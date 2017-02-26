@@ -20,3 +20,9 @@ Attempt to create my own virtual assistant
 
 Programm Structure
 ==================
+
+- Impressor: The Impressor handles the data input. It acts asan converter, which transmitts the necessary information to the processor in the form of events.
+
+- Processor: The Processor is the part which converts the input events into output events. This is were the AI lives. The AI core is planned to be based on OpenAI
+
+- Expressor: The Expressor takes the output event, and shows a reaction. They are either multimedia expressions, or working actions like sending an email
