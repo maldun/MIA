@@ -16,7 +16,9 @@ MIA - MIA Is not an Assistant
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-Attempt to create my own virtual assistant
+Attempt to create my own virtual assistant. This project can be seen as long term and evolving.
+It is not the goal to make state of the art algorithms, but to deepen my understanding of machine learning, by trying out
+to automate everyday tasks, and machine communication.
 
 Programm Structure
 ==================
@@ -26,3 +28,9 @@ Programm Structure
 - Processor: The Processor is the part which converts the input events into output events. This is were the AI lives. The AI core is planned to be based on OpenAI
 
 - Expressor: The Expressor takes the output event, and shows a reaction. They are either multimedia expressions, or working actions like sending an email
+
+Tasks
+=====
+
+- Scheduling: One of the main tasks is to provide an efficient work schedule for every day life.
+- Communication: Communication with the user
