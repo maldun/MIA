@@ -57,3 +57,7 @@ class VisualExpressor(ExpressorInterface):
         else:
             raise NotImplementedError(variant_string)
         
+class TextualExpressor(ExpressorInterface):
+    
+    pass
+        
