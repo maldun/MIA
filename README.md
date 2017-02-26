@@ -1,4 +1,6 @@
+==============================
 MIA - MIA Is not an Assistant
+==============================
     Copyright (C) 2017  Stefan Reiterer
 
     This program is free software: you can redistribute it and/or modify
@@ -16,3 +18,5 @@ MIA - MIA Is not an Assistant
 
 Attempt to create my own virtual assistant
 
+Programm Structure
+==================
