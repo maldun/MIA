@@ -1,0 +1,33 @@
+import json
+import subprocess
+import time
+import os
+
+CFG_FILE = "setup_cfg.json"
+
+# Note: It may be necessary to reset before if docker makes problem ... 
+# e.g. with podman do `podman system reset`
+
+def install_ollama(version="llama3.2",docker="docker",mode="rocm",port=11434,timeout=10):
+    cmd = [docker]
+    if mode == "rocm":
+      cmd +=  f"run -d --device /dev/kfd --device /dev/dri -v ollama:/root/.ollama -p {port}:{port} --name ollama ollama/ollama:rocm".split()
+    elif mode == "cpu":
+      cmd += f"run --replace -d -v ollama:/root/.ollama -p {port}:{port} --name ollama ollama/ollama".split()
+    
+    proc = subprocess.Popen(cmd)
+    proc.wait()
+
+
+def start_ollama(version="lama3.2",docker="docker",timeout=10,mode="rocm",port=11434):
+    cmd = [docker] + "exec -it ollama ollama run".split() + [version]
+    proc = subprocess.Popen(cmd)
+    time.sleep(timeout)
+    proc.communicate(input=b'\\bye')
+    proc.wait()
+
+if __name__ == "__main__":
+    with open(CFG_FILE,'r') as fp:
+        cfg = json.load(fp)
+    install_ollama(**cfg)
+    start_ollama(**cfg)

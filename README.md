@@ -21,6 +21,10 @@ Attempt to create my own virtual assistant. This project can be seen as long ter
 It is not the goal to make state of the art algorithms, but to deepen my understanding of machine learning, by trying out
 to automate everyday tasks, and machine communication.
 
+Notes
+==================
+It may be necessary to reset before if docker makes problem ... e.g. with podman do `podman system reset`
+
 Programm Structure
 ==================
 
