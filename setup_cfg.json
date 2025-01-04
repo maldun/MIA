@@ -1,4 +1,5 @@
 {
+  "name":"ollama",
   "docker":"docker",
   "port":11434,
   "version":"llama3.2",
