@@ -4,5 +4,6 @@
   "port":11434,
   "version":"llama3.2",
   "mode":"rocm",
-  "timeout":3
+  "timeout":3,
+  "web_port":8585
 }
