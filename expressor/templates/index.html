@@ -24,7 +24,6 @@
   reconnectionInterval: 500
   });
 
-
 document.getElementById('sendMessage').addEventListener('click', () => {
   const message = document.getElementById('messageInput').value;
   socket.emit('message', message);
