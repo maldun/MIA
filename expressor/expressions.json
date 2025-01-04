@@ -1,0 +1,8 @@
+{
+  "greet":{"vid":"greet000.mp4"},
+  "no":{"vid":"no001.mp4"},
+  "no_ironic":{"vid":"no002.mp4"},
+  "talk":{"vid":["talk001.mp4","talk002.mp4","talk003,mp4"]},
+  "yes":{"vid":"yes001.mp4"},
+  "idle":{"vid":"idle001.mp4"}
+}

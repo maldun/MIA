@@ -22,6 +22,9 @@ from flask_socketio import SocketIO, emit
 import logging
 import os
 
+from expressor import VideoExpressor
+vid_exp = VideoExpressor()
+
 # constants and paths
 fpath = os.path.split(__file__)[0]
 TEMPLATE_DIR = "templates"
@@ -78,6 +81,7 @@ def handle_message(message):
     print(f"Received message: {message}")
     with open("testmsg.txt",'w') as fp:
         fp.write(message)
+    vid_exp.express("idle")
     return "Message received successfully"
 
 
@@ -86,8 +90,8 @@ def handle_message(message):
 def index():
     logger.info('Rendering index.html template')
     print("Rendering index.html template")
-  
-    return render_template('index.html' ,socket_url=get_socket_url(port))
+    return render_template('index.html' ,socket_url=get_socket_url(port),name="ich")
 
 if __name__ == '__main__':
+    vid_exp.express("greet")
     socketio.run(app, debug=True,port=port)

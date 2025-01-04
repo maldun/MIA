@@ -5,7 +5,7 @@
 </head>
 <body>
     <h1>Hello, {{ name }}!</h1>
-    <video id="video" width="400" autoplay loop src="{{ url_for('static', filename='video.mp4') }}">
+    <video id="video" width="400" autoplay loop src="{{ url_for('static', filename='video.mp4') }}" onended="reloadVideo()">
         Your browser does not support the video tag.
     </video>
     <input type="text" id="messageInput" placeholder="Type a message...">
@@ -45,6 +45,10 @@ socket.on('message', (data) => {
     document.getElementById('video').src = newSrc;
   }
 });
+
+      function reloadVideo() {
+            document.getElementById('video').src = "{{ url_for('static', filename='video.mp4') }}";
+        }
     </script>
 </body>
 </html

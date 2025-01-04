@@ -16,48 +16,105 @@
 #You should have received a copy of the GNU General Public License
 #along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# standard messages
-interface_string = "Error: This is the prototype interface!"
-variant_string = "Error: Variant not implemented!"
+from abc import ABC, abstractmethod
+import json
+import os
+import shutil
 
 def get_current_dir():
     import inspect, os
     #print(inspect.getfile(inspect.currentframe())) # script filename (usually with path))
     return os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 
-from . import play_media
-
 class ExpressorInterface:
     """
     The expressor main class interface
+    The expressor manages feelings
     """
-    def greet(self,variant=0):
-        raise NotImplementedError(interface_string)
+    EXPRESSIONS = {"yes","no","talk","idle","greet"}
+    DATA_TYPE_KEY = ""
     
+    NOT_PROPER_TYPE_MSG = "Error: expressions is not of the proper data type (a json, filename or a dict)"
+    NOT_IMPLEMENTED_MSG = "Error: Method not implemented yet!"
     
-class VisualExpressor(ExpressorInterface):
-    """
-    This is the main class for visual expressions.
-    First version using animated videos from blender.
-    """
-    
-    def __init__(self,video_directory,video_name='MIA',delay=1):
+    def __init__(self,expressions="expressions.json"):
         """
-        The init method only has to store the directory containing
-        the multimedia for videos.
+        load all information about expressions
         """
-        self.video_directory = video_directory
-        self.delay = delay
-        self.video_name = video_name
+        if isinstance(expressions,str):
+            if not os.path.exists(expressions):
+                try: # maybe a json ...
+                    expressions = json.loads(expressions)
+                except json.JSONDecodeError:
+                    pass
+                # let's try if the file is in the same folder
+                expressions = os.path.join(get_current_dir(),expressions)
+            with open(expressions,'r') as fp:
+                expressions = json.load(fp)
         
-    def greet(self,variant=0):
-        
-        if variant in [0]:
-            return play_media.play_animation(self.video_directory+"greet{0:03d}.avi".format(variant),window_name=self.video_name,delay=self.delay)
+        if isinstance(expressions,dict):
+            # store original for reference (not much data ...)
+            self.set_expressions(expressions)
         else:
-            raise NotImplementedError(variant_string)
-        
-class TextualExpressor(ExpressorInterface):
+            raise TypeError(self,NOT_PROPER_TYPE_MSG)
     
-    pass
+    @abstractmethod
+    def set_expressions(self,expressions):
+        """
+        sets the expression dict accordingly
+        """
+        raise NotImplementedError(self.NOT_IMPLEMENTED_MSG)
+    
+    @abstractmethod
+    def express(self,key):
+        """
+        Performs action according to need for type
+        """
+        raise NotImplementedError(self.NOT_IMPLEMENTED_MSG)
         
+
+class VideoExpressor(ExpressorInterface):
+    DATA_TYPE_KEY = "vid"
+    VID_NOT_FOUND_MSG = "Error: Video {} not found!"
+    DEFAULT_TARGET = os.path.join(get_current_dir(),"templates","static","video.mp4")
+    STATE_SUFF = "_curr_state"
+    def __init__(self,expressions="expressions.json",target_file=None,video_path=None):
+        if target_file is None:
+            self._target_file = self.DEFAULT_TARGET
+        else:
+            self._target_file = target_file
+        if video_path is None:
+            self._video_path = os.path.join(get_current_dir(),"vids")
+        else:
+            self._video_path = video_path
+        super().__init__(expressions)
+        
+    def set_expressions(self,expressions):
+        """
+        sets the expression dict accordingly ( in this case vids)
+        """
+        self._expressions = expressions
+        for key, val in expressions.items():
+            setattr(self,key,val[self.DATA_TYPE_KEY])
+    def express(self,key):
+        """
+        Copies the video to the correct path.
+        """
+        video_file = getattr(self,key)
+        if isinstance(video_file,list):
+            statekey = key+self.STATE_SUFF
+            if hasattr(self,statekey):
+                curr = getattr(self,statekey)
+                curr = (curr + 1)%len(video_file)
+            else:
+                curr = 0
+                
+            setattr(self,statekey,curr)
+            video_file = video_file[curr]
+                
+        # check if video is there
+        if not os.path.exists(video_file):
+            video_file = os.path.join(self._video_path,video_file)
+        if not os.path.exists(video_file):
+            raise FileNotFoundError(self.VID_NOT_FOUND_MSG.format(video_file))
+        shutil.copy2(video_file,self._target_file)
