@@ -2,19 +2,102 @@
 <html>
 <head>
     <title>My Page</title>
+    <style>
+        grid-template-columns:  2fr 1fr;
+        gap: 20px;
+
+        .grid {
+            display: grid;
+            place-items: center;
+            /*width: 100%;*/
+            grid-template-columns:  2fr 1fr;
+        }
+        
+        .video-container {
+            display: grid;
+            place-items: left;
+            grid-template-columns:  2fr 1fr;
+        }
+
+        .answer-container {
+            display: flex;
+            align-items: stretch;
+            justify-content: stretch;
+        }
+        #answerText {
+         padding: 10px;
+         width: 470px;
+         height: 270px;
+        }
+        #answerInput {
+         max-height: 400px; /* Set a maximum height */
+         overflow-y: auto; /* Enable vertical scrolling */
+         overflow-x: auto;
+         width:  30px;
+         height: 10px;
+         padding: 10px;
+         width: 100%;
+         border-radius: 0;
+         border-width: 1px;
+         border-style: solid;
+         border-color: #ccc;
+         background-color: #f9f9f9;
+        }
+
+#answerInput:focus {
+  outline: none;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+#answerInput::placeholder {
+  color: #999;
+}
+
+        
+     .background-text {
+        background-color: #f0f0f0;
+        font-size: 16px;
+        color: #333;
+    }
+    </style>
+</head>
+<body>
+ <h1>Hello, {{ name | safe}}!</h1>
+    <div class="grid">
+        <div class="video-container">
+            <video id="video" width="405" autoplay loop src="{{ url_for('static', filename='video.mp4') }}" onended="reloadVideo()">
+                Your browser does not support the video tag.
+            </video>
+            <div>
+            <textarea id="answerText" rows="19" cols="67" class="background-text"></textarea>
+            </div>
+        </div>
+        <div class="answer-container">
+            <input type="text" id="answerInput" placeholder="Type an answer...">
+            <button id="sendMessage">Send Answer</button>
+            <!--<p id="answerText"></p>-->
+        </div>
+    </div>
+
+    <!-- rest of your code remains the same -->
+<!--<!DOCTYPE html>
+<html>
+<head>
+    <title>My Page</title>
 </head>
 <body>
     <h1>Hello, {{ name }}!</h1>
     <video id="video" width="400" autoplay loop src="{{ url_for('static', filename='video.mp4') }}" onended="reloadVideo()">
         Your browser does not support the video tag.
-    </video>
-    <input type="text" id="messageInput" placeholder="Type a message...">
-    <button id="sendMessage">Send Message</button>
+    </video>-->
+    <!--<input type="text" id="answerInput" placeholder="Type an answer...">
+    <button id="sendMessage">Send Answer</button>-->
 
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js" integrity="sha384-2huaZvOR9iDzHqslqwpR87isEmrfxqyWOF7hr7BY6KG0+hVKLoEXMPUJw3ynWuhO" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <!--<script src="{{ url_for('static', filename='script.js') }}"></script>-->
     <script>
-    // Define the port variable before using it
+        // Define the port variable before using it
      let port = 8585; // or any other value you set in your Flask app
      const socketUrl = {{ socket_url | tojson }};
   //const socket = io('ws://127.0.0.1:' + port + '/', {
@@ -25,9 +108,9 @@
   });
 
 document.getElementById('sendMessage').addEventListener('click', () => {
-  const message = document.getElementById('messageInput').value;
+  const message = document.getElementById('answerInput').value;
   socket.emit('message', message);
-  document.getElementById('messageInput').value = '';
+  document.getElementById('answerInput').value = '';
 });
 
 socket.on('connect', () => {
@@ -46,15 +129,53 @@ socket.on('message', (data) => {
   }
 });
 
-     socket.on('video_updated', (url) => {
+     socket.on('answer', (data) => {
+        // Update the answer text here
+        document.getElementById('answerText').innerHTML = data;
+      });
+
+    socket.on('video_updated', (url) => {
     // Update the video source here
     //document.getElementById('video').src = url;
     document.getElementById('video').src = "{{ url_for('static', filename='') }}" + url;
     });
-
+      
       function reloadVideo() {
             //document.getElementById('video').src = "{{ url_for('static', filename='video.mp4') }}";
       }
+      
+
+    // Add event listener for keyup (to detect when the user types)
+     answerInput.addEventListener('keyup', () => {
+    // Get the input text
+      const text = answerInput.value;
+
+     // Use a library like Marked to parse Markdown syntax
+     let markedText = marked.marked(text);
+
+     // Replace bold tags with font-weight: bold CSS
+     markedText = markedText.replace(/<b>(.*?)<\/b>/g, (match) => `<span style="font-weight: bold;">${match}</span>`);
+
+     // Replace italic tags with font-style: italic CSS
+     markedText = markedText.replace(/<i>(.*?)<\/i>/g, (match) => `<span style="font-style: italic;">${match}</span>`);
+
+     // Replace links with <a> tags
+     markedText = markedText.replace(/\[(.*?)\]\((.*?)\)/g, (match) => `<a href="${2}">${1}</a>`);
+
+     // Replace images with img tags
+     markedText = markedText.replace(/\[(.*?)\](https:\/\/example\.com\/[^\s]+)\)/g, (match) => `<img src="${2}" />`);
+
+     // Create a temporary container element
+    const tempElement = document.createElement('div');
+
+    // Populate the temporary element with the marked-up text
+    tempElement.innerHTML = markedText;
+     
+     tempElement.style.color = 'inherit';
+     //answerInput.innerHTML = markedText;
+     // Append the temporary element to the original answerInput element
+    answerInput.appendChild(tempElement);
+     });
     </script>
 </body>
-</html
+</html>

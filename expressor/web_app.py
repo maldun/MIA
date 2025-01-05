@@ -21,6 +21,20 @@ import json
 from flask_socketio import SocketIO, emit
 import logging
 import os
+import time
+
+import markdown
+from markdown import Markdown
+class MyMarkdown(Markdown):
+    """
+    Stupid hack ...
+    """
+    def convert(self, text):
+        t = super().convert(text)
+        t = t.removeprefix("<p>").removesuffix("</p>")
+        return t
+
+md = MyMarkdown()
 
 from expressor import VideoExpressor
 vid_exp = VideoExpressor()
@@ -91,13 +105,14 @@ def handle_message(message):
 def index():
     logger.info('Rendering index.html template')
     print("Rendering index.html template")
-    return render_template('index.html' ,socket_url=get_socket_url(port),name="ich")
+    return render_template('index.html' ,socket_url=get_socket_url(port),name=md.convert("*ich*"))
 
 @socketio.on('reload_video')
 def reload_video(vid):
-    print('Received signal to reload video')
+    logger.info('Received signal to reload video')
     # Update the video source here
     url = vid
+    time.sleep(1)
     emit('video_updated', url)
 
 
