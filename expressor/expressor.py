@@ -76,6 +76,7 @@ class ExpressorInterface:
 class VideoExpressor(ExpressorInterface):
     DATA_TYPE_KEY = "vid"
     VID_NOT_FOUND_MSG = "Error: Video {} not found!"
+    TARGET_PATH =  os.path.join(get_current_dir(),"templates","static")
     DEFAULT_TARGET = os.path.join(get_current_dir(),"templates","static","video.mp4")
     STATE_SUFF = "_curr_state"
     def __init__(self,expressions="expressions.json",target_file=None,video_path=None):
@@ -111,10 +112,11 @@ class VideoExpressor(ExpressorInterface):
                 
             setattr(self,statekey,curr)
             video_file = video_file[curr]
-                
+        vid_file = video_file
         # check if video is there
         if not os.path.exists(video_file):
             video_file = os.path.join(self._video_path,video_file)
         if not os.path.exists(video_file):
             raise FileNotFoundError(self.VID_NOT_FOUND_MSG.format(video_file))
-        shutil.copy2(video_file,self._target_file)
+        shutil.copy2(video_file,os.path.join(self.TARGET_PATH,vid_file))
+        return vid_file

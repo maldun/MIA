@@ -46,9 +46,15 @@ socket.on('message', (data) => {
   }
 });
 
+     socket.on('video_updated', (url) => {
+    // Update the video source here
+    //document.getElementById('video').src = url;
+    document.getElementById('video').src = "{{ url_for('static', filename='') }}" + url;
+    });
+
       function reloadVideo() {
-            document.getElementById('video').src = "{{ url_for('static', filename='video.mp4') }}";
-        }
+            //document.getElementById('video').src = "{{ url_for('static', filename='video.mp4') }}";
+      }
     </script>
 </body>
 </html

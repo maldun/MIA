@@ -81,7 +81,8 @@ def handle_message(message):
     print(f"Received message: {message}")
     with open("testmsg.txt",'w') as fp:
         fp.write(message)
-    vid_exp.express("idle")
+    new_vid = vid_exp.express("idle")
+    reload_video(new_vid)
     return "Message received successfully"
 
 
@@ -91,6 +92,14 @@ def index():
     logger.info('Rendering index.html template')
     print("Rendering index.html template")
     return render_template('index.html' ,socket_url=get_socket_url(port),name="ich")
+
+@socketio.on('reload_video')
+def reload_video(vid):
+    print('Received signal to reload video')
+    # Update the video source here
+    url = vid
+    emit('video_updated', url)
+
 
 if __name__ == '__main__':
     vid_exp.express("greet")
