@@ -36,20 +36,26 @@ class MyMarkdown(Markdown):
 
 md = MyMarkdown()
 
-from expressor import VideoExpressor
-vid_exp = VideoExpressor()
+
 
 # constants and paths
+from .constants import CFG_FILE, LOG_FNAME
 fpath = os.path.split(__file__)[0]
+cfg_file = os.path.join(fpath,CFG_FILE)
 TEMPLATE_DIR = "templates"
 STATIC_DIR = os.path.join(TEMPLATE_DIR,"static")
 static_folder = os.path.join(fpath,STATIC_DIR)
-LOG_FNAME = "mia.log"
-CFG_FILE = os.path.join("..","setup_cfg.json")
-with open(CFG_FILE,'r') as jp:
+
+
+with open(cfg_file,'r') as jp:
     cfg = json.load(jp)
 PORT_OPT = "web_port"
 
+from .expressor import VideoExpressor
+vid_exp = VideoExpressor()
+
+from .communicator import Communicator
+comm = Communicator(**cfg)
 
 app = Flask(__name__, static_folder=static_folder)
 
@@ -88,18 +94,36 @@ def get_video_frames(video_path):
     return "Video frames retrieved successfully"
 
 
+def express_and_reload(expression):
+    new_vid = vid_exp.express(expression)
+    reload_video(new_vid)
+
 # Create a function to handle messages from clients
 @socketio.on('message')
 def handle_message(message):
     logger.info("Received message: {}".format(message))
     print(f"Received message: {message}")
-    with open("testmsg.txt",'w') as fp:
-        fp.write(message)
-    new_vid = vid_exp.express("idle")
-    reload_video(new_vid)
+    express_and_reload("talk")
+    time.sleep(1)
+    express_and_reload("talk")
+    
+    answer = ""
+    answer_stream = comm.chat(message)
+    for chunk in answer_stream:
+        answer += comm.handle_chunk(chunk)
+        send_answer(answer)
+    
+    time.sleep(1)
+    express_and_reload("talk")
+    time.sleep(0.5)
+    express_and_reload("idle")
+    
     return "Message received successfully"
 
 
+def send_answer(answer):
+    logger.info("Sent answer: {}".format(answer))
+    emit('answer',answer)
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -112,10 +136,9 @@ def reload_video(vid):
     logger.info('Received signal to reload video')
     # Update the video source here
     url = vid
-    time.sleep(1)
+    time.sleep(0.1)
     emit('video_updated', url)
 
-
 if __name__ == '__main__':
-    vid_exp.express("greet")
+    vid_exp.express("idle")
     socketio.run(app, debug=True,port=port)

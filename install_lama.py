@@ -8,7 +8,7 @@ CFG_FILE = "setup_cfg.json"
 # Note: It may be necessary to reset before if docker makes problem ... 
 # e.g. with podman do `podman system reset`
 
-def install_ollama(name="ollama",version="llama3.2",docker="docker",mode="rocm",port=11434,timeout=10):
+def install_ollama(name="ollama",version="llama3.2",docker="docker",mode="rocm",port=11434,timeout=10,**_):
     cmd = [docker]
     if mode == "rocm":
       cmd +=  f"run --replace -d --device /dev/kfd --device /dev/dri -v ollama:/root/.ollama -p {port}:{port} --name {name} ollama/ollama:rocm".split()
@@ -19,7 +19,7 @@ def install_ollama(name="ollama",version="llama3.2",docker="docker",mode="rocm",
     proc.wait()
 
 # Note: To stop the dialoge enter /bye in prompt
-def start_ollama(version="lama3.2",docker="docker",timeout=10,mode="rocm",port=11434,name="ollama"):
+def start_ollama(version="lama3.2",docker="docker",timeout=10,mode="rocm",port=11434,name="ollama",**_):
     cmd = [docker] + f"exec -it {name} ollama run ".split() + [version]
     proc = subprocess.Popen(cmd)
     time.sleep(timeout)
