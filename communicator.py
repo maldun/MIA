@@ -46,6 +46,8 @@ class Communicator:
     DEFAULT_HEADER = {'x-some-header': 'some-value'}
     MSG_KEY = "message"
     CONTENT_KEY="content"
+    USER_ROLE = "user"
+    ASSISTANT_ROLE = "assistant"
     def __init__(self,port=11434,address="localhost",protocol="http",version="llama3.2",**_):
         self.port = port
         self.address = address
@@ -54,13 +56,12 @@ class Communicator:
         
         self.host = protocol + "://" + address + '/' + str(port)
         self.client = Client(host=self.host,headers=self.DEFAULT_HEADER)
+        self._history = []
     
     def chat(self,msg,stream=True):
-        msg_dic = {"role":"user",
-                   "content":msg}
-        
+        msg_dic = self.update_history(msg,role=self.USER_ROLE)
         answer = chat(model=self.version,
-                     messages=[msg_dic],
+                     messages=self._history,
                      stream=stream,
                      )
         return answer
@@ -68,14 +69,21 @@ class Communicator:
     def handle_chunk(self,chunk):
         return chunk[self.MSG_KEY][self.CONTENT_KEY]
     
+    def update_history(self,anwser,role=ASSISTANT_ROLE):
+        answer_dic = {"role":role,"content":answer}
+        self._history.append(answer_dic)
+        return answer_dic
+    
     def calibrate(self):
         """
         Calibrate the chat for proper answers with emotions
         """
         msg = EMOTION_QUESTION
         answer = self.chat(msg)
+        answer_str = ""
         for chunk in answer:
-            pass
+            answer_str += self.handle_chunk(chunk)
+        self.update_history(answer_str)
 
 if __name__ == "__main__":
     print(EMOTION_QUESTION)
