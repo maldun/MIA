@@ -19,6 +19,9 @@ import numpy as np
 import cv2
 import subprocess
 import os
+from playsound import playsound
+
+
 
 filename = 'wave001.avi'
 delay = 25
@@ -53,3 +56,8 @@ def play_animation(filename,window_name,delay=delay):
     Animation player meta function
     """
     return play_animation_mplayer(filename,window_name,delay=delay)
+
+def play_sound(filename):
+    playsound(filename)
+
+

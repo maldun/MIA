@@ -9,7 +9,7 @@
   "address":"localhost",
   "protocol":"http",
   "tts_model":"tts_models/de/thorsten/tacotron2-DDC",
-  "voice_model":"/home/maldun/prog/Python/MIA/voice/models/mitchieMmiku/mitchieMmiku.pth",
+  "voice_model":"/home/maldun/prog/Python/MIA/voice/models/MikuAI/MikuAI.pth",
   "tts_device":null,
   "gfx_version":"11.0.0",
   "voice_sample":"/home/maldun/prog/Python/MIA/voice/samples/miku_vocals.wav"

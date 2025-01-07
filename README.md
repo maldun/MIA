@@ -34,13 +34,16 @@ Install ROCM/CUDA (Fedora):
 
 Source: https://medium.com/@anvesh.jhuboo/rocm-pytorch-on-fedora-51224563e5be
 
-
+Install coqui-ai tts:
+- `git clone https://github.com/coqui-ai/TTS`
+- `pip install -e .[all,dev,notebooks]  # Select the relevant extras`
 
 Notes
 ==================
 It may be necessary to reset before if docker makes problem ... e.g. with podman do `podman system reset`
 Setup rocm properly and install with `python3.10 -m pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/rocm6.0`
 Also set your GLX proeprly, in my case it was: `os.environ["HSA_OVERRIDE_GFX_VERSION"] = "11.0.0"`
+Downloads of bark can be faulty re-download fine_2.pt manually.
 
 Programm Structure
 ==================
