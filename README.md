@@ -21,6 +21,21 @@ Attempt to create my own virtual assistant. This project can be seen as long ter
 It is not the goal to make state of the art algorithms, but to deepen my understanding of machine learning, by trying out
 to automate everyday tasks, and machine communication.
 
+Installation
+==================
+
+Install ROCM/CUDA (Fedora):
+- `sudo usermod -a -G video $LOGNAME`
+- `sudo dnf install rocminfo`
+- `sudo dnf install rocm-opencl`
+-  `sudo dnf install rocm-clinfo`
+- `sudo dnf install rocm-hip`
+- `pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/rocm6.0`
+
+Source: https://medium.com/@anvesh.jhuboo/rocm-pytorch-on-fedora-51224563e5be
+
+
+
 Notes
 ==================
 It may be necessary to reset before if docker makes problem ... e.g. with podman do `podman system reset`
