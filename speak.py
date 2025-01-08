@@ -33,7 +33,8 @@ class Speaker:
     """
     Transforms a msg into speech using TTS and voice changers.
     """
-    TTS_DEFAULT = "tts_models/de/thorsten/tacotron2-DDC"
+    TTS_DEFAULT = "tts_models/en/ljspeech/glow-tts"
+    #TTS_DEFAULT = "tts_models/
     def __init__(self,tts_model=TTS_DEFAULT,voice_model=None,tts_device=None,gfx_version=None,voice_sample=None,**_):
         self._tts_model = tts_model
         self._voice = voice_model
@@ -55,8 +56,9 @@ class Speaker:
         self._tts = TTS(model_name=tts_model).to(device)
         
     def init_rvc_model(self,model,device):
-        self._rvc = RVCInference(device=device)
-        self._rvc.load_model(model)
+        self._rvc = RVCInference(device=device+":0")
+        self._rvc.load_model(model) #,index_path="/home/maldun/Downloads/MikuAI/added_IVF3010_Flat_nprobe_1_v2.index",version='v2')
+        self._rvc.set_params(f0up_key=0, protect=0.3,f0method="crepe")
         
     def text2speech(self,msg,output_file):
         self._tts.tts_with_vc_to_file(msg, speaker_wav=self._voice_sample, file_path=output_file)
@@ -74,10 +76,17 @@ class Speaker:
                     fname = output_file
                 else:
                     fname = fpout.name
+                
                 self.text2speech(msg,fpin.name)
                 self.change_voice(fpin.name,fname)
                 self.play_voice(fname)
+                #self.play_voice(fpin.name)
                 
+                # fin = "in.wav"
+                # fout="out.wav"
+                # self.text2speech(msg,fin)
+                # self.change_voice(fin,fout)
+                # self.play_voice(fout)
 
 # Get device
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -89,10 +98,13 @@ if __name__ == "__main__":
     os.environ["HSA_OVERRIDE_GFX_VERSION"] = "11.0.0"
     s = Speaker(**cfg)
     testout1 = "../testoutput.wav"
-    msg = "Dies ist ein Test"
-    s.text2speech(msg,testout1)
     testout2 = "../testoutputc.wav"
-    s.change_voice(testout1,testout2)
+    #msg = "Dies ist ein Test"
+    #msg = "L\u00f6we sucht das Licht\nSchatten tanzen auf dem Berg\nGeheimnisvolk schaut"
+    msg = "Let's test some sentences, alright? This is a test."
+    #s.text2speech(msg,testout1)
+    
+    #s.change_voice(testout1,testout2)
     #s.play_voice(testout2)
-    s.text2voice(msg)
+    #s.text2voice(msg)
     

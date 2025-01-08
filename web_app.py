@@ -22,6 +22,7 @@ from flask_socketio import SocketIO, emit
 import logging
 import os
 import time
+import threading
 
 import markdown
 from markdown import Markdown
@@ -57,7 +58,11 @@ vid_exp = VideoExpressor()
 from .communicator import Communicator
 comm = Communicator(**cfg)
 
+from .speak import Speaker
+speaker = Speaker(**cfg)
+
 app = Flask(__name__, static_folder=static_folder)
+lock = threading.Lock()
 
 port = int(cfg[PORT_OPT])
 URL_KEY = "url"
@@ -103,18 +108,43 @@ def express_and_reload(expression):
 def handle_message(message):
     logger.info("Received message: {}".format(message))
     print(f"Received message: {message}")
-    express_and_reload("talk")
+    express_and_reload("idle")
     time.sleep(1)
-    express_and_reload("talk")
+    #express_and_reload("talk")
     
     answer = ""
+    partial_chunk = ""
+    emotion = None
+    emotion_set = False
     answer_stream = comm.chat(message)
     for chunk in answer_stream:
-        answer += comm.handle_chunk(chunk)
-        send_answer(answer)
+        chunk_str = comm.handle_chunk(chunk)
+        answer += chunk_str
+        partial_chunk += chunk_str
+        emotion = comm.check_emotion(answer)
+        if emotion is None:
+            continue
+        if emotion_set is False:
+            express_and_reload(emotion)
+            partial_chunk = comm.extract_emotion(partial_chunk)
+            emotion_set = True
+        else:
+            filt_answer = comm.extract_emotion(answer)
+            send_answer(filt_answer)
+            #if len(partial_chunk.strip())>10:
+            #    speaker.text2voice(partial_chunk)
+            #    partial_chunk = ""
+    comm.update_history(answer)
+    comm.dump_history()
+    
+    if len(filt_answer.strip()) > 0:
+        with lock:
+            speaker.text2voice(filt_answer)
+                
+    #speaker.text2voice(answer)
     
     time.sleep(1)
-    express_and_reload("talk")
+    #express_and_reload("talk")
     time.sleep(0.5)
     express_and_reload("idle")
     
