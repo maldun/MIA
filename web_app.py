@@ -23,6 +23,7 @@ import logging
 import os
 import time
 import threading
+import multiprocessing as mp
 
 import markdown
 from markdown import Markdown
@@ -35,9 +36,7 @@ class MyMarkdown(Markdown):
         t = t.removeprefix("<p>").removesuffix("</p>")
         return t
 
-md = MyMarkdown()
-
-
+md = MyMarkdown(output_format='html')
 
 # constants and paths
 from .constants import CFG_FILE, LOG_FNAME
@@ -46,7 +45,6 @@ cfg_file = os.path.join(fpath,CFG_FILE)
 TEMPLATE_DIR = "templates"
 STATIC_DIR = os.path.join(TEMPLATE_DIR,"static")
 static_folder = os.path.join(fpath,STATIC_DIR)
-
 
 with open(cfg_file,'r') as jp:
     cfg = json.load(jp)
@@ -58,7 +56,7 @@ vid_exp = VideoExpressor()
 from .communicator import Communicator
 comm = Communicator(**cfg)
 
-from .speak import Speaker
+from .speak import Speaker, split_into_lines_and_sentences
 speaker = Speaker(**cfg)
 
 app = Flask(__name__, static_folder=static_folder)
@@ -116,30 +114,44 @@ def handle_message(message):
     partial_chunk = ""
     emotion = None
     emotion_set = False
+    nr_emotions = 0
     answer_stream = comm.chat(message)
+    answer_list = []
     for chunk in answer_stream:
         chunk_str = comm.handle_chunk(chunk)
         answer += chunk_str
-        partial_chunk += chunk_str
-        emotion = comm.check_emotion(answer)
-        if emotion is None:
-            continue
-        if emotion_set is False:
+        emotions, text = comm.extract_emotion(answer)
+        if nr_emotions < len(emotions):
+            emotion = emotions[nr_emotions]
+            tx = text[nr_emotions]
+            nr_emotions+= 1
+
             express_and_reload(emotion)
-            partial_chunk = comm.extract_emotion(partial_chunk)
             emotion_set = True
-        else:
-            filt_answer = comm.extract_emotion(answer)
-            send_answer(filt_answer)
-            #if len(partial_chunk.strip())>10:
-            #    speaker.text2voice(partial_chunk)
-            #    partial_chunk = ""
+        #else:
+        #    filt_answer = comm.extract_emotion(answer)
+        #    send_answer(filt_answer)
+        filt_answer = comm.extract_text(answer)
+        send_answer(filt_answer)
+    
+    # if nr_emotions < len(emotions) and len(text[-1]) > 0:
+    #     p = mp.Process(target=speaker.text2voice, args=(text[-1],))
+    #     p.run()
+    
+    filt_answer = comm.extract_text(answer)
+    
+    send_answer(filt_answer)
     comm.update_history(answer)
     comm.dump_history()
-    
+    filt_answer = comm.extract_text(answer)
     if len(filt_answer.strip()) > 0:
-        with lock:
-            speaker.text2voice(filt_answer)
+        try:
+            with lock:
+                speaker.text2voice(filt_answer)
+        except RuntimeError as rt:
+            logger.error(str(rt))
+    md_answer = md.convert(filt_answer)
+    send_answer(md_answer)
                 
     #speaker.text2voice(answer)
     
@@ -159,7 +171,7 @@ def send_answer(answer):
 def index():
     logger.info('Rendering index.html template')
     print("Rendering index.html template")
-    return render_template('index.html' ,socket_url=get_socket_url(port),name=md.convert("*ich*"))
+    return render_template('index.html' ,socket_url=get_socket_url(port),name=md.convert("*MIA*"))
 
 @socketio.on('reload_video')
 def reload_video(vid):

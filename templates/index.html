@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>My Page</title>
+    <title>MIA's Home</title>
     <style>
         grid-template-columns:  2fr 1fr;
         gap: 20px;
@@ -26,8 +26,8 @@
         }
         #answerText {
          padding: 10px;
-         width: 470px;
-         height: 270px;
+         width: 640px;
+         height: 420px;
         }
         #answerInput {
          max-height: 400px; /* Set a maximum height */
@@ -44,14 +44,14 @@
          background-color: #f9f9f9;
         }
 
-#answerInput:focus {
-  outline: none;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-}
+          #answerInput:focus {
+            outline: none;
+          box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+          }
 
-#answerInput::placeholder {
-  color: #999;
-}
+          #answerInput::placeholder {
+          color: #999;
+          }
 
         
      .background-text {
@@ -59,13 +59,24 @@
         font-size: 16px;
         color: #333;
     }
+    body {
+      background-image: url("{{ url_for('static', filename='background.jpg') }}");
+      background-size: cover;
+      height: 100vh;
+      margin: 0;
+      padding: 0;
+      background-repeat: no-repeat;
+      background-position: top;
+      background-attachment: fixed;
+      background-size: 1440px 1024px;
+      }
     </style>
 </head>
 <body>
- <h1>Hello, {{ name | safe}}!</h1>
+ <h1 style="color:white;">I am {{ name | safe}}, eager to help!</h1>
     <div class="grid">
         <div class="video-container">
-            <video id="video" width="405" autoplay loop src="{{ url_for('static', filename='video.mp4') }}" onended="reloadVideo()">
+            <video id="video" width="600" autoplay loop src="{{ url_for('static', filename='video.mp4') }}" onended="reloadVideo()">
                 Your browser does not support the video tag.
             </video>
             <div>
@@ -176,6 +187,15 @@ socket.on('message', (data) => {
      // Append the temporary element to the original answerInput element
     answerInput.appendChild(tempElement);
      });
+     
+    // Add event listener for keydown (to detect when Enter is pressed)
+    answerInput.addEventListener('keydown', (e) => {
+    if (e.key === "Enter") {
+        const message = document.getElementById('answerInput').value;
+        socket.emit('message', message);
+        document.getElementById('answerInput').value = '';
+    }
+    }); 
     </script>
 </body>
 </html>

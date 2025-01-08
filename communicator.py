@@ -19,6 +19,7 @@
 from ollama import AsyncClient, Client, chat, ChatResponse
 import json
 import os
+import re
 
 curr_path = os.path.split(__file__)[0]
 
@@ -121,9 +122,36 @@ class Communicator:
     @staticmethod
     def extract_emotion(msg):
         """
-        Filters out first line with emotion and returns rest of string.
+        Filters out all lines with emotion and returns rest as string and list of emotions.
         """
-        return msg.partition('\n')[2].lstrip()
+        words_to_match = list(EMOTION_EXPRESSION_MAP.keys())
+        word_regexes = []
+        for word in words_to_match:
+            escaped_word = re.escape(word)
+            pattern = fr'{escaped_word}\W*\n\n' #fr'^\s*({escaped_word})\W*\n\n$'
+            word_regexes.append(pattern)
+        combined_pattern = '|'.join(word_regexes)
+        regex = re.compile(combined_pattern)
+        emotions = regex.findall(msg)
+        emotions = [e.strip() for e in emotions]
+        emotions = [EMOTION_EXPRESSION_MAP[e] for e in emotions]
+        texts = regex.split(msg)
+        # ignore everything beofe first split
+        if len(texts) > len(emotions):
+            texts = texts[1:]
+        
+        return emotions,texts
+        #return msg.partition('\n')[2].lstrip()
+    
+    @staticmethod
+    def extract_text(msg):
+        """
+        Returns the filtered message
+        """
+        _, texts = Communicator.extract_emotion(msg)
+        return '\n'.join(texts)
 
 if __name__ == "__main__":
     print(EMOTION_QUESTION)
+    msg = "happy\n\n\nI'm happy you like it! Lamp Haikus might not be as common, but I tried to capture its cozy and warm essence. If you're ready for more, I've got one about a cloud:\n\n\nagree \n\n\nWhispy clouds drift by\nSoftly shading the sun's face\nNature's gentle kiss"
+    res,pat = Communicator.extract_emotion(msg)

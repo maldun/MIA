@@ -10,7 +10,7 @@
   "protocol":"http",
   "tts_model":"tts_models/en/ljspeech/glow-tts",
   "voice_model":"/home/maldun/prog/Python/MIA/voice/models/MikuAI/MikuAI.pth",
-  "tts_device":null,
+  "tts_device":"cpu",
   "gfx_version":"11.0.0",
   "voice_sample":"/home/maldun/prog/Python/MIA/voice/samples/miku_vocals.wav",
   "history_file":"memories.json"
