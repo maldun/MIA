@@ -42,6 +42,7 @@ md = MyMarkdown(output_format='html')
 from .constants import CFG_FILE, LOG_FNAME
 fpath = os.path.split(__file__)[0]
 cfg_file = os.path.join(fpath,CFG_FILE)
+exchange_file = os.path.join(fpath,"exchange.txt")
 TEMPLATE_DIR = "templates"
 STATIC_DIR = os.path.join(TEMPLATE_DIR,"static")
 static_folder = os.path.join(fpath,STATIC_DIR)
@@ -57,7 +58,8 @@ from .communicator import Communicator
 comm = Communicator(**cfg)
 
 from .speak import Speaker, split_into_lines_and_sentences
-speaker = Speaker(**cfg)
+#speaker = Speaker(**cfg)
+
 
 app = Flask(__name__, static_folder=static_folder)
 lock = threading.Lock()
@@ -144,12 +146,20 @@ def handle_message(message):
     comm.update_history(answer)
     comm.dump_history()
     filt_answer = comm.extract_text(answer)
-    if len(filt_answer.strip()) > 0:
-        try:
-            with lock:
-                speaker.text2voice(filt_answer)
-        except RuntimeError as rt:
-            logger.error(str(rt))
+    # if len(filt_answer.strip()) > 0:
+    #     try:
+    #         with lock:
+    #             speaker.text2voice(filt_answer)
+    #     except RuntimeError as rt:
+    #         logger.error(str(rt))
+    # wailt till finished ... clonky ...
+    while os.path.exists(exchange_file):
+        pass
+    with open(exchange_file,'w') as fp:
+        fp.write(filt_answer)
+    while os.path.exists(exchange_file):
+        pass
+        
     md_answer = md.convert(filt_answer)
     send_answer(md_answer)
                 

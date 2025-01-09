@@ -23,6 +23,7 @@ from rvc_python.infer import RVCInference
 import pyaudio  
 import wave
 import tempfile
+import sys
 
 try:
     from .play_media import play_sound
@@ -104,9 +105,14 @@ class Speaker:
     TTS_DEFAULT = "tts_models/en/ljspeech/glow-tts"
     #TTS_DEFAULT = "tts_models/
     MAX_SENTENCES = 4
-    def __init__(self,tts_model=TTS_DEFAULT,voice_model=None,tts_device=None,gfx_version=None,voice_sample=None,**_):
+    def __init__(self,tts_model=TTS_DEFAULT,voice_model=None,tts_device=None,gfx_version=None,voice_sample=None,rvc_opts=None,rvc_params=None,**_):
         self._tts_model = tts_model
         self._voice = voice_model
+        if rvc_opts is None: rvc_opts = {}
+        if rvc_params is None: rvc_params = {}
+        self._rvc_opts = rvc_opts
+        self._rvc_params = rvc_params
+        
         if gfx_version is not None:
             os.environ["HSA_OVERRIDE_GFX_VERSION"] = gfx_version
         
@@ -126,9 +132,11 @@ class Speaker:
         
     def init_rvc_model(self,model,device):
         self._rvc = RVCInference(device=device) #+":0")
-        self._rvc.load_model(model,index_path="/home/maldun/Downloads/MikuAI/added_IVF3010_Flat_nprobe_1_v2.index",version='v2')
-        self._rvc.set_params(#f0up_key=2, protect=0.5,
-                             f0method="crepe")
+        
+        self._rvc.load_model(model,**self._rvc_opts)
+        self._rvc.set_params(**self._rvc_params)
+                             #f0up_key=2, protect=0.5,
+                             #f0method= "pm")  # (harvest, crepe, rmvpe, pm)
         
     def text2speech(self,msg,output_file):
         # no message no sound
@@ -159,15 +167,21 @@ class Speaker:
                     fname = fpout.name
                 
                 self.text2speech(msg,fpin.name)
-                #self.change_voice(fpin.name,fname)
-                #self.play_voice(fname)
-                self.play_voice(fpin.name)
+                self.change_voice(fpin.name,fname)
+                self.play_voice(fname)
+
+def watchdog(cfg_file,exchange_file):
+    with open(cfg_file,'r') as fp: cfg = json.load(fp)
+    speaker = Speaker(**cfg)
+    while True:
+        if os.path.exists(exchange_file):
+            with open(exchange_file,'r') as ef:
+                msg = ef.read().strip()
+            speaker.text2voice(msg)
+            os.remove(exchange_file)
                 
-                # fin = "in.wav"
-                # fout="out.wav"
-                # self.text2speech(msg,fin)
-                # self.change_voice(fin,fout)
-                # self.play_voice(fout)
+                
+            
 
 # Get device
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -175,9 +189,9 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 if __name__ == "__main__":
     # test
     import json
-    with open("setup_cfg.json",'r') as fp: cfg = json.load(fp)
-    os.environ["HSA_OVERRIDE_GFX_VERSION"] = "11.0.0"
-    s = Speaker(**cfg)
+    # with open("setup_cfg.json",'r') as fp: cfg = json.load(fp)
+    # os.environ["HSA_OVERRIDE_GFX_VERSION"] = "11.0.0"
+    # s = Speaker(**cfg)
     testout1 = "../testoutput.wav"
     testout2 = "../testoutputc.wav"
     #msg = "Dies ist ein Test"
@@ -188,4 +202,8 @@ if __name__ == "__main__":
     #s.change_voice(testout1,testout2)
     #s.play_voice(testout2)
     #s.text2voice(msg)
+    # very primitive .. build a server later
+    cfg_file=sys.argv[1]
+    exc_file=sys.argv[2]
+    watchdog(cfg_file,exc_file)
     
