@@ -65,8 +65,7 @@ vid_exp = VideoExpressor()
 from .communicator import Communicator
 comm = Communicator(**cfg)
 
-from .speak import Speaker, split_into_lines_and_sentences
-#speaker = Speaker(**cfg)
+from .speak import split_into_lines_and_sentences, chunker, cut_down_lines
 
 
 app = Flask(__name__, static_folder=static_folder)
@@ -199,11 +198,13 @@ iframe_code_footer="""
 </html>
 """
 
+
 def send_answer(answer,markdown=False):
     logger.info("Sent answer: {}".format(answer))
 
     if markdown is True:
         answer = md.convert(answer)
+        answer = cut_down_lines(answer)
         iframe_code_body=f"<pre>\n{answer}\n</pre>"
     else:
         answer=answer.lstrip()

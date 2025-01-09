@@ -150,3 +150,4 @@ ToDo
 - Make website play audio instead of server for portability to web.
 - Change file based sound server to http server (after putting audio to web)
 - improve performance of TTS and RVC
+- Add shutdown button

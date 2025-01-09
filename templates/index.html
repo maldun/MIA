@@ -70,6 +70,7 @@
       background-attachment: fixed;
       background-size: 1440px 1024px;
       }
+      
     </style>
 </head>
 <body>
@@ -145,6 +146,7 @@ socket.on('message', (data) => {
         // Update the answer text here
         //document.getElementById('answerText').innerHTML = data;
         document.getElementById('answerText').contentWindow.location.reload();
+        
       });
 
     socket.on('video_updated', (url) => {

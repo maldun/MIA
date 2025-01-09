@@ -19,6 +19,7 @@ import json
 import os
 import signal
 import subprocess
+import threading
 from .web_app import socketio, app, port, comm
 
 from .constants import CFG_FILE, LOG_FNAME
@@ -33,19 +34,27 @@ with open(cfg_file,'r') as jp:
     cfg = json.load(jp)
 
 if __name__ == "__main__":
+    if os.path.exists(exchange_file):
+            os.remove(exchange_file)
     try:
         cmd_speak = ["python3.10",os.path.join(fpath,"speak.py"),cfg_file,exchange_file]
         cmd_llama = ["python3.10",os.path.join(fpath,"install_lama.py"),cfg_file]
         
-        llama_proc = subprocess.Popen(cmd_llama)
-        speak_proc = subprocess.Popen(cmd_speak)
-        llama_proc.wait()
+        lock = threading.Lock()
+        with lock:
+            llama_proc = subprocess.Popen(cmd_llama)
+            print(f"llama process started with {llama_proc.pid}")
+            speak_proc = subprocess.Popen(cmd_speak)
+            print(f"speak process started with {speak_proc.pid}")
+            llama_proc.wait()
+            print("llama proc finished!")
             
-        comm.calibrate()
-        socketio.run(app, debug=False,port=port)
+            comm.calibrate()
+            socketio.run(app, debug=False,port=port)
     except KeyboardInterrupt:
         comm.dump_history()
         os.killpg(os.getpgid(speak_proc.pid), signal.SIGTERM)
+        #os.killpg(os.getpgid(llama_proc.pid), signal.SIGTERM)
         if os.path.exists(exchange_file):
             os.remove(exchange_file)
         

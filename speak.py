@@ -28,8 +28,10 @@ import sys
 
 try:
     from .play_media import play_sound
+    from .constants import TEXT_COLS
 except ImportError:
     from play_media import play_sound
+    from constants import TEXT_COLS
 
 # -*- coding: utf-8 -*-
 import re
@@ -107,6 +109,37 @@ def filter_symbol_sentences(sentences):
     comp = re.compile(regex)
     proper_sentences = [s for s in sentences if len(comp.findall(s))>0]
     return proper_sentences
+
+def cut_down_lines(answer,line_length=TEXT_COLS-2):
+    """
+    Cuts lines if they are too long.
+    """
+    lines = []
+    for line in answer.splitlines():
+        carry=""
+        if len(line) > line_length:
+            chunks = chunker(line,line_length)
+            new_lines = []
+            for chunk in chunks:
+                new_line = chunk
+                if len(carry) > 0:
+                    new_line = carry+new_line
+                    carry = ""
+                if len(chunk.split())>1:
+                    carry = chunk.split()[-1]
+                    if new_line.endswith(carry):
+                        new_line = new_line.removesuffix(carry)
+                    else: # we have whitespace
+                        white = new_line.split(carry)[-1]
+                        new_line = new_line.rstrip().removesuffix(carry)
+                        carry = carry+white
+                new_lines += [new_line]
+            lines += new_lines
+        else:
+            lines += [line]
+    
+    new_answer = "\n".join(lines)
+    return new_answer
 
 class Speaker:
     """
@@ -228,6 +261,11 @@ def tests():
     expected = ["The kitty's snoozing!"]
     result = filter_symbol_sentences(split_into_lines_and_sentences(msg2))
     assert expected==result
+    msg = "The playful and energetic golden retriever, named named Max bla"
+    result = cut_down_lines(msg,30)
+    breakpoint()
+    assert len(result.splitlines())==3
+    assert result.endswith("Max bla")
 
 TEST_KEYWORD = "test"
 
