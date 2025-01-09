@@ -108,7 +108,7 @@ Programm Structure
 - HTML Site: Web interface.
 - media files for expressions and background.
 
-     
+```
 MIA ..> LLM Server <---
  |         |          |
  |         v          |
@@ -118,7 +118,7 @@ MIA ..> LLM Server <---
   ...> Web App <----------> media
   
 ( ...> : Starts; ---> communicates with)
-
+``` 
 Tasks
 =====
 
