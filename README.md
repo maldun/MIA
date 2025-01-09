@@ -65,8 +65,30 @@ Prerequisites:
 - Install/Check requirements in requirments.txt (`python -m pip install -r requirments.txt`)
 
 ### Configuration
-- Configure setup_cfg.json to your liking (my settings are included as an example)
+- (my settings are included as an example)
+- Configure setup_cfg.json to your liking (here my default)
+
+    - "name":"ollama", (docker name)
+    - "docker":"docker", (docker executable e.g. podman as alernative; Fedora symlinks podman)
+    - "port":11434, (ollama port)
+    - "version":"llama3.2", (ollama model)
+    - "mode":"rocm", (gpu flag, check ollama docker docu)
+    - "timeout":3, (timeout setting for video refresh)
+    - "web_port":8585, (port for web-app)
+    - "address":"localhost", (adress)
+    - "protocol":"http", (web protocol used for site)
+    - "tts_model":"tts_models/en/ljspeech/glow-tts", (tts model; see TTS docu)
+    - "voice_model":"/path/to/MIA/voice/models/modelname/model.pth", (optional: voice model for rvc)
+    - "rvc_opts":{"index_path":"/path/to/MIA/voice/models/modelname/model.index","version":"v2"},
+    - "rvc_params":{"f0method":"pm"},  (for these see python-rvc docu)
+    - "rvc_enabled":false, (enable,disable rvc)
+    - "tts_device":"cpu", (device for tts, either cuda/cpu, for some reason cpu worked better ...)
+    - "gfx_version":"11.0.0", (flag used for roc)
+    - "voice_sample":"/path/to/MIA/voice/samples/miku_vocals.wav",(voice sample for tts voice cloning)
+    - "history_file":"memories.json" (MIA's memory)
+
 - Configure expressions.json with expressions and associated .mp4 files
+- Set the emotions and the expressions associated with it in emotion_map.json. When the AI provides an emotion the proper video is loaded.
 - First time: go into the MIA folder and run `install_lama.py setup_cfg.json -f`. The docker will start. You can chat a little and then exit with `/bye`.
 
 Usage:
@@ -76,12 +98,6 @@ Usage:
 - Open Webbrowser on `localhost:<web_port>`
 - *Hint*: KDE has a web browser plugin as desktop app ...
 
-Notes
-==================
-- It may be necessary to reset before if docker makes problem ... e.g. with podman do `podman system reset`
-- Setup rocm properly and install with `python3.10 -m pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/rocm6.0`
-- Also set your GLX proeprly with AMD cards, in my case it was: `os.environ["HSA_OVERRIDE_GFX_VERSION"] = "11.0.0"` check the correct one for your card!
-- Downloads of bark can be faulty re-download fine_2.pt manually if you want to use bark for tts.
 
 Programm Structure
 ==================
@@ -91,7 +107,18 @@ Programm Structure
 - memories.json: Memory of MIA, shouldn't be too big even after longer time.
 - webapp: Flask app to handle communication with Computer
 - HTML Site: Web interface.
-- vids and expressions.json: Set the emotions 
+- media files for expressions and background.
+
+     
+MIA ..> LLM Server <---
+ |         |          |
+ |         v          |
+  ...> Speak Server   | 
+ |         |          |
+ |         v          |
+  ...> Web App <----------> media
+  
+( ...> : Starts; ---> communicates with)
 
 Tasks
 =====
@@ -99,3 +126,11 @@ Tasks
 - Communication: Communication with the user
 - Expression of feelings
 - Talking with the user (via TTS)
+
+Notes
+==================
+- It may be necessary to reset before if docker makes problem ... e.g. with podman do `podman system reset`
+- Setup rocm properly and install with `python3.10 -m pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/rocm6.0`
+- Also set your GLX proeprly with AMD cards, in my case it was: `os.environ["HSA_OVERRIDE_GFX_VERSION"] = "11.0.0"` check the correct one for your card!
+- Downloads of bark can be faulty re-download fine_2.pt manually if you want to use bark for tts.
+- This is tested for my setup. When other test it and hare intall notes I am happy to share them.
