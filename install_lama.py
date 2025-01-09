@@ -1,14 +1,28 @@
+import argparse
 import json
 import subprocess
 import time
 import os
 import sys
 
+parser = argparse.ArgumentParser(
+                  prog='install_ollama',
+                  description='Installs ollama docker',
+                  epilog='Setup setup_cfg.json first!')
+
+parser.add_argument('cfg_file')           # positional argument
+#parser.add_argument('-c', '--count')      # option that takes a value
+parser.add_argument('-f', '--first_setup',action='store_true')  # on/off flag
+
+args = parser.parse_args()
+
 CFG_FILE = "setup_cfg.json"
-if len(sys.argv) > 1:
-  cfg_file = sys.argv[1]
+if len(args.cfg_file) > 0:
+  cfg_file = args.cfg_file
 else:
   cfg_file = CFG_FILE
+  
+first_setup = args.first_setup
 
 # Note: It may be necessary to reset before if docker makes problem ... 
 # e.g. with podman do `podman system reset`
@@ -35,4 +49,5 @@ if __name__ == "__main__":
     with open(cfg_file,'r') as fp:
         cfg = json.load(fp)
     install_ollama(**cfg)
-    #start_ollama(**cfg)
+    if first_setup is True:
+      start_ollama(**cfg)

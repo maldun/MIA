@@ -31,7 +31,6 @@ class ExpressorInterface:
     The expressor main class interface
     The expressor manages feelings
     """
-    EXPRESSIONS = {"yes","no","talk","idle","greet"}
     DATA_TYPE_KEY = ""
     
     NOT_PROPER_TYPE_MSG = "Error: expressions is not of the proper data type (a json, filename or a dict)"

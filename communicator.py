@@ -22,16 +22,21 @@ import os
 import re
 
 curr_path = os.path.split(__file__)[0]
+EMOTION_EXPRESSION_MAP = os.path.join(curr_path,"emotion_map.json")
 
-EMOTION_EXPRESSION_MAP = {
-    "agree":"yes",
-    "disagree":"no",
-    "neutral":"idle",
-    "annoyed":"annoyed",
-    "happy":"greet"
-}
+with open(EMOTION_EXPRESSION_MAP,'r') as em:
+    emotion_expression_map = json.load(em)
 
-emotions = "\n".join(list(EMOTION_EXPRESSION_MAP.keys()))
+
+# {
+#     "agree":"yes",
+#     "disagree":"no",
+#     "neutral":"idle",
+#     "annoyed":"annoyed",
+#     "happy":"greet"
+# }
+
+emotions = "\n".join(list(emotion_expression_map.keys()))
 
 EMOTION_QUESTION=f"""
 Before we start our conversation can you do the following for every answer:
@@ -114,8 +119,8 @@ class Communicator:
     @staticmethod
     def check_emotion(msg):
         line1 = msg.partition('\n')[0].strip()
-        if line1 in EMOTION_EXPRESSION_MAP.keys():
-            return EMOTION_EXPRESSION_MAP[line1]
+        if line1 in emotion_expression_map.keys():
+            return emotion_expression_map[line1]
         else:
             return None
     
@@ -124,7 +129,7 @@ class Communicator:
         """
         Filters out all lines with emotion and returns rest as string and list of emotions.
         """
-        words_to_match = list(EMOTION_EXPRESSION_MAP.keys())
+        words_to_match = list(emotion_expression_map.keys())
         word_regexes = []
         for word in words_to_match:
             escaped_word = re.escape(word)
@@ -134,7 +139,7 @@ class Communicator:
         regex = re.compile(combined_pattern)
         emotions = regex.findall(msg)
         emotions = [e.strip() for e in emotions]
-        emotions = [EMOTION_EXPRESSION_MAP[e] for e in emotions]
+        emotions = [emotion_expression_map[e] for e in emotions]
         texts = regex.split(msg)
         # ignore everything beofe first split
         if len(texts) > len(emotions):
