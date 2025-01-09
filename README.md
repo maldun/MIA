@@ -133,3 +133,10 @@ Notes
 - Also set your GLX proeprly with AMD cards, in my case it was: `os.environ["HSA_OVERRIDE_GFX_VERSION"] = "11.0.0"` check the correct one for your card!
 - Downloads of bark can be faulty re-download fine_2.pt manually if you want to use bark for tts.
 - This is tested for my setup. When other test it and hare intall notes I am happy to share them.
+
+ToDo 
+=====
+
+- Make website play audio instead of server for portability to web.
+- Change file based sound server to http server (after putting audio to web)
+- improve performance of TTS and RVC
