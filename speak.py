@@ -16,6 +16,7 @@
 #You should have received a copy of the GNU General Public License
 #along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import json
 import os
 import torch
 from TTS.api import TTS
@@ -98,6 +99,15 @@ def chunker(lst, n):
     for i in range(0, len(lst), n):
         yield lst[i:i + n]
 
+def filter_symbol_sentences(sentences):
+    """
+    Filters out sentences which consist only of symbols
+    """
+    regex = alphabets+r'+?'
+    comp = re.compile(regex)
+    proper_sentences = [s for s in sentences if len(comp.findall(s))>0]
+    return proper_sentences
+
 class Speaker:
     """
     Transforms a msg into speech using TTS and voice changers.
@@ -105,11 +115,12 @@ class Speaker:
     TTS_DEFAULT = "tts_models/en/ljspeech/glow-tts"
     #TTS_DEFAULT = "tts_models/
     MAX_SENTENCES = 4
-    def __init__(self,tts_model=TTS_DEFAULT,voice_model=None,tts_device=None,gfx_version=None,voice_sample=None,rvc_opts=None,rvc_params=None,**_):
+    def __init__(self,tts_model=TTS_DEFAULT,voice_model=None,tts_device=None,gfx_version=None,voice_sample=None,rvc_opts=None,rvc_params=None,rvc_enabled=True,**_):
         self._tts_model = tts_model
         self._voice = voice_model
         if rvc_opts is None: rvc_opts = {}
         if rvc_params is None: rvc_params = {}
+        self._rvc_enabled = rvc_enabled
         self._rvc_opts = rvc_opts
         self._rvc_params = rvc_params
         
@@ -124,7 +135,8 @@ class Speaker:
         self._voice_sample = voice_sample
         self._voice_model = voice_model
         self.init_tts_model(self._tts_model,self._device)
-        self.init_rvc_model(self._voice_model,self._device)
+        if self._rvc_enabled is True:
+            self.init_rvc_model(self._voice_model,self._device)
         
 
     def init_tts_model(self,tts_model,device):
@@ -144,13 +156,15 @@ class Speaker:
             return 
         
         sentences = split_into_lines_and_sentences(msg)
+        sentences = filter_symbol_sentences(sentences)
         chunks = list(chunker(sentences,self.MAX_SENTENCES))
         chunks = list(map(lambda l: '\n'.join(l),chunks))
         if len(chunks) > 1:
             # play only max sentences for now
             self._tts.tts_with_vc_to_file(chunks[0], speaker_wav=self._voice_sample, file_path=output_file)
-        else:
-            self._tts.tts_with_vc_to_file(msg, speaker_wav=self._voice_sample, file_path=output_file)
+        elif len(chunks) == 1:
+            self._tts.tts_with_vc_to_file(chunks[0], speaker_wav=self._voice_sample, file_path=output_file)
+        # else nothing
         
     def change_voice(self,wav_file_in,wav_file_out):
         self._rvc.infer_file(wav_file_in, wav_file_out)
@@ -165,10 +179,13 @@ class Speaker:
                     fname = output_file
                 else:
                     fname = fpout.name
-                
-                self.text2speech(msg,fpin.name)
-                self.change_voice(fpin.name,fname)
-                self.play_voice(fname)
+                if self._rvc_enabled is True:
+                    self.text2speech(msg,fpin.name)
+                    self.change_voice(fpin.name,fname)
+                    self.play_voice(fname)
+                else:
+                    self.text2speech(msg,fname)
+                    self.play_voice(fname)
 
 def watchdog(cfg_file,exchange_file):
     with open(cfg_file,'r') as fp: cfg = json.load(fp)
@@ -186,9 +203,8 @@ def watchdog(cfg_file,exchange_file):
 # Get device
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
-if __name__ == "__main__":
+def tests():
     # test
-    import json
     # with open("setup_cfg.json",'r') as fp: cfg = json.load(fp)
     # os.environ["HSA_OVERRIDE_GFX_VERSION"] = "11.0.0"
     # s = Speaker(**cfg)
@@ -202,8 +218,26 @@ if __name__ == "__main__":
     #s.change_voice(testout1,testout2)
     #s.play_voice(testout2)
     #s.text2voice(msg)
+    msg2 = """
+     /_/\ 
+     ( ^ - ^ ) 
+     >___<
+
+     The kitty's snoozing!
+    """
+    expected = ["The kitty's snoozing!"]
+    result = filter_symbol_sentences(split_into_lines_and_sentences(msg2))
+    assert expected==result
+
+TEST_KEYWORD = "test"
+
+if __name__ == "__main__":
+    
     # very primitive .. build a server later
     cfg_file=sys.argv[1]
-    exc_file=sys.argv[2]
-    watchdog(cfg_file,exc_file)
+    if cfg_file.lower()==TEST_KEYWORD:
+        tests()
+    else:
+        exc_file=sys.argv[2]
+        watchdog(cfg_file,exc_file)
     

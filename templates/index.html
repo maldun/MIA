@@ -80,7 +80,8 @@
                 Your browser does not support the video tag.
             </video>
             <div>
-            <textarea id="answerText" rows="19" cols="67" class="background-text"></textarea>
+            <!--<textarea id="answerText" rows="19" cols="67" class="background-text"></textarea>-->
+            <iframe id="answerText" height="420" width="640" src="{{ url_for('static', filename='answer.html') }}"></iframe>
             </div>
         </div>
         <div class="answer-container">
@@ -142,7 +143,8 @@ socket.on('message', (data) => {
 
      socket.on('answer', (data) => {
         // Update the answer text here
-        document.getElementById('answerText').innerHTML = data;
+        //document.getElementById('answerText').innerHTML = data;
+        document.getElementById('answerText').contentWindow.location.reload();
       });
 
     socket.on('video_updated', (url) => {

@@ -30,4 +30,4 @@ if __name__ == "__main__":
     with open(CFG_FILE,'r') as fp:
         cfg = json.load(fp)
     install_ollama(**cfg)
-    start_ollama(**cfg)
+    #start_ollama(**cfg)

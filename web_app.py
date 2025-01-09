@@ -31,21 +31,29 @@ class MyMarkdown(Markdown):
     """
     Stupid hack ...
     """
-    def convert(self, text):
+    PREFIX = "<p>"
+    SUFFIX = "</p>"
+    def convert(self, text,remove_paragraph=False):
         t = super().convert(text)
-        t = t.removeprefix("<p>").removesuffix("</p>")
+        if remove_paragraph is True:
+            t = t.removeprefix(self.PREFIX).removesuffix(self.SUFFIX)
         return t
+    # def add_paragraphs(self, text):
+    #     lines = text.splitlines()
+    #     lines = [self.PREFIX+line+self.
 
 md = MyMarkdown(output_format='html')
 
 # constants and paths
-from .constants import CFG_FILE, LOG_FNAME
+from .constants import CFG_FILE, LOG_FNAME, TEXT_COLOR, FONT_SIZE, BACKGROUND_COLOR
+from .constants import TEXT_ROWS, TEXT_COLS, TEXT_FONT
 fpath = os.path.split(__file__)[0]
 cfg_file = os.path.join(fpath,CFG_FILE)
 exchange_file = os.path.join(fpath,"exchange.txt")
 TEMPLATE_DIR = "templates"
 STATIC_DIR = os.path.join(TEMPLATE_DIR,"static")
 static_folder = os.path.join(fpath,STATIC_DIR)
+ANSWER_FILE = os.path.join(static_folder,"answer.html")
 
 with open(cfg_file,'r') as jp:
     cfg = json.load(jp)
@@ -160,8 +168,7 @@ def handle_message(message):
     while os.path.exists(exchange_file):
         pass
         
-    md_answer = md.convert(filt_answer)
-    send_answer(md_answer)
+    send_answer(filt_answer,markdown=True)
                 
     #speaker.text2voice(answer)
     
@@ -173,15 +180,48 @@ def handle_message(message):
     return "Message received successfully"
 
 
-def send_answer(answer):
+iframe_code_header=f"""
+<!DOCTYPE html>
+<html>
+<style>
+body {{
+     background-color: {BACKGROUND_COLOR};
+     color: {TEXT_COLOR};
+     font-size: {FONT_SIZE};
+     font-family: {TEXT_FONT};
+    }}
+</style>
+<body>
+    """
+
+iframe_code_footer="""
+</body>
+</html>
+"""
+
+def send_answer(answer,markdown=False):
     logger.info("Sent answer: {}".format(answer))
+
+    if markdown is True:
+        answer = md.convert(answer)
+        iframe_code_body=f"<pre>\n{answer}\n</pre>"
+    else:
+        answer=answer.lstrip()
+        css_style=f"background-color: {BACKGROUND_COLOR};color: {TEXT_COLOR};font-size: {FONT_SIZE};font-family: {TEXT_FONT};"
+        iframe_code_body=f'<textarea id="answerTextArea" style="{css_style}" rows="{TEXT_ROWS}" cols="{TEXT_COLS}">\n'
+        iframe_code_body+=answer
+        iframe_code_body+="</textarea>"
+
+    iframe_code = "\n".join([iframe_code_header,iframe_code_body,iframe_code_footer])
+    with open(ANSWER_FILE,'w') as af:
+        af.write(iframe_code)
     emit('answer',answer)
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
     logger.info('Rendering index.html template')
     print("Rendering index.html template")
-    return render_template('index.html' ,socket_url=get_socket_url(port),name=md.convert("*MIA*"))
+    return render_template('index.html' ,socket_url=get_socket_url(port),name=md.convert("*MIA*",remove_paragraph=True))
 
 @socketio.on('reload_video')
 def reload_video(vid):

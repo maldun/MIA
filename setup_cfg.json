@@ -12,6 +12,7 @@
   "voice_model":"/home/maldun/prog/Python/MIA/voice/models/MikuAI/MikuAI.pth",
   "rvc_opts":{"index_path":"/home/maldun/Downloads/MikuAI/added_IVF3010_Flat_nprobe_1_v2.index","version":"v2"},
   "rvc_params":{"f0method":"pm"},
+  "rvc_enabled":false,
   "tts_device":"cpu",
   "gfx_version":"11.0.0",
   "voice_sample":"/home/maldun/prog/Python/MIA/voice/samples/miku_vocals.wav",
