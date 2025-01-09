@@ -2,8 +2,13 @@ import json
 import subprocess
 import time
 import os
+import sys
 
 CFG_FILE = "setup_cfg.json"
+if len(sys.argv) > 1:
+  cfg_file = sys.argv[1]
+else:
+  cfg_file = CFG_FILE
 
 # Note: It may be necessary to reset before if docker makes problem ... 
 # e.g. with podman do `podman system reset`
@@ -27,7 +32,7 @@ def start_ollama(version="lama3.2",docker="docker",timeout=10,mode="rocm",port=1
     proc.wait()
 
 if __name__ == "__main__":
-    with open(CFG_FILE,'r') as fp:
+    with open(cfg_file,'r') as fp:
         cfg = json.load(fp)
     install_ollama(**cfg)
     #start_ollama(**cfg)

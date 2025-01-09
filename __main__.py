@@ -19,7 +19,6 @@ import json
 import os
 import signal
 import subprocess
-import threading
 from .web_app import socketio, app, port, comm
 
 from .constants import CFG_FILE, LOG_FNAME
@@ -35,15 +34,18 @@ with open(cfg_file,'r') as jp:
 
 if __name__ == "__main__":
     try:
-        lock = threading.Lock()
-        cmd = ["python3.10",os.path.join(fpath,"speak.py"),cfg_file,exchange_file]
-        with lock:
-            proc = subprocess.Popen(cmd)
+        cmd_speak = ["python3.10",os.path.join(fpath,"speak.py"),cfg_file,exchange_file]
+        cmd_llama = ["python3.10",os.path.join(fpath,"install_lama.py"),cfg_file]
+        
+        llama_proc = subprocess.Popen(cmd_llama)
+        speak_proc = subprocess.Popen(cmd_speak)
+        llama_proc.wait()
+            
         comm.calibrate()
         socketio.run(app, debug=False,port=port)
     except KeyboardInterrupt:
         comm.dump_history()
-        os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
+        os.killpg(os.getpgid(speak_proc.pid), signal.SIGTERM)
         if os.path.exists(exchange_file):
             os.remove(exchange_file)
         
