@@ -88,6 +88,16 @@ Prerequisites:
 
 - Configure expressions.json with expressions and associated .mp4 files
 - Set the emotions and the expressions associated with it in emotion_map.json. When the AI provides an emotion the proper video is loaded.
+- Some configurations are found in `constants.py` which can be adjusted like textbox settings.
+    - CFG_FILE = "setup_cfg.json" (cfg file to use)
+    - LOG_FNAME = "mia.log" (log file)
+    - BACKGROUND_COLOR = "#000000" 
+    - TEXT_COLOR = "#6cf542" 
+    - FONT_SIZE = "16px" 
+    - TEXT_ROWS = 15 
+    - TEXT_COLS = 60
+    - TEXT_FONT = '"Brush Script MT", cursive'
+    
 - First time: go into the MIA folder and run `install_lama.py setup_cfg.json -f`. The docker will start. You can chat a little and then exit with `/bye`.
 
 Usage:
