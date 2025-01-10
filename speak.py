@@ -16,6 +16,7 @@
 #You should have received a copy of the GNU General Public License
 #along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import argparse
 import json
 import os
 import torch
@@ -28,10 +29,12 @@ import sys
 
 try:
     from .play_media import play_sound
-    from .constants import TEXT_COLS
+    from .constants import CFG_FILE, TEXT_COLS, TEXT_KEY, VOICE_KEY
+    from .mia_logger import logger
 except ImportError:
     from play_media import play_sound
-    from constants import TEXT_COLS
+    from constants import TEXT_COLS, TEXT_KEY, CFG_FILE, VOICE_KEY
+    from mia_logger import logger
 
 # -*- coding: utf-8 -*-
 import re
@@ -206,6 +209,8 @@ class Speaker:
         play_sound(wav_file)
         
     def text2voice(self,msg,output_file=None):
+        if len(msg) == 0:
+            return 
         with tempfile.NamedTemporaryFile(delete=True) as fpin:
             with tempfile.NamedTemporaryFile(delete=True) as fpout:
                 if output_file is not None:
@@ -227,6 +232,7 @@ def watchdog(cfg_file,exchange_file):
         if os.path.exists(exchange_file):
             with open(exchange_file,'r') as ef:
                 msg = ef.read().strip()
+            logger.debug(msg)
             speaker.text2voice(msg)
             os.remove(exchange_file)
                 
@@ -238,19 +244,19 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 
 def tests():
     # test
-    # with open("setup_cfg.json",'r') as fp: cfg = json.load(fp)
-    # os.environ["HSA_OVERRIDE_GFX_VERSION"] = "11.0.0"
-    # s = Speaker(**cfg)
+    with open(CFG_FILE,'r') as fp: cfg = json.load(fp)
+    os.environ["HSA_OVERRIDE_GFX_VERSION"] = "11.0.0"
+    s = Speaker(**cfg)
     testout1 = "../testoutput.wav"
     testout2 = "../testoutputc.wav"
-    #msg = "Dies ist ein Test"
+    msg = "Dies ist ein Test"
     #msg = "L\u00f6we sucht das Licht\nSchatten tanzen auf dem Berg\nGeheimnisvolk schaut"
     msg = "Let's test some sentences, alright? This is a test."
-    #s.text2speech(msg,testout1)
+    s.text2speech(msg,testout1)
     
-    #s.change_voice(testout1,testout2)
-    #s.play_voice(testout2)
-    #s.text2voice(msg)
+    s.change_voice(testout1,testout2)
+    s.play_voice(testout2)
+    s.text2voice(msg)
     msg2 = """
      /_/\ 
      ( ^ - ^ ) 
@@ -263,19 +269,54 @@ def tests():
     assert expected==result
     msg = "The playful and energetic golden retriever, named named Max bla"
     result = cut_down_lines(msg,30)
-    breakpoint()
     assert len(result.splitlines())==3
     assert result.endswith("Max bla")
 
-TEST_KEYWORD = "test"
+
+def generate(cfg_file,expression_file,sound_format="wav"):
+    curr_dir = os.path.split(__file__)[0]
+    with open(cfg_file,'r') as fp: 
+        cfg = json.load(fp)
+        speaker = Speaker(**cfg)
+    with open(expression_file,'r') as fp:
+        expressions = json.load(fp)
+    for exp, data in expressions.items():
+        text = data[TEXT_KEY]
+        output_file = os.path.join(curr_dir,"voice","expressions",f"{exp}.{sound_format}")
+        speaker.text2voice(text,output_file=output_file)
+        expressions[exp][VOICE_KEY] = output_file
+    with open(expression_file,'w') as fp:
+        json.dump(expressions,fp)
+
+parser = argparse.ArgumentParser(
+                  prog='speak',
+                  description='Tools for voice generation and TTS',
+                  usage="For service: python speak.py cfg_file expression_file, or flags -t/--test for test or -g/--generate for voice sample generation -d/--debug for debugging",
+                  
+                  epilog='')
+
+parser.add_argument('cfg_file',nargs='?',default=CFG_FILE,help="configuration file")   # positional argument
+parser.add_argument('exchange_file',nargs='?',default="exchange.txt",help="file for file based serving")   # positional argument
+#parser.add_argument('-c', '--count')      # option that takes a value
+parser.add_argument('-t', '--test',action='store_true',help="execute tests")  # on/off flag
+parser.add_argument('-g', '--generate',action='store_true',help="generate expression samples. Needs cfg_file and expressions.json with text entries (instead of exchange file).")  # on/off flag
+parser.add_argument('-d', '--debug',action='store_true',help="execute file with nothing else for debugging")  # on/off flag
+
+args = parser.parse_args()
 
 if __name__ == "__main__":
     
-    # very primitive .. build a server later
-    cfg_file=sys.argv[1]
-    if cfg_file.lower()==TEST_KEYWORD:
+    if args.debug is True:
+        with open(CFG_FILE,'r') as fp: cfg = json.load(fp)
+        os.environ["HSA_OVERRIDE_GFX_VERSION"] = "11.0.0"
+        s = Speaker(**cfg)   
+    elif args.test is True:
         tests()
+    elif args.generate is True:
+        generate(args.cfg_file,args.exchange_file)
     else:
+        cfg_file = args.cfg_file
+        exc_file = args.exchange_file
         exc_file=sys.argv[2]
         watchdog(cfg_file,exc_file)
     

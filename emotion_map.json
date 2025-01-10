@@ -1,7 +1,8 @@
 {
     "agree":"yes",
     "disagree":"no",
-    "neutral":"idle",
+    "neutral":"talk",
     "annoyed":"annoyed",
-    "happy":"greet"
+    "happy":"greet",
+    "MIA":"greet"
 }

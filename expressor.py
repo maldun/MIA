@@ -20,6 +20,9 @@ from abc import ABC, abstractmethod
 import json
 import os
 import shutil
+from .constants import VIDEO_KEY, VOICE_KEY, EXPRESSION_FILE
+from .play_media import play_sound
+from .mia_logger import logger
 
 def get_current_dir():
     import inspect, os
@@ -36,7 +39,7 @@ class ExpressorInterface:
     NOT_PROPER_TYPE_MSG = "Error: expressions is not of the proper data type (a json, filename or a dict)"
     NOT_IMPLEMENTED_MSG = "Error: Method not implemented yet!"
     
-    def __init__(self,expressions="expressions.json"):
+    def __init__(self,expressions=EXPRESSION_FILE):
         """
         load all information about expressions
         """
@@ -57,12 +60,13 @@ class ExpressorInterface:
         else:
             raise TypeError(self,NOT_PROPER_TYPE_MSG)
     
-    @abstractmethod
     def set_expressions(self,expressions):
         """
-        sets the expression dict accordingly
+        sets the expression dict accordingly ( in this case vids)
         """
-        raise NotImplementedError(self.NOT_IMPLEMENTED_MSG)
+        self._expressions = expressions
+        for key, val in expressions.items():
+            setattr(self,key,val[self.DATA_TYPE_KEY])
     
     @abstractmethod
     def express(self,key):
@@ -73,12 +77,12 @@ class ExpressorInterface:
         
 
 class VideoExpressor(ExpressorInterface):
-    DATA_TYPE_KEY = "vid"
+    DATA_TYPE_KEY = VIDEO_KEY
     VID_NOT_FOUND_MSG = "Error: Video {} not found!"
     TARGET_PATH =  os.path.join(get_current_dir(),"templates","static")
     DEFAULT_TARGET = os.path.join(get_current_dir(),"templates","static","video.mp4")
     STATE_SUFF = "_curr_state"
-    def __init__(self,expressions="expressions.json",target_file=None,video_path=None):
+    def __init__(self,expressions=EXPRESSION_FILE,target_file=None,video_path=None):
         if target_file is None:
             self._target_file = self.DEFAULT_TARGET
         else:
@@ -119,3 +123,32 @@ class VideoExpressor(ExpressorInterface):
             raise FileNotFoundError(self.VID_NOT_FOUND_MSG.format(video_file))
         shutil.copy2(video_file,os.path.join(self.TARGET_PATH,vid_file))
         return vid_file
+
+class VoiceExpressor(ExpressorInterface):
+    """
+    Class for making expressions in form of voices.
+    """
+    DATA_TYPE_KEY=VOICE_KEY
+    KEY_MISS_ERR = "Error: Expression for voice {key} missing or wrong key!"
+    SND_FILE_MISS_ERR = "Error: Sound file {file} is missing! No sound played!"
+    DEFAULT_PATH =  os.path.join(get_current_dir(),"voice","expressions")
+    def express(self,key,fail_on_no_file=False):
+        """
+        Plays the sound fitting to the expressions
+        """
+        
+        if key not in self._expressions.keys():
+            raise KeyError(self.KEY_MISS_ERR.format(key=key))
+        sound_file = getattr(self,key)
+        candidates = (sound_file,os.path.join(self.DEFAULT_PATH,sound_file))
+        for candidate in candidates:
+            if os.path.exists(candidate):
+                play_sound(candidate)
+                break
+        else:
+            err_msg = self.SND_FILE_MISS_ERR.format(file=sound_file)
+            logger.error(err_msg)
+            if fail_on_no_file is True:
+                raise FileNotFoundError(err_msg)
+    
+        

@@ -130,10 +130,14 @@ class Communicator:
         Filters out all lines with emotion and returns rest as string and list of emotions.
         """
         words_to_match = list(emotion_expression_map.keys())
+        if len(msg.splitlines()) == 1:
+            emotions = [emotion_expression_map[e] for e in words_to_match if e==msg.strip()]
+            return emotions, ['']
+        
         word_regexes = []
         for word in words_to_match:
             escaped_word = re.escape(word)
-            pattern = fr'{escaped_word}\W*\n\n' #fr'^\s*({escaped_word})\W*\n\n$'
+            pattern = fr'{escaped_word}\W*\n' #fr'^\s*({escaped_word})\W*\n\n$'
             word_regexes.append(pattern)
         combined_pattern = '|'.join(word_regexes)
         regex = re.compile(combined_pattern)
@@ -160,3 +164,7 @@ if __name__ == "__main__":
     print(EMOTION_QUESTION)
     msg = "happy\n\n\nI'm happy you like it! Lamp Haikus might not be as common, but I tried to capture its cozy and warm essence. If you're ready for more, I've got one about a cloud:\n\n\nagree \n\n\nWhispy clouds drift by\nSoftly shading the sun's face\nNature's gentle kiss"
     res,pat = Communicator.extract_emotion(msg)
+    assert "yes" in res and "greet" in res
+    msg2 = "neutral \nI don't have emotions or feelings, so I'm not capable of feeling annoyance. My previous response was a neutral acknowledgement that you were being slightly perturbing or frustrating."
+    res2,pat2 = Communicator.extract_emotion(msg2)
+    assert res2 == ["talk"]

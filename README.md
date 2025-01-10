@@ -97,6 +97,7 @@ Prerequisites:
     - TEXT_ROWS = 15 
     - TEXT_COLS = 60
     - TEXT_FONT = '"Brush Script MT", cursive'
+- Generate expressions with `python -m python3.10 -i speak.py setup_cfg.json expressions.json --generate`
     
 - First time: go into the MIA folder and run `install_lama.py setup_cfg.json -f`. The docker will start. You can chat a little and then exit with `/bye`.
 
@@ -151,3 +152,6 @@ ToDo
 - Change file based sound server to http server (after putting audio to web)
 - improve performance of TTS and RVC
 - Add shutdown button
+- Make expression also as a service.
+- Make Package
+- Make better input field.

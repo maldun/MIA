@@ -58,9 +58,11 @@ ANSWER_FILE = os.path.join(static_folder,"answer.html")
 with open(cfg_file,'r') as jp:
     cfg = json.load(jp)
 PORT_OPT = "web_port"
+TIMEOUT_OPT = "timeout"
 
-from .expressor import VideoExpressor
+from .expressor import VideoExpressor, VoiceExpressor
 vid_exp = VideoExpressor()
+voc_exp = VoiceExpressor()
 
 from .communicator import Communicator
 comm = Communicator(**cfg)
@@ -72,6 +74,7 @@ app = Flask(__name__, static_folder=static_folder)
 lock = threading.Lock()
 
 port = int(cfg[PORT_OPT])
+timeout = int(cfg[TIMEOUT_OPT])
 URL_KEY = "url"
 def get_socket_url(port,page="localhost",protocol='ws'):
     return {URL_KEY:f"{protocol}://{page}:{port}"}
@@ -80,15 +83,7 @@ socketio = SocketIO(app,cors_allowed_origins=get_socket_url(port,protocol='http'
 
 #g.socket_url = f"ws://127.0.0.1:{port}/"
 
-logger = logging.getLogger(__name__)
-
-# Set log level to DEBUG
-logger.setLevel(logging.DEBUG)
-
-# Create a logging handler that writes logs to a file
-handler = logging.FileHandler(os.path.join(fpath,LOG_FNAME))
-handler.setLevel(logging.DEBUG)  # Set level here as well
-logger.addHandler(handler)
+from .mia_logger import logger
 
 logger.debug('Start Logging')
 print("start")
@@ -109,13 +104,14 @@ def get_video_frames(video_path):
 def express_and_reload(expression):
     new_vid = vid_exp.express(expression)
     reload_video(new_vid)
+    voc_exp.express(expression)
 
 # Create a function to handle messages from clients
 @socketio.on('message')
 def handle_message(message):
     logger.info("Received message: {}".format(message))
     print(f"Received message: {message}")
-    express_and_reload("idle")
+    #express_and_reload("idle")
     time.sleep(1)
     #express_and_reload("talk")
     
@@ -134,18 +130,10 @@ def handle_message(message):
             emotion = emotions[nr_emotions]
             tx = text[nr_emotions]
             nr_emotions+= 1
-
             express_and_reload(emotion)
-            emotion_set = True
-        #else:
-        #    filt_answer = comm.extract_emotion(answer)
-        #    send_answer(filt_answer)
+
         filt_answer = comm.extract_text(answer)
         send_answer(filt_answer)
-    
-    # if nr_emotions < len(emotions) and len(text[-1]) > 0:
-    #     p = mp.Process(target=speaker.text2voice, args=(text[-1],))
-    #     p.run()
     
     filt_answer = comm.extract_text(answer)
     
@@ -153,12 +141,7 @@ def handle_message(message):
     comm.update_history(answer)
     comm.dump_history()
     filt_answer = comm.extract_text(answer)
-    # if len(filt_answer.strip()) > 0:
-    #     try:
-    #         with lock:
-    #             speaker.text2voice(filt_answer)
-    #     except RuntimeError as rt:
-    #         logger.error(str(rt))
+
     # wailt till finished ... clonky ...
     while os.path.exists(exchange_file):
         pass
@@ -168,12 +151,12 @@ def handle_message(message):
         pass
         
     send_answer(filt_answer,markdown=True)
-                
+    if len(filt_answer) == 0:
+        # if no speech wait a bit
+        time.sleep(timeout)
     #speaker.text2voice(answer)
     
-    time.sleep(1)
-    #express_and_reload("talk")
-    time.sleep(0.5)
+    time.sleep(2)
     express_and_reload("idle")
     
     return "Message received successfully"
@@ -222,6 +205,7 @@ def send_answer(answer,markdown=False):
 def index():
     logger.info('Rendering index.html template')
     print("Rendering index.html template")
+    vid_exp.express("idle")
     return render_template('index.html' ,socket_url=get_socket_url(port),name=md.convert("*MIA*",remove_paragraph=True))
 
 @socketio.on('reload_video')

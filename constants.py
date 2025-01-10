@@ -8,3 +8,10 @@ FONT_SIZE = "16px"
 TEXT_ROWS = 15
 TEXT_COLS = 55
 TEXT_FONT = 'Arial, cursive'
+
+# Important config keys for expressions
+EXPRESSION_FILE = "expressions.json"
+TEXT_KEY = "text"
+VIDEO_KEY = "vid"
+VOICE_KEY = "voice"
+
