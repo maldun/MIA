@@ -8,8 +8,8 @@ TIME_FORMAT = "%Y.%M.%d %H:%m:%S:"
 BACKGROUND_COLOR = "#000000"
 TEXT_COLOR = "#6cf542"
 FONT_SIZE = "16px"
-TEXT_ROWS = 15
-TEXT_COLS = 55
+TEXT_ROWS = 50
+TEXT_COLS = 65
 TEXT_FONT = 'Arial, cursive'
 
 # Important config keys for expressions

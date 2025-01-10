@@ -14,7 +14,7 @@
 #You should have received a copy of the GNU General Public License
 #along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from flask import Flask, render_template, request, send_file, g, jsonify
+from flask import Flask, render_template, request, send_file, g, jsonify, send_from_directory
 import av
 import cv2
 import json
@@ -24,6 +24,7 @@ import os
 import time
 import threading
 import multiprocessing as mp
+import shutil
 
 
 # constants and paths
@@ -36,6 +37,13 @@ TEMPLATE_DIR = "templates"
 STATIC_DIR = os.path.join(TEMPLATE_DIR,"static")
 static_folder = os.path.join(fpath,STATIC_DIR)
 ANSWER_FILE = os.path.join(static_folder,"answer.html")
+
+UPLOAD_DIR = os.path.join(TEMPLATE_DIR,"upload")
+upload_folder = os.path.join(fpath,UPLOAD_DIR)
+AUDIO_DIR = os.path.join(TEMPLATE_DIR,"audio")
+audio_folder = os.path.join(fpath,AUDIO_DIR)
+
+AUDIO_OUTFILE = "out.wav"
 
 with open(cfg_file,'r') as jp:
     cfg = json.load(jp)
@@ -53,7 +61,16 @@ from .utils import MyMarkdown, cut_down_lines, split_into_lines_and_sentences, c
 md = MyMarkdown(output_format='html')
 
 app = Flask(__name__, static_folder=static_folder)
+app.config["UPLOAD_FOLDER"] = UPLOAD_DIR
 lock = threading.Lock()
+app.config['MAX_CONTENT_LENGTH'] = 100*1024**2  # 16 MB
+
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 port = int(cfg[PORT_OPT])
 timeout = int(cfg[TIMEOUT_OPT])
@@ -185,15 +202,16 @@ iframe_code_footer="""
 </body>
 </html>
 """
-
+# add markdown module
+markdown_source='<script type="module" src="https://md-block.verou.me/md-block.js"></script>'
 
 def send_answer(answer,markdown=False):
     logger.info("Sent answer: {}".format(answer))
 
     if markdown is True:
-        answer = md.convert(answer)
+        #answer = md.convert(answer)
         answer = cut_down_lines(answer)
-        iframe_code_body=f'<div markdown=1>\n{answer}\n</div>'
+        iframe_code_body=markdown_source+'\n'+f'<md-block>\n{answer}\n</md-block>'
     else:
         answer=answer.lstrip()
         css_style=f"background-color: {BACKGROUND_COLOR};color: {TEXT_COLOR};font-size: {FONT_SIZE};font-family: {TEXT_FONT};"
@@ -220,6 +238,64 @@ def reload_video(vid):
     url = vid
     time.sleep(0.1)
     emit('video_updated', url)
+
+
+@app.route("/upload", methods=["POST"])
+def upload_sound_file():
+    if "file" not in request.files:
+        return "No file part", 400
+    file = request.files["file"]
+    if file.filename == "":
+        return "No selected file", 400
+    
+    main_fname = os.path.split(file.filename)[1]
+    url_filename = os.path.join(upload_folder,main_fname)
+    audio_filename = os.path.join(audio_folder,main_fname)
+    file.save(url_filename)
+    #file.save(os.path.join(static_folder, file.filename))
+    
+    logger.info("File uploaded successfully")
+    mimetype="audio/wav"
+    outfile = AUDIO_OUTFILE
+    out_filename = os.path.join(audio_folder,AUDIO_OUTFILE)
+    #send_file(url_filename,mimetype=mimetype,as_attachment=True,download_name=main_fname)
+    #send_from_directory(url_filename,"upload",mimetype=mimetype,as_attachment=True,download_name=main_fname)
+
+    shutil.move(url_filename,out_filename)
+    serve_audio(outfile)
+    log_msg = "Audio loaded sucessfully"
+    socketio.emit('audio_reload',log_msg)
+    logger.info(log_msg)
+    return log_msg
+
+@app.route('/audio/<filename>')
+def serve_audio(filename):
+    mimetype="audio/wav"
+    return send_from_directory(AUDIO_DIR, filename,mimetype=mimetype)
+
+# @socketio.event
+# def emit_audio_file():
+#     filename = 'static/audio.wav'
+#     sio.emit('audio', send_file(filename, 
+# mimetype='audio/wav'))
+
+@socketio.on('audio_ended')
+def cleanup_audio(vid):
+    logger.info('Cleanup Audio File')
+    # Update the video source here
+    outfile = AUDIO_OUTFILE
+    out_filename = os.path.join(audio_folder,AUDIO_OUTFILE)
+    os.remove(out_filename)
+    log_msg = "audio file deleted"
+    logger.info(log_msg)
+    emit('audio_reload',log_msg)
+
+
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(os.path.join(app.root_path, 'static'),
+                          'favicon.ico',mimetype='image/vnd.microsoft.icon')
+
 
 if __name__ == '__main__':
     vid_exp.express("idle")

@@ -20,7 +20,11 @@ import cv2
 import subprocess
 import os
 from playsound import playsound
-
+import requests
+try:
+    from .mia_logger import logger
+except ImportError:
+    from mia_logger import logger
 
 
 filename = 'wave001.avi'
@@ -46,7 +50,7 @@ def play_animation_cv2(filename,window_name,delay=delay):
 def play_animation_mplayer(filename,window_name,delay=delay):
     with open(os.devnull, 'w') as FNULL:
         p = subprocess.run(["mplayer","-title",window_name,"-speed",str(delay), filename],stdout=FNULL, stderr=subprocess.STDOUT)
-        if p.returncode is 0:
+        if p.returncode == 0:
             return True
         else:
             return False
@@ -57,7 +61,13 @@ def play_animation(filename,window_name,delay=delay):
     """
     return play_animation_mplayer(filename,window_name,delay=delay)
 
-def play_sound(filename):
-    playsound(filename)
+def play_sound(filename,url=None):
+    if url is None:
+        playsound(filename)
+    else:
+        with open(filename, 'rb') as fp:
+            req = dict(filename=filename, file=fp)
+            response = requests.post(url, files=req)
+            logger.info(response.text)
 
 
