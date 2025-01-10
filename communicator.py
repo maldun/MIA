@@ -21,6 +21,11 @@ import json
 import os
 import re
 
+try:
+    from .mia_logger import logger
+except ImportError:
+    from mia_logger import logger
+
 curr_path = os.path.split(__file__)[0]
 EMOTION_EXPRESSION_MAP = os.path.join(curr_path,"emotion_map.json")
 
@@ -125,6 +130,15 @@ class Communicator:
             return None
     
     @staticmethod
+    def empty_emotion(msg):
+        if "neutral" in emotion_expression_map.keys():
+            emotions=[emotion_expression_map["neutral"]]
+        texts = [msg]
+        logger.error(f"Error: Emotion forgotten with message {msg}")
+        return emotions, texts
+            
+    
+    @staticmethod
     def extract_emotion(msg):
         """
         Filters out all lines with emotion and returns rest as string and list of emotions.
@@ -132,6 +146,8 @@ class Communicator:
         words_to_match = list(emotion_expression_map.keys())
         if len(msg.splitlines()) == 1:
             emotions = [emotion_expression_map[e] for e in words_to_match if e==msg.strip()]
+            if len(emotions) == 0:
+                return Communicator.empty_emotion(msg)
             return emotions, ['']
         
         word_regexes = []
@@ -147,7 +163,10 @@ class Communicator:
         texts = regex.split(msg)
         # ignore everything beofe first split
         if len(texts) > len(emotions):
-            texts = texts[1:]
+            if len(emotions)>0:
+                texts = texts[1:]
+            else:
+               emotions, texts = Communicator.empty_emotion(msg)
         
         return emotions,texts
         #return msg.partition('\n')[2].lstrip()
@@ -168,3 +187,6 @@ if __name__ == "__main__":
     msg2 = "neutral \nI don't have emotions or feelings, so I'm not capable of feeling annoyance. My previous response was a neutral acknowledgement that you were being slightly perturbing or frustrating."
     res2,pat2 = Communicator.extract_emotion(msg2)
     assert res2 == ["talk"]
+    msg3 = "After a while, Crocodile"
+    res3,pat3 = Communicator.extract_emotion(msg3)
+    assert res3 == ["talk"] and pat3 == [msg3]
