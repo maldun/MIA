@@ -6,6 +6,7 @@
   "mode":"rocm",
   "timeout":3,
   "web_port":8585,
+  "sound_port":8586,
   "address":"localhost",
   "protocol":"http",
   "tts_model":"tts_models/en/ljspeech/glow-tts",
@@ -16,5 +17,6 @@
   "tts_device":"cpu",
   "gfx_version":"11.0.0",
   "voice_sample":"/home/maldun/prog/Python/MIA/voice/samples/miku_vocals.wav",
-  "history_file":"memories.json"
+  "history_file":"memories.json",
+  "intro_sound":"voice/expressions/idle.wav"
 }

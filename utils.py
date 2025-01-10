@@ -17,9 +17,9 @@
 #along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 try:
-    from .constants import TEXT_COLS
+    from .constants import TEXT_COLS, URL_KEY
 except ImportError:
-    from constants import TEXT_COLS
+    from constants import TEXT_COLS, URL_KEY
 
 import markdown
 from markdown import Markdown
@@ -144,6 +144,14 @@ def filter_symbol_sentences(sentences):
     comp = re.compile(regex)
     proper_sentences = [s for s in sentences if len(comp.findall(s))>0]
     return proper_sentences
+
+
+def get_socket_url(port,page="localhost",protocol='ws',json=True):
+    """
+    Combines a proper url and returns a dict for jsyfying
+    """
+    url = f"{protocol}://{page}:{port}"
+    return {URL_KEY:url} if json is True else url
 
 if __name__ == "__main__":
     # Tests

@@ -25,11 +25,13 @@ import time
 import threading
 import multiprocessing as mp
 import shutil
+import socket
 
 
 # constants and paths
 from .constants import CFG_FILE, LOG_FNAME, TEXT_COLOR, FONT_SIZE, BACKGROUND_COLOR
 from .constants import TEXT_ROWS, TEXT_COLS, TEXT_FONT
+from .constants import ADDRESS_KEY, PROTOCOL_KEY, WEB_PORT_KEY, SOUND_PORT_KEY, URL_KEY
 fpath = os.path.split(__file__)[0]
 cfg_file = os.path.join(fpath,CFG_FILE)
 exchange_file = os.path.join(fpath,"exchange.txt")
@@ -38,8 +40,10 @@ STATIC_DIR = os.path.join(TEMPLATE_DIR,"static")
 static_folder = os.path.join(fpath,STATIC_DIR)
 ANSWER_FILE = os.path.join(static_folder,"answer.html")
 
-UPLOAD_DIR = os.path.join(TEMPLATE_DIR,"upload")
+UPLOAD="upload"
+UPLOAD_DIR = os.path.join(TEMPLATE_DIR,UPLOAD)
 upload_folder = os.path.join(fpath,UPLOAD_DIR)
+AUDIO="audio"
 AUDIO_DIR = os.path.join(TEMPLATE_DIR,"audio")
 audio_folder = os.path.join(fpath,AUDIO_DIR)
 
@@ -47,38 +51,31 @@ AUDIO_OUTFILE = "out.wav"
 
 with open(cfg_file,'r') as jp:
     cfg = json.load(jp)
-PORT_OPT = "web_port"
 TIMEOUT_OPT = "timeout"
+
+from .utils import MyMarkdown, cut_down_lines, split_into_lines_and_sentences, chunker, get_socket_url
+md = MyMarkdown(output_format='html')
+
+port = int(cfg[WEB_PORT_KEY])
+timeout = int(cfg[TIMEOUT_OPT])
+prot = cfg[PROTOCOL_KEY]
+WEB_URL = get_socket_url(port,protocol=prot)[URL_KEY]
 
 from .expressor import VideoExpressor, VoiceExpressor
 vid_exp = VideoExpressor()
-voc_exp = VoiceExpressor()
+voc_exp = VoiceExpressor(web_url=WEB_URL+'/'+UPLOAD)
 
 from .communicator import Communicator
 comm = Communicator(**cfg)
-
-from .utils import MyMarkdown, cut_down_lines, split_into_lines_and_sentences, chunker
-md = MyMarkdown(output_format='html')
 
 app = Flask(__name__, static_folder=static_folder)
 app.config["UPLOAD_FOLDER"] = UPLOAD_DIR
 lock = threading.Lock()
 app.config['MAX_CONTENT_LENGTH'] = 100*1024**2  # 16 MB
 
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
-
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-port = int(cfg[PORT_OPT])
-timeout = int(cfg[TIMEOUT_OPT])
-URL_KEY = "url"
-def get_socket_url(port,page="localhost",protocol='ws'):
-    return {URL_KEY:f"{protocol}://{page}:{port}"}
-
-socketio = SocketIO(app,cors_allowed_origins=get_socket_url(port,protocol='http')[URL_KEY])
+socketio = SocketIO(app,cors_allowed_origins=WEB_URL)
 
 #g.socket_url = f"ws://127.0.0.1:{port}/"
 
@@ -87,8 +84,6 @@ from .mia_logger import logger
 logger.debug('Start Logging')
 print("start")
 
-# Video file path
-VIDEO_FILE = "/home/maldun/prog/Python/MIA/expressor/vids/greet000.mp4"
 
 def get_video_frames(video_path):
     logger.info("Getting video frames")
@@ -133,32 +128,6 @@ def process_message(message):
     time.sleep(1)
     #express_and_reload("talk")
     
-    # answer = ""
-    # partial_chunk = ""
-    # emotion = None
-    # emotion_set = False
-    # nr_emotions = 0
-    # answer_stream = comm.chat(message)
-    # answer_list = []
-    # for chunk in answer_stream:
-    #     chunk_str = comm.handle_chunk(chunk)
-    #     answer += chunk_str
-    #     emotions, text = comm.extract_emotion(answer)
-    #     if nr_emotions < len(emotions):
-    #         emotion = emotions[nr_emotions]
-    #         #tx = text[nr_emotions]
-    #         nr_emotions+= 1
-    #         express_and_reload(emotion)
-    # 
-    #     filt_answer = comm.extract_text(answer)
-    #     send_answer(filt_answer)
-    
-#     filt_answer = comm.extract_text(answer)
-#     
-#     send_answer(filt_answer)
-#     comm.update_history(answer)
-#     comm.dump_history()
-
     answer, filt_answer = comm.exchange(message,
                                         emotion_reaction=express_and_reload,
                                         update_message=send_answer,
@@ -224,11 +193,30 @@ def send_answer(answer,markdown=False):
         af.write(iframe_code)
     emit('answer',answer)
 
+def play_intro_sound():
+    # copy intro sound
+    intro_sound = cfg["intro_sound"]
+    out_audio = os.path.join(audio_folder,AUDIO_OUTFILE)
+    candidates = {intro_sound,os.path.join(app.root_path,intro_sound)}
+    for c in candidates:
+        if os.path.exists(c):
+            shutil.copy2(c,out_audio)
+            serve_audio(AUDIO_OUTFILE)
+            log_msg = "Intro Audio loaded sucessfully"
+            socketio.emit('audio_reload',log_msg)
+            break
+    else:
+        log_msg = "No Intro Audio found!"
+    logger.info(log_msg)
+    return log_msg
+    
+    
 @app.route('/', methods=['GET', 'POST'])
 def index():
     logger.info('Rendering index.html template')
     print("Rendering index.html template")
     vid_exp.express("idle")
+    play_intro_sound()
     return render_template('index.html' ,socket_url=get_socket_url(port),name=md.convert("*MIA*",remove_paragraph=True))
 
 @socketio.on('reload_video')
@@ -247,7 +235,6 @@ def upload_sound_file():
     file = request.files["file"]
     if file.filename == "":
         return "No selected file", 400
-    
     main_fname = os.path.split(file.filename)[1]
     url_filename = os.path.join(upload_folder,main_fname)
     audio_filename = os.path.join(audio_folder,main_fname)

@@ -18,3 +18,14 @@ TEXT_KEY = "text"
 VIDEO_KEY = "vid"
 VOICE_KEY = "voice"
 
+# Important Config Keys for URL
+ADDRESS_KEY = "address"
+PROTOCOL_KEY = 'protocol'
+WEB_PORT_KEY = "web_port"
+SOUND_PORT_KEY = "sound_port"
+URL_KEY = "url"
+
+# Request_types:
+SPEECH_REQ = b"SPEECH"
+SOUND_REQ = b"SOUND"
+

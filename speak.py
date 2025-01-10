@@ -26,19 +26,24 @@ import pyaudio
 import wave
 import tempfile
 import sys
+import socketserver
 
 try:
     from .play_media import play_sound
     from .constants import CFG_FILE, TEXT_COLS, TEXT_KEY, VOICE_KEY
+    from .constants import ADDRESS_KEY, PROTOCOL_KEY, WEB_PORT_KEY, SOUND_PORT_KEY, URL_KEY
+    from .constants import SPEECH_REQ, SOUND_REQ
     from .mia_logger import logger
     from .utils import split_into_sentences, split_into_lines_and_sentences, chunker 
-    from .utils import filter_symbol_sentences
+    from .utils import filter_symbol_sentences, get_socket_url
 except ImportError:
     from play_media import play_sound
     from constants import TEXT_COLS, TEXT_KEY, CFG_FILE, VOICE_KEY
+    from constants import ADDRESS_KEY, PROTOCOL_KEY, WEB_PORT_KEY, SOUND_PORT_KEY, URL_KEY
+    from constants import SPEECH_REQ, SOUND_REQ
     from mia_logger import logger
     from utils import split_into_sentences, split_into_lines_and_sentences, chunker 
-    from utils import filter_symbol_sentences
+    from utils import filter_symbol_sentences, get_socket_url
 
 
 class Speaker:
@@ -122,9 +127,55 @@ class Speaker:
                     self.text2speech(msg,fname)
                     self.play_voice(fname)
 
-def watchdog(cfg_file,exchange_file):
+
+
+# Get device
+# device = "cuda" if torch.cuda.is_available() else "cpu"
+
+class SoundHandler(socketserver.StreamRequestHandler):
+    """
+    Socketserver handler for request handling from flask server side
+    """
+    REQUEST_TYPES = {SPEECH_REQ,SOUND_REQ}
+    @staticmethod
+    def _cut_request(data, request_type):
+        if data.beginswith(request_type):
+            return data.removeprefix(request_type).lstrip()
+    
+    @staticmethod
+    def process_request(data):
+        dic = json.loads(data)
+        return dic
+    
+    def handle(self):
+        # self.rfile is a file-like object created by the handler;
+        # we can now use e.g. readline() instead of raw recv() calls
+        self.data = self.rfile.readline().strip()
+        print("{} wrote:".format(self.client_address[0]))
+        logger.info("Request recieved: " + self.data.decode()) 
+        print(self.data)
+        req = self.process_request(data)
+        print(req)
+            
+        # Likewise, self.wfile is a file-like object used to write back
+        # to the client
+        self.wfile.write(self.data.upper())
+
+def start_server(cfg_file,exchange_file):
     with open(cfg_file,'r') as fp: cfg = json.load(fp)
     speaker = Speaker(**cfg)
+    protocol = cfg[PROTOCOL_KEY]
+    address = cfg[ADDRESS_KEY]
+    #web_port = cfg[WEB_PORT_KEY]
+    sound_port = cfg[SOUND_PORT_KEY]
+    host = f'{protocol}://{address}'
+    
+    # # Create the server, binding to localhost on port 9999
+    # with socketserver.TCPServer((host, sound_port), SoundHandler) as sound_server:
+    #     # Activate the server; this will keep running until you
+    #     # interrupt the program with Ctrl-C
+    #     sound_server.serve_forever()
+    
     while True:
         if os.path.exists(exchange_file):
             with open(exchange_file,'r') as ef:
@@ -133,12 +184,6 @@ def watchdog(cfg_file,exchange_file):
             speaker.text2voice(msg)
             os.remove(exchange_file)
                 
-                
-            
-
-# Get device
-device = "cuda" if torch.cuda.is_available() else "cpu"
-
 def tests():
     # test
     with open(CFG_FILE,'r') as fp: cfg = json.load(fp)
@@ -201,5 +246,5 @@ if __name__ == "__main__":
         cfg_file = args.cfg_file
         exc_file = args.exchange_file
         exc_file=sys.argv[2]
-        watchdog(cfg_file,exc_file)
+        start_server(cfg_file,exc_file)
     

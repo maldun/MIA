@@ -132,6 +132,13 @@ class VoiceExpressor(ExpressorInterface):
     KEY_MISS_ERR = "Error: Expression for voice {key} missing or wrong key!"
     SND_FILE_MISS_ERR = "Error: Sound file {file} is missing! No sound played!"
     DEFAULT_PATH =  os.path.join(get_current_dir(),"voice","expressions")
+    def __init__(self,expressions=EXPRESSION_FILE,web_url=None):
+        """
+        Provided url from webserver for playing sounds.
+        """
+        self._web_url = web_url
+        return super().__init__(expressions=EXPRESSION_FILE)
+    
     def express(self,key,fail_on_no_file=False):
         """
         Plays the sound fitting to the expressions
@@ -143,7 +150,7 @@ class VoiceExpressor(ExpressorInterface):
         candidates = (sound_file,os.path.join(self.DEFAULT_PATH,sound_file))
         for candidate in candidates:
             if os.path.exists(candidate):
-                play_sound(candidate)
+                play_sound(candidate,url=self._web_url)
                 break
         else:
             err_msg = self.SND_FILE_MISS_ERR.format(file=sound_file)
