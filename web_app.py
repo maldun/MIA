@@ -193,7 +193,7 @@ def send_answer(answer,markdown=False):
     if markdown is True:
         answer = md.convert(answer)
         answer = cut_down_lines(answer)
-        iframe_code_body=f"<pre>\n{answer}\n</pre>"
+        iframe_code_body=f'<div markdown=1>\n{answer}\n</div>'
     else:
         answer=answer.lstrip()
         css_style=f"background-color: {BACKGROUND_COLOR};color: {TEXT_COLOR};font-size: {FONT_SIZE};font-family: {TEXT_FONT};"

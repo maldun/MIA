@@ -59,6 +59,8 @@ def cut_down_lines(answer,line_length=TEXT_COLS-2):
                         new_line = new_line.rstrip().removesuffix(carry)
                         carry = carry+white
                 new_lines += [new_line]
+            if len(carry)>0:
+                new_lines += [carry]
             lines += new_lines
         else:
             lines += [line]
@@ -160,4 +162,10 @@ if __name__ == "__main__":
     md = MyMarkdown(output_format='html')
     filt_msg = md.convert(filt_msg)
     msg4 =cut_down_lines(filt_msg)
-    #assert msg4.endswith("get you started!</p>")
+    assert msg4.endswith("started!</p>")
+    
+    msg5 ="This is a common gotcha! Serving audio files directly from the server to be played in the browser can be tricky. You'll need to ensure that the MIME type is correct and that the browser can handle binary data. Here are some general steps:\n\n1. In your Flask app, use `send_file` to serve the `.wav` file as a binary response.\n2. In your JavaScript code, use the HTML5 `Audio` API or a library like Web Audio API to play the audio.\n\nHere's an example of how you might do this in Flask and JavaScript:\n```python\nfrom flask import Flask, send_file\n\napp = Flask(__name__)\n\n@app.route('/play_audio')\ndef play_audio():\n    return send_file('path/to/your/audio.wav', mimetype='audio/wav')\n\n# In your HTML file (client-side)\n<a id=\"play-button\" href=\"/play_audio\">Play Audio</a>\n\n<script>\n  const audioElement = document.createElement('audio');\n  audioElement.src = '/play_audio';\n  audioElement MIME-type: 'audio/wav';\n\n  // Play the audio\n  audioElement.play();\n</script>\n```\nThis is just a basic example, and you may need to modify it to fit your specific use case.\n\nIf you're feeling stuck, I can try to help you with more details or point you in the direction of some resources that might be helpful!"
+    last="This is just a basic example, and you may need to modify it to fit your specific use case.\n\nIf you're feeling stuck, I can try to help you with more details or point you in the direction of some resources that might be helpful!"
+    msg5 =cut_down_lines(last)
+    assert "case." in msg5
+    assert msg5.endswith("helpful!")
