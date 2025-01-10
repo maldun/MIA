@@ -1,6 +1,9 @@
 CFG_FILE = "setup_cfg.json"
 LOG_FNAME = "mia.log"
 
+# time format
+TIME_FORMAT = "%Y.%M.%d %H:%m:%S:"
+
 # Textbox settings
 BACKGROUND_COLOR = "#000000"
 TEXT_COLOR = "#6cf542"

@@ -20,6 +20,7 @@ from ollama import AsyncClient, Client, chat, ChatResponse
 import json
 import os
 import re
+import random
 
 try:
     from .mia_logger import logger
@@ -28,18 +29,16 @@ except ImportError:
 
 curr_path = os.path.split(__file__)[0]
 EMOTION_EXPRESSION_MAP = os.path.join(curr_path,"emotion_map.json")
+PENALTIES_MAP = os.path.join(curr_path,"penalties.json")
+POSSIBLE_PENALTIES_KEY = "possible"
+RESPONSE_KEY = "response"
 
 with open(EMOTION_EXPRESSION_MAP,'r') as em:
     emotion_expression_map = json.load(em)
+with open(PENALTIES_MAP,'r') as pm:
+    penalties = json.load(pm)
 
 
-# {
-#     "agree":"yes",
-#     "disagree":"no",
-#     "neutral":"idle",
-#     "annoyed":"annoyed",
-#     "happy":"greet"
-# }
 
 emotions = "\n".join(list(emotion_expression_map.keys()))
 
@@ -50,6 +49,8 @@ When I ask something, before you give your answer give me one of the following e
 
 followed by a newline. Also I call you MIA from now on.
 """ 
+
+EMOTION_FORGOTTEN_KEY="emotion_forgotten"
 
 class Communicator:
     """
@@ -64,6 +65,7 @@ class Communicator:
     ROLE_KEY = "role"
     USER_ROLE = "user"
     ASSISTANT_ROLE = "assistant"
+    
     def __init__(self,port=11434,address="localhost",protocol="http",version="llama3.2",history_file="memories.json",**_):
         self.port = port
         self.address = address
@@ -133,11 +135,37 @@ class Communicator:
     def empty_emotion(msg):
         if "neutral" in emotion_expression_map.keys():
             emotions=[emotion_expression_map["neutral"]]
-        texts = [msg]
+        texts = [msg,EMOTION_FORGOTTEN_KEY]
         logger.error(f"Error: Emotion forgotten with message {msg}")
         return emotions, texts
-            
     
+    @staticmethod
+    def _determine_penalty(misdeed):
+        """
+        Penalizes MIA for misbehavior ... aka sends a fun message after a hickup.
+        """
+        response = penalties[misdeed][RESPONSE_KEY]
+        possible = penalties[misdeed][POSSIBLE_PENALTIES_KEY]
+        nr_penalties = len(possible)
+        penalty_nr = random.randint(0,nr_penalties-1)
+        penalty = possible[penalty_nr]
+        answer = "\n".join([response,penalty])
+        return answer
+    
+    def penalize(self,emotions,texts,_test=False):
+        """
+        Checks if something went wrong and penalize.
+        """
+        if _test is True:
+            texts += [EMOTION_FORGOTTEN_KEY]
+        
+        if len(emotions)<len(texts):
+            misdeed = texts[-1]
+            penalty = self._determine_penalty(misdeed)
+            return penalty
+        else:
+            return None
+        
     @staticmethod
     def extract_emotion(msg):
         """
@@ -178,6 +206,55 @@ class Communicator:
         """
         _, texts = Communicator.extract_emotion(msg)
         return '\n'.join(texts)
+    
+    def exchange(self,message,emotion_reaction=None,update_message=None,filter_message=True):
+        """
+        Performs an message exchange.
+        emotion_reaction is a callable
+        which reacts to emotions found 
+        in the message, If it is set to
+        none an empty function is used.
+        Similar, update_message is an 
+        update function which reacts to
+        the next chunk in the message.
+        If None is provided an empty function
+        is used as well.
+        Filter message flag tells if the message
+        function uses the message or the (emotion)
+        filtered message.
+        Returns the complete message and filtered
+        messages alike
+        """
+        if emotion_reaction is None:
+            def emotion_reaction(emotion):
+                return
+        if update_message is None:
+            def update_message(message):
+                return
+        # init vars
+        answer = ""
+        emotion = None
+        nr_emotions = 0
+        answer_stream = self.chat(message)
+        # process chunks
+        for chunk in answer_stream:
+            chunk_str = self.handle_chunk(chunk)
+            answer += chunk_str
+            emotions, text = self.extract_emotion(answer)
+            # if new emotion in list process it
+            if nr_emotions < len(emotions):
+                emotion = emotions[nr_emotions]
+                #tx = text[nr_emotions]
+                nr_emotions+= 1
+                emotion_reaction(emotion)
+            # update message
+            to_send = self.extract_text(answer) if filter_message is True else answer
+            update_message(to_send)
+        
+        filt_answer = self.extract_text(answer)
+        self.update_history(answer)
+        self.dump_history()
+        return answer, filt_answer
 
 if __name__ == "__main__":
     print(EMOTION_QUESTION)

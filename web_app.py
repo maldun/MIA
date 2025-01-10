@@ -111,36 +111,59 @@ def express_and_reload(expression):
 def handle_message(message):
     logger.info("Received message: {}".format(message))
     print(f"Received message: {message}")
+    result = process_message(message)
+    logger.info(str(message))
+    
+    log_msg="Message received successfully"
+    logger.info(log_msg)
+    return log_msg
+
+def penalize(answer):
+    emotions, text = comm.extract_emotion(answer)
+    penalty = comm.penalize(emotions,text)
+    if isinstance(penalty,str):
+        logger.info("Penalty!: " + str(penalty))
+        time.sleep(timeout/2)
+        process_message(penalty)
+    elif penalty is None:
+        return
+    
+
+def process_message(message):
     #express_and_reload("idle")
     time.sleep(1)
     #express_and_reload("talk")
     
-    answer = ""
-    partial_chunk = ""
-    emotion = None
-    emotion_set = False
-    nr_emotions = 0
-    answer_stream = comm.chat(message)
-    answer_list = []
-    for chunk in answer_stream:
-        chunk_str = comm.handle_chunk(chunk)
-        answer += chunk_str
-        emotions, text = comm.extract_emotion(answer)
-        if nr_emotions < len(emotions):
-            emotion = emotions[nr_emotions]
-            tx = text[nr_emotions]
-            nr_emotions+= 1
-            express_and_reload(emotion)
+    # answer = ""
+    # partial_chunk = ""
+    # emotion = None
+    # emotion_set = False
+    # nr_emotions = 0
+    # answer_stream = comm.chat(message)
+    # answer_list = []
+    # for chunk in answer_stream:
+    #     chunk_str = comm.handle_chunk(chunk)
+    #     answer += chunk_str
+    #     emotions, text = comm.extract_emotion(answer)
+    #     if nr_emotions < len(emotions):
+    #         emotion = emotions[nr_emotions]
+    #         #tx = text[nr_emotions]
+    #         nr_emotions+= 1
+    #         express_and_reload(emotion)
+    # 
+    #     filt_answer = comm.extract_text(answer)
+    #     send_answer(filt_answer)
+    
+#     filt_answer = comm.extract_text(answer)
+#     
+#     send_answer(filt_answer)
+#     comm.update_history(answer)
+#     comm.dump_history()
 
-        filt_answer = comm.extract_text(answer)
-        send_answer(filt_answer)
-    
-    filt_answer = comm.extract_text(answer)
-    
-    send_answer(filt_answer)
-    comm.update_history(answer)
-    comm.dump_history()
-    filt_answer = comm.extract_text(answer)
+    answer, filt_answer = comm.exchange(message,
+                                        emotion_reaction=express_and_reload,
+                                        update_message=send_answer,
+                                        filter_message=True)
 
     # wailt till finished ... clonky ...
     while os.path.exists(exchange_file):
@@ -154,12 +177,12 @@ def handle_message(message):
     if len(filt_answer) == 0:
         # if no speech wait a bit
         time.sleep(timeout)
-    #speaker.text2voice(answer)
     
+    penalize(answer)
     time.sleep(2)
     express_and_reload("idle")
     
-    return "Message received successfully"
+    return "Message processed successfully"
 
 
 iframe_code_header=f"""
