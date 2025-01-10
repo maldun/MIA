@@ -25,24 +25,6 @@ import time
 import threading
 import multiprocessing as mp
 
-import markdown
-from markdown import Markdown
-class MyMarkdown(Markdown):
-    """
-    Stupid hack ...
-    """
-    PREFIX = "<p>"
-    SUFFIX = "</p>"
-    def convert(self, text,remove_paragraph=False):
-        t = super().convert(text)
-        if remove_paragraph is True:
-            t = t.removeprefix(self.PREFIX).removesuffix(self.SUFFIX)
-        return t
-    # def add_paragraphs(self, text):
-    #     lines = text.splitlines()
-    #     lines = [self.PREFIX+line+self.
-
-md = MyMarkdown(output_format='html')
 
 # constants and paths
 from .constants import CFG_FILE, LOG_FNAME, TEXT_COLOR, FONT_SIZE, BACKGROUND_COLOR
@@ -67,8 +49,8 @@ voc_exp = VoiceExpressor()
 from .communicator import Communicator
 comm = Communicator(**cfg)
 
-from .speak import split_into_lines_and_sentences, chunker, cut_down_lines
-
+from .utils import MyMarkdown, cut_down_lines, split_into_lines_and_sentences, chunker
+md = MyMarkdown(output_format='html')
 
 app = Flask(__name__, static_folder=static_folder)
 lock = threading.Lock()

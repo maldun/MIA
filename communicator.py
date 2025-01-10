@@ -24,21 +24,22 @@ import random
 
 try:
     from .mia_logger import logger
+    from .constants import CFG_FILE, TEXT_COLS
 except ImportError:
     from mia_logger import logger
+    from constants import CFG_FILE, TEXT_COLS
 
 curr_path = os.path.split(__file__)[0]
 EMOTION_EXPRESSION_MAP = os.path.join(curr_path,"emotion_map.json")
 PENALTIES_MAP = os.path.join(curr_path,"penalties.json")
 POSSIBLE_PENALTIES_KEY = "possible"
 RESPONSE_KEY = "response"
+EMOTION_FORGOTTEN_KEY="emotion_forgotten"
 
 with open(EMOTION_EXPRESSION_MAP,'r') as em:
     emotion_expression_map = json.load(em)
 with open(PENALTIES_MAP,'r') as pm:
     penalties = json.load(pm)
-
-
 
 emotions = "\n".join(list(emotion_expression_map.keys()))
 
@@ -49,8 +50,6 @@ When I ask something, before you give your answer give me one of the following e
 
 followed by a newline. Also I call you MIA from now on.
 """ 
-
-EMOTION_FORGOTTEN_KEY="emotion_forgotten"
 
 class Communicator:
     """
@@ -256,14 +255,27 @@ class Communicator:
         self.dump_history()
         return answer, filt_answer
 
-if __name__ == "__main__":
+
+def tests():
     print(EMOTION_QUESTION)
+    
     msg = "happy\n\n\nI'm happy you like it! Lamp Haikus might not be as common, but I tried to capture its cozy and warm essence. If you're ready for more, I've got one about a cloud:\n\n\nagree \n\n\nWhispy clouds drift by\nSoftly shading the sun's face\nNature's gentle kiss"
     res,pat = Communicator.extract_emotion(msg)
     assert "yes" in res and "greet" in res
+    
     msg2 = "neutral \nI don't have emotions or feelings, so I'm not capable of feeling annoyance. My previous response was a neutral acknowledgement that you were being slightly perturbing or frustrating."
     res2,pat2 = Communicator.extract_emotion(msg2)
     assert res2 == ["talk"]
+    
     msg3 = "After a while, Crocodile"
     res3,pat3 = Communicator.extract_emotion(msg3)
-    assert res3 == ["talk"] and pat3 == [msg3]
+    assert res3 == ["talk"] and pat3 == [msg3,EMOTION_FORGOTTEN_KEY]
+    
+    msg = "The playful and energetic golden retriever, named named Max bla"
+    result = cut_down_lines(msg,30)
+    assert len(result.splitlines())==3
+    assert result.endswith("Max bla")
+    
+
+if __name__ == "__main__":
+    tests()
