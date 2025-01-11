@@ -29,6 +29,7 @@ SOUND_PORT_KEY = "sound_port"
 URL_KEY = "url"
 UPLOAD_ROUTE = "upload"
 AUDIO_ROUTE = "audio"
+TIME_ROUTE = "time"
 
 # Request_types:
 SPEECH_REQ = "SPEECH"
@@ -37,13 +38,14 @@ TIME_REQ = "TIME"
 MESSAGE_SIZE=2**12
 
 # Keys for scheduler
-INTERVAL_KEY = "clock_interval"
+TIME_INTERVAL_KEY = "clock_interval"
 TIME_BEFORE_KEY = "time_before"
 SIGNAL_EMOTION_KEY = "signal_emotion"
 NEUTRAL_EMOTION_KEY = "neutral_emotion"
 
 # Other
 AUDIO_MIME_TYPE="audio/wav"
-
+TASK_KEY="task"
+UPDATE_TIME_TASK = "update_time"
 
 

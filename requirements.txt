@@ -6,6 +6,7 @@ annotated-types==0.7.0
 antlr4-python3-runtime==4.8
 anyascii==0.3.2
 anyio==4.8.0
+APScheduler==3.11.0
 asttokens==3.0.0
 async-timeout==5.0.1
 attrs==24.3.0
@@ -48,6 +49,7 @@ fastapi==0.115.6
 ffmpeg-python==0.2.0
 filelock==3.13.1
 Flask==3.1.0
+Flask-APScheduler==1.13.1
 Flask-SocketIO==5.5.1
 fonttools==4.55.3
 frozenlist==1.5.0
@@ -146,10 +148,12 @@ pytorch-triton-rocm==3.0.0
 pytz==2024.2
 pyworld==0.3.4
 PyYAML==6.0.2
+redis==5.2.1
 regex==2024.11.6
 requests==2.32.3
 resampy==0.4.3
 rich==13.9.4
+rq==2.1.0
 -e git+https://github.com/daswer123/rvc-python.git@cff3ffbe99ce2e062831e4377f8cef587d0f38f9#egg=rvc_python
 sacrebleu==2.5.1
 safetensors==0.5.1

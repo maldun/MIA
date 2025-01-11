@@ -27,13 +27,14 @@ import threading
 import multiprocessing as mp
 import shutil
 import socket
-
+from flask_apscheduler import APScheduler
 
 # constants and paths
 from .constants import CFG_FILE, LOG_FNAME, TEXT_COLOR, FONT_SIZE, BACKGROUND_COLOR
 from .constants import TEXT_ROWS, TEXT_COLS, TEXT_FONT, TIME_FORMAT, MESSAGE_SIZE
 from .constants import ADDRESS_KEY, PROTOCOL_KEY, WEB_PORT_KEY, SOUND_PORT_KEY, URL_KEY, U8
 from .constants import AUDIO_ROUTE, UPLOAD_ROUTE, AUDIO_MIME_TYPE, SPEECH_REQ, SOUND_REQ, TIME_REQ
+from . import constants as CONST
 FPATH = os.path.split(__file__)[0]
 cfg_file = os.path.join(FPATH,CFG_FILE)
 TEMPLATE_DIR = "templates"
@@ -72,10 +73,20 @@ from .communicator import Communicator
 comm = Communicator(**cfg)
 
 app = Flask(__name__, static_folder=STATIC_FOLDER)
+# add scheduler
+TIME_UPDATE_INTERVAL = cfg[CONST.TIME_INTERVAL_KEY]
+# initialize scheduler
+scheduler = APScheduler()
+# set configuration values
+scheduler.api_enabled = True
+# start scheduler
+scheduler.init_app(app)
+scheduler.start()
+
+# upload folder
 app.config["UPLOAD_FOLDER"] = UPLOAD_DIR
 lock = threading.Lock()
 app.config['MAX_CONTENT_LENGTH'] = 100*1024**2  # 16 MB
-
 
 
 socketio = SocketIO(app,cors_allowed_origins=WEB_URL)
@@ -181,6 +192,31 @@ def process_message(message):
     express_and_reload("idle",sound=True)
     return "Message processed successfully"
 
+
+import requests
+from io import StringIO
+
+# interval time update
+# direct scheduling is for losers ...
+# so we make a cron job which sends a request back to us.
+@scheduler.task('cron', id='time_update', second=30,
+                misfire_grace_time=TIME_UPDATE_INTERVAL)
+def time_update_trigger():
+    print("Trigggggger!!!!!!")
+    #send_voice_request("Trigger!")
+    url=WEB_URL + '/' + CONST.TIME_ROUTE
+    req={CONST.TASK_KEY:CONST.UPDATE_TIME_TASK}
+    response = requests.get(url, params=req)
+    logger.info(response.text)
+
+@app.route(f"/{CONST.TIME_ROUTE}", methods=["GET"])    
+def time_update_request():
+    if CONST.TASK_KEY not in request.values:
+        return "No data sent", 400
+    tasks = request.values.getlist(CONST.TASK_KEY)
+    if CONST.UPDATE_TIME_TASK in tasks:
+        return time_update() 
+
 def time_update():
     answer, filt_answer, penalty = comm.time_update(
                                         emotion_expression=express_and_reload,
@@ -201,6 +237,8 @@ def time_update():
     logger.info(log_msg)
     return log_msg
     
+
+
 
 iframe_code_header=f"""
 <!DOCTYPE html>
@@ -241,7 +279,7 @@ def send_answer(answer,markdown=False):
     iframe_code = "\n".join([iframe_code_header,iframe_code_body,iframe_code_footer])
     with open(ANSWER_FILE,'w') as af:
         af.write(iframe_code)
-    emit('answer',answer)
+    socketio.emit('answer',answer)
 
 def play_intro_sound():
     # copy intro sound
@@ -259,7 +297,7 @@ def play_intro_sound():
         log_msg = "No Intro Audio found!"
     logger.info(log_msg)
     return log_msg
-    
+
 #address=ADDRESS,port=WEB_PORT
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -267,7 +305,10 @@ def index():
     print("Rendering index.html template")
     vid_exp.express("idle")
     play_intro_sound()
-    return render_template('index.html' ,socket_url=get_url(json=True,**cfg),name=md.convert("*MIA*",remove_paragraph=True))
+    
+    # start server
+    renderer = render_template('index.html' ,socket_url=get_url(json=True,**cfg),name=md.convert("*MIA*",remove_paragraph=True))
+    return renderer
 
 @socketio.on('reload_video')
 def reload_video(vid):
@@ -275,7 +316,10 @@ def reload_video(vid):
     # Update the video source here
     url = vid
     time.sleep(0.1)
-    emit('video_updated', url)
+    # don´t forget: emit alone is fragile ...
+    # use socketio.emit like here.
+    # --> flask context
+    socketio.emit('video_updated', url)
 
 
 @app.route(f"/{UPLOAD_ROUTE}", methods=["POST"])
@@ -324,7 +368,7 @@ def cleanup_audio(vid):
     os.remove(out_filename)
     log_msg = "audio file deleted"
     logger.info(log_msg)
-    emit('audio_reload',log_msg)
+    socketio.emit('audio_reload',log_msg)
 
 
 @app.route('/favicon.ico')

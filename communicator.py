@@ -26,12 +26,12 @@ import datetime
 try:
     from .mia_logger import logger
     from .constants import CFG_FILE, TEXT_COLS, TIME_FORMAT
-    from .constants import NEUTRAL_EMOTION_KEY, INTERVAL_KEY, TIME_BEFORE_KEY, SIGNAL_EMOTION_KEY
+    from .constants import NEUTRAL_EMOTION_KEY, TIME_BEFORE_KEY, SIGNAL_EMOTION_KEY
     from . import utils
 except ImportError:
     from mia_logger import logger
     from constants import CFG_FILE, TEXT_COLS, TIME_FORMAT
-    from constants import NEUTRAL_EMOTION_KEY, INTERVAL_KEY, TIME_BEFORE_KEY, SIGNAL_EMOTION_KEY
+    from constants import NEUTRAL_EMOTION_KEY, TIME_BEFORE_KEY, SIGNAL_EMOTION_KEY
     import utils
 
 curr_path = os.path.split(__file__)[0]
@@ -326,12 +326,11 @@ class Communicator:
                 pass
             else: 
                 if texts[-1] == EMOTION_FORGOTTEN_KEY:
-                    text = "\n",join(texts[-1])
+                    text = "\n".join(texts[:-1])
                 update_message(text)
         
         # using final_update because maybe there is something to say
         def _final_update(answer,filt_answer,penalty):
-            breakpoint()
             if _test_neutral is True:
                 answer=getattr(self,NEUTRAL_EMOTION_KEY)
             if _test_neutral_but_penalty is True:
