@@ -17,6 +17,7 @@
 from flask import Flask, render_template, request, send_file, g, jsonify, send_from_directory
 import av
 import cv2
+import datetime
 import json
 from flask_socketio import SocketIO, emit
 import logging
@@ -30,22 +31,21 @@ import socket
 
 # constants and paths
 from .constants import CFG_FILE, LOG_FNAME, TEXT_COLOR, FONT_SIZE, BACKGROUND_COLOR
-from .constants import TEXT_ROWS, TEXT_COLS, TEXT_FONT
-from .constants import ADDRESS_KEY, PROTOCOL_KEY, WEB_PORT_KEY, SOUND_PORT_KEY, URL_KEY
-fpath = os.path.split(__file__)[0]
-cfg_file = os.path.join(fpath,CFG_FILE)
-exchange_file = os.path.join(fpath,"exchange.txt")
+from .constants import TEXT_ROWS, TEXT_COLS, TEXT_FONT, TIME_FORMAT, MESSAGE_SIZE
+from .constants import ADDRESS_KEY, PROTOCOL_KEY, WEB_PORT_KEY, SOUND_PORT_KEY, URL_KEY, U8
+from .constants import AUDIO_ROUTE, UPLOAD_ROUTE, AUDIO_MIME_TYPE, SPEECH_REQ, SOUND_REQ, TIME_REQ
+FPATH = os.path.split(__file__)[0]
+cfg_file = os.path.join(FPATH,CFG_FILE)
 TEMPLATE_DIR = "templates"
 STATIC_DIR = os.path.join(TEMPLATE_DIR,"static")
-static_folder = os.path.join(fpath,STATIC_DIR)
-ANSWER_FILE = os.path.join(static_folder,"answer.html")
+STATIC_FOLDER = os.path.join(FPATH,STATIC_DIR)
+ANSWER_FILE = os.path.join(STATIC_FOLDER,"answer.html")
 
-UPLOAD="upload"
-UPLOAD_DIR = os.path.join(TEMPLATE_DIR,UPLOAD)
-upload_folder = os.path.join(fpath,UPLOAD_DIR)
-AUDIO="audio"
-AUDIO_DIR = os.path.join(TEMPLATE_DIR,"audio")
-audio_folder = os.path.join(fpath,AUDIO_DIR)
+UPLOAD_DIR = os.path.join(TEMPLATE_DIR,UPLOAD_ROUTE)
+UPLOAD_FOLDER = os.path.join(FPATH,UPLOAD_DIR)
+
+AUDIO_DIR = os.path.join(TEMPLATE_DIR,AUDIO_ROUTE)
+AUDIO_FOLDER= os.path.join(FPATH,AUDIO_DIR)
 
 AUDIO_OUTFILE = "out.wav"
 
@@ -53,22 +53,25 @@ with open(cfg_file,'r') as jp:
     cfg = json.load(jp)
 TIMEOUT_OPT = "timeout"
 
-from .utils import MyMarkdown, cut_down_lines, split_into_lines_and_sentences, chunker, get_socket_url
+from .utils import MyMarkdown, cut_down_lines, get_url, get_websocket_url
 md = MyMarkdown(output_format='html')
 
-port = int(cfg[WEB_PORT_KEY])
-timeout = int(cfg[TIMEOUT_OPT])
-prot = cfg[PROTOCOL_KEY]
-WEB_URL = get_socket_url(port,protocol=prot)[URL_KEY]
+WEB_PORT = int(cfg[WEB_PORT_KEY])
+SOUND_PORT = int(cfg[SOUND_PORT_KEY])
+TIMEOUT = int(cfg[TIMEOUT_OPT])
+PROTOCOL = cfg[PROTOCOL_KEY]
+ADDRESS = cfg[ADDRESS_KEY]
+
+WEB_URL = get_url(**cfg)
 
 from .expressor import VideoExpressor, VoiceExpressor
 vid_exp = VideoExpressor()
-voc_exp = VoiceExpressor(web_url=WEB_URL+'/'+UPLOAD)
+voc_exp = VoiceExpressor(web_url=WEB_URL+'/'+UPLOAD_ROUTE)
 
 from .communicator import Communicator
 comm = Communicator(**cfg)
 
-app = Flask(__name__, static_folder=static_folder)
+app = Flask(__name__, static_folder=STATIC_FOLDER)
 app.config["UPLOAD_FOLDER"] = UPLOAD_DIR
 lock = threading.Lock()
 app.config['MAX_CONTENT_LENGTH'] = 100*1024**2  # 16 MB
@@ -95,10 +98,11 @@ def get_video_frames(video_path):
     return "Video frames retrieved successfully"
 
 
-def express_and_reload(expression):
+def express_and_reload(expression,sound=True):
     new_vid = vid_exp.express(expression)
     reload_video(new_vid)
-    voc_exp.express(expression)
+    if sound is True:
+        voc_exp.express(expression)
 
 # Create a function to handle messages from clients
 @socketio.on('message')
@@ -113,15 +117,44 @@ def handle_message(message):
     return log_msg
 
 def penalize(answer):
+    """
+    Sometimes an LLM hickups ... we send a 
+    "penalty" to correct the behavior and have
+    a little fun with it ...
+    """
     emotions, text = comm.extract_emotion(answer)
     penalty = comm.penalize(emotions,text)
     if isinstance(penalty,str):
         logger.info("Penalty!: " + str(penalty))
-        time.sleep(timeout/2)
+        time.sleep(TIMEOUT/2)
         process_message(penalty)
     elif penalty is None:
         return
-    
+ 
+def send_voice_request(msg):
+    """
+    Sends meesage asking for text2speech conversion.
+    Sends Timestamp for control.
+    """
+    # nothing to do
+    if len(msg) == 0:
+        return
+    HOST = get_websocket_url(address=ADDRESS,protocol=PROTOCOL)
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        # Connect to server and send data
+        sock.connect((HOST, SOUND_PORT))
+        timestamp = datetime.datetime.now().strftime(TIME_FORMAT)
+        request = {SPEECH_REQ:msg,TIME_REQ:timestamp}
+        request = json.dumps(request) + '\n'
+        sock.sendall(bytes(request, U8))
+        # Receive data from the server and shut down
+        received = str(sock.recv(MESSAGE_SIZE), U8)
+        received = json.loads(received)
+        if SOUND_REQ in received and TIME_REQ in received:
+            if received[TIME_REQ] == timestamp:
+                logger.info("Speech played!")
+            else:
+                logger.info("Something went wrong on Sound Server Side!")
 
 def process_message(message):
     #express_and_reload("idle")
@@ -133,23 +166,15 @@ def process_message(message):
                                         update_message=send_answer,
                                         filter_message=True)
 
-    # wailt till finished ... clonky ...
-    while os.path.exists(exchange_file):
-        pass
-    with open(exchange_file,'w') as fp:
-        fp.write(filt_answer)
-    while os.path.exists(exchange_file):
-        pass
-        
+    send_voice_request(filt_answer)
     send_answer(filt_answer,markdown=True)
     if len(filt_answer) == 0:
         # if no speech wait a bit
-        time.sleep(timeout)
+        time.sleep(TIMEOUT)
     
     penalize(answer)
     time.sleep(2)
-    express_and_reload("idle")
-    
+    express_and_reload("idle",sound=True)
     return "Message processed successfully"
 
 
@@ -172,14 +197,15 @@ iframe_code_footer="""
 </html>
 """
 # add markdown module
-markdown_source='<script type="module" src="https://md-block.verou.me/md-block.js"></script>'
+markdown_source='''<script type="module" src="https://md-block.verou.me/md-block.js"></script>'''
 
 def send_answer(answer,markdown=False):
     logger.info("Sent answer: {}".format(answer))
 
     if markdown is True:
         #answer = md.convert(answer)
-        answer = cut_down_lines(answer)
+        lines = cut_down_lines(answer).splitlines()
+        answer = "\n\n".join(lines)
         iframe_code_body=markdown_source+'\n'+f'<md-block>\n{answer}\n</md-block>'
     else:
         answer=answer.lstrip()
@@ -196,7 +222,7 @@ def send_answer(answer,markdown=False):
 def play_intro_sound():
     # copy intro sound
     intro_sound = cfg["intro_sound"]
-    out_audio = os.path.join(audio_folder,AUDIO_OUTFILE)
+    out_audio = os.path.join(AUDIO_FOLDER,AUDIO_OUTFILE)
     candidates = {intro_sound,os.path.join(app.root_path,intro_sound)}
     for c in candidates:
         if os.path.exists(c):
@@ -210,14 +236,14 @@ def play_intro_sound():
     logger.info(log_msg)
     return log_msg
     
-    
+#address=ADDRESS,port=WEB_PORT
 @app.route('/', methods=['GET', 'POST'])
 def index():
     logger.info('Rendering index.html template')
     print("Rendering index.html template")
     vid_exp.express("idle")
     play_intro_sound()
-    return render_template('index.html' ,socket_url=get_socket_url(port),name=md.convert("*MIA*",remove_paragraph=True))
+    return render_template('index.html' ,socket_url=get_url(json=True,**cfg),name=md.convert("*MIA*",remove_paragraph=True))
 
 @socketio.on('reload_video')
 def reload_video(vid):
@@ -228,7 +254,7 @@ def reload_video(vid):
     emit('video_updated', url)
 
 
-@app.route("/upload", methods=["POST"])
+@app.route(f"/{UPLOAD_ROUTE}", methods=["POST"])
 def upload_sound_file():
     if "file" not in request.files:
         return "No file part", 400
@@ -236,17 +262,16 @@ def upload_sound_file():
     if file.filename == "":
         return "No selected file", 400
     main_fname = os.path.split(file.filename)[1]
-    url_filename = os.path.join(upload_folder,main_fname)
-    audio_filename = os.path.join(audio_folder,main_fname)
+    url_filename = os.path.join(UPLOAD_FOLDER,main_fname)
+    audio_filename = os.path.join(AUDIO_FOLDER,main_fname)
     file.save(url_filename)
-    #file.save(os.path.join(static_folder, file.filename))
+    #file.save(os.path.join(STATIC_FOLDER, file.filename))
     
     logger.info("File uploaded successfully")
-    mimetype="audio/wav"
     outfile = AUDIO_OUTFILE
-    out_filename = os.path.join(audio_folder,AUDIO_OUTFILE)
-    #send_file(url_filename,mimetype=mimetype,as_attachment=True,download_name=main_fname)
-    #send_from_directory(url_filename,"upload",mimetype=mimetype,as_attachment=True,download_name=main_fname)
+    out_filename = os.path.join(AUDIO_FOLDER,AUDIO_OUTFILE)
+    #send_file(url_filename,mimetype=AUDIO_MIME_TYPE,as_attachment=True,download_name=main_fname)
+    #send_from_directory(url_filename,"upload",mimetype=AUDIO_MIME_TYPE,as_attachment=True,download_name=main_fname)
 
     shutil.move(url_filename,out_filename)
     serve_audio(outfile)
@@ -255,10 +280,10 @@ def upload_sound_file():
     logger.info(log_msg)
     return log_msg
 
-@app.route('/audio/<filename>')
+@app.route(f'/{AUDIO_ROUTE}/<filename>')
 def serve_audio(filename):
     mimetype="audio/wav"
-    return send_from_directory(AUDIO_DIR, filename,mimetype=mimetype)
+    return send_from_directory(AUDIO_DIR, filename,mimetype=AUDIO_MIME_TYPE)
 
 # @socketio.event
 # def emit_audio_file():
@@ -271,7 +296,7 @@ def cleanup_audio(vid):
     logger.info('Cleanup Audio File')
     # Update the video source here
     outfile = AUDIO_OUTFILE
-    out_filename = os.path.join(audio_folder,AUDIO_OUTFILE)
+    out_filename = os.path.join(AUDIO_FOLDER,AUDIO_OUTFILE)
     os.remove(out_filename)
     log_msg = "audio file deleted"
     logger.info(log_msg)
@@ -286,4 +311,4 @@ def favicon():
 
 if __name__ == '__main__':
     vid_exp.express("idle")
-    socketio.run(app, debug=True,port=port)
+    socketio.run(app, debug=True,port=WEB_PORT)

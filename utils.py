@@ -145,13 +145,27 @@ def filter_symbol_sentences(sentences):
     proper_sentences = [s for s in sentences if len(comp.findall(s))>0]
     return proper_sentences
 
+def get_websocket_url(protocol="http",address="localhost"):
+    host = f'{address}'
+    if not address in {"localhost","0.0.0.0","127.0.0.1"}:
+        host = f"{protocol}://"+host
+    return host
 
-def get_socket_url(port,page="localhost",protocol='ws',json=True):
+def get_url(protocol="ws",address="localhost",web_port=None,**kwargs):
     """
     Combines a proper url and returns a dict for jsyfying
     """
-    url = f"{protocol}://{page}:{port}"
-    return {URL_KEY:url} if json is True else url
+    url = ""
+    if isinstance(protocol,str):
+        url += f"{protocol}://"
+    if isinstance(address,str):
+        url += address
+    if isinstance(web_port,str) or isinstance(web_port,int):
+        url += f":{web_port}"
+    if "json" in kwargs:
+        if kwargs["json"] is True:
+            return {URL_KEY:url}
+    return url
 
 if __name__ == "__main__":
     # Tests
@@ -177,3 +191,7 @@ if __name__ == "__main__":
     last2 =cut_down_lines(last)
     assert "case." in last2
     assert last2.endswith("helpful!")
+    
+    assert get_url(**{"address":"localhost","protocol":"http","web_port":30})=="http://localhost:30"
+    assert get_url(json=True,**{"address":"localhost","protocol":"http","web_port":30})[URL_KEY]=="http://localhost:30"
+    assert get_websocket_url()=="localhost"

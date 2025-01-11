@@ -26,24 +26,26 @@ import pyaudio
 import wave
 import tempfile
 import sys
+import socket
 import socketserver
+import time
 
 try:
     from .play_media import play_sound
-    from .constants import CFG_FILE, TEXT_COLS, TEXT_KEY, VOICE_KEY
+    from .constants import CFG_FILE, TEXT_COLS, TEXT_KEY, VOICE_KEY, EXPRESSION_FILE
     from .constants import ADDRESS_KEY, PROTOCOL_KEY, WEB_PORT_KEY, SOUND_PORT_KEY, URL_KEY
-    from .constants import SPEECH_REQ, SOUND_REQ
+    from .constants import SPEECH_REQ, SOUND_REQ, TIME_REQ, UPLOAD_ROUTE, U8
     from .mia_logger import logger
     from .utils import split_into_sentences, split_into_lines_and_sentences, chunker 
-    from .utils import filter_symbol_sentences, get_socket_url
+    from .utils import filter_symbol_sentences, get_websocket_url
 except ImportError:
     from play_media import play_sound
-    from constants import TEXT_COLS, TEXT_KEY, CFG_FILE, VOICE_KEY
+    from constants import TEXT_COLS, TEXT_KEY, CFG_FILE, VOICE_KEY, EXPRESSION_FILE
     from constants import ADDRESS_KEY, PROTOCOL_KEY, WEB_PORT_KEY, SOUND_PORT_KEY, URL_KEY
-    from constants import SPEECH_REQ, SOUND_REQ
+    from constants import SPEECH_REQ, SOUND_REQ, TIME_REQ, UPLOAD_ROUTE, U8
     from mia_logger import logger
     from utils import split_into_sentences, split_into_lines_and_sentences, chunker 
-    from utils import filter_symbol_sentences, get_socket_url
+    from utils import filter_symbol_sentences, get_websocket_url
 
 
 class Speaker:
@@ -53,7 +55,8 @@ class Speaker:
     TTS_DEFAULT = "tts_models/en/ljspeech/glow-tts"
     #TTS_DEFAULT = "tts_models/
     MAX_SENTENCES = 4
-    def __init__(self,tts_model=TTS_DEFAULT,voice_model=None,tts_device=None,gfx_version=None,voice_sample=None,rvc_opts=None,rvc_params=None,rvc_enabled=True,**_):
+    def __init__(self,tts_model=TTS_DEFAULT,voice_model=None,tts_device=None,gfx_version=None,voice_sample=None,rvc_opts=None,rvc_params=None,rvc_enabled=True,
+                 web_port=8585,address="localhost",protocol="http",**_):
         self._tts_model = tts_model
         self._voice = voice_model
         if rvc_opts is None: rvc_opts = {}
@@ -61,6 +64,10 @@ class Speaker:
         self._rvc_enabled = rvc_enabled
         self._rvc_opts = rvc_opts
         self._rvc_params = rvc_params
+        if isinstance(web_port,int) and isinstance(address,str) and isinstance(protocol,str):
+            self._url = f"{protocol}://{address}:{web_port}/{UPLOAD_ROUTE}"
+        else:
+            self._url = None
         
         if gfx_version is not None:
             os.environ["HSA_OVERRIDE_GFX_VERSION"] = gfx_version
@@ -87,7 +94,19 @@ class Speaker:
         self._rvc.set_params(**self._rvc_params)
                              #f0up_key=2, protect=0.5,
                              #f0method= "pm")  # (harvest, crepe, rmvpe, pm)
-        
+    
+    @staticmethod
+    def get_wav_duration(filename):
+        """
+        Computes the length of play time from
+        a wav file. Returns duration in seconds.
+        """
+        with wave.open(filename, 'r') as wav_file:
+            frames = wav_file.getnframes()
+            rate = wav_file.getframerate()
+            duration = frames / float(rate)
+            return duration
+    
     def text2speech(self,msg,output_file):
         # no message no sound
         if len(msg.strip()) == 0:
@@ -108,11 +127,15 @@ class Speaker:
         self._rvc.infer_file(wav_file_in, wav_file_out)
     
     def play_voice(self,wav_file):
-        play_sound(wav_file)
+        play_sound(wav_file,url=self._url)
         
     def text2voice(self,msg,output_file=None):
+        """
+        Generates a voice from text and return the play length
+        of the voice file.
+        """
         if len(msg) == 0:
-            return 
+            return 0
         with tempfile.NamedTemporaryFile(delete=True) as fpin:
             with tempfile.NamedTemporaryFile(delete=True) as fpout:
                 if output_file is not None:
@@ -126,7 +149,8 @@ class Speaker:
                 else:
                     self.text2speech(msg,fname)
                     self.play_voice(fname)
-
+                duration = self.get_wav_duration(fname)
+                return duration
 
 
 # Get device
@@ -142,53 +166,84 @@ class SoundHandler(socketserver.StreamRequestHandler):
         if data.beginswith(request_type):
             return data.removeprefix(request_type).lstrip()
     
+    
     @staticmethod
     def process_request(data):
         dic = json.loads(data)
-        return dic
+        if SPEECH_REQ in dic and TIME_REQ in dic:
+            out, time = dic[SPEECH_REQ], dic[TIME_REQ]
+        else:
+            out, time = None, None
+        return out, time
+    
     
     def handle(self):
         # self.rfile is a file-like object created by the handler;
         # we can now use e.g. readline() instead of raw recv() calls
+
         self.data = self.rfile.readline().strip()
         print("{} wrote:".format(self.client_address[0]))
-        logger.info("Request recieved: " + self.data.decode()) 
+        logger.info("{} wrote:".format(self.client_address[0])+ ' ' + "Request recieved: " + self.data.decode()) 
         print(self.data)
-        req = self.process_request(data)
-        print(req)
-            
-        # Likewise, self.wfile is a file-like object used to write back
-        # to the client
-        self.wfile.write(self.data.upper())
+        msg, time_stamp = self.process_request(self.data)
+        if isinstance(msg,str) and len(msg)>0:
+            speaker = self.server.speaker
+            duration = speaker.text2voice(msg)
+            time.sleep(duration+0.5)
+            # Likewise, self.wfile is a file-like object used to write back
+            # to the client
+            answer = "Msg played!"
+            logger.info(answer+f"at {time_stamp}")
+            self.wfile.write(json.dumps({SOUND_REQ:answer,TIME_REQ:time_stamp}).encode(U8))
+        
 
-def start_server(cfg_file,exchange_file):
+class SoundServer(socketserver.TCPServer):
+    """
+    Derived class to enable adding a Speaker instance.
+    """
+    @property
+    def speaker(self):
+        if hasattr(self,"_speaker"):
+            return self._speaker
+        else:
+            raise AttributeError(f"'{type(t).__name__}' object has no attribute speaker! (Set speaker first)")
+    @speaker.setter
+    def speaker(self,val):
+        if not isinstance(val,Speaker):
+            raise TypeError("Error: Object is not of type Speaker!")
+        self._speaker = val
+
+def start_server(cfg_file):
     with open(cfg_file,'r') as fp: cfg = json.load(fp)
     speaker = Speaker(**cfg)
-    protocol = cfg[PROTOCOL_KEY]
-    address = cfg[ADDRESS_KEY]
+    ADDRESS = cfg[ADDRESS_KEY]
+    PROTOCOL = cfg[PROTOCOL_KEY]
     #web_port = cfg[WEB_PORT_KEY]
-    sound_port = cfg[SOUND_PORT_KEY]
-    host = f'{protocol}://{address}'
+    SOUND_PORT = cfg[SOUND_PORT_KEY]
     
-    # # Create the server, binding to localhost on port 9999
-    # with socketserver.TCPServer((host, sound_port), SoundHandler) as sound_server:
-    #     # Activate the server; this will keep running until you
-    #     # interrupt the program with Ctrl-C
-    #     sound_server.serve_forever()
+    # on localhost we don't add http or https ...
+    HOST = get_websocket_url(protocol=PROTOCOL,address=ADDRESS)
     
-    while True:
-        if os.path.exists(exchange_file):
-            with open(exchange_file,'r') as ef:
-                msg = ef.read().strip()
-            logger.debug(msg)
-            speaker.text2voice(msg)
-            os.remove(exchange_file)
+    # Create the server, binding to localhost on port 9999
+    SoundServer.allow_reuse_address=True
+    with SoundServer((HOST, SOUND_PORT), SoundHandler) as sound_server:
+        # Activate the server; this will keep running until you
+        # interrupt the program with Ctrl-C
+        # enable adres reuse
+        sound_server.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)  
+        sound_server.speaker = speaker
+        sound_server.serve_forever()
+    
                 
 def tests():
     # test
     with open(CFG_FILE,'r') as fp: cfg = json.load(fp)
     os.environ["HSA_OVERRIDE_GFX_VERSION"] = "11.0.0"
+    # deactivae sever and enable rvc for testing
+    cfg["rvc_enabled"] = True
+    cfg["address"] = None
     s = Speaker(**cfg)
+    
     testout1 = "../testoutput.wav"
     testout2 = "../testoutputc.wav"
     msg = "Dies ist ein Test"
@@ -199,6 +254,8 @@ def tests():
     s.change_voice(testout1,testout2)
     s.play_voice(testout2)
     s.text2voice(msg)
+    duration = s.get_wav_duration("out.wav")
+    assert duration > 15
 
 
 def generate(cfg_file,expression_file,sound_format="wav"):
@@ -224,10 +281,11 @@ parser = argparse.ArgumentParser(
                   epilog='')
 
 parser.add_argument('cfg_file',nargs='?',default=CFG_FILE,help="configuration file")   # positional argument
-parser.add_argument('exchange_file',nargs='?',default="exchange.txt",help="file for file based serving")   # positional argument
+parser.add_argument('expression_file',nargs='?',default=EXPRESSION_FILE,
+                    help="file for expressions")   # positional argument
 #parser.add_argument('-c', '--count')      # option that takes a value
 parser.add_argument('-t', '--test',action='store_true',help="execute tests")  # on/off flag
-parser.add_argument('-g', '--generate',action='store_true',help="generate expression samples. Needs cfg_file and expressions.json with text entries (instead of exchange file).")  # on/off flag
+parser.add_argument('-g', '--generate',action='store_true',help="generate expression samples. Needs cfg_file and expressions.json with text entries.")  # on/off flag
 parser.add_argument('-d', '--debug',action='store_true',help="execute file with nothing else for debugging")  # on/off flag
 
 args = parser.parse_args()
@@ -241,10 +299,8 @@ if __name__ == "__main__":
     elif args.test is True:
         tests()
     elif args.generate is True:
-        generate(args.cfg_file,args.exchange_file)
+        generate(args.cfg_file,args.expression_file)
     else:
         cfg_file = args.cfg_file
-        exc_file = args.exchange_file
-        exc_file=sys.argv[2]
-        start_server(cfg_file,exc_file)
+        start_server(cfg_file)
     

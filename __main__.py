@@ -20,7 +20,7 @@ import os
 import signal
 import subprocess
 import threading
-from .web_app import socketio, app, port, comm
+from .web_app import socketio, app, comm, WEB_PORT
 
 from .constants import CFG_FILE, LOG_FNAME
 fpath = os.path.split(__file__)[0]
@@ -50,7 +50,7 @@ if __name__ == "__main__":
             print("llama proc finished!")
             
             comm.calibrate()
-            socketio.run(app, debug=False,port=port)
+            socketio.run(app, debug=False,port=WEB_PORT)
     except KeyboardInterrupt:
         comm.dump_history()
         os.killpg(os.getpgid(speak_proc.pid), signal.SIGTERM)
