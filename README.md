@@ -113,7 +113,7 @@ Programm Structure
 ==================
 
 - Ollama Container running as service.
-- speaker Server: Handles TTS requests (currently file based, http server planned for later).
+- speaker Server: Handles TTS requests via socketserver.
 - memories.json: Memory of MIA, shouldn't be too big even after longer time.
 - webapp: Flask app to handle communication with Computer
 - HTML Site: Web interface.
