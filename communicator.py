@@ -21,13 +21,18 @@ import json
 import os
 import re
 import random
+import datetime
 
 try:
     from .mia_logger import logger
-    from .constants import CFG_FILE, TEXT_COLS
+    from .constants import CFG_FILE, TEXT_COLS, TIME_FORMAT
+    from .constants import NEUTRAL_EMOTION_KEY, INTERVAL_KEY, TIME_BEFORE_KEY, SIGNAL_EMOTION_KEY
+    from . import utils
 except ImportError:
     from mia_logger import logger
-    from constants import CFG_FILE, TEXT_COLS
+    from constants import CFG_FILE, TEXT_COLS, TIME_FORMAT
+    from constants import NEUTRAL_EMOTION_KEY, INTERVAL_KEY, TIME_BEFORE_KEY, SIGNAL_EMOTION_KEY
+    import utils
 
 curr_path = os.path.split(__file__)[0]
 EMOTION_EXPRESSION_MAP = os.path.join(curr_path,"emotion_map.json")
@@ -35,13 +40,14 @@ PENALTIES_MAP = os.path.join(curr_path,"penalties.json")
 POSSIBLE_PENALTIES_KEY = "possible"
 RESPONSE_KEY = "response"
 EMOTION_FORGOTTEN_KEY="emotion_forgotten"
+ADDED_MESSAGE_KEY="added_message"
 
 with open(EMOTION_EXPRESSION_MAP,'r') as em:
-    emotion_expression_map = json.load(em)
+    EMOTION_EXPRESSION_MAP = json.load(em)
 with open(PENALTIES_MAP,'r') as pm:
     penalties = json.load(pm)
 
-emotions = "\n".join(list(emotion_expression_map.keys()))
+emotions = "\n".join(list(EMOTION_EXPRESSION_MAP.keys()))
 
 EMOTION_QUESTION=f"""
 Before we start our conversation can you do the following for every answer:
@@ -51,6 +57,9 @@ When I ask something, before you give your answer give me one of the following e
 followed by a newline. Also I call you MIA from now on.
 """ 
 
+class MIANeutralEmotionException(Exception):
+    pass
+    
 class Communicator:
     """
     This class handles the communication between
@@ -64,8 +73,17 @@ class Communicator:
     ROLE_KEY = "role"
     USER_ROLE = "user"
     ASSISTANT_ROLE = "assistant"
+    TIME_TEMPLATE = """
+    I send you this as information. Is something upcoming?
+    Send any emotion we agreed on followed by a newline and a short message 
+    when something comes up around an {time_before} later (e.g. an event we talked before or a 
+    task which we talked about) except "{neutral_emotion}" or respond only with the emotion "{neutral_emotion}" and nothing else that I know nothing is ahead. 
+    So if nothing is to report really only respond with "{neutral_emotion}". 
+    """
+
+    TIME_UPDATE="Hi MIA it is {time}." 
     
-    def __init__(self,port=11434,address="localhost",protocol="http",version="llama3.2",history_file="memories.json",**_):
+    def __init__(self,port=11434,address="localhost",protocol="http",version="llama3.2",history_file="memories.json",neutral_emotion="disagree",time_before="1 hour",**_):
         self.port = port
         self.address = address
         self.protocol = protocol
@@ -83,6 +101,11 @@ class Communicator:
                 self._history = json.load(fp)
         else:
             self._history = []
+            
+        time_update_msg = self.TIME_TEMPLATE.format(neutral_emotion=neutral_emotion,
+                                                    time_before=time_before)
+        self.time_update_msg = self.TIME_UPDATE + time_update_msg
+        setattr(self,NEUTRAL_EMOTION_KEY,neutral_emotion)
     
     def chat(self,msg,stream=True):
         msg_dic = self.update_history(msg,role=self.USER_ROLE)
@@ -99,6 +122,9 @@ class Communicator:
         return chunk[self.MSG_KEY][self.CONTENT_KEY]
     
     def update_history(self,answer,role=ASSISTANT_ROLE):
+        """
+        Updates the chat history.
+        """
         answer_dic = {self.ROLE_KEY:role,self.CONTENT_KEY:answer}
         self._history.append(answer_dic)
         return answer_dic
@@ -125,15 +151,18 @@ class Communicator:
     @staticmethod
     def check_emotion(msg):
         line1 = msg.partition('\n')[0].strip()
-        if line1 in emotion_expression_map.keys():
-            return emotion_expression_map[line1]
+        if line1 in EMOTION_EXPRESSION_MAP:
+            return line1
         else:
             return None
     
     @staticmethod
     def empty_emotion(msg):
-        if "neutral" in emotion_expression_map.keys():
-            emotions=[emotion_expression_map["neutral"]]
+        """
+        Things to do when no emotion was recieved.
+        """
+        if "neutral" in EMOTION_EXPRESSION_MAP:
+            emotions=["neutral"]
         texts = [msg,EMOTION_FORGOTTEN_KEY]
         logger.error(f"Error: Emotion forgotten with message {msg}")
         return emotions, texts
@@ -164,15 +193,19 @@ class Communicator:
             return penalty
         else:
             return None
-        
+    
+    @staticmethod
+    def map_emotion(emotion):
+        return EMOTION_EXPRESSION_MAP[emotion]
+    
     @staticmethod
     def extract_emotion(msg):
         """
         Filters out all lines with emotion and returns rest as string and list of emotions.
         """
-        words_to_match = list(emotion_expression_map.keys())
+        words_to_match = list(EMOTION_EXPRESSION_MAP.keys())
         if len(msg.splitlines()) == 1:
-            emotions = [emotion_expression_map[e] for e in words_to_match if e==msg.strip()]
+            emotions = [e for e in words_to_match if e==msg.strip()]
             if len(emotions) == 0:
                 return Communicator.empty_emotion(msg)
             return emotions, ['']
@@ -186,7 +219,7 @@ class Communicator:
         regex = re.compile(combined_pattern)
         emotions = regex.findall(msg)
         emotions = [e.strip() for e in emotions]
-        emotions = [emotion_expression_map[e] for e in emotions]
+        emotions = [e for e in emotions]
         texts = regex.split(msg)
         # ignore everything beofe first split
         if len(texts) > len(emotions):
@@ -206,7 +239,8 @@ class Communicator:
         _, texts = Communicator.extract_emotion(msg)
         return '\n'.join(texts)
     
-    def exchange(self,message,emotion_reaction=None,update_message=None,filter_message=True):
+    def exchange(self,message,emotion_reaction=None,update_message=None,filter_message=True,
+                 map_emotions_to_reactions=True,final_update=None):
         """
         Performs an message exchange.
         emotion_reaction is a callable
@@ -222,13 +256,18 @@ class Communicator:
         function uses the message or the (emotion)
         filtered message.
         Returns the complete message and filtered
-        messages alike
+        messages alike.
+        final_update is a function for message
+        postprocessing. Maybe necessary for some cases.
         """
         if emotion_reaction is None:
             def emotion_reaction(emotion):
                 return
         if update_message is None:
             def update_message(message):
+                return
+        if final_update is None:
+            def final_update(answer,filt_answer,penalty):
                 return
         # init vars
         answer = ""
@@ -245,16 +284,95 @@ class Communicator:
                 emotion = emotions[nr_emotions]
                 #tx = text[nr_emotions]
                 nr_emotions+= 1
-                emotion_reaction(emotion)
+                arg = self.map_emotion(emotion) if map_emotions_to_reactions is True else emotion
+                emotion_reaction(arg)
             # update message
             to_send = self.extract_text(answer) if filter_message is True else answer
             update_message(to_send)
-        
+            
         filt_answer = self.extract_text(answer)
+        penalty = self.penalize(emotions, text)
         self.update_history(answer)
         self.dump_history()
-        return answer, filt_answer
+        final_update(answer, filt_answer, penalty)
+        return answer, filt_answer, penalty
+    
+    def time_update(self,emotion_expression=None,update_message=None,_test_neutral=False,
+                    _test_neutral_but_penalty=False):
+        """
+        Function that Sends a request and should be scheduled.
+        """
+        timestamp = utils.get_timestamp()[:-1]
+        message = self.time_update_msg.format(time=timestamp)
+        if emotion_expression is None:
+            def emotion_reaction(emotion):
+                return
+        if update_message is None:
+            def update_message(message):
+                return
 
+        def _emotion_reaction(emotion):
+            if emotion == getattr(self,NEUTRAL_EMOTION_KEY):
+                return
+            else: #if emotion == getattr(self,SIGNAL_EMOTION_KEY):
+                expression = self.map_emotion(emotion)
+                emotion_expression(expression)
+            
+        def _update_message(message):
+            emotions, texts = Communicator.extract_emotion(message)
+            emotion = emotions[0]
+            text = "\n".join(texts)
+            if emotion == getattr(self,NEUTRAL_EMOTION_KEY):
+                pass
+            else: 
+                if texts[-1] == EMOTION_FORGOTTEN_KEY:
+                    text = "\n",join(texts[-1])
+                update_message(text)
+        
+        # using final_update because maybe there is something to say
+        def _final_update(answer,filt_answer,penalty):
+            breakpoint()
+            if _test_neutral is True:
+                answer=getattr(self,NEUTRAL_EMOTION_KEY)
+            if _test_neutral_but_penalty is True:
+                answer=getattr(self,NEUTRAL_EMOTION_KEY)+'\n\nbla bla bla'
+                
+            emotions, texts = Communicator.extract_emotion(answer)
+            emotion = emotions[0]
+            text = "\n".join(texts)
+            if emotion == getattr(self,NEUTRAL_EMOTION_KEY):
+                if len(text)>0:
+                    check = texts + [ADDED_MESSAGE_KEY]
+                    penalty = self.penalize(emotions,check)
+                else:
+                    penalty = None
+                    answer = None
+                dic = dict(answer=answer,
+                           filt_answer="\n".join(texts),
+                           penalty=penalty)
+                string = json.dumps(dic)
+                raise MIANeutralEmotionException(string)
+            
+        # using exception handling for personal experiment ...
+        def handle_mia_excp(mia_excp_msg):
+            dic = json.loads(mia_excp_msg)
+            answer, filt_answer, penalty = dic["answer"],dic["filt_answer"],dic["penalty"]
+            self.update_history(getattr(self,NEUTRAL_EMOTION_KEY))
+            self.dump_history()
+            return answer, filt_answer, penalty
+        
+        try:
+            answer, filt_answer, penalty = self.exchange(message,emotion_reaction=_emotion_reaction,
+                                                         update_message=_update_message,
+                                                         final_update=_final_update,
+                                                         filter_message=False,
+                                                         map_emotions_to_reactions=False)
+        except MIANeutralEmotionException as mia_excp:
+            answer, filt_answer, penalty = handle_mia_excp(str(mia_excp))
+        return answer, filt_answer, penalty
+            
+        
+        
 
 def tests():
     print(EMOTION_QUESTION)

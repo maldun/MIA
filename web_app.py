@@ -53,7 +53,7 @@ with open(cfg_file,'r') as jp:
     cfg = json.load(jp)
 TIMEOUT_OPT = "timeout"
 
-from .utils import MyMarkdown, cut_down_lines, get_url, get_websocket_url
+from .utils import MyMarkdown, cut_down_lines, get_url, get_websocket_url, get_timestamp
 md = MyMarkdown(output_format='html')
 
 WEB_PORT = int(cfg[WEB_PORT_KEY])
@@ -99,6 +99,9 @@ def get_video_frames(video_path):
 
 
 def express_and_reload(expression,sound=True):
+    """
+    Makes an expression and reloads everything.
+    """
     new_vid = vid_exp.express(expression)
     reload_video(new_vid)
     if sound is True:
@@ -111,19 +114,19 @@ def handle_message(message):
     print(f"Received message: {message}")
     result = process_message(message)
     logger.info(str(message))
+    #result = time_update()
+    logger.info(str(result))
     
     log_msg="Message received successfully"
     logger.info(log_msg)
     return log_msg
 
-def penalize(answer):
+def penalize(penalty):
     """
     Sometimes an LLM hickups ... we send a 
     "penalty" to correct the behavior and have
     a little fun with it ...
     """
-    emotions, text = comm.extract_emotion(answer)
-    penalty = comm.penalize(emotions,text)
     if isinstance(penalty,str):
         logger.info("Penalty!: " + str(penalty))
         time.sleep(TIMEOUT/2)
@@ -143,7 +146,7 @@ def send_voice_request(msg):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
         # Connect to server and send data
         sock.connect((HOST, SOUND_PORT))
-        timestamp = datetime.datetime.now().strftime(TIME_FORMAT)
+        timestamp = get_timestamp()
         request = {SPEECH_REQ:msg,TIME_REQ:timestamp}
         request = json.dumps(request) + '\n'
         sock.sendall(bytes(request, U8))
@@ -161,10 +164,11 @@ def process_message(message):
     time.sleep(1)
     #express_and_reload("talk")
     
-    answer, filt_answer = comm.exchange(message,
+    answer, filt_answer, penalty = comm.exchange(message,
                                         emotion_reaction=express_and_reload,
                                         update_message=send_answer,
-                                        filter_message=True)
+                                        filter_message=True,
+                                        map_emotions_to_reactions=True)
 
     send_voice_request(filt_answer)
     send_answer(filt_answer,markdown=True)
@@ -172,11 +176,31 @@ def process_message(message):
         # if no speech wait a bit
         time.sleep(TIMEOUT)
     
-    penalize(answer)
+    penalize(penalty)
     time.sleep(2)
     express_and_reload("idle",sound=True)
     return "Message processed successfully"
 
+def time_update():
+    answer, filt_answer, penalty = comm.time_update(
+                                        emotion_expression=express_and_reload,
+                                        update_message=send_answer,
+                                        _test_neutral_but_penalty=False
+                                        )
+     
+    if answer is None:
+        pass
+    else:
+        send_voice_request(filt_answer)
+        send_answer(filt_answer,markdown=True)
+    if penalty is not None:
+        process_message(penalty)
+        return "Time update processed, but penalty"
+    
+    log_msg = "Time update processed successfully"
+    logger.info(log_msg)
+    return log_msg
+    
 
 iframe_code_header=f"""
 <!DOCTYPE html>

@@ -18,5 +18,8 @@
   "gfx_version":"11.0.0",
   "voice_sample":"/home/maldun/prog/Python/MIA/voice/samples/miku_vocals.wav",
   "history_file":"memories.json",
-  "intro_sound":"voice/expressions/idle.wav"
+  "intro_sound":"voice/expressions/idle.wav",
+  "clock_interval": 1800,
+  "time_before": "1 hour",
+  "neutral_emotion": "disagree"
 }

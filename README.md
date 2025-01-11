@@ -87,7 +87,7 @@ Prerequisites:
     - "history_file":"memories.json" (MIA's memory)
 
 - Configure expressions.json with expressions and associated .mp4 files
-- Set the emotions and the expressions associated with it in emotion_map.json. When the AI provides an emotion the proper video is loaded.
+- Set the emotions and the expressions associated with it in emotion_map.json. When the AI provides an emotion the proper video is loaded. **Important** The example should be the minimal set of emotion. Don't remove one of them!
 - Some configurations are found in `constants.py` which can be adjusted like textbox settings.
     - CFG_FILE = "setup_cfg.json" (cfg file to use)
     - LOG_FNAME = "mia.log" (log file)

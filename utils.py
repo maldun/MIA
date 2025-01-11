@@ -17,10 +17,11 @@
 #along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 try:
-    from .constants import TEXT_COLS, URL_KEY
+    from .constants import TEXT_COLS, URL_KEY, TIME_FORMAT
 except ImportError:
-    from constants import TEXT_COLS, URL_KEY
+    from constants import TEXT_COLS, URL_KEY, TIME_FORMAT
 
+import datetime
 import markdown
 from markdown import Markdown
 class MyMarkdown(Markdown):
@@ -166,6 +167,9 @@ def get_url(protocol="ws",address="localhost",web_port=None,**kwargs):
         if kwargs["json"] is True:
             return {URL_KEY:url}
     return url
+
+def get_timestamp():
+    return datetime.datetime.now().strftime(TIME_FORMAT)
 
 if __name__ == "__main__":
     # Tests
