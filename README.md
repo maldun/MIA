@@ -98,6 +98,8 @@ Prerequisites:
     - TEXT_COLS = 60
     - TEXT_FONT = '"Brush Script MT", cursive'
 - Generate expressions with `python -m python3.10 -i speak.py setup_cfg.json expressions.json --generate`
+- Add Optional: add favicon.ico in templates/static, Add intro_sound (.wav). to setup_cfg.json.
+
     
 - First time: go into the MIA folder and run `install_lama.py setup_cfg.json -f`. The docker will start. You can chat a little and then exit with `/bye`.
 
