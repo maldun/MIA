@@ -76,7 +76,7 @@ class Communicator:
     TIME_TEMPLATE = """
     I send you this as information, that you know what time currently is since you don't have a clock and otherwise don't know what time it is. Is something upcoming?
     Send any emotion we agreed on followed by a newline and a short message 
-    when something comes up at least {time_before} later or already overdue (e.g. an event we talked before or a 
+    when something comes up at least {time_before} later or already overdue by at most {time_before} (e.g. an event we talked before or a 
     task which we talked about. I will mark them to you with the keyword "{task_key}:" followed by task, that you can find them more easily) 
     except "{neutral_emotion}" or respond only with the emotion "{neutral_emotion}" and nothing else that I know nothing is ahead or overdue. 
     So if nothing is to report really only respond with "{neutral_emotion}!". 
