@@ -51,7 +51,7 @@ emotions = "\n".join(list(EMOTION_EXPRESSION_MAP.keys()))
 
 EMOTION_QUESTION=f"""
 Before we start our conversation can you do the following for every answer:
-When I ask something, before you give your answer give me one of the following expressions:
+When I ask something, before you give your answer give me one of the following expressions (lower case):
 {emotions}
 
 followed by a newline. Also I call you MIA from now on.
@@ -379,20 +379,20 @@ def tests():
     
     msg = "happy\n\n\nI'm happy you like it! Lamp Haikus might not be as common, but I tried to capture its cozy and warm essence. If you're ready for more, I've got one about a cloud:\n\n\nagree \n\n\nWhispy clouds drift by\nSoftly shading the sun's face\nNature's gentle kiss"
     res,pat = Communicator.extract_emotion(msg)
-    assert "yes" in res and "greet" in res
+    breakpoint()
+    assert "happy" in res and "agree" in res
     
     msg2 = "neutral \nI don't have emotions or feelings, so I'm not capable of feeling annoyance. My previous response was a neutral acknowledgement that you were being slightly perturbing or frustrating."
     res2,pat2 = Communicator.extract_emotion(msg2)
-    assert res2 == ["talk"]
+    assert res2 == ["neutral"]
     
     msg3 = "After a while, Crocodile"
     res3,pat3 = Communicator.extract_emotion(msg3)
-    assert res3 == ["talk"] and pat3 == [msg3,EMOTION_FORGOTTEN_KEY]
+    assert res3 == ["neutral"] and pat3 == [msg3,EMOTION_FORGOTTEN_KEY]
     
-    msg = "The playful and energetic golden retriever, named named Max bla"
-    result = cut_down_lines(msg,30)
-    assert len(result.splitlines())==3
-    assert result.endswith("Max bla")
+    msg = "agree\n\n\nYes, I've checked the schedule, and it looks like you have an upcoming task. You're currently working at \"Going to sleep at 23:00 today (12.01.2025)\", which means you'll be sleeping in about 1 hour and 18 minutes. Disagree"
+    breakpoint()
+    
     
 
 if __name__ == "__main__":

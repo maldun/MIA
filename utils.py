@@ -220,7 +220,12 @@ if __name__ == "__main__":
     assert "case." in last2
     assert last2.endswith("helpful!")
     
-    assert get_url(**{"address":"localhost","protocol":"http","web_port":30})=="http://localhost:30"
-    assert get_url(json=True,**{"address":"localhost","protocol":"http","web_port":30})[URL_KEY]=="http://localhost:30"
+    msg = "The playful and energetic golden retriever, named named Max bla"
+    result = cut_down_lines(msg,30)
+    assert len(result.splitlines())==3
+    assert result.endswith("Max bla")
+    
+    assert get_url(web=False,**{"address":"localhost","protocol":"http","web_port":30})=="http://localhost:30"
+    assert get_url(web=False,json=True,**{"address":"localhost","protocol":"http","web_port":30})[URL_KEY]=="http://localhost:30"
     assert get_websocket_url()=="localhost"
     assert replace_localhost("localhost")==get_own_ip()
