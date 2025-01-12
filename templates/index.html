@@ -5,44 +5,81 @@
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
     <style>
         grid-template-columns:  2fr 1fr;
-        gap: 20px;
+        gap: 10px;
 
+/*        textarea {
+            display:block;
+            margin-bottom:1em;
+            clear:both;
+          }*/
+        
         .grid {
             display: grid;
             place-items: center;
-            /*width: 100%;*/
-            grid-template-columns:  2fr 1fr;
+            width: 100%;
+            /*grid-template-columns:  2fr 1fr;*/
+            grid-template-columns:  50% 50%;
+            column-gap: 0vw;
+            row-gap: 0vh;
         }
         
-        .video-container {
+        .output-container {
             display: grid;
             place-items: left;
-            grid-template-columns:  2fr 1fr;
+            /*grid-template-columns:  2fr 1fr;*/
+            grid-template-columns:  60vw 80vh;
+            width: 100%;
+            height: 75vh;
         }
 
+        .video-container {
+            display: flex;
+            align-items: stretch;
+            justify-content: stretch;
+            height: 90%;
+            width: 90%
+            place-items: left;
+         }
+        
+         .text-output-container {
+            display: flex;
+            align-items: stretch;
+            justify-content: stretch;
+            height: 80vh;
+            width: 80vw
+            place-items: right;
+         }
+        
         .answer-container {
             display: flex;
             align-items: stretch;
             justify-content: stretch;
+            width: 100%;
+            height: 25%;
         }
+        
+
         #answerText {
-         padding: 10px;
-         width: 640px;
-         height: 420px;
+         padding: 1em;
+         width: 35vw;
+         height: 70vh;
         }
         #answerInput {
          max-height: 400px; /* Set a maximum height */
          overflow-y: auto; /* Enable vertical scrolling */
          overflow-x: auto;
          width:  30px;
-         height: 10px;
+         /*height: 10px;*/
+         height: 16vh;
          padding: 10px;
          width: 100%;
          border-radius: 0;
          border-width: 1px;
          border-style: solid;
          border-color: #ccc;
-         background-color: #f9f9f9;
+         color: #6cf542;
+         /*background-color: #f9f9f9;*/
+         background-color: #000000;
         }
 
           #answerInput:focus {
@@ -52,6 +89,7 @@
 
           #answerInput::placeholder {
           color: #999;
+          /*color: #6cf542;*/
           }
 
         
@@ -63,7 +101,7 @@
     body {
       background-image: url("{{ url_for('static', filename='background.jpg') }}");
       background-size: cover;
-      height: 100vh;
+      height: 95vh;
       margin: 0;
       padding: 0;
       background-repeat: no-repeat;
@@ -77,17 +115,20 @@
 <body>
  <h1 style="color:white;">I am {{ name | safe}}, eager to help!</h1>
     <div class="grid">
+        <div class="output-container">
         <div class="video-container">
-            <video id="video" width="500" autoplay loop src="{{ url_for('static', filename='video.mp4') }}" onended="reloadVideo()">
+            <video id="video" loop src="{{ url_for('static', filename='video.mp4') }}" onended="reloadVideo()">
                 Your browser does not support the video tag.
             </video>
-            <div>
+          </div>
+         <div class="text-output-container">>
             <!--<textarea id="answerText" rows="19" cols="67" class="background-text"></textarea>-->
-            <iframe id="answerText" height="420" width="640" src="{{ url_for('static', filename='answer.html') }}"></iframe>
-            </div>
+            <iframe id="answerText"  src="{{ url_for('static', filename='answer.html') }}"></iframe>
+        </div>
         </div>
         <div class="answer-container">
-            <input type="text" id="answerInput" placeholder="Type an answer...">
+            <!--<input type="text" id="answerInput" placeholder="Type an answer...">-->
+            <textarea id="answerInput" rows="30" cols="67" placeholder="Type an answer..." class="background-text"></textarea>
             <button id="sendMessage">Send Answer</button>
             <!--<p id="answerText"></p>-->
         </div>

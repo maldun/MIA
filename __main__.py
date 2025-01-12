@@ -53,7 +53,7 @@ if __name__ == "__main__":
             # a little trickery ... make the main process pid known ...
             # left here for future reference ...
             #app.config[MAIN_THREAD_ID_KEY] = os.getpid()
-            socketio.run(app, debug=False,port=WEB_PORT)
+            socketio.run(app, debug=True,port=WEB_PORT)
             
     except KeyboardInterrupt:
         comm.dump_history()
