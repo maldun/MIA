@@ -15,6 +15,7 @@
 #along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from flask import Flask, render_template, request, send_file, g, jsonify, send_from_directory
+from flask import current_app
 import av
 import cv2
 import datetime
@@ -26,7 +27,10 @@ import time
 import threading
 import multiprocessing as mp
 import shutil
+import signal
 import socket
+import sys
+import requests
 from flask_apscheduler import APScheduler
 
 # constants and paths
@@ -170,7 +174,29 @@ def send_voice_request(msg):
             else:
                 logger.info("Something went wrong on Sound Server Side!")
 
+def handle_special_commands(message):
+    """
+    Some special commands to make usage easier!
+    """
+    cmd=message.strip().lower()
+    match cmd:
+        case CONST.SHUTDOWN_COMMAND:
+            breakpoint()
+            quit_msg="Goodnight MIA"
+            logger.info(quit_msg)
+            # Evil but maybe helpful for other stuff
+            # so comment stays as example
+            #pid = current_app.config[CONST.MAIN_THREAD_ID_KEY]
+            # get process id 
+            pid = os.getpid()
+            # get process group id
+            gid = os.getpgid(pid)
+            # kill all process of the group with Strg+C
+            os.killpg(gid, signal.SIGTERM)
+
 def process_message(message):
+    # special commands go here
+    handle_special_commands(message)
     #express_and_reload("idle")
     time.sleep(1)
     #express_and_reload("talk")
@@ -193,8 +219,7 @@ def process_message(message):
     return "Message processed successfully"
 
 
-import requests
-from io import StringIO
+
 
 # interval time update
 # direct scheduling is for losers ...
@@ -368,14 +393,11 @@ def cleanup_audio(vid):
     out_filename = os.path.join(AUDIO_FOLDER,AUDIO_OUTFILE)
     try:
         os.remove(out_filename)
+        log_msg = "audio file deleted"
+        socketio.emit('audio_reload',log_msg)
     except FileNotFoundError as exc:
-        logger.info(str(exc))
-    except Exception as exc:
-        logger.error(str(exc))
-        
-    log_msg = "audio file deleted"
+        log_msg = str(exc)
     logger.info(log_msg)
-    socketio.emit('audio_reload',log_msg)
     return log_msg
 
 

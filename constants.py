@@ -48,4 +48,5 @@ AUDIO_MIME_TYPE="audio/wav"
 TASK_KEY="task"
 UPDATE_TIME_TASK = "update_time"
 
-
+SHUTDOWN_COMMAND = "/goodnight!"
+MAIN_THREAD_ID_KEY = "MAIN_THREAD_ID"

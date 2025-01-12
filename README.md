@@ -152,8 +152,6 @@ ToDo
 =====
 
 - improve performance of TTS and RVC
-- Add shutdown button
 - Make Package
 - Make better input field.
-- Clock
 - zip memories or find another way (let the LLM extract for example)
