@@ -18,8 +18,10 @@
 
 try:
     from .constants import TEXT_COLS, URL_KEY, TIME_FORMAT
+    from . import constants as CONST
 except ImportError:
     from constants import TEXT_COLS, URL_KEY, TIME_FORMAT
+    import constants as CONST
 
 import datetime
 import markdown
@@ -165,6 +167,13 @@ def get_own_ip():
         s.close()
     return IP
 
+def replace_localhost(url):
+    new_url=url
+    oip = get_own_ip()
+    for lh in {"localhost","0.0.0.0","127.0.0.1"}:
+        new_url=new_url.replace(lh,oip)
+    return new_url
+
 def get_url(protocol="ws",address="localhost",web_port=None,**kwargs):
     """
     Combines a proper url and returns a dict for jsyfying
@@ -176,6 +185,9 @@ def get_url(protocol="ws",address="localhost",web_port=None,**kwargs):
         url += address
     if isinstance(web_port,str) or isinstance(web_port,int):
         url += f":{web_port}"
+    if "web" in kwargs:
+        if kwargs["web"] is True:
+            url=replace_localhost(url)
     if "json" in kwargs:
         if kwargs["json"] is True:
             return {URL_KEY:url}
@@ -212,3 +224,4 @@ if __name__ == "__main__":
     assert get_url(**{"address":"localhost","protocol":"http","web_port":30})=="http://localhost:30"
     assert get_url(json=True,**{"address":"localhost","protocol":"http","web_port":30})[URL_KEY]=="http://localhost:30"
     assert get_websocket_url()=="localhost"
+    assert replace_localhost("localhost")==get_own_ip()

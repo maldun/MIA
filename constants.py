@@ -47,6 +47,7 @@ NEUTRAL_EMOTION_KEY = "neutral_emotion"
 AUDIO_MIME_TYPE="audio/wav"
 TASK_KEY="task"
 UPDATE_TIME_TASK = "update_time"
+LOCALHOST = "localhot"
 
 SHUTDOWN_COMMAND = "/goodnight!"
 MAIN_THREAD_ID_KEY = "MAIN_THREAD_ID"

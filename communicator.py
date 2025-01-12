@@ -25,12 +25,12 @@ import datetime
 
 try:
     from .mia_logger import logger
-    from .constants import CFG_FILE, TEXT_COLS, TIME_FORMAT
+    from .constants import CFG_FILE, TEXT_COLS, TIME_FORMAT, LOCALHOST
     from .constants import NEUTRAL_EMOTION_KEY, TIME_BEFORE_KEY, SIGNAL_EMOTION_KEY
     from . import utils
 except ImportError:
     from mia_logger import logger
-    from constants import CFG_FILE, TEXT_COLS, TIME_FORMAT
+    from constants import CFG_FILE, TEXT_COLS, TIME_FORMAT, LOCALHOST
     from constants import NEUTRAL_EMOTION_KEY, TIME_BEFORE_KEY, SIGNAL_EMOTION_KEY
     import utils
 

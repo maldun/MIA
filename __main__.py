@@ -51,8 +51,8 @@ if __name__ == "__main__":
             # a little trickery ... make the main process pid known ...
             # left here for future reference ...
             #app.config[MAIN_THREAD_ID_KEY] = os.getpid()
-            #host_ip = get_own_ip()
-            host_ip=None
+            host_ip = get_own_ip()
+            #host_ip=None
             socketio.run(app, host=host_ip,debug=False,port=WEB_PORT)
             
     except KeyboardInterrupt:

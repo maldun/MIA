@@ -337,7 +337,8 @@ def index():
     play_intro_sound()
     
     # start server
-    renderer = render_template('index.html' ,socket_url=get_url(json=True,**cfg),name=md.convert("*MIA*",remove_paragraph=True))
+    breakpoint()
+    renderer = render_template('index.html' ,socket_url=get_url(web=True,json=True,**cfg),name=md.convert("*MIA*",remove_paragraph=True))
     return renderer
 
 @socketio.on('reload_video')

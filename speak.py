@@ -37,7 +37,7 @@ try:
     from .constants import SPEECH_REQ, SOUND_REQ, TIME_REQ, UPLOAD_ROUTE, U8
     from .mia_logger import logger
     from .utils import split_into_sentences, split_into_lines_and_sentences, chunker 
-    from .utils import filter_symbol_sentences, get_websocket_url
+    from .utils import filter_symbol_sentences, get_websocket_url, replace_localhost
 except ImportError:
     from play_media import play_sound
     from constants import TEXT_COLS, TEXT_KEY, CFG_FILE, VOICE_KEY, EXPRESSION_FILE
@@ -45,7 +45,7 @@ except ImportError:
     from constants import SPEECH_REQ, SOUND_REQ, TIME_REQ, UPLOAD_ROUTE, U8
     from mia_logger import logger
     from utils import split_into_sentences, split_into_lines_and_sentences, chunker 
-    from utils import filter_symbol_sentences, get_websocket_url
+    from utils import filter_symbol_sentences, get_websocket_url, replace_localhost
 
 
 class Speaker:
