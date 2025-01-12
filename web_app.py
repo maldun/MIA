@@ -181,7 +181,6 @@ def handle_special_commands(message):
     cmd=message.strip().lower()
     match cmd:
         case CONST.SHUTDOWN_COMMAND:
-            breakpoint()
             quit_msg="Goodnight MIA"
             logger.info(quit_msg)
             # Evil but maybe helpful for other stuff
