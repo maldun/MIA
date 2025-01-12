@@ -2,7 +2,7 @@ CFG_FILE = "setup_cfg.json"
 LOG_FNAME = "mia.log"
 
 # time format
-TIME_FORMAT = "%Y.%M.%d %H:%m:%S:"
+TIME_FORMAT = "%Y.%m.%d %H:%m:%S:"
 
 # encoding
 U8 = "utf-8"
