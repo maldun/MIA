@@ -297,7 +297,7 @@ def send_answer(answer,markdown=False):
     else:
         answer=answer.lstrip()
         css_style=f"background-color: {BACKGROUND_COLOR};color: {TEXT_COLOR};font-size: {FONT_SIZE};font-family: {TEXT_FONT};"
-        iframe_code_body=f'<textarea id="answerTextArea" style="{css_style}" rows="{TEXT_ROWS}" cols="{TEXT_COLS}">\n'
+        iframe_code_body=f'<textarea id="answerTextArea" style="{css_style}" rows="{TEXT_ROWS}" cols="{TEXT_COLS}" wrap="hard">\n'
         iframe_code_body+=answer
         iframe_code_body+="</textarea>"
 
