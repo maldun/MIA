@@ -197,7 +197,18 @@ class Communicator:
     
     @staticmethod
     def map_emotion(emotion):
-        return EMOTION_EXPRESSION_MAP[emotion]
+        """
+        Maps an emotion to provided expression.
+        In case of doubt return "neutral"
+        """
+        if emotion in EMOTION_EXPRESSION_MAP:
+            return EMOTION_EXPRESSION_MAP[emotion]
+        elif emotion.upper() in EMOTION_EXPRESSION_MAP:
+            return EMOTION_EXPRESSION_MAP[emotion.upper()]
+        elif emotion.capitalize() in EMOTION_EXPRESSION_MAP:
+            return EMOTION_EXPRESSION_MAP[emotion.capitalize()]
+        else:
+            return EMOTION_EXPRESSION_MAP["neutral"]
     
     @staticmethod
     def extract_emotion(msg):
@@ -404,8 +415,6 @@ def tests():
     emotions, texts = Communicator.extract_emotion(msg)
     assert emotions==["agree","disagree"]
     assert texts[-1]!=''
-    
-    
     
 
 if __name__ == "__main__":
