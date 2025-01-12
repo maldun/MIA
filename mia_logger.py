@@ -30,7 +30,8 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 # Set log level to DEBUG
-logger.setLevel(logging.DEBUG)
+#logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
 # Create a logging handler that writes logs to a file
 handler = logging.FileHandler(os.path.join(fpath,LOG_FNAME))

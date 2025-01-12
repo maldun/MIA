@@ -37,7 +37,7 @@ try:
     from .constants import SPEECH_REQ, SOUND_REQ, TIME_REQ, UPLOAD_ROUTE, U8
     from .mia_logger import logger
     from .utils import split_into_sentences, split_into_lines_and_sentences, chunker 
-    from .utils import filter_symbol_sentences, get_websocket_url, replace_localhost
+    from .utils import filter_symbol_sentences, get_websocket_url, get_url
 except ImportError:
     from play_media import play_sound
     from constants import TEXT_COLS, TEXT_KEY, CFG_FILE, VOICE_KEY, EXPRESSION_FILE
@@ -45,7 +45,7 @@ except ImportError:
     from constants import SPEECH_REQ, SOUND_REQ, TIME_REQ, UPLOAD_ROUTE, U8
     from mia_logger import logger
     from utils import split_into_sentences, split_into_lines_and_sentences, chunker 
-    from utils import filter_symbol_sentences, get_websocket_url, replace_localhost
+    from utils import filter_symbol_sentences, get_websocket_url, get_url
 
 
 class Speaker:
@@ -65,7 +65,8 @@ class Speaker:
         self._rvc_opts = rvc_opts
         self._rvc_params = rvc_params
         if isinstance(web_port,int) and isinstance(address,str) and isinstance(protocol,str):
-            self._url = f"{protocol}://{address}:{web_port}/{UPLOAD_ROUTE}"
+            #self._url = f"{protocol}://{address}:{web_port}/{UPLOAD_ROUTE}"
+            self._url=get_url(protocol=protocol,address=address,web_port=web_port)+f"/{UPLOAD_ROUTE}"
         else:
             self._url = None
         

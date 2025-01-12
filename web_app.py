@@ -59,6 +59,7 @@ with open(cfg_file,'r') as jp:
 TIMEOUT_OPT = "timeout"
 
 from .utils import MyMarkdown, cut_down_lines, get_url, get_websocket_url, get_timestamp
+from . import utils
 md = MyMarkdown(output_format='html')
 
 WEB_PORT = int(cfg[WEB_PORT_KEY])
@@ -67,7 +68,7 @@ TIMEOUT = int(cfg[TIMEOUT_OPT])
 PROTOCOL = cfg[PROTOCOL_KEY]
 ADDRESS = cfg[ADDRESS_KEY]
 
-WEB_URL = get_url(**cfg)
+WEB_URL = get_url(web=True,**cfg)
 
 from .expressor import VideoExpressor, VoiceExpressor
 vid_exp = VideoExpressor()
@@ -93,12 +94,12 @@ lock = threading.Lock()
 app.config['MAX_CONTENT_LENGTH'] = 100*1024**2  # 100 MB
 
 ALLOWED_ORIGIN_FILE=os.path.join(app.root_path,CONST.ALLOWED_ORIGIN_FILE)
-allowed_files = [WEB_URL]
+allowed_origins = [WEB_URL]
 if os.path.exists(ALLOWED_ORIGIN_FILE):
     with open(ALLOWED_ORIGIN_FILE,'r') as aof:
-        allowed_files += aof.read().splitlines()
+        allowed_origins += aof.read().splitlines()
 
-socketio = SocketIO(app,cors_allowed_origins=allowed_files)
+socketio = SocketIO(app,cors_allowed_origins=allowed_origins)
 
 #g.socket_url = f"ws://127.0.0.1:{port}/"
 
@@ -337,8 +338,7 @@ def index():
     play_intro_sound()
     
     # start server
-    breakpoint()
-    renderer = render_template('index.html' ,socket_url=get_url(web=True,json=True,**cfg),name=md.convert("*MIA*",remove_paragraph=True))
+    renderer = render_template('index.html' ,socket_url=get_url(json=True,**cfg),name=md.convert("*MIA*",remove_paragraph=True))
     return renderer
 
 @socketio.on('reload_video')

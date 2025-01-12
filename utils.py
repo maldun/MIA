@@ -174,7 +174,7 @@ def replace_localhost(url):
         new_url=new_url.replace(lh,oip)
     return new_url
 
-def get_url(protocol="ws",address="localhost",web_port=None,**kwargs):
+def get_url(web=True,protocol="ws",address="localhost",web_port=None,**kwargs):
     """
     Combines a proper url and returns a dict for jsyfying
     """
@@ -185,9 +185,8 @@ def get_url(protocol="ws",address="localhost",web_port=None,**kwargs):
         url += address
     if isinstance(web_port,str) or isinstance(web_port,int):
         url += f":{web_port}"
-    if "web" in kwargs:
-        if kwargs["web"] is True:
-            url=replace_localhost(url)
+    if web is True:
+        url=replace_localhost(url)
     if "json" in kwargs:
         if kwargs["json"] is True:
             return {URL_KEY:url}
