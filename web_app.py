@@ -223,7 +223,7 @@ def process_message(message):
 # interval time update
 # direct scheduling is for losers ...
 # so we make a (cron) job which sends a request back to us.
-@scheduler.task('interval', id='time_update', seconds=TIME_UPDATE_INTERVAL,
+@scheduler.task('cron', id='time_update', hour="0-23",#seconds=TIME_UPDATE_INTERVAL,
                 misfire_grace_time=TIME_UPDATE_INTERVAL//10)
 def time_update_trigger():
     #print("Trigggggger!!!!!!")

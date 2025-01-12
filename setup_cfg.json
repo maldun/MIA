@@ -21,5 +21,6 @@
   "intro_sound":"voice/expressions/idle.wav",
   "clock_interval": 3600,
   "time_before": "2 hour",
-  "neutral_emotion": "disagree"
+  "neutral_emotion": "disagree",
+  "task_key": "TASK"
 }

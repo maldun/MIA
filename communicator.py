@@ -77,14 +77,14 @@ class Communicator:
     I send you this as information. Is something upcoming?
     Send any emotion we agreed on followed by a newline and a short message 
     when something comes up around an {time_before} later (e.g. an event we talked before or a 
-    task which we talked about. I will mark them to you with the keyword "TASK:" followed by task, that you can find them more easily) 
+    task which we talked about. I will mark them to you with the keyword "{task_key}:" followed by task, that you can find them more easily) 
     except "{neutral_emotion}" or respond only with the emotion "{neutral_emotion}" and nothing else that I know nothing is ahead. 
     So if nothing is to report really only respond with "{neutral_emotion}!". 
     """
 
     TIME_UPDATE="Hi MIA it is {time}." 
     
-    def __init__(self,port=11434,address="localhost",protocol="http",version="llama3.2",history_file="memories.json",neutral_emotion="disagree",time_before="1 hour",**_):
+    def __init__(self,port=11434,address="localhost",protocol="http",version="llama3.2",history_file="memories.json",neutral_emotion="disagree",time_before="1 hour",task_key="TASK",**_):
         self.port = port
         self.address = address
         self.protocol = protocol
@@ -104,7 +104,7 @@ class Communicator:
             self._history = []
             
         time_update_msg = self.TIME_TEMPLATE.format(neutral_emotion=neutral_emotion,
-                                                    time_before=time_before)
+                                                    time_before=time_before, task_key=task_key)
         self.time_update_msg = self.TIME_UPDATE + time_update_msg
         setattr(self,NEUTRAL_EMOTION_KEY,neutral_emotion)
     
