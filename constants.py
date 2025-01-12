@@ -50,3 +50,5 @@ UPDATE_TIME_TASK = "update_time"
 
 SHUTDOWN_COMMAND = "/goodnight!"
 MAIN_THREAD_ID_KEY = "MAIN_THREAD_ID"
+
+ALLOWED_ORIGIN_FILE="allowed_origins.txt"

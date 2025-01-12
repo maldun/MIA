@@ -92,8 +92,13 @@ app.config["UPLOAD_FOLDER"] = UPLOAD_DIR
 lock = threading.Lock()
 app.config['MAX_CONTENT_LENGTH'] = 100*1024**2  # 100 MB
 
+ALLOWED_ORIGIN_FILE=os.path.join(app.root_path,CONST.ALLOWED_ORIGIN_FILE)
+allowed_files = [WEB_URL]
+if os.path.exists(ALLOWED_ORIGIN_FILE):
+    with open(ALLOWED_ORIGIN_FILE,'r') as aof:
+        allowed_files += aof.read().splitlines()
 
-socketio = SocketIO(app,cors_allowed_origins=WEB_URL)
+socketio = SocketIO(app,cors_allowed_origins=allowed_files)
 
 #g.socket_url = f"ws://127.0.0.1:{port}/"
 
