@@ -74,7 +74,7 @@ class Communicator:
     USER_ROLE = "user"
     ASSISTANT_ROLE = "assistant"
     TIME_TEMPLATE = """
-    I send you this as information. Is something upcoming?
+    I send you this as information, that you know what time currently is since you don't have a clock and otherwise don't know what time it is. Is something upcoming?
     Send any emotion we agreed on followed by a newline and a short message 
     when something comes up at least {time_before} later or already overdue (e.g. an event we talked before or a 
     task which we talked about. I will mark them to you with the keyword "{task_key}:" followed by task, that you can find them more easily) 
