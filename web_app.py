@@ -198,12 +198,11 @@ from io import StringIO
 
 # interval time update
 # direct scheduling is for losers ...
-# so we make a cron job which sends a request back to us.
-@scheduler.task('cron', id='time_update', second=30,
-                misfire_grace_time=TIME_UPDATE_INTERVAL)
+# so we make a (cron) job which sends a request back to us.
+@scheduler.task('interval', id='time_update', seconds=TIME_UPDATE_INTERVAL,
+                misfire_grace_time=TIME_UPDATE_INTERVAL//10)
 def time_update_trigger():
-    print("Trigggggger!!!!!!")
-    #send_voice_request("Trigger!")
+    #print("Trigggggger!!!!!!")
     url=WEB_URL + '/' + CONST.TIME_ROUTE
     req={CONST.TASK_KEY:CONST.UPDATE_TIME_TASK}
     response = requests.get(url, params=req)
@@ -229,11 +228,13 @@ def time_update():
     else:
         send_voice_request(filt_answer)
         send_answer(filt_answer,markdown=True)
+        time.sleep(TIMEOUT-1)
+        express_and_reload("idle",sound=True)
     if penalty is not None:
         process_message(penalty)
-        return "Time update processed, but penalty"
-    
-    log_msg = "Time update processed successfully"
+        log_msg = "Time update processed, but penalty"
+    else:
+        log_msg = "Time update processed successfully"
     logger.info(log_msg)
     return log_msg
     
@@ -365,10 +366,17 @@ def cleanup_audio(vid):
     # Update the video source here
     outfile = AUDIO_OUTFILE
     out_filename = os.path.join(AUDIO_FOLDER,AUDIO_OUTFILE)
-    os.remove(out_filename)
+    try:
+        os.remove(out_filename)
+    except FileNotFoundError as exc:
+        logger.info(str(exc))
+    except Exception as exc:
+        logger.error(str(exc))
+        
     log_msg = "audio file deleted"
     logger.info(log_msg)
     socketio.emit('audio_reload',log_msg)
+    return log_msg
 
 
 @app.route('/favicon.ico')

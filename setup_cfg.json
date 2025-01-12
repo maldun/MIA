@@ -19,7 +19,7 @@
   "voice_sample":"/home/maldun/prog/Python/MIA/voice/samples/miku_vocals.wav",
   "history_file":"memories.json",
   "intro_sound":"voice/expressions/idle.wav",
-  "clock_interval": 30,
-  "time_before": "1 hour",
+  "clock_interval": 3600,
+  "time_before": "2 hour",
   "neutral_emotion": "disagree"
 }
