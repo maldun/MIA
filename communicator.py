@@ -298,20 +298,28 @@ class Communicator:
         nr_emotions = 0
         answer_stream = self.chat(message)
         # process chunks
-        for chunk in answer_stream:
-            chunk_str = self.handle_chunk(chunk)
-            answer += chunk_str
-            emotions, text = self.extract_emotion(answer)
-            # if new emotion in list process it
-            if nr_emotions < len(emotions):
-                emotion = emotions[nr_emotions]
-                #tx = text[nr_emotions]
-                nr_emotions+= 1
-                arg = self.map_emotion(emotion) if map_emotions_to_reactions is True else emotion
-                emotion_reaction(arg)
-            # update message
-            to_send = self.extract_text(answer) if filter_message is True else answer
-            update_message(to_send)
+        try:
+            for chunk in answer_stream:
+                chunk_str = self.handle_chunk(chunk)
+                answer += chunk_str
+                emotions, text = self.extract_emotion(answer)
+                # if new emotion in list process it
+                if nr_emotions < len(emotions):
+                    emotion = emotions[nr_emotions]
+                    #tx = text[nr_emotions]
+                    nr_emotions+= 1
+                    arg = self.map_emotion(emotion) if map_emotions_to_reactions is True else emotion
+                    emotion_reaction(arg)
+                # update message
+                to_send = self.extract_text(answer) if filter_message is True else answer
+                update_message(to_send)
+        except Exception as exc:
+            # give expception back
+            raise exc
+        finally: 
+            # but sorre current messge befor everything breaks down
+            self.update_history(answer)
+            self.dump_history()
             
         filt_answer = self.extract_text(answer)
         penalty = self.penalize(emotions, text)
@@ -356,6 +364,7 @@ class Communicator:
         def _final_update(answer,filt_answer,penalty):
             if _test_neutral is True:
                 answer=getattr(self,NEUTRAL_EMOTION_KEY)
+                breakpoint()
             if _test_neutral_but_penalty is True:
                 answer=getattr(self,NEUTRAL_EMOTION_KEY)+'\n\nbla bla bla'
                 

@@ -250,6 +250,7 @@ def time_update():
     answer, filt_answer, penalty = comm.time_update(
                                         emotion_expression=express_and_reload,
                                         update_message=send_answer,
+                                        _test_neutral=False,
                                         _test_neutral_but_penalty=False
                                         )
      
