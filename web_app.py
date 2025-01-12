@@ -90,7 +90,7 @@ scheduler.start()
 # upload folder
 app.config["UPLOAD_FOLDER"] = UPLOAD_DIR
 lock = threading.Lock()
-app.config['MAX_CONTENT_LENGTH'] = 100*1024**2  # 16 MB
+app.config['MAX_CONTENT_LENGTH'] = 100*1024**2  # 100 MB
 
 
 socketio = SocketIO(app,cors_allowed_origins=WEB_URL)

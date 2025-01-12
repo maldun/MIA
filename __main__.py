@@ -25,7 +25,6 @@ from .web_app import socketio, app, comm, WEB_PORT, scheduler, time_update_trigg
 from .constants import CFG_FILE, LOG_FNAME
 fpath = os.path.split(__file__)[0]
 cfg_file = os.path.join(fpath,CFG_FILE)
-exchange_file = os.path.join(fpath,"exchange.txt")
 TEMPLATE_DIR = "templates"
 STATIC_DIR = os.path.join(TEMPLATE_DIR,"static")
 static_folder = os.path.join(fpath,STATIC_DIR)
@@ -34,10 +33,8 @@ with open(cfg_file,'r') as jp:
     cfg = json.load(jp)
 
 if __name__ == "__main__":
-    if os.path.exists(exchange_file):
-            os.remove(exchange_file)
     try:
-        cmd_speak = ["python3.10",os.path.join(fpath,"speak.py"),cfg_file,exchange_file]
+        cmd_speak = ["python3.10",os.path.join(fpath,"speak.py"),cfg_file]
         cmd_llama = ["python3.10",os.path.join(fpath,"install_lama.py"),cfg_file]
         
         lock = threading.Lock()
@@ -53,7 +50,7 @@ if __name__ == "__main__":
             # a little trickery ... make the main process pid known ...
             # left here for future reference ...
             #app.config[MAIN_THREAD_ID_KEY] = os.getpid()
-            socketio.run(app, debug=True,port=WEB_PORT)
+            socketio.run(app, debug=False,port=WEB_PORT)
             
     except KeyboardInterrupt:
         comm.dump_history()
