@@ -11,8 +11,8 @@ U8 = "utf-8"
 BACKGROUND_COLOR = "#000000"
 TEXT_COLOR = "#6cf542"
 FONT_SIZE = "16px"
-TEXT_ROWS = 50
-TEXT_COLS = 55
+TEXT_ROWS = 25
+TEXT_COLS = 75
 TEXT_FONT = 'Arial, cursive'
 
 # Important config keys for expressions
