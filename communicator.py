@@ -204,7 +204,13 @@ class Communicator:
         """
         Filters out all lines with emotion and returns rest as string and list of emotions.
         """
+        # all emotions and some combinations
         words_to_match = list(EMOTION_EXPRESSION_MAP.keys())
+        words_to_match += [e.capitalize() for e in EMOTION_EXPRESSION_MAP]
+        words_to_match += [e.upper() for e in EMOTION_EXPRESSION_MAP]
+        # filter duplicates
+        words_to_match = list(set(words_to_match))
+        
         if len(msg.splitlines()) == 1:
             emotions = [e for e in words_to_match if e==msg.strip()]
             if len(emotions) == 0:
@@ -218,9 +224,11 @@ class Communicator:
             word_regexes.append(pattern)
         combined_pattern = '|'.join(word_regexes)
         regex = re.compile(combined_pattern)
+        # add a newline for easier finding of emotions at the end of text.
+        msg += '\n'
         emotions = regex.findall(msg)
         emotions = [e.strip() for e in emotions]
-        emotions = [e for e in emotions]
+        emotions = [e.lower() for e in emotions]
         texts = regex.split(msg)
         # ignore everything beofe first split
         if len(texts) > len(emotions):
@@ -229,6 +237,9 @@ class Communicator:
             else:
                emotions, texts = Communicator.empty_emotion(msg)
         
+        # remove artificial newline if it is necessary
+        if len(texts) > 1 and texts[-1] == '':
+            texts = texts[:-1]
         return emotions,texts
         #return msg.partition('\n')[2].lstrip()
     
@@ -379,7 +390,6 @@ def tests():
     
     msg = "happy\n\n\nI'm happy you like it! Lamp Haikus might not be as common, but I tried to capture its cozy and warm essence. If you're ready for more, I've got one about a cloud:\n\n\nagree \n\n\nWhispy clouds drift by\nSoftly shading the sun's face\nNature's gentle kiss"
     res,pat = Communicator.extract_emotion(msg)
-    breakpoint()
     assert "happy" in res and "agree" in res
     
     msg2 = "neutral \nI don't have emotions or feelings, so I'm not capable of feeling annoyance. My previous response was a neutral acknowledgement that you were being slightly perturbing or frustrating."
@@ -391,7 +401,10 @@ def tests():
     assert res3 == ["neutral"] and pat3 == [msg3,EMOTION_FORGOTTEN_KEY]
     
     msg = "agree\n\n\nYes, I've checked the schedule, and it looks like you have an upcoming task. You're currently working at \"Going to sleep at 23:00 today (12.01.2025)\", which means you'll be sleeping in about 1 hour and 18 minutes. Disagree"
-    breakpoint()
+    emotions, texts = Communicator.extract_emotion(msg)
+    assert emotions==["agree","disagree"]
+    assert texts[-1]!=''
+    
     
     
 
