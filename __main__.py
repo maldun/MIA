@@ -21,6 +21,7 @@ import signal
 import subprocess
 import threading
 from .web_app import socketio, app, comm, WEB_PORT, scheduler, time_update_trigger
+from .utils import get_own_ip
 
 from .constants import CFG_FILE, LOG_FNAME
 fpath = os.path.split(__file__)[0]
@@ -50,7 +51,9 @@ if __name__ == "__main__":
             # a little trickery ... make the main process pid known ...
             # left here for future reference ...
             #app.config[MAIN_THREAD_ID_KEY] = os.getpid()
-            socketio.run(app, debug=False,port=WEB_PORT)
+            #host_ip = get_own_ip()
+            host_ip=None
+            socketio.run(app, host=host_ip,debug=False,port=WEB_PORT)
             
     except KeyboardInterrupt:
         comm.dump_history()

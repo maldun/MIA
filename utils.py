@@ -23,6 +23,7 @@ except ImportError:
 
 import datetime
 import markdown
+import socket
 from markdown import Markdown
 class MyMarkdown(Markdown):
     """
@@ -151,6 +152,18 @@ def get_websocket_url(protocol="http",address="localhost"):
     if not address in {"localhost","0.0.0.0","127.0.0.1"}:
         host = f"{protocol}://"+host
     return host
+
+def get_own_ip():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        # doesn't even have to be reachable
+        s.connect(('10.255.255.255', 1))
+        IP = s.getsockname()[0]
+    except Exception:
+        IP = '127.0.0.1'
+    finally:
+        s.close()
+    return IP
 
 def get_url(protocol="ws",address="localhost",web_port=None,**kwargs):
     """
