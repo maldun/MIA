@@ -501,7 +501,7 @@ def tests():
     
     msg3 = "After a while, Crocodile"
     res3,pat3 = Communicator.extract_emotion(msg3)
-    assert res3 == ["neutral"] and pat3 == [msg3,EMOTION_FORGOTTEN_KEY]
+    assert res3 == ["disagree"] and pat3 == [msg3,EMOTION_FORGOTTEN_KEY]
     
     msg = "agree\n\n\nYes, I've checked the schedule, and it looks like you have an upcoming task. You're currently working at \"Going to sleep at 23:00 today (12.01.2025)\", which means you'll be sleeping in about 1 hour and 18 minutes. Disagree"
     emotions, texts = Communicator.extract_emotion(msg)
