@@ -6,7 +6,7 @@
   "mode":"rocm",
   "timeout":3,
   "web_port":8585,
-  "sound_port":8590,
+  "sound_port":8595,
   "address":"localhost",
   "protocol":"http",
   "tts_model":"tts_models/en/ljspeech/glow-tts",
@@ -18,9 +18,13 @@
   "gfx_version":"11.0.0",
   "voice_sample":"/home/maldun/prog/Python/MIA/voice/samples/miku_vocals.wav",
   "history_file":"memories.json",
+  "long_time_history_file":"long_time_history.json",
   "intro_sound":"voice/expressions/idle.wav",
   "clock_interval": 3600,
   "time_before": "2 hour",
   "neutral_emotion": "disagree",
-  "task_key": "TASK"
+  "task_key": "TASK",
+  "summary_words": 3000,
+  "calibration_file":"calibration.txt",
+  "max_conversations":50
 }

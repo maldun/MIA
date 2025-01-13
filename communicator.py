@@ -55,7 +55,11 @@ When I ask something, before you give your answer give me one of the following e
 {emotions}
 
 followed by a newline. Also I call you MIA from now on.
-""" 
+"""
+SUMMARY_WORDS=2000
+SUMMARIZE_QUESTION='''MIA, please summarize our complete chat history within {summary_words} words. Try to extract the topics we talked about and a short summary what the result of the discussion of each topic was. Please also look out for tasks marked with "{task_key}:" so that we don't forget them.'''
+WAKE_UP_MSG = " After that pretend you just woke up in the next upcoming query (human brain summarizes memory during sleep, so this is an emulation after all)."
+SUMMARIZE_PREAMBLE='MIA this was your summary of our history "{history}" abd this was you summary of our last of our last conversation: "{summary}".\n Use it for reference in our next conversation'
 
 class MIANeutralEmotionException(Exception):
     pass
@@ -84,7 +88,9 @@ class Communicator:
 
     TIME_UPDATE="Hi MIA it is {time}." 
     
-    def __init__(self,port=11434,address="localhost",protocol="http",version="llama3.2",history_file="memories.json",neutral_emotion="disagree",time_before="1 hour",task_key="TASK",**_):
+    def __init__(self,port=11434,address="localhost",protocol="http",version="llama3.2",
+                 history_file="memories.json",neutral_emotion="disagree",time_before="1 hour",task_key="TASK",summary_words=2000,calibration_file="calibration.txt",
+                 long_time_history_file="long_time_history.json",max_conversations=30,**_):
         self.port = port
         self.address = address
         self.protocol = protocol
@@ -103,10 +109,26 @@ class Communicator:
         else:
             self._history = []
             
+        if not os.path.exists(long_time_history_file):
+            self.long_time_history_file = os.path.join(curr_path,long_time_history_file)
+        else:
+            self.long_time_history_file = long_time_history_file
+        
+        if os.path.exists(calibration_file):
+            with open(calibration_file,'r') as cfp:
+                self._addtional_calibration=cfp.read()
+        elif os.path.exists(os.path.join(curr_path,calibration_file)):
+            with open(os.path.join(curr_path,calibration_file),'r') as cfp:
+                self._addtional_calibration=cfp.read()
+        else:
+            self._addtional_calibration=""
+        
         time_update_msg = self.TIME_TEMPLATE.format(neutral_emotion=neutral_emotion,
                                                     time_before=time_before, task_key=task_key)
         self.time_update_msg = self.TIME_UPDATE + time_update_msg
         setattr(self,NEUTRAL_EMOTION_KEY,neutral_emotion)
+        self.summarize_msg = SUMMARIZE_QUESTION.format(task_key=task_key,summary_words=summary_words)
+        self._max_conversations = max_conversations
     
     def chat(self,msg,stream=True):
         msg_dic = self.update_history(msg,role=self.USER_ROLE)
@@ -130,15 +152,27 @@ class Communicator:
         self._history.append(answer_dic)
         return answer_dic
     
-    def calibrate(self):
+    def _silent_conversation(self,msg):
         """
-        Calibrate the chat for proper answers with emotions
+        Auxillary function for silent conversations in the backgroung.
         """
-        msg = EMOTION_QUESTION
         answer = self.chat(msg)
         answer_str = ""
         for chunk in answer:
             answer_str += self.handle_chunk(chunk)
+        return answer_str
+        
+    def calibrate(self):
+        """
+        Calibrate the chat for proper answers with emotions and other
+        things the user wants to add e.g. a personality (in calibration_file).
+        Furthermore an initial timestamp is added to tell MIA to look out for
+        tasks.
+        """
+        msg = "\n".join((EMOTION_QUESTION,self._addtional_calibration))
+        timestamp = utils.get_timestamp()[:-1]
+        msg += self.time_update_msg.format(time=timestamp)
+        answer_str = self._silent_conversation(msg)
         self.update_history(answer_str)
     
     def dump_history(self):
@@ -147,8 +181,54 @@ class Communicator:
         """
         if hasattr(self,"history_file") and hasattr(self,"_history"):
             with open(self.history_file,'w') as fp:
-                json.dump(self._history,fp)
+                json.dump(self._history,fp,indent=2)
     
+    def emulate_dreaming(self,wake_up=True):
+        """
+        Asks MIA to summarize the message hitory and replaces the
+        memories with this summary. This emulates what brains do
+        when they go to sleep (somewhat ...)
+        currently done manual, but maybe automatic later on
+        after a good frequency is known. Long time history
+        is also stored. Maybe postrpocessing is added later
+        to emulate long time memories. For now it's more
+        for debugging.
+        """
+        msg = self.summarize_msg
+        answer = self._silent_conversation(msg)
+        
+        # summarize including the long time history
+        if os.path.exists(self.long_time_history_file):
+            with open(self.long_time_history_file,'r') as fp:
+                long_time_history = json.load(fp)
+        else:
+            long_time_history = []
+        
+        # summarize long time history adding new history
+        long_time_history += self._history[-2:]
+        self._history = long_time_history
+        msg = self.summarize_msg
+        timestamp = utils.get_timestamp()[:-1]
+        msg += f" (Current time is {timestamp})"
+        answer_long = self._silent_conversation(msg)
+        self.update_history(answer_long)
+        long_time_history = self._history
+        with open(self.long_time_history_file,'w') as fp:
+            json.dump(long_time_history,fp,indent=2)
+        
+        # use summaries as basis
+        msg=SUMMARIZE_PREAMBLE.format(summary=answer,history=answer_long)
+        # clear memory
+        self._history = []
+        self.dump_history()
+        # start new history
+        self.calibrate()
+        if wake_up is True:
+            msg += WAKE_UP_MSG
+        answer=self._silent_conversation(msg)
+        self.update_history(answer)
+        self.dump_history()
+        
     @staticmethod
     def check_emotion(msg):
         line1 = msg.partition('\n')[0].strip()
@@ -162,8 +242,8 @@ class Communicator:
         """
         Things to do when no emotion was recieved.
         """
-        if "neutral" in EMOTION_EXPRESSION_MAP:
-            emotions=["neutral"]
+        if "disagree" in EMOTION_EXPRESSION_MAP:
+            emotions=["disagree"]
         texts = [msg,EMOTION_FORGOTTEN_KEY]
         logger.error(f"Error: Emotion forgotten with message {msg}")
         return emotions, texts
@@ -291,6 +371,12 @@ class Communicator:
                 return
         if final_update is None:
             def final_update(answer,filt_answer,penalty):
+                """
+                By default final update checks if max length of conversation
+                is reached, summarize and reset memory.
+                """
+                if len(self._history)>self._max_conversations*2+1:
+                    self.emulate_dreaming(wake_up=False)
                 return
         # init vars
         answer = ""
@@ -401,9 +487,6 @@ class Communicator:
         except MIANeutralEmotionException as mia_excp:
             answer, filt_answer, penalty = handle_mia_excp(str(mia_excp))
         return answer, filt_answer, penalty
-            
-        
-        
 
 def tests():
     print(EMOTION_QUESTION)

@@ -49,7 +49,11 @@ TASK_KEY="task"
 UPDATE_TIME_TASK = "update_time"
 LOCALHOST = "localhot"
 
-SHUTDOWN_COMMAND = "/goodnight!"
+# special commands
+SHUTDOWN_COMMAND = "/break!"
+SLEEP_COMMAND = "/goodnight!"
+DREAM_COMMAND = "/dream!"
+
 MAIN_THREAD_ID_KEY = "MAIN_THREAD_ID"
 
 ALLOWED_ORIGIN_FILE="allowed_origins.txt"

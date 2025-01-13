@@ -189,6 +189,10 @@ def get_url(web=True,protocol="ws",address="localhost",web_port=None,**kwargs):
     return url
 
 def get_timestamp():
+    """
+    Writes out the current timestamp as a proper string,
+    with formating defined in constants.
+    """
     return datetime.datetime.now().strftime(TIME_FORMAT)
 
 if __name__ == "__main__":

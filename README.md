@@ -109,6 +109,10 @@ Usage:
 - Start: Activate virtual env and start: `python -m MIA`.
 - Open Webbrowser on `localhost:<web_port>`
 - *Hint*: KDE has a web browser plugin as desktop app ...
+- Special Commands:
+    - /dream! : MIA summarizes her memories and a new chat is started based on this summy.
+    - /goodnight! : shuts down MIA and let her dream
+    - /break! : shuts down MIA (service). Re-Start where you left of, so itś like she is on break.
 
 
 Programm Structure

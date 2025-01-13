@@ -187,7 +187,7 @@ def handle_special_commands(message):
     cmd=message.strip().lower()
     match cmd:
         case CONST.SHUTDOWN_COMMAND:
-            quit_msg="Goodnight MIA"
+            quit_msg="Have a break MIA"
             logger.info(quit_msg)
             # Evil but maybe helpful for other stuff
             # so comment stays as example
@@ -198,6 +198,20 @@ def handle_special_commands(message):
             gid = os.getpgid(pid)
             # kill all process of the group with Strg+C
             os.killpg(gid, signal.SIGTERM)
+        case CONST.DREAM_COMMAND:
+            dream_msg="sweet Dreams MIA"
+            logger.info(dream_msg)
+            comm.emulate_dreaming()
+        case CONST.SLEEP_COMMAND:
+            quit_msg="Goodnight MIA"
+            logger.info(quit_msg)
+            comm.emulate_dreaming()
+            pid = os.getpid()
+            # get process group id
+            gid = os.getpgid(pid)
+            # kill all process of the group with Strg+C
+            os.killpg(gid, signal.SIGTERM)
+            
 
 def process_message(message):
     # special commands go here
