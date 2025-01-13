@@ -401,12 +401,11 @@ class Communicator:
                 update_message(to_send)
         except Exception as exc:
             # give expception back
-            raise exc
-        finally: 
             # but sorre current messge befor everything breaks down
             self.update_history(answer)
             self.dump_history()
-            
+            raise exc
+        
         filt_answer = self.extract_text(answer)
         penalty = self.penalize(emotions, text)
         self.update_history(answer)
