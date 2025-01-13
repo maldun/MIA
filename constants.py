@@ -53,6 +53,7 @@ LOCALHOST = "localhot"
 SHUTDOWN_COMMAND = "/break!"
 SLEEP_COMMAND = "/goodnight!"
 DREAM_COMMAND = "/dream!"
+UPDATE_COMMAND = "/time!"
 
 MAIN_THREAD_ID_KEY = "MAIN_THREAD_ID"
 

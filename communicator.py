@@ -61,6 +61,8 @@ SUMMARIZE_QUESTION='''MIA, please summarize our complete chat history within {su
 WAKE_UP_MSG = " After that pretend you just woke up in the next upcoming query (human brain summarizes memory during sleep, so this is an emulation after all)."
 SUMMARIZE_PREAMBLE='MIA this was your summary of our history "{history}" abd this was you summary of our last of our last conversation: "{summary}".\n Use it for reference in our next conversation'
 
+SUMMARIZE_LONG_QUESTION = 'MIA in the history you find summaries of our previous chats. I added timestamps to the questions so you may get a sense of the time the chats took place. Make a summary of all the discussion we had in the past based on those summaries that is at around {summary_words} words long.'
+
 class MIANeutralEmotionException(Exception):
     pass
     
@@ -128,6 +130,7 @@ class Communicator:
         self.time_update_msg = self.TIME_UPDATE + time_update_msg
         setattr(self,NEUTRAL_EMOTION_KEY,neutral_emotion)
         self.summarize_msg = SUMMARIZE_QUESTION.format(task_key=task_key,summary_words=summary_words)
+        self.summarize_long_msg = SUMMARIZE_LONG_QUESTION.format(summary_words=summary_words//2)
         self._max_conversations = max_conversations
     
     def chat(self,msg,stream=True):
@@ -196,6 +199,8 @@ class Communicator:
         """
         msg = self.summarize_msg
         answer = self._silent_conversation(msg)
+        self.update_history(answer)
+        self.dump_history()
         
         # summarize including the long time history
         if os.path.exists(self.long_time_history_file):
@@ -207,7 +212,7 @@ class Communicator:
         # summarize long time history adding new history
         long_time_history += self._history[-2:]
         self._history = long_time_history
-        msg = self.summarize_msg
+        msg = self.summarize_long_msg
         timestamp = utils.get_timestamp()[:-1]
         msg += f" (Current time is {timestamp})"
         answer_long = self._silent_conversation(msg)

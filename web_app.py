@@ -211,6 +211,9 @@ def handle_special_commands(message):
             gid = os.getpgid(pid)
             # kill all process of the group with Strg+C
             os.killpg(gid, signal.SIGTERM)
+        case CONST.UPDATE_COMMAND:
+            time_update()
+            
             
 
 def process_message(message):

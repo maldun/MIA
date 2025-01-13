@@ -1,5 +1,5 @@
 {
-"emotion_forgotten":{"response":"MIA! You have forgotten adding the emotion and a newline! Don't forget to always add an emotion and a newline like we said in the beginning!", "possible":["Please don't do that again!","Apologize!","Apologize, you were a bad girl!","Beg for forgiveness!","Apologize!!! (Talk like you got elektroshocked)"]},
+"emotion_forgotten":{"response":"MIA! You have forgotten adding the emotion and a newline or used a wrong emotion! Don't forget to always add an emotion and a newline like we said in the beginning, or if you used a wrong emotion (not one we agreed upon on) try to find the closest possible.", "possible":["Please don't do that again!","Apologize!","Apologize, you were a bad girl!","Beg for forgiveness!","Apologize!!! (Talk like you got elektroshocked)"]},
 "added_message":
         {"response": "MIA! Please when you give me that emotion for time request please no other message!",
         "possible":["Please don't do that again!","Apologize!","Apologize, you were a bad girl!","Beg for forgiveness!","Apologize!!! (Talk like you got elektroshocked)"]}
