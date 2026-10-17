@@ -58,6 +58,12 @@ Prerequisites:
 - `git clone https://github.com/daswer123/rvc-python`
 - `python3.10 -m pip install -e .`
 
+### Install Kokoro TTS (default tts engine):
+- `python3.10 -m pip install espeakng-loader phonemizer onnxruntime "numpy==1.26.4"`
+- `python3.10 -m pip install --no-deps kokoro-onnx` (it asks for numpy>=2, but works with 1.26 which rvc/coqui need)
+- Download `kokoro-v1.0.onnx` and `voices-v1.0.bin` from https://github.com/thewh1teagle/kokoro-onnx/releases/tag/model-files-v1.0 into `voice/models/kokoro/`
+- Compare voices and pitch shifts with `python3.10 voice_lab.py` (writes samples to `voice/samples/lab/`)
+
 ### Clone
 - `git clone https://github.com/maldun/MIA.git`
 - Go into MIA folder
@@ -70,17 +76,22 @@ Prerequisites:
     - "name":"ollama", (docker name)
     - "docker":"docker", (docker executable e.g. podman as alernative; Fedora symlinks podman)
     - "port":11434, (ollama port)
-    - "version":"llama3.2", (ollama model)
+    - "version":"gemma4:26b", (ollama model)
+    - "llm_options":{"num_ctx":16384}, (ollama model options, e.g. context size)
+    - "think":false, (thinking mode of the model; leave out for model default)
     - "mode":"rocm", (gpu flag, check ollama docker docu)
     - "timeout":3, (timeout setting for video refresh)
     - "web_port":8585, (port for web-app)
     - "address":"localhost", (adress)
     - "protocol":"http", (web protocol used for site)
-    - "tts_model":"tts_models/en/ljspeech/glow-tts", (tts model; see TTS docu)
+    - "tts_engine":"kokoro", (tts engine: kokoro or coqui)
+    - "kokoro_opts":{"voice":"af_heart","speed":1.0,"lang":"en-us"}, (kokoro settings; "model" and "voices" paths can be set too)
+    - "tts_model":"tts_models/en/ljspeech/glow-tts", (tts model for coqui engine; see TTS docu)
     - "voice_model":"/path/to/MIA/voice/models/modelname/model.pth", (optional: voice model for rvc)
     - "rvc_opts":{"index_path":"/path/to/MIA/voice/models/modelname/model.index","version":"v2"},
-    - "rvc_params":{"f0method":"pm"},  (for these see python-rvc docu)
-    - "rvc_enabled":false, (enable,disable rvc)
+    - "rvc_params":{"f0method":"rmvpe","f0up_key":3},  (for these see python-rvc docu)
+    - "rvc_enabled":true, (enable,disable rvc)
+    - "sentence_pause":0.3, (extra pause in seconds between spoken sentences)
     - "tts_device":"cpu", (device for tts, either cuda/cpu, for some reason cpu worked better ...)
     - "gfx_version":"11.0.0", (flag used for roc)
     - "voice_sample":"/path/to/MIA/voice/samples/miku_vocals.wav",(voice sample for tts voice cloning)

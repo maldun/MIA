@@ -20,7 +20,6 @@ import argparse
 import json
 import os
 import torch
-from TTS.api import TTS
 from rvc_python.infer import RVCInference
 import pyaudio  
 import wave
@@ -29,6 +28,7 @@ import sys
 import socket
 import socketserver
 import time
+from concurrent.futures import ThreadPoolExecutor
 
 try:
     from .play_media import play_sound
@@ -47,6 +47,7 @@ except ImportError:
     from utils import split_into_sentences, split_into_lines_and_sentences, chunker 
     from utils import filter_symbol_sentences, get_websocket_url, get_url
 
+curr_path = os.path.split(__file__)[0]
 
 class Speaker:
     """
@@ -54,9 +55,21 @@ class Speaker:
     """
     TTS_DEFAULT = "tts_models/en/ljspeech/glow-tts"
     #TTS_DEFAULT = "tts_models/
-    MAX_SENTENCES = 4
+    COQUI_ENGINE = "coqui"
+    KOKORO_ENGINE = "kokoro"
+    KOKORO_DEFAULTS = {"model":"voice/models/kokoro/kokoro-v1.0.onnx",
+                       "voices":"voice/models/kokoro/voices-v1.0.bin",
+                       "voice":"af_heart","speed":1.0,"lang":"en-us"}
+    # sentences per spoken chunk: the first chunk is short so speech starts early,
+    # the following ones are rendered while the previous chunk is playing
+    FIRST_CHUNK_SENTENCES = 1
+    CHUNK_SENTENCES = 1
     def __init__(self,tts_model=TTS_DEFAULT,voice_model=None,tts_device=None,gfx_version=None,voice_sample=None,rvc_opts=None,rvc_params=None,rvc_enabled=True,
-                 web_port=8585,address="localhost",protocol="http",**_):
+                 web_port=8585,address="localhost",protocol="http",tts_engine=COQUI_ENGINE,kokoro_opts=None,sentence_pause=0.3,**_):
+        self._tts_engine = tts_engine
+        self._kokoro_opts = dict(self.KOKORO_DEFAULTS, **(kokoro_opts or {}))
+        # extra wait after each chunk to cover upload and player start in the browser
+        self._sentence_pause = sentence_pause
         self._tts_model = tts_model
         self._voice = voice_model
         if rvc_opts is None: rvc_opts = {}
@@ -85,10 +98,33 @@ class Speaker:
             self.init_rvc_model(self._voice_model,self._device)
         
 
+    @staticmethod
+    def _resolve_path(path):
+        """
+        Relative paths are taken relative to the MIA directory.
+        """
+        if os.path.isabs(path) or os.path.exists(path):
+            return path
+        return os.path.join(curr_path,path)
+
     def init_tts_model(self,tts_model,device):
-        self._tts = TTS(model_name=tts_model).to(device)
+        # engines are imported lazily so that only the used one has to be installed
+        if self._tts_engine == self.KOKORO_ENGINE:
+            from kokoro_onnx import Kokoro
+            self._tts = Kokoro(self._resolve_path(self._kokoro_opts["model"]),
+                               self._resolve_path(self._kokoro_opts["voices"]))
+        elif self._tts_engine == self.COQUI_ENGINE:
+            from TTS.api import TTS
+            self._tts = TTS(model_name=tts_model).to(device)
+        else:
+            raise ValueError(f"Unknown tts_engine '{self._tts_engine}'!")
         
     def init_rvc_model(self,model,device):
+        # torch >= 2.6 loads only weights by default, but the hubert model
+        # used by rvc contains a fairseq Dictionary
+        if hasattr(torch.serialization,"add_safe_globals"):
+            from fairseq.data.dictionary import Dictionary
+            torch.serialization.add_safe_globals([Dictionary])
         self._rvc = RVCInference(device=device) #+":0")
         
         self._rvc.load_model(model,**self._rvc_opts)
@@ -108,21 +144,33 @@ class Speaker:
             duration = frames / float(rate)
             return duration
     
-    def text2speech(self,msg,output_file):
-        # no message no sound
-        if len(msg.strip()) == 0:
-            return 
-        
+    def split_into_chunks(self,msg):
+        """
+        Splits a msg into speakable chunks of sentences. The first chunk
+        is kept short, so that speech can start as early as possible.
+        """
         sentences = split_into_lines_and_sentences(msg)
         sentences = filter_symbol_sentences(sentences)
-        chunks = list(chunker(sentences,self.MAX_SENTENCES))
-        chunks = list(map(lambda l: '\n'.join(l),chunks))
-        if len(chunks) > 1:
-            # play only max sentences for now
-            self._tts.tts_with_vc_to_file(chunks[0], speaker_wav=self._voice_sample, file_path=output_file)
-        elif len(chunks) == 1:
-            self._tts.tts_with_vc_to_file(chunks[0], speaker_wav=self._voice_sample, file_path=output_file)
-        # else nothing
+        first, rest = sentences[:self.FIRST_CHUNK_SENTENCES], sentences[self.FIRST_CHUNK_SENTENCES:]
+        chunks = [first] + list(chunker(rest,self.CHUNK_SENTENCES)) if len(first) > 0 else []
+        return list(map(lambda l: '\n'.join(l),chunks))
+
+    def text2speech(self,msg,output_file):
+        """
+        Converts the whole msg into speech and writes it to output_file.
+        Returns True if a file was written.
+        """
+        # no message no sound
+        if len(msg.strip()) == 0:
+            return False
+        if self._tts_engine == self.KOKORO_ENGINE:
+            import soundfile as sf
+            opts = self._kokoro_opts
+            samples, sample_rate = self._tts.create(msg,voice=opts["voice"],speed=opts["speed"],lang=opts["lang"])
+            sf.write(output_file,samples,sample_rate)
+        else:
+            self._tts.tts_with_vc_to_file(msg, speaker_wav=self._voice_sample, file_path=output_file)
+        return True
         
     def change_voice(self,wav_file_in,wav_file_out):
         self._rvc.infer_file(wav_file_in, wav_file_out)
@@ -130,28 +178,54 @@ class Speaker:
     def play_voice(self,wav_file):
         play_sound(wav_file,url=self._url)
         
+    def render_voice(self,msg,output_file):
+        """
+        Renders msg into output_file (TTS and voice change if enabled).
+        Returns the play length in seconds (0 if nothing was rendered).
+        """
+        if self._rvc_enabled is True:
+            with tempfile.NamedTemporaryFile(suffix=".wav") as fpin:
+                if not self.text2speech(msg,fpin.name):
+                    return 0
+                self.change_voice(fpin.name,output_file)
+        elif not self.text2speech(msg,output_file):
+            return 0
+        return self.get_wav_duration(output_file)
+
     def text2voice(self,msg,output_file=None):
         """
-        Generates a voice from text and return the play length
-        of the voice file.
+        Generates a voice from text, plays it and returns the play length
+        of the last played voice file.
+        If output_file is given the whole msg is rendered into this file,
+        otherwise the msg is spoken chunk by chunk, where the next chunk is
+        rendered while the current one is playing.
         """
         if len(msg) == 0:
             return 0
-        with tempfile.NamedTemporaryFile(delete=True) as fpin:
-            with tempfile.NamedTemporaryFile(delete=True) as fpout:
-                if output_file is not None:
-                    fname = output_file
-                else:
-                    fname = fpout.name
-                if self._rvc_enabled is True:
-                    self.text2speech(msg,fpin.name)
-                    self.change_voice(fpin.name,fname)
-                    self.play_voice(fname)
-                else:
-                    self.text2speech(msg,fname)
-                    self.play_voice(fname)
-                duration = self.get_wav_duration(fname)
-                return duration
+        if output_file is not None:
+            duration = self.render_voice(msg,output_file)
+            if duration > 0:
+                self.play_voice(output_file)
+            return duration
+
+        chunks = self.split_into_chunks(msg)
+        if len(chunks) == 0:
+            return 0
+        duration = 0
+        with tempfile.TemporaryDirectory() as tmp_dir, ThreadPoolExecutor(max_workers=1) as renderer:
+            fnames = [os.path.join(tmp_dir,f"chunk{nr:03d}.wav") for nr in range(len(chunks))]
+            next_render = renderer.submit(self.render_voice,chunks[0],fnames[0])
+            for nr, fname in enumerate(fnames):
+                duration = next_render.result()
+                if nr + 1 < len(chunks):
+                    next_render = renderer.submit(self.render_voice,chunks[nr+1],fnames[nr+1])
+                if duration == 0:
+                    continue
+                self.play_voice(fname)
+                # the last chunk is waited for by the caller
+                if nr + 1 < len(chunks):
+                    time.sleep(duration + self._sentence_pause)
+        return duration
 
 
 # Get device
@@ -251,7 +325,6 @@ def tests():
     #msg = "L\u00f6we sucht das Licht\nSchatten tanzen auf dem Berg\nGeheimnisvolk schaut"
     msg = "Let's test some sentences, alright? This is a test."
     s.text2speech(msg,testout1)
-    
     s.change_voice(testout1,testout2)
     s.play_voice(testout2)
     s.text2voice(msg)
@@ -289,9 +362,8 @@ parser.add_argument('-t', '--test',action='store_true',help="execute tests")  # 
 parser.add_argument('-g', '--generate',action='store_true',help="generate expression samples. Needs cfg_file and expressions.json with text entries.")  # on/off flag
 parser.add_argument('-d', '--debug',action='store_true',help="execute file with nothing else for debugging")  # on/off flag
 
-args = parser.parse_args()
-
 if __name__ == "__main__":
+    args = parser.parse_args()
     
     if args.debug is True:
         with open(CFG_FILE,'r') as fp: cfg = json.load(fp)
