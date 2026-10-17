@@ -94,7 +94,7 @@ class Communicator:
     
     def __init__(self,port=11434,address="localhost",protocol="http",version="llama3.2",
                  history_file="memories.json",neutral_emotion="disagree",time_before="1 hour",task_key="TASK",summary_words=2000,calibration_file="calibration.txt",
-                 long_time_history_file="long_time_history.json",max_conversations=30,llm_options=None,think=None,version_light=None,llm_options_light=None,**_):
+                 long_time_history_file="long_time_history.json",max_conversations=30,llm_options=None,think=None,version_light=None,llm_options_light=None,keep_alive=None,**_):
         self.port = port
         self.address = address
         self.protocol = protocol
@@ -102,6 +102,8 @@ class Communicator:
         # model options (e.g. num_ctx) and thinking mode (None = model default)
         self.llm_options = llm_options
         self.think = think
+        # how long Ollama keeps the model loaded after a request (None = Ollama default of 5 minutes)
+        self.keep_alive = keep_alive
         # model profiles: the full model and an optional light one,
         # which can be switched at runtime (e.g. if the GPU is needed otherwise)
         self._profiles = {self.FULL_PROFILE:(version,llm_options)}
@@ -170,6 +172,7 @@ class Communicator:
                                   stream=stream,
                                   options=self.llm_options,
                                   think=self.think,
+                                  keep_alive=self.keep_alive,
                                   )
         return answer
     
