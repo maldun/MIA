@@ -27,10 +27,15 @@ else:
 # Note: It may be necessary to reset before if docker makes problem ... 
 # e.g. with podman do `podman system reset`
 
-def install_ollama(name="ollama",version="llama3.2",docker="docker",mode="rocm",port=11434,timeout=10,**_):
+def install_ollama(name="ollama",version="llama3.2",docker="docker",mode="rocm",port=11434,timeout=10,gfx_version=None,**_):
     cmd = [docker]
     if mode == "rocm":
-      cmd +=  f"run --replace -d --device /dev/kfd --device /dev/dri -v ollama:/root/.ollama -p {port}:{port} --name {name} ollama/ollama:rocm".split()
+      # label=disable: SELinux (Fedora) otherwise makes the ROCm runtime crash when loading a model
+      cmd +=  "run --replace -d --device /dev/kfd --device /dev/dri --security-opt label=disable".split()
+      # needed for cards like the RX 7800 XT (gfx1101), same setting as for torch in speak.py
+      if gfx_version is not None:
+        cmd += ["-e", f"HSA_OVERRIDE_GFX_VERSION={gfx_version}"]
+      cmd += f"-v ollama:/root/.ollama -p {port}:{port} --name {name} ollama/ollama:rocm".split()
     elif mode == "cpu":
       cmd += f"run --replace -d -v ollama:/root/.ollama -p {port}:{port} --name {name} ollama/ollama".split()
       
