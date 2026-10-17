@@ -163,7 +163,7 @@ Key design decisions:
 - `emotion_map.json` keeps its existing entries and gains one entry per new emotion the LLM may use: `sad`, `angry`, `surprised`, `embarrassed`, `smug`, `thinking` (each mapping to the preset of the same name). MIA's LLM prompt is built from this file, so the new emotions become available to the LLM automatically.
 - `expressions.json` keeps `text` and `voice`; the `vid` entry becomes optional and unused. New expressions may have no voice clip yet (`VoiceExpressor` must then skip silently); clips can be generated later with `speak.py --generate`.
 - Unknown preset names must not crash MIA: the UI logs them and keeps the current expression.
-- Out of scope here (unchanged): chat input, speech audio streaming and lip sync stay as they are.
+- Out of scope here: chat input and the chat page (modernized in `REQUIREMENTS_CHAT.md`), speech audio streaming and lip sync stay as they are.
 
 ## 5. Non-functional requirements
 
@@ -195,8 +195,9 @@ Keep the code structured so these can be added without major rewrites (in partic
 | 4. Expressions | Expression engine + the 14 required presets (4.4) | Presets blend smoothly; blinking and idle motion work; all 14 look right in a contact sheet. |
 | 5. MIA integration | `PresetExpressor`, iframe + event bridge, extended `emotion_map.json` (4.9) | MIA's answers drive the character; no video code is left. |
 | 6. Editor | Slider panel + preset API | A new expression can be built on a phone, saved, and loaded on another device. |
-| 7. LLM | Generate endpoint + UI | A text description produces a valid expression; keep/edit/reject works and is logged. |
-| 8. Remote | Tailscale HTTPS setup + README | The page opens over HTTPS from a phone outside the home network. |
+| 7. Chat | Modern chat page around the character, see `REQUIREMENTS_CHAT.md` (its phases C1-C5) | A real conversation with MIA works in a modern chat UI on desktop and phone, with history, streaming and stop. |
+| 8. LLM | Generate endpoint + UI | A text description produces a valid expression; keep/edit/reject works and is logged. |
+| 9. Remote | Tailscale HTTPS setup + README | The page opens over HTTPS from a phone outside the home network. |
 
 After each phase, stop and report what was built, how to test it, and any decisions the user should make before the next phase.
 

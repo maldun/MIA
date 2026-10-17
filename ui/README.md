@@ -2,6 +2,8 @@
 
 Work in progress, see `REQUIREMENTS.md`. Status: phases 1-4 done (phase list in REQUIREMENTS.md; next: 5 = MIA integration).
 
+Next: the chat page of MIA is to be modernized, see `REQUIREMENTS_CHAT.md` (phases C1-C5).
+
 ## Tools (Fedora, Flatpak)
 
 - Blender 5.0 and Godot 4.6.1 as Flatpaks (`org.blender.Blender`, `org.godotengine.Godot`).
