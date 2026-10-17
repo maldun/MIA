@@ -39,6 +39,7 @@ from .constants import TEXT_ROWS, TEXT_COLS, TEXT_FONT, TIME_FORMAT, MESSAGE_SIZ
 from .constants import ADDRESS_KEY, PROTOCOL_KEY, WEB_PORT_KEY, SOUND_PORT_KEY, URL_KEY, U8
 from .constants import AUDIO_ROUTE, UPLOAD_ROUTE, AUDIO_MIME_TYPE, SPEECH_REQ, SOUND_REQ, TIME_REQ
 from . import constants as CONST
+from .speech_stream import SpeechStreamer
 FPATH = os.path.split(__file__)[0]
 cfg_file = os.path.join(FPATH,CFG_FILE)
 TEMPLATE_DIR = "templates"
@@ -243,14 +244,29 @@ def process_message(message):
     time.sleep(1)
     #express_and_reload("talk")
     
-    answer, filt_answer, penalty = comm.exchange(message,
-                                        emotion_reaction=express_and_reload,
-                                        update_message=send_answer,
-                                        filter_message=True,
-                                        map_emotions_to_reactions=True)
+    # MIA starts to speak while the answer is still generated
+    streamer = SpeechStreamer(get_websocket_url(address=ADDRESS,protocol=PROTOCOL),SOUND_PORT)
+    reactions = []
+    def react(expression):
+        # only the first expression plays its sound, otherwise it would cut off the speech
+        express_and_reload(expression,sound=len(reactions)==0)
+        reactions.append(expression)
+    def update(text):
+        send_answer(text)
+        streamer.update(text)
+    try:
+        answer, filt_answer, penalty = comm.exchange(message,
+                                            emotion_reaction=react,
+                                            update_message=update,
+                                            filter_message=True,
+                                            map_emotions_to_reactions=True)
+    except Exception:
+        streamer.abort()
+        raise
 
-    send_voice_request(filt_answer)
+    streamer.finish(filt_answer)
     send_answer(filt_answer,markdown=True)
+    streamer.wait()
     if len(filt_answer) == 0:
         # if no speech wait a bit
         time.sleep(TIMEOUT)

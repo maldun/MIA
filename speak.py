@@ -28,13 +28,15 @@ import sys
 import socket
 import socketserver
 import time
+import queue
+import threading
 from concurrent.futures import ThreadPoolExecutor
 
 try:
     from .play_media import play_sound
     from .constants import CFG_FILE, TEXT_COLS, TEXT_KEY, VOICE_KEY, EXPRESSION_FILE
     from .constants import ADDRESS_KEY, PROTOCOL_KEY, WEB_PORT_KEY, SOUND_PORT_KEY, URL_KEY
-    from .constants import SPEECH_REQ, SOUND_REQ, TIME_REQ, UPLOAD_ROUTE, U8
+    from .constants import SPEECH_REQ, SOUND_REQ, TIME_REQ, UPLOAD_ROUTE, U8, STREAM_REQ, STREAM_END_REQ
     from .mia_logger import logger
     from .utils import split_into_sentences, split_into_lines_and_sentences, chunker 
     from .utils import filter_symbol_sentences, get_websocket_url, get_url
@@ -42,7 +44,7 @@ except ImportError:
     from play_media import play_sound
     from constants import TEXT_COLS, TEXT_KEY, CFG_FILE, VOICE_KEY, EXPRESSION_FILE
     from constants import ADDRESS_KEY, PROTOCOL_KEY, WEB_PORT_KEY, SOUND_PORT_KEY, URL_KEY
-    from constants import SPEECH_REQ, SOUND_REQ, TIME_REQ, UPLOAD_ROUTE, U8
+    from constants import SPEECH_REQ, SOUND_REQ, TIME_REQ, UPLOAD_ROUTE, U8, STREAM_REQ, STREAM_END_REQ
     from mia_logger import logger
     from utils import split_into_sentences, split_into_lines_and_sentences, chunker 
     from utils import filter_symbol_sentences, get_websocket_url, get_url
@@ -208,23 +210,45 @@ class Speaker:
                 self.play_voice(output_file)
             return duration
 
-        chunks = self.split_into_chunks(msg)
-        if len(chunks) == 0:
-            return 0
-        duration = 0
+        return self.speak_chunks(self.split_into_chunks(msg))
+
+    def speak_chunks(self,chunks):
+        """
+        Speaks the text chunks one after another and returns the play length
+        of the last played chunk. chunks can be any iterable, which may
+        produce its chunks over time (e.g. sentences of an answer which is
+        still being generated). Every chunk is rendered as soon as it arrives,
+        while the previous one is still playing.
+        """
+        rendered = queue.Queue()
+        finished = object()
         with tempfile.TemporaryDirectory() as tmp_dir, ThreadPoolExecutor(max_workers=1) as renderer:
-            fnames = [os.path.join(tmp_dir,f"chunk{nr:03d}.wav") for nr in range(len(chunks))]
-            next_render = renderer.submit(self.render_voice,chunks[0],fnames[0])
-            for nr, fname in enumerate(fnames):
-                duration = next_render.result()
-                if nr + 1 < len(chunks):
-                    next_render = renderer.submit(self.render_voice,chunks[nr+1],fnames[nr+1])
-                if duration == 0:
-                    continue
-                self.play_voice(fname)
-                # the last chunk is waited for by the caller
-                if nr + 1 < len(chunks):
-                    time.sleep(duration + self._sentence_pause)
+            def feed():
+                try:
+                    for nr, chunk in enumerate(chunks):
+                        fname = os.path.join(tmp_dir,f"chunk{nr:05d}.wav")
+                        rendered.put((renderer.submit(self.render_voice,chunk,fname),fname))
+                except Exception as exc:
+                    rendered.put(exc)
+                rendered.put(finished)
+            threading.Thread(target=feed,daemon=True).start()
+
+            duration = 0
+            play_end = 0
+            item = rendered.get()
+            while item is not finished:
+                if isinstance(item,Exception):
+                    raise item
+                future, fname = item
+                chunk_duration = future.result()
+                if chunk_duration > 0:
+                    duration = chunk_duration
+                    # wait until the previous chunk is played
+                    time.sleep(max(0,play_end - time.time()))
+                    self.play_voice(fname)
+                    play_end = time.time() + duration + self._sentence_pause
+                item = rendered.get()
+        # the last chunk is waited for by the caller
         return duration
 
 
@@ -252,6 +276,25 @@ class SoundHandler(socketserver.StreamRequestHandler):
         return out, time
     
     
+    def _read_stream(self,first_msg):
+        """
+        Generator for the sentences of a stream request,
+        starting with the one from the first line.
+        """
+        msg = first_msg
+        while True:
+            if isinstance(msg,str) and len(msg.strip())>0:
+                sentences = filter_symbol_sentences([msg])
+                if len(sentences) > 0:
+                    yield sentences[0]
+            line = self.rfile.readline().strip()
+            if len(line) == 0:
+                return # connection closed
+            dic = json.loads(line)
+            if dic.get(STREAM_END_REQ) is True:
+                return
+            msg = dic.get(SPEECH_REQ)
+
     def handle(self):
         # self.rfile is a file-like object created by the handler;
         # we can now use e.g. readline() instead of raw recv() calls
@@ -261,8 +304,15 @@ class SoundHandler(socketserver.StreamRequestHandler):
         logger.info("{} wrote:".format(self.client_address[0])+ ' ' + "Request recieved: " + self.data.decode()) 
         print(self.data)
         msg, time_stamp = self.process_request(self.data)
-        if isinstance(msg,str) and len(msg)>0:
-            speaker = self.server.speaker
+        speaker = self.server.speaker
+        if json.loads(self.data).get(STREAM_REQ) is True:
+            # sentences follow line by line until the end marker
+            duration = speaker.speak_chunks(self._read_stream(msg))
+            time.sleep(duration+0.5)
+            answer = "Stream played!"
+            logger.info(answer+f"at {time_stamp}")
+            self.wfile.write(json.dumps({SOUND_REQ:answer,TIME_REQ:time_stamp}).encode(U8))
+        elif isinstance(msg,str) and len(msg)>0:
             duration = speaker.text2voice(msg)
             time.sleep(duration+0.5)
             # Likewise, self.wfile is a file-like object used to write back

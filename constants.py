@@ -34,6 +34,9 @@ TIME_ROUTE = "time"
 # Request_types:
 SPEECH_REQ = "SPEECH"
 SOUND_REQ = "SOUND"
+# a stream request sends sentences line by line (json) over one connection
+STREAM_REQ = "STREAM" # flag in the first line of a stream
+STREAM_END_REQ = "STREAM_END" # last line of a stream
 TIME_REQ = "TIME"
 MESSAGE_SIZE=2**12
 
