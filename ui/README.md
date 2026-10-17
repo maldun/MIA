@@ -1,6 +1,6 @@
 # MIA UI (Godot)
 
-Work in progress, see `REQUIREMENTS.md`. Status: phases 1-3 done.
+Work in progress, see `REQUIREMENTS.md`. Status: phases 1-4 done (phase list in REQUIREMENTS.md; next: 5 = MIA integration).
 
 ## Tools (Fedora, Flatpak)
 
@@ -34,3 +34,17 @@ Godot lists 57 blend shapes: the 58 Blender keys minus the `Basis` reference key
 - Size: .wasm 36 MB + .pck 11 MB raw; about 20 MB gzipped (the simple server does not gzip).
 - Scene: `godot/main.gd` (waist-up camera, arms-down pose, soft light; mouse drag/wheel and touch drag/pinch).
 - `godot/tools/screenshot.gd` renders the scene to a PNG; headless Chromium with SwiftShader also works for web checks.
+
+## Phase 4: expressions
+
+- `godot/expression_engine.gd` (`ExpressionEngine`): the central API. `play(name, duration)` / `apply_preset(dict, duration)`
+  blend smoothly (default 0.25 s, easing `smooth|linear|sine|cubic`), keys not in the new preset go back to 0,
+  automatic blinking (2.5-6 s apart, suppressed while the eyes are closed), subtle idle motion (breathing, head sway).
+  `validate()` rejects unknown shape keys / bone params, clamps values and logs every correction.
+- Presets: `godot/presets/library.json`, `{"presets": [ {name, description, weights, bones, tags, source} ]}`.
+  The 14 required ones: greet, no, annoyed, talk, yes, idle (from `expressions.json`) and neutral, happy, sad, angry,
+  surprised, embarrassed, smug, thinking. Bone params (degrees): head_pitch (+ down), head_yaw (+ viewer's right),
+  head_roll, eye_pitch, eye_yaw.
+- Tests: `godot --headless --path ui/godot --script res://tools/test_expressions.gd` (checks validation, blending, blinking, idle).
+- Review: `godot/tools/contact_sheet.gd` + `tools/montage.py` render all presets into one image;
+  the web page has a collapsible button bar to play them (temporary, replaced by the editor in phase 6).

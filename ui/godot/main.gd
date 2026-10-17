@@ -15,10 +15,48 @@ var _touches := {}
 var _pinch_start := 0.0
 var _pinch_dist_start := 0.0
 
+var engine: ExpressionEngine
+var _bar: Control
+
 func _ready() -> void:
 	_setup_environment()
 	_load_character()
 	_setup_camera()
+	_setup_expressions()
+	_build_preset_bar()
+
+func _setup_expressions() -> void:
+	if skeleton == null:
+		return
+	engine = ExpressionEngine.new()
+	add_child(engine)
+	engine.setup(character, skeleton)
+	engine.load_library("res://presets/library.json")
+	engine.play("idle", 0.0)
+
+# temporary review panel (the slider editor of phase 6 replaces it); collapsible for phones
+func _build_preset_bar() -> void:
+	if engine == null:
+		return
+	var layer := CanvasLayer.new()
+	add_child(layer)
+	var root := VBoxContainer.new()
+	root.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
+	root.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	layer.add_child(root)
+	var toggle := Button.new()
+	toggle.text = "Expressions"
+	toggle.custom_minimum_size = Vector2(0, 56)
+	root.add_child(toggle)
+	_bar = HFlowContainer.new()
+	root.add_child(_bar)
+	for preset_name in engine.library_order:
+		var b := Button.new()
+		b.text = preset_name
+		b.custom_minimum_size = Vector2(110, 56)
+		b.pressed.connect(engine.play.bind(preset_name))
+		_bar.add_child(b)
+	toggle.pressed.connect(func(): _bar.visible = not _bar.visible)
 
 func _setup_environment() -> void:
 	var env := Environment.new()

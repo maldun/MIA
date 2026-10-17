@@ -7,7 +7,8 @@ Take an anime character exported from VRoid Studio (provided as a `.blend` file)
 - shows the character in a web browser, on any device, including phones;
 - plays a library of reusable facial expressions with smooth transitions;
 - lets the user create and save new expressions live with sliders;
-- can generate new expressions from a text description using an LLM running on the user's own machine.
+- can generate new expressions from a text description using an LLM running on the user's own machine;
+- **replaces the old video expressor of MIA** (pre-rendered `.mp4` clips per expression, see `expressor.py`/`web_app.py`): MIA's emotions and expressions now drive the 3D character (see 4.9).
 
 Everything is hosted on one strong machine (the "host"). Remote devices only open a link.
 
@@ -37,6 +38,9 @@ Key design decisions:
 ## 3. Inputs
 
 - `.blend` file of the character, originally exported from VRoid Studio. Textures should be packed (File → External Data → Pack Resources). If they are not, report missing textures before continuing.
+- MIA's existing configuration, which defines what the character must be able to express:
+  - `emotion_map.json`: emotion keyword the LLM may answer with (`agree`, `disagree`, `neutral`, `annoyed`, `happy`, `MIA`) → expression key;
+  - `expressions.json`: expression key (`greet`, `no`, `annoyed`, `talk`, `yes`, `idle`) → video, spoken text and voice clip. The voice clips stay, the videos are replaced by presets.
 - No other assets are provided. Anything else must be created or sourced from open-licensed projects.
 
 ## 4. Functional requirements
@@ -80,6 +84,11 @@ Key design decisions:
 }
 ```
 
+- **Required presets** (14), named exactly so MIA's configuration can refer to them:
+  - everything MIA already uses (one preset per key of `expressions.json`): `greet`, `no`, `annoyed`, `talk`, `yes`, `idle`;
+  - the suggested starters: `neutral`, `happy`, `sad`, `angry`, `surprised`, `embarrassed`, `smug`, `thinking`.
+  - The old videos only conveyed the mood; the presets keep that mood (e.g. `yes` = agreeing smile, `no` = stern, `annoyed` = half-lidded "Seriously?", `talk` = attentive, `idle` = friendly waiting face).
+- `bones` supports `head_pitch`, `head_yaw`, `head_roll`, `eye_yaw`, `eye_pitch` (degrees). The model has no jaw bone, so mouth opening goes through the `Fcl_MTH_*` shape keys.
 - `source` is one of `manual`, `llm`, `llm_edited`.
 - Smooth blending between expressions with a configurable duration (default ~0.25 s) and easing.
 - Shape keys not mentioned in a preset blend back to 0.
@@ -131,6 +140,16 @@ Key design decisions:
 - Remote access through **Tailscale** only. Use Tailscale's HTTPS support (e.g. `tailscale serve`) so the page is served over HTTPS without opening public ports. Verify the exact commands at setup time and document them.
 - Documented one-command start: start the LLM server (if not running), the backend, and the HTTPS exposure.
 
+### 4.9 Integration with MIA (replaces the video expressor)
+
+- MIA's chat page shows the Godot web export in place of the `<video>` element (embedded, same origin, e.g. `<iframe>`).
+- `expressor.py`: a new `PresetExpressor` replaces `VideoExpressor`. `express(key)` no longer copies a video; it tells the UI to play the preset `key`. `web_app.express_and_reload()` keeps its signature and behaviour (including the voice clip via `VoiceExpressor`), and the video code, `video.mp4` copying and the `reload_video` events are removed.
+- Transport MIA → UI: MIA emits an event over its existing Socket.IO connection (`expression`, payload `{name}`); the page forwards it to the Godot iframe (`postMessage`), where a small JavaScript bridge calls the central expression API. Until the backend of 4.7 exists, the presets are loaded from the Godot project; afterwards from the backend.
+- `emotion_map.json` keeps its existing entries and gains one entry per new emotion the LLM may use: `sad`, `angry`, `surprised`, `embarrassed`, `smug`, `thinking` (each mapping to the preset of the same name). MIA's LLM prompt is built from this file, so the new emotions become available to the LLM automatically.
+- `expressions.json` keeps `text` and `voice`; the `vid` entry becomes optional and unused. New expressions may have no voice clip yet (`VoiceExpressor` must then skip silently); clips can be generated later with `speak.py --generate`.
+- Unknown preset names must not crash MIA: the UI logs them and keeps the current expression.
+- Out of scope here (unchanged): chat input, speech audio streaming and lip sync stay as they are.
+
 ## 5. Non-functional requirements
 
 - **Performance:** smooth playback (target 30+ fps) on a mid-range phone browser, 60 fps on desktop.
@@ -158,10 +177,11 @@ Keep the code structured so these can be added without major rewrites (in partic
 | 1. Inspect | `docs/asset_inventory.md` | Every shape key, bone, material and texture is listed, and problems are flagged. |
 | 2. Pipeline | Export script + character in Godot | The character renders in the Godot editor and every shape key can be driven. |
 | 3. Web render | Web export served locally | The character renders with the toon look in desktop and phone browsers. |
-| 4. Expressions | Expression engine + 5–10 starter presets | Presets blend smoothly; blinking and idle motion work. |
-| 5. Editor | Slider panel + preset API | A new expression can be built on a phone, saved, and loaded on another device. |
-| 6. LLM | Generate endpoint + UI | A text description produces a valid expression; keep/edit/reject works and is logged. |
-| 7. Remote | Tailscale HTTPS setup + README | The page opens over HTTPS from a phone outside the home network. |
+| 4. Expressions | Expression engine + the 14 required presets (4.4) | Presets blend smoothly; blinking and idle motion work; all 14 look right in a contact sheet. |
+| 5. MIA integration | `PresetExpressor`, iframe + event bridge, extended `emotion_map.json` (4.9) | MIA's answers drive the character; no video code is left. |
+| 6. Editor | Slider panel + preset API | A new expression can be built on a phone, saved, and loaded on another device. |
+| 7. LLM | Generate endpoint + UI | A text description produces a valid expression; keep/edit/reject works and is logged. |
+| 8. Remote | Tailscale HTTPS setup + README | The page opens over HTTPS from a phone outside the home network. |
 
 After each phase, stop and report what was built, how to test it, and any decisions the user should make before the next phase.
 
@@ -169,8 +189,8 @@ After each phase, stop and report what was built, how to test it, and any decisi
 
 Ask these before or during the relevant phase rather than assuming:
 
-1. Host machine: operating system and GPU?
-2. Which local LLM server is already installed, if any (Ollama, llama.cpp, LM Studio)? Preferred model?
-3. Godot version preference (default: latest stable 4.x)?
-4. Which starter expressions to create first (e.g. neutral, happy, sad, angry, surprised, embarrassed, smug, thinking)?
+1. Host machine: operating system and GPU? *(answered: Fedora 43, RX 7800 XT)*
+2. Which local LLM server is already installed, if any (Ollama, llama.cpp, LM Studio)? Preferred model? *(answered: Ollama in a podman container, light model `gemma4:12b-it-qat`)*
+3. Godot version preference (default: latest stable 4.x)? *(answered: 4.6.1)*
+4. Which starter expressions to create first (answered: the 14 of 4.4)
 5. Should the editor be protected (e.g. a simple password), or is Tailscale access control enough?
