@@ -85,7 +85,8 @@ Prerequisites:
     - "mode":"rocm", (gpu flag, check ollama docker docu)
     - "timeout":3, (pause in seconds before the character returns to the idle expression)
     - "character_dir":"ui/godot/build/web", (optional: folder with the web export of the 3D character, see ui/README.md)
-    - "https_port":8586, (optional: port of the HTTPS proxy in front of the web app, see "Access from other computers")
+    - "https_port":8586, (optional: `python -m MIA` starts an HTTPS proxy on this port in front of the web app, see "Access from other computers")
+    - "host":"0.0.0.0", (optional: address the web app listens on; default all addresses, i.e. localhost and LAN)
     - "background_dir":"backgrounds", (optional: folder with background pictures for the character, see backgrounds/README.md)
     - "background_image":"room.jpg", (optional: picture shown at the start, default: the first one)
     - "web_port":8585, (port for web-app)
@@ -132,12 +133,16 @@ Usage:
 Access from other computers or phones (HTTPS):
 ===================
 
-The 3D character only runs in a *secure context*: on `localhost` or over HTTPS. Opening `http://<address>:<web_port>` from another device
-fails with a message that HTTPS is needed. Put HTTPS in front of the web app:
+The 3D character only runs in a *secure context*: on `localhost` or over HTTPS. Opening `http://<lan address>:<web_port>` from another device
+(or on this computer via the LAN address) fails with a message that HTTPS is needed.
 
-- `ui/tools/https_proxy.sh 8586 <address>:<web_port>` (needs `openssl` and `socat`) creates a self-signed certificate in `ui/certs` and
-  serves the app on `https://<address>:8586`; set `"https_port":8586` in `setup_cfg.json` so the page may connect.
+- On this computer use `http://localhost:<web_port>`.
+- For other devices set `"https_port":8586` in `setup_cfg.json` and install `openssl` and `socat` (`sudo dnf install openssl socat`).
+  `python -m MIA` then starts an HTTPS proxy together with MIA (and stops it with MIA) and prints the addresses:
+  `https://<lan address>:8586` (also `https://localhost:8586`). A self-signed certificate is created in `ui/certs` on the first start.
+- Use the HTTPS port only with `https://`: `https://localhost:<web_port>` does not work, the web port speaks plain HTTP.
 - The browser warns once about the certificate (Advanced > continue). Import `ui/certs/mia.crt` as trusted certificate to avoid that.
+- Without MIA the proxy can be started by hand: `ui/tools/https_proxy.sh 8586 127.0.0.1:<web_port>`.
 - From outside the home network use Tailscale (`tailscale serve`), which provides a trusted HTTPS address without opening ports.
 - Special Commands:
     - /dream! : MIA summarizes her memories and a new chat is started based on this summy.

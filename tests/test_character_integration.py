@@ -253,5 +253,94 @@ class WebAppEvents(unittest.TestCase):
         self.assertIn("toCharacter({type: 'speaking'", html)
 
 
+class TlsProxyTest(unittest.TestCase):
+    """python -m MIA starts the https proxy when "https_port" is set."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.tls = importlib.import_module("MIA.tls_proxy")
+
+    @staticmethod
+    def free_port():
+        import socket
+        with socket.socket() as sock:
+            sock.bind(("127.0.0.1", 0))
+            return sock.getsockname()[1]
+
+    def test_nothing_started_without_https_port(self):
+        self.assertIsNone(self.tls.start_https_proxy({}, REPO, 8585))
+        self.assertIsNone(self.tls.start_https_proxy({"https_port": None}, REPO, 8585))
+
+    def test_missing_tools_do_not_crash_mia(self):
+        old = self.tls.shutil.which
+        self.tls.shutil.which = lambda tool: None
+        try:
+            self.assertIsNone(self.tls.start_https_proxy({"https_port": 8586}, REPO, 8585))
+        finally:
+            self.tls.shutil.which = old
+
+    def test_missing_script_does_not_crash_mia(self):
+        with tempfile.TemporaryDirectory() as empty:
+            self.assertIsNone(self.tls.start_https_proxy({"https_port": 8586}, empty, 8585))
+
+    def test_https_on_localhost_reaches_the_web_app(self):
+        import http.server
+        import socket
+        import ssl
+        import threading
+        import time
+        import urllib.request
+        if not all(self.tls.shutil.which(tool) for tool in ("socat", "openssl")):
+            self.skipTest("socat and openssl are needed")
+
+        class Handler(http.server.BaseHTTPRequestHandler):
+            def do_GET(self):
+                body = b"hello from the web app"
+                self.send_response(200)
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+
+            def log_message(self, *args):
+                pass
+
+        web_port, https_port = self.free_port(), self.free_port()
+        backend = http.server.ThreadingHTTPServer(("127.0.0.1", web_port), Handler)
+        threading.Thread(target=backend.serve_forever, daemon=True).start()
+        proc = self.tls.start_https_proxy({"https_port": https_port}, REPO, web_port)
+        try:
+            self.assertIsNotNone(proc)
+            context = ssl.create_default_context()
+            context.check_hostname = False
+            context.verify_mode = ssl.CERT_NONE   # self-signed certificate
+            answer = None
+            for _ in range(40):
+                try:
+                    answer = urllib.request.urlopen(f"https://localhost:{https_port}/", timeout=3, context=context).read()
+                    break
+                except Exception:
+                    time.sleep(0.25)
+            self.assertEqual(answer, b"hello from the web app")
+            # the certificate is valid for localhost and the LAN addresses
+            cert = ssl.get_server_certificate(("127.0.0.1", https_port))
+            self.assertIn("BEGIN CERTIFICATE", cert)
+            # https on the plain http port does not work (this is what a wrong port looks like)
+            with self.assertRaises(Exception):
+                urllib.request.urlopen(f"https://localhost:{web_port}/", timeout=3, context=context)
+        finally:
+            if proc is not None:
+                proc.terminate()
+                proc.wait(timeout=5)
+            backend.shutdown()
+        with self.assertRaises(Exception):   # stopped with MIA
+            urllib.request.urlopen(f"https://localhost:{https_port}/", timeout=2, context=context)
+
+    def test_main_binds_all_addresses_and_starts_the_proxy(self):
+        source = open(os.path.join(REPO, "__main__.py")).read()
+        self.assertIn('cfg.get("host","0.0.0.0")', source)
+        self.assertIn("start_https_proxy(cfg,fpath,WEB_PORT)", source)
+        self.assertIn("https_proc.terminate()", source)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

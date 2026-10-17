@@ -110,3 +110,9 @@ The chat page connects to the socket of the address it was loaded from, so the s
   draws the picture on canvas layer -1, scaled to cover the view; on the desktop it reads `<repository>/backgrounds` directly.
 - The page can switch it with `{"type": "background", "name": "room.jpg"}` ("" = plain colour); the menu (`/character/?menu`) has a Background row.
 - Tests: `godot/tools/test_background.gd` (headless) and the background tests in `tests/test_character_integration.py`.
+
+### HTTPS starts with MIA
+
+`python -m MIA` listens on all addresses (`"host"` in `setup_cfg.json` restricts that) and starts `tools/https_proxy.sh` when `"https_port"` is set
+(code: `tls_proxy.py`); missing `socat`/`openssl` are logged and MIA runs without the proxy. Tests: `TlsProxyTest` in `tests/test_character_integration.py`
+(including a real HTTPS request to localhost through the proxy).

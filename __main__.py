@@ -22,6 +22,8 @@ import subprocess
 import threading
 from .web_app import socketio, app, comm, WEB_PORT, scheduler, time_update_trigger
 from .utils import get_own_ip
+from .tls_proxy import start_https_proxy
+from .constants import HTTPS_PORT_KEY
 
 from .constants import CFG_FILE, LOG_FNAME
 fpath = os.path.split(__file__)[0]
@@ -34,6 +36,7 @@ with open(cfg_file,'r') as jp:
     cfg = json.load(jp)
 
 if __name__ == "__main__":
+    https_proc = None
     try:
         cmd_speak = ["python3.10",os.path.join(fpath,"speak.py"),cfg_file]
         cmd_llama = ["python3.10",os.path.join(fpath,"install_lama.py"),cfg_file]
@@ -53,7 +56,14 @@ if __name__ == "__main__":
             #app.config[MAIN_THREAD_ID_KEY] = os.getpid()
             host_ip = get_own_ip()
             #host_ip=None
-            socketio.run(app, host=host_ip,debug=False,port=WEB_PORT)
+            # listen on all addresses (localhost and LAN), "host" in the cfg file can restrict this.
+            # The character needs a secure context: http://localhost:<web_port> or the https proxy.
+            host = cfg.get("host","0.0.0.0")
+            https_proc = start_https_proxy(cfg,fpath,WEB_PORT)
+            print(f"MIA: http://localhost:{WEB_PORT}")
+            if https_proc is not None:
+                print(f"MIA (https, for other devices): https://{host_ip}:{cfg[HTTPS_PORT_KEY]}")
+            socketio.run(app, host=host,debug=False,port=WEB_PORT)
             
     except KeyboardInterrupt:
         comm.dump_history()
@@ -61,4 +71,7 @@ if __name__ == "__main__":
         #os.killpg(os.getpgid(llama_proc.pid), signal.SIGTERM)
         if os.path.exists(exchange_file):
             os.remove(exchange_file)
-        
+    finally:
+        # the https proxy lives and dies with MIA
+        if https_proc is not None:
+            https_proc.terminate()
