@@ -78,6 +78,8 @@ Prerequisites:
     - "port":11434, (ollama port)
     - "version":"gemma4:26b", (ollama model)
     - "llm_options":{"num_ctx":16384}, (ollama model options, e.g. context size)
+    - "version_light":"gemma4:12b-it-qat", (optional: smaller model; switch with /light! and back with /full!, e.g. if the GPU is needed for other programs)
+    - "llm_options_light":{"num_ctx":16384}, (options of the light model)
     - "think":false, (thinking mode of the model; leave out for model default)
     - "mode":"rocm", (gpu flag, check ollama docker docu)
     - "timeout":3, (timeout setting for video refresh)
@@ -124,6 +126,8 @@ Usage:
     - /dream! : MIA summarizes her memories and a new chat is started based on this summy.
     - /goodnight! : shuts down MIA and let her dream
     - /break! : shuts down MIA (service). Re-Start where you left of, so itś like she is on break.
+    - /light! : switches to the light model (`version_light`) and unloads the full one, to free GPU memory for other programs.
+    - /full! : switches back to the full model.
 
 
 Programm Structure

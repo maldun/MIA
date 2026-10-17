@@ -180,12 +180,31 @@ def send_voice_request(msg):
             else:
                 logger.info("Something went wrong on Sound Server Side!")
 
+def switch_model(profile):
+    """
+    Switches the model profile and reports the result in the UI.
+    """
+    if comm.set_profile(profile):
+        msg = f"Switched to {profile} model ({comm.version})."
+    else:
+        msg = f"No {profile} model configured!"
+    logger.info(msg)
+    send_answer(msg,markdown=True)
+
 def handle_special_commands(message):
     """
     Some special commands to make usage easier!
+    Returns True if the message was a command which is completely
+    handled, so that it must not be sent to the model.
     """
     cmd=message.strip().lower()
     match cmd:
+        case CONST.LIGHT_COMMAND:
+            switch_model(comm.LIGHT_PROFILE)
+            return True
+        case CONST.FULL_COMMAND:
+            switch_model(comm.FULL_PROFILE)
+            return True
         case CONST.SHUTDOWN_COMMAND:
             quit_msg="Have a break MIA"
             logger.info(quit_msg)
@@ -218,7 +237,8 @@ def handle_special_commands(message):
 
 def process_message(message):
     # special commands go here
-    handle_special_commands(message)
+    if handle_special_commands(message):
+        return "Command processed successfully"
     #express_and_reload("idle")
     time.sleep(1)
     #express_and_reload("talk")

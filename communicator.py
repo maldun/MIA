@@ -89,10 +89,12 @@ class Communicator:
     """
 
     TIME_UPDATE="Hi MIA it is {time}." 
+    FULL_PROFILE = "full"
+    LIGHT_PROFILE = "light"
     
     def __init__(self,port=11434,address="localhost",protocol="http",version="llama3.2",
                  history_file="memories.json",neutral_emotion="disagree",time_before="1 hour",task_key="TASK",summary_words=2000,calibration_file="calibration.txt",
-                 long_time_history_file="long_time_history.json",max_conversations=30,llm_options=None,think=None,**_):
+                 long_time_history_file="long_time_history.json",max_conversations=30,llm_options=None,think=None,version_light=None,llm_options_light=None,**_):
         self.port = port
         self.address = address
         self.protocol = protocol
@@ -100,6 +102,12 @@ class Communicator:
         # model options (e.g. num_ctx) and thinking mode (None = model default)
         self.llm_options = llm_options
         self.think = think
+        # model profiles: the full model and an optional light one,
+        # which can be switched at runtime (e.g. if the GPU is needed otherwise)
+        self._profiles = {self.FULL_PROFILE:(version,llm_options)}
+        if version_light is not None:
+            self._profiles[self.LIGHT_PROFILE] = (version_light,llm_options_light)
+        self.profile = self.FULL_PROFILE
         
         self.host = protocol + "://" + address + ':' + str(port)
         self.client = Client(host=self.host,headers=self.DEFAULT_HEADER)
@@ -136,6 +144,25 @@ class Communicator:
         self.summarize_long_msg = SUMMARIZE_LONG_QUESTION.format(summary_words=summary_words//2)
         self._max_conversations = max_conversations
     
+    def set_profile(self,profile):
+        """
+        Switches to the model profile (FULL_PROFILE or LIGHT_PROFILE)
+        and unloads the previous model from the GPU if it is a different one.
+        Returns True if the profile is available.
+        """
+        if profile not in self._profiles:
+            return False
+        old_version = self.version
+        self.version, self.llm_options = self._profiles[profile]
+        self.profile = profile
+        if old_version != self.version:
+            try:
+                # keep_alive=0 unloads the model right away
+                self.client.generate(model=old_version,keep_alive=0)
+            except Exception as e:
+                logger.warning(f"Could not unload model {old_version}: {e}")
+        return True
+
     def chat(self,msg,stream=True):
         msg_dic = self.update_history(msg,role=self.USER_ROLE)
         answer = self.client.chat(model=self.version,

@@ -54,6 +54,8 @@ SHUTDOWN_COMMAND = "/break!"
 SLEEP_COMMAND = "/goodnight!"
 DREAM_COMMAND = "/dream!"
 UPDATE_COMMAND = "/time!"
+LIGHT_COMMAND = "/light!" # switch to the light model (saves GPU memory)
+FULL_COMMAND = "/full!" # switch back to the full model
 
 MAIN_THREAD_ID_KEY = "MAIN_THREAD_ID"
 

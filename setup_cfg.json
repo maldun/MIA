@@ -4,6 +4,8 @@
   "port":11434,
   "version":"gemma4:26b",
   "llm_options":{"num_ctx":16384},
+  "version_light":"gemma4:12b-it-qat",
+  "llm_options_light":{"num_ctx":16384},
   "think":false,
   "mode":"rocm",
   "timeout":3,
