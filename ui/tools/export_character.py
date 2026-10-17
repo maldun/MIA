@@ -21,6 +21,16 @@ for mod in ("bl_ext.blender_org.vrm", "bl_ext.user_default.vrm"):
 if not hasattr(bpy.ops.export_scene, "vrm"):
     raise SystemExit("VRM add-on is not enabled/installed in this Blender")
 
+# smaller textures for the web build (MAX_TEX env var, default 1024; 0 = keep original sizes)
+max_tex = int(os.environ.get("MAX_TEX", "1024"))
+if max_tex > 0:
+    for im in bpy.data.images:
+        if im.name == "Thumbnail":  # only the VRM preview picture
+            im.scale(256, 256)
+        elif max(im.size) > max_tex:
+            f = max_tex / max(im.size)
+            im.scale(max(1, int(im.size[0] * f)), max(1, int(im.size[1] * f)))
+
 arm = next(o for o in bpy.data.objects if o.type == 'ARMATURE')
 bpy.ops.object.select_all(action='DESELECT')
 arm.select_set(True)

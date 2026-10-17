@@ -1,6 +1,6 @@
 # MIA UI (Godot)
 
-Work in progress, see `REQUIREMENTS.md`. Status: phases 1 and 2 done.
+Work in progress, see `REQUIREMENTS.md`. Status: phases 1-3 done.
 
 ## Tools (Fedora, Flatpak)
 
@@ -22,3 +22,15 @@ lets Godot import it and checks that every shape key exists and can be driven (`
 Godot lists 57 blend shapes: the 58 Blender keys minus the `Basis` reference key.
 
 `godot/tools/screenshot.gd` renders the character once to a PNG (needs a display).
+
+## Phase 3: web render
+
+- Export templates (one time): download `Godot_v4.6.1-stable_export_templates.tpz` from the godot-builds release,
+  verify it against `SHA512-SUMS.txt`, and put `web_nothreads_release.zip`, `web_nothreads_debug.zip` and `version.txt`
+  from its `templates/` folder into `~/.var/app/org.godotengine.Godot/data/godot/export_templates/4.6.1.stable/`.
+- `tools/export_character.sh` shrinks textures to max 1024 px (`MAX_TEX=0` keeps the originals); the VRM is then 12 MB.
+- `tools/build_web.sh` writes the single-threaded web build to `godot/build/web` (no COOP/COEP headers needed).
+- `python tools/serve_web.py [port]` serves it (default 8060) with the right MIME types.
+- Size: .wasm 36 MB + .pck 11 MB raw; about 20 MB gzipped (the simple server does not gzip).
+- Scene: `godot/main.gd` (waist-up camera, arms-down pose, soft light; mouse drag/wheel and touch drag/pinch).
+- `godot/tools/screenshot.gd` renders the scene to a PNG; headless Chromium with SwiftShader also works for web checks.
