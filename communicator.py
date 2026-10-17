@@ -92,13 +92,16 @@ class Communicator:
     
     def __init__(self,port=11434,address="localhost",protocol="http",version="llama3.2",
                  history_file="memories.json",neutral_emotion="disagree",time_before="1 hour",task_key="TASK",summary_words=2000,calibration_file="calibration.txt",
-                 long_time_history_file="long_time_history.json",max_conversations=30,**_):
+                 long_time_history_file="long_time_history.json",max_conversations=30,llm_options=None,think=None,**_):
         self.port = port
         self.address = address
         self.protocol = protocol
         self.version = version
+        # model options (e.g. num_ctx) and thinking mode (None = model default)
+        self.llm_options = llm_options
+        self.think = think
         
-        self.host = protocol + "://" + address + '/' + str(port)
+        self.host = protocol + "://" + address + ':' + str(port)
         self.client = Client(host=self.host,headers=self.DEFAULT_HEADER)
         # if file is not provided with path -> store in current dir
         if os.path.split(history_file)[0] == "":
@@ -135,10 +138,12 @@ class Communicator:
     
     def chat(self,msg,stream=True):
         msg_dic = self.update_history(msg,role=self.USER_ROLE)
-        answer = chat(model=self.version,
-                     messages=self._history,
-                     stream=stream,
-                     )
+        answer = self.client.chat(model=self.version,
+                                  messages=self._history,
+                                  stream=stream,
+                                  options=self.llm_options,
+                                  think=self.think,
+                                  )
         return answer
     
     def handle_chunk(self,chunk):

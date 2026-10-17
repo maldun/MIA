@@ -106,7 +106,7 @@ nltk==3.9.1
 num2words==0.5.14
 numba==0.60.0
 numpy==1.26.4
-ollama==0.4.5
+ollama==0.6.3
 omegaconf==2.0.6
 opencv-python==4.10.0.84
 packaging==24.2
