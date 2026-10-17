@@ -83,7 +83,9 @@ Prerequisites:
     - "keep_alive":"30m", (how long the model stays loaded after a request; avoids cold starts, e.g. for the hourly time check)
     - "think":false, (thinking mode of the model; leave out for model default)
     - "mode":"rocm", (gpu flag, check ollama docker docu)
-    - "timeout":3, (timeout setting for video refresh)
+    - "timeout":3, (pause in seconds before the character returns to the idle expression)
+    - "character_dir":"ui/godot/build/web", (optional: folder with the web export of the 3D character, see ui/README.md)
+    - "https_port":8586, (optional: port of the HTTPS proxy in front of the web app, see "Access from other computers")
     - "web_port":8585, (port for web-app)
     - "address":"localhost", (adress)
     - "protocol":"http", (web protocol used for site)
@@ -100,8 +102,9 @@ Prerequisites:
     - "voice_sample":"/path/to/MIA/voice/samples/miku_vocals.wav",(voice sample for tts voice cloning)
     - "history_file":"memories.json" (MIA's memory)
 
-- Configure expressions.json with expressions and associated .mp4 files
-- Set the emotions and the expressions associated with it in emotion_map.json. When the AI provides an emotion the proper video is loaded. **Important** The example should be the minimal set of emotion. Don't remove one of them!
+- The character on the page is a 3D model (Godot web export, see `ui/README.md`). Build it once with `ui/tools/build_web.sh`; MIA serves it under `/character/` and shows it in the page. It replaces the old pre-rendered videos.
+- Configure expressions.json: every expression has a `preset` (expression of the character, see `ui/godot/presets/library.json`; default: the expression key itself), the spoken `text` and the `voice` clip (`null` = no voice clip yet).
+- Set the emotions and the expressions associated with it in emotion_map.json. When the AI provides an emotion the character makes the proper expression (face, arm gesture) and the voice clip is played. The mouth moves while MIA's voice plays. **Important** The example should be the minimal set of emotion. Don't remove one of them! Emotions can be added: the prompt for the AI is built from this file (new expressions need a preset with the same name or a `preset` entry).
 - Some configurations are found in `constants.py` which can be adjusted like textbox settings.
     - CFG_FILE = "setup_cfg.json" (cfg file to use)
     - LOG_FNAME = "mia.log" (log file)
@@ -123,6 +126,17 @@ Usage:
 - Start: Activate virtual env and start: `python -m MIA`.
 - Open Webbrowser on `localhost:<web_port>`
 - *Hint*: KDE has a web browser plugin as desktop app ...
+
+Access from other computers or phones (HTTPS):
+===================
+
+The 3D character only runs in a *secure context*: on `localhost` or over HTTPS. Opening `http://<address>:<web_port>` from another device
+fails with a message that HTTPS is needed. Put HTTPS in front of the web app:
+
+- `ui/tools/https_proxy.sh 8586 <address>:<web_port>` (needs `openssl` and `socat`) creates a self-signed certificate in `ui/certs` and
+  serves the app on `https://<address>:8586`; set `"https_port":8586` in `setup_cfg.json` so the page may connect.
+- The browser warns once about the certificate (Advanced > continue). Import `ui/certs/mia.crt` as trusted certificate to avoid that.
+- From outside the home network use Tailscale (`tailscale serve`), which provides a trusted HTTPS address without opening ports.
 - Special Commands:
     - /dream! : MIA summarizes her memories and a new chat is started based on this summy.
     - /goodnight! : shuts down MIA and let her dream

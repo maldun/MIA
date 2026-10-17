@@ -67,3 +67,30 @@ Godot lists 57 blend shapes: the 58 Blender keys minus the `Basis` reference key
 - Menu: the active expression/gesture is highlighted, "stop gesture" is the first button of the gesture row.
 - Taps on a phone: `emulate_mouse_from_touch` is on again (buttons need it); the camera code ignores the emulated mouse events.
 - Tests: `tools/test_expressions.gd` (headless) and `tools/test_menu.gd` (presses the menu buttons; run it with a window to include real clicks).
+
+## Phase 5: MIA integration
+
+- `expressor.py`: `PresetExpressor` replaces `VideoExpressor`; `express(key)` sends the preset name to the page, unknown keys are logged and ignored.
+  `VoiceExpressor` skips expressions without a voice clip.
+- `web_app.py`: `express_and_reload()` emits the socket.io event `expression` ({"name": preset}) and plays the voice clip;
+  `/character/` serves the web export (folder `character_dir`, default `ui/godot/build/web`, with the `.wasm` MIME type);
+  a page that loaded the character announces `character_ready` and gets the current expression (idle after the start).
+- `templates/index.html`: an iframe with the character replaces the `<video>`; the page forwards `expression` events to it (`postMessage`)
+  and tells it when the voice is playing (`speaking`).
+- `godot/host_bridge.gd` receives these messages; the dev menu is hidden inside the iframe (add `?menu` to `/character/` to see it).
+- `emotion_map.json` has six new emotions (sad, angry, surprised, embarrassed, smug, thinking), `expressions.json` six new expressions without voice clip yet
+  (generate with `speak.py --generate`, note: it regenerates all clips).
+- Tests: `python tests/test_character_integration.py` (MIA virtualenv), `godot/tools/test_bridge.gd` (headless),
+  `python ui/tools/browser_check.py <url> <out.png>` opens a page in headless Chromium and reports the console.
+
+### HTTPS for other devices
+
+Godot's web export (audio worklet, WebGL) needs a secure context. `http://localhost` is one, `http://<lan address>` is not:
+other computers and phones get a message that HTTPS is needed. `tools/https_proxy.sh <https port> <target host:port>`
+runs a TLS proxy (openssl + socat, self-signed certificate in `ui/certs`):
+
+- `ui/tools/https_proxy.sh 8586 <lan address>:8585` for MIA's page (and `"https_port":8586` in `setup_cfg.json`),
+- `ui/tools/https_proxy.sh 8443 127.0.0.1:8060` for the character test server (`tools/serve_web.py`).
+
+The chat page connects to the socket of the address it was loaded from, so the same page works on localhost, in the LAN and over HTTPS.
+`python ui/tools/browser_check.py https://<address>:8586/ out.png --insecure` checks a page in headless Chromium.

@@ -16,10 +16,9 @@
 
 from flask import Flask, render_template, request, send_file, g, jsonify, send_from_directory
 from flask import current_app
-import av
-import cv2
 import datetime
 import json
+import mimetypes
 from flask_socketio import SocketIO, emit
 import logging
 import os
@@ -71,8 +70,7 @@ ADDRESS = cfg[ADDRESS_KEY]
 
 WEB_URL = get_url(web=True,**cfg)
 
-from .expressor import VideoExpressor, VoiceExpressor
-vid_exp = VideoExpressor()
+from .expressor import PresetExpressor, VoiceExpressor
 voc_exp = VoiceExpressor(web_url=WEB_URL+'/'+UPLOAD_ROUTE)
 
 from .communicator import Communicator
@@ -95,7 +93,29 @@ lock = threading.Lock()
 app.config['MAX_CONTENT_LENGTH'] = 100*1024**2  # 100 MB
 
 ALLOWED_ORIGIN_FILE=os.path.join(app.root_path,CONST.ALLOWED_ORIGIN_FILE)
-allowed_origins = [WEB_URL]
+def build_allowed_origins(web_url, address, web_port, https_port=None, own_ip=None):
+    """
+    Origins (pages) that may connect to the socket: the page served by this app, reached via localhost, the
+    configured address, our own address, plain or behind the HTTPS proxy.
+    """
+    hosts = ["localhost", "127.0.0.1", address, own_ip]
+    ports = {"http": web_port}
+    if https_port:
+        ports["https"] = https_port
+    origins = [web_url]
+    for scheme, port in ports.items():
+        for host in hosts:
+            if host:
+                origin = f"{scheme}://{host}:{port}"
+                if origin not in origins:
+                    origins.append(origin)
+    return origins
+
+try:
+    _OWN_IP = utils.get_own_ip()
+except Exception:  # no network: localhost only
+    _OWN_IP = None
+allowed_origins = build_allowed_origins(WEB_URL, ADDRESS, WEB_PORT, cfg.get(CONST.HTTPS_PORT_KEY), _OWN_IP)
 if os.path.exists(ALLOWED_ORIGIN_FILE):
     with open(ALLOWED_ORIGIN_FILE,'r') as aof:
         allowed_origins += aof.read().splitlines()
@@ -104,28 +124,33 @@ socketio = SocketIO(app,cors_allowed_origins=allowed_origins)
 
 #g.socket_url = f"ws://127.0.0.1:{port}/"
 
+# the 3D character (Godot web export, see ui/) is shown in the page; expressions are sent to it as events
+mimetypes.add_type("application/wasm", ".wasm")
+CHARACTER_FOLDER = cfg.get(CONST.CHARACTER_DIR_KEY, CONST.DEFAULT_CHARACTER_DIR)
+if not os.path.isabs(CHARACTER_FOLDER):
+    CHARACTER_FOLDER = os.path.join(FPATH, CHARACTER_FOLDER)
+
 from .mia_logger import logger
 
 logger.debug('Start Logging')
 print("start")
 
 
-def get_video_frames(video_path):
-    logger.info("Getting video frames")
-    # Open the video file using av
-    with open(video_path, 'rb') as f:
-        stream = av.open(f)
-        for packet in stream.decode():
-            yield packet.to_image()
-    return "Video frames retrieved successfully"
+def send_expression(preset):
+    """
+    Tells all connected pages to let the character play the expression preset.
+    (socketio.emit like everywhere else, emit alone is fragile outside the flask context)
+    """
+    socketio.emit(CONST.EXPRESSION_EVENT, {"name": preset})
 
+pre_exp = PresetExpressor(send=send_expression)
+IDLE_EXPRESSION = "idle"
 
 def express_and_reload(expression,sound=True):
     """
-    Makes an expression and reloads everything.
+    Lets the character make the expression (and plays its voice clip).
     """
-    new_vid = vid_exp.express(expression)
-    reload_video(new_vid)
+    pre_exp.express(expression)
     if sound is True:
         voc_exp.express(expression)
 
@@ -388,23 +413,33 @@ def play_intro_sound():
 def index():
     logger.info('Rendering index.html template')
     print("Rendering index.html template")
-    vid_exp.express("idle")
     play_intro_sound()
     
     # start server
     renderer = render_template('index.html' ,socket_url=get_url(json=True,**cfg),name=md.convert("*MIA*",remove_paragraph=True))
     return renderer
 
-@socketio.on('reload_video')
-def reload_video(vid):
-    logger.info('Received signal to reload video')
-    # Update the video source here
-    url = vid
-    time.sleep(0.1)
-    # don´t forget: emit alone is fragile ...
-    # use socketio.emit like here.
-    # --> flask context
-    socketio.emit('video_updated', url)
+@socketio.on(CONST.CHARACTER_READY_EVENT)
+def character_ready(_=None):
+    """
+    A page loaded the character: show the current expression (idle after the start).
+    """
+    send_expression(pre_exp.current or pre_exp.express(IDLE_EXPRESSION))
+
+@app.route(f"/{CONST.CHARACTER_ROUTE}/")
+def character_index():
+    return character_file("index.html")
+
+@app.route(f"/{CONST.CHARACTER_ROUTE}/<path:filename>")
+def character_file(filename):
+    """
+    Serves the web export of the 3D character with the right MIME types (incl. .wasm).
+    """
+    if not os.path.isdir(CHARACTER_FOLDER):
+        return (f"Character not built yet. Run ui/tools/build_web.sh (expected in {CHARACTER_FOLDER}).", 404)
+    response = send_from_directory(CHARACTER_FOLDER, filename)
+    response.headers["Cache-Control"] = "no-cache"
+    return response
 
 
 @app.route(f"/{UPLOAD_ROUTE}", methods=["POST"])
@@ -447,7 +482,7 @@ def serve_audio(filename):
 @socketio.on('audio_ended')
 def cleanup_audio(vid):
     logger.info('Cleanup Audio File')
-    # Update the video source here
+    # delete the audio file that was played
     outfile = AUDIO_OUTFILE
     out_filename = os.path.join(AUDIO_FOLDER,AUDIO_OUTFILE)
     try:
@@ -467,5 +502,5 @@ def favicon():
 
 
 if __name__ == '__main__':
-    vid_exp.express("idle")
+    pre_exp.express(IDLE_EXPRESSION)
     socketio.run(app, debug=True,port=WEB_PORT)

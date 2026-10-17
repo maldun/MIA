@@ -1,8 +1,14 @@
 {
-"greet": {"vid": "greet000.mp4", "text": "Hello!", "voice": "Navi_Hello1.wav"}, 
-"no": {"vid": "no001.mp4", "text": "No no no!", "voice": "no.wav"}, 
-"annoyed": {"vid": "no002.mp4", "text": "Seriously?", "voice": "annoyed.wav"}, 
-"talk": {"vid": "talk004.mp4", "text": "Listen!", "voice": "hey_listen.wav"}, 
-"yes": {"vid": "yes001.mp4", "text": "Yes!", "voice": "yes.wav"}, 
-"idle": {"vid": "idle001.mp4", "text": "How can I help you?", "voice": "Navi_Hey1.wav"}
+"greet": {"preset": "greet", "text": "Hello!", "voice": "Navi_Hello1.wav"},
+"no": {"preset": "no", "text": "No no no!", "voice": "no.wav"},
+"annoyed": {"preset": "annoyed", "text": "Seriously?", "voice": "annoyed.wav"},
+"talk": {"preset": "talk", "text": "Listen!", "voice": "hey_listen.wav"},
+"yes": {"preset": "yes", "text": "Yes!", "voice": "yes.wav"},
+"idle": {"preset": "idle", "text": "How can I help you?", "voice": "Navi_Hey1.wav"},
+"sad": {"preset": "sad", "text": "Oh no...", "voice": null},
+"angry": {"preset": "angry", "text": "That is enough!", "voice": null},
+"surprised": {"preset": "surprised", "text": "Oh!", "voice": null},
+"embarrassed": {"preset": "embarrassed", "text": "Um... well...", "voice": null},
+"smug": {"preset": "smug", "text": "Hehe, of course.", "voice": null},
+"thinking": {"preset": "thinking", "text": "Hmm, let me think.", "voice": null}
 }

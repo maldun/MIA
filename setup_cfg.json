@@ -12,6 +12,7 @@
   "mode":"rocm",
   "timeout":3,
   "web_port":8585,
+  "https_port":8586,
   "sound_port":8595,
   "address":"localhost",
   "protocol":"http",

@@ -32,7 +32,14 @@
             height: 70vh;
         }
 
-        .video-container {
+        .character-container iframe {
+            border: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+        }
+
+        .character-container {
             display: flex;
             align-items: stretch;
             justify-content: stretch;
@@ -118,10 +125,8 @@
  <h1 style="color:white;">I am {{ name | safe}}, eager to help!</h1>
     <div class="grid">
         <div class="output-container">
-        <div class="video-container">
-            <video id="video" autoplay loop src="{{ url_for('static', filename='video.mp4') }}" onended="reloadVideo()">
-                Your browser does not support the video tag.
-            </video>
+        <div class="character-container">
+            <iframe id="character" src="{{ url_for('character_index') }}" title="MIA" allow="autoplay"></iframe>
           </div>
          <div class="text-output-container">>
             <!--<textarea id="answerText" rows="19" cols="67" class="background-text"></textarea>-->
@@ -145,20 +150,6 @@
    
 
 
-    <!-- rest of your code remains the same -->
-<!--<!DOCTYPE html>
-<html>
-<head>
-    <title>My Page</title>
-</head>
-<body>
-    <h1>Hello, {{ name }}!</h1>
-    <video id="video" width="400" autoplay loop src="{{ url_for('static', filename='video.mp4') }}" onended="reloadVideo()">
-        Your browser does not support the video tag.
-    </video>-->
-    <!--<input type="text" id="answerInput" placeholder="Type an answer...">
-    <button id="sendMessage">Send Answer</button>-->
-
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js" integrity="sha384-2huaZvOR9iDzHqslqwpR87isEmrfxqyWOF7hr7BY6KG0+hVKLoEXMPUJw3ynWuhO" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <!--<script src="{{ url_for('static', filename='script.js') }}"></script>-->
@@ -167,7 +158,8 @@
      let port = 8585; // or any other value you set in your Flask app
      const socketUrl = {{ socket_url | tojson }};
   //const socket = io('ws://127.0.0.1:' + port + '/', {
-  const socket = io(socketUrl.url, {
+  // connect to the server the page came from (works on localhost, in the LAN and behind an HTTPS proxy)
+  const socket = io(window.location.origin, {
   transport: ['websocket', 'polling'],
   reconnectionDelayMax: 10000,
   reconnectionInterval: 500
@@ -187,11 +179,26 @@ socket.on('disconnect', () => {
   console.log('Disconnected from the server');
 });
 
-socket.on('message', (data) => {
-  console.log(`Received message: ${data}`);
-  if (typeof data === 'string' && data.startsWith('video.mp4')) {
-    const newSrc = data;
-    document.getElementById('video').src = newSrc;
+// --- the 3D character (Godot web export in the iframe) -------------------------------------
+// MIA -> page: socket event "expression" -> character; the page tells the character when audio is playing
+const characterFrame = document.getElementById('character');
+function toCharacter(message) {
+  if (characterFrame.contentWindow) {
+    characterFrame.contentWindow.postMessage(JSON.stringify(message), window.location.origin);
+  }
+}
+socket.on('expression', (data) => {
+  toCharacter({type: 'expression', name: data.name});
+});
+window.addEventListener('message', (event) => {
+  if (event.origin !== window.location.origin || event.source !== characterFrame.contentWindow) {
+    return;
+  }
+  let message = {};
+  try { message = JSON.parse(event.data); } catch (e) { return; }
+  if (message.type === 'ready') {
+    // the character is loaded: it shows the current expression
+    socket.emit('character_ready');
   }
 });
 
@@ -202,15 +209,6 @@ socket.on('message', (data) => {
         
       });
 
-    socket.on('video_updated', (url) => {
-    // Update the video source here
-    //document.getElementById('video').src = url;
-    document.getElementById('video').src = "{{ url_for('static', filename='') }}" + url;
-    });
-      
-      function reloadVideo() {
-            //document.getElementById('video').src = "{{ url_for('static', filename='video.mp4') }}";
-      }
       
 
     // Add event listener for keyup (to detect when the user types)
@@ -258,6 +256,14 @@ socket.on('message', (data) => {
     var audio1 = document.getElementById("audio");
     audio1.onended = function() {
         socket.emit('audio_ended', "audio playback has ended");
+        toCharacter({type: 'speaking', value: false});
+    };
+    // the mouth of the character moves while MIA's voice plays
+    audio1.onplaying = function() {
+        toCharacter({type: 'speaking', value: true});
+    };
+    audio1.onpause = function() {
+        toCharacter({type: 'speaking', value: false});
     };
     socket.on('audio_reload', (data) => {
         // Update the audio here

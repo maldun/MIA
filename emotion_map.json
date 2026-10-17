@@ -1,8 +1,14 @@
 {
-    "agree":"yes",
-    "disagree":"no",
-    "neutral":"talk",
-    "annoyed":"annoyed",
-    "happy":"greet",
-    "MIA":"greet"
+    "agree": "yes",
+    "disagree": "no",
+    "neutral": "talk",
+    "annoyed": "annoyed",
+    "happy": "greet",
+    "MIA": "greet",
+    "sad": "sad",
+    "angry": "angry",
+    "surprised": "surprised",
+    "embarrassed": "embarrassed",
+    "smug": "smug",
+    "thinking": "thinking"
 }

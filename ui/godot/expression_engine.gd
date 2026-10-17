@@ -33,9 +33,12 @@ var gestures: GestureEngine   # arm poses; presets may start a gesture
 var library := {}        # preset name -> validated preset
 var library_order: Array[String] = []
 var current_name := ""
-## true while the character talks: the mouth moves (set by presets with "speaking": true,
-## or by a speech source via set_speaking())
-var speaking := false
+## true while the character talks: the mouth moves. Either the current preset speaks
+## ("speaking": true) or a speech source says so via set_speaking() (e.g. the voice is playing);
+## a new expression does not end the second kind.
+var speaking: bool:
+	get:
+		return _preset_speaking or _speech_active
 
 var _meshes: Array = []  # [{"mi": MeshInstance3D, "index": {shape name: index}}]
 var _shapes := {}        # all known shape key names
@@ -59,6 +62,8 @@ var _mouth := {}         # shown vowel weights while speaking
 var _mouth_target := {}
 var _mouth_wait := 0.0
 var _gesture_from_preset := false
+var _preset_speaking := false
+var _speech_active := false
 
 func setup(character: Node, skeleton: Skeleton3D) -> void:
 	_skeleton = skeleton
@@ -183,7 +188,7 @@ func play(preset_name: String, duration := -1.0, with_gesture := true) -> bool:
 	return true
 
 func set_speaking(value: bool) -> void:
-	speaking = value
+	_speech_active = value
 
 ## Plays any preset dictionary (e.g. from the editor or the LLM); it is validated first.
 func apply_preset(preset: Dictionary, duration := -1.0, with_gesture := true) -> bool:
@@ -198,7 +203,7 @@ func apply_preset(preset: Dictionary, duration := -1.0, with_gesture := true) ->
 	_dur = default_duration if duration < 0.0 else duration
 	_t = 0.0 if _dur > 0.0 else 1.0
 	current_name = p["name"]
-	speaking = p["speaking"]
+	_preset_speaking = p["speaking"]
 	if with_gesture and gestures != null and not String(p["gesture"]).is_empty():
 		_gesture_from_preset = true
 		gestures.play(p["gesture"])

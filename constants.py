@@ -18,8 +18,18 @@ TEXT_FONT = 'Arial, cursive'
 # Important config keys for expressions
 EXPRESSION_FILE = "expressions.json"
 TEXT_KEY = "text"
-VIDEO_KEY = "vid"
+PRESET_KEY = "preset"  # name of the character expression preset (default: the expression key itself)
 VOICE_KEY = "voice"
+
+# folder with the web export of the 3D character (ui/godot), relative to this folder or absolute
+CHARACTER_DIR_KEY = "character_dir"
+DEFAULT_CHARACTER_DIR = "ui/godot/build/web"
+CHARACTER_ROUTE = "character"
+EXPRESSION_EVENT = "expression"      # socket.io event MIA -> page -> character
+CHARACTER_READY_EVENT = "character_ready"
+# optional: port of an HTTPS proxy in front of the web app (ui/tools/https_proxy.sh). Browsers only run the
+# character (and use audio worklets) in a secure context, i.e. on localhost or over HTTPS.
+HTTPS_PORT_KEY = "https_port"
 
 # Important Config Keys for URL
 ADDRESS_KEY = "address"

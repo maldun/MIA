@@ -21,6 +21,7 @@ var _pinch_start := 0.0
 var _pinch_dist_start := 0.0
 
 var engine: ExpressionEngine
+var bridge: HostBridge
 var _bar: Control
 var _buttons := {}  # "expression:<name>" / "gesture:<name>" -> Button (highlighted while active)
 
@@ -69,6 +70,9 @@ func _setup_expressions() -> void:
 	engine.setup(character, skeleton)  # also puts the arms into the relaxed base pose
 	engine.load_library("res://presets/library.json")
 	engine.play("idle", 0.0)
+	bridge = HostBridge.new()
+	add_child(bridge)
+	bridge.setup(engine)  # commands from the page around us (MIA's chat page)
 
 # --- camera ---------------------------------------------------------------------------------
 
@@ -156,7 +160,8 @@ func _unhandled_input(event: InputEvent) -> void:
 # temporary (the slider editor of phase 6 replaces it); collapsible for phones
 
 func _build_panel() -> void:
-	if engine == null:
+	# inside MIA's page the dev menu is hidden (add ?menu to the URL to see it anyway)
+	if engine == null or (HostBridge.is_embedded() and not HostBridge.has_url_flag("menu")):
 		return
 	var layer := CanvasLayer.new()
 	add_child(layer)
