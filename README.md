@@ -102,6 +102,7 @@ Prerequisites:
     - "rvc_enabled":true, (enable,disable rvc)
     - "sentence_pause":0.3, (extra pause in seconds between spoken sentences)
     - "tts_device":"cpu", (device for tts, either cuda/cpu, for some reason cpu worked better ...)
+    - "cpu_threads":4, (optional: at most this many CPU threads for the speech process (torch for RVC/Coqui, onnxruntime for Kokoro, numpy) and for Ollama's runner (`num_thread`); without it (or 0) every library uses all cores. A lower number puts less load on the CPU at the price of slower speech. An explicit "num_thread" in "llm_options" wins. After changing it the first request reloads the model once.)
     - "gfx_version":"11.0.0", (flag used for roc)
     - "voice_sample":"/path/to/MIA/voice/samples/miku_vocals.wav",(voice sample for tts voice cloning)
     - "history_file":"memories.json" (MIA's memory)

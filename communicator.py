@@ -28,11 +28,13 @@ try:
     from .constants import CFG_FILE, TEXT_COLS, TIME_FORMAT, LOCALHOST
     from .constants import NEUTRAL_EMOTION_KEY, TIME_BEFORE_KEY, SIGNAL_EMOTION_KEY
     from . import utils
+    from .cpu_threads import parse as parse_cpu_threads, add_to_llm_options
 except ImportError:
     from mia_logger import logger
     from constants import CFG_FILE, TEXT_COLS, TIME_FORMAT, LOCALHOST
     from constants import NEUTRAL_EMOTION_KEY, TIME_BEFORE_KEY, SIGNAL_EMOTION_KEY
     import utils
+    from cpu_threads import parse as parse_cpu_threads, add_to_llm_options
 
 curr_path = os.path.split(__file__)[0]
 EMOTION_EXPRESSION_MAP = os.path.join(curr_path,"emotion_map.json")
@@ -94,7 +96,7 @@ class Communicator:
     
     def __init__(self,port=11434,address="localhost",protocol="http",version="llama3.2",
                  history_file="memories.json",neutral_emotion="disagree",time_before="1 hour",task_key="TASK",summary_words=2000,calibration_file="calibration.txt",
-                 long_time_history_file="long_time_history.json",max_conversations=30,llm_options=None,think=None,version_light=None,llm_options_light=None,keep_alive=None,default_profile=None,**_):
+                 long_time_history_file="long_time_history.json",max_conversations=30,llm_options=None,think=None,version_light=None,llm_options_light=None,keep_alive=None,default_profile=None,cpu_threads=None,**_):
         self.port = port
         self.address = address
         self.protocol = protocol
@@ -104,6 +106,11 @@ class Communicator:
         self.think = think
         # how long Ollama keeps the model loaded after a request (None = Ollama default of 5 minutes)
         self.keep_alive = keep_alive
+        # at most this many CPU threads for Ollama's runner ("num_thread"); None = Ollama decides
+        self.cpu_threads = parse_cpu_threads(cpu_threads)
+        llm_options = add_to_llm_options(llm_options, self.cpu_threads)
+        llm_options_light = add_to_llm_options(llm_options_light, self.cpu_threads)
+        self.llm_options = llm_options
         # model profiles: the full model and an optional light one,
         # which can be switched at runtime (e.g. if the GPU is needed otherwise)
         self._profiles = {self.FULL_PROFILE:(version,llm_options)}

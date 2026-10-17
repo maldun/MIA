@@ -19,6 +19,13 @@
 import argparse
 import json
 import os
+import sys
+# CPU thread limit ("cpu_threads" in the cfg file): the environment has to be set before numpy and torch are imported
+try:
+    from .cpu_threads import early_limit_from_argv, parse as parse_cpu_threads, limit_environment, limit_torch, onnx_session_options
+except ImportError:
+    from cpu_threads import early_limit_from_argv, parse as parse_cpu_threads, limit_environment, limit_torch, onnx_session_options
+early_limit_from_argv(sys.argv, default_cfg=os.path.join(os.path.split(__file__)[0], "setup_cfg.json"))
 import torch
 from rvc_python.infer import RVCInference
 import pyaudio  
@@ -67,7 +74,7 @@ class Speaker:
     FIRST_CHUNK_SENTENCES = 1
     CHUNK_SENTENCES = 1
     def __init__(self,tts_model=TTS_DEFAULT,voice_model=None,tts_device=None,gfx_version=None,voice_sample=None,rvc_opts=None,rvc_params=None,rvc_enabled=True,
-                 web_port=8585,address="localhost",protocol="http",tts_engine=COQUI_ENGINE,kokoro_opts=None,sentence_pause=0.3,**_):
+                 web_port=8585,address="localhost",protocol="http",tts_engine=COQUI_ENGINE,kokoro_opts=None,sentence_pause=0.3,cpu_threads=None,**_):
         self._tts_engine = tts_engine
         self._kokoro_opts = dict(self.KOKORO_DEFAULTS, **(kokoro_opts or {}))
         # extra wait after each chunk to cover upload and player start in the browser
@@ -87,6 +94,13 @@ class Speaker:
         
         if gfx_version is not None:
             os.environ["HSA_OVERRIDE_GFX_VERSION"] = gfx_version
+
+        # at most this many CPU threads for torch (RVC, Coqui) and onnxruntime (Kokoro); None = all cores
+        self._cpu_threads = parse_cpu_threads(cpu_threads)
+        if self._cpu_threads:
+            limit_environment(self._cpu_threads)
+            limit_torch(self._cpu_threads)
+            logger.info(f"speech: using at most {self._cpu_threads} CPU threads")
         
         if tts_device is None:
             self._device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -113,8 +127,17 @@ class Speaker:
         # engines are imported lazily so that only the used one has to be installed
         if self._tts_engine == self.KOKORO_ENGINE:
             from kokoro_onnx import Kokoro
-            self._tts = Kokoro(self._resolve_path(self._kokoro_opts["model"]),
-                               self._resolve_path(self._kokoro_opts["voices"]))
+            model = self._resolve_path(self._kokoro_opts["model"])
+            voices = self._resolve_path(self._kokoro_opts["voices"])
+            options = onnx_session_options(self._cpu_threads)
+            if options is None:
+                self._tts = Kokoro(model, voices)
+            else:
+                # same session as Kokoro makes itself, but with the thread limit
+                import onnxruntime as ort
+                from kokoro_onnx.session import resolve_providers
+                session = ort.InferenceSession(model, sess_options=options, providers=resolve_providers())
+                self._tts = Kokoro.from_session(session, voices)
         elif self._tts_engine == self.COQUI_ENGINE:
             from TTS.api import TTS
             self._tts = TTS(model_name=tts_model).to(device)
