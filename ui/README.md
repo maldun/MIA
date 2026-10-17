@@ -127,7 +127,7 @@ The chat page connects to the socket of the address it was loaded from, so the s
   MIA's emotions use, `?force=1` overrides), `GET /api/shape-keys`, `GET /api/gestures`.
   Values are corrected like in the character (unknown shape keys, bones and gestures removed, values clamped) and reported as `corrections`.
 - **Safety:** writing needs `Content-Type: application/json` (no cross-site form posts), a known origin if the browser sends one
-  (the page's own address is always fine), and the header `X-MIA-Token` if `editor_token` is set. Names are 1-40 letters, digits, `-`, `_`
+  (the page's own address is always fine), and the header `X-MIA-Token`. The token is created on the first start (`data/editor_token.txt`, mode 600, not in version control, printed at start); `editor_token` in the configuration overrides it, `""` switches it off. Desktop clients (tests) read it from `MIA_TOKEN` or the file `MIA_TOKEN_FILE`. Names are 1-40 letters, digits, `-`, `_`
   (no paths), files are written atomically, bodies over 64 KB are refused.
 - **Character:** `godot/preset_api.gd` (client, polls the version every 10 s so other devices' changes show up; offline it keeps the
   bundled presets), `godot/expression_editor.gd` (the panel: right side on wide screens, bottom sheet on phones, big slider handles,

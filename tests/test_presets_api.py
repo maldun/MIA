@@ -169,9 +169,8 @@ class ApiTest(unittest.TestCase):
         tmp = tempfile.TemporaryDirectory()
         self.addCleanup(tmp.cleanup)
         app = Flask("test")
-        cfg = {"presets_dir": os.path.join(tmp.name, "presets")}
-        if token:
-            cfg["editor_token"] = token
+        cfg = {"presets_dir": os.path.join(tmp.name, "presets"), "editor_token": token or "",   # "" = no token
+               "editor_token_file": os.path.join(tmp.name, "token.txt")}
         self.store = pa.init_presets_api(app, cfg, REPO, allowed_origins=lambda: ["http://good.example:8585"])
         return app.test_client()
 
@@ -266,6 +265,61 @@ class ApiTest(unittest.TestCase):
         http = self.make_client()
         r = http.post("/api/presets", json=smug(description="x" * 100000))
         self.assertEqual(r.status_code, 413)
+
+
+class TokenDefaultTest(unittest.TestCase):
+    """without "editor_token" in the configuration a token is generated and kept outside of it"""
+
+    def make(self, **cfg_extra):
+        from flask import Flask
+        pa = importlib.import_module("MIA.presets_api")
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        token_file = os.path.join(tmp.name, "data", "token.txt")
+        cfg = {"presets_dir": os.path.join(tmp.name, "presets"), "editor_token_file": token_file}
+        cfg.update(cfg_extra)
+        app = Flask("test")
+        pa.init_presets_api(app, cfg, REPO)
+        return app, app.test_client(), token_file, cfg
+
+    def test_a_token_is_generated_and_required(self):
+        app, http, token_file, _ = self.make()
+        token, source = app.config["EDITOR_TOKEN_INFO"]
+        self.assertGreaterEqual(len(token), 16)
+        self.assertEqual(source, token_file)
+        with open(token_file) as fp:
+            self.assertEqual(fp.read().strip(), token)
+        self.assertEqual(oct(os.stat(token_file).st_mode & 0o777), "0o600")          # only the owner can read it
+        self.assertTrue(http.get("/api/presets").get_json()["token_required"])
+        self.assertEqual(http.post("/api/presets", json=smug()).status_code, 401)
+        self.assertEqual(http.post("/api/presets", json=smug(), headers={"X-MIA-Token": token}).status_code, 201)
+
+    def test_the_token_stays_the_same_after_a_restart(self):
+        app, _, token_file, cfg = self.make()
+        first = app.config["EDITOR_TOKEN_INFO"][0]
+        from flask import Flask
+        pa = importlib.import_module("MIA.presets_api")
+        again = Flask("again")
+        pa.init_presets_api(again, cfg, REPO)
+        self.assertEqual(again.config["EDITOR_TOKEN_INFO"][0], first)
+
+    def test_configured_token_wins_over_the_file(self):
+        app, http, token_file, _ = self.make(editor_token="from-config")
+        self.assertEqual(app.config["EDITOR_TOKEN_INFO"], ("from-config", "setup_cfg.json"))
+        self.assertFalse(os.path.exists(token_file))                                      # nothing is generated
+        self.assertEqual(http.post("/api/presets", json=smug(), headers={"X-MIA-Token": "from-config"}).status_code, 201)
+
+    def test_the_token_can_be_switched_off(self):
+        for off in ["", "  ", False, None]:
+            app, http, token_file, _ = self.make(editor_token=off)
+            self.assertIsNone(app.config["EDITOR_TOKEN_INFO"][0], repr(off))
+            self.assertFalse(http.get("/api/presets").get_json()["token_required"])
+            self.assertEqual(http.post("/api/presets", json=smug()).status_code, 201)
+            self.assertFalse(os.path.exists(token_file))
+
+    def test_the_token_file_is_not_under_version_control(self):
+        ignore = open(os.path.join(REPO, ".gitignore")).read()
+        self.assertIn("data/", ignore)    # data/editor_token.txt is the default place
 
 
 class WebAppWiring(unittest.TestCase):

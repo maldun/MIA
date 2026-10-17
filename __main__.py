@@ -66,6 +66,11 @@ if __name__ == "__main__":
             host = cfg.get("host","0.0.0.0")
             https_proc = start_https_proxy(cfg,fpath,WEB_PORT)
             print(f"MIA: http://localhost:{WEB_PORT}")
+            token, token_source = app.config.get("EDITOR_TOKEN_INFO", (None, ""))
+            if token:
+                print(f"Expression editor token (asked once per device before presets can be changed): {token}   [{token_source}]")
+            else:
+                print("Expression editor: no token, everyone who can reach the page may change presets")
             if https_proc is not None:
                 print(f"MIA (https, for other devices): https://{host_ip}:{cfg[HTTPS_PORT_KEY]}")
             socketio.run(app, host=host,debug=False,port=WEB_PORT)

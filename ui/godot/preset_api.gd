@@ -31,12 +31,16 @@ static func detect_base_url() -> String:
 		return str(JavaScriptBridge.eval("window.location.origin"))
 	return OS.get_environment("MIA_URL")
 
-## the token is kept in the browser's local storage (not in the page)
+## the token is kept in the browser's local storage (not in the page); on the desktop it comes from MIA_TOKEN or the file MIA_TOKEN_FILE
 static func stored_token() -> String:
-	if OS.has_feature("web"):
-		var value = JavaScriptBridge.eval("(function(){try{return window.localStorage.getItem('%s')||''}catch(e){return ''}})()" % TOKEN_STORAGE_KEY)
-		return str(value)
-	return ""
+	if not OS.has_feature("web"):
+		var from_env := OS.get_environment("MIA_TOKEN")
+		var file := OS.get_environment("MIA_TOKEN_FILE")   # e.g. MIA's data/editor_token.txt
+		if from_env.is_empty() and not file.is_empty() and FileAccess.file_exists(file):
+			return FileAccess.get_file_as_string(file).strip_edges()
+		return from_env
+	var value = JavaScriptBridge.eval("(function(){try{return window.localStorage.getItem('%s')||''}catch(e){return ''}})()" % TOKEN_STORAGE_KEY)
+	return str(value)
 
 static func store_token(value: String) -> void:
 	if OS.has_feature("web"):

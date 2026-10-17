@@ -1,6 +1,6 @@
 extends SceneTree
 # End-to-end: the editor against a running MIA web app (real HTTP), with a second client as "another device".
-# Start MIA's web app first. Run: MIA_URL=http://localhost:8585 godot --headless --path ui/godot --script res://tools/test_editor_live.gd
+# Start MIA's web app first. Run: MIA_URL=http://localhost:8585 MIA_TOKEN_FILE=data/editor_token.txt godot --headless --path ui/godot --script res://tools/test_editor_live.gd
 # (needs a display or --headless; creates and deletes a preset called live_test_*)
 
 var failures := 0
@@ -37,6 +37,21 @@ func _init() -> void:
 	check(await wait_for(func(): return api.available), "the character connects to MIA's preset server (%s)" % url)
 	check(await wait_for(func(): return eng.library.size() >= 14), "the presets of the server are loaded (%d)" % eng.library.size())
 	check("idle" in api.protected_names, "the server tells which presets MIA's emotions use")
+
+	# a client without the token may read but not change (MIA_TOKEN or MIA_TOKEN_FILE hold the token for this test)
+	if api.token_required:
+		var anonymous := PresetApi.new()
+		main.add_child(anonymous)
+		anonymous.setup(url)
+		anonymous.token = ""
+		anonymous.refresh()
+		await wait_for(func(): return anonymous.available)
+		var refused := [""]
+		anonymous.operation_done.connect(func(_k, ok: bool, message: String, _d): refused[0] = "ok" if ok else message)
+		anonymous.create({"name": "live_test_anonymous", "weights": {}})
+		await wait_for(func(): return refused[0] != "")
+		check(anonymous.available and refused[0].contains("token"), "without the token reading works but changing is refused (%s)" % refused[0])
+		check(not api.token.is_empty(), "this client has the token (MIA_TOKEN / MIA_TOKEN_FILE)")
 
 	var created := "live_test_%d" % (Time.get_ticks_msec() % 100000)
 	ed.open()

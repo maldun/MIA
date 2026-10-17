@@ -35,16 +35,19 @@ sends one, and the header X-MIA-Token if "editor_token" is set in setup_cfg.json
 import hmac
 import json
 import os
+import secrets
 from urllib.parse import urlparse
 
 from flask import Blueprint, jsonify, request
 
 try:
     from .constants import PRESETS_DIR_KEY, DEFAULT_PRESETS_DIR, EDITOR_TOKEN_KEY, EXPRESSION_FILE, TOKEN_HEADER
+    from .constants import EDITOR_TOKEN_FILE_KEY, DEFAULT_EDITOR_TOKEN_FILE
     from .mia_logger import logger
     from .preset_store import PresetStore, PresetError
 except ImportError:  # used as plain script / in tests
     from constants import PRESETS_DIR_KEY, DEFAULT_PRESETS_DIR, EDITOR_TOKEN_KEY, EXPRESSION_FILE, TOKEN_HEADER
+    from constants import EDITOR_TOKEN_FILE_KEY, DEFAULT_EDITOR_TOKEN_FILE
     from mia_logger import logger
     from preset_store import PresetStore, PresetError
 
@@ -61,6 +64,37 @@ def mia_presets(root):
     except (OSError, ValueError):
         return set()
     return {entry.get("preset", key) for key, entry in expressions.items() if isinstance(entry, dict)}
+
+
+def resolve_token(cfg, root):
+    """
+    The token that changing presets needs, and where it comes from: (token or None, description).
+    "editor_token" in the configuration wins ("" or false switch the token off). If the key is missing, a random
+    token is created on the first start and kept in "editor_token_file" (default data/editor_token.txt, only the
+    owner can read it): no secret in the configuration file, which is under version control.
+    """
+    if EDITOR_TOKEN_KEY in cfg:
+        value = cfg[EDITOR_TOKEN_KEY]
+        if isinstance(value, str) and value.strip():
+            return value.strip(), "setup_cfg.json"
+        return None, "switched off in setup_cfg.json"
+    path = cfg.get(EDITOR_TOKEN_FILE_KEY, DEFAULT_EDITOR_TOKEN_FILE)
+    if not os.path.isabs(path):
+        path = os.path.join(root, path)
+    try:
+        with open(path) as fp:
+            token = fp.read().strip()
+        if token:
+            return token, path
+    except OSError:
+        pass
+    token = secrets.token_urlsafe(16)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    with os.fdopen(fd, "w") as fp:
+        fp.write(token + "\n")
+    logger.info(f"preset editor: new token created in {path}")
+    return token, path
 
 
 def create_store(cfg, root):
@@ -174,8 +208,8 @@ def create_blueprint(store, root, token=None, allowed_origins=None):
 def init_presets_api(app, cfg, root, allowed_origins=None):
     """creates the store and registers the API at the Flask app; returns the store"""
     store = create_store(cfg, root)
-    token = cfg.get(EDITOR_TOKEN_KEY) or None
+    token, source = resolve_token(cfg, root)
+    app.config["EDITOR_TOKEN_INFO"] = (token, source)
     app.register_blueprint(create_blueprint(store, root, token=token, allowed_origins=allowed_origins))
-    if token:
-        logger.info("preset editor: changing presets needs the editor token")
+    logger.info("preset editor: changing presets needs the editor token (%s)" % source if token else "preset editor: no token, everyone who can reach the page may change presets")
     return store

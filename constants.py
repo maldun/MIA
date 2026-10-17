@@ -40,7 +40,9 @@ BACKGROUND_EXTENSIONS = (".png", ".jpg", ".jpeg", ".webp")
 # "editor_token": optional secret that changing presets needs (header X-MIA-Token), see presets_api.py
 PRESETS_DIR_KEY = "presets_dir"
 DEFAULT_PRESETS_DIR = "data/presets"
-EDITOR_TOKEN_KEY = "editor_token"
+EDITOR_TOKEN_KEY = "editor_token"            # "" or false: no token; missing: a token is generated on first start
+EDITOR_TOKEN_FILE_KEY = "editor_token_file"
+DEFAULT_EDITOR_TOKEN_FILE = "data/editor_token.txt"
 TOKEN_HEADER = "X-MIA-Token"
 BACKGROUND_LIST_ROUTE = "character-backgrounds.json"
 BACKGROUND_ROUTE = "character-backgrounds"
