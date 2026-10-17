@@ -57,3 +57,13 @@ Godot lists 57 blend shapes: the 58 Blender keys minus the `Basis` reference key
 - Fixed: in Godot 4 a bone pose is the *absolute* local transform, not an offset from rest. The first engine version set the
   eye bones to "identity", which rotated them 90 degrees and hid the irises. The same mistake is fixed in the arm pose.
   `godot/tools/eye_closeup.gd` renders an eye close-up for checking this.
+
+### Gesture rework (hands, palms, speaking)
+
+- `gesture_engine.gd` now poses arms from directions + palm directions and curls the fingers (poses: relaxed, open, fist, point).
+  `explain` (palm-up open hand) replaced pointing for `talk`; `point` (index finger out) stays available.
+- A gesture started from the menu also shows its face (`"expression"` in `gestures.json`); presets that start a gesture do not loop back.
+- `talk` has `"speaking": true`: the mouth moves through vowels (`Fcl_MTH_A/I/U/E/O`).
+- Menu: the active expression/gesture is highlighted, "stop gesture" is the first button of the gesture row.
+- Taps on a phone: `emulate_mouse_from_touch` is on again (buttons need it); the camera code ignores the emulated mouse events.
+- Tests: `tools/test_expressions.gd` (headless) and `tools/test_menu.gd` (presses the menu buttons; run it with a window to include real clicks).

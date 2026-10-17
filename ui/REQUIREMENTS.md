@@ -88,11 +88,15 @@ Key design decisions:
   - everything MIA already uses (one preset per key of `expressions.json`): `greet`, `no`, `annoyed`, `talk`, `yes`, `idle`;
   - the suggested starters: `neutral`, `happy`, `sad`, `angry`, `surprised`, `embarrassed`, `smug`, `thinking`.
   - The old videos only conveyed the mood; the presets keep that mood (e.g. `yes` = agreeing smile, `no` = stern, `annoyed` = half-lidded "Seriously?", `talk` = attentive, `idle` = friendly waiting face).
-- **Gestures (arms):** the arms hang relaxed by default. A gesture is a short keyframed arm animation from `presets/gestures.json`
-  (12 so far: wave, point, shrug, think, hands_on_hips, hand_on_hip, arms_crossed, wave_off, hands_up, cheer, fist_pump, clasp).
-  A preset may name one with `"gesture"`; playing the preset starts it, after its duration the arms ease back. Gestures can
-  also be played on their own through the same central API. Arm angles are authored per limb as `[elev, swing, twist]` (see `gesture_engine.gd`).
-  Known limit: no collision with the jacket, so crossed or clasped arms partly disappear inside it.
+- **Gestures (arms, hands):** the arms hang relaxed by default. A gesture is a short keyframed arm and hand animation from `presets/gestures.json`
+  (13 so far: wave, point, explain, shrug, think, hands_on_hips, hand_on_hip, arms_crossed, wave_off, hands_up, cheer, fist_pump, clasp).
+  Limbs are authored as directions `[forward, up, outward]` with an optional `palm` direction (e.g. towards the viewer, or up); fingers use named poses
+  (`relaxed`, `open`, `fist`, `point` = index finger out, rest in a fist). See `gesture_engine.gd`.
+  A preset may name a gesture with `"gesture"`; playing the preset starts it. A gesture also names its facial `"expression"`, so playing a gesture on its own
+  (e.g. from the menu) brings that face (cheer = happy). After the gesture's duration the arms ease back; "stop" returns them right away.
+  Known limit: no collision with the jacket; the long sleeve cuffs hide most of the hands.
+- **Speaking:** a preset with `"speaking": true` (`talk`) animates the mouth through random vowel shapes until another preset is played. A speech source can
+  call `set_speaking()` for the same effect (real lip sync stays out of scope).
 - **Camera:** default view shows the whole figure; named views `body`, `bust`, `face`; orbit/zoom with mouse and touch.
 - `bones` supports `head_pitch`, `head_yaw`, `head_roll`, `eye_yaw`, `eye_pitch` (degrees). The model has no jaw bone, so mouth opening goes through the `Fcl_MTH_*` shape keys.
 - `source` is one of `manual`, `llm`, `llm_edited`.

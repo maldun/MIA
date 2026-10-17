@@ -2,7 +2,7 @@
   "presets": [
     {"name": "neutral", "description": "relaxed resting face", "weights": {}, "bones": {}, "tags": ["neutral", "calm"], "source": "manual"},
     {"name": "idle", "description": "friendly waiting face, faint smile (\"How can I help you?\")", "weights": {"Fcl_MTH_Fun": 0.3, "Fcl_BRW_Fun": 0.2}, "bones": {}, "tags": ["neutral", "friendly", "waiting"], "source": "manual"},
-    {"name": "talk", "description": "attentive, slightly engaged (\"Listen!\")", "weights": {"Fcl_MTH_Fun": 0.25, "Fcl_BRW_Fun": 0.15, "Fcl_EYE_Surprised": 0.1}, "bones": {}, "gesture": "point", "tags": ["neutral", "attentive"], "source": "manual"},
+    {"name": "talk", "description": "attentive, slightly engaged (\"Listen!\")", "weights": {"Fcl_MTH_Fun": 0.25, "Fcl_BRW_Fun": 0.15, "Fcl_EYE_Surprised": 0.1}, "bones": {}, "gesture": "explain", "speaking": true, "tags": ["neutral", "attentive"], "source": "manual"},
     {"name": "greet", "description": "cheerful hello, warm open smile (\"Hello!\")", "weights": {"Fcl_MTH_Joy": 0.7, "Fcl_BRW_Joy": 0.4, "Fcl_EYE_Joy": 0.3}, "bones": {"head_roll": 3.0}, "gesture": "wave", "tags": ["happy", "greeting"], "source": "manual"},
     {"name": "yes", "description": "agreeing, pleased smile (\"Yes!\")", "weights": {"Fcl_MTH_Fun": 0.55, "Fcl_BRW_Joy": 0.3, "Fcl_EYE_Fun": 0.2}, "bones": {"head_pitch": 4.0}, "gesture": "fist_pump", "tags": ["agree", "happy"], "source": "manual"},
     {"name": "no", "description": "stern disagreement (\"No no no!\")", "weights": {"Fcl_MTH_Angry": 0.6, "Fcl_BRW_Angry": 0.5, "Fcl_EYE_Angry": 0.3}, "bones": {"head_yaw": -4.0}, "gesture": "wave_off", "tags": ["disagree", "stern"], "source": "manual"},

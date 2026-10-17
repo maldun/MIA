@@ -22,6 +22,7 @@ var _pinch_dist_start := 0.0
 
 var engine: ExpressionEngine
 var _bar: Control
+var _buttons := {}  # "expression:<name>" / "gesture:<name>" -> Button (highlighted while active)
 
 func _ready() -> void:
 	_setup_environment()
@@ -117,6 +118,9 @@ func _zoom(factor: float) -> void:
 	_distance_goal = clampf(_distance_goal * factor, MIN_DISTANCE, MAX_DISTANCE)
 
 func _unhandled_input(event: InputEvent) -> void:
+	# mouse events emulated from touches are ignored here: touches are handled below
+	if event is InputEventMouse and event.device == InputEvent.DEVICE_ID_EMULATION:
+		return
 	# mouse: left drag orbits, wheel zooms
 	if event is InputEventMouseMotion and (event.button_mask & MOUSE_BUTTON_MASK_LEFT):
 		yaw -= event.relative.x * 0.006
@@ -168,12 +172,29 @@ func _build_panel() -> void:
 	_bar.visible = false  # start collapsed so the whole figure is visible
 	root.add_child(_bar)
 	_add_row("Camera", ["body", "bust", "face"], show_view)
-	_add_row("Expression", engine.library_order, engine.play)
-	_add_row("Gesture", engine.gestures.library_order, engine.gestures.play)
-	_add_row("", ["stop gesture"], func(_n): engine.gestures.stop())
+	_add_row("Expression", engine.library_order, engine.play, "expression")
+	_add_row("Gesture", ["stop gesture"] + engine.gestures.library_order, _gesture_button, "gesture")
 	toggle.pressed.connect(func(): _bar.visible = not _bar.visible)
+	engine.expression_changed.connect(func(_n): _refresh_active())
+	engine.gestures.gesture_started.connect(func(_n): _refresh_active())
+	engine.gestures.gesture_finished.connect(func(_n): _refresh_active())
+	_refresh_active()
 
-func _add_row(title: String, names: Array, callback: Callable) -> void:
+func _gesture_button(item: String) -> void:
+	if item == "stop gesture":
+		engine.gestures.stop()
+	else:
+		engine.gestures.play(item)
+
+## highlights the buttons of the expression and gesture that are active right now
+func _refresh_active() -> void:
+	for key in _buttons:
+		var parts: PackedStringArray = key.split(":")
+		var active := (parts[0] == "expression" and parts[1] == engine.current_name) \
+				or (parts[0] == "gesture" and parts[1] == engine.gestures.current)
+		(_buttons[key] as Button).modulate = Color(1.0, 0.85, 0.35) if active else Color.WHITE
+
+func _add_row(title: String, names: Array, callback: Callable, kind := "") -> void:
 	if not title.is_empty():
 		var label := Label.new()
 		label.text = title
@@ -187,3 +208,5 @@ func _add_row(title: String, names: Array, callback: Callable) -> void:
 		b.custom_minimum_size = Vector2(100, 48)
 		b.pressed.connect(callback.bind(item))
 		flow.add_child(b)
+		if not kind.is_empty():
+			_buttons[kind + ":" + item] = b

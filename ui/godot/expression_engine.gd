@@ -4,7 +4,7 @@ extends Node
 ## MIA bridge, editor, LLM, ...) only calls play() / apply_preset().
 ##
 ## Preset: {"name", "description", "weights": {shape key: 0..1}, "bones": {param: degrees},
-##          "gesture": optional name from gestures.json, "tags": [], "source": "manual" | "llm" | "llm_edited"}
+##          "gesture": optional name from gestures.json, "speaking": bool (animated mouth), "tags": [], "source": "manual" | "llm" | "llm_edited"}
 ## Bone params: head_pitch (+ = looks down), head_yaw (+ = turns to the viewer's right),
 ## head_roll (+ = top of the head to the viewer's left), eye_yaw, eye_pitch (same signs).
 
@@ -20,6 +20,9 @@ const BLINK_CLOSE_TIME := 0.07
 const BLINK_OPEN_TIME := 0.12
 const BLINK_MIN_INTERVAL := 2.5
 const BLINK_MAX_INTERVAL := 6.0
+## mouth shapes used while "speaking" (vowel keys of the model)
+const VOWELS := ["Fcl_MTH_A", "Fcl_MTH_I", "Fcl_MTH_U", "Fcl_MTH_E", "Fcl_MTH_O"]
+const MOUTH_FOLLOW := 18.0
 
 var default_duration := 0.25
 ## "smooth" (smoothstep), "linear", "sine" or "cubic"
@@ -30,6 +33,9 @@ var gestures: GestureEngine   # arm poses; presets may start a gesture
 var library := {}        # preset name -> validated preset
 var library_order: Array[String] = []
 var current_name := ""
+## true while the character talks: the mouth moves (set by presets with "speaking": true,
+## or by a speech source via set_speaking())
+var speaking := false
 
 var _meshes: Array = []  # [{"mi": MeshInstance3D, "index": {shape name: index}}]
 var _shapes := {}        # all known shape key names
@@ -49,6 +55,10 @@ var _applied := {}       # shape keys written last frame
 var _clock := 0.0
 var _blink_wait := 3.0
 var _blink_time := -1.0  # < 0: not blinking
+var _mouth := {}         # shown vowel weights while speaking
+var _mouth_target := {}
+var _mouth_wait := 0.0
+var _gesture_from_preset := false
 
 func setup(character: Node, skeleton: Skeleton3D) -> void:
 	_skeleton = skeleton
@@ -71,6 +81,7 @@ func setup(character: Node, skeleton: Skeleton3D) -> void:
 	add_child(gestures)
 	gestures.setup(skeleton)
 	gestures.load_library("res://presets/gestures.json")
+	gestures.gesture_started.connect(_on_gesture_started)
 
 func get_shape_names() -> Array:
 	var names := _shapes.keys()
@@ -141,6 +152,7 @@ func validate(raw) -> Dictionary:
 	if not ["manual", "llm", "llm_edited"].has(source):
 		corrections.append("unknown source '%s' set to manual" % source)
 		source = "manual"
+	var speaks := bool(raw.get("speaking", false))
 	var gesture := ""
 	if raw.has("gesture"):
 		gesture = str(raw["gesture"])
@@ -153,7 +165,7 @@ func validate(raw) -> Dictionary:
 			tags.append(str(t))
 	_log_corrections(name, corrections)
 	return {"preset": {"name": name, "description": str(raw.get("description", "")),
-			"weights": weights, "bones": bones, "gesture": gesture, "tags": tags, "source": source},
+			"weights": weights, "bones": bones, "gesture": gesture, "speaking": speaks, "tags": tags, "source": source},
 			"corrections": corrections}
 
 func _log_corrections(name: String, corrections: Array) -> void:
@@ -163,15 +175,18 @@ func _log_corrections(name: String, corrections: Array) -> void:
 # --- the central API --------------------------------------------------------------------
 
 ## Plays a preset from the library. Unknown names keep the current expression.
-func play(preset_name: String, duration := -1.0) -> bool:
+func play(preset_name: String, duration := -1.0, with_gesture := true) -> bool:
 	if not library.has(preset_name):
 		push_warning("unknown expression '%s', keeping '%s'" % [preset_name, current_name])
 		return false
-	apply_preset(library[preset_name], duration)
+	apply_preset(library[preset_name], duration, with_gesture)
 	return true
 
+func set_speaking(value: bool) -> void:
+	speaking = value
+
 ## Plays any preset dictionary (e.g. from the editor or the LLM); it is validated first.
-func apply_preset(preset: Dictionary, duration := -1.0) -> bool:
+func apply_preset(preset: Dictionary, duration := -1.0, with_gesture := true) -> bool:
 	var result := validate(preset)
 	if result["preset"] == null:
 		return false
@@ -183,8 +198,11 @@ func apply_preset(preset: Dictionary, duration := -1.0) -> bool:
 	_dur = default_duration if duration < 0.0 else duration
 	_t = 0.0 if _dur > 0.0 else 1.0
 	current_name = p["name"]
-	if gestures != null and not String(p["gesture"]).is_empty():
+	speaking = p["speaking"]
+	if with_gesture and gestures != null and not String(p["gesture"]).is_empty():
+		_gesture_from_preset = true
 		gestures.play(p["gesture"])
+		_gesture_from_preset = false
 	if _dur <= 0.0:
 		advance(0.0)
 	expression_changed.emit(current_name)
@@ -207,8 +225,34 @@ func advance(delta: float) -> void:
 	var blink := _update_blink(delta)
 	if blink > 0.0:
 		out[BLINK_KEY] = maxf(out.get(BLINK_KEY, 0.0), blink)
+	_update_mouth(delta, out)
 	_write_shapes(out)
 	_write_bones()
+
+## a gesture played on its own brings its own facial expression (not when a preset started it)
+func _on_gesture_started(gesture_name: String) -> void:
+	if _gesture_from_preset:
+		return
+	var face: String = gestures.library[gesture_name].get("expression", "")
+	if not face.is_empty():
+		play(face, -1.0, false)
+
+## moves the mouth through random vowels while speaking, closes it otherwise
+func _update_mouth(delta: float, out: Dictionary) -> void:
+	_mouth_wait -= delta
+	if _mouth_wait <= 0.0:
+		_mouth_wait = randf_range(0.09, 0.2)
+		_mouth_target.clear()
+		if speaking and randf() < 0.85:  # now and then a short closed pause
+			var v: String = VOWELS[randi() % VOWELS.size()]
+			_mouth_target[v] = randf_range(0.45, 0.9) if v == "Fcl_MTH_A" else randf_range(0.3, 0.7)
+	elif not speaking:
+		_mouth_target.clear()
+	var k := 1.0 - exp(-MOUTH_FOLLOW * delta) if delta > 0.0 else 1.0
+	for v in VOWELS:
+		_mouth[v] = lerpf(_mouth.get(v, 0.0), _mouth_target.get(v, 0.0), k)
+		if _mouth[v] > 0.002:
+			out[v] = maxf(out.get(v, 0.0), _mouth[v])
 
 func eyes_closed_level() -> float:
 	var level := 0.0
