@@ -6,6 +6,7 @@
   "llm_options":{"num_ctx":8192},
   "version_light":"gemma4:12b-it-qat",
   "llm_options_light":{"num_ctx":8192},
+  "default_profile":"light",
   "think":false,
   "keep_alive":"30m",
   "mode":"rocm",

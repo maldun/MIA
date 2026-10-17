@@ -94,7 +94,7 @@ class Communicator:
     
     def __init__(self,port=11434,address="localhost",protocol="http",version="llama3.2",
                  history_file="memories.json",neutral_emotion="disagree",time_before="1 hour",task_key="TASK",summary_words=2000,calibration_file="calibration.txt",
-                 long_time_history_file="long_time_history.json",max_conversations=30,llm_options=None,think=None,version_light=None,llm_options_light=None,keep_alive=None,**_):
+                 long_time_history_file="long_time_history.json",max_conversations=30,llm_options=None,think=None,version_light=None,llm_options_light=None,keep_alive=None,default_profile=None,**_):
         self.port = port
         self.address = address
         self.protocol = protocol
@@ -110,6 +110,10 @@ class Communicator:
         if version_light is not None:
             self._profiles[self.LIGHT_PROFILE] = (version_light,llm_options_light)
         self.profile = self.FULL_PROFILE
+        # start with the configured profile (if available) without unloading anything
+        if default_profile in self._profiles:
+            self.version, self.llm_options = self._profiles[default_profile]
+            self.profile = default_profile
         
         self.host = protocol + "://" + address + ':' + str(port)
         self.client = Client(host=self.host,headers=self.DEFAULT_HEADER)
