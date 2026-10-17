@@ -83,5 +83,32 @@ func _init() -> void:
 		eng.advance(1.0 / 60.0)
 	check(skeleton.get_bone_pose_rotation(head).angle_to(q0) > 0.001, "idle motion moves the head")
 
+	# gestures
+	var g: GestureEngine = eng.gestures
+	g.set_process(false)  # stepped by hand
+	check(g.library.size() == 12, "12 gestures load (got %d)" % g.library.size())
+	for n in eng.library_order:
+		var gname: String = eng.library[n]["gesture"]
+		check(gname.is_empty() or g.library.has(gname), "preset '%s' refers to an existing gesture ('%s')" % [n, gname])
+	check(eng.validate({"name": "t", "gesture": "nope"})["preset"]["gesture"] == "", "unknown gesture removed from a preset")
+	check(not g.play("nope"), "unknown gesture name returns false")
+	var arm := skeleton.find_bone("RightUpperArm")
+	g.stop()  # an earlier step ('greet') already started a gesture
+	for i in 60:
+		g.advance(1.0 / 30.0)
+	var base_q := skeleton.get_bone_pose_rotation(arm)
+	check(g.play("wave"), "gesture 'wave' starts")
+	for i in 30:
+		g.advance(1.0 / 30.0)
+	check(skeleton.get_bone_pose_rotation(arm).angle_to(base_q) > 0.5, "right arm moves away from the base pose during 'wave'")
+	var finished := [false]
+	g.gesture_finished.connect(func(_n): finished[0] = true)
+	for i in 120:  # 4 s > duration 2.8 s
+		g.advance(1.0 / 30.0)
+	check(finished[0] and g.current == "", "gesture finishes after its duration")
+	check(skeleton.get_bone_pose_rotation(arm).angle_to(base_q) < 0.02, "arm returns to the base pose")
+	eng.play("greet", 0.0)
+	check(g.current == "wave", "playing preset 'greet' starts its gesture 'wave'")
+
 	print("RESULT ", "ALL PASSED" if failures == 0 else "%d FAILED" % failures)
 	quit(0 if failures == 0 else 1)

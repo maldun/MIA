@@ -14,7 +14,8 @@ lib = os.path.join(os.path.dirname(__file__), "..", "godot", "presets", "library
 if os.path.exists(lib):
     import json
     order = [p["name"] for p in json.load(open(lib))["presets"]]
-    names = [n for n in order if n in names]
+    if set(names) <= set(order):
+        names = [n for n in order if n in names]
 imgs = [Image.open(os.path.join(src, n + ".png")).convert("RGB") for n in names]
 imgs = [im.resize((im.width // 2, im.height // 2)) for im in imgs]
 w, h = imgs[0].size

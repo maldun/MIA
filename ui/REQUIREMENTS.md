@@ -88,6 +88,12 @@ Key design decisions:
   - everything MIA already uses (one preset per key of `expressions.json`): `greet`, `no`, `annoyed`, `talk`, `yes`, `idle`;
   - the suggested starters: `neutral`, `happy`, `sad`, `angry`, `surprised`, `embarrassed`, `smug`, `thinking`.
   - The old videos only conveyed the mood; the presets keep that mood (e.g. `yes` = agreeing smile, `no` = stern, `annoyed` = half-lidded "Seriously?", `talk` = attentive, `idle` = friendly waiting face).
+- **Gestures (arms):** the arms hang relaxed by default. A gesture is a short keyframed arm animation from `presets/gestures.json`
+  (12 so far: wave, point, shrug, think, hands_on_hips, hand_on_hip, arms_crossed, wave_off, hands_up, cheer, fist_pump, clasp).
+  A preset may name one with `"gesture"`; playing the preset starts it, after its duration the arms ease back. Gestures can
+  also be played on their own through the same central API. Arm angles are authored per limb as `[elev, swing, twist]` (see `gesture_engine.gd`).
+  Known limit: no collision with the jacket, so crossed or clasped arms partly disappear inside it.
+- **Camera:** default view shows the whole figure; named views `body`, `bust`, `face`; orbit/zoom with mouse and touch.
 - `bones` supports `head_pitch`, `head_yaw`, `head_roll`, `eye_yaw`, `eye_pitch` (degrees). The model has no jaw bone, so mouth opening goes through the `Fcl_MTH_*` shape keys.
 - `source` is one of `manual`, `llm`, `llm_edited`.
 - Smooth blending between expressions with a configurable duration (default ~0.25 s) and easing.

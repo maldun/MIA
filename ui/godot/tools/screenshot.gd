@@ -13,7 +13,7 @@ func _init() -> void:
 	if args.size() > 1:
 		main.yaw = deg_to_rad(float(args[1]))
 	if args.size() > 2:
-		main.distance = float(args[2])
+		main.set_camera(main.pivot, float(args[2]))
 	main._update_camera()
 	for i in 10:
 		await process_frame

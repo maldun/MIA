@@ -4,7 +4,7 @@ extends Node
 ## MIA bridge, editor, LLM, ...) only calls play() / apply_preset().
 ##
 ## Preset: {"name", "description", "weights": {shape key: 0..1}, "bones": {param: degrees},
-##          "tags": [], "source": "manual" | "llm" | "llm_edited"}
+##          "gesture": optional name from gestures.json, "tags": [], "source": "manual" | "llm" | "llm_edited"}
 ## Bone params: head_pitch (+ = looks down), head_yaw (+ = turns to the viewer's right),
 ## head_roll (+ = top of the head to the viewer's left), eye_yaw, eye_pitch (same signs).
 
@@ -26,6 +26,7 @@ var default_duration := 0.25
 var easing := "smooth"
 var blink_enabled := true
 var idle_enabled := true
+var gestures: GestureEngine   # arm poses; presets may start a gesture
 var library := {}        # preset name -> validated preset
 var library_order: Array[String] = []
 var current_name := ""
@@ -66,6 +67,10 @@ func setup(character: Node, skeleton: Skeleton3D) -> void:
 		for b in ["Spine", "Chest", "UpperChest", "Neck", "Head", "LeftEye", "RightEye"]:
 			_bone[b] = skeleton.find_bone(b)
 	_blink_wait = randf_range(BLINK_MIN_INTERVAL, BLINK_MAX_INTERVAL)
+	gestures = GestureEngine.new()
+	add_child(gestures)
+	gestures.setup(skeleton)
+	gestures.load_library("res://presets/gestures.json")
 
 func get_shape_names() -> Array:
 	var names := _shapes.keys()
@@ -136,13 +141,19 @@ func validate(raw) -> Dictionary:
 	if not ["manual", "llm", "llm_edited"].has(source):
 		corrections.append("unknown source '%s' set to manual" % source)
 		source = "manual"
+	var gesture := ""
+	if raw.has("gesture"):
+		gesture = str(raw["gesture"])
+		if gestures != null and not gesture.is_empty() and not gestures.library.has(gesture):
+			corrections.append("unknown gesture '%s' removed" % gesture)
+			gesture = ""
 	var tags: Array = []
 	if typeof(raw.get("tags")) == TYPE_ARRAY:
 		for t in raw["tags"]:
 			tags.append(str(t))
 	_log_corrections(name, corrections)
 	return {"preset": {"name": name, "description": str(raw.get("description", "")),
-			"weights": weights, "bones": bones, "tags": tags, "source": source},
+			"weights": weights, "bones": bones, "gesture": gesture, "tags": tags, "source": source},
 			"corrections": corrections}
 
 func _log_corrections(name: String, corrections: Array) -> void:
@@ -172,6 +183,8 @@ func apply_preset(preset: Dictionary, duration := -1.0) -> bool:
 	_dur = default_duration if duration < 0.0 else duration
 	_t = 0.0 if _dur > 0.0 else 1.0
 	current_name = p["name"]
+	if gestures != null and not String(p["gesture"]).is_empty():
+		gestures.play(p["gesture"])
 	if _dur <= 0.0:
 		advance(0.0)
 	expression_changed.emit(current_name)
@@ -263,8 +276,9 @@ func _rotate(bone_name: String, degrees: Vector3) -> void:
 		return
 	var r := Basis(Vector3.UP, deg_to_rad(degrees.y)) * Basis(Vector3.RIGHT, deg_to_rad(degrees.x)) \
 			* Basis(Vector3.BACK, deg_to_rad(degrees.z))
+	# the pose is the absolute local transform (not relative to rest): rotate the rest orientation
 	var rest := _skeleton.get_bone_rest(i).basis
-	_skeleton.set_bone_pose_rotation(i, (rest.inverse() * r * rest).get_rotation_quaternion())
+	_skeleton.set_bone_pose_rotation(i, (r * rest).get_rotation_quaternion())
 
 func _mix(a: Dictionary, b: Dictionary, k: float) -> Dictionary:
 	var out := {}

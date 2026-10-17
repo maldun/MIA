@@ -1,0 +1,56 @@
+{
+  "gestures": [
+    {"name": "wave", "description": "friendly wave with the right hand", "duration": 2.8, "keys": [
+      {"t": 0.0, "R": {"upper": [30, 25, 0], "lower": [80, 25, 0]}},
+      {"t": 0.5, "R": {"upper": [30, 25, 0], "lower": [105, 25, 0]}},
+      {"t": 0.9, "R": {"upper": [30, 25, 0], "lower": [65, 25, 0]}},
+      {"t": 1.3, "R": {"upper": [30, 25, 0], "lower": [105, 25, 0]}},
+      {"t": 1.7, "R": {"upper": [30, 25, 0], "lower": [65, 25, 0]}},
+      {"t": 2.1, "R": {"upper": [30, 25, 0], "lower": [95, 25, 0]}}]},
+    {"name": "point", "description": "points forward with the right arm", "duration": 2.0, "keys": [
+      {"t": 0.0, "R": {"upper": [-5, 75, 0], "lower": [0, 80, 0]}},
+      {"t": 1.6, "R": {"upper": [-5, 75, 0], "lower": [0, 80, 0]}}]},
+    {"name": "shrug", "description": "both shoulders up, forearms out, palms open", "duration": 2.0, "keys": [
+      {"t": 0.0, "R": {"shoulder": [14, 0, 0], "upper": [-55, 5, 0], "lower": [15, 40, 0]},
+                 "L": {"shoulder": [14, 0, 0], "upper": [-55, 5, 0], "lower": [15, 40, 0]}},
+      {"t": 1.5, "R": {"shoulder": [14, 0, 0], "upper": [-55, 5, 0], "lower": [15, 40, 0]},
+                 "L": {"shoulder": [14, 0, 0], "upper": [-55, 5, 0], "lower": [15, 40, 0]}}]},
+    {"name": "think", "description": "right hand to the chin", "duration": 3.5, "keys": [
+      {"t": 0.0, "R": {"upper": [-30, 55, 0], "lower": [135, 65, 0]}},
+      {"t": 3.0, "R": {"upper": [-30, 55, 0], "lower": [135, 65, 0]}}]},
+    {"name": "hands_on_hips", "description": "both hands on the hips", "duration": 3.0, "keys": [
+      {"t": 0.0, "R": {"upper": [-45, -15, 0], "lower": [-135, -10, 0]},
+                 "L": {"upper": [-45, -15, 0], "lower": [-135, -10, 0]}},
+      {"t": 2.5, "R": {"upper": [-45, -15, 0], "lower": [-135, -10, 0]},
+                 "L": {"upper": [-45, -15, 0], "lower": [-135, -10, 0]}}]},
+    {"name": "hand_on_hip", "description": "right hand on the hip, relaxed", "duration": 3.0, "keys": [
+      {"t": 0.0, "R": {"upper": [-45, -15, 0], "lower": [-135, -10, 0]}},
+      {"t": 2.5, "R": {"upper": [-45, -15, 0], "lower": [-135, -10, 0]}}]},
+    {"name": "arms_crossed", "description": "arms crossed in front of the chest", "duration": 3.0, "keys": [
+      {"t": 0.0, "R": {"upper": [-55, 45, 0], "lower": [165, 78, 0]},
+                 "L": {"upper": [-57, 42, 0], "lower": [175, 72, 0]}},
+      {"t": 2.5, "R": {"upper": [-55, 45, 0], "lower": [165, 78, 0]},
+                 "L": {"upper": [-57, 42, 0], "lower": [175, 72, 0]}}]},
+    {"name": "wave_off", "description": "both hands wave 'no' in front of the body", "duration": 2.2, "keys": [
+      {"t": 0.0, "R": {"upper": [-40, 40, 0], "lower": [70, 50, 0]}, "L": {"upper": [-40, 40, 0], "lower": [70, 50, 0]}},
+      {"t": 0.4, "R": {"upper": [-40, 40, 0], "lower": [100, 50, 0]}, "L": {"upper": [-40, 40, 0], "lower": [100, 50, 0]}},
+      {"t": 0.8, "R": {"upper": [-40, 40, 0], "lower": [70, 50, 0]}, "L": {"upper": [-40, 40, 0], "lower": [70, 50, 0]}},
+      {"t": 1.2, "R": {"upper": [-40, 40, 0], "lower": [100, 50, 0]}, "L": {"upper": [-40, 40, 0], "lower": [100, 50, 0]}},
+      {"t": 1.6, "R": {"upper": [-40, 40, 0], "lower": [70, 50, 0]}, "L": {"upper": [-40, 40, 0], "lower": [70, 50, 0]}}]},
+    {"name": "hands_up", "description": "both hands up in surprise", "duration": 2.0, "keys": [
+      {"t": 0.0, "R": {"upper": [15, 40, 0], "lower": [85, 45, 0]}, "L": {"upper": [15, 40, 0], "lower": [85, 45, 0]}},
+      {"t": 1.5, "R": {"upper": [15, 40, 0], "lower": [85, 45, 0]}, "L": {"upper": [15, 40, 0], "lower": [85, 45, 0]}}]},
+    {"name": "cheer", "description": "both arms raised joyfully", "duration": 2.0, "keys": [
+      {"t": 0.0, "R": {"upper": [55, 10, 0], "lower": [80, 10, 0]}, "L": {"upper": [55, 10, 0], "lower": [80, 10, 0]}},
+      {"t": 0.5, "R": {"upper": [65, 10, 0], "lower": [88, 10, 0]}, "L": {"upper": [65, 10, 0], "lower": [88, 10, 0]}},
+      {"t": 1.0, "R": {"upper": [55, 10, 0], "lower": [80, 10, 0]}, "L": {"upper": [55, 10, 0], "lower": [80, 10, 0]}},
+      {"t": 1.5, "R": {"upper": [65, 10, 0], "lower": [88, 10, 0]}, "L": {"upper": [65, 10, 0], "lower": [88, 10, 0]}}]},
+    {"name": "fist_pump", "description": "small right fist pump for 'yes'", "duration": 1.6, "keys": [
+      {"t": 0.0, "R": {"upper": [-15, 30, 0], "lower": [70, 30, 0]}},
+      {"t": 0.4, "R": {"upper": [-5, 30, 0], "lower": [95, 25, 0]}},
+      {"t": 0.8, "R": {"upper": [-15, 30, 0], "lower": [70, 30, 0]}}]},
+    {"name": "clasp", "description": "hands together in front, shy", "duration": 3.0, "keys": [
+      {"t": 0.0, "R": {"upper": [-60, 35, 0], "lower": [-120, 85, 0]}, "L": {"upper": [-60, 35, 0], "lower": [-120, 85, 0]}},
+      {"t": 2.5, "R": {"upper": [-60, 35, 0], "lower": [-120, 85, 0]}, "L": {"upper": [-60, 35, 0], "lower": [-120, 85, 0]}}]}
+  ]
+}

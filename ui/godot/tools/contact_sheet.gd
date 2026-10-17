@@ -15,9 +15,7 @@ func _init() -> void:
 		layer.visible = false
 	main.engine.blink_enabled = false
 	main.engine.idle_enabled = false
-	main.pivot += Vector3(0, 0.13, 0)
-	main.distance = 0.8
-	main._update_camera()
+	main.set_camera(Vector3(0, main.head_height - 0.02, 0), 0.8)
 	for preset_name in main.engine.library_order:
 		main.engine.play(preset_name, 0.0)
 		for i in 4:

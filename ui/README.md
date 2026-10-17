@@ -48,3 +48,12 @@ Godot lists 57 blend shapes: the 58 Blender keys minus the `Basis` reference key
 - Tests: `godot --headless --path ui/godot --script res://tools/test_expressions.gd` (checks validation, blending, blinking, idle).
 - Review: `godot/tools/contact_sheet.gd` + `tools/montage.py` render all presets into one image;
   the web page has a collapsible button bar to play them (temporary, replaced by the editor in phase 6).
+
+### Gestures, camera and the eye fix (after phase 4)
+
+- `godot/gesture_engine.gd` + `presets/gestures.json`: relaxed arms by default, 12 gestures; a preset can start one (`"gesture"`).
+  Preview all poses with `godot/tools/gesture_sheet.gd`.
+- Default camera shows the whole figure; the menu (collapsed at start) has camera views body/bust/face, all expressions and gestures.
+- Fixed: in Godot 4 a bone pose is the *absolute* local transform, not an offset from rest. The first engine version set the
+  eye bones to "identity", which rotated them 90 degrees and hid the irises. The same mistake is fixed in the arm pose.
+  `godot/tools/eye_closeup.gd` renders an eye close-up for checking this.
