@@ -9,6 +9,8 @@ extends Node
 ## head_roll (+ = top of the head to the viewer's left), eye_yaw, eye_pitch (same signs).
 
 signal expression_changed(preset_name: String)
+## the library was replaced (loaded from the file or from the server)
+signal library_changed
 
 const BLINK_KEY := "Fcl_EYE_Close"
 ## keys that already close the eyes: no extra blinking while they are high
@@ -101,15 +103,21 @@ func load_library(path: String) -> int:
 	if typeof(parsed) != TYPE_DICTIONARY or typeof(parsed.get("presets")) != TYPE_ARRAY:
 		push_error("expression library %s is not {\"presets\": [...]}" % path)
 		return 0
+	return set_library(parsed["presets"])
+
+## Replaces the library by the given presets (the bundled file, or the presets from the server).
+## Invalid ones are skipped; the expression that is playing keeps playing. Returns the number of valid presets.
+func set_library(presets: Array) -> int:
 	library.clear()
 	library_order.clear()
-	for raw in parsed["presets"]:
+	for raw in presets:
 		var result := validate(raw)
 		if result["preset"] == null:
 			continue
 		var preset: Dictionary = result["preset"]
 		library[preset["name"]] = preset
 		library_order.append(preset["name"])
+	library_changed.emit()
 	return library.size()
 
 ## Checks a preset: rejects unknown shape keys and bone params, clamps values.

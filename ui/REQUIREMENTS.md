@@ -133,6 +133,9 @@ Key design decisions:
   - **Reject** → discarded, but logged.
 - All accepted, edited, and rejected results are logged (`data/feedback_log.jsonl`) so future prompts can use them as positive and negative examples.
 
+> Decision for 4.7: the backend is MIA's existing Flask app (not a second FastAPI server): one server for page, character and presets,
+> one set of access rules. The preset API is in `presets_api.py`; see ui/README.md, phase 6.
+
 ### 4.7 Backend (host machine)
 
 - Small web server. Suggested: Python + FastAPI (any lightweight option is fine; justify the choice).

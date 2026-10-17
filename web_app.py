@@ -40,6 +40,7 @@ from .constants import AUDIO_ROUTE, UPLOAD_ROUTE, AUDIO_MIME_TYPE, SPEECH_REQ, S
 from . import constants as CONST
 from .speech_stream import SpeechStreamer
 from .shutdown import request_shutdown
+from .presets_api import init_presets_api
 FPATH = os.path.split(__file__)[0]
 cfg_file = os.path.join(FPATH,CFG_FILE)
 TEMPLATE_DIR = "templates"
@@ -122,6 +123,9 @@ if os.path.exists(ALLOWED_ORIGIN_FILE):
         allowed_origins += aof.read().splitlines()
 
 socketio = SocketIO(app,cors_allowed_origins=allowed_origins)
+
+# expression presets of the character (REST API, files in "presets_dir"); the editor of the character uses it
+preset_store = init_presets_api(app,cfg,FPATH,allowed_origins=lambda: allowed_origins)
 
 #g.socket_url = f"ws://127.0.0.1:{port}/"
 

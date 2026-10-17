@@ -88,6 +88,8 @@ Prerequisites:
     - "https_port":8586, (optional: `python -m MIA` starts an HTTPS proxy on this port in front of the web app, see "Access from other computers")
     - "host":"0.0.0.0", (optional: address the web app listens on; default all addresses, i.e. localhost and LAN)
     - "shutdown_pause":1.0, (optional: seconds between the shutdown steps, see "Stopping MIA")
+    - "presets_dir":"data/presets", (optional: folder with the expression presets of the character, one json file per preset, shared by all devices; filled with the default presets on first use)
+    - "editor_token":"a secret", (optional: if set, changing presets in the expression editor needs this token; reading is open)
     - "background_dir":"backgrounds", (optional: folder with background pictures for the character, see backgrounds/README.md)
     - "background_image":"room.jpg", (optional: picture shown at the start, default: the first one)
     - "web_port":8585, (port for web-app)
@@ -131,6 +133,15 @@ Usage:
 - Start: Activate virtual env and start: `python -m MIA`.
 - Open Webbrowser on `localhost:<web_port>`
 - *Hint*: KDE has a web browser plugin as desktop app ...
+
+Expression editor:
+===================
+
+The link "Edit expressions" in MIA's page (or `/character/?editor`) opens the character with the slider editor: one slider per shape key
+(eyes, brows, mouth, head, other), a filter, load / reset / save as new / overwrite / rename / delete. Presets are saved on MIA's server
+(`presets_dir`), so a preset made on the phone is there on every other device a few seconds later. Presets that MIA's emotions use
+(`expressions.json`) cannot be deleted or renamed by accident. Changing presets is open to everyone who can reach the page unless
+`"editor_token"` is set in `setup_cfg.json`; the editor then asks for the token. Without the server the character uses its bundled presets.
 
 Stopping MIA:
 ===================

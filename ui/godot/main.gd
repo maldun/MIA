@@ -23,7 +23,11 @@ var _pinch_dist_start := 0.0
 var engine: ExpressionEngine
 var bridge: HostBridge
 var backgrounds: BackgroundManager
+var preset_api: PresetApi
+var editor: ExpressionEditor
 var _bar: Control
+var _menu_root: Control
+var _expression_flow: HFlowContainer
 var _background_row_built := false
 var _buttons := {}  # "expression:<name>" / "gesture:<name>" -> Button (highlighted while active)
 
@@ -77,6 +81,14 @@ func _setup_expressions() -> void:
 	engine.setup(character, skeleton)  # also puts the arms into the relaxed base pose
 	engine.load_library("res://presets/library.json")
 	engine.play("idle", 0.0)
+	# the presets of the server (shared by all devices) replace the bundled ones as soon as they arrive;
+	# without a server the bundled presets stay
+	preset_api = PresetApi.new()
+	add_child(preset_api)
+	preset_api.setup()
+	preset_api.library_received.connect(func(presets: Array, _info): _on_server_presets(presets))
+	preset_api.refresh()
+	preset_api.start_polling()
 	bridge = HostBridge.new()
 	add_child(bridge)
 	bridge.setup(engine, backgrounds)  # commands from the page around us (MIA's chat page)
@@ -176,6 +188,7 @@ func _build_panel() -> void:
 	root.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
 	root.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	layer.add_child(root)
+	_menu_root = root
 	var toggle := Button.new()
 	toggle.text = "Menu"
 	toggle.custom_minimum_size = Vector2(0, 56)
@@ -183,8 +196,19 @@ func _build_panel() -> void:
 	_bar = VBoxContainer.new()
 	_bar.visible = false  # start collapsed so the whole figure is visible
 	root.add_child(_bar)
+	editor = ExpressionEditor.new()
+	layer.add_child(editor)
+	editor.setup(engine, preset_api)
+	editor.closed.connect(func(): _menu_root.visible = true)
+	var editor_button := Button.new()
+	editor_button.text = "Expression editor"
+	editor_button.name = "editor_button"
+	editor_button.custom_minimum_size = Vector2(0, 48)
+	editor_button.pressed.connect(open_editor)
+	_bar.add_child(editor_button)
 	_add_row("Camera", ["body", "bust", "face"], show_view)
-	_add_row("Expression", engine.library_order, engine.play, "expression")
+	_expression_flow = _add_row("Expression", engine.library_order, engine.play, "expression")
+	engine.library_changed.connect(_rebuild_expression_row)
 	_add_row("Gesture", ["stop gesture"] + engine.gestures.library_order, _gesture_button, "gesture")
 	toggle.pressed.connect(func(): _bar.visible = not _bar.visible)
 	backgrounds.list_changed.connect(_on_backgrounds_listed)
@@ -194,6 +218,8 @@ func _build_panel() -> void:
 	engine.gestures.gesture_started.connect(func(_n): _refresh_active())
 	engine.gestures.gesture_finished.connect(func(_n): _refresh_active())
 	_refresh_active()
+	if HostBridge.has_url_flag("editor"):
+		open_editor()
 
 ## the background row appears when there are pictures in the backgrounds folder
 func _on_backgrounds_listed(names: Array, _default_name: String) -> void:
@@ -218,7 +244,30 @@ func _refresh_active() -> void:
 				or (parts[0] == "background" and (parts[1] == backgrounds.current or (parts[1] == "none" and backgrounds.current.is_empty())))
 		(_buttons[key] as Button).modulate = Color(1.0, 0.85, 0.35) if active else Color.WHITE
 
-func _add_row(title: String, names: Array, callback: Callable, kind := "") -> void:
+## the expression editor (menu button, or ?editor in the URL); the menu is hidden while it is open
+func open_editor() -> void:
+	if editor == null:
+		return
+	_menu_root.visible = false
+	editor.open()
+
+## the presets from the server replace the bundled ones (an empty answer is ignored)
+func _on_server_presets(presets: Array) -> void:
+	if not presets.is_empty():
+		engine.set_library(presets)
+
+func _rebuild_expression_row() -> void:
+	if _expression_flow == null:
+		return
+	for key in _buttons.keys():
+		if str(key).begins_with("expression:"):
+			_buttons.erase(key)
+	for child in _expression_flow.get_children():
+		child.queue_free()
+	_fill_row(_expression_flow, engine.library_order, engine.play, "expression")
+	_refresh_active()
+
+func _add_row(title: String, names: Array, callback: Callable, kind := "") -> HFlowContainer:
 	if not title.is_empty():
 		var label := Label.new()
 		label.text = title
@@ -226,6 +275,10 @@ func _add_row(title: String, names: Array, callback: Callable, kind := "") -> vo
 		_bar.add_child(label)
 	var flow := HFlowContainer.new()
 	_bar.add_child(flow)
+	_fill_row(flow, names, callback, kind)
+	return flow
+
+func _fill_row(flow: HFlowContainer, names: Array, callback: Callable, kind: String) -> void:
 	for item in names:
 		var b := Button.new()
 		b.text = item

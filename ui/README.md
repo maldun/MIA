@@ -116,3 +116,25 @@ The chat page connects to the socket of the address it was loaded from, so the s
 `python -m MIA` listens on all addresses (`"host"` in `setup_cfg.json` restricts that) and starts `tools/https_proxy.sh` when `"https_port"` is set
 (code: `tls_proxy.py`); missing `socat`/`openssl` are logged and MIA runs without the proxy. Tests: `TlsProxyTest` in `tests/test_character_integration.py`
 (including a real HTTPS request to localhost through the proxy).
+
+## Phase 6: expression editor and preset API
+
+- **Backend:** the preset API is part of MIA's Flask app (`presets_api.py`, storage in `preset_store.py`), not a second FastAPI server:
+  the page, the character and the presets come from one server with one set of access rules (HTTPS proxy, allowed origins, token).
+  One json file per preset in `presets_dir` (default `data/presets`, git-ignored), filled from `godot/presets/library.json` on first use.
+  REST: `GET /api/presets` (all + version + `token_required` + protected names), `GET /api/presets/version`, `GET /api/presets/<name>`,
+  `POST /api/presets`, `PUT /api/presets/<name>` (a different name in the body renames), `DELETE /api/presets/<name>` (409 for presets
+  MIA's emotions use, `?force=1` overrides), `GET /api/shape-keys`, `GET /api/gestures`.
+  Values are corrected like in the character (unknown shape keys, bones and gestures removed, values clamped) and reported as `corrections`.
+- **Safety:** writing needs `Content-Type: application/json` (no cross-site form posts), a known origin if the browser sends one
+  (the page's own address is always fine), and the header `X-MIA-Token` if `editor_token` is set. Names are 1-40 letters, digits, `-`, `_`
+  (no paths), files are written atomically, bodies over 64 KB are refused.
+- **Character:** `godot/preset_api.gd` (client, polls the version every 10 s so other devices' changes show up; offline it keeps the
+  bundled presets), `godot/expression_editor.gd` (the panel: right side on wide screens, bottom sheet on phones, big slider handles,
+  solid background), `godot/presets/shape_keys.json` (categories and descriptions of the 57 shape keys, also used for validation and,
+  later, for the LLM prompt). `?editor` opens the editor at start, the dev menu has an "Expression editor" button.
+  The stretch aspect is `expand` now: the canvas fills any window (no black bars next to the character).
+- **Tests:** `python tests/test_presets_api.py` (23 tests: storage, rules, API, token, origin),
+  `godot --headless ... --script res://tools/test_editor.gd` (43 checks with an in-memory server),
+  `MIA_URL=http://127.0.0.1:8685 godot ... --script res://tools/test_editor_live.gd` (real HTTP against a running MIA app and a second client
+  as "another device"), `tools/editor_shot.gd` renders the editor to a PNG (wide and phone shapes).

@@ -36,6 +36,12 @@ BACKGROUND_DIR_KEY = "background_dir"
 DEFAULT_BACKGROUND_DIR = "backgrounds"
 BACKGROUND_IMAGE_KEY = "background_image"
 BACKGROUND_EXTENSIONS = (".png", ".jpg", ".jpeg", ".webp")
+# expression presets shared by all devices: one json file per preset in this folder (relative to this folder or absolute);
+# "editor_token": optional secret that changing presets needs (header X-MIA-Token), see presets_api.py
+PRESETS_DIR_KEY = "presets_dir"
+DEFAULT_PRESETS_DIR = "data/presets"
+EDITOR_TOKEN_KEY = "editor_token"
+TOKEN_HEADER = "X-MIA-Token"
 BACKGROUND_LIST_ROUTE = "character-backgrounds.json"
 BACKGROUND_ROUTE = "character-backgrounds"
 
