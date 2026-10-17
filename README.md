@@ -87,6 +87,7 @@ Prerequisites:
     - "character_dir":"ui/godot/build/web", (optional: folder with the web export of the 3D character, see ui/README.md)
     - "https_port":8586, (optional: `python -m MIA` starts an HTTPS proxy on this port in front of the web app, see "Access from other computers")
     - "host":"0.0.0.0", (optional: address the web app listens on; default all addresses, i.e. localhost and LAN)
+    - "shutdown_pause":1.0, (optional: seconds between the shutdown steps, see "Stopping MIA")
     - "background_dir":"backgrounds", (optional: folder with background pictures for the character, see backgrounds/README.md)
     - "background_image":"room.jpg", (optional: picture shown at the start, default: the first one)
     - "web_port":8585, (port for web-app)
@@ -129,6 +130,14 @@ Usage:
 - Start: Activate virtual env and start: `python -m MIA`.
 - Open Webbrowser on `localhost:<web_port>`
 - *Hint*: KDE has a web browser plugin as desktop app ...
+
+Stopping MIA:
+===================
+
+Ctrl+C in the terminal, the commands `/break!` and `/goodnight!` (the latter lets MIA dream first) and SIGTERM all lead to the same orderly shutdown:
+MIA saves its history, stops the HTTPS proxy and then the speech process, one step after the other with a pause of `shutdown_pause` seconds in between.
+The helper processes run in their own session, so Ctrl+C reaches only MIA. Before, everything was signalled at the same instant and the commands killed the whole process group.
+A helper that does not end within 10 seconds is killed. The Ollama container keeps running.
 
 Access from other computers or phones (HTTPS):
 ===================

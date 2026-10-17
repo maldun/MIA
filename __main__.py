@@ -24,6 +24,7 @@ from .web_app import socketio, app, comm, WEB_PORT, scheduler, time_update_trigg
 from .utils import get_own_ip
 from .tls_proxy import start_https_proxy
 from .constants import HTTPS_PORT_KEY
+from .shutdown import install_term_handler, stop_process, graceful_shutdown, DEFAULT_PAUSE
 
 from .constants import CFG_FILE, LOG_FNAME
 fpath = os.path.split(__file__)[0]
@@ -37,6 +38,9 @@ with open(cfg_file,'r') as jp:
 
 if __name__ == "__main__":
     https_proc = None
+    speak_proc = None
+    # Ctrl+C, SIGTERM and the commands /break! and /goodnight! all end in the same orderly shutdown below
+    install_term_handler()
     try:
         cmd_speak = ["python3.10",os.path.join(fpath,"speak.py"),cfg_file]
         cmd_llama = ["python3.10",os.path.join(fpath,"install_lama.py"),cfg_file]
@@ -45,7 +49,8 @@ if __name__ == "__main__":
         with lock:
             llama_proc = subprocess.Popen(cmd_llama)
             print(f"llama process started with {llama_proc.pid}")
-            speak_proc = subprocess.Popen(cmd_speak)
+            # own session: Ctrl+C in the terminal reaches only MIA, which stops the helper in order
+            speak_proc = subprocess.Popen(cmd_speak,start_new_session=True)
             print(f"speak process started with {speak_proc.pid}")
             llama_proc.wait()
             print("llama proc finished!")
@@ -66,12 +71,11 @@ if __name__ == "__main__":
             socketio.run(app, host=host,debug=False,port=WEB_PORT)
             
     except KeyboardInterrupt:
-        comm.dump_history()
-        os.killpg(os.getpgid(speak_proc.pid), signal.SIGTERM)
-        #os.killpg(os.getpgid(llama_proc.pid), signal.SIGTERM)
-        if os.path.exists(exchange_file):
-            os.remove(exchange_file)
+        print("MIA is shutting down ...")
     finally:
-        # the https proxy lives and dies with MIA
-        if https_proc is not None:
-            https_proc.terminate()
+        # one step after the other with a short pause, instead of everything at the same instant
+        graceful_shutdown([("save history", comm.dump_history),
+                           ("stop https proxy", lambda: stop_process(https_proc,"https proxy",group=True)),
+                           ("stop speech process", lambda: stop_process(speak_proc,"speech process",group=True))],
+                          pause=cfg.get("shutdown_pause",DEFAULT_PAUSE))
+        print("MIA stopped.")

@@ -51,6 +51,7 @@ def start_https_proxy(cfg, folder, web_port, target_host="127.0.0.1"):
     if not os.path.exists(script):
         logger.error(f"HTTPS proxy not started, {script} not found")
         return None
-    proc = subprocess.Popen([script, str(https_port), f"{target_host}:{web_port}"])
+    # own session: Ctrl+C in the terminal reaches only MIA, which stops the proxy at shutdown
+    proc = subprocess.Popen([script, str(https_port), f"{target_host}:{web_port}"], start_new_session=True)
     logger.info(f"HTTPS proxy started (pid {proc.pid}): https port {https_port} -> http {target_host}:{web_port}")
     return proc

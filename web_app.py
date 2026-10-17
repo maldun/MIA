@@ -39,6 +39,7 @@ from .constants import ADDRESS_KEY, PROTOCOL_KEY, WEB_PORT_KEY, SOUND_PORT_KEY, 
 from .constants import AUDIO_ROUTE, UPLOAD_ROUTE, AUDIO_MIME_TYPE, SPEECH_REQ, SOUND_REQ, TIME_REQ
 from . import constants as CONST
 from .speech_stream import SpeechStreamer
+from .shutdown import request_shutdown
 FPATH = os.path.split(__file__)[0]
 cfg_file = os.path.join(FPATH,CFG_FILE)
 TEMPLATE_DIR = "templates"
@@ -237,30 +238,24 @@ def handle_special_commands(message):
         case CONST.SHUTDOWN_COMMAND:
             quit_msg="Have a break MIA"
             logger.info(quit_msg)
-            # Evil but maybe helpful for other stuff
-            # so comment stays as example
-            #pid = current_app.config[CONST.MAIN_THREAD_ID_KEY]
-            # get process id 
-            pid = os.getpid()
-            # get process group id
-            gid = os.getpgid(pid)
-            # kill all process of the group with Strg+C
-            os.killpg(gid, signal.SIGTERM)
+            # same orderly path as Ctrl+C (only this process is signalled, not the whole process group)
+            request_shutdown()
+            return True
         case CONST.DREAM_COMMAND:
             dream_msg="sweet Dreams MIA"
             logger.info(dream_msg)
             comm.emulate_dreaming()
+            return True
         case CONST.SLEEP_COMMAND:
             quit_msg="Goodnight MIA"
             logger.info(quit_msg)
             comm.emulate_dreaming()
-            pid = os.getpid()
-            # get process group id
-            gid = os.getpgid(pid)
-            # kill all process of the group with Strg+C
-            os.killpg(gid, signal.SIGTERM)
+            request_shutdown()
+            return True
         case CONST.UPDATE_COMMAND:
             time_update()
+            return True
+    return False
             
             
 

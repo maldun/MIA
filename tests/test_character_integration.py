@@ -339,7 +339,7 @@ class TlsProxyTest(unittest.TestCase):
         source = open(os.path.join(REPO, "__main__.py")).read()
         self.assertIn('cfg.get("host","0.0.0.0")', source)
         self.assertIn("start_https_proxy(cfg,fpath,WEB_PORT)", source)
-        self.assertIn("https_proc.terminate()", source)
+        self.assertIn("stop_process(https_proc", source)   # the proxy lives and dies with MIA
 
 
 if __name__ == "__main__":
