@@ -97,6 +97,8 @@ Key design decisions:
   Known limit: no collision with the jacket; the long sleeve cuffs hide most of the hands.
 - **Speaking:** a preset with `"speaking": true` (`talk`) animates the mouth through random vowel shapes until another preset is played. A speech source can
   call `set_speaking()` for the same effect (real lip sync stays out of scope).
+- **Background:** a custom background picture (png/jpg/webp) from the `backgrounds` folder of MIA, scaled to cover the view; plain colour if there is none.
+  The server lists and delivers the pictures; the page or the menu can switch between them.
 - **Camera:** default view shows the whole figure; named views `body`, `bust`, `face`; orbit/zoom with mouse and touch.
 - `bones` supports `head_pitch`, `head_yaw`, `head_roll`, `eye_yaw`, `eye_pitch` (degrees). The model has no jaw bone, so mouth opening goes through the `Fcl_MTH_*` shape keys.
 - `source` is one of `manual`, `llm`, `llm_edited`.

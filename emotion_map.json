@@ -1,9 +1,9 @@
 {
     "agree": "yes",
     "disagree": "no",
-    "neutral": "talk",
+    "neutral": "neutral",
     "annoyed": "annoyed",
-    "happy": "greet",
+    "happy": "happy",
     "MIA": "greet",
     "sad": "sad",
     "angry": "angry",

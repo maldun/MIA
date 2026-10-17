@@ -129,6 +129,9 @@ mimetypes.add_type("application/wasm", ".wasm")
 CHARACTER_FOLDER = cfg.get(CONST.CHARACTER_DIR_KEY, CONST.DEFAULT_CHARACTER_DIR)
 if not os.path.isabs(CHARACTER_FOLDER):
     CHARACTER_FOLDER = os.path.join(FPATH, CHARACTER_FOLDER)
+BACKGROUND_FOLDER = cfg.get(CONST.BACKGROUND_DIR_KEY, CONST.DEFAULT_BACKGROUND_DIR)
+if not os.path.isabs(BACKGROUND_FOLDER):
+    BACKGROUND_FOLDER = os.path.join(FPATH, BACKGROUND_FOLDER)
 
 from .mia_logger import logger
 
@@ -425,6 +428,35 @@ def character_ready(_=None):
     A page loaded the character: show the current expression (idle after the start).
     """
     send_expression(pre_exp.current or pre_exp.express(IDLE_EXPRESSION))
+
+def list_backgrounds():
+    """
+    Names of the pictures in the backgrounds folder (sorted) and the one to show first.
+    """
+    if not os.path.isdir(BACKGROUND_FOLDER):
+        return [], ""
+    files = sorted(f for f in os.listdir(BACKGROUND_FOLDER)
+                   if f.lower().endswith(CONST.BACKGROUND_EXTENSIONS) and os.path.isfile(os.path.join(BACKGROUND_FOLDER, f)))
+    wanted = cfg.get(CONST.BACKGROUND_IMAGE_KEY)
+    return files, (wanted if wanted in files else (files[0] if files else ""))
+
+@app.route(f"/{CONST.BACKGROUND_LIST_ROUTE}")
+def character_background_list():
+    files, default = list_backgrounds()
+    response = jsonify({"files": files, "default": default})
+    response.headers["Cache-Control"] = "no-cache"
+    return response
+
+@app.route(f"/{CONST.BACKGROUND_ROUTE}/<path:filename>")
+def character_background(filename):
+    """
+    Delivers one background picture (only pictures, only from the backgrounds folder).
+    """
+    if filename not in list_backgrounds()[0]:
+        return "No such background picture", 404
+    response = send_from_directory(BACKGROUND_FOLDER, filename)
+    response.headers["Cache-Control"] = "no-cache"
+    return response
 
 @app.route(f"/{CONST.CHARACTER_ROUTE}/")
 def character_index():

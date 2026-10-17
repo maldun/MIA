@@ -94,3 +94,19 @@ runs a TLS proxy (openssl + socat, self-signed certificate in `ui/certs`):
 
 The chat page connects to the socket of the address it was loaded from, so the same page works on localhost, in the LAN and over HTTPS.
 `python ui/tools/browser_check.py https://<address>:8586/ out.png --insecure` checks a page in headless Chromium.
+
+### Emotions (decisions after phase 5)
+
+- `happy` uses the `happy` preset (broad smile, cheer gesture); `neutral` uses the calm `neutral` preset (no gesture,
+  no "Listen!" clip). Both expressions have no voice clip yet; the mouth still moves while MIA's voice plays.
+  `MIA`, `agree`, `disagree`, `annoyed` keep their expressions (greet, yes, no, annoyed); `talk` stays available but is no emotion anymore.
+
+### Custom background
+
+- Pictures (png, jpg, webp) in the `backgrounds` folder of MIA (`"background_dir"` in `setup_cfg.json`) are shown behind the character;
+  the first one at the start, or `"background_image"`. See `backgrounds/README.md`.
+- `web_app.py` serves them: `GET /character-backgrounds.json` ({"files": [...], "default": ...}) and `GET /character-backgrounds/<name>`
+  (only pictures of that folder). The character (`godot/background_manager.gd`) loads them from the server it came from and
+  draws the picture on canvas layer -1, scaled to cover the view; on the desktop it reads `<repository>/backgrounds` directly.
+- The page can switch it with `{"type": "background", "name": "room.jpg"}` ("" = plain colour); the menu (`/character/?menu`) has a Background row.
+- Tests: `godot/tools/test_background.gd` (headless) and the background tests in `tests/test_character_integration.py`.

@@ -86,6 +86,8 @@ Prerequisites:
     - "timeout":3, (pause in seconds before the character returns to the idle expression)
     - "character_dir":"ui/godot/build/web", (optional: folder with the web export of the 3D character, see ui/README.md)
     - "https_port":8586, (optional: port of the HTTPS proxy in front of the web app, see "Access from other computers")
+    - "background_dir":"backgrounds", (optional: folder with background pictures for the character, see backgrounds/README.md)
+    - "background_image":"room.jpg", (optional: picture shown at the start, default: the first one)
     - "web_port":8585, (port for web-app)
     - "address":"localhost", (adress)
     - "protocol":"http", (web protocol used for site)

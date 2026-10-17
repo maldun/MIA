@@ -30,6 +30,14 @@ CHARACTER_READY_EVENT = "character_ready"
 # optional: port of an HTTPS proxy in front of the web app (ui/tools/https_proxy.sh). Browsers only run the
 # character (and use audio worklets) in a secure context, i.e. on localhost or over HTTPS.
 HTTPS_PORT_KEY = "https_port"
+# custom background pictures behind the character: pictures (png, jpg, webp) in this folder (relative to this
+# folder or absolute); "background_image" names the one shown at the start (default: the first one)
+BACKGROUND_DIR_KEY = "background_dir"
+DEFAULT_BACKGROUND_DIR = "backgrounds"
+BACKGROUND_IMAGE_KEY = "background_image"
+BACKGROUND_EXTENSIONS = (".png", ".jpg", ".jpeg", ".webp")
+BACKGROUND_LIST_ROUTE = "character-backgrounds.json"
+BACKGROUND_ROUTE = "character-backgrounds"
 
 # Important Config Keys for URL
 ADDRESS_KEY = "address"

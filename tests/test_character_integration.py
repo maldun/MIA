@@ -43,6 +43,18 @@ class ConfigFiles(unittest.TestCase):
         for emotion in ["agree", "disagree", "neutral", "annoyed", "happy", "MIA"]:
             self.assertIn(emotion, self.emotions)
 
+    def test_happy_uses_the_happy_preset_and_neutral_a_calm_one(self):
+        self.assertEqual(self.emotions["happy"], "happy")
+        self.assertEqual(self.expressions["happy"]["preset"], "happy")
+        self.assertEqual(self.emotions["neutral"], "neutral")
+        self.assertEqual(self.expressions["neutral"]["preset"], "neutral")
+        # the calm preset has no gesture and does not move the mouth by itself
+        library = {p["name"]: p for p in load_json("ui/godot/presets/library.json")["presets"]}
+        self.assertFalse(library["neutral"].get("gesture"))
+        self.assertFalse(library["neutral"].get("speaking"))
+        # neutral answers are the most common ones: no "Listen!" clip for them
+        self.assertIsNone(self.expressions["neutral"]["voice"])
+
     def test_new_emotions_are_there(self):
         for emotion in ["sad", "angry", "surprised", "embarrassed", "smug", "thinking"]:
             self.assertEqual(self.emotions[emotion], emotion)
@@ -160,6 +172,65 @@ class WebAppEvents(unittest.TestCase):
             self.assertIn(b"build_web.sh", response.data)
         finally:
             wa.CHARACTER_FOLDER = old
+
+    def _with_backgrounds(self, files):
+        """runs a block with a temporary backgrounds folder holding the given file names"""
+        import contextlib
+
+        @contextlib.contextmanager
+        def ctx():
+            wa = self.web_app
+            with tempfile.TemporaryDirectory() as folder:
+                for name in files:
+                    with open(os.path.join(folder, name), "wb") as fp:
+                        fp.write(b"fake picture " + name.encode())
+                os.mkdir(os.path.join(folder, "sub.png"))  # a folder named like a picture is no picture
+                old = wa.BACKGROUND_FOLDER
+                wa.BACKGROUND_FOLDER = folder
+                try:
+                    yield wa.app.test_client()
+                finally:
+                    wa.BACKGROUND_FOLDER = old
+        return ctx()
+
+    def test_backgrounds_are_listed_sorted_and_only_pictures(self):
+        with self._with_backgrounds(["b.jpg", "a.PNG", "notes.txt", "c.webp", "video.mp4"]) as http:
+            data = http.get("/character-backgrounds.json").get_json()
+            self.assertEqual(data["files"], ["a.PNG", "b.jpg", "c.webp"])
+            self.assertEqual(data["default"], "a.PNG")  # the first one
+
+    def test_configured_background_is_the_default(self):
+        wa = self.web_app
+        wa.cfg["background_image"] = "b.jpg"
+        try:
+            with self._with_backgrounds(["a.png", "b.jpg"]) as http:
+                self.assertEqual(http.get("/character-backgrounds.json").get_json()["default"], "b.jpg")
+            wa.cfg["background_image"] = "missing.jpg"  # unknown name: fall back to the first picture
+            with self._with_backgrounds(["a.png", "b.jpg"]) as http:
+                self.assertEqual(http.get("/character-backgrounds.json").get_json()["default"], "a.png")
+        finally:
+            wa.cfg.pop("background_image", None)
+
+    def test_background_files_are_served_but_nothing_else(self):
+        with self._with_backgrounds(["room.png", "notes.txt"]) as http:
+            ok = http.get("/character-backgrounds/room.png")
+            self.assertEqual(ok.status_code, 200)
+            self.assertEqual(ok.data, b"fake picture room.png")
+            ok.close()
+            self.assertEqual(http.get("/character-backgrounds/notes.txt").status_code, 404)   # not a picture
+            self.assertEqual(http.get("/character-backgrounds/missing.png").status_code, 404)
+            self.assertEqual(http.get("/character-backgrounds/../setup_cfg.json").status_code, 404)  # no way out of the folder
+            self.assertEqual(http.get("/character-backgrounds/%2e%2e/setup_cfg.json").status_code, 404)
+            self.assertEqual(http.get("/character-backgrounds/sub.png").status_code, 404)
+
+    def test_missing_background_folder_gives_an_empty_list(self):
+        wa = self.web_app
+        old = wa.BACKGROUND_FOLDER
+        wa.BACKGROUND_FOLDER = "/nonexistent/backgrounds"
+        try:
+            self.assertEqual(wa.app.test_client().get("/character-backgrounds.json").get_json(), {"files": [], "default": ""})
+        finally:
+            wa.BACKGROUND_FOLDER = old
 
     def test_allowed_origins_cover_localhost_lan_and_https_proxy(self):
         origins = self.web_app.build_allowed_origins("http://192.168.1.5:8585", "localhost", 8585, 8586, "192.168.1.5")

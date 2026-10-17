@@ -22,7 +22,9 @@ var _pinch_dist_start := 0.0
 
 var engine: ExpressionEngine
 var bridge: HostBridge
+var backgrounds: BackgroundManager
 var _bar: Control
+var _background_row_built := false
 var _buttons := {}  # "expression:<name>" / "gesture:<name>" -> Button (highlighted while active)
 
 func _ready() -> void:
@@ -35,8 +37,13 @@ func _ready() -> void:
 
 func _setup_environment() -> void:
 	var env := Environment.new()
-	env.background_mode = Environment.BG_COLOR
-	env.background_color = Color(0.86, 0.88, 0.92)
+	# the background (plain colour or a picture from the backgrounds folder) is drawn on canvas layer -1
+	env.background_mode = Environment.BG_CANVAS
+	env.background_canvas_max_layer = -1
+	backgrounds = BackgroundManager.new()
+	add_child(backgrounds)
+	backgrounds.setup()
+	backgrounds.refresh()
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	env.ambient_light_color = Color(0.85, 0.87, 0.95)
 	env.ambient_light_energy = 0.6
@@ -72,7 +79,7 @@ func _setup_expressions() -> void:
 	engine.play("idle", 0.0)
 	bridge = HostBridge.new()
 	add_child(bridge)
-	bridge.setup(engine)  # commands from the page around us (MIA's chat page)
+	bridge.setup(engine, backgrounds)  # commands from the page around us (MIA's chat page)
 
 # --- camera ---------------------------------------------------------------------------------
 
@@ -180,9 +187,20 @@ func _build_panel() -> void:
 	_add_row("Expression", engine.library_order, engine.play, "expression")
 	_add_row("Gesture", ["stop gesture"] + engine.gestures.library_order, _gesture_button, "gesture")
 	toggle.pressed.connect(func(): _bar.visible = not _bar.visible)
+	backgrounds.list_changed.connect(_on_backgrounds_listed)
+	_on_backgrounds_listed(backgrounds.names, backgrounds.default_name)
+	backgrounds.background_changed.connect(func(_n): _refresh_active())
 	engine.expression_changed.connect(func(_n): _refresh_active())
 	engine.gestures.gesture_started.connect(func(_n): _refresh_active())
 	engine.gestures.gesture_finished.connect(func(_n): _refresh_active())
+	_refresh_active()
+
+## the background row appears when there are pictures in the backgrounds folder
+func _on_backgrounds_listed(names: Array, _default_name: String) -> void:
+	if _background_row_built or names.is_empty() or _bar == null:
+		return
+	_background_row_built = true
+	_add_row("Background", ["none"] + names, func(item): backgrounds.show_background("" if item == "none" else item), "background")
 	_refresh_active()
 
 func _gesture_button(item: String) -> void:
@@ -196,7 +214,8 @@ func _refresh_active() -> void:
 	for key in _buttons:
 		var parts: PackedStringArray = key.split(":")
 		var active := (parts[0] == "expression" and parts[1] == engine.current_name) \
-				or (parts[0] == "gesture" and parts[1] == engine.gestures.current)
+				or (parts[0] == "gesture" and parts[1] == engine.gestures.current) \
+				or (parts[0] == "background" and (parts[1] == backgrounds.current or (parts[1] == "none" and backgrounds.current.is_empty())))
 		(_buttons[key] as Button).modulate = Color(1.0, 0.85, 0.35) if active else Color.WHITE
 
 func _add_row(title: String, names: Array, callback: Callable, kind := "") -> void:

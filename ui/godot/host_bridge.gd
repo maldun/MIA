@@ -8,16 +8,19 @@ extends Node
 ##   {"type": "expression", "name": "happy"}     play an expression preset
 ##   {"type": "gesture", "name": "wave"}          play a gesture
 ##   {"type": "speaking", "value": true}          the character's voice is playing: the mouth moves
+##   {"type": "background", "name": "room.jpg"}   show a picture of the backgrounds folder ("" = plain colour)
 ## Unknown names or types are logged and ignored, the current expression stays.
 ## After startup the bridge tells the host {"type": "ready"}.
 
 signal handled(message: Dictionary, ok: bool)
 
 var engine: ExpressionEngine
+var backgrounds: BackgroundManager
 var _callback  # JavaScriptObject callback; keep the reference or it is freed
 
-func setup(expression_engine: ExpressionEngine) -> void:
+func setup(expression_engine: ExpressionEngine, background_manager: BackgroundManager = null) -> void:
 	engine = expression_engine
+	backgrounds = background_manager
 	if OS.has_feature("web"):
 		_callback = JavaScriptBridge.create_callback(_on_js_message)
 		JavaScriptBridge.get_interface("window").addEventListener("message", _callback)
@@ -54,6 +57,10 @@ func handle(message: Dictionary) -> bool:
 		"speaking":
 			engine.set_speaking(bool(message.get("value", false)))
 			ok = true
+		"background":
+			if backgrounds != null:
+				backgrounds.show_background(str(message.get("name", "")))
+				ok = true
 		"ready":
 			ok = true  # our own message when the character is not embedded
 		_:

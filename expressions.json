@@ -10,5 +10,7 @@
 "surprised": {"preset": "surprised", "text": "Oh!", "voice": null},
 "embarrassed": {"preset": "embarrassed", "text": "Um... well...", "voice": null},
 "smug": {"preset": "smug", "text": "Hehe, of course.", "voice": null},
-"thinking": {"preset": "thinking", "text": "Hmm, let me think.", "voice": null}
+"thinking": {"preset": "thinking", "text": "Hmm, let me think.", "voice": null},
+"happy": {"preset": "happy", "text": "Yay!", "voice": null},
+"neutral": {"preset": "neutral", "text": "I see.", "voice": null}
 }
