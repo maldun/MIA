@@ -7,6 +7,8 @@ MIA's page should look and feel like a modern chat application, with the 3D char
 - The character fills the whole window; the chat is a clean, translucent panel on top of it (a bottom sheet on phones).
 - A real conversation view: message bubbles for you and for MIA, timestamps, formatted answers (markdown, code), answers that
   appear while MIA is still writing, a proper input field, and the history of earlier conversations.
+- Instead of a fixed headline the page shows a short **mood and status line** in MIA's own words ("Feeling cheerful!",
+  "Thinking ..."), driven by the same emotion that drives the character's face.
 - Works well on desktop and phone, in dark and light themes, with keyboard and screen reader.
 - Everything stays on the host machine and the private network: no external scripts, fonts or services.
 
@@ -17,7 +19,7 @@ better in the browser than in Godot's web export). Godot keeps the character, th
 
 What exists today (`templates/index.html`, `web_app.py`), as facts:
 
-- One page with a heading ("I am MIA, eager to help!"), the character iframe, an iframe with the **current answer only**, a plain
+- One page with a fixed heading ("I am MIA, eager to help!", it never changes), the character iframe, an iframe with the **current answer only**, a plain
   textarea and a "Send Answer" button. There is no conversation view: no history, no bubbles of your own messages, no timestamps.
 - The answer is written into a shared file (`answer.html`) on every streamed chunk and shown by reloading an iframe. All devices share
   that one file; it is rewritten from scratch for every chunk; the markdown is rendered by a web component (`md-block`).
@@ -69,9 +71,10 @@ Wide screen (>= 900 px)                     Phone, portrait
 - **Phone / narrow:** bottom sheet with three snap heights: peek (composer + last message), half, full. A drag handle changes them;
   the composer stays above the on-screen keyboard (uses the visual viewport and safe-area insets), the character stays visible above.
 - **Landscape phone:** panel at the right like wide screens, 45 % width.
-- **Header** (inside the panel): MIA's name and avatar, a status line ("online", "thinking...", "speaking...", "offline"), and a menu button.
+- **Mood line** (4.3) above the character where the old heading was; **header** (inside the panel): MIA's name and avatar, a small
+  connection and model status ("online", "light model", "offline"), and a menu button.
   The menu has: Character (view: body, bust, face), Background, Expression editor, Sound (mute, volume), Theme, Settings, About.
-- The old heading, the answer iframe and the grid are removed.
+- The old heading is replaced by the mood line, the answer iframe and the grid are removed.
 
 ### 4.2 Visual design
 
@@ -84,6 +87,47 @@ Wide screen (>= 900 px)                     Phone, portrait
   `prefers-reduced-motion` turns animation off.
 - **Icons:** inline SVG (vendored, no icon font, no CDN).
 - Empty state: a friendly first message with a few suggestions ("Say hello", "What can you do?") that fill the composer.
+
+### 4.3 Mood line (replaces the headline)
+
+A brief, friendly message about how MIA feels or what she is doing, in the place of the old headline.
+
+- **Place:** top of the page, centered over the free area of the character (wide screens: left of the panel; phones: top of the screen),
+  as a small rounded chip with a soft translucent background so it reads on any background picture. One line, at most about 50 characters
+  (ellipsis, the full text as tooltip); on very narrow screens (< 360 px) only the emoji and the first words. It stays visible when the
+  chat panel is collapsed, and it does not overlap the caption (4.1, 7) or the panel.
+- **Content:** an emoji or small icon and a short sentence in MIA's voice (first person), for example
+
+  | Mood (emotion keyword) | Example |
+  |---|---|
+  | neutral / idle | "Ready when you are." |
+  | happy | "Feeling cheerful!" |
+  | greet / `MIA` | "Hello again!" |
+  | agree / yes | "Glad we agree!" |
+  | disagree / no | "I don't think so." |
+  | annoyed | "Seriously?" |
+  | sad | "A bit down today." |
+  | angry | "Not amused." |
+  | surprised | "Oh! I did not expect that." |
+  | embarrassed | "A little shy ..." |
+  | smug | "Quite pleased with myself." |
+  | thinking | "Hmm, let me think ..." |
+
+- **Activity** overrides the mood while it lasts: *thinking* ("Thinking ..." with animated dots) from sending until the first text,
+  *speaking* (the mood text with a small sound-wave icon), *dreaming* ("Sorting my memories ..."), *offline* ("Can't reach my brain
+  right now." when Ollama is not reachable), *model switch* ("Light mode: saving energy." / "Full power!").
+  When the activity ends the mood line returns to the current mood.
+- **Source of truth:** the server. The mood is the emotion keyword of MIA's latest message (the same value that selects the character's
+  expression); the phrase is picked from `moods.json` (several variants per emotion, chosen at random but never the same twice in a row)
+  and sent to all devices, so every device shows the same line. Unknown emotions fall back to the neutral phrases.
+- **Lifetime:** a mood stays for 10 minutes after the last answer (setting `mood_hold_minutes`), then the line returns to the "ready" phrase;
+  a new emotion or activity replaces it immediately. At start the line shows "ready" (or the mood restored from the chat log if it is recent).
+- **Editable:** `moods.json` in the MIA folder (default shipped, same style as `emotion_map.json`): `{"emotions": {"happy": {"emoji": "...",
+  "texts": ["Feeling cheerful!", "..."]}}, "activities": {"thinking": {...}, "speaking": {...}, ...}}`. Texts are meant to match MIA's
+  personality and language; new emotions added to `emotion_map.json` need an entry (the neutral phrases are used until then).
+- **Behavior:** crossfade of about 250 ms when the text changes, no change flicker when the same mood repeats; can be switched off in the settings.
+- **Accessibility:** `aria-live="polite"`, announced at most once every 30 seconds (not on every activity change); the emoji has a text alternative.
+- **Later (optional, C6):** greetings by time of day, a mood line written by the LLM itself in an idle moment.
 
 ## 5. Chat features
 
@@ -132,8 +176,8 @@ Wide screen (>= 900 px)                     Phone, portrait
 ### 5.4 Status and connection
 
 - Connection indicator: "reconnecting ..." banner (not blocking), sending disabled while offline, drafts kept, automatic retry with backoff.
-- Server status in the header: online/offline, current model (large/light), busy (thinking, speaking). Errors from the LLM or speech
-  are shown as system notes with a short, human message (details in the log).
+- Server status in the header: online/offline and the current model (large/light); what MIA is doing (thinking, speaking) and how she feels
+  is the job of the mood line (4.3). Errors from the LLM or speech are shown as system notes with a short, human message (details in the log).
 
 ### 5.5 Sound
 
@@ -172,12 +216,12 @@ Socket.IO (names versioned in one place, documented):
 | server -> all | `chat_start` | `{id, role: "assistant", created}`: MIA starts a message (typing indicator) |
 | server -> all | `chat_delta` | `{id, text}`: the filtered text so far (cumulative, so a late client can catch up) |
 | server -> all | `chat_done` | `{id, text, emotion, status}` |
-| server -> all | `chat_status` | `{busy, activity: "idle|thinking|speaking", model, profile, queue}` |
+| server -> all | `chat_status` | `{busy, activity: "idle|thinking|speaking|dreaming|offline", model, profile, queue, mood: {emotion, emoji, text, since}}` |
 | server -> all | `chat_error` | `{id?, message}` human readable |
 
 REST:
 
-- `GET /api/chat/history?before=<id>&limit=50` visible messages, newest last; `GET /api/chat/status`.
+- `GET /api/chat/history?before=<id>&limit=50` visible messages, newest last; `GET /api/chat/status` (the same payload as `chat_status`, including the mood).
 - `POST /api/chat/clear` with `{"scope": "log"}` (needs the editor token or a `chat_token`; the page confirms first).
 - Existing: expression events, `character_ready`, `speaking` stay as they are.
 
@@ -190,6 +234,8 @@ REST:
 - Streaming deltas are throttled (at most about 20 per second per message).
 - Emotion keywords, expressions, speech streaming, penalties and the time check keep working through the same path; their
   visible results become messages or system notes as described in 5.1.
+- **Mood:** a small component keeps the current mood (emotion of the latest message, `since`) and the activity, picks the phrase from
+  `moods.json`, applies the hold time, and publishes `chat_status` on every change. It reads `moods.json` again when the file changes.
 - Input validation: text length, control characters stripped, commands recognized server-side as before (same list as the palette,
   served by `GET /api/chat/commands` so page and server never disagree).
 - Security: sanitized rendering on the client; the server stores text only (no HTML); same-origin and allowed-origin rules as for
@@ -211,6 +257,7 @@ REST:
 ## 8. Settings and persistence (per device, localStorage, all wrapped in try/catch)
 
 Theme (dark/light/system), accent color, panel width, sheet snap height, send-on-Enter, queue behavior, sound (mute, volume), show emotions,
+show the mood line,
 show timestamps, compact mode (denser spacing). A "reset settings" action. Drafts and unsent messages are per device.
 
 ## 9. Accessibility and languages
@@ -235,9 +282,12 @@ show timestamps, compact mode (denser spacing). A "reset settings" action. Draft
 
 ## 11. Testing
 
-- **JavaScript unit tests** with Node's built-in test runner (`node --test`, Node 22 is installed): markdown rendering and sanitizing
+- **JavaScript unit tests** with Node's built-in test runner (`node --test`, Node 22 is installed): mood line (text shortening, crossfade, narrow
+  layout, announce throttle), markdown rendering and sanitizing
   (including attack strings), message grouping and day separators, streaming merge, autoscroll rules, command palette filtering,
   settings storage with a failing localStorage, i18n lookup.
+- **Python tests (mood):** phrase choice (random, never the same twice in a row, fallback for unknown emotions), activity overrides the mood and
+  returns to it, hold time and return to "ready", changed `moods.json` is picked up, a broken file keeps the defaults.
 - **Python tests:** chat log (append, paging, rotation, atomic writes, corrupt line handling), event flow with the socket.io test client
   (send, stream, done, stop, queue, errors, two clients see the same), history filtering (no calibration/time/summary/penalty messages),
   commands list, rate limit, validation.
@@ -252,9 +302,9 @@ show timestamps, compact mode (denser spacing). A "reset settings" action. Draft
 
 | Phase | Deliverable | Done when |
 |---|---|---|
-| C1 Foundation | Layout shell (full-window character, panel / bottom sheet, header, menu), design tokens, themes, vendored libraries, strict CSP, i18n skeleton | The new page loads without any external request, looks right in dark and light on three viewports, the old page parts are gone, the character works as before. |
-| C2 Backend | Chat log, message model, `chat_*` events, background processing, queue, stop, history API, commands API | A script or test client can send, stream, stop and read the history; two clients see the same; the old blocking handler is gone; tests green. |
-| C3 Chat | Bubbles, markdown, streaming, typing indicator, composer, command palette, autoscroll, history paging, status and reconnect | A real conversation with MIA works end to end on desktop and phone viewports, including stop, reload and history. |
+| C1 Foundation | Layout shell (full-window character, panel / bottom sheet, header, menu, **mood line with fixed text**), design tokens, themes, vendored libraries, strict CSP, i18n skeleton | The new page loads without any external request, looks right in dark and light on three viewports, the old page parts are gone, the character works as before. |
+| C2 Backend | Chat log, message model, `chat_*` events, background processing, queue, stop, history API, commands API, **mood component and `moods.json`** | A script or test client can send, stream, stop and read the history; two clients see the same; the old blocking handler is gone; tests green. |
+| C3 Chat | Bubbles, markdown, streaming, typing indicator, composer, command palette, autoscroll, history paging, status and reconnect, **live mood line** | A real conversation with MIA works end to end on desktop and phone viewports, including stop, reload and history. |
 | C4 Character | `viewport_inset` framing, caption mode, menu entries (view, background, editor, sound) | The character is centered in the free area while the panel opens, closes, resizes and snaps; collapsing shows captions. |
 | C5 Polish | Accessibility pass, reduced motion, performance budget, settings, empty state, cleanup of old code (`answer.html`, `md-block`, CDN links), documentation | Checklist of section 9 and 10 passes, README updated, manual phone checklist done. |
 | C6 Optional | Regenerate, speak again, search, export, accent presets, German texts | Chosen after C5. |
@@ -266,17 +316,26 @@ After each phase: stop, report what was built, how to test it, and what to decid
 Voice input (microphone), attachments and images from the user, accounts and multiple users, message editing, push notifications, an
 installable app / offline mode (a self-signed certificate prevents service workers), chat rendered inside Godot, translating MIA's answers.
 
-## 14. Open questions
+## 14. Decisions and open points
 
-Suggested answers are in brackets; the work starts with these unless you decide otherwise.
+Decided by the user (2026-10-18): all of the suggested answers below were accepted, with one change (the mood line, 4.3).
 
-1. Chat panel at the **right** on wide screens, or on the left, or floating? [right]
-2. Default theme and accent: dark with the blue of the character's hair? [yes]
-3. Show MIA's emotion as a badge/emoji on each message? [yes, small, can be switched off]
-4. Keep the whole conversation visible forever (a separate chat log), independent of MIA's memory? [yes; deletable from the menu]
-5. Should the hourly "time check" messages from MIA be visible? [yes, marked "automatic", hideable]
-6. Enter sends on phones, or Enter = new line? [new line, send button sends]
-7. While MIA is busy: queue one message, or block the composer? [queue one]
-8. Should sending messages need a token (like the expression editor), or is the home network enough? [no token now; optional `chat_token` later, needed once MIA is reachable from outside]
-9. English only for the interface now? [yes, German texts prepared in the dictionary]
-10. Is "stop" while MIA is speaking supposed to stop the speech too? [yes, setting]
+1. Chat panel at the **right** on wide screens. ✔
+2. Default theme dark, accent the blue of the character's hair. ✔
+3. MIA's emotion as a small badge/emoji on each message, can be switched off. ✔
+4. The whole conversation stays visible (separate chat log, independent of MIA's memory), deletable from the menu. ✔
+5. The hourly time-check messages from MIA are visible, marked "automatic", hideable. ✔
+6. Phones: Enter = new line, the send button sends. ✔
+7. While MIA is busy: queue one message. ✔
+8. No chat token for now; an optional `chat_token` later, needed once MIA is reachable from outside. ✔
+9. English only for the interface now, German texts prepared in the dictionary. ✔
+10. "Stop" also stops the speech (setting). ✔
+11. **Change:** the headline "I am MIA, eager to help!" is replaced by a brief **mood and status line** (4.3). ✔
+
+Still open (suggested answers in brackets; work starts with these unless you decide otherwise):
+
+12. Mood texts in the first person, in MIA's voice ("Feeling cheerful!")? [yes; editable in `moods.json`, so the persona, for example the "goshujin-sama" style
+    from your calibration, can be put there]
+13. The mood line above the character (centered over the free area, also when the chat is collapsed)? [yes]
+14. How long does a mood last after the last answer? [10 minutes, then "Ready when you are."]
+15. Should the mood line also show the model ("light mode") or only mood and activity? [mood and activity in the line, the model as a small chip in the panel header]
