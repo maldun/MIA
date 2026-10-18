@@ -391,6 +391,82 @@ Options: polish pass for style, "continue on its own for N scenes" (later), read
 
 Acceptance: a story over 20+ scenes keeps names, places and facts consistent in the test set checks; the state file alone is enough to resume after a restart.
 
+## 13a. Emotions, behaviour feedback (rewards and penalties) and memory: review of the early experiments
+
+MIA started with three experiments that carry a lot of weight today: emotions as keywords in the text, penalties as scolding messages, and "dreaming" as a summary of the session.
+They worked well enough to build the character on. This section records what they do, what is fragile, and what replaces them. Nothing here is built yet; it has to be reviewed first.
+
+### What the code does today (communicator.py, penalties.json, moods.py)
+- **Emotions**: the first message of every conversation (`EMOTION_QUESTION`) asks the model to start every answer with one keyword from `emotion_map.json` and a newline. The keyword is cut out of the
+  streamed text, mapped to an expression (and a mood line in the page). A missing or unknown keyword counts as "forgotten".
+- **Penalties**: when an emotion is missing, `penalties.json` provides a scolding message ("MIA! You have forgotten adding the emotion ...", plus an apology line at random) that is sent to the model **as the next
+  user message**, so it becomes part of the memory. It was a joke at the start; in effect it is a correction channel that costs tokens and pollutes the history.
+- **Dreaming** (`emulate_dreaming`): the model summarises the whole chat (about 2000 words), the summaries of past sessions are summarised again into a long-term summary (a summary of summaries), the history is
+  cleared, the persona is sent again and the summaries are given back as the new beginning, with the instruction to "pretend you just woke up". The raw history is overwritten.
+- **Tasks**: lines marked `TASK:` in the chat are supposed to survive in the summaries; the hourly time check asks the model whether something is due.
+
+### Assessment
+- Emotions as in-band keywords depend on the model's discipline in every single answer; the penalty exists *because* that fails. The keyword channel also carries only one emotion per answer position,
+  without intensity, and the list of emotions in the prompt is separate from the presets and gestures that the character can really show.
+- Scolding is the wrong tool for format errors: constrained decoding and schemas prevent them, a silent retry repairs them, and neither needs to enter the memory. The *idea* behind the penalty (unwanted
+  behaviour should have a consequence that changes later behaviour) is sound and is worth a proper design (see below).
+- Dreaming by summary is "compaction", used widely, and a reasonable first approximation of what sleep does (compress, keep what matters). Its known weaknesses: it is lossy and the loss is silent;
+  a summary of summaries drifts further with every round; a hallucinated or wrong statement in a summary becomes a permanent "fact" without a trace to its source; details cannot be recovered after the raw
+  history is gone; tasks inside prose can be dropped; and the model that summarises is the weak local model, so quality varies. With a context of 8192 tokens, memory design is not a detail.
+- Neuroscience gives a better analogy than "summarise": in complementary-learning-systems theory, fast episodic storage (hippocampus) is replayed during rest to train slower semantic storage (cortex),
+  which extracts regularities, while episodes fade; memory is also rewritten when recalled (reconsolidation). Translated: keep the episodes, **extract** structured knowledge from them with links back,
+  **merge** it with what is known (add, update, contradict, forget), and **retrieve** by relevance when needed, instead of replacing the past by one text.
+
+### Requirements: emotions
+- EM1. Emotion is **out of band**: a separate small structured step or field (schema: emotion from the list, optional intensity, optional second emotion with the sentence it starts at) next to the text,
+  not a keyword in the spoken text. Options to evaluate in the harness: (a) schema-constrained output with the emotion field first and the text streamed after it; (b) a separate quick call (or the
+  small classifier of 8, level 1 on the CPU) that labels the finished text or each sentence; (c) a mix, where (a) is used and (b) repairs missing values. A missing emotion is repaired silently, never penalised.
+- EM2. The list of emotions is **generated from the preset library** (the expression presets and gestures the character can show), so a new preset can be used without editing a prompt; the mapping file becomes data.
+- EM3. Emotion can be a **state** and not only a label: a mood (valence and arousal, as in the circumplex model of affect) that moves with the conversation and decays with time, from which the label and the
+  expression strength follow. The existing mood tracker (hold time, activity) is the first form; the question is whether the model, the user's tone or both drive it.
+- EM4. Emotion timing: with sentence-level labels the character can change its expression while it speaks (the voice pipeline already works per sentence).
+- EM5. Test cases for emotions (a scenario and the acceptable expressions) belong to the harness (9); the choice between (a), (b), (c) is made by measurement, including latency.
+
+### Requirements: behaviour feedback (the reward and penalty system)
+The goal: unwanted behaviour is **detected**, **recorded** and **changes later behaviour**, without scolding inside the conversation and without training the model to please instead of to be right.
+- BF1. **Behaviour rules** are library entries (4a): a named rule with a detector (a hard check where possible: format, language, forbidden markup in speech, a claim without source, tone words; a model view only where
+  code cannot decide), a severity, a description of the wanted behaviour, and examples. Rules are data; a skill lists the rules it is held to. The rules of the old first message (no markdown in speech, "times"
+  instead of the asterisk, no stage directions) become the first rules.
+- BF2. **Signals**: automatic (detector hits, hard-check failures, retries, budget overruns), explicit (the user marks a message: thumbs, "wrong", "too long", a category), and implicit (regeneration, edits,
+  quick corrections). Every signal is a line in the run log with the run, the node, the rule and the sign (reward or penalty). Nothing is hidden: the user can see the list of recent violations and rewards.
+- BF3. **Consequences**, in order of introduction; each one needs the signals of the previous ones:
+  1. repair: the run repairs the output silently (retry with the violated rule named, a deterministic fix such as removing markup); the conversation history stays clean;
+  2. selection: rule hits per prompt or pipeline variant feed the statistics of the library, so variants with fewer hits are chosen more often (bandit, 8, level 2);
+  3. lessons: a recurring violation produces a short written lesson ("do not use asterisks for emphasis, your voice cannot say them"), kept in a procedural memory (below) and put into the context when the
+     situation matches (verbal reinforcement, as in Reflexion), with the user's approval for lessons that change tone or persona;
+  4. examples: pairs of a bad and a good answer (the repaired one) are stored and retrieved as few-shot examples for the stage that failed;
+  5. training (optional, last): the pairs are a preference dataset for an offline adapter (DPO-style) of the local model, only if the earlier consequences are not enough.
+- BF4. **Protection against the usual failures of reward systems**: (a) *sycophancy*: approval of the user must not be the only reward, because models trained on approval learn to agree and flatter; rewards for
+  factual answers come from hard checks and sources, and thumbs are weighed against them; (b) *Goodhart*: any learned selection is evaluated on held-out test cases that it never sees; (c) *reward hacking*: a
+  detector that is easy to satisfy without being right (for example an emotion keyword present but wrong) is paired with a second signal; (d) a rule or lesson is a draft until the user accepts it (L12, L13).
+- BF5. **The joke stays in the character, not in the mechanism**: the playful scolding and apology can remain as an optional character behaviour (an embarrassed expression, a self-deprecating line spoken or
+  shown once), generated from a violation record after the repair, configurable and off by default for long sessions. It never enters the model's history as a user message.
+- BF6. Honest limits: reward and penalty change the *pipeline* (prompts, examples, selection, memory) far more reliably than they change the *model*. Changing the model's weights is the last, optional step (BF3.5).
+
+### Requirements: memory and dreaming
+- MM1. **Tiers**: (1) working memory, the recent turns verbatim; (2) episodic memory, the raw chat log and run log, **never overwritten** (they already exist: `chat_log.jsonl`, `data/runs`); (3) semantic memory, structured
+  facts and preferences about the user, the world of the story and the projects, each with provenance (source message ids, date, confidence); (4) procedural memory, the lessons and rules of BF3; (5) a **commitment
+  ledger**, tasks and appointments as records (text, due time, status, source), replacing the `TASK:` convention inside prose. The hourly time check reads the ledger (code decides what is due; the model only phrases the reminder).
+- MM2. **Consolidation** ("dreaming") is a library pipeline, run when idle, at night or by `/dream!`, on the light model: select the episodes since the last run; extract candidate facts, preferences and commitments as
+  structured records with source ids; compare each candidate with the existing records and decide add, update, contradict (keep both with dates and mark the older one), or no-op; write per-topic summaries
+  that link to their sources (they are an index into the episodes, not a replacement); apply decay (rarely used, low-importance items fade from retrieval, they are not deleted); produce a short **digest**
+  for the user ("what I took from today"), which can be corrected.
+- MM3. **Memory writes are verified**: a candidate fact must be supported by its source message (the hard checks of 12.2 apply: the quote is in the source); text from the web or from files never becomes a
+  fact about the user; contradictions are surfaced, not silently resolved. Eager consolidation after every message is expensive, so batches at rest are the default.
+- MM4. **Retrieval at answer time** replaces "continue from the compressed text": the context is assembled within the token budget from the persona, the matching lessons, the retrieved facts (embeddings on the CPU
+  plus recency and importance, and tags), a short rolling summary of the current session, and the recent turns. The "pretend you woke up" step is dropped; waking up is just a fresh context with the relevant memories.
+- MM5. **User control**: a page to look at, edit and delete memory records and lessons (privacy and correction); every change is logged; export is a file copy.
+- MM6. **Evaluation**: a memory test set (a scripted conversation, then consolidation, then questions on recall, update of a changed fact, contradiction, temporal order, commitments, and "unknown") in the
+  harness; the current summary-based dreaming is the **baseline** and the new method must beat it at equal or lower token cost. Public benchmarks of long-term conversational memory exist (LoCoMo,
+  LongMemEval) and can be used as a reference, but the own set reflects the real use.
+- MM7. Open research questions: how much of the benefit of consolidation comes from structure (records with provenance) and how much from retrieval? Does batch consolidation at rest lose measurable quality compared
+  with eager writes? Do lessons (procedural memory) reduce rule violations measurably compared with a longer system prompt?
+
 ## 14. References
 
 Marked [S] were found in the web search of this project phase (2026 papers: claims are from search summaries and must be read before they are relied upon). The others are
@@ -469,6 +545,14 @@ Executable and tool-based verification (see 12.2)
 - Gou et al. 2023, CRITIC: Large Language Models Can Self-Correct with Tool-Interactive Critiquing. arXiv:2305.11738
 - (from memory, to be checked) work on property-based testing and test-oracle problems from software engineering applies to model-written checks (Barr et al. 2015, The Oracle Problem in Software Testing: A Survey, IEEE TSE)
 
+Memory, consolidation and behaviour feedback (see 13a)
+- [S] Sharma et al. 2024 (ICLR), Towards Understanding Sycophancy in Language Models. arXiv:2310.13548 (found in the search: RLHF preference data favour answers that agree with the user)
+- [S] Mem0 (Chhikara et al. 2025: structured facts extracted and consolidated at write time), A-Mem (Xu et al. 2025: linked agentic notes, arXiv:2502.12110), Zep (Rasmussen et al. 2025: temporal knowledge graph); MemGPT (Packer et al. 2023, arXiv:2310.08560: paging between context and external storage; critics note latency and dependence on the model's memory decisions); the search summaries did not give the Mem0 and Zep arXiv numbers
+- [S] LoCoMo (Maharana et al. 2024, arXiv:2402.17753) and LongMemEval (Wu et al. 2024, arXiv:2410.10813): benchmarks of long-term conversational memory (existence confirmed in the search); recent 2026 papers on consolidation cost and reconsolidation (arXiv:2609.16053, 2605.16045, 2609.05441) were seen only as abstracts
+- Park et al. 2023, Generative Agents: Interactive Simulacra of Human Behavior. arXiv:2304.03442 (memory stream, retrieval by recency, importance and relevance, reflection that links to sources; not seen in the search)
+- McClelland, McNaughton, O'Reilly 1995, Why there are complementary learning systems in the hippocampus and neocortex, Psychological Review (consolidation by replay); Nader, Schafe, LeDoux 2000, Fear memories require protein synthesis in the amygdala for reconsolidation after retrieval, Nature (reconsolidation); Russell 1980, A circumplex model of affect, Journal of Personality and Social Psychology (valence and arousal). From memory, check before citing
+- Bai et al. 2022, Constitutional AI: Harmlessness from AI Feedback. arXiv:2212.08073; Rafailov et al. 2023, Direct Preference Optimization. arXiv:2305.18290; Skalse et al. 2022, Defining and Characterizing Reward Hacking. arXiv:2209.13085 (all from memory, check)
+
 Local research agents (implementations to learn from)
 - [S] LearningCircuit/local-deep-research; langchain-ai/local-deepresearcher; OpenDeepResearcher-via-searxng (GitHub)
 
@@ -476,6 +560,7 @@ Local research agents (implementations to learn from)
 
 1. **Foundation**: run log (L1), event stream (E), pipeline runner with fake model tests (P), skill loader (S); `chat` ported as the reference skill. Status block in the chat page.
 1b. **Library** (4a): node and pipeline entries as files, the SQLite index, validation, `select` with hard filters and statistics from the run log, `tools/library.py`; the existing `chat` and `summarize` pipelines move into it as the first entries, the web tools and `chunk_text` become the first nodes. **This comes before the checks**, so they are written as library nodes.
+1c. **Behaviour layer** (13a), in two parts that do not block the research work: (i) *signals first*: behaviour rules as library entries, violation and reward lines in the run log, silent repair instead of scolding, emotion as a structured step (EM1 to EM5, measured against the keyword method); (ii) *memory* later: ledger of commitments, structured memory with provenance, consolidation pipeline, retrieval, memory page, and the memory test set with the current dreaming as the baseline.
 2. **Research**: SearXNG setup (DuckDuckGo fallback), tools with the safety rules (X), the research pipeline and its test set; harness (L3); hard checks first (`fixed_code`, `citation`, `web_confirm`, then the sandboxed `script` check); first comparisons (direct vs. pipeline, with/without verify, hard checks vs. styles).
 3. **Storytelling**: story state, scene loop, interactive UI; test set with consistency checks.
 4. **Variants**: inspect the VRM parts (V4), variant store and API, editor, switching with the task.
@@ -484,6 +569,7 @@ Local research agents (implementations to learn from)
 7. Optional: controller and distillation (8, levels 4–5).
 
 ## 16. Open questions
+- Behaviour layer (13a): which unwanted behaviours matter most to you (the list starts with the format rules of the first message)? Should the playful penalty stay as an optional character moment? Is the digest of a consolidation something you want to see every day? Which facts about you should never be stored?
 
 - Which meshes does the VRM have for accessories and clothes (V4)? Do we need additions in Blender?
 - Which Qwen model and context length are usable on 12 GB with acceptable speed (to be measured with the harness, M3)?
