@@ -23,7 +23,8 @@ import threading
 from .web_app import socketio, app, comm, WEB_PORT, scheduler, time_update_trigger
 from .utils import get_own_ip
 from .tls_proxy import start_https_proxy
-from .constants import HTTPS_PORT_KEY
+from . import tailscale_serve
+from .constants import HTTPS_PORT_KEY, TAILSCALE_KEY
 from .shutdown import install_term_handler, stop_process, graceful_shutdown, DEFAULT_PAUSE
 
 from .constants import CFG_FILE, LOG_FNAME
@@ -39,6 +40,7 @@ with open(cfg_file,'r') as jp:
 if __name__ == "__main__":
     https_proc = None
     speak_proc = None
+    tailscale_started = False
     # Ctrl+C, SIGTERM and the commands /break! and /goodnight! all end in the same orderly shutdown below
     install_term_handler()
     try:
@@ -73,6 +75,10 @@ if __name__ == "__main__":
                 print("Expression editor: no token, everyone who can reach the page may change presets")
             if https_proc is not None:
                 print(f"MIA (https, for other devices): https://{host_ip}:{cfg[HTTPS_PORT_KEY]}")
+            if cfg.get(TAILSCALE_KEY):
+                served = tailscale_serve.start_serve(WEB_PORT)
+                tailscale_started = served["ok"]
+                print(f"MIA (Tailscale, only your tailnet): {served['url']}" if served["ok"] else f"Tailscale: {served['message']}")
             socketio.run(app, host=host,debug=False,port=WEB_PORT)
             
     except KeyboardInterrupt:
@@ -80,6 +86,7 @@ if __name__ == "__main__":
     finally:
         # one step after the other with a short pause, instead of everything at the same instant
         graceful_shutdown([("save history", comm.dump_history),
+                           ("stop tailscale serve", lambda: tailscale_serve.stop_serve(WEB_PORT) if tailscale_started else None),
                            ("stop https proxy", lambda: stop_process(https_proc,"https proxy",group=True)),
                            ("stop speech process", lambda: stop_process(speak_proc,"speech process",group=True))],
                           pause=cfg.get("shutdown_pause",DEFAULT_PAUSE))

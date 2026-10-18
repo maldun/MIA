@@ -52,6 +52,10 @@ EXPRESSION_MODEL_KEY = "expression_model"              # default: the model MIA 
 EXPRESSION_TEMPERATURE_KEY = "expression_temperature"
 DEFAULT_EXPRESSION_TEMPERATURE = 0.7
 FEEDBACK_LOG_KEY = "feedback_log"
+
+# remote access (ui/REQUIREMENTS.md 4.8)
+TAILSCALE_KEY = "tailscale"                    # true: MIA publishes itself in your tailnet with `tailscale serve` at start
+PUBLIC_HOSTS_KEY = "public_hosts"              # more host names pages may be loaded from (e.g. a reverse proxy), besides the tailnet name
 DEFAULT_FEEDBACK_LOG = "data/feedback_log.jsonl"
 EDITOR_TOKEN_KEY = "editor_token"            # "" or false: no token; missing: a token is generated on first start
 EDITOR_TOKEN_FILE_KEY = "editor_token_file"

@@ -112,6 +112,7 @@ Prerequisites:
     - "chat_token":"a secret", (optional: token for deleting the conversation over the API; default is the editor token)
     - "moods_file":"moods.json", "mood_hold_minutes":10, (optional: the phrases of the mood line (edit them to match MIA's personality) and how long a mood stays after the last answer)
     - "expression_model":"gemma4:12b-it-qat", "expression_temperature":0.7, "feedback_log":"data/feedback_log.jsonl", (optional: expressions from a description in the expression editor. The model defaults to the one MIA is using right now (same options, so Ollama does not reload anything); the log keeps what you kept, edited or rejected, and is used as examples in later requests)
+    - "tailscale":true, "public_hosts":["mia.example.ts.net"], (optional, off by default: publish MIA in your tailnet at start with `tailscale serve`; `public_hosts` are more host names pages may be loaded from. The tailnet name of this machine is found automatically if Tailscale is installed)
     - "gfx_version":"11.0.0", (flag used for roc)
     - "voice_sample":"/path/to/MIA/voice/samples/miku_vocals.wav",(voice sample for tts voice cloning)
     - "history_file":"memories.json" (MIA's memory)
@@ -167,7 +168,12 @@ The 3D character only runs in a *secure context*: on `localhost` or over HTTPS. 
 - Use the HTTPS port only with `https://`: `https://localhost:<web_port>` does not work, the web port speaks plain HTTP.
 - The browser warns once about the certificate (Advanced > continue). Import `ui/certs/mia.crt` as trusted certificate to avoid that.
 - Without MIA the proxy can be started by hand: `ui/tools/https_proxy.sh 8586 127.0.0.1:<web_port>`.
-- From outside the home network use Tailscale (`tailscale serve`), which provides a trusted HTTPS address without opening ports.
+- From outside the home network (optional, not needed at home) use Tailscale, which gives a trusted HTTPS address inside your tailnet without opening any port:
+  install it (`curl -fsSL https://tailscale.com/install.sh | sh`, `sudo tailscale up`), turn on MagicDNS and HTTPS Certificates in the Tailscale admin console
+  (the machine name then appears in public certificate logs), and run `ui/tools/remote.sh up` (or set `"tailscale": true` in `setup_cfg.json` and MIA does it at start
+  and stops it at the end). The address is `https://<machine>.<tailnet>.ts.net/`; `ui/tools/remote.sh status|down` show and stop it. Never use `tailscale funnel` (public).
+  Everyone in your tailnet can then open the chat (there is no login); presets, expression generation and "clear history" still need the editor token.
+  Set `"host":"127.0.0.1"` to listen on this computer only (then the LAN HTTPS proxy no longer works). Not tried against a real Tailscale here; the commands are from Tailscale's docs.
 - Special Commands:
     - /dream! : MIA summarizes her memories and a new chat is started based on this summy.
     - /goodnight! : shuts down MIA and let her dream

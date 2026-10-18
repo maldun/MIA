@@ -259,3 +259,11 @@ In the expression editor, type what you want ("surprised but trying to hide it")
   and live over real HTTP: `python ui/tools/expression_stub_server.py` (fake model), then `MIA_URL=http://127.0.0.1:8685 MIA_TOKEN_FILE=data/editor_token.txt
   MIA_EXPRESSION_LIVE=1 godot --headless --path ui/godot --script res://tools/test_editor_live.gd`. Not tested here: the quality of a real model's answers; try a few descriptions
   and use Reject / Keep so the next prompts learn from them. Rebuild the web export (`ui/tools/build_web.sh`) after pulling this phase.
+
+## Phase 9: remote access (optional)
+
+Only needed outside the home network; at home `http://localhost:<web_port>` and the HTTPS proxy are enough. `tailscale_serve.py` calls the `tailscale` command line
+(`tailscale serve --bg <port>`, `tailscale serve status`, `tailscale serve --https=443 <port> off`; syntax from Tailscale's documentation) and does nothing when Tailscale is not
+installed, running or logged in. `"tailscale": true` in `setup_cfg.json` publishes MIA at start and stops it at the end; `ui/tools/remote.sh up|down|status` does the same by hand.
+The tailnet name (found automatically, or `public_hosts`) becomes an allowed origin for the socket and the preset API. Tests: `python tests/test_tailscale.py` (16, with a fake
+`tailscale` program, also for the script). Not tried against a real Tailscale: `tailscale serve` asks you once to enable HTTPS in the admin console and prints a link for it.

@@ -197,7 +197,7 @@ Keep the code structured so these can be added without major rewrites (in partic
 | 6. Editor | Slider panel + preset API | A new expression can be built on a phone, saved, and loaded on another device. |
 | 7. Chat | Modern chat page around the character, see `REQUIREMENTS_CHAT.md` (its phases C1-C5) | A real conversation with MIA works in a modern chat UI on desktop and phone, with history, streaming and stop. |
 | 8. LLM | Generate endpoint + UI | A text description produces a valid expression; keep/edit/reject works and is logged. **Built** (see ui/README.md, phase 8; the answers of a real model still need a try-out). |
-| 9. Remote | Tailscale HTTPS setup + README | The page opens over HTTPS from a phone outside the home network. |
+| 9. Remote | Tailscale HTTPS setup + README | The page opens over HTTPS from a phone outside the home network. **Prepared, optional** (see ui/README.md, phase 9; not tried against a real Tailscale). |
 
 After each phase, stop and report what was built, how to test it, and any decisions the user should make before the next phase.
 

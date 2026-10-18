@@ -44,6 +44,7 @@ from .chat_log import ChatLog
 from .chat_service import ChatService
 from .chat_api import create_blueprint as create_chat_blueprint
 from .moods import MoodTracker
+from . import tailscale_serve
 FPATH = os.path.split(__file__)[0]
 cfg_file = os.path.join(FPATH,CFG_FILE)
 TEMPLATE_DIR = "templates"
@@ -97,12 +98,15 @@ lock = threading.Lock()
 app.config['MAX_CONTENT_LENGTH'] = 100*1024**2  # 100 MB
 
 ALLOWED_ORIGIN_FILE=os.path.join(app.root_path,CONST.ALLOWED_ORIGIN_FILE)
-def build_allowed_origins(web_url, address, web_port, https_port=None, own_ip=None):
+def build_allowed_origins(web_url, address, web_port, https_port=None, own_ip=None, extra_hosts=()):
     """
     Origins (pages) that may connect to the socket: the page served by this app, reached via localhost, the
     configured address, our own address, plain or behind the HTTPS proxy.
     """
     hosts = ["localhost", "127.0.0.1", address, own_ip]
+    origins_extra = []
+    for host in extra_hosts:      # tailnet name, reverse proxy: through `tailscale serve` the page comes from https://<name>
+        origins_extra += tailscale_serve.origins_for(host)
     ports = {"http": web_port}
     if https_port:
         ports["https"] = https_port
@@ -113,13 +117,21 @@ def build_allowed_origins(web_url, address, web_port, https_port=None, own_ip=No
                 origin = f"{scheme}://{host}:{port}"
                 if origin not in origins:
                     origins.append(origin)
-    return origins
+    return origins + [o for o in origins_extra if o not in origins]
 
 try:
     _OWN_IP = utils.get_own_ip()
 except Exception:  # no network: localhost only
     _OWN_IP = None
-allowed_origins = build_allowed_origins(WEB_URL, ADDRESS, WEB_PORT, cfg.get(CONST.HTTPS_PORT_KEY), _OWN_IP)
+def _remote_hosts():
+    """the name of this machine in the tailnet (if Tailscale runs) and the configured "public_hosts" """
+    hosts = list(cfg.get(CONST.PUBLIC_HOSTS_KEY, []))
+    info = tailscale_serve.node_info() if tailscale_serve.find_binary() else None
+    if info:
+        hosts.append(info["name"])
+    return hosts
+
+allowed_origins = build_allowed_origins(WEB_URL, ADDRESS, WEB_PORT, cfg.get(CONST.HTTPS_PORT_KEY), _OWN_IP, extra_hosts=_remote_hosts())
 if os.path.exists(ALLOWED_ORIGIN_FILE):
     with open(ALLOWED_ORIGIN_FILE,'r') as aof:
         allowed_origins += aof.read().splitlines()
