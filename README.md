@@ -234,3 +234,10 @@ ToDo
 - Make Package
 - Make better input field.
 - zip memories or find another way (let the LLM extract for example)
+
+### Voice clips: greeting at startup and "Hey, listen!"
+
+The old "How can I help you?" intro is gone. In `setup_cfg.json`:
+- `intro_sounds`: clips of which one is picked at random when a page loads (`Navi_Hello1`, `Navi_Hey1`). `intro_sound` is only the fallback when none of them exists.
+- `attention_sounds` and `attention_chance` (0..1, 0 = never): before MIA starts talking on her own (the hourly time update) she calls out with one of these (`hey_listen`, `Navi_Hey1`) with that chance.
+Missing files are skipped. Add your own clips to either list.

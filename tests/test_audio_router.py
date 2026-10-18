@@ -170,8 +170,9 @@ class WebAppTest(unittest.TestCase):
         intro = os.path.join(self.tmp.name, "intro.wav")
         with open(intro, "wb") as fp:
             fp.write(b"RIFF-intro")
-        saved = self.wa.cfg["intro_sound"]
+        saved = self.wa.cfg["intro_sound"], self.wa.cfg.get("intro_sounds")
         self.wa.cfg["intro_sound"] = intro
+        self.wa.cfg["intro_sounds"] = []
         try:
             old, new = self.connect(), self.connect()
             old.emit("audio_claim", {})
@@ -185,7 +186,50 @@ class WebAppTest(unittest.TestCase):
             old.disconnect()
             new.disconnect()
         finally:
-            self.wa.cfg["intro_sound"] = saved
+            self.wa.cfg["intro_sound"], self.wa.cfg["intro_sounds"] = saved
+
+    def test_the_intro_is_one_of_the_listed_clips(self):
+        clips = []
+        for number in range(3):
+            path = os.path.join(self.tmp.name, "clip%d.wav" % number)
+            with open(path, "wb") as fp:
+                fp.write(b"RIFF-clip%d" % number)
+            clips.append(path)
+        saved = self.wa.cfg["intro_sound"], self.wa.cfg.get("intro_sounds")
+        self.wa.cfg["intro_sound"] = "missing.wav"
+        self.wa.cfg["intro_sounds"] = clips + ["also-missing.wav"]
+        try:
+            seen = set()
+            for _ in range(40):
+                client = self.connect()
+                client.emit("audio_claim", {"initial": True})
+                seen.add(self.http.get(self.reloads(client)[0]["url"]).data)
+                client.disconnect()
+            self.assertEqual(seen, {b"RIFF-clip0", b"RIFF-clip1", b"RIFF-clip2"})
+        finally:
+            self.wa.cfg["intro_sound"], self.wa.cfg["intro_sounds"] = saved
+
+    def test_attention_call_follows_its_chance_and_skips_missing_files(self):
+        clip = os.path.join(self.tmp.name, "listen.wav")
+        with open(clip, "wb") as fp:
+            fp.write(b"RIFF-listen")
+        saved = {k: self.wa.cfg.get(k) for k in ("attention_sounds", "attention_chance")}
+        client = self.connect()
+        client.emit("audio_claim", {})
+        client.get_received()
+        try:
+            self.wa.cfg["attention_sounds"] = [clip, "missing.wav"]
+            self.wa.cfg["attention_chance"] = 0.0
+            self.assertFalse(self.wa.maybe_call_attention())
+            self.wa.cfg["attention_chance"] = 1.0
+            self.assertTrue(self.wa.maybe_call_attention())
+            lines = self.reloads(client)
+            self.assertEqual(self.http.get(lines[0]["url"]).data, b"RIFF-listen")
+            self.wa.cfg["attention_sounds"] = ["missing.wav"]
+            self.assertFalse(self.wa.maybe_call_attention())
+        finally:
+            self.wa.cfg.update(saved)
+            client.disconnect()
 
     def test_claiming_without_initial_does_not_play_the_intro(self):
         client = self.connect()

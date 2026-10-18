@@ -25,6 +25,7 @@ import os
 import time
 import threading
 import multiprocessing as mp
+import random
 import shutil
 import signal
 import socket
@@ -378,6 +379,7 @@ def time_update():
     if answer is None:
         pass
     else:
+        maybe_call_attention()
         send_voice_request(filt_answer)
         emotions, _ = comm.extract_emotion(answer)
         chat_service.post_assistant(filt_answer, emotion=emotions[0] if emotions else None, auto=True)
@@ -416,19 +418,40 @@ def publish_audio(source_path, message, move=False):
     audio_router.announce(f"/{AUDIO_ROUTE}/{name}", serial, message)
     return serial
 
+def find_sound(path):
+    """the file of a configured sound (as given, or relative to the program folder); None when it is missing"""
+    for candidate in (path, os.path.join(app.root_path, path)):
+        if os.path.isfile(candidate):
+            return candidate
+    return None
+
+def pick_sound(sounds):
+    """a random one of the configured sounds that exist"""
+    found = [f for f in (find_sound(s) for s in sounds) if f]
+    return random.choice(found) if found else None
+
 def play_intro_sound():
-    # the intro sound is played by the page that loaded (it claims the voice and asks for it)
-    intro_sound = cfg["intro_sound"]
-    candidates = {intro_sound,os.path.join(app.root_path,intro_sound)}
-    for c in candidates:
-        if os.path.exists(c):
-            publish_audio(c, "intro")
-            log_msg = "Intro Audio loaded sucessfully"
-            break
+    # the intro sound is played by the page that loaded (it claims the voice and asks for it);
+    # "intro_sounds" is a list of clips (one is picked at random), "intro_sound" the single fallback
+    sounds = list(cfg.get("intro_sounds") or []) or [cfg["intro_sound"]]
+    chosen = pick_sound(sounds) or pick_sound([cfg["intro_sound"]])
+    if chosen:
+        publish_audio(chosen, "intro")
+        log_msg = "Intro Audio loaded sucessfully: " + os.path.basename(chosen)
     else:
         log_msg = "No Intro Audio found!"
     logger.info(log_msg)
     return log_msg
+
+def maybe_call_attention():
+    """sometimes MIA calls out before she starts talking on her own ("Hey, listen!"); the chance is "attention_chance" (0 = never)"""
+    sounds = cfg.get("attention_sounds") or []
+    if not sounds or random.random() >= float(cfg.get("attention_chance", 0.0)):
+        return False
+    chosen = pick_sound(sounds)
+    if chosen:
+        publish_audio(chosen, "attention")
+    return bool(chosen)
 
 #address=ADDRESS,port=WEB_PORT
 # --- the chat: log, mood, background processing (chat_service.py) -----------------------------------------------
