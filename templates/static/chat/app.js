@@ -53,6 +53,7 @@ const layout = initLayout({
 // --- connection: header, banner, history after (re)connecting --------------------------------------------
 let composer = null;
 let chat = null;
+let sound = null;
 
 function showState(state) {
   $('connection').dataset.state = state;
@@ -63,6 +64,7 @@ function showState(state) {
   banner.textContent = t(state === 'reconnecting' ? 'banner.reconnecting' : 'banner.offline');
   composer?.setOnline(state === 'online' || state === 'connecting');
   if (state === 'online') {
+    sound?.connected();      // this page may play the voice (only one page does)
     chat?.loadLatest();      // first load, and what was missed while offline
   }
 }
@@ -103,7 +105,7 @@ new ResizeObserver(sendInset).observe($('panel'));
 new ResizeObserver(sendInset).observe($('mood'));
 window.addEventListener('resize', sendInset);
 
-initSound({
+sound = initSound({
   audio: $('audio'),
   socket,
   character,
@@ -234,4 +236,4 @@ $('settings-button').addEventListener('click', () => {
 started = true;
 
 // handle for tests and debugging
-window.miaChat = { renderMarkdown, socket, theme, chat, mood, composer, settings };
+window.miaChat = { renderMarkdown, socket, theme, chat, mood, composer, settings, sound, character };

@@ -274,3 +274,21 @@ Typing into the Godot canvas in a browser can be sluggish (the canvas needs the 
 is a normal input of the chat page; it stores the token under the key `mia_token`, the same one the editor reads (`preset_api.gd` reads it again for every request, so a token
 entered in the page works without reloading the editor tab). The editor's own Token field still works. Text fields of the editor also ask the browser to focus the canvas when
 you enter them (`HostBridge.focus_canvas`). `ui/tools/browser_check.py` got `--local-storage key=value` to test such flows.
+
+## The voice in the page: one page plays (fix for echo and a stuck "talking" state)
+
+Every open page (a second tab, the phone next to the computer) is a socket client. Before, all of them played every line and each one deleted the shared
+`out.wav` when it ended, so lines were heard twice or three times (an echo, the idle clip too), and a page whose file had just been deleted by another one
+never got its "playback ended": the character stayed in the talking pose. Now:
+
+- **One page plays** (`audio_router.py`): a page that is visible claims the voice (`audio_claim`, again when it gets focus or is touched), the others are told
+  (`audio_owner`) and stay silent. The new lines (`audio_reload` with `url` and `serial`) go only to that page. Nobody claimed: the page that connected last gets
+  them, a closed page hands the voice on. The intro sound plays on the page that was just loaded.
+- **Every line has its own file** (`templates/audio/line-<serial>.wav`, the latest 12 are kept, never cached): no shared file, nothing to delete early.
+- **The page queues lines** (`sound.js`): a line that arrives while another plays waits and is played after it, nothing is cut off.
+- **"Talking" ends**: the mouth follows the queue (on while lines play, one "off" when the queue is empty, no flicker between sentences); the page repeats "speaking"
+  every 1.5 s and the character stops talking by itself 5 s after the last signal (`SPEECH_WATCHDOG`, a lost "off" can no longer leave it talking). If an answer fails,
+  the character returns to idle.
+- **Tests:** `python tests/test_audio_router.py` (19), `node --test` (sound queue), `test_bridge.gd` (watchdog), and in a real browser with two connected pages
+  `ui/tools/chat_audio_e2e.js` (two lines uploaded one right after the other: played in order, the second page gets nothing, "talking" ends). Rebuild the web export
+  (`ui/tools/build_web.sh`) for the character's watchdog; the page fixes need only a reload.

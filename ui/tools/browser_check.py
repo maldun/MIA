@@ -36,7 +36,7 @@ out_dir = os.path.dirname(os.path.abspath(args.out))
 width, height = args.size.split("x")
 browser = subprocess.Popen(
     ["flatpak", "run", f"--filesystem={out_dir}", "--share=network", "org.chromium.Chromium", "--headless=new",
-     "--no-sandbox", "--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader",
+     "--no-sandbox", "--autoplay-policy=no-user-gesture-required", "--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader",
      f"--remote-debugging-port={args.port}", f"--window-size={width},{height}"]
     + (["--ignore-certificate-errors"] if args.insecure else []) + ["about:blank"],
     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)

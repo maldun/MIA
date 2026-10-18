@@ -45,6 +45,7 @@ from .chat_service import ChatService
 from .chat_api import create_blueprint as create_chat_blueprint
 from .moods import MoodTracker
 from .speech_text import speech_text
+from .audio_router import AudioRouter
 from . import tailscale_serve
 FPATH = os.path.split(__file__)[0]
 cfg_file = os.path.join(FPATH,CFG_FILE)
@@ -57,8 +58,6 @@ UPLOAD_FOLDER = os.path.join(FPATH,UPLOAD_DIR)
 
 AUDIO_DIR = os.path.join(TEMPLATE_DIR,AUDIO_ROUTE)
 AUDIO_FOLDER= os.path.join(FPATH,AUDIO_DIR)
-
-AUDIO_OUTFILE = "out.wav"
 
 with open(cfg_file,'r') as jp:
     cfg = json.load(jp)
@@ -199,6 +198,7 @@ def handle_chat_stop(_=None):
 @socketio.on('connect')
 def handle_connect(_auth=None):
     """a page connected: it learns the state (busy, model, mood) right away"""
+    audio_router.connect(request.sid)
     emit('chat_status', chat_service.status())
 
 def penalize(penalty):
@@ -326,6 +326,7 @@ def converse(message,on_delta=None,on_emotion=None,should_stop=None):
                                             should_stop=should_stop)
     except Exception:
         streamer.abort()
+        express_and_reload("idle",sound=False)      # no answer: the character does not stay in the pose of the last reaction
         raise
 
     if should_stop is not None and should_stop():
@@ -393,17 +394,36 @@ def time_update():
 
 
 
+AUDIO_KEEP = 12      # the latest lines stay on disk (every line has its own file, nothing is shared between pages)
+audio_router = AudioRouter(lambda event, payload, to=None: socketio.emit(event, payload, to=to) if to else socketio.emit(event, payload))
+
+def publish_audio(source_path, message, move=False):
+    """moves (an upload) or copies (the intro sound) a rendered line to its own file and tells the page that plays the voice; returns the serial number"""
+    serial = audio_router.next_serial()
+    name = f"line-{serial:06d}.wav"
+    target = os.path.join(AUDIO_FOLDER, name)
+    os.makedirs(AUDIO_FOLDER, exist_ok=True)
+    if move:
+        shutil.move(source_path, target)
+    else:
+        shutil.copy2(source_path, target)
+    old_files = sorted(f for f in os.listdir(AUDIO_FOLDER) if f.startswith("line-") and f.endswith(".wav"))
+    for old in old_files[:-AUDIO_KEEP]:
+        try:
+            os.remove(os.path.join(AUDIO_FOLDER, old))
+        except OSError:
+            pass
+    audio_router.announce(f"/{AUDIO_ROUTE}/{name}", serial, message)
+    return serial
+
 def play_intro_sound():
-    # copy intro sound
+    # the intro sound is played by the page that loaded (it claims the voice and asks for it)
     intro_sound = cfg["intro_sound"]
-    out_audio = os.path.join(AUDIO_FOLDER,AUDIO_OUTFILE)
     candidates = {intro_sound,os.path.join(app.root_path,intro_sound)}
     for c in candidates:
         if os.path.exists(c):
-            shutil.copy2(c,out_audio)
-            serve_audio(AUDIO_OUTFILE)
+            publish_audio(c, "intro")
             log_msg = "Intro Audio loaded sucessfully"
-            socketio.emit('audio_reload',log_msg)
             break
     else:
         log_msg = "No Intro Audio found!"
@@ -459,8 +479,6 @@ def chat_page_headers(response):
 def index():
     logger.info('Rendering index.html template')
     print("Rendering index.html template")
-    play_intro_sound()
-    
     # start server
     renderer = render_template('index.html' ,socket_url=get_url(json=True,**cfg),name=md.convert("*MIA*",remove_paragraph=True))
     return renderer
@@ -526,27 +544,19 @@ def upload_sound_file():
         return "No selected file", 400
     main_fname = os.path.split(file.filename)[1]
     url_filename = os.path.join(UPLOAD_FOLDER,main_fname)
-    audio_filename = os.path.join(AUDIO_FOLDER,main_fname)
+    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
     file.save(url_filename)
-    #file.save(os.path.join(STATIC_FOLDER, file.filename))
-    
     logger.info("File uploaded successfully")
-    outfile = AUDIO_OUTFILE
-    out_filename = os.path.join(AUDIO_FOLDER,AUDIO_OUTFILE)
-    #send_file(url_filename,mimetype=AUDIO_MIME_TYPE,as_attachment=True,download_name=main_fname)
-    #send_from_directory(url_filename,"upload",mimetype=AUDIO_MIME_TYPE,as_attachment=True,download_name=main_fname)
-
-    shutil.move(url_filename,out_filename)
-    serve_audio(outfile)
+    publish_audio(url_filename, "line", move=True)
     log_msg = "Audio loaded sucessfully"
-    socketio.emit('audio_reload',log_msg)
     logger.info(log_msg)
     return log_msg
 
 @app.route(f'/{AUDIO_ROUTE}/<filename>')
 def serve_audio(filename):
-    mimetype="audio/wav"
-    return send_from_directory(AUDIO_DIR, filename,mimetype=AUDIO_MIME_TYPE)
+    response = send_from_directory(AUDIO_DIR, filename,mimetype=AUDIO_MIME_TYPE)
+    response.headers["Cache-Control"] = "no-store"
+    return response
 
 # @socketio.event
 # def emit_audio_file():
@@ -554,20 +564,21 @@ def serve_audio(filename):
 #     sio.emit('audio', send_file(filename, 
 # mimetype='audio/wav'))
 
+@socketio.on('audio_claim')
+def handle_audio_claim(data=None):
+    """a page that is visible / used asks to play the voice; a page that was just loaded (initial) also gets the intro sound"""
+    if audio_router.claim(request.sid) and isinstance(data, dict) and data.get("initial"):
+        play_intro_sound()
+    return {"owner": audio_router.target() == request.sid}
+
 @socketio.on('audio_ended')
-def cleanup_audio(vid):
-    logger.info('Cleanup Audio File')
-    # delete the audio file that was played
-    outfile = AUDIO_OUTFILE
-    out_filename = os.path.join(AUDIO_FOLDER,AUDIO_OUTFILE)
-    try:
-        os.remove(out_filename)
-        log_msg = "audio file deleted"
-        socketio.emit('audio_reload',log_msg)
-    except FileNotFoundError as exc:
-        log_msg = str(exc)
-    logger.info(log_msg)
-    return log_msg
+def audio_ended(data=None):
+    """playback of a line ended (informational: every line has its own file, which is removed later)"""
+    return "ok"
+
+@socketio.on('disconnect')
+def handle_disconnect(_reason=None):
+    audio_router.disconnect(request.sid)
 
 
 @app.route('/favicon.ico')

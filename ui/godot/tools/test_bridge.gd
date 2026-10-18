@@ -3,6 +3,7 @@ extends SceneTree
 # Run: godot --headless --path ui/godot --script res://tools/test_bridge.gd
 
 var failures := 0
+const SPEECH_WATCHDOG_TEST := 6.0
 
 func check(cond: bool, what: String) -> void:
 	print(("PASS  " if cond else "FAIL  ") + what)
@@ -83,6 +84,22 @@ func _init() -> void:
 	check(bridge.handle_json('{"type": "view", "name": "face"}'), "view message is accepted")
 	check(is_equal_approx(main._distance_goal, 0.8), "the camera goes to the face view")
 	check(not bridge.handle_json('{"type": "view", "name": "moon"}'), "unknown view is refused")
+
+	# --- the watchdog: "talking" never stays on without a fresh signal ---------------------------------------
+	bridge.handle_json('{"type": "expression", "name": "idle"}')
+	eng.advance(1.0)
+	bridge.handle_json('{"type": "speaking", "value": true}')
+	check(eng.speaking, "speaking true: the mouth is on")
+	for i in 8:
+		eng.advance(1.0)
+		if i % 2 == 0:
+			bridge.handle_json('{"type": "speaking", "value": true}')       # the page repeats it while a line plays
+	check(eng.speaking, "repeated signals keep the character talking for longer than the watchdog")
+	eng.advance(SPEECH_WATCHDOG_TEST)
+	check(not eng.speaking, "without a new signal the character stops talking by itself (the 'false' may have got lost)")
+	bridge.handle_json('{"type": "speaking", "value": true}')
+	bridge.handle_json('{"type": "speaking", "value": false}')
+	check(not eng.speaking, "an explicit false ends it at once")
 
 	print("RESULT ", "ALL PASSED" if failures == 0 else "%d FAILED" % failures)
 	quit(0 if failures == 0 else 1)

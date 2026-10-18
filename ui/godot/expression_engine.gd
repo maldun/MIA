@@ -22,6 +22,9 @@ const BLINK_CLOSE_TIME := 0.07
 const BLINK_OPEN_TIME := 0.12
 const BLINK_MIN_INTERVAL := 2.5
 const BLINK_MAX_INTERVAL := 6.0
+## seconds after which the voice counts as stopped when no new set_speaking(true) arrives (the page repeats it every 1.5 s)
+const SPEECH_WATCHDOG := 5.0
+
 ## mouth shapes used while "speaking" (vowel keys of the model)
 const VOWELS := ["Fcl_MTH_A", "Fcl_MTH_I", "Fcl_MTH_U", "Fcl_MTH_E", "Fcl_MTH_O"]
 const MOUTH_FOLLOW := 18.0
@@ -65,6 +68,7 @@ var _mouth_target := {}
 var _mouth_wait := 0.0
 var _gesture_from_preset := false
 var _preset_speaking := false
+var _speech_deadline := 0.0
 var _speech_active := false
 
 func setup(character: Node, skeleton: Skeleton3D) -> void:
@@ -195,8 +199,12 @@ func play(preset_name: String, duration := -1.0, with_gesture := true) -> bool:
 	apply_preset(library[preset_name], duration, with_gesture)
 	return true
 
+## The voice is playing (true) or not (false). The page repeats "true" while a line plays; without a new "true" the
+## mouth stops after SPEECH_WATCHDOG seconds, so a lost "false" (a closed tab, an interrupted line) cannot leave the
+## character talking for ever.
 func set_speaking(value: bool) -> void:
 	_speech_active = value
+	_speech_deadline = _clock + SPEECH_WATCHDOG
 
 ## Plays any preset dictionary (e.g. from the editor or the LLM); it is validated first.
 func apply_preset(preset: Dictionary, duration := -1.0, with_gesture := true) -> bool:
@@ -228,6 +236,8 @@ func _process(delta: float) -> void:
 
 func advance(delta: float) -> void:
 	_clock += delta
+	if _speech_active and _clock > _speech_deadline:
+		_speech_active = false      # no sign of the voice for a while
 	if _t < 1.0:
 		_t = minf(1.0, _t + delta / _dur)
 	var k := _ease(_t)
