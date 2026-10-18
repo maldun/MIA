@@ -176,8 +176,6 @@ def send_expression(preset):
 
 pre_exp = PresetExpressor(send=send_expression)
 IDLE_EXPRESSION = "idle"
-# returning to idle after an answer is silent, unless "idle_sound" is set: the clip of "idle" (e.g. a "Hey!") at the end of every answer is annoying
-IDLE_SOUND = bool(cfg.get(CONST.IDLE_SOUND_KEY, False))
 
 def express_and_reload(expression,sound=True):
     """
@@ -343,7 +341,7 @@ def converse(message,on_delta=None,on_emotion=None,should_stop=None):
     
     penalize(penalty)
     time.sleep(2)
-    express_and_reload("idle",sound=IDLE_SOUND)
+    express_and_reload("idle",sound=True)
     return filt_answer
 
 
@@ -383,7 +381,7 @@ def time_update():
         emotions, _ = comm.extract_emotion(answer)
         chat_service.post_assistant(filt_answer, emotion=emotions[0] if emotions else None, auto=True)
         time.sleep(TIMEOUT-1)
-        express_and_reload("idle",sound=IDLE_SOUND)
+        express_and_reload("idle",sound=True)
     if penalty is not None:
         process_message(penalty)
         log_msg = "Time update processed, but penalty"
