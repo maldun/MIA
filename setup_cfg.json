@@ -25,6 +25,7 @@
   "rvc_enabled":true,
   "sentence_pause":0.3,
   "tts_device":"cpu",
+  "cpu_threads":6,
   "gfx_version":"11.0.0",
   "voice_sample":"/home/maldun/prog/Python/MIA/voice/samples/miku_vocals.wav",
   "history_file":"memories.json",
