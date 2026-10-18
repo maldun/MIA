@@ -1,0 +1,9 @@
+{
+ "name": "web_checks",
+ "description": "Citation and web confirmation on RECORDED pages and search results (web.json): the real fetcher with its safety rules, the real search and text extraction, deterministic and offline, no model. Traps: invisible text, mirrors, a popular myth, dead and hostile pages, redirects into the local network, clipped pages.",
+ "target": {
+  "kind": "checks",
+  "include_web": true,
+  "fixtures": "web.json"
+ }
+}

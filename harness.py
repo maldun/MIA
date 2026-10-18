@@ -13,10 +13,14 @@ import json
 import os
 import time
 
+import requests
+
 try:
-    from . import metrics
+    from . import checks, metrics, web_tools
 except ImportError:  # used as plain script / in tests
+    import checks
     import metrics
+    import web_tools
 
 INPUT_KEY = {"checks": "claim", "pipeline": "input"}
 CASE_KEYS = {"id", "tags", "claim", "input", "truth", "expect", "note"}
@@ -127,6 +131,69 @@ class CountingModel:
         return self.calls, self.chars_in, self.chars_out
 
 
+# --- recorded web: the real fetcher, safety rules, search and text extraction on fixed pages --------------------------------------------------------------
+
+SEARXNG_FIXTURE_URL = "http://localhost:8590"
+FILLER = "The quick brown fox jumps over the lazy dog. "
+
+
+class FixtureResponse:
+    def __init__(self, status=200, body="", content_type="text/html; charset=utf-8", headers=None, json_data=None):
+        self.status_code, self._body, self._json = status, body.encode("utf-8"), json_data
+        self.headers = dict({"Content-Type": content_type}, **(headers or {}))
+        self.encoding, self.raw, self.text = "utf-8", None, body
+
+    def iter_content(self, chunk_size=1):
+        for i in range(0, len(self._body), 65536):
+            yield self._body[i:i + 65536]
+
+    def json(self):
+        if self._json is None:
+            raise ValueError("no json")
+        return self._json
+
+    def close(self):
+        pass
+
+
+class FixtureWebSession:
+    """a stand-in for requests.Session that answers from a fixture file: {"pages": {url: {status, content_type, body, headers, error}}, "searches": {query: [results]}}.
+    A body may contain {{PAD:n}}, replaced by n characters of filler (long pages). "error": "timeout" or "unreachable" raises like the network would.
+    Searches are answered as a SearXNG would; a query without an entry finds nothing; the entry "__down__": true makes the search backend unreachable."""
+
+    def __init__(self, fixtures):
+        self.pages, self.searches = fixtures.get("pages", {}), fixtures.get("searches", {})
+        self.calls = []
+
+    @staticmethod
+    def _pad(body):
+        import re
+        return re.sub(r"\{\{PAD:(\d+)\}\}", lambda m: (FILLER * (int(m.group(1)) // len(FILLER) + 1))[:int(m.group(1))], body)
+
+    def get(self, url, params=None, **kwargs):
+        self.calls.append(url if not params else "%s?q=%s" % (url, params.get("q")))
+        if url.startswith(SEARXNG_FIXTURE_URL):
+            if self.searches.get("__down__"):
+                raise requests.ConnectionError("search backend down")
+            return FixtureResponse(json_data={"results": [dict(r, engines=["fixture"], content=r.get("snippet", "")) for r in self.searches.get((params or {}).get("q"), [])],
+                                              "unresponsive_engines": []})
+        entry = self.pages.get(url)
+        if entry is None or entry.get("error") == "unreachable":
+            raise requests.ConnectionError("no such host: " + url)
+        if entry.get("error") == "timeout":
+            raise requests.ConnectTimeout("timed out")
+        return FixtureResponse(entry.get("status", 200), self._pad(entry.get("body", "")), entry.get("content_type", "text/html; charset=utf-8"), entry.get("headers"))
+
+
+def fixture_checks(core, fixtures):
+    """a CheckRunner whose web checks (citation, web confirmation) use the recorded web of the fixtures; everything else is the Core's"""
+    session = FixtureWebSession(fixtures)
+    tools, _, _ = web_tools.build_web_tools({"search_backends": ["searxng"]}, None, session=session, resolver=lambda host: ["93.184.216.34"])
+    functions = dict(checks.build_web_checks(tools["web_search"][0], tools["fetch_page"][0]))
+    names = list(core.runner.tools) + ["web_search", "fetch_page"]
+    return checks.CheckRunner(core.library, lambda: {**core.runner.functions, **functions}, lambda: names, sandbox=core.sandbox), session
+
+
 class Run:
     def __init__(self, header, records):
         self.header, self.records = header, records
@@ -177,13 +244,20 @@ class Harness:
         self.targets = {"checks": self._checks, "pipeline": self._pipeline}
         self.targets.update(targets or {})
         self.counter = None
+        self._fixture_runners = {}
         if core is not None and getattr(core.runner, "model", None) is not None:
             self.counter = CountingModel(core.runner.model)
             core.runner.model = self.counter
 
     # -- the targets --
     def _checks(self, case, variant, suite):
-        outcome = self.core.checks.run(case["claim"], include_web=bool(suite.target.get("include_web")))
+        runner = self.core.checks
+        if suite.target.get("fixtures"):                                   # recorded web: deterministic and offline
+            runner = self._fixture_runners.get(suite.name)
+            if runner is None:
+                with open(os.path.join(suite.path, suite.target["fixtures"]), encoding="utf-8") as fp:
+                    runner = self._fixture_runners[suite.name] = fixture_checks(self.core, json.load(fp))[0]
+        outcome = runner.run(case["claim"], include_web=bool(suite.target.get("include_web")))
         return outcome["status"], outcome
 
     def _pipeline(self, case, variant, suite):

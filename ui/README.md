@@ -498,3 +498,9 @@ Changes to a check, a prompt, a pipeline or a model are judged by running the sa
 - First model baseline (`eval/baselines/computable-gemma4-12b.md`): `verify.computable@1` decided 79 % of the claims (right overall 77 %, 0 false passes in 20 false claims); the harness showed that the statistics cases
   failed because the hand-written description of the data was misread and a `KeyError` did not name the keys. `verify.computable@2` generates the shape of `data` from the real data and names the keys in a `KeyError`:
   coverage 95 %, right overall 92 %, still 0 false passes, 8.4 s instead of 12.7 s per case. The paired sign test gives p = 0.11, so the gain is likely but not proven with 39 cases.
+- **`web_checks` suite** (31 cases, deterministic, offline, no model): citation and web confirmation on **recorded pages**. A suite target with `"fixtures": "web.json"` makes the harness build the web checks on
+  `FixtureWebSession`, a stand-in for the network that answers from the file (`pages`: status, content type, body, headers, errors such as `timeout`; `searches`: query to results; `{{PAD:n}}` makes long pages), so
+  the real fetcher with its safety rules, the real search and the real text extraction run on fixed material. Cases cover real and missing quotes, near misses, invisible text, dead links, timeouts, PDFs, search
+  pages, local and private addresses, redirects (also into the local network), clipped pages; mirrors, a third source that saves a claim, a correction found by the disconfirming search, hostile pages with instructions
+  aimed at models, queries that repeat the claim. Result: 31 of 31 behave as expected. The one **documented false pass** is a popular myth that two independent sources repeat while the disconfirming search
+  finds no correction (`w-popular-myth-no-correction`, tag `known_limit`): web confirmation cannot catch what the web does not contradict; it is kept in the numbers on purpose.

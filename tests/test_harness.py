@@ -269,7 +269,79 @@ class PipelineVariants(unittest.TestCase):
         self.assertEqual(len(self.seen), len(self.seen))
 
 
+class RecordedWeb(unittest.TestCase):
+    """the fixture session: the real fetcher and search on recorded pages"""
+    FIXTURES = {"pages": {"https://a.example/p": {"body": "<html><title>T</title><p>Hello world</p></html>"},
+                          "https://a.example/long": {"body": "<p>start</p><p>{{PAD:5000}}</p><p>end</p>"},
+                          "https://a.example/gone": {"status": 404, "body": "x"},
+                          "https://a.example/slow": {"error": "timeout"},
+                          "https://a.example/pdf": {"content_type": "application/pdf", "body": "%PDF"},
+                          "https://a.example/redirect": {"status": 302, "headers": {"Location": "https://a.example/p"}, "body": ""}},
+                "searches": {"hello": [{"title": "T", "url": "https://a.example/p", "snippet": "Hello"}]}}
+
+    def tools(self, fixtures=None):
+        session = H.FixtureWebSession(fixtures or self.FIXTURES)
+        import web_tools
+        tools, search, client = web_tools.build_web_tools({"search_backends": ["searxng"]}, None, session=session, resolver=lambda host: ["93.184.216.34"])
+        return tools, session
+
+    def test_pages_searches_and_failures(self):
+        import web_tools
+        tools, session = self.tools()
+        page = tools["fetch_page"][0]("https://a.example/p")
+        self.assertEqual((page["title"], page["text"]), ("T", "Hello world"))
+        self.assertEqual(tools["fetch_page"][0]("https://a.example/redirect")["text"], "Hello world")
+        self.assertEqual(tools["web_search"][0]("hello")["results"][0]["url"], "https://a.example/p")
+        self.assertEqual(tools["web_search"][0]("nothing")["results"], [])
+        for url, error in (("https://a.example/gone", web_tools.HttpStatusError), ("https://a.example/pdf", web_tools.UnsupportedContent), ("https://a.example/slow", web_tools.WebError),
+                           ("https://unknown.example/x", web_tools.WebError), ("http://127.0.0.1:8585/", web_tools.UnsafeUrl)):
+            with self.assertRaises(error, msg=url):
+                tools["fetch_page"][0](url)
+        self.assertNotIn("http://127.0.0.1:8585/", session.calls)                         # the safety rules still apply to recorded pages
+
+    def test_padding_makes_long_pages(self):
+        tools, _ = self.tools()
+        page = tools["fetch_page"][0]("https://a.example/long")
+        self.assertGreater(len(page["text"]), 5000)
+        clipped = tools["fetch_page"][0]("https://a.example/long", max_chars=100)
+        self.assertEqual((len(clipped["text"]), clipped["clipped"]), (100, True))
+
+    def test_a_search_backend_that_is_down(self):
+        import web_tools
+        tools, _ = self.tools({"pages": {}, "searches": {"__down__": True}})
+        with self.assertRaises(web_tools.SearchError):
+            tools["web_search"][0]("hello")
+
+    def test_a_fixture_suite_runs_through_the_harness(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = write_suite(tmp, "recorded", [{"id": "ok", "claim": {"type": "citation", "data": {"url": "https://a.example/p", "quote": "Hello world"}}, "truth": True, "expect": "pass"},
+                                                  {"id": "gone", "claim": {"type": "citation", "data": {"url": "https://a.example/gone", "quote": "anything at all"}}, "truth": False, "expect": "fail"}],
+                                 target={"kind": "checks", "include_web": True, "fixtures": "web.json"})
+            with open(os.path.join(folder, "web.json"), "w") as fp:
+                json.dump(self.FIXTURES, fp)
+            core = Core(os.path.join(REPO, "skills"), Library(os.path.join(REPO, "library")), tmp)
+            run = H.Harness(core).run(H.load_suite(folder))
+            self.assertEqual([(r["status"], M.is_right(r)) for r in run.records], [("pass", True), ("fail", True)])
+            # without the fixtures flag the same claims need the real web, which the Core of this test does not have: they are not offered
+            plain = write_suite(tmp, "plain", [{"id": "ok", "claim": {"type": "citation", "data": {"url": "https://a.example/p", "quote": "Hello world"}}, "expect": "not_applicable"}],
+                                target={"kind": "checks", "include_web": True})
+            self.assertEqual(H.Harness(core).run(H.load_suite(plain)).records[0]["status"], "not_applicable")
+
+
 class ShippedSuites(unittest.TestCase):
+    def test_the_web_checks_suite_matches_on_recorded_pages(self):
+        """citation and web confirmation against fixed pages: deterministic, offline. A failure is a bug in a check or a wrong expectation: decide which."""
+        suite = H.load_suite(os.path.join(SUITES, "web_checks"))
+        core = Core(os.path.join(REPO, "skills"), Library(os.path.join(REPO, "library")), tempfile.mkdtemp())
+        run = H.Harness(core).run(suite)
+        self.assertEqual([(r["case"], r["status"], r["expect"]) for r in run.records if not M.is_right(r)], [])
+        verification = M.verification_metrics(run.records)
+        known = [r["case"] for r in run.records if r["truth"] is False and r["status"] == "pass"]
+        self.assertEqual(known, ["w-popular-myth-no-correction"])                        # the one documented false pass, and no other
+        self.assertEqual(verification["false_fail"]["k"], 0)
+        self.assertEqual(M.stability(H.Harness(core).run(suite, repeats=2).records)["rate"], 1.0)
+        self.assertTrue(all(c.get("note") for c in suite.select(tags=["known_limit"])))
+
     def test_every_shipped_suite_is_valid(self):
         found = H.list_suites(SUITES)
         self.assertGreaterEqual(len(found), 2)

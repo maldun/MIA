@@ -231,7 +231,7 @@ decision, so they can be compared offline before they are trusted.
   and what fraction of errors the verifier shares with the generator.
 
 - L6. **Built** (phase 3): suites with `truth` and `expect`, the harness with variants, repeats and cost counting, the metrics with intervals and the paired sign test, `tools/eval.py`, and two suites (`hard_checks`
-  deterministic, `computable` with a model). Test first: a behaviour change starts with a case. Still open: the suites for web confirmation and citation (they need a recorded web or a fixed set of pages), the
+  deterministic, `computable` with a model). Test first: a behaviour change starts with a case. The web checks have a suite on recorded pages (`web_checks`, fixtures). Still open: the
   research questions, the LLM judge with a rubric calibrated on the user's ratings, and the verification styles (single, consistency, trial, jury) as variants of one suite.
 
 ## 10. Graph viewer and editor
