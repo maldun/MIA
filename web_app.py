@@ -41,6 +41,10 @@ from . import constants as CONST
 from .speech_stream import SpeechStreamer
 from .shutdown import request_shutdown
 from .presets_api import init_presets_api
+from .chat_log import ChatLog
+from .chat_service import ChatService
+from .chat_api import create_blueprint as create_chat_blueprint
+from .moods import MoodTracker
 FPATH = os.path.split(__file__)[0]
 cfg_file = os.path.join(FPATH,CFG_FILE)
 TEMPLATE_DIR = "templates"
@@ -165,16 +169,27 @@ def express_and_reload(expression,sound=True):
 # Create a function to handle messages from clients
 @socketio.on('message')
 def handle_message(message):
+    # old event of the previous page: same path as chat_send (background work, no blocking handler)
     logger.info("Received message: {}".format(message))
-    print(f"Received message: {message}")
-    result = process_message(message)
-    logger.info(str(message))
-    #result = time_update()
-    logger.info(str(result))
-    
-    log_msg="Message received successfully"
+    ack = chat_service.send(message, sender=request.sid)
+    log_msg = "Message received successfully" if ack["ok"] else ack["error"]
     logger.info(log_msg)
     return log_msg
+
+@socketio.on('chat_send')
+def handle_chat_send(data=None):
+    """{id (client id), text}: acknowledged right away, the answer follows as chat_* events"""
+    data = data if isinstance(data, dict) else {"text": data}
+    return chat_service.send(data.get("text"), client_id=data.get("id"), sender=request.sid)
+
+@socketio.on('chat_stop')
+def handle_chat_stop(_=None):
+    return {"stopped": chat_service.stop()}
+
+@socketio.on('connect')
+def handle_connect(_auth=None):
+    """a page connected: it learns the state (busy, model, mood) right away"""
+    emit('chat_status', chat_service.status())
 
 def penalize(penalty):
     """
@@ -224,6 +239,7 @@ def switch_model(profile):
         msg = f"No {profile} model configured!"
     logger.info(msg)
     send_answer(msg,markdown=True)
+    return msg
 
 def handle_special_commands(message):
     """
@@ -267,29 +283,47 @@ def process_message(message):
     # special commands go here
     if handle_special_commands(message):
         return "Command processed successfully"
-    #express_and_reload("idle")
+    converse(message)
+    return "Message processed successfully"
+
+def converse(message,on_delta=None,on_emotion=None,should_stop=None):
+    """
+    The exchange with MIA: the model answers (streamed), the character reacts, the speech streams along.
+    on_delta(text) gets the filtered text so far, on_emotion(keyword) every emotion keyword, should_stop() ends the answer
+    early (the text received so far stays). Returns the filtered answer.
+    """
     time.sleep(1)
-    #express_and_reload("talk")
     
     # MIA starts to speak while the answer is still generated
     streamer = SpeechStreamer(get_websocket_url(address=ADDRESS,protocol=PROTOCOL),SOUND_PORT)
     reactions = []
-    def react(expression):
+    def react(emotion):
         # only the first expression plays its sound, otherwise it would cut off the speech
-        express_and_reload(expression,sound=len(reactions)==0)
-        reactions.append(expression)
+        express_and_reload(comm.map_emotion(emotion),sound=len(reactions)==0)
+        reactions.append(emotion)
+        if on_emotion is not None:
+            on_emotion(emotion)
     def update(text):
         send_answer(text)
         streamer.update(text)
+        if on_delta is not None:
+            on_delta(text)
     try:
         answer, filt_answer, penalty = comm.exchange(message,
                                             emotion_reaction=react,
                                             update_message=update,
                                             filter_message=True,
-                                            map_emotions_to_reactions=True)
+                                            map_emotions_to_reactions=False,
+                                            should_stop=should_stop)
     except Exception:
         streamer.abort()
         raise
+
+    if should_stop is not None and should_stop():
+        streamer.abort()
+        send_answer(filt_answer,markdown=True)
+        express_and_reload("idle",sound=False)
+        return filt_answer
 
     streamer.finish(filt_answer)
     send_answer(filt_answer,markdown=True)
@@ -301,7 +335,7 @@ def process_message(message):
     penalize(penalty)
     time.sleep(2)
     express_and_reload("idle",sound=True)
-    return "Message processed successfully"
+    return filt_answer
 
 
 
@@ -339,6 +373,8 @@ def time_update():
     else:
         send_voice_request(filt_answer)
         send_answer(filt_answer,markdown=True)
+        emotions, _ = comm.extract_emotion(answer)
+        chat_service.post_assistant(filt_answer, emotion=emotions[0] if emotions else None, auto=True)
         time.sleep(TIMEOUT-1)
         express_and_reload("idle",sound=True)
     if penalty is not None:
@@ -411,6 +447,35 @@ def play_intro_sound():
     return log_msg
 
 #address=ADDRESS,port=WEB_PORT
+# --- the chat: log, mood, background processing (chat_service.py) -----------------------------------------------
+def run_chat_command(command):
+    """runs a slash command; returns the text of the system note"""
+    if command == CONST.LIGHT_COMMAND:
+        return switch_model(comm.LIGHT_PROFILE)
+    if command == CONST.FULL_COMMAND:
+        return switch_model(comm.FULL_PROFILE)
+    handle_special_commands(command)
+    return {CONST.DREAM_COMMAND: "MIA has sorted her memories.",
+            CONST.UPDATE_COMMAND: "The time was sent to MIA.",
+            CONST.SLEEP_COMMAND: "Goodnight! MIA is shutting down ...",
+            CONST.SHUTDOWN_COMMAND: "MIA is shutting down ..."}.get(command)
+
+def _own_path(key, default):
+    path = cfg.get(key, default)
+    return path if os.path.isabs(path) else os.path.join(FPATH, path)
+
+chat_log = ChatLog(_own_path(CONST.CHAT_LOG_KEY, CONST.DEFAULT_CHAT_LOG),
+                   max_messages=cfg.get(CONST.CHAT_LOG_MAX_KEY, 10000))
+mood = MoodTracker(_own_path(CONST.MOODS_FILE_KEY, CONST.DEFAULT_MOODS_FILE),
+                   hold_minutes=cfg.get(CONST.MOOD_HOLD_KEY, 10))
+chat_service = ChatService(socketio.emit, chat_log, mood, converse, run_command=run_chat_command,
+                           model_info=lambda: (comm.version, getattr(comm, "profile", None)),
+                           queue_size=cfg.get(CONST.CHAT_QUEUE_KEY, 1),
+                           rate_limit=(cfg.get(CONST.CHAT_RATE_KEY, 10), 60),
+                           spawn=socketio.start_background_task)
+_chat_token = cfg.get(CONST.CHAT_TOKEN_KEY, app.config["EDITOR_TOKEN_INFO"][0])
+app.register_blueprint(create_chat_blueprint(chat_service, token=_chat_token or None, allowed_origins=lambda: allowed_origins))
+
 # the chat page loads only its own files: no inline scripts, no external hosts (ui/REQUIREMENTS_CHAT.md, 8)
 CHAT_PAGE_CSP = (
     "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; "

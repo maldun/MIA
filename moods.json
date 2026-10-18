@@ -1,0 +1,25 @@
+{
+    "ready": {"emoji": "😊", "texts": ["Ready when you are."]},
+    "emotions": {
+        "neutral":     {"emoji": "😊", "texts": ["Ready when you are.", "All calm here."]},
+        "happy":       {"emoji": "😄", "texts": ["Feeling cheerful!", "Today is a good day.", "I'm in a great mood."]},
+        "MIA":         {"emoji": "👋", "texts": ["Hello again!", "Nice to see you!"]},
+        "agree":       {"emoji": "👍", "texts": ["Glad we agree!", "Exactly my thinking."]},
+        "disagree":    {"emoji": "🙅", "texts": ["I don't think so.", "Not so sure about that."]},
+        "annoyed":     {"emoji": "😒", "texts": ["Seriously?", "That was a bit much."]},
+        "sad":         {"emoji": "😢", "texts": ["A bit down today.", "Feeling a little blue."]},
+        "angry":       {"emoji": "😠", "texts": ["Not amused.", "I'm rather upset."]},
+        "surprised":   {"emoji": "😮", "texts": ["Oh! I did not expect that.", "Well, that's a surprise!"]},
+        "embarrassed": {"emoji": "😳", "texts": ["A little shy ...", "That was awkward."]},
+        "smug":        {"emoji": "😏", "texts": ["Quite pleased with myself.", "I knew it."]},
+        "thinking":    {"emoji": "🤔", "texts": ["Hmm, let me think ...", "Pondering this."]}
+    },
+    "activities": {
+        "thinking": {"emoji": "💭", "texts": ["Thinking ..."]},
+        "speaking": {"emoji": "🔊", "texts": []},
+        "dreaming": {"emoji": "🌙", "texts": ["Sorting my memories ..."]},
+        "offline":  {"emoji": "🔌", "texts": ["Can't reach my brain right now."]},
+        "light":    {"emoji": "🔋", "texts": ["Light mode: saving energy."]},
+        "full":     {"emoji": "⚡", "texts": ["Full power!"]}
+    }
+}

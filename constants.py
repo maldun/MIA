@@ -40,6 +40,17 @@ BACKGROUND_EXTENSIONS = (".png", ".jpg", ".jpeg", ".webp")
 # "editor_token": optional secret that changing presets needs (header X-MIA-Token), see presets_api.py
 PRESETS_DIR_KEY = "presets_dir"
 DEFAULT_PRESETS_DIR = "data/presets"
+
+# chat (ui/REQUIREMENTS_CHAT.md 6)
+CHAT_LOG_KEY = "chat_log"                      # append-only conversation log (not MIA's memory)
+DEFAULT_CHAT_LOG = "data/chat_log.jsonl"
+CHAT_LOG_MAX_KEY = "chat_log_max_messages"
+CHAT_QUEUE_KEY = "chat_queue"                  # how many messages may wait while MIA answers
+CHAT_RATE_KEY = "chat_rate_per_minute"         # messages per minute and connection, 0 = no limit
+CHAT_TOKEN_KEY = "chat_token"                  # token for deleting the conversation (default: the editor token)
+MOODS_FILE_KEY = "moods_file"
+DEFAULT_MOODS_FILE = "moods.json"
+MOOD_HOLD_KEY = "mood_hold_minutes"
 EDITOR_TOKEN_KEY = "editor_token"            # "" or false: no token; missing: a token is generated on first start
 EDITOR_TOKEN_FILE_KEY = "editor_token_file"
 DEFAULT_EDITOR_TOKEN_FILE = "data/editor_token.txt"

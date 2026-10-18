@@ -158,3 +158,28 @@ The old headline is now a mood line (fixed text "Ready when you are." in C1; rea
   `node --test "tests/js/*.test.mjs"` (storage, i18n, theme, layout rules, message normalizing, markdown),
   `python ui/tools/browser_check.py <url> <png> --size 360x740 --mobile --dark --eval "<js>"` (headless Chromium: screenshot, console, list of external requests,
   `--eval` may return a promise).
+
+## Chat backend, phase C2
+
+The server now describes the conversation as **messages** (`chat_service.py`, `chat_log.py`, `chat_api.py`, `moods.py`).
+`chat_send` is answered immediately; the exchange runs in a background task (one at a time, one more may wait), so the socket
+handler never blocks. The old events (`message`, `answer`, `audio_reload`, ...) still work for the page of C1 and are removed in C3.
+
+| Direction | Event | Payload |
+|---|---|---|
+| page -> server | `chat_send` | `{id, text}`, acknowledgement `{ok, message, queued, command}` or `{ok: false, error}` |
+| page -> server | `chat_stop` | acknowledgement `{stopped}`; the text received so far stays, the message is marked `stopped` |
+| server -> all | `chat_message` | a complete message: yours, system notes (commands), automatic MIA messages (`auto: true`, e.g. the hourly time check) |
+| server -> all | `chat_start` / `chat_delta` / `chat_done` | MIA's answer: start, cumulative text (at most about 20 per second), final `{id, text, emotion, status}` |
+| server -> all | `chat_status` | `{busy, activity, model, profile, queue, mood: {emotion, emoji, text, since, activity}}`, also sent on connect |
+| server -> all | `chat_error` | `{id?, message}` |
+
+REST: `GET /api/chat/history?before=<id>&limit=50`, `GET /api/chat/status`, `GET /api/chat/commands`,
+`POST /api/chat/clear {"scope": "log"}` (header `X-MIA-Token`, the editor token unless `chat_token` is set).
+
+- **Mood line:** `moods.json` (edit it; read again when it changes) holds first person phrases per emotion keyword and per activity
+  (thinking, dreaming, offline ...). The phrase is chosen on the server, never the same twice in a row, and sent to every device;
+  a mood returns to "Ready when you are." after `mood_hold_minutes`.
+- **Not in the chat log:** calibration, the hourly prompt to the model, summaries and penalties (the reminder to start with an emotion).
+- **Stop:** `Communicator.exchange(should_stop=...)` closes the stream to Ollama and keeps the received text in MIA's history.
+- **Tests:** `python tests/test_chat_backend.py` (33 tests: log, mood, service with a fake model, stop, queue, errors, rate limit, REST, two clients).

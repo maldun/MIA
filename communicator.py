@@ -394,7 +394,7 @@ class Communicator:
         return '\n'.join(texts)
     
     def exchange(self,message,emotion_reaction=None,update_message=None,filter_message=True,
-                 map_emotions_to_reactions=True,final_update=None):
+                 map_emotions_to_reactions=True,final_update=None,should_stop=None):
         """
         Performs an message exchange.
         emotion_reaction is a callable
@@ -413,6 +413,9 @@ class Communicator:
         messages alike.
         final_update is a function for message
         postprocessing. Maybe necessary for some cases.
+        should_stop is a callable; when it returns True the stream
+        is closed, the text received so far is kept (in the history
+        as well) and no penalty is determined.
         """
         if emotion_reaction is None:
             def emotion_reaction(emotion):
@@ -434,9 +437,13 @@ class Communicator:
         emotion = None
         nr_emotions = 0
         answer_stream = self.chat(message)
+        stopped = False
         # process chunks
         try:
             for chunk in answer_stream:
+                if should_stop is not None and should_stop():
+                    stopped = True
+                    break
                 chunk_str = self.handle_chunk(chunk)
                 answer += chunk_str
                 emotions, text = self.extract_emotion(answer)
@@ -457,6 +464,13 @@ class Communicator:
             self.dump_history()
             raise exc
         
+        if stopped:
+            close = getattr(answer_stream, "close", None)
+            if callable(close):
+                close()
+            self.update_history(answer)
+            self.dump_history()
+            return answer, self.extract_text(answer), None
         filt_answer = self.extract_text(answer)
         penalty = self.penalize(emotions, text)
         self.update_history(answer)
