@@ -1,0 +1,238 @@
+/*
+  Layout of the chat page (ui/REQUIREMENTS_CHAT.md, section 4.1).
+  The character fills the window; the chat panel floats above it:
+    - wide / landscape (aspect ratio >= 1:1 and width >= 600 px): panel at the right, resizable, collapsible
+    - phones in portrait: bottom sheet with three snap heights (peek, half, full)
+  layout.js only sets variables (--panel-w, --sheet-h, --kb, --occupied-w) and data attributes (data-snap, data-collapsed).
+*/
+
+:root {
+  --gap: 12px;
+  --panel-w: 420px;          /* wide: chosen by the user (drag the edge) */
+  --peek-h: 150px;           /* sheet: composer and the last message */
+  --sheet-h: calc(var(--peek-h) + env(safe-area-inset-bottom, 0px));
+  --kb: 0px;                 /* height of the on-screen keyboard (visual viewport) */
+  --occupied-w: 0px;         /* width the panel takes at the right, the character is centered in the rest */
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: var(--leading);
+  color: var(--text);
+  background: var(--page-bg);
+  overflow: hidden;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body[data-snap="half"] { --sheet-h: 52dvh; }
+body[data-snap="full"] { --sheet-h: 90dvh; }
+body[data-dragging="true"] .panel { transition: none; }
+
+[hidden] { display: none !important; }
+
+/* --- the character -------------------------------------------------------------------- */
+
+.stage {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+}
+
+.stage iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: transparent;
+}
+
+/* --- mood line (replaces the old headline) -------------------------------------------- */
+
+.mood {
+  position: fixed;
+  z-index: 20;
+  top: calc(var(--gap) + env(safe-area-inset-top, 0px));
+  left: calc((100% - var(--occupied-w)) / 2);
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  max-width: min(92vw, 560px);
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--chip);
+  -webkit-backdrop-filter: blur(var(--blur));
+  backdrop-filter: blur(var(--blur));
+  box-shadow: var(--shadow);
+  color: var(--text);
+  font-size: var(--text-base);
+  pointer-events: none;
+  transition: left var(--dur) var(--ease);
+}
+
+.mood-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 359px) {
+  .mood-text { max-width: 14ch; }
+}
+
+/* --- the panel -------------------------------------------------------------------------- */
+
+.panel {
+  position: fixed;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--glass);
+  -webkit-backdrop-filter: blur(var(--blur)) saturate(1.2);
+  backdrop-filter: blur(var(--blur)) saturate(1.2);
+  box-shadow: var(--shadow);
+  transition: transform var(--dur) var(--ease), height var(--dur) var(--ease), width var(--dur) var(--ease);
+}
+
+.panel-resize,
+.sheet-handle {
+  flex: none;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  cursor: grab;
+  touch-action: none;
+}
+
+.panel-resize:focus-visible,
+.sheet-handle:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}
+
+/* wide / landscape: panel at the right */
+@media (min-aspect-ratio: 1/1) and (min-width: 600px) {
+  .panel {
+    top: var(--gap);
+    right: var(--gap);
+    bottom: var(--gap);
+    width: var(--panel-w);
+    max-width: calc(100% - 2 * var(--gap));
+    border-radius: var(--radius-lg);
+  }
+
+  .panel-resize {
+    position: absolute;
+    z-index: 2;
+    top: 0;
+    bottom: 0;
+    left: -5px;
+    width: 14px;
+    cursor: col-resize;
+  }
+
+  .panel-resize::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 5px;
+    width: 4px;
+    height: 44px;
+    margin-top: -22px;
+    border-radius: var(--radius-pill);
+    background: var(--border);
+    opacity: 0;
+    transition: opacity var(--dur-fast);
+  }
+
+  .panel:hover .panel-resize::after,
+  .panel-resize:focus-visible::after { opacity: 1; }
+
+  .sheet-handle { display: none; }
+
+  .panel[data-collapsed="true"] {
+    transform: translateX(calc(100% + 2 * var(--gap)));
+    visibility: hidden;
+  }
+
+  .panel-open {
+    right: var(--gap);
+    bottom: var(--gap);
+  }
+}
+
+/* narrow portrait: bottom sheet */
+@media not all and ((min-aspect-ratio: 1/1) and (min-width: 600px)) {
+  .panel {
+    left: 0;
+    right: 0;
+    bottom: var(--kb);
+    height: var(--sheet-h);
+    max-height: calc(100dvh - var(--kb) - 56px);
+    border-bottom: 0;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .panel-resize { display: none; }
+
+  .sheet-handle {
+    position: relative;
+    height: 26px;
+    width: 100%;
+  }
+
+  .sheet-handle::after {
+    content: "";
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    width: 44px;
+    height: 5px;
+    margin-left: -22px;
+    border-radius: var(--radius-pill);
+    background: var(--border);
+  }
+
+  .panel[data-collapsed="true"] {
+    transform: translateY(100%);
+    visibility: hidden;
+  }
+
+  .panel-open {
+    left: 50%;
+    bottom: calc(var(--gap) + env(safe-area-inset-bottom, 0px));
+    transform: translateX(-50%);
+  }
+}
+
+/* button that brings a collapsed panel back */
+.panel-open {
+  position: fixed;
+  z-index: 29;
+}
+
+/* the icon sprite takes no space */
+.sprite {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+/* the chat itself: header, messages, composer (details in components.css) */
+.panel-header { flex: none; }
+.messages { flex: 1 1 auto; min-height: 0; }
+.composer { flex: none; }

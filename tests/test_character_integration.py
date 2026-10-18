@@ -242,15 +242,18 @@ class WebAppEvents(unittest.TestCase):
         self.assertFalse([o for o in without_https if o.startswith("https://")])
 
     def test_page_connects_to_its_own_origin(self):
-        html = open(os.path.join(REPO, "templates", "index.html")).read()
-        self.assertIn("io(window.location.origin", html)
+        with open(os.path.join(REPO, "templates", "static", "chat", "socket.js"), encoding="utf-8") as handle:
+            source = handle.read()
+        self.assertIn("origin = location.origin", source)
+        self.assertIn("io(origin", source)
 
     def test_page_embeds_the_character_and_has_no_video(self):
         html = open(os.path.join(REPO, "templates", "index.html")).read()
         self.assertIn('id="character"', html)
         self.assertNotIn("<video", html)
         self.assertNotIn("video_updated", html)
-        self.assertIn("toCharacter({type: 'speaking'", html)
+        with open(os.path.join(REPO, "templates", "static", "chat", "character.js"), encoding="utf-8") as handle:
+            self.assertIn("type: 'speaking'", handle.read())
 
 
 class TlsProxyTest(unittest.TestCase):

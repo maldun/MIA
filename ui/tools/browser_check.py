@@ -22,6 +22,9 @@ parser.add_argument("--wait", type=float, default=60.0, help="seconds to wait af
 parser.add_argument("--size", default="1280x900")
 parser.add_argument("--eval", default=None, help="JavaScript expression evaluated after the wait")
 parser.add_argument("--port", type=int, default=9333)
+parser.add_argument("--dark", action="store_true", help="emulate a dark system theme")
+parser.add_argument("--light", action="store_true", help="emulate a light system theme")
+parser.add_argument("--mobile", action="store_true", help="emulate a phone (touch, device pixel ratio 2)")
 parser.add_argument("--insecure", action="store_true", help="accept self-signed certificates")
 args = parser.parse_args()
 
@@ -47,8 +50,11 @@ try:
     ws = simple_websocket.Client(target["webSocketDebuggerUrl"])
     next_id = [0]
     console = []
+    requests = []
 
     def handle(message):
+        if message.get("method") == "Network.requestWillBeSent":
+            requests.append(message["params"]["request"]["url"])
         if message.get("method") == "Runtime.consoleAPICalled":
             console.append(" ".join(str(a.get("value", a.get("description", ""))) for a in message["params"]["args"]))
         elif message.get("method") == "Runtime.exceptionThrown":
@@ -78,13 +84,23 @@ try:
     print("connected", flush=True)
     call("Runtime.enable")
     call("Page.enable")
+    call("Network.enable")
+    if args.mobile:
+        call("Emulation.setDeviceMetricsOverride", {"width": int(width), "height": int(height), "deviceScaleFactor": 2, "mobile": True})
+        call("Emulation.setTouchEmulationEnabled", {"enabled": True})
+    if args.dark or args.light:
+        call("Emulation.setEmulatedMedia", {"features": [{"name": "prefers-color-scheme", "value": "dark" if args.dark else "light"}]})
     call("Page.navigate", {"url": args.url})
     print("navigated", flush=True)
     pump(args.wait)
     print("waited", flush=True)
     if args.eval:
-        result = call("Runtime.evaluate", {"expression": args.eval, "returnByValue": True})
+        result = call("Runtime.evaluate", {"expression": args.eval, "returnByValue": True, "awaitPromise": True})
         print("EVAL", json.dumps(result.get("result", {}).get("value")))
+    origin = args.url.split("/", 3)[:3]
+    origin = "/".join(origin)
+    external = sorted({u for u in requests if not u.startswith((origin, "data:", "blob:", "about:"))})
+    print("EXTERNAL REQUESTS", json.dumps(external))
     shot = call("Page.captureScreenshot", {"format": "png"}, timeout=60)
     with open(args.out, "wb") as fp:
         fp.write(base64.b64decode(shot["data"]))

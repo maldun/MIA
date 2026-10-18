@@ -140,3 +140,21 @@ The chat page connects to the socket of the address it was loaded from, so the s
   `godot --headless ... --script res://tools/test_editor.gd` (43 checks with an in-memory server),
   `MIA_URL=http://127.0.0.1:8685 godot ... --script res://tools/test_editor_live.gd` (real HTTP against a running MIA app and a second client
   as "another device"), `tools/editor_shot.gd` renders the editor to a PNG (wide and phone shapes).
+
+## Chat page, phase C1 (foundation)
+
+`templates/index.html` is a new shell (requirements: `ui/REQUIREMENTS_CHAT.md`): the character fills the window, the chat is a panel at the
+right on wide screens (drag the left edge, arrow keys on the edge, collapse button) and a bottom sheet with three snap heights on phones.
+The old headline is now a mood line (fixed text "Ready when you are." in C1; real moods come in C2).
+
+- **Code:** `templates/static/chat/*.js` are ES modules without a build step (`app.js` wires them), CSS in `tokens.css` (design tokens, dark / light / auto),
+  `layout.css`, `components.css`; texts in `i18n/en.json` and `de.json` (English is shown, `?lang=de` previews German).
+- **Offline:** socket.io, marked and DOMPurify are vendored in `templates/static/vendor/` (versions and checksums in `VENDOR.md`). The page makes no
+  request to other hosts; the server sends a strict `Content-Security-Policy` (no inline script or style).
+- **Query options:** `?theme=dark|light|auto`, `?lang=de`, `?character=0` (page without the character, for screenshots and tests).
+- **Kept for now:** the old socket events (`message`, `answer`, `audio_reload`, `audio_ended`, `expression`, `character_ready`); `chat-lite.js` shows
+  them as bubbles until C2/C3 bring the real chat protocol.
+- **Tests:** `python tests/test_chat_page.py` (page, CSP, no inline code, no external URLs, files and dictionaries),
+  `node --test "tests/js/*.test.mjs"` (storage, i18n, theme, layout rules, message normalizing, markdown),
+  `python ui/tools/browser_check.py <url> <png> --size 360x740 --mobile --dark --eval "<js>"` (headless Chromium: screenshot, console, list of external requests,
+  `--eval` may return a promise).

@@ -1,0 +1,119 @@
+/*
+  Design tokens of the chat page (ui/REQUIREMENTS_CHAT.md, principle 5).
+  All colors, sizes, radii, shadows and fonts are CSS variables; themes only change variables.
+  Themes: data-theme="dark" | "light" | "auto" (follows the system) on <html>.
+*/
+
+:root {
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+
+  --text-sm: 0.8125rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --leading: 1.45;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 22px;
+  --radius-pill: 999px;
+
+  --blur: 18px;
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --dur-fast: 150ms;
+  --dur: 250ms;
+
+  /* the accent is the blue of the character's hair; the hue can be changed in one place */
+  --accent-h: 218;
+  --accent: hsl(var(--accent-h) 70% 48%);            /* backgrounds (own bubbles, send button): white text on it passes AA */
+  --accent-strong: hsl(var(--accent-h) 72% 40%);
+  --accent-contrast: #ffffff;
+  --focus: hsl(var(--accent-h) 100% 74%);
+}
+
+/* dark (default) */
+:root,
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --glass: rgba(16, 18, 26, 0.72);
+  --glass-solid: #12141c;
+  --text: #eceff7;
+  --text-muted: #a3acc0;
+  --border: rgba(255, 255, 255, 0.12);
+  --bubble: rgba(255, 255, 255, 0.09);
+  --bubble-text: var(--text);
+  --field: rgba(255, 255, 255, 0.07);
+  --chip: rgba(14, 16, 24, 0.62);
+  --hover: rgba(255, 255, 255, 0.08);
+  --accent-text: hsl(var(--accent-h) 100% 76%);       /* links, dots, icons on the glass */
+  --shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
+  --ok: #7ee2a8;
+  --warn: #ffd37a;
+  --danger: #ff8f86;
+  --page-bg: #0b0d14;
+}
+
+/* light */
+:root[data-theme="light"] {
+  color-scheme: light;
+  --glass: rgba(255, 255, 255, 0.76);
+  --glass-solid: #ffffff;
+  --text: #171b28;
+  --text-muted: #566079;
+  --border: rgba(20, 30, 60, 0.12);
+  --bubble: rgba(20, 40, 90, 0.07);
+  --bubble-text: var(--text);
+  --field: rgba(20, 40, 90, 0.06);
+  --chip: rgba(255, 255, 255, 0.74);
+  --hover: rgba(20, 40, 90, 0.07);
+  --accent-text: hsl(var(--accent-h) 80% 38%);
+  --shadow: 0 10px 40px rgba(20, 30, 60, 0.2);
+  --ok: #17794a;
+  --warn: #8a5a00;
+  --danger: #b3261e;
+  --page-bg: #dfe6f3;
+}
+
+/* automatic: the light palette when the system asks for it */
+@media (prefers-color-scheme: light) {
+  :root[data-theme="auto"] {
+    color-scheme: light;
+    --glass: rgba(255, 255, 255, 0.76);
+    --glass-solid: #ffffff;
+    --text: #171b28;
+    --text-muted: #566079;
+    --border: rgba(20, 30, 60, 0.12);
+    --bubble: rgba(20, 40, 90, 0.07);
+    --bubble-text: var(--text);
+    --field: rgba(20, 40, 90, 0.06);
+    --chip: rgba(255, 255, 255, 0.74);
+    --hover: rgba(20, 40, 90, 0.07);
+    --accent-text: hsl(var(--accent-h) 80% 38%);
+    --shadow: 0 10px 40px rgba(20, 30, 60, 0.2);
+    --ok: #17794a;
+    --warn: #8a5a00;
+    --danger: #b3261e;
+    --page-bg: #dfe6f3;
+  }
+}
+
+/* without backdrop blur the glass becomes a solid surface (readability first) */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :root {
+    --glass: var(--glass-solid);
+    --chip: var(--glass-solid);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-fast: 0ms;
+    --dur: 0ms;
+  }
+}

@@ -1,279 +1,133 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en" data-theme="auto">
 <head>
-    <title>MIA's Home</title>
-    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
-    <style>
-        grid-template-columns:  2fr 1fr;
-        gap: 10px;
-
-/*        textarea {
-            display:block;
-            margin-bottom:1em;
-            clear:both;
-          }*/
-        
-        .grid {
-            display: grid;
-            place-items: center;
-            width: 100%;
-            /*grid-template-columns:  2fr 1fr;*/
-            grid-template-columns:  70vw 30vw;
-            column-gap: 0vw;
-            row-gap: 0vh;
-        }
-        
-        .output-container {
-            display: grid;
-            place-items: left;
-            /*grid-template-columns:  2fr 1fr;*/
-            grid-template-columns:  50vw 30vw;
-            width: 100%;
-            height: 70vh;
-        }
-
-        .character-container iframe {
-            border: 0;
-            width: 100%;
-            height: 100%;
-            background: transparent;
-        }
-
-        .character-container {
-            display: flex;
-            align-items: stretch;
-            justify-content: stretch;
-            height: 70vh;
-            width: 75vw;
-            place-items: left;
-         }
-        
-         .text-output-container {
-            display: flex;
-            align-items: stretch;
-            justify-content: stretch;
-            height: 80vh;
-            width: 200vw;
-            /*place-items: right;*/
-         }
-        
-        .answer-container {
-            display: flex;
-            align-items: stretch;
-            justify-content: stretch;
-            width: 100vw;
-            height: 23vh;
-        }
-        
-
-        #answerText {
-         padding: 0.1em;
-         width: 47vw;
-         height: 69vh;
-        }
-        #answerInput {
-         max-height: 400px; /* Set a maximum height */
-         overflow-y: auto; /* Enable vertical scrolling */
-         overflow-x: auto;
-         width:  30px;
-         /*height: 10px;*/
-         height: 20vh;
-         padding: 10px;
-         width: 100%;
-         border-radius: 0;
-         border-width: 1px;
-         border-style: solid;
-         border-color: #ccc;
-         color: #6cf542;
-         /*background-color: #f9f9f9;*/
-         background-color: #000000;
-        }
-
-          #answerInput:focus {
-            outline: none;
-          box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-          }
-
-          #answerInput::placeholder {
-          color: #999;
-          /*color: #6cf542;*/
-          }
-
-        
-     .background-text {
-        background-color: #f0f0f0;
-        font-size: 16px;
-        color: #333;
-    }
-    body {
-      background-image: url("{{ url_for('static', filename='background.jpg') }}");
-      background-size: cover;
-      height: 90vh;
-      width: 95vw;
-      margin: 0.5em;
-      padding: 0;
-      background-repeat: no-repeat;
-      background-position: top;
-      background-attachment: fixed;
-      /*background-size: 1440px 1024px;*/
-      background-size: 100% 100%;
-      }
-      
-    </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+  <meta name="color-scheme" content="dark light">
+  <title>MIA</title>
+  <link rel="icon" href="{{ url_for('favicon') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='chat/tokens.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='chat/layout.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='chat/components.css') }}">
+  <script type="module" src="{{ url_for('static', filename='chat/app.js') }}"></script>
 </head>
-<body>
- <h1 style="color:white;">I am {{ name | safe}}, eager to help!</h1>
- <a id="editExpressions" href="/character/?editor" target="_blank" rel="noopener" style="color:#9ecbff;">Edit expressions</a>
-    <div class="grid">
-        <div class="output-container">
-        <div class="character-container">
-            <iframe id="character" src="{{ url_for('character_index') }}" title="MIA" allow="autoplay"></iframe>
-          </div>
-         <div class="text-output-container">>
-            <!--<textarea id="answerText" rows="19" cols="67" class="background-text"></textarea>-->
-            <iframe id="answerText"  src="{{ url_for('static', filename='answer.html') }}"></iframe>
+<body data-snap="half">
+  <!-- icons (inline, no icon font, no external files) -->
+  <svg class="sprite" width="0" height="0" aria-hidden="true" focusable="false">
+    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.4A8 8 0 1 1 21 12z"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></symbol>
+    <symbol id="i-monitor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></symbol>
+    <symbol id="i-volume" viewBox="0 0 24 24"><path d="M11 5L6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></symbol>
+    <symbol id="i-volume-off" viewBox="0 0 24 24"><path d="M11 5L6 9H3v6h3l5 4V5z"/><path d="M22 9l-6 6M16 9l6 6"/></symbol>
+    <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></symbol>
+  </svg>
+
+  <!-- the character (Godot web export) fills the window -->
+  <div class="stage" id="stage">
+    <iframe id="character" src="{{ url_for('character_index') }}" title="MIA" allow="autoplay"></iframe>
+  </div>
+
+  <!-- mood and status line, replaces the old headline -->
+  <div class="mood" id="mood" role="status" aria-live="polite">
+    <span class="mood-emoji" id="mood-emoji" aria-hidden="true">😊</span>
+    <span class="mood-text" id="mood-text" data-i18n="mood.ready">Ready when you are.</span>
+  </div>
+
+  <!-- the chat -->
+  <aside class="panel" id="panel" aria-label="Chat" data-collapsed="false">
+    <div class="panel-resize" id="panel-resize" role="separator" aria-orientation="vertical" tabindex="0" aria-label="Resize chat" data-i18n-aria-label="panel.resize"></div>
+    <button class="sheet-handle" id="sheet-handle" type="button" aria-label="Resize chat" data-i18n-aria-label="panel.resize"></button>
+
+    <header class="panel-header">
+      <div class="avatar" aria-hidden="true">M</div>
+      <div class="who">
+        <div class="name" data-i18n="app.title">MIA</div>
+        <div class="status" id="connection" data-state="connecting">
+          <span class="dot" aria-hidden="true"></span>
+          <span id="connection-text" data-i18n="connection.connecting">Connecting ...</span>
         </div>
+      </div>
+      <span class="chip" id="model-chip" hidden></span>
+      <button class="icon-button" id="menu-button" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="menu" aria-label="Menu" data-i18n-aria-label="header.menu">
+        <svg class="icon" aria-hidden="true"><use href="#i-menu"/></svg>
+      </button>
+      <button class="icon-button" id="collapse-button" type="button" aria-label="Hide chat" data-i18n-aria-label="header.hide">
+        <svg class="icon" aria-hidden="true"><use href="#i-chevron"/></svg>
+      </button>
+    </header>
+
+    <div class="menu" id="menu" role="menu" aria-label="Menu" data-i18n-aria-label="header.menu" hidden>
+      <div class="menu-group">
+        <div class="menu-title" data-i18n="menu.sound">Sound</div>
+        <button class="menu-item" id="mute-toggle" type="button" role="menuitemcheckbox" aria-checked="false">
+          <svg class="icon" aria-hidden="true"><use href="#i-volume" id="mute-icon"/></svg>
+          <span id="mute-label" data-i18n="menu.mute">Mute</span>
+        </button>
+        <div class="menu-row">
+          <label class="visually-hidden" for="volume" data-i18n="menu.volume">Volume</label>
+          <svg class="icon" aria-hidden="true"><use href="#i-volume"/></svg>
+          <input id="volume" type="range" min="0" max="100" value="100">
         </div>
-        <div class="answer-container">
-            <!--<input type="text" id="answerInput" placeholder="Type an answer...">-->
-            <textarea id="answerInput" rows="30" cols="67" placeholder="Type an answer..." class="background-text"></textarea>
-            <button id="sendMessage">Send Answer</button>
-            <!--<p id="answerText"></p>-->
+      </div>
+      <div class="menu-group">
+        <div class="menu-title" data-i18n="menu.theme">Theme</div>
+        <div class="segmented" role="group" aria-label="Theme" data-i18n-aria-label="menu.theme">
+          <button class="menu-item" type="button" data-theme-choice="auto" aria-pressed="false"><svg class="icon" aria-hidden="true"><use href="#i-monitor"/></svg><span data-i18n="theme.auto">Auto</span></button>
+          <button class="menu-item" type="button" data-theme-choice="dark" aria-pressed="false"><svg class="icon" aria-hidden="true"><use href="#i-moon"/></svg><span data-i18n="theme.dark">Dark</span></button>
+          <button class="menu-item" type="button" data-theme-choice="light" aria-pressed="false"><svg class="icon" aria-hidden="true"><use href="#i-sun"/></svg><span data-i18n="theme.light">Light</span></button>
         </div>
-        <div>
-        <!--For debugging-->
-        <!--<audio id="audio" autoplay controls>-->
-        <audio id="audio" autoplay>
-        <source src="/audio/out.wav" type="audio/wav"/>
-        </audio>
-        </div>
+      </div>
+      <div class="menu-group">
+        <a class="menu-item" id="editor-link" role="menuitem" href="{{ url_for('character_index') }}?editor" target="_blank" rel="noopener">
+          <svg class="icon" aria-hidden="true"><use href="#i-pencil"/></svg><span data-i18n="menu.editor">Expression editor</span>
+        </a>
+        <button class="menu-item" id="about-button" type="button" role="menuitem">
+          <svg class="icon" aria-hidden="true"><use href="#i-info"/></svg><span data-i18n="menu.about">About</span>
+        </button>
+      </div>
     </div>
-   
 
+    <div class="messages" id="messages" role="log" aria-live="polite" aria-relevant="additions" aria-label="Conversation" data-i18n-aria-label="messages.label" tabindex="0">
+      <div class="empty" id="empty">
+        <h2 data-i18n="empty.title">Say hello to MIA</h2>
+        <p data-i18n="empty.text">Ask a question, tell her about your day, or try one of these:</p>
+        <div class="suggestions">
+          <button class="suggestion" type="button" data-suggestion="empty.hello.text" data-i18n="empty.hello">Say hello</button>
+          <button class="suggestion" type="button" data-suggestion="empty.capabilities.text" data-i18n="empty.capabilities">What can you do?</button>
+          <button class="suggestion" type="button" data-suggestion="empty.interesting.text" data-i18n="empty.interesting">Tell me something interesting</button>
+        </div>
+      </div>
+    </div>
+    <button class="jump" id="jump" type="button" hidden data-i18n="messages.jump">New messages</button>
+    <button class="sound-hint" id="sound-hint" type="button" hidden data-i18n="sound.hint">Tap to enable sound</button>
 
-    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js" integrity="sha384-2huaZvOR9iDzHqslqwpR87isEmrfxqyWOF7hr7BY6KG0+hVKLoEXMPUJw3ynWuhO" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <!--<script src="{{ url_for('static', filename='script.js') }}"></script>-->
-    <script>
-        // Define the port variable before using it
-     let port = 8585; // or any other value you set in your Flask app
-     const socketUrl = {{ socket_url | tojson }};
-  //const socket = io('ws://127.0.0.1:' + port + '/', {
-  // connect to the server the page came from (works on localhost, in the LAN and behind an HTTPS proxy)
-  const socket = io(window.location.origin, {
-  transport: ['websocket', 'polling'],
-  reconnectionDelayMax: 10000,
-  reconnectionInterval: 500
-  });
+    <form class="composer" id="composer" autocomplete="off">
+      <label class="visually-hidden" for="input" data-i18n="composer.label">Message to MIA</label>
+      <textarea id="input" rows="1" maxlength="8000" placeholder="Write to MIA ..." data-i18n-placeholder="composer.placeholder" enterkeyhint="send"></textarea>
+      <button class="send" id="send" type="submit" disabled aria-label="Send" data-i18n-aria-label="composer.send">
+        <svg class="icon" aria-hidden="true"><use href="#i-send"/></svg>
+      </button>
+    </form>
+  </aside>
 
-document.getElementById('sendMessage').addEventListener('click', () => {
-  const message = document.getElementById('answerInput').value;
-  socket.emit('message', message);
-  document.getElementById('answerInput').value = '';
-});
+  <button class="panel-open" id="panel-open" type="button" hidden aria-label="Show chat" data-i18n-aria-label="panel.show">
+    <svg class="icon" aria-hidden="true"><use href="#i-chat"/></svg>
+  </button>
 
-socket.on('connect', () => {
-  console.log('Connected to the server');
-});
+  <dialog id="about" aria-labelledby="about-title">
+    <h2 id="about-title" data-i18n="about.title">MIA</h2>
+    <p data-i18n="about.text">MIA is not an assistant. This chat page shows MIA and her 3D character. Everything runs on your own machine; the page loads nothing from the internet.</p>
+    <div class="actions"><button type="button" id="about-close" data-i18n="about.close">Close</button></div>
+  </dialog>
 
-socket.on('disconnect', () => {
-  console.log('Disconnected from the server');
-});
-
-// --- the 3D character (Godot web export in the iframe) -------------------------------------
-// MIA -> page: socket event "expression" -> character; the page tells the character when audio is playing
-const characterFrame = document.getElementById('character');
-function toCharacter(message) {
-  if (characterFrame.contentWindow) {
-    characterFrame.contentWindow.postMessage(JSON.stringify(message), window.location.origin);
-  }
-}
-socket.on('expression', (data) => {
-  toCharacter({type: 'expression', name: data.name});
-});
-window.addEventListener('message', (event) => {
-  if (event.origin !== window.location.origin || event.source !== characterFrame.contentWindow) {
-    return;
-  }
-  let message = {};
-  try { message = JSON.parse(event.data); } catch (e) { return; }
-  if (message.type === 'ready') {
-    // the character is loaded: it shows the current expression
-    socket.emit('character_ready');
-  }
-});
-
-     socket.on('answer', (data) => {
-        // Update the answer text here
-        //document.getElementById('answerText').innerHTML = data;
-        document.getElementById('answerText').contentWindow.location.reload();
-        
-      });
-
-      
-
-    // Add event listener for keyup (to detect when the user types)
-     answerInput.addEventListener('keyup', () => {
-    // Get the input text
-      const text = answerInput.value;
-
-     // Use a library like Marked to parse Markdown syntax
-     let markedText = marked.marked(text);
-
-     // Replace bold tags with font-weight: bold CSS
-     markedText = markedText.replace(/<b>(.*?)<\/b>/g, (match) => `<span style="font-weight: bold;">${match}</span>`);
-
-     // Replace italic tags with font-style: italic CSS
-     markedText = markedText.replace(/<i>(.*?)<\/i>/g, (match) => `<span style="font-style: italic;">${match}</span>`);
-
-     // Replace links with <a> tags
-     markedText = markedText.replace(/\[(.*?)\]\((.*?)\)/g, (match) => `<a href="${2}">${1}</a>`);
-
-     // Replace images with img tags
-     markedText = markedText.replace(/\[(.*?)\](https:\/\/example\.com\/[^\s]+)\)/g, (match) => `<img src="${2}" />`);
-
-     // Create a temporary container element
-    const tempElement = document.createElement('div');
-
-    // Populate the temporary element with the marked-up text
-    tempElement.innerHTML = markedText;
-     
-     tempElement.style.color = 'inherit';
-     //answerInput.innerHTML = markedText;
-     // Append the temporary element to the original answerInput element
-    answerInput.appendChild(tempElement);
-     });
-     
-    // Add event listener for keydown (to detect when Enter is pressed)
-    answerInput.addEventListener('keydown', (e) => {
-    if (e.key === "Enter") {
-        const message = document.getElementById('answerInput').value;
-        socket.emit('message', message);
-        document.getElementById('answerInput').value = '';
-    }
-    });
-    
-    // Audio control
-    var audio1 = document.getElementById("audio");
-    audio1.onended = function() {
-        socket.emit('audio_ended', "audio playback has ended");
-        toCharacter({type: 'speaking', value: false});
-    };
-    // the mouth of the character moves while MIA's voice plays
-    audio1.onplaying = function() {
-        toCharacter({type: 'speaking', value: true});
-    };
-    audio1.onpause = function() {
-        toCharacter({type: 'speaking', value: false});
-    };
-    socket.on('audio_reload', (data) => {
-        // Update the audio here
-        //document.getElementById('answerText').contentWindow.location.reload();
-        var audio2 = document.getElementById("audio");
-        audio2.load();
-        console.log(data);
-      });
-
-    </script>
+  <!-- MIA's voice: the page plays the audio files the server produces -->
+  <audio id="audio" autoplay>
+    <source src="/audio/out.wav" type="audio/wav">
+  </audio>
 </body>
 </html>

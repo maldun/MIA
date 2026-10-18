@@ -411,6 +411,21 @@ def play_intro_sound():
     return log_msg
 
 #address=ADDRESS,port=WEB_PORT
+# the chat page loads only its own files: no inline scripts, no external hosts (ui/REQUIREMENTS_CHAT.md, 8)
+CHAT_PAGE_CSP = (
+    "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; "
+    "connect-src 'self'; frame-src 'self'; media-src 'self' blob:; object-src 'none'; base-uri 'none'; "
+    "form-action 'self'; frame-ancestors 'self'"
+)
+
+@app.after_request
+def chat_page_headers(response):
+    if request.path == '/' or request.path.startswith('/static/chat/'):
+        response.headers.setdefault('Content-Security-Policy', CHAT_PAGE_CSP)
+        response.headers.setdefault('X-Content-Type-Options', 'nosniff')
+        response.headers.setdefault('Referrer-Policy', 'same-origin')
+    return response
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
     logger.info('Rendering index.html template')
