@@ -9,7 +9,10 @@ import { initCharacter } from './character.js';
 import { initSound } from './sound.js';
 import { initMenu } from './menu.js';
 import { initComposer } from './composer.js';
-import { initChatLite } from './chat-lite.js';
+import { initChat } from './chat.js';
+import { initMood } from './mood.js';
+import { askConfirm, initPalette, loadCommands } from './palette.js';
+import { modelLabel } from './chat-model.js';
 
 const $ = (id) => document.getElementById(id);
 const storage = defaultStorage();
@@ -32,11 +35,21 @@ initLayout({
   openButton: $('panel-open'),
 });
 
-// connection state in the header
-const connection = $('connection');
+// --- connection: header, banner, history after (re)connecting --------------------------------------------
+let composer = null;
+let chat = null;
+
 function showState(state) {
-  connection.dataset.state = state;
+  $('connection').dataset.state = state;
   $('connection-text').textContent = t(`connection.${state}`);
+  const banner = $('banner');
+  banner.hidden = state === 'online' || state === 'connecting';
+  banner.dataset.state = state;
+  banner.textContent = t(state === 'reconnecting' ? 'banner.reconnecting' : 'banner.offline');
+  composer?.setOnline(state === 'online' || state === 'connecting');
+  if (state === 'online') {
+    chat?.loadLatest();      // first load, and what was missed while offline
+  }
 }
 const socket = connect(showState);
 
@@ -65,29 +78,66 @@ initMenu({
   aboutClose: $('about-close'),
 });
 
-const chat = initChatLite({ list: $('messages'), empty: $('empty'), jump: $('jump'), render: renderMarkdown, t });
+// --- mood line and header chip, driven by the server --------------------------------------------------
+const mood = initMood({ chip: $('mood'), emoji: $('mood-emoji'), text: $('mood-text'), live: $('mood-live') });
+
+socket.on('chat_status', (status) => {
+  mood.update(status.mood, status.activity);
+  composer?.setBusy(status.busy && (status.activity === 'thinking' || status.activity === 'speaking'));
+  const chip = $('model-chip');
+  const label = modelLabel(status.profile);
+  chip.hidden = !label;
+  chip.textContent = label ? t(`chip.${label}`) : '';
+  chip.title = status.model ?? '';
+});
+
+// --- the conversation --------------------------------------------------------------------------------
+function toast(message) {
+  chat.note(message);
+  const live = $('mood-live');
+  live.textContent = message;
+}
+
+chat = initChat({ list: $('messages'), empty: $('empty'), jump: $('jump'), olderButton: $('older'), socket, render: renderMarkdown, t, notify: toast });
+
+let commands = [];
+loadCommands().then((list) => { commands = list; });
 
 const suggestions = document.querySelectorAll('[data-suggestion]');
 for (const suggestion of suggestions) suggestion.dataset.text = t(suggestion.dataset.suggestion);
 
-initComposer({
+initPalette({
+  input: $('input'),
+  list: $('palette'),
+  commands: () => commands,
+  onPick: (command) => composer.fill(command.command),
+});
+
+composer = initComposer({
   form: $('composer'),
   input: $('input'),
   send: $('send'),
+  stop: $('stop'),
+  counter: $('counter'),
   storage,
   suggestions,
-  onSend(text) {
-    if (!socket.connected) {
-      chat.note(t('chat.sending_failed'));
-      return false;
+  async onSend(text) {
+    const command = commands.find((c) => c.command === text.toLowerCase());
+    if (command?.confirm) {
+      const ok = await askConfirm({
+        dialog: $('confirm'),
+        message: $('confirm-text'),
+        ok: $('confirm-ok'),
+        cancel: $('confirm-cancel'),
+        text: t('confirm.command', { command: command.command, description: command.description }),
+      });
+      if (!ok) return false;
     }
-    socket.emit('message', text);
-    chat.user(text);
+    chat.send(text);
     return true;
   },
+  onStop: () => socket.emit('chat_stop'),
 });
 
-socket.on('answer', (text) => chat.answer(String(text ?? '')));
-
 // handle for tests and debugging
-window.miaChat = { renderMarkdown, socket, theme, chat };
+window.miaChat = { renderMarkdown, socket, theme, chat, mood, composer };

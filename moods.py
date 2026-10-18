@@ -138,10 +138,8 @@ class MoodTracker:
             if activity:
                 entry = self._entry("activities", activity)
                 activity_text = self._activity_text(activity, entry)
-                if activity_text:      # "speaking" has no text of its own: the mood text stays, with the sound icon
+                if activity_text:      # "speaking" has no text of its own: the mood stays (the page adds a sound icon)
                     emoji, text = (entry or {}).get("emoji", emoji), activity_text
-                elif entry and entry.get("emoji"):
-                    emoji = entry["emoji"]
             return {"emotion": None if key == "ready" else key, "emoji": emoji, "text": text,
                     "since": self._since, "activity": activity}
 

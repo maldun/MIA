@@ -1,0 +1,182 @@
+/* The conversation (C3): message rows with name, emotion badge, time and actions; day separators; command palette;
+   connection banner; stop button; mood line fade. Uses the tokens of tokens.css. */
+
+/* --- rows: a sender line, the bubble, a foot with time and actions ------------------------------ */
+
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-width: 88%;
+}
+
+.row.user { align-self: flex-end; align-items: flex-end; }
+.row.assistant { align-self: flex-start; align-items: flex-start; }
+.row.system { align-self: center; max-width: 94%; }
+
+.row .msg { max-width: 100%; align-self: auto; }
+.row.local .msg { opacity: 0.75; }
+
+.msg-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 2px 6px 0;
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+.msg-name { font-weight: 600; }
+.badge { font-size: 1.05em; line-height: 1; }
+
+.tag {
+  padding: 0 6px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  font-size: 0.75em;
+}
+
+.msg-foot {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0 6px;
+  color: var(--text-muted);
+  font-size: var(--text-xs, 0.75rem);
+  min-height: 1.2em;
+}
+
+/* the actions of a message are quiet until you point at it (always there on touch screens) */
+.row .link-button { opacity: 0; }
+.row:hover .link-button,
+.row:focus-within .link-button,
+.row .link-button.danger { opacity: 1; }
+@media (hover: none) { .row .link-button { opacity: 1; } }
+
+.link-button {
+  padding: 0 4px;
+  border: 0;
+  background: transparent;
+  color: var(--accent-text);
+  font: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.link-button.danger { color: var(--danger); }
+.link-button:focus-visible { outline: 2px solid var(--focus); border-radius: 4px; }
+
+.msg.stopped { outline: 1px dashed var(--border); outline-offset: 2px; }
+
+.day {
+  align-self: center;
+  margin: var(--space-3) 0 var(--space-1);
+  padding: 2px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--field);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+.older {
+  align-self: center;
+  flex: none;
+  padding: 4px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+
+/* --- connection banner ------------------------------------------------------------------------- */
+
+.banner {
+  flex: none;
+  padding: 6px var(--space-4);
+  background: var(--field);
+  border-bottom: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  text-align: center;
+}
+
+.banner[data-state="offline"] { color: var(--danger); }
+
+/* --- composer: field with counter, stop button, command palette -------------------------------------- */
+
+.composer .field {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.composer .field textarea { width: 100%; }
+
+.counter {
+  position: absolute;
+  right: 12px;
+  bottom: -1.1em;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+}
+
+.stop {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--field);
+  color: var(--danger);
+  cursor: pointer;
+}
+
+.stop .icon { fill: currentColor; stroke: none; }
+.stop:focus-visible { outline: 2px solid var(--focus); }
+
+.palette {
+  flex: none;
+  margin: 0 var(--space-3);
+  padding: 4px;
+  max-height: 14em;
+  overflow-y: auto;
+  list-style: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md, 14px);
+  background: var(--glass);
+  box-shadow: var(--shadow);
+}
+
+.palette li {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.palette li[aria-selected="true"] { background: var(--field); }
+.palette .command { font-family: var(--font-mono); font-weight: 600; }
+.palette .description { color: var(--text-muted); font-size: var(--text-sm); }
+
+/* --- mood line: crossfade, sound icon while MIA speaks ------------------------------------------------------ */
+
+.mood-emoji,
+.mood-text { transition: opacity 125ms ease; }
+.mood.fading .mood-emoji,
+.mood.fading .mood-text { opacity: 0; }
+.mood[data-activity="speaking"] .mood-text::after { content: " \1F50A"; }
+
+@media (prefers-reduced-motion: reduce) {
+  .mood-emoji,
+  .mood-text { transition: none; }
+}
+
+dialog .actions { gap: var(--space-2); }

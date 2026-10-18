@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='chat/tokens.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='chat/layout.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='chat/components.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='chat/messages.css') }}">
   <script type="module" src="{{ url_for('static', filename='chat/app.js') }}"></script>
 </head>
 <body data-snap="half">
@@ -24,6 +25,7 @@
     <symbol id="i-volume" viewBox="0 0 24 24"><path d="M11 5L6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></symbol>
     <symbol id="i-volume-off" viewBox="0 0 24 24"><path d="M11 5L6 9H3v6h3l5 4V5z"/><path d="M22 9l-6 6M16 9l6 6"/></symbol>
     <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></symbol>
+    <symbol id="i-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></symbol>
     <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></symbol>
   </svg>
 
@@ -33,10 +35,11 @@
   </div>
 
   <!-- mood and status line, replaces the old headline -->
-  <div class="mood" id="mood" role="status" aria-live="polite">
+  <div class="mood" id="mood">
     <span class="mood-emoji" id="mood-emoji" aria-hidden="true">😊</span>
     <span class="mood-text" id="mood-text" data-i18n="mood.ready">Ready when you are.</span>
   </div>
+  <div class="visually-hidden" id="mood-live" role="status" aria-live="polite"></div>
 
   <!-- the chat -->
   <aside class="panel" id="panel" aria-label="Chat" data-collapsed="false">
@@ -92,7 +95,10 @@
       </div>
     </div>
 
+    <div class="banner" id="banner" role="status" hidden></div>
+
     <div class="messages" id="messages" role="log" aria-live="polite" aria-relevant="additions" aria-label="Conversation" data-i18n-aria-label="messages.label" tabindex="0">
+      <button class="older" id="older" type="button" hidden data-i18n="messages.older">Load older messages</button>
       <div class="empty" id="empty">
         <h2 data-i18n="empty.title">Say hello to MIA</h2>
         <p data-i18n="empty.text">Ask a question, tell her about your day, or try one of these:</p>
@@ -106,9 +112,16 @@
     <button class="jump" id="jump" type="button" hidden data-i18n="messages.jump">New messages</button>
     <button class="sound-hint" id="sound-hint" type="button" hidden data-i18n="sound.hint">Tap to enable sound</button>
 
+    <ul class="palette" id="palette" role="listbox" aria-label="Commands" data-i18n-aria-label="composer.commands" hidden></ul>
     <form class="composer" id="composer" autocomplete="off">
       <label class="visually-hidden" for="input" data-i18n="composer.label">Message to MIA</label>
-      <textarea id="input" rows="1" maxlength="8000" placeholder="Write to MIA ..." data-i18n-placeholder="composer.placeholder" enterkeyhint="send"></textarea>
+      <div class="field">
+        <textarea id="input" rows="1" maxlength="8000" placeholder="Write to MIA ..." data-i18n-placeholder="composer.placeholder" enterkeyhint="send" role="combobox" aria-expanded="false" aria-controls="palette" aria-autocomplete="list"></textarea>
+        <span class="counter" id="counter" hidden></span>
+      </div>
+      <button class="stop" id="stop" type="button" hidden aria-label="Stop" data-i18n-aria-label="composer.stop">
+        <svg class="icon" aria-hidden="true"><use href="#i-stop"/></svg>
+      </button>
       <button class="send" id="send" type="submit" disabled aria-label="Send" data-i18n-aria-label="composer.send">
         <svg class="icon" aria-hidden="true"><use href="#i-send"/></svg>
       </button>
@@ -118,6 +131,14 @@
   <button class="panel-open" id="panel-open" type="button" hidden aria-label="Show chat" data-i18n-aria-label="panel.show">
     <svg class="icon" aria-hidden="true"><use href="#i-chat"/></svg>
   </button>
+
+  <dialog id="confirm" aria-labelledby="confirm-text">
+    <p id="confirm-text"></p>
+    <div class="actions">
+      <button type="button" id="confirm-cancel" data-i18n="confirm.cancel">Cancel</button>
+      <button type="button" id="confirm-ok" data-i18n="confirm.ok">Yes, do it</button>
+    </div>
+  </dialog>
 
   <dialog id="about" aria-labelledby="about-title">
     <h2 id="about-title" data-i18n="about.title">MIA</h2>

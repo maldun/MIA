@@ -183,3 +183,23 @@ REST: `GET /api/chat/history?before=<id>&limit=50`, `GET /api/chat/status`, `GET
 - **Not in the chat log:** calibration, the hourly prompt to the model, summaries and penalties (the reminder to start with an emotion).
 - **Stop:** `Communicator.exchange(should_stop=...)` closes the stream to Ollama and keeps the received text in MIA's history.
 - **Tests:** `python tests/test_chat_backend.py` (33 tests: log, mood, service with a fake model, stop, queue, errors, rate limit, REST, two clients).
+
+## Chat page, phase C3 (the real conversation)
+
+The page now uses the `chat_*` events of C2 (the C1 bubbles and the old `answer` event are not used any more).
+
+- **Code:** `chat-model.js` (pure: ordering, grouping, times, links, command filter; tested with node), `chat.js` (history, live messages, streaming
+  batched per animation frame, sending with retry, paging, autoscroll, unread count), `mood.js` (live mood line), `palette.js` (slash commands,
+  confirmation dialog), `composer.js` (stop button, queue hint, draft, up-arrow recall, length counter), styles in `messages.css`.
+- **Messages:** bubbles for you (right, links clickable, shown as typed) and MIA (left, markdown, sanitized), sender line with the emotion badge and an
+  "automatic" tag for her own messages, relative times (full date as tooltip), day separators, copy button, state text (sending, waiting, stopped, error,
+  retry when it could not be sent). Several devices see the same conversation; your own message is upgraded in place when the server confirms it.
+- **History:** the last 50 messages on load (`/api/chat/history`), older ones while scrolling up (or the button), at most about 300 rows in the page.
+  After a lost connection the page reloads the latest messages. "New messages (n)" appears when you scrolled up.
+- **Composer:** Enter sends (Shift+Enter newline; on touch screens the send button sends), while MIA answers a stop button appears and one more message
+  waits in the queue, `/` opens the command list (dangerous commands ask first), the field is disabled for sending while offline.
+- **Mood line:** shows exactly what the server says (`chat_status.mood`), crossfades, adds a sound icon while MIA speaks, and tells screen readers at
+  most every 30 seconds. The header chip shows the model (light or full).
+- **Tests:** `node --test "tests/js/*.test.mjs"` (16), and the browser check `ui/tools/chat_stub_server.py` + `ui/tools/chat_e2e.js` (history, paging,
+  streaming, mood changes, palette, stop, error; see the header of the stub server).
+- **Still old:** the server still emits `answer` and writes `answer.html` for the old page, and still handles the old `message` event; both go in C5.
