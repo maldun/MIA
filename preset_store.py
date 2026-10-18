@@ -62,7 +62,7 @@ def _is_number(value):
 
 
 class PresetStore:
-    def __init__(self, folder, defaults_file=None, shape_keys_file=None, gestures_file=None, protected=None):
+    def __init__(self, folder, defaults_file=None, shape_keys_file=None, gestures_file=None, protected=None, gestures_provider=None):
         """
         folder: where the preset files live (created, and filled from defaults_file when empty)
         defaults_file: {"presets": [...]} used to fill an empty folder (the library shipped with the character)
@@ -73,10 +73,18 @@ class PresetStore:
         self._protected = protected or (lambda: set())
         self._lock = threading.RLock()
         self.known_shape_keys = self._read_names(shape_keys_file, "shape_keys")
-        self.known_gestures = self._read_names(gestures_file, "gestures")
+        self._known_gestures = self._read_names(gestures_file, "gestures")
+        self._gestures_provider = gestures_provider      # function() -> every gesture name (built in and made in the editor)
         os.makedirs(folder, exist_ok=True)
         if defaults_file and not self.names():
             self._seed(defaults_file)
+
+    @property
+    def known_gestures(self):
+        """the gesture names a preset may use (None: no check)"""
+        if self._gestures_provider is not None:
+            return set(self._gestures_provider())
+        return self._known_gestures
 
     # --- helpers -----------------------------------------------------------------------------
 

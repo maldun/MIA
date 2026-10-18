@@ -34,6 +34,8 @@ BACKGROUND_EXTENSIONS = (".png", ".jpg", ".jpeg", ".webp")
 # expression presets shared by all devices: one json file per preset in this folder (relative to this folder or absolute);
 # "editor_token": optional secret that changing presets needs (header X-MIA-Token), see presets_api.py
 PRESETS_DIR_KEY = "presets_dir"
+GESTURES_DIR_KEY = "gestures_dir"
+DEFAULT_GESTURES_DIR = "data/gestures"
 DEFAULT_PRESETS_DIR = "data/presets"
 
 # chat (ui/REQUIREMENTS_CHAT.md 6)

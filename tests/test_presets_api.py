@@ -169,7 +169,7 @@ class ApiTest(unittest.TestCase):
         tmp = tempfile.TemporaryDirectory()
         self.addCleanup(tmp.cleanup)
         app = Flask("test")
-        cfg = {"presets_dir": os.path.join(tmp.name, "presets"), "editor_token": token or "",   # "" = no token
+        cfg = {"presets_dir": os.path.join(tmp.name, "presets"), "gestures_dir": os.path.join(tmp.name, "gestures"), "editor_token": token or "",   # "" = no token
                "editor_token_file": os.path.join(tmp.name, "token.txt")}
         self.store = pa.init_presets_api(app, cfg, REPO, allowed_origins=lambda: ["http://good.example:8585"])
         return app.test_client()
@@ -179,7 +179,7 @@ class ApiTest(unittest.TestCase):
         data = http.get("/api/presets").get_json()
         self.assertEqual(len(data["presets"]), 14)
         self.assertEqual(data["token_required"], False)
-        self.assertEqual(data["version"], self.store.version())
+        self.assertEqual(len(data["version"]), 12)            # one number for presets and gestures together
         self.assertIn("idle", data["protected"])        # used by MIA's expressions.json
         self.assertEqual(http.get("/api/presets/smug").get_json()["name"], "smug")
         self.assertEqual(http.get("/api/presets/nope").status_code, 404)
@@ -192,7 +192,7 @@ class ApiTest(unittest.TestCase):
         self.assertEqual(keys["categories"], ["eyes", "brows", "mouth", "other"])
         gestures = http.get("/api/gestures").get_json()["gestures"]
         self.assertIn("wave", [g["name"] for g in gestures])
-        self.assertEqual(len(gestures), 13)
+        self.assertEqual(len(gestures), 14)
 
     def test_create_update_rename_delete_over_http(self):
         http = self.make_client()

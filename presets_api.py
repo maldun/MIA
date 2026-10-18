@@ -27,7 +27,12 @@ REST API for the character's expression presets (ui/REQUIREMENTS.md 4.7), part o
   PUT    /api/presets/<name>     overwrite; a different "name" in the body renames it
   DELETE /api/presets/<name>     delete (409 for presets MIA's emotions use, unless ?force=1)
   GET    /api/shape-keys         shape keys with categories and descriptions
-  GET    /api/gestures           gestures
+  GET    /api/gestures           every gesture: built in (kind "keys") and made in the editor (kind "pose", complete in "pose_gestures"), + version
+  GET    /api/gestures/<name>    one gesture made in the editor
+  POST   /api/gestures           create (409 if it exists or the name is a built in gesture)
+  PUT    /api/gestures/<name>    overwrite; a different "name" in the body renames it
+  DELETE /api/gestures/<name>    delete (409 for built in ones and ones that presets use, unless ?force=1)
+  GET    /api/pose-model         the sliders of the gesture editor: angles, ranges, neutral values, descriptions
   POST   /api/expression/generate   {"description"}: the LLM makes an expression (validated, not saved)
   POST   /api/expression/match      {"description"}: the closest existing preset (no LLM, instant)
   POST   /api/expression/feedback   {"id", "decision": keep|edit|reject, "preset"?}: logged, used as examples later
@@ -35,6 +40,7 @@ REST API for the character's expression presets (ui/REQUIREMENTS.md 4.7), part o
 Writing (POST, PUT, DELETE) needs JSON as content type (no cross-site form posts), an allowed origin if the browser
 sends one, and the header X-MIA-Token if "editor_token" is set in setup_cfg.json.
 """
+import hashlib
 import hmac
 import json
 import os
@@ -45,16 +51,22 @@ from flask import Blueprint, jsonify, request
 
 try:
     from .constants import PRESETS_DIR_KEY, DEFAULT_PRESETS_DIR, EDITOR_TOKEN_KEY, EXPRESSION_FILE, TOKEN_HEADER
+    from .constants import GESTURES_DIR_KEY, DEFAULT_GESTURES_DIR
     from .constants import EDITOR_TOKEN_FILE_KEY, DEFAULT_EDITOR_TOKEN_FILE
     from .mia_logger import logger
     from .preset_store import PresetStore, PresetError
+    from .gesture_store import GestureStore
+    from .pose_model import describe as describe_pose_model
     from .expression_llm import ExpressionGenerator
     from .constants import FEEDBACK_LOG_KEY, DEFAULT_FEEDBACK_LOG
 except ImportError:  # used as plain script / in tests
     from constants import PRESETS_DIR_KEY, DEFAULT_PRESETS_DIR, EDITOR_TOKEN_KEY, EXPRESSION_FILE, TOKEN_HEADER
+    from constants import GESTURES_DIR_KEY, DEFAULT_GESTURES_DIR
     from constants import EDITOR_TOKEN_FILE_KEY, DEFAULT_EDITOR_TOKEN_FILE
     from mia_logger import logger
     from preset_store import PresetStore, PresetError
+    from gesture_store import GestureStore
+    from pose_model import describe as describe_pose_model
     from expression_llm import ExpressionGenerator
     from constants import FEEDBACK_LOG_KEY, DEFAULT_FEEDBACK_LOG
 
@@ -104,7 +116,21 @@ def resolve_token(cfg, root):
     return token, path
 
 
-def create_store(cfg, root):
+def create_gesture_store(cfg, root, presets_ref):
+    """
+    the gesture store as configured (folder "gestures_dir"). presets_ref: a list that holds the preset store once it exists (the gesture
+    store asks it which presets use a gesture and which expressions exist; the preset store asks the gesture store for the gesture names)
+    """
+    folder = cfg.get(GESTURES_DIR_KEY, DEFAULT_GESTURES_DIR)
+    if not os.path.isabs(folder):
+        folder = os.path.join(root, folder)
+    shipped = os.path.join(root, PRESET_FILES)
+    return GestureStore(folder, shipped_file=os.path.join(shipped, "gestures.json"),
+                        in_use=lambda name: [p["name"] for p in presets_ref[0].list() if p.get("gesture") == name] if presets_ref else [],
+                        expression_names=lambda: presets_ref[0].names() if presets_ref else [])
+
+
+def create_store(cfg, root, gestures=None):
     """the preset store as configured (folder "presets_dir", filled from the library shipped with the character)"""
     folder = cfg.get(PRESETS_DIR_KEY, DEFAULT_PRESETS_DIR)
     if not os.path.isabs(folder):
@@ -114,10 +140,11 @@ def create_store(cfg, root):
                        defaults_file=os.path.join(shipped, "library.json"),
                        shape_keys_file=os.path.join(shipped, "shape_keys.json"),
                        gestures_file=os.path.join(shipped, "gestures.json"),
-                       protected=lambda: mia_presets(root))
+                       protected=lambda: mia_presets(root),
+                       gestures_provider=gestures.all_names if gestures is not None else None)
 
 
-def create_generator(cfg, root, store, llm, model_name=lambda: None):
+def create_generator(cfg, root, store, llm, model_name=lambda: None, gestures=None):
     """the expression generator (None without a language model function)"""
     if llm is None:
         return None
@@ -126,10 +153,11 @@ def create_generator(cfg, root, store, llm, model_name=lambda: None):
     if not os.path.isabs(log):
         log = os.path.join(root, log)
     return ExpressionGenerator(store, llm, os.path.join(shipped, "shape_keys.json"), os.path.join(shipped, "gestures.json"),
-                               log_path=log, model_name=model_name)
+                               log_path=log, model_name=model_name,
+                               gestures_provider=gestures.describe_all if gestures is not None else None)
 
 
-def create_blueprint(store, root, token=None, allowed_origins=None, generator=None):
+def create_blueprint(store, root, token=None, allowed_origins=None, generator=None, gestures=None):
     bp = Blueprint("presets_api", __name__)
     shipped = os.path.join(root, PRESET_FILES)
 
@@ -163,16 +191,22 @@ def create_blueprint(store, root, token=None, allowed_origins=None, generator=No
     def handle_preset_error(exc):
         return error(exc.message, exc.status, exc.details)
 
+    def version():
+        """any change of a preset or of a gesture changes it (other devices poll this one number)"""
+        if gestures is None:
+            return store.version()
+        return hashlib.sha1((store.version() + gestures.version()).encode()).hexdigest()[:12]
+
     @bp.get("/api/presets")
     def list_presets():
-        response = jsonify({"presets": store.list(), "version": store.version(), "token_required": bool(token),
+        response = jsonify({"presets": store.list(), "version": version(), "token_required": bool(token),
                             "protected": sorted(store.protected())})
         response.headers["Cache-Control"] = "no-cache"
         return response
 
     @bp.get("/api/presets/version")
     def presets_version():
-        response = jsonify({"version": store.version()})
+        response = jsonify({"version": version()})
         response.headers["Cache-Control"] = "no-cache"
         return response
 
@@ -187,7 +221,7 @@ def create_blueprint(store, root, token=None, allowed_origins=None, generator=No
             return refused
         preset, corrections = store.create(body())
         logger.info(f"preset '{preset['name']}' created")
-        response = jsonify({"preset": preset, "corrections": corrections, "version": store.version()})
+        response = jsonify({"preset": preset, "corrections": corrections, "version": version()})
         response.status_code = 201
         return response
 
@@ -198,7 +232,7 @@ def create_blueprint(store, root, token=None, allowed_origins=None, generator=No
             return refused
         preset, corrections = store.update(name, body(), force=request.args.get("force") == "1")
         logger.info(f"preset '{name}' saved" + (f" as '{preset['name']}'" if preset["name"] != name else ""))
-        return jsonify({"preset": preset, "corrections": corrections, "version": store.version()})
+        return jsonify({"preset": preset, "corrections": corrections, "version": version()})
 
     @bp.delete("/api/presets/<name>")
     def delete_preset(name):
@@ -207,19 +241,65 @@ def create_blueprint(store, root, token=None, allowed_origins=None, generator=No
             return refused
         store.delete(name, force=request.args.get("force") == "1")
         logger.info(f"preset '{name}' deleted")
-        return jsonify({"deleted": name, "version": store.version()})
+        return jsonify({"deleted": name, "version": version()})
 
     @bp.get("/api/shape-keys")
     def shape_keys():
         with open(os.path.join(shipped, "shape_keys.json")) as fp:
             return jsonify(json.load(fp))
 
-    @bp.get("/api/gestures")
-    def gestures():
-        with open(os.path.join(shipped, "gestures.json")) as fp:
-            data = json.load(fp)["gestures"]
-        return jsonify({"gestures": [{"name": g["name"], "description": g.get("description", ""),
-                                      "expression": g.get("expression", "")} for g in data]})
+    if gestures is not None:
+        @bp.get("/api/pose-model")
+        def pose_model():
+            return jsonify(describe_pose_model())
+
+        @bp.get("/api/gestures")
+        def list_gestures():
+            response = jsonify({"gestures": gestures.describe_all(), "pose_gestures": gestures.list(), "version": gestures.version(),
+                                "token_required": bool(token)})
+            response.headers["Cache-Control"] = "no-cache"
+            return response
+
+        @bp.get("/api/gestures/<name>")
+        def get_gesture(name):
+            return jsonify(gestures.get(name))
+
+        @bp.post("/api/gestures")
+        def create_gesture():
+            refused = check_write()
+            if refused:
+                return refused
+            gesture, corrections = gestures.create(body())
+            logger.info(f"gesture '{gesture['name']}' created")
+            response = jsonify({"gesture": gesture, "corrections": corrections, "version": version()})
+            response.status_code = 201
+            return response
+
+        @bp.put("/api/gestures/<name>")
+        def update_gesture(name):
+            refused = check_write()
+            if refused:
+                return refused
+            gesture, corrections = gestures.update(name, body(), force=request.args.get("force") == "1")
+            logger.info(f"gesture '{name}' saved" + (f" as '{gesture['name']}'" if gesture["name"] != name else ""))
+            return jsonify({"gesture": gesture, "corrections": corrections, "version": version()})
+
+        @bp.delete("/api/gestures/<name>")
+        def delete_gesture(name):
+            refused = check_write()
+            if refused:
+                return refused
+            gestures.delete(name, force=request.args.get("force") == "1")
+            logger.info(f"gesture '{name}' deleted")
+            return jsonify({"deleted": name, "version": version()})
+
+    if gestures is None:        # without a gesture store only the gestures that come with the character are listed
+        @bp.get("/api/gestures")
+        def builtin_gestures():
+            with open(os.path.join(shipped, "gestures.json")) as fp:
+                data = json.load(fp)["gestures"]
+            return jsonify({"gestures": [{"name": g["name"], "description": g.get("description", ""),
+                                          "expression": g.get("expression", "")} for g in data]})
 
     if generator is not None:
         def description_of(data):
@@ -257,12 +337,16 @@ def create_blueprint(store, root, token=None, allowed_origins=None, generator=No
 
 
 def init_presets_api(app, cfg, root, allowed_origins=None, llm=None, model_name=lambda: None):
-    """creates the store and registers the API at the Flask app; returns the store (llm: function (messages, schema) -> text)"""
-    store = create_store(cfg, root)
-    generator = create_generator(cfg, root, store, llm, model_name)
+    """creates the stores and registers the API at the Flask app; returns the preset store (llm: function (messages, schema) -> text)"""
+    presets_ref = []
+    gestures = create_gesture_store(cfg, root, presets_ref)
+    store = create_store(cfg, root, gestures)
+    presets_ref.append(store)
+    generator = create_generator(cfg, root, store, llm, model_name, gestures)
     app.config["EXPRESSION_GENERATOR"] = generator
+    app.config["GESTURE_STORE"] = gestures
     token, source = resolve_token(cfg, root)
     app.config["EDITOR_TOKEN_INFO"] = (token, source)
-    app.register_blueprint(create_blueprint(store, root, token=token, allowed_origins=allowed_origins, generator=generator))
+    app.register_blueprint(create_blueprint(store, root, token=token, allowed_origins=allowed_origins, generator=generator, gestures=gestures))
     logger.info("preset editor: changing presets needs the editor token (%s)" % source if token else "preset editor: no token, everyone who can reach the page may change presets")
     return store

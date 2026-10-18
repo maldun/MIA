@@ -67,7 +67,7 @@ def now():
 
 
 class ExpressionGenerator:
-    def __init__(self, store, chat, shape_keys_file, gestures_file=None, log_path=None, examples=4, model_name=lambda: None):
+    def __init__(self, store, chat, shape_keys_file, gestures_file=None, log_path=None, examples=4, model_name=lambda: None, gestures_provider=None):
         """
         store: the PresetStore (validation, examples, closest preset)
         chat: function (messages, schema) -> the model's answer as text; raises if the model cannot be reached
@@ -86,10 +86,15 @@ class ExpressionGenerator:
             data = json.load(fp)
         self.categories = data.get("categories", [])
         self.shape_keys = data["shape_keys"]
-        self.gestures = []
+        self._gestures = []
+        self._gestures_provider = gestures_provider      # function() -> [{"name", "description"}]: the built in gestures and the ones of the editor
         if gestures_file and os.path.exists(gestures_file):
             with open(gestures_file, encoding="utf-8") as fp:
-                self.gestures = json.load(fp).get("gestures", [])
+                self._gestures = json.load(fp).get("gestures", [])
+
+    @property
+    def gestures(self):
+        return list(self._gestures_provider()) if self._gestures_provider is not None else self._gestures
 
     # --- the schema the model must answer with -----------------------------------------------------------------
     def schema(self):
