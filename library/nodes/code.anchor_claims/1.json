@@ -1,0 +1,60 @@
+{
+ "id": "code.anchor_claims",
+ "version": 1,
+ "kind": "code",
+ "title": "Keep only claims that are in the text",
+ "description": "Drops claims with the wrong shape, keeps claims whose text is a verbatim span of the source, snaps slightly reworded ones to the right sentence (75 percent alike), drops invented ones and duplicates. Answer: {claims, dropped, snapped}.",
+ "tags": [
+  "extract",
+  "claims",
+  "safety",
+  "exact"
+ ],
+ "applies_to": {
+  "tasks": [
+   "research"
+  ]
+ },
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "text",
+    "claims"
+   ],
+   "properties": {
+    "text": {
+     "type": "string"
+    },
+    "claims": {
+     "type": "array"
+    }
+   }
+  }
+ },
+ "outputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "claims"
+   ]
+  }
+ },
+ "params": {},
+ "body": {
+  "function": "anchor_claims",
+  "plain": "checking that every claim is really in the text"
+ },
+ "cost": {
+  "seconds": 0.05
+ },
+ "safety": {
+  "reads_web": false,
+  "runs_code": false
+ },
+ "status": "trusted",
+ "origin": {
+  "by": "manual",
+  "note": "extraction.anchor_claims, unit tested"
+ }
+}

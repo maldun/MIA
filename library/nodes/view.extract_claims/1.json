@@ -1,0 +1,105 @@
+{
+ "id": "view.extract_claims",
+ "version": 1,
+ "kind": "model",
+ "title": "Find the checkable claims in a text",
+ "description": "Asks the model for the claims in a text as structured data (type, a verbatim span of the text, data for the checks). The guide is extraction.EXTRACTION_GUIDE (a test keeps them equal). The answer must go through code.anchor_claims: a model rewords, and invents.",
+ "tags": [
+  "view",
+  "extract",
+  "claims",
+  "structured"
+ ],
+ "applies_to": {
+  "tasks": [
+   "research"
+  ]
+ },
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "text"
+   ],
+   "properties": {
+    "text": {
+     "type": "string"
+    }
+   }
+  }
+ },
+ "outputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "claims"
+   ]
+  }
+ },
+ "params": {
+  "guide": {
+   "default": "Find the checkable claims in the text. A claim is a statement that can be true or false and that a program or a source could check. Do not judge whether it is true: extract false claims too.\nFor each claim give: type, text (copy the sentence, or the part of it that holds the claim, EXACTLY as it appears in the text, character for character), data.\nTypes and their data:\n- numeric: an arithmetic statement. data: {\"expression\": \"12*1.5+3\", \"value\": 21} (digits and + - * / ** and brackets; value is the claimed result)\n- unit: a conversion between units. data: {\"value\": 5, \"from_unit\": \"km\", \"to_unit\": \"mi\", \"result_value\": 3.1}\n- date: calendar facts. data: {\"kind\": \"weekday\", \"date\": \"2000-01-01\", \"weekday\": \"Saturday\"}. Other kinds: days_between (start, end, days), age (birth, on, years), leap_year (year, leap: true or false), add_days (start, days, result_date). Dates as YYYY-MM-DD.\n- fact: a statement about the world with names and numbers or other specifics. data: {\"entities\": [\"Eiffel Tower\"], \"facts\": [\"330 metres\"]} (entities: the names; facts: the key numbers and specifics as written)\n- quotation: somebody is quoted. data: {\"quote\": \"the words\", \"attributed_to\": \"Name\"}\n- citation: a web address is given as a source. data: {\"url\": \"https://...\", \"quote\": \"the quoted words, if any\"}\nNot claims: opinions, feelings, questions, advice, instructions, chat, hedged statements (might, probably, I think), what others only think or feel, and numbers that are no statements (phone numbers, page numbers, times, a year inside a name).\nA sentence can hold several claims: give each its own entry with the same text. If there is nothing to check, return an empty list.",
+   "description": "what a claim is and which data each type has"
+  }
+ },
+ "body": {
+  "system": "You are a careful reader who finds the checkable claims in texts and copies the words of the text exactly. You never invent or reword.",
+  "template": "Text:\n{{text}}\n\n{{guide}}\n\nReply with JSON: {\"claims\": [{\"type\": ..., \"text\": ..., \"data\": {...}}]}.",
+  "schema": {
+   "type": "object",
+   "required": [
+    "claims"
+   ],
+   "properties": {
+    "claims": {
+     "type": "array",
+     "maxItems": 40,
+     "items": {
+      "type": "object",
+      "required": [
+       "type",
+       "text",
+       "data"
+      ],
+      "properties": {
+       "type": {
+        "enum": [
+         "numeric",
+         "unit",
+         "date",
+         "fact",
+         "quotation",
+         "citation",
+         "computable"
+        ]
+       },
+       "text": {
+        "type": "string",
+        "minLength": 4,
+        "maxLength": 600
+       },
+       "data": {
+        "type": "object"
+       }
+      }
+     }
+    }
+   }
+  },
+  "retries": 1,
+  "plain": "reading the text for claims"
+ },
+ "cost": {
+  "seconds": 10,
+  "tokens": 1500
+ },
+ "safety": {
+  "reads_web": false,
+  "runs_code": false
+ },
+ "status": "draft",
+ "origin": {
+  "by": "manual",
+  "note": "not measured yet: draft until the suite 'extraction' has been run with it"
+ }
+}

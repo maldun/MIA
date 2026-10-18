@@ -504,3 +504,18 @@ Changes to a check, a prompt, a pipeline or a model are judged by running the sa
   pages, local and private addresses, redirects (also into the local network), clipped pages; mirrors, a third source that saves a claim, a correction found by the disconfirming search, hostile pages with instructions
   aimed at models, queries that repeat the claim. Result: 31 of 31 behave as expected. The one **documented false pass** is a popular myth that two independent sources repeat while the disconfirming search
   finds no correction (`w-popular-myth-no-correction`, tag `known_limit`): web confirmation cannot catch what the web does not contradict; it is kept in the numbers on purpose.
+
+## Core, phase 4: claims out of prose (extraction), test first
+
+The research pipeline needs the claims of a text as data that the checks accept. `extraction.py` defines the claim (`{type, text, data}`; `text` is a **verbatim span of the source**, so an invented claim is
+detectable by code), the scorer, a pattern-based baseline and a safety step; `eval/suites/extraction` has 51 texts (48 claims to find: arithmetic, units, dates, facts, quotations, citations, several kinds in a
+paragraph, and 11 texts with nothing checkable: opinions, questions, advice, hedges, phone and page numbers). Extraction does not judge truth: false claims are extracted too.
+
+- **Scorer** (`score_extraction`): each gold claim is matched, has the wrong data, the wrong type, or is missed; each predicted claim is matched, spurious, a duplicate, or unanchored (its text is not a verbatim
+  span); the same arithmetic written differently, unit names, date formats and weekday names are equivalent. The report gives precision, recall, F1, the share of perfect texts, how many texts without claims
+  stayed clean, and the problems by kind (target kind `extraction`, record field `score`).
+- **Baseline without a model** (`extract.rules`, skill `extract_claims_rules`): F1 0.705, 32 of 51 texts perfect, never an unanchored claim; weak on units and dates in free wording, two claims in a sentence
+  and numbers that are no claims. Details in `eval/baselines/extraction-rules.md`.
+- **Model-based extractor** (`extract.llm`, skill `extract_claims`, still a **draft**: not measured yet): the model gets the guide (`EXTRACTION_GUIDE`) and answers with structured claims; `code.anchor_claims`
+  drops what has the wrong shape, keeps verbatim spans, snaps slightly reworded claims to their sentence and drops invented ones.
+- Tests: `tests/test_extraction.py` (34).

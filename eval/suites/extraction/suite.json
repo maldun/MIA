@@ -1,0 +1,8 @@
+{
+ "name": "extraction",
+ "description": "Claims out of prose: short texts with the claims a careful reader finds (type, verbatim span, data) and texts with nothing checkable (opinions, questions, advice, hedges, numbers that are no claims). A perfect text has every claim found with the right type and data, nothing invented, every span verbatim. Extraction does not judge truth: false claims are extracted too.",
+ "target": {
+  "kind": "extraction",
+  "skill": "extract_claims_rules"
+ }
+}

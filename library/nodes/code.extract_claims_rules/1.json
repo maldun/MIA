@@ -1,0 +1,55 @@
+{
+ "id": "code.extract_claims_rules",
+ "version": 1,
+ "kind": "code",
+ "title": "Find claims with patterns (no model)",
+ "description": "A baseline extractor: patterns for arithmetic, unit conversions, weekdays and leap years, quotations, citations, and a rough rule for facts (a name and a number, no hedge). Finds what has a clear form, misses what needs reading. Answer: {claims: [{type, text (verbatim span), data}]}.",
+ "tags": [
+  "extract",
+  "claims",
+  "exact"
+ ],
+ "applies_to": {
+  "tasks": [
+   "research"
+  ]
+ },
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "text"
+   ],
+   "properties": {
+    "text": {
+     "type": "string"
+    }
+   }
+  }
+ },
+ "outputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "claims"
+   ]
+  }
+ },
+ "params": {},
+ "body": {
+  "function": "extract_claims_rules",
+  "plain": "looking for claims with patterns"
+ },
+ "cost": {
+  "seconds": 0.01
+ },
+ "safety": {
+  "reads_web": false,
+  "runs_code": false
+ },
+ "status": "tested",
+ "origin": {
+  "by": "manual",
+  "note": "extraction.extract_claims_rules; measured with the suite 'extraction'"
+ }
+}

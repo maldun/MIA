@@ -1,0 +1,32 @@
+{
+ "id": "extract.rules",
+ "version": 1,
+ "title": "Extract claims with patterns",
+ "description": "One step: the rule-based extractor. The baseline that a model-based extractor has to beat or complement.",
+ "goal": "claims out of prose",
+ "tags": [
+  "extract",
+  "claims"
+ ],
+ "applies_to": {
+  "tasks": [
+   "research"
+  ]
+ },
+ "cost_class": "cheap",
+ "result": "answer",
+ "nodes": [
+  {
+   "id": "rules",
+   "use": "code.extract_claims_rules@1",
+   "wire": {
+    "text": "$input.text"
+   },
+   "output": "answer"
+  }
+ ],
+ "status": "tested",
+ "origin": {
+  "by": "manual"
+ }
+}

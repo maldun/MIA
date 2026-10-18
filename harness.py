@@ -16,14 +16,15 @@ import time
 import requests
 
 try:
-    from . import checks, metrics, web_tools
+    from . import checks, extraction, metrics, web_tools
 except ImportError:  # used as plain script / in tests
     import checks
+    import extraction
     import metrics
     import web_tools
 
-INPUT_KEY = {"checks": "claim", "pipeline": "input"}
-CASE_KEYS = {"id", "tags", "claim", "input", "truth", "expect", "note"}
+INPUT_KEY = {"checks": "claim", "pipeline": "input", "extraction": "input"}
+CASE_KEYS = {"id", "tags", "claim", "input", "truth", "expect", "note", "gold"}
 STATUSES = ("pass", "fail", "open", "not_applicable")
 MAX_OUTPUT_CHARS = 3000
 
@@ -88,6 +89,12 @@ def load_suite(folder):
             problems.append("%s: needs '%s' for a %s target" % (label, key, target["kind"]))
         if case.get("truth") is None and case.get("expect") is None:
             problems.append("%s: needs 'truth' or 'expect' (what is right?)" % label)
+        if target["kind"] == "extraction":
+            gold = case.get("gold")
+            if not isinstance(gold, list) or not all(isinstance(g, dict) and g.get("type") and g.get("anchor") for g in gold):
+                problems.append("%s: an extraction case needs 'gold', a list (maybe empty) of claims with 'type' and 'anchor'" % label)
+            elif isinstance(case.get("input"), dict) and any(g["anchor"] not in case["input"].get("text", "") for g in gold):
+                problems.append("%s: every gold anchor must be a verbatim part of the input text" % label)
         if case.get("truth") is not None and not isinstance(case["truth"], bool):
             problems.append("%s: 'truth' must be true or false" % label)
         if case.get("expect") is not None and metrics.normalize_status(case["expect"]) not in STATUSES:
@@ -241,7 +248,7 @@ class Harness:
     def __init__(self, core=None, clock=time.time, targets=None):
         """core: a Core (for the targets 'checks' and 'pipeline'); targets: more kinds, {kind: function(case, variant, context) -> (status, output)}, for tests and new tasks"""
         self.core, self._clock = core, clock
-        self.targets = {"checks": self._checks, "pipeline": self._pipeline}
+        self.targets = {"checks": self._checks, "pipeline": self._pipeline, "extraction": self._extraction}
         self.targets.update(targets or {})
         self.counter = None
         self._fixture_runners = {}
@@ -272,11 +279,31 @@ class Harness:
             skill["budget"] = dict(skill["budget"], **variant["budget"])
         graph = self.core.graph(skill)[0]
         result = self.core.runner.run(skill, graph, case["input"], task="eval:" + suite.name)
+        return self._status_of(result, suite)
+
+    def _status_of(self, result, suite):
         answer = result.answer
         field = suite.target.get("status_field", "status")
         if result.status == "done" and isinstance(answer, dict) and field in answer:
             return answer[field], {"answer": answer, "events": len(result.events)}
         return "error:" + (result.status if result.status != "done" else "no_" + field), {"answer": answer, "error": result.error}
+
+    def _extraction(self, case, variant, suite):
+        """a pipeline whose answer is {"claims": [...]}, scored against the gold claims of the case"""
+        skill = copy.deepcopy(self.core.skills.get(variant.get("skill") or suite.target["skill"]))
+        if skill is None:
+            raise SuiteError("there is no skill '%s'" % (variant.get("skill") or suite.target["skill"]))
+        for key in ("pipeline", "model"):
+            if variant.get(key):
+                skill[key] = variant[key] if key == "pipeline" else ({"profile": variant[key]} if variant[key] in ("light", "full", "current") else {"name": variant[key]})
+        result = self.core.runner.run(skill, self.core.graph(skill)[0], case["input"], task="eval:" + suite.name)
+        if result.status != "done" or not isinstance(result.answer, dict):
+            return "error:" + (result.status if result.status != "done" else "no_answer"), {"error": result.error, "answer": result.answer}
+        claims = result.answer.get("claims")
+        if not isinstance(claims, list):
+            return "error:no_claims", {"answer": result.answer}
+        score = extraction.score_extraction(case["input"]["text"], claims, case["gold"])
+        return ("pass" if score["ok"] else "fail"), {"claims": claims, "score": score}
 
     # -- a run --
     def run(self, suite, variant=None, repeats=1, tags=None, only=None, limit=None, progress=None):
@@ -315,6 +342,8 @@ class Harness:
                   "output": _clip(output)}
         if error:
             record["error"] = error
+        if isinstance(output, dict) and isinstance(output.get("score"), dict):
+            record["score"] = output["score"]
         return record
 
 
@@ -350,6 +379,23 @@ def format_report(run, worst=8):
         wrong = [r for r in records if r.get("truth") is not None and not metrics.is_right(r)]
         for r in wrong[:worst]:
             lines.append("   WRONG %-24s said %-14s truth %s" % (r["case"], r["status"], r["truth"]))
+    ex = metrics.extraction_metrics(records)
+    if ex["cases"]:
+        pr = lambda r: "n/a" if r["rate"] is None else "%.1f%% (%d of %d)" % (100 * r["rate"], r["k"], r["n"])   # noqa: E731
+        lines += ["", "as an extractor, on %d texts with %d claims to find:" % (ex["cases"], ex["gold"]),
+                  "   precision (what it found is right)   " + pr(ex["precision"]) + "  [%d claims found]" % ex["predicted"],
+                  "   recall (what is there, it found)     " + pr(ex["recall"]), "   F1                                   " + ("n/a" if ex["f1"] is None else "%.3f" % ex["f1"]),
+                  "   texts extracted perfectly            " + pr(ex["perfect"]),
+                  "   texts without claims left clean      " + pr(ex["empty_clean"]) + "   <- an invented claim there",
+                  "   claims whose text is not in the source " + pr(ex["unanchored"]),
+                  "   problems: " + ", ".join("%s %d" % (k, v) for k, v in ex["problems"].items() if v) if any(ex["problems"].values()) else "   no problems"]
+        bad = [r for r in records if isinstance(r.get("score"), dict) and not r["score"]["ok"]]
+        for r in bad[:worst]:
+            s = r["score"]
+            parts = [("missed " + "; ".join(m["anchor"][:40] for m in s["missed"])) if s["missed"] else "", ("wrong data " + str([w["keys"] for w in s["wrong_data"]])) if s["wrong_data"] else "",
+                     ("wrong type " + str([(w["wanted"], w["got"]) for w in s["wrong_type"]])) if s["wrong_type"] else "", ("spurious " + str(len(s["spurious"]))) if s["spurious"] else "",
+                     ("duplicate " + str(len(s["duplicates"]))) if s["duplicates"] else "", ("unanchored " + str(len(s["unanchored"]))) if s["unanchored"] else ""]
+            lines.append("   NOT PERFECT %-22s %s" % (r["case"], " | ".join(x for x in parts if x)))
     table = metrics.breakdown(records)
     if len(table) > 1:
         lines += ["", "by tag (right / cases):"]

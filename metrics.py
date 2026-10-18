@@ -113,6 +113,23 @@ def breakdown(records, by="tags"):
     return dict(sorted(table.items()))
 
 
+def extraction_metrics(records):
+    """for the records that carry a `score` (extraction.score_extraction): micro precision and recall over all claims, F1, the cases that are perfect, and the problems counted by kind.
+    Texts without any gold claim are 'empty' cases: a claim there is an invented claim."""
+    scored = [r for r in records if isinstance(r.get("score"), dict)]
+    gold = sum(r["score"]["gold"] for r in scored)
+    predicted = sum(r["score"]["predicted"] for r in scored)
+    matched = sum(r["score"]["matched"] for r in scored)
+    precision, recall = rate(matched, predicted), rate(matched, gold)
+    p, q = precision["rate"], recall["rate"]
+    empty = [r for r in scored if r["score"]["gold"] == 0]
+    kinds = {k: sum(len(r["score"].get(k, [])) for r in scored) for k in ("missed", "wrong_data", "wrong_type", "spurious", "duplicates", "unanchored", "invalid")}
+    return {"cases": len(scored), "gold": gold, "predicted": predicted, "matched": matched, "precision": precision, "recall": recall,
+            "f1": None if not p or not q else 2 * p * q / (p + q), "perfect": rate(sum(1 for r in scored if r["score"]["ok"]), len(scored)),
+            "empty_cases": len(empty), "empty_clean": rate(sum(1 for r in empty if r["score"]["predicted"] == 0), len(empty)),
+            "unanchored": rate(kinds["unanchored"], predicted), "problems": kinds}
+
+
 def cost(records):
     n = len(records)
     seconds = sum(r.get("seconds", 0.0) for r in records)

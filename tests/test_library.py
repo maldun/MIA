@@ -110,7 +110,7 @@ class ShippedTests(unittest.TestCase):
         lib = L.Library(SHIPPED)
         self.assertEqual(lib.errors, {})
         self.assertEqual(lib.warnings, [])
-        self.assertEqual({e["id"] for e in lib.entries("pipeline")}, {"chat", "summarize", "verify.computable"})
+        self.assertGreaterEqual({e["id"] for e in lib.entries("pipeline")}, {"chat", "summarize", "verify.computable"})
         self.assertGreaterEqual({e["id"] for e in lib.entries("node")}, {"code.converse", "view.summarize", "tool.web_search", "tool.fetch_page", "code.chunk_text",
                                                                           "code.untrusted_wrap", "check.injection_signals"})
         graph, uses, safety = lib.expand(lib.resolve("summarize"))
