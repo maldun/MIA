@@ -224,6 +224,9 @@ Pipeline (each node one narrow step; `map` where written):
 
 SearXNG: self-hosted, JSON output enabled, results from several engines; only the query leaves the machine and it reaches the upstream engines from the user's IP without cookies.
 Rate limits and blocks by upstream engines are possible, so the tool retries with other engines and reports failures in the block.
+**Fallback:** DuckDuckGo (no install) is a second search backend behind the same tool interface. It is used when SearXNG is not reachable or returns nothing, and the status block
+says which backend answered. Its downsides (no official free API, scraped endpoints that can break or be rate limited, a single engine, fewer filters) are accepted for a fallback;
+the backend is selected per skill in the config (`search_backends: [searxng, duckduckgo]`).
 
 Acceptance: on the research test set the pipeline gives (a) no quote that is not in its source, (b) "unknown" on questions without an answer in most cases, (c) a measurable gain in claim
 support over the direct answer of the same model.
