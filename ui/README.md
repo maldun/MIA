@@ -424,3 +424,24 @@ files; a skill names a pipeline, and the old `pipelines/` folder is gone.
 - Try them: `python tools/try_checks.py` (examples without web access), `--web` (also citation and web confirmation), `--claim '{...}'`, `--list`.
 - Tests: `tests/test_checks.py` (39 tests; the web checks run against fake search and fetch; a test keeps the library entries and the code in step).
 - Not built yet: the sandboxed script check, the research pipeline that extracts claims, and the harness that measures precision and coverage of the checks.
+
+## Core, phase 2c: the sandbox and the web broker
+
+`sandbox.py` runs code that MIA did not write (model-written verification scripts first). The **wall** is made of operating system features, not of Python:
+
+- **bubblewrap** (`bwrap`): new user, pid, ipc, uts, cgroup and **network** namespaces. The script sees the Python standard library (read-only), an empty `/tmp` of limited size, its own input and nothing else:
+  no home directory, no `/etc`, no project files, no environment variables, no network (not even this machine's localhost, which in the sandbox is an empty network of its own). The root is read-only.
+- **seccomp filter** (built in `seccomp_program()`, x86_64): no new processes (fork, vfork, clone without `CLONE_THREAD`, clone3 answers "not implemented" so threads still work), no ptrace, mount, unshare,
+  setns, bpf, io_uring, kernel modules, keyrings, perf; the 32-bit system call table kills the process.
+- **limits**: address space, CPU time, file size and open files inside; a wall-clock timeout from outside kills the whole sandbox; stdout and the result are capped.
+- **On top, convenience layers** (not the boundary): an AST policy (`check_script`: allowed imports only, no `open`/`eval`/`exec`, no dunder tricks) and a restricted namespace in the runner. They give clear
+  messages and are tested separately; `tests/test_sandbox.py` tests the wall with both switched off (`policy=False, raw=True`) and with the 4 weakest points of the wall removed one at a time to see the tests fail.
+- If bubblewrap or user namespaces are missing, `Sandbox.available` is False and `run()` refuses: the feature is off, never weakened. A run takes about 65 ms.
+- A script gets `data` (its input) and sets `result` (JSON). `SCRIPT_GUIDE` is the text for prompts that ask a model to write one.
+
+**Web access for scripts** goes through a broker (`broker.py`), because a sandbox has no network and no curl: a Unix socket (a file bind-mounted into the sandbox) answers two questions, `web.get(url, mode="text"|"raw")`
+and `web.search(query)`. The answers come from MIA's own web tools, so a script is held to the same rules (public addresses only, redirects and connected address checked, limits, no POST, no cookies, every request
+in the web log) plus budgets per script (default 5 pages, 3 searches, 400 kB). The script never sees an address or a socket; the name is resolved and connected by the broker, not by the script.
+
+- Not wired yet: the script check (`check.script`), the `script` node kind of the runner, and the dispatcher integration; the choice of a stronger backend (rootless podman, see `REQUIREMENTS_CORE.md` 12.2).
+- Tests: `tests/test_sandbox.py` (45 tests: policy, seccomp program, runs, the wall, the broker).
