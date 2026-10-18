@@ -7,6 +7,8 @@ A node:           {"id", "kind", "plain": "text for the status block with {{vari
   model     "prompt" (stage of the skill), "schema" (optional, name in the skill), "inputs" {var: ref}, "retries" (default 1)
   tool      "tool" (registered tool, must be listed in the skill), "args" {name: ref}
   code      "function" (registered function), "args" {name: ref}
+  script    "script" (Python text), "data" {name: ref} (the input of the script), "web" (may use the web broker), "operation" {kind, origin, tainted, stakes}, "limits": runs in the sandbox;
+            the output is {status, result, stdout, error, backend, tier ...}; a script that does not end with status ok is an error of the node
   map       "over" ref, "as" name, "body" [nodes], "collect" name (taken from each item's context), "workers" (default 1)
   branch    "if" condition, "then" [nodes], "else" [nodes]
   loop      "body" [nodes], "until" condition (checked after each pass), "max" (1..20)
@@ -24,12 +26,14 @@ from concurrent.futures import ThreadPoolExecutor
 
 try:
     from .schema_check import check as check_schema
+    from .sandbox import Operation
 except ImportError:  # used as plain script / in tests
     from schema_check import check as check_schema
+    from sandbox import Operation
 
 Tool = namedtuple("Tool", "func budget_key")
 
-KINDS = ("model", "tool", "code", "map", "branch", "loop", "ask_user")
+KINDS = ("model", "tool", "code", "script", "map", "branch", "loop", "ask_user")
 MAX_LOOP = 20
 MAX_PLAIN = 160
 ON_ERROR = ("fail", "skip", "default")
@@ -205,6 +209,9 @@ def validate_pipeline(graph, tools=None, functions=None, skill=None):
                     problems.append("%s: the tool '%s' is not registered" % (label, name))
                 if skill is not None and name not in skill["tools"]:
                     problems.append("%s: the skill does not list the tool '%s'" % (label, name))
+            elif kind == "script":
+                if not isinstance(node.get("script"), str) or not node["script"].strip():
+                    problems.append("%s: a script node needs 'script'" % label)
             elif kind == "code":
                 if not node.get("function"):
                     problems.append("%s: a code node needs 'function'" % label)
@@ -263,13 +270,14 @@ class _State:
 
 
 class Runner:
-    def __init__(self, model=None, tools=None, functions=None, run_log=None, rng=None, clock=time.monotonic):
+    def __init__(self, model=None, tools=None, functions=None, run_log=None, rng=None, clock=time.monotonic, sandbox=None, broker_factory=None):
         """model: object with chat(messages, schema=None, model=None, profile=None, options=None) -> text; tools: {name: callable | Tool};
         functions: {name: callable}; run_log: RunLog or None"""
         self.model = model
         self.tools = {k: v if isinstance(v, Tool) else Tool(v, None) for k, v in (tools or {}).items()}
         self.functions = dict(functions or {})
         self.run_log = run_log
+        self.sandbox, self.broker_factory = sandbox, broker_factory      # sandbox.SandboxRouter and a function that makes a web broker per script
         self.rng = rng or random.Random()
         self.clock = clock
 
@@ -381,6 +389,27 @@ class Runner:
     def _do_code(self, st, node, ctx, item):
         function = st.functions[node["function"]]
         return function(**resolve(node.get("args", {}), ctx))
+
+    def _do_script(self, st, node, ctx, item):
+        if self.sandbox is None:
+            raise NodeError("no sandbox is configured, scripts cannot run")
+        operation = Operation(**{k: v for k, v in (node.get("operation") or {}).items() if k in ("kind", "origin", "tainted", "stakes")})
+        data = resolve(node.get("data", {}), ctx)
+        limits = {k: v for k, v in (node.get("limits") or {}).items() if k in ("timeout", "memory_mb", "cpu_seconds", "max_output")}
+        broker = None
+        if node.get("web"):
+            if self.broker_factory is None:
+                raise NodeError("web access for scripts is not configured")
+            broker = self.broker_factory()
+        if broker is not None:
+            with broker:
+                run = self.sandbox.run(node["script"], data, operation=operation, broker=broker, **{"timeout": 60, **limits})
+        else:
+            run = self.sandbox.run(node["script"], data, operation=operation, **limits)
+        if run.status != "ok":
+            detail = (run.error or {}).get("message") or "; ".join(run.problems) or run.status
+            raise NodeError("the script %s: %s" % (run.status, detail))
+        return run.as_dict()
 
     def _do_tool(self, st, node, ctx, item):
         tool = st.tools[node["tool"]]

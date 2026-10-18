@@ -363,8 +363,8 @@ class RunnerTests(unittest.TestCase):
 
     def test_the_shipped_check_nodes_are_consistent_with_the_code(self):
         nodes = [e for e in self.library.entries("node") if "check" in e["tags"] and e.get("applies_to", {}).get("claim_types")]        # injection_signals is a helper, not a claim check
-        self.assertEqual(len(nodes), 8)
-        functions = {**C.OFFLINE_FUNCTIONS, **C.build_web_checks(self.search, self.fetch)}
+        self.assertEqual(len(nodes), 10)
+        functions = {**C.OFFLINE_FUNCTIONS, **C.build_web_checks(self.search, self.fetch), **C.build_script_checks(None)}
         for entry in nodes:
             self.assertIn(entry["body"]["function"], functions, entry["id"])
             self.assertTrue(entry["applies_to"]["claim_types"], entry["id"])
@@ -444,22 +444,22 @@ class RunnerTests(unittest.TestCase):
         library = Library(os.path.join(REPO, "library"), user)
         pipeline = {"id": "verify.hard_test", "version": 1, "title": "Hard checks for claims", "tags": ["verify"], "result": "verdicts",
                     "nodes": [{"id": "each", "kind": "map", "over": "$input.claims", "as": "claim", "collect": "outcome", "output": "verdicts",
-                               "body": [{"id": "hard", "use": "code.hard_checks_offline@1", "wire": {"claim": "$claim"}, "output": "outcome"}]}]}
+                               "body": [{"id": "hard", "use": "code.hard_checks_offline@2", "wire": {"claim": "$claim"}, "output": "outcome"}]}]}
         library.add_draft("pipeline", pipeline)
         library.set_status("verify.hard_test@1", "trusted")
         skills = os.path.join(self.tmp.name, "skills")
         os.makedirs(skills)
         with open(os.path.join(skills, "t.md"), "w") as fp:
-            fp.write("---\nname: t\npipeline: verify.hard_test\n---\n")
+            fp.write("---\nname: t\npipeline: verify.hard_test\nmax_safety: {runs_code: true}\n---\n")
         core = Core(skills, library, self.tmp.name, functions=C.OFFLINE_FUNCTIONS)
         result = core.run("t", {"claims": [{"type": "numeric", "data": {"expression": "2+2", "value": 4}}, {"type": "numeric", "data": {"expression": "2+2", "value": 5}}]})
         self.assertEqual([v["verdict"] for v in result.answer], ["supported", "contradicted"])
-        self.assertEqual({e["library"] for e in result.events if e["kind"] == "start" and e["node"] == "hard"}, {"code.hard_checks_offline@1"})
+        self.assertEqual({e["library"] for e in result.events if e["kind"] == "start" and e["node"] == "hard"}, {"code.hard_checks_offline@2"})
         # the web dispatcher is a node that reads the web: a skill without that permission is refused
-        library.add_draft("pipeline", dict(pipeline, id="verify.hard_web", nodes=[{"id": "hard", "use": "code.hard_checks_web@1", "wire": {"claim": "$input.claim"}, "output": "verdicts"}]))
+        library.add_draft("pipeline", dict(pipeline, id="verify.hard_web", nodes=[{"id": "hard", "use": "code.hard_checks_web@2", "wire": {"claim": "$input.claim"}, "output": "verdicts"}]))
         library.set_status("verify.hard_web@1", "trusted")
         with open(os.path.join(skills, "w.md"), "w") as fp:
-            fp.write("---\nname: w\npipeline: verify.hard_web\ntools: [web_search, fetch_page]\n---\n")
+            fp.write("---\nname: w\npipeline: verify.hard_web\ntools: [web_search, fetch_page]\nmax_safety: {runs_code: true}\n---\n")
         self.assertIn("reads_web", "; ".join(core.check().get("w", [])))
 
 

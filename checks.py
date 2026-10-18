@@ -25,9 +25,11 @@ from urllib.parse import urlparse
 try:
     from .schema_check import check as check_schema
     from . import web_tools
+    from .sandbox import Operation
 except ImportError:  # used as plain script / in tests
     from schema_check import check as check_schema
     import web_tools
+    from sandbox import Operation
 
 PASS, FAIL, INCONCLUSIVE, NOT_APPLICABLE = "pass", "fail", "inconclusive", "not_applicable"
 
@@ -567,6 +569,75 @@ def _jaccard(a, b):
     return len(a & b) / len(a | b) if a | b else 0.0
 
 
+# --- scripts: the model writes a check, the sandbox runs it -------------------------------------------------------------------------------
+
+def _clip(text, limit):
+    text = str(text)
+    return text if len(text) <= limit else text[:limit] + "...[+%d characters]" % (len(text) - limit)
+
+
+def make_script_check(router, broker_factory=None, web=False):
+    """script_check(script, data=None, expect=None, ...): a script written for a claim runs in the sandbox (sandbox.py) and its result is the evidence. The contract of the script:
+    `result = {"holds": True | False, "values": {the numbers and facts it used}, "explanation": "..."}` (see sandbox.SCRIPT_GUIDE).
+    Because a script written by the model that made the claim can share its misconception (HC3), a verdict needs the values: a script that does not say what it used cannot be reviewed,
+    so it stays inconclusive. The script text, its hash, the output and the backend are in the evidence. web=True: the script may use `web.get` / `web.search` through the broker
+    (broker_factory() makes one per run); such a script is a strong-tier operation (podman). `tainted` says that the input comes from unchecked web or file text."""
+    name = "script_web" if web else "script"
+
+    def script_check(script, data=None, expect=None, tainted=False, origin="model", stakes="normal", timeout=None):
+        if not isinstance(script, str) or not script.strip():
+            return result(NOT_APPLICABLE, name, "a script is needed")
+        if router is None:
+            return result(INCONCLUSIVE, name, "no sandbox is configured, scripts cannot run")
+        if web and broker_factory is None:
+            return result(NOT_APPLICABLE, name, "web access for scripts is not configured")
+        operation = Operation("web_script" if web else "compute", origin, tainted, stakes)
+        broker = broker_factory() if web else None
+        if broker is not None:
+            with broker:
+                run = router.run(script, data, operation=operation, broker=broker, timeout=timeout or 60)
+        else:
+            run = router.run(script, data, operation=operation, timeout=timeout or 10)
+        evidence = {"script_hash": run.script_hash, "script": _clip(script, 1500), "backend": run.backend, "tier": run.tier, "degraded": run.degraded,
+                    "seconds": round(run.seconds, 3), "stdout": _clip(run.stdout, 500), "result": run.result}
+        if broker is not None:
+            evidence["web_log"] = broker.log
+        if run.status == "rejected":
+            return result(INCONCLUSIVE, name, "the script was not run: %s" % "; ".join(run.problems[:3]), [dict(evidence, problems=run.problems)])
+        if run.status == "unavailable":
+            return result(INCONCLUSIVE, name, "no sandbox for this operation: %s" % (run.error or {}).get("message", ""), [evidence])
+        if run.status != "ok":
+            error = run.error or {}
+            where = " (line %s)" % error["line"] if error.get("line") else ""
+            return result(INCONCLUSIVE, name, "the script %s: %s%s" % ({"timeout": "did not finish", "crashed": "was stopped", "error": "failed"}.get(run.status, run.status),
+                                                                    error.get("message", run.status), where), [dict(evidence, error=error)])
+        report = run.result
+        if isinstance(report, dict) and "holds" in report:
+            holds, values = report["holds"], report.get("values")
+            if not isinstance(holds, bool):
+                return result(INCONCLUSIVE, name, "`holds` must be true or false", [evidence])
+            if not isinstance(values, dict) or not values:
+                return result(INCONCLUSIVE, name, "the script says %s but does not report the values it used, so it cannot be reviewed" % ("true" if holds else "false"), [evidence])
+            detail = str(report.get("explanation") or ("the script confirms the claim" if holds else "the script refutes the claim"))
+            return result(PASS if holds else FAIL, name, _clip(detail, 300), [dict(evidence, values=values)])
+        if expect is not None and isinstance(report, dict) and "value" in report:
+            try:
+                actual, wanted = parse_number(report["value"]), parse_number(expect)
+                agrees = _agrees(wanted, actual, 0.005, expect)
+            except (ValueError, TypeError):
+                actual, wanted = report["value"], expect
+                agrees = actual == wanted
+            return result(PASS if agrees else FAIL, name, "the script computed %s, the claim says %s" % (report["value"], expect), [evidence])
+        return result(INCONCLUSIVE, name, "the script did not report `holds` (or `value` with an expected value)", [evidence])
+
+    return script_check
+
+
+def build_script_checks(router, broker_factory=None):
+    """the functions of the script checks for a sandbox router (sandbox.SandboxRouter) and, for web scripts, a function that makes a broker per run"""
+    return {"script_check": make_script_check(router, broker_factory, web=False), "script_check_web": make_script_check(router, broker_factory, web=True)}
+
+
 # --- the registry and the runner -------------------------------------------------------------------------------------------------------------------------------
 
 OFFLINE_FUNCTIONS = {"quote_in_source": quote_in_source, "arithmetic_claim": arithmetic_claim, "unit_conversion": unit_conversion, "date_claim": date_claim,
@@ -595,22 +666,31 @@ class CheckRunner:
     """runs the hard checks that apply to a claim: {"type": quotation | citation | numeric | unit | date | structured | schedule | fact, "text": "...", "data": {fields}}.
     The checks come from the library (nodes tagged 'check' that declare the claim type), cheapest first; a check whose required fields are missing in `data` is skipped."""
 
-    def __init__(self, library, functions, tools=None):
-        """functions: callable returning {name: function} (looked up at run time); tools: callable returning the names of tools that exist"""
-        self.library, self._functions, self._tools = library, functions, tools or (lambda: None)
+    def __init__(self, library, functions, tools=None, sandbox=None):
+        """functions: callable returning {name: function} (looked up at run time); tools: callable returning the names of tools that exist; sandbox: a SandboxRouter or None
+        (without a working sandbox the script checks are not offered, they are never run unprotected)"""
+        self.library, self._functions, self._tools, self.sandbox = library, functions, tools or (lambda: None), sandbox
 
     def run(self, claim, include_web=False, fail_fast=True):
         started = time.time()
         if not isinstance(claim, dict) or not isinstance(claim.get("data", {}), dict):
             return {"status": "not_applicable", "verdict": "none", "results": [], "trace": [], "detail": "a claim needs a type and data fields"}
         data, functions = claim.get("data", {}), self._functions()
-        chosen = self.library.select("node", tags=["check"], applies_to={"claim_types": claim.get("type", "")}, allow_web=include_web, allow_code=False,
-                                     tools=self._tools(), sandbox=False)
+        sandboxed = self.sandbox is not None and self.sandbox.available
+        chosen = self.library.select("node", tags=["check"], applies_to={"claim_types": claim.get("type", "")}, allow_web=include_web, allow_code=sandboxed,
+                                     tools=self._tools(), sandbox=sandboxed)
         candidates = []
         for item in chosen["selected"]:
             entry = self.library.resolve(item["ref"], "node", allow_draft=True)
-            if entry["kind"] == "code" and entry["body"]["function"] in functions and claim.get("type", "") in (entry.get("applies_to") or {}).get("claim_types", []):
-                candidates.append(entry)
+            if entry["kind"] != "code" or entry["body"]["function"] not in functions or claim.get("type", "") not in (entry.get("applies_to") or {}).get("claim_types", []):
+                continue
+            safety = entry.get("safety") or {}
+            if safety.get("runs_code"):
+                # a script that reads the web is a strong-tier operation: skip it when no backend can run it (the run itself would be refused, never weakened)
+                kind = "web_script" if safety.get("reads_web") else "compute"
+                if not (sandboxed and self.sandbox.available_for(Operation(kind, "model", bool(claim.get("tainted")), claim.get("stakes", "normal")))):
+                    continue
+            candidates.append(entry)
         candidates.sort(key=lambda e: ((e.get("cost") or {}).get("seconds", 0), e["id"]))
         results, trace = [], []
         for entry in candidates:
@@ -624,6 +704,9 @@ class CheckRunner:
             kwargs = {k: v for k, v in data.items() if k in properties}
             if "claim" in properties and "claim" not in kwargs and claim.get("text"):
                 kwargs["claim"] = claim["text"]
+            for key in ("tainted", "stakes", "origin"):                     # what the sandbox needs to choose its wall (sandbox.Operation)
+                if key in properties and key not in kwargs and key in claim:
+                    kwargs[key] = claim[key]
             kwargs.update({k: spec["default"] for k, spec in (entry.get("params") or {}).items() if k not in kwargs and "default" in spec})
             began = time.time()
             try:

@@ -1,0 +1,93 @@
+{
+ "id": "check.script",
+ "version": 1,
+ "kind": "code",
+ "title": "A script recomputes the claim",
+ "description": "A short Python script (written for the claim, run in the sandbox without network or files) recomputes the claim from the data. The script has to set result = {holds: true|false, values: {what it used}, explanation: text}. Without the values it cannot be reviewed, so the check stays inconclusive (a script written by the model that made the claim can share its misconception). The script, its hash and its output are in the evidence.",
+ "tags": [
+  "check",
+  "script",
+  "sandbox"
+ ],
+ "applies_to": {
+  "claim_types": [
+   "computable"
+  ],
+  "tasks": [
+   "research"
+  ]
+ },
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "script"
+   ],
+   "properties": {
+    "script": {
+     "type": "string"
+    },
+    "data": {},
+    "expect": {},
+    "tainted": {
+     "type": "boolean"
+    },
+    "origin": {
+     "enum": [
+      "library",
+      "model",
+      "external"
+     ]
+    },
+    "stakes": {
+     "enum": [
+      "normal",
+      "high"
+     ]
+    }
+   }
+  }
+ },
+ "outputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "status",
+    "check",
+    "detail",
+    "evidence"
+   ],
+   "properties": {
+    "status": {
+     "enum": [
+      "pass",
+      "fail",
+      "inconclusive",
+      "not_applicable"
+     ]
+    }
+   }
+  }
+ },
+ "params": {},
+ "body": {
+  "function": "script_check",
+  "plain": "A script recomputes the claim"
+ },
+ "needs": {
+  "tools": [],
+  "sandbox": true
+ },
+ "cost": {
+  "seconds": 5
+ },
+ "safety": {
+  "reads_web": false,
+  "runs_code": true
+ },
+ "status": "tested",
+ "origin": {
+  "by": "manual",
+  "note": "checks.make_script_check; unit tested against the real sandbox, no harness measurements yet"
+ }
+}

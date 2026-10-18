@@ -103,6 +103,8 @@ def validate_node(entry, label="node"):
         problems.append("%s: 'safety' may only contain true/false for %s" % (label, ", ".join(SAFETY_FLAGS)))
     if kind == "script" and not entry.get("safety", {}).get("runs_code"):
         problems.append("%s: a script node must declare safety.runs_code" % label)
+    if kind == "script" and isinstance(body, dict) and body.get("web") and not entry.get("safety", {}).get("reads_web"):
+        problems.append("%s: a script with web access must declare safety.reads_web" % label)
     needs = entry.get("needs", {})
     if not isinstance(needs, dict) or not isinstance(needs.get("tools", []), list):
         problems.append("%s: 'needs' must be an object, 'tools' a list" % label)
@@ -127,7 +129,8 @@ def _canonical(entry):
 
 
 def content_hash(entry):
-    return hashlib.sha256(_canonical(entry).encode("utf-8")).hexdigest()[:16]
+    """identifies the content of an entry; the status is not part of it (it is what may change, see Library.set_status). "2:" marks this form of the hash"""
+    return "2:" + hashlib.sha256(_canonical({k: v for k, v in entry.items() if k != "status"}).encode("utf-8")).hexdigest()[:16]
 
 
 # --- the library --------------------------------------------------------------------------------------------------------------------
@@ -251,10 +254,8 @@ class Library:
             where = "%s, node '%s' (%s)" % (ref_of(pipeline["id"], pipeline["version"]), node.get("id"), ref)
             if not isinstance(node.get("id"), str) or not LOCAL_ID_RE.fullmatch(node["id"]):
                 raise LibraryError("%s: every node needs an id" % where)
-            if entry["kind"] == "script":
-                raise LibraryError("%s: script nodes cannot run yet (the sandbox is not built)" % where)
             for key in node:
-                if key not in ("id", "use", "params", "wire", "output", "plain", "on_error", "default"):
+                if key not in ("id", "use", "params", "wire", "output", "plain", "on_error", "default", "tainted", "stakes"):
                     raise LibraryError("%s: unknown field '%s'" % (where, key))
             declared = (entry.get("params") or {})
             for name in node.get("params", {}):
@@ -287,6 +288,10 @@ class Library:
                 out.update(tool=body["tool"], args=variables)
             elif entry["kind"] == "code":
                 out.update(function=body["function"], args=variables)
+            elif entry["kind"] == "script":
+                out.update(script=body["script"], data=variables, limits=body.get("limits") or {}, web=bool(body.get("web")),
+                           operation={"kind": "web_script" if body.get("web") else "compute", "origin": "library" if entry["status"] in USABLE else "model",
+                                      "tainted": bool(node.get("tainted")), "stakes": node.get("stakes", "normal")})
             elif entry["kind"] == "ask_user":
                 out.update(question=body["question"], options=variables.get("options"))
             if "plain" not in node:
@@ -348,7 +353,7 @@ class Library:
                                (ref, key[0], key[1], entry_type, entry.get("kind", "pipeline"), entry["title"], entry["status"], json.dumps(entry.get("tags", [])),
                                 json.dumps(entry.get("applies_to", {})), json.dumps(entry.get("cost", {})), json.dumps(self._entry_safety(entry_type, entry)),
                                 entry["_source"], entry["_path"]))
-                    if ref in seen and seen[ref] != entry["_hash"]:
+                    if ref in seen and seen[ref].startswith("2:") and seen[ref] != entry["_hash"]:
                         self.warnings.append("%s changed after it was first indexed: versions are immutable, give the change a new version" % ref)
                     db.execute("INSERT OR REPLACE INTO seen VALUES (?,?)", (ref, entry["_hash"]))
                     if entry_type == "pipeline":

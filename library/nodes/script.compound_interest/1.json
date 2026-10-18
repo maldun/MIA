@@ -1,0 +1,69 @@
+{
+ "id": "script.compound_interest",
+ "version": 1,
+ "kind": "script",
+ "title": "Compound interest",
+ "description": "A stored, pinned script: the value of a sum after some years at an annual rate, compounded yearly. Input: principal, rate (percent), years. Shows the script node kind.",
+ "tags": [
+  "script",
+  "numeric",
+  "finance"
+ ],
+ "applies_to": {
+  "tasks": [
+   "research"
+  ]
+ },
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "principal",
+    "rate",
+    "years"
+   ],
+   "properties": {
+    "principal": {
+     "type": "number"
+    },
+    "rate": {
+     "type": "number"
+    },
+    "years": {
+     "type": "integer"
+    }
+   }
+  }
+ },
+ "outputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "value"
+   ]
+  }
+ },
+ "params": {},
+ "body": {
+  "script": "from decimal import Decimal, ROUND_HALF_UP\nvalue = Decimal(str(data['principal'])) * (1 + Decimal(str(data['rate'])) / 100) ** int(data['years'])\nresult = {'value': float(value.quantize(Decimal('0.01'), ROUND_HALF_UP)), 'values': {'principal': data['principal'], 'rate': data['rate'], 'years': data['years']}}\n",
+  "limits": {
+   "timeout": 5
+  },
+  "plain": "calculating compound interest"
+ },
+ "cost": {
+  "seconds": 1
+ },
+ "safety": {
+  "reads_web": false,
+  "runs_code": true
+ },
+ "needs": {
+  "sandbox": true
+ },
+ "status": "tested",
+ "origin": {
+  "by": "manual",
+  "note": "unit tested"
+ }
+}

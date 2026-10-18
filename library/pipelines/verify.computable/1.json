@@ -1,0 +1,92 @@
+{
+ "id": "verify.computable",
+ "version": 1,
+ "title": "Verify a computable claim with a script",
+ "description": "The model writes a script for the claim from the claim text and a description of the data, the sandbox runs it, the result is a hard-check result (pass, fail, inconclusive). If the script does not work (an error, a rule of the sandbox, no values reported) the model gets the problem and repairs it, at most twice.",
+ "goal": "recompute a claim from its data",
+ "tags": [
+  "verify",
+  "script",
+  "hard-check"
+ ],
+ "applies_to": {
+  "claim_types": [
+   "computable"
+  ],
+  "tasks": [
+   "research"
+  ]
+ },
+ "cost_class": "normal",
+ "result": "verdict",
+ "nodes": [
+  {
+   "id": "write",
+   "use": "view.write_check_script@1",
+   "wire": {
+    "claim": "$input.claim",
+    "data_description": "$input.data_description"
+   },
+   "output": "written"
+  },
+  {
+   "id": "run",
+   "use": "check.script@1",
+   "wire": {
+    "script": "$written.script",
+    "data": "$input.data"
+   },
+   "output": "verdict"
+  },
+  {
+   "id": "repair",
+   "kind": "branch",
+   "plain": "the script did not give a verdict",
+   "if": {
+    "ref": "verdict.status",
+    "op": "==",
+    "value": "inconclusive"
+   },
+   "then": [
+    {
+     "id": "again",
+     "kind": "loop",
+     "max": 2,
+     "plain": "repairing the script",
+     "until": {
+      "ref": "verdict.status",
+      "op": "!=",
+      "value": "inconclusive"
+     },
+     "body": [
+      {
+       "id": "fix",
+       "use": "view.fix_check_script@1",
+       "wire": {
+        "claim": "$input.claim",
+        "data_description": "$input.data_description",
+        "script": "$written.script",
+        "problem": "$verdict.detail"
+       },
+       "output": "written"
+      },
+      {
+       "id": "rerun",
+       "use": "check.script@1",
+       "wire": {
+        "script": "$written.script",
+        "data": "$input.data"
+       },
+       "output": "verdict"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "status": "tested",
+ "origin": {
+  "by": "manual",
+  "note": "no harness measurements yet"
+ }
+}

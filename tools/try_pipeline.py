@@ -24,6 +24,7 @@ sys.path.insert(0, _LINK_DIR)
 from ollama import Client  # noqa: E402
 from MIA.core import Core  # noqa: E402
 from MIA.library import Library  # noqa: E402
+from MIA.sandbox import create_router  # noqa: E402
 from MIA.pipeline import PipelineError  # noqa: E402
 from MIA.pipeline_model import OllamaModel  # noqa: E402
 
@@ -56,7 +57,7 @@ def main():
     work = tempfile.mkdtemp()
     library = Library(os.path.join(REPO, cfg.get("library_dir", "library")), os.path.join(REPO, cfg.get("user_library_dir", "data/library")),
                       os.path.join(work, "library.sqlite"))
-    core = Core(os.path.join(REPO, cfg.get("skills_dir", "skills")), library, args.runs or work, model=model, functions={"converse": None})
+    core = Core(os.path.join(REPO, cfg.get("skills_dir", "skills")), library, args.runs or work, model=model, functions={"converse": None}, sandbox=create_router(cfg))
     problems = core.check()
     for name, found in problems.items():
         print("PROBLEM %s: %s" % (name, "; ".join(found)))
@@ -68,7 +69,7 @@ def main():
     inputs = {"text": open(args.file, encoding="utf-8").read() if args.file else " ".join(args.text)}
     for item in args.input:
         key, _, value = item.partition("=")
-        inputs[key] = int(value) if value.isdigit() else value
+        inputs[key] = int(value) if value.isdigit() else (json.loads(value) if value[:1] in "{[" else value)       # numbers and JSON are understood
     inputs.setdefault("sentences", 3)
     if args.model:
         core.skills.get(args.skill)["model"] = {"name": args.model}

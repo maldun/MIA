@@ -49,6 +49,15 @@ class PolicyTests(unittest.TestCase):
             problems = S.check_script(code)
             self.assertTrue(problems and expected in " ".join(problems), "%s -> %s" % (code, problems))
 
+    def test_the_input_is_read_only(self):
+        for code in ("data = {'x': 1}", "data['x'] = 5", "data['a']['b'] = 5", "data['x'] += 1", "del data['x']", "for data in range(3):\n    pass", "data.value = 1", "web = 5",
+                     "with open_it() as data:\n    pass", "(data, y) = (1, 2)"):
+            problems = S.check_script(code, allow_web=True)
+            self.assertTrue(any("must not be reassigned or changed" in p for p in problems), "%s -> %s" % (code, problems))
+        for code in ("x = data['x'] + 1\nresult = x", "total = sum(data['numbers'])", "copy = dict(data)\ncopy['x'] = 2", "items = list(data['numbers'])\nitems.append(1)",
+                     "def f(data):\n    return data\nresult = f(1)", "result = [d for d in data['numbers']]"):
+            self.assertEqual([p for p in S.check_script(code) if "must not be" in p], [], code)
+
     def test_web_is_allowed_only_when_granted(self):
         self.assertTrue(S.check_script("page = web.get('https://a.example')"))
         self.assertEqual(S.check_script("page = web.get('https://a.example')\nresult = 1", allow_web=True), [])

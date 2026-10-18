@@ -56,9 +56,9 @@
   "reads_web": false,
   "runs_code": false
  },
- "status": "trusted",
+ "status": "retired",
  "origin": {
   "by": "manual",
-  "note": "checks.CheckRunner"
+  "note": "checks.CheckRunner Retired: version 2 declares that scripts can run."
  }
 }

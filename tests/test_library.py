@@ -110,7 +110,7 @@ class ShippedTests(unittest.TestCase):
         lib = L.Library(SHIPPED)
         self.assertEqual(lib.errors, {})
         self.assertEqual(lib.warnings, [])
-        self.assertEqual({e["id"] for e in lib.entries("pipeline")}, {"chat", "summarize"})
+        self.assertEqual({e["id"] for e in lib.entries("pipeline")}, {"chat", "summarize", "verify.computable"})
         self.assertGreaterEqual({e["id"] for e in lib.entries("node")}, {"code.converse", "view.summarize", "tool.web_search", "tool.fetch_page", "code.chunk_text",
                                                                           "code.untrusted_wrap", "check.injection_signals"})
         graph, uses, safety = lib.expand(lib.resolve("summarize"))
@@ -220,11 +220,27 @@ class ExpansionTests(Base):
             with self.assertRaises(L.LibraryError, msg=expected) as raised:
                 self.expand(nodes)
             self.assertIn(expected, str(raised.exception))
-        script = node("check.script", kind="script", body={"script": "print(1)"}, safety={"runs_code": True})
-        script["inputs"] = {"schema": {"properties": {}}}
-        with self.assertRaises(L.LibraryError) as raised:
-            self.expand([{"id": "s", "use": "check.script@1"}], extra_nodes=[script])
-        self.assertIn("sandbox is not built", str(raised.exception))
+
+    def test_script_nodes_expand_into_sandbox_operations(self):
+        script = node("script.calc", kind="script", body={"script": "result = data['x'] * 2", "limits": {"timeout": 3}}, safety={"runs_code": True},
+                      inputs={"schema": {"type": "object", "required": ["x"], "properties": {"x": {"type": "number"}}}}, params={})
+        graph, uses, safety = self.expand([{"id": "s", "use": "script.calc@1", "wire": {"x": "$input.x"}, "output": "out"},
+                                           {"id": "t", "use": "script.calc@1", "wire": {"x": "$input.x"}, "tainted": True, "stakes": "high", "output": "out2"}], extra_nodes=[script])
+        first, second = graph["nodes"]
+        self.assertEqual((first["kind"], first["script"], first["data"], first["limits"], first["web"]), ("script", "result = data['x'] * 2", {"x": "$input.x"}, {"timeout": 3}, False))
+        self.assertEqual(first["operation"], {"kind": "compute", "origin": "library", "tainted": False, "stakes": "normal"})      # a trusted, pinned script
+        self.assertEqual(second["operation"], {"kind": "compute", "origin": "library", "tainted": True, "stakes": "high"})        # the pipeline says what its input is
+        self.assertEqual(safety, {"reads_web": False, "runs_code": True})
+        draft = node("script.draft", kind="script", status="draft", body={"script": "result = 1"}, safety={"runs_code": True},
+                     inputs={"schema": {"type": "object", "properties": {}}}, params={})
+        graph = self.expand([{"id": "d", "use": "script.draft@1"}], extra_nodes=[draft])[0]
+        self.assertEqual(graph["nodes"][0]["operation"]["origin"], "model")                                                       # a draft is not trusted like a library script
+
+    def test_script_nodes_with_web_access_must_say_so(self):
+        web = node("script.web", kind="script", body={"script": "result = 1", "web": True}, safety={"runs_code": True})
+        self.assertIn("reads_web", "; ".join(L.validate_node(web)))
+        web["safety"] = {"runs_code": True, "reads_web": True}
+        self.assertEqual(L.validate_node(web), [])
 
 
 class ResolveAndStatusTests(Base):

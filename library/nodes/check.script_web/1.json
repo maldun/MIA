@@ -1,0 +1,97 @@
+{
+ "id": "check.script_web",
+ "version": 1,
+ "kind": "code",
+ "title": "A script checks the claim against web data",
+ "description": "Like check.script, and the script may call web.get(url) and web.search(query) through the broker (same safety rules and budgets as MIA's own web tools). A strong-tier operation: it runs in the podman sandbox only.",
+ "tags": [
+  "check",
+  "script",
+  "sandbox",
+  "web"
+ ],
+ "applies_to": {
+  "claim_types": [
+   "computable_web"
+  ],
+  "tasks": [
+   "research"
+  ]
+ },
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "script"
+   ],
+   "properties": {
+    "script": {
+     "type": "string"
+    },
+    "data": {},
+    "expect": {},
+    "tainted": {
+     "type": "boolean"
+    },
+    "origin": {
+     "enum": [
+      "library",
+      "model",
+      "external"
+     ]
+    },
+    "stakes": {
+     "enum": [
+      "normal",
+      "high"
+     ]
+    }
+   }
+  }
+ },
+ "outputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "status",
+    "check",
+    "detail",
+    "evidence"
+   ],
+   "properties": {
+    "status": {
+     "enum": [
+      "pass",
+      "fail",
+      "inconclusive",
+      "not_applicable"
+     ]
+    }
+   }
+  }
+ },
+ "params": {},
+ "body": {
+  "function": "script_check_web",
+  "plain": "A script checks the claim against web data"
+ },
+ "needs": {
+  "tools": [
+   "web_search",
+   "fetch_page"
+  ],
+  "sandbox": true
+ },
+ "cost": {
+  "seconds": 30
+ },
+ "safety": {
+  "reads_web": true,
+  "runs_code": true
+ },
+ "status": "tested",
+ "origin": {
+  "by": "manual",
+  "note": "checks.make_script_check; unit tested against the real sandbox, no harness measurements yet"
+ }
+}

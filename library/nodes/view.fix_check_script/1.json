@@ -1,0 +1,96 @@
+{
+ "id": "view.fix_check_script",
+ "version": 1,
+ "kind": "model",
+ "title": "Repair a verification script",
+ "description": "The script for a claim did not work (an error, a rule of the sandbox, no values reported). The model sees the claim, the data description, the script and the problem and returns a corrected script.",
+ "tags": [
+  "view",
+  "script",
+  "structured",
+  "repair"
+ ],
+ "applies_to": {
+  "claim_types": [
+   "computable"
+  ],
+  "tasks": [
+   "research"
+  ]
+ },
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "claim",
+    "data_description",
+    "script",
+    "problem"
+   ],
+   "properties": {
+    "claim": {
+     "type": "string"
+    },
+    "data_description": {
+     "type": "string"
+    },
+    "script": {
+     "type": "string"
+    },
+    "problem": {
+     "type": "string"
+    }
+   }
+  }
+ },
+ "outputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "script"
+   ]
+  }
+ },
+ "params": {
+  "guide": {
+   "default": "Write a short Python script. It has these names: `data` (the input, parsed JSON; read it, never retype, reassign or change it) and, only if web access was granted, `web` (`web.get(url)` returns the page text, `web.search(query)` returns results).\nAllowed imports: math, statistics, fractions, decimal, datetime, calendar, re, json, itertools, collections, string, functools, operator, heapq, bisect, textwrap, unicodedata, csv, base64, hashlib, html, urllib.parse, typing, copy, numbers, enum. There is no file access, no network, no other module. The script must set `result` to JSON data. For a check, `result` is\n{\"holds\": true or false, \"values\": {the numbers and facts the script used}, \"explanation\": \"one sentence\"}. Print nothing else that matters.",
+   "description": "what a script may use (sandbox.SCRIPT_GUIDE)"
+  }
+ },
+ "body": {
+  "system": "You repair short Python scripts that check claims by recomputing them from the given data. You never trust the claim; you only use what the guide allows.",
+  "template": "This script was written to check a claim, but it did not work.\n\nClaim: {{claim}}\n\nThe input data of the script (the name `data`): {{data_description}}\n\n{{guide}}\n\nThe script:\n{{script}}\n\nThe problem: {{problem}}\n\nFix the problem. Read every number from `data`; never copy numbers from the claim into the script and never retype `data`. Reply with JSON: {\"script\": \"<the corrected Python code>\", \"approach\": \"<one sentence>\"}.",
+  "schema": {
+   "type": "object",
+   "required": [
+    "script"
+   ],
+   "properties": {
+    "script": {
+     "type": "string",
+     "minLength": 10,
+     "maxLength": 8000
+    },
+    "approach": {
+     "type": "string",
+     "maxLength": 300
+    }
+   }
+  },
+  "retries": 1,
+  "plain": "repairing the check script"
+ },
+ "cost": {
+  "seconds": 15,
+  "tokens": 2000
+ },
+ "safety": {
+  "reads_web": false,
+  "runs_code": false
+ },
+ "status": "tested",
+ "origin": {
+  "by": "manual",
+  "note": "tried with the real model; no harness measurements yet"
+ }
+}

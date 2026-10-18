@@ -47,7 +47,9 @@ from .chat_api import create_blueprint as create_chat_blueprint
 from .moods import MoodTracker
 from .speech_text import speech_text
 from .audio_router import AudioRouter
+from . import broker as broker_module
 from . import checks
+from . import sandbox as sandbox_module
 from .core import Core
 from .library import Library
 from .pipeline import Tool
@@ -486,12 +488,15 @@ mood = MoodTracker(_own_path(CONST.MOODS_FILE_KEY, CONST.DEFAULT_MOODS_FILE),
 pipeline_model = OllamaModel(comm.client, lambda profile: getattr(comm, "_profiles", {}).get(profile),
                              lambda: (comm.version, comm.llm_options), keep_alive=comm.keep_alive)
 _runs_dir = _own_path(CONST.RUNS_DIR_KEY, CONST.DEFAULT_RUNS_DIR)
-_web_tools, _, _ = build_web_tools(cfg, _runs_dir)          # search (SearXNG, DuckDuckGo as fallback) and page fetcher with the safety rules
+_web_tools, _web_search, _web_client = build_web_tools(cfg, _runs_dir)          # search (SearXNG, DuckDuckGo as fallback) and page fetcher with the safety rules
 library = Library(_own_path(CONST.LIBRARY_DIR_KEY, CONST.DEFAULT_LIBRARY_DIR), _own_path(CONST.USER_LIBRARY_DIR_KEY, CONST.DEFAULT_USER_LIBRARY_DIR),
                   _own_path(CONST.LIBRARY_INDEX_KEY, CONST.DEFAULT_LIBRARY_INDEX))
 for _path, _problem in library.errors.items():
     logger.warning("library entry %s: %s", _path, _problem)
-core = Core(_own_path(CONST.SKILLS_DIR_KEY, CONST.DEFAULT_SKILLS_DIR), library, _runs_dir, model=pipeline_model,
+# the sandbox for scripts (bubblewrap for ordinary calculations, podman for exposed ones; probed when first needed) and the broker that gives a script web access through the same safety rules
+sandbox_router = sandbox_module.create_router(cfg)
+core = Core(_own_path(CONST.SKILLS_DIR_KEY, CONST.DEFAULT_SKILLS_DIR), library, _runs_dir, model=pipeline_model, sandbox=sandbox_router,
+            broker_factory=lambda: broker_module.WebBroker(broker_module.web_handlers(_web_search, _web_client)),
             tools={name: Tool(*pair) for name, pair in _web_tools.items()},
             functions={"chunk_text": web_tools.chunk_text, "untrusted": web_tools.untrusted, "injection_signals": web_tools.injection_signals,
                        **checks.build_web_checks(_web_tools["web_search"][0], _web_tools["fetch_page"][0])})

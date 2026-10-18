@@ -458,5 +458,21 @@ a script with web access (`web_script`), hostile documents to parse (`parse`), i
 (status `unavailable`, with the reasons) and never silently weakened; `sandbox_degrade: true` allows bubblewrap instead and marks the result `degraded`. Settings (optional): `sandbox_backend`
 (`auto`, `bubblewrap`, `podman`), `sandbox_degrade`, `sandbox_image`. Try it: `python tools/try_sandbox.py` (backends and routing table), `--attack` (hostile scripts on the chosen backend), `--script ...`.
 
-- Not wired yet: the script check (`check.script`), the `script` node kind of the runner, and the dispatcher integration (they will pass the `Operation`).
 - Tests: `tests/test_sandbox.py` (66 tests: policy, seccomp program and podman profile, runs, the wall of both backends, the broker incl. forged lines, the routing decisions).
+
+## Core, phase 2d: script checks
+
+A claim that can be recomputed is checked by a **script that the model writes for it** and the sandbox runs (`check.script`, claim type `computable`; `check.script_web` for scripts that may use the web
+broker, claim type `computable_web`, strong tier only). The contract (`sandbox.SCRIPT_GUIDE` is the text for prompts): the script reads `data` and sets
+`result = {"holds": true | false, "values": {what it used}, "explanation": "..."}`. Rules that come from the test-oracle problem (HC3):
+- a verdict **needs the values**; a script that says true or false without reporting what it used cannot be reviewed and stays `inconclusive`;
+- `data` (the input) is **read-only for the script**: no reassigning, no assigning into it (found with the real model, which had re-typed the input including the claimed number at the top of its script);
+- the script, its hash, the output, the backend and the tier are in the evidence; scripts with problems are never run (the policy gives the reason) and a crash, timeout or error is `inconclusive`.
+
+The wall depends on the operation (see the sandbox section): the dispatcher passes the claim's `tainted` and `stakes` fields on, and skips script checks when no backend can run them; they are never run unprotected.
+Library entries: `check.script`, `check.script_web`, `view.write_check_script` (the prompt), `view.fix_check_script`, the pipeline `verify.computable` (the model writes the script, the sandbox runs it; if it does not work
+the model gets the problem and repairs it, at most twice) and the stored script `script.compound_interest` as an example of the **`script` node kind** (a pinned script of the library; a pipeline node can say `"tainted": true` or
+`"stakes": "high"`, and a failing script is an error of the node). The dispatchers `code.hard_checks_*` have a version 2 that declares `runs_code`; version 1 is retired. A skill that uses them says `max_safety: {runs_code: true}`.
+The skill `verify_computable` runs the pipeline: `python tools/try_pipeline.py verify_computable --input 'claim=...' --input 'data_description=...' --input 'data={...}' ""`.
+`Core(..., sandbox=router, broker_factory=...)` switches the script checks on; without a sandbox they are not offered.
+Tests: `tests/test_script_checks.py` (29 tests: the contract, every sandbox outcome, the choice of the wall, the dispatcher with and without sandbox, the pipeline with a fake model including repair, script nodes).

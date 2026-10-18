@@ -37,6 +37,7 @@ ALLOWED_MODULES = ("math", "statistics", "fractions", "decimal", "datetime", "ca
                    "bisect", "textwrap", "unicodedata", "csv", "base64", "hashlib", "html", "urllib.parse", "typing", "copy", "numbers", "enum")
 FORBIDDEN_NAMES = {"open", "exec", "eval", "compile", "__import__", "input", "breakpoint", "globals", "locals", "vars", "getattr", "setattr", "delattr", "help", "exit", "quit",
                    "memoryview", "__builtins__", "__loader__", "__spec__"}
+READ_ONLY_NAMES = {"data", "web"}          # the input of the script: a script that retypes it (and the claim's numbers with it) does not check the real data
 FORBIDDEN_ATTRIBUTES = {"gi_frame", "gi_code", "cr_frame", "cr_code", "ag_frame", "ag_code", "f_globals", "f_locals", "f_builtins", "f_back", "f_code", "tb_frame", "tb_next",
                         "func_globals", "mro"}
 
@@ -45,7 +46,7 @@ class SandboxUnavailable(Exception):
     pass
 
 
-SCRIPT_GUIDE = """Write a short Python script. It has these names: `data` (the input, parsed JSON) and, only if web access was granted, `web` (`web.get(url)` returns the page text, `web.search(query)` returns results).
+SCRIPT_GUIDE = """Write a short Python script. It has these names: `data` (the input, parsed JSON; read it, never retype, reassign or change it) and, only if web access was granted, `web` (`web.get(url)` returns the page text, `web.search(query)` returns results).
 Allowed imports: %s. There is no file access, no network, no other module. The script must set `result` to JSON data. For a check, `result` is
 {"holds": true or false, "values": {the numbers and facts the script used}, "explanation": "one sentence"}. Print nothing else that matters.""" % ", ".join(ALLOWED_MODULES)
 
@@ -85,6 +86,12 @@ def check_script(code, allow_web=False):
                 problems.append("line %s: the attribute '%s' is not allowed" % (line, node.attr))
         elif isinstance(node, (ast.Global, ast.Nonlocal)):
             problems.append("line %s: global and nonlocal are not allowed" % line)
+        if isinstance(node, (ast.Name, ast.Subscript, ast.Attribute)) and isinstance(getattr(node, "ctx", None), (ast.Store, ast.Del)):
+            root = node
+            while isinstance(root, (ast.Subscript, ast.Attribute)):
+                root = root.value
+            if isinstance(root, ast.Name) and root.id in READ_ONLY_NAMES:
+                problems.append("line %s: `%s` is the input and must not be reassigned or changed: read from it" % (line, root.id))
     return sorted(set(problems), key=lambda p: (int(p.split()[1].rstrip(":")) if p.split()[1].rstrip(":").isdigit() else 0, p))[:20]
 
 
@@ -190,7 +197,11 @@ class _Backend:
         if self.reason:
             return False
         self._available = True                      # the test run below goes through run(), which checks this flag
-        outcome = self.run("result = 6 * 7", timeout=60, policy=False)
+        try:
+            outcome = self.run("result = 6 * 7", timeout=60, policy=False)
+        except OSError as exc:
+            self.reason, self._available = "the test run could not start: %s" % exc, False
+            return False
         if outcome.ok and outcome.result == 42:
             return True
         self.reason = "the test run failed: %s %s" % (outcome.status, (outcome.stderr or json.dumps(outcome.error))[:300])
@@ -349,7 +360,7 @@ class BubblewrapSandbox(_Backend):
         self.python = os.path.realpath("/usr/bin/python3") if os.path.exists("/usr/bin/python3") else os.path.realpath(python)
 
     def _check_installation(self):
-        if not self.bwrap:
+        if not self.bwrap or not os.access(self.bwrap, os.X_OK):
             return "bubblewrap (bwrap) is not installed"
         if not os.path.exists(self.python):
             return "no system Python at %s" % self.python

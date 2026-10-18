@@ -18,23 +18,26 @@ except ImportError:  # used as plain script / in tests
 
 
 class Core:
-    def __init__(self, skills_dir, library, runs_dir, model=None, tools=None, functions=None, rng=None):
+    def __init__(self, skills_dir, library, runs_dir, model=None, tools=None, functions=None, rng=None, sandbox=None, broker_factory=None):
+        """sandbox: a sandbox.SandboxRouter (None = no scripts can run); broker_factory: makes a web broker per script (broker.WebBroker), None = scripts have no web"""
         self.skills = SkillStore(skills_dir)
         self.library = library
         self.run_log = RunLog(runs_dir)
         tools = dict(tools or {})
         tools.setdefault("library_select", Tool(self._select, None))
         tools.setdefault("library_describe", Tool(self._describe, None))
-        functions = {**checks.OFFLINE_FUNCTIONS, **(functions or {})}
-        self.runner = Runner(model=model, tools=tools, functions=functions, run_log=self.run_log, rng=rng)
+        self.sandbox = sandbox
+        functions = {**checks.OFFLINE_FUNCTIONS, **checks.build_script_checks(sandbox, broker_factory), **(functions or {})}
+        self.runner = Runner(model=model, tools=tools, functions=functions, run_log=self.run_log, rng=rng, sandbox=sandbox, broker_factory=broker_factory)
         # the hard checks of the library, picked per claim (checks.CheckRunner); the web variant needs a skill that may read the web
-        self.checks = checks.CheckRunner(library, lambda: self.runner.functions, lambda: list(self.runner.tools))
+        self.checks = checks.CheckRunner(library, lambda: self.runner.functions, lambda: list(self.runner.tools), sandbox=sandbox)
         self.runner.functions.setdefault("hard_checks_offline", lambda claim, fail_fast=True: self.checks.run(claim, include_web=False, fail_fast=fail_fast))
         self.runner.functions.setdefault("hard_checks_web", lambda claim, fail_fast=True: self.checks.run(claim, include_web=True, fail_fast=fail_fast))
 
     # -- the library as tools for planning steps (reading only; new entries are drafts made by people or on request) --
     def _select(self, entry_type="pipeline", tags=(), applies_to=None, max_seconds=None, task=None):
-        return self.library.select(entry_type, tags=tags, applies_to=applies_to, max_seconds=max_seconds, task=task, tools=self.runner.tools)
+        return self.library.select(entry_type, tags=tags, applies_to=applies_to, max_seconds=max_seconds, task=task, tools=self.runner.tools,
+                                   sandbox=self.sandbox is not None and self.sandbox.available)
 
     def _describe(self, ref, entry_type="pipeline"):
         entry = self.library.resolve(ref, entry_type, allow_draft=True)

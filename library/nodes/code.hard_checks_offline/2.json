@@ -1,0 +1,65 @@
+{
+ "id": "code.hard_checks_offline",
+ "version": 2,
+ "kind": "code",
+ "title": "Hard checks (no web access)",
+ "description": "Runs the hard checks of the library that apply to a claim ({type, text, data}), cheapest first, and combines them: a failed check decides (contradicted), passes are evidence (supported only if every applicable check passed), anything else leaves the claim open for the verification styles. Script checks run in the sandbox when one is available; the claim can say `tainted` or `stakes` to get the strong wall.",
+ "tags": [
+  "dispatcher",
+  "hard-checks"
+ ],
+ "applies_to": {
+  "tasks": [
+   "research"
+  ]
+ },
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "claim"
+   ],
+   "properties": {
+    "claim": {
+     "type": "object"
+    }
+   }
+  }
+ },
+ "outputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "status",
+    "verdict",
+    "results",
+    "trace"
+   ]
+  }
+ },
+ "params": {
+  "fail_fast": {
+   "default": true
+  }
+ },
+ "body": {
+  "function": "hard_checks_offline",
+  "plain": "Hard checks (no web access)"
+ },
+ "needs": {
+  "tools": [],
+  "sandbox": false
+ },
+ "cost": {
+  "seconds": 0.5
+ },
+ "safety": {
+  "reads_web": false,
+  "runs_code": true
+ },
+ "status": "trusted",
+ "origin": {
+  "by": "manual",
+  "note": "version 1 could not run code; this one can (check.script)"
+ }
+}

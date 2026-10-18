@@ -353,6 +353,10 @@ Requirements:
   Mitigations: the script is generated from the *claim*, not from the draft's reasoning; it must print the values it used; the judge or verifier sees the script (a different view or model reviews
   that the script tests what the claim says); numeric claims are computed in two independent ways when cheap (for example `decimal` and `fractions`); the harness measures how often a passing
   script was still wrong (L5).
+- HC3a. **Built** (phase 2d): the contract `result = {holds, values, explanation}` with the rule that a verdict needs the values; `data` is read-only for the script (a model re-typed the input, claimed number included,
+  in its first scripts); the evidence carries the script, its hash and the output; scripts are written from the claim and a description of the data, not from the draft's reasoning; a script that does not work is repaired
+  by the model with the reported problem (at most twice). Still open: the second independent evaluation of numeric claims by a different view or model (the reviewer of the script), and the measurement of how often a
+  passing script was still wrong (harness, L5).
 - HC4. **Web confirmation rules.** The query is built from the claim's key entities and numbers, not from its wording (confirmation bias in the query is the main risk of searching "does X hold?");
   a disconfirming query is always run for `web_confirm`; "nothing found" is `inconclusive`, never `fail`; source quality is part of the evidence (domain type, date, whether it is a primary source),
   and results from the research task's own sources do not count as independent confirmation of themselves. All fetched text is untrusted data (X1).
