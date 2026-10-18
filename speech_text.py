@@ -20,6 +20,7 @@
 What MIA's voice says: the text of an answer without the marks of markdown and without stage directions.
 
   *smiles and waves*       one asterisk on each side: an expression or action, never spoken (MIA's rule, see communicator.EMOTION_QUESTION)
+  2*3, 2 * 3             between digits: read as "times"
   **strong**, __strong__   emphasis does not work in speech: the words stay, the marks go
   # headings, > quotes, - lists, `code`, ~~strike~~, [text](link), tables: marks removed, link texts kept, links and images dropped
 
@@ -43,6 +44,7 @@ ACTION = re.compile(r"(?<![\*\w])\*(?![\*\s])(?:[^*\n]|\n(?!\n))+?(?<![\s\*])\*(
 OPEN_ACTION = re.compile(r"(?<![\*\w])\*(?!\*)(?:[^*\n]|\n(?!\n))*\Z")
 STRONG = re.compile(r"(\*\*|__)(.+?)\1", re.S)
 UNDERSCORE = re.compile(r"(?<![\w_])_(?=\S)([^_\n]+?)(?<=\S)_(?![\w_])")
+TIMES = re.compile(r"(?<=\d)[ \t]*\*[ \t]*(?=\d)")      # 2*3, 2 * 3: a multiplication (the model should write "times", this is the safety net)
 SPACE_BEFORE_PUNCTUATION = re.compile(r"[ \t]+([.,!?;:])")
 
 
@@ -59,6 +61,7 @@ def speech_text(text, final=True):
     text = IMAGE.sub(" ", text)
     text = LINK.sub(r"\1", text)
     text = URL.sub(" ", text)
+    text = TIMES.sub(" times ", text)
     text = ACTION.sub(" ", text)
     if not final:
         text = OPEN_ACTION.sub("", text)

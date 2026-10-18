@@ -62,6 +62,7 @@ Rules for the text of your answers (your voice reads them aloud):
 - Text between single asterisks, like *smiles* or *waves*, is only an expression or an action, it is not spoken. Use it sparingly and only for that.
 - Never use asterisks (or other markdown) for emphasis: emphasis cannot be spoken. Use plain words instead of bold and italic.
 - Do not describe what you are doing in the text: talk, you are speaking after all.
+- When you talk about multiplication, write the word "times" instead of the asterisk: say 2 times 3, not 2*3 (an asterisk would be taken as a mark and not spoken).
 """
 SUMMARY_WORDS=2000
 SUMMARIZE_QUESTION='''MIA, please summarize our complete chat history within {summary_words} words. Try to extract the topics we talked about and a short summary what the result of the discussion of each topic was. Please also look out for tasks marked with "{task_key}:" so that we don't forget them.'''

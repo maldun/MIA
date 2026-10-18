@@ -58,7 +58,9 @@ class FilterTest(unittest.TestCase):
         self.assertEqual(self.say("| a | b |\n|---|---|\n| 1 | 2 |"), "a b\n1 2")
 
     def test_stray_asterisks_and_spacing(self):
-        self.assertEqual(self.say("2 * 3 = 6"), "2 3 = 6")
+        self.assertEqual(self.say("2 * 3 = 6"), "2 times 3 = 6")
+        self.assertEqual(self.say("It is 2*3*4 in total."), "It is 2 times 3 times 4 in total.")
+        self.assertEqual(self.say("a * b"), "a b")      # only numbers are multiplied by the safety net
         self.assertEqual(self.say("Wait *"), "Wait")
         self.assertEqual(self.say("Hello *smiles* ."), "Hello.")
 
@@ -154,6 +156,7 @@ class PromptTest(unittest.TestCase):
         self.assertIn("single asterisks", text)
         self.assertIn("not spoken", text)
         self.assertIn("emphasis", text)
+        self.assertIn("times", text)
 
 
 if __name__ == "__main__":
