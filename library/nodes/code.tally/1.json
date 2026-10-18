@@ -1,0 +1,55 @@
+{
+ "id": "code.tally",
+ "version": 1,
+ "kind": "code",
+ "title": "Count the votes",
+ "description": "Majority of the votes that take a side; a tie or less than half for the winner is `unclear` (inconclusive). Answer: {status, verdict, agreement, counts, reasons, detail}.",
+ "tags": [
+  "verify",
+  "exact"
+ ],
+ "applies_to": {
+  "tasks": [
+   "research"
+  ]
+ },
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "verdicts"
+   ],
+   "properties": {
+    "verdicts": {}
+   }
+  }
+ },
+ "outputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "status",
+    "verdict",
+    "agreement",
+    "counts"
+   ]
+  }
+ },
+ "params": {},
+ "body": {
+  "function": "tally",
+  "plain": "counting the votes"
+ },
+ "cost": {
+  "seconds": 0.01
+ },
+ "safety": {
+  "reads_web": false,
+  "runs_code": false
+ },
+ "status": "trusted",
+ "origin": {
+  "by": "manual",
+  "note": "verification.tally, unit tested"
+ }
+}

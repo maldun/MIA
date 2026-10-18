@@ -1,0 +1,87 @@
+{
+ "id": "verify.jury",
+ "version": 1,
+ "title": "A jury of experts with different contexts",
+ "description": "Every expert (a name and a context; default panel: fact checker, sceptic, domain reader) judges alone, then the votes are counted. Different contexts make the mistakes less alike.",
+ "goal": "judge a claim that no hard check can decide",
+ "tags": [
+  "verify",
+  "style"
+ ],
+ "applies_to": {
+  "claim_types": [
+   "fact"
+  ],
+  "tasks": [
+   "research"
+  ]
+ },
+ "cost_class": "normal",
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "claim",
+    "evidence"
+   ],
+   "properties": {
+    "claim": {
+     "type": "string"
+    },
+    "evidence": {
+     "type": "string",
+     "description": "sources or notes, may be empty"
+    },
+    "experts": {
+     "type": "array",
+     "description": "optional list of {name, context}"
+    }
+   }
+  }
+ },
+ "result": "verdict",
+ "nodes": [
+  {
+   "id": "panel",
+   "use": "code.experts@1",
+   "wire": {
+    "experts": "$input.experts"
+   },
+   "output": "members"
+  },
+  {
+   "id": "each",
+   "kind": "map",
+   "over": "$members",
+   "as": "expert",
+   "collect": "one",
+   "plain": "asking {{expert.name}}",
+   "body": [
+    {
+     "id": "judge",
+     "use": "view.verdict@1",
+     "wire": {
+      "claim": "$input.claim",
+      "evidence": "$input.evidence",
+      "context": "$expert.context"
+     },
+     "output": "one"
+    }
+   ],
+   "output": "votes"
+  },
+  {
+   "id": "count",
+   "use": "code.tally@1",
+   "wire": {
+    "verdicts": "$votes"
+   },
+   "output": "verdict"
+  }
+ ],
+ "status": "draft",
+ "origin": {
+  "by": "manual",
+  "note": "verification style; wiring tested with scripted replies, not measured with a real model yet"
+ }
+}

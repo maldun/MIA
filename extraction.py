@@ -287,4 +287,61 @@ def anchor_claims(text, claims, snap=0.75):
     return {"claims": kept, "dropped": dropped, "snapped": snapped}
 
 
-FUNCTIONS = {"extract_claims_rules": extract_claims_rules, "anchor_claims": anchor_claims}
+STRUCTURED = ("numeric", "unit", "date", "citation", "quotation", "computable")
+_DATE_SUPPORT = {"leap_year": re.compile(r"\bleap\b", re.I), "weekday": re.compile(r"\b(?:mon|tues|wednes|thurs|fri|satur|sun)day\b", re.I),
+                 "age": re.compile(r"\b(?:old|age|aged|born|birthday)\b", re.I), "days_between": re.compile(r"\b(?:days?|between|later|after|before|until)\b", re.I),
+                 "add_days": re.compile(r"\b(?:days?|later|after|before|from now|ago)\b", re.I)}
+
+
+def tidy_claims(text, claims):
+    """what a model returned after anchoring, made tidy: one claim per statement. Rules, per sentence of the source:
+    1. a date claim of a kind the sentence does not talk about (a leap year check for "1903") is dropped;
+    2. a `fact` is dropped when the same sentence has a structured claim (numeric, unit, date, citation, quotation): the specific claim wins;
+    3. of several facts in one sentence only the one with the longest text stays;
+    4. a claim whose text is a fragment of another kept claim of the same type goes, and so does a numeric claim with an expression that is already there.
+    Several structured claims of one sentence stay (two calculations in one sentence are two claims). Returns {"claims", "dropped": [{claim, reason}]}."""
+    sentences = [x.strip() for x in _SENTENCE.split(str(text).strip()) if x.strip()]
+    wording = [_norm_text(x) for x in sentences]
+    claims = [c for c in (claims if isinstance(claims, list) else []) if isinstance(c, dict)]
+
+    def sentence_of(claim):
+        mine = _norm_text(claim.get("text", ""))
+        for i, w in enumerate(wording):
+            if mine and (mine in w or w in mine):
+                return i
+        return -1 - id(claim)                                    # its own group: nothing to compare with
+
+    groups = {}
+    for index, claim in enumerate(claims):
+        groups.setdefault(sentence_of(claim), []).append(index)
+    drop = {}
+    for members in groups.values():
+        position = sentence_of(claims[members[0]])
+        sentence = sentences[position] if position >= 0 else ""
+        for i in members:
+            c = claims[i]
+            support = _DATE_SUPPORT.get((c.get("data") or {}).get("kind")) if c.get("type") == "date" else None
+            if support is not None and sentence and not support.search(sentence):
+                drop[i] = "the sentence does not talk about a %s" % c["data"]["kind"].replace("_", " ")
+        alive = [i for i in members if i not in drop]
+        if any(claims[i].get("type") in STRUCTURED for i in alive):
+            for i in alive:
+                if claims[i].get("type") == "fact":
+                    drop[i] = "the sentence has a more specific claim"
+        facts = [i for i in alive if i not in drop and claims[i].get("type") == "fact"]
+        for i in sorted(facts, key=lambda k: -len(str(claims[k].get("text", ""))))[1:]:
+            drop[i] = "another fact of this sentence says more"
+        alive = [i for i in members if i not in drop]
+        for i in alive:
+            mine = _norm_text(claims[i].get("text", ""))
+            for j in alive:
+                if i == j or i in drop or j in drop or claims[i].get("type") != claims[j].get("type"):
+                    continue
+                other = _norm_text(claims[j].get("text", ""))
+                same_expression = claims[i].get("type") == "numeric" and (claims[i].get("data") or {}).get("expression") == (claims[j].get("data") or {}).get("expression")
+                if (mine != other and mine in other) or (same_expression and (i > j)):
+                    drop[i] = "a fragment of another claim" if not same_expression else "the same calculation again"
+    return {"claims": [c for i, c in enumerate(claims) if i not in drop], "dropped": [{"claim": claims[i], "reason": r} for i, r in sorted(drop.items())]}
+
+
+FUNCTIONS = {"extract_claims_rules": extract_claims_rules, "anchor_claims": anchor_claims, "tidy_claims": tidy_claims}

@@ -214,6 +214,56 @@ class Anchoring(unittest.TestCase):
         self.assertEqual(score["unanchored"], [])
 
 
+class Tidying(unittest.TestCase):
+    def tidy(self, text, claims):
+        return E.tidy_claims(text, claims)
+
+    @staticmethod
+    def claim(claim_type, text, **data):
+        return {"type": claim_type, "text": text, "data": data}
+
+    def test_a_fact_gives_way_to_a_specific_claim_of_its_sentence(self):
+        text = "The route is 5 km long, which is 3.1 mi."
+        unit = self.claim("unit", text, value=5, from_unit="km", to_unit="mi", result_value=3.1)
+        out = self.tidy(text, [self.claim("fact", "The route is 5 km long", entities=["route"]), unit])
+        self.assertEqual(out["claims"], [unit])
+        self.assertEqual(out["dropped"][0]["reason"], "the sentence has a more specific claim")
+
+    def test_of_several_facts_the_longest_stays(self):
+        text = "The tower was built for the 1889 World's Fair in Paris."
+        long_fact = self.claim("fact", text, entities=["tower"])
+        out = self.tidy(text, [self.claim("fact", "in Paris", entities=["Paris"]), long_fact, self.claim("fact", "for the 1889 World's Fair", entities=["Fair"])])
+        self.assertEqual(out["claims"], [long_fact])
+
+    def test_a_date_claim_the_sentence_does_not_talk_about_goes(self):
+        text = "Marie Curie won the Nobel Prize in Physics in 1903."
+        fact_claim = self.claim("fact", text, entities=["Marie Curie"])
+        out = self.tidy(text, [fact_claim, self.claim("date", "1903", kind="leap_year", year=1903, leap=False)])
+        self.assertEqual(out["claims"], [fact_claim])
+        self.assertIn("leap year", out["dropped"][0]["reason"])
+        leap = self.claim("date", "1900 was not a leap year.", kind="leap_year", year=1900, leap=False)
+        self.assertEqual(self.tidy("1900 was not a leap year.", [leap])["claims"], [leap])
+
+    def test_two_calculations_in_one_sentence_stay_but_not_the_same_one_twice(self):
+        text = "2 + 3 = 5 and 4 * 4 = 16."
+        a, b = self.claim("numeric", "2 + 3 = 5", expression="2+3", value=5), self.claim("numeric", "4 * 4 = 16", expression="4*4", value=16)
+        self.assertEqual(self.tidy(text, [a, b])["claims"], [a, b])
+        again = self.claim("numeric", "2 + 3", expression="2+3", value=5)
+        self.assertEqual(self.tidy(text, [a, again, b])["claims"], [a, b])
+
+    def test_claims_of_different_sentences_do_not_touch_each_other(self):
+        text = "The tower is 330 metres tall. It was completed in 1889."
+        claims = [self.claim("fact", "The tower is 330 metres tall.", entities=["tower"]), self.claim("date", "It was completed in 1889.", kind="age")]
+        self.assertEqual(self.tidy(text, claims)["claims"], [claims[0]])        # the age claim has no support in its sentence; the fact stays
+        facts = [self.claim("fact", "The tower is 330 metres tall.", entities=["tower"]), self.claim("fact", "It was completed in 1889.", entities=["tower"])]
+        self.assertEqual(self.tidy(text, facts)["claims"], facts)
+
+    def test_odd_input_is_safe(self):
+        self.assertEqual(self.tidy("", [])["claims"], [])
+        self.assertEqual(self.tidy("text", None)["claims"], [])
+        self.assertEqual(self.tidy("text", ["junk", self.claim("fact", "text", entities=["x"])])["claims"], [self.claim("fact", "text", entities=["x"])])
+
+
 class ModelPipeline(unittest.TestCase):
     TEXT = "The Eiffel Tower is 330 metres tall. I think it is pretty."
 

@@ -1,0 +1,84 @@
+{
+ "id": "view.rebut",
+ "version": 1,
+ "kind": "model",
+ "title": "Answer the other side",
+ "description": "The voice of one side reads the case of the other side and answers it point by point, honestly (it may concede). Answer: {points: [..]}.",
+ "tags": [
+  "view",
+  "verify",
+  "structured"
+ ],
+ "applies_to": {
+  "tasks": [
+   "research"
+  ]
+ },
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "claim",
+    "side",
+    "other_case"
+   ],
+   "properties": {
+    "claim": {
+     "type": "string"
+    },
+    "side": {
+     "type": "string"
+    },
+    "other_case": {
+     "type": "string"
+    }
+   }
+  }
+ },
+ "outputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "points"
+   ]
+  }
+ },
+ "params": {},
+ "body": {
+  "system": "You argue one side of a question. You answer the other side's points one by one and concede what is right. You never invent facts.",
+  "template": "Claim:\n{{claim}}\n\nYour side: {{side}} the claim.\n\nThe case of the other side:\n{{other_case}}\n\nAnswer it in at most four short points. Reply with JSON: {\"points\": [..]}.",
+  "schema": {
+   "type": "object",
+   "required": [
+    "points"
+   ],
+   "properties": {
+    "points": {
+     "type": "array",
+     "minItems": 1,
+     "maxItems": 4,
+     "items": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 400
+     }
+    }
+   }
+  },
+  "retries": 1,
+  "plain": "answering the other side"
+ },
+ "cost": {
+  "seconds": 8,
+  "tokens": 700
+ },
+ "safety": {
+  "reads_web": false,
+  "runs_code": false
+ },
+ "status": "draft",
+ "origin": {
+  "by": "manual",
+  "note": "verification style, tested with scripted replies; not measured with a real model yet"
+ }
+}

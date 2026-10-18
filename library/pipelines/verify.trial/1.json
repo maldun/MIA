@@ -1,0 +1,111 @@
+{
+ "id": "verify.trial",
+ "version": 1,
+ "title": "A trial: prosecution, defence, rebuttals, judge",
+ "description": "As the cops, plus a second round: each side answers the other's case before the judge decides. The prosecution argues that the claim is false, the defence that it is true.",
+ "goal": "judge a claim that no hard check can decide",
+ "tags": [
+  "verify",
+  "style"
+ ],
+ "applies_to": {
+  "claim_types": [
+   "fact"
+  ],
+  "tasks": [
+   "research"
+  ]
+ },
+ "cost_class": "normal",
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "claim",
+    "evidence"
+   ],
+   "properties": {
+    "claim": {
+     "type": "string"
+    },
+    "evidence": {
+     "type": "string",
+     "description": "sources or notes, may be empty"
+    }
+   }
+  }
+ },
+ "result": "verdict",
+ "nodes": [
+  {
+   "id": "defence",
+   "use": "view.argue@1",
+   "wire": {
+    "claim": "$input.claim",
+    "evidence": "$input.evidence",
+    "side": "for"
+   },
+   "output": "case_for"
+  },
+  {
+   "id": "prosecution",
+   "use": "view.argue@1",
+   "wire": {
+    "claim": "$input.claim",
+    "evidence": "$input.evidence",
+    "side": "against"
+   },
+   "output": "case_against"
+  },
+  {
+   "id": "defence_answers",
+   "use": "view.rebut@1",
+   "wire": {
+    "claim": "$input.claim",
+    "side": "for",
+    "other_case": "$case_against.points"
+   },
+   "output": "answer_for"
+  },
+  {
+   "id": "prosecution_answers",
+   "use": "view.rebut@1",
+   "wire": {
+    "claim": "$input.claim",
+    "side": "against",
+    "other_case": "$case_for.points"
+   },
+   "output": "answer_against"
+  },
+  {
+   "id": "judge",
+   "use": "view.judge@1",
+   "wire": {
+    "claim": "$input.claim",
+    "evidence": "$input.evidence",
+    "case_for": {
+     "case": "$case_for.points",
+     "answer_to_the_prosecution": "$answer_for.points"
+    },
+    "case_against": {
+     "case": "$case_against.points",
+     "answer_to_the_defence": "$answer_against.points"
+    }
+   },
+   "output": "ruling"
+  },
+  {
+   "id": "count",
+   "use": "code.tally@1",
+   "wire": {
+    "verdicts": "$ruling"
+   },
+   "output": "verdict"
+  }
+ ],
+ "status": "draft",
+ "origin": {
+  "by": "manual",
+  "note": "verification style; wiring tested with scripted replies, not measured with a real model yet"
+ }
+}

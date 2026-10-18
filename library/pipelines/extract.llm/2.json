@@ -1,0 +1,51 @@
+{
+ "id": "extract.llm",
+ "version": 2,
+ "title": "Extract claims with the model",
+ "description": "The model reads the text and returns claims; code keeps only those that are really in the text and then one claim per statement.",
+ "goal": "claims out of prose",
+ "tags": [
+  "extract",
+  "claims"
+ ],
+ "applies_to": {
+  "tasks": [
+   "research"
+  ]
+ },
+ "cost_class": "normal",
+ "result": "answer",
+ "nodes": [
+  {
+   "id": "ask",
+   "use": "view.extract_claims@1",
+   "wire": {
+    "text": "$input.text"
+   },
+   "output": "raw"
+  },
+  {
+   "id": "anchor",
+   "use": "code.anchor_claims@1",
+   "wire": {
+    "text": "$input.text",
+    "claims": "$raw.claims"
+   },
+   "output": "anchored"
+  },
+  {
+   "id": "tidy",
+   "use": "code.tidy_claims@1",
+   "wire": {
+    "text": "$input.text",
+    "claims": "$anchored.claims"
+   },
+   "output": "answer"
+  }
+ ],
+ "status": "draft",
+ "origin": {
+  "by": "manual",
+  "note": "extract.llm@1 plus tidy_claims, to be measured with repeats"
+ }
+}

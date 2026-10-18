@@ -1,0 +1,49 @@
+{
+ "id": "code.experts",
+ "version": 1,
+ "kind": "code",
+ "title": "The panel of a jury",
+ "description": "The experts given, or the default panel (fact checker, sceptic, domain reader). Each expert is {name, context}.",
+ "tags": [
+  "verify",
+  "exact"
+ ],
+ "applies_to": {
+  "tasks": [
+   "research"
+  ]
+ },
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "experts"
+   ],
+   "properties": {
+    "experts": {}
+   }
+  }
+ },
+ "outputs": {
+  "schema": {
+   "type": "array"
+  }
+ },
+ "params": {},
+ "body": {
+  "function": "experts",
+  "plain": "choosing the experts"
+ },
+ "cost": {
+  "seconds": 0.01
+ },
+ "safety": {
+  "reads_web": false,
+  "runs_code": false
+ },
+ "status": "trusted",
+ "origin": {
+  "by": "manual",
+  "note": "verification.experts, unit tested"
+ }
+}

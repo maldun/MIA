@@ -4,7 +4,7 @@ The core of MIA's tasks (ui/REQUIREMENTS_CORE.md): skills (skills/*.md), the lib
 expands it into the graph of the runner, checks that the skill may use what the pipeline needs (web access, code), runs it and logs the run with the library entries it used.
 """
 try:
-    from . import behaviour, checks, extraction
+    from . import behaviour, checks, extraction, verification
     from .library import LibraryError
     from .pipeline import PipelineError, Runner, Tool, validate_pipeline
     from .run_log import RunLog
@@ -13,6 +13,7 @@ except ImportError:  # used as plain script / in tests
     import checks
     import extraction
     import behaviour
+    import verification
     from library import LibraryError
     from pipeline import PipelineError, Runner, Tool, validate_pipeline
     from run_log import RunLog
@@ -29,7 +30,7 @@ class Core:
         tools.setdefault("library_select", Tool(self._select, None))
         tools.setdefault("library_describe", Tool(self._describe, None))
         self.sandbox = sandbox
-        functions = {**checks.OFFLINE_FUNCTIONS, **extraction.FUNCTIONS, **behaviour.FUNCTIONS, **checks.build_script_checks(sandbox, broker_factory), **(functions or {})}
+        functions = {**checks.OFFLINE_FUNCTIONS, **extraction.FUNCTIONS, **behaviour.FUNCTIONS, **verification.FUNCTIONS, **checks.build_script_checks(sandbox, broker_factory), **(functions or {})}
         self.runner = Runner(model=model, tools=tools, functions=functions, run_log=self.run_log, rng=rng, sandbox=sandbox, broker_factory=broker_factory)
         # the hard checks of the library, picked per claim (checks.CheckRunner); the web variant needs a skill that may read the web
         self.checks = checks.CheckRunner(library, lambda: self.runner.functions, lambda: list(self.runner.tools), sandbox=sandbox)

@@ -1,0 +1,88 @@
+{
+ "id": "verify.consistency",
+ "version": 1,
+ "title": "The same question several times",
+ "description": "Asks the same question `rounds` times (default 3, at most 20) and takes the majority; a split answer is not a verdict. Only helps against sampling noise, not against a systematic mistake.",
+ "goal": "judge a claim that no hard check can decide",
+ "tags": [
+  "verify",
+  "style"
+ ],
+ "applies_to": {
+  "claim_types": [
+   "fact"
+  ],
+  "tasks": [
+   "research"
+  ]
+ },
+ "cost_class": "normal",
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "claim",
+    "evidence"
+   ],
+   "properties": {
+    "claim": {
+     "type": "string"
+    },
+    "evidence": {
+     "type": "string",
+     "description": "sources or notes, may be empty"
+    },
+    "rounds": {
+     "type": "integer",
+     "minimum": 1,
+     "maximum": 20
+    }
+   }
+  }
+ },
+ "result": "verdict",
+ "nodes": [
+  {
+   "id": "rounds",
+   "use": "code.sequence@1",
+   "wire": {
+    "n": "$input.rounds"
+   },
+   "output": "numbers"
+  },
+  {
+   "id": "each",
+   "kind": "map",
+   "over": "$numbers",
+   "as": "round",
+   "collect": "one",
+   "plain": "asking again",
+   "body": [
+    {
+     "id": "judge",
+     "use": "view.verdict@1",
+     "wire": {
+      "claim": "$input.claim",
+      "evidence": "$input.evidence",
+      "context": "an impartial checker"
+     },
+     "output": "one"
+    }
+   ],
+   "output": "votes"
+  },
+  {
+   "id": "count",
+   "use": "code.tally@1",
+   "wire": {
+    "verdicts": "$votes"
+   },
+   "output": "verdict"
+  }
+ ],
+ "status": "draft",
+ "origin": {
+  "by": "manual",
+  "note": "verification style; wiring tested with scripted replies, not measured with a real model yet"
+ }
+}

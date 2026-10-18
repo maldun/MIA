@@ -1,0 +1,93 @@
+{
+ "id": "view.verdict",
+ "version": 1,
+ "kind": "model",
+ "title": "One verdict on a claim",
+ "description": "A single voice judges a claim, with the evidence if there is any, from the point of view of `context` (may be empty). Answer: {verdict: supported | refuted | unclear, reason, confidence}.",
+ "tags": [
+  "view",
+  "verify",
+  "structured"
+ ],
+ "applies_to": {
+  "tasks": [
+   "research"
+  ]
+ },
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "claim",
+    "evidence",
+    "context"
+   ],
+   "properties": {
+    "claim": {
+     "type": "string"
+    },
+    "evidence": {
+     "type": "string"
+    },
+    "context": {
+     "type": "string"
+    }
+   }
+  }
+ },
+ "outputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "verdict",
+    "reason"
+   ]
+  }
+ },
+ "params": {},
+ "body": {
+  "system": "You are a careful, honest checker of claims. Judge the claim, not how it is worded. Say \"supported\" only when you have good reason to think it is true, \"refuted\" only when you have good reason to think it is false, otherwise \"unclear\". Never guess to be helpful: \"unclear\" is a good answer.",
+  "template": "Claim:\n{{claim}}\n\nEvidence (may be empty; then use only what you reliably know):\n{{evidence}}\n\nYour point of view: {{context}}\n\nReply with JSON: {\"verdict\": \"supported\" | \"refuted\" | \"unclear\", \"reason\": one or two sentences, \"confidence\": 0 to 1}.",
+  "schema": {
+   "type": "object",
+   "required": [
+    "verdict",
+    "reason"
+   ],
+   "properties": {
+    "verdict": {
+     "enum": [
+      "supported",
+      "refuted",
+      "unclear"
+     ]
+    },
+    "reason": {
+     "type": "string",
+     "minLength": 3,
+     "maxLength": 600
+    },
+    "confidence": {
+     "type": "number",
+     "minimum": 0,
+     "maximum": 1
+    }
+   }
+  },
+  "retries": 1,
+  "plain": "judging the claim"
+ },
+ "cost": {
+  "seconds": 8,
+  "tokens": 700
+ },
+ "safety": {
+  "reads_web": false,
+  "runs_code": false
+ },
+ "status": "draft",
+ "origin": {
+  "by": "manual",
+  "note": "verification style, tested with scripted replies; not measured with a real model yet"
+ }
+}

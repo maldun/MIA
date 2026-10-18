@@ -1,0 +1,59 @@
+{
+ "id": "code.tidy_claims",
+ "version": 1,
+ "kind": "code",
+ "title": "One claim per statement",
+ "description": "After anchoring: drops date claims the sentence does not talk about, facts in a sentence that has a more specific claim, all but the longest fact of a sentence, fragments of another claim and repeated calculations. Answer: {claims, dropped}.",
+ "tags": [
+  "extract",
+  "claims",
+  "exact"
+ ],
+ "applies_to": {
+  "tasks": [
+   "research"
+  ]
+ },
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "text",
+    "claims"
+   ],
+   "properties": {
+    "text": {
+     "type": "string"
+    },
+    "claims": {
+     "type": "array"
+    }
+   }
+  }
+ },
+ "outputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "claims"
+   ]
+  }
+ },
+ "params": {},
+ "body": {
+  "function": "tidy_claims",
+  "plain": "keeping one claim per statement"
+ },
+ "cost": {
+  "seconds": 0.05
+ },
+ "safety": {
+  "reads_web": false,
+  "runs_code": false
+ },
+ "status": "draft",
+ "origin": {
+  "by": "manual",
+  "note": "made from the 17 duplicates of the first measurement of extract.llm@1"
+ }
+}

@@ -1,0 +1,64 @@
+{
+ "id": "verify.single",
+ "version": 1,
+ "title": "One voice judges",
+ "description": "The simplest style: one model call, one verdict. The baseline every other style has to beat.",
+ "goal": "judge a claim that no hard check can decide",
+ "tags": [
+  "verify",
+  "style"
+ ],
+ "applies_to": {
+  "claim_types": [
+   "fact"
+  ],
+  "tasks": [
+   "research"
+  ]
+ },
+ "cost_class": "normal",
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "claim",
+    "evidence"
+   ],
+   "properties": {
+    "claim": {
+     "type": "string"
+    },
+    "evidence": {
+     "type": "string",
+     "description": "sources or notes, may be empty"
+    }
+   }
+  }
+ },
+ "result": "verdict",
+ "nodes": [
+  {
+   "id": "judge",
+   "use": "view.verdict@1",
+   "wire": {
+    "claim": "$input.claim",
+    "evidence": "$input.evidence",
+    "context": "an impartial checker"
+   },
+   "output": "one"
+  },
+  {
+   "id": "count",
+   "use": "code.tally@1",
+   "wire": {
+    "verdicts": "$one"
+   },
+   "output": "verdict"
+  }
+ ],
+ "status": "draft",
+ "origin": {
+  "by": "manual",
+  "note": "verification style; wiring tested with scripted replies, not measured with a real model yet"
+ }
+}

@@ -1,0 +1,49 @@
+{
+ "id": "code.sequence",
+ "version": 1,
+ "kind": "code",
+ "title": "A list 0..n-1",
+ "description": "To ask the same question n times in a map node (n at most 20).",
+ "tags": [
+  "verify",
+  "exact"
+ ],
+ "applies_to": {
+  "tasks": [
+   "research"
+  ]
+ },
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "n"
+   ],
+   "properties": {
+    "n": {}
+   }
+  }
+ },
+ "outputs": {
+  "schema": {
+   "type": "array"
+  }
+ },
+ "params": {},
+ "body": {
+  "function": "sequence",
+  "plain": "preparing the rounds"
+ },
+ "cost": {
+  "seconds": 0.01
+ },
+ "safety": {
+  "reads_web": false,
+  "runs_code": false
+ },
+ "status": "trusted",
+ "origin": {
+  "by": "manual",
+  "note": "verification.sequence, unit tested"
+ }
+}
