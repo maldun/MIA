@@ -84,6 +84,83 @@ is cheap), `branch` (condition on a field), `loop` (repeat a sub-graph until a c
 - P5. The runner is independent of the UI and testable with a fake model (like `FakeServer` in the character tests).
 - P6. Graphs can be rendered as a diagram (viewer first, editor later, see 10).
 
+## 4a. The library: nodes and pipelines as a growing knowledge base
+
+Pipelines (4) and the pieces they are made of are not buried in skill files: they live in a **library** of reusable, versioned, documented entries from which a task
+pulls what it needs. The checks of 12.2, the verification styles of 12.1 and the model views are entries of this library, not special code. Over time the library is the
+knowledge base of what works for which kind of task (and the thing the learning ladder of 8 and the harness of 9 operate on).
+
+**Two kinds of entries**
+
+| Entry | What it is | Examples |
+|---|---|---|
+| **node** | one reusable step with a declared interface | `check.quote_in_source`, `check.date_arithmetic`, `check.script_sandbox`, `check.web_confirm`, `view.entailment`, `view.prosecutor`, `view.juror_numbers_only`, `tool.web_search`, `code.chunk_text` |
+| **pipeline** | a graph that wires nodes (by reference) and sets their parameters | `research_v1`, `verify.single`, `verify.trial`, `verify.jury_experts`, `story.scene_loop` |
+
+A node entry (one JSON file, immutable once it has a version number above 0):
+
+```
+{ "id": "check.quote_in_source", "version": 2, "kind": "code",            # kind: model | tool | code | script | ask_user (the node kinds of 4)
+  "title": "Quote occurs in the source", "description": "...",
+  "tags": ["check", "citation", "exact"], "applies_to": {"claim_types": ["quotation", "citation"], "tasks": ["research"]},
+  "inputs":  {"schema": {...}},  "outputs": {"schema": {...}},           # JSON schemas: wiring is validated against them
+  "params":  {"normalize_space": {"default": true}},
+  "body":    {"function": "quote_in_source"},                            # or a prompt template + schema (model), or a script (script)
+  "needs":   {"tools": [], "sandbox": false, "model": null},
+  "cost":    {"tokens": 0, "seconds": 0.01, "calls": {}},                # an estimate; measured values come from the run log
+  "safety":  {"reads_web": false, "runs_code": false},
+  "status":  "trusted",                                                  # draft | tested | trusted | retired
+  "origin":  {"by": "manual", "parent": null, "created": "...", "note": "..."} }
+```
+
+A pipeline entry is the format of 4 with two additions: nodes can be **references** (`{"id": "q1", "use": "check.quote_in_source@2", "params": {...}, "wire": {...}}`)
+as well as inline nodes, and a header with `tags`, `applies_to`, `goal`, `cost_class`, `status`, `origin` (with `parent` for lineage: which pipeline it was derived from and why).
+
+**Storage: files are the truth, a database is the index.**
+- L1. Entries are files: `library/nodes/<id>/<version>.json` and `library/pipelines/<id>/<version>.json` for the shipped ones (in the repository, reviewed with git) and the same
+  structure under `data/library/` for the user's and for model-made ones. Plain text, diffable, editable by hand, easy to share.
+- L2. A SQLite index (`data/library.sqlite`) is built from the files and can be deleted and rebuilt at any time. It holds the searchable fields (id, version, kind, tags, applies_to,
+  status, cost), the dependency graph (which pipeline uses which node version), and the **statistics** (see below). SQLite because it is in the standard library, needs no server and
+  is enough for thousands of entries. Semantic search over descriptions (embeddings, computed on the CPU, 6) is a later addition to the same index, not a different store.
+- L3. Versions are immutable: a changed node or pipeline is a new version; runs refer to `id@version` (the run log already records pipeline and skill versions, it gains the node
+  versions), so every earlier run and evaluation stays reproducible. `retired` entries stay readable.
+- L4. Skills (3) refer to pipelines of the library by `id` (or `id@version`, or a selector, see below) and keep what is about the task as a whole: persona, model profile, budget,
+  triggers, variant, voice, lines of the status block. Prompts of model nodes move into the library nodes (views); the skill may still override parameters.
+- L5. Inline nodes (as in the current pipelines) remain allowed for experiments; a command promotes an inline node or a whole pipeline into the library as a draft.
+
+**Pulling from the library ("selection")**
+- L6. A selector asks for entries by a task description: `{"kind": "pipeline", "tags": ["verify"], "applies_to": {"claim_type": "numeric"}, "max_seconds": 60, "stakes": "low"}`.
+  The library answers with candidates, ranked. Ranking, in order of introduction: (1) hard filters (status, applicability, tools available, sandbox available, budget); (2) the measured
+  statistics of the candidates for this kind of task (quality, cost, time) from the harness and the run log; (3) later a contextual bandit over the candidates (8, level 2) with exploration
+  limited to `tested` entries.
+- L7. The research pipeline does not hard-code its checks: a `select` step asks the library which checks apply to each extracted claim (numeric, date, quotation, citation, plain fact),
+  runs the hard ones first and passes the open claims on to a verification style chosen by stakes and budget (12.1, VS3).
+- L8. Selection is explainable: the result lists why each candidate was chosen or dropped (filter, statistic); the choice is written to the run log.
+
+**Statistics and the knowledge that accumulates**
+- L9. For every node version and pipeline version the index keeps running statistics per task type: runs, success and failure rates, latency, tokens, and, from labelled test cases and user
+  feedback, quality measures (for verifiers: precision and recall of flags, calibration; 9, L5). Statistics are derived from the run log and the harness and can be recomputed.
+- L10. The library also stores **cases**: a claim or task description, the checks and styles that were applied, the verdict, and the later outcome (user correction, hard-check result).
+  Cases make "for claims like this, check X worked" retrievable (similar-case lookup by tags first, embeddings later) and are the training data for routing and the verifier models.
+- L11. Nothing is deleted by learning: low-performing entries are marked `retired` or demoted in the ranking; the reason and the numbers stay with them.
+
+**Making entries (by hand, by the harness, by a model)**
+- L12. Lifecycle: `draft` (new, never used automatically) -> `tested` (passed the harness on its test cases; may be chosen when exploring) -> `trusted` (beats the baselines; chosen by default)
+  -> `retired`. Promotion is a decision of the user, supported by the harness report (9, L3); it is never automatic.
+- L13. Entries proposed by a model (a new view, a changed pipeline, a script) are always `draft` with `origin.by` naming the model, and shown to the user as a diff (G3). A `script` node is
+  pinned by the hash of its text: any change is a new version, and the sandbox rules (HC2) apply to every script, however trusted.
+- L14. Safety classes (`reads_web`, `runs_code`) are part of the interface; a pipeline's class is the maximum of its nodes, and the skill declares the maximum it may use (for example a
+  chat skill without web access cannot select a pipeline that reads the web).
+- L15. Validation on load: references resolve, wiring matches the schemas, loops are bounded, tools exist, no cycles in the dependency graph; a broken entry is reported and skipped
+  (like a broken skill file, S1).
+
+**Interface for people and models**
+- L16. A command line tool (`tools/library.py`): `list`, `search`, `show`, `validate`, `reindex`, `stats`, `promote`, `diff`; later the graph viewer/editor of 10 reads and writes the same files.
+- L17. The same operations are available to pipelines as tools (`library.select`, `library.describe`) so that a planning step can inspect what exists; writing is limited to drafts.
+
+Open questions: whether very small helper models (classifier, verifier) are library entries too (probably yes, kind `model_file`, with their training data and evaluation attached); how the
+chat page names and shows a chosen pipeline ("which checks ran") without overloading the status block; whether shared libraries between users are wanted (probably later, with signing).
+
 ## 5. Status events and the visible block
 
 Each event has: run id, node id, kind (`start`/`done`/`retry`/`error`/`note`), a **playful line** and a **plain description** (shown in brackets),
@@ -398,6 +475,7 @@ Local research agents (implementations to learn from)
 ## 15. Phases (proposal)
 
 1. **Foundation**: run log (L1), event stream (E), pipeline runner with fake model tests (P), skill loader (S); `chat` ported as the reference skill. Status block in the chat page.
+1b. **Library** (4a): node and pipeline entries as files, the SQLite index, validation, `select` with hard filters and statistics from the run log, `tools/library.py`; the existing `chat` and `summarize` pipelines move into it as the first entries, the web tools and `chunk_text` become the first nodes. **This comes before the checks**, so they are written as library nodes.
 2. **Research**: SearXNG setup (DuckDuckGo fallback), tools with the safety rules (X), the research pipeline and its test set; harness (L3); hard checks first (`fixed_code`, `citation`, `web_confirm`, then the sandboxed `script` check); first comparisons (direct vs. pipeline, with/without verify, hard checks vs. styles).
 3. **Storytelling**: story state, scene loop, interactive UI; test set with consistency checks.
 4. **Variants**: inspect the VRM parts (V4), variant store and API, editor, switching with the task.
