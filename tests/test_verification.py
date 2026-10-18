@@ -155,5 +155,29 @@ class Styles(unittest.TestCase):
         self.assertEqual(library.resolve("code.tally@1", "node")["status"], "trusted")
 
 
+class VerdictsSuite(unittest.TestCase):
+    def test_the_suite_loads_and_is_balanced(self):
+        import harness as H
+        suite = H.load_suite(os.path.join(REPO, "eval", "suites", "verdicts"))
+        cases = suite.cases
+        self.assertGreaterEqual(len(cases), 50)
+        truths = [c.get("truth") for c in cases]
+        self.assertGreaterEqual(truths.count(True), 15)
+        self.assertGreaterEqual(truths.count(False), 15)
+        for case in cases:
+            self.assertEqual(sorted(case["input"]), ["claim", "evidence", "experts", "rounds"], case["id"])
+            if case.get("truth") is None:
+                self.assertEqual(case.get("expect"), "inconclusive", case["id"])
+
+    def test_every_case_runs_through_a_style_with_a_scripted_model(self):
+        import harness as H
+        cases = H.load_suite(os.path.join(REPO, "eval", "suites", "verdicts")).cases
+        folder = tempfile.mkdtemp()
+        core = Core(os.path.join(REPO, "skills"), Library(os.path.join(REPO, "library")), folder, model=Scripted(lambda p, n: vote("unclear")))
+        for case in cases[:6]:
+            result = core.run("verify_claim", case["input"])
+            self.assertEqual((result.status, result.answer["status"]), ("done", "inconclusive"), case["id"])
+
+
 if __name__ == "__main__":
     unittest.main()

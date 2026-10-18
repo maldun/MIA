@@ -1,0 +1,8 @@
+{
+ "name": "verdicts",
+ "description": "Claims that no hard check can decide, with known truth, for the verification styles (verify.single, consistency, jury, cops, trial; pin one with --pipeline): well known facts, popular myths that sound true, true statements that sound wrong, numbers that are a factor off, claims decided by given evidence, claims nobody can decide (the right answer is no verdict) and a piece of evidence that gives orders. truth was written by hand and is checkable by anyone. Needs the model.",
+ "target": {
+  "kind": "pipeline",
+  "skill": "verify_claim"
+ }
+}
