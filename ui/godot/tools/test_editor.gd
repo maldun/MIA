@@ -18,6 +18,7 @@ class FakeServer extends PresetApi:
 	var counter := 1
 	var calls: Array = []
 	var feedback: Array = []
+	var gesture_docs: Array = []
 	var generate_error := ""
 	var generated_preset := {"name": "llm-sly-grin", "description": "a sly grin", "weights": {"Fcl_MTH_Fun": 0.6, "Fcl_EYE_Joy": 0.4},
 			"bones": {"head_roll": 4.0}, "gesture": "", "speaking": false, "tags": ["smug", "sly"], "source": "llm"}
@@ -30,6 +31,9 @@ class FakeServer extends PresetApi:
 		var write := method != HTTPClient.METHOD_GET
 		if write and not needs_token.is_empty() and token != needs_token:
 			done.call(401, {"error": "a valid token is needed to change presets"})
+			return
+		if path == "/api/gestures":
+			done.call(200, {"gestures": [], "pose_gestures": gesture_docs, "version": "1", "token_required": false})
 			return
 		if path == "/api/expression/match":
 			done.call(200, {"name": "smug", "score": 3, "preset": presets.get("smug")})

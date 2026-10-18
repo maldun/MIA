@@ -301,3 +301,24 @@ loads nothing new. First try with `gemma4:12b-it-qat`: all answers valid, 2.7-5.
 (`Fcl_HA_*`) for moods like "shy" because of their names, and with a schema that lists every shape key it wrote many keys with value 0. The prompt now says what the key groups
 are for and asks for the style of the hand made presets (a mouth, a brow and an eye key, small turns); the weights are a short list of `{key, value}` (at most 8) instead of an
 object with all 57 keys; the examples have the same format; typical presets are used as examples when nothing in the library is similar.
+
+## Gestures from angles (gesture editor, step 1: server side and character)
+
+A gesture made in the editor is **only its final pose**, given as a few angles; the motion is the interpolation from the neutral pose (the relaxed arms) to that pose in `reach`
+seconds, held for `hold` seconds, then the arms ease back. No keyframes to record. What is not set is neutral, so a pose lists only what changes.
+
+- **The sliders (`pose_model.py`, served as `GET /api/pose-model`, converted by `ui/godot/pose_model.gd`):** per arm (the same numbers for both arms, the left one mirrored):
+  `upper_raise` 0..180 (hanging ... level ... up), `upper_direction` -120..180 (0 sideways, 90 forward, 180 across, -90 backward), `elbow_bend` 0..150, `elbow_turn` -180..180
+  (the forearm swings 0 forward, 90 inward, -90 outward), `hand_turn` -180..180 (0 palm to the body, 90 forward = towards the viewer), `wrist` -70..70, `fingers` (a name, or
+  `thumb/index/middle/ring/little` 0 open ... 100 closed). Torso: `torso_lean` (+ forward), `torso_side` and `torso_turn` (+ to the character's left). Neutral values reproduce the
+  relaxed arm of the engine. All angles are in the character's frame, not relative to the torso: "forward" is always towards the viewer and a hanging arm stays hanging when the torso
+  leans; only the shoulders move with the torso. The torso is shared by `Spine`, `Chest` and `UpperChest` (30/30/40 %) on top of the breathing.
+- **Server (`gesture_store.py`, routes in `presets_api.py`):** one JSON file per gesture in `data/gestures` (`gestures_dir`): `{"name", "kind": "pose", "description", "expression", "reach",
+  "hold", "pose": {"R": {...}, "L": {...}, "torso": {...}}, "source"}`. `GET /api/gestures` lists the built in (`kind: "keys"`, `builtin: true`, read only: they come with the character and
+  their names cannot be reused) and the ones of the editor (`pose_gestures`, complete); `GET/POST/PUT/DELETE /api/gestures[/<name>]` with the same rules as presets (token, JSON, origin;
+  values are clamped and unknown ones removed with a message; an empty pose is refused; a gesture that presets use is not renamed or deleted without `?force=1`). Presets and the
+  expression generator accept the new gestures. The version number of `/api/presets/version` now covers presets and gestures together, so other devices load both.
+- **Character:** `PresetApi` loads the gestures with the presets (`gestures_received`, `create_gesture` / `update_gesture` / `delete_gesture`), `GestureEngine.set_pose_gestures()` converts them
+  into the keys the engine plays (they can be played from the menu, by presets and by the page like the built in ones); finger curls in percent are supported by the engine too.
+- **Tests:** `python tests/test_gestures_api.py` (26), `godot --headless --path ui/godot --script res://tools/test_pose.gd` (48: the angle conversion, playing, torso, fingers, gestures coming and
+  going), `ui/godot/tools/pose_sheet.gd` renders pose documents to pictures (front and side) for a visual check. The slider UI of the editor is the next step.

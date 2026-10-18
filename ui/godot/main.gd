@@ -89,6 +89,7 @@ func _setup_expressions() -> void:
 	add_child(preset_api)
 	preset_api.setup()
 	preset_api.library_received.connect(func(presets: Array, _info): _on_server_presets(presets))
+	preset_api.gestures_received.connect(func(docs: Array): engine.gestures.set_pose_gestures(docs))   # gestures made in the editor
 	preset_api.refresh()
 	preset_api.start_polling()
 	bridge = HostBridge.new()

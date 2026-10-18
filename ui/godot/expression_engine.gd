@@ -22,6 +22,9 @@ const BLINK_CLOSE_TIME := 0.07
 const BLINK_OPEN_TIME := 0.12
 const BLINK_MIN_INTERVAL := 2.5
 const BLINK_MAX_INTERVAL := 6.0
+## how the torso angles of a gesture are shared by the spine bones (they add up to 1)
+const TORSO_SHARE := {"Spine": 0.3, "Chest": 0.3, "UpperChest": 0.4}
+
 ## seconds after which the voice counts as stopped when no new set_speaking(true) arrives (the page repeats it every 1.5 s)
 const SPEECH_WATCHDOG := 5.0
 
@@ -330,11 +333,16 @@ func _write_bones() -> void:
 	var head := Vector3(_shown_b.get("head_pitch", 0.0) + sway.x,
 			_shown_b.get("head_yaw", 0.0) + sway.y, _shown_b.get("head_roll", 0.0) + sway.z)
 	_rotate("Head", head)
-	_rotate("UpperChest", Vector3(breath, 0, 0))
-	_rotate("Chest", Vector3(breath * 0.5, 0, 0))
+	# the torso of a gesture (lean, turn, tilt) is shared by the three spine bones, on top of the breathing
+	var torso: Vector3 = gestures.torso_euler if gestures != null else Vector3.ZERO
+	_rotate("Spine", torso * TORSO_SHARE["Spine"])
+	_rotate("UpperChest", Vector3(breath, 0, 0) + torso * TORSO_SHARE["UpperChest"])
+	_rotate("Chest", Vector3(breath * 0.5, 0, 0) + torso * TORSO_SHARE["Chest"])
 	var eye := Vector3(_shown_b.get("eye_pitch", 0.0), _shown_b.get("eye_yaw", 0.0), 0.0)
 	_rotate("LeftEye", eye)
 	_rotate("RightEye", eye)
+	if gestures != null:
+		gestures.reapply()      # the arms hang on the torso that was just posed
 
 ## Rotates a bone by euler degrees (pitch about X, yaw about Y, roll about Z) in its parent's frame.
 func _rotate(bone_name: String, degrees: Vector3) -> void:

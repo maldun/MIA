@@ -259,6 +259,7 @@ func _build_details(parent: VBoxContainer) -> void:
 	_gesture_option = OptionButton.new()
 	_gesture_option.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_gesture_option.custom_minimum_size = Vector2(0, 44)
+	engine.gestures.library_changed.connect(_fill_gestures)
 	_gesture_option.add_item(NO_GESTURE)
 	for g in engine.gestures.library_order:
 		_gesture_option.add_item(g)
@@ -490,6 +491,19 @@ func _select_option(preset_name: String) -> void:
 		if _preset_option.get_item_text(i) == (preset_name if not preset_name.is_empty() else NEW_ENTRY):
 			_preset_option.select(i)
 			return
+
+## the gesture list of the preset: keeps the selected gesture when it still exists
+func _fill_gestures() -> void:
+	var selected := ""
+	if _gesture_option.selected > 0:
+		selected = _gesture_option.get_item_text(_gesture_option.selected)
+	_gesture_option.clear()
+	_gesture_option.add_item(NO_GESTURE)
+	for g in engine.gestures.library_order:
+		_gesture_option.add_item(g)
+	for i in _gesture_option.item_count:
+		if _gesture_option.get_item_text(i) == selected:
+			_gesture_option.select(i)
 
 func _on_library_changed() -> void:
 	_preset_option.clear()

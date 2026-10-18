@@ -8,12 +8,17 @@ extends Node
 ## Limbs: "shoulder", "upper" (upper arm), "lower" (forearm), "hand" (follows "lower" if missing).
 ## Fingers: "fingers": a name from FINGER_POSES ("relaxed", "open", "fist", "point").
 ##
+## Fingers: a name from FINGER_POSES, or {"thumb", "index", "middle", "ring", "little"}: 0 (open) ... 100 (closed) each.
+##
 ## Gesture: {"name", "description", "expression": optional preset name, "duration",
-##           "keys": [{"t": seconds, "R": {limb: ..., "fingers": ...}, "L": {...}}]}
+##           "keys": [{"t": seconds, "R": {limb: ..., "fingers": ...}, "L": {...}, "torso": [pitch, yaw, roll] degrees}]}
 ## Between keys everything is interpolated; after "duration" the arms ease back to BASE.
+## Gestures made in the gesture editor (angles of the final pose, see pose_model.gd) are converted into such keys by set_pose_gestures().
 
 signal gesture_started(gesture_name: String)
 signal gesture_finished(gesture_name: String)
+## gestures were added or removed (the ones made in the editor come and go)
+signal library_changed
 
 const LIMBS := ["shoulder", "upper", "lower", "hand"]
 const BONES := {"shoulder": "Shoulder", "upper": "UpperArm", "lower": "LowerArm", "hand": "Hand"}
@@ -47,6 +52,11 @@ const FOLLOW_SPEED := 9.0
 var library := {}
 var library_order: Array[String] = []
 var current := ""
+
+## the torso of the gesture as euler degrees (pitch + forward, yaw + to the left, roll + to the right); the expression engine puts it on
+## the spine bones (with the breathing). The arm directions are in the character's frame, not relative to the torso ("forward" is always
+## towards the viewer, a hanging arm hangs down): only the shoulders move with the torso.
+var torso_euler := Vector3.ZERO
 
 var _skeleton: Skeleton3D
 var _bones := {}      # "R"/"L" -> {limb: index}
@@ -93,6 +103,18 @@ func load_library(path: String) -> int:
 			push_warning("gesture without name/keys ignored")
 	return library.size()
 
+## The gestures made in the editor (their documents from the server): the ones that were set before are replaced.
+func set_pose_gestures(docs: Array) -> void:
+	for gesture_name in library_order.duplicate():
+		if str(library[gesture_name].get("kind", "")) == "pose":
+			library.erase(gesture_name)
+			library_order.erase(gesture_name)
+	for doc in docs:
+		if typeof(doc) == TYPE_DICTIONARY and typeof(doc.get("name")) == TYPE_STRING and not library.has(doc["name"]):
+			library[doc["name"]] = PoseModel.gesture_from_pose(doc)
+			library_order.append(doc["name"])
+	library_changed.emit()
+
 ## Starts a gesture; unknown names keep the current one running.
 func play(gesture_name: String) -> bool:
 	if not library.has(gesture_name):
@@ -126,6 +148,12 @@ func advance(delta: float) -> void:
 			_palm[side][limb] = (_palm[side][limb] as Vector3).lerp(_target_palm(side, limb), k)
 		for finger in FINGERS:
 			_curl[side][finger] = (_curl[side][finger] as Vector3).lerp(_target_curl(side, finger), k)
+	torso_euler = torso_euler.lerp(_target_torso(), k)
+	_apply()
+
+## poses the arms and fingers again with the bones as they are now. The arm bones are set relative to their parents, so this is called
+## after the torso moved (ExpressionEngine): the arm directions then never depend on which of the two engines runs first.
+func reapply() -> void:
 	_apply()
 
 func _finish() -> void:
@@ -203,9 +231,31 @@ func _target_curl(side: String, finger: String) -> Vector3:
 	if _gesture.is_empty():
 		return _pose_curl(BASE_FINGERS, finger)
 	var s := _span()
-	var pa: String = (s[0].get(side, {}) as Dictionary).get("fingers", BASE_FINGERS)
-	var pb: String = (s[1].get(side, {}) as Dictionary).get("fingers", BASE_FINGERS)
-	return _pose_curl(pa, finger).lerp(_pose_curl(pb, finger), s[2])
+	var pa = (s[0].get(side, {}) as Dictionary).get("fingers", BASE_FINGERS)
+	var pb = (s[1].get(side, {}) as Dictionary).get("fingers", BASE_FINGERS)
+	return _curl_of(pa, finger).lerp(_curl_of(pb, finger), s[2])
+
+## the curl of one finger for a finger spec: a pose name, or {"index": 0..100, ...} between open and fist (missing fingers stay relaxed)
+func _curl_of(spec, finger: String) -> Vector3:
+	if typeof(spec) == TYPE_DICTIONARY:
+		var key := finger.to_lower()
+		if spec.has(key):
+			return _pose_curl("open", finger).lerp(_pose_curl("fist", finger), clampf(float(spec[key]) / 100.0, 0.0, 1.0))
+		return _pose_curl(BASE_FINGERS, finger)
+	return _pose_curl(str(spec), finger)
+
+func _target_torso() -> Vector3:
+	if _gesture.is_empty():
+		return Vector3.ZERO
+	var s := _span()
+	return _key_torso(s[0]).lerp(_key_torso(s[1]), s[2])
+
+func _key_torso(key: Dictionary) -> Vector3:
+	var t = key.get("torso")
+	if t == null:
+		return Vector3.ZERO
+	return Vector3(t[0], t[1], t[2])
+
 
 # --- posing ---------------------------------------------------------------------------------------
 

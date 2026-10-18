@@ -89,6 +89,7 @@ Prerequisites:
     - "host":"0.0.0.0", (optional: address the web app listens on; default all addresses, i.e. localhost and LAN)
     - "shutdown_pause":1.0, (optional: seconds between the shutdown steps, see "Stopping MIA")
     - "presets_dir":"data/presets", (optional: folder with the expression presets of the character, one json file per preset, shared by all devices; filled with the default presets on first use)
+    - "gestures_dir":"data/gestures", (optional: gestures made with the gesture editor, one json file per gesture, shared by all devices like the presets; changing them needs the same token)
     - "editor_token":"a secret", (optional: the token that changing presets in the expression editor needs; reading is open. If the key is missing, a random token is created on the first start in `data/editor_token.txt` (not in version control) and printed when MIA starts; "" switches the token off)
     - "background_dir":"backgrounds", (optional: folder with background pictures for the character, see backgrounds/README.md)
     - "background_image":"room.jpg", (optional: picture shown at the start, default: the first one)

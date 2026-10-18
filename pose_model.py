@@ -48,7 +48,7 @@ ARM_PARAMS = {
     "upper_direction": ("arm", "Arm direction", -120.0, 180.0, 0.0,
                         "where the lifted arm points: 0 sideways, 90 forward, 180 across the body, -90 backward"),
     "elbow_bend": ("arm", "Elbow bend", 0.0, 150.0, 9.0, "0 straight arm, 150 hand at the shoulder"),
-    "elbow_turn": ("arm", "Elbow direction", -180.0, 180.0, -37.0,
+    "elbow_turn": ("arm", "Elbow direction", -180.0, 180.0, 37.0,
                    "the direction the forearm swings when the elbow bends: 0 forward, 90 inward, -90 outward, 180 backward"),
     "hand_turn": ("hand", "Palm turn", -180.0, 180.0, 0.0, "turns the palm around the forearm: 0 towards the body, 90 forward, -90 backward, 180 away from the body"),
     "wrist": ("hand", "Wrist", -70.0, 70.0, 0.0, "bends the hand: positive towards the palm, negative towards the back of the hand"),

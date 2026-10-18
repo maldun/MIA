@@ -13,6 +13,10 @@ signal availability_changed(available: bool)
 signal operation_done(kind: String, ok: bool, message: String, data: Dictionary)
 ## the language model answered (or failed) for generate(): data has "id", "preset", "corrections", "closest", "seconds", "model"
 signal generated(ok: bool, data: Dictionary, message: String)
+## the gestures made in the gesture editor (documents with the final pose as angles), on every refresh
+signal gestures_received(docs: Array)
+## the sliders of the gesture editor from the server: angles, ranges, neutral values (pose_model.py)
+signal pose_model_received(info: Dictionary)
 ## the closest existing preset for match_description(): data has "name", "score", "preset"
 signal matched(data: Dictionary)
 ## the token changed because it was entered somewhere else (the chat page)
@@ -80,8 +84,25 @@ func refresh() -> void:
 			token_required = bool(data.get("token_required", false))
 			protected_names = data.get("protected", [])
 			library_received.emit(data["presets"], data)
+			load_gestures()
 		else:
 			_set_available(false))
+
+## loads the gestures made in the editor (answer: gestures_received)
+func load_gestures() -> void:
+	if base_url.is_empty():
+		return
+	_request(HTTPClient.METHOD_GET, "/api/gestures", null, func(code: int, data):
+		if code == 200 and typeof(data) == TYPE_DICTIONARY and typeof(data.get("pose_gestures")) == TYPE_ARRAY:
+			gestures_received.emit(data["pose_gestures"]))
+
+## loads the slider definitions of the gesture editor (answer: pose_model_received)
+func load_pose_model() -> void:
+	if base_url.is_empty():
+		return
+	_request(HTTPClient.METHOD_GET, "/api/pose-model", null, func(code: int, data):
+		if code == 200 and typeof(data) == TYPE_DICTIONARY:
+			pose_model_received.emit(data))
 
 ## cheap check whether any preset changed since we loaded them
 func check_version() -> void:
@@ -105,6 +126,18 @@ func update(old_name: String, preset: Dictionary) -> void:
 
 func delete(preset_name: String, force := false) -> void:
 	_write("delete", HTTPClient.METHOD_DELETE, "/api/presets/" + preset_name.uri_encode() + ("?force=1" if force else ""), null)
+
+# gestures made in the editor: the same rules and the same token as presets (operation_done has the kinds below)
+
+func create_gesture(doc: Dictionary) -> void:
+	_write("gesture_create", HTTPClient.METHOD_POST, "/api/gestures", doc)
+
+## overwrites the gesture `old_name`; a different name inside `doc` renames it
+func update_gesture(old_name: String, doc: Dictionary) -> void:
+	_write("gesture_update", HTTPClient.METHOD_PUT, "/api/gestures/" + old_name.uri_encode(), doc)
+
+func delete_gesture(gesture_name: String, force := false) -> void:
+	_write("gesture_delete", HTTPClient.METHOD_DELETE, "/api/gestures/" + gesture_name.uri_encode() + ("?force=1" if force else ""), null)
 
 # --- expressions from a description ---------------------------------------------------------------------
 
@@ -168,7 +201,8 @@ func unauthorized_message() -> String:
 
 func _success_message(kind: String, info: Dictionary) -> String:
 	var corrections: Array = info.get("corrections", [])
-	var text: String = {"create": "Saved as new preset.", "update": "Saved.", "delete": "Deleted."}.get(kind, "Done.")
+	var text: String = {"create": "Saved as new preset.", "update": "Saved.", "delete": "Deleted.", "gesture_create": "Gesture saved.",
+			"gesture_update": "Gesture saved.", "gesture_delete": "Gesture deleted."}.get(kind, "Done.")
 	if not corrections.is_empty():
 		text += " Corrected: " + "; ".join(PackedStringArray(corrections))
 	return text
