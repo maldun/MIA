@@ -208,6 +208,33 @@ hold-out test cases that are never used for tuning, several independent signals 
 - Which cheap signals (logged user behaviour) correlate with the claim-level quality, so they can serve as reward for the bandit?
 - Does a bandit over pipeline variants beat the best fixed variant on the user's own tasks within a realistic number of interactions?
 
+### 12.1 Verification styles (interchangeable pipeline nodes)
+
+A verification style is a sub-graph that takes a claim (or a hypothesis) and the evidence and returns a verdict `supported | contradicted | unresolved`, a confidence, and the full
+transcript (logged). The skill file selects the style; the harness compares them at equal token cost; the bandit (8, level 2) may choose among them later.
+
+| Style | Roles | Notes |
+|---|---|---|
+| `single` | one entailment question: claim + passage only | baseline, cheapest; also used as a gate for the others |
+| `consistency` | N samples of `single` with different views (order, wording, temperature), vote | baseline from the literature (Wang et al.) |
+| `good_bad_cop` | two views commit independently first, then see each other's position and revise; capped rounds | risk: conformity and sycophancy, so positions are fixed before the exchange and "disagreement remains" is a valid outcome |
+| `trial` | **prosecutor** (attacks the hypothesis), **defender** (supports it and rebuts the prosecutor), **judge** (tests the hypothesis, questions both, gives the verdict) | arguments must cite verbatim evidence passages (code checks the quotes); the judge never wrote the claim; the order of prosecutor/defender is swapped on a second pass to measure position bias |
+| `trial_jury` | like `trial`, but the verdict comes from a **jury of several viewpoints** (experts) that each judge the same case, then their verdicts are combined (majority, or weighted by measured reliability) | the experts differ by **context and question**, not only by a role label (for example a dates-and-numbers checker that sees only numbers, a source-reliability viewpoint that sees metadata, a domain expert with a domain-specific excerpt); disagreement inside the jury is reported |
+| `trial_experts` | `trial`, plus experts that the judge can call as witnesses for a specialised answer in this context | experts have narrow tools and contexts; their answers count as evidence, not as verdicts |
+
+Common requirements:
+- VS1. Every style has the same interface, so one node can be replaced by another without changing the rest of the pipeline.
+- VS2. Roles are separate prompts and separate views (what each role sees is defined in the skill file); models can differ per role (a different model for the judge or for one juror).
+- VS3. Gate: the expensive styles run only on claims that `single` marks as uncertain (or on claims above a stakes threshold), because debate does not beat cheap baselines on easy cases
+  (Smit et al.; the later critique in 14).
+- VS4. Fixed maximum number of turns and tokens per style; "unresolved" is always allowed.
+- VS5. The harness reports, per style: accuracy against labelled claims, calibration, cost (tokens, seconds), position bias (swap test), conformity (how often a juror or cop changes
+  to a wrong position after seeing the other), and the share of errors that it has in common with the generator (L5).
+- VS6. Jury aggregation is configurable (majority, unanimity required, weighted by the measured reliability of each viewpoint). Weights are learned from the logs only after enough labelled
+  cases (8, level 3), with hold-out cases.
+- VS7. Open research questions: does a different context help more than a role label (jury of experts versus single judge with a persona)? Does the jury reduce shared errors compared with
+  one judge? When does the added cost pay off?
+
 ## 13. Task details (first two)
 
 ### 13.1 Research
@@ -304,6 +331,18 @@ Storytelling
 - Yang et al. 2022, DOC: Improving Long Story Coherence With Detailed Outline Control. arXiv:2212.10077
 - [S] DOME: Dynamic Hierarchical Outlining with Memory-Enhancement (ACL 2025). arXiv:2412.13575
 - [S] ConWriter (2026). arXiv:2608.05169
+
+Debate, juries and multi-agent verification (see 12.1)
+- Irving, Christiano, Amodei 2018, AI safety via debate. arXiv:1805.00899
+- [S] Khan et al. 2024 (ICML), Debating with More Persuasive LLMs Leads to More Truthful Answers. arXiv:2402.06782
+- [S] Du et al. 2023 (ICML 2024), Improving Factuality and Reasoning in Language Models through Multiagent Debate. arXiv:2305.14325
+- [S] Smit et al. 2024 (ICML), Should we be going MAD? A Look at Multi-Agent Debate Strategies for LLMs. arXiv:2311.17371
+- [S] If Multi-Agent Debate is the Answer, What is the Question? arXiv:2502.08788
+- Liang et al. 2023, Encouraging Divergent Thinking in LLMs through Multi-Agent Debate. arXiv:2305.19118 (abstract not retrieved in the search)
+- Chan et al. 2023, ChatEval. arXiv:2308.07201; Verga et al. 2024, Replacing Judges with Juries (PoLL). arXiv:2404.18796
+- Michael et al. 2023, Debate Helps Supervise Unreliable Experts. arXiv:2311.08702; Kenton et al. 2024, On Scalable Oversight with Weak LLMs Judging Strong LLMs. arXiv:2407.04622
+- Zheng et al. 2023, Is "A Helpful Assistant" the Best Role for LLMs? arXiv:2311.10054; Wang et al. 2023, Solo Performance Prompting. arXiv:2307.05300; Wang et al. 2024, Mixture-of-Agents. arXiv:2406.04692
+- Court-style agents (for example AgentCourt, arXiv:2408.08089): not verified, read before citing
 
 Local research agents (implementations to learn from)
 - [S] LearningCircuit/local-deep-research; langchain-ai/local-deepresearcher; OpenDeepResearcher-via-searxng (GitHub)
