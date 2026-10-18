@@ -432,3 +432,36 @@ dialog .actions button {
   white-space: nowrap;
   border: 0;
 }
+
+/* settings (C5) */
+html[data-emotions="0"] .badge,
+html[data-timestamps="0"] .msg-foot time { display: none; }
+html[data-mood="0"] .mood { display: none; }
+html[data-compact="1"] .messages { gap: 2px; }
+html[data-compact="1"] .msg { padding-block: 6px; }
+html[data-compact="1"] .msg-head { margin-top: 2px; }
+
+dialog#settings,
+dialog#shortcuts { max-width: min(440px, calc(100vw - 32px)); }
+.settings-list { display: grid; gap: var(--space-2); margin: var(--space-3) 0; }
+.settings-list label.switch {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--space-3);
+  min-height: 44px; cursor: pointer;
+}
+.settings-list input[type="checkbox"] { width: 22px; height: 22px; accent-color: var(--accent); }
+.swatches { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.swatch {
+  width: 44px; height: 44px; border-radius: var(--radius-pill); border: 2px solid transparent;
+  background: hsl(var(--swatch-h) 70% 48%); cursor: pointer;
+}
+.swatch[aria-pressed="true"] { border-color: var(--text); box-shadow: 0 0 0 2px var(--glass-solid) inset; }
+.shortcut-list { display: grid; grid-template-columns: auto 1fr; gap: var(--space-2) var(--space-4); margin: var(--space-3) 0; }
+.shortcut-list dd { margin: 0; }
+.shortcut-list kbd { font-family: var(--font-mono); font-size: var(--text-sm); border: 1px solid var(--border); border-radius: 6px; padding: 2px 6px; }
+
+/* more contrast when the system asks for it */
+@media (prefers-contrast: more) {
+  :root { --border: currentColor; }
+  .msg, .panel, .menu, dialog { border: 1px solid currentColor; }
+  .link-button, .older, .jump { text-decoration: underline; }
+}

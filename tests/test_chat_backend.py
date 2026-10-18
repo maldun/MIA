@@ -466,11 +466,15 @@ class WebAppChat(unittest.TestCase):
         self.assertTrue(status)
         self.assertIn("mood", status[0])
 
-    def test_old_message_event_still_works(self):
+    def test_old_message_event_and_answer_file_are_gone(self):
         client = self.wa.socketio.test_client(self.wa.app)
+        client.get_received()
         client.emit("message", "old page", callback=True)
-        self.assertTrue(wait_for(lambda: self.answers == ["old page"]))
-        self.assertTrue(wait_for(lambda: not self.wa.chat_service.status()["busy"]))
+        time.sleep(0.3)
+        self.assertEqual(self.answers, [])
+        self.assertFalse([m for m in client.get_received() if m["name"] == "answer"])
+        self.assertFalse(hasattr(self.wa, "send_answer"))
+        self.assertFalse(hasattr(self.wa, "ANSWER_FILE"))
 
     def test_history_status_and_commands_api(self):
         client = self.wa.socketio.test_client(self.wa.app)

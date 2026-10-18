@@ -70,5 +70,22 @@
   "view.bust": "Bust",
   "view.face": "Face",
   "menu.background": "Background",
-  "background.none": "None"
+  "background.none": "None",
+  "menu.settings": "Settings",
+  "settings.title": "Settings",
+  "settings.send_on_enter": "Enter sends the message",
+  "settings.emotions": "Show emotions",
+  "settings.mood": "Show the mood line",
+  "settings.timestamps": "Show times",
+  "settings.compact": "Compact messages",
+  "settings.accent": "Accent color",
+  "settings.reset": "Reset settings",
+  "settings.reset_done": "Settings reset.",
+  "shortcuts.title": "Keyboard shortcuts",
+  "shortcuts.focus": "Write a message",
+  "shortcuts.collapse": "Hide or show the chat",
+  "shortcuts.latest": "Jump to the latest message",
+  "shortcuts.menu": "Open the menu",
+  "shortcuts.settings": "Open the settings",
+  "shortcuts.help": "Show this list"
 }

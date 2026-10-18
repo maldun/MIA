@@ -15,6 +15,8 @@ import { askConfirm, initPalette, loadCommands } from './palette.js';
 import { modelLabel } from './chat-model.js';
 import { initCaption } from './caption.js';
 import { initViewMenu } from './view-menu.js';
+import { ACCENTS, initSettings } from './settings.js';
+import { SHORTCUTS, initShortcuts } from './shortcuts.js';
 
 const $ = (id) => document.getElementById(id);
 const storage = defaultStorage();
@@ -27,6 +29,7 @@ applyTranslations(document);
 document.title = t('app.title');
 
 const theme = initTheme({ storage, search: location.search });
+const settings = initSettings({ storage, onChange: () => sendInset() });
 
 const layout = initLayout({
   storage,
@@ -104,7 +107,7 @@ initSound({
   t,
 });
 
-initMenu({
+const menuControl = initMenu({
   button: $('menu-button'),
   menu: $('menu'),
   themeButtons: document.querySelectorAll('[data-theme-choice]'),
@@ -182,6 +185,67 @@ composer = initComposer({
     return true;
   },
   onStop: () => socket.emit('chat_stop'),
+  sendOnEnter: () => settings.get().sendOnEnter,
+});
+
+// --- settings, shortcuts, dialogs ---------------------------------------------------------------------
+const settingsDialog = $('settings');
+const swatches = $('swatches');
+for (const hue of ACCENTS) {
+  const swatch = document.createElement('button');
+  swatch.type = 'button';
+  swatch.className = 'swatch';
+  swatch.style.setProperty('--swatch-h', String(hue));
+  swatch.dataset.hue = String(hue);
+  swatch.setAttribute('aria-label', `${t('settings.accent')} ${hue}`);
+  swatch.addEventListener('click', () => settings.set('accent', hue));
+  swatches.append(swatch);
+}
+
+function syncSettings() {
+  const values = settings.get();
+  for (const box of settingsDialog.querySelectorAll('[data-setting]')) box.checked = Boolean(values[box.dataset.setting]);
+  for (const swatch of swatches.children) swatch.setAttribute('aria-pressed', String(Number(swatch.dataset.hue) === values.accent));
+}
+for (const box of settingsDialog.querySelectorAll('[data-setting]')) {
+  box.addEventListener('change', () => { settings.set(box.dataset.setting, box.checked); syncSettings(); });
+}
+settings.set = ((set) => (key, value) => { set(key, value); syncSettings(); })(settings.set);
+function openSettings() {
+  syncSettings();
+  menuControl.close(false);
+  settingsDialog.showModal();
+}
+$('settings-button').addEventListener('click', openSettings);
+$('settings-close').addEventListener('click', () => settingsDialog.close());
+$('settings-reset').addEventListener('click', () => {
+  settings.reset(['mia.theme', 'mia.view', 'mia.background', 'mia.muted', 'mia.volume', 'mia.snap', 'mia.collapsed']);
+  theme.set('auto');
+  syncSettings();
+  toast(t('settings.reset_done'));
+});
+
+const shortcutDialog = $('shortcuts');
+for (const shortcut of SHORTCUTS) {
+  const term = document.createElement('dt');
+  const key = document.createElement('kbd');
+  key.textContent = shortcut.keys;
+  term.append(key);
+  const description = document.createElement('dd');
+  description.textContent = t(shortcut.label);
+  $('shortcut-list').append(term, description);
+}
+$('shortcuts-close').addEventListener('click', () => shortcutDialog.close());
+
+initShortcuts({
+  actions: {
+    focus: () => { if (layout.collapsed) layout.setCollapsed(false); composer.focus(); },
+    collapse: () => layout.setCollapsed(!layout.collapsed),
+    latest: () => { if (layout.collapsed) layout.setCollapsed(false); chat.scrollDown(); $('messages').focus(); },
+    menu: () => { if (layout.collapsed) layout.setCollapsed(false); menuControl.open(); },
+    settings: openSettings,
+    help: () => shortcutDialog.showModal(),
+  },
 });
 
 // handle for tests and debugging

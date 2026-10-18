@@ -33,8 +33,7 @@ import requests
 from flask_apscheduler import APScheduler
 
 # constants and paths
-from .constants import CFG_FILE, LOG_FNAME, TEXT_COLOR, FONT_SIZE, BACKGROUND_COLOR
-from .constants import TEXT_ROWS, TEXT_COLS, TEXT_FONT, TIME_FORMAT, MESSAGE_SIZE
+from .constants import CFG_FILE, LOG_FNAME, TIME_FORMAT, MESSAGE_SIZE
 from .constants import ADDRESS_KEY, PROTOCOL_KEY, WEB_PORT_KEY, SOUND_PORT_KEY, URL_KEY, U8
 from .constants import AUDIO_ROUTE, UPLOAD_ROUTE, AUDIO_MIME_TYPE, SPEECH_REQ, SOUND_REQ, TIME_REQ
 from . import constants as CONST
@@ -50,7 +49,6 @@ cfg_file = os.path.join(FPATH,CFG_FILE)
 TEMPLATE_DIR = "templates"
 STATIC_DIR = os.path.join(TEMPLATE_DIR,"static")
 STATIC_FOLDER = os.path.join(FPATH,STATIC_DIR)
-ANSWER_FILE = os.path.join(STATIC_FOLDER,"answer.html")
 
 UPLOAD_DIR = os.path.join(TEMPLATE_DIR,UPLOAD_ROUTE)
 UPLOAD_FOLDER = os.path.join(FPATH,UPLOAD_DIR)
@@ -64,7 +62,7 @@ with open(cfg_file,'r') as jp:
     cfg = json.load(jp)
 TIMEOUT_OPT = "timeout"
 
-from .utils import MyMarkdown, cut_down_lines, get_url, get_websocket_url, get_timestamp
+from .utils import MyMarkdown, get_url, get_websocket_url, get_timestamp
 from . import utils
 md = MyMarkdown(output_format='html')
 
@@ -167,15 +165,6 @@ def express_and_reload(expression,sound=True):
         voc_exp.express(expression)
 
 # Create a function to handle messages from clients
-@socketio.on('message')
-def handle_message(message):
-    # old event of the previous page: same path as chat_send (background work, no blocking handler)
-    logger.info("Received message: {}".format(message))
-    ack = chat_service.send(message, sender=request.sid)
-    log_msg = "Message received successfully" if ack["ok"] else ack["error"]
-    logger.info(log_msg)
-    return log_msg
-
 @socketio.on('chat_send')
 def handle_chat_send(data=None):
     """{id (client id), text}: acknowledged right away, the answer follows as chat_* events"""
@@ -238,7 +227,6 @@ def switch_model(profile):
     else:
         msg = f"No {profile} model configured!"
     logger.info(msg)
-    send_answer(msg,markdown=True)
     return msg
 
 def handle_special_commands(message):
@@ -304,7 +292,6 @@ def converse(message,on_delta=None,on_emotion=None,should_stop=None):
         if on_emotion is not None:
             on_emotion(emotion)
     def update(text):
-        send_answer(text)
         streamer.update(text)
         if on_delta is not None:
             on_delta(text)
@@ -321,12 +308,10 @@ def converse(message,on_delta=None,on_emotion=None,should_stop=None):
 
     if should_stop is not None and should_stop():
         streamer.abort()
-        send_answer(filt_answer,markdown=True)
         express_and_reload("idle",sound=False)
         return filt_answer
 
     streamer.finish(filt_answer)
-    send_answer(filt_answer,markdown=True)
     streamer.wait()
     if len(filt_answer) == 0:
         # if no speech wait a bit
@@ -363,7 +348,6 @@ def time_update_request():
 def time_update():
     answer, filt_answer, penalty = comm.time_update(
                                         emotion_expression=express_and_reload,
-                                        update_message=send_answer,
                                         _test_neutral=False,
                                         _test_neutral_but_penalty=False
                                         )
@@ -372,7 +356,6 @@ def time_update():
         pass
     else:
         send_voice_request(filt_answer)
-        send_answer(filt_answer,markdown=True)
         emotions, _ = comm.extract_emotion(answer)
         chat_service.post_assistant(filt_answer, emotion=emotions[0] if emotions else None, auto=True)
         time.sleep(TIMEOUT-1)
@@ -387,47 +370,6 @@ def time_update():
     
 
 
-
-iframe_code_header=f"""
-<!DOCTYPE html>
-<html>
-<style>
-body {{
-     background-color: {BACKGROUND_COLOR};
-     color: {TEXT_COLOR};
-     font-size: {FONT_SIZE};
-     font-family: {TEXT_FONT};
-    }}
-</style>
-<body>
-    """
-
-iframe_code_footer="""
-</body>
-</html>
-"""
-# add markdown module
-markdown_source='''<script type="module" src="https://md-block.verou.me/md-block.js"></script>'''
-
-def send_answer(answer,markdown=False):
-    logger.info("Sent answer: {}".format(answer))
-
-    if markdown is True:
-        #answer = md.convert(answer)
-        lines = cut_down_lines(answer).splitlines()
-        answer = "\n\n".join(lines)
-        iframe_code_body=markdown_source+'\n'+f'<md-block>\n{answer}\n</md-block>'
-    else:
-        answer=answer.lstrip()
-        css_style=f"background-color: {BACKGROUND_COLOR};color: {TEXT_COLOR};font-size: {FONT_SIZE};font-family: {TEXT_FONT};"
-        iframe_code_body=f'<textarea id="answerTextArea" style="{css_style}" rows="{TEXT_ROWS}" cols="{TEXT_COLS}" wrap="hard">\n'
-        iframe_code_body+=answer
-        iframe_code_body+="</textarea>"
-
-    iframe_code = "\n".join([iframe_code_header,iframe_code_body,iframe_code_footer])
-    with open(ANSWER_FILE,'w') as af:
-        af.write(iframe_code)
-    socketio.emit('answer',answer)
 
 def play_intro_sound():
     # copy intro sound

@@ -70,5 +70,22 @@
   "view.bust": "Büste",
   "view.face": "Gesicht",
   "menu.background": "Hintergrund",
-  "background.none": "Keiner"
+  "background.none": "Keiner",
+  "menu.settings": "Einstellungen",
+  "settings.title": "Einstellungen",
+  "settings.send_on_enter": "Enter sendet die Nachricht",
+  "settings.emotions": "Emotionen anzeigen",
+  "settings.mood": "Stimmungszeile anzeigen",
+  "settings.timestamps": "Zeiten anzeigen",
+  "settings.compact": "Kompakte Nachrichten",
+  "settings.accent": "Akzentfarbe",
+  "settings.reset": "Einstellungen zurücksetzen",
+  "settings.reset_done": "Einstellungen zurückgesetzt.",
+  "shortcuts.title": "Tastenkürzel",
+  "shortcuts.focus": "Nachricht schreiben",
+  "shortcuts.collapse": "Chat aus- oder einblenden",
+  "shortcuts.latest": "Zur neuesten Nachricht springen",
+  "shortcuts.menu": "Menü öffnen",
+  "shortcuts.settings": "Einstellungen öffnen",
+  "shortcuts.help": "Diese Liste anzeigen"
 }

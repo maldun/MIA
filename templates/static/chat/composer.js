@@ -13,7 +13,7 @@ export function normalizeMessage(text) {
     .slice(0, MAX_LENGTH);
 }
 
-export function initComposer({ form, input, send, stop, counter, storage, suggestions, onSend, onStop, win = window }) {
+export function initComposer({ form, input, send, stop, counter, storage, suggestions, onSend, onStop, sendOnEnter = () => true, win = window }) {
   const coarse = () => win.matchMedia?.('(pointer: coarse)').matches ?? false;
   let composing = false;
   let online = true;
@@ -55,7 +55,7 @@ export function initComposer({ form, input, send, stop, counter, storage, sugges
   input.addEventListener('compositionstart', () => { composing = true; });
   input.addEventListener('compositionend', () => { composing = false; });
   input.addEventListener('keydown', (event) => {
-    if (event.key === 'Enter' && !event.shiftKey && !event.isComposing && !composing && !coarse()) {
+    if (event.key === 'Enter' && !event.shiftKey && !event.isComposing && !composing && !coarse() && sendOnEnter()) {
       event.preventDefault();
       submit();
     } else if (event.key === 'ArrowUp' && input.value === '' && last) {

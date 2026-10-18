@@ -2,7 +2,7 @@
 
 Work in progress, see `REQUIREMENTS.md`. Status: phases 1-4 done (phase list in REQUIREMENTS.md; next: 5 = MIA integration).
 
-Next: the chat page of MIA is to be modernized, see `REQUIREMENTS_CHAT.md` (phases C1-C5).
+Next: the chat page of MIA is to be modernized, see `REQUIREMENTS_CHAT.md` (phases C1-C5, all built).
 
 ## Tools (Fedora, Flatpak)
 
@@ -202,7 +202,7 @@ The page now uses the `chat_*` events of C2 (the C1 bubbles and the old `answer`
   most every 30 seconds. The header chip shows the model (light or full).
 - **Tests:** `node --test "tests/js/*.test.mjs"` (16), and the browser check `ui/tools/chat_stub_server.py` + `ui/tools/chat_e2e.js` (history, paging,
   streaming, mood changes, palette, stop, error; see the header of the stub server).
-- **Still old:** the server still emits `answer` and writes `answer.html` for the old page, and still handles the old `message` event; both go in C5.
+- **Still old (removed in C5):** the server emitted `answer`, wrote `answer.html` and handled the old `message` event.
 
 ## Chat page, phase C4 (character integration)
 
@@ -220,3 +220,24 @@ The page now uses the `chat_*` events of C2 (the C1 bubbles and the old `answer`
 - **Tests:** `godot --headless --path ui/godot --script res://tools/test_bridge.gd` (26 checks: the projected position of the character is
   checked for a side panel, a bottom sheet and no inset), `node --test "tests/js/*.test.mjs"` (22 checks incl. inset and caption text).
   Rebuild the web export with `ui/tools/build_web.sh` after pulling this phase (the Godot code changed).
+
+## Chat page, phase C5 (polish)
+
+- **Cleanup:** `send_answer`, `answer.html`, the md-block CDN link, the old `message` and `answer` socket events and the unused text constants are gone from
+  `web_app.py`. Delete the leftovers in your checkout: `templates/static/answer.html`, `templates/static/md-block.js.js`.
+  Nothing is loaded from the internet (checked by `tests/test_chat_page.py`).
+- **Settings** (menu > Settings, per device, localStorage): Enter sends, show emotions, show the mood line, show times, compact messages, accent color
+  (7 hues), and "Reset settings" (also resets theme, camera view, background, sound, panel size and collapse state).
+  Code: `chat/settings.js` (values become `data-*` attributes and `--accent-h` on `<html>`, `components.css` does the rest).
+- **Keyboard:** `/` focuses the message field, `Alt+H` hides/shows the chat, `Alt+End` jumps to the latest message, `Alt+M` opens the menu,
+  `Alt+,` the settings, `?` lists the shortcuts, `Esc` closes menus and dialogs (native `<dialog>`, focus stays inside). Code: `chat/shortcuts.js`.
+- **Accessibility:** `prefers-reduced-motion` (in the tokens) and the new `prefers-contrast: more` (visible borders, underlined link buttons);
+  touch targets are 44 px; the message list is `role="log"`; the mood line announces at most every 30 s.
+- **Performance budget:** chat JavaScript 18.8 KB gzipped (limit 100 KB), CSS 6.4 KB; vendored libraries are separate.
+- **Tests:** `node --test "tests/js/*.test.mjs"` (27), `tests/test_chat_page.py`, `tests/test_chat_backend.py` (33; the old `message` event has a test that it is gone).
+
+Manual phone checklist (iOS Safari 16+, Android Chrome):
+1. Open over HTTPS: chat loads, history shows. 2. Tap the field: the sheet stays above the keyboard. 3. Drag the sheet handle: three snaps, the character stays
+centered in the free area. 4. Send a message: it streams; "Tap to enable sound" then MIA speaks. 5. Stop while she answers. 6. Hide the chat: the caption shows
+her answer. 7. Menu > Settings: toggles and accent apply at once; reset works. 8. Landscape: side panel. 9. System "reduce motion": no crossfades.
+10. Text size 200 %: nothing is cut off.
