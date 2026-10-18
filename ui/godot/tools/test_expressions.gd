@@ -86,7 +86,7 @@ func _init() -> void:
 	# gestures
 	var g: GestureEngine = eng.gestures
 	g.set_process(false)  # stepped by hand
-	check(g.library.size() == 13, "13 gestures load (got %d)" % g.library.size())
+	check(g.library.size() == 14, "14 gestures load (got %d)" % g.library.size())
 	for n in eng.library_order:
 		var gname: String = eng.library[n]["gesture"]
 		check(gname.is_empty() or g.library.has(gname), "preset '%s' refers to an existing gesture ('%s')" % [n, gname])

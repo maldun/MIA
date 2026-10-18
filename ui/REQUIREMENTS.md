@@ -89,7 +89,7 @@ Key design decisions:
   - the suggested starters: `neutral`, `happy`, `sad`, `angry`, `surprised`, `embarrassed`, `smug`, `thinking`.
   - The old videos only conveyed the mood; the presets keep that mood (e.g. `yes` = agreeing smile, `no` = stern, `annoyed` = half-lidded "Seriously?", `talk` = attentive, `idle` = friendly waiting face).
 - **Gestures (arms, hands):** the arms hang relaxed by default. A gesture is a short keyframed arm and hand animation from `presets/gestures.json`
-  (13 so far: wave, point, explain, shrug, think, hands_on_hips, hand_on_hip, arms_crossed, wave_off, hands_up, cheer, fist_pump, clasp).
+  (14 so far: wave, point, explain, shrug, think, hands_on_hips, hand_on_hip, hands_behind_back, arms_crossed, wave_off, hands_up, cheer, fist_pump, clasp).
   Limbs are authored as directions `[forward, up, outward]` with an optional `palm` direction (e.g. towards the viewer, or up); fingers use named poses
   (`relaxed`, `open`, `fist`, `point` = index finger out, rest in a fist). See `gesture_engine.gd`.
   A preset may name a gesture with `"gesture"`; playing the preset starts it. A gesture also names its facial `"expression"`, so playing a gesture on its own
