@@ -495,3 +495,6 @@ Changes to a check, a prompt, a pipeline or a model are judged by running the sa
 - What the first run of `hard_checks` found: **four false passes** (an exact integer result was accepted within a percentage tolerance, for example `250 * 4 = 1004` or 2 hours as 121 minutes) and a wrong
   expectation about the sharp s (`casefold`). The checks were fixed (an exact result must be matched within the rounding the claim shows, with exact decimals also for huge numbers), not the expectations.
 - Tests: `tests/test_metrics.py` (18, hand-counted numbers), `tests/test_harness.py` (19).
+- First model baseline (`eval/baselines/computable-gemma4-12b.md`): `verify.computable@1` decided 79 % of the claims (right overall 77 %, 0 false passes in 20 false claims); the harness showed that the statistics cases
+  failed because the hand-written description of the data was misread and a `KeyError` did not name the keys. `verify.computable@2` generates the shape of `data` from the real data and names the keys in a `KeyError`:
+  coverage 95 %, right overall 92 %, still 0 false passes, 8.4 s instead of 12.7 s per case. The paired sign test gives p = 0.11, so the gain is likely but not proven with 39 cases.

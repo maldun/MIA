@@ -162,6 +162,27 @@ class CombineTests(unittest.TestCase):
         self.assertEqual(C.combine([]), {"status": "not_applicable", "verdict": "none"})
 
 
+class DescribeDataTests(unittest.TestCase):
+    def test_the_shape_not_the_values(self):
+        text = C.describe_data({"numbers": [3, 5, 7, 9], "claimed": 6.0, "word": "secret", "ok": True, "nothing": None})
+        self.assertEqual(text, "`data` is a dict with the keys: numbers (list of 4 numbers), claimed (number), word (text), ok (true or false), nothing (null)")
+        self.assertNotIn("secret", text)
+        self.assertNotIn("3, 5", text)
+
+    def test_nested_data_keeps_the_names_the_script_needs(self):
+        text = C.describe_data({"groups": [{"size": 100, "percent": 50}, {"size": 300, "percent": 80}], "deep": {"a": {"b": {"c": 1}}}, "mixed": [1, "x"], "empty": []})
+        self.assertIn("groups (list of 2 dicts, each with the keys: size (number), percent (number))", text)
+        self.assertIn("deep (dict with the keys: a (dict with 1 keys))", text)
+        self.assertIn("mixed (list of 2 mixed values)", text)
+        self.assertIn("empty (empty list)", text)
+
+    def test_other_shapes_and_the_hint(self):
+        self.assertEqual(C.describe_data([1, 2, 3]), "`data` is a list of 3 numbers")
+        self.assertEqual(C.describe_data("text"), "`data` is a text")
+        self.assertEqual(C.describe_data({"a": 1}, "  a is the answer  "), "`data` is a dict with the keys: a (number). a is the answer")
+        self.assertTrue(C.describe_data({"k%d" % i: i for i in range(40)}).count("(number)") <= 15)       # long dicts are cut
+
+
 class FakeFetch:
     def __init__(self, pages):
         self.pages = pages

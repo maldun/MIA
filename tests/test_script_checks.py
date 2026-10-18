@@ -95,6 +95,14 @@ class ScriptCheckLogic(unittest.TestCase):
             self.assertIn(first, got["detail"])
             self.assertIn(second, got["detail"])
 
+    def test_a_key_error_names_the_keys_that_exist(self):
+        error = sr("error", error={"type": "KeyError", "message": "'data'", "line": 5})
+        outcome = self.check(error, data={"numbers": [1, 2], "claimed": 3})[0]
+        self.assertEqual(outcome["status"], INC)
+        self.assertIn("`data` has only the keys 'numbers', 'claimed'", outcome["detail"])
+        self.assertNotIn("has only the keys", self.check(sr("error", error={"type": "ValueError", "message": "x", "line": 1}), data={"a": 1})[0]["detail"])
+        self.assertNotIn("has only the keys", self.check(error, data=[1, 2])[0]["detail"])                        # a list has no keys
+
     def test_the_operation_follows_what_the_script_is(self):
         outcome, router = self.check(sr(result=holds()), tainted=True, origin="external", stakes="high")
         self.assertEqual(router.calls[0]["operation"], {"kind": "compute", "origin": "external", "tainted": True, "stakes": "high"})
@@ -291,11 +299,33 @@ class ComputablePipeline(unittest.TestCase):
         prompt = model.calls[0][0][1]["content"]
         self.assertIn(self.INPUT["claim"], prompt)
         self.assertIn(S.SCRIPT_GUIDE, prompt)                                       # the model is told exactly what a script may use
+        self.assertIn("`data` is a dict with the keys: principal (number), rate (number), years (number), claimed (number)", prompt)      # the shape comes from the real data
+        self.assertIn(self.INPUT["data_description"], prompt)                       # the hint of the caller is kept
         self.assertNotIn("1628.89 is right", prompt)
         run = core.run_log.read()[0]
-        self.assertEqual(run["uses"], ["check.script@1", "view.fix_check_script@1", "view.write_check_script@1"])
+        self.assertEqual(run["uses"], ["check.script@1", "code.describe_data@1", "view.fix_check_script@1", "view.write_check_script@1"])
+        self.assertEqual(run["pipeline_version"], 2)
         self.assertEqual(len(model.calls), 1)                                       # nothing to repair: one call of the model
         self.assertEqual(run["pipeline"], "verify.computable")
+
+    def test_version_one_stays_available_for_comparisons(self):
+        core, model = self.core([{"script": COMPOUND}])
+        skill = core.skills.get("verify")
+        skill["pipeline"] = "verify.computable@1"
+        graph, uses, _ = core.graph(skill)
+        self.assertNotIn("code.describe_data@1", uses)
+        result = core.runner.run(skill, graph, self.INPUT)
+        self.assertEqual(result.answer["status"], "pass")
+        self.assertIn(self.INPUT["data_description"], model.calls[0][0][1]["content"])
+        self.assertNotIn("`data` is a dict", model.calls[0][0][1]["content"])
+
+    def test_the_repair_sees_the_real_shape_too(self):
+        core, model = self.core([{"script": "result = {'holds': True, 'values': {'a': data['data']}}"}, {"script": COMPOUND}])
+        result = core.run("verify", self.INPUT)
+        self.assertEqual(result.answer["status"], "pass")
+        repair_prompt = model.calls[1][0][1]["content"]
+        self.assertIn("`data` is a dict with the keys: principal (number)", repair_prompt)
+        self.assertIn("`data` has only the keys 'principal', 'rate', 'years', 'claimed'", repair_prompt)      # the KeyError names what exists
 
     def test_a_wrong_claim_is_contradicted(self):
         core, _ = self.core([{"script": COMPOUND}])

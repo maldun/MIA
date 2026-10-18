@@ -640,8 +640,11 @@ def make_script_check(router, broker_factory=None, web=False):
         if run.status != "ok":
             error = run.error or {}
             where = " (line %s)" % error["line"] if error.get("line") else ""
-            return result(INCONCLUSIVE, name, "the script %s: %s%s" % ({"timeout": "did not finish", "crashed": "was stopped", "error": "failed"}.get(run.status, run.status),
-                                                                    error.get("message", run.status), where), [dict(evidence, error=error)])
+            message = error.get("message", run.status)
+            if error.get("type") == "KeyError" and isinstance(data, dict):
+                message += " (KeyError: `data` has only the keys %s)" % ", ".join(repr(k) for k in list(data)[:15])          # so that a repair knows what exists
+            return result(INCONCLUSIVE, name, "the script %s: %s%s" % ({"timeout": "did not finish", "crashed": "was stopped", "error": "failed"}.get(run.status, run.status), message, where),
+                          [dict(evidence, error=error)])
         report = run.result
         if isinstance(report, dict) and "holds" in report:
             holds, values = report["holds"], report.get("values")
@@ -664,6 +667,38 @@ def make_script_check(router, broker_factory=None, web=False):
     return script_check
 
 
+def describe_data(data, hint=""):
+    """the shape of the input of a script as text, made from the real data (names and kinds, never the values), so that the model that writes the script cannot misread it:
+    '`data` is a dict with the keys: numbers (list of 4 numbers), claimed (number)'. `hint` (what the keys mean) is appended."""
+    def kind(value, depth=0):
+        if isinstance(value, bool):
+            return "true or false"
+        if isinstance(value, (int, float)):
+            return "number"
+        if isinstance(value, str):
+            return "text"
+        if value is None:
+            return "null"
+        if isinstance(value, dict):
+            if depth >= 2 or not value:
+                return "dict" if not value else "dict with %d keys" % len(value)
+            return "dict with the keys: " + ", ".join("%s (%s)" % (k, kind(v, depth + 1)) for k, v in list(value.items())[:15])
+        if isinstance(value, (list, tuple)):
+            if not value:
+                return "empty list"
+            if all(isinstance(v, dict) for v in value) and depth < 2 and value[0]:
+                keys = list(value[0].items())[:15]
+                return "list of %d dicts, each with the keys: %s" % (len(value), ", ".join("%s (%s)" % (k, kind(v, depth + 2)) for k, v in keys))
+            kinds = {kind(v, depth + 1) for v in value}
+            if len(kinds) == 1:
+                one = next(iter(kinds))
+                return "list of %d %s" % (len(value), one + "s" if not one.startswith(("dict", "list")) and not one.endswith("s") else one)
+            return "list of %d mixed values" % len(value)
+        return type(value).__name__
+    text = "`data` is a " + kind(data)
+    return text + (". " + str(hint).strip() if str(hint).strip() else "")
+
+
 def build_script_checks(router, broker_factory=None):
     """the functions of the script checks for a sandbox router (sandbox.SandboxRouter) and, for web scripts, a function that makes a broker per run"""
     return {"script_check": make_script_check(router, broker_factory, web=False), "script_check_web": make_script_check(router, broker_factory, web=True)}
@@ -671,7 +706,7 @@ def build_script_checks(router, broker_factory=None):
 
 # --- the registry and the runner -------------------------------------------------------------------------------------------------------------------------------
 
-OFFLINE_FUNCTIONS = {"quote_in_source": quote_in_source, "arithmetic_claim": arithmetic_claim, "unit_conversion": unit_conversion, "date_claim": date_claim,
+OFFLINE_FUNCTIONS = {"describe_data": describe_data, "quote_in_source": quote_in_source, "arithmetic_claim": arithmetic_claim, "unit_conversion": unit_conversion, "date_claim": date_claim,
                      "schema_valid": schema_valid, "schedule_overlap": schedule_overlap}
 
 

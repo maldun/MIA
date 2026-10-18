@@ -1,0 +1,53 @@
+{
+ "id": "code.describe_data",
+ "version": 1,
+ "kind": "code",
+ "title": "Describe the shape of the data",
+ "description": "Names and kinds of the keys of the input of a script, made from the real data (never the values). A hand-written description of the data caused most of the failures in the first baseline run (the model wrote data['data'] for {'numbers': [...]}).",
+ "tags": [
+  "text",
+  "exact",
+  "script"
+ ],
+ "applies_to": {
+  "tasks": [
+   "research"
+  ]
+ },
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "data"
+   ],
+   "properties": {
+    "data": {},
+    "hint": {
+     "type": "string"
+    }
+   }
+  }
+ },
+ "outputs": {
+  "schema": {
+   "type": "string"
+  }
+ },
+ "params": {},
+ "body": {
+  "function": "describe_data",
+  "plain": "describing the shape of the data"
+ },
+ "cost": {
+  "seconds": 0.001
+ },
+ "safety": {
+  "reads_web": false,
+  "runs_code": false
+ },
+ "status": "trusted",
+ "origin": {
+  "by": "manual",
+  "note": "checks.describe_data, unit tested"
+ }
+}

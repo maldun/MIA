@@ -1,0 +1,102 @@
+{
+ "id": "verify.computable",
+ "version": 2,
+ "title": "Verify a computable claim with a script",
+ "description": "Version 2: the shape of `data` is generated from the real data (code.describe_data) and handed to the model, and a KeyError in a script names the keys that exist. Version 1 passed the hand-written description of the data; its weak spot was the statistics cases (see eval/baselines).",
+ "goal": "recompute a claim from its data",
+ "tags": [
+  "verify",
+  "script",
+  "hard-check"
+ ],
+ "applies_to": {
+  "claim_types": [
+   "computable"
+  ],
+  "tasks": [
+   "research"
+  ]
+ },
+ "cost_class": "normal",
+ "result": "verdict",
+ "nodes": [
+  {
+   "id": "shape",
+   "use": "code.describe_data@1",
+   "wire": {
+    "data": "$input.data",
+    "hint": "$input.data_description"
+   },
+   "output": "described"
+  },
+  {
+   "id": "write",
+   "use": "view.write_check_script@1",
+   "wire": {
+    "claim": "$input.claim",
+    "data_description": "$described"
+   },
+   "output": "written"
+  },
+  {
+   "id": "run",
+   "use": "check.script@1",
+   "wire": {
+    "script": "$written.script",
+    "data": "$input.data"
+   },
+   "output": "verdict"
+  },
+  {
+   "id": "repair",
+   "kind": "branch",
+   "plain": "the script did not give a verdict",
+   "if": {
+    "ref": "verdict.status",
+    "op": "==",
+    "value": "inconclusive"
+   },
+   "then": [
+    {
+     "id": "again",
+     "kind": "loop",
+     "max": 2,
+     "plain": "repairing the script",
+     "until": {
+      "ref": "verdict.status",
+      "op": "!=",
+      "value": "inconclusive"
+     },
+     "body": [
+      {
+       "id": "fix",
+       "use": "view.fix_check_script@1",
+       "wire": {
+        "claim": "$input.claim",
+        "data_description": "$described",
+        "script": "$written.script",
+        "problem": "$verdict.detail"
+       },
+       "output": "written"
+      },
+      {
+       "id": "rerun",
+       "use": "check.script@1",
+       "wire": {
+        "script": "$written.script",
+        "data": "$input.data"
+       },
+       "output": "verdict"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "status": "tested",
+ "origin": {
+  "by": "manual",
+  "parent": "verify.computable@1",
+  "note": "found with the evaluation harness (tools/eval.py run computable)"
+ }
+}
