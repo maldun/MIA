@@ -195,8 +195,7 @@ or cloak for storytelling). The variant shows at a glance which mode is active.
   colour or texture overrides, optionally a default expression bias and a default idle gesture.
 - V2. Skills name a variant; switching the task switches the variant, with a short animation (spin, flash or puff, to be decided). The user can also switch manually.
 - V3. A variant editor in the character page (like the expression and gesture editors): toggle parts, pick colours, name and save, preview live.
-- V4. No second model file is needed as long as variants only toggle parts and change materials; this requires that the VRM has separable meshes for accessories and
-  clothes. **Open:** inspect the mesh and material names of the current model (`ui/godot/tools`, inspect step) and decide if a few meshes must be added in Blender.
+- V4. No second model file is needed as long as variants only toggle parts and change materials. **Answered** (`ui/docs/outfit_inventory.md`): the clothes are separate surfaces of the `Body` mesh (jacket, leggings, boots, gloves, leg warmers, belt, pouch) and the hair is its own mesh, so parts can be hidden and tinted without Blender. Not possible without more work: taking off the black top and shorts (painted into the skin texture), recolouring strongly coloured textures with a tint (offline recoloured textures instead), and **accessories**, which the model does not have: they come as small procedural shapes on bones or as separate `.glb` props.
 - V5. The chat page shows the active task (small label or colour) next to the character so the state is visible without the 3D view.
 - V6. More variants can be added later without code changes (data only).
 
@@ -580,7 +579,7 @@ Local research agents (implementations to learn from)
 1c. **Behaviour layer** (13a), in two parts that do not block the research work: (i) *signals first*: behaviour rules as library entries, violation and reward lines in the run log, silent repair instead of scolding, emotion as a structured step (EM1 to EM5, measured against the keyword method); (ii) *memory* later: ledger of commitments, structured memory with provenance, consolidation pipeline, retrieval, memory page, and the memory test set with the current dreaming as the baseline.
 2. **Research**: SearXNG setup (DuckDuckGo fallback), tools with the safety rules (X), the research pipeline and its test set; harness (L3); hard checks first (`fixed_code`, `citation`, `web_confirm`, then the sandboxed `script` check); first comparisons (direct vs. pipeline, with/without verify, hard checks vs. styles).
 3. **Storytelling**: story state, scene loop, interactive UI; test set with consistency checks.
-4. **Variants**: inspect the VRM parts (V4), variant store and API, editor, switching with the task.
+4. **Variants**: (the VRM parts are inspected, V4 answered) variant store and API, editor, switching with the task.
 5. **Graph viewer**, then editor with proposals (G).
 6. **Routing and learning** (8, levels 1–3), `schedule` skill.
 7. Optional: controller and distillation (8, levels 4–5).
@@ -588,7 +587,7 @@ Local research agents (implementations to learn from)
 ## 16. Open questions
 - Behaviour layer (13a): which unwanted behaviours matter most to you (the list starts with the format rules of the first message)? Should the playful penalty stay as an optional character moment? Is the digest of a consolidation something you want to see every day? Which facts about you should never be stored?
 
-- Which meshes does the VRM have for accessories and clothes (V4)? Do we need additions in Blender?
+- Variants (V4 is answered): which accessories per task (glasses, notebook, hat ...) and are procedural shapes enough or should they be made in Blender?
 - Which Qwen model and context length are usable on 12 GB with acceptable speed (to be measured with the harness, M3)?
 - Language: research answers in the question's language; the sources may be English. Where is translation done, and does it hurt claim checking?
 - Which feedback controls does the chat page get (thumbs, "wrong source", edit) to feed L1 without annoying the user?
