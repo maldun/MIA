@@ -360,8 +360,8 @@ The plan is in `REQUIREMENTS_CORE.md`. Phase 1 is the foundation; the chat now r
 - **Search**: backends in order, `search_backends` (default `["searxng", "duckduckgo"]`). A backend that fails or finds nothing hands over to the next; the answer says which
   one was used, what failed and which engines SearXNG could not reach. Duplicates (same page with tracking parameters, `www.`, fragments) are merged, results that point to
   private addresses are dropped. "Nothing found" is an answer, not an error; only "no backend answered" is an error.
-- **SearXNG** (self-hosted, the first choice): `tools/searxng/run.sh` starts it with podman or docker on `127.0.0.1:8888` (`stop`, `check` also exist). Its settings enable the
-  JSON output. Upstream engines (Brave, DuckDuckGo, ...) sometimes throttle it; `check` and the status block show that. Setting: `searxng_url` (default `http://localhost:8888`).
+- **SearXNG** (self-hosted, the first choice): `tools/searxng/run.sh` starts it with podman or docker on `127.0.0.1:8590` (`stop`, `check` also exist). Its settings enable the
+  JSON output. Upstream engines (Brave, DuckDuckGo, ...) sometimes throttle it; `check` and the status block show that. Settings: `searxng_port` (default 8590, used by MIA and by `run.sh`; 8888 is taken by too many other programs) or `searxng_url` for another address.
   It is not started by MIA and does not restart with the machine unless you set that up (the image is about 270 MB).
 - **DuckDuckGo** (the fallback): no install; it reads the HTML result page (there is no official free API), waits at least 1.5 s between requests and reports a CAPTCHA or rate limit.
 - **Fetching** (`WebClient`): only http(s) to public addresses on ports 80, 443, 8080, 8443; the address is checked before the connection, at every redirect (at most 4) and for the

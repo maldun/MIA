@@ -1,4 +1,4 @@
-# SearXNG for MIA: a private meta search engine on this machine only (127.0.0.1:8888, see tools/searxng/run.sh).
+# SearXNG for MIA: a private meta search engine on this machine only (127.0.0.1:8590 by default, see tools/searxng/run.sh).
 # __SECRET__ is replaced by run.sh with a random key and written to settings.local.yml (which is not committed).
 use_default_settings: true
 

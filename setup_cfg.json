@@ -31,6 +31,7 @@
   "voice_sample":"/home/maldun/prog/Python/MIA/voice/samples/miku_vocals.wav",
   "history_file":"memories.json",
   "long_time_history_file":"long_time_history.json",
+  "searxng_port": 8590,
   "intro_sound":"voice/expressions/idle.wav",
   "intro_sounds":["voice/expressions/Navi_Hello1.wav", "voice/expressions/Navi_Hey1.wav"],
   "attention_sounds":["voice/expressions/hey_listen.wav", "voice/expressions/Navi_Hey1.wav"],

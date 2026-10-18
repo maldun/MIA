@@ -482,15 +482,23 @@ class Search:
 
 # --- the tools for the pipelines --------------------------------------------------------------------------------------------------------
 
+DEFAULT_SEARXNG_PORT = 8590
+
+
+def searxng_url(cfg):
+    """where SearXNG listens: "searxng_url" if given (another machine, a proxy), else localhost on "searxng_port" (default 8590; tools/searxng/run.sh uses the same port)"""
+    return cfg.get("searxng_url") or "http://localhost:%d" % int(cfg.get("searxng_port", DEFAULT_SEARXNG_PORT))
+
+
 def build_web_tools(cfg, runs_dir, session=None, resolver=None):
     """(tools, search, client): tools = {"web_search": (callable, "search_calls"), "fetch_page": (callable, "fetch_calls")} for the pipeline runner, built from the
-    configuration (keys: search_backends, searxng_url, web_timeout, web_max_bytes, web_max_chars, search_results). Creating them touches no network."""
+    configuration (keys: search_backends, searxng_port, searxng_url, web_timeout, web_max_bytes, web_max_chars, search_results). Creating them touches no network."""
     log = WebLog(runs_dir)
     timeout = cfg.get("web_timeout", [5, 15])
     backends = []
     for name in cfg.get("search_backends", ["searxng", "duckduckgo"]):
-        if name == "searxng" and cfg.get("searxng_url", "http://localhost:8888"):
-            backends.append(SearxngBackend(cfg.get("searxng_url", "http://localhost:8888"), session=session, timeout=timeout[-1]))
+        if name == "searxng":
+            backends.append(SearxngBackend(searxng_url(cfg), session=session, timeout=timeout[-1]))
         elif name == "duckduckgo":
             backends.append(DuckDuckGoBackend(session=session, timeout=timeout[-1]))
     search = Search(backends, log, max_results=cfg.get("search_results", 8))

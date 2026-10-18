@@ -1,5 +1,5 @@
 #!/bin/bash
-# Starts SearXNG for MIA's research on 127.0.0.1:8888 with podman (or docker).
+# Starts SearXNG for MIA's research on 127.0.0.1:<searxng_port> (default 8590) with podman (or docker).
 #   tools/searxng/run.sh          start (or restart) the container
 #   tools/searxng/run.sh stop     stop and remove it
 #   tools/searxng/run.sh check    ask it for a test search and show the first results
@@ -8,7 +8,8 @@ set -e
 HERE="$(dirname "$(readlink -f "$0")")"
 ENGINE="${CONTAINER_ENGINE:-$(command -v podman || command -v docker)}"
 NAME=mia-searxng
-PORT="${SEARXNG_PORT:-8888}"
+# the port: $SEARXNG_PORT, else "searxng_port" of setup_cfg.json, else 8590 (MIA reads the same key)
+PORT="${SEARXNG_PORT:-$(python3 -c "import json; print(json.load(open('$HERE/../../setup_cfg.json')).get('searxng_port', 8590))" 2>/dev/null || echo 8590)}"
 CONF="$HERE/settings.local.yml"
 
 case "${1:-start}" in
