@@ -12,11 +12,12 @@ import io
 import json
 import os
 import resource
-import socket
 import sys
 import traceback
 
 MARK = "\x01MIA\x01"
+REQUEST = "\x01MIA-REQ\x01"
+ANSWER = "\x01MIA-RES\x01"
 SAFE_BUILTINS = (
     "abs all any ascii bin bool bytearray bytes callable chr classmethod complex dict divmod enumerate filter float format frozenset hasattr hash hex id int isinstance issubclass "
     "iter len list map max min next object oct ord pow property range repr reversed round set slice sorted staticmethod str sum super tuple type zip "
@@ -54,27 +55,23 @@ class WebError(RuntimeError):
 
 
 class Web:
-    """the only way out for a script: asks the broker outside the sandbox (GET and search, with the same safety rules and budgets as MIA's own web tools)"""
+    """the only way out for a script: asks the broker outside the sandbox (GET and search, with the same safety rules and budgets as MIA's own web tools).
+    The request is a line on the real stdout, the answer a line on stdin: the sandbox needs no network, no socket and no mounted file for it."""
 
-    def __init__(self, path):
-        self.path = path
+    def __init__(self, out):
+        self.out = out
 
     def _ask(self, request):
         try:
-            with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as s:
-                s.settimeout(60)
-                s.connect(self.path)
-                s.sendall(json.dumps(request).encode("utf-8") + b"\n")
-                data = b""
-                while not data.endswith(b"\n"):
-                    block = s.recv(65536)
-                    if not block:
-                        break
-                    data += block
-        except OSError as exc:
+            self.out.write(REQUEST + json.dumps(request) + "\n")
+            self.out.flush()
+            line = sys.stdin.readline()
+        except (OSError, ValueError) as exc:
             raise WebError("the web broker cannot be reached (%s)" % exc)
+        if not line.startswith(ANSWER):
+            raise WebError("the web broker did not answer")
         try:
-            answer = json.loads(data.decode("utf-8"))
+            answer = json.loads(line[len(ANSWER):])
         except ValueError:
             raise WebError("the web broker sent an unreadable answer")
         if "error" in answer:
@@ -97,7 +94,7 @@ def set_limits(spec):
         resource.setrlimit(getattr(resource, name), (value, value))
 
 
-def build_namespace(spec, data, out):
+def build_namespace(spec, data, out, real_stdout):
     allowed = set(spec["allowed_modules"])
     real_import = builtins.__import__
 
@@ -115,7 +112,7 @@ def build_namespace(spec, data, out):
         namespace = {"__builtins__": safe, "__name__": "__script__"}
     namespace["data"] = data
     if spec.get("broker"):
-        namespace["web"] = Web(spec["broker"])
+        namespace["web"] = Web(real_stdout)
     return namespace
 
 
@@ -129,7 +126,7 @@ def run(spec):
         with open("/sandbox/script.py", encoding="utf-8") as fp:
             code = fp.read()
         set_limits(spec)
-        namespace = build_namespace(spec, data, out)
+        namespace = build_namespace(spec, data, out, real_stdout)
         sys.stdout = out
         try:
             exec(compile(code, "<script>", "exec"), namespace)

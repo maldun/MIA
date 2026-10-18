@@ -17,6 +17,7 @@ import hashlib
 import json
 import os
 import platform
+import secrets
 import shutil
 import signal
 import struct
@@ -27,6 +28,9 @@ import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 MARK = "\x01MIA\x01"
+REQUEST = b"\x01MIA-REQ\x01"
+ANSWER = b"\x01MIA-RES\x01"
+MAX_REQUEST_LINE = 8192
 MAX_SCRIPT_CHARS = 8000
 
 ALLOWED_MODULES = ("math", "statistics", "fractions", "decimal", "datetime", "calendar", "re", "json", "itertools", "collections", "string", "functools", "operator", "heapq",
@@ -143,11 +147,14 @@ def seccomp_program():
 # --- running ---------------------------------------------------------------------------------------------------------------------------
 
 class SandboxResult:
-    """status: ok | error (the script failed or reported an error) | timeout | crashed (killed: memory, CPU, a forbidden system call) | rejected (policy) | unavailable"""
+    """status: ok | error (the script failed or reported an error) | timeout | crashed (killed: memory, CPU, a forbidden system call) | rejected (policy) | unavailable.
+    backend / tier / degraded tell where it ran (see SandboxRouter)"""
 
-    def __init__(self, status, result=None, stdout="", stderr="", error=None, seconds=0.0, exit_code=None, truncated=False, problems=None, script_hash=""):
+    def __init__(self, status, result=None, stdout="", stderr="", error=None, seconds=0.0, exit_code=None, truncated=False, problems=None, script_hash="", backend="", tier="",
+                 degraded=False):
         self.status, self.result, self.stdout, self.stderr, self.error = status, result, stdout, stderr, error
         self.seconds, self.exit_code, self.truncated, self.problems, self.script_hash = seconds, exit_code, truncated, problems or [], script_hash
+        self.backend, self.tier, self.degraded = backend, tier, degraded
 
     @property
     def ok(self):
@@ -155,60 +162,59 @@ class SandboxResult:
 
     def as_dict(self):
         return {"status": self.status, "result": self.result, "stdout": self.stdout, "stderr": self.stderr, "error": self.error, "seconds": round(self.seconds, 3),
-                "truncated": self.truncated, "problems": self.problems, "script_hash": self.script_hash}
+                "truncated": self.truncated, "problems": self.problems, "script_hash": self.script_hash, "backend": self.backend, "tier": self.tier, "degraded": self.degraded}
 
 
-class Sandbox:
-    def __init__(self, bwrap=None, python=None, tmp_root=None):
-        self.bwrap = bwrap or shutil.which("bwrap")
-        python = python or shutil.which("python3") or sys.executable
-        self.python = os.path.realpath("/usr/bin/python3") if os.path.exists("/usr/bin/python3") else os.path.realpath(python)
+class _Backend:
+    """what all backends share: the policy, the files of a run, the runner protocol and the reading of its answer. A backend supplies the command that builds the wall (_command)
+    and a way to stop a run that does not end (_stop)."""
+    name = ""
+
+    def __init__(self, tmp_root=None):
         self.tmp_root = tmp_root
         self._available = None
         self.reason = ""
 
-    # -- is there a wall? --
     @property
     def available(self):
         if self._available is None:
             self._available = self._probe()
         return self._available
 
+    def _check_installation(self):
+        """a reason string when this backend cannot work on this machine, else ''"""
+        raise NotImplementedError
+
     def _probe(self):
-        if not self.bwrap:
-            self.reason = "bubblewrap (bwrap) is not installed"
+        self.reason = self._check_installation()
+        if self.reason:
             return False
-        if not os.path.exists(self.python):
-            self.reason = "no system Python at %s" % self.python
-            return False
-        outcome = self.run("result = 6 * 7", timeout=15, policy=False)
+        self._available = True                      # the test run below goes through run(), which checks this flag
+        outcome = self.run("result = 6 * 7", timeout=60, policy=False)
         if outcome.ok and outcome.result == 42:
             return True
         self.reason = "the test run failed: %s %s" % (outcome.status, (outcome.stderr or json.dumps(outcome.error))[:300])
+        self._available = False
         return False
 
     def info(self):
-        return {"available": self.available, "reason": self.reason, "bwrap": self.bwrap, "python": self.python, "seccomp": seccomp_program() is not None,
-                "arch": platform.machine()}
+        return {"backend": self.name, "available": self.available, "reason": self.reason, "arch": platform.machine()}
 
-    # -- one run --
     def run(self, code, data=None, timeout=10, memory_mb=512, cpu_seconds=None, max_output=65536, fsize_mb=4, tmp_mb=16, broker=None, policy=True, raw=False):
-        """runs `code` in the sandbox with `data` as input; returns a SandboxResult. policy=False skips the AST check and raw=True gives the script the full Python builtins:
+        """runs `code` with `data` as input; returns a SandboxResult. policy=False skips the AST check and raw=True gives the script the full Python builtins:
         both are for testing the wall, never for model-written code"""
         started = time.time()
         digest = hashlib.sha256(str(code).encode("utf-8", "replace")).hexdigest()[:16]
-        if self._available is False and self.reason:
-            return SandboxResult("unavailable", error={"message": self.reason}, script_hash=digest)
-        if not self.bwrap or not os.path.exists(self.python):
-            return SandboxResult("unavailable", error={"message": "no sandbox on this machine"}, script_hash=digest)
+        if self._available is False:
+            return SandboxResult("unavailable", error={"message": self.reason or "no sandbox on this machine"}, script_hash=digest, backend=self.name)
         if policy:
             problems = check_script(code, allow_web=broker is not None)
             if problems:
-                return SandboxResult("rejected", problems=problems, script_hash=digest, error={"message": "; ".join(problems[:3])})
+                return SandboxResult("rejected", problems=problems, script_hash=digest, error={"message": "; ".join(problems[:3])}, backend=self.name)
         try:
             payload = json.dumps(data if data is not None else {})
         except (TypeError, ValueError):
-            return SandboxResult("rejected", problems=["the input data is not JSON"], script_hash=digest)
+            return SandboxResult("rejected", problems=["the input data is not JSON"], script_hash=digest, backend=self.name)
         work = tempfile.mkdtemp(prefix="mia-sandbox-", dir=self.tmp_root)
         outputs = tempfile.mkdtemp(prefix="mia-sandbox-out-", dir=self.tmp_root)          # what the sandbox writes to stdout and stderr: not visible inside
         try:
@@ -217,47 +223,49 @@ class Sandbox:
             shutil.rmtree(work, ignore_errors=True)
             shutil.rmtree(outputs, ignore_errors=True)
 
+    def _command(self, work, spec, memory_mb, tmp_mb, broker):
+        """(command list, extra file descriptors to pass, handle for _stop, cleanup callable)"""
+        raise NotImplementedError
+
+    def _stop(self, process, handle):
+        try:
+            os.killpg(process.pid, signal.SIGKILL)
+        except (ProcessLookupError, PermissionError):
+            process.kill()
+
     def _run(self, work, outputs, code, payload, timeout, memory_mb, cpu_seconds, max_output, fsize_mb, tmp_mb, broker, raw, started, digest):
         for name, text in (("script.py", code), ("input.json", payload)):
             with open(os.path.join(work, name), "w", encoding="utf-8") as fp:
                 fp.write(text)
         shutil.copy(os.path.join(HERE, "sandbox_runner.py"), os.path.join(work, "runner.py"))
         spec = {"memory_mb": memory_mb, "cpu_seconds": int(cpu_seconds) + 1, "fsize_mb": fsize_mb, "max_output": max_output, "raw": bool(raw),
-                "allowed_modules": list(ALLOWED_MODULES), "broker": "/broker/sock" if broker is not None else None}
-        command = [self.bwrap, "--unshare-all", "--die-with-parent", "--new-session", "--cap-drop", "ALL", "--clearenv",
-                   "--setenv", "PATH", "/nonexistent", "--setenv", "LANG", "C.UTF-8", "--setenv", "PYTHONDONTWRITEBYTECODE", "1", "--setenv", "PYTHONHASHSEED", "0",
-                   "--ro-bind", "/usr/lib", "/usr/lib", "--ro-bind", "/usr/lib64", "/usr/lib64", "--ro-bind", self.python, self.python,
-                   "--symlink", "usr/lib", "/lib", "--symlink", "usr/lib64", "/lib64", "--proc", "/proc", "--dev", "/dev",
-                   "--size", str(tmp_mb * 1024 * 1024), "--tmpfs", "/tmp", "--ro-bind", work, "/sandbox"]
-        if broker is not None:
-            command += ["--bind", broker.directory, "/broker"]
-        command += ["--remount-ro", "/", "--chdir", "/tmp"]                       # all mount points exist: now the root itself is read-only
-        pass_fds = ()
-        read_end = None
-        program = seccomp_program()
-        if program is not None:
-            read_end, write_end = os.pipe()
-            os.write(write_end, program)
-            os.close(write_end)
-            command += ["--seccomp", str(read_end)]
-            pass_fds = (read_end,)
-        # -s -S -P: no user site, no site, no script directory on the path. (-I would also ignore PYTHONHASHSEED, and the environment is empty anyway.)
-        command += [self.python, "-s", "-S", "-P", "/sandbox/runner.py", json.dumps(spec)]
-        out_path, err_path = os.path.join(outputs, "stdout.txt"), os.path.join(outputs, "stderr.txt")
+                "allowed_modules": list(ALLOWED_MODULES), "broker": broker is not None}
+        command, pass_fds, handle, cleanup = self._command(work, spec, memory_mb, tmp_mb, broker)
+        err_path = os.path.join(outputs, "stderr.txt")
         status, exit_code = "ok", None
         try:
-            with open(out_path, "wb") as out, open(err_path, "wb") as err:
-                process = subprocess.Popen(command, stdin=subprocess.DEVNULL, stdout=out, stderr=err, pass_fds=pass_fds, start_new_session=True, cwd="/")
-                try:
-                    exit_code = process.wait(timeout=timeout)
-                except subprocess.TimeoutExpired:
-                    status = "timeout"
-                    self._kill(process)
+            with open(err_path, "wb") as err:
+                if broker is None:
+                    out_path = os.path.join(outputs, "stdout.txt")
+                    with open(out_path, "wb") as out:
+                        process = subprocess.Popen(command, stdin=subprocess.DEVNULL, stdout=out, stderr=err, pass_fds=pass_fds, start_new_session=True, cwd="/")
+                        try:
+                            exit_code = process.wait(timeout=timeout)
+                        except subprocess.TimeoutExpired:
+                            status = "timeout"
+                            self._stop(process, handle)
+                            exit_code = process.wait()
+                    stdout = self._read(out_path, max_output * 2 + 4096)
+                else:
+                    process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=err, pass_fds=pass_fds, start_new_session=True, cwd="/")
+                    captured, timed_out = self._serve(process, broker, started + timeout, max_output * 2 + 4096)
+                    if timed_out:
+                        status = "timeout"
+                        self._stop(process, handle)
                     exit_code = process.wait()
+                    stdout = captured.decode("utf-8", errors="replace")
         finally:
-            if read_end is not None:
-                os.close(read_end)
-        stdout = self._read(out_path, max_output * 2 + 4096)
+            cleanup()
         stderr = self._read(err_path, 4000)
         seconds = time.time() - started
         envelope = None
@@ -267,21 +275,59 @@ class Sandbox:
                 envelope = json.loads(stdout[at + len(MARK):].strip().splitlines()[0])
             except (ValueError, IndexError):
                 envelope = None
+        common = dict(stderr=stderr, seconds=seconds, exit_code=exit_code, script_hash=digest, backend=self.name)
         if status == "timeout":
-            return SandboxResult("timeout", stdout=stdout[:2000], stderr=stderr, seconds=seconds, exit_code=exit_code, script_hash=digest,
-                                 error={"type": "Timeout", "message": "the script did not finish within %s seconds" % timeout, "line": None})
+            return SandboxResult("timeout", stdout=stdout[:2000], error={"type": "Timeout", "message": "the script did not finish within %s seconds" % timeout, "line": None}, **common)
         if envelope is None:
-            return SandboxResult("crashed", stdout=stdout[:2000], stderr=stderr, seconds=seconds, exit_code=exit_code, script_hash=digest,
-                                 error={"type": "Crashed", "message": "the sandbox ended without an answer (exit code %s): memory, CPU time or a forbidden system call" % exit_code, "line": None})
-        return SandboxResult(envelope["status"], envelope.get("result"), envelope.get("stdout", ""), stderr, envelope.get("error"), seconds, exit_code, envelope.get("truncated", False),
-                             script_hash=digest)
+            return SandboxResult("crashed", stdout=stdout[:2000], **dict(common, error={"type": "Crashed", "line": None, "message": "the sandbox ended without an answer (exit code %s): "
+                                                                                     "memory, CPU time or a forbidden system call" % exit_code}))
+        return SandboxResult(envelope["status"], envelope.get("result"), envelope.get("stdout", ""), error=envelope.get("error"), truncated=envelope.get("truncated", False), **common)
 
     @staticmethod
-    def _kill(process):
+    def _serve(process, broker, deadline, limit):
+        """reads the standard output of a sandbox that has web access: request lines are answered by the broker on its standard input, everything else is kept (up to `limit`).
+        Returns (what was kept, whether the deadline passed)"""
+        import selectors
+        selector = selectors.DefaultSelector()
+        selector.register(process.stdout, selectors.EVENT_READ)
+        kept, buffer, skipping = bytearray(), b"", False
+
+        def answer(request):
+            try:
+                process.stdin.write(ANSWER + json.dumps(request, ensure_ascii=False).encode("utf-8") + b"\n")
+                process.stdin.flush()
+            except (BrokenPipeError, OSError, ValueError):
+                pass
+
         try:
-            os.killpg(process.pid, signal.SIGKILL)
-        except (ProcessLookupError, PermissionError):
-            process.kill()
+            while True:
+                remaining = deadline - time.time()
+                if remaining <= 0:
+                    return bytes(kept), True
+                if not selector.select(min(remaining, 0.5)):
+                    continue
+                chunk = os.read(process.stdout.fileno(), 65536)
+                if not chunk:
+                    return bytes(kept), False
+                buffer += chunk
+                while True:
+                    newline = buffer.find(b"\n")
+                    if newline < 0:
+                        if len(buffer) > MAX_REQUEST_LINE:                     # a line that never ends: whatever it was, it is not kept and not a request that will be served
+                            if not skipping and buffer.startswith(REQUEST):
+                                answer({"error": "the request is too long"})
+                            skipping, buffer = True, b""
+                        break
+                    line, buffer = buffer[:newline], buffer[newline + 1:]
+                    if skipping:
+                        skipping = False                                       # the end of the overlong line
+                        continue
+                    if line.startswith(REQUEST):
+                        answer(broker.handle_line(line[len(REQUEST):]))
+                    elif len(kept) < limit:
+                        kept += line[:limit - len(kept)] + b"\n"
+        finally:
+            selector.close()
 
     @staticmethod
     def _read(path, limit):
@@ -290,3 +336,226 @@ class Sandbox:
                 return fp.read(limit).decode("utf-8", errors="replace")
         except OSError:
             return ""
+
+
+class BubblewrapSandbox(_Backend):
+    """namespaces from bubblewrap, a seccomp filter, resource limits: about 65 ms per run, no image to keep, runs in the SELinux domain of the user"""
+    name = "bubblewrap"
+
+    def __init__(self, bwrap=None, python=None, tmp_root=None):
+        super().__init__(tmp_root)
+        self.bwrap = bwrap or shutil.which("bwrap")
+        python = python or shutil.which("python3") or sys.executable
+        self.python = os.path.realpath("/usr/bin/python3") if os.path.exists("/usr/bin/python3") else os.path.realpath(python)
+
+    def _check_installation(self):
+        if not self.bwrap:
+            return "bubblewrap (bwrap) is not installed"
+        if not os.path.exists(self.python):
+            return "no system Python at %s" % self.python
+        return ""
+
+    def info(self):
+        return dict(super().info(), bwrap=self.bwrap, python=self.python, seccomp=seccomp_program() is not None)
+
+    def _command(self, work, spec, memory_mb, tmp_mb, broker):
+        command = [self.bwrap, "--unshare-all", "--die-with-parent", "--new-session", "--cap-drop", "ALL", "--clearenv",
+                   "--setenv", "PATH", "/nonexistent", "--setenv", "LANG", "C.UTF-8", "--setenv", "PYTHONDONTWRITEBYTECODE", "1", "--setenv", "PYTHONHASHSEED", "0",
+                   "--ro-bind", "/usr/lib", "/usr/lib", "--ro-bind", "/usr/lib64", "/usr/lib64", "--ro-bind", self.python, self.python,
+                   "--symlink", "usr/lib", "/lib", "--symlink", "usr/lib64", "/lib64", "--proc", "/proc", "--dev", "/dev",
+                   "--size", str(tmp_mb * 1024 * 1024), "--tmpfs", "/tmp", "--ro-bind", work, "/sandbox"]
+        command += ["--remount-ro", "/", "--chdir", "/tmp"]                       # all mount points exist: now the root itself is read-only
+        pass_fds, read_end = (), None
+        program = seccomp_program()
+        if program is not None:
+            read_end, write_end = os.pipe()
+            os.write(write_end, program)
+            os.close(write_end)
+            command += ["--seccomp", str(read_end)]
+            pass_fds = (read_end,)
+        # -s -S -P: no user site, no site, no script directory on the path. (-I would also ignore PYTHONHASHSEED, and the environment is empty anyway.)
+        command += [self.python, "-s", "-S", "-P", "/sandbox/runner.py", json.dumps(spec)]
+
+        def cleanup():
+            if read_end is not None:
+                os.close(read_end)
+        return command, pass_fds, None, cleanup
+
+
+DEFAULT_IMAGE = "localhost/mia-sandbox:1"
+PODMAN_PROFILE_SOURCES = ("/etc/containers/seccomp.json", "/usr/share/containers/seccomp.json")
+THREAD_ONLY = {"index": 0, "value": CLONE_THREAD, "valueTwo": CLONE_THREAD, "op": "SCMP_CMP_MASKED_EQ"}       # (flags & CLONE_THREAD) == CLONE_THREAD
+
+
+def podman_seccomp_profile(source=None):
+    """podman's own default profile, made stricter the same way as the bubblewrap filter: the system calls of DENIED_X86_64 and fork/vfork/clone/clone3 lose their permission,
+    and clone comes back only with CLONE_THREAD (threads yes, processes no). Returns the profile dict, or None when the default profile cannot be found."""
+    for path in ([source] if source else PODMAN_PROFILE_SOURCES):
+        if path and os.path.exists(path):
+            with open(path, encoding="utf-8") as fp:
+                profile = json.load(fp)
+            break
+    else:
+        return None
+    removed = set(DENIED_X86_64) | {"fork", "vfork", "clone", "clone3"}
+    groups = []
+    for group in profile.get("syscalls", []):
+        if group.get("action") == "SCMP_ACT_ALLOW":
+            group = dict(group, names=[n for n in group.get("names", []) if n not in removed])
+            if not group["names"]:
+                continue
+        groups.append(group)
+    groups.append({"names": ["clone"], "action": "SCMP_ACT_ALLOW", "args": [THREAD_ONLY]})
+    groups.append({"names": ["clone3"], "action": "SCMP_ACT_ERRNO", "errnoRet": ENOSYS})
+    groups.append({"names": sorted(n for n in DENIED_X86_64 if n not in ("clone3",)) + ["fork", "vfork"], "action": "SCMP_ACT_ERRNO", "errnoRet": EPERM})
+    profile["syscalls"] = groups
+    return profile
+
+
+class PodmanSandbox(_Backend):
+    """a rootless podman container per run: no network, read-only root, no capabilities, no-new-privileges, a stricter seccomp profile, hard cgroup limits (memory, processes, cpu)
+    and SELinux confinement (container_t with its own category label). About 1 s per run and an image to build (tools/sandbox/build_image.sh).
+    One container per run, never a pod: containers of a pod share one network namespace."""
+    name = "podman"
+
+    def __init__(self, podman=None, image=DEFAULT_IMAGE, tmp_root=None, profile_source=None):
+        super().__init__(tmp_root)
+        self.podman = podman or shutil.which("podman")
+        self.image = image
+        self.profile_source = profile_source
+        self._profile_dir = None
+
+    def _check_installation(self):
+        if not self.podman:
+            return "podman is not installed"
+        try:
+            exists = subprocess.run([self.podman, "image", "exists", self.image], capture_output=True, timeout=30).returncode == 0
+        except (OSError, subprocess.TimeoutExpired):
+            return "podman does not answer"
+        if not exists:
+            return "the image %s does not exist (build it with tools/sandbox/build_image.sh)" % self.image
+        if podman_seccomp_profile(self.profile_source) is None:
+            return "podman's default seccomp profile was not found, so the stricter profile cannot be made"
+        return ""
+
+    def info(self):
+        return dict(super().info(), podman=self.podman, image=self.image)
+
+    def _profile_path(self):
+        if self._profile_dir is None:
+            self._profile_dir = tempfile.mkdtemp(prefix="mia-seccomp-", dir=self.tmp_root)
+            with open(os.path.join(self._profile_dir, "profile.json"), "w", encoding="utf-8") as fp:
+                json.dump(podman_seccomp_profile(self.profile_source), fp)
+        return os.path.join(self._profile_dir, "profile.json")
+
+    def _command(self, work, spec, memory_mb, tmp_mb, broker):
+        name = "mia-sbx-" + secrets.token_hex(5)
+        command = [self.podman, "run", "--rm", "--name", name, "--pull=never", "--network=none", "--read-only", "--cap-drop=all", "--security-opt", "no-new-privileges",
+                   "--security-opt", "seccomp=" + self._profile_path(), "--pids-limit=64", "--memory=%dm" % (memory_mb + 128), "--memory-swap=%dm" % (memory_mb + 128), "--cpus=1",
+                   "--hostname", "sandbox", "--no-hosts", "--stop-timeout=0",
+                   "--tmpfs", "/tmp:rw,size=%dm,noexec,nosuid,nodev" % tmp_mb, "-v", "%s:/sandbox:ro,Z" % work, "-w", "/tmp",
+                   "--env", "LANG=C.UTF-8", "--env", "PYTHONDONTWRITEBYTECODE=1", "--env", "PYTHONHASHSEED=0"]
+        if broker is not None:
+            command.insert(2, "-i")                                      # the answers of the broker arrive on the standard input
+        command += [self.image, "python3", "-s", "-S", "-P", "/sandbox/runner.py", json.dumps(spec)]
+        return command, (), name, lambda: None
+
+    def _stop(self, process, handle):
+        try:
+            subprocess.run([self.podman, "rm", "-f", "-t", "0", handle], capture_output=True, timeout=20)
+        except (OSError, subprocess.TimeoutExpired):
+            pass
+        super()._stop(process, handle)
+
+
+Sandbox = BubblewrapSandbox        # the first backend under its old name
+
+
+# --- which backend for which operation ----------------------------------------------------------------------------------------------------
+
+class Operation:
+    """what is about to run, as far as it matters for the choice of the wall.
+    kind:    compute (a pure calculation) | web_script (a script that gets web access through the broker) | parse (hostile documents)
+    origin:  library (a pinned entry that is tested or trusted) | model (written by the model for this claim) | external (from outside: pasted, downloaded)
+    tainted: the input comes from text of the web or of files nobody checked (prompt injection could have shaped the script)
+    stakes:  normal | high"""
+
+    def __init__(self, kind="compute", origin="model", tainted=False, stakes="normal"):
+        self.kind, self.origin, self.tainted, self.stakes = kind, origin, bool(tainted), stakes
+
+    def as_dict(self):
+        return {"kind": self.kind, "origin": self.origin, "tainted": self.tainted, "stakes": self.stakes}
+
+
+def required_tier(operation):
+    """("standard" | "strong", [reasons]): the strong tier is for what is most exposed to hostile influence or matters most"""
+    reasons = []
+    if operation.kind in ("web_script", "parse"):
+        reasons.append("the %s kind of operation reads outside data" % operation.kind)
+    if operation.tainted:
+        reasons.append("its input comes from unchecked web or file text")
+    if operation.origin == "external":
+        reasons.append("the code comes from outside")
+    if operation.stakes == "high":
+        reasons.append("the stakes are high")
+    return ("strong" if reasons else "standard"), reasons
+
+
+class SandboxRouter:
+    """Chooses the backend per operation. standard: bubblewrap (fast: many small checks), podman if bubblewrap is missing. strong: podman only (SELinux, cgroups, own image).
+    If the strong backend is missing the operation is refused (status unavailable), unless degrade=True, which runs it on bubblewrap and marks the result degraded.
+    force: use only this backend for everything ('bubblewrap' or 'podman')."""
+
+    def __init__(self, backends, degrade=False, force=None):
+        self.backends = dict(backends)
+        self.degrade, self.force = degrade, force
+
+    def order(self, tier):
+        if self.force in self.backends:
+            return [self.force]
+        if tier == "strong":
+            return ["podman"] + (["bubblewrap"] if self.degrade else [])
+        return ["bubblewrap", "podman"]
+
+    def choose(self, operation=None):
+        """(backend or None, tier, reasons): the first available backend in the order of the tier"""
+        operation = operation or Operation()
+        tier, reasons = required_tier(operation)
+        for name in self.order(tier):
+            backend = self.backends.get(name)
+            if backend is not None and backend.available:
+                if tier == "strong" and name != "podman" and not self.force:
+                    reasons = reasons + ["degraded: the strong backend is not available"]
+                return backend, tier, reasons
+        return None, tier, reasons
+
+    @property
+    def available(self):
+        """some backend works (used to switch the script checks on or off)"""
+        return any(b.available for b in self.backends.values())
+
+    def available_for(self, operation=None):
+        return self.choose(operation)[0] is not None
+
+    def info(self):
+        return {"backends": {name: b.info() for name, b in self.backends.items()}, "degrade": self.degrade, "force": self.force}
+
+    def run(self, code, data=None, operation=None, **kwargs):
+        backend, tier, reasons = self.choose(operation)
+        if backend is None:
+            wanted = self.order(tier)
+            detail = "; ".join("%s: %s" % (n, self.backends[n].reason or "not available") for n in wanted if n in self.backends) or "no backend configured"
+            return SandboxResult("unavailable", error={"message": "no sandbox for a %s operation (%s). %s" % (tier, "; ".join(reasons) or "standard", detail)},
+                                 script_hash=hashlib.sha256(str(code).encode("utf-8", "replace")).hexdigest()[:16], tier=tier)
+        result = backend.run(code, data, **kwargs)
+        result.tier = tier
+        result.degraded = tier == "strong" and backend.name != "podman" and not self.force
+        return result
+
+
+def create_router(cfg=None, tmp_root=None):
+    """a router from the configuration: sandbox_backend ('auto' | 'bubblewrap' | 'podman'), sandbox_degrade (false), sandbox_image"""
+    cfg = cfg or {}
+    force = cfg.get("sandbox_backend", "auto")
+    return SandboxRouter({"bubblewrap": BubblewrapSandbox(tmp_root=tmp_root), "podman": PodmanSandbox(image=cfg.get("sandbox_image", DEFAULT_IMAGE), tmp_root=tmp_root)},
+                         degrade=bool(cfg.get("sandbox_degrade", False)), force=force if force in ("bubblewrap", "podman") else None)

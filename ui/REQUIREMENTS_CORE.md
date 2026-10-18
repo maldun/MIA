@@ -340,16 +340,15 @@ Requirements:
     `eval`, `__import__`, attribute tricks to builtins, or `os`/`sys`/`subprocess`/`socket`; data comes in as a JSON file or constant and the result goes out as one JSON line on stdout;
   - the script, input, output, exit status and timings are logged; a script is never run twice with changed inputs hidden from the log;
   - if no real sandbox is available the check is **off**, not weakened, and the status block says so.
-- HC2a. **Sandbox backends** (decision of the design, measured on the development machine). `Sandbox` is an interface (`available`, `run`, `info`); the first backend is bubblewrap with a seccomp filter (65 ms per run).
-  A second backend, a **rootless podman container**, adds what bubblewrap cannot give: SELinux confinement (`container_t` with a random MCS label; the machine runs SELinux enforcing), hard cgroup limits (memory,
-  pids, cpu: a fork bomb is stopped by the pids limit), and a path to stronger isolation by changing the OCI runtime (gVisor `runsc`, or a micro VM with `crun-krun`/Kata, which need KVM and `/dev/kvm` is not
-  present on this machine today). Costs: 0.8 to 1.2 s per start, an image that has to be built or pulled and kept up to date, more moving parts. A *pod* is the wrong primitive: containers of one pod share one
-  network namespace, which would give the sandbox the network of its sidecar. The rule is one container per run with `--network=none --read-only --cap-drop=all --security-opt no-new-privileges`, the same
-  seccomp profile as the bubblewrap backend, and the broker socket mounted in as a volume. The backend is chosen in the configuration (`sandbox_backend`: bubblewrap, podman, auto); a skill with high stakes
-  can ask for the stronger one.
-- HC2b. **Web access of scripts** only through the broker (`broker.py`): GET and search, the same safety rules and web log as MIA's own tools, budgets per script, nothing else leaves the sandbox. No curl, no sockets.
-  Later options: run the page fetcher and HTML extraction itself in a sandbox with network but no files and no access to this machine's services (so a parser bug in hostile HTML cannot touch MIA), with
-  the DNS answer pinned by the broker.
+- HC2a. **Two sandbox backends, chosen per operation** (built, measured on the development machine). `bubblewrap` (namespaces, read-only root, seccomp, limits; 65 ms) is the **standard** tier for many small
+  pure calculations. A **rootless podman container** (one container per run, never a pod, because the containers of a pod share one network namespace) is the **strong** tier: it adds SELinux confinement
+  (`container_t` with its own category label; the machine runs SELinux enforcing), hard cgroup limits (a fork bomb is stopped by the pids limit) and a seccomp profile made stricter than podman's default;
+  it costs about 0.9 s per run and an image (`tools/sandbox/build_image.sh`). The strong tier is used when an operation is exposed to hostile influence or matters most: a script with web access, parsing of hostile
+  documents, input that is tainted by unchecked web or file text, code from outside, high stakes. If the strong backend is missing the operation is refused, never weakened (optionally degraded, and marked).
+  Stronger isolation can follow by changing the OCI runtime of the strong tier (gVisor `runsc`, or a micro VM with `crun-krun`/Kata, which need KVM; `/dev/kvm` is not present on this machine today).
+- HC2b. **Web access of scripts** only through the broker (`broker.py`), over the standard input and output of the sandbox (no socket, no mounted file, so also no conflict with SELinux): GET and search, the same
+  safety rules and web log as MIA's own tools, budgets per script, nothing else leaves the sandbox. No curl, no sockets. A later option: run the page fetcher and HTML extraction itself in a sandbox with network
+  but no files and no access to this machine's services (so a parser bug in hostile HTML cannot touch MIA), with the DNS answer pinned by the broker.
 - HC3. **Test-oracle caveat for scripts.** A script written by the same model that made the claim can encode the same misconception (it checks what the model believes, for example a wrong formula).
   Mitigations: the script is generated from the *claim*, not from the draft's reasoning; it must print the values it used; the judge or verifier sees the script (a different view or model reviews
   that the script tests what the claim says); numeric claims are computed in two independent ways when cheap (for example `decimal` and `fractions`); the harness measures how often a passing

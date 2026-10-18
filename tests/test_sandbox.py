@@ -392,36 +392,274 @@ class BrokerTests(unittest.TestCase):
         run = SANDBOX.run("result = web.get('https://a.example')", policy=False)
         self.assertEqual((run.status, run.error["type"]), ("error", "NameError"))
 
-    def test_the_socket_is_the_only_way_out_and_is_cleaned_up(self):
+    def test_there_is_no_other_way_out(self):
         broker, _, _ = make_broker({})
         with broker:
-            directory = broker.directory
-            self.assertTrue(os.path.exists(os.path.join(directory, "sock")))
-            run = wall("import socket\ntry:\n    socket.create_connection(('1.1.1.1', 443), timeout=2)\n    result = 'REACHED'\nexcept OSError:\n    result = 'blocked'", broker=broker)
-            self.assertEqual(run.result, "blocked")
-        self.assertFalse(os.path.exists(directory))
+            run = wall("import os, socket\nout = {'broker_dir': os.path.exists('/broker')}\ntry:\n    socket.create_connection(('1.1.1.1', 443), timeout=2)\n    out['net'] = 'REACHED'\n"
+                       "except OSError:\n    out['net'] = 'blocked'\nresult = out", broker=broker)
+        self.assertEqual(run.result, {"broker_dir": False, "net": "blocked"})                # no socket, no mounted directory: only the two pipes
 
     def test_a_script_can_not_break_the_broker(self):
+        # the script writes forged and broken protocol lines on the real stdout, then asks normally: every line is answered or ignored and the broker keeps serving
         broker, session, _ = make_broker({"https://a.example/page": FakeResponse(self.PAGE)})
         with broker:
-            run = wall("import socket, json\ndef ask(raw):\n    try:\n        s = socket.socket(socket.AF_UNIX)\n        s.connect('/broker/sock')\n        s.sendall(raw)\n        s.shutdown(socket.SHUT_WR)\n"
-                       "        data = b''\n        while True:\n            b = s.recv(65536)\n            if not b:\n                break\n            data += b\n        return data.decode()[:80]\n"
-                       "    except OSError as e:\n        return 'error: ' + type(e).__name__\n"
-                       "result = [ask(b'garbage'), ask(b'{\"op\": \"shell\", \"cmd\": \"id\"}\\n'), ask(b'{\"op\": \"get\"}\\n'), ask(b'x' * 20000 + b'\\n')]", broker=broker)
-            after = SANDBOX.run("result = web.get('https://a.example/page')['title']", broker=broker)
+            run = wall("import sys\nREQ = '\\x01MIA-REQ\\x01'\ndef raw(text):\n    sys.__stdout__.write(REQ + text + '\\n')\n    sys.__stdout__.flush()\n    return sys.stdin.readline()[:60]\n"
+                       "answers = [raw('garbage'), raw('{\"op\": \"shell\", \"cmd\": \"id\"}'), raw('{\"op\": \"get\"}'), raw('[1, 2]'), raw('\"text\"')]\n"
+                       "sys.__stdout__.write(REQ + 'x' * 20000 + '\\n')\nsys.__stdout__.flush()\nanswers.append(sys.stdin.readline()[:60])\n"
+                       "sys.__stdout__.write('not a request, just noise\\n')\nsys.__stdout__.flush()\n"
+                       "answers.append(str(web.get('https://a.example/page')['title']))\nresult = answers", broker=broker, timeout=20)
         self.assertEqual(run.status, "ok", run.error)
-        self.assertTrue(all("error" in answer for answer in run.result), run.result)
-        self.assertEqual(after.result, "Doc")                                                 # still serving afterwards
+        self.assertTrue(all("error" in answer for answer in run.result[:-1]), run.result)
+        self.assertEqual(run.result[-1], "Doc")                                              # still serving, and in step with the script
+        self.assertEqual(session.calls, ["https://a.example/page"])
+
+    def test_a_script_that_never_reads_its_answers_does_not_block_MIA(self):
+        broker, _, _ = make_broker({"https://a.example/page": FakeResponse(self.PAGE)})
+        started = time.time()
+        with broker:
+            run = wall("import sys\nfor i in range(200):\n    sys.__stdout__.write('\\x01MIA-REQ\\x01{\"op\": \"search\", \"query\": \"x\"}\\n')\nsys.__stdout__.flush()\nresult = 'sent'", broker=broker, timeout=10)
+        self.assertLess(time.time() - started, 10)
+        self.assertIn(run.status, ("ok", "timeout", "crashed", "error"))
+        self.assertLessEqual(broker.calls["search"], 3)                                      # the budget held
+
+    def test_output_with_a_broker_is_capped_too(self):
+        broker, _, _ = make_broker({})
+        with broker:
+            run = SANDBOX.run("for i in range(100000):\n    print('x' * 100)\nresult = 'done'", broker=broker, max_output=2000)
+        self.assertEqual((run.status, run.result, len(run.stdout), run.truncated), ("ok", "done", 2000, True))
+
+    def test_a_timeout_with_a_broker(self):
+        broker, _, _ = make_broker({})
+        started = time.time()
+        with broker:
+            run = SANDBOX.run("while True:\n    pass", broker=broker, timeout=1.5, policy=False)
+        self.assertEqual(run.status, "timeout")
+        self.assertLess(time.time() - started, 8)
+
+
+class FakeBackend:
+    def __init__(self, name, available=True, reason=""):
+        self.name, self.available, self.reason, self.runs = name, available, reason, []
+
+    def run(self, code, data=None, **kw):
+        self.runs.append(code)
+        return S.SandboxResult("ok", result=self.name, backend=self.name)
+
+    def info(self):
+        return {"backend": self.name, "available": self.available}
+
+
+def router(bubblewrap=True, podman=True, **kw):
+    return S.SandboxRouter({"bubblewrap": FakeBackend("bubblewrap", bubblewrap, "no bwrap"), "podman": FakeBackend("podman", podman, "no image")}, **kw)
+
+
+class RouterTests(unittest.TestCase):
+    CASES = [
+        (dict(kind="compute", origin="library"), "standard", "bubblewrap"),
+        (dict(kind="compute", origin="model"), "standard", "bubblewrap"),
+        (dict(kind="compute", origin="model", stakes="normal"), "standard", "bubblewrap"),
+        (dict(kind="compute", origin="model", tainted=True), "strong", "podman"),          # the input is web text: prompt injection could have shaped the script
+        (dict(kind="web_script", origin="library"), "strong", "podman"),
+        (dict(kind="web_script", origin="model"), "strong", "podman"),
+        (dict(kind="parse", origin="library"), "strong", "podman"),
+        (dict(kind="compute", origin="external"), "strong", "podman"),
+        (dict(kind="compute", origin="library", stakes="high"), "strong", "podman"),
+    ]
+
+    def test_the_tier_and_the_reasons(self):
+        for kwargs, tier, _ in self.CASES:
+            self.assertEqual(S.required_tier(S.Operation(**kwargs))[0], tier, kwargs)
+        self.assertEqual(S.required_tier(S.Operation())[1], [])
+        reasons = " ".join(S.required_tier(S.Operation(kind="web_script", tainted=True, stakes="high"))[1])
+        for part in ("web_script", "unchecked", "stakes"):
+            self.assertIn(part, reasons)
+
+    def test_the_backend_follows_the_operation(self):
+        r = router()
+        for kwargs, tier, backend in self.CASES:
+            chosen, got_tier, _ = r.choose(S.Operation(**kwargs))
+            self.assertEqual((chosen.name, got_tier), (backend, tier), kwargs)
+        self.assertEqual(r.choose()[0].name, "bubblewrap")                                  # no operation given: standard
+
+    def test_run_marks_tier_and_backend(self):
+        r = router()
+        outcome = r.run("x", operation=S.Operation(kind="web_script"))
+        self.assertEqual((outcome.backend, outcome.tier, outcome.degraded), ("podman", "strong", False))
+        self.assertEqual(r.backends["bubblewrap"].runs, [])
+        outcome = r.run("y")
+        self.assertEqual((outcome.backend, outcome.tier), ("bubblewrap", "standard"))
+
+    def test_a_missing_backend(self):
+        # standard operations can use podman when bubblewrap is missing; a strong one is refused without podman (never weakened) ...
+        self.assertEqual(router(bubblewrap=False).choose()[0].name, "podman")
+        refused = router(podman=False).run("x", operation=S.Operation(kind="web_script"))
+        self.assertEqual((refused.status, refused.tier), ("unavailable", "strong"))
+        self.assertIn("strong operation", refused.error["message"])
+        self.assertIn("no image", refused.error["message"])
+        self.assertEqual(router(podman=False).backends["bubblewrap"].runs, [])
+        # ... unless degrading is allowed, which is marked on the result
+        degraded = router(podman=False, degrade=True).run("x", operation=S.Operation(stakes="high"))
+        self.assertEqual((degraded.status, degraded.backend, degraded.degraded), ("ok", "bubblewrap", True))
+        both_missing = router(bubblewrap=False, podman=False)
+        self.assertFalse(both_missing.available)
+        self.assertEqual(both_missing.run("x").status, "unavailable")
+        self.assertTrue(router(podman=False).available)
+
+    def test_forcing_one_backend(self):
+        r = router(force="bubblewrap")
+        self.assertEqual(r.choose(S.Operation(kind="web_script"))[0].name, "bubblewrap")
+        self.assertFalse(r.run("x", operation=S.Operation(kind="web_script")).degraded)       # the user chose it: not a degradation
+        r = router(force="podman")
+        self.assertEqual(r.choose()[0].name, "podman")
+        self.assertIsNone(router(podman=False, force="podman").choose()[0])
+
+    def test_the_router_from_the_configuration(self):
+        r = S.create_router({"sandbox_backend": "podman", "sandbox_degrade": True, "sandbox_image": "localhost/other:2"})
+        self.assertEqual((r.force, r.degrade, r.backends["podman"].image), ("podman", True, "localhost/other:2"))
+        r = S.create_router({})
+        self.assertEqual((r.force, r.degrade), (None, False))
+        self.assertEqual(sorted(r.info()["backends"]), ["bubblewrap", "podman"])
+        self.assertIsNone(S.create_router({"sandbox_backend": "auto"}).force)
+
+
+class ProfileTests(unittest.TestCase):
+    def test_podmans_default_profile_is_made_stricter(self):
+        profile = S.podman_seccomp_profile()
+        if profile is None:
+            self.skipTest("no default podman seccomp profile on this machine")
+        allowed = {n for g in profile["syscalls"] if g["action"] == "SCMP_ACT_ALLOW" for n in g["names"]}
+        for name in ("fork", "vfork", "ptrace", "mount", "unshare", "setns", "bpf", "io_uring_setup", "process_vm_writev"):
+            self.assertNotIn(name, allowed, name)
+        self.assertIn("read", allowed)
+        self.assertIn("write", allowed)
+        clone = [g for g in profile["syscalls"] if g["action"] == "SCMP_ACT_ALLOW" and "clone" in g["names"]]
+        self.assertEqual(len(clone), 1)
+        self.assertEqual(clone[0]["args"], [S.THREAD_ONLY])                                  # clone only with CLONE_THREAD
+        enosys = [g for g in profile["syscalls"] if g["action"] == "SCMP_ACT_ERRNO" and "clone3" in g["names"]]
+        self.assertTrue(all(g["errnoRet"] == S.ENOSYS for g in enosys))
+        self.assertEqual(S.podman_seccomp_profile("/nonexistent/profile.json"), None)
+
+
+PODMAN = S.PodmanSandbox()
+needs_podman = unittest.skipUnless(PODMAN.available, "no podman sandbox here: %s" % PODMAN.reason)
+
+
+def podman_wall(code, **kw):
+    kw.setdefault("timeout", 20)
+    return PODMAN.run(code, policy=False, raw=True, **kw)
+
+
+def leftover_containers():
+    import subprocess
+    return subprocess.run(["podman", "ps", "-a", "--format", "{{.Names}}", "--filter", "name=mia-sbx"], capture_output=True, text=True).stdout.split()
+
+
+@needs_podman
+class PodmanTests(unittest.TestCase):
+    def test_a_normal_run(self):
+        run = PODMAN.run("import math\nprint('hi')\nresult = {'root': math.sqrt(data['n'])}", {"n": 49})
+        self.assertEqual((run.status, run.result, run.stdout, run.backend), ("ok", {"root": 7.0}, "hi\n", "podman"))
+        self.assertEqual(PODMAN.run("import os").status, "rejected")                          # the same policy as for the other backend
+        self.assertEqual(PODMAN.run("1/0").error["type"], "ZeroDivisionError")
+
+    def test_no_files_of_the_host_and_an_empty_environment(self):
+        os.environ["MIA_SECRET_FOR_TEST"] = "hunter2"
+        try:
+            run = podman_wall("import os\nresult = {'home': os.path.exists('/home/%s'), 'repo': os.path.exists(%r), 'env': dict(os.environ), 'passwd': open('/etc/passwd').read()}"
+                              % (os.environ.get("USER", "nobody"), REPO))
+        finally:
+            del os.environ["MIA_SECRET_FOR_TEST"]
+        self.assertEqual((run.status, run.result["home"], run.result["repo"]), ("ok", False, False))
+        self.assertNotIn("MIA_SECRET_FOR_TEST", run.result["env"])
+        self.assertNotIn(os.environ.get("USER", "nobody") + ":", run.result["passwd"])         # the image's own /etc/passwd, not the host's
+
+    def test_no_network(self):
+        import socket
+        server = socket.socket()
+        server.bind(("127.0.0.1", 0))
+        server.listen(1)
+        try:
+            run = podman_wall("import socket\nout = {}\nfor name, address in (('internet', ('1.1.1.1', 443)), ('local', ('127.0.0.1', %d)), ('lan', ('192.168.0.1', 80))):\n"
+                              "    try:\n        socket.create_connection(address, timeout=2)\n        out[name] = 'REACHED'\n    except OSError as e:\n        out[name] = type(e).__name__\nresult = out"
+                              % server.getsockname()[1])
+        finally:
+            server.close()
+        self.assertEqual(run.status, "ok")
+        self.assertNotIn("REACHED", run.result.values())
+
+    def test_no_new_processes_but_threads_work(self):
+        run = podman_wall("import os\ntry:\n    os.fork()\n    result = 'FORKED'\nexcept OSError as e:\n    result = e.errno")
+        self.assertIn(run.result, (1, 38))
+        run = podman_wall("import subprocess\ntry:\n    subprocess.run(['/usr/bin/true'])\n    result = 'STARTED'\nexcept OSError as e:\n    result = type(e).__name__")
+        self.assertNotEqual(run.result, "STARTED")
+        run = podman_wall("import threading\nr = []\nts = [threading.Thread(target=lambda i=i: r.append(i)) for i in range(5)]\n[t.start() for t in ts]\n[t.join() for t in ts]\nresult = sorted(r)")
+        self.assertEqual(run.result, [0, 1, 2, 3, 4])
+
+    def test_the_process_limit_of_the_cgroup(self):
+        run = podman_wall("import threading, time\nstarted = 0\nstop = threading.Event()\ntry:\n    for i in range(300):\n        threading.Thread(target=stop.wait, daemon=True).start()\n"
+                          "        started += 1\nexcept RuntimeError:\n    pass\nstop.set()\nresult = started")
+        self.assertEqual(run.status, "ok")
+        self.assertLess(run.result, 100)                                                       # --pids-limit=64 stops the 300 threads
+
+    def test_dangerous_system_calls_are_refused(self):
+        run = podman_wall("import ctypes\nlibc = ctypes.CDLL(None, use_errno=True)\nout = {}\nfor name, number, args in (('ptrace', 101, (0, 0, 0, 0)), ('mount', 165, (0, 0, 0, 0, 0)), "
+                          "('unshare', 272, (0x10000000,)), ('bpf', 321, (0, 0, 0)), ('io_uring_setup', 425, (8, 0))):\n    r = libc.syscall(number, *args)\n"
+                          "    out[name] = ctypes.get_errno() if r == -1 else 'ALLOWED'\nresult = out")
+        self.assertEqual(run.status, "ok")
+        self.assertTrue(all(v in (1, 38) for v in run.result.values()), run.result)
+
+    def test_read_only_root_and_a_limited_temporary_directory(self):
+        run = podman_wall("try:\n    open('/usr/x', 'w')\n    result = 'WRITABLE'\nexcept OSError as e:\n    result = type(e).__name__")
+        self.assertNotEqual(run.result, "WRITABLE")
+        run = podman_wall("n = 0\ntry:\n    for i in range(100):\n        open('/tmp/f%d' % i, 'wb').write(b'x' * (512 * 1024))\n        n += 1\nexcept OSError:\n    pass\nresult = n", tmp_mb=4, fsize_mb=4)
+        self.assertLess(run.result, 100)
+
+    def test_the_container_is_confined_by_selinux_and_has_no_capabilities(self):
+        run = podman_wall("status = open('/proc/self/status').read()\nresult = {'caps': status.split('CapEff:')[1].split()[0], 'nnp': status.split('NoNewPrivs:')[1].split()[0], "
+                          "'seccomp': status.split('Seccomp:')[1].split()[0], 'label': open('/proc/self/attr/current').read()}")
+        self.assertEqual((run.result["caps"], run.result["nnp"], run.result["seccomp"]), ("0000000000000000", "1", "2"))
+        import subprocess
+        if subprocess.run(["getenforce"], capture_output=True, text=True).stdout.strip() == "Enforcing":
+            self.assertIn("container_t", run.result["label"])
+
+    def test_memory_and_time_limits_and_no_container_is_left(self):
+        run = podman_wall("x = bytearray(2 * 1024 * 1024 * 1024)\nresult = len(x)", memory_mb=256)
+        self.assertIn(run.status, ("error", "crashed"))
+        started = time.time()
+        run = podman_wall("while True:\n    pass", timeout=2)
+        self.assertEqual(run.status, "timeout")
+        self.assertLess(time.time() - started, 12)
+        self.assertEqual(leftover_containers(), [])
+
+    def test_the_broker_works_through_a_volume(self):
+        broker, session, _ = make_broker({"https://a.example/page": FakeResponse(BrokerTests.PAGE)})
+        with broker:
+            run = PODMAN.run("page = web.get('https://a.example/page')\nresult = [page['title'], page['text']]", broker=broker)
+            blocked = PODMAN.run("try:\n    web.get('http://127.0.0.1:8585/')\n    result = 'FETCHED'\nexcept Exception as e:\n    result = 'refused'", broker=broker)
+        self.assertEqual((run.status, run.result), ("ok", ["Doc", "Height 330 metres."]))
+        self.assertEqual(blocked.result, "refused")
+        self.assertEqual(session.calls, ["https://a.example/page"])
+
+    def test_runs_in_parallel_do_not_collide(self):
+        import concurrent.futures
+        with concurrent.futures.ThreadPoolExecutor(4) as pool:
+            results = list(pool.map(lambda n: PODMAN.run("result = data['n'] * 2", {"n": n}), range(4)))
+        self.assertEqual([r.result for r in results], [0, 2, 4, 6])
+        self.assertEqual(leftover_containers(), [])
+
 
 
 class BrokerUnitTests(unittest.TestCase):
     def test_handlers_without_a_sandbox(self):
         broker, _, _ = make_broker({"https://a.example/page": FakeResponse("<p>Hi</p>")})
-        answer = broker._answer(json.dumps({"op": "get", "url": "https://a.example/page"}).encode())
+        answer = broker.handle_line(json.dumps({"op": "get", "url": "https://a.example/page"}).encode())
         self.assertEqual(answer["text"], "Hi")
-        self.assertIn("unknown operation", broker._answer(b'{"op": "post"}')["error"])
-        self.assertIn("unreadable", broker._answer(b"not json")["error"])
-        self.assertIn("UnsafeUrl", broker._answer(json.dumps({"op": "get", "url": "http://localhost/"}).encode())["error"])
+        self.assertIn("unknown operation", broker.handle_line(b'{"op": "post"}')["error"])
+        self.assertIn("unreadable", broker.handle_line(b"not json")["error"])
+        self.assertIn("unreadable", broker.handle_line(b"[1, 2]")["error"])
+        self.assertIn("unreadable", broker.handle_line(b"\xff\xfe")["error"])
+        self.assertIn("UnsafeUrl", broker.handle_line(json.dumps({"op": "get", "url": "http://localhost/"}).encode())["error"])
+        self.assertEqual(B.WebBroker({"get": lambda url, mode: 1 / 0}).handle({"op": "get", "url": "x"}), {"error": "failed: ZeroDivisionError"})   # a failing handler is an answer, not a crash
         self.assertEqual(broker.calls["get"], 2)                                              # a refused address still counts against the budget
 
 

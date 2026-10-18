@@ -439,9 +439,24 @@ files; a skill names a pipeline, and the old `pipelines/` folder is gone.
 - If bubblewrap or user namespaces are missing, `Sandbox.available` is False and `run()` refuses: the feature is off, never weakened. A run takes about 65 ms.
 - A script gets `data` (its input) and sets `result` (JSON). `SCRIPT_GUIDE` is the text for prompts that ask a model to write one.
 
-**Web access for scripts** goes through a broker (`broker.py`), because a sandbox has no network and no curl: a Unix socket (a file bind-mounted into the sandbox) answers two questions, `web.get(url, mode="text"|"raw")`
-and `web.search(query)`. The answers come from MIA's own web tools, so a script is held to the same rules (public addresses only, redirects and connected address checked, limits, no POST, no cookies, every request
-in the web log) plus budgets per script (default 5 pages, 3 searches, 400 kB). The script never sees an address or a socket; the name is resolved and connected by the broker, not by the script.
+**Web access for scripts** goes through a broker (`broker.py`), because a sandbox has no network and no curl. The script writes a request line on its standard output (`web.get(url, mode="text"|"raw")` or
+`web.search(query)`), MIA answers on its standard input. No socket and no mounted file: nothing for SELinux or the namespaces to get in the way of (a container cannot connect to a socket of an unconfined
+process under SELinux, which is how this design was found). The answers come from MIA's own web tools, so a script is held to the same rules (public addresses only, redirects and connected address checked, limits,
+no POST, no cookies, every request in the web log) plus budgets per script (default 5 pages, 3 searches, 400 kB). The script never sees an address or a socket; the name is resolved and connected by the broker.
+Forged or broken protocol lines are answered with an error or ignored; the output of a script is capped also while it talks to the broker.
 
-- Not wired yet: the script check (`check.script`), the `script` node kind of the runner, and the dispatcher integration; the choice of a stronger backend (rootless podman, see `REQUIREMENTS_CORE.md` 12.2).
-- Tests: `tests/test_sandbox.py` (45 tests: policy, seccomp program, runs, the wall, the broker).
+**Two backends, chosen per operation** (`SandboxRouter`):
+
+| Backend | What it adds | Cost |
+|---|---|---|
+| `bubblewrap` | namespaces, read-only root, seccomp filter, limits | about 65 ms per run, nothing to install |
+| `podman` | a rootless container per run (never a pod: pods share one network namespace): no network, read-only root, no capabilities, no-new-privileges, podman's own seccomp profile made stricter (no fork/clone of processes, same list as above), **SELinux confinement** (`container_t` with its own category label), **cgroup limits** (memory, 64 processes, 1 cpu) | about 0.9 s per run, an image of 170 MB (`tools/sandbox/build_image.sh`, once) |
+
+An operation (`Operation`: kind, origin, tainted, stakes) gets the **standard** tier (bubblewrap; many small checks) or the **strong** tier (podman only) when it is exposed or important:
+a script with web access (`web_script`), hostile documents to parse (`parse`), input that comes from unchecked web or file text (`tainted`: prompt injection could have shaped the script), code from outside
+(`origin: external`), or high stakes. A pure calculation of a library script or of the model on the user's own data is standard. If the strong backend is missing the operation is **refused**
+(status `unavailable`, with the reasons) and never silently weakened; `sandbox_degrade: true` allows bubblewrap instead and marks the result `degraded`. Settings (optional): `sandbox_backend`
+(`auto`, `bubblewrap`, `podman`), `sandbox_degrade`, `sandbox_image`. Try it: `python tools/try_sandbox.py` (backends and routing table), `--attack` (hostile scripts on the chosen backend), `--script ...`.
+
+- Not wired yet: the script check (`check.script`), the `script` node kind of the runner, and the dispatcher integration (they will pass the `Operation`).
+- Tests: `tests/test_sandbox.py` (66 tests: policy, seccomp program and podman profile, runs, the wall of both backends, the broker incl. forged lines, the routing decisions).

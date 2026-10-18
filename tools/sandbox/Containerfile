@@ -1,0 +1,8 @@
+# The image of the podman sandbox backend (sandbox.py, PodmanSandbox): Python and nothing else.
+# Build with tools/sandbox/build_image.sh. Nothing is installed from the network when a script runs (the container has no network at all).
+FROM registry.fedoraproject.org/fedora-minimal:43
+RUN microdnf install -y --setopt=install_weak_deps=0 --nodocs python3 \
+    && microdnf clean all \
+    && rm -rf /var/cache/* /usr/share/doc /usr/share/man /usr/share/info /usr/share/locale \
+    && find /usr/lib /usr/lib64 -name '__pycache__' -prune -exec rm -rf {} + 2>/dev/null; \
+    useradd -u 1000 -M -s /sbin/nologin sandbox 2>/dev/null; true

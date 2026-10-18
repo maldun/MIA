@@ -1,16 +1,12 @@
 """
 The web broker for sandboxed scripts (ui/REQUIREMENTS_CORE.md 11, 12.2): a sandbox has no network at all, not even a loopback to this machine, so a script cannot run curl or open a
-socket. What it gets instead is a capability: a Unix socket (a file that is bind-mounted into the sandbox) behind which this process answers two questions, GET a page and search.
+socket. What it gets instead is a capability: a request line on its standard output, answered on its standard input by this process (sandbox.py reads the lines), for two questions:
+GET a page and search. No socket, no mounted file, and so nothing for SELinux or the namespaces to get in the way of.
 The answers come from MIA's own web tools (web_tools.py), so a script is held to exactly the rules of every other web access: public addresses only, checked at every redirect and
 for the connected address, size and type limits, no cookies, no POST, untrusted text with the instruction signals reported, every request in the web log. On top come budgets per script
 (calls and bytes). The script never sees an address, a header or a socket; this also means the DNS name is resolved and connected by the broker, not by the script.
 """
 import json
-import os
-import shutil
-import socket
-import tempfile
-import threading
 import time
 
 try:
@@ -19,7 +15,6 @@ except ImportError:  # used as plain script / in tests
     import web_tools
 
 DEFAULT_LIMITS = {"get": 5, "search": 3, "bytes": 400_000}
-MAX_REQUEST = 8192
 
 
 def web_handlers(search, client, max_chars=60000):
@@ -44,87 +39,42 @@ def web_handlers(search, client, max_chars=60000):
 
 
 class WebBroker:
-    """usage: with WebBroker(handlers) as broker: sandbox.run(code, broker=broker)"""
+    """usage: with WebBroker(handlers) as broker: sandbox.run(code, broker=broker). The sandbox calls handle() for every request line its script writes."""
 
-    def __init__(self, handlers, limits=None, tmp_root=None):
+    def __init__(self, handlers, limits=None):
         self.handlers = handlers
         self.limits = {**DEFAULT_LIMITS, **(limits or {})}
-        self.tmp_root = tmp_root
-        self.directory = None
         self.calls = {"get": 0, "search": 0}
         self.bytes = 0
         self.log = []
-        self._server = None
-        self._thread = None
-        self._stop = threading.Event()
 
     def __enter__(self):
-        self.start()
         return self
 
     def __exit__(self, *exc):
-        self.close()
+        return False
 
-    def start(self):
-        self.directory = tempfile.mkdtemp(prefix="mia-broker-", dir=self.tmp_root)
-        os.chmod(self.directory, 0o700)
-        path = os.path.join(self.directory, "sock")
-        self._server = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-        self._server.bind(path)
-        os.chmod(path, 0o600)
-        self._server.listen(4)
-        self._server.settimeout(0.2)
-        self._thread = threading.Thread(target=self._serve, daemon=True)
-        self._thread.start()
+    def handle(self, request):
+        """the answer (a dict) to one request (a dict from the script); never raises"""
+        try:
+            return self._answer(request)
+        except Exception as exc:                        # the broker must never die because of a script
+            return {"error": "the broker failed: %s" % type(exc).__name__}
 
-    def close(self):
-        self._stop.set()
-        if self._thread is not None:
-            self._thread.join(timeout=3)
-        if self._server is not None:
-            self._server.close()
-        if self.directory:
-            shutil.rmtree(self.directory, ignore_errors=True)
-            self.directory = None
-
-    # -- serving: one request per connection, one at a time (a script is sequential) --
-    def _serve(self):
-        while not self._stop.is_set():
-            try:
-                connection, _ = self._server.accept()
-            except socket.timeout:
-                continue
-            except OSError:
-                return
-            with connection:
-                connection.settimeout(20)
-                try:
-                    answer = self._answer(self._read_request(connection))
-                except Exception as exc:                        # the broker must never die because of a script
-                    answer = {"error": "the broker failed: %s" % type(exc).__name__}
-                try:
-                    connection.sendall(json.dumps(answer, ensure_ascii=False).encode("utf-8") + b"\n")
-                except OSError:
-                    pass
-
-    @staticmethod
-    def _read_request(connection):
-        data = b""
-        while not data.endswith(b"\n") and len(data) < MAX_REQUEST:
-            block = connection.recv(MAX_REQUEST)
-            if not block:
-                break
-            data += block
-        return data
-
-    def _answer(self, raw):
+    def handle_line(self, raw):
+        """the answer for a request line as the sandbox sent it (bytes)"""
         try:
             request = json.loads(raw.decode("utf-8"))
-            operation = request["op"]
-        except (ValueError, KeyError, UnicodeDecodeError, TypeError):
+            if not isinstance(request, dict) or "op" not in request:
+                raise ValueError
+        except (ValueError, UnicodeDecodeError):
             return {"error": "unreadable request"}
+        return self.handle(request)
+
+    def _answer(self, request):
+        operation = request.get("op")
         if operation not in self.handlers:
-            return {"error": "unknown operation '%s'" % operation}
+            return {"error": "unknown operation '%s'" % str(operation)[:30]}
         if self.calls[operation] >= self.limits.get(operation, 0):
             self.log.append({"op": operation, "refused": "budget"})
             return {"error": "budget: at most %d %s call(s) per script" % (self.limits.get(operation, 0), operation)}
