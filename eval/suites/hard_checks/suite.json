@@ -1,0 +1,8 @@
+{
+ "name": "hard_checks",
+ "description": "The exact checks of the library (quote in source, arithmetic, units, calendar facts, schedule overlap, structure) through the dispatcher, without web access and without a model. Expectations come from what is semantically right, with traps (typical human and model mistakes) and a few honest known limits. Deterministic: it has to match every time.",
+ "target": {
+  "kind": "checks",
+  "include_web": false
+ }
+}

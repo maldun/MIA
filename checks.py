@@ -19,7 +19,7 @@ import math
 import re
 import time
 import unicodedata
-from decimal import Decimal, InvalidOperation, getcontext
+from decimal import Decimal, InvalidOperation, localcontext
 from urllib.parse import urlparse
 
 try:
@@ -50,7 +50,7 @@ def normalize(text, ignore_case=True):
     text = unicodedata.normalize("NFKC", str(text))
     text = "".join(_PUNCT.get(c, c) for c in text)
     text = re.sub(r"\s+", " ", text).strip()
-    return text.lower() if ignore_case else text
+    return text.casefold() if ignore_case else text
 
 
 def _for_matching(text, ignore_case=True):
@@ -111,7 +111,7 @@ def quote_in_source(quote, source, ignore_case=True, near=0.85):
 
 # --- numbers: arithmetic and units -------------------------------------------------------------------------------------------------
 
-getcontext().prec = 40
+DECIMAL_PRECISION = 40
 _BINARY = {ast.Add: "+", ast.Sub: "-", ast.Mult: "*", ast.Div: "/", ast.FloorDiv: "//", ast.Mod: "%", ast.Pow: "**"}
 _CONSTANTS = {"pi": ("3.14159265358979323846264338327950288419716939937510", math.pi), "e": ("2.71828182845904523536028747135266249775724709369995", math.e)}
 MAX_EXPRESSION = 200
@@ -166,8 +166,10 @@ def evaluate_two_ways(expression):
         raise ExpressionError("the expression is too long")
     try:
         as_float = _walk(tree, float, _float_op, lambda neg, v: -v if neg else v, lambda f, v: math.sqrt(v) if f == "sqrt" else abs(v), lambda n: _CONSTANTS[n][1])
-        as_decimal = _walk(tree, lambda v: Decimal(repr(v)) if isinstance(v, float) else Decimal(v), _decimal_op, lambda neg, v: -v if neg else v,
-                           lambda f, v: v.sqrt() if f == "sqrt" else abs(v), lambda n: Decimal(_CONSTANTS[n][0]))
+        with localcontext() as context:
+            context.prec = DECIMAL_PRECISION
+            as_decimal = _walk(tree, lambda v: Decimal(repr(v)) if isinstance(v, float) else Decimal(v), _decimal_op, lambda neg, v: -v if neg else v,
+                               lambda f, v: v.sqrt() if f == "sqrt" else abs(v), lambda n: Decimal(_CONSTANTS[n][0]))
     except (ZeroDivisionError, OverflowError, ValueError, InvalidOperation) as exc:
         raise ExpressionError("cannot be calculated (%s)" % exc.__class__.__name__)
     if isinstance(as_float, complex) or isinstance(as_decimal, complex):
@@ -181,9 +183,14 @@ def parse_number(value):
         raise ValueError("not a number")
     if isinstance(value, (int, float)):
         return float(value)
-    text = re.sub(r"[\s '_]", "", str(value)).replace("−", "-")
+    return float(_clean_number(value))
+
+
+def _clean_number(value):
+    """the digits of a written number with a point as the decimal mark and no thousands marks (see parse_number)"""
+    text = re.sub(r"[\s\u00a0'_]", "", str(value)).replace("\u2212", "-")
     if re.fullmatch(r"[-+]?\d+(\.\d+)?", text):
-        return float(text)
+        return text
     if "," in text and "." in text:
         decimal = "," if text.rfind(",") > text.rfind(".") else "."
         text = text.replace("." if decimal == "," else ",", "").replace(decimal, ".")
@@ -191,7 +198,19 @@ def parse_number(value):
         text = text.replace(",", "") if re.fullmatch(r"[-+]?\d{1,3}(,\d{3})+", text) else text.replace(",", ".")
     elif text.count(".") > 1:
         text = text.replace(".", "")
-    return float(text)
+    float(text)                                                               # raises ValueError for anything that is not a number
+    return text
+
+
+def _exact(value):
+    """the claimed number as an exact Decimal (floats through their shortest text)"""
+    if isinstance(value, bool):
+        raise ValueError("not a number")
+    if isinstance(value, int):
+        return Decimal(value)
+    if isinstance(value, float):
+        return Decimal(repr(value))
+    return Decimal(_clean_number(value))
 
 
 def _decimals(value):
@@ -206,8 +225,12 @@ ROUNDING_CAP = 0.02          # rounding explains at most 2 percent of the real v
 
 
 def _agrees(claimed, actual, tolerance, claimed_raw):
-    """within the relative tolerance, or within the rounding the claimed number shows (half a unit of its last digit, but never more than ROUNDING_CAP of the real value)"""
+    """within the relative tolerance, or within the rounding the claimed number shows (half a unit of its last digit, but never more than ROUNDING_CAP of the real value).
+    An exact result (a whole number) has nothing to round: the claim has to equal it within the rounding it shows and no relative tolerance applies, so 250 * 4 is not 1004."""
     half_unit = 0.5 * 10 ** -_decimals(claimed_raw)
+    nearest = round(actual)
+    if abs(actual - nearest) <= 1e-9 * max(1.0, abs(actual)):
+        return abs(claimed - nearest) <= half_unit * 1.0000001
     return abs(claimed - actual) <= max(tolerance * abs(actual), min(half_unit * 1.0000001, ROUNDING_CAP * abs(actual)))
 
 
@@ -225,7 +248,15 @@ def arithmetic_claim(expression, value, tolerance=0.005):
     if not math.isclose(as_float, decimal_float, rel_tol=1e-9, abs_tol=1e-12):
         return result(INCONCLUSIVE, name, "the two evaluations disagree (%r and %r)" % (as_float, decimal_float), [{"float": as_float, "decimal": str(as_decimal)}])
     evidence = [{"expression": expression, "result": as_float, "claimed": claimed}]
-    if _agrees(claimed, as_float, tolerance, value):
+    if as_decimal == as_decimal.to_integral_value():
+        # an exact whole number, also a very big one (floats cannot tell 121932631112635269 from ...270, the decimals can)
+        try:
+            agrees = abs(_exact(value) - as_decimal) <= Decimal(5) / Decimal(10) ** (_decimals(value) + 1)
+        except (ValueError, InvalidOperation):
+            agrees = False
+    else:
+        agrees = _agrees(claimed, as_float, tolerance, value)
+    if agrees:
         return result(PASS, name, "%s = %s" % (expression, _fmt(as_float)), evidence)
     return result(FAIL, name, "%s is %s, not %s" % (expression, _fmt(as_float), value), evidence)
 

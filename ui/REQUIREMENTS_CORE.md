@@ -230,6 +230,10 @@ decision, so they can be compared offline before they are trusted.
 - L5. For verifiers (the research object) the harness also reports: precision and recall of "unsupported" flags, calibration of confidence, agreement between verifiers,
   and what fraction of errors the verifier shares with the generator.
 
+- L6. **Built** (phase 3): suites with `truth` and `expect`, the harness with variants, repeats and cost counting, the metrics with intervals and the paired sign test, `tools/eval.py`, and two suites (`hard_checks`
+  deterministic, `computable` with a model). Test first: a behaviour change starts with a case. Still open: the suites for web confirmation and citation (they need a recorded web or a fixed set of pages), the
+  research questions, the LLM judge with a rubric calibrated on the user's ratings, and the verification styles (single, consistency, trial, jury) as variants of one suite.
+
 ## 10. Graph viewer and editor
 
 - G1. Viewer first: the pipeline graph is drawn, the current node is highlighted live during a run (the same events as the status block).

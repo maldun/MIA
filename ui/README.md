@@ -476,3 +476,22 @@ the model gets the problem and repairs it, at most twice) and the stored script 
 The skill `verify_computable` runs the pipeline: `python tools/try_pipeline.py verify_computable --input 'claim=...' --input 'data_description=...' --input 'data={...}' ""`.
 `Core(..., sandbox=router, broker_factory=...)` switches the script checks on; without a sandbox they are not offered.
 Tests: `tests/test_script_checks.py` (29 tests: the contract, every sandbox outcome, the choice of the wall, the dispatcher with and without sandbox, the pipeline with a fake model including repair, script nodes).
+
+## Core, phase 3: the evaluation harness (test first)
+
+Changes to a check, a prompt, a pipeline or a model are judged by running the same suite before and after, not by a feeling (`REQUIREMENTS_CORE.md` 9).
+
+- **Suites** (`eval/suites/<name>/suite.json` + `cases.jsonl`): one case per line with `id`, `tags`, the input (`claim` for the checks, `input` for a pipeline), `truth` (is the claim actually right?) and/or
+  `expect` (the exact behaviour a regression wants, for example that a near match stays `open`), and a `note` saying why. Shipped: `hard_checks` (118 cases, deterministic, no model: quotes, arithmetic, units,
+  calendar facts, schedules, structure, routing, with traps and a few documented known limits) and `computable` (39 cases for the pipeline in which a model writes the check script, half right and half wrong claims,
+  truths computed in Python by the generator).
+- **Numbers** (`metrics.py`): for verifiers the dangerous error comes first, the **false pass** (a wrong claim that passed), then false fail, coverage (how much is decided at all), accuracy among the decided and overall,
+  precision of pass and of fail; everything with 95 percent Wilson intervals, because 30 cases cannot say much (an honest "0 of 44 false passes" has an upper bound of 8 percent). Also per tag, stability over repeats
+  (the same status every time?), cost (seconds, model calls, characters), and the paired comparison of two runs with the exact sign test.
+- **Runs** (`harness.py`, `tools/eval.py`): `python tools/eval.py run <suite> [--variant name] [--repeats n] [--tag t] [--model light|full|name] [--pipeline id@version] [--skill s]`; the variant is saved with the run
+  in `data/eval/`; `report <suite|file>`, `compare <fileA> <fileB>` or `compare <suite> <variantA> <variantB>`, `list`, `cases <suite>`. A case that breaks the target is an `error:` result, not the end of the run.
+- **The rule** from here on: a check or pipeline change that touches behaviour gets a case first (a failing one), then the fix. `tests/test_harness.py` runs the `hard_checks` suite as a regression (every case
+  must match, no false pass, deterministic); the model suites are run by hand (`tools/eval.py run computable`) because they need the model and take minutes.
+- What the first run of `hard_checks` found: **four false passes** (an exact integer result was accepted within a percentage tolerance, for example `250 * 4 = 1004` or 2 hours as 121 minutes) and a wrong
+  expectation about the sharp s (`casefold`). The checks were fixed (an exact result must be matched within the rounding the claim shows, with exact decimals also for huge numbers), not the expectations.
+- Tests: `tests/test_metrics.py` (18, hand-counted numbers), `tests/test_harness.py` (19).

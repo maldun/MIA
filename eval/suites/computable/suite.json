@@ -1,0 +1,8 @@
+{
+ "name": "computable",
+ "description": "Claims about numbers that a script can recompute: the pipeline verify.computable (a model writes the check, the sandbox runs it). Half of the claims are right, half wrong, with traps (naive averages, compound vs simple rates, leap years, one euro off). Needs the model and a sandbox. truth is computed in Python when the suite is generated.",
+ "target": {
+  "kind": "pipeline",
+  "skill": "verify_computable"
+ }
+}
