@@ -168,6 +168,7 @@ decision, so they can be compared offline before they are trusted.
   narrow tools and schemas (prompt injection cannot be solved by prompting alone, so the tool set per stage is the real protection).
 - X2. Web access only through the search/fetch tools with timeouts, size limits, a content-type filter and no execution of scripts; private addresses (localhost, LAN) are blocked.
 - X3. A run never writes outside `data/`. Skill and pipeline files are read-only for models; changes go through proposals (G3).
+- X5. Scripts written by a model run only in the sandbox of HC2 (never in the MIA process, never with network or project files); without a working sandbox the `script` check is disabled.
 - X4. The search tool logs every query (to the run log), so it can be checked what MIA asked the internet.
 
 ## 12. Verification: background and design consequences
@@ -215,6 +216,7 @@ transcript (logged). The skill file selects the style; the harness compares them
 
 | Style | Roles | Notes |
 |---|---|---|
+| `hard` | no model judgement: the hard checks of 12.2 only | strongest where it applies; its coverage is limited |
 | `single` | one entailment question: claim + passage only | baseline, cheapest; also used as a gate for the others |
 | `consistency` | N samples of `single` with different views (order, wording, temperature), vote | baseline from the literature (Wang et al.) |
 | `good_bad_cop` | two views commit independently first, then see each other's position and revise; capped rounds | risk: conformity and sycophancy, so positions are fixed before the exchange and "disagreement remains" is a valid outcome |
@@ -225,7 +227,7 @@ transcript (logged). The skill file selects the style; the harness compares them
 Common requirements:
 - VS1. Every style has the same interface, so one node can be replaced by another without changing the rest of the pipeline.
 - VS2. Roles are separate prompts and separate views (what each role sees is defined in the skill file); models can differ per role (a different model for the judge or for one juror).
-- VS3. Gate: the expensive styles run only on claims that `single` marks as uncertain (or on claims above a stakes threshold), because debate does not beat cheap baselines on easy cases
+- VS3. Gate: the hard checks (12.2) run first; the expensive styles run only on the claims they leave open and that `single` marks as uncertain (or on claims above a stakes threshold), because debate does not beat cheap baselines on easy cases
   (Smit et al.; the later critique in 14).
 - VS4. Fixed maximum number of turns and tokens per style; "unresolved" is always allowed.
 - VS5. The harness reports, per style: accuracy against labelled claims, calibration, cost (tokens, seconds), position bias (swap test), conformity (how often a juror or cop changes
@@ -234,6 +236,46 @@ Common requirements:
   cases (8, level 3), with hold-out cases.
 - VS7. Open research questions: does a different context help more than a role label (jury of experts versus single judge with a persona)? Does the jury reduce shared errors compared with
   one judge? When does the added cost pay off?
+
+### 12.2 Hard checks (executable and external evidence)
+
+The styles of 12.1 are judgements by models. **Hard checks** are different: a program runs or the outside world is asked, and the result is evidence that does not depend on the
+generator's opinion. They come first in the order of verification (cheap and strong before expensive and soft), and a style only sees the claims that the hard checks could not settle.
+
+Interface (same for all): `check(claim, context) -> {status: pass | fail | inconclusive | not_applicable, evidence, transcript, cost}`. An applicability step decides which checks fit a claim
+(numeric, date or time, quotation, citation or URL, code, plain factual statement). Results are logged with the exact script, query or URL.
+
+| Check | What it does | Strength |
+|---|---|---|
+| `fixed_code` | built-in functions: arithmetic, units, dates and weekdays, JSON/format validity, schedule overlaps, "this quote occurs verbatim in this page" | exact, deterministic |
+| `script` | the model writes a short Python script that computes or tests the claim (a number, a date, a sorting or counting statement, a consistency check on given data); it runs in a **sandbox** and its output is the evidence | strong for computable claims; see the caveat below |
+| `citation` | every cited URL is reachable, the quote is in the page, title and date match the claim, the source is not the search result page itself | exact for existence, says nothing about truth |
+| `web_confirm` | independent web search for the key facts of a claim, with a query that is **not** copied from the draft; requires agreement of at least two independent sources (different domains, no mirrors of each other); a second, disconfirming query ("X myth", "X false", "X correction") looks for contradictions | medium, depends on the sources |
+| `lookup` (later) | structured free sources (for example Wikidata or Wikipedia APIs, official data portals) for named facts: dates, numbers, definitions | medium to strong for what they contain |
+
+Requirements:
+- HC1. Hard checks run **before** the styles. A claim that fails a hard check is `contradicted` regardless of any debate verdict; a pass counts as evidence for the judge or jury, not as proof
+  (a script can be wrong, a source can be wrong). `inconclusive` and `not_applicable` pass the claim on to the styles. The combination rule is in one place and covered by tests.
+- HC2. **Sandbox for generated scripts** (the most security-relevant part of this plan):
+  - a separate process per script, started with `python -I`, no network, no access to the project or home directory (a throw-away working directory; use an OS sandbox such as bubblewrap
+    or `unshare` when available, and resource limits as the minimum), CPU time, memory, process count and output size limits, a wall-clock timeout;
+  - an AST check before running: only a whitelist of modules (`math`, `statistics`, `fractions`, `decimal`, `datetime`, `re`, `json`, `itertools`, `collections`, `string`) and no `open`, `exec`,
+    `eval`, `__import__`, attribute tricks to builtins, or `os`/`sys`/`subprocess`/`socket`; data comes in as a JSON file or constant and the result goes out as one JSON line on stdout;
+  - the script, input, output, exit status and timings are logged; a script is never run twice with changed inputs hidden from the log;
+  - if no real sandbox is available the check is **off**, not weakened, and the status block says so.
+- HC3. **Test-oracle caveat for scripts.** A script written by the same model that made the claim can encode the same misconception (it checks what the model believes, for example a wrong formula).
+  Mitigations: the script is generated from the *claim*, not from the draft's reasoning; it must print the values it used; the judge or verifier sees the script (a different view or model reviews
+  that the script tests what the claim says); numeric claims are computed in two independent ways when cheap (for example `decimal` and `fractions`); the harness measures how often a passing
+  script was still wrong (L5).
+- HC4. **Web confirmation rules.** The query is built from the claim's key entities and numbers, not from its wording (confirmation bias in the query is the main risk of searching "does X hold?");
+  a disconfirming query is always run for `web_confirm`; "nothing found" is `inconclusive`, never `fail`; source quality is part of the evidence (domain type, date, whether it is a primary source),
+  and results from the research task's own sources do not count as independent confirmation of themselves. All fetched text is untrusted data (X1).
+- HC5. Hard checks are interchangeable nodes like the styles (same node interface), can be combined in a skill (`checks: [citation, fixed_code, script, web_confirm]`) and have budgets
+  (scripts, searches, seconds per claim).
+- HC6. The harness reports per check: coverage (share of claims it applies to), precision of `fail` flags, false passes, cost, and the disagreement rate with the style verdicts. Disagreements between a
+  hard check and a style are logged as interesting cases for the user's own review.
+- HC7. Open research questions: how much of the factual error of a local model can be settled by hard checks alone, and how much is left for judgement styles? Is a disconfirming query worth its cost?
+  How often does a model-written verification script share the misconception of the claim?
 
 ## 13. Task details (first two)
 
@@ -344,13 +386,19 @@ Debate, juries and multi-agent verification (see 12.1)
 - Zheng et al. 2023, Is "A Helpful Assistant" the Best Role for LLMs? arXiv:2311.10054; Wang et al. 2023, Solo Performance Prompting. arXiv:2307.05300; Wang et al. 2024, Mixture-of-Agents. arXiv:2406.04692
 - Court-style agents (for example AgentCourt, arXiv:2408.08089): not verified, read before citing
 
+Executable and tool-based verification (see 12.2)
+- Gao et al. 2022, PAL: Program-aided Language Models. arXiv:2211.10435
+- Chen et al. 2022, Program of Thoughts Prompting. arXiv:2211.12588
+- Gou et al. 2023, CRITIC: Large Language Models Can Self-Correct with Tool-Interactive Critiquing. arXiv:2305.11738
+- (from memory, to be checked) work on property-based testing and test-oracle problems from software engineering applies to model-written checks (Barr et al. 2015, The Oracle Problem in Software Testing: A Survey, IEEE TSE)
+
 Local research agents (implementations to learn from)
 - [S] LearningCircuit/local-deep-research; langchain-ai/local-deepresearcher; OpenDeepResearcher-via-searxng (GitHub)
 
 ## 15. Phases (proposal)
 
 1. **Foundation**: run log (L1), event stream (E), pipeline runner with fake model tests (P), skill loader (S); `chat` ported as the reference skill. Status block in the chat page.
-2. **Research**: SearXNG setup, tools with the safety rules (X), the research pipeline and its test set; harness (L3); first comparisons (direct vs. pipeline, with/without verify).
+2. **Research**: SearXNG setup (DuckDuckGo fallback), tools with the safety rules (X), the research pipeline and its test set; harness (L3); hard checks first (`fixed_code`, `citation`, `web_confirm`, then the sandboxed `script` check); first comparisons (direct vs. pipeline, with/without verify, hard checks vs. styles).
 3. **Storytelling**: story state, scene loop, interactive UI; test set with consistency checks.
 4. **Variants**: inspect the VRM parts (V4), variant store and API, editor, switching with the task.
 5. **Graph viewer**, then editor with proposals (G).
