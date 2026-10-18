@@ -22,6 +22,9 @@ parser.add_argument("--wait", type=float, default=60.0, help="seconds to wait af
 parser.add_argument("--size", default="1280x900")
 parser.add_argument("--eval", default=None, help="JavaScript expression evaluated after the wait")
 parser.add_argument("--port", type=int, default=9333)
+parser.add_argument("--click", default=None, help="x,y: click there after the wait (e.g. into a text field of the Godot canvas)")
+parser.add_argument("--type", default=None, help="text typed with real key events after the click")
+parser.add_argument("--steps", default=None, help="actions after the wait, separated by |: click:x,y  type:text  wait:seconds")
 parser.add_argument("--dark", action="store_true", help="emulate a dark system theme")
 parser.add_argument("--light", action="store_true", help="emulate a light system theme")
 parser.add_argument("--mobile", action="store_true", help="emulate a phone (touch, device pixel ratio 2)")
@@ -94,6 +97,31 @@ try:
     print("navigated", flush=True)
     pump(args.wait)
     print("waited", flush=True)
+    if args.steps:
+        for step in args.steps.split("|"):
+            action, _, value = step.partition(":")
+            if action == "click":
+                x, y = (float(v) for v in value.split(","))
+                for kind in ("mousePressed", "mouseReleased"):
+                    call("Input.dispatchMouseEvent", {"type": kind, "x": x, "y": y, "button": "left", "clickCount": 1})
+                pump(0.5)
+            elif action == "type":
+                for char in value:
+                    call("Input.dispatchKeyEvent", {"type": "keyDown", "text": char, "key": char, "unmodifiedText": char})
+                    call("Input.dispatchKeyEvent", {"type": "keyUp", "key": char})
+                pump(0.5)
+            elif action == "wait":
+                pump(float(value))
+    if args.click:
+        x, y = (float(v) for v in args.click.split(","))
+        for kind in ("mousePressed", "mouseReleased"):
+            call("Input.dispatchMouseEvent", {"type": kind, "x": x, "y": y, "button": "left", "clickCount": 1})
+        pump(1.0)
+    if args.type:
+        for char in args.type:
+            call("Input.dispatchKeyEvent", {"type": "keyDown", "text": char, "key": char, "unmodifiedText": char})
+            call("Input.dispatchKeyEvent", {"type": "keyUp", "key": char})
+        pump(1.0)
     if args.eval:
         result = call("Runtime.evaluate", {"expression": args.eval, "returnByValue": True, "awaitPromise": True})
         print("EVAL", json.dumps(result.get("result", {}).get("value")))

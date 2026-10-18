@@ -157,7 +157,7 @@ The old headline is now a mood line (fixed text "Ready when you are." in C1; rea
 - **Tests:** `python tests/test_chat_page.py` (page, CSP, no inline code, no external URLs, files and dictionaries),
   `node --test "tests/js/*.test.mjs"` (storage, i18n, theme, layout rules, message normalizing, markdown),
   `python ui/tools/browser_check.py <url> <png> --size 360x740 --mobile --dark --eval "<js>"` (headless Chromium: screenshot, console, list of external requests,
-  `--eval` may return a promise).
+  `--eval` may return a promise; `--steps "click:x,y|type:text|wait:s"` drives text fields of the Godot canvas).
 
 ## Chat backend, phase C2
 

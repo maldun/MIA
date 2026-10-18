@@ -591,8 +591,6 @@ func _disarm_delete() -> void:
 func _on_operation_done(kind: String, ok: bool, message: String, data: Dictionary) -> void:
 	_set_status(message, not ok)
 	_token_row.visible = api.token_required
-	if not ok and message == api.unauthorized_message() and _token_row.visible:
-		_token_edit.grab_focus()      # the cursor is where the token goes
 	if not ok:
 		_pending_select = ""
 		return
