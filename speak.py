@@ -47,6 +47,7 @@ try:
     from .mia_logger import logger
     from .utils import split_into_sentences, split_into_lines_and_sentences, chunker 
     from .speech_text import speech_text
+    from .voice_fix import suppress_tone
     from .utils import filter_symbol_sentences, get_websocket_url, get_url
 except ImportError:
     from play_media import play_sound
@@ -56,6 +57,7 @@ except ImportError:
     from mia_logger import logger
     from utils import split_into_sentences, split_into_lines_and_sentences, chunker 
     from speech_text import speech_text
+    from voice_fix import suppress_tone
     from utils import filter_symbol_sentences, get_websocket_url, get_url
 
 curr_path = os.path.split(__file__)[0]
@@ -143,7 +145,7 @@ class Speaker:
     CHUNK_SENTENCES = 1
     def __init__(self,tts_model=TTS_DEFAULT,voice_model=None,tts_device=None,gfx_version=None,voice_sample=None,rvc_opts=None,rvc_params=None,rvc_enabled=True,
                  web_port=8585,address="localhost",protocol="http",tts_engine=COQUI_ENGINE,kokoro_opts=None,sentence_pause=0.3,cpu_threads=None,
-                 rvc_cache_index=True,tts_warmup=True,rvc_pad=None,**_):
+                 rvc_cache_index=True,tts_warmup=True,rvc_pad=None,rvc_whistle_hz=700.0,**_):
         self._tts_engine = tts_engine
         self._kokoro_opts = dict(self.KOKORO_DEFAULTS, **(kokoro_opts or {}))
         # extra wait after each chunk to cover upload and player start in the browser
@@ -180,6 +182,8 @@ class Speaker:
         self._voice_model = voice_model
         self._rvc_cache_index = rvc_cache_index
         self._rvc_pad = rvc_pad
+        # the voice model whistles at a fixed frequency on some vowels: removed after the conversion (0 / null = off), see voice_fix.py
+        self._whistle_hz = float(rvc_whistle_hz) if rvc_whistle_hz else None
         self.init_tts_model(self._tts_model,self._device)
         if self._rvc_enabled is True:
             self.init_rvc_model(self._voice_model,self._device)
@@ -288,6 +292,18 @@ class Speaker:
         
     def change_voice(self,wav_file_in,wav_file_out):
         self._rvc.infer_file(wav_file_in, wav_file_out)
+        if self._whistle_hz:
+            self.remove_whistle(wav_file_out)
+
+    def remove_whistle(self,wav_file):
+        """removes the tone that the voice model produces on some sounds (only where it is present), in place"""
+        import numpy as np
+        import soundfile as sf
+        samples, rate = sf.read(wav_file)
+        if samples.ndim > 1:
+            samples = samples.mean(axis=1)
+        cleaned = suppress_tone(samples,rate,self._whistle_hz)
+        sf.write(wav_file,np.clip(cleaned,-1.0,1.0),rate,subtype="PCM_16")
     
     def play_voice(self,wav_file):
         play_sound(wav_file,url=self._url)
