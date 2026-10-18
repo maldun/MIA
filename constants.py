@@ -34,6 +34,12 @@ BACKGROUND_EXTENSIONS = (".png", ".jpg", ".jpeg", ".webp")
 # expression presets shared by all devices: one json file per preset in this folder (relative to this folder or absolute);
 # "editor_token": optional secret that changing presets needs (header X-MIA-Token), see presets_api.py
 PRESETS_DIR_KEY = "presets_dir"
+SKILLS_DIR_KEY = "skills_dir"                   # skill files (ui/REQUIREMENTS_CORE.md 3)
+DEFAULT_SKILLS_DIR = "skills"
+PIPELINES_DIR_KEY = "pipelines_dir"
+DEFAULT_PIPELINES_DIR = "pipelines"
+RUNS_DIR_KEY = "runs_dir"                       # the log of the runs (data for evaluation and learning)
+DEFAULT_RUNS_DIR = "data/runs"
 GESTURES_DIR_KEY = "gestures_dir"
 DEFAULT_GESTURES_DIR = "data/gestures"
 DEFAULT_PRESETS_DIR = "data/presets"

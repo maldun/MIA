@@ -205,6 +205,8 @@ class ServiceTest(unittest.TestCase):
     def make(self, **options):
         def exchange(text, on_delta, on_emotion, should_stop):
             self.gate.wait(5)
+            if self.mode.get("hook"):
+                self.mode["hook"]()
             if self.mode["error"]:
                 raise ConnectionError(self.mode["error"])
             for emotion in self.mode["emotions"]:
@@ -244,6 +246,28 @@ class ServiceTest(unittest.TestCase):
         self.assertEqual(messages[1]["emotion"], "happy")
         self.assertEqual(messages[1]["model"], "test-model")
         self.assertEqual(messages[1]["id"], done["id"])
+
+    def test_pipeline_steps_reach_the_page_and_the_log_when_the_skill_shows_them(self):
+        steps = [{"kind": "run_start", "payload": {"show": True}}, {"kind": "start", "node": "a"}, {"kind": "done", "node": "a"}, {"kind": "run_end", "payload": {}}]
+        self.mode["hook"] = lambda: [self.service.pipeline_event(e) for e in steps]
+        self.service.send("research this")
+        self.assertTrue(self.idle())
+        sent = [p for e, p in self.events if e == "chat_pipeline"]
+        self.assertEqual([p["event"]["kind"] for p in sent], ["run_start", "start", "done", "run_end"])
+        done = [p for e, p in self.events if e == "chat_done"][0]
+        self.assertEqual({p["id"] for p in sent}, {done["id"]})
+        self.assertEqual(self.log.history()[0][-1]["pipeline"], steps)
+        # events after the answer belong to nobody
+        self.service.pipeline_event({"kind": "start"})
+        self.assertEqual(len([e for e, _ in self.events if e == "chat_pipeline"]), 4)
+
+    def test_pipeline_steps_stay_hidden_without_a_status_block(self):
+        steps = [{"kind": "run_start", "payload": {"show": False}}, {"kind": "start", "node": "a"}]
+        self.mode["hook"] = lambda: [self.service.pipeline_event(e) for e in steps]
+        self.service.send("just chat")
+        self.assertTrue(self.idle())
+        self.assertNotIn("chat_pipeline", self.names())
+        self.assertNotIn("pipeline", self.log.history()[0][-1])
 
     def test_deltas_are_cumulative_and_throttled(self):
         self.mode["words"] = ["w%d" % i for i in range(200)]

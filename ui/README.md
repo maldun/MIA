@@ -336,3 +336,19 @@ You set the angles of the **final pose**; the character moves there from the neu
 - The pose is shown live while a slider moves. **Play** shows the whole motion from neutral (with the face); **Neutral** resets all angles.
 - Only angles that differ from neutral are stored. **Save as new**, **Overwrite**, **Rename** and **Delete** (press twice) work like in the expression editor and need the same token.
 - Test: `godot --headless --path ui/godot --script res://tools/test_gesture_editor.gd`.
+
+## Core, phase 1: skills, pipelines, run log, status block
+
+The plan is in `REQUIREMENTS_CORE.md`. Phase 1 is the foundation; the chat now runs on it (behaviour unchanged).
+
+- `skills/*.md`: one file per task (front matter: name, version, model profile, pipeline, tools, budget, `status_block`; sections `prompts`, `schemas`, `lines`, `examples`).
+  Changed files are reloaded, a broken file is only logged. Shipped: `chat`, `summarize` (a small example that uses the model).
+- `pipelines/*.json`: the steps of a skill as a tree of nodes (`model`, `tool`, `code`, `map`, `branch`, `loop`, `ask_user`) with references (`$name.field`), conditions
+  without code, retries for answers that do not fit their schema, and budgets (steps, seconds, calls per tool). The format is documented at the top of `pipeline.py`.
+- `pipeline.py` (runner), `skill_store.py`, `schema_check.py`, `pipeline_model.py` (Ollama behind the interface of the runner), `core.py` (all together).
+- `run_log.py`: every run is one JSON line in `data/runs/runs-YYYY-MM.jsonl` (input, events with timings, result) and feedback lines that refer to a run.
+- The status block: skills with `status_block: true` show their steps under the answer, open while MIA works and as one quiet line afterwards ("Boiling it down… (summarizing
+  the text in 2 sentences)": playful line from the skill, accurate description in brackets). The steps are also kept in the chat log. `chat` has no block.
+- Config keys (all optional): `skills_dir`, `pipelines_dir`, `runs_dir`.
+- Try a skill with the real model: `python tools/try_pipeline.py summarize "text ..."`, check all skills: `python tools/try_pipeline.py --check`.
+- Tests: `tests/test_pipeline.py` (runner, skills, log, model adapter), `tests/js/pipeline.test.mjs` (status block), two new tests in `tests/test_chat_backend.py`.

@@ -23,6 +23,7 @@ background (one at a time, one more may wait), and pushes the result to all conn
   chat_message  a complete message (yours, system notes, automatic MIA messages)
   chat_start    MIA starts a message           chat_delta  the text so far (cumulative)
   chat_done     the message is finished        chat_status {busy, activity, model, profile, queue, mood}
+  chat_pipeline {id, event}  a step of the pipeline that makes the answer (only for skills with a status block, see pipeline_event)
   chat_error    a human readable problem
 
 The service knows nothing about Flask or the model: `emit(event, payload)` and `run_exchange(text, on_delta,
@@ -79,6 +80,9 @@ class ChatService:
         self._stop = threading.Event()
         self._hits = collections.defaultdict(collections.deque)
         self._commands = {c["command"] for c in COMMANDS}
+        self._message_id = None          # the answer in progress: pipeline events belong to it
+        self._pipeline = []
+        self._show_pipeline = False
 
     # --- state -----------------------------------------------------------------------------------
     def is_command(self, text):
@@ -142,6 +146,20 @@ class ChatService:
             self._stop.set()
         return running
 
+    # --- the steps of the pipeline behind an answer --------------------------------------------------------------
+    def pipeline_event(self, event):
+        """an event of the pipeline runner (pipeline.py); shown in the status block of the answer when the skill wants one, and kept in the log record"""
+        with self._lock:
+            message_id = self._message_id
+            if message_id is None:
+                return
+            if event.get("kind") == "run_start":
+                self._show_pipeline = bool((event.get("payload") or {}).get("show"))
+            if not self._show_pipeline:
+                return
+            self._pipeline.append(event)
+        self._emit("chat_pipeline", {"id": message_id, "event": event})
+
     # --- messages that do not come from the page -----------------------------------------------------------
     def note(self, text, **fields):
         record = self.log.append("system", text, markdown=False, **fields)
@@ -192,6 +210,8 @@ class ChatService:
     def _do_chat(self, text):
         message_id = self.log.new_id()
         created = utc_now()
+        with self._lock:
+            self._message_id, self._pipeline, self._show_pipeline = message_id, [], False
         model = self._model_info()[0]
         self._emit("chat_start", {"id": message_id, "role": "assistant", "created": created})
         self.set_activity("thinking")
@@ -227,6 +247,10 @@ class ChatService:
         else:
             self.set_activity(None)
         extra = {"emotions": state["emotions"]} if len(state["emotions"]) > 1 else {}
+        with self._lock:
+            steps, self._message_id = self._pipeline, None
+        if steps:
+            extra["pipeline"] = steps
         record = self.log.append("assistant", state["text"], id=message_id, created=created, emotion=state["emotion"],
                                  status=status, model=model, **extra)
         self._emit("chat_done", {"id": message_id, "text": record["text"], "emotion": record["emotion"], "status": status})

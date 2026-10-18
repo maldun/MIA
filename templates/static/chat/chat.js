@@ -1,6 +1,6 @@
 // The conversation on the page: history, live messages (chat_* events), streaming, sending with retry, paging, autoscroll.
 // The server is the source of truth (see ui/README.md, chat backend); this module only draws it.
-import { clock, continuesGroup, dayKey, dayLabel, emojiFor, linkify, relativeTime, trimOldest, upsert, MAX_IN_DOM } from './chat-model.js';
+import { clock, continuesGroup, dayKey, dayLabel, emojiFor, linkify, pipelineHeadline, pipelineLine, pipelineRows, pipelineState, relativeTime, trimOldest, upsert, MAX_IN_DOM } from './chat-model.js';
 
 export function isNearBottom(element, threshold = 80) {
   return element.scrollHeight - element.scrollTop - element.clientHeight <= threshold;
@@ -69,6 +69,14 @@ export function initChat({ list, empty, jump, olderButton, socket, render, t, or
       }
       row.append(head);
     }
+    if (message.role === 'assistant') {
+      const steps = el('details', 'pipeline');
+      steps.dataset.role = 'pipeline';
+      steps.hidden = true;
+      steps.append(el('summary'), el('ol', 'pipeline-steps'));
+      steps.querySelector('summary').addEventListener('click', () => { steps.dataset.touched = '1'; });
+      row.append(steps);
+    }
     const bubble = el('div', `msg ${message.role}`);
     bubble.dataset.role = 'bubble';
     row.append(bubble);
@@ -89,6 +97,27 @@ export function initChat({ list, empty, jump, olderButton, socket, render, t, or
     return row;
   }
 
+  /** the expandable block "how I got there": open while the answer is made, closed afterwards (unless the reader opened or closed it) */
+  function drawPipeline(row, message) {
+    const steps = row.querySelector('[data-role=pipeline]');
+    if (!steps) return;
+    const events = message.pipeline ?? [];
+    steps.hidden = events.length === 0;
+    if (!events.length) return;
+    const state = pipelineState(events);
+    steps.classList.toggle('running', !state.finished);
+    steps.classList.toggle('failed', state.finished && state.status !== 'done');
+    steps.querySelector('summary').textContent = pipelineHeadline(events, t);
+    const list = steps.querySelector('ol');
+    list.textContent = '';
+    for (const step of pipelineRows(events)) {
+      const item = el('li', `step ${step.state}`, pipelineLine(step));
+      if (step.item !== null) item.dataset.item = step.item;
+      list.append(item);
+    }
+    if (!steps.dataset.touched) steps.open = !state.finished && Boolean(message.streaming);
+  }
+
   function fill(row, message) {
     const bubble = row.querySelector('[data-role=bubble]');
     if (bubble) {
@@ -96,6 +125,7 @@ export function initChat({ list, empty, jump, olderButton, socket, render, t, or
       bubbleContent(bubble, message);
       bubble.hidden = message.role === 'assistant' && !message.streaming && !message.text;      // nothing came before the error
     }
+    drawPipeline(row, message);
     const copy = row.querySelector('[data-action=copy]');
     if (copy) copy.hidden = !message.text;
     const badge = row.querySelector('[data-role=badge]');
@@ -314,6 +344,13 @@ export function initChat({ list, empty, jump, olderButton, socket, render, t, or
     streaming(data.id);
     pendingText.set(data.id, data.text);
     if (!frame) frame = win.requestAnimationFrame(flush);
+  });
+  socket.on('chat_pipeline', (data) => {
+    const message = streaming(data.id);
+    (message.pipeline ??= []).push(data.event);
+    const row = rows.get(data.id);
+    if (row) drawPipeline(row, message);
+    if (stick) win.requestAnimationFrame(scrollDown);
   });
   socket.on('chat_done', (data) => {
     streaming(data.id);

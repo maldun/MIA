@@ -297,3 +297,34 @@ kbd {
   font: inherit;
 }
 .hint { color: var(--text-muted); font-size: var(--text-sm); }
+
+/* the steps behind an answer: open while MIA works, one quiet line afterwards */
+.pipeline {
+  margin: 0 6px var(--space-1);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+.pipeline > summary {
+  cursor: pointer;
+  list-style: none;
+  padding: var(--space-1) 0;
+}
+.pipeline > summary::-webkit-details-marker { display: none; }
+.pipeline > summary::before { content: "▸ "; color: var(--accent-text); }
+.pipeline[open] > summary::before { content: "▾ "; }
+.pipeline.running > summary { color: var(--text); }
+.pipeline.failed > summary { color: var(--warn); }
+.pipeline > summary:focus-visible { outline: 2px solid var(--focus); border-radius: 4px; }
+.pipeline-steps {
+  margin: 0 0 var(--space-2);
+  padding: 0 0 0 var(--space-4);
+  border-left: 2px solid var(--border);
+  list-style: none;
+}
+.pipeline-steps .step { padding: 2px 0 2px var(--space-3); }
+.pipeline-steps .step::before { content: "·"; margin-left: calc(-1 * var(--space-3)); display: inline-block; width: var(--space-3); }
+.pipeline-steps .step.running::before { content: "…"; color: var(--accent-text); }
+.pipeline-steps .step.done::before { content: "✓"; color: var(--ok); }
+.pipeline-steps .step.retry::before { content: "↻"; color: var(--warn); }
+.pipeline-steps .step.error { color: var(--danger); }
+.pipeline-steps .step.error::before { content: "✗"; }

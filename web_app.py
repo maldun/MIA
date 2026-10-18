@@ -47,6 +47,8 @@ from .chat_api import create_blueprint as create_chat_blueprint
 from .moods import MoodTracker
 from .speech_text import speech_text
 from .audio_router import AudioRouter
+from .core import Core
+from .pipeline_model import OllamaModel
 from . import tailscale_serve
 FPATH = os.path.split(__file__)[0]
 cfg_file = os.path.join(FPATH,CFG_FILE)
@@ -475,7 +477,23 @@ chat_log = ChatLog(_own_path(CONST.CHAT_LOG_KEY, CONST.DEFAULT_CHAT_LOG),
                    max_messages=cfg.get(CONST.CHAT_LOG_MAX_KEY, 10000))
 mood = MoodTracker(_own_path(CONST.MOODS_FILE_KEY, CONST.DEFAULT_MOODS_FILE),
                    hold_minutes=cfg.get(CONST.MOOD_HOLD_KEY, 10))
-chat_service = ChatService(socketio.emit, chat_log, mood, converse, run_command=run_chat_command,
+# the tasks of MIA as skills with pipelines (ui/REQUIREMENTS_CORE.md); the chat is the first one
+pipeline_model = OllamaModel(comm.client, lambda profile: getattr(comm, "_profiles", {}).get(profile),
+                             lambda: (comm.version, comm.llm_options), keep_alive=comm.keep_alive)
+core = Core(_own_path(CONST.SKILLS_DIR_KEY, CONST.DEFAULT_SKILLS_DIR), _own_path(CONST.PIPELINES_DIR_KEY, CONST.DEFAULT_PIPELINES_DIR),
+            _own_path(CONST.RUNS_DIR_KEY, CONST.DEFAULT_RUNS_DIR), model=pipeline_model)
+for _name, _problems in core.check(functions={"converse": None}).items():
+    logger.warning("skill %s: %s", _name, "; ".join(_problems))
+
+def run_chat_exchange(text, on_delta, on_emotion, should_stop):
+    """the answer of the chat skill: the pipeline runs `converse` (the exchange with MIA) and reports its steps to the page"""
+    result = core.run("chat", {"text": text}, on_event=lambda event: chat_service.pipeline_event(event), should_stop=should_stop,
+                      functions={"converse": lambda text: converse(text, on_delta, on_emotion, should_stop)})
+    if result.status == "error":
+        raise RuntimeError(result.error)
+    return result.answer
+
+chat_service = ChatService(socketio.emit, chat_log, mood, run_chat_exchange, run_command=run_chat_command,
                            model_info=lambda: (comm.version, getattr(comm, "profile", None)),
                            queue_size=cfg.get(CONST.CHAT_QUEUE_KEY, 1),
                            rate_limit=(cfg.get(CONST.CHAT_RATE_KEY, 10), 60),

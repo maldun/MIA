@@ -109,3 +109,58 @@ export function captionText(text, max = 160) {
   const space = tail.indexOf(' ');
   return '… ' + (space > 0 && space < 30 ? tail.slice(space + 1) : tail);
 }
+
+// --- the steps behind an answer (the status block, ui/REQUIREMENTS_CORE.md 5) ---------------------------------------
+
+/** one row per step from the events of a run: {key, node, item, state: running | done | retry | error, playful, plain} in order of appearance */
+export function pipelineRows(events) {
+  const rows = [];
+  const byKey = new Map();
+  for (const event of events ?? []) {
+    if (event.kind === 'run_start' || event.kind === 'run_end') continue;
+    const key = event.node ? `${event.node}:${event.item ?? ''}` : `run:${rows.length}`;
+    let row = byKey.get(key);
+    if (!row) {
+      row = { key, node: event.node, item: event.item ?? null, state: 'running', playful: '', plain: '' };
+      byKey.set(key, row);
+      rows.push(row);
+    }
+    if (event.kind === 'start') {
+      row.state = 'running';
+      row.playful = event.playful || row.playful;
+      row.plain = event.plain || row.plain;
+    } else if (event.kind === 'done') {
+      row.state = 'done';
+    } else if (event.kind === 'retry') {
+      row.state = 'retry';
+      row.plain = event.plain || row.plain;
+    } else if (event.kind === 'error') {
+      row.state = 'error';
+      row.plain = event.plain || row.plain;
+    }
+  }
+  return rows;
+}
+
+/** the playful line with the accurate description in brackets */
+export function pipelineLine(row) {
+  return row.playful ? `${row.playful} (${row.plain})` : row.plain;
+}
+
+/** {finished, status, seconds} of a run: finished when the run_end event is there */
+export function pipelineState(events) {
+  const end = (events ?? []).find((e) => e.kind === 'run_end');
+  return { finished: Boolean(end), status: end?.payload?.status ?? null, seconds: end?.payload?.seconds ?? null };
+}
+
+/** the line of the closed block: what happens right now, or how it went */
+export function pipelineHeadline(events, t) {
+  const rows = pipelineRows(events);
+  const state = pipelineState(events);
+  if (!state.finished) {
+    const current = [...rows].reverse().find((r) => r.state === 'running' || r.state === 'retry') ?? rows[rows.length - 1];
+    return current ? pipelineLine(current) : t('pipeline.working');
+  }
+  const base = t('pipeline.summary', { n: rows.length, s: (state.seconds ?? 0).toFixed(1) });
+  return state.status === 'done' ? base : `${base} · ${t(`pipeline.status.${state.status}`)}`;
+}
