@@ -26,7 +26,10 @@ export function initMood({ chip, emoji, text, live, enabled = true, win = window
     chip.classList.remove('fading');
   }
 
+  let latest = null;
+
   function update(mood, activity = mood?.activity) {
+    if (mood) latest = { mood, activity };      // remembered, also while the line is switched off
     if (!mood || !enabled) return;
     const key = `${mood.emoji}|${mood.text}|${activity ?? ''}`;
     if (key === shown) return;
@@ -43,5 +46,16 @@ export function initMood({ chip, emoji, text, live, enabled = true, win = window
   }
 
   chip.hidden = !enabled;
-  return { update };
+  return {
+    update,
+    /** the setting "show the mood line" */
+    setEnabled(value) {
+      enabled = value;
+      chip.hidden = !value;
+      if (value && latest) {
+        shown = null;
+        update(latest.mood, latest.activity);      // comes back with the current mood, not empty
+      }
+    },
+  };
 }

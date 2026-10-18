@@ -8,12 +8,7 @@ TIME_FORMAT = "%Y.%m.%d %H:%m:%S:"
 U8 = "utf-8"
 
 # Textbox settings
-BACKGROUND_COLOR = "#000000"
-TEXT_COLOR = "#6cf542"
-FONT_SIZE = "16px"
-TEXT_ROWS = 30
 TEXT_COLS = 75
-TEXT_FONT = 'Arial, cursive'
 
 # Important config keys for expressions
 EXPRESSION_FILE = "expressions.json"

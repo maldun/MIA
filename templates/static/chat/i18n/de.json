@@ -70,5 +70,22 @@
   "view.bust": "Büste",
   "view.face": "Gesicht",
   "menu.background": "Hintergrund",
-  "background.none": "Keiner"
+  "background.none": "Keiner",
+  "menu.settings": "Einstellungen",
+  "settings.title": "Einstellungen",
+  "settings.enter": "Eingabetaste",
+  "settings.enter.auto": "Sendet am Computer, neue Zeile auf Touchscreens",
+  "settings.enter.enter": "Sendet immer (Umschalt+Eingabe: neue Zeile)",
+  "settings.enter.newline": "Immer neue Zeile (Senden-Knopf benutzen)",
+  "settings.mood": "Stimmungszeile anzeigen",
+  "settings.emotions": "Emotionen bei Nachrichten anzeigen",
+  "settings.times": "Zeiten anzeigen",
+  "settings.compact": "Kompakte Nachrichten",
+  "settings.reset": "Einstellungen zurücksetzen",
+  "settings.shortcuts": "Tastatur",
+  "shortcut.composer": "Nachricht schreiben",
+  "shortcut.latest": "Zur neuesten Nachricht springen",
+  "shortcut.toggle": "Chat ein- oder ausblenden",
+  "shortcut.menu": "Menü öffnen",
+  "shortcut.escape": "Menü, Liste oder Dialog schließen"
 }

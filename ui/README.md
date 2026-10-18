@@ -202,7 +202,7 @@ The page now uses the `chat_*` events of C2 (the C1 bubbles and the old `answer`
   most every 30 seconds. The header chip shows the model (light or full).
 - **Tests:** `node --test "tests/js/*.test.mjs"` (16), and the browser check `ui/tools/chat_stub_server.py` + `ui/tools/chat_e2e.js` (history, paging,
   streaming, mood changes, palette, stop, error; see the header of the stub server).
-- **Still old:** the server still emits `answer` and writes `answer.html` for the old page, and still handles the old `message` event; both go in C5.
+- **Old code:** removed in C5 (see below).
 
 ## Chat page, phase C4 (character integration)
 
@@ -220,3 +220,20 @@ The page now uses the `chat_*` events of C2 (the C1 bubbles and the old `answer`
 - **Tests:** `godot --headless --path ui/godot --script res://tools/test_bridge.gd` (26 checks: the projected position of the character is
   checked for a side panel, a bottom sheet and no inset), `node --test "tests/js/*.test.mjs"` (22 checks incl. inset and caption text).
   Rebuild the web export with `ui/tools/build_web.sh` after pulling this phase (the Godot code changed).
+
+## Chat page, phase C5 (polish and cleanup)
+
+- **Old code removed:** the `message` socket event, the `answer` event, `answer.html` with its iframe and the `md-block` web component (CDN) are gone; the page uses
+  `chat_send` and the `chat_*` events only. The unused text box constants (`BACKGROUND_COLOR`, `TEXT_COLOR`, `FONT_SIZE`, `TEXT_ROWS`, `TEXT_FONT`) were removed from
+  `constants.py`. A script or tool that still sends `message` must use `chat_send` now (`{id, text}`).
+- **Settings (menu > Settings, per device):** Enter key (sends on computers / new line on touch screens, always sends, always new line), mood line on or off,
+  emotions at messages, times, compact messages, reset. `settings.js` keeps them in localStorage and sets data attributes on `<html>`; broken stored data falls back
+  to the defaults.
+- **Keyboard:** `/` writes a message, `Alt+Down` jumps to the latest message, `Alt+C` shows or hides the chat, `Alt+M` opens the menu, `Esc` closes menu, list and dialogs
+  (listed in the settings dialog). The message list is not a live region any more: a separate region announces each *finished* answer (and notes), so screen readers
+  do not read streamed text word by word; `aria-busy` is set while MIA writes.
+- **Touch and contrast:** all buttons are at least 44 x 44 px on touch screens (the sheet handle too), `prefers-contrast: more` gives stronger borders and text,
+  `prefers-reduced-motion` switches animations off.
+- **Budget:** the chat's own scripts must stay under 100 KB gzipped (tested in `tests/test_chat_page.py`; currently about 19 KB).
+- **Tests:** `node --test "tests/js/*.test.mjs"` (29), `python tests/test_chat_page.py` (11), browser check `ui/tools/chat_a11y.js` (semantics, shortcuts, settings, announcement,
+  small touch targets; run it with `--mobile --size 320x640` for a small phone). The manual list for a real phone is `ui/CHECKLIST_CHAT_PHONE.md`.

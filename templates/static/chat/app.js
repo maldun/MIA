@@ -15,6 +15,8 @@ import { askConfirm, initPalette, loadCommands } from './palette.js';
 import { modelLabel } from './chat-model.js';
 import { initCaption } from './caption.js';
 import { initViewMenu } from './view-menu.js';
+import { enterSends, initSettings } from './settings.js';
+import { initAnnouncements, initShortcuts } from './a11y.js';
 
 const $ = (id) => document.getElementById(id);
 const storage = defaultStorage();
@@ -27,6 +29,15 @@ applyTranslations(document);
 document.title = t('app.title');
 
 const theme = initTheme({ storage, search: location.search });
+let mood = null;
+let started = false;      // the setting callback runs once while the page is built
+const settings = initSettings({
+  storage,
+  onChange(values) {
+    mood?.setEnabled(values.showMood);
+    if (started) sendInset();
+  },
+});
 
 const layout = initLayout({
   storage,
@@ -104,7 +115,7 @@ initSound({
   t,
 });
 
-initMenu({
+const menu = initMenu({
   button: $('menu-button'),
   menu: $('menu'),
   themeButtons: document.querySelectorAll('[data-theme-choice]'),
@@ -124,7 +135,7 @@ viewMenu = initViewMenu({
 });
 
 // --- mood line and header chip, driven by the server --------------------------------------------------
-const mood = initMood({ chip: $('mood'), emoji: $('mood-emoji'), text: $('mood-text'), live: $('mood-live') });
+mood = initMood({ chip: $('mood'), emoji: $('mood-emoji'), text: $('mood-text'), live: $('mood-live'), enabled: settings.get().showMood });
 
 socket.on('chat_status', (status) => {
   mood.update(status.mood, status.activity);
@@ -182,7 +193,35 @@ composer = initComposer({
     return true;
   },
   onStop: () => socket.emit('chat_stop'),
+  enterSends: () => enterSends(settings.get().enterSends, window.matchMedia?.('(pointer: coarse)').matches ?? false),
 });
 
+// --- settings of this device, keyboard shortcuts, announcements for screen readers ------------------------------
+initAnnouncements({ region: $('announce'), socket, list: $('messages'), t });
+initShortcuts({ composer, layout, menu, chat });
+
+const fields = { enterSends: $('set-enter'), showMood: $('set-mood'), showEmotions: $('set-emotions'), showTimes: $('set-times'), compact: $('set-compact') };
+
+function showSettings(values) {
+  fields.enterSends.value = values.enterSends;
+  for (const key of ['showMood', 'showEmotions', 'showTimes', 'compact']) fields[key].checked = values[key];
+}
+
+for (const [key, field] of Object.entries(fields)) {
+  field.addEventListener('change', () => settings.set(key, field.type === 'checkbox' ? field.checked : field.value));
+}
+$('settings-reset').addEventListener('click', () => {
+  settings.reset();
+  theme.set('auto');
+  showSettings(settings.get());
+});
+$('settings-button').addEventListener('click', () => {
+  menu.close(false);
+  showSettings(settings.get());
+  $('settings').showModal();
+});
+
+started = true;
+
 // handle for tests and debugging
-window.miaChat = { renderMarkdown, socket, theme, chat, mood, composer };
+window.miaChat = { renderMarkdown, socket, theme, chat, mood, composer, settings };

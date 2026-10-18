@@ -70,5 +70,22 @@
   "view.bust": "Bust",
   "view.face": "Face",
   "menu.background": "Background",
-  "background.none": "None"
+  "background.none": "None",
+  "menu.settings": "Settings",
+  "settings.title": "Settings",
+  "settings.enter": "Enter key",
+  "settings.enter.auto": "Sends on computers, new line on touch screens",
+  "settings.enter.enter": "Always sends (Shift+Enter: new line)",
+  "settings.enter.newline": "Always a new line (use the send button)",
+  "settings.mood": "Show the mood line",
+  "settings.emotions": "Show emotions at messages",
+  "settings.times": "Show times",
+  "settings.compact": "Compact messages",
+  "settings.reset": "Reset settings",
+  "settings.shortcuts": "Keyboard",
+  "shortcut.composer": "Write a message",
+  "shortcut.latest": "Jump to the latest message",
+  "shortcut.toggle": "Show or hide the chat",
+  "shortcut.menu": "Open the menu",
+  "shortcut.escape": "Close menu, list or dialog"
 }

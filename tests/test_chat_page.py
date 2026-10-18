@@ -2,6 +2,7 @@
 Tests for the chat page (templates/index.html and templates/static/chat/*): strict CSP, no inline code,
 nothing from the internet, all referenced files exist. Run with the MIA virtualenv: python tests/test_chat_page.py
 """
+import gzip
 import importlib
 import json
 import os
@@ -79,6 +80,33 @@ class ChatPage(unittest.TestCase):
         self.assertEqual(set(en), set(de))
         keys = set(re.findall(r'data-i18n(?:-[a-z-]+)?="([^"]+)"', self.html))
         self.assertTrue(keys <= set(en), keys - set(en))
+
+    def test_performance_budget_of_the_scripts(self):
+        """the chat's own JavaScript (not the vendored libraries) stays under 100 KB gzipped"""
+        total = 0
+        for name in os.listdir(CHAT_STATIC):
+            if name.endswith(".js"):
+                with open(os.path.join(CHAT_STATIC, name), "rb") as handle:
+                    total += len(gzip.compress(handle.read()))
+        self.assertLess(total, 100 * 1024, "chat scripts are %d bytes gzipped" % total)
+
+    def test_no_leftovers_of_the_old_page(self):
+        for name in os.listdir(CHAT_STATIC):
+            path = os.path.join(CHAT_STATIC, name)
+            if os.path.isfile(path):
+                with open(path, encoding="utf-8") as handle:
+                    source = handle.read()
+                self.assertNotIn("md-block", source, name)
+                self.assertNotIn("answer.html", source, name)
+        self.assertNotIn("answerInput", self.html)
+        self.assertFalse(os.path.exists(os.path.join(REPO, "templates", "static", "answer.html")))
+
+    def test_the_log_and_the_page_do_not_use_the_old_answer_event(self):
+        with open(os.path.join(REPO, "web_app.py"), encoding="utf-8") as handle:
+            source = handle.read()
+        self.assertNotIn("emit('answer'", source)
+        self.assertNotIn("md-block", source)
+        self.assertNotIn("@socketio.on('message')", source)
 
     def test_old_socket_events_still_work(self):
         wa = self.web_app

@@ -121,12 +121,7 @@ Prerequisites:
 - Some configurations are found in `constants.py` which can be adjusted like textbox settings.
     - CFG_FILE = "setup_cfg.json" (cfg file to use)
     - LOG_FNAME = "mia.log" (log file)
-    - BACKGROUND_COLOR = "#000000" 
-    - TEXT_COLOR = "#6cf542" 
-    - FONT_SIZE = "16px" 
-    - TEXT_ROWS = 15 
     - TEXT_COLS = 60
-    - TEXT_FONT = '"Brush Script MT", cursive'
 - Generate expressions with `python -m python3.10 -i speak.py setup_cfg.json expressions.json --generate`
 - Add Optional: add favicon.ico in templates/static, Add intro_sound (.wav). to setup_cfg.json.
 

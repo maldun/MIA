@@ -5,6 +5,10 @@
 export const MAX_LENGTH = 8000;
 const COUNTER_FROM = 7000;
 
+function coarse(win = window) {
+  return win.matchMedia?.('(pointer: coarse)').matches ?? false;
+}
+
 /** trim, cut to the limit, drop control characters (but keep line breaks and tabs) */
 export function normalizeMessage(text) {
   return String(text ?? '')
@@ -13,8 +17,7 @@ export function normalizeMessage(text) {
     .slice(0, MAX_LENGTH);
 }
 
-export function initComposer({ form, input, send, stop, counter, storage, suggestions, onSend, onStop, win = window }) {
-  const coarse = () => win.matchMedia?.('(pointer: coarse)').matches ?? false;
+export function initComposer({ form, input, send, stop, counter, storage, suggestions, onSend, onStop, enterSends = () => !coarse(), win = window }) {
   let composing = false;
   let online = true;
   let busy = false;
@@ -55,7 +58,7 @@ export function initComposer({ form, input, send, stop, counter, storage, sugges
   input.addEventListener('compositionstart', () => { composing = true; });
   input.addEventListener('compositionend', () => { composing = false; });
   input.addEventListener('keydown', (event) => {
-    if (event.key === 'Enter' && !event.shiftKey && !event.isComposing && !composing && !coarse()) {
+    if (event.key === 'Enter' && !event.shiftKey && !event.isComposing && !composing && enterSends()) {
       event.preventDefault();
       submit();
     } else if (event.key === 'ArrowUp' && input.value === '' && last) {
