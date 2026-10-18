@@ -60,6 +60,72 @@ except ImportError:
 
 curr_path = os.path.split(__file__)[0]
 
+
+class _CachedIndex:
+    """
+    A faiss index together with all its vectors. RVC needs both for every sentence; rvc_python reads
+    the index file (several hundred MB) and copies all vectors again on every call.
+    """
+    def __init__(self,index):
+        self._index = index
+        self._vectors = index.reconstruct_n(0,index.ntotal)
+
+    def reconstruct_n(self,start,count):
+        if start == 0 and count == self._index.ntotal:
+            return self._vectors   # only read by RVC, never changed
+        return self._index.reconstruct_n(start,count)
+
+    def __getattr__(self,name):
+        return getattr(self._index,name)
+
+
+class _FaissWithCache:
+    """faiss for RVC's pipeline: read_index keeps the last index (and its vectors) in memory"""
+    def __init__(self,faiss_module):
+        self._faiss = faiss_module
+        self._cache = {}
+
+    def read_index(self,path,*args):
+        key = (os.path.abspath(path),os.path.getmtime(path))
+        if key not in self._cache:
+            self._cache.clear()   # one voice at a time
+            self._cache[key] = _CachedIndex(self._faiss.read_index(path,*args))
+        return self._cache[key]
+
+    def __getattr__(self,name):
+        return getattr(self._faiss,name)
+
+
+HUBERT_RATE = 16000   # RVC works at 16 kHz internally
+RVC_WINDOW = 160      # one pitch frame
+
+
+def rvc_padding_samples(seconds,target_rate):
+    """(samples at 16 kHz, samples at the voice's rate) for a padding: whole pitch frames, so both cuts stay aligned"""
+    frames = max(1,round(seconds*HUBERT_RATE/RVC_WINDOW))
+    pad = frames*RVC_WINDOW
+    return pad, pad*target_rate//HUBERT_RATE
+
+
+def set_rvc_padding(rvc,seconds):
+    """
+    RVC pads every piece of audio with this much on both sides before converting it (default on a CPU: 1 s).
+    The voice generator renders the padding too, so for short sentences most of the work is padding.
+    """
+    pipeline = rvc.vc.pipeline
+    pad, pad_target = rvc_padding_samples(seconds,rvc.vc.tgt_sr)
+    pipeline.t_pad = pad
+    pipeline.t_pad_tgt = pad_target
+    pipeline.t_pad2 = pad*2
+    logger.info(f"speech: RVC padding {pad/HUBERT_RATE:.2f} s")
+
+
+def cache_rvc_index():
+    """the index of the voice is read once instead of once per sentence"""
+    from rvc_python.modules.vc import pipeline as rvc_pipeline
+    if not isinstance(rvc_pipeline.faiss,_FaissWithCache):
+        rvc_pipeline.faiss = _FaissWithCache(rvc_pipeline.faiss)
+
 class Speaker:
     """
     Transforms a msg into speech using TTS and voice changers.
@@ -76,7 +142,8 @@ class Speaker:
     FIRST_CHUNK_SENTENCES = 1
     CHUNK_SENTENCES = 1
     def __init__(self,tts_model=TTS_DEFAULT,voice_model=None,tts_device=None,gfx_version=None,voice_sample=None,rvc_opts=None,rvc_params=None,rvc_enabled=True,
-                 web_port=8585,address="localhost",protocol="http",tts_engine=COQUI_ENGINE,kokoro_opts=None,sentence_pause=0.3,cpu_threads=None,**_):
+                 web_port=8585,address="localhost",protocol="http",tts_engine=COQUI_ENGINE,kokoro_opts=None,sentence_pause=0.3,cpu_threads=None,
+                 rvc_cache_index=True,tts_warmup=True,rvc_pad=0.25,**_):
         self._tts_engine = tts_engine
         self._kokoro_opts = dict(self.KOKORO_DEFAULTS, **(kokoro_opts or {}))
         # extra wait after each chunk to cover upload and player start in the browser
@@ -111,10 +178,26 @@ class Speaker:
         
         self._voice_sample = voice_sample
         self._voice_model = voice_model
+        self._rvc_cache_index = rvc_cache_index
+        self._rvc_pad = rvc_pad
         self.init_tts_model(self._tts_model,self._device)
         if self._rvc_enabled is True:
             self.init_rvc_model(self._voice_model,self._device)
-        
+        if tts_warmup:
+            self.warm_up()
+
+    def warm_up(self):
+        """
+        Renders a short sentence once: RVC loads its helper models (hubert, rmvpe) and the
+        index on first use, so without this the first answer after the start is the slowest.
+        """
+        started = time.time()
+        try:
+            with tempfile.TemporaryDirectory() as tmp_dir:
+                self.render_voice("Hello.",os.path.join(tmp_dir,"warmup.wav"))
+            logger.info(f"speech: warmed up in {time.time()-started:.1f} s")
+        except Exception as exc:
+            logger.warning(f"speech: warm-up failed ({exc}), the first sentence will be slower")
 
     @staticmethod
     def _resolve_path(path):
@@ -153,9 +236,13 @@ class Speaker:
             from fairseq.data.dictionary import Dictionary
             torch.serialization.add_safe_globals([Dictionary])
         self._rvc = RVCInference(device=device) #+":0")
-        
+
         self._rvc.load_model(model,**self._rvc_opts)
         self._rvc.set_params(**self._rvc_params)
+        if self._rvc_cache_index:
+            cache_rvc_index()
+        if self._rvc_pad is not None:
+            set_rvc_padding(self._rvc,self._rvc_pad)
                              #f0up_key=2, protect=0.5,
                              #f0method= "pm")  # (harvest, crepe, rmvpe, pm)
     
