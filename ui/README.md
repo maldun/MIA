@@ -255,7 +255,7 @@ In the expression editor, type what you want ("surprised but trying to hide it")
 - **Feedback log:** every request and decision is appended to `data/feedback_log.jsonl` (`feedback_log` in `setup_cfg.json`), not in version control.
 - **Model:** by default the model MIA is using right now with the same options (`num_ctx` ...), so Ollama does not have to load a second model or reload this one.
   `"expression_model"` picks another model (then the first request loads it), `"expression_temperature"` (default 0.7) the creativity.
-- **Tests:** `python tests/test_expression_llm.py` (21: prompt, validation, retry, offline, busy, match, feedback and examples, REST), `test_editor.gd` (65 checks incl. the UI flow),
+- **Tests:** `python tests/test_expression_llm.py` (21: prompt, validation, retry, offline, busy, match, feedback and examples, REST), `test_editor.gd` (67 checks incl. the UI flow),
   and live over real HTTP: `python ui/tools/expression_stub_server.py` (fake model), then `MIA_URL=http://127.0.0.1:8685 MIA_TOKEN_FILE=data/editor_token.txt
   MIA_EXPRESSION_LIVE=1 godot --headless --path ui/godot --script res://tools/test_editor_live.gd`. Not tested here: the quality of a real model's answers; try a few descriptions
   and use Reject / Keep so the next prompts learn from them. Rebuild the web export (`ui/tools/build_web.sh`) after pulling this phase.

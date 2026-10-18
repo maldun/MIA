@@ -150,13 +150,19 @@ func _write(kind: String, method: int, path: String, body) -> void:
 			message = _success_message(kind, info)
 		elif code == 401:
 			token_required = true
-			message = "A token is needed to change presets."
+			message = unauthorized_message()
 		elif code == 0:
 			_set_available(false)
 			message = "The server cannot be reached."
 		else:
 			message = str(info.get("error", "HTTP %d" % code))
 		operation_done.emit(kind, ok, message, info))
+
+## what to tell the user when the server refuses a change because of the token (none entered, or a wrong or outdated one)
+func unauthorized_message() -> String:
+	if token.is_empty():
+		return "A token is needed to change presets: paste it into the Token field below (it is in MIA's data/editor_token.txt and printed when MIA starts)."
+	return "The token was not accepted (wrong or outdated). Paste the current one into the Token field below: data/editor_token.txt in MIA's folder, also printed when MIA starts."
 
 func _success_message(kind: String, info: Dictionary) -> String:
 	var corrections: Array = info.get("corrections", [])

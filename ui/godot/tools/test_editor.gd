@@ -243,6 +243,12 @@ func _init() -> void:
 	ed._name_edit.text_changed.emit("needs_token")
 	ed._save_new()
 	check(not server.presets.has("needs_token") and ed._status.text.contains("token"), "without the token nothing is saved")
+	check(ed._status.text.contains("Token field") and ed._token_row.visible, "the message says where the token goes")
+	ed._token_edit.text = "wrong"
+	ed._token_edit.text_changed.emit("wrong")
+	ed._save_new()
+	await frames(3)
+	check(not server.presets.has("needs_token") and ed._status.text.contains("wrong or outdated"), "a wrong token is called wrong, not 'missing': %s" % ed._status.text.left(60))
 	ed._token_edit.text = "s3cret"
 	ed._token_edit.text_changed.emit("s3cret")
 	ed._save_new()
