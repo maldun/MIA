@@ -143,7 +143,7 @@ class Speaker:
     CHUNK_SENTENCES = 1
     def __init__(self,tts_model=TTS_DEFAULT,voice_model=None,tts_device=None,gfx_version=None,voice_sample=None,rvc_opts=None,rvc_params=None,rvc_enabled=True,
                  web_port=8585,address="localhost",protocol="http",tts_engine=COQUI_ENGINE,kokoro_opts=None,sentence_pause=0.3,cpu_threads=None,
-                 rvc_cache_index=True,tts_warmup=True,rvc_pad=0.25,**_):
+                 rvc_cache_index=True,tts_warmup=True,rvc_pad=None,**_):
         self._tts_engine = tts_engine
         self._kokoro_opts = dict(self.KOKORO_DEFAULTS, **(kokoro_opts or {}))
         # extra wait after each chunk to cover upload and player start in the browser
