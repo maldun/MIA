@@ -116,7 +116,7 @@ def main():
         return
 
     suite = harness.load_suite(os.path.join(SUITES, args.args[0]))
-    need_model = suite.target["kind"] == "pipeline"
+    need_model = suite.target["kind"] in ("pipeline", "extraction") and bool(args.skill or args.pipeline or suite.target["kind"] == "pipeline")
     core = build_core(cfg, need_model, need_sandbox=need_model)
     variant = {"name": args.variant}
     for key in ("skill", "pipeline", "model"):
