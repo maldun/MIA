@@ -111,6 +111,7 @@ Prerequisites:
     - "chat_rate_per_minute":10, (optional: messages per minute and connection, 0 = no limit)
     - "chat_token":"a secret", (optional: token for deleting the conversation over the API; default is the editor token)
     - "moods_file":"moods.json", "mood_hold_minutes":10, (optional: the phrases of the mood line (edit them to match MIA's personality) and how long a mood stays after the last answer)
+    - "expression_model":"gemma4:12b-it-qat", "expression_temperature":0.7, "feedback_log":"data/feedback_log.jsonl", (optional: expressions from a description in the expression editor. The model defaults to the one MIA is using right now (same options, so Ollama does not reload anything); the log keeps what you kept, edited or rejected, and is used as examples in later requests)
     - "gfx_version":"11.0.0", (flag used for roc)
     - "voice_sample":"/path/to/MIA/voice/samples/miku_vocals.wav",(voice sample for tts voice cloning)
     - "history_file":"memories.json" (MIA's memory)

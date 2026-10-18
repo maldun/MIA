@@ -17,6 +17,10 @@ class FakeServer extends PresetApi:
 	var online := true
 	var counter := 1
 	var calls: Array = []
+	var feedback: Array = []
+	var generate_error := ""
+	var generated_preset := {"name": "llm-sly-grin", "description": "a sly grin", "weights": {"Fcl_MTH_Fun": 0.6, "Fcl_EYE_Joy": 0.4},
+			"bones": {"head_roll": 4.0}, "gesture": "", "speaking": false, "tags": ["smug", "sly"], "source": "llm"}
 
 	func _request(method: int, path: String, body, done: Callable) -> void:
 		calls.append("%d %s" % [method, path])
@@ -26,6 +30,19 @@ class FakeServer extends PresetApi:
 		var write := method != HTTPClient.METHOD_GET
 		if write and not needs_token.is_empty() and token != needs_token:
 			done.call(401, {"error": "a valid token is needed to change presets"})
+			return
+		if path == "/api/expression/match":
+			done.call(200, {"name": "smug", "score": 3, "preset": presets.get("smug")})
+			return
+		if path == "/api/expression/generate":
+			if generate_error.is_empty():
+				done.call(200, {"id": "r1", "preset": generated_preset.duplicate(true), "corrections": [], "closest": "smug", "seconds": 1.5, "model": "fake"})
+			else:
+				done.call(503, {"error": generate_error})
+			return
+		if path == "/api/expression/feedback":
+			feedback.append(body)
+			done.call(200, {"logged": body["decision"]})
 			return
 		var name_in_path := path.trim_prefix("/api/presets/").get_slice("?", 0)
 		if method == HTTPClient.METHOD_GET and path == "/api/presets":
@@ -240,6 +257,79 @@ func _init() -> void:
 	check(ed.anchor_left == 0.0 and ed.anchor_right == 1.0 and ed.anchor_top == 1.0, "phone: bottom sheet")
 	ed.close()
 	check(not ed.visible, "the panel can be closed")
+
+	# --- expressions from a description -------------------------------------------------------------------------------
+	ed.load_preset("happy")
+	check(ed._generate_button.disabled, "Generate is disabled while the description is empty")
+	ed._describe_edit.text = "sly grin"
+	ed._describe_edit.text_changed.emit("sly grin")
+	check(not ed._generate_button.disabled, "Generate is enabled with a description")
+	server.calls.clear()
+	ed._generate()
+	await frames(3)
+	check("2 /api/expression/match" in server.calls and "2 /api/expression/generate" in server.calls, "the description goes to match (instant) and generate")
+	check(not ed._gen.is_empty() and ed._result_row.visible, "the result is shown with keep / edit / reject")
+	check(ed._name_edit.text == "llm-sly-grin" and ed._description_edit.text == "a sly grin", "name and description of the result are filled in")
+	check(absf((ed._rows["Fcl_MTH_Fun"]["slider"] as HSlider).value - 0.6) < 0.001, "the sliders show the generated weights")
+	eng.advance(0.8)
+	var fun := face.get_blend_shape_value(face.find_blend_shape_by_name("Fcl_MTH_Fun"))
+	check(absf(fun - 0.6) < 0.05, "the character shows it (Fun %.2f)" % fun)
+	check(ed.loaded_name == "" and ed.collect("llm-sly-grin")["source"] == "llm", "it is an unsaved new preset with source llm")
+
+	# keep: saved as it is, the server learns "keep"
+	server.feedback.clear()
+	ed._keep()
+	await frames(4)
+	check(server.presets.has("llm-sly-grin") and server.presets["llm-sly-grin"]["source"] == "llm", "Keep saves the preset with source llm")
+	check(server.feedback.size() == 1 and server.feedback[0]["decision"] == "keep" and server.feedback[0]["id"] == "r1", "the server is told 'keep'")
+	check(not ed._result_row.visible and ed._gen.is_empty(), "the keep / edit / reject row is gone afterwards")
+
+	# edit: change a slider, save under another name -> llm_edited and "edit" with the saved preset
+	ed._describe_edit.text = "sly grin again"
+	ed._generate()
+	await frames(3)
+	(ed._rows["Fcl_MTH_Fun"]["slider"] as HSlider).value = 0.9
+	ed._name_edit.text = "my-sly-grin"
+	server.feedback.clear()
+	ed._save_new()
+	await frames(4)
+	check(server.presets.has("my-sly-grin") and server.presets["my-sly-grin"]["source"] == "llm_edited", "a changed result is saved as llm_edited")
+	check(server.feedback.size() == 1 and server.feedback[0]["decision"] == "edit" and server.feedback[0]["preset"]["weights"]["Fcl_MTH_Fun"] == 0.9,
+			"the server is told 'edit' with the saved preset")
+
+	# reject: back to the expression before, "reject" is logged, nothing saved
+	ed.load_preset("sad")
+	eng.play("sad", 0.0)
+	var count_before := server.presets.size()
+	ed._describe_edit.text = "a different look"
+	ed._generate()
+	await frames(3)
+	server.feedback.clear()
+	ed._reject_generated()
+	await frames(2)
+	check(server.feedback.size() == 1 and server.feedback[0]["decision"] == "reject", "Reject is logged")
+	check(server.presets.size() == count_before and not ed._result_row.visible, "nothing was saved and the row is gone")
+	check(eng.current_name == "sad", "the expression from before comes back (got '%s')" % eng.current_name)
+
+	# a failing model: clear message, the expression from before stays
+	server.generate_error = "the language model could not be reached: down"
+	ed._describe_edit.text = "anything"
+	ed._generate()
+	await frames(3)
+	check(ed._gen.is_empty() and not ed._result_row.visible and not ed._generate_button.disabled and ed._generate_button.text == "Generate", "after an error the button is usable again")
+	check(ed._status.text.contains("could not be reached"), "the error is shown: %s" % ed._status.text)
+	check(eng.current_name == "sad", "the expression from before stays after an error")
+	server.generate_error = ""
+
+	# offline: generate is not possible
+	server.online = false
+	server.refresh()
+	await frames(2)
+	ed._refresh_buttons()
+	check(ed._generate_button.disabled, "Generate is disabled offline")
+	server.online = true
+	server.refresh()
+	await frames(2)
 
 	print("RESULT ", "ALL PASSED" if failures == 0 else "%d FAILED" % failures)
 	quit(0 if failures == 0 else 1)

@@ -128,5 +128,35 @@ func _init() -> void:
 	await wait_for(func(): return not eng.library.has(created + "_c"))
 	check(not eng.library.has(created + "_c"), "cleaned up")
 
+	# --- expressions from a description: needs a server with a language model function (ui/tools/expression_stub_server.py has a fake one)
+	if OS.get_environment("MIA_EXPRESSION_LIVE") == "1":
+		var answer := [{}]
+		api.generated.connect(func(ok: bool, data: Dictionary, message: String): answer[0] = {"ok": ok, "data": data, "message": message})
+		var closest_reply := [{}]
+		api.matched.connect(func(data: Dictionary): closest_reply[0] = data)
+		api.match_description("a sad and tearful look")
+		await wait_for(func(): return not (closest_reply[0] as Dictionary).is_empty())
+		check(str(closest_reply[0].get("name", "")) == "sad", "match: the closest preset to 'sad and tearful' is 'sad' (%s)" % closest_reply[0].get("name", ""))
+		api.generate("a sly grin")
+		await wait_for(func(): return not (answer[0] as Dictionary).is_empty(), 20.0)
+		var generated: Dictionary = answer[0]
+		check(generated.get("ok", false), "generate: the server answers (%s)" % generated.get("message", ""))
+		var preset: Dictionary = generated.get("data", {}).get("preset", {})
+		check(preset.get("source", "") == "llm" and not (preset.get("weights", {}) as Dictionary).is_empty(), "generate: a validated preset with source llm")
+		check(not api.protected_names.has(preset.get("name", "")) and not eng.library.has(preset.get("name", "")), "generate: it is not saved")
+		api.send_feedback(str(generated.get("data", {}).get("id", "")), "reject")
+		var anonymous_generate := PresetApi.new()
+		main.add_child(anonymous_generate)
+		anonymous_generate.setup(url)
+		anonymous_generate.token = ""
+		anonymous_generate.refresh()
+		await wait_for(func(): return anonymous_generate.available)
+		var refused_generate := [""]
+		anonymous_generate.generated.connect(func(ok: bool, _d, message: String): refused_generate[0] = "ok" if ok else message)
+		anonymous_generate.generate("anything")
+		await wait_for(func(): return refused_generate[0] != "")
+		if api.token_required:
+			check(refused_generate[0].contains("token"), "generate without the token is refused (%s)" % refused_generate[0])
+
 	print("RESULT ", "ALL PASSED" if failures == 0 else "%d FAILED" % failures)
 	quit(0 if failures == 0 else 1)

@@ -29,6 +29,10 @@ var _bones := {}
 var _loaded_source := "manual"
 var _pending_select := ""
 var _delete_armed := false
+var _gen := {}               # the expression of the language model that is shown: {"id", "preset"} (empty = none)
+var _before_gen := ""        # expression that was shown before the request (comes back when it is rejected)
+var _gen_busy := false
+var _feedback_after_save := false
 
 var _preset_option: OptionButton
 var _gesture_option: OptionButton
@@ -39,6 +43,9 @@ var _status: Label
 var _name_edit: LineEdit
 var _description_edit: LineEdit
 var _tags_edit: LineEdit
+var _describe_edit: LineEdit
+var _generate_button: Button
+var _result_row: HFlowContainer
 var _token_row: HBoxContainer
 var _token_edit: LineEdit
 var _save_new_button: Button
@@ -58,6 +65,8 @@ func setup(expression_engine: ExpressionEngine, preset_api: PresetApi) -> void:
 	engine.library_changed.connect(_on_library_changed)
 	api.availability_changed.connect(func(_a): _on_availability())
 	api.operation_done.connect(_on_operation_done)
+	api.generated.connect(_on_generated)
+	api.matched.connect(_on_matched)
 	get_viewport().size_changed.connect(_update_layout)
 	visible = false
 	_on_library_changed()
@@ -117,6 +126,27 @@ func _build() -> void:
 	_preset_option.item_selected.connect(_on_preset_selected)
 	picker.add_child(_preset_option)
 	picker.add_child(_button("Neutral", reset_to_neutral, "reset_button"))
+
+	# describe an expression in words: the language model makes it, the closest preset is shown while it works
+	var describe := HBoxContainer.new()
+	root.add_child(describe)
+	_describe_edit = LineEdit.new()
+	_describe_edit.placeholder_text = "Describe an expression, e.g. surprised but hiding it"
+	_describe_edit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_describe_edit.custom_minimum_size = Vector2(0, 44)
+	_describe_edit.clear_button_enabled = true
+	_describe_edit.max_length = 300
+	_describe_edit.text_submitted.connect(func(_t): _generate())
+	_describe_edit.text_changed.connect(func(_t): _refresh_buttons())
+	describe.add_child(_describe_edit)
+	_generate_button = _button("Generate", _generate, "generate_button")
+	describe.add_child(_generate_button)
+	_result_row = HFlowContainer.new()
+	_result_row.visible = false
+	root.add_child(_result_row)
+	_result_row.add_child(_button("Keep", _keep, "keep_button"))
+	_result_row.add_child(_button("Edit", _edit_generated, "edit_button"))
+	_result_row.add_child(_button("Reject", _reject_generated, "reject_button"))
 
 	_status = Label.new()
 	_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -393,6 +423,7 @@ func _apply_filter(text: String) -> void:
 func load_preset(preset_name: String) -> bool:
 	if not engine.library.has(preset_name):
 		return false
+	_dismiss_generated()
 	var p: Dictionary = engine.library[preset_name]
 	_weights = (p["weights"] as Dictionary).duplicate()
 	_bones = (p["bones"] as Dictionary).duplicate()
@@ -428,6 +459,7 @@ func reset_to_neutral() -> void:
 	_refresh_buttons()
 
 func start_new() -> void:
+	_dismiss_generated()
 	_weights.clear()
 	_bones.clear()
 	_sync_sliders()
@@ -491,7 +523,7 @@ func collect(preset_name: String) -> Dictionary:
 	if source == "llm" and dirty:
 		source = "llm_edited"   # an expression made by the LLM and changed by hand
 	if loaded_name.is_empty():
-		source = "manual"
+		source = ("llm_edited" if dirty else "llm") if not _gen.is_empty() else "manual"
 	var gesture := ""
 	if _gesture_option.selected > 0:
 		gesture = _gesture_option.get_item_text(_gesture_option.selected)
@@ -511,6 +543,7 @@ func _save_new() -> void:
 		_set_status("'%s' exists already: load it and use 'Overwrite', or choose another name." % n, true)
 		return
 	_pending_select = n
+	_feedback_after_save = not _gen.is_empty()
 	_disarm_delete()
 	api.create(collect(n))
 
@@ -566,6 +599,12 @@ func _on_operation_done(kind: String, ok: bool, message: String, data: Dictionar
 	else:
 		dirty = false
 		loaded_name = str((data.get("preset", {}) as Dictionary).get("name", loaded_name))
+		if kind == "create" and _feedback_after_save and not _gen.is_empty():
+			# an expression of the language model was saved: kept as it was, or edited by hand first
+			var saved: Dictionary = data.get("preset", {})
+			api.send_feedback(str(_gen["id"]), "edit" if saved.get("source", "") == "llm_edited" else "keep", saved)
+			_dismiss_generated()
+		_feedback_after_save = false
 	api.refresh()   # the answer replaces the library and selects _pending_select
 
 # --- state of the buttons and messages ----------------------------------------------------------------------------------
@@ -588,7 +627,95 @@ func _refresh_buttons() -> void:
 	_rename_button.disabled = not online or loaded_name.is_empty() or not _valid_name(typed) or typed == loaded_name
 	_delete_button.disabled = not online or loaded_name.is_empty()
 	_token_row.visible = online and api.token_required
+	_generate_button.disabled = not online or _gen_busy or _describe_edit.text.strip_edges().is_empty()
 
 func _set_status(text: String, is_error := false) -> void:
 	_status.text = text
 	_status.add_theme_color_override("font_color", Color(1.0, 0.55, 0.5) if is_error else Color(0.7, 0.9, 0.7))
+
+# --- expressions from a description (LLM) ------------------------------------------------------------------------------
+
+## asks for an expression; meanwhile the closest preset is shown (the model may need seconds)
+func _generate() -> void:
+	var description := _describe_edit.text.strip_edges()
+	if description.is_empty() or _gen_busy or not api.available:
+		return
+	_dismiss_generated()
+	_gen_busy = true
+	_before_gen = engine.current_name
+	_generate_button.text = "..."
+	_refresh_buttons()
+	_set_status("Asking the language model ... the closest preset is shown meanwhile.")
+	api.match_description(description)
+	api.generate(description)
+
+func _on_matched(data: Dictionary) -> void:
+	var preset_name := str(data.get("name", ""))
+	if _gen_busy and _gen.is_empty() and engine.library.has(preset_name):
+		engine.play(preset_name)
+
+func _on_generated(ok: bool, data: Dictionary, message: String) -> void:
+	_gen_busy = false
+	_generate_button.text = "Generate"
+	if not ok:
+		if engine.library.has(_before_gen):
+			engine.play(_before_gen)
+		_set_status(message, true)
+		_refresh_buttons()
+		return
+	_gen = {"id": str(data.get("id", "")), "preset": data["preset"]}
+	_load_generated(data["preset"])
+	_result_row.visible = true
+	var text := "Made by the language model in %.1f s: keep it, edit it or reject it." % float(data.get("seconds", 0.0))
+	var corrections: Array = data.get("corrections", [])
+	if not corrections.is_empty():
+		text += " (Corrected: " + "; ".join(PackedStringArray(corrections)) + ")"
+	_set_status(text)
+	_refresh_buttons()
+
+## puts the generated expression into the sliders as a new, unsaved preset and shows it
+func _load_generated(p: Dictionary) -> void:
+	_weights = (p.get("weights", {}) as Dictionary).duplicate()
+	_bones = (p.get("bones", {}) as Dictionary).duplicate()
+	_sync_sliders()
+	var gesture_index := 0
+	for i in _gesture_option.item_count:
+		if _gesture_option.get_item_text(i) == str(p.get("gesture", "")):
+			gesture_index = i
+	_gesture_option.select(gesture_index)
+	_speaking_check.set_pressed_no_signal(false)
+	_name_edit.text = str(p.get("name", ""))
+	_description_edit.text = str(p.get("description", ""))
+	_tags_edit.text = ", ".join(PackedStringArray(p.get("tags", [])))
+	loaded_name = ""
+	_loaded_source = "llm"
+	dirty = false
+	_select_option("")
+	engine.apply_preset(preview_preset(), 0.4, false)
+
+## saves it as it is (source llm); "Save as new" after changing sliders saves it as llm_edited
+func _keep() -> void:
+	if _gen.is_empty():
+		return
+	_save_new()
+
+func _edit_generated() -> void:
+	if _gen.is_empty():
+		return
+	_set_status("Change the sliders, then press 'Save as new': it is saved as an edited expression and the model learns from it.")
+
+func _reject_generated() -> void:
+	if _gen.is_empty():
+		return
+	api.send_feedback(str(_gen["id"]), "reject")
+	_dismiss_generated()
+	if engine.library.has(_before_gen):
+		engine.play(_before_gen)
+	_set_status("Rejected (the model will avoid it next time).")
+
+## the generated expression is no longer the one being worked on (another preset was loaded, saved, rejected)
+func _dismiss_generated() -> void:
+	_gen = {}
+	_feedback_after_save = false
+	if _result_row != null:
+		_result_row.visible = false

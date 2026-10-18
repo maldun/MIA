@@ -127,7 +127,15 @@ if os.path.exists(ALLOWED_ORIGIN_FILE):
 socketio = SocketIO(app,cors_allowed_origins=allowed_origins)
 
 # expression presets of the character (REST API, files in "presets_dir"); the editor of the character uses it
-preset_store = init_presets_api(app,cfg,FPATH,allowed_origins=lambda: allowed_origins)
+def expression_llm(messages, schema):
+    """the language model for expressions from a description: MIA's Ollama server, answers must follow the JSON schema"""
+    reply = comm.client.chat(model=cfg.get(CONST.EXPRESSION_MODEL_KEY) or comm.version, messages=messages, format=schema, stream=False,
+                             options={**(comm.llm_options or {}), "temperature": cfg.get(CONST.EXPRESSION_TEMPERATURE_KEY, CONST.DEFAULT_EXPRESSION_TEMPERATURE)},      # same options as the chat: no model reload
+                             think=False, keep_alive=comm.keep_alive)
+    return reply["message"]["content"]
+
+preset_store = init_presets_api(app,cfg,FPATH,allowed_origins=lambda: allowed_origins,llm=expression_llm,
+                                model_name=lambda: cfg.get(CONST.EXPRESSION_MODEL_KEY) or comm.version)
 
 #g.socket_url = f"ws://127.0.0.1:{port}/"
 

@@ -237,3 +237,25 @@ The page now uses the `chat_*` events of C2 (the C1 bubbles and the old `answer`
 - **Budget:** the chat's own scripts must stay under 100 KB gzipped (tested in `tests/test_chat_page.py`; currently about 19 KB).
 - **Tests:** `node --test "tests/js/*.test.mjs"` (29), `python tests/test_chat_page.py` (11), browser check `ui/tools/chat_a11y.js` (semantics, shortcuts, settings, announcement,
   small touch targets; run it with `--mobile --size 320x640` for a small phone). The manual list for a real phone is `ui/CHECKLIST_CHAT_PHONE.md`.
+
+## Phase 8: expressions from a description (LLM)
+
+In the expression editor, type what you want ("surprised but trying to hide it") and press **Generate**. MIA's own Ollama makes the expression; nothing leaves your machine.
+
+- **Flow:** the closest existing preset is shown at once (`/api/expression/match`, no model needed), then the model's expression replaces it and is loaded into the sliders as a new,
+  unsaved preset. **Keep** saves it (`source: llm`), **Edit** lets you change sliders and press "Save as new" (`source: llm_edited`), **Reject** discards it and brings the
+  previous expression back. Offline or with a failing model you get a clear message and the expression from before stays.
+- **Backend (`expression_llm.py`, routes in `presets_api.py`):** `POST /api/expression/generate {"description"}`, `POST /api/expression/match`, `POST /api/expression/feedback
+  {"id", "decision": "keep|edit|reject", "preset"?}`. They need the editor token, JSON and a known origin like every write. One request at a time (others get 429), a model
+  that cannot be reached gives 503, two unusable answers 502.
+- **The prompt:** the 57 shape keys with categories and descriptions, the head/eye bones with their directions, the gestures, rules (3-10 keys, left/right keys for asymmetric looks,
+  no vowel keys), and examples: what you kept or edited before (as good examples), what you rejected (marked "do not repeat"), then presets similar to the request.
+- **Structured output:** the model must answer with a JSON schema in which every shape key is a number from 0 to 1, so it cannot even name an unknown key. The answer is checked like
+  any preset (unknown keys removed, values clamped, corrections shown), a second try is made on an unusable answer.
+- **Feedback log:** every request and decision is appended to `data/feedback_log.jsonl` (`feedback_log` in `setup_cfg.json`), not in version control.
+- **Model:** by default the model MIA is using right now with the same options (`num_ctx` ...), so Ollama does not have to load a second model or reload this one.
+  `"expression_model"` picks another model (then the first request loads it), `"expression_temperature"` (default 0.7) the creativity.
+- **Tests:** `python tests/test_expression_llm.py` (21: prompt, validation, retry, offline, busy, match, feedback and examples, REST), `test_editor.gd` (65 checks incl. the UI flow),
+  and live over real HTTP: `python ui/tools/expression_stub_server.py` (fake model), then `MIA_URL=http://127.0.0.1:8685 MIA_TOKEN_FILE=data/editor_token.txt
+  MIA_EXPRESSION_LIVE=1 godot --headless --path ui/godot --script res://tools/test_editor_live.gd`. Not tested here: the quality of a real model's answers; try a few descriptions
+  and use Reject / Keep so the next prompts learn from them. Rebuild the web export (`ui/tools/build_web.sh`) after pulling this phase.

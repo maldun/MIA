@@ -28,6 +28,9 @@ REST API for the character's expression presets (ui/REQUIREMENTS.md 4.7), part o
   DELETE /api/presets/<name>     delete (409 for presets MIA's emotions use, unless ?force=1)
   GET    /api/shape-keys         shape keys with categories and descriptions
   GET    /api/gestures           gestures
+  POST   /api/expression/generate   {"description"}: the LLM makes an expression (validated, not saved)
+  POST   /api/expression/match      {"description"}: the closest existing preset (no LLM, instant)
+  POST   /api/expression/feedback   {"id", "decision": keep|edit|reject, "preset"?}: logged, used as examples later
 
 Writing (POST, PUT, DELETE) needs JSON as content type (no cross-site form posts), an allowed origin if the browser
 sends one, and the header X-MIA-Token if "editor_token" is set in setup_cfg.json.
@@ -45,11 +48,15 @@ try:
     from .constants import EDITOR_TOKEN_FILE_KEY, DEFAULT_EDITOR_TOKEN_FILE
     from .mia_logger import logger
     from .preset_store import PresetStore, PresetError
+    from .expression_llm import ExpressionGenerator
+    from .constants import FEEDBACK_LOG_KEY, DEFAULT_FEEDBACK_LOG
 except ImportError:  # used as plain script / in tests
     from constants import PRESETS_DIR_KEY, DEFAULT_PRESETS_DIR, EDITOR_TOKEN_KEY, EXPRESSION_FILE, TOKEN_HEADER
     from constants import EDITOR_TOKEN_FILE_KEY, DEFAULT_EDITOR_TOKEN_FILE
     from mia_logger import logger
     from preset_store import PresetStore, PresetError
+    from expression_llm import ExpressionGenerator
+    from constants import FEEDBACK_LOG_KEY, DEFAULT_FEEDBACK_LOG
 
 MAX_BODY = 64 * 1024
 PRESET_FILES = os.path.join("ui", "godot", "presets")
@@ -110,7 +117,19 @@ def create_store(cfg, root):
                        protected=lambda: mia_presets(root))
 
 
-def create_blueprint(store, root, token=None, allowed_origins=None):
+def create_generator(cfg, root, store, llm, model_name=lambda: None):
+    """the expression generator (None without a language model function)"""
+    if llm is None:
+        return None
+    shipped = os.path.join(root, PRESET_FILES)
+    log = cfg.get(FEEDBACK_LOG_KEY, DEFAULT_FEEDBACK_LOG)
+    if not os.path.isabs(log):
+        log = os.path.join(root, log)
+    return ExpressionGenerator(store, llm, os.path.join(shipped, "shape_keys.json"), os.path.join(shipped, "gestures.json"),
+                               log_path=log, model_name=model_name)
+
+
+def create_blueprint(store, root, token=None, allowed_origins=None, generator=None):
     bp = Blueprint("presets_api", __name__)
     shipped = os.path.join(root, PRESET_FILES)
 
@@ -202,14 +221,48 @@ def create_blueprint(store, root, token=None, allowed_origins=None):
         return jsonify({"gestures": [{"name": g["name"], "description": g.get("description", ""),
                                       "expression": g.get("expression", "")} for g in data]})
 
+    if generator is not None:
+        def description_of(data):
+            if not isinstance(data, dict):
+                raise PresetError("send a JSON object with a description")
+            return data.get("description")
+
+        @bp.post("/api/expression/generate")
+        def generate_expression():
+            refused = check_write()
+            if refused:
+                return refused
+            description = description_of(body())
+            logger.info(f"expression requested: {str(description)[:80]!r}")
+            return jsonify(generator.generate(description))
+
+        @bp.post("/api/expression/match")
+        def match_expression():
+            refused = check_write()
+            if refused:
+                return refused
+            return jsonify(generator.match(description_of(body())))
+
+        @bp.post("/api/expression/feedback")
+        def expression_feedback():
+            refused = check_write()
+            if refused:
+                return refused
+            data = body()
+            if not isinstance(data, dict):
+                raise PresetError("send a JSON object")
+            return jsonify(generator.feedback(data.get("id"), data.get("decision"), data.get("preset")))
+
     return bp
 
 
-def init_presets_api(app, cfg, root, allowed_origins=None):
-    """creates the store and registers the API at the Flask app; returns the store"""
+def init_presets_api(app, cfg, root, allowed_origins=None, llm=None, model_name=lambda: None):
+    """creates the store and registers the API at the Flask app; returns the store (llm: function (messages, schema) -> text)"""
     store = create_store(cfg, root)
+    generator = create_generator(cfg, root, store, llm, model_name)
+    app.config["EXPRESSION_GENERATOR"] = generator
     token, source = resolve_token(cfg, root)
     app.config["EDITOR_TOKEN_INFO"] = (token, source)
-    app.register_blueprint(create_blueprint(store, root, token=token, allowed_origins=allowed_origins))
+    app.register_blueprint(create_blueprint(store, root, token=token, allowed_origins=allowed_origins, generator=generator))
     logger.info("preset editor: changing presets needs the editor token (%s)" % source if token else "preset editor: no token, everyone who can reach the page may change presets")
     return store

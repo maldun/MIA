@@ -11,10 +11,15 @@ signal library_received(presets: Array, info: Dictionary)
 signal availability_changed(available: bool)
 ## kind: "create", "update", "delete"; message: what to tell the user
 signal operation_done(kind: String, ok: bool, message: String, data: Dictionary)
+## the language model answered (or failed) for generate(): data has "id", "preset", "corrections", "closest", "seconds", "model"
+signal generated(ok: bool, data: Dictionary, message: String)
+## the closest existing preset for match_description(): data has "name", "score", "preset"
+signal matched(data: Dictionary)
 
 const POLL_SECONDS := 10.0
 const TOKEN_HEADER := "X-MIA-Token"
 const TOKEN_STORAGE_KEY := "mia_token"
+const GENERATE_TIMEOUT := 180.0   # a local model may need a while to load
 
 var base_url := ""
 var token := ""
@@ -24,6 +29,7 @@ var token_required := false
 var protected_names: Array = []
 
 var _timer: Timer
+var _next_timeout := 0.0
 
 ## address of the server: the page's own origin in the browser, MIA_URL on the desktop ("" = none)
 static func detect_base_url() -> String:
@@ -98,6 +104,40 @@ func update(old_name: String, preset: Dictionary) -> void:
 func delete(preset_name: String, force := false) -> void:
 	_write("delete", HTTPClient.METHOD_DELETE, "/api/presets/" + preset_name.uri_encode() + ("?force=1" if force else ""), null)
 
+# --- expressions from a description ---------------------------------------------------------------------
+
+## asks the language model for an expression (answer: generated); the result is not saved, keep it with create()
+func generate(description: String) -> void:
+	if not available:
+		generated.emit(false, {}, "Offline: the server cannot be reached.")
+		return
+	_next_timeout = GENERATE_TIMEOUT
+	_request(HTTPClient.METHOD_POST, "/api/expression/generate", {"description": description}, func(code: int, data):
+		var info: Dictionary = data if typeof(data) == TYPE_DICTIONARY else {}
+		if code == 200 and typeof(info.get("preset")) == TYPE_DICTIONARY:
+			generated.emit(true, info, "")
+		elif code == 0:
+			generated.emit(false, {}, "The server cannot be reached.")
+		else:
+			generated.emit(false, {}, str(info.get("error", "HTTP %d" % code))))
+
+## instant answer without the language model: the existing preset that fits the description best (answer: matched)
+func match_description(description: String) -> void:
+	if not available:
+		return
+	_request(HTTPClient.METHOD_POST, "/api/expression/match", {"description": description}, func(code: int, data):
+		if code == 200 and typeof(data) == TYPE_DICTIONARY:
+			matched.emit(data))
+
+## tells the server what the user did with a generated expression: "keep", "edit" (with the saved preset) or "reject"
+func send_feedback(request_id: String, decision: String, preset := {}) -> void:
+	if not available:
+		return
+	var body := {"id": request_id, "decision": decision}
+	if not preset.is_empty():
+		body["preset"] = preset
+	_request(HTTPClient.METHOD_POST, "/api/expression/feedback", body, func(_code: int, _data): pass)
+
 func _write(kind: String, method: int, path: String, body) -> void:
 	if not available:
 		operation_done.emit(kind, false, "Offline: the server cannot be reached, nothing was saved.", {})
@@ -130,6 +170,8 @@ func _success_message(kind: String, info: Dictionary) -> String:
 ## done(code, parsed_json); code 0 = no connection
 func _request(method: int, path: String, body, done: Callable) -> void:
 	var http := HTTPRequest.new()
+	http.timeout = _next_timeout
+	_next_timeout = 0.0
 	add_child(http)
 	var headers := PackedStringArray(["Accept: application/json"])
 	if body != null:

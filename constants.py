@@ -46,6 +46,13 @@ CHAT_TOKEN_KEY = "chat_token"                  # token for deleting the conversa
 MOODS_FILE_KEY = "moods_file"
 DEFAULT_MOODS_FILE = "moods.json"
 MOOD_HOLD_KEY = "mood_hold_minutes"
+
+# expressions from a description (ui/REQUIREMENTS.md 4.6)
+EXPRESSION_MODEL_KEY = "expression_model"              # default: the model MIA is using right now
+EXPRESSION_TEMPERATURE_KEY = "expression_temperature"
+DEFAULT_EXPRESSION_TEMPERATURE = 0.7
+FEEDBACK_LOG_KEY = "feedback_log"
+DEFAULT_FEEDBACK_LOG = "data/feedback_log.jsonl"
 EDITOR_TOKEN_KEY = "editor_token"            # "" or false: no token; missing: a token is generated on first start
 EDITOR_TOKEN_FILE_KEY = "editor_token_file"
 DEFAULT_EDITOR_TOKEN_FILE = "data/editor_token.txt"
