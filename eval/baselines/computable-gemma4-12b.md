@@ -125,3 +125,145 @@ on the 39 cases both ran (a case with repeats counts as the share of right runs)
    A: false pass 0 of 20, coverage 79%, 12.7 s per run, 77 calls
    B: false pass 0 of 20, coverage 95%, 8.4 s per run, 53 calls
 ```
+
+
+---
+
+# Correction after three repeats per case (added the next day)
+
+The first comparison above had one run per case and **overstated the gain**: the single run of version 1 was a bad draw (77 % right), while over 117 runs (39 cases x 3) it is 89.7 % right.
+The model is not deterministic: only 79.5 % (v1) and 84.6 % (v2) of the cases get the same status in all three runs. Conclusions from one run per case should not be trusted.
+
+| 117 runs each (39 cases x 3) | v1 (`verify.computable@1`) | v2 (`verify.computable@2`) |
+|---|---|---|
+| decided (coverage) | 90.6 % | 97.4 % |
+| right overall | 89.7 % | 94.9 % |
+| false pass (wrong claim passed) | 0 of 60 (interval up to 6 %) | 0 of 60 (interval up to 6 %) |
+| false fail (right claim refuted) | 1 of 57 | 3 of 57 |
+| same status in all 3 runs | 79.5 % | 84.6 % |
+| seconds per run / model calls | 11.3 / 209 | 8.7 / 160 |
+| statistics cases right | 73.3 % | 93.3 % |
+| paired difference per case | only v1 right in 3 cases, only v2 right in 6: exact sign test p = 0.51 | |
+
+What holds: v2 decides more claims, is cheaper (23 % less time, 23 % fewer calls) and fixes the statistics cases; no wrong claim passed in either version in 60 + 60 tries.
+What does not hold: a large jump in correctness, or a proven difference. A new weakness showed up: v2 refutes right claims that are **rounded** (`compound-interest-right`, `sales-tax-right`, `bmi-right`: the claim
+says 54.0, the exact value is 53.9892, the script demands equality). The writer of the script does not know the precision of the claimed number. Candidate for the next version: tell the script the precision of the claim
+(for example the claimed number as written) and the rule to round its own result to the same number of decimals before comparing.
+
+## Reports of the repeat runs
+
+### v1-r3
+
+```
+running computable (39 cases x 3) as variant 'v1-r3' ...
+
+
+suite computable, variant v1-r3: 39 cases x 3 run(s)  [pipeline verify.computable@1]
+run on 2026-10-18 22:14 UTC, pipeline=verify.computable@1
+
+behaves as expected:    89.7%  (95% interval 83 to 94%, 105 of 117)
+   MISMATCH mean-right             got inconclusive   expected pass           
+   MISMATCH mean-wrong             got inconclusive   expected fail           
+   MISMATCH median-odd-wrong       got inconclusive   expected fail           
+   MISMATCH population-sd-wrong    got inconclusive   expected fail           
+   MISMATCH vowels-right           got inconclusive   expected pass           
+   MISMATCH population-sd-wrong    got inconclusive   expected fail           
+   MISMATCH bmi-right              got fail           expected pass           
+   MISMATCH sum-to-100-right       got inconclusive   expected pass           
+   ... and 4 more
+
+as a verifier, on 117 claims (57 true, 60 false):
+   decided (coverage)    90.6%  (95% interval 84 to 95%, 106 of 117)
+   right among decided   99.1%  (95% interval 95 to 100%, 105 of 106)
+   right overall         89.7%  (95% interval 83 to 94%, 105 of 117)
+   FALSE PASS             0.0%  (95% interval 0 to 6%, 0 of 60)   <- a wrong claim that passed
+   false fail             1.8%  (95% interval 0 to 9%, 1 of 57)
+   precision of pass    100.0%  (95% interval 93 to 100%, 50 of 50)
+   precision of fail     98.2%  (95% interval 91 to 100%, 55 of 56)
+   errors                 0.0%  (95% interval 0 to 3%, 0 of 117)
+   confusion: pass/true 50  pass/false 0  fail/false 55  fail/true 1  abstained true 6  abstained false 5
+   WRONG mean-right               said inconclusive   truth True
+   WRONG mean-wrong               said inconclusive   truth False
+   WRONG median-odd-wrong         said inconclusive   truth False
+   WRONG population-sd-wrong      said inconclusive   truth False
+   WRONG vowels-right             said inconclusive   truth True
+   WRONG population-sd-wrong      said inconclusive   truth False
+   WRONG bmi-right                said fail           truth True
+   WRONG sum-to-100-right         said inconclusive   truth True
+
+by tag (right / cases):
+   calendar               100.0%  (95% interval 76 to 100%, 12 of 12)
+   everyday                91.7%  (95% interval 65 to 99%, 11 of 12)
+   finance                100.0%  (95% interval 90 to 100%, 33 of 33)
+   math                    95.8%  (95% interval 80 to 99%, 23 of 24)
+   numeric                 89.7%  (95% interval 83 to 94%, 105 of 117)
+   statistics              73.3%  (95% interval 56 to 86%, 22 of 30)
+   text                    66.7%  (95% interval 30 to 90%, 4 of 6)
+   trap                   100.0%  (95% interval 85 to 100%, 21 of 21)
+
+stability over repeats (same status every time):  79.5%  (95% interval 64 to 89%, 31 of 39)
+
+cost: 1320.8 s in total, 11.29 s per run, 209 model calls, 374233 characters sent, 204502 received
+```
+
+### v2-r3
+
+```
+running computable (39 cases x 3) as variant 'v2-r3' ...
+
+
+suite computable, variant v2-r3: 39 cases x 3 run(s)  [pipeline verify.computable]
+run on 2026-10-18 21:57 UTC, no changes to the defaults
+
+behaves as expected:    94.9%  (95% interval 89 to 98%, 111 of 117)
+   MISMATCH compound-interest-right got fail           expected pass           
+   MISMATCH median-odd-wrong       got inconclusive   expected fail           
+   MISMATCH bmi-right              got fail           expected pass           
+   MISMATCH days-between-right     got inconclusive   expected pass           
+   MISMATCH sales-tax-right        got fail           expected pass           
+   MISMATCH median-odd-right       got inconclusive   expected pass           
+
+as a verifier, on 117 claims (57 true, 60 false):
+   decided (coverage)    97.4%  (95% interval 93 to 99%, 114 of 117)
+   right among decided   97.4%  (95% interval 93 to 99%, 111 of 114)
+   right overall         94.9%  (95% interval 89 to 98%, 111 of 117)
+   FALSE PASS             0.0%  (95% interval 0 to 6%, 0 of 60)   <- a wrong claim that passed
+   false fail             5.3%  (95% interval 2 to 14%, 3 of 57)
+   precision of pass    100.0%  (95% interval 93 to 100%, 52 of 52)
+   precision of fail     95.2%  (95% interval 87 to 98%, 59 of 62)
+   errors                 0.0%  (95% interval 0 to 3%, 0 of 117)
+   confusion: pass/true 52  pass/false 0  fail/false 59  fail/true 3  abstained true 2  abstained false 1
+   WRONG compound-interest-right  said fail           truth True
+   WRONG median-odd-wrong         said inconclusive   truth False
+   WRONG bmi-right                said fail           truth True
+   WRONG days-between-right       said inconclusive   truth True
+   WRONG sales-tax-right          said fail           truth True
+   WRONG median-odd-right         said inconclusive   truth True
+
+by tag (right / cases):
+   calendar                91.7%  (95% interval 65 to 99%, 11 of 12)
+   everyday                91.7%  (95% interval 65 to 99%, 11 of 12)
+   finance                 93.9%  (95% interval 80 to 98%, 31 of 33)
+   math                   100.0%  (95% interval 86 to 100%, 24 of 24)
+   numeric                 94.9%  (95% interval 89 to 98%, 111 of 117)
+   statistics              93.3%  (95% interval 79 to 98%, 28 of 30)
+   text                   100.0%  (95% interval 61 to 100%, 6 of 6)
+   trap                   100.0%  (95% interval 85 to 100%, 21 of 21)
+
+stability over repeats (same status every time):  84.6%  (95% interval 70 to 93%, 33 of 39)
+
+cost: 1013.1 s in total, 8.66 s per run, 160 model calls, 281264 characters sent, 159753 received
+```
+
+### Paired comparison
+
+```
+A = computable/v1-r3    B = computable/v2-r3
+on the 39 cases both ran (a case with repeats counts as the share of right runs):
+   A right on 35.0, B right on 37.0
+   only A right: 3   only B right: 6   exact sign test p = 0.508 (not distinguishable from chance with these cases)
+   only A: compound-interest-right, days-between-right, sales-tax-right
+   only B: mean-right, mean-wrong, population-sd-right, population-sd-wrong, sum-to-100-right, vowels-right
+   A: false pass 0 of 60, coverage 91%, 11.3 s per run, 209 calls
+   B: false pass 0 of 60, coverage 97%, 8.7 s per run, 160 calls
+```
