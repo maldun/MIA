@@ -25,6 +25,7 @@ parser.add_argument("--port", type=int, default=9333)
 parser.add_argument("--click", default=None, help="x,y: click there after the wait (e.g. into a text field of the Godot canvas)")
 parser.add_argument("--type", default=None, help="text typed with real key events after the click")
 parser.add_argument("--steps", default=None, help="actions after the wait, separated by |: click:x,y  type:text  wait:seconds")
+parser.add_argument("--local-storage", action="append", default=[], help="key=value put into localStorage before the page loads (repeatable)")
 parser.add_argument("--dark", action="store_true", help="emulate a dark system theme")
 parser.add_argument("--light", action="store_true", help="emulate a light system theme")
 parser.add_argument("--mobile", action="store_true", help="emulate a phone (touch, device pixel ratio 2)")
@@ -93,6 +94,9 @@ try:
         call("Emulation.setTouchEmulationEnabled", {"enabled": True})
     if args.dark or args.light:
         call("Emulation.setEmulatedMedia", {"features": [{"name": "prefers-color-scheme", "value": "dark" if args.dark else "light"}]})
+    for item in args.local_storage:
+        key, _, value = item.partition("=")
+        call("Page.addScriptToEvaluateOnNewDocument", {"source": "try{localStorage.setItem(%s,%s)}catch(e){}" % (json.dumps(key), json.dumps(value))})
     call("Page.navigate", {"url": args.url})
     print("navigated", flush=True)
     pump(args.wait)

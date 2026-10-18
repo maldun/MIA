@@ -178,6 +178,11 @@
       <label class="setting check"><input type="checkbox" id="set-emotions"><span data-i18n="settings.emotions">Show emotions at messages</span></label>
       <label class="setting check"><input type="checkbox" id="set-times"><span data-i18n="settings.times">Show times</span></label>
       <label class="setting check"><input type="checkbox" id="set-compact"><span data-i18n="settings.compact">Compact messages</span></label>
+      <label class="setting">
+        <span data-i18n="settings.token">Editor token</span>
+        <input type="password" id="set-token" autocomplete="off" spellcheck="false" data-i18n-placeholder="settings.token.placeholder" placeholder="from data/editor_token.txt">
+        <small class="hint" data-i18n="settings.token.hint">Needed once per device to change expressions in the expression editor. The editor reads it from here.</small>
+      </label>
       <h3 data-i18n="settings.shortcuts">Keyboard</h3>
       <dl class="shortcuts">
         <dt><kbd>/</kbd></dt><dd data-i18n="shortcut.composer">Write a message</dd>

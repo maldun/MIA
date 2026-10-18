@@ -19,6 +19,7 @@ import { enterSends, initSettings } from './settings.js';
 import { initAnnouncements, initShortcuts } from './a11y.js';
 
 const $ = (id) => document.getElementById(id);
+const EDITOR_TOKEN_KEY = 'mia_token';      // the same key the character (preset_api.gd) uses
 const storage = defaultStorage();
 const params = new URLSearchParams(location.search);
 
@@ -204,12 +205,21 @@ const fields = { enterSends: $('set-enter'), showMood: $('set-mood'), showEmotio
 
 function showSettings(values) {
   fields.enterSends.value = values.enterSends;
+  tokenField.value = storage.get(EDITOR_TOKEN_KEY, '') ?? '';
   for (const key of ['showMood', 'showEmotions', 'showTimes', 'compact']) fields[key].checked = values[key];
 }
 
 for (const [key, field] of Object.entries(fields)) {
   field.addEventListener('change', () => settings.set(key, field.type === 'checkbox' ? field.checked : field.value));
 }
+// the editor token: a normal input of the page (reliable focus and paste); the character reads the same stored value
+const tokenField = $('set-token');
+tokenField.addEventListener('input', () => {
+  const value = tokenField.value.trim();
+  if (value) storage.set(EDITOR_TOKEN_KEY, value);
+  else storage.remove(EDITOR_TOKEN_KEY);
+});
+
 $('settings-reset').addEventListener('click', () => {
   settings.reset();
   theme.set('auto');

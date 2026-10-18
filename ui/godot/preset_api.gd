@@ -15,6 +15,8 @@ signal operation_done(kind: String, ok: bool, message: String, data: Dictionary)
 signal generated(ok: bool, data: Dictionary, message: String)
 ## the closest existing preset for match_description(): data has "name", "score", "preset"
 signal matched(data: Dictionary)
+## the token changed because it was entered somewhere else (the chat page)
+signal token_changed(new_token: String)
 
 const POLL_SECONDS := 10.0
 const TOKEN_HEADER := "X-MIA-Token"
@@ -175,6 +177,7 @@ func _success_message(kind: String, info: Dictionary) -> String:
 
 ## done(code, parsed_json); code 0 = no connection
 func _request(method: int, path: String, body, done: Callable) -> void:
+	_pick_up_token()
 	var http := HTTPRequest.new()
 	http.timeout = _next_timeout
 	_next_timeout = 0.0
@@ -194,6 +197,14 @@ func _request(method: int, path: String, body, done: Callable) -> void:
 	if http.request(base_url + path, headers, method, payload) != OK:
 		http.queue_free()
 		done.call(0, null)
+
+## in the browser the token may have been entered in the chat page (settings): the same stored value, read again for every request
+func _pick_up_token() -> void:
+	if OS.has_feature("web"):
+		var stored := stored_token()
+		if not stored.is_empty() and stored != token:
+			token = stored
+			token_changed.emit(token)
 
 func _set_available(value: bool) -> void:
 	if value != available:

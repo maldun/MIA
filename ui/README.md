@@ -267,3 +267,10 @@ Only needed outside the home network; at home `http://localhost:<web_port>` and 
 installed, running or logged in. `"tailscale": true` in `setup_cfg.json` publishes MIA at start and stops it at the end; `ui/tools/remote.sh up|down|status` does the same by hand.
 The tailnet name (found automatically, or `public_hosts`) becomes an allowed origin for the socket and the preset API. Tests: `python tests/test_tailscale.py` (16, with a fake
 `tailscale` program, also for the script). Not tried against a real Tailscale: `tailscale serve` asks you once to enable HTTPS in the admin console and prints a link for it.
+
+### Editor token in the chat page, and keyboard focus in the editor
+
+Typing into the Godot canvas in a browser can be sluggish (the canvas needs the keyboard focus). So the token no longer has to be typed there: **menu > Settings > Editor token**
+is a normal input of the chat page; it stores the token under the key `mia_token`, the same one the editor reads (`preset_api.gd` reads it again for every request, so a token
+entered in the page works without reloading the editor tab). The editor's own Token field still works. Text fields of the editor also ask the browser to focus the canvas when
+you enter them (`HostBridge.focus_canvas`). `ui/tools/browser_check.py` got `--local-storage key=value` to test such flows.

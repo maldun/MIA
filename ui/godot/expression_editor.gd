@@ -66,6 +66,9 @@ func setup(expression_engine: ExpressionEngine, preset_api: PresetApi) -> void:
 	api.availability_changed.connect(func(_a): _on_availability())
 	api.operation_done.connect(_on_operation_done)
 	api.generated.connect(_on_generated)
+	api.token_changed.connect(func(t): _token_edit.text = t)
+	for field in [_describe_edit, _name_edit, _description_edit, _tags_edit, _token_edit, _filter]:
+		(field as LineEdit).focus_entered.connect(HostBridge.focus_canvas)   # typing needs the keyboard focus on the canvas in the browser
 	api.matched.connect(_on_matched)
 	get_viewport().size_changed.connect(_update_layout)
 	visible = false

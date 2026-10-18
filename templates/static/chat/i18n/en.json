@@ -87,5 +87,8 @@
   "shortcut.latest": "Jump to the latest message",
   "shortcut.toggle": "Show or hide the chat",
   "shortcut.menu": "Open the menu",
-  "shortcut.escape": "Close menu, list or dialog"
+  "shortcut.escape": "Close menu, list or dialog",
+  "settings.token": "Editor token",
+  "settings.token.placeholder": "from data/editor_token.txt",
+  "settings.token.hint": "Needed once per device to change expressions in the expression editor. The editor reads it from here."
 }

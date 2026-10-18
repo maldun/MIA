@@ -287,3 +287,13 @@ kbd {
   :root[data-theme="light"] { --border: rgba(0, 0, 0, 0.6); --text-muted: #2b3243; }
   .msg, .panel, .mood, .caption, .chip { border-width: 2px; }
 }
+
+.setting input[type="password"] {
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--field);
+  color: var(--text);
+  font: inherit;
+}
+.hint { color: var(--text-muted); font-size: var(--text-sm); }

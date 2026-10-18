@@ -87,5 +87,8 @@
   "shortcut.latest": "Zur neuesten Nachricht springen",
   "shortcut.toggle": "Chat ein- oder ausblenden",
   "shortcut.menu": "Menü öffnen",
-  "shortcut.escape": "Menü, Liste oder Dialog schließen"
+  "shortcut.escape": "Menü, Liste oder Dialog schließen",
+  "settings.token": "Editor-Token",
+  "settings.token.placeholder": "aus data/editor_token.txt",
+  "settings.token.hint": "Einmal pro Gerät nötig, um Ausdrücke im Ausdruckseditor zu ändern. Der Editor liest es von hier."
 }

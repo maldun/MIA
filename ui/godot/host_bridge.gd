@@ -40,6 +40,11 @@ func setup(expression_engine: ExpressionEngine, background_manager: BackgroundMa
 static func is_embedded() -> bool:
 	return OS.has_feature("web") and bool(JavaScriptBridge.eval("window.parent !== window"))
 
+## gives the keyboard focus to the canvas of the page (text fields need it in the browser; clicking is not always enough)
+static func focus_canvas() -> void:
+	if OS.has_feature("web"):
+		JavaScriptBridge.eval("(function(){var c=document.querySelector('canvas'); if(c){window.focus(); c.focus();}})()")
+
 ## true if the URL has the given query parameter, e.g. ?menu
 static func has_url_flag(flag: String) -> bool:
 	return OS.has_feature("web") and str(JavaScriptBridge.eval("window.location.search")).contains(flag)
