@@ -27,10 +27,12 @@ try:
     from .constants import SPEECH_REQ, SOUND_REQ, TIME_REQ, STREAM_REQ, STREAM_END_REQ, U8, MESSAGE_SIZE
     from .mia_logger import logger
     from .utils import split_into_lines_and_sentences, filter_symbol_sentences, get_timestamp
+    from .speech_text import speech_text
 except ImportError:
     from constants import SPEECH_REQ, SOUND_REQ, TIME_REQ, STREAM_REQ, STREAM_END_REQ, U8, MESSAGE_SIZE
     from mia_logger import logger
     from utils import split_into_lines_and_sentences, filter_symbol_sentences, get_timestamp
+    from speech_text import speech_text
 
 
 class SpeechStreamer:
@@ -49,8 +51,9 @@ class SpeechStreamer:
         self._sent = 0 # number of sentences sent so far
 
     @staticmethod
-    def split(text):
-        return filter_symbol_sentences(split_into_lines_and_sentences(text))
+    def split(text, final=True):
+        """sentences of the text for the voice: without markdown marks and without *actions* (see speech_text.py)"""
+        return filter_symbol_sentences(split_into_lines_and_sentences(speech_text(text, final)))
 
     def _send_line(self,dic):
         self._sock.sendall(bytes(json.dumps(dic) + '\n',U8))
@@ -75,7 +78,7 @@ class SpeechStreamer:
         Sends all sentences which are complete. The last sentence is kept
         back, since it may still grow (or be part of an emotion keyword).
         """
-        self._send(self.split(text)[self._sent:-1])
+        self._send(self.split(text, final=False)[self._sent:-1])
 
     def finish(self,text):
         """

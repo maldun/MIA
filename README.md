@@ -120,6 +120,10 @@ Prerequisites:
 - The character on the page is a 3D model (Godot web export, see `ui/README.md`). Build it once with `ui/tools/build_web.sh`; MIA serves it under `/character/` and shows it in the page. It replaces the old pre-rendered videos.
 - Configure expressions.json: every expression has a `preset` (expression of the character, see `ui/godot/presets/library.json`; default: the expression key itself), the spoken `text` and the `voice` clip (`null` = no voice clip yet).
 - Set the emotions and the expressions associated with it in emotion_map.json. When the AI provides an emotion the character makes the proper expression (face, arm gesture) and the voice clip is played. The mouth moves while MIA's voice plays. **Important** The example should be the minimal set of emotion. Don't remove one of them! Emotions can be added: the prompt for the AI is built from this file (new expressions need a preset with the same name or a `preset` entry).
+- What MIA's voice says (`speech_text.py`): the text for the speech is filtered. Text in single asterisks (`*smiles*`) is an expression or action and is **not spoken**
+  (MIA's prompt tells the model to use it only for that, and never for emphasis); `**bold**`, `_italic_`, headings, lists, quotes, code, tables and links lose their marks
+  (link texts stay, URLs and images are dropped). While an answer is still streaming, an action that is not closed yet is held back as well. The chat page still shows the full
+  text. The rule is part of the calibration message (`EMOTION_QUESTION` in `communicator.py`); it reaches the model at the next start (calibration runs at every start).
 - Some configurations are found in `constants.py` which can be adjusted like textbox settings.
     - CFG_FILE = "setup_cfg.json" (cfg file to use)
     - LOG_FNAME = "mia.log" (log file)

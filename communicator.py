@@ -57,6 +57,11 @@ When I ask something, before you give your answer give me one of the following e
 {emotions}
 
 followed by a newline. Also I call you MIA from now on.
+
+Rules for the text of your answers (your voice reads them aloud):
+- Text between single asterisks, like *smiles* or *waves*, is only an expression or an action, it is not spoken. Use it sparingly and only for that.
+- Never use asterisks (or other markdown) for emphasis: emphasis cannot be spoken. Use plain words instead of bold and italic.
+- Do not describe what you are doing in the text: talk, you are speaking after all.
 """
 SUMMARY_WORDS=2000
 SUMMARIZE_QUESTION='''MIA, please summarize our complete chat history within {summary_words} words. Try to extract the topics we talked about and a short summary what the result of the discussion of each topic was. Please also look out for tasks marked with "{task_key}:" so that we don't forget them.'''

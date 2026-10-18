@@ -46,6 +46,7 @@ try:
     from .constants import SPEECH_REQ, SOUND_REQ, TIME_REQ, UPLOAD_ROUTE, U8, STREAM_REQ, STREAM_END_REQ
     from .mia_logger import logger
     from .utils import split_into_sentences, split_into_lines_and_sentences, chunker 
+    from .speech_text import speech_text
     from .utils import filter_symbol_sentences, get_websocket_url, get_url
 except ImportError:
     from play_media import play_sound
@@ -54,6 +55,7 @@ except ImportError:
     from constants import SPEECH_REQ, SOUND_REQ, TIME_REQ, UPLOAD_ROUTE, U8, STREAM_REQ, STREAM_END_REQ
     from mia_logger import logger
     from utils import split_into_sentences, split_into_lines_and_sentences, chunker 
+    from speech_text import speech_text
     from utils import filter_symbol_sentences, get_websocket_url, get_url
 
 curr_path = os.path.split(__file__)[0]
@@ -307,7 +309,7 @@ class SoundHandler(socketserver.StreamRequestHandler):
         msg = first_msg
         while True:
             if isinstance(msg,str) and len(msg.strip())>0:
-                sentences = filter_symbol_sentences([msg])
+                sentences = filter_symbol_sentences([speech_text(msg)])
                 if len(sentences) > 0:
                     yield sentences[0]
             line = self.rfile.readline().strip()
@@ -335,8 +337,8 @@ class SoundHandler(socketserver.StreamRequestHandler):
             answer = "Stream played!"
             logger.info(answer+f"at {time_stamp}")
             self.wfile.write(json.dumps({SOUND_REQ:answer,TIME_REQ:time_stamp}).encode(U8))
-        elif isinstance(msg,str) and len(msg)>0:
-            duration = speaker.text2voice(msg)
+        elif isinstance(msg,str) and len(speech_text(msg))>0:
+            duration = speaker.text2voice(speech_text(msg))
             time.sleep(duration+0.5)
             # Likewise, self.wfile is a file-like object used to write back
             # to the client

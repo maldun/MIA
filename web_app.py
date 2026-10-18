@@ -44,6 +44,7 @@ from .chat_log import ChatLog
 from .chat_service import ChatService
 from .chat_api import create_blueprint as create_chat_blueprint
 from .moods import MoodTracker
+from .speech_text import speech_text
 from . import tailscale_serve
 FPATH = os.path.split(__file__)[0]
 cfg_file = os.path.join(FPATH,CFG_FILE)
@@ -218,7 +219,8 @@ def send_voice_request(msg):
     Sends meesage asking for text2speech conversion.
     Sends Timestamp for control.
     """
-    # nothing to do
+    # nothing to do (the voice does not read markdown marks or *actions*)
+    msg = speech_text(msg)
     if len(msg) == 0:
         return
     HOST = get_websocket_url(address=ADDRESS,protocol=PROTOCOL)
