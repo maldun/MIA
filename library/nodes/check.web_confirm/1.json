@@ -1,0 +1,102 @@
+{
+ "id": "check.web_confirm",
+ "version": 1,
+ "kind": "code",
+ "title": "Independent confirmation on the web",
+ "description": "Searches with the key entities and numbers (never the claim's wording), reads up to 4 pages from different domains, requires at least 2 independent sources (mirrors count once) that contain all the facts, and always runs a disconfirming search (myth, false). Disagreement or nothing found is inconclusive, never fail.",
+ "tags": [
+  "check",
+  "web",
+  "fact"
+ ],
+ "applies_to": {
+  "claim_types": [
+   "fact"
+  ],
+  "tasks": [
+   "research"
+  ]
+ },
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "entities"
+   ],
+   "properties": {
+    "entities": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     }
+    },
+    "facts": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     }
+    },
+    "claim": {
+     "type": "string"
+    },
+    "language": {
+     "type": "string"
+    },
+    "time_range": {
+     "type": "string"
+    }
+   }
+  }
+ },
+ "outputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "status",
+    "check",
+    "detail",
+    "evidence"
+   ],
+   "properties": {
+    "status": {
+     "enum": [
+      "pass",
+      "fail",
+      "inconclusive",
+      "not_applicable"
+     ]
+    }
+   }
+  }
+ },
+ "params": {
+  "max_fetches": {
+   "default": 4
+  },
+  "min_sources": {
+   "default": 2
+  }
+ },
+ "body": {
+  "function": "web_confirm",
+  "plain": "Independent confirmation on the web"
+ },
+ "needs": {
+  "tools": [
+   "web_search",
+   "fetch_page"
+  ]
+ },
+ "cost": {
+  "seconds": 20
+ },
+ "safety": {
+  "reads_web": true,
+  "runs_code": false
+ },
+ "status": "tested",
+ "origin": {
+  "by": "manual",
+  "note": "unit tested with fakes; no harness measurements yet"
+ }
+}

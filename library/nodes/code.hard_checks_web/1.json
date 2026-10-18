@@ -1,0 +1,67 @@
+{
+ "id": "code.hard_checks_web",
+ "version": 1,
+ "kind": "code",
+ "title": "Hard checks (with web)",
+ "description": "Runs the hard checks of the library that apply to a claim ({type, text, data}), cheapest first, and combines them: a failed check decides (contradicted), passes are evidence (supported only if every applicable check passed), anything else leaves the claim open for the verification styles. Includes the checks that read the web.",
+ "tags": [
+  "dispatcher",
+  "hard-checks"
+ ],
+ "applies_to": {
+  "tasks": [
+   "research"
+  ]
+ },
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "claim"
+   ],
+   "properties": {
+    "claim": {
+     "type": "object"
+    }
+   }
+  }
+ },
+ "outputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "status",
+    "verdict",
+    "results",
+    "trace"
+   ]
+  }
+ },
+ "params": {
+  "fail_fast": {
+   "default": true
+  }
+ },
+ "body": {
+  "function": "hard_checks_web",
+  "plain": "Hard checks (with web)"
+ },
+ "needs": {
+  "tools": [
+   "web_search",
+   "fetch_page"
+  ]
+ },
+ "cost": {
+  "seconds": 25
+ },
+ "safety": {
+  "reads_web": true,
+  "runs_code": false
+ },
+ "status": "trusted",
+ "origin": {
+  "by": "manual",
+  "note": "checks.CheckRunner"
+ }
+}

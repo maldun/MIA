@@ -1,0 +1,64 @@
+{
+ "id": "code.hard_checks_offline",
+ "version": 1,
+ "kind": "code",
+ "title": "Hard checks (no web access)",
+ "description": "Runs the hard checks of the library that apply to a claim ({type, text, data}), cheapest first, and combines them: a failed check decides (contradicted), passes are evidence (supported only if every applicable check passed), anything else leaves the claim open for the verification styles.",
+ "tags": [
+  "dispatcher",
+  "hard-checks"
+ ],
+ "applies_to": {
+  "tasks": [
+   "research"
+  ]
+ },
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "claim"
+   ],
+   "properties": {
+    "claim": {
+     "type": "object"
+    }
+   }
+  }
+ },
+ "outputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "status",
+    "verdict",
+    "results",
+    "trace"
+   ]
+  }
+ },
+ "params": {
+  "fail_fast": {
+   "default": true
+  }
+ },
+ "body": {
+  "function": "hard_checks_offline",
+  "plain": "Hard checks (no web access)"
+ },
+ "needs": {
+  "tools": []
+ },
+ "cost": {
+  "seconds": 0.5
+ },
+ "safety": {
+  "reads_web": false,
+  "runs_code": false
+ },
+ "status": "trusted",
+ "origin": {
+  "by": "manual",
+  "note": "checks.CheckRunner"
+ }
+}

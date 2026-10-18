@@ -400,3 +400,27 @@ files; a skill names a pipeline, and the old `pipelines/` folder is gone.
 - Config keys (optional): `library_dir`, `user_library_dir`, `library_index`.
 - Tool: `python tools/library.py list | search | show | validate | reindex | stats | select | promote | diff | used-by` (see its help).
 - Tests: `tests/test_library.py` (34 tests: validation, file rules, wiring, versions, status, index, selection, statistics from real runs, cases, drafts, safety).
+
+## Core, phase 2b: the hard checks as library nodes
+
+`checks.py` holds the checks of `REQUIREMENTS_CORE.md` 12.2, the library holds them as nodes (`library/nodes/check.*`). Every check answers `{status: pass | fail | inconclusive | not_applicable, detail, evidence}`.
+
+| Node | Claim type | What it decides |
+|---|---|---|
+| `check.quote_in_source` | quotation | the quote occurs in the source (typography, case and spaces normalised, `...` skips text); a near match is `inconclusive` and shows the closest passage |
+| `check.arithmetic` | numeric | `expression = value` within a tolerance and the rounding the claim shows (at most 2 percent of the value); no `eval`: two evaluators (float and 40-digit decimal) must agree |
+| `check.unit_conversion` | unit | length, mass, time, volume, speed, area, data, energy, pressure, temperature |
+| `check.date_claim` | date | weekday of a date, days between, date plus days, age, leap year, before/after |
+| `check.schema_valid` | structured | a value fits its JSON schema |
+| `check.schedule_overlap` | schedule | no overlapping events, none ends before it starts |
+| `check.citation` | citation | the cited page loads (404/410 fail, timeouts and PDFs are inconclusive), is not a search page, contains the quote or has a matching title |
+| `check.web_confirm` | fact | needs 2 independent domains (mirrors count once) that contain all facts, query built from entities and numbers, never from the claim's wording, and a disconfirming search ("myth", "false"); never `fail` |
+
+- **Dispatcher**: the nodes `code.hard_checks_offline` and `code.hard_checks_web` take a claim `{type, text, data}`, ask the library for the checks tagged `check` that declare the claim type,
+  run the cheap ones first (a `fail` stops the rest) and combine them with one rule (`checks.combine`): any fail = `contradicted`; all applicable pass = `supported`; anything else = `open`
+  (a pass is evidence, not proof); nothing applicable = `none`. The web variant reads the web, so a skill using it declares `max_safety: {reads_web: true}`.
+- A disputed fact needs a correction marker within about 90 characters of the fact in a search snippet: the disconfirming query attracts pages about myths in general, and those mention
+  the fact in passing (found and fixed with the real search).
+- Try them: `python tools/try_checks.py` (examples without web access), `--web` (also citation and web confirmation), `--claim '{...}'`, `--list`.
+- Tests: `tests/test_checks.py` (39 tests; the web checks run against fake search and fetch; a test keeps the library entries and the code in step).
+- Not built yet: the sandboxed script check, the research pipeline that extracts claims, and the harness that measures precision and coverage of the checks.

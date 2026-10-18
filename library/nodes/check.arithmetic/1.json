@@ -1,0 +1,85 @@
+{
+ "id": "check.arithmetic",
+ "version": 1,
+ "kind": "code",
+ "title": "Arithmetic claim holds",
+ "description": "'expression = value' holds within a relative tolerance and the rounding the claimed value shows. The expression is evaluated without eval(), twice (floats and 40-digit decimals); if the two disagree the check is inconclusive.",
+ "tags": [
+  "check",
+  "exact",
+  "numeric"
+ ],
+ "applies_to": {
+  "claim_types": [
+   "numeric"
+  ],
+  "tasks": [
+   "research"
+  ]
+ },
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "expression",
+    "value"
+   ],
+   "properties": {
+    "expression": {
+     "type": "string"
+    },
+    "value": {
+     "type": [
+      "number",
+      "string"
+     ]
+    }
+   }
+  }
+ },
+ "outputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "status",
+    "check",
+    "detail",
+    "evidence"
+   ],
+   "properties": {
+    "status": {
+     "enum": [
+      "pass",
+      "fail",
+      "inconclusive",
+      "not_applicable"
+     ]
+    }
+   }
+  }
+ },
+ "params": {
+  "tolerance": {
+   "default": 0.005
+  }
+ },
+ "body": {
+  "function": "arithmetic_claim",
+  "plain": "Arithmetic claim holds"
+ },
+ "needs": {
+  "tools": []
+ },
+ "cost": {
+  "seconds": 0.01
+ },
+ "safety": {
+  "reads_web": false,
+  "runs_code": false
+ },
+ "status": "trusted",
+ "origin": {
+  "by": "manual",
+  "note": "checks.py, unit tested"
+ }
+}

@@ -1,0 +1,97 @@
+{
+ "id": "check.unit_conversion",
+ "version": 1,
+ "kind": "code",
+ "title": "Unit conversion holds",
+ "description": "'value unit = result unit' holds (length, mass, time, volume (US), speed, area, data, energy, pressure, temperature). The rounding of the claimed result is allowed.",
+ "tags": [
+  "check",
+  "exact",
+  "numeric",
+  "unit"
+ ],
+ "applies_to": {
+  "claim_types": [
+   "unit"
+  ],
+  "tasks": [
+   "research"
+  ]
+ },
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "value",
+    "from_unit",
+    "to_unit",
+    "result_value"
+   ],
+   "properties": {
+    "value": {
+     "type": [
+      "number",
+      "string"
+     ]
+    },
+    "from_unit": {
+     "type": "string"
+    },
+    "to_unit": {
+     "type": "string"
+    },
+    "result_value": {
+     "type": [
+      "number",
+      "string"
+     ]
+    }
+   }
+  }
+ },
+ "outputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "status",
+    "check",
+    "detail",
+    "evidence"
+   ],
+   "properties": {
+    "status": {
+     "enum": [
+      "pass",
+      "fail",
+      "inconclusive",
+      "not_applicable"
+     ]
+    }
+   }
+  }
+ },
+ "params": {
+  "tolerance": {
+   "default": 0.01
+  }
+ },
+ "body": {
+  "function": "unit_conversion",
+  "plain": "Unit conversion holds"
+ },
+ "needs": {
+  "tools": []
+ },
+ "cost": {
+  "seconds": 0.01
+ },
+ "safety": {
+  "reads_web": false,
+  "runs_code": false
+ },
+ "status": "trusted",
+ "origin": {
+  "by": "manual",
+  "note": "checks.py, unit tested"
+ }
+}

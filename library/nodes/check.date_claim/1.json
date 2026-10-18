@@ -1,0 +1,132 @@
+{
+ "id": "check.date_claim",
+ "version": 1,
+ "kind": "code",
+ "title": "Calendar fact holds",
+ "description": "Weekday of a date, days between dates, a date plus days, an age on a day, leap years, before/after. The dates arrive in fields (ISO, 29.02.2024 or 'February 29, 2024'); reading them from prose is the model's job.",
+ "tags": [
+  "check",
+  "exact",
+  "date"
+ ],
+ "applies_to": {
+  "claim_types": [
+   "date"
+  ],
+  "tasks": [
+   "research"
+  ]
+ },
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "kind"
+   ],
+   "properties": {
+    "kind": {
+     "enum": [
+      "weekday",
+      "days_between",
+      "add_days",
+      "age",
+      "leap_year",
+      "order"
+     ]
+    },
+    "date": {
+     "type": "string"
+    },
+    "weekday": {
+     "type": "string"
+    },
+    "start": {
+     "type": "string"
+    },
+    "end": {
+     "type": "string"
+    },
+    "days": {
+     "type": [
+      "integer",
+      "string"
+     ]
+    },
+    "birth": {
+     "type": "string"
+    },
+    "on": {
+     "type": "string"
+    },
+    "years": {
+     "type": [
+      "integer",
+      "string"
+     ]
+    },
+    "year": {
+     "type": [
+      "integer",
+      "string"
+     ]
+    },
+    "leap": {
+     "type": "boolean"
+    },
+    "a": {
+     "type": "string"
+    },
+    "b": {
+     "type": "string"
+    },
+    "relation": {
+     "type": "string"
+    },
+    "result_date": {
+     "type": "string"
+    }
+   }
+  }
+ },
+ "outputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "status",
+    "check",
+    "detail",
+    "evidence"
+   ],
+   "properties": {
+    "status": {
+     "enum": [
+      "pass",
+      "fail",
+      "inconclusive",
+      "not_applicable"
+     ]
+    }
+   }
+  }
+ },
+ "params": {},
+ "body": {
+  "function": "date_claim",
+  "plain": "Calendar fact holds"
+ },
+ "needs": {
+  "tools": []
+ },
+ "cost": {
+  "seconds": 0.01
+ },
+ "safety": {
+  "reads_web": false,
+  "runs_code": false
+ },
+ "status": "trusted",
+ "origin": {
+  "by": "manual",
+  "note": "checks.py, unit tested"
+ }
+}

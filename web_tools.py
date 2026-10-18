@@ -42,6 +42,14 @@ class UnsupportedContent(WebError):
     pass
 
 
+class HttpStatusError(WebError):
+    """the server answered with an error status (404 and 410 mean the page is gone, 5xx and 429 mean try again later)"""
+
+    def __init__(self, status):
+        super().__init__("the server answered %d" % status)
+        self.status = status
+
+
 class SearchError(WebError):
     def __init__(self, message, errors=None):
         super().__init__(message)
@@ -174,7 +182,7 @@ class WebClient:
 
     def _read(self, response, url, redirects, started):
         if response.status_code >= 400:
-            raise WebError("the server answered %d" % response.status_code)
+            raise HttpStatusError(response.status_code)
         content_type = response.headers.get("Content-Type", "").split(";")[0].strip().lower()
         if content_type and content_type not in ALLOWED_TYPES:
             raise UnsupportedContent("content type '%s' is not read" % content_type)

@@ -1,0 +1,82 @@
+{
+ "id": "check.citation",
+ "version": 1,
+ "kind": "code",
+ "title": "Citation is a real source",
+ "description": "The cited page loads under the safety rules, is not a search results page, and contains the quote (or, without a quote, its title matches). 404 and 410 fail; timeouts, 5xx and PDFs are inconclusive. Existence, not truth.",
+ "tags": [
+  "check",
+  "citation",
+  "web"
+ ],
+ "applies_to": {
+  "claim_types": [
+   "citation"
+  ],
+  "tasks": [
+   "research"
+  ]
+ },
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "url"
+   ],
+   "properties": {
+    "url": {
+     "type": "string"
+    },
+    "quote": {
+     "type": "string"
+    },
+    "title": {
+     "type": "string"
+    }
+   }
+  }
+ },
+ "outputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "status",
+    "check",
+    "detail",
+    "evidence"
+   ],
+   "properties": {
+    "status": {
+     "enum": [
+      "pass",
+      "fail",
+      "inconclusive",
+      "not_applicable"
+     ]
+    }
+   }
+  }
+ },
+ "params": {},
+ "body": {
+  "function": "citation_check",
+  "plain": "Citation is a real source"
+ },
+ "needs": {
+  "tools": [
+   "fetch_page"
+  ]
+ },
+ "cost": {
+  "seconds": 4
+ },
+ "safety": {
+  "reads_web": true,
+  "runs_code": false
+ },
+ "status": "tested",
+ "origin": {
+  "by": "manual",
+  "note": "unit tested with fakes; no harness measurements yet"
+ }
+}

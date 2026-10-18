@@ -1,0 +1,81 @@
+{
+ "id": "check.schedule_overlap",
+ "version": 1,
+ "kind": "code",
+ "title": "Schedule has no overlaps",
+ "description": "No two events overlap (an event may start when another ends) and none ends before it starts. Times as ISO strings or HH:MM.",
+ "tags": [
+  "check",
+  "exact",
+  "schedule"
+ ],
+ "applies_to": {
+  "claim_types": [
+   "schedule"
+  ],
+  "tasks": [
+   "research"
+  ]
+ },
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "events"
+   ],
+   "properties": {
+    "events": {
+     "type": "array",
+     "items": {
+      "type": "object"
+     }
+    }
+   }
+  }
+ },
+ "outputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "status",
+    "check",
+    "detail",
+    "evidence"
+   ],
+   "properties": {
+    "status": {
+     "enum": [
+      "pass",
+      "fail",
+      "inconclusive",
+      "not_applicable"
+     ]
+    }
+   }
+  }
+ },
+ "params": {
+  "allow_touching": {
+   "default": true
+  }
+ },
+ "body": {
+  "function": "schedule_overlap",
+  "plain": "Schedule has no overlaps"
+ },
+ "needs": {
+  "tools": []
+ },
+ "cost": {
+  "seconds": 0.01
+ },
+ "safety": {
+  "reads_web": false,
+  "runs_code": false
+ },
+ "status": "trusted",
+ "origin": {
+  "by": "manual",
+  "note": "checks.py, unit tested"
+ }
+}

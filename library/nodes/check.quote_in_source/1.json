@@ -1,0 +1,86 @@
+{
+ "id": "check.quote_in_source",
+ "version": 1,
+ "kind": "code",
+ "title": "Quote occurs in the source",
+ "description": "The quote occurs in the source text after typography and spaces are normalised ('...' inside the quote skips text). A near match is inconclusive and shows the closest passage: a quotation has to be exact to pass.",
+ "tags": [
+  "check",
+  "exact",
+  "quotation"
+ ],
+ "applies_to": {
+  "claim_types": [
+   "quotation"
+  ],
+  "tasks": [
+   "research"
+  ]
+ },
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "quote",
+    "source"
+   ],
+   "properties": {
+    "quote": {
+     "type": "string"
+    },
+    "source": {
+     "type": "string"
+    }
+   }
+  }
+ },
+ "outputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "status",
+    "check",
+    "detail",
+    "evidence"
+   ],
+   "properties": {
+    "status": {
+     "enum": [
+      "pass",
+      "fail",
+      "inconclusive",
+      "not_applicable"
+     ]
+    }
+   }
+  }
+ },
+ "params": {
+  "ignore_case": {
+   "default": true
+  },
+  "near": {
+   "default": 0.85,
+   "description": "word similarity from which a near match is reported"
+  }
+ },
+ "body": {
+  "function": "quote_in_source",
+  "plain": "Quote occurs in the source"
+ },
+ "needs": {
+  "tools": []
+ },
+ "cost": {
+  "seconds": 0.05
+ },
+ "safety": {
+  "reads_web": false,
+  "runs_code": false
+ },
+ "status": "trusted",
+ "origin": {
+  "by": "manual",
+  "note": "checks.py, unit tested"
+ }
+}

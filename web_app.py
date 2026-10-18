@@ -47,6 +47,7 @@ from .chat_api import create_blueprint as create_chat_blueprint
 from .moods import MoodTracker
 from .speech_text import speech_text
 from .audio_router import AudioRouter
+from . import checks
 from .core import Core
 from .library import Library
 from .pipeline import Tool
@@ -492,7 +493,8 @@ for _path, _problem in library.errors.items():
     logger.warning("library entry %s: %s", _path, _problem)
 core = Core(_own_path(CONST.SKILLS_DIR_KEY, CONST.DEFAULT_SKILLS_DIR), library, _runs_dir, model=pipeline_model,
             tools={name: Tool(*pair) for name, pair in _web_tools.items()},
-            functions={"chunk_text": web_tools.chunk_text, "untrusted": web_tools.untrusted, "injection_signals": web_tools.injection_signals})
+            functions={"chunk_text": web_tools.chunk_text, "untrusted": web_tools.untrusted, "injection_signals": web_tools.injection_signals,
+                       **checks.build_web_checks(_web_tools["web_search"][0], _web_tools["fetch_page"][0])})
 for _name, _problems in core.check(functions={"converse": None}).items():
     logger.warning("skill %s: %s", _name, "; ".join(_problems))
 

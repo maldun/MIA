@@ -1,0 +1,76 @@
+{
+ "id": "check.schema_valid",
+ "version": 1,
+ "kind": "code",
+ "title": "Value fits a schema",
+ "description": "The structured value fits its JSON schema (types, required fields, ranges, lists).",
+ "tags": [
+  "check",
+  "exact",
+  "structured"
+ ],
+ "applies_to": {
+  "claim_types": [
+   "structured"
+  ],
+  "tasks": [
+   "research"
+  ]
+ },
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "value",
+    "schema"
+   ],
+   "properties": {
+    "schema": {
+     "type": "object"
+    },
+    "value": {}
+   }
+  }
+ },
+ "outputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "status",
+    "check",
+    "detail",
+    "evidence"
+   ],
+   "properties": {
+    "status": {
+     "enum": [
+      "pass",
+      "fail",
+      "inconclusive",
+      "not_applicable"
+     ]
+    }
+   }
+  }
+ },
+ "params": {},
+ "body": {
+  "function": "schema_valid",
+  "plain": "Value fits a schema"
+ },
+ "needs": {
+  "tools": []
+ },
+ "cost": {
+  "seconds": 0.01
+ },
+ "safety": {
+  "reads_web": false,
+  "runs_code": false
+ },
+ "status": "trusted",
+ "origin": {
+  "by": "manual",
+  "note": "checks.py, schema_check.py, unit tested"
+ }
+}

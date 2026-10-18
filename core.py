@@ -4,11 +4,13 @@ The core of MIA's tasks (ui/REQUIREMENTS_CORE.md): skills (skills/*.md), the lib
 expands it into the graph of the runner, checks that the skill may use what the pipeline needs (web access, code), runs it and logs the run with the library entries it used.
 """
 try:
+    from . import checks
     from .library import LibraryError
     from .pipeline import PipelineError, Runner, Tool, validate_pipeline
     from .run_log import RunLog
     from .skill_store import SkillStore
 except ImportError:  # used as plain script / in tests
+    import checks
     from library import LibraryError
     from pipeline import PipelineError, Runner, Tool, validate_pipeline
     from run_log import RunLog
@@ -23,7 +25,12 @@ class Core:
         tools = dict(tools or {})
         tools.setdefault("library_select", Tool(self._select, None))
         tools.setdefault("library_describe", Tool(self._describe, None))
+        functions = {**checks.OFFLINE_FUNCTIONS, **(functions or {})}
         self.runner = Runner(model=model, tools=tools, functions=functions, run_log=self.run_log, rng=rng)
+        # the hard checks of the library, picked per claim (checks.CheckRunner); the web variant needs a skill that may read the web
+        self.checks = checks.CheckRunner(library, lambda: self.runner.functions, lambda: list(self.runner.tools))
+        self.runner.functions.setdefault("hard_checks_offline", lambda claim, fail_fast=True: self.checks.run(claim, include_web=False, fail_fast=fail_fast))
+        self.runner.functions.setdefault("hard_checks_web", lambda claim, fail_fast=True: self.checks.run(claim, include_web=True, fail_fast=fail_fast))
 
     # -- the library as tools for planning steps (reading only; new entries are drafts made by people or on request) --
     def _select(self, entry_type="pipeline", tags=(), applies_to=None, max_seconds=None, task=None):
