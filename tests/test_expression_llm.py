@@ -80,12 +80,14 @@ class GeneratorTest(Base):
             keys = [k["name"] for k in json.load(fp)["shape_keys"]]
         for key in keys:
             self.assertIn(key, system)
-            self.assertIn(key, schema["properties"]["weights"]["properties"])
+            self.assertIn(key, schema["properties"]["weights"]["items"]["properties"]["key"]["enum"])
         for bone in self.ps.BONE_PARAMS:
             self.assertIn(bone, system)
         self.assertIn("wave", system)
         self.assertEqual(messages[-1]["content"], "Request: smug")
         self.assertEqual(schema["required"], ["description", "weights"])
+        self.assertEqual(schema["properties"]["weights"]["maxItems"], self.llm.MAX_KEYS)
+        self.assertEqual(schema["properties"]["weights"]["type"], "array")
         self.assertIn("wave", schema["properties"]["gesture"]["enum"])
 
     def test_unknown_keys_and_out_of_range_values_are_corrected(self):
@@ -93,6 +95,34 @@ class GeneratorTest(Base):
         result = self.gen.generate("joy")
         self.assertEqual(result["preset"]["weights"], {"Fcl_EYE_Joy": 1.0})
         self.assertTrue(any("Made_Up_Key" in c for c in result["corrections"]))
+
+    def test_the_list_format_of_the_schema_is_understood_and_zeros_are_dropped(self):
+        weights = [{"key": "Fcl_MTH_Fun", "value": 0.5}, {"key": "Fcl_EYE_Joy", "value": 0.3}, {"key": "Fcl_HA_Hide", "value": 0},
+                   {"key": "Not_A_Key", "value": 0.9}, {"value": 0.4}, "junk"]
+        self.replies = [answer(weights=weights)]
+        result = self.gen.generate("smug")
+        self.assertEqual(result["preset"]["weights"], {"Fcl_MTH_Fun": 0.5, "Fcl_EYE_Joy": 0.3})
+        self.assertTrue(any("Not_A_Key" in c for c in result["corrections"]))
+
+    def test_an_object_of_weights_still_works(self):
+        self.replies = [answer(weights={"Fcl_MTH_Fun": 0.5, "Fcl_EYE_Joy": 0.0})]
+        self.assertEqual(self.gen.generate("smug")["preset"]["weights"], {"Fcl_MTH_Fun": 0.5})
+
+    def test_the_prompt_warns_about_teeth_and_explains_the_style(self):
+        self.gen.generate("shy")
+        system = self.calls[0][0][0]["content"]
+        self.assertIn("Fcl_HA_*", system)
+        self.assertIn("teeth", system)
+        self.assertIn("MOUTH", system)
+        self.assertIn("never list a key with value 0", system)
+
+    def test_without_similar_presets_typical_ones_are_the_examples(self):
+        self.gen.generate("zzzz qqqq")
+        system = self.calls[0][0][0]["content"]
+        for text in ("confident half-smile", "shy, looking away", "broad happy smile"):      # smug, embarrassed, happy
+            self.assertIn(f"Request: {text}", system)
+        self.assertNotIn("Request: angry", system)
+        self.assertIn('"weights": [{"key": "Fcl_MTH_Fun", "value": 0.6}', system)       # examples look like the answer that is asked for
 
     def test_one_retry_on_an_unusable_answer(self):
         self.replies = ["this is not json", answer()]

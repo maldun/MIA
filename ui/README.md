@@ -292,3 +292,12 @@ never got its "playback ended": the character stayed in the talking pose. Now:
 - **Tests:** `python tests/test_audio_router.py` (19), `node --test` (sound queue), `test_bridge.gd` (watchdog), and in a real browser with two connected pages
   `ui/tools/chat_audio_e2e.js` (two lines uploaded one right after the other: played in order, the second page gets nothing, "talking" ends). Rebuild the web export
   (`ui/tools/build_web.sh`) for the character's watchdog; the page fixes need only a reload.
+
+### Trying the expression generator with the real model
+
+`python tools/try_expression.py "surprised but trying to hide it" "a sly grin"` runs the generator against Ollama without the page (temporary presets, nothing is saved;
+`--prompt "smug"` prints the prompt, `--model` and `--temperature` change the model). It uses the model MIA uses (the light profile) with the same options, so Ollama
+loads nothing new. First try with `gemma4:12b-it-qat`: all answers valid, 2.7-5.6 s each. Two prompt problems showed up and are fixed: the model used the teeth and fang keys
+(`Fcl_HA_*`) for moods like "shy" because of their names, and with a schema that lists every shape key it wrote many keys with value 0. The prompt now says what the key groups
+are for and asks for the style of the hand made presets (a mouth, a brow and an eye key, small turns); the weights are a short list of `{key, value}` (at most 8) instead of an
+object with all 57 keys; the examples have the same format; typical presets are used as examples when nothing in the library is similar.

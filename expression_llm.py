@@ -42,8 +42,11 @@ except ImportError:  # used as plain script / in tests
     from preset_store import PresetError, BONE_PARAMS, BONE_LIMIT, MAX_DESCRIPTION
 
 MAX_REQUEST = 300
+MAX_KEYS = 8            # shape keys in one expression: a face is a few keys, not all of them
 DECISIONS = ("keep", "edit", "reject")
 PENDING_LIMIT = 100
+# when nothing in the library resembles the request, these hand made presets show the style (a mouth, a brow and an eye key, small turns)
+DEFAULT_EXAMPLES = ("smug", "embarrassed", "happy", "sad", "surprised", "thinking")
 STOP_WORDS = {"a", "an", "the", "and", "or", "but", "with", "of", "to", "in", "on", "very", "slightly", "a", "bit", "little", "trying",
               "is", "are", "looks", "look", "like", "her", "his", "she", "he", "it"}
 BONE_HELP = {
@@ -90,14 +93,19 @@ class ExpressionGenerator:
 
     # --- the schema the model must answer with -----------------------------------------------------------------
     def schema(self):
-        """every shape key is a number from 0 to 1, so the model cannot even name an unknown key"""
-        weight = {"type": "number", "minimum": 0, "maximum": 1}
+        """
+        The weights are a short list of {key, value}: the key can only be one of the shape keys (an enum), the value a number from 0 to 1, and
+        at most MAX_KEYS entries. (A schema with one property per shape key makes models walk through all of them and write zeros.)
+        """
+        entry = {"type": "object", "properties": {"key": {"type": "string", "enum": [k["name"] for k in self.shape_keys]},
+                                                  "value": {"type": "number", "minimum": 0, "maximum": 1}},
+                 "required": ["key", "value"]}
         bone = {"type": "number", "minimum": -BONE_LIMIT, "maximum": BONE_LIMIT}
         return {
             "type": "object",
             "properties": {
                 "description": {"type": "string", "description": "one short sentence describing the expression"},
-                "weights": {"type": "object", "properties": {k["name"]: weight for k in self.shape_keys}},
+                "weights": {"type": "array", "items": entry, "minItems": 1, "maxItems": MAX_KEYS},
                 "bones": {"type": "object", "properties": {b: bone for b in BONE_PARAMS}},
                 "tags": {"type": "array", "items": {"type": "string"}},
                 "gesture": {"type": "string", "enum": [""] + [g["name"] for g in self.gestures]},
@@ -116,7 +124,9 @@ class ExpressionGenerator:
         return "\n".join(lines)
 
     def _example_text(self, preset, note=""):
-        data = {"description": preset.get("description", ""), "weights": preset.get("weights", {}), "bones": preset.get("bones", {}),
+        # the same format as the answer the schema asks for: a list of {key, value}
+        weights = [{"key": k, "value": v} for k, v in sorted(preset.get("weights", {}).items(), key=lambda kv: -kv[1]) if v]
+        data = {"description": preset.get("description", ""), "weights": weights, "bones": preset.get("bones", {}),
                 "tags": preset.get("tags", [])}
         return f"{note}Request: {preset.get('_request', preset.get('name', ''))}\nAnswer: {json.dumps(data, ensure_ascii=False)}"
 
@@ -146,11 +156,16 @@ class ExpressionGenerator:
                 good.append(item)
         chosen = good[: self.examples]
         taken = {p.get("name") for p in chosen}
-        for score, preset in self._ranked(description):
+        ranked = self._ranked(description)
+        by_name = {preset["name"]: preset for _, preset in ranked}
+        similar = [preset for score, preset in ranked if score > 0]
+        typical = [by_name[name] for name in DEFAULT_EXAMPLES if name in by_name]
+        for preset in similar + typical:
             if len(chosen) >= self.examples:
                 break
             if preset["name"] not in taken and preset.get("weights"):
                 chosen.append(dict(preset, _request=preset.get("description") or preset["name"]))
+                taken.add(preset["name"])
         return chosen, bad[:2]
 
     def messages(self, description, problem=None):
@@ -158,8 +173,12 @@ class ExpressionGenerator:
         system = (
             "You control the face of an anime style 3D character. You answer with the facial expression for a description as JSON.\n\n"
             "Rules:\n"
-            "- \"weights\": shape key name -> value from 0.0 (off) to 1.0 (fully on). Use only the shape keys below, normally 3 to 10 of them. "
-            "Everything you do not name is 0.\n"
+            "- \"weights\": a list of {\"key\": shape key name, \"value\": 0.0 to 1.0}, at most 8 entries, only keys from the list below. "
+            "Everything you do not name is 0, so never list a key with value 0.\n"
+            "- Build the face like the examples: one or two MOUTH keys (Fcl_MTH_*), one BROW key (Fcl_BRW_*) and one or two EYE keys (Fcl_EYE_*), "
+            "with strengths between 0.2 and 0.9, plus small head or eye turns. Subtle is better than extreme.\n"
+            "- The keys Fcl_HA_* are teeth and fangs: use them only when the description asks for teeth, fangs or a toothy grin, never for moods like shy, "
+            "sad or sleepy. The keys Fcl_ALL_* change the whole face at once: avoid them, the specific eye, brow and mouth keys are better.\n"
             "- Keys with _L and _R belong to the character's left and right side (use them for asymmetric looks, winks, a smirk).\n"
             "- Do not use the vowel keys (Fcl_MTH_A, I, U, E, O) unless the mouth should be open as in speaking; use the mouth shapes (smile, sad, angry, ...) for the mood.\n"
             "- \"bones\": optional small head and eye turns in degrees (-45 to 45): "
@@ -221,6 +240,20 @@ class ExpressionGenerator:
             number += 1
         return name[:40]
 
+    @staticmethod
+    def _weights(raw):
+        """{key: value} from the answer: a list of {"key", "value"} (what the schema asks for) or an object; zeros are dropped"""
+        if isinstance(raw, list):
+            weights = {}
+            for entry in raw:
+                if isinstance(entry, dict) and isinstance(entry.get("key"), str):
+                    weights[entry["key"]] = entry.get("value", 0)
+        elif isinstance(raw, dict):
+            weights = dict(raw)
+        else:
+            return {}
+        return {k: v for k, v in weights.items() if not (isinstance(v, (int, float)) and not isinstance(v, bool) and v == 0)}
+
     def _attempt(self, description, problem):
         reply = self._chat(self.messages(description, problem), self.schema())
         try:
@@ -229,7 +262,7 @@ class ExpressionGenerator:
             return None, "the answer was not valid JSON"
         if not isinstance(data, dict):
             return None, "the answer was not a JSON object"
-        raw = {"name": self._new_name(description), "description": data.get("description", ""), "weights": data.get("weights", {}),
+        raw = {"name": self._new_name(description), "description": data.get("description", ""), "weights": self._weights(data.get("weights", {})),
                "bones": data.get("bones", {}), "tags": data.get("tags", []), "gesture": data.get("gesture", ""), "source": "llm"}
         preset, corrections = self.store.normalize(raw)
         if not preset["weights"] and not preset["bones"]:
