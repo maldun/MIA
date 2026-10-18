@@ -47,6 +47,7 @@ from .chat_api import create_blueprint as create_chat_blueprint
 from .moods import MoodTracker
 from .speech_text import speech_text
 from .audio_router import AudioRouter
+from . import behaviour
 from . import broker as broker_module
 from . import checks
 from . import sandbox as sandbox_module
@@ -509,6 +510,7 @@ def run_chat_exchange(text, on_delta, on_emotion, should_stop):
                       functions={"converse": lambda text: converse(text, on_delta, on_emotion, should_stop)})
     if result.status == "error":
         raise RuntimeError(result.error)
+    behaviour.record_signals(core.run_log, result.run_id, result.answer or "", node="converse")     # the speech rules only log (BF2): the answer is not changed and nobody is scolded
     return result.answer
 
 chat_service = ChatService(socketio.emit, chat_log, mood, run_chat_exchange, run_command=run_chat_command,

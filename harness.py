@@ -16,14 +16,15 @@ import time
 import requests
 
 try:
-    from . import checks, extraction, metrics, web_tools
+    from . import behaviour, checks, extraction, metrics, web_tools
 except ImportError:  # used as plain script / in tests
+    import behaviour
     import checks
     import extraction
     import metrics
     import web_tools
 
-INPUT_KEY = {"checks": "claim", "pipeline": "input", "extraction": "input"}
+INPUT_KEY = {"checks": "claim", "pipeline": "input", "extraction": "input", "text_rules": "input"}
 CASE_KEYS = {"id", "tags", "claim", "input", "truth", "expect", "note", "gold"}
 STATUSES = ("pass", "fail", "open", "not_applicable")
 MAX_OUTPUT_CHARS = 3000
@@ -89,6 +90,10 @@ def load_suite(folder):
             problems.append("%s: needs '%s' for a %s target" % (label, key, target["kind"]))
         if case.get("truth") is None and case.get("expect") is None:
             problems.append("%s: needs 'truth' or 'expect' (what is right?)" % label)
+        if target["kind"] == "text_rules":
+            gold = case.get("gold")
+            if not isinstance(gold, dict) or not isinstance(gold.get("rules"), list):
+                problems.append("%s: a text_rules case needs 'gold' with a list 'rules' (maybe empty) and optionally 'repaired', 'remaining', 'matches'" % label)
         if target["kind"] == "extraction":
             gold = case.get("gold")
             if not isinstance(gold, list) or not all(isinstance(g, dict) and g.get("type") and g.get("anchor") for g in gold):
@@ -248,7 +253,7 @@ class Harness:
     def __init__(self, core=None, clock=time.time, targets=None):
         """core: a Core (for the targets 'checks' and 'pipeline'); targets: more kinds, {kind: function(case, variant, context) -> (status, output)}, for tests and new tasks"""
         self.core, self._clock = core, clock
-        self.targets = {"checks": self._checks, "pipeline": self._pipeline, "extraction": self._extraction}
+        self.targets = {"checks": self._checks, "pipeline": self._pipeline, "extraction": self._extraction, "text_rules": self._text_rules}
         self.targets.update(targets or {})
         self.counter = None
         self._fixture_runners = {}
@@ -287,6 +292,19 @@ class Harness:
         if result.status == "done" and isinstance(answer, dict) and field in answer:
             return answer[field], {"answer": answer, "events": len(result.events)}
         return "error:" + (result.status if result.status != "done" else "no_" + field), {"answer": answer, "error": result.error}
+
+    def _text_rules(self, case, variant, suite):
+        """the behaviour rules (behaviour.py) on a text: which rules fire, what the repair makes of it, what remains, and that repairing twice changes nothing more"""
+        text, gold, rules = case["input"]["text"], case["gold"], variant.get("rules")
+        found = behaviour.check_text(text, rules)
+        repaired = behaviour.repair_text(text, rules)
+        score = {"expected": sorted(gold["rules"]), "found": found["rules"], "remaining": repaired["remaining"], "repaired": repaired["text"],
+                 "idempotent": behaviour.repair_text(repaired["text"], rules)["text"] == repaired["text"],
+                 "remaining_ok": sorted(repaired["remaining"]) == sorted(gold.get("remaining", [])),
+                 "repair_ok": (repaired["text"] == gold["repaired"]) if "repaired" in gold else None,
+                 "matches_ok": (sorted(v["match"] for v in found["violations"]) == sorted(gold["matches"])) if "matches" in gold else None}
+        score["ok"] = bool(score["found"] == score["expected"] and score["remaining_ok"] and score["idempotent"] and score["repair_ok"] is not False and score["matches_ok"] is not False)
+        return ("pass" if score["ok"] else "fail"), {"score": score}
 
     def _extraction(self, case, variant, suite):
         """a pipeline whose answer is {"claims": [...]}, scored against the gold claims of the case"""
@@ -396,6 +414,15 @@ def format_report(run, worst=8):
                      ("wrong type " + str([(w["wanted"], w["got"]) for w in s["wrong_type"]])) if s["wrong_type"] else "", ("spurious " + str(len(s["spurious"]))) if s["spurious"] else "",
                      ("duplicate " + str(len(s["duplicates"]))) if s["duplicates"] else "", ("unanchored " + str(len(s["unanchored"]))) if s["unanchored"] else ""]
             lines.append("   NOT PERFECT %-22s %s" % (r["case"], " | ".join(x for x in parts if x)))
+    rm = metrics.rule_metrics(records)
+    if rm["texts"]:
+        pr = lambda r: "n/a" if r["rate"] is None else "%.1f%% (%d of %d)" % (100 * r["rate"], r["k"], r["n"])   # noqa: E731
+        lines += ["", "as behaviour rules, on %d texts:" % rm["texts"], "   %-28s %5s %5s %5s   precision / recall" % ("rule", "right", "false", "missed")]
+        for name, row in rm["rules"].items():
+            lines.append("   %-28s %5d %5d %5d   %s / %s" % (name, row["tp"], row["fp"], row["fn"], "n/a" if row["precision"]["rate"] is None else "%.0f%%" % (100 * row["precision"]["rate"]),
+                                                            "n/a" if row["recall"]["rate"] is None else "%.0f%%" % (100 * row["recall"]["rate"])))
+        lines += ["   clean texts left alone      " + pr(rm["clean_ok"]) + "   <- a false alarm otherwise", "   repairs as expected         " + pr(rm["repair_ok"]),
+                  "   what cannot be repaired     " + pr(rm["remaining_ok"]), "   repair is idempotent        " + pr(rm["idempotent"])]
     table = metrics.breakdown(records)
     if len(table) > 1:
         lines += ["", "by tag (right / cases):"]

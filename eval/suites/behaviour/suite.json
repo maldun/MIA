@@ -1,0 +1,7 @@
+{
+ "name": "behaviour",
+ "description": "The speech rules (behaviour.py) from the first message of MIA on short texts: which rules fire, what the silent repair makes of the text, what cannot be repaired, that repairing twice changes nothing more, and that clean texts and look-alikes (powers, names with underscores, globs, ordinary brackets, past tense) are left alone. Deterministic, no model.",
+ "target": {
+  "kind": "text_rules"
+ }
+}

@@ -1,0 +1,32 @@
+{
+ "id": "behaviour.speech",
+ "version": 1,
+ "title": "Speech rules for a text",
+ "description": "Check and repair a text against the speech rules; the answer carries the violations (signals) and what remains.",
+ "goal": "text that can be read aloud",
+ "tags": [
+  "behaviour",
+  "speech"
+ ],
+ "applies_to": {
+  "tasks": [
+   "chat"
+  ]
+ },
+ "cost_class": "cheap",
+ "result": "answer",
+ "nodes": [
+  {
+   "id": "rules",
+   "use": "code.apply_rules@1",
+   "wire": {
+    "text": "$input.text"
+   },
+   "output": "answer"
+  }
+ ],
+ "status": "trusted",
+ "origin": {
+  "by": "manual"
+ }
+}

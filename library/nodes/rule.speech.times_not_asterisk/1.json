@@ -1,0 +1,81 @@
+{
+ "id": "rule.speech.times_not_asterisk",
+ "version": 1,
+ "kind": "code",
+ "title": "Say \"times\", do not write an asterisk",
+ "description": "Behaviour rule speech.times_not_asterisk: Write the word \"times\" for multiplication: 2 times 3, not 2*3. Detector and repair in behaviour.py; a deterministic repair exists.",
+ "tags": [
+  "rule",
+  "speech",
+  "behaviour",
+  "exact"
+ ],
+ "applies_to": {
+  "tasks": [
+   "chat"
+  ]
+ },
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "text"
+   ],
+   "properties": {
+    "text": {
+     "type": "string"
+    }
+   }
+  }
+ },
+ "outputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "text",
+    "violations",
+    "remaining",
+    "fixed"
+   ]
+  }
+ },
+ "params": {
+  "rules": {
+   "default": [
+    "speech.times_not_asterisk"
+   ],
+   "description": "the rule this node stands for"
+  },
+  "repair": {
+   "default": true
+  }
+ },
+ "body": {
+  "function": "apply_rules",
+  "plain": "checking the text: say \"times\", do not write an asterisk"
+ },
+ "rule": {
+  "severity": "warn",
+  "wanted": "Write the word \"times\" for multiplication: 2 times 3, not 2*3.",
+  "bad": [
+   "2*3 is 6",
+   "12 * 1.5 + 3"
+  ],
+  "good": [
+   "2 times 3 is 6",
+   "12 times 1.5 plus 3"
+  ]
+ },
+ "cost": {
+  "seconds": 0.001
+ },
+ "safety": {
+  "reads_web": false,
+  "runs_code": false
+ },
+ "status": "trusted",
+ "origin": {
+  "by": "manual",
+  "note": "behaviour.py; from the first message of MIA (communicator.EMOTION_QUESTION); measured with the suite 'behaviour'"
+ }
+}

@@ -73,9 +73,36 @@ class RunLog:
         """thumbs up/down, a correction, a free note ... refers to the run by its id"""
         self._write({"kind": "feedback", "run": run_id, "created": utc_stamp(self._clock()), "type": kind, "value": _clip(value), "note": _clip(note)})
 
+    def add_signal(self, run_id, rule, sign="penalty", node=None, detail="", **fields):
+        """a reward or a penalty for a rule (ui/REQUIREMENTS_CORE.md 13a, BF2): which run, which node, which rule, which sign; read() joins the signals to their run as "signals"
+        and signals_by_rule() counts them. Extra fields (span, text, severity) are kept."""
+        self._write({"kind": "signal", "run": run_id, "created": utc_stamp(self._clock()), "rule": rule, "sign": sign, "node": node, "detail": _clip(detail), **{k: _clip(v) for k, v in fields.items()}})
+
+    def signals_by_rule(self):
+        """{rule: {"penalty": n, "reward": n, "runs": number of runs}} over the whole log"""
+        table, runs = {}, {}
+        if not os.path.isdir(self.folder):
+            return table
+        for name in sorted(os.listdir(self.folder)):
+            if not (name.startswith("runs-") and name.endswith(".jsonl")):
+                continue
+            with open(os.path.join(self.folder, name), encoding="utf-8") as fp:
+                for line in fp:
+                    try:
+                        record = json.loads(line)
+                    except ValueError:
+                        continue
+                    if record.get("kind") == "signal":
+                        row = table.setdefault(record["rule"], {"penalty": 0, "reward": 0, "runs": 0})
+                        row[record.get("sign", "penalty")] = row.get(record.get("sign", "penalty"), 0) + 1
+                        runs.setdefault(record["rule"], set()).add(record.get("run"))
+        for rule, ids in runs.items():
+            table[rule]["runs"] = len(ids)
+        return table
+
     def read(self, limit=None):
         """the runs (oldest first) with their feedback joined as "feedback": [..]"""
-        runs, order, feedback = {}, [], []
+        runs, order, feedback, signals = {}, [], [], []
         if not os.path.isdir(self.folder):
             return []
         for name in sorted(os.listdir(self.folder)):
@@ -92,8 +119,13 @@ class RunLog:
                         order.append(record["id"])
                     elif record.get("kind") == "feedback":
                         feedback.append(record)
+                    elif record.get("kind") == "signal":
+                        signals.append(record)
         for item in feedback:
             if item.get("run") in runs:
                 runs[item["run"]].setdefault("feedback", []).append(item)
+        for item in signals:
+            if item.get("run") in runs:
+                runs[item["run"]].setdefault("signals", []).append(item)
         result = [runs[i] for i in order]
         return result[-limit:] if limit else result

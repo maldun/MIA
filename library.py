@@ -25,7 +25,8 @@ COST_CLASSES = ("cheap", "normal", "expensive")
 SAFETY_FLAGS = ("reads_web", "runs_code")
 ID_RE = re.compile(r"[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)*")
 LOCAL_ID_RE = re.compile(r"[A-Za-z][\w\-]{0,39}")
-NODE_KEYS = {"id", "version", "kind", "title", "description", "tags", "applies_to", "inputs", "outputs", "params", "body", "needs", "cost", "safety", "status", "origin"}
+NODE_KEYS = {"id", "version", "kind", "title", "description", "tags", "applies_to", "inputs", "outputs", "params", "body", "needs", "cost", "safety", "status", "origin", "rule"}
+SEVERITIES = ("info", "warn", "error")
 PIPELINE_KEYS = {"id", "version", "title", "description", "goal", "tags", "applies_to", "cost_class", "result", "nodes", "inputs", "needs", "cost", "status", "origin"}
 MIN_RUNS_FOR_STATS = 3
 
@@ -108,6 +109,14 @@ def validate_node(entry, label="node"):
     needs = entry.get("needs", {})
     if not isinstance(needs, dict) or not isinstance(needs.get("tools", []), list):
         problems.append("%s: 'needs' must be an object, 'tools' a list" % label)
+    rule = entry.get("rule")
+    if rule is not None:
+        if not isinstance(rule, dict) or rule.get("severity") not in SEVERITIES or not isinstance(rule.get("wanted"), str) or not rule.get("wanted", "").strip():
+            problems.append("%s: 'rule' needs a severity (%s) and a text 'wanted' (the behaviour that is wanted)" % (label, ", ".join(SEVERITIES)))
+        elif not all(isinstance(rule.get(k, []), list) for k in ("bad", "good")):
+            problems.append("%s: rule.bad and rule.good must be lists of example texts" % label)
+        if "rule" not in entry.get("tags", []):
+            problems.append("%s: a node with a 'rule' block must carry the tag 'rule'" % label)
     return problems
 
 
@@ -371,6 +380,10 @@ class Library:
             return []
         with self._connect() as db:
             return [row["pipeline"] for row in db.execute("SELECT pipeline FROM deps WHERE node=? ORDER BY pipeline", (node_ref,))]
+
+    def rules(self):
+        """the behaviour rules of the library (nodes with a `rule` block that are usable), by id"""
+        return [e for e in self.entries("node") if e.get("rule") and e["status"] in USABLE]
 
     # -- searching and selecting --
     def entries(self, entry_type="pipeline"):

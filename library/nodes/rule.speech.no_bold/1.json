@@ -1,0 +1,81 @@
+{
+ "id": "rule.speech.no_bold",
+ "version": 1,
+ "kind": "code",
+ "title": "No bold markup in speech",
+ "description": "Behaviour rule speech.no_bold: Say what is important in plain words; bold cannot be spoken. Detector and repair in behaviour.py; a deterministic repair exists.",
+ "tags": [
+  "rule",
+  "speech",
+  "behaviour",
+  "exact"
+ ],
+ "applies_to": {
+  "tasks": [
+   "chat"
+  ]
+ },
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "text"
+   ],
+   "properties": {
+    "text": {
+     "type": "string"
+    }
+   }
+  }
+ },
+ "outputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "text",
+    "violations",
+    "remaining",
+    "fixed"
+   ]
+  }
+ },
+ "params": {
+  "rules": {
+   "default": [
+    "speech.no_bold"
+   ],
+   "description": "the rule this node stands for"
+  },
+  "repair": {
+   "default": true
+  }
+ },
+ "body": {
+  "function": "apply_rules",
+  "plain": "checking the text: no bold markup in speech"
+ },
+ "rule": {
+  "severity": "warn",
+  "wanted": "Say what is important in plain words; bold cannot be spoken.",
+  "bad": [
+   "This is **really** important.",
+   "**Note:** it closes at five."
+  ],
+  "good": [
+   "This is really important.",
+   "Note: it closes at five."
+  ]
+ },
+ "cost": {
+  "seconds": 0.001
+ },
+ "safety": {
+  "reads_web": false,
+  "runs_code": false
+ },
+ "status": "trusted",
+ "origin": {
+  "by": "manual",
+  "note": "behaviour.py; from the first message of MIA (communicator.EMOTION_QUESTION); measured with the suite 'behaviour'"
+ }
+}

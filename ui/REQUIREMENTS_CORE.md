@@ -445,10 +445,10 @@ They worked well enough to build the character on. This section records what the
 
 ### Requirements: behaviour feedback (the reward and penalty system)
 The goal: unwanted behaviour is **detected**, **recorded** and **changes later behaviour**, without scolding inside the conversation and without training the model to please instead of to be right.
-- BF1. **Behaviour rules** are library entries (4a): a named rule with a detector (a hard check where possible: format, language, forbidden markup in speech, a claim without source, tone words; a model view only where
+- BF1 (built, phase 1c). **Behaviour rules** are library entries (4a): a named rule with a detector (a hard check where possible: format, language, forbidden markup in speech, a claim without source, tone words; a model view only where
   code cannot decide), a severity, a description of the wanted behaviour, and examples. Rules are data; a skill lists the rules it is held to. The rules of the old first message (no markdown in speech, "times"
   instead of the asterisk, no stage directions) become the first rules.
-- BF2. **Signals**: automatic (detector hits, hard-check failures, retries, budget overruns), explicit (the user marks a message: thumbs, "wrong", "too long", a category), and implicit (regeneration, edits,
+- BF2 (automatic signals built for speech rules; explicit and implicit not yet). **Signals**: automatic (detector hits, hard-check failures, retries, budget overruns), explicit (the user marks a message: thumbs, "wrong", "too long", a category), and implicit (regeneration, edits,
   quick corrections). Every signal is a line in the run log with the run, the node, the rule and the sign (reward or penalty). Nothing is hidden: the user can see the list of recent violations and rewards.
 - BF3. **Consequences**, in order of introduction; each one needs the signals of the previous ones:
   1. repair: the run repairs the output silently (retry with the violated rule named, a deterministic fix such as removing markup); the conversation history stays clean;

@@ -1,0 +1,80 @@
+{
+ "id": "rule.speech.no_emphasis",
+ "version": 1,
+ "kind": "code",
+ "title": "No emphasis with asterisks",
+ "description": "Behaviour rule speech.no_emphasis: Asterisks are only for short actions such as *smiles*; never for emphasis. Detector and repair in behaviour.py; a deterministic repair exists.",
+ "tags": [
+  "rule",
+  "speech",
+  "behaviour",
+  "exact"
+ ],
+ "applies_to": {
+  "tasks": [
+   "chat"
+  ]
+ },
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "text"
+   ],
+   "properties": {
+    "text": {
+     "type": "string"
+    }
+   }
+  }
+ },
+ "outputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "text",
+    "violations",
+    "remaining",
+    "fixed"
+   ]
+  }
+ },
+ "params": {
+  "rules": {
+   "default": [
+    "speech.no_emphasis"
+   ],
+   "description": "the rule this node stands for"
+  },
+  "repair": {
+   "default": true
+  }
+ },
+ "body": {
+  "function": "apply_rules",
+  "plain": "checking the text: no emphasis with asterisks"
+ },
+ "rule": {
+  "severity": "warn",
+  "wanted": "Asterisks are only for short actions such as *smiles*; never for emphasis.",
+  "bad": [
+   "That is *very* kind of you."
+  ],
+  "good": [
+   "That is very kind of you.",
+   "*smiles* That is kind of you."
+  ]
+ },
+ "cost": {
+  "seconds": 0.001
+ },
+ "safety": {
+  "reads_web": false,
+  "runs_code": false
+ },
+ "status": "trusted",
+ "origin": {
+  "by": "manual",
+  "note": "behaviour.py; from the first message of MIA (communicator.EMOTION_QUESTION); measured with the suite 'behaviour'"
+ }
+}

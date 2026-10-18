@@ -1,0 +1,79 @@
+{
+ "id": "rule.speech.sparing_actions",
+ "version": 1,
+ "kind": "code",
+ "title": "Few actions in asterisks",
+ "description": "Behaviour rule speech.sparing_actions: At most 2 actions like *waves* in one message. Detector and repair in behaviour.py; a deterministic repair exists.",
+ "tags": [
+  "rule",
+  "speech",
+  "behaviour",
+  "exact"
+ ],
+ "applies_to": {
+  "tasks": [
+   "chat"
+  ]
+ },
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "text"
+   ],
+   "properties": {
+    "text": {
+     "type": "string"
+    }
+   }
+  }
+ },
+ "outputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "text",
+    "violations",
+    "remaining",
+    "fixed"
+   ]
+  }
+ },
+ "params": {
+  "rules": {
+   "default": [
+    "speech.sparing_actions"
+   ],
+   "description": "the rule this node stands for"
+  },
+  "repair": {
+   "default": true
+  }
+ },
+ "body": {
+  "function": "apply_rules",
+  "plain": "checking the text: few actions in asterisks"
+ },
+ "rule": {
+  "severity": "info",
+  "wanted": "At most 2 actions like *waves* in one message.",
+  "bad": [
+   "*smiles* Hi! *waves* Look, *nods* really, *giggles* ok."
+  ],
+  "good": [
+   "*smiles* Hi! *waves* Look, really, ok."
+  ]
+ },
+ "cost": {
+  "seconds": 0.001
+ },
+ "safety": {
+  "reads_web": false,
+  "runs_code": false
+ },
+ "status": "trusted",
+ "origin": {
+  "by": "manual",
+  "note": "behaviour.py; from the first message of MIA (communicator.EMOTION_QUESTION); measured with the suite 'behaviour'"
+ }
+}

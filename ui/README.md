@@ -519,3 +519,11 @@ paragraph, and 11 texts with nothing checkable: opinions, questions, advice, hed
 - **Model-based extractor** (`extract.llm`, skill `extract_claims`, still a **draft**: not measured yet): the model gets the guide (`EXTRACTION_GUIDE`) and answers with structured claims; `code.anchor_claims`
   drops what has the wrong shape, keeps verbatim spans, snaps slightly reworded claims to their sentence and drops invented ones.
 - Tests: `tests/test_extraction.py` (34).
+
+## Core, phase 1c: the speech rules as detectors and signals
+
+- `behaviour.py`: five rules from the first message of MIA, each a deterministic detector with spans and (where certain) a repair: `speech.no_bold`, `speech.no_emphasis`, `speech.times_not_asterisk` (2*3 becomes "2 times 3"), `speech.sparing_actions` (at most 2 `*actions*`; the extra ones are cut), `speech.no_stage_directions` ("I smile." and "(smiles)"; brackets are cut, narration is only reported). Code spans and fences are exempt. Known limits (in the suite as `known_limit`): `__bold__` is not detected, a word like `*pointless*` counts as an action, "I wave goodbye when I leave." is flagged.
+- Library: the rules are nodes `rule.speech.*` (with a `rule` block: severity, wanted, bad/good examples; a test keeps them equal to the code), the node `code.apply_rules`, the pipeline `behaviour.speech` and the skill `check_speech`. `Library.rules()` lists them.
+- Signals: `RunLog.add_signal(run, rule, sign, node, detail)`, `signals_by_rule()` and the joined `"signals"` in `read()`. The chat only **logs** the hits of every answer (`web_app.run_chat_exchange`); the answer is not changed and nobody is scolded. Consequences (retry, lessons, selection) come later (BF3).
+- Evaluation: suite `behaviour` (67 texts, target `text_rules`): 67 of 67; every rule precision and recall 100 %, 32 of 32 clean texts left alone, repairs idempotent. Run: `python tools/eval.py run behaviour --no-save`.
+- Tests: `tests/test_behaviour.py` (24).

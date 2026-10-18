@@ -1,0 +1,81 @@
+{
+ "id": "rule.speech.no_stage_directions",
+ "version": 1,
+ "kind": "code",
+ "title": "Talk, do not narrate",
+ "description": "Behaviour rule speech.no_stage_directions: Do not describe what you are doing in the text: say the words, and use an *action* if it must be shown. Detector and repair in behaviour.py; a deterministic repair exists.",
+ "tags": [
+  "rule",
+  "speech",
+  "behaviour",
+  "exact"
+ ],
+ "applies_to": {
+  "tasks": [
+   "chat"
+  ]
+ },
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "text"
+   ],
+   "properties": {
+    "text": {
+     "type": "string"
+    }
+   }
+  }
+ },
+ "outputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "text",
+    "violations",
+    "remaining",
+    "fixed"
+   ]
+  }
+ },
+ "params": {
+  "rules": {
+   "default": [
+    "speech.no_stage_directions"
+   ],
+   "description": "the rule this node stands for"
+  },
+  "repair": {
+   "default": true
+  }
+ },
+ "body": {
+  "function": "apply_rules",
+  "plain": "checking the text: talk, do not narrate"
+ },
+ "rule": {
+  "severity": "warn",
+  "wanted": "Do not describe what you are doing in the text: say the words, and use an *action* if it must be shown.",
+  "bad": [
+   "I smile and say hello.",
+   "Hello! (smiles)"
+  ],
+  "good": [
+   "Hello!",
+   "*smiles* Hello!"
+  ]
+ },
+ "cost": {
+  "seconds": 0.001
+ },
+ "safety": {
+  "reads_web": false,
+  "runs_code": false
+ },
+ "status": "trusted",
+ "origin": {
+  "by": "manual",
+  "note": "behaviour.py; from the first message of MIA (communicator.EMOTION_QUESTION); measured with the suite 'behaviour'"
+ }
+}

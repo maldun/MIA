@@ -1,0 +1,66 @@
+{
+ "id": "code.apply_rules",
+ "version": 1,
+ "kind": "code",
+ "title": "Check a text against the behaviour rules and repair it",
+ "description": "All speech rules at once: finds the violations, repairs what code can repair with certainty (markup, 'times', brackets, surplus actions) and reports what remains. Answer: {text, violations, remaining, fixed}.",
+ "tags": [
+  "behaviour",
+  "speech",
+  "exact"
+ ],
+ "applies_to": {
+  "tasks": [
+   "chat"
+  ]
+ },
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "text"
+   ],
+   "properties": {
+    "text": {
+     "type": "string"
+    }
+   }
+  }
+ },
+ "outputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "text",
+    "violations",
+    "remaining",
+    "fixed"
+   ]
+  }
+ },
+ "params": {
+  "rules": {
+   "default": null,
+   "description": "names of the rules (None = all)"
+  },
+  "repair": {
+   "default": true
+  }
+ },
+ "body": {
+  "function": "apply_rules",
+  "plain": "checking the text against the speech rules"
+ },
+ "cost": {
+  "seconds": 0.002
+ },
+ "safety": {
+  "reads_web": false,
+  "runs_code": false
+ },
+ "status": "trusted",
+ "origin": {
+  "by": "manual",
+  "note": "behaviour.apply_rules"
+ }
+}

@@ -116,7 +116,7 @@ def breakdown(records, by="tags"):
 def extraction_metrics(records):
     """for the records that carry a `score` (extraction.score_extraction): micro precision and recall over all claims, F1, the cases that are perfect, and the problems counted by kind.
     Texts without any gold claim are 'empty' cases: a claim there is an invented claim."""
-    scored = [r for r in records if isinstance(r.get("score"), dict)]
+    scored = [r for r in records if isinstance(r.get("score"), dict) and "gold" in r["score"]]
     gold = sum(r["score"]["gold"] for r in scored)
     predicted = sum(r["score"]["predicted"] for r in scored)
     matched = sum(r["score"]["matched"] for r in scored)
@@ -128,6 +128,26 @@ def extraction_metrics(records):
             "f1": None if not p or not q else 2 * p * q / (p + q), "perfect": rate(sum(1 for r in scored if r["score"]["ok"]), len(scored)),
             "empty_cases": len(empty), "empty_clean": rate(sum(1 for r in empty if r["score"]["predicted"] == 0), len(empty)),
             "unanchored": rate(kinds["unanchored"], predicted), "problems": kinds}
+
+
+def rule_metrics(records):
+    """for the records that carry a rule `score` ({"expected": [rules], "found": [rules], "repair_ok", "idempotent", ...}): per rule how often it fired rightly (tp), wrongly (fp) or not when it should (fn),
+    the rate of false alarms on texts that are clean, and how good and how safe the repairs are"""
+    scored = [r for r in records if isinstance(r.get("score"), dict) and "found" in r["score"]]
+    table = {}
+    for r in scored:
+        expected, found = set(r["score"]["expected"]), set(r["score"]["found"])
+        for rule in expected | found:
+            row = table.setdefault(rule, {"tp": 0, "fp": 0, "fn": 0})
+            row["tp" if rule in expected and rule in found else "fp" if rule in found else "fn"] += 1
+    for row in table.values():
+        row["precision"] = rate(row["tp"], row["tp"] + row["fp"])
+        row["recall"] = rate(row["tp"], row["tp"] + row["fn"])
+    clean = [r for r in scored if not r["score"]["expected"]]
+    repairs = [r for r in scored if r["score"].get("repair_ok") is not None]
+    return {"texts": len(scored), "rules": dict(sorted(table.items())), "clean_texts": len(clean), "clean_ok": rate(sum(1 for r in clean if not r["score"]["found"]), len(clean)),
+            "repair_ok": rate(sum(1 for r in repairs if r["score"]["repair_ok"]), len(repairs)), "idempotent": rate(sum(1 for r in scored if r["score"].get("idempotent")), len(scored)),
+            "remaining_ok": rate(sum(1 for r in scored if r["score"].get("remaining_ok")), len(scored))}
 
 
 def cost(records):
