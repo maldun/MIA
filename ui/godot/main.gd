@@ -27,6 +27,7 @@ var bridge: HostBridge
 var backgrounds: BackgroundManager
 var preset_api: PresetApi
 var editor: ExpressionEditor
+var gesture_editor: GestureEditor
 var _bar: Control
 var _menu_root: Control
 var _expression_flow: HFlowContainer
@@ -226,6 +227,18 @@ func _build_panel() -> void:
 	layer.add_child(editor)
 	editor.setup(engine, preset_api)
 	editor.closed.connect(func(): _menu_root.visible = true)
+	gesture_editor = GestureEditor.new()
+	layer.add_child(gesture_editor)
+	gesture_editor.setup(engine, preset_api)
+	gesture_editor.closed.connect(func(): _menu_root.visible = true)
+	editor.gestures_requested.connect(open_gesture_editor)
+	gesture_editor.expressions_requested.connect(open_editor)
+	var gesture_editor_button := Button.new()
+	gesture_editor_button.text = "Gesture editor"
+	gesture_editor_button.name = "gesture_editor_button"
+	gesture_editor_button.custom_minimum_size = Vector2(0, 48)
+	gesture_editor_button.pressed.connect(open_gesture_editor)
+	_bar.add_child(gesture_editor_button)
 	var editor_button := Button.new()
 	editor_button.text = "Expression editor"
 	editor_button.name = "editor_button"
@@ -244,7 +257,9 @@ func _build_panel() -> void:
 	engine.gestures.gesture_started.connect(func(_n): _refresh_active())
 	engine.gestures.gesture_finished.connect(func(_n): _refresh_active())
 	_refresh_active()
-	if HostBridge.has_url_flag("editor"):
+	if HostBridge.has_url_flag("gestures"):
+		open_gesture_editor()
+	elif HostBridge.has_url_flag("editor"):
 		open_editor()
 
 ## the background row appears when there are pictures in the backgrounds folder
@@ -274,8 +289,19 @@ func _refresh_active() -> void:
 func open_editor() -> void:
 	if editor == null:
 		return
+	if gesture_editor != null and gesture_editor.visible:
+		gesture_editor.close()
 	_menu_root.visible = false
 	editor.open()
+
+## the gesture editor (menu button, ?gestures in the URL, or the "Gestures" button of the expression editor)
+func open_gesture_editor() -> void:
+	if gesture_editor == null:
+		return
+	if editor != null and editor.visible:
+		editor.close()
+	_menu_root.visible = false
+	gesture_editor.open()
 
 ## the presets from the server replace the bundled ones (an empty answer is ignored)
 func _on_server_presets(presets: Array) -> void:

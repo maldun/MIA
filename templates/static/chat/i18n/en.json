@@ -31,6 +31,7 @@
   "theme.dark": "Dark",
   "theme.light": "Light",
   "menu.editor": "Expression editor",
+  "menu.gesture_editor": "Gesture editor",
   "menu.about": "About",
   "about.title": "MIA",
   "about.text": "MIA is not an assistant. This chat page shows MIA and her 3D character. Everything runs on your own machine; the page loads nothing from the internet.",

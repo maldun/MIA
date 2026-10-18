@@ -65,12 +65,9 @@ static func arm_entry(params: Dictionary) -> Dictionary:
 static func torso_euler(torso: Dictionary) -> Vector3:
 	return Vector3(float(torso.get("torso_lean", 0.0)), float(torso.get("torso_turn", 0.0)), -float(torso.get("torso_side", 0.0)))
 
-## A gesture made of angles ({"name", "pose": {"R", "L", "torso"}, "reach", "hold", "expression", "description"}) as the gesture engine
-## plays it: the first key is the neutral pose (nothing set), the second the final pose after `reach`, held until reach + hold.
-static func gesture_from_pose(doc: Dictionary) -> Dictionary:
+## the final pose of a gesture document as one key of the gesture engine (without a time)
+static func final_key(doc: Dictionary) -> Dictionary:
 	var pose: Dictionary = doc.get("pose", {})
-	var reach := clampf(float(doc.get("reach", 0.6)), 0.05, 10.0)
-	var hold := clampf(float(doc.get("hold", 1.5)), 0.0, 20.0)
 	var final := {}
 	for side in ["R", "L"]:
 		if pose.has(side):
@@ -78,6 +75,14 @@ static func gesture_from_pose(doc: Dictionary) -> Dictionary:
 	if pose.has("torso"):
 		var e := torso_euler(pose["torso"])
 		final["torso"] = [e.x, e.y, e.z]
+	return final
+
+## A gesture made of angles ({"name", "pose": {"R", "L", "torso"}, "reach", "hold", "expression", "description"}) as the gesture engine
+## plays it: the first key is the neutral pose (nothing set), the second the final pose after `reach`, held until reach + hold.
+static func gesture_from_pose(doc: Dictionary) -> Dictionary:
+	var reach := clampf(float(doc.get("reach", 0.6)), 0.05, 10.0)
+	var hold := clampf(float(doc.get("hold", 1.5)), 0.0, 20.0)
+	var final := final_key(doc)
 	var first := {"t": 0.0}
 	var second := final.duplicate(true)
 	second["t"] = reach

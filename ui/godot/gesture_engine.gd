@@ -52,6 +52,8 @@ const FOLLOW_SPEED := 9.0
 var library := {}
 var library_order: Array[String] = []
 var current := ""
+## the documents (angles) of the gestures made in the editor, by name: the editor loads them back into its sliders
+var pose_docs := {}
 
 ## the torso of the gesture as euler degrees (pitch + forward, yaw + to the left, roll + to the right); the expression engine puts it on
 ## the spine bones (with the breathing). The arm directions are in the character's frame, not relative to the torso ("forward" is always
@@ -109,11 +111,54 @@ func set_pose_gestures(docs: Array) -> void:
 		if str(library[gesture_name].get("kind", "")) == "pose":
 			library.erase(gesture_name)
 			library_order.erase(gesture_name)
+	pose_docs.clear()
 	for doc in docs:
 		if typeof(doc) == TYPE_DICTIONARY and typeof(doc.get("name")) == TYPE_STRING and not library.has(doc["name"]):
 			library[doc["name"]] = PoseModel.gesture_from_pose(doc)
 			library_order.append(doc["name"])
+			pose_docs[doc["name"]] = doc
 	library_changed.emit()
+
+const PREVIEW := "_preview"
+const TRY := "_try"
+
+## Shows the final pose of a gesture document and keeps it (the editor calls it while a slider moves). No face, no sound, no end.
+func preview(doc: Dictionary) -> void:
+	var final := PoseModel.final_key(doc)
+	var first := final.duplicate(true)
+	first["t"] = 0.0
+	var second := final.duplicate(true)
+	second["t"] = 1.0e9
+	_gesture = {"name": PREVIEW, "duration": 2.0e9, "keys": [first, second]}
+	current = PREVIEW
+	_time = 0.0
+
+## Leaves the preview: the arms ease back to neutral.
+func end_preview() -> void:
+	if current == PREVIEW:
+		_gesture = {}
+		current = ""
+
+## Puts arms, fingers and torso at once to the neutral pose (no easing).
+func snap_to_base() -> void:
+	for side in ["R", "L"]:
+		for limb in LIMBS:
+			_dir[side][limb] = _base_dir(limb)
+			_palm[side][limb] = Vector3.ZERO
+		for finger in FINGERS:
+			_curl[side][finger] = _pose_curl(BASE_FINGERS, finger)
+	torso_euler = Vector3.ZERO
+	_apply()
+
+## Plays a gesture document once from the neutral pose, like it will be played later (with its face).
+func try_doc(doc: Dictionary) -> bool:
+	if PoseModel.final_key(doc).is_empty():
+		return false
+	end_preview()
+	_gesture = {}
+	snap_to_base()
+	library[TRY] = PoseModel.gesture_from_pose(doc)
+	return play(TRY)
 
 ## Starts a gesture; unknown names keep the current one running.
 func play(gesture_name: String) -> bool:

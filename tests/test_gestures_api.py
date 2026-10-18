@@ -48,6 +48,11 @@ class PoseModelTest(unittest.TestCase):
         self.assertEqual(d["timing"]["reach"]["default"], 0.6)
         json.dumps(d)
 
+    def test_the_copy_for_the_character_is_current(self):
+        """ui/godot/presets/pose_model.json is what the editor builds its sliders from: python tools/export_pose_model.py writes it"""
+        with open(os.path.join(SHIPPED, "pose_model.json"), encoding="utf-8") as fp:
+            self.assertEqual(json.load(fp), json.loads(json.dumps(self.pm.describe())))
+
     def test_only_what_is_given_is_kept(self):
         pose, corrections = self.pm.normalize_pose({"R": {"upper_raise": 90}})
         self.assertEqual(pose, {"R": {"upper_raise": 90.0}})

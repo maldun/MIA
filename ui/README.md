@@ -322,3 +322,17 @@ seconds, held for `hold` seconds, then the arms ease back. No keyframes to recor
   into the keys the engine plays (they can be played from the menu, by presets and by the page like the built in ones); finger curls in percent are supported by the engine too.
 - **Tests:** `python tests/test_gestures_api.py` (26), `godot --headless --path ui/godot --script res://tools/test_pose.gd` (48: the angle conversion, playing, torso, fingers, gestures coming and
   going), `ui/godot/tools/pose_sheet.gd` renders pose documents to pictures (front and side) for a visual check. The slider UI of the editor is the next step.
+
+### The gesture editor (step 2: the sliders)
+
+Open it from the chat page menu ("Gesture editor"), the character's Menu, the "Gestures" button of the expression editor, or with `/character/?gestures`.
+You set the angles of the **final pose**; the character moves there from the neutral pose in "reach" seconds, holds it for "hold" seconds and eases back.
+
+- **Arm** section: which arm the sliders show, and the **Mirror** switch (on by default: both arms get the same angles; off: each arm separately).
+  Turning Mirror on copies the shown arm to the other one. Arm angles: lift, direction, elbow bend, elbow turn.
+- **Hand and fingers**: palm turn, wrist, fingers as a name (relaxed, open, fist, point) or five percent sliders (custom).
+- **Torso**: lean, side, turn (shared by both sides). Legs and feet come later.
+- **Timing, face and name**: reach and hold seconds, the face (expression preset) that goes with it, name and description.
+- The pose is shown live while a slider moves. **Play** shows the whole motion from neutral (with the face); **Neutral** resets all angles.
+- Only angles that differ from neutral are stored. **Save as new**, **Overwrite**, **Rename** and **Delete** (press twice) work like in the expression editor and need the same token.
+- Test: `godot --headless --path ui/godot --script res://tools/test_gesture_editor.gd`.

@@ -31,6 +31,7 @@
   "theme.dark": "Dunkel",
   "theme.light": "Hell",
   "menu.editor": "Ausdruck-Editor",
+  "menu.gesture_editor": "Gesten-Editor",
   "menu.about": "Über",
   "about.title": "MIA",
   "about.text": "MIA is not an assistant. Diese Chat-Seite zeigt MIA und ihre 3D-Figur. Alles läuft auf deinem eigenen Rechner; die Seite lädt nichts aus dem Internet.",

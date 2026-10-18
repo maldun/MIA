@@ -1,0 +1,123 @@
+{
+ "sides": [
+  "R",
+  "L"
+ ],
+ "arm": [
+  {
+   "name": "upper_raise",
+   "group": "arm",
+   "label": "Raise arm",
+   "min": 0.0,
+   "max": 180.0,
+   "neutral": 22.0,
+   "description": "how far the upper arm is lifted away from the body: 0 hanging, 90 level, 180 straight up"
+  },
+  {
+   "name": "upper_direction",
+   "group": "arm",
+   "label": "Arm direction",
+   "min": -120.0,
+   "max": 180.0,
+   "neutral": 0.0,
+   "description": "where the lifted arm points: 0 sideways, 90 forward, 180 across the body, -90 backward"
+  },
+  {
+   "name": "elbow_bend",
+   "group": "arm",
+   "label": "Elbow bend",
+   "min": 0.0,
+   "max": 150.0,
+   "neutral": 9.0,
+   "description": "0 straight arm, 150 hand at the shoulder"
+  },
+  {
+   "name": "elbow_turn",
+   "group": "arm",
+   "label": "Elbow direction",
+   "min": -180.0,
+   "max": 180.0,
+   "neutral": 37.0,
+   "description": "the direction the forearm swings when the elbow bends: 0 forward, 90 inward, -90 outward, 180 backward"
+  },
+  {
+   "name": "hand_turn",
+   "group": "hand",
+   "label": "Palm turn",
+   "min": -180.0,
+   "max": 180.0,
+   "neutral": 0.0,
+   "description": "turns the palm around the forearm: 0 towards the body, 90 forward, -90 backward, 180 away from the body"
+  },
+  {
+   "name": "wrist",
+   "group": "hand",
+   "label": "Wrist",
+   "min": -70.0,
+   "max": 70.0,
+   "neutral": 0.0,
+   "description": "bends the hand: positive towards the palm, negative towards the back of the hand"
+  }
+ ],
+ "torso": [
+  {
+   "name": "torso_lean",
+   "group": "torso",
+   "label": "Lean",
+   "min": -30.0,
+   "max": 30.0,
+   "neutral": 0.0,
+   "description": "positive leans forward, negative backward"
+  },
+  {
+   "name": "torso_side",
+   "group": "torso",
+   "label": "Tilt sideways",
+   "min": -25.0,
+   "max": 25.0,
+   "neutral": 0.0,
+   "description": "positive to the character's left, negative to the right"
+  },
+  {
+   "name": "torso_turn",
+   "group": "torso",
+   "label": "Turn",
+   "min": -40.0,
+   "max": 40.0,
+   "neutral": 0.0,
+   "description": "positive turns to the character's left, negative to the right"
+  }
+ ],
+ "fingers": {
+  "names": [
+   "relaxed",
+   "open",
+   "fist",
+   "point"
+  ],
+  "keys": [
+   "thumb",
+   "index",
+   "middle",
+   "ring",
+   "little"
+  ],
+  "min": 0,
+  "max": 100,
+  "neutral": "relaxed"
+ },
+ "timing": {
+  "reach": {
+   "min": 0.2,
+   "max": 3.0,
+   "default": 0.6,
+   "description": "seconds from the neutral pose to the final pose"
+  },
+  "hold": {
+   "min": 0.0,
+   "max": 8.0,
+   "default": 1.5,
+   "description": "seconds the final pose is held before the arms ease back"
+  }
+ }
+}

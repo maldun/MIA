@@ -6,6 +6,8 @@ extends PanelContainer
 ## Made for touch: large sliders, a panel at the right (wide screens) or a bottom sheet (phones), closable.
 
 signal closed
+## the "Gestures" button: the page switches to the gesture editor
+signal gestures_requested
 
 const CATEGORY_TITLES := {"eyes": "Eyes", "brows": "Brows", "mouth": "Mouth", "other": "Other (teeth, whole face)"}
 const BONES := ["head_pitch", "head_yaw", "head_roll", "eye_pitch", "eye_yaw"]
@@ -119,6 +121,7 @@ func _build() -> void:
 	title.text = "Expression editor"
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header.add_child(title)
+	header.add_child(_button("Gestures", func(): gestures_requested.emit(), "gestures_button"))
 	header.add_child(_button("Close", close, "close_button"))
 
 	var picker := HBoxContainer.new()
@@ -606,6 +609,8 @@ func _disarm_delete() -> void:
 		_delete_button.text = "Delete"
 
 func _on_operation_done(kind: String, ok: bool, message: String, data: Dictionary) -> void:
+	if kind.begins_with("gesture_"):
+		return   # the gesture editor handles these
 	_set_status(message, not ok)
 	_token_row.visible = api.token_required
 	if not ok:
