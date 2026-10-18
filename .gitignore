@@ -4,3 +4,6 @@ __pycache__/
 
 # rendered lines of MIA voice (one file per line, removed after a while)
 templates/audio/line-*.wav
+
+# SearXNG settings with the generated secret key
+tools/searxng/settings.local.yml

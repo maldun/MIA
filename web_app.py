@@ -48,7 +48,9 @@ from .moods import MoodTracker
 from .speech_text import speech_text
 from .audio_router import AudioRouter
 from .core import Core
+from .pipeline import Tool
 from .pipeline_model import OllamaModel
+from .web_tools import build_web_tools
 from . import tailscale_serve
 FPATH = os.path.split(__file__)[0]
 cfg_file = os.path.join(FPATH,CFG_FILE)
@@ -480,8 +482,10 @@ mood = MoodTracker(_own_path(CONST.MOODS_FILE_KEY, CONST.DEFAULT_MOODS_FILE),
 # the tasks of MIA as skills with pipelines (ui/REQUIREMENTS_CORE.md); the chat is the first one
 pipeline_model = OllamaModel(comm.client, lambda profile: getattr(comm, "_profiles", {}).get(profile),
                              lambda: (comm.version, comm.llm_options), keep_alive=comm.keep_alive)
+_runs_dir = _own_path(CONST.RUNS_DIR_KEY, CONST.DEFAULT_RUNS_DIR)
+_web_tools, _, _ = build_web_tools(cfg, _runs_dir)          # search (SearXNG, DuckDuckGo as fallback) and page fetcher with the safety rules
 core = Core(_own_path(CONST.SKILLS_DIR_KEY, CONST.DEFAULT_SKILLS_DIR), _own_path(CONST.PIPELINES_DIR_KEY, CONST.DEFAULT_PIPELINES_DIR),
-            _own_path(CONST.RUNS_DIR_KEY, CONST.DEFAULT_RUNS_DIR), model=pipeline_model)
+            _runs_dir, model=pipeline_model, tools={name: Tool(*pair) for name, pair in _web_tools.items()})
 for _name, _problems in core.check(functions={"converse": None}).items():
     logger.warning("skill %s: %s", _name, "; ".join(_problems))
 

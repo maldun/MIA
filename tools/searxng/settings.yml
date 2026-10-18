@@ -1,0 +1,20 @@
+# SearXNG for MIA: a private meta search engine on this machine only (127.0.0.1:8888, see tools/searxng/run.sh).
+# __SECRET__ is replaced by run.sh with a random key and written to settings.local.yml (which is not committed).
+use_default_settings: true
+
+server:
+  secret_key: "__SECRET__"
+  limiter: false            # only MIA talks to it; the bot limiter would block her
+  image_proxy: false
+  bind_address: "0.0.0.0"   # inside the container; run.sh publishes the port on 127.0.0.1 only
+  port: 8080
+
+search:
+  safe_search: 1
+  autocomplete: ""
+  formats:
+    - html
+    - json                  # MIA reads the results as JSON
+
+ui:
+  static_use_hash: true
