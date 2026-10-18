@@ -1,0 +1,16 @@
+{
+ "id": "check.injection_signals",
+ "version": 1,
+ "kind": "code",
+ "title": "Phrases that look like instructions to a model",
+ "description": "Finds phrases such as 'ignore previous instructions' in web text. A hint for the log and the status block, not a protection: the protection is narrow tools and schemas in the stages that read the web.",
+ "tags": ["check", "web", "safety", "exact"],
+ "applies_to": {"tasks": ["research"]},
+ "inputs": {"schema": {"type": "object", "required": ["text"], "properties": {"text": {"type": "string"}}}},
+ "outputs": {"schema": {"type": "array", "items": {"type": "string"}}},
+ "body": {"function": "injection_signals", "plain": "checking the page for instructions aimed at models"},
+ "cost": {"seconds": 0.001},
+ "safety": {"reads_web": false, "runs_code": false},
+ "status": "trusted",
+ "origin": {"by": "manual", "note": "web_tools.injection_signals"}
+}

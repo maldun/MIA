@@ -1,0 +1,25 @@
+{
+ "id": "view.summarize",
+ "version": 1,
+ "kind": "model",
+ "title": "Summarize a text",
+ "description": "Faithful summary in the language of the text with up to five key points. Structured answer (constrained JSON).",
+ "tags": ["summarize", "view", "structured"],
+ "applies_to": {"tasks": ["summarize"]},
+ "inputs": {"schema": {"type": "object", "required": ["text", "sentences"],
+                       "properties": {"text": {"type": "string"}, "sentences": {"type": "integer"}}}},
+ "outputs": {"schema": {"type": "object", "required": ["summary", "key_points"]}},
+ "body": {
+  "system": "You summarize texts faithfully. You never add facts that are not in the text.",
+  "template": "Summarize the following text in at most {{sentences}} sentences, in the language of the text, and list up to 5 key points.\n\nText:\n{{text}}",
+  "schema": {"type": "object", "required": ["summary", "key_points"],
+             "properties": {"summary": {"type": "string", "minLength": 1, "maxLength": 1500},
+                            "key_points": {"type": "array", "maxItems": 5, "items": {"type": "string", "maxLength": 300}}}},
+  "retries": 1,
+  "plain": "summarizing the text"
+ },
+ "cost": {"seconds": 5},
+ "safety": {"reads_web": false, "runs_code": false},
+ "status": "tested",
+ "origin": {"by": "manual", "note": "tried by hand with gemma4:12b (about 5 s); no harness measurements yet"}
+}

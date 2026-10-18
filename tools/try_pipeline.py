@@ -23,6 +23,7 @@ sys.path.insert(0, _LINK_DIR)
 
 from ollama import Client  # noqa: E402
 from MIA.core import Core  # noqa: E402
+from MIA.library import Library  # noqa: E402
 from MIA.pipeline import PipelineError  # noqa: E402
 from MIA.pipeline_model import OllamaModel  # noqa: E402
 
@@ -52,8 +53,10 @@ def main():
     current = profiles["light"] if cfg.get("default_profile") == "light" and cfg.get("version_light") else profiles["full"]
     client = Client(host=f"http://{cfg.get('address', 'localhost')}:{cfg.get('port', 11434)}")
     model = OllamaModel(client, lambda p: profiles.get(p) if profiles.get(p, (None,))[0] else None, lambda: current, keep_alive=cfg.get("keep_alive"))
-    core = Core(os.path.join(REPO, cfg.get("skills_dir", "skills")), os.path.join(REPO, cfg.get("pipelines_dir", "pipelines")),
-                args.runs or tempfile.mkdtemp(), model=model, functions={"converse": None})
+    work = tempfile.mkdtemp()
+    library = Library(os.path.join(REPO, cfg.get("library_dir", "library")), os.path.join(REPO, cfg.get("user_library_dir", "data/library")),
+                      os.path.join(work, "library.sqlite"))
+    core = Core(os.path.join(REPO, cfg.get("skills_dir", "skills")), library, args.runs or work, model=model, functions={"converse": None})
     problems = core.check()
     for name, found in problems.items():
         print("PROBLEM %s: %s" % (name, "; ".join(found)))

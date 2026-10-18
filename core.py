@@ -1,46 +1,62 @@
 """
-The core of MIA's tasks (ui/REQUIREMENTS_CORE.md): skills (skills/*.md), their pipelines (pipelines/*.json), the runner and the run log together.
-`Core.run("research", {"text": ...})` loads the skill and its pipeline (changed files are reloaded), validates them, runs the pipeline and logs the run.
+The core of MIA's tasks (ui/REQUIREMENTS_CORE.md): skills (skills/*.md), the library of nodes and pipelines (library.py), the runner and the run log together.
+`Core.run("research", {"text": ...})` loads the skill, takes its pipeline from the library (the highest tested or trusted version, or the one the skill pins as "id@version"),
+expands it into the graph of the runner, checks that the skill may use what the pipeline needs (web access, code), runs it and logs the run with the library entries it used.
 """
-import json
-import os
-
 try:
-    from .pipeline import PipelineError, Runner, validate_pipeline
+    from .library import LibraryError
+    from .pipeline import PipelineError, Runner, Tool, validate_pipeline
     from .run_log import RunLog
     from .skill_store import SkillStore
 except ImportError:  # used as plain script / in tests
-    from pipeline import PipelineError, Runner, validate_pipeline
+    from library import LibraryError
+    from pipeline import PipelineError, Runner, Tool, validate_pipeline
     from run_log import RunLog
     from skill_store import SkillStore
 
 
 class Core:
-    def __init__(self, skills_dir, pipelines_dir, runs_dir, model=None, tools=None, functions=None, rng=None):
+    def __init__(self, skills_dir, library, runs_dir, model=None, tools=None, functions=None, rng=None):
         self.skills = SkillStore(skills_dir)
-        self.pipelines_dir = pipelines_dir
+        self.library = library
         self.run_log = RunLog(runs_dir)
+        tools = dict(tools or {})
+        tools.setdefault("library_select", Tool(self._select, None))
+        tools.setdefault("library_describe", Tool(self._describe, None))
         self.runner = Runner(model=model, tools=tools, functions=functions, run_log=self.run_log, rng=rng)
 
-    def pipeline(self, name):
-        path = os.path.join(self.pipelines_dir, name + ".json")
+    # -- the library as tools for planning steps (reading only; new entries are drafts made by people or on request) --
+    def _select(self, entry_type="pipeline", tags=(), applies_to=None, max_seconds=None, task=None):
+        return self.library.select(entry_type, tags=tags, applies_to=applies_to, max_seconds=max_seconds, task=task, tools=self.runner.tools)
+
+    def _describe(self, ref, entry_type="pipeline"):
+        entry = self.library.resolve(ref, entry_type, allow_draft=True)
+        return {k: v for k, v in entry.items() if not k.startswith("_")}
+
+    def graph(self, skill):
+        """(graph, uses, safety) of the pipeline the skill names; raises PipelineError"""
         try:
-            with open(path, encoding="utf-8") as fp:
-                return json.load(fp)
-        except OSError:
-            raise PipelineError("there is no pipeline file %s" % path)
-        except ValueError as exc:
-            raise PipelineError("%s is not valid JSON (%s)" % (path, exc))
+            entry = self.library.resolve(skill["pipeline"], "pipeline")
+            graph, uses, safety = self.library.expand(entry)
+        except LibraryError as exc:
+            raise PipelineError(str(exc))
+        allowed = skill.get("max_safety") or {}
+        for flag, needed in safety.items():
+            if needed and not allowed.get(flag):
+                raise PipelineError("the pipeline '%s' needs '%s', which the skill '%s' does not allow (max_safety)" % (skill["pipeline"], flag, skill["name"]))
+        return graph, uses, safety
 
     def check(self, functions=None):
         """the problems of every skill with its pipeline: {skill name: [problems]} (skills without problems are left out); file errors under their path"""
         self.skills.reload()
         found = {path: [message] for path, message in self.skills.errors.items()}
+        found.update({path: [message] for path, message in self.library.errors.items()})
         all_functions = {**self.runner.functions, **(functions or {})}
         for name in self.skills.names():
             skill = self.skills.skills[name]
             try:
-                problems = validate_pipeline(self.pipeline(skill["pipeline"]), tools=self.runner.tools, functions=all_functions, skill=skill)
+                graph = self.graph(skill)[0]
+                problems = validate_pipeline(graph, tools=self.runner.tools, functions=all_functions, skill=skill)
             except PipelineError as exc:
                 problems = [str(exc)]
             if problems:
@@ -51,4 +67,5 @@ class Core:
         skill = self.skills.get(task)
         if skill is None:
             raise PipelineError("there is no skill '%s'" % task)
-        return self.runner.run(skill, self.pipeline(skill["pipeline"]), inputs, task=task, **kwargs)
+        graph = self.graph(skill)[0]
+        return self.runner.run(skill, graph, inputs, task=task, **kwargs)

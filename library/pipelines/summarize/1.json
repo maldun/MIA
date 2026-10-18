@@ -1,0 +1,17 @@
+{
+ "id": "summarize",
+ "version": 1,
+ "title": "Summarize a text",
+ "description": "One model step with a structured answer (summary and key points).",
+ "goal": "short faithful summary",
+ "tags": ["summarize"],
+ "applies_to": {"tasks": ["summarize"]},
+ "cost_class": "cheap",
+ "result": "answer",
+ "nodes": [
+  {"id": "summarize", "use": "view.summarize@1", "wire": {"text": "$input.text", "sentences": "$input.sentences"}, "output": "answer",
+   "plain": "summarizing the text in {{input.sentences}} sentences"}
+ ],
+ "status": "tested",
+ "origin": {"by": "manual", "note": "no harness measurements yet"}
+}

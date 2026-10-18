@@ -188,7 +188,9 @@ def validate_pipeline(graph, tools=None, functions=None, skill=None):
             if node.get("on_error", "fail") not in ON_ERROR:
                 problems.append("%s: on_error must be one of %s" % (label, ", ".join(ON_ERROR)))
             if kind == "model":
-                if skill is not None:
+                if node.get("template"):
+                    pass                                                  # prompt and schema come with the node (library entries)
+                elif skill is not None:
                     if node.get("prompt") not in skill["prompts"]:
                         problems.append("%s: the skill has no prompt '%s'" % (label, node.get("prompt")))
                     if node.get("schema") is not None and node["schema"] not in skill["schemas"]:
@@ -281,7 +283,8 @@ class Runner:
         run = None
         if self.run_log is not None:
             model = (skill["model"] or {}).get("name") or (skill["model"] or {}).get("profile")
-            run = self.run_log.start(task or skill["name"], skill["name"], skill["version"], graph.get("name"), graph.get("version"), model, inputs)
+            run = self.run_log.start(task or skill["name"], skill["name"], skill["version"], graph.get("name"), graph.get("version"), model, inputs,
+                                     uses=graph.get("uses"))
         ctx = {"input": inputs}
         st = _State(self, skill, graph, ctx, on_event, should_stop, ask, run, all_functions, all_tools)
         self._emit(st, "run_start", None, plain=skill.get("description", skill["name"]),
@@ -329,7 +332,7 @@ class Runner:
         if text and len(text) > MAX_PLAIN:
             text = text[:MAX_PLAIN - 1] + "…"                 # the status line shows what happens, not whole documents
         event = {"run": st.run.id if st.run else None, "seq": seq, "node": node["id"] if node else None,
-                 "node_kind": node["kind"] if node else None, "kind": kind, "item": item,
+                 "node_kind": node["kind"] if node else None, "library": node.get("library") if node else None, "kind": kind, "item": item,
                  "at": round(self.clock() - st.t0, 3), "playful": self._playful(st, node) if node and kind == "start" else "",
                  "plain": text or "", "payload": payload or {}}
         if st.run is not None:
@@ -434,13 +437,19 @@ class Runner:
     def _do_model(self, st, node, ctx, item):
         skill = st.skill
         variables = {**ctx, **resolve(node.get("inputs", {}), ctx)}
-        prompt = render(skill["prompts"][node["prompt"]], variables)
-        example = skill["examples"].get(node["prompt"])
-        if example:
-            prompt += "\n\nExamples:\n" + render(example, variables, strict=False)
-        messages = ([{"role": "system", "content": render(skill["prompts"]["system"], variables, strict=False)}] if "system" in skill["prompts"] else [])
+        if node.get("template"):
+            prompt = render(node["template"], variables)
+            system = node.get("system")
+            schema = node.get("schema_def")
+        else:
+            prompt = render(skill["prompts"][node["prompt"]], variables)
+            example = skill["examples"].get(node["prompt"])
+            if example:
+                prompt += "\n\nExamples:\n" + render(example, variables, strict=False)
+            system = skill["prompts"].get("system")
+            schema = skill["schemas"].get(node["schema"]) if node.get("schema") else None
+        messages = [{"role": "system", "content": render(system, variables, strict=False)}] if system else []
         messages.append({"role": "user", "content": prompt})
-        schema = skill["schemas"].get(node["schema"]) if node.get("schema") else None
         settings = skill["model"] or {}
         for attempt in range(int(node.get("retries", 1)) + 1):
             reply = self.model.chat(messages, schema=schema, model=settings.get("name"), profile=settings.get("profile"), options=settings.get("options"))

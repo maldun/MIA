@@ -1,0 +1,18 @@
+{
+ "id": "tool.web_search",
+ "version": 1,
+ "kind": "tool",
+ "title": "Web search",
+ "description": "Searches with SearXNG, falls back to DuckDuckGo. Returns the backend that answered, the results (title, url, snippet) and what failed. Nothing found is an answer, not an error. Every query is written to the web log.",
+ "tags": ["web", "search", "tool"],
+ "applies_to": {"tasks": ["research"]},
+ "inputs": {"schema": {"type": "object", "required": ["query"],
+                       "properties": {"query": {"type": "string"}, "count": {"type": "integer"}, "language": {"type": "string"}, "time_range": {"type": "string"}}}},
+ "outputs": {"schema": {"type": "object", "required": ["results"]}},
+ "body": {"tool": "web_search", "plain": "searching the web"},
+ "needs": {"tools": ["web_search"]},
+ "cost": {"seconds": 3, "calls": {"search_calls": 1}},
+ "safety": {"reads_web": true, "runs_code": false},
+ "status": "trusted",
+ "origin": {"by": "manual", "note": "web_tools.py, tested without network and tried live"}
+}

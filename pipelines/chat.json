@@ -1,8 +1,0 @@
-{
-  "name": "chat",
-  "version": 1,
-  "result": "answer",
-  "nodes": [
-    {"id": "converse", "kind": "code", "function": "converse", "args": {"text": "$input.text"}, "output": "answer", "plain": "MIA answers"}
-  ]
-}

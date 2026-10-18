@@ -62,11 +62,11 @@ class RunLog:
         with self._lock, open(self._file(), "a", encoding="utf-8") as fp:
             fp.write(line + "\n")
 
-    def start(self, task, skill=None, skill_version=None, pipeline=None, pipeline_version=None, model=None, input=None):
+    def start(self, task, skill=None, skill_version=None, pipeline=None, pipeline_version=None, model=None, input=None, uses=None):
         now = self._clock()
         record = {"kind": "run", "id": "r-%s-%s" % (time.strftime("%Y%m%d%H%M%S", time.gmtime(now)), secrets.token_hex(2)),
                   "created": utc_stamp(now), "task": task, "skill": skill, "skill_version": skill_version,
-                  "pipeline": pipeline, "pipeline_version": pipeline_version, "model": model, "input": _clip(input), "events": []}
+                  "pipeline": pipeline, "pipeline_version": pipeline_version, "uses": list(uses or []), "model": model, "input": _clip(input), "events": []}
         return Run(self, record)
 
     def add_feedback(self, run_id, kind, value=None, note=""):

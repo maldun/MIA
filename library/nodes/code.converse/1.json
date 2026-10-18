@@ -1,0 +1,15 @@
+{
+ "id": "code.converse",
+ "version": 1,
+ "kind": "code",
+ "title": "MIA answers",
+ "description": "The exchange with MIA as it has always worked: the model answers (streamed), the character reacts to the emotions, the voice streams along. The function is given to the run by the chat service because it needs the callbacks of the page.",
+ "tags": ["chat", "conversation", "streaming"],
+ "applies_to": {"tasks": ["chat"]},
+ "inputs": {"schema": {"type": "object", "required": ["text"], "properties": {"text": {"type": "string"}}}},
+ "outputs": {"schema": {"type": "string"}},
+ "body": {"function": "converse", "plain": "MIA answers"},
+ "safety": {"reads_web": false, "runs_code": false},
+ "status": "trusted",
+ "origin": {"by": "manual", "note": "ported from the chat on the pipeline runner (core phase 1)"}
+}

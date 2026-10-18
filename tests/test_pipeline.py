@@ -16,6 +16,7 @@ sys.path.insert(0, REPO)
 
 import schema_check                                   # noqa: E402
 from core import Core                                 # noqa: E402
+from library import Library                           # noqa: E402
 from pipeline import (BudgetExceeded, PipelineError, Runner, Tool, lookup, render, resolve, test_condition,  # noqa: E402
                       validate_pipeline)
 from pipeline_model import OllamaModel                # noqa: E402
@@ -357,7 +358,7 @@ class RunnerTests(unittest.TestCase):
 
 class CoreTests(unittest.TestCase):
     def core(self, **kwargs):
-        return Core(os.path.join(REPO, "skills"), os.path.join(REPO, "pipelines"), tempfile.mkdtemp(), **kwargs)
+        return Core(os.path.join(REPO, "skills"), Library(os.path.join(REPO, "library")), tempfile.mkdtemp(), **kwargs)
 
     def test_the_shipped_skills_are_valid(self):
         core = self.core(functions={"converse": lambda text: text})

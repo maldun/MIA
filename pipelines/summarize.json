@@ -1,9 +1,0 @@
-{
-  "name": "summarize",
-  "version": 1,
-  "result": "answer",
-  "nodes": [
-    {"id": "summarize", "kind": "model", "prompt": "summarize", "schema": "summary", "output": "answer", "retries": 1,
-     "plain": "summarizing the text in {{input.sentences}} sentences"}
-  ]
-}

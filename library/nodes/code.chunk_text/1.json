@@ -1,0 +1,16 @@
+{
+ "id": "code.chunk_text",
+ "version": 1,
+ "kind": "code",
+ "title": "Cut a long text into chunks",
+ "description": "Pieces of about `size` characters that end at paragraph or sentence breaks where possible, with a little overlap. Long pages are never pushed whole into the model.",
+ "tags": ["text", "chunk", "exact"],
+ "inputs": {"schema": {"type": "object", "required": ["text"], "properties": {"text": {"type": "string"}}}},
+ "outputs": {"schema": {"type": "array", "items": {"type": "string"}}},
+ "params": {"size": {"default": 1500, "description": "characters per chunk"}, "overlap": {"default": 150, "description": "characters shared with the next chunk"}},
+ "body": {"function": "chunk_text", "plain": "cutting the text into pieces"},
+ "cost": {"seconds": 0.01},
+ "safety": {"reads_web": false, "runs_code": false},
+ "status": "trusted",
+ "origin": {"by": "manual", "note": "web_tools.chunk_text"}
+}

@@ -343,13 +343,13 @@ The plan is in `REQUIREMENTS_CORE.md`. Phase 1 is the foundation; the chat now r
 
 - `skills/*.md`: one file per task (front matter: name, version, model profile, pipeline, tools, budget, `status_block`; sections `prompts`, `schemas`, `lines`, `examples`).
   Changed files are reloaded, a broken file is only logged. Shipped: `chat`, `summarize` (a small example that uses the model).
-- `pipelines/*.json`: the steps of a skill as a tree of nodes (`model`, `tool`, `code`, `map`, `branch`, `loop`, `ask_user`) with references (`$name.field`), conditions
+- Pipelines (since phase 1b entries of the library, see below): the steps of a skill as a tree of nodes (`model`, `tool`, `code`, `map`, `branch`, `loop`, `ask_user`) with references (`$name.field`), conditions
   without code, retries for answers that do not fit their schema, and budgets (steps, seconds, calls per tool). The format is documented at the top of `pipeline.py`.
 - `pipeline.py` (runner), `skill_store.py`, `schema_check.py`, `pipeline_model.py` (Ollama behind the interface of the runner), `core.py` (all together).
 - `run_log.py`: every run is one JSON line in `data/runs/runs-YYYY-MM.jsonl` (input, events with timings, result) and feedback lines that refer to a run.
 - The status block: skills with `status_block: true` show their steps under the answer, open while MIA works and as one quiet line afterwards ("Boiling it down… (summarizing
   the text in 2 sentences)": playful line from the skill, accurate description in brackets). The steps are also kept in the chat log. `chat` has no block.
-- Config keys (all optional): `skills_dir`, `pipelines_dir`, `runs_dir`.
+- Config keys (all optional): `skills_dir`, `library_dir`, `runs_dir` (and see the library section).
 - Try a skill with the real model: `python tools/try_pipeline.py summarize "text ..."`, check all skills: `python tools/try_pipeline.py --check`.
 - Tests: `tests/test_pipeline.py` (runner, skills, log, model adapter), `tests/js/pipeline.test.mjs` (status block), two new tests in `tests/test_chat_backend.py`.
 
@@ -377,3 +377,26 @@ The plan is in `REQUIREMENTS_CORE.md`. Phase 1 is the foundation; the chat now r
 - Tests: `tests/test_web_tools.py` (no network; fakes for sessions and name resolution).
 - A limit worth knowing: the check of the connected address uses the socket of the connection when the library gives it, and the name is resolved by the system a second time when
   the connection is made. A name that changes its address between the two lookups is therefore caught by the connected-address check, not by the first one.
+
+## Core, phase 1b: the library of nodes and pipelines
+
+The design is in `REQUIREMENTS_CORE.md` section 4a. Nodes (reusable steps: checks, model views, tools, code) and pipelines (graphs that wire nodes by reference) are versioned
+files; a skill names a pipeline, and the old `pipelines/` folder is gone.
+
+- Files: `library/nodes/<id>/<version>.json` and `library/pipelines/<id>/<version>.json` are shipped (reviewed with git); `data/library/` has the same structure for entries of the user and
+  of models, and `status.json` with the decisions about status. A version is immutable: a changed entry is a new version. The index `data/library.sqlite` (entries, dependencies,
+  statistics, cases) is rebuilt from the files at start and can be deleted.
+- A pipeline node is `{"id": "q", "use": "check.quote@1", "wire": {"quote": "$input.q"}, "params": {...}, "output": "v"}`. The version must be pinned. `wire` must match the declared inputs,
+  `params` the declared parameters (defaults apply); wrong wiring is reported when the library loads, a broken pipeline is skipped, not fatal. The safety flags (`reads_web`, `runs_code`) of
+  the nodes add up for the pipeline, and the skill must allow them (`max_safety: {reads_web: true}` in its front matter), otherwise the run is refused.
+- A skill's `pipeline: summarize` takes the highest version that is `tested` or `trusted`; `summarize@2` pins one (a draft may be pinned for trying it). Statuses: draft, tested, trusted, retired;
+  `promote` records your decision in `status.json`, shipped files never change.
+- `select` answers which entries fit a task (tags, what they apply to, time and token budget, tools and sandbox available, web/code allowed) with the reasons for each choice and each drop;
+  ranking uses specificity, status and the measured results from the run log (from 3 runs on). Planning steps can call it as the tools `library_select` and `library_describe`
+  (a skill lists them under `tools:`). Cases (a claim, what was applied, the verdict, the outcome) can be stored and found by common tags.
+- Models can only add **drafts** (`Library.add_draft`), never trusted entries; script nodes cannot run yet (the sandbox is not built).
+- First entries: the pipelines `chat` and `summarize`; the nodes `code.converse`, `view.summarize`, `tool.web_search`, `tool.fetch_page`, `code.chunk_text`, `code.untrusted_wrap`,
+  `check.injection_signals`. The runs record the library entries they used (`uses` in the run log, `library` in the events).
+- Config keys (optional): `library_dir`, `user_library_dir`, `library_index`.
+- Tool: `python tools/library.py list | search | show | validate | reindex | stats | select | promote | diff | used-by` (see its help).
+- Tests: `tests/test_library.py` (34 tests: validation, file rules, wiring, versions, status, index, selection, statistics from real runs, cases, drafts, safety).
