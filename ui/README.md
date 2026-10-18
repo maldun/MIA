@@ -203,3 +203,20 @@ The page now uses the `chat_*` events of C2 (the C1 bubbles and the old `answer`
 - **Tests:** `node --test "tests/js/*.test.mjs"` (16), and the browser check `ui/tools/chat_stub_server.py` + `ui/tools/chat_e2e.js` (history, paging,
   streaming, mood changes, palette, stop, error; see the header of the stub server).
 - **Still old:** the server still emits `answer` and writes `answer.html` for the old page, and still handles the old `message` event; both go in C5.
+
+## Chat page, phase C4 (character integration)
+
+- **Free-area framing:** the page tells the character how much of the window the chat covers
+  (`{"type": "viewport_inset", "left", "right", "top", "bottom", "width", "height"}` in pixels, sent at most once per frame, also while the panel is
+  dragged or the sheet snaps). `main.gd` eases the camera so the character appears in the middle of the free area (side panel: left of it; bottom
+  sheet: above it) and keeps the figure inside the free height. Insets are clamped to 90% of the window; a message without a window size or with
+  non-numbers is refused. Collapsing the chat gives the whole window back.
+- **View and background:** new bridge message `{"type": "view", "name": "body|bust|face"}`. The menu of the page has a camera row and (when there are pictures in the
+  backgrounds folder) a background list; both are remembered per device and sent again when the character has loaded.
+- **Caption mode:** with the chat collapsed, MIA's current answer appears as a caption at the bottom of the character area (plain text, the end of a long
+  answer) and fades out a few seconds after she has finished (longer for longer text). Her own messages (time check) appear too.
+- **Optional character:** without WebGL, or when the character does not report `ready` within 30 seconds, the page removes the iframe, shows a small notice and
+  the chat keeps working.
+- **Tests:** `godot --headless --path ui/godot --script res://tools/test_bridge.gd` (26 checks: the projected position of the character is
+  checked for a side panel, a bottom sheet and no inset), `node --test "tests/js/*.test.mjs"` (22 checks incl. inset and caption text).
+  Rebuild the web export with `ui/tools/build_web.sh` after pulling this phase (the Godot code changed).

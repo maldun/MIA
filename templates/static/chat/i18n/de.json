@@ -63,5 +63,12 @@
   "banner.offline": "Verbindung verloren. Versuche neu zu verbinden ...",
   "banner.reconnecting": "Verbinde neu ...",
   "chip.light": "leicht",
-  "chip.full": "voll"
+  "chip.full": "voll",
+  "character.unavailable": "Der 3D-Charakter konnte nicht geladen werden. Der Chat funktioniert auch ohne.",
+  "menu.view": "Kamera",
+  "view.body": "Körper",
+  "view.bust": "Büste",
+  "view.face": "Gesicht",
+  "menu.background": "Hintergrund",
+  "background.none": "Keiner"
 }

@@ -15,6 +15,8 @@ var yaw := 0.0
 var pitch := deg_to_rad(4.0)
 var distance := 3.8
 var _pivot_goal := pivot
+var _inset := Vector4.ZERO  # left, right, top, bottom: fractions of the window the page covers (chat panel); eased
+var _inset_goal := Vector4.ZERO
 var _distance_goal := distance
 var _touches := {}
 var _pinch_start := 0.0
@@ -92,6 +94,8 @@ func _setup_expressions() -> void:
 	bridge = HostBridge.new()
 	add_child(bridge)
 	bridge.setup(engine, backgrounds)  # commands from the page around us (MIA's chat page)
+	bridge.inset_changed.connect(set_inset)
+	bridge.view_requested.connect(show_view)
 
 # --- camera ---------------------------------------------------------------------------------
 
@@ -115,6 +119,11 @@ func show_view(view: String) -> void:
 			_pivot_goal = Vector3(0, head_height * 0.55, 0)
 			_distance_goal = 3.8
 
+## The page covers part of the window (chat panel, bottom sheet): the camera centers the character in the free area
+## and keeps it inside the free height. Fractions of the window; eased like the views.
+func set_inset(left: float, right: float, top: float, bottom: float) -> void:
+	_inset_goal = Vector4(left, right, top, bottom)
+
 ## Sets the camera right away (also used by the screenshot tools).
 func set_camera(new_pivot: Vector3, new_distance: float) -> void:
 	pivot = new_pivot
@@ -125,17 +134,33 @@ func set_camera(new_pivot: Vector3, new_distance: float) -> void:
 
 func _process(delta: float) -> void:
 	var k := 1.0 - exp(-CAMERA_FOLLOW * delta)
-	if not pivot.is_equal_approx(_pivot_goal) or not is_equal_approx(distance, _distance_goal):
+	var moving := not pivot.is_equal_approx(_pivot_goal) or not is_equal_approx(distance, _distance_goal)
+	if moving:
 		pivot = pivot.lerp(_pivot_goal, k)
 		distance = lerpf(distance, _distance_goal, k)
+	if _inset != _inset_goal:
+		_inset = _inset.lerp(_inset_goal, k)
+		if _inset.distance_to(_inset_goal) < 0.0005:
+			_inset = _inset_goal
+		moving = true
+	if moving:
 		_update_camera()
 
 func _update_camera() -> void:
 	pitch = clampf(pitch, deg_to_rad(-40), deg_to_rad(60))
 	distance = clampf(distance, MIN_DISTANCE, MAX_DISTANCE)
-	var offset := Vector3(0, 0, distance).rotated(Vector3.RIGHT, -pitch).rotated(Vector3.UP, yaw)
+	# the free height of the window decides how far away the camera is (the figure stays inside it)
+	var free_height := clampf(1.0 - _inset.z - _inset.w, 0.3, 1.0)
+	var eff_distance := distance / free_height
+	var offset := Vector3(0, 0, eff_distance).rotated(Vector3.RIGHT, -pitch).rotated(Vector3.UP, yaw)
 	camera.position = pivot + offset
 	camera.look_at(pivot)
+	# the character appears in the middle of the free area: slide the camera (orientation stays) by the offset of that middle
+	var size := get_viewport().get_visible_rect().size
+	var half_height := eff_distance * tan(deg_to_rad(camera.fov) * 0.5)
+	var half_width := half_height * size.x / maxf(size.y, 1.0)
+	var ndc := Vector2(_inset.x - _inset.y, _inset.w - _inset.z)
+	camera.position -= camera.global_transform.basis.x * ndc.x * half_width + camera.global_transform.basis.y * ndc.y * half_height
 
 func _zoom(factor: float) -> void:
 	_distance_goal = clampf(_distance_goal * factor, MIN_DISTANCE, MAX_DISTANCE)

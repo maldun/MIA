@@ -9,10 +9,20 @@ extends Node
 ##   {"type": "gesture", "name": "wave"}          play a gesture
 ##   {"type": "speaking", "value": true}          the character's voice is playing: the mouth moves
 ##   {"type": "background", "name": "room.jpg"}   show a picture of the backgrounds folder ("" = plain colour)
+##   {"type": "viewport_inset", "left": 0, "right": 444, "top": 0, "bottom": 0, "width": 1440, "height": 900}
+##                                                how many pixels of the window the page covers (chat panel); the camera
+##                                                centers the character in the free area. width/height: size of the window.
+##   {"type": "view", "name": "bust"}             camera view: body, bust or face
 ## Unknown names or types are logged and ignored, the current expression stays.
 ## After startup the bridge tells the host {"type": "ready"}.
 
 signal handled(message: Dictionary, ok: bool)
+## fractions of the window (0..MAX_INSET) the page covers on each side
+signal inset_changed(left: float, right: float, top: float, bottom: float)
+signal view_requested(view_name: String)
+
+const MAX_INSET := 0.9
+const VIEWS := ["body", "bust", "face"]
 
 var engine: ExpressionEngine
 var backgrounds: BackgroundManager
@@ -61,9 +71,32 @@ func handle(message: Dictionary) -> bool:
 			if backgrounds != null:
 				backgrounds.show_background(str(message.get("name", "")))
 				ok = true
+		"viewport_inset":
+			ok = _handle_inset(message)
+		"view":
+			var view_name := str(message.get("name", ""))
+			if view_name in VIEWS:
+				view_requested.emit(view_name)
+				ok = true
 		"ready":
 			ok = true  # our own message when the character is not embedded
 		_:
 			push_warning("unknown host message type '%s'" % message.get("type", ""))
 	handled.emit(message, ok)
 	return ok
+
+## pixels -> fractions of the window; refuses messages without a usable window size or with non-numbers
+func _handle_inset(message: Dictionary) -> bool:
+	var values := []
+	for key in ["left", "right", "top", "bottom", "width", "height"]:
+		var value = message.get(key, 0)
+		if typeof(value) != TYPE_INT and typeof(value) != TYPE_FLOAT:
+			push_warning("viewport_inset: '%s' is not a number" % key)
+			return false
+		values.append(float(value))
+	if values[4] <= 0.0 or values[5] <= 0.0:
+		push_warning("viewport_inset needs the window width and height")
+		return false
+	inset_changed.emit(clampf(values[0] / values[4], 0.0, MAX_INSET), clampf(values[1] / values[4], 0.0, MAX_INSET),
+			clampf(values[2] / values[5], 0.0, MAX_INSET), clampf(values[3] / values[5], 0.0, MAX_INSET))
+	return true

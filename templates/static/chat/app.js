@@ -13,6 +13,8 @@ import { initChat } from './chat.js';
 import { initMood } from './mood.js';
 import { askConfirm, initPalette, loadCommands } from './palette.js';
 import { modelLabel } from './chat-model.js';
+import { initCaption } from './caption.js';
+import { initViewMenu } from './view-menu.js';
 
 const $ = (id) => document.getElementById(id);
 const storage = defaultStorage();
@@ -26,13 +28,14 @@ document.title = t('app.title');
 
 const theme = initTheme({ storage, search: location.search });
 
-initLayout({
+const layout = initLayout({
   storage,
   panel: $('panel'),
   resizeHandle: $('panel-resize'),
   sheetHandle: $('sheet-handle'),
   collapseButton: $('collapse-button'),
   openButton: $('panel-open'),
+  moodChip: $('mood'),
 });
 
 // --- connection: header, banner, history after (re)connecting --------------------------------------------
@@ -53,7 +56,40 @@ function showState(state) {
 }
 const socket = connect(showState);
 
-const character = initCharacter({ frame: $('character'), socket, enabled: params.get('character') !== '0' });
+// --- the character: framing in the free area, camera view, background, captions -----------------------------
+let viewMenu = null;
+let insetFrame = 0;
+
+/** tells the character how much of the window the chat covers (at most once per frame, also while the sheet moves) */
+function sendInset() {
+  if (insetFrame) return;
+  insetFrame = window.requestAnimationFrame(() => {
+    insetFrame = 0;
+    character.setInset(layout.inset());
+  });
+}
+
+const character = initCharacter({
+  frame: $('character'),
+  socket,
+  enabled: params.get('character') !== '0',
+  onReady() {
+    sendInset();
+    viewMenu?.apply();
+  },
+  onFailed() {
+    $('character-notice').hidden = false;
+  },
+});
+
+const caption = initCaption({ el: $('caption'), socket, isCollapsed: () => layout.collapsed });
+layout.onChange(() => {
+  sendInset();
+  caption.update();
+});
+new ResizeObserver(sendInset).observe($('panel'));
+new ResizeObserver(sendInset).observe($('mood'));
+window.addEventListener('resize', sendInset);
 
 initSound({
   audio: $('audio'),
@@ -76,6 +112,15 @@ initMenu({
   aboutButton: $('about-button'),
   aboutDialog: $('about'),
   aboutClose: $('about-close'),
+});
+
+viewMenu = initViewMenu({
+  buttons: document.querySelectorAll('[data-view]'),
+  group: $('background-group'),
+  select: $('background-select'),
+  character,
+  storage,
+  t,
 });
 
 // --- mood line and header chip, driven by the server --------------------------------------------------

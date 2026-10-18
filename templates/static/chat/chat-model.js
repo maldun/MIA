@@ -94,3 +94,18 @@ export function filterCommands(commands, typed) {
 export function modelLabel(profile) {
   return profile === 'light' ? 'light' : profile === 'full' ? 'full' : '';
 }
+
+/** plain text for the caption: markdown marks removed, the end of a long answer (what MIA says right now) */
+export function captionText(text, max = 160) {
+  const plain = String(text ?? '')
+    .replace(/```[\s\S]*?```/g, ' ')
+    .replace(/!?\[([^\]]*)\]\([^)]*\)/g, '$1')
+    .replace(/[*_`>#~]+/g, '')
+    .replace(/^\s*[-+]\s+/gm, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (plain.length <= max) return plain;
+  const tail = plain.slice(-max);
+  const space = tail.indexOf(' ');
+  return '… ' + (space > 0 && space < 30 ? tail.slice(space + 1) : tail);
+}

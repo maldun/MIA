@@ -53,12 +53,21 @@ export function occupiedWidth({ mode, collapsed, panelWidth }) {
   return mode === 'panel' && !collapsed ? panelWidth + 2 * GAP : 0;
 }
 
+/** the part of the window the chat covers, in pixels: the character is centered in the rest ({"type": "viewport_inset"}) */
+export function insetFor({ mode, collapsed, rect, width, height, top = 0 }) {
+  const inset = { left: 0, right: 0, top: Math.max(0, Math.round(top)), bottom: 0, width, height };      // top: the mood line
+  if (collapsed || !rect) return inset;
+  if (mode === 'panel') inset.right = Math.max(0, Math.round(width - rect.left));
+  else inset.bottom = Math.max(0, Math.round(height - rect.top));
+  return inset;
+}
+
 function numberOr(value, fallback) {
   const number = Number(value);
   return Number.isFinite(number) ? number : fallback;
 }
 
-export function initLayout({ storage, panel, resizeHandle, sheetHandle, collapseButton, openButton, root = document.documentElement, win = window }) {
+export function initLayout({ storage, panel, resizeHandle, sheetHandle, collapseButton, openButton, moodChip = null, root = document.documentElement, win = window }) {
   const body = document.body;
   let panelWidth = clampPanelWidth(numberOr(storage.get('mia.panelWidth'), 420), win.innerWidth);
   let snap = SNAPS.includes(storage.get('mia.snap')) ? storage.get('mia.snap') : 'half';
@@ -170,6 +179,7 @@ export function initLayout({ storage, panel, resizeHandle, sheetHandle, collapse
   apply();
   return {
     mode,
+    inset: () => insetFor({ mode: mode(), collapsed, rect: panel.getBoundingClientRect(), width: win.innerWidth, height: win.innerHeight, top: moodChip && !moodChip.hidden ? moodChip.getBoundingClientRect().bottom + 6 : 0 }),
     get collapsed() { return collapsed; },
     get snap() { return snap; },
     get panelWidth() { return panelWidth; },
