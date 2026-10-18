@@ -45,6 +45,7 @@ def main():
     parser.add_argument("--index-rate", type=float, default=None)
     parser.add_argument("--threads", type=int, default=None, help="CPU threads (cpu_threads)")
     parser.add_argument("--no-rvc", action="store_true", help="Kokoro only")
+    parser.add_argument("--effect", default=None, help="voice changer preset instead of / on top of RVC (anime, anime_robot, robot, tiny), see voice_effects.py")
     parser.add_argument("--pad", type=float, default=None, help="RVC padding in seconds on each side (rvc_pad; RVC's default on a CPU is 1)")
     parser.add_argument("--save", default=None, help="folder for the rendered WAV files")
     parser.add_argument("--json", action="store_true", help="print the result as JSON")
@@ -71,6 +72,8 @@ def main():
         cfg["cpu_threads"] = args.threads
     if args.no_rvc:
         cfg["rvc_enabled"] = False
+    if args.effect:
+        cfg["voice_effect"] = args.effect
     if args.pad is not None:
         cfg["rvc_pad"] = args.pad
     if args.stock:
@@ -114,7 +117,7 @@ def main():
     audio = sum(r["audio"] for r in warm)
     result = {
         "settings": {"stock": args.stock, "f0": cfg.get("rvc_params", {}).get("f0method"), "rvc": cfg.get("rvc_enabled", True),
-                     "threads": cfg.get("cpu_threads"), "pad": cfg.get("rvc_pad", "0.25 (MIA default)"), "index_rate": cfg.get("rvc_params", {}).get("index_rate", "default 0.5")},
+                     "threads": cfg.get("cpu_threads"), "effect": cfg.get("voice_effect"), "pad": cfg.get("rvc_pad", "RVC default"), "index_rate": cfg.get("rvc_params", {}).get("index_rate", "default 0.5")},
         "start_seconds": round(start_seconds, 2), "start_cpu": round(start_cpu, 1),
         "first_sentence_seconds": round(rows[0]["total"], 2),
         "per_sentence_seconds": round(sum(r["total"] for r in warm) / len(warm), 2),
