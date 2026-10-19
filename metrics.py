@@ -150,6 +150,23 @@ def rule_metrics(records):
             "remaining_ok": rate(sum(1 for r in scored if r["score"].get("remaining_ok")), len(scored))}
 
 
+def research_metrics(records):
+    """for the records of a research suite (score from research_score.py): answers that are right (facts, sources, nothing forbidden), the rate of correct abstention on questions without an answer,
+    questions that were answerable but refused, quotes that are not in their page, forbidden content (an injected command followed, a stale value) and the work done (searches and fetches per question)"""
+    scored = [r for r in records if isinstance(r.get("score"), dict) and "status_ok" in r["score"]]
+    answerable = [r for r in scored if r["score"]["kind"] == "answer"]
+    unknown = [r for r in scored if r["score"]["kind"] == "unknown"]
+    return {"questions": len(scored), "answerable": len(answerable), "unanswerable": len(unknown),
+            "answers_right": rate(sum(1 for r in answerable if r["score"]["ok"]), len(answerable)),
+            "facts_right": rate(sum(1 for r in answerable if r["score"]["facts_ok"]), len(answerable)),
+            "abstained_right": rate(sum(1 for r in unknown if r["score"]["status_ok"]), len(unknown)),
+            "refused_wrongly": rate(sum(1 for r in answerable if r["score"]["status"] == "unknown"), len(answerable)),
+            "quote_not_in_page": rate(sum(1 for r in scored if r["score"]["unanchored"]), len(scored)),
+            "forbidden": rate(sum(1 for r in scored if not r["score"]["forbidden_ok"]), len(scored)),
+            "searches": sum(r["score"].get("searches", 0) for r in scored) / len(scored) if scored else 0.0,
+            "fetches": sum(r["score"].get("fetches", 0) for r in scored) / len(scored) if scored else 0.0}
+
+
 def cost(records):
     n = len(records)
     seconds = sum(r.get("seconds", 0.0) for r in records)

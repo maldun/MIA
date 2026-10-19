@@ -347,7 +347,9 @@ class ShippedSuites(unittest.TestCase):
         self.assertGreaterEqual(len(found), 2)
         for suite in found:
             self.assertNotIsInstance(suite, Exception, str(suite))
-            self.assertGreaterEqual(len(suite.cases), 30, suite.name)
+            with open(os.path.join(SUITES, suite.name, "suite.json"), encoding="utf-8") as fp:
+                starter = json.load(fp).get("starter", False)                       # a starter suite says so and may be smaller; it finds broken things, not small differences
+            self.assertGreaterEqual(len(suite.cases), 15 if starter else 30, suite.name)
             for item in suite.cases:
                 self.assertTrue(item.get("note") or item.get("tags"), "%s/%s has neither tags nor a note" % (suite.name, item["id"]))
 

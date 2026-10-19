@@ -11,20 +11,24 @@ A *variant* is what changes between runs: the skill, a pinned pipeline version, 
 import copy
 import json
 import os
+import re
 import time
 
 import requests
 
 try:
-    from . import behaviour, checks, extraction, metrics, web_tools
+    from . import behaviour, checks, extraction, metrics, research_score, web_tools
+    from .pipeline import Tool
 except ImportError:  # used as plain script / in tests
     import behaviour
     import checks
     import extraction
     import metrics
+    import research_score
+    from pipeline import Tool
     import web_tools
 
-INPUT_KEY = {"checks": "claim", "pipeline": "input", "extraction": "input", "text_rules": "input"}
+INPUT_KEY = {"checks": "claim", "pipeline": "input", "extraction": "input", "text_rules": "input", "research": "input"}
 CASE_KEYS = {"id", "tags", "claim", "input", "truth", "expect", "note", "gold"}
 STATUSES = ("pass", "fail", "open", "not_applicable")
 MAX_OUTPUT_CHARS = 3000
@@ -146,7 +150,7 @@ class CountingModel:
 # --- recorded web: the real fetcher, safety rules, search and text extraction on fixed pages --------------------------------------------------------------
 
 SEARXNG_FIXTURE_URL = "http://localhost:8590"
-FILLER = "The quick brown fox jumps over the lazy dog. "
+FILLER = research_score.FILLER
 
 
 class FixtureResponse:
@@ -171,30 +175,65 @@ class FixtureResponse:
 class FixtureWebSession:
     """a stand-in for requests.Session that answers from a fixture file: {"pages": {url: {status, content_type, body, headers, error}}, "searches": {query: [results]}}.
     A body may contain {{PAD:n}}, replaced by n characters of filler (long pages). "error": "timeout" or "unreachable" raises like the network would.
-    Searches are answered as a SearXNG would; a query without an entry finds nothing; the entry "__down__": true makes the search backend unreachable."""
+    Searches are answered as a SearXNG would; a query without an entry finds nothing; the entry "__down__": true makes the search backend unreachable.
+    With "keyword_search": true a query without an entry is answered by a tiny search engine over the pages (words of the query found in the title, text or the "search_text" of a page, best first, at most
+    five): a research pipeline writes its own queries, so exact queries cannot be recorded. A page that is unreachable can still be found through its "search_text"."""
 
     def __init__(self, fixtures):
         self.pages, self.searches = fixtures.get("pages", {}), fixtures.get("searches", {})
+        self.keyword_search = bool(fixtures.get("keyword_search"))
         self.calls = []
+        self._index = None
+
+    def _search_index(self):
+        if self._index is None:
+            self._index = []
+            for url, entry in sorted(self.pages.items()):
+                html = entry.get("search_text") or re.sub(r"\{\{PAD:\d+\}\}", " ", entry.get("body", ""))
+                extracted = web_tools.extract_text(html)
+                text = extracted["text"] or html
+                self._index.append((url, extracted["title"] or url, text, set(_words(extracted["title"] + " " + text))))
+        return self._index
+
+    def _keyword_results(self, query):
+        wanted = set(_words(query))
+        scored = [(len(wanted & words), url, title, text) for url, title, text, words in self._search_index()]
+        return [{"title": title, "url": url, "snippet": " ".join(text.split())[:160]} for score, url, title, text in sorted(scored, key=lambda x: (-x[0], x[1])) if score > 0][:5]
 
     @staticmethod
     def _pad(body):
         import re
-        return re.sub(r"\{\{PAD:(\d+)\}\}", lambda m: (FILLER * (int(m.group(1)) // len(FILLER) + 1))[:int(m.group(1))], body)
+        return research_score.expand_pad(body)
 
     def get(self, url, params=None, **kwargs):
         self.calls.append(url if not params else "%s?q=%s" % (url, params.get("q")))
         if url.startswith(SEARXNG_FIXTURE_URL):
             if self.searches.get("__down__"):
                 raise requests.ConnectionError("search backend down")
-            return FixtureResponse(json_data={"results": [dict(r, engines=["fixture"], content=r.get("snippet", "")) for r in self.searches.get((params or {}).get("q"), [])],
-                                              "unresponsive_engines": []})
+            query = (params or {}).get("q")
+            found = self.searches[query] if query in self.searches else (self._keyword_results(query) if self.keyword_search else [])
+            return FixtureResponse(json_data={"results": [dict(r, engines=["fixture"], content=r.get("snippet", "")) for r in found], "unresponsive_engines": []})
         entry = self.pages.get(url)
         if entry is None or entry.get("error") == "unreachable":
             raise requests.ConnectionError("no such host: " + url)
         if entry.get("error") == "timeout":
             raise requests.ConnectTimeout("timed out")
         return FixtureResponse(entry.get("status", 200), self._pad(entry.get("body", "")), entry.get("content_type", "text/html; charset=utf-8"), entry.get("headers"))
+
+
+_STOP_WORDS = {"the", "and", "for", "are", "was", "were", "how", "what", "when", "who", "does", "did", "has", "have", "with", "from", "that", "this", "which", "into", "than", "then", "its", "his", "her",
+               "can", "you", "your", "our", "not", "but", "any", "all", "one", "day", "many", "much", "long", "often"}
+
+
+def _words(text):
+    return [w for w in re.findall(r"[^\W_]{3,}", str(text).casefold()) if w not in _STOP_WORDS]
+
+
+def fixture_tools(fixtures):
+    """({"web_search": Tool, "fetch_page": Tool}, session): the real search and fetcher with their safety rules over the recorded web of the fixtures"""
+    session = FixtureWebSession(fixtures)
+    tools, _, _ = web_tools.build_web_tools({"search_backends": ["searxng"]}, None, session=session, resolver=lambda host: ["93.184.216.34"])
+    return {name: Tool(*pair) for name, pair in tools.items()}, session
 
 
 def fixture_checks(core, fixtures):
@@ -253,10 +292,11 @@ class Harness:
     def __init__(self, core=None, clock=time.time, targets=None):
         """core: a Core (for the targets 'checks' and 'pipeline'); targets: more kinds, {kind: function(case, variant, context) -> (status, output)}, for tests and new tasks"""
         self.core, self._clock = core, clock
-        self.targets = {"checks": self._checks, "pipeline": self._pipeline, "extraction": self._extraction, "text_rules": self._text_rules}
+        self.targets = {"checks": self._checks, "pipeline": self._pipeline, "extraction": self._extraction, "text_rules": self._text_rules, "research": self._research}
         self.targets.update(targets or {})
         self.counter = None
         self._fixture_runners = {}
+        self._fixtures = {}
         if core is not None and getattr(core.runner, "model", None) is not None:
             self.counter = CountingModel(core.runner.model)
             core.runner.model = self.counter
@@ -305,6 +345,29 @@ class Harness:
                  "matches_ok": (sorted(v["match"] for v in found["violations"]) == sorted(gold["matches"])) if "matches" in gold else None}
         score["ok"] = bool(score["found"] == score["expected"] and score["remaining_ok"] and score["idempotent"] and score["repair_ok"] is not False and score["matches_ok"] is not False)
         return ("pass" if score["ok"] else "fail"), {"score": score}
+
+    def _research(self, case, variant, suite):
+        """a research pipeline over the recorded web of the suite (web.json, searched by keywords): its answer {answer, status, sources} is scored against the gold of the case (research_score.py)"""
+        skill = copy.deepcopy(self.core.skills.get(variant.get("skill") or suite.target["skill"]))
+        if skill is None:
+            raise SuiteError("there is no skill '%s'" % (variant.get("skill") or suite.target["skill"]))
+        for key in ("pipeline", "model"):
+            if variant.get(key):
+                skill[key] = variant[key] if key == "pipeline" else ({"profile": variant[key]} if variant[key] in ("light", "full", "current") else {"name": variant[key]})
+        if variant.get("budget"):
+            skill["budget"] = dict(skill["budget"], **variant["budget"])
+        fixtures = self._fixtures.get(suite.name)
+        if fixtures is None:
+            with open(os.path.join(suite.path, suite.target["fixtures"]), encoding="utf-8") as fp:
+                fixtures = self._fixtures[suite.name] = json.load(fp)
+        tools, session = fixture_tools(fixtures)
+        result = self.core.runner.run(skill, self.core.graph(skill)[0], case["input"], task="eval:" + suite.name, tools=tools)
+        if result.status != "done" or not isinstance(result.answer, dict):
+            return "error:" + (result.status if result.status != "done" else "no_answer"), {"error": result.error, "answer": result.answer}
+        score = research_score.score_research(result.answer, case["gold"], fixtures)
+        score["searches"] = sum(1 for c in session.calls if "?q=" in c)
+        score["fetches"] = sum(1 for c in session.calls if "?q=" not in c)
+        return ("pass" if score["ok"] else "fail"), {"answer": result.answer, "score": score}
 
     def _extraction(self, case, variant, suite):
         """a pipeline whose answer is {"claims": [...]}, scored against the gold claims of the case"""
@@ -423,6 +486,14 @@ def format_report(run, worst=8):
                                                             "n/a" if row["recall"]["rate"] is None else "%.0f%%" % (100 * row["recall"]["rate"])))
         lines += ["   clean texts left alone      " + pr(rm["clean_ok"]) + "   <- a false alarm otherwise", "   repairs as expected         " + pr(rm["repair_ok"]),
                   "   what cannot be repaired     " + pr(rm["remaining_ok"]), "   repair is idempotent        " + pr(rm["idempotent"])]
+    rs = metrics.research_metrics(records)
+    if rs["questions"]:
+        pr = lambda r: "n/a" if r["rate"] is None else "%.1f%% (%d of %d)" % (100 * r["rate"], r["k"], r["n"])   # noqa: E731
+        lines += ["", "as a research pipeline, on %d questions (%d with an answer in the recorded web, %d without):" % (rs["questions"], rs["answerable"], rs["unanswerable"]),
+                  "   answer right (facts, sources, nothing forbidden)  " + pr(rs["answers_right"]), "   facts right                     " + pr(rs["facts_right"]),
+                  "   said unknown where nothing is to be found  " + pr(rs["abstained_right"]), "   refused although it was answerable  " + pr(rs["refused_wrongly"]) + "   <- too timid",
+                  "   a quote that is not in its page  " + pr(rs["quote_not_in_page"]) + "   <- the worst error", "   forbidden content in the answer (injected command, wrong value)  " + pr(rs["forbidden"]),
+                  "   work per question: %.1f searches, %.1f page fetches" % (rs["searches"], rs["fetches"])]
     table = metrics.breakdown(records)
     if len(table) > 1:
         lines += ["", "by tag (right / cases):"]

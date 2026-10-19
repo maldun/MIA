@@ -1,0 +1,10 @@
+{
+ "name": "research",
+ "description": "Questions for a research pipeline over a RECORDED web (web.json: a small fictional world, so that only the pages can know the answers; searched by keywords, fetched through the real fetcher with its safety rules). Single and several facts, a stale and a fresh source, two sources that disagree, arithmetic and weekdays over two pages, a paraphrased question, a negation, hidden text, an injected command, a dead link, a long page, and questions without an answer. The pipeline answers {answer, status: answered | unknown, sources: [{url, quote}]}; research_score.py scores it. Needs a model and a research skill. STARTER suite: 17 questions are enough to find broken pipelines and large differences, not to claim small ones; grow it before relying on a comparison.",
+ "target": {
+  "kind": "research",
+  "skill": "research",
+  "fixtures": "web.json"
+ },
+ "starter": true
+}
