@@ -412,6 +412,15 @@ class CheckPlan(unittest.TestCase):
         for question in ("How often does the Rivertown ferry run?", "How many works does the museum hold?"):
             self.assertFalse(R.check_plan(_plan(question), question)["needs_calculation"], question)
 
+    def test_with_a_calculation_the_lookup_is_the_fact_not_the_question(self):
+        question = "On which day of the week did the Oakline Viaduct open?"
+        out = R.check_plan(_plan("What is the opening date of the Oakline Viaduct?"), question)
+        self.assertEqual(self.texts(out), ["What is the opening date of the Oakline Viaduct?"])          # the question itself would ask for a weekday that no page states
+        self.assertTrue(out["needs_calculation"])
+        self.assertNotIn("verbatim", self.rules(out))
+        simple = R.check_plan(_plan("What is the opening date of the Oakline Viaduct?"), "When did the Oakline Viaduct open?")
+        self.assertEqual(self.texts(simple), ["When did the Oakline Viaduct open?"])                       # without a calculation the question's own words stay
+
     def test_the_router_on_questions_of_both_kinds(self):
         simple = ["When did the Rivertown Bridge open to traffic?", "Can I visit the Tarn Museum on a Monday?", "How much is admission to the Tarn Museum?", "On which day of the week did the bridge open?",
                   "What is the population of Elmsford?", "When did the first cars drive across the new bridge in Rivertown?"]
@@ -472,6 +481,218 @@ class CheckedPipelines(unittest.TestCase):
         self.assertEqual(checked["status"], "pass", checked)
         self.assertEqual(model2.calls, ["answer", "plan", "answer", "calc", "compose"])
         self.assertIn("Monday", checked["output"]["answer"]["answer"])
+
+
+COMPOUND = H.load_suite(os.path.join(REPO, "eval", "suites", "research_compound"))
+
+
+class TypedFunctions(unittest.TestCase):
+    def test_dates_and_numbers_are_read_from_text(self):
+        import datetime
+        for text in ("opened on 5 June 1998", "June 5, 1998.", "on the 5th of June 1998"[:0] + "5th June 1998", "1998-06-05"):
+            self.assertEqual(R.to_date(text), datetime.date(1998, 6, 5), text)
+        self.assertIsNone(R.to_date("in 1998"))
+        self.assertIsNone(R.to_date("31 February 2001"))
+        self.assertEqual((R.to_number("12,400 inhabitants"), R.to_number("210 metres"), R.to_number("about 1.5 million"), R.to_number("none")), (12400.0, 210.0, 1.5, None))
+
+    def test_a_value_stays_only_if_it_stands_in_a_verified_quote(self):
+        passages = [{"n": 1, "url": "u", "title": "", "text": "The mayor of Weissbach is Anna Keller. Weissbach has 12,400 inhabitants."}]
+        good = R.anchor_answer({"answer": "Anna Keller", "status": "answered", "value": "Anna Keller", "sources": [{"n": 1, "quote": "The mayor of Weissbach is Anna Keller."}]}, passages)
+        self.assertEqual((good["status"], good["value"]), ("answered", "Anna Keller"))
+        number = R.anchor_answer({"answer": "12400", "status": "answered", "value": "12400", "sources": [{"n": 1, "quote": "Weissbach has 12,400 inhabitants."}]}, passages)
+        self.assertEqual(number["value"], "12400")
+        invented = R.anchor_answer({"answer": "Tom Ruiz", "status": "answered", "value": "Tom Ruiz", "sources": [{"n": 1, "quote": "The mayor of Weissbach is Anna Keller."}]}, passages)
+        self.assertEqual((invented["status"], invented["value"]), ("answered", None))
+        self.assertNotIn("value", R.anchor_answer({"answer": "x", "status": "answered", "sources": [{"n": 1, "quote": "The mayor of Weissbach is Anna Keller."}]}, passages))
+        self.assertIsNone(R.anchor_answer({"answer": "unknown", "status": "unknown", "value": "x", "sources": []}, passages)["value"])
+
+    def plan(self):
+        return {"steps": [{"id": 1, "op": "lookup", "attribute": "builder", "entity": "Alder Bridge"}, {"id": 2, "op": "lookup", "attribute": "head office", "entity": "#1"},
+                          {"id": 3, "op": "lookup", "attribute": "mayor", "entity": "#2"}], "answer": "#3"}
+
+    def run_steps(self, plan, answers):
+        values = R.typed_start()
+        asked = []
+        while True:
+            current = R.typed_prepare(plan, values)
+            if current["done"]:
+                return values, asked
+            if current["kind"] == "lookup":
+                asked.append(current["question"])
+                value = answers.get(current["step"]["id"])
+                values = R.typed_lookup_record(values, current, {"status": "answered" if value else "unknown", "answer": "a", "value": value, "sources": [{"url": "u", "quote": "q"}] if value else []})
+            else:
+                values = R.typed_other(values, current)
+
+    def test_each_step_is_searched_with_the_result_of_the_one_before(self):
+        values, asked = self.run_steps(self.plan(), {1: "Hartmann & Sons", 2: "Weissbach", 3: "Anna Keller"})
+        self.assertEqual(asked, ["What is the builder of Alder Bridge?", "What is the head office of Hartmann & Sons?", "What is the mayor of Weissbach?"])
+        self.assertTrue(all(v["ok"] for v in values))
+
+    def test_a_step_without_a_value_blocks_the_steps_that_need_it(self):
+        values, asked = self.run_steps(self.plan(), {1: "Hartmann & Sons", 2: None})
+        self.assertEqual(len(asked), 2)                                           # step 3 is not searched
+        self.assertEqual([v["ok"] for v in values], [True, False, False])
+        self.assertEqual(values[2]["kind"], "op")                                 # recorded as blocked
+
+    def test_operations_by_code(self):
+        plan = {"steps": [{"id": 1, "op": "lookup", "attribute": "length", "entity": "Alder Bridge"}, {"id": 2, "op": "lookup", "attribute": "length", "entity": "Oakline Viaduct"},
+                          {"id": 3, "op": "difference", "args": ["#1", "#2"], "unit": "metres"}, {"id": 4, "op": "compare", "args": ["#1", "#2"]}], "answer": "#3"}
+        values, _ = self.run_steps(plan, {1: "210 metres", 2: "540 metres"})
+        self.assertEqual(values[2]["value"], "330")
+        self.assertIn("the difference is 330 metres", values[2]["text"])
+        self.assertIn("the larger value is length of Oakline Viaduct", values[3]["text"])
+        weekday = {"steps": [{"id": 1, "op": "lookup", "attribute": "opening date", "entity": "Oakline Viaduct"}, {"id": 2, "op": "weekday", "args": ["#1"]}], "answer": "#2"}
+        values, _ = self.run_steps(weekday, {1: "5 June 1998"})
+        self.assertIn("1998-06-05 was a Friday", values[1]["text"])
+        days = {"steps": [{"id": 1, "op": "lookup", "attribute": "opening date", "entity": "A"}, {"id": 2, "op": "lookup", "attribute": "opening date", "entity": "B"},
+                          {"id": 3, "op": "days_between", "args": ["#1", "#2"]}, {"id": 4, "op": "years_between", "args": ["#1", "#2"]}, {"id": 5, "op": "add_days", "args": ["#1", "10"]}], "answer": "#3"}
+        values, _ = self.run_steps(days, {1: "5 June 1998", 2: "14 September 2024"})
+        self.assertIn("9598 days", values[2]["text"])
+        self.assertIn("26 calendar years", values[3]["text"])
+        self.assertIn("1998-06-15", values[4]["text"])
+
+    def test_an_operation_on_things_that_are_not_numbers_is_reported(self):
+        plan = {"steps": [{"id": 1, "op": "lookup", "attribute": "builder", "entity": "A"}, {"id": 2, "op": "lookup", "attribute": "builder", "entity": "B"},
+                          {"id": 3, "op": "difference", "args": ["#1", "#2"]}], "answer": "#3"}
+        values, _ = self.run_steps(plan, {1: "Nordbau", 2: "Hartmann"})
+        self.assertFalse(values[2]["ok"])
+        self.assertIn("not numbers", values[2]["text"])
+
+    def test_the_plan_check(self):
+        question = "Who is the mayor of the town where the company that built the Alder Bridge has its head office?"
+        self.assertTrue(R.check_typed_plan(self.plan(), question)["valid"])
+        simple = R.check_typed_plan(self.plan(), "How tall is the tower?")
+        self.assertFalse(simple["valid"])
+        self.assertIn("simple question", simple["problems"][0])
+        forward = self.plan()
+        forward["steps"][0]["entity"] = "#3"
+        self.assertFalse(R.check_typed_plan(forward, question)["valid"])
+        self.assertFalse(R.check_typed_plan({"steps": [{"id": 1, "op": "weekday", "args": ["5 June"]}], "answer": "#1"}, "On which day of the week?")["valid"])        # no lookup
+        self.assertFalse(R.check_typed_plan(None, question)["valid"])
+
+    def test_the_summary_has_facts_and_calculation(self):
+        plan = {"steps": [{"id": 1, "op": "lookup", "attribute": "founding year", "entity": "A"}, {"id": 2, "op": "lookup", "attribute": "founding year", "entity": "B"},
+                          {"id": 3, "op": "difference", "args": ["#1", "#2"], "unit": "years"}], "answer": "#3"}
+        values, _ = self.run_steps(plan, {1: "1887", 2: "1971"})
+        table = R.typed_summary(plan, values)
+        self.assertEqual(table["answered"], 2)
+        self.assertIn("Step 3 (difference)", table["calculation"])
+        self.assertEqual(len(table["passages"]), 2)
+
+
+class TypedPipelines(unittest.TestCase):
+    """research.escalate@3 and research.typed over the recorded web of the compound questions, with a model that plays each step from a table"""
+    ANSWERS = {
+        "What is the builder of Alder Bridge?": ("built in 1932 by Hartmann", "Hartmann & Sons"),
+        "What is the head office of Hartmann & Sons?": ("head office is in Weissbach", "Weissbach"),
+        "What is the mayor of Weissbach?": ("The mayor of Weissbach is Anna Keller", "Anna Keller"),
+        "What is the founding year of Hartmann & Sons?": ("founded in 1887", "1887"),
+        "What is the founding year of Brandt Engineering?": ("founded in 1971", "1971"),
+        "What is the opening date of Oakline Viaduct?": ("opened on 5 June 1998", "5 June 1998"),
+    }
+    PASSAGE = Decompose.PASSAGE
+
+    class Model:
+        def __init__(self, outer, typed_plan, free_plan=None, queries=None, hide=()):
+            self.outer, self.typed_plan, self.free_plan, self.queries, self.hide = outer, typed_plan, free_plan, list(queries or []), set(hide)
+            self.calls, self.asked = [], []
+
+        @staticmethod
+        def compose(prompt):
+            """a composer that says unknown when a step is blocked or a sub-question has no answer, and otherwise states the calculation and all the quoted facts"""
+            facts = prompt.split("Facts (each with the sub-question it answers and a quote):\n", 1)[1].split("\n\nCalculation", 1)[0]
+            calc = prompt.split("Calculation (by a program):\n", 1)[1].split("\n\nWrite", 1)[0]
+            quotes = re.findall(r"\[(\d+)\] quote from \S+: \"(.*?)\"$", facts, re.M)
+            if not quotes or "blocked" in calc or "No answer was found" in facts:
+                return json.dumps({"answer": "Not every fact could be found.", "status": "unknown", "sources": []})
+            return json.dumps({"answer": "%s | %s" % (calc, " ".join(q for _, q in quotes)), "status": "answered", "sources": [{"n": int(n), "quote": q} for n, q in quotes]})
+
+        def chat(self, messages, schema=None, model=None, profile=None, options=None):
+            prompt = messages[-1]["content"]
+            if "Write a plan: numbered steps" in prompt:
+                self.calls.append("typed plan")
+                return json.dumps(self.typed_plan)
+            if "Split the question into the smallest number" in prompt:
+                self.calls.append("free plan")
+                return json.dumps(self.free_plan)
+            if "did not give an answer" in prompt:
+                self.calls.append("requery")
+                return json.dumps({"query": self.queries.pop(0)})
+            if "Write the final answer" in prompt:
+                self.calls.append("compose")
+                return self.compose(prompt)
+            self.calls.append("answer")
+            question = prompt.split("Question:\n", 1)[1].split("\n", 1)[0]
+            self.asked.append(question)
+            needle, value = self.outer.ANSWERS.get(question, (None, None))
+            if needle and question not in self.hide:
+                for number, text in Decompose.PASSAGE.findall(prompt):
+                    if needle in text:
+                        quote = re.search(r"[^.\n]*%s[^.\n]*\." % re.escape(needle), text).group(0).strip()
+                        return json.dumps({"answer": quote, "status": "answered", "sources": [{"n": int(number), "quote": quote}], "value": value})
+            return json.dumps({"answer": "The passages do not say.", "status": "unknown", "sources": [], "value": ""})
+
+    def run_case(self, case_id, model, pipeline):
+        core = Core(os.path.join(REPO, "skills"), Library(os.path.join(REPO, "library")), tempfile.mkdtemp(), model=model)
+        return H.Harness(core).run(COMPOUND, {"name": "typed", "pipeline": pipeline}, only=[case_id]).records[0]
+
+    CHAIN = {"steps": [{"id": 1, "op": "lookup", "attribute": "builder", "entity": "Alder Bridge"}, {"id": 2, "op": "lookup", "attribute": "head office", "entity": "#1"},
+                       {"id": 3, "op": "lookup", "attribute": "mayor", "entity": "#2"}], "answer": "#3"}
+
+    def test_a_three_hop_chain_is_answered_step_by_step(self):
+        model = self.Model(self, self.CHAIN)
+        record = self.run_case("mayor-of-builders-town", model, "research.escalate@3")
+        self.assertEqual(model.calls, ["answer", "typed plan", "answer", "answer", "answer", "compose"])          # the cheap try said unknown, then three lookups
+        self.assertEqual(model.asked[1:], ["What is the builder of Alder Bridge?", "What is the head office of Hartmann & Sons?", "What is the mayor of Weissbach?"])
+        self.assertEqual(record["status"], "pass", record)
+        self.assertEqual(record["score"]["unanchored"], [])
+
+    def test_a_difference_is_calculated_by_code(self):
+        plan = {"steps": [{"id": 1, "op": "lookup", "attribute": "founding year", "entity": "Hartmann & Sons"}, {"id": 2, "op": "lookup", "attribute": "founding year", "entity": "Brandt Engineering"},
+                          {"id": 3, "op": "difference", "args": ["#1", "#2"], "unit": "years"}], "answer": "#3"}
+        model = self.Model(self, plan)
+        record = self.run_case("older-company-by-years", model, "research.escalate@3")
+        self.assertEqual(record["status"], "pass", record)
+        self.assertIn("84", record["output"]["answer"]["answer"])
+        self.assertEqual(model.calls.count("answer"), 3)
+
+    def test_a_weekday_is_calculated_by_code(self):
+        plan = {"steps": [{"id": 1, "op": "lookup", "attribute": "opening date", "entity": "Oakline Viaduct"}, {"id": 2, "op": "weekday", "args": ["#1"]}], "answer": "#2"}
+        record = self.run_case("viaduct-opening-weekday", self.Model(self, plan), "research.escalate@3")
+        self.assertEqual(record["status"], "pass", record)
+        self.assertIn("Friday", record["output"]["answer"]["answer"])
+
+    def test_a_chain_that_breaks_is_unknown_and_stops_searching(self):
+        model = self.Model(self, self.CHAIN, queries=["Hartmann head office town", "mayor of the town"], hide={"What is the head office of Hartmann & Sons?"})
+        record = self.run_case("mayor-of-founding-town-unknown", model, "research.typed@1")
+        self.assertEqual(record["status"], "pass", record)                                                     # an unanswerable question: unknown is right
+        self.assertNotIn("What is the mayor of Weissbach?", model.asked)                                       # step 3 was blocked, never searched
+        self.assertEqual(model.calls.count("requery"), 1)                                                      # step 1 is answered at once; only step 2 gets a second try
+        record2 = self.run_case("mayor-of-builders-town", self.Model(self, self.CHAIN, queries=["Hartmann head office town", "town of Hartmann"], hide={"What is the head office of Hartmann & Sons?"}), "research.typed@1")
+        self.assertEqual(record2["score"]["status"], "unknown")                                                # the answerable question fails honestly, with no invented quote
+        self.assertEqual(record2["score"]["unanchored"], [])
+
+    def test_a_plan_that_is_not_sound_falls_back_to_the_checked_decomposition(self):
+        broken = {"steps": [{"id": 1, "op": "lookup", "attribute": "builder", "entity": "#2"}, {"id": 2, "op": "lookup", "attribute": "head office", "entity": "#1"}], "answer": "#2"}
+        free = {"subquestions": [{"question": "Which company built the Alder Bridge?", "query": "Alder Bridge"}], "needs_calculation": False}
+        model = self.Model(self, broken, free_plan=free)
+        self.run_case("mayor-of-builders-town", model, "research.escalate@3")
+        self.assertEqual(model.calls[:3], ["answer", "typed plan", "free plan"])                                  # the typed plan is rejected, the free planner takes over
+
+    def test_a_question_the_first_try_answers_never_plans(self):
+        class Quick(self.Model):
+            def chat(inner, messages, **kwargs):
+                prompt = messages[-1]["content"]
+                if "Write a plan" in prompt or "Split the question" in prompt:
+                    raise AssertionError("planned")
+                inner.calls.append("answer")
+                number, text = Decompose.PASSAGE.findall(prompt)[0]
+                quote = re.search(r"[^.\n]*1895[^.\n]*\.", prompt).group(0).strip()
+                return json.dumps({"answer": quote, "status": "answered", "sources": [{"n": 1, "quote": quote}], "value": "1895"})
+        model = Quick(self, self.CHAIN)
+        record = self.run_case("library-founded-single", model, "research.escalate@3")
+        self.assertEqual((record["status"], model.calls), ("pass", ["answer"]))
 
 
 if __name__ == "__main__":

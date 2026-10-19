@@ -1,0 +1,61 @@
+{
+ "id": "code.typed_summary",
+ "version": 1,
+ "kind": "code",
+ "title": "The results of a typed plan as facts",
+ "description": "The lookups as numbered facts with their quotes (and as passages to anchor the final answer), the operations as one text. Answer: {facts, passages, context, answered, open, calculation}.",
+ "tags": [
+  "research",
+  "exact",
+  "typed"
+ ],
+ "applies_to": {
+  "tasks": [
+   "research"
+  ]
+ },
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "plan",
+    "values"
+   ],
+   "properties": {
+    "plan": {},
+    "values": {},
+    "question": {
+     "type": "string"
+    }
+   }
+  }
+ },
+ "outputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "facts",
+    "passages",
+    "context",
+    "calculation"
+   ]
+  }
+ },
+ "params": {},
+ "body": {
+  "function": "typed_summary",
+  "plain": "collecting the results"
+ },
+ "cost": {
+  "seconds": 0.05
+ },
+ "safety": {
+  "reads_web": false,
+  "runs_code": false
+ },
+ "status": "trusted",
+ "origin": {
+  "by": "manual",
+  "note": "research.typed_summary, unit tested"
+ }
+}

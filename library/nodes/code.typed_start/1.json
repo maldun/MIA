@@ -1,0 +1,44 @@
+{
+ "id": "code.typed_start",
+ "version": 1,
+ "kind": "code",
+ "title": "No values yet",
+ "description": "The empty list of values at the start of a typed plan.",
+ "tags": [
+  "research",
+  "exact",
+  "typed"
+ ],
+ "applies_to": {
+  "tasks": [
+   "research"
+  ]
+ },
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [],
+   "properties": {}
+  }
+ },
+ "outputs": {
+  "schema": {}
+ },
+ "params": {},
+ "body": {
+  "function": "typed_start",
+  "plain": "starting the plan"
+ },
+ "cost": {
+  "seconds": 0.05
+ },
+ "safety": {
+  "reads_web": false,
+  "runs_code": false
+ },
+ "status": "trusted",
+ "origin": {
+  "by": "manual",
+  "note": "research.typed_start, unit tested"
+ }
+}

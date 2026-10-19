@@ -1,0 +1,50 @@
+{
+ "id": "code.typed_other",
+ "version": 1,
+ "kind": "code",
+ "title": "Run an operation of a typed plan",
+ "description": "difference, compare, weekday, days_between, years_between or add_days over the values of earlier steps, done by code; blocked if a value is missing.",
+ "tags": [
+  "research",
+  "exact",
+  "typed"
+ ],
+ "applies_to": {
+  "tasks": [
+   "research"
+  ]
+ },
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "values",
+    "current"
+   ],
+   "properties": {
+    "values": {},
+    "current": {}
+   }
+  }
+ },
+ "outputs": {
+  "schema": {}
+ },
+ "params": {},
+ "body": {
+  "function": "typed_other",
+  "plain": "calculating"
+ },
+ "cost": {
+  "seconds": 0.05
+ },
+ "safety": {
+  "reads_web": false,
+  "runs_code": false
+ },
+ "status": "trusted",
+ "origin": {
+  "by": "manual",
+  "note": "research.typed_other, unit tested"
+ }
+}

@@ -1,0 +1,57 @@
+{
+ "id": "plan.typed",
+ "version": 1,
+ "title": "Plan a question as a typed plan (variant C)",
+ "description": "Variant (C) of 13b ST13: view.typed_plan writes the steps (lookups and operations with #n references), code.check_typed_plan checks them. The answer is the plan; whether it is sound is in the score (structure_ok).",
+ "goal": "a plan",
+ "tags": [
+  "plan",
+  "research",
+  "typed"
+ ],
+ "applies_to": {
+  "tasks": [
+   "research"
+  ]
+ },
+ "cost_class": "cheap",
+ "result": "raw",
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "question"
+   ],
+   "properties": {
+    "question": {
+     "type": "string"
+    }
+   }
+  }
+ },
+ "nodes": [
+  {
+   "id": "plan",
+   "use": "view.typed_plan@1",
+   "wire": {
+    "question": "$input.question"
+   },
+   "output": "raw"
+  },
+  {
+   "id": "check",
+   "use": "code.check_typed_plan@1",
+   "wire": {
+    "plan": "$raw",
+    "question": "$input.question"
+   },
+   "output": "checked"
+  }
+ ],
+ "status": "draft",
+ "origin": {
+  "by": "manual",
+  "parent": "plan.checked@1",
+  "note": "variant C of the planner; measured with the suite plans"
+ }
+}

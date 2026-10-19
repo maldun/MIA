@@ -1,0 +1,52 @@
+{
+ "id": "code.typed_lookup_record",
+ "version": 1,
+ "kind": "code",
+ "title": "Record the result of a lookup",
+ "description": "Adds the lookup just run to the values: ok only if the answer is supported by a quote and its bare value stands in the quote.",
+ "tags": [
+  "research",
+  "exact",
+  "typed"
+ ],
+ "applies_to": {
+  "tasks": [
+   "research"
+  ]
+ },
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "values",
+    "current",
+    "attempt"
+   ],
+   "properties": {
+    "values": {},
+    "current": {},
+    "attempt": {}
+   }
+  }
+ },
+ "outputs": {
+  "schema": {}
+ },
+ "params": {},
+ "body": {
+  "function": "typed_lookup_record",
+  "plain": "noting the result"
+ },
+ "cost": {
+  "seconds": 0.05
+ },
+ "safety": {
+  "reads_web": false,
+  "runs_code": false
+ },
+ "status": "trusted",
+ "origin": {
+  "by": "manual",
+  "note": "research.typed_lookup_record, unit tested"
+ }
+}

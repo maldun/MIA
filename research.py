@@ -5,6 +5,8 @@ The code steps of the research pipelines (ui/REQUIREMENTS_CORE.md 13.1, 13b). Th
   collect_passages(question, pages, ...)             the passages of the fetched pages that share most words with the question, numbered, within a character budget, rendered as untrusted web text
   check_plan(plan, question)                         normalize_plan plus the checks of 13b ST11: what asks for what the question states, what has little to do with the question, near-duplicates,
                                                      multi-step plans that lose the question, the question's own words for a single lookup, calculations flagged by wording; every change is reported
+  check_typed_plan / typed_prepare / typed_lookup_record / typed_other / typed_summary   a typed plan (13b ST10) is checked, then run step by step: the next step with the results of the earlier ones
+                                                     substituted (#2 becomes "Nordbau"), a lookup answered with a quote and a bare value, an operation done by code, blocked when a step it needs has no value
   normalize_plan(plan, question)                     the plan of a model made safe: one to four sub-questions with a query each (the question itself when the plan is empty), and whether it is a single lookup
   facts_table(subquestions, results)                 the verified answers of the sub-questions as numbered facts for the final answer (and as passages to anchor it again)
   calculate(request)                                 the calculation a model asked for, done by code: weekday, years_between, days_between, add_days (dates as YYYY-MM-DD, years as YYYY)
@@ -16,9 +18,10 @@ import datetime
 import re
 
 try:
-    from . import checks, web_tools
+    from . import checks, plans, web_tools
 except ImportError:  # used as plain script / in tests
     import checks
+    import plans
     import web_tools
 
 _STOP_WORDS = {"the", "and", "for", "are", "was", "were", "how", "what", "when", "who", "does", "did", "has", "have", "with", "from", "that", "this", "which", "into", "than", "then", "its", "his", "her",
@@ -68,6 +71,11 @@ def collect_passages(question, pages, per_page=2, size=900, budget=6000):
     return {"passages": passages, "context": context or "(no pages could be read)", "signals": sorted(signals), "pages": used}
 
 
+def _plain_value(text):
+    """a value as plain words for the comparison with a quote: lower case, no punctuation, no thousands separators"""
+    return " ".join(re.sub(r"[^\w.]+", " ", re.sub(r"(?<=\d),(?=\d{3})", "", str(text)).casefold()).split())
+
+
 def anchor_answer(answer, passages):
     """{"answer", "status": answered | unknown, "sources": [{url, quote}], "dropped": [...], "demoted": bool, "draft": the model's answer when it was demoted}"""
     by_number = {p.get("n"): p for p in passages if isinstance(p, dict)} if isinstance(passages, list) else {}
@@ -85,14 +93,159 @@ def anchor_answer(answer, passages):
         else:
             dropped.append({"n": source.get("n"), "quote": quote[:120], "reason": "no such passage" if not passage else "the quote is not in the passage"})
     text, status = str(answer.get("answer", "")).strip(), answer.get("status")
+    extra = {}
+    if "value" in answer:                      # the bare value of a lookup (a name, a number, a date): only if it stands in a verified quote
+        value = str(answer.get("value") or "").strip()
+        extra["value"] = value if value and any(_plain_value(value) in _plain_value(k["quote"]) for k in kept) else None
     if status != "answered" or not text:
-        return {"answer": text or NO_ANSWER, "status": "unknown", "sources": [], "dropped": dropped, "demoted": False}
+        return {"answer": text or NO_ANSWER, "status": "unknown", "sources": [], "dropped": dropped, "demoted": False, **({"value": None} if extra else {})}
     if not kept:
-        return {"answer": NO_ANSWER, "status": "unknown", "sources": [], "dropped": dropped, "demoted": True, "draft": text}
-    return {"answer": text, "status": "answered", "sources": kept, "dropped": dropped, "demoted": False}
+        return {"answer": NO_ANSWER, "status": "unknown", "sources": [], "dropped": dropped, "demoted": True, "draft": text, **({"value": None} if extra else {})}
+    return {"answer": text, "status": "answered", "sources": kept, "dropped": dropped, "demoted": False, **extra}
 
 
 MAX_SUBQUESTIONS = 4
+_MONTHS = {name: number for number, names in enumerate((("january", "jan"), ("february", "feb"), ("march", "mar"), ("april", "apr"), ("may",), ("june", "jun"), ("july", "jul"), ("august", "aug"),
+                                                         ("september", "sep", "sept"), ("october", "oct"), ("november", "nov"), ("december", "dec")), 1) for name in names}
+
+
+def to_number(value):
+    """the first number in a text (thousands separators allowed), or None"""
+    match = re.search(r"-?\d{1,3}(?:,\d{3})+(?:\.\d+)?|-?\d+(?:\.\d+)?", str(value))
+    return float(match.group(0).replace(",", "")) if match else None
+
+
+def to_date(value):
+    """a date in a text as datetime.date (YYYY-MM-DD, 5 June 1998, June 5, 1998), or None"""
+    text = str(value)
+    try:
+        match = re.search(r"\b(\d{4})-(\d{2})-(\d{2})\b", text)
+        if match:
+            return datetime.date(int(match.group(1)), int(match.group(2)), int(match.group(3)))
+        match = re.search(r"\b(\d{1,2})(?:st|nd|rd|th)?\s+([A-Za-z]{3,9})\.?,?\s+(\d{4})\b", text)
+        if match and match.group(2).lower() in _MONTHS:
+            return datetime.date(int(match.group(3)), _MONTHS[match.group(2).lower()], int(match.group(1)))
+        match = re.search(r"\b([A-Za-z]{3,9})\.?\s+(\d{1,2})(?:st|nd|rd|th)?,?\s+(\d{4})\b", text)
+        if match and match.group(1).lower() in _MONTHS:
+            return datetime.date(int(match.group(3)), _MONTHS[match.group(1).lower()], int(match.group(2)))
+    except ValueError:
+        return None
+    return None
+
+
+def _as_year_or_date(value):
+    day = to_date(value)
+    if day:
+        return day.isoformat()
+    match = re.search(r"\b(\d{4})\b", str(value))
+    return match.group(1) if match else None
+
+
+def _number_text(number):
+    return str(int(number)) if float(number).is_integer() else ("%g" % number)
+
+
+def check_typed_plan(plan, question):
+    """{"valid", "plan", "problems"}: a typed plan is run only if its structure is sound (plans.typed_problems) and the question is one for a plan (a comparison, a chain, two questions in one, or a
+    calculation); a simple question takes the cheap way"""
+    problems = plans.typed_problems(plan)
+    if not problems and not any(isinstance(s, dict) and s.get("op") == "lookup" for s in plan["steps"]):
+        problems.append("a plan needs at least one lookup")
+    if not problems and len(plan["steps"]) > 8:
+        problems.append("more than 8 steps")
+    if not problems and not (_COMPOUND.search(str(question)) or _CALCULATION.search(str(question))):
+        problems.append("a simple question needs no plan")
+    return {"valid": not problems, "plan": plan if isinstance(plan, dict) else {}, "problems": problems}
+
+
+def typed_start():
+    return []
+
+
+def _label(step, entity=None):
+    return "%s of %s" % (step.get("attribute", ""), entity if entity is not None else step.get("entity", ""))
+
+
+def typed_prepare(plan, values, question=""):
+    """the next step to run: {"done": True}, or {"done": False, "kind": "lookup", "step", "question", "query", "label"} (a runnable lookup, its entity substituted), or {"done": False, "kind": "other", "step"}
+    for an operation or a step that is blocked because a step it needs has no value"""
+    finished = {v["id"]: v for v in values}
+    for step in plan.get("steps", []):
+        if step["id"] in finished:
+            continue
+        if step["op"] == "lookup":
+            entity = step["entity"]
+            if str(entity).startswith("#"):
+                source = finished.get(int(str(entity)[1:]))
+                if not source or not source.get("ok"):
+                    return {"done": False, "kind": "other", "step": step, "blocked": True}
+                entity = str(source["value"])
+            return {"done": False, "kind": "lookup", "step": step, "label": _label(step, entity), "question": "What is the %s of %s?" % (step["attribute"], entity),
+                    "query": "%s %s" % (step["attribute"], entity)}
+        refs = [a for a in step.get("args", []) if str(a).startswith("#")]
+        if any(not finished.get(int(str(r)[1:]), {}).get("ok") for r in refs):
+            return {"done": False, "kind": "other", "step": step, "blocked": True}
+        return {"done": False, "kind": "other", "step": step, "blocked": False}
+    return {"done": True}
+
+
+def typed_lookup_record(values, current, attempt):
+    """the values so far plus the result of the lookup just run (ok only if the answer is supported by a quote and has a bare value that stands in the quote)"""
+    attempt = attempt if isinstance(attempt, dict) else {}
+    ok = attempt.get("status") == "answered" and bool(attempt.get("value"))
+    step = current["step"]
+    return list(values) + [{"id": step["id"], "kind": "lookup", "label": current["label"], "question": current["question"], "ok": ok, "value": attempt.get("value") if ok else None,
+                            "result": {k: attempt.get(k) for k in ("answer", "status", "sources")}}]
+
+
+def _operand(args, finished, index):
+    a = args[index]
+    return finished[int(a[1:])] if str(a).startswith("#") else {"value": a, "label": str(a), "ok": True}
+
+
+def typed_other(values, current):
+    """runs the operation of the step (difference, compare, weekday, days_between, years_between, add_days) with the values so far, or records that it is blocked"""
+    step = current["step"]
+    finished = {v["id"]: v for v in values}
+    entry = {"id": step["id"], "kind": "op", "op": step["op"], "label": step["op"], "ok": False, "value": None, "text": "(blocked: a step it needs has no value)"}
+    if not current.get("blocked"):
+        args = step.get("args", [])
+        first = _operand(args, finished, 0)
+        second = _operand(args, finished, 1) if len(args) > 1 else None
+        op = step["op"]
+        if op in ("difference", "compare"):
+            na, nb = to_number(first["value"]), to_number(second["value"])
+            if na is None or nb is None:
+                entry["text"] = "(the values %r and %r are not numbers)" % (first["value"], second["value"])
+            elif op == "difference":
+                unit = " %s" % step["unit"] if step.get("unit") else ""
+                entry.update(ok=True, value=_number_text(abs(na - nb)), text="%s = %s, %s = %s: the difference is %s%s." % (first["label"], _number_text(na), second["label"], _number_text(nb),
+                                                                                                                         _number_text(abs(na - nb)), unit))
+            else:
+                high, low = ((first, na), (second, nb)) if na >= nb else ((second, nb), (first, na))
+                entry.update(ok=True, value=high[0]["label"], text="%s = %s, %s = %s: the larger value is %s, the smaller value is %s." % (first["label"], _number_text(na), second["label"], _number_text(nb),
+                                                                                                                                       high[0]["label"], low[0]["label"]))
+        else:
+            request = {"op": op}
+            if op == "weekday":
+                request["a"] = to_date(first["value"]).isoformat() if to_date(first["value"]) else None
+            elif op == "add_days":
+                request.update(a=to_date(first["value"]).isoformat() if to_date(first["value"]) else None, n=to_number(second["value"]) if second else None)
+                request["n"] = int(request["n"]) if request["n"] is not None else None
+            elif op in ("days_between", "years_between"):
+                request.update(a=_as_year_or_date(first["value"]), b=_as_year_or_date(second["value"]) if second else None)
+            done = calculate(request) if request.get("a") else {"ok": False, "text": "(no usable date or year in %r)" % first["value"]}
+            entry.update(ok=done["ok"], text="%s: %s" % (first["label"] if op == "weekday" else op, done["text"]), value=done["text"] if done["ok"] else None)
+    return list(values) + [entry]
+
+
+def typed_summary(plan, values, question=""):
+    """{"facts" ..., "context", "passages", "answered", "open", "calculation"}: the lookups as numbered facts and the operations as one text, for the final answer"""
+    lookups = [v for v in values if v["kind"] == "lookup"]
+    table = facts_table([{"id": v["id"], "question": v["question"]} for v in lookups], [dict(v["result"], status="answered" if v["ok"] else "unknown") for v in lookups])
+    operations = [v for v in values if v["kind"] == "op"]
+    table["calculation"] = "\n".join("Step %d (%s): %s" % (v["id"], v["op"], v["text"]) for v in operations) or "(no calculation)"
+    return table
 
 
 def normalize_plan(plan, question):
@@ -140,7 +293,8 @@ def check_plan(plan, question):
     base = normalize_plan(plan, question)
     subs, checks = list(base["subquestions"]), []
     wanted = _stems(question)
-    if len(subs) > 1 and not _COMPOUND.search(str(question)):
+    calculation = base["needs_calculation"] or bool(_CALCULATION.search(str(question)))       # then the lookups are the facts the calculation needs, not the question itself
+    if len(subs) > 1 and not _COMPOUND.search(str(question)) and not calculation:
         checks.append({"rule": "simple question", "detail": "the question has no sign of a comparison, a chain or two questions in one: the question itself is the only lookup (the planner wrote %d)" % len(subs)})
         subs = []
     if len(subs) > 1:
@@ -176,14 +330,14 @@ def check_plan(plan, question):
             subs, fallback = [], True
     if not subs:
         subs, fallback = [{"id": 1, "question": str(question), "query": str(question)}], True
-    if len(subs) == 1 and (subs[0]["question"].strip() != str(question).strip() or subs[0]["query"].strip() != str(question).strip()):
+    if len(subs) == 1 and not calculation and (subs[0]["question"].strip() != str(question).strip() or subs[0]["query"].strip() != str(question).strip()):
         if not fallback:
             checks.append({"rule": "verbatim", "detail": "a single lookup keeps the question's own words (was %r)" % subs[0]["question"]})
         subs = [{"id": 1, "question": str(question), "query": str(question)}]
     for index, sub in enumerate(subs, 1):
         sub["id"] = index
     needs = base["needs_calculation"]
-    if not needs and _CALCULATION.search(str(question)):
+    if not needs and calculation:
         needs = True
         checks.append({"rule": "calculation", "detail": "the wording of the question asks for a calculation"})
     return {"subquestions": subs, "needs_calculation": needs, "single": len(subs) == 1, "checks": checks, "fallback": fallback}
@@ -255,4 +409,5 @@ def calculate(request):
 
 
 FUNCTIONS = {"top_urls": top_urls, "collect_passages": collect_passages, "anchor_answer": anchor_answer, "normalize_plan": normalize_plan, "facts_table": facts_table,
-             "calculate": calculate, "only_result": only_result, "check_plan": check_plan}
+             "calculate": calculate, "only_result": only_result, "check_plan": check_plan, "check_typed_plan": check_typed_plan,
+             "typed_start": typed_start, "typed_prepare": typed_prepare, "typed_lookup_record": typed_lookup_record, "typed_other": typed_other, "typed_summary": typed_summary}

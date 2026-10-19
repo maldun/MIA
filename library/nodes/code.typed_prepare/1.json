@@ -1,0 +1,58 @@
+{
+ "id": "code.typed_prepare",
+ "version": 1,
+ "kind": "code",
+ "title": "The next step of a typed plan",
+ "description": "The next step that has no value yet: a runnable lookup with the results of earlier steps substituted into its question and query, an operation, or a step that is blocked because a step it needs has no value; or done. Answer: {done, kind, step, question, query, label, blocked}.",
+ "tags": [
+  "research",
+  "exact",
+  "typed"
+ ],
+ "applies_to": {
+  "tasks": [
+   "research"
+  ]
+ },
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "plan",
+    "values"
+   ],
+   "properties": {
+    "plan": {},
+    "values": {},
+    "question": {
+     "type": "string"
+    }
+   }
+  }
+ },
+ "outputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "done"
+   ]
+  }
+ },
+ "params": {},
+ "body": {
+  "function": "typed_prepare",
+  "plain": "choosing the next step"
+ },
+ "cost": {
+  "seconds": 0.05
+ },
+ "safety": {
+  "reads_web": false,
+  "runs_code": false
+ },
+ "status": "trusted",
+ "origin": {
+  "by": "manual",
+  "note": "research.typed_prepare, unit tested"
+ }
+}

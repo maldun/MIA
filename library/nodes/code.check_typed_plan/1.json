@@ -1,0 +1,59 @@
+{
+ "id": "code.check_typed_plan",
+ "version": 1,
+ "kind": "code",
+ "title": "Check a typed plan before it runs",
+ "description": "The structure must be sound (plans.typed_problems), there must be a lookup, at most 8 steps, and the question must be one for a plan (a comparison, a chain, a calculation). Answer: {valid, plan, problems}.",
+ "tags": [
+  "research",
+  "exact",
+  "typed"
+ ],
+ "applies_to": {
+  "tasks": [
+   "research"
+  ]
+ },
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "plan",
+    "question"
+   ],
+   "properties": {
+    "plan": {},
+    "question": {
+     "type": "string"
+    }
+   }
+  }
+ },
+ "outputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "valid",
+    "plan",
+    "problems"
+   ]
+  }
+ },
+ "params": {},
+ "body": {
+  "function": "check_typed_plan",
+  "plain": "checking the plan"
+ },
+ "cost": {
+  "seconds": 0.05
+ },
+ "safety": {
+  "reads_web": false,
+  "runs_code": false
+ },
+ "status": "trusted",
+ "origin": {
+  "by": "manual",
+  "note": "research.check_typed_plan, unit tested"
+ }
+}
