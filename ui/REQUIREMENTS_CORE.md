@@ -511,6 +511,41 @@ consolidates the results. It stays a graph of library nodes (4a): nothing here n
 - ST9. Open research questions: how much of a gain comes from the decomposition and how much from the checks and anchoring? Do small plan templates generalise across questions? How fast can a challenger be judged with the
   few requests a single user produces (sample sizes, sequential tests)?
 
+## 13c. The context graph: the working material of a task as a graph (decided 2026-10-19, after a literature check)
+
+"Context graph" is used in two senses in the literature (14): (a) a graph built **per task, at run time** from what was retrieved, used to select and compress the context of the next step (StepChain GraphRAG, decision-aware memory cards); (b) a
+**persistent store of decision traces** (what was decided, why, with which alternatives) used as agent memory, described mostly in vendor material and not benchmarked independently. Both have a place, in different layers.
+No graph is built beforehand for web search: the open web has no fixed corpus to index. What can be built beforehand is limited to material we own (CG7).
+
+- CG1. **Nodes and edges.** Nodes: the question, plan, subtask, search query, result, passage (verbatim quote, URL, date), claim, draft sentence, verdict, and **open slot** (a target of the plan that has no supported value yet).
+  Edges: `decomposes`, `retrieved_by`, `quoted_from`, `supports`, `contradicts`, `answers`, `uses`, `derived_from`, `supersedes` (a newer source for the same entity and attribute), `same_as` (alias; proposed, see CG2).
+  Every node carries provenance and a status (anchored, conflicting, unverified, open). A plain table of claims with provenance is the first implementation; relations beyond it are added only when the suite shows they help.
+- CG2. **Built on the fly, only from anchored material.** The graph grows from what the subtasks retrieve (13b ST1 to ST3), as in StepChain GraphRAG where only the retrieved passages are parsed into a graph. A claim enters only if its quote occurs
+  in its page (the check of extraction, 9). Entity aliases are merged by deterministic rules first (normalised names, shared quotes); a model may *propose* a `same_as`, which is logged and not trusted before a check or the user confirms it.
+- CG3. **Context assembly by code.** For each model call, code selects the neighbourhood of the current step (its goal, the passages and claims linked to it, conflicting claims, open slots) and renders it as compact text within a token budget.
+  The model never gets whole pages when passages and claims will do. Reason: in the literature the answer is often in the retrieved context but the small model still fails (the "reasoning bottleneck"), and compressing the context by walking the
+  graph reduced it by about 60 percent without extra model calls.
+- CG4. **Gaps and targets are properties of the graph.** "Every sub-question has a supporting anchored claim" and "no entity named in the question is without the attribute asked for" are checks over the graph; the open slots decide which
+  further calls are requested (13b ST4: calls on demand) and which query is written for them.
+- CG5. **Conflicts by rule.** The same entity and attribute with different values: a newer dated source supersedes an older one (the old value stays, marked superseded); the same date or no date is flagged, and the answer must show both
+  values or say that the sources differ (the museum case of the research suite).
+- CG6. **Per run, visible, then dropped.** The graph lives in memory during the run, is written to the run log (so that the later graph viewer, 10, can show how an answer came about: a sentence leads back through a claim and a quote to a page)
+  and is dropped afterwards. A wrong item therefore stays local to its task.
+- CG7. **Persistent layers, each optional and each only from verified material.**
+  1. **Decision traces.** One record per run: question type, plan template and version, the context items used, targets met or open, calls and seconds, outcome signals (13a BF2). This is what the plan competition (13b ST5) and the bandit (8) learn from:
+     which plan, with which context, passed its targets. Mostly the run log already holds it; the work is the structure and the queries.
+  2. **Promotion to memory.** A claim that is anchored, unconflicted and dated may be written as a record with provenance into the memory store of 13a (MM). Nothing unverified is promoted.
+  3. **Pre-built graphs for own material only**: notes, documents, earlier verified results, MIA's conversations. Not for the web.
+- CG8. **Evidence from the literature, and its weight** (checked 2026-10-19 through search results, two abstracts and a tool-made summary of one paper's page, not by reading the papers; details in 14; the numbers must be checked against the papers before they are cited): the per-task graph helps multi-hop question answering, but in StepChain GraphRAG the ablation shows decomposition alone (36.3 EM on average)
+  and graph retrieval alone (22.1) are both far below the combination (57.7), so the graph is not the whole gain; the gain over the best baseline was 2.6 EM with GPT-4o and smaller with 70B open models (one benchmark). The reasoning-bottleneck paper reports that
+  graph-based compression with structured prompting let an 8B model match an unaugmented 70B model at about 12 times lower cost, on a pre-built graph. The memory-card paper reports Hit@1 0.58 to 0.78 for file retrieval on 50 SWE-bench instances (a different domain,
+  a small test). The persistent "decision trace" sense is supported by vendor material, not by independent measurement. **All of this is a reason to try it, and a reason to measure it ourselves.**
+- CG9. **Tests first (9, 13b ST8).** The research suite gets three questions that need more than one page: a second hop to a page the question does not name (the firm that built the bridge, then the town of that firm), a three-page comparison
+  (which is older and by how many years), and a conflict with dates (the new museum director against the old one). Variants: (A) raw passages in one prompt, (B) decomposition without a graph, (C) decomposition with the context graph.
+  Metrics: answer right, quote not in page, too timid, calls and seconds, open slots closed by the gap round. A claim that the graph helps is made only with repeats and only for the part that (C) adds over (B).
+- CG10. Open research questions: how much of the gain is the graph and how much the decomposition? Is a claims table enough or do relations add something measurable? Do decision traces improve plan selection beyond the plain run statistics of the
+  library? How good is deterministic alias merging on real pages?
+
 ## 14. References
 
 Marked [S] were found in the web search of this project phase (2026 papers: claims are from search summaries and must be read before they are relied upon). The others are
@@ -596,6 +631,13 @@ Memory, consolidation and behaviour feedback (see 13a)
 - Park et al. 2023, Generative Agents: Interactive Simulacra of Human Behavior. arXiv:2304.03442 (memory stream, retrieval by recency, importance and relevance, reflection that links to sources; not seen in the search)
 - McClelland, McNaughton, O'Reilly 1995, Why there are complementary learning systems in the hippocampus and neocortex, Psychological Review (consolidation by replay); Nader, Schafe, LeDoux 2000, Fear memories require protein synthesis in the amygdala for reconsolidation after retrieval, Nature (reconsolidation); Russell 1980, A circumplex model of affect, Journal of Personality and Social Psychology (valence and arousal). From memory, check before citing
 - Bai et al. 2022, Constitutional AI: Harmlessness from AI Feedback. arXiv:2212.08073; Rafailov et al. 2023, Direct Preference Optimization. arXiv:2305.18290; Skalse et al. 2022, Defining and Characterizing Reward Hacking. arXiv:2209.13085 (all from memory, check)
+
+Context graphs, graph-based retrieval for small models (section 13c)
+- [S] StepChain GraphRAG: Reasoning Over Knowledge Graphs for Multi-Hop Question Answering. arXiv:2510.02827 (graph built on the fly from retrieved passages; known from a tool-made summary of the paper's page, the ablation and the limits quoted in 13c CG8 come from it)
+- [S] The Reasoning Bottleneck in Graph-RAG: Structured Prompting and Context Compression for Multi-Hop QA. arXiv:2603.14045 (abstract read only: the PDF text could not be extracted)
+- [S] Decision-Aware Memory Cards: Counterfactual-Inspired Context Selection and Compression for Tool-Using LLM Agents. arXiv:2606.08151 (abstract read only)
+- [S] From Agent Traces to Trust: A Survey of Evidence Tracing and Execution Provenance in LLM Agents. arXiv:2606.04990 (found in search, not read)
+- [S] Vendor descriptions of "context graphs" as decision-trace memory: Neo4j (What is a context graph?), FalkorDB, Cognee. Positioning material; no independent benchmarks found.
 
 Local research agents (implementations to learn from)
 - [S] LearningCircuit/local-deep-research; langchain-ai/local-deepresearcher; OpenDeepResearcher-via-searxng (GitHub)

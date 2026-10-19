@@ -48,8 +48,20 @@ class World(unittest.TestCase):
     def test_the_search_finds_the_page_with_the_answer(self):
         for case in SUITE.cases:
             gold = case["gold"]
-            if gold["kind"] == "answer":
+            if gold["kind"] == "answer" and "needs-graph" not in case["tags"]:
                 self.assertTrue(set(urls_found(case["input"]["question"])) & set(gold["sources_any"]), case["id"])
+
+    def test_the_second_hop_pages_need_a_second_search(self):
+        nordbau, director = "https://nordbau.example/about", "https://tarn-museum.example/news/new-director"
+        direct = urls_found(CASES["builder-town-second-hop"]["input"]["question"])
+        self.assertIn("https://elmbruecken.example/about", direct)                                             # a decoy company is found as easily as the right one
+        self.assertNotIn("bridge", (S.page_text(WORLD, nordbau) or "").casefold().replace("bridges", ""))      # the right page does not mention the bridge: the name from the first hop decides
+        self.assertIn(nordbau, urls_found("Nordbau"))
+        self.assertIn("https://gazette.rivertown.example/bridge-opens", urls_found("Rivertown Bridge built by the firm"))
+        self.assertIn(director, urls_found(CASES["museum-director-dated"]["input"]["question"]))
+        self.assertIn("https://tarn-museum.example/team", urls_found(CASES["museum-director-dated"]["input"]["question"]))      # the old page is found too: the newer date has to win
+        self.assertIn(nordbau, urls_found("Nordbau company founded"))
+        self.assertEqual({c["id"] for c in SUITE.cases if "needs-graph" in c["tags"]}, {"builder-town-second-hop", "older-museum-or-builder", "museum-director-dated"})
 
     def test_unanswerable_questions_get_pages_that_do_not_answer(self):
         for question, name in (("Who designed the Rivertown Bridge?", "designer"), ("What is the name of the dog of the mayor of Rivertown?", "has a dog"), ("What is the population of Elmsford?", "Elmsford")):
