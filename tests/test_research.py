@@ -318,5 +318,35 @@ class Decompose(unittest.TestCase):
         self.assertEqual((record["score"]["status"], record["score"]["unanchored"]), ("unknown", []))
 
 
+class Escalate(unittest.TestCase):
+    """research.escalate: the cheap try first, decomposition only when it finds nothing"""
+
+    def run_case(self, case_id, model):
+        core = Core(os.path.join(REPO, "skills"), Library(os.path.join(REPO, "library")), tempfile.mkdtemp(), model=model)
+        return H.Harness(core).run(SUITE, {"name": "escalate", "pipeline": "research.escalate@1"}, only=[case_id]).records[0]
+
+    def test_a_question_the_first_try_answers_costs_one_model_call(self):
+        question = "When did the Rivertown Bridge open to traffic?"
+        model = Decompose.Model({"subquestions": [], "needs_calculation": False}, needles={question: "opened to traffic"})
+        record = self.run_case("bridge-date", model)
+        self.assertEqual(model.calls, ["answer"])
+        self.assertEqual(record["status"], "pass", record)
+
+    def test_a_question_without_a_supported_answer_is_decomposed(self):
+        plan = {"subquestions": [{"question": "When did the Rivertown Bridge open to traffic?", "query": "Rivertown Bridge opened traffic"}], "needs_calculation": True}
+        model = Decompose.Model(plan, calc={"op": "weekday", "a": "2021-05-03"}, needles={"When did the Rivertown Bridge open to traffic?": "opened to traffic"})
+        record = self.run_case("weekday-of-opening", model)
+        self.assertEqual(model.calls, ["answer", "plan", "answer", "calc", "compose"])           # the first try said unknown; then the strategy
+        self.assertEqual(record["status"], "pass", record)
+        self.assertIn("Monday", record["output"]["answer"]["answer"])
+
+    def test_a_question_nobody_can_answer_is_unknown_after_both(self):
+        plan = {"subquestions": [{"question": "Who designed the Rivertown Bridge?", "query": "designer Rivertown Bridge"}], "needs_calculation": False}
+        model = Decompose.Model(plan, queries=["bridge architect"])
+        record = self.run_case("bridge-designer-unknown", model)
+        self.assertEqual(model.calls, ["answer", "plan", "answer", "requery", "answer"])
+        self.assertEqual(record["status"], "pass", record)
+
+
 if __name__ == "__main__":
     unittest.main()

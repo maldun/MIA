@@ -46,6 +46,7 @@ from .chat_service import ChatService
 from .chat_api import create_blueprint as create_chat_blueprint
 from .moods import MoodTracker
 from .speech_text import speech_text
+from . import research_chat
 from .audio_router import AudioRouter
 from . import behaviour
 from . import broker as broker_module
@@ -513,7 +514,21 @@ def run_chat_exchange(text, on_delta, on_emotion, should_stop):
     behaviour.record_signals(core.run_log, result.run_id, result.answer or "", node="converse")     # the speech rules only log (BF2): the answer is not changed and nobody is scolded
     return result.answer
 
-chat_service = ChatService(socketio.emit, chat_log, mood, run_chat_exchange, run_command=run_chat_command,
+def speak_answer(text):
+    """MIA says the answer of a research (not its list of sources)"""
+    spoken = speech_text(text)
+    if not spoken:
+        return
+    streamer = SpeechStreamer(get_websocket_url(address=ADDRESS, protocol=PROTOCOL), SOUND_PORT)
+    streamer.finish(spoken)
+    streamer.wait()
+
+def run_research_exchange(question, on_delta, on_emotion, should_stop):
+    """/research: the skill `research` searches, reads and answers with quotes; the steps go to the status block, the answer to the chat"""
+    return research_chat.run_research(core, question, pipeline=cfg.get(CONST.RESEARCH_PIPELINE_KEY, CONST.DEFAULT_RESEARCH_PIPELINE),
+                                      on_event=lambda event: chat_service.pipeline_event(event), should_stop=should_stop, speak=speak_answer)
+
+chat_service = ChatService(socketio.emit, chat_log, mood, run_chat_exchange, run_command=run_chat_command, run_research=run_research_exchange,
                            model_info=lambda: (comm.version, getattr(comm, "profile", None)),
                            queue_size=cfg.get(CONST.CHAT_QUEUE_KEY, 1),
                            rate_limit=(cfg.get(CONST.CHAT_RATE_KEY, 10), 60),

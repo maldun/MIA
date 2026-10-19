@@ -390,7 +390,7 @@ class ServiceTest(unittest.TestCase):
 
     def test_commands_are_listed_once(self):
         listed = {c["command"] for c in self.service_module.COMMANDS}
-        self.assertEqual(listed, {"/light!", "/full!", "/dream!", "/time!", "/goodnight!", "/break!"})
+        self.assertEqual(listed, {"/light!", "/full!", "/dream!", "/time!", "/research ", "/goodnight!", "/break!"})
         self.assertTrue(all(c["confirm"] for c in self.service_module.COMMANDS if c["command"] in ("/break!", "/goodnight!")))
 
 

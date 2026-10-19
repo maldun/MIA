@@ -40,6 +40,7 @@ except ImportError:  # used as plain script / in tests
     from chat_log import utc_now
 
 MAX_LENGTH = 8000
+RESEARCH = re.compile(r"/research(?:\s+(.*))?", re.I | re.S)        # /research followed by the question
 DELTA_INTERVAL = 0.05          # at most about 20 deltas per second per message
 CONTROL_CHARACTERS = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
 
@@ -48,6 +49,7 @@ COMMANDS = (
     {"command": "/full!", "description": "Switch back to the large model", "confirm": False},
     {"command": "/dream!", "description": "Sort and summarize MIA's memory", "confirm": False},
     {"command": "/time!", "description": "Send the current time to MIA", "confirm": False},
+    {"command": "/research ", "description": "Search the web and answer with sources: /research your question", "confirm": False},
     {"command": "/goodnight!", "description": "Dream, then shut MIA down", "confirm": True},
     {"command": "/break!", "description": "Shut MIA down", "confirm": True},
 )
@@ -62,8 +64,9 @@ def normalize_text(text):
 
 class ChatService:
     def __init__(self, emit, log, mood, run_exchange, run_command=None, model_info=None, queue_size=1,
-                 rate_limit=(10, 60), spawn=None, clock=time.monotonic):
+                 rate_limit=(10, 60), spawn=None, clock=time.monotonic, run_research=None):
         self._emit = emit
+        self._run_research = run_research          # (question, on_delta, on_emotion, should_stop) -> the answer, for /research
         self.log = log
         self.mood = mood
         self._run_exchange = run_exchange
@@ -87,6 +90,12 @@ class ChatService:
     # --- state -----------------------------------------------------------------------------------
     def is_command(self, text):
         return text.strip().lower() in self._commands
+
+    @staticmethod
+    def research_question(text):
+        """the question of "/research question" ("" for a bare /research), None when the text is no research command"""
+        match = RESEARCH.fullmatch(text.strip())
+        return None if match is None else (match.group(1) or "").strip()
 
     def status(self):
         model, profile = self._model_info()
@@ -128,12 +137,17 @@ class ChatService:
             if self._running and len(self._queue) >= self.queue_size:
                 return {"ok": False, "error": "MIA is busy, please wait until she has answered."}
             command = self.is_command(text)
+            question = self.research_question(text)
+            if question is not None and not question:
+                return {"ok": False, "error": "Write your question after /research, for example: /research how tall is the Eiffel Tower"}
+            if question is not None and self._run_research is None:
+                return {"ok": False, "error": "Research is not available."}
             record = None
             if not command:
                 record = self.log.append("user", text, client_id=client_id) if client_id else self.log.append("user", text)
                 self._emit("chat_message", record)
             queued = self._running
-            self._queue.append(("command" if command else "chat", text))
+            self._queue.append(("command" if command else "research" if question is not None else "chat", question if question is not None else text))
             self._start_worker()
         self.publish_status()
         return {"ok": True, "message": record, "queued": queued, "command": command}
@@ -192,7 +206,7 @@ class ChatService:
                 self._current = kind
                 self._stop.clear()
             try:
-                self._do_command(text) if kind == "command" else self._do_chat(text)
+                self._do_command(text) if kind == "command" else self._do_chat(text, kind)
             except Exception as exc:       # the worker must survive anything
                 self._emit("chat_error", {"message": "Something went wrong: %s" % exc})
         self.publish_status()
@@ -207,13 +221,13 @@ class ChatService:
             self.set_activity(None)
         self.note(result or "Command %s done." % command, command=command)
 
-    def _do_chat(self, text):
+    def _do_chat(self, text, task="chat"):
         message_id = self.log.new_id()
         created = utc_now()
         with self._lock:
             self._message_id, self._pipeline, self._show_pipeline = message_id, [], False
         model = self._model_info()[0]
-        self._emit("chat_start", {"id": message_id, "role": "assistant", "created": created})
+        self._emit("chat_start", {"id": message_id, "role": "assistant", "created": created, **({"task": task} if task != "chat" else {})})
         self.set_activity("thinking")
         state = {"text": "", "emotion": None, "emotions": [], "last": 0.0, "first": True}
 
@@ -235,7 +249,8 @@ class ChatService:
 
         status = "done"
         try:
-            final = self._run_exchange(text, on_delta, on_emotion, self._stop.is_set)
+            run = self._run_exchange if task == "chat" else self._run_research
+            final = run(text, on_delta, on_emotion, self._stop.is_set)
             if final is not None:
                 state["text"] = final
             if self._stop.is_set():
@@ -247,6 +262,8 @@ class ChatService:
         else:
             self.set_activity(None)
         extra = {"emotions": state["emotions"]} if len(state["emotions"]) > 1 else {}
+        if task != "chat":
+            extra["task"] = task
         with self._lock:
             steps, self._message_id = self._pipeline, None
         if steps:

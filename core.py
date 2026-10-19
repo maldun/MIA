@@ -77,9 +77,12 @@ class Core:
                 found[name] = problems
         return found
 
-    def run(self, task, inputs, **kwargs):
+    def run(self, task, inputs, pipeline=None, **kwargs):
+        """runs the skill of the task; `pipeline` ("research.decompose@1") runs another pipeline of the library under the skill's settings"""
         skill = self.skills.get(task)
         if skill is None:
             raise PipelineError("there is no skill '%s'" % task)
+        if pipeline:
+            skill = dict(skill, pipeline=pipeline)
         graph = self.graph(skill)[0]
         return self.runner.run(skill, graph, inputs, task=task, **kwargs)
