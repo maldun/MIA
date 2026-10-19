@@ -1,0 +1,53 @@
+{
+ "id": "code.calculate",
+ "version": 1,
+ "kind": "code",
+ "title": "Do the calculation a model asked for",
+ "description": "weekday, years_between, days_between, add_days over dates and years (YYYY-MM-DD, YYYY); code, not a model, calculates. Answer: {ok, text}.",
+ "tags": [
+  "research",
+  "exact"
+ ],
+ "applies_to": {
+  "tasks": [
+   "research"
+  ]
+ },
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "request"
+   ],
+   "properties": {
+    "request": {}
+   }
+  }
+ },
+ "outputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "ok",
+    "text"
+   ]
+  }
+ },
+ "params": {},
+ "body": {
+  "function": "calculate",
+  "plain": "calculating"
+ },
+ "cost": {
+  "seconds": 0.05
+ },
+ "safety": {
+  "reads_web": false,
+  "runs_code": false
+ },
+ "status": "trusted",
+ "origin": {
+  "by": "manual",
+  "note": "research.calculate, unit tested"
+ }
+}

@@ -4,6 +4,7 @@ scripted model. Nothing here says how good the pipeline is with a real model: th
 """
 import json
 import os
+import re
 import sys
 import tempfile
 import unittest
@@ -160,6 +161,161 @@ class Pipeline(unittest.TestCase):
     def test_the_dead_link_does_not_stop_the_run(self):
         records, _, _ = self.run_suite("reader", ["library-hours-dead-link"])
         self.assertNotIn(records["library-hours-dead-link"]["status"], ("error:error", "error:PipelineError"))
+
+
+class Calculations(unittest.TestCase):
+    def test_weekday_years_days_and_adding(self):
+        self.assertEqual(R.calculate({"op": "weekday", "a": "2021-05-03"})["text"], "2021-05-03 was a Monday.")
+        self.assertIn("67 calendar years", R.calculate({"op": "years_between", "a": "1954", "b": "2021-05-03"})["text"])
+        self.assertIn("8 calendar years", R.calculate({"op": "years_between", "a": "1962", "b": "1954"})["text"])
+        self.assertIn("Full years elapsed between the two dates: 66", R.calculate({"op": "years_between", "a": "1954-06-01", "b": "2021-05-03"})["text"])
+        self.assertIn("31 days", R.calculate({"op": "days_between", "a": "2021-05-03", "b": "2021-06-03"})["text"])
+        self.assertIn("2021-05-10", R.calculate({"op": "add_days", "a": "2021-05-03", "n": 7})["text"])
+
+    def test_bad_requests_are_reported_not_raised(self):
+        for request in ({"op": "weekday", "a": "May 3"}, {"op": "days_between", "a": "2021-05-03"}, {"op": "add_days", "a": "2021-05-03"}, {"op": "years_between", "a": "x", "b": "y"}, {"op": "teleport"}):
+            self.assertFalse(R.calculate(request)["ok"], request)
+        for nothing in (None, {}, {"op": "none"}, "junk"):
+            self.assertTrue(R.calculate(nothing)["ok"])
+
+
+class PlanAndFacts(unittest.TestCase):
+    def test_the_plan_is_made_safe(self):
+        plan = {"subquestions": [{"question": "When was it built?", "query": "built"}, {"question": "when was it built?", "query": "again"}, {"question": "ab", "query": "x"}, "junk",
+                                 {"question": "Who owns it?", "query": ""}] + [{"question": "Extra question %d" % i, "query": "q"} for i in range(6)], "needs_calculation": 1}
+        out = R.normalize_plan(plan, "Q")
+        self.assertEqual([s["question"] for s in out["subquestions"]][:2], ["When was it built?", "Who owns it?"])
+        self.assertEqual(len(out["subquestions"]), R.MAX_SUBQUESTIONS)
+        self.assertEqual(out["subquestions"][1]["query"], "Who owns it?")
+        self.assertEqual((out["needs_calculation"], out["single"]), (True, False))
+
+    def test_an_empty_plan_falls_back_to_the_question(self):
+        for bad in (None, {}, {"subquestions": []}, {"subquestions": "x"}):
+            out = R.normalize_plan(bad, "How tall is it?")
+            self.assertEqual((out["subquestions"], out["single"], out["needs_calculation"]), ([{"id": 1, "question": "How tall is it?", "query": "How tall is it?"}], True, False))
+
+    def test_facts_table(self):
+        subs = [{"id": 1, "question": "q1"}, {"id": 2, "question": "q2"}, {"id": 3, "question": "q3"}]
+        results = [{"status": "answered", "answer": "A1", "sources": [{"url": "u1", "quote": "quote one"}, {"url": "u2", "quote": "quote two"}]}, {"status": "unknown", "sources": []},
+                   {"status": "answered", "answer": "A3", "sources": [{"url": "u3", "quote": "quote three"}]}]
+        out = R.facts_table(subs, results)
+        self.assertEqual([f["n"] for f in out["facts"]], [1, 2, 3])
+        self.assertEqual((out["answered"], out["open"]), (2, ["q2"]))
+        self.assertEqual(out["passages"][2], {"n": 3, "url": "u3", "text": "quote three"})
+        self.assertIn("No answer was found", out["context"])
+        self.assertEqual(R.facts_table(None, None)["context"], "(nothing was found)")
+
+    def test_only_result(self):
+        self.assertEqual(R.only_result([{"status": "answered"}, {"status": "unknown"}]), {"status": "answered"})
+        self.assertEqual(R.only_result([])["status"], "unknown")
+
+    def test_top_urls_can_exclude_pages_already_read(self):
+        hits = {"results": [{"url": "https://a.example/x"}, {"url": "https://b.example/y"}, {"url": "https://c.example/z"}]}
+        self.assertEqual(R.top_urls(hits, 3, ["https://a.example/x/"]), ["https://b.example/y", "https://c.example/z"])
+
+
+class Decompose(unittest.TestCase):
+    """research.decompose over the recorded web with a model that plays each step from a table of replies"""
+    PASSAGE = re.compile(r"\[(\d+)\] [^\n]*\n<<<WEB TEXT from \S+\n(.*?)\n>>>", re.S)
+
+    class Model:
+        def __init__(self, plan, queries=None, calc=None, needles=None):
+            self.plan, self.queries, self.calc, self.needles = plan, queries or [], calc, needles or {}
+            self.calls = []
+
+        def chat(self, messages, schema=None, model=None, profile=None, options=None):
+            prompt = messages[-1]["content"]
+            if "Split the question into the smallest number" in prompt:
+                self.calls.append("plan")
+                return json.dumps(self.plan)
+            if "did not give an answer" in prompt:
+                self.calls.append("requery")
+                return json.dumps({"query": self.queries.pop(0)})
+            if "Choose it:" in prompt:
+                self.calls.append("calc")
+                return json.dumps(self.calc)
+            if "Write the final answer" in prompt:
+                self.calls.append("compose")
+                return self.compose(prompt)
+            self.calls.append("answer")
+            return self.read(prompt)
+
+        def read(self, prompt):
+            question = prompt.split("Question:\n", 1)[1].split("\n", 1)[0]
+            for number, text in Decompose.PASSAGE.findall(prompt):
+                needle = self.needles.get(question)
+                if needle and needle in text:
+                    quote = re.search(r"[^.\n]*%s[^.\n]*\." % re.escape(needle), text).group(0).strip()
+                    return json.dumps({"answer": quote, "status": "answered", "sources": [{"n": int(number), "quote": quote}]})
+            return json.dumps({"answer": "The passages do not say; they mention something else.", "status": "unknown", "sources": []})
+
+        def compose(self, prompt):
+            facts = prompt.split("Facts (each with the sub-question it answers and a quote):\n", 1)[1].split("\n\nCalculation", 1)[0]
+            quotes = re.findall(r"\[(\d+)\] quote from \S+: \"(.*?)\"$", facts, re.M)
+            calc = prompt.split("Calculation (by a program):\n", 1)[1].split("\n\nWrite", 1)[0]
+            if not quotes:
+                return json.dumps({"answer": "No fact was found.", "status": "unknown", "sources": []})
+            return json.dumps({"answer": "%s | %s" % (calc, quotes[0][1]), "status": "answered", "sources": [{"n": int(n), "quote": q} for n, q in quotes]})
+
+    def run_case(self, case_id, model):
+        core = Core(os.path.join(REPO, "skills"), Library(os.path.join(REPO, "library")), tempfile.mkdtemp(), model=model)
+        run = H.Harness(core).run(SUITE, {"name": "decompose", "pipeline": "research.decompose@1"}, only=[case_id])
+        return run.records[0]
+
+    def test_a_simple_question_costs_one_planning_call_more(self):
+        plan = {"subquestions": [{"question": "When did the Rivertown Bridge open to traffic?", "query": "Rivertown Bridge opened traffic"}], "needs_calculation": False}
+        model = self.Model(plan, needles={"When did the Rivertown Bridge open to traffic?": "opened to traffic"})
+        record = self.run_case("bridge-date", model)
+        self.assertEqual(model.calls, ["plan", "answer"])
+        self.assertEqual(record["status"], "pass", record)
+
+    def test_the_weekday_is_calculated_by_code(self):
+        plan = {"subquestions": [{"question": "When did the Rivertown Bridge open to traffic?", "query": "Rivertown Bridge opened traffic"}], "needs_calculation": True}
+        model = self.Model(plan, calc={"op": "weekday", "a": "2021-05-03"}, needles={"When did the Rivertown Bridge open to traffic?": "opened to traffic"})
+        record = self.run_case("weekday-of-opening", model)
+        self.assertEqual(model.calls, ["plan", "answer", "calc", "compose"])
+        self.assertEqual(record["status"], "pass", record)
+        self.assertIn("Monday", record["output"]["answer"]["answer"])
+
+    def test_two_facts_and_a_calculation(self):
+        plan = {"subquestions": [{"question": "When was the Tarn Museum founded?", "query": "Tarn Museum founded"}, {"question": "When did the Rivertown Bridge open?", "query": "Rivertown Bridge opened"}],
+                "needs_calculation": True}
+        model = self.Model(plan, calc={"op": "years_between", "a": "1954", "b": "2021-05-03"},
+                           needles={"When was the Tarn Museum founded?": "founded in 1954", "When did the Rivertown Bridge open?": "opened to traffic"})
+        record = self.run_case("years-between", model)
+        self.assertEqual(model.calls, ["plan", "answer", "answer", "calc", "compose"])
+        self.assertEqual(record["status"], "pass", record)
+        self.assertEqual(record["score"]["unanchored"], [])
+
+    def test_a_retry_only_for_the_sub_question_that_stays_open(self):
+        plan = {"subquestions": [{"question": "When was the Tarn Museum founded?", "query": "zzzz qqqq"}, {"question": "When did the Rivertown Bridge open?", "query": "Rivertown Bridge opened"}],
+                "needs_calculation": True}
+        model = self.Model(plan, queries=["Tarn Museum founded"], calc={"op": "years_between", "a": "1954", "b": "2021"},
+                           needles={"When was the Tarn Museum founded?": "founded in 1954", "When did the Rivertown Bridge open?": "opened to traffic"})
+        record = self.run_case("years-between", model)
+        self.assertEqual(model.calls, ["plan", "answer", "requery", "answer", "answer", "calc", "compose"])    # the first search found nothing: a requery and a second answer, only for that one
+        self.assertEqual(record["status"], "pass", record)
+
+    def test_nothing_found_even_after_the_retry_is_unknown(self):
+        plan = {"subquestions": [{"question": "Who designed the Rivertown Bridge?", "query": "designer Rivertown Bridge"}], "needs_calculation": False}
+        model = self.Model(plan, queries=["bridge architect"])
+        record = self.run_case("bridge-designer-unknown", model)
+        self.assertEqual(model.calls, ["plan", "answer", "requery", "answer"])
+        self.assertEqual(record["status"], "pass", record)
+
+    def test_a_garbage_plan_falls_back_to_the_question(self):
+        model = self.Model({"subquestions": [], "needs_calculation": False}, needles={"When did the Rivertown Bridge open to traffic?": "opened to traffic"})
+        record = self.run_case("bridge-date", model)
+        self.assertEqual(model.calls[:2], ["plan", "answer"])
+        self.assertEqual(record["status"], "pass", record)
+
+    def test_an_invented_quote_in_the_composed_answer_is_demoted(self):
+        plan = {"subquestions": [{"question": "When did the Rivertown Bridge open to traffic?", "query": "Rivertown Bridge opened traffic"}], "needs_calculation": True}
+        model = self.Model(plan, calc={"op": "weekday", "a": "2021-05-03"}, needles={"When did the Rivertown Bridge open to traffic?": "opened to traffic"})
+        model.compose = lambda prompt: json.dumps({"answer": "Tuesday", "status": "answered", "sources": [{"n": 1, "quote": "It opened on a Tuesday."}]})
+        record = self.run_case("weekday-of-opening", model)
+        self.assertEqual(record["status"], "fail")
+        self.assertEqual((record["score"]["status"], record["score"]["unanchored"]), ("unknown", []))
 
 
 if __name__ == "__main__":

@@ -1,0 +1,94 @@
+{
+ "id": "view.research_plan",
+ "version": 1,
+ "kind": "model",
+ "title": "Split a question into lookups",
+ "description": "The model splits a question into the smallest number of sub-questions that one fact on a page can answer, with a search query each, and says whether a calculation is needed. Answer: {subquestions, needs_calculation}.",
+ "tags": [
+  "view",
+  "research",
+  "structured"
+ ],
+ "applies_to": {
+  "tasks": [
+   "research"
+  ]
+ },
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "question"
+   ],
+   "properties": {
+    "question": {
+     "type": "string"
+    }
+   }
+  }
+ },
+ "outputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "subquestions",
+    "needs_calculation"
+   ]
+  }
+ },
+ "params": {},
+ "body": {
+  "system": "You plan how to look something up on the web. You are brief and you never answer the question yourself.",
+  "template": "Question:\n{{question}}\n\nSplit the question into the smallest number of sub-questions that can each be answered by ONE fact on a web page.\n- A question that one fact answers gets exactly ONE sub-question: the question itself.\n- If the answer needs facts from different places (two things that are compared or combined, or a fact about something that has to be identified first), give one sub-question per fact. At most 4.\n- Do not guess names that the question does not give.\n- For each sub-question give a short search query: names and key words only, no question words.\n- Set needs_calculation to true if the final answer needs a calculation or a calendar fact from the facts (a difference of years or days, the weekday of a date, a date plus days). Do not calculate yourself.\n\nReply with JSON: {\"subquestions\": [{\"question\": ..., \"query\": ...}], \"needs_calculation\": true | false}.",
+  "schema": {
+   "type": "object",
+   "required": [
+    "subquestions",
+    "needs_calculation"
+   ],
+   "properties": {
+    "subquestions": {
+     "type": "array",
+     "maxItems": 4,
+     "items": {
+      "type": "object",
+      "required": [
+       "question",
+       "query"
+      ],
+      "properties": {
+       "question": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 300
+       },
+       "query": {
+        "type": "string",
+        "minLength": 2,
+        "maxLength": 200
+       }
+      }
+     }
+    },
+    "needs_calculation": {
+     "type": "boolean"
+    }
+   }
+  },
+  "retries": 1,
+  "plain": "planning the lookups"
+ },
+ "cost": {
+  "seconds": 8,
+  "tokens": 900
+ },
+ "safety": {
+  "reads_web": false,
+  "runs_code": false
+ },
+ "status": "draft",
+ "origin": {
+  "by": "manual",
+  "note": "not measured yet: draft until the suite 'research' has been run with it"
+ }
+}

@@ -1,0 +1,58 @@
+{
+ "id": "code.facts_table",
+ "version": 1,
+ "kind": "code",
+ "title": "The verified answers as numbered facts",
+ "description": "Turns the answers of the sub-questions into numbered facts with their quotes (and into passages to anchor the final answer again). Answer: {facts, passages, context, answered, open}.",
+ "tags": [
+  "research",
+  "exact"
+ ],
+ "applies_to": {
+  "tasks": [
+   "research"
+  ]
+ },
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "subquestions",
+    "results"
+   ],
+   "properties": {
+    "subquestions": {},
+    "results": {}
+   }
+  }
+ },
+ "outputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "facts",
+    "passages",
+    "context",
+    "answered",
+    "open"
+   ]
+  }
+ },
+ "params": {},
+ "body": {
+  "function": "facts_table",
+  "plain": "collecting the facts"
+ },
+ "cost": {
+  "seconds": 0.05
+ },
+ "safety": {
+  "reads_web": false,
+  "runs_code": false
+ },
+ "status": "trusted",
+ "origin": {
+  "by": "manual",
+  "note": "research.facts_table, unit tested"
+ }
+}

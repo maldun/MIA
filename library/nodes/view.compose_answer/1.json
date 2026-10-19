@@ -1,0 +1,111 @@
+{
+ "id": "view.compose_answer",
+ "version": 1,
+ "kind": "model",
+ "title": "Compose the final answer from verified facts",
+ "description": "One model call over the verified facts of all sub-questions and the result of the calculation. The answer must go through code.anchor_answer against the facts.",
+ "tags": [
+  "view",
+  "research",
+  "structured"
+ ],
+ "applies_to": {
+  "tasks": [
+   "research"
+  ]
+ },
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "question",
+    "facts",
+    "calculation"
+   ],
+   "properties": {
+    "question": {
+     "type": "string"
+    },
+    "facts": {
+     "type": "string"
+    },
+    "calculation": {
+     "type": "string"
+    }
+   }
+  }
+ },
+ "outputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "answer",
+    "status",
+    "sources"
+   ]
+  }
+ },
+ "params": {},
+ "body": {
+  "system": "You are a careful researcher. You answer only from the facts you are given, you quote exactly, and you say \"unknown\" when they do not suffice.",
+  "template": "Question:\n{{question}}\n\nFacts (each with the sub-question it answers and a quote):\n{{facts}}\n\nCalculation (by a program):\n{{calculation}}\n\nWrite the final answer to the question using ONLY the numbered facts and the calculation. Rules:\n- Copy every fact you use as a quote, EXACTLY as written in the fact, and give its number n.\n- The calculation was done by a program and is correct: use its result as it is.\n- If the facts or the calculation do not give the answer, set status to \"unknown\" and say briefly which fact is missing. Do not use what you know from memory.\n- If facts disagree, say so and give both values with their quotes.\n\nReply with JSON: {\"answer\": ..., \"status\": \"answered\" | \"unknown\", \"sources\": [{\"n\": fact number, \"quote\": exact words}]}.",
+  "schema": {
+   "type": "object",
+   "required": [
+    "answer",
+    "status",
+    "sources"
+   ],
+   "properties": {
+    "answer": {
+     "type": "string",
+     "minLength": 3,
+     "maxLength": 1200
+    },
+    "status": {
+     "enum": [
+      "answered",
+      "unknown"
+     ]
+    },
+    "sources": {
+     "type": "array",
+     "maxItems": 6,
+     "items": {
+      "type": "object",
+      "required": [
+       "n",
+       "quote"
+      ],
+      "properties": {
+       "n": {
+        "type": "integer",
+        "minimum": 1
+       },
+       "quote": {
+        "type": "string",
+        "minLength": 4,
+        "maxLength": 400
+       }
+      }
+     }
+    }
+   }
+  },
+  "retries": 1,
+  "plain": "composing the answer"
+ },
+ "cost": {
+  "seconds": 10,
+  "tokens": 900
+ },
+ "safety": {
+  "reads_web": false,
+  "runs_code": false
+ },
+ "status": "draft",
+ "origin": {
+  "by": "manual",
+  "note": "not measured yet: draft until the suite 'research' has been run with it"
+ }
+}

@@ -1,0 +1,90 @@
+{
+ "id": "view.calc_request",
+ "version": 1,
+ "kind": "model",
+ "title": "Ask for a calculation",
+ "description": "The model names the calculation (weekday, years_between, days_between, add_days) and its dates from the facts; code does the calculation. Answer: {op, a, b, n}.",
+ "tags": [
+  "view",
+  "research",
+  "structured"
+ ],
+ "applies_to": {
+  "tasks": [
+   "research"
+  ]
+ },
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "question",
+    "facts"
+   ],
+   "properties": {
+    "question": {
+     "type": "string"
+    },
+    "facts": {
+     "type": "string"
+    }
+   }
+  }
+ },
+ "outputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "op"
+   ]
+  }
+ },
+ "params": {},
+ "body": {
+  "system": "You decide which calculation a question needs. You never calculate yourself.",
+  "template": "Question:\n{{question}}\n\nFacts found:\n{{facts}}\n\nThe final answer needs a calculation. Choose it:\n- weekday: the weekday of the date a (YYYY-MM-DD)\n- years_between: calendar years between a and b (years YYYY or dates)\n- days_between: days between the dates a and b (YYYY-MM-DD)\n- add_days: the date a plus n days\n- none: no calculation helps\nUse ONLY dates and years that appear in the facts, written as YYYY-MM-DD or YYYY.\n\nReply with JSON: {\"op\": ..., \"a\": ..., \"b\": ..., \"n\": ...} (leave out what the calculation does not use).",
+  "schema": {
+   "type": "object",
+   "required": [
+    "op"
+   ],
+   "properties": {
+    "op": {
+     "enum": [
+      "weekday",
+      "years_between",
+      "days_between",
+      "add_days",
+      "none"
+     ]
+    },
+    "a": {
+     "type": "string",
+     "maxLength": 30
+    },
+    "b": {
+     "type": "string",
+     "maxLength": 30
+    },
+    "n": {
+     "type": "integer"
+    }
+   }
+  },
+  "retries": 1,
+  "plain": "asking for a calculation"
+ },
+ "cost": {
+  "seconds": 4,
+  "tokens": 900
+ },
+ "safety": {
+  "reads_web": false,
+  "runs_code": false
+ },
+ "status": "draft",
+ "origin": {
+  "by": "manual",
+  "note": "not measured yet: draft until the suite 'research' has been run with it"
+ }
+}

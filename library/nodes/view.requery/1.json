@@ -1,0 +1,79 @@
+{
+ "id": "view.requery",
+ "version": 1,
+ "kind": "model",
+ "title": "Write another search query",
+ "description": "After a search that did not answer: a different query, using what the reader said was missing. Answer: {query}.",
+ "tags": [
+  "view",
+  "research",
+  "structured"
+ ],
+ "applies_to": {
+  "tasks": [
+   "research"
+  ]
+ },
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "question",
+    "previous_query",
+    "note"
+   ],
+   "properties": {
+    "question": {
+     "type": "string"
+    },
+    "previous_query": {
+     "type": "string"
+    },
+    "note": {
+     "type": "string"
+    }
+   }
+  }
+ },
+ "outputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "query"
+   ]
+  }
+ },
+ "params": {},
+ "body": {
+  "system": "You write web search queries. You never repeat a query that failed.",
+  "template": "The search for this question did not give an answer.\nQuestion: {{question}}\nFirst search query: {{previous_query}}\nWhat the reader said about the pages: {{note}}\n\nWrite ONE different search query: other key words, synonyms, or the names that the reader mentions. Names and key words only, no question words. Do not repeat the first query.\n\nReply with JSON: {\"query\": ...}.",
+  "schema": {
+   "type": "object",
+   "required": [
+    "query"
+   ],
+   "properties": {
+    "query": {
+     "type": "string",
+     "minLength": 2,
+     "maxLength": 200
+    }
+   }
+  },
+  "retries": 1,
+  "plain": "trying another search"
+ },
+ "cost": {
+  "seconds": 4,
+  "tokens": 900
+ },
+ "safety": {
+  "reads_web": false,
+  "runs_code": false
+ },
+ "status": "draft",
+ "origin": {
+  "by": "manual",
+  "note": "not measured yet: draft until the suite 'research' has been run with it"
+ }
+}

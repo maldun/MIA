@@ -1,0 +1,47 @@
+{
+ "id": "code.only_result",
+ "version": 1,
+ "kind": "code",
+ "title": "The first result of a list",
+ "description": "A single lookup needs no composing: its answer is the answer.",
+ "tags": [
+  "research",
+  "exact"
+ ],
+ "applies_to": {
+  "tasks": [
+   "research"
+  ]
+ },
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "results"
+   ],
+   "properties": {
+    "results": {}
+   }
+  }
+ },
+ "outputs": {
+  "schema": {}
+ },
+ "params": {},
+ "body": {
+  "function": "only_result",
+  "plain": "taking the answer"
+ },
+ "cost": {
+  "seconds": 0.05
+ },
+ "safety": {
+  "reads_web": false,
+  "runs_code": false
+ },
+ "status": "trusted",
+ "origin": {
+  "by": "manual",
+  "note": "research.only_result, unit tested"
+ }
+}

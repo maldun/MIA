@@ -1,0 +1,58 @@
+{
+ "id": "code.normalize_plan",
+ "version": 1,
+ "kind": "code",
+ "title": "Make the plan of a model safe",
+ "description": "One to four sub-questions with a query each (the question itself when the plan is empty), whether the answer needs a calculation, whether it is a single lookup. Answer: {subquestions, needs_calculation, single}.",
+ "tags": [
+  "research",
+  "exact"
+ ],
+ "applies_to": {
+  "tasks": [
+   "research"
+  ]
+ },
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "plan",
+    "question"
+   ],
+   "properties": {
+    "plan": {},
+    "question": {
+     "type": "string"
+    }
+   }
+  }
+ },
+ "outputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "subquestions",
+    "needs_calculation",
+    "single"
+   ]
+  }
+ },
+ "params": {},
+ "body": {
+  "function": "normalize_plan",
+  "plain": "checking the plan"
+ },
+ "cost": {
+  "seconds": 0.05
+ },
+ "safety": {
+  "reads_web": false,
+  "runs_code": false
+ },
+ "status": "trusted",
+ "origin": {
+  "by": "manual",
+  "note": "research.normalize_plan, unit tested"
+ }
+}

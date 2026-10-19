@@ -1,0 +1,56 @@
+{
+ "id": "code.top_urls",
+ "version": 2,
+ "kind": "code",
+ "title": "The first addresses of a search result",
+ "description": "The first n distinct http(s) addresses of a search result, in order, without those in `exclude` (pages already read).",
+ "tags": [
+  "research",
+  "exact"
+ ],
+ "applies_to": {
+  "tasks": [
+   "research"
+  ]
+ },
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "hits"
+   ],
+   "properties": {
+    "hits": {},
+    "exclude": {
+     "type": "array"
+    }
+   }
+  }
+ },
+ "outputs": {
+  "schema": {}
+ },
+ "params": {
+  "n": {
+   "default": 3,
+   "description": "how many pages to read"
+  }
+ },
+ "body": {
+  "function": "top_urls",
+  "plain": "choosing the pages to read"
+ },
+ "cost": {
+  "seconds": 0.05
+ },
+ "safety": {
+  "reads_web": false,
+  "runs_code": false
+ },
+ "status": "trusted",
+ "origin": {
+  "by": "manual",
+  "parent": "code.top_urls@1",
+  "note": "research.top_urls with `exclude`: a second search reads new pages"
+ }
+}
