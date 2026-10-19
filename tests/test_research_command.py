@@ -103,7 +103,7 @@ class Way(unittest.TestCase):
 
     def test_a_question_without_an_answer_is_said_honestly_and_not_spoken_as_fact(self):
         spoken = []
-        text = RC.run_research(self.core(TR.Scripted("unknown")), "Who designed the Rivertown Bridge?", speak=spoken.append)
+        text = RC.run_research(self.core(TR.Scripted("unknown")), "Who designed the Rivertown Bridge?", pipeline="research.baseline@1", speak=spoken.append)
         self.assertNotIn("Sources:", text)
         self.assertEqual(spoken, [])
 

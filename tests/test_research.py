@@ -125,7 +125,7 @@ class Pipeline(unittest.TestCase):
         tmp = tempfile.mkdtemp()
         model = Scripted(mode)
         core = Core(os.path.join(REPO, "skills"), Library(os.path.join(REPO, "library")), tmp, model=model)
-        run = H.Harness(core).run(SUITE, {"name": mode}, only=only)
+        run = H.Harness(core).run(SUITE, {"name": mode, "pipeline": "research.baseline@1"}, only=only)
         return {r["case"]: r for r in run.records}, model, run
 
     def test_the_pipeline_reads_the_recorded_web_and_answers_with_a_quote(self):
