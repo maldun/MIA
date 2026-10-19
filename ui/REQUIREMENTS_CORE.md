@@ -483,6 +483,34 @@ The goal: unwanted behaviour is **detected**, **recorded** and **changes later b
 - MM7. Open research questions: how much of the benefit of consolidation comes from structure (records with provenance) and how much from retrieval? Does batch consolidation at rest lose measurable quality compared
   with eager writes? Do lessons (procedural memory) reduce rule violations measurably compared with a longer system prompt?
 
+## 13b. Strategies: split a task so that small models can do the parts (decided 2026-10-19)
+
+Idea: a small model gets further with smarter processes than with a bigger prompt. A **strategy** is a pipeline (4) that turns a task into small subtasks, gives each a **target** a check can test, runs them with small contexts and
+consolidates the results. It stays a graph of library nodes (4a): nothing here needs a new kind of thing, only a plan that is data passed between nodes. First user: the research task (13.1), built after its test suite.
+
+- ST1. **Plan as data.** A `plan` node returns a list of subtasks `{id, goal, inputs, target, budget}`; a following `map` runs them. A **target** is something code can test (at least 2 independent sources, a number with a unit, every
+  claim has an anchor quote that occurs in its page, an answer or an explicit "open"), never a model's impression. A plan also has an overall done-condition.
+- ST2. **Small contexts.** A subtask sees only its goal and its own material (one sub-question and a few passages), not the whole task. Outputs are schema-bound and anchored (quote check) or discarded, as in extraction.
+- ST3. **Consolidation by code first.** Merging answers, conflict flags between sources, dropping what has no anchor and the source list are code. A model writes the draft only from the verified material, and a check finds sentences
+  of the draft without an anchor.
+- ST4. **Fast first, calls on demand.** The first version of a strategy is cheap (target: well under 15 model calls per question on the light model). Further calls are requested only for unmet targets: a gap check names the
+  open subtasks and failed targets and starts a follow-up round for exactly those (a loop with a limit of 2, 13.1 step 8). A strategy that always spends its maximum is a defect. Calls, seconds and rounds are measured (9).
+- ST5. **Templates and challengers (hybrid).** A task type has an **active template**: a plan structure in the library (comparison, "how many", "who/when/where", pros and cons, ...; versioned, with status as every entry). The model
+  may propose a **free plan** for a request. Free plans are never trusted by default:
+  1. a challenger plan runs next to the active template on the same request, or on a share of requests (a **shadow run**: logged, not shown) or on one view/branch of the pipeline only;
+  2. both are scored by the same cheap signals: targets met, anchored share, verifier pass rate, calls, seconds, and the user's signals where there are some (13a BF2);
+  3. if the challenger is clearly better over enough requests (the same statistics as in 9, never one run), it becomes a new version of the template (draft, then tested, then active, with the old one kept);
+  4. if it is worse, the old template is used again, now and for that request (**fallback**), and the failed plan is kept as a negative example with its numbers (a lesson for later planning, 13a).
+  This is the contextual bandit of 8 (level 2) with plan structures as the arms; the ladder and its rule hold: it works with fixed defaults, learned choices are logged next to the default choice, and everything can be switched off.
+- ST6. **Views.** A challenger can change one view at a time (the planning prompt, the extraction view, the verification style) so that a gain can be attributed. A new variant of a view is a new node version (4a) and is compared
+  with the harness before it replaces anything.
+- ST7. **Visible steps.** The subtasks are the steps of the status block (5): the playful line plus the accurate text in brackets ("sub-question 2 of 4: how tall is the tower"), with targets met or open in the expanded block.
+  Shadow runs are marked as such in the log, not in the chat.
+- ST8. **Tests first (9).** The research suite (recorded pages, `FixtureWebSession`) holds questions with known answers, conflicting sources, an unanswerable question and a page with injected instructions. Variants: (a) one big prompt
+  with all passages (no strategy), (b) decompose, execute, consolidate, (c) with the gap round. Metrics: answer correct, every claim anchored, correct abstention, calls, seconds. Strategies are claimed better only with repeats.
+- ST9. Open research questions: how much of a gain comes from the decomposition and how much from the checks and anchoring? Do small plan templates generalise across questions? How fast can a challenger be judged with the
+  few requests a single user produces (sample sizes, sequential tests)?
+
 ## 14. References
 
 Marked [S] were found in the web search of this project phase (2026 papers: claims are from search summaries and must be read before they are relied upon). The others are
