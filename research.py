@@ -3,6 +3,8 @@ The code steps of the research pipelines (ui/REQUIREMENTS_CORE.md 13.1, 13b). Th
 
   top_urls(hits, n)                                  the first n distinct addresses of a search result
   collect_passages(question, pages, ...)             the passages of the fetched pages that share most words with the question, numbered, within a character budget, rendered as untrusted web text
+  check_plan(plan, question)                         normalize_plan plus the checks of 13b ST11: what asks for what the question states, what has little to do with the question, near-duplicates,
+                                                     multi-step plans that lose the question, the question's own words for a single lookup, calculations flagged by wording; every change is reported
   normalize_plan(plan, question)                     the plan of a model made safe: one to four sub-questions with a query each (the question itself when the plan is empty), and whether it is a single lookup
   facts_table(subquestions, results)                 the verified answers of the sub-questions as numbered facts for the final answer (and as passages to anchor it again)
   calculate(request)                                 the calculation a model asked for, done by code: weekday, years_between, days_between, add_days (dates as YYYY-MM-DD, years as YYYY)
@@ -111,6 +113,82 @@ def normalize_plan(plan, question):
     return {"subquestions": subs, "needs_calculation": needs, "single": len(subs) == 1}
 
 
+_ASK_WORDS = {"which", "what", "where", "when", "who", "whom", "whose", "how", "does", "did", "there"}
+_NAME_OF = re.compile(r"\bnames? of (?:the )?([A-Z][\w'-]*(?:\s+[A-Z][\w'-]*)*)\s*\??$")      # "the name of the Tarn Museum": a proper name that the question has already
+_COMPOUND = re.compile(r"\b(?:or|than|both|each|between|compare|difference|older|younger|longer|shorter|bigger|larger|smaller|taller|earlier|later)\b"
+                       r"|,\s*and\b|\band\s+(?:when|who|what|where|how|which|by how)\b|\bof the\b.*\bof the\b|\bthat (?!is\b|are\b)\w+|\b(?:where|whose)\s+(?!is\b|are\b)\w+"
+                       r"|(?<=\w\s)\bwho\s+(?!is\b|are\b)\w+", re.I)
+_CALCULATION = re.compile(r"\b(day of the week|what day|which day|weekday|how many (?:years|days|months|weeks)|(?:years?|days?|months?) (?:older|younger|earlier|later|between|passed|apart)|older|younger|difference|"
+                          r"how much (?:more|less|longer|shorter|bigger|smaller|taller)|by how many)\b", re.I)
+MIN_SHARED = 2             # a lookup must share this many content words with the question
+MIN_COVERAGE = 0.6         # a plan of several lookups must keep this share of the question's content words
+SIMILAR = 0.7              # lookups with this share of their words in common are the same lookup
+
+
+def _stems(text):
+    """the content words of a text, cut to four letters (works = work, founded = founding)"""
+    return {w[:4] for w in re.findall(r"[^\W_]+", str(text).casefold()) if len(w) >= 3 and w not in _STOP_WORDS and w not in _ASK_WORDS}
+
+
+def _same_lookup(a, b):
+    """two lookups are the same when one has no word the other lacks, or when they share SIMILAR of their words"""
+    return bool(a and b) and (a <= b or b <= a or len(a & b) / len(a | b) >= SIMILAR)
+
+
+def check_plan(plan, question):
+    """normalize_plan plus the checks of 13b ST11. Returns the plan with "checks": [{rule, detail}] (what was changed and why) and "fallback": True when the plan was replaced by the question itself."""
+    base = normalize_plan(plan, question)
+    subs, checks = list(base["subquestions"]), []
+    wanted = _stems(question)
+    if len(subs) > 1 and not _COMPOUND.search(str(question)):
+        checks.append({"rule": "simple question", "detail": "the question has no sign of a comparison, a chain or two questions in one: the question itself is the only lookup (the planner wrote %d)" % len(subs)})
+        subs = []
+    if len(subs) > 1:
+        kept = []
+        for sub in subs:
+            own = _stems(sub["question"])
+            named = _NAME_OF.search(sub["question"].strip())
+            if named and named.group(1).casefold() in str(question).casefold():
+                checks.append({"rule": "nothing new", "detail": "dropped %r: it asks for the name of %s, which the question already names" % (sub["question"], named.group(1))})
+            elif len(own & wanted) < MIN_SHARED:
+                checks.append({"rule": "off topic", "detail": "dropped %r: it shares fewer than %d content words with the question" % (sub["question"], MIN_SHARED)})
+            else:
+                kept.append(sub)
+        subs = kept
+    merged = []
+    for sub in subs:
+        own = _stems(sub["question"])
+        twin = next((m for m in merged if own and _same_lookup(own, _stems(m["question"]))), None)
+        if twin is None:
+            merged.append(sub)
+        elif own > _stems(twin["question"]):                      # the later one says everything the earlier said and more: it replaces it
+            checks.append({"rule": "redundant", "detail": "dropped %r: %r says the same and more" % (twin["question"], sub["question"])})
+            merged[merged.index(twin)] = sub
+        else:
+            checks.append({"rule": "redundant", "detail": "dropped %r: the same lookup as %r" % (sub["question"], twin["question"])})
+    subs = merged
+    fallback = False
+    if len(subs) > 1:
+        covered = set().union(*(_stems(s["question"] + " " + s["query"]) for s in subs))
+        share = len(covered & wanted) / len(wanted) if wanted else 1.0
+        if share < MIN_COVERAGE:
+            checks.append({"rule": "coverage", "detail": "the plan keeps only %.0f%% of the question's content words: the question itself is used" % (100 * share)})
+            subs, fallback = [], True
+    if not subs:
+        subs, fallback = [{"id": 1, "question": str(question), "query": str(question)}], True
+    if len(subs) == 1 and (subs[0]["question"].strip() != str(question).strip() or subs[0]["query"].strip() != str(question).strip()):
+        if not fallback:
+            checks.append({"rule": "verbatim", "detail": "a single lookup keeps the question's own words (was %r)" % subs[0]["question"]})
+        subs = [{"id": 1, "question": str(question), "query": str(question)}]
+    for index, sub in enumerate(subs, 1):
+        sub["id"] = index
+    needs = base["needs_calculation"]
+    if not needs and _CALCULATION.search(str(question)):
+        needs = True
+        checks.append({"rule": "calculation", "detail": "the wording of the question asks for a calculation"})
+    return {"subquestions": subs, "needs_calculation": needs, "single": len(subs) == 1, "checks": checks, "fallback": fallback}
+
+
 def only_result(results):
     return results[0] if isinstance(results, list) and results else {"answer": NO_ANSWER, "status": "unknown", "sources": []}
 
@@ -177,4 +255,4 @@ def calculate(request):
 
 
 FUNCTIONS = {"top_urls": top_urls, "collect_passages": collect_passages, "anchor_answer": anchor_answer, "normalize_plan": normalize_plan, "facts_table": facts_table,
-             "calculate": calculate, "only_result": only_result}
+             "calculate": calculate, "only_result": only_result, "check_plan": check_plan}

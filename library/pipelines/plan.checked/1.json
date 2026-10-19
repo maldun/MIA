@@ -1,0 +1,57 @@
+{
+ "id": "plan.checked",
+ "version": 1,
+ "title": "Plan a question as free sub-questions, then check the plan in code",
+ "description": "Variant (B) of 13b ST13: the planner of plan.free, then code.check_plan (router for simple questions, identity, relevance, redundancy, coverage, verbatim single lookup, calculation by wording). The answer is the plan, with the list of checks that changed it.",
+ "goal": "a plan",
+ "tags": [
+  "plan",
+  "research",
+  "checked"
+ ],
+ "applies_to": {
+  "tasks": [
+   "research"
+  ]
+ },
+ "cost_class": "cheap",
+ "result": "plan",
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "question"
+   ],
+   "properties": {
+    "question": {
+     "type": "string"
+    }
+   }
+  }
+ },
+ "nodes": [
+  {
+   "id": "plan",
+   "use": "view.research_plan@1",
+   "wire": {
+    "question": "$input.question"
+   },
+   "output": "rawplan"
+  },
+  {
+   "id": "norm",
+   "use": "code.check_plan@1",
+   "wire": {
+    "plan": "$rawplan",
+    "question": "$input.question"
+   },
+   "output": "plan"
+  }
+ ],
+ "status": "draft",
+ "origin": {
+  "by": "manual",
+  "parent": "plan.free@1",
+  "note": "variant B of the planner; measured with the suite plans"
+ }
+}

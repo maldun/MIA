@@ -1,0 +1,399 @@
+{
+ "id": "research.escalate",
+ "version": 2,
+ "title": "Research: the cheap try first, decomposition only when it finds nothing",
+ "description": "13b ST4, fast first and calls on demand: research.baseline runs first (one search, three pages, one model call); only if it ends without an answer supported by a quote, the question is decomposed (research.decompose: sub-questions, a retry for open ones, a calculation by code, a composed answer) and that answer replaces it. A question the baseline answers costs what the baseline costs. Version 2 checks the plan in code (code.check_plan) before it runs.",
+ "goal": "an answer with quotes, or unknown",
+ "tags": [
+  "research",
+  "strategy",
+  "escalate"
+ ],
+ "applies_to": {
+  "tasks": [
+   "research"
+  ]
+ },
+ "cost_class": "normal",
+ "result": "answer",
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "question"
+   ],
+   "properties": {
+    "question": {
+     "type": "string"
+    }
+   }
+  }
+ },
+ "nodes": [
+  {
+   "id": "search",
+   "use": "tool.web_search@1",
+   "wire": {
+    "query": "$input.question"
+   },
+   "output": "hits",
+   "plain": "searching for: {{input.question}}"
+  },
+  {
+   "id": "pick",
+   "use": "code.top_urls@1",
+   "wire": {
+    "hits": "$hits"
+   },
+   "output": "urls"
+  },
+  {
+   "id": "read",
+   "kind": "map",
+   "over": "$urls",
+   "as": "address",
+   "collect": "page",
+   "workers": 1,
+   "plain": "reading the pages",
+   "body": [
+    {
+     "id": "fetch",
+     "use": "tool.fetch_page@1",
+     "wire": {
+      "url": "$address"
+     },
+     "output": "page",
+     "on_error": "skip",
+     "plain": "reading {{address}}"
+    }
+   ],
+   "output": "pages"
+  },
+  {
+   "id": "passages",
+   "use": "code.collect_passages@1",
+   "wire": {
+    "question": "$input.question",
+    "pages": "$pages"
+   },
+   "output": "material"
+  },
+  {
+   "id": "write",
+   "use": "view.answer_from_passages@1",
+   "wire": {
+    "question": "$input.question",
+    "context": "$material.context"
+   },
+   "output": "draft"
+  },
+  {
+   "id": "check",
+   "use": "code.anchor_answer@1",
+   "wire": {
+    "answer": "$draft",
+    "passages": "$material.passages"
+   },
+   "output": "answer"
+  },
+  {
+   "id": "escalate",
+   "kind": "branch",
+   "plain": "the first try found no supported answer: splitting the question",
+   "if": {
+    "ref": "answer.status",
+    "op": "!=",
+    "value": "answered"
+   },
+   "then": [
+    {
+     "id": "plan",
+     "use": "view.research_plan@1",
+     "wire": {
+      "question": "$input.question"
+     },
+     "output": "rawplan"
+    },
+    {
+     "id": "norm",
+     "use": "code.check_plan@1",
+     "wire": {
+      "plan": "$rawplan",
+      "question": "$input.question"
+     },
+     "output": "plan"
+    },
+    {
+     "id": "lookups",
+     "kind": "map",
+     "over": "$plan.subquestions",
+     "as": "sub",
+     "collect": "attempt",
+     "workers": 1,
+     "plain": "looking up the sub-questions",
+     "output": "results",
+     "body": [
+      {
+       "id": "search1",
+       "use": "tool.web_search@1",
+       "wire": {
+        "query": "$sub.query"
+       },
+       "output": "hits1",
+       "plain": "searching for: {{sub.query}}"
+      },
+      {
+       "id": "pick1",
+       "use": "code.top_urls@2",
+       "wire": {
+        "hits": "$hits1"
+       },
+       "output": "urls1"
+      },
+      {
+       "id": "read1",
+       "kind": "map",
+       "over": "$urls1",
+       "as": "address",
+       "collect": "page",
+       "workers": 1,
+       "plain": "reading the pages",
+       "output": "pages1",
+       "body": [
+        {
+         "id": "fetch1",
+         "use": "tool.fetch_page@1",
+         "wire": {
+          "url": "$address"
+         },
+         "output": "page",
+         "on_error": "skip",
+         "plain": "reading {{address}}"
+        }
+       ]
+      },
+      {
+       "id": "passages1",
+       "use": "code.collect_passages@1",
+       "wire": {
+        "question": "$sub.question",
+        "pages": "$pages1"
+       },
+       "output": "material1"
+      },
+      {
+       "id": "write1",
+       "use": "view.answer_from_passages@1",
+       "wire": {
+        "question": "$sub.question",
+        "context": "$material1.context"
+       },
+       "output": "draft1"
+      },
+      {
+       "id": "check1",
+       "use": "code.anchor_answer@1",
+       "wire": {
+        "answer": "$draft1",
+        "passages": "$material1.passages"
+       },
+       "output": "attempt"
+      },
+      {
+       "id": "retry",
+       "kind": "branch",
+       "plain": "the first search did not answer",
+       "if": {
+        "ref": "attempt.status",
+        "op": "!=",
+        "value": "answered"
+       },
+       "then": [
+        {
+         "id": "requery",
+         "use": "view.requery@1",
+         "wire": {
+          "question": "$sub.question",
+          "previous_query": "$sub.query",
+          "note": "$attempt.answer"
+         },
+         "output": "newquery"
+        },
+        {
+         "id": "search2",
+         "use": "tool.web_search@1",
+         "wire": {
+          "query": "$newquery.query"
+         },
+         "output": "hits2",
+         "plain": "searching again for: {{newquery.query}}"
+        },
+        {
+         "id": "pick2",
+         "use": "code.top_urls@2",
+         "wire": {
+          "hits": "$hits2",
+          "exclude": "$urls1"
+         },
+         "output": "urls2"
+        },
+        {
+         "id": "read2",
+         "kind": "map",
+         "over": "$urls2",
+         "as": "address",
+         "collect": "page",
+         "workers": 1,
+         "plain": "reading the pages",
+         "output": "pages2",
+         "body": [
+          {
+           "id": "fetch2",
+           "use": "tool.fetch_page@1",
+           "wire": {
+            "url": "$address"
+           },
+           "output": "page",
+           "on_error": "skip",
+           "plain": "reading {{address}}"
+          }
+         ]
+        },
+        {
+         "id": "passages2",
+         "use": "code.collect_passages@1",
+         "wire": {
+          "question": "$sub.question",
+          "pages": "$pages2"
+         },
+         "output": "material2"
+        },
+        {
+         "id": "write2",
+         "use": "view.answer_from_passages@1",
+         "wire": {
+          "question": "$sub.question",
+          "context": "$material2.context"
+         },
+         "output": "draft2"
+        },
+        {
+         "id": "check2",
+         "use": "code.anchor_answer@1",
+         "wire": {
+          "answer": "$draft2",
+          "passages": "$material2.passages"
+         },
+         "output": "attempt"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "facts",
+     "use": "code.facts_table@1",
+     "wire": {
+      "subquestions": "$plan.subquestions",
+      "results": "$results"
+     },
+     "output": "table"
+    },
+    {
+     "id": "finish",
+     "kind": "branch",
+     "plain": "composing the answer",
+     "if": {
+      "all": [
+       {
+        "ref": "plan.single",
+        "op": "true"
+       },
+       {
+        "ref": "plan.needs_calculation",
+        "op": "false"
+       }
+      ]
+     },
+     "then": [
+      {
+       "id": "only",
+       "use": "code.only_result@1",
+       "wire": {
+        "results": "$results"
+       },
+       "output": "answer"
+      }
+     ],
+     "else": [
+      {
+       "id": "need",
+       "kind": "branch",
+       "plain": "does the answer need a calculation",
+       "if": {
+        "ref": "plan.needs_calculation",
+        "op": "true"
+       },
+       "then": [
+        {
+         "id": "ask_calc",
+         "use": "view.calc_request@1",
+         "wire": {
+          "question": "$input.question",
+          "facts": "$table.context"
+         },
+         "output": "request"
+        },
+        {
+         "id": "do_calc",
+         "use": "code.calculate@1",
+         "wire": {
+          "request": "$request"
+         },
+         "output": "calculation"
+        }
+       ],
+       "else": [
+        {
+         "id": "no_calc",
+         "use": "code.calculate@1",
+         "wire": {
+          "request": {
+           "op": "none"
+          }
+         },
+         "output": "calculation"
+        }
+       ]
+      },
+      {
+       "id": "compose",
+       "use": "view.compose_answer@1",
+       "wire": {
+        "question": "$input.question",
+        "facts": "$table.context",
+        "calculation": "$calculation.text"
+       },
+       "output": "composed"
+      },
+      {
+       "id": "anchor",
+       "use": "code.anchor_answer@1",
+       "wire": {
+        "answer": "$composed",
+        "passages": "$table.passages"
+       },
+       "output": "answer"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "status": "draft",
+ "origin": {
+  "by": "manual",
+  "parent": "research.escalate@1",
+  "note": "variant B: the plan is checked in code (13b ST11); not measured yet"
+ }
+}

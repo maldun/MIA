@@ -1,0 +1,61 @@
+{
+ "id": "code.check_plan",
+ "version": 1,
+ "kind": "code",
+ "title": "Check the plan of a model before it runs",
+ "description": "normalize_plan plus the checks of 13b ST11: a question with no sign of a comparison, a chain or two questions in one is a simple question and its only lookup is the question itself; in a compound plan, a lookup for the name of what the question already names, a lookup that shares fewer than two content words with the question, and near-duplicates are dropped; a multi-step plan that keeps under 60 percent of the content words is replaced by the question; a single lookup keeps the question's own words; a calculation is flagged by the wording as well. Answer: {subquestions, needs_calculation, single, checks, fallback}.",
+ "tags": [
+  "research",
+  "exact",
+  "plan"
+ ],
+ "applies_to": {
+  "tasks": [
+   "research"
+  ]
+ },
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "plan",
+    "question"
+   ],
+   "properties": {
+    "plan": {},
+    "question": {
+     "type": "string"
+    }
+   }
+  }
+ },
+ "outputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "subquestions",
+    "needs_calculation",
+    "single",
+    "checks",
+    "fallback"
+   ]
+  }
+ },
+ "params": {},
+ "body": {
+  "function": "check_plan",
+  "plain": "checking the plan"
+ },
+ "cost": {
+  "seconds": 0.05
+ },
+ "safety": {
+  "reads_web": false,
+  "runs_code": false
+ },
+ "status": "trusted",
+ "origin": {
+  "by": "manual",
+  "note": "research.check_plan, unit tested; router and rules from the drift seen in eval/baselines/research-decompose.md"
+ }
+}

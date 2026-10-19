@@ -348,5 +348,131 @@ class Escalate(unittest.TestCase):
         self.assertEqual(record["status"], "pass", record)
 
 
+def _plan(*questions, calc=False):
+    return {"subquestions": [{"question": q, "query": q} for q in questions], "needs_calculation": calc}
+
+
+class CheckPlan(unittest.TestCase):
+    def texts(self, out):
+        return [s["question"] for s in out["subquestions"]]
+
+    def rules(self, out):
+        return [c["rule"] for c in out["checks"]]
+
+    def test_the_drift_of_the_first_measurement_is_repaired(self):
+        cases = [("How many works does the Tarn Museum hold?", _plan("What is the name of the Tarn Museum?", "How many works does the Tarn Museum hold?")),
+                 ("How often does the Rivertown ferry run?", _plan("What is the name of the ferry service in Rivertown?", "What is the ferry schedule for the Rivertown ferry?")),
+                 ("When was the Rivertown library founded?", _plan("Where is the Rivertown library located?", "When was the library in Rivertown founded?")),
+                 ("How many inhabitants does Rivertown have?", _plan("What is the population of Rivertown?"))]
+        for question, plan in cases:
+            out = R.check_plan(plan, question)
+            self.assertEqual(self.texts(out), [question], question)
+            self.assertEqual(out["subquestions"][0]["query"], question)
+            self.assertTrue(out["single"])
+
+    def test_a_compound_question_keeps_its_plan(self):
+        question = "Who is the mayor of the town where the company that built the Alder Bridge has its head office?"
+        plan = _plan("Which company built the Alder Bridge?", "Where is the head office of that company?", "Who is the mayor of that town?")
+        out = R.check_plan(plan, question)
+        self.assertEqual(self.texts(out), self.texts(plan_normalised(plan, question)))
+        self.assertEqual((len(out["subquestions"]), out["checks"], out["fallback"]), (3, [], False))
+
+    def test_a_name_that_the_question_already_has_is_not_asked_in_a_compound_plan(self):
+        question = "Which is older, the Tarn Museum or the company that built the Rivertown Bridge, and by how many years?"
+        plan = _plan("What is the name of the Tarn Museum?", "What is the founding year of the Tarn Museum?", "What is the name of the company that built the Rivertown Bridge?",
+                     "What is the founding year of the company that built the Rivertown Bridge?")
+        out = R.check_plan(plan, question)
+        self.assertEqual(self.rules(out).count("nothing new"), 1)
+        self.assertIn("What is the name of the company that built the Rivertown Bridge?", self.texts(out))          # a step of the chain stays
+        self.assertNotIn("What is the name of the Tarn Museum?", self.texts(out))
+        self.assertTrue(out["needs_calculation"])
+
+    def test_a_lookup_with_little_to_do_with_the_question_goes(self):
+        question = "Which bridge is longer, the Alder Bridge or the Oakline Viaduct, and by how many metres?"
+        out = R.check_plan(_plan("How long is the Alder Bridge?", "How long is the Oakline Viaduct?", "Who is the mayor of Brookfield?"), question)
+        self.assertEqual(self.rules(out), ["off topic", "calculation"])
+        self.assertEqual(len(out["subquestions"]), 2)
+
+    def test_near_duplicates_are_merged(self):
+        question = "Which is bigger, Weissbach or Kellerau, and what is the difference in population?"
+        out = R.check_plan(_plan("What is the population of Weissbach?", "What is the population of Weissbach town?", "What is the population of Kellerau?"), question)
+        self.assertIn("redundant", self.rules(out))
+        self.assertEqual(len(out["subquestions"]), 2)
+
+    def test_a_compound_plan_that_loses_the_question_is_replaced(self):
+        question = "Which is older, the Tarn Museum or the company that built the Rivertown Bridge, and by how many years?"
+        out = R.check_plan(_plan("What is the weather in Paris today", "What is the weather in Rome today"), question)
+        self.assertTrue(out["fallback"])
+        self.assertEqual(self.texts(out), [question])
+
+    def test_calculations_are_flagged_by_the_wording(self):
+        for question in ("On which day of the week did the Rivertown Bridge open to traffic?", "How many years passed between the founding and the opening?",
+                         "How many days are there between the two dates?", "What is the difference in population between the towns?"):
+            self.assertTrue(R.check_plan(_plan(question), question)["needs_calculation"], question)
+        for question in ("How often does the Rivertown ferry run?", "How many works does the museum hold?"):
+            self.assertFalse(R.check_plan(_plan(question), question)["needs_calculation"], question)
+
+    def test_the_router_on_questions_of_both_kinds(self):
+        simple = ["When did the Rivertown Bridge open to traffic?", "Can I visit the Tarn Museum on a Monday?", "How much is admission to the Tarn Museum?", "On which day of the week did the bridge open?",
+                  "What is the population of Elmsford?", "When did the first cars drive across the new bridge in Rivertown?"]
+        compound = ["Which is older, the museum or the library?", "Who founded the Tarn Museum, and when?", "How long is the bridge and what did it cost?", "Who is the director of the museum that was founded in 1985?",
+                    "What is the name of the dog of the mayor of Rivertown?", "In which town is the head office of the company that built the bridge?", "How many years passed between A and B?"]
+        for question in simple:
+            self.assertIsNone(R._COMPOUND.search(question), question)
+        for question in compound:
+            self.assertIsNotNone(R._COMPOUND.search(question), question)
+
+    def test_garbage_in_still_gives_a_plan(self):
+        for bad in (None, {}, {"subquestions": "x"}, {"subquestions": []}):
+            out = R.check_plan(bad, "How tall is the tower?")
+            self.assertEqual((self.texts(out), out["single"]), (["How tall is the tower?"], True))
+
+    def test_the_plan_is_scored_by_the_plan_suite_after_the_check(self):
+        import plans as P
+        gold = {"lookups": [1, 1], "cover": [["tarn"], ["museum"], ["works", "hold"]], "verbatim": True, "must_not": ["name of the tarn museum"]}
+        question = "How many works does the Tarn Museum hold?"
+        raw = _plan("What is the name of the Tarn Museum?")
+        self.assertFalse(P.score_plan(raw, gold, question)["ok"])
+        self.assertTrue(P.score_plan(R.check_plan(raw, question), gold, question)["ok"])
+
+
+def plan_normalised(plan, question):
+    return R.normalize_plan(plan, question)
+
+
+class CheckedPipelines(unittest.TestCase):
+    def test_plan_checked_runs_the_planner_and_the_checks(self):
+        model = Decompose.Model(_plan("What is the name of the Tarn Museum?", "How many works does the Tarn Museum hold?"))
+        core = Core(os.path.join(REPO, "skills"), Library(os.path.join(REPO, "library")), tempfile.mkdtemp(), model=model)
+        run = H.Harness(core).run(H.load_suite(os.path.join(REPO, "eval", "suites", "plans")), {"name": "checked", "pipeline": "plan.checked@1"}, only=["r-museum-works-conflict", "r-ferry-injection"])
+        self.assertEqual([r["status"] for r in run.records], ["pass", "pass"])
+        self.assertEqual(model.calls, ["plan", "plan"])                                           # one model call per question; the checks are code
+
+    class FirstTryFails(Decompose.Model):
+        """the cheap first try says unknown (once); then the sub-question is answered from the passages"""
+        def read(self, prompt):
+            self.reads = getattr(self, "reads", 0) + 1
+            if self.reads == 1:
+                return json.dumps({"answer": "The passages do not say.", "status": "unknown", "sources": []})
+            return super().read(prompt)
+
+    def run_pipeline(self, pipeline):
+        question = "On which day of the week did the Rivertown Bridge open to traffic?"
+        plan = _plan("When did the Rivertown Bridge open to traffic?", calc=False)                                   # the planner forgets that a calculation is needed
+        model = self.FirstTryFails(plan, calc={"op": "weekday", "a": "2021-05-03"}, needles={"When did the Rivertown Bridge open to traffic?": "opened to traffic", question: "opened to traffic"})
+        core = Core(os.path.join(REPO, "skills"), Library(os.path.join(REPO, "library")), tempfile.mkdtemp(), model=model)
+        record = H.Harness(core).run(SUITE, {"name": "x", "pipeline": pipeline}, only=["weekday-of-opening"]).records[0]
+        return record, model
+
+    def test_a_planner_that_forgets_the_calculation_fails_unchecked_and_passes_checked(self):
+        unchecked, model1 = self.run_pipeline("research.escalate@1")
+        self.assertEqual(unchecked["status"], "fail")                       # no calculation was asked for: the answer has the date, not the weekday
+        self.assertEqual(model1.calls, ["answer", "plan", "answer"])
+        checked, model2 = self.run_pipeline("research.escalate@2")
+        self.assertEqual(checked["status"], "pass", checked)
+        self.assertEqual(model2.calls, ["answer", "plan", "answer", "calc", "compose"])
+        self.assertIn("Monday", checked["output"]["answer"]["answer"])
+
+
 if __name__ == "__main__":
     unittest.main()
