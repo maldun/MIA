@@ -40,7 +40,7 @@ except ImportError:  # used as plain script / in tests
     from chat_log import utc_now
 
 MAX_LENGTH = 8000
-RESEARCH = re.compile(r"/research(?:\s+(.*))?", re.I | re.S)        # /research followed by the question
+TASK_COMMAND = re.compile(r"/(research|search)(?:\s+(.*))?", re.I | re.S)        # /research question, /search query
 DELTA_INTERVAL = 0.05          # at most about 20 deltas per second per message
 CONTROL_CHARACTERS = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
 
@@ -50,6 +50,7 @@ COMMANDS = (
     {"command": "/dream!", "description": "Sort and summarize MIA's memory", "confirm": False},
     {"command": "/time!", "description": "Send the current time to MIA", "confirm": False},
     {"command": "/research ", "description": "Search the web and answer with sources: /research your question", "confirm": False},
+    {"command": "/search ", "description": "Show the top web results for a query, no answer: /search your query", "confirm": False},
     {"command": "/goodnight!", "description": "Dream, then shut MIA down", "confirm": True},
     {"command": "/break!", "description": "Shut MIA down", "confirm": True},
 )
@@ -64,9 +65,10 @@ def normalize_text(text):
 
 class ChatService:
     def __init__(self, emit, log, mood, run_exchange, run_command=None, model_info=None, queue_size=1,
-                 rate_limit=(10, 60), spawn=None, clock=time.monotonic, run_research=None):
+                 rate_limit=(10, 60), spawn=None, clock=time.monotonic, run_research=None, run_search=None):
         self._emit = emit
         self._run_research = run_research          # (question, on_delta, on_emotion, should_stop) -> the answer, for /research
+        self._run_search = run_search              # (query, on_delta, on_emotion, should_stop) -> the list of results, for /search
         self.log = log
         self.mood = mood
         self._run_exchange = run_exchange
@@ -92,10 +94,16 @@ class ChatService:
         return text.strip().lower() in self._commands
 
     @staticmethod
-    def research_question(text):
+    def task_command(text):
+        """("research" | "search", the argument) for "/research question" and "/search query" (argument "" for the bare command), None for any other text"""
+        match = TASK_COMMAND.fullmatch(text.strip())
+        return None if match is None else (match.group(1).lower(), (match.group(2) or "").strip())
+
+    @classmethod
+    def research_question(cls, text):
         """the question of "/research question" ("" for a bare /research), None when the text is no research command"""
-        match = RESEARCH.fullmatch(text.strip())
-        return None if match is None else (match.group(1) or "").strip()
+        found = cls.task_command(text)
+        return found[1] if found and found[0] == "research" else None
 
     def status(self):
         model, profile = self._model_info()
@@ -137,17 +145,18 @@ class ChatService:
             if self._running and len(self._queue) >= self.queue_size:
                 return {"ok": False, "error": "MIA is busy, please wait until she has answered."}
             command = self.is_command(text)
-            question = self.research_question(text)
-            if question is not None and not question:
-                return {"ok": False, "error": "Write your question after /research, for example: /research how tall is the Eiffel Tower"}
-            if question is not None and self._run_research is None:
-                return {"ok": False, "error": "Research is not available."}
+            task, argument = self.task_command(text) or (None, None)
+            if task is not None and not argument:
+                example = "/research how tall is the Eiffel Tower" if task == "research" else "/search Eiffel Tower height"
+                return {"ok": False, "error": "Write %s after /%s, for example: %s" % ("your question" if task == "research" else "what to search for", task, example)}
+            if task is not None and (self._run_research if task == "research" else self._run_search) is None:
+                return {"ok": False, "error": "%s is not available." % task.capitalize()}
             record = None
             if not command:
                 record = self.log.append("user", text, client_id=client_id) if client_id else self.log.append("user", text)
                 self._emit("chat_message", record)
             queued = self._running
-            self._queue.append(("command" if command else "research" if question is not None else "chat", question if question is not None else text))
+            self._queue.append(("command" if command else task if task is not None else "chat", argument if task is not None else text))
             self._start_worker()
         self.publish_status()
         return {"ok": True, "message": record, "queued": queued, "command": command}
@@ -249,7 +258,7 @@ class ChatService:
 
         status = "done"
         try:
-            run = self._run_exchange if task == "chat" else self._run_research
+            run = {"chat": self._run_exchange, "research": self._run_research, "search": self._run_search}[task]
             final = run(text, on_delta, on_emotion, self._stop.is_set)
             if final is not None:
                 state["text"] = final

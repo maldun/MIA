@@ -528,7 +528,11 @@ def run_research_exchange(question, on_delta, on_emotion, should_stop):
     return research_chat.run_research(core, question, pipeline=cfg.get(CONST.RESEARCH_PIPELINE_KEY, CONST.DEFAULT_RESEARCH_PIPELINE),
                                       on_event=lambda event: chat_service.pipeline_event(event), should_stop=should_stop, speak=speak_answer)
 
-chat_service = ChatService(socketio.emit, chat_log, mood, run_chat_exchange, run_command=run_chat_command, run_research=run_research_exchange,
+def run_search_exchange(query, on_delta, on_emotion, should_stop):
+    """/search: the top results of the search tool, no model"""
+    return research_chat.run_search(_web_tools["web_search"][0], query, count=cfg.get(CONST.SEARCH_RESULTS_SHOWN_KEY, CONST.DEFAULT_SEARCH_RESULTS_SHOWN), should_stop=should_stop)
+
+chat_service = ChatService(socketio.emit, chat_log, mood, run_chat_exchange, run_command=run_chat_command, run_research=run_research_exchange, run_search=run_search_exchange,
                            model_info=lambda: (comm.version, getattr(comm, "profile", None)),
                            queue_size=cfg.get(CONST.CHAT_QUEUE_KEY, 1),
                            rate_limit=(cfg.get(CONST.CHAT_RATE_KEY, 10), 60),
