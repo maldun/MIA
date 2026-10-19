@@ -1,0 +1,71 @@
+{
+ "id": "code.collect_passages",
+ "version": 1,
+ "kind": "code",
+ "title": "The passages that fit the question",
+ "description": "Cuts the fetched pages into pieces, keeps the pieces that share most words with the question (at most per_page from each page, within a character budget), numbers them and renders them as untrusted web text. Answer: {passages, context, signals, pages}.",
+ "tags": [
+  "research",
+  "exact"
+ ],
+ "applies_to": {
+  "tasks": [
+   "research"
+  ]
+ },
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "question",
+    "pages"
+   ],
+   "properties": {
+    "question": {
+     "type": "string"
+    },
+    "pages": {}
+   }
+  }
+ },
+ "outputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "passages",
+    "context",
+    "signals",
+    "pages"
+   ]
+  }
+ },
+ "params": {
+  "per_page": {
+   "default": 2
+  },
+  "size": {
+   "default": 900,
+   "description": "characters per piece"
+  },
+  "budget": {
+   "default": 6000,
+   "description": "characters in all"
+  }
+ },
+ "body": {
+  "function": "collect_passages",
+  "plain": "choosing the passages"
+ },
+ "cost": {
+  "seconds": 0.05
+ },
+ "safety": {
+  "reads_web": false,
+  "runs_code": false
+ },
+ "status": "trusted",
+ "origin": {
+  "by": "manual",
+  "note": "research.collect_passages, unit tested"
+ }
+}

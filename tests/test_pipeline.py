@@ -361,7 +361,7 @@ class CoreTests(unittest.TestCase):
         return Core(os.path.join(REPO, "skills"), Library(os.path.join(REPO, "library")), tempfile.mkdtemp(), **kwargs)
 
     def test_the_shipped_skills_are_valid(self):
-        core = self.core(functions={"converse": lambda text: text})
+        core = self.core(functions={"converse": lambda text: text}, tools={"web_search": lambda query: {}, "fetch_page": lambda url: {}})         # the web tools are the app's
         self.assertEqual(core.check(), {})
         self.assertIn("chat", core.skills.names())
 

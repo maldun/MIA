@@ -1,0 +1,56 @@
+{
+ "id": "code.anchor_answer",
+ "version": 1,
+ "kind": "code",
+ "title": "Keep only what is quoted",
+ "description": "A source stays only if its quote occurs in the passage it cites; an answer without a verified source becomes `unknown`. Answer: {answer, status, sources, dropped, demoted}.",
+ "tags": [
+  "research",
+  "exact"
+ ],
+ "applies_to": {
+  "tasks": [
+   "research"
+  ]
+ },
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "answer",
+    "passages"
+   ],
+   "properties": {
+    "answer": {},
+    "passages": {}
+   }
+  }
+ },
+ "outputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "answer",
+    "status",
+    "sources"
+   ]
+  }
+ },
+ "params": {},
+ "body": {
+  "function": "anchor_answer",
+  "plain": "checking the quotes"
+ },
+ "cost": {
+  "seconds": 0.05
+ },
+ "safety": {
+  "reads_web": false,
+  "runs_code": false
+ },
+ "status": "trusted",
+ "origin": {
+  "by": "manual",
+  "note": "research.anchor_answer, unit tested"
+ }
+}

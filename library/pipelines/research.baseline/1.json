@@ -1,0 +1,104 @@
+{
+ "id": "research.baseline",
+ "version": 1,
+ "title": "Research without a strategy: search, read, answer once",
+ "description": "The baseline the strategies (13b) have to beat: one search with the question, the first pages are read, the best passages go into ONE prompt, the answer is quoted and the quotes are checked in code. Two model-free steps before and after one model call; no decomposition, no second round.",
+ "goal": "an answer with quotes, or unknown",
+ "tags": [
+  "research",
+  "baseline"
+ ],
+ "applies_to": {
+  "tasks": [
+   "research"
+  ]
+ },
+ "cost_class": "normal",
+ "result": "answer",
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "question"
+   ],
+   "properties": {
+    "question": {
+     "type": "string"
+    }
+   }
+  }
+ },
+ "nodes": [
+  {
+   "id": "search",
+   "use": "tool.web_search@1",
+   "wire": {
+    "query": "$input.question"
+   },
+   "output": "hits",
+   "plain": "searching for: {{input.question}}"
+  },
+  {
+   "id": "pick",
+   "use": "code.top_urls@1",
+   "wire": {
+    "hits": "$hits"
+   },
+   "output": "urls"
+  },
+  {
+   "id": "read",
+   "kind": "map",
+   "over": "$urls",
+   "as": "address",
+   "collect": "page",
+   "workers": 1,
+   "plain": "reading the pages",
+   "body": [
+    {
+     "id": "fetch",
+     "use": "tool.fetch_page@1",
+     "wire": {
+      "url": "$address"
+     },
+     "output": "page",
+     "on_error": "skip",
+     "plain": "reading {{address}}"
+    }
+   ],
+   "output": "pages"
+  },
+  {
+   "id": "passages",
+   "use": "code.collect_passages@1",
+   "wire": {
+    "question": "$input.question",
+    "pages": "$pages"
+   },
+   "output": "material"
+  },
+  {
+   "id": "write",
+   "use": "view.answer_from_passages@1",
+   "wire": {
+    "question": "$input.question",
+    "context": "$material.context"
+   },
+   "output": "draft"
+  },
+  {
+   "id": "check",
+   "use": "code.anchor_answer@1",
+   "wire": {
+    "answer": "$draft",
+    "passages": "$material.passages"
+   },
+   "output": "answer"
+  }
+ ],
+ "status": "draft",
+ "origin": {
+  "by": "manual",
+  "note": "the no-strategy variant (a) of 13b ST8; not measured yet"
+ }
+}
