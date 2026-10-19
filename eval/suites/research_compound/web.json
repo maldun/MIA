@@ -1,0 +1,48 @@
+{
+ "keyword_search": true,
+ "pages": {
+  "https://bridges.brookfield.example/alder-bridge": {
+   "body": "<html><head><title>Alder Bridge</title></head><body><h1>Alder Bridge</h1><p>The Alder Bridge is 210 metres long. It was built in 1932 by Hartmann &amp; Sons and carries the main road over the river Brook.</p></body></html>"
+  },
+  "https://bridges.brookfield.example/oakline-viaduct": {
+   "body": "<html><head><title>Oakline Viaduct</title></head><body><h1>Oakline Viaduct</h1><p>The Oakline Viaduct is 540 metres long. It was built by Brandt Engineering and opened on 5 June 1998.</p></body></html>"
+  },
+  "https://hartmann-sons.example/about": {
+   "body": "<html><head><title>Hartmann &amp; Sons</title></head><body><h1>Hartmann &amp; Sons</h1><p>Hartmann &amp; Sons is a family company founded in 1887. Its head office is in Weissbach. The company employs 140 people.</p></body></html>"
+  },
+  "https://brandt-engineering.example/about": {
+   "body": "<html><head><title>Brandt Engineering</title></head><body><h1>Brandt Engineering</h1><p>Brandt Engineering was founded in 1971. Its head office is in Kellerau. The company specialises in steel structures.</p></body></html>"
+  },
+  "https://weissbach.example/town": {
+   "body": "<html><head><title>Weissbach</title></head><body><h1>Weissbach</h1><p>Weissbach is a town with 12,400 inhabitants. The mayor of Weissbach is Anna Keller.</p></body></html>"
+  },
+  "https://kellerau.example/town": {
+   "body": "<html><head><title>Kellerau</title></head><body><h1>Kellerau</h1><p>Kellerau is a town with 31,900 inhabitants. The mayor of Kellerau is Tom Ruiz.</p></body></html>"
+  },
+  "https://books.example/lena-moser": {
+   "body": "<html><head><title>Dr. Lena Moser</title></head><body><h1>Dr. Lena Moser</h1><p>Dr. Lena Moser, born in 1961 in Weissbach, is a geographer. She is the author of the book The River Atlas.</p></body></html>"
+  },
+  "https://books.example/the-river-atlas": {
+   "body": "<html><head><title>The River Atlas</title></head><body><h1>The River Atlas</h1><p>The River Atlas was published in 2004 and describes the rivers of the region.</p></body></html>"
+  },
+  "https://alder-museum.example/about": {
+   "body": "<html><head><title>Alder Museum</title></head><body><h1>Alder Museum</h1><p>The Alder Museum was founded in 1910. Its director is Jonas Pell. The museum shows tools and machines.</p></body></html>"
+  },
+  "https://glass-museum.example/about": {
+   "body": "<html><head><title>Glass Museum</title></head><body><h1>Glass Museum</h1><p>The Glass Museum was founded in 1985. Its director is Mira Cole. The museum shows glass art.</p></body></html>"
+  },
+  "https://brookfield.example/fair-2024": {
+   "body": "<html><head><title>Brookfield Fair 2024</title></head><body><h1>Brookfield Fair 2024</h1><p>The Brookfield Fair has been held every autumn since 1952. The 2024 fair opens on 14 September 2024.</p></body></html>"
+  },
+  "https://brookfield.example/library": {
+   "body": "<html><head><title>Brookfield library</title></head><body><h1>Brookfield library</h1><p>The Brookfield library was founded in 1895. It has 14,000 members.</p></body></html>"
+  },
+  "https://history.brookfield.example/alder-ferry": {
+   "body": "<html><head><title>The old Alder ferry</title></head><body><h1>The old Alder ferry</h1><p>Before the bridge, a ferry crossed the river Brook at the Alder meadow. The ferry stopped running in 1932.</p></body></html>"
+  },
+  "https://brookfield.example/companies-register": {
+   "body": "<html><head><title>Register of companies in Brookfield</title></head><body><h1>Register of companies in Brookfield</h1><p>The register lists companies of the region: shipyards, bakeries and a printing house. It does not say what any of them built or where they were founded.</p></body></html>"
+  }
+ },
+ "searches": {}
+}

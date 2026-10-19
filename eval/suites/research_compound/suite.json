@@ -1,0 +1,10 @@
+{
+ "name": "research_compound",
+ "description": "COMPOUND questions for a research pipeline over a RECORDED web of 14 pages in a fictional region (web.json, searched by keywords): chains of two and three lookups where a step needs the result of the one before (the company that built a bridge, its head office, the mayor of that town), reverse lookups (the museum founded in 1985), parallel chains, comparisons with a difference, years and days between facts on two pages, a weekday, two facts about one thing, a simple question that a planner should leave alone and a near miss without an answer (the pages say where the head office is, not where the company was founded). Needs a model and the skill research. STARTER suite: enough to find broken pipelines and large differences, not small ones.",
+ "target": {
+  "kind": "research",
+  "skill": "research",
+  "fixtures": "web.json"
+ },
+ "starter": true
+}

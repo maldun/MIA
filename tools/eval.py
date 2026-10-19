@@ -97,7 +97,7 @@ def main():
             for case in suite.cases:
                 for tag in case.get("tags", []):
                     tags[tag] = tags.get(tag, 0) + 1
-            print("%-14s %3d cases  target %s%s\n   %s\n   tags: %s" % (suite.name, len(suite.cases), suite.target["kind"], " (needs a model)" if suite.target["kind"] in ("pipeline", "research") else "",
+            print("%-14s %3d cases  target %s%s\n   %s\n   tags: %s" % (suite.name, len(suite.cases), suite.target["kind"], " (needs a model)" if suite.target["kind"] in ("pipeline", "research", "plan") else "",
                                                                        suite.description[:150], ", ".join("%s %d" % t for t in sorted(tags.items()))))
         return
     if args.command == "cases":
@@ -116,7 +116,7 @@ def main():
         return
 
     suite = harness.load_suite(os.path.join(SUITES, args.args[0]))
-    need_model = suite.target["kind"] in ("pipeline", "research") or (suite.target["kind"] == "extraction" and bool(args.skill or args.pipeline))
+    need_model = suite.target["kind"] in ("pipeline", "research", "plan") or (suite.target["kind"] == "extraction" and bool(args.skill or args.pipeline))
     core = build_core(cfg, need_model, need_sandbox=need_model)
     variant = {"name": args.variant}
     for key in ("skill", "pipeline", "model"):

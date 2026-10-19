@@ -1,0 +1,8 @@
+{
+ "name": "plans",
+ "description": "PLANS of research questions, scored on the plan alone (one model call per question, no web): the number of lookups, the words of the question that must not get lost, phrases that must not be asked (the drift seen in the first measurement of the decomposition), the question's own words for a single lookup, and, for typed plans, a sound structure, the dependency between lookups and the operations the answer needs. The questions are those of the suites research (one fact, two facts, a calculation, a trap) and research_compound (chains, comparisons, calculations). Free and typed plans (13b ST10) are scored by the same suite. Needs a model and the skill plan_question.",
+ "target": {
+  "kind": "plan",
+  "skill": "plan_question"
+ }
+}

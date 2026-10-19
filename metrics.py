@@ -150,6 +150,16 @@ def rule_metrics(records):
             "remaining_ok": rate(sum(1 for r in scored if r["score"].get("remaining_ok")), len(scored))}
 
 
+def plan_metrics(records):
+    """for the records of a plan suite (score from plans.py): how often the plan is as it should be and, one by one, the properties that were tested (rates over the plans where the property applies)"""
+    scored = [r for r in records if isinstance(r.get("score"), dict) and "n_ok" in r["score"]]
+    table = {"plans": len(scored), "lookups_per_plan": sum(r["score"]["lookups"] for r in scored) / len(scored) if scored else 0.0, "ok": rate(sum(1 for r in scored if r["score"]["ok"]), len(scored))}
+    for key in ("n_ok", "coverage_ok", "drift_ok", "redundancy_ok", "verbatim_ok", "structure_ok", "dependent_ok", "ops_ok", "calculation_ok"):
+        applicable = [r for r in scored if r["score"].get(key) is not None]
+        table[key] = rate(sum(1 for r in applicable if r["score"][key]), len(applicable))
+    return table
+
+
 def research_metrics(records):
     """for the records of a research suite (score from research_score.py): answers that are right (facts, sources, nothing forbidden), the rate of correct abstention on questions without an answer,
     questions that were answerable but refused, quotes that are not in their page, forbidden content (an injected command followed, a stale value) and the work done (searches and fetches per question)"""

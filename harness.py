@@ -17,18 +17,19 @@ import time
 import requests
 
 try:
-    from . import behaviour, checks, extraction, metrics, research_score, web_tools
+    from . import behaviour, checks, extraction, metrics, plans, research_score, web_tools
     from .pipeline import Tool
 except ImportError:  # used as plain script / in tests
     import behaviour
     import checks
     import extraction
     import metrics
+    import plans
     import research_score
     from pipeline import Tool
     import web_tools
 
-INPUT_KEY = {"checks": "claim", "pipeline": "input", "extraction": "input", "text_rules": "input", "research": "input"}
+INPUT_KEY = {"checks": "claim", "pipeline": "input", "extraction": "input", "text_rules": "input", "research": "input", "plan": "input"}
 CASE_KEYS = {"id", "tags", "claim", "input", "truth", "expect", "note", "gold"}
 STATUSES = ("pass", "fail", "open", "not_applicable")
 MAX_OUTPUT_CHARS = 3000
@@ -292,7 +293,7 @@ class Harness:
     def __init__(self, core=None, clock=time.time, targets=None):
         """core: a Core (for the targets 'checks' and 'pipeline'); targets: more kinds, {kind: function(case, variant, context) -> (status, output)}, for tests and new tasks"""
         self.core, self._clock = core, clock
-        self.targets = {"checks": self._checks, "pipeline": self._pipeline, "extraction": self._extraction, "text_rules": self._text_rules, "research": self._research}
+        self.targets = {"checks": self._checks, "pipeline": self._pipeline, "extraction": self._extraction, "text_rules": self._text_rules, "research": self._research, "plan": self._plan}
         self.targets.update(targets or {})
         self.counter = None
         self._fixture_runners = {}
@@ -345,6 +346,20 @@ class Harness:
                  "matches_ok": (sorted(v["match"] for v in found["violations"]) == sorted(gold["matches"])) if "matches" in gold else None}
         score["ok"] = bool(score["found"] == score["expected"] and score["remaining_ok"] and score["idempotent"] and score["repair_ok"] is not False and score["matches_ok"] is not False)
         return ("pass" if score["ok"] else "fail"), {"score": score}
+
+    def _plan(self, case, variant, suite):
+        """a pipeline whose answer is a plan (free sub-questions or a typed plan, plans.py), scored against what the gold of the case says a good plan has"""
+        skill = copy.deepcopy(self.core.skills.get(variant.get("skill") or suite.target["skill"]))
+        if skill is None:
+            raise SuiteError("there is no skill '%s'" % (variant.get("skill") or suite.target["skill"]))
+        for key in ("pipeline", "model"):
+            if variant.get(key):
+                skill[key] = variant[key] if key == "pipeline" else ({"profile": variant[key]} if variant[key] in ("light", "full", "current") else {"name": variant[key]})
+        result = self.core.runner.run(skill, self.core.graph(skill)[0], case["input"], task="eval:" + suite.name)
+        if result.status != "done" or not isinstance(result.answer, dict):
+            return "error:" + (result.status if result.status != "done" else "no_answer"), {"error": result.error, "answer": result.answer}
+        score = plans.score_plan(result.answer, case["gold"], case["input"]["question"])
+        return ("pass" if score["ok"] else "fail"), {"plan": result.answer, "score": score}
 
     def _research(self, case, variant, suite):
         """a research pipeline over the recorded web of the suite (web.json, searched by keywords): its answer {answer, status, sources} is scored against the gold of the case (research_score.py)"""
@@ -486,6 +501,14 @@ def format_report(run, worst=8):
                                                             "n/a" if row["recall"]["rate"] is None else "%.0f%%" % (100 * row["recall"]["rate"])))
         lines += ["   clean texts left alone      " + pr(rm["clean_ok"]) + "   <- a false alarm otherwise", "   repairs as expected         " + pr(rm["repair_ok"]),
                   "   what cannot be repaired     " + pr(rm["remaining_ok"]), "   repair is idempotent        " + pr(rm["idempotent"])]
+    pm = metrics.plan_metrics(records)
+    if pm["plans"]:
+        pr = lambda r: "n/a" if r["rate"] is None else "%.1f%% (%d of %d)" % (100 * r["rate"], r["k"], r["n"])   # noqa: E731
+        lines += ["", "as a planner, on %d plans (%.1f lookups per plan):" % (pm["plans"], pm["lookups_per_plan"]), "   the plan is as it should be (all of the following)  " + pr(pm["ok"]),
+                  "   the number of lookups is right  " + pr(pm["n_ok"]), "   no word of the question is lost  " + pr(pm["coverage_ok"]), "   nothing is asked that should not be  " + pr(pm["drift_ok"]),
+                  "   no redundant lookup  " + pr(pm["redundancy_ok"]), "   a single lookup keeps the question's own words  " + pr(pm["verbatim_ok"]),
+                  "   a calculation is flagged when needed (free plans)  " + pr(pm["calculation_ok"]), "   the structure is sound (typed plans)  " + pr(pm["structure_ok"]),
+                  "   the dependency is expressed (typed plans)  " + pr(pm["dependent_ok"]), "   the operations are there (typed plans)  " + pr(pm["ops_ok"])]
     rs = metrics.research_metrics(records)
     if rs["questions"]:
         pr = lambda r: "n/a" if r["rate"] is None else "%.1f%% (%d of %d)" % (100 * r["rate"], r["k"], r["n"])   # noqa: E731

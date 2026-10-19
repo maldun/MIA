@@ -1,0 +1,56 @@
+{
+ "id": "plan.free",
+ "version": 1,
+ "title": "Plan a question as free sub-questions (the planner of research.decompose)",
+ "description": "Variant (A) of 13b ST13: view.research_plan writes the sub-questions, code.normalize_plan makes the plan safe. The answer is the plan itself, not an answer to the question: the planner can be measured alone (suite `plans`) before it is run.",
+ "goal": "a plan",
+ "tags": [
+  "plan",
+  "research"
+ ],
+ "applies_to": {
+  "tasks": [
+   "research"
+  ]
+ },
+ "cost_class": "cheap",
+ "result": "plan",
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "question"
+   ],
+   "properties": {
+    "question": {
+     "type": "string"
+    }
+   }
+  }
+ },
+ "nodes": [
+  {
+   "id": "plan",
+   "use": "view.research_plan@1",
+   "wire": {
+    "question": "$input.question"
+   },
+   "output": "rawplan"
+  },
+  {
+   "id": "norm",
+   "use": "code.normalize_plan@1",
+   "wire": {
+    "plan": "$rawplan",
+    "question": "$input.question"
+   },
+   "output": "plan"
+  }
+ ],
+ "status": "draft",
+ "origin": {
+  "by": "manual",
+  "parent": "research.decompose@1",
+  "note": "variant A of the planner; measured with the suite plans"
+ }
+}

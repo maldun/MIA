@@ -511,6 +511,28 @@ consolidates the results. It stays a graph of library nodes (4a): nothing here n
 - ST9. Open research questions: how much of a gain comes from the decomposition and how much from the checks and anchoring? Do small plan templates generalise across questions? How fast can a challenger be judged with the
   few requests a single user produces (sample sizes, sequential tests)?
 
+- ST10. **Typed plans (decided 2026-10-20, to be measured).** The first measurement of free sub-questions (`research.decompose@1`, eval/baselines/research-decompose.md) showed what goes wrong: a 12B planner rewrites one-fact questions, adds
+  sub-questions nobody needs, is not stable between runs, and cannot plan a step that needs the result of an earlier one ("the founding year of *the company that built the bridge*"). A **typed plan** is a small dataflow program instead of
+  a list of questions:
+  `{"steps": [{"id": 1, "op": "lookup", "attribute": "founding year", "entity": "Tarn Museum"}, {"id": 2, "op": "lookup", "attribute": "company that built", "entity": "Rivertown Bridge"},
+  {"id": 3, "op": "lookup", "attribute": "founding year", "entity": "#2"}, {"id": 4, "op": "difference", "args": ["#1", "#3"], "unit": "years"}], "answer": "#4"}`.
+  Operations form a fixed vocabulary: `lookup` (an attribute of an entity or of the result `#n` of an earlier step, answered with quotes by the research steps), and the operations done **by code**: `difference`, `compare`, `weekday`,
+  `days_between`, `years_between`, `add_days`. Steps run in order; a lookup whose entity is `#n` is searched with the value of step n (so the dependent step works); the answer is composed from the verified values.
+  The model call that writes the plan is schema-constrained (the syntax cannot be wrong); its meaning can still be wrong, which the checks of ST11 catch as far as code can. Related work: decomposing a question into triple-pattern queries
+  ("SPARQL chain-of-thought") improved Graph-RAG accuracy by 2 to 14 points with Llama-8B and 70B (arXiv:2603.14045, abstract read); the numbered step list with references (`#1`, `#2`) is known from the question-decomposition
+  literature (QDMR), from memory and not checked here.
+- ST11. **Checking a plan before it is run (code, no model call).** (a) **Coverage**: the content words of the question (names, numbers, the attribute asked for) must be covered by the plan; a plan that loses "works" from "how many works does
+  the museum hold" is rejected and the original question is used. (b) **Redundancy**: two lookups of the same attribute of the same entity, or near-identical sub-questions, are merged. (c) **Nothing new**: a lookup that asks for what the
+  question already states ("the name of the Tarn Museum") is dropped. (d) **Verbatim single lookup**: a plan with one lookup keeps the question's own words. (e) **Structure** (typed plans): ids in order, references only to earlier steps, operations
+  with the right number of arguments, every step used by the answer, a typed result (date, number, name). (f) **Outcome**: a lookup that stays unknown and whose result the answer does not use must not make the answer unknown.
+  A model check ("does each step help answer the question?") is optional and only for compound questions.
+- ST12. **A router in code decides whether to plan at all.** Questions with markers of a compound task (a comparison "older", "bigger", "which ... or"; "between"; "how many years/days"; "the ... of the ... that ..."; two questions joined by "and")
+  go to the planner; everything else takes the cheap first try. The escalation of ST4 stays as the safety net in both directions: an unsupported answer of the cheap try is decomposed, and a plan that fails ST11 falls back to the cheap try.
+- ST13. **Suites and variants (tests first).** Suite `plans` scores the **plan alone** (one model call per question, fast to iterate): number of lookups in the gold range, coverage of the required words, no redundancy, no drift (phrases that must not
+  be asked), the question's own words for a single lookup, the dependency expressed (typed plans), the operations needed (typed plans), a valid structure (typed plans). Suite `research_compound` measures the **whole pipeline** on 16 compound questions over
+  a recorded web of 14 pages (chains of two and three lookups, comparisons, differences, weekdays and days between, a reverse lookup, parallel chains, a near miss). Variants: (A) free sub-questions as built (`plan.free@1`), (B) free sub-questions with the
+  checks of ST11, (C) typed plans. Planners are not deterministic, so every comparison runs with repeats and reports stability. The 20-question suite `research` stays unchanged, so that its baselines remain comparable.
+
 ## 13c. The context graph: the working material of a task as a graph (decided 2026-10-19, after a literature check)
 
 "Context graph" is used in two senses in the literature (14): (a) a graph built **per task, at run time** from what was retrieved, used to select and compress the context of the next step (StepChain GraphRAG, decision-aware memory cards); (b) a
