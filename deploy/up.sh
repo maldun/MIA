@@ -19,6 +19,19 @@ if [ "${1:-}" = "character" ]; then
   python3 "$ROOT/ui/tools/character_pack.py" install web
   exec "$0" up -d --no-deps --force-recreate mia
 fi
+# deploy/up.sh calibration [path/to/calibration.txt]   the personality text of MIA ("address me master ...") is not in git; copy it into the data volume
+# (default: calibration.txt of the MIA folder) and restart MIA, which reads it at the start
+if [ "${1:-}" = "calibration" ]; then
+  FILE="${2:-$(dirname "$HERE")/calibration.txt}"
+  [ -f "$FILE" ] || { echo "no such file: $FILE"; exit 1; }
+  ENGINE="$(command -v podman || command -v docker)"
+  CONTAINER="$($ENGINE ps -aq --filter "label=com.docker.compose.project=${MIA_PROJECT:-mia}" --filter label=com.docker.compose.service=mia | head -1)"
+  [ -n "$CONTAINER" ] || { echo "MIA container not found, start the stack first: deploy/up.sh"; exit 1; }
+  $ENGINE cp "$FILE" "$CONTAINER:/opt/mia/MIA/data/calibration.txt"
+  $ENGINE restart "$CONTAINER" >/dev/null
+  echo "calibration.txt copied into the data volume, MIA restarted"
+  exit 0
+fi
 # the project name gives containers and volumes their prefix (mia_ollama ...); another name = a second stack next to the first
 export COMPOSE_PROJECT_NAME="${MIA_PROJECT:-mia}"
 FILES=(-f compose.yaml)

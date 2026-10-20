@@ -32,6 +32,17 @@ For other devices set `MIA_BIND=0.0.0.0` in `deploy/.env` and open `https://<add
 | `ui/godot/build/web/` | `ui/godot/build/web` (or `MIA_CHARACTER_DIR`), read-only | the 3D character |
 | Ollama's models | volume `ollama` | models are downloaded once |
 
+## The personality (calibration.txt)
+
+`calibration.txt` (how MIA addresses you, her character) is your own file and not in git, so the container starts without it. Copy it into the data volume once, and again after you change it:
+
+```
+deploy/up.sh calibration                 # uses calibration.txt of the MIA folder
+deploy/up.sh calibration path/to/file    # another file
+```
+
+MIA is restarted; the file stays in the volume `mia-data`. The same holds for her memories: `memories.json` and `long_time_history.json` of an old installation are not in the volume (copy them into `/opt/mia/MIA/data/` with `podman cp` while the stack is stopped, or start fresh).
+
 ## The 3D character
 
 The character is not in the image or in git. Put the zip from your Drive in with one command:
