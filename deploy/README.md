@@ -52,6 +52,16 @@ deploy/up.sh memories path/to/folder
 
 MIA is stopped first (it saves its history when it stops), the files are copied in and MIA starts again. What the container had before is kept as `<name>.container-previous` in the volume.
 
+## Backup and restore
+
+```
+deploy/up.sh backup                      # mia-backup-<date>.tar.gz in the current folder
+deploy/up.sh backup path/to/file.tar.gz
+deploy/up.sh restore path/to/file.tar.gz
+```
+
+The archive holds the whole data volume: histories, chat log, presets, gestures, calibration, tokens, library index. MIA is stopped while the files are copied (it saves its history when it stops) and starts again. `restore` first saves the current state as `mia-before-restore-<time>.tar.gz`, so a wrong restore can be undone with another restore. Files that exist only in the volume are not deleted by a restore. The models of Ollama (volume `ollama`) and the character are not part of it (they come from the downloads and the zip).
+
 ## The 3D character
 
 The character is not in the image or in git. Put the zip from your Drive in with one command:

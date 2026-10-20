@@ -3,6 +3,9 @@
 # Makes deploy/.env with a secret for SearXNG on the first call. Needs podman with a compose provider (sudo dnf install podman-compose) or docker compose.
 set -e
 HERE="$(dirname "$(readlink -f "$0")")"
+CALLER="$PWD"
+# a path argument as the caller wrote it (relative to where the caller stood, not to deploy/)
+abspath() { case "$1" in /*) echo "$1" ;; *) echo "$CALLER/$1" ;; esac; }
 cd "$HERE"
 # a value of .env (the environment wins), with a default
 envval() { local v="${!1:-}"; if [ -z "$v" ] && [ -f .env ]; then v="$(sed -n "s/^$1=//p" .env | tail -1)"; fi; echo "${v:-$2}"; }
@@ -15,14 +18,15 @@ fi
 # and unpacked to ui/godot/build/web, which the container mounts; MIA is then recreated so that it sees the new folder
 if [ "${1:-}" = "character" ]; then
   ROOT="$(dirname "$HERE")"
-  if [ -n "${2:-}" ] && [ ! "$2" -ef "$ROOT/ui/character/$(basename "$2")" ]; then cp "$2" "$ROOT/ui/character/"; fi
+  ZIP="$([ -n "${2:-}" ] && abspath "$2" || true)"
+  if [ -n "$ZIP" ] && [ ! "$ZIP" -ef "$ROOT/ui/character/$(basename "$ZIP")" ]; then cp "$ZIP" "$ROOT/ui/character/"; fi
   python3 "$ROOT/ui/tools/character_pack.py" install web
   exec "$0" up -d --no-deps --force-recreate mia
 fi
 # deploy/up.sh calibration [path/to/calibration.txt]   the personality text of MIA ("address me master ...") is not in git; copy it into the data volume
 # (default: calibration.txt of the MIA folder) and restart MIA, which reads it at the start
 if [ "${1:-}" = "calibration" ]; then
-  FILE="${2:-$(dirname "$HERE")/calibration.txt}"
+  FILE="$([ -n "${2:-}" ] && abspath "$2" || echo "$(dirname "$HERE")/calibration.txt")"
   [ -f "$FILE" ] || { echo "no such file: $FILE"; exit 1; }
   ENGINE="$(command -v podman || command -v docker)"
   CONTAINER="$($ENGINE ps -aq --filter "label=com.docker.compose.project=${MIA_PROJECT:-mia}" --filter label=com.docker.compose.service=mia | head -1)"
@@ -36,7 +40,7 @@ fi
 # MIA is stopped first (it saves its history when it stops), the files are copied over the ones in the data volume, then MIA starts again. The files the
 # container had are kept next to the new ones as <name>.container-previous.
 if [ "${1:-}" = "memories" ]; then
-  DIR="${2:-$(dirname "$HERE")}"
+  DIR="$([ -n "${2:-}" ] && abspath "$2" || dirname "$HERE")"
   ENGINE="$(command -v podman || command -v docker)"
   CONTAINER="$($ENGINE ps -aq --filter "label=com.docker.compose.project=${MIA_PROJECT:-mia}" --filter label=com.docker.compose.service=mia | head -1)"
   [ -n "$CONTAINER" ] || { echo "MIA container not found, start the stack first: deploy/up.sh"; exit 1; }
@@ -55,6 +59,44 @@ if [ "${1:-}" = "memories" ]; then
   rm -rf "$SAVE"
   $ENGINE start "$CONTAINER" >/dev/null
   echo "MIA started again with the old memories"
+  exit 0
+fi
+# deploy/up.sh backup [file.tar.gz]    everything MIA keeps (data volume: histories, presets, gestures, chat log, calibration, library index ...) as one archive
+# deploy/up.sh restore file.tar.gz     put it back (after a backup of the current state, made automatically as mia-before-restore-<time>.tar.gz)
+# MIA is stopped while the files are copied (it saves its history when it stops) and started again.
+if [ "${1:-}" = "backup" ] || [ "${1:-}" = "restore" ]; then
+  MODE="$1"
+  ENGINE="$(command -v podman || command -v docker)"
+  CONTAINER="$($ENGINE ps -aq --filter "label=com.docker.compose.project=${MIA_PROJECT:-mia}" --filter label=com.docker.compose.service=mia | head -1)"
+  [ -n "$CONTAINER" ] || { echo "MIA container not found, start the stack first: deploy/up.sh"; exit 1; }
+  DATA=/opt/mia/MIA/data
+  make_backup() {      # $1: archive; MIA is stopped before and started after by the caller
+    local tmp; tmp="$(mktemp -d)"
+    $ENGINE cp "$CONTAINER:$DATA/." "$tmp/"
+    tar -czf "$1" -C "$tmp" .
+    rm -rf "$tmp"
+  }
+  if [ "$MODE" = "backup" ]; then
+    OUT="$(abspath "${2:-mia-backup-$(date +%Y%m%d-%H%M).tar.gz}")"
+    $ENGINE stop "$CONTAINER" >/dev/null
+    make_backup "$OUT"
+    $ENGINE start "$CONTAINER" >/dev/null
+    echo "backup written: $OUT ($(du -h "$OUT" | cut -f1))"
+  else
+    [ -n "${2:-}" ] || { echo "usage: deploy/up.sh restore file.tar.gz"; exit 1; }
+    IN="$(abspath "$2")"
+    [ -f "$IN" ] && tar -tzf "$IN" >/dev/null 2>&1 || { echo "not a readable .tar.gz: $IN"; exit 1; }
+    $ENGINE stop "$CONTAINER" >/dev/null
+    SAFE="$CALLER/mia-before-restore-$(date +%Y%m%d-%H%M%S).tar.gz"
+    make_backup "$SAFE"
+    echo "state before the restore saved: $SAFE"
+    TMP="$(mktemp -d)"
+    tar -xzf "$IN" -C "$TMP" --no-same-owner
+    $ENGINE cp "$TMP/." "$CONTAINER:$DATA/"
+    rm -rf "$TMP"
+    $ENGINE start "$CONTAINER" >/dev/null
+    echo "restored from $IN, MIA started again (files that are only in the volume stay; they are in $SAFE)"
+  fi
   exit 0
 fi
 # the project name gives containers and volumes their prefix (mia_ollama ...); another name = a second stack next to the first
