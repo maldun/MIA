@@ -21,11 +21,19 @@ def _short(quote):
     return quote if len(quote) <= MAX_QUOTE else quote[:MAX_QUOTE].rsplit(" ", 1)[0] + " ..."
 
 
+_PASSAGE_MARK = re.compile(r"[ \t]*\[\d+(?:\s*[,;]\s*\d+)*\]")
+
+
+def _clean(text):
+    """the model refers to its passages and facts as [3] or [2, 5]; these numbers mean nothing to a reader (the sources are listed below the answer), so they are taken out of the answer text"""
+    return _PASSAGE_MARK.sub("", str(text)).strip()
+
+
 def format_answer(answer):
     """the text of the chat message for {answer, status, sources}"""
     if not isinstance(answer, dict) or not str(answer.get("answer", "")).strip():
         return NO_ANSWER
-    text = str(answer["answer"]).strip()
+    text = _clean(answer["answer"])
     sources = answer.get("sources") if answer.get("status") == "answered" else None
     if not sources:
         return text
@@ -35,7 +43,7 @@ def format_answer(answer):
 
 def spoken_text(answer):
     """what MIA says: the answer, not the list of sources"""
-    return str(answer.get("answer", "")).strip() if isinstance(answer, dict) and answer.get("status") == "answered" else ""
+    return _clean(answer.get("answer", "")) if isinstance(answer, dict) and answer.get("status") == "answered" else ""
 
 
 def friendly_error(error):
@@ -73,6 +81,9 @@ def format_results(result, count=MAX_RESULTS):
     if not lines:
         return "No usable results for \u201c%s\u201d." % _plain(result.get("query", ""), 120)
     note = "Results for \u201c%s\u201d (%s):" % (_plain(result.get("query", ""), 120), _plain(result.get("backend", "") or "search", 40))
+    errors = [_plain(e, 160) for e in result.get("errors", []) if e] if isinstance(result.get("errors"), list) else []
+    if errors:          # the first backend did not answer: the person should know why SearXNG is not the one that answered
+        note += "\nNote: " + "; ".join(errors)
     return note + "\n\n" + "\n\n".join(lines)
 
 

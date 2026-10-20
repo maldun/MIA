@@ -48,6 +48,14 @@ class Formatting(unittest.TestCase):
         self.assertIn("Sources:\n- https://gazette.example/x: “opened to traffic on 3 May 2021”", text)
         self.assertNotIn("**", text)
 
+    def test_the_numbers_of_the_passages_are_taken_out_of_the_answer(self):
+        answer = {"answer": "The Clans invaded [3]. The SLDF left [6, 7] after the war [2;4]. A word [sic] stays.", "status": "answered",
+                  "sources": [{"url": "https://a.example/x", "quote": "Completed 31 March 1889; 137 years ago[1]"}]}
+        text = RC.format_answer(answer)
+        self.assertTrue(text.startswith("The Clans invaded. The SLDF left after the war. A word [sic] stays."))
+        self.assertIn("137 years ago[1]", text)                                          # a quote is shown as it is
+        self.assertEqual(RC.spoken_text(answer), "The Clans invaded. The SLDF left after the war. A word [sic] stays.")
+
     def test_unknown_has_no_sources_and_says_so_in_words(self):
         text = RC.format_answer({"answer": "The pages do not say who designed it.", "status": "unknown", "sources": [{"url": "u", "quote": "q"}]})
         self.assertEqual(text, "The pages do not say who designed it.")

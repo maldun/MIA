@@ -47,6 +47,7 @@ from .chat_api import create_blueprint as create_chat_blueprint
 from .moods import MoodTracker
 from .speech_text import speech_text
 from . import research_chat
+from . import searxng_control
 from .audio_router import AudioRouter
 from . import behaviour
 from . import broker as broker_module
@@ -491,6 +492,11 @@ pipeline_model = OllamaModel(comm.client, lambda profile: getattr(comm, "_profil
                              lambda: (comm.version, comm.llm_options), keep_alive=comm.keep_alive)
 _runs_dir = _own_path(CONST.RUNS_DIR_KEY, CONST.DEFAULT_RUNS_DIR)
 _web_tools, _web_search, _web_client = build_web_tools(cfg, _runs_dir)          # search (SearXNG, DuckDuckGo as fallback) and page fetcher with the safety rules
+try:        # is SearXNG running? if not, say why searches use the fallback (and start the container if the user wants it: "searxng_autostart")
+    _searx = searxng_control.ensure_searxng(cfg)
+    (logger.info if _searx["reachable"] or not _searx["wanted"] else logger.warning)("web search: %s", _searx["message"])
+except Exception as _exc:
+    logger.warning("web search: SearXNG could not be checked (%s)", _exc)
 library = Library(_own_path(CONST.LIBRARY_DIR_KEY, CONST.DEFAULT_LIBRARY_DIR), _own_path(CONST.USER_LIBRARY_DIR_KEY, CONST.DEFAULT_USER_LIBRARY_DIR),
                   _own_path(CONST.LIBRARY_INDEX_KEY, CONST.DEFAULT_LIBRARY_INDEX))
 for _path, _problem in library.errors.items():
