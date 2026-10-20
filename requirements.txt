@@ -1,8 +1,6 @@
-# MIA, core: the web app and the chat, the research (search, pages, checks), the voice with Kokoro and the voice effect. No torch, no RVC, no Coqui.
-# Python 3.10 to 3.12 (3.12 recommended; tested on 3.10, 3.11 and 3.12, see README.md). Install:
-#   python -m pip install -r requirements.txt
-#   python -m pip install --no-deps kokoro-onnx        (it asks for numpy>=2, but works with the numpy 1.26 pinned here, which the voice extras need)
-# The voice extras (RVC voice conversion, Coqui TTS, torch for the GPU) are in requirements-voice.txt. The exact freeze of the development machine is requirements-freeze-py310.txt.
+# MIA: the web app and the chat, the research (search, pages, checks), the voice (Kokoro on onnxruntime) and the voice effect.
+# No torch and no GPU libraries (Ollama brings its own GPU runtime in its container). RVC and Coqui TTS were removed in October 2026.
+# Python 3.11 to 3.13 (kokoro-onnx needs below 3.14); tested on 3.12, see README.md. Install:   python -m pip install -r requirements.txt
 Flask==3.1.0
 Flask-SocketIO==5.5.1
 Flask-APScheduler==1.13.1
@@ -12,11 +10,9 @@ requests==2.32.3
 ollama==0.6.3
 PyYAML==6.0.2
 lxml==5.3.0
-numpy==1.26.4
-scipy==1.11.4
+numpy>=2.0.2
+scipy>=1.14
 soundfile==0.13.0
-praat-parselmouth==0.4.5
+praat-parselmouth>=0.4.5
 onnxruntime>=1.17
-espeakng-loader
-phonemizer
-# not needed any more (imported only when used): playsound (local playback, unmaintained), opencv-python (an old local animation player), PyAudio (was imported, never used)
+kokoro-onnx>=0.4.7

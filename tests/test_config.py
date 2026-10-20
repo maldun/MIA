@@ -112,7 +112,7 @@ class Example(unittest.TestCase):
         data = json.load(open(EXAMPLE, encoding="utf-8"))
         for key in ("version", "version_light", "searxng_port", "searxng_autostart", "web_port", "sound_port", "voice_effect"):
             self.assertIn(key, data)
-        self.assertGreaterEqual(len(data), 80)
+        self.assertGreaterEqual(len(data), 70)
 
     def test_every_option_the_code_reads_is_in_the_example(self):
         data = json.load(open(EXAMPLE, encoding="utf-8"))

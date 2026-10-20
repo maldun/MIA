@@ -17,7 +17,7 @@
 #along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-A simple voice changer for an artificial character: effects on the TTS audio instead of a neural voice conversion (RVC). It needs a fraction
+A simple voice changer for an artificial character: effects on the TTS audio (it replaced a neural voice conversion, RVC, in October 2026). It needs a fraction
 of the CPU time, and it has no whistle or other artifacts of a trained voice model.
 
   pitch_semitones   raises (or lowers) the pitch of the voice

@@ -20,15 +20,14 @@ import argparse
 import json
 import os
 import sys
-# CPU thread limit ("cpu_threads" in the cfg file): the environment has to be set before numpy and torch are imported
+# CPU thread limit ("cpu_threads" in the cfg file): the environment has to be set before numpy and onnxruntime are imported
 try:
-    from .cpu_threads import early_limit_from_argv, parse as parse_cpu_threads, limit_environment, limit_torch, onnx_session_options
+    from .cpu_threads import early_limit_from_argv, parse as parse_cpu_threads, limit_environment, onnx_session_options
     from .config import default_path as default_config
 except ImportError:
-    from cpu_threads import early_limit_from_argv, parse as parse_cpu_threads, limit_environment, limit_torch, onnx_session_options
+    from cpu_threads import early_limit_from_argv, parse as parse_cpu_threads, limit_environment, onnx_session_options
     from config import default_path as default_config
 early_limit_from_argv(sys.argv, default_cfg=default_config(os.path.split(__file__)[0]))
-# torch and rvc_python are imported where they are used (RVC and Coqui, or a GPU check): Kokoro with the voice effect runs without them. pyaudio was imported here but is not used.
 import wave
 import tempfile
 import sys
@@ -47,7 +46,6 @@ try:
     from .mia_logger import logger
     from .utils import split_into_sentences, split_into_lines_and_sentences, chunker 
     from .speech_text import speech_text
-    from .voice_fix import suppress_tone
     from .voice_effects import settings_for as effect_settings, apply_effects
     from .utils import filter_symbol_sentences, get_websocket_url, get_url
 except ImportError:
@@ -58,94 +56,17 @@ except ImportError:
     from mia_logger import logger
     from utils import split_into_sentences, split_into_lines_and_sentences, chunker 
     from speech_text import speech_text
-    from voice_fix import suppress_tone
     from voice_effects import settings_for as effect_settings, apply_effects
     from utils import filter_symbol_sentences, get_websocket_url, get_url
 
 curr_path = os.path.split(__file__)[0]
 
 
-class _CachedIndex:
-    """
-    A faiss index together with all its vectors. RVC needs both for every sentence; rvc_python reads
-    the index file (several hundred MB) and copies all vectors again on every call.
-    """
-    def __init__(self,index):
-        self._index = index
-        self._vectors = index.reconstruct_n(0,index.ntotal)
-
-    def reconstruct_n(self,start,count):
-        if start == 0 and count == self._index.ntotal:
-            return self._vectors   # only read by RVC, never changed
-        return self._index.reconstruct_n(start,count)
-
-    def __getattr__(self,name):
-        return getattr(self._index,name)
-
-
-class _FaissWithCache:
-    """faiss for RVC's pipeline: read_index keeps the last index (and its vectors) in memory"""
-    def __init__(self,faiss_module):
-        self._faiss = faiss_module
-        self._cache = {}
-
-    def read_index(self,path,*args):
-        key = (os.path.abspath(path),os.path.getmtime(path))
-        if key not in self._cache:
-            self._cache.clear()   # one voice at a time
-            self._cache[key] = _CachedIndex(self._faiss.read_index(path,*args))
-        return self._cache[key]
-
-    def __getattr__(self,name):
-        return getattr(self._faiss,name)
-
-
-HUBERT_RATE = 16000   # RVC works at 16 kHz internally
-RVC_WINDOW = 160      # one pitch frame
-
-
-def rvc_padding_samples(seconds,target_rate):
-    """(samples at 16 kHz, samples at the voice's rate) for a padding: whole pitch frames, so both cuts stay aligned"""
-    frames = max(1,round(seconds*HUBERT_RATE/RVC_WINDOW))
-    pad = frames*RVC_WINDOW
-    return pad, pad*target_rate//HUBERT_RATE
-
-
-def set_rvc_padding(rvc,seconds):
-    """
-    RVC pads every piece of audio with this much on both sides before converting it (default on a CPU: 1 s).
-    The voice generator renders the padding too, so for short sentences most of the work is padding.
-    """
-    pipeline = rvc.vc.pipeline
-    pad, pad_target = rvc_padding_samples(seconds,rvc.vc.tgt_sr)
-    pipeline.t_pad = pad
-    pipeline.t_pad_tgt = pad_target
-    pipeline.t_pad2 = pad*2
-    logger.info(f"speech: RVC padding {pad/HUBERT_RATE:.2f} s")
-
-
-def cache_rvc_index():
-    """the index of the voice is read once instead of once per sentence"""
-    from rvc_python.modules.vc import pipeline as rvc_pipeline
-    if not isinstance(rvc_pipeline.faiss,_FaissWithCache):
-        rvc_pipeline.faiss = _FaissWithCache(rvc_pipeline.faiss)
-
-def _torch_cuda_available():
-    """is there a GPU for the TTS: False when torch is not installed (Kokoro runs on onnxruntime)"""
-    try:
-        import torch
-    except ImportError:
-        return False
-    return torch.cuda.is_available()
-
-
 class Speaker:
     """
-    Transforms a msg into speech using TTS and voice changers.
+    Transforms a msg into speech: Kokoro (onnxruntime) and, if wanted, the voice effect of voice_effects.py on top of it.
+    (RVC voice conversion and Coqui TTS were removed on 2026-10-20: the effect gives the voice, and nothing needs torch any more.)
     """
-    TTS_DEFAULT = "tts_models/en/ljspeech/glow-tts"
-    #TTS_DEFAULT = "tts_models/
-    COQUI_ENGINE = "coqui"
     KOKORO_ENGINE = "kokoro"
     KOKORO_DEFAULTS = {"model":"voice/models/kokoro/kokoro-v1.0.onnx",
                        "voices":"voice/models/kokoro/voices-v1.0.bin",
@@ -154,61 +75,40 @@ class Speaker:
     # the following ones are rendered while the previous chunk is playing
     FIRST_CHUNK_SENTENCES = 1
     CHUNK_SENTENCES = 1
-    def __init__(self,tts_model=TTS_DEFAULT,voice_model=None,tts_device=None,gfx_version=None,voice_sample=None,rvc_opts=None,rvc_params=None,rvc_enabled=True,
-                 web_port=8585,address="localhost",protocol="http",tts_engine=COQUI_ENGINE,kokoro_opts=None,sentence_pause=0.3,cpu_threads=None,
-                 rvc_cache_index=True,tts_warmup=True,rvc_pad=None,rvc_whistle_hz=700.0,voice_effect=None,**_):
+    def __init__(self,tts_engine=KOKORO_ENGINE,kokoro_opts=None,web_port=8585,address="localhost",protocol="http",sentence_pause=0.3,cpu_threads=None,
+                 tts_warmup=True,voice_effect=None,rvc_enabled=False,**_):
+        # options of a configuration from before the removal (voice_model, rvc_opts, rvc_params, tts_device, tts_model ...) are ignored; the two that would change what is heard are refused
+        if tts_engine != self.KOKORO_ENGINE:
+            raise ValueError(f"tts_engine '{tts_engine}' is not available: the Coqui TTS engine was removed, only '{self.KOKORO_ENGINE}' is left (set \"tts_engine\": \"kokoro\" in setup_cfg.json)")
+        if rvc_enabled:
+            raise ValueError("RVC was removed: set \"rvc_enabled\": false in setup_cfg.json (the voice effect, \"voice_effect\", gives the voice)")
         self._tts_engine = tts_engine
         self._kokoro_opts = dict(self.KOKORO_DEFAULTS, **(kokoro_opts or {}))
         # extra wait after each chunk to cover upload and player start in the browser
         self._sentence_pause = sentence_pause
-        self._tts_model = tts_model
-        self._voice = voice_model
-        if rvc_opts is None: rvc_opts = {}
-        if rvc_params is None: rvc_params = {}
-        self._rvc_enabled = rvc_enabled
-        self._rvc_opts = rvc_opts
-        self._rvc_params = rvc_params
         if isinstance(web_port,int) and isinstance(address,str) and isinstance(protocol,str):
-            #self._url = f"{protocol}://{address}:{web_port}/{UPLOAD_ROUTE}"
             self._url=get_url(protocol=protocol,address=address,web_port=web_port)+f"/{UPLOAD_ROUTE}"
         else:
             self._url = None
-        
-        if gfx_version is not None:
-            os.environ["HSA_OVERRIDE_GFX_VERSION"] = gfx_version
 
-        # at most this many CPU threads for torch (RVC, Coqui) and onnxruntime (Kokoro); None = all cores
+        # at most this many CPU threads for onnxruntime (Kokoro) and numpy; None = all cores
         self._cpu_threads = parse_cpu_threads(cpu_threads)
         if self._cpu_threads:
             limit_environment(self._cpu_threads)
-            limit_torch(self._cpu_threads)
             logger.info(f"speech: using at most {self._cpu_threads} CPU threads")
-        
-        if tts_device is None:
-            self._device = "cuda" if _torch_cuda_available() else "cpu"
-        else:
-            self._device = tts_device
-        
-        self._voice_sample = voice_sample
-        self._voice_model = voice_model
-        self._rvc_cache_index = rvc_cache_index
-        self._rvc_pad = rvc_pad
-        # the voice model whistles at a fixed frequency on some vowels: removed after the conversion (0 / null = off), see voice_fix.py
-        self._whistle_hz = float(rvc_whistle_hz) if rvc_whistle_hz else None
-        # simple voice changer on top of the TTS (and of RVC, if that is on): pitch, formants, robot effects; a typo in the config stops the start
+
+        # simple voice changer on top of the TTS: pitch, formants, robot effects; a typo in the config stops the start
         self._effect = effect_settings(voice_effect)
         if self._effect:
             logger.info(f"speech: voice effect {self._effect}")
-        self.init_tts_model(self._tts_model,self._device)
-        if self._rvc_enabled is True:
-            self.init_rvc_model(self._voice_model,self._device)
+        self.init_tts_model()
         if tts_warmup:
             self.warm_up()
 
     def warm_up(self):
         """
-        Renders a short sentence once: RVC loads its helper models (hubert, rmvpe) and the
-        index on first use, so without this the first answer after the start is the slowest.
+        Renders a short sentence once: the model loads its helpers on first use,
+        so without this the first answer after the start is the slowest.
         """
         started = time.time()
         try:
@@ -227,46 +127,20 @@ class Speaker:
             return path
         return os.path.join(curr_path,path)
 
-    def init_tts_model(self,tts_model,device):
-        # engines are imported lazily so that only the used one has to be installed
-        if self._tts_engine == self.KOKORO_ENGINE:
-            from kokoro_onnx import Kokoro
-            model = self._resolve_path(self._kokoro_opts["model"])
-            voices = self._resolve_path(self._kokoro_opts["voices"])
-            options = onnx_session_options(self._cpu_threads)
-            if options is None:
-                self._tts = Kokoro(model, voices)
-            else:
-                # same session as Kokoro makes itself, but with the thread limit
-                import onnxruntime as ort
-                from kokoro_onnx.session import resolve_providers
-                session = ort.InferenceSession(model, sess_options=options, providers=resolve_providers())
-                self._tts = Kokoro.from_session(session, voices)
-        elif self._tts_engine == self.COQUI_ENGINE:
-            from TTS.api import TTS
-            self._tts = TTS(model_name=tts_model).to(device)
+    def init_tts_model(self):
+        from kokoro_onnx import Kokoro      # imported here so that importing this module needs no TTS packages
+        model = self._resolve_path(self._kokoro_opts["model"])
+        voices = self._resolve_path(self._kokoro_opts["voices"])
+        options = onnx_session_options(self._cpu_threads)
+        if options is None:
+            self._tts = Kokoro(model, voices)
         else:
-            raise ValueError(f"Unknown tts_engine '{self._tts_engine}'!")
-        
-    def init_rvc_model(self,model,device):
-        import torch
-        from rvc_python.infer import RVCInference        # the voice model needs the "voice" extras (requirements-voice.txt)
-        # torch >= 2.6 loads only weights by default, but the hubert model
-        # used by rvc contains a fairseq Dictionary
-        if hasattr(torch.serialization,"add_safe_globals"):
-            from fairseq.data.dictionary import Dictionary
-            torch.serialization.add_safe_globals([Dictionary])
-        self._rvc = RVCInference(device=device) #+":0")
+            # same session as Kokoro makes itself, but with the thread limit
+            import onnxruntime as ort
+            from kokoro_onnx.session import resolve_providers
+            session = ort.InferenceSession(model, sess_options=options, providers=resolve_providers())
+            self._tts = Kokoro.from_session(session, voices)
 
-        self._rvc.load_model(model,**self._rvc_opts)
-        self._rvc.set_params(**self._rvc_params)
-        if self._rvc_cache_index:
-            cache_rvc_index()
-        if self._rvc_pad is not None:
-            set_rvc_padding(self._rvc,self._rvc_pad)
-                             #f0up_key=2, protect=0.5,
-                             #f0method= "pm")  # (harvest, crepe, rmvpe, pm)
-    
     @staticmethod
     def get_wav_duration(filename):
         """
@@ -298,22 +172,14 @@ class Speaker:
         # no message no sound
         if len(msg.strip()) == 0:
             return False
-        if self._tts_engine == self.KOKORO_ENGINE:
-            import soundfile as sf
-            opts = self._kokoro_opts
-            samples, sample_rate = self._tts.create(msg,voice=opts["voice"],speed=opts["speed"],lang=opts["lang"])
-            sf.write(output_file,samples,sample_rate)
-        else:
-            self._tts.tts_with_vc_to_file(msg, speaker_wav=self._voice_sample, file_path=output_file)
+        import soundfile as sf
+        opts = self._kokoro_opts
+        samples, sample_rate = self._tts.create(msg,voice=opts["voice"],speed=opts["speed"],lang=opts["lang"])
+        sf.write(output_file,samples,sample_rate)
         return True
         
-    def change_voice(self,wav_file_in,wav_file_out):
-        self._rvc.infer_file(wav_file_in, wav_file_out)
-        if self._whistle_hz:
-            self.remove_whistle(wav_file_out)
-
     def apply_effect(self,wav_file):
-        """the voice changer (voice_effects.py) on a rendered file, in place"""
+        """the voice effect (voice_effects.py) on a rendered file, in place"""
         import numpy as np
         import soundfile as sf
         samples, rate = sf.read(wav_file)
@@ -321,30 +187,15 @@ class Speaker:
             samples = samples.mean(axis=1)
         sf.write(wav_file,np.clip(apply_effects(samples,rate,self._effect),-1.0,1.0),rate,subtype="PCM_16")
 
-    def remove_whistle(self,wav_file):
-        """removes the tone that the voice model produces on some sounds (only where it is present), in place"""
-        import numpy as np
-        import soundfile as sf
-        samples, rate = sf.read(wav_file)
-        if samples.ndim > 1:
-            samples = samples.mean(axis=1)
-        cleaned = suppress_tone(samples,rate,self._whistle_hz)
-        sf.write(wav_file,np.clip(cleaned,-1.0,1.0),rate,subtype="PCM_16")
-    
     def play_voice(self,wav_file):
         play_sound(wav_file,url=self._url)
         
     def render_voice(self,msg,output_file):
         """
-        Renders msg into output_file (TTS and voice change if enabled).
+        Renders msg into output_file (TTS and the voice effect if there is one).
         Returns the play length in seconds (0 if nothing was rendered).
         """
-        if self._rvc_enabled is True:
-            with tempfile.NamedTemporaryFile(suffix=".wav") as fpin:
-                if not self.text2speech(msg,fpin.name):
-                    return 0
-                self.change_voice(fpin.name,output_file)
-        elif not self.text2speech(msg,output_file):
+        if not self.text2speech(msg,output_file):
             return 0
         if self._effect:
             self.apply_effect(output_file)
@@ -407,9 +258,6 @@ class Speaker:
         # the last chunk is waited for by the caller
         return duration
 
-
-# Get device
-# device = "cuda" if torch.cuda.is_available() else "cpu"
 
 class SoundHandler(socketserver.StreamRequestHandler):
     """
@@ -517,25 +365,17 @@ def start_server(cfg_file):
     
                 
 def tests():
-    # test
-    with open(CFG_FILE,'r') as fp: cfg = json.load(fp)
-    os.environ["HSA_OVERRIDE_GFX_VERSION"] = "11.0.0"
-    # deactivae sever and enable rvc for testing
-    cfg["rvc_enabled"] = True
+    """a manual try of the voice: renders a sentence with the settings of the configuration (no web server) and plays it"""
+    with open(default_config(curr_path),'r') as fp: cfg = json.load(fp)
     cfg["address"] = None
     s = Speaker(**cfg)
-    
-    testout1 = "../testoutput.wav"
-    testout2 = "../testoutputc.wav"
-    msg = "Dies ist ein Test"
-    #msg = "L\u00f6we sucht das Licht\nSchatten tanzen auf dem Berg\nGeheimnisvolk schaut"
     msg = "Let's test some sentences, alright? This is a test."
-    s.text2speech(msg,testout1)
-    s.change_voice(testout1,testout2)
-    s.play_voice(testout2)
-    s.text2voice(msg)
-    duration = s.get_wav_duration("out.wav")
-    assert duration > 15
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        out = os.path.join(tmp_dir,"test.wav")
+        duration = s.render_voice(msg,out)
+        print(f"rendered {duration:.1f} s of speech")
+        assert duration > 1
+        s.play_voice(out)
 
 
 def generate(cfg_file,expression_file,sound_format="wav"):

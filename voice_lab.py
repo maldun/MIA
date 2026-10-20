@@ -17,33 +17,34 @@
 #along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-Renders the same test text with different Kokoro voices and RVC pitch shifts,
+Renders the same test text with different Kokoro voices and the presets of the voice effect (voice_effects.py),
 to compare them by ear. Also reports the render speed (real time factor).
 """
 import argparse
 import json
 import os
+import shutil
 import time
 
 try:
     from .constants import CFG_FILE
     from .speak import Speaker
+    from .voice_effects import PRESETS, settings_for
 except ImportError:
     from constants import CFG_FILE
     from speak import Speaker
+    from voice_effects import PRESETS, settings_for
 
 curr_path = os.path.split(__file__)[0]
 TEST_TEXT = "Hi, I'm MIA! I just woke up and I'm ready to help. Shall we look at your tasks for today?"
 VOICES = ["af_heart","af_bella","af_sky","af_nicole","jf_alpha"]
-PITCHES = [0,3,6]
 
 parser = argparse.ArgumentParser(prog='voice_lab',
-                                 description='Renders voice samples for comparing TTS voices and RVC pitch shifts')
+                                 description='Renders voice samples for comparing Kokoro voices and the presets of the voice effect')
 parser.add_argument('cfg_file',nargs='?',default=CFG_FILE,help="configuration file")
 parser.add_argument('-o','--out_dir',default=os.path.join(curr_path,"voice","samples","lab"),help="output directory")
 parser.add_argument('-v','--voices',nargs='+',default=VOICES,help="kokoro voices")
-parser.add_argument('-p','--pitches',nargs='+',type=int,default=PITCHES,help="RVC pitch shifts (semitones)")
-parser.add_argument('-f','--f0method',default="rmvpe",help="RVC pitch method (pm, harvest, crepe, rmvpe)")
+parser.add_argument('-e','--effects',nargs='+',default=sorted(PRESETS),help="presets of the voice effect (voice_effects.py); the plain voice is always rendered")
 parser.add_argument('-t','--text',default=TEST_TEXT,help="text to speak")
 
 def timed(func,*args):
@@ -54,8 +55,8 @@ def timed(func,*args):
 def main(args):
     with open(args.cfg_file,'r') as fp:
         cfg = json.load(fp)
-    # no web server needed and always use kokoro and rvc
-    cfg.update(address=None,tts_engine=Speaker.KOKORO_ENGINE,rvc_enabled=True)
+    # no web server needed; the effect is applied here, one preset after the other
+    cfg.update(address=None,voice_effect=None,tts_warmup=False)
     speaker = Speaker(**cfg)
     os.makedirs(args.out_dir,exist_ok=True)
 
@@ -65,11 +66,12 @@ def main(args):
         _, tts_time = timed(speaker.text2speech,args.text,tts_file)
         duration = speaker.get_wav_duration(tts_file)
         print(f"{voice}: {duration:.1f}s audio, TTS {tts_time:.2f}s (RTF {tts_time/duration:.2f})")
-        for pitch in args.pitches:
-            speaker._rvc.set_params(f0method=args.f0method,f0up_key=pitch)
-            rvc_file = os.path.join(args.out_dir,f"{voice}_rvc{pitch:+d}.wav")
-            _, rvc_time = timed(speaker.change_voice,tts_file,rvc_file)
-            print(f"  pitch {pitch:+d}: RVC {rvc_time:.2f}s (RTF {rvc_time/duration:.2f}) -> {rvc_file}")
+        for preset in args.effects:
+            speaker._effect = settings_for(preset)
+            effect_file = os.path.join(args.out_dir,f"{voice}_{preset}.wav")
+            shutil.copyfile(tts_file,effect_file)
+            _, effect_time = timed(speaker.apply_effect,effect_file)
+            print(f"  effect {preset}: {effect_time:.2f}s (RTF {effect_time/duration:.2f}) -> {effect_file}")
 
 if __name__ == "__main__":
     main(parser.parse_args())

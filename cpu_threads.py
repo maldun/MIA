@@ -17,10 +17,10 @@
 #along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-The "cpu_threads" setting: how many CPU threads the speech process (torch for RVC and Coqui, onnxruntime for Kokoro,
+The "cpu_threads" setting: how many CPU threads the speech process (onnxruntime for Kokoro,
 the BLAS libraries behind numpy) and Ollama's runner may use. Without the setting each of them uses all cores.
 
-This module imports nothing heavy, so the limit can be set before numpy and torch are imported
+This module imports nothing heavy, so the limit can be set before numpy and onnxruntime are imported
 (their thread pools are created on import). 0, None, or a missing setting mean: no limit.
 """
 import json
@@ -68,7 +68,7 @@ def from_config_file(path):
 def early_limit_from_argv(argv, default_cfg=None):
     """
     For a script started like `python speak.py setup_cfg.json ...`: reads the setting from the first .json
-    file in the arguments (or default_cfg) and sets the environment, before numpy and torch are imported.
+    file in the arguments (or default_cfg) and sets the environment, before numpy and onnxruntime are imported.
     Returns the number of threads or None.
     """
     candidates = [a for a in argv[1:] if not a.startswith("-") and a.endswith(".json")]
@@ -79,22 +79,6 @@ def early_limit_from_argv(argv, default_cfg=None):
         limit_environment(threads)
         return threads
     return None
-
-def limit_torch(threads):
-    """
-    Limits torch (RVC, Coqui TTS). Call after importing torch.
-    """
-    if not threads:
-        return
-    try:
-        import torch
-    except ImportError:
-        return          # no torch (Kokoro with onnxruntime only): nothing to limit here
-    torch.set_num_threads(threads)
-    try:
-        torch.set_num_interop_threads(min(threads, 2))
-    except RuntimeError:
-        pass  # can only be set once, before any parallel work
 
 def onnx_session_options(threads):
     """

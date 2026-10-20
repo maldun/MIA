@@ -167,7 +167,6 @@ class SpeakerTest(unittest.TestCase):
 
     def make(self, effect):
         speaker = self.speak.Speaker.__new__(self.speak.Speaker)
-        speaker._rvc_enabled = False
         speaker._effect = importlib.import_module("MIA.voice_effects").settings_for(effect)
         return speaker
 
@@ -200,7 +199,27 @@ class SpeakerTest(unittest.TestCase):
 
     def test_a_typo_in_the_configuration_stops_the_start_with_a_clear_message(self):
         with self.assertRaisesRegex(ValueError, "unknown voice_effect preset 'animee'"):
-            self.speak.Speaker(tts_engine="kokoro", rvc_enabled=False, voice_effect="animee")
+            self.speak.Speaker(voice_effect="animee")
+
+    def test_the_removed_engines_are_refused_with_a_message_that_says_what_to_change(self):
+        with self.assertRaisesRegex(ValueError, "Coqui TTS engine was removed"):
+            self.speak.Speaker(tts_engine="coqui")
+        with self.assertRaisesRegex(ValueError, "RVC was removed.*rvc_enabled"):
+            self.speak.Speaker(rvc_enabled=True)
+
+    def test_a_configuration_from_before_the_removal_still_starts(self):
+        speak = self.speak
+        speak.Speaker.init_tts_model = lambda self, *a: None
+        old = {"tts_engine": "kokoro", "tts_model": "tts_models/en/ljspeech/glow-tts", "voice_model": "x.pth", "rvc_opts": {"index_path": "x"}, "rvc_params": {"f0up_key": 3},
+               "rvc_enabled": False, "tts_device": "cpu", "voice_sample": "x.wav", "rvc_cache_index": True, "rvc_pad": None, "rvc_whistle_hz": 700, "gfx_version": "11.0.0", "voice_effect": "anime"}
+        speaker = speak.Speaker(tts_warmup=False, **old)
+        self.assertEqual(speaker._effect, importlib.import_module("MIA.voice_effects").settings_for("anime"))
+
+    def test_the_speaker_has_nothing_of_rvc_left(self):
+        for name in ("change_voice", "remove_whistle", "init_rvc_model", "_rvc"):
+            self.assertFalse(hasattr(self.speak.Speaker, name), name)
+        self.assertFalse(hasattr(self.speak, "set_rvc_padding"))
+        self.assertFalse(hasattr(self.speak, "suppress_tone"))
 
 
 if __name__ == "__main__":

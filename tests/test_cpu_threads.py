@@ -114,47 +114,34 @@ class ConfigFile(unittest.TestCase):
                     os.environ[name] = value
 
 
-@unittest.skipUnless(importlib.util.find_spec("torch"), "torch is not installed (the voice extras, requirements-voice.txt)")
 class RealEffect(unittest.TestCase):
-    """Fresh interpreters: does the limit really reach torch and onnxruntime?"""
+    """Fresh interpreters: does the limit really reach numpy's thread pools and onnxruntime?"""
 
-    def test_env_set_early_limits_torch_without_any_further_call(self):
+    def test_env_set_early_limits_the_thread_pools_before_numpy_is_imported(self):
         with tempfile.TemporaryDirectory() as tmp:
             cfg = write_cfg(tmp, cpu_threads=3)
             out = run_python(f"""
-                import sys
+                import os, sys
                 sys.argv = ['speak.py', {cfg!r}]
                 from MIA.cpu_threads import early_limit_from_argv
                 early_limit_from_argv(sys.argv)
-                import torch                      # imported after the environment is set, like in speak.py
-                print(torch.get_num_threads())
+                print(os.environ.get('OMP_NUM_THREADS'), os.environ.get('OPENBLAS_NUM_THREADS'), 'numpy' in sys.modules)
             """)
-        self.assertEqual(out, "3")
+        self.assertEqual(out, "3 3 False")
 
-    def test_without_the_setting_torch_uses_all_its_threads(self):
+    def test_without_the_setting_the_environment_is_left_alone(self):
         with tempfile.TemporaryDirectory() as tmp:
             cfg = write_cfg(tmp, other=1)
             out = run_python(f"""
-                import sys
+                import os, sys
+                for name in ('OMP_NUM_THREADS', 'OPENBLAS_NUM_THREADS', 'MKL_NUM_THREADS'):
+                    os.environ.pop(name, None)
                 sys.argv = ['speak.py', {cfg!r}]
                 from MIA.cpu_threads import early_limit_from_argv
                 early_limit_from_argv(sys.argv)
-                import torch
-                print(torch.get_num_threads())
+                print(os.environ.get('OMP_NUM_THREADS'), os.environ.get('OPENBLAS_NUM_THREADS'))
             """)
-        self.assertGreater(int(out), 3)
-
-    def test_limit_torch_after_import(self):
-        out = run_python("""
-            import torch
-            from MIA.cpu_threads import limit_torch
-            before = torch.get_num_threads()
-            limit_torch(2)
-            print(before, torch.get_num_threads())
-        """)
-        before, after = out.split()
-        self.assertGreater(int(before), 2)
-        self.assertEqual(after, "2")
+        self.assertEqual(out, "None None")
 
     def test_onnx_session_options(self):
         out = run_python("""
@@ -163,6 +150,13 @@ class RealEffect(unittest.TestCase):
             print(o.intra_op_num_threads, o.inter_op_num_threads, onnx_session_options(None))
         """)
         self.assertEqual(out, "3 1 None")
+
+    def test_there_is_no_torch_limit_any_more(self):
+        out = run_python("""
+            import MIA.cpu_threads as ct
+            print(hasattr(ct, 'limit_torch'))
+        """)
+        self.assertEqual(out, "False")
 
 
 class CommunicatorAndSpeaker(unittest.TestCase):
@@ -179,33 +173,34 @@ class CommunicatorAndSpeaker(unittest.TestCase):
             self.assertEqual(plain._profiles["full"], ("big", {"num_ctx": 8192}))
             self.assertIsNone(plain._profiles["light"][1])
 
-    @unittest.skipUnless(importlib.util.find_spec("torch"), "torch is not installed (the voice extras, requirements-voice.txt)")
     def test_speaker_applies_the_limit(self):
         # Speaker with the model loading switched off: only the thread handling is checked
         with tempfile.TemporaryDirectory() as tmp:
             cfg = write_cfg(tmp, cpu_threads=3)
             out = run_python(f"""
-                import sys
+                import os, sys
                 sys.argv = ['speak.py', {cfg!r}]
                 from MIA import speak
                 speak.Speaker.init_tts_model = lambda self, *a: None
-                speaker = speak.Speaker(tts_device="cpu", rvc_enabled=False, cpu_threads=2)
-                import torch
-                print(speaker._cpu_threads, torch.get_num_threads())
+                speaker = speak.Speaker(cpu_threads=2, tts_warmup=False)
+                print(speaker._cpu_threads, os.environ.get('OMP_NUM_THREADS'))
             """, timeout=240)
         self.assertEqual(out, "2 2")
 
-    @unittest.skipUnless(importlib.util.find_spec("torch"), "torch is not installed (the voice extras, requirements-voice.txt)")
     def test_speaker_without_setting_keeps_all_threads(self):
-        out = run_python("""
-            import sys
-            from MIA import speak
-            speak.Speaker.init_tts_model = lambda self, *a: None
-            speaker = speak.Speaker(tts_device="cpu", rvc_enabled=False)
-            import torch
-            print(speaker._cpu_threads, torch.get_num_threads() > 3)
-        """, timeout=240)
-        self.assertEqual(out, "None True")
+        with tempfile.TemporaryDirectory() as tmp:
+            cfg = write_cfg(tmp, other=1)
+            out = run_python(f"""
+                import os, sys
+                for name in ('OMP_NUM_THREADS', 'OPENBLAS_NUM_THREADS', 'MKL_NUM_THREADS'):
+                    os.environ.pop(name, None)
+                sys.argv = ['speak.py', {cfg!r}]
+                from MIA import speak
+                speak.Speaker.init_tts_model = lambda self, *a: None
+                speaker = speak.Speaker(tts_warmup=False)
+                print(speaker._cpu_threads, os.environ.get('OMP_NUM_THREADS'))
+            """, timeout=240)
+        self.assertEqual(out, "None None")
 
     def test_kokoro_is_built_with_the_thread_limit(self):
         with open(os.path.join(REPO, "speak.py")) as fp:
@@ -213,7 +208,7 @@ class CommunicatorAndSpeaker(unittest.TestCase):
         self.assertIn("onnx_session_options(self._cpu_threads)", source)
         self.assertIn("Kokoro.from_session(session, voices)", source)
         self.assertIn("early_limit_from_argv(sys.argv", source)
-        self.assertLess(source.index("early_limit_from_argv(sys.argv"), source.index("import torch\n"), "env must be set before torch is imported")
+        self.assertLess(source.index("early_limit_from_argv(sys.argv"), source.index("from .play_media import play_sound"), "env must be set before numpy is imported (play_media imports it)")
 
 
 if __name__ == "__main__":

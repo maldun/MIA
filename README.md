@@ -26,50 +26,35 @@ Installation
 Prerequisites:
 --------------
 
-- python 3.10 to 3.12 (3.12 recommended; Python 3.10 reaches its end of life in October 2026). The core runs on 3.10, 3.11 and 3.12 (tested); the voice extras (RVC, Coqui TTS, torch) are in `requirements-voice.txt`: RVC needs 3.10, Coqui and torch 2.4.1 stop at 3.12
+- python 3.11 to 3.13 (3.12 recommended and tested; Python 3.10 reaches its end of life in October 2026). Nothing needs `torch` any more: the voice is Kokoro on onnxruntime with a small voice effect, RVC voice conversion and Coqui TTS were removed in October 2026 (`git log` has them)
 - rocm/cuda (works with CPU but slow....)
 - docker/podman
 - (Tested on Fedora 40; should work on other systems though)
 - Some mp4 files for expression of feelings (set in expressions.json; can be extended shortened as needed)
-- a .wav voice sample of your choice (set under option `voice_sample` in `setup_cfg.json`).
 - background .jpg file of your choice (into `templates/static/background.jpg`).
-- optional: a .pth model for rvc.
 (I made my own with blender and collected other stuff, but I don't share due to copyright reasons. Private use is one thing, publishing another ..., but the internet is full of fun stuff so go ahead.)
 
 ### Create virtual environment (example)
-- `python3.12 -m venv <venvfolder>/mia` (or `python3.11`, `python3.10`)
+- `python3.12 -m venv <venvfolder>/mia` (or `python3.11`, `python3.13`)
 - `source <venvfolder>/mia/bin/activate`
-- `python -m pip install -r requirements.txt` (the core: web app, chat, research, Kokoro voice) and `python -m pip install --no-deps kokoro-onnx`
-- optional, for RVC, Coqui TTS and GPU torch: `python -m pip install -r requirements-voice.txt` (and the ROCm/CUDA steps below)
+- `python -m pip install -r requirements.txt` (web app, chat, research and the Kokoro voice with the effect; no torch)
 
-### Install ROCM/CUDA (Fedora; only for the voice extras, Ollama brings its own GPU runtime in its container):
+### GPU for Ollama (Fedora, AMD; Ollama brings its own GPU runtime in its container, the host needs the driver and the device access):
 - `sudo usermod -a -G video $LOGNAME`
 - `sudo dnf install rocminfo`
 - `sudo dnf install rocm-opencl`
 -  `sudo dnf install rocm-clinfo`
 - `sudo dnf install rocm-hip`
-- `pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/rocm6.0`
 
-- (Source: https://medium.com/@anvesh.jhuboo/rocm-pytorch-on-fedora-51224563e5be)
 
-### Install coqui-ai tts:
-- `git clone https://github.com/idiap/coqui-ai-TTS.git`
-- `pip install -e .[all,dev,notebooks]  # Select the relevant extras`
-
-### Install python-rvc (Optional):
-- `git clone https://github.com/daswer123/rvc-python`
-- `python3.10 -m pip install -e .` (RVC: Python 3.10)
-
-### Install Kokoro TTS (default tts engine):
-- `python -m pip install espeakng-loader phonemizer onnxruntime "numpy==1.26.4"` (all in `requirements.txt`)
-- `python -m pip install --no-deps kokoro-onnx` (it asks for numpy>=2, but works with 1.26 which rvc/coqui need)
+### Kokoro TTS (the voice; the packages are in `requirements.txt`):
 - Download `kokoro-v1.0.onnx` and `voices-v1.0.bin` from https://github.com/thewh1teagle/kokoro-onnx/releases/tag/model-files-v1.0 into `voice/models/kokoro/`
-- Compare voices and pitch shifts with `python voice_lab.py` (writes samples to `voice/samples/lab/`)
+- Compare voices and effect presets with `python voice_lab.py` (writes samples to `voice/samples/lab/`)
 
 ### Clone
 - `git clone https://github.com/maldun/MIA.git`
 - Go into MIA folder
-- Install/Check requirements in requirements.txt (`python -m pip install -r requirements.txt`; the full freeze of the development machine is `requirements-freeze-py310.txt`)
+- Install/Check requirements in requirements.txt (`python -m pip install -r requirements.txt`)
 
 ### Configuration
 - The real configuration of a machine is `setup_cfg.json`. It is **not in version control** (a deployment on another machine would otherwise fight with the one in git at every commit). The tracked template is
@@ -102,19 +87,11 @@ Prerequisites:
     - "web_port":8585, (port for web-app)
     - "address":"localhost", (adress)
     - "protocol":"http", (web protocol used for site)
-    - "tts_engine":"kokoro", (tts engine: kokoro or coqui)
     - "kokoro_opts":{"voice":"af_heart","speed":1.0,"lang":"en-us"}, (kokoro settings; "model" and "voices" paths can be set too)
-    - "tts_model":"tts_models/en/ljspeech/glow-tts", (tts model for coqui engine; see TTS docu)
-    - "voice_model":"/path/to/MIA/voice/models/modelname/model.pth", (optional: voice model for rvc)
-    - "rvc_opts":{"index_path":"/path/to/MIA/voice/models/modelname/model.index","version":"v2"},
-    - "rvc_params":{"f0method":"rmvpe","f0up_key":3},  (for these see python-rvc docu)
-    - "rvc_enabled":true, (enable,disable rvc)
     - "sentence_pause":0.3, (extra pause in seconds between spoken sentences)
-    - "tts_device":"cpu", (device for tts, either cuda/cpu, for some reason cpu worked better ...)
-    - "cpu_threads":4, (optional, off by default: at most this many CPU threads for the speech process (torch for RVC/Coqui, onnxruntime for Kokoro, numpy) and for Ollama's runner (`num_thread`); without it (or 0) every library uses all cores. A lower number puts less load on the CPU at the price of slower speech. An explicit "num_thread" in "llm_options" wins. After changing it the first request reloads the model once.)
-    - "rvc_pad":0.25, "tts_warmup":true, "rvc_cache_index":true, (optional: speed-ups of the voice. `tts_warmup` and `rvc_cache_index` are on by default and do not change the sound. `rvc_pad` is NOT set by default (RVC's own 1 s padding is used): RVC pads every sentence on both sides before converting it and renders the padding too, so `"rvc_pad":0.25` makes it much faster, but it may change the sound a little (a hollow sound was reported), listen before keeping it. The warm-up renders one short sentence at start, so the first answer is not slowed down by loading RVC's helper models. The RVC index (several hundred MB) is read once instead of for every sentence. Measure with `python tools/tts_benchmark.py --models-root <MIA folder>`; on a Ryzen 9 5900X: 3.2 s per sentence before, 2.2-2.5 s after, real-time factor 1.08 -> 0.74-0.83, first sentence 5.3 s -> 1.8 s. `"cpu_threads":6` halves the CPU load and is still faster than speaking (0.83), 12 is the fastest (0.74))
-    - "rvc_whistle_hz":700, (optional, on by default: the MikuAI voice model produces a whistle, a pure tone of about 700 Hz on some vowels (100-250 ms, in almost every sentence); no RVC setting removes it and the Kokoro audio does not have it. After the conversion MIA removes the tone with a narrow filter, only where it is present (about 60 ms per sentence); normal speech is untouched. `0` switches it off. For another voice model find its frequency with `python tools/find_whistle.py <converted wav files>` (the frequency that comes back in several different sentences); details in `voice_fix.py`.)
-    - "voice_effect":"anime", (optional, off by default: a simple voice changer on the Kokoro audio instead of (or on top of) RVC, about 100 times faster than speaking and without the artifacts of a trained model. Use it with `"rvc_enabled":false`. Presets: `anime` (pitch +5 semitones, formants +13%, a little sparkle), `anime_robot` (the same with flatter intonation, ring modulation and a metallic resonance), `robot` (monotone, ring modulation, lo-fi), `tiny` (+8 semitones, formants +22%), `off`. Single settings can be changed: `{"preset":"anime","pitch_semitones":7,"formant_shift":1.18}`; all settings are described in `voice_effects.py` (pitch_semitones, formant_shift, pitch_range 0 = monotone, ring_hz/ring_mix, comb_ms/comb_mix, bitcrush, sparkle_db). A typo stops the speech server with a message. Compare with `python tools/tts_benchmark.py --no-rvc --effect anime --save <folder>`; measured on a Ryzen 9 5900X: 0.84 s per sentence and real-time factor 0.28 (Kokoro alone) against 3.0 s and 1.03 with RVC)
+    - "cpu_threads":4, (optional, off by default: at most this many CPU threads for the speech process (onnxruntime for Kokoro, numpy) and for Ollama's runner (`num_thread`); without it (or 0) every library uses all cores. A lower number puts less load on the CPU at the price of slower speech. An explicit "num_thread" in "llm_options" wins. After changing it the first request reloads the model once.)
+    - "tts_warmup":true, (optional, on by default: renders a short sentence at the start, so that the first answer is not the slowest)
+    - "voice_effect":"anime", (optional, off by default: a simple voice changer on the Kokoro audio (it replaced the RVC voice conversion): about 100 times faster than speaking and without the artifacts of a trained voice model. Presets: `anime` (pitch +5 semitones, formants +13%, a little sparkle), `anime_robot` (the same with flatter intonation, ring modulation and a metallic resonance), `robot` (monotone, ring modulation, lo-fi), `tiny` (+8 semitones, formants +22%), `off`. Single settings can be changed: `{"preset":"anime","pitch_semitones":7,"formant_shift":1.18}`; all settings are described in `voice_effects.py` (pitch_semitones, formant_shift, pitch_range 0 = monotone, ring_hz/ring_mix, comb_ms/comb_mix, bitcrush, sparkle_db). A typo stops the speech server with a message. Compare with `python tools/tts_benchmark.py --no-rvc --effect anime --save <folder>`; measured on a Ryzen 9 5900X: 0.84 s per sentence and real-time factor 0.28 (Kokoro alone) against 3.0 s and 1.03 with RVC)
     - "chat_log":"data/chat_log.jsonl", (optional: the conversation as the chat page shows it, one JSON object per line; separate from MIA's memory, so dreaming does not touch it. Stays on this machine; delete the file or use the "clear" API to remove the history)
     - "chat_log_max_messages":10000, (optional: the oldest messages are dropped above this number)
     - "chat_queue":1, (optional: how many messages may wait while MIA is answering; more are refused with a hint)
@@ -124,7 +101,6 @@ Prerequisites:
     - "expression_model":"gemma4:12b-it-qat", "expression_temperature":0.7, "feedback_log":"data/feedback_log.jsonl", (optional: expressions from a description in the expression editor. The model defaults to the one MIA is using right now (same options, so Ollama does not reload anything); the log keeps what you kept, edited or rejected, and is used as examples in later requests)
     - "tailscale":true, "public_hosts":["mia.example.ts.net"], (optional, off by default: publish MIA in your tailnet at start with `tailscale serve`; `public_hosts` are more host names pages may be loaded from. The tailnet name of this machine is found automatically if Tailscale is installed)
     - "gfx_version":"11.0.0", (flag used for roc)
-    - "voice_sample":"/path/to/MIA/voice/samples/miku_vocals.wav",(voice sample for tts voice cloning)
     - "history_file":"memories.json" (MIA's memory)
     - "search_backends":["searxng","duckduckgo"], "searxng_port":8590, "searxng_url":null, "searxng_autostart":true, (the web search of the research: backends in order, the SearXNG port (the same key is read by `tools/searxng/run.sh`) or its full address for another machine, and whether MIA starts the existing container `mia-searxng` at launch when SearXNG does not answer; see ui/README.md "Core, phase 5j")
     - "search_results":8, "search_results_shown":5, "web_timeout":[5,15], "web_max_bytes":2000000, "web_max_chars":30000, (how many results a search keeps and `/search` shows; connect and read timeout in seconds; the largest page body and the longest page text the fetcher takes)
@@ -132,7 +108,7 @@ Prerequisites:
     - "sandbox_backend":"auto", "sandbox_degrade":false, "sandbox_image":"localhost/mia-sandbox:1", (where scripts of the checks run: bubblewrap or podman, chosen per operation when "auto"; whether a weaker sandbox may be used when the strong one is missing; the image of the podman sandbox, `tools/sandbox/build_image.sh`)
     - "skills_dir":"skills", "library_dir":"library", "user_library_dir":"data/library", "library_index":"data/library.sqlite", "runs_dir":"data/runs", (the skills, the library of nodes and pipelines (shipped and your own), its index and the run log)
     - "chat_token", "editor_token": (not in the example, because their presence changes the behaviour: `editor_token` set to a text is the token for the expression editor, `""` switches the check off, missing = a random token in `editor_token_file`; `chat_token` defaults to the editor token)
-    - "editor_token_file":"data/editor_token.txt", "rvc_whistle_hz":700, "rvc_cache_index":true, "tts_warmup":true, "rvc_pad":null, (see the entries above for these)
+    - "editor_token_file":"data/editor_token.txt", (the file with the random editor token that is made at the first start when "editor_token" is not set)
 
 - The character on the page is a 3D model (Godot web export, see `ui/README.md`). Build it once with `ui/tools/build_web.sh`; MIA serves it under `/character/` and shows it in the page. It replaces the old pre-rendered videos.
 - Configure expressions.json: every expression has a `preset` (expression of the character, see `ui/godot/presets/library.json`; default: the expression key itself), the spoken `text` and the `voice` clip (`null` = no voice clip yet).
@@ -234,7 +210,7 @@ Tasks
 Notes
 ==================
 - It may be necessary to reset before if docker makes problem ... e.g. with podman do `podman system reset`
-- Setup rocm properly and install with `python3.10 -m pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/rocm6.0`
+- Options of the removed engines (`tts_engine`, `tts_model`, `tts_device`, `voice_model`, `voice_sample`, `rvc_*`) in an older `setup_cfg.json` are ignored; `"rvc_enabled": true` or a `tts_engine` other than `kokoro` stops the start with a message that says what to change.
 - Also set your GLX proeprly with AMD cards, in my case it was: `os.environ["HSA_OVERRIDE_GFX_VERSION"] = "11.0.0"` check the correct one for your card!
 - Downloads of bark can be faulty re-download fine_2.pt manually if you want to use bark for tts.
 - This is tested for my setup. When other test it and hare intall notes I am happy to share them.
@@ -243,7 +219,7 @@ Notes
 ToDo 
 =====
 
-- improve performance of TTS and RVC
+- improve performance of TTS
 - Make Package
 - Make better input field.
 - zip memories or find another way (let the LLM extract for example)
