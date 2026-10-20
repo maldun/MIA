@@ -334,7 +334,7 @@ Decided by the user (2026-10-18): all of the suggested answers below were accept
 
 Still open (suggested answers in brackets; work starts with these unless you decide otherwise):
 
-12. Mood texts in the first person, in MIA's voice ("Feeling cheerful!")? [yes; editable in `moods.json`, so the persona, for example the "goshujin-sama" style
+12. Mood texts in the first person, in MIA's voice ("Feeling cheerful!")? [yes; editable in `moods.json`, so the persona, for example the "master" style
     from your calibration, can be put there]
 13. The mood line above the character (centered over the free area, also when the chat is collapsed)? [yes]
 14. How long does a mood last after the last answer? [10 minutes, then "Ready when you are."]
