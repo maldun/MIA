@@ -1,7 +1,7 @@
 # MIA as a service: MIA (this folder), Ollama (the language model) and SearXNG (web search).
 #   deploy/up.sh                                   first start: makes .env and the config, starts everything (CPU)
 #   deploy/up.sh rocm | nvidia                     with the GPU of Ollama (AMD / NVIDIA)
-# The page is on http://localhost:8585 (MIA_PORT / MIA_BIND in .env change that). Only MIA is published; Ollama and SearXNG are reachable inside the stack.
+# The page is on http://localhost:8585 (MIA_PORT / MIA_BIND in .env change that). Only MIA (http, 8585) and its https front (8586) are published; Ollama and SearXNG are reachable inside the stack.
 # More in deploy/README.md.
 services:
   mia:
@@ -20,6 +20,17 @@ services:
       - mia-data:/opt/mia/MIA/data
       - ${MIA_KOKORO_DIR:-../voice/models/kokoro}:/opt/mia/MIA/voice/models/kokoro:ro,z
       - ${MIA_CHARACTER_DIR:-../ui/godot/build/web}:/opt/mia/MIA/ui/godot/build/web:ro,z
+
+  https:
+    image: docker.io/library/caddy:2
+    restart: unless-stopped
+    depends_on:
+      - mia
+    ports:
+      - "${MIA_BIND:-127.0.0.1}:${MIA_HTTPS_PORT:-8586}:8586"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro,z
+      - caddy-data:/data
 
   ollama:
     image: docker.io/ollama/ollama:latest
@@ -46,4 +57,5 @@ services:
 
 volumes:
   mia-data:
+  caddy-data:
   ollama:

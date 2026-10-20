@@ -1,6 +1,6 @@
 # MIA as a service (podman compose)
 
-Three containers: **mia** (this code, CPU only, Python 3.12), **ollama** (the language model, the only one that may use the GPU) and **searxng** (web search). Only MIA is published, on `127.0.0.1:8585`.
+Four containers: **mia** (this code, CPU only, Python 3.12), **https** (Caddy, TLS in front of MIA), **ollama** (the language model, the only one that may use the GPU) and **searxng** (web search). Published are `http://127.0.0.1:8585` (MIA) and `https://127.0.0.1:8586` (same page through Caddy).
 
 ## Start
 
@@ -11,6 +11,16 @@ deploy/up.sh down                        # stop (the volumes stay); deploy/up.sh
 ```
 
 The first call writes `deploy/.env` (the SearXNG secret of this machine, not in git). MIA waits for Ollama and pulls `version` and `version_light` of the config through its API when they are missing (the first start downloads the models, the log says so).
+
+## HTTPS
+
+Browsers run the 3D character only in a secure context: `http://localhost:8585` is one, a LAN address needs HTTPS. The `https` service (`deploy/Caddyfile`) answers on port 8586 for any name or address with a certificate of its own local CA, so on another device the browser warns once ("not secure", continue). To get rid of the warning, trust the CA once on each device:
+
+```
+podman cp mia_https_1:/data/caddy/pki/authorities/local/root.crt mia-ca.crt     # then import it as trusted certificate authority
+```
+
+For other devices set `MIA_BIND=0.0.0.0` in `deploy/.env` and open `https://<address of this machine>:8586`. If MIA refuses the page (origin), add the name you use to `public_hosts` in the config. The CA lives in the volume `caddy-data`, so the certificates stay the same after a restart.
 
 ## What is mounted
 
@@ -34,7 +44,7 @@ It copies the zip to `ui/character/`, checks it against `ui/character/manifest.j
 
 ## Settings in `.env` (all optional)
 
-`MIA_PORT` (8585), `MIA_BIND` (127.0.0.1; `0.0.0.0` for other machines, then also set `public_hosts` in the config), `MIA_PROJECT` (mia; another name = a second stack next to the first), `MIA_CONFIG`, `MIA_KOKORO_DIR`, `MIA_CHARACTER_DIR`, `HSA_OVERRIDE_GFX_VERSION` (rocm, 11.0.0).
+`MIA_PORT` (8585), `MIA_HTTPS_PORT` (8586), `MIA_BIND` (127.0.0.1; `0.0.0.0` for other machines, then also set `public_hosts` in the config), `MIA_PROJECT` (mia; another name = a second stack next to the first), `MIA_CONFIG`, `MIA_KOKORO_DIR`, `MIA_CHARACTER_DIR`, `HSA_OVERRIDE_GFX_VERSION` (rocm, 11.0.0).
 
 ## Notes
 

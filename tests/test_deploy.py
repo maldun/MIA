@@ -28,10 +28,15 @@ class DeployTests(unittest.TestCase):
 
     def test_compose_files_name_the_services(self):
         text = open(os.path.join(DEPLOY, "compose.yaml"), encoding="utf-8").read()
-        for service in ("mia:", "ollama:", "searxng:"):
+        for service in ("mia:", "https:", "ollama:", "searxng:"):
             self.assertIn("\n  " + service, text)
         self.assertNotIn("ollama:\n    ports", text)          # Ollama is not published
         self.assertIn("/dev/kfd", open(os.path.join(DEPLOY, "compose.rocm.yaml"), encoding="utf-8").read())
+
+    def test_caddy_proxies_to_mia(self):
+        text = open(os.path.join(DEPLOY, "Caddyfile"), encoding="utf-8").read()
+        self.assertIn("reverse_proxy mia:8585", text)
+        self.assertIn("tls internal", text)
 
     def test_secrets_stay_out_of_git(self):
         self.assertIn(".env", open(os.path.join(DEPLOY, ".gitignore"), encoding="utf-8").read())
