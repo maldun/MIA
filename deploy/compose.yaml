@@ -13,6 +13,9 @@ services:
     depends_on:
       - searxng
     environment:
+      MIA_PUBLIC_PORT: ${MIA_PORT:-8585}
+      MIA_PUBLIC_HTTPS_PORT: ${MIA_HTTPS_PORT:-8586}      # the pages that come through the https service may use the socket
+      MIA_PUBLIC_HOSTS: ${MIA_PUBLIC_HOSTS:-}              # addresses of this machine for other devices (up.sh fills it with MIA_BIND=0.0.0.0)
       MIA_OLLAMA_HOST: ${OLLAMA_URL:-http://ollama:11434}      # OLLAMA_URL in .env: an Ollama that exists already, see README
     ports:
       - "${MIA_BIND:-127.0.0.1}:${MIA_PORT:-8585}:8585"

@@ -119,7 +119,7 @@ def build_allowed_origins(web_url, address, web_port, https_port=None, own_ip=No
     Origins (pages) that may connect to the socket: the page served by this app, reached via localhost, the
     configured address, our own address, plain or behind the HTTPS proxy.
     """
-    hosts = ["localhost", "127.0.0.1", address, own_ip]
+    hosts = ["localhost", "127.0.0.1", address, own_ip] + [h for h in extra_hosts if h]
     origins_extra = []
     for host in extra_hosts:      # tailnet name, reverse proxy: through `tailscale serve` the page comes from https://<name>
         origins_extra += tailscale_serve.origins_for(host)
@@ -142,12 +142,17 @@ except Exception:  # no network: localhost only
 def _remote_hosts():
     """the name of this machine in the tailnet (if Tailscale runs) and the configured "public_hosts" """
     hosts = list(cfg.get(CONST.PUBLIC_HOSTS_KEY, []))
+    hosts += [h.strip() for h in os.environ.get("MIA_PUBLIC_HOSTS", "").split(",") if h.strip()]          # compose: the addresses the stack is reached by
     info = tailscale_serve.node_info() if tailscale_serve.find_binary() else None
     if info:
         hosts.append(info["name"])
     return hosts
 
-allowed_origins = build_allowed_origins(WEB_URL, ADDRESS, WEB_PORT, cfg.get(CONST.HTTPS_PORT_KEY), _OWN_IP, extra_hosts=_remote_hosts())
+# port of an HTTPS front that MIA does not start itself (compose: Caddy), as the browser sees it
+_PUBLIC_HTTPS_PORT = os.environ.get("MIA_PUBLIC_HTTPS_PORT") or cfg.get("public_https_port")
+allowed_origins = build_allowed_origins(WEB_URL, ADDRESS, WEB_PORT, cfg.get(CONST.HTTPS_PORT_KEY) or _PUBLIC_HTTPS_PORT, _OWN_IP, extra_hosts=_remote_hosts())
+if os.environ.get("MIA_PUBLIC_PORT"):          # compose: the port the stack publishes MIA on (MIA_PORT), if not the one inside
+    allowed_origins += [o for o in build_allowed_origins(WEB_URL, ADDRESS, int(os.environ["MIA_PUBLIC_PORT"]), None, _OWN_IP, extra_hosts=_remote_hosts()) if o not in allowed_origins]
 if os.path.exists(ALLOWED_ORIGIN_FILE):
     with open(ALLOWED_ORIGIN_FILE,'r') as aof:
         allowed_origins += aof.read().splitlines()

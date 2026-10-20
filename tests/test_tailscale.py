@@ -110,6 +110,12 @@ class OriginsTest(unittest.TestCase):
         self.assertIn("http://localhost:8585", origins)
         self.assertEqual(len(origins), len(set(origins)))
 
+    def test_a_public_host_is_allowed_on_the_web_and_the_https_port(self):
+        origins = self.wa.build_allowed_origins("http://localhost:8585", "localhost", 8585, 8586, None, extra_hosts=["192.168.1.50", ""])
+        self.assertIn("https://192.168.1.50:8586", origins)          # a compose stack: Caddy in front, reached by the LAN address
+        self.assertIn("http://192.168.1.50:8585", origins)
+        self.assertNotIn("http://:8585", origins)
+
     def test_without_extra_hosts_nothing_changes(self):
         plain = self.wa.build_allowed_origins("http://localhost:8585", "localhost", 8585, 8586, "192.168.1.5")
         self.assertFalse([o for o in plain if o.endswith(".ts.net")])

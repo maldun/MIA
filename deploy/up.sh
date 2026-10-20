@@ -4,6 +4,8 @@
 set -e
 HERE="$(dirname "$(readlink -f "$0")")"
 cd "$HERE"
+# a value of .env (the environment wins), with a default
+envval() { local v="${!1:-}"; if [ -z "$v" ] && [ -f .env ]; then v="$(sed -n "s/^$1=//p" .env | tail -1)"; fi; echo "${v:-$2}"; }
 if [ ! -f .env ]; then
   echo "SEARXNG_SECRET=$(openssl rand -hex 32)" > .env
   chmod 600 .env
@@ -26,17 +28,49 @@ if [ -n "$OLLAMA_URL" ]; then export OLLAMA_URL; else FILES+=(--profile ollama);
 case "${1:-}" in
   rocm|nvidia) FILES+=(-f "compose.$1.yaml"); shift ;;
 esac
+# for other devices (MIA_BIND=0.0.0.0): MIA must accept the pages that come by this machine's addresses and name
+if [ -z "${MIA_PUBLIC_HOSTS:-}" ] && [ "$(envval MIA_BIND 127.0.0.1)" != "127.0.0.1" ]; then
+  MIA_PUBLIC_HOSTS="$(hostname -s),$(hostname -I 2>/dev/null | tr ' ' '\n' | grep -v ':' | paste -sd, -)"
+  export MIA_PUBLIC_HOSTS
+fi
 DEFAULT=(up -d --build)
 if [ -n "${COMPOSE:-}" ]; then
   if [ $# -eq 0 ]; then set -- "${DEFAULT[@]}"; fi
-  exec $COMPOSE "${FILES[@]}" "$@"
+  RUN=($COMPOSE "${FILES[@]}")
 elif command -v podman-compose >/dev/null 2>&1; then
   # podman-compose keeps a running container after a rebuild; the volumes (data, models) survive the recreation
   if [ $# -eq 0 ]; then set -- "${DEFAULT[@]}" --force-recreate; fi
-  exec podman-compose "${FILES[@]}" "$@"
+  RUN=(podman-compose "${FILES[@]}")
 elif command -v docker >/dev/null 2>&1 && docker compose version >/dev/null 2>&1; then
   if [ $# -eq 0 ]; then set -- "${DEFAULT[@]}"; fi
-  exec docker compose "${FILES[@]}" "$@"
+  RUN=(docker compose "${FILES[@]}")
 else
   echo "no compose provider found: sudo dnf install podman-compose   (or set COMPOSE=\"...\")"; exit 1
 fi
+
+
+if [ "$1" != "up" ]; then
+  exec "${RUN[@]}" "$@"
+fi
+
+"${RUN[@]}" "$@"
+BIND="$(envval MIA_BIND 127.0.0.1)"; PORT="$(envval MIA_PORT 8585)"; SPORT="$(envval MIA_HTTPS_PORT 8586)"
+HOSTS=(localhost)
+if [ "$BIND" != "127.0.0.1" ]; then
+  for ip in $(hostname -I 2>/dev/null); do case "$ip" in *:*) ;; *) HOSTS+=("$ip") ;; esac; done
+fi
+echo
+echo "MIA is starting (it first waits for Ollama, the first start may download the models):"
+for h in "${HOSTS[@]}"; do
+  echo "  http://$h:$PORT    https://$h:$SPORT   (self-signed certificate: the browser asks once)"
+done
+if [ "$BIND" = "127.0.0.1" ]; then
+  echo "  other devices: MIA_BIND=0.0.0.0 in deploy/.env, then deploy/up.sh again"
+fi
+echo "  log: deploy/up.sh logs -f mia      stop: deploy/up.sh down"
+echo -n "waiting for the page "
+for _ in $(seq 1 60); do
+  if curl -s -o /dev/null -m 2 "http://127.0.0.1:$PORT/"; then echo " ready."; exit 0; fi
+  echo -n "."; sleep 2
+done
+echo " not yet (a model download can take long); follow it with: deploy/up.sh logs -f mia"
