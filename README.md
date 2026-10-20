@@ -26,7 +26,7 @@ Installation
 Prerequisites:
 --------------
 
-- python 3.10 to 3.12 (3.12 recommended; Python 3.10 reaches its end of life in October 2026). The core runs on 3.10 and 3.11 (tested); the voice extras (RVC, Coqui TTS, torch) are in `requirements-voice.txt`: RVC needs 3.10, Coqui and torch 2.4.1 stop at 3.12
+- python 3.10 to 3.12 (3.12 recommended; Python 3.10 reaches its end of life in October 2026). The core runs on 3.10, 3.11 and 3.12 (tested); the voice extras (RVC, Coqui TTS, torch) are in `requirements-voice.txt`: RVC needs 3.10, Coqui and torch 2.4.1 stop at 3.12
 - rocm/cuda (works with CPU but slow....)
 - docker/podman
 - (Tested on Fedora 40; should work on other systems though)

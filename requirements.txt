@@ -1,5 +1,5 @@
 # MIA, core: the web app and the chat, the research (search, pages, checks), the voice with Kokoro and the voice effect. No torch, no RVC, no Coqui.
-# Python 3.10 to 3.12 (3.12 recommended; tested on 3.10 and 3.11, see README.md). Install:
+# Python 3.10 to 3.12 (3.12 recommended; tested on 3.10, 3.11 and 3.12, see README.md). Install:
 #   python -m pip install -r requirements.txt
 #   python -m pip install --no-deps kokoro-onnx        (it asks for numpy>=2, but works with the numpy 1.26 pinned here, which the voice extras need)
 # The voice extras (RVC voice conversion, Coqui TTS, torch for the GPU) are in requirements-voice.txt. The exact freeze of the development machine is requirements-freeze-py310.txt.
