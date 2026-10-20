@@ -78,6 +78,28 @@ class Loader(unittest.TestCase):
             C.ensure(self.folder)
         self.assertIn("setup_cfg.example.json", str(caught.exception))
 
+    def test_missing_options_are_listed_without_touching_the_file(self):
+        self.write("setup_cfg.example.json", '{"port": 1, "new_option": [1, 2], "searxng_autostart": true}')
+        self.write("setup_cfg.json", '{"port": 99}')
+        before = open(os.path.join(self.folder, "setup_cfg.json")).read()
+        self.assertEqual(C.missing(self.folder), {"new_option": [1, 2], "searxng_autostart": True})
+        self.assertEqual(open(os.path.join(self.folder, "setup_cfg.json")).read(), before)
+
+    def test_without_a_real_file_everything_is_missing(self):
+        self.write("setup_cfg.example.json", '{"a": 1, "b": 2}')
+        self.assertEqual(C.missing(self.folder), {"a": 1, "b": 2})
+
+    def test_the_command_line_report(self):
+        import subprocess
+        self.write("setup_cfg.example.json", '{"port": 1, "new_option": "x"}')
+        self.write("setup_cfg.json", '{"port": 99}')
+        out = subprocess.run([sys.executable, os.path.join(REPO, "config.py"), self.folder], capture_output=True, text=True, timeout=30).stdout
+        self.assertIn('"new_option": "x"', out)
+        self.assertNotIn('"port"', out)
+        self.write("setup_cfg.json", '{"port": 99, "new_option": "mine"}')
+        out = subprocess.run([sys.executable, os.path.join(REPO, "config.py"), self.folder], capture_output=True, text=True, timeout=30).stdout
+        self.assertIn("has every option", out)
+
     def test_tools_read_the_real_file_or_else_the_example(self):
         self.write("setup_cfg.example.json", "{}")
         self.assertTrue(C.default_path(self.folder).endswith("setup_cfg.example.json"))
