@@ -15,3 +15,8 @@ setup_cfg.json
 voice/models/kokoro/*
 !voice/models/kokoro/.kokoro_models_here
 voice/samples/lab/
+
+# the Blender source of the 3D character and Blender's backups: not shared (ui/character/README.md)
+*.blend
+*.blend1
+*.blend2
