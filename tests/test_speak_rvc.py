@@ -3,6 +3,7 @@ Tests for the speed-ups of MIA's voice in speak.py: the RVC index is read once, 
 No models are loaded (fakes stand in for faiss and RVC). Run with the MIA virtualenv: python tests/test_speak_rvc.py
 """
 import importlib
+import importlib.util
 import os
 import sys
 import tempfile
@@ -84,6 +85,7 @@ class IndexCacheTest(unittest.TestCase):
         self.faiss.read_index(self.path)
         self.assertEqual(len(self.fake.reads), 2)
 
+    @unittest.skipUnless(importlib.util.find_spec("rvc_python"), "rvc_python is not installed (the voice extras, requirements-voice.txt)")
     def test_installing_twice_does_not_wrap_twice(self):
         pipeline = importlib.import_module("rvc_python.modules.vc.pipeline")
         original = pipeline.faiss

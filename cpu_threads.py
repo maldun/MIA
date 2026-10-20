@@ -86,7 +86,10 @@ def limit_torch(threads):
     """
     if not threads:
         return
-    import torch
+    try:
+        import torch
+    except ImportError:
+        return          # no torch (Kokoro with onnxruntime only): nothing to limit here
     torch.set_num_threads(threads)
     try:
         torch.set_num_interop_threads(min(threads, 2))

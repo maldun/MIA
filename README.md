@@ -26,7 +26,7 @@ Installation
 Prerequisites:
 --------------
 
-- python >= 3.10 (if you want rvc running then currently it is 3.10)
+- python 3.10 to 3.12 (3.12 recommended; Python 3.10 reaches its end of life in October 2026). The core runs on 3.10 and 3.11 (tested); the voice extras (RVC, Coqui TTS, torch) are in `requirements-voice.txt`: RVC needs 3.10, Coqui and torch 2.4.1 stop at 3.12
 - rocm/cuda (works with CPU but slow....)
 - docker/podman
 - (Tested on Fedora 40; should work on other systems though)
@@ -37,10 +37,12 @@ Prerequisites:
 (I made my own with blender and collected other stuff, but I don't share due to copyright reasons. Private use is one thing, publishing another ..., but the internet is full of fun stuff so go ahead.)
 
 ### Create virtual environment (example)
-- `python -m venv <venvfolder>/mia`
-- `<venvfolder>/mia/bin/activate`
+- `python3.12 -m venv <venvfolder>/mia` (or `python3.11`, `python3.10`)
+- `source <venvfolder>/mia/bin/activate`
+- `python -m pip install -r requirements.txt` (the core: web app, chat, research, Kokoro voice) and `python -m pip install --no-deps kokoro-onnx`
+- optional, for RVC, Coqui TTS and GPU torch: `python -m pip install -r requirements-voice.txt` (and the ROCm/CUDA steps below)
 
-### Install ROCM/CUDA (Fedora):
+### Install ROCM/CUDA (Fedora; only for the voice extras, Ollama brings its own GPU runtime in its container):
 - `sudo usermod -a -G video $LOGNAME`
 - `sudo dnf install rocminfo`
 - `sudo dnf install rocm-opencl`
@@ -56,18 +58,18 @@ Prerequisites:
 
 ### Install python-rvc (Optional):
 - `git clone https://github.com/daswer123/rvc-python`
-- `python3.10 -m pip install -e .`
+- `python3.10 -m pip install -e .` (RVC: Python 3.10)
 
 ### Install Kokoro TTS (default tts engine):
-- `python3.10 -m pip install espeakng-loader phonemizer onnxruntime "numpy==1.26.4"`
-- `python3.10 -m pip install --no-deps kokoro-onnx` (it asks for numpy>=2, but works with 1.26 which rvc/coqui need)
+- `python -m pip install espeakng-loader phonemizer onnxruntime "numpy==1.26.4"` (all in `requirements.txt`)
+- `python -m pip install --no-deps kokoro-onnx` (it asks for numpy>=2, but works with 1.26 which rvc/coqui need)
 - Download `kokoro-v1.0.onnx` and `voices-v1.0.bin` from https://github.com/thewh1teagle/kokoro-onnx/releases/tag/model-files-v1.0 into `voice/models/kokoro/`
-- Compare voices and pitch shifts with `python3.10 voice_lab.py` (writes samples to `voice/samples/lab/`)
+- Compare voices and pitch shifts with `python voice_lab.py` (writes samples to `voice/samples/lab/`)
 
 ### Clone
 - `git clone https://github.com/maldun/MIA.git`
 - Go into MIA folder
-- Install/Check requirements in requirments.txt (`python -m pip install -r requirments.txt`)
+- Install/Check requirements in requirements.txt (`python -m pip install -r requirements.txt`; the full freeze of the development machine is `requirements-freeze-py310.txt`)
 
 ### Configuration
 - The real configuration of a machine is `setup_cfg.json`. It is **not in version control** (a deployment on another machine would otherwise fight with the one in git at every commit). The tracked template is

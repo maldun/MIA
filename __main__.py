@@ -19,6 +19,7 @@ import json
 import os
 import signal
 import subprocess
+import sys
 import threading
 from .web_app import socketio, app, comm, WEB_PORT, scheduler, time_update_trigger
 from .utils import get_own_ip
@@ -49,8 +50,9 @@ if __name__ == "__main__":
     # Ctrl+C, SIGTERM and the commands /break! and /goodnight! all end in the same orderly shutdown below
     install_term_handler()
     try:
-        cmd_speak = ["python3.10",os.path.join(fpath,"speak.py"),cfg_file]
-        cmd_llama = ["python3.10",os.path.join(fpath,"install_lama.py"),cfg_file]
+        # the same interpreter as MIA itself (the commands used to name one fixed Python version)
+        cmd_speak = [sys.executable,os.path.join(fpath,"speak.py"),cfg_file]
+        cmd_llama = [sys.executable,os.path.join(fpath,"install_lama.py"),cfg_file]
         
         lock = threading.Lock()
         with lock:

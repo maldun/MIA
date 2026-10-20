@@ -16,10 +16,8 @@
 
 
 import numpy as np
-import cv2
 import subprocess
 import os
-from playsound import playsound
 import requests
 try:
     from .mia_logger import logger
@@ -31,6 +29,7 @@ filename = 'wave001.avi'
 delay = 25
 
 def play_animation_cv2(filename,window_name,delay=delay):
+    import cv2      # only for this old local player (opencv-python); the web app does not need it
     cap = cv2.VideoCapture(filename)
 
     while(cap.isOpened()):
@@ -63,6 +62,7 @@ def play_animation(filename,window_name,delay=delay):
 
 def play_sound(filename,url=None):
     if url is None:
+        from playsound import playsound      # local playback only; unmaintained, so it is imported when it is really used
         playsound(filename)
     else:
         with open(filename, 'rb') as fp:

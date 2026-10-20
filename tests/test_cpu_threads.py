@@ -9,6 +9,7 @@ import subprocess
 import sys
 import tempfile
 import textwrap
+import importlib.util
 import unittest
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -113,6 +114,7 @@ class ConfigFile(unittest.TestCase):
                     os.environ[name] = value
 
 
+@unittest.skipUnless(importlib.util.find_spec("torch"), "torch is not installed (the voice extras, requirements-voice.txt)")
 class RealEffect(unittest.TestCase):
     """Fresh interpreters: does the limit really reach torch and onnxruntime?"""
 
@@ -177,6 +179,7 @@ class CommunicatorAndSpeaker(unittest.TestCase):
             self.assertEqual(plain._profiles["full"], ("big", {"num_ctx": 8192}))
             self.assertIsNone(plain._profiles["light"][1])
 
+    @unittest.skipUnless(importlib.util.find_spec("torch"), "torch is not installed (the voice extras, requirements-voice.txt)")
     def test_speaker_applies_the_limit(self):
         # Speaker with the model loading switched off: only the thread handling is checked
         with tempfile.TemporaryDirectory() as tmp:
@@ -192,6 +195,7 @@ class CommunicatorAndSpeaker(unittest.TestCase):
             """, timeout=240)
         self.assertEqual(out, "2 2")
 
+    @unittest.skipUnless(importlib.util.find_spec("torch"), "torch is not installed (the voice extras, requirements-voice.txt)")
     def test_speaker_without_setting_keeps_all_threads(self):
         out = run_python("""
             import sys

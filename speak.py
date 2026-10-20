@@ -28,9 +28,7 @@ except ImportError:
     from cpu_threads import early_limit_from_argv, parse as parse_cpu_threads, limit_environment, limit_torch, onnx_session_options
     from config import default_path as default_config
 early_limit_from_argv(sys.argv, default_cfg=default_config(os.path.split(__file__)[0]))
-import torch
-from rvc_python.infer import RVCInference
-import pyaudio  
+# torch and rvc_python are imported where they are used (RVC and Coqui, or a GPU check): Kokoro with the voice effect runs without them. pyaudio was imported here but is not used.
 import wave
 import tempfile
 import sys
@@ -132,6 +130,15 @@ def cache_rvc_index():
     if not isinstance(rvc_pipeline.faiss,_FaissWithCache):
         rvc_pipeline.faiss = _FaissWithCache(rvc_pipeline.faiss)
 
+def _torch_cuda_available():
+    """is there a GPU for the TTS: False when torch is not installed (Kokoro runs on onnxruntime)"""
+    try:
+        import torch
+    except ImportError:
+        return False
+    return torch.cuda.is_available()
+
+
 class Speaker:
     """
     Transforms a msg into speech using TTS and voice changers.
@@ -178,7 +185,7 @@ class Speaker:
             logger.info(f"speech: using at most {self._cpu_threads} CPU threads")
         
         if tts_device is None:
-            self._device = "cuda" if torch.cuda.is_available() else "cpu"
+            self._device = "cuda" if _torch_cuda_available() else "cpu"
         else:
             self._device = tts_device
         
@@ -242,6 +249,8 @@ class Speaker:
             raise ValueError(f"Unknown tts_engine '{self._tts_engine}'!")
         
     def init_rvc_model(self,model,device):
+        import torch
+        from rvc_python.infer import RVCInference        # the voice model needs the "voice" extras (requirements-voice.txt)
         # torch >= 2.6 loads only weights by default, but the hubert model
         # used by rvc contains a fairseq Dictionary
         if hasattr(torch.serialization,"add_safe_globals"):

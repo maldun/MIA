@@ -618,3 +618,12 @@ paragraph, and 11 texts with nothing checkable: opinions, questions, advice, hed
       disabled: false
   ```
   More engines mean more variety and more risk of being rate-limited (every search asks all enabled engines; a research asks several times): about five working engines are enough.
+
+## Core, phase 5k: preparing the upgrade of Python (2026-10-20)
+
+- Why: Python 3.10 reaches its end of life in October 2026 (to my knowledge). What binds MIA to 3.10 is the voice stack, not MIA: `torch 2.4.1+rocm6.0` has wheels up to 3.12 only (the PyTorch server has none for 3.13 and 3.14), the pinned Coqui TTS commit says `<3.13`, `kokoro-onnx` 0.6.1 says `<3.14`, and RVC (via `fairseq`) needs 3.10 according to the README. RVC is off on this machine; Kokoro with the voice effect needs none of `torch`, `rvc_python` or `pyaudio`.
+- Done: `torch`, `rvc_python` (in `speak.py`), `playsound` and `cv2` (in `play_media.py`) are imported where they are used, and `pyaudio` (imported, never used) is gone. `limit_torch` does nothing without torch. `python -m MIA` starts its helpers with the interpreter it runs in (`sys.executable`, it was a fixed `python3.10`). Three regular expressions in `utils.py` are raw strings (warnings today, errors in a later Python).
+- Requirements: `requirements.txt` is the core (web app, chat, research, Kokoro voice and effect; no torch), `requirements-voice.txt` the extras (ROCm torch, Coqui TTS, RVC), `requirements-freeze-py310.txt` the exact freeze of this machine as it was.
+- Measured: a **fresh Python 3.11 environment installed only from `requirements.txt`** (Flask 3.1.0, numpy 1.26.4, scipy 1.11.4, onnxruntime 1.31.0, parselmouth 0.4.5, ...) passes every test file; 7 tests that really use `torch` or `rvc_python` are skipped there. The development environment (3.10, with torch and RVC) passes all. `pip check` reports only that `kokoro-onnx` asks for numpy>=2 while 1.26 is pinned (documented in the README; it works).
+- Not measured: Python 3.12 (not installed on this machine: `sudo dnf install python3.12`), and the full voice stack (ROCm torch, Coqui) on 3.11 or 3.12; speaking with real audio and the GPU. A try with Python 3.14 was stopped (it compiles scipy from source); 3.13 and 3.14 would need a newer torch and no Coqui.
+- Next: Python 3.12 venv, `requirements.txt` plus `requirements-voice.txt` without RVC, start MIA, listen to a sentence, run the tests. Tests: `tests/test_requirements.py` (6).
