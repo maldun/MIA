@@ -52,6 +52,18 @@ deploy/up.sh memories path/to/folder
 
 MIA is stopped first (it saves its history when it stops), the files are copied in and MIA starts again. What the container had before is kept as `<name>.container-previous` in the volume.
 
+## Taking over an old installation
+
+The settings you made in the app (expression presets, gestures), the chat log and the editor token are files in the `data/` folder of the old installation; the container starts with an empty volume. In one go:
+
+```
+deploy/up.sh data                  # presets, gestures, chat_log.jsonl, feedback_log.jsonl, editor_token.txt from <MIA folder>/data
+deploy/up.sh calibration           # how she addresses you
+deploy/up.sh memories              # her conversation memory
+```
+
+Each command stops MIA while it copies and starts it again. Reload the page afterwards; the editor of the character shows the presets again.
+
 ## Backup and restore
 
 ```

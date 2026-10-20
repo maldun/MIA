@@ -61,6 +61,26 @@ if [ "${1:-}" = "memories" ]; then
   echo "MIA started again with the old memories"
   exit 0
 fi
+# deploy/up.sh data [folder]   take over the data folder of an old installation: expression presets, gestures, chat log, feedback log, editor token
+# (<folder>/data, default the MIA folder). Files with the same name are replaced, others stay. MIA is stopped while copying and started again.
+if [ "${1:-}" = "data" ]; then
+  DIR="$([ -n "${2:-}" ] && abspath "$2" || dirname "$HERE")/data"
+  [ -d "$DIR" ] || { echo "no data folder: $DIR"; exit 1; }
+  ENGINE="$(command -v podman || command -v docker)"
+  CONTAINER="$($ENGINE ps -aq --filter "label=com.docker.compose.project=${MIA_PROJECT:-mia}" --filter label=com.docker.compose.service=mia | head -1)"
+  [ -n "$CONTAINER" ] || { echo "MIA container not found, start the stack first: deploy/up.sh"; exit 1; }
+  $ENGINE stop "$CONTAINER" >/dev/null
+  COPIED=0
+  for name in presets gestures chat_log.jsonl feedback_log.jsonl editor_token.txt; do
+    if [ -e "$DIR/$name" ]; then
+      $ENGINE cp "$DIR/$name" "$CONTAINER:/opt/mia/MIA/data/"
+      echo "copied $name"; COPIED=$((COPIED + 1))
+    fi
+  done
+  $ENGINE start "$CONTAINER" >/dev/null
+  echo "$COPIED item(s) taken over from $DIR, MIA started again"
+  exit 0
+fi
 # deploy/up.sh backup [file.tar.gz]    everything MIA keeps (data volume: histories, presets, gestures, chat log, calibration, library index ...) as one archive
 # deploy/up.sh restore file.tar.gz     put it back (after a backup of the current state, made automatically as mia-before-restore-<time>.tar.gz)
 # MIA is stopped while the files are copied (it saves its history when it stops) and started again.
