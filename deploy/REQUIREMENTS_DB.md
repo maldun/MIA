@@ -1,5 +1,8 @@
 # Several MIA instances: shared state in a database (plan, not built yet)
 
+**Status 2026-10-21: postponed.** Nothing of this is built; one instance on the volume `mia-data` is the supported setup. This file keeps the requirements and the design for later. Start with stage 0 when several instances are really needed.
+**Decided:** several instances are **one shared MIA with one memory** (persona `mia` for all). Separate memories stay possible later through another `persona` value, but nothing is planned for it.
+
 Decided 2026-10-21: a database container is wanted because **several MIA instances** will run in the future (other machines, other front ends). One instance on one volume works today and stays the default.
 
 ## Goal
@@ -47,7 +50,8 @@ Decided 2026-10-21: a database container is wanted because **several MIA instanc
 - Two MIA processes against one database: messages from both appear in order on both sides; one summary, not two.
 - Migration: files → database → files gives identical files.
 
-## Open decisions
+## Decisions
 
-- **Shared memory or separate?** Do several instances speak as the same MIA with one history, or does each instance (or each front end) have its own conversation? Default of this plan: one persona `mia` shared, a different `persona` value gives separate memory.
-- Postgres is assumed. Say so if a different database is preferred (MariaDB works with the same layer, only the SQL files change).
+- **One shared MIA with one memory** (decided 2026-10-21): all instances use persona `mia`. Consequences for stage 3: the history is one sequence of messages for everybody, so two instances answering at the same moment must see each other's messages (reload when the last `seq` changed, before and after the model call) and an exchange is written as a unit. Open question for then: whether two simultaneous questions are answered one after the other (a lock per persona, simple) or in parallel (they would not see each other).
+- Postgres is assumed. A different database works with the same layer, only the SQL files change.
+- Postponed until several instances are needed. Until then nothing changes in the code; the migration of the files to the database is planned for the day it starts (`memories` and `calibration` commands of `deploy/up.sh` already move the old files into the volume).
