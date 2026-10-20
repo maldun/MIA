@@ -1,5 +1,5 @@
 # SearXNG for MIA: a private meta search engine on this machine only (127.0.0.1:8590 by default, see tools/searxng/run.sh).
-# __SECRET__ is replaced by run.sh with a random key and written to settings.local.yml (which is not committed).
+# run.sh writes this file as settings.local.yml (which is not committed), with a random secret key in place of the placeholder below.
 use_default_settings: true
 
 server:
@@ -18,3 +18,14 @@ search:
 
 ui:
   static_use_hash: true
+
+# engines switched on in addition to the defaults (default: google cse, duckduckgo, brave, wikipedia, wikidata and a few for translation and currency).
+# Probed 2026-10-20 from the development machine, one query each: google cse (on by default), bing, yahoo and yep answered; duckduckgo answered about every second time (CAPTCHA), brave was rate limited,
+# google, qwant and searchmysite refused. Every search asks all enabled engines, so more than about five is a risk of being rate limited. After a change: `tools/searxng/run.sh refresh`.
+engines:
+  - name: bing
+    disabled: false
+  - name: yahoo
+    disabled: false
+  - name: yep
+    disabled: false

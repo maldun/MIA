@@ -24,6 +24,7 @@ REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _LINK_DIR = tempfile.mkdtemp()
 os.symlink(REPO, os.path.join(_LINK_DIR, "MIA"))
 sys.path.insert(0, _LINK_DIR)
+from MIA.config import default_path as default_config  # noqa: E402
 
 from MIA.library import Library, LibraryError, ref_of  # noqa: E402
 from MIA.run_log import RunLog  # noqa: E402
@@ -43,7 +44,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("command", choices=["list", "search", "show", "validate", "reindex", "stats", "select", "promote", "diff", "used-by"])
     parser.add_argument("words", nargs="*")
-    parser.add_argument("--cfg", default=os.path.join(REPO, "setup_cfg.json"))
+    parser.add_argument("--cfg", default=default_config(REPO))
     parser.add_argument("--tag", action="append", default=[])
     parser.add_argument("--kind")
     parser.add_argument("--nodes", action="store_true", help="search / select among nodes (default: pipelines)")

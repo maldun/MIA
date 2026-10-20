@@ -21,6 +21,7 @@ REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _LINK_DIR = tempfile.mkdtemp()
 os.symlink(REPO, os.path.join(_LINK_DIR, "MIA"))
 sys.path.insert(0, _LINK_DIR)
+from MIA.config import default_path as default_config  # noqa: E402
 
 from MIA import web_tools  # noqa: E402
 
@@ -31,7 +32,7 @@ SAMPLE_ADDRESSES = ["http://127.0.0.1:8585/api/presets", "http://localhost:11434
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("query", nargs="*")
-    parser.add_argument("--cfg", default=os.path.join(REPO, "setup_cfg.json"))
+    parser.add_argument("--cfg", default=default_config(REPO))
     parser.add_argument("--fetch", type=int, default=0, help="fetch the first N results")
     parser.add_argument("--url", help="fetch this page")
     parser.add_argument("--backends", help="comma separated, overrides search_backends")

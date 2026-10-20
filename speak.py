@@ -23,9 +23,11 @@ import sys
 # CPU thread limit ("cpu_threads" in the cfg file): the environment has to be set before numpy and torch are imported
 try:
     from .cpu_threads import early_limit_from_argv, parse as parse_cpu_threads, limit_environment, limit_torch, onnx_session_options
+    from .config import default_path as default_config
 except ImportError:
     from cpu_threads import early_limit_from_argv, parse as parse_cpu_threads, limit_environment, limit_torch, onnx_session_options
-early_limit_from_argv(sys.argv, default_cfg=os.path.join(os.path.split(__file__)[0], "setup_cfg.json"))
+    from config import default_path as default_config
+early_limit_from_argv(sys.argv, default_cfg=default_config(os.path.split(__file__)[0]))
 import torch
 from rvc_python.infer import RVCInference
 import pyaudio  

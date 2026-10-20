@@ -23,6 +23,7 @@ REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _LINK_DIR = tempfile.mkdtemp()
 os.symlink(REPO, os.path.join(_LINK_DIR, "MIA"))
 sys.path.insert(0, _LINK_DIR)
+from MIA.config import default_path as default_config  # noqa: E402
 
 from ollama import Client  # noqa: E402
 from MIA.expression_llm import ExpressionGenerator  # noqa: E402
@@ -35,7 +36,7 @@ SHIPPED = os.path.join(REPO, "ui", "godot", "presets")
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("descriptions", nargs="*")
-    parser.add_argument("--cfg", default=os.path.join(REPO, "setup_cfg.json"))
+    parser.add_argument("--cfg", default=default_config(REPO))
     parser.add_argument("--model", default=None, help="default: the light model of setup_cfg.json")
     parser.add_argument("--temperature", type=float, default=0.7)
     parser.add_argument("--prompt", action="store_true", help="only print the prompt for the first description")

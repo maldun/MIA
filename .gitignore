@@ -7,3 +7,6 @@ templates/audio/line-*.wav
 
 # SearXNG settings with the generated secret key
 tools/searxng/settings.local.yml
+
+# the real configuration of this machine (setup_cfg.example.json is the tracked template; MIA copies it on the first start)
+setup_cfg.json

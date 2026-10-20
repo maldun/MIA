@@ -70,8 +70,11 @@ Prerequisites:
 - Install/Check requirements in requirments.txt (`python -m pip install -r requirments.txt`)
 
 ### Configuration
-- (my settings are included as an example)
-- Configure setup_cfg.json to your liking (here my default)
+- The real configuration of a machine is `setup_cfg.json`. It is **not in version control** (a deployment on another machine would otherwise fight with the one in git at every commit). The tracked template is
+  `setup_cfg.example.json`: it lists every option (84 at the moment; the values are those of the development machine, adjust paths, models and ports). On the first start `python -m MIA` copies the example to
+  `setup_cfg.json` and says so; after that only your file is read. When a new version of MIA brings new options, they appear in the example; a test (`tests/test_config.py`) keeps the example complete.
+  Two options mean something different when they are *present*, so they are not in the example: `editor_token` and `chat_token` (see below).
+- Configure setup_cfg.json to your liking (the list below describes the options; "optional" options are in the example with their default):
 
     - "name":"ollama", (docker name)
     - "docker":"docker", (docker executable e.g. podman as alernative; Fedora symlinks podman)
@@ -120,6 +123,13 @@ Prerequisites:
     - "gfx_version":"11.0.0", (flag used for roc)
     - "voice_sample":"/path/to/MIA/voice/samples/miku_vocals.wav",(voice sample for tts voice cloning)
     - "history_file":"memories.json" (MIA's memory)
+    - "search_backends":["searxng","duckduckgo"], "searxng_port":8590, "searxng_url":null, "searxng_autostart":true, (the web search of the research: backends in order, the SearXNG port (the same key is read by `tools/searxng/run.sh`) or its full address for another machine, and whether MIA starts the existing container `mia-searxng` at launch when SearXNG does not answer; see ui/README.md "Core, phase 5j")
+    - "search_results":8, "search_results_shown":5, "web_timeout":[5,15], "web_max_bytes":2000000, "web_max_chars":30000, (how many results a search keeps and `/search` shows; connect and read timeout in seconds; the largest page body and the longest page text the fetcher takes)
+    - "research_pipeline":null, (the pipeline of the library that `/research` runs; null = the one the skill `research` names, now `research.escalate@1`)
+    - "sandbox_backend":"auto", "sandbox_degrade":false, "sandbox_image":"localhost/mia-sandbox:1", (where scripts of the checks run: bubblewrap or podman, chosen per operation when "auto"; whether a weaker sandbox may be used when the strong one is missing; the image of the podman sandbox, `tools/sandbox/build_image.sh`)
+    - "skills_dir":"skills", "library_dir":"library", "user_library_dir":"data/library", "library_index":"data/library.sqlite", "runs_dir":"data/runs", (the skills, the library of nodes and pipelines (shipped and your own), its index and the run log)
+    - "chat_token", "editor_token": (not in the example, because their presence changes the behaviour: `editor_token` set to a text is the token for the expression editor, `""` switches the check off, missing = a random token in `editor_token_file`; `chat_token` defaults to the editor token)
+    - "editor_token_file":"data/editor_token.txt", "rvc_whistle_hz":700, "rvc_cache_index":true, "tts_warmup":true, "rvc_pad":null, (see the entries above for these)
 
 - The character on the page is a 3D model (Godot web export, see `ui/README.md`). Build it once with `ui/tools/build_web.sh`; MIA serves it under `/character/` and shows it in the page. It replaces the old pre-rendered videos.
 - Configure expressions.json: every expression has a `preset` (expression of the character, see `ui/godot/presets/library.json`; default: the expression key itself), the spoken `text` and the `voice` clip (`null` = no voice clip yet).

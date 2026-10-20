@@ -20,6 +20,7 @@ REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _LINK_DIR = tempfile.mkdtemp()
 os.symlink(REPO, os.path.join(_LINK_DIR, "MIA"))
 sys.path.insert(0, _LINK_DIR)
+from MIA.config import default_path as default_config  # noqa: E402
 
 from ollama import Client  # noqa: E402
 from MIA.core import Core  # noqa: E402
@@ -42,7 +43,7 @@ def main():
     parser.add_argument("text", nargs="*", help="the text (several words are joined)")
     parser.add_argument("--file", help="read the text from a file")
     parser.add_argument("--input", action="append", default=[], help="more inputs: name=value (numbers are numbers)")
-    parser.add_argument("--cfg", default=os.path.join(REPO, "setup_cfg.json"))
+    parser.add_argument("--cfg", default=default_config(REPO))
     parser.add_argument("--model", default=None)
     parser.add_argument("--runs", default=None, help="folder for the run log (default: temporary)")
     parser.add_argument("--check", action="store_true")

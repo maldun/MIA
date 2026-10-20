@@ -21,6 +21,7 @@ REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _LINK_DIR = tempfile.mkdtemp()
 os.symlink(REPO, os.path.join(_LINK_DIR, "MIA"))
 sys.path.insert(0, _LINK_DIR)
+from MIA.config import default_path as default_config  # noqa: E402
 
 SENTENCES = [
     "Hello! It is nice to see you again.",
@@ -39,7 +40,7 @@ def cpu_seconds():
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--cfg", default=os.path.join(REPO, "setup_cfg.json"))
+    parser.add_argument("--cfg", default=default_config(REPO))
     parser.add_argument("--stock", action="store_true", help="switch MIA's optimizations off")
     parser.add_argument("--f0", default=None, help="f0 method of RVC (rmvpe, pm, harvest, crepe)")
     parser.add_argument("--index-rate", type=float, default=None)

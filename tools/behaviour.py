@@ -18,6 +18,7 @@ REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _LINK_DIR = tempfile.mkdtemp()
 os.symlink(REPO, os.path.join(_LINK_DIR, "MIA"))
 sys.path.insert(0, _LINK_DIR)
+from MIA.config import default_path as default_config  # noqa: E402
 
 from MIA import behaviour  # noqa: E402
 from MIA.run_log import RunLog  # noqa: E402
@@ -87,7 +88,7 @@ def main():
     parser.add_argument("text", nargs="*")
     parser.add_argument("--file")
     parser.add_argument("--recent", type=int, default=10)
-    parser.add_argument("--cfg", default=os.path.join(REPO, "setup_cfg.json"))
+    parser.add_argument("--cfg", default=default_config(REPO))
     args = parser.parse_args()
     if args.command == "rules":
         show_rules()

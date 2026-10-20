@@ -25,6 +25,7 @@ REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _LINK_DIR = tempfile.mkdtemp()
 os.symlink(REPO, os.path.join(_LINK_DIR, "MIA"))
 sys.path.insert(0, _LINK_DIR)
+from MIA.config import default_path as default_config  # noqa: E402
 
 from MIA import harness  # noqa: E402
 from MIA.core import Core  # noqa: E402
@@ -63,7 +64,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("command", choices=["list", "run", "report", "compare", "cases"])
     parser.add_argument("args", nargs="*")
-    parser.add_argument("--cfg", default=os.path.join(REPO, "setup_cfg.json"))
+    parser.add_argument("--cfg", default=default_config(REPO))
     parser.add_argument("--variant", default="default")
     parser.add_argument("--repeats", type=int, default=1)
     parser.add_argument("--tag", action="append", default=[])

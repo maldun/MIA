@@ -26,7 +26,8 @@ MODELS = args.models_root or REPO
 link = tempfile.mkdtemp()
 os.symlink(REPO, os.path.join(link, "MIA"))
 sys.path.insert(0, link)
-cfg = json.load(open(os.path.join(REPO, "setup_cfg.json")))
+from MIA.config import default_path as default_config  # noqa: E402
+cfg = json.load(open(default_config(REPO)))
 cfg["kokoro_opts"] = dict(cfg["kokoro_opts"], model=os.path.join(MODELS, "voice/models/kokoro/kokoro-v1.0.onnx"),
                           voices=os.path.join(MODELS, "voice/models/kokoro/voices-v1.0.bin"))
 cfg["tts_warmup"] = False

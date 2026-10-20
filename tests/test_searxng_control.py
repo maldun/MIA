@@ -141,5 +141,55 @@ class SearchNote(unittest.TestCase):
         self.assertIn("\\*\\*bold\\*\\*", text)
 
 
+class RunScript(unittest.TestCase):
+    """tools/searxng/run.sh refresh in a copy of the folder, with `echo` instead of podman: nothing real is restarted"""
+
+    def setUp(self):
+        import shutil
+        import tempfile
+        self.tmp = tempfile.mkdtemp()
+        self.folder = os.path.join(self.tmp, "tools", "searxng")
+        os.makedirs(self.folder)
+        for name in ("run.sh", "settings.yml"):
+            shutil.copy(os.path.join(REPO, "tools", "searxng", name), self.folder)
+        with open(os.path.join(self.tmp, "setup_cfg.json"), "w", encoding="utf-8") as fp:
+            fp.write('{"searxng_port": 8590}')
+
+    def tearDown(self):
+        import shutil
+        shutil.rmtree(self.tmp, ignore_errors=True)
+
+    def run_script(self, command):
+        import subprocess
+        return subprocess.run(["bash", os.path.join(self.folder, "run.sh"), command], env=dict(os.environ, CONTAINER_ENGINE="echo"), capture_output=True, text=True, timeout=30)
+
+    def conf(self):
+        with open(os.path.join(self.folder, "settings.local.yml"), encoding="utf-8") as fp:
+            return fp.read()
+
+    def test_refresh_keeps_the_secret_of_this_machine_and_writes_the_engines(self):
+        with open(os.path.join(self.folder, "settings.local.yml"), "w", encoding="utf-8") as fp:
+            fp.write('server:\n  secret_key: "0123456789abcdef"\n')
+        done = self.run_script("refresh")
+        self.assertEqual(done.returncode, 0, done.stderr)
+        text = self.conf()
+        self.assertIn('secret_key: "0123456789abcdef"', text)
+        self.assertNotIn("__SECRET__", text)
+        for engine in ("bing", "yahoo", "yep"):
+            self.assertIn("- name: %s\n    disabled: false" % engine, text)
+        self.assertIn("restart mia-searxng", done.stdout)
+        self.assertEqual(oct(os.stat(os.path.join(self.folder, "settings.local.yml")).st_mode & 0o777), "0o600")
+
+    def test_refresh_without_a_file_makes_a_new_secret(self):
+        self.assertEqual(self.run_script("refresh").returncode, 0)
+        import re
+        found = re.search(r'secret_key: "([0-9a-f]{64})"', self.conf())
+        self.assertIsNotNone(found)
+
+    def test_the_template_has_no_placeholder_in_a_comment(self):
+        with open(os.path.join(REPO, "tools", "searxng", "settings.yml"), encoding="utf-8") as fp:
+            self.assertEqual(fp.read().count("__SECRET__"), 1)
+
+
 if __name__ == "__main__":
     unittest.main()

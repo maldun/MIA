@@ -62,6 +62,9 @@ from .web_tools import build_web_tools
 from . import tailscale_serve
 FPATH = os.path.split(__file__)[0]
 cfg_file = os.path.join(FPATH,CFG_FILE)
+if os.path.basename(cfg_file) == "setup_cfg.json":
+    from .config import ensure as _ensure_config
+    cfg_file, _ = _ensure_config(FPATH)         # the first start on a new machine: setup_cfg.json is made from setup_cfg.example.json
 TEMPLATE_DIR = "templates"
 STATIC_DIR = os.path.join(TEMPLATE_DIR,"static")
 STATIC_FOLDER = os.path.join(FPATH,STATIC_DIR)
