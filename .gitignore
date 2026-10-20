@@ -20,3 +20,6 @@ voice/samples/lab/
 *.blend
 *.blend1
 *.blend2
+
+# the 3D character as zip files that travel outside git (ui/tools/character_pack.py; the manifest next to them is tracked)
+ui/character/*.zip

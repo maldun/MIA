@@ -1,16 +1,35 @@
-# The source of the 3D character
+# The 3D character: the files that travel outside git
 
-`mia.blend` (13 MB) is the only source of the character. It is **not in version control** (the model is not shared; `*.blend` is git-ignored, so it cannot be committed by accident). Put it here, or give its path
-to the scripts.
+The model is not shared, so it is not in the repository (`*.blend` and `ui/character/*.zip` are git-ignored). Two zip files carry it from one machine to another, for example through your own Google Drive.
+`manifest.json` (tracked) says which version of each zip is the right one and its SHA-256; it contains no model data.
 
-Everything else is derived from it and can be made again at any time:
+| pack | what is in it | size | needed for |
+|---|---|---|---|
+| `mia-character-web-N.zip` | the web export, 9 files: `index.html`, `index.js`, `index.wasm` (Godot's engine), `index.pck` (the character and the scene), the two audio worklets and three PNGs (splash, icons) | 20.5 MB | **running** the character on any machine: no Godot, no Blender |
+| `mia-character-source-N.zip` | `mia.blend` | 13 MB | only where the character is **edited** (then `ui/tools/setup_character.sh` makes the VRM and the web export from it) |
 
-| file | made by | in git |
-|---|---|---|
-| `ui/godot/assets/mia.vrm` (12 MB) | `ui/tools/export_character.sh mia.blend` (Blender with the VRM add-on, textures shrunk to 1024 px) | ignored |
-| `ui/godot/build/web` (48 MB, served by MIA) | `ui/tools/build_web.sh` (Godot headless export) | ignored |
+`mia.vrm` is not packed: it is made from the `.blend` (identical byte for byte), and the browser does not need it, the character is inside `index.pck`.
 
-Both steps in one command: `ui/tools/setup_character.sh [path/to/mia.blend]` (the argument, else `$MIA_BLEND`, else `ui/character/mia.blend`). Measured on 2026-10-20: the VRM from the same `.blend` is identical byte for byte
-(SHA-256), the export takes 13 s; the web export takes 8 s and two builds are identical. One time per machine: the flatpaks of Blender 5.0 and Godot 4.6.1, the VRM add-on and the Godot export templates (`ui/README.md`).
+## On the machine that has the character
 
-**Keep a copy of `mia.blend` somewhere else too.** It is the one file of the character that exists only once.
+1. After a change of the character: `ui/tools/setup_character.sh path/to/mia.blend` (VRM and web export).
+2. `python ui/tools/character_pack.py pack all --blend path/to/mia.blend` makes the zips here and updates `manifest.json` (the version grows only when the content changed; the same content gives the same file).
+3. Upload the new zip(s) to your Drive, commit `manifest.json`.
+
+## On another machine
+
+1. Download the zip named in `manifest.json` (`python ui/tools/character_pack.py status` shows the name) from your Drive into this folder.
+2. `python ui/tools/character_pack.py install web` checks the SHA-256 and unpacks to `ui/godot/build/web`, which MIA serves under `/character/`. (`install source` puts `mia.blend` here; a `mia.blend` that was here is kept as `mia.previous.blend`.)
+
+A zip that is not the one of the manifest, or has paths outside its place, links or an unreasonable size, is refused (`tests/test_character_pack.py`). Without the `character_dir` option the default is `ui/godot/build/web`.
+
+## What was tested (2026-10-20)
+
+Packed, unpacked into a folder of a "new machine" (no Godot, no Blender used), served with `ui/tools/serve_web.py` and loaded in headless Chromium: the character appears, all nine files are requested and found.
+Rebuilding from the same `.blend` gives an identical VRM (SHA-256) and an identical web export, so a pack can always be made again.
+
+**Keep a copy of `mia.blend` somewhere else too** (the source pack in your Drive is that copy). It is the one file of the character that exists only once.
+
+## Rights
+
+Before the model or the zips go anywhere public, check the rights of what is inside (VRoid Studio parts, bought hair or clothes, textures): see the notes in the commit history of this file and the license fields of the VRM (`allowRedistribution`, `modification`, `avatarPermission`).

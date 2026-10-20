@@ -1,0 +1,17 @@
+{
+ "format": 1,
+ "source": {
+  "file": "mia-character-source-1.zip",
+  "files": 1,
+  "sha256": "73f18f6966ad9fc8e090ecc0472f81568eeab481e36e8eefd10c879377d001f1",
+  "size": 12981458,
+  "version": 1
+ },
+ "web": {
+  "file": "mia-character-web-1.zip",
+  "files": 9,
+  "sha256": "55c929e1c1861411cdf40c9756c4683070bfe74c42e1c1146f15275203d565cb",
+  "size": 20535577,
+  "version": 1
+ }
+}
