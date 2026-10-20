@@ -20,6 +20,9 @@ fi
 # the project name gives containers and volumes their prefix (mia_ollama ...); another name = a second stack next to the first
 export COMPOSE_PROJECT_NAME="${MIA_PROJECT:-mia}"
 FILES=(-f compose.yaml)
+# OLLAMA_URL in .env (or the environment): use that Ollama and do not start one; otherwise the stack runs its own
+if [ -z "${OLLAMA_URL:-}" ] && [ -f .env ]; then OLLAMA_URL="$(sed -n 's/^OLLAMA_URL=//p' .env | tail -1)"; fi
+if [ -n "$OLLAMA_URL" ]; then export OLLAMA_URL; else FILES+=(--profile ollama); fi
 case "${1:-}" in
   rocm|nvidia) FILES+=(-f "compose.$1.yaml"); shift ;;
 esac

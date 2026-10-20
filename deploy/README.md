@@ -42,9 +42,19 @@ deploy/up.sh character path/to/mia-character-web-1.zip
 
 It copies the zip to `ui/character/`, checks it against `ui/character/manifest.json` (SHA-256, safe paths), unpacks it to `ui/godot/build/web` and recreates the MIA container so that it sees the new folder. Without the path it uses the zip that already lies in `ui/character/`. No Godot and no Blender are needed (`ui/character/README.md`).
 
+## An Ollama that exists already
+
+Put its address in `deploy/.env`, e.g. on another machine:
+
+```
+OLLAMA_URL=http://192.168.1.50:11434
+```
+
+`deploy/up.sh` then does not start the `ollama` service at all and MIA talks to that address (the environment variable `MIA_OLLAMA_HOST` overrides `ollama_host` of the config; the same works outside compose). The GPU files are not needed then, the GPU belongs to that machine. The other Ollama must be reachable from the container (on the other machine `OLLAMA_HOST=0.0.0.0` and an open port; Ollama has no login, so keep it inside your own network or a VPN). MIA pulls `version` and `version_light` there if they are missing; set `"ollama_pull": false` in the config to leave that Ollama's models alone. For an Ollama on the same machine use the address of the host (`http://host.containers.internal:11434` in podman) instead of `localhost`.
+
 ## Settings in `.env` (all optional)
 
-`MIA_PORT` (8585), `MIA_HTTPS_PORT` (8586), `MIA_BIND` (127.0.0.1; `0.0.0.0` for other machines, then also set `public_hosts` in the config), `MIA_PROJECT` (mia; another name = a second stack next to the first), `MIA_CONFIG`, `MIA_KOKORO_DIR`, `MIA_CHARACTER_DIR`, `HSA_OVERRIDE_GFX_VERSION` (rocm, 11.0.0).
+`OLLAMA_URL` (see above), `MIA_PORT` (8585), `MIA_HTTPS_PORT` (8586), `MIA_BIND` (127.0.0.1; `0.0.0.0` for other machines, then also set `public_hosts` in the config), `MIA_PROJECT` (mia; another name = a second stack next to the first), `MIA_CONFIG`, `MIA_KOKORO_DIR`, `MIA_CHARACTER_DIR`, `HSA_OVERRIDE_GFX_VERSION` (rocm, 11.0.0).
 
 ## Notes
 

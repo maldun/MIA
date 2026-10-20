@@ -5,6 +5,7 @@
   "ollama_host": null,
   "ollama_managed": true,
   "ollama_wait": 300,
+  "ollama_pull": true,
   "version":"gemma4:26b",
   "llm_options":{"num_ctx":8192},
   "version_light":"gemma4:12b-it-qat",

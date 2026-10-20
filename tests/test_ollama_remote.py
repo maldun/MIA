@@ -31,6 +31,20 @@ class OllamaRemoteTests(unittest.TestCase):
         self.assertEqual(O.ollama_url({}), "http://localhost:11434")
         self.assertEqual(O.ollama_url({"ollama_host": None, "protocol": "https"}), "https://localhost:11434")
 
+    def test_environment_wins(self):
+        os.environ["MIA_OLLAMA_HOST"] = "http://far:1/"
+        try:
+            self.assertEqual(O.ollama_url({"ollama_host": "http://ollama:11434"}), "http://far:1")
+            from communicator import Communicator
+            self.assertEqual(Communicator(ollama_host="http://ollama:11434").host, "http://far:1")
+        finally:
+            del os.environ["MIA_OLLAMA_HOST"]
+
+    def test_pull_switched_off(self):
+        client = FakeClient(models=[])
+        self.assertTrue(O.prepare({"version": "a:1", "ollama_pull": False}, timeout=1, log=lambda m: None, client=client))
+        self.assertEqual(client.pulled, [])
+
     def test_wait(self):
         clock = [0]
         sleeps = []

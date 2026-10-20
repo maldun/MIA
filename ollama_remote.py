@@ -1,12 +1,13 @@
 """Ollama that is not started by MIA (a compose service, another machine): wait until it answers and pull the missing models through its API."""
+import os
 import time
 
 from ollama import Client
 
 
 def ollama_url(cfg):
-    """the address of Ollama: 'ollama_host' (a full URL) if set, else protocol://address:port"""
-    host = cfg.get("ollama_host")
+    """the address of Ollama: the environment variable MIA_OLLAMA_HOST, else 'ollama_host' (a full URL), else protocol://address:port"""
+    host = os.environ.get("MIA_OLLAMA_HOST") or cfg.get("ollama_host")
     if host:
         return str(host).rstrip("/")
     return "%s://%s:%s" % (cfg.get("protocol", "http"), cfg.get("address", "localhost"), cfg.get("port", 11434))
@@ -58,5 +59,8 @@ def prepare(cfg, timeout=None, log=print, client=None):
     if not wait_for_ollama(client, timeout=cfg.get("ollama_wait", 300) if timeout is None else timeout):
         log("Ollama at %s does not answer" % ollama_url(cfg))
         return False
-    pull_missing(client, [cfg.get("version"), cfg.get("version_light")], log=log)
+    if cfg.get("ollama_pull", True):
+        pull_missing(client, [cfg.get("version"), cfg.get("version_light")], log=log)
+    else:
+        log("ollama_pull is false: the models are not checked")
     return True

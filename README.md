@@ -71,6 +71,7 @@ MIA, Ollama and SearXNG as three containers with one command (`deploy/up.sh`), i
     - "docker":"docker", (docker executable e.g. podman as alernative; Fedora symlinks podman)
     - "port":11434, (ollama port)
     - "ollama_host":null, (optional: full URL of Ollama, e.g. "http://ollama:11434", instead of address/port; for a compose stack or another machine)
+    - "ollama_pull":true, (false: do not pull missing models on an Ollama that MIA does not manage; the environment variable MIA_OLLAMA_HOST overrides ollama_host)
     - "ollama_managed":true, (false: MIA does not start the Ollama container; it waits for it ("ollama_wait" seconds) and pulls missing models through its API; see deploy/README.md)
     - "version":"gemma4:26b", (ollama model)
     - "llm_options":{"num_ctx":8192}, (ollama model options, e.g. context size)

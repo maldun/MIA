@@ -11,8 +11,9 @@ services:
     image: localhost/mia:latest
     restart: unless-stopped
     depends_on:
-      - ollama
       - searxng
+    environment:
+      MIA_OLLAMA_HOST: ${OLLAMA_URL:-http://ollama:11434}      # OLLAMA_URL in .env: an Ollama that exists already, see README
     ports:
       - "${MIA_BIND:-127.0.0.1}:${MIA_PORT:-8585}:8585"
     volumes:
@@ -33,6 +34,7 @@ services:
       - caddy-data:/data
 
   ollama:
+    profiles: ["ollama"]          # only without OLLAMA_URL (up.sh switches the profile)
     image: docker.io/ollama/ollama:latest
     restart: unless-stopped
     environment:

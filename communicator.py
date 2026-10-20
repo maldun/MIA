@@ -129,6 +129,7 @@ class Communicator:
             self.profile = default_profile
         
         # ollama_host (a full URL, e.g. http://ollama:11434 in a compose stack) replaces protocol/address/port for Ollama
+        ollama_host = os.environ.get("MIA_OLLAMA_HOST") or ollama_host
         self.host = str(ollama_host).rstrip("/") if ollama_host else protocol + "://" + address + ':' + str(port)
         self.client = Client(host=self.host,headers=self.DEFAULT_HEADER)
         # if file is not provided with path -> store in current dir
