@@ -604,3 +604,17 @@ paragraph, and 11 texts with nothing checkable: opinions, questions, advice, hed
 - The answers of the research and of `/research` no longer carry the model's internal passage numbers (`[3]`, `[6, 7]`); the sources are listed below the answer.
 - State of the engines behind SearXNG on 2026-10-20 (not MIA's doing): Google CSE answers every query, DuckDuckGo about half of them (CAPTCHA otherwise), Brave is suspended for "too many requests" for a while, Wikipedia/Wikidata are enabled but gave nothing for general queries. It is a meta search with one reliable engine. More engines can be enabled in `tools/searxng/settings.local.yml` (the container mounts the file of the checkout that ran `run.sh`).
 - Tests: `tests/test_searxng_control.py` (15, with fakes: nothing real is started) and `tests/test_research_command.py` (now 30).
+- `setup_cfg.json`: `"searxng_autostart": true` (set 2026-10-20): MIA starts the existing container `mia-searxng` at launch when SearXNG does not answer.
+- Engine options (probed 2026-10-20 from this machine with one query each, "python asyncio tutorial"; this SearXNG, version 2026.10.17, offers 67 general and web engines, 9 enabled): answered: google cse 20 results (enabled), bing 10, yahoo 7, yep 20, privacywall 10, searchch 10, yandex 10, seznam 8, fynd 3, mwmbl 85 (a small independent index; mixed quality); did not answer: duckduckgo (CAPTCHA, enabled), brave (too many requests, enabled), google (access denied), qwant (access denied), searchmysite (denied), resulthunter (timeout), tusksearch (HTTP error), wiby, wikipedia and encyclosearch (no hit for this query); not in this version: startpage, mojeek, marginalia, stract, presearch. Engines are switched in `settings.local.yml` of the checkout that ran `run.sh`, then `podman restart mia-searxng`:
+
+  ```yaml
+  use_default_settings: true
+  engines:
+    - name: bing
+      disabled: false
+    - name: yahoo
+      disabled: false
+    - name: yep
+      disabled: false
+  ```
+  More engines mean more variety and more risk of being rate-limited (every search asks all enabled engines; a research asks several times): about five working engines are enough.
