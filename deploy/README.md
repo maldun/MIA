@@ -41,7 +41,16 @@ deploy/up.sh calibration                 # uses calibration.txt of the MIA folde
 deploy/up.sh calibration path/to/file    # another file
 ```
 
-MIA is restarted; the file stays in the volume `mia-data`. The same holds for her memories: `memories.json` and `long_time_history.json` of an old installation are not in the volume (copy them into `/opt/mia/MIA/data/` with `podman cp` while the stack is stopped, or start fresh).
+MIA is restarted; the file stays in the volume `mia-data`.
+
+Her memories (`memories.json`, `long_time_history.json`) of an old installation are not in the volume either. Take them over with
+
+```
+deploy/up.sh memories                    # from the MIA folder
+deploy/up.sh memories path/to/folder
+```
+
+MIA is stopped first (it saves its history when it stops), the files are copied in and MIA starts again. What the container had before is kept as `<name>.container-previous` in the volume.
 
 ## The 3D character
 

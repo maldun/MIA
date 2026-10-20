@@ -32,6 +32,31 @@ if [ "${1:-}" = "calibration" ]; then
   echo "calibration.txt copied into the data volume, MIA restarted"
   exit 0
 fi
+# deploy/up.sh memories [folder]   take over MIA's memories of an old installation (memories.json, long_time_history.json from the MIA folder or the given folder)
+# MIA is stopped first (it saves its history when it stops), the files are copied over the ones in the data volume, then MIA starts again. The files the
+# container had are kept next to the new ones as <name>.container-previous.
+if [ "${1:-}" = "memories" ]; then
+  DIR="${2:-$(dirname "$HERE")}"
+  ENGINE="$(command -v podman || command -v docker)"
+  CONTAINER="$($ENGINE ps -aq --filter "label=com.docker.compose.project=${MIA_PROJECT:-mia}" --filter label=com.docker.compose.service=mia | head -1)"
+  [ -n "$CONTAINER" ] || { echo "MIA container not found, start the stack first: deploy/up.sh"; exit 1; }
+  FOUND=()
+  for name in memories.json long_time_history.json; do [ -f "$DIR/$name" ] && FOUND+=("$name"); done
+  [ ${#FOUND[@]} -gt 0 ] || { echo "no memories.json or long_time_history.json in $DIR"; exit 1; }
+  $ENGINE stop "$CONTAINER" >/dev/null
+  SAVE="$(mktemp -d)"
+  for name in "${FOUND[@]}"; do
+    if $ENGINE cp "$CONTAINER:/opt/mia/MIA/data/$name" "$SAVE/$name" 2>/dev/null; then
+      $ENGINE cp "$SAVE/$name" "$CONTAINER:/opt/mia/MIA/data/$name.container-previous"
+    fi
+    $ENGINE cp "$DIR/$name" "$CONTAINER:/opt/mia/MIA/data/$name"
+    echo "copied $name"
+  done
+  rm -rf "$SAVE"
+  $ENGINE start "$CONTAINER" >/dev/null
+  echo "MIA started again with the old memories"
+  exit 0
+fi
 # the project name gives containers and volumes their prefix (mia_ollama ...); another name = a second stack next to the first
 export COMPOSE_PROJECT_NAME="${MIA_PROJECT:-mia}"
 FILES=(-f compose.yaml)
