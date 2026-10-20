@@ -1,0 +1,5 @@
+# NVIDIA GPU for Ollama: deploy/up.sh nvidia (needs nvidia-container-toolkit with CDI: sudo nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml)
+services:
+  ollama:
+    devices:
+      - nvidia.com/gpu=all

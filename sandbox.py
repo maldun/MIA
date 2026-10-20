@@ -512,6 +512,20 @@ def required_tier(operation):
     return ("strong" if reasons else "standard"), reasons
 
 
+class NoSandbox:
+    """sandbox_backend 'none': for a MIA that already runs inside a container, where bubblewrap and podman cannot work.
+    Never available, so script checks stay switched off; the other hard checks are not affected."""
+    name = "none"
+    available = False
+    reason = "sandbox_backend is none (MIA runs in a container)"
+
+    def info(self):
+        return {"name": self.name, "available": False, "reason": self.reason}
+
+    def run(self, code, data=None, **kwargs):
+        raise RuntimeError(self.reason)
+
+
 class SandboxRouter:
     """Chooses the backend per operation. standard: bubblewrap (fast: many small checks), podman if bubblewrap is missing. strong: podman only (SELinux, cgroups, own image).
     If the strong backend is missing the operation is refused (status unavailable), unless degrade=True, which runs it on bubblewrap and marks the result degraded.
@@ -565,8 +579,10 @@ class SandboxRouter:
 
 
 def create_router(cfg=None, tmp_root=None):
-    """a router from the configuration: sandbox_backend ('auto' | 'bubblewrap' | 'podman'), sandbox_degrade (false), sandbox_image"""
+    """a router from the configuration: sandbox_backend ('auto' | 'bubblewrap' | 'podman' | 'none'), sandbox_degrade (false), sandbox_image"""
     cfg = cfg or {}
     force = cfg.get("sandbox_backend", "auto")
+    if force == "none":
+        return SandboxRouter({"none": NoSandbox()}, degrade=False, force="none")
     return SandboxRouter({"bubblewrap": BubblewrapSandbox(tmp_root=tmp_root), "podman": PodmanSandbox(image=cfg.get("sandbox_image", DEFAULT_IMAGE), tmp_root=tmp_root)},
                          degrade=bool(cfg.get("sandbox_degrade", False)), force=force if force in ("bubblewrap", "podman") else None)

@@ -1,0 +1,16 @@
+.git
+.claude
+**/__pycache__
+*.pyc
+venvs
+data
+mia.log
+setup_cfg.json
+voice/models/kokoro/*
+voice/samples
+ui/godot/build
+ui/godot/.godot
+ui/character/*.zip
+*.blend*
+tools/searxng/settings.local.yml
+eval/runs

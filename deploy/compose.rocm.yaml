@@ -1,0 +1,11 @@
+# AMD GPU for Ollama (as MIA's own start does): deploy/up.sh rocm
+services:
+  ollama:
+    image: docker.io/ollama/ollama:rocm
+    devices:
+      - /dev/kfd
+      - /dev/dri
+    security_opt:
+      - label=disable          # SELinux (Fedora) otherwise makes the ROCm runtime crash when loading a model
+    environment:
+      HSA_OVERRIDE_GFX_VERSION: ${HSA_OVERRIDE_GFX_VERSION:-11.0.0}      # cards like the RX 7800 XT (gfx1101), "gfx_version" of setup_cfg.json

@@ -56,9 +56,12 @@ Prerequisites:
 - Go into MIA folder
 - Install/Check requirements in requirements.txt (`python -m pip install -r requirements.txt`)
 
+### Running as a service (podman compose)
+MIA, Ollama and SearXNG as three containers with one command (`deploy/up.sh`), including the zipped 3D character (`deploy/up.sh character <zip>`): see `deploy/README.md`.
+
 ### Configuration
 - The real configuration of a machine is `setup_cfg.json`. It is **not in version control** (a deployment on another machine would otherwise fight with the one in git at every commit). The tracked template is
-  `setup_cfg.example.json`: it lists every option (84 at the moment; the values are those of the development machine, adjust paths, models and ports). On the first start `python -m MIA` copies the example to
+  `setup_cfg.example.json`: it lists every option (76 at the moment; the values are those of the development machine, adjust paths, models and ports). On the first start `python -m MIA` copies the example to
   `setup_cfg.json` and says so; after that only your file is read. When a new version of MIA brings new options, they appear in the example; a test (`tests/test_config.py`) keeps the example complete.
   Two options mean something different when they are *present*, so they are not in the example: `editor_token` and `chat_token` (see below).
   After an update, `python config.py` lists the options of the example that your `setup_cfg.json` does not have yet (it only reports; the defaults apply until you add them).
@@ -67,6 +70,8 @@ Prerequisites:
     - "name":"ollama", (docker name)
     - "docker":"docker", (docker executable e.g. podman as alernative; Fedora symlinks podman)
     - "port":11434, (ollama port)
+    - "ollama_host":null, (optional: full URL of Ollama, e.g. "http://ollama:11434", instead of address/port; for a compose stack or another machine)
+    - "ollama_managed":true, (false: MIA does not start the Ollama container; it waits for it ("ollama_wait" seconds) and pulls missing models through its API; see deploy/README.md)
     - "version":"gemma4:26b", (ollama model)
     - "llm_options":{"num_ctx":8192}, (ollama model options, e.g. context size)
     - "version_light":"gemma4:12b-it-qat", (optional: smaller model; switch with /light! and back with /full!, e.g. if the GPU is needed for other programs)
@@ -105,7 +110,7 @@ Prerequisites:
     - "search_backends":["searxng","duckduckgo"], "searxng_port":8590, "searxng_url":null, "searxng_autostart":true, (the web search of the research: backends in order, the SearXNG port (the same key is read by `tools/searxng/run.sh`) or its full address for another machine, and whether MIA starts the existing container `mia-searxng` at launch when SearXNG does not answer; see ui/README.md "Core, phase 5j")
     - "search_results":8, "search_results_shown":5, "web_timeout":[5,15], "web_max_bytes":2000000, "web_max_chars":30000, (how many results a search keeps and `/search` shows; connect and read timeout in seconds; the largest page body and the longest page text the fetcher takes)
     - "research_pipeline":null, (the pipeline of the library that `/research` runs; null = the one the skill `research` names, now `research.escalate@1`)
-    - "sandbox_backend":"auto", "sandbox_degrade":false, "sandbox_image":"localhost/mia-sandbox:1", (where scripts of the checks run: bubblewrap or podman, chosen per operation when "auto"; whether a weaker sandbox may be used when the strong one is missing; the image of the podman sandbox, `tools/sandbox/build_image.sh`)
+    - "sandbox_backend":"auto", "sandbox_degrade":false, "sandbox_image":"localhost/mia-sandbox:1", (where scripts of the checks run: bubblewrap or podman, chosen per operation when "auto"; "none" inside a container (no script sandbox, deploy/README.md); whether a weaker sandbox may be used when the strong one is missing; the image of the podman sandbox, `tools/sandbox/build_image.sh`)
     - "skills_dir":"skills", "library_dir":"library", "user_library_dir":"data/library", "library_index":"data/library.sqlite", "runs_dir":"data/runs", (the skills, the library of nodes and pipelines (shipped and your own), its index and the run log)
     - "chat_token", "editor_token": (not in the example, because their presence changes the behaviour: `editor_token` set to a text is the token for the expression editor, `""` switches the check off, missing = a random token in `editor_token_file`; `chat_token` defaults to the editor token)
     - "editor_token_file":"data/editor_token.txt", (the file with the random editor token that is made at the first start when "editor_token" is not set)

@@ -1,0 +1,17 @@
+# MIA without a GPU and without Ollama (that is its own service, see compose.yaml).
+# Build from the MIA folder:  podman build -f deploy/Containerfile -t mia .
+FROM docker.io/library/python:3.12-slim
+
+ENV PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1 PIP_DISABLE_PIP_VERSION_CHECK=1
+# the code lives in a folder called MIA, the package is started from its parent (python -m MIA)
+WORKDIR /opt/mia
+COPY requirements.txt MIA/requirements.txt
+RUN pip install -r MIA/requirements.txt
+COPY . MIA/
+# data (histories, presets, logs) is a volume; the Kokoro model and the character come as mounts (compose.yaml)
+RUN useradd --uid 1000 --create-home mia && mkdir -p MIA/data MIA/templates/audio && chown -R mia:mia /opt/mia
+USER mia
+EXPOSE 8585
+HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
+  CMD python -c "import urllib.request as u; u.urlopen('http://127.0.0.1:8585/', timeout=4)"
+CMD ["python", "-m", "MIA"]

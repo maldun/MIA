@@ -86,7 +86,8 @@ if __name__ == "__main__":
                 served = tailscale_serve.start_serve(WEB_PORT)
                 tailscale_started = served["ok"]
                 print(f"MIA (Tailscale, only your tailnet): {served['url']}" if served["ok"] else f"Tailscale: {served['message']}")
-            socketio.run(app, host=host,debug=False,port=WEB_PORT)
+            # allow_unsafe_werkzeug: without a terminal (service, container) Flask-SocketIO refuses the Werkzeug server; MIA is a personal app behind its own port
+            socketio.run(app, host=host,debug=False,port=WEB_PORT,allow_unsafe_werkzeug=True)
             
     except KeyboardInterrupt:
         print("MIA is shutting down ...")

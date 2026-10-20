@@ -56,6 +56,11 @@ def start_ollama(version="lama3.2",version_light=None,docker="docker",timeout=10
 if __name__ == "__main__":
     with open(cfg_file,'r') as fp:
         cfg = json.load(fp)
-    install_ollama(**cfg)
-    #if first_setup is True:
-    start_ollama(**cfg)
+    if cfg.get("ollama_managed", True):
+        install_ollama(**cfg)
+        #if first_setup is True:
+        start_ollama(**cfg)
+    else:
+        # Ollama runs elsewhere (compose service, other machine): only wait for it and pull what is missing
+        from ollama_remote import prepare
+        sys.exit(0 if prepare(cfg) else 1)
