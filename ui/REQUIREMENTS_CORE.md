@@ -553,7 +553,7 @@ No graph is built beforehand for web search: the open web has no fixed corpus to
   further calls are requested (13b ST4: calls on demand) and which query is written for them.
 - CG5. **Conflicts by rule.** The same entity and attribute with different values: a newer dated source supersedes an older one (the old value stays, marked superseded); the same date or no date is flagged, and the answer must show both
   values or say that the sources differ (the museum case of the research suite).
-- CG6. **Per run, visible, then dropped.** The graph lives in memory during the run, is written to the run log (so that the later graph viewer, 10, can show how an answer came about: a sentence leads back through a claim and a quote to a page)
+- CG6 (revised 2026-10-22, see CG11). **Per run, visible; rebuilt from the log, not kept.** The graph lives in memory during the run, is written to the run log (so that the later graph viewer, 10, can show how an answer came about: a sentence leads back through a claim and a quote to a page)
   and is dropped afterwards. A wrong item therefore stays local to its task.
 - CG7. **Persistent layers, each optional and each only from verified material.**
   1. **Decision traces.** One record per run: question type, plan template and version, the context items used, targets met or open, calls and seconds, outcome signals (13a BF2). This is what the plan competition (13b ST5) and the bandit (8) learn from:
@@ -567,6 +567,27 @@ No graph is built beforehand for web search: the open web has no fixed corpus to
 - CG9. **Tests first (9, 13b ST8).** The research suite gets three questions that need more than one page: a second hop to a page the question does not name (the firm that built the bridge, then the town of that firm), a three-page comparison
   (which is older and by how many years), and a conflict with dates (the new museum director against the old one). Variants: (A) raw passages in one prompt, (B) decomposition without a graph, (C) decomposition with the context graph.
   Metrics: answer right, quote not in page, too timid, calls and seconds, open slots closed by the gap round. A claim that the graph helps is made only with repeats and only for the part that (C) adds over (B).
+- CG11. **The log is the source of truth; the graph is a view of it (decided 2026-10-22).** Logging does not depend on how a task is solved (one prompt, a pipeline, expert agents, debate): every
+  run emits **typed events** into the run log (L1), and the context graph of a run is the result of replaying them (a pure function from events to graph). A node or edge of the graph is never
+  stored on its own; it has the id of the event that made it (or the hash of its content), so every item can be traced back to what happened. The graph can therefore be thrown away and rebuilt for
+  any run, which keeps the property of CG6 (a wrong item stays local to its run) and removes its weakness (nothing was kept to look at afterwards).
+- CG12. **One run id everywhere.** The run id (and the id of the node or role acting) travels with every model call, web request, scholarly API request and check, so that each line in each log belongs to a run.
+  State on 2026-10-22: the run log (`run_log.py`, one JSON line per run with the events of its nodes) is built and used by the pipeline runner and the chat; the web log (`web_tools.WebLog`,
+  also used by `scholar.py`) is a separate file whose lines have **no run id** (fields: time, kind, backend, query, found, kept, ms, error), so a web request cannot be joined to the answer it led to;
+  the run events know only the lifecycle (`run_start`, `start`, `done`, `error`, `run_end`) and no domain events.
+- CG13. **Typed domain events, a small fixed vocabulary** with a schema each (checked when written, so that a log line is never free text): `query_issued`, `source_found`, `source_dropped` (reason), `page_fetched`
+  (content hash), `passage_extracted` (quote, anchor found yes/no), `claim_made`, `claim_verified` (verdict, style), `conflict_found`, `slot_opened` / `slot_closed`, `model_call` (model, prompt hash, tokens,
+  seconds), `check_run` (name, result), `budget_spent`, `checkpoint`, `plan_made`, `template_used` (13b ST5, RV49), `user_feedback`. Every event has `run`, `seq`, `at`, `actor` (the node, or the role in an agent setup)
+  and `parent` (the event it follows from). Agents and non-agent pipelines emit the same events; an agent approach adds actors, not a different log.
+- CG14. **Large content is stored once, by hash.** Page texts, abstracts and full texts go into a content-addressed store (`data/store/<hash>`) and the events carry the hash and a short excerpt. The run line
+  stays small (the clipping at 20,000 characters of `run_log` today loses text that an audit needs), identical pages are stored once, and a retention setting says how long the store keeps texts (the
+  events and hashes stay).
+- CG15. **What the log makes possible** (each is a requirement for the tooling, not a wish): (a) *explain an answer*: a sentence leads through claim, quote, page and query to the event that issued the query (the
+  viewer, 10); (b) *replay*: rebuild the graph of any run; (c) *offline reproduction*: a run is repeated from the stored pages and API answers without the network (the harness, 9, and `FixtureWebSession` already work this way for
+  recorded pages), which is also the benchmark of the research requirements and the regression test of every pipeline change; (d) *diff*: two runs of one question compared event by event (which sources, which claims
+  differ); (e) *decision traces* (CG7.1) as queries over events, kept in a derived index that can be rebuilt (as `library.sqlite` is derived from the files); (f) *cost accounting* per actor from the `model_call` events.
+- CG16. **Privacy and size.** The logs stay on the machine (L1); the store has a retention setting; an export for sharing removes the user's own text and keeps structure and hashes; the size per review is
+  estimated before it is relied on (a review of 40 abstracts and 10 full texts is in the order of megabytes).
 - CG10. Open research questions: how much of the gain is the graph and how much the decomposition? Is a claims table enough or do relations add something measurable? Do decision traces improve plan selection beyond the plain run statistics of the
   library? How good is deterministic alias merging on real pages?
 
