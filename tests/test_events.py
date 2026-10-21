@@ -155,6 +155,19 @@ class Stream(unittest.TestCase):
         self.assertTrue(E.check_log([{"seq": 1, "kind": "start", "parent": 5}]))                                     # parent from the future
         self.assertTrue(E.check_log([{"seq": 1, "kind": "event", "type": "query_issued", "payload": {}}]))           # does not fit
 
+    def test_the_round_of_a_session_is_inherited(self):
+        stream, sink = self.make()
+        with E.activate(stream):
+            with E.acting("session", round=2):
+                inner = E.emit("check_run", EXAMPLES["check_run"])
+                with E.acting("expert"):
+                    nested = E.emit("check_run", EXAMPLES["check_run"])
+                with E.acting("judge", round=3):
+                    own = E.emit("check_run", EXAMPLES["check_run"])
+            outside = E.emit("check_run", EXAMPLES["check_run"])
+        self.assertEqual([e["round"] for e in (inner, nested, own, outside)], [2, 2, 3, None])
+        self.assertEqual(stream.emit("check_run", EXAMPLES["check_run"], round=7)["round"], 7)
+
     def test_no_stream_no_effect(self):
         self.assertIsNone(E.emit("query_issued", EXAMPLES["query_issued"]))
         self.assertEqual(E.current_ids(), {})

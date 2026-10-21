@@ -7,6 +7,7 @@ and the run id / actor that travel to everything that logs (web log, scholar log
   V2  an event that does not fit its schema is never written as it is: strict mode (tests) raises EventError, normal mode writes a log_error event with the problem. Nothing is dropped silently
   V3  secrets never reach a log (LG4): fields named like token, password, secret, key, authorization, cookie, e-mail are replaced, and e-mail addresses and bearer tokens in text are removed
   V4  seq is strictly increasing within a run and shared by both kinds of events; parent is always an earlier seq (checked by check_log)
+  V6  an event inside an agent session carries the round (communication step) it belongs to; the trace of a session is the series of its rounds (4b of the core requirements)
   V5  text is not in the events when it is big: they carry a hash (digest()) and an excerpt; the content store (a later step) keeps the texts
 """
 import contextlib
@@ -197,10 +198,10 @@ class EventStream:
                 pass                                # the display must not break a run
         return event
 
-    def emit(self, type_, payload=None, actor=None, parent=None, node=None, item=None, plain=""):
+    def emit(self, type_, payload=None, actor=None, parent=None, node=None, item=None, plain="", round=None):
         """a domain event. Returns the event written (a log_error event if the payload did not fit and strict is off)."""
         payload = {} if payload is None else payload
-        _, ctx_actor, ctx_parent, ctx_node = _context()
+        _, ctx_actor, ctx_parent, ctx_node, ctx_round = _context()
         problems = validate(type_, payload)
         if problems:
             self.problems.append((type_, problems))
@@ -209,7 +210,8 @@ class EventStream:
             original = type_
             type_, payload = "log_error", {"problem": "; ".join(problems[:3])[:7000], "original_type": str(original)[:120]}
         event = {"kind": "event", "type": type_, "schema": ENVELOPE_VERSION, "node": node or ctx_node, "node_kind": None, "library": None, "item": item, "playful": "",
-                 "plain": excerpt(plain), "payload": payload, "actor": actor or ctx_actor, "parent": parent if parent is not None else ctx_parent}
+                 "plain": excerpt(plain), "payload": payload, "actor": actor or ctx_actor, "parent": parent if parent is not None else ctx_parent,
+                 "round": round if round is not None else ctx_round}
         return self.record(event)
 
 
@@ -241,12 +243,12 @@ _current = contextvars.ContextVar("mia_events", default=None)
 
 def _context():
     value = _current.get()
-    return value if value else (None, None, None, None)
+    return value if value else (None, None, None, None, None)
 
 
 @contextlib.contextmanager
 def activate(stream):
-    token = _current.set((stream, None, None, None))
+    token = _current.set((stream, None, None, None, None))
     try:
         yield stream
     finally:
@@ -254,10 +256,11 @@ def activate(stream):
 
 
 @contextlib.contextmanager
-def acting(actor, parent=None, node=None):
-    """inside an active stream: events emitted here belong to this actor (a node, or a role) and follow from parent"""
-    stream = _context()[0]
-    token = _current.set((stream, actor, parent, node if node is not None else actor)) if stream is not None else None
+def acting(actor, parent=None, node=None, round=None):
+    """inside an active stream: events emitted here belong to this actor (a node, or a role) and follow from parent. round: the communication step of an agent session
+    (the trace of a session is the series of its rounds, as in a co-simulation); nested actors inherit it unless they give their own"""
+    stream, _, _, _, outer_round = _context()
+    token = _current.set((stream, actor, parent, node if node is not None else actor, round if round is not None else outer_round)) if stream is not None else None
     try:
         yield
     finally:
@@ -273,7 +276,7 @@ def emit(type_, payload=None, **kwargs):
 
 def current_ids():
     """{"run", "actor"} of the active stream for the other logs (CG12); empty outside a run"""
-    stream, actor, _, _ = _context()
+    stream, actor, _, _, _ = _context()
     if stream is None:
         return {}
     ids = {"run": stream.run_id} if stream.run_id else {}
