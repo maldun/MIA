@@ -177,9 +177,22 @@ def _judge_text(proc):
 
 def _describe(graph, node):
     attrs = node["attrs"]
-    text = attrs.get("text") or attrs.get("quote") or attrs.get("title") or attrs.get("goal") or attrs.get("target") or node["id"]
-    status = graph.claim_status(node["id"]) if node["type"] == "claim" else node["status"]
-    return "%s %s%s: %s" % (node["type"], node["id"].split(":", 1)[-1], " [%s]" % status if status else "", ev.excerpt(text, 120))
+    kind = node["type"]
+    name = node["id"].split(":", 1)[-1]
+    status = graph.claim_status(node["id"]) if kind == "claim" else node["status"]
+    tag = " [%s]" % status if status else ""
+    if kind == "page":
+        return "page of %s%s: %s bytes" % (ev.excerpt(attrs.get("ref", name), 70), tag, attrs.get("bytes", "?"))
+    if kind == "plan":
+        return "plan (%s%s): %s sub-questions" % (attrs.get("origin", "?"), ", " + attrs["template"] if attrs.get("template") else "", attrs.get("steps", "?"))
+    if kind == "source":
+        return "source %s%s: %s%s" % (ev.excerpt(name, 60), tag, ev.excerpt(attrs.get("title", ""), 70), " (%s)" % attrs["source_class"] if attrs.get("source_class") else "")
+    if kind == "query":
+        return "query%s: %s" % (tag, ev.excerpt(attrs.get("text", name), 100))
+    if kind == "slot":
+        return "open slot %s%s: %s" % (name, tag, ev.excerpt(attrs.get("target", ""), 100))
+    text = attrs.get("text") or attrs.get("quote") or attrs.get("title") or attrs.get("goal") or attrs.get("target") or name
+    return "%s %s%s: %s" % (kind, name[:12], tag, ev.excerpt(text, 120))
 
 
 # --- replay -------------------------------------------------------------------------------------------------------------------------------
@@ -486,33 +499,76 @@ class View:
         return edges
 
 
+# processes that only make a node: the node says it all, so a view does not list them (the verdicts, checks, drops, conflicts and calls carry information of their own)
+CREATORS = ("query_issued", "source_found", "page_fetched", "passage_extracted", "claim_made", "slot_opened", "draft_sentence", "plan_made")
+
+
+def _subtask_of_nodes(graph):
+    """the sub-question every node belongs to: given by the node (a query, passage, claim, slot), else taken from its neighbours through the processes, repeated a few times"""
+    sub = {n["id"]: str(n["attrs"]["subtask"]) for n in graph.nodes.values() if n["attrs"].get("subtask") is not None and n["type"] != "subtask"}
+    for _ in range(6):
+        changed = False
+        for node in graph.nodes.values():
+            if node["id"] in sub or node["type"] in ("subtask", "question", "plan", "draft"):
+                continue
+            around = [sub[m] for m in graph.neighbours(node["id"]) if m in sub]
+            if around and len(set(around)) == 1:
+                sub[node["id"]] = around[0]
+                changed = True
+        if not changed:
+            break
+    return sub
+
+
 def default_view(graph):
-    """one group per subtask (its nodes and processes), one for the dropped sources, one for the model calls; groups of at least two nodes"""
+    """one group per sub-question (its goal, queries, sources, passages, claims, slots and the processes between them), the dropped sources in one group, the sources and pages that
+    several sub-questions share in one, the model calls in one, and the verdicts, checks and bookkeeping that belong to no sub-question in one; groups of at least two nodes"""
     view = View(graph)
     by_subtask = {}
-    for node in graph.nodes.values():
-        sub = node["attrs"].get("subtask")
-        if sub is not None and node["type"] != "subtask":
-            by_subtask.setdefault(str(sub), []).append(node["id"])
+    for node_id, sub in _subtask_of_nodes(graph).items():
+        by_subtask.setdefault(sub, []).append(node_id)
     for sub, ids in sorted(by_subtask.items()):
         sid = "subtask:%s" % sub
-        members = ([sid] if sid in graph.nodes else []) + ids
+        members = ([sid] if sid in graph.nodes and sid not in ids else []) + [i for i in ids if graph.nodes[i]["type"] != "source" or graph.nodes[i]["status"] != "dropped"]
+        goal = graph.nodes.get(sid, {}).get("attrs", {}).get("goal")
         if len(members) >= 2:
-            view.contract("subtask %s" % sub, members)
+            view.contract("subtask %s%s" % (sub, ": " + ev.excerpt(goal, 60) if goal else ""), members)
     dropped = [n["id"] for n in graph.data("source") if n["status"] == "dropped" and n["id"] not in view.parent]
     if len(dropped) >= 2:
         view.contract("dropped sources", dropped)
+    read = [n["id"] for n in graph.data() if n["type"] in ("source", "page") and n["id"] not in view.parent]
+    if len(read) >= 2:
+        view.contract("sources and pages (used by several sub-questions)", read)
     calls = [n["id"] for n in graph.processes("model_call") if n["id"] not in view.parent]
     if len(calls) >= 2:
         view.contract("model calls", calls)
+    rest = [n["id"] for n in graph.processes() if n["type"] not in CREATORS and n["type"] != "model_call" and n["id"] not in view.parent]
+    if len(rest) >= 2:
+        view.contract("verdicts, checks and bookkeeping", rest)
     return view
 
 
 def _line(graph, node):
     attrs = node["attrs"]
     if node["cls"] == PROCESS:
-        extra = {"claim_verified": " %s (%s)" % (attrs.get("verdict"), _judge_text(node)), "model_call": " %.1fs" % (attrs.get("seconds") or 0.0)}.get(node["type"], "")
-        return "- %s by %s%s" % (node["type"], node["ID"], extra)
+        what = ""
+        made = [e["dst"] for e in graph.edges if e["src"] == node["id"] and e["kind"] == "produced"]
+        used = [e["src"] for e in graph.edges if e["dst"] == node["id"] and e["kind"] == "used"]
+        if node["type"] == "claim_verified":
+            what = " %s (%s)" % (attrs.get("verdict"), _judge_text(node))
+        elif node["type"] == "model_call":
+            what = " %.1fs%s" % (attrs.get("seconds") or 0.0, "" if attrs.get("valid", True) else " (invalid)")
+        elif node["type"] in ("budget_spent",):
+            what = " %s %s/%s" % (attrs.get("name"), attrs.get("used"), attrs.get("limit"))
+        elif node["type"] == "check_run":
+            what = " %s: %s" % (attrs.get("name"), attrs.get("result"))
+        elif node["type"] == "router_decision":
+            what = " %s" % attrs.get("strategy")
+        elif made:
+            what = " -> " + _describe(graph, graph.nodes[made[0]])
+        elif used:
+            what = " <- " + _describe(graph, graph.nodes[used[0]])
+        return "- %s by %s%s" % (node["type"], node["ID"], ev.excerpt(what, 140))
     return "- " + _describe(graph, node)
 
 
@@ -535,9 +591,13 @@ def _weight(graph, ids):
 
 def render(view, budget_tokens=800, focus=None):
     """the view as text within about budget_tokens (4 characters a token): the groups that need attention most are expanded first (PG16, CG3); focus: a group id, or the name of a
-    group, that is expanded first. Returns (text, expanded group ids)"""
+    group, that is expanded first. A group that does not fit as a whole is shown partly ([~]: only the members that need attention and the number of the others).
+    Returns (text, expanded group ids, partly expanded ones included)"""
     graph, limit = view.graph, budget_tokens * 4
-    expanded = []
+    expanded, partial = [], set()
+
+    def attention(i):
+        return _weight(graph, view.leaves(i) if i in view.groups else [i]) > 0
 
     def lines_of(i, depth):
         pad = "  " * depth
@@ -549,17 +609,26 @@ def render(view, budget_tokens=800, focus=None):
                 n = graph.nodes[leaf]
                 if n["cls"] == DATA:
                     kinds[n["type"]] = kinds.get(n["type"], 0) + 1
-            head = "%s[%s] %s: %s" % (pad, "-" if i in expanded else "+", g["name"], ", ".join("%d %s" % (c, t) for t, c in sorted(kinds.items())) or "%d nodes" % len(leaves))
+            head = "%s[%s] %s: %s" % (pad, ("~" if i in partial else "-") if i in expanded else "+", g["name"], ", ".join("%d %s" % (c, t) for t, c in sorted(kinds.items())) or "%d nodes" % len(leaves))
             open_n = sum(1 for leaf in leaves if graph.nodes[leaf]["type"] == "slot" and graph.nodes[leaf]["status"] == "open")
             if open_n:
                 head += " (%d open)" % open_n
             if i not in expanded:
                 return [head]
-            body = []
+            body, hidden = [], 0
             for m in g["members"]:
+                if i in partial and not attention(m):
+                    hidden += 1 if m in graph.nodes and not (graph.nodes[m]["cls"] == PROCESS and graph.nodes[m]["type"] in CREATORS) else 0
+                    hidden += 1 if m in view.groups else 0
+                    continue
                 body.extend(lines_of(m, depth + 1))
+            if hidden:
+                body.append("%s  … %d more" % (pad, hidden))
             return [head] + body
-        return [pad + _line(graph, graph.nodes[i])]
+        node = graph.nodes[i]
+        if node["cls"] == PROCESS and node["type"] in CREATORS:
+            return []
+        return [pad + _line(graph, node)]
 
     def text():
         out = []
@@ -575,20 +644,24 @@ def render(view, budget_tokens=800, focus=None):
         return [g for g in view.groups if g not in expanded and _visible_group(view, g, expanded)]
 
     if focus:
-        target = focus if focus in view.groups else next((g for g, v in view.groups.items() if v["name"] == focus), None)
+        target = focus if focus in view.groups else next((g for g, v in view.groups.items() if v["name"] == focus or v["name"].startswith(focus + ":")), None)
         if target:
             expanded.append(target)
     while True:
         candidates = sorted(collapsed(), key=lambda g: (-_weight(graph, view.leaves(g)), g))
         if not candidates:
             break
-        expanded.append(candidates[0])                       # strictly best first: a less important group never takes the room of the most important one
+        best = candidates[0]
+        expanded.append(best)                                # strictly best first: a less important group never takes the room of the most important one
         if len(text()) > limit:
-            expanded.pop()
-            break
+            partial.add(best)                                # it does not fit as a whole: show only what needs attention in it, and how many more there are
+            if len(text()) > limit or not any(attention(m) for m in view.groups[best]["members"]):
+                expanded.pop()
+                partial.discard(best)
+                break
     result = text()
     while len(result) > limit and expanded:                  # the focus alone may be too big: shrink from the last expanded
-        expanded.pop()
+        partial.discard(expanded.pop())
         result = text()
     if len(result) > limit:                                  # even the collapsed view is too big: cut it and say so
         kept, total = [], 0

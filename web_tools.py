@@ -23,9 +23,10 @@ from urllib.parse import parse_qs, parse_qsl, urlencode, urljoin, urlparse, urlu
 import requests
 
 try:
-    from . import events
+    from . import events, evidence
 except ImportError:  # used as plain script / in tests
     import events
+    import evidence
 
 USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0 MIA-research"
 ALLOWED_PORTS = (80, 443, 8080, 8443)
@@ -504,9 +505,11 @@ def searxng_url(cfg):
     return cfg.get("searxng_url") or "http://localhost:%d" % int(cfg.get("searxng_port", DEFAULT_SEARXNG_PORT))
 
 
-def build_web_tools(cfg, runs_dir, session=None, resolver=None):
+def build_web_tools(cfg, runs_dir, session=None, resolver=None, store=None, trust=None):
     """(tools, search, client): tools = {"web_search": (callable, "search_calls"), "fetch_page": (callable, "fetch_calls")} for the pipeline runner, built from the
-    configuration (keys: search_backends, searxng_port, searxng_url, web_timeout, web_max_bytes, web_max_chars, search_results). Creating them touches no network."""
+    configuration (keys: search_backends, searxng_port, searxng_url, web_timeout, web_max_bytes, web_max_chars, search_results). Creating them touches no network.
+    store: a content_store.ContentStore that keeps the text of every page read; trust: a function url -> {"class", "score"} (source_trust.TrustTable.for_url). Inside a run both tools write
+    their evidence events (evidence.py)."""
     log = WebLog(runs_dir)
     timeout = cfg.get("web_timeout", [5, 15])
     backends = []
@@ -520,10 +523,20 @@ def build_web_tools(cfg, runs_dir, session=None, resolver=None):
     max_chars = cfg.get("web_max_chars", 30000)
 
     def web_search(query, count=None, language=None, time_range=None):
-        return search.search(query, count, language, time_range)
+        try:
+            result = search.search(query, count, language, time_range)
+        except SearchError as exc:
+            evidence.search_done(query, error=str(exc))
+            raise
+        evidence.search_done(result["query"], result, trust=trust)
+        return result
 
     def fetch_page(url, max_chars=max_chars):
-        page = client.get(url)
+        try:
+            page = client.get(url)
+        except WebError as exc:
+            evidence.fetch_failed(url, exc)
+            raise
         if page["content_type"] in ("text/html", "application/xhtml+xml", ""):
             extracted = extract_text(page["text"])
         else:
@@ -531,7 +544,9 @@ def build_web_tools(cfg, runs_dir, session=None, resolver=None):
         text = extracted["text"]
         clipped = len(text) > max_chars
         text = text[:max_chars]
-        return {"url": page["url"], "title": extracted["title"], "text": text, "clipped": clipped or page["truncated"],
-                "content_type": page["content_type"], "signals": injection_signals(text)}
+        result = {"url": page["url"], "ref": url, "title": extracted["title"], "text": text, "clipped": clipped or page["truncated"],
+                  "content_type": page["content_type"], "signals": injection_signals(text)}
+        evidence.fetch_done(url, result, store)
+        return result
 
     return {"web_search": (web_search, "search_calls"), "fetch_page": (fetch_page, "fetch_calls")}, search, client

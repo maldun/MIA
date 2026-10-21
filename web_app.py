@@ -52,6 +52,7 @@ from .audio_router import AudioRouter
 from . import behaviour
 from . import events as events_module
 from .content_store import ContentStore
+from . import source_trust
 from . import broker as broker_module
 from . import checks
 from . import sandbox as sandbox_module
@@ -501,7 +502,11 @@ mood = MoodTracker(_own_path(CONST.MOODS_FILE_KEY, CONST.DEFAULT_MOODS_FILE),
 pipeline_model = OllamaModel(comm.client, lambda profile: getattr(comm, "_profiles", {}).get(profile),
                              lambda: (comm.version, comm.llm_options), keep_alive=comm.keep_alive)
 _runs_dir = _own_path(CONST.RUNS_DIR_KEY, CONST.DEFAULT_RUNS_DIR)
-_web_tools, _web_search, _web_client = build_web_tools(cfg, _runs_dir)          # search (SearXNG, DuckDuckGo as fallback) and page fetcher with the safety rules
+# prompts, answers and the pages that were read are kept in full, by hash (content_store.py); conversations only with "store_chat_texts"; old texts go after "store_days"
+content_store = ContentStore(_own_path("store_dir", "data/store"))
+content_store.prune(cfg.get("store_days", 90))
+_source_trust = source_trust.build_trust(cfg)
+_web_tools, _web_search, _web_client = build_web_tools(cfg, _runs_dir, store=content_store, trust=_source_trust.for_url)          # search (SearXNG, DuckDuckGo as fallback) and page fetcher with the safety rules
 try:        # is SearXNG running? if not, say why searches use the fallback (and start the container if the user wants it: "searxng_autostart")
     _searx = searxng_control.ensure_searxng(cfg)
     (logger.info if _searx["reachable"] or not _searx["wanted"] else logger.warning)("web search: %s", _searx["message"])
@@ -524,9 +529,6 @@ def _run_environment():
     return _environment_cache["value"]
 
 
-# prompts and answers of the runs in full, by hash (content_store.py); conversations only with "store_chat_texts"; old texts are removed after "store_days"
-content_store = ContentStore(_own_path("store_dir", "data/store"))
-content_store.prune(cfg.get("store_days", 90))
 core = Core(_own_path(CONST.SKILLS_DIR_KEY, CONST.DEFAULT_SKILLS_DIR), library, _runs_dir, model=pipeline_model, sandbox=sandbox_router, environment=_run_environment,
             store=content_store, store_texts=(lambda name: True) if cfg.get("store_chat_texts") else None,
             broker_factory=lambda: broker_module.WebBroker(broker_module.web_handlers(_web_search, _web_client)),

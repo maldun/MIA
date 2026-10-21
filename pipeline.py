@@ -335,6 +335,8 @@ class Runner:
         seconds = self.clock() - st.t0
         answer = lookup(graph["result"], ctx)
         answer = None if answer is _MISSING else answer
+        reason = {"done": "sufficient", "stopped": "user", "budget": "budget", "error": "error"}.get(status, "error")
+        ev.emit("stop_decision", {"reason": reason, "detail": ev.excerpt(error or status, 200)}, actor="runner")
         self._emit(st, "run_end", None, plain=status, payload={"status": status, "seconds": round(seconds, 3)})
         if run is not None:
             run.finish(status, {"answer": answer}, seconds, error)
@@ -383,7 +385,7 @@ class Runner:
         self._guard(st)
         kind = node["kind"]
         start = self._emit(st, "start", node, item=item, ctx=ctx)
-        with ev.acting(node["id"], parent=start["seq"]):
+        with ev.acting(node["id"], parent=start["seq"], item=item):
             try:
                 value = getattr(self, "_do_" + kind)(st, node, ctx, item)
             except (Stopped, BudgetExceeded):
@@ -431,6 +433,8 @@ class Runner:
                 st.calls[tool.budget_key] = st.calls.get(tool.budget_key, 0) + 1
                 count = st.calls[tool.budget_key]
             limit = st.budget.get(tool.budget_key)
+            if limit is not None:
+                ev.emit("budget_spent", {"name": tool.budget_key, "amount": 1, "used": count, "limit": limit})
             if limit is not None and count > limit:
                 raise BudgetExceeded(tool.budget_key)
         return tool.func(**resolve(node.get("args", {}), ctx))
@@ -444,7 +448,9 @@ class Runner:
         return answer
 
     def _do_branch(self, st, node, ctx, item):
-        self._run_nodes(st, node.get("then" if test_condition(node["if"], ctx) else "else") or [], ctx, item)
+        taken = test_condition(node["if"], ctx)
+        ev.emit("router_decision", {"strategy": "%s:%s" % (node["id"], "then" if taken else "else"), "markers": [ev.excerpt(json.dumps(node["if"], default=str), 100)]})
+        self._run_nodes(st, node.get("then" if taken else "else") or [], ctx, item)
 
     def _do_loop(self, st, node, ctx, item):
         for _ in range(node["max"]):

@@ -249,7 +249,8 @@ class InThePipeline(unittest.TestCase):
         self.assertEqual(result.status, "error")
         loose, events = self.run_nodes(nodes, None, {"search": Tool(bad, "search_calls")})
         self.assertEqual(loose.status, "done")                                              # in production the run goes on and the problem is in the log
-        self.assertEqual([e["type"] for e in events if e.get("kind") == "event"], ["log_error"])
+        types = [e["type"] for e in events if e.get("kind") == "event" and e["type"] not in ("budget_spent", "stop_decision")]     # the runner's own events are not the point here
+        self.assertEqual(types, ["log_error"])
 
     def test_threads_of_a_map_keep_run_and_actor(self):
         def work(item):

@@ -340,7 +340,8 @@ class RunnerTests(unittest.TestCase):
             record = runs[0]
             self.assertEqual((record["id"], record["task"], record["skill_version"], record["status"], record["output"]),
                              (result.run_id, "demo", 3, "done", {"answer": "ok"}))
-            self.assertEqual([e["kind"] for e in record["events"]], ["run_start", "start", "done", "run_end"])
+            self.assertEqual([e["kind"] for e in record["events"] if e["kind"] != "event"], ["run_start", "start", "done", "run_end"])
+            self.assertEqual([e["type"] for e in record["events"] if e["kind"] == "event"], ["stop_decision"])
 
     def test_long_descriptions_are_clipped(self):
         nodes = [{"id": "a", "kind": "code", "function": "f", "output": "out", "plain": "reading {{input.text}}"}]

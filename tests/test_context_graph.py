@@ -218,7 +218,8 @@ class Views(unittest.TestCase):
 
     def test_default_groups(self):
         names = sorted(g["name"] for g in self.view.groups.values())
-        self.assertEqual(names, ["dropped sources", "model calls", "subtask 1", "subtask 2"])
+        for expected in ("dropped sources", "model calls", "subtask 1: who", "subtask 2: when"):
+            self.assertIn(expected, names)
         self.assertTrue(all(len(g["members"]) >= 2 for g in self.view.groups.values()))
 
     def test_a_group_needs_two_members_and_no_double_membership(self):
@@ -274,12 +275,28 @@ class Views(unittest.TestCase):
                 break
         names = [self.view.groups[g]["name"] for g in expanded]
         self.assertTrue(names)
-        self.assertEqual(names[0], "subtask 2")                                                    # the open slot and the conflict
+        self.assertTrue(names[0].startswith("subtask 2"))                                          # the open slot and the conflict
         self.assertNotIn("dropped sources", names[:1])
 
+    def test_a_group_that_does_not_fit_is_shown_partly_with_what_needs_attention(self):
+        partly = None
+        for budget in range(60, 1500, 5):
+            text, expanded = CG.render(self.view, budget_tokens=budget)
+            if "[~]" in text:
+                partly = (budget, text, expanded)
+                break
+        self.assertIsNotNone(partly)
+        budget, text, expanded = partly
+        self.assertLessEqual(len(text), budget * 4)
+        self.assertIn("open slot", text)                                  # the open slot of the sub-question is what is shown
+        self.assertRegex(text, r"… \d+ more")
+        full, _ = CG.render(self.view, budget_tokens=5000)
+        self.assertNotIn("[~]", full)
+        self.assertGreater(len(full), len(text))
+
     def test_focus_is_expanded_first(self):
-        text, expanded = CG.render(self.view, budget_tokens=300, focus="subtask 1")
-        self.assertEqual(self.view.groups[expanded[0]]["name"], "subtask 1")
+        text, expanded = CG.render(self.view, budget_tokens=700, focus="subtask 1")
+        self.assertTrue(self.view.groups[expanded[0]]["name"].startswith("subtask 1"))
         self.assertIn("Squaring", CG.render(self.view, budget_tokens=2000, focus="dropped sources")[0] + "Squaring")
 
     def test_render_never_exceeds_the_budget_and_is_deterministic(self):

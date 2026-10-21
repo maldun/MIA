@@ -18,9 +18,10 @@ import datetime
 import re
 
 try:
-    from . import checks, plans, web_tools
+    from . import checks, evidence, plans, web_tools
 except ImportError:  # used as plain script / in tests
     import checks
+    import evidence
     import plans
     import web_tools
 
@@ -36,16 +37,21 @@ def _words(text):
 def top_urls(hits, n=3, exclude=None):
     results = hits.get("results") if isinstance(hits, dict) else hits
     urls, seen = [], {web_tools.normalize_url(u) for u in exclude if isinstance(u, str)} if isinstance(exclude, list) else set()
+    dropped = []
     for item in results if isinstance(results, list) else []:
         url = item.get("url") if isinstance(item, dict) else None
         if not isinstance(url, str) or not url.startswith(("http://", "https://")):
+            continue
+        if len(urls) >= max(0, int(n)):
+            dropped.append((url, "not_selected"))
             continue
         key = web_tools.normalize_url(url)
         if key not in seen:
             seen.add(key)
             urls.append(url)
-        if len(urls) >= max(0, int(n)):
-            break
+        else:
+            dropped.append((url, "duplicate"))
+    evidence.urls_dropped(dropped)
     return urls
 
 
@@ -60,13 +66,14 @@ def collect_passages(question, pages, per_page=2, size=900, budget=6000):
         signals.update(page.get("signals") or [])
         scored = [(len(wanted & _words(chunk)), -index, chunk) for index, chunk in enumerate(web_tools.chunk_text(page["text"], size=size, overlap=100))]
         for score, index, chunk in sorted(scored, reverse=True)[:max(1, int(per_page))]:
-            candidates.append((score, -index, page.get("url", ""), page.get("title", ""), chunk))
+            candidates.append((score, -index, page.get("url", ""), page.get("title", ""), chunk, page.get("ref") or page.get("url", "")))
     passages, total = [], 0
-    for score, _, url, title, chunk in sorted(candidates, key=lambda c: (-c[0], c[1])):
+    for score, _, url, title, chunk, ref in sorted(candidates, key=lambda c: (-c[0], c[1])):
         if total + len(chunk) > budget and passages:
             continue
-        passages.append({"n": len(passages) + 1, "url": url, "title": title, "text": chunk, "score": score})
+        passages.append({"n": len(passages) + 1, "url": url, "ref": ref, "title": title, "text": chunk, "score": score})
         total += len(chunk)
+    evidence.passages_collected(passages, pages, lambda quote, source: checks.quote_in_source(quote, source)["status"] == "pass")
     context = "\n\n".join("[%d] %s (%s)\n%s" % (p["n"], p["title"] or "page", p["url"], web_tools.untrusted(p["text"], p["url"])) for p in passages)
     return {"passages": passages, "context": context or "(no pages could be read)", "signals": sorted(signals), "pages": used}
 
@@ -77,7 +84,14 @@ def _plain_value(text):
 
 
 def anchor_answer(answer, passages):
-    """{"answer", "status": answered | unknown, "sources": [{url, quote}], "dropped": [...], "demoted": bool, "draft": the model's answer when it was demoted}"""
+    """{"answer", "status": answered | unknown, "sources": [{url, quote}], "dropped": [...], "demoted": bool, "draft": the model's answer when it was demoted}.
+    Inside a run the check is logged: a check_run per cited quote, the claim, the verdict of the rule and the sentence of the draft (evidence.py)."""
+    outcome = _anchor(answer, passages)
+    evidence.answer_checked(answer, outcome, passages)
+    return outcome
+
+
+def _anchor(answer, passages):
     by_number = {p.get("n"): p for p in passages if isinstance(p, dict)} if isinstance(passages, list) else {}
     if not isinstance(answer, dict):
         return {"answer": NO_ANSWER, "status": "unknown", "sources": [], "dropped": [], "demoted": False}
@@ -155,6 +169,9 @@ def check_typed_plan(plan, question):
         problems.append("more than 8 steps")
     if not problems and not (_COMPOUND.search(str(question)) or _CALCULATION.search(str(question))):
         problems.append("a simple question needs no plan")
+    steps = [s for s in (plan.get("steps") if isinstance(plan, dict) else []) or [] if isinstance(s, dict)]
+    evidence.plan_checked("typed", plan if isinstance(plan, dict) else {}, [("typed_plan", False, p) for p in problems] or [("typed_plan", True, "")],
+                          goals={str(s.get("id")): _label(s) for s in steps if s.get("op") == "lookup" and s.get("id") is not None}, subtasks=len(steps))
     return {"valid": not problems, "plan": plan if isinstance(plan, dict) else {}, "problems": problems}
 
 
@@ -249,7 +266,13 @@ def typed_summary(plan, values, question=""):
 
 
 def normalize_plan(plan, question):
-    """{"subquestions": [{id, question, query}], "needs_calculation": bool, "single": bool}"""
+    """{"subquestions": [{id, question, query}], "needs_calculation": bool, "single": bool}. Inside a run: plan_made (origin free, without checks)."""
+    result = _normalize(plan, question)
+    evidence.plan_checked("free", result, [], goals={str(s["id"]): s["question"] for s in result["subquestions"]}, subtasks=len(result["subquestions"]))
+    return result
+
+
+def _normalize(plan, question):
     items = plan.get("subquestions") if isinstance(plan, dict) else None
     subs, seen = [], set()
     for item in items if isinstance(items, list) else []:
@@ -290,7 +313,7 @@ def _same_lookup(a, b):
 
 def check_plan(plan, question):
     """normalize_plan plus the checks of 13b ST11. Returns the plan with "checks": [{rule, detail}] (what was changed and why) and "fallback": True when the plan was replaced by the question itself."""
-    base = normalize_plan(plan, question)
+    base = _normalize(plan, question)
     subs, checks = list(base["subquestions"]), []
     wanted = _stems(question)
     calculation = base["needs_calculation"] or bool(_CALCULATION.search(str(question)))       # then the lookups are the facts the calculation needs, not the question itself
@@ -340,7 +363,10 @@ def check_plan(plan, question):
     if not needs and calculation:
         needs = True
         checks.append({"rule": "calculation", "detail": "the wording of the question asks for a calculation"})
-    return {"subquestions": subs, "needs_calculation": needs, "single": len(subs) == 1, "checks": checks, "fallback": fallback}
+    result = {"subquestions": subs, "needs_calculation": needs, "single": len(subs) == 1, "checks": checks, "fallback": fallback}
+    evidence.plan_checked("free", {k: v for k, v in result.items() if k != "checks"}, [(c["rule"], False, c["detail"]) for c in checks] or [("plan_rules", True, "")],
+                          goals={str(s["id"]): s["question"] for s in subs}, subtasks=len(subs))
+    return result
 
 
 def only_result(results):
@@ -361,6 +387,8 @@ def facts_table(subquestions, results):
             n = len(facts) + 1
             facts.append({"n": n, "sub": sub.get("id"), "question": sub.get("question"), "answer": result.get("answer"), "url": source["url"], "quote": source["quote"]})
             lines.append("  [%d] quote from %s: \"%s\"" % (n, source["url"], source["quote"]))
+    evidence.fact_passages(facts)
+    evidence.facts_open([(sub.get("id"), sub.get("question")) for sub in (subquestions if isinstance(subquestions, list) else []) if sub.get("question") in open_questions])
     return {"facts": facts, "passages": [{"n": f["n"], "url": f["url"], "text": f["quote"]} for f in facts], "context": "\n".join(lines) or "(nothing was found)",
             "answered": len({f["sub"] for f in facts}), "open": open_questions}
 
@@ -378,6 +406,13 @@ def _date(value):
 
 def calculate(request):
     """{"ok", "text"}: the calculation a model asked for, {"op": weekday | years_between | days_between | add_days | none, "a", "b", "n"}"""
+    outcome = _calculate(request)
+    if isinstance(request, dict) and request.get("op") not in (None, "", "none"):
+        evidence.calculation_done(request, outcome)
+    return outcome
+
+
+def _calculate(request):
     if not isinstance(request, dict) or request.get("op") in (None, "", "none"):
         return {"ok": True, "text": "(no calculation)"}
     op = request["op"]

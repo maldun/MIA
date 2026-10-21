@@ -130,7 +130,7 @@ def _maybe(schema):
     return {**schema, "type": [schema["type"], "null"]}
 
 
-DROP_REASONS = ["off_topic", "after_cutoff", "no_date", "retracted", "notice", "duplicate", "low_trust", "no_text", "fetch_failed", "blocked", "budget", "other"]
+DROP_REASONS = ["off_topic", "after_cutoff", "no_date", "retracted", "notice", "duplicate", "low_trust", "no_text", "fetch_failed", "blocked", "budget", "not_selected", "other"]
 VERDICTS = ["supported", "contradicted", "not_found"]
 STOP_REASONS = ["sufficient", "budget", "user", "error", "no_more_sources"]
 SUBTASK = {"type": ["string", "integer", "null"], "maxLength": 120}
@@ -206,7 +206,7 @@ class EventStream:
     def emit(self, type_, payload=None, actor=None, parent=None, node=None, item=None, plain="", round=None):
         """a domain event. Returns the event written (a log_error event if the payload did not fit and strict is off)."""
         payload = {} if payload is None else payload
-        _, ctx_actor, ctx_parent, ctx_node, ctx_round = _context()
+        _, ctx_actor, ctx_parent, ctx_node, ctx_round, ctx_item = _context()
         problems = validate(type_, payload)
         if problems:
             self.problems.append((type_, problems))
@@ -214,7 +214,7 @@ class EventStream:
                 raise EventError("%s: %s" % (type_, "; ".join(problems[:3])))
             original = type_
             type_, payload = "log_error", {"problem": "; ".join(problems[:3])[:7000], "original_type": str(original)[:120]}
-        event = {"kind": "event", "type": type_, "schema": ENVELOPE_VERSION, "node": node or ctx_node, "node_kind": None, "library": None, "item": item, "playful": "",
+        event = {"kind": "event", "type": type_, "schema": ENVELOPE_VERSION, "node": node or ctx_node, "node_kind": None, "library": None, "item": item if item is not None else ctx_item, "playful": "",
                  "plain": excerpt(plain), "payload": payload, "actor": actor or ctx_actor, "parent": parent if parent is not None else ctx_parent,
                  "round": round if round is not None else ctx_round}
         return self.record(event)
@@ -248,12 +248,12 @@ _current = contextvars.ContextVar("mia_events", default=None)
 
 def _context():
     value = _current.get()
-    return value if value else (None, None, None, None, None)
+    return value if value else (None, None, None, None, None, None)
 
 
 @contextlib.contextmanager
 def activate(stream):
-    token = _current.set((stream, None, None, None, None))
+    token = _current.set((stream, None, None, None, None, None))
     try:
         yield stream
     finally:
@@ -261,16 +261,27 @@ def activate(stream):
 
 
 @contextlib.contextmanager
-def acting(actor, parent=None, node=None, round=None):
+def acting(actor, parent=None, node=None, round=None, item=None):
     """inside an active stream: events emitted here belong to this actor (a node, or a role) and follow from parent. round: the communication step of an agent session
-    (the trace of a session is the series of its rounds, as in a co-simulation); nested actors inherit it unless they give their own"""
-    stream, _, _, _, outer_round = _context()
-    token = _current.set((stream, actor, parent, node if node is not None else actor, round if round is not None else outer_round)) if stream is not None else None
+    (the trace of a session is the series of its rounds, as in a co-simulation); nested actors inherit it unless they give their own. item: the element of a map the node works on"""
+    stream, _, _, _, outer_round, outer_item = _context()
+    token = (_current.set((stream, actor, parent, node if node is not None else actor, round if round is not None else outer_round, item if item is not None else outer_item))
+             if stream is not None else None)
     try:
         yield
     finally:
         if token is not None:
             _current.reset(token)
+
+
+def active():
+    """is a run's stream active here (events would be written)?"""
+    return _context()[0] is not None
+
+
+def current_item():
+    """the item (index of the map element) the active node works on, or None"""
+    return _context()[5]
 
 
 def emit(type_, payload=None, **kwargs):
@@ -281,7 +292,7 @@ def emit(type_, payload=None, **kwargs):
 
 def current_ids():
     """{"run", "actor"} of the active stream for the other logs (CG12); empty outside a run"""
-    stream, actor, _, _, _ = _context()
+    stream, actor, _, _, _, _ = _context()
     if stream is None:
         return {}
     ids = {"run": stream.run_id} if stream.run_id else {}
