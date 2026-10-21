@@ -70,7 +70,8 @@ def search_done(query, result=None, error=None, trust=None):
     for rank, hit in enumerate((result or {}).get("results") or [], 1):
         known = trust(hit["url"]) if trust else {}
         ev.emit("source_found", _with({"ref": _cut(hit["url"], 1000), "title": _cut(hit.get("title") or hit["url"], 380), "backend": hit.get("backend") or backend, "rank": rank,
-                                       "query": _cut(query, 380), "source_class": known.get("class"), "trust": known.get("score")}, date=hit.get("date")))
+                                       "query": _cut(query, 380), "source_class": known.get("class"), "trust": known.get("score")},
+                              date=hit.get("date"), snippet=_cut(hit.get("snippet"), 380) if hit.get("snippet") else None, engine=_cut(hit.get("engine"), 120) if hit.get("engine") else None))
 
 
 @_safe
@@ -78,7 +79,9 @@ def fetch_done(ref, page, store=None):
     """page_fetched (the text goes to the store, the event carries its hash) and a check_run for the phrases that look like instructions"""
     text = page.get("text") or ""
     hash_ = store.put(text) if store is not None else ev.digest(text)
-    ev.emit("page_fetched", {"ref": _cut(ref, 1000), "hash": hash_, "bytes": len(text.encode("utf-8", "replace")), "truncated": bool(page.get("clipped")), "status": 200})
+    ev.emit("page_fetched", {"ref": _cut(ref, 1000), "hash": hash_, "bytes": len(text.encode("utf-8", "replace")), "truncated": bool(page.get("clipped")), "status": 200,
+                             "title": _cut(page.get("title"), 380), "url": _cut(page.get("url") or ref, 1000), "content_type": _cut(page.get("content_type"), 120),
+                             "signals": [_cut(x, 120) for x in (page.get("signals") or [])][:50]})
     signals = page.get("signals") or []
     ev.emit("check_run", _with({"name": "injection_signals", "target": _cut(ref, 380), "result": "fail" if signals else "pass"}, detail=_cut("; ".join(signals), 380) if signals else None))
 

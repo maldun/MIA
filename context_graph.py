@@ -297,7 +297,7 @@ def _h_source_dropped(graph, proc, seq, p):
 def _h_page(graph, proc, seq, p):
     sid = "source:%s" % p["ref"]
     _used(graph, proc, sid, "source", seq)
-    _made(graph, proc, "page:%s" % p["hash"], "page", seq, bytes=p.get("bytes"), truncated=p.get("truncated"), status_code=p.get("status"), ref=p["ref"])
+    _made(graph, proc, "page:%s" % p["hash"], "page", seq, bytes=p.get("bytes"), truncated=p.get("truncated"), status_code=p.get("status"), ref=p["ref"], title=p.get("title"))
     if graph.nodes[sid]["status"] in (None, "found"):
         graph.nodes[sid]["status"] = "fetched"
 
@@ -680,3 +680,107 @@ def _visible_group(view, gid, expanded):
     """a group can be expanded when it is on the top level or inside an expanded group"""
     parent = view.parent.get(gid)
     return parent is None or parent in expanded
+
+# --- comparing two runs, and text exports (13d step 5) ------------------------------------------------------------------------------------
+
+_COMPARED = ("text", "quote", "title", "goal", "target", "origin", "template", "source_class", "drop_reason", "backend", "ref")
+
+
+def _comparable(graph):
+    """what two runs of the same task should have in common: the data nodes by id (plan nodes by their content, their ids hold an event number), without clock and event numbers"""
+    out = {}
+    for node in graph.data():
+        if node["type"] == "plan":
+            key = "plan:%s:%s" % (node["attrs"].get("origin"), node["attrs"].get("steps"))
+        else:
+            key = node["id"]
+        status = graph.claim_status(node["id"]) if node["type"] == "claim" else node["status"]
+        out[key] = {"type": node["type"], "status": status, **{k: node["attrs"].get(k) for k in _COMPARED if node["attrs"].get(k) is not None}}
+    return out
+
+
+def _process_counts(graph):
+    counts = {}
+    for p in graph.processes():
+        counts[p["type"]] = counts.get(p["type"], 0) + 1
+    return counts
+
+
+def diff(a, b):
+    """the differences between the graphs of two runs, as readable lines (empty: the same). Compared: the data nodes with their status and main fields, the relations
+    (who supports what, judged by whom), the number of processes by kind, how the run ended. Not compared: seconds, event numbers, run ids."""
+    out = []
+    left, right = _comparable(a), _comparable(b)
+    for key in sorted(set(left) - set(right)):
+        out.append("only in the first run: %s %s" % (left[key]["type"], key))
+    for key in sorted(set(right) - set(left)):
+        out.append("only in the second run: %s %s" % (right[key]["type"], key))
+    for key in sorted(set(left) & set(right)):
+        for field in sorted(set(left[key]) | set(right[key])):
+            if left[key].get(field) != right[key].get(field):
+                out.append("%s %s: %s was %r, is %r" % (left[key]["type"], key, field, left[key].get(field), right[key].get(field)))
+    for kind in ("supports", "contradicts"):
+        ra = {(p, c, j.get("actor") if j else None) for p, c, _, j, _ in a.relations(kind)}
+        rb = {(p, c, j.get("actor") if j else None) for p, c, _, j, _ in b.relations(kind)}
+        for item in sorted(ra - rb, key=str):
+            out.append("%s only in the first run: %s -> %s (judge %s)" % (kind, item[0], item[1], item[2]))
+        for item in sorted(rb - ra, key=str):
+            out.append("%s only in the second run: %s -> %s (judge %s)" % (kind, item[0], item[1], item[2]))
+    pa, pb = _process_counts(a), _process_counts(b)
+    for kind in sorted(set(pa) | set(pb)):
+        if pa.get(kind, 0) != pb.get(kind, 0):
+            out.append("process kinds: %d x %s in the first run, %d in the second" % (pa.get(kind, 0), kind, pb.get(kind, 0)))
+    if (a.meta.get("stop") or {}).get("reason") != (b.meta.get("stop") or {}).get("reason"):
+        out.append("the run ended differently: %s against %s" % ((a.meta.get("stop") or {}).get("reason"), (b.meta.get("stop") or {}).get("reason")))
+    return out
+
+
+def _label(view, i):
+    if i in view.groups:
+        return "[+] " + ev.excerpt(view.groups[i]["name"], 48).replace('"', "'")
+    node = view.graph.nodes.get(i)
+    return ev.excerpt(_describe(view.graph, node) if node["cls"] == DATA else "%s by %s" % (node["type"], node["ID"]), 48).replace('"', "'") if node else str(i)
+
+
+def _export_ids(view):
+    ids = []
+    edges = view.quotient_edges()
+    for edge in edges:
+        for end in edge[:2]:
+            if end not in ids:
+                ids.append(end)
+    for i in view.top():
+        if i not in ids:
+            ids.append(i)
+    return ids, edges
+
+
+def to_dot(view):
+    """Graphviz source of the view: groups are boxes, data nodes ellipses, process instances diamonds"""
+    ids, edges = _export_ids(view)
+    lines = ["digraph run {", "  rankdir=LR;", "  node [fontsize=10];"]
+    for n, i in enumerate(ids):
+        shape = "box" if i in view.groups else ("diamond" if view.graph.nodes.get(i, {}).get("cls") == PROCESS else "ellipse")
+        lines.append('  n%d [label="%s", shape=%s];' % (n, _label(view, i), shape))
+    index = {i: n for n, i in enumerate(ids)}
+    for a, b, kind in edges:
+        lines.append('  n%d -> n%d [label="%s"];' % (index[a], index[b], kind))
+    return "\n".join(lines + ["}"])
+
+
+def to_mermaid(view):
+    """Mermaid flowchart source of the view"""
+    ids, edges = _export_ids(view)
+    lines = ["flowchart LR"]
+    for n, i in enumerate(ids):
+        label = _label(view, i).replace("(", "[").replace(")", "]")
+        if i in view.groups:
+            lines.append('  n%d["%s"]' % (n, label))
+        elif view.graph.nodes.get(i, {}).get("cls") == PROCESS:
+            lines.append('  n%d{"%s"}' % (n, label))
+        else:
+            lines.append('  n%d(["%s"])' % (n, label))
+    index = {i: n for n, i in enumerate(ids)}
+    for a, b, kind in edges:
+        lines.append("  n%d -->|%s| n%d" % (index[a], kind, index[b]))
+    return "\n".join(lines)

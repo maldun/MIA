@@ -62,6 +62,8 @@
   "store_days": 90,
   "store_chat_texts": false,
   "source_trust_file": "data/source_trust.json",
+  "review_domain_experts": 3,
+  "review_role_models": {},
   "review_budget": {"screen": 40, "read": 10, "calls": 150, "tokens": 400000, "seconds": 1800, "api_requests": 80, "checkpoint_every": 10},
   "skills_dir": "skills",
   "library_dir": "library",

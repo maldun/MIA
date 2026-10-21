@@ -6,11 +6,16 @@ of the run. Nothing here calls a model or the internet.
       instead of letting it happen, and the first refusal is remembered (hit) so that the report can say which limit ended the stage
   B2  every K sources checked (checkpoint_every) the run stops for an intermediate report and the user decides whether to continue; a stage never continues by itself
   B3  the cut-off defaults to today; a date in the future is refused (it would allow nothing more than today and hides a typo)
+  B4  the number of domain experts is a setting of the request (RV44): 0 = none (the fixed roles and one generalist judgement), 1 = the main field, k = the main field and the k-1 most
+      relevant related fields; the fixed roles (planner, collector, source expert) do not depend on it; role_models says which role runs on a model of its own (default: all on the same one)
 """
 import datetime
 import time
 
 LIMITS = ("screen", "read", "calls", "tokens", "seconds", "api_requests")
+FIXED_ROLES = ("planner", "collector", "source_expert")
+DEFAULT_DOMAIN_EXPERTS = 3
+MAX_DOMAIN_EXPERTS = 10
 DEFAULT_BUDGET = {"screen": 40, "read": 10, "calls": 150, "tokens": 400000, "seconds": 1800, "api_requests": 80, "checkpoint_every": 10}
 
 
@@ -79,7 +84,8 @@ class Budget:
 
 
 class ReviewRequest:
-    def __init__(self, question, until=None, since=None, languages=None, fields=None, budget=None, include_transfer=False, today=None, clock=time.monotonic):
+    def __init__(self, question, until=None, since=None, languages=None, fields=None, budget=None, include_transfer=False, today=None, clock=time.monotonic,
+                 domain_experts=DEFAULT_DOMAIN_EXPERTS, expert_fields=None, role_models=None):
         self.today = today or datetime.date.today()
         self.question = " ".join(str(question or "").split())
         if len(self.question) < 8:
@@ -96,18 +102,39 @@ class ReviewRequest:
         self.fields = [str(f) for f in (fields or [])]
         self.budget = budget if isinstance(budget, Budget) else Budget(budget, clock=clock)
         self.include_transfer = bool(include_transfer)          # RV48: methods from other fields, only on request
+        if isinstance(domain_experts, bool) or not isinstance(domain_experts, int) or not 0 <= domain_experts <= MAX_DOMAIN_EXPERTS:
+            raise RequestError("domain_experts must be a whole number from 0 to %d, not %r" % (MAX_DOMAIN_EXPERTS, domain_experts))
+        self.domain_experts = domain_experts
+        self.expert_fields = [str(f) for f in (expert_fields or [])]
+        if len(self.expert_fields) > domain_experts:
+            raise RequestError("%d fields are named for the experts, but domain_experts is %d" % (len(self.expert_fields), domain_experts))
+        self.role_models = {}
+        for role, model in (role_models or {}).items():
+            if role not in FIXED_ROLES + ("domain",):
+                raise RequestError("unknown role %r in role_models (known: %s, domain)" % (role, ", ".join(FIXED_ROLES)))
+            if model:
+                self.role_models[role] = str(model)
 
     @classmethod
     def from_config(cls, question, cfg=None, **kwargs):
         """limits from the option review_budget, the rest from the arguments"""
-        return cls(question, budget=Budget((cfg or {}).get("review_budget"), clock=kwargs.pop("clock", time.monotonic)), **kwargs)
+        cfg = cfg or {}
+        kwargs.setdefault("domain_experts", cfg.get("review_domain_experts", DEFAULT_DOMAIN_EXPERTS))
+        kwargs.setdefault("role_models", cfg.get("review_role_models"))
+        return cls(question, budget=Budget(cfg.get("review_budget"), clock=kwargs.pop("clock", time.monotonic)), **kwargs)
+
+    def roles(self):
+        """who takes part (RV44): the fixed roles, how many domain experts and for which fields (empty: chosen by relevance from the field graph), and the model of each role (None: the common one)"""
+        models = {role: self.role_models.get(role) for role in FIXED_ROLES + ("domain",)}
+        return {"fixed": list(FIXED_ROLES), "domain_experts": self.domain_experts, "expert_fields": list(self.expert_fields), "models": models,
+                "generalist": self.domain_experts == 0}
 
     def as_of_today(self):
         return self.until >= self.today
 
     def to_dict(self):
         return {"question": self.question, "until": self.until.isoformat(), "since": self.since.isoformat() if self.since else None, "languages": self.languages,
-                "fields": self.fields, "include_transfer": self.include_transfer, "budget": self.budget.state(), "as_of_today": self.as_of_today()}
+                "fields": self.fields, "include_transfer": self.include_transfer, "budget": self.budget.state(), "as_of_today": self.as_of_today(), "roles": self.roles()}
 
 
 def _date(value, name):

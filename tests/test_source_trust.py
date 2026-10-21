@@ -197,6 +197,34 @@ class RequestTests(unittest.TestCase):
         self.assertEqual(request.budget.limits["screen"], 12)
         self.assertEqual(request.budget.limits["read"], RR.DEFAULT_BUDGET["read"])
 
+    def test_the_number_of_domain_experts_is_adjustable_and_the_fixed_roles_stay(self):
+        for n in (0, 1, 2, 3, 5):
+            roles = self.make(domain_experts=n).roles()
+            self.assertEqual(roles["fixed"], ["planner", "collector", "source_expert"])
+            self.assertEqual((roles["domain_experts"], roles["generalist"]), (n, n == 0))
+        self.assertEqual(self.make().roles()["domain_experts"], RR.DEFAULT_DOMAIN_EXPERTS)
+        for bad in (-1, 11, 2.5, "3", True, None):
+            with self.assertRaises(RR.RequestError):
+                self.make(domain_experts=bad)
+
+    def test_fields_for_the_experts_and_models_for_the_roles(self):
+        request = self.make(domain_experts=2, expert_fields=["electrical engineering", "physics"], role_models={"source_expert": "gemma4:26b", "domain": None})
+        roles = request.roles()
+        self.assertEqual(roles["expert_fields"], ["electrical engineering", "physics"])
+        self.assertEqual(roles["models"], {"planner": None, "collector": None, "source_expert": "gemma4:26b", "domain": None})
+        with self.assertRaises(RR.RequestError):
+            self.make(domain_experts=1, expert_fields=["a", "b"])                       # more fields than experts
+        with self.assertRaises(RR.RequestError):
+            self.make(role_models={"jury": "x"})                                        # no such role
+        self.assertEqual(request.to_dict()["roles"]["domain_experts"], 2)
+
+    def test_the_default_comes_from_the_configuration(self):
+        request = RR.ReviewRequest.from_config("A research question that is long enough?", {"review_domain_experts": 1, "review_role_models": {"collector": "tiny"}}, today=self.TODAY)
+        self.assertEqual(request.domain_experts, 1)
+        self.assertEqual(request.roles()["models"]["collector"], "tiny")
+        explicit = RR.ReviewRequest.from_config("A research question that is long enough?", {"review_domain_experts": 1}, today=self.TODAY, domain_experts=4)
+        self.assertEqual(explicit.domain_experts, 4)                                    # a request overrides the default
+
     def test_state_for_the_intermediate_report(self):
         budget = RR.Budget({"api_requests": 5})
         budget.spend("api_requests", 5)
