@@ -54,10 +54,15 @@ def redact(value, _depth=0):
     return value
 
 
+def clean_text(value):
+    """the text of a value as it is hashed and stored: a string as it is, anything else as canonical JSON, secrets and e-mail addresses removed first (V3)"""
+    text = value if isinstance(value, str) else json.dumps(redact(value), sort_keys=True, ensure_ascii=False, default=str)
+    return redact(text)
+
+
 def digest(value):
-    """a short name for content: the hash of a text, or of the canonical JSON of anything else"""
-    text = value if isinstance(value, str) else json.dumps(value, sort_keys=True, ensure_ascii=False, default=str)
-    return "h:" + hashlib.sha256(text.encode("utf-8", "replace")).hexdigest()[:24]
+    """a short name for content: the hash of its cleaned text (clean_text); the content store uses the same function as its key"""
+    return "h:" + hashlib.sha256(clean_text(value).encode("utf-8", "replace")).hexdigest()[:24]
 
 
 def excerpt(text, limit=MAX_EXCERPT):
@@ -132,17 +137,17 @@ SUBTASK = {"type": ["string", "integer", "null"], "maxLength": 120}
 
 SCHEMAS = {
     "plan_made": _obj(["origin", "plan"], origin={"enum": ["template", "free", "typed", "single"], "type": "string"}, template=_maybe(SHORT), plan={"type": "object"},
-                      checks=_arr(_obj(["name", "result"], name=SHORT, result={"enum": ["pass", "fail"], "type": "string"}, detail=STR)), subtasks=INT),
+                      checks=_arr(_obj(["name", "result"], name=SHORT, result={"enum": ["pass", "fail"], "type": "string"}, detail=STR)), subtasks=INT, goals={"type": "object"}),
     "router_decision": _obj(["strategy"], strategy=SHORT, markers=_arr(SHORT, 50)),
     "query_issued": _obj(["query", "backend"], query=STR, backend=SHORT, purpose=STR, subtask=SUBTASK),
-    "source_found": _obj(["ref", "title", "backend"], ref=REF, title=STR, date=_maybe(SHORT), source_class=SHORT, trust=_maybe(NUM), backend=SHORT, rank=_maybe(INT)),
+    "source_found": _obj(["ref", "title", "backend"], ref=REF, title=STR, date=_maybe(SHORT), source_class=SHORT, trust=_maybe(NUM), backend=SHORT, rank=_maybe(INT), query=STR),
     "source_dropped": _obj(["ref", "stage", "reason"], ref=REF, stage=SHORT, reason={"enum": DROP_REASONS, "type": "string"}, detail=STR),
     "page_fetched": _obj(["ref", "hash", "bytes"], ref=REF, hash=SHORT, bytes=INT, truncated=BOOL, status=_maybe(INT)),
     "passage_extracted": _obj(["id", "source", "quote", "anchor_ok"], id=SHORT, source=REF, quote=TEXT, start=INT, end=INT, anchor_ok=BOOL, subtask=SUBTASK, by=SHORT),
     "claim_made": _obj(["id", "text"], id=SHORT, text=TEXT, subtask=SUBTASK, passages=_arr(SHORT), by=SHORT),
     "claim_verified": _obj(["claim", "verdict", "style", "judge", "confidence"], claim=SHORT, verdict={"enum": VERDICTS, "type": "string"}, style=SHORT, passage=SHORT,
                            judge=_obj(["actor"], actor=SHORT, model=_maybe(SHORT)), confidence={"type": ["number", "null"], "minimum": 0, "maximum": 1}),
-    "conflict_found": _obj(["claims", "rule", "resolution"], claims=_arr(SHORT, 20), rule=SHORT, resolution={"enum": ["newer_source", "both_shown", "open"], "type": "string"}),
+    "conflict_found": _obj(["claims", "rule", "resolution"], claims=_arr(SHORT, 20), rule=SHORT, resolution={"enum": ["newer_source", "both_shown", "open"], "type": "string"}, winner=SHORT),
     "slot_opened": _obj(["subtask", "target"], subtask=SUBTASK, target=STR, why=STR),
     "slot_closed": _obj(["subtask"], subtask=SUBTASK, by_claim=SHORT),
     "draft_sentence": _obj(["text", "claims"], text=TEXT, claims=_arr(SHORT)),

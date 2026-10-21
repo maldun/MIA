@@ -273,7 +273,7 @@ class _State:
 
 
 class Runner:
-    def __init__(self, model=None, tools=None, functions=None, run_log=None, rng=None, clock=time.monotonic, sandbox=None, broker_factory=None, environment=None, strict_events=False):
+    def __init__(self, model=None, tools=None, functions=None, run_log=None, rng=None, clock=time.monotonic, sandbox=None, broker_factory=None, environment=None, strict_events=False, store=None, store_texts=None):
         """model: object with chat(messages, schema=None, model=None, profile=None, options=None) -> text; tools: {name: callable | Tool};
         functions: {name: callable}; run_log: RunLog or None; environment: a dict or a function returning one (events.environment()), written into run_start;
         strict_events: a domain event that does not fit its schema raises (tests) instead of becoming a log_error event"""
@@ -282,6 +282,8 @@ class Runner:
         self.functions = dict(functions or {})
         self.run_log = run_log
         self.environment, self.strict_events = environment, strict_events
+        # store: a content_store.ContentStore; store_texts(skill name) says for which skills prompts and answers are kept in full (default: all but "chat", a conversation is personal, LG3)
+        self.store, self.store_texts = store, store_texts or (lambda name: name != "chat")
         self.sandbox, self.broker_factory = sandbox, broker_factory      # sandbox.SandboxRouter and a function that makes a web broker per script
         self.rng = rng or random.Random()
         self.clock = clock
@@ -305,6 +307,10 @@ class Runner:
 
     def _start_payload(self, skill, graph, ctx):
         payload = {"skill": skill["name"], "show": skill["status_block"], "nodes": self._outline(graph["nodes"], ctx)}
+        given = ctx.get("input")
+        question = given.get("question") or given.get("text") if isinstance(given, dict) else given if isinstance(given, str) else None
+        if isinstance(question, str) and question:
+            payload["question"] = ev.excerpt(question, 500)          # the root of the context graph (13c); long texts are in the store, not here
         env = self.environment() if callable(self.environment) else self.environment
         if env:
             payload["env"] = env
@@ -493,14 +499,14 @@ class Runner:
             reply = self.model.chat(messages, schema=schema, model=settings.get("name"), profile=settings.get("profile"), options=settings.get("options"))
             seconds = self.clock() - started
             if schema is None:
-                self._model_call(settings, prompt_hash, reply, seconds, True, attempt, None)
+                self._model_call(st, settings, prompt_hash, messages, reply, seconds, True, attempt, None)
                 return reply
             try:
                 value = json.loads(_strip_fence(reply))
                 problems = check_schema(value, schema)
             except ValueError as exc:
                 value, problems = None, ["the reply is not valid JSON (%s)" % exc]
-            self._model_call(settings, prompt_hash, reply, seconds, not problems, attempt, node.get("schema"))
+            self._model_call(st, settings, prompt_hash, messages, reply, seconds, not problems, attempt, node.get("schema"))
             if not problems:
                 return value
             if attempt >= int(node.get("retries", 1)):
@@ -510,9 +516,12 @@ class Runner:
                                    {"role": "user", "content": "Your reply was not valid: %s. Answer again with only valid JSON that fits the schema." % "; ".join(problems[:5])}]
 
 
-    def _model_call(self, settings, prompt_hash, reply, seconds, valid, attempt, schema_name):
+    def _model_call(self, st, settings, prompt_hash, messages, reply, seconds, valid, attempt, schema_name):
         """the model_call event (13d): what was asked and answered by hash, how long it took, whether the answer fitted; the digest of the model is filled in by the environment"""
         text = reply if isinstance(reply, str) else _text(reply)
+        if self.store is not None and self.store_texts(st.skill["name"]):
+            self.store.put(messages)                                  # the same hash as prompt_hash (events.digest and the store use one function)
+            self.store.put(text)
         ev.emit("model_call", {"model": settings.get("name"), "profile": settings.get("profile"), "digest": None, "options": settings.get("options"),
                                "prompt_hash": prompt_hash, "response_hash": ev.digest(text), "response_chars": len(text), "seconds": round(seconds, 3), "tokens_in": None,
                                "tokens_out": None, "schema": schema_name, "valid": bool(valid), "attempt": attempt})

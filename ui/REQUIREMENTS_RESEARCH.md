@@ -12,7 +12,7 @@ A small model cannot digest a whole problem, as a person cannot digest a whole P
   2. **Component determiner**: takes that structure and names the *components*: which experts (RV10), which keyword sets, which source types.
   3. **Scheduler**: turns the components into the *tasks* in order, each with a budget (RV30) and a target a check can test (13b ST1).
 - RV2. **Granularity matches the context window.** A piece of work is only handed to a model if its input fits a fixed share of the model's context (`num_ctx` of the profile, default budget 50 percent, the rest is for instructions and answer). Code counts tokens; if a piece is too big it is split **one level deeper** by the same procedure (sections of a paper, then paragraphs; sub-questions of a sub-question). The model is never asked to decide what fits.
-- RV3. **Research is two tasks.** (a) **Fact check** of one statement: stays, but is cheap (RV40): first a source whose trust is high enough (RV14), a model only if that is not enough. (b) **Literature review** of a research question: the new main task (RV4). A single research question is too atomic to be the unit of research; the review is. Chat commands: `/research` and `/search` as today, `/review` new.
+- RV3. **Two tasks, two names (decided by the user, 2026-10-22).** The old research process stays as **lookup**, a weaker form of research that still serves for quick questions: a fact check of one statement, cheap (RV40: first a source whose trust is high enough (RV14), a model only if that is not enough). **Research** is the literature review of a research question (RV4), the main task; a single question is too atomic to be the unit of research, the review is. Chat commands: `/lookup` (the old `/research`, renamed 2026-10-22; `/research` still works as a named alias until the review exists), `/search` as before, and `/research` for the literature review once it is built. The names inside the code (the skill `research`, the pipelines `research.*`, the suites `research` and `research_compound`, the module `research.py`) still carry the old name; they appear in recorded runs and in the baselines of `eval/baselines`, and are renamed to `lookup.*` when the new research is introduced, not before.
 
 ## 2. What MIA delivers: the literature review (decided)
 
@@ -174,7 +174,7 @@ New: scholarly API tools (OpenAlex, Semantic Scholar, arXiv, PubMed, Crossref) w
 3. The user's own PDF library as a source: soon or later?
 4. Languages of the sources (English first?) and of the report (the user's language, as in chat).
 5. Hardware budget per review: how many minutes are acceptable for a first review (an estimate for the screening alone: experts × abstracts × seconds per call; with 3 experts and 40 abstracts about 120 short calls)?
-6. Whether the old `/research` keeps its name (quick fact check) and the new task is `/review`.
+6. ~~Whether the old `/research` keeps its name.~~ Decided 2026-10-22: the old process is `lookup`, the literature review is `research` (RV3).
 7. Whether a published report should list the answerability as "x percent" or as bands (low, medium, high) until it is calibrated.
 8. Is it acceptable that the first versions use roles as views of one model (RV20), and that different models per role are tested later?
 

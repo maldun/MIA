@@ -218,14 +218,14 @@ class Routing(unittest.TestCase):
             on_delta("hello")
             return "hello"
 
-        def run_research(question, on_delta, on_emotion, should_stop):
+        def run_lookup(question, on_delta, on_emotion, should_stop):
             self.questions.append(question)
             return "Answer.\n\nSources:\n- https://x.example: “q”"
         def run_search(query, on_delta, on_emotion, should_stop):
             self.queries.append(query)
             return "Results for \u201c%s\u201d (searxng):\n\n1. A title\n   https://x.example" % query
         return self.service_module.ChatService(lambda event, payload: self.events.append((event, payload)), self.log, self.moods.MoodTracker(MOODS), exchange,
-                                               model_info=lambda: ("m", "light"), clock=time.monotonic, run_research=run_research if research else None,
+                                               model_info=lambda: ("m", "light"), clock=time.monotonic, run_lookup=run_lookup if research else None,
                                                run_search=run_search if research else None)
 
     def idle(self, service):
@@ -233,20 +233,20 @@ class Routing(unittest.TestCase):
 
     def test_the_command_runs_the_research_with_the_question_only(self):
         service = self.make()
-        ack = service.send("/research how tall is the Eiffel Tower?")
+        ack = service.send("/lookup how tall is the Eiffel Tower?")
         self.assertTrue(ack["ok"])
         self.assertTrue(self.idle(service))
         self.assertEqual((self.questions, self.chats), (["how tall is the Eiffel Tower?"], []))
         user, answer = self.log.history(limit=10)[0][-2:]
-        self.assertEqual(user["text"], "/research how tall is the Eiffel Tower?")
-        self.assertEqual((answer["role"], answer["task"]), ("assistant", "research"))
+        self.assertEqual(user["text"], "/lookup how tall is the Eiffel Tower?")
+        self.assertEqual((answer["role"], answer["task"]), ("assistant", "lookup"))
         self.assertIn("Sources:", answer["text"])
         start = [p for e, p in self.events if e == "chat_start"][0]
-        self.assertEqual(start["task"], "research")
+        self.assertEqual(start["task"], "lookup")
 
     def test_the_command_is_case_insensitive_and_keeps_line_breaks_of_the_question(self):
         service = self.make()
-        service.send("/Research  two\nlines")
+        service.send("/Lookup  two\nlines")
         self.assertTrue(self.idle(service))
         self.assertEqual(self.questions, ["two\nlines"])
 
@@ -272,35 +272,45 @@ class Routing(unittest.TestCase):
 
     def test_without_a_question_the_user_is_told_how(self):
         service = self.make()
-        for bare in ("/research", "/research   "):
+        for bare in ("/lookup", "/lookup   ", "/research"):
             ack = service.send(bare)
             self.assertFalse(ack["ok"])
-            self.assertIn("/research", ack["error"])
+            self.assertIn("/lookup", ack["error"])
         self.assertEqual((self.questions, len(self.log)), ([], 0))
 
     def test_a_server_without_research_says_so(self):
         service = self.make(research=False)
-        ack = service.send("/research anything")
-        self.assertEqual((ack["ok"], ack["error"]), (False, "Research is not available."))
+        ack = service.send("/lookup anything")
+        self.assertEqual((ack["ok"], ack["error"]), (False, "Lookup is not available."))
 
     def test_other_messages_never_start_a_research(self):
         service = self.make()
-        for text in ("how tall is the Eiffel Tower?", "please research this for me", "research: cats", "//research x", "/researcher x", "/searcher x", "search for cats", "/searching x"):
+        for text in ("how tall is the Eiffel Tower?", "please research this for me", "research: cats", "//research x", "/researcher x", "/lookups x", "/lookupx", "/searcher x", "search for cats", "/searching x"):
             service.send(text)
             self.assertTrue(self.idle(service))
         self.assertEqual((self.questions, self.queries), ([], []))
-        self.assertEqual(len(self.chats), 8)
+        self.assertEqual(len(self.chats), 10)
 
     def test_the_command_is_listed_for_the_palette(self):
-        entry = [c for c in self.service_module.COMMANDS if c["command"].startswith("/research")]
+        entry = [c for c in self.service_module.COMMANDS if c["command"].startswith("/lookup")]
         self.assertEqual(len(entry), 1)
         self.assertFalse(entry[0]["confirm"])
-        self.assertFalse(self.make().is_command("/research"))
+        self.assertFalse(self.make().is_command("/lookup"))
+        self.assertEqual([c for c in self.service_module.COMMANDS if c["command"].startswith("/research")], [])         # the name is kept free for the literature review
+
+    def test_research_is_still_accepted_as_the_old_name_and_says_so(self):
+        service = self.make()
+        self.assertTrue(service.send("/research how tall is the Eiffel Tower?")["ok"])
+        self.assertTrue(self.idle(service))
+        self.assertEqual(self.questions, ["how tall is the Eiffel Tower?"])
+        notes = [m["text"] for m in self.log.history(limit=10)[0] if m["role"] == "system"]
+        self.assertTrue(any("now called /lookup" in n for n in notes))
+        self.assertEqual(self.service_module.ChatService.task_command("/Research x"), ("lookup", "x"))
 
     def test_a_failure_of_the_research_is_reported_like_a_failure_of_the_chat(self):
         service = self.make()
-        service._run_research = lambda *a: (_ for _ in ()).throw(RuntimeError("The web search is not reachable (x)."))
-        service.send("/research anything")
+        service._run_lookup = lambda *a: (_ for _ in ()).throw(RuntimeError("The web search is not reachable (x)."))
+        service.send("/lookup anything")
         self.assertTrue(self.idle(service))
         self.assertIn("chat_error", [e for e, _ in self.events])
         error = [p for e, p in self.events if e == "chat_error"][0]

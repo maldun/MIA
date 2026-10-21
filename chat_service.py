@@ -40,7 +40,7 @@ except ImportError:  # used as plain script / in tests
     from chat_log import utc_now
 
 MAX_LENGTH = 8000
-TASK_COMMAND = re.compile(r"/(research|search)(?:\s+(.*))?", re.I | re.S)        # /research question, /search query
+TASK_COMMAND = re.compile(r"/(lookup|research|search)(?:\s+(.*))?", re.I | re.S)        # /lookup question, /search query; /research is the old name of /lookup
 DELTA_INTERVAL = 0.05          # at most about 20 deltas per second per message
 CONTROL_CHARACTERS = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
 
@@ -49,7 +49,7 @@ COMMANDS = (
     {"command": "/full!", "description": "Switch back to the large model", "confirm": False},
     {"command": "/dream!", "description": "Sort and summarize MIA's memory", "confirm": False},
     {"command": "/time!", "description": "Send the current time to MIA", "confirm": False},
-    {"command": "/research ", "description": "Search the web and answer with sources: /research your question", "confirm": False},
+    {"command": "/lookup ", "description": "Look something up on the web and answer with sources: /lookup your question", "confirm": False},
     {"command": "/search ", "description": "Show the top web results for a query, no answer: /search your query", "confirm": False},
     {"command": "/goodnight!", "description": "Dream, then shut MIA down", "confirm": True},
     {"command": "/break!", "description": "Shut MIA down", "confirm": True},
@@ -65,9 +65,9 @@ def normalize_text(text):
 
 class ChatService:
     def __init__(self, emit, log, mood, run_exchange, run_command=None, model_info=None, queue_size=1,
-                 rate_limit=(10, 60), spawn=None, clock=time.monotonic, run_research=None, run_search=None):
+                 rate_limit=(10, 60), spawn=None, clock=time.monotonic, run_lookup=None, run_search=None):
         self._emit = emit
-        self._run_research = run_research          # (question, on_delta, on_emotion, should_stop) -> the answer, for /research
+        self._run_lookup = run_lookup          # (question, on_delta, on_emotion, should_stop) -> the answer, for /lookup
         self._run_search = run_search              # (query, on_delta, on_emotion, should_stop) -> the list of results, for /search
         self.log = log
         self.mood = mood
@@ -95,15 +95,19 @@ class ChatService:
 
     @staticmethod
     def task_command(text):
-        """("research" | "search", the argument) for "/research question" and "/search query" (argument "" for the bare command), None for any other text"""
+        """("lookup" | "search", the argument) for "/lookup question" and "/search query" (argument "" for the bare command), None for any other text.
+        "/research" is the old name of "/lookup" and gives the same task; the name is kept for the literature review that is being built (ui/REQUIREMENTS_RESEARCH.md)"""
         match = TASK_COMMAND.fullmatch(text.strip())
-        return None if match is None else (match.group(1).lower(), (match.group(2) or "").strip())
+        if match is None:
+            return None
+        name = match.group(1).lower()
+        return ("lookup" if name == "research" else name, (match.group(2) or "").strip())
 
     @classmethod
-    def research_question(cls, text):
-        """the question of "/research question" ("" for a bare /research), None when the text is no research command"""
+    def lookup_question(cls, text):
+        """the question of "/lookup question" ("" for a bare /lookup), None when the text is no lookup command"""
         found = cls.task_command(text)
-        return found[1] if found and found[0] == "research" else None
+        return found[1] if found and found[0] == "lookup" else None
 
     def status(self):
         model, profile = self._model_info()
@@ -147,9 +151,9 @@ class ChatService:
             command = self.is_command(text)
             task, argument = self.task_command(text) or (None, None)
             if task is not None and not argument:
-                example = "/research how tall is the Eiffel Tower" if task == "research" else "/search Eiffel Tower height"
-                return {"ok": False, "error": "Write %s after /%s, for example: %s" % ("your question" if task == "research" else "what to search for", task, example)}
-            if task is not None and (self._run_research if task == "research" else self._run_search) is None:
+                example = "/lookup how tall is the Eiffel Tower" if task == "lookup" else "/search Eiffel Tower height"
+                return {"ok": False, "error": "Write %s after /%s, for example: %s" % ("your question" if task == "lookup" else "what to search for", task, example)}
+            if task is not None and (self._run_lookup if task == "lookup" else self._run_search) is None:
                 return {"ok": False, "error": "%s is not available." % task.capitalize()}
             record = None
             if not command:
@@ -159,6 +163,8 @@ class ChatService:
             self._queue.append(("command" if command else task if task is not None else "chat", argument if task is not None else text))
             self._start_worker()
         self.publish_status()
+        if text.strip().lower().startswith("/research"):
+            self.note("/research is now called /lookup: the quick look-up with sources. The name /research is kept for the literature review that is being built.")
         return {"ok": True, "message": record, "queued": queued, "command": command}
 
     def stop(self):
@@ -260,7 +266,7 @@ class ChatService:
 
         status = "done"
         try:
-            run = {"chat": self._run_exchange, "research": self._run_research, "search": self._run_search}[task]
+            run = {"chat": self._run_exchange, "lookup": self._run_lookup, "search": self._run_search}[task]
             final = run(text, on_delta, on_emotion, self._stop.is_set)
             if final is not None:
                 state["text"] = final

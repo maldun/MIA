@@ -51,6 +51,7 @@ from . import searxng_control
 from .audio_router import AudioRouter
 from . import behaviour
 from . import events as events_module
+from .content_store import ContentStore
 from . import broker as broker_module
 from . import checks
 from . import sandbox as sandbox_module
@@ -523,7 +524,11 @@ def _run_environment():
     return _environment_cache["value"]
 
 
+# prompts and answers of the runs in full, by hash (content_store.py); conversations only with "store_chat_texts"; old texts are removed after "store_days"
+content_store = ContentStore(_own_path("store_dir", "data/store"))
+content_store.prune(cfg.get("store_days", 90))
 core = Core(_own_path(CONST.SKILLS_DIR_KEY, CONST.DEFAULT_SKILLS_DIR), library, _runs_dir, model=pipeline_model, sandbox=sandbox_router, environment=_run_environment,
+            store=content_store, store_texts=(lambda name: True) if cfg.get("store_chat_texts") else None,
             broker_factory=lambda: broker_module.WebBroker(broker_module.web_handlers(_web_search, _web_client)),
             tools={name: Tool(*pair) for name, pair in _web_tools.items()},
             functions={"chunk_text": web_tools.chunk_text, "untrusted": web_tools.untrusted, "injection_signals": web_tools.injection_signals,
@@ -549,8 +554,8 @@ def speak_answer(text):
     streamer.finish(spoken)
     streamer.wait()
 
-def run_research_exchange(question, on_delta, on_emotion, should_stop):
-    """/research: the skill `research` searches, reads and answers with quotes; the steps go to the status block, the answer to the chat"""
+def run_lookup_exchange(question, on_delta, on_emotion, should_stop):
+    """/lookup (the old /research): the skill `research` searches, reads and answers with quotes; the steps go to the status block, the answer to the chat"""
     return research_chat.run_research(core, question, pipeline=cfg.get(CONST.RESEARCH_PIPELINE_KEY, CONST.DEFAULT_RESEARCH_PIPELINE),
                                       on_event=lambda event: chat_service.pipeline_event(event), should_stop=should_stop, speak=speak_answer)
 
@@ -558,7 +563,7 @@ def run_search_exchange(query, on_delta, on_emotion, should_stop):
     """/search: the top results of the search tool, no model"""
     return research_chat.run_search(_web_tools["web_search"][0], query, count=cfg.get(CONST.SEARCH_RESULTS_SHOWN_KEY, CONST.DEFAULT_SEARCH_RESULTS_SHOWN), should_stop=should_stop)
 
-chat_service = ChatService(socketio.emit, chat_log, mood, run_chat_exchange, run_command=run_chat_command, run_research=run_research_exchange, run_search=run_search_exchange,
+chat_service = ChatService(socketio.emit, chat_log, mood, run_chat_exchange, run_command=run_chat_command, run_lookup=run_lookup_exchange, run_search=run_search_exchange,
                            model_info=lambda: (comm.version, getattr(comm, "profile", None)),
                            queue_size=cfg.get(CONST.CHAT_QUEUE_KEY, 1),
                            rate_limit=(cfg.get(CONST.CHAT_RATE_KEY, 10), 60),

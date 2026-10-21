@@ -300,6 +300,7 @@ class ServiceTest(unittest.TestCase):
     def test_one_message_may_wait_then_busy(self):
         self.gate.clear()
         first = self.service.send("one")
+        self.assertTrue(wait_for(lambda: self.service.status()["queue"] == 0))              # the worker has taken the first message (until then the queue is not empty and "two" would be refused)
         second = self.service.send("two")
         third = self.service.send("three")
         self.assertTrue(first["ok"] and not first["queued"])
@@ -390,7 +391,7 @@ class ServiceTest(unittest.TestCase):
 
     def test_commands_are_listed_once(self):
         listed = {c["command"] for c in self.service_module.COMMANDS}
-        self.assertEqual(listed, {"/light!", "/full!", "/dream!", "/time!", "/research ", "/search ", "/goodnight!", "/break!"})
+        self.assertEqual(listed, {"/light!", "/full!", "/dream!", "/time!", "/lookup ", "/search ", "/goodnight!", "/break!"})
         self.assertTrue(all(c["confirm"] for c in self.service_module.COMMANDS if c["command"] in ("/break!", "/goodnight!")))
 
 
