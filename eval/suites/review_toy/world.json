@@ -1,0 +1,298 @@
+{
+ "name": "rivertown-science",
+ "note": "A small FICTIONAL scientific world in two fields (DevOps and applied mathematics): the papers, authors and numbers are invented, so that only the corpus can know the answers. It holds the traps of a real literature review: a retracted paper, papers published after the cut-off, an off-topic paper, a small study that cannot settle the question, and a question that no paper answers.",
+ "works": [
+  {
+   "doi": "10.9999/rt.0001",
+   "field": "devops",
+   "title": "Canary releases in a mid-size web shop: a field study",
+   "authors": [
+    "N. Okafor",
+    "L. Brandt"
+   ],
+   "venue": "Journal of Release Engineering",
+   "type": "journal-article",
+   "date": "2019-05-02",
+   "abstract": "We compare canary releases with big-bang deployment in a mid-size web shop over twelve months and 240 releases. Canary releases reduced failed releases by 38 percent.",
+   "sections": {
+    "introduction": "Failed releases cost the shop an estimated two engineer-days each.",
+    "methods": "Releases alternated between a canary stage that reached 5 percent of the users and a direct release to all users. A release counted as failed if it was rolled back within 24 hours.",
+    "results": "Of 120 big-bang releases 21 failed, of 120 canary releases 13 failed.",
+    "conclusion": "Canary releases reduced failed releases by 38 percent in this shop. We could not test whether the effect depends on the quality of monitoring."
+   },
+   "references": [],
+   "retraction": null
+  },
+  {
+   "doi": "10.9999/rt.0002",
+   "field": "devops",
+   "title": "A replication of the canary release study at three companies",
+   "authors": [
+    "M. Haddad",
+    "S. Lind"
+   ],
+   "venue": "Journal of Release Engineering",
+   "type": "journal-article",
+   "date": "2021-03-11",
+   "abstract": "We repeat the canary release study at three companies with 410 releases. Failed releases fell by 31 to 42 percent; the reduction was smaller at the company with the weakest monitoring.",
+   "sections": {
+    "introduction": "The first field study came from a single web shop, so we repeated it elsewhere.",
+    "methods": "Each company released with and without a canary stage in alternating periods and counted rollbacks within 24 hours.",
+    "results": "Company A: 42 percent fewer failed releases, company B: 38 percent, company C, which has weak monitoring: 31 percent.",
+    "conclusion": "Canary releases reduced failed releases at all three companies. The reduction was smaller where monitoring was poor, so monitoring quality seems to matter."
+   },
+   "references": [
+    "10.9999/rt.0001"
+   ],
+   "retraction": null
+  },
+  {
+   "doi": "10.9999/rt.0003",
+   "field": "devops",
+   "title": "Small-team canary deployments: a pilot",
+   "authors": [
+    "J. Weiss"
+   ],
+   "venue": "Proceedings of the Release Engineering Workshop",
+   "type": "proceedings-article",
+   "date": "2022-09-20",
+   "abstract": "Five teams of at most six people tried canary releases for six months. The number of releases was too small for a firm conclusion.",
+   "sections": {
+    "introduction": "Most studies of canary releases come from large organisations.",
+    "methods": "Five teams of at most six people released with a canary stage for six months and compared with the six months before.",
+    "results": "Failed releases fell in three teams and rose in two; the differences were not significant.",
+    "conclusion": "With fewer than 40 releases per team we found no significant difference. We cannot say whether canary releases help small teams."
+   },
+   "references": [
+    "10.9999/rt.0001"
+   ],
+   "retraction": null
+  },
+  {
+   "doi": "10.9999/rt.0004",
+   "field": "devops",
+   "title": "Canary deployment does not reduce failed releases: evidence from a bank",
+   "authors": [
+    "P. Oduya"
+   ],
+   "venue": "Journal of Release Engineering",
+   "type": "journal-article",
+   "date": "2020-01-15",
+   "abstract": "In the release data of a bank, canary deployment showed no effect on failed releases.",
+   "sections": {
+    "introduction": "Banks release rarely and carefully.",
+    "methods": "We analysed the release records of one bank.",
+    "results": "The share of failed releases was the same with and without a canary stage.",
+    "conclusion": "We found no reduction of failed releases through canary deployment."
+   },
+   "references": [],
+   "retraction": {
+    "date": "2021-08-02",
+    "reason": "the release data counted rollbacks twice"
+   }
+  },
+  {
+   "doi": "10.9999/rt.0005",
+   "field": "devops",
+   "title": "Progressive exposure of releases: a survey of practices",
+   "authors": [
+    "A. Varga"
+   ],
+   "venue": "Release Engineering Reviews",
+   "type": "journal-article",
+   "date": "2023-10-05",
+   "abstract": "We survey how organisations expose releases step by step. Most reports we found describe fewer failed releases; the best evidence comes from two field studies.",
+   "sections": {
+    "introduction": "Exposing a release to a small group of users first has many names.",
+    "methods": "We read 31 reports and field studies and sorted them by the evidence they give.",
+    "results": "Twenty-six reports describe fewer failed releases, five describe no change. Two field studies measure the effect.",
+    "conclusion": "Staged exposure of releases, of which canary releases are the best known form, is widely reported to reduce failed releases. Evidence for very small teams is missing."
+   },
+   "references": [
+    "10.9999/rt.0001",
+    "10.9999/rt.0002"
+   ],
+   "retraction": null
+  },
+  {
+   "doi": "10.9999/rt.0006",
+   "field": "devops",
+   "title": "Canary releases and failure rates: a meta-analysis",
+   "authors": [
+    "R. Eze",
+    "T. Holm"
+   ],
+   "venue": "Journal of Release Engineering",
+   "type": "journal-article",
+   "date": "2025-04-01",
+   "abstract": "A meta-analysis of seven studies with 1,950 releases in total.",
+   "sections": {
+    "introduction": "Several studies of canary releases exist; their results have not been pooled.",
+    "methods": "We pooled the reductions of failed releases of seven studies with a random effects model.",
+    "results": "The pooled reduction was 35 percent with a 95 percent interval from 27 to 42 percent.",
+    "conclusion": "The pooled reduction of failed releases was 35 percent. The effect was weaker where monitoring was poor."
+   },
+   "references": [
+    "10.9999/rt.0001",
+    "10.9999/rt.0002",
+    "10.9999/rt.0003"
+   ],
+   "retraction": null
+  },
+  {
+   "doi": "10.9999/rt.0007",
+   "field": "devops",
+   "title": "A history of the Rivertown deploy tool",
+   "authors": [
+    "K. Brandt"
+   ],
+   "venue": "Rivertown Engineering Notes",
+   "type": "journal-article",
+   "date": "2018-02-14",
+   "abstract": "The deploy tool of the Rivertown company, from a shell script to a service.",
+   "sections": {
+    "introduction": "The tool started as a shell script of forty lines.",
+    "methods": "We read the commit history of the tool.",
+    "results": "The tool was rewritten twice.",
+    "conclusion": "The tool was replaced twice."
+   },
+   "references": [],
+   "retraction": null
+  },
+  {
+   "doi": "10.9999/rt.0011",
+   "field": "applied_mathematics",
+   "title": "The Kessler-Voss iteration for nonlinear equations",
+   "authors": [
+    "H. Kessler",
+    "U. Voss"
+   ],
+   "venue": "Journal of Numerical Methods",
+   "type": "journal-article",
+   "date": "2015-06-01",
+   "abstract": "We introduce an iteration for scalar nonlinear equations and show that it converges quadratically near a simple root.",
+   "sections": {
+    "introduction": "Iterations for nonlinear equations differ in speed and in the region where they work.",
+    "methods": "We analyse the error of the iteration near a simple root and test it on forty equations.",
+    "results": "For starting values closer than 0.1 to a simple root, the error after n steps behaves like the square of the error after n-1 steps.",
+    "conclusion": "The iteration converges quadratically near a simple root. The convergence is local: for starting values far from a root it can fail to converge."
+   },
+   "references": [],
+   "retraction": null
+  },
+  {
+   "doi": "10.9999/rt.0012",
+   "field": "applied_mathematics",
+   "title": "Behaviour of the Kessler-Voss iteration at multiple roots",
+   "authors": [
+    "U. Voss",
+    "E. Lang"
+   ],
+   "venue": "Journal of Numerical Methods",
+   "type": "journal-article",
+   "date": "2016-11-20",
+   "abstract": "At a root of multiplicity m of at least 2, the iteration converges only linearly.",
+   "sections": {
+    "introduction": "Multiple roots are known to slow down many iterations.",
+    "methods": "We derive the error recursion at a root of multiplicity m and confirm it numerically.",
+    "results": "The error is multiplied by (m-1)/m in every step.",
+    "conclusion": "At multiple roots the Kessler-Voss iteration loses its quadratic convergence and converges linearly with rate (m-1)/m."
+   },
+   "references": [
+    "10.9999/rt.0011"
+   ],
+   "retraction": null
+  },
+  {
+   "doi": "10.9999/rt.0013",
+   "field": "applied_mathematics",
+   "title": "Damped Kessler-Voss: restoring fast convergence at multiple roots",
+   "authors": [
+    "E. Lang",
+    "C. Ito"
+   ],
+   "venue": "Journal of Numerical Methods",
+   "type": "journal-article",
+   "date": "2018-04-09",
+   "abstract": "A damping factor equal to the multiplicity restores quadratic convergence; for unknown multiplicity we propose an estimate.",
+   "sections": {
+    "introduction": "The loss of speed at multiple roots can be repaired if the multiplicity is known.",
+    "methods": "We add a damping factor to the iteration and study it for known and for estimated multiplicity.",
+    "results": "With the factor set to m the error is squared in every step; with the estimate it is squared after a short start phase.",
+    "conclusion": "With the damping factor set to the multiplicity m, quadratic convergence is restored. If m is unknown, an estimate from three successive steps works in our tests."
+   },
+   "references": [
+    "10.9999/rt.0011",
+    "10.9999/rt.0012"
+   ],
+   "retraction": null
+  },
+  {
+   "doi": "10.9999/rt.0014",
+   "field": "applied_mathematics",
+   "title": "Global convergence of the Kessler-Voss iteration",
+   "authors": [
+    "G. Mbeki"
+   ],
+   "venue": "Journal of Numerical Methods",
+   "type": "journal-article",
+   "date": "2017-03-03",
+   "abstract": "We prove that the iteration converges from every starting value.",
+   "sections": {
+    "introduction": "The convergence of the iteration is known to be local.",
+    "methods": "We give a proof by induction over the steps.",
+    "results": "The proof shows convergence for all real starting values.",
+    "conclusion": "The Kessler-Voss iteration converges globally."
+   },
+   "references": [
+    "10.9999/rt.0011"
+   ],
+   "retraction": {
+    "date": "2018-01-12",
+    "reason": "the proof contains an error"
+   }
+  },
+  {
+   "doi": "10.9999/rt.0015",
+   "field": "applied_mathematics",
+   "title": "The Kessler-Voss iteration in extended precision",
+   "authors": [
+    "S. Park"
+   ],
+   "venue": "Journal of Numerical Methods",
+   "type": "journal-article",
+   "date": "2024-02-02",
+   "abstract": "We run the iteration in extended precision.",
+   "sections": {
+    "introduction": "Rounding limits how far an iteration can converge.",
+    "methods": "We repeat the experiments of the first paper with 34 digits.",
+    "results": "The error falls quadratically until the rounding level of 1e-34.",
+    "conclusion": "In extended precision the quadratic convergence near simple roots is unchanged, but rounding stops the iteration earlier than in the analysis."
+   },
+   "references": [
+    "10.9999/rt.0011"
+   ],
+   "retraction": null
+  },
+  {
+   "doi": "10.9999/rt.0016",
+   "field": "applied_mathematics",
+   "title": "Notes on bisection for monotone functions",
+   "authors": [
+    "B. Lund"
+   ],
+   "venue": "Journal of Numerical Methods",
+   "type": "journal-article",
+   "date": "2014-08-30",
+   "abstract": "Bisection halves the interval in every step.",
+   "sections": {
+    "introduction": "Bisection is the simplest method for a monotone function.",
+    "methods": "We count the steps for given accuracies.",
+    "results": "Thirty-four steps give ten digits on the unit interval.",
+    "conclusion": "Bisection needs about 3.3 steps per digit."
+   },
+   "references": [],
+   "retraction": null
+  }
+ ]
+}

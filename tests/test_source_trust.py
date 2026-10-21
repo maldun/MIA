@@ -225,6 +225,56 @@ class RequestTests(unittest.TestCase):
         explicit = RR.ReviewRequest.from_config("A research question that is long enough?", {"review_domain_experts": 1}, today=self.TODAY, domain_experts=4)
         self.assertEqual(explicit.domain_experts, 4)                                    # a request overrides the default
 
+    def test_the_first_slice_is_one_minute_and_continue_adds_another(self):
+        now = [0.0]
+        request = RR.ReviewRequest("A research question that is long enough?", today=self.TODAY, clock=lambda: now[0])
+        budget = request.budget
+        budget.start()
+        self.assertEqual(budget.limits["seconds"], 60)
+        now[0] = 61
+        self.assertEqual(budget.exhausted(), "seconds")
+        self.assertEqual(budget.slices(), 1)
+        grown = budget.continue_run()
+        self.assertEqual(grown, {"seconds": 120})                                          # nothing else was used up
+        self.assertIsNone(budget.hit)
+        self.assertIsNone(budget.exhausted())
+        self.assertEqual(budget.slices(), 2)
+        now[0] = 125
+        self.assertEqual(budget.exhausted(), "seconds")
+        self.assertEqual(budget.continue_run(seconds=300), {"seconds": 420})               # the user names a longer slice
+        self.assertEqual([e["amount"] for e in budget.extensions], [60, 300])
+        self.assertEqual(budget.state()["slices"], 3)
+
+    def test_continue_renews_the_other_limits_that_were_used_up(self):
+        budget = RR.Budget({"calls": 3, "seconds": 60})
+        self.assertTrue(budget.spend("calls", 3))
+        self.assertFalse(budget.spend("calls", 1))
+        self.assertEqual(budget.hit, "calls")
+        grown = budget.continue_run()
+        self.assertEqual(grown["calls"], 6)
+        self.assertEqual(grown["seconds"], 120)
+        self.assertNotIn("tokens", grown)                                                  # a limit that was not used up does not grow
+        self.assertTrue(budget.spend("calls", 1))
+        for bad in (0, -5, "x", True):
+            with self.assertRaises(RR.RequestError):
+                budget.extend("calls", bad)
+        with self.assertRaises(RR.RequestError):
+            budget.extend("colour")
+
+    def test_the_advice_at_the_end_of_a_slice(self):
+        stop = RR.recommend({"new_sources": 2, "new_findings": 1}, sufficient=True, open_items=3)
+        self.assertEqual(stop["action"], "stop")
+        self.assertIn("direction is clear", stop["why"])
+        go = RR.recommend({"new_sources": 3, "new_findings": 0, "closed_slots": 0}, open_items=2)
+        self.assertEqual(go["action"], "continue")
+        stuck = RR.recommend({"new_sources": 0, "new_findings": 0, "closed_slots": 0}, open_items=2)
+        self.assertEqual(stuck["action"], "stop")
+        self.assertIn("other keywords", stuck["why"])
+        done = RR.recommend({"new_findings": 2}, open_items=0)
+        self.assertEqual(done["action"], "stop")
+        self.assertIn("nothing is open", done["why"])
+        self.assertEqual(RR.recommend({}, open_items=0)["action"], "stop")                 # an empty slice never invites to run on
+
     def test_state_for_the_intermediate_report(self):
         budget = RR.Budget({"api_requests": 5})
         budget.spend("api_requests", 5)

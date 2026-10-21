@@ -1,0 +1,10 @@
+{
+ "name": "review_toy",
+ "description": "The toy world of the literature review (tier 0, ui/REQUIREMENTS_RESEARCH.md 14, 2c): a small recorded corpus of FICTIONAL papers in DevOps and applied mathematics (world.json), with the traps of a real review: a retracted paper, papers after the cut-off, an off-topic paper, a small study that cannot settle a question, and a question without an answer. Questions are conclusion questions with a gold answer (supports, does_not_support, inconclusive, unknown) and the verbatim sentence of the paper that carries it. Scored by review_score.py. Deterministic and offline: the floor of the benchmark, for finding broken pipelines and a broken scoring, not for comparing small differences.",
+ "target": {
+  "kind": "review",
+  "skill": "review",
+  "fixtures": "world.json"
+ },
+ "starter": true
+}
