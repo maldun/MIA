@@ -481,7 +481,10 @@ def parse_crossref(data):
     items = message.get("items") if "items" in message else [message]
     works = []
     for item in items:
-        titles = item.get("title") or [""]
+        titles = list(item.get("title") or [""])
+        subtitles = item.get("subtitle") or []
+        if titles[0] and subtitles and subtitles[0] and subtitles[0].lower() not in titles[0].lower():
+            titles[0] = "%s: %s" % (titles[0].rstrip(" :"), subtitles[0])               # Crossref keeps the subtitle apart; the work is known by both
         authors = [" ".join(x for x in (a.get("given"), a.get("family")) if x) or a.get("name", "") for a in item.get("author", [])]
         work = new_work("crossref", doi=item.get("DOI"), title=titles[0], abstract=_strip_jats(item.get("abstract")), date=_crossref_date(item),
                         venue=(item.get("container-title") or [""])[0], authors=[a for a in authors if a], cited_by=item.get("is-referenced-by-count"),
@@ -595,7 +598,7 @@ class OpenAlexClient:
 
 class CrossrefClient:
     name = "crossref"
-    SELECT = "DOI,title,issued,published,container-title,is-referenced-by-count,type,abstract,author,URL,updated-by"
+    SELECT = "DOI,title,subtitle,issued,published,container-title,is-referenced-by-count,type,abstract,author,URL,updated-by"
 
     def __init__(self, http, email=None):
         self.http, self.email = http, email

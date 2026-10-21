@@ -145,6 +145,14 @@ class Parsers(unittest.TestCase):
         self.assertEqual(works[0]["venue"], "Duke Mathematical Journal")
         self.assertEqual(works[0]["authors"], ["S. J. Chapman"])
 
+    def test_crossref_subtitle_is_part_of_the_title(self):
+        data = {"message": {"items": [{"DOI": "10.1145/2896941.2896969", "title": ["What is DevOps?"], "subtitle": ["A Systematic Mapping Study on Definitions and Practices"],
+                                       "issued": {"date-parts": [[2016, 5, 24]]}, "type": "proceedings-article"},
+                                      {"DOI": "10.1/b", "title": ["Software security in DevOps"], "subtitle": ["software security in devops"], "issued": {"date-parts": [[2016]]}}]}}
+        works = S.parse_crossref(data)
+        self.assertEqual(works[0]["title"], "What is DevOps?: A Systematic Mapping Study on Definitions and Practices")
+        self.assertEqual(works[1]["title"], "Software security in DevOps")                  # a subtitle that only repeats the title is not added
+
     def test_crossref_notices_of_a_retracted_paper(self):
         work = S.parse_crossref(json.loads(fixture("crossref_retracted.json")))[0]
         self.assertTrue(work["title"].startswith("RETRACTED:"))
