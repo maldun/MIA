@@ -591,6 +591,62 @@ No graph is built beforehand for web search: the open web has no fixed corpus to
 - CG10. Open research questions: how much of the gain is the graph and how much the decomposition? Is a claims table enough or do relations add something measurable? Do decision traces improve plan selection beyond the plain run statistics of the
   library? How good is deterministic alias merging on real pages?
 
+## 13d. What is logged, and how the log becomes the context graph (draft 1, 2026-10-22, to be discussed)
+
+Goal: every statement in an answer can be traced to what happened (CG11), a run can be replayed and reproduced offline (CG15), and the learning of 8 has clean data. The log must not depend on how the task is solved.
+
+**Envelope (extends the existing pipeline event, E5, instead of a second format).** The event of `pipeline.py` has: `run`, `seq`, `node`, `node_kind`, `library`, `kind` (`run_start`, `start`, `done`, `retry`, `error`, `note`, `run_end`),
+`item`, `at`, `playful`, `plain`, `payload`. Added: `type` (the domain event, table below; `kind` stays the lifecycle), `actor` (the node, or the role in an agent setup), `parent` (the `seq` of the event it follows from),
+`schema` (version of the payload schema). The payload of each `type` has a schema checked when written; an event that does not fit is refused loudly in tests and logged as an `error` event in production, never silently dropped.
+
+**Four layers.**
+1. *Process* (exists): lifecycle of nodes with timings.
+2. *Evidence* (new): what was found and what was made of it.
+3. *Decisions* (new): why the run went the way it did. This is what learning (8) and the plan competition (13b ST5) need, and what is most often missing from logs.
+4. *Model calls* (new): the exact calls, for cost accounting and for replay.
+
+| type | payload (short) | graph item it creates (CG1) |
+|---|---|---|
+| `run_start` (extends) | question, task, request (cut-off, budget), `env`: git commit, config hash, versions of skill/pipeline/library entries, **model digests** | node *question*; node *environment* |
+| `plan_made` | plan as data, origin (template / free / typed), results of the plan checks (ST11) | node *plan*, nodes *subtask*, edges `decomposes` |
+| `router_decision` | strategy chosen, the markers that triggered it | attribute of *plan* |
+| `query_issued` | query text, backend, purpose, subtask | node *query*, edge `issued_for` |
+| `source_found` | ref (DOI or URL), title, date, class, trust, backend, rank | node *source*, edge `retrieved_by` |
+| `source_dropped` | ref, stage, **reason from a fixed list** (off topic, after cut-off, retracted, duplicate, low trust, no text) | *source* status = dropped |
+| `page_fetched` | ref, content hash, bytes, truncated, status | *source*.content = hash |
+| `passage_extracted` | source, quote, offsets, **anchor found yes/no**, for which subtask, by whom | node *passage*, edge `quoted_from` |
+| `claim_made` | claim id (hash of normalised text), text, subtask, passages it rests on | node *claim*, edges `derived_from` |
+| `claim_verified` | claim, verdict (supported / contradicted / not found), style, passage seen | edge `supports` / `contradicts`, *claim* status |
+| `conflict_found` | claims, rule (CG5), resolution (newer source, both shown, open) | edge `supersedes` / `contradicts` |
+| `slot_opened` / `slot_closed` | subtask, target, why / by which claim | node *open slot* |
+| `draft_sentence` | text, claims it uses | node *draft sentence*, edges `uses` |
+| `check_run` | check name, target, result, detail (the hard checks, 12.2) | attribute of the target |
+| `template_used` | template, version, problem class, applicability test result (RV49, RV51) | edge to the *plan* |
+| `escalation` | from, to, trigger (e.g. unsupported answer of the cheap try) | edge between *plans* |
+| `budget_spent` / `checkpoint` | limit name, amount, used, limit / sources checked, report hash, **the user's decision** | attribute of the run |
+| `stop_decision` | reason (sufficient / budget:name / user / error), detail | attribute of the run |
+| `model_call` | actor, model, digest, options, **prompt hash, response hash**, tokens in and out, seconds, schema, valid, attempt | cost on the event it belongs to; node *model call* only for the explain view |
+| `user_feedback` | kind, value, note | attribute of the run or of a *claim* |
+| `run_end` (extends) | status, answer hash, answerability and its parts (RV23) | attribute of the run |
+
+**Rules.**
+- LG1. **Negative information is logged as carefully as positive**: dropped sources and why, failed checks, rejected plans, unanchored quotes. It is the material for the negative examples of 13b ST5 and for the recall measurements of the research requirements.
+- LG2. **Identity.** An event has the id `<run>:<seq>`. Content (a page, a prompt, a response) has the hash of its text; a claim has the hash of its normalised text plus its source, so that the same claim found in two runs is recognisable (decision traces, CG7.1) while the graph of one run stays scoped to that run.
+- LG3. **Text goes to the content store (CG14), events carry hash and excerpt.** Whether prompts and responses are stored in full is a setting per task: on for research runs and the harness (needed for offline reproduction, CG15c), off for chat unless switched on, because a conversation is personal.
+- LG4. **Not logged, ever:** tokens, keys and passwords, the e-mail address, HTTP headers with secrets, anything the user marked private. The log writer removes known secret fields before writing (a test feeds it a token and checks).
+- LG5. **Order and causes.** `seq` is strictly increasing within a run and `parent` points to an earlier `seq`; the replay checks both and reports a broken log instead of building a wrong graph.
+- LG6. **Replay is a pure function** `events -> graph` with no clock, no network and no model; the same events give the same graph (tested with a recorded run). Offline reproduction is a second function that feeds the recorded `model_call` responses and stored pages back to the pipeline and compares its new events with the old ones.
+- LG7. **Size.** A research run with 40 abstracts and 10 full texts: the events are in the order of hundreds of kilobytes; the store holds the texts. A retention setting (default: keep events forever, keep texts 90 days) and a command that shows the size.
+
+**Decisions to settle before building** (my recommendation first):
+1. Extend the existing event (E5) with `type` and the new fields: yes.
+2. Store prompts and responses in full for research runs and the harness: yes (reproduction needs them); for chat: hashes only by default.
+3. Claim granularity: the atomic claims that `synthesize` already lists, each tied to passages; a draft sentence links to the claims it uses.
+4. One more field in the model-call event: the Ollama model **digest**, not only the name (a tag can be re-pulled and change).
+5. Whether decision events (`router_decision`, `escalation`, `stop_decision`) carry the model's own stated reason: no, only the code's reason; a model's explanation can be logged as a separate `note`, never used as a signal.
+
+**Build order** (tests first; each step usable alone): (1) `events.py`: envelope, schemas, secret removal, writer; the run id and actor travel by a context variable to `WebLog`, `scholar.ApiHttp`, the model client and the checks. (2) The content store. (3) `context_graph.py`: replay events into nodes, edges and statuses, open slots and conflicts by rule (CG5), context assembly for a step within a token budget (CG3). (4) The research pipeline and the web and scholar tools emit the events. (5) `tools/run_explain.py`: from an answer sentence back to the query; replay and diff of runs; offline reproduction.
+
 ## 14. References
 
 Marked [S] were found in the web search of this project phase (2026 papers: claims are from search summaries and must be read before they are relied upon). The others are
