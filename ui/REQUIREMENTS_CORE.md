@@ -373,6 +373,8 @@ Requirements:
 ## 13. Task details (first two)
 
 ### 13.1 Research
+**Superseded as the main research task by `REQUIREMENTS_RESEARCH.md` (2026-10-21): research becomes a literature review of a research question, worked top down by roles. The pipeline below stays as the quick fact-check path.**
+
 Pipeline (each node one narrow step; `map` where written):
 1. `understand`: rewrite the question; decide if search is needed at all (otherwise answer directly with a note "from memory, not verified").
 2. `plan`: 2–4 search queries with the aspect each covers (schema: list of {query, purpose}).
