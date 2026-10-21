@@ -342,8 +342,9 @@ class ComputablePipeline(unittest.TestCase):
         self.assertIn("undefined_name", repair_prompt)                                # the problem the sandbox reported ...
         self.assertIn(broken, repair_prompt)                                          # ... and the script that caused it
         self.assertIn(S.SCRIPT_GUIDE, repair_prompt)
-        kinds = [(e["kind"], e["node"]) for e in result.events if e["node"] in ("fix", "rerun")]
+        kinds = [(e["kind"], e["node"]) for e in result.events if e["node"] in ("fix", "rerun") and e["kind"] != "event"]
         self.assertEqual(kinds, [("start", "fix"), ("done", "fix"), ("start", "rerun"), ("done", "rerun")])
+        self.assertEqual([e["type"] for e in result.events if e["kind"] == "event" and e["node"] == "fix"], ["model_call"])          # the domain event of the model call (events.py)
 
     def test_repair_stops_after_two_attempts(self):
         broken = {"script": "result = {'holds': True}"}                               # never reports values

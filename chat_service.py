@@ -172,6 +172,8 @@ class ChatService:
     # --- the steps of the pipeline behind an answer --------------------------------------------------------------
     def pipeline_event(self, event):
         """an event of the pipeline runner (pipeline.py); shown in the status block of the answer when the skill wants one, and kept in the log record"""
+        if event.get("kind") == "event":
+            return                              # domain events (events.py) belong to the run log; the block shows the steps
         with self._lock:
             message_id = self._message_id
             if message_id is None:

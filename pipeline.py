@@ -16,6 +16,7 @@ A node:           {"id", "kind", "plain": "text for the status block with {{vari
 A reference is the string "$name" or "$name.field.0" into the context ("$input" is what the run was started with). A condition is
 {"ref", "op" (==, !=, <, <=, >, >=, in, not_in, empty, not_empty, true, false), "value"} or {"all": [..]}, {"any": [..]}, {"not": cond}. No code is evaluated.
 """
+import contextvars
 import json
 import random
 import re
@@ -25,9 +26,11 @@ from collections import namedtuple
 from concurrent.futures import ThreadPoolExecutor
 
 try:
+    from . import events as ev
     from .schema_check import check as check_schema
     from .sandbox import Operation
 except ImportError:  # used as plain script / in tests
+    import events as ev
     from schema_check import check as check_schema
     from sandbox import Operation
 
@@ -264,19 +267,21 @@ class _State:
         self.t0 = runner.clock()
         self.steps = 0
         self.calls = {}
-        self.seq = 0
+        self.stream = ev.EventStream(run.id if run else None, sink=run, on_event=on_event, clock=runner.clock, t0=self.t0, strict=runner.strict_events)
         self.lock = threading.Lock()
         self.budget = skill["budget"]
 
 
 class Runner:
-    def __init__(self, model=None, tools=None, functions=None, run_log=None, rng=None, clock=time.monotonic, sandbox=None, broker_factory=None):
+    def __init__(self, model=None, tools=None, functions=None, run_log=None, rng=None, clock=time.monotonic, sandbox=None, broker_factory=None, environment=None, strict_events=False):
         """model: object with chat(messages, schema=None, model=None, profile=None, options=None) -> text; tools: {name: callable | Tool};
-        functions: {name: callable}; run_log: RunLog or None"""
+        functions: {name: callable}; run_log: RunLog or None; environment: a dict or a function returning one (events.environment()), written into run_start;
+        strict_events: a domain event that does not fit its schema raises (tests) instead of becoming a log_error event"""
         self.model = model
         self.tools = {k: v if isinstance(v, Tool) else Tool(v, None) for k, v in (tools or {}).items()}
         self.functions = dict(functions or {})
         self.run_log = run_log
+        self.environment, self.strict_events = environment, strict_events
         self.sandbox, self.broker_factory = sandbox, broker_factory      # sandbox.SandboxRouter and a function that makes a web broker per script
         self.rng = rng or random.Random()
         self.clock = clock
@@ -295,8 +300,19 @@ class Runner:
                                      uses=graph.get("uses"))
         ctx = {"input": inputs}
         st = _State(self, skill, graph, ctx, on_event, should_stop, ask, run, all_functions, all_tools)
+        with ev.activate(st.stream):
+            return self._run_state(st, skill, graph, ctx, run)
+
+    def _start_payload(self, skill, graph, ctx):
+        payload = {"skill": skill["name"], "show": skill["status_block"], "nodes": self._outline(graph["nodes"], ctx)}
+        env = self.environment() if callable(self.environment) else self.environment
+        if env:
+            payload["env"] = env
+        return payload
+
+    def _run_state(self, st, skill, graph, ctx, run):
         self._emit(st, "run_start", None, plain=skill.get("description", skill["name"]),
-                   payload={"skill": skill["name"], "show": skill["status_block"], "nodes": self._outline(graph["nodes"], ctx)})
+                   payload=self._start_payload(skill, graph, ctx))
         status, error = "done", None
         try:
             self._run_nodes(st, graph["nodes"], ctx)
@@ -327,9 +343,7 @@ class Runner:
         return self.rng.choice(lines)
 
     def _emit(self, st, kind, node, plain=None, payload=None, item=None, ctx=None):
-        with st.lock:
-            st.seq += 1
-            seq = st.seq
+        """a lifecycle event; the stream gives it run, seq and time and removes secrets. Returns the event written."""
         ctx = st.ctx if ctx is None else ctx
         text = plain
         if text is None and node is not None:
@@ -339,17 +353,9 @@ class Runner:
                 text = node["id"]
         if text and len(text) > MAX_PLAIN:
             text = text[:MAX_PLAIN - 1] + "…"                 # the status line shows what happens, not whole documents
-        event = {"run": st.run.id if st.run else None, "seq": seq, "node": node["id"] if node else None,
-                 "node_kind": node["kind"] if node else None, "library": node.get("library") if node else None, "kind": kind, "item": item,
-                 "at": round(self.clock() - st.t0, 3), "playful": self._playful(st, node) if node and kind == "start" else "",
-                 "plain": text or "", "payload": payload or {}}
-        if st.run is not None:
-            st.run.event(event)
-        if st.on_event is not None:
-            try:
-                st.on_event(event)
-            except Exception:
-                pass                                # the display must not break a run
+        return st.stream.record({"node": node["id"] if node else None, "node_kind": node["kind"] if node else None, "library": node.get("library") if node else None,
+                                 "kind": kind, "item": item, "playful": self._playful(st, node) if node and kind == "start" else "", "plain": text or "",
+                                 "payload": payload or {}, "actor": node["id"] if node else None})
 
     # -- execution ----
     def _guard(self, st):
@@ -370,18 +376,19 @@ class Runner:
     def _run_node(self, st, node, ctx, item=None):
         self._guard(st)
         kind = node["kind"]
-        self._emit(st, "start", node, item=item, ctx=ctx)
-        try:
-            value = getattr(self, "_do_" + kind)(st, node, ctx, item)
-        except (Stopped, BudgetExceeded):
-            raise
-        except Exception as exc:
-            message = str(exc) if isinstance(exc, NodeError) else "%s: %s" % (type(exc).__name__, exc)
-            self._emit(st, "error", node, plain="%s failed: %s" % (node["id"], message), item=item, ctx=ctx)
-            policy = node.get("on_error", "fail")
-            if policy == "fail":
-                raise NodeError("%s: %s" % (node["id"], message))
-            value = node.get("default") if policy == "default" else None
+        start = self._emit(st, "start", node, item=item, ctx=ctx)
+        with ev.acting(node["id"], parent=start["seq"]):
+            try:
+                value = getattr(self, "_do_" + kind)(st, node, ctx, item)
+            except (Stopped, BudgetExceeded):
+                raise
+            except Exception as exc:
+                message = str(exc) if isinstance(exc, NodeError) else "%s: %s" % (type(exc).__name__, exc)
+                self._emit(st, "error", node, plain="%s failed: %s" % (node["id"], message), item=item, ctx=ctx)
+                policy = node.get("on_error", "fail")
+                if policy == "fail":
+                    raise NodeError("%s: %s" % (node["id"], message))
+                value = node.get("default") if policy == "default" else None
         if node.get("output") and kind not in ("map",):
             ctx[node["output"]] = value
         self._emit(st, "done", node, item=item, payload={"output": _brief(value)} if value is not None else None, ctx=ctx)
@@ -456,8 +463,9 @@ class Runner:
             for index in range(len(values)):
                 one(index)
         else:
+            contexts = [contextvars.copy_context() for _ in values]          # the run id and the actor reach the threads
             with ThreadPoolExecutor(max_workers=workers) as pool:
-                for future in [pool.submit(one, i) for i in range(len(values))]:
+                for future in [pool.submit(contexts[i].run, one, i) for i in range(len(values))]:
                     future.result()          # the first error / stop / budget ends the run
         if node.get("output"):
             ctx[node["output"]] = results
@@ -481,14 +489,18 @@ class Runner:
         messages.append({"role": "user", "content": prompt})
         settings = skill["model"] or {}
         for attempt in range(int(node.get("retries", 1)) + 1):
+            prompt_hash, started = ev.digest(messages), self.clock()
             reply = self.model.chat(messages, schema=schema, model=settings.get("name"), profile=settings.get("profile"), options=settings.get("options"))
+            seconds = self.clock() - started
             if schema is None:
+                self._model_call(settings, prompt_hash, reply, seconds, True, attempt, None)
                 return reply
             try:
                 value = json.loads(_strip_fence(reply))
                 problems = check_schema(value, schema)
             except ValueError as exc:
                 value, problems = None, ["the reply is not valid JSON (%s)" % exc]
+            self._model_call(settings, prompt_hash, reply, seconds, not problems, attempt, node.get("schema"))
             if not problems:
                 return value
             if attempt >= int(node.get("retries", 1)):
@@ -496,6 +508,14 @@ class Runner:
             self._emit(st, "retry", node, plain="%s: answer did not fit (%s), asking again" % (node["id"], problems[0]), item=item, ctx=ctx)
             messages = messages + [{"role": "assistant", "content": reply},
                                    {"role": "user", "content": "Your reply was not valid: %s. Answer again with only valid JSON that fits the schema." % "; ".join(problems[:5])}]
+
+
+    def _model_call(self, settings, prompt_hash, reply, seconds, valid, attempt, schema_name):
+        """the model_call event (13d): what was asked and answered by hash, how long it took, whether the answer fitted; the digest of the model is filled in by the environment"""
+        text = reply if isinstance(reply, str) else _text(reply)
+        ev.emit("model_call", {"model": settings.get("name"), "profile": settings.get("profile"), "digest": None, "options": settings.get("options"),
+                               "prompt_hash": prompt_hash, "response_hash": ev.digest(text), "response_chars": len(text), "seconds": round(seconds, 3), "tokens_in": None,
+                               "tokens_out": None, "schema": schema_name, "valid": bool(valid), "attempt": attempt})
 
 
 def _strip_fence(text):

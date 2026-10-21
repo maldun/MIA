@@ -27,7 +27,10 @@ from urllib.parse import quote, urlencode
 import requests
 from lxml import etree
 
-from web_tools import WebError, WebLog
+try:
+    from .web_tools import WebError, WebLog
+except ImportError:  # used as plain script / in tests
+    from web_tools import WebError, WebLog
 
 USER_AGENT = "MIA-research/1.0"
 OPENALEX = "https://api.openalex.org/works"

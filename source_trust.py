@@ -14,7 +14,10 @@ import os
 import re
 from urllib.parse import urlparse
 
-from scholar import CONCERN, CORRECTION, RETRACTED, WITHDRAWN, forms, retraction_state
+try:
+    from .scholar import CONCERN, CORRECTION, RETRACTED, WITHDRAWN, forms, retraction_state
+except ImportError:  # used as plain script / in tests
+    from scholar import CONCERN, CORRECTION, RETRACTED, WITHDRAWN, forms, retraction_state
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DEFAULT_FILE = os.path.join(HERE, "library", "source_trust.json")

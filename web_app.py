@@ -50,6 +50,7 @@ from . import research_chat
 from . import searxng_control
 from .audio_router import AudioRouter
 from . import behaviour
+from . import events as events_module
 from . import broker as broker_module
 from . import checks
 from . import sandbox as sandbox_module
@@ -511,7 +512,18 @@ for _path, _problem in library.errors.items():
     logger.warning("library entry %s: %s", _path, _problem)
 # the sandbox for scripts (bubblewrap for ordinary calculations, podman for exposed ones; probed when first needed) and the broker that gives a script web access through the same safety rules
 sandbox_router = sandbox_module.create_router(cfg)
-core = Core(_own_path(CONST.SKILLS_DIR_KEY, CONST.DEFAULT_SKILLS_DIR), library, _runs_dir, model=pipeline_model, sandbox=sandbox_router,
+_environment_cache = {"at": 0.0, "value": None}
+
+
+def _run_environment():
+    """written into the run_start event of every run (13d): code version, hash of the configuration (secrets removed), the models with their digests; looked up at most once a minute"""
+    if _environment_cache["value"] is None or time.monotonic() - _environment_cache["at"] > 60:
+        names = [n for n in (cfg.get("version"), cfg.get("version_light")) if n]
+        _environment_cache.update(at=time.monotonic(), value=events_module.environment(cfg, root=FPATH, models=events_module.model_digests(comm.client, names)))
+    return _environment_cache["value"]
+
+
+core = Core(_own_path(CONST.SKILLS_DIR_KEY, CONST.DEFAULT_SKILLS_DIR), library, _runs_dir, model=pipeline_model, sandbox=sandbox_router, environment=_run_environment,
             broker_factory=lambda: broker_module.WebBroker(broker_module.web_handlers(_web_search, _web_client)),
             tools={name: Tool(*pair) for name, pair in _web_tools.items()},
             functions={"chunk_text": web_tools.chunk_text, "untrusted": web_tools.untrusted, "injection_signals": web_tools.injection_signals,

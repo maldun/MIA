@@ -84,6 +84,34 @@ is cheap), `branch` (condition on a field), `loop` (repeat a sub-graph until a c
 - P5. The runner is independent of the UI and testable with a fake model (like `FakeServer` in the character tests).
 - P6. Graphs can be rendered as a diagram (viewer first, editor later, see 10).
 
+## 4b. Workflows as process graphs; agents as co-simulation (direction decided 2026-10-22; the data model is to be taken from the Co-Simulation Process Graph)
+
+**State today:** pipelines are JSON graphs (the seven node kinds above), versioned and with a status in the library (4a), validated by P4. Missing: one graph model that also holds **agent workflows** (roles, message exchange, rounds), and the generation of runner configuration from graph metadata.
+
+**Source of the model.** The Co-Simulation Process Graph (CSPG) of Reiterer and co-authors: "A Graph-Based Meta-Data Model for DevOps in Simulation-Driven Development and Generation of DCP Configurations" (Reiterer, Schiffer, Schwaiger, Kalab; Modelica Conference 2021, open access, https://ecp.ep.liu.se/index.php/modelica/article/view/219; Electronics 11(20), 2022), "Modelling deployment pipelines for co-simulations with graph-based metadata" (Reiterer, Kalab; Int. J. Simulation and Process Modelling, 2021) and the extension to SSP and SysML2 (Modelica Conference 2023, https://ecp.ep.liu.se/index.php/modelica/article/view/923), and the dissertation. **What is known here, from search summaries only:** an abstract graph-based metadata model that generates the scenario description of a co-simulation (for the DCP standard) and the code for the build server that sets up and runs it; a formal definition of the data structure and algorithms for the generation, with the graph held in a NoSQL graph database; a Python DCP master as a demonstration. **The node and edge types of the model were not read** (the host of the open-access PDF could not be reached from this machine on 2026-10-22); they must be taken from the papers before this section is made concrete.
+
+**The analogy (proposed by the user, 2026-10-22):** a multi-agent system or a debate is a co-simulation with an orchestrator as master; the overall workflow fits the process graph. A first mapping, to be checked against the papers (co-simulation terms from general knowledge, not checked here):
+
+| co-simulation | agent workflow |
+|---|---|
+| slave with an interface (inputs, outputs, parameters) and an internal state | an agent or role: input = the context view and incoming messages, output = a message or claims, parameters = prompt version, model, options, state = its memory |
+| master (orchestrator) with a schedule | the orchestrator: who acts when, what is passed on, when to stop |
+| communication (macro) step | a round of a debate, or one execution of a node |
+| coupling scheme: Jacobi (all slaves step from the same state, in parallel) | independent parallel answers, then exchange: voting, a mixture-of-agents layer |
+| coupling scheme: Gauss-Seidel (sequential, later slaves see the results of earlier ones) | a sequential refinement chain or turn-taking debate |
+| iterative coupling with a fixed-point iteration, relaxation factor and convergence tolerance | multi-round debate; **the "agreement modulation" of Smit et al. [1] acts like a relaxation factor** (how much weight on the others' state against one's own); a convergence criterion (the answers stop changing) can replace a fixed number of rounds |
+| step-size control | adaptive number of rounds and context size per step |
+| instability, damping | consensus collapse and conformity [3] as a possible analogue (a hypothesis, not a result) |
+| the scenario description and the generated build code | the pipeline configuration and runner code generated from the graph |
+| the simulation trace (time series of all variables) | the event log (CG11): the run is the trace, replay is re-simulation |
+
+- PG1. **Every pipeline and workflow is stored as a graph:** nodes (steps, agents, orchestrator), edges (typed data connections and control order), attributes (interface schemas, versions, status, budgets). Today's pipeline JSON stays the executable form; the graph is the canonical metadata from which it is generated and into which existing pipelines are imported. So a workflow can be validated, compared, shown (10) and changed on the graph level.
+- PG2. **Agent workflows are co-simulations:** participants with interfaces, one orchestrator with a coupling scheme (parallel, sequential, iterative), rounds, convergence and stop criteria, and budgets. Debate, voting, mixture-of-agents, expert roles with views and the single-pass pipeline are **instances of one model** that differ in graph and schedule. Consequence for the research plan: the variants B, C0, C1 and D of `REQUIREMENTS_RESEARCH.md` are graphs, and the benchmark compares graphs; further variants follow from the analogy at no extra cost: parallel against sequential coupling, a relaxation factor instead of a prompt statement, a convergence criterion instead of a fixed number of rounds.
+- PG3. **Graph, library and log are tied by ids:** the graph names library entries by id and version (4a); the version of the graph that produced a run is in the `env` of `run_start` (13d); the ids of graph nodes are the actors of the events (CG13).
+- PG4. **Storage:** files in the library now (JSON, validated); a queryable graph store later, together with the shared database (`deploy/REQUIREMENTS_DB.md`). The CSPG work used a NoSQL graph database; that is a candidate there, not a decision here.
+- PG5. **Generation both ways:** graph to runner configuration (pipeline, skill) with the validation of P4; pipeline JSON to graph for what exists. Tests first: a pipeline that is imported and generated again behaves the same on the recorded runs.
+- PG6. Open: the exact node and edge types (from the CSPG); whether the orchestrator is a node kind of the present runner or a separate runner; a measure of convergence for text answers (overlap of the claim sets, agreement of verdicts); whether relaxation can be applied to text at all.
+
 ## 4a. The library: nodes and pipelines as a growing knowledge base
 
 Pipelines (4) and the pieces they are made of are not buried in skill files: they live in a **library** of reusable, versioned, documented entries from which a task
@@ -645,7 +673,7 @@ Goal: every statement in an answer can be traced to what happened (CG11), a run 
 4. One more field in the model-call event: the Ollama model **digest**, not only the name (a tag can be re-pulled and change).
 5. Whether decision events (`router_decision`, `escalation`, `stop_decision`) carry the model's own stated reason: no, only the code's reason; a model's explanation can be logged as a separate `note`, never used as a signal.
 
-**Build order** (tests first; each step usable alone): (1) `events.py`: envelope, schemas, secret removal, writer; the run id and actor travel by a context variable to `WebLog`, `scholar.ApiHttp`, the model client and the checks. (2) The content store. (3) `context_graph.py`: replay events into nodes, edges and statuses, open slots and conflicts by rule (CG5), context assembly for a step within a token budget (CG3). (4) The research pipeline and the web and scholar tools emit the events. (5) `tools/run_explain.py`: from an answer sentence back to the query; replay and diff of runs; offline reproduction.
+**Build order** (tests first; each step usable alone; **step 1 built 2026-10-22**: `events.py`, `tests/test_events.py`; the pipeline runner shares its sequence numbers, sets the node as actor and parent of the events inside it, writes a `model_call` event for every model call and the `env` into `run_start` (code version, config hash, model digests, from `web_app.py`); the web log and with it the scholar log carry the run id and the actor and lose secrets; the chat block does not show domain events; decisions 1 to 4 were taken as recommended, and `claim_verified` records who judged (`judge`) and how sure (`confidence`, null if the judge gives no figure), as asked for the benchmark): (1) `events.py`: envelope, schemas, secret removal, writer; the run id and actor travel by a context variable to `WebLog`, `scholar.ApiHttp`, the model client and the checks. (2) The content store. (3) `context_graph.py`: replay events into nodes, edges and statuses, open slots and conflicts by rule (CG5), context assembly for a step within a token budget (CG3). (4) The research pipeline and the web and scholar tools emit the events. (5) `tools/run_explain.py`: from an answer sentence back to the query; replay and diff of runs; offline reproduction.
 
 ## 14. References
 

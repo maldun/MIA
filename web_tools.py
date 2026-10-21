@@ -22,6 +22,11 @@ from urllib.parse import parse_qs, parse_qsl, urlencode, urljoin, urlparse, urlu
 
 import requests
 
+try:
+    from . import events
+except ImportError:  # used as plain script / in tests
+    import events
+
 USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0 MIA-research"
 ALLOWED_PORTS = (80, 443, 8080, 8443)
 ALLOWED_TYPES = ("text/html", "application/xhtml+xml", "text/plain", "text/markdown", "text/xml", "application/xml", "application/json")
@@ -121,7 +126,8 @@ class WebLog:
         if not self.folder:
             return
         now = self._clock()
-        line = json.dumps({"at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(now)), "kind": kind, **fields}, ensure_ascii=False, default=str)
+        # the run and the acting node (CG12) when a run is active; secrets and e-mail addresses are removed (LG4)
+        line = json.dumps(events.redact({"at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(now)), "kind": kind, **events.current_ids(), **fields}), ensure_ascii=False, default=str)
         try:
             os.makedirs(self.folder, exist_ok=True)
             with self._lock, open(os.path.join(self.folder, "web-%s.jsonl" % time.strftime("%Y-%m", time.gmtime(now))), "a", encoding="utf-8") as fp:
