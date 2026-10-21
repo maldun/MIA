@@ -124,7 +124,15 @@ export COMPOSE_PROJECT_NAME="${MIA_PROJECT:-mia}"
 FILES=(-f compose.yaml)
 # OLLAMA_URL in .env (or the environment): use that Ollama and do not start one; otherwise the stack runs its own
 if [ -z "${OLLAMA_URL:-}" ] && [ -f .env ]; then OLLAMA_URL="$(sed -n 's/^OLLAMA_URL=//p' .env | tail -1)"; fi
-if [ -n "$OLLAMA_URL" ]; then export OLLAMA_URL; else FILES+=(--profile ollama); fi
+if [ -n "$OLLAMA_URL" ]; then
+  export OLLAMA_URL
+  # the container reaches the host as host.containers.internal; from here it is localhost
+  if ! curl -s -m 3 -o /dev/null "${OLLAMA_URL//host.containers.internal/localhost}/api/tags"; then
+    echo "WARNING: no Ollama answers at $OLLAMA_URL. MIA waits for it (ollama_wait seconds) and its page starts only after that. Start it (e.g. podman start ollama) or remove OLLAMA_URL from deploy/.env to let the stack run its own."
+  fi
+else
+  FILES+=(--profile ollama)
+fi
 case "${1:-}" in
   rocm|nvidia) FILES+=(-f "compose.$1.yaml"); shift ;;
 esac
@@ -173,4 +181,4 @@ for _ in $(seq 1 60); do
   if curl -s -o /dev/null -m 2 "http://127.0.0.1:$PORT/"; then echo " ready."; exit 0; fi
   echo -n "."; sleep 2
 done
-echo " not yet (a model download can take long); follow it with: deploy/up.sh logs -f mia"
+echo " not yet. A model download can take long, and MIA waits for Ollama before its page starts; look at: deploy/up.sh logs -f mia"

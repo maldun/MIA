@@ -55,6 +55,18 @@ class OllamaRemoteTests(unittest.TestCase):
         late = O.wait_for_ollama(FakeClient(fail_times=99), timeout=5, pause=2, sleep=lambda s: clock.__setitem__(0, clock[0] + s), now=lambda: clock[0])
         self.assertFalse(late)
 
+    def test_waiting_is_not_silent(self):
+        clock = [0.0]
+        said = []
+        ok = O.wait_for_ollama(FakeClient(fail_times=99), timeout=40, pause=2, sleep=lambda s: clock.__setitem__(0, clock[0] + s), now=lambda: clock[0],
+                               log=said.append, every=15, url="http://far:1")
+        self.assertFalse(ok)
+        self.assertEqual(len(said), 3)                                      # at 0, 16 and 32 seconds
+        self.assertIn("http://far:1", said[0])
+        self.assertIn("ConnectionError", said[0])
+        quiet = O.wait_for_ollama(FakeClient(fail_times=1), timeout=10, pause=1, sleep=lambda s: None, now=lambda: 0.0, log=said.append)
+        self.assertTrue(quiet)
+
     def test_pull_only_missing(self):
         client = FakeClient(models=["gemma4:26b", "tiny:latest"])
         pulled = O.pull_missing(client, ["gemma4:26b", "gemma4:12b-it-qat", "tiny", None], log=lambda m: None)

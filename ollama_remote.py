@@ -13,16 +13,23 @@ def ollama_url(cfg):
     return "%s://%s:%s" % (cfg.get("protocol", "http"), cfg.get("address", "localhost"), cfg.get("port", 11434))
 
 
-def wait_for_ollama(client, timeout=120, pause=2, sleep=time.sleep, now=time.monotonic):
-    """True as soon as the server answers, False after timeout seconds"""
-    end = now() + timeout
+def wait_for_ollama(client, timeout=120, pause=2, sleep=time.sleep, now=time.monotonic, log=None, every=15, url=""):
+    """True as soon as the server answers, False after timeout seconds. While it waits it says so (log) at the start and then every `every` seconds: MIA's page
+    only starts after Ollama is there, and a silent wait looks like a hang."""
+    start = now()
+    end = start + timeout
+    last_said = None
     while True:
         try:
             client.list()
             return True
-        except Exception:
+        except Exception as exc:
             if now() >= end:
                 return False
+            if log is not None and (last_said is None or now() - last_said >= every):
+                log("waiting for Ollama%s (%d of %d seconds): %s. The page starts when it answers; start Ollama, or change ollama_host / OLLAMA_URL"
+                    % (" at " + url if url else "", now() - start, timeout, type(exc).__name__))
+                last_said = now()
             sleep(pause)
 
 
@@ -53,10 +60,10 @@ def pull_missing(client, models, log=print):
     return pulled
 
 
-def prepare(cfg, timeout=None, log=print, client=None):
+def prepare(cfg, timeout=None, log=lambda message: print(message, flush=True), client=None):
     """wait for the server, then pull version and version_light if missing. True if Ollama was reachable."""
     client = client or Client(host=ollama_url(cfg))
-    if not wait_for_ollama(client, timeout=cfg.get("ollama_wait", 300) if timeout is None else timeout):
+    if not wait_for_ollama(client, timeout=cfg.get("ollama_wait", 300) if timeout is None else timeout, log=log, url=ollama_url(cfg)):
         log("Ollama at %s does not answer" % ollama_url(cfg))
         return False
     if cfg.get("ollama_pull", True):
