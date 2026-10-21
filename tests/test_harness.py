@@ -348,7 +348,8 @@ class ShippedSuites(unittest.TestCase):
         for suite in found:
             self.assertNotIsInstance(suite, Exception, str(suite))
             with open(os.path.join(SUITES, suite.name, "suite.json"), encoding="utf-8") as fp:
-                starter = json.load(fp).get("starter", False)                       # a starter suite says so and may be smaller; it finds broken things, not small differences
+                meta = json.load(fp)
+            starter = meta.get("starter", False) or meta.get("draft", False)       # a starter suite says so and may be smaller; it finds broken things, not small differences. A draft suite is still being built (labels not confirmed)
             # the unit of a review suite is the conclusion question: a case is a whole review with several of them
             size = sum(len(c["gold"]["questions"]) for c in suite.cases) if suite.target.get("kind") == "review" else len(suite.cases)
             self.assertGreaterEqual(size, 15 if starter else 30, suite.name)

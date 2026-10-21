@@ -113,6 +113,66 @@ class Building(unittest.TestCase):
         self.assertEqual(len(included), 3)
 
 
+GOMES = """ACM Computing Surveys, Vol. 51, No. 3, Article 49. Publication date: May 2018.
+[13] Andrés A. Alvarez Cabrera, Krijn Woestenenk, and Tetsuo Tomiyama. 2011. An architecture model to support
+cooperative design for mechatronic products: A control design case. Mechatronics 21, 3 (Apr. 2011), 534–547.
+DOI:http://dx.doi.org/10.1016/j.mechatronics.2011.01.009
+49:27
+[17] Fernando J. Barros. 1997. Modeling formalisms for dynamic structure systems. ACM Transactions on Modeling and
+Computer Simulation 7, 4 (Oct. 1997), 501–515. DOI:http://dx.doi.org/10.1145/268403.268423
+"""
+NAYAK = """[1] S. Lu and S. V. Pereverzev, “Numerical differentiation from a viewpoint of regularization theory,” Math. Comp., vol. 75, no. 256, pp. 1853–1870, 2006.
+[7] H. W. Engl, M. Hanke, and A. Neubauer, Regularization of inverse problems, vol. 375 of Mathematics and its Applications. Kluwer Academic Publishers Group, Dordrecht, 1996.
+"""
+ARGOUL = """[AE05]
+
+P. Argoul and S. Erlicher. Mechanical modelling and computational
+issues in civil engineering, volume 23 of Lecture Notes. Springer,
+2005.
+10
+[Arg90]
+
+P. Argoul. Identification des structures vibrantes. Thèse de doctorat, Ecole Nationale des Ponts et Chaussées, 1990. 283 pages.
+"""
+
+
+class References(unittest.TestCase):
+    def test_name_year_style_with_a_doi_in_the_entry(self):
+        refs = RC.parse_references(GOMES)
+        self.assertEqual([r["key"] for r in refs], ["13", "17"])
+        self.assertEqual(refs[0]["title"], "An architecture model to support cooperative design for mechatronic products: A control design case")
+        self.assertEqual((refs[0]["year"], refs[0]["doi"]), (2011, "10.1016/j.mechatronics.2011.01.009"))
+        self.assertEqual(refs[1]["authors"], "Fernando J. Barros")
+        self.assertEqual(refs[1]["doi"], "10.1145/268403.268423")
+
+    def test_initials_first_style_quoted_title_and_book(self):
+        refs = RC.parse_references(NAYAK)
+        self.assertEqual(refs[0]["authors"], "S. Lu and S. V. Pereverzev")
+        self.assertEqual(refs[0]["title"], "Numerical differentiation from a viewpoint of regularization theory")
+        self.assertEqual(refs[0]["year"], 2006)                                                      # not the page number 1853
+        self.assertEqual((refs[1]["title"], refs[1]["year"]), ("Regularization of inverse problems", 1996))
+
+    def test_keys_on_their_own_line_and_page_noise(self):
+        refs = RC.parse_references(ARGOUL)
+        self.assertEqual([r["key"] for r in refs], ["AE05", "Arg90"])
+        self.assertEqual(refs[0]["authors"], "P. Argoul and S. Erlicher")
+        self.assertEqual(refs[0]["title"], "Mechanical modelling and computational issues in civil engineering")
+        self.assertEqual(refs[1]["year"], 1990)
+
+    def test_citations_in_the_text(self):
+        known = {"1", "5", "6", "7", "AE05", "TA77", "LA04"}
+        text = "monographs such as [5], [6]; see [7] or [9]; on [0, 1] nothing; ([LA04, AE05] and [TA77][BG67])"
+        self.assertEqual(RC.cited_keys(text, known), {"5", "6", "7", "LA04", "AE05", "TA77"})
+
+    def test_a_work_must_be_published_within_the_time_of_the_review(self):
+        self.assertTrue(RC.published_by({"year": 2017}, "2018-05-31"))
+        self.assertFalse(RC.published_by({"year": 2018}, "2018-05-31"))                              # a bare year counts to its last day
+        self.assertFalse(RC.published_by({"year": 2019}, "2018-05-31"))
+        self.assertFalse(RC.published_by({"date": "2018-06-02", "year": 2018}, "2018-05-31"))
+        self.assertFalse(RC.published_by({}, "2018-05-31"))                                          # undated is not within
+        self.assertTrue(RC.published_by({}, None))
+
+
 class CaseFile(unittest.TestCase):
     def test_gold_entry_and_case(self):
         resolved = {"title": "DevOps a definition", "matched_title": "DevOps: a definition", "authors": "Banica", "resolved": True, "doi": "10.1/d", "year": 2017, "date": "2017-05-01"}

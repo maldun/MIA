@@ -235,3 +235,19 @@ The numbered list with authors, venues, identifiers and **how well each source w
 - SCAR (scientific analogies across 13 fields), YARN (abstraction before analogical mapping), IsoSci (arXiv 2607.01431), IDRBench (arXiv 2507.15736): search summaries only.
 - "Squaring the Square", logicpuzzles.ca/blog/squaring-the-square (page fetched and summarised by a tool).
 - Cochrane reviews and PRISMA as models for the search log and flow: known, not searched here (a search for Cochrane-based LLM benchmarks found nothing).
+
+## Status of phase 2c (paused 2026-10-22, to be continued)
+
+Reference cases from real reviews (draft suite `eval/suites/review/` (written by `tools/build_review_cases.py` from `tools/review_suite.json`, marked `"draft": true`, labels `confirmed: false`):
+
+| case | review | published = cut-off | included works |
+|---|---|---|---|
+| devops-ruetz-2019 | Rütz, DevOps: a systematic literature review (seminar paper) | search April 2019 (paper Aug 2019), cut-off 2019-04-30 | 58 from Table 2, 41 resolved to DOIs (`ruetz_included.json` in the job temp folder, 17 trade-press titles stay title-only) |
+| inverse-argoul-2012 | Argoul, Overview of Inverse Problems (lecture notes, tier 1) | 2012-07-27 | the 44 references of the notes |
+| inverse-nayak-overview-2019 | Nayak, chapters 1 to 5 of the dissertation (overview, tier 1); the new method of later chapters is not part of the case | 2019-12-31 | references cited in chapters 1 to 5 |
+| cosim-gomes-2018 | Gomes et al., Co-Simulation: A Survey (ACM Computing Surveys, tier 2) | 2018-05-31 | the 158 references (95 print a DOI) |
+
+- Publication date matters (user, 2026-10-22): the time of a case is the date of the review (the search date where documented); a work whose date is later than the review is refused as a match (another edition), a bare year counts to its last day (`review_case.published_by`).
+- Built: `pdf_text.py` (PDF in a wall), `review_case.py` (`parse_matrix`, `parse_references`, `cited_keys`, `resolve`, `build_included`, `draft_case`, `published_by`), `tools/build_review_cases.py` (builds all four cases; checks every evidence quote verbatim against the text; paths point to the job temp folder `papers/`, adjust `TMP`).
+- Not done: the build run was stopped at about 30 of 44 resolutions of Argoul (about 30 s per search because of rate limits; Gomes 63 and Nayak about 50 more searches), so `cases.jsonl` does not exist yet. Next: rerun the build (the scholar cache keeps what was searched), check the quotes of the Argoul, Nayak and Gomes questions (only Rütz's passed so far), let the user confirm or relabel the questions, then 2d (full text), 2e (baseline pipeline), 2f (first numbers).
+- Sources of the texts (untrusted, kept outside the repo): Rütz `~/Downloads/Systematic-Literature-Review-DevOps.pdf`, Argoul `~/Downloads/inverseproblemenglishversion2.pdf`, Gomes `~/Downloads/gomes_cosimulation3179993.pdf`, Nayak `~/Documents/skripten/Linalg+Numerik/Inverse Problems Regularization and Its Applications.pdf`; the converted text files live in the job temp folder `papers/review_*.txt` (made with `pdf_text.pdf_to_text`).

@@ -1,0 +1,9 @@
+{
+ "name": "review",
+ "description": "Real reference cases of the literature review (tiers 1 and 2 of ui/REQUIREMENTS_RESEARCH.md 14): published reviews and overviews in DevOps (Rütz 2019, a systematic review), applied mathematics (Argoul 2012, lecture notes; Nayak 2019, the overview chapters of a dissertation) and co-simulation (Gomes et al. 2018, a survey). The included works are the works the review used (resolved to DOIs where possible, otherwise title only), the time of a case is the date of the review (the search date where it is documented), and the questions are conclusion questions with the verbatim sentence of the review. DRAFT: the labels are proposals taken from the conclusions of the reviews and carry confirmed: false until a person has checked them.",
+ "target": {
+  "kind": "review",
+  "skill": "review"
+ },
+ "draft": true
+}

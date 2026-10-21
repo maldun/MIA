@@ -110,6 +110,69 @@ def build_included(entries, clients, until=None, progress=None):
     return included, report
 
 
+REF_START = re.compile(r"^\[([^\]\s]{1,12})\]\s*(.*)$")
+_NOISE = re.compile(r"^(ACM Computing Surveys, Vol\..*|\d+:\d+|[A-Z]\. [A-Z][a-z]+ et al\.|\d{1,3})$")
+_AUTHOR = r"(?:[A-Z][a-zà-ÿ]*\.\s?)+(?:[\w’'-]+\s?)+"
+_YEAR = re.compile(r"\b(1[5-9]\d\d|20[0-3]\d)\b")
+_DOI = re.compile(r"10\.\d{4,9}/\S+")
+
+
+def parse_references(text):
+    """[{"key", "raw", "authors", "title", "year", "doi"}] from a reference list whose entries start with [key]; the heuristics (authors, quoted title or the part after the authors,
+    first year, the DOI printed in the entry) are for matching only: R1 makes a wrong guess an unresolved entry, never a wrong one. The text of one reference list, not a whole paper."""
+    entries, current = [], None
+    for line in str(text).splitlines():
+        line = line.strip()
+        m = REF_START.match(line)
+        if m:
+            current = {"key": m.group(1), "lines": [m.group(2)]}
+            entries.append(current)
+        elif current is not None and line and not _NOISE.match(line):
+            current["lines"].append(line)
+    out = []
+    for entry in entries:
+        raw = " ".join(l for l in entry["lines"] if l)
+        raw = re.sub(r"(?<=\w)- (?=[a-z])", "", raw)                                                    # hyphenation at a line end
+        doi = None
+        marker = re.search(r"DOI:|doi\.org/|https?://\s*dx\.", raw)
+        body = raw[:marker.start()] if marker else raw
+        if marker:
+            tail = re.sub(r"\s+", "", raw[marker.start():])
+            m = _DOI.search(tail)
+            doi = scholar.clean_doi(m.group(0).rstrip(".,;")) if m else None
+        names, title, year = "", "", None
+        named = re.match(r"^(.+?)\.\s+((?:1[5-9]|20)\d\d)[a-z]?\.\s+(.+)$", body)                 # "Authors. 2011. Title. Venue ..."
+        if named:
+            names, year = named.group(1).strip(), int(named.group(2))
+            title = re.split(r"\.\s|\.$", named.group(3), maxsplit=1)[0].strip(" ,.")
+        else:                                                                                      # "A. B. Name and C. Name, “Title,” venue, 1999." or "A. Name. Title. Venue 1999."
+            authors = re.match(r"^(?:(?:[A-Z]\.\s?)+[\w’'-]+(?:\s*,\s*and\s+|\s+and\s+|\s*,\s*|\s*;\s*)?)+", body)
+            names = authors.group(0).strip(" ,;.") if authors else ""
+            rest = body[authors.end():] if authors else body
+            quoted = re.search(r"[“\"]([^”\"]{8,})[”\"]", rest)
+            title = quoted.group(1).strip(" ,.") if quoted else re.split(r"\.\s|,\s+vol\.|,\s+volume|\.$", rest.lstrip(" .,"), maxsplit=1)[0].strip(" ,.")
+            years = _YEAR.findall(body)
+            year = int(years[-1]) if years else None
+        out.append({"key": entry["key"], "raw": raw, "authors": names, "title": title, "year": year, "doi": doi})
+    return out
+
+
+def cited_keys(text, known):
+    """which of the reference keys (a set) are cited in the text as [k], [k1, k2], [k1][k2]; intervals such as [0, 1] are not citations"""
+    cited = set()
+    for body in re.findall(r"\[([^\[\]]{1,60})\]", str(text)):
+        keys = [k for k in re.split(r"[,;\s]+|and|or|–", body) if k]
+        if not keys or "0" in keys:
+            continue
+        cited |= {k for k in keys if k in known}
+    return cited
+
+
+def published_by(item, until):
+    """True when the work is dated within the review's time (strict: no date at all is not within; a bare year counts to its last day)"""
+    return scholar.within({"date": item.get("date"), "year": item.get("year")}, until)[0] if until else True
+
+
 def gold_entry(item):
     """the compact form of an included work in a case file"""
     entry = {"title": item.get("matched_title") or item["title"], "authors": item.get("authors")}
