@@ -38,9 +38,16 @@ def install_ollama(name="ollama",version="llama3.2",docker="docker",mode="rocm",
       # keep the VRAM footprint small: one model at a time, one slot (no extra KV cache)
       cmd += ["-e", "OLLAMA_MAX_LOADED_MODELS=1", "-e", "OLLAMA_NUM_PARALLEL=1"]
       cmd += f"-v ollama:/root/.ollama -p {port}:{port} --name {name} ollama/ollama:rocm".split()
+    elif mode == "nvidia":
+      # needs nvidia-container-toolkit with CDI (sudo nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml), as deploy/compose.nvidia.yaml
+      cmd += "run --replace -d --device nvidia.com/gpu=all --security-opt label=disable".split()
+      cmd += ["-e", "OLLAMA_MAX_LOADED_MODELS=1", "-e", "OLLAMA_NUM_PARALLEL=1"]
+      cmd += f"-v ollama:/root/.ollama -p {port}:{port} --name {name} ollama/ollama".split()
     elif mode == "cpu":
       cmd += f"run --replace -d -v ollama:/root/.ollama -p {port}:{port} --name {name} ollama/ollama".split()
-      
+    else:
+      sys.exit(f"unknown mode {mode!r} in the config (rocm, nvidia or cpu)")
+
     proc = subprocess.Popen(cmd)
     proc.wait()
 

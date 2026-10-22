@@ -85,7 +85,7 @@ MIA, Ollama and SearXNG as three containers with one command (`deploy/up.sh`), i
     - "llm_options_light":{"num_ctx":8192}, (options of the light model)
     - "keep_alive":"30m", (how long the model stays loaded after a request; avoids cold starts, e.g. for the hourly time check)
     - "think":false, (thinking mode of the model; leave out for model default)
-    - "mode":"rocm", (gpu flag, check ollama docker docu)
+    - "mode":"rocm", (gpu of Ollama: "rocm" (AMD), "nvidia" (needs nvidia-container-toolkit with CDI, see deploy/compose.nvidia.yaml) or "cpu")
     - "timeout":3, (pause in seconds before the character returns to the idle expression)
     - "character_dir":"ui/godot/build/web", (optional: folder with the web export of the 3D character, see ui/README.md)
     - "https_port":8586, (optional: `python -m MIA` starts an HTTPS proxy on this port in front of the web app, see "Access from other computers")
