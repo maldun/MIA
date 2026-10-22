@@ -14,3 +14,6 @@ ui/character/*.zip
 *.blend*
 tools/searxng/settings.local.yml
 eval/runs
+backgrounds/*
+!backgrounds/README.md
+calibration.txt

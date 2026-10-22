@@ -23,3 +23,8 @@ voice/samples/lab/
 
 # the 3D character as zip files that travel outside git (ui/tools/character_pack.py; the manifest next to them is tracked)
 ui/character/*.zip
+
+# own pictures behind the character (backgrounds/README.md; the folder is kept by its README) and the personality text of MIA (README.md, "calibration.txt")
+backgrounds/*
+!backgrounds/README.md
+calibration.txt
