@@ -26,6 +26,7 @@ import time
 import threading
 import multiprocessing as mp
 import random
+import re
 import shutil
 import signal
 import socket
@@ -422,12 +423,22 @@ def time_update():
 AUDIO_KEEP = 12      # the latest lines stay on disk (every line has its own file, nothing is shared between pages)
 audio_router = AudioRouter(lambda event, payload, to=None: socketio.emit(event, payload, to=to) if to else socketio.emit(event, payload))
 
+def line_serials(folder):
+    """the serial numbers of the line-<serial>.wav files in folder"""
+    found = []
+    for f in os.listdir(folder):
+        match = re.fullmatch(r"line-(\d+)\.wav", f)
+        if match:
+            found.append(int(match.group(1)))
+    return found
+
 def publish_audio(source_path, message, move=False):
     """moves (an upload) or copies (the intro sound) a rendered line to its own file and tells the page that plays the voice; returns the serial number"""
-    serial = audio_router.next_serial()
+    os.makedirs(AUDIO_FOLDER, exist_ok=True)
+    # continue after the lines of an earlier run: the cleanup below keeps the highest names, a new line-000001 would be removed at once
+    serial = audio_router.next_serial(after=max(line_serials(AUDIO_FOLDER), default=0))
     name = f"line-{serial:06d}.wav"
     target = os.path.join(AUDIO_FOLDER, name)
-    os.makedirs(AUDIO_FOLDER, exist_ok=True)
     if move:
         shutil.move(source_path, target)
     else:

@@ -86,6 +86,10 @@ class RouterTest(unittest.TestCase):
     def test_serial_numbers_increase(self):
         self.assertEqual([self.router.next_serial() for _ in range(3)], [1, 2, 3])
 
+    def test_serial_numbers_continue_after_the_lines_on_disk(self):
+        self.assertEqual(self.router.next_serial(after=26), 27)
+        self.assertEqual(self.router.next_serial(after=5), 28)
+
 
 class WebAppTest(unittest.TestCase):
     @classmethod
@@ -141,6 +145,22 @@ class WebAppTest(unittest.TestCase):
         self.assertEqual(self.http.get(urls[0]).data, b"RIFF-first")
         self.assertEqual(self.http.get(urls[1]).data, b"RIFF-second")
         self.assertEqual(self.http.get(urls[0]).headers["Cache-Control"], "no-store")
+        client.disconnect()
+
+    def test_a_line_after_a_restart_is_not_removed_by_the_cleanup(self):
+        # the files of the run before a restart are still there, the router of the new run counts from 0 again
+        os.makedirs(self.wa.AUDIO_FOLDER)
+        for serial in range(15, 27):
+            with open(os.path.join(self.wa.AUDIO_FOLDER, f"line-{serial:06d}.wav"), "wb") as fp:
+                fp.write(b"RIFF-old")
+        self.wa.audio_router.serial = 0
+        client = self.connect()
+        self.upload(data=b"RIFF-new")
+        url = self.reloads(client)[0]["url"]
+        self.assertEqual(url, "/audio/line-000027.wav")
+        response = self.http.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, b"RIFF-new")
         client.disconnect()
 
     def test_an_ended_message_cannot_remove_a_newer_line(self):

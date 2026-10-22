@@ -69,9 +69,10 @@ class AudioRouter:
                 return self.owner
             return self._connected[-1] if self._connected else None
 
-    def next_serial(self):
+    def next_serial(self, after=0):
+        """the next serial number, above `after` too (the highest line already on disk: after a restart the count would start at 1 again)"""
         with self._lock:
-            self.serial += 1
+            self.serial = max(self.serial, after) + 1
             return self.serial
 
     def announce(self, url, serial, message=""):
