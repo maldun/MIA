@@ -24,6 +24,7 @@ services:
       - mia-data:/opt/mia/MIA/data
       - ${MIA_KOKORO_DIR:-../voice/models/kokoro}:/opt/mia/MIA/voice/models/kokoro:ro,z
       - ${MIA_CHARACTER_DIR:-../ui/godot/build/web}:/opt/mia/MIA/ui/godot/build/web:ro,z
+      - ${MIA_BACKGROUND_DIR:-../backgrounds}:/opt/mia/MIA/backgrounds:ro,z      # new pictures appear on a reload of the page, no rebuild
 
   https:
     image: docker.io/library/caddy:2

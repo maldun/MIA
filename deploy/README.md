@@ -30,6 +30,7 @@ For other devices set `MIA_BIND=0.0.0.0` in `deploy/.env` and open `https://<add
 | `data/` | volume `mia-data` | histories, presets, logs, token |
 | `voice/models/kokoro/` | `voice/models/kokoro` (or `MIA_KOKORO_DIR`), read-only | the Kokoro model files (README of the main folder) |
 | `ui/godot/build/web/` | `ui/godot/build/web` (or `MIA_CHARACTER_DIR`), read-only | the 3D character |
+| `backgrounds/` | `backgrounds` (or `MIA_BACKGROUND_DIR`), read-only | the pictures behind the character (`backgrounds/README.md`); a new picture appears when the page is reloaded |
 | Ollama's models | volume `ollama` | models are downloaded once |
 
 ## The personality (calibration.txt)
@@ -96,7 +97,7 @@ OLLAMA_URL=http://192.168.1.50:11434
 
 ## Settings in `.env` (all optional)
 
-`OLLAMA_URL` (see above), `MIA_PORT` (8585), `MIA_HTTPS_PORT` (8586), `MIA_BIND` (127.0.0.1; `0.0.0.0` for other machines, then also set `public_hosts` in the config), `MIA_PROJECT` (mia; another name = a second stack next to the first), `MIA_CONFIG`, `MIA_KOKORO_DIR`, `MIA_CHARACTER_DIR`, `HSA_OVERRIDE_GFX_VERSION` (rocm, 11.0.0).
+`OLLAMA_URL` (see above), `MIA_PORT` (8585), `MIA_HTTPS_PORT` (8586), `MIA_BIND` (127.0.0.1; `0.0.0.0` for other machines, then also set `public_hosts` in the config), `MIA_PROJECT` (mia; another name = a second stack next to the first), `MIA_CONFIG`, `MIA_KOKORO_DIR`, `MIA_CHARACTER_DIR`, `MIA_BACKGROUND_DIR`, `HSA_OVERRIDE_GFX_VERSION` (rocm, 11.0.0).
 
 ## Notes
 
