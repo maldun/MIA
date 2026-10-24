@@ -995,53 +995,49 @@ package MIA_Requirements {
 
     // ================================================================ the requirement tree
 
-    /* Usages, so that satisfy and verify can refer to them. */
-    requirement miaRequirements {
-        doc /* Constraints first, then the high-level requirements in the order of the prose document. */
+    /* Usages, so that satisfy and verify can refer to them. Constraints first, then the high-level requirements. */
+    requirement con1 : FreeAndOpen;
+    requirement con2 : HardwareEnvelope;
+    requirement con3 : TechnologyChoices;
+    requirement con4 : SecureContext;
+    requirement con5 : PrivateNetworkOnly;
+    requirement con6 : TrustedUsersOnly;
+    requirement con7 : SharedDatabase;
 
-        requirement con1 : FreeAndOpen;
-        requirement con2 : HardwareEnvelope;
-        requirement con3 : TechnologyChoices;
-        requirement con4 : SecureContext;
-        requirement con5 : PrivateNetworkOnly;
-        requirement con6 : TrustedUsersOnly;
-        requirement con7 : SharedDatabase;
-
-        requirement fr1 : Conversation;
-        requirement fr2 : EmbodiedCharacter;
-        requirement fr3 : Voice;
-        requirement fr4 : TransparencyOfStateAndMethod;
-        requirement fr5 : OwnerShapedAppearanceAndPersona;
-        requirement nfr1 : AccessibleOnEveryDevice;
-        requirement fr6 : TasksAsSkills;
-        requirement fr7 : WorkflowsAsData;
-        requirement nfr2 : SmallModelStrategies;
-        requirement fr8 : ModelManagement;
-        requirement fr9 : VerifyBeforeAsserting;
-        requirement nfr3 : UntrustedInputStaysData;
-        requirement nfr4 : HonestConfidence;
-        requirement fr10 : Lookup;
-        requirement fr11 : LiteratureReview;
-        requirement fr12 : KnowledgeOfSources;
-        requirement fr13 : MethodTransfer;
-        requirement fr14 : Memory;
-        requirement fr15 : BehaviourRulesAndFeedback;
-        requirement fr16 : Traceability;
-        requirement fr17 : MeasurableQuality;
-        requirement fr18 : OptionalLearning;
-        requirement nfr5 : LocalFirstPrivacy;
-        requirement nfr6 : SecureAccess;
-        requirement fr19 : Operable;
-        requirement fr21 : AccountsAndLogin;
-        requirement fr22 : GraphApp;
-        requirement nfr7 : EfficientOnGivenHardware;
-        requirement nfr8 : SharedStateInDatabase;
-    }
+    requirement fr1 : Conversation;
+    requirement fr2 : EmbodiedCharacter;
+    requirement fr3 : Voice;
+    requirement fr4 : TransparencyOfStateAndMethod;
+    requirement fr5 : OwnerShapedAppearanceAndPersona;
+    requirement nfr1 : AccessibleOnEveryDevice;
+    requirement fr6 : TasksAsSkills;
+    requirement fr7 : WorkflowsAsData;
+    requirement nfr2 : SmallModelStrategies;
+    requirement fr8 : ModelManagement;
+    requirement fr9 : VerifyBeforeAsserting;
+    requirement nfr3 : UntrustedInputStaysData;
+    requirement nfr4 : HonestConfidence;
+    requirement fr10 : Lookup;
+    requirement fr11 : LiteratureReview;
+    requirement fr12 : KnowledgeOfSources;
+    requirement fr13 : MethodTransfer;
+    requirement fr14 : Memory;
+    requirement fr15 : BehaviourRulesAndFeedback;
+    requirement fr16 : Traceability;
+    requirement fr17 : MeasurableQuality;
+    requirement fr18 : OptionalLearning;
+    requirement nfr5 : LocalFirstPrivacy;
+    requirement nfr6 : SecureAccess;
+    requirement fr19 : Operable;
+    requirement fr21 : AccountsAndLogin;
+    requirement fr22 : GraphApp;
+    requirement nfr7 : EfficientOnGivenHardware;
+    requirement nfr8 : SharedStateInDatabase;
 }
 
 package MIA_Allocation {
     private import MIA_Architecture::*;
-    private import MIA_Requirements::miaRequirements::*;
+    private import MIA_Requirements::*;
     private import VerificationCases::*;
 
     // ---------------------------------------------------------------- satisfy
