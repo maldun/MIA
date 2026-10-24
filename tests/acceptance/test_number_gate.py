@@ -55,17 +55,27 @@ class Gate(unittest.TestCase):
             self.assertEqual(indexes(result, "check_run", "number_check"), [], claim)
 
     @mark.req("REQ-GATE-002")
-    def test_a_failed_check_decides_without_a_model_call(self):
-        """TC-GATE-002: the evidence would let a judge say supported, the number check says fail."""
-        result, model = gate_run(cops_answer("supported"), TOWER, "The tower is 1,020 m tall. Everything said about it is true and supported.")
+    def test_a_failed_check_goes_to_the_judge(self):
+        """TC-GATE-002 (A-01): the check says fail; the judge sees the line and decides; the verdict is the judge's."""
+        result, model = gate_run(cops_answer("supported"), TOWER, "The tower is 1,020 m tall.")
         answer = self.done(result)
-        self.assertEqual((answer["verdict"], answer["status"]), ("refuted", "fail"))
-        self.assertEqual(len(model.prompts), 0)
+        self.assertEqual(len(model.prompts), 3)
+        self.assertIn("Number check: fail", model.prompts[2])
+        self.assertEqual((answer["verdict"], answer["status"]), ("supported", "pass"))
+
+    @mark.req("REQ-GATE-006")
+    def test_a_number_claim_without_evidence_is_not_decided(self):
+        """TC-GATE-006 (A-01): 5 claims with a number and empty evidence: unclear, inconclusive, 0 calls, no facts."""
+        for claim in (TOWER, "The group sold 4.8 million records.", "The road is 453 kilometres long.", "The bridge was built in 1937.", "The album has 12 tracks."):
+            result, model = gate_run(cops_answer("supported"), claim, "")
+            answer = self.done(result)
+            self.assertEqual((answer["verdict"], answer["status"], answer["calls"], answer["facts"]), ("unclear", "inconclusive", 0, []), claim)
+            self.assertEqual(len(model.prompts), 0, claim)
 
     @mark.req("REQ-GATE-003")
     def test_a_claim_the_check_leaves_open_goes_to_one_judgement_style(self):
         """TC-GATE-003: cops by default (argue for, argue against, judge, in this order, the judge sees the check line), single when configured."""
-        for claim, evidence in ((TOWER, "The tower is 1,200 m tall."), ("The hall is 40 m long.", "The hall has 40 seats."), (TOWER, "")):
+        for claim, evidence in ((TOWER, "The tower is 1,200 m tall."), ("The hall is 40 m long.", "The hall has 40 seats.")):
             result, model = gate_run(cops_answer(), claim, evidence)
             self.done(result)
             self.assertEqual(len(model.prompts), 3, (claim, evidence))
@@ -113,8 +123,8 @@ class Gate(unittest.TestCase):
 
     @mark.req("IF-003")
     def test_the_result_record_has_verdict_status_calls_seconds_and_facts(self):
-        """TC-IF-003: calls 0 and no facts when the number check decides; 3 calls when the cops style decides; verdict and status agree."""
-        decided, _ = gate_run(cops_answer(), TOWER, "The tower is 1,020 m tall.")
+        """TC-IF-003 (A-01): calls 0 and no facts for a number claim without evidence; 3 calls when the cops style decides; verdict and status agree."""
+        decided, _ = gate_run(cops_answer(), TOWER, "")
         record = self.done(decided)
         for field in ("verdict", "status", "calls", "seconds", "facts"):
             self.assertIn(field, record)

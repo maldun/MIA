@@ -28,3 +28,6 @@ ui/character/*.zip
 backgrounds/*
 !backgrounds/README.md
 calibration.txt
+
+# suites
+eval/suites/verdicts_vitaminc*/
