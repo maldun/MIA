@@ -1,6 +1,6 @@
 # High-Level Specification: MIA
 
-**Status:** Draft (review steps 1 to 5 and the sweep confirmed; step 6 (acceptance criteria) edited, awaiting confirmation; step 7 next; see review-log.md)
+**Status:** Draft (review steps 1 to 6 confirmed apart from the acceptance criteria marked *proposed*; step 7 (risks and open questions) edited, awaiting confirmation; then the approval of the whole HLS; see review-log.md)
 **Owner:** Stefan Reiterer   **Date:** 2026-10-24
 **Project / deliverable:** MIA, "MIA Is not an Assistant": a personal virtual assistant with a 3D character, a local voice, and a research core for small local language models
 
@@ -241,7 +241,7 @@ Step 6 of the review (2026-10-24). Each criterion says what is shown, which requ
 | Id | Criterion | Covers | Verified by | State |
 |---|---|---|---|---|
 | AC-1 | Two users log in on a desktop and a phone viewport. Messages show who sent them; answers stream; stop, queue position, reload and the shared history work; regenerate and speak again work; the chat still works when the character cannot load. Browser checks at 360, 768 and 1440 px in both themes; keyboard and screen reader pass. | FR-1, FR-2, NFR-1 | test (stub model), demonstration (phone checklist) | proposed |
-| AC-2 | **(a) Quality.** On the holdout of the verification suites the chosen gate passes fewer wrong claims than the single-voice baseline and loses no more true claims, decided with the rule of the agent-app workflow. Needs a holdout and 30+ near-miss claims first: `tools/make_external_suite.py` draws them from VitaminC (evidence-based, contrastive pairs) and Wikidata (no-evidence near-miss pairs) with a seeded hash split, and `tools/label_agreement.py` audits a 20 % sample of your own labels against the benchmark labels (single-person limitation recorded in `eval-spec.md`). **(b) Reproducible reruns (D-31).** Each holdout case is run at least 3 times (repeats fixed in *Plan*) on the **same sources**: the verdicts agree across the repeats, and the set of facts and statements is the same, with the same number of facts, each statement matched by its numbers, entities and anchored quote; only order and wording may differ. Agreement threshold and matching rule are fixed in *Plan*; the old version is measured first as the reference. Because the live web returns different pages from run to run, reproducibility is measured on recorded pages, and a live run stores its sources by hash so that it can be repeated on them. | FR-9, FR-10 | measurement | proposed (b: confirmed by the owner, D-31) |
+| AC-2 | **(a) Quality.** On the holdout of the verification suites the chosen gate passes fewer wrong claims than the single-voice baseline and loses no more true claims, decided with the rule of the agent-app workflow. Needs a holdout and 30+ near-miss claims first: `tools/make_external_suite.py` draws them from VitaminC (evidence-based, contrastive pairs) and Wikidata (no-evidence near-miss pairs) with a seeded hash split, and `tools/label_agreement.py` audits a 20 % sample of your own labels against the benchmark labels (single-person limitation recorded in `eval-spec.md`); the suites are built (150 VitaminC groups and 150 Wikidata pairs, the owner's run of 2026-10-24); the model pins and the baseline are still missing. **(b) Reproducible reruns (D-31).** Each holdout case is run at least 3 times (repeats fixed in *Plan*) on the **same sources**: the verdicts agree across the repeats, and the set of facts and statements is the same, with the same number of facts, each statement matched by its numbers, entities and anchored quote; only order and wording may differ. Agreement threshold and matching rule are fixed in *Plan*; the old version is measured first as the reference. Because the live web returns different pages from run to run, reproducibility is measured on recorded pages, and a live run stores its sources by hash so that it can be repeated on them. | FR-9, FR-10 | measurement | confirmed (D-31); suites built, pins and baseline pending |
 | AC-3 | The review benchmark reports per tier: source recall and precision, violations of the cut-off (must be 0), invented references (must be 0), quote anchoring (must be 100 %), retracted works dropped and listed, against a baseline. | FR-11, FR-12, NFR-4 | measurement, test | proposed |
 | AC-4 | A recorded run is replayed and reproduced offline with an identical result; a log with a broken order is reported; two runs can be compared; a secret fed to the writer does not appear in the log. | FR-16 | test | proposed |
 | AC-5 | A browser test records every request the page makes and finds none outside the host; the web log lists every query that left the machine. | NFR-5 | test, inspection | proposed |
@@ -258,39 +258,55 @@ Step 6 of the review (2026-10-24). Each criterion says what is shown, which requ
 | AC-16 | In the graph app a user edits a node as JSON and saves a new version (author, time); an invalid edit is refused with the broken rule named; a former version can be restored; the library export to files and the seed from files give identical entries. | FR-22 | test, demonstration | proposed |
 | AC-17 | The contact sheet of the presets looks right; a second `.vrm` model loads and reports which presets and gestures it cannot map; a saved expression or gesture appears on a second device without a reload; a workflow with a variant changes the outfit and one without keeps the chat's. | FR-24, FR-32, FR-2, FR-23 | demonstration, test | proposed |
 | AC-18 | Votes in the four categories are stored with user, time and subject; scores are shown per category and overall over time; the overall score shifts the mood; the interval is a setting; a minus on a factual answer opens a benchmark case instead of changing the fact. | FR-27 | test, demonstration | proposed |
-| AC-19 | First text of a chat answer on the light model within a time set in *Plan*; with a review slice running, a chat message still gets its first text within the same limit; the character runs at 30+ fps on a mid-range phone and 60 on desktop. | NFR-7, CON-2 | measurement | proposed |
+| AC-19 | First text of a chat answer on the light model within a time set in *Plan*; with a review slice running, a chat message still gets its first text within the same limit; the character runs at 30+ fps on a mid-range phone and 60 on desktop. | NFR-7, CON-2 | measurement | confirmed (D-29); the latency number is set in Plan |
 | AC-20 | Constraints hold: licence file present and no paid API in the web log (CON-1); the technology choices of CON-3 are kept; the login page tells users that everything is visible to all (CON-6). | CON-1, CON-3 | inspection | proposed |
 | AC-21 | For an answer produced by a task, the user opens a step-by-step account whose accurate part comes from event data, not from a model; the status line shows mood and activity. | FR-4 | test, demonstration | proposed |
 | AC-22 | On the lookup suites the cheap first try needs fewer than 15 model calls per question on the light model; a learned choice, if any, is logged next to the default and can be switched off; variants are compared on the same cases with repeats. | NFR-2, FR-17, FR-18 | measurement | proposed |
 | AC-23 | `/light!` and `/full!` switch the model and free GPU memory; an unreachable model server gives a plain message; a task that reaches the internet is started only by a command of a user; `/search` lists findings from SearXNG without composing an answer. | FR-8, FR-6 | test, demonstration | proposed |
-| AC-24 | *Later (FR-14 is proposed):* the memory test set (store, update, contradict, recall, unknown) is passed at least as well as today's summary-based dreaming at equal or lower token cost; every record has its source and a user can inspect, correct and delete it. | FR-14 | measurement | proposed |
+| AC-24 | *Later (FR-14 is proposed):* the memory test set (store, update, contradict, recall, unknown) is passed at least as well as today's summary-based dreaming at equal or lower token cost; every record has its source and a user can inspect, correct and delete it. | FR-14 | measurement | later, not in the first version (confirmed) |
 | AC-25 | The speech-rule detectors keep their recorded precision and recall on the behaviour suite; a violation is repaired silently and never enters the memory as a scolding. | FR-15 | test, measurement | proposed |
-| AC-26 | *Optional (FR-13 is off by default):* on the retro-discovery cases the scout proposes the known method in its top 3 and marks a candidate verified only when an executable test passed. | FR-13 | measurement | proposed |
+| AC-26 | *Optional (FR-13 is off by default):* on the retro-discovery cases the scout proposes the known method in its top 3 and marks a candidate verified only when an executable test passed. | FR-13 | measurement | later, optional, not in the first version (confirmed) |
 
 ## 7. Risks and open questions
-| Risk / question | Impact | Mitigation / owner |
-|---|---|---|
-| No holdout and starter-sized suites; labels by one person | verification and research decisions come out NOT DECIDED or noise | grow suites, split holdout, second labeller for the holdout (Plan; owner) |
-| All baselines are for the light model | model change or full model has no reference | new baselines per pin (Plan) |
-| No quality criterion for chat or persona | the largest user-visible part is unmeasured | owner supplies example cases; decide whether a judge rubric is used (this review) |
-| Model digests unknown | pins incomplete | owner runs `ollama list` with Ollama up |
-| Reruns of the old version gave vastly different outputs (owner's observation); causes may be the model (sampling), the live web (different pages), the order of results, or the pipeline | FR-9, FR-10, AC-2 | measure stability first on recorded pages with a pinned seed and temperature, then live; the harness already reports it (single voice 100 %, cops 96 %, trial 92 % on `verdicts`) |
-| Memory is the early summary design (high cost of a wrong summary) | wrong "facts" persist | prioritise FR-14 after the review baseline, or earlier? (owner) |
-| Review is the largest open item; real reference cases paused; labels need the owner | schedule | continue 2c with the owner's labels (owner) |
-| SysML not parsed by a tool | syntax errors | load into Syside or the pilot implementation, fix per `KNOWN_RISKS.md` |
-| Unit-test style without pytest markers | trace warnings | accept, or add markers (Plan) |
-| Chat latency target undefined ("seconds") | NFR-7 not testable | choose a number from measured first-token times (Plan) |
-| Translation: answers in the question's language, sources in English | claim checking across languages | undecided (baseline section 4, item 11) |
-| Tailscale never tried | NFR-6 unproven | try with a phone outside the network (owner) |
-| Some voice clips (`Navi_*.wav`) look like samples from a game; they are outside git and a character pack with them could not be shared | FR-31, FR-24 | mitigated by decision D-26: if the samples do not exist, create "Hello!", "Hey!" and "Listen!" with the TTS and use those as the defaults; keep the samples out of shared packs |
-| Behaviour layer questions (which behaviours, daily digest, facts never stored) | FR-14, FR-15 scope | interview (this review) |
+Step 7 of the review (2026-10-24). State: **open** (needs a decision or work), **mitigated** (a measure is decided), **resolved**.
+
+| Risk / question | Impact | Mitigation / owner | State |
+|---|---|---|---|
+| The SysML text was never parsed by a tool | syntax errors hide in the model | `architecture.sysml` and both supplements load clean in the pilot implementation (owner, 2026-10-24); keep `tools/check_sysml_model.py` for ids, coverage and parity | resolved |
+| No holdout, starter-sized suites, labels by one person | decisions come out NOT DECIDED or noise | suites from VitaminC and Wikidata with a seeded hash split are built (`tools/make_external_suite.py`: 812 cases, about 110 wrong claims in the holdout); the owner audits a sample with `tools/label_agreement.py`; the single-labeller limit is recorded in `eval-spec.md` (Plan) | mitigated |
+| The benchmark sources are in the models' training data (Wikipedia, Wikidata); VitaminC is CC BY-SA 3.0 and may not be compatible with the GPL-3.0 repository | results on no-evidence pairs may measure memory; licence conflict if committed | keep the VitaminC cases out of git, commit script, seed and manifest; compare evidence-based with no-evidence results | open |
+| All baselines are for the light model | model change or full model has no reference | new baselines per pin (Plan) | open |
+| Model digests unknown (Ollama was not running) | pins incomplete, results not attributable | owner runs `ollama list` with Ollama up; pins with seed and temperature go into `eval-spec.md` | open |
+| Reruns of the old version gave vastly different outputs (owner's observation) | FR-9, FR-10, AC-2(b) | measure stability first on recorded pages with a pinned seed and temperature 0, then live with stored sources; matching rule in code | open |
+| No quality criterion for chat in character | the largest user-visible part is unmeasured | AC-8 (check dialogues, reactions, weekly score); **someone has to write the check dialogues from `calibration.txt`** (it is now a shared configuration file, D-22) | open |
+| Login is new and security-critical (passwords, sessions, throttling, owner-created accounts) | a weak login exposes everything that every user can see | use a vetted library and a slow password hash, no own cryptography; AC-14; HTTPS only (CON-4) | open (Plan) |
+| Moving the state from files to PostgreSQL | lost or doubled data while migrating | storage interfaces first (stage 0 of `deploy/REQUIREMENTS_DB.md`), file export and seed, backup before any migration, AC-15 | open (Plan) |
+| Any user can edit workflows, prompts, personas and context graphs for everyone (CON-6, TB-edit) | one wrong edit changes MIA for all | validation before saving, every edit a new version with author, restore of a former version, a model's edit stays a proposal (FR-22, FR-7) | mitigated |
+| One model server and one 16 GB GPU shared by several users and long tasks | chat freezes during a review slice; model switch affects all | chat priority (NFR-7), confirmation for `/light!` and `/full!`, measured first-token times (AC-19) | mitigated |
+| Chat latency target undefined ("seconds") | NFR-7 not testable | choose a number from measured first-token times (Plan) | open |
+| Memory is the early summary design (a wrong summary becomes a permanent fact) | wrong "facts" persist | FR-14 and AC-24 are **later** (decided); until then no new facts are added to the memory by the web | mitigated |
+| The literature review is the largest open item; real reference cases are paused; labels need the owner | schedule, the first success criterion | continue 2c with the owner's labels, then 2d to 2f (Plan) | open |
+| The other requirement documents (`ui/REQUIREMENTS_*.md`, `deploy/REQUIREMENTS_DB.md`, `README.md`) now disagree with this HLS (single user, tokens, files as truth, per-run graph, no viewer, the video design in the README) | two sources of truth, the old confusion again | add a header to each pointing to `specs/mia` and listing what it supersedes; update the README | open |
+| One person does the building, the labelling and the approving | no independent check | accept, record it; open sources provide independent labels | accepted |
+| Translation: answers in the question's language, sources in English | claim checking across languages | undecided | open |
+| Tailscale never tried | NFR-6 unproven | try with a phone outside the network (owner) | open |
+| Some voice clips (`Navi_*.wav`) look like game samples | FR-31, FR-24, sharing a character pack | decision D-26: generate the defaults with the TTS; keep the samples out of shared packs | mitigated |
+| Daily digest of the memory, facts never to be stored (behaviour layer questions) | scope of FR-14, FR-15 | decide when FR-14 starts (later) | deferred |
+| Unit-test style without pytest markers | trace warnings | accept or add markers (Plan) | accepted |
+
+### Open questions for the owner
+1. Model pins: which two models are the pins (the setup names `gemma4:12b-it-qat` and `gemma4:26b`), and what are their digests, seed and temperature?
+2. The first-token time of a chat answer that you accept (the number for AC-19).
+3. Who writes the check dialogues for AC-8, and may the coding agent read `calibration.txt` to draft them (it is shared configuration now, D-22)?
+4. Language of the answers when the question is not English.
+5. Order of the work in Plan. Proposal: (A) baselines of the verification suites with pins and the stability measurement; (B) storage layer, PostgreSQL and accounts; (C) the specification format of FR-26 and the library in the database; (D) the literature review (2c to 2f); (E) the lookup through the path of FR-20 within one month of (D); then the graph app, character variants, the feedback system and tasks and memos.
 
 ### Plausibility of the high-level requirements (explore-phase rule, 2026-10-24)
 Quick thought per requirement: is there a precedent, does a rough estimate fit, is a spike needed. Plan records the evidence per requirement; only the doubtful ones are listed.
 
 | Requirement | Verdict | Why | Spike or measurement before Plan |
 |---|---|---|---|
-| FR-9 (near-miss numbers) | doubtful | the lead of the cops style rests on 3 distinct claims; sign test not significant | grow the suite to 30+ near-miss claims, with a holdout |
+| FR-9 (near-miss numbers) | doubtful | the lead of the cops style rests on 3 distinct claims; sign test not significant | suites with about 110 wrong claims in the holdout are built (`tools/make_external_suite.py`); run the baselines with pinned models |
 | FR-11 literature review | doubtful | recall of a 12B model on papers is unmeasured; the real reference cases are paused | finish 2c with the owner's labels, run the baseline (2e/2f) |
 | FR-13 method transfer | doubtful | LLM analogy mining struggles on scientific text (RV research notes); off by default | retro-discovery on the two known cases of the owner |
 | FR-14 memory | doubtful | a 12B model must extract and verify records; today's dreaming has a known silent loss | memory test set with today's dreaming as baseline |
