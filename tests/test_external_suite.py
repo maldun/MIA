@@ -19,6 +19,7 @@ import make_external_suite as M                          # noqa: E402
 import label_agreement as LA                             # noqa: E402
 import tag_ambiguous as TA                               # noqa: E402
 import tag_requirements as TR                            # noqa: E402
+import promote_drafts as PD                              # noqa: E402
 
 
 class SplitAndTwins(unittest.TestCase):
@@ -158,6 +159,27 @@ class TagRequirements(unittest.TestCase):
                 self.assertEqual(out["w"], ["number", "req:R-1", "req:R-5"])
                 self.assertEqual(out["t"], ["number", "req:R-2", "req:R-5"])
                 self.assertEqual(out["n"], ["number", "req:R-5"])
+
+
+class PromoteDrafts(unittest.TestCase):
+    def test_dry_run_writes_nothing_and_labelled_writes_two_folders(self):
+        with tempfile.TemporaryDirectory() as d:
+            drafts = os.path.join(d, "drafts.jsonl")
+            rows = [{"id": "a", "tags": ["x", "source:draft", "split:dev"], "truth": None}, {"id": "b", "tags": ["x", "source:draft", "split:holdout"], "truth": False},
+                    {"id": "c", "tags": ["x", "source:draft", "split:holdout"], "truth": False}]
+            with open(drafts, "w") as f:
+                f.write("".join(json.dumps(r) + "\n" for r in rows))
+            suites = os.path.join(d, "suites")
+            os.makedirs(suites)
+            self.assertEqual(PD.main(drafts, "inj", suites, False), 0)
+            self.assertEqual(os.listdir(suites), [])
+            self.assertEqual(PD.main(drafts, "inj", suites, True), 0)
+            self.assertEqual(sorted(os.listdir(suites)), ["inj", "inj.holdout"])
+            hold = [json.loads(l) for l in open(os.path.join(suites, "inj.holdout", "cases.jsonl"))]
+            self.assertEqual([c["id"] for c in hold], ["b", "c"])
+            self.assertIn("label:people", hold[0]["tags"])
+            self.assertNotIn("source:draft", hold[0]["tags"])
+            self.assertEqual(PD.main(drafts, "inj", suites, True), 1)          # never overwrites
 
 
 if __name__ == "__main__":
