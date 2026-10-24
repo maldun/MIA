@@ -785,3 +785,11 @@ class CheckRunner:
             if fail_fast and outcome["status"] == FAIL:
                 break
         return dict(combine(results), results=results, trace=trace, seconds=round(time.time() - started, 3))
+
+
+# --- number check (Plan iteration 1, specs/number-gate; STUB until task T-xx of plan.md) ---------------------------------------------------
+
+def number_check(claim, evidence):
+    """STUB: compares the number of a claim with the values of the same quantity in the evidence (REQ-NUM-001 to REQ-NUM-006).
+    Returns result(status, "number_check", detail) with status pass, fail, inconclusive or not_applicable. Not implemented: the status is deliberately outside the vocabulary."""
+    return result("unimplemented", "number_check", "stub: the number check is not written yet")

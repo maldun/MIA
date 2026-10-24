@@ -1,0 +1,13 @@
+{
+ "_note": "Measured baselines of the benchmarks (specs/number-gate/test-spec.md). Protected: change only through a plan amendment.",
+ "BM-GATE-001": {
+  "verifies": "NFR-BUD-001",
+  "budget_median_seconds": 10.0,
+  "regression_factor": 1.2,
+  "reference": "cops 6.2 s per claim on the old suite verdicts (eval/baselines/verdicts-styles.md, 2026-10-19, light model, mean)",
+  "median_seconds": null,
+  "measured": null,
+  "pin": "MP-light sha256:38044be4f923e5a55264ed7df4eaac2676651a905f735197c504045140c02bd3",
+  "status": "to be measured at task T-06 on the new suites"
+ }
+}

@@ -210,3 +210,25 @@ def compare(records_a, records_b):
     only_b = [c for c in shared if b[c] > a[c]]
     return {"cases": len(shared), "a_right": sum(a[c] for c in shared), "b_right": sum(b[c] for c in shared), "only_a": only_a, "only_b": only_b,
             "p_value": sign_test(len(only_a), len(only_b)), "missing_in_a": sorted(set(b) - set(a)), "missing_in_b": sorted(set(a) - set(b))}
+
+
+# --- stability of repeats (Plan iteration 1, specs/number-gate; STUBS until the tasks of plan.md) ------------------------------------------------
+
+def same_facts(facts_a, facts_b):
+    """STUB (REQ-STAB-001): True when both lists hold the same facts; a fact is {"entity", "number", "unit", "quote"}, compared by normalised parts, order and wording ignored."""
+    return None
+
+
+def case_is_stable(repeats):
+    """STUB (REQ-STAB-001): True when all repeats of a case ({"status", "facts", ...}) have the same status and the same facts."""
+    return False
+
+
+def repeat_lists(records):
+    """STUB (IF-004): {case id: [{"status", "facts"}, ...]} for the cases with at least two repeats."""
+    return {}
+
+
+def stability_report(records):
+    """STUB (REQ-STAB-002): {"n": cases with repeats, "share": share of stable cases, "low", "high": Wilson 95 % interval, "unstable": [case ids]}."""
+    return {"n": 0, "share": 0.0, "low": 0.0, "high": 0.0, "unstable": []}

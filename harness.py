@@ -43,7 +43,8 @@ class Suite:
     def __init__(self, name, description, target, cases, path=""):
         self.name, self.description, self.target, self.cases, self.path = name, description, target, cases, path
 
-    def select(self, tags=None, only=None, limit=None):
+    def select(self, tags=None, only=None, limit=None, include_retired=False):
+        # STUB (REQ-EVAL-002): include_retired is accepted and ignored until the task of plan.md
         cases = self.cases
         if only:
             cases = [c for c in cases if c["id"] in only]
@@ -402,7 +403,8 @@ class Harness:
         return ("pass" if score["ok"] else "fail"), {"claims": claims, "score": score}
 
     # -- a run --
-    def run(self, suite, variant=None, repeats=1, tags=None, only=None, limit=None, progress=None):
+    def run(self, suite, variant=None, repeats=1, tags=None, only=None, limit=None, progress=None, pin=None, include_retired=False):
+        # STUB (REQ-EVAL-001, -002, -003): pin and include_retired are accepted and ignored until the tasks of plan.md
         variant = dict({"name": "default"}, **(variant or {}))
         cases = suite.select(tags, only, limit)
         target = self.targets.get(suite.target["kind"])
@@ -547,3 +549,15 @@ def format_compare(run_a, run_b):
     if c["missing_in_a"] or c["missing_in_b"]:
         lines.append("   not in both: %d only in B, %d only in A" % (len(c["missing_in_a"]), len(c["missing_in_b"])))
     return "\n".join(lines)
+
+
+# --- Plan iteration 1 (specs/number-gate): sample of a suite and the input of a case; STUBS until the tasks of plan.md -------------------------
+
+def sample_cases(cases, n, seed):
+    """STUB (REQ-EVAL-004): n active cases chosen with the seed, the cases of a pair (tag pair:<id>) kept together."""
+    return []
+
+
+def case_input(case, pin):
+    """STUB (IF-005): what the harness hands to the gate: claim, evidence, seed and temperature of the pin."""
+    return {}
