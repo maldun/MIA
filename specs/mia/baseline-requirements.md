@@ -93,7 +93,7 @@ Status is taken from `ui/README.md` and the commit log, not from the requirement
 | TK-7 | Storytelling: premise, outline, scene loop with state file, consistency checks, user steers each scene | CORE 13.2 | Proposed |
 | TK-8 | Character variant shown for the active task; the chat shows the active task | CORE 7, V5 | Proposed |
 | TK-9 | Models per skill (profile or named model), per role; context size per skill; long text never stuffed whole; embeddings and classifiers on the CPU | CORE 6 (M1 to M5) | Partly |
-| TK-10 | Graph viewer and editor | CORE 10 | **Dropped** (text tools and DOT / Mermaid export instead; edits by models are proposals as diffs, G3) |
+| TK-10 | Graph viewer and editor | CORE 10 | ~~Dropped 2026-10-22~~ **Reversed 2026-10-24 (D-9): a graph app on the shared database is wanted**; edits by models stay proposals as diffs (G3) |
 
 ### 3.6 Verification and trust
 
@@ -177,7 +177,7 @@ Found while collecting. None of these is fatal; each should be settled once and 
 9. **Dropped but still referenced.** P6 of CORE ("viewer first, editor later") and the phase list `5. Graph viewer and editor` conflict with section 10, which drops both.
 10. **Multi-instance vs single instance.** CHAT 6.4 and the file storage assume one instance with one running exchange at a time; DB assumes several. Postponed, but any new component should use the storage interfaces proposed there so the door stays open.
 11. **Language.** CORE asks where translation happens (research answers in the question's language, sources in English); RES open question 4 repeats it. Undecided.
-12. **Open questions that block requirements** (collected): editor protection beyond Tailscale (CHAR Q5, answered by the token); which behaviours matter most and whether the daily memory digest is wanted (CORE 16); accessories per task variant; which Qwen model is usable on 12 GB (M3); user PDF library as a source (RES Q3); report figure as percent or bands until calibrated (RES Q7); roles as views first (RES Q8); is method transfer wanted in every review (RES Q0).
+12. **Open questions that block requirements** (collected): editor protection beyond Tailscale (CHAR Q5, answered by the token); which behaviours matter most and whether the daily memory digest is wanted (CORE 16); accessories per task variant; which Qwen model is usable on 16 GB (M3); user PDF library as a source (RES Q3); report figure as percent or bands until calibrated (RES Q7); roles as views first (RES Q8); is method transfer wanted in every review (RES Q0).
 
 ## 5. Quantified targets found in the sources
 

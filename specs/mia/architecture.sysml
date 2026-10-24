@@ -672,7 +672,8 @@ package MIA_Requirements {
     }
     requirement def <'CON-2'> HardwareEnvelope {
         subject mia : MiaSystem;
-        doc /* One consumer GPU with 12 GB, 62 GB RAM, one language model loaded at a time. */
+        doc /* One consumer GPU with 16 GB (RX 7800 XT), 62 GB RAM, one language model loaded at a time;
+               with several users requests queue. */
         attribute gpuMemoryGB : Real = 16;
         attribute loadedModels : Integer = 1;
     }
@@ -683,11 +684,23 @@ package MIA_Requirements {
     }
     requirement def <'CON-4'> SecureContext {
         subject mia : MiaSystem;
-        doc /* The 3D character runs only on localhost or over HTTPS. */
+        doc /* The 3D character runs only on localhost or over HTTPS; passwords are sent only over HTTPS or on localhost. */
     }
     requirement def <'CON-5'> PrivateNetworkOnly {
         subject mia : MiaSystem;
         doc /* Remote access only inside a private network (Tailscale); no public port, never tailscale funnel. */
+    }
+
+    requirement def <'CON-6'> TrustedUsersOnly {
+        subject mia : MiaSystem;
+        doc /* A handful of trusted users; all see and may edit everything (skills, workflows, presets, persona, memory);
+               a change applies to all at once. No roles or per-user permissions inside MIA. */
+        attribute maxUsers : Integer = 10;
+    }
+    requirement def <'CON-7'> SharedDatabase {
+        subject mia : MiaSystem;
+        doc /* One shared database reachable by MIA and the graph app; MIA's state stays behind storage interfaces.
+               The engine is not decided (PostgreSQL in deploy/REQUIREMENTS_DB.md). */
     }
 
     // ================================================================ interaction
@@ -955,6 +968,8 @@ package MIA_Requirements {
         requirement con3 : TechnologyChoices;
         requirement con4 : SecureContext;
         requirement con5 : PrivateNetworkOnly;
+        requirement con6 : TrustedUsersOnly;
+        requirement con7 : SharedDatabase;
 
         requirement fr1 : Conversation;
         requirement fr2 : EmbodiedCharacter;
@@ -998,6 +1013,8 @@ package MIA_Allocation {
     satisfy con3 by mia;
     satisfy con4 by mia;
     satisfy con5 by mia;
+    satisfy con6 by mia;
+    satisfy con7 by mia;
     satisfy fr1 by mia;
     satisfy fr2 by mia;
     satisfy fr3 by mia;
@@ -1036,6 +1053,8 @@ package MIA_Allocation {
     allocate con3 to mia.frontEnd.characterRenderer;
     allocate con4 to mia.operation.httpsAccess;
     allocate con5 to mia.operation.httpsAccess;
+    allocate con6 to mia.webApp.accessControl;
+    allocate con7 to mia.persistence.storageLayer;
 
     // interaction
     allocate fr1 to mia.frontEnd.chatPage;

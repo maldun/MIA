@@ -16,9 +16,9 @@ Why a fresh start now: five requirement documents grew side by side with the cod
 
 ## 2. Scope
 ### In scope
-**Accounts and login for several users, and a shared database** for the state that applications share (D-1). Everything MIA does on the host: the conversation (chat page, server, history), the embodied character (expressions, gestures, editor), the voice, the task runtime (skills, pipelines, library, strategies), verification and its sandbox, research (lookup now, literature review next), memory and behaviour feedback, the log and its views, the evaluation harness, the operation (configuration, containers, access, shutdown).
+**Accounts and login for several trusted users, a shared database** for the state that applications share (D-1), and **a graph app** that visualises and edits the workflow graphs on that database (D-9). Everything MIA does on the host: the conversation (chat page, server, history), the embodied character (expressions, gestures, editor), the voice, the task runtime (skills, pipelines, library, strategies), verification and its sandbox, research (lookup now, literature review next), memory and behaviour feedback, the log and its views, the evaluation harness, the operation (configuration, containers, access, shutdown).
 ### Out of scope (non-goals)
-Fine-tuning the Gemma model (until the learning ladder reaches distillation and the owner decides so); a generic workflow engine; legs and feet of the character; voice input, attachments, installable app and offline mode of the chat; a graph viewer or editor (dropped, text tools and DOT/Mermaid export instead); paid APIs.
+Fine-tuning the Gemma model (until the learning ladder reaches distillation and the owner decides so); a generic workflow engine; legs and feet of the character; voice input, attachments, installable app and offline mode of the chat; paid APIs.
 ### Known shortcuts (prototype)
 The persona is a text file outside git (`calibration.txt`); the editor and chat have one shared token and no login today (to be replaced by accounts, D-1); Tailscale access has not been tried against a real tailnet; the verification styles and the research suites are starter-sized; evaluation labels were set by the owner alone; SysML text is not parsed by a tool yet.
 
@@ -58,13 +58,15 @@ The persona is a text file outside git (`calibration.txt`); the editor and chat 
 
 ### 3.3 Constraints
 - **CON-1** Free and open: local models through Ollama, self-hosted search, no paid API; licence GPL-3.0-or-later.
-- **CON-2** Hardware: Ryzen 9 5900X (24 threads), RX 7800 XT with **16 GB** VRAM, 62 GB RAM (measured 2026-10-24); one language model loaded at a time (`OLLAMA_MAX_LOADED_MODELS=1`).
+- **CON-2** Hardware: Ryzen 9 5900X (24 threads), RX 7800 XT with **16 GB** VRAM, 62 GB RAM (measured 2026-10-24); one language model loaded at a time (`OLLAMA_MAX_LOADED_MODELS=1`). With several users the model server serves one request at a time; the others wait in a queue.
 - **CON-3** Python 3.11 to 3.13 (3.12 tested); Godot 4.6.1 with GDScript only and the Compatibility renderer; the chat page in plain HTML, CSS and ES modules without build step or UI framework.
-- **CON-4** The 3D character runs only on `localhost` or over HTTPS.
+- **CON-4** The 3D character runs only on `localhost` or over HTTPS; passwords are sent only over HTTPS or on `localhost`.
 - **CON-5** Remote access only inside a private network (Tailscale); no public port, never `tailscale funnel`.
+- **CON-6** Trusted users only: a handful of people; all see and may edit everything (skills, workflows, presets, persona, memory); a change applies to all at once. There are no roles or per-user permissions inside MIA.
+- **CON-7** One shared database, reachable by MIA and the graph app; MIA's state stays behind storage interfaces. The engine is not decided here (PostgreSQL in `deploy/REQUIREMENTS_DB.md`).
 
 ### 3.4 Target environment and lifetime
-Fedora 43 (KDE, Wayland), podman, the owner's workstation; viewers on phones and other computers in the home network and the tailnet. NVIDIA and CPU-only modes exist but are not the target. Lifetime: long-term and evolving; the owner maintains it. It is not a frozen demonstrator, so deploy and freeze are about the compose stack and its backups, not about shipping a package.
+Fedora 43 (KDE, Wayland), podman, the owner's workstation; a handful of trusted users on phones and other computers in the home network and the tailnet. The compose stack gains a database service and the graph app; backups include the database. NVIDIA and CPU-only modes exist but are not the target. Lifetime: long-term and evolving; the owner maintains it. It is not a frozen demonstrator, so deploy and freeze are about the compose stack and its backups, not about shipping a package.
 
 ### 3.5 Mapping from the first draft
 | Draft id | Here | Draft id | Here | Draft id | Here |
