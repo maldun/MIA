@@ -1,0 +1,31 @@
+digraph C {
+rankdir=LR; fontname="Helvetica"; node [fontname="Helvetica", fontsize=10, shape=box];
+label="Agent view: untrusted text into model steps (orange = model step, grey = code, label = trust boundary)"; labelloc=t; fontsize=16;
+"intake" [label="intake", style=filled, fillcolor="#e6e6e6"];
+"fetcher" [label="fetcher", style=filled, fillcolor="#e6e6e6"];
+"scholar" [label="scholar", style=filled, fillcolor="#e6e6e6"];
+"historyStore" [label="historyStore", style=filled, fillcolor="#e6e6e6"];
+"sandbox" [label="sandbox", style=filled, fillcolor="#e6e6e6"];
+"chat" [label="chat\nTB-user\nMP-full", style="filled,rounded", fillcolor="#ffd8a8"];
+"planner" [label="planner\nTB-user\nMP-light", style="filled,rounded", fillcolor="#ffd8a8"];
+"extractor" [label="extractor\nTB-web\nMP-light", style="filled,rounded", fillcolor="#ffd8a8"];
+"judge" [label="judge\nTB-web\nMP-light", style="filled,rounded", fillcolor="#ffd8a8"];
+"synthesiser" [label="synthesiser\nTB-web\nMP-full", style="filled,rounded", fillcolor="#ffd8a8"];
+"scriptWriter" [label="scriptWriter\nTB-code\nMP-light", style="filled,rounded", fillcolor="#ffd8a8"];
+"expression" [label="expression\nTB-user\nMP-light", style="filled,rounded", fillcolor="#ffd8a8"];
+"dreamer" [label="dreamer\nTB-history\nMP-light", style="filled,rounded", fillcolor="#ffd8a8"];
+"screener" [label="screener\nTB-paper\nMP-light", style="filled,rounded", fillcolor="#ffd8a8"];
+"reviewPlanner" [label="reviewPlanner\nTB-user\nMP-full", style="filled,rounded", fillcolor="#ffd8a8"];
+"intake" -> "chat" [label="UserMessage\n(user)", fontsize=8];
+"intake" -> "planner" [label="UserMessage\n(user)", fontsize=8];
+"intake" -> "expression" [label="UserMessage\n(user)", fontsize=8];
+"intake" -> "reviewPlanner" [label="UserMessage\n(user)", fontsize=8];
+"fetcher" -> "extractor" [label="FetchedPageText\n(web)", fontsize=8];
+"fetcher" -> "judge" [label="FetchedPageText\n(web)", fontsize=8];
+"fetcher" -> "synthesiser" [label="FetchedPageText\n(web)", fontsize=8];
+"fetcher" -> "scriptWriter" [label="FetchedPageText\n(web)", fontsize=8];
+"scholar" -> "screener" [label="PaperText\n(web)", fontsize=8];
+"historyStore" -> "chat" [label="ChatHistory\n(model)", fontsize=8];
+"historyStore" -> "dreamer" [label="ChatHistory\n(model)", fontsize=8];
+"scriptWriter" -> "sandbox" [label="GeneratedScript\n(model)", fontsize=8];
+}
