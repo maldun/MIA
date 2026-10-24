@@ -9,8 +9,9 @@ Deterministic tests run with the fake model server (`FakeServer` of the existing
 | Test ID | Verifies | Level | Setup / inputs | Expected result | Limit / tolerance |
 |---|---|---|---|---|---|
 | TC-GATE-001 | REQ-GATE-001 | Component | 6 claims with a number and evidence, 2 claims with a number and empty evidence, fake model, run log | for the 6 claims the event check_run of the number check precedes the first model call; for the 2 claims no number check runs | exact |
-| TC-GATE-002 | REQ-GATE-002 | Component | fake number check returning fail for a claim whose evidence would let the fake judge say supported | verdict refuted, number of model calls 0 | exact |
-| TC-GATE-003 | REQ-GATE-003 | Component | fake number check returning pass, then inconclusive, then not_applicable; style cops; once with style single | cops: argue for, argue against, judge once each in this order, the judge input contains the check line; single: 1 model call | exact |
+| TC-GATE-002 | REQ-GATE-002 | Component | scripted judge answering supported to every prompt; claim 1,200 m, evidence "1,020 m" (the check says fail) | the judge input contains "Number check: fail"; 3 model calls; the verdict is the judge's (supported) | exact |
+| TC-GATE-003 | REQ-GATE-003 | Component | claims whose check returns pass, then inconclusive; style cops; once with style single | cops: argue for, argue against, judge once each in this order, the judge input contains the check line; single: 1 model call | exact |
+| TC-GATE-006 | REQ-GATE-006 | Component | 5 claims with a number and empty evidence, scripted model | verdict unclear, status inconclusive, 0 model calls, no facts | exact |
 | TC-GATE-004 | REQ-GATE-004 | Component | the 20 claims without a number of the suite `verdicts`, fake model with scripted replies | verdict and number of model calls equal those of verify.single@1 on the same replies | exact |
 | TC-GATE-005 | REQ-GATE-005 | Component | evidence of 30000 characters, then 4000, then 3999 | each argue and judge input carries at most 4000 characters of evidence; 4000 and 3999 are passed whole | exact |
 | TC-NUM-001 | REQ-NUM-001 | Component | 1,200 m vs 1,020 m; 1,200 m vs 1,200 m; 1,200 m vs 1,210 m; 4.8 million vs 4.83 million; 4.8 million vs 4.9 million | fail; pass; fail; pass; fail | exact |
@@ -22,7 +23,7 @@ Deterministic tests run with the fake model server (`FakeServer` of the existing
 | TC-ARG-001 | REQ-ARG-001 | Contract | outputs with 0, 1, 2, 4 and 5 points; points of 2, 3, 400 and 401 characters | accepted: 1, 2, 4 points and 3, 400 characters; rejected: 0 and 5 points, 2 and 401 characters | exact |
 | TC-IF-001 | IF-001 | Contract | the 4 acceptance claims of REQ-NUM-001 to REQ-NUM-004 | status fail or pass, inconclusive, pass or fail by bound, not_applicable in turn; detail of at most 200 characters | exact |
 | TC-IF-002 | IF-002 | Contract | judge outputs with the verdicts supported, refuted, unclear, maybe; reasons of 2, 3, 600 and 601 characters; confidence 0, 1 and 1.1 | accepted: the three verdicts, reasons of 3 and 600, confidence 0 and 1; rejected: maybe, 2, 601 and 1.1 | exact |
-| TC-IF-003 | IF-003 | Contract | a claim decided by the number check; a claim decided by the cops style | calls 0 and facts empty; calls 3; verdict and status agree by supported-pass, refuted-fail, unclear-inconclusive | exact |
+| TC-IF-003 | IF-003 | Contract | a claim with a number and empty evidence; a claim judged by the cops style | calls 0 and facts empty; calls 3; verdict and status agree by supported-pass, refuted-fail, unclear-inconclusive | exact |
 | TC-IF-004 | IF-004 | Contract | 4 cases with 3 repeats, 1 case with 1 repeat | the metric receives 4 lists of 3 entries with status and facts; the single repeat is not passed | exact |
 | TC-IF-005 | IF-005 | Contract | fake gate, 3 cases, pin seed 7 and temperature 0 | the harness hands over 4 fields per case: claim, evidence, seed 7, temperature 0 | exact |
 | TC-IF-006 | IF-006 | Contract | the examples of TC-IF-002 against the schema of view.verdict@1 | same accepts and rejects (verdict, reason; no confidence required) | exact |
@@ -57,7 +58,7 @@ The statistical criteria are eval criteria; they are specified in `eval-spec.md`
 
 | Test ID | Verifies | Target | Conditions | Expected result |
 |---|---|---|---|---|
-| SMOKE-GATE-001 | REQ-GATE-002, REQ-GATE-003 | the MIA compose stack with its Ollama | 5 cases tagged smoke, chosen at T-06 by the owner (3 from verdicts_wikidata dev, 2 from verdicts_vitaminc dev), pin MP-light | the same verdict as in the release run for every case |
+| SMOKE-GATE-001 | REQ-GATE-003, REQ-GATE-006 | the MIA compose stack with its Ollama | 5 cases tagged smoke, chosen at T-06 by the owner (3 from verdicts_wikidata dev, 2 from verdicts_vitaminc dev), pin MP-light | the same verdict as in the release run for every case; unclear for the Wikidata cases |
 | SMOKE-GATE-002 | REQ-EVAL-001 | the same | one run of 5 smoke cases | the run header names the digest of the model that the server really holds |
 
 ## Validation criteria (checked in Phase 7)

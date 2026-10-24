@@ -102,7 +102,7 @@ package NumberGate {
         action def CombineVerdict { in item check : CheckResult; in item ruling : Ruling; out item verdict : Verdict; }
 
         action def VerifyClaim {
-            doc /* One claim from receipt to verdict. A failed number check ends here (REQ-GATE-002); a claim without a number takes the single voice (REQ-GATE-004); the cops steps run otherwise (REQ-GATE-003). */
+            doc /* One claim from receipt to verdict. A claim with a number and no evidence ends here with unclear (REQ-GATE-006); a failed number check goes to the judge as a line (REQ-GATE-002); a claim without a number takes the single voice (REQ-GATE-004); the cops steps run otherwise (REQ-GATE-003). */
             action receiveClaim : ReceiveClaim;
             action checkNumber : CheckNumber;
             action prepareEvidence : PrepareEvidence;
@@ -354,10 +354,11 @@ package NumberGate {
         private import System::*;
 
         requirement def <'REQ-GATE-001'> NumberCheckFirst { subject gate : VerificationGate; }
-        requirement def <'REQ-GATE-002'> FailedCheckDecides { subject gate : VerificationGate; }
+        requirement def <'REQ-GATE-002'> FailedCheckGoesToJudge { subject gate : VerificationGate; }
         requirement def <'REQ-GATE-003'> StyleForOpenClaims { subject gate : VerificationGate; }
         requirement def <'REQ-GATE-004'> ClaimsWithoutNumber { subject gate : VerificationGate; }
         requirement def <'REQ-GATE-005'> EvidenceSizeLimit { subject gate : VerificationGate; }
+        requirement def <'REQ-GATE-006'> NoEvidenceNoVerdict { subject gate : VerificationGate; }
         requirement def <'REQ-NUM-001'> ContradictingNumber { subject chk : NumberCheck; }
         requirement def <'REQ-NUM-002'> NoNumberInEvidence { subject chk : NumberCheck; }
         requirement def <'REQ-NUM-003'> ClaimsWithBound { subject chk : NumberCheck; }
@@ -374,7 +375,7 @@ package NumberGate {
         requirement def <'REQ-VER-001'> WrongClaimsWithEvidence { subject gate : VerificationGate; }
         requirement def <'REQ-VER-002'> WrongClaimsWithoutEvidence { subject gate : VerificationGate; }
         requirement def <'REQ-VER-003'> TrueClaimsKeptWithEvidence { subject gate : VerificationGate; }
-        requirement def <'REQ-VER-004'> TrueClaimsKeptWithoutEvidence { subject gate : VerificationGate; }
+        requirement def <'REQ-VER-004'> NoTrueClaimRefutedWithoutEvidence { subject gate : VerificationGate; }
         requirement def <'REQ-VER-005'> StableVerdictsWithEvidence { subject gate : VerificationGate; }
         requirement def <'REQ-VER-006'> StableVerdictsWithoutEvidence { subject gate : VerificationGate; }
         requirement def <'REQ-VER-007'> InstructionsInEvidence { subject gate : VerificationGate; }
@@ -388,10 +389,11 @@ package NumberGate {
         requirement def <'NFR-BUD-001'> TimePerClaim { subject gate : VerificationGate; }
 
         requirement reqGate001 : NumberCheckFirst;
-        requirement reqGate002 : FailedCheckDecides;
+        requirement reqGate002 : FailedCheckGoesToJudge;
         requirement reqGate003 : StyleForOpenClaims;
         requirement reqGate004 : ClaimsWithoutNumber;
         requirement reqGate005 : EvidenceSizeLimit;
+        requirement reqGate006 : NoEvidenceNoVerdict;
         requirement reqNum001 : ContradictingNumber;
         requirement reqNum002 : NoNumberInEvidence;
         requirement reqNum003 : ClaimsWithBound;
@@ -408,7 +410,7 @@ package NumberGate {
         requirement reqVer001 : WrongClaimsWithEvidence;
         requirement reqVer002 : WrongClaimsWithoutEvidence;
         requirement reqVer003 : TrueClaimsKeptWithEvidence;
-        requirement reqVer004 : TrueClaimsKeptWithoutEvidence;
+        requirement reqVer004 : NoTrueClaimRefutedWithoutEvidence;
         requirement reqVer005 : StableVerdictsWithEvidence;
         requirement reqVer006 : StableVerdictsWithoutEvidence;
         requirement reqVer007 : InstructionsInEvidence;
@@ -426,6 +428,7 @@ package NumberGate {
         satisfy reqGate003 by numberGate.gate;
         satisfy reqGate004 by numberGate.gate;
         satisfy reqGate005 by numberGate.gate;
+        satisfy reqGate006 by numberGate.gate;
         satisfy reqNum001 by numberGate.numberCheck;
         satisfy reqNum002 by numberGate.numberCheck;
         satisfy reqNum003 by numberGate.numberCheck;
@@ -491,6 +494,7 @@ package NumberGate {
         verification def TcGate003 { subject s : VerificationGate; objective { verify reqGate003; } }
         verification def TcGate004 { subject s : VerificationGate; objective { verify reqGate004; } }
         verification def TcGate005 { subject s : VerificationGate; objective { verify reqGate005; } }
+        verification def TcGate006 { subject s : VerificationGate; objective { verify reqGate006; } }
         verification def TcNum001 { subject s : NumberCheck; objective { verify reqNum001; } }
         verification def TcNum002 { subject s : NumberCheck; objective { verify reqNum002; } }
         verification def TcNum003 { subject s : NumberCheck; objective { verify reqNum003; } }

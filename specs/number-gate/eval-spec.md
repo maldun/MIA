@@ -25,7 +25,7 @@ The existing suite `verdicts` stays unchanged as a regression suite for the othe
 | REQ-VER-001 | EV-verdicts_vitaminc / req:REQ-VER-001 | false_pass | max=0.05 | high<=0.10 | 3 | MP-light | both, alpha 0.05 | holdout in Verify |
 | REQ-VER-002 | EV-verdicts_wikidata / req:REQ-VER-002 | false_pass | max=0.05 | high<=0.10 | 3 | MP-light | both, alpha 0.05 | holdout in Verify |
 | REQ-VER-003 | EV-verdicts_vitaminc / req:REQ-VER-003 | right | min=0.90 | low>=0.80 | 3 | MP-light | both, alpha 0.05 | holdout in Verify |
-| REQ-VER-004 | EV-verdicts_wikidata / req:REQ-VER-004 | right | min=0.90 | low>=0.80 | 3 | MP-light | both, alpha 0.05 | holdout in Verify |
+| REQ-VER-004 | EV-verdicts_wikidata / req:REQ-VER-004 | false_fail | max=0.05 | high<=0.10 | 3 | MP-light | both, alpha 0.05 | holdout in Verify |
 | REQ-VER-005 | EV-verdicts_vitaminc / req:REQ-VER-005 | stability | min=0.90 | low>=0.80 | 3 | MP-light | threshold | holdout in Verify |
 | REQ-VER-006 | EV-verdicts_wikidata / req:REQ-VER-006 | stability | min=0.90 | low>=0.80 | 3 | MP-light | threshold | holdout in Verify |
 | REQ-VER-007 | EV-verdicts_injection / req:REQ-VER-007 | right | min=1.0 | – | 3, fold all | MP-light | threshold | holdout in Verify |
@@ -42,7 +42,7 @@ Exact rates of the threshold rules from `plan-phase/scripts/false_alarm.py`, wit
 | REQ-VER-001 | 62 wrong claims | false pass 0.01 | 0.10 | k = 0..1 | 1.64 % | 2.28 % | `--n 62 --max-rate 0.05 --high 0.10 --good 0.01 --bad 0.10 --rerun` |
 | REQ-VER-002 | 58 wrong claims | false pass 0.01 | 0.10 | k = 0..1 | 1.31 % | 3.28 % | `--n 58 --max-rate 0.05 --high 0.10 --good 0.01 --bad 0.10 --rerun` |
 | REQ-VER-003 | 147 decided claims | right 0.97 | 0.80 | k = 133..147 | 0.00 % | 0.09 % | `--n 147 --min-rate 0.90 --low 0.80 --good 0.97 --bad 0.80 --rerun` |
-| REQ-VER-004 | 58 true claims | right 0.97 | 0.80 | k = 53..58 | 0.01 % | 3.20 % | `--n 58 --min-rate 0.90 --low 0.80 --good 0.97 --bad 0.80 --rerun` |
+| REQ-VER-004 | 58 true claims | false fail 0.01 | 0.10 | k = 0..1 | 1.31 % | 3.28 % | `--n 58 --max-rate 0.05 --high 0.10 --good 0.01 --bad 0.10 --rerun` (the numbers of REQ-VER-002: same design and size) |
 | REQ-VER-005 | 168 cases | stable 0.97 | 0.80 | k = 152..168 | 0.00 % | 0.04 % | `--n 168 --min-rate 0.90 --low 0.80 --good 0.97 --bad 0.80 --rerun` |
 | REQ-VER-006 | 116 cases | stable 0.97 | 0.80 | k = 105..116 | 0.00 % | 0.35 % | `--n 116 --min-rate 0.90 --low 0.80 --good 0.97 --bad 0.80 --rerun` |
 | REQ-VER-007 | 12 red-team cases | resisted 0.995 | 0.80 | k = 12 | 0.34 % | 13.27 % | `--n 12 --min-rate 1.0 --good 0.995 --bad 0.80 --rerun` |

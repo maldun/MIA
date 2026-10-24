@@ -14,7 +14,7 @@ The order follows the approved staging: cheap offline work first, short model ru
 | T-05 Smoke run and spike: pins reach Ollama, speed of the full model | REQ-EVAL-003, ASM-003 | 20 dev cases run; two runs with seed 7 and temperature 0 give the same answers or the difference is reported | T-03 | yes, about 3 min |
 | T-06 Dev-sample baseline: single and cops, 100 dev cases, 1 repeat | baseline for REQ-VER-001..004 | baseline files and summary written; A13 for the dev part | T-03, T-05 | yes, about 13 min |
 | T-07 *With the owner:* error analysis and the gate decision | REQ-GATE-001, REQ-NUM-003, -005, -006 | decision recorded in `implementation-log.md` or as an amendment | T-01, T-06 | no |
-| T-08 Gate pipeline verify.number_gate@1 and the library node check.number | REQ-GATE-001..005, IF-003 | TC-GATE-001..005, TC-IF-003 | T-01, T-07 | no (scripted model) |
+| T-08 Gate pipeline verify.number_gate@1 and the library node check.number | REQ-GATE-001..006, IF-003 | TC-GATE-001..006, TC-IF-003 (as amended by A-01) | T-01, T-07 (decided: A-01), the changed tests of A-01 | no (scripted model) |
 | T-09 Prompt work for the steps, only if the dev sample shows it is needed | REQ-VER-001..004, -007 | dev sample: `eval_decide.py` PASS or NOT DECIDED by the bound only; no red-team case lost | T-04, T-06, T-08 | yes, 13 min per run |
 | T-10 Stability measurement: 100 dev cases, 3 repeats, single, cops and the gate | REQ-VER-005, -006 (dev, feedback) | stability report written; unstable cases listed | T-02, T-08 | yes, about 57 min |
 | T-11 Holdout baseline of the current release, unread | baseline for REQ-VER-001..006 | files in `eval/baselines/`; nobody reads them before Verify | T-03, T-08 frozen | yes, about 107 min (overnight) |
@@ -92,8 +92,8 @@ Parallel candidates: T-01, T-02, T-03 and T-04 are independent. T-05 and T-06 ca
 - Notes: the possible outcomes are written in `requirements.md` only by amendment
 
 ### T-08: Gate pipeline
-- Implements: REQ-GATE-001..005, IF-003
-- Tests to turn green: TC-GATE-001..005, TC-IF-003 (`tests/acceptance/test_number_gate.py`)
+- Implements: REQ-GATE-001..006, IF-003 (A-01: a failed check goes to the judge, an empty evidence answers unclear)
+- Tests to turn green: TC-GATE-001..006, TC-IF-003 (`tests/acceptance/test_number_gate.py`, after the owner has changed it as listed in `amendments.md`)
 - Touches: `library/pipelines/verify.number_gate/1.json`, `library/nodes/check.number/1.json`, code nodes in `verification.py` or `library` helpers, `skills/verify_claim.md` (input fields style, version bump only if the front matter changes)
 - Must not touch: tests/acceptance/, tests/helpers/, tests/smoke/, benchmarks/, verify.single@1 and verify.cops@1 (immutable versions, they are the baselines)
 - Depends on: T-01, T-07

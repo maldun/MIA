@@ -19,27 +19,27 @@ Scope of this iteration: verification of claims with numbers (the gate), the sta
 - Status: Draft
 - History: –
 
-### REQ-GATE-002 – A failed number check decides
+### REQ-GATE-002 – A failed number check goes to the judge
 - Level: Component   Subject: VerificationGate
-- Text: If the number check returns fail, then the verification gate shall return the verdict refuted without running a judgement style.
-- Rationale: HC1: a claim that fails a hard check is contradicted regardless of any model verdict
+- Text: If the number check returns fail, then the verification gate shall run one judgement style and put the check line, marked as a contradiction found by code, in the evidence that the judge sees; the verdict is the one of the judgement style.
+- Rationale: A-01 (owner, 2026-10-24, T-07): on the 332 dev claims of verdicts_vitaminc the check failed 12 of 169 true claims (7 %) and passed 16 of 129 false ones (12 %); its errors are claims with the right number and another subject, which it cannot see. It informs the judge and does not decide.
 - Parent: HLS FR-9
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: with a fake number check that returns fail, the verdict is refuted and the number of model calls is 0 (exact)
-- Plausibility: example – with a fake number check returning fail, the gate returns before it builds any model input (plausible)
+- Acceptance criterion: with a scripted judge that answers supported to every prompt, a claim of 1,200 m with the evidence "1,020 m": the judge input contains the line "Number check: fail", the number of model calls is 3 and the verdict is the judge's (supported) (exact)
+- Plausibility: example – the check line is one more evidence line, as REQ-GATE-003 already requires for pass and inconclusive; that a 12B judge heeds a fail line is measured by the dev suites at T-09 (plausible)
 - Verified by: TC-GATE-002
 - Status: Draft
-- History: –
+- History: A-01 (2026-10-24): was "a failed number check decides: refuted without a model call"; changed by owner decision 1 at T-07
 
 ### REQ-GATE-003 – Judgement style for claims the check leaves open
 - Level: Component   Subject: VerificationGate
-- Text: If the number check returns pass, inconclusive or not_applicable, then the verification gate shall run exactly one judgement style, cops by default, and add the line of the check result to the evidence.
+- Text: If the number check returns pass, fail or inconclusive, then the verification gate shall run exactly one judgement style, cops by default, and add the line of the check result to the evidence.
 - Rationale: a pass is evidence for the judge, not proof (HC1); cops removed the near-miss errors of the single voice in the baseline of 2026-10-19 (3 claims)
 - Parent: HLS FR-9
 - Priority: Should
 - Verification method: Test
-- Acceptance criterion: with a fake model, the steps argue for, argue against and judge run once each in this order; the judge input contains the check result line, which says not_applicable when the evidence is empty and the check did not run; with the configured style single, one model call runs (exact)
+- Acceptance criterion: with a scripted model, for a claim whose check passes, one whose check fails and one whose check is inconclusive, the steps argue for, argue against and judge run once each in this order and the judge input contains the check result line; with the configured style single, one model call runs (exact)
 - Plausibility: precedent – the library pipeline verify.cops@1 runs these three steps in this order, and the check line is one more evidence line (plausible)
 - Verified by: TC-GATE-003
 - Status: Draft
@@ -70,6 +70,19 @@ Scope of this iteration: verification of claims with numbers (the gate), the sta
 - Verified by: TC-GATE-005
 - Status: Draft
 - History: –
+
+### REQ-GATE-006 – No evidence, no verdict
+- Level: Component   Subject: VerificationGate
+- Text: When a claim contains a number and its evidence is empty, the verification gate shall return the verdict unclear without a model call.
+- Rationale: A-01: without evidence the verdict rests on what the model happens to know; on the 50 Wikidata dev cases of T-06 the single voice passed 28 % of the wrong claims and was right on 34 %; the gate abstains instead of guessing (owner decision 1 at T-07)
+- Parent: HLS FR-9
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: for 5 claims with a number and empty evidence the verdict is unclear, the status inconclusive, the number of model calls 0 and the facts empty (exact)
+- Plausibility: example – the first step of the gate is the test of the evidence length, as in REQ-NUM-004 (plausible)
+- Verified by: TC-GATE-006
+- Status: Draft
+- History: A-01 (2026-10-24): new
 
 ### REQ-NUM-001 – Contradicting number in the evidence
 - Level: Component   Subject: NumberCheck
@@ -146,7 +159,7 @@ Scope of this iteration: verification of claims with numbers (the gate), the sta
 - Verification method: Evaluation
 - Acceptance criterion: false-pass rate at most 5 %, upper 95 % bound at most 10 %, not worse than the baseline; with the planned 58 wrong claims at most 1 wrong claim passed
 - Eval criterion: suite=EV-verdicts_wikidata; select=req:REQ-VER-002; metric=false_pass; max=0.05; high<=0.10; repeats=3; pin=MP-light; rule=both; alpha=0.05; false_alarm=0.013; split=holdout
-- Plausibility: baseline – near-miss values of towers, rivers, mountains and bridges are not in any earlier suite; a 12B model may not know them, in which case no gate can reach 5 % without evidence and the criterion is reconsidered by amendment after T-06; false alarm 1.3 %, miss 3.3 % at n = 58 (doubtful)
+- Plausibility: baseline – T-06 on 50 dev cases: the single voice passed 28 % (7 of 25) of the wrong claims without evidence, cops 16 %; since A-01 the gate abstains on these claims (REQ-GATE-006), so the rate is 0 by construction and the criterion guards against a regression; false alarm 1.3 %, miss 3.3 % at n = 58 (plausible)
 - Verified by: EV-verdicts_wikidata
 - Status: Draft
 - History: –
@@ -165,19 +178,19 @@ Scope of this iteration: verification of claims with numbers (the gate), the sta
 - Status: Draft
 - History: –
 
-### REQ-VER-004 – True claims kept (Wikidata)
+### REQ-VER-004 – No true claim refuted without evidence (Wikidata)
 - Level: System   Subject: VerificationGate
-- Text: The verification gate shall return supported for at least 90 % of the true claims of the suite verdicts_wikidata.
-- Rationale: as REQ-VER-003; a gate that refutes every unfamiliar value would pass the wrong-claim criterion for the wrong reason
+- Text: The verification gate shall refute at most 5 % of the true claims of the suite verdicts_wikidata.
+- Rationale: A-01: replaces "supported for at least 90 % of the true claims"; without evidence a true claim can be neither confirmed by code nor by a 12B model (T-06: right on 34 % of the Wikidata dev claims), so the gate abstains, but it must not refute true claims either
 - Parent: HLS FR-9
 - Priority: Must
 - Verification method: Evaluation
-- Acceptance criterion: right rate at least 90 %, lower 95 % bound at least 80 %, not worse than the baseline; planned 58 true claims
-- Eval criterion: suite=EV-verdicts_wikidata; select=req:REQ-VER-004; metric=right; min=0.90; low>=0.80; repeats=3; pin=MP-light; rule=both; alpha=0.05; false_alarm=0.0001; split=holdout
-- Plausibility: baseline – as REQ-VER-002, depends on what the model knows about the 4 families of values; false alarm 0.01 %, miss 3.2 % at n = 58 (doubtful)
+- Acceptance criterion: false-fail rate at most 5 %, upper 95 % bound at most 10 %, not worse than the baseline; planned 58 true claims
+- Eval criterion: suite=EV-verdicts_wikidata; select=req:REQ-VER-004; metric=false_fail; max=0.05; high<=0.10; repeats=3; pin=MP-light; rule=both; alpha=0.05; false_alarm=0.013; split=holdout
+- Plausibility: baseline – T-06 on 50 dev cases: the single voice refuted 32 % (8 of 25) of the true claims, cops 40 %; since A-01 the gate abstains on these claims (REQ-GATE-006), so the rate is 0 by construction; same design and size as REQ-VER-002: false alarm 1.3 %, miss 3.3 % at n = 58 (plausible)
 - Verified by: EV-verdicts_wikidata
 - Status: Draft
-- History: –
+- History: A-01 (2026-10-24): was metric right, min 0.90, low >= 0.80 (owner decision 1 at T-07)
 
 ### REQ-VER-005 – Stable verdicts (VitaminC)
 - Level: System   Subject: VerificationGate
@@ -384,7 +397,7 @@ Scope of this iteration: verification of claims with numbers (the gate), the sta
 - Parent: REQ-EVAL-001
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: for a claim decided by the number check the record has calls 0 and facts empty; for a claim decided by the cops style it has calls 3; verdict and status agree by the table supported-pass, refuted-fail, unclear-inconclusive (exact)
+- Acceptance criterion: for a claim with a number and empty evidence the record has calls 0 and facts empty; for a claim judged by the cops style it has calls 3; verdict and status agree by the table supported-pass, refuted-fail, unclear-inconclusive (exact)
 - Plausibility: precedent – the harness records status, calls and seconds per case today (metrics.py); only the field facts is new (plausible)
 - Verified by: TC-IF-003
 - Status: Draft
@@ -483,6 +496,7 @@ Scope of this iteration: verification of claims with numbers (the gate), the sta
 | REQ-GATE-003 | Component | FR-9 | VerificationGate | TC-GATE-003 |
 | REQ-GATE-004 | Component | FR-9 | VerificationGate | TC-GATE-004 |
 | REQ-GATE-005 | Component | NFR-2 | VerificationGate | TC-GATE-005 |
+| REQ-GATE-006 | Component | FR-9 | VerificationGate | TC-GATE-006 |
 | REQ-NUM-001 | Component | FR-9 | NumberCheck | TC-NUM-001 |
 | REQ-NUM-002 | Component | FR-9 | NumberCheck | TC-NUM-002 |
 | REQ-NUM-003 | Component | FR-9 | NumberCheck | TC-NUM-003 |

@@ -15,7 +15,7 @@ The steps have no tools, so an injection cannot start an action here; it can ste
 - Boundary: TB-evidence
 - Category: LLM01 Prompt injection (indirect)
 - Impact: an author of the evidence makes MIA call a wrong claim supported
-- Mitigation: REQ-VER-007, REQ-GATE-002, REQ-ARG-001, IF-002, X1
+- Mitigation: REQ-VER-007, REQ-GATE-006, REQ-ARG-001, IF-002, X1 (A-01: a failed number check no longer decides without the judge, so an instruction in the evidence can reach the verdict of a number claim; the check line stands outside the evidence block, and the injection suite measures it)
 - Red-team cases: RT-001, RT-002, RT-003
 - Residual risk: biased evidence without any instruction still sways the judge; watched by the evidence cases of EV-verdicts_vitaminc
 - Status: Draft
