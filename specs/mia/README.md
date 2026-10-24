@@ -28,4 +28,10 @@ unzip jupyter-sysml-kernel-0.63.0.zip -d ~/sysml-kernel
 ~/venvs/sysml/bin/jupyter lab        # new notebook, kernel "SysML"
 ```
 
+If `install.py` stops with `ValueError: badly formed help string` (seen on 2026-10-24 with Python 3.14), the release has `%publish` and `%viz` in two argparse help strings, where `%` must be written `%%`. Fix the copy of the installer, then run it again:
+
+```
+sed -i 's/%publish/%%publish/; s/%viz/%%viz/' ~/sysml-kernel/install.py
+```
+
 In a notebook cell, paste or load the six files (all packages must be known to the kernel), then for example `%viz --view=tree MIA_Architecture::MiaSystem`. A parse error in a cell is the real syntax check that `KNOWN_RISKS.md` is waiting for. The kernel's `%help` lists the magic commands. The matching JupyterLab extension (`jupyterlab-sysml-0.63.0.tgz`, syntax highlighting) is an optional second asset of the same release.
