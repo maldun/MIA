@@ -787,9 +787,97 @@ class CheckRunner:
         return dict(combine(results), results=results, trace=trace, seconds=round(time.time() - started, 3))
 
 
-# --- number check (Plan iteration 1, specs/number-gate; STUB until task T-xx of plan.md) ---------------------------------------------------
+# --- number check (Plan iteration 1, specs/number-gate: REQ-NUM-001 to REQ-NUM-006, IF-001) ------------------------------------------------
+
+_SCALES = {"thousand": 1e3, "million": 1e6, "billion": 1e9, "trillion": 1e12}
+_NOT_UNITS = {"in", "st", "b", "pt", "cup"}                     # ordinary words after a number ("40 in the room")
+_PERCENT = {"%": "percent", "percent": "percent"}
+_MONEY = {"$": "usd", "€": "eur", "£": "gbp", "dollars": "usd", "euros": "eur", "usd": "usd", "eur": "eur"}
+_BOUNDS = (("at least", "ge"), ("at most", "le"), ("more than", "gt"), ("less than", "lt"), ("fewer than", "lt"), ("over", "gt"), ("under", "lt"))
+_FILLER = {"the", "a", "an", "of", "in", "on", "at", "and", "or", "is", "are", "was", "were", "has", "have", "had", "by", "for", "to", "with", "as", "about", "around",
+           "approximately", "than", "more", "less", "over", "under", "least", "most", "long", "tall", "high", "that", "it", "its", "which", "from"}
+_NUMBER = re.compile(r"(?<![\w.,])\d(?:[\d,. ']*\d)?")
+_WORD = re.compile(r"[^\W\d_]+(?:/[^\W\d_]+)?|%")
+
+
+def _dimension(word):
+    """(dimension, factor to its base unit) of a unit word, or None"""
+    word = word.lower()
+    if word in _PERCENT:
+        return "percent", 1.0
+    if word in _MONEY:
+        return "money:" + _MONEY[word], 1.0
+    if word in _NOT_UNITS:
+        return None
+    unit = _unit(word)
+    for dimension, table in _UNITS.items():
+        if unit in table:
+            return dimension, table[unit]
+    return None
+
+
+def _quantities(text):
+    """the numbers of a text as quantities: value, scale word, unit dimension, bound, and the content words that follow (up to three)"""
+    found = []
+    for match in _NUMBER.finditer(text):
+        try:
+            value = parse_number(match.group())
+        except ValueError:
+            continue
+        before = text[:match.start()].rstrip()
+        words = _WORD.findall(re.split(r"[.;!?]\s|\d", text[match.end():], maxsplit=1)[0])
+        scale = 1.0
+        if words and words[0].lower() in _SCALES:
+            scale = _SCALES[words.pop(0).lower()]
+        unit = _dimension(words[0]) if words else None
+        if unit:
+            words.pop(0)
+        elif before[-1:] in _MONEY:
+            unit = ("money:" + _MONEY[before[-1:]], 1.0)
+        bound = next((code for phrase, code in _BOUNDS if before.lower().endswith(phrase)), None)
+        nouns = {w.lower().rstrip("s") for w in words[:3] if w.lower() not in _FILLER}
+        found.append({"value": value, "raw": match.group(), "scale": scale, "unit": unit, "bound": bound, "nouns": nouns})
+    return found
+
+
+def _same_quantity(claimed, seen):
+    """REQ-NUM-006: the same unit dimension, or (when neither side has a unit) the same noun in the three words after the number"""
+    if claimed["unit"] and seen["unit"]:
+        return claimed["unit"][0] == seen["unit"][0]
+    return not claimed["unit"] and not seen["unit"] and bool(claimed["nouns"] & seen["nouns"])
+
+
+def _holds(claimed, seen):
+    """does the evidence value keep the claim? The evidence value is expressed in the unit and scale of the claim (REQ-NUM-001, -003, -005)"""
+    unit = claimed["unit"][1] if claimed["unit"] else 1.0
+    actual = seen["value"] * seen["scale"] * (seen["unit"][1] if seen["unit"] else 1.0) / (claimed["scale"] * unit)
+    bound, limit = claimed["bound"], claimed["value"]
+    if bound:
+        return {"gt": actual > limit, "ge": actual >= limit, "lt": actual < limit, "le": actual <= limit}[bound]
+    return _agrees(limit, actual, 0.01, claimed["raw"])
+
+
+def _judge_quantity(claimed, seen_values):
+    """pass, fail or None (nothing of the evidence decides) for one claimed quantity; a bound in the evidence ("more than 23 million") decides nothing"""
+    deciding = [s for s in seen_values if _same_quantity(claimed, s) and not s["bound"]]
+    if not deciding:
+        return None
+    return PASS if any(_holds(claimed, s) for s in deciding) else FAIL
+
 
 def number_check(claim, evidence):
-    """STUB: compares the number of a claim with the values of the same quantity in the evidence (REQ-NUM-001 to REQ-NUM-006).
-    Returns result(status, "number_check", detail) with status pass, fail, inconclusive or not_applicable. Not implemented: the status is deliberately outside the vocabulary."""
-    return result("unimplemented", "number_check", "stub: the number check is not written yet")
+    """Compares the numbers of a claim with the values of the same quantity in the evidence. Status: pass, fail (the evidence states the quantity with
+    another value), inconclusive (nothing of the evidence decides) or not_applicable (no evidence, or no number in the claim). The detail is at most 200 characters."""
+    name = "number_check"
+    if not str(evidence).strip():
+        return result(NOT_APPLICABLE, name, "no evidence")
+    claimed = _quantities(str(claim))
+    if not claimed:
+        return result(NOT_APPLICABLE, name, "the claim has no number")
+    seen = _quantities(str(evidence))
+    verdicts = [(c, _judge_quantity(c, seen)) for c in claimed]
+    for status, text in ((FAIL, "the evidence gives another value for %s"), (PASS, "the evidence agrees with %s")):
+        hit = next((c for c, v in verdicts if v == status), None)
+        if hit:
+            return result(status, name, (text % hit["raw"])[:200], [{"claimed": hit["raw"]}])
+    return result(INCONCLUSIVE, name, "no value of the same quantity in the evidence")

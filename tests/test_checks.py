@@ -484,5 +484,30 @@ class RunnerTests(unittest.TestCase):
         self.assertIn("reads_web", "; ".join(core.check().get("w", [])))
 
 
+class NumberCheckEdgeTests(unittest.TestCase):
+    """edges of the number check beyond the acceptance tests (REQ-NUM-001 to -006)"""
+
+    def status(self, claim, evidence):
+        return C.number_check(claim, evidence)["status"]
+
+    def test_claim_without_number_is_not_applicable(self):
+        self.assertEqual(self.status("The village has no school.", "The village has a school."), "not_applicable")
+
+    def test_percent_and_money_are_units_of_their_own(self):
+        self.assertEqual(self.status("Turnout was 61 percent.", "Turnout was 61%."), "pass")
+        self.assertEqual(self.status("Turnout was 61 percent.", "Turnout was 54%."), "fail")
+        self.assertEqual(self.status("It earned $5 million.", "It earned 5,000,000 dollars."), "pass")
+        self.assertEqual(self.status("It earned $5 million.", "It earned 6 million euros."), "inconclusive")
+
+    def test_a_year_without_unit_or_noun_decides_nothing(self):
+        self.assertEqual(self.status("The bridge was built in 1937.", "The bridge was built in 1938."), "inconclusive")
+
+    def test_in_is_not_inches(self):
+        self.assertEqual(self.status("The room is 40 in the building.", "The room is 40 m wide."), "inconclusive")
+
+    def test_the_other_number_of_a_claim_does_not_hide_a_contradiction(self):
+        self.assertEqual(self.status("In 1998 the group sold 5 million records.", "The group sold 4.9 million records."), "fail")
+
+
 if __name__ == "__main__":
     unittest.main()
