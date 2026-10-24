@@ -1,22 +1,26 @@
 # High-Level Specification: MIA
 
-**Status:** Draft (under step-by-step review with the owner, started 2026-10-24)
+**Status:** Draft (step 1 of 7 of the review edited, awaiting confirmation; see review-log.md)
 **Owner:** Stefan Reiterer   **Date:** 2026-10-24
 **Project / deliverable:** MIA, "MIA Is not an Assistant": a personal virtual assistant with a 3D character, a local voice, and a research core for small local language models
 
 Supersedes `docs/fresh-start/02_high_level_requirements.md` (HLR-01..27; mapping in 3.5). Input: `baseline-requirements.md` (what the five requirement documents ask for, with status), `research.md` (facts). Model: `architecture.sysml` and `model/`.
 
 ## 1. Context and goal
-MIA is built and run by one person on one machine. It is a companion and assistant: a chat page with a 3D anime character that shows emotions and gestures, speaks with a locally synthesised voice and answers with a local language model (`gemma4`). It is also a research vehicle: the project asks how much quality a small, free, local model reaches when it is embedded in pipelines that verify what they say, log what they do and can be measured. The next large goal is a literature review of a research question (reading papers, judging how well the literature answers a question), after the quick fact-check ("lookup") that exists today.
+*Step 1 of the review (2026-10-24), decisions D-1 and D-2 of `review-log.md`. Sections 3 to 6 still describe the single-user draft; the changes they need are listed in the review log and applied in the later steps.*
+
+MIA is built by one person and is to become a **multi-user system**: several users log in, and a database stores information that is shared between apps. Today it runs on one machine for one owner. It is a companion and assistant: a chat page with a 3D anime character that shows emotions and gestures, speaks with a locally synthesised voice and answers with a local language model (`gemma4`). It is also a research vehicle: the project asks how much quality a small, free, local model reaches when it is embedded in pipelines that verify what they say, log what they do and can be measured. The next large goal is a literature review of a research question (reading papers, judging how well the literature answers a question), after the quick fact-check ("lookup") that exists today.
+Development is **iterative**: MIA is meant to grow several skills and workflows over time, each added through the same path (skill file, pipeline, suite, baseline, review). **Success** means two things: the first real skill, the literature review, works and is measured; and a **second skill is added within one month** by the same path, which shows that the path itself works.
+The character is the face of the product: it shows a mood in every situation, speaks with an anime-like voice produced by an open TTS in the browser, can be exchanged by loading a VRoid `.vrm` model, follows a persona from `calibration.txt`, and a plus/minus feedback system over several categories shapes its mood and its behaviour over time (details C-1..C-8 in `review-log.md`, to become requirements in step 3).
 Why a fresh start now: five requirement documents grew side by side with the code, partly contradict each other and are partly out of date; the new development workflow (explore, plan, implement, verify, commit, deploy, validate) needs one specification that everything else traces back to.
 
 ## 2. Scope
 ### In scope
-Everything MIA does on the owner's host: the conversation (chat page, server, history), the embodied character (expressions, gestures, editor), the voice, the task runtime (skills, pipelines, library, strategies), verification and its sandbox, research (lookup now, literature review next), memory and behaviour feedback, the log and its views, the evaluation harness, the operation (configuration, containers, access, shutdown).
+**Accounts and login for several users, and a shared database** for the state that applications share (D-1). Everything MIA does on the host: the conversation (chat page, server, history), the embodied character (expressions, gestures, editor), the voice, the task runtime (skills, pipelines, library, strategies), verification and its sandbox, research (lookup now, literature review next), memory and behaviour feedback, the log and its views, the evaluation harness, the operation (configuration, containers, access, shutdown).
 ### Out of scope (non-goals)
-Multi-user operation and accounts; fine-tuning the Gemma model (until the learning ladder reaches distillation and the owner decides so); a generic workflow engine; legs and feet of the character; voice input, attachments, installable app and offline mode of the chat; a graph viewer or editor (dropped, text tools and DOT/Mermaid export instead); paid APIs.
+Fine-tuning the Gemma model (until the learning ladder reaches distillation and the owner decides so); a generic workflow engine; legs and feet of the character; voice input, attachments, installable app and offline mode of the chat; a graph viewer or editor (dropped, text tools and DOT/Mermaid export instead); paid APIs.
 ### Known shortcuts (prototype)
-The persona is a text file outside git (`calibration.txt`); the editor and chat have one shared token and no login; Tailscale access has not been tried against a real tailnet; the verification styles and the research suites are starter-sized; evaluation labels were set by the owner alone; SysML text is not parsed by a tool yet.
+The persona is a text file outside git (`calibration.txt`); the editor and chat have one shared token and no login today (to be replaced by accounts, D-1); Tailscale access has not been tried against a real tailnet; the verification styles and the research suites are starter-sized; evaluation labels were set by the owner alone; SysML text is not parsed by a tool yet.
 
 ## 3. High-level requirements
 `Status` below: built / partly / proposed / postponed, as in `baseline-requirements.md` (taken from `ui/README.md` and the commit log, tests not re-run today). Baseline ids in brackets.
