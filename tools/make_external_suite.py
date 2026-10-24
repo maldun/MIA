@@ -4,6 +4,9 @@ Usage (repository root, needs the internet, standard library only):
     python3 -I tools/make_external_suite.py --out data/eval-external --seed 7
     python3 -I tools/make_external_suite.py --source wikidata --n-wikidata 120 --out data/eval-external
 
+Duration: about 1 to 2 minutes in total (VitaminC: one 29 MB download, about 10 seconds; Wikidata: 4 queries, about 1 minute).
+It prints progress lines with the elapsed time on stderr. Raw answers are kept in <out>/.cache, so a repeat is quick.
+
 What it writes below --out (default data/eval-external, ignored by git):
     suites/verdicts_vitaminc/            dev cases        suite.json + cases.jsonl
     suites/verdicts_vitaminc.holdout/    holdout cases    (never read it while tuning)
@@ -26,7 +29,6 @@ compatible with GPL-3.0); commit the script, the seed and the manifest.
 import argparse, csv, hashlib, json, math, pathlib, random, re, sys, time, urllib.parse, urllib.request
 
 UA = "MIA-eval-suite-builder/1.0 (research tool; https://github.com/maldun/MIA)"
-HF = "https://datasets-server.huggingface.co/rows"
 WDQS = "https://query.wikidata.org/sparql"
 REQ_TAG = "req:AC-2"
 TARGET = {"kind": "pipeline", "skill": "verify_claim"}
@@ -90,12 +92,33 @@ def cohen_kappa(a, b):
 
 
 # ---------------------------------------------------------------- network
+CACHE_DIR = None        # set by main(): every answer is kept here, so an interrupted run restarts quickly and repeats see the same data
+
+
+T0 = time.time()
+
+
+def say(msg):
+    """progress line on stderr with the elapsed time"""
+    s = int(time.time() - T0)
+    print("[%02d:%02d] %s" % (s // 60, s % 60, msg), file=sys.stderr, flush=True)
+
+
 def http_json(url, headers=None, tries=4):
+    cache = None
+    if CACHE_DIR is not None:
+        cache = pathlib.Path(CACHE_DIR) / (hashlib.sha1(url.encode("utf8")).hexdigest() + ".json")
+        if cache.exists():
+            return json.loads(cache.read_text(encoding="utf8"))
     last = None
     for k in range(tries):
         try:
             req = urllib.request.Request(url, headers=dict({"User-Agent": UA}, **(headers or {})))
-            return json.load(urllib.request.urlopen(req, timeout=60))
+            data = json.load(urllib.request.urlopen(req, timeout=60))
+            if cache is not None:
+                cache.parent.mkdir(parents=True, exist_ok=True)
+                cache.write_text(json.dumps(data), encoding="utf8")
+            return data
         except Exception as e:                       # network trouble: wait and try again
             last = e
             time.sleep(1.5 * (k + 1))
@@ -103,27 +126,50 @@ def http_json(url, headers=None, tries=4):
 
 
 # ---------------------------------------------------------------- VitaminC
-def vitaminc_cases(n_groups, seed, pages):
+VC_URL = "https://huggingface.co/datasets/tals/vitaminc/resolve/main/test.jsonl"     # 29 MB, the whole test split
+
+
+def download(url, path):
+    """download once, with progress; the file is kept in the cache folder"""
+    path = pathlib.Path(path)
+    if path.exists() and path.stat().st_size > 0:
+        say("VitaminC: using the downloaded file %s" % path)
+        return path
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_suffix(".part")
+    req = urllib.request.Request(url, headers={"User-Agent": UA})
+    with urllib.request.urlopen(req, timeout=60) as r, open(tmp, "wb") as f:
+        total = int(r.headers.get("Content-Length") or 0)
+        done = 0
+        next_report = 0
+        while True:
+            chunk = r.read(1 << 20)
+            if not chunk:
+                break
+            f.write(chunk)
+            done += len(chunk)
+            if done >= next_report:
+                say("VitaminC: downloaded %d of %d MB (%d %%)" % (done >> 20, total >> 20, 100 * done // total if total else 0))
+                next_report += 5 << 20
+    tmp.rename(path)
+    return path
+
+
+def vitaminc_cases(n_groups, seed):
     rng = random.Random(f"vitaminc:{seed}")
-    q = dict(dataset="tals/vitaminc", config="default", split="test", length=100)
-    first = http_json(HF + "?" + urllib.parse.urlencode(dict(q, offset=0)))
-    total = first["num_rows_total"]
-    offsets = sorted(rng.sample(range(0, total - 100, 100), min(pages, total // 100 - 1)))
+    path = download(VC_URL, pathlib.Path(CACHE_DIR or ".") / "vitaminc-test.jsonl")
     groups = {}
-    for off in offsets:
-        rows = http_json(HF + "?" + urllib.parse.urlencode(dict(q, offset=off)))["rows"]
-        time.sleep(0.3)
-        ids = [r["row"]["case_id"] for r in rows]
-        edge = {ids[0], ids[-1]}                      # groups cut by the page border are incomplete
-        for r in rows:
-            x = r["row"]
-            if x["case_id"] in edge:
-                continue
+    n_rows = 0
+    with open(path, encoding="utf8") as f:
+        for line in f:
+            x = json.loads(line)
+            n_rows += 1
             if re.search(r"\d", x["claim"]) and re.search(r"\d", x["evidence"]):
                 groups.setdefault(str(x["case_id"]), []).append(x)
     usable = {g: rs for g, rs in groups.items() if len({r["label"] for r in rs}) >= 2
               and any(r["label"] in ("SUPPORTS", "REFUTES") for r in rs)}
     chosen = rng.sample(sorted(usable), min(n_groups, len(usable)))
+    say("VitaminC: %d rows read, %d usable contrastive groups with numbers, drawing %d (asked for %d)" % (n_rows, len(usable), len(chosen), n_groups))
     cases = []
     for g in chosen:
         pair = "vc-" + g
@@ -137,7 +183,7 @@ def vitaminc_cases(n_groups, seed, pages):
             if lab == "NOT ENOUGH INFO":
                 case.update({"truth": None, "expect": "inconclusive", "note": "VitaminC: not enough information in the evidence"})
             else:
-                case.update({"truth": lab == "SUPPORTS", "note": "VitaminC, Wikipedia revision %s" % r["wiki_revision_id"]})
+                case.update({"truth": lab == "SUPPORTS", "note": "VitaminC, Wikipedia revision %s" % r.get("wiki_revision_id", "?")})
             cases.append(case)
     return cases
 
@@ -145,17 +191,17 @@ def vitaminc_cases(n_groups, seed, pages):
 # ---------------------------------------------------------------- Wikidata
 FAMILIES = [
     # name, query, claim template, kind, divisor of the Wikidata amount
-    ("mountain-height", """SELECT ?item ?itemLabel ?v WHERE { ?item wdt:P31 wd:Q8502; wikibase:sitelinks ?l; p:P2048/psn:P2048/wikibase:quantityAmount ?v .
-        FILTER(?l > 40) FILTER(?v = FLOOR(?v)) SERVICE wikibase:label { bd:serviceParam wikibase:language "en". } } LIMIT 300""",
+    ("mountain-height", """SELECT ?item ?itemLabel ?v WHERE { ?item wdt:P31 wd:Q8502; wikibase:sitelinks ?l; p:P2044/psn:P2044/wikibase:quantityAmount ?v .
+        FILTER(?l > 10) FILTER(?v = FLOOR(?v)) SERVICE wikibase:label { bd:serviceParam wikibase:language "en". } } LIMIT 300""",
      "{label} is {n} metres high.", "quantity", 1),
     ("tower-height", """SELECT ?item ?itemLabel ?v WHERE { VALUES ?cls { wd:Q12518 wd:Q11303 } ?item wdt:P31 ?cls; wikibase:sitelinks ?l; p:P2048/psn:P2048/wikibase:quantityAmount ?v .
-        FILTER(?l > 12) FILTER(?v = FLOOR(?v)) SERVICE wikibase:label { bd:serviceParam wikibase:language "en". } } LIMIT 300""",
+        FILTER(?l > 8) FILTER(?v = FLOOR(?v)) SERVICE wikibase:label { bd:serviceParam wikibase:language "en". } } LIMIT 300""",
      "{label} is {n} metres tall.", "quantity", 1),
     ("river-length", """SELECT ?item ?itemLabel ?v WHERE { ?item wdt:P31 wd:Q4022; wikibase:sitelinks ?l; p:P2043/psn:P2043/wikibase:quantityAmount ?v .
         FILTER(?l > 25) FILTER(?v/1000 = FLOOR(?v/1000)) SERVICE wikibase:label { bd:serviceParam wikibase:language "en". } } LIMIT 300""",
      "The {label} is {n} kilometres long.", "quantity", 1000),
     ("bridge-year", """SELECT ?item ?itemLabel ?v WHERE { ?item wdt:P31 wd:Q12280; wikibase:sitelinks ?l; p:P571/psv:P571 ?node .
-        ?node wikibase:timeValue ?t; wikibase:timePrecision 9 . BIND(YEAR(?t) AS ?v) FILTER(?l > 12)
+        ?node wikibase:timeValue ?t; wikibase:timePrecision 9 . BIND(YEAR(?t) AS ?v) FILTER(?l > 4)
         SERVICE wikibase:label { bd:serviceParam wikibase:language "en". } } LIMIT 300""",
      "{label} was built in {n}.", "year", 1),
 ]
@@ -165,8 +211,10 @@ def wikidata_cases(n_pairs, seed):
     rng = random.Random(f"wikidata:{seed}")
     pool = []
     for name, query, template, kind, div in FAMILIES:
+        say("Wikidata: query %s (can take up to a minute)" % name)
         url = WDQS + "?" + urllib.parse.urlencode({"query": query, "format": "json"})
         data = http_json(url, {"Accept": "application/sparql-results+json"})
+        say("Wikidata: %s: %d rows" % (name, len(data["results"]["bindings"])))
         time.sleep(1.0)
         seen = set()
         for b in data["results"]["bindings"]:
@@ -179,6 +227,7 @@ def wikidata_cases(n_pairs, seed):
             if v > 0:
                 pool.append((name, template, kind, qid, label, v))
     rng.shuffle(pool)
+    say("Wikidata: %d candidate items in %d families, building pairs" % (len(pool), len(FAMILIES)))
     per_family = {}
     cases = []
     for name, template, kind, qid, label, v in pool:
@@ -257,27 +306,36 @@ def main(argv=None):
     ap.add_argument("--out", default="data/eval-external")
     ap.add_argument("--seed", type=int, default=7)
     ap.add_argument("--n-vitaminc", type=int, default=60, help="contrastive groups to draw (about 3 cases each)")
-    ap.add_argument("--vitaminc-pages", type=int, default=40, help="pages of 100 rows to read")
     ap.add_argument("--n-wikidata", type=int, default=80, help="true/false pairs")
+    ap.add_argument("--cache", default=None, help="folder for the raw answers (default: <out>/.cache)")
     a = ap.parse_args(argv)
     out = pathlib.Path(a.out)
+    global CACHE_DIR
+    CACHE_DIR = a.cache or str(out / ".cache")
     manifest = {"seed": a.seed, "made": time.strftime("%Y-%m-%d"), "sources": {}}
     all_cases = []
     if a.source in ("vitaminc", "both"):
-        cs = vitaminc_cases(a.n_vitaminc, a.seed, a.vitaminc_pages)
+        say("VitaminC: downloading the test split once (29 MB, about 10 seconds)")
+        cs = vitaminc_cases(a.n_vitaminc, a.seed)
         dev, hold = write_suites(out, "verdicts_vitaminc", cs,
                                  "Claims with number-bearing Wikipedia evidence and contrastive revisions (VitaminC, CC BY-SA 3.0): SUPPORTS true, REFUTES false, NOT ENOUGH INFO no verdict. Labels by the benchmark's annotators.")
         manifest["sources"]["vitaminc"] = {"licence": "CC BY-SA 3.0", "dev": len(dev), "holdout": len(hold), "ids_sha1": hashlib.sha1("".join(sorted(c["id"] for c in cs)).encode()).hexdigest()}
         all_cases += cs
     if a.source in ("wikidata", "both"):
+        say("Wikidata: 4 queries (about 1 minute)")
         cs = wikidata_cases(a.n_wikidata, a.seed)
         dev, hold = write_suites(out, "verdicts_wikidata", cs,
                                  "Near-miss number claims without evidence: a true value from Wikidata (CC0) and a false twin made by a seeded rule (factor, swapped digits, unit off by 10, year off).")
         manifest["sources"]["wikidata"] = {"licence": "CC0", "dev": len(dev), "holdout": len(hold), "ids_sha1": hashlib.sha1("".join(sorted(c["id"] for c in cs)).encode()).hexdigest()}
         all_cases += cs
+    say("writing the audit sample")
     manifest["audit_rows"] = write_audit(out, all_cases, a.seed)
     out.mkdir(parents=True, exist_ok=True)
     (out / "manifest.json").write_text(json.dumps(manifest, indent=1), encoding="utf8")
+    say("done. Folder: %s" % out)
+    for src, m in manifest["sources"].items():
+        say("  %-9s %4d dev cases, %4d holdout cases" % (src, m["dev"], m["holdout"]))
+    say("  audit sheet: %d rows (%s)" % (manifest["audit_rows"], out / "audit" / "sample_sheet.csv"))
     print(json.dumps(manifest, indent=1))
     return 0
 
