@@ -312,6 +312,97 @@ Scope of this iteration: verification of claims with numbers (the gate), the sta
 - Status: Draft
 - History: –
 
+### REQ-ARG-001 – Structured arguments
+- Level: Component   Subject: ArgueStep
+- Text: The argue step shall return a JSON object with the field points, an array of 1 to 4 strings of 3 to 400 characters each.
+- Rationale: constrained output keeps the judge input small and the gate independent of free text (principle 4)
+- Parent: HLS NFR-2
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: the schema accepts 1, 2 and 4 points of 3 and of 400 characters and rejects 0 points, 5 points, a point of 2 characters and a point of 401 characters (exact)
+- Plausibility: precedent – view.argue@1 has exactly this output schema (minItems 1, maxItems 4, minLength 3, maxLength 400) (plausible)
+- Verified by: TC-ARG-001
+- Status: Draft
+- History: –
+
+### IF-001 – Check result interface
+- Level: Interface   Subject: NumberCheck
+- Text: The number check shall return to the verification gate one record with the field status, one of pass, fail, inconclusive and not_applicable, and the field detail, a text of at most 200 characters.
+- Rationale: the vocabulary of all hard checks (checks.py), so that the gate treats every check alike
+- Parent: REQ-GATE-001
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: for the 4 acceptance claims of REQ-NUM-001, -002, -003 and -004 the record has the four statuses in turn and a detail of at most 200 characters (exact)
+- Plausibility: precedent – every check in checks.py answers with these four statuses and a detail (plausible)
+- Verified by: TC-IF-001
+- Status: Draft
+- History: –
+
+### IF-002 – Ruling interface
+- Level: Interface   Subject: JudgeStep
+- Text: The judge step shall return one JSON object with the field verdict, one of supported, refuted and unclear, the field reason, a text of 3 to 600 characters, and optionally the field confidence, a number from 0 to 1.
+- Rationale: the vocabulary of the tally in verification.py (VERDICTS); constrained decoding prevents format errors
+- Parent: REQ-GATE-003
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: the schema accepts the 3 verdicts with a reason of 3 and of 600 characters and a confidence of 0 and of 1, and rejects the verdict maybe, a reason of 2 characters, a reason of 601 characters and a confidence of 1.1 (exact)
+- Plausibility: precedent – view.judge@1 has exactly this output schema (plausible)
+- Verified by: TC-IF-002
+- Status: Draft
+- History: –
+
+### IF-003 – Result record interface
+- Level: Interface   Subject: VerificationGate
+- Text: The verification gate shall return to the harness for each claim one record with the fields verdict, status, calls, seconds and facts, where facts is a possibly empty list of triples of entity, number with unit and quote hash.
+- Rationale: the harness records the cost of every run (metrics.cost) and the stability metric needs the facts (REQ-STAB-001); the verdict step has no facts, a lookup has
+- Parent: REQ-EVAL-001
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: for a claim decided by the number check the record has calls 0 and facts empty; for a claim decided by the cops style it has calls 3; verdict and status agree by the table supported-pass, refuted-fail, unclear-inconclusive (exact)
+- Plausibility: precedent – the harness records status, calls and seconds per case today (metrics.py); only the field facts is new (plausible)
+- Verified by: TC-IF-003
+- Status: Draft
+- History: –
+
+### IF-004 – Run records interface
+- Level: Interface   Subject: Harness
+- Text: The harness shall pass to the stability metric, for each case with at least two repeats, the list of its repeats, each with the fields status and facts.
+- Rationale: the stability metric compares repeats of one case; it must not depend on the file format of the saved run
+- Parent: REQ-STAB-001
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: for 4 cases with 3 repeats each the metric receives 4 lists of 3 entries; a case with 1 repeat is not passed (exact)
+- Plausibility: precedent – metrics.stability already groups the records of a run by case (plausible)
+- Verified by: TC-IF-004
+- Status: Draft
+- History: –
+
+### IF-005 – Case input interface
+- Level: Interface   Subject: Harness
+- Text: The harness shall pass to the verification gate for each case the claim, the evidence, the seed of the pin and the temperature of the pin.
+- Rationale: repeats measure instability only when the sampling is pinned; the gate must receive the sampling parameters from the run, not from a default (REQ-EVAL-003)
+- Parent: REQ-EVAL-003
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: with the fake gate, the harness hands over 4 fields for each of 3 cases, with the seed 7 and the temperature 0 of the pin (exact)
+- Plausibility: example – the harness builds the input of a case today; two fields are added (plausible)
+- Verified by: TC-IF-005
+- Status: Draft
+- History: –
+
+### IF-006 – Single voice ruling interface
+- Level: Interface   Subject: SingleVoiceStep
+- Text: The single-voice step shall return one JSON object in the format of IF-002.
+- Rationale: the gate tallies the ruling of the cops style and of the single voice alike
+- Parent: REQ-GATE-004
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: the schema of view.verdict@1 accepts and rejects the same examples as in IF-002 (exact)
+- Plausibility: precedent – view.verdict@1 has the output schema {verdict, reason} (plausible)
+- Verified by: TC-IF-006
+- Status: Draft
+- History: –
+
 ### NFR-BUD-001 – Time per claim
 - Level: Component   Subject: VerificationGate
 - Text: The verification gate shall decide a claim in a median of at most 10 seconds on the pin MP-light.
@@ -384,4 +475,11 @@ Scope of this iteration: verification of claims with numbers (the gate), the sta
 | REQ-EVAL-002 | Component | FR-17 | Harness | TC-EVAL-002 |
 | REQ-EVAL-003 | Component | FR-17 | Harness | TC-EVAL-003 |
 | REQ-EVAL-004 | Component | FR-17 | Harness | TC-EVAL-004 |
+| REQ-ARG-001 | Component | NFR-2 | ArgueStep | TC-ARG-001 |
+| IF-001 | Interface | REQ-GATE-001 | NumberCheck | TC-IF-001 |
+| IF-002 | Interface | REQ-GATE-003 | JudgeStep | TC-IF-002 |
+| IF-003 | Interface | REQ-EVAL-001 | VerificationGate | TC-IF-003 |
+| IF-004 | Interface | REQ-STAB-001 | Harness | TC-IF-004 |
+| IF-005 | Interface | REQ-EVAL-003 | Harness | TC-IF-005 |
+| IF-006 | Interface | REQ-GATE-004 | SingleVoiceStep | TC-IF-006 |
 | NFR-BUD-001 | Component | NFR-2 | VerificationGate | BM-GATE-001 |

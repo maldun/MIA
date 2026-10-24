@@ -1,0 +1,5 @@
+{
+ "_note": "Which requirement ids the cases of each generated suite count for (tools/tag_requirements.py). The criteria select cases by the tag req:<ID>.",
+ "verdicts_vitaminc": {"wrong": ["REQ-VER-001"], "true": ["REQ-VER-003"], "none": [], "all": ["REQ-VER-005"]},
+ "verdicts_wikidata": {"wrong": ["REQ-VER-002"], "true": ["REQ-VER-004"], "none": [], "all": ["REQ-VER-006"]}
+}

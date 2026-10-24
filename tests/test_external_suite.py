@@ -18,6 +18,7 @@ sys.path.insert(0, os.path.join(REPO, "tools"))
 import make_external_suite as M                          # noqa: E402
 import label_agreement as LA                             # noqa: E402
 import tag_ambiguous as TA                               # noqa: E402
+import tag_requirements as TR                            # noqa: E402
 
 
 class SplitAndTwins(unittest.TestCase):
@@ -137,6 +138,26 @@ class TagAmbiguous(unittest.TestCase):
             self.assertEqual(out[0]["tags"], ["ambiguous", "number", "retired"])
             self.assertEqual(out[0]["note"].count("ambiguous:"), 1)
             self.assertEqual(out[1]["tags"], ["number"])
+
+
+class TagRequirements(unittest.TestCase):
+    def test_tags_by_truth_and_replaces_older_req_tags(self):
+        with tempfile.TemporaryDirectory() as d:
+            for suite in ("s", "s.holdout"):
+                os.makedirs(os.path.join(d, suite))
+                rows = [{"id": "w", "tags": ["number", "req:AC-2"], "truth": False}, {"id": "t", "tags": ["number"], "truth": True},
+                        {"id": "n", "tags": ["number"], "truth": None, "expect": "inconclusive"}]
+                with open(os.path.join(d, suite, "cases.jsonl"), "w") as f:
+                    f.write("".join(json.dumps(r) + "\n" for r in rows))
+            mapping = os.path.join(d, "m.json")
+            json.dump({"_note": "x", "s": {"wrong": ["R-1"], "true": ["R-2"], "none": [], "all": ["R-5"]}}, open(mapping, "w"))
+            TR.main(mapping, d)
+            TR.main(mapping, d)                                   # repeating changes nothing
+            for suite in ("s", "s.holdout"):
+                out = {json.loads(l)["id"]: json.loads(l)["tags"] for l in open(os.path.join(d, suite, "cases.jsonl"))}
+                self.assertEqual(out["w"], ["number", "req:R-1", "req:R-5"])
+                self.assertEqual(out["t"], ["number", "req:R-2", "req:R-5"])
+                self.assertEqual(out["n"], ["number", "req:R-5"])
 
 
 if __name__ == "__main__":

@@ -7,7 +7,8 @@
 # Steps (safe to repeat):
 #   1. optionally generate into data/eval-external (the source of truth, ignored by git)
 #   2. remove a stray copy in data/eval (that folder is for saved runs only), but only if it is identical to the source
-#   3. tag the cases listed in data/eval-external/audit/ambiguous.txt as ambiguous and retired in the source
+#   3. tag the cases listed in data/eval-external/audit/ambiguous.txt as ambiguous and retired in the source,
+#      and tag every case with the requirement ids its criterion selects (specs/number-gate/case-requirements.json)
 #   4. copy the four suite folders to eval/suites/ (the harness reads eval/suites), so the copies carry the tags
 #   5. make sure .gitignore keeps the VitaminC cases out of git (CC BY-SA 3.0)
 #   6. print the case counts and run `tools/eval.py list`
@@ -55,6 +56,14 @@ if [[ -f "$AMB" ]]; then
   python3 -I tools/tag_ambiguous.py "$AMB" "$SRC"/suites/*
 else
   echo "no $AMB yet: run tools/label_agreement.py after labelling the audit sheet, then call this script again"
+fi
+
+say "3b. tag the cases with the requirement ids of the criteria (specs/number-gate/case-requirements.json)"
+MAP="specs/number-gate/case-requirements.json"
+if [[ -f "$MAP" ]]; then
+  python3 -I tools/tag_requirements.py "$MAP" "$SRC/suites"
+else
+  echo "no $MAP: the cases keep the tags of the generator"
 fi
 
 say "4. copy to $DST"
