@@ -37,6 +37,7 @@ label="Requirements allocated to subsystems (edge label = number of parts)"; lab
 "fr27" [label="FR-27", shape=box, style=filled, fillcolor="#eeeeee"];
 "fr28" [label="FR-28", shape=box, style=filled, fillcolor="#eeeeee"];
 "fr29" [label="FR-29", shape=box, style=filled, fillcolor="#eeeeee"];
+"fr30" [label="FR-30", shape=box, style=filled, fillcolor="#eeeeee"];
 "nfr1" [label="NFR-1", shape=box, style=filled, fillcolor="#eeeeee"];
 "nfr2" [label="NFR-2", shape=box, style=filled, fillcolor="#eeeeee"];
 "nfr3" [label="NFR-3", shape=box, style=filled, fillcolor="#eeeeee"];
@@ -103,6 +104,9 @@ label="Requirements allocated to subsystems (edge label = number of parts)"; lab
 "fr29" -> "S_conversation" [label="3", fontsize=8, tooltip="behaviourRegistry, feedbackLedger, expressor"];
 "fr3" -> "S_frontEnd" [label="1", fontsize=8, tooltip="audioPlayer"];
 "fr3" -> "S_voice" [label="4", fontsize=8, tooltip="textFilter, synthesizer, voiceEffect, streamer"];
+"fr30" -> "S_graphApp" [label="2", fontsize=8, tooltip="graphView, nodeEditor"];
+"fr30" -> "S_observability" [label="1", fontsize=8, tooltip="contextGraph"];
+"fr30" -> "S_taskRuntime" [label="1", fontsize=8, tooltip="workflowGraph"];
 "fr4" -> "S_observability" [label="2", fontsize=8, tooltip="runLog, explainTool"];
 "fr4" -> "S_webApp" [label="1", fontsize=8, tooltip="moodTracker"];
 "fr5" -> "S_frontEnd" [label="1", fontsize=8, tooltip="expressionEditor"];

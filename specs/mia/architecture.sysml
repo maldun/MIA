@@ -1085,11 +1085,12 @@ package MIA_Requirements {
         doc /* Every workflow (skill with its pipeline) shall carry a written specification that states its inputs and outputs
                (schemas, units, allowed values, what "unknown" looks like), its measurable acceptance criteria
                (metric, threshold, number of repeats, model pin, decision rule, budgets of tokens, time and
-               calls), and a benchmark: a set of test cases with labelled truth, a development part for tuning
-               and a held-out part for decisions, and a recorded baseline. The specification and benchmark are
-               stored with the workflow in the library; a workflow without them can only be a draft; every run
-               of the harness records the versions of the workflow, the model pin and the benchmark, so that
-               variants can be verified against the criteria and optimised against each other on the same cases. */
+               calls), a context graph (FR-30), and a benchmark: a set of test cases with labelled truth, a
+               development part for tuning and a held-out part for decisions, and a recorded baseline. The
+               specification and benchmark are stored with the workflow in the library; a workflow without them
+               can only be a draft; every run of the harness records the versions of the workflow, the model pin
+               and the benchmark, so that variants can be verified against the criteria and optimised against
+               each other on the same cases. */
         attribute minRepeatsForSampledModels : Integer = 3;
         @Trace { :>> baseline = ("TK-2", "TK-3", "TK-4", "EV-1"); :>> verifiedBy = (HowVerified::inspection, HowVerified::test, HowVerified::measurement); }
     }
@@ -1128,6 +1129,16 @@ package MIA_Requirements {
         attribute negativeVotesToNearlyStop : Integer = 5;
         attribute maxChancePercentAfterThat : Real = 1;
         @Trace { :>> baseline = ("BF-1", "BF-2"); :>> verifiedBy = (HowVerified::test, HowVerified::measurement); }
+    }
+
+    requirement def <'FR-30'> WorkflowContextGraph {
+        subject mia : MiaSystem;
+        doc /* Every workflow shall be accompanied by a context graph: the concepts, entities, source types and relations the
+               workflow works with, and the views that say which part of it each step sees within its token
+               budget. The context graph is stored with the workflow in the shared database, can be adapted by
+               any user in the graph app (every change a new version, FR-22), and each run builds its own run
+               graph from it and logs it (FR-16). */
+        @Trace { :>> baseline = ("TK-5", "LG-3"); :>> verifiedBy = (HowVerified::inspection, HowVerified::demonstration); }
     }
 
     // ================================================================ the requirement tree
@@ -1176,6 +1187,7 @@ package MIA_Requirements {
     requirement fr27 : FeedbackAndPoints;
     requirement fr28 : TasksAndMemos;
     requirement fr29 : AdaptationToNegativeFeedback;
+    requirement fr30 : WorkflowContextGraph;
     requirement nfr7 : EfficientOnGivenHardware;
     requirement nfr8 : SharedStateInDatabase;
 }
@@ -1229,6 +1241,7 @@ package MIA_Allocation {
     satisfy fr27 by mia;
     satisfy fr28 by mia;
     satisfy fr29 by mia;
+    satisfy fr30 by mia;
     satisfy nfr7 by mia;
     satisfy nfr8 by mia;
 
@@ -1360,6 +1373,10 @@ package MIA_Allocation {
     allocate fr29 to mia.conversation.behaviourRegistry;
     allocate fr29 to mia.conversation.feedbackLedger;
     allocate fr29 to mia.conversation.expressor;
+    allocate fr30 to mia.taskRuntime.workflowGraph;
+    allocate fr30 to mia.observability.contextGraph;
+    allocate fr30 to mia.graphApp.graphView;
+    allocate fr30 to mia.graphApp.nodeEditor;
     allocate fr22 to mia.graphApp.graphView;
     allocate fr22 to mia.graphApp.nodeEditor;
     allocate fr22 to mia.graphApp.versionStore;

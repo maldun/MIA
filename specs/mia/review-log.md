@@ -116,3 +116,12 @@ Design choices I made while drafting; each is the owner's to overrule:
 | Tooling: all requirement docs in `architecture.sysml` are now **generated from the HLS sentences**, and `tools/check_sysml_model.py` fails when they differ. First run of the check found two docs where `textwrap` had split words at hyphens; fixed | one source of truth |
 
 Not changed in step 3 (they belong to later steps): the agent profile (4: tasks, autonomy, data classes with attributed votes and shared visibility, example cases), architecture decisions table (5), acceptance criteria (6), risks (7).
+
+### Step 4 (agent profile), edited 2026-10-24
+| Id | Decision | Edit |
+|---|---|---|
+| D-17 | **New FR-30 Workflow context graph**: every workflow is accompanied by a context graph that users can adapt. *My reading, to confirm:* a graph of the concepts, entities, source types and relations the workflow works with, and the views that say what each step sees within its token budget; stored in the database, editable in the graph app, each run builds its run graph from it. The per-run graph of `context_graph.py` exists; a stored graph per workflow is new. FR-26 now lists it as part of the workflow's specification. | FR-30, FR-26, SysML |
+| D-18 | **Quality notion for chat in character** (owner): *this is MIA* = (i) behaves as `calibration.txt` notes, measured statistically with check dialogues; (ii) reactions fit the personality, tested statistically against check dialogues; (iii) an overall positive feedback score after a fixed interval (1 week as baseline). *Not MIA* = the inversions. AC-8 rewritten as three parts; the "missing" rows of the quality notion replaced. | quality notion, AC-8 |
+| D-19 | **Data classes**: all votes, scores, tasks, memos and context graphs are *shared inside MIA, private from outside*; account data and password hashes are secret and never logged. | data classes |
+| D-20 | **"Yes, ask" on the autonomy of feedback adaptation** (my reading): MIA reduces a behaviour gradually and tells users with a note they can undo, and **asks before a behaviour is nearly stopped** (the 5th net negative). To confirm. | autonomy table |
+| – | Added to the autonomy table: tasks and memos, workflow edits (a user edit is a new validated version that applies to all), account creation (owner only), vote adaptation. New trust boundary **TB-edit** (users edit workflows and prompts for everyone); it is named in the agent view in step 5. | agent profile |
