@@ -221,6 +221,21 @@ This is a description of an existing system, so the architecture mirrors the cod
 | Tailscale never tried | NFR-6 unproven | try with a phone outside the network (owner) |
 | Behaviour layer questions (which behaviours, daily digest, facts never stored) | FR-14, FR-15 scope | interview (this review) |
 
+### Plausibility of the high-level requirements (explore-phase rule, 2026-10-24)
+Quick thought per requirement: is there a precedent, does a rough estimate fit, is a spike needed. Plan records the evidence per requirement; only the doubtful ones are listed.
+
+| Requirement | Verdict | Why | Spike or measurement before Plan |
+|---|---|---|---|
+| FR-9 (near-miss numbers) | doubtful | the lead of the cops style rests on 3 distinct claims; sign test not significant | grow the suite to 30+ near-miss claims, with a holdout |
+| FR-11 literature review | doubtful | recall of a 12B model on papers is unmeasured; the real reference cases are paused | finish 2c with the owner's labels, run the baseline (2e/2f) |
+| FR-13 method transfer | doubtful | LLM analogy mining struggles on scientific text (RV research notes); off by default | retro-discovery on the two known cases of the owner |
+| FR-14 memory | doubtful | a 12B model must extract and verify records; today's dreaming has a known silent loss | memory test set with today's dreaming as baseline |
+| FR-15 / C-8 (stop after 5 negative feedbacks) | doubtful | conflicts with BF4 (approval must not be the only reward) | decide the scope: style and gestures only, never facts |
+| FR-18 learning | doubtful | a handful of users gives few samples | decide whether learning stays off until data exists |
+| NFR-7 latency and fps | doubtful | phone fps unmeasured; queue wait with several users on the 26B model unknown | measure first-token time and fps once; pick the numbers |
+| FR-22 graph app | plausible with effort | precedent: ArangoDB graph view; a vendored graph library handles hundreds of nodes; edit as JSON text | small prototype of the view on the existing library entries |
+Plausible without a spike: FR-1 to FR-8, FR-10, FR-12, FR-16, FR-17, FR-19, FR-21, NFR-1 to NFR-6, NFR-8 (built, or standard technology).
+
 ## 8. Changes in iteration 1 (feedback)
 None: this is the first HLS. Feedback items will be recorded here as FB-xx.
 
