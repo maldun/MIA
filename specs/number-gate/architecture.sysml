@@ -362,6 +362,8 @@ package NumberGate {
         requirement def <'REQ-NUM-002'> NoNumberInEvidence { subject chk : NumberCheck; }
         requirement def <'REQ-NUM-003'> ClaimsWithBound { subject chk : NumberCheck; }
         requirement def <'REQ-NUM-004'> NoEvidence { subject chk : NumberCheck; }
+        requirement def <'REQ-NUM-005'> ScaleWordsAndUnits { subject chk : NumberCheck; }
+        requirement def <'REQ-NUM-006'> QuantityMatching { subject chk : NumberCheck; }
         requirement def <'REQ-ARG-001'> StructuredArguments { subject arg : ArgueStep; }
         requirement def <'IF-001'> CheckResultInterface { subject chk : NumberCheck; }
         requirement def <'IF-002'> RulingInterface { subject jdg : JudgeStep; }
@@ -394,6 +396,8 @@ package NumberGate {
         requirement reqNum002 : NoNumberInEvidence;
         requirement reqNum003 : ClaimsWithBound;
         requirement reqNum004 : NoEvidence;
+        requirement reqNum005 : ScaleWordsAndUnits;
+        requirement reqNum006 : QuantityMatching;
         requirement reqArg001 : StructuredArguments;
         requirement if001 : CheckResultInterface;
         requirement if002 : RulingInterface;
@@ -426,6 +430,8 @@ package NumberGate {
         satisfy reqNum002 by numberGate.numberCheck;
         satisfy reqNum003 by numberGate.numberCheck;
         satisfy reqNum004 by numberGate.numberCheck;
+        satisfy reqNum005 by numberGate.numberCheck;
+        satisfy reqNum006 by numberGate.numberCheck;
         satisfy reqArg001 by numberGate.proArguer;
         satisfy if001 by numberGate.numberCheck;
         satisfy if002 by numberGate.judge;
@@ -459,6 +465,8 @@ package NumberGate {
         dependency depNum002 from reqNum002 to reqGate003;
         dependency depNum003 from reqNum003 to reqGate001;
         dependency depNum004 from reqNum004 to reqGate003;
+        dependency depNum005 from reqNum005 to reqGate001;
+        dependency depNum006 from reqNum006 to reqGate001;
         dependency depArg001 from reqArg001 to reqGate003;
         dependency depIf001 from if001 to reqGate001;
         dependency depIf002 from if002 to reqGate003;
@@ -487,6 +495,8 @@ package NumberGate {
         verification def TcNum002 { subject s : NumberCheck; objective { verify reqNum002; } }
         verification def TcNum003 { subject s : NumberCheck; objective { verify reqNum003; } }
         verification def TcNum004 { subject s : NumberCheck; objective { verify reqNum004; } }
+        verification def TcNum005 { subject s : NumberCheck; objective { verify reqNum005; } }
+        verification def TcNum006 { subject s : NumberCheck; objective { verify reqNum006; } }
         verification def TcArg001 { subject s : ArgueStep; objective { verify reqArg001; } }
         verification def TcIf001 { subject s : NumberCheck; objective { verify if001; } }
         verification def TcIf002 { subject s : JudgeStep; objective { verify if002; } }

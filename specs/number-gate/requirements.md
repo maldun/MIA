@@ -73,16 +73,16 @@ Scope of this iteration: verification of claims with numbers (the gate), the sta
 
 ### REQ-NUM-001 – Contradicting number in the evidence
 - Level: Component   Subject: NumberCheck
-- Text: If the evidence states the claimed quantity with a value that differs from the claimed value by more than the rounding cap of 2 %, then the number check shall return fail.
-- Rationale: uses the agreement rule of checks.py (ROUNDING_CAP); deterministic
+- Text: If the evidence states the claimed quantity with a value that does not agree with the claimed value under the agreement rule of checks.py, then the number check shall return fail; a whole-number value must be equal, any other value must lie within 1 % or within the rounding that the claim shows, at most 2 %.
+- Rationale: uses the agreement rule of checks.py (_agrees, ROUNDING_CAP 0.02); deterministic; an exact value leaves nothing to round
 - Parent: HLS FR-9
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: claim 1,200 m with evidence 1,020 m: fail; claim 1,200 m with evidence 1,210 m: pass; claim 5 km with evidence 3.1 mi: pass (exact)
-- Plausibility: precedent, example – checks.py has the agreement rule with ROUNDING_CAP 0.02 and unit_conversion; by hand: 1,020 against 1,200 m is 15 % off, 1,210 m is 0.8 % off, 3.1 mi is 4.99 km, 0.2 % off 5 km (plausible)
+- Acceptance criterion: claim 1,200 m with evidence 1,020 m: fail; with 1,200 m: pass; with 1,210 m: fail (whole numbers must be equal); claim 4.8 million with evidence 4.83 million: pass; with 4.9 million: fail (exact)
+- Plausibility: precedent, example – checked against the code on 2026-10-24: _agrees(1200, 1210) is False, _agrees(4.8, 4.83) is True, _agrees(4.8, 4.9) is False; the earlier hand value "1,200 m against 1,210 m is a pass" was wrong because an exact value is not rounded (plausible)
 - Verified by: TC-NUM-001
 - Status: Draft
-- History: –
+- History: rev A: the acceptance values assumed that the 2 % cap applies to whole numbers; corrected after the check against the code (Plan step 4)
 
 ### REQ-NUM-002 – No number in the evidence
 - Level: Component   Subject: NumberCheck
@@ -312,6 +312,32 @@ Scope of this iteration: verification of claims with numbers (the gate), the sta
 - Status: Draft
 - History: –
 
+### REQ-NUM-005 – Scale words and units
+- Level: Component   Subject: NumberCheck
+- Text: When the claim and the evidence write the same quantity with different scale words or with units of one dimension, the number check shall convert both to one unit before it compares them.
+- Rationale: VitaminC and Wikipedia write "23.5 million", "23,500,000", km and mi; without the conversion the check fails true claims
+- Parent: HLS FR-9
+- Priority: Should
+- Verification method: Test
+- Acceptance criterion: claim 23.5 million with evidence 23,500,000: pass; claim 5 km with evidence 3.1 miles: pass; with 3.0 miles: fail; claim 1.2 km with evidence 1,210 m: pass (exact)
+- Plausibility: precedent – checks.unit_conversion has the unit tables and the agreement rule (5 km against 3.1 mi passes, against 3.0 mi fails, checked on 2026-10-24); the scale words thousand, million and billion are new and short (plausible)
+- Verified by: TC-NUM-005
+- Status: Draft
+- History: –
+
+### REQ-NUM-006 – Matching the quantity
+- Level: Component   Subject: NumberCheck
+- Text: The number check shall compare the claimed value only with evidence values of the same unit dimension or with the same noun in the three words after the number, and shall return inconclusive if no evidence value matches.
+- Rationale: a number in the evidence that belongs to another quantity must not decide the claim; the albums and singles of the VitaminC example do not state the sales
+- Parent: HLS FR-9
+- Priority: Should
+- Verification method: Test
+- Acceptance criterion: claim "The hall is 40 m long." with evidence "The hall has 40 seats.": inconclusive; claim "Westlife sold under 23.5 million records." with evidence "13 million albums and 9.8 million singles": inconclusive; claim "40 m" with evidence "length 41 m": fail (exact)
+- Plausibility: example – the three-word window and the unit dimension are two simple tests on the text after the number; how many claims of the suites they match is shown by the dev sample at T-07 (doubtful)
+- Verified by: TC-NUM-006
+- Status: Draft
+- History: –
+
 ### REQ-ARG-001 – Structured arguments
 - Level: Component   Subject: ArgueStep
 - Text: The argue step shall return a JSON object with the field points, an array of 1 to 4 strings of 3 to 400 characters each.
@@ -461,6 +487,8 @@ Scope of this iteration: verification of claims with numbers (the gate), the sta
 | REQ-NUM-002 | Component | FR-9 | NumberCheck | TC-NUM-002 |
 | REQ-NUM-003 | Component | FR-9 | NumberCheck | TC-NUM-003 |
 | REQ-NUM-004 | Component | FR-9 | NumberCheck | TC-NUM-004 |
+| REQ-NUM-005 | Component | FR-9 | NumberCheck | TC-NUM-005 |
+| REQ-NUM-006 | Component | FR-9 | NumberCheck | TC-NUM-006 |
 | REQ-VER-001 | System | FR-9 | VerificationGate | EV-verdicts_vitaminc |
 | REQ-VER-002 | System | FR-9 | VerificationGate | EV-verdicts_wikidata |
 | REQ-VER-003 | System | FR-9 | VerificationGate | EV-verdicts_vitaminc |
