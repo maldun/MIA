@@ -779,7 +779,9 @@ package MIA_Requirements {
         doc /* MIA shall let several logged-in users hold a conversation with her in a web browser on desktop and phone, with
                answers appearing while they are written, a stop button, a queue of waiting messages, a history
                that survives reload and is shown live on every connected device, every message attributed to the
-               user who sent it, and one shared MIA answering all of them (D-4). */
+               user who sent it, and one shared MIA answering all of them (D-4). The visible history is kept
+               apart from MIA's memory, is bounded in size and can be deleted by a user after a confirmation;
+               the page shows the connection state, reconnects by itself and keeps unsent drafts. */
         attribute queuedMessages : Integer = 1;
         attribute messagesPerMinute : Integer = 10;
         @Trace { :>> baseline = ("CT-1", "CT-2", "CT-3", "CT-4", "CT-5", "CT-6", "CT-8", "CT-9", "CT-11");
@@ -789,7 +791,10 @@ package MIA_Requirements {
         subject mia : MiaSystem;
         doc /* MIA shall show her emotional state and speech through a 3D character with smoothly blending facial expressions,
                arm gestures, a moving mouth while speaking, blinking and idle motion, driven through one central
-               expression API; if the character cannot load, the chat shall still work. */
+               expression API; if the character cannot load, the chat shall still work. The character is the
+               stage: it fills the window and the chat overlays it (a side panel on wide screens, a bottom sheet
+               on phones) and can be collapsed so that only the character and a caption of the last answer
+               remain. */
         attribute blendSeconds : Real = 0.25;
         attribute minFpsPhone : Real = 30;
         attribute minFpsDesktop : Real = 60;
@@ -876,7 +881,9 @@ package MIA_Requirements {
     requirement def <'FR-9'> VerifyBeforeAsserting {
         subject mia : MiaSystem;
         doc /* MIA shall check by code what code can check, use model judgement only for the rest, treat "unknown" as a proper
-               answer, and let a failed hard check outweigh any model verdict. */
+               answer, and let a failed hard check outweigh any model verdict. Judgement styles (single voice,
+               repeated samples, a jury, for and against with a judge, a trial) are interchangeable, run only on
+               the claims that the hard checks leave open, and have fixed numbers of turns and tokens. */
         @Trace { :>> baseline = ("VE-1", "VE-2", "VE-4", "VE-5", "VE-7");
                  :>> verifiedBy = (HowVerified::measurement, HowVerified::test); }
     }
@@ -914,7 +921,12 @@ package MIA_Requirements {
                report: sources kept and dropped with reasons, findings per sub-question with verbatim anchors,
                conflicts, an answerability figure with its parts, open gaps and next keywords; she works in time
                slices (first 60 s), gives an intermediate report with a recommendation at the end of each, and
-               continues only when the requesting user agrees. */
+               continues only when the requesting user agrees. She works top down in levels with narrow roles
+               (analyse the question, determine the components, schedule the tasks) and sizes each piece of work
+               to a share of the context window by code; she stops when a check in code finds every sub-question
+               answered or a budget used up, never because the model feels done; names that other fields use for
+               the same thing are proposed as aliases and accepted only with evidence, and each finding records
+               the field whose vocabulary found it. */
         attribute firstSliceSeconds : Real = 60;
         attribute checkpointEverySources : Integer = 10;
         @Trace { :>> baseline = ("RS-2", "RS-3", "RS-4", "RS-5", "RS-7", "RS-8", "RS-9", "RS-10", "RS-12", "RS-14");
@@ -973,7 +985,8 @@ package MIA_Requirements {
         subject mia : MiaSystem;
         doc /* MIA shall be evaluated by a harness that runs pipeline variants on fixed suites with repeats, intervals and cost
                counting; every behaviour change starts with a test case; improvement claims hold on held-out
-               cases. */
+               cases. A model used as a judge is calibrated against the users' ratings before its verdicts
+               count. */
         @Trace { :>> baseline = ("EV-1", "RS-14", "RS-15");
                  :>> verifiedBy = (HowVerified::test, HowVerified::inspection); }
     }
@@ -1166,7 +1179,8 @@ package MIA_Requirements {
                with an audio file, made with the TTS and the voice effect (FR-3) or supplied as a recording;
                every user can add, replace or remove lines (FR-5); the line is chosen by mood and event, at
                random among several; a mood without a line stays silent and a missing file is skipped without an
-               error and logged. */
+               error and logged. The default lines ("Hello!", "Hey!", "Listen!" and one per mood) are generated
+               with the TTS, so that MIA needs no third-party recordings (D-26). */
         attribute attentionChance : Real = 0.3;
         @Trace { :>> baseline = ("VO-3", "CT-7", "EM-1"); :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
     }

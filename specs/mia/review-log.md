@@ -143,3 +143,20 @@ Open for step 5: **where do the benchmark data live?** FR-26 says a workflow's s
 |---|---|---|
 | D-24 | **Benchmark data**: cases, suites and baselines stay as files in `eval/` (protected, in git); the workflow entry in the database references them by suite id and version; run results are stored in the database. Step 5 confirmed. | FR-26 |
 | D-25 | **Voice lines were missing from the HLS** (the owner asked). Baseline `VO-3` (clips per expression in `expressions.json`, intro sounds, attention sounds with a chance of 0.3) was only in a bracket of FR-3, never stated. New **FR-31 Voice lines**: greeting, a line per mood or expression, an attention call before MIA speaks on her own, a shocked line on a negative vote; data, editable by every user, chosen at random among several, silent when missing. **AC-13**. New part `voice.voiceLines`. Risk noted: some clips (`Navi_*.wav`) look like game samples and are outside git. | FR-31, FR-3, FR-23, autonomy, risks, AC-13 |
+
+### Sweep of the baseline against the HLS (2026-10-24)
+Method (`tools/sweep_baseline.py`, reproducible): for each of the 90 baseline rows, the distinctive words of the row (backticked terms and words of 6 or more letters) are counted in the HLS text **without** its id brackets; rows with low coverage and rows that no bracket cites are read by hand. Result: 80 of 90 rows are cited in a bracket; 10 are not.
+
+| Row | Finding | Action |
+|---|---|---|
+| VO-3 | found earlier by the owner (voice lines) | FR-31 |
+| TK-7, TK-8, CH-11, CT-12 | storytelling, character variants, chat extras: proposed, never decided | listed under "Not decided yet" in the scope; the owner chooses the **second skill** |
+| CT-13 | non-goal list was incomplete and said accounts are out of scope | HLS non-goals completed; baseline row corrected |
+| G-1, G-2, C-4, C-6, C-7 | covered by section 1, CON-1, CON-3 and the scope, not by a bracket | no change |
+| CT-1, CT-8, CT-6 | layout, chat log separate from memory and deletable, connection state and drafts were cited but not stated | added to FR-2 and FR-1 |
+| VE-4, RS-3, RS-8, RS-12, EV-2 | verification styles behind hard checks, top-down levels, stop by a check in code, cross-field aliases, judge calibration were cited but not stated | added to FR-9, FR-11, FR-17 |
+| CH-6, CT-3, CT-4, CT-5, CT-7, others between 0.45 and 0.65 | detail that belongs to the detailed documents (`ui/REQUIREMENTS_CHAT.md` and others) | no change |
+
+| Id | Decision | Edit |
+|---|---|---|
+| D-26 | If the game samples (`Navi_*.wav`) do not exist, **create the default lines with the TTS** ("Hello!", "Hey!", "Listen!" as the file names suggest, plus one per mood); this mitigates the licensing risk. | FR-31, risk table |

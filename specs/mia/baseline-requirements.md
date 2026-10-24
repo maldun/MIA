@@ -69,7 +69,7 @@ Status is taken from `ui/README.md` and the commit log, not from the requirement
 | CT-10 | Design tokens, themes dark / light / system (WCAG AA), reduced motion, 44 px touch targets, keyboard use, screen-reader semantics, one i18n dictionary (English now, German prepared), strict CSP, no CDN | CHAT 3, 4.2, 9 | Built (C5) |
 | CT-11 | Chat commands: `/light! /full! /dream! /goodnight! /break! /time!` and (added later) `/lookup /search /research` | CHAT 5.2, README, RES RV3 | Built |
 | CT-12 | Optional C6: regenerate, speak again, search, export, accent presets, German texts | CHAT 12 | Proposed |
-| CT-13 | Out of scope: voice input, attachments, accounts, message editing, push, installable app, translating answers | CHAT 13 | standing |
+| CT-13 | Out of scope: voice input, attachments, message editing, push, installable app, translating answers (accounts were out of scope here and are **in scope since 2026-10-24**, D-1) | CHAT 13 | standing |
 
 ### 3.4 Voice
 
