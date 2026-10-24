@@ -1037,13 +1037,12 @@ package MIA_Requirements {
     }
     requirement def <'NFR-7'> EfficientOnGivenHardware {
         subject mia : MiaSystem;
-        doc /* The first text of a chat answer appears within seconds on the light model (target to be fixed, see 6); every
-               task runs under explicit budgets (steps, seconds, calls, tokens) and a run that exceeds one ends
-               with what it has and says what is missing; the character runs at 30+ fps on a mid-range phone and
-               60 fps on desktop. Several users share one model server: waiting messages are queued, show their
-               position and are refused only when the queue is full (length set in Plan). A chat answer has
-               priority over a background task: a long task (a review slice) yields the model server to waiting
-               chat messages. */
+        doc /* The first text of a chat answer appears within 10 seconds on the light model (D-34); every task runs under
+               explicit budgets (steps, seconds, calls, tokens) and a run that exceeds one ends with what it has
+               and says what is missing; the character runs at 30+ fps on a mid-range phone and 60 fps on
+               desktop. Several users share one model server: waiting messages are queued, show their position
+               and are refused only when the queue is full (length set in Plan). A chat answer has priority over
+               a background task: a long task (a review slice) yields the model server to waiting chat messages. */
         @Trace { :>> baseline = ("C-2", "CT-9", "RS-9");
                  :>> verifiedBy = (HowVerified::measurement); }
     }
@@ -1109,8 +1108,9 @@ package MIA_Requirements {
         doc /* MIA shall behave roughly as the persona file specifies: she uses the names and pronouns given there correctly
                and addresses every user as "master" by default unless the persona file specifies otherwise
                (D-14, D-16) and repeats back-story elements in fitting situations; calibration.txt is one shared
-               configuration file for all users and the baseline of the persona; every user can change it (FR-5)
-               and a change applies to all (D-22). How well she keeps it is measured by a persona suite in Plan. */
+               parameter file for all users and the baseline of the persona (D-22, D-35); every user can change
+               it (FR-5) and a change applies to all (D-22). How well she keeps it is measured by a persona
+               suite in Plan. */
         @Trace { :>> baseline = ("ME-1"); :>> verifiedBy = (HowVerified::measurement); }
     }
 
