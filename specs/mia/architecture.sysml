@@ -888,7 +888,9 @@ package MIA_Requirements {
         doc /* MIA shall check by code what code can check, use model judgement only for the rest, treat "unknown" as a proper
                answer, and let a failed hard check outweigh any model verdict. Judgement styles (single voice,
                repeated samples, a jury, for and against with a judge, a trial) are interchangeable, run only on
-               the claims that the hard checks leave open, and have fixed numbers of turns and tokens. */
+               the claims that the hard checks leave open, and have fixed numbers of turns and tokens. Repeating
+               a run on the same input and the same sources gives the same verdicts and the same set of facts
+               and statements; only their order and wording may differ (D-31). */
         @Trace { :>> baseline = ("VE-1", "VE-2", "VE-4", "VE-5", "VE-7");
                  :>> verifiedBy = (HowVerified::measurement, HowVerified::test); }
     }
@@ -918,7 +920,8 @@ package MIA_Requirements {
         doc /* MIA shall answer a factual question with the sources and verbatim quotes that support it, prefer a trusted
                source to a model judgement, and say "unknown" when nothing supports an answer. A search command
                calls the SearXNG metasearch and lists the findings (title, address, short text) without
-               composing or verifying an answer (D-28). */
+               composing or verifying an answer (D-28). Repeating a lookup on the same sources gives the same
+               facts and statements, with the same number of facts; only order and wording may differ (D-31). */
         @Trace { :>> baseline = ("RS-1", "RS-6");
                  :>> verifiedBy = (HowVerified::measurement); }
     }
@@ -1123,7 +1126,7 @@ package MIA_Requirements {
                results are stored in the database; a workflow without a specification and a benchmark can only
                be a draft; every run of the harness records the versions of the workflow, the model pin and the
                benchmark, so that variants can be verified against the criteria and optimised against each other
-               on the same cases. */
+               on the same cases. Stability across repeats is one of the measurable criteria of every workflow. */
         attribute minRepeatsForSampledModels : Integer = 3;
         @Trace { :>> baseline = ("TK-2", "TK-3", "TK-4", "EV-1"); :>> verifiedBy = (HowVerified::inspection, HowVerified::test, HowVerified::measurement); }
     }
