@@ -167,7 +167,7 @@ Review (default): 40 sources screened, 10 read, 150 model calls, 400 000 tokens,
 MIA is a Python service (Flask and Socket.IO) with a speech subprocess, a model server (Ollama), a search service (SearXNG) and an HTTPS front (proxy or Caddy). The browser loads a chat page and the Godot web export of the character; everything runs on the host. Inside, thirteen subsystems: front end, web application, graph app, conversation core, task runtime, verification suite, research suite, voice, observability, evaluation, learning layer (proposed), persistence (files), operation. The agent view shows ten model steps and the five trust boundaries above.
 
 ### 5.2 SysML model
-`architecture.sysml` holds, in this order: shared vocabulary (status, trace), the architecture (items, ports, interfaces, `MiaSystem` with 65 leaf parts that name their code files and status), the agent view, the requirements (CON-1..5, FR-1..19, NFR-1..8), and satisfy/allocate/verification. `model/` holds the context (people, concerns, external systems) and the behaviours (chat exchange, lookup, review, consolidation, activity states). Excerpt:
+`architecture.sysml` holds, in this order: shared vocabulary (status, trace), the architecture (items, ports, interfaces, `MiaSystem` with 65 leaf parts that name their code files and status), the agent view, the requirements (CON-1..7, FR-1..22, NFR-1..8), and satisfy/allocate/verification. `model/` holds the context (people, concerns, external systems) and the behaviours (chat exchange, lookup, review, consolidation, activity states). Excerpt:
 
 ```sysml
 part def ExtractionStep {
