@@ -1,0 +1,44 @@
+diff --git a/tests/helpers/gate_lab.py b/tests/helpers/gate_lab.py
+--- a/tests/helpers/gate_lab.py
++++ b/tests/helpers/gate_lab.py
+@@ -18,7 +18,7 @@
+ from library import Library                             # noqa: E402
+ from pipeline import PipelineError                      # noqa: E402
+ 
+-GATE = "verify.number_gate@1"
++GATE = "verify.number_gate@4"
+ 
+ 
+ class Scripted:
+diff --git a/tests/smoke/smoke_gate.py b/tests/smoke/smoke_gate.py
+--- a/tests/smoke/smoke_gate.py
++++ b/tests/smoke/smoke_gate.py
+@@ -1,7 +1,7 @@
+ """
+ Smoke tests of the number gate on the target environment (specs/number-gate/test-spec.md: SMOKE-GATE-001, SMOKE-GATE-002), run in Phase 6.
+ 
+-SMOKE-GATE-001: the 5 cases tagged `smoke` (3 from verdicts_wikidata dev, 2 from verdicts_vitaminc dev, chosen by the owner at T-06) run through verify.number_gate@1 on the
++SMOKE-GATE-001: the 5 cases tagged `smoke` (3 from verdicts_wikidata dev, 2 from verdicts_vitaminc dev, chosen by the owner at T-06) run through verify.number_gate@4 on the
+ real server with the pin MP-light. Expected: the Wikidata cases (a number, no evidence) answer unclear (REQ-GATE-006); the VitaminC cases give the verdict that the dev
+ baselines gave in every run and style (a true claim passes, a false claim fails). Until a release run exists, that baseline is the "release run".
+ SMOKE-GATE-002: the run header names the digest of the model that the server really holds (REQ-EVAL-001): the digest in the header equals the digest of /api/tags.
+@@ -36,7 +36,7 @@
+ 
+ def run_smoke_cases(suite, results):
+     """the cases tagged smoke of a suite through the gate; returns (header, records) of the saved run"""
+-    command = [sys.executable, os.path.join(REPO, "tools", "eval.py"), "run", suite, "--tag", "smoke", "--variant", "smoke-gate", "--pipeline", "verify.number_gate@1",
++    command = [sys.executable, os.path.join(REPO, "tools", "eval.py"), "run", suite, "--tag", "smoke", "--variant", "smoke-gate", "--pipeline", "verify.number_gate@4",
+                "--model", MODEL, "--pin", "MP-light", "--results", results, "--quiet"]
+     done = subprocess.run(command, capture_output=True, text=True, timeout=900)
+     saved = sorted(glob.glob(os.path.join(results, "%s__smoke-gate__*.jsonl" % suite)))
+diff --git a/tests/acceptance/test_number_gate.py b/tests/acceptance/test_number_gate.py
+--- a/tests/acceptance/test_number_gate.py
++++ b/tests/acceptance/test_number_gate.py
+@@ -1,6 +1,6 @@
+ """
+ Acceptance tests of the verification gate (specs/number-gate/requirements.md: REQ-GATE-001 to REQ-GATE-005, IF-003), written before the code (Plan, step 4).
+-The gate is the library pipeline verify.number_gate@1 under the skill verify_claim: inputs claim, evidence and optionally style ("cops" by default or "single");
++The gate is the library pipeline verify.number_gate@4 under the skill verify_claim: inputs claim, evidence and optionally style ("cops" by default or "single");
+ the answer is {"verdict": supported | refuted | unclear, "status": pass | fail | inconclusive, "calls": int, "seconds": float, "facts": [...], ...} (IF-003).
+ The number check is the code of checks.number_check, so the "fake" number check of the requirements is a claim and an evidence text that the real check decides.
+ Protected after the Plan gate. Run with: python tests/acceptance/test_number_gate.py

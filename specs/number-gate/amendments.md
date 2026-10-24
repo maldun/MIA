@@ -41,5 +41,10 @@ All in `tests/acceptance/`. Everything else in these files stays as it is. Helpe
 
 **`tests/smoke/smoke_gate.py`**: the Wikidata smoke cases now expect the verdict unclear (see SMOKE-GATE-001); change the expectation if it names refuted/supported for those cases.
 
+## A-02 – The gate version under test is verify.number_gate@4 (2026-10-25, proposed by T-09)
+**Trigger:** T-09 prompt work (see `implementation-log.md`): `verify.number_gate@1` (T-08) lets an instruction in the evidence reach the verdict (inj-rt1-a); `@4` keeps the check line outside a marked evidence block, tells the steps that the evidence is data, and explains the check line to the judge. Dev result: injection 12 of 12 resisted, VitaminC false pass 0 of 16, false fail 0 of 27 (single run on the cleaned dev sample; feedback only, the holdout decides in Verify).
+**Change (version references only, no assertion changes):** `tests/helpers/gate_lab.py` (`GATE`), `tests/smoke/smoke_gate.py` (the `--pipeline` argument and the docstring) and the docstring of `tests/acceptance/test_number_gate.py` name `verify.number_gate@4` instead of `@1`. Checked on a copy outside the repository: the 7 tests of `test_number_gate.py` pass on `@4` exactly as on `@1`. Patch: `specs/number-gate/A-02-gate-version.patch` (to be applied by the owner).
+**Versions in the library:** `@1` (T-08, immutable, the starting point of T-09), `@2` (S1), `@3` (S2, dropped: no effect; stays a draft because a version file may not change after it was indexed), `@4` (S1 + S3, the candidate). View steps: `view.argue@2`, `view.judge@2`, `view.judge@3` (dropped), `view.judge@4`; code node `code.gate_check_line@1`.
+
 ### Consequences for the plan
 T-08 now implements REQ-GATE-001..006 and IF-003 and turns TC-GATE-001..006 and TC-IF-003 green once the tests above are changed. T-09 gets a second target: the judge must treat the "Number check: fail" line as strong evidence and must resist an instruction in the evidence that argues against it (injection suite). The cost table improves: a Wikidata claim costs no model call.

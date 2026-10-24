@@ -1,0 +1,203 @@
+{
+ "id": "verify.number_gate",
+ "version": 4,
+ "title": "Number gate",
+ "description": "Claims with a number and no evidence answer unclear without a model call. Otherwise the numbers of the claim are checked against the evidence by code and the line of the result goes to one judgement style (cops by default, single when asked; a claim without a number takes the single voice as before). The evidence is cut to 4000 characters.",
+ "goal": "judge a claim, using code for what code can verify and abstaining where nothing can be checked",
+ "tags": [
+  "verify",
+  "gate"
+ ],
+ "applies_to": {
+  "claim_types": [
+   "fact"
+  ],
+  "tasks": [
+   "research"
+  ]
+ },
+ "cost_class": "normal",
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "claim",
+    "evidence"
+   ],
+   "properties": {
+    "claim": {
+     "type": "string"
+    },
+    "evidence": {
+     "type": "string",
+     "description": "sources or notes, may be empty"
+    },
+    "style": {
+     "enum": [
+      "cops",
+      "single"
+     ],
+     "description": "judgement style for a claim with a number and evidence (default cops)"
+    }
+   }
+  }
+ },
+ "result": "answer",
+ "nodes": [
+  {
+   "id": "prepare",
+   "use": "code.gate_prepare@1",
+   "wire": {
+    "given": "$input"
+   },
+   "output": "plan"
+  },
+  {
+   "id": "route",
+   "kind": "branch",
+   "plain": "choosing the way",
+   "if": {
+    "ref": "plan.route",
+    "op": "==",
+    "value": "abstain"
+   },
+   "then": [
+    {
+     "id": "abstain",
+     "use": "code.gate_abstain@1",
+     "wire": {
+      "plan": "$plan"
+     },
+     "output": "answer"
+    }
+   ],
+   "else": [
+    {
+     "id": "check",
+     "use": "check.number@1",
+     "wire": {
+      "claim": "$input.claim",
+      "evidence": "$plan.evidence"
+     },
+     "output": "check"
+    },
+    {
+     "id": "shape",
+     "use": "code.gate_evidence@1",
+     "wire": {
+      "plan": "$plan",
+      "check": "$check"
+     },
+     "output": "seen"
+    },
+    {
+     "id": "line",
+     "use": "code.gate_check_line@1",
+     "wire": {
+      "check": "$check"
+     },
+     "output": "line"
+    },
+    {
+     "id": "style",
+     "kind": "branch",
+     "plain": "the judgement style",
+     "if": {
+      "ref": "plan.route",
+      "op": "==",
+      "value": "cops"
+     },
+     "then": [
+      {
+       "id": "pro",
+       "use": "view.argue@2",
+       "wire": {
+        "claim": "$input.claim",
+        "evidence": "$plan.evidence",
+        "check": "$line",
+        "side": "for"
+       },
+       "output": "case_for"
+      },
+      {
+       "id": "con",
+       "use": "view.argue@2",
+       "wire": {
+        "claim": "$input.claim",
+        "evidence": "$plan.evidence",
+        "check": "$line",
+        "side": "against"
+       },
+       "output": "case_against"
+      },
+      {
+       "id": "judge",
+       "use": "view.judge@4",
+       "wire": {
+        "claim": "$input.claim",
+        "evidence": "$plan.evidence",
+        "check": "$line",
+        "case_for": "$case_for.points",
+        "case_against": "$case_against.points"
+       },
+       "output": "ruling"
+      },
+      {
+       "id": "count",
+       "use": "code.tally@1",
+       "wire": {
+        "verdicts": "$ruling"
+       },
+       "output": "tally"
+      },
+      {
+       "id": "record",
+       "use": "code.gate_record@1",
+       "wire": {
+        "plan": "$plan",
+        "check": "$check",
+        "verdict": "$tally"
+       },
+       "output": "answer"
+      }
+     ],
+     "else": [
+      {
+       "id": "voice",
+       "use": "view.verdict@1",
+       "wire": {
+        "claim": "$input.claim",
+        "evidence": "$seen",
+        "context": "an impartial checker"
+       },
+       "output": "one"
+      },
+      {
+       "id": "count_one",
+       "use": "code.tally@1",
+       "wire": {
+        "verdicts": "$one"
+       },
+       "output": "tally"
+      },
+      {
+       "id": "record_one",
+       "use": "code.gate_record@1",
+       "wire": {
+        "plan": "$plan",
+        "check": "$check",
+        "verdict": "$tally"
+       },
+       "output": "answer"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "status": "draft",
+ "origin": {
+  "by": "manual",
+  "note": "T-09 variant 4 of specs/number-gate: judge@4, argue@2, the check line outside the evidence block; not measured on holdout"
+ }
+}

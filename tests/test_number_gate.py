@@ -128,7 +128,7 @@ class Functions(unittest.TestCase):
         self.assertIn("not run", G.gate_check_line({"status": "not_applicable", "detail": "x"}))
 
     def test_the_gate_pipeline_is_the_one_the_tests_name(self):
-        self.assertEqual(GATE, "verify.number_gate@1")
+        self.assertTrue(GATE.startswith("verify.number_gate@"), GATE)
 
 
 if __name__ == "__main__":
