@@ -22,26 +22,31 @@ package MIA_Context {
     concern def <'CN-1'> CompanionQuality {
         doc /* A pleasant, in-character conversation partner that feels alive: answers in seconds, a face that
                shows the mood, a voice, a history, and a page that works on a phone. */
+        subject mia;
         stakeholder owner : Owner;
         stakeholder user : User;
     }
     concern def <'CN-2'> TrustworthyFacts {
         doc /* What MIA states as fact can be traced to a source or a check; "unknown" is an honest answer;
                references are never invented. */
+        subject mia;
         stakeholder owner : Owner;
     }
     concern def <'CN-3'> ResearchValue {
         doc /* The project answers a research question: how far a small free local model gets inside pipelines
                with verification. Every comparison is fair, repeatable and carries its limits. */
+        subject mia;
         stakeholder owner : Owner;
     }
     concern def <'CN-4'> OwnershipAndPrivacy {
         doc /* Data, models and compute stay on the owner's machines; nothing runs without the owner's consent
                on the internet; the GPU can be handed back to other programs. */
+        subject mia;
         stakeholder owner : Owner;
     }
     concern def <'CN-5'> Operability {
         doc /* Install, update, back up, stop cleanly and understand what happened, without being an expert in every part. */
+        subject mia;
         stakeholder owner : Owner;
     }
 
