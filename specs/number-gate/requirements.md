@@ -39,7 +39,7 @@ Scope of this iteration: verification of claims with numbers (the gate), the sta
 - Parent: HLS FR-9
 - Priority: Should
 - Verification method: Test
-- Acceptance criterion: with a fake model, the steps argue for, argue against and judge run once each in this order; the judge input contains the check result line; with the configured style single, one model call runs (exact)
+- Acceptance criterion: with a fake model, the steps argue for, argue against and judge run once each in this order; the judge input contains the check result line, which says not_applicable when the evidence is empty and the check did not run; with the configured style single, one model call runs (exact)
 - Plausibility: precedent – the library pipeline verify.cops@1 runs these three steps in this order, and the check line is one more evidence line (plausible)
 - Verified by: TC-GATE-003
 - Status: Draft
