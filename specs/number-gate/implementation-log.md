@@ -33,3 +33,5 @@ Plan baseline: tag `plan-baseline-it1`. My test runs are feedback, not verificat
   - A sample of pairs with an odd N is one case short rather than splitting a pair.
   - `case_input` is the interface of IF-005; the gate pipeline (T-08) decides how it uses seed and temperature, because the model options already carry them.
 - Open for T-05: whether the real Ollama adapter honours `seed` and `temperature` in `options` (the fake model only proves they are passed).
+- Added with T-03 for T-05: `tools/eval.py` reads the suites from `MIA_SUITES` when set (a worktree finds the labelled suites of the main checkout, where the installed suites live); `tools/run_t05_smoke.sh` runs the T-05 smoke and determinism spike in one go (digest check, 10 dev cases per suite for single and cops, 6 cases twice).
+- Finding on the suites (no test needed, it is data): a VitaminC `pair:` tag groups 3 to 4 cases of one claim (75 of 100 groups do not have 2 cases), a Wikidata pair has 2 except 2 pairs whose other half is retired. `sample_cases` keeps a whole group together, so a sample of N cases can be a little short of N.

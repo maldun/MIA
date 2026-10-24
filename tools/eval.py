@@ -33,7 +33,7 @@ from MIA.core import Core  # noqa: E402
 from MIA.library import Library  # noqa: E402
 from MIA.sandbox import create_router  # noqa: E402
 
-SUITES = os.path.join(REPO, "eval", "suites")
+SUITES = os.environ.get("MIA_SUITES") or os.path.join(REPO, "eval", "suites")       # a worktree finds the labelled suites of the main checkout this way
 # the model pins of specs/number-gate/eval-spec.md ("Model pins"); a change of a pin is an amendment there first
 PINS = {"MP-light": {"name": "gemma4:12b-it-qat", "digest": "sha256:38044be4f923e5a55264ed7df4eaac2676651a905f735197c504045140c02bd3", "seed": 7, "temperature": 0}}
 
