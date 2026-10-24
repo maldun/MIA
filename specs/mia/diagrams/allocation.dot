@@ -33,6 +33,10 @@ label="Requirements allocated to subsystems (edge label = number of parts)"; lab
 "fr23" [label="FR-23", shape=box, style=filled, fillcolor="#eeeeee"];
 "fr24" [label="FR-24", shape=box, style=filled, fillcolor="#eeeeee"];
 "fr25" [label="FR-25", shape=box, style=filled, fillcolor="#eeeeee"];
+"fr26" [label="FR-26", shape=box, style=filled, fillcolor="#eeeeee"];
+"fr27" [label="FR-27", shape=box, style=filled, fillcolor="#eeeeee"];
+"fr28" [label="FR-28", shape=box, style=filled, fillcolor="#eeeeee"];
+"fr29" [label="FR-29", shape=box, style=filled, fillcolor="#eeeeee"];
 "nfr1" [label="NFR-1", shape=box, style=filled, fillcolor="#eeeeee"];
 "nfr2" [label="NFR-2", shape=box, style=filled, fillcolor="#eeeeee"];
 "nfr3" [label="NFR-3", shape=box, style=filled, fillcolor="#eeeeee"];
@@ -89,6 +93,14 @@ label="Requirements allocated to subsystems (edge label = number of parts)"; lab
 "fr24" -> "S_operation" [label="1", fontsize=8, tooltip="characterTools"];
 "fr25" -> "S_conversation" [label="1", fontsize=8, tooltip="persona"];
 "fr25" -> "S_evaluation" [label="1", fontsize=8, tooltip="suites"];
+"fr26" -> "S_evaluation" [label="2", fontsize=8, tooltip="harness, suites"];
+"fr26" -> "S_taskRuntime" [label="3", fontsize=8, tooltip="libraryStore, skillStore, pipelineRunner"];
+"fr27" -> "S_conversation" [label="1", fontsize=8, tooltip="feedbackLedger"];
+"fr27" -> "S_frontEnd" [label="1", fontsize=8, tooltip="chatPage"];
+"fr27" -> "S_webApp" [label="1", fontsize=8, tooltip="moodTracker"];
+"fr28" -> "S_conversation" [label="2", fontsize=8, tooltip="taskMemoStore, scheduleReminders"];
+"fr28" -> "S_persistence" [label="1", fontsize=8, tooltip="database"];
+"fr29" -> "S_conversation" [label="3", fontsize=8, tooltip="behaviourRegistry, feedbackLedger, expressor"];
 "fr3" -> "S_frontEnd" [label="1", fontsize=8, tooltip="audioPlayer"];
 "fr3" -> "S_voice" [label="4", fontsize=8, tooltip="textFilter, synthesizer, voiceEffect, streamer"];
 "fr4" -> "S_observability" [label="2", fontsize=8, tooltip="runLog, explainTool"];

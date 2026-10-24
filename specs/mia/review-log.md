@@ -86,3 +86,20 @@ Open for the owner (CR-5 with several users): the persona says "master". Does MI
 |---|---|---|---|
 | D-14 | Chunk 1 of step 3b confirmed. **MIA calls every user "master"** (one shared persona, the same form of address for all). | FR-25 | applied |
 | D-15 | **New requirement FR-26**: every workflow has a specification of inputs and outputs and measurable criteria, with a benchmark (test set, development and held-out parts, baseline), so that it can be verified and optimised. Was **not** covered before: FR-7 (validated versioned data), FR-17 (a harness exists), FR-20 (a path with a suite) and NFR-2 (structured outputs) touch it, but none demands a written specification per workflow with criteria. | FR-26 (new), FR-20 (points to it), AC-10 | applied |
+
+### Step 3b, chunk 2 (drafted 2026-10-24): CR-6, CR-7, CR-8
+| Id | Decision | Edit |
+|---|---|---|
+| D-16 | FR-26 and AC-10 confirmed. **FR-25: "master" for every user by default, unless `calibration.txt` specifies otherwise.** Chunk 2 drafted from the owner's description. | applied |
+
+New: **FR-27 Feedback and points** (CR-6), **FR-28 Tasks and memos** (CR-7), **FR-29 Adaptation to negative feedback** (CR-8); FR-23 (mood) now also takes the overall score; **AC-11** (after 5 net negatives at most 1 percent in 1000 opportunities), **AC-12** (50 tasks and memos recited word for word).
+
+Design choices I made while drafting; each is the owner's to overrule:
+1. **Points:** a plus adds and a minus subtracts a number of points in the category voted for; the value per vote and the weight per category are settings; the overall score is the weighted sum of the four categories. The "story" (money, love points) is data: a text per category, fictional.
+2. **Whose votes:** all users' votes count equally (shared MIA, trusted users), each attributed.
+3. **Mood:** the overall score shifts the general mood through a moving window (length set in Plan), so one vote does not stick forever.
+4. **"Adjust on that metric":** read as: compare workflow and behaviour versions over time by their feedback score (FR-26 benchmark remains the decision basis); feedback never changes a fact (conflict with BF4 resolved by scope).
+5. **Attribution:** a minus must name the behaviour it is about; if a message contains several (gesture, expression, phrase), the vote asks which one. Every reaction therefore carries behaviour ids.
+6. **Stopping:** "at least 5 times it should stop (or 1 % or less)" is written as: after at least 5 net negative votes the chance is at most 1 % per opportunity; positive votes can restore it; the exact curve is fixed in Plan. Net = negatives minus positives.
+7. **Scope of FR-29:** style and reactions only (gestures, expressions, recurring phrases, kinds of reaction), never facts, safety checks or the persona's names.
+8. **Tasks and memos:** read back from the records by code, never regenerated; stored in the shared database; all users see and may change them.
