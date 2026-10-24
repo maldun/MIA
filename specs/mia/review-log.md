@@ -219,3 +219,8 @@ The first version was silent until the end and could take 20 minutes or more: th
 | D-38 | The owner confirmed that the coding agent may read `calibration.txt` and that it is **treated as a shared parameter file from now on**. Content (2 lines): role = virtual maid MIA-chan, form of address = master, salary in DEP (Digital Electric Points), personality = diligent and earnest, tries to fulfil requests, sometimes cheeky or sarcastic. No back story. | research.md |
 | – | **The currency of the feedback story is DEP** (FR-27), read from the file. The check dialogues of AC-8 (i): address as master, role, DEP when asked about pay (code-checkable); (ii): reactions diligent and earnest with an occasional cheeky or sarcastic remark, a rate set in Plan, judged by a calibrated judge (FR-17). | FR-27, FR-25, quality notion |
 | open for Plan | Is the file **free text only** (as today, sent as a prompt) or does it get structured lines such as `address: master`, `currency: DEP`, `traits: ...` that code can read, with the free text kept? Proposal: keep the free text for the model and add `key: value` lines for what code needs (the form of address for the check, the currency for FR-27, the sarcasm rate for the FR-29 counters). | – |
+
+### Approval of the HLS (owner, 2026-10-24)
+| Id | Decision | Edit |
+|---|---|---|
+| D-39 | **The HLS is approved**, including the 17 acceptance criteria that were still marked *proposed* (now *accepted*). Phase 1 (Explore) is finished; Phase 2 (Plan) starts with the order of work of section 7 (D-37). | status line, AC table |
