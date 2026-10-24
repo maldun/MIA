@@ -7,7 +7,8 @@ The evaluation harness on the command line (ui/REQUIREMENTS_CORE.md 9). Run with
   python tools/eval.py run computable --variant light --model light
   python tools/eval.py run computable --variant full --model gemma4:26b --pipeline verify.computable@1
   python tools/eval.py run hard_checks --tag numeric --limit 10        only some cases
-  python tools/eval.py report hard_checks                     the report of the newest saved run of a suite (or of a file)
+  python tools/eval.py run verdicts_vitaminc --pipeline verify.single@1 --pin MP-light --sample 100 --repeats 1     seeded sample, pinned model setting
+  python tools/eval.py report hard_checks                  the report of the newest saved run of a suite (or of a file)
   python tools/eval.py compare data/eval/a.jsonl data/eval/b.jsonl     the same cases under two variants, with the exact sign test
   python tools/eval.py compare computable light full          the newest runs of two variants of a suite
   python tools/eval.py cases hard_checks --tag trap           show the cases
@@ -33,6 +34,8 @@ from MIA.library import Library  # noqa: E402
 from MIA.sandbox import create_router  # noqa: E402
 
 SUITES = os.path.join(REPO, "eval", "suites")
+# the model pins of specs/number-gate/eval-spec.md ("Model pins"); a change of a pin is an amendment there first
+PINS = {"MP-light": {"name": "gemma4:12b-it-qat", "digest": "sha256:38044be4f923e5a55264ed7df4eaac2676651a905f735197c504045140c02bd3", "seed": 7, "temperature": 0}}
 
 
 def own(cfg, key, default):
@@ -73,6 +76,10 @@ def main():
     parser.add_argument("--skill")
     parser.add_argument("--pipeline")
     parser.add_argument("--model")
+    parser.add_argument("--pin", choices=sorted(PINS), help="model pin of eval-spec.md: its seed and temperature go to every model call and the pin is written to the run header")
+    parser.add_argument("--sample", type=int, metavar="N", help="a seeded sample of N active cases; the two halves of a pair stay together")
+    parser.add_argument("--sample-seed", type=int, default=7, help="seed of --sample (default 7)")
+    parser.add_argument("--include-retired", action="store_true", help="also run the cases tagged retired")
     parser.add_argument("--results", default=None, help="folder of saved runs (default: data/eval)")
     parser.add_argument("--no-save", action="store_true")
     parser.add_argument("--quiet", action="store_true")
@@ -123,8 +130,16 @@ def main():
     for key in ("skill", "pipeline", "model"):
         if getattr(args, key):
             variant[key] = getattr(args, key)
-    print("running %s (%d cases x %d) as variant '%s' ...\n" % (suite.name, len(suite.select(args.tag or None, args.only.split(",") if args.only else None, args.limit)), args.repeats, args.variant))
-    run = harness.Harness(core).run(suite, variant, args.repeats, args.tag or None, args.only.split(",") if args.only else None, args.limit, None if args.quiet else show_progress)
+    only = args.only.split(",") if args.only else None
+    if args.sample:
+        sampled = [c["id"] for c in harness.sample_cases(suite.select(args.tag or None, only, None, args.include_retired), args.sample, args.sample_seed)]
+        if not sampled:
+            sys.exit("the sample is empty: %d is too small for the cases or pairs of this suite" % args.sample)
+        only = sampled
+    count = len(suite.select(args.tag or None, only, args.limit, args.include_retired))
+    print("running %s (%d cases x %d) as variant '%s' ...\n" % (suite.name, count, args.repeats, args.variant))
+    run = harness.Harness(core).run(suite, variant, args.repeats, args.tag or None, only, args.limit, None if args.quiet else show_progress,
+                                    pin=PINS.get(args.pin), include_retired=args.include_retired)
     print("\n" + harness.format_report(run))
     if not args.no_save:
         print("\nsaved: %s" % run.save(results))

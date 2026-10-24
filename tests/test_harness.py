@@ -386,5 +386,31 @@ class ShippedSuites(unittest.TestCase):
             self.assertTrue(item.get("note"), item["id"])
 
 
+class SampleAndPinEdges(unittest.TestCase):
+    """edges of the sample and the pin beyond the acceptance tests (REQ-EVAL-001 to -004)"""
+
+    def test_a_sample_skips_retired_cases_and_keeps_the_order_of_the_suite(self):
+        cases = [{"id": "c%d" % i, "tags": ["retired"] if i == 3 else []} for i in range(10)]
+        sample = H.sample_cases(cases, 6, 7)
+        self.assertEqual(len(sample), 6)
+        self.assertNotIn("c3", [c["id"] for c in sample])
+        self.assertEqual([c["id"] for c in sample], sorted(c["id"] for c in sample))
+
+    def test_a_sample_larger_than_the_suite_is_the_whole_active_suite(self):
+        cases = [{"id": "c%d" % i, "tags": []} for i in range(4)]
+        self.assertEqual(len(H.sample_cases(cases, 50, 1)), 4)
+
+    def test_an_odd_sample_of_pairs_is_one_short_rather_than_a_split_pair(self):
+        cases = [{"id": "%d%s" % (i, h), "tags": ["pair:%d" % i]} for i in range(5) for h in "ab"]
+        self.assertEqual(len(H.sample_cases(cases, 5, 3)), 4)
+
+    def test_the_pin_keeps_the_other_model_options_of_the_skill(self):
+        runner = H.Harness()
+        runner.pin = {"seed": 7, "temperature": 0}
+        skill = runner._pinned({"model": {"profile": "light", "options": {"num_ctx": 8192}}})
+        self.assertEqual(skill["model"], {"profile": "light", "options": {"num_ctx": 8192, "seed": 7, "temperature": 0}})
+        self.assertEqual(H.Harness()._pinned({"model": None}), {"model": None})
+
+
 if __name__ == "__main__":
     unittest.main()

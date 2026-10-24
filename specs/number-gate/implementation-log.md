@@ -22,3 +22,14 @@ Plan baseline: tag `plan-baseline-it1`. My test runs are feedback, not verificat
 - Tests reported green: `tests/acceptance/test_stability.py` 5 of 5 (incl. the regression TC-STAB-003 and the 1000-seed property test); TC-IF-004 in `test_contracts.py`; `tests/test_metrics.py` 22 (4 new); all other touched modules unchanged
 - Decisions: a fact key is (entity without case and diacritics, number as float, unit, SHA-1 of the normalised quote); facts compare as a multiset, so a repeated fact counts twice; records without a `facts` field compare by status alone, so old runs still work; `inconclusive` and `none` are one status.
 - Still red in `test_contracts.py`: TC-IF-005 (T-03).
+
+## T-03 Harness features – done 2026-10-24
+- Implements: REQ-EVAL-001, -002, -003, -004, IF-005 (`harness.Suite.select`, `Harness.run(pin, include_retired)`, `Harness._pinned`, `suite_sha1`, `sample_cases`, `case_input`; `tools/eval.py` options `--pin`, `--sample`, `--sample-seed`, `--include-retired`)
+- Tests reported green: `test_harness_pin.py` 5 of 5, `test_contracts.py` 5 of 5 (TC-IF-005 now green); `tests/test_harness.py` 28 (4 new); all other touched modules unchanged. Acceptance overall: 28 of 29 plus the benchmark skeleton; red are the 6 gate tests (T-08) and BM-GATE-001 (T-13).
+- Decisions:
+  - The pin reaches the model through `skill["model"]["options"]` of a copy of the skill (the pipeline runner already passes those to `model.chat`), in the four skill-based targets (pipeline, plan, research, extraction). The pin name and digest are recorded in the header only; which model answers is still chosen by the variant (`--model`). T-05 checks that the digest of the running model equals the pin.
+  - `PINS` (MP-light) lives in `tools/eval.py`, copied from `eval-spec.md`; a change there is an amendment first.
+  - `--sample` selects ids with `sample_cases` and hands them to `Harness.run` as `only`; an empty sample stops with a message instead of running everything.
+  - A sample of pairs with an odd N is one case short rather than splitting a pair.
+  - `case_input` is the interface of IF-005; the gate pipeline (T-08) decides how it uses seed and temperature, because the model options already carry them.
+- Open for T-05: whether the real Ollama adapter honours `seed` and `temperature` in `options` (the fake model only proves they are passed).

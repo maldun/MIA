@@ -9,8 +9,10 @@ reports the numbers of metrics.py. A change to a prompt, a pipeline, a check or 
 A *variant* is what changes between runs: the skill, a pinned pipeline version, the model; its name is part of the saved file. Runs are saved as JSON lines in `data/eval/`.
 """
 import copy
+import hashlib
 import json
 import os
+import random
 import re
 import time
 
@@ -44,8 +46,7 @@ class Suite:
         self.name, self.description, self.target, self.cases, self.path = name, description, target, cases, path
 
     def select(self, tags=None, only=None, limit=None, include_retired=False):
-        # STUB (REQ-EVAL-002): include_retired is accepted and ignored until the task of plan.md
-        cases = self.cases
+        cases = self.cases if include_retired else [c for c in self.cases if "retired" not in c.get("tags", [])]       # REQ-EVAL-002
         if only:
             cases = [c for c in cases if c["id"] in only]
         if tags:
@@ -297,6 +298,7 @@ class Harness:
         self.targets = {"checks": self._checks, "pipeline": self._pipeline, "extraction": self._extraction, "text_rules": self._text_rules, "research": self._research, "plan": self._plan}
         self.targets.update(targets or {})
         self.counter = None
+        self.pin = None
         self._fixture_runners = {}
         self._fixtures = {}
         if core is not None and getattr(core.runner, "model", None) is not None:
@@ -325,8 +327,15 @@ class Harness:
         if variant.get("budget"):
             skill["budget"] = dict(skill["budget"], **variant["budget"])
         graph = self.core.graph(skill)[0]
-        result = self.core.runner.run(skill, graph, case["input"], task="eval:" + suite.name)
+        result = self.core.runner.run(self._pinned(skill), graph, case["input"], task="eval:" + suite.name)
         return self._status_of(result, suite)
+
+    def _pinned(self, skill):
+        """the skill with the seed and the temperature of the pin in its model options, so that they reach every model call (REQ-EVAL-003)"""
+        if self.pin:
+            model = skill.get("model") or {}
+            skill["model"] = dict(model, options=dict(model.get("options") or {}, seed=self.pin["seed"], temperature=self.pin["temperature"]))
+        return skill
 
     def _status_of(self, result, suite):
         answer = result.answer
@@ -356,7 +365,7 @@ class Harness:
         for key in ("pipeline", "model"):
             if variant.get(key):
                 skill[key] = variant[key] if key == "pipeline" else ({"profile": variant[key]} if variant[key] in ("light", "full", "current") else {"name": variant[key]})
-        result = self.core.runner.run(skill, self.core.graph(skill)[0], case["input"], task="eval:" + suite.name)
+        result = self.core.runner.run(self._pinned(skill), self.core.graph(skill)[0], case["input"], task="eval:" + suite.name)
         if result.status != "done" or not isinstance(result.answer, dict):
             return "error:" + (result.status if result.status != "done" else "no_answer"), {"error": result.error, "answer": result.answer}
         score = plans.score_plan(result.answer, case["gold"], case["input"]["question"])
@@ -377,7 +386,7 @@ class Harness:
             with open(os.path.join(suite.path, suite.target["fixtures"]), encoding="utf-8") as fp:
                 fixtures = self._fixtures[suite.name] = json.load(fp)
         tools, session = fixture_tools(fixtures)
-        result = self.core.runner.run(skill, self.core.graph(skill)[0], case["input"], task="eval:" + suite.name, tools=tools)
+        result = self.core.runner.run(self._pinned(skill), self.core.graph(skill)[0], case["input"], task="eval:" + suite.name, tools=tools)
         if result.status != "done" or not isinstance(result.answer, dict):
             return "error:" + (result.status if result.status != "done" else "no_answer"), {"error": result.error, "answer": result.answer}
         score = research_score.score_research(result.answer, case["gold"], fixtures)
@@ -393,7 +402,7 @@ class Harness:
         for key in ("pipeline", "model"):
             if variant.get(key):
                 skill[key] = variant[key] if key == "pipeline" else ({"profile": variant[key]} if variant[key] in ("light", "full", "current") else {"name": variant[key]})
-        result = self.core.runner.run(skill, self.core.graph(skill)[0], case["input"], task="eval:" + suite.name)
+        result = self.core.runner.run(self._pinned(skill), self.core.graph(skill)[0], case["input"], task="eval:" + suite.name)
         if result.status != "done" or not isinstance(result.answer, dict):
             return "error:" + (result.status if result.status != "done" else "no_answer"), {"error": result.error, "answer": result.answer}
         claims = result.answer.get("claims")
@@ -404,13 +413,18 @@ class Harness:
 
     # -- a run --
     def run(self, suite, variant=None, repeats=1, tags=None, only=None, limit=None, progress=None, pin=None, include_retired=False):
-        # STUB (REQ-EVAL-001, -002, -003): pin and include_retired are accepted and ignored until the tasks of plan.md
+        """pin: {"name", "digest", "seed", "temperature"} of the model setting (eval-spec.md, Model pins); seed and temperature go to every model call (REQ-EVAL-003)
+        and the whole pin into the header (REQ-EVAL-001). Retired cases are skipped unless include_retired (REQ-EVAL-002)."""
         variant = dict({"name": "default"}, **(variant or {}))
-        cases = suite.select(tags, only, limit)
+        cases = suite.select(tags, only, limit, include_retired)
         target = self.targets.get(suite.target["kind"])
         if target is None:
             raise SuiteError("the harness has no target of kind '%s'" % suite.target["kind"])
+        self.pin = pin
         header = {"suite": suite.name, "variant": variant, "repeats": repeats, "cases": len(cases), "started": self._clock(), "target": suite.target}
+        if pin:
+            header["pin"] = {key: pin.get(key) for key in ("name", "digest", "seed", "temperature")}
+        header["suite_sha1"] = suite_sha1(suite.path)
         if suite.target["kind"] == "pipeline" and self.core is not None:
             skill = self.core.skills.get(variant.get("skill") or suite.target["skill"])
             if skill is not None:
@@ -553,11 +567,36 @@ def format_compare(run_a, run_b):
 
 # --- Plan iteration 1 (specs/number-gate): sample of a suite and the input of a case; STUBS until the tasks of plan.md -------------------------
 
+def suite_sha1(folder):
+    """{file name: SHA-1} of the files of a suite, so that a saved run says which version of the cases it ran (REQ-EVAL-001)"""
+    hashes = {}
+    for name in ("suite.json", "cases.jsonl"):
+        path = os.path.join(folder or "", name)
+        if os.path.isfile(path):
+            with open(path, "rb") as fp:
+                hashes[name] = hashlib.sha1(fp.read()).hexdigest()
+    return hashes
+
+
 def sample_cases(cases, n, seed):
-    """STUB (REQ-EVAL-004): n active cases chosen with the seed, the cases of a pair (tag pair:<id>) kept together."""
-    return []
+    """n active cases chosen with the seed; the cases of a pair (tag pair:<id>) stay together, so a sample never splits a true and a false half (REQ-EVAL-004).
+    Fewer than n are returned only when the units (a pair is one unit) cannot add up to n. The order of the suite is kept."""
+    units = {}
+    for index, case in enumerate(cases):
+        if "retired" in case.get("tags", []):
+            continue
+        pair = next((t for t in case.get("tags", []) if t.startswith("pair:")), None)
+        units.setdefault(pair or "case:%d" % index, []).append(index)
+    order = list(units.values())
+    random.Random(seed).shuffle(order)
+    chosen = []
+    for unit in order:
+        if len(chosen) + len(unit) <= n:
+            chosen += unit
+    return [cases[i] for i in sorted(chosen)]
 
 
 def case_input(case, pin):
-    """STUB (IF-005): what the harness hands to the gate: claim, evidence, seed and temperature of the pin."""
-    return {}
+    """what the harness hands to the gate: claim, evidence, and the seed and temperature of the pin (IF-005)"""
+    given = case["input"]
+    return {"claim": given["claim"], "evidence": given.get("evidence", ""), "seed": pin["seed"], "temperature": pin["temperature"]}
