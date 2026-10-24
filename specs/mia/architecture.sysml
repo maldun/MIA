@@ -3,7 +3,7 @@
  *
  * One file, six packages, in this order:
  *   MIA_Common        status and verification enums, metadata Implementation and Trace
- *   MIA_Architecture  items, ports, interfaces, MiaSystem with 12 subsystems; leaf parts name their code files
+ *   MIA_Architecture  items, ports, interfaces, MiaSystem with 13 subsystems; leaf parts name their code files
  *   MIA_AgentView     the app agent: model steps, untrusted items, trust boundaries (agent-app conventions, 8)
  *   MIA_Requirements  constraints CON-1..5, functional FR-1..FR-19, non-functional NFR-1..NFR-8
  *   MIA_Allocation    satisfy by the system, allocate to the parts that carry it, verification cases
@@ -155,6 +155,7 @@ package MIA_Architecture {
 
         part frontEnd : WebFrontEnd;
         part webApp : WebApplication;
+        part graphApp : GraphApp;
         part conversation : ConversationCore;
         part taskRuntime : TaskRuntime;
         part verification : VerificationSuite;
@@ -245,8 +246,33 @@ package MIA_Architecture {
             }
         }
         part accessControl {
-            doc /* Editor and chat tokens, allowed origins, content security policy. */
+            doc /* Editor and chat tokens today (to be replaced by accounts, FR-21), allowed origins, content security policy. */
             @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("web_app.py", "presets_api.py"); }
+        }
+        part accountService {
+            doc /* Target: accounts created by the owner, passwords as salted slow hashes, sessions, login throttling, password change. */
+            @Implementation { :>> status = ImplementationStatus::proposed; }
+        }
+    }
+
+    part def GraphApp {
+        doc /* Target: web page of the same stack that shows workflow graphs as nodes and edges, as the ArangoDB web interface does,
+               and edits each node and edge as a JSON dictionary on the shared database. Text data only. */
+        part graphView {
+            doc /* Node-and-edge view with a vendored graph library (plain HTML and JavaScript, no build step). */
+            @Implementation { :>> status = ImplementationStatus::proposed; }
+        }
+        part nodeEditor {
+            doc /* Edits one node or edge as a JSON document; saving creates a new version. */
+            @Implementation { :>> status = ImplementationStatus::proposed; }
+        }
+        part versionStore {
+            doc /* Immutable versions with author and time; history and diff; an edit by a model is a proposal. */
+            @Implementation { :>> status = ImplementationStatus::proposed; :>> modules = ("library.py"); }
+        }
+        part graphValidator {
+            doc /* The rules of the process graph model (identity, data nodes only connected through processes, cycles only inside a session) and the pipeline validation. */
+            @Implementation { :>> status = ImplementationStatus::partly; :>> modules = ("pipeline_model.py", "context_graph.py"); }
         }
     }
 
@@ -478,14 +504,18 @@ package MIA_Architecture {
     }
 
     part def Persistence {
-        doc /* Everything is files on the host (JSON, JSON lines, Markdown, one SQLite index). Postgres behind a storage layer is postponed. */
+        doc /* Everything is files on the host (JSON, JSON lines, Markdown, one SQLite index). Target: PostgreSQL in a container behind a storage layer (proposed). */
         part files {
             doc /* data/, memories.json, long_time_history.json, presets, gestures, chat log, runs, store, library. */
             @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("config.py", "constants.py"); }
         }
         part storageLayer {
-            doc /* Interfaces over the file stores so a database can replace them (stage 0 of the database plan). */
-            @Implementation { :>> status = ImplementationStatus::postponed; }
+            doc /* Interfaces over the file stores so that the database can replace them (stage 0 of the database plan). */
+            @Implementation { :>> status = ImplementationStatus::proposed; }
+        }
+        part database {
+            doc /* PostgreSQL in a container with a volume, a health check, migration from files and back, backup and restore. */
+            @Implementation { :>> status = ImplementationStatus::proposed; :>> modules = ("deploy/REQUIREMENTS_DB.md"); }
         }
     }
 
@@ -699,17 +729,14 @@ package MIA_Requirements {
     }
     requirement def <'CON-7'> SharedDatabase {
         subject mia : MiaSystem;
-        doc /* One shared database reachable by MIA and the graph app; MIA's state stays behind storage interfaces.
-               The engine is not decided (PostgreSQL in deploy/REQUIREMENTS_DB.md). */
+        doc /* One shared PostgreSQL database in a container, reachable by MIA and the graph app; MIA's state stays behind storage interfaces. */
     }
 
     // ================================================================ interaction
 
     requirement def <'FR-1'> Conversation {
         subject mia : MiaSystem;
-        doc /* MIA shall let the owner hold a conversation in a web browser on desktop and phone, with answers
-               appearing while they are written, the ability to stop an answer, one waiting message while she is
-               busy, a history that survives reload, and the same conversation visible live on every connected device. */
+        doc /* MIA shall let several logged-in users hold a conversation with her in a web browser on desktop and phone, with answers appearing while they are written, a stop button, a queue of waiting messages, a history that survives reload and is shown live on every connected device, every message attributed to the user who sent it, and one shared MIA answering all of them. */
         attribute queuedMessages : Integer = 1;
         attribute messagesPerMinute : Integer = 10;
         @Trace { :>> baseline = ("CT-1", "CT-2", "CT-3", "CT-4", "CT-5", "CT-6", "CT-8", "CT-9", "CT-11");
@@ -745,8 +772,7 @@ package MIA_Requirements {
     }
     requirement def <'FR-5'> OwnerShapedAppearanceAndPersona {
         subject mia : MiaSystem;
-        doc /* MIA shall let the owner change expressions, gestures, backgrounds, mood phrases, emotions and the
-               persona as data, without changing code, and shall protect changes that affect all devices with a token. */
+        doc /* MIA shall let every user change expressions, gestures, backgrounds, mood phrases, emotions and the persona as data without changing code; a change applies to all users at once and is recorded with its author. */
         @Trace { :>> baseline = ("CH-4", "CH-6", "CH-7", "CH-8", "CH-9", "CT-2", "OP-5");
                  :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
     }
@@ -773,9 +799,7 @@ package MIA_Requirements {
     }
     requirement def <'FR-7'> WorkflowsAsData {
         subject mia : MiaSystem;
-        doc /* MIA shall define every pipeline and agent workflow as validated, versioned data in a library of
-               reusable entries with a lifecycle (draft, tested, trusted, retired); entries proposed by a model
-               shall remain drafts until the owner approves them, shown as a diff and tried on the test set first. */
+        doc /* MIA shall define every pipeline and agent workflow as validated, versioned data in a library with a lifecycle (draft, tested, trusted, retired); every edit by a user is a new immutable version with author and time and applies to all; an entry proposed by a model stays a draft until a user approves it, shown as a diff and tried on the test set. */
         @Trace { :>> baseline = ("TK-3", "TK-4", "TK-5", "TK-10");
                  :>> verifiedBy = (HowVerified::test, HowVerified::inspection); }
     }
@@ -919,17 +943,13 @@ package MIA_Requirements {
 
     requirement def <'NFR-5'> LocalFirstPrivacy {
         subject mia : MiaSystem;
-        doc /* MIA shall keep conversations, memory, logs and models on the host; the only data leaving the host
-               shall be the text of a web search or scholarly query (and an e-mail address only if the owner
-               configured one); the page shall load nothing from the internet. */
+        doc /* MIA shall keep conversations, memory, logs, accounts and models on the host; the only data leaving the host shall be the text of a web search or scholarly query (and an e-mail address only if configured); the page shall load nothing from the internet. Inside MIA nothing is private between users; the login page says so. */
         @Trace { :>> baseline = ("C-5", "CT-10", "VE-6");
                  :>> verifiedBy = (HowVerified::test, HowVerified::inspection); }
     }
     requirement def <'NFR-6'> SecureAccess {
         subject mia : MiaSystem;
-        doc /* MIA shall be reachable from other devices only over HTTPS inside the home network or the owner's
-               tailnet; require a token for actions that change shared data or delete history; check origins and
-               limit message rates. */
+        doc /* MIA shall be reachable from other devices only over HTTPS inside the home network or the owner's tailnet; authenticate every request by an account; check origins and limit message rates per user. */
         @Trace { :>> baseline = ("OP-4", "OP-5");
                  :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
     }
@@ -949,12 +969,28 @@ package MIA_Requirements {
         @Trace { :>> baseline = ("C-2", "CT-9", "RS-9");
                  :>> verifiedBy = (HowVerified::measurement); }
     }
-    requirement def <'NFR-8'> RoomToGrow {
+    requirement def <'NFR-8'> SharedStateInDatabase {
         subject mia : MiaSystem;
-        doc /* MIA shall keep her state behind storage interfaces so that several instances can later share one
-               memory in a database without changing the components that use it. Postponed. */
+        doc /* MIA shall keep her shared state (history, summaries, chat log, feedback, presets, gestures, library entries, accounts) in a PostgreSQL database in a container behind storage interfaces, so that MIA and the graph app share it; the move from files is one command and reversible by export; backup and restore cover the database. */
         @Trace { :>> baseline = ("OP-7", "CT-8");
                  :>> verifiedBy = (HowVerified::inspection); }
+    }
+
+    requirement def <'FR-21'> AccountsAndLogin {
+        subject mia : MiaSystem;
+        doc /* Only the owner creates accounts. Every user logs in with a local account and password, may change their own
+               password, keeps a session on their devices, and every action that changes shared data is attributed to the
+               account. Passwords are stored only as salted slow hashes; repeated failed logins are throttled. */
+        attribute maxFailedLoginsPerMinute : Integer = 5;
+        @Trace { :>> baseline = ("OP-5"); :>> verifiedBy = (HowVerified::test, HowVerified::inspection); }
+    }
+    requirement def <'FR-22'> GraphApp {
+        subject mia : MiaSystem;
+        doc /* A web page in the same stack as the chat shows workflow graphs as nodes and edges and lets any logged-in user
+               edit each node and edge directly as a JSON dictionary (text data only). It reads and writes the shared
+               database, checks the graph rules before saving, saves every edit as a new version and shows the history
+               and a diff. */
+        @Trace { :>> baseline = ("TK-5", "TK-10"); :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
     }
 
     // ================================================================ the requirement tree
@@ -996,8 +1032,10 @@ package MIA_Requirements {
         requirement nfr5 : LocalFirstPrivacy;
         requirement nfr6 : SecureAccess;
         requirement fr19 : Operable;
+        requirement fr21 : AccountsAndLogin;
+        requirement fr22 : GraphApp;
         requirement nfr7 : EfficientOnGivenHardware;
-        requirement nfr8 : RoomToGrow;
+        requirement nfr8 : SharedStateInDatabase;
     }
 }
 
@@ -1040,6 +1078,8 @@ package MIA_Allocation {
     satisfy nfr5 by mia;
     satisfy nfr6 by mia;
     satisfy fr19 by mia;
+    satisfy fr21 by mia;
+    satisfy fr22 by mia;
     satisfy nfr7 by mia;
     satisfy nfr8 by mia;
 
@@ -1142,6 +1182,15 @@ package MIA_Allocation {
     allocate fr19 to mia.operation.launcher;
     allocate fr19 to mia.operation.shutdownSequence;
     allocate fr19 to mia.operation.composeStack;
+    allocate fr21 to mia.webApp.accountService;
+    allocate fr21 to mia.webApp.accessControl;
+    allocate fr22 to mia.graphApp.graphView;
+    allocate fr22 to mia.graphApp.nodeEditor;
+    allocate fr22 to mia.graphApp.versionStore;
+    allocate fr22 to mia.graphApp.graphValidator;
+    allocate fr7 to mia.graphApp.versionStore;
+    allocate nfr6 to mia.webApp.accountService;
+    allocate nfr8 to mia.persistence.database;
     allocate nfr7 to mia.taskRuntime.pipelineRunner;
     allocate nfr7 to mia.taskRuntime.modelManager;
     allocate nfr7 to mia.research.reviewRequest;

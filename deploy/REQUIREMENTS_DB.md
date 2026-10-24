@@ -1,6 +1,6 @@
 # Several MIA instances: shared state in a database (plan, not built yet)
 
-**Status 2026-10-21: postponed.** Nothing of this is built; one instance on the volume `mia-data` is the supported setup. This file keeps the requirements and the design for later. Start with stage 0 when several instances are really needed.
+**Status 2026-10-24: wanted again** (owner decisions D-4, D-9, D-11 of `specs/mia/review-log.md`: one shared MIA, a graph app on the database, PostgreSQL in a container). Earlier status, 2026-10-21: postponed. Nothing of this is built; one instance on the volume `mia-data` is the supported setup. This file keeps the requirements and the design for later. Start with stage 0 when several instances are really needed.
 **Decided:** several instances are **one shared MIA with one memory** (persona `mia` for all). Separate memories stay possible later through another `persona` value, but nothing is planned for it.
 
 Decided 2026-10-21: a database container is wanted because **several MIA instances** will run in the future (other machines, other front ends). One instance on one volume works today and stays the default.

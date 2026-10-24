@@ -160,7 +160,7 @@ Status is taken from `ui/README.md` and the commit log, not from the requirement
 | OP-4 | Secure context for the 3D character: `localhost` or HTTPS; self-signed proxy on the LAN; Tailscale serve for remote access, never funnel; tailnet members can chat without login | README, CHAR 4.8 | Built (Tailscale not tried against a real tailnet) |
 | OP-5 | Tokens: `editor_token` for writes to presets, gestures and clearing history, `chat_token` optional; allowed-origin rule; rate limit | README, CHAT 6.4 | Built |
 | OP-6 | Documented reproducible setup from scratch, tests (Python 814+ tests, `node --test`, headless browser checks, phone checklist) | CHAR 5, CHAT 11 | Built |
-| OP-7 | Shared state for several instances in PostgreSQL behind a storage layer; **one shared MIA with one memory**; migration files to database and back | DB | **Postponed** |
+| OP-7 | Shared state for several instances in PostgreSQL behind a storage layer; **one shared MIA with one memory**; migration files to database and back | DB | Proposed since 2026-10-24 (was postponed) |
 
 ## 4. Where the sources disagree or are out of date
 
