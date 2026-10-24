@@ -1008,10 +1008,7 @@ package MIA_Requirements {
 
     requirement def <'FR-20'> SkillDevelopmentPath {
         subject mia : MiaSystem;
-        doc /* One documented path from an idea to a promoted skill, open to every user: a skill file and a pipeline built from
-               library nodes and validated before use; a suite with people-labelled cases, a holdout split and a recorded
-               baseline before the skill is trusted; a declaration of model, tools, budgets and trust boundaries; draft status
-               until a user promotes it; the time from idea to promotion is recorded. */
+        doc /* One documented path from an idea to a promoted skill, open to every user: a skill file and a pipeline built from library nodes and validated before use; the specification and benchmark of FR-26 before the skill is trusted; a declaration of model, tools, budgets and trust boundaries; draft status until a user promotes it; the time from idea to promotion is recorded. */
         attribute maxDaysForSecondSkill : Integer = 30;
         @Trace { :>> baseline = ("TK-2", "TK-4", "TK-6", "EV-1"); :>> verifiedBy = (HowVerified::inspection, HowVerified::demonstration); }
     }
@@ -1031,10 +1028,20 @@ package MIA_Requirements {
     }
     requirement def <'FR-25'> PersonaFromFile {
         subject mia : MiaSystem;
-        doc /* MIA behaves roughly as the persona file specifies: she uses the names and pronouns given there correctly and
-               repeats back-story elements in fitting situations; the file is data every user can change and a change applies
-               to all. Measured by a persona suite. */
+        doc /* MIA behaves roughly as the persona file specifies: she uses the names and pronouns given there correctly, addresses every user with the form of address the persona gives (for example master, the same for all users) and repeats back-story elements in fitting situations; the file is data every user can change and a change applies to all. Measured by a persona suite. */
         @Trace { :>> baseline = ("ME-1"); :>> verifiedBy = (HowVerified::measurement); }
+    }
+
+    requirement def <'FR-26'> WorkflowSpecificationAndBenchmark {
+        subject mia : MiaSystem;
+        doc /* Every workflow (skill with its pipeline) carries a written specification: inputs and outputs (schemas, units,
+               allowed values, what unknown looks like), measurable acceptance criteria (metric, threshold, repeats, model pin,
+               decision rule, budgets of tokens, time and calls) and a benchmark: labelled test cases with a development part
+               and a held-out part, and a recorded baseline. Stored with the workflow in the library; without them a workflow
+               stays a draft; every harness run records workflow version, model pin and benchmark version, so variants can be
+               verified against the criteria and optimised against each other on the same cases. */
+        attribute minRepeatsForSampledModels : Integer = 3;
+        @Trace { :>> baseline = ("TK-2", "TK-3", "TK-4", "EV-1"); :>> verifiedBy = (HowVerified::inspection, HowVerified::test, HowVerified::measurement); }
     }
 
     // ================================================================ the requirement tree
@@ -1079,6 +1086,7 @@ package MIA_Requirements {
     requirement fr23 : MoodInEverySituation;
     requirement fr24 : CharacterExchange;
     requirement fr25 : PersonaFromFile;
+    requirement fr26 : WorkflowSpecificationAndBenchmark;
     requirement nfr7 : EfficientOnGivenHardware;
     requirement nfr8 : SharedStateInDatabase;
 }
@@ -1128,6 +1136,7 @@ package MIA_Allocation {
     satisfy fr23 by mia;
     satisfy fr24 by mia;
     satisfy fr25 by mia;
+    satisfy fr26 by mia;
     satisfy nfr7 by mia;
     satisfy nfr8 by mia;
 
@@ -1245,6 +1254,11 @@ package MIA_Allocation {
     allocate fr24 to mia.frontEnd.characterRenderer;
     allocate fr25 to mia.conversation.persona;
     allocate fr25 to mia.evaluation.suites;
+    allocate fr26 to mia.taskRuntime.libraryStore;
+    allocate fr26 to mia.taskRuntime.skillStore;
+    allocate fr26 to mia.taskRuntime.pipelineRunner;
+    allocate fr26 to mia.evaluation.harness;
+    allocate fr26 to mia.evaluation.suites;
     allocate fr22 to mia.graphApp.graphView;
     allocate fr22 to mia.graphApp.nodeEditor;
     allocate fr22 to mia.graphApp.versionStore;

@@ -80,3 +80,9 @@ Assumption to confirm (A-1): `L1` of the library says files are the truth and SQ
 | CR-5 persona from `calibration.txt` | **FR-25** (names, pronouns, back story; measured by a persona suite) | partly: file is sent at every start, behaviour unmeasured |
 
 Open for the owner (CR-5 with several users): the persona says "master". Does MIA call **every** user "master" (one shared persona, D-4), or the account name, or both ("master" plus the name)?
+
+### Confirmations and additions of 2026-10-24 (owner)
+| Id | Decision | Touches | Edit |
+|---|---|---|---|
+| D-14 | Chunk 1 of step 3b confirmed. **MIA calls every user "master"** (one shared persona, the same form of address for all). | FR-25 | applied |
+| D-15 | **New requirement FR-26**: every workflow has a specification of inputs and outputs and measurable criteria, with a benchmark (test set, development and held-out parts, baseline), so that it can be verified and optimised. Was **not** covered before: FR-7 (validated versioned data), FR-17 (a harness exists), FR-20 (a path with a suite) and NFR-2 (structured outputs) touch it, but none demands a written specification per workflow with criteria. | FR-26 (new), FR-20 (points to it), AC-10 | applied |
