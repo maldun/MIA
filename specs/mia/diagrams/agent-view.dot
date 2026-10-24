@@ -6,6 +6,8 @@ label="Agent view: untrusted text into model steps (orange = model step, grey = 
 "scholar" [label="scholar", style=filled, fillcolor="#e6e6e6"];
 "historyStore" [label="historyStore", style=filled, fillcolor="#e6e6e6"];
 "sandbox" [label="sandbox", style=filled, fillcolor="#e6e6e6"];
+"graphEditor" [label="graphEditor", style=filled, fillcolor="#e6e6e6"];
+"validator" [label="validator", style=filled, fillcolor="#e6e6e6"];
 "chat" [label="chat\nTB-user\nMP-full", style="filled,rounded", fillcolor="#ffd8a8"];
 "planner" [label="planner\nTB-user\nMP-light", style="filled,rounded", fillcolor="#ffd8a8"];
 "extractor" [label="extractor\nTB-web\nMP-light", style="filled,rounded", fillcolor="#ffd8a8"];
@@ -28,4 +30,5 @@ label="Agent view: untrusted text into model steps (orange = model step, grey = 
 "historyStore" -> "chat" [label="ChatHistory\n(model)", fontsize=8];
 "historyStore" -> "dreamer" [label="ChatHistory\n(model)", fontsize=8];
 "scriptWriter" -> "sandbox" [label="GeneratedScript\n(model)", fontsize=8];
+"graphEditor" -> "validator" [label="WorkflowEdit\n(user)", fontsize=8];
 }

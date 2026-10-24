@@ -603,18 +603,22 @@ package MIA_AgentView {
     item def ChatHistory { @Untrusted { origin = "model"; } doc /* Earlier turns, which contain model output and quoted web text. */ }
     item def GeneratedScript { @Untrusted { origin = "model"; } doc /* A check script written by a model; runs only in the sandbox. */ }
     item def Verdict { attribute status : String; }
+    item def WorkflowEdit { @Untrusted { origin = "user"; } doc /* A workflow, prompt or context graph edited by a user in the graph app (TB-edit). Users are trusted (CON-6); the edit is validated and versioned. */ }
 
     port def UserTextPort { out item userText : UserMessage; }
     port def PageTextPort { out item page : FetchedPageText; }
     port def PaperTextPort { out item paper : PaperText; }
     port def HistoryPort { out item history : ChatHistory; }
     port def ScriptPort { out item script : GeneratedScript; }
+    port def EditPort { out item edit : WorkflowEdit; }
 
     // Code parts that hand untrusted text to model steps
     part def MessageIntake { doc /* Code: validation, rate limit, command recognition (chat_service.py). */ port messageOut : UserTextPort; }
     part def PageFetcher { doc /* Code: search and fetch tools with safety rules (web_tools.py). */ port pageOut : PageTextPort; }
     part def ScholarReader { doc /* Code: scholarly APIs, PDF to text inside a wall (scholar.py, pdf_text.py). */ port paperOut : PaperTextPort; }
     part def HistoryStore { doc /* Code: memories.json (communicator.py). */ port historyOut : HistoryPort; }
+    part def GraphEditor { doc /* Code: the graph app; sends the edited node or graph as JSON (nodeEditor). */ port editOut : EditPort; }
+    part def WorkflowValidator { doc /* Code, boundary TB-edit: checks graph rules and schemas, stores a new version, refuses a broken edit (pipeline_model.py, library.py). */ port editIn : ~EditPort; }
     part def ScriptSandbox { doc /* Code: runs a generated script isolated, no network (sandbox.py, broker.py). */ port scriptIn : ~ScriptPort; }
 
     // Model steps. HLS level: the attributes marked "Plan" are fixed in Phase 2. tokenBudget is the context window
@@ -689,6 +693,8 @@ package MIA_AgentView {
         part scholar : ScholarReader;
         part historyStore : HistoryStore;
         part sandbox : ScriptSandbox;
+        part graphEditor : GraphEditor;
+        part validator : WorkflowValidator;
 
         part chat : ChatStep;
         part planner : PlanStep;
@@ -713,6 +719,7 @@ package MIA_AgentView {
         flow of ChatHistory from historyStore.historyOut to chat.historyIn;
         flow of ChatHistory from historyStore.historyOut to dreamer.historyIn;
         flow of GeneratedScript from scriptWriter.scriptOut to sandbox.scriptIn;
+        flow of WorkflowEdit from graphEditor.editOut to validator.editIn;
     }
 }
 
@@ -1074,9 +1081,9 @@ package MIA_Requirements {
         subject mia : MiaSystem;
         doc /* MIA shall behave roughly as the persona file specifies: she uses the names and pronouns given there correctly
                and addresses every user as "master" by default unless the persona file specifies otherwise
-               (D-14, D-16) and repeats back-story elements in fitting situations; the file is data that every
-               user can change (FR-5) and a change applies to all. How well she keeps it is measured by a
-               persona suite in Plan. */
+               (D-14, D-16) and repeats back-story elements in fitting situations; calibration.txt is one shared
+               configuration file for all users and the baseline of the persona; every user can change it (FR-5)
+               and a change applies to all (D-22). How well she keeps it is measured by a persona suite in Plan. */
         @Trace { :>> baseline = ("ME-1"); :>> verifiedBy = (HowVerified::measurement); }
     }
 
@@ -1103,9 +1110,10 @@ package MIA_Requirements {
                settings), and MIA keeps a score per category and an overall score, over time, in the shared
                database, each vote with its user, time and the thing voted on. A small story tells what MIA
                receives for the points (for example money or love points; the words are data, purely fictional,
-               shown in the page). The overall score is shown over time and shifts MIA's general mood (FR-23).
-               The scores are used to compare versions of workflows and behaviours over time; they never decide
-               a fact (NFR-4, BF4): a minus on a factual answer opens a case for the benchmark instead of
+               shown in the page). The overall score is shown over time and shifts MIA's general mood (FR-23);
+               the interval over which the score is judged (one week at first) is a setting that may be changed
+               (D-23). The scores are used to compare versions of workflows and behaviours over time; they never
+               decide a fact (NFR-4, BF4): a minus on a factual answer opens a case for the benchmark instead of
                changing what MIA states. */
         attribute categories : Integer = 4;
         @Trace { :>> baseline = ("BF-2", "CT-2"); :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
@@ -1133,11 +1141,13 @@ package MIA_Requirements {
 
     requirement def <'FR-30'> WorkflowContextGraph {
         subject mia : MiaSystem;
-        doc /* Every workflow shall be accompanied by a context graph: the concepts, entities, source types and relations the
-               workflow works with, and the views that say which part of it each step sees within its token
-               budget. The context graph is stored with the workflow in the shared database, can be adapted by
-               any user in the graph app (every change a new version, FR-22), and each run builds its own run
-               graph from it and logs it (FR-16). */
+        doc /* MIA shall keep one context graph per workflow and one context graph for the chat as a whole: the concepts,
+               entities, source types and relations that the workflow (or the conversation) works with, and the
+               views that say which part of it each step sees within its token budget. The context graphs are
+               stored in the shared database, can be adapted by any user in the graph app (every change a new
+               version, FR-22), and are what makes a workflow traceable. A graph per run is built only for tasks
+               that need working memory of their own, for example extending a keyword search; it is not a
+               general mechanism. */
         @Trace { :>> baseline = ("TK-5", "LG-3"); :>> verifiedBy = (HowVerified::inspection, HowVerified::demonstration); }
     }
 
@@ -1374,7 +1384,6 @@ package MIA_Allocation {
     allocate fr29 to mia.conversation.feedbackLedger;
     allocate fr29 to mia.conversation.expressor;
     allocate fr30 to mia.taskRuntime.workflowGraph;
-    allocate fr30 to mia.observability.contextGraph;
     allocate fr30 to mia.graphApp.graphView;
     allocate fr30 to mia.graphApp.nodeEditor;
     allocate fr22 to mia.graphApp.graphView;

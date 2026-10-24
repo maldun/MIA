@@ -105,7 +105,6 @@ label="Requirements allocated to subsystems (edge label = number of parts)"; lab
 "fr3" -> "S_frontEnd" [label="1", fontsize=8, tooltip="audioPlayer"];
 "fr3" -> "S_voice" [label="4", fontsize=8, tooltip="textFilter, synthesizer, voiceEffect, streamer"];
 "fr30" -> "S_graphApp" [label="2", fontsize=8, tooltip="graphView, nodeEditor"];
-"fr30" -> "S_observability" [label="1", fontsize=8, tooltip="contextGraph"];
 "fr30" -> "S_taskRuntime" [label="1", fontsize=8, tooltip="workflowGraph"];
 "fr4" -> "S_observability" [label="2", fontsize=8, tooltip="runLog, explainTool"];
 "fr4" -> "S_webApp" [label="1", fontsize=8, tooltip="moodTracker"];

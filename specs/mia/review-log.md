@@ -125,3 +125,15 @@ Not changed in step 3 (they belong to later steps): the agent profile (4: tasks,
 | D-19 | **Data classes**: all votes, scores, tasks, memos and context graphs are *shared inside MIA, private from outside*; account data and password hashes are secret and never logged. | data classes |
 | D-20 | **"Yes, ask" on the autonomy of feedback adaptation** (my reading): MIA reduces a behaviour gradually and tells users with a note they can undo, and **asks before a behaviour is nearly stopped** (the 5th net negative). To confirm. | autonomy table |
 | – | Added to the autonomy table: tasks and memos, workflow edits (a user edit is a new validated version that applies to all), account creation (owner only), vote adaptation. New trust boundary **TB-edit** (users edit workflows and prompts for everyone); it is named in the agent view in step 5. | agent profile |
+
+### Confirmations and changes of 2026-10-24 (owner), then step 5 (architecture)
+| Id | Decision | Edit |
+|---|---|---|
+| D-21 | **One context graph per workflow and one for the chat as a whole**, stored and adaptable; the **per-run graph is dropped as a general mechanism** and kept only for tasks that need working memory (for example extending a keyword search). FR-30 rewritten. The event log (FR-16) stays the source of truth for what happened; the replay and explain tools stay as tools. Note for `REQUIREMENTS_CORE` 13c: CG6 and CG11 (the graph of a run is a view of the log) are narrowed accordingly. | FR-30, decisions table, allocation (no more observability.contextGraph for FR-30) |
+| D-22 | **`calibration.txt` is one shared configuration file for all users** and the baseline of the persona (not private). | FR-25, data classes, shortcuts |
+| D-23 | The interval of the feedback criterion is **one week at first and a setting**. | FR-27, AC-8 |
+| – | D-20 confirmed: MIA asks only before a behaviour is nearly stopped (the fifth net negative). Steps 3c and 4 are confirmed. | – |
+
+Step 5: overview rewritten (13 subsystems, PostgreSQL, accounts, graph app); the key-decisions table now lists database, one shared MIA, accounts, context graphs, chat priority, votes on style only, and the graph app (the earlier rows "Postgres postponed" and "viewer dropped" are replaced); the agent view has the edit boundary TB-edit (`WorkflowEdit` item, `GraphEditor`, `WorkflowValidator`, a flow between them).
+
+Open for step 5: **where do the benchmark data live?** FR-26 says a workflow's specification and benchmark are stored with it in the library (the database). The agent-app workflow protects `eval/suites/` and `eval/baselines/` as **files in git** (protected, reviewed, holdout hygiene). Recommendation: suites, cases and baselines stay files in `eval/` (versioned in git, protected); the workflow entry in the database references them by suite id and version, and the **results** (runs, scores, votes) are stored in the database. To confirm.
