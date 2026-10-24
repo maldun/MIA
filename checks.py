@@ -792,7 +792,8 @@ class CheckRunner:
 _SCALES = {"thousand": 1e3, "million": 1e6, "billion": 1e9, "trillion": 1e12}
 _NOT_UNITS = {"in", "st", "b", "pt", "cup"}                     # ordinary words after a number ("40 in the room")
 _PERCENT = {"%": "percent", "percent": "percent"}
-_MONEY = {"$": "usd", "€": "eur", "£": "gbp", "dollars": "usd", "euros": "eur", "usd": "usd", "eur": "eur"}
+_MONEY = {"$": "usd", "€": "eur", "£": "gbp", "₹": "inr", "¥": "jpy", "dollars": "usd", "euros": "eur", "usd": "usd", "eur": "eur"}
+_MONEY_SYMBOLS = [k for k in _MONEY if len(k) == 1]
 _BOUNDS = (("at least", "ge"), ("at most", "le"), ("more than", "gt"), ("less than", "lt"), ("fewer than", "lt"), ("over", "gt"), ("under", "lt"))
 _FILLER = {"the", "a", "an", "of", "in", "on", "at", "and", "or", "is", "are", "was", "were", "has", "have", "had", "by", "for", "to", "with", "as", "about", "around",
            "approximately", "than", "more", "less", "over", "under", "least", "most", "long", "tall", "high", "that", "it", "its", "which", "from"}
@@ -824,7 +825,8 @@ def _quantities(text):
             value = parse_number(match.group())
         except ValueError:
             continue
-        before = text[:match.start()].rstrip()
+        symbol = text[:match.start()].rstrip()[-1:]                                    # a currency symbol may stand between a bound and its number ("less than $ 44")
+        before = text[:match.start()].rstrip().rstrip("".join(_MONEY_SYMBOLS)).rstrip()
         words = _WORD.findall(re.split(r"[.;!?]\s|\d", text[match.end():], maxsplit=1)[0])
         scale = 1.0
         if words and words[0].lower() in _SCALES:
@@ -832,8 +834,8 @@ def _quantities(text):
         unit = _dimension(words[0]) if words else None
         if unit:
             words.pop(0)
-        elif before[-1:] in _MONEY:
-            unit = ("money:" + _MONEY[before[-1:]], 1.0)
+        elif symbol in _MONEY_SYMBOLS:
+            unit = ("money:" + _MONEY[symbol], 1.0)
         bound = next((code for phrase, code in _BOUNDS if before.lower().endswith(phrase)), None)
         nouns = {w.lower().rstrip("s") for w in words[:3] if w.lower() not in _FILLER}
         found.append({"value": value, "raw": match.group(), "scale": scale, "unit": unit, "bound": bound, "nouns": nouns})
@@ -841,10 +843,10 @@ def _quantities(text):
 
 
 def _same_quantity(claimed, seen):
-    """REQ-NUM-006: the same unit dimension, or (when neither side has a unit) the same noun in the three words after the number"""
+    """REQ-NUM-006: the same unit dimension, or (when one side has no unit) the same noun in the three words after the number ("₹50 crore" and "18 Crore")"""
     if claimed["unit"] and seen["unit"]:
         return claimed["unit"][0] == seen["unit"][0]
-    return not claimed["unit"] and not seen["unit"] and bool(claimed["nouns"] & seen["nouns"])
+    return bool(claimed["nouns"] & seen["nouns"])
 
 
 def _holds(claimed, seen):

@@ -54,3 +54,32 @@ Findings:
 5. The first VitaminC cops case that failed (vc-5ed50880c9e77c000848d32c_3, true) was answered inconclusive, no false pass in the smoke sample.
 
 Next: T-06 (`tools/run_t06_baseline.sh`, about 15 minutes).
+
+## T-06 Dev-sample baseline – run 2026-10-24 (owner ran `tools/run_t06_baseline.sh`, twice; log `data/eval/t06.log` in the main checkout)
+Dev split only, pin MP-light (seed 7, temperature 0), 1 repeat, 50 cases per suite (seeded sample, groups kept together), `verify.single@1` and `verify.cops@1`. Baseline copies `eval/baselines/<suite>__<style>__devsample.jsonl` exist (the second run did not overwrite them). Feedback for me, not verification; intervals are 95 % Wilson over claims with a verdict.
+
+| Suite | Style | Right overall | Coverage | False pass | False fail | Seconds per case | Calls |
+|---|---|---|---|---|---|---|---|
+| vitaminc | single | 86.7 % (39 of 45; 74–94) | 97.8 % | 11.1 % (2 of 18; 3–33) | 11.1 % (3 of 27) | 1.4 | 50 |
+| vitaminc | cops | 77.8 % (35 of 45; 64–87) | 88.9 % | 11.1 % (2 of 18; 3–33) | 11.1 % (3 of 27) | 6.6 | 150 |
+| wikidata (no evidence) | single | 34.0 % (17 of 50; 22–48) | 64 % | 28 % (7 of 25; 14–48) | 32 % (8 of 25) | 1.3 | 50 |
+| wikidata (no evidence) | cops | 32.0 % (16 of 50; 21–46) | 60 % | 16 % (4 of 25; 6–35) | 40 % (10 of 25) | 5.9 | 150 |
+
+- Against the criteria (REQ-VER-001 false pass at most 5 %, -003 right at least 90 %): VitaminC single is 11 % false pass, 87 % right: a gap of about 6 points and 3 points, plausible by prompt work or a gate. Wikidata (REQ-VER-002/-004) is far off: 28 % false pass and 34 % right overall; as the plausibility lines warned, the model does not know obscure facts, and no style helps. **Stop condition "criterion looks unreachable" for REQ-VER-002 and REQ-VER-004 on the judgement alone: decision at T-07.**
+- The second, identical run changed 2 of 45 VitaminC single answers (coverage 97.8 % to 95.6 %: two answers moved between a verdict and inconclusive); cops and both Wikidata runs were identical. Together with the T-05 finding this is the server-state effect, now measured: about 4 % of VitaminC single cases flip between two runs. That is the order of magnitude to expect in T-10 (stability), against a threshold of 0.90.
+- Cost matches the cost table (cops about 4 to 5 times single).
+
+## T-07 first evidence – the number check on the dev split (no model; to decide with the owner)
+Run of `checks.number_check` on all 332 active dev cases of verdicts_vitaminc (truth known), after fixing one bug found by this very analysis (a currency symbol between a bound and its number hid the bound: "less than $ 44 billion" was compared for equality; regression test in `tests/test_checks.py`; the one-sided noun match of REQ-NUM-006 for "₹50 crore" against "18 Crore" came with it):
+
+| Check says | claim true | claim false | no verdict |
+|---|---|---|---|
+| pass | 88 | 16 | 7 |
+| fail | 12 | 58 | 10 |
+| inconclusive | 68 | 55 | 16 |
+| not_applicable | 1 | 0 | 1 |
+
+- The check decides 191 of 332 cases (58 %). Of the 129 false claims it passes 16 (12 %); of the 169 true claims it fails 12 (7 %). That is the same order as the model (single: 11 % and 11 %), not better. The 28 wrong decisions are mostly claims whose number is right but whose subject is swapped (Tupac against Makaveli; Bulls against Pacers; "initially lost" against "initially won" in 2011), spelled-out numbers ("two-year"), and European thousands marks ("300.000"). A number check cannot tell those apart; this is the limit of the idea, not a bug.
+- Wikidata: all 182 cases are `not_applicable` (no evidence), as designed.
+- Crossed with the model on the 50-case sample (45 with a verdict): the check agrees with the model on 38 of 45 decisions; the errors overlap (both wrong on the same 2 false claims). "Check first, model otherwise" gives 38 right, 4 false pass, 3 false fail (single); the model alone has 2 false pass, 3 false fail. So the check as an override does not help on this sample, and as a veto it would have turned one correct model pass (true claim) into a fail.
+- Decision needed from the owner (T-07), options in the report to the owner.

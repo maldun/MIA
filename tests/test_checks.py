@@ -505,6 +505,13 @@ class NumberCheckEdgeTests(unittest.TestCase):
     def test_in_is_not_inches(self):
         self.assertEqual(self.status("The room is 40 in the building.", "The room is 40 m wide."), "inconclusive")
 
+    def test_a_currency_symbol_between_the_bound_and_the_number_keeps_the_bound(self):
+        """found on the dev split of verdicts_vitaminc: 'less than $ 44 billion' and 'less than ₹50 crore' were compared for equality"""
+        self.assertEqual(self.status("S. Walton is worth less than $ 44 billion.", "Walton had a net worth of $ 44.4 billion."), "fail")
+        self.assertEqual(self.status("S. Walton is worth less than $ 44 billion.", "Walton had a net worth of $ 43.4 billion."), "pass")
+        self.assertEqual(self.status("Sarfarosh grossed less than ₹50 crore.", "Sarfarosh grossed 18 Crore in India."), "pass")
+        self.assertEqual(self.status("Sarfarosh grossed more than ₹50 crore.", "Sarfarosh grossed 80 Crore in India."), "pass")
+
     def test_the_other_number_of_a_claim_does_not_hide_a_contradiction(self):
         self.assertEqual(self.status("In 1998 the group sold 5 million records.", "The group sold 4.9 million records."), "fail")
 
