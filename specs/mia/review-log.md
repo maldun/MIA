@@ -224,3 +224,11 @@ The first version was silent until the end and could take 20 minutes or more: th
 | Id | Decision | Edit |
 |---|---|---|
 | D-39 | **The HLS is approved**, including the 17 acceptance criteria that were still marked *proposed* (now *accepted*). Phase 1 (Explore) is finished; Phase 2 (Plan) starts with the order of work of section 7 (D-37). | status line, AC table |
+
+### Pins, suites and audit checked (2026-10-24, Plan stage 1)
+| Id | Finding / decision | Edit |
+|---|---|---|
+| D-40 | **Pins recorded from the running Ollama** (`/api/tags`): **MP-light** = `gemma4:12b-it-qat`, digest `sha256:38044be4f923e5a55264ed7df4eaac2676651a905f735197c504045140c02bd3`, Q4_0, 11.9B, 7.2 GB; **MP-full** = `gemma4:26b`, digest `sha256:001e5dafc3c77684c2307ebc6ab8e336e10c9b18eca52acf547d72fc83c3ca8c`, Q4_K_M, 25.2B, 18.7 GB; server: Ollama in podman (`ollama/ollama:rocm`, `OLLAMA_MAX_LOADED_MODELS=1`, `OLLAMA_NUM_PARALLEL=1`). Seed and temperature still to be fixed in `eval-spec.md`. | risk table |
+| – | **The full model does not fit the GPU:** 18.7 GB against 16 GB VRAM. The 10 s target is for the light model only. | risk table |
+| – | **Audit of the benchmark labels:** the owner labelled all 166 rows; agreement with the benchmark **152 of 166 (92 %), Cohen's kappa 0.85**; 14 differing cases (8 of them involve the "unknown" class: benchmark unknown but owner true 3 or false 3, benchmark false but owner unknown 4, benchmark true but owner unknown 1; plus true to false 2 and false to true 1). The differing ids are in `data/eval-external/audit/ambiguous.txt`; `tools/tag_ambiguous.py` marks them `ambiguous` and `retired` (the scripts skip `retired`; they do not know `ambiguous`). | tool and test |
+| – | **Where the suites are:** the four folders are not in `eval/suites/` (the harness reads `eval/suites`, `tools/eval.py:35`); an identical copy of the whole generated folder, including the labelled sheet, sits in `data/eval/` (the folder for saved runs); the source is `data/eval-external/`. To do by the owner: copy `data/eval-external/suites/verdicts_*` to `eval/suites/`, remove the stray copy from `data/eval/` (`suites`, `audit`, `manifest.json`), run `tag_ambiguous.py` on both the generated and the copied folders. | – |

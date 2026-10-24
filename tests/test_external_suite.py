@@ -17,6 +17,7 @@ sys.path.insert(0, os.path.join(REPO, "tools"))
 
 import make_external_suite as M                          # noqa: E402
 import label_agreement as LA                             # noqa: E402
+import tag_ambiguous as TA                               # noqa: E402
 
 
 class SplitAndTwins(unittest.TestCase):
@@ -118,6 +119,24 @@ class Agreement(unittest.TestCase):
                 w.writerows([["a", "x", "", "true", ""], ["b", "x", "", "true", ""], ["c", "x", "", "unknown", ""], ["d", "x", "", "", ""]])
             self.assertEqual(LA.main(sheet, key), 0)
             self.assertEqual(open(os.path.join(d, "ambiguous.txt")).read().split(), ["case-b"])
+
+
+class TagAmbiguous(unittest.TestCase):
+    def test_tags_listed_cases_once_and_leaves_the_others(self):
+        with tempfile.TemporaryDirectory() as d:
+            folder = os.path.join(d, "s")
+            os.makedirs(folder)
+            rows = [{"id": "a", "tags": ["number"], "truth": True, "note": "n"}, {"id": "b", "tags": ["number"], "truth": False}]
+            with open(os.path.join(folder, "cases.jsonl"), "w") as f:
+                f.write("".join(json.dumps(r) + "\n" for r in rows))
+            amb = os.path.join(d, "ambiguous.txt")
+            open(amb, "w").write("a\nmissing\n")
+            self.assertEqual(TA.main(amb, [folder]), 0)
+            self.assertEqual(TA.main(amb, [folder]), 0)           # repeating changes nothing more
+            out = [json.loads(l) for l in open(os.path.join(folder, "cases.jsonl"))]
+            self.assertEqual(out[0]["tags"], ["ambiguous", "number", "retired"])
+            self.assertEqual(out[0]["note"].count("ambiguous:"), 1)
+            self.assertEqual(out[1]["tags"], ["number"])
 
 
 if __name__ == "__main__":
