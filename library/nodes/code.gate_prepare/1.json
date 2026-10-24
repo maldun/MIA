@@ -1,0 +1,52 @@
+{
+ "id": "code.gate_prepare",
+ "version": 1,
+ "kind": "code",
+ "title": "Route of a claim in the number gate",
+ "description": "A claim with a number and no evidence takes the route abstain, a claim without a number the route single, other claims the style asked for (cops by default); cuts the evidence to 4000 characters. Answer: {route, numbered, evidence, started}.",
+ "tags": [
+  "verify",
+  "gate",
+  "exact"
+ ],
+ "applies_to": {
+  "tasks": [
+   "research"
+  ]
+ },
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "given"
+   ],
+   "properties": {
+    "given": {
+     "type": "object"
+    }
+   }
+  }
+ },
+ "outputs": {
+  "schema": {
+   "type": "object"
+  }
+ },
+ "params": {},
+ "body": {
+  "function": "gate_prepare",
+  "plain": "choosing the way"
+ },
+ "cost": {
+  "seconds": 0.01
+ },
+ "safety": {
+  "reads_web": false,
+  "runs_code": false
+ },
+ "status": "draft",
+ "origin": {
+  "by": "manual",
+  "note": "number gate (specs/number-gate, T-08); unit tested in tests/test_number_gate.py"
+ }
+}

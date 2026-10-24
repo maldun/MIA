@@ -18,6 +18,8 @@
 Documents changed: `requirements.md`, `test-spec.md`, `eval-spec.md`, `threat-model.md`, `architecture.sysml`, `plan.md`, `specs/mia/high-level-spec.md`, `specs/mia/review-log.md`. A new baseline is not needed for the Wikidata criteria (the new gate abstains by construction); the VitaminC baselines (T-06, T-11) are of `verify.single@1` and `verify.cops@1` and stay valid.
 
 ### Protected tests that must change (to be written by the owner, outside the implementing session)
+A ready patch is in `specs/number-gate/A-01-tests.patch` (apply it from the repository root after you have read it); it contains exactly the changes 1 to 4 below. With it the 7 tests of `test_number_gate.py` pass against the T-08 code (checked on a copy outside the repository, 2026-10-24). The smoke test is not in the patch.
+
 All in `tests/acceptance/`. Everything else in these files stays as it is. Helpers (`tests/helpers/gate_lab.py`) need no change.
 
 **`test_number_gate.py`**

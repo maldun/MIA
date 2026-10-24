@@ -1,0 +1,79 @@
+"""
+The code part of the verification gate verify.number_gate@1 (specs/number-gate: REQ-GATE-001 to REQ-GATE-006, IF-003). The gate is a library pipeline; the decisions that must
+not depend on a model are made here, in plain functions:
+
+  gate_prepare(given)        the route of a claim and the evidence cut to EVIDENCE_LIMIT characters: "abstain" (a number and no evidence: REQ-GATE-006), "single" (no
+                             number: as the current release, REQ-GATE-004, or style single) or "cops" (the default for a claim with a number)
+  run_number_check(c, e)     checks.number_check, logged as a check_run event when it ran (REQ-GATE-001)
+  gate_evidence(plan, check) the evidence the judgement steps see: the line of the check result first, then the evidence (REQ-GATE-002, -003)
+  gate_record(...)           the result record of IF-003 from the tally of the judgement style
+  gate_abstain(plan)         the same record when nobody was asked
+"""
+import re
+import time
+
+try:
+    from . import checks
+    from . import events as ev
+except ImportError:  # used as plain script / in tests
+    import checks
+    import events as ev
+
+EVIDENCE_LIMIT = 4000
+STYLES = ("cops", "single")
+EVENT_RESULT = {"pass": "pass", "fail": "fail", "inconclusive": "skipped"}       # the vocabulary of the check_run event
+CALLS = {"abstain": 0, "single": 1, "cops": 3}
+
+
+def gate_prepare(given):
+    """given: the input of the run {claim, evidence, style (optional)}"""
+    claim, evidence, style = str(given.get("claim", "")), str(given.get("evidence") or ""), given.get("style") or "cops"
+    if style not in STYLES:
+        raise ValueError("style must be one of %s, not %r" % (", ".join(STYLES), style))
+    numbered = bool(re.search(r"\d", claim))
+    if not numbered:
+        route = "single"
+    elif not evidence.strip():
+        route = "abstain"
+    else:
+        route = style
+    return {"route": route, "numbered": numbered, "evidence": evidence[:EVIDENCE_LIMIT], "started": time.monotonic()}
+
+
+def run_number_check(claim, evidence):
+    outcome = checks.number_check(claim, evidence)
+    if outcome["status"] != checks.NOT_APPLICABLE:
+        ev.emit("check_run", {"name": "number_check", "target": str(claim)[:380], "result": EVENT_RESULT[outcome["status"]], "detail": "%s: %s" % (outcome["status"], outcome["detail"])[:380]})
+    return outcome
+
+
+def check_line(check):
+    """the line of a check result for the judge; none when the check did not apply"""
+    if check["status"] == checks.NOT_APPLICABLE:
+        return ""
+    line = "Number check: %s - %s" % (check["status"], check["detail"])
+    if check["status"] == checks.FAIL:
+        line += ". Code found a contradiction between the claim and the evidence."
+    return line
+
+
+def gate_evidence(plan, check):
+    line = check_line(check)
+    return "%s\n\n---\n%s" % (line, plan["evidence"]) if line else plan["evidence"]
+
+
+def _record(plan, tally, check_status):
+    return dict(tally, calls=CALLS[plan["route"]], seconds=round(time.monotonic() - plan["started"], 3), facts=[], number_check=check_status)
+
+
+def gate_record(plan, check, verdict):
+    return _record(plan, verdict, check["status"])
+
+
+def gate_abstain(plan):
+    tally = {"status": "inconclusive", "verdict": "unclear", "agreement": 0.0, "counts": {"supported": 0, "refuted": 0, "unclear": 0},
+             "reasons": ["a claim with a number and no evidence is not decided"], "detail": "no evidence: the gate does not guess"}
+    return _record(plan, tally, checks.NOT_APPLICABLE)
+
+
+FUNCTIONS = {"gate_prepare": gate_prepare, "run_number_check": run_number_check, "gate_evidence": gate_evidence, "gate_record": gate_record, "gate_abstain": gate_abstain}

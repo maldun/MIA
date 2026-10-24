@@ -1,0 +1,60 @@
+{
+ "id": "code.gate_record",
+ "version": 1,
+ "kind": "code",
+ "title": "Result record of the number gate",
+ "description": "The tally of the judgement style plus calls, seconds, facts and the status of the number check (IF-003).",
+ "tags": [
+  "verify",
+  "gate",
+  "exact"
+ ],
+ "applies_to": {
+  "tasks": [
+   "research"
+  ]
+ },
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "plan",
+    "check",
+    "verdict"
+   ],
+   "properties": {
+    "plan": {
+     "type": "object"
+    },
+    "check": {
+     "type": "object"
+    },
+    "verdict": {
+     "type": "object"
+    }
+   }
+  }
+ },
+ "outputs": {
+  "schema": {
+   "type": "object"
+  }
+ },
+ "params": {},
+ "body": {
+  "function": "gate_record",
+  "plain": "writing the result"
+ },
+ "cost": {
+  "seconds": 0.01
+ },
+ "safety": {
+  "reads_web": false,
+  "runs_code": false
+ },
+ "status": "draft",
+ "origin": {
+  "by": "manual",
+  "note": "number gate (specs/number-gate, T-08); unit tested in tests/test_number_gate.py"
+ }
+}

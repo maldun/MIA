@@ -1,0 +1,56 @@
+{
+ "id": "check.number",
+ "version": 1,
+ "kind": "code",
+ "title": "Numbers of the claim against the evidence",
+ "description": "The numbers of the claim against the values of the same quantity in the evidence (pass, fail, inconclusive); not_applicable without evidence or without a number. Logged as a check_run event when it ran.",
+ "tags": [
+  "check",
+  "exact",
+  "numeric"
+ ],
+ "applies_to": {
+  "tasks": [
+   "research"
+  ]
+ },
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "claim",
+    "evidence"
+   ],
+   "properties": {
+    "claim": {
+     "type": "string"
+    },
+    "evidence": {
+     "type": "string"
+    }
+   }
+  }
+ },
+ "outputs": {
+  "schema": {
+   "type": "object"
+  }
+ },
+ "params": {},
+ "body": {
+  "function": "run_number_check",
+  "plain": "comparing the numbers"
+ },
+ "cost": {
+  "seconds": 0.01
+ },
+ "safety": {
+  "reads_web": false,
+  "runs_code": false
+ },
+ "status": "draft",
+ "origin": {
+  "by": "manual",
+  "note": "number gate (specs/number-gate, T-08); unit tested in tests/test_number_gate.py"
+ }
+}

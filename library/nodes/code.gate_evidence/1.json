@@ -1,0 +1,56 @@
+{
+ "id": "code.gate_evidence",
+ "version": 1,
+ "kind": "code",
+ "title": "Evidence with the line of the number check",
+ "description": "The evidence that the judgement steps see: the line 'Number check: <status> - <detail>' first, then a separator and the evidence; the evidence alone when the check did not apply.",
+ "tags": [
+  "verify",
+  "gate",
+  "exact"
+ ],
+ "applies_to": {
+  "tasks": [
+   "research"
+  ]
+ },
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "plan",
+    "check"
+   ],
+   "properties": {
+    "plan": {
+     "type": "object"
+    },
+    "check": {
+     "type": "object"
+    }
+   }
+  }
+ },
+ "outputs": {
+  "schema": {
+   "type": "object"
+  }
+ },
+ "params": {},
+ "body": {
+  "function": "gate_evidence",
+  "plain": "preparing the evidence"
+ },
+ "cost": {
+  "seconds": 0.01
+ },
+ "safety": {
+  "reads_web": false,
+  "runs_code": false
+ },
+ "status": "draft",
+ "origin": {
+  "by": "manual",
+  "note": "number gate (specs/number-gate, T-08); unit tested in tests/test_number_gate.py"
+ }
+}
