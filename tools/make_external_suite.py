@@ -254,12 +254,12 @@ def wikidata_cases(n_pairs, seed):
 
 
 # ---------------------------------------------------------------- writing
-def write_suites(out, base, cases, description):
+def write_suites(out, base, cases, description, mod=3):
     dev, hold = [], []
     for c in cases:
         c = dict(c)
         pair = c.pop("pair")
-        holdout = is_holdout(pair)
+        holdout = is_holdout(pair, mod)
         c["tags"] = sorted(set(c["tags"] + ["split:holdout" if holdout else "split:dev"]))
         (hold if holdout else dev).append(c)
     for name, rows in ((base, dev), (base + ".holdout", hold)):
@@ -307,6 +307,7 @@ def main(argv=None):
     ap.add_argument("--seed", type=int, default=7)
     ap.add_argument("--n-vitaminc", type=int, default=60, help="contrastive groups to draw (about 3 cases each)")
     ap.add_argument("--n-wikidata", type=int, default=80, help="true/false pairs")
+    ap.add_argument("--holdout-mod", type=int, default=3, help="one of N pairs goes to the holdout (3: a third, 2: half)")
     ap.add_argument("--cache", default=None, help="folder for the raw answers (default: <out>/.cache)")
     a = ap.parse_args(argv)
     out = pathlib.Path(a.out)
@@ -318,14 +319,14 @@ def main(argv=None):
         say("VitaminC: downloading the test split once (29 MB, about 10 seconds)")
         cs = vitaminc_cases(a.n_vitaminc, a.seed)
         dev, hold = write_suites(out, "verdicts_vitaminc", cs,
-                                 "Claims with number-bearing Wikipedia evidence and contrastive revisions (VitaminC, CC BY-SA 3.0): SUPPORTS true, REFUTES false, NOT ENOUGH INFO no verdict. Labels by the benchmark's annotators.")
+                                 "Claims with number-bearing Wikipedia evidence and contrastive revisions (VitaminC, CC BY-SA 3.0): SUPPORTS true, REFUTES false, NOT ENOUGH INFO no verdict. Labels by the benchmark's annotators.", a.holdout_mod)
         manifest["sources"]["vitaminc"] = {"licence": "CC BY-SA 3.0", "dev": len(dev), "holdout": len(hold), "ids_sha1": hashlib.sha1("".join(sorted(c["id"] for c in cs)).encode()).hexdigest()}
         all_cases += cs
     if a.source in ("wikidata", "both"):
         say("Wikidata: 4 queries (about 1 minute)")
         cs = wikidata_cases(a.n_wikidata, a.seed)
         dev, hold = write_suites(out, "verdicts_wikidata", cs,
-                                 "Near-miss number claims without evidence: a true value from Wikidata (CC0) and a false twin made by a seeded rule (factor, swapped digits, unit off by 10, year off).")
+                                 "Near-miss number claims without evidence: a true value from Wikidata (CC0) and a false twin made by a seeded rule (factor, swapped digits, unit off by 10, year off).", a.holdout_mod)
         manifest["sources"]["wikidata"] = {"licence": "CC0", "dev": len(dev), "holdout": len(hold), "ids_sha1": hashlib.sha1("".join(sorted(c["id"] for c in cs)).encode()).hexdigest()}
         all_cases += cs
     say("writing the audit sample")
