@@ -103,3 +103,16 @@ Design choices I made while drafting; each is the owner's to overrule:
 6. **Stopping:** "at least 5 times it should stop (or 1 % or less)" is written as: after at least 5 net negative votes the chance is at most 1 % per opportunity; positive votes can restore it; the exact curve is fixed in Plan. Net = negatives minus positives.
 7. **Scope of FR-29:** style and reactions only (gestures, expressions, recurring phrases, kinds of reaction), never facts, safety checks or the persona's names.
 8. **Tasks and memos:** read back from the records by code, never regenerated; stored in the shared database; all users see and may change them.
+
+### Step 3c: old requirements checked against the new decisions (edited 2026-10-24)
+| Change | Why |
+|---|---|
+| FR-4, FR-6, FR-8, FR-12, FR-14, FR-15, FR-11: "the owner" became "every user" / "a user" / "the requesting user" | CON-6: every user sees and edits everything; FR-8: any user may switch the model, the switch applies to all and asks for confirmation |
+| FR-15 points to FR-29 for the adaptation to votes; FR-18 learns from signals "including the votes of FR-27"; FR-16: every run is attributed to the user who started it | multi-user and the feedback system |
+| FR-19: the owner creates the first account at installation; the database is part of backup and restore | D-6, D-11, D-12 |
+| NFR-7: **a chat answer has priority over a background task**; a long task such as a review slice yields the model server to waiting chat messages | one model server shared by several users (CON-2) |
+| HLS: a "Users and stakeholders" table was added to section 1 (it was missing since the first draft) | the stakeholders of the first draft were lost when the draft was replaced |
+| SysML context: `Guest` ("no login") replaced by `User`; `Owner` is a `User` | accounts for all |
+| Tooling: all requirement docs in `architecture.sysml` are now **generated from the HLS sentences**, and `tools/check_sysml_model.py` fails when they differ. First run of the check found two docs where `textwrap` had split words at hyphens; fixed | one source of truth |
+
+Not changed in step 3 (they belong to later steps): the agent profile (4: tasks, autonomy, data classes with attributed votes and shared visibility, example cases), architecture decisions table (5), acceptance criteria (6), risks (7).

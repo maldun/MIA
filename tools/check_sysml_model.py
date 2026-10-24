@@ -111,6 +111,22 @@ for b in sorted(cited):
     if b not in base_ids:
         problems.append(f"baseline id {b} not in baseline-requirements.md")
 
+# 6. the doc of each requirement in the model is the sentence of the HLS (the HLS is the source)
+def norm(s):
+    return re.sub(r"\s+", " ", s.replace("**", "").replace("`", "")).strip()
+hls_text = {}
+for line in hls.split("\n"):
+    m = re.match(r"^- \*\*((?:N?FR)-\d+) [^*]+\*\*(?: \([^)]*\))? \[[^\]]*\] \([^)]*\)\. (.*)$", line)
+    if m:
+        hls_text[m.group(1)] = norm(m.group(2))
+    m = re.match(r"^- \*\*(CON-\d)\*\* (.*)$", line)
+    if m:
+        hls_text[m.group(1)] = norm(m.group(2))
+for rid in sorted(defs):
+    m = re.search(r"requirement def <'%s'> \w+ \{\s*subject mia : MiaSystem;\s*doc /\*(.*?)\*/" % re.escape(rid), arch, re.S)
+    if m and norm(m.group(1)) != hls_text.get(rid):
+        problems.append(f"{rid}: the doc in architecture.sysml differs from the HLS sentence")
+
 print("PROBLEMS:" if problems else "OK")
 for p in problems:
     print(" -", p)

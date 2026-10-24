@@ -9,11 +9,12 @@ package MIA_Context {
 
     part def Person;
 
-    part def Owner :> Person {
-        doc /* The one user: owner, developer, researcher and host administrator. Multi-user operation is a non-goal. */
+    part def User :> Person {
+        doc /* A trusted person with a local account (password). A handful at most. Sees and may edit everything; a change
+               applies to all (CON-6). Every user is addressed as master unless the persona says otherwise. */
     }
-    part def Guest :> Person {
-        doc /* Someone the owner lets open the link in the home network or the tailnet. There is no login. */
+    part def Owner :> User {
+        doc /* The user who creates the accounts, administers the host, develops and researches. */
     }
 
     // ---------------------------------------------------------------- concerns
@@ -22,7 +23,7 @@ package MIA_Context {
         doc /* A pleasant, in-character conversation partner that feels alive: answers in seconds, a face that
                shows the mood, a voice, a history, and a page that works on a phone. */
         stakeholder owner : Owner;
-        stakeholder guest : Guest;
+        stakeholder user : User;
     }
     concern def <'CN-2'> TrustworthyFacts {
         doc /* What MIA states as fact can be traced to a source or a check; "unknown" is an honest answer;
@@ -81,7 +82,7 @@ package MIA_Context {
     part def MiaContext {
         doc /* Who and what MIA talks to. Interfaces are the typed links of MIA_Architecture. */
         part owner : Owner;
-        part guest : Guest [0..*];
+        part user : User [0..*];
         part device : BrowserDevice [1..*];
         part ollama : OllamaServer;
         part searxng : SearxngServer;

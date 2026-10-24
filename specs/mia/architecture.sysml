@@ -725,19 +725,20 @@ package MIA_Requirements {
 
     requirement def <'CON-1'> FreeAndOpen {
         subject mia : MiaSystem;
-        doc /* Local models through Ollama, self-hosted search, no paid API; licence GPL-3.0-or-later. */
+        doc /* Free and open: local models through Ollama, self-hosted search, no paid API; licence GPL-3.0-or-later. */
     }
     requirement def <'CON-2'> HardwareEnvelope {
         subject mia : MiaSystem;
-        doc /* One consumer GPU with 16 GB (RX 7800 XT), 62 GB RAM, one language model loaded at a time;
-               with several users requests queue. */
+        doc /* Hardware: Ryzen 9 5900X (24 threads), RX 7800 XT with 16 GB VRAM, 62 GB RAM (measured 2026-10-24); one language
+               model loaded at a time (OLLAMA_MAX_LOADED_MODELS=1). With several users the model server serves
+               one request at a time; the others wait in a queue. */
         attribute gpuMemoryGB : Real = 16;
         attribute loadedModels : Integer = 1;
     }
     requirement def <'CON-3'> TechnologyChoices {
         subject mia : MiaSystem;
-        doc /* Python 3.11 to 3.13; Godot 4.x with GDScript only and the Compatibility renderer; chat page in plain
-               HTML, CSS and ES modules without a build step or UI framework. */
+        doc /* Python 3.11 to 3.13 (3.12 tested); Godot 4.6.1 with GDScript only and the Compatibility renderer; the chat page
+               in plain HTML, CSS and ES modules without build step or UI framework. */
     }
     requirement def <'CON-4'> SecureContext {
         subject mia : MiaSystem;
@@ -750,20 +751,24 @@ package MIA_Requirements {
 
     requirement def <'CON-6'> TrustedUsersOnly {
         subject mia : MiaSystem;
-        doc /* A handful of trusted users; all see and may edit everything (skills, workflows, presets, persona, memory);
-               a change applies to all at once. No roles or per-user permissions inside MIA. */
+        doc /* Trusted users only: a handful of people; all see and may edit everything (skills, workflows, presets, persona,
+               memory); a change applies to all at once. There are no roles or per-user permissions inside MIA. */
         attribute maxUsers : Integer = 10;
     }
     requirement def <'CON-7'> SharedDatabase {
         subject mia : MiaSystem;
-        doc /* One shared PostgreSQL database in a container, reachable by MIA and the graph app; MIA's state stays behind storage interfaces. */
+        doc /* One shared PostgreSQL database in a container (D-11), reachable by MIA and the graph app; MIA's state stays
+               behind storage interfaces (deploy/REQUIREMENTS_DB.md). */
     }
 
     // ================================================================ interaction
 
     requirement def <'FR-1'> Conversation {
         subject mia : MiaSystem;
-        doc /* MIA shall let several logged-in users hold a conversation with her in a web browser on desktop and phone, with answers appearing while they are written, a stop button, a queue of waiting messages, a history that survives reload and is shown live on every connected device, every message attributed to the user who sent it, and one shared MIA answering all of them. */
+        doc /* MIA shall let several logged-in users hold a conversation with her in a web browser on desktop and phone, with
+               answers appearing while they are written, a stop button, a queue of waiting messages, a history
+               that survives reload and is shown live on every connected device, every message attributed to the
+               user who sent it, and one shared MIA answering all of them (D-4). */
         attribute queuedMessages : Integer = 1;
         attribute messagesPerMinute : Integer = 10;
         @Trace { :>> baseline = ("CT-1", "CT-2", "CT-3", "CT-4", "CT-5", "CT-6", "CT-8", "CT-9", "CT-11");
@@ -771,9 +776,9 @@ package MIA_Requirements {
     }
     requirement def <'FR-2'> EmbodiedCharacter {
         subject mia : MiaSystem;
-        doc /* MIA shall show her emotional state and speech through a 3D character: facial expressions that blend
-               smoothly, arm gestures, a moving mouth while speaking, blinking and idle motion, driven through one
-               central expression API; if the character cannot load, the chat shall still work. */
+        doc /* MIA shall show her emotional state and speech through a 3D character with smoothly blending facial expressions,
+               arm gestures, a moving mouth while speaking, blinking and idle motion, driven through one central
+               expression API; if the character cannot load, the chat shall still work. */
         attribute blendSeconds : Real = 0.25;
         attribute minFpsPhone : Real = 30;
         attribute minFpsDesktop : Real = 60;
@@ -782,29 +787,35 @@ package MIA_Requirements {
     }
     requirement def <'FR-3'> Voice {
         subject mia : MiaSystem;
-        doc /* MIA shall make the voice of every answer automatically with an open text-to-speech engine (Kokoro for now, replaceable behind one interface), apply a post-processing step that makes it sound anime-like, and play it in the user's browser, sentence by sentence, speaking only what is meant to be heard; every user can mute or stop it for themselves. */
+        doc /* MIA shall make the voice of every answer automatically with an open text-to-speech engine (Kokoro for now,
+               replaceable behind one interface), apply a post-processing step that makes it sound anime-like,
+               and play it in the user's browser, sentence by sentence, speaking only what is meant to be heard;
+               every user can mute or stop it for themselves. */
         @Trace { :>> baseline = ("VO-1", "VO-2", "VO-3", "VO-4", "CT-7");
                  :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
     }
     requirement def <'FR-4'> TransparencyOfStateAndMethod {
         subject mia : MiaSystem;
-        doc /* MIA shall tell the owner in one short line how she feels and what she is doing, and shall let the
-               owner open, for any answer produced by a task, a step-by-step account of how it came about; the
-               accurate description shall always come from real event data, never from a model. */
+        doc /* MIA shall tell every user in one short line how she feels and what she is doing, and shall let a user open, for
+               any answer produced by a task, a step-by-step account of how it came about, whose accurate part
+               comes from real event data and never from a model. */
         attribute moodHoldMinutes : Integer = 10;
         @Trace { :>> baseline = ("CT-2", "LG-1", "LG-3");
                  :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
     }
     requirement def <'FR-5'> OwnerShapedAppearanceAndPersona {
         subject mia : MiaSystem;
-        doc /* MIA shall let every user change expressions, gestures, backgrounds, mood phrases, emotions and the persona as data without changing code, with an expression editor and a motion editor; a saved change applies to all users at once, appears on every connected device without a reload, and is recorded with its author. */
+        doc /* MIA shall let every user change expressions, gestures, backgrounds, mood phrases, emotions and the persona as
+               data without changing code, with an expression editor and a motion editor (today the gesture
+               editor); a saved change applies to all users at once, appears on every connected device without a
+               reload, and is recorded with its author (D-10). */
         @Trace { :>> baseline = ("CH-4", "CH-6", "CH-7", "CH-8", "CH-9", "CT-2", "OP-5");
                  :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
     }
     requirement def <'NFR-1'> AccessibleOnEveryDevice {
         subject mia : MiaSystem;
-        doc /* MIA shall be usable by keyboard and screen reader, in dark and light themes, with reduced motion
-               respected, on widths from 320 to 2560 px in current Chrome, Firefox and Safari (iOS 16+). */
+        doc /* Keyboard and screen-reader use, dark and light themes, reduced motion, widths 320 to 2560 px, current Chrome,
+               Firefox and Safari (iOS 16+), touch targets of at least 44 px. */
         attribute minWidthPx : Integer = 320;
         attribute maxWidthPx : Integer = 2560;
         attribute minTouchTargetPx : Integer = 44;
@@ -816,24 +827,25 @@ package MIA_Requirements {
 
     requirement def <'FR-6'> TasksAsSkills {
         subject mia : MiaSystem;
-        doc /* MIA shall perform each kind of work (chat, lookup, literature review, storytelling, scheduling,
-               summarising) as a task defined by a human-readable skill file and a pipeline, selectable by the
-               owner, with the choice never made silently for tasks that reach the internet. */
+        doc /* MIA shall perform each kind of work as a task defined by a human-readable skill file and a pipeline, selectable
+               by every user; a task that reaches the internet is never chosen silently. */
         @Trace { :>> baseline = ("TK-1", "TK-2", "RS-1", "CT-11");
                  :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'FR-7'> WorkflowsAsData {
         subject mia : MiaSystem;
-        doc /* MIA shall define every pipeline and agent workflow as validated, versioned data in a library with a lifecycle (draft, tested, trusted, retired); every edit by a user is a new immutable version with author and time and applies to all; an entry proposed by a model stays a draft until a user approves it, shown as a diff and tried on the test set. */
+        doc /* MIA shall define every pipeline and agent workflow as validated, versioned data in a library with a lifecycle
+               (draft, tested, trusted, retired); every edit by a user is a new immutable version with author
+               and time and applies to all (D-10); an entry proposed by a model stays a draft until a user
+               approves it, shown as a diff and tried on the test set. */
         @Trace { :>> baseline = ("TK-3", "TK-4", "TK-5", "TK-10");
                  :>> verifiedBy = (HowVerified::test, HowVerified::inspection); }
     }
     requirement def <'NFR-2'> SmallModelStrategies {
         subject mia : MiaSystem;
-        doc /* MIA shall reach useful quality with small local models by splitting work into narrow steps with
-               structured outputs and testable targets, by keeping every model input inside a fixed share of the
-               context window, by letting code do everything code can do, and by spending more calls only when a
-               target is unmet. */
+        doc /* Narrow steps with structured outputs and testable targets; every model input inside 50 % of the context window;
+               code does what code can; more calls only when a target is unmet; a cheap first try of fewer than
+               15 model calls per question on the light model. */
         attribute cheapTryMaxCalls : Integer = 15;
         attribute contextSharePercent : Real = 50;
         @Trace { :>> baseline = ("TK-6", "TK-9", "RS-3");
@@ -841,8 +853,9 @@ package MIA_Requirements {
     }
     requirement def <'FR-8'> ModelManagement {
         subject mia : MiaSystem;
-        doc /* MIA shall run on a local model server, let the owner switch between a light and a full model, free
-               GPU memory on request, and say plainly when the model server is unreachable. */
+        doc /* MIA shall run on a local model server, let any user switch between a light and a full model (the switch applies
+               to all and asks for confirmation, CON-6), free GPU memory on request, and say plainly when the
+               model server is unreachable. */
         @Trace { :>> baseline = ("C-1", "C-2", "C-3", "CT-11");
                  :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
     }
@@ -851,25 +864,24 @@ package MIA_Requirements {
 
     requirement def <'FR-9'> VerifyBeforeAsserting {
         subject mia : MiaSystem;
-        doc /* MIA shall check what can be checked by code first (arithmetic, dates, schemas, quotes present in
-               their source, executable claims), use model judgement only for the rest, treat "unknown" and
-               "unverified" as proper answers, and let a failed hard check outweigh any model verdict. */
+        doc /* MIA shall check by code what code can check, use model judgement only for the rest, treat "unknown" as a proper
+               answer, and let a failed hard check outweigh any model verdict. */
         @Trace { :>> baseline = ("VE-1", "VE-2", "VE-4", "VE-5", "VE-7");
                  :>> verifiedBy = (HowVerified::measurement, HowVerified::test); }
     }
     requirement def <'NFR-3'> UntrustedInputStaysData {
         subject mia : MiaSystem;
-        doc /* MIA shall treat all text from the web, papers, PDFs and users as data that never acts as
-               instruction; run model-written scripts and parse hostile documents only inside an isolating
-               sandbox; and if the sandbox is missing refuse the operation instead of weakening it. */
+        doc /* Text from the web, papers, PDFs and users never acts as instruction; model-written scripts and hostile documents
+               are processed only in an isolating sandbox; a missing sandbox means the operation is refused,
+               never weakened. */
         @Trace { :>> baseline = ("VE-3", "VE-6", "RS-7");
                  :>> verifiedBy = (HowVerified::test, HowVerified::inspection); }
     }
     requirement def <'NFR-4'> HonestConfidence {
         subject mia : MiaSystem;
-        doc /* MIA shall state how sure she is only with figures computed by code from anchored evidence, never
-               show a source she did not retrieve, and report limits (contamination, small samples, missing
-               access) with every result. */
+        doc /* Confidence figures are computed by code from anchored evidence; MIA never shows a source she did not retrieve (0
+               invented references, 100 % of cited quotes found in their source); limits are reported with every
+               result. */
         attribute maxHallucinatedReferences : Integer = 0;
         attribute minQuoteAnchoringPercent : Real = 100;
         @Trace { :>> baseline = ("RS-10", "RS-11", "EV-2");
@@ -880,18 +892,18 @@ package MIA_Requirements {
 
     requirement def <'FR-10'> Lookup {
         subject mia : MiaSystem;
-        doc /* MIA shall answer a factual question quickly with the sources and verbatim quotes that support it,
-               preferring a trusted source to a model judgement, and say "unknown" when nothing supports an answer. */
+        doc /* MIA shall answer a factual question with the sources and verbatim quotes that support it, prefer a trusted
+               source to a model judgement, and say "unknown" when nothing supports an answer. */
         @Trace { :>> baseline = ("RS-1", "RS-6");
                  :>> verifiedBy = (HowVerified::measurement); }
     }
     requirement def <'FR-11'> LiteratureReview {
         subject mia : MiaSystem;
-        doc /* Given a research question, an optional field scope, a cut-off date and a budget, MIA shall produce a
-               structured report of the literature found: sources kept and dropped with reasons, findings per
-               sub-question with verbatim anchors, conflicts between sources, an answerability figure with its
-               parts, open gaps and suggested next keywords. She shall work in time slices, give an intermediate
-               report with a recommendation at the end of each slice, and continue only when the owner agrees. */
+        doc /* Given a research question, an optional field scope, a cut-off date and a budget, MIA shall produce a structured
+               report: sources kept and dropped with reasons, findings per sub-question with verbatim anchors,
+               conflicts, an answerability figure with its parts, open gaps and next keywords; she works in time
+               slices (first 60 s), gives an intermediate report with a recommendation at the end of each, and
+               continues only when the requesting user agrees. */
         attribute firstSliceSeconds : Real = 60;
         attribute checkpointEverySources : Integer = 10;
         @Trace { :>> baseline = ("RS-2", "RS-3", "RS-4", "RS-5", "RS-7", "RS-8", "RS-9", "RS-10", "RS-12", "RS-14");
@@ -899,17 +911,16 @@ package MIA_Requirements {
     }
     requirement def <'FR-12'> KnowledgeOfSources {
         subject mia : MiaSystem;
-        doc /* MIA shall record where a source comes from and how far she trusts it (class, venue, date,
-               peer-review status, retraction or correction status read from the metadata), keep the owner's edits
-               of that trust, and honour a time cut-off strictly. */
+        doc /* MIA shall record where a source comes from and how far she trusts it (class, venue, date, peer-review status,
+               retraction status from the metadata), keep the users' edits of that trust and honour a time
+               cut-off strictly. */
         @Trace { :>> baseline = ("RS-5", "RS-6");
                  :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'FR-13'> MethodTransfer {
         subject mia : MiaSystem;
-        doc /* On request MIA shall look for methods from other fields that fit the structure of the problem,
-               offering few ranked candidates marked as hypotheses unless an executable test on a toy instance
-               passed. Off by default. */
+        doc /* On request MIA shall look for methods from other fields that fit the structure of a problem, offering few ranked
+               candidates marked as hypotheses unless an executable test on a toy instance passed. */
         attribute defaultCandidates : Integer = 3;
         @Trace { :>> baseline = ("RS-13");
                  :>> verifiedBy = (HowVerified::measurement, HowVerified::test); }
@@ -919,19 +930,19 @@ package MIA_Requirements {
 
     requirement def <'FR-14'> Memory {
         subject mia : MiaSystem;
-        doc /* MIA shall remember the relationship over time: keep the raw conversation, keep structured facts,
-               preferences and commitments with a link back to their source, consolidate at rest, retrieve what is
-               relevant within the token budget, let the owner inspect, correct and delete any record, and never
-               store a fact about the owner that came from web or file text. */
+        doc /* MIA shall remember the relationship over time: keep the raw conversation, keep structured facts, preferences and
+               commitments linked to their source, consolidate at rest, retrieve what is relevant within the
+               token budget, let every user inspect, correct and delete any record, and never store a fact about
+               a user that came from web or file text. */
         @Trace { :>> baseline = ("ME-1", "ME-2");
                  :>> verifiedBy = (HowVerified::measurement, HowVerified::test); }
     }
     requirement def <'FR-15'> BehaviourRulesAndFeedback {
         subject mia : MiaSystem;
-        doc /* MIA shall detect violations of defined behaviour rules, repair them silently, record them as
-               signals, and let signals change later behaviour through selection, written lessons and examples;
-               reward for factual answers shall come from checks and sources, not from the owner's approval alone;
-               no correction shall enter the conversation memory as a scolding. */
+        doc /* MIA shall detect violations of defined behaviour rules, repair them silently, record them as signals and let
+               signals change later behaviour; reward for factual answers comes from checks and sources, not
+               from the users' approval alone (the adaptation to votes is FR-29); no correction enters the
+               conversation memory as a scolding. */
         @Trace { :>> baseline = ("BF-1", "BF-2", "EM-1", "EM-2");
                  :>> verifiedBy = (HowVerified::test, HowVerified::measurement); }
     }
@@ -940,26 +951,26 @@ package MIA_Requirements {
 
     requirement def <'FR-16'> Traceability {
         subject mia : MiaSystem;
-        doc /* MIA shall write every run as typed, schema-checked events carrying one run id through every model
-               call, web or API request and check, with secrets removed; any statement in an answer shall be
-               traceable back to the query that found its source; any recorded run shall be replayable into its
-               graph and reproducible offline, and two runs shall be comparable event by event. */
+        doc /* MIA shall write every run as typed, schema-checked events with one run id through every model call, request and
+               check, secrets removed; any statement in an answer shall be traceable to the query that found its
+               source; a recorded run shall be replayable and reproducible offline; two runs shall be
+               comparable. Every run is attributed to the user who started it. */
         @Trace { :>> baseline = ("LG-1", "LG-2", "LG-3", "LG-4");
                  :>> verifiedBy = (HowVerified::test, HowVerified::inspection); }
     }
     requirement def <'FR-17'> MeasurableQuality {
         subject mia : MiaSystem;
-        doc /* MIA shall be evaluated by a harness that runs pipeline variants on fixed suites with repeats,
-               intervals and cost counting; every behaviour change shall start with a test case; claims of
-               improvement shall hold on held-out cases. */
+        doc /* MIA shall be evaluated by a harness that runs pipeline variants on fixed suites with repeats, intervals and cost
+               counting; every behaviour change starts with a test case; improvement claims hold on held-out
+               cases. */
         @Trace { :>> baseline = ("EV-1", "RS-14", "RS-15");
                  :>> verifiedBy = (HowVerified::test, HowVerified::inspection); }
     }
     requirement def <'FR-18'> OptionalLearning {
         subject mia : MiaSystem;
-        doc /* MIA shall learn only from logged signals, only in discrete choices of configuration and graph
-               weights (never model weights unless the owner decides so later), with every learned choice logged
-               next to the default, switchable off and reversible. */
+        doc /* MIA shall learn only from logged signals (including the votes of FR-27), only in discrete choices of
+               configuration and graph weights, with every learned choice logged next to the default, switchable
+               off and reversible. */
         @Trace { :>> baseline = ("LN-1", "RS-15");
                  :>> verifiedBy = (HowVerified::test, HowVerified::measurement); }
     }
@@ -968,35 +979,46 @@ package MIA_Requirements {
 
     requirement def <'NFR-5'> LocalFirstPrivacy {
         subject mia : MiaSystem;
-        doc /* MIA shall keep conversations, memory, logs, accounts and models on the host; the only data leaving the host shall be the text of a web search or scholarly query (and an e-mail address only if configured); the page shall load nothing from the internet. Inside MIA nothing is private between users; the login page says so. */
+        doc /* Conversations, memory, logs, accounts and models stay on the host; the only data leaving it is the text of a web
+               or scholarly query (and an e-mail address only if configured); the page loads nothing from the
+               internet. Inside MIA nothing is private between users (CON-6): the login page says so. */
         @Trace { :>> baseline = ("C-5", "CT-10", "VE-6");
                  :>> verifiedBy = (HowVerified::test, HowVerified::inspection); }
     }
     requirement def <'NFR-6'> SecureAccess {
         subject mia : MiaSystem;
-        doc /* MIA shall be reachable from other devices only over HTTPS inside the home network or the owner's tailnet; authenticate every request by an account; check origins and limit message rates per user. */
+        doc /* Other devices reach MIA only over HTTPS inside the home network or the tailnet; every request is authenticated
+               by an account (FR-21); origins are checked and message rates limited per user. */
         @Trace { :>> baseline = ("OP-4", "OP-5");
                  :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
     }
     requirement def <'FR-19'> Operable {
         subject mia : MiaSystem;
-        doc /* MIA shall be installable and runnable from a single configuration file and one command (venv or
+        doc /* MIA shall be installable and runnable from one configuration file and one command (virtual environment or
                compose stack), shut down in an orderly way that saves her memory, back up and restore her data,
-               and report missing options after an update. */
+               and report missing options after an update. At installation the owner creates the first account;
+               the database is part of backup and restore. */
         @Trace { :>> baseline = ("OP-1", "OP-2", "OP-3", "OP-6");
                  :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
     }
     requirement def <'NFR-7'> EfficientOnGivenHardware {
         subject mia : MiaSystem;
-        doc /* MIA shall give a chat answer's first text within seconds on the light model, keep every task under
-               explicit budgets (steps, seconds, calls, tokens), and end a run that exceeds a budget with what she
-               has and a statement of what is missing. */
+        doc /* The first text of a chat answer appears within seconds on the light model (target to be fixed, see 6); every
+               task runs under explicit budgets (steps, seconds, calls, tokens) and a run that exceeds one ends
+               with what it has and says what is missing; the character runs at 30+ fps on a mid-range phone and
+               60 fps on desktop. Several users share one model server: waiting messages are queued, show their
+               position and are refused only when the queue is full (length set in Plan). A chat answer has
+               priority over a background task: a long task (a review slice) yields the model server to waiting
+               chat messages. */
         @Trace { :>> baseline = ("C-2", "CT-9", "RS-9");
                  :>> verifiedBy = (HowVerified::measurement); }
     }
     requirement def <'NFR-8'> SharedStateInDatabase {
         subject mia : MiaSystem;
-        doc /* MIA shall keep her shared state (history, summaries, chat log, feedback, presets, gestures, library entries, accounts) in a PostgreSQL database in a container behind storage interfaces, so that MIA and the graph app share it; the move from files is one command and reversible by export; backup and restore cover the database. */
+        doc /* MIA shall keep her shared state (history, summaries, chat log, feedback, presets, gestures, library entries,
+               accounts) in a PostgreSQL database in a container behind storage interfaces, so that MIA and the
+               graph app share it; the move from files to the database is one command and reversible by export;
+               backup and restore cover the database. */
         @Trace { :>> baseline = ("OP-7", "CT-8");
                  :>> verifiedBy = (HowVerified::inspection); }
     }
@@ -1004,79 +1026,105 @@ package MIA_Requirements {
     requirement def <'FR-21'> AccountsAndLogin {
         subject mia : MiaSystem;
         doc /* Only the owner creates accounts. Every user logs in with a local account and password, may change their own
-               password, keeps a session on their devices, and every action that changes shared data is attributed to the
-               account. Passwords are stored only as salted slow hashes; repeated failed logins are throttled. */
+               password, keeps a session on their devices, and every action that changes shared data is
+               attributed to the account. Passwords are stored only as salted slow hashes; repeated failed
+               logins are throttled. */
         attribute maxFailedLoginsPerMinute : Integer = 5;
         @Trace { :>> baseline = ("OP-5"); :>> verifiedBy = (HowVerified::test, HowVerified::inspection); }
     }
     requirement def <'FR-22'> GraphApp {
         subject mia : MiaSystem;
-        doc /* A web page in the same stack as the chat shows workflow graphs as nodes and edges and lets any logged-in user
-               edit each node and edge directly as a JSON dictionary (text data only). It reads and writes the shared
-               database, checks the graph rules before saving, saves every edit as a new version and shows the history
-               and a diff. */
+        doc /* MIA shall provide a graph app, a web page in the same stack as the chat (plain HTML and JavaScript, a vendored
+               graph library, no build step), that shows workflow graphs as nodes and edges and lets any
+               logged-in user edit each node and edge directly as a JSON dictionary (text data only). It reads
+               and writes the shared database, checks the graph rules (node identity, no two data nodes
+               adjacent, cycles only inside a session) before saving, saves every edit as a new version, and
+               shows the version history and a diff. */
         @Trace { :>> baseline = ("TK-5", "TK-10"); :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
     }
 
     requirement def <'FR-20'> SkillDevelopmentPath {
         subject mia : MiaSystem;
-        doc /* One documented path from an idea to a promoted skill, open to every user: a skill file and a pipeline built from library nodes and validated before use; the specification and benchmark of FR-26 before the skill is trusted; a declaration of model, tools, budgets and trust boundaries; draft status until a user promotes it; the time from idea to promotion is recorded. */
+        doc /* MIA shall provide one documented path from an idea to a promoted skill, open to every user: a skill file and a
+               pipeline built from library nodes and validated before use; the specification and benchmark of
+               FR-26 before the skill is trusted; a declaration of the skill's model, tools, budgets and trust
+               boundaries; a draft status until a user promotes it; and a record of the time from idea to
+               promotion, so that the criterion "a second skill within one month" can be checked. */
         attribute maxDaysForSecondSkill : Integer = 30;
         @Trace { :>> baseline = ("TK-2", "TK-4", "TK-6", "EV-1"); :>> verifiedBy = (HowVerified::inspection, HowVerified::demonstration); }
     }
     requirement def <'FR-23'> MoodInEverySituation {
         subject mia : MiaSystem;
-        doc /* MIA holds a mood at all times (idle, thinking, speaking, waiting, greeting, error, offline) and the character shows the expression and gesture that an editable mood map assigns; an unknown mood falls back to neutral; the mood changes with events and settles back over time; the overall feedback score shifts the general mood. */
+        doc /* MIA shall hold a mood at all times, including when idle, thinking, speaking, waiting in the queue, greeting a
+               user who logs in, reporting an error and being offline, and the character shall show the
+               expression and gesture that an editable mood map assigns to that mood; an unknown mood falls back
+               to neutral, and the mood changes with events and settles back over time. The overall feedback
+               score (FR-27) shifts the general mood. */
         @Trace { :>> baseline = ("CT-2", "EM-1", "EM-2"); :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
     }
     requirement def <'FR-24'> CharacterExchange {
         subject mia : MiaSystem;
-        doc /* A user can select the character from a VRoid model in .vrm format and transfer both the original and the
-               compiled web export between machines with scripting tools; expressions and gestures are mapped to the shape
-               keys of another model or reported as missing, never silently dropped. */
+        doc /* A user shall be able to select the character from a VRoid model in .vrm format and to transfer both the original
+               files and the compiled web export between machines with scripting tools (import, build, pack,
+               unpack); expressions and gestures defined for one model are mapped to the shape keys of another
+               or reported as missing, never silently dropped. */
         @Trace { :>> baseline = ("CH-1", "CH-2"); :>> verifiedBy = (HowVerified::demonstration, HowVerified::test); }
     }
     requirement def <'FR-25'> PersonaFromFile {
         subject mia : MiaSystem;
-        doc /* MIA behaves roughly as the persona file specifies: she uses the names and pronouns given there correctly, addresses every user as master by default unless the persona file specifies otherwise, and repeats back-story elements in fitting situations; the file is data every user can change and a change applies to all. Measured by a persona suite. */
+        doc /* MIA shall behave roughly as the persona file specifies: she uses the names and pronouns given there correctly
+               and addresses every user as "master" by default unless the persona file specifies otherwise
+               (D-14, D-16) and repeats back-story elements in fitting situations; the file is data that every
+               user can change (FR-5) and a change applies to all. How well she keeps it is measured by a
+               persona suite in Plan. */
         @Trace { :>> baseline = ("ME-1"); :>> verifiedBy = (HowVerified::measurement); }
     }
 
     requirement def <'FR-26'> WorkflowSpecificationAndBenchmark {
         subject mia : MiaSystem;
-        doc /* Every workflow (skill with its pipeline) carries a written specification: inputs and outputs (schemas, units,
-               allowed values, what unknown looks like), measurable acceptance criteria (metric, threshold, repeats, model pin,
-               decision rule, budgets of tokens, time and calls) and a benchmark: labelled test cases with a development part
-               and a held-out part, and a recorded baseline. Stored with the workflow in the library; without them a workflow
-               stays a draft; every harness run records workflow version, model pin and benchmark version, so variants can be
-               verified against the criteria and optimised against each other on the same cases. */
+        doc /* Every workflow (skill with its pipeline) shall carry a written specification that states its inputs and outputs
+               (schemas, units, allowed values, what "unknown" looks like), its measurable acceptance criteria
+               (metric, threshold, number of repeats, model pin, decision rule, budgets of tokens, time and
+               calls), and a benchmark: a set of test cases with labelled truth, a development part for tuning
+               and a held-out part for decisions, and a recorded baseline. The specification and benchmark are
+               stored with the workflow in the library; a workflow without them can only be a draft; every run
+               of the harness records the versions of the workflow, the model pin and the benchmark, so that
+               variants can be verified against the criteria and optimised against each other on the same cases. */
         attribute minRepeatsForSampledModels : Integer = 3;
         @Trace { :>> baseline = ("TK-2", "TK-3", "TK-4", "EV-1"); :>> verifiedBy = (HowVerified::inspection, HowVerified::test, HowVerified::measurement); }
     }
 
     requirement def <'FR-27'> FeedbackAndPoints {
         subject mia : MiaSystem;
-        doc /* Every user can give a plus or a minus on an answer, a reaction or a behaviour; a vote counts in one of four
-               categories (answer quality, reactions, character behaviour, service); MIA keeps a score per category and an
-               overall score over time in the shared database, each vote with user, time and subject. A small fictional story
-               tells what MIA receives for points. The overall score shifts the general mood. Scores compare workflow and
-               behaviour versions over time and never decide a fact: a minus on a factual answer opens a benchmark case. */
+        doc /* Every user can give a plus or a minus on an answer, a reaction or a behaviour of the character. A vote counts in
+               one of four categories (answer quality, reactions, character behaviour, service); a plus adds and
+               a minus subtracts points in that category (the value per vote and the weight per category are
+               settings), and MIA keeps a score per category and an overall score, over time, in the shared
+               database, each vote with its user, time and the thing voted on. A small story tells what MIA
+               receives for the points (for example money or love points; the words are data, purely fictional,
+               shown in the page). The overall score is shown over time and shifts MIA's general mood (FR-23).
+               The scores are used to compare versions of workflows and behaviours over time; they never decide
+               a fact (NFR-4, BF4): a minus on a factual answer opens a case for the benchmark instead of
+               changing what MIA states. */
         attribute categories : Integer = 4;
         @Trace { :>> baseline = ("BF-2", "CT-2"); :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
     }
     requirement def <'FR-28'> TasksAndMemos {
         subject mia : MiaSystem;
-        doc /* Tasks (text, optional due time, status, creator) and memos (text, creator, time) are stored as records in the
-               shared database and recited word for word on request and at the due time, read back by code and never
-               regenerated by the model; every user sees and may change all of them. */
+        doc /* MIA shall store tasks (text, optional due time, status, who created them) and memos (free text, who, when) as
+               records in the shared database, and shall recite them correctly: on request and at the due time
+               the text is read back from the records by code, word for word, never regenerated by the model;
+               every user sees and may change all of them (CON-6). */
         @Trace { :>> baseline = ("ME-1", "ME-2"); :>> verifiedBy = (HowVerified::test, HowVerified::measurement); }
     }
     requirement def <'FR-29'> AdaptationToNegativeFeedback {
         subject mia : MiaSystem;
-        doc /* Each votable behaviour (gesture, expression, reaction, recurring phrase) has an identity and is shown less
-               often after each net negative vote; after at least 5 net negative votes it occurs with a chance of at most
-               1 percent per opportunity; positive votes can bring it back. On a negative vote MIA behaves shocked. The rule
-               applies to style and reactions, never to facts or safety checks; any user can see and reset the counters. */
+        doc /* MIA shall give each behaviour of the character that a user can vote on (a gesture, an expression, a reaction, a
+               recurring phrase or turn of speech) an identity, and shall show a behaviour less often after each
+               net negative vote on it; after at least 5 net negative votes it shall occur with a chance of at
+               most 1 % per opportunity; positive votes can bring it back. On a negative vote MIA behaves
+               shocked (a fitting expression and a short reaction). The rule applies to style and reactions,
+               never to facts or to safety checks (BF4); any user can see and reset the counters (CON-6). */
         attribute negativeVotesToNearlyStop : Integer = 5;
         attribute maxChancePercentAfterThat : Real = 1;
         @Trace { :>> baseline = ("BF-1", "BF-2"); :>> verifiedBy = (HowVerified::test, HowVerified::measurement); }
