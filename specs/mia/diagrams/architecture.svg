@@ -240,22 +240,25 @@
 <!-- voice -->
 <g id="node8" class="node">
 <title>voice</title>
-<polygon fill="#444444" stroke="none" points="337.31,-528 337.31,-550 397.56,-550 397.56,-528 337.31,-528"/>
-<polygon fill="none" stroke="black" points="337.31,-528 337.31,-550 397.56,-550 397.56,-528 337.31,-528"/>
-<text xml:space="preserve" text-anchor="start" x="355.06" y="-536.5" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="10.00" fill="white">voice</text>
-<polygon fill="#b7e1b0" stroke="none" points="337.31,-506 337.31,-528 397.56,-528 397.56,-506 337.31,-506"/>
-<polygon fill="none" stroke="black" points="337.31,-506 337.31,-528 397.56,-528 397.56,-506 337.31,-506"/>
-<text xml:space="preserve" text-anchor="start" x="342.31" y="-513.5" font-family="Helvetica,sans-Serif" font-size="10.00">textFilter</text>
-<polygon fill="#b7e1b0" stroke="none" points="337.31,-484 337.31,-506 397.56,-506 397.56,-484 337.31,-484"/>
-<polygon fill="none" stroke="black" points="337.31,-484 337.31,-506 397.56,-506 397.56,-484 337.31,-484"/>
-<text xml:space="preserve" text-anchor="start" x="342.31" y="-491.5" font-family="Helvetica,sans-Serif" font-size="10.00">synthesizer</text>
-<polygon fill="#b7e1b0" stroke="none" points="337.31,-462 337.31,-484 397.56,-484 397.56,-462 337.31,-462"/>
-<polygon fill="none" stroke="black" points="337.31,-462 337.31,-484 397.56,-484 397.56,-462 337.31,-462"/>
-<text xml:space="preserve" text-anchor="start" x="342.31" y="-469.5" font-family="Helvetica,sans-Serif" font-size="10.00">voiceEffect</text>
-<polygon fill="#b7e1b0" stroke="none" points="337.31,-440 337.31,-462 397.56,-462 397.56,-440 337.31,-440"/>
-<polygon fill="none" stroke="black" points="337.31,-440 337.31,-462 397.56,-462 397.56,-440 337.31,-440"/>
-<text xml:space="preserve" text-anchor="start" x="342.31" y="-447.5" font-family="Helvetica,sans-Serif" font-size="10.00">streamer</text>
-<polygon fill="none" stroke="black" points="336.31,-439 336.31,-551 398.56,-551 398.56,-439 336.31,-439"/>
+<polygon fill="#444444" stroke="none" points="337.31,-539 337.31,-561 397.56,-561 397.56,-539 337.31,-539"/>
+<polygon fill="none" stroke="black" points="337.31,-539 337.31,-561 397.56,-561 397.56,-539 337.31,-539"/>
+<text xml:space="preserve" text-anchor="start" x="355.06" y="-547.5" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="10.00" fill="white">voice</text>
+<polygon fill="#b7e1b0" stroke="none" points="337.31,-517 337.31,-539 397.56,-539 397.56,-517 337.31,-517"/>
+<polygon fill="none" stroke="black" points="337.31,-517 337.31,-539 397.56,-539 397.56,-517 337.31,-517"/>
+<text xml:space="preserve" text-anchor="start" x="342.31" y="-524.5" font-family="Helvetica,sans-Serif" font-size="10.00">textFilter</text>
+<polygon fill="#b7e1b0" stroke="none" points="337.31,-495 337.31,-517 397.56,-517 397.56,-495 337.31,-495"/>
+<polygon fill="none" stroke="black" points="337.31,-495 337.31,-517 397.56,-517 397.56,-495 337.31,-495"/>
+<text xml:space="preserve" text-anchor="start" x="342.31" y="-502.5" font-family="Helvetica,sans-Serif" font-size="10.00">synthesizer</text>
+<polygon fill="#b7e1b0" stroke="none" points="337.31,-473 337.31,-495 397.56,-495 397.56,-473 337.31,-473"/>
+<polygon fill="none" stroke="black" points="337.31,-473 337.31,-495 397.56,-495 397.56,-473 337.31,-473"/>
+<text xml:space="preserve" text-anchor="start" x="342.31" y="-480.5" font-family="Helvetica,sans-Serif" font-size="10.00">voiceEffect</text>
+<polygon fill="#b7e1b0" stroke="none" points="337.31,-451 337.31,-473 397.56,-473 397.56,-451 337.31,-451"/>
+<polygon fill="none" stroke="black" points="337.31,-451 337.31,-473 397.56,-473 397.56,-451 337.31,-451"/>
+<text xml:space="preserve" text-anchor="start" x="342.31" y="-458.5" font-family="Helvetica,sans-Serif" font-size="10.00">streamer</text>
+<polygon fill="#ffe699" stroke="none" points="337.31,-429 337.31,-451 397.56,-451 397.56,-429 337.31,-429"/>
+<polygon fill="none" stroke="black" points="337.31,-429 337.31,-451 397.56,-451 397.56,-429 337.31,-429"/>
+<text xml:space="preserve" text-anchor="start" x="342.31" y="-436.5" font-family="Helvetica,sans-Serif" font-size="10.00">voiceLines</text>
+<polygon fill="none" stroke="black" points="336.31,-428 336.31,-562 398.56,-562 398.56,-428 336.31,-428"/>
 </g>
 <!-- research&#45;&gt;voice -->
 <!-- evaluation -->
@@ -349,7 +352,7 @@
 <text xml:space="preserve" text-anchor="start" x="159.69" y="-107.5" font-family="Helvetica,sans-Serif" font-size="10.00">built (45)</text>
 <polygon fill="#ffe699" stroke="none" points="143.81,-78 143.81,-100 213.06,-100 213.06,-78 143.81,-78"/>
 <polygon fill="none" stroke="black" points="143.81,-78 143.81,-100 213.06,-100 213.06,-78 143.81,-78"/>
-<text xml:space="preserve" text-anchor="start" x="156.69" y="-85.5" font-family="Helvetica,sans-Serif" font-size="10.00">partly (10)</text>
+<text xml:space="preserve" text-anchor="start" x="156.69" y="-85.5" font-family="Helvetica,sans-Serif" font-size="10.00">partly (11)</text>
 <polygon fill="#a9c8ee" stroke="none" points="143.81,-56 143.81,-78 213.06,-78 213.06,-56 143.81,-56"/>
 <polygon fill="none" stroke="black" points="143.81,-56 143.81,-78 213.06,-78 213.06,-56 143.81,-56"/>
 <text xml:space="preserve" text-anchor="start" x="148.81" y="-63.5" font-family="Helvetica,sans-Serif" font-size="10.00">proposed (16)</text>

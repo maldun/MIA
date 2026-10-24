@@ -461,6 +461,10 @@ package MIA_Architecture {
             doc /* Sentence-wise speech during streaming, numbered lines, clean-up. */
             @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("speech_stream.py", "audio_router.py"); }
         }
+        part voiceLines {
+            doc /* Short lines per mood and event (text plus audio file), intro and attention sounds with a chance; chosen at random among several; missing files skipped. */
+            @Implementation { :>> status = ImplementationStatus::partly; :>> modules = ("expressor.py", "expressions.json", "speak.py"); }
+        }
     }
 
     part def Observability {
@@ -797,7 +801,7 @@ package MIA_Requirements {
         doc /* MIA shall make the voice of every answer automatically with an open text-to-speech engine (Kokoro for now,
                replaceable behind one interface), apply a post-processing step that makes it sound anime-like,
                and play it in the user's browser, sentence by sentence, speaking only what is meant to be heard;
-               every user can mute or stop it for themselves. */
+               every user can mute or stop it for themselves. Short fixed lines for moods and events are FR-31. */
         @Trace { :>> baseline = ("VO-1", "VO-2", "VO-3", "VO-4", "CT-7");
                  :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
     }
@@ -1066,7 +1070,7 @@ package MIA_Requirements {
                user who logs in, reporting an error and being offline, and the character shall show the
                expression and gesture that an editable mood map assigns to that mood; an unknown mood falls back
                to neutral, and the mood changes with events and settles back over time. The overall feedback
-               score (FR-27) shifts the general mood. */
+               score (FR-27) shifts the general mood. A voice line (FR-31) may accompany the mood. */
         @Trace { :>> baseline = ("CT-2", "EM-1", "EM-2"); :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
     }
     requirement def <'FR-24'> CharacterExchange {
@@ -1094,10 +1098,12 @@ package MIA_Requirements {
                (metric, threshold, number of repeats, model pin, decision rule, budgets of tokens, time and
                calls), a context graph (FR-30), and a benchmark: a set of test cases with labelled truth, a
                development part for tuning and a held-out part for decisions, and a recorded baseline. The
-               specification and benchmark are stored with the workflow in the library; a workflow without them
-               can only be a draft; every run of the harness records the versions of the workflow, the model pin
-               and the benchmark, so that variants can be verified against the criteria and optimised against
-               each other on the same cases. */
+               specification is stored with the workflow in the library; the cases, suites and baselines of the
+               benchmark are files in eval/ (protected, in git), referenced by suite id and version, and run
+               results are stored in the database; a workflow without a specification and a benchmark can only
+               be a draft; every run of the harness records the versions of the workflow, the model pin and the
+               benchmark, so that variants can be verified against the criteria and optimised against each other
+               on the same cases. */
         attribute minRepeatsForSampledModels : Integer = 3;
         @Trace { :>> baseline = ("TK-2", "TK-3", "TK-4", "EV-1"); :>> verifiedBy = (HowVerified::inspection, HowVerified::test, HowVerified::measurement); }
     }
@@ -1151,6 +1157,20 @@ package MIA_Requirements {
         @Trace { :>> baseline = ("TK-5", "LG-3"); :>> verifiedBy = (HowVerified::inspection, HowVerified::demonstration); }
     }
 
+    requirement def <'FR-31'> VoiceLines {
+        subject mia : MiaSystem;
+        doc /* MIA shall speak short voice lines for moods and events: a greeting when a user opens the page or logs in, a line
+               per mood or expression (for example yes, no, annoyed, surprised), an attention call such as "Hey,
+               listen!" before she speaks on her own initiative (a task coming due, the hourly time check) with
+               a chance that is a setting, and a shocked line on a negative vote (FR-29). A line is data, a text
+               with an audio file, made with the TTS and the voice effect (FR-3) or supplied as a recording;
+               every user can add, replace or remove lines (FR-5); the line is chosen by mood and event, at
+               random among several; a mood without a line stays silent and a missing file is skipped without an
+               error and logged. */
+        attribute attentionChance : Real = 0.3;
+        @Trace { :>> baseline = ("VO-3", "CT-7", "EM-1"); :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
+    }
+
     // ================================================================ the requirement tree
 
     /* Usages, so that satisfy and verify can refer to them. Constraints first, then the high-level requirements. */
@@ -1198,6 +1218,7 @@ package MIA_Requirements {
     requirement fr28 : TasksAndMemos;
     requirement fr29 : AdaptationToNegativeFeedback;
     requirement fr30 : WorkflowContextGraph;
+    requirement fr31 : VoiceLines;
     requirement nfr7 : EfficientOnGivenHardware;
     requirement nfr8 : SharedStateInDatabase;
 }
@@ -1252,6 +1273,7 @@ package MIA_Allocation {
     satisfy fr28 by mia;
     satisfy fr29 by mia;
     satisfy fr30 by mia;
+    satisfy fr31 by mia;
     satisfy nfr7 by mia;
     satisfy nfr8 by mia;
 
@@ -1386,6 +1408,10 @@ package MIA_Allocation {
     allocate fr30 to mia.taskRuntime.workflowGraph;
     allocate fr30 to mia.graphApp.graphView;
     allocate fr30 to mia.graphApp.nodeEditor;
+    allocate fr31 to mia.voice.voiceLines;
+    allocate fr31 to mia.conversation.expressor;
+    allocate fr31 to mia.conversation.scheduleReminders;
+    allocate fr31 to mia.frontEnd.audioPlayer;
     allocate fr22 to mia.graphApp.graphView;
     allocate fr22 to mia.graphApp.nodeEditor;
     allocate fr22 to mia.graphApp.versionStore;
