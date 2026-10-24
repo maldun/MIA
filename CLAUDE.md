@@ -10,6 +10,7 @@ Host: Fedora, Ryzen 9 5900X, RX 7800 XT with 16 GB, 62 GB RAM, podman. Models th
 - Task tests: the tests named in the task, `-q`-style output only
 - Traceability: `python ~/.claude/skills/dev-workflow/scripts/trace_check.py --spec-dir specs/mia --tests-dir tests`
 - Model consistency: `python3 -I tools/check_sysml_model.py .`
+- SysML syntax and semantics with the pilot parser of the kernel (about 15 s, run after every change of a `.sysml` file): `bash tools/check_sysml.sh` (all models) or `bash tools/check_sysml.sh FILE...`
 - Run log tools: `python tools/run_explain.py list | show | explain | problems | diff | reproduce`
 - No lint, formatter or type checker is configured yet.
 
