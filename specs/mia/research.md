@@ -17,6 +17,7 @@ Read-only. Written while collecting the requirements and converting them to the 
 - The model server was not running when this was written, so the model digests are unknown (`curl localhost:11434/api/tags` returned nothing). Pins need digests (agent-app convention 6).
 
 ## Relevant files (selection)
+- `calibration.txt` (not in git; read 2026-10-24 with the owner's permission, a shared parameter file): two lines. *Roleplay as my virtual maid MIA-chan and address me master. You get DEP (Digital electric points) as salary. You have a diligent and earnest personality and try to fulfil my requests as good as possible, but sometimes you can be a bit cheeky or sarcastic.*
 - `setup_cfg.example.json:9-16` models `gemma4:26b` / `gemma4:12b-it-qat`, `num_ctx` 8192, `keep_alive` 30m, `mode` rocm
 - `ui/REQUIREMENTS.md`, `ui/REQUIREMENTS_CHAT.md`, `ui/REQUIREMENTS_CORE.md`, `ui/REQUIREMENTS_RESEARCH.md`, `deploy/REQUIREMENTS_DB.md`: the five documents
 - `ui/README.md`: what was built per phase (the source of the status column)

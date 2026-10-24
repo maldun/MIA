@@ -1107,10 +1107,12 @@ package MIA_Requirements {
         subject mia : MiaSystem;
         doc /* MIA shall behave roughly as the persona file specifies: she uses the names and pronouns given there correctly
                and addresses every user as "master" by default unless the persona file specifies otherwise
-               (D-14, D-16) and repeats back-story elements in fitting situations; calibration.txt is one shared
-               parameter file for all users and the baseline of the persona (D-22, D-35); every user can change
-               it (FR-5) and a change applies to all (D-22). How well she keeps it is measured by a persona
-               suite in Plan. */
+               (D-14, D-16) and repeats back-story elements in fitting situations (the file today names the role
+               of a virtual maid, MIA-chan, the form of address master, a salary in DEP and a diligent, earnest
+               personality that is sometimes cheeky or sarcastic; it has no further back story); calibration.txt
+               is one shared parameter file for all users and the baseline of the persona (D-22, D-35); every
+               user can change it (FR-5) and a change applies to all (D-22). How well she keeps it is measured
+               by a persona suite in Plan. */
         @Trace { :>> baseline = ("ME-1"); :>> verifiedBy = (HowVerified::measurement); }
     }
 
@@ -1138,12 +1140,13 @@ package MIA_Requirements {
                a minus subtracts points in that category (the value per vote and the weight per category are
                settings), and MIA keeps a score per category and an overall score, over time, in the shared
                database, each vote with its user, time and the thing voted on. A small story tells what MIA
-               receives for the points (for example money or love points; the words are data, purely fictional,
-               shown in the page). The overall score is shown over time and shifts MIA's general mood (FR-23);
-               the interval over which the score is judged (one week at first) is a setting that may be changed
-               (D-23). The scores are used to compare versions of workflows and behaviours over time; they never
-               decide a fact (NFR-4, BF4): a minus on a factual answer opens a case for the benchmark instead of
-               changing what MIA states. */
+               receives for the points: the currency is named in the parameter file of FR-25 (today DEP, Digital
+               Electric Points, her salary); the words are data, purely fictional, shown in the page. The
+               overall score is shown over time and shifts MIA's general mood (FR-23); the interval over which
+               the score is judged (one week at first) is a setting that may be changed (D-23). The scores are
+               used to compare versions of workflows and behaviours over time; they never decide a fact (NFR-4,
+               BF4): a minus on a factual answer opens a case for the benchmark instead of changing what MIA
+               states. */
         attribute categories : Integer = 4;
         @Trace { :>> baseline = ("BF-2", "CT-2"); :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
     }
