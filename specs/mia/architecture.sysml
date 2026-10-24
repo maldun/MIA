@@ -863,14 +863,18 @@ package MIA_Requirements {
                (draft, tested, trusted, retired); every edit by a user is a new immutable version with author
                and time and applies to all (D-10); an entry proposed by a model stays a draft until a user
                approves it, shown as a diff and tried on the test set. The workflow model is a directed acyclic
-               graph: nodes are tasks, edges are data dependencies. MIA shall check by an algorithm, when a
+               graph of two kinds of nodes, in the manner of P-graphs: process nodes (tasks) and data nodes (an
+               artifact such as a claim, a page or a result). An edge leads from a data node to the process that
+               reads it, or from a process to the data node that it writes; two data nodes are never adjacent; a
+               data node that no process writes is an input of the workflow; a data node can be read by several
+               processes, so the same input appears once in the model. MIA shall check by an algorithm, when a
                workflow is saved and before it runs, that it has no cycle, and shall name a cycle that it finds.
                A debate, a vote or another multi-agent task is a process inside one node of kind session: the
                node holds the configuration of the master that supervises the task, with its stopping criteria
                (a maximum number of cycles, a maximum time, or both; the first one reached ends it), and the
                definition of the multi-agent task itself. A session node without a stopping criterion is
                refused. The cycles inside a node are recorded as events (the field round) and are not part of
-               the workflow graph (amendment 2, D-42). */
+               the workflow graph (amendments 2 and 3, D-42, D-43). */
         @Trace { :>> baseline = ("TK-3", "TK-4", "TK-5", "TK-10");
                  :>> verifiedBy = (HowVerified::test, HowVerified::inspection); }
     }
@@ -1082,9 +1086,9 @@ package MIA_Requirements {
         doc /* MIA shall provide a graph app, a web page in the same stack as the chat (plain HTML and JavaScript, a vendored
                graph library, no build step), that shows workflow graphs as nodes and edges and lets any
                logged-in user edit each node and edge directly as a JSON dictionary (text data only). It reads
-               and writes the shared database, checks the graph rules (node identity, no cycle, a stopping
-               criterion on every session node) before saving, saves every edit as a new version, and shows the
-               version history and a diff. */
+               and writes the shared database, checks the graph rules (node identity, no two data nodes
+               adjacent, no cycle, a stopping criterion on every session node) before saving, saves every edit
+               as a new version, and shows the version history and a diff. */
         @Trace { :>> baseline = ("TK-5", "TK-10"); :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
     }
 
@@ -1222,8 +1226,8 @@ package MIA_Requirements {
 
     requirement def <'FR-33'> WorkflowSchedule {
         subject mia : MiaSystem;
-        doc /* MIA shall compute from the graph of a workflow and the measured costs of its nodes (seconds, calls and tokens
-               from the run log; for a session node its stopping criteria times the cost of one cycle) a
+        doc /* MIA shall compute from the graph of a workflow and the measured costs of its process nodes (seconds, calls and
+               tokens from the run log; for a session node its stopping criteria times the cost of one cycle) a
                schedule before the run: the order, the steps that can overlap, the critical path, and an
                estimate of time, calls and tokens; she shows the estimate and refuses to start a run whose
                estimate exceeds its budget (FR-26). */
