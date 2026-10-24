@@ -1,0 +1,52 @@
+{
+ "id": "code.gate_check_line",
+ "version": 1,
+ "kind": "code",
+ "title": "Line of the number check",
+ "description": "The line 'Number check: <status> - <detail>' as a value of its own, or a note that the check did not apply.",
+ "tags": [
+  "verify",
+  "gate",
+  "exact"
+ ],
+ "applies_to": {
+  "tasks": [
+   "research"
+  ]
+ },
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "check"
+   ],
+   "properties": {
+    "check": {
+     "type": "object"
+    }
+   }
+  }
+ },
+ "outputs": {
+  "schema": {
+   "type": "object"
+  }
+ },
+ "params": {},
+ "body": {
+  "function": "gate_check_line",
+  "plain": "writing the check line"
+ },
+ "cost": {
+  "seconds": 0.01
+ },
+ "safety": {
+  "reads_web": false,
+  "runs_code": false
+ },
+ "status": "draft",
+ "origin": {
+  "by": "manual",
+  "note": "number gate (specs/number-gate, T-08); unit tested in tests/test_number_gate.py"
+ }
+}

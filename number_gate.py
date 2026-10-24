@@ -5,7 +5,8 @@ not depend on a model are made here, in plain functions:
   gate_prepare(given)        the route of a claim and the evidence cut to EVIDENCE_LIMIT characters: "abstain" (a number and no evidence: REQ-GATE-006), "single" (no
                              number: as the current release, REQ-GATE-004, or style single) or "cops" (the default for a claim with a number)
   run_number_check(c, e)     checks.number_check, logged as a check_run event when it ran (REQ-GATE-001)
-  gate_evidence(plan, check) the evidence the judgement steps see: the line of the check result first, then the evidence (REQ-GATE-002, -003)
+  gate_evidence(plan, check) the evidence the judgement steps see: the line of the check result first, then the evidence (REQ-GATE-002, -003); used by verify.number_gate@1
+                             and by the style single; gate_check_line gives the line alone, for the prompts of verify.number_gate@2 that keep it outside the evidence
   gate_record(...)           the result record of IF-003 from the tally of the judgement style
   gate_abstain(plan)         the same record when nobody was asked
 """
@@ -37,7 +38,12 @@ def gate_prepare(given):
         route = "abstain"
     else:
         route = style
-    return {"route": route, "numbered": numbered, "evidence": evidence[:EVIDENCE_LIMIT], "started": time.monotonic()}
+    return {"route": route, "numbered": numbered, "evidence": defang(evidence)[:EVIDENCE_LIMIT], "started": time.monotonic()}
+
+
+def defang(evidence):
+    """the prompts of verify.number_gate@2 quote the evidence between <<<EVIDENCE and EVIDENCE>>>; the evidence must not be able to close that block itself (THR-001)"""
+    return evidence.replace("<<<", "<<").replace(">>>", ">>")
 
 
 def run_number_check(claim, evidence):
@@ -55,6 +61,11 @@ def check_line(check):
     if check["status"] == checks.FAIL:
         line += ". Code found a contradiction between the claim and the evidence."
     return line
+
+
+def gate_check_line(check):
+    """the line of the check result as a value of its own, outside the evidence block (verify.number_gate@2)"""
+    return check_line(check) or "not run (the claim has no number to compare)"
 
 
 def gate_evidence(plan, check):
@@ -76,4 +87,4 @@ def gate_abstain(plan):
     return _record(plan, tally, checks.NOT_APPLICABLE)
 
 
-FUNCTIONS = {"gate_prepare": gate_prepare, "run_number_check": run_number_check, "gate_evidence": gate_evidence, "gate_record": gate_record, "gate_abstain": gate_abstain}
+FUNCTIONS = {"gate_prepare": gate_prepare, "run_number_check": run_number_check, "gate_check_line": gate_check_line, "gate_evidence": gate_evidence, "gate_record": gate_record, "gate_abstain": gate_abstain}
