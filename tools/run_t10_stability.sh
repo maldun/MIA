@@ -28,6 +28,11 @@ PY
 for style in single gate cops; do
   case $style in single) pipeline=verify.single@1;; cops) pipeline=verify.cops@1;; gate) pipeline=$GATE;; esac
   for suite in verdicts_vitaminc verdicts_wikidata; do
+    # resumable: a run is saved only when it is complete, so a saved file means "done"; stop the script at any time and start it again
+    if ls data/eval/"$suite"__t10-"$style"__*.jsonl >/dev/null 2>&1; then
+      echo; echo "--- $style, $suite: already done ($(ls data/eval/"$suite"__t10-"$style"__*.jsonl | head -1)), skipped"
+      continue
+    fi
     echo; echo "--- $style ($pipeline), $suite, 3 repeats"
     start=$(date +%s)
     "$PY" tools/eval.py run "$suite" --variant "t10-$style" --pipeline "$pipeline" --model "$MODEL" --pin MP-light --repeats 3 --quiet \
