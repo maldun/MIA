@@ -102,6 +102,16 @@ class RoutesOfVariant2(Routes):
         self.assertNotIn("<<<EVIDENCE", model.prompts[0])
 
 
+class RoutesOfVariant3(RoutesOfVariant2):
+    """T-09 S2: the same wiring with the judge that judges against the evidence (the change is in the system prompt of view.judge@3)"""
+    PIPELINE = "verify.number_gate@3"
+
+
+class RoutesOfVariant4(RoutesOfVariant2):
+    """T-09 S3: S1 plus the explanation of the check line in the system prompt of view.judge@4 (S2 was dropped: no effect on the dev sample)"""
+    PIPELINE = "verify.number_gate@4"
+
+
 class Functions(unittest.TestCase):
     def test_evidence_is_cut_to_the_limit_and_the_line_comes_first(self):
         plan = G.gate_prepare({"claim": TOWER, "evidence": "x" * 9000})
