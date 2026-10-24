@@ -1,6 +1,6 @@
 """
 Acceptance tests of the verification gate (specs/number-gate/requirements.md: REQ-GATE-001 to REQ-GATE-005, IF-003), written before the code (Plan, step 4).
-The gate is the library pipeline verify.number_gate@1 under the skill verify_claim: inputs claim, evidence and optionally style ("cops" by default or "single");
+The gate is the library pipeline verify.number_gate@4 under the skill verify_claim: inputs claim, evidence and optionally style ("cops" by default or "single");
 the answer is {"verdict": supported | refuted | unclear, "status": pass | fail | inconclusive, "calls": int, "seconds": float, "facts": [...], ...} (IF-003).
 The number check is the code of checks.number_check, so the "fake" number check of the requirements is a claim and an evidence text that the real check decides.
 Protected after the Plan gate. Run with: python tests/acceptance/test_number_gate.py

@@ -1,7 +1,7 @@
 """
 Smoke tests of the number gate on the target environment (specs/number-gate/test-spec.md: SMOKE-GATE-001, SMOKE-GATE-002), run in Phase 6.
 
-SMOKE-GATE-001: the 5 cases tagged `smoke` (3 from verdicts_wikidata dev, 2 from verdicts_vitaminc dev, chosen by the owner at T-06) run through verify.number_gate@1 on the
+SMOKE-GATE-001: the 5 cases tagged `smoke` (3 from verdicts_wikidata dev, 2 from verdicts_vitaminc dev, chosen by the owner at T-06) run through verify.number_gate@4 on the
 real server with the pin MP-light. Expected: the Wikidata cases (a number, no evidence) answer unclear (REQ-GATE-006); the VitaminC cases give the verdict that the dev
 baselines gave in every run and style (a true claim passes, a false claim fails). Until a release run exists, that baseline is the "release run".
 SMOKE-GATE-002: the run header names the digest of the model that the server really holds (REQ-EVAL-001): the digest in the header equals the digest of /api/tags.
@@ -36,7 +36,7 @@ def server_digest(url, name=MODEL):
 
 def run_smoke_cases(suite, results):
     """the cases tagged smoke of a suite through the gate; returns (header, records) of the saved run"""
-    command = [sys.executable, os.path.join(REPO, "tools", "eval.py"), "run", suite, "--tag", "smoke", "--variant", "smoke-gate", "--pipeline", "verify.number_gate@1",
+    command = [sys.executable, os.path.join(REPO, "tools", "eval.py"), "run", suite, "--tag", "smoke", "--variant", "smoke-gate", "--pipeline", "verify.number_gate@4",
                "--model", MODEL, "--pin", "MP-light", "--results", results, "--quiet"]
     done = subprocess.run(command, capture_output=True, text=True, timeout=900)
     saved = sorted(glob.glob(os.path.join(results, "%s__smoke-gate__*.jsonl" % suite)))

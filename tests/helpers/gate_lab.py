@@ -18,7 +18,7 @@ from core import Core                                   # noqa: E402
 from library import Library                             # noqa: E402
 from pipeline import PipelineError                      # noqa: E402
 
-GATE = "verify.number_gate@1"
+GATE = "verify.number_gate@4"
 
 
 class Scripted:
