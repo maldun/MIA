@@ -253,6 +253,10 @@ package MIA_Architecture {
             doc /* Target: accounts created by the owner, passwords as salted slow hashes, sessions, login throttling, password change. */
             @Implementation { :>> status = ImplementationStatus::proposed; }
         }
+        part variantStore {
+            doc /* Target: character variants as data (shown or hidden parts, colours), stored like presets; a workflow names one, the chat has the default. */
+            @Implementation { :>> status = ImplementationStatus::proposed; :>> modules = ("preset_store.py", "presets_api.py"); }
+        }
     }
 
     part def GraphApp {
@@ -781,7 +785,8 @@ package MIA_Requirements {
                that survives reload and is shown live on every connected device, every message attributed to the
                user who sent it, and one shared MIA answering all of them (D-4). The visible history is kept
                apart from MIA's memory, is bounded in size and can be deleted by a user after a confirmation;
-               the page shows the connection state, reconnects by itself and keeps unsent drafts. */
+               the page shows the connection state, reconnects by itself and keeps unsent drafts. Users can have
+               the last answer regenerated and any answer spoken again (D-28). */
         attribute queuedMessages : Integer = 1;
         attribute messagesPerMinute : Integer = 10;
         @Trace { :>> baseline = ("CT-1", "CT-2", "CT-3", "CT-4", "CT-5", "CT-6", "CT-8", "CT-9", "CT-11");
@@ -911,7 +916,9 @@ package MIA_Requirements {
     requirement def <'FR-10'> Lookup {
         subject mia : MiaSystem;
         doc /* MIA shall answer a factual question with the sources and verbatim quotes that support it, prefer a trusted
-               source to a model judgement, and say "unknown" when nothing supports an answer. */
+               source to a model judgement, and say "unknown" when nothing supports an answer. A search command
+               calls the SearXNG metasearch and lists the findings (title, address, short text) without
+               composing or verifying an answer (D-28). */
         @Trace { :>> baseline = ("RS-1", "RS-6");
                  :>> verifiedBy = (HowVerified::measurement); }
     }
@@ -1185,6 +1192,16 @@ package MIA_Requirements {
         @Trace { :>> baseline = ("VO-3", "CT-7", "EM-1"); :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
     }
 
+    requirement def <'FR-32'> CharacterVariantPerWorkflow {
+        subject mia : MiaSystem;
+        doc /* Every workflow can name a character variant, a choice of shown or hidden parts and colours of the character (for
+               example another outfit), which the character wears while the workflow runs and which the chat
+               shows as a small label; a workflow without a variant uses the variant of the chat. Variants are
+               data that every user can create, change and select in the character editor, and a change applies
+               to all. */
+        @Trace { :>> baseline = ("CH-11", "TK-8"); :>> verifiedBy = (HowVerified::demonstration, HowVerified::test); }
+    }
+
     // ================================================================ the requirement tree
 
     /* Usages, so that satisfy and verify can refer to them. Constraints first, then the high-level requirements. */
@@ -1233,6 +1250,7 @@ package MIA_Requirements {
     requirement fr29 : AdaptationToNegativeFeedback;
     requirement fr30 : WorkflowContextGraph;
     requirement fr31 : VoiceLines;
+    requirement fr32 : CharacterVariantPerWorkflow;
     requirement nfr7 : EfficientOnGivenHardware;
     requirement nfr8 : SharedStateInDatabase;
 }
@@ -1288,6 +1306,7 @@ package MIA_Allocation {
     satisfy fr29 by mia;
     satisfy fr30 by mia;
     satisfy fr31 by mia;
+    satisfy fr32 by mia;
     satisfy nfr7 by mia;
     satisfy nfr8 by mia;
 
@@ -1422,6 +1441,10 @@ package MIA_Allocation {
     allocate fr30 to mia.taskRuntime.workflowGraph;
     allocate fr30 to mia.graphApp.graphView;
     allocate fr30 to mia.graphApp.nodeEditor;
+    allocate fr32 to mia.webApp.variantStore;
+    allocate fr32 to mia.frontEnd.characterRenderer;
+    allocate fr32 to mia.frontEnd.expressionEditor;
+    allocate fr32 to mia.taskRuntime.skillStore;
     allocate fr31 to mia.voice.voiceLines;
     allocate fr31 to mia.conversation.expressor;
     allocate fr31 to mia.conversation.scheduleReminders;

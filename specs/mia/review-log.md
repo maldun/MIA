@@ -160,3 +160,10 @@ Method (`tools/sweep_baseline.py`, reproducible): for each of the 90 baseline ro
 | Id | Decision | Edit |
 |---|---|---|
 | D-26 | If the game samples (`Navi_*.wav`) do not exist, **create the default lines with the TTS** ("Hello!", "Hey!", "Listen!" as the file names suggest, plus one per mood); this mitigates the licensing risk. | FR-31, risk table |
+
+### Decisions of 2026-10-24 after the sweep, and step 6 (acceptance criteria)
+| Id | Decision | Edit |
+|---|---|---|
+| D-27 | **Storytelling is just another skill**, noted as a future skill. **The second skill is the lookup** (the one that exists today), added through the path of FR-20 within one month of the literature review. **A character variant per workflow**; a workflow without one uses the chat's. New **FR-32**. The sweep is confirmed. | scope (future features), AC-9, FR-32 |
+| D-28 | **Chat extras**: only **regenerate** and **speak again** are built in the first version (FR-1); export, search within the conversation, accent presets and German texts are noted as future features. **`/search` calls SearXNG and lists the findings** (FR-10), as today. | FR-1, FR-10, scope |
+| – | **Step 6**: section 6 rebuilt as one table of 26 criteria (AC-1 to AC-26), each with the requirements it covers, the way it is checked and a state (*confirmed* for the owner's own criteria, *proposed* for the others). New criteria: AC-14 accounts, AC-15 database and shared changes, AC-16 graph app, AC-17 character and variants, AC-18 feedback, AC-19 performance with chat priority, AC-20 constraints, AC-21 transparency, AC-22 small-model strategies and learning, AC-23 model management and search, AC-24 memory (later), AC-25 behaviour rules, AC-26 method transfer (optional). The checker now fails when a requirement is covered by no criterion. | HLS section 6, checker |

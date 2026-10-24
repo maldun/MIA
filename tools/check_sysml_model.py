@@ -127,6 +127,21 @@ for rid in sorted(defs):
     if m and norm(m.group(1)) != hls_text.get(rid):
         problems.append(f"{rid}: the doc in architecture.sysml differs from the HLS sentence")
 
+# 7. every requirement is covered by at least one acceptance criterion of section 6 of the HLS
+covered = set()
+ac_rows = 0
+for line in hls.split("\n"):
+    m = re.match(r"^\| (AC-\d+) \| .*? \| ([A-Z, 0-9-]+) \| [^|]* \| [^|]* \|\s*$", line)
+    if m:
+        ac_rows += 1
+        covered |= {x.strip() for x in m.group(2).split(",") if x.strip()}
+print("acceptance criteria:", ac_rows)
+for rid in sorted(ids_hls):
+    if rid not in covered:
+        problems.append(f"{rid}: not covered by any acceptance criterion")
+for rid in sorted(covered - ids_hls):
+    problems.append(f"acceptance criteria cite unknown requirement {rid}")
+
 print("PROBLEMS:" if problems else "OK")
 for p in problems:
     print(" -", p)
