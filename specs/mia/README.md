@@ -17,3 +17,15 @@ Checks (from the repository root):
 - `python3 -I ~/.claude/skills/agent-app/scripts/agent_check.py --spec-dir specs/mia --eval-dir eval` 20 errors that are the Plan-phase placeholders (per-step second budgets, threat ids) and the warning that no suite has a holdout split.
 
 History: the first draft (27 requirements `HLR-01..27`, 6 SysML files) lived in `docs/fresh-start/`; the mapping is in section 3.5 of the HLS.
+
+## Viewing and validating the model (SysML v2)
+The reference tool is the OMG pilot implementation (`Systems-Modeling/SysML-v2-Pilot-Implementation`, release `2026-09`, asset `jupyter-sysml-kernel-0.63.0.zip`, 126 MB, contains a Java jar and the standard library). It runs as a Jupyter kernel; `%viz` draws diagrams with Graphviz. Needs Java and `dot` (both installed on the development host). Steps, read from the release's own `install.py` (not run by the coding agent; run them yourself):
+
+```
+python3 -m venv ~/venvs/sysml && ~/venvs/sysml/bin/pip install jupyterlab
+unzip jupyter-sysml-kernel-0.63.0.zip -d ~/sysml-kernel
+~/venvs/sysml/bin/python ~/sysml-kernel/install.py --sys-prefix --graphviz-path /usr/bin/dot
+~/venvs/sysml/bin/jupyter lab        # new notebook, kernel "SysML"
+```
+
+In a notebook cell, paste or load the six files (all packages must be known to the kernel), then for example `%viz --view=tree MIA_Architecture::MiaSystem`. A parse error in a cell is the real syntax check that `KNOWN_RISKS.md` is waiting for. The kernel's `%help` lists the magic commands. The matching JupyterLab extension (`jupyterlab-sysml-0.63.0.tgz`, syntax highlighting) is an optional second asset of the same release.
