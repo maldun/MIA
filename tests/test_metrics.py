@@ -170,5 +170,25 @@ class CompareTests(unittest.TestCase):
         self.assertEqual((c["only_a"], c["only_b"], c["p_value"]), ([], [], 1.0))
 
 
+class StabilityWithFactsTests(unittest.TestCase):
+    """edges of the stability metric beyond the acceptance tests (REQ-STAB-001, REQ-STAB-002)"""
+
+    def test_records_without_facts_compare_by_status_only(self):
+        records = [{"case": "a", "repeat": 0, "status": "pass"}, {"case": "a", "repeat": 1, "status": "pass"},
+                   {"case": "b", "repeat": 0, "status": "pass"}, {"case": "b", "repeat": 1, "status": "fail"}]
+        self.assertEqual(M.stability_report(records)["unstable"], ["b"])
+
+    def test_inconclusive_and_none_are_the_same_status(self):
+        self.assertTrue(M.case_is_stable([{"status": "inconclusive", "facts": []}, {"status": "none", "facts": []}]))
+
+    def test_a_repeated_fact_counts_twice(self):
+        fact = {"entity": "A", "number": 1, "unit": "m", "quote": "q"}
+        self.assertFalse(M.same_facts([fact], [fact, fact]))
+
+    def test_no_case_with_repeats_gives_an_empty_report(self):
+        report = M.stability_report([{"case": "a", "repeat": 0, "status": "pass", "facts": []}])
+        self.assertEqual((report["n"], report["unstable"]), (0, []))
+
+
 if __name__ == "__main__":
     unittest.main()

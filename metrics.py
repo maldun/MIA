@@ -8,7 +8,9 @@ The numbers of the evaluation (ui/REQUIREMENTS_CORE.md 9, EL3 to EL5), without a
 stays `open`). The metrics for verifiers follow the questions of the research notes: how often is a pass wrong (false pass), how often a fail (false fail), how much is decided at all
 (coverage), and how sure can one be with so few cases (Wilson intervals; with 30 cases the intervals are wide, and that is part of the result).
 """
+import hashlib
 import math
+import unicodedata
 from collections import defaultdict
 
 OPEN = "open"
@@ -212,23 +214,50 @@ def compare(records_a, records_b):
             "p_value": sign_test(len(only_a), len(only_b)), "missing_in_a": sorted(set(b) - set(a)), "missing_in_b": sorted(set(a) - set(b))}
 
 
-# --- stability of repeats (Plan iteration 1, specs/number-gate; STUBS until the tasks of plan.md) ------------------------------------------------
+# --- stability of repeats with facts (Plan iteration 1, specs/number-gate: REQ-STAB-001, REQ-STAB-002, IF-004) ------------------------------------
+
+def _plain(text):
+    """lower case, no diacritics, single spaces: the form in which two facts are compared"""
+    decomposed = unicodedata.normalize("NFKD", str(text))
+    return " ".join("".join(c for c in decomposed if not unicodedata.combining(c)).casefold().split())
+
+
+def _number(value):
+    """the number of a fact as a float ('1,200' and 1200 are the same); text that is no number stays text"""
+    try:
+        return float(str(value).replace(",", "").replace(" ", ""))
+    except ValueError:
+        return _plain(value)
+
+
+def _fact_key(fact):
+    quote = hashlib.sha1(_plain(fact.get("quote", "")).encode("utf8")).hexdigest()
+    return (_plain(fact.get("entity", "")), _number(fact.get("number", "")), _plain(fact.get("unit", "")), quote)
+
 
 def same_facts(facts_a, facts_b):
-    """STUB (REQ-STAB-001): True when both lists hold the same facts; a fact is {"entity", "number", "unit", "quote"}, compared by normalised parts, order and wording ignored."""
-    return None
+    """True when both lists hold the same facts; a fact is {"entity", "number", "unit", "quote"}, compared by normalised parts; order and the wording of the answer are ignored"""
+    return sorted(map(_fact_key, facts_a), key=repr) == sorted(map(_fact_key, facts_b), key=repr)
 
 
 def case_is_stable(repeats):
-    """STUB (REQ-STAB-001): True when all repeats of a case ({"status", "facts", ...}) have the same status and the same facts."""
-    return False
+    """True when all repeats of a case ({"status", "facts", ...}) have the same status and the same facts"""
+    first = repeats[0]
+    return all(normalize_status(r["status"]) == normalize_status(first["status"]) and same_facts(r.get("facts", []), first.get("facts", [])) for r in repeats[1:])
 
 
 def repeat_lists(records):
-    """STUB (IF-004): {case id: [{"status", "facts"}, ...]} for the cases with at least two repeats."""
-    return {}
+    """{case id: [{"status", "facts"}, ...]} for the cases with at least two repeats"""
+    grouped = defaultdict(list)
+    for r in records:
+        grouped[r["case"]].append({"status": r["status"], "facts": r.get("facts", [])})
+    return {case: repeats for case, repeats in grouped.items() if len(repeats) > 1}
 
 
 def stability_report(records):
-    """STUB (REQ-STAB-002): {"n": cases with repeats, "share": share of stable cases, "low", "high": Wilson 95 % interval, "unstable": [case ids]}."""
-    return {"n": 0, "share": 0.0, "low": 0.0, "high": 0.0, "unstable": []}
+    """{"n": cases with repeats, "share": share of stable cases, "low", "high": Wilson 95 % interval, "unstable": [case ids]}"""
+    lists = repeat_lists(records)
+    unstable = sorted(case for case, repeats in lists.items() if not case_is_stable(repeats))
+    stable = len(lists) - len(unstable)
+    low, high = wilson(stable, len(lists))
+    return {"n": len(lists), "share": stable / len(lists) if lists else 0.0, "low": low, "high": high, "unstable": unstable}

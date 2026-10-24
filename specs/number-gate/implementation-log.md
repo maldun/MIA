@@ -16,3 +16,9 @@ Plan baseline: tag `plan-baseline-it1`. My test runs are feedback, not verificat
   - If the evidence has several values of the claimed dimension (300 m and 20 m), any agreeing value gives pass: a claim "20 m tall" would pass against the tower sentence. This is a possible false pass; measure it on the dev sample before deciding whether to tighten it (nouns of the first window).
   - Arithmetic claims (sum of albums and singles) are out of scope of the check.
 - Commit: see git log (`feat: number check (T-01)`).
+
+## T-02 Stability metric with facts – done 2026-10-24
+- Implements: REQ-STAB-001, REQ-STAB-002, IF-004 (`metrics.same_facts`, `case_is_stable`, `repeat_lists`, `stability_report`; `metrics.stability` unchanged)
+- Tests reported green: `tests/acceptance/test_stability.py` 5 of 5 (incl. the regression TC-STAB-003 and the 1000-seed property test); TC-IF-004 in `test_contracts.py`; `tests/test_metrics.py` 22 (4 new); all other touched modules unchanged
+- Decisions: a fact key is (entity without case and diacritics, number as float, unit, SHA-1 of the normalised quote); facts compare as a multiset, so a repeated fact counts twice; records without a `facts` field compare by status alone, so old runs still work; `inconclusive` and `none` are one status.
+- Still red in `test_contracts.py`: TC-IF-005 (T-03).
