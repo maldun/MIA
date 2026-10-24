@@ -1,5 +1,5 @@
 """
-The evaluation harness (ui/REQUIREMENTS_CORE.md 9, L2 to L5): runs a *suite* of cases against a target (the hard checks, a pipeline of the library), records what happened and how much it cost, and
+The evaluation harness (ui/REQUIREMENTS_CORE.md 9, EL2 to EL5): runs a *suite* of cases against a target (the hard checks, a pipeline of the library), records what happened and how much it cost, and
 reports the numbers of metrics.py. A change to a prompt, a pipeline, a check or a model is judged by running the same suite before and after and comparing, not by a feeling.
 
   eval/suites/<name>/suite.json     {"name", "description", "target": {"kind": "checks" | "pipeline", ...}}

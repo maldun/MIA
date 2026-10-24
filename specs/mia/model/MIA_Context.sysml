@@ -71,8 +71,8 @@ package MIA_Context {
         doc /* Optional: HTTPS inside the owner's tailnet through tailscale serve; never funnel. */
     }
     part def HostMachine :> ExternalSystem {
-        doc /* Fedora, one AMD GPU with 12 GB (ROCm; NVIDIA and CPU also supported), 62 GB RAM, podman. */
-        attribute gpuMemoryGB : Real = 12;
+        doc /* Fedora, one AMD RX 7800 XT with 16 GB (ROCm; NVIDIA and CPU also supported), 62 GB RAM, podman. */
+        attribute gpuMemoryGB : Real = 16;
         attribute ramGB : Real = 62;
     }
 

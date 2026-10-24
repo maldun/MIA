@@ -7,7 +7,7 @@ embedded in clever pipelines with verification, small helper models and a little
 
 ## 1. Principles
 
-1. **Free and local.** Ollama models, SearXNG for search, no paid API. Hardware is the limit (RX 7700 XT with 12 GB, Ryzen 9 5900X, 62 GB RAM;
+1. **Free and local.** Ollama models, SearXNG for search, no paid API. Hardware is the limit (RX 7800 XT with 16 GB, Ryzen 9 5900X, 62 GB RAM; confirmed with fastfetch and the driver on 2026-10-24;
    `gemma4:12b-it-qat` as light and `gemma4:26b` as full model, both with `num_ctx` 8192 today).
 2. **A task is a skill file plus a pipeline, not a model.** The same model serves all tasks with different prompts, budgets and tools. Other models
    (for example Qwen for long contexts) can be assigned per skill.
@@ -193,14 +193,14 @@ as well as inline nodes, and a header with `tags`, `applies_to`, `goal`, `cost_c
 
 **Statistics and the knowledge that accumulates**
 - L9. For every node version and pipeline version the index keeps running statistics per task type: runs, success and failure rates, latency, tokens, and, from labelled test cases and user
-  feedback, quality measures (for verifiers: precision and recall of flags, calibration; 9, L5). Statistics are derived from the run log and the harness and can be recomputed.
+  feedback, quality measures (for verifiers: precision and recall of flags, calibration; 9, EL5). Statistics are derived from the run log and the harness and can be recomputed.
 - L10. The library also stores **cases**: a claim or task description, the checks and styles that were applied, the verdict, and the later outcome (user correction, hard-check result).
   Cases make "for claims like this, check X worked" retrievable (similar-case lookup by tags first, embeddings later) and are the training data for routing and the verifier models.
 - L11. Nothing is deleted by learning: low-performing entries are marked `retired` or demoted in the ranking; the reason and the numbers stay with them.
 
 **Making entries (by hand, by the harness, by a model)**
 - L12. Lifecycle: `draft` (new, never used automatically) -> `tested` (passed the harness on its test cases; may be chosen when exploring) -> `trusted` (beats the baselines; chosen by default)
-  -> `retired`. Promotion is a decision of the user, supported by the harness report (9, L3); it is never automatic.
+  -> `retired`. Promotion is a decision of the user, supported by the harness report (9, EL3); it is never automatic.
 - L13. Entries proposed by a model (a new view, a changed pipeline, a script) are always `draft` with `origin.by` naming the model, and shown to the user as a diff (G3). A `script` node is
   pinned by the hash of its text: any change is a new version, and the sandbox rules (HC2) apply to every script, however trusted.
 - L14. Safety classes (`reads_web`, `runs_code`) are part of the interface; a pipeline's class is the maximum of its nodes, and the skill declares the maximum it may use (for example a
@@ -234,7 +234,7 @@ Examples: "Rummaging through the internet… (search: 'rust borrow checker', 3 q
 - M1. Models are chosen per skill (profile `light` or `full`, or a named model). The runner loads and unloads through Ollama and reports which model is active.
 - M2. Slow, long-context models (for example a Qwen with a large context) are allowed for background-style tasks (research, long stories). The status block must
   make waiting bearable. Chat stays on the fast model.
-- M3. Context size is a per-skill option. The cost of long contexts on a 12 GB card is real (the KV cache grows with the context; weights that do not fit run partly from
+- M3. Context size is a per-skill option. The cost of long contexts on a 16 GB card is real (the KV cache grows with the context; weights that do not fit run partly from
   RAM and are slow), so every skill has a measured timing in the test report (9) and the default context is the smallest one that works.
 - M4. Long texts are never pushed whole into the context: pages and stories are cut into chunks, summarised and indexed (retrieval beats stuffing; models also use the
   middle of a long context worse than its ends, Liu et al. 2023).
@@ -273,17 +273,17 @@ decision, so they can be compared offline before they are trusted.
 
 ## 9. Evaluation and logging (what makes it research)
 
-- L1. Every run is stored (JSONL in `data/runs/`): task, skill/pipeline versions, model, all node inputs and outputs, events with timings, the final answer, and the user
+- EL1. Every run is stored (JSONL in `data/runs/`): task, skill/pipeline versions, model, all node inputs and outputs, events with timings, the final answer, and the user
   feedback (thumbs, edit, regenerate, free note). Sensitive content stays on the machine.
-- L2. A fixed **test set** per task (about 30 cases for research and storytelling at first, written by the user and the assistant, with notes on what a good answer is).
+- EL2. A fixed **test set** per task (about 30 cases for research and storytelling at first, written by the user and the assistant, with notes on what a good answer is).
   Research cases include questions with a known answer, questions without an answer, and questions whose popular answer is wrong.
-- L3. A harness runs a pipeline variant on the test set offline and reports quality, time and token use. Variants are compared on the same cases and seeds.
-- L4. Quality is measured by several kinds of signal and never by a single one: code checks (format, quote present in source, dates), claim-level support against sources,
+- EL3. A harness runs a pipeline variant on the test set offline and reports quality, time and token use. Variants are compared on the same cases and seeds.
+- EL4. Quality is measured by several kinds of signal and never by a single one: code checks (format, quote present in source, dates), claim-level support against sources,
   an LLM judge with a rubric (calibrated against the user's own ratings, see 12), and pairwise user preferences.
-- L5. For verifiers (the research object) the harness also reports: precision and recall of "unsupported" flags, calibration of confidence, agreement between verifiers,
+- EL5. For verifiers (the research object) the harness also reports: precision and recall of "unsupported" flags, calibration of confidence, agreement between verifiers,
   and what fraction of errors the verifier shares with the generator.
 
-- L6. **Built** (phase 3): suites with `truth` and `expect`, the harness with variants, repeats and cost counting, the metrics with intervals and the paired sign test, `tools/eval.py`, and two suites (`hard_checks`
+- EL6. **Built** (phase 3): suites with `truth` and `expect`, the harness with variants, repeats and cost counting, the metrics with intervals and the paired sign test, `tools/eval.py`, and two suites (`hard_checks`
   deterministic, `computable` with a model). Test first: a behaviour change starts with a case. The web checks have a suite on recorded pages (`web_checks`, fixtures). Still open: the
   research questions, the LLM judge with a rubric calibrated on the user's ratings, and the verification styles (single, consistency, trial, jury) as variants of one suite.
 
@@ -293,7 +293,7 @@ decision, so they can be compared offline before they are trusted.
 
 - G1. ~~Viewer first~~ **dropped (2026-10-22)**: the text explain tool and a DOT or Mermaid export replace it.
 - G2. ~~Editor second~~ **dropped (2026-10-22)**: editing is done on the text files; what remains of the idea is the rule that a change is saved as a new version of the pipeline, not in place, and validated (P4).
-- G3. Edits by a model (MIA or an assistant) are **proposals**: shown as a diff, checked against the test set (L3) in a dry run, applied only after user approval.
+- G3. Edits by a model (MIA or an assistant) are **proposals**: shown as a diff, checked against the test set (EL3) in a dry run, applied only after user approval.
   Rationale: this makes "optimise the pipeline on the fly" safe and measurable, and it prevents the self-improvement loop from rewarding itself (Goodhart effect, see 12).
 - G4. ~~Technology~~ not needed. (Existing open-source editors (for example NodeTool, PySpur, LangGraph-GUI) were references, not
   dependencies.)
@@ -331,13 +331,13 @@ reliable signal (tests, rules, retrieved evidence). The generator-verifier error
 - Verification costs are scaled with difficulty (Snell et al., test-time compute): easy questions get one pass, uncertain ones more samples or a second round of search.
 
 **Search-time compute vs. sampling.** Brown et al. (Large Language Monkeys) show that coverage grows with the number of samples, but picking the right one needs a verifier; without it,
-majority vote saturates. That is why verifier quality (L5) is the limiting factor and why we measure it.
+majority vote saturates. That is why verifier quality (EL5) is the limiting factor and why we measure it.
 
 **Calibration.** A verifier that says "supported" must be right about as often as it says it (Guo et al. on calibration). The harness reports reliability curves, not only accuracy.
 For the user-facing answer, "unknown" and "unverified" are first-class outcomes.
 
 **Goodhart and self-improvement.** Once a learned component (reward model, bandit, pipeline editor) optimises against a score, it finds the weaknesses of the score. Mitigations here:
-hold-out test cases that are never used for tuning, several independent signals (L4), user spot checks, and the approval gate of G3.
+hold-out test cases that are never used for tuning, several independent signals (EL4), user spot checks, and the approval gate of G3.
 
 **Research questions this project can answer** (candidate notes for the user's own research):
 - How much does claim-level grounded verification improve factual precision of a 12–26B local model with search, and at what cost in time?
@@ -367,7 +367,7 @@ Common requirements:
   (Smit et al.; the later critique in 14).
 - VS4. Fixed maximum number of turns and tokens per style; "unresolved" is always allowed.
 - VS5. The harness reports, per style: accuracy against labelled claims, calibration, cost (tokens, seconds), position bias (swap test), conformity (how often a juror or cop changes
-  to a wrong position after seeing the other), and the share of errors that it has in common with the generator (L5).
+  to a wrong position after seeing the other), and the share of errors that it has in common with the generator (EL5).
 - VS6. Jury aggregation is configurable (majority, unanimity required, weighted by the measured reliability of each viewpoint). Weights are learned from the logs only after enough labelled
   cases (8, level 3), with hold-out cases.
 - VS7. Open research questions: does a different context help more than a role label (jury of experts versus single judge with a persona)? Does the jury reduce shared errors compared with
@@ -411,11 +411,11 @@ Requirements:
 - HC3. **Test-oracle caveat for scripts.** A script written by the same model that made the claim can encode the same misconception (it checks what the model believes, for example a wrong formula).
   Mitigations: the script is generated from the *claim*, not from the draft's reasoning; it must print the values it used; the judge or verifier sees the script (a different view or model reviews
   that the script tests what the claim says); numeric claims are computed in two independent ways when cheap (for example `decimal` and `fractions`); the harness measures how often a passing
-  script was still wrong (L5).
+  script was still wrong (EL5).
 - HC3a. **Built** (phase 2d): the contract `result = {holds, values, explanation}` with the rule that a verdict needs the values; `data` is read-only for the script (a model re-typed the input, claimed number included,
   in its first scripts); the evidence carries the script, its hash and the output; scripts are written from the claim and a description of the data, not from the draft's reasoning; a script that does not work is repaired
   by the model with the reported problem (at most twice). Still open: the second independent evaluation of numeric claims by a different view or model (the reviewer of the script), and the measurement of how often a
-  passing script was still wrong (harness, L5).
+  passing script was still wrong (harness, EL5).
 - HC4. **Web confirmation rules.** The query is built from the claim's key entities and numbers, not from its wording (confirmation bias in the query is the main risk of searching "does X hold?");
   a disconfirming query is always run for `web_confirm`; "nothing found" is `inconclusive`, never `fail`; source quality is part of the evidence (domain type, date, whether it is a primary source),
   and results from the research task's own sources do not count as independent confirmation of themselves. All fetched text is untrusted data (X1).
@@ -624,7 +624,7 @@ No graph is built beforehand for web search: the open web has no fixed corpus to
   (which is older and by how many years), and a conflict with dates (the new museum director against the old one). Variants: (A) raw passages in one prompt, (B) decomposition without a graph, (C) decomposition with the context graph.
   Metrics: answer right, quote not in page, too timid, calls and seconds, open slots closed by the gap round. A claim that the graph helps is made only with repeats and only for the part that (C) adds over (B).
 - CG11. **The log is the source of truth; the graph is a view of it (decided 2026-10-22).** Logging does not depend on how a task is solved (one prompt, a pipeline, expert agents, debate): every
-  run emits **typed events** into the run log (L1), and the context graph of a run is the result of replaying them (a pure function from events to graph). A node or edge of the graph is never
+  run emits **typed events** into the run log (EL1), and the context graph of a run is the result of replaying them (a pure function from events to graph). A node or edge of the graph is never
   stored on its own; it has the id of the event that made it (or the hash of its content), so every item can be traced back to what happened. The graph can therefore be thrown away and rebuilt for
   any run, which keeps the property of CG6 (a wrong item stays local to its run) and removes its weakness (nothing was kept to look at afterwards).
 - CG12. **One run id everywhere.** The run id (and the id of the node or role acting) travels with every model call, web request, scholarly API request and check, so that each line in each log belongs to a run.
@@ -642,7 +642,7 @@ No graph is built beforehand for web search: the open web has no fixed corpus to
   viewer later, text explain tool first, 10); (b) *replay*: rebuild the graph of any run; (c) *offline reproduction*: a run is repeated from the stored pages and API answers without the network (the harness, 9, and `FixtureWebSession` already work this way for
   recorded pages), which is also the benchmark of the research requirements and the regression test of every pipeline change; (d) *diff*: two runs of one question compared event by event (which sources, which claims
   differ); (e) *decision traces* (CG7.1) as queries over events, kept in a derived index that can be rebuilt (as `library.sqlite` is derived from the files); (f) *cost accounting* per actor from the `model_call` events.
-- CG16. **Privacy and size.** The logs stay on the machine (L1); the store has a retention setting; an export for sharing removes the user's own text and keeps structure and hashes; the size per review is
+- CG16. **Privacy and size.** The logs stay on the machine (EL1); the store has a retention setting; an export for sharing removes the user's own text and keeps structure and hashes; the size per review is
   estimated before it is relied on (a review of 40 abstracts and 10 full texts is in the order of megabytes).
 - CG10. Open research questions: how much of the gain is the graph and how much the decomposition? Is a claims table enough or do relations add something measurable? Do decision traces improve plan selection beyond the plain run statistics of the
   library? How good is deterministic alias merging on real pages?
@@ -701,7 +701,7 @@ Goal: every statement in an answer can be traced to what happened (CG11), a run 
 4. One more field in the model-call event: the Ollama model **digest**, not only the name (a tag can be re-pulled and change).
 5. Whether decision events (`router_decision`, `escalation`, `stop_decision`) carry the model's own stated reason: no, only the code's reason; a model's explanation can be logged as a separate `note`, never used as a signal.
 
-**Build order** (tests first; each step usable alone; **step 1 built 2026-10-22**: `events.py`, `tests/test_events.py`; the pipeline runner shares its sequence numbers, sets the node as actor and parent of the events inside it, writes a `model_call` event for every model call and the `env` into `run_start` (code version, config hash, model digests, from `web_app.py`); the web log and with it the scholar log carry the run id and the actor and lose secrets; the chat block does not show domain events; decisions 1 to 4 were taken as recommended, and `claim_verified` records who judged (`judge`) and how sure (`confidence`, null if the judge gives no figure), as asked for the benchmark): (1) `events.py`: envelope, schemas, secret removal, writer; the run id and actor travel by a context variable to `WebLog`, `scholar.ApiHttp`, the model client and the checks. (2) The content store (**built 2026-10-22**: `content_store.py`; keyed by `events.digest`, secrets removed before hashing, atomic and idempotent, a failing disk never breaks a run, retention by age (`store_days`); the pipeline runner stores prompts and answers for every skill but `chat` (`store_chat_texts` switches chat on); `tests/test_content_store.py`). (3) `context_graph.py` (**built 2026-10-22**, `tests/test_context_graph.py`): `replay()` turns the events of a run into the graph in the shape of the process graph (data nodes only connected through process instances with the identity (actor, seq), relations such as supports derived from the verification processes with judge, style and confidence), claim status, open slots, conflicts with a winner (CG5), provenance and `explain()` from any node back to the query, cost per actor, validation of the model's rules and of a broken log (a problem is reported, never a silent wrong graph); `View` and `default_view()` are the hierarchy views of PG16, and `render()` shows a view within a token budget, strictly the most important group first (open slots, conflicts, unverified claims), cutting with a note when even the overview does not fit. (4) **Evidence events (built 2026-10-22, `evidence.py`, `tests/test_evidence.py`):** the web search writes `query_issued` and a `source_found` per result (class and trust from the source trust table), the page fetcher `page_fetched` (the page text goes to the store, the event carries its hash) and a check of the instruction-like phrases, a failed fetch a `source_dropped`; the lookup code steps write the dropped results (`not_selected`, `duplicate`), the passages (with whether they occur in their page), the plan with the results of its checks, the quote check of an answer (a `check_run` per cited quote, the claim, the verdict of the rule with style `anchor` and no figure of confidence, the sentence of the draft), the open slots of unanswered sub-questions and calculations; the runner writes `budget_spent` for every counted tool call, `router_decision` for every branch it takes and `stop_decision` for the end of every run. The sub-question of an event is the index of the map element it runs in (E4). Complete lookup runs over the recorded web replay into graphs without a dangling reference. `render()` got partial expansion (only what needs attention, and how many more) and the default view groups by sub-question, shared sources, dropped sources, model calls and verdicts. Still open from step 4: the scholarly tools (`scholar.py`) do not emit events yet (they will with the review pipeline), typed plans give their evidence events without a sub-question number (the step id is not visible to the tools), and the harness does not store texts yet. Not yet: the context assembly of a pipeline step from a view (CG3) in a running pipeline. (4) The research pipeline and the web and scholar tools emit the events. (5) `tools/run_explain.py`: from an answer sentence back to the query; replay and diff of runs; offline reproduction. **Step 5 built 2026-10-22** (`run_explain.py`, `tools/run_explain.py`, `reproduce.py`, `tests/test_run_explain.py`): `list`, `show` (the view within a token budget), `explain` (a sentence or node back to the query), `cost`, `problems`, `diff` of two runs (`context_graph.diff`), `export` as Graphviz or Mermaid text, `call` (prompt and answer of a model call from the store) and `reproduce`: the run is repeated through the same pipeline with no network and no model, the answers found in the store by the hash of the prompt, the searches and pages taken from the events (which therefore carry snippet, engine, title, final address and content type), and the new graph is compared with the old; a pipeline, prompt or library change that changes what a run does shows as a divergence with the difference between the recorded prompt and the new one. Baseline, invented-quote and decomposed runs (with a second search round) reproduce exactly. Limits (P3 of `reproduce.py`): runs whose texts were not stored, clipped inputs, e-mail addresses and secrets.
+**Build order** (tests first; each step usable alone; **step 1 built 2026-10-22**: `events.py`, `tests/test_events.py`; the pipeline runner shares its sequence numbers, sets the node as actor and parent of the events inside it, writes a `model_call` event for every model call and the `env` into `run_start` (code version, config hash, model digests, from `web_app.py`); the web log and with it the scholar log carry the run id and the actor and lose secrets; the chat block does not show domain events; decisions 1 to 4 were taken as recommended, and `claim_verified` records who judged (`judge`) and how sure (`confidence`, null if the judge gives no figure), as asked for the benchmark): (1) `events.py`: envelope, schemas, secret removal, writer; the run id and actor travel by a context variable to `WebLog`, `scholar.ApiHttp`, the model client and the checks. (2) The content store (**built 2026-10-22**: `content_store.py`; keyed by `events.digest`, secrets removed before hashing, atomic and idempotent, a failing disk never breaks a run, retention by age (`store_days`); the pipeline runner stores prompts and answers for every skill but `chat` (`store_chat_texts` switches chat on); `tests/test_content_store.py`). (3) `context_graph.py` (**built 2026-10-22**, `tests/test_context_graph.py`): `replay()` turns the events of a run into the graph in the shape of the process graph (data nodes only connected through process instances with the identity (actor, seq), relations such as supports derived from the verification processes with judge, style and confidence), claim status, open slots, conflicts with a winner (CG5), provenance and `explain()` from any node back to the query, cost per actor, validation of the model's rules and of a broken log (a problem is reported, never a silent wrong graph); `View` and `default_view()` are the hierarchy views of PG16, and `render()` shows a view within a token budget, strictly the most important group first (open slots, conflicts, unverified claims), cutting with a note when even the overview does not fit. (4) **Evidence events (built 2026-10-22, `evidence.py`, `tests/test_evidence.py`):** the web search writes `query_issued` and a `source_found` per result (class and trust from the source trust table), the page fetcher `page_fetched` (the page text goes to the store, the event carries its hash) and a check of the instruction-like phrases, a failed fetch a `source_dropped`; the lookup code steps write the dropped results (`not_selected`, `duplicate`), the passages (with whether they occur in their page), the plan with the results of its checks, the quote check of an answer (a `check_run` per cited quote, the claim, the verdict of the rule with style `anchor` and no figure of confidence, the sentence of the draft), the open slots of unanswered sub-questions and calculations; the runner writes `budget_spent` for every counted tool call, `router_decision` for every branch it takes and `stop_decision` for the end of every run. The sub-question of an event is the index of the map element it runs in (E4). Complete lookup runs over the recorded web replay into graphs without a dangling reference. `render()` got partial expansion (only what needs attention, and how many more) and the default view groups by sub-question, shared sources, dropped sources, model calls and verdicts. Still open from step 4: the scholarly tools (`scholar.py`) do not emit events yet (they will with the review pipeline), typed plans give their evidence events without a sub-question number (the step id is not visible to the tools), and the harness does not store texts yet. Not yet: the context assembly of a pipeline step from a view (CG3) in a running pipeline. (4b) The research pipeline and the web and scholar tools emit the events. (5) `tools/run_explain.py`: from an answer sentence back to the query; replay and diff of runs; offline reproduction. **Step 5 built 2026-10-22** (`run_explain.py`, `tools/run_explain.py`, `reproduce.py`, `tests/test_run_explain.py`): `list`, `show` (the view within a token budget), `explain` (a sentence or node back to the query), `cost`, `problems`, `diff` of two runs (`context_graph.diff`), `export` as Graphviz or Mermaid text, `call` (prompt and answer of a model call from the store) and `reproduce`: the run is repeated through the same pipeline with no network and no model, the answers found in the store by the hash of the prompt, the searches and pages taken from the events (which therefore carry snippet, engine, title, final address and content type), and the new graph is compared with the old; a pipeline, prompt or library change that changes what a run does shows as a divergence with the difference between the recorded prompt and the new one. Baseline, invented-quote and decomposed runs (with a second search round) reproduce exactly. Limits (P3 of `reproduce.py`): runs whose texts were not stored, clipped inputs, e-mail addresses and secrets.
 
 ## 14. References
 
@@ -801,10 +801,10 @@ Local research agents (implementations to learn from)
 
 ## 15. Phases (proposal)
 
-1. **Foundation**: run log (L1), event stream (E), pipeline runner with fake model tests (P), skill loader (S); `chat` ported as the reference skill. Status block in the chat page.
+1. **Foundation**: run log (EL1), event stream (E), pipeline runner with fake model tests (P), skill loader (S); `chat` ported as the reference skill. Status block in the chat page.
 1b. **Library** (4a): node and pipeline entries as files, the SQLite index, validation, `select` with hard filters and statistics from the run log, `tools/library.py`; the existing `chat` and `summarize` pipelines move into it as the first entries, the web tools and `chunk_text` become the first nodes. **This comes before the checks**, so they are written as library nodes.
 1c. **Behaviour layer** (13a), in two parts that do not block the research work: (i) *signals first*: behaviour rules as library entries, violation and reward lines in the run log, silent repair instead of scolding, emotion as a structured step (EM1 to EM5, measured against the keyword method); (ii) *memory* later: ledger of commitments, structured memory with provenance, consolidation pipeline, retrieval, memory page, and the memory test set with the current dreaming as the baseline.
-2. **Research**: SearXNG setup (DuckDuckGo fallback), tools with the safety rules (X), the research pipeline and its test set; harness (L3); hard checks first (`fixed_code`, `citation`, `web_confirm`, then the sandboxed `script` check); first comparisons (direct vs. pipeline, with/without verify, hard checks vs. styles).
+2. **Research**: SearXNG setup (DuckDuckGo fallback), tools with the safety rules (X), the research pipeline and its test set; harness (EL3); hard checks first (`fixed_code`, `citation`, `web_confirm`, then the sandboxed `script` check); first comparisons (direct vs. pipeline, with/without verify, hard checks vs. styles).
 3. **Storytelling**: story state, scene loop, interactive UI; test set with consistency checks.
 4. **Variants**: (the VRM parts are inspected, V4 answered) variant store and API, editor, switching with the task.
 5. *(dropped, 10)* Graph viewer and editor: graphs are data in text files, edited as text; the text explain tool and the DOT/Mermaid export remain. The proposal mechanism (G3) is independent of a UI.
@@ -815,7 +815,7 @@ Local research agents (implementations to learn from)
 - Behaviour layer (13a): which unwanted behaviours matter most to you (the list starts with the format rules of the first message)? Should the playful penalty stay as an optional character moment? Is the digest of a consolidation something you want to see every day? Which facts about you should never be stored?
 
 - Variants (V4 is answered): which accessories per task (glasses, notebook, hat ...) and are procedural shapes enough or should they be made in Blender?
-- Which Qwen model and context length are usable on 12 GB with acceptable speed (to be measured with the harness, M3)?
+- Which Qwen model and context length are usable on 16 GB with acceptable speed (to be measured with the harness, M3)?
 - Language: research answers in the question's language; the sources may be English. Where is translation done, and does it hurt claim checking?
-- Which feedback controls does the chat page get (thumbs, "wrong source", edit) to feed L1 without annoying the user?
+- Which feedback controls does the chat page get (thumbs, "wrong source", edit) to feed EL1 without annoying the user?
 - Does the status block also show for chat (probably only for runs longer than a few seconds)?

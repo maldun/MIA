@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "deny": [
+      "Edit(eval/suites/**)",
+      "Edit(eval/baselines/**)",
+      "Edit(tests/acceptance/**)",
+      "Edit(tests/helpers/**)",
+      "Edit(tests/smoke/**)",
+      "Edit(benchmarks/**)",
+      "Read(eval/suites/*.holdout/**)",
+      "Bash(ollama pull:*)",
+      "Bash(ollama rm:*)",
+      "Bash(git push:*)"
+    ]
+  }
+}

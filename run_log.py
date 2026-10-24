@@ -1,5 +1,5 @@
 """
-The log of the runs (ui/REQUIREMENTS_CORE.md 9, L1): every run of a skill is stored as one JSON line with its input, the events of all nodes with timings,
+The log of the runs (ui/REQUIREMENTS_CORE.md 9, EL1): every run of a skill is stored as one JSON line with its input, the events of all nodes with timings,
 the result and (later) the feedback of the user. The file is append-only, one file per month (`runs-YYYY-MM.jsonl`); feedback is a separate line that refers to the
 run, read() joins both. This is the data for the evaluation harness and for everything that learns.
 """

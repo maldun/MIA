@@ -1,5 +1,5 @@
 """
-The numbers of the evaluation (ui/REQUIREMENTS_CORE.md 9, L3 to L5), without any dependency. A *record* is the result of one case in one run:
+The numbers of the evaluation (ui/REQUIREMENTS_CORE.md 9, EL3 to EL5), without any dependency. A *record* is the result of one case in one run:
 
   {"case": id, "repeat": 0, "tags": [...], "status": "pass" | "fail" | "open" | "not_applicable" | "error:...", "expect": status or None, "truth": True | False | None,
    "seconds": float, "calls": int, "chars_in": int, "chars_out": int}
