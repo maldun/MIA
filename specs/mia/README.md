@@ -4,8 +4,8 @@ Phase 1 (Explore) of the development workflow, status **Draft**, under step-by-s
 
 | File | What |
 |---|---|
-| `high-level-spec.md` | the HLS: goal, scope, FR-1..32, NFR-1..8, CON-1..7, agent profile, architecture, acceptance criteria, risks and open questions |
-| `architecture.sysml` | SysML v2: vocabulary, architecture (13 subsystems, 73 parts with code files and status), agent view (10 model steps, 5 trust boundaries), requirements, satisfy / allocate / verification |
+| `high-level-spec.md` | the HLS: goal, scope, FR-1..33, NFR-1..8, CON-1..7, agent profile, architecture, acceptance criteria, risks and open questions |
+| `architecture.sysml` | SysML v2: vocabulary, architecture (13 subsystems, 74 parts with code files and status), agent view (10 model steps, 5 trust boundaries), requirements, satisfy / allocate / verification |
 | `model/MIA_Context.sysml`, `model/MIA_Behavior.sysml` | supplements: people, concerns, external systems; chat exchange, lookup, review, consolidation, activity states |
 | `baseline-requirements.md` | what the five requirement documents and the README ask for, per capability, with status, and the contradictions between them |
 | `research.md` | measured facts: hardware, models, baselines, what was not looked at |

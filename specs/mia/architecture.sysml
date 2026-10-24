@@ -355,6 +355,10 @@ package MIA_Architecture {
             doc /* Target: workflows and agent sessions stored as process graphs and generated into runner configuration. */
             @Implementation { :>> status = ImplementationStatus::proposed; :>> modules = ("context_graph.py"); }
         }
+        part scheduler {
+            doc /* Target: from the contracted graph and the measured node costs computes order, overlap, critical path and the estimate of time, calls and tokens; refuses a run that exceeds its budget (FR-33). */
+            @Implementation { :>> status = ImplementationStatus::proposed; }
+        }
         part storytelling {
             doc /* Premise, outline, scene loop with story state. */
             @Implementation { :>> status = ImplementationStatus::proposed; }
@@ -858,7 +862,13 @@ package MIA_Requirements {
         doc /* MIA shall define every pipeline and agent workflow as validated, versioned data in a library with a lifecycle
                (draft, tested, trusted, retired); every edit by a user is a new immutable version with author
                and time and applies to all (D-10); an entry proposed by a model stays a draft until a user
-               approves it, shown as a diff and tried on the test set. */
+               approves it, shown as a diff and tried on the test set. The workflow model is a directed graph in
+               which a cycle may occur only inside a session (a debate, a vote, a repair round) that a master
+               supervises; every session holds a limit on the number of cycles or on the time, or both, and the
+               master ends it when the first limit is reached. Before a run MIA contracts every session to one
+               node as a derived view and checks by an algorithm that the contracted graph is acyclic, naming a
+               cycle that it finds outside a session. The stored graph is never replaced by the contraction,
+               because a contraction loses dependencies and context; a session without a limit is refused. */
         @Trace { :>> baseline = ("TK-3", "TK-4", "TK-5", "TK-10");
                  :>> verifiedBy = (HowVerified::test, HowVerified::inspection); }
     }
@@ -1208,6 +1218,16 @@ package MIA_Requirements {
         @Trace { :>> baseline = ("CH-11", "TK-8"); :>> verifiedBy = (HowVerified::demonstration, HowVerified::test); }
     }
 
+    requirement def <'FR-33'> WorkflowSchedule {
+        subject mia : MiaSystem;
+        doc /* MIA shall compute from the contracted graph of a workflow and the measured costs of its nodes (seconds, calls
+               and tokens from the run log; for a session its limits times the cost of one cycle) a schedule
+               before the run: the order, the steps that can overlap, the critical path, and an estimate of
+               time, calls and tokens; she shows the estimate and refuses to start a run whose estimate exceeds
+               its budget (FR-26). */
+        @Trace { :>> baseline = ("TK-5", "TK-9"); :>> verifiedBy = (HowVerified::test, HowVerified::measurement); }
+    }
+
     // ================================================================ the requirement tree
 
     /* Usages, so that satisfy and verify can refer to them. Constraints first, then the high-level requirements. */
@@ -1257,6 +1277,7 @@ package MIA_Requirements {
     requirement fr30 : WorkflowContextGraph;
     requirement fr31 : VoiceLines;
     requirement fr32 : CharacterVariantPerWorkflow;
+    requirement fr33 : WorkflowSchedule;
     requirement nfr7 : EfficientOnGivenHardware;
     requirement nfr8 : SharedStateInDatabase;
 }
@@ -1313,6 +1334,7 @@ package MIA_Allocation {
     satisfy fr30 by mia;
     satisfy fr31 by mia;
     satisfy fr32 by mia;
+    satisfy fr33 by mia;
     satisfy nfr7 by mia;
     satisfy nfr8 by mia;
 
@@ -1447,6 +1469,11 @@ package MIA_Allocation {
     allocate fr30 to mia.taskRuntime.workflowGraph;
     allocate fr30 to mia.graphApp.graphView;
     allocate fr30 to mia.graphApp.nodeEditor;
+    allocate fr33 to mia.taskRuntime.scheduler;
+    allocate fr33 to mia.taskRuntime.pipelineRunner;
+    allocate fr33 to mia.taskRuntime.workflowGraph;
+    allocate fr7 to mia.taskRuntime.workflowGraph;
+    allocate fr7 to mia.graphApp.graphValidator;
     allocate fr32 to mia.webApp.variantStore;
     allocate fr32 to mia.frontEnd.characterRenderer;
     allocate fr32 to mia.frontEnd.expressionEditor;
