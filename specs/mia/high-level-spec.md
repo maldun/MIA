@@ -178,7 +178,7 @@ part def ExtractionStep {
 }
 flow of FetchedPageText from fetcher.pageOut to extractor.pageIn;
 satisfy fr9 by mia;
-allocate fr9 to mia.verification.hardChecks;
+allocate fr9 to mia.verifier.hardChecks;
 ```
 
 ### 5.3 Integration with the existing system

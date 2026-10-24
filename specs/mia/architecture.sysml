@@ -78,13 +78,13 @@ package MIA_Architecture {
     item def ModelStream;
     item def SearchQuery { attribute text : String; }
     item def SearchResults;
-    item def ScholarQuery { attribute text : String; attribute until : String[0..1]; }   // date cut-off
+    item def ScholarQuery { attribute text : String; attribute untilDate : String[0..1]; }   // date cut-off
     item def ScholarRecords;
     item def RunEvent {
         attribute run : String;              // one run id travels with every model call and request
         attribute seq : Integer;
-        attribute type : String;             // typed vocabulary of REQUIREMENTS_CORE 13d
-        attribute actor : String;
+        attribute eventType : String;             // typed vocabulary of REQUIREMENTS_CORE 13d
+        attribute actorName : String;
     }
 
     // ---------------------------------------------------------------- ports and interfaces
@@ -109,7 +109,7 @@ package MIA_Architecture {
         out item query : ScholarQuery;
         in item records : ScholarRecords;
     }
-    port def EventSink { in item event : RunEvent; }
+    port def EventSink { in item runEvent : RunEvent; }
 
     interface def ChatLink {
         end browserSide : ~ChatPort;
@@ -158,7 +158,7 @@ package MIA_Architecture {
         part graphApp : GraphApp;
         part conversation : ConversationCore;
         part taskRuntime : TaskRuntime;
-        part verification : VerificationSuite;
+        part verifier : VerificationSuite;
         part research : ResearchSuite;
         part voice : VoiceSubsystem;
         part observability : Observability;
@@ -179,7 +179,7 @@ package MIA_Architecture {
         interface expressionLink : ExpressionLink connect webApp.expression to frontEnd.expression;
         interface eventsFromRuntime : EventLink connect taskRuntime.events to observability.sink;
         interface eventsFromResearch : EventLink connect research.events to observability.sink;
-        interface eventsFromVerification : EventLink connect verification.events to observability.sink;
+        interface eventsFromVerification : EventLink connect verifier.events to observability.sink;
     }
 
     /* The single instance used by the allocation and by the context. */
@@ -323,7 +323,7 @@ package MIA_Architecture {
                 :>> modules = ("core.py", "pipeline.py", "pipeline_model.py", "schema_check.py");
             }
         }
-        part library {
+        part libraryStore {
             doc /* Versioned node and pipeline entries, statuses, SQLite index, selection, statistics. */
             @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("library.py", "tools/library.py", "library/nodes", "library/pipelines"); }
         }
@@ -577,7 +577,7 @@ package MIA_AgentView {
     item def GeneratedScript { @Untrusted { origin = "model"; } doc /* A check script written by a model; runs only in the sandbox. */ }
     item def Verdict { attribute status : String; }
 
-    port def UserTextPort { out item message : UserMessage; }
+    port def UserTextPort { out item userText : UserMessage; }
     port def PageTextPort { out item page : FetchedPageText; }
     port def PaperTextPort { out item paper : PaperText; }
     port def HistoryPort { out item history : ChatHistory; }
@@ -1122,7 +1122,7 @@ package MIA_Allocation {
     allocate fr6 to mia.taskRuntime.pipelineRunner;
     allocate fr6 to mia.taskRuntime.storytelling;
     allocate fr6 to mia.research.lookup;
-    allocate fr7 to mia.taskRuntime.library;
+    allocate fr7 to mia.taskRuntime.libraryStore;
     allocate fr7 to mia.taskRuntime.workflowGraph;
     allocate fr7 to mia.learning.approvalGate;
     allocate nfr2 to mia.taskRuntime.planner;
@@ -1131,11 +1131,11 @@ package MIA_Allocation {
     allocate fr8 to mia.operation.configuration;
 
     // trust
-    allocate fr9 to mia.verification.hardChecks;
-    allocate fr9 to mia.verification.verificationStyles;
-    allocate fr9 to mia.verification.claimExtractor;
-    allocate nfr3 to mia.verification.sandbox;
-    allocate nfr3 to mia.verification.webBroker;
+    allocate fr9 to mia.verifier.hardChecks;
+    allocate fr9 to mia.verifier.verificationStyles;
+    allocate fr9 to mia.verifier.claimExtractor;
+    allocate nfr3 to mia.verifier.sandbox;
+    allocate nfr3 to mia.verifier.webBroker;
     allocate nfr3 to mia.research.pdfReader;
     allocate nfr3 to mia.research.webTools;
     allocate nfr4 to mia.research.reviewPipeline;

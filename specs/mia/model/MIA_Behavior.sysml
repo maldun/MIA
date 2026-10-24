@@ -125,7 +125,7 @@ package MIA_Behavior {
         action synthesise {
             doc /* Answer in the user's language from extracted passages only, with numbered sources. */
         }
-        action verify {
+        action verifyClaims {
             doc /* Hard checks first; a style only for open claims; the verifier sees claim and passage only. */
         }
         action repair {
@@ -142,7 +142,7 @@ package MIA_Behavior {
         then fetch;
         then extract;
         then synthesise;
-        then verify;
+        then verifyClaims;
         then repair;
         then report;
         then done;
@@ -237,7 +237,7 @@ package MIA_Behavior {
         action verifyAgainstSource {
             doc /* A candidate must be supported by its source message; web or file text never becomes a fact about the owner. */
         }
-        action merge {
+        action mergeRecords {
             doc /* Add, update, contradict (keep both, mark the older one) or no-op. */
         }
         action summariseTopics {
@@ -252,7 +252,7 @@ package MIA_Behavior {
         then selectEpisodes;
         then extractCandidates;
         then verifyAgainstSource;
-        then merge;
+        then mergeRecords;
         then summariseTopics;
         then decay;
         then writeDigest;
