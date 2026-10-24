@@ -304,6 +304,10 @@ package MIA_Architecture {
             doc /* Hourly time check; target: a commitment ledger read by code. */
             @Implementation { :>> status = ImplementationStatus::partly; :>> modules = ("communicator.py"); }
         }
+        part persona {
+            doc /* The persona file (calibration.txt, not in git): names, pronouns, back story; sent at every start. */
+            @Implementation { :>> status = ImplementationStatus::partly; :>> modules = ("communicator.py"); }
+        }
     }
 
     part def TaskRuntime {
@@ -345,6 +349,10 @@ package MIA_Architecture {
                 :>> status = ImplementationStatus::built;
                 :>> modules = ("install_lama.py", "ollama_remote.py", "cpu_threads.py");
             }
+        }
+        part skillScaffold {
+            doc /* Target: template, checklist and time record for the path from idea to promoted skill (FR-20). */
+            @Implementation { :>> status = ImplementationStatus::proposed; :>> modules = ("tools/library.py"); }
         }
     }
 
@@ -542,6 +550,13 @@ package MIA_Architecture {
             @Implementation {
                 :>> status = ImplementationStatus::built;
                 :>> modules = ("deploy/compose.yaml", "deploy/Containerfile", "deploy/up.sh");
+            }
+        }
+        part characterTools {
+            doc /* Scripts that build the character from its source, export the VRM, pack and unpack the compiled web export. */
+            @Implementation {
+                :>> status = ImplementationStatus::partly;
+                :>> modules = ("ui/tools/setup_character.sh", "ui/tools/export_character.py", "ui/tools/character_pack.py", "ui/character/README.md");
             }
         }
     }
@@ -755,9 +770,7 @@ package MIA_Requirements {
     }
     requirement def <'FR-3'> Voice {
         subject mia : MiaSystem;
-        doc /* MIA shall speak her answers aloud sentence by sentence with a voice synthesised on the host,
-               speaking only what is meant to be heard (no markup, no stage directions), and shall let the owner
-               mute or stop her. */
+        doc /* MIA shall make the voice of every answer automatically with an open text-to-speech engine (Kokoro for now, replaceable behind one interface), apply a post-processing step that makes it sound anime-like, and play it in the user's browser, sentence by sentence, speaking only what is meant to be heard; every user can mute or stop it for themselves. */
         @Trace { :>> baseline = ("VO-1", "VO-2", "VO-3", "VO-4", "CT-7");
                  :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
     }
@@ -772,7 +785,7 @@ package MIA_Requirements {
     }
     requirement def <'FR-5'> OwnerShapedAppearanceAndPersona {
         subject mia : MiaSystem;
-        doc /* MIA shall let every user change expressions, gestures, backgrounds, mood phrases, emotions and the persona as data without changing code; a change applies to all users at once and is recorded with its author. */
+        doc /* MIA shall let every user change expressions, gestures, backgrounds, mood phrases, emotions and the persona as data without changing code, with an expression editor and a motion editor; a saved change applies to all users at once, appears on every connected device without a reload, and is recorded with its author. */
         @Trace { :>> baseline = ("CH-4", "CH-6", "CH-7", "CH-8", "CH-9", "CT-2", "OP-5");
                  :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
     }
@@ -993,6 +1006,37 @@ package MIA_Requirements {
         @Trace { :>> baseline = ("TK-5", "TK-10"); :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
     }
 
+    requirement def <'FR-20'> SkillDevelopmentPath {
+        subject mia : MiaSystem;
+        doc /* One documented path from an idea to a promoted skill, open to every user: a skill file and a pipeline built from
+               library nodes and validated before use; a suite with people-labelled cases, a holdout split and a recorded
+               baseline before the skill is trusted; a declaration of model, tools, budgets and trust boundaries; draft status
+               until a user promotes it; the time from idea to promotion is recorded. */
+        attribute maxDaysForSecondSkill : Integer = 30;
+        @Trace { :>> baseline = ("TK-2", "TK-4", "TK-6", "EV-1"); :>> verifiedBy = (HowVerified::inspection, HowVerified::demonstration); }
+    }
+    requirement def <'FR-23'> MoodInEverySituation {
+        subject mia : MiaSystem;
+        doc /* MIA holds a mood at all times (idle, thinking, speaking, waiting, greeting, error, offline) and the character
+               shows the expression and gesture that an editable mood map assigns; an unknown mood falls back to neutral; the
+               mood changes with events and settles back over time. */
+        @Trace { :>> baseline = ("CT-2", "EM-1", "EM-2"); :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
+    }
+    requirement def <'FR-24'> CharacterExchange {
+        subject mia : MiaSystem;
+        doc /* A user can select the character from a VRoid model in .vrm format and transfer both the original and the
+               compiled web export between machines with scripting tools; expressions and gestures are mapped to the shape
+               keys of another model or reported as missing, never silently dropped. */
+        @Trace { :>> baseline = ("CH-1", "CH-2"); :>> verifiedBy = (HowVerified::demonstration, HowVerified::test); }
+    }
+    requirement def <'FR-25'> PersonaFromFile {
+        subject mia : MiaSystem;
+        doc /* MIA behaves roughly as the persona file specifies: she uses the names and pronouns given there correctly and
+               repeats back-story elements in fitting situations; the file is data every user can change and a change applies
+               to all. Measured by a persona suite. */
+        @Trace { :>> baseline = ("ME-1"); :>> verifiedBy = (HowVerified::measurement); }
+    }
+
     // ================================================================ the requirement tree
 
     /* Usages, so that satisfy and verify can refer to them. Constraints first, then the high-level requirements. */
@@ -1029,8 +1073,12 @@ package MIA_Requirements {
     requirement nfr5 : LocalFirstPrivacy;
     requirement nfr6 : SecureAccess;
     requirement fr19 : Operable;
+    requirement fr20 : SkillDevelopmentPath;
     requirement fr21 : AccountsAndLogin;
     requirement fr22 : GraphApp;
+    requirement fr23 : MoodInEverySituation;
+    requirement fr24 : CharacterExchange;
+    requirement fr25 : PersonaFromFile;
     requirement nfr7 : EfficientOnGivenHardware;
     requirement nfr8 : SharedStateInDatabase;
 }
@@ -1074,8 +1122,12 @@ package MIA_Allocation {
     satisfy nfr5 by mia;
     satisfy nfr6 by mia;
     satisfy fr19 by mia;
+    satisfy fr20 by mia;
     satisfy fr21 by mia;
     satisfy fr22 by mia;
+    satisfy fr23 by mia;
+    satisfy fr24 by mia;
+    satisfy fr25 by mia;
     satisfy nfr7 by mia;
     satisfy nfr8 by mia;
 
@@ -1178,8 +1230,21 @@ package MIA_Allocation {
     allocate fr19 to mia.operation.launcher;
     allocate fr19 to mia.operation.shutdownSequence;
     allocate fr19 to mia.operation.composeStack;
+    allocate fr20 to mia.taskRuntime.skillScaffold;
+    allocate fr20 to mia.taskRuntime.skillStore;
+    allocate fr20 to mia.taskRuntime.libraryStore;
+    allocate fr20 to mia.evaluation.harness;
+    allocate fr20 to mia.evaluation.suites;
+    allocate fr20 to mia.learning.approvalGate;
     allocate fr21 to mia.webApp.accountService;
     allocate fr21 to mia.webApp.accessControl;
+    allocate fr23 to mia.webApp.moodTracker;
+    allocate fr23 to mia.conversation.expressor;
+    allocate fr23 to mia.frontEnd.characterRenderer;
+    allocate fr24 to mia.operation.characterTools;
+    allocate fr24 to mia.frontEnd.characterRenderer;
+    allocate fr25 to mia.conversation.persona;
+    allocate fr25 to mia.evaluation.suites;
     allocate fr22 to mia.graphApp.graphView;
     allocate fr22 to mia.graphApp.nodeEditor;
     allocate fr22 to mia.graphApp.versionStore;

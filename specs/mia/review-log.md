@@ -8,19 +8,19 @@ Rule of the review: one HLS section per step; the owner confirms each step befor
 |---|---|---|---|
 | D-1 | MIA becomes a **multi-user system with login** and a **database** that stores information between apps. Reverses the non-goal "multi-user operation" and lifts the postponement of `deploy/REQUIREMENTS_DB.md`. | 1, 2, NFR-6, NFR-8, CON, architecture (Persistence, access control), baseline OP-7 | scope edited in step 1; requirements in step 3 |
 | D-2 | Development is **iterative**: MIA develops several skills and workflows. Success = one skill built (the literature review) **and a second skill added within 1 month**. | 1, 6 | goal edited in step 1; criterion drafted as AC-9, confirmed in step 6 |
-| D-3 | Character and behaviour requirements (answer to question 3), listed below as C-1..C-8 | 3, 4, 5, 6 | recorded; applied in steps 3 to 6 |
+| D-3 | Character and behaviour requirements (answer to question 3), listed below as CR-1..CR-8 | 3, 4, 5, 6 | recorded; applied in steps 3 to 6 |
 
-### C-1..C-8 (owner, 2026-10-24), to be turned into requirements in step 3
-- **C-1 Mood in every situation.** The character reacts with a mood in every situation and shows the expression mapped to that mood.
-- **C-2 Voice.** The voice is made automatically by an open TTS (Kokoro for now), played in the browser; a post-processing step makes it sound anime-like.
-- **C-3 Character exchange.** A character is easy to select from a VRoid model (`.vrm`); original and compiled files are transferred with scripting tools.
-- **C-4 Editors.** Expressions and motions are adjusted in an expression editor and a motion editor; changes update automatically.
-- **C-5 Persona from `calibration.txt`.** A provided `calibration.txt` makes the persona behave roughly as specified: correct names and pronouns (for example "master") and back-story bits are repeated.
-- **C-6 Feedback system.** Plus/minus feedback measures overall feedback over time and allows adjustment on that metric. A small story tells what MIA receives (money, love points, ...). The mood changes with feedback and an overall score is reflected in the general mood. Categories: answer quality, reactions, character behaviour, service; points are added and subtracted per category.
-- **C-7 Tasks and memos.** MIA stores tasks and memos and recites them correctly.
-- **C-8 Learning from negative feedback.** Behaviour with negative feedback happens less often and, after at least 5 negative feedbacks, stops (or at most 1 % chance). On negative feedback MIA behaves shocked.
+### CR-1..CR-8 (owner, 2026-10-24; first called C-1..C-8, renamed because the baseline has constraints C-1..C-7), to be turned into requirements in step 3
+- **CR-1 Mood in every situation.** The character reacts with a mood in every situation and shows the expression mapped to that mood.
+- **CR-2 Voice.** The voice is made automatically by an open TTS (Kokoro for now), played in the browser; a post-processing step makes it sound anime-like.
+- **CR-3 Character exchange.** A character is easy to select from a VRoid model (`.vrm`); original and compiled files are transferred with scripting tools.
+- **CR-4 Editors.** Expressions and motions are adjusted in an expression editor and a motion editor; changes update automatically.
+- **CR-5 Persona from `calibration.txt`.** A provided `calibration.txt` makes the persona behave roughly as specified: correct names and pronouns (for example "master") and back-story bits are repeated.
+- **CR-6 Feedback system.** Plus/minus feedback measures overall feedback over time and allows adjustment on that metric. A small story tells what MIA receives (money, love points, ...). The mood changes with feedback and an overall score is reflected in the general mood. Categories: answer quality, reactions, character behaviour, service; points are added and subtracted per category.
+- **CR-7 Tasks and memos.** MIA stores tasks and memos and recites them correctly.
+- **CR-8 Learning from negative feedback.** Behaviour with negative feedback happens less often and, after at least 5 negative feedbacks, stops (or at most 1 % chance). On negative feedback MIA behaves shocked.
 
-Fit with what exists: C-1, C-2 (partly), C-3 (partly), C-4 (built for expressions and gestures; "motion editor" = gesture editor), C-5 (persona exists, not measured), C-7 (hourly time check and `TASK:` convention only; ledger proposed in `REQUIREMENTS_CORE` MM1), C-6 and C-8 (new; C-8 is the "consequences" ladder BF3 plus a hard rule). Tension to settle in step 3: C-8 ("stops after 5 negatives") versus `BF4` (approval must not be the only reward, no sycophancy); and C-6 "money, love points" is a character story, not a real payment.
+Fit with what exists: CR-1, CR-2 (partly), CR-3 (partly), CR-4 (built for expressions and gestures; "motion editor" = gesture editor), CR-5 (persona exists, not measured), CR-7 (hourly time check and `TASK:` convention only; ledger proposed in `REQUIREMENTS_CORE` MM1), CR-6 and CR-8 (new; CR-8 is the "consequences" ladder BF3 plus a hard rule). Tension to settle in step 3: CR-8 ("stops after 5 negatives") versus `BF4` (approval must not be the only reward, no sycophancy); and CR-6 "money, love points" is a character story, not a real payment.
 
 ### Open questions raised by D-1 (to be answered before step 3)
 1. Memory, persona and feedback: **per user** or one shared MIA? (2026-10-21 decision was "one shared MIA with one memory".)
@@ -68,3 +68,15 @@ Assumption to confirm (A-1): `L1` of the library says files are the truth and SQ
 | Id | Decision | Touches | Edit |
 |---|---|---|---|
 | D-13 | **Library entries live in the database; there is a file format to export them and to seed the database from files.** Shipped entries in `library/` are seeded; an export writes entries back to files for review in git. Replaces `L1` ("files are the truth") for the multi-user system. | FR-7, FR-22, NFR-8, CORE 4a L1/L2 | recorded; text applied in step 3b |
+
+### Step 3b, chunk 1 (edited 2026-10-24): FR-20 and CR-1 to CR-5
+| Request | Becomes | Status in the code base |
+|---|---|---|
+| D-8 skill path | **FR-20 Skill development path** (every user; suite, holdout, baseline, draft until promoted, time recorded); **AC-9** one-month criterion | tools exist (`tools/library.py promote`, `tools/eval.py`); the scaffold and the time record are new |
+| CR-1 mood in every situation | **FR-23** (mood map, all situations, fallback neutral, settles over time) | partly: mood from emotion keyword and activity (`moods.py`, `emotion_map.json`) |
+| CR-2 voice | **FR-3** rewritten (open TTS, replaceable, anime post-processing, plays in the browser) | built: Kokoro with `voice_effect` anime |
+| CR-3 character exchange | **FR-24** (`.vrm` selection, transfer of original and compiled files, mapping of expressions) | partly: scripts for the Blender route; direct `.vrm` and the mapping to another model are new; **doubtful** (shape keys differ per model) |
+| CR-4 editors | **FR-5** rewritten (expression editor and motion editor, live update on all devices) | built (the motion editor is the gesture editor) |
+| CR-5 persona from `calibration.txt` | **FR-25** (names, pronouns, back story; measured by a persona suite) | partly: file is sent at every start, behaviour unmeasured |
+
+Open for the owner (CR-5 with several users): the persona says "master". Does MIA call **every** user "master" (one shared persona, D-4), or the account name, or both ("master" plus the name)?
