@@ -18,6 +18,8 @@ REAL_NOT_READY = {
     "IF-202": "N-2.4 Workflow execution not integrated yet",
     "IF-203": "N-2.3 Workflow management not integrated yet",
     "IF-204": "N-2.5 Voice synthesis not integrated yet",
+    "IF-301": "N-3.2 Graph tables not integrated yet",
+    "IF-302": "N-3.3 Record tables not integrated yet",
 }
 
 
@@ -73,5 +75,11 @@ def subject_for(interface, kind):
         if interface == "IF-204":
             from if_204_speech import SpeechMock
             return SpeechMock()
+        if interface == "IF-301":
+            from if_301_graph_tables import GraphTablesMock
+            return GraphTablesMock()
+        if interface == "IF-302":
+            from if_302_record_tables import RecordTablesMock
+            return RecordTablesMock()
         raise KeyError(interface)
     raise unittest.SkipTest(REAL_NOT_READY[interface])

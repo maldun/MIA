@@ -27,3 +27,9 @@ Used by the requirements linter (L1) and as context for the LLM assessor (L3). T
 | Workflow management | Node N-2.3: the library of workflows and skills, graph rules, specifications, context graphs, schedule | TaskRuntime | – | workflow editor |
 | Workflow execution | Node N-2.4: running a workflow under budgets with verification, research, sandbox and run log | TaskRuntime | – | task engine |
 | Voice synthesis | Node N-2.5: text-to-speech on the host with the anime effect and the voice lines | VoiceSubsystem | – | speech engine |
+| Chat and login views | Node N-1.1: the chat page, login and user views, voting, tasks and memos views, accessibility; owns the socket to the Backend | WebFrontEnd | – | chat UI |
+| Character view | Node N-1.2: the 3D character in an iframe, expressions, gestures, mouth, mood map, editors, model selection | WebFrontEnd | – | avatar view |
+| Voice playback | Node N-1.3: playing the audio of the answers and the voice lines in this browser | WebFrontEnd | – | audio player |
+| Storage layer | Node N-3.1: the PostgreSQL database and the one door to it (IF-102) | Persistence | – | DB layer |
+| Graph tables | Node N-3.2: the tables of workflows and context graphs and the graph rules of every write | Persistence | – | graph store |
+| Record tables | Node N-3.3: the tables of history, memory, votes, tasks, memos, presets, gestures and run results | Persistence | – | record store |
