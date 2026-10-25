@@ -1055,8 +1055,8 @@ package MIA_Requirements {
         subject mia : MiaSystem;
         doc /* The first text of a chat answer appears within 10 seconds on the light model (D-34); every task runs under
                explicit budgets (steps, seconds, calls, tokens) and a run that exceeds one ends with what it has
-               and says what is missing; the character runs at 30+ fps on a mid-range phone and 60 fps on
-               desktop. Several users share one model server: waiting messages are queued, show their position
+               and says what is missing; the character runs at 30+ fps on a phone inside the network and on a
+               desktop browser. Several users share one model server: waiting messages are queued, show their position
                and are refused only when the queue is full (length set in Plan). A chat answer has priority over
                a background task: a long task (a review slice) yields the model server to waiting chat messages. */
         @Trace { :>> baseline = ("C-2", "CT-9", "RS-9");

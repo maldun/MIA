@@ -296,12 +296,12 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 
 ### REQ-FE-025 – Frame rate
 - Level: high   Subject: WebFrontEnd
-- Text: While the character is shown, the Web Frontend shall render at 30 frames per second or more on a mid-range phone and 60 on desktop.
+- Text: While the character is shown, the Web Frontend shall render at 30 frames per second or more on a phone inside the network and on a desktop browser.
 - Rationale: refines NFR-7
 - Parent: NFR-7
 - Priority: Should
 - Verification method: Measurement
-- Acceptance criterion: AC-19: median of 10 runs of 30 s on the reference phone and desktop reaches the rates
+- Acceptance criterion: AC-19: median of 10 runs of 30 s reaches 30 fps on any phone inside the network (no particular device) and on the desktop
 - Verified by: –
 - Status: Draft
 - History: –

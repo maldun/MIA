@@ -116,12 +116,12 @@ The 3D character in an iframe (Godot web export): expressions, gestures, mouth, 
 
 ### REQ-CHV-010 – Frame rate
 - Level: low   Subject: WebFrontEnd
-- Text: While the character is shown, the Character view shall render at 30 frames per second or more on a mid-range phone and 60 on desktop.
+- Text: While the character is shown, the Character view shall render at 30 frames per second or more on a phone inside the network and on a desktop browser.
 - Rationale: refines REQ-FE-025
 - Parent: REQ-FE-025
 - Priority: Should
 - Verification method: Measurement
-- Acceptance criterion: AC-19: median of 10 runs of 30 s on the reference phone and desktop reaches the rates
+- Acceptance criterion: AC-19: median of 10 runs of 30 s reaches 30 fps on any phone inside the network (no particular device) and on the desktop
 - Verified by: –
 - Status: Draft
 - History: –

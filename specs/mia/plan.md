@@ -9,7 +9,7 @@ This is the plan of the whole tree, one task per node cycle in the order of the 
 | Task | Title | Implements | Green when | Depends on |
 | --- | --- | --- | --- | --- |
 | T-01 | *Owner:* install the contract drafts and run them | IF-101..IF-405 (mock side) | all mock-side contract tests green, real side skipped | – |
-| T-02 | *Owner:* fix the open numbers OPEN-2..OPEN-6 (OPEN-1 and OPEN-3 wait for T-04) | TC-MIA-011, -015, -019, -028 | the owner's answers are in `test-spec.md` and `review-log.md` | – |
+| T-02 | *Owner:* confirm OPEN-6 (queue length: recommendation 5 waiting messages, at most 2 per user); OPEN-1..OPEN-5 are decided | TC-MIA-008, -011, -015, -019, -028 | the answer is in `test-spec.md` and `review-log.md`; the baseline of today's MIA (T-04) confirms the 0.90 of OPEN-1 | – |
 | T-03 | Red integration tests for the root: step 0 (walking skeleton, lookup on the mocks) and steps 1 to 5 | TC-MIA-001..029 (system level), AC-9 | step_00 fails for the right reason (assertion, not import) and is the first green target | T-01 |
 | T-04 | Measure today's MIA: first-text time, frame rate, persona dialogues, estimate against measured time of the recorded lookup runs | BM-MIA-001, BM-MIA-002, OPEN-1, OPEN-3 | baselines recorded in `test-spec.md`; OPEN-1 and OPEN-3 can be answered | – |
 | T-05 | Plausibility record and quality walk for the root and the high-level nodes (people rate, references back the rating) | all requirements and assumptions | `req_plausibility.py` and `quality_check.py` report no error | – |
@@ -34,9 +34,9 @@ Parallel candidates: T-01, T-02, T-04, T-05 and T-13 are independent. T-06 and T
 - Depends on: –
 - Notes: `! bash tools/install_contract_drafts.sh`, then `bash tools/install_contract_drafts.sh --run`; the agent may not write to the protected folders. After it: protect `tests/acceptance/`, `tests/helpers/`, `tests/integration/`, `contracts/`, `stages.yaml`, `decomposition.yaml`.
 
-### T-02: fix the open numbers OPEN-2..OPEN-6 (OPEN-1 and OPEN-3 wait for T-04)
-- Implements: TC-MIA-011, -015, -019, -028
-- Green when: the owner's answers are in `test-spec.md` and `review-log.md`
+### T-02: confirm OPEN-6 (queue length: recommendation 5 waiting messages, at most 2 per user); OPEN-1..OPEN-5 are decided
+- Implements: TC-MIA-008, -011, -015, -019, -028
+- Green when: the answer is in `test-spec.md` and `review-log.md`; the baseline of today's MIA (T-04) confirms the 0.90 of OPEN-1
 - Must not touch: tests/acceptance/, tests/helpers/, tests/smoke/, tests/integration/, benchmarks/, eval/suites/, eval/baselines/, contracts/ (changes by amendment only)
 - Depends on: –
 - Notes: OPEN-2 (the 0.5 % rate), OPEN-4 (the phone), OPEN-5 (5 s), OPEN-6 (queue length) can be answered now.

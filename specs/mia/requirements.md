@@ -532,13 +532,13 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 
 ### NFR-7 – Efficient on the given hardware
 - Level: top   Subject: MiaSystem
-- Text: The MIA system shall show the first text of a chat answer within 10 s on the light model, run every task under explicit budgets of steps, seconds, calls and tokens, and give a waiting chat message priority over a background task.
+- Text: The MIA system shall show the first text of a chat answer within 10 s on the light model, run the character at 30 frames per second or more on a phone inside the network and on a desktop browser, run every task under explicit budgets of steps, seconds, calls and tokens, and give a waiting chat message priority over a background task.
 - Rationale: HLS section 3.2, NFR-7
 - Parent: HLS NFR-7
 - Priority: Must
 - Verification method: Measurement
-- Acceptance criterion: AC-19: first text of a chat answer within 10 s on the light model, also while a review slice runs; 30 fps or more on a mid-range phone and 60 fps on desktop
-- Quality: performance efficiency measure: median time to the first text of a chat answer; frame rate; target: at most 10 s; 30 fps phone, 60 fps desktop; context: MP-light, reference hardware, also while a review slice runs
+- Acceptance criterion: AC-19: first text of a chat answer within 10 s on the light model, also while a review slice runs; 30 fps or more on any phone inside the network (no particular device) and on desktop
+- Quality: performance efficiency measure: median time to the first text of a chat answer; frame rate; target: at most 10 s; 30 fps on a phone and on desktop; context: MP-light, reference hardware, also while a review slice runs
 - Refined in: N-1.2, N-2.1, N-2.4
 - Verified by: TC-MIA-019
 - Status: Draft
