@@ -209,3 +209,19 @@ Workflows, memories, history, user feedback, context graphs and accounts behind 
 - Verified by: –
 - Status: Draft
 - History: –
+
+## Interface requirements
+
+Owned by this node as provider (or, for an external provider, as the consumer that depends on it). The details are in `contracts/`; the mock and the contract suite are in `tests/helpers/mocks/` and `tests/acceptance/contract/`.
+
+### IF-102 – Storage interface
+- Level: high   Subject: Persistence
+- Text: The Database shall provide the Backend with the storage interface IF-102 as specified in contracts/IF-102-storage-interface.md (put as a new immutable version, get, history, ids, delete where allowed, subscribe, and refusal of an invalid workflow with the broken rule named).
+- Rationale: interface between sibling nodes, decided by N-0 (decomposition.yaml)
+- Parent: NFR-8, CON-7, FR-7
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-15, AC-27: the contract suite test_if_102_storage.py passes against the mock (stage 1) and the Database (stage 2)
+- Verified by: TC-IF-102-01..07
+- Status: Draft
+- History: v0, amendment 5/7 (2026-10-25)

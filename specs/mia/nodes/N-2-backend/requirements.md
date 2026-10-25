@@ -917,3 +917,43 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verified by: –
 - Status: Draft
 - History: –
+
+## Interface requirements
+
+Owned by this node as provider (or, for an external provider, as the consumer that depends on it). The details are in `contracts/`; the mock and the contract suite are in `tests/helpers/mocks/` and `tests/acceptance/contract/`.
+
+### IF-101 – Chat, expression, audio and REST API
+- Level: high   Subject: WebApplication
+- Text: The Backend shall provide the Web Frontend with the chat, expression, audio and REST interface IF-101 as specified in contracts/IF-101-chat-api.md (login with throttling, send with queue position, stop, history with senders, and the events chat_message, chat_start, chat_delta, audio_chunk, expression, chat_done and chat_error).
+- Rationale: interface between sibling nodes, decided by N-0 (decomposition.yaml)
+- Parent: FR-1, FR-3, FR-21
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-1, AC-14: the contract suite test_if_101_chat_api.py passes against the mock (stage 1) and the Backend (stage 2)
+- Verified by: TC-IF-101-01..08
+- Status: Draft
+- History: v0, amendment 5/7 (2026-10-25)
+
+### IF-103 – Model server (chat completion with structured output)
+- Level: high   Subject: WebApplication
+- Text: The Backend shall use the model server only through the interface IF-103 as specified in contracts/IF-103-model-server.md, handling the errors unreachable, timeout and bad_output.
+- Rationale: interface between sibling nodes, decided by N-0 (decomposition.yaml)
+- Parent: FR-8, FR-9, NFR-2
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-23: the contract suite test_if_103_model_server.py passes against the mock (stage 1) and the pinned Ollama (stage 2)
+- Verified by: TC-IF-103-01..06
+- Status: Draft
+- History: v0, amendment 5/7 (2026-10-25)
+
+### IF-104 – Workflow and graph API for the Graph app
+- Level: high   Subject: WebApplication
+- Text: The Backend shall provide the Graph app with the workflow and graph interface IF-104 as specified in contracts/IF-104-graph-api.md (login with the Backend's session, list, read, save as a new version, history, diff and restore, and refusal of an invalid graph with the broken rule named).
+- Rationale: interface between sibling nodes, decided by N-0 (decomposition.yaml)
+- Parent: FR-22, FR-30, FR-7
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-16, AC-27: the contract suite test_if_104_graph_api.py passes against the mock (stage 1) and the Backend (stage 2)
+- Verified by: TC-IF-104-01..05
+- Status: Draft
+- History: v0, amendment 5/7 (2026-10-25)

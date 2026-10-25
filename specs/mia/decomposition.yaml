@@ -177,6 +177,7 @@ decomposition:
         location: tests/helpers/mocks/if_101_chat_api.py
         does: ["accepts login, a chat message, answers with scripted sentences and expression events"]
         does_not: ["real model latency", "real budgets", "history persistence"]
+      spec: contracts/IF-101-chat-api.md
       suite: tests/acceptance/contract/test_if_101_chat_api.py
 
     - id: IF-102
@@ -191,6 +192,7 @@ decomposition:
         location: tests/helpers/mocks/if_102_storage.py
         does: ["reads and writes records of every table in memory", "returns the documented errors"]
         does_not: ["transactions across tables", "concurrent writers", "backup and restore"]
+      spec: contracts/IF-102-storage-interface.md
       suite: tests/acceptance/contract/test_if_102_storage.py
 
     - id: IF-103
@@ -206,6 +208,7 @@ decomposition:
         location: tests/helpers/mocks/if_103_model_server.py
         does: ["scripted replies, token counts, errors and timeouts"]
         does_not: ["quality of a real model (eval criteria are decided on the pinned model)"]
+      spec: contracts/IF-103-model-server.md
       suite: tests/acceptance/contract/test_if_103_model_server.py
 
     - id: IF-104
@@ -220,6 +223,7 @@ decomposition:
         location: tests/helpers/mocks/if_104_graph_api.py
         does: ["login and session", "list and read workflows and context graphs", "save a version, history, diff, restore", "refuse an invalid graph with the broken rule named"]
         does_not: ["the real graph rules beyond a fixed list of cases", "concurrent edits"]
+      spec: contracts/IF-104-graph-api.md
       suite: tests/acceptance/contract/test_if_104_graph_api.py
 
     # Decision D-2/D-47 (HLS section 5.5): the graph app N-5 is an independent tool and goes through the backend API

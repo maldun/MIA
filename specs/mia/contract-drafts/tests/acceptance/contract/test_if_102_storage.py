@@ -8,7 +8,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 HELPERS = os.path.join(os.path.dirname(os.path.dirname(HERE)), "helpers")
 sys.path.insert(0, HELPERS)
 
-from contract import each_provider            # noqa: E402
+from contract import contract, each_provider  # noqa: E402
 from markers import mark                      # noqa: E402  (from tests/helpers, shared with the other acceptance tests)
 from errors import StorageError               # noqa: E402
 
@@ -28,6 +28,7 @@ def refused(test, store, doc, rule):
     test.assertEqual(store.ids("workflows"), [])
 
 
+@contract
 class StorageContract(unittest.TestCase):
     @mark.req("IF-102", "REQ-DB-003")
     @each_provider(IF)

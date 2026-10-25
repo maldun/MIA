@@ -18,17 +18,29 @@ REAL_NOT_READY = {
 
 
 def each_provider(interface, make=None):
-    """Decorator: run the test once with the mock and once with the real provider (skipped until integrated).
-    `make` may build the mock differently for a test (for example with a short queue): make(kind) -> subject."""
-    def wrap(test):
-        def run(self):
-            for kind in ("mock", "real"):
-                with self.subTest(kind):
-                    test(self, make(kind) if make else subject_for(interface, kind))
-        run.__name__, run.__doc__ = test.__name__, test.__doc__
-        run.req_ids = getattr(test, "req_ids", ())
-        return run
-    return wrap
+    """Marks a test of a contract suite. `make(kind)` may build the subject differently for this test (for example with a
+    short queue); without it subject_for(interface, kind) is used. The class decorator `contract` turns every marked test
+    into two: <name>_mock (stage 1, must pass) and <name>_real (stage 2, skipped until the provider is integrated)."""
+    def tag(test):
+        test.contract_interface, test.contract_make = interface, make
+        return test
+    return tag
+
+
+def contract(cls):
+    for name, test in list(vars(cls).items()):
+        interface = getattr(test, "contract_interface", None)
+        if interface is None:
+            continue
+        delattr(cls, name)
+        for kind in ("mock", "real"):
+            def run(self, test=test, kind=kind, interface=interface):
+                make = test.contract_make
+                test(self, make(kind) if make else subject_for(interface, kind))
+            run.__name__, run.__doc__ = "%s_%s" % (name, kind), test.__doc__
+            run.req_ids = getattr(test, "req_ids", ())
+            setattr(cls, run.__name__, run)
+    return cls
 
 
 def subject_for(interface, kind):
