@@ -16,8 +16,9 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Priority: Must
 - Verification method: Test, Demonstration
 - Acceptance criterion: AC-1: two users on a desktop and a phone viewport; messages show the sender; answers stream; stop, queue position, reload and shared history work; the chat works when the character cannot load
+- Quality: functional suitability measure: share of scripted chat scenarios of AC-1 that pass; target: 100 %; context: two users, desktop and phone viewports, fake model
 - Refined in: N-1.1, N-2.1, N-2.2, N-3.3
-- Verified by: –
+- Verified by: TC-MIA-001
 - Status: Draft
 - History: –
 
@@ -30,7 +31,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Verification method: Test, Demonstration
 - Acceptance criterion: AC-1, AC-17: expressions blend, gestures play, the mouth moves while speaking; with the character unloaded the chat still answers
 - Refined in: N-1.2
-- Verified by: –
+- Verified by: TC-MIA-001, TC-MIA-017
 - Status: Draft
 - History: –
 
@@ -43,7 +44,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Verification method: Test, Demonstration
 - Acceptance criterion: AC-13: every answer is synthesised on the host with the anime effect and played sentence by sentence in the browser, without markup or stage directions; a user can mute or stop it for themselves
 - Refined in: N-2.5, N-1.3
-- Verified by: –
+- Verified by: TC-MIA-013
 - Status: Draft
 - History: –
 
@@ -55,8 +56,9 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Priority: Should
 - Verification method: Test, Demonstration
 - Acceptance criterion: AC-21: the status line shows mood and activity; for an answer produced by a task the step-by-step account is built from event data and contains no model-written part
+- Quality: interaction capability measure: share of answers of a task whose account is built from events only; target: 100 %; context: answers produced by a task
 - Refined in: N-1.1, N-2.4
-- Verified by: –
+- Verified by: TC-MIA-021
 - Status: Draft
 - History: –
 
@@ -69,7 +71,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Verification method: Test
 - Acceptance criterion: AC-15, AC-17: a saved change of expression, gesture, background, mood phrase, emotion or persona appears on a second device within seconds without a reload and is recorded with its author
 - Refined in: N-1.2, N-2.1, N-3.3
-- Verified by: –
+- Verified by: TC-MIA-015, TC-MIA-017
 - Status: Draft
 - History: –
 
@@ -82,7 +84,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Verification method: Test, Demonstration
 - Acceptance criterion: AC-23: a task that reaches the internet is started only by a command of a user
 - Refined in: N-2.3, N-2.4
-- Verified by: –
+- Verified by: TC-MIA-023
 - Status: Draft
 - History: –
 
@@ -95,7 +97,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Verification method: Test
 - Acceptance criterion: AC-27: a cycle is refused with the cycle named; two adjacent data nodes are refused; a session node without a stopping criterion is refused; every accepted graph has a topological order (property test on generated graphs)
 - Refined in: N-2.3, N-3.2
-- Verified by: –
+- Verified by: TC-MIA-010, TC-MIA-027
 - Status: Draft
 - History: –
 
@@ -107,8 +109,9 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Priority: Must
 - Verification method: Test, Demonstration
 - Acceptance criterion: AC-23: `/light!` and `/full!` switch the model after a confirmation and free GPU memory; an unreachable model server gives a plain message
+- Quality: flexibility measure: steps needed to switch between the pins MP-light and MP-full; target: one command, one confirmation; context: any logged-in user, local Ollama on the owner's host
 - Refined in: N-2.4
-- Verified by: –
+- Verified by: TC-MIA-023
 - Status: Draft
 - History: –
 
@@ -121,7 +124,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Verification method: Test, Measurement
 - Acceptance criterion: AC-2: on the holdout the chosen gate passes fewer wrong claims than the single voice and loses no more true claims among those with evidence (agent-app decision rule); repeated runs give the same verdicts (REQ-VER-005, REQ-VER-006)
 - Refined in: N-2.3, N-2.4, N-3, N-4
-- Verified by: –
+- Verified by: TC-MIA-002
 - Status: Draft
 - History: –
 
@@ -134,7 +137,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Verification method: Test, Measurement
 - Acceptance criterion: AC-2, AC-23: every answer carries sources and verbatim quotes or the answer unknown; `/search` lists findings without composing an answer; a repeated lookup on the same sources gives the same facts
 - Refined in: N-2.3, N-2.4, N-3, N-4
-- Verified by: –
+- Verified by: TC-MIA-002, TC-MIA-009, TC-MIA-023
 - Status: Draft
 - History: –
 
@@ -147,7 +150,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Verification method: Measurement, Test
 - Acceptance criterion: AC-3: per tier source recall and precision against a baseline; 0 violations of the cut-off; 0 invented references; 100 % of quotes anchored
 - Refined in: N-2.3, N-2.4, N-3, N-4
-- Verified by: –
+- Verified by: TC-MIA-003, TC-MIA-009
 - Status: Draft
 - History: –
 
@@ -160,7 +163,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Verification method: Test
 - Acceptance criterion: AC-3: retracted works are dropped and listed; the cut-off is honoured strictly; a user's edit of a trust value is kept
 - Refined in: N-2.3, N-2.4, N-3.3
-- Verified by: –
+- Verified by: TC-MIA-003
 - Status: Draft
 - History: –
 
@@ -173,7 +176,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Verification method: Measurement
 - Acceptance criterion: AC-26 (later, optional): the scout proposes the known method in its top 3 on the retro-discovery cases and marks a candidate verified only when an executable test passed
 - Refined in: N-2.3, N-2.4, N-3, N-4
-- Verified by: –
+- Verified by: TC-MIA-026
 - Status: Draft
 - History: –
 
@@ -186,7 +189,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Verification method: Measurement, Test
 - Acceptance criterion: AC-24 (later): the memory test set is passed at least as well as today's summary-based dreaming at equal or lower token cost; every record shows its source and can be corrected and deleted by a user
 - Refined in: N-2.2, N-3.3
-- Verified by: –
+- Verified by: TC-MIA-024
 - Status: Draft
 - History: –
 
@@ -199,7 +202,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Verification method: Test, Measurement
 - Acceptance criterion: AC-25: the speech-rule detectors keep their recorded precision and recall on the behaviour suite; a violation is repaired silently and never enters the memory as a scolding
 - Refined in: N-2.2
-- Verified by: –
+- Verified by: TC-MIA-025
 - Status: Draft
 - History: –
 
@@ -212,7 +215,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Verification method: Test
 - Acceptance criterion: AC-4: a recorded run replays offline with an identical result; a log with a broken order is reported; two runs compare; a secret fed to the writer does not appear in the log
 - Refined in: N-2.4
-- Verified by: –
+- Verified by: TC-MIA-004
 - Status: Draft
 - History: –
 
@@ -225,7 +228,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Verification method: Test, Inspection
 - Acceptance criterion: AC-22: variants are compared on the same cases with repeats and intervals; a judge model counts only after calibration against the users' ratings
 - Refined in: N-4
-- Verified by: –
+- Verified by: TC-MIA-002, TC-MIA-022
 - Status: Draft
 - History: –
 
@@ -238,7 +241,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Verification method: Test
 - Acceptance criterion: AC-22: a learned choice is logged next to the default, can be switched off and reversed
 - Refined in: N-2.4
-- Verified by: –
+- Verified by: TC-MIA-022
 - Status: Draft
 - History: –
 
@@ -250,8 +253,9 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Priority: Must
 - Verification method: Test, Demonstration
 - Acceptance criterion: AC-7: a fresh checkout, one configuration file and one command bring MIA up in the compose stack including the database; the owner creates the first account; the next start reports missing options
+- Quality: reliability measure: state kept over an orderly shutdown and a backup and restore round trip; target: no record lost; context: compose stack with the database
 - Refined in: N-4
-- Verified by: –
+- Verified by: TC-MIA-007
 - Status: Draft
 - History: –
 
@@ -263,8 +267,9 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Priority: Must
 - Verification method: Inspection, Measurement
 - Acceptance criterion: AC-9: the lookup passes the path first as the documented example; the literature review is added within one month after its promotion; the time from idea to promotion is recorded
+- Quality: maintainability measure: code changes of the platform needed to add a workflow by the documented path; target: none; context: a new valid library entry; lookup first, review within one month
 - Refined in: N-2.3, N-4
-- Verified by: –
+- Verified by: TC-MIA-009
 - Status: Draft
 - History: –
 
@@ -276,8 +281,9 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Priority: Must
 - Verification method: Test, Inspection
 - Acceptance criterion: AC-14: only the owner creates accounts; at most 5 failed logins per minute per account are accepted; passwords are stored only as salted slow hashes and never logged; a user changes their own password
+- Quality: security measure: failed logins accepted per minute and account; plain passwords stored; target: at most 5; none; context: trusted users, home network and tailnet
 - Refined in: N-1.1, N-2.1, N-3.1
-- Verified by: –
+- Verified by: TC-MIA-014
 - Status: Draft
 - History: –
 
@@ -290,7 +296,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Verification method: Test, Demonstration
 - Acceptance criterion: AC-16: a user edits a node as JSON and saves a new version; an invalid edit is refused with the broken rule named; a former version can be restored; the export to files and the seed from files give identical entries
 - Refined in: N-5, N-2.3, N-3.2
-- Verified by: –
+- Verified by: TC-MIA-016
 - Status: Draft
 - History: –
 
@@ -302,8 +308,9 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Priority: Should
 - Verification method: Test, Demonstration
 - Acceptance criterion: AC-17: in each listed situation (idle, thinking, speaking, queue, login, error, offline) the character shows the expression of the mood map; an unknown mood falls back to neutral
+- Quality: interaction capability measure: situations of the mood list that show their mapped expression; target: 7 of 7; context: chat page with the character
 - Refined in: N-1.2, N-2.2
-- Verified by: –
+- Verified by: TC-MIA-017
 - Status: Draft
 - History: –
 
@@ -315,8 +322,9 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Priority: Should
 - Verification method: Demonstration, Test
 - Acceptance criterion: AC-17: a second `.vrm` model loads and reports which presets and gestures it cannot map
+- Quality: compatibility measure: presets and gestures of a second .vrm model that are mapped or listed as missing; target: 100 % mapped or listed, none dropped silently; context: VRoid models
 - Refined in: N-1.2
-- Verified by: –
+- Verified by: TC-MIA-017
 - Status: Draft
 - History: –
 
@@ -329,7 +337,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Verification method: Measurement
 - Acceptance criterion: AC-8: check dialogues made from `calibration.txt` pass at a rate fixed in Plan against the recorded baseline, decided statistically; every user is addressed as master unless the file says otherwise
 - Refined in: N-2.2
-- Verified by: –
+- Verified by: TC-MIA-008
 - Status: Draft
 - History: –
 
@@ -342,7 +350,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Verification method: Inspection, Test
 - Acceptance criterion: AC-10: every shipped workflow has a specification, a context graph and a benchmark with a baseline; the library refuses to promote one without them; every harness run records workflow version, model pin and benchmark version
 - Refined in: N-2.3, N-4
-- Verified by: –
+- Verified by: TC-MIA-010
 - Status: Draft
 - History: –
 
@@ -355,7 +363,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Verification method: Test, Demonstration
 - Acceptance criterion: AC-18: votes in the four categories are stored with user, time and subject; scores show per category and overall over time; the overall score shifts the mood; a minus on a factual answer opens a benchmark case and changes no fact
 - Refined in: N-1.1, N-2.2, N-3.3
-- Verified by: –
+- Verified by: TC-MIA-018
 - Status: Draft
 - History: –
 
@@ -368,7 +376,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Verification method: Test
 - Acceptance criterion: AC-12: of 50 stored tasks and memos all are recited word for word on request and at their due time
 - Refined in: N-2.2, N-3.3
-- Verified by: –
+- Verified by: TC-MIA-012
 - Status: Draft
 - History: –
 
@@ -381,7 +389,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Verification method: Test, Measurement
 - Acceptance criterion: AC-11: after 5 net negative votes a test of 1000 opportunities shows the behaviour at most 10 times; a positive vote raises the rate again; votes on facts never change a fact
 - Refined in: N-2.2
-- Verified by: –
+- Verified by: TC-MIA-011
 - Status: Draft
 - History: –
 
@@ -394,7 +402,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Verification method: Inspection, Test
 - Acceptance criterion: AC-10: every shipped workflow and the chat have a stored context graph that any user can adapt in the graph app as a new version
 - Refined in: N-2.3, N-3.2, N-5
-- Verified by: –
+- Verified by: TC-MIA-010
 - Status: Draft
 - History: –
 
@@ -407,7 +415,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Verification method: Test, Demonstration
 - Acceptance criterion: AC-13: every mood of the mood map has at least one voice line or is declared silent; the default lines are generated by the TTS; a missing audio file does not interrupt a conversation and is logged
 - Refined in: N-2.5, N-1.3
-- Verified by: –
+- Verified by: TC-MIA-013
 - Status: Draft
 - History: –
 
@@ -419,8 +427,9 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Priority: Could
 - Verification method: Demonstration, Test
 - Acceptance criterion: AC-17: a workflow with a variant changes the outfit and one without keeps the chat's
+- Quality: flexibility measure: workflows that change the character's outfit by a variant; target: every workflow that names one; context: character with shown/hidden parts
 - Refined in: N-1.2, N-2.3
-- Verified by: –
+- Verified by: TC-MIA-017
 - Status: Draft
 - History: –
 
@@ -433,7 +442,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Verification method: Test, Measurement
 - Acceptance criterion: AC-28: the estimate of time, calls and tokens is shown before a run; on the recorded lookup runs it is within the factor fixed in Plan of the measured time; a run whose estimate exceeds its budget is refused
 - Refined in: N-2.3
-- Verified by: –
+- Verified by: TC-MIA-028
 - Status: Draft
 - History: –
 
@@ -445,8 +454,9 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Priority: Must
 - Verification method: Test, Demonstration
 - Acceptance criterion: AC-1: browser checks at 360, 768 and 1440 px in both themes; keyboard and screen reader pass; touch targets of at least 44 px
+- Quality: interaction capability measure: touch targets below 44 px, failing keyboard or screen-reader paths, widths 320 to 2560 px without a passing check; target: 0; context: current Chrome, Firefox and Safari (iOS 16+), both themes, reduced motion
 - Refined in: N-1.1, N-1.2
-- Verified by: –
+- Verified by: TC-MIA-001
 - Status: Draft
 - History: –
 
@@ -458,8 +468,9 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Priority: Must
 - Verification method: Measurement, Inspection
 - Acceptance criterion: AC-22: on the lookup suites the cheap first try needs fewer than 15 model calls per question on the light model; every model input stays inside 50 % of the context window
+- Quality: performance efficiency measure: model calls of the cheap first try; share of the context window used by one input; target: fewer than 15; at most 50 %; context: MP-light, lookup suites
 - Refined in: N-2.4
-- Verified by: –
+- Verified by: TC-MIA-022
 - Status: Draft
 - History: –
 
@@ -471,8 +482,9 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-6: with the sandbox removed script checks report unavailable and nothing runs; injected instructions in pages and papers change no verdict and start no tool
+- Quality: security measure: injected instructions that change a verdict or start a tool; target: 0; context: red-team cases, sandbox present and removed
 - Refined in: N-2.4
-- Verified by: –
+- Verified by: TC-MIA-006
 - Status: Draft
 - History: –
 
@@ -484,8 +496,9 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Priority: Must
 - Verification method: Test, Measurement
 - Acceptance criterion: AC-3: 0 invented references and 100 % of cited quotes found in their source; confidence figures computed by code
+- Quality: reliability measure: invented references; cited quotes not found in their source; target: 0; 0 (100 % found); context: lookup and review results
 - Refined in: N-2.3, N-2.4, N-4
-- Verified by: –
+- Verified by: TC-MIA-003
 - Status: Draft
 - History: –
 
@@ -497,8 +510,9 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Priority: Must
 - Verification method: Test, Inspection
 - Acceptance criterion: AC-5: a browser test records every request the page makes and finds none outside the host; the web log lists every query that left the machine; the login page says that nothing is private between users
+- Quality: security measure: requests that leave the host other than the text of a web or scholarly query; target: 0; context: browser sessions of the chat and the graph app
 - Refined in: N-1, N-2, N-3
-- Verified by: –
+- Verified by: TC-MIA-005
 - Status: Draft
 - History: –
 
@@ -510,8 +524,9 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Priority: Must
 - Verification method: Test, Inspection
 - Acceptance criterion: AC-14: other devices reach MIA only over HTTPS inside the home network or the tailnet; every request needs a login; origins are checked; message rates are limited per user; passwords go over plain HTTP only to `localhost`
+- Quality: security measure: unauthenticated requests served; plain-HTTP passwords accepted from LAN addresses; target: 0; 0; context: home network and tailnet
 - Refined in: N-2.1, N-4
-- Verified by: –
+- Verified by: TC-MIA-014
 - Status: Draft
 - History: –
 
@@ -523,8 +538,9 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Priority: Must
 - Verification method: Measurement
 - Acceptance criterion: AC-19: first text of a chat answer within 10 s on the light model, also while a review slice runs; 30 fps or more on a mid-range phone and 60 fps on desktop
+- Quality: performance efficiency measure: median time to the first text of a chat answer; frame rate; target: at most 10 s; 30 fps phone, 60 fps desktop; context: MP-light, reference hardware, also while a review slice runs
 - Refined in: N-1.2, N-2.1, N-2.4
-- Verified by: –
+- Verified by: TC-MIA-019
 - Status: Draft
 - History: –
 
@@ -536,8 +552,9 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-15: the state is in the PostgreSQL database; files to database and back gives identical files; backup and restore round-trip including the database; a change by one user is visible to another within seconds with its author
+- Quality: maintainability measure: tables reached only through the storage interface; records that differ after files to database and back or after backup and restore; target: all tables; 0; context: the Backend (and the Graph app through it), the compose stack
 - Refined in: N-3, N-2.1
-- Verified by: –
+- Verified by: TC-MIA-015
 - Status: Draft
 - History: –
 
@@ -550,7 +567,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Verification method: Test, Demonstration
 - Acceptance criterion: AC-29: from a fresh checkout the compose stack starts the containers of N-2 (serving the frontend files of N-1), N-3, N-4 and N-5 with one configuration file; each container also starts alone against the mocks of its neighbours and passes its contract suites
 - Refined in: N-4, N-2, N-3, N-5
-- Verified by: –
+- Verified by: TC-MIA-029
 - Status: Draft
 - History: –
 
@@ -563,7 +580,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Verification method: Inspection
 - Acceptance criterion: AC-20: licence file present; no paid API in the web log
 - Refined in: N-4
-- Verified by: –
+- Verified by: TC-MIA-020
 - Status: Draft
 - History: –
 
@@ -576,7 +593,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Verification method: Measurement
 - Acceptance criterion: AC-19: measured on the Ryzen 9 5900X with the RX 7800 XT (16 GB VRAM, 62 GB RAM); one language model loaded at a time
 - Refined in: N-2.4, N-4
-- Verified by: –
+- Verified by: TC-MIA-019
 - Status: Draft
 - History: –
 
@@ -589,7 +606,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Verification method: Inspection
 - Acceptance criterion: AC-20: Python 3.11 to 3.13; Godot 4.6.1 with GDScript and the Compatibility renderer; chat page in plain HTML, CSS and ES modules without build step
 - Refined in: N-1, N-2
-- Verified by: –
+- Verified by: TC-MIA-020
 - Status: Draft
 - History: –
 
@@ -602,7 +619,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Verification method: Test
 - Acceptance criterion: AC-14: the character loads only on `localhost` or over HTTPS; passwords are sent only over HTTPS or to `localhost`
 - Refined in: N-1, N-2.1
-- Verified by: –
+- Verified by: TC-MIA-014
 - Status: Draft
 - History: –
 
@@ -615,7 +632,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Verification method: Inspection
 - Acceptance criterion: AC-14: no public port; `tailscale funnel` is not used
 - Refined in: N-4
-- Verified by: –
+- Verified by: TC-MIA-014
 - Status: Draft
 - History: –
 
@@ -628,7 +645,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Verification method: Inspection, Test
 - Acceptance criterion: AC-20: the login page says that everything is visible to all; a change by one user applies to all
 - Refined in: N-1.1, N-2.1
-- Verified by: –
+- Verified by: TC-MIA-015, TC-MIA-020
 - Status: Draft
 - History: –
 
@@ -641,6 +658,6 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Verification method: Inspection
 - Acceptance criterion: AC-15: one PostgreSQL database in a container reachable by MIA and the graph app; MIA's state is behind storage interfaces
 - Refined in: N-3
-- Verified by: –
+- Verified by: TC-MIA-015
 - Status: Draft
 - History: –

@@ -46,7 +46,8 @@ if ids_model != ids_hls:
     problems.append(f"id mismatch: model-only {sorted(ids_model - ids_hls)} HLS-only {sorted(ids_hls - ids_model)}")
 
 # usages and defs
-defs = dict((i, n) for i, n in re.findall(r"requirement def <'((?:FR|NFR|CON)-\d+)'> (\w+)", arch))
+# interface requirements (IF-nnn, Plan) are defined, used, satisfied and allocated like the others; only the comparison with the HLS ids above leaves them out
+defs = dict((i, n) for i, n in re.findall(r"requirement def <'((?:FR|NFR|CON|IF)-\d+)'> (\w+)", arch))
 tree = dict(re.findall(r"^\s+requirement (\w+) : (\w+);", arch, flags=re.M))
 for n, d in tree.items():
     if d not in defs.values():
@@ -122,7 +123,7 @@ for line in hls.split("\n"):
     m = re.match(r"^- \*\*(CON-\d)\*\* (.*)$", line)
     if m:
         hls_text[m.group(1)] = norm(m.group(2))
-for rid in sorted(defs):
+for rid in sorted(i for i in defs if not i.startswith("IF-")):   # interface requirements have no HLS sentence; their text is in requirements.md
     m = re.search(r"requirement def <'%s'> \w+ \{\s*subject mia : MiaSystem;\s*doc /\*(.*?)\*/" % re.escape(rid), arch, re.S)
     if m and norm(m.group(1)) != hls_text.get(rid):
         problems.append(f"{rid}: the doc in architecture.sysml differs from the HLS sentence")

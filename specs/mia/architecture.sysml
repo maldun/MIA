@@ -1081,6 +1081,87 @@ package MIA_Requirements {
                  :>> verifiedBy = (HowVerified::test); }
     }
 
+    requirement def <'IF-101'> ChatApiInterface {
+        subject mia : MiaSystem;
+        doc /* Interface requirement: chat, expression, audio and REST API between the web frontend and the backend. Specified in contracts/IF-101-*.md, tested by its contract suite (specs/mia/test-spec.md). */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'IF-102'> StorageInterface {
+        subject mia : MiaSystem;
+        doc /* Interface requirement: storage interface of the database, the one door to the shared state. Specified in contracts/IF-102-*.md, tested by its contract suite (specs/mia/test-spec.md). */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'IF-103'> ModelServerInterface {
+        subject mia : MiaSystem;
+        doc /* Interface requirement: model server: chat completion with structured output. Specified in contracts/IF-103-*.md, tested by its contract suite (specs/mia/test-spec.md). */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'IF-104'> GraphApiInterface {
+        subject mia : MiaSystem;
+        doc /* Interface requirement: workflow and graph API of the backend for the graph app. Specified in contracts/IF-104-*.md, tested by its contract suite (specs/mia/test-spec.md). */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'IF-111'> CharacterBridgeInterface {
+        subject mia : MiaSystem;
+        doc /* Interface requirement: character bridge between the chat page and the character view. Specified in contracts/IF-111-*.md, tested by its contract suite (specs/mia/test-spec.md). */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'IF-112'> VoicePlayerInterface {
+        subject mia : MiaSystem;
+        doc /* Interface requirement: voice player between the chat page and the voice playback. Specified in contracts/IF-112-*.md, tested by its contract suite (specs/mia/test-spec.md). */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'IF-201'> ChatTurnInterface {
+        subject mia : MiaSystem;
+        doc /* Interface requirement: chat turn service between the gateway and the chat agent. Specified in contracts/IF-201-*.md, tested by its contract suite (specs/mia/test-spec.md). */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'IF-202'> RunWorkflowInterface {
+        subject mia : MiaSystem;
+        doc /* Interface requirement: run a workflow under budgets. Specified in contracts/IF-202-*.md, tested by its contract suite (specs/mia/test-spec.md). */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'IF-203'> WorkflowLibraryInterface {
+        subject mia : MiaSystem;
+        doc /* Interface requirement: library of workflows and context graphs as versioned data. Specified in contracts/IF-203-*.md, tested by its contract suite (specs/mia/test-spec.md). */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'IF-204'> SpeechInterface {
+        subject mia : MiaSystem;
+        doc /* Interface requirement: speech synthesis on the host. Specified in contracts/IF-204-*.md, tested by its contract suite (specs/mia/test-spec.md). */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'IF-301'> GraphTablesInterface {
+        subject mia : MiaSystem;
+        doc /* Interface requirement: table definitions and validation of workflows and context graphs. Specified in contracts/IF-301-*.md, tested by its contract suite (specs/mia/test-spec.md). */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'IF-302'> RecordTablesInterface {
+        subject mia : MiaSystem;
+        doc /* Interface requirement: table definitions and validation of the record tables. Specified in contracts/IF-302-*.md, tested by its contract suite (specs/mia/test-spec.md). */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'IF-401'> RunEventsInterface {
+        subject mia : MiaSystem;
+        doc /* Interface requirement: typed events of a run, order, replay and comparison. Specified in contracts/IF-401-*.md, tested by its contract suite (specs/mia/test-spec.md). */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'IF-402'> ToolCallsInterface {
+        subject mia : MiaSystem;
+        doc /* Interface requirement: tool calls under the budgets of a run, with trust labels. Specified in contracts/IF-402-*.md, tested by its contract suite (specs/mia/test-spec.md). */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'IF-404'> WebAccessInterface {
+        subject mia : MiaSystem;
+        doc /* Interface requirement: web search and fetch (external provider). Specified in contracts/IF-404-*.md, tested by its contract suite (specs/mia/test-spec.md). */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'IF-405'> ScholarlySourcesInterface {
+        subject mia : MiaSystem;
+        doc /* Interface requirement: scholarly sources with a strict date cut-off (external provider). Specified in contracts/IF-405-*.md, tested by its contract suite (specs/mia/test-spec.md). */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+
     requirement def <'FR-21'> AccountsAndLogin {
         subject mia : MiaSystem;
         doc /* Only the owner creates accounts. Every user logs in with a local account and password, may change their own
@@ -1296,6 +1377,22 @@ package MIA_Requirements {
     requirement nfr7 : EfficientOnGivenHardware;
     requirement nfr8 : SharedStateInDatabase;
     requirement nfr9 : ContainerPerNode;
+    requirement if101 : ChatApiInterface;
+    requirement if102 : StorageInterface;
+    requirement if103 : ModelServerInterface;
+    requirement if104 : GraphApiInterface;
+    requirement if111 : CharacterBridgeInterface;
+    requirement if112 : VoicePlayerInterface;
+    requirement if201 : ChatTurnInterface;
+    requirement if202 : RunWorkflowInterface;
+    requirement if203 : WorkflowLibraryInterface;
+    requirement if204 : SpeechInterface;
+    requirement if301 : GraphTablesInterface;
+    requirement if302 : RecordTablesInterface;
+    requirement if401 : RunEventsInterface;
+    requirement if402 : ToolCallsInterface;
+    requirement if404 : WebAccessInterface;
+    requirement if405 : ScholarlySourcesInterface;
 }
 
 package MIA_Allocation {
@@ -1354,6 +1451,22 @@ package MIA_Allocation {
     satisfy nfr7 by mia;
     satisfy nfr8 by mia;
     satisfy nfr9 by mia;
+    satisfy if101 by mia;
+    satisfy if102 by mia;
+    satisfy if103 by mia;
+    satisfy if104 by mia;
+    satisfy if111 by mia;
+    satisfy if112 by mia;
+    satisfy if201 by mia;
+    satisfy if202 by mia;
+    satisfy if203 by mia;
+    satisfy if204 by mia;
+    satisfy if301 by mia;
+    satisfy if302 by mia;
+    satisfy if401 by mia;
+    satisfy if402 by mia;
+    satisfy if404 by mia;
+    satisfy if405 by mia;
 
     // ---------------------------------------------------------------- allocate
 
@@ -1455,6 +1568,22 @@ package MIA_Allocation {
     allocate fr19 to mia.operation.shutdownSequence;
     allocate fr19 to mia.operation.composeStack;
     allocate nfr9 to mia.operation.composeStack;
+    allocate if101 to mia.webApp.chatService;
+    allocate if102 to mia.persistence.storageLayer;
+    allocate if103 to mia.taskRuntime.modelManager;
+    allocate if104 to mia.webApp.presetsApi;
+    allocate if111 to mia.frontEnd.hostBridge;
+    allocate if112 to mia.frontEnd.audioPlayer;
+    allocate if201 to mia.conversation.communicator;
+    allocate if202 to mia.taskRuntime.pipelineRunner;
+    allocate if203 to mia.taskRuntime.libraryStore;
+    allocate if204 to mia.voice.streamer;
+    allocate if301 to mia.persistence.database;
+    allocate if302 to mia.persistence.database;
+    allocate if401 to mia.observability.runLog;
+    allocate if402 to mia.verifier.hardChecks;
+    allocate if404 to mia.research.webTools;
+    allocate if405 to mia.research.scholarClients;
     allocate fr20 to mia.taskRuntime.skillScaffold;
     allocate fr20 to mia.taskRuntime.skillStore;
     allocate fr20 to mia.taskRuntime.libraryStore;

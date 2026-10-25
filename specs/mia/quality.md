@@ -13,14 +13,14 @@ Q-1 (decided): ISO/IEC 25010:2023. A quality requirement (`Quality:` line) is wr
 ## Characteristics
 | Characteristic | Requirements (IDs) or `not now` | Reason for `not now` | Step-up path (security, safety only) |
 |---|---|---|---|
-| Functional suitability | FR-1..FR-20; AC-2 (verification beats single voice on the holdout); NFR-4 (no invented sources) | | |
+| Functional suitability | FR-1 as the model case; the other FR-n of HLS 3.1 by their acceptance criteria AC-1..AC-29 (test-spec.md); AC-2 (verification beats single voice on the holdout) |  |  |
 | Performance efficiency | NFR-7 (first text in 10 s on MP-light, budgets per run, fps), NFR-2, CON-2 | | |
-| Compatibility | NFR-1 (browsers, widths), CON-3, FR-8 (model server); the interface between the three top nodes (decomposition, IF-101..IF-103) | | |
-| Interaction capability | NFR-1 (accessibility, touch targets), FR-4 (transparency), FR-23 (mood in every situation) | | |
-| Reliability | NFR-4 (honest confidence), NFR-8 (database, backups), FR-19 | availability targets `not now` (Q-3): restart by hand after a crash | |
+| Compatibility | FR-24 (VRoid .vrm models), CON-3 (technology); browsers and widths are under interaction capability, the model switch under flexibility; the interfaces between the nodes are under contract (`contracts/`, `decomposition.yaml`) |  |  |
+| Interaction capability | NFR-1 (accessibility, devices, browsers, touch targets), FR-4 (transparency), FR-23 (mood in every situation) |  |  |
+| Reliability | NFR-4 (honest confidence), FR-19 (orderly shutdown, backup and restore) | availability targets `not now` (Q-3): restart by hand after a crash |  |
 | Security | NFR-3 (untrusted input stays data), NFR-5, NFR-6, FR-21, CON-4, CON-5; trust boundaries TB-user..TB-edit; threat model in Plan | | If MIA is ever exposed beyond trusted users: per-user permissions (CON-6 lifted), rate limits per account, audit log of edits, penetration test, update policy for the bill of materials |
-| Maintainability | NFR-8, FR-20 (one development path), decomposition into nodes with contracts | | |
-| Flexibility | FR-24 (character exchange), FR-8 (model switch), FR-32 (variants); portability to NVIDIA or CPU-only `not now` | NVIDIA and CPU-only modes exist but are not the target (3.4) | |
+| Maintainability | NFR-8 (database, backups, one door to the state), FR-20 (one development path), decomposition into nodes with contracts |  |  |
+| Flexibility | FR-8 (model switch), FR-32 (variants) | NVIDIA and CPU-only modes exist but are not the target (3.4) |  |
 | Safety | `not now` | decided by the owner (Q-2): no safety requirements at all; MIA controls nothing physical | If MIA acts on the world (calendar writes, e-mail, home control): redo as a safety analysis before the first such tool |
 
 ## Quality in use (judged in Validate, in the context above)

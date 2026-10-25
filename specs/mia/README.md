@@ -9,6 +9,7 @@ Phase 1 (Explore) of the development workflow, status **Draft**, under step-by-s
 | `model/MIA_Context.sysml`, `model/MIA_Behavior.sysml` | supplements: people, concerns, external systems; chat exchange, lookup, review, consolidation, activity states |
 | `baseline-requirements.md` | what the five requirement documents and the README ask for, per capability, with status, and the contradictions between them |
 | `quality.md`, `shortcuts-register.md`, `decomposition.yaml` | amendment 5 (decided 2026-10-25): quality model walk, shortcuts and exit criteria, the tree of nodes with the top-level interfaces |
+| `requirements.md`, `test-spec.md`, `plan.md`, `glossary.md`, `stages.yaml` (repository root) | Plan for the root node N-0 (draft): top-level requirements, one test case per acceptance criterion plus the contract test cases, the plan of the whole tree, the stage ladder. The nodes have their requirements in `nodes/`, the interfaces are in `contracts/`, drafts of mocks and suites in `contract-drafts/` (installed by `tools/install_contract_drafts.sh`) |
 | `research.md` | measured facts: hardware, models, baselines, what was not looked at |
 | `KNOWN_RISKS.md` | where a SysML parser is most likely to object |
 

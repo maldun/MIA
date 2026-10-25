@@ -1,0 +1,27 @@
+# Stage ladder of MIA (blueprint M27): every check has a stage by the time it needs.
+#   0 edit loop (seconds)   1 commit gate (< 2 min)   2 commit stage (<= 10 min, clean environment)
+#   3 acceptance stage (<= 30 min)   4 long run (hours; scheduled and before integration)
+# Run:  python ~/.claude/skills/dev-workflow/scripts/run_stages.py --stages stages.yaml --upto 1
+# Stage 4 is the eval runs with the pinned model (python tools/eval.py ..., decided by eval_decide.py against the baseline of the criterion);
+# it has no step here until the first node plan names its suites and repeats. required_for_merge therefore lists 1 to 3 for now.
+stages:
+  budget_s: {0: 10, 1: 120, 2: 600, 3: 1800}
+  required_for_merge: [1, 2, 3]
+  review_starts_after: 3
+  long_run_max_age_days: 7
+
+steps:
+  - {id: model-ids,    stage: 0, cmd: "python3 -I tools/check_sysml_model.py .", needs: []}
+  # trace joins this ladder with T-14 (node requirements in the model): until then trace_check.py reports their ids as missing in architecture.sysml
+  # - {id: trace,      stage: 1, cmd: "python3 -I ~/.claude/skills/dev-workflow/scripts/trace_check.py --spec-dir specs/mia --tests-dir tests", needs: []}
+  - {id: quality,      stage: 1, cmd: "python3 -I ~/.claude/skills/plan-phase/scripts/quality_check.py --quality specs/mia/quality.md --requirements specs/mia/requirements.md", needs: []}
+  - {id: decomposition, stage: 1, cmd: "python3 -I ~/.claude/skills/decomposition/scripts/decomp_check.py --record specs/mia/decomposition.yaml --root .", needs: []}
+  - {id: sysml-parse,  stage: 1, cmd: "bash tools/check_sysml.sh", needs: [model-ids]}
+  - {id: js,           stage: 1, cmd: "node --test \"tests/js/*.test.mjs\"", needs: []}
+  - {id: unit,         stage: 1, cmd: "python -m unittest discover -s tests -q", needs: []}
+  - {id: contract-mocks, stage: 1, cmd: "python -m unittest discover -s tests/acceptance/contract -p \"test_if_*.py\" -k _mock", needs: [unit]}
+  - {id: contract-js,  stage: 1, cmd: "node --test tests/acceptance/contract/test_if_111_character_bridge.test.mjs tests/acceptance/contract/test_if_112_voice_player.test.mjs", needs: []}
+  - {id: acceptance,   stage: 2, cmd: "python -m unittest discover -s tests/acceptance -p \"test_*.py\" -q", needs: [unit]}
+  - {id: contract-real, stage: 2, cmd: "python -m unittest discover -s tests/acceptance/contract -p \"test_if_*.py\" -k _real", needs: [acceptance]}
+  - {id: integration,  stage: 3, cmd: "python -m unittest discover -s tests/integration -p \"test_*.py\" -q", needs: [contract-real]}
+  - {id: smoke,        stage: 3, cmd: "python -m unittest discover -s tests/smoke -p \"test_*.py\" -q", needs: [integration]}
