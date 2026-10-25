@@ -7,7 +7,7 @@ Running a workflow version under a budget, and the measured costs the schedule i
 ## Operations
 | Name | Input | Output | Notes |
 |---|---|---|---|
-| `run(workflow, version, inputs, budget, user)` | workflow id, version number, input dict, budget `{steps, seconds, calls, tokens}` (any key may be absent = unlimited), account | `{"run_id", "status", "outputs", "missing", "events"}` | status `done`, `budget_exhausted` or `refused`; `events` are typed run events (`run_start` first, `run_end` last, all with the run id and the user) |
+| `run(workflow, version, inputs, budget, user, options=None)` | workflow id, version number, input dict, budget `{steps, seconds, calls, tokens}` (any key may be absent = unlimited), account, optional `options` = `{"model_pin", "seed", "temperature"}` | `{"run_id", "status", "outputs", "missing", "events", "cost"}` | status `done`, `budget_exhausted` or `refused`; `events` are typed run events (`run_start` first, `run_end` last, all with the run id and the user; `run_start` carries the options); `cost` = `{"steps","seconds","calls","tokens"}` actually spent (all 0 when refused) |
 | `costs(workflow, node_id)` | | `{"seconds", "calls", "tokens"}` or `None` | measured median of recorded runs, from the run log |
 
 ## Errors
@@ -31,4 +31,4 @@ Running a workflow version under a budget, and the measured costs the schedule i
 ## Version history
 | Version | Date | Change | Amendment |
 |---|---|---|---|
-| v0 | 2026-10-25 | first draft | 8 |
+| v0 | 2026-10-25 | first draft; options and cost added in the plan of N-4 (F-4, amendment 9) | 8, 9 |

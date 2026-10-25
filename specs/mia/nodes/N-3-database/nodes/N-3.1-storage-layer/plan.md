@@ -13,7 +13,7 @@ A leaf of the Database. Each task is small, vertical, fits one session and start
 | T-03 Accounts | REQ-SLY-005 | TC-SLY-005 | T-01 |
 | T-04 Library export and seed | REQ-SLY-009 | TC-SLY-009 | T-01 |
 | T-05 Migration command | REQ-SLY-007 | TC-SLY-007 (file side; the database side joins with T-06) | T-01 |
-| T-06 PostgreSQL backend (needs approval) | REQ-SLY-001, REQ-SLY-002, REQ-SLY-003, REQ-SLY-006, REQ-SLY-012 | TC-SLY-001, TC-SLY-002, TC-SLY-003, TC-SLY-006 (PostgreSQL), TC-SLY-007 | T-01, T-05, **owner approval of psycopg 3** |
+| T-06 PostgreSQL backend (psycopg 3 approved, D-54) | REQ-SLY-001, REQ-SLY-002, REQ-SLY-003, REQ-SLY-006, REQ-SLY-012 | TC-SLY-001, TC-SLY-002, TC-SLY-003, TC-SLY-006 (PostgreSQL), TC-SLY-007 | T-01, T-05 |
 | T-07 Backup and restore | REQ-SLY-008 | TC-SLY-008 | T-06 |
 | T-08 Container, network and compose service | REQ-SLY-010, REQ-SLY-011 | TC-SLY-010, TC-SLY-011 | T-06 |
 
@@ -64,14 +64,14 @@ A leaf of the Database. Each task is small, vertical, fits one session and start
 - Done when: the listed tests are green and all other tests are unchanged
 - Notes: Reads the file stores through the same interface, so both directions are the same code.
 
-### T-06: PostgreSQL backend (needs approval)
+### T-06: PostgreSQL backend (psycopg 3 approved, D-54)
 - Implements: REQ-SLY-001, REQ-SLY-002, REQ-SLY-003, REQ-SLY-006, REQ-SLY-012
 - Tests to turn green: TC-SLY-001, TC-SLY-002, TC-SLY-003, TC-SLY-006 (PostgreSQL), TC-SLY-007
 - Touches: `storage_postgres.py`, `requirements-db.txt` (new)
 - Must not touch: tests/acceptance/, tests/helpers/, tests/smoke/, tests/integration/, benchmarks/, contracts/, eval/suites/, eval/baselines/
-- Depends on: T-01, T-05, **owner approval of psycopg 3**
+- Depends on: T-01, T-05
 - Done when: the listed tests are green and all other tests are unchanged
-- Notes: A spike first (one session): psycopg 3 against `postgres:16` in a podman container, LISTEN/NOTIFY across two connections within 2 s. Stop and report if the dependency is not approved.
+- Notes: A spike first (one session): psycopg 3 against `postgres:16` in a podman container, LISTEN/NOTIFY across two connections within 2 s. The dependency is approved (D-54); anything beyond psycopg 3 and `requirements-db.txt` is not.
 
 ### T-07: Backup and restore
 - Implements: REQ-SLY-008

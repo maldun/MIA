@@ -14,6 +14,7 @@ REAL_NOT_READY = {
     "IF-102": "N-3 Database not integrated yet",
     "IF-103": "the real model server is only used in stage 2",
     "IF-104": "N-2 Backend not integrated yet",
+    "IF-105": "N-2 Backend not integrated yet",
     "IF-201": "N-2.2 Chat agent not integrated yet",
     "IF-202": "N-2.4 Workflow execution not integrated yet",
     "IF-203": "N-2.3 Workflow management not integrated yet",
@@ -67,6 +68,9 @@ def subject_for(interface, kind):
         if interface == "IF-104":
             from if_104_graph_api import GraphApiMock
             return GraphApiMock()
+        if interface == "IF-105":
+            from if_105_evaluation_access import EvaluationAccessMock
+            return EvaluationAccessMock()
         if interface == "IF-201":
             from if_201_chat_turn import ChatTurnMock
             return ChatTurnMock()

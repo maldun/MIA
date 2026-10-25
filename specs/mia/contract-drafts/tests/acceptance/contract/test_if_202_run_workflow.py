@@ -59,6 +59,18 @@ class RunWorkflowContract(unittest.TestCase):
         self.assertGreater(costs["calls"], 0)
         self.assertIsNone(runner.costs("lookup", "no-such-node"))
 
+    @mark.req("IF-202", "REQ-OPS-004")
+    @each_provider(IF)
+    def test_options_and_cost_of_a_run(self, runner):
+        """TC-IF-202-05: the options of a run (model pin, seed, temperature) are in the run_start event; the cost is returned and is 0 for a refused run."""
+        options = {"model_pin": "MP-light", "seed": 7, "temperature": 0}
+        done = runner.run("lookup", 1, {}, {"calls": 15}, "anna", options=options)
+        self.assertEqual(done["events"][0]["options"], options)
+        self.assertEqual(set(done["cost"]), {"steps", "seconds", "calls", "tokens"})
+        self.assertGreater(done["cost"]["calls"], 0)
+        refused = runner.run("lookup", 1, {}, {"calls": 1}, "anna", options=options)
+        self.assertEqual(refused["cost"], {"steps": 0, "seconds": 0, "calls": 0, "tokens": 0})
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -19,7 +19,7 @@ class RunWorkflowMock:
         self.workflows = workflows or DEFAULT
         self._runs = 0
 
-    def run(self, workflow, version, inputs, budget, user):
+    def run(self, workflow, version, inputs, budget, user, options=None):
         """status: refused (the estimate exceeds a budget, nothing is started), budget_exhausted (the run exceeds a budget; partial outputs), done."""
         script = self.workflows.get(workflow, {}).get(str(version))
         if script is None:
@@ -27,7 +27,7 @@ class RunWorkflowMock:
         self._runs += 1
         run_id = "r%d" % self._runs
         event = lambda kind, **payload: {"type": kind, "run_id": run_id, "user": user, **payload}
-        events = [event("run_start", workflow=workflow, version=version)]
+        events = [event("run_start", workflow=workflow, version=version, options=dict(options) if options else None)]
         budget = budget or {}
         too_big = [k for k in KEYS if k in budget and script["estimate"].get(k, 0) > budget[k]]
         over = [k for k in KEYS if k in budget and script["cost"].get(k, 0) > budget[k]]
@@ -38,7 +38,8 @@ class RunWorkflowMock:
         else:
             status, outputs, missing = "done", dict(script["outputs"]), []
         events.append(event("run_end", status=status, missing=missing))
-        return {"run_id": run_id, "status": status, "outputs": outputs, "missing": missing, "events": events}
+        cost = {k: 0 for k in KEYS} if status == "refused" else dict(script["cost"])
+        return {"run_id": run_id, "status": status, "outputs": outputs, "missing": missing, "events": events, "cost": cost}
 
     def costs(self, workflow, node_id):
         for script in self.workflows.get(workflow, {}).values():

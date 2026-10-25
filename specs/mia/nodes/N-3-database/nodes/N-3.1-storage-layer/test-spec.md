@@ -26,4 +26,4 @@ Contract test cases of IF-102: TC-IF-102-01 to the last of the suite (listed in 
 
 - ASM-N3-001: podman is installed on the development host and can pull `postgres:16`; the PostgreSQL tests are skipped, never weakened, where it is not.
 - ASM-N3-002: the standard library has `hashlib.scrypt`; no new dependency is needed for the password hash.
-- ASM-N3-003: the PostgreSQL driver is `psycopg` 3, kept in `requirements-db.txt` and imported only when the storage is `postgres` (design of `deploy/REQUIREMENTS_DB.md`); **this is a new dependency and needs the owner's approval before task T-06 of N-3.1**.
+- ASM-N3-003: the PostgreSQL driver is `psycopg` 3, kept in `requirements-db.txt` and imported only when the storage is `postgres` (design of `deploy/REQUIREMENTS_DB.md`); approved by the owner on 2026-10-25 (D-54).
