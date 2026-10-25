@@ -321,8 +321,8 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 ### REQ-FE-027 – Character in a secure context
 - Level: high   Subject: WebFrontEnd
 - Text: The Web Frontend shall load the character only on localhost or over HTTPS.
-- Rationale: refines CON-4
-- Parent: CON-4
+- Rationale: refines CON-4, NFR-6
+- Parent: CON-4, NFR-6
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-14: over plain HTTP to a LAN address the character does not load (exact)
@@ -345,8 +345,8 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 ### REQ-FE-029 – Plain stack
 - Level: high   Subject: WebFrontEnd
 - Text: The Web Frontend shall be plain HTML, CSS and ES modules without a build step or a UI framework, with the character as a Godot 4.6.1 web export in the Compatibility renderer.
-- Rationale: refines CON-3
-- Parent: CON-3
+- Rationale: refines CON-3, NFR-1
+- Parent: CON-3, NFR-1
 - Priority: Must
 - Verification method: Inspection
 - Acceptance criterion: AC-20: no bundler files; the Godot version string is 4.6.1 (exact)

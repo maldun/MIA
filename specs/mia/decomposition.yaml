@@ -39,8 +39,10 @@ decomposition:
       boundary:
         - {interface: IF-101, role: provides, child: N-2.1}
         - {interface: IF-104, role: provides, child: N-2.1}
+        - {interface: IF-102, role: consumes, child: N-2.1}
         - {interface: IF-102, role: consumes, child: N-2.2}
         - {interface: IF-102, role: consumes, child: N-2.3}
+        - {interface: IF-102, role: consumes, child: N-2.4}
         - {interface: IF-103, role: consumes, child: N-2.4}
 
     - id: N-3
@@ -107,6 +109,9 @@ decomposition:
       folder: specs/mia/nodes/N-2-backend/nodes/N-2.1-api-and-accounts
       status: Planned
       children: []
+      tasks: 6                          # estimates until the node is planned
+      test_stage: 2
+      leaf_exception: "the gateway: two interfaces face outward (IF-101, IF-104) and three inward (IF-201, IF-203, IF-102); the inward ones are single-call clients, the node stays one routing layer"
 
     - id: N-2.2
       name: Chat agent
@@ -115,6 +120,9 @@ decomposition:
       folder: specs/mia/nodes/N-2-backend/nodes/N-2.2-chat-agent
       status: Planned
       children: []
+      tasks: 8
+      test_stage: 3                     # model-dependent behaviour is decided by evals (stage 4)
+      leaf_exception: "the hub of the persona: IF-201 outward, IF-202 and IF-204 as single-call clients and IF-102 as storage client; cut again by concern (conversation and queue, memory, feedback and adaptation) if the plan exceeds 8 tasks"
 
     - id: N-2.3
       name: Workflow management
@@ -123,6 +131,8 @@ decomposition:
       folder: specs/mia/nodes/N-2-backend/nodes/N-2.3-workflow-management
       status: Planned
       children: []
+      tasks: 7
+      test_stage: 2
 
     - id: N-2.4
       name: Workflow execution
@@ -131,6 +141,9 @@ decomposition:
       folder: specs/mia/nodes/N-2-backend/nodes/N-2.4-workflow-execution
       status: Planned
       children: []
+      tasks: 8
+      test_stage: 4
+      leaf_exception: "holds 35 requirements and four interfaces; it is the doubtful, model-dependent part (FR-9, FR-11) and is cut again into runtime, verification, research and run log (low-2) before its plan, risky nodes first"
 
     - id: N-2.5
       name: Voice synthesis
@@ -139,6 +152,8 @@ decomposition:
       folder: specs/mia/nodes/N-2-backend/nodes/N-2.5-voice-synthesis
       status: Planned
       children: []
+      tasks: 4
+      test_stage: 2
 
     - id: N-3.1
       name: Storage layer and accounts tables
@@ -229,7 +244,68 @@ decomposition:
     # Decision D-2/D-47 (HLS section 5.5): the graph app N-5 is an independent tool and goes through the backend API
     # (IF-104). The backend validates edits (TB-edit); N-3.1 validates again.
     # Search and scholarly services (SearXNG, scholarly APIs) are external providers of N-2.4; their
-    # interfaces are recorded when N-2 is cut.
+    # interfaces are recorded when N-2.4 is cut again.
+
+    # Interfaces between the children of N-2 (decided by N-2, amendment 8 / D-48)
+    - id: IF-201
+      name: Chat turn service (API and accounts to chat agent)
+      provider: N-2.2
+      consumers: [N-2.1]
+      decided_by: N-2
+      version: v0
+      mock:
+        complexity: 3               # a stream of events, a queue
+        kind: fake
+        location: tests/helpers/mocks/if_201_chat_turn.py
+        does: ["send for an account, queue position, stop, history, the event stream of one scripted answer"]
+        does_not: ["model latency", "persistence", "persona and mood"]
+      spec: contracts/IF-201-chat-turn.md
+      suite: tests/acceptance/contract/test_if_201_chat_turn.py
+
+    - id: IF-202
+      name: Run a workflow
+      provider: N-2.4
+      consumers: [N-2.2, N-2.3]
+      decided_by: N-2
+      version: v0
+      mock:
+        complexity: 3               # budgets, a stream of run events, costs
+        kind: fake
+        location: tests/helpers/mocks/if_202_run_workflow.py
+        does: ["run a workflow version with a scripted result", "budget end with what is missing", "event stream", "measured cost of a node"]
+        does_not: ["real model calls", "real verification and research"]
+      spec: contracts/IF-202-run-workflow.md
+      suite: tests/acceptance/contract/test_if_202_run_workflow.py
+
+    - id: IF-203
+      name: Workflow library
+      provider: N-2.3
+      consumers: [N-2.1, N-2.2, N-2.4]
+      decided_by: N-2
+      version: v0
+      mock:
+        complexity: 2               # in-memory library on the storage mock
+        kind: fake
+        location: tests/helpers/mocks/if_203_workflow_library.py
+        does: ["list, read, save a version, history, diff, restore", "lifecycle status", "estimate of a run from stored costs"]
+        does_not: ["the real graph rules beyond the shared rule module", "specification and benchmark records"]
+      spec: contracts/IF-203-workflow-library.md
+      suite: tests/acceptance/contract/test_if_203_workflow_library.py
+
+    - id: IF-204
+      name: Speech synthesis
+      provider: N-2.5
+      consumers: [N-2.2]
+      decided_by: N-2
+      version: v0
+      mock:
+        complexity: 2               # returns short generated audio bytes
+        kind: fake
+        location: tests/helpers/mocks/if_204_speech.py
+        does: ["synthesise a sentence to an audio chunk", "deliver a voice line", "the documented errors"]
+        does_not: ["the sound of the real voice", "the anime effect"]
+      spec: contracts/IF-204-speech.md
+      suite: tests/acceptance/contract/test_if_204_speech.py
 
   integration:
     - node: N-0
@@ -240,3 +316,11 @@ decomposition:
         - {child: N-1, test: tests/integration/N-0/step_03}
         - {child: N-2, test: tests/integration/N-0/step_04}
         - {child: N-5, test: tests/integration/N-0/step_05, reason: "an add-on tool (owner, 2026-10-25): MIA is complete and usable without it, so it is integrated last"}
+    - node: N-2
+      skeleton: tests/integration/N-2/step_00
+      order:
+        - {child: N-2.5, test: tests/integration/N-2/step_01}
+        - {child: N-2.3, test: tests/integration/N-2/step_02}
+        - {child: N-2.4, test: tests/integration/N-2/step_03, reason: "risky first: the model-dependent part (FR-9, FR-11) and the largest node; its interfaces IF-202 and IF-203 are mocks until then"}
+        - {child: N-2.2, test: tests/integration/N-2/step_04}
+        - {child: N-2.1, test: tests/integration/N-2/step_05}

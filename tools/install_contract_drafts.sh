@@ -24,7 +24,7 @@ if [ "${1:-}" != "--run" ]; then
 fi
 
 if [ "${1:-}" = "--run" ] || [ "$status" = 0 ]; then
-    for suite in tests/acceptance/contract/test_if_10*.py; do
+    for suite in tests/acceptance/contract/test_if_*.py; do
         echo "== $suite"
         python3 "$suite" 2>&1 | tail -3
     done

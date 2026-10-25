@@ -259,6 +259,8 @@ The top-level cut follows the owner's suggestion of 2026-10-25; the mapping of t
 
 Containers (amendment 6, NFR-9): N-2, N-3, N-4 and N-5 are one container each under podman; N-1 is static files in the image of the backend container, so it has no container of its own and its tests run in a browser against the mock of IF-101. Voice synthesis (N-2.5) runs in the backend container or as a second container of the same node (decided when N-2 is cut).
 
+The Backend N-2 is cut into five low-level nodes in Plan (D-48 of the review log, `decomposition.yaml`): the interfaces between them are IF-201 chat turn, IF-202 run a workflow, IF-203 workflow library and IF-204 speech; N-2.4 Workflow execution is the risky node and is cut again before its plan.
+
 Top-level interfaces (decided here, each with a mock and a contract suite before the children start): IF-101 chat, expression, audio and REST API between N-1 and N-2; IF-102 storage interface of N-3, used by N-2 only; IF-103 the model server, an external provider owned by N-2; IF-104 workflow and graph API (REST with the backend's session) between N-2 and N-5 (amendment 7).
 
 Integration order: N-3, N-4, N-1, N-2, then N-5 last. N-5 is an add-on (owner, 2026-10-25): MIA is complete and usable without it. The testability-first order would put it first, so the record carries a `reason:` for the move.

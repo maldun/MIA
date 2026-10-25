@@ -51,7 +51,7 @@ class ModelServerContract(unittest.TestCase):
             self.assertEqual(caught.exception.code, "bad_output")
             self.assertEqual(caught.exception.detail, raw)
 
-    @mark.req("IF-103", "REQ-BE-044")
+    @mark.req("IF-103", "REQ-BE-045")
     @each_provider(IF, make(down=True))
     def test_unreachable_server(self, model):
         """TC-IF-103-04 golden 2: a server that is not running is 'unreachable'; the caller can say so in plain words."""

@@ -22,3 +22,8 @@ Used by the requirements linter (L1) and as context for the LLM assessor (L3). T
 | judgement style | The way model judgement is organised for open claims: single voice, repeated samples, jury, cops, trial | – | – | verdict style |
 | model pin | The model name, tag and digest an evaluation was run with (MP-light, MP-full) | – | – | model version |
 | holdout | The part of a suite used only for decisions in Verify | – | – | test split |
+| API and accounts | Node N-2.1: the Socket.IO and REST surface of the Backend, accounts and sessions, delivery of the frontend files | WebApplication | – | gateway |
+| Chat agent | Node N-2.2: the shared conversation, queue, persona, mood, memory, behaviour rules, votes, adaptation, tasks and memos | ConversationCore | – | chat bot, dialogue manager |
+| Workflow management | Node N-2.3: the library of workflows and skills, graph rules, specifications, context graphs, schedule | TaskRuntime | – | workflow editor |
+| Workflow execution | Node N-2.4: running a workflow under budgets with verification, research, sandbox and run log | TaskRuntime | – | task engine |
+| Voice synthesis | Node N-2.5: text-to-speech on the host with the anime effect and the voice lines | VoiceSubsystem | – | speech engine |

@@ -177,8 +177,8 @@ Harness, suites, baselines, compose stack, backups, shutdown. The sub-part Opera
 ### REQ-OPS-015 – Free and open
 - Level: high   Subject: Evaluation
 - Text: The Evaluation and operation node shall provide the licence GPL-3.0-or-later and use no paid API.
-- Rationale: refines CON-1
-- Parent: CON-1
+- Rationale: refines CON-1, NFR-5
+- Parent: CON-1, NFR-5
 - Priority: Must
 - Verification method: Inspection
 - Acceptance criterion: AC-20: licence file present; no paid API host in the web log
@@ -189,8 +189,8 @@ Harness, suites, baselines, compose stack, backups, shutdown. The sub-part Opera
 ### REQ-OPS-016 – Hardware configuration
 - Level: high   Subject: Evaluation
 - Text: The Evaluation and operation node shall configure the model server to load one model at a time.
-- Rationale: refines CON-2
-- Parent: CON-2
+- Rationale: refines CON-2, NFR-7
+- Parent: CON-2, NFR-7
 - Priority: Must
 - Verification method: Inspection
 - Acceptance criterion: AC-19: OLLAMA_MAX_LOADED_MODELS equals 1 (exact)

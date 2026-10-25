@@ -177,8 +177,8 @@ The server and accounts, the chat agent, workflow management, workflow execution
 ### REQ-BE-015 – Everything visible to all users
 - Level: high   Subject: WebApplication
 - Text: The Backend shall give every logged-in user the same access to all data and apply a change to all users at once, without roles.
-- Rationale: refines CON-6
-- Parent: CON-6
+- Rationale: refines CON-6, FR-5
+- Parent: CON-6, FR-5
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-20: a second user sees and changes a first user's workflow, preset and persona
@@ -861,8 +861,8 @@ The server and accounts, the chat agent, workflow management, workflow execution
 ### REQ-BE-072 – One model at a time
 - Level: high   Subject: WebApplication
 - Text: The Backend shall use one language model at a time on the 16 GB GPU and serve several users by the queue.
-- Rationale: refines CON-2
-- Parent: CON-2
+- Rationale: refines CON-2, NFR-7
+- Parent: CON-2, NFR-7
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-19: two simultaneous messages are answered one after the other
@@ -873,8 +873,8 @@ The server and accounts, the chat agent, workflow management, workflow execution
 ### REQ-BE-073 – Python versions
 - Level: high   Subject: WebApplication
 - Text: The Backend shall run on Python 3.11 to 3.13.
-- Rationale: refines CON-3
-- Parent: CON-3
+- Rationale: refines CON-3, NFR-9
+- Parent: CON-3, NFR-9
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-20: the unit tests pass on 3.12 and the import works on 3.11 and 3.13 (exact)
