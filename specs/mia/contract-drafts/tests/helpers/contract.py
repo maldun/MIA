@@ -20,6 +20,10 @@ REAL_NOT_READY = {
     "IF-204": "N-2.5 Voice synthesis not integrated yet",
     "IF-301": "N-3.2 Graph tables not integrated yet",
     "IF-302": "N-3.3 Record tables not integrated yet",
+    "IF-401": "N-2.4.3 Run log not integrated yet",
+    "IF-402": "N-2.4.2 Tools and sandbox not integrated yet",
+    "IF-404": "the real web client and SearXNG are only used in stage 2",
+    "IF-405": "the real scholarly APIs are only used in stage 2",
 }
 
 
@@ -81,5 +85,17 @@ def subject_for(interface, kind):
         if interface == "IF-302":
             from if_302_record_tables import RecordTablesMock
             return RecordTablesMock()
+        if interface == "IF-401":
+            from if_401_run_events import RunEventsMock
+            return RunEventsMock()
+        if interface == "IF-402":
+            from if_402_tool_calls import ToolCallsMock
+            return ToolCallsMock()
+        if interface == "IF-404":
+            from if_404_web import WebMock
+            return WebMock()
+        if interface == "IF-405":
+            from if_405_scholarly_sources import ScholarMock
+            return ScholarMock()
         raise KeyError(interface)
     raise unittest.SkipTest(REAL_NOT_READY[interface])

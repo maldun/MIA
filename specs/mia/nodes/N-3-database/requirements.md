@@ -210,6 +210,18 @@ Workflows, memories, history, user feedback, context graphs and accounts behind 
 - Status: Draft
 - History: –
 
+### REQ-DB-018 – Example workflows as seed data
+- Level: high   Subject: Persistence
+- Text: The Database shall ship the example workflows lookup, verify and review, the search command and method transfer (off by default) as seed entries of the library, with their specifications, context graphs and benchmark references.
+- Rationale: refines FR-20, FR-26
+- Parent: FR-20, FR-26
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-9, AC-10: after a seed from files the library holds the five entries; export then seed gives identical entries (exact)
+- Verified by: –
+- Status: Draft
+- History: –
+
 ## Interface requirements
 
 Owned by this node as provider (or, for an external provider, as the consumer that depends on it). The details are in `contracts/`; the mock and the contract suite are in `tests/helpers/mocks/` and `tests/acceptance/contract/`.

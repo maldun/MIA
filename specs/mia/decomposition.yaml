@@ -4,7 +4,7 @@
 # Interface ids start at IF-101 because specs/number-gate already uses IF-001..IF-004.
 decomposition:
   system: mia
-  levels: [top, high, low]
+  levels: [top, high, low, low-2]
   limits: {children_min: 2, children_max: 7, leaf_tasks: 8, leaf_interfaces: 3}
 
   nodes:
@@ -145,11 +145,46 @@ decomposition:
       level: low
       subject: TaskRuntime
       folder: specs/mia/nodes/N-2-backend/nodes/N-2.4-workflow-execution
+      status: Draft
+      test_stage: 4
+      children: [N-2.4.1, N-2.4.2, N-2.4.3]    # the platform only: the example workflows are library data (D-50)
+      boundary:
+        - {interface: IF-202, role: provides, child: N-2.4.1}
+        - {interface: IF-203, role: consumes, child: N-2.4.1}
+        - {interface: IF-103, role: consumes, child: N-2.4.1}
+        - {interface: IF-102, role: consumes, child: N-2.4.3}
+
+    - id: N-2.4.1
+      name: Pipeline runner
+      level: low-2
+      subject: TaskRuntime
+      folder: specs/mia/nodes/N-2-backend/nodes/N-2.4-workflow-execution/nodes/N-2.4.1-pipeline-runner
+      status: Planned
+      children: []
+      tasks: 8                          # estimates until the node is planned
+      test_stage: 3
+      leaf_exception: "a hub by nature: it provides IF-202 and consumes IF-203, IF-103, IF-401 and IF-402, every one a single-call client; it names no particular workflow"
+
+    - id: N-2.4.2
+      name: Tools and sandbox
+      level: low-2
+      subject: VerificationSuite
+      folder: specs/mia/nodes/N-2-backend/nodes/N-2.4-workflow-execution/nodes/N-2.4.2-tools-and-sandbox
       status: Planned
       children: []
       tasks: 8
-      test_stage: 4
-      leaf_exception: "holds 35 requirements and four interfaces; it is the doubtful, model-dependent part (FR-9, FR-11) and is cut again into runtime, verification, research and run log (low-2) before its plan, risky nodes first"
+      test_stage: 3
+      leaf_exception: "provides IF-402 and consumes IF-401, IF-404 and IF-405; the two external sources are single-call clients, each tool is a small package"
+
+    - id: N-2.4.3
+      name: Run log
+      level: low-2
+      subject: Observability
+      folder: specs/mia/nodes/N-2-backend/nodes/N-2.4-workflow-execution/nodes/N-2.4.3-run-log
+      status: Planned
+      children: []
+      tasks: 5
+      test_stage: 2
 
     - id: N-2.5
       name: Voice synthesis
@@ -381,9 +416,72 @@ decomposition:
       spec: contracts/IF-302-record-tables.md
       suite: tests/acceptance/contract/test_if_302_record_tables.py
 
+    # Interfaces between the children of N-2.4 (decided by N-2.4, D-50)
+    - id: IF-401
+      name: Run event log
+      provider: N-2.4.3
+      consumers: [N-2.4.1, N-2.4.2]
+      decided_by: N-2.4
+      version: v0
+      mock:
+        complexity: 2               # an in-memory log with run ids, order and the account
+        kind: fake
+        location: tests/helpers/mocks/if_401_run_events.py
+        does: ["typed events with run id and user, in order", "events of a run, the account of an answer, the comparison of two runs", "secrets removed", "a broken order is reported"]
+        does_not: ["persistence", "the full event schema of events.py"]
+      spec: contracts/IF-401-run-events.md
+      suite: tests/acceptance/contract/test_if_401_run_events.py
+
+    - id: IF-402
+      name: Tool calls
+      provider: N-2.4.2
+      consumers: [N-2.4.1]
+      decided_by: N-2.4
+      version: v0
+      mock:
+        complexity: 3               # counted calls against budgets, trust labels, scripted tools
+        kind: fake
+        location: tests/helpers/mocks/if_402_tool_calls.py
+        does: ["number_check, quote_in_source, schema_check, run_script, web_search, fetch_passages, scholar_search, source_record", "a budget per tool and run", "a trust label on every output", "a script run that is refused without a sandbox"]
+        does_not: ["real network access", "a real sandbox"]
+      spec: contracts/IF-402-tool-calls.md
+      suite: tests/acceptance/contract/test_if_402_tool_calls.py
+
+    - id: IF-404
+      name: Web search and fetch (external)
+      provider: ext:web
+      owner: N-2.4.2
+      consumers: [N-2.4.2]
+      decided_by: N-2.4
+      version: v0
+      mock:
+        complexity: 3               # scripted pages and results, refusals, errors
+        kind: fake
+        location: tests/helpers/mocks/if_404_web.py
+        does: ["search results, fetch of scripted pages", "refusal of private addresses, odd ports and unsupported content", "HTTP errors and search errors"]
+        does_not: ["the real internet", "redirect chains"]
+      spec: contracts/IF-404-web.md
+      suite: tests/acceptance/contract/test_if_404_web.py
+
+    - id: IF-405
+      name: Scholarly sources (external)
+      provider: ext:scholar
+      owner: N-2.4.2
+      consumers: [N-2.4.2]
+      decided_by: N-2.4
+      version: v0
+      mock:
+        complexity: 3               # scripted works, the strict date cut-off, a failing source
+        kind: fake
+        location: tests/helpers/mocks/if_405_scholarly_sources.py
+        does: ["search over scripted works in one record format", "the strict date cut-off", "one failing source does not stop the others"]
+        does_not: ["the five real APIs", "the file cache"]
+      spec: contracts/IF-405-scholarly-sources.md
+      suite: tests/acceptance/contract/test_if_405_scholarly_sources.py
+
   integration:
     - node: N-0
-      skeleton: tests/integration/N-0/step_00
+      skeleton: tests/integration/N-0/step_00   # the thinnest end-to-end scenario is the example workflow lookup on the mocks (D-50)
       order:
         - {child: N-3, test: tests/integration/N-0/step_01}
         - {child: N-4, test: tests/integration/N-0/step_02}
@@ -410,3 +508,9 @@ decomposition:
         - {child: N-3.2, test: tests/integration/N-3/step_01}
         - {child: N-3.3, test: tests/integration/N-3/step_02}
         - {child: N-3.1, test: tests/integration/N-3/step_03}
+    - node: N-2.4
+      skeleton: tests/integration/N-2.4/step_00
+      order:
+        - {child: N-2.4.3, test: tests/integration/N-2.4/step_01}
+        - {child: N-2.4.2, test: tests/integration/N-2.4/step_02}
+        - {child: N-2.4.1, test: tests/integration/N-2.4/step_03}

@@ -33,3 +33,7 @@ Used by the requirements linter (L1) and as context for the LLM assessor (L3). T
 | Storage layer | Node N-3.1: the PostgreSQL database and the one door to it (IF-102) | Persistence | – | DB layer |
 | Graph tables | Node N-3.2: the tables of workflows and context graphs and the graph rules of every write | Persistence | – | graph store |
 | Record tables | Node N-3.3: the tables of history, memory, votes, tasks, memos, presets, gestures and run results | Persistence | – | record store |
+| Pipeline runner | Node N-2.4.1: runs a workflow step by step under budgets, with model calls and model management; knows no particular workflow | TaskRuntime | – | executor |
+| Tools and sandbox | Node N-2.4.2: the tools any workflow can call (code checks, web, scholarly sources, source records) and the sandbox, counted against the budgets of a run | VerificationSuite | – | tool box |
+| Run log | Node N-2.4.3: typed events of runs, replay, comparison, the account of an answer | Observability | – | trace store |
+| example workflow | A workflow delivered as library data to prove the platform and to serve as a blueprint: lookup, verify, review, method transfer; its criteria are decided by the benchmark | – | – | built-in skill |

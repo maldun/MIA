@@ -56,7 +56,7 @@ Running a workflow under budgets: the pipeline runner, model management, verific
 
 ### REQ-WFX-005 – Code checks first
 - Level: low   Subject: TaskRuntime
-- Text: The Workflow execution shall check a claim by code where a code check exists and use model judgement only for the claims that the code checks leave open.
+- Text: The Workflow execution shall offer the code checks number_check, quote_in_source and schema_check as tools that any workflow can call.
 - Rationale: refines REQ-BE-046
 - Parent: REQ-BE-046
 - Priority: Must
@@ -66,57 +66,9 @@ Running a workflow under budgets: the pipeline runner, model management, verific
 - Status: Draft
 - History: –
 
-### REQ-WFX-006 – Unclear without evidence
+### REQ-WFX-006 – Lookup with sources
 - Level: low   Subject: TaskRuntime
-- Text: If a claim contains a number and has no evidence, then the Workflow execution shall give the verdict unclear without a model call.
-- Rationale: refines REQ-BE-047
-- Parent: REQ-BE-047
-- Priority: Must
-- Verification method: Test
-- Acceptance criterion: AC-2: for 10 claims with a number and no evidence there are 0 model calls and the verdict is unclear (exact)
-- Verified by: –
-- Status: Draft
-- History: –
-
-### REQ-WFX-007 – A failed check informs the judge
-- Level: low   Subject: TaskRuntime
-- Text: If a code check fails, then the Workflow execution shall pass the failed check to the judgement style as a contradiction found by code.
-- Rationale: refines REQ-BE-048
-- Parent: REQ-BE-048
-- Priority: Must
-- Verification method: Test
-- Acceptance criterion: AC-2: the judge input contains the check line (exact); the verdict is the judge's
-- Verified by: –
-- Status: Draft
-- History: –
-
-### REQ-WFX-008 – Judgement quality
-- Level: low   Subject: TaskRuntime
-- Text: The Workflow execution shall run the chosen judgement style so that on the holdout it passes fewer wrong claims than the single voice and loses no more true claims among those with evidence.
-- Rationale: refines REQ-BE-049
-- Parent: REQ-BE-049
-- Priority: Must
-- Verification method: Measurement
-- Acceptance criterion: AC-2: decided with the rule of the agent-app workflow against the baseline
-- Verified by: –
-- Status: Draft
-- History: –
-
-### REQ-WFX-009 – Stable verdicts
-- Level: low   Subject: TaskRuntime
-- Text: When a verification is repeated on the same input and the same sources, the Workflow execution shall give the same verdicts and the same set of facts.
-- Rationale: refines REQ-BE-050
-- Parent: REQ-BE-050
-- Priority: Must
-- Verification method: Measurement
-- Acceptance criterion: AC-2: stability limit 0.90 (lower bound of the 95 % interval, at least) on the dev suites (REQ-VER-005, REQ-VER-006)
-- Verified by: –
-- Status: Draft
-- History: –
-
-### REQ-WFX-010 – Lookup with sources
-- Level: low   Subject: TaskRuntime
-- Text: When a user asks a factual question, the Workflow execution shall answer with the sources and verbatim quotes that back it, or with unknown when nothing backs an answer.
+- Text: The Workflow execution shall offer the tools web_search and fetch_passages (findings with title, address and short text; passages with verbatim quotes) that any workflow can call.
 - Rationale: refines REQ-BE-051
 - Parent: REQ-BE-051
 - Priority: Must
@@ -126,57 +78,9 @@ Running a workflow under budgets: the pipeline runner, model management, verific
 - Status: Draft
 - History: –
 
-### REQ-WFX-011 – Search command
+### REQ-WFX-007 – Source records and cut-off
 - Level: low   Subject: TaskRuntime
-- Text: When a user gives the search command, the Workflow execution shall list the findings of the metasearch (title, address, short text) without composing or verifying an answer.
-- Rationale: refines REQ-BE-052
-- Parent: REQ-BE-052
-- Priority: Should
-- Verification method: Test
-- Acceptance criterion: AC-23: /search returns the list and starts no pipeline
-- Verified by: –
-- Status: Draft
-- History: –
-
-### REQ-WFX-012 – Review report
-- Level: low   Subject: TaskRuntime
-- Text: When a user gives a research question, a cut-off date and a budget, the Workflow execution shall produce a report of kept and dropped sources with reasons, findings per sub-question with verbatim anchors, conflicts and open gaps.
-- Rationale: refines REQ-BE-053
-- Parent: REQ-BE-053
-- Priority: Should
-- Verification method: Measurement
-- Acceptance criterion: AC-3: per tier source recall and precision against the baseline
-- Verified by: –
-- Status: Draft
-- History: –
-
-### REQ-WFX-013 – Review in time slices
-- Level: low   Subject: TaskRuntime
-- Text: The Workflow execution shall work a review in time slices, give an intermediate report with a recommendation at the end of each slice and continue only when the requesting user agrees.
-- Rationale: refines REQ-BE-054
-- Parent: REQ-BE-054
-- Priority: Should
-- Verification method: Test
-- Acceptance criterion: AC-3: after the first slice (60 s) the run waits for agreement (exact)
-- Verified by: –
-- Status: Draft
-- History: –
-
-### REQ-WFX-014 – Review stops by a code check
-- Level: low   Subject: TaskRuntime
-- Text: The Workflow execution shall end a review when a code check finds every sub-question answered or a budget used up.
-- Rationale: refines REQ-BE-055
-- Parent: REQ-BE-055
-- Priority: Should
-- Verification method: Test
-- Acceptance criterion: AC-3: with a fake model that always says done, the run still continues until the code check holds
-- Verified by: –
-- Status: Draft
-- History: –
-
-### REQ-WFX-015 – Source records and cut-off
-- Level: low   Subject: TaskRuntime
-- Text: The Workflow execution shall record where a source comes from and how far it is trusted, keep the users' edits of that trust and honour a time cut-off strictly.
+- Text: The Workflow execution shall offer the tools scholar_search and source_record, which return one record format with the origin, the trust class, the retraction state and a strictly applied date cut-off.
 - Rationale: refines REQ-BE-056
 - Parent: REQ-BE-056
 - Priority: Must
@@ -186,19 +90,7 @@ Running a workflow under budgets: the pipeline runner, model management, verific
 - Status: Draft
 - History: –
 
-### REQ-WFX-016 – Method transfer
-- Level: low   Subject: TaskRuntime
-- Text: Where method transfer is switched on, the Workflow execution shall offer few ranked candidate methods marked as hypotheses unless an executable test on a toy instance passed.
-- Rationale: refines REQ-BE-057
-- Parent: REQ-BE-057
-- Priority: Could
-- Verification method: Measurement
-- Acceptance criterion: AC-26: the known method is in the top 3 on the retro-discovery cases
-- Verified by: –
-- Status: Draft
-- History: –
-
-### REQ-WFX-017 – Typed run events
+### REQ-WFX-008 – Typed run events
 - Level: low   Subject: TaskRuntime
 - Text: The Workflow execution shall write every run as typed, schema-checked events with one run id and the starting user, with secrets removed.
 - Rationale: refines REQ-BE-058
@@ -210,7 +102,7 @@ Running a workflow under budgets: the pipeline runner, model management, verific
 - Status: Draft
 - History: –
 
-### REQ-WFX-018 – Replay and comparison
+### REQ-WFX-009 – Replay and comparison
 - Level: low   Subject: TaskRuntime
 - Text: The Workflow execution shall replay a recorded run offline with an identical result and compare two runs.
 - Rationale: refines REQ-BE-059
@@ -222,7 +114,7 @@ Running a workflow under budgets: the pipeline runner, model management, verific
 - Status: Draft
 - History: –
 
-### REQ-WFX-019 – Statements traceable to a query
+### REQ-WFX-010 – Statements traceable to a query
 - Level: low   Subject: TaskRuntime
 - Text: The Workflow execution shall make every statement of an answer traceable to the query that found its source.
 - Rationale: refines REQ-BE-060
@@ -234,7 +126,7 @@ Running a workflow under budgets: the pipeline runner, model management, verific
 - Status: Draft
 - History: –
 
-### REQ-WFX-020 – Optional learning
+### REQ-WFX-011 – Optional learning
 - Level: low   Subject: TaskRuntime
 - Text: Where learning is switched on, the Workflow execution shall learn only from logged signals in discrete choices of configuration and graph weights and log every learned choice next to the default.
 - Rationale: refines REQ-BE-061
@@ -246,7 +138,7 @@ Running a workflow under budgets: the pipeline runner, model management, verific
 - Status: Draft
 - History: –
 
-### REQ-WFX-021 – Context window share
+### REQ-WFX-012 – Context window share
 - Level: low   Subject: TaskRuntime
 - Text: The Workflow execution shall keep every model input inside 50 % of the context window.
 - Rationale: refines REQ-BE-062
@@ -258,7 +150,7 @@ Running a workflow under budgets: the pipeline runner, model management, verific
 - Status: Draft
 - History: –
 
-### REQ-WFX-022 – Model calls of the first try
+### REQ-WFX-013 – Model calls of the first try
 - Level: low   Subject: TaskRuntime
 - Text: The Workflow execution shall use fewer than 15 model calls for the first try of a question on the light model.
 - Rationale: refines REQ-BE-063
@@ -270,7 +162,7 @@ Running a workflow under budgets: the pipeline runner, model management, verific
 - Status: Draft
 - History: –
 
-### REQ-WFX-023 – Untrusted text is data
+### REQ-WFX-014 – Untrusted text is data
 - Level: low   Subject: TaskRuntime
 - Text: The Workflow execution shall treat text from the web, papers, PDFs and users as data and never as instruction.
 - Rationale: refines REQ-BE-064
@@ -282,7 +174,7 @@ Running a workflow under budgets: the pipeline runner, model management, verific
 - Status: Draft
 - History: –
 
-### REQ-WFX-024 – Sandbox or refuse
+### REQ-WFX-015 – Sandbox or refuse
 - Level: low   Subject: TaskRuntime
 - Text: If no isolating sandbox is present, then the Workflow execution shall refuse to run a model-written script or a hostile document.
 - Rationale: refines REQ-BE-065
@@ -294,21 +186,9 @@ Running a workflow under budgets: the pipeline runner, model management, verific
 - Status: Draft
 - History: –
 
-### REQ-WFX-025 – Confidence by code
+### REQ-WFX-016 – No invented source
 - Level: low   Subject: TaskRuntime
-- Text: The Workflow execution shall compute confidence figures by code from anchored evidence and report the limits with every result.
-- Rationale: refines REQ-BE-066
-- Parent: REQ-BE-066
-- Priority: Must
-- Verification method: Test
-- Acceptance criterion: AC-3: each result shows its limits
-- Verified by: –
-- Status: Draft
-- History: –
-
-### REQ-WFX-026 – No invented source
-- Level: low   Subject: TaskRuntime
-- Text: The Workflow execution shall show no source it did not retrieve.
+- Text: The Workflow execution shall return every fetched passage with its source reference, so that a quote can be checked against the source text.
 - Rationale: refines REQ-BE-067
 - Parent: REQ-BE-067
 - Priority: Must
@@ -318,7 +198,7 @@ Running a workflow under budgets: the pipeline runner, model management, verific
 - Status: Draft
 - History: –
 
-### REQ-WFX-027 – Only queries leave the host
+### REQ-WFX-017 – Only queries leave the host
 - Level: low   Subject: TaskRuntime
 - Text: The Workflow execution shall send off the host only the text of a web or scholarly query and, if configured, an e-mail address.
 - Rationale: refines REQ-BE-068
@@ -330,7 +210,7 @@ Running a workflow under budgets: the pipeline runner, model management, verific
 - Status: Draft
 - History: –
 
-### REQ-WFX-028 – First text in 10 seconds
+### REQ-WFX-018 – First text in 10 seconds
 - Level: low   Subject: TaskRuntime
 - Text: When a chat message is answered on the light model, the Workflow execution shall send the first text within 10 s.
 - Rationale: refines REQ-BE-069
@@ -342,7 +222,7 @@ Running a workflow under budgets: the pipeline runner, model management, verific
 - Status: Draft
 - History: –
 
-### REQ-WFX-029 – Budgets and what is missing
+### REQ-WFX-019 – Budgets and what is missing
 - Level: low   Subject: TaskRuntime
 - Text: If a task exceeds a budget of steps, seconds, calls or tokens, then the Workflow execution shall end it with what it has and say what is missing.
 - Rationale: refines REQ-BE-070
@@ -354,7 +234,7 @@ Running a workflow under budgets: the pipeline runner, model management, verific
 - Status: Draft
 - History: –
 
-### REQ-WFX-030 – Chat before background
+### REQ-WFX-020 – Chat before background
 - Level: low   Subject: TaskRuntime
 - Text: While a chat message waits, the Workflow execution shall let a long background task yield the model server.
 - Rationale: refines REQ-BE-071
@@ -366,7 +246,7 @@ Running a workflow under budgets: the pipeline runner, model management, verific
 - Status: Draft
 - History: –
 
-### REQ-WFX-031 – One model at a time
+### REQ-WFX-021 – One model at a time
 - Level: low   Subject: TaskRuntime
 - Text: The Workflow execution shall use one language model at a time on the 16 GB GPU and serve several users by the queue.
 - Rationale: refines REQ-BE-072
@@ -378,7 +258,7 @@ Running a workflow under budgets: the pipeline runner, model management, verific
 - Status: Draft
 - History: –
 
-### REQ-WFX-032 – State only through the storage interface
+### REQ-WFX-022 – State only through the storage interface
 - Level: low   Subject: TaskRuntime
 - Text: The Workflow execution shall store run results only through the storage interface IF-102.
 - Rationale: refines REQ-BE-074
@@ -390,7 +270,7 @@ Running a workflow under budgets: the pipeline runner, model management, verific
 - Status: Draft
 - History: –
 
-### REQ-WFX-033 – Use IF-103 only
+### REQ-WFX-023 – Use IF-103 only
 - Level: low   Subject: TaskRuntime
 - Text: The Workflow execution shall use the model server only through the interface IF-103 as specified in contracts/IF-103-model-server.md.
 - Rationale: refines IF-103

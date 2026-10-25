@@ -120,7 +120,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Priority: Must
 - Verification method: Test, Measurement
 - Acceptance criterion: AC-2: on the holdout the chosen gate passes fewer wrong claims than the single voice and loses no more true claims among those with evidence (agent-app decision rule); repeated runs give the same verdicts (REQ-VER-005, REQ-VER-006)
-- Refined in: N-2.4
+- Refined in: N-2.3, N-2.4, N-3, N-4
 - Verified by: –
 - Status: Draft
 - History: –
@@ -133,7 +133,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Priority: Must
 - Verification method: Test, Measurement
 - Acceptance criterion: AC-2, AC-23: every answer carries sources and verbatim quotes or the answer unknown; `/search` lists findings without composing an answer; a repeated lookup on the same sources gives the same facts
-- Refined in: N-2.4
+- Refined in: N-2.3, N-2.4, N-3, N-4
 - Verified by: –
 - Status: Draft
 - History: –
@@ -146,7 +146,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Priority: Should
 - Verification method: Measurement, Test
 - Acceptance criterion: AC-3: per tier source recall and precision against a baseline; 0 violations of the cut-off; 0 invented references; 100 % of quotes anchored
-- Refined in: N-2.4
+- Refined in: N-2.3, N-2.4, N-3, N-4
 - Verified by: –
 - Status: Draft
 - History: –
@@ -159,7 +159,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-3: retracted works are dropped and listed; the cut-off is honoured strictly; a user's edit of a trust value is kept
-- Refined in: N-2.4, N-3.3
+- Refined in: N-2.3, N-2.4, N-3.3
 - Verified by: –
 - Status: Draft
 - History: –
@@ -172,7 +172,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Priority: Could
 - Verification method: Measurement
 - Acceptance criterion: AC-26 (later, optional): the scout proposes the known method in its top 3 on the retro-discovery cases and marks a candidate verified only when an executable test passed
-- Refined in: N-2.4
+- Refined in: N-2.3, N-2.4, N-3, N-4
 - Verified by: –
 - Status: Draft
 - History: –
@@ -484,7 +484,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Priority: Must
 - Verification method: Test, Measurement
 - Acceptance criterion: AC-3: 0 invented references and 100 % of cited quotes found in their source; confidence figures computed by code
-- Refined in: N-2.4
+- Refined in: N-2.3, N-2.4, N-4
 - Verified by: –
 - Status: Draft
 - History: –

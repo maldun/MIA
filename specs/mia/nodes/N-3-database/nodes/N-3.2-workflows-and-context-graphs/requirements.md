@@ -42,6 +42,18 @@ The tables of workflows and context graphs and the graph rules that every write 
 - Status: Draft
 - History: –
 
+### REQ-GTB-004 – Example workflows as seed data
+- Level: low   Subject: Persistence
+- Text: The Graph tables shall ship the example workflows lookup, verify and review, the search command and method transfer (off by default) as seed entries of the library, with their specifications, context graphs and benchmark references.
+- Rationale: refines REQ-DB-018
+- Parent: REQ-DB-018
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-9, AC-10: after a seed from files the library holds the five entries; export then seed gives identical entries (exact)
+- Verified by: –
+- Status: Draft
+- History: –
+
 ## Interface requirements
 
 Owned by this node as provider (or, for an external provider, as the consumer that depends on it). The details are in `contracts/`; the mock and the contract suite are in `tests/helpers/mocks/` and `tests/acceptance/contract/`.

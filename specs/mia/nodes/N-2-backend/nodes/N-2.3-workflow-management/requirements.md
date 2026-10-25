@@ -126,7 +126,175 @@ The library of workflows and skills as versioned data, the graph rules, specific
 - Status: Draft
 - History: –
 
-### REQ-WFM-011 – State only through the storage interface
+### REQ-WFM-011 – Code checks first
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall deliver the example workflow verify as a library entry whose model steps come after every code check that exists for the claim.
+- Rationale: refines REQ-BE-046
+- Parent: REQ-BE-046
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-2: in the run log the code checks precede the first model call of each claim
+- Verified by: –
+- Status: Draft
+- History: –
+
+### REQ-WFM-012 – Unclear without evidence
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall deliver the example workflow verify so that a claim with a number and no evidence gets the verdict unclear without a model call.
+- Rationale: refines REQ-BE-047
+- Parent: REQ-BE-047
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-2: for 10 claims with a number and no evidence there are 0 model calls and the verdict is unclear (exact)
+- Verified by: –
+- Status: Draft
+- History: –
+
+### REQ-WFM-013 – A failed check informs the judge
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall deliver the example workflow verify so that a failed code check reaches the judgement step as a contradiction found by code.
+- Rationale: refines REQ-BE-048
+- Parent: REQ-BE-048
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-2: the judge input contains the check line (exact); the verdict is the judge's
+- Verified by: –
+- Status: Draft
+- History: –
+
+### REQ-WFM-014 – Judgement quality
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall deliver the example workflow verify so that on the holdout it passes fewer wrong claims than the single voice and loses no more true claims among those with evidence.
+- Rationale: refines REQ-BE-049
+- Parent: REQ-BE-049
+- Priority: Must
+- Verification method: Measurement
+- Acceptance criterion: AC-2: decided with the rule of the agent-app workflow against the baseline
+- Verified by: –
+- Status: Draft
+- History: –
+
+### REQ-WFM-015 – Stable verdicts
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall deliver the example workflows verify and lookup so that a repeated run on the same input and the same sources gives the same verdicts and the same set of facts.
+- Rationale: refines REQ-BE-050
+- Parent: REQ-BE-050
+- Priority: Must
+- Verification method: Measurement
+- Acceptance criterion: AC-2: stability limit 0.90 (lower bound of the 95 % interval, at least) on the dev suites (REQ-VER-005, REQ-VER-006)
+- Verified by: –
+- Status: Draft
+- History: –
+
+### REQ-WFM-016 – Lookup with sources
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall deliver the example workflow lookup as a library entry that answers a factual question with the sources and verbatim quotes that back it, or with unknown when nothing backs an answer.
+- Rationale: refines REQ-BE-051
+- Parent: REQ-BE-051
+- Priority: Must
+- Verification method: Test, Measurement
+- Acceptance criterion: AC-2: every answer of the lookup suite carries a source and a quote or the verdict unknown
+- Verified by: –
+- Status: Draft
+- History: –
+
+### REQ-WFM-017 – Search command
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall deliver the search command as a library entry that lists the findings of the metasearch (title, address, short text) without composing or verifying an answer.
+- Rationale: refines REQ-BE-052
+- Parent: REQ-BE-052
+- Priority: Should
+- Verification method: Test
+- Acceptance criterion: AC-23: /search returns the list and starts no pipeline
+- Verified by: –
+- Status: Draft
+- History: –
+
+### REQ-WFM-018 – Review report
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall deliver the example workflow review as a library entry that produces a report of kept and dropped sources with reasons, findings per sub-question with verbatim anchors, conflicts and open gaps.
+- Rationale: refines REQ-BE-053
+- Parent: REQ-BE-053
+- Priority: Should
+- Verification method: Measurement
+- Acceptance criterion: AC-3: per tier source recall and precision against the baseline
+- Verified by: –
+- Status: Draft
+- History: –
+
+### REQ-WFM-019 – Review in time slices
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall deliver the example workflow review so that it works in time slices, gives an intermediate report with a recommendation at the end of each slice and continues only when the requesting user agrees.
+- Rationale: refines REQ-BE-054
+- Parent: REQ-BE-054
+- Priority: Should
+- Verification method: Test
+- Acceptance criterion: AC-3: after the first slice (60 s) the run waits for agreement (exact)
+- Verified by: –
+- Status: Draft
+- History: –
+
+### REQ-WFM-020 – Review stops by a code check
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall deliver the example workflow review so that it ends when a code check finds every sub-question answered or a budget is used up.
+- Rationale: refines REQ-BE-055
+- Parent: REQ-BE-055
+- Priority: Should
+- Verification method: Test
+- Acceptance criterion: AC-3: with a fake model that always says done, the run still continues until the code check holds
+- Verified by: –
+- Status: Draft
+- History: –
+
+### REQ-WFM-021 – Source records and cut-off
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall deliver the example workflows lookup and review so that they record where a source comes from and how far it is trusted, keep the users' edits of that trust and honour a time cut-off strictly.
+- Rationale: refines REQ-BE-056
+- Parent: REQ-BE-056
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-3: 0 violations of the cut-off; retracted works are dropped and listed (exact)
+- Verified by: –
+- Status: Draft
+- History: –
+
+### REQ-WFM-022 – Method transfer
+- Level: low   Subject: TaskRuntime
+- Text: Where method transfer is switched on, the Workflow management shall deliver the example workflow method_transfer as a library entry that offers few ranked candidate methods marked as hypotheses unless an executable test on a toy instance passed.
+- Rationale: refines REQ-BE-057
+- Parent: REQ-BE-057
+- Priority: Could
+- Verification method: Measurement
+- Acceptance criterion: AC-26: the known method is in the top 3 on the retro-discovery cases
+- Verified by: –
+- Status: Draft
+- History: –
+
+### REQ-WFM-023 – Confidence by code
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall deliver the example workflows so that confidence figures are computed by tool calls of code from anchored evidence and the limits are reported with every result.
+- Rationale: refines REQ-BE-066
+- Parent: REQ-BE-066
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-3: each result shows its limits
+- Verified by: –
+- Status: Draft
+- History: –
+
+### REQ-WFM-024 – No invented source
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall deliver the example workflows so that no source appears in an answer that a tool did not retrieve.
+- Rationale: refines REQ-BE-067
+- Parent: REQ-BE-067
+- Priority: Must
+- Verification method: Measurement
+- Acceptance criterion: AC-3: 0 invented references and 100 % of cited quotes found in their source
+- Verified by: –
+- Status: Draft
+- History: –
+
+### REQ-WFM-025 – State only through the storage interface
 - Level: low   Subject: TaskRuntime
 - Text: The Workflow management shall keep and read workflows and context graphs only through the storage interface IF-102.
 - Rationale: refines REQ-BE-074
@@ -138,7 +306,7 @@ The library of workflows and skills as versioned data, the graph rules, specific
 - Status: Draft
 - History: –
 
-### REQ-WFM-012 – Workflow and graph API
+### REQ-WFM-026 – Workflow and graph API
 - Level: low   Subject: TaskRuntime
 - Text: The Workflow management shall list, read, save as a new version, show the history and diff of, and restore workflows and context graphs through IF-203, and refuse an invalid graph with the broken rule named.
 - Rationale: refines REQ-BE-076

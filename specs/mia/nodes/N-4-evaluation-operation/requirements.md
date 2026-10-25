@@ -221,3 +221,27 @@ Harness, suites, baselines, compose stack, backups, shutdown. The sub-part Opera
 - Verified by: –
 - Status: Draft
 - History: –
+
+### REQ-OPS-019 – Benchmarks of the example workflows
+- Level: high   Subject: Evaluation
+- Text: The Evaluation and operation node shall hold the suites, baselines and eval criteria of the example workflows lookup, verify and review as the benchmark that decides their criteria.
+- Rationale: refines FR-9, FR-10, FR-11, FR-26
+- Parent: FR-9, FR-10, FR-11, FR-26
+- Priority: Must
+- Verification method: Inspection, Measurement
+- Acceptance criterion: AC-2, AC-3: each example workflow has a suite with a holdout and a recorded baseline; the criteria are decided with the rule of the agent-app workflow
+- Verified by: –
+- Status: Draft
+- History: –
+
+### REQ-OPS-020 – Example workflows as proof of concept
+- Level: high   Subject: Evaluation
+- Text: The Evaluation and operation node shall run the lookup workflow end to end as the proof-of-concept scenario of the platform and the review workflow once it is promoted.
+- Rationale: refines FR-20, NFR-2, NFR-4
+- Parent: FR-20, NFR-2, NFR-4
+- Priority: Should
+- Verification method: Test, Demonstration
+- Acceptance criterion: AC-9: the lookup scenario runs on the mocks (step 0 of the integration tests) and again with each real node; the time from idea to promotion is recorded
+- Verified by: –
+- Status: Draft
+- History: –
