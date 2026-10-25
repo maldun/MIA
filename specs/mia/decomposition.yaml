@@ -215,8 +215,8 @@ decomposition:
     - node: N-0
       skeleton: tests/integration/N-0/step_00
       order:
-        - {child: N-5, test: tests/integration/N-0/step_01}
-        - {child: N-3, test: tests/integration/N-0/step_02}
-        - {child: N-4, test: tests/integration/N-0/step_03}
-        - {child: N-1, test: tests/integration/N-0/step_04}
-        - {child: N-2, test: tests/integration/N-0/step_05}
+        - {child: N-3, test: tests/integration/N-0/step_01}
+        - {child: N-4, test: tests/integration/N-0/step_02}
+        - {child: N-1, test: tests/integration/N-0/step_03}
+        - {child: N-2, test: tests/integration/N-0/step_04}
+        - {child: N-5, test: tests/integration/N-0/step_05, reason: "an add-on tool (owner, 2026-10-25): MIA is complete and usable without it, so it is integrated last"}

@@ -254,9 +254,11 @@ The top-level cut follows the owner's suggestion of 2026-10-25; the mapping of t
 | N-2 Backend | the server and accounts, the chat agent (persona, memory use, behaviour rules, adaptation), workflow management, workflow execution with verification and research, voice synthesis | WebApplication, ConversationCore, LearningLayer, TaskRuntime, VerificationSuite, ResearchSuite, Observability, the host side of VoiceSubsystem | N-2.1 API and accounts, N-2.2 chat agent, N-2.3 workflow management (library, specification, graph model, schedule: FR-7, 26, 30, 33), N-2.4 workflow execution (runtime, verification, research, run log), N-2.5 voice synthesis (Kokoro, voice effect) |
 | N-3 Database | workflows, memories, history, user feedback, context graphs, accounts, behind the storage layer | Persistence | N-3.1 storage layer and accounts tables, N-3.2 workflows and context graphs, N-3.3 memories, history and user feedback |
 | N-4 Evaluation and operation | harness, suites, baselines, compose stack, backups, shutdown | Evaluation, OperationLayer | none yet (one concern) |
-| N-5 Graph app | shows and edits the workflow graphs and context graphs as nodes and edges; an independent tool | GraphApp | none (one concern) |
+| N-5 Graph app (add-on, integrated last) | shows and edits the workflow graphs and context graphs as nodes and edges; an independent tool | GraphApp | none (one concern) |
 
 Top-level interfaces (decided here, each with a mock and a contract suite before the children start): IF-101 chat, expression, audio and REST API between N-1 and N-2; IF-102 storage interface of N-3, used by N-2 and N-5; IF-103 the model server, an external provider owned by N-2.
+
+Integration order: N-3, N-4, N-1, N-2, then N-5 last. N-5 is an add-on (owner, 2026-10-25): MIA is complete and usable without it. The testability-first order would put it first, so the record carries a `reason:` for the move.
 
 **Decisions of the owner (2026-10-25):**
 - **D-1** Evaluation and operation is a node of its own (N-4).
