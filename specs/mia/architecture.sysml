@@ -5,7 +5,7 @@
  *   MIA_Common        status and verification enums, metadata Implementation and Trace
  *   MIA_Architecture  items, ports, interfaces, MiaSystem with 13 subsystems; leaf parts name their code files
  *   MIA_AgentView     the app agent: model steps, untrusted items, trust boundaries (agent-app conventions, 8)
- *   MIA_Requirements  constraints CON-1..5, functional FR-1..FR-19, non-functional NFR-1..NFR-8
+ *   MIA_Requirements  constraints CON-1..5, functional FR-1..FR-19, non-functional NFR-1..NFR-9
  *   MIA_Allocation    satisfy by the system, allocate to the parts that carry it, verification cases
  *
  * Supplements in specs/mia/model/: MIA_Context.sysml (people, concerns, external systems, context) and
@@ -1071,6 +1071,15 @@ package MIA_Requirements {
         @Trace { :>> baseline = ("OP-7", "CT-8");
                  :>> verifiedBy = (HowVerified::inspection); }
     }
+    requirement def <'NFR-9'> ContainerPerNode {
+        subject mia : MiaSystem;
+        doc /* MIA shall run each of the nodes N-2 to N-5 (backend, database, evaluation and operation, graph app)
+               as its own container under podman and serve the web frontend N-1 (static files) from the backend
+               container; every container is startable alone and all together by the compose stack with the
+               same configuration file (amendment 6, D-46). */
+        @Trace { :>> baseline = ("OP-1");
+                 :>> verifiedBy = (HowVerified::test); }
+    }
 
     requirement def <'FR-21'> AccountsAndLogin {
         subject mia : MiaSystem;
@@ -1286,6 +1295,7 @@ package MIA_Requirements {
     requirement fr33 : WorkflowSchedule;
     requirement nfr7 : EfficientOnGivenHardware;
     requirement nfr8 : SharedStateInDatabase;
+    requirement nfr9 : ContainerPerNode;
 }
 
 package MIA_Allocation {
@@ -1343,6 +1353,7 @@ package MIA_Allocation {
     satisfy fr33 by mia;
     satisfy nfr7 by mia;
     satisfy nfr8 by mia;
+    satisfy nfr9 by mia;
 
     // ---------------------------------------------------------------- allocate
 
@@ -1443,6 +1454,7 @@ package MIA_Allocation {
     allocate fr19 to mia.operation.launcher;
     allocate fr19 to mia.operation.shutdownSequence;
     allocate fr19 to mia.operation.composeStack;
+    allocate nfr9 to mia.operation.composeStack;
     allocate fr20 to mia.taskRuntime.skillScaffold;
     allocate fr20 to mia.taskRuntime.skillStore;
     allocate fr20 to mia.taskRuntime.libraryStore;
@@ -1561,6 +1573,14 @@ package MIA_Allocation {
                none outside the host; the web log lists every query that left the machine. */
         subject mia : MiaSystem;
         objective { verify nfr5; }
+        return verdict : VerdictKind;
+    }
+
+    verification def ContainerPerNodeCheck {
+        doc /* Each node's container starts alone against the mocks of its neighbours and all together by the
+               compose stack; the frontend files are served by the backend container. */
+        subject mia : MiaSystem;
+        objective { verify nfr9; }
         return verdict : VerdictKind;
     }
 }

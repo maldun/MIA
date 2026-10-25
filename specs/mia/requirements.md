@@ -2,7 +2,7 @@
 
 **HLS:** specs/mia/high-level-spec.md   **Decomposition:** specs/mia/decomposition.yaml   **Status:** Draft (Plan step 1 for the root node, 2026-10-25)
 
-Scope: the requirements of the whole system. They are the HLS requirements FR-1..FR-33 and NFR-1..NFR-8 in EARS form, keeping their ids; the long HLS texts are cut to the one statement that is checked at the top, and the details are refined in the child nodes (the line `Refined in`). The acceptance criterion points to the HLS criteria AC-1..AC-28, whose numbers *Plan* fixes (repeats, thresholds, seeds) are set in the node that owns the measurement (agent-app rule: not here). The constraints CON-1..CON-7 of HLS section 3.3 are at the end. Interfaces between the top-level nodes are in the section at the end.
+Scope: the requirements of the whole system. They are the HLS requirements FR-1..FR-33 and NFR-1..NFR-9 in EARS form, keeping their ids; the long HLS texts are cut to the one statement that is checked at the top, and the details are refined in the child nodes (the line `Refined in`). The acceptance criterion points to the HLS criteria AC-1..AC-28, whose numbers *Plan* fixes (repeats, thresholds, seeds) are set in the node that owns the measurement (agent-app rule: not here). The constraints CON-1..CON-7 of HLS section 3.3 are at the end. Interfaces between the top-level nodes are in the section at the end.
 
 Status of this file: first draft by the coding agent. Not yet done: lint run, plausibility record, glossary, `test-spec.md`, the refinement into the nodes, the interface contracts with mocks and suites.
 
@@ -537,6 +537,19 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Verification method: Test
 - Acceptance criterion: AC-15: the state is in the PostgreSQL database; files to database and back gives identical files; backup and restore round-trip including the database; a change by one user is visible to another within seconds with its author
 - Refined in: N-3, N-2.1
+- Verified by: –
+- Status: Draft
+- History: –
+
+### NFR-9 – A container per node
+- Level: top   Subject: MiaSystem
+- Text: The MIA system shall run each of the nodes N-2 to N-5 as its own container under podman, serve the web frontend N-1 as static files from the backend container, and start every container alone and all together by the compose stack with the same configuration file.
+- Rationale: HLS section 3.2, NFR-9
+- Parent: HLS NFR-9
+- Priority: Must
+- Verification method: Test, Demonstration
+- Acceptance criterion: AC-29: from a fresh checkout the compose stack starts the containers of N-2 (serving the frontend files of N-1), N-3, N-4 and N-5 with one configuration file; each container also starts alone against the mocks of its neighbours and passes its contract suites
+- Refined in: N-4, N-2, N-3, N-5
 - Verified by: –
 - Status: Draft
 - History: –

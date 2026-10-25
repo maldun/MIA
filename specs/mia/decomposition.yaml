@@ -21,6 +21,7 @@ decomposition:
       level: high
       subject: WebFrontEnd
       folder: specs/mia/nodes/N-1-web-frontend
+      # NFR-9: static files, shipped inside the backend container (N-2); no container of its own
       status: Draft
       test_stage: 2
       children: [N-1.1, N-1.2, N-1.3]
