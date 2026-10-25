@@ -1,8 +1,8 @@
 # Path to product: shortcuts and exit criteria (MIA)
 
-Blueprint M25. Draft of 2026-10-25 (amendment 5, proposed). Source of the entries: "Known shortcuts" in the HLS (section 2), the risk table and `KNOWN_RISKS.md`. Reviewed at each gate.
+Blueprint M25. Approved 2026-10-25 (amendment 5, D-45). Source of the entries: "Known shortcuts" in the HLS (section 2), the risk table and `KNOWN_RISKS.md`. Reviewed at each gate.
 
-**Might become a product or enter a regulated use?** undecided, proposed answer **no** (a private assistant for a handful of trusted users; revisit if MIA is offered to people outside that circle). Open choice P-1.
+**Might become a product or enter a regulated use?** **no** (P-1, owner 2026-10-25) (a private assistant for a handful of trusted users; revisit if MIA is offered to people outside that circle).
 
 ## Shortcuts
 | ID | Shortcut | Why taken | Risk if it stays | Resolved by (T-nn / TD-nn / DR-nnn) | Status |
@@ -19,7 +19,7 @@ Blueprint M25. Draft of 2026-10-25 (amendment 5, proposed). Source of the entrie
 ## Exit criteria before leaving research use
 - [ ] Every shortcut is resolved or explicitly accepted (owner, reason)
 - [ ] Requirements are completed for the new use (quality model re-walked: `Safety` and `Security` no longer "basics only", `quality.md` step-up path done)
-- [ ] Applicable standards and their owners identified: personal data of other users (GDPR) if the circle grows; none otherwise (to confirm, P-1)
+- [ ] Applicable standards and their owners identified: personal data of other users (GDPR) if the circle grows; none otherwise (P-1: no product)
 - [ ] Responsible person signs off on every deferral that touches security, safety, legal or data protection
-- [ ] Operation: runbook, monitoring and support owner in place (see O-1 in the HLS section 3.6)
+- [ ] Operation: runbook, monitoring and support owner in place (runbook is a Plan requirement, HLS section 3.6)
 - [ ] Licenses, bill of materials and disclosure of AI use are complete (`release_check.py`)

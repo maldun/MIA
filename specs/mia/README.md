@@ -8,7 +8,7 @@ Phase 1 (Explore) of the development workflow, status **Draft**, under step-by-s
 | `architecture.sysml` | SysML v2: vocabulary, architecture (13 subsystems, 74 parts with code files and status), agent view (10 model steps, 5 trust boundaries), requirements, satisfy / allocate / verification |
 | `model/MIA_Context.sysml`, `model/MIA_Behavior.sysml` | supplements: people, concerns, external systems; chat exchange, lookup, review, consolidation, activity states |
 | `baseline-requirements.md` | what the five requirement documents and the README ask for, per capability, with status, and the contradictions between them |
-| `quality.md`, `shortcuts-register.md`, `decomposition.yaml` | amendment 5 (draft, pending the owner): quality model walk, shortcuts and exit criteria, the tree of nodes with the top-level interfaces |
+| `quality.md`, `shortcuts-register.md`, `decomposition.yaml` | amendment 5 (decided 2026-10-25): quality model walk, shortcuts and exit criteria, the tree of nodes with the top-level interfaces |
 | `research.md` | measured facts: hardware, models, baselines, what was not looked at |
 | `KNOWN_RISKS.md` | where a SysML parser is most likely to object |
 
