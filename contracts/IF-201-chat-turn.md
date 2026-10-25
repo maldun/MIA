@@ -17,7 +17,7 @@ The call from the gateway to the chat agent. Authentication, sessions and the wi
 | Condition | Signal | What the consumer may rely on afterwards |
 |---|---|---|
 | empty or blank text, or more than 4000 characters | `ServiceError("empty_text")` | nothing queued |
-| queue full (length set in Plan) | `ServiceError("queue_full")` | nothing queued |
+| queue full (5 waiting messages in all) or 2 waiting messages of this account | `ServiceError("queue_full")` | nothing queued |
 
 ## Bounds
 | Quantity | Bound | Source |

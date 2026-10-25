@@ -71,7 +71,8 @@ Setup and expected result are in the docstring of each test (the golden examples
 | TC-IF-101-02 | IF-101 | Contract | 1 (mock) and 2 (real) | golden 2: five failures, then 429 even with the right password; after 61 s the right password works. | exact |
 | TC-IF-101-03 | IF-101 | Contract | 1 (mock) and 2 (real) | send, stop, history and connect without a session are 401 unauthenticated and queue nothing. | exact |
 | TC-IF-101-04 | IF-101 | Contract | 1 (mock) and 2 (real) | golden 1: ben | exact |
-| TC-IF-101-05 | IF-101 | Contract | 1 (mock) and 2 (real) | golden 3: positions 1, 2, 3; a fourth message is 503 queue_full and queues nothing; after settle the queue is empty. | exact |
+| TC-IF-101-05 | IF-101 | Contract | 1 (mock) and 2 (real) | golden 3: positions 1, 2, 3 (two users); a fourth message is 503 queue_full and queues nothing; after settle the queue is empty. | exact |
+| TC-IF-101-09 | IF-101 | Contract | 1 (mock) and 2 (real) | with the defaults (5 in all, 2 per user) a third waiting message of one user is 503 queue_full while another user can still send. | exact |
 | TC-IF-101-06 | IF-101 | Contract | 1 (mock) and 2 (real) | golden 3: stop right after send gives chat_done with status stopped and no chat_delta. | exact |
 | TC-IF-101-07 | IF-101 | Contract | 1 (mock) and 2 (real) | empty or blank text is 422 empty_text and nothing is queued. | exact |
 | TC-IF-101-08 | IF-101 | Contract | 1 (mock) and 2 (real) | a user who connects later gets the same ordered history with senders, the assistant | exact |
@@ -188,4 +189,4 @@ Error rates from `plan-phase/scripts/false_alarm.py` (`--n 1000 --max-rate 0.01 
 | OPEN-3 | AC-28 / TC-MIA-028 | Decided (owner): generous, a factor of 3 either way; what matters is that an estimate is shown, the run works and the first text comes within about 10 s (the current implementation answers 1 or 2 sentences within that) | owner |
 | OPEN-4 | AC-19 / BM-MIA-002 | Decided (owner): no particular phone, any phone inside the network; 30 fps is the target on the phone and on the desktop (NFR-7 and AC-19 amended: the desktop figure was 60 fps) | owner |
 | OPEN-5 | AC-15 / TC-MIA-015 | Decided (owner): "within seconds" is 5 s (the Database promises 2 s per subscriber) | owner |
-| OPEN-6 | NFR-7 / REQ-BE-003 | Recommendation, to be confirmed by the owner: a queue of 5 waiting messages and at most 2 waiting messages per user. Reason: one model at a time, about 10 s per answer on MP-light, a handful of trusted users; the last of 5 waits about 50 s, which is the longest wait that still feels like a conversation; the per-user limit keeps one user from filling the queue | owner (confirm) |
+| OPEN-6 | NFR-7 / REQ-BE-003 | Decided (owner, 2026-10-25, on the recommendation): a queue of 5 waiting messages and at most 2 waiting messages per user | owner |

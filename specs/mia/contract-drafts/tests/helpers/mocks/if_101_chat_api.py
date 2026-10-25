@@ -13,10 +13,11 @@ MAX_TEXT = 4000
 
 
 class ChatApiMock:
-    def __init__(self, accounts=None, answers=None, queue_limit=5):
+    def __init__(self, accounts=None, answers=None, queue_limit=5, user_limit=2):
         self.accounts = accounts or {"anna": "pw-anna", "ben": "pw-ben"}
         self.answers = list(answers or [])            # each: a list of sentences, or {"sentences": [...], "emotion": "..."}
-        self.queue_limit = queue_limit
+        self.queue_limit, self.user_limit = queue_limit, user_limit
+        self._owner = {}                              # message id -> account of the queued user message
         self.now = 0.0
         self._failed = collections.defaultdict(list)  # account -> times of failed logins
         self._sessions = {}                           # token -> account
@@ -54,11 +55,12 @@ class ChatApiMock:
         user = self._user(session)
         if not isinstance(text, str) or not text.strip() or len(text) > MAX_TEXT:
             raise ApiError(422, "empty_text")
-        if len(self._queue) >= self.queue_limit:
+        if len(self._queue) >= self.queue_limit or sum(1 for i in self._queue if self._owner.get(i) == user) >= self.user_limit:
             raise ApiError(503, "queue_full")
         message = self._record("user", user, text)
         self._broadcast("chat_message", message)
         self._queue.append(message["id"])
+        self._owner[message["id"]] = user
         self._broadcast("chat_status", self._status())
         return {"id": message["id"], "position": len(self._queue)}
 

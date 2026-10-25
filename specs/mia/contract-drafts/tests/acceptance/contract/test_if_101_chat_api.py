@@ -89,14 +89,27 @@ class ChatApiContract(unittest.TestCase):
     @mark.req("IF-101", "REQ-BE-003", "REQ-FE-002")
     @each_provider(IF, make(queue_limit=3))
     def test_waiting_messages_have_positions_and_the_queue_has_a_limit(self, api):
-        """TC-IF-101-05 golden 3: positions 1, 2, 3; a fourth message is 503 queue_full and queues nothing; after settle the queue is empty."""
-        s = api.login("anna", "pw-anna")
-        self.assertEqual([api.send(s, "m%d" % i)["position"] for i in (1, 2, 3)], [1, 2, 3])
-        err = error_of(lambda: api.send(s, "m4"))
+        """TC-IF-101-05 golden 3: positions 1, 2, 3 (two users); a fourth message is 503 queue_full and queues nothing; after settle the queue is empty."""
+        s, b = api.login("anna", "pw-anna"), api.login("ben", "pw-ben")
+        self.assertEqual([api.send(s, "m1")["position"], api.send(b, "m2")["position"], api.send(s, "m3")["position"]], [1, 2, 3])
+        err = error_of(lambda: api.send(b, "m4"))
         self.assertEqual((err.status, err.code), (503, "queue_full"))
         api.settle()
         self.assertEqual(api.send(s, "m5")["position"], 1)
         self.assertEqual([m["text"] for m in api.history(s, 50) if m["role"] == "user"], ["m1", "m2", "m3", "m5"])
+
+    @mark.req("IF-101", "REQ-BE-003")
+    @each_provider(IF)
+    def test_one_user_cannot_fill_the_queue(self, api):
+        """TC-IF-101-09: with the defaults (5 in all, 2 per user) a third waiting message of one user is 503 queue_full while another user can still send."""
+        s, b = api.login("anna", "pw-anna"), api.login("ben", "pw-ben")
+        api.send(s, "a1")
+        api.send(s, "a2")
+        err = error_of(lambda: api.send(s, "a3"))
+        self.assertEqual((err.status, err.code), (503, "queue_full"))
+        self.assertEqual(api.send(b, "b1")["position"], 3)
+        api.settle()
+        self.assertEqual(api.send(s, "a4")["position"], 1)
 
     @mark.req("IF-101", "REQ-BE-004")
     @each_provider(IF, make(answers=[["One.", "Two.", "Three."]]))

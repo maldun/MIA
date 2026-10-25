@@ -14,7 +14,7 @@ The PostgreSQL database and the one door to it (IF-102): immutable versions, acc
 - Priority: Must
 - Verification method: Inspection, Test
 - Acceptance criterion: AC-15, AC-29: the container starts alone and passes the contract suite of IF-102
-- Verified by: –
+- Verified by: TC-SLY-001
 - Status: Draft
 - History: –
 
@@ -26,7 +26,7 @@ The PostgreSQL database and the one door to it (IF-102): immutable versions, acc
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-15: a record of each kind is written and read back identically
-- Verified by: –
+- Verified by: TC-SLY-002
 - Status: Draft
 - History: –
 
@@ -38,7 +38,7 @@ The PostgreSQL database and the one door to it (IF-102): immutable versions, acc
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-16: version n is unchanged after version n+1 is written (exact)
-- Verified by: –
+- Verified by: TC-SLY-003
 - Status: Draft
 - History: –
 
@@ -50,19 +50,19 @@ The PostgreSQL database and the one door to it (IF-102): immutable versions, acc
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-16, AC-27: each of the rules (identity, adjacent data nodes, cycle, session stopping criterion) is refused with its name; protects against TB-edit
-- Verified by: –
+- Verified by: TC-SLY-004
 - Status: Draft
 - History: –
 
 ### REQ-SLY-005 – Accounts
 - Level: low   Subject: Persistence
-- Text: The Storage layer shall store accounts with a salted slow password hash and let only the owner's request create one.
+- Text: The Storage layer shall store accounts with a salted slow password hash and no plain password.
 - Rationale: refines REQ-DB-005
 - Parent: REQ-DB-005
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-14: no plain password is stored (exact)
-- Verified by: –
+- Acceptance criterion: AC-14: no plain password is stored; two accounts with the same password have different hashes (exact)
+- Verified by: TC-SLY-005
 - Status: Draft
 - History: –
 
@@ -74,7 +74,7 @@ The PostgreSQL database and the one door to it (IF-102): immutable versions, acc
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-15: a second subscriber is notified within 2 s
-- Verified by: –
+- Verified by: TC-SLY-006
 - Status: Draft
 - History: –
 
@@ -86,7 +86,7 @@ The PostgreSQL database and the one door to it (IF-102): immutable versions, acc
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-15: files to database and back give identical files (exact)
-- Verified by: –
+- Verified by: TC-SLY-007
 - Status: Draft
 - History: –
 
@@ -98,7 +98,7 @@ The PostgreSQL database and the one door to it (IF-102): immutable versions, acc
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-7, AC-15: backup and restore round-trip returns the same records (exact)
-- Verified by: –
+- Verified by: TC-SLY-008
 - Status: Draft
 - History: –
 
@@ -110,7 +110,7 @@ The PostgreSQL database and the one door to it (IF-102): immutable versions, acc
 - Priority: Should
 - Verification method: Test
 - Acceptance criterion: AC-16: export then seed gives identical entries (exact)
-- Verified by: –
+- Verified by: TC-SLY-009
 - Status: Draft
 - History: –
 
@@ -122,7 +122,7 @@ The PostgreSQL database and the one door to it (IF-102): immutable versions, acc
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-5: a connection from the LAN is refused (exact)
-- Verified by: –
+- Verified by: TC-SLY-010
 - Status: Draft
 - History: –
 
@@ -134,7 +134,7 @@ The PostgreSQL database and the one door to it (IF-102): immutable versions, acc
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-29: starts alone and in the stack with the same configuration file
-- Verified by: –
+- Verified by: TC-SLY-011
 - Status: Draft
 - History: –
 
@@ -146,6 +146,6 @@ The PostgreSQL database and the one door to it (IF-102): immutable versions, acc
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-15: the contract suite test_if_102_storage.py passes against the Storage layer (stage 2)
-- Verified by: –
+- Verified by: TC-SLY-001
 - Status: Draft
 - History: –

@@ -32,12 +32,12 @@ The server and accounts, the chat agent, workflow management, workflow execution
 
 ### REQ-BE-003 – Queue with positions
 - Level: high   Subject: WebApplication
-- Text: While the model server is busy, the Backend shall queue incoming chat messages, report each position and refuse a message only when the queue is full (length set in Plan).
+- Text: While the model server is busy, the Backend shall queue incoming chat messages, report each position and refuse a message only when the queue is full (at most 5 waiting messages in all and at most 2 per user).
 - Rationale: refines FR-1, NFR-7
 - Parent: FR-1, NFR-7
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-19: with a full queue the next message is refused with a plain message; positions are reported
+- Acceptance criterion: AC-19: with 5 waiting messages the sixth is refused with a plain message; a third waiting message of one user is refused while another user can still send; positions are reported
 - Verified by: –
 - Status: Draft
 - History: –

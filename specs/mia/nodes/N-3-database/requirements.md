@@ -14,7 +14,7 @@ Workflows, memories, history, user feedback, context graphs and accounts behind 
 - Priority: Must
 - Verification method: Inspection, Test
 - Acceptance criterion: AC-15, AC-29: the container starts alone and passes the contract suite of IF-102
-- Verified by: –
+- Verified by: TC-N3-001
 - Status: Draft
 - History: –
 
@@ -26,7 +26,7 @@ Workflows, memories, history, user feedback, context graphs and accounts behind 
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-15: a record of each kind is written and read back identically
-- Verified by: –
+- Verified by: TC-N3-002
 - Status: Draft
 - History: –
 
@@ -38,7 +38,7 @@ Workflows, memories, history, user feedback, context graphs and accounts behind 
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-16: version n is unchanged after version n+1 is written (exact)
-- Verified by: –
+- Verified by: TC-N3-003
 - Status: Draft
 - History: –
 
@@ -50,19 +50,19 @@ Workflows, memories, history, user feedback, context graphs and accounts behind 
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-16, AC-27: each of the rules (identity, adjacent data nodes, cycle, session stopping criterion) is refused with its name; protects against TB-edit
-- Verified by: –
+- Verified by: TC-N3-004
 - Status: Draft
 - History: –
 
 ### REQ-DB-005 – Accounts
 - Level: high   Subject: Persistence
-- Text: The Database shall store accounts with a salted slow password hash and let only the owner's request create one.
+- Text: The Database shall store accounts with a salted slow password hash and no plain password; the Backend decides who creates an account (REQ-BE-011).
 - Rationale: refines FR-21
 - Parent: FR-21
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-14: no plain password is stored (exact)
-- Verified by: –
+- Acceptance criterion: AC-14: no plain password is stored; two accounts with the same password have different hashes (exact)
+- Verified by: TC-N3-005
 - Status: Draft
 - History: –
 
@@ -74,7 +74,7 @@ Workflows, memories, history, user feedback, context graphs and accounts behind 
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-15: a second subscriber is notified within 2 s
-- Verified by: –
+- Verified by: TC-N3-006
 - Status: Draft
 - History: –
 
@@ -86,7 +86,7 @@ Workflows, memories, history, user feedback, context graphs and accounts behind 
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-15: files to database and back give identical files (exact)
-- Verified by: –
+- Verified by: TC-N3-007
 - Status: Draft
 - History: –
 
@@ -98,7 +98,7 @@ Workflows, memories, history, user feedback, context graphs and accounts behind 
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-7, AC-15: backup and restore round-trip returns the same records (exact)
-- Verified by: –
+- Verified by: TC-N3-007
 - Status: Draft
 - History: –
 
@@ -110,7 +110,7 @@ Workflows, memories, history, user feedback, context graphs and accounts behind 
 - Priority: Should
 - Verification method: Test
 - Acceptance criterion: AC-16: export then seed gives identical entries (exact)
-- Verified by: –
+- Verified by: TC-N3-008
 - Status: Draft
 - History: –
 
@@ -122,7 +122,7 @@ Workflows, memories, history, user feedback, context graphs and accounts behind 
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-10: each stored result carries the three versions
-- Verified by: –
+- Verified by: TC-N3-009
 - Status: Draft
 - History: –
 
@@ -134,7 +134,7 @@ Workflows, memories, history, user feedback, context graphs and accounts behind 
 - Priority: Should
 - Verification method: Test
 - Acceptance criterion: AC-10: a context graph edit creates a new version
-- Verified by: –
+- Verified by: TC-N3-010
 - Status: Draft
 - History: –
 
@@ -146,7 +146,7 @@ Workflows, memories, history, user feedback, context graphs and accounts behind 
 - Priority: Should
 - Verification method: Test
 - Acceptance criterion: AC-18: 100 % of scripted votes read back complete
-- Verified by: –
+- Verified by: TC-N3-011
 - Status: Draft
 - History: –
 
@@ -158,7 +158,7 @@ Workflows, memories, history, user feedback, context graphs and accounts behind 
 - Priority: Should
 - Verification method: Test
 - Acceptance criterion: AC-24: a deleted record is gone (exact)
-- Verified by: –
+- Verified by: TC-N3-011
 - Status: Draft
 - History: –
 
@@ -170,7 +170,7 @@ Workflows, memories, history, user feedback, context graphs and accounts behind 
 - Priority: Should
 - Verification method: Test
 - Acceptance criterion: AC-12: 50 of 50 items read back identical (exact)
-- Verified by: –
+- Verified by: TC-N3-011
 - Status: Draft
 - History: –
 
@@ -182,7 +182,7 @@ Workflows, memories, history, user feedback, context graphs and accounts behind 
 - Priority: Could
 - Verification method: Test
 - Acceptance criterion: AC-3: an edited trust value survives a restart
-- Verified by: –
+- Verified by: TC-N3-011
 - Status: Draft
 - History: –
 
@@ -194,7 +194,7 @@ Workflows, memories, history, user feedback, context graphs and accounts behind 
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-5: a connection from the LAN is refused (exact)
-- Verified by: –
+- Verified by: TC-N3-012
 - Status: Draft
 - History: –
 
@@ -206,7 +206,7 @@ Workflows, memories, history, user feedback, context graphs and accounts behind 
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-29: starts alone and in the stack with the same configuration file
-- Verified by: –
+- Verified by: TC-N3-001
 - Status: Draft
 - History: –
 
@@ -218,7 +218,7 @@ Workflows, memories, history, user feedback, context graphs and accounts behind 
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-9, AC-10: after a seed from files the library holds the five entries; export then seed gives identical entries (exact)
-- Verified by: –
+- Verified by: TC-N3-008
 - Status: Draft
 - History: –
 

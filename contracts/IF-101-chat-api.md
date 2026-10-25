@@ -9,7 +9,7 @@ The wire between the browser and the server. Draft v0 starts from today's Socket
 |---|---|---|---|
 | `login(user, password)` **[new]** | account, password | session token | HTTPS or localhost only (CON-4); 5 failed logins per minute per account, then `429 throttled` even with the right password (REQ-BE-009) |
 | `connect(session)` | session | event `chat_status` first | `{busy, activity, model, profile, queue, mood}` as today |
-| `send(session, text, client_id)` (`chat_send`) | text 1..4000 characters | ack `{"id", "position"}` **[new: position]** | `position` 1 = answered next; 401 without session; 422 `empty_text`; 503 `queue_full` (length set in Plan, mock 5) |
+| `send(session, text, client_id)` (`chat_send`) | text 1..4000 characters | ack `{"id", "position"}` **[new: position]** | `position` 1 = answered next; 401 without session; 422 `empty_text`; 503 `queue_full` (5 waiting messages in all, or 2 waiting messages of this account) |
 | `stop(session)` (`chat_stop`) | | `{"stopped": bool}` | ends the running or next answer; no `chat_delta` after the ack |
 | `history(session, limit)` (`/api/chat/history`) | | list of messages, oldest first | each with `id, role, sender [new], text, created` |
 | `events(session)` | | events received since the last call | `chat_message`, `chat_start`, `chat_delta`, `chat_done`, `chat_status`, `chat_error`, `expression`, `audio_chunk [new]` |

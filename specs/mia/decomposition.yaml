@@ -201,9 +201,9 @@ decomposition:
       level: low
       subject: Persistence
       folder: specs/mia/nodes/N-3-database/nodes/N-3.1-storage-layer
-      status: Planned
+      status: Draft
       children: []
-      tasks: 8                          # estimates until the node is planned
+      tasks: 8                       
       test_stage: 2                     # real PostgreSQL in a container
 
     - id: N-3.2
@@ -211,7 +211,7 @@ decomposition:
       level: low
       subject: Persistence
       folder: specs/mia/nodes/N-3-database/nodes/N-3.2-workflows-and-context-graphs
-      status: Planned
+      status: Draft
       children: []
       tasks: 3
       test_stage: 1
@@ -221,9 +221,9 @@ decomposition:
       level: low
       subject: Persistence
       folder: specs/mia/nodes/N-3-database/nodes/N-3.3-memories-history-feedback
-      status: Planned
+      status: Draft
       children: []
-      tasks: 5
+      tasks: 2
       test_stage: 2
 
   interfaces:

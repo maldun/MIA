@@ -14,7 +14,7 @@ The tables of workflows and context graphs and the graph rules that every write 
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-15: a record of each kind is written and read back identically
-- Verified by: –
+- Verified by: TC-GTB-001
 - Status: Draft
 - History: –
 
@@ -26,19 +26,19 @@ The tables of workflows and context graphs and the graph rules that every write 
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-16, AC-27: each of the rules (identity, adjacent data nodes, cycle, session stopping criterion) is refused with its name; protects against TB-edit
-- Verified by: –
+- Verified by: TC-GTB-002, TC-GTB-003
 - Status: Draft
 - History: –
 
 ### REQ-GTB-003 – Context graphs stored
 - Level: low   Subject: Persistence
-- Text: The Graph tables shall store one context graph per workflow and one for the chat as versioned records.
+- Text: The Graph tables shall define the table of context graphs as versioned records that are not deletable and are validated by the graph rules; the Storage layer keys them by workflow id or by chat.
 - Rationale: refines REQ-DB-011
 - Parent: REQ-DB-011
 - Priority: Should
 - Verification method: Test
 - Acceptance criterion: AC-10: a context graph edit creates a new version
-- Verified by: –
+- Verified by: TC-GTB-004
 - Status: Draft
 - History: –
 
@@ -50,7 +50,7 @@ The tables of workflows and context graphs and the graph rules that every write 
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-9, AC-10: after a seed from files the library holds the five entries; export then seed gives identical entries (exact)
-- Verified by: –
+- Verified by: TC-GTB-005
 - Status: Draft
 - History: –
 

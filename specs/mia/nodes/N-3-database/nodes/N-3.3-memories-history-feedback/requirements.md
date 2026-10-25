@@ -14,67 +14,67 @@ The tables of the history, summaries, chat log, memory, votes, tasks, memos, pre
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-15: a record of each kind is written and read back identically
-- Verified by: –
+- Verified by: TC-RTB-001
 - Status: Draft
 - History: –
 
 ### REQ-RTB-002 – Run results
 - Level: low   Subject: Persistence
-- Text: The Record tables shall store the run results with workflow version, model pin and benchmark version.
+- Text: The Record tables shall define the table of run results with the required fields workflow, workflow_version, model_pin and benchmark_version and refuse a record that lacks one.
 - Rationale: refines REQ-DB-010
 - Parent: REQ-DB-010
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-10: each stored result carries the three versions
-- Verified by: –
+- Verified by: TC-RTB-002
 - Status: Draft
 - History: –
 
 ### REQ-RTB-003 – Votes stored
 - Level: low   Subject: Persistence
-- Text: The Record tables shall store each vote with user, time, subject and category.
+- Text: The Record tables shall define the table of votes with the required fields user, subject, category (one of four) and value (1 or -1); the time of a vote is that of its version.
 - Rationale: refines REQ-DB-012
 - Parent: REQ-DB-012
 - Priority: Should
 - Verification method: Test
 - Acceptance criterion: AC-18: 100 % of scripted votes read back complete
-- Verified by: –
+- Verified by: TC-RTB-003
 - Status: Draft
 - History: –
 
 ### REQ-RTB-004 – Memory records
 - Level: low   Subject: Persistence
-- Text: The Record tables shall store memory records with their source and delete a record when asked.
+- Text: The Record tables shall define the table of memory records with the required fields text and source, as deletable records.
 - Rationale: refines REQ-DB-013
 - Parent: REQ-DB-013
 - Priority: Should
 - Verification method: Test
 - Acceptance criterion: AC-24: a deleted record is gone (exact)
-- Verified by: –
+- Verified by: TC-RTB-004
 - Status: Draft
 - History: –
 
 ### REQ-RTB-005 – Tasks and memos exact
 - Level: low   Subject: Persistence
-- Text: The Record tables shall store the text of tasks and memos without change.
+- Text: The Record tables shall define the tables of tasks and memos with the required field text, as deletable records, and validate a document without changing it.
 - Rationale: refines REQ-DB-014
 - Parent: REQ-DB-014
 - Priority: Should
 - Verification method: Test
 - Acceptance criterion: AC-12: 50 of 50 items read back identical (exact)
-- Verified by: –
+- Verified by: TC-RTB-005
 - Status: Draft
 - History: –
 
 ### REQ-RTB-006 – Source trust stored
 - Level: low   Subject: Persistence
-- Text: The Record tables shall keep the users' edits of the trust of a source.
+- Text: The Record tables shall define the table of the trust values of sources as versioned records that are not deletable.
 - Rationale: refines REQ-DB-015
 - Parent: REQ-DB-015
 - Priority: Could
 - Verification method: Test
 - Acceptance criterion: AC-3: an edited trust value survives a restart
-- Verified by: –
+- Verified by: TC-RTB-006
 - Status: Draft
 - History: –
 
