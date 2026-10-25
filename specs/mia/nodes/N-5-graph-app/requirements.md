@@ -2,7 +2,7 @@
 
 **Parent:** `specs/mia/requirements.md` (top level N-0)   **Decomposition:** `specs/mia/decomposition.yaml`   **Status:** Draft (Plan, 2026-10-25)
 
-An independent add-on tool that shows and edits workflow and context graphs on the database through IF-102. Integrated last. Refines the top-level requirements named in each `Parent`; the details of low-level nodes follow when this node is cut. Numbers marked *Plan* are fixed in the node that owns the measurement.
+An independent add-on tool that shows and edits workflow and context graphs through the backend API IF-104 (no database access of its own). Integrated last. Refines the top-level requirements named in each `Parent`; the details of low-level nodes follow when this node is cut. Numbers marked *Plan* are fixed in the node that owns the measurement.
 
 ## Requirements
 
@@ -37,7 +37,7 @@ An independent add-on tool that shows and edits workflow and context graphs on t
 - Parent: FR-22, FR-7
 - Priority: Should
 - Verification method: Test
-- Acceptance criterion: AC-27: each violation is refused with the rule named, in the app and again by the storage layer
+- Acceptance criterion: AC-27: each violation is refused with the rule named, in the app and again by the backend
 - Verified by: –
 - Status: Draft
 - History: –
@@ -54,14 +54,14 @@ An independent add-on tool that shows and edits workflow and context graphs on t
 - Status: Draft
 - History: –
 
-### REQ-GA-005 – Work through the storage interface
+### REQ-GA-005 – Work through the backend API
 - Level: high   Subject: GraphApp
-- Text: The Graph app shall read and write the shared database only through the storage interface IF-102.
+- Text: The Graph app shall read and write workflows and context graphs only through the workflow and graph API IF-104.
 - Rationale: refines FR-22, CON-7
 - Parent: FR-22, CON-7
 - Priority: Should
-- Verification method: Inspection
-- Acceptance criterion: AC-15: no database driver is imported outside the storage client
+- Verification method: Inspection, Test
+- Acceptance criterion: AC-15: the Graph app imports no database driver (exact); every call goes to IF-104
 - Verified by: –
 - Status: Draft
 - History: –
@@ -80,12 +80,12 @@ An independent add-on tool that shows and edits workflow and context graphs on t
 
 ### REQ-GA-007 – Login required
 - Level: high   Subject: GraphApp
-- Text: The Graph app shall require a login with an account of the database.
+- Text: The Graph app shall require a login that the backend authenticates and use the backend session for every call.
 - Rationale: refines FR-21, NFR-6
 - Parent: FR-21, NFR-6
 - Priority: Should
 - Verification method: Test
-- Acceptance criterion: AC-14: a request without a session shows the login only (exact)
+- Acceptance criterion: AC-14: a request without a session shows the login only (exact); the Graph app holds no password check of its own
 - Verified by: –
 - Status: Draft
 - History: –
@@ -133,7 +133,7 @@ An independent add-on tool that shows and edits workflow and context graphs on t
 - Parent: NFR-9
 - Priority: Should
 - Verification method: Test
-- Acceptance criterion: AC-29: starts alone against the mock of IF-102 and in the stack
+- Acceptance criterion: AC-29: starts alone against the mock of IF-104 and in the stack
 - Verified by: –
 - Status: Draft
 - History: –

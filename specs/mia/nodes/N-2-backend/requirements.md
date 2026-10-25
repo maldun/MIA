@@ -905,3 +905,15 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verified by: –
 - Status: Draft
 - History: –
+
+### REQ-BE-076 – Workflow and graph API
+- Level: high   Subject: WebApplication
+- Text: The Backend shall offer the Graph app, under the Backend's session, the listing, reading, saving as a new version, history, diff and restore of workflows and context graphs, and refuse an invalid graph with the broken rule named (IF-104).
+- Rationale: refines FR-22, FR-30, FR-7
+- Parent: FR-22, FR-30, FR-7
+- Priority: Should
+- Verification method: Test
+- Acceptance criterion: AC-16: with the fake storage each of the six operations works; an invalid graph is refused with the rule named (exact)
+- Verified by: –
+- Status: Draft
+- History: –

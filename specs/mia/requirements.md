@@ -289,7 +289,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Priority: Should
 - Verification method: Test, Demonstration
 - Acceptance criterion: AC-16: a user edits a node as JSON and saves a new version; an invalid edit is refused with the broken rule named; a former version can be restored; the export to files and the seed from files give identical entries
-- Refined in: N-5, N-3.2
+- Refined in: N-5, N-2.3, N-3.2
 - Verified by: –
 - Status: Draft
 - History: –

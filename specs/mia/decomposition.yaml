@@ -38,6 +38,7 @@ decomposition:
       children: [N-2.1, N-2.2, N-2.3, N-2.4, N-2.5]
       boundary:
         - {interface: IF-101, role: provides, child: N-2.1}
+        - {interface: IF-104, role: provides, child: N-2.1}
         - {interface: IF-102, role: consumes, child: N-2.2}
         - {interface: IF-102, role: consumes, child: N-2.3}
         - {interface: IF-103, role: consumes, child: N-2.4}
@@ -181,7 +182,7 @@ decomposition:
     - id: IF-102
       name: Storage interface (state of all apps)
       provider: N-3
-      consumers: [N-2, N-5]         # the graph app works on the database directly (owner, D-2)
+      consumers: [N-2]              # the graph app goes through the backend API IF-104 (owner, D-47)
       decided_by: N-0
       version: v0
       mock:
@@ -207,8 +208,22 @@ decomposition:
         does_not: ["quality of a real model (eval criteria are decided on the pinned model)"]
       suite: tests/acceptance/contract/test_if_103_model_server.py
 
-    # Decision D-2 (HLS section 5.5): the graph app N-5 is an independent tool and uses IF-102 directly;
-    # N-3.1 validates edits (TB-edit). If the owner meant "through the backend API", drop N-5 from IF-102.
+    - id: IF-104
+      name: Workflow and graph API (REST with the backend's session)
+      provider: N-2
+      consumers: [N-5]
+      decided_by: N-0
+      version: v0
+      mock:
+        complexity: 2               # a fake REST server: login, list, read, save versions, history, diff, restore
+        kind: fake
+        location: tests/helpers/mocks/if_104_graph_api.py
+        does: ["login and session", "list and read workflows and context graphs", "save a version, history, diff, restore", "refuse an invalid graph with the broken rule named"]
+        does_not: ["the real graph rules beyond a fixed list of cases", "concurrent edits"]
+      suite: tests/acceptance/contract/test_if_104_graph_api.py
+
+    # Decision D-2/D-47 (HLS section 5.5): the graph app N-5 is an independent tool and goes through the backend API
+    # (IF-104). The backend validates edits (TB-edit); N-3.1 validates again.
     # Search and scholarly services (SearXNG, scholarly APIs) are external providers of N-2.4; their
     # interfaces are recorded when N-2 is cut.
 

@@ -1095,7 +1095,7 @@ package MIA_Requirements {
         doc /* MIA shall provide a graph app, a web page in the same stack as the chat (plain HTML and JavaScript, a vendored
                graph library, no build step), that shows workflow graphs as nodes and edges and lets any
                logged-in user edit each node and edge directly as a JSON dictionary (text data only). It reads
-               and writes the shared database, checks the graph rules (node identity, no two data nodes
+               and writes the shared database through the backend, checks the graph rules (node identity, no two data nodes
                adjacent, no cycle, a stopping criterion on every session node) before saving, saves every edit
                as a new version, and shows the version history and a diff. */
         @Trace { :>> baseline = ("TK-5", "TK-10"); :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }

@@ -9,7 +9,7 @@ Used by the requirements linter (L1) and as context for the LLM assessor (L3). T
 | Database | Node N-3: the PostgreSQL database and its storage layer | Persistence | – | data layer |
 | Evaluation and operation node | Node N-4: harness, suites, baselines, compose stack, backup, shutdown | Evaluation | – | tooling node |
 | Graph app | Node N-5: the independent add-on tool that shows and edits workflow and context graphs | GraphApp | – | graph editor, graph UI |
-| storage interface | The interface IF-102 of the Database used by the Backend and the Graph app | StorageLayer | – | database API, DB access |
+| storage interface | The interface IF-102 of the Database, used by the Backend only | StorageLayer | – | database API, DB access |
 | workflow | A pipeline or agent workflow stored as a graph of process nodes and data nodes | – | – | flow, pipeline graph |
 | process node | A node of a workflow graph that does work (a task, a model step or a session) | – | – | step node, task node |
 | data node | A node of a workflow graph that holds an artifact (a claim, a page, a result) | – | – | material node, artifact node |

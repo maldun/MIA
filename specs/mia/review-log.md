@@ -262,3 +262,8 @@ The first version was silent until the end and could take 20 minutes or more: th
 | Id | Decision | Edit |
 |---|---|---|
 | D-46 | **NFR-9 added.** MIA runs each of the nodes N-2 to N-5 as its own container under podman, startable alone and all together by the compose stack with the same configuration file; the web frontend (N-1) is static files served by the backend container (owner's answer to "is running all nodes in docker a top-level requirement?"). Podman, not Docker, because that is the host's engine | HLS 3.2 (NFR-9), 6 (AC-29), 5.5, 8 (amendment 6); `architecture.sysml` (requirement, satisfy, allocate to the compose stack, verification case); `requirements.md` |
+
+### Amendment 7: the graph app goes through the backend API (owner, 2026-10-25)
+| Id | Decision | Edit |
+|---|---|---|
+| D-47 | **The graph app (N-5) works through the backend API (IF-104), not directly on the database; this revises D-2.** Reason (the owner's point): a direct line needs a second login implementation in the graph app. The backend holds the one login and session, validates every edited workflow and graph (TB-edit) and writes through the storage interface IF-102; N-3.1 validates again. N-5 stays its own node and container and is integrated last. CON-7 and NFR-8 keep their words | HLS 3.1 (FR-22: "through the backend"), 5.5, 8 (amendment 7); `architecture.sysml` (FR-22 doc); `decomposition.yaml` (IF-104, IF-102 consumers); `requirements.md`, REQ-BE-076, REQ-GA-003/005/007/011; `glossary.md` |
