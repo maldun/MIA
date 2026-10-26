@@ -166,6 +166,25 @@
     </div>
   </dialog>
 
+  <dialog id="login" aria-labelledby="login-title">
+    <h2 id="login-title" data-i18n="login.title">Log in</h2>
+    <form class="settings-form" id="login-form" autocomplete="on">
+      <label class="setting">
+        <span data-i18n="login.user">Account</span>
+        <input type="text" id="login-user" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" required>
+      </label>
+      <label class="setting">
+        <span data-i18n="login.password">Password</span>
+        <input type="password" id="login-password" name="password" autocomplete="current-password" required>
+      </label>
+      <p class="hint" id="login-visible" data-i18n="login.visible">Everything here is visible to all users of this MIA: the conversation, her memory, the workflows and every change with its author.</p>
+      <p class="form-error" id="login-error" role="alert" hidden></p>
+      <div class="actions">
+        <button type="submit" id="login-submit" data-i18n="login.submit">Log in</button>
+      </div>
+    </form>
+  </dialog>
+
   <dialog id="settings" aria-labelledby="settings-title">
     <h2 id="settings-title" data-i18n="settings.title">Settings</h2>
     <form method="dialog" class="settings-form" id="settings-form">

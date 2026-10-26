@@ -36,3 +36,36 @@ The ten views in the last rows are in the approved requirements but IF-101 v0 (s
 
 ## Plan amendments
 None yet.
+
+---
+
+## Slice 1 (owner decision 2026-10-26: "slice first, v1 later")
+Done on branch `impl/n-1-web-frontend`: the part of N-1.1 that IF-101 v0 allows, plus a mock server to click through it.
+
+| Requirement | What was done | Tests (reported green) |
+|---|---|---|
+| REQ-CLV-001 sender | `senderName` and the group rule in `chat-model.js`, used by `chat.js`: another account is shown by name, my own as "You", MIA by her name; two users in a row are two groups; an old server without `sender` looks as before | `tests/js/multiuser.test.mjs` (2 tests); `tests/test_chat_mock_server.py` (the other user sees the sender) |
+| REQ-CLV-002 queue position | `queueText`: "Waiting, place n" from the acknowledgement (`position`); "Waiting" for a server without a position; the acknowledgement of today's server (`ok`, `queued`) and of IF-101 (`id`, `position`) are both understood | 2 JS tests; mock server test (positions 1, 2, 3 and the refusal of a third message of one user) |
+| REQ-CLV-014 login | new `login.js`: `submitLogin` (POST `/api/login`, JSON, same-origin cookie, one attempt), `loginErrorKey` (wrong, throttled, lost connection), the dialog `initLogin`; the page opens it when the history answers 401 or the socket is refused with `unauthenticated`; after success the page reloads with the cookie | 3 JS tests; mock server tests (401, cookie `HttpOnly` and `SameSite=Strict`, sixth wrong login 429 even with the right password) |
+| REQ-CLV-015 all is visible | the login dialog says it, in English and German (`login.visible`) | JS test (both dictionaries and the markup) |
+| REQ-CLV-018 password only over a secure channel | `secureChannel`: HTTPS, or localhost, 127.0.0.1, ::1 over HTTP; otherwise the form is switched off with a reason and nothing is sent | 2 JS tests |
+| REQ-CLV-021 IF-101 only | a static check lists every `/api` address and socket event of the page against the interface and the character/voice events | 1 JS test |
+
+Totals reported green: 76 JS tests (65 before + 11), `test_chat_page.py` 11 (dictionaries have equal keys, strict CSP, no inline code, performance budget), `test_chat_mock_server.py` 7.
+
+### The mock server and the start script
+`ui/tools/chat_mock_server.py` is the real page (served by `web_app.py`) with the chat handlers replaced by the IF-101 mock of the protected helper (login with throttling, `send` with positions, `stop`, `history`, events with the sender); answers are scripted and stream with a gap, and a message waits `ANSWER_DELAY` seconds (default 4) so that the positions can be seen. Stage `chat-with-login` of `tools/start_testing.sh` runs it as a container (port 8686): `bash tools/start_testing.sh start chat-with-login`, accounts `anna / pw-anna`, `ben / pw-ben`, `carl / pw-carl`. Tried in the container with real HTTP: page 200, history without session 401, login 200 with cookie, history 200. A browser click-through was not possible in this session (headless Chromium does not answer in the background session); the owner clicks.
+
+### Findings
+| Finding | Covered by test |
+|---|---|
+| IF-101 v0 acknowledges `send` with `{id, position}` only. The page needs the stored message (with its server id and sender) in the acknowledgement, or the `client_id` echoed in the `chat_message` event; otherwise the local copy of my message and the server's copy are two rows. The mock server adds `message` to the acknowledgement. **Input for IF-101 v1 and for N-2.1** | mock server test (`ack["message"]`) |
+| IF-101 v0 does not say how the session travels. Decision of this slice: a cookie `mia_session` (HttpOnly, SameSite=Strict, Secure on HTTPS) that the server sets at `/api/login`; the page keeps no token; a socket without the cookie is refused with the message `unauthenticated`. **To be written into IF-101 v1 and N-2.1** | mock server tests |
+| Position 1 means "answered next"; the text "Waiting, place 1" shows until the answer starts. Whether place 1 should read differently is a wording decision | JS test |
+| The page keeps working with today's server (no login, no sender, old acknowledgement): the old tests and the old-server cases pass | existing 65 JS tests, `test_chat_page.py` |
+
+### Not done in the slice (waits for IF-101 v1)
+Password change and the account of a kept session (REQ-CLV-014 rest), regenerate and speak again (-005), the account of a task (-008), editors for the persona (-009), voting (-010), tasks, memos and memory (-011), source trust (-012), variant label (-013).
+
+### Reuse check
+`chat.js`, `chat-model.js`, `socket.js`, `app.js` and the dialogs of the page were extended (a few lines each); `login.js` and the mock server are new because no login existed. The stub server of the old backend stays as stage `chat-on-stub`.
