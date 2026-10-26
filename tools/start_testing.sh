@@ -45,6 +45,6 @@ case "$cmd" in
         for s in "${names[@]}"; do echo "== $s"; run "$s" stop; done ;;
     restart)                                         # start skips a running stage and so keeps the old code; this stops and starts it again
         [ $# -gt 0 ] || { echo "name the stage(s) to restart"; exit 1; }
-        bash "$0" stop "$@" && bash "$0" start "$@" ;;
+        bash "$0" stop "$@"; bash "$0" start "$@" ;;       # no &&: a stage's stop may end with a non-zero status when nothing else ran
     *) sed -n '2,11p' "$0"; exit 2 ;;
 esac
