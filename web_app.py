@@ -46,6 +46,7 @@ from .chat_log import ChatLog
 from .chat_service import ChatService
 from .chat_api import create_blueprint as create_chat_blueprint
 from . import accounts_api
+from .internal_auth import ensure_token, internal_headers
 from .storage import Storage
 from .storage_files import FileBackend
 from .moods import MoodTracker
@@ -217,7 +218,10 @@ def express_and_reload(expression,sound=True):
 def handle_chat_send(data=None):
     """{id (client id), text}: acknowledged right away, the answer follows as chat_* events"""
     data = data if isinstance(data, dict) else {"text": data}
-    return chat_service.send(data.get("text"), client_id=data.get("id"), sender=request.sid)
+    account = _account_sockets.account_of(request.sid) if _account_sockets is not None else None
+    if account:
+        _account_changes.record(account, "chat_send", "")                    # who wrote (REQ-API-009); the text is not recorded
+    return chat_service.send(data.get("text"), client_id=data.get("id"), sender=account or request.sid)       # the rate limit is per user (REQ-API-007)
 
 @socketio.on('chat_stop')
 def handle_chat_stop(_=None):
@@ -387,7 +391,7 @@ def time_update_trigger():
     #print("Trigggggger!!!!!!")
     url=WEB_URL + '/' + CONST.TIME_ROUTE
     req={CONST.TASK_KEY:CONST.UPDATE_TIME_TASK}
-    response = requests.get(url, params=req)
+    response = requests.get(url, params=req, headers=internal_headers())
     logger.info(response.text)
 
 @app.route(f"/{CONST.TIME_ROUTE}", methods=["GET"])    
@@ -594,7 +598,11 @@ app.register_blueprint(create_chat_blueprint(chat_service, token=_chat_token or 
 _account_sockets = None
 if cfg.get(CONST.ACCOUNTS_KEY, False):
     _account_store = Storage(FileBackend(os.path.join(FPATH, cfg.get(CONST.ACCOUNTS_DIR_KEY, "data/db"))))
-    _account_service, _account_sockets = accounts_api.install(app, socketio, _account_store, owner=cfg.get(CONST.OWNER_KEY) or None)
+    _account_changes = accounts_api.ChangeLog(os.path.join(FPATH, cfg.get(CONST.CHANGES_LOG_KEY, "data/changes.jsonl")))
+    _account_service, _account_sockets = accounts_api.install(
+        app, socketio, _account_store, changes=_account_changes, allowed_origins=lambda: allowed_origins,
+        open_paths=("/",), open_prefixes=("/static/",),                       # the page and its files; the character, backgrounds and audio need the session
+        internal_paths=(f"/{UPLOAD_ROUTE}", f"/{CONST.TIME_ROUTE}"), internal_token=ensure_token())      # our own speech process and scheduler
 
 # the chat page loads only its own files: no inline scripts, no external hosts (ui/REQUIREMENTS_CHAT.md, 8)
 CHAT_PAGE_CSP = (

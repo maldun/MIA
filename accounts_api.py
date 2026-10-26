@@ -1,20 +1,35 @@
 """
-The web side of login and logout (N-2.1 T-01; IF-101: login, whoami, change_password, logout; accounts for the owner).
+The web side of the accounts (N-2.1 T-01 and T-02; IF-101: login, whoami, change_password, logout).
 
 create_accounts_blueprint(service): the routes, with the session in the cookie `mia_session` (HttpOnly, SameSite=Strict, Secure on HTTPS; the page keeps no token).
-SocketSessions(service, socketio): which sockets belong to which session; a socket without a valid session is refused, and the sockets of a session that ends
-(logout) are disconnected (REQ-API-017). The decisions are those of api_sessions.py; this module only turns them into HTTP and Socket.IO.
-
-Not here (N-2.1 T-02): refusing every other request without a session. Until then this is registered only when the config switches accounts on (web_app.py).
+install(app, socketio, store, ...): the routes plus the guard that every request passes (REQ-API-007):
+  - a foreign `Origin` is refused (403 bad_origin), also with a session;
+  - the page, its static files and the login are open; our own speech process passes the internal paths with a shared secret (header X-MIA-Internal);
+    every other request needs a session (401 unauthenticated); the socket handshake is guarded by guard_connect;
+  - a password (login, change_password) is accepted only over a secure channel: HTTPS, or a request from this machine (403 insecure_channel, REQ-API-008);
+  - every successful change (POST, PUT, PATCH, DELETE) is written to the ChangeLog with the account (REQ-API-009); there are no roles (REQ-API-010).
+SocketSessions: which sockets belong to which session; a socket without a valid session is refused, the sockets of a session that ends (logout) are disconnected
+(REQ-API-017), and the account of a socket is the key of the message rate limit (REQ-API-007: per user).
+Accounts are made on the machine with tools/accounts_cli.py; no request creates one.
 """
-from flask import Blueprint, jsonify, request
+import hmac
+import json
+import os
+import time
+
+from flask import Blueprint, g, jsonify, request
 
 try:
-    from .api_sessions import ApiError
+    from .api_sessions import ApiError, SessionService
+    from .internal_auth import INTERNAL_HEADER
 except ImportError:  # plain import (single test run as a script)
-    from api_sessions import ApiError
+    from api_sessions import ApiError, SessionService
+    from internal_auth import INTERNAL_HEADER
 
 COOKIE = "mia_session"
+PASSWORD_PATHS = ("/api/login", "/api/change_password")
+NO_CHANGE_PATHS = ("/api/login", "/api/logout", "/api/change_password")       # not changes of shared data
+LOOPBACK = ("127.0.0.1", "::1")
 
 
 def _body():
@@ -67,12 +82,67 @@ def create_accounts_blueprint(service, cookie=COOKIE):
         data = _body()
         return answer(lambda: service.change_password(token(), data.get("old"), data.get("new")))
 
-    @bp.post("/api/accounts")
-    def create_account():
-        data = _body()
-        return answer(lambda: service.create_account(token(), data.get("name"), data.get("password")))
-
     return bp
+
+
+class ChangeLog:
+    """who changed what (REQ-API-009): one JSON line {time, account, action, target} per change; the content of a change is not written (it can hold private text).
+    With path None nothing is written to disk and only the list in memory is kept (tests)."""
+
+    def __init__(self, path, clock=time.time):
+        self.path, self._clock, self._rows = path, clock, []
+
+    def record(self, account, action, target):
+        row = {"time": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(self._clock())), "account": account, "action": action, "target": target}
+        self._rows.append(row)
+        if self.path:
+            os.makedirs(os.path.dirname(self.path) or ".", exist_ok=True)
+            with open(self.path, "a", encoding="utf-8") as fp:
+                fp.write(json.dumps(row, ensure_ascii=False) + "\n")
+
+    def read(self):
+        return list(self._rows)
+
+
+def secure_channel():
+    """a password may arrive over HTTPS, or from this machine; X-Forwarded-Proto counts only when the proxy that sets it runs on this machine too"""
+    if request.is_secure or request.remote_addr in LOOPBACK:
+        return True
+    return False
+
+
+def _forwarded_https():
+    return request.remote_addr in LOOPBACK and request.headers.get("X-Forwarded-Proto", "").lower() == "https"
+
+
+def install_guard(app, service, cookie=COOKIE, open_paths=("/",), open_prefixes=("/static/",), internal_paths=(), internal_token=None, allowed_origins=lambda: [], changes=None):
+    @app.before_request
+    def guard():
+        path = request.path
+        if path.startswith("/socket.io/"):
+            return None                                                 # the handshake is guarded by guard_connect
+        origin = request.headers.get("Origin")
+        if origin and origin not in allowed_origins():
+            return jsonify({"error": "bad_origin"}), 403
+        if path in PASSWORD_PATHS and request.method == "POST" and not (secure_channel() or _forwarded_https()):
+            return jsonify({"error": "insecure_channel"}), 403
+        if path in internal_paths and internal_token:
+            if hmac.compare_digest(request.headers.get(INTERNAL_HEADER, ""), internal_token):
+                return None
+        if path == "/api/login" or path in open_paths or any(path.startswith(p) for p in open_prefixes):
+            return None
+        account = service.user_of(request.cookies.get(cookie))
+        if account is None:
+            return jsonify({"error": "unauthenticated"}), 401
+        g.account = account
+        return None
+
+    @app.after_request
+    def attribute(response):
+        account = getattr(g, "account", None)
+        if changes is not None and account and request.method in ("POST", "PUT", "PATCH", "DELETE") and 200 <= response.status_code < 300 and request.path not in NO_CHANGE_PATHS:
+            changes.record(account, request.method, request.path)
+        return response
 
 
 class SocketSessions:
@@ -97,20 +167,23 @@ class SocketSessions:
     def token_of(self, sid):
         return self._by_sid.get(sid)
 
+    def account_of(self, sid):
+        """the account behind a socket: the key of the message rate limit, so two devices of a user share one limit"""
+        token = self._by_sid.get(sid)
+        return self.service.user_of(token) if token else None
+
     def _drop(self, token):
         for sid in [s for s, t in self._by_sid.items() if t == token]:
             del self._by_sid[sid]
             getattr(self.socketio, "server", self.socketio).disconnect(sid)          # Flask-SocketIO keeps the python-socketio server in .server
 
 
-def install(app, socketio, store, owner=None):
-    """registers the routes on the Flask app and returns (service, sockets); web_app.py calls guard_connect / forget_socket from its connect and disconnect handlers"""
-    try:
-        from .api_sessions import SessionService
-    except ImportError:
-        from api_sessions import SessionService
-    service = SessionService(store, owner=owner)
+def install(app, socketio, store, **guard_options):
+    """registers the routes and the guard on the Flask app and returns (service, sockets); web_app.py calls guard_connect / forget_socket from its connect and
+    disconnect handlers. guard_options: see install_guard."""
+    service = SessionService(store)
     app.register_blueprint(create_accounts_blueprint(service))
+    install_guard(app, service, **guard_options)
     return service, SocketSessions(service, socketio)
 
 

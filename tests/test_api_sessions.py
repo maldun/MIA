@@ -1,6 +1,6 @@
 """
 N-2.1 T-01, the logic of login, session, throttling, password and logout (framework free): TC-API-003 login, TC-API-004 throttling, TC-API-005 no password stored or logged,
-TC-API-006 owner-only accounts, TC-API-017 logout. Runs on the mock of IF-102 and a fake clock.
+TC-API-006 no account by request, TC-API-017 logout. Runs on the mock of IF-102 and a fake clock.
 Run: python tests/test_api_sessions.py
 """
 import io
@@ -43,7 +43,7 @@ class Sessions(unittest.TestCase):
         self.store, self.clock = StorageMock(), Clock()
         for name, password in (("anna", "pw-anna-1"), ("ben", "pw-ben-123")):
             accounts.create(self.store, name, password, "setup")
-        self.api = S.SessionService(self.store, owner="anna", clock=self.clock)
+        self.api = S.SessionService(self.store, clock=self.clock)
 
     @mark.req("REQ-API-003")
     def test_the_right_password_opens_a_session_and_a_wrong_one_does_not(self):
@@ -83,22 +83,10 @@ class Sessions(unittest.TestCase):
             self.assertNotIn(secret, stream.getvalue())
 
     @mark.req("REQ-API-006")
-    def test_only_the_owner_creates_an_account(self):
-        """TC-API-006"""
-        owner, other = self.api.login("anna", "pw-anna-1"), self.api.login("ben", "pw-ben-123")
-        err = error_of(lambda: self.api.create_account(other, "carl", "pw-carl-123"))
-        self.assertEqual((err.status, err.code), (403, "forbidden"))
+    def test_the_service_has_no_way_to_create_an_account(self):
+        """TC-API-006: accounts are made by the owner on the machine (tools/accounts_cli.py), a request cannot create one"""
+        self.assertFalse(hasattr(self.api, "create_account"))
         self.assertNotIn("carl", self.store.ids("accounts"))
-        self.api.create_account(owner, "carl", "pw-carl-123")
-        self.assertTrue(self.api.login("carl", "pw-carl-123"))
-        self.assertEqual(error_of(lambda: self.api.create_account(owner, "carl", "pw-carl-123")).status, 409)          # the name is taken
-        self.assertEqual(error_of(lambda: self.api.create_account(owner, "dora", "short")).code, "weak_password")
-        self.assertEqual(error_of(lambda: self.api.create_account("no-session", "dora", "pw-dora-123")).status, 401)
-
-    @mark.req("REQ-API-006")
-    def test_nobody_is_the_owner_when_no_owner_is_configured(self):
-        api = S.SessionService(self.store, owner=None, clock=self.clock)
-        self.assertEqual(error_of(lambda: api.create_account(api.login("anna", "pw-anna-1"), "carl", "pw-carl-123")).status, 403)
 
     @mark.req("REQ-API-003")
     def test_whoami_and_the_own_password(self):

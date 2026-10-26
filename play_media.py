@@ -21,8 +21,10 @@ import os
 import requests
 try:
     from .mia_logger import logger
+    from .internal_auth import internal_headers
 except ImportError:
     from mia_logger import logger
+    from internal_auth import internal_headers
 
 
 filename = 'wave001.avi'
@@ -67,7 +69,7 @@ def play_sound(filename,url=None):
     else:
         with open(filename, 'rb') as fp:
             req = dict(filename=filename, file=fp)
-            response = requests.post(url, files=req)
+            response = requests.post(url, files=req, headers=internal_headers())          # the secret of this MIA start, if the accounts are on (N-2.1 T-02)
             logger.info(response.text)
 
 

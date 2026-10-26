@@ -84,7 +84,7 @@
   "chat_rate_per_minute": 10,
   "accounts_enabled": false,
   "accounts_dir": "data/db",
-  "owner_account": "",
+  "changes_log": "data/changes.jsonl",
   "moods_file": "moods.json",
   "mood_hold_minutes": 10,
   "expression_model": null,
