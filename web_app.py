@@ -46,6 +46,7 @@ from .chat_log import ChatLog
 from .chat_service import ChatService
 from .chat_api import create_blueprint as create_chat_blueprint
 from . import accounts_api
+from .chat_ops_api import create_chat_ops_blueprint
 from .internal_auth import ensure_token, internal_headers
 from .storage import Storage
 from .storage_files import FileBackend
@@ -585,12 +586,15 @@ def run_search_exchange(query, on_delta, on_emotion, should_stop):
     """/search: the top results of the search tool, no model"""
     return research_chat.run_search(_web_tools["web_search"][0], query, count=cfg.get(CONST.SEARCH_RESULTS_SHOWN_KEY, CONST.DEFAULT_SEARCH_RESULTS_SHOWN), should_stop=should_stop)
 
+_db_dir = os.path.join(FPATH, cfg.get(CONST.ACCOUNTS_DIR_KEY, "data/db"))
+_votes_store = Storage(FileBackend(_db_dir))                  # the votes table (REQ-CHA-015); the accounts use the same folder
 chat_service = ChatService(socketio.emit, chat_log, mood, run_chat_exchange, run_command=run_chat_command, run_lookup=run_lookup_exchange, run_search=run_search_exchange,
                            model_info=lambda: (comm.version, getattr(comm, "profile", None)),
                            queue_size=cfg.get(CONST.CHAT_QUEUE_KEY, 5 if cfg.get(CONST.ACCOUNTS_KEY, False) else 1),
                            user_limit=2 if cfg.get(CONST.ACCOUNTS_KEY, False) else 0,           # IF-101: 5 waiting in all, 2 per account
                            rate_limit=(cfg.get(CONST.CHAT_RATE_KEY, 10), 60),
-                           spawn=socketio.start_background_task)
+                           spawn=socketio.start_background_task, votes=_votes_store)
+app.register_blueprint(create_chat_ops_blueprint(chat_service))
 _chat_token = cfg.get(CONST.CHAT_TOKEN_KEY, app.config["EDITOR_TOKEN_INFO"][0])
 app.register_blueprint(create_chat_blueprint(chat_service, token=_chat_token or None, allowed_origins=lambda: allowed_origins))
 
@@ -598,7 +602,7 @@ app.register_blueprint(create_chat_blueprint(chat_service, token=_chat_token or 
 # Create the first account with `python tools/accounts_cli.py create NAME`.
 _account_sockets = None
 if cfg.get(CONST.ACCOUNTS_KEY, False):
-    _account_store = Storage(FileBackend(os.path.join(FPATH, cfg.get(CONST.ACCOUNTS_DIR_KEY, "data/db"))))
+    _account_store = _votes_store
     _account_changes = accounts_api.ChangeLog(os.path.join(FPATH, cfg.get(CONST.CHANGES_LOG_KEY, "data/changes.jsonl")))
     _account_service, _account_sockets = accounts_api.install(
         app, socketio, _account_store, changes=_account_changes, allowed_origins=lambda: allowed_origins,
