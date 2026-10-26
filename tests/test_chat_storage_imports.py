@@ -21,6 +21,7 @@ CHAT_AGENT = [
     'research_chat.py',
     'extraction.py',
     'source_trust.py',
+    'memory_records.py',
 ]
 
 
