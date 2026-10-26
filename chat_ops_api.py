@@ -40,14 +40,14 @@ def create_chat_ops_blueprint(chat):
 
     @bp.post("/api/regenerate")
     def regenerate():
-        return answer(lambda: chat.regenerate(account(), data().get("id")))
+        return answer(lambda: chat.regenerate(account(), data().get("message_id")))
 
     @bp.post("/api/speak_again")
     def speak_again():
-        return answer(lambda: chat.speak_again(data().get("id")))
+        return answer(lambda: chat.speak_again(data().get("message_id")))
 
-    @bp.get("/api/account/<message_id>")
-    def account_of(message_id):
-        return answer(lambda: chat.account(message_id))
+    @bp.get("/api/account")
+    def account_of():
+        return answer(lambda: chat.account(request.args.get("message_id")))
 
     return bp

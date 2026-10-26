@@ -52,11 +52,11 @@ class OpsApiTest(unittest.TestCase):
         self.assertEqual(self.client.post("/api/vote", json={}).status_code, 422)             # a body without fields is invalid, not a crash
 
     def test_answer_operations(self):
-        self.assertEqual(self.client.post("/api/speak_again", json={"id": self.answer}).get_json(), {"sentences": 2})
-        self.assertTrue(self.client.get("/api/account/" + self.answer).get_json()[0]["plain"])
-        self.assertEqual(self.client.get("/api/account/nope").status_code, 404)
-        self.assertEqual(self.client.post("/api/regenerate", json={"id": self.answer}).get_json()["position"], 1)
-        self.assertEqual(self.client.post("/api/regenerate", json={"id": "nope"}).status_code, 404)
+        self.assertEqual(self.client.post("/api/speak_again", json={"message_id": self.answer}).get_json(), {"sentences": 2})
+        self.assertTrue(self.client.get("/api/account?message_id=" + self.answer).get_json()[0]["plain"])
+        self.assertEqual(self.client.get("/api/account?message_id=nope").status_code, 404)
+        self.assertEqual(self.client.post("/api/regenerate", json={"message_id": self.answer}).get_json()["position"], 1)
+        self.assertEqual(self.client.post("/api/regenerate", json={"message_id": "nope"}).status_code, 404)
 
 
 if __name__ == "__main__":
