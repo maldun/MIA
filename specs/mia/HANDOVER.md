@@ -1,4 +1,4 @@
-# Hand-over: where MIA stands (2026-10-27)
+# Hand-over: where MIA stands (2026-10-27, evening)
 
 For a fresh session. Read this, then `specs/mia/plan.md` (tasks), `specs/mia/review-log.md` (decisions D-45 to D-73, the newest at the end) and the `implementation-log.md` of the node you work on. Rules: `CLAUDE.md`; the agent memory has the owner's working rules (give scripts not step lists, give the merge commands, scripts show the diff, reuse existing code).
 
@@ -14,7 +14,9 @@ For a fresh session. Read this, then `specs/mia/plan.md` (tasks), `specs/mia/rev
 | Amendment | What | State |
 |---|---|---|
 | A-01 to A-04 | root order; real Database providers; IF-101 v1; IF-111 keeps the current expression and IF-101 v2 `logout` | installed |
-| **A-05** | IF-101 v3 (`403 bad_origin`, `403 insecure_channel`) and the real provider of IF-101 in `contract.py` (login, throttling, whoami, change_password, logout and the 401 without a session run against `api_sessions.py`) | **not installed yet:** `bash tools/apply_amendment_a05.sh`, then `--do`, then commit |
+| **A-05** | IF-101 v3 and the real provider of IF-101 (login, throttling, whoami, change_password, logout) | installed |
+| **A-06** | IF-101 v4 (`score` and event `score` carry `series`: sums per ISO week `YYYY-Www`, oldest first, only weeks with a vote); IF-201 v1 (regenerate, speak_again, account, vote, score; events variant, score; errors not_found, not_the_last_answer, invalid_vote); mocks and suites; D-74 | installed |
+| A-07 (to come) | the real provider in `tests/helpers/contract.py` for the IF-101 operations that get built (the 14 skipped tests), same style as A-05 | draft it when the code exists |
 
 ## Plan material waiting for the owner
 - **Threat model** `specs/mia/threat-model.md` (6 boundaries, 10 threats) and the **step budgets** in the agent view (`secondBudget` per call: from the skill files, three are guesses) are drafts to review. `bash tools/check_agent.sh --errors` (use `EVAL_DIR=/home/maldun/prog/Python/MIA/eval` for the untracked injection suites) shows 7 errors: no red-team case for THR-004 to THR-010.
@@ -24,8 +26,8 @@ For a fresh session. Read this, then `specs/mia/plan.md` (tasks), `specs/mia/rev
 - `formal.yaml` (Z3 check of the budgets) is not written.
 
 ## Open decisions (owner)
-1. Score "over time" (REQ-CLV-010): IF-101 votes by time or a series.
-2. IF-201 (API to chat agent) probably needs the v1 operations too: draft as **A-06**, with N-2.1 and N-2.2 tasks.
+1. ~~Score over time~~ decided 2026-10-27: by time, per ISO week (A-06).
+2. ~~IF-201 v1 operations~~ done as A-06 (records, trust and persona go through IF-102, not the chat agent).
 3. Character model selection and variants in Godot (REQ-CHV-007, -008): after the first human tests.
 4. REQ-EVL-011 (the harness reaches the platform only through IF-105): the old harness targets (checks, pipeline, research ...) still call the in-process core; kept side by side until the N-2 integration (owner agreed 2026-10-27).
 5. FR-20 wants the time from idea to promotion on record: the library stores creation and promotion times, the idea date is stored nowhere (N-2.3 may need a field).
@@ -47,6 +49,6 @@ For a fresh session. Read this, then `specs/mia/plan.md` (tasks), `specs/mia/rev
 - **Hardware:** the machine had fatal CPU machine checks when MIA shut down under load (memory note). Do not run the full compose stack or the big model for tests; the light model through `tools/check_accounts_real.sh`, which unloads it and stops Ollama again, was fine.
 
 ## Suggested next steps
-1. Install A-05 (`tools/apply_amendment_a05.sh`), then N-2.1 T-03 so the skipped real contract tests start to run.
-2. Run the agent check from the main checkout and commit `eval/suites` (Plan material above).
-3. Small N-4.1 gaps (per-case table in the report, live latency run), then N-4.2 and T-07 once the N-2 steps exist.
+1. **N-2.2 (chat agent)**: votes into the `votes` table (`record_tables`), score with `series`, regenerate, speak_again, account (IF-201 v1, tests TC-IF-201-05 to -07 and TC-CHA-015). Read its `plan.md` first.
+2. **N-2.1 T-03 rest**: routes and socket events over IF-201 (vote, score, regenerate, speak again, account), records/trust/persona over IF-102 with `item_changed`, `trust_changed`, `persona_changed`; then draft A-07 so the skipped contract tests run. `ui/tools/chat_mock_server.py` must also give `series` (the page shows scores per week).
+3. Owner: websocket-client in the image (real latency number), the agent check of the promoted red-team suites, then N-4.2 and T-07 once the N-2 steps exist.
