@@ -43,17 +43,26 @@ def chat_ask(url, user, password, text, timeout=120):
     reply.raise_for_status()
     client = socketio.Client(http_session=session)
     client.connect(url, headers={"Cookie": "; ".join("%s=%s" % (c.name, c.value) for c in session.cookies)}, wait_timeout=10)
-    first = {"seen": None}
+    first = {"seen": None, "done": None}
     client.on("chat_delta", lambda *_: first.update(seen=True) if first["seen"] is None else None)
+    client.on("chat_done", lambda *_: first.update(done=True))
+
+    def wait(key, what):
+        deadline = time.monotonic() + timeout
+        while first[key] is None:
+            if time.monotonic() > deadline:
+                raise TimeoutError("no %s in %d s" % (what, timeout))
+            time.sleep(0.01)
+
+    first["done"] = True                                                    # nothing is running yet
 
     def ask():
-        first["seen"] = None
-        client.emit("chat_send", {"id": "latency-%d" % time.monotonic_ns(), "text": text})
-        deadline = time.monotonic() + timeout
-        while first["seen"] is None:
-            if time.monotonic() > deadline:
-                raise TimeoutError("no first text in %d s" % timeout)
-            time.sleep(0.01)
+        wait("done", "end of the previous answer")                          # not timed with the next run: it starts on an idle server
+        first["seen"] = first["done"] = None
+        ack = client.call("chat_send", {"id": "latency-%d" % time.monotonic_ns(), "text": text}, timeout=10)
+        if not (isinstance(ack, dict) and ack.get("ok")):                  # e.g. a full queue must not look like a slow answer
+            raise RuntimeError("message refused: %s" % (ack,))
+        wait("seen", "first text")
     return ask
 
 

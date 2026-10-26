@@ -64,7 +64,15 @@ class PlatformHarness(unittest.TestCase):
         self.assertEqual((overall["k"], overall["n"], round(overall["low"], 2), round(overall["high"], 2)), (12, 15, 0.55, 0.93))
         cost = M.cost(run.records)                                 # the mock's cost per run: 3 calls, 1800 tokens, 9.0 s
         self.assertEqual((cost["calls"], cost["tokens"], cost["seconds"]), (45, 27000, 135.0))
-        self.assertIn("27000", H.format_report(run))
+        report = H.format_report(run)
+        self.assertIn("27000", report)
+        self.assertIn("per case (passes / repeats):", report)
+        self.assertRegex(report, r"c0 +3 of 3")
+        self.assertRegex(report, r"c4 +0 of 3")
+
+    def test_report_without_repeats_has_no_case_table(self):
+        suite = make_suite(self.tmp.name, ["pass", "fail"])
+        self.assertNotIn("per case", H.format_report(self.harness.run(suite, repeats=1, pin=PIN)))
 
     @mark.req("REQ-EVL-004")
     def test_every_header_carries_the_versions(self):

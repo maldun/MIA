@@ -554,6 +554,10 @@ def format_report(run, worst=8):
         lines += ["   %-22s %s" % (tag, _pct(r)) for tag, r in table.items()]
     if h["repeats"] > 1:
         lines += ["", "stability over repeats (same status every time): " + _pct(metrics.stability(records))]
+        lines += ["", "per case (passes / repeats):"]
+        for row in metrics.case_table(records):
+            r = metrics.rate(row["passes"], row["repeats"])
+            lines.append("   %-22s %d of %d  (95%% interval %.0f to %.0f%%)" % (row["case"], row["passes"], row["repeats"], 100 * r["low"], 100 * r["high"]))
     cost = metrics.cost(records)
     lines += ["", "cost: %.1f s in total, %.2f s per run, %d model calls, %d characters sent, %d received" % (cost["seconds"], cost["seconds_per_run"], cost["calls"], cost["chars_in"], cost["chars_out"]) + (", %d tokens" % cost["tokens"] if cost["tokens"] else "")]
     return "\n".join(lines)
