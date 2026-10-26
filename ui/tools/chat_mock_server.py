@@ -208,6 +208,10 @@ def r_delete_item():
     return run_api(lambda s: api.delete_item(s, request.args.get("kind"), request.args.get("id")))
 
 
+for _name, _view in (("items", r_items), ("save", r_save_item), ("delete", r_delete_item)):            # as above, for the real routes of items_api
+    w.app.view_functions["items_api." + _name] = _view
+
+
 @w.app.get("/api/trust")
 def r_trust():
     return run_api(lambda s: api.trust(s))
