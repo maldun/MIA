@@ -8,7 +8,7 @@ Items carrying it now (from the T-04 verification report):
 - D-3 retrieval of "my height" style questions (word overlap only), owner decision then.
 - D-4 latency and VRAM with the real chat model, repeats and median (preliminary snapshot is in the report).
 - D-5 duplicate and wrong records in the Memory tab over real use.
-- AC-8 (persona) and AC-25 (detector precision and recall): earlier "postponed to the first iteration after the field test" (`HANDOVER.md`). **Ask the owner** whether this wording is the same label.
+- AC-8 (persona) and AC-25 (detector precision and recall): earlier "postponed to the first iteration after the field test" (`HANDOVER.md`). Confirmed by the owner 2026-10-26: the same label.
 
 ## T-04 verification: state
 Report `specs/mia/nodes/N-2-backend/nodes/N-2.2-chat-agent/verification-report.md`, branch `worktree-verify-t04-close` (commit `8cc777c`, from master `f007fd3`). Proposed verdict: **verified with accepted deviations**, once the owner has done:
