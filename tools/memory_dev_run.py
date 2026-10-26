@@ -2,7 +2,9 @@
 
   ~/prog/Python/venvs/mia312/bin/python tools/memory_dev_run.py [--repeats 3] [--log FILE]
 
-Needs Ollama with the light model loaded. Lines of the sample whose split is not "dev" are skipped before they are parsed: holdout content is never read or printed.
+Needs Ollama with the light model loaded. Lines of the sample whose split is not the chosen one are skipped before they are parsed: by default (dev) holdout content is never read or printed.
+  --split holdout --verifier   the decision run of AC-24 (A-12): ONLY for the independent verifier in a fresh session, never for the implementer; it needs the flag --verifier
+                               and prints the verdict of the rule (at least 9 of 11 cases right and a Wilson 95 % lower bound of 0.5; a failing run is repeated once with fresh repeats)
 Per case and repeat a fresh store is used; update cases are seeded with the record they replace (named in the proposal after "replaces:"); cases whose source is not the
 user's own message go through MemoryRecords.remember, which refuses them before the model is asked. A stored record matches an expected one when the kind is equal and at
 least half of the expected words occur in it (a rough feedback measure, the owner's labels are the truth). Prints a table per case and totals; the raw predictions go to the log.
@@ -30,13 +32,26 @@ from MIA.storage import Storage                          # noqa: E402
 from MIA.storage_files import FileBackend                # noqa: E402
 
 SAMPLE = os.path.join(REPO, "specs", "mia", "eval-drafts", "memory_sample.jsonl")
-DEV = re.compile(r'"split":\s*"dev"')
+SPLITS = {"dev": re.compile(r'"split":\s*"dev"'), "holdout": re.compile(r'"split":\s*"holdout"')}
 REPLACES = re.compile(r"^(.*?)\s*\(replaces:\s*(.*?)\)\s*$")
 
 
-def dev_cases(sample=SAMPLE):
+def dev_cases(sample=SAMPLE, split="dev"):
     with open(sample, encoding="utf-8") as fp:
-        return [json.loads(line) for line in fp if DEV.search(line)]
+        return [json.loads(line) for line in fp if SPLITS[split].search(line)]
+
+
+def case_right(runs):
+    """a case is right when the majority of its repeats stored every wanted record and, where nothing was wanted, nothing at all (extra records next to a wanted one are the owner's labelling question)"""
+    good = sum(1 for r in runs if r["hits"] == r["expected"] and (r["expected"] > 0 or r["extra"] == 0))
+    return good * 2 > len(runs)
+
+
+def wilson_low(k, n, z=1.96):
+    if n == 0:
+        return 0.0
+    p = k / n
+    return (p + z * z / (2 * n) - z * ((p * (1 - p) + z * z / (4 * n)) / n) ** 0.5) / (1 + z * z / n)
 
 
 def expected_of(case):
@@ -88,6 +103,8 @@ def run_case(core, case, work):
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--repeats", type=int, default=3)
+    parser.add_argument("--split", choices=sorted(SPLITS), default="dev")
+    parser.add_argument("--verifier", action="store_true", help="required for --split holdout: I am the independent verifier, not the implementer")
     parser.add_argument("--sample", default=SAMPLE, help="the memory sample (default: the one of this checkout); only its dev lines are read")
     parser.add_argument("--cfg", default=default_path(REPO))
     parser.add_argument("--log", default=os.path.join(tempfile.gettempdir(), "memory_write_dev_run.jsonl"))
@@ -105,10 +122,12 @@ def main():
         digest = next((m.get("digest") for m in client.list().get("models", []) if light in (m.get("model"), m.get("name"))), None)
     except Exception:
         pass
-    cases = dev_cases(args.sample)
+    if args.split == "holdout" and not args.verifier:
+        parser.error("the holdout is run by the independent verifier only (add --verifier if that is you, in a fresh session)")
+    cases = dev_cases(args.sample, args.split)
     version = re.search(r"^version:\s*(\d+)", open(os.path.join(REPO, "skills", "memory_write.md"), encoding="utf-8").read(), re.M).group(1)
-    print("skill memory_write v%s, model %s (digest %s), %d dev cases, %d repeats, started %s"
-          % (version, light, (digest or "?")[:12], len(cases), args.repeats, time.strftime("%Y-%m-%d %H:%M")))
+    print("skill memory_write v%s, model %s (digest %s), %d %s cases, %d repeats, started %s"
+          % (version, light, (digest or "?")[:12], len(cases), args.split, args.repeats, time.strftime("%Y-%m-%d %H:%M")))
     rows = []
     for case in cases:
         runs = [run_case(core, case, work) for _ in range(args.repeats)]
@@ -126,7 +145,15 @@ def main():
     print("\nrecall %d/%d (%.0f %%)   extra records %d   in the %d runs that expect nothing: %d stored   replaced right %d/%d   refused before the model %d runs   model seconds %.0f"
           % (hits, expected, 100.0 * hits / max(1, expected), sum(r["extra"] for r in runs), len(quiet), sum(r["extra"] for r in quiet), sum(replaced), len(replaced),
              sum(r["refused"] for r in runs), sum(r["seconds"] for r in runs)))
-    print("raw predictions: %s (feedback on the dev cases only, not a decision)" % args.log)
+    right = sum(case_right(rs) for _c, rs in rows)
+    low = wilson_low(right, len(rows))
+    print("cases right (majority of repeats): %d of %d, Wilson 95 %% lower bound %.2f" % (right, len(rows), low))
+    if args.split == "holdout":
+        passed = len(rows) > 0 and right / len(rows) >= 0.8 and low >= 0.5
+        print("AC-24 (a) rule (>= 80 %% right and lower bound >= 0.5): %s%s" % ("PASS" if passed else "FAIL", "" if passed else " (re-run once with fresh repeats, never more)"))
+        print("raw predictions: %s (holdout run: the stored texts are in the log, do not copy them into prompts or cases)" % args.log)
+    else:
+        print("raw predictions: %s (feedback on the dev cases only, not a decision)" % args.log)
 
 
 if __name__ == "__main__":
