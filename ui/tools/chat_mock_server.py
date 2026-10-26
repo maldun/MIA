@@ -19,10 +19,10 @@ repo = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 link_dir = tempfile.mkdtemp()
 os.symlink(repo, os.path.join(link_dir, "MIA"))
 sys.path.insert(0, link_dir)
-# the protected mock of IF-101 (v1 since amendment A-03); until A-03 is installed the draft next to it is used
+# the protected mock of IF-101 (v2 since amendment A-04); until A-04 is installed the draft next to it is used
 for candidate in (os.path.join(repo, "tests", "helpers", "mocks"), os.path.join(repo, "specs", "mia", "contract-drafts", "tests", "helpers", "mocks")):
     with open(os.path.join(candidate, "if_101_chat_api.py"), encoding="utf-8") as handle:
-        if "def whoami" in handle.read():
+        if "def logout" in handle.read():
             break
 sys.path.insert(0, candidate)
 
@@ -143,6 +143,19 @@ def body():
 @w.app.get("/api/whoami")
 def r_whoami():
     return run_api(lambda s: api.whoami(s))
+
+
+@w.app.post("/api/logout")
+def r_logout():
+    """IF-101 v2: the session ends, its sockets are closed and the cookie is cleared."""
+    token = session()
+    response, status = run_api(lambda s: api.logout(s))
+    if status == 200:
+        for sid in sids.pop(token, set()):
+            tokens.pop(sid, None)
+            w.socketio.server.disconnect(sid)
+        response.set_cookie(COOKIE, "", max_age=0, httponly=True, samesite="Strict", secure=request.is_secure)
+    return response, status
 
 
 @w.app.post("/api/change_password")

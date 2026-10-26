@@ -138,6 +138,17 @@ class RestViews(unittest.TestCase):
         for method, path in (("get", "/api/whoami"), ("get", "/api/score"), ("get", "/api/items?kind=tasks"), ("post", "/api/vote"), ("get", "/api/trust"), ("get", "/api/persona")):
             self.assertEqual(getattr(w.app.test_client(), method)(path).status_code, 401, path)
 
+    @mark.req("REQ-CLV-022")
+    def test_logout_ends_the_session_clears_the_cookie_and_leaves_other_sessions(self):
+        other = w.app.test_client()
+        login(other, "anna", "pw-anna")
+        reply = self.anna.post("/api/logout")
+        self.assertEqual((reply.status_code, reply.get_json()), (200, {"loggedOut": True}))
+        self.assertIn("mia_session=;", reply.headers.get("Set-Cookie", ""))
+        self.assertEqual(self.anna.get("/api/whoami").status_code, 401)
+        self.assertEqual(self.anna.post("/api/logout").status_code, 401)
+        self.assertEqual(other.get("/api/whoami").get_json(), {"user": "anna"})
+
     @mark.req("REQ-CLV-014")
     def test_whoami_and_the_own_password(self):
         self.assertEqual(self.anna.get("/api/whoami").get_json(), {"user": "anna"})

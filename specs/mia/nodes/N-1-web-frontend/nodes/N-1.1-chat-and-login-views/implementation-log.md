@@ -102,3 +102,4 @@ The page kept its modules; `chat.js` got the answer actions (about 60 lines), th
 
 ### Not done
 Frame rate (field), the variant and model selection in Godot (deferred by the owner until after the first tests), the series of the score.
+| REQ-CLV-022 logout (A-04) | button `account-logout` in the account dialog; `api.logout` (POST `/api/logout`); `initAccount` reports `onLoggedOut`, the page closes the socket and opens the login; a 401 (session already gone) counts as logged out; other failures keep the user logged in and say so; the mock server has the route (draft mock until A-04 is installed) | `tests/js/logout.test.mjs` (4), `test_chat_mock_server.py` logout test; the allowed-address list of TC-CLV-021 got `/api/logout` |

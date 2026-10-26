@@ -150,7 +150,8 @@ const menu = initMenu({
 const workspace = initWorkspace({ dialog: $('workspace'), tabsEl: $('workspace-tabs'), body: $('workspace-body'), closeButton: $('workspace-close'), api, socket, t, notify: toast });
 const account = initAccount({
   dialog: $('account'), nameEl: $('account-name'), form: $('account-form'), oldInput: $('account-old'), newInput: $('account-new'), repeatInput: $('account-repeat'),
-  errorLine: $('account-error'), closeButton: $('account-close'), api, storage, t, notify: toast,
+  errorLine: $('account-error'), closeButton: $('account-close'), logoutButton: $('account-logout'), api, storage, t, notify: toast,
+  onLoggedOut: () => { socket.disconnect(); login.open(); },      // the server ended the session; the socket would be refused anyway
 });
 $('workspace-button').addEventListener('click', () => { menu.close(false); workspace.open(); });
 $('account-button').addEventListener('click', () => { menu.close(false); account.open(); });
