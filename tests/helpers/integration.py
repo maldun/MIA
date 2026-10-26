@@ -15,7 +15,7 @@ sys.path.insert(0, os.path.join(HERE, "mocks"))
 
 from contract import subject_for  # noqa: E402
 
-READY = set()    # nodes whose integration step has been done, e.g. {"N-3.2"}
+READY = {"N-3.2", "N-3.3", "N-3.1", "N-3"}    # nodes whose integration step has been done (amendment A-02: the Database)
 
 PYTHON_INTERFACES = ("IF-101", "IF-102", "IF-103", "IF-104", "IF-105", "IF-201", "IF-202", "IF-203", "IF-204", "IF-301", "IF-302", "IF-401", "IF-402", "IF-404", "IF-405")
 
