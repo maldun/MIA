@@ -15,7 +15,7 @@ The chat page: messages, queue, history, status line, voting, tasks and memos, e
 - Verification method: Test
 - Acceptance criterion: AC-1: with the mock of IF-101, two users' messages show their names and the scripted answer appears sentence by sentence
 - Verified by: TC-CLV-001
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-CLV-002 – Stop and queue position
@@ -27,7 +27,7 @@ The chat page: messages, queue, history, status line, voting, tasks and memos, e
 - Verification method: Test
 - Acceptance criterion: AC-1: with a mock queue of 3, the positions 1, 2, 3 are shown; stop sends the stop event once
 - Verified by: TC-CLV-002
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-CLV-003 – Shared history after reload
@@ -39,7 +39,7 @@ The chat page: messages, queue, history, status line, voting, tasks and memos, e
 - Verification method: Test
 - Acceptance criterion: AC-1: after reload the last 50 messages of the mock appear in order; a message sent by the mock from another user appears within 2 s
 - Verified by: TC-CLV-003
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-CLV-004 – Connection state and drafts
@@ -51,7 +51,7 @@ The chat page: messages, queue, history, status line, voting, tasks and memos, e
 - Verification method: Test
 - Acceptance criterion: AC-1: with the mock connection cut for 5 s the state shows offline, the draft text stays, the page reconnects without a reload
 - Verified by: TC-CLV-004
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-CLV-005 – Regenerate and speak again
@@ -63,7 +63,7 @@ The chat page: messages, queue, history, status line, voting, tasks and memos, e
 - Verification method: Test
 - Acceptance criterion: AC-1: the two controls send one event each; the mock answers are shown
 - Verified by: TC-CLV-005
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-CLV-006 – Chat without the character
@@ -75,7 +75,7 @@ The chat page: messages, queue, history, status line, voting, tasks and memos, e
 - Verification method: Test
 - Acceptance criterion: AC-1: with the character iframe blocked, a message is sent and answered (exact)
 - Verified by: TC-CLV-006
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-CLV-007 – Character as stage
@@ -87,7 +87,7 @@ The chat page: messages, queue, history, status line, voting, tasks and memos, e
 - Verification method: Demonstration
 - Acceptance criterion: AC-1: viewports 360, 768 and 1440 px show the layout; collapsed view shows the caption
 - Verified by: TC-CLV-007
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-CLV-008 – Status line and account of a task
@@ -99,7 +99,7 @@ The chat page: messages, queue, history, status line, voting, tasks and memos, e
 - Verification method: Test, Demonstration
 - Acceptance criterion: AC-21: the status line shows the mock mood and activity; opening an answer shows the mock account
 - Verified by: TC-CLV-008
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-CLV-009 – Editors for expressions, gestures and persona
@@ -111,7 +111,7 @@ The chat page: messages, queue, history, status line, voting, tasks and memos, e
 - Verification method: Test
 - Acceptance criterion: AC-17: a change pushed by the mock appears within 2 s without reload
 - Verified by: TC-CLV-009
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-CLV-010 – Voting controls and score
@@ -123,7 +123,7 @@ The chat page: messages, queue, history, status line, voting, tasks and memos, e
 - Verification method: Test, Demonstration
 - Acceptance criterion: AC-18: a vote sends one event with category and subject; the mock scores are drawn per category and overall
 - Verified by: TC-CLV-010
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-CLV-011 – Tasks, memos and memory views
@@ -135,7 +135,7 @@ The chat page: messages, queue, history, status line, voting, tasks and memos, e
 - Verification method: Test
 - Acceptance criterion: AC-12, AC-24: with 50 mock records all are listed; an edit and a delete send one event each
 - Verified by: TC-CLV-011
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-CLV-012 – Source trust edit
@@ -147,7 +147,7 @@ The chat page: messages, queue, history, status line, voting, tasks and memos, e
 - Verification method: Test
 - Acceptance criterion: AC-3: the edit event carries source id, old and new value
 - Verified by: TC-CLV-012
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-CLV-013 – Variant label
@@ -159,7 +159,7 @@ The chat page: messages, queue, history, status line, voting, tasks and memos, e
 - Verification method: Test
 - Acceptance criterion: AC-17: a mock run with a variant changes the outfit and shows the label; a run without keeps the chat's variant
 - Verified by: TC-CLV-013
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-CLV-014 – Login views and password change
@@ -171,7 +171,7 @@ The chat page: messages, queue, history, status line, voting, tasks and memos, e
 - Verification method: Test
 - Acceptance criterion: AC-14: the three views send one event each
 - Verified by: TC-CLV-014
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-CLV-015 – Login page states visibility
@@ -183,7 +183,7 @@ The chat page: messages, queue, history, status line, voting, tasks and memos, e
 - Verification method: Inspection
 - Acceptance criterion: AC-20: the login page text is present (exact)
 - Verified by: TC-CLV-015
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-CLV-016 – Accessibility and devices
@@ -195,7 +195,7 @@ The chat page: messages, queue, history, status line, voting, tasks and memos, e
 - Verification method: Test, Demonstration
 - Acceptance criterion: AC-1: browser checks at 360, 768 and 1440 px in both themes; touch targets measured at 44 px or more (exact)
 - Verified by: TC-CLV-016
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-CLV-017 – No request leaves the host
@@ -207,7 +207,7 @@ The chat page: messages, queue, history, status line, voting, tasks and memos, e
 - Verification method: Test
 - Acceptance criterion: AC-5: a browser test records every request of a session and finds 0 outside the host (exact)
 - Verified by: TC-CLV-017
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-CLV-018 – Password over a secure channel
@@ -219,7 +219,7 @@ The chat page: messages, queue, history, status line, voting, tasks and memos, e
 - Verification method: Test
 - Acceptance criterion: AC-14: over plain HTTP to a LAN address the login form sends nothing (exact)
 - Verified by: TC-CLV-018
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-CLV-019 – Plain stack
@@ -231,7 +231,7 @@ The chat page: messages, queue, history, status line, voting, tasks and memos, e
 - Verification method: Inspection
 - Acceptance criterion: AC-20: no bundler files; the Godot version string is 4.6.1 (exact)
 - Verified by: TC-CLV-019
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-CLV-020 – Delivered by the backend
@@ -243,7 +243,7 @@ The chat page: messages, queue, history, status line, voting, tasks and memos, e
 - Verification method: Test
 - Acceptance criterion: AC-29: the chat page loads from the backend container; the frontend has no container of its own
 - Verified by: TC-CLV-020
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-CLV-021 – Use IF-101 only
@@ -255,5 +255,5 @@ The chat page: messages, queue, history, status line, voting, tasks and memos, e
 - Verification method: Test
 - Acceptance criterion: AC-1: with the mock of IF-101 every scenario of the chat page runs; no other request leaves the page
 - Verified by: TC-CLV-021
-- Status: Draft
+- Status: Approved
 - History: –

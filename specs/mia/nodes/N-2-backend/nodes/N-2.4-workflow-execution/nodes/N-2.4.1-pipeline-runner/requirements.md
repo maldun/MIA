@@ -15,7 +15,7 @@ Runs a workflow step by step under budgets: model calls and model management, pr
 - Verification method: Test
 - Acceptance criterion: AC-23: a chat message alone starts no internet task (exact)
 - Verified by: TC-RUN-001
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-RUN-002 – Switch the model
@@ -27,7 +27,7 @@ Runs a workflow step by step under budgets: model calls and model management, pr
 - Verification method: Test, Demonstration
 - Acceptance criterion: AC-23: /light! and /full! switch after confirmation; memory is freed on request
 - Verified by: TC-RUN-002
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-RUN-003 – Model server unreachable
@@ -39,7 +39,7 @@ Runs a workflow step by step under budgets: model calls and model management, pr
 - Verification method: Test
 - Acceptance criterion: AC-23: with the fake server down the user gets the plain message (exact)
 - Verified by: TC-RUN-003
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-RUN-004 – Optional learning
@@ -51,7 +51,7 @@ Runs a workflow step by step under budgets: model calls and model management, pr
 - Verification method: Test
 - Acceptance criterion: AC-22: a learned choice is logged with the default and can be switched off and reversed
 - Verified by: TC-RUN-004
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-RUN-005 – Context window share
@@ -63,7 +63,7 @@ Runs a workflow step by step under budgets: model calls and model management, pr
 - Verification method: Test
 - Acceptance criterion: AC-22: over the lookup suites 100 % of inputs are at most 4096 tokens at num_ctx 8192
 - Verified by: TC-RUN-005
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-RUN-006 – Model calls of the first try
@@ -75,7 +75,7 @@ Runs a workflow step by step under budgets: model calls and model management, pr
 - Verification method: Measurement
 - Acceptance criterion: AC-22: on the lookup suites the maximum is below 15
 - Verified by: TC-RUN-006
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-RUN-007 – First text in 10 seconds
@@ -87,7 +87,7 @@ Runs a workflow step by step under budgets: model calls and model management, pr
 - Verification method: Measurement
 - Acceptance criterion: AC-19: median over 20 runs is within 10 s, also while a review slice runs
 - Verified by: TC-RUN-007
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-RUN-008 – Budgets and what is missing
@@ -99,7 +99,7 @@ Runs a workflow step by step under budgets: model calls and model management, pr
 - Verification method: Test
 - Acceptance criterion: AC-19: each of the four budgets ends a scripted run with a message naming it
 - Verified by: TC-RUN-008
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-RUN-009 – Chat before background
@@ -111,7 +111,7 @@ Runs a workflow step by step under budgets: model calls and model management, pr
 - Verification method: Test
 - Acceptance criterion: AC-19: with a review slice running a chat message gets its first text within 10 s
 - Verified by: TC-RUN-009
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-RUN-010 – One model at a time
@@ -123,7 +123,7 @@ Runs a workflow step by step under budgets: model calls and model management, pr
 - Verification method: Test
 - Acceptance criterion: AC-19: two simultaneous messages are answered one after the other
 - Verified by: TC-RUN-010
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-RUN-011 – Use IF-103 only
@@ -135,7 +135,7 @@ Runs a workflow step by step under budgets: model calls and model management, pr
 - Verification method: Test
 - Acceptance criterion: AC-23: the contract suite test_if_103_model_server.py passes against the Workflow execution (stage 2)
 - Verified by: TC-RUN-011
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-RUN-012 – Use the library, the tools and the log only through their interfaces
@@ -147,7 +147,7 @@ Runs a workflow step by step under budgets: model calls and model management, pr
 - Verification method: Inspection, Test
 - Acceptance criterion: AC-1: with the mocks of the three interfaces a scripted workflow runs end to end; no other import exists
 - Verified by: TC-RUN-012
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-RUN-013 – Know no particular workflow
@@ -159,7 +159,7 @@ Runs a workflow step by step under budgets: model calls and model management, pr
 - Verification method: Inspection, Test
 - Acceptance criterion: AC-9: the lookup, verify and review entries run with the same runner; a new valid entry runs without a change of code
 - Verified by: TC-RUN-013
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-RUN-014 – Realise IF-202
@@ -171,7 +171,7 @@ Runs a workflow step by step under budgets: model calls and model management, pr
 - Verification method: Test
 - Acceptance criterion: AC-19, AC-28: the contract suite test_if_202_run_workflow.py passes against the Pipeline runner (stage 2)
 - Verified by: TC-RUN-014
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-RUN-015 – Realise IF-105
@@ -183,5 +183,5 @@ Runs a workflow step by step under budgets: model calls and model management, pr
 - Verification method: Test
 - Acceptance criterion: AC-2, AC-8: the contract suite test_if_105_evaluation_access.py passes against the Pipeline runner (stage 2)
 - Verified by: TC-RUN-015
-- Status: Draft
+- Status: Approved
 - History: –

@@ -15,7 +15,7 @@ The tables of workflows and context graphs and the graph rules that every write 
 - Verification method: Test
 - Acceptance criterion: AC-15: a record of each kind is written and read back identically
 - Verified by: TC-GTB-001
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-GTB-002 – Schema validation on write
@@ -27,7 +27,7 @@ The tables of workflows and context graphs and the graph rules that every write 
 - Verification method: Test
 - Acceptance criterion: AC-16, AC-27: each of the rules (identity, adjacent data nodes, cycle, session stopping criterion) is refused with its name; protects against TB-edit
 - Verified by: TC-GTB-002, TC-GTB-003
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-GTB-003 – Context graphs stored
@@ -39,7 +39,7 @@ The tables of workflows and context graphs and the graph rules that every write 
 - Verification method: Test
 - Acceptance criterion: AC-10: a context graph edit creates a new version
 - Verified by: TC-GTB-004
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-GTB-004 – Example workflows as seed data
@@ -51,7 +51,7 @@ The tables of workflows and context graphs and the graph rules that every write 
 - Verification method: Test
 - Acceptance criterion: AC-9, AC-10: after a seed from files the library holds the five entries; export then seed gives identical entries (exact)
 - Verified by: TC-GTB-005
-- Status: Draft
+- Status: Approved
 - History: –
 
 ## Interface requirements
@@ -67,5 +67,5 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-27: the contract suite test_if_301_graph_tables.py passes against the mock (stage 1) and the Graph tables (stage 2)
 - Verified by: TC-IF-301-01..03
-- Status: Draft
+- Status: Approved
 - History: v0, amendment 5/7 (2026-10-25)

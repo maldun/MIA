@@ -15,7 +15,7 @@ The tables of the history, summaries, chat log, memory, votes, tasks, memos, pre
 - Verification method: Test
 - Acceptance criterion: AC-15: a record of each kind is written and read back identically
 - Verified by: TC-RTB-001
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-RTB-002 – Run results
@@ -27,7 +27,7 @@ The tables of the history, summaries, chat log, memory, votes, tasks, memos, pre
 - Verification method: Test
 - Acceptance criterion: AC-10: each stored result carries the three versions
 - Verified by: TC-RTB-002
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-RTB-003 – Votes stored
@@ -39,7 +39,7 @@ The tables of the history, summaries, chat log, memory, votes, tasks, memos, pre
 - Verification method: Test
 - Acceptance criterion: AC-18: 100 % of scripted votes read back complete
 - Verified by: TC-RTB-003
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-RTB-004 – Memory records
@@ -51,7 +51,7 @@ The tables of the history, summaries, chat log, memory, votes, tasks, memos, pre
 - Verification method: Test
 - Acceptance criterion: AC-24: a deleted record is gone (exact)
 - Verified by: TC-RTB-004
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-RTB-005 – Tasks and memos exact
@@ -63,7 +63,7 @@ The tables of the history, summaries, chat log, memory, votes, tasks, memos, pre
 - Verification method: Test
 - Acceptance criterion: AC-12: 50 of 50 items read back identical (exact)
 - Verified by: TC-RTB-005
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-RTB-006 – Source trust stored
@@ -75,7 +75,7 @@ The tables of the history, summaries, chat log, memory, votes, tasks, memos, pre
 - Verification method: Test
 - Acceptance criterion: AC-3: an edited trust value survives a restart
 - Verified by: TC-RTB-006
-- Status: Draft
+- Status: Approved
 - History: –
 
 ## Interface requirements
@@ -91,5 +91,5 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-18, AC-24: the contract suite test_if_302_record_tables.py passes against the mock (stage 1) and the Record tables (stage 2)
 - Verified by: TC-IF-302-01..03
-- Status: Draft
+- Status: Approved
 - History: v0, amendment 5/7 (2026-10-25)

@@ -15,7 +15,7 @@ An independent add-on tool that shows and edits workflow and context graphs thro
 - Verification method: Demonstration
 - Acceptance criterion: AC-16: a recorded library entry of the lookup is drawn with all its nodes and edges
 - Verified by: TC-GA-001
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-GA-002 – Edit as JSON
@@ -27,7 +27,7 @@ An independent add-on tool that shows and edits workflow and context graphs thro
 - Verification method: Test
 - Acceptance criterion: AC-16: a node edited as JSON is saved as the edited dictionary (exact)
 - Verified by: TC-GA-002
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-GA-003 – Graph rules before saving
@@ -39,7 +39,7 @@ An independent add-on tool that shows and edits workflow and context graphs thro
 - Verification method: Test
 - Acceptance criterion: AC-27: each violation is refused with the rule named, in the app and again by the backend
 - Verified by: TC-GA-003
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-GA-004 – Versions, history and diff
@@ -51,7 +51,7 @@ An independent add-on tool that shows and edits workflow and context graphs thro
 - Verification method: Test
 - Acceptance criterion: AC-16: a former version is restored and saved as a new version
 - Verified by: TC-GA-004
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-GA-005 – Work through the backend API
@@ -63,7 +63,7 @@ An independent add-on tool that shows and edits workflow and context graphs thro
 - Verification method: Inspection, Test
 - Acceptance criterion: AC-15: the Graph app imports no database driver (exact); every call goes to IF-104
 - Verified by: TC-GA-005
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-GA-006 – Context graphs edited
@@ -75,7 +75,7 @@ An independent add-on tool that shows and edits workflow and context graphs thro
 - Verification method: Test
 - Acceptance criterion: AC-10: a context graph edit appears as a new version
 - Verified by: TC-GA-006
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-GA-007 – Login required
@@ -87,7 +87,7 @@ An independent add-on tool that shows and edits workflow and context graphs thro
 - Verification method: Test
 - Acceptance criterion: AC-14: a request without a session shows the login only (exact); the Graph app holds no password check of its own
 - Verified by: TC-GA-007
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-GA-008 – Library export and seed
@@ -99,7 +99,7 @@ An independent add-on tool that shows and edits workflow and context graphs thro
 - Verification method: Test
 - Acceptance criterion: AC-16: export then seed gives identical entries (exact)
 - Verified by: TC-GA-008
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-GA-009 – Plain stack with a vendored library
@@ -111,7 +111,7 @@ An independent add-on tool that shows and edits workflow and context graphs thro
 - Verification method: Inspection
 - Acceptance criterion: AC-20: no bundler files; the library is in the repository
 - Verified by: TC-GA-009
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-GA-010 – No outside request
@@ -123,7 +123,7 @@ An independent add-on tool that shows and edits workflow and context graphs thro
 - Verification method: Test
 - Acceptance criterion: AC-5: a browser test finds 0 requests outside the host
 - Verified by: TC-GA-010
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-GA-011 – Own container
@@ -135,5 +135,5 @@ An independent add-on tool that shows and edits workflow and context graphs thro
 - Verification method: Test
 - Acceptance criterion: AC-29: starts alone against the mock of IF-104 and in the stack
 - Verified by: TC-GA-011
-- Status: Draft
+- Status: Approved
 - History: –

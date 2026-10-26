@@ -19,7 +19,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Quality: functional suitability measure: share of scripted chat scenarios of AC-1 that pass; target: 100 %; context: two users, desktop and phone viewports, fake model
 - Refined in: N-1.1, N-2.1, N-2.2, N-3.3
 - Verified by: TC-MIA-001
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### FR-2 – Embodied character
@@ -32,7 +32,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Acceptance criterion: AC-1, AC-17: expressions blend, gestures play, the mouth moves while speaking; with the character unloaded the chat still answers
 - Refined in: N-1.2
 - Verified by: TC-MIA-001, TC-MIA-017
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### FR-3 – Voice
@@ -45,7 +45,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Acceptance criterion: AC-13: every answer is synthesised on the host with the anime effect and played sentence by sentence in the browser, without markup or stage directions; a user can mute or stop it for themselves
 - Refined in: N-2.5, N-1.3
 - Verified by: TC-MIA-013
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### FR-4 – Transparency
@@ -59,7 +59,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Quality: interaction capability measure: share of answers of a task whose account is built from events only; target: 100 %; context: answers produced by a task
 - Refined in: N-1.1, N-2.4
 - Verified by: TC-MIA-021
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### FR-5 – User-shaped appearance and persona
@@ -72,7 +72,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Acceptance criterion: AC-15, AC-17: a saved change of expression, gesture, background, mood phrase, emotion or persona appears on a second device within seconds without a reload and is recorded with its author
 - Refined in: N-1.2, N-2.1, N-3.3
 - Verified by: TC-MIA-015, TC-MIA-017
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### FR-6 – Tasks as skills
@@ -85,7 +85,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Acceptance criterion: AC-23: a task that reaches the internet is started only by a command of a user
 - Refined in: N-2.3, N-2.4
 - Verified by: TC-MIA-023
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### FR-7 – Workflows as data
@@ -98,7 +98,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Acceptance criterion: AC-27: a cycle is refused with the cycle named; two adjacent data nodes are refused; a session node without a stopping criterion is refused; every accepted graph has a topological order (property test on generated graphs)
 - Refined in: N-2.3, N-3.2
 - Verified by: TC-MIA-010, TC-MIA-027
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### FR-8 – Model management
@@ -112,7 +112,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Quality: flexibility measure: steps needed to switch between the pins MP-light and MP-full; target: one command, one confirmation; context: any logged-in user, local Ollama on the owner's host
 - Refined in: N-2.4
 - Verified by: TC-MIA-023
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### FR-9 – Verify before asserting
@@ -125,7 +125,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Acceptance criterion: AC-2: on the holdout the chosen gate passes fewer wrong claims than the single voice and loses no more true claims among those with evidence (agent-app decision rule); repeated runs give the same verdicts (REQ-VER-005, REQ-VER-006)
 - Refined in: N-2.3, N-2.4, N-3, N-4
 - Verified by: TC-MIA-002
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### FR-10 – Lookup
@@ -138,7 +138,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Acceptance criterion: AC-2, AC-23: every answer carries sources and verbatim quotes or the answer unknown; `/search` lists findings without composing an answer; a repeated lookup on the same sources gives the same facts
 - Refined in: N-2.3, N-2.4, N-3, N-4
 - Verified by: TC-MIA-002, TC-MIA-009, TC-MIA-023
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### FR-11 – Literature review
@@ -151,7 +151,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Acceptance criterion: AC-3: per tier source recall and precision against a baseline; 0 violations of the cut-off; 0 invented references; 100 % of quotes anchored
 - Refined in: N-2.3, N-2.4, N-3, N-4
 - Verified by: TC-MIA-003, TC-MIA-009
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### FR-12 – Knowledge of sources
@@ -164,7 +164,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Acceptance criterion: AC-3: retracted works are dropped and listed; the cut-off is honoured strictly; a user's edit of a trust value is kept
 - Refined in: N-2.3, N-2.4, N-3.3
 - Verified by: TC-MIA-003
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### FR-13 – Method transfer
@@ -177,7 +177,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Acceptance criterion: AC-26 (later, optional): the scout proposes the known method in its top 3 on the retro-discovery cases and marks a candidate verified only when an executable test passed
 - Refined in: N-2.3, N-2.4, N-3, N-4
 - Verified by: TC-MIA-026
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### FR-14 – Memory
@@ -190,7 +190,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Acceptance criterion: AC-24 (later): the memory test set is passed at least as well as today's summary-based dreaming at equal or lower token cost; every record shows its source and can be corrected and deleted by a user
 - Refined in: N-2.2, N-3.3
 - Verified by: TC-MIA-024
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### FR-15 – Behaviour rules and feedback
@@ -203,7 +203,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Acceptance criterion: AC-25: the speech-rule detectors keep their recorded precision and recall on the behaviour suite; a violation is repaired silently and never enters the memory as a scolding
 - Refined in: N-2.2
 - Verified by: TC-MIA-025
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### FR-16 – Traceability
@@ -216,7 +216,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Acceptance criterion: AC-4: a recorded run replays offline with an identical result; a log with a broken order is reported; two runs compare; a secret fed to the writer does not appear in the log
 - Refined in: N-2.4
 - Verified by: TC-MIA-004
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### FR-17 – Measurable quality
@@ -229,7 +229,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Acceptance criterion: AC-22: variants are compared on the same cases with repeats and intervals; a judge model counts only after calibration against the users' ratings
 - Refined in: N-4
 - Verified by: TC-MIA-002, TC-MIA-022
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### FR-18 – Optional learning
@@ -242,7 +242,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Acceptance criterion: AC-22: a learned choice is logged next to the default, can be switched off and reversed
 - Refined in: N-2.4
 - Verified by: TC-MIA-022
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### FR-19 – Operable
@@ -256,7 +256,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Quality: reliability measure: state kept over an orderly shutdown and a backup and restore round trip; target: no record lost; context: compose stack with the database
 - Refined in: N-4
 - Verified by: TC-MIA-007
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### FR-20 – Skill development path
@@ -270,7 +270,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Quality: maintainability measure: code changes of the platform needed to add a workflow by the documented path; target: none; context: a new valid library entry; lookup first, review within one month
 - Refined in: N-2.3, N-4
 - Verified by: TC-MIA-009
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### FR-21 – Accounts and login
@@ -284,7 +284,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Quality: security measure: failed logins accepted per minute and account; plain passwords stored; target: at most 5; none; context: trusted users, home network and tailnet
 - Refined in: N-1.1, N-2.1, N-3.1
 - Verified by: TC-MIA-014
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### FR-22 – Graph app
@@ -297,7 +297,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Acceptance criterion: AC-16: a user edits a node as JSON and saves a new version; an invalid edit is refused with the broken rule named; a former version can be restored; the export to files and the seed from files give identical entries
 - Refined in: N-5, N-2.3, N-3.2
 - Verified by: TC-MIA-016
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### FR-23 – Mood in every situation
@@ -311,7 +311,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Quality: interaction capability measure: situations of the mood list that show their mapped expression; target: 7 of 7; context: chat page with the character
 - Refined in: N-1.2, N-2.2
 - Verified by: TC-MIA-017
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### FR-24 – Character exchange
@@ -325,7 +325,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Quality: compatibility measure: presets and gestures of a second .vrm model that are mapped or listed as missing; target: 100 % mapped or listed, none dropped silently; context: VRoid models
 - Refined in: N-1.2
 - Verified by: TC-MIA-017
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### FR-25 – Persona from a file
@@ -338,7 +338,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Acceptance criterion: AC-8: check dialogues made from `calibration.txt` pass at a rate fixed in Plan against the recorded baseline, decided statistically; every user is addressed as master unless the file says otherwise
 - Refined in: N-2.2
 - Verified by: TC-MIA-008
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### FR-26 – Workflow specification and benchmark
@@ -351,7 +351,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Acceptance criterion: AC-10: every shipped workflow has a specification, a context graph and a benchmark with a baseline; the library refuses to promote one without them; every harness run records workflow version, model pin and benchmark version
 - Refined in: N-2.3, N-4
 - Verified by: TC-MIA-010
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### FR-27 – Feedback and points
@@ -364,7 +364,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Acceptance criterion: AC-18: votes in the four categories are stored with user, time and subject; scores show per category and overall over time; the overall score shifts the mood; a minus on a factual answer opens a benchmark case and changes no fact
 - Refined in: N-1.1, N-2.2, N-3.3
 - Verified by: TC-MIA-018
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### FR-28 – Tasks and memos
@@ -377,7 +377,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Acceptance criterion: AC-12: of 50 stored tasks and memos all are recited word for word on request and at their due time
 - Refined in: N-2.2, N-3.3
 - Verified by: TC-MIA-012
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### FR-29 – Adaptation to negative feedback
@@ -390,7 +390,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Acceptance criterion: AC-11: after 5 net negative votes a test of 1000 opportunities shows the behaviour at most 10 times; a positive vote raises the rate again; votes on facts never change a fact
 - Refined in: N-2.2
 - Verified by: TC-MIA-011
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### FR-30 – Workflow context graph
@@ -403,7 +403,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Acceptance criterion: AC-10: every shipped workflow and the chat have a stored context graph that any user can adapt in the graph app as a new version
 - Refined in: N-2.3, N-3.2, N-5
 - Verified by: TC-MIA-010
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### FR-31 – Voice lines
@@ -416,7 +416,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Acceptance criterion: AC-13: every mood of the mood map has at least one voice line or is declared silent; the default lines are generated by the TTS; a missing audio file does not interrupt a conversation and is logged
 - Refined in: N-2.5, N-1.3
 - Verified by: TC-MIA-013
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### FR-32 – Character variant per workflow
@@ -430,7 +430,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Quality: flexibility measure: workflows that change the character's outfit by a variant; target: every workflow that names one; context: character with shown/hidden parts
 - Refined in: N-1.2, N-2.3
 - Verified by: TC-MIA-017
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### FR-33 – Workflow schedule
@@ -443,7 +443,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Acceptance criterion: AC-28: the estimate of time, calls and tokens is shown before a run; on the recorded lookup runs it is within the factor fixed in Plan of the measured time; a run whose estimate exceeds its budget is refused
 - Refined in: N-2.3
 - Verified by: TC-MIA-028
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### NFR-1 – Accessibility and device range
@@ -457,7 +457,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Quality: interaction capability measure: touch targets below 44 px, failing keyboard or screen-reader paths, widths 320 to 2560 px without a passing check; target: 0; context: current Chrome, Firefox and Safari (iOS 16+), both themes, reduced motion
 - Refined in: N-1.1, N-1.2
 - Verified by: TC-MIA-001
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### NFR-2 – Small-model strategies
@@ -471,7 +471,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Quality: performance efficiency measure: model calls of the cheap first try; share of the context window used by one input; target: fewer than 15; at most 50 %; context: MP-light, lookup suites
 - Refined in: N-2.4
 - Verified by: TC-MIA-022
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### NFR-3 – Untrusted input stays data
@@ -485,7 +485,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Quality: security measure: injected instructions that change a verdict or start a tool; target: 0; context: red-team cases, sandbox present and removed
 - Refined in: N-2.4
 - Verified by: TC-MIA-006
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### NFR-4 – Honest confidence
@@ -499,7 +499,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Quality: reliability measure: invented references; cited quotes not found in their source; target: 0; 0 (100 % found); context: lookup and review results
 - Refined in: N-2.3, N-2.4, N-4
 - Verified by: TC-MIA-003
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### NFR-5 – Local-first privacy
@@ -513,7 +513,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Quality: security measure: requests that leave the host other than the text of a web or scholarly query; target: 0; context: browser sessions of the chat and the graph app
 - Refined in: N-1, N-2, N-3
 - Verified by: TC-MIA-005
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### NFR-6 – Secure access
@@ -527,7 +527,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Quality: security measure: unauthenticated requests served; plain-HTTP passwords accepted from LAN addresses; target: 0; 0; context: home network and tailnet
 - Refined in: N-2.1, N-4
 - Verified by: TC-MIA-014
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### NFR-7 – Efficient on the given hardware
@@ -541,7 +541,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Quality: performance efficiency measure: median time to the first text of a chat answer; frame rate; target: at most 10 s; 30 fps on a phone and on desktop; context: MP-light, reference hardware, also while a review slice runs
 - Refined in: N-1.2, N-2.1, N-2.4
 - Verified by: TC-MIA-019
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### NFR-8 – Shared state in a database
@@ -555,7 +555,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Quality: maintainability measure: tables reached only through the storage interface; records that differ after files to database and back or after backup and restore; target: all tables; 0; context: the Backend (and the Graph app through it), the compose stack
 - Refined in: N-3, N-2.1
 - Verified by: TC-MIA-015
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### NFR-9 – A container per node
@@ -568,7 +568,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Acceptance criterion: AC-29: from a fresh checkout the compose stack starts the containers of N-2 (serving the frontend files of N-1), N-3, N-4 and N-5 with one configuration file; each container also starts alone against the mocks of its neighbours and passes its contract suites
 - Refined in: N-4, N-2, N-3, N-5
 - Verified by: TC-MIA-029
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### CON-1 – Free and open
@@ -581,7 +581,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Acceptance criterion: AC-20: licence file present; no paid API in the web log
 - Refined in: N-4
 - Verified by: TC-MIA-020
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### CON-2 – Hardware
@@ -594,7 +594,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Acceptance criterion: AC-19: measured on the Ryzen 9 5900X with the RX 7800 XT (16 GB VRAM, 62 GB RAM); one language model loaded at a time
 - Refined in: N-2.4, N-4
 - Verified by: TC-MIA-019
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### CON-3 – Technology
@@ -607,7 +607,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Acceptance criterion: AC-20: Python 3.12; Godot 4.6.1 with GDScript and the Compatibility renderer; chat page in plain HTML, CSS and ES modules without build step
 - Refined in: N-1, N-2
 - Verified by: TC-MIA-020
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### CON-4 – Secure context for the character
@@ -620,7 +620,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Acceptance criterion: AC-14: the character loads only on `localhost` or over HTTPS; passwords are sent only over HTTPS or to `localhost`
 - Refined in: N-1, N-2.1
 - Verified by: TC-MIA-014
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### CON-5 – Private network only
@@ -633,7 +633,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Acceptance criterion: AC-14: no public port; `tailscale funnel` is not used
 - Refined in: N-4
 - Verified by: TC-MIA-014
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### CON-6 – Trusted users only
@@ -646,7 +646,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Acceptance criterion: AC-20: the login page says that everything is visible to all; a change by one user applies to all
 - Refined in: N-1.1, N-2.1
 - Verified by: TC-MIA-015, TC-MIA-020
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### CON-7 – One shared database
@@ -659,5 +659,5 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Acceptance criterion: AC-15: one PostgreSQL database in a container reachable by MIA and the graph app; MIA's state is behind storage interfaces
 - Refined in: N-3
 - Verified by: TC-MIA-015
-- Status: Draft
+- Status: Approved
 - History: –

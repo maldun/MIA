@@ -15,7 +15,7 @@ Installing, configuring, starting and stopping MIA: the compose stack with one c
 - Verification method: Test, Demonstration
 - Acceptance criterion: AC-7: a fresh checkout starts to a working chat in the compose stack
 - Verified by: TC-OPR-001
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-OPR-002 – First account at installation
@@ -27,7 +27,7 @@ Installing, configuring, starting and stopping MIA: the compose stack with one c
 - Verification method: Test
 - Acceptance criterion: AC-7: the first start offers the account creation exactly once
 - Verified by: TC-OPR-002
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-OPR-003 – Missing options reported
@@ -39,7 +39,7 @@ Installing, configuring, starting and stopping MIA: the compose stack with one c
 - Verification method: Test
 - Acceptance criterion: AC-7: removing 2 options gives a report naming both (exact)
 - Verified by: TC-OPR-003
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-OPR-004 – Orderly shutdown
@@ -51,7 +51,7 @@ Installing, configuring, starting and stopping MIA: the compose stack with one c
 - Verification method: Test
 - Acceptance criterion: AC-7: after SIGTERM the history and memory are saved (exact)
 - Verified by: TC-OPR-004
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-OPR-005 – Backup and restore of all data
@@ -63,7 +63,7 @@ Installing, configuring, starting and stopping MIA: the compose stack with one c
 - Verification method: Test
 - Acceptance criterion: AC-7: backup, wipe and restore return the same data (exact)
 - Verified by: TC-OPR-005
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-OPR-006 – Runbook
@@ -75,7 +75,7 @@ Installing, configuring, starting and stopping MIA: the compose stack with one c
 - Verification method: Inspection
 - Acceptance criterion: AC-7: the runbook steps are run once on a clean machine
 - Verified by: TC-OPR-006
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-OPR-007 – Compose stack
@@ -87,7 +87,7 @@ Installing, configuring, starting and stopping MIA: the compose stack with one c
 - Verification method: Test, Demonstration
 - Acceptance criterion: AC-29: each container starts alone against the mocks; all start together
 - Verified by: TC-OPR-007
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-OPR-008 – Private access only
@@ -99,7 +99,7 @@ Installing, configuring, starting and stopping MIA: the compose stack with one c
 - Verification method: Inspection, Test
 - Acceptance criterion: AC-14: a port scan from outside the network finds nothing open; tailscale funnel is not used
 - Verified by: TC-OPR-008
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-OPR-009 – Free and open
@@ -111,7 +111,7 @@ Installing, configuring, starting and stopping MIA: the compose stack with one c
 - Verification method: Inspection
 - Acceptance criterion: AC-20: licence file present; no paid API host in the web log
 - Verified by: TC-OPR-009
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-OPR-010 – Hardware configuration
@@ -123,5 +123,5 @@ Installing, configuring, starting and stopping MIA: the compose stack with one c
 - Verification method: Inspection
 - Acceptance criterion: AC-19: OLLAMA_MAX_LOADED_MODELS equals 1 (exact)
 - Verified by: TC-OPR-010
-- Status: Draft
+- Status: Approved
 - History: –

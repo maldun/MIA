@@ -15,7 +15,7 @@ The PostgreSQL database and the one door to it (IF-102): immutable versions, acc
 - Verification method: Inspection, Test
 - Acceptance criterion: AC-15, AC-29: the container starts alone and passes the contract suite of IF-102
 - Verified by: TC-SLY-001
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-SLY-002 – Shared state held
@@ -27,7 +27,7 @@ The PostgreSQL database and the one door to it (IF-102): immutable versions, acc
 - Verification method: Test
 - Acceptance criterion: AC-15: a record of each kind is written and read back identically
 - Verified by: TC-SLY-002
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-SLY-003 – Immutable versions
@@ -39,7 +39,7 @@ The PostgreSQL database and the one door to it (IF-102): immutable versions, acc
 - Verification method: Test
 - Acceptance criterion: AC-16: version n is unchanged after version n+1 is written (exact)
 - Verified by: TC-SLY-003
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-SLY-004 – Schema validation on write
@@ -51,7 +51,7 @@ The PostgreSQL database and the one door to it (IF-102): immutable versions, acc
 - Verification method: Test
 - Acceptance criterion: AC-16, AC-27: each of the rules (identity, adjacent data nodes, cycle, session stopping criterion) is refused with its name; protects against TB-edit
 - Verified by: TC-SLY-004
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-SLY-005 – Accounts
@@ -63,7 +63,7 @@ The PostgreSQL database and the one door to it (IF-102): immutable versions, acc
 - Verification method: Test
 - Acceptance criterion: AC-14: no plain password is stored; two accounts with the same password have different hashes (exact)
 - Verified by: TC-SLY-005
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-SLY-006 – Change notification
@@ -75,7 +75,7 @@ The PostgreSQL database and the one door to it (IF-102): immutable versions, acc
 - Verification method: Test
 - Acceptance criterion: AC-15: a second subscriber is notified within 2 s
 - Verified by: TC-SLY-006
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-SLY-007 – Reversible move from files
@@ -87,7 +87,7 @@ The PostgreSQL database and the one door to it (IF-102): immutable versions, acc
 - Verification method: Test
 - Acceptance criterion: AC-15: files to database and back give identical files (exact)
 - Verified by: TC-SLY-007
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-SLY-008 – Backup and restore
@@ -99,7 +99,7 @@ The PostgreSQL database and the one door to it (IF-102): immutable versions, acc
 - Verification method: Test
 - Acceptance criterion: AC-7, AC-15: backup and restore round-trip returns the same records (exact)
 - Verified by: TC-SLY-008
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-SLY-009 – Library export and seed
@@ -111,7 +111,7 @@ The PostgreSQL database and the one door to it (IF-102): immutable versions, acc
 - Verification method: Test
 - Acceptance criterion: AC-16: export then seed gives identical entries (exact)
 - Verified by: TC-SLY-009
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-SLY-010 – Reachable only inside the host network
@@ -123,7 +123,7 @@ The PostgreSQL database and the one door to it (IF-102): immutable versions, acc
 - Verification method: Test
 - Acceptance criterion: AC-5: a connection from the LAN is refused (exact)
 - Verified by: TC-SLY-010
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-SLY-011 – Own container
@@ -135,7 +135,7 @@ The PostgreSQL database and the one door to it (IF-102): immutable versions, acc
 - Verification method: Test
 - Acceptance criterion: AC-29: starts alone and in the stack with the same configuration file
 - Verified by: TC-SLY-011
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-SLY-012 – Realise IF-102
@@ -147,5 +147,5 @@ The PostgreSQL database and the one door to it (IF-102): immutable versions, acc
 - Verification method: Test
 - Acceptance criterion: AC-15: the contract suite test_if_102_storage.py passes against the Storage layer (stage 2)
 - Verified by: TC-SLY-001
-- Status: Draft
+- Status: Approved
 - History: –

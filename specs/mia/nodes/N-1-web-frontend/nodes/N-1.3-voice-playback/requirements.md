@@ -15,7 +15,7 @@ Playing the audio of the answers and the voice lines in this browser: queue, cla
 - Verification method: Test
 - Acceptance criterion: AC-13: with 5 scripted audio chunks the playback order equals the arrival order and no sentence overlaps
 - Verified by: TC-VPB-001
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-VPB-002 – Mute and stop per user
@@ -27,7 +27,7 @@ Playing the audio of the answers and the voice lines in this browser: queue, cla
 - Verification method: Test
 - Acceptance criterion: AC-13: after mute no audio plays on this device; a second device still plays
 - Verified by: TC-VPB-002
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-VPB-003 – Voice lines
@@ -39,7 +39,7 @@ Playing the audio of the answers and the voice lines in this browser: queue, cla
 - Verification method: Test
 - Acceptance criterion: AC-13: a line with a missing file produces one report event and no error shown; the conversation continues
 - Verified by: TC-VPB-003
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-VPB-004 – No request leaves the host
@@ -51,7 +51,7 @@ Playing the audio of the answers and the voice lines in this browser: queue, cla
 - Verification method: Test
 - Acceptance criterion: AC-5: a browser test records every request of a session and finds 0 outside the host (exact)
 - Verified by: TC-VPB-004
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-VPB-005 – Delivered by the backend
@@ -63,7 +63,7 @@ Playing the audio of the answers and the voice lines in this browser: queue, cla
 - Verification method: Test
 - Acceptance criterion: AC-29: the chat page loads from the backend container; the frontend has no container of its own
 - Verified by: TC-VPB-005
-- Status: Draft
+- Status: Approved
 - History: –
 
 ## Interface requirements
@@ -79,5 +79,5 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-13: the contract suite test_if_112_voice_player.test.mjs passes against the mock (stage 1) and the Voice playback (stage 2)
 - Verified by: TC-IF-112-01..05
-- Status: Draft
+- Status: Approved
 - History: v0, amendment 5/7 (2026-10-25)

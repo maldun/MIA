@@ -15,7 +15,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test
 - Acceptance criterion: AC-1: with the fake model each scripted answer arrives as ordered sentences
 - Verified by: TC-API-001, TC-CHA-001, TC-N2-005
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-002 – One shared MIA
@@ -27,7 +27,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test
 - Acceptance criterion: AC-1: two users' messages appear with their names in the same history
 - Verified by: TC-CHA-002, TC-N2-004
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-003 – Queue with positions
@@ -39,7 +39,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test
 - Acceptance criterion: AC-19: with 5 waiting messages the sixth is refused with a plain message; a third waiting message of one user is refused while another user can still send; positions are reported
 - Verified by: TC-CHA-003, TC-N2-004
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-004 – Stop an answer
@@ -51,7 +51,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test
 - Acceptance criterion: AC-1: after a stop request no further sentence is sent (exact)
 - Verified by: TC-CHA-004, TC-N2-004
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-005 – Bounded history
@@ -63,7 +63,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test
 - Acceptance criterion: AC-1: the bound is held; deletion without confirmation is refused
 - Verified by: TC-CHA-005, TC-N2-004
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-006 – Regenerate and speak again
@@ -75,7 +75,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test
 - Acceptance criterion: AC-1: two requests give a new answer and a new audio stream
 - Verified by: TC-CHA-006, TC-N2-004
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-007 – Changes reach all devices
@@ -87,7 +87,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test
 - Acceptance criterion: AC-15: a change by one user is visible on a second connection within 5 s with its author
 - Verified by: TC-API-002, TC-N2-005
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-008 – Login and session
@@ -99,7 +99,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test
 - Acceptance criterion: AC-14: correct credentials open a session; wrong ones do not (exact)
 - Verified by: TC-API-003, TC-N2-005
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-009 – Throttled failed logins
@@ -111,7 +111,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test
 - Acceptance criterion: AC-14: the sixth failed attempt within a minute is refused even with the right password (exact)
 - Verified by: TC-API-004, TC-N2-005
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-010 – Password handling
@@ -123,7 +123,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test, Inspection
 - Acceptance criterion: AC-14: a search of the database and all logs after 10 logins finds no password (exact)
 - Verified by: TC-API-005, TC-N2-005
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-011 – Own password and owner-only accounts
@@ -135,7 +135,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test
 - Acceptance criterion: AC-14: a non-owner's create request is refused (exact)
 - Verified by: TC-API-006, TC-N2-005
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-012 – Every request authenticated
@@ -147,7 +147,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test
 - Acceptance criterion: AC-14: a request without a session is refused; a foreign origin is refused; the rate limit value is set in Plan
 - Verified by: TC-API-007, TC-N2-005
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-013 – Passwords only over a secure channel
@@ -159,7 +159,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test
 - Acceptance criterion: AC-14: plain HTTP from a LAN address is refused (exact)
 - Verified by: TC-API-008, TC-N2-005
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-014 – Attribution of changes
@@ -171,7 +171,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test
 - Acceptance criterion: AC-15: 100 % of changes in a scripted session carry the account
 - Verified by: TC-API-009, TC-N2-005
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-015 – Everything visible to all users
@@ -183,7 +183,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test
 - Acceptance criterion: AC-20: a second user sees and changes a first user's workflow, preset and persona
 - Verified by: TC-API-010, TC-N2-005
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-016 – Voice synthesis
@@ -195,7 +195,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test
 - Acceptance criterion: AC-13: each sentence of a 5-sentence answer yields one audio chunk
 - Verified by: TC-VOI-001, TC-N2-001
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-017 – Speak only what is meant to be heard
@@ -207,7 +207,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test
 - Acceptance criterion: AC-13: on 10 answers with markup the synthesis input contains none (exact)
 - Verified by: TC-VOI-002, TC-N2-001
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-018 – Voice lines
@@ -219,7 +219,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test
 - Acceptance criterion: AC-13: every mood of the map has a line or is declared silent; a missing file is logged and skipped
 - Verified by: TC-CHA-007, TC-VOI-003, TC-N2-004
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-019 – Default voice lines generated
@@ -231,7 +231,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Inspection
 - Acceptance criterion: AC-13: no default line is a third-party recording
 - Verified by: TC-VOI-004, TC-N2-001
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-020 – Step-by-step account
@@ -243,7 +243,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test
 - Acceptance criterion: AC-21: the account equals a rendering of the logged events (exact)
 - Verified by: TC-LOG-001, TC-N2-003
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-021 – Persona from the file
@@ -255,7 +255,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Measurement
 - Acceptance criterion: AC-8: check dialogues pass at a rate fixed in Plan against the recorded baseline, decided statistically
 - Verified by: TC-CHA-008, TC-N2-004
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-022 – Mood at all times
@@ -267,7 +267,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test
 - Acceptance criterion: AC-17: for each of the 7 situations the held mood equals the mood map
 - Verified by: TC-CHA-009, TC-N2-004
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-023 – Score shifts the mood
@@ -279,7 +279,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test
 - Acceptance criterion: AC-18: a scripted score change moves the mood offset in the right direction
 - Verified by: TC-CHA-010, TC-N2-004
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-024 – Structured memory
@@ -291,7 +291,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Measurement
 - Acceptance criterion: AC-24: the memory test set is passed at least as well as today's dreaming at equal or lower token cost
 - Verified by: TC-CHA-011, TC-N2-004
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-025 – No memory from untrusted text
@@ -303,7 +303,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test
 - Acceptance criterion: AC-6: a page that states a fact about a user leaves the memory unchanged (exact)
 - Verified by: TC-CHA-012, TC-N2-004
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-026 – Memory open to users
@@ -315,7 +315,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test
 - Acceptance criterion: AC-24: the three actions work on a sample record
 - Verified by: TC-CHA-013, TC-N2-004
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-027 – Silent repair of behaviour violations
@@ -327,7 +327,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test, Measurement
 - Acceptance criterion: AC-25: the detectors keep their recorded precision and recall on the behaviour suite
 - Verified by: TC-CHA-014, TC-N2-004
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-028 – Votes stored
@@ -339,7 +339,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test
 - Acceptance criterion: AC-18: 100 % of scripted votes are stored complete and the scores equal their sums
 - Verified by: TC-CHA-015, TC-N2-004
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-029 – A minus on a fact opens a case
@@ -351,7 +351,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test
 - Acceptance criterion: AC-18, AC-11: after the minus the answer text is unchanged (exact) and one case is proposed
 - Verified by: TC-CHA-016, TC-N2-004
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-030 – Adaptation to negative feedback
@@ -363,7 +363,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test, Measurement
 - Acceptance criterion: AC-11: in 1000 opportunities after 5 net negative votes the behaviour appears at most 10 times
 - Verified by: TC-CHA-017, TC-N2-004
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-031 – Counters visible and resettable
@@ -375,7 +375,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test
 - Acceptance criterion: AC-11: a reset restores the default rate; a vote on a fact leaves counters of facts unchanged
 - Verified by: TC-CHA-018, TC-N2-004
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-032 – Tasks and memos recited from records
@@ -387,7 +387,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test
 - Acceptance criterion: AC-12: 50 of 50 stored items are recited word for word on request and at their due time (exact)
 - Verified by: TC-CHA-019, TC-N2-004
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-033 – Skills as tasks
@@ -399,7 +399,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test
 - Acceptance criterion: AC-23: the selectable list shows each skill; a selected skill runs its pipeline
 - Verified by: TC-WFM-001, TC-N2-002
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-034 – Internet tasks only on command
@@ -411,7 +411,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test
 - Acceptance criterion: AC-23: a chat message alone starts no internet task (exact)
 - Verified by: TC-RUN-001, TC-N2-003
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-035 – Versioned workflow library
@@ -423,7 +423,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test
 - Acceptance criterion: AC-10, AC-16: an edit creates version n+1 and leaves version n unchanged (exact)
 - Verified by: TC-WFM-002, TC-N2-002
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-036 – No cycles
@@ -435,7 +435,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test
 - Acceptance criterion: AC-27: a workflow with a cycle is refused with the cycle named; property test on generated graphs: every accepted graph has a topological order
 - Verified by: TC-WFM-003, TC-N2-002
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-037 – Graph rules
@@ -447,7 +447,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test
 - Acceptance criterion: AC-27: each of the three violations is refused with the rule named (exact)
 - Verified by: TC-WFM-004, TC-N2-002
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-038 – Model proposals stay drafts
@@ -459,7 +459,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test
 - Acceptance criterion: AC-10: a proposed entry has status draft and cannot be run as trusted
 - Verified by: TC-WFM-005, TC-N2-002
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-039 – Specification before trust
@@ -471,7 +471,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test
 - Acceptance criterion: AC-10: promotion of a workflow lacking any of the three is refused (exact)
 - Verified by: TC-WFM-006, TC-N2-002
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-040 – Time from idea to promotion
@@ -483,7 +483,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test
 - Acceptance criterion: AC-9: the record has two time stamps for each promoted skill
 - Verified by: TC-WFM-007, TC-N2-002
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-041 – Context graphs
@@ -495,7 +495,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test
 - Acceptance criterion: AC-10: the view of a step stays within its budget in tokens (exact on the recorded lookup run)
 - Verified by: TC-WFM-008, TC-N2-002
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-042 – Workflow schedule and estimate
@@ -507,7 +507,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test, Measurement
 - Acceptance criterion: AC-28: on the recorded lookup runs the estimate is within the factor set in Plan of the measured time
 - Verified by: TC-RUN-014, TC-WFM-009, TC-N2-003
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-043 – Character variant per workflow
@@ -519,7 +519,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test
 - Acceptance criterion: AC-17: a run with a variant sends the variant name; a run without sends none
 - Verified by: TC-WFM-010, TC-N2-002
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-044 – Switch the model
@@ -531,7 +531,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test, Demonstration
 - Acceptance criterion: AC-23: /light! and /full! switch after confirmation; memory is freed on request
 - Verified by: TC-RUN-002, TC-N2-003
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-045 – Model server unreachable
@@ -543,7 +543,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test
 - Acceptance criterion: AC-23: with the fake server down the user gets the plain message (exact)
 - Verified by: TC-RUN-003, TC-N2-003
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-046 – Code checks first
@@ -555,7 +555,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test
 - Acceptance criterion: AC-2: in the run log the code checks precede the first model call of each claim
 - Verified by: TC-TLS-001, TC-WFM-011, TC-N2-003
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-047 – Unclear without evidence
@@ -567,7 +567,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test
 - Acceptance criterion: AC-2: for 10 claims with a number and no evidence there are 0 model calls and the verdict is unclear (exact)
 - Verified by: TC-WFM-012, TC-N2-002
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-048 – A failed check informs the judge
@@ -579,7 +579,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test
 - Acceptance criterion: AC-2: the judge input contains the check line (exact); the verdict is the judge's
 - Verified by: TC-WFM-013, TC-N2-002
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-049 – Judgement quality
@@ -591,7 +591,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Measurement
 - Acceptance criterion: AC-2: decided with the rule of the agent-app workflow against the baseline
 - Verified by: TC-WFM-014, TC-N2-002
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-050 – Stable verdicts
@@ -603,7 +603,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Measurement
 - Acceptance criterion: AC-2: stability limit 0.90 (lower bound of the 95 % interval, at least) on the dev suites (REQ-VER-005, REQ-VER-006)
 - Verified by: TC-WFM-015, TC-N2-002
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-051 – Lookup with sources
@@ -615,7 +615,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test, Measurement
 - Acceptance criterion: AC-2: every answer of the lookup suite carries a source and a quote or the verdict unknown
 - Verified by: TC-TLS-002, TC-WFM-016, TC-N2-003
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-052 – Search command
@@ -627,7 +627,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test
 - Acceptance criterion: AC-23: /search returns the list and starts no pipeline
 - Verified by: TC-WFM-017, TC-N2-002
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-053 – Review report
@@ -639,7 +639,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Measurement
 - Acceptance criterion: AC-3: per tier source recall and precision against the baseline
 - Verified by: TC-WFM-018, TC-N2-002
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-054 – Review in time slices
@@ -651,7 +651,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test
 - Acceptance criterion: AC-3: after the first slice (60 s) the run waits for agreement (exact)
 - Verified by: TC-WFM-019, TC-N2-002
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-055 – Review stops by a code check
@@ -663,7 +663,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test
 - Acceptance criterion: AC-3: with a fake model that always says done, the run still continues until the code check holds
 - Verified by: TC-WFM-020, TC-N2-002
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-056 – Source records and cut-off
@@ -675,7 +675,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test
 - Acceptance criterion: AC-3: 0 violations of the cut-off; retracted works are dropped and listed (exact)
 - Verified by: TC-TLS-003, TC-WFM-021, TC-N2-003
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-057 – Method transfer
@@ -687,7 +687,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Measurement
 - Acceptance criterion: AC-26: the known method is in the top 3 on the retro-discovery cases
 - Verified by: TC-WFM-022, TC-N2-002
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-058 – Typed run events
@@ -699,7 +699,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test
 - Acceptance criterion: AC-4: a secret fed to the writer does not appear in the log (exact); a log with a broken order is reported
 - Verified by: TC-LOG-002, TC-N2-003
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-059 – Replay and comparison
@@ -711,7 +711,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test
 - Acceptance criterion: AC-4: replay equals the original (exact)
 - Verified by: TC-LOG-003, TC-N2-003
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-060 – Statements traceable to a query
@@ -723,7 +723,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test
 - Acceptance criterion: AC-4: on the recorded lookup run 100 % of statements link to a query
 - Verified by: TC-LOG-004, TC-N2-003
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-061 – Optional learning
@@ -735,7 +735,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test
 - Acceptance criterion: AC-22: a learned choice is logged with the default and can be switched off and reversed
 - Verified by: TC-RUN-004, TC-N2-003
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-062 – Context window share
@@ -747,7 +747,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test
 - Acceptance criterion: AC-22: over the lookup suites 100 % of inputs are at most 4096 tokens at num_ctx 8192
 - Verified by: TC-RUN-005, TC-N2-003
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-063 – Model calls of the first try
@@ -759,7 +759,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Measurement
 - Acceptance criterion: AC-22: on the lookup suites the maximum is below 15
 - Verified by: TC-RUN-006, TC-N2-003
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-064 – Untrusted text is data
@@ -771,7 +771,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test
 - Acceptance criterion: AC-6: injected instructions change no verdict and start no tool (red-team cases)
 - Verified by: TC-TLS-004, TC-TLS-008, TC-N2-003
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-065 – Sandbox or refuse
@@ -783,7 +783,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test
 - Acceptance criterion: AC-6: with the sandbox removed script checks report unavailable and nothing runs (exact)
 - Verified by: TC-TLS-005, TC-N2-003
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-066 – Confidence by code
@@ -795,7 +795,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test
 - Acceptance criterion: AC-3: each result shows its limits
 - Verified by: TC-WFM-023, TC-N2-002
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-067 – No invented source
@@ -807,7 +807,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Measurement
 - Acceptance criterion: AC-3: 0 invented references and 100 % of cited quotes found in their source
 - Verified by: TC-TLS-006, TC-WFM-024, TC-N2-003
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-068 – Only queries leave the host
@@ -819,7 +819,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test, Inspection
 - Acceptance criterion: AC-5: the web log lists every query that left the machine
 - Verified by: TC-TLS-007, TC-N2-003
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-069 – First text in 10 seconds
@@ -831,7 +831,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Measurement
 - Acceptance criterion: AC-19: median over 20 runs is within 10 s, also while a review slice runs
 - Verified by: TC-RUN-007, TC-N2-003
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-070 – Budgets and what is missing
@@ -843,7 +843,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test
 - Acceptance criterion: AC-19: each of the four budgets ends a scripted run with a message naming it
 - Verified by: TC-RUN-008, TC-RUN-012, TC-RUN-014, TC-TLS-008, TC-N2-003
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-071 – Chat before background
@@ -855,7 +855,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test
 - Acceptance criterion: AC-19: with a review slice running a chat message gets its first text within 10 s
 - Verified by: TC-RUN-009, TC-N2-003
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-072 – One model at a time
@@ -867,7 +867,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test
 - Acceptance criterion: AC-19: two simultaneous messages are answered one after the other
 - Verified by: TC-RUN-010, TC-N2-003
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-073 – Python versions
@@ -879,7 +879,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test
 - Acceptance criterion: AC-20: the unit tests pass on 3.12 (exact)
 - Verified by: TC-API-011, TC-N2-005
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-074 – State only through the storage interface
@@ -891,7 +891,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Inspection, Test
 - Acceptance criterion: AC-15: no database driver is imported outside the storage client
 - Verified by: TC-API-012, TC-CHA-020, TC-LOG-005, TC-WFM-025, TC-N2-005
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-075 – Serve the frontend
@@ -903,7 +903,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test
 - Acceptance criterion: AC-29: the container starts alone against the mocks and serves the chat page
 - Verified by: TC-API-013, TC-N2-005
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-BE-076 – Workflow and graph API
@@ -915,7 +915,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Verification method: Test
 - Acceptance criterion: AC-16: with the fake storage each of the six operations works; an invalid graph is refused with the rule named (exact)
 - Verified by: TC-API-014, TC-WFM-026, TC-N2-005
-- Status: Draft
+- Status: Approved
 - History: –
 
 ## Interface requirements
@@ -931,7 +931,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-1, AC-14: the contract suite test_if_101_chat_api.py passes against the mock (stage 1) and the Backend (stage 2)
 - Verified by: TC-IF-101-01..08, TC-API-015, TC-N2-005
-- Status: Draft
+- Status: Approved
 - History: v0, amendment 5/7 (2026-10-25)
 
 ### IF-103 – Model server (chat completion with structured output)
@@ -943,7 +943,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-23: the contract suite test_if_103_model_server.py passes against the mock (stage 1) and the pinned Ollama (stage 2)
 - Verified by: TC-IF-103-01..06, TC-RUN-011, TC-RUN-013, TC-N2-003
-- Status: Draft
+- Status: Approved
 - History: v0, amendment 5/7 (2026-10-25)
 
 ### IF-104 – Workflow and graph API for the Graph app
@@ -955,7 +955,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-16, AC-27: the contract suite test_if_104_graph_api.py passes against the mock (stage 1) and the Backend (stage 2)
 - Verified by: TC-IF-104-01..05, TC-API-016, TC-N2-005
-- Status: Draft
+- Status: Approved
 - History: v0, amendment 5/7 (2026-10-25)
 
 ### IF-105 – Evaluation access for the harness
@@ -967,5 +967,5 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-2, AC-8: the contract suite test_if_105_evaluation_access.py passes against the mock (stage 1) and the Backend (stage 2)
 - Verified by: TC-IF-105-01..04, TC-RUN-015, TC-N2-003
-- Status: Draft
+- Status: Approved
 - History: v0, amendment 9 (2026-10-25)

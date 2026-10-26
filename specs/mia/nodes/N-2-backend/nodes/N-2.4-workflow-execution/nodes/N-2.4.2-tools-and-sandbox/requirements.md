@@ -15,7 +15,7 @@ The tools that any workflow can call, each counted against the budgets of the ru
 - Verification method: Test
 - Acceptance criterion: AC-2: in the run log the code checks precede the first model call of each claim
 - Verified by: TC-TLS-001
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-TLS-002 – Lookup with sources
@@ -27,7 +27,7 @@ The tools that any workflow can call, each counted against the budgets of the ru
 - Verification method: Test, Measurement
 - Acceptance criterion: AC-2: every answer of the lookup suite carries a source and a quote or the verdict unknown
 - Verified by: TC-TLS-002
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-TLS-003 – Source records and cut-off
@@ -39,7 +39,7 @@ The tools that any workflow can call, each counted against the budgets of the ru
 - Verification method: Test
 - Acceptance criterion: AC-3: 0 violations of the cut-off; retracted works are dropped and listed (exact)
 - Verified by: TC-TLS-003
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-TLS-004 – Untrusted text is data
@@ -51,7 +51,7 @@ The tools that any workflow can call, each counted against the budgets of the ru
 - Verification method: Test
 - Acceptance criterion: AC-6: injected instructions change no verdict and start no tool (red-team cases)
 - Verified by: TC-TLS-004
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-TLS-005 – Sandbox or refuse
@@ -63,7 +63,7 @@ The tools that any workflow can call, each counted against the budgets of the ru
 - Verification method: Test
 - Acceptance criterion: AC-6: with the sandbox removed script checks report unavailable and nothing runs (exact)
 - Verified by: TC-TLS-005
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-TLS-006 – No invented source
@@ -75,7 +75,7 @@ The tools that any workflow can call, each counted against the budgets of the ru
 - Verification method: Measurement
 - Acceptance criterion: AC-3: 0 invented references and 100 % of cited quotes found in their source
 - Verified by: TC-TLS-006
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-TLS-007 – Only queries leave the host
@@ -87,7 +87,7 @@ The tools that any workflow can call, each counted against the budgets of the ru
 - Verification method: Test, Inspection
 - Acceptance criterion: AC-5: the web log lists every query that left the machine
 - Verified by: TC-TLS-007
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-TLS-008 – Budget and trust label per tool call
@@ -99,7 +99,7 @@ The tools that any workflow can call, each counted against the budgets of the ru
 - Verification method: Test
 - Acceptance criterion: AC-6: a call over the budget is refused with the budget named; every output carries its trust label
 - Verified by: TC-TLS-008
-- Status: Draft
+- Status: Approved
 - History: –
 
 ## Interface requirements
@@ -115,7 +115,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-2, AC-5, AC-6: the contract suite test_if_402_tool_calls.py passes against the mock (stage 1) and the Tools and sandbox (stage 2)
 - Verified by: TC-IF-402-01..05
-- Status: Draft
+- Status: Approved
 - History: v0, amendment 5/7 (2026-10-25)
 
 ### IF-404 – Web search and fetch (external)
@@ -127,7 +127,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-5, AC-6: the contract suite test_if_404_web.py passes against the mock (stage 1) and the real web client with SearXNG (stage 2)
 - Verified by: TC-IF-404-01..04
-- Status: Draft
+- Status: Approved
 - History: v0, amendment 5/7 (2026-10-25)
 
 ### IF-405 – Scholarly sources (external)
@@ -139,5 +139,5 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-3: the contract suite test_if_405_scholarly_sources.py passes against the mock (stage 1) and the real APIs (stage 2)
 - Verified by: TC-IF-405-01..04
-- Status: Draft
+- Status: Approved
 - History: v0, amendment 5/7 (2026-10-25)

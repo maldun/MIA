@@ -15,7 +15,7 @@ Workflows, memories, history, user feedback, context graphs and accounts behind 
 - Verification method: Inspection, Test
 - Acceptance criterion: AC-15, AC-29: the container starts alone and passes the contract suite of IF-102
 - Verified by: TC-N3-001
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-DB-002 – Shared state held
@@ -27,7 +27,7 @@ Workflows, memories, history, user feedback, context graphs and accounts behind 
 - Verification method: Test
 - Acceptance criterion: AC-15: a record of each kind is written and read back identically
 - Verified by: TC-N3-002
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-DB-003 – Immutable versions
@@ -39,7 +39,7 @@ Workflows, memories, history, user feedback, context graphs and accounts behind 
 - Verification method: Test
 - Acceptance criterion: AC-16: version n is unchanged after version n+1 is written (exact)
 - Verified by: TC-N3-003
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-DB-004 – Schema validation on write
@@ -51,7 +51,7 @@ Workflows, memories, history, user feedback, context graphs and accounts behind 
 - Verification method: Test
 - Acceptance criterion: AC-16, AC-27: each of the rules (identity, adjacent data nodes, cycle, session stopping criterion) is refused with its name; protects against TB-edit
 - Verified by: TC-N3-004
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-DB-005 – Accounts
@@ -63,7 +63,7 @@ Workflows, memories, history, user feedback, context graphs and accounts behind 
 - Verification method: Test
 - Acceptance criterion: AC-14: no plain password is stored; two accounts with the same password have different hashes (exact)
 - Verified by: TC-N3-005
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-DB-006 – Change notification
@@ -75,7 +75,7 @@ Workflows, memories, history, user feedback, context graphs and accounts behind 
 - Verification method: Test
 - Acceptance criterion: AC-15: a second subscriber is notified within 2 s
 - Verified by: TC-N3-006
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-DB-007 – Reversible move from files
@@ -87,7 +87,7 @@ Workflows, memories, history, user feedback, context graphs and accounts behind 
 - Verification method: Test
 - Acceptance criterion: AC-15: files to database and back give identical files (exact)
 - Verified by: TC-N3-007
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-DB-008 – Backup and restore
@@ -99,7 +99,7 @@ Workflows, memories, history, user feedback, context graphs and accounts behind 
 - Verification method: Test
 - Acceptance criterion: AC-7, AC-15: backup and restore round-trip returns the same records (exact)
 - Verified by: TC-N3-007
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-DB-009 – Library export and seed
@@ -111,7 +111,7 @@ Workflows, memories, history, user feedback, context graphs and accounts behind 
 - Verification method: Test
 - Acceptance criterion: AC-16: export then seed gives identical entries (exact)
 - Verified by: TC-N3-008
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-DB-010 – Run results
@@ -123,7 +123,7 @@ Workflows, memories, history, user feedback, context graphs and accounts behind 
 - Verification method: Test
 - Acceptance criterion: AC-10: each stored result carries the three versions
 - Verified by: TC-N3-009
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-DB-011 – Context graphs stored
@@ -135,7 +135,7 @@ Workflows, memories, history, user feedback, context graphs and accounts behind 
 - Verification method: Test
 - Acceptance criterion: AC-10: a context graph edit creates a new version
 - Verified by: TC-N3-010
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-DB-012 – Votes stored
@@ -147,7 +147,7 @@ Workflows, memories, history, user feedback, context graphs and accounts behind 
 - Verification method: Test
 - Acceptance criterion: AC-18: 100 % of scripted votes read back complete
 - Verified by: TC-N3-011
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-DB-013 – Memory records
@@ -159,7 +159,7 @@ Workflows, memories, history, user feedback, context graphs and accounts behind 
 - Verification method: Test
 - Acceptance criterion: AC-24: a deleted record is gone (exact)
 - Verified by: TC-N3-011
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-DB-014 – Tasks and memos exact
@@ -171,7 +171,7 @@ Workflows, memories, history, user feedback, context graphs and accounts behind 
 - Verification method: Test
 - Acceptance criterion: AC-12: 50 of 50 items read back identical (exact)
 - Verified by: TC-N3-011
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-DB-015 – Source trust stored
@@ -183,7 +183,7 @@ Workflows, memories, history, user feedback, context graphs and accounts behind 
 - Verification method: Test
 - Acceptance criterion: AC-3: an edited trust value survives a restart
 - Verified by: TC-N3-011
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-DB-016 – Reachable only inside the host network
@@ -195,7 +195,7 @@ Workflows, memories, history, user feedback, context graphs and accounts behind 
 - Verification method: Test
 - Acceptance criterion: AC-5: a connection from the LAN is refused (exact)
 - Verified by: TC-N3-012
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-DB-017 – Own container
@@ -207,7 +207,7 @@ Workflows, memories, history, user feedback, context graphs and accounts behind 
 - Verification method: Test
 - Acceptance criterion: AC-29: starts alone and in the stack with the same configuration file
 - Verified by: TC-N3-001
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-DB-018 – Example workflows as seed data
@@ -219,7 +219,7 @@ Workflows, memories, history, user feedback, context graphs and accounts behind 
 - Verification method: Test
 - Acceptance criterion: AC-9, AC-10: after a seed from files the library holds the five entries; export then seed gives identical entries (exact)
 - Verified by: TC-N3-008
-- Status: Draft
+- Status: Approved
 - History: –
 
 ## Interface requirements
@@ -235,5 +235,5 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-15, AC-27: the contract suite test_if_102_storage.py passes against the mock (stage 1) and the Database (stage 2)
 - Verified by: TC-IF-102-01..07
-- Status: Draft
+- Status: Approved
 - History: v0, amendment 5/7 (2026-10-25)

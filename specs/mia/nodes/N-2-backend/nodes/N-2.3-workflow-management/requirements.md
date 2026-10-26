@@ -15,7 +15,7 @@ The library of workflows and skills as versioned data, the graph rules, specific
 - Verification method: Test
 - Acceptance criterion: AC-23: the selectable list shows each skill; a selected skill runs its pipeline
 - Verified by: TC-WFM-001
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-WFM-002 – Versioned workflow library
@@ -27,7 +27,7 @@ The library of workflows and skills as versioned data, the graph rules, specific
 - Verification method: Test
 - Acceptance criterion: AC-10, AC-16: an edit creates version n+1 and leaves version n unchanged (exact)
 - Verified by: TC-WFM-002
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-WFM-003 – No cycles
@@ -39,7 +39,7 @@ The library of workflows and skills as versioned data, the graph rules, specific
 - Verification method: Test
 - Acceptance criterion: AC-27: a workflow with a cycle is refused with the cycle named; property test on generated graphs: every accepted graph has a topological order
 - Verified by: TC-WFM-003
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-WFM-004 – Graph rules
@@ -51,7 +51,7 @@ The library of workflows and skills as versioned data, the graph rules, specific
 - Verification method: Test
 - Acceptance criterion: AC-27: each of the three violations is refused with the rule named (exact)
 - Verified by: TC-WFM-004
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-WFM-005 – Model proposals stay drafts
@@ -63,7 +63,7 @@ The library of workflows and skills as versioned data, the graph rules, specific
 - Verification method: Test
 - Acceptance criterion: AC-10: a proposed entry has status draft and cannot be run as trusted
 - Verified by: TC-WFM-005
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-WFM-006 – Specification before trust
@@ -75,7 +75,7 @@ The library of workflows and skills as versioned data, the graph rules, specific
 - Verification method: Test
 - Acceptance criterion: AC-10: promotion of a workflow lacking any of the three is refused (exact)
 - Verified by: TC-WFM-006
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-WFM-007 – Time from idea to promotion
@@ -87,7 +87,7 @@ The library of workflows and skills as versioned data, the graph rules, specific
 - Verification method: Test
 - Acceptance criterion: AC-9: the record has two time stamps for each promoted skill
 - Verified by: TC-WFM-007
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-WFM-008 – Context graphs
@@ -99,7 +99,7 @@ The library of workflows and skills as versioned data, the graph rules, specific
 - Verification method: Test
 - Acceptance criterion: AC-10: the view of a step stays within its budget in tokens (exact on the recorded lookup run)
 - Verified by: TC-WFM-008
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-WFM-009 – Workflow schedule and estimate
@@ -111,7 +111,7 @@ The library of workflows and skills as versioned data, the graph rules, specific
 - Verification method: Test, Measurement
 - Acceptance criterion: AC-28: on the recorded lookup runs the estimate is within the factor set in Plan of the measured time
 - Verified by: TC-WFM-009
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-WFM-010 – Character variant per workflow
@@ -123,7 +123,7 @@ The library of workflows and skills as versioned data, the graph rules, specific
 - Verification method: Test
 - Acceptance criterion: AC-17: a run with a variant sends the variant name; a run without sends none
 - Verified by: TC-WFM-010
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-WFM-011 – Code checks first
@@ -135,7 +135,7 @@ The library of workflows and skills as versioned data, the graph rules, specific
 - Verification method: Test
 - Acceptance criterion: AC-2: in the run log the code checks precede the first model call of each claim
 - Verified by: TC-WFM-011
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-WFM-012 – Unclear without evidence
@@ -147,7 +147,7 @@ The library of workflows and skills as versioned data, the graph rules, specific
 - Verification method: Test
 - Acceptance criterion: AC-2: for 10 claims with a number and no evidence there are 0 model calls and the verdict is unclear (exact)
 - Verified by: TC-WFM-012
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-WFM-013 – A failed check informs the judge
@@ -159,7 +159,7 @@ The library of workflows and skills as versioned data, the graph rules, specific
 - Verification method: Test
 - Acceptance criterion: AC-2: the judge input contains the check line (exact); the verdict is the judge's
 - Verified by: TC-WFM-013
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-WFM-014 – Judgement quality
@@ -171,7 +171,7 @@ The library of workflows and skills as versioned data, the graph rules, specific
 - Verification method: Measurement
 - Acceptance criterion: AC-2: decided with the rule of the agent-app workflow against the baseline
 - Verified by: TC-WFM-014
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-WFM-015 – Stable verdicts
@@ -183,7 +183,7 @@ The library of workflows and skills as versioned data, the graph rules, specific
 - Verification method: Measurement
 - Acceptance criterion: AC-2: stability limit 0.90 (lower bound of the 95 % interval, at least) on the dev suites (REQ-VER-005, REQ-VER-006)
 - Verified by: TC-WFM-015
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-WFM-016 – Lookup with sources
@@ -195,7 +195,7 @@ The library of workflows and skills as versioned data, the graph rules, specific
 - Verification method: Test, Measurement
 - Acceptance criterion: AC-2: every answer of the lookup suite carries a source and a quote or the verdict unknown
 - Verified by: TC-WFM-016
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-WFM-017 – Search command
@@ -207,7 +207,7 @@ The library of workflows and skills as versioned data, the graph rules, specific
 - Verification method: Test
 - Acceptance criterion: AC-23: /search returns the list and starts no pipeline
 - Verified by: TC-WFM-017
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-WFM-018 – Review report
@@ -219,7 +219,7 @@ The library of workflows and skills as versioned data, the graph rules, specific
 - Verification method: Measurement
 - Acceptance criterion: AC-3: per tier source recall and precision against the baseline
 - Verified by: TC-WFM-018
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-WFM-019 – Review in time slices
@@ -231,7 +231,7 @@ The library of workflows and skills as versioned data, the graph rules, specific
 - Verification method: Test
 - Acceptance criterion: AC-3: after the first slice (60 s) the run waits for agreement (exact)
 - Verified by: TC-WFM-019
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-WFM-020 – Review stops by a code check
@@ -243,7 +243,7 @@ The library of workflows and skills as versioned data, the graph rules, specific
 - Verification method: Test
 - Acceptance criterion: AC-3: with a fake model that always says done, the run still continues until the code check holds
 - Verified by: TC-WFM-020
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-WFM-021 – Source records and cut-off
@@ -255,7 +255,7 @@ The library of workflows and skills as versioned data, the graph rules, specific
 - Verification method: Test
 - Acceptance criterion: AC-3: 0 violations of the cut-off; retracted works are dropped and listed (exact)
 - Verified by: TC-WFM-021
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-WFM-022 – Method transfer
@@ -267,7 +267,7 @@ The library of workflows and skills as versioned data, the graph rules, specific
 - Verification method: Measurement
 - Acceptance criterion: AC-26: the known method is in the top 3 on the retro-discovery cases
 - Verified by: TC-WFM-022
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-WFM-023 – Confidence by code
@@ -279,7 +279,7 @@ The library of workflows and skills as versioned data, the graph rules, specific
 - Verification method: Test
 - Acceptance criterion: AC-3: each result shows its limits
 - Verified by: TC-WFM-023
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-WFM-024 – No invented source
@@ -291,7 +291,7 @@ The library of workflows and skills as versioned data, the graph rules, specific
 - Verification method: Measurement
 - Acceptance criterion: AC-3: 0 invented references and 100 % of cited quotes found in their source
 - Verified by: TC-WFM-024
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-WFM-025 – State only through the storage interface
@@ -303,7 +303,7 @@ The library of workflows and skills as versioned data, the graph rules, specific
 - Verification method: Inspection, Test
 - Acceptance criterion: AC-15: no database driver is imported outside the storage client
 - Verified by: TC-WFM-025
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-WFM-026 – Workflow and graph API
@@ -315,7 +315,7 @@ The library of workflows and skills as versioned data, the graph rules, specific
 - Verification method: Test
 - Acceptance criterion: AC-16: with the fake storage each of the six operations works; an invalid graph is refused with the rule named (exact)
 - Verified by: TC-WFM-026
-- Status: Draft
+- Status: Approved
 - History: –
 
 ## Interface requirements
@@ -331,5 +331,5 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-10, AC-16, AC-28: the contract suite test_if_203_workflow_library.py passes against the mock (stage 1) and the Workflow management (stage 2)
 - Verified by: TC-IF-203-01..04
-- Status: Draft
+- Status: Approved
 - History: v0, amendment 5/7 (2026-10-25)

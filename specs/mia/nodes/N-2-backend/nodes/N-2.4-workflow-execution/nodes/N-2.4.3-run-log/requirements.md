@@ -15,7 +15,7 @@ The log is the source of truth: typed events with a run id, replay and compariso
 - Verification method: Test
 - Acceptance criterion: AC-21: the account equals a rendering of the logged events (exact)
 - Verified by: TC-LOG-001
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-LOG-002 – Typed run events
@@ -27,7 +27,7 @@ The log is the source of truth: typed events with a run id, replay and compariso
 - Verification method: Test
 - Acceptance criterion: AC-4: a secret fed to the writer does not appear in the log (exact); a log with a broken order is reported
 - Verified by: TC-LOG-002
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-LOG-003 – Replay and comparison
@@ -39,7 +39,7 @@ The log is the source of truth: typed events with a run id, replay and compariso
 - Verification method: Test
 - Acceptance criterion: AC-4: replay equals the original (exact)
 - Verified by: TC-LOG-003
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-LOG-004 – Statements traceable to a query
@@ -51,7 +51,7 @@ The log is the source of truth: typed events with a run id, replay and compariso
 - Verification method: Test
 - Acceptance criterion: AC-4: on the recorded lookup run 100 % of statements link to a query
 - Verified by: TC-LOG-004
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-LOG-005 – State only through the storage interface
@@ -63,7 +63,7 @@ The log is the source of truth: typed events with a run id, replay and compariso
 - Verification method: Inspection, Test
 - Acceptance criterion: AC-15: no database driver is imported outside the storage client
 - Verified by: TC-LOG-005
-- Status: Draft
+- Status: Approved
 - History: –
 
 ## Interface requirements
@@ -79,5 +79,5 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-4, AC-21: the contract suite test_if_401_run_events.py passes against the mock (stage 1) and the Run log (stage 2)
 - Verified by: TC-IF-401-01..04
-- Status: Draft
+- Status: Approved
 - History: v0, amendment 5/7 (2026-10-25)

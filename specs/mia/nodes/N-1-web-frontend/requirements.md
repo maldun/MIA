@@ -15,7 +15,7 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Verification method: Test
 - Acceptance criterion: AC-1: with the mock of IF-101, two users' messages show their names and the scripted answer appears sentence by sentence
 - Verified by: TC-N1-003, TC-CLV-001, TC-CLV-021
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-FE-002 – Stop and queue position
@@ -27,7 +27,7 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Verification method: Test
 - Acceptance criterion: AC-1: with a mock queue of 3, the positions 1, 2, 3 are shown; stop sends the stop event once
 - Verified by: TC-N1-003, TC-CLV-002
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-FE-003 – Shared history after reload
@@ -39,7 +39,7 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Verification method: Test
 - Acceptance criterion: AC-1: after reload the last 50 messages of the mock appear in order; a message sent by the mock from another user appears within 2 s
 - Verified by: TC-N1-003, TC-CLV-003
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-FE-004 – Connection state and drafts
@@ -51,7 +51,7 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Verification method: Test
 - Acceptance criterion: AC-1: with the mock connection cut for 5 s the state shows offline, the draft text stays, the page reconnects without a reload
 - Verified by: TC-N1-003, TC-CLV-004
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-FE-005 – Regenerate and speak again
@@ -63,7 +63,7 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Verification method: Test
 - Acceptance criterion: AC-1: the two controls send one event each; the mock answers are shown
 - Verified by: TC-N1-003, TC-CLV-005
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-FE-006 – Chat without the character
@@ -75,7 +75,7 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Verification method: Test
 - Acceptance criterion: AC-1: with the character iframe blocked, a message is sent and answered (exact)
 - Verified by: TC-N1-002, TC-CLV-006, TC-CHV-001
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-FE-007 – Character as stage
@@ -87,7 +87,7 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Verification method: Demonstration
 - Acceptance criterion: AC-1: viewports 360, 768 and 1440 px show the layout; collapsed view shows the caption
 - Verified by: TC-N1-003, TC-CLV-007
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-FE-008 – One expression API
@@ -99,7 +99,7 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Verification method: Inspection, Test
 - Acceptance criterion: AC-17: a scripted list of 14 presets and 5 gestures played through the API shows each on the character; no other call path exists
 - Verified by: TC-N1-002, TC-CHV-002
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-FE-009 – Living character
@@ -111,7 +111,7 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Verification method: Demonstration
 - Acceptance criterion: AC-1: reviewer checklist for mouth, blending, blinking, idle motion on desktop and phone
 - Verified by: TC-N1-002, TC-CHV-003
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-FE-010 – Mood shown by the mood map
@@ -123,7 +123,7 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Verification method: Test
 - Acceptance criterion: AC-17: for every mood of the map and for 1 unknown mood the shown expression is the mapped one or neutral (exact)
 - Verified by: TC-N1-002, TC-CHV-004
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-FE-011 – Voice playback
@@ -135,7 +135,7 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Verification method: Test
 - Acceptance criterion: AC-13: with 5 scripted audio chunks the playback order equals the arrival order and no sentence overlaps
 - Verified by: TC-N1-001, TC-VPB-001
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-FE-012 – Mute and stop per user
@@ -147,7 +147,7 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Verification method: Test
 - Acceptance criterion: AC-13: after mute no audio plays on this device; a second device still plays
 - Verified by: TC-N1-001, TC-VPB-002
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-FE-013 – Voice lines
@@ -159,7 +159,7 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Verification method: Test
 - Acceptance criterion: AC-13: a line with a missing file produces one report event and no error shown; the conversation continues
 - Verified by: TC-N1-001, TC-VPB-003
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-FE-014 – Status line and account of a task
@@ -171,7 +171,7 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Verification method: Test, Demonstration
 - Acceptance criterion: AC-21: the status line shows the mock mood and activity; opening an answer shows the mock account
 - Verified by: TC-N1-003, TC-CLV-008
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-FE-015 – Editors for expressions, gestures and persona
@@ -183,7 +183,7 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Verification method: Test
 - Acceptance criterion: AC-17: a change pushed by the mock appears within 2 s without reload
 - Verified by: TC-N1-002, TC-CLV-009, TC-CHV-005
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-FE-016 – Voting controls and score
@@ -195,7 +195,7 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Verification method: Test, Demonstration
 - Acceptance criterion: AC-18: a vote sends one event with category and subject; the mock scores are drawn per category and overall
 - Verified by: TC-N1-003, TC-CLV-010
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-FE-017 – Shocked reaction
@@ -207,7 +207,7 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Verification method: Test
 - Acceptance criterion: AC-11: on a mock negative-vote answer the shocked expression is shown (exact)
 - Verified by: TC-N1-002, TC-CHV-006
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-FE-018 – Tasks, memos and memory views
@@ -219,7 +219,7 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Verification method: Test
 - Acceptance criterion: AC-12, AC-24: with 50 mock records all are listed; an edit and a delete send one event each
 - Verified by: TC-N1-003, TC-CLV-011
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-FE-019 – Source trust edit
@@ -231,7 +231,7 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Verification method: Test
 - Acceptance criterion: AC-3: the edit event carries source id, old and new value
 - Verified by: TC-N1-003, TC-CLV-012
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-FE-020 – Character model selection
@@ -243,7 +243,7 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Verification method: Demonstration, Test
 - Acceptance criterion: AC-17: a second .vrm model loads and the unmapped list is shown
 - Verified by: TC-N1-002, TC-CHV-007
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-FE-021 – Variant label
@@ -255,7 +255,7 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Verification method: Test
 - Acceptance criterion: AC-17: a mock run with a variant changes the outfit and shows the label; a run without keeps the chat's variant
 - Verified by: TC-N1-002, TC-CLV-013, TC-CHV-008
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-FE-022 – Login views and password change
@@ -267,7 +267,7 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Verification method: Test
 - Acceptance criterion: AC-14: the three views send one event each
 - Verified by: TC-N1-003, TC-CLV-014
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-FE-023 – Login page states visibility
@@ -279,7 +279,7 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Verification method: Inspection
 - Acceptance criterion: AC-20: the login page text is present (exact)
 - Verified by: TC-N1-006, TC-CLV-015
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-FE-024 – Accessibility and devices
@@ -291,7 +291,7 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Verification method: Test, Demonstration
 - Acceptance criterion: AC-1: browser checks at 360, 768 and 1440 px in both themes; touch targets measured at 44 px or more (exact)
 - Verified by: TC-N1-003, TC-CLV-016, TC-CHV-009
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-FE-025 – Frame rate
@@ -303,7 +303,7 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Verification method: Measurement
 - Acceptance criterion: AC-19: median of 10 runs of 30 s reaches 30 fps on any phone inside the network (no particular device) and on the desktop
 - Verified by: TC-N1-005, TC-CHV-010
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-FE-026 – No request leaves the host
@@ -315,7 +315,7 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Verification method: Test
 - Acceptance criterion: AC-5: a browser test records every request of a session and finds 0 outside the host (exact)
 - Verified by: TC-N1-004, TC-CLV-017, TC-CLV-021, TC-CHV-011, TC-VPB-004
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-FE-027 – Character in a secure context
@@ -327,7 +327,7 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Verification method: Test
 - Acceptance criterion: AC-14: over plain HTTP to a LAN address the character does not load (exact)
 - Verified by: TC-N1-004, TC-CHV-012
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-FE-028 – Password over a secure channel
@@ -339,7 +339,7 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Verification method: Test
 - Acceptance criterion: AC-14: over plain HTTP to a LAN address the login form sends nothing (exact)
 - Verified by: TC-N1-004, TC-CLV-018
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-FE-029 – Plain stack
@@ -351,7 +351,7 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Verification method: Inspection
 - Acceptance criterion: AC-20: no bundler files; the Godot version string is 4.6.1 (exact)
 - Verified by: TC-N1-006, TC-CLV-019, TC-CHV-013
-- Status: Draft
+- Status: Approved
 - History: –
 
 ### REQ-FE-030 – Delivered by the backend
@@ -363,5 +363,5 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Verification method: Test
 - Acceptance criterion: AC-29: the chat page loads from the backend container; the frontend has no container of its own
 - Verified by: TC-N1-006, TC-CLV-020, TC-CHV-014, TC-VPB-005
-- Status: Draft
+- Status: Approved
 - History: –
