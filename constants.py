@@ -61,6 +61,7 @@ CHAT_RATE_KEY = "chat_rate_per_minute"         # messages per minute and connect
 CHAT_TOKEN_KEY = "chat_token"                  # token for deleting the conversation (default: the editor token)
 ACCOUNTS_KEY = "accounts_enabled"              # login, session and logout (N-2.1); off until the other routes are protected too (T-02)
 ACCOUNTS_DIR_KEY = "accounts_dir"              # the folder of the file storage that holds the accounts
+PERSONA_FILE_KEY = "persona_file"              # the persona of the chat as a shared JSON file (IF-101 persona)
 CHANGES_LOG_KEY = "changes_log"                # who changed what (REQ-API-009), one JSON line per change
 MOODS_FILE_KEY = "moods_file"
 DEFAULT_MOODS_FILE = "moods.json"
