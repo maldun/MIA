@@ -31,6 +31,8 @@ on_emotion, should_stop)` are given to it (web_app.py), which makes it testable 
 """
 import collections
 import datetime
+import json
+import random
 import re
 import threading
 import time
@@ -38,10 +40,12 @@ import time
 try:
     from .chat_log import utc_now, MAX_PAGE
     from .record_tables import CATEGORIES
+    from .storage import StorageError
     from .speech_text import speech_text
 except ImportError:  # used as plain script / in tests
     from chat_log import utc_now, MAX_PAGE
     from record_tables import CATEGORIES
+    from storage import StorageError
     from speech_text import speech_text
 
 MAX_LENGTH = 8000
@@ -69,6 +73,27 @@ def normalize_text(text):
 SENTENCE_END = re.compile(r"(?<=[.!?])\s+")
 
 
+NET_NEGATIVE = 5               # REQ-CHA-017: from this many net negative votes a behaviour is shown only rarely
+RARE_CHANCE = 0.002            # at most 1 % is required; a chance of exactly 1 % would break "at most 10 in 1000 opportunities" in about 4 of 10 checks
+
+
+def show_chance(net):
+    """the chance that a behaviour is shown at one opportunity: always, until it has NET_NEGATIVE net negative votes; plus votes raise the net and so the chance again"""
+    return RARE_CHANCE if net <= -NET_NEGATIVE else 1.0
+
+
+def behaviours_from_file(path):
+    """() -> the names of the file {"behaviours": [...]}; read at every call so the list may change while MIA runs; a missing or broken file gives an empty list"""
+    def read():
+        try:
+            with open(path, encoding="utf-8") as fp:
+                names = json.load(fp).get("behaviours", [])
+        except (OSError, ValueError, AttributeError):
+            return []
+        return [name for name in names if isinstance(name, str)] if isinstance(names, list) else []
+    return read
+
+
 class ChatError(Exception):
     """a refused operation of IF-201 (v1): `code` is not_found, not_the_last_answer, invalid_vote or queue_full; `rule` names what a vote broke"""
     def __init__(self, code, rule=None):
@@ -78,7 +103,8 @@ class ChatError(Exception):
 
 class ChatService:
     def __init__(self, emit, log, mood, run_exchange, run_command=None, model_info=None, queue_size=1, user_limit=0,
-                 rate_limit=(10, 60), spawn=None, clock=time.monotonic, run_lookup=None, run_search=None, votes=None, wall_clock=time.time):
+                 rate_limit=(10, 60), spawn=None, clock=time.monotonic, run_lookup=None, run_search=None, votes=None, wall_clock=time.time,
+                 behaviours=None, reputable=0.6):
         self._emit = emit
         self._run_lookup = run_lookup          # (question, on_delta, on_emotion, should_stop) -> the answer, for /lookup
         self._run_search = run_search              # (query, on_delta, on_emotion, should_stop) -> the list of results, for /search
@@ -94,6 +120,8 @@ class ChatService:
         self._clock = clock
         self._votes = votes                    # the Storage layer (IF-102): the votes table
         self._wall_clock = wall_clock          # seconds since the epoch; the time of a vote and so its week
+        self._behaviours = behaviours          # () -> the names of the behaviours that can be voted on (REQ-CHA-017); read at every use, the list may change; None: no list
+        self._reputable = reputable            # a source with at least this trust is reputable (owner 2026-10-27: a fact has at least one reputable source)
         self._lock = threading.RLock()
         self._queue = collections.deque()
         self._running = False
@@ -103,6 +131,7 @@ class ChatService:
         self._commands = {c["command"] for c in COMMANDS}
         self._message_id = None          # the answer in progress: pipeline events belong to it
         self._pipeline = []
+        self._sources = []
         self._show_pipeline = False
 
     # --- state -----------------------------------------------------------------------------------
@@ -254,14 +283,88 @@ class ChatService:
             raise ChatError("invalid_vote", "category")
         if isinstance(value, bool) or value not in (1, -1):
             raise ChatError("invalid_vote", "value")
-        if category == "answer_quality":
-            self._answer(subject)
+        record = self._answer(subject) if category == "answer_quality" else None
+        if category == "character_behaviour" and self._behaviours is not None and subject not in self._behaviours():
+            raise ChatError("invalid_vote", "subject")
         created = datetime.datetime.fromtimestamp(self._wall_clock(), datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
         # one record per user, category and subject: a repeated click or a changed mind is a new version of it, not a second vote
         self._votes.put("votes", "%s|%s|%s" % (account, category, subject), {"user": account, "subject": subject, "category": category, "value": value, "created": created}, account)
+        if record is not None and value == -1 and self.is_fact(record):
+            self._open_case(record, account, created)
+        if category == "character_behaviour" and self._behaviours is not None:
+            self._keep_counter(subject, account)
         score = self.score()
         self._emit("score", score)
         return {"stored": True, "score": score}
+
+    # --- a minus on a fact, adaptation, counters (REQ-CHA-016 to -018) ----------------------------------------------
+    def note_sources(self, sources):
+        """the sources behind the answer in progress, [{"url", "trust"}], reported by the lookup skill; kept with the answer"""
+        with self._lock:
+            if self._message_id is not None:
+                self._sources = [dict(source) for source in sources]
+
+    def is_fact(self, record):
+        """an answer is factual when at least one of its sources is reputable; it can still be wrong, but it has a source"""
+        return any(isinstance(s, dict) and s.get("trust", 0) >= self._reputable for s in record.get("sources") or [])
+
+    def _open_case(self, record, account, created):
+        """a proposed benchmark case, one per answer; the answer itself stays as it is. A person labels it later (the eval rules)."""
+        asked = None
+        for message in reversed(self.log.history(before=record["id"], limit=MAX_PAGE)[0]):
+            if message["role"] == "user":
+                asked = message["text"]
+                break
+        try:
+            case = self._votes.get("cases", record["id"])["doc"]
+        except StorageError:
+            case = {"question": asked or "", "answer": record["text"], "sources": record.get("sources", []), "status": "proposed", "created": created, "voters": []}
+        if account not in case["voters"]:
+            case["voters"].append(account)
+        self._votes.put("cases", record["id"], case, account)
+
+    def _names(self):
+        return list(self._behaviours()) if self._behaviours is not None else []
+
+    def _state(self, name):
+        """net, votes and chance of a behaviour, counted from the votes since its last reset (a vote of the same second as the reset counts as before it)"""
+        try:
+            reset_at = self._votes.get("behaviours", name)["doc"].get("reset_at")
+        except StorageError:
+            reset_at = None
+        values = []
+        for vote_id in self._votes.ids("votes"):
+            vote = self._votes.get("votes", vote_id)["doc"]
+            if vote["category"] == "character_behaviour" and vote["subject"] == name and (reset_at is None or vote["created"] > reset_at):
+                values.append(vote["value"])
+        return {"net": sum(values), "votes": len(values), "chance": show_chance(sum(values)), "reset_at": reset_at}
+
+    def _keep_counter(self, name, author):
+        state = self._state(name)
+        self._votes.put("behaviours", name, {"name": name, "net": state["net"], "votes": state["votes"], "reset_at": state["reset_at"]}, author)
+
+    def counters(self):
+        """the adaptation counters of every behaviour of the list, for every user to see"""
+        return {name: self._state(name) for name in self._names()}
+
+    def reset_counter(self, account, name):
+        """back to the default rate; the votes stay in the table, only those after the reset count"""
+        if name not in self._names():
+            raise ChatError("not_found")
+        now = datetime.datetime.fromtimestamp(self._wall_clock(), datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        self._votes.put("behaviours", name, {"name": name, "net": 0, "votes": 0, "reset_at": now}, account)
+        self._emit("counters_changed", {"name": name, "author": account})
+        return self._state(name)
+
+    def show_behaviour(self, name, rng=random.random):
+        """one opportunity to show a behaviour: True if it is shown. What is not on the list (a fact, a safety check) is always shown."""
+        if name not in self._names():
+            return True
+        try:
+            net = self._votes.get("behaviours", name)["doc"]["net"]            # the kept counter: an opportunity must not count all votes again
+        except StorageError:
+            net = 0
+        return rng() < show_chance(net)
 
     def score(self):
         """sums per category and overall, and the same per ISO week of the vote (oldest first, only weeks with a vote)"""
@@ -342,7 +445,7 @@ class ChatService:
         message_id = self.log.new_id()
         created = utc_now()
         with self._lock:
-            self._message_id, self._pipeline, self._show_pipeline = message_id, [], False
+            self._message_id, self._pipeline, self._sources, self._show_pipeline = message_id, [], [], False
         model = self._model_info()[0]
         self._emit("chat_start", {"id": message_id, "role": "assistant", "created": created, **({"task": task} if task != "chat" else {})})
         self._emit("variant", {"name": None})              # no workflow picks a character variant yet (REQ-CHV-008): the chat's variant stays
@@ -383,9 +486,11 @@ class ChatService:
         if task != "chat":
             extra["task"] = task
         with self._lock:
-            steps, self._message_id = self._pipeline, None
+            steps, sources, self._message_id = self._pipeline, self._sources, None
         if steps:
             extra["pipeline"] = steps
+        if sources:
+            extra["sources"] = sources
         record = self.log.append("assistant", state["text"], id=message_id, created=created, emotion=state["emotion"],
                                  status=status, model=model, **extra)
         self._emit("chat_done", {"id": message_id, "text": record["text"], "emotion": record["emotion"], "status": status})

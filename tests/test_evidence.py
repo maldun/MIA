@@ -64,6 +64,16 @@ class RealRuns(unittest.TestCase):
             self.assertIn(expected, types, expected)
         self.assertEqual(graph.nodes["question"]["attrs"]["text"], QUESTION)
 
+    def test_the_sources_of_the_answer_are_reported_with_their_trust(self):
+        """REQ-CHA-016: the chat keeps the sources behind a lookup answer with their trust, to tell a fact (a reputable source) from an opinion"""
+        core, seen = self.core(TR.Scripted("reader")), []
+        text = RC.run_research(core, QUESTION, pipeline="research.baseline@1", on_sources=seen.append, trust=source_trust.TrustTable.load().for_url)
+        self.assertIn("3 May 2021", text)
+        self.assertEqual(len(seen), 1)
+        self.assertTrue(seen[0])
+        self.assertTrue(all(s["url"].startswith("http") and 0 <= s["trust"] <= 1 for s in seen[0]))
+        self.assertEqual([s["url"] for s in seen[0]], [s["url"] for s in core.run("research", {"question": QUESTION}, pipeline="research.baseline@1").answer["sources"]])
+
     def test_sources_pages_and_trust(self):
         core = self.core(TR.Scripted("reader"))
         RC.run_research(core, QUESTION, pipeline="research.baseline@1")

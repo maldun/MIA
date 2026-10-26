@@ -1,4 +1,4 @@
-"""The routes of the operations on answers and votes (IF-101 v1, provided by the chat agent over IF-201): vote, score, regenerate, speak_again, account.
+"""The routes of the operations on answers and votes (IF-101 v1, provided by the chat agent over IF-201): vote, score, regenerate, speak_again, account, counters, reset_counter (REQ-CHA-018).
 The guard of accounts_api has put the account into g.account; without accounts the author is "page". The change log records the POSTs there."""
 from flask import Blueprint, g, jsonify, request
 
@@ -49,5 +49,13 @@ def create_chat_ops_blueprint(chat):
     @bp.get("/api/account")
     def account_of():
         return answer(lambda: chat.account(request.args.get("message_id")))
+
+    @bp.get("/api/counters")
+    def counters():
+        return answer(chat.counters)
+
+    @bp.post("/api/reset_counter")
+    def reset_counter():
+        return answer(lambda: chat.reset_counter(account(), data().get("name")))
 
     return bp

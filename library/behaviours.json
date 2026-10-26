@@ -1,0 +1,4 @@
+{
+  "note": "The behaviours of the character that users can vote on in the category character_behaviour (REQ-CHA-017, -018). Edit freely: the list is read at every vote, so a new name works at once. Facts and safety checks are never behaviours of this list. The names are the gesture clips today.",
+  "behaviours": ["greet", "idle", "no", "talk", "yes"]
+}

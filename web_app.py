@@ -43,7 +43,7 @@ from .speech_stream import SpeechStreamer
 from .shutdown import request_shutdown
 from .presets_api import init_presets_api
 from .chat_log import ChatLog
-from .chat_service import ChatService
+from .chat_service import ChatService, behaviours_from_file
 from .chat_api import create_blueprint as create_chat_blueprint
 from . import accounts_api
 from .chat_ops_api import create_chat_ops_blueprint
@@ -582,7 +582,8 @@ def speak_answer(text):
 def run_lookup_exchange(question, on_delta, on_emotion, should_stop):
     """/lookup (the old /research): the skill `research` searches, reads and answers with quotes; the steps go to the status block, the answer to the chat"""
     return research_chat.run_research(core, question, pipeline=cfg.get(CONST.RESEARCH_PIPELINE_KEY, CONST.DEFAULT_RESEARCH_PIPELINE),
-                                      on_event=lambda event: chat_service.pipeline_event(event), should_stop=should_stop, speak=speak_answer)
+                                      on_event=lambda event: chat_service.pipeline_event(event), should_stop=should_stop, speak=speak_answer,
+                                      on_sources=chat_service.note_sources, trust=source_trust.build_trust(cfg).for_url)      # a fresh table: the trust of sources is edited on the page
 
 def run_search_exchange(query, on_delta, on_emotion, should_stop):
     """/search: the top results of the search tool, no model"""
@@ -595,7 +596,9 @@ chat_service = ChatService(socketio.emit, chat_log, mood, run_chat_exchange, run
                            queue_size=cfg.get(CONST.CHAT_QUEUE_KEY, 5 if cfg.get(CONST.ACCOUNTS_KEY, False) else 1),
                            user_limit=2 if cfg.get(CONST.ACCOUNTS_KEY, False) else 0,           # IF-101: 5 waiting in all, 2 per account
                            rate_limit=(cfg.get(CONST.CHAT_RATE_KEY, 10), 60),
-                           spawn=socketio.start_background_task, votes=_votes_store)
+                           spawn=socketio.start_background_task, votes=_votes_store,
+                           behaviours=behaviours_from_file(os.path.join(FPATH, cfg.get(CONST.BEHAVIOURS_FILE_KEY, "library/behaviours.json"))),
+                           reputable=cfg.get(CONST.REPUTABLE_TRUST_KEY, 0.6))
 app.register_blueprint(create_chat_ops_blueprint(chat_service))
 app.register_blueprint(create_items_blueprint(_votes_store, socketio.emit))
 app.register_blueprint(create_trust_persona_blueprint(os.path.join(FPATH, cfg.get("source_trust_file") or "data/source_trust.json"),      # the file build_trust reads

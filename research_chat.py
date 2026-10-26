@@ -98,13 +98,16 @@ def run_search(web_search, query, count=MAX_RESULTS, should_stop=None):
     return format_results(result, count)
 
 
-def run_research(core, question, pipeline=None, on_event=None, should_stop=None, speak=None):
+def run_research(core, question, pipeline=None, on_event=None, should_stop=None, speak=None, on_sources=None, trust=None):
+    """on_sources([{"url", "trust"}]) gets the sources behind an answered question (trust: url -> {"score"}, the table of source_trust.py), so the chat can keep them"""
     result = core.run("research", {"question": question}, pipeline=pipeline, on_event=on_event, should_stop=should_stop)
     if result.status == "stopped":
         return ""
     if result.status != "done":
         raise RuntimeError(friendly_error(result.error))
     text = format_answer(result.answer)
+    if on_sources is not None and trust is not None and isinstance(result.answer, dict) and result.answer.get("status") == "answered":
+        on_sources([{"url": s["url"], "trust": trust(s["url"])["score"]} for s in result.answer.get("sources") or [] if isinstance(s, dict) and s.get("url")])
     spoken = spoken_text(result.answer)
     if speak is not None and spoken:
         try:
