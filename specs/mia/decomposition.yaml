@@ -64,9 +64,9 @@ decomposition:
       folder: specs/mia/nodes/N-4-evaluation-operation
       status: Draft
       test_stage: 4
-      children: []
-      tasks: 6
-      early_stop: "tooling and operation scripts, one concern; cut further only if it grows"
+      children: [N-4.1, N-4.2]
+      boundary:
+        - {interface: IF-105, role: consumes, child: N-4.1}
 
     - id: N-5
       name: Graph app
@@ -197,6 +197,26 @@ decomposition:
       children: []
       tasks: 4
       test_stage: 2
+
+    - id: N-4.1
+      name: Evaluation
+      level: low
+      subject: Evaluation
+      folder: specs/mia/nodes/N-4-evaluation-operation/nodes/N-4.1-evaluation
+      status: Draft
+      children: []
+      tasks: 7
+      test_stage: 3
+
+    - id: N-4.2
+      name: Operation
+      level: low
+      subject: OperationLayer
+      folder: specs/mia/nodes/N-4-evaluation-operation/nodes/N-4.2-operation
+      status: Draft
+      children: []
+      tasks: 8
+      test_stage: 3
 
     - id: N-3.1
       name: Storage layer
@@ -525,6 +545,11 @@ decomposition:
         - {child: N-3.2, test: tests/integration/N-3/step_01}
         - {child: N-3.3, test: tests/integration/N-3/step_02}
         - {child: N-3.1, test: tests/integration/N-3/step_03}
+    - node: N-4
+      skeleton: tests/integration/N-4/step_00
+      order:
+        - {child: N-4.1, test: tests/integration/N-4/step_01, reason: "the harness comes first because every model-dependent decision of the later cycles needs it; it runs on the IF-105 mock until N-2 is integrated"}
+        - {child: N-4.2, test: tests/integration/N-4/step_02}
     - node: N-2.4
       skeleton: tests/integration/N-2.4/step_00
       order:

@@ -14,7 +14,7 @@ Harness, suites, baselines, compose stack, backups, shutdown. The sub-part Opera
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-22: variants are compared on the same cases with 3 repeats and 95 % intervals
-- Verified by: –
+- Verified by: TC-N4-001
 - Status: Draft
 - History: –
 
@@ -26,7 +26,7 @@ Harness, suites, baselines, compose stack, backups, shutdown. The sub-part Opera
 - Priority: Must
 - Verification method: Inspection, Test
 - Acceptance criterion: AC-2: a decision script refuses a dev-split run for a verdict
-- Verified by: –
+- Verified by: TC-N4-003
 - Status: Draft
 - History: –
 
@@ -38,7 +38,7 @@ Harness, suites, baselines, compose stack, backups, shutdown. The sub-part Opera
 - Priority: Should
 - Verification method: Test
 - Acceptance criterion: AC-22: an uncalibrated judge's verdicts are marked not counted
-- Verified by: –
+- Verified by: TC-N4-003
 - Status: Draft
 - History: –
 
@@ -50,7 +50,7 @@ Harness, suites, baselines, compose stack, backups, shutdown. The sub-part Opera
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-10: 100 % of runs carry the three versions
-- Verified by: –
+- Verified by: TC-N4-001
 - Status: Draft
 - History: –
 
@@ -62,7 +62,7 @@ Harness, suites, baselines, compose stack, backups, shutdown. The sub-part Opera
 - Priority: Must
 - Verification method: Inspection
 - Acceptance criterion: AC-10: each shipped workflow has a baseline file
-- Verified by: –
+- Verified by: TC-N4-003
 - Status: Draft
 - History: –
 
@@ -74,7 +74,7 @@ Harness, suites, baselines, compose stack, backups, shutdown. The sub-part Opera
 - Priority: Should
 - Verification method: Inspection
 - Acceptance criterion: AC-9: the lookup is documented as the example
-- Verified by: –
+- Verified by: TC-N4-003
 - Status: Draft
 - History: –
 
@@ -86,7 +86,7 @@ Harness, suites, baselines, compose stack, backups, shutdown. The sub-part Opera
 - Priority: Must
 - Verification method: Test, Demonstration
 - Acceptance criterion: AC-7: a fresh checkout starts to a working chat in the compose stack
-- Verified by: –
+- Verified by: TC-N4-002
 - Status: Draft
 - History: –
 
@@ -98,7 +98,7 @@ Harness, suites, baselines, compose stack, backups, shutdown. The sub-part Opera
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-7: the first start offers the account creation exactly once
-- Verified by: –
+- Verified by: TC-N4-003
 - Status: Draft
 - History: –
 
@@ -110,7 +110,7 @@ Harness, suites, baselines, compose stack, backups, shutdown. The sub-part Opera
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-7: removing 2 options gives a report naming both (exact)
-- Verified by: –
+- Verified by: TC-N4-003
 - Status: Draft
 - History: –
 
@@ -122,7 +122,7 @@ Harness, suites, baselines, compose stack, backups, shutdown. The sub-part Opera
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-7: after SIGTERM the history and memory are saved (exact)
-- Verified by: –
+- Verified by: TC-N4-003
 - Status: Draft
 - History: –
 
@@ -134,7 +134,7 @@ Harness, suites, baselines, compose stack, backups, shutdown. The sub-part Opera
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-7: backup, wipe and restore return the same data (exact)
-- Verified by: –
+- Verified by: TC-N4-003
 - Status: Draft
 - History: –
 
@@ -146,7 +146,7 @@ Harness, suites, baselines, compose stack, backups, shutdown. The sub-part Opera
 - Priority: Should
 - Verification method: Inspection
 - Acceptance criterion: AC-7: the runbook steps are run once on a clean machine
-- Verified by: –
+- Verified by: TC-N4-003
 - Status: Draft
 - History: –
 
@@ -158,7 +158,7 @@ Harness, suites, baselines, compose stack, backups, shutdown. The sub-part Opera
 - Priority: Must
 - Verification method: Test, Demonstration
 - Acceptance criterion: AC-29: each container starts alone against the mocks; all start together
-- Verified by: –
+- Verified by: TC-N4-002
 - Status: Draft
 - History: –
 
@@ -170,7 +170,7 @@ Harness, suites, baselines, compose stack, backups, shutdown. The sub-part Opera
 - Priority: Must
 - Verification method: Inspection, Test
 - Acceptance criterion: AC-14: a port scan from outside the network finds nothing open; tailscale funnel is not used
-- Verified by: –
+- Verified by: TC-N4-003
 - Status: Draft
 - History: –
 
@@ -182,7 +182,7 @@ Harness, suites, baselines, compose stack, backups, shutdown. The sub-part Opera
 - Priority: Must
 - Verification method: Inspection
 - Acceptance criterion: AC-20: licence file present; no paid API host in the web log
-- Verified by: –
+- Verified by: TC-N4-003
 - Status: Draft
 - History: –
 
@@ -194,7 +194,7 @@ Harness, suites, baselines, compose stack, backups, shutdown. The sub-part Opera
 - Priority: Must
 - Verification method: Inspection
 - Acceptance criterion: AC-19: OLLAMA_MAX_LOADED_MODELS equals 1 (exact)
-- Verified by: –
+- Verified by: TC-N4-002
 - Status: Draft
 - History: –
 
@@ -206,7 +206,7 @@ Harness, suites, baselines, compose stack, backups, shutdown. The sub-part Opera
 - Priority: Must
 - Verification method: Measurement
 - Acceptance criterion: AC-19: the measurement tool reports both with the median of repeated runs
-- Verified by: –
+- Verified by: TC-N4-001
 - Status: Draft
 - History: –
 
@@ -218,7 +218,7 @@ Harness, suites, baselines, compose stack, backups, shutdown. The sub-part Opera
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-22: a comparison with different case lists is refused
-- Verified by: –
+- Verified by: TC-N4-003
 - Status: Draft
 - History: –
 
@@ -230,7 +230,7 @@ Harness, suites, baselines, compose stack, backups, shutdown. The sub-part Opera
 - Priority: Must
 - Verification method: Inspection, Measurement
 - Acceptance criterion: AC-2, AC-3: each example workflow has a suite with a holdout and a recorded baseline; the criteria are decided with the rule of the agent-app workflow
-- Verified by: –
+- Verified by: TC-N4-003
 - Status: Draft
 - History: –
 
@@ -242,6 +242,6 @@ Harness, suites, baselines, compose stack, backups, shutdown. The sub-part Opera
 - Priority: Should
 - Verification method: Test, Demonstration
 - Acceptance criterion: AC-9: the lookup scenario runs on the mocks (step 0 of the integration tests) and again with each real node; the time from idea to promotion is recorded
-- Verified by: –
+- Verified by: TC-N4-001
 - Status: Draft
 - History: –
