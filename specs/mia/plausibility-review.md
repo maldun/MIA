@@ -18,8 +18,8 @@ Context: a controlled environment with a few users (ASM-MU-001); performance and
 - Criterion: AC-2: on the holdout the chosen gate passes fewer wrong claims than the single voice and loses no more true claims among those with evidence (agent-app decision rule); repeated runs give the same verdicts (REQ-VER-005, REQ-VER-006)
 - Verified by: Test, Measurement
 - Flagged because: decided by a measurement, depends on the model, a GPU or a phone
-- Decision: 
-- Basis: 
+- Decision: field
+- Basis: hard to check outside field tests
 
 ### 2. REQ-BE-049
 
@@ -27,8 +27,8 @@ Context: a controlled environment with a few users (ASM-MU-001); performance and
 - Criterion: AC-2: decided with the rule of the agent-app workflow against the baseline
 - Verified by: Measurement
 - Flagged because: decided by a measurement, depends on the model, a GPU or a phone
-- Decision: 
-- Basis: 
+- Decision: field
+- Basis: hard to check outside field tests
 
 ### 3. REQ-WFM-014
 
@@ -36,8 +36,8 @@ Context: a controlled environment with a few users (ASM-MU-001); performance and
 - Criterion: AC-2: decided with the rule of the agent-app workflow against the baseline
 - Verified by: Measurement
 - Flagged because: decided by a measurement, depends on the model, a GPU or a phone
-- Decision: 
-- Basis: 
+- Decision: field
+- Basis: hard to check outside field tests also should used at small scale
 
 ---
 
@@ -53,8 +53,8 @@ Context: a controlled environment with a few users (ASM-MU-001); performance and
 - Criterion: AC-2: stability limit 0.90 (lower bound of the 95 % interval, at least) on the dev suites (REQ-VER-005, REQ-VER-006)
 - Verified by: Measurement
 - Flagged because: decided by a measurement, numeric bound in the criterion
-- Decision: 
-- Basis: 
+- Decision: field
+- Basis: hard to check outside field tests also should used at small scale
 
 ### 5. REQ-WFM-015
 
@@ -62,8 +62,8 @@ Context: a controlled environment with a few users (ASM-MU-001); performance and
 - Criterion: AC-2: stability limit 0.90 (lower bound of the 95 % interval, at least) on the dev suites (REQ-VER-005, REQ-VER-006)
 - Verified by: Measurement
 - Flagged because: decided by a measurement, numeric bound in the criterion
-- Decision: 
-- Basis: 
+- Decision: plausible
+- Basis: 2 sigma is reasonable for this use case. 
 
 ---
 
@@ -79,8 +79,8 @@ Context: a controlled environment with a few users (ASM-MU-001); performance and
 - Criterion: AC-2, AC-23: every answer carries sources and verbatim quotes or the answer unknown; `/search` lists findings without composing an answer; a repeated lookup on the same sources gives the same facts
 - Verified by: Test, Measurement
 - Flagged because: decided by a measurement
-- Decision: 
-- Basis: 
+- Decision: plausible
+- Basis: It is the safe variant to avoid wrong judgement
 
 ### 7. REQ-BE-051
 
@@ -88,8 +88,8 @@ Context: a controlled environment with a few users (ASM-MU-001); performance and
 - Criterion: AC-2: every answer of the lookup suite carries a source and a quote or the verdict unknown
 - Verified by: Test, Measurement
 - Flagged because: decided by a measurement
-- Decision: 
-- Basis: 
+- Decision: plausible
+- Basis: There should be no more cases left
 
 ### 8. REQ-WFM-016
 
@@ -97,8 +97,8 @@ Context: a controlled environment with a few users (ASM-MU-001); performance and
 - Criterion: AC-2: every answer of the lookup suite carries a source and a quote or the verdict unknown
 - Verified by: Test, Measurement
 - Flagged because: decided by a measurement
-- Decision: 
-- Basis: 
+- Decision: plausible
+- Basis: There should be no more cases left
 
 ---
 
@@ -114,8 +114,8 @@ Context: a controlled environment with a few users (ASM-MU-001); performance and
 - Criterion: AC-3: per tier source recall and precision against a baseline; 0 violations of the cut-off; 0 invented references; 100 % of quotes anchored
 - Verified by: Measurement, Test
 - Flagged because: decided by a measurement, numeric bound in the criterion, depends on the model, a GPU or a phone
-- Decision: 
-- Basis: 
+- Decision: accept: criteria may be adjusted later if it is not working
+- Basis: hard to check outside field tests also should used at small scale
 
 ### 10. REQ-BE-053
 
@@ -123,8 +123,8 @@ Context: a controlled environment with a few users (ASM-MU-001); performance and
 - Criterion: AC-3: per tier source recall and precision against the baseline
 - Verified by: Measurement
 - Flagged because: decided by a measurement, depends on the model, a GPU or a phone
-- Decision: 
-- Basis: 
+- Decision: accept: criteria may be adjusted later if it is not working
+- Basis: hard to check outside field tests also should used at small scale also small scale us with little users
 
 ### 11. REQ-WFM-018
 
@@ -132,8 +132,9 @@ Context: a controlled environment with a few users (ASM-MU-001); performance and
 - Criterion: AC-3: per tier source recall and precision against the baseline
 - Verified by: Measurement
 - Flagged because: decided by a measurement, depends on the model, a GPU or a phone
-- Decision: 
-- Basis: 
+- Decision: accept: criteria may be adjusted later if it is not working
+- Basis: hard to check outside field tests also should used at small scale also small scale us with little users
+
 
 ---
 
@@ -149,8 +150,9 @@ Context: a controlled environment with a few users (ASM-MU-001); performance and
 - Criterion: AC-26 (later, optional): the scout proposes the known method in its top 3 on the retro-discovery cases and marks a candidate verified only when an executable test passed
 - Verified by: Measurement
 - Flagged because: decided by a measurement
-- Decision: 
-- Basis: 
+- Decision: accept: criteria may be adjusted later if it is not working
+- Basis: hard to check outside field tests also should used at small scale also small scale us with little users
+
 
 ### 13. REQ-BE-057
 
@@ -158,8 +160,9 @@ Context: a controlled environment with a few users (ASM-MU-001); performance and
 - Criterion: AC-26: the known method is in the top 3 on the retro-discovery cases
 - Verified by: Measurement
 - Flagged because: decided by a measurement
-- Decision: 
-- Basis: 
+- Decision: accept: criteria may be adjusted later if it is not working
+- Basis: hard to check outside field tests also should used at small scale also small scale us with little users
+
 
 ### 14. REQ-WFM-022
 
@@ -167,8 +170,9 @@ Context: a controlled environment with a few users (ASM-MU-001); performance and
 - Criterion: AC-26: the known method is in the top 3 on the retro-discovery cases
 - Verified by: Measurement
 - Flagged because: decided by a measurement
-- Decision: 
-- Basis: 
+- Decision: accept: criteria may be adjusted later if it is not working
+- Basis: hard to check outside field tests also should used at small scale also small scale us with little users
+
 
 ---
 
@@ -184,8 +188,8 @@ Context: a controlled environment with a few users (ASM-MU-001); performance and
 - Criterion: AC-24 (later): the memory test set is passed at least as well as today's summary-based dreaming at equal or lower token cost; every record shows its source and can be corrected and deleted by a user
 - Verified by: Measurement, Test
 - Flagged because: decided by a measurement
-- Decision: 
-- Basis: 
+- Decision: plausible
+- Basis: Not critical can adjusted later
 
 ### 16. REQ-BE-024
 
@@ -193,8 +197,8 @@ Context: a controlled environment with a few users (ASM-MU-001); performance and
 - Criterion: AC-24: the memory test set is passed at least as well as today's dreaming at equal or lower token cost
 - Verified by: Measurement
 - Flagged because: decided by a measurement
-- Decision: 
-- Basis: 
+- Decision: plausible
+- Basis: Not critical can adjusted later
 
 ### 17. REQ-CHA-011
 
@@ -202,8 +206,8 @@ Context: a controlled environment with a few users (ASM-MU-001); performance and
 - Criterion: AC-24: the memory test set is passed at least as well as today's dreaming at equal or lower token cost
 - Verified by: Measurement
 - Flagged because: decided by a measurement
-- Decision: 
-- Basis: 
+- Decision: plausible
+- Basis: Not critical can adjusted later
 
 ---
 
@@ -219,8 +223,8 @@ Context: a controlled environment with a few users (ASM-MU-001); performance and
 - Criterion: AC-25: the speech-rule detectors keep their recorded precision and recall on the behaviour suite; a violation is repaired silently and never enters the memory as a scolding
 - Verified by: Test, Measurement
 - Flagged because: decided by a measurement
-- Decision: 
-- Basis: 
+- Decision: plausible
+- Basis: Not critical can adjusted later
 
 ### 19. REQ-BE-027
 
@@ -228,8 +232,8 @@ Context: a controlled environment with a few users (ASM-MU-001); performance and
 - Criterion: AC-25: the detectors keep their recorded precision and recall on the behaviour suite
 - Verified by: Test, Measurement
 - Flagged because: decided by a measurement
-- Decision: 
-- Basis: 
+- Decision: plausible
+- Basis: Not critical can adjusted later
 
 ### 20. REQ-CHA-014
 
@@ -237,8 +241,8 @@ Context: a controlled environment with a few users (ASM-MU-001); performance and
 - Criterion: AC-25: the detectors keep their recorded precision and recall on the behaviour suite
 - Verified by: Test, Measurement
 - Flagged because: decided by a measurement
-- Decision: 
-- Basis: 
+- Decision: plausible
+- Basis: Not critical can adjusted later
 
 ---
 
@@ -254,8 +258,8 @@ Context: a controlled environment with a few users (ASM-MU-001); performance and
 - Criterion: AC-8: check dialogues made from `calibration.txt` pass at a rate fixed in Plan against the recorded baseline, decided statistically; every user is addressed as master unless the file says otherwise
 - Verified by: Measurement
 - Flagged because: decided by a measurement, depends on the model, a GPU or a phone
-- Decision: 
-- Basis: 
+- Decision: plausible
+- Basis: Not critical can adjusted later. Only for personal use so hardware constraints are ok
 
 ### 22. REQ-BE-021
 
@@ -263,8 +267,8 @@ Context: a controlled environment with a few users (ASM-MU-001); performance and
 - Criterion: AC-8: check dialogues pass at a rate fixed in Plan against the recorded baseline, decided statistically
 - Verified by: Measurement
 - Flagged because: decided by a measurement, depends on the model, a GPU or a phone
-- Decision: 
-- Basis: 
+- Decision: plausible
+- Basis: Not critical can adjusted later. Only for personal use so hardware constraints are ok
 
 ### 23. REQ-CHA-008
 
@@ -272,8 +276,8 @@ Context: a controlled environment with a few users (ASM-MU-001); performance and
 - Criterion: AC-8: check dialogues pass at a rate fixed in Plan against the recorded baseline, decided statistically
 - Verified by: Measurement
 - Flagged because: decided by a measurement, depends on the model, a GPU or a phone
-- Decision: 
-- Basis: 
+- Decision: plausible
+- Basis: Not critical can adjusted later. Only for personal use so hardware constraints are ok
 
 ---
 
@@ -289,8 +293,8 @@ Context: a controlled environment with a few users (ASM-MU-001); performance and
 - Criterion: AC-11: after 5 net negative votes a test of 1000 opportunities shows the behaviour at most 10 times; a positive vote raises the rate again; votes on facts never change a fact
 - Verified by: Test, Measurement
 - Flagged because: decided by a measurement, numeric bound in the criterion
-- Decision: 
-- Basis: 
+- Decision: field
+- Basis: hard to tell without field test
 
 ### 25. REQ-BE-030
 
@@ -298,8 +302,8 @@ Context: a controlled environment with a few users (ASM-MU-001); performance and
 - Criterion: AC-11: in 1000 opportunities after 5 net negative votes the behaviour appears at most 10 times
 - Verified by: Test, Measurement
 - Flagged because: decided by a measurement, numeric bound in the criterion
-- Decision: 
-- Basis: 
+- Decision: field
+- Basis: hard to tell without a field test
 
 ### 26. REQ-CHA-017
 
@@ -307,8 +311,8 @@ Context: a controlled environment with a few users (ASM-MU-001); performance and
 - Criterion: AC-11: in 1000 opportunities after 5 net negative votes the behaviour appears at most 10 times
 - Verified by: Test, Measurement
 - Flagged because: decided by a measurement, numeric bound in the criterion
-- Decision: 
-- Basis: 
+- Decision: field
+- Basis: hard to tell without a field test
 
 ---
 
@@ -325,8 +329,8 @@ Context: a controlled environment with a few users (ASM-MU-001); performance and
 - Quality line: reliability measure: invented references; cited quotes not found in their source; target: 0; 0 (100 % found); context: lookup and review results
 - Verified by: Test, Measurement
 - Flagged because: decided by a measurement, quality requirement with a target, numeric bound in the criterion
-- Decision: 
-- Basis: 
+- Decision: plausible
+- Basis: should be precise.
 
 ---
 
@@ -342,8 +346,8 @@ Context: a controlled environment with a few users (ASM-MU-001); performance and
 - Criterion: AC-10: each shipped workflow has a baseline file
 - Verified by: Inspection
 - Flagged because: depends on the model, a GPU or a phone
-- Decision: 
-- Basis: 
+- Decision: plausible
+- Basis: there should be a starting point and improve over time
 
 ### 29. REQ-OPS-005
 
@@ -351,8 +355,9 @@ Context: a controlled environment with a few users (ASM-MU-001); performance and
 - Criterion: AC-10: each shipped workflow has a baseline file
 - Verified by: Inspection
 - Flagged because: depends on the model, a GPU or a phone
-- Decision: 
-- Basis: 
+- Decision: plausible
+- Basis: there should be a starting point and improve over time
+
 
 ### 30. REQ-EVL-009
 
@@ -360,8 +365,9 @@ Context: a controlled environment with a few users (ASM-MU-001); performance and
 - Criterion: AC-2, AC-3: each example workflow has a suite with a holdout and a recorded baseline; the criteria are decided with the rule of the agent-app workflow
 - Verified by: Inspection, Measurement
 - Flagged because: decided by a measurement, depends on the model, a GPU or a phone
-- Decision: 
-- Basis: 
+- Decision: plausible
+- Basis: there should be a starting point and improve over time. PErsonal use so hardware is known
+
 
 ### 31. REQ-OPS-019
 
@@ -369,8 +375,8 @@ Context: a controlled environment with a few users (ASM-MU-001); performance and
 - Criterion: AC-2, AC-3: each example workflow has a suite with a holdout and a recorded baseline; the criteria are decided with the rule of the agent-app workflow
 - Verified by: Inspection, Measurement
 - Flagged because: decided by a measurement, depends on the model, a GPU or a phone
-- Decision: 
-- Basis: 
+- Decision: plausible
+- Basis: there should be a starting point and improve over time. PErsonal use so hardware is known
 
 ---
 
@@ -387,8 +393,8 @@ Context: a controlled environment with a few users (ASM-MU-001); performance and
 - Quality line: security measure: failed logins accepted per minute and account; plain passwords stored; target: at most 5; none; context: trusted users, home network and tailnet
 - Verified by: Test, Inspection
 - Flagged because: quality requirement with a target, numeric bound in the criterion
-- Decision: 
-- Basis: 
+- Decision: plausible
+- Basis: there should be a starting point and improve over time. PErsonal use so hardware is known
 
 ### 33. NFR-3
 
@@ -397,8 +403,8 @@ Context: a controlled environment with a few users (ASM-MU-001); performance and
 - Quality line: security measure: injected instructions that change a verdict or start a tool; target: 0; context: red-team cases, sandbox present and removed
 - Verified by: Test
 - Flagged because: quality requirement with a target
-- Decision: 
-- Basis: 
+- Decision: plausible
+- Basis: there should be a starting point and improve over time. PErsonal use so hardware is known
 
 ### 34. NFR-5
 
@@ -407,8 +413,8 @@ Context: a controlled environment with a few users (ASM-MU-001); performance and
 - Quality line: security measure: requests that leave the host other than the text of a web or scholarly query; target: 0; context: browser sessions of the chat and the graph app
 - Verified by: Test, Inspection
 - Flagged because: quality requirement with a target
-- Decision: 
-- Basis: 
+- Decision: plausible
+- Basis: there should be a starting point and improve over time. PErsonal use so hardware is known
 
 ### 35. NFR-6
 
@@ -417,8 +423,8 @@ Context: a controlled environment with a few users (ASM-MU-001); performance and
 - Quality line: security measure: unauthenticated requests served; plain-HTTP passwords accepted from LAN addresses; target: 0; 0; context: home network and tailnet
 - Verified by: Test, Inspection
 - Flagged because: quality requirement with a target
-- Decision: 
-- Basis: 
+- Decision: plausible
+- Basis: there should be a starting point and improve over time. PErsonal use so hardware is known
 
 ---
 
@@ -435,8 +441,8 @@ Context: a controlled environment with a few users (ASM-MU-001); performance and
 - Quality line: compatibility measure: presets and gestures of a second .vrm model that are mapped or listed as missing; target: 100 % mapped or listed, none dropped silently; context: VRoid models
 - Verified by: Demonstration, Test
 - Flagged because: quality requirement with a target
-- Decision: 
-- Basis: 
+- Decision: plausible
+- Basis: Model should not deviate too much
 
 ---
 
@@ -451,6 +457,6 @@ Context: a controlled environment with a few users (ASM-MU-001); performance and
 - Text: ASM-N1-002: the phone figure (30 fps on any phone inside the network) is measured on the phones the owner has at hand; no particular device is named (HLS amendment 9).
 - Verified by: assumption
 - Flagged because: assumption: checked in validation
-- Decision: 
-- Basis: 
+- Decision: plausible
+- Basis: personal use only small user group
 

@@ -1,2 +1,236 @@
 # Decisions of the person who rates, read from plausibility-review.md by tools/import_plausibility_review.py
-decisions: {}
+decisions:
+  ASM-N1-002:
+    basis:
+    - personal use only small user group
+    decision: plausible
+  FR-10:
+    basis:
+    - It is the safe variant to avoid wrong judgement
+    decision: plausible
+  FR-11:
+    accepted_risk:
+      decided: '{date} by {by}'
+      follow_up: VAL-006
+      owner: '{by}'
+      reason: criteria may be adjusted later if it is not working
+    basis:
+    - hard to check outside field tests also should used at small scale
+    decision: questionable
+  FR-13:
+    accepted_risk:
+      decided: '{date} by {by}'
+      follow_up: VAL-006
+      owner: '{by}'
+      reason: criteria may be adjusted later if it is not working
+    basis:
+    - hard to check outside field tests also should used at small scale also small
+      scale us with little users
+    decision: questionable
+  FR-14:
+    basis:
+    - Not critical can adjusted later
+    decision: plausible
+  FR-15:
+    basis:
+    - Not critical can adjusted later
+    decision: plausible
+  FR-21:
+    basis:
+    - there should be a starting point and improve over time. PErsonal use so hardware
+      is known
+    decision: plausible
+  FR-24:
+    basis:
+    - Model should not deviate too much
+    decision: plausible
+  FR-25:
+    basis:
+    - Not critical can adjusted later. Only for personal use so hardware constraints
+      are ok
+    decision: plausible
+  FR-29:
+    accepted_risk:
+      decided: '{date} by {by}'
+      follow_up: VAL-006
+      owner: '{by}'
+      reason: performance and resource figures are validated in the field (phase 7,
+        VAL-006) and tuned in later iterations
+    basis:
+    - hard to tell without field test
+    decision: questionable
+  FR-9:
+    accepted_risk:
+      decided: '{date} by {by}'
+      follow_up: VAL-006
+      owner: '{by}'
+      reason: performance and resource figures are validated in the field (phase 7,
+        VAL-006) and tuned in later iterations
+    basis:
+    - hard to check outside field tests
+    decision: questionable
+  NFR-3:
+    basis:
+    - there should be a starting point and improve over time. PErsonal use so hardware
+      is known
+    decision: plausible
+  NFR-4:
+    basis:
+    - should be precise.
+    decision: plausible
+  NFR-5:
+    basis:
+    - there should be a starting point and improve over time. PErsonal use so hardware
+      is known
+    decision: plausible
+  NFR-6:
+    basis:
+    - there should be a starting point and improve over time. PErsonal use so hardware
+      is known
+    decision: plausible
+  REQ-BE-021:
+    basis:
+    - Not critical can adjusted later. Only for personal use so hardware constraints
+      are ok
+    decision: plausible
+  REQ-BE-024:
+    basis:
+    - Not critical can adjusted later
+    decision: plausible
+  REQ-BE-027:
+    basis:
+    - Not critical can adjusted later
+    decision: plausible
+  REQ-BE-030:
+    accepted_risk:
+      decided: '{date} by {by}'
+      follow_up: VAL-006
+      owner: '{by}'
+      reason: performance and resource figures are validated in the field (phase 7,
+        VAL-006) and tuned in later iterations
+    basis:
+    - hard to tell without a field test
+    decision: questionable
+  REQ-BE-049:
+    accepted_risk:
+      decided: '{date} by {by}'
+      follow_up: VAL-006
+      owner: '{by}'
+      reason: performance and resource figures are validated in the field (phase 7,
+        VAL-006) and tuned in later iterations
+    basis:
+    - hard to check outside field tests
+    decision: questionable
+  REQ-BE-050:
+    accepted_risk:
+      decided: '{date} by {by}'
+      follow_up: VAL-006
+      owner: '{by}'
+      reason: performance and resource figures are validated in the field (phase 7,
+        VAL-006) and tuned in later iterations
+    basis:
+    - hard to check outside field tests also should used at small scale
+    decision: questionable
+  REQ-BE-051:
+    basis:
+    - There should be no more cases left
+    decision: plausible
+  REQ-BE-053:
+    accepted_risk:
+      decided: '{date} by {by}'
+      follow_up: VAL-006
+      owner: '{by}'
+      reason: criteria may be adjusted later if it is not working
+    basis:
+    - hard to check outside field tests also should used at small scale also small
+      scale us with little users
+    decision: questionable
+  REQ-BE-057:
+    accepted_risk:
+      decided: '{date} by {by}'
+      follow_up: VAL-006
+      owner: '{by}'
+      reason: criteria may be adjusted later if it is not working
+    basis:
+    - hard to check outside field tests also should used at small scale also small
+      scale us with little users
+    decision: questionable
+  REQ-CHA-008:
+    basis:
+    - Not critical can adjusted later. Only for personal use so hardware constraints
+      are ok
+    decision: plausible
+  REQ-CHA-011:
+    basis:
+    - Not critical can adjusted later
+    decision: plausible
+  REQ-CHA-014:
+    basis:
+    - Not critical can adjusted later
+    decision: plausible
+  REQ-CHA-017:
+    accepted_risk:
+      decided: '{date} by {by}'
+      follow_up: VAL-006
+      owner: '{by}'
+      reason: performance and resource figures are validated in the field (phase 7,
+        VAL-006) and tuned in later iterations
+    basis:
+    - hard to tell without a field test
+    decision: questionable
+  REQ-EVL-005:
+    basis:
+    - there should be a starting point and improve over time
+    decision: plausible
+  REQ-EVL-009:
+    basis:
+    - there should be a starting point and improve over time. PErsonal use so hardware
+      is known
+    decision: plausible
+  REQ-OPS-005:
+    basis:
+    - there should be a starting point and improve over time
+    decision: plausible
+  REQ-OPS-019:
+    basis:
+    - there should be a starting point and improve over time. PErsonal use so hardware
+      is known
+    decision: plausible
+  REQ-WFM-014:
+    accepted_risk:
+      decided: '{date} by {by}'
+      follow_up: VAL-006
+      owner: '{by}'
+      reason: performance and resource figures are validated in the field (phase 7,
+        VAL-006) and tuned in later iterations
+    basis:
+    - hard to check outside field tests also should used at small scale
+    decision: questionable
+  REQ-WFM-015:
+    basis:
+    - 2 sigma is reasonable for this use case.
+    decision: plausible
+  REQ-WFM-016:
+    basis:
+    - There should be no more cases left
+    decision: plausible
+  REQ-WFM-018:
+    accepted_risk:
+      decided: '{date} by {by}'
+      follow_up: VAL-006
+      owner: '{by}'
+      reason: criteria may be adjusted later if it is not working
+    basis:
+    - hard to check outside field tests also should used at small scale also small
+      scale us with little users
+    decision: questionable
+  REQ-WFM-022:
+    accepted_risk:
+      decided: '{date} by {by}'
+      follow_up: VAL-006
+      owner: '{by}'
+      reason: criteria may be adjusted later if it is not working
+    basis:
+    - hard to check outside field tests also should used at small scale also small
+      scale us with little users
+    decision: questionable
