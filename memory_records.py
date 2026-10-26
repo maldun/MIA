@@ -76,6 +76,30 @@ class MemoryRecords:
             ids.append(record_id)
         return ids
 
+    def remember(self, account, message_id, text, source_kind, ask):
+        """one message of the user into the memory: ask(text, known) is the writer step (a model) and gives the candidates, add() stores the valid ones; returns the new ids.
+        The source is checked FIRST: text of the web, a file or a tool is never shown to the writer, so nothing in it can steer it (REQ-CHA-012). A writer that fails or answers
+        nonsense stores nothing; a blank message is not asked about. `known` lists the records that match the message as `id: text`, so that a correction can name what it replaces."""
+        if not isinstance(source_kind, str) or source_kind != "user":
+            raise MemoryRefused("memory records come from the user's own message, not from %r" % (source_kind,))
+        if not isinstance(text, str) or not text.strip():
+            return []
+        try:
+            candidates = ask(text, self.known(text))
+        except Exception:
+            return []
+        return self.add(account, message_id, candidates, source_kind)
+
+    def known(self, text):
+        """the active records that match the text, one `id: text` line each, within the budget (what the writer may name in `replaces`)"""
+        lines, left = [], self.budget_tokens
+        for record_id, doc in self._ranked(text):
+            line = "%s: %s" % (record_id, doc["text"])
+            if tokens(line) + 1 <= left:
+                lines.append(line)
+                left -= tokens(line) + 1
+        return "\n".join(lines)
+
     def _active(self, record_id):
         try:
             doc = self._storage.get("memory", record_id)["doc"]
@@ -86,8 +110,8 @@ class MemoryRecords:
     def line(self, doc):
         return "- %s: %s (%s)" % (doc.get("kind", "fact"), doc["text"], doc.get("source", "?"))
 
-    def retrieve(self, question, budget_tokens=None):
-        """the active records that share a word with the question, best first, as many as fit the budget; [] when none shares a word"""
+    def _ranked(self, question):
+        """(id, record) of the active records that share a word with the question, best first; nothing for a question without words or without a match"""
         wanted = _words(question)
         if not wanted:
             return []
@@ -103,8 +127,12 @@ class MemoryRecords:
             score = overlap / len(wanted) + RECENCY_WEIGHT * math.pow(0.5, age_days / HALF_LIFE_DAYS) + KIND_WEIGHT.get(doc.get("kind"), 0)
             scored.append((score, doc.get("updated", ""), record_id, doc))
         scored.sort(key=lambda entry: (entry[0], entry[1]), reverse=True)
+        return [(record_id, doc) for _score, _updated, record_id, doc in scored]
+
+    def retrieve(self, question, budget_tokens=None):
+        """the active records that share a word with the question, best first, as many as fit the budget; [] when none shares a word"""
         left, found = self.budget_tokens if budget_tokens is None else budget_tokens, []
-        for _score, _updated, _record_id, doc in scored:
+        for _record_id, doc in self._ranked(question):
             cost = tokens(self.line(doc)) + 1                      # the line break
             if cost <= left:
                 found.append(doc)
