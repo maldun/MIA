@@ -65,7 +65,7 @@ How to read it: a model step can only be steered through text, and most MIA step
 - Boundary: TB-history
 - Category: LLM04 Data and memory poisoning
 - Impact: text from a web page that was quoted in a chat answer ends up as a "fact about the user" in the memory and steers later answers
-- Mitigation: REQ-BE-025 (no memory from untrusted text), REQ-BE-024 (structured memory), REQ-DB-013 (records with a source), NFR-3
+- Mitigation: REQ-BE-025 (no memory from untrusted text), REQ-BE-024 (structured memory), REQ-DB-013 (records with a source), NFR-3; **structural (A-11):** the memory writer step has the user's message as its only input and `memory_records.py` refuses every other source before the step is asked, so page, file or tool text never reaches it (TC-CHA-012, exact)
 - Red-team cases: RT-009 (draft: four cases in specs/mia/eval-drafts/redteam_mia.jsonl, to be labelled by a person and moved into a suite)
 - Residual risk: a wrong fact typed by a user is a user's fact; every user sees and can delete all records (CON-6)
 - Status: Draft

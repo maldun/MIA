@@ -688,6 +688,13 @@ package MIA_AgentView {
         @TrustBoundary { boundary = "TB-history"; threats = "THR-006"; }
         port historyIn : ~HistoryPort;
     }
+    part def MemoryWriteStep {
+        doc /* What to remember from one message of the user: facts, preferences, commitments (D-78). Skill memory_write. Its only input is the user's own message: no flow
+               carries page, file or tool text to it, and memory_records.py refuses any other source before the step is asked (REQ-CHA-012). */
+        @ModelStep { schema = "memory_records.schema.json"; tools = ""; tokenBudget = 8192; secondBudget = 15.0; pin = "MP-light"; criterion = "none: set in Plan (AC-24 with the reworded REQ-CHA-011)"; }
+        @TrustBoundary { boundary = "TB-user"; threats = "THR-004, THR-006"; }
+        port userIn : ~UserTextPort;
+    }
     part def ReviewScreeningStep {
         doc /* Proposed: relevance of abstracts and pieces of papers to a research question. */
         @ModelStep { schema = "screening.schema.json"; tools = ""; tokenBudget = 8192; secondBudget = 15.0; pin = "MP-light"; criterion = "none: set in Plan"; }
@@ -719,12 +726,14 @@ package MIA_AgentView {
         part scriptWriter : ScriptWriterStep;
         part expression : ExpressionStep;
         part dreamer : DreamStep;
+        part memoryWriter : MemoryWriteStep;
         part screener : ReviewScreeningStep;
         part reviewPlanner : ReviewPlannerStep;
 
         flow of UserMessage from intake.messageOut to chat.userIn;
         flow of UserMessage from intake.messageOut to planner.userIn;
         flow of UserMessage from intake.messageOut to expression.userIn;
+        flow of UserMessage from intake.messageOut to memoryWriter.userIn;
         flow of UserMessage from intake.messageOut to reviewPlanner.userIn;
         flow of FetchedPageText from fetcher.pageOut to extractor.pageIn;
         flow of FetchedPageText from fetcher.pageOut to judge.pageIn;
