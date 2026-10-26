@@ -5,7 +5,7 @@ For a fresh session. Read this, then `CLAUDE.md` (rules), `specs/mia/plan.md` (t
 Everything below is **merged into master** (last merge `d89d253`) unless it says otherwise. Start a new job from a worktree and check first that it branched from current master (`git log --oneline -1`, then `git merge --ff-only master`).
 
 ## State by node
-- **Plan phase: approved** (tag `decomp-baseline`); about 426 requirements `Approved`; protected material: `tests/helpers`, `tests/acceptance/contract`, `tests/integration`, `contracts/`, `eval/suites`, `eval/baselines`; model in `specs/mia/architecture.sysml`. Protected files change **by amendment only** (A-01 to A-08 all installed, table below).
+- **Plan phase: approved** (tag `decomp-baseline`); about 426 requirements `Approved`; protected material: `tests/helpers`, `tests/acceptance/contract`, `tests/integration`, `contracts/`, `eval/suites`, `eval/baselines`; model in `specs/mia/architecture.sysml`. Protected files change **by amendment only** (A-01 to A-08 installed, A-09 drafted (table below)).
 - **N-3 Database: done** (`storage*.py`, `accounts.py`, `graph_*`, `record_tables.py` now with 12 tables incl. `cases` and `behaviours`, `migrate.py`, `tools/backup.sh`, `deploy/db/`).
 - **N-1 Web Frontend: done** except the deferred parts (character model selection and variants in Godot: REQ-CHV-007, -008, after the first human tests). The page has no view for the adaptation counters yet.
 - **N-4.1 Evaluation: T-01 to T-06 done** (`eval_platform.py`, `metrics.case_table`, `tools/decide_guard.py`, `tools/check_baselines.py`, `tools/measure_latency.py` ...). Not done: T-07 (proof of concept, waits for N-2 and N-3 steps), TC-EVL-009 (agent check on the suites), the live latency number (needs `websocket-client` in the image: a dependency for the owner to approve). N-4.2 not started.
@@ -37,10 +37,11 @@ Everything below is **merged into master** (last merge `d89d253`) unless it says
 | A-06 | IF-101 v4 (`series` per ISO week); IF-201 v1 (regenerate, speak_again, account, vote, score) |
 | A-07 | real providers of IF-101 and IF-201 in `tests/helpers/contract.py`; the suites forward `make` options. Skips left: IF-101 3, IF-201 2 (expression/`audio_chunk` N-2.5, `stop` of a waiting answer N-2.2 T-01, the character variant REQ-CHV-008) |
 | A-08 | IF-101 v5 (`counters`, `reset_counter`, `counters_changed`, `invalid_vote` rule `subject`), IF-201 v2, IF-302 v1 (tables `cases`, `behaviours`); five accounts in the suites (anna, ben, carl, dora, emil) |
+| A-09 | IF-101 v6: optional `due` (tasks only) in `save_item`, shown by `items`; `invalid_item` rule `due` (D-77). Drafted and tested on a scratch copy; **install: `bash tools/apply_amendment_a09.sh --do` in the main checkout** |
 
 ## Decisions the owner still has to make
 1. **T-04 structured memory (REQ-CHA-011 to -013).** 011 is an eval criterion ("at least as good as today's dreaming at equal or lower token cost"): it needs a people-labelled memory test set and a store design (facts, preferences, commitments linked to a source; the `memory` table has only `text` and `source`). 012 (no memory from web or file text) has nothing to guard until a structured writer exists. 013 (inspect, correct, delete with source) already works through `items_api`.
-2. **A `due` field for tasks** (IF-101 `save_item` has none, so recitation at the due time is only tested at the service level): small amendment A-09, the items route keeps and shows `due`.
+2. ~~A `due` field for tasks~~ decided and drafted as A-09 (D-77); the page has no `due` input yet.
 3. **AC-8 (persona) and AC-25 (detector precision and recall)** are eval criteria: they need the check dialogues / the run on the protected suite with the pinned model; not decided or run by the agent.
 4. The judgement calls of D-76 (0.2 % instead of 1 %, a step instead of a curve, a reset at the same second, a case is not removed by a later plus) and `moods.json` `situations` (greeting = happy, error = embarrassed).
 5. Older ones: REQ-EVL-011 (old harness targets still call the in-process core until the N-2 integration); FR-20 (the idea date is stored nowhere, N-2.3 may need a field); legacy stores (chat log, memory, presets ...) need a loader and a writer each (D-67), the Tasks/Memos/Memory tabs of the page start empty; no session timeout, accounts only from the CLI.
@@ -51,7 +52,7 @@ Everything below is **merged into master** (last merge `d89d253`) unless it says
 
 ## Suggested next steps
 1. ~~Re-point `counters` / `reset_counter` in the mock server~~ done.
-2. After the owner's answers: T-04 (design first, then tests), A-09 for `due`.
+2. T-04: decided 2026-10-27, literature plus a small n=30 sample the owner labels (see D-78 once written); install A-09.
 3. Wired since: the speech streamer speaks the settled, repaired text (`SpeechStreamer(repair, settle)`, `tests/test_speech_repair.py`); `converse` asks `show_behaviour` before a gesture (`tests/test_converse_behaviours.py`). Still open, each needs a decision: voice lines (when does a mood say a line?), `MoodTracker.enter` (`idle` would clear the emotion of an answer; nothing triggers `waiting` or `greeting`), the sender in the prompt (crosses IF-201 and the pipeline signatures). Original list: play the voice lines (`VoiceExpressor` plays one clip per expression), call `show_behaviour` where the character picks a gesture, `MoodTracker.enter` for thinking/speaking/waiting/greeting, name the sender in the prompt, let the speech streamer speak the repaired text (it still gets the raw text).
 4. The counters view on the page (N-1, REQ-CLV) and a `due` input.
 5. Legacy stores into the tables (D-67); `ChatService.account` only echoes `pipeline` events kept in the log record, the link to the run log (IF-401) is open; the chat log is still a file (`chat_log.py`), not the history table.

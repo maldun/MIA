@@ -2,6 +2,7 @@
 Complexity 3: a stream of events, a queue and a clock. It does not reproduce real model latency, budgets or persistence."""
 import collections
 import datetime
+import re
 
 try:
     from .errors import ApiError
@@ -209,7 +210,7 @@ class ChatApiMock:
         self._user(session)
         return [dict(i) for i in self._kind(kind).values()]
 
-    def save_item(self, session, kind, item_id, text, source=None):
+    def save_item(self, session, kind, item_id, text, source=None, due=None):
         """A new record (item_id None) or a change of one; memory records need a source. The others see it at once (event item_changed)."""
         user = self._user(session)
         records = self._kind(kind)
@@ -217,6 +218,8 @@ class ChatApiMock:
             raise ApiError(422, "empty_text")
         if kind == "memory" and not source:
             raise ApiError(422, "invalid_item", rule="source")
+        if due is not None and (kind != "tasks" or not self._valid_due(due)):
+            raise ApiError(422, "invalid_item", rule="due")                       # v6: only a task falls due, as UTC to the second
         if item_id is not None and item_id not in records:
             raise ApiError(404, "not_found")
         if item_id is None:
@@ -225,9 +228,21 @@ class ChatApiMock:
         record = {"id": item_id, "text": text, "author": user, "created": "t%d" % int(self.now)}
         if source:
             record["source"] = source
+        if due:
+            record["due"] = due
         records[item_id] = record
         self._broadcast("item_changed", {"kind": kind, "id": item_id, "author": user, "deleted": False})
         return dict(record)
+
+    @staticmethod
+    def _valid_due(due):
+        if not isinstance(due, str) or not re.fullmatch(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z", due):
+            return False
+        try:
+            datetime.datetime.strptime(due, "%Y-%m-%dT%H:%M:%SZ")
+        except ValueError:
+            return False
+        return True
 
     def delete_item(self, session, kind, item_id):
         user = self._user(session)
