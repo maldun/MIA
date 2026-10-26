@@ -521,8 +521,8 @@ decomposition:
       skeleton: tests/integration/N-0/step_00   # the thinnest end-to-end scenario is the example workflow lookup on the mocks (D-50)
       order:
         - {child: N-3, test: tests/integration/N-0/step_01}
-        - {child: N-4, test: tests/integration/N-0/step_02, reason: "the harness is needed to decide the model-dependent criteria of N-2, so it is built early against the IF-105 mock; the real Backend replaces the mock at step_04"}
-        - {child: N-1, test: tests/integration/N-0/step_03}
+        - {child: N-1, test: tests/integration/N-0/step_02, reason: "amendment A-01 (owner, 2026-10-26): the Web Frontend comes early so that users can click through the chat on the mocks of IF-101 and give feedback while the Backend is built"}
+        - {child: N-4, test: tests/integration/N-0/step_03, reason: "the harness is needed to decide the model-dependent criteria of N-2, so it is built before the Backend against the IF-105 mock; the real Backend replaces the mock at step_04"}
         - {child: N-2, test: tests/integration/N-0/step_04}
         - {child: N-5, test: tests/integration/N-0/step_05, reason: "an add-on tool (owner, 2026-10-25): MIA is complete and usable without it, so it is integrated last"}
     - node: N-2

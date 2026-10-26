@@ -15,7 +15,7 @@ This is the plan of the whole tree, one task per node cycle in the order of the 
 | T-05 | Plausibility record and quality walk for the root and the high-level nodes (people rate, references back the rating) | all requirements and assumptions | `req_plausibility.py` and `quality_check.py` report no error | – |
 | T-06 | Node cycle N-3 Database: N-3.2 Graph tables, N-3.3 Record tables, N-3.1 Storage layer, integration steps 1 to 3 | REQ-DB-*, IF-102, IF-301, IF-302; step_01 of N-0 | contract suites of IF-102, IF-301, IF-302 green on the real side; N-3 integration tests green | T-01, T-03 |
 | T-07 | Node cycle N-4 Evaluation and operation: harness, suites, baselines, compose stack, backup, shutdown | REQ-OPS-*, NFR-9, FR-17, FR-19; AC-7, AC-29 | TC-MIA-007 and TC-MIA-029 green on the compose stack with mocks | T-01, T-03 |
-| T-08 | Node cycle N-1 Web Frontend: N-1.3 Voice playback, N-1.2 Character view, N-1.1 Chat and login views | REQ-CLV-*, REQ-CHV-*, REQ-VPB-*, IF-111, IF-112; step_03 of N-0 | browser contract suites green on the real side; TC-MIA-001, -005, -013, -017 on the mocks | T-01, T-03 |
+| T-08 | Node cycle N-1 Web Frontend: N-1.3 Voice playback, N-1.2 Character view, N-1.1 Chat and login views | REQ-CLV-*, REQ-CHV-*, REQ-VPB-*, IF-111, IF-112; step_02 of N-0 | browser contract suites green on the real side; TC-MIA-001, -005, -013, -017 on the mocks | T-01, T-03 |
 | T-09 | Node cycle N-2 Backend: N-2.5 Voice synthesis, N-2.3 Workflow management, N-2.4 Workflow execution (N-2.4.3 Run log, N-2.4.2 Tools and sandbox, N-2.4.1 Pipeline runner), N-2.2 Chat agent, N-2.1 API and accounts | REQ-BE-* and the low-level requirements, IF-101, IF-103, IF-104, IF-201..IF-204, IF-401, IF-402, IF-404, IF-405; step_04 of N-0 | all contract suites of N-2 green on the real side; TC-MIA-002..004, -006, -010, -012, -014, -018, -021..023 | T-06, T-07 |
 | T-10 | The example workflows as proof of concept: seed entries lookup, verify, review, search, method transfer; specification, context graph and benchmark each; lookup promoted first | FR-9..FR-13, FR-20, FR-26, NFR-4, AC-2, AC-3, AC-9 | TC-MIA-002 decided on the holdout; the lookup scenario green end to end; review promoted within one month (VAL-002) | T-07, T-09 |
 | T-11 | Node cycle N-5 Graph app (add-on, integrated last) | REQ-GA-*, IF-104; step_05 of N-0 | TC-MIA-016 green; contract suite of IF-104 on the real side | T-09 |
@@ -77,7 +77,7 @@ Parallel candidates: T-01, T-02, T-04, T-05 and T-13 are independent. T-06 and T
 - Notes: The harness features and baselines of `specs/number-gate` (its T-03, T-06, T-11, T-12, T-14) are executed here; that package keeps its folder and numbering.
 
 ### T-08: Node cycle N-1 Web Frontend: N-1.3 Voice playback, N-1.2 Character view, N-1.1 Chat and login views
-- Implements: REQ-CLV-*, REQ-CHV-*, REQ-VPB-*, IF-111, IF-112; step_03 of N-0
+- Implements: REQ-CLV-*, REQ-CHV-*, REQ-VPB-*, IF-111, IF-112; step_02 of N-0
 - Green when: browser contract suites green on the real side; TC-MIA-001, -005, -013, -017 on the mocks
 - Must not touch: tests/acceptance/, tests/helpers/, tests/smoke/, tests/integration/, benchmarks/, eval/suites/, eval/baselines/, contracts/ (changes by amendment only)
 - Depends on: T-01, T-03
