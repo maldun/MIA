@@ -24,24 +24,21 @@ def main():
     proposal = yaml.safe_load((root / "specs/mia/plausibility-proposal.yaml").read_text(encoding="utf-8"))["proposal"]
     items, open_items = {}, []
     for iid, p in proposal.items():
-        if p.get("attention"):
-            if not p.get("decision"):
-                open_items.append(iid)
-                continue
+        if p.get("decision"):                         # decided by the person (the categories multi-user and field are the owner's decisions)
             item = {"rating": p["decision"], "basis": p.get("basis") or []}
             for key in ("probe", "accepted_risk", "method", "claims", "note"):
                 if p.get(key):
                     item[key] = p[key]
-        elif args.accept_unflagged:
-            item = {"rating": p["proposed"], "basis": [p["basis"]]}
-        else:
+        elif p.get("attention") or not args.accept_unflagged:
             open_items.append(iid)
             continue
+        else:
+            item = {"rating": p["proposed"], "basis": [p["basis"]] if isinstance(p["basis"], str) else p["basis"]}
         item.update(rated_by=args.by, rated=args.date, hardware="HW-target")
         items[iid] = item
     record = {"plausibility": {"hardware": {"HW-target": HARDWARE}, "references": {}, "items": items}}
     (root / "specs/mia/plausibility.yaml").write_text("# Plausibility record (L2b). Written by tools/apply_plausibility.py from plausibility-proposal.yaml, rated by %s.\n" % args.by
-                                                      + yaml.safe_dump(record, sort_keys=True, allow_unicode=True), encoding="utf-8")
+                                                      + yaml.safe_dump(record, sort_keys=True, allow_unicode=True).replace("{by}", args.by), encoding="utf-8")
     print("%d rated, %d without a record yet" % (len(items), len(open_items)))
 
 

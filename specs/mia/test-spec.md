@@ -186,6 +186,7 @@ Error rates from `plan-phase/scripts/false_alarm.py` (`--n 1000 --max-rate 0.01 
 | VAL-003 | The character feels in character and pleasant to the users | the weekly overall score (AC-8c), a short rating by each user after one week, the check dialogues (AC-8a, b) | users and owner | descriptive; the score trend over the week, no margin |
 | VAL-004 | MIA is usable on a phone inside the tailnet | each user uses the chat on their phone for one week and reports problems (SMOKE-MIA-002, FB items) | users | descriptive |
 | VAL-005 | The platform is a blueprint: a person adds a new example workflow by the documented path without changing platform code | a dry run of the path with a new small workflow, time recorded | owner | descriptive |
+| VAL-006 | MIA is fast and light enough in daily use | first text time, frame rate on the phones in use, model calls of the first try, context share, model switch and estimate against measured time, taken from the run log and the measurement tools (BM-MIA-001, BM-MIA-002) over one week; the requirements postponed to the field (category `field` in the plausibility record) are checked here | owner and users | descriptive: the medians are reported; a figure that misses its target starts the next iteration (no margin now) |
 
 ## Open numbers and the owner decisions on them (2026-10-25)
 
@@ -197,3 +198,7 @@ Error rates from `plan-phase/scripts/false_alarm.py` (`--n 1000 --max-rate 0.01 
 | OPEN-4 | AC-19 / BM-MIA-002 | Decided (owner): no particular phone, any phone inside the network; 30 fps is the target on the phone and on the desktop (NFR-7 and AC-19 amended: the desktop figure was 60 fps) | owner |
 | OPEN-5 | AC-15 / TC-MIA-015 | Decided (owner): "within seconds" is 5 s (the Database promises 2 s per subscriber) | owner |
 | OPEN-6 | NFR-7 / REQ-BE-003 | Decided (owner, 2026-10-25, on the recommendation): a queue of 5 waiting messages and at most 2 waiting messages per user | owner |
+
+## Assumptions of the whole system
+
+- ASM-MU-001: MIA is used in a controlled environment by a few trusted users who rarely work at the same time (owner, 2026-10-26). Checked in the field with the first users (VAL-003, VAL-004); the queue (5 messages, 2 per user) and the live update are built for this load.
