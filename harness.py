@@ -48,6 +48,8 @@ class Suite:
 
     def select(self, tags=None, only=None, limit=None, include_retired=False):
         cases = self.cases if include_retired else [c for c in self.cases if "retired" not in c.get("tags", [])]       # REQ-EVAL-002
+        if not self.name.endswith(".holdout"):                                      # a dev run never reads a held-out case (REQ-EVL-002 of N-4.1)
+            cases = [c for c in cases if "split:holdout" not in c.get("tags", [])]
         if only:
             cases = [c for c in cases if c["id"] in only]
         if tags:
