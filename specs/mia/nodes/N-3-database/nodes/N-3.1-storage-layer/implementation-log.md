@@ -26,3 +26,6 @@ None.
 ## Open questions for Phase 4 and the integration step
 - Real provider for the IF-102 suite: an amendment of `tests/helpers/contract.py` at integration step 3 of N-3 (owner), with the error translation above.
 - Text of IF-102: "immutable for workflows and context_graphs" should read "for the tables that are not deletable (IF-301, IF-302)". Proposal for an amendment of the spec text, no test changes.
+
+## T-03 Accounts (added)
+- Done: `accounts.py` (scrypt of the standard library, N=2^14, r=8, p=1, a random salt per account, the parameters stored with the hash) and `tests/test_accounts.py` (5 tests: TC-SLY-005, a password change is a new version, empty input and duplicates refused, non-ASCII passwords). No existing account code in the repository (reuse check: nothing to reuse). Unknown accounts cost one hash, so a login attempt does not reveal which names exist by timing. Reported green: 5 tests. Who may create accounts is REQ-BE-011 (Backend), throttling REQ-API-004.
