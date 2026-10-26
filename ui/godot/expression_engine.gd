@@ -37,6 +37,9 @@ var default_duration := 0.25
 var easing := "smooth"
 var blink_enabled := true
 var idle_enabled := true
+## the user prefers reduced motion (prefers-reduced-motion in the browser): the idle sway and the breathing shrink to this share (REQ-CHV-009)
+const REDUCED_IDLE_SCALE := 0.25
+var reduced_motion := false
 var gestures: GestureEngine   # arm poses; presets may start a gesture
 var library := {}        # preset name -> validated preset
 var library_order: Array[String] = []
@@ -325,11 +328,12 @@ func _write_bones() -> void:
 	var sway := Vector3.ZERO
 	var breath := 0.0
 	if idle_enabled:
-		sway = Vector3(
+		var idle_scale := REDUCED_IDLE_SCALE if reduced_motion else 1.0
+		sway = idle_scale * Vector3(
 				sin(_clock * 0.29 + 1.0) * 0.8 + sin(_clock * 0.71) * 0.3,
 				sin(_clock * 0.37) * 1.2 + sin(_clock * 0.91) * 0.5,
 				sin(_clock * 0.23 + 2.0) * 0.9)
-		breath = sin(_clock * TAU * 0.22) * 0.6
+		breath = idle_scale * sin(_clock * TAU * 0.22) * 0.6
 	var head := Vector3(_shown_b.get("head_pitch", 0.0) + sway.x,
 			_shown_b.get("head_yaw", 0.0) + sway.y, _shown_b.get("head_roll", 0.0) + sway.z)
 	_rotate("Head", head)

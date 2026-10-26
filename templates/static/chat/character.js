@@ -12,10 +12,12 @@ export function webglAvailable(doc = document) {
 }
 
 /**
- * onReady: the character loaded (send it the current view and inset); onFailed: no WebGL or no answer in time, the chat
- * then works full width and the page shows a small notice.
+ * onReady: the character loaded (send it the current view and inset); onFailed(reason): no secure context, no WebGL, no answer in time or
+ * the character itself said "failed" (IF-111); the chat then works full width and the page shows a small notice. onUnmapped(presets, gestures):
+ * what a newly selected model cannot map. The character loads only on localhost or over HTTPS (a secure context, REQ-CHV-012).
  */
-export function initCharacter({ frame, socket, origin = location.origin, enabled = true, onReady = () => {}, onFailed = () => {}, win = window }) {
+export function initCharacter({ frame, socket, origin = location.origin, enabled = true, onReady = () => {}, onFailed = () => {}, onUnmapped = () => {},
+  win = window, secure = win.isSecureContext, hasWebgl = webglAvailable }) {
   let ready = false;
   let timer = 0;
 
@@ -23,25 +25,28 @@ export function initCharacter({ frame, socket, origin = location.origin, enabled
     if (enabled && frame.contentWindow) frame.contentWindow.postMessage(JSON.stringify(message), origin);
   }
 
-  function disable(failed) {
+  function disable(failed, reason) {
+    const wasEnabled = enabled;
     enabled = false;
     frame.removeAttribute('src');
     frame.hidden = true;
     win.clearTimeout(timer);
-    if (failed) onFailed();
+    if (failed && wasEnabled) onFailed(reason);          // reported once, whatever the cause
   }
 
   if (!enabled) {
     disable(false);
-  } else if (!webglAvailable()) {
-    disable(true);
+  } else if (!secure) {
+    disable(true, 'insecure');
+  } else if (!hasWebgl()) {
+    disable(true, 'no WebGL');
   } else {
-    timer = win.setTimeout(() => { if (!ready) disable(true); }, LOAD_TIMEOUT_MS);
+    timer = win.setTimeout(() => { if (!ready) disable(true, 'timeout'); }, LOAD_TIMEOUT_MS);
   }
 
   socket.on('expression', (data) => send({ type: 'expression', name: data?.name }));
 
-  window.addEventListener('message', (event) => {
+  win.addEventListener('message', (event) => {
     if (event.origin !== origin || event.source !== frame.contentWindow) return;
     let message = {};
     try {
@@ -55,6 +60,10 @@ export function initCharacter({ frame, socket, origin = location.origin, enabled
       win.clearTimeout(timer);
       socket.emit('character_ready');
       onReady();
+    } else if (message.type === 'failed') {
+      disable(true, message.reason ?? 'failed');
+    } else if (message.type === 'unmapped') {
+      onUnmapped(message.presets ?? [], message.gestures ?? []);
     }
   });
 
