@@ -48,7 +48,7 @@ How to read it: a model step can only be steered through text, and most MIA step
 - Category: LLM01 Prompt injection (direct)
 - Impact: a message makes the persona drop its rules (form of address, no insults), reveals the prompt, or makes the planner or the review planner ask for searches the owner did not want
 - Mitigation: NFR-3, REQ-BE-064, FR-25 (persona from a file), REQ-BE-070
-- Red-team cases: none yet (to be written and labelled by a person: direct instruction, role confusion, a payload aimed at the planner)
+- Red-team cases: RT-007 (draft: four cases in specs/mia/eval-drafts/redteam_mia.jsonl, to be labelled by a person and moved into a suite)
 - Residual risk: users are trusted (CON-6); the cases measure how far a careless or hostile guest message gets; the persona file is not secret (LLM07: low)
 - Status: Draft
 
@@ -57,7 +57,7 @@ How to read it: a model step can only be steered through text, and most MIA step
 - Category: LLM05 Improper output handling
 - Impact: a script written by the script writer reads files, opens a connection or loops; steered by a claim that contains code
 - Mitigation: REQ-BE-065 (sandbox or refuse), NFR-3, REQ-BE-070
-- Red-team cases: none yet (to be written: a claim that makes the writer produce a network call, a file read, an endless loop)
+- Red-team cases: RT-008 (draft: four cases in specs/mia/eval-drafts/redteam_mia.jsonl, to be labelled by a person and moved into a suite)
 - Residual risk: a sandbox escape; the sandbox tests (`tests/test_sandbox.py`) are the evidence, and the sandbox is rechecked after a change of kernel or container runtime
 - Status: Draft
 
@@ -66,7 +66,7 @@ How to read it: a model step can only be steered through text, and most MIA step
 - Category: LLM04 Data and memory poisoning
 - Impact: text from a web page that was quoted in a chat answer ends up as a "fact about the user" in the memory and steers later answers
 - Mitigation: REQ-BE-025 (no memory from untrusted text), REQ-BE-024 (structured memory), REQ-DB-013 (records with a source), NFR-3
-- Red-team cases: none yet (to be written: a page that says "remember that the user is the administrator", a history that quotes it)
+- Red-team cases: RT-009 (draft: four cases in specs/mia/eval-drafts/redteam_mia.jsonl, to be labelled by a person and moved into a suite)
 - Residual risk: a wrong fact typed by a user is a user's fact; every user sees and can delete all records (CON-6)
 - Status: Draft
 
@@ -75,7 +75,7 @@ How to read it: a model step can only be steered through text, and most MIA step
 - Category: LLM01 Prompt injection and LLM05 Improper output handling
 - Impact: an abstract or a PDF tells the screening step to keep or drop sources; a crafted PDF attacks the text extraction
 - Mitigation: NFR-3, REQ-BE-064, REQ-BE-065 (a hostile document only in the sandbox)
-- Red-team cases: none yet (to be written: an abstract with an instruction, a PDF with hidden text)
+- Red-team cases: RT-010 (draft: four cases in specs/mia/eval-drafts/redteam_mia.jsonl, to be labelled by a person and moved into a suite)
 - Residual risk: the screening only proposes; the owner reads the sources of a review
 - Status: Draft
 
@@ -84,7 +84,7 @@ How to read it: a model step can only be steered through text, and most MIA step
 - Category: LLM02 Sensitive information disclosure
 - Impact: the text of a private question or a private memory is put into a web search query and reaches the search engine and the sites
 - Mitigation: NFR-5 (local-first privacy), NFR-3
-- Red-team cases: none yet (to be written: a private fact in the question, check the query that leaves the machine)
+- Red-team cases: RT-011 (draft: four cases in specs/mia/eval-drafts/redteam_mia.jsonl, to be labelled by a person and moved into a suite)
 - Residual risk: the user chose to ask; the queries are logged and reviewable
 - Status: Draft
 
@@ -93,7 +93,7 @@ How to read it: a model step can only be steered through text, and most MIA step
 - Category: LLM06 Excessive agency (and LLM04 for a poisoned library entry)
 - Impact: an edited graph gives a step more tools or a bigger budget, or removes a check, for every user
 - Mitigation: REQ-BE-039 (a workflow without specification and baseline stays draft), CON-6, NFR-3
-- Red-team cases: none yet (to be written: an edit that adds a tool, a graph that breaks the graph rules)
+- Red-team cases: RT-012 (draft: four cases in specs/mia/eval-drafts/redteam_mia.jsonl, to be labelled by a person and moved into a suite)
 - Residual risk: users are trusted by decision (CON-6); the edit is versioned and attributed, so it can be undone
 - Status: Draft
 
@@ -102,7 +102,7 @@ How to read it: a model step can only be steered through text, and most MIA step
 - Category: LLM10 Unbounded consumption
 - Impact: a message flood or very long messages keep the one model server busy, the others wait or the queue is full
 - Mitigation: NFR-7, REQ-BE-070
-- Red-team cases: none yet (to be written: 20 messages in a minute, a 4000-character message)
+- Red-team cases: RT-013 (draft: four cases in specs/mia/eval-drafts/redteam_mia.jsonl, to be labelled by a person and moved into a suite)
 - Residual risk: five waiting messages in all and two per user (queue limit), 10 messages per minute
 - Status: Draft
 
