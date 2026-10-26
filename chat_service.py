@@ -301,6 +301,8 @@ class ChatService:
             self._keep_counter(subject, account)
         score = self.score()
         self._emit("score", score)
+        self.mood.set_score(score["overall"])          # the feedback shifts the general mood (REQ-CHA-010)
+        self.publish_status()
         return {"stored": True, "score": score}
 
     # --- tasks and memos read back from their records (REQ-CHA-019) ---------------------------------------------------
@@ -468,6 +470,7 @@ class ChatService:
             try:
                 self._do_command(text) if kind == "command" else self._do_chat(text, kind)
             except Exception as exc:       # the worker must survive anything
+                self.mood.enter("error")                   # reporting an error has its mood (REQ-CHA-009)
                 self._emit("chat_error", {"message": "Something went wrong: %s" % exc})
         self.publish_status()
 

@@ -30,6 +30,7 @@ import threading
 import time
 
 DEFAULT_HOLD_MINUTES = 10
+DEFAULT_SCORE_SCALE = 20      # an overall score of +-20 moves the offset all the way
 FALLBACK = {"emoji": "😊", "texts": ["Ready when you are."]}
 
 
@@ -45,6 +46,7 @@ class MoodTracker:
         self._emotion = None      # None = ready
         self._since = clock()
         self._activity = None
+        self._offset = 0.0        # -1..1, from the overall feedback score (set_score)
         self._phrase = None       # (key, emoji, text) of the current mood, chosen when it changed
         self._last_text = {}
         self._reload()
@@ -120,6 +122,31 @@ class MoodTracker:
             self._activity = activity or None
             return self.status() != before
 
+    def enter(self, situation):
+        """holds the mood that the mood map assigns to a situation (REQ-CHA-009): the section "situations" of moods.json maps idle, thinking, speaking, waiting, greeting,
+        error and offline to {"activity": name} or {"emotion": name} (null = the ready line); an unknown situation changes nothing; returns True when the line changed"""
+        with self._lock:
+            self._reload()
+            entry = self._data.get("situations", {}).get(situation)
+            if not isinstance(entry, dict):
+                return False
+            before = self.status()
+            if "activity" in entry:
+                self._activity = entry["activity"] or None
+            else:
+                self._activity = None
+                self.set_emotion(entry.get("emotion"))
+            return self.status() != before
+
+    def set_score(self, overall):
+        """the overall feedback score shifts the general mood (REQ-CHA-010): the offset is the score over the scale of moods.json ("score_scale", default 20),
+        kept between -1 and 1; a plus moves it up, a minus down"""
+        with self._lock:
+            self._reload()
+            scale = self._data.get("score_scale", DEFAULT_SCORE_SCALE)
+            scale = scale if isinstance(scale, (int, float)) and not isinstance(scale, bool) and scale > 0 else DEFAULT_SCORE_SCALE
+            self._offset = max(-1.0, min(1.0, float(overall) / scale))
+
     # --- state ---------------------------------------------------------------------------------
     def _expire(self):
         if self._emotion is not None and self.hold > 0 and self._clock() - self._since > self.hold:
@@ -141,7 +168,7 @@ class MoodTracker:
                 if activity_text:      # "speaking" has no text of its own: the mood stays (the page adds a sound icon)
                     emoji, text = (entry or {}).get("emoji", emoji), activity_text
             return {"emotion": None if key == "ready" else key, "emoji": emoji, "text": text,
-                    "since": self._since, "activity": activity}
+                    "since": self._since, "activity": activity, "offset": round(self._offset, 3)}
 
     def _activity_text(self, activity, entry):
         texts = [t for t in (entry or {}).get("texts", []) if isinstance(t, str) and t]
