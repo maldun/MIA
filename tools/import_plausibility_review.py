@@ -42,13 +42,20 @@ def main(root):
             if not (what and who and when):
                 problems.append("%s: probe needs what | who | when" % rid)
             item.update(decision="questionable", probe={"what": what, "who": who, "when": when})
+        elif word == "accept":                       # shorthand: accept the risk for now; the reason is the text after the colon (or the Basis line)
+            reason = decision.split(":", 1)[1].strip() if ":" in decision else ""
+            reason = reason or basis
+            if not reason:
+                problems.append("%s: accept needs a reason after the colon, e.g.  accept: we accept for now, the field shows it" % rid)
+            item.update(decision="questionable", accepted_risk={"reason": reason, "owner": "{by}", "decided": "{date} by {by}", "follow_up": "VAL-006"})
+            basis = basis or reason
         elif word == "risk":
             reason, owner, follow = parts(decision.split(":", 1)[1], 3)
             if not (reason and owner):
                 problems.append("%s: risk needs reason | owner | follow-up" % rid)
             item.update(decision="questionable", accepted_risk={"reason": reason, "owner": owner, "decided": "{date} by {by}", "follow_up": follow or "VAL-006"})
         else:
-            problems.append("%s: unknown decision word '%s'" % (rid, word))
+            problems.append("%s: unknown decision word '%s'. Known words: plausible | field | accept: <reason> | probe: <what> | <who> | <when> | risk: <reason> | <owner> | <follow-up> | implausible" % (rid, word))
             continue
         if len(basis) < 10:
             problems.append("%s: Basis needs at least 10 characters" % rid)

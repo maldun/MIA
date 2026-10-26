@@ -82,6 +82,7 @@ def main(root):
     assert listed == open_ids, ("not in a family:", sorted(open_ids - listed), "not open:", sorted(listed - open_ids))
     L = ["# Plausibility review: %d open items" % len(open_ids), "",
          "Write your decision on every line `Decision:` and, where it helps, the reason on `Basis:`. Decision words: `plausible` | `field` (postponed to the field, VAL-006) | "
+         "`accept: <reason>` (questionable, the risk is accepted for now, you are the owner, follow-up VAL-006) | "
          "`probe: <what> | <who> | <when>` | `risk: <reason> | <owner> | <follow-up>` | `implausible`. The suggestion lines are only the agent's opinion. "
          "Then run `python3 -I tools/import_plausibility_review.py .` and after it `tools/apply_plausibility.py`.", "",
          "Context: a controlled environment with a few users (ASM-MU-001); performance and resource figures go to the field (VAL-006); the baseline of today's MIA is task T-04 (owner).", ""]
