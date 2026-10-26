@@ -1,7 +1,7 @@
 """Voice lines of the moods (REQ-CHA-007, FR-31): which sound files MIA may say at a mood or event.
 
 library/voice_lines.json: {"lines": {"annoyed": ["annoyed.wav", "grr.wav"]}, "silent": ["neutral", ...]}. pick(mood) chooses one of the lines at random, gives None for a mood
-without a line (it stays silent), and skips a file that is missing (and says so in the log). A mood must have a line or be declared silent: uncovered() names those that are
+without a line (it stays silent), and skips a file that is missing (and says so in the log). A mood must have an entry in "lines" (an empty list = silent, owner 2026-10-27; the old list "silent" still counts): uncovered() names those that have
 neither, so that a new mood in moods.json cannot be forgotten. The file is read at every call, like the list of behaviours: it may change while MIA runs.
 """
 import json
@@ -46,4 +46,4 @@ class VoiceLines:
     def uncovered(self):
         """the moods of the map that have no line and are not declared silent"""
         lines, silent = self._read()
-        return [mood for mood in self.moods if not lines.get(mood.lower()) and mood.lower() not in silent]
+        return [mood for mood in self.moods if mood.lower() not in lines and mood.lower() not in silent]

@@ -54,7 +54,9 @@ class ConverseBehaviours(unittest.TestCase):
         self.saved = {name: getattr(w, name) for name in ("comm", "SpeechStreamer", "express_and_reload", "penalize")}
         self.saved_show, self.saved_sleep = w.chat_service.show_behaviour, w.time.sleep
         w.comm, w.SpeechStreamer = FakeComm(), FakeStreamer
-        w.express_and_reload = lambda name, sound=True: self.played.append((name, sound))
+        w.express_and_reload = lambda name, sound=True, line=None: self.played.append((name, sound) if line is None else (name, sound, line))
+        self.saved_pick = w.voice_lines.pick
+        w.voice_lines.pick = lambda mood: None
         w.penalize = lambda penalty: None
         w.time.sleep = lambda seconds: None
         self.addCleanup(self.restore)
@@ -63,6 +65,7 @@ class ConverseBehaviours(unittest.TestCase):
         for name, value in self.saved.items():
             setattr(w, name, value)
         w.chat_service.show_behaviour, w.time.sleep = self.saved_show, self.saved_sleep
+        w.voice_lines.pick = self.saved_pick
 
     @mark.req("REQ-CHA-017")
     def test_a_gesture_that_is_not_shown_is_skipped_and_the_mood_still_reaches_the_page(self):
@@ -76,6 +79,13 @@ class ConverseBehaviours(unittest.TestCase):
         w.chat_service.show_behaviour = lambda name: name != "yes"
         w.converse("hi")
         self.assertEqual(self.played[0], ("no", True))
+
+    @mark.req("REQ-CHA-007")
+    def test_the_mood_of_the_first_gesture_says_its_line_and_a_mood_without_one_is_silent_about_it(self):
+        w.chat_service.show_behaviour = lambda name: True
+        w.voice_lines.pick = lambda mood: "/lines/%s.wav" % mood if mood == "agree" else None
+        w.converse("hi")
+        self.assertEqual(self.played[:2], [("yes", True, "/lines/agree.wav"), ("no", False)])
 
 
 if __name__ == "__main__":

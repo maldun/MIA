@@ -104,6 +104,8 @@ ADDRESS = cfg[ADDRESS_KEY]
 WEB_URL = get_url(web=True,**cfg)
 
 from .expressor import PresetExpressor, VoiceExpressor
+from .play_media import play_sound
+from .voice_lines import VoiceLines, mood_names
 voc_exp = VoiceExpressor(web_url=WEB_URL+'/'+UPLOAD_ROUTE)
 
 from .communicator import Communicator
@@ -211,13 +213,16 @@ def send_expression(preset):
 pre_exp = PresetExpressor(send=send_expression)
 IDLE_EXPRESSION = "idle"
 
-def express_and_reload(expression,sound=True):
+def express_and_reload(expression,sound=True,line=None):
     """
-    Lets the character make the expression (and plays its voice clip).
+    Lets the character make the expression (and plays its voice clip, or the line of the mood when there is one).
     """
     pre_exp.express(expression)
     if sound is True:
-        voc_exp.express(expression)
+        if line:
+            play_sound(line,url=WEB_URL+'/'+UPLOAD_ROUTE)
+        else:
+            voc_exp.express(expression)
 
 # Create a function to handle messages from clients
 @socketio.on('chat_send')
@@ -352,7 +357,7 @@ def converse(message,on_delta=None,on_emotion=None,should_stop=None):
         # only the first expression plays its sound, otherwise it would cut off the speech
         expression = comm.map_emotion(emotion)
         if chat_service.show_behaviour(expression):          # a gesture with many net minus votes is shown rarely (REQ-CHA-017); the mood still goes to the page
-            express_and_reload(expression,sound=len(played)==0)
+            express_and_reload(expression,sound=len(played)==0,line=voice_lines.pick(emotion) if len(played)==0 else None)
             played.append(expression)
         reactions.append(emotion)
         if on_emotion is not None:
@@ -532,6 +537,8 @@ chat_log = ChatLog(_own_path(CONST.CHAT_LOG_KEY, CONST.DEFAULT_CHAT_LOG),
                    max_messages=cfg.get(CONST.CHAT_LOG_MAX_KEY, 10000))
 mood = MoodTracker(_own_path(CONST.MOODS_FILE_KEY, CONST.DEFAULT_MOODS_FILE),
                    hold_minutes=cfg.get(CONST.MOOD_HOLD_KEY, 10))
+voice_lines = VoiceLines(os.path.join(FPATH, "library", "voice_lines.json"), VoiceExpressor.DEFAULT_PATH, mood_names(os.path.join(FPATH, CONST.DEFAULT_MOODS_FILE)),
+                         log=logger.warning)                  # the line a mood says (REQ-CHA-007)
 # the tasks of MIA as skills with pipelines (ui/REQUIREMENTS_CORE.md); the chat is the first one
 pipeline_model = OllamaModel(comm.client, lambda profile: getattr(comm, "_profiles", {}).get(profile),
                              lambda: (comm.version, comm.llm_options), keep_alive=comm.keep_alive)

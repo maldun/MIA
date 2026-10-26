@@ -78,6 +78,15 @@ class VoiceLinesTest(unittest.TestCase):
         self.assertEqual(self.voice(moods=("happy", "sad", "angry", "neutral")).uncovered(), ["angry", "neutral"])
 
     @mark.req("REQ-CHA-007")
+    def test_a_mood_with_an_empty_list_is_covered_and_silent(self):
+        """owner 2026-10-27: every mood has an entry in `lines`, some of them empty"""
+        self.files("a.wav")
+        self.config({"happy": ["a.wav"], "sad": [], "Angry": []})
+        voice = self.voice(moods=("happy", "sad", "angry", "neutral"))
+        self.assertEqual(voice.uncovered(), ["neutral"])
+        self.assertIsNone(voice.pick("sad"))
+
+    @mark.req("REQ-CHA-007")
     def test_a_broken_or_missing_config_is_silence(self):
         self.assertIsNone(self.voice().pick("happy"))
         with open(self.path, "w") as fp:
