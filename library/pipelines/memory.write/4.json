@@ -1,0 +1,17 @@
+{
+ "id": "memory.write",
+ "version": 4,
+ "title": "Candidates for the structured memory",
+ "description": "One model step: what to remember from one message of the user. The candidates are checked and stored by code (memory_records.py), which refuses any source but the user's own message.",
+ "goal": "records worth remembering, nothing from questions, secrets or imagined things",
+ "tags": ["memory"],
+ "applies_to": {"tasks": ["memory_write"]},
+ "cost_class": "cheap",
+ "result": "answer",
+ "nodes": [
+  {"id": "write", "use": "view.memory_write@4", "wire": {"text": "$input.text", "known": "$input.known"}, "output": "answer",
+   "plain": "deciding what to remember"}
+ ],
+ "status": "draft",
+ "origin": {"by": "manual", "note": "no harness measurements yet (D-78)"}
+}

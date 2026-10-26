@@ -49,6 +49,9 @@ def set_memory_split():
     category_counts = defaultdict(lambda: {"dev": 0, "holdout": 0})
 
     for case in cases:
+        if case.get("label") is None:                  # not labelled by the owner yet: no split either
+            new_cases.append(case)
+            continue
         old_split = case.get("split", "none")
         new_split = "holdout" if case["id"] in HOLDOUT else "dev"
 

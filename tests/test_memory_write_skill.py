@@ -53,7 +53,7 @@ class MemoryWriteSkill(unittest.TestCase):
         skill = open(os.path.join(ROOT, "skills", "memory_write.md"), encoding="utf-8").read()
         self.assertIn("profile: light", skill)
         self.assertIn("tools: []", skill)
-        self.assertIn("pipeline: memory.write@3", skill)
+        self.assertIn("pipeline: memory.write@5", skill)
 
 
 if __name__ == "__main__":

@@ -69,7 +69,12 @@ class MemoryTest(unittest.TestCase):
         self.assertEqual(len(self.storage.history("memory", old)), 2)                      # the first version is still there: the record stays inspectable
         self.assertEqual(self.storage.get("memory", new)["doc"]["status"], "active")
         self.assertEqual([d["text"] for d in self.memory.retrieve("where does anna live?")], ["lives in Vienna"])
-        self.assertEqual(self.add([{"kind": "fact", "text": "x", "replaces": "no-such-id"}]), [])      # a replacement of an unknown record is a candidate that is dropped
+        before = self.stored()
+        for bad in ("no-such-id", "1", "", old):                                                                # an invented id, an empty one, an id that is already replaced
+            [kept] = self.add([{"kind": "fact", "text": "has a cat", "replaces": bad}])                          # the statement is kept, nothing is replaced (found in a dev run: the model invents ids)
+            self.assertEqual(self.storage.get("memory", kept)["doc"]["status"], "active")
+        self.assertEqual(self.storage.get("memory", new)["doc"]["status"], "active")
+        self.assertEqual(len(self.stored()), len(before) + 4)
 
     @mark.req("REQ-CHA-011")
     def test_retrieval_ranks_by_relevance_then_recency_and_abstains_without_a_match(self):

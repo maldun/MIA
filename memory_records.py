@@ -56,7 +56,7 @@ class MemoryRecords:
 
     def add(self, account, message_id, candidates, source_kind):
         """stores the valid candidates {kind, text, replaces?} as records about `account` that came from the message `message_id`; returns their ids.
-        Refuses everything unless source_kind is exactly "user". A candidate with an unknown kind, a blank text, or a `replaces` that is not an active record is dropped."""
+        Refuses everything unless source_kind is exactly "user". A candidate with an unknown kind or a blank text is dropped; a `replaces` that is not an active record is ignored and the record is stored."""
         if not isinstance(source_kind, str) or source_kind != "user":
             raise MemoryRefused("memory records come from the user's own message, not from %r" % (source_kind,))
         now = _stamp(self._clock())
@@ -65,10 +65,8 @@ class MemoryRecords:
             if not isinstance(item, dict) or item.get("kind") not in KINDS or not isinstance(item.get("text"), str) or not item["text"].strip():
                 continue
             old_id = item.get("replaces")
-            if old_id is not None:
-                old = self._active(old_id)
-                if old is None:
-                    continue
+            old = self._active(old_id) if isinstance(old_id, str) and old_id else None
+            if old is not None:                        # an unknown, empty or already replaced id replaces nothing: the model invents ids, the statement itself is kept
                 self._storage.put("memory", old_id, dict(old, status="replaced", updated=now), account)
             record_id = "%017d-%s" % (int(self._clock() * 1_000_000), os.urandom(2).hex())
             self._storage.put("memory", record_id, {"text": item["text"], "kind": item["kind"], "source": message_id, "subject": account, "status": "active",
