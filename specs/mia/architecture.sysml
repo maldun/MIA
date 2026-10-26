@@ -1101,6 +1101,11 @@ package MIA_Requirements {
         doc /* Interface requirement: workflow and graph API of the backend for the graph app. Specified in contracts/IF-104-*.md, tested by its contract suite (specs/mia/test-spec.md). */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
+    requirement def <'IF-105'> EvaluationAccessInterface {
+        subject mia : MiaSystem;
+        doc /* Interface requirement: evaluation access: run a case of a workflow with a pinned model, seed and temperature, and read the cost and the events. Specified in contracts/IF-105-*.md, tested by its contract suite (specs/mia/test-spec.md). */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
     requirement def <'IF-111'> CharacterBridgeInterface {
         subject mia : MiaSystem;
         doc /* Interface requirement: character bridge between the chat page and the character view. Specified in contracts/IF-111-*.md, tested by its contract suite (specs/mia/test-spec.md). */
@@ -1381,6 +1386,7 @@ package MIA_Requirements {
     requirement if102 : StorageInterface;
     requirement if103 : ModelServerInterface;
     requirement if104 : GraphApiInterface;
+    requirement if105 : EvaluationAccessInterface;
     requirement if111 : CharacterBridgeInterface;
     requirement if112 : VoicePlayerInterface;
     requirement if201 : ChatTurnInterface;
@@ -1455,6 +1461,7 @@ package MIA_Allocation {
     satisfy if102 by mia;
     satisfy if103 by mia;
     satisfy if104 by mia;
+    satisfy if105 by mia;
     satisfy if111 by mia;
     satisfy if112 by mia;
     satisfy if201 by mia;
@@ -1576,6 +1583,7 @@ package MIA_Allocation {
     allocate if112 to mia.frontEnd.audioPlayer;
     allocate if201 to mia.conversation.communicator;
     allocate if202 to mia.taskRuntime.pipelineRunner;
+    allocate if105 to mia.taskRuntime.pipelineRunner;
     allocate if203 to mia.taskRuntime.libraryStore;
     allocate if204 to mia.voice.streamer;
     allocate if301 to mia.persistence.database;

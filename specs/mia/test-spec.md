@@ -48,6 +48,7 @@ One suite per interface, protected, with a provider fixture over the mock (stage
 | IF-102 | Storage interface (state of all apps) | N-3 to N-2 | N-0 | 2 | tests/acceptance/contract/test_if_102_storage.py |
 | IF-103 | Model server (chat completion with structured output) | ext:ollama to N-2 | N-0 | 3 | tests/acceptance/contract/test_if_103_model_server.py |
 | IF-104 | Workflow and graph API (REST with the backend's session) | N-2 to N-5 | N-0 | 2 | tests/acceptance/contract/test_if_104_graph_api.py |
+| IF-105 | Evaluation access (run a case with a pinned model, seed and temperature) | N-2 to N-4 | N-0 | 2 | tests/acceptance/contract/test_if_105_evaluation_access.py |
 | IF-201 | Chat turn service (API and accounts to chat agent) | N-2.2 to N-2.1 | N-2 | 3 | tests/acceptance/contract/test_if_201_chat_turn.py |
 | IF-202 | Run a workflow | N-2.4 to N-2.2, N-2.3 | N-2 | 3 | tests/acceptance/contract/test_if_202_run_workflow.py |
 | IF-203 | Workflow library | N-2.3 to N-2.1, N-2.2, N-2.4 | N-2 | 2 | tests/acceptance/contract/test_if_203_workflow_library.py |
@@ -94,6 +95,10 @@ Setup and expected result are in the docstring of each test (the golden examples
 | TC-IF-104-03 | IF-104 | Contract | 1 (mock) and 2 (real) | golden 3: wrong credentials and a made-up token are 401 and change nothing. | exact |
 | TC-IF-104-04 | IF-104 | Contract | 1 (mock) and 2 (real) | golden 2: a cycle is 422 with the rule; no id and no version appear. | exact |
 | TC-IF-104-05 | IF-104 | Contract | 1 (mock) and 2 (real) | golden 3: unknown id and kind are 404; a stale expected_version is 409 with the current version. | exact |
+| TC-IF-105-01 | IF-105 | Contract | 1 (mock) and 2 (real) | golden 1: done; the run_start event carries model pin, seed and temperature; the run belongs to the user harness; the cost is returned. | exact |
+| TC-IF-105-02 | IF-105 | Contract | 1 (mock) and 2 (real) | golden 2: no seed is bad_options, the pin MP-huge is pin_unavailable, an unknown workflow is unknown_workflow; nothing runs. | exact |
+| TC-IF-105-03 | IF-105 | Contract | 1 (mock) and 2 (real) | golden 3: with a fake model two runs with the same inputs and options have equal outputs and equal event types and payloads. | exact |
+| TC-IF-105-04 | IF-105 | Contract | 1 (mock) and 2 (real) | a budget below the estimate is refused with the budget named; cost 0; run_start and run_end exist. | exact |
 | TC-IF-111-01 | IF-111 | Contract | 1 (mock) and 2 (real) | golden 1: after ready, an expression and the mouth follow the messages | exact |
 | TC-IF-111-02 | IF-111 | Contract | 1 (mock) and 2 (real) | golden 3: an unknown expression shows neutral | exact |
 | TC-IF-111-03 | IF-111 | Contract | 1 (mock) and 2 (real) | golden 3: a foreign origin, malformed JSON and an unknown type change nothing and raise nothing | exact |
@@ -113,6 +118,7 @@ Setup and expected result are in the docstring of each test (the golden examples
 | TC-IF-202-02 | IF-202 | Contract | 1 (mock) and 2 (real) | golden 2: estimated at 2 calls, needs 4, budget 3: budget_exhausted, missing names the budget, partial outputs, run_end written. | exact |
 | TC-IF-202-03 | IF-202 | Contract | 1 (mock) and 2 (real) | golden 3: a budget below the estimate is refused before any work; unknown workflow is unknown_workflow. | exact |
 | TC-IF-202-04 | IF-202 | Contract | 1 (mock) and 2 (real) | costs of a node that was run are numbers; of an unknown node None (the schedule then marks the estimate incomplete). | exact |
+| TC-IF-202-05 | IF-202 | Contract | 1 (mock) and 2 (real) | the options of a run (model pin, seed, temperature) are in the run_start event; the cost is returned and is 0 for a refused run. | exact |
 | TC-IF-203-01 | IF-203 | Contract | 1 (mock) and 2 (real) | golden 1: version 1, an edit as version 2, the diff names the node, restore gives version 3 equal to version 1; status stays draft. | exact |
 | TC-IF-203-02 | IF-203 | Contract | 1 (mock) and 2 (real) | cycle, adjacent data nodes and a session node without stopping criterion are invalid with the rule; nothing is stored. | exact |
 | TC-IF-203-03 | IF-203 | Contract | 1 (mock) and 2 (real) | golden 2: tested before specification and benchmark are attached is not_promotable and names both; after attaching it works. | exact |

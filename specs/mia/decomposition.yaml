@@ -39,6 +39,7 @@ decomposition:
       boundary:
         - {interface: IF-101, role: provides, child: N-2.1}
         - {interface: IF-104, role: provides, child: N-2.1}
+        - {interface: IF-105, role: provides, child: N-2.4}
         - {interface: IF-102, role: consumes, child: N-2.1}
         - {interface: IF-102, role: consumes, child: N-2.2}
         - {interface: IF-102, role: consumes, child: N-2.3}
@@ -150,6 +151,7 @@ decomposition:
       children: [N-2.4.1, N-2.4.2, N-2.4.3]    # the platform only: the example workflows are library data (D-50)
       boundary:
         - {interface: IF-202, role: provides, child: N-2.4.1}
+        - {interface: IF-105, role: provides, child: N-2.4.1}
         - {interface: IF-203, role: consumes, child: N-2.4.1}
         - {interface: IF-103, role: consumes, child: N-2.4.1}
         - {interface: IF-102, role: consumes, child: N-2.4.3}
@@ -163,7 +165,7 @@ decomposition:
       children: []
       tasks: 8                          # estimates until the node is planned
       test_stage: 3
-      leaf_exception: "a hub by nature: it provides IF-202 and consumes IF-203, IF-103, IF-401 and IF-402, every one a single-call client; it names no particular workflow"
+      leaf_exception: "a hub by nature: it provides IF-202 and IF-105 (the evaluation access is a thin facade over the same run, options and cost) and consumes IF-203, IF-103, IF-401 and IF-402, every one a single-call client; it names no particular workflow"
 
     - id: N-2.4.2
       name: Tools and sandbox
@@ -287,6 +289,21 @@ decomposition:
         does_not: ["the real graph rules beyond a fixed list of cases", "concurrent edits"]
       spec: contracts/IF-104-graph-api.md
       suite: tests/acceptance/contract/test_if_104_graph_api.py
+
+    - id: IF-105
+      name: Evaluation access (run a case with a pinned model, seed and temperature)
+      provider: N-2
+      consumers: [N-4]
+      decided_by: N-0
+      version: v0
+      mock:
+        complexity: 2               # a fake runner that echoes its options, built on the mock of IF-202
+        kind: fake
+        location: tests/helpers/mocks/if_105_evaluation_access.py
+        does: ["list workflows", "run a case with the required options and return outputs, events and cost", "refuse missing options and an unknown pin", "same inputs and options give the same run"]
+        does_not: ["real model calls", "the real eval criteria and baselines"]
+      spec: contracts/IF-105-evaluation-access.md
+      suite: tests/acceptance/contract/test_if_105_evaluation_access.py
 
     # Decision D-2/D-47 (HLS section 5.5): the graph app N-5 is an independent tool and goes through the backend API
     # (IF-104). The backend validates edits (TB-edit); N-3.1 validates again.
@@ -484,7 +501,7 @@ decomposition:
       skeleton: tests/integration/N-0/step_00   # the thinnest end-to-end scenario is the example workflow lookup on the mocks (D-50)
       order:
         - {child: N-3, test: tests/integration/N-0/step_01}
-        - {child: N-4, test: tests/integration/N-0/step_02}
+        - {child: N-4, test: tests/integration/N-0/step_02, reason: "the harness is needed to decide the model-dependent criteria of N-2, so it is built early against the IF-105 mock; the real Backend replaces the mock at step_04"}
         - {child: N-1, test: tests/integration/N-0/step_03}
         - {child: N-2, test: tests/integration/N-0/step_04}
         - {child: N-5, test: tests/integration/N-0/step_05, reason: "an add-on tool (owner, 2026-10-25): MIA is complete and usable without it, so it is integrated last"}

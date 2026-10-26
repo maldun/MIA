@@ -2,7 +2,7 @@
 
 **Parent:** `specs/mia/requirements.md` (top level N-0)   **Decomposition:** `specs/mia/decomposition.yaml`   **Status:** Draft (Plan, 2026-10-25)
 
-The server and accounts, the chat agent, workflow management, workflow execution with verification and research, voice synthesis. Provides IF-101, consumes IF-102 and IF-103. Refines the top-level requirements named in each `Parent`; the details of low-level nodes follow when this node is cut. Numbers marked *Plan* are fixed in the node that owns the measurement.
+The server and accounts, the chat agent, workflow management, workflow execution with verification and research, voice synthesis. Provides IF-101, IF-104 and IF-105, consumes IF-102 and IF-103. Refines the top-level requirements named in each `Parent`; the details of low-level nodes follow when this node is cut. Numbers marked *Plan* are fixed in the node that owns the measurement.
 
 ## Requirements
 
@@ -957,3 +957,15 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verified by: TC-IF-104-01..05
 - Status: Draft
 - History: v0, amendment 5/7 (2026-10-25)
+
+### IF-105 – Evaluation access for the harness
+- Level: high   Subject: WebApplication
+- Text: The Backend shall provide the Evaluation and operation node with the evaluation interface IF-105 as specified in contracts/IF-105-evaluation-access.md (list workflows, run a case of a workflow version with a required model pin, seed and temperature, return outputs, events and cost, and refuse missing options and a pin the server does not hold).
+- Rationale: interface between sibling nodes, decided by N-0 (decomposition.yaml); finding F-4
+- Parent: FR-9, FR-25, REQ-BE-050
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-2, AC-8: the contract suite test_if_105_evaluation_access.py passes against the mock (stage 1) and the Backend (stage 2)
+- Verified by: TC-IF-105-01..04
+- Status: Draft
+- History: v0, amendment 9 (2026-10-25)

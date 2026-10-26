@@ -2,7 +2,7 @@
 
 **Parent:** `specs/mia/nodes/N-2-backend/nodes/N-2.4-workflow-execution/requirements.md` (N-2.4)   **Decomposition:** `specs/mia/decomposition.yaml`   **Status:** Draft (Plan, 2026-10-25)
 
-Runs a workflow step by step under budgets: model calls and model management, priority of the chat, learning choices. Provides IF-202; consumes IF-203 (the workflow), IF-103 (model server), IF-401 (events) and IF-402 (tools). A hub by nature: every step of a workflow passes it. Knows no particular workflow. Refines the top-level requirements named in each `Parent`; the details of low-level nodes follow when this node is cut. Numbers marked *Plan* are fixed in the node that owns the measurement.
+Runs a workflow step by step under budgets: model calls and model management, priority of the chat, learning choices. Provides IF-202 and IF-105; consumes IF-203 (the workflow), IF-103 (model server), IF-401 (events) and IF-402 (tools). A hub by nature: every step of a workflow passes it. Knows no particular workflow. Refines the top-level requirements named in each `Parent`; the details of low-level nodes follow when this node is cut. Numbers marked *Plan* are fixed in the node that owns the measurement.
 
 ## Requirements
 
@@ -170,6 +170,18 @@ Runs a workflow step by step under budgets: model calls and model management, pr
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-19, AC-28: the contract suite test_if_202_run_workflow.py passes against the Pipeline runner (stage 2)
+- Verified by: –
+- Status: Draft
+- History: –
+
+### REQ-RUN-015 – Realise IF-105
+- Level: low-2   Subject: TaskRuntime
+- Text: The Pipeline runner shall realise the evaluation interface IF-105 as specified in contracts/IF-105-evaluation-access.md by running a case with the same code as IF-202, recording the model pin, seed and temperature in the run_start event and returning the cost.
+- Rationale: refines REQ-WFX-024
+- Parent: REQ-WFX-024
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-2, AC-8: the contract suite test_if_105_evaluation_access.py passes against the Pipeline runner (stage 2)
 - Verified by: –
 - Status: Draft
 - History: –

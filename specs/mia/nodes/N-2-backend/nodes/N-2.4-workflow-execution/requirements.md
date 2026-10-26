@@ -2,7 +2,7 @@
 
 **Parent:** `specs/mia/nodes/N-2-backend/requirements.md` (N-2)   **Decomposition:** `specs/mia/decomposition.yaml`   **Status:** Draft (Plan, 2026-10-25)
 
-Running a workflow under budgets: the pipeline runner, model management, verification, research, sandbox, run log and replay. Provides IF-202; consumes IF-103 (model server), IF-203 (the workflow to run) and IF-102 (run results). Expected to be cut again (runtime, verification, research, run log) when its turn comes. Refines the top-level requirements named in each `Parent`; the details of low-level nodes follow when this node is cut. Numbers marked *Plan* are fixed in the node that owns the measurement.
+Running a workflow under budgets: the pipeline runner, model management, verification, research, sandbox, run log and replay. Provides IF-202 and IF-105; consumes IF-103 (model server), IF-203 (the workflow to run) and IF-102 (run results). Expected to be cut again (runtime, verification, research, run log) when its turn comes. Refines the top-level requirements named in each `Parent`; the details of low-level nodes follow when this node is cut. Numbers marked *Plan* are fixed in the node that owns the measurement.
 
 ## Requirements
 
@@ -282,6 +282,18 @@ Running a workflow under budgets: the pipeline runner, model management, verific
 - Status: Draft
 - History: –
 
+### REQ-WFX-024 – Realise IF-105
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow execution shall realise the evaluation interface IF-105 as specified in contracts/IF-105-evaluation-access.md by running a case through the same runner as IF-202, recording the model pin, seed and temperature in the run_start event and returning the cost.
+- Rationale: refines IF-105
+- Parent: IF-105
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-2, AC-8: the contract suite test_if_105_evaluation_access.py passes against the Workflow execution (stage 2)
+- Verified by: TC-IF-105-01..04
+- Status: Draft
+- History: –
+
 ## Interface requirements
 
 Owned by this node as provider (or, for an external provider, as the consumer that depends on it). The details are in `contracts/`; the mock and the contract suite are in `tests/helpers/mocks/` and `tests/acceptance/contract/`.
@@ -294,6 +306,6 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-19, AC-28: the contract suite test_if_202_run_workflow.py passes against the mock (stage 1) and the Workflow execution (stage 2)
-- Verified by: TC-IF-202-01..04
+- Verified by: TC-IF-202-01..05
 - Status: Draft
 - History: v0, amendment 5/7 (2026-10-25)
