@@ -68,6 +68,20 @@ class AnswersTest(unittest.TestCase):
         self.assertEqual((score["overall"], score["votes"]), (1, 5))
 
     @mark.req("REQ-CHA-015")
+    def test_a_user_counts_once_per_subject_and_category(self):
+        """Clicking plus again does not raise the score; a changed mind replaces the vote (the table keeps the earlier version); other users count on."""
+        answer = self.answer()
+        for _ in range(3):
+            self.chat.vote("anna", answer, "answer_quality", 1)
+        self.assertEqual((self.chat.score()["overall"], self.chat.score()["votes"]), (1, 1))
+        self.assertEqual(self.chat.vote("anna", answer, "answer_quality", -1)["score"]["overall"], -1)
+        self.assertEqual(self.chat.vote("ben", answer, "answer_quality", 1)["score"]["overall"], 0)
+        self.assertEqual(self.chat.vote("anna", answer, "reactions", 1)["score"]["votes"], 3)             # another category is another vote
+        entry = self.storage.ids("votes")
+        self.assertEqual(len(entry), 3)
+        self.assertEqual(max(len(self.storage.history("votes", i)) for i in entry), 4)
+
+    @mark.req("REQ-CHA-015")
     def test_the_score_is_given_per_iso_week_and_pushed(self):
         """TC-IF-201-07: sums per ISO week, oldest first, only weeks with a vote; the sums of the weeks equal the totals; a score event follows."""
         self.chat.vote("anna", "service", "service", 1)

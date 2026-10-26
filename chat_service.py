@@ -34,7 +34,6 @@ import datetime
 import re
 import threading
 import time
-import uuid
 
 try:
     from .chat_log import utc_now, MAX_PAGE
@@ -256,7 +255,8 @@ class ChatService:
         if category == "answer_quality":
             self._answer(subject)
         created = datetime.datetime.fromtimestamp(self._wall_clock(), datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-        self._votes.put("votes", uuid.uuid4().hex, {"user": account, "subject": subject, "category": category, "value": value, "created": created}, account)
+        # one record per user, category and subject: a repeated click or a changed mind is a new version of it, not a second vote
+        self._votes.put("votes", "%s|%s|%s" % (account, category, subject), {"user": account, "subject": subject, "category": category, "value": value, "created": created}, account)
         score = self.score()
         self._emit("score", score)
         return {"stored": True, "score": score}
