@@ -7,16 +7,21 @@ State: verification **postponed by the owner** until trial-run data exists. Repo
 - The holdout is **used**: a second run is allowed only after a FAIL, so after a prompt or skill change it needs a new holdout (amendment by the owner), not a re-run.
 - REQ-CHA-012 by tests and reading (single caller `chat_service.py:573`), REQ-CHA-013 by `test_items_api.py`, static checks as in the report. No code, skill, sample or test was changed.
 
+## Owner decision 2026-10-26 (after the run)
+- MEM-S27 relabelled `preference` to `fact` in `specs/mia/eval-drafts/memory_sample.jsonl` (the stored "is vegetarian" fact is correct). This is **post-hoc**: the recorded run was scored with the old label (10 of 11); with the new label the same log would score 11 of 11. The run is not repeated and the original score stays in the report. D-2 is closed by this.
+- Measurements (AC-24 b with more records, latency and VRAM with light and full model, D-4) move to the field test.
+- The security work (red-team cases RT-009) comes last.
+
 ## Open
-1. Trial data with `structured_memory` on (the option is off by default): real conversations over some days, then run `tools/memory_cost.py` again (AC-24 b had 1 record) and look at wrong or duplicate records in the Memory tab.
+1. Field test with `structured_memory` on (the option is off by default): real conversations over some days; then `tools/memory_cost.py` again, latency and VRAM, and wrong or duplicate records in the Memory tab.
 2. Memory tab demonstration (REQ-CHA-013) by the owner.
-3. Transcript review (check F) of the holdout log by a person: MEM-S27, MEM-S09 and about 10 more.
-4. Measure latency and VRAM with the light memory call and the full chat model on the 16 GB card (D-4).
-5. Owner decisions: kind label of MEM-S27 or the matcher (D-2, by amendment), retrieval of "my height" style questions (D-3), the empty red-team draft file (D-6).
+3. Transcript review (check F) of the holdout log by a person: MEM-S09 and about 10 more.
+4. Retrieval of "my height" style questions (D-3), owner decision.
+5. Last: the empty red-team draft file, the four THR-006 (RT-009) cases (D-6).
 
 ## Next steps
 1. Merge the verify branch: `cd /home/maldun/prog/Python/MIA && git merge worktree-verify-t04`.
-2. Turn `structured_memory` on in `setup_cfg.json` for the trial period and use MIA normally.
-3. After the trial: a fresh verifier session closes the report (new `memory_cost.py` run, transcripts, Memory tab), without opening the holdout again; verdict "verified" or "with accepted deviations".
+2. Turn `structured_memory` on in `setup_cfg.json` for the field test and use MIA normally.
+3. After the field test: a fresh verifier session closes the report (measurements, transcripts, Memory tab), without opening the holdout again; verdict "verified" or "with accepted deviations".
 4. Then Commit phase (`commit-phase` + `agent-app-commit`).
-5. In parallel, if wanted: Plan session for D-2, D-3 and the RT-009 cases.
+5. Last, Plan session for D-3 and the RT-009 cases.

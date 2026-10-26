@@ -38,7 +38,7 @@ Verifier: fresh session, 2026-10-26, branch `worktree-verify-t04` from master `d
 | ID | Severity | Finding | Destination |
 |---|---|---|---|
 | D-1 | low | `structured_memory` is off by default; the owner tried it once; nothing ran it under load. | Phase 6/7 |
-| D-2 | low | The score matcher requires equal `kind`; MEM-S27 is right in content, wrong in kind, and the kind of "is vegetarian" (fact vs preference) is ambiguous by label. Not tuned. | Plan: owner decides the label or the matcher by amendment |
+| D-2 | low (closed 2026-10-26: owner relabelled MEM-S27 to `fact` after the run; the recorded score stays 10 of 11, the same log would score 11 of 11 with the new label; not re-run) | The score matcher requires equal `kind`; MEM-S27 is right in content, wrong in kind, and the kind of "is vegetarian" (fact vs preference) is ambiguous by label. Not tuned. | Plan: owner decides the label or the matcher by amendment |
 | D-3 | low | AC-24 (b) rests on 1 stored record; it says nothing about a full memory. Also "do you remember my height?" retrieved 0 records for the stored height record (no shared word with "175cm tall"): retrieval is word-overlap only. | Phase 7: re-measure with more records; consider a failing test for this question |
 | D-4 | medium | Light model for the memory call plus the full model as chat unload each other on the 16 GB card; not measured. | Phase 6: measure latency and VRAM with `structured_memory` on |
 | D-5 | low | Duplicate records for one statement (6 extras in 33 runs, wording changes between repeats). Accepted by the hand-over rule; they will show up as clutter in the Memory tab. | Backlog |
