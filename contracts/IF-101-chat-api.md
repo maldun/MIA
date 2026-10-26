@@ -1,4 +1,4 @@
-# IF-101 – Chat, expression, audio and REST API, v5
+# IF-101 – Chat, expression, audio and REST API, v6
 
 Owner (provider): N-2 Backend (child N-2.1)   Consumers: N-1 Web Frontend   Decided by: N-0   Mock complexity: 3 (stream of events, queue, clock, small stores)   Suite: `tests/acceptance/contract/test_if_101_chat_api.py`
 
@@ -25,8 +25,8 @@ The server sets the session at `login` as a cookie `mia_session` (HttpOnly, Same
 | `score(session)` **[v1]** | | `{"overall", "categories", "votes", "series"}` **[v4: series]** | sums per category and overall; `series` = the same sums per ISO week of the vote's time, `[{"week": "YYYY-Www", "overall", "categories"}]`, oldest first, only weeks with a vote, so the sums of the weeks equal the totals (REQ-CLV-010); the event `score` pushes the same after each vote |
 | `counters(session)` **[v5]** | | `{name: {"net", "votes", "chance", "reset_at"}}` for every behaviour of the list | the adaptation counters (REQ-BE-031, REQ-CHA-018): `net` = sum of the `character_behaviour` votes on that name since the last reset, `chance` = how likely the behaviour is shown at one opportunity (1.0, and at most 0.01 from a `net` of -5 or less; REQ-BE-030), `reset_at` = time of the last reset or `null`; every user sees them (CON-6) |
 | `reset_counter(session, name)` **[v5]** | name of a behaviour | the counter of that name after the reset | back to the default rate, the votes stay stored and only later ones count; event `counters_changed {name, author}`; 404 `not_found` for a name that is not on the list |
-| `items(session, kind)` **[v1]** | kind in `tasks`, `memos`, `memory` | list of `{id, text, author, created, source?}` | every user sees all records (CON-6) |
-| `save_item(session, kind, id, text, source)` **[v1]** | id None = new | the stored record | memory needs a `source` (422 `invalid_item`, rule `source`); empty text 422; 404 unknown id; text comes back byte for byte (FR-28); event `item_changed` to the others |
+| `items(session, kind)` **[v1]** | kind in `tasks`, `memos`, `memory` | list of `{id, text, author, created, source?, due?}` **[v6: due]** | every user sees all records (CON-6) |
+| `save_item(session, kind, id, text, source, due)` **[v1]** | id None = new; `due` (optional, tasks only) **[v6]** | the stored record | `due` is a UTC time `YYYY-MM-DDTHH:MM:SSZ`: the chat agent says the task once at that time (REQ-CHA-019); a save without `due` clears it; any other format, or `due` on memos or memory, is 422 `invalid_item`, rule `due`; a change of the text with the same `due` does not make the chat say the task again, a new `due` does; memory needs a `source` (422 `invalid_item`, rule `source`); empty text 422; 404 unknown id; text comes back byte for byte (FR-28); event `item_changed` to the others |
 | `delete_item(session, kind, id)` **[v1]** | | `{"deleted": true}` | any user may delete any record; 404 unknown id; event `item_changed` with `deleted: true` |
 | `trust(session)` / `set_trust(session, source, value)` **[v1]** | source id, value 0..1 | `{"source", "old", "new"}` | event `trust_changed {source, old, new, author}`; 422 `invalid_trust`; 404 unknown source |
 | `persona(session)` / `save_persona(session, doc)` **[v1]** | doc with `text` | the stored persona | event `persona_changed {author}`; 422 `invalid_persona` |
@@ -87,3 +87,4 @@ Events (server to every connected page):
 | v3 | 2026-10-27 | the errors `403 bad_origin` and `403 insecure_channel` (REQ-API-007, REQ-API-008, found in N-2.1 T-02); the title says v3 | A-05 |
 | v4 | 2026-10-27 | `score` and the event `score` carry `series`, the sums per ISO week (owner: score over time "by time", per week) | A-06 |
 | v5 | 2026-10-27 | `counters`, `reset_counter` and the event `counters_changed` (REQ-BE-030, REQ-BE-031); `invalid_vote` rule `subject`; `regenerate` of a known message that is not the last answer, a user message included, is `422 not_the_last_answer` (404 stays for an unknown id); the list of behaviours is the names of `character_behaviour`: `greet`, `idle`, `no`, `talk`, `yes` for the mock | A-08 |
+| v6 | 2026-10-27 | `save_item` takes an optional `due` (tasks only) and `items` shows it; `invalid_item` gets the rule `due` (owner decision: recitation at the due time, REQ-CHA-019) | A-09 |

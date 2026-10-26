@@ -12,6 +12,7 @@ DEFINITIONS = {
 REQUIRED = {"cases": ("question", "answer", "status"), "behaviours": ("name", "net", "votes"),"memory": ("text", "source"), "votes": ("user", "subject", "category", "value"), "tasks": ("text",), "memos": ("text",),
             "runs": ("workflow", "workflow_version", "model_pin", "benchmark_version")}
 CATEGORIES = ("answer_quality", "reactions", "character_behaviour", "service")
+MEMORY_FIELDS = {"kind": ("fact", "preference", "commitment"), "status": ("active", "replaced")}      # v2 (amendment A-10): optional, checked when present
 
 
 class RecordTablesMock:
@@ -24,6 +25,10 @@ class RecordTablesMock:
         for field in REQUIRED.get(table, ()):
             if not isinstance(doc, dict) or field not in doc:
                 return {"rule": "schema", "detail": field}
+        if table == "memory":
+            for field, allowed in MEMORY_FIELDS.items():
+                if field in doc and doc[field] not in allowed:
+                    return {"rule": "schema", "detail": field}
         if table == "votes" and (doc["category"] not in CATEGORIES or doc["value"] not in (1, -1)):
             return {"rule": "category" if doc["category"] not in CATEGORIES else "schema", "detail": doc["category"] if doc["category"] not in CATEGORIES else "value"}
         return None

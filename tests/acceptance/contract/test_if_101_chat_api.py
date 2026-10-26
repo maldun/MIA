@@ -356,6 +356,22 @@ class ChatApiContract(unittest.TestCase):
         self.assertEqual((err.status, err.code, err.rule), (422, "invalid_vote", "subject"))
         self.assertEqual(api.score(anna)["votes"], 6)                               # 5 on the behaviour (ben's repeat replaced his first) and 1 on the answer; the refused vote is not stored
 
+    @mark.req("IF-101", "REQ-CHA-019", "REQ-BE-032")
+    @each_provider(IF)
+    def test_a_task_has_an_optional_due_time_that_only_tasks_have(self, api):
+        """TC-IF-101-23 (v6): a task keeps and lists its `due` (UTC, to the second); a save without it clears it; another format, or a due time on memos or memory, is 422 invalid_item with the rule `due` and stores nothing."""
+        anna = api.login("anna", "pw-anna")
+        task = api.save_item(anna, "tasks", None, "Call Zoe", due="2026-11-02T09:00:00Z")
+        self.assertEqual(task["due"], "2026-11-02T09:00:00Z")
+        self.assertEqual(api.items(anna, "tasks")[0]["due"], "2026-11-02T09:00:00Z")
+        self.assertNotIn("due", api.save_item(anna, "tasks", task["id"], "Call Zoe"))
+        self.assertNotIn("due", api.save_item(anna, "tasks", None, "No hurry"))
+        for kind, due in (("tasks", "tomorrow"), ("tasks", "2026-11-02"), ("tasks", "2026-11-02T09:00:00+01:00"), ("tasks", "2026-13-02T09:00:00Z"), ("memos", "2026-11-02T09:00:00Z")):
+            err = error_of(lambda: api.save_item(anna, kind, None, "x", due=due))
+            self.assertEqual((err.status, err.code, err.rule), (422, "invalid_item", "due"), (kind, due))
+        self.assertEqual(len(api.items(anna, "tasks")), 2)
+        self.assertEqual(api.items(anna, "memos"), [])
+
     @mark.req("IF-101", "REQ-CLV-013", "REQ-BE-043")
     @each_provider(IF)
     def test_an_answer_announces_the_character_variant_of_its_workflow(self, api):

@@ -272,8 +272,8 @@ class _ChatApiAdapter:
     def items(self, session, kind):
         return self._route("get", "/api/items?kind=%s" % kind, session)
 
-    def save_item(self, session, kind, item_id, text, source=None):
-        return self._route("post", "/api/items", session, json={"kind": kind, "id": item_id, "text": text, "source": source})
+    def save_item(self, session, kind, item_id, text, source=None, due=None):
+        return self._route("post", "/api/items", session, json={"kind": kind, "id": item_id, "text": text, "source": source, "due": due})
 
     def delete_item(self, session, kind, item_id):
         return self._route("delete", "/api/items?kind=%s&id=%s" % (kind, item_id), session)
