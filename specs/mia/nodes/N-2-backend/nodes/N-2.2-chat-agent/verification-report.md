@@ -2,7 +2,7 @@
 
 Verifier: fresh session, 2026-10-26, branch `worktree-verify-t04` from master `d9e2837`. I did not implement T-04 and ran no dev eval. I changed no code, skill, sample or test.
 
-**Verdict proposal: verified with accepted deviations** (see D-1 to D-4). Needs a person's decision and the transcript review (check F).
+**Verdict: postponed by the owner (2026-10-26) until there is data from trial runs.** Evidence so far would support "verified with accepted deviations" (see D-1 to D-5), but the owner decided not to close the verification now. The holdout was run once and stays as recorded; it is not re-run, and the owner's remark that the model had to be started first is noted below. Open before closing: the trial-run data (D-3, D-4), the transcript review (check F) and the Memory tab demonstration.
 
 ## Holdout run, AC-24 (a)
 - Command: `tools/memory_dev_run.py --split holdout --verifier --repeats 3`, run once. Log: `/home/maldun/verify-t04-logs/holdout1.jsonl` (outside the repo, contains holdout texts).
