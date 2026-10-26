@@ -19,10 +19,11 @@ import time
 import requests
 
 try:
-    from . import behaviour, checks, extraction, metrics, plans, research_score, web_tools
+    from . import behaviour, checks, eval_platform, extraction, metrics, plans, research_score, web_tools
     from .pipeline import Tool
 except ImportError:  # used as plain script / in tests
     import behaviour
+    import eval_platform
     import checks
     import extraction
     import metrics
@@ -31,7 +32,7 @@ except ImportError:  # used as plain script / in tests
     from pipeline import Tool
     import web_tools
 
-INPUT_KEY = {"checks": "claim", "pipeline": "input", "extraction": "input", "text_rules": "input", "research": "input", "plan": "input"}
+INPUT_KEY = {"workflow": "input", "checks": "claim", "pipeline": "input", "extraction": "input", "text_rules": "input", "research": "input", "plan": "input"}
 CASE_KEYS = {"id", "tags", "claim", "input", "truth", "expect", "note", "gold"}
 STATUSES = ("pass", "fail", "open", "not_applicable")
 MAX_OUTPUT_CHARS = 3000
@@ -292,10 +293,12 @@ def _clip(value, limit=MAX_OUTPUT_CHARS):
 
 
 class Harness:
-    def __init__(self, core=None, clock=time.time, targets=None):
-        """core: a Core (for the targets 'checks' and 'pipeline'); targets: more kinds, {kind: function(case, variant, context) -> (status, output)}, for tests and new tasks"""
+    def __init__(self, core=None, clock=time.time, targets=None, platform=None):
+        """core: a Core (for the targets 'checks' and 'pipeline'); platform: a provider of IF-105 (for the target 'workflow'); targets: more kinds, {kind: function(case, variant, context) -> (status, output)}, for tests and new tasks"""
         self.core, self._clock = core, clock
         self.targets = {"checks": self._checks, "pipeline": self._pipeline, "extraction": self._extraction, "text_rules": self._text_rules, "research": self._research, "plan": self._plan}
+        if platform is not None:
+            self.targets["workflow"] = eval_platform.WorkflowTarget(platform, lambda: self.pin)
         self.targets.update(targets or {})
         self.counter = None
         self.pin = None
@@ -425,6 +428,11 @@ class Harness:
         if pin:
             header["pin"] = {key: pin.get(key) for key in ("name", "digest", "seed", "temperature")}
         header["suite_sha1"] = suite_sha1(suite.path)
+        header["benchmark_version"] = header["suite_sha1"]               # REQ-EVL-004: the version of the benchmark is the content of the suite
+        if suite.target["kind"] == "workflow":
+            if not pin:
+                raise SuiteError("%s: a workflow suite needs a pin (model, seed, temperature)" % suite.name)
+            header["workflow"], header["workflow_version"] = suite.target["workflow"], suite.target["version"]
         if suite.target["kind"] == "pipeline" and self.core is not None:
             skill = self.core.skills.get(variant.get("skill") or suite.target["skill"])
             if skill is not None:
@@ -456,6 +464,9 @@ class Harness:
             record["error"] = error
         if isinstance(output, dict) and isinstance(output.get("score"), dict):
             record["score"] = output["score"]
+        if isinstance(output, dict) and isinstance(output.get("cost"), dict):          # a run through IF-105 brings its own cost (REQ-EVL-001)
+            cost = output["cost"]
+            record.update(calls=cost.get("calls", 0), tokens=cost.get("tokens", 0), seconds=cost.get("seconds", record["seconds"]))
         return record
 
 
@@ -540,8 +551,18 @@ def format_report(run, worst=8):
     if h["repeats"] > 1:
         lines += ["", "stability over repeats (same status every time): " + _pct(metrics.stability(records))]
     cost = metrics.cost(records)
-    lines += ["", "cost: %.1f s in total, %.2f s per run, %d model calls, %d characters sent, %d received" % (cost["seconds"], cost["seconds_per_run"], cost["calls"], cost["chars_in"], cost["chars_out"])]
+    lines += ["", "cost: %.1f s in total, %.2f s per run, %d model calls, %d characters sent, %d received" % (cost["seconds"], cost["seconds_per_run"], cost["calls"], cost["chars_in"], cost["chars_out"]) + (", %d tokens" % cost["tokens"] if cost["tokens"] else "")]
     return "\n".join(lines)
+
+
+def require_same_cases(run_a, run_b):
+    """REQ-EVL-008: two runs are compared only on the same cases with the same repeats; the differing case is named"""
+    ids_a, ids_b = {r["case"] for r in run_a.records}, {r["case"] for r in run_b.records}
+    if ids_a != ids_b:
+        differing = sorted(ids_a ^ ids_b)
+        raise SuiteError("the runs do not have the same cases (%d differ: %s)" % (len(differing), ", ".join(differing[:10])))
+    if run_a.header["repeats"] != run_b.header["repeats"]:
+        raise SuiteError("the runs do not have the same repeats (%s and %s)" % (run_a.header["repeats"], run_b.header["repeats"]))
 
 
 def format_compare(run_a, run_b):

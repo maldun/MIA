@@ -120,7 +120,12 @@ def main():
         a, b = args.args[0], args.args[1]
         if len(args.args) == 3:                                     # compare <suite> <variant a> <variant b>
             a, b = "%s:%s" % (args.args[0], args.args[1]), "%s:%s" % (args.args[0], args.args[2])
-        print(harness.format_compare(resolve_run(a), resolve_run(b)))
+        run_a, run_b = resolve_run(a), resolve_run(b)
+        try:
+            harness.require_same_cases(run_a, run_b)                # REQ-EVL-008: only the same cases with the same repeats are compared
+        except harness.SuiteError as exc:
+            raise SystemExit("not compared: %s" % exc)
+        print(harness.format_compare(run_a, run_b))
         return
 
     suite = harness.load_suite(os.path.join(SUITES, args.args[0]))

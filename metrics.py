@@ -183,7 +183,17 @@ def cost(records):
     n = len(records)
     seconds = sum(r.get("seconds", 0.0) for r in records)
     return {"runs": n, "seconds": seconds, "seconds_per_run": seconds / n if n else 0.0, "calls": sum(r.get("calls", 0) for r in records),
-            "chars_in": sum(r.get("chars_in", 0) for r in records), "chars_out": sum(r.get("chars_out", 0) for r in records)}
+            "tokens": sum(r.get("tokens", 0) for r in records), "chars_in": sum(r.get("chars_in", 0) for r in records), "chars_out": sum(r.get("chars_out", 0) for r in records)}
+
+
+def case_table(records):
+    """per case: how many repeats and how many of them did what the case asked: [{"case", "repeats", "passes"}] in the order of first appearance"""
+    table = {}
+    for r in records:
+        row = table.setdefault(r["case"], {"case": r["case"], "repeats": 0, "passes": 0})
+        row["repeats"] += 1
+        row["passes"] += 1 if is_right(r) else 0
+    return list(table.values())
 
 
 def stability(records):
