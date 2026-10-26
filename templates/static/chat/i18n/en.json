@@ -96,5 +96,16 @@
   "shortcut.escape": "Close menu, list or dialog",
   "settings.token": "Editor token",
   "settings.token.placeholder": "from data/editor_token.txt",
-  "settings.token.hint": "Needed once per device to change expressions in the expression editor. The editor reads it from here."
+  "settings.token.hint": "Needed once per device to change expressions in the expression editor. The editor reads it from here.",
+  "login.title": "Log in",
+  "login.user": "Account",
+  "login.password": "Password",
+  "login.submit": "Log in",
+  "login.visible": "Everything here is visible to all users of this MIA: the conversation, her memory, the workflows and every change with its author.",
+  "login.bad": "Account or password is wrong.",
+  "login.throttled": "Too many tries. Please wait a minute.",
+  "login.insecure": "A password is only sent over HTTPS or on this computer (localhost). Open the page over HTTPS.",
+  "login.empty": "Please enter your account and your password.",
+  "login.failed": "The login did not work. Is MIA reachable?",
+  "chat.position": "Waiting, place {n}"
 }

@@ -1,6 +1,6 @@
 // The conversation on the page: history, live messages (chat_* events), streaming, sending with retry, paging, autoscroll.
 // The server is the source of truth (see ui/README.md, chat backend); this module only draws it.
-import { clock, continuesGroup, dayKey, dayLabel, emojiFor, linkify, pipelineHeadline, pipelineLine, pipelineRows, pipelineState, relativeTime, trimOldest, upsert, MAX_IN_DOM } from './chat-model.js';
+import { clock, continuesGroup, dayKey, dayLabel, emojiFor, linkify, pipelineHeadline, pipelineLine, pipelineRows, pipelineState, queueText, relativeTime, senderName, trimOldest, upsert, MAX_IN_DOM } from './chat-model.js';
 
 export function isNearBottom(element, threshold = 80) {
   return element.scrollHeight - element.scrollTop - element.clientHeight <= threshold;
@@ -13,7 +13,10 @@ function el(tag, className, text) {
   return node;
 }
 
-export function initChat({ list, empty, jump, olderButton, socket, render, t, origin = location.origin, win = window, notify = () => {} }) {
+/**
+ * me(): the account of this page (null when not known); onLoginRequired(): the server says there is no session (IF-101: 401 unauthenticated).
+ */
+export function initChat({ list, empty, jump, olderButton, socket, render, t, origin = location.origin, win = window, notify = () => {}, me = () => null, onLoginRequired = () => {} }) {
   const messages = [];          // sorted by id, what is in the DOM
   const rows = new Map();       // id -> row element
   const pendingText = new Map();
@@ -60,7 +63,7 @@ export function initChat({ list, empty, jump, olderButton, socket, render, t, or
     }
     if (!continuesGroup(previous, message)) {
       const head = el('div', 'msg-head');
-      head.append(el('span', 'msg-name', message.role === 'user' ? t('chat.you') : t('app.title')));
+      head.append(el('span', 'msg-name', senderName(message, me(), t)));
       if (message.role === 'assistant') {
         const badge = el('span', 'badge');
         badge.dataset.role = 'badge';
@@ -144,7 +147,7 @@ export function initChat({ list, empty, jump, olderButton, socket, render, t, or
     if (state) {
       let text = '';
       if (message.local === 'sending') text = t('chat.sending');
-      else if (message.local === 'queued') text = t('chat.waiting');
+      else if (message.local === 'queued') text = queueText(message, t);
       else if (message.status === 'stopped') text = t('chat.stopped');
       else if (message.status === 'error') text = t('chat.error');
       state.textContent = text;
@@ -264,7 +267,11 @@ export function initChat({ list, empty, jump, olderButton, socket, render, t, or
     const url = new URL('/api/chat/history', origin);
     url.searchParams.set('limit', '50');
     if (before) url.searchParams.set('before', before);
-    const response = await fetch(url);
+    const response = await fetch(url, { credentials: 'same-origin' });
+    if (response.status === 401) {                  // no session: the login asks, then the page reloads
+      onLoginRequired();
+      return { messages: [], older: false };
+    }
     if (!response.ok) throw new Error(`history ${response.status}`);
     return response.json();
   }
@@ -370,14 +377,17 @@ export function initChat({ list, empty, jump, olderButton, socket, render, t, or
     socket.timeout(10000).emit('chat_send', { id: clientId, text }, (error, ack) => {
       const row = [...rows.values()].find((r) => r.dataset.client === clientId);
       const message = row ? messages.find((m) => m.id === row.dataset.id) : null;
-      if (error || !ack?.ok) {
+      // today's server answers {ok, message, queued}; IF-101 answers {id, position} (the mock server adds ok and message)
+      const accepted = ack?.ok ?? (ack?.id !== undefined);
+      if (error || !accepted) {
         if (message) place({ id: message.id, local: 'failed' });
         unsent.set(clientId, text);
         notify(ack?.error ?? t('chat.sending_failed'));
         return;
       }
       unsent.delete(clientId);
-      if (message && ack.message) place({ ...ack.message, client_id: clientId, local: ack.queued ? 'queued' : undefined });
+      const waiting = ack.queued ?? (ack.position >= 1);
+      if (message && ack.message) place({ ...ack.message, client_id: clientId, local: waiting ? 'queued' : undefined, position: ack.position });
     });
   }
 

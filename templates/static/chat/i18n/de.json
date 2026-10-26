@@ -96,5 +96,16 @@
   "shortcut.escape": "Menü, Liste oder Dialog schließen",
   "settings.token": "Editor-Token",
   "settings.token.placeholder": "aus data/editor_token.txt",
-  "settings.token.hint": "Einmal pro Gerät nötig, um Ausdrücke im Ausdruckseditor zu ändern. Der Editor liest es von hier."
+  "settings.token.hint": "Einmal pro Gerät nötig, um Ausdrücke im Ausdruckseditor zu ändern. Der Editor liest es von hier.",
+  "login.title": "Anmelden",
+  "login.user": "Konto",
+  "login.password": "Passwort",
+  "login.submit": "Anmelden",
+  "login.visible": "Alles hier ist für alle Nutzer dieser MIA sichtbar: das Gespräch, ihr Gedächtnis, die Workflows und jede Änderung mit ihrem Autor.",
+  "login.bad": "Konto oder Passwort ist falsch.",
+  "login.throttled": "Zu viele Versuche. Bitte eine Minute warten.",
+  "login.insecure": "Ein Passwort wird nur über HTTPS oder auf diesem Rechner (localhost) gesendet. Bitte die Seite über HTTPS öffnen.",
+  "login.empty": "Bitte Konto und Passwort eingeben.",
+  "login.failed": "Die Anmeldung hat nicht geklappt. Ist MIA erreichbar?",
+  "chat.position": "Wartet, Platz {n}"
 }

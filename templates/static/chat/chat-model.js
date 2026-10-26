@@ -36,9 +36,23 @@ function minutesBetween(a, b) {
   return Math.abs(new Date(a).getTime() - new Date(b).getTime()) / 60000;
 }
 
+/** who is shown above a message: MIA's name, "You" for my own messages, the account name of the other users (IF-101 `sender`) */
+export function senderName(message, me, t) {
+  if (message.role !== 'user') return t('app.title');
+  if (message.sender && message.sender !== me) return message.sender;
+  return t('chat.you');
+}
+
+/** the small text under a message that waits: its place in the queue (IF-101 `position`), or just "Waiting" for a server that sends none */
+export function queueText(message, t) {
+  if (message.local !== 'queued') return '';
+  return message.position ? t('chat.position', { n: message.position }) : t('chat.waiting');
+}
+
 /** a message continues the group of the previous one: same sender, close in time, no system notes */
 export function continuesGroup(previous, message) {
   if (!previous || previous.role !== message.role || message.role === 'system') return false;
+  if ((previous.sender ?? null) !== (message.sender ?? null)) return false;      // two users in a row are two groups
   if (Boolean(previous.auto) !== Boolean(message.auto)) return false;
   return minutesBetween(previous.created, message.created) <= GROUP_MINUTES;
 }

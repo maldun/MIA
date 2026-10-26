@@ -10,6 +10,7 @@ import { initSound } from './sound.js';
 import { initMenu } from './menu.js';
 import { initComposer } from './composer.js';
 import { initChat } from './chat.js';
+import { initLogin } from './login.js';
 import { initMood } from './mood.js';
 import { askConfirm, initPalette, loadCommands } from './palette.js';
 import { modelLabel } from './chat-model.js';
@@ -68,7 +69,19 @@ function showState(state) {
     chat?.loadLatest();      // first load, and what was missed while offline
   }
 }
-const socket = connect(showState);
+// a server with accounts (IF-101) answers 401 without a session: the login asks and the page reloads with the session cookie
+const login = initLogin({
+  dialog: $('login'),
+  form: $('login-form'),
+  userInput: $('login-user'),
+  passwordInput: $('login-password'),
+  errorLine: $('login-error'),
+  submitButton: $('login-submit'),
+  storage,
+  t,
+  onSuccess: () => location.reload(),
+});
+const socket = connect(showState, location.origin, () => login.open());
 
 // --- the character: framing in the free area, camera view, background, captions -----------------------------
 let viewMenu = null;
@@ -157,7 +170,11 @@ function toast(message) {
   live.textContent = message;
 }
 
-chat = initChat({ list: $('messages'), empty: $('empty'), jump: $('jump'), olderButton: $('older'), socket, render: renderMarkdown, t, notify: toast });
+chat = initChat({
+  list: $('messages'), empty: $('empty'), jump: $('jump'), olderButton: $('older'), socket, render: renderMarkdown, t, notify: toast,
+  me: () => storage.get('mia.account') || null,
+  onLoginRequired: () => login.open(),
+});
 
 let commands = [];
 loadCommands().then((list) => { commands = list; });
