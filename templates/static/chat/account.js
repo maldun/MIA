@@ -1,7 +1,7 @@
-// The account dialog (REQ-CLV-014): who is logged in (the account of a kept session) and the change of the user's own password.
+// The account dialog (REQ-CLV-014, REQ-CLV-022): who is logged in (the account of a kept session), the change of the user's own password and the logout.
 import { passwordProblem } from './panels-model.js';
 
-export function initAccount({ dialog, nameEl, form, oldInput, newInput, repeatInput, errorLine, closeButton, api, storage, t, notify = () => {} }) {
+export function initAccount({ dialog, nameEl, form, oldInput, newInput, repeatInput, errorLine, closeButton, logoutButton, api, storage, t, notify = () => {}, onLoggedOut = () => {} }) {
   function show(key) {
     errorLine.textContent = key ? t(key) : '';
     errorLine.hidden = !key;
@@ -34,6 +34,17 @@ export function initAccount({ dialog, nameEl, form, oldInput, newInput, repeatIn
     form.reset();                                          // the passwords are never kept in the page
     dialog.close();
     notify(t('account.changed'));
+  });
+  logoutButton.addEventListener('click', async () => {
+    try {
+      await api.logout();
+    } catch (error) {
+      // a session that is already gone is as good as a logout; any other failure keeps the user logged in and says so
+      if (error.status !== 401) { show(error.status === 0 ? 'chat.offline' : 'account.logout_failed'); return; }
+    }
+    form.reset();
+    dialog.close();
+    onLoggedOut();
   });
   closeButton.addEventListener('click', () => dialog.close());
   return { open };

@@ -35,6 +35,7 @@ export function createApi({ origin = location.origin, fetchFn = (url, init) => f
 
   return {
     whoami: () => request('GET', '/api/whoami'),
+    logout: () => request('POST', '/api/logout'),
     changePassword: (oldPassword, newPassword) => request('POST', '/api/change_password', { body: { old: oldPassword, new: newPassword } }),
     regenerate: (messageId) => request('POST', '/api/regenerate', { body: { message_id: messageId } }),
     speakAgain: (messageId) => request('POST', '/api/speak_again', { body: { message_id: messageId } }),

@@ -165,5 +165,7 @@
   "account.mismatch": "The two new passwords are not the same.",
   "account.same": "The new password must differ from the current one.",
   "account.wrong_old": "The current password is wrong.",
-  "account.failed": "The password could not be changed."
+  "account.failed": "The password could not be changed.",
+  "account.logout": "Log out",
+  "account.logout_failed": "Logging out failed."
 }

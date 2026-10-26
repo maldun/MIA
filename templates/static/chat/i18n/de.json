@@ -165,5 +165,7 @@
   "account.mismatch": "Die beiden neuen Passwörter sind nicht gleich.",
   "account.same": "Das neue Passwort muss sich vom aktuellen unterscheiden.",
   "account.wrong_old": "Das aktuelle Passwort ist falsch.",
-  "account.failed": "Das Passwort konnte nicht geändert werden."
+  "account.failed": "Das Passwort konnte nicht geändert werden.",
+  "account.logout": "Abmelden",
+  "account.logout_failed": "Das Abmelden hat nicht geklappt."
 }
