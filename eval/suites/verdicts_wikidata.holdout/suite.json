@@ -1,0 +1,8 @@
+{
+ "name": "verdicts_wikidata.holdout",
+ "description": "Near-miss number claims without evidence: a true value from Wikidata (CC0) and a false twin made by a seeded rule (factor, swapped digits, unit off by 10, year off).",
+ "target": {
+  "kind": "pipeline",
+  "skill": "verify_claim"
+ }
+}

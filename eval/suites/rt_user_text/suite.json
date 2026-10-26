@@ -1,0 +1,7 @@
+{
+ "name": "rt_user_text",
+ "description": "Red-team cases (dev part), labelled by a person; target not decided yet",
+ "target": {
+  "kind": "pending"
+ }
+}

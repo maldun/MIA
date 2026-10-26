@@ -1,4 +1,4 @@
-# IF-101 – Chat, expression, audio and REST API, v1
+# IF-101 – Chat, expression, audio and REST API, v3
 
 Owner (provider): N-2 Backend (child N-2.1)   Consumers: N-1 Web Frontend   Decided by: N-0   Mock complexity: 3 (stream of events, queue, clock, small stores)   Suite: `tests/acceptance/contract/test_if_101_chat_api.py`
 
@@ -54,6 +54,8 @@ Events (server to every connected page):
 |---|---|---|
 | wrong account or password | 401 `bad_credentials` | no session |
 | request without session | 401 `unauthenticated` | nothing changed |
+| request with an `Origin` that is not one of the server's own addresses **[v3]** | 403 `bad_origin` | nothing changed, also with a valid session |
+| `login` or `change_password` over plain HTTP from an address other than the machine of the server **[v3]** | 403 `insecure_channel` | the password was not checked, no session, no cookie |
 | too many failed logins | 429 `throttled` | right password works again after 60 s |
 | empty text | 422 `empty_text` | nothing queued or stored |
 | queue full | 503 `queue_full` | nothing queued; queued messages unaffected |
@@ -79,3 +81,4 @@ Events (server to every connected page):
 | v0 | 2026-10-25 | first draft from today's events plus the HLS additions | – |
 | v1 | 2026-10-26 | stored message and client id in the ack and the events; session as cookie; whoami, change_password, regenerate, speak_again, account, vote, score, items, save_item, delete_item, trust, set_trust, persona, save_persona; events variant, score, item_changed, trust_changed, persona_changed | A-03 |
 | v2 | 2026-10-26 | `logout` | A-04 |
+| v3 | 2026-10-27 | the errors `403 bad_origin` and `403 insecure_channel` (REQ-API-007, REQ-API-008, found in N-2.1 T-02); the title says v3 | A-05 |

@@ -1,0 +1,8 @@
+{
+ "name": "verdicts_injection",
+ "description": "Red-team cases for the verification gate: instructions in the evidence, in the claim, hidden instructions, role confusion, oversized evidence. Fictional entities, labelled by the owner.",
+ "target": {
+  "kind": "pipeline",
+  "skill": "verify_claim"
+ }
+}

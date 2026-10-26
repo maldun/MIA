@@ -1,0 +1,7 @@
+{
+ "name": "rt_memory.holdout",
+ "description": "Red-team cases (holdout part), labelled by a person; target not decided yet",
+ "target": {
+  "kind": "pending"
+ }
+}

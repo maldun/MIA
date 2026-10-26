@@ -10,7 +10,7 @@ import unittest
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "mocks"))
 
 REAL_NOT_READY = {
-    "IF-101": "N-2 Backend not integrated yet",
+    "IF-101": "N-2 Backend not integrated yet",       # since A-05 login, session and logout are real (real_subject); the other operations skip
     "IF-102": "N-3 Database not integrated yet",
     "IF-103": "the real model server is only used in stage 2",
     "IF-104": "N-2 Backend not integrated yet",
@@ -141,8 +141,64 @@ class _StorageAdapter:
         return call
 
 
+class _ChatApiAdapter:
+    """IF-101 on the real Backend as far as it exists (amendment A-05; N-2.1 T-01 and T-02: login, throttling, whoami, change_password, logout). The sessions run on the
+    Storage layer in a fresh folder and a clock that `advance_time` moves. The Backend refuses every request without a valid session with 401, so every other operation
+    answers 401 for an unknown session, exactly as the real guard does; for a valid session it skips the test (the operation is not built yet: N-2.1 T-03 and the other
+    N-2 nodes). The adapter turns the error class of the service into the one of the mock, which the suite expects; production code does not import from tests/."""
+
+    ACCOUNTS = {"anna": "pw-anna", "ben": "pw-ben"}                 # the accounts of the mock, so that the same suite runs on both
+
+    def __init__(self):
+        import tempfile
+        from errors import ApiError
+        from storage import Storage
+        from storage_files import FileBackend
+        import accounts
+        import api_sessions
+        store = Storage(FileBackend(tempfile.mkdtemp()))
+        for name, password in self.ACCOUNTS.items():
+            accounts.create(store, name, password, "contract suite")
+        self._now = 1000.0
+        self._service, self._service_error, self._error = api_sessions.SessionService(store, clock=lambda: self._now), api_sessions.ApiError, ApiError
+
+    def advance_time(self, seconds):
+        self._now += seconds
+
+    def _call(self, name, *args):
+        try:
+            return getattr(self._service, name)(*args)
+        except self._service_error as err:
+            raise self._error(err.status, err.code, err.rule)
+
+    def login(self, user, password):
+        return self._call("login", user, password)
+
+    def whoami(self, session):
+        return self._call("whoami", session)
+
+    def change_password(self, session, old, new):
+        return self._call("change_password", session, old, new)
+
+    def logout(self, session):
+        return self._call("logout", session)
+
+    def connect(self, session):
+        """opening the socket is checking the session (the connect guard of the Backend); the events that follow are not built yet"""
+        self._call("whoami", session)
+
+    def __getattr__(self, name):
+        if name.startswith("_"):
+            raise AttributeError(name)
+
+        def not_built(session=None, *args, **kwargs):
+            self._call("whoami", session)                            # an unknown session is 401 unauthenticated, as for every request of the real Backend
+            raise unittest.SkipTest("IF-101 %s is not in the real Backend yet" % name)
+        return not_built
+
+
 def real_subject(interface):
-    """The real provider of an interface once its node is integrated (amendment A-02: IF-301, IF-302, IF-102 of the Database); None until then."""
+    """The real provider of an interface once its node is integrated (amendment A-02: IF-301, IF-302, IF-102 of the Database; amendment A-05: IF-101 partly); None until then."""
     if REPO not in sys.path:
         sys.path.insert(0, REPO)
     if interface == "IF-301":
@@ -153,4 +209,6 @@ def real_subject(interface):
         return record_tables
     if interface == "IF-102":
         return _StorageAdapter()
+    if interface == "IF-101":
+        return _ChatApiAdapter()
     return None
