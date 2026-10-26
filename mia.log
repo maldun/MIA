@@ -1,5 +1,0 @@
-2026.10.26 16:10:27: INFO     preset folder /tmp/tmpks9zwbeo/MIA/data/presets filled with 14 default presets
-2026.10.26 16:10:27: INFO     preset editor: new token created in /tmp/tmpks9zwbeo/MIA/data/editor_token.txt
-2026.10.26 16:10:27: INFO     preset editor: changing presets needs the editor token (/tmp/tmpks9zwbeo/MIA/data/editor_token.txt)
-2026.10.26 16:10:27: WARNING  web search: SearXNG does not answer at http://localhost:8590 and could not be started (neither podman nor docker is installed). Create it with tools/searxng/run.sh start
-2026.10.26 16:10:29: INFO     Rendering index.html template

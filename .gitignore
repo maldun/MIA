@@ -31,3 +31,6 @@ calibration.txt
 
 # suites
 eval/suites/verdicts_vitaminc*/
+
+# log of a running MIA (the test runs in the container write it into the checkout)
+mia.log
