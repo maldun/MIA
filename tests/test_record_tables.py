@@ -16,10 +16,10 @@ RUN = {"workflow": "lookup", "workflow_version": 1, "model_pin": "MP-light", "be
 
 class Definitions(unittest.TestCase):
     @mark.req("REQ-RTB-001", "REQ-RTB-006", "IF-302")
-    def test_ten_tables_all_versioned_and_deletable_exactly_where_planned(self):
+    def test_all_tables_versioned_and_deletable_exactly_where_planned(self):
         """TC-RTB-001, TC-RTB-006."""
         tables = definitions()
-        self.assertEqual(set(tables), {"history", "memory", "votes", "tasks", "memos", "accounts", "presets", "gestures", "runs", "source_trust"})
+        self.assertEqual(set(tables), {"history", "memory", "votes", "tasks", "memos", "accounts", "presets", "gestures", "runs", "source_trust", "cases", "behaviours"})
         self.assertTrue(all(t["versioned"] for t in tables.values()))
         self.assertEqual({k for k, t in tables.items() if t["deletable"]}, {"history", "memory", "tasks", "memos"})
         self.assertEqual(tables["source_trust"], {"versioned": True, "deletable": False})

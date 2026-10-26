@@ -26,7 +26,7 @@ class OpsApiTest(unittest.TestCase):
         log = ChatLog(os.path.join(self.dir, "log.jsonl"))
         self.chat = ChatService(lambda e, p: self.events.append((e, p)), log, MoodTracker(os.path.join(ROOT, "moods.json")),
                                 lambda text, on_delta, on_emotion, stop: "One. Two.", queue_size=5, spawn=lambda t: t(),
-                                votes=Storage(FileBackend(os.path.join(self.dir, "db"))))
+                                votes=Storage(FileBackend(os.path.join(self.dir, "db"))), behaviours=lambda: ["wave"])
         app = Flask(__name__)
 
         @app.before_request
@@ -57,6 +57,19 @@ class OpsApiTest(unittest.TestCase):
         self.assertEqual(self.client.get("/api/account?message_id=nope").status_code, 404)
         self.assertEqual(self.client.post("/api/regenerate", json={"message_id": self.answer}).get_json()["position"], 1)
         self.assertEqual(self.client.post("/api/regenerate", json={"message_id": "nope"}).status_code, 404)
+
+    def test_counters_are_listed_and_reset(self):
+        self.client.post("/api/vote", json={"subject": "wave", "category": "character_behaviour", "value": -1})
+        self.assertEqual(self.client.get("/api/counters").get_json()["wave"]["net"], -1)
+        self.events.clear()
+        got = self.client.post("/api/reset_counter", json={"name": "wave"})
+        self.assertEqual((got.status_code, got.get_json()["net"]), (200, 0))
+        self.assertEqual(self.events, [("counters_changed", {"name": "wave", "author": "anna"})])
+        missing = self.client.post("/api/reset_counter", json={"name": "nope"})
+        self.assertEqual((missing.status_code, missing.get_json()), (404, {"error": "not_found"}))
+        self.assertEqual(self.client.post("/api/reset_counter", json={}).status_code, 404)
+        unknown = self.client.post("/api/vote", json={"subject": "dance", "category": "character_behaviour", "value": -1})
+        self.assertEqual((unknown.status_code, unknown.get_json()), (422, {"error": "invalid_vote", "rule": "subject"}))
 
 
 if __name__ == "__main__":

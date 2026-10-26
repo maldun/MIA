@@ -1,14 +1,14 @@
 """
-The ten record tables and their validation: IF-302, provided to the Storage layer (REQ-RTB-001 to REQ-RTB-006).
+The record tables and their validation: IF-302, provided to the Storage layer (REQ-RTB-001 to REQ-RTB-006).
 
-All tables are versioned. Deletable are only the records a user may remove (history, memory, tasks, memos); votes, accounts, run results, presets, gestures
-and source trust keep every version. validate() checks what the tables must be able to rely on and nothing else: required fields, the four vote
+All tables are versioned. Deletable are only the records a user may remove (history, memory, tasks, memos); votes, accounts, run results, presets, gestures,
+source trust, cases and counters keep every version. validate() checks what the tables must be able to rely on and nothing else: required fields, the four vote
 categories and the vote value. It never changes a document (a task or memo comes back word for word, FR-28).
 """
 
 TABLES = {name: {"versioned": True, "deletable": name in ("history", "memory", "tasks", "memos")}
-          for name in ("history", "memory", "votes", "tasks", "memos", "accounts", "presets", "gestures", "runs", "source_trust")}
-REQUIRED = {"memory": ("text", "source"), "votes": ("user", "subject", "category", "value"), "tasks": ("text",), "memos": ("text",),
+          for name in ("history", "memory", "votes", "tasks", "memos", "accounts", "presets", "gestures", "runs", "source_trust", "cases", "behaviours")}     # cases: proposed benchmark cases (REQ-CHA-016); behaviours: the adaptation counters (REQ-CHA-017, -018)
+REQUIRED = {"cases": ("question", "answer", "status"), "behaviours": ("name", "net", "votes"), "memory": ("text", "source"), "votes": ("user", "subject", "category", "value"), "tasks": ("text",), "memos": ("text",),
             "runs": ("workflow", "workflow_version", "model_pin", "benchmark_version")}
 CATEGORIES = ("answer_quality", "reactions", "character_behaviour", "service")
 

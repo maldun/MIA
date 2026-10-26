@@ -26,7 +26,9 @@ class RecordTablesContract(unittest.TestCase):
         for table in ("votes", "runs"):
             self.assertFalse(defs[table]["deletable"], table)
         self.assertTrue(all(d["versioned"] for d in defs.values()))
-        self.assertTrue({"history", "memory", "votes", "tasks", "memos", "accounts", "presets", "gestures", "runs", "source_trust"} <= set(defs))
+        self.assertTrue({"history", "memory", "votes", "tasks", "memos", "accounts", "presets", "gestures", "runs", "source_trust", "cases", "behaviours"} <= set(defs))
+        for table in ("cases", "behaviours"):                                   # v1 (A-08): proposed benchmark cases and the adaptation counters keep every version
+            self.assertEqual(defs[table], {"versioned": True, "deletable": False}, table)
 
     @mark.req("IF-302", "REQ-DB-012")
     @each_provider(IF)
@@ -44,6 +46,9 @@ class RecordTablesContract(unittest.TestCase):
         self.assertEqual(tables.validate("memory", {"text": "likes tea"}), {"rule": "schema", "detail": "source"})
         self.assertIsNone(tables.validate("memos", {"text": "Call Zoë at 9:00 – bring \"the\" notes\n\tdone ✓"}))
         self.assertEqual(tables.validate("runs", {"workflow": "lookup"})["rule"], "schema")
+        self.assertEqual(tables.validate("cases", {"question": "q", "status": "proposed"}), {"rule": "schema", "detail": "answer"})
+        self.assertIsNone(tables.validate("cases", {"question": "q", "answer": "a", "status": "proposed"}))
+        self.assertIsNone(tables.validate("behaviours", {"name": "wave", "net": -5, "votes": 5}))
         with self.assertRaises(ValueError):
             tables.validate("workflows", {})
 
