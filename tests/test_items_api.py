@@ -34,8 +34,8 @@ class ItemsApiTest(unittest.TestCase):
         app.register_blueprint(create_items_blueprint(self.storage, lambda e, p: self.events.append((e, p)), clock=lambda: self.now[0]))
         self.client = app.test_client()
 
-    def save(self, kind, text, id=None, source=None):
-        return self.client.post("/api/items", json={"kind": kind, "id": id, "text": text, "source": source})
+    def save(self, kind, text, id=None, source=None, due=None):
+        return self.client.post("/api/items", json={"kind": kind, "id": id, "text": text, "source": source, "due": due})
 
     def test_a_new_record_comes_back_byte_for_byte_and_is_listed(self):
         got = self.save("tasks", TEXT)
@@ -83,6 +83,30 @@ class ItemsApiTest(unittest.TestCase):
         self.assertEqual(self.client.delete("/api/items?kind=tasks&id=" + record["id"]).get_json(), {"deleted": True})
         self.assertEqual(self.events[-1], ("item_changed", {"kind": "tasks", "id": record["id"], "author": "ben", "deleted": True}))
         self.assertEqual(self.client.get("/api/items?kind=tasks").get_json(), [])
+
+    # --- IF-101 v6 (A-09): the due time of a task, which the recitation at the due time reads (REQ-CHA-019) ---
+    def test_a_task_keeps_and_shows_its_due_time_and_a_change_without_one_clears_it(self):
+        record = self.save("tasks", "call Zoe", due="2026-11-02T09:00:00Z").get_json()
+        self.assertEqual(record["due"], "2026-11-02T09:00:00Z")
+        self.assertEqual(self.client.get("/api/items?kind=tasks").get_json()[0]["due"], "2026-11-02T09:00:00Z")
+        self.assertNotIn("due", self.save("tasks", "call Zoe", id=record["id"]).get_json())
+        self.assertNotIn("due", self.save("tasks", "no due").get_json())
+
+    def test_a_bad_due_time_or_a_due_time_on_another_kind_is_refused(self):
+        for due in ("tomorrow", "2026-11-02", "2026-11-02T09:00:00+01:00", "2026-13-02T09:00:00Z", 5):
+            got = self.save("tasks", "x", due=due)
+            self.assertEqual((got.status_code, got.get_json()), (422, {"error": "invalid_item", "rule": "due"}), due)
+        self.assertEqual(self.save("memos", "x", due="2026-11-02T09:00:00Z").get_json(), {"error": "invalid_item", "rule": "due"})
+        self.assertEqual(self.client.get("/api/items?kind=tasks").get_json(), [])
+
+    def test_a_text_change_keeps_the_mark_that_the_task_was_recited_but_a_new_due_time_clears_it(self):
+        record = self.save("tasks", "water", due="2026-11-02T09:00:00Z").get_json()
+        doc = self.storage.get("tasks", record["id"])["doc"]
+        self.storage.put("tasks", record["id"], dict(doc, recited="2026-11-02T09:00:05Z"), "MIA")
+        self.save("tasks", "water the herbs", id=record["id"], due="2026-11-02T09:00:00Z")
+        self.assertEqual(self.storage.get("tasks", record["id"])["doc"]["recited"], "2026-11-02T09:00:05Z")
+        self.save("tasks", "water the herbs", id=record["id"], due="2026-11-03T09:00:00Z")
+        self.assertNotIn("recited", self.storage.get("tasks", record["id"])["doc"])
 
 
 if __name__ == "__main__":

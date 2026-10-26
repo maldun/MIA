@@ -211,7 +211,7 @@ def r_items():
 
 @w.app.post("/api/items")
 def r_save_item():
-    return run_api(lambda s: api.save_item(s, body().get("kind"), body().get("id"), body().get("text"), body().get("source")))
+    return run_api(lambda s: api.save_item(s, body().get("kind"), body().get("id"), body().get("text"), body().get("source"), **({"due": body()["due"]} if body().get("due") else {})))      # IF-101 v6 (A-09); an older mock has no due
 
 
 @w.app.delete("/api/items")
