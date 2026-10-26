@@ -7,8 +7,9 @@ DEFINITIONS = {
     "memos": {"versioned": True, "deletable": True}, "accounts": {"versioned": True, "deletable": False},
     "presets": {"versioned": True, "deletable": False}, "gestures": {"versioned": True, "deletable": False},
     "runs": {"versioned": True, "deletable": False}, "source_trust": {"versioned": True, "deletable": False},
+    "cases": {"versioned": True, "deletable": False}, "behaviours": {"versioned": True, "deletable": False},      # v1 (amendment A-08)
 }
-REQUIRED = {"memory": ("text", "source"), "votes": ("user", "subject", "category", "value"), "tasks": ("text",), "memos": ("text",),
+REQUIRED = {"cases": ("question", "answer", "status"), "behaviours": ("name", "net", "votes"),"memory": ("text", "source"), "votes": ("user", "subject", "category", "value"), "tasks": ("text",), "memos": ("text",),
             "runs": ("workflow", "workflow_version", "model_pin", "benchmark_version")}
 CATEGORIES = ("answer_quality", "reactions", "character_behaviour", "service")
 

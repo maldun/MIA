@@ -1,4 +1,4 @@
-# IF-101 – Chat, expression, audio and REST API, v4
+# IF-101 – Chat, expression, audio and REST API, v5
 
 Owner (provider): N-2 Backend (child N-2.1)   Consumers: N-1 Web Frontend   Decided by: N-0   Mock complexity: 3 (stream of events, queue, clock, small stores)   Suite: `tests/acceptance/contract/test_if_101_chat_api.py`
 
@@ -21,8 +21,10 @@ The server sets the session at `login` as a cookie `mia_session` (HttpOnly, Same
 | `regenerate(session, message_id)` **[v1]** | id of the LAST answer | `{"position", "asked"}` | queued like a message; the new answer is a new message, the old one stays; 404 unknown id; 422 `not_the_last_answer`; 503 `queue_full` |
 | `speak_again(session, message_id)` **[v1]** | id of any answer | `{"sentences": n}` | one `audio_chunk` per sentence to every connected page; 404 unknown id |
 | `account(session, message_id)` **[v1]** | id of an answer | list of `{"seq", "plain"}` | the step-by-step account of the answer in order (from the run log, IF-401); 404 for a message that is not an answer |
-| `vote(session, subject, category, value)` **[v1]** | subject = message id (answers) or a name; category in `answer_quality`, `reactions`, `character_behaviour`, `service`; value 1 or -1 | `{"stored": true, "score"}` | kept with user and time (REQ-BE-028); `422 invalid_vote` with rule `category` or `value`; 404 for an unknown answer |
+| `vote(session, subject, category, value)` **[v1]** | subject = message id (answers) or a name; category in `answer_quality`, `reactions`, `character_behaviour`, `service`; value 1 or -1 | `{"stored": true, "score"}` | kept with user and time (REQ-BE-028); `422 invalid_vote` with rule `category` or `value`, or **[v5]** `subject` (a `character_behaviour` vote on a name that is not on the list of behaviours); 404 for an unknown answer |
 | `score(session)` **[v1]** | | `{"overall", "categories", "votes", "series"}` **[v4: series]** | sums per category and overall; `series` = the same sums per ISO week of the vote's time, `[{"week": "YYYY-Www", "overall", "categories"}]`, oldest first, only weeks with a vote, so the sums of the weeks equal the totals (REQ-CLV-010); the event `score` pushes the same after each vote |
+| `counters(session)` **[v5]** | | `{name: {"net", "votes", "chance", "reset_at"}}` for every behaviour of the list | the adaptation counters (REQ-BE-031, REQ-CHA-018): `net` = sum of the `character_behaviour` votes on that name since the last reset, `chance` = how likely the behaviour is shown at one opportunity (1.0, and at most 0.01 from a `net` of -5 or less; REQ-BE-030), `reset_at` = time of the last reset or `null`; every user sees them (CON-6) |
+| `reset_counter(session, name)` **[v5]** | name of a behaviour | the counter of that name after the reset | back to the default rate, the votes stay stored and only later ones count; event `counters_changed {name, author}`; 404 `not_found` for a name that is not on the list |
 | `items(session, kind)` **[v1]** | kind in `tasks`, `memos`, `memory` | list of `{id, text, author, created, source?}` | every user sees all records (CON-6) |
 | `save_item(session, kind, id, text, source)` **[v1]** | id None = new | the stored record | memory needs a `source` (422 `invalid_item`, rule `source`); empty text 422; 404 unknown id; text comes back byte for byte (FR-28); event `item_changed` to the others |
 | `delete_item(session, kind, id)` **[v1]** | | `{"deleted": true}` | any user may delete any record; 404 unknown id; event `item_changed` with `deleted: true` |
@@ -48,6 +50,7 @@ Events (server to every connected page):
 | `item_changed` **[v1]** | `{kind, id, author, deleted}` |
 | `trust_changed` **[v1]** | `{source, old, new, author}` |
 | `persona_changed` **[v1]** | `{author}` |
+| `counters_changed` **[v5]** | `{name, author}` |
 
 ## Errors
 | Condition | Signal | What the consumer may rely on afterwards |
@@ -83,3 +86,4 @@ Events (server to every connected page):
 | v2 | 2026-10-26 | `logout` | A-04 |
 | v3 | 2026-10-27 | the errors `403 bad_origin` and `403 insecure_channel` (REQ-API-007, REQ-API-008, found in N-2.1 T-02); the title says v3 | A-05 |
 | v4 | 2026-10-27 | `score` and the event `score` carry `series`, the sums per ISO week (owner: score over time "by time", per week) | A-06 |
+| v5 | 2026-10-27 | `counters`, `reset_counter` and the event `counters_changed` (REQ-BE-030, REQ-BE-031); `invalid_vote` rule `subject`; `regenerate` of a known message that is not the last answer, a user message included, is `422 not_the_last_answer` (404 stays for an unknown id); the list of behaviours is the names of `character_behaviour`: `greet`, `idle`, `no`, `talk`, `yes` for the mock | A-08 |

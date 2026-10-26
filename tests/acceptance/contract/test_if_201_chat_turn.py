@@ -135,6 +135,29 @@ class ChatTurnContract(unittest.TestCase):
         self.assertEqual(code_of(lambda: chat.vote("anna", "nope", "answer_quality", 1)), "not_found")
         self.assertEqual(chat.score()["votes"], 2)                                  # refused votes are not stored
 
+    @mark.req("IF-201", "REQ-CHA-017", "REQ-CHA-018")
+    @each_provider(IF)
+    def test_the_counters_follow_the_votes_and_a_reset_restores_the_default_rate(self, chat):
+        """TC-IF-201-08 (v2): 5 net negative votes on a behaviour give a chance of at most 0.01; a reset restores 1.0 and announces counters_changed; a name that is not on the list is invalid_vote (subject) or not_found."""
+        seen = []
+        chat.subscribe(seen.append)
+        self.assertEqual(sorted(chat.counters()), ["greet", "idle", "no", "talk", "yes"])
+        for account in ("anna", "ben", "carl", "dora", "emil"):
+            chat.vote(account, "talk", "character_behaviour", -1)
+        self.assertEqual((chat.counters()["talk"]["net"], chat.counters()["talk"]["votes"]), (-5, 5))
+        self.assertLessEqual(chat.counters()["talk"]["chance"], 0.01)
+        chat.advance_time(60)
+        self.assertEqual(chat.reset_counter("ben", "talk")["chance"], 1.0)
+        self.assertEqual([e["payload"] for e in seen if e["event"] == "counters_changed"], [{"name": "talk", "author": "ben"}])
+        self.assertEqual(chat.score()["votes"], 5)                                  # the votes stay
+        self.assertEqual(code_of(lambda: chat.reset_counter("ben", "dance")), "not_found")
+        try:
+            chat.vote("anna", "dance", "character_behaviour", -1)
+        except ServiceError as err:
+            self.assertEqual((err.code, err.rule), ("invalid_vote", "subject"))
+        else:
+            self.fail("no ServiceError raised")
+
 
 if __name__ == "__main__":
     unittest.main()
