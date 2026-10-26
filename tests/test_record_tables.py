@@ -95,6 +95,23 @@ class Validation(unittest.TestCase):
         for table in ("history", "accounts", "presets", "gestures", "source_trust"):
             self.assertIsNone(validate(table, {"anything": 1}))
 
+    @mark.req("REQ-CHA-011", "IF-302")
+    def test_a_memory_record_may_carry_kind_status_subject_and_updated_and_an_old_one_stays_valid(self):
+        """IF-302 v2 (A-10): kind is fact, preference or commitment and status is active or replaced, when present; a record of v1 (text and source only) is still valid."""
+        old = {"text": "likes tea", "source": "chat"}
+        self.assertIsNone(validate("memory", old))
+        full = dict(old, kind="preference", status="active", subject="anna", updated="2026-10-27T10:00:00Z")
+        self.assertIsNone(validate("memory", full))
+        for kind in ("fact", "preference", "commitment"):
+            self.assertIsNone(validate("memory", dict(old, kind=kind)))
+        for status in ("active", "replaced"):
+            self.assertIsNone(validate("memory", dict(old, status=status)))
+        self.assertEqual(validate("memory", dict(old, kind="opinion")), {"rule": "schema", "detail": "kind"})
+        self.assertEqual(validate("memory", dict(old, status="deleted")), {"rule": "schema", "detail": "status"})
+        self.assertEqual(validate("memory", dict(old, kind=None)), {"rule": "schema", "detail": "kind"})
+        self.assertEqual(validate("memory", {"text": "x", "kind": "fact"}), {"rule": "schema", "detail": "source"})      # the source stays required, and is checked first
+        self.assertIsNone(validate("tasks", {"text": "x", "kind": "anything"}))                                           # only memory has these fields
+
 
 if __name__ == "__main__":
     unittest.main()
