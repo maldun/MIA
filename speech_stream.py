@@ -42,7 +42,10 @@ class SpeechStreamer:
     Usage: call update(text) with the (emotion filtered) text so far, whenever it
     grows; then finish(text) with the complete text and wait() until it is spoken.
     """
-    def __init__(self,host,port):
+    def __init__(self,host,port,repair=None,settle=None):
+        # repair/settle: the voice speaks what the page shows (REQ-CHA-014): a growing text is cut to its settled part first, then repaired
+        self._repair = repair
+        self._settle = settle or (lambda text: text)
         self._host = host
         self._port = port
         self._sock = None
@@ -78,12 +81,16 @@ class SpeechStreamer:
         Sends all sentences which are complete. The last sentence is kept
         back, since it may still grow (or be part of an emotion keyword).
         """
+        if self._repair:
+            text = self._repair(self._settle(text))
         self._send(self.split(text, final=False)[self._sent:-1])
 
     def finish(self,text):
         """
         Sends the rest of the final text and the end marker. Does not wait.
         """
+        if self._repair:
+            text = self._repair(text)
         self._send(self.split(text)[self._sent:])
         if self._sock is not None and not self._failed:
             try:

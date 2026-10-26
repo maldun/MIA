@@ -43,7 +43,7 @@ from .speech_stream import SpeechStreamer
 from .shutdown import request_shutdown
 from .presets_api import init_presets_api
 from .chat_log import ChatLog
-from .chat_service import ChatService, behaviours_from_file
+from .chat_service import ChatService, behaviours_from_file, settled
 from .chat_api import create_blueprint as create_chat_blueprint
 from . import accounts_api
 from .chat_ops_api import create_chat_ops_blueprint
@@ -345,7 +345,8 @@ def converse(message,on_delta=None,on_emotion=None,should_stop=None):
     time.sleep(1)
     
     # MIA starts to speak while the answer is still generated
-    streamer = SpeechStreamer(get_websocket_url(address=ADDRESS,protocol=PROTOCOL),SOUND_PORT)
+    streamer = SpeechStreamer(get_websocket_url(address=ADDRESS,protocol=PROTOCOL),SOUND_PORT,
+                              repair=lambda text: behaviour.apply_rules(text)["text"],settle=settled)      # the voice speaks the repaired text the page shows (REQ-CHA-014)
     reactions = []
     def react(emotion):
         # only the first expression plays its sound, otherwise it would cut off the speech
