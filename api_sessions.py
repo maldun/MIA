@@ -1,11 +1,12 @@
 """
-Login, session, throttling, own password, owner-only accounts and logout of the Backend (N-2.1 T-01: REQ-API-003 to -006 and -017, REQ-BE-077).
+Login, session, throttling, own password and logout of the Backend (N-2.1 T-01: REQ-API-003 to -005 and -017, REQ-BE-077).
 
 Framework free: the web layer (web_app.py) calls these methods and turns an ApiError into its status and `{"error": code}`. The operations and errors are those of
 IF-101 (contracts/IF-101-chat-api.md): login, whoami, change_password, logout. Accounts live in the storage interface (IF-102) through accounts.py; a session
 is a random token kept in memory only, so a restart logs everybody out (the page then asks for the login again).
 
-Creating an account is not an operation of IF-101; `create_account` is the rule of REQ-BE-011 for whoever offers it (the owner's tool): only the owner may.
+Creating an account is not an operation of this service or of IF-101 (decision of the owner, 2026-10-27): the owner makes accounts on the machine with
+tools/accounts_cli.py, so no request can create one (REQ-API-006).
 """
 import secrets
 import time
@@ -21,7 +22,7 @@ MIN_PASSWORD = 8                 # characters (IF-101, change_password)
 
 
 class ApiError(Exception):
-    """The errors of IF-101: status 401 unauthenticated / bad_credentials, 403 forbidden, 409 conflict, 422 weak_password, 429 throttled."""
+    """The errors of IF-101: status 401 unauthenticated / bad_credentials, 422 weak_password, 429 throttled."""
 
     def __init__(self, status, code, rule=None):
         super().__init__("%s %s%s" % (status, code, ": %s" % rule if rule else ""))
@@ -29,9 +30,9 @@ class ApiError(Exception):
 
 
 class SessionService:
-    def __init__(self, store, owner=None, clock=time.time):
-        """store: a provider of IF-102 (accounts table); owner: the account that may create accounts (None: nobody)"""
-        self.store, self.owner, self._clock = store, owner, clock
+    def __init__(self, store, clock=time.time):
+        """store: a provider of IF-102 (accounts table)"""
+        self.store, self._clock = store, clock
         self._sessions = {}                 # token -> account
         self._failed = {}                   # account -> times of the failed logins
         self._listeners = []                # called with the token of a session that ended
@@ -82,20 +83,6 @@ class SessionService:
         self._check_new(new)
         accounts.set_password(self.store, user, new, user)
         return {"changed": True}
-
-    def create_account(self, token, name, password):
-        """REQ-API-006: only the owner; a taken name is a 409, a weak password a 422"""
-        user = self._user(token)
-        if self.owner is None or user != self.owner:
-            raise ApiError(403, "forbidden")
-        self._check_new(password)
-        try:
-            accounts.create(self.store, name, password, user)
-        except ValueError as exc:
-            if "exists" in str(exc):
-                raise ApiError(409, "conflict")
-            raise ApiError(422, "invalid")
-        return {"created": name}
 
     @staticmethod
     def _check_new(password):
