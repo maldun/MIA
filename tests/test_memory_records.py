@@ -12,7 +12,7 @@ sys.path.insert(0, ROOT)
 sys.path.insert(0, os.path.join(ROOT, "tests", "helpers"))
 
 from markers import mark                                  # noqa: E402
-from memory_records import MemoryRecords, MemoryRefused, tokens   # noqa: E402
+from memory_records import MemoryRecords, MemoryRefused, memory_hooks, tokens   # noqa: E402
 from storage import Storage                               # noqa: E402
 from storage_files import FileBackend                     # noqa: E402
 
@@ -138,6 +138,31 @@ class MemoryTest(unittest.TestCase):
         self.assertEqual(self.memory.remember("anna", "m1", "I like tea", "user", lambda text, known: "not a list"), [])
         self.assertEqual(self.stored(), [])
         self.assertEqual(self.memory.remember("anna", "m1", "   ", "user", lambda text, known: self.fail("a blank message is not asked about")), [])
+
+    @mark.req("REQ-CHA-011")
+    def test_the_hooks_for_the_app_remember_a_user_message_and_give_the_block_for_a_question(self):
+        calls = []
+
+        def run_skill(inputs):
+            calls.append(inputs)
+            return {"records": [{"kind": "preference", "text": "likes tea"}]}
+
+        provider, remember = memory_hooks(self.memory, run_skill)
+        self.assertEqual(provider("what tea?"), "")                                                  # nothing known yet: no block
+        self.assertEqual(len(remember("anna", "m1", "I like tea")), 1)
+        self.assertEqual(calls, [{"text": "I like tea", "known": ""}])
+        self.assertEqual(provider("which tea do I like?"), "- preference: likes tea (m1)")
+
+    @mark.req("REQ-CHA-011")
+    def test_the_hooks_survive_a_skill_that_fails_or_answers_something_else(self):
+        def failing(inputs):
+            raise RuntimeError("model down")
+
+        _provider, remember = memory_hooks(self.memory, failing)
+        self.assertEqual(remember("anna", "m1", "I like tea"), [])
+        _provider, remember = memory_hooks(self.memory, lambda inputs: "not a mapping")
+        self.assertEqual(remember("anna", "m1", "I like tea"), [])
+        self.assertEqual(self.stored(), [])
 
 
 if __name__ == "__main__":

@@ -34,8 +34,8 @@ DEV = re.compile(r'"split":\s*"dev"')
 REPLACES = re.compile(r"^(.*?)\s*\(replaces:\s*(.*?)\)\s*$")
 
 
-def dev_cases():
-    with open(SAMPLE, encoding="utf-8") as fp:
+def dev_cases(sample=SAMPLE):
+    with open(sample, encoding="utf-8") as fp:
         return [json.loads(line) for line in fp if DEV.search(line)]
 
 
@@ -88,6 +88,7 @@ def run_case(core, case, work):
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--repeats", type=int, default=3)
+    parser.add_argument("--sample", default=SAMPLE, help="the memory sample (default: the one of this checkout); only its dev lines are read")
     parser.add_argument("--cfg", default=default_path(REPO))
     parser.add_argument("--log", default=os.path.join(tempfile.gettempdir(), "memory_write_dev_run.jsonl"))
     args = parser.parse_args()
@@ -104,7 +105,7 @@ def main():
         digest = next((m.get("digest") for m in client.list().get("models", []) if light in (m.get("model"), m.get("name"))), None)
     except Exception:
         pass
-    cases = dev_cases()
+    cases = dev_cases(args.sample)
     version = re.search(r"^version:\s*(\d+)", open(os.path.join(REPO, "skills", "memory_write.md"), encoding="utf-8").read(), re.M).group(1)
     print("skill memory_write v%s, model %s (digest %s), %d dev cases, %d repeats, started %s"
           % (version, light, (digest or "?")[:12], len(cases), args.repeats, time.strftime("%Y-%m-%d %H:%M")))

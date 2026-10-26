@@ -54,6 +54,7 @@ from .internal_auth import ensure_token, internal_headers
 from .storage import Storage
 from .storage_files import FileBackend
 from .moods import MoodTracker
+from .memory_records import MemoryRecords, memory_hooks
 from .speech_text import speech_text
 from . import research_chat
 from . import searxng_control
@@ -609,6 +610,17 @@ def run_search_exchange(query, on_delta, on_emotion, should_stop):
 
 _db_dir = os.path.join(FPATH, cfg.get(CONST.ACCOUNTS_DIR_KEY, "data/db"))
 _votes_store = Storage(FileBackend(_db_dir))                  # the votes table (REQ-CHA-015); the accounts use the same folder
+
+def run_memory_skill(inputs):
+    """the skill memory_write: what to remember from one message of the user"""
+    result = core.run("memory_write", inputs)
+    if result.status != "done":
+        raise RuntimeError(result.error)
+    return result.answer
+
+_remember = None
+if cfg.get(CONST.STRUCTURED_MEMORY_KEY, False):               # off by default: one more call of the light model after every plain chat turn
+    comm.memory_provider, _remember = memory_hooks(MemoryRecords(_votes_store, budget_tokens=cfg.get(CONST.MEMORY_BUDGET_KEY, 400)), run_memory_skill)
 chat_service = ChatService(socketio.emit, chat_log, mood, run_chat_exchange, run_command=run_chat_command, run_lookup=run_lookup_exchange, run_search=run_search_exchange,
                            model_info=lambda: (comm.version, getattr(comm, "profile", None)),
                            queue_size=cfg.get(CONST.CHAT_QUEUE_KEY, 5 if cfg.get(CONST.ACCOUNTS_KEY, False) else 1),
@@ -617,7 +629,7 @@ chat_service = ChatService(socketio.emit, chat_log, mood, run_chat_exchange, run
                            spawn=socketio.start_background_task, votes=_votes_store,
                            behaviours=behaviours_from_file(os.path.join(FPATH, cfg.get(CONST.BEHAVIOURS_FILE_KEY, "library/behaviours.json"))),
                            reputable=cfg.get(CONST.REPUTABLE_TRUST_KEY, 0.6),
-                           repair=lambda text: behaviour.apply_rules(text)["text"])         # the stream is held back and repaired silently (REQ-CHA-014)
+                           repair=lambda text: behaviour.apply_rules(text)["text"], remember=_remember)         # the stream is held back and repaired silently (REQ-CHA-014)
 app.register_blueprint(create_chat_ops_blueprint(chat_service))
 app.register_blueprint(create_items_blueprint(_votes_store, socketio.emit))
 app.register_blueprint(create_trust_persona_blueprint(os.path.join(FPATH, cfg.get("source_trust_file") or "data/source_trust.json"),      # the file build_trust reads

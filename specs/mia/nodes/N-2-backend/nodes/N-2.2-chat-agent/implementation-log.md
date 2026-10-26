@@ -40,3 +40,9 @@ What the transcripts show (read for every case that missed or added something):
 - Extras (13 records in 60 runs, the same cases each time): one statement stored as two records (a fact and a derived preference: S03 allergy and "no recipes with peanuts"; S07 "be called Steffi" and "not be called master"; S08 "likes jazz" and "never listens to metal"; S29 "Tom hates mornings" and "schedule meetings late"). The owner's labels name one record each; whether the second is wrong is a labelling question (the proposals are `ok`, so as labelled these count as extra).
 - Cost: about 62 model seconds for 51 calls, so about 1.2 s a call on the light model.
 - Cases added by the agent as proposals, **not labelled, no split** (the owner decides; `tools/set_memory_split.py` now leaves unlabelled cases alone): MEM-S31 (a German commitment must give an English record) and MEM-S32 (German facts must give English records). Not run.
+
+## Wiring and run 8 (2026-10-27)
+
+- The owner labelled the two language cases: MEM-S31 `ok`, split `dev`; MEM-S32 `ok`, split `holdout` (not read). The dev split has 21 cases, the holdout 11.
+- Run 8: skill 6 (`memory.write@5`), 21 dev cases, 3 repeats, same model and digest: recall 51/51 (100 %), 11 extra records, 0 stored in the 18 runs that expect nothing, replacements 3/3, 68 model seconds; MEM-S31 (a German commitment) gives an English record in 3 of 3 repeats (the wording differs). Log: `eval-drafts/runs/memory_write_v6_dev_3.jsonl`. The script read the owner's file in the main checkout (`--sample`).
+- Still feedback on tuned cases, not evidence.

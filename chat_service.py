@@ -123,7 +123,7 @@ class ChatError(Exception):
 class ChatService:
     def __init__(self, emit, log, mood, run_exchange, run_command=None, model_info=None, queue_size=1, user_limit=0,
                  rate_limit=(10, 60), spawn=None, clock=time.monotonic, run_lookup=None, run_search=None, votes=None, wall_clock=time.time,
-                 behaviours=None, reputable=0.6, repair=None):
+                 behaviours=None, reputable=0.6, repair=None, remember=None):
         self._emit = emit
         self._run_lookup = run_lookup          # (question, on_delta, on_emotion, should_stop) -> the answer, for /lookup
         self._run_search = run_search              # (query, on_delta, on_emotion, should_stop) -> the list of results, for /search
@@ -141,6 +141,7 @@ class ChatService:
         self._wall_clock = wall_clock          # seconds since the epoch; the time of a vote and so its week
         self._repair = repair                  # text -> the text with the violations of the behaviour rules repaired (behaviour.py); None = answers are streamed as they come
         self._behaviours = behaviours          # () -> the names of the behaviours that can be voted on (REQ-CHA-017); read at every use, the list may change; None: no list
+        self._remember = remember              # (account, message_id, text) -> ids: the structured memory (REQ-CHA-011); called after a plain chat turn is done, None = off
         self._reputable = reputable            # a source with at least this trust is reputable (owner 2026-10-27: a fact has at least one reputable source)
         self._lock = threading.RLock()
         self._queue = collections.deque()
@@ -228,7 +229,7 @@ class ChatService:
                 record = self.log.append("user", text, **fields)
                 self._emit("chat_message", record)
             queued = self._running
-            self._queue.append(("command" if command else task if task is not None else "chat", argument if task is not None else text, author, author))
+            self._queue.append(("command" if command else task if task is not None else "chat", argument if task is not None else text, author, author, record["id"] if record else None))
             position = len(self._queue)
             self._start_worker()
         self.publish_status()
@@ -277,7 +278,7 @@ class ChatService:
             own = sum(1 for item in self._queue if item[2] == account)
             if self._running and (len(self._queue) >= self.queue_size or (self.user_limit and own >= self.user_limit)):
                 raise ChatError("queue_full")
-            self._queue.append(("chat", asked["text"], account, asked.get("sender")))        # the answer names who asked, not who clicked
+            self._queue.append(("chat", asked["text"], account, asked.get("sender"), None))        # the answer names who asked, not who clicked
             position = len(self._queue)
             self._start_worker()
         self.publish_status()
@@ -478,11 +479,11 @@ class ChatService:
                     self._running = False
                     self._current = None
                     break
-                kind, text, _author, speaker = self._queue.popleft()
+                kind, text, _author, speaker, message_id = self._queue.popleft()
                 self._current = kind
                 self._stop.clear()
             try:
-                self._do_command(text) if kind == "command" else self._do_chat(text, kind, speaker)
+                self._do_command(text) if kind == "command" else self._do_chat(text, kind, speaker, message_id)
             except Exception as exc:       # the worker must survive anything
                 self.mood.enter("error")                   # reporting an error has its mood (REQ-CHA-009)
                 self._emit("chat_error", {"message": "Something went wrong: %s" % exc})
@@ -503,7 +504,7 @@ class ChatService:
             self.set_activity(None)
         self.note(result or "Command %s done." % command, command=command)
 
-    def _do_chat(self, text, task="chat", speaker=None):
+    def _do_chat(self, text, task="chat", speaker=None, user_message_id=None):
         message_id = self.log.new_id()
         created = utc_now()
         with self._lock:
@@ -569,3 +570,8 @@ class ChatService:
         record = self.log.append("assistant", state["text"], id=message_id, created=created, emotion=state["emotion"],
                                  status=status, model=model, **extra)
         self._emit("chat_done", {"id": message_id, "text": record["text"], "emotion": record["emotion"], "status": status})
+        if self._remember is not None and task == "chat" and status == "done" and user_message_id:
+            try:
+                self._remember(speaker or "page", user_message_id, text)       # after the answer is out: the page never waits for the memory; a failing memory costs nothing else
+            except Exception:
+                pass

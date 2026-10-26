@@ -100,6 +100,7 @@ class Communicator:
 
     TIME_UPDATE="Hi MIA it is {time}." 
     persona_provider = None          # () -> the text of the shared persona file (web_app.py sets it); None = no persona
+    memory_provider = None           # (message) -> the block of memory records that match the message, "" for none (web_app.py sets it with "structured_memory"); None = off
     FULL_PROFILE = "full"
     LIGHT_PROFILE = "light"
     
@@ -187,16 +188,22 @@ class Communicator:
                 logger.warning(f"Could not unload model {old_version}: {e}")
         return True
 
-    def persona_message(self):
+    def persona_message(self, message=None):
         """the system message of a call (REQ-CHA-008): the shared persona file, read again at every call so that a change on the page counts at once, with the default
         form of address; calibration.txt is the fallback of a setup without a persona. It is not part of the history, so it is never summarized away or stored twice."""
         text = self.persona_provider() if self.persona_provider else ""
-        return {self.ROLE_KEY:"system",self.CONTENT_KEY:persona_block(text,fallback=self._addtional_calibration)}
+        memory = ""
+        if self.memory_provider and message:
+            try:
+                memory = self.memory_provider(message)
+            except Exception:             # a memory that fails must not stop the answer
+                memory = ""
+        return {self.ROLE_KEY:"system",self.CONTENT_KEY:persona_block(text,fallback=self._addtional_calibration,memory=memory)}
 
     def chat(self,msg,stream=True):
         msg_dic = self.update_history(msg,role=self.USER_ROLE)
         answer = self.client.chat(model=self.version,
-                                  messages=[self.persona_message()]+self._history,
+                                  messages=[self.persona_message(msg)]+self._history,
                                   stream=stream,
                                   options=self.llm_options,
                                   think=self.think,
