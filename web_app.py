@@ -587,7 +587,8 @@ def run_search_exchange(query, on_delta, on_emotion, should_stop):
 
 chat_service = ChatService(socketio.emit, chat_log, mood, run_chat_exchange, run_command=run_chat_command, run_lookup=run_lookup_exchange, run_search=run_search_exchange,
                            model_info=lambda: (comm.version, getattr(comm, "profile", None)),
-                           queue_size=cfg.get(CONST.CHAT_QUEUE_KEY, 1),
+                           queue_size=cfg.get(CONST.CHAT_QUEUE_KEY, 5 if cfg.get(CONST.ACCOUNTS_KEY, False) else 1),
+                           user_limit=2 if cfg.get(CONST.ACCOUNTS_KEY, False) else 0,           # IF-101: 5 waiting in all, 2 per account
                            rate_limit=(cfg.get(CONST.CHAT_RATE_KEY, 10), 60),
                            spawn=socketio.start_background_task)
 _chat_token = cfg.get(CONST.CHAT_TOKEN_KEY, app.config["EDITOR_TOKEN_INFO"][0])

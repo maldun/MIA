@@ -297,6 +297,42 @@ class ServiceTest(unittest.TestCase):
         self.assertTrue(self.service.send("a\x00b\x07c")["ok"])
         self.assertEqual(self.log.history()[0][0]["text"], "abc")
 
+    def test_ack_has_the_stored_message_a_position_and_error_codes(self):
+        """IF-101 v1: ack {id, position, message}; 422 empty_text, 503 queue_full as `code` next to the plain `error`"""
+        self.gate.clear()
+        first = self.service.send("one", client_id="c1", sender="anna", author="anna")
+        self.assertTrue(wait_for(lambda: self.service.status()["queue"] == 0))
+        second = self.service.send("two", sender="anna", author="anna")
+        self.assertEqual((first["id"], first["message"]["sender"], first["message"]["client_id"]), (first["message"]["id"], "anna", "c1"))
+        self.assertEqual((first["position"], second["position"]), (1, 1))                      # position 1 = answered next
+        self.assertEqual(self.service.send("  ")["code"], "empty_text")
+        self.assertEqual(self.service.send("three", sender="anna", author="anna")["code"], "queue_full")
+        self.gate.set()
+        self.assertTrue(self.idle())
+
+    def test_waiting_messages_per_user_are_limited(self):
+        """IF-101: 5 waiting messages in all, 2 per user"""
+        self.service = self.make(queue_size=5, user_limit=2)
+        self.gate.clear()
+        self.service.send("a0", sender="anna", author="anna")
+        self.assertTrue(wait_for(lambda: self.service.status()["queue"] == 0))
+        self.assertTrue(self.service.send("a1", sender="anna", author="anna")["ok"])
+        self.assertTrue(self.service.send("a2", sender="anna", author="anna")["ok"])
+        refused = self.service.send("a3", sender="anna", author="anna")
+        self.assertEqual(refused["code"], "queue_full")
+        self.assertTrue(self.service.send("b1", sender="ben", author="ben")["ok"])             # another user is not blocked
+        self.assertEqual(self.service.status()["queue"], 3)
+        self.gate.set()
+        self.assertTrue(self.idle())
+
+    def test_variant_event_follows_chat_start(self):
+        """IF-101 v1: `variant {name}` after `chat_start`; null = the chat's variant stays"""
+        self.service.send("hi")
+        self.assertTrue(self.idle())
+        names = self.names()
+        self.assertEqual(names[names.index("chat_start") + 1], "variant")
+        self.assertEqual(dict(self.events)["variant"], {"name": None})
+
     def test_one_message_may_wait_then_busy(self):
         self.gate.clear()
         first = self.service.send("one")

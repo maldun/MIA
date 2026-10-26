@@ -64,7 +64,7 @@ def normalize_text(text):
 
 
 class ChatService:
-    def __init__(self, emit, log, mood, run_exchange, run_command=None, model_info=None, queue_size=1,
+    def __init__(self, emit, log, mood, run_exchange, run_command=None, model_info=None, queue_size=1, user_limit=0,
                  rate_limit=(10, 60), spawn=None, clock=time.monotonic, run_lookup=None, run_search=None):
         self._emit = emit
         self._run_lookup = run_lookup          # (question, on_delta, on_emotion, should_stop) -> the answer, for /lookup
@@ -75,6 +75,7 @@ class ChatService:
         self._run_command = run_command
         self._model_info = model_info or (lambda: (None, None))
         self.queue_size = max(0, int(queue_size))
+        self.user_limit = max(0, int(user_limit))          # waiting messages per account (IF-101: 2); 0 = no limit
         self._rate_count, self._rate_window = rate_limit
         self._spawn = spawn or (lambda target: threading.Thread(target=target, daemon=True).start())
         self._clock = clock
@@ -141,14 +142,15 @@ class ChatService:
         sender is the key of the rate limit (a connection or an account); author the account that wrote it, stored as the `sender` of the message (IF-101)"""
         text = normalize_text(text)
         if not text:
-            return {"ok": False, "error": "The message is empty."}
+            return {"ok": False, "error": "The message is empty.", "code": "empty_text"}
         if len(text) > MAX_LENGTH:
-            return {"ok": False, "error": "The message is too long (at most %d characters)." % MAX_LENGTH}
+            return {"ok": False, "error": "The message is too long (at most %d characters)." % MAX_LENGTH, "code": "empty_text"}
         if self._rate_limited(sender):
             return {"ok": False, "error": "Too many messages, please wait a moment."}
         with self._lock:
-            if self._running and len(self._queue) >= self.queue_size:
-                return {"ok": False, "error": "MIA is busy, please wait until she has answered."}
+            own = sum(1 for item in self._queue if author and item[2] == author)
+            if self._running and (len(self._queue) >= self.queue_size or (self.user_limit and author and own >= self.user_limit)):
+                return {"ok": False, "error": "MIA is busy, please wait until she has answered.", "code": "queue_full"}
             command = self.is_command(text)
             task, argument = self.task_command(text) or (None, None)
             if task is not None and not argument:
@@ -162,12 +164,13 @@ class ChatService:
                 record = self.log.append("user", text, **fields)
                 self._emit("chat_message", record)
             queued = self._running
-            self._queue.append(("command" if command else task if task is not None else "chat", argument if task is not None else text))
+            self._queue.append(("command" if command else task if task is not None else "chat", argument if task is not None else text, author))
+            position = len(self._queue)
             self._start_worker()
         self.publish_status()
         if text.strip().lower().startswith("/research"):
             self.note("/research is now called /lookup: the quick look-up with sources. The name /research is kept for the literature review that is being built.")
-        return {"ok": True, "message": record, "queued": queued, "command": command}
+        return {"ok": True, "message": record, "queued": queued, "command": command, "id": record["id"] if record else None, "position": position}
 
     def stop(self):
         """stops the running answer (the text received so far stays)"""
@@ -221,7 +224,7 @@ class ChatService:
                     self._running = False
                     self._current = None
                     break
-                kind, text = self._queue.popleft()
+                kind, text, _author = self._queue.popleft()
                 self._current = kind
                 self._stop.clear()
             try:
@@ -247,6 +250,7 @@ class ChatService:
             self._message_id, self._pipeline, self._show_pipeline = message_id, [], False
         model = self._model_info()[0]
         self._emit("chat_start", {"id": message_id, "role": "assistant", "created": created, **({"task": task} if task != "chat" else {})})
+        self._emit("variant", {"name": None})              # no workflow picks a character variant yet (REQ-CHV-008): the chat's variant stays
         self.set_activity("thinking")
         state = {"text": "", "emotion": None, "emotions": [], "last": 0.0, "first": True}
 
