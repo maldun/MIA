@@ -46,3 +46,7 @@ What the transcripts show (read for every case that missed or added something):
 - The owner labelled the two language cases: MEM-S31 `ok`, split `dev`; MEM-S32 `ok`, split `holdout` (not read). The dev split has 21 cases, the holdout 11.
 - Run 8: skill 6 (`memory.write@5`), 21 dev cases, 3 repeats, same model and digest: recall 51/51 (100 %), 11 extra records, 0 stored in the 18 runs that expect nothing, replacements 3/3, 68 model seconds; MEM-S31 (a German commitment) gives an English record in 3 of 3 repeats (the wording differs). Log: `eval-drafts/runs/memory_write_v6_dev_3.jsonl`. The script read the owner's file in the main checkout (`--sample`).
 - Still feedback on tuned cases, not evidence.
+
+## Run 9 (2026-10-27, before the hand-over to Verify)
+
+Skill 6 unchanged, 21 dev cases, 3 repeats, same model and digest, with the new per-case measure of the script (a case is right when the majority of its repeats stored every wanted record and, where nothing was wanted, nothing): **21 of 21 cases right, Wilson 95 % lower bound 0.85**; recall 51/51, 12 extra records, 0 stored in the 18 runs that expect nothing, 68 model seconds (`eval-drafts/runs/memory_write_v6_dev_4.jsonl`). Feedback on tuned cases only. The decision run on the holdout is for the independent verifier: `specs/mia/verify-handover-t04.md`.
