@@ -213,6 +213,29 @@ class ChatApiContract(unittest.TestCase):
         self.assertEqual([(c["id"], c["index"], c["sentence"]) for c in chunks], [(first["id"], 0, "First try.")])
         self.assertEqual(error_of(lambda: api.speak_again(s, "nope")).status, 404)
 
+    @mark.req("IF-101", "REQ-BE-028", "REQ-CLV-010")
+    @each_provider(IF, make(answers=[["Fine."]]))
+    def test_the_score_is_also_given_per_week(self, api):
+        """TC-IF-101-21 (v4): `series` has the sums of each ISO week with a vote, oldest first; the sums of the weeks add up to the totals; a refused vote is in no week."""
+        anna, ben = api.login("anna", "pw-anna"), api.login("ben", "pw-ben")
+        api.connect(ben)
+        api.send(anna, "hi")
+        api.settle()
+        answer = api.history(anna, 5)[-1]["id"]
+        api.events(ben)
+        api.vote(anna, answer, "answer_quality", 1)
+        api.vote(ben, "service", "service", -1)
+        api.advance_time(8 * 24 * 3600)                                             # the next week and a bit
+        api.vote(ben, answer, "answer_quality", 1)
+        self.assertEqual(error_of(lambda: api.vote(ben, answer, "answer_quality", 5)).code, "invalid_vote")          # refused
+        score = api.score(anna)
+        self.assertEqual([w["week"] for w in score["series"]], ["2026-W02", "2026-W03"])
+        self.assertEqual((score["series"][0]["overall"], score["series"][1]["overall"]), (0, 1))
+        self.assertEqual(score["series"][0]["categories"], {"answer_quality": 1, "reactions": 0, "character_behaviour": 0, "service": -1})
+        self.assertEqual(sum(w["overall"] for w in score["series"]), score["overall"])
+        pushed = [e["payload"] for e in api.events(ben) if e["event"] == "score"]
+        self.assertEqual(pushed[-1]["series"], score["series"])
+
     @mark.req("IF-101", "REQ-CLV-010", "REQ-BE-028")
     @each_provider(IF)
     def test_votes_have_a_category_and_the_scores_follow(self, api):

@@ -1,6 +1,7 @@
 """Mock of IF-101, the chat, expression, audio and REST API of the Backend (protected).
 Complexity 3: a stream of events, a queue and a clock. It does not reproduce real model latency, budgets or persistence."""
 import collections
+import datetime
 
 try:
     from .errors import ApiError
@@ -14,6 +15,7 @@ ITEM_KINDS = ("tasks", "memos", "memory")             # v1
 CATEGORIES = ("answer_quality", "reactions", "character_behaviour", "service")
 TRUST = {"example.org": 0.5, "wikipedia.org": 0.8}
 MIN_PASSWORD = 8
+START = datetime.datetime(2026, 1, 5, tzinfo=datetime.timezone.utc)      # a Monday: the mock's clock 0; v4 groups the votes by the ISO week of their time
 
 
 class ChatApiMock:
@@ -158,16 +160,23 @@ class ChatApiMock:
             raise ApiError(422, "invalid_vote", rule="category" if category not in CATEGORIES else "value")
         if category == "answer_quality" and message_id not in [m["id"] for m in self._history]:
             raise ApiError(404, "not_found")
-        self._votes.append({"user": user, "subject": message_id, "category": category, "value": value, "created": "t%d" % int(self.now)})
+        self._votes.append({"user": user, "subject": message_id, "category": category, "value": value, "created": "t%d" % int(self.now), "at": self.now})
         score = self.score(session)
         self._broadcast("score", score)
         return {"stored": True, "score": score}
 
     def score(self, session):
-        """The scores per category and overall."""
+        """The scores per category and overall, and v4: the same sums per ISO week (`series`, oldest first, only weeks with a vote)."""
         self._user(session)
-        categories = {c: sum(v["value"] for v in self._votes if v["category"] == c) for c in CATEGORIES}
-        return {"overall": sum(categories.values()), "categories": categories, "votes": len(self._votes)}
+        def sums(votes):
+            categories = {c: sum(v["value"] for v in votes if v["category"] == c) for c in CATEGORIES}
+            return {"overall": sum(categories.values()), "categories": categories}
+        weeks = {}
+        for v in self._votes:
+            year, week, _ = (START + datetime.timedelta(seconds=v["at"])).isocalendar()
+            weeks.setdefault("%d-W%02d" % (year, week), []).append(v)
+        series = [dict(week=name, **sums(votes)) for name, votes in sorted(weeks.items())]
+        return dict(sums(self._votes), votes=len(self._votes), series=series)
 
     def items(self, session, kind):
         """All records of tasks, memos or memory, oldest first; every user sees and may change all of them (CON-6)."""
