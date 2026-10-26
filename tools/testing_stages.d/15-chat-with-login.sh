@@ -6,7 +6,7 @@
 NAME=mia-test-chat-login
 URL="http://127.0.0.1:8686/?character=0"
 case "${1:-}" in
-    describe) echo "chat page with login on the IF-101 mock: accounts anna/pw-anna, ben/pw-ben, carl/pw-carl; send two messages quickly to see 'Waiting, place 2'  ->  $URL" ;;
+    describe) echo "chat page with login on the IF-101 v1 mock (accounts anna/pw-anna, ben/pw-ben, carl/pw-carl): senders, queue places, 👍👎 🔊 ↻ ⓘ under an answer, menu: Workspace (tasks, memos, memory, sources, persona, score) and Account  ->  $URL" ;;
     available) have_image || find_python >/dev/null || { echo "neither the image $IMAGE (podman build -f deploy/Containerfile -t mia .) nor a python with flask; set MIA_PYTHON"; exit 1; } ;;
     auto) exit 0 ;;
     start) if have_image; then
