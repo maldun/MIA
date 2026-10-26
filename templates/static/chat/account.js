@@ -40,7 +40,8 @@ export function initAccount({ dialog, nameEl, form, oldInput, newInput, repeatIn
       await api.logout();
     } catch (error) {
       // a session that is already gone is as good as a logout; any other failure keeps the user logged in and says so
-      if (error.status !== 401) { show(error.status === 0 ? 'chat.offline' : 'account.logout_failed'); return; }
+      // (the button is in the menu, the dialog is not open: the failure comes as a message)
+      if (error.status !== 401) { notify(t(error.status === 0 ? 'chat.offline' : 'account.logout_failed')); return; }
     }
     form.reset();
     dialog.close();

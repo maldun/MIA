@@ -22,11 +22,12 @@ function setup({ logoutFails = false } = {}) {
   };
   const api = createApi({ origin: 'https://mia.example', fetchFn });
   const events = [];
+  const messages = [];
   const parts = { dialog: element(), nameEl: element(), form: element(), oldInput: element(), newInput: element(), repeatInput: element(), errorLine: element(), closeButton: element(), logoutButton: element() };
   const account = initAccount({
-    ...parts, api, storage: { get: () => '', set() {} }, t: (key) => key, notify: () => {}, onLoggedOut: () => events.push('logged out'),
+    ...parts, api, storage: { get: () => '', set() {} }, t: (key) => key, notify: (m) => messages.push(m), onLoggedOut: () => events.push('logged out'),
   });
-  return { calls, parts, events, account };
+  return { calls, parts, events, messages, account };
 }
 
 test('TC-CLV-022: the logout sends one request to /api/logout', async () => {
@@ -47,12 +48,11 @@ test('TC-CLV-022: the logout button closes the account dialog, sends one request
 });
 
 test('TC-CLV-022: a logout that cannot reach the server says so and does not report a logout', async () => {
-  const { parts, events } = setup({ logoutFails: true });
+  const { parts, events, messages } = setup({ logoutFails: true });
   parts.dialog.open = true;
   await parts.logoutButton.listeners.click();
   assert.deepEqual(events, []);
-  assert.equal(parts.errorLine.textContent, 'chat.offline');
-  assert.equal(parts.dialog.open, true);
+  assert.deepEqual(messages, ['chat.offline']);
 });
 
 test('TC-CLV-022: a session that is already gone (401) counts as logged out', async () => {
@@ -60,6 +60,7 @@ test('TC-CLV-022: a session that is already gone (401) counts as logged out', as
   const fetchFn = async () => ({ ok: false, status: 401, json: async () => ({ error: 'unauthenticated' }) });
   const api = createApi({ origin: 'https://mia.example', fetchFn, onLoginRequired: () => calls.push('login') });
   const events = [];
+  const messages = [];
   const parts = { dialog: element(), nameEl: element(), form: element(), oldInput: element(), newInput: element(), repeatInput: element(), errorLine: element(), closeButton: element(), logoutButton: element() };
   initAccount({ ...parts, api, storage: { get: () => '', set() {} }, t: (k) => k, onLoggedOut: () => events.push('logged out') });
   await parts.logoutButton.listeners.click();

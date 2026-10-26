@@ -155,6 +155,7 @@ const account = initAccount({
 });
 $('workspace-button').addEventListener('click', () => { menu.close(false); workspace.open(); });
 $('account-button').addEventListener('click', () => { menu.close(false); account.open(); });
+$('account-logout').addEventListener('click', () => menu.close(false));       // the logout itself is in account.js
 socket.on('variant', (data) => {
   const label = variantLabel(data?.name, t);
   $('variant').textContent = label;
