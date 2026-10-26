@@ -8,8 +8,8 @@ case "${1:-}" in
     available) has_db || { echo "not yet: N-3.1 T-08 (compose service db) is not built"; exit 1; } ;;
     auto) exit 1 ;;
     start) has_db || { echo "not yet: N-3.1 T-08 is not built"; exit 1; }
-           (cd "$ROOT" && bash deploy/up.sh db) ;;
-    stop) (cd "$ROOT" && bash deploy/up.sh down) ;;
+           (cd "$ROOT" && MIA_PROJECT=mia-testing bash deploy/up.sh db-only) && echo "try: bash tools/backup.sh out.tar.gz --db-container mia-testing_db_1 --db-user mia --db-name mia   (the data volume stays when the stage is stopped)" ;;
+    stop) (cd "$ROOT" && MIA_PROJECT=mia-testing bash deploy/up.sh db down) ;;
     status) has_db && echo "available" || echo "not built" ;;
     *) echo "usage: $0 describe|available|auto|start|stop|status"; exit 2 ;;
 esac

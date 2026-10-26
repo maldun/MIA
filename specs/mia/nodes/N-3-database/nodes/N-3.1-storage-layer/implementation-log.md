@@ -53,3 +53,13 @@ None.
 ## T-07 Backup and restore (added)
 - Done: `tools/backup.sh` and `tools/restore.sh` (scripts, not a list of steps) and `tests/test_backup.py` (3 tests, TC-SLY-008): 50 records with an extra version plus a data folder with a subfolder and non-ASCII text; backup; wipe both; restore: the same rows (table, id, version, author, time, document) and the same files. The archive holds `db.dump` (pg_dump custom format) and `data.tar`. A restore first checks the archive (a foreign archive changes nothing), then saves the state before it as `mia-before-restore-<time>.tar.gz`, the same convention as `deploy/up.sh restore`. Reported green: 3 tests.
 - Reuse: the safety copy before a restore and the naming follow `deploy/up.sh backup|restore` (which keeps covering the compose data volume); the throwaway database of `test_storage_postgres.py` is the test fixture.
+
+## T-08 Container, network and compose service (added)
+- Done: service `db` in `deploy/compose.yaml` (profile `db`, `postgres:16`, volume `pgdata`, health check `pg_isready`, no published port, the schema of `deploy/db/` mounted as the init script, password from `.env`), `deploy/up.sh db` (also the database; makes `POSTGRES_PASSWORD` and `MIA_DATABASE_URL` once in `.env`) and `deploy/up.sh db-only` (only the database, returns at once), `MIA_DATABASE_URL` passed to the `mia` service, `tests/test_database_stack.py` (5 tests: 3 on the compose file, 2 with real containers). Reported green: 5 tests in 24 s, no skips.
+- TC-SLY-010: no port is published; connections from `127.0.0.1`, the LAN address and the container address are refused; a container on another network gets no answer; a container of the stack connects as `db`. TC-SLY-011: a container started alone with the same settings and the stack give the same tables (`records`, `schema_version`), both ready, the health check passes.
+- The stack without the profile is unchanged (test). `up.sh db` and `db-only` were tried in a scratch copy of `deploy/` (project `mia-test-upsh`), not on the real project: password and URL made, database healthy, port not published; the scratch stack was removed.
+- Reuse: the `ollama` profile pattern of `up.sh`/compose, the `.env` handling and the project name `MIA_PROJECT`. New: the service, the `db`/`db-only` arguments.
+- Not done here (belongs to the N-2 wiring): the `storage` option in `config.py` that picks the database from `MIA_DATABASE_URL`.
+
+## Hand-over of N-3.1
+All eight tasks are done; every task has a commit and tests. Open for the integration step of N-3 (owner, amendments): the real providers in `tests/helpers/contract.py` for IF-301, IF-302 and IF-102 (error class translation), and the text of IF-102.

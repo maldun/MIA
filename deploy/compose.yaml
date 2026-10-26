@@ -17,6 +17,7 @@ services:
       MIA_PUBLIC_HTTPS_PORT: ${MIA_HTTPS_PORT:-8586}      # the pages that come through the https service may use the socket
       MIA_PUBLIC_HOSTS: ${MIA_PUBLIC_HOSTS:-}              # addresses of this machine for other devices (up.sh fills it with MIA_BIND=0.0.0.0)
       MIA_OLLAMA_HOST: ${OLLAMA_URL:-http://ollama:11434}      # OLLAMA_URL in .env: an Ollama that exists already, see README
+      MIA_DATABASE_URL: ${MIA_DATABASE_URL:-}                  # set by  deploy/up.sh db  (the storage option picks the database)
     ports:
       - "${MIA_BIND:-127.0.0.1}:${MIA_PORT:-8585}:8585"
     volumes:
@@ -53,6 +54,27 @@ services:
       retries: 5
       start_period: 20s
 
+  # The shared state (N-3.1, REQ-SLY-010/011): PostgreSQL for several instances. Only with  deploy/up.sh db  (profile db). No port is published: it is
+  # reachable from the containers of this stack only (their network), never from the host or the home network. The schema of deploy/db/ runs at the first
+  # start of an empty volume, so the tables exist whether the container is started alone or by the stack.
+  db:
+    profiles: ["db"]
+    image: docker.io/library/postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: mia
+      POSTGRES_DB: mia
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-}            # up.sh db makes it in .env; the image refuses an empty one
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db:/docker-entrypoint-initdb.d:ro,z
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mia -d mia"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
   searxng:
     image: docker.io/searxng/searxng:latest
     restart: unless-stopped
@@ -65,3 +87,4 @@ volumes:
   mia-data:
   caddy-data:
   ollama:
+  pgdata:
