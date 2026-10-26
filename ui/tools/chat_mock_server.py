@@ -188,6 +188,11 @@ def r_score():
     return run_api(lambda s: api.score(s))
 
 
+# web_app registers the real routes of the same paths first and they would win: the mock answers on their endpoints
+for _name, _view in (("vote", r_vote), ("score", r_score), ("regenerate", r_regenerate), ("speak_again", r_speak_again), ("account_of", r_account)):
+    w.app.view_functions["chat_ops_api." + _name] = _view
+
+
 @w.app.get("/api/items")
 def r_items():
     return run_api(lambda s: api.items(s, request.args.get("kind")))

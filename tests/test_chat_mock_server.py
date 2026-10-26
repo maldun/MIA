@@ -172,6 +172,9 @@ class RestViews(unittest.TestCase):
         self.assertEqual(vote["score"]["overall"], 1)
         self.assertEqual(self.anna.post("/api/vote", json={"subject": first["id"], "category": "mood", "value": 1}).status_code, 422)
         self.assertEqual(self.anna.get("/api/score").get_json()["categories"]["answer_quality"], 1)
+        series = self.anna.get("/api/score").get_json()["series"]                           # IF-101 v4: the sums per ISO week
+        self.assertEqual([w["overall"] for w in series], [1])
+        self.assertRegex(series[0]["week"], r"^\d{4}-W\d{2}$")
         self.assertEqual(len(self.anna.get("/api/account?message_id=" + first["id"]).get_json()), 2)
         sock.get_received()
         self.assertEqual(self.anna.post("/api/speak_again", json={"message_id": first["id"]}).get_json()["sentences"], 2)
