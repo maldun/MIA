@@ -53,5 +53,17 @@ class RecordTablesContract(unittest.TestCase):
             tables.validate("workflows", {})
 
 
+    @mark.req("IF-302", "REQ-CHA-011")
+    @each_provider(IF)
+    def test_a_memory_record_may_carry_kind_and_status(self, tables):
+        """TC-IF-302-04 (v2): kind (fact, preference, commitment) and status (active, replaced) are checked when present, subject and updated are free; a record of v1 stays valid; the source stays required."""
+        old = {"text": "likes tea", "source": "chat"}
+        self.assertIsNone(tables.validate("memory", old))
+        self.assertIsNone(tables.validate("memory", dict(old, kind="commitment", status="replaced", subject="anna", updated="2026-10-27T10:00:00Z")))
+        self.assertEqual(tables.validate("memory", dict(old, kind="opinion")), {"rule": "schema", "detail": "kind"})
+        self.assertEqual(tables.validate("memory", dict(old, status="deleted")), {"rule": "schema", "detail": "status"})
+        self.assertEqual(tables.validate("memory", {"text": "x", "kind": "fact"}), {"rule": "schema", "detail": "source"})
+
+
 if __name__ == "__main__":
     unittest.main()
