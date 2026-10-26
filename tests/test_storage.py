@@ -32,11 +32,12 @@ def code_of(call):
     raise AssertionError("no StorageError raised")
 
 
-class FileStorage(unittest.TestCase):
+class StorageBehaviour:
+    """The behaviour of the Storage layer, the same on every backend. A test class mixes it with unittest.TestCase and says
+    new_backend(label): a backend that is empty (a different label is a different, independent store) and reopen(): a new backend on the same data."""
+
     def setUp(self):
-        self.dir = tempfile.mkdtemp()
-        self.addCleanup(shutil.rmtree, self.dir, True)
-        self.store = Storage(FileBackend(self.dir))
+        self.store = Storage(self.new_backend("main"))
 
     @mark.req("REQ-SLY-002")
     def test_a_record_of_each_table_reads_back_equal(self):
@@ -50,7 +51,7 @@ class FileStorage(unittest.TestCase):
     def test_a_new_storage_on_the_same_folder_sees_the_records(self):
         """The records are on disk, not in memory."""
         self.store.put("memory", "m", {"text": "t", "source": "s"}, "anna")
-        again = Storage(FileBackend(self.dir))
+        again = Storage(self.reopen())
         self.assertEqual(again.ids("memory"), ["m"])
         self.assertEqual(again.get("memory", "m")["doc"], {"text": "t", "source": "s"})
 
@@ -69,7 +70,7 @@ class FileStorage(unittest.TestCase):
         """TC-SLY-003: 500 random sequences (seeds 1 to 500) of put, get(version) and history."""
         for seed in range(1, 501):
             rng = random.Random(seed)
-            store = Storage(FileBackend(os.path.join(self.dir, "s%d" % seed)))
+            store = Storage(self.new_backend("s%d" % seed))
             written = {}
             for _ in range(rng.randint(1, 8)):
                 rid = rng.choice("abc")
@@ -164,6 +165,18 @@ class FileStorage(unittest.TestCase):
         self.store.put("workflows", "w", LOOKUP, "anna")
         code_of(lambda: self.store.put("workflows", "w", CYCLE, "anna"))
         self.assertEqual(self.store.put("workflows", "w", LOOKUP, "ben"), {"version": 2})
+
+
+class FileStorage(StorageBehaviour, unittest.TestCase):
+    def new_backend(self, label):
+        if not hasattr(self, "dir"):
+            self.dir = tempfile.mkdtemp()
+            self.addCleanup(shutil.rmtree, self.dir, True)
+        self.main = FileBackend(os.path.join(self.dir, label))
+        return self.main
+
+    def reopen(self):
+        return FileBackend(self.main.root)
 
 
 if __name__ == "__main__":

@@ -38,3 +38,14 @@ None.
 
 ## Gap for the owner (not covered by any N-3 task)
 - The legacy file stores (`data/chat_log.jsonl`, `memories.json`, `feedback_log.jsonl`, presets and gestures as one JSON file per name, `moods.json`) have their own formats. Moving their content into the new tables (and back, so that "the data folder identical file by file" also holds for a real MIA data folder) needs an importer per store. The plan puts "moving the old stores behind the Storage layer" in later N-2 tasks; the importers for the migration command are not named there. Proposal: add them as part of those N-2 tasks (each store gets `to_records` and `from_records` next to its code, tested with the fixtures) and add one test per store to `tests/test_migrate.py`.
+
+## T-06 PostgreSQL backend (added)
+- Done: `storage_postgres.py` (one `records` table of versions, `deploy/db/001_records.sql` applied once by number, LISTEN/NOTIFY notices), `requirements-db.txt` (`psycopg[binary]>=3.2,<4`, approved D-54), `tests/test_storage_postgres.py` (17 tests on a throwaway `postgres:16` container with data on tmpfs). The behaviour tests of the file backend are a mixin (`StorageBehaviour` in `tests/test_storage.py`) and run unchanged on both backends: TC-SLY-002, -003 (500 seeds), -004, the IF-102 errors; plus TC-SLY-006 (20 writes, second instance hears each once, median and maximum at most 2 s), TC-SLY-007 (files to database and back through `migrate`), two instances writing one record never share a version, the schema is applied once. The IF-102 contract suite with `Storage(PostgresBackend)` as real provider (scratch adapter): 16 of 16 tests, TC-SLY-001 reported green.
+- Reuse: the entries and all rules are the code of T-01 (`Storage`); the backend only stores and reads entries. `migrate.py` opens it by name (`storage_postgres`) as planned.
+- The tests run with the python that has psycopg (a scratch venv from `requirements.txt` plus `requirements-db.txt` on Python 3.12). They skip with a reason without psycopg, podman or the image; the skip is not a weakening.
+
+| Finding | Task | Covered by test |
+|---|---|---|
+| The contract suite (TC-IF-102-06) expects the notice when `put` returns; a database notice arrives a moment later (within the 2 s bound). The writer's own subscribers are therefore told at once and the channel carries the notice to the other instances only, tagged with an origin id | T-06 | `test_a_subscriber_is_told_once_per_write...` (files) and the contract suite on PostgreSQL; `test_a_write_on_one_connection_is_heard_on_the_other_within_2_s` |
+| Two instances can race on the next version number; the primary key refuses the second and the loser gets `conflict` with the current version | T-06 | `test_two_instances_writing_the_same_record_never_share_a_version` |
+| A listener thread must end quietly when the server goes away | T-06 | observed while stopping the container; the loop catches `OperationalError` |

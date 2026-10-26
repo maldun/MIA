@@ -8,10 +8,12 @@ Storage holds the rules and a backend holds the bytes, so the file backend and t
   - subscribers are told after every write
 
 A backend offers: versions(table, id) -> list of entries (oldest first), append(table, id, entry), ids(table), remove(table, id). It does not
-know the rules. Records are never changed in place; only append and remove (of a deletable table) touch the data.
+know the rules. Records are never changed in place; only append and remove (of a deletable table) touch the data. A backend shared by several
+instances also offers publish(event) and listen(callback): the notices of the other instances come through that channel, tagged with the origin.
 """
 import copy
 import threading
+import uuid
 
 try:
     from . import graph_tables, record_tables
@@ -42,6 +44,8 @@ class Storage:
         self.tables = table_definitions()
         self._lock = threading.Lock()
         self._listeners = {table: [] for table in self.tables}
+        self._listening = False
+        self._id = uuid.uuid4().hex             # tells the notices of this instance from those of the others
 
     def _check(self, table):
         if table not in self.tables:
@@ -64,9 +68,18 @@ class Storage:
             entry = {"id": record_id, "version": current + 1, "author": author, "time": utc_now(), "doc": copy.deepcopy(doc)}
             self.backend.append(table, record_id, entry)
         event = {"table": table, "id": record_id, "version": entry["version"], "author": author}
-        for listener in list(self._listeners[table]):
-            listener(dict(event))
+        self._dispatch(event)                   # the subscribers of this instance hear it at once ...
+        if hasattr(self.backend, "publish"):    # ... the other instances of a shared database through its channel
+            self.backend.publish(dict(event, origin=self._id))
         return {"version": entry["version"]}
+
+    def _on_remote(self, event):
+        if event.get("origin") != self._id:     # this instance has told its own subscribers already
+            self._dispatch({k: v for k, v in event.items() if k != "origin"})
+
+    def _dispatch(self, event):
+        for listener in list(self._listeners.get(event["table"], ())):
+            listener(dict(event))
 
     def get(self, table, record_id, version=None):
         self._check(table)
@@ -97,6 +110,9 @@ class Storage:
     def subscribe(self, table, callback):
         """callback({"table", "id", "version", "author"}) after every write of the table; returns a function that unsubscribes."""
         self._check(table)
+        if hasattr(self.backend, "listen") and not self._listening:
+            self.backend.listen(self._on_remote)
+            self._listening = True
         self._listeners[table].append(callback)
 
         def unsubscribe():
