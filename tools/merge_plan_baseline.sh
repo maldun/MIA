@@ -19,9 +19,10 @@ current=$(git branch --show-current)
 git rev-parse --verify -q "$BRANCH" >/dev/null || { echo "NOT READY: branch $BRANCH not found"; exit 1; }
 if git rev-parse --verify -q "$TAG" >/dev/null; then echo "NOT READY: the tag $TAG exists already"; exit 1; fi
 
-# only the installed protected tests may be untracked or modified; anything else would be swept into the merge
-other=$(git status --porcelain | grep -v -E '^\?\? tests/(helpers|acceptance/contract|integration)/|^ ?M tests/(helpers|acceptance/contract|integration)/' || true)
-if [ -n "$other" ]; then echo "NOT READY: other changes in the working tree:"; echo "$other"; exit 1; fi
+# Untracked files ('??') are ignored on purpose: they are not part of the merge and the script adds only the three test folders.
+# Changes to TRACKED files outside those folders block the merge (git needs a clean tree for it).
+other=$(git status --porcelain --untracked-files=no | grep -v -E '^.. tests/(helpers|acceptance/contract|integration)/' || true)
+if [ -n "$other" ]; then echo "NOT READY: changes to tracked files outside the protected tests (commit or stash them):"; echo "$other"; exit 1; fi
 
 # the installed tests must equal the drafts of the plan branch
 for kind in contract integration; do
@@ -39,7 +40,7 @@ for kind in contract integration; do
 done
 [ "$bad" = 0 ] || { echo "NOT READY: fix the lines above (amendments to protected files are copied by hand)"; exit 1; }
 
-echo "READY: $BRANCH ($(git rev-list --count master.."$BRANCH") commits) into master; $(git status --porcelain | wc -l) installed test files to commit; tag $TAG"
+echo "READY: $BRANCH ($(git rev-list --count master.."$BRANCH") commits) into master; $(git status --porcelain -- tests/helpers tests/acceptance/contract tests/integration | wc -l) installed test files to commit ($(git status --porcelain | grep -c '^??' || true) untracked files elsewhere are left alone); tag $TAG"
 [ "$do_it" = 1 ] || { echo "dry run: nothing changed. Run again with --do."; exit 0; }
 
 git merge --no-ff "$BRANCH" -m "plan: approved plan package of MIA (root record, 31 node specs, interface contracts, mocks, contract suites, integration drafts, plausibility record)"
