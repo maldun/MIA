@@ -228,7 +228,7 @@ class ChatService:
                 record = self.log.append("user", text, **fields)
                 self._emit("chat_message", record)
             queued = self._running
-            self._queue.append(("command" if command else task if task is not None else "chat", argument if task is not None else text, author))
+            self._queue.append(("command" if command else task if task is not None else "chat", argument if task is not None else text, author, author))
             position = len(self._queue)
             self._start_worker()
         self.publish_status()
@@ -277,7 +277,7 @@ class ChatService:
             own = sum(1 for item in self._queue if item[2] == account)
             if self._running and (len(self._queue) >= self.queue_size or (self.user_limit and own >= self.user_limit)):
                 raise ChatError("queue_full")
-            self._queue.append(("chat", asked["text"], account))
+            self._queue.append(("chat", asked["text"], account, asked.get("sender")))        # the answer names who asked, not who clicked
             position = len(self._queue)
             self._start_worker()
         self.publish_status()
@@ -478,11 +478,11 @@ class ChatService:
                     self._running = False
                     self._current = None
                     break
-                kind, text, _author = self._queue.popleft()
+                kind, text, _author, speaker = self._queue.popleft()
                 self._current = kind
                 self._stop.clear()
             try:
-                self._do_command(text) if kind == "command" else self._do_chat(text, kind)
+                self._do_command(text) if kind == "command" else self._do_chat(text, kind, speaker)
             except Exception as exc:       # the worker must survive anything
                 self.mood.enter("error")                   # reporting an error has its mood (REQ-CHA-009)
                 self._emit("chat_error", {"message": "Something went wrong: %s" % exc})
@@ -503,7 +503,7 @@ class ChatService:
             self.set_activity(None)
         self.note(result or "Command %s done." % command, command=command)
 
-    def _do_chat(self, text, task="chat"):
+    def _do_chat(self, text, task="chat", speaker=None):
         message_id = self.log.new_id()
         created = utc_now()
         with self._lock:
@@ -541,7 +541,8 @@ class ChatService:
         status = "done"
         try:
             run = {"chat": self._run_exchange, "lookup": self._run_lookup, "search": self._run_search}[task]
-            final = run(text, on_delta, on_emotion, self._stop.is_set)
+            # the model knows who writes (accounts only); the log keeps the plain text. A lookup or search question is data for a tool and stays as it is
+            final = run("[%s] %s" % (speaker, text) if speaker and task == "chat" else text, on_delta, on_emotion, self._stop.is_set)
             if final is not None:
                 state["text"] = final
             if self._stop.is_set():

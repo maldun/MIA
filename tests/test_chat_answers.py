@@ -113,7 +113,7 @@ class AnswersTest(unittest.TestCase):
         self.assertEqual(code_of(lambda: self.chat.regenerate("anna", user)), ("not_the_last_answer", None))      # a known message that is no answer: 422 like the mock, not 404
         result = self.chat.regenerate("anna", last)
         self.assertEqual(result["position"], 1)
-        self.assertEqual(self.asked, ["q1", "q2", "q2"])
+        self.assertEqual(self.asked, ["[anna] q1", "[anna] q2", "[anna] q2"])
         self.assertEqual(len([m for m in self.log.history()[0] if m["role"] == "assistant"]), 3)
         self.assertEqual(len([m for m in self.log.history()[0] if m["role"] == "user"]), 2)        # the question is not stored twice
 
