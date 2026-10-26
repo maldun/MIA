@@ -182,6 +182,19 @@ class RestViews(unittest.TestCase):
         variants = [r["args"][0]["name"] for r in self.ben_socket.get_received() if r["name"] == "variant"]
         self.assertEqual(variants, [None, None, "summer"])                                 # answers 1 and 2 (regenerate) have none, the third has one
 
+    @mark.req("REQ-CHA-018")
+    def test_the_counters_are_the_mock_s_and_a_reset_is_heard_by_the_others(self):
+        """The real routes of chat_ops_api would answer from the page's own storage: the mock must answer on their endpoints (IF-101 v5)."""
+        counters = self.anna.get("/api/counters").get_json()
+        self.assertEqual(sorted(counters), ["greet", "idle", "no", "talk", "yes"])
+        self.assertEqual(counters["no"], {"net": 0, "votes": 0, "chance": 1.0, "reset_at": None})
+        self.ben_socket.get_received()
+        self.assertEqual(self.anna.post("/api/reset_counter", json={"name": "no"}).status_code, 200)
+        self.assertEqual(self.anna.post("/api/reset_counter", json={"name": "dance"}).status_code, 404)
+        heard = [r["args"][0] for r in self.ben_socket.get_received() if r["name"] == "counters_changed"]
+        self.assertEqual(heard, [{"name": "no", "author": "anna"}])
+        self.assertEqual(w.app.test_client().get("/api/counters").status_code, 401)
+
     @mark.req("REQ-CLV-011", "REQ-CLV-009", "REQ-CLV-012")
     def test_records_trust_and_persona_and_the_others_hear_of_the_change(self):
         self.ben_socket.get_received()
