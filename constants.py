@@ -59,6 +59,9 @@ CHAT_LOG_MAX_KEY = "chat_log_max_messages"
 CHAT_QUEUE_KEY = "chat_queue"                  # how many messages may wait while MIA answers
 CHAT_RATE_KEY = "chat_rate_per_minute"         # messages per minute and connection, 0 = no limit
 CHAT_TOKEN_KEY = "chat_token"                  # token for deleting the conversation (default: the editor token)
+ACCOUNTS_KEY = "accounts_enabled"              # login, session and logout (N-2.1); off until the other routes are protected too (T-02)
+ACCOUNTS_DIR_KEY = "accounts_dir"              # the folder of the file storage that holds the accounts
+OWNER_KEY = "owner_account"                    # the account that may create accounts (empty: nobody)
 MOODS_FILE_KEY = "moods_file"
 DEFAULT_MOODS_FILE = "moods.json"
 MOOD_HOLD_KEY = "mood_hold_minutes"

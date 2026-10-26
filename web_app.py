@@ -45,6 +45,9 @@ from .presets_api import init_presets_api
 from .chat_log import ChatLog
 from .chat_service import ChatService
 from .chat_api import create_blueprint as create_chat_blueprint
+from . import accounts_api
+from .storage import Storage
+from .storage_files import FileBackend
 from .moods import MoodTracker
 from .speech_text import speech_text
 from . import research_chat
@@ -223,6 +226,8 @@ def handle_chat_stop(_=None):
 @socketio.on('connect')
 def handle_connect(_auth=None):
     """a page connected: it learns the state (busy, model, mood) right away"""
+    if _account_sockets is not None:
+        accounts_api.guard_connect(_account_sockets)                  # no session, no socket (IF-101)
     audio_router.connect(request.sid)
     emit('chat_status', chat_service.status())
 
@@ -584,6 +589,13 @@ chat_service = ChatService(socketio.emit, chat_log, mood, run_chat_exchange, run
 _chat_token = cfg.get(CONST.CHAT_TOKEN_KEY, app.config["EDITOR_TOKEN_INFO"][0])
 app.register_blueprint(create_chat_blueprint(chat_service, token=_chat_token or None, allowed_origins=lambda: allowed_origins))
 
+# login, session and logout (N-2.1 T-01). Off by default: the other routes are not protected by the session before T-02, and the old page has no login.
+# Create the first account with `python tools/accounts_cli.py create NAME`.
+_account_sockets = None
+if cfg.get(CONST.ACCOUNTS_KEY, False):
+    _account_store = Storage(FileBackend(os.path.join(FPATH, cfg.get(CONST.ACCOUNTS_DIR_KEY, "data/db"))))
+    _account_service, _account_sockets = accounts_api.install(app, socketio, _account_store, owner=cfg.get(CONST.OWNER_KEY) or None)
+
 # the chat page loads only its own files: no inline scripts, no external hosts (ui/REQUIREMENTS_CHAT.md, 8)
 CHAT_PAGE_CSP = (
     "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; "
@@ -702,6 +714,8 @@ def audio_ended(data=None):
 
 @socketio.on('disconnect')
 def handle_disconnect(_reason=None):
+    if _account_sockets is not None:
+        accounts_api.forget_socket(_account_sockets)
     audio_router.disconnect(request.sid)
 
 
