@@ -48,6 +48,7 @@ from .chat_api import create_blueprint as create_chat_blueprint
 from . import accounts_api
 from .chat_ops_api import create_chat_ops_blueprint
 from .items_api import create_items_blueprint
+from .trust_persona_api import create_trust_persona_blueprint
 from .internal_auth import ensure_token, internal_headers
 from .storage import Storage
 from .storage_files import FileBackend
@@ -597,6 +598,8 @@ chat_service = ChatService(socketio.emit, chat_log, mood, run_chat_exchange, run
                            spawn=socketio.start_background_task, votes=_votes_store)
 app.register_blueprint(create_chat_ops_blueprint(chat_service))
 app.register_blueprint(create_items_blueprint(_votes_store, socketio.emit))
+app.register_blueprint(create_trust_persona_blueprint(os.path.join(FPATH, cfg.get("source_trust_file") or "data/source_trust.json"),      # the file build_trust reads
+                                                      os.path.join(FPATH, cfg.get(CONST.PERSONA_FILE_KEY, "data/persona.json")), socketio.emit))
 _chat_token = cfg.get(CONST.CHAT_TOKEN_KEY, app.config["EDITOR_TOKEN_INFO"][0])
 app.register_blueprint(create_chat_blueprint(chat_service, token=_chat_token or None, allowed_origins=lambda: allowed_origins))
 

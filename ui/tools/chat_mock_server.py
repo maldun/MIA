@@ -232,6 +232,10 @@ def r_save_persona():
     return run_api(lambda s: api.save_persona(s, body().get("doc")))
 
 
+for _name, _view in (("trust", r_trust), ("set_trust", r_set_trust), ("persona", r_persona), ("save_persona", r_save_persona)):    # as above, for trust_persona_api
+    w.app.view_functions["trust_persona_api." + _name] = _view
+
+
 @w.socketio.on("connect")
 def connect(_auth=None):
     token = session()

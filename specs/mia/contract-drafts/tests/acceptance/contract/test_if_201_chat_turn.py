@@ -16,7 +16,7 @@ IF = "IF-201"
 
 
 def make(**options):
-    return lambda kind: ChatTurnMock(**options) if kind == "mock" else subject_for(IF, kind)
+    return lambda kind: ChatTurnMock(**options) if kind == "mock" else subject_for(IF, kind, **options)
 
 
 def code_of(call):
