@@ -423,6 +423,9 @@ dialog .actions button {
 
 /* --- login dialog ---------------------------------------------------------------------------------- */
 
+/* the login hides the app behind it completely: nothing of the conversation or the character shows before a user has logged in */
+#login::backdrop { background: #000; }
+
 .form-error {
   margin: var(--space-3) 0 0;
   color: var(--danger, #c0392b);

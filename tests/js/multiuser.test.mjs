@@ -95,6 +95,11 @@ test('TC-CLV-015: the login page states that everything is visible to all users,
   assert.ok(html.includes('data-i18n="login.visible"'));
 });
 
+test('TC-CLV-015: the login screen has an opaque black backdrop, so the app behind it is not visible before the login', () => {
+  const css = readFileSync(new URL('../../templates/static/chat/components.css', import.meta.url).pathname, 'utf8');
+  assert.match(css, /#login::backdrop\s*\{\s*background:\s*#000;?\s*\}/);
+});
+
 // --- TC-CLV-021: the page uses the calls of IF-101 only ------------------------------------------------------
 test('TC-CLV-021: every address and socket event the page uses is one of the interface (or of the character and the voice)', () => {
   const dir = new URL('../../templates/static/chat/', import.meta.url).pathname;
