@@ -633,68 +633,71 @@ package MIA_AgentView {
     part def WorkflowValidator { doc /* Code, boundary TB-edit: checks graph rules and schemas, stores a new version, refuses a broken edit (pipeline_model.py, library.py). */ port editIn : ~EditPort; }
     part def ScriptSandbox { doc /* Code: runs a generated script isolated, no network (sandbox.py, broker.py). */ port scriptIn : ~ScriptPort; }
 
-    // Model steps. HLS level: the attributes marked "Plan" are fixed in Phase 2. tokenBudget is the context window
-    // (num_ctx 8192 on both profiles today), not yet a per-step budget.
+    // Model steps. tokenBudget is the context window (num_ctx 8192 on both profiles today), not yet a per-step budget.
+    // secondBudget (Plan draft, 2026-10-26) is the time of ONE call of the step: the seconds of today's skill file divided by its steps, rounded
+    // (Chat 120, Plan 12, Extraction 20, Verdict 25, Synthesis 60, ScriptWriter 20, Dream 50); Expression 30, ReviewScreening 15 and
+    // ReviewPlanner 60 are guesses until their skills exist. They are proposals to be replaced by the measured seconds of the baselines
+    // (BM-MIA-001, T-05 of N-4.1) and checked with formal.yaml. threats names the THR entries of threat-model.md.
     part def ChatStep {
         doc /* The persona's answer, streamed; emotion keyword first. Skill chat. */
-        @ModelStep { schema = "none: free text"; tools = ""; tokenBudget = 8192; secondBudget = 0.0; pin = "MP-full"; criterion = "none: set in Plan"; }
-        @TrustBoundary { boundary = "TB-user"; threats = ""; }
+        @ModelStep { schema = "none: free text"; tools = ""; tokenBudget = 8192; secondBudget = 120.0; pin = "MP-full"; criterion = "none: set in Plan"; }
+        @TrustBoundary { boundary = "TB-user"; threats = "THR-004, THR-006, THR-010"; }
         port userIn : ~UserTextPort;
         port historyIn : ~HistoryPort;
     }
     part def PlanStep {
         doc /* Sub-questions or a typed plan for a compound question. Skill plan_question. */
-        @ModelStep { schema = "plan.schema.json"; tools = ""; tokenBudget = 8192; secondBudget = 0.0; pin = "MP-light"; criterion = "none: set in Plan"; }
-        @TrustBoundary { boundary = "TB-user"; threats = ""; }
+        @ModelStep { schema = "plan.schema.json"; tools = ""; tokenBudget = 8192; secondBudget = 12.0; pin = "MP-light"; criterion = "none: set in Plan"; }
+        @TrustBoundary { boundary = "TB-user"; threats = "THR-004, THR-010"; }
         port userIn : ~UserTextPort;
     }
     part def ExtractionStep {
         doc /* Passages and claims from page text, quotes checked in code. Skills extract_claims, research. */
-        @ModelStep { schema = "claims.schema.json"; tools = ""; tokenBudget = 8192; secondBudget = 0.0; pin = "MP-light"; criterion = "none: set in Plan"; }
-        @TrustBoundary { boundary = "TB-web"; threats = ""; }
+        @ModelStep { schema = "claims.schema.json"; tools = ""; tokenBudget = 8192; secondBudget = 20.0; pin = "MP-light"; criterion = "none: set in Plan"; }
+        @TrustBoundary { boundary = "TB-web"; threats = "THR-001, THR-002, THR-003, THR-008"; }
         port pageIn : ~PageTextPort;
     }
     part def VerdictStep {
         doc /* One voice, or argue-for, argue-against, rebut and judge (verification styles). Skill verify_claim. */
-        @ModelStep { schema = "ruling.schema.json"; tools = ""; tokenBudget = 8192; secondBudget = 0.0; pin = "MP-light"; criterion = "none: set in Plan"; }
-        @TrustBoundary { boundary = "TB-web"; threats = ""; }
+        @ModelStep { schema = "ruling.schema.json"; tools = ""; tokenBudget = 8192; secondBudget = 25.0; pin = "MP-light"; criterion = "none: set in Plan"; }
+        @TrustBoundary { boundary = "TB-web"; threats = "THR-001, THR-002, THR-003"; }
         port pageIn : ~PageTextPort;
     }
     part def SynthesisStep {
         doc /* Answer written from verified passages only. Skill research. */
-        @ModelStep { schema = "answer.schema.json"; tools = ""; tokenBudget = 8192; secondBudget = 0.0; pin = "MP-full"; criterion = "none: set in Plan"; }
-        @TrustBoundary { boundary = "TB-web"; threats = ""; }
+        @ModelStep { schema = "answer.schema.json"; tools = ""; tokenBudget = 8192; secondBudget = 60.0; pin = "MP-full"; criterion = "none: set in Plan"; }
+        @TrustBoundary { boundary = "TB-web"; threats = "THR-001, THR-003"; }
         port pageIn : ~PageTextPort;
     }
     part def ScriptWriterStep {
         doc /* Writes a short check script from a claim. The script is untrusted code. Skill verify_computable. */
-        @ModelStep { schema = "script.schema.json"; tools = ""; tokenBudget = 8192; secondBudget = 0.0; pin = "MP-light"; criterion = "none: set in Plan"; }
-        @TrustBoundary { boundary = "TB-code"; threats = ""; }
+        @ModelStep { schema = "script.schema.json"; tools = ""; tokenBudget = 8192; secondBudget = 20.0; pin = "MP-light"; criterion = "none: set in Plan"; }
+        @TrustBoundary { boundary = "TB-code"; threats = "THR-005, THR-001"; }
         port pageIn : ~PageTextPort;
         port scriptOut : ScriptPort;
     }
     part def ExpressionStep {
         doc /* Expression preset from a description in the editor (expression_llm.py). */
-        @ModelStep { schema = "preset.schema.json"; tools = ""; tokenBudget = 8192; secondBudget = 0.0; pin = "MP-light"; criterion = "none: set in Plan"; }
-        @TrustBoundary { boundary = "TB-user"; threats = ""; }
+        @ModelStep { schema = "preset.schema.json"; tools = ""; tokenBudget = 8192; secondBudget = 30.0; pin = "MP-light"; criterion = "none: set in Plan"; }
+        @TrustBoundary { boundary = "TB-user"; threats = "THR-004"; }
         port userIn : ~UserTextPort;
     }
     part def DreamStep {
         doc /* Summary of the history (today); extraction of structured memory records (target). Skill summarize. */
-        @ModelStep { schema = "none: free text"; tools = ""; tokenBudget = 8192; secondBudget = 0.0; pin = "MP-light"; criterion = "none: set in Plan"; }
-        @TrustBoundary { boundary = "TB-history"; threats = ""; }
+        @ModelStep { schema = "none: free text"; tools = ""; tokenBudget = 8192; secondBudget = 50.0; pin = "MP-light"; criterion = "none: set in Plan"; }
+        @TrustBoundary { boundary = "TB-history"; threats = "THR-006"; }
         port historyIn : ~HistoryPort;
     }
     part def ReviewScreeningStep {
         doc /* Proposed: relevance of abstracts and pieces of papers to a research question. */
-        @ModelStep { schema = "screening.schema.json"; tools = ""; tokenBudget = 8192; secondBudget = 0.0; pin = "MP-light"; criterion = "none: set in Plan"; }
-        @TrustBoundary { boundary = "TB-paper"; threats = ""; }
+        @ModelStep { schema = "screening.schema.json"; tools = ""; tokenBudget = 8192; secondBudget = 15.0; pin = "MP-light"; criterion = "none: set in Plan"; }
+        @TrustBoundary { boundary = "TB-paper"; threats = "THR-007"; }
         port paperIn : ~PaperTextPort;
     }
     part def ReviewPlannerStep {
         doc /* Proposed: system analyser, component determiner and scheduler as views of one model. */
-        @ModelStep { schema = "review_plan.schema.json"; tools = ""; tokenBudget = 8192; secondBudget = 0.0; pin = "MP-full"; criterion = "none: set in Plan"; }
-        @TrustBoundary { boundary = "TB-user"; threats = ""; }
+        @ModelStep { schema = "review_plan.schema.json"; tools = ""; tokenBudget = 8192; secondBudget = 60.0; pin = "MP-full"; criterion = "none: set in Plan"; }
+        @TrustBoundary { boundary = "TB-user"; threats = "THR-004, THR-010"; }
         port userIn : ~UserTextPort;
     }
 
