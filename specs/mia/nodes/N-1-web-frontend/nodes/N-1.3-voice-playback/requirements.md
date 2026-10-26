@@ -14,7 +14,7 @@ Playing the audio of the answers and the voice lines in this browser: queue, cla
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-13: with 5 scripted audio chunks the playback order equals the arrival order and no sentence overlaps
-- Verified by: –
+- Verified by: TC-VPB-001
 - Status: Draft
 - History: –
 
@@ -26,7 +26,7 @@ Playing the audio of the answers and the voice lines in this browser: queue, cla
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-13: after mute no audio plays on this device; a second device still plays
-- Verified by: –
+- Verified by: TC-VPB-002
 - Status: Draft
 - History: –
 
@@ -38,7 +38,7 @@ Playing the audio of the answers and the voice lines in this browser: queue, cla
 - Priority: Should
 - Verification method: Test
 - Acceptance criterion: AC-13: a line with a missing file produces one report event and no error shown; the conversation continues
-- Verified by: –
+- Verified by: TC-VPB-003
 - Status: Draft
 - History: –
 
@@ -50,7 +50,7 @@ Playing the audio of the answers and the voice lines in this browser: queue, cla
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-5: a browser test records every request of a session and finds 0 outside the host (exact)
-- Verified by: –
+- Verified by: TC-VPB-004
 - Status: Draft
 - History: –
 
@@ -62,7 +62,7 @@ Playing the audio of the answers and the voice lines in this browser: queue, cla
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-29: the chat page loads from the backend container; the frontend has no container of its own
-- Verified by: –
+- Verified by: TC-VPB-005
 - Status: Draft
 - History: –
 

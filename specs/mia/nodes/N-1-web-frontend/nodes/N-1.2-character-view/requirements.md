@@ -14,7 +14,7 @@ The 3D character in an iframe (Godot web export): expressions, gestures, mouth, 
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-1: with the character iframe blocked, a message is sent and answered (exact)
-- Verified by: –
+- Verified by: TC-CHV-001
 - Status: Draft
 - History: –
 
@@ -26,7 +26,7 @@ The 3D character in an iframe (Godot web export): expressions, gestures, mouth, 
 - Priority: Must
 - Verification method: Inspection, Test
 - Acceptance criterion: AC-17: a scripted list of 14 presets and 5 gestures played through the API shows each on the character; no other call path exists
-- Verified by: –
+- Verified by: TC-CHV-002
 - Status: Draft
 - History: –
 
@@ -38,7 +38,7 @@ The 3D character in an iframe (Godot web export): expressions, gestures, mouth, 
 - Priority: Should
 - Verification method: Demonstration
 - Acceptance criterion: AC-1: reviewer checklist for mouth, blending, blinking, idle motion on desktop and phone
-- Verified by: –
+- Verified by: TC-CHV-003
 - Status: Draft
 - History: –
 
@@ -50,7 +50,7 @@ The 3D character in an iframe (Godot web export): expressions, gestures, mouth, 
 - Priority: Should
 - Verification method: Test
 - Acceptance criterion: AC-17: for every mood of the map and for 1 unknown mood the shown expression is the mapped one or neutral (exact)
-- Verified by: –
+- Verified by: TC-CHV-004
 - Status: Draft
 - History: –
 
@@ -62,7 +62,7 @@ The 3D character in an iframe (Godot web export): expressions, gestures, mouth, 
 - Priority: Should
 - Verification method: Test
 - Acceptance criterion: AC-17: a change pushed by the mock appears within 2 s without reload
-- Verified by: –
+- Verified by: TC-CHV-005
 - Status: Draft
 - History: –
 
@@ -74,7 +74,7 @@ The 3D character in an iframe (Godot web export): expressions, gestures, mouth, 
 - Priority: Could
 - Verification method: Test
 - Acceptance criterion: AC-11: on a mock negative-vote answer the shocked expression is shown (exact)
-- Verified by: –
+- Verified by: TC-CHV-006
 - Status: Draft
 - History: –
 
@@ -86,7 +86,7 @@ The 3D character in an iframe (Godot web export): expressions, gestures, mouth, 
 - Priority: Should
 - Verification method: Demonstration, Test
 - Acceptance criterion: AC-17: a second .vrm model loads and the unmapped list is shown
-- Verified by: –
+- Verified by: TC-CHV-007
 - Status: Draft
 - History: –
 
@@ -98,7 +98,7 @@ The 3D character in an iframe (Godot web export): expressions, gestures, mouth, 
 - Priority: Could
 - Verification method: Test
 - Acceptance criterion: AC-17: a mock run with a variant changes the outfit and shows the label; a run without keeps the chat's variant
-- Verified by: –
+- Verified by: TC-CHV-008
 - Status: Draft
 - History: –
 
@@ -110,7 +110,7 @@ The 3D character in an iframe (Godot web export): expressions, gestures, mouth, 
 - Priority: Must
 - Verification method: Test, Demonstration
 - Acceptance criterion: AC-1: browser checks at 360, 768 and 1440 px in both themes; touch targets measured at 44 px or more (exact)
-- Verified by: –
+- Verified by: TC-CHV-009
 - Status: Draft
 - History: –
 
@@ -122,7 +122,7 @@ The 3D character in an iframe (Godot web export): expressions, gestures, mouth, 
 - Priority: Should
 - Verification method: Measurement
 - Acceptance criterion: AC-19: median of 10 runs of 30 s reaches 30 fps on any phone inside the network (no particular device) and on the desktop
-- Verified by: –
+- Verified by: TC-CHV-010
 - Status: Draft
 - History: –
 
@@ -134,7 +134,7 @@ The 3D character in an iframe (Godot web export): expressions, gestures, mouth, 
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-5: a browser test records every request of a session and finds 0 outside the host (exact)
-- Verified by: –
+- Verified by: TC-CHV-011
 - Status: Draft
 - History: –
 
@@ -146,7 +146,7 @@ The 3D character in an iframe (Godot web export): expressions, gestures, mouth, 
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-14: over plain HTTP to a LAN address the character does not load (exact)
-- Verified by: –
+- Verified by: TC-CHV-012
 - Status: Draft
 - History: –
 
@@ -158,7 +158,7 @@ The 3D character in an iframe (Godot web export): expressions, gestures, mouth, 
 - Priority: Must
 - Verification method: Inspection
 - Acceptance criterion: AC-20: no bundler files; the Godot version string is 4.6.1 (exact)
-- Verified by: –
+- Verified by: TC-CHV-013
 - Status: Draft
 - History: –
 
@@ -170,7 +170,7 @@ The 3D character in an iframe (Godot web export): expressions, gestures, mouth, 
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-29: the chat page loads from the backend container; the frontend has no container of its own
-- Verified by: –
+- Verified by: TC-CHV-014
 - Status: Draft
 - History: –
 

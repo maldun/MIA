@@ -14,7 +14,7 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-1: with the mock of IF-101, two users' messages show their names and the scripted answer appears sentence by sentence
-- Verified by: –
+- Verified by: TC-N1-003, TC-CLV-001, TC-CLV-021
 - Status: Draft
 - History: –
 
@@ -26,7 +26,7 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-1: with a mock queue of 3, the positions 1, 2, 3 are shown; stop sends the stop event once
-- Verified by: –
+- Verified by: TC-N1-003, TC-CLV-002
 - Status: Draft
 - History: –
 
@@ -38,7 +38,7 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-1: after reload the last 50 messages of the mock appear in order; a message sent by the mock from another user appears within 2 s
-- Verified by: –
+- Verified by: TC-N1-003, TC-CLV-003
 - Status: Draft
 - History: –
 
@@ -50,7 +50,7 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-1: with the mock connection cut for 5 s the state shows offline, the draft text stays, the page reconnects without a reload
-- Verified by: –
+- Verified by: TC-N1-003, TC-CLV-004
 - Status: Draft
 - History: –
 
@@ -62,7 +62,7 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Priority: Should
 - Verification method: Test
 - Acceptance criterion: AC-1: the two controls send one event each; the mock answers are shown
-- Verified by: –
+- Verified by: TC-N1-003, TC-CLV-005
 - Status: Draft
 - History: –
 
@@ -74,7 +74,7 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-1: with the character iframe blocked, a message is sent and answered (exact)
-- Verified by: –
+- Verified by: TC-N1-002, TC-CLV-006, TC-CHV-001
 - Status: Draft
 - History: –
 
@@ -86,7 +86,7 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Priority: Should
 - Verification method: Demonstration
 - Acceptance criterion: AC-1: viewports 360, 768 and 1440 px show the layout; collapsed view shows the caption
-- Verified by: –
+- Verified by: TC-N1-003, TC-CLV-007
 - Status: Draft
 - History: –
 
@@ -98,7 +98,7 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Priority: Must
 - Verification method: Inspection, Test
 - Acceptance criterion: AC-17: a scripted list of 14 presets and 5 gestures played through the API shows each on the character; no other call path exists
-- Verified by: –
+- Verified by: TC-N1-002, TC-CHV-002
 - Status: Draft
 - History: –
 
@@ -110,7 +110,7 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Priority: Should
 - Verification method: Demonstration
 - Acceptance criterion: AC-1: reviewer checklist for mouth, blending, blinking, idle motion on desktop and phone
-- Verified by: –
+- Verified by: TC-N1-002, TC-CHV-003
 - Status: Draft
 - History: –
 
@@ -122,7 +122,7 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Priority: Should
 - Verification method: Test
 - Acceptance criterion: AC-17: for every mood of the map and for 1 unknown mood the shown expression is the mapped one or neutral (exact)
-- Verified by: –
+- Verified by: TC-N1-002, TC-CHV-004
 - Status: Draft
 - History: –
 
@@ -134,7 +134,7 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-13: with 5 scripted audio chunks the playback order equals the arrival order and no sentence overlaps
-- Verified by: –
+- Verified by: TC-N1-001, TC-VPB-001
 - Status: Draft
 - History: –
 
@@ -146,7 +146,7 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-13: after mute no audio plays on this device; a second device still plays
-- Verified by: –
+- Verified by: TC-N1-001, TC-VPB-002
 - Status: Draft
 - History: –
 
@@ -158,7 +158,7 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Priority: Should
 - Verification method: Test
 - Acceptance criterion: AC-13: a line with a missing file produces one report event and no error shown; the conversation continues
-- Verified by: –
+- Verified by: TC-N1-001, TC-VPB-003
 - Status: Draft
 - History: –
 
@@ -170,7 +170,7 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Priority: Should
 - Verification method: Test, Demonstration
 - Acceptance criterion: AC-21: the status line shows the mock mood and activity; opening an answer shows the mock account
-- Verified by: –
+- Verified by: TC-N1-003, TC-CLV-008
 - Status: Draft
 - History: –
 
@@ -182,7 +182,7 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Priority: Should
 - Verification method: Test
 - Acceptance criterion: AC-17: a change pushed by the mock appears within 2 s without reload
-- Verified by: –
+- Verified by: TC-N1-002, TC-CLV-009, TC-CHV-005
 - Status: Draft
 - History: –
 
@@ -194,7 +194,7 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Priority: Should
 - Verification method: Test, Demonstration
 - Acceptance criterion: AC-18: a vote sends one event with category and subject; the mock scores are drawn per category and overall
-- Verified by: –
+- Verified by: TC-N1-003, TC-CLV-010
 - Status: Draft
 - History: –
 
@@ -206,7 +206,7 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Priority: Could
 - Verification method: Test
 - Acceptance criterion: AC-11: on a mock negative-vote answer the shocked expression is shown (exact)
-- Verified by: –
+- Verified by: TC-N1-002, TC-CHV-006
 - Status: Draft
 - History: –
 
@@ -218,7 +218,7 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Priority: Should
 - Verification method: Test
 - Acceptance criterion: AC-12, AC-24: with 50 mock records all are listed; an edit and a delete send one event each
-- Verified by: –
+- Verified by: TC-N1-003, TC-CLV-011
 - Status: Draft
 - History: –
 
@@ -230,7 +230,7 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Priority: Could
 - Verification method: Test
 - Acceptance criterion: AC-3: the edit event carries source id, old and new value
-- Verified by: –
+- Verified by: TC-N1-003, TC-CLV-012
 - Status: Draft
 - History: –
 
@@ -242,7 +242,7 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Priority: Should
 - Verification method: Demonstration, Test
 - Acceptance criterion: AC-17: a second .vrm model loads and the unmapped list is shown
-- Verified by: –
+- Verified by: TC-N1-002, TC-CHV-007
 - Status: Draft
 - History: –
 
@@ -254,7 +254,7 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Priority: Could
 - Verification method: Test
 - Acceptance criterion: AC-17: a mock run with a variant changes the outfit and shows the label; a run without keeps the chat's variant
-- Verified by: –
+- Verified by: TC-N1-002, TC-CLV-013, TC-CHV-008
 - Status: Draft
 - History: –
 
@@ -266,7 +266,7 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-14: the three views send one event each
-- Verified by: –
+- Verified by: TC-N1-003, TC-CLV-014
 - Status: Draft
 - History: –
 
@@ -278,7 +278,7 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Priority: Must
 - Verification method: Inspection
 - Acceptance criterion: AC-20: the login page text is present (exact)
-- Verified by: –
+- Verified by: TC-N1-006, TC-CLV-015
 - Status: Draft
 - History: –
 
@@ -290,7 +290,7 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Priority: Must
 - Verification method: Test, Demonstration
 - Acceptance criterion: AC-1: browser checks at 360, 768 and 1440 px in both themes; touch targets measured at 44 px or more (exact)
-- Verified by: –
+- Verified by: TC-N1-003, TC-CLV-016, TC-CHV-009
 - Status: Draft
 - History: –
 
@@ -302,7 +302,7 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Priority: Should
 - Verification method: Measurement
 - Acceptance criterion: AC-19: median of 10 runs of 30 s reaches 30 fps on any phone inside the network (no particular device) and on the desktop
-- Verified by: –
+- Verified by: TC-N1-005, TC-CHV-010
 - Status: Draft
 - History: –
 
@@ -314,7 +314,7 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-5: a browser test records every request of a session and finds 0 outside the host (exact)
-- Verified by: –
+- Verified by: TC-N1-004, TC-CLV-017, TC-CLV-021, TC-CHV-011, TC-VPB-004
 - Status: Draft
 - History: –
 
@@ -326,7 +326,7 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-14: over plain HTTP to a LAN address the character does not load (exact)
-- Verified by: –
+- Verified by: TC-N1-004, TC-CHV-012
 - Status: Draft
 - History: –
 
@@ -338,7 +338,7 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-14: over plain HTTP to a LAN address the login form sends nothing (exact)
-- Verified by: –
+- Verified by: TC-N1-004, TC-CLV-018
 - Status: Draft
 - History: –
 
@@ -350,7 +350,7 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Priority: Must
 - Verification method: Inspection
 - Acceptance criterion: AC-20: no bundler files; the Godot version string is 4.6.1 (exact)
-- Verified by: –
+- Verified by: TC-N1-006, TC-CLV-019, TC-CHV-013
 - Status: Draft
 - History: –
 
@@ -362,6 +362,6 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-29: the chat page loads from the backend container; the frontend has no container of its own
-- Verified by: –
+- Verified by: TC-N1-006, TC-CLV-020, TC-CHV-014, TC-VPB-005
 - Status: Draft
 - History: –

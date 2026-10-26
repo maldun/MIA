@@ -43,7 +43,7 @@ A leaf. Each task is small, vertical, fits one session and starts from a red tes
 - Must not touch: tests/acceptance/, tests/helpers/, tests/smoke/, tests/integration/, benchmarks/, contracts/, eval/suites/, eval/baselines/
 - Depends on: T-01
 - Done when: the listed tests are green and all other tests are unchanged
-- Notes: Waits for OPEN-7 (kappa threshold).
+- Notes: Threshold decided (OPEN-7): Cohen's kappa 0.6 or more.
 
 ### T-04: Baseline and suite checks
 - Implements: REQ-EVL-005, REQ-EVL-009
