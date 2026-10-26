@@ -12,6 +12,7 @@ The server sets the session at `login` as a cookie `mia_session` (HttpOnly, Same
 |---|---|---|---|
 | `login(user, password)` | account, password | session (cookie) | HTTPS or localhost only (CON-4); 5 failed logins per minute per account, then `429 throttled` even with the right password (REQ-BE-009) |
 | `whoami(session)` **[v1]** | | `{"user"}` | the account of a kept session; the page asks after a reload |
+| `logout(session)` **[v2]** | | `{"loggedOut": true}` | ends the session: the same cookie is `401 unauthenticated` afterwards and its sockets are closed; the cookie is cleared (`Max-Age=0`); 401 without a valid session (REQ-BE-077) |
 | `change_password(session, old, new)` **[v1]** | the own password | `{"changed": true}` | `401 bad_credentials` if `old` is wrong; `422 weak_password` below 8 characters; the old password stops working (REQ-BE-011) |
 | `connect(session)` | session | event `chat_status` first | `{busy, activity, model, profile, queue, mood}` as today |
 | `send(session, text, client_id)` (`chat_send`) | text 1..4000 characters | ack `{"id", "position", "message"}` **[v1: message]** | `position` 1 = answered next; `message` is the stored message `{id, role, sender, text, created, client_id}`; 401 without session; 422 `empty_text`; 503 `queue_full` (5 waiting messages in all, 2 per user) |
@@ -77,3 +78,4 @@ Events (server to every connected page):
 |---|---|---|---|
 | v0 | 2026-10-25 | first draft from today's events plus the HLS additions | – |
 | v1 | 2026-10-26 | stored message and client id in the ack and the events; session as cookie; whoami, change_password, regenerate, speak_again, account, vote, score, items, save_item, delete_item, trust, set_trust, persona, save_persona; events variant, score, item_changed, trust_changed, persona_changed | A-03 |
+| v2 | 2026-10-26 | `logout` | A-04 |

@@ -8,7 +8,7 @@ The wire between the chat page and the character iframe. Draft v0 from today's `
 Page to character (`character.receive(jsonString, origin)`):
 | type | fields | effect |
 |---|---|---|
-| `expression` | `name` | the character shows the preset; an unknown name falls back to `neutral` |
+| `expression` | `name` | the character shows the preset; an unknown name changes nothing: the character keeps the expression it shows (A-04) |
 | `speaking` | `value` bool | the mouth moves while true (the page repeats it while a line plays) |
 | `viewport_inset` | `left, right, top, bottom, width, height` | the area covered by the chat; negative values count as 0 |
 | `view` | `name` | camera view |
@@ -39,9 +39,10 @@ Character to page (callback `onMessage(jsonString)`):
 ## Golden examples
 1. Typical: after `ready`, `expression {name: "happy"}` shows happy; `speaking {value: true}` then `false` moves and stops the mouth.
 2. Failure: a load failure sends `failed`; messages afterwards change nothing and cause no error.
-3. Edge: an expression `nonsense` shows `neutral`; a message with a foreign origin or `{not json` is ignored; `viewport_inset` with `left: -5` counts as 0.
+3. Edge: after `happy`, an expression `nonsense` leaves `happy` shown; a message with a foreign origin or `{not json` is ignored; `viewport_inset` with `left: -5` counts as 0.
 
 ## Version history
 | Version | Date | Change | Amendment |
 |---|---|---|---|
 | v0 | 2026-10-25 | first draft from character.js | – |
+| v1 | 2026-10-26 | an unknown expression name keeps the current expression (was: neutral), as the Godot bridge and the backend do | A-04 |

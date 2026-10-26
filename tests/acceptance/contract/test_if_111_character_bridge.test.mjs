@@ -24,10 +24,10 @@ eachProvider('IF-111', 'TC-IF-111-01 golden 1: after ready, an expression and th
 });
 
 // mark.req("IF-111", "REQ-FE-010")
-eachProvider('IF-111', 'TC-IF-111-02 golden 3: an unknown expression shows neutral', make(), (character) => {
+eachProvider('IF-111', 'TC-IF-111-02 golden 3: an unknown expression keeps the current one', make(), (character) => {
   send(character, { type: 'expression', name: 'happy' });
   send(character, { type: 'expression', name: 'nonsense' });
-  assert.equal(character.state.expression, 'neutral');
+  assert.equal(character.state.expression, 'happy');
 });
 
 // mark.req("IF-111")
