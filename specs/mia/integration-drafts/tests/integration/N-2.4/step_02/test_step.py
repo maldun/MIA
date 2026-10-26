@@ -17,7 +17,7 @@ REAL_INTERFACES = ('IF-401', 'IF-402')
 
 
 class Step02(unittest.TestCase):
-    @mark.req(*scenario.MARKS[2])
+    @mark.req("REQ-TLS-001", "REQ-TLS-008")
     def test_scenario_02(self):
         """N-2.4.2 real"""
         need(REAL_NODES)

@@ -17,7 +17,7 @@ REAL_INTERFACES = ()
 
 
 class Step00(unittest.TestCase):
-    @mark.req(*scenario.MARKS[0])
+    @mark.req()
     def test_scenario_00(self):
         """all parts as mocks (the skeleton)"""
         need(REAL_NODES)

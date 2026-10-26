@@ -26,7 +26,7 @@ if [ "${1:-}" != "--run" ]; then
             echo "DIFFERS    $rel (not overwritten; change protected files by amendment)"
             status=1
         fi
-    done < <(find "$SRC/tests" -type f -name '*.py' | sort)
+    done < <(find "$SRC/tests" -type f \( -name '*.py' -o -name '*.mjs' \) | sort)
 fi
 
 if [ "${1:-}" = "--run" ] || [ "$status" = 0 ]; then
@@ -34,5 +34,7 @@ if [ "${1:-}" = "--run" ] || [ "$status" = 0 ]; then
         echo "== $step"
         python3 "$step" 2>&1 | tail -3
     done
+    echo "== node --test tests/integration/*/step_*/test_step.test.mjs"
+    node --test tests/integration/*/step_*/test_step.test.mjs 2>&1 | grep -E '^# (tests|pass|fail|skipped)'
 fi
 exit $status

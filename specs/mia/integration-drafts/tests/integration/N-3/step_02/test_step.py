@@ -17,7 +17,7 @@ REAL_INTERFACES = ('IF-301', 'IF-302')
 
 
 class Step02(unittest.TestCase):
-    @mark.req(*scenario.MARKS[2])
+    @mark.req("REQ-DB-010", "REQ-DB-012", "REQ-DB-013", "REQ-DB-014", "REQ-DB-015")
     def test_scenario_02(self):
         """N-3.3 real"""
         need(REAL_NODES)
