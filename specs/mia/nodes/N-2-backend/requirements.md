@@ -930,7 +930,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-1, AC-14: the contract suite test_if_101_chat_api.py passes against the mock (stage 1) and the Backend (stage 2)
-- Verified by: TC-IF-101-01..08, TC-API-015, TC-N2-005
+- Verified by: TC-IF-101-01..17, TC-API-015, TC-N2-005
 - Status: Approved
 - History: v0, amendment 5/7 (2026-10-25)
 
