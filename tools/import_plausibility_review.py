@@ -9,7 +9,7 @@ import sys
 
 import yaml
 
-FIELD_RISK = {"reason": "performance and resource figures are validated in the field (phase 7, VAL-006) and tuned in later iterations", "owner": "{by}",
+FIELD_RISK = {"reason": "the figure or quality is validated in the field (phase 7, VAL-006) and the criterion is tuned in later iterations", "owner": "{by}",
               "decided": "{date} by {by}", "follow_up": "VAL-006"}
 
 
