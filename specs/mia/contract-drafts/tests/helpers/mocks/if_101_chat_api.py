@@ -14,13 +14,14 @@ MAX_TEXT = 4000
 ITEM_KINDS = ("tasks", "memos", "memory")             # v1
 CATEGORIES = ("answer_quality", "reactions", "character_behaviour", "service")
 TRUST = {"example.org": 0.5, "wikipedia.org": 0.8}
+BEHAVIOURS = ("greet", "idle", "no", "talk", "yes")        # v5: the names of `character_behaviour` that can be voted on (the real list is library/behaviours.json)
 MIN_PASSWORD = 8
 START = datetime.datetime(2026, 1, 5, tzinfo=datetime.timezone.utc)      # a Monday: the mock's clock 0; v4 groups the votes by the ISO week of their time
 
 
 class ChatApiMock:
     def __init__(self, accounts=None, answers=None, queue_limit=5, user_limit=2):
-        self.accounts = accounts or {"anna": "pw-anna", "ben": "pw-ben"}
+        self.accounts = accounts or {"anna": "pw-anna", "ben": "pw-ben", "carl": "pw-carl", "dora": "pw-dora", "emil": "pw-emil"}      # v5: five voters for the counters
         self.answers = list(answers or [])            # each: a list of sentences, or {"sentences": [...], "emotion": "..."}
         self.queue_limit, self.user_limit = queue_limit, user_limit
         self._owner = {}                              # message id -> account of the queued user message
@@ -29,6 +30,7 @@ class ChatApiMock:
         self._sessions = {}                           # token -> account
         self._events = {}                             # token -> events not yet read
         self._history, self._queue, self._stop_next, self._ids = [], collections.deque(), False, 0
+        self._resets = {}                             # v5: behaviour name -> mock time of its last counter reset
         self._votes = []                              # v1: {"user", "subject", "category", "value", "created"}
         self._items = {kind: {} for kind in ITEM_KINDS}    # v1: kind -> id -> {"id", "text", "source"?, "created", "author"}
         self._trust = dict(TRUST)                     # v1: source id -> value 0..1
@@ -160,10 +162,34 @@ class ChatApiMock:
             raise ApiError(422, "invalid_vote", rule="category" if category not in CATEGORIES else "value")
         if category == "answer_quality" and message_id not in [m["id"] for m in self._history]:
             raise ApiError(404, "not_found")
+        if category == "character_behaviour" and message_id not in BEHAVIOURS:
+            raise ApiError(422, "invalid_vote", rule="subject")
+        # one vote per user, category and subject (REQ-CHA-015): a repeat or a changed mind replaces the earlier one
+        self._votes = [v for v in self._votes if (v["user"], v["category"], v["subject"]) != (user, category, message_id)]
         self._votes.append({"user": user, "subject": message_id, "category": category, "value": value, "created": "t%d" % int(self.now), "at": self.now})
         score = self.score(session)
         self._broadcast("score", score)
         return {"stored": True, "score": score}
+
+    def _counter(self, name):
+        since = self._resets.get(name)
+        values = [v["value"] for v in self._votes if v["category"] == "character_behaviour" and v["subject"] == name and (since is None or v["at"] > since)]
+        net = sum(values)
+        return {"net": net, "votes": len(values), "chance": 0.002 if net <= -5 else 1.0, "reset_at": None if since is None else "t%d" % int(since)}
+
+    def counters(self, session):
+        """v5: the adaptation counters of every behaviour of the list (REQ-BE-030, REQ-BE-031): the net of the votes since the last reset and the chance of showing it."""
+        self._user(session)
+        return {name: self._counter(name) for name in BEHAVIOURS}
+
+    def reset_counter(self, session, name):
+        """v5: back to the default rate; the votes stay, only later ones count."""
+        user = self._user(session)
+        if name not in BEHAVIOURS:
+            raise ApiError(404, "not_found")
+        self._resets[name] = self.now
+        self._broadcast("counters_changed", {"name": name, "author": user})
+        return self._counter(name)
 
     def score(self, session):
         """The scores per category and overall, and v4: the same sums per ISO week (`series`, oldest first, only weeks with a vote)."""

@@ -324,6 +324,38 @@ class ChatApiContract(unittest.TestCase):
         self.assertTrue(all(isinstance(l["plain"], str) and l["plain"] for l in lines))
         self.assertEqual(error_of(lambda: api.account(s, history[0]["id"])).status, 404)
 
+    @mark.req("IF-101", "REQ-BE-030", "REQ-BE-031", "REQ-CHA-017", "REQ-CHA-018")
+    @each_provider(IF)
+    def test_the_adaptation_counters_are_seen_and_reset_by_every_user(self, api):
+        """TC-IF-101-22 (v5): every behaviour of the list has a counter; 5 net negative votes make its chance at most 0.01; any user resets it, the others hear of it, the votes stay; a name that is not on the list is refused."""
+        anna, ben = api.login("anna", "pw-anna"), api.login("ben", "pw-ben")
+        api.connect(ben)
+        self.assertEqual(sorted(api.counters(anna)), ["greet", "idle", "no", "talk", "yes"])
+        self.assertEqual(api.counters(anna)["no"], {"net": 0, "votes": 0, "chance": 1.0, "reset_at": None})
+        api.vote(anna, "no", "character_behaviour", -1)
+        api.vote(ben, "no", "character_behaviour", -1)
+        api.vote(ben, "no", "character_behaviour", -1)                              # a repeat of the same user and subject counts once
+        self.assertEqual((api.counters(ben)["no"]["net"], api.counters(ben)["no"]["votes"]), (-2, 2))
+        self.assertEqual(api.counters(ben)["no"]["chance"], 1.0)
+        for user in ("carl", "dora", "emil"):
+            api.vote(api.login(user, "pw-" + user), "no", "character_behaviour", -1)
+        self.assertLessEqual(api.counters(anna)["no"]["chance"], 0.01)
+        self.assertEqual(api.counters(anna)["yes"]["chance"], 1.0)                  # another behaviour is untouched
+        api.send(anna, "hi")
+        api.settle()
+        api.vote(anna, api.history(anna, 5)[-1]["id"], "answer_quality", -1)        # a vote on an answer moves no counter
+        self.assertEqual(api.counters(anna)["no"]["net"], -5)
+        api.events(ben)
+        api.advance_time(60)
+        reset = api.reset_counter(ben, "no")
+        self.assertEqual((reset["net"], reset["votes"], reset["chance"]), (0, 0, 1.0))
+        self.assertEqual([e["payload"] for e in api.events(ben) if e["event"] == "counters_changed"], [{"name": "no", "author": "ben"}])
+        self.assertEqual(api.score(anna)["categories"]["character_behaviour"], -5)  # the votes stay stored
+        self.assertEqual(error_of(lambda: api.reset_counter(anna, "dance")).status, 404)
+        err = error_of(lambda: api.vote(anna, "dance", "character_behaviour", -1))
+        self.assertEqual((err.status, err.code, err.rule), (422, "invalid_vote", "subject"))
+        self.assertEqual(api.score(anna)["votes"], 6)                               # 5 on the behaviour (ben's repeat replaced his first) and 1 on the answer; the refused vote is not stored
+
     @mark.req("IF-101", "REQ-CLV-013", "REQ-BE-043")
     @each_provider(IF)
     def test_an_answer_announces_the_character_variant_of_its_workflow(self, api):

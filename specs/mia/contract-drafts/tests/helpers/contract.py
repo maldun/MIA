@@ -151,7 +151,8 @@ class _ChatApiAdapter:
     (the streaming events of an answer, the queue limits inside the agent, `stop`, the variant event: N-2.1 T-03 rest, N-2.2, N-2.5) skips the test with the name of
     the operation. The adapter turns the error class of the service into the one of the mock, which the suite expects; production code does not import from tests/."""
 
-    ACCOUNTS = {"anna": "pw-anna", "ben": "pw-ben"}                 # the accounts of the mock, so that the same suite runs on both
+    ACCOUNTS = {"anna": "pw-anna", "ben": "pw-ben", "carl": "pw-carl", "dora": "pw-dora", "emil": "pw-emil"}      # the accounts of the mock, so that the same suite runs on both
+    BEHAVIOURS = ["greet", "idle", "no", "talk", "yes"]             # the list of the mock (library/behaviours.json has the same names)
     TRUST_SOURCES = {"example.org": 0.5}                            # a source the mock has and the default table does not: seeded through the override file
     START = 1767571200                                              # 2026-01-05 00:00 UTC, a Monday: the clock 0 of the mock
 
@@ -183,7 +184,7 @@ class _ChatApiAdapter:
             json.dump({"classes": {name: {"prior": value, "reason": "contract suite"} for name, value in self.TRUST_SOURCES.items()}}, fp)
         self._chat = ChatService(self._broadcast, ChatLog(os.path.join(folder, "chat.jsonl")), MoodTracker(os.path.join(REPO, "moods.json")),
                                  self._scripted_answer, queue_size=queue_limit, user_limit=user_limit, spawn=self._pending.append,
-                                 votes=store, wall_clock=lambda: self.START + self._now)
+                                 votes=store, wall_clock=lambda: self.START + self._now, behaviours=lambda: self.BEHAVIOURS)
         app = Flask(__name__)
 
         @app.before_request
@@ -295,6 +296,12 @@ class _ChatApiAdapter:
     def score(self, session):
         return self._route("get", "/api/score", session)
 
+    def counters(self, session):
+        return self._route("get", "/api/counters", session)
+
+    def reset_counter(self, session, name):
+        return self._route("post", "/api/reset_counter", session, json={"name": name})
+
     def regenerate(self, session, message_id):
         return self._route("post", "/api/regenerate", session, json={"message_id": message_id})
 
@@ -339,7 +346,7 @@ class _ChatTurnAdapter:
         self._error, self._chat_error = ServiceError, ChatError
         self._chat = ChatService(self._deliver, ChatLog(os.path.join(folder, "chat.jsonl")), MoodTracker(os.path.join(REPO, "moods.json")), self._scripted_answer,
                                  queue_size=queue_limit, spawn=self._pending.append, votes=Storage(FileBackend(os.path.join(folder, "db"))),
-                                 wall_clock=lambda: self.START + self._now)
+                                 wall_clock=lambda: self.START + self._now, behaviours=lambda: _ChatApiAdapter.BEHAVIOURS)
 
     def _deliver(self, event, payload):
         for callback in list(self._callbacks):
@@ -379,6 +386,12 @@ class _ChatTurnAdapter:
 
     def score(self):
         return self._chat.score()
+
+    def counters(self):
+        return self._chat.counters()
+
+    def reset_counter(self, account, name):
+        return self._call(lambda: self._chat.reset_counter(account, name))
 
     def advance_time(self, seconds):
         self._now += seconds

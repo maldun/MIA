@@ -12,8 +12,9 @@ CODES = {"empty_text": "empty_text", "queue_full": "queue_full"}      # every ot
 
 class ChatTurnMock:
     def __init__(self, answers=None, queue_limit=5):
-        self._api = ChatApiMock(accounts={"anna": "pw", "ben": "pw"}, answers=answers, queue_limit=queue_limit)
-        self._sessions = {name: self._api.login(name, "pw") for name in ("anna", "ben")}
+        names = ("anna", "ben", "carl", "dora", "emil")                   # v2: five voters for the counters
+        self._api = ChatApiMock(accounts={name: "pw" for name in names}, answers=answers, queue_limit=queue_limit)
+        self._sessions = {name: self._api.login(name, "pw") for name in names}
         self._observer = self._sessions["ben"]
         self._api.connect(self._observer)
         self._callbacks = []
@@ -56,6 +57,14 @@ class ChatTurnMock:
 
     def score(self):
         return self._api.score(self._observer)
+
+    def counters(self):                                                   # v2 (amendment A-08)
+        return self._api.counters(self._observer)
+
+    def reset_counter(self, account, name):
+        result = self._call(lambda: self._api.reset_counter(self._sessions[account], name))
+        self._forward()
+        return result
 
     def advance_time(self, seconds):
         """Test adapter: move the clock of the chat agent (the weeks of the score)."""
