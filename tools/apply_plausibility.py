@@ -22,6 +22,10 @@ def main():
     args = ap.parse_args()
     root = pathlib.Path(args.root)
     proposal = yaml.safe_load((root / "specs/mia/plausibility-proposal.yaml").read_text(encoding="utf-8"))["proposal"]
+    decisions_file = root / "specs/mia/plausibility-decisions.yaml"
+    if decisions_file.exists():                   # the person's decisions from plausibility-review.md win over the proposal
+        for iid, decided in (yaml.safe_load(decisions_file.read_text(encoding="utf-8")) or {}).get("decisions", {}).items():
+            proposal.setdefault(iid, {}).update(decided)
     items, open_items = {}, []
     for iid, p in proposal.items():
         if p.get("decision"):                         # decided by the person (the categories multi-user and field are the owner's decisions)
@@ -38,7 +42,7 @@ def main():
         items[iid] = item
     record = {"plausibility": {"hardware": {"HW-target": HARDWARE}, "references": {}, "items": items}}
     (root / "specs/mia/plausibility.yaml").write_text("# Plausibility record (L2b). Written by tools/apply_plausibility.py from plausibility-proposal.yaml, rated by %s.\n" % args.by
-                                                      + yaml.safe_dump(record, sort_keys=True, allow_unicode=True).replace("{by}", args.by), encoding="utf-8")
+                                                      + yaml.safe_dump(record, sort_keys=True, allow_unicode=True).replace("{by}", args.by).replace("{date}", args.date), encoding="utf-8")
     print("%d rated, %d without a record yet" % (len(items), len(open_items)))
 
 
