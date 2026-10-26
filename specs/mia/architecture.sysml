@@ -2130,7 +2130,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-API-011'> PythonVersions_Api011 {
         subject s : WebApplication;
-        doc /* The API and accounts shall run on Python 3.11 to 3.13, and so shall every other part of the Backend. */
+        doc /* The Backend shall run every one of its parts on Python 3.11 to 3.13. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-API-012'> StateOnlyThroughTheStorageInterface_Api012 {
@@ -2465,12 +2465,12 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-TLS-001'> CodeChecksFirst_Tls001 {
         subject s : VerificationSuite;
-        doc /* The Tools and sandbox shall offer the code checks number_check, quote_in_source and schema_check as tools that any workflow can call. */
+        doc /* The Tools and sandbox shall offer the code checks number_check, quote_in_source and schema_check as tools for every workflow. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-TLS-002'> LookupWithSources_Tls002 {
         subject s : VerificationSuite;
-        doc /* The Tools and sandbox shall offer the tools web_search and fetch_passages (findings with title, address and short text; passages with verbatim quotes) that any workflow can call. */
+        doc /* The Tools and sandbox shall offer the tools web_search and fetch_passages (findings with title, address and short text; passages with verbatim quotes) for every workflow. */
         @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::measurement); }
     }
     requirement def <'REQ-TLS-003'> SourceRecordsAndCutOff_Tls003 {
@@ -2490,7 +2490,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-TLS-006'> NoInventedSource_Tls006 {
         subject s : VerificationSuite;
-        doc /* The Tools and sandbox shall return every fetched passage with its source reference, so that a quote can be checked against the source text. */
+        doc /* The Tools and sandbox shall return every fetched passage with its source reference, so that the quote check compares the quote with the source text. */
         @Trace { :>> verifiedBy = (HowVerified::measurement); }
     }
     requirement def <'REQ-TLS-007'> OnlyQueriesLeaveTheHost_Tls007 {
@@ -2550,12 +2550,12 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-WFX-005'> CodeChecksFirst_Wfx005 {
         subject s : TaskRuntime;
-        doc /* The Workflow execution shall offer the code checks number_check, quote_in_source and schema_check as tools that any workflow can call. */
+        doc /* The Workflow execution shall offer the code checks number_check, quote_in_source and schema_check as tools for every workflow. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-WFX-006'> LookupWithSources_Wfx006 {
         subject s : TaskRuntime;
-        doc /* The Workflow execution shall offer the tools web_search and fetch_passages (findings with title, address and short text; passages with verbatim quotes) that any workflow can call. */
+        doc /* The Workflow execution shall offer the tools web_search and fetch_passages (findings with title, address and short text; passages with verbatim quotes) for every workflow. */
         @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::measurement); }
     }
     requirement def <'REQ-WFX-007'> SourceRecordsAndCutOff_Wfx007 {
@@ -2605,7 +2605,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-WFX-016'> NoInventedSource_Wfx016 {
         subject s : TaskRuntime;
-        doc /* The Workflow execution shall return every fetched passage with its source reference, so that a quote can be checked against the source text. */
+        doc /* The Workflow execution shall return every fetched passage with its source reference, so that the quote check compares the quote with the source text. */
         @Trace { :>> verifiedBy = (HowVerified::measurement); }
     }
     requirement def <'REQ-WFX-017'> OnlyQueriesLeaveTheHost_Wfx017 {

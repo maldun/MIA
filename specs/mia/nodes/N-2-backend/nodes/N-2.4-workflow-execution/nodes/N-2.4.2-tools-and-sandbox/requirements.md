@@ -8,7 +8,7 @@ The tools that any workflow can call, each counted against the budgets of the ru
 
 ### REQ-TLS-001 – Code checks first
 - Level: low-2   Subject: VerificationSuite
-- Text: The Tools and sandbox shall offer the code checks number_check, quote_in_source and schema_check as tools that any workflow can call.
+- Text: The Tools and sandbox shall offer the code checks number_check, quote_in_source and schema_check as tools for every workflow.
 - Rationale: refines REQ-WFX-005
 - Parent: REQ-WFX-005
 - Priority: Must
@@ -20,7 +20,7 @@ The tools that any workflow can call, each counted against the budgets of the ru
 
 ### REQ-TLS-002 – Lookup with sources
 - Level: low-2   Subject: VerificationSuite
-- Text: The Tools and sandbox shall offer the tools web_search and fetch_passages (findings with title, address and short text; passages with verbatim quotes) that any workflow can call.
+- Text: The Tools and sandbox shall offer the tools web_search and fetch_passages (findings with title, address and short text; passages with verbatim quotes) for every workflow.
 - Rationale: refines REQ-WFX-006
 - Parent: REQ-WFX-006
 - Priority: Must
@@ -68,7 +68,7 @@ The tools that any workflow can call, each counted against the budgets of the ru
 
 ### REQ-TLS-006 – No invented source
 - Level: low-2   Subject: VerificationSuite
-- Text: The Tools and sandbox shall return every fetched passage with its source reference, so that a quote can be checked against the source text.
+- Text: The Tools and sandbox shall return every fetched passage with its source reference, so that the quote check compares the quote with the source text.
 - Rationale: refines REQ-WFX-016
 - Parent: REQ-WFX-016
 - Priority: Must

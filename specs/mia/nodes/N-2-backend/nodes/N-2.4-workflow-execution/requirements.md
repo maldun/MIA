@@ -56,7 +56,7 @@ Running a workflow under budgets: the pipeline runner, model management, verific
 
 ### REQ-WFX-005 – Code checks first
 - Level: low   Subject: TaskRuntime
-- Text: The Workflow execution shall offer the code checks number_check, quote_in_source and schema_check as tools that any workflow can call.
+- Text: The Workflow execution shall offer the code checks number_check, quote_in_source and schema_check as tools for every workflow.
 - Rationale: refines REQ-BE-046
 - Parent: REQ-BE-046
 - Priority: Must
@@ -68,7 +68,7 @@ Running a workflow under budgets: the pipeline runner, model management, verific
 
 ### REQ-WFX-006 – Lookup with sources
 - Level: low   Subject: TaskRuntime
-- Text: The Workflow execution shall offer the tools web_search and fetch_passages (findings with title, address and short text; passages with verbatim quotes) that any workflow can call.
+- Text: The Workflow execution shall offer the tools web_search and fetch_passages (findings with title, address and short text; passages with verbatim quotes) for every workflow.
 - Rationale: refines REQ-BE-051
 - Parent: REQ-BE-051
 - Priority: Must
@@ -188,7 +188,7 @@ Running a workflow under budgets: the pipeline runner, model management, verific
 
 ### REQ-WFX-016 – No invented source
 - Level: low   Subject: TaskRuntime
-- Text: The Workflow execution shall return every fetched passage with its source reference, so that a quote can be checked against the source text.
+- Text: The Workflow execution shall return every fetched passage with its source reference, so that the quote check compares the quote with the source text.
 - Rationale: refines REQ-BE-067
 - Parent: REQ-BE-067
 - Priority: Must

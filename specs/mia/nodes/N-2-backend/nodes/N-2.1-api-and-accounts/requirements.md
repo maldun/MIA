@@ -128,7 +128,7 @@ The gateway of the Backend: the Socket.IO and REST surface (IF-101, IF-104), acc
 
 ### REQ-API-011 – Python versions
 - Level: low   Subject: WebApplication
-- Text: The API and accounts shall run on Python 3.11 to 3.13, and so shall every other part of the Backend.
+- Text: The Backend shall run every one of its parts on Python 3.11 to 3.13.
 - Rationale: refines REQ-BE-073
 - Parent: REQ-BE-073
 - Priority: Must
