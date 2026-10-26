@@ -269,7 +269,7 @@ decomposition:
       provider: N-3
       consumers: [N-2]              # the graph app goes through the backend API IF-104 (owner, D-47)
       decided_by: N-0
-      version: v0
+      version: v1
       mock:
         complexity: 2              # in-memory fake of the storage layer
         kind: fake

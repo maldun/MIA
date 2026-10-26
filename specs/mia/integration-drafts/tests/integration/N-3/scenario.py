@@ -55,6 +55,11 @@ def run(p, t):
         storage.put("votes", "v%03d" % n, dict(vote, subject="m%d" % n), "anna")
     t.assertEqual(len(storage.ids("votes")), 100)
     t.assertEqual(storage.get("votes", "v007")["doc"]["subject"], "m7")
+    run = {"workflow": "lookup", "workflow_version": 1, "model_pin": "MP-light", "benchmark_version": "B1"}
+    t.assertIsNone(records.validate("runs", run))
+    t.assertEqual(records.validate("runs", {k: v for k, v in run.items() if k != "benchmark_version"})["detail"], "benchmark_version")
+    t.assertEqual(storage.put("runs", "r1", run, "harness"), {"version": 1})
+    t.assertEqual(storage.get("runs", "r1")["doc"], run)
     storage.put("memory", "k1", {"text": "likes tea", "source": "chat"}, "anna")
     storage.delete("memory", "k1", "anna")
     t.assertEqual(code_of(lambda: storage.get("memory", "k1"))[0], "not_found")

@@ -120,6 +120,17 @@ class StorageContract(unittest.TestCase):
         store.put("memos", "x", {"text": text}, "anna")
         self.assertEqual(store.get("memos", "x")["doc"]["text"], text)
 
+    @mark.req("IF-102", "REQ-DB-010", "REQ-DB-015")
+    @each_provider(IF)
+    def test_run_results_and_source_trust_are_tables(self, store):
+        """TC-IF-102-08 (F-5): a run result and a source trust value are written and read back as versions; the second write of a source is version 2."""
+        run = {"workflow": "lookup", "workflow_version": 1, "model_pin": "MP-light", "benchmark_version": "B1"}
+        self.assertEqual(store.put("runs", "r1", run, "harness"), {"version": 1})
+        self.assertEqual(store.get("runs", "r1")["doc"], run)
+        self.assertEqual(store.put("source_trust", "example.org", {"trust": 0.5}, "owner"), {"version": 1})
+        self.assertEqual(store.put("source_trust", "example.org", {"trust": 0.7}, "owner"), {"version": 2})
+        self.assertEqual(store.get("source_trust", "example.org", version=1)["doc"], {"trust": 0.5})
+
 
 if __name__ == "__main__":
     unittest.main()

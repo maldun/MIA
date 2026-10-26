@@ -14,7 +14,7 @@ The only door to the shared state. Python calls on a storage client (the real on
 | `delete(table, id, author)` | | nothing | refused with `immutable` for `workflows` and `context_graphs` |
 | `subscribe(table, callback)` | | a function that unsubscribes | `callback({"table","id","version","author"})` after every write |
 
-Tables: workflows, context_graphs, history, memory, votes, tasks, memos, accounts, presets, gestures.
+Tables: workflows, context_graphs, history, memory, votes, tasks, memos, accounts, presets, gestures, runs, source_trust.
 
 ## Errors
 | Condition | Signal | What the consumer may rely on afterwards |
@@ -40,3 +40,4 @@ Tables: workflows, context_graphs, history, memory, votes, tasks, memos, account
 | Version | Date | Change | Amendment |
 |---|---|---|---|
 | v0 | 2026-10-25 | first draft | – |
+| v1 | 2026-10-26 | tables `runs` (run results with workflow version, model pin and benchmark version) and `source_trust` added, as IF-302 defines them (finding F-5) | 9 |

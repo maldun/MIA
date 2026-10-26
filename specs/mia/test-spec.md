@@ -84,6 +84,7 @@ Setup and expected result are in the docstring of each test (the golden examples
 | TC-IF-102-05 | IF-102 | Contract | 1 (mock) and 2 (real) | versioned tables refuse delete; a memory record can be deleted and is gone. | exact |
 | TC-IF-102-06 | IF-102 | Contract | 1 (mock) and 2 (real) | a subscriber gets one notice per write; after unsubscribe none. | exact |
 | TC-IF-102-07 | IF-102 | Contract | 1 (mock) and 2 (real) | text with odd characters comes back byte for byte (the word-for-word recital of FR-28). | exact |
+| TC-IF-102-08 | IF-102 | Contract | 1 (mock) and 2 (real) | F-5: a run result and a source trust value are written and read back as versions; the second write of a source is version 2. | exact |
 | TC-IF-103-01 | IF-103 | Contract | 1 (mock) and 2 (real) | golden 1: message, model and token counts. | exact |
 | TC-IF-103-02 | IF-103 | Contract | 1 (mock) and 2 (real) | a JSON text or a dict that has the required keys is returned as a dict. | exact |
 | TC-IF-103-03 | IF-103 | Contract | 1 (mock) and 2 (real) | golden 2: text that is not JSON and JSON that lacks a required key are bad_output with the raw reply in detail. | exact |

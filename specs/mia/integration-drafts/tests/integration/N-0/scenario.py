@@ -44,6 +44,10 @@ def run(p, t):
     t.assertEqual(storage.put("history", answer["id"], {"role": answer["role"], "sender": answer["sender"], "text": answer["text"]}, "anna"), {"version": 1})
     t.assertEqual(storage.get("history", answer["id"])["doc"]["sender"], "MIA")
 
+    run_record = {"workflow": "lookup", "workflow_version": 1, "model_pin": "MP-light", "benchmark_version": "B1"}
+    t.assertEqual(storage.put("runs", result["run_id"], run_record, "anna"), {"version": 1})
+    t.assertEqual(storage.get("runs", result["run_id"])["doc"]["model_pin"], "MP-light")
+
     # the evaluation harness reaches the same workflow with a pinned model, a seed and a temperature
     first = evaluation.run_case("lookup", 1, {"question": QUESTION}, OPTIONS)
     again = evaluation.run_case("lookup", 1, {"question": QUESTION}, OPTIONS)
