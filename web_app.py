@@ -347,10 +347,13 @@ def converse(message,on_delta=None,on_emotion=None,should_stop=None):
     # MIA starts to speak while the answer is still generated
     streamer = SpeechStreamer(get_websocket_url(address=ADDRESS,protocol=PROTOCOL),SOUND_PORT,
                               repair=lambda text: behaviour.apply_rules(text)["text"],settle=settled)      # the voice speaks the repaired text the page shows (REQ-CHA-014)
-    reactions = []
+    reactions, played = [], []
     def react(emotion):
         # only the first expression plays its sound, otherwise it would cut off the speech
-        express_and_reload(comm.map_emotion(emotion),sound=len(reactions)==0)
+        expression = comm.map_emotion(emotion)
+        if chat_service.show_behaviour(expression):          # a gesture with many net minus votes is shown rarely (REQ-CHA-017); the mood still goes to the page
+            express_and_reload(expression,sound=len(played)==0)
+            played.append(expression)
         reactions.append(emotion)
         if on_emotion is not None:
             on_emotion(emotion)
