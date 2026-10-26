@@ -11,7 +11,7 @@ A leaf. Each task is small, vertical, fits one session and starts from a red tes
 | T-01 Chat view with sender, streaming and shared history | REQ-CLV-001, REQ-CLV-003, REQ-CLV-021 | TC-CLV-001, TC-CLV-003, TC-CLV-021 | T-01 of the root plan (mocks installed) |
 | T-02 Stop, queue position, regenerate and speak again | REQ-CLV-002, REQ-CLV-005 | TC-CLV-002, TC-CLV-005 | T-01 |
 | T-03 Connection state and drafts | REQ-CLV-004 | TC-CLV-004 | T-01 |
-| T-04 Login views, password change and secure channel | REQ-CLV-014, REQ-CLV-015, REQ-CLV-018 | TC-CLV-014, TC-CLV-015, TC-CLV-018 | T-01 |
+| T-04 Login views, password change and secure channel | REQ-CLV-014, REQ-CLV-015, REQ-CLV-018, REQ-CLV-022 | TC-CLV-014, TC-CLV-015, TC-CLV-018, TC-CLV-022 | T-01 |
 | T-05 Status line, account of a task, voting, source trust edit, variant label | REQ-CLV-008, REQ-CLV-010, REQ-CLV-012, REQ-CLV-013 | TC-CLV-008, TC-CLV-010, TC-CLV-012, TC-CLV-013 | T-01 |
 | T-06 Tasks, memos and memory views, editors | REQ-CLV-011, REQ-CLV-009 | TC-CLV-009, TC-CLV-011 | T-01 |
 | T-07 Layout, accessibility, devices, chat without the character | REQ-CLV-006, REQ-CLV-007, REQ-CLV-016 | TC-CLV-006, TC-CLV-007, TC-CLV-016 (phone part by checklist) | T-01 |
@@ -47,8 +47,8 @@ A leaf. Each task is small, vertical, fits one session and starts from a red tes
 - Notes: Mock connection cut for 5 s.
 
 ### T-04: Login views, password change and secure channel
-- Implements: REQ-CLV-014, REQ-CLV-015, REQ-CLV-018
-- Tests to turn green: TC-CLV-014, TC-CLV-015, TC-CLV-018
+- Implements: REQ-CLV-014, REQ-CLV-015, REQ-CLV-018, REQ-CLV-022
+- Tests to turn green: TC-CLV-014, TC-CLV-015, TC-CLV-018, TC-CLV-022
 - Touches: `templates/`, `templates/static/chat/chat.js`
 - Must not touch: tests/acceptance/, tests/helpers/, tests/smoke/, tests/integration/, benchmarks/, contracts/, eval/suites/, eval/baselines/
 - Depends on: T-01

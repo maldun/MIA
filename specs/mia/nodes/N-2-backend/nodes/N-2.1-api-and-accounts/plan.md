@@ -8,7 +8,7 @@ A leaf. Each task is small, vertical, fits one session and starts from a red tes
 
 | Task | Implements | Green when | Depends on |
 | --- | --- | --- | --- |
-| T-01 Login, session, throttling, password handling, owner-only accounts | REQ-API-003, REQ-API-004, REQ-API-005, REQ-API-006 | TC-API-003, TC-API-004, TC-API-005, TC-API-006 | T-01 of the root plan (mocks installed) |
+| T-01 Login, session, throttling, password handling, owner-only accounts | REQ-API-003, REQ-API-004, REQ-API-005, REQ-API-006, REQ-API-017 | TC-API-003, TC-API-004, TC-API-005, TC-API-006, TC-API-017 | T-01 of the root plan (mocks installed) |
 | T-02 Authenticated requests, secure channel, attribution, everything visible | REQ-API-007, REQ-API-008, REQ-API-009, REQ-API-010 | TC-API-007, TC-API-008, TC-API-009, TC-API-010 | T-01 |
 | T-03 Chat events, streaming, changes reach all devices, realise IF-101 | REQ-API-001, REQ-API-002, REQ-API-015 | TC-API-001, TC-API-002, TC-API-015 | T-01 |
 | T-04 Workflow and graph API, realise IF-104 | REQ-API-014, REQ-API-016 | TC-API-014, TC-API-016 | T-01 |

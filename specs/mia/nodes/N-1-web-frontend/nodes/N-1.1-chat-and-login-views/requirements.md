@@ -257,3 +257,15 @@ The chat page: messages, queue, history, status line, voting, tasks and memos, e
 - Verified by: TC-CLV-021
 - Status: Approved
 - History: –
+
+### REQ-CLV-022 – Logout
+- Level: low   Subject: WebFrontEnd
+- Text: The Chat and login views shall offer a logout that ends the session at the server, closes the socket and shows the login.
+- Rationale: refines REQ-FE-031; the owner found after testing that the login has no logout (2026-10-26)
+- Parent: REQ-FE-031
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-14: one logout request is sent, the socket is closed, the login dialog is shown, a reload shows the login (exact)
+- Verified by: TC-CLV-022
+- Status: Approved
+- History: A-04 (2026-10-26)

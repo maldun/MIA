@@ -365,3 +365,15 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Verified by: TC-N1-006, TC-CLV-020, TC-CHV-014, TC-VPB-005
 - Status: Approved
 - History: –
+
+### REQ-FE-031 – Logout
+- Level: high   Subject: WebFrontEnd
+- Text: The Web Frontend shall let a signed-in user log out.
+- Rationale: refines FR-21; the owner found after testing that the login has no logout (2026-10-26)
+- Parent: FR-21
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-14: after a logout the page shows the login and a reload does not sign in again
+- Verified by: TC-N1-003, TC-CLV-022
+- Status: Approved
+- History: A-04 (2026-10-26)

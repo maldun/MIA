@@ -177,6 +177,20 @@ class ChatApiContract(unittest.TestCase):
         self.assertTrue(api.login("anna", "long-enough-1"))
         self.assertEqual(error_of(lambda: api.whoami("no-session")).status, 401)
 
+    @mark.req("IF-101", "REQ-CLV-022", "REQ-BE-077")
+    @each_provider(IF)
+    def test_logout_ends_only_that_session(self, api):
+        """TC-IF-101-18 (v2): after a logout the session is refused with 401 on every operation; a second session of the same account and the password stay valid."""
+        s1 = api.login("anna", "pw-anna")
+        s2 = api.login("anna", "pw-anna")
+        api.connect(s1)
+        self.assertEqual(api.logout(s1), {"loggedOut": True})
+        self.assertEqual(error_of(lambda: api.whoami(s1)).status, 401)
+        self.assertEqual(error_of(lambda: api.history(s1, 5)).status, 401)
+        self.assertEqual(error_of(lambda: api.logout(s1)).status, 401)
+        self.assertEqual(api.whoami(s2), {"user": "anna"})
+        self.assertTrue(api.login("anna", "pw-anna"))
+
     @mark.req("IF-101", "REQ-CLV-005", "REQ-BE-006")
     @each_provider(IF, make(answers=[["First try."], ["Second try. Better."]]))
     def test_regenerate_the_last_answer_and_speak_any_answer_again(self, api):
