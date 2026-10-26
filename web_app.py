@@ -574,7 +574,7 @@ def run_chat_exchange(text, on_delta, on_emotion, should_stop):
                       functions={"converse": lambda text: converse(text, on_delta, on_emotion, should_stop)})
     if result.status == "error":
         raise RuntimeError(result.error)
-    behaviour.record_signals(core.run_log, result.run_id, result.answer or "", node="converse")     # the speech rules only log (BF2): the answer is not changed and nobody is scolded
+    behaviour.record_signals(core.run_log, result.run_id, result.answer or "", node="converse")     # the violations of the text the model wrote are signals (BF2); the chat service repairs the text silently before the page sees it, and nobody is scolded
     return result.answer
 
 def speak_answer(text):
@@ -605,7 +605,8 @@ chat_service = ChatService(socketio.emit, chat_log, mood, run_chat_exchange, run
                            rate_limit=(cfg.get(CONST.CHAT_RATE_KEY, 10), 60),
                            spawn=socketio.start_background_task, votes=_votes_store,
                            behaviours=behaviours_from_file(os.path.join(FPATH, cfg.get(CONST.BEHAVIOURS_FILE_KEY, "library/behaviours.json"))),
-                           reputable=cfg.get(CONST.REPUTABLE_TRUST_KEY, 0.6))
+                           reputable=cfg.get(CONST.REPUTABLE_TRUST_KEY, 0.6),
+                           repair=lambda text: behaviour.apply_rules(text)["text"])         # the stream is held back and repaired silently (REQ-CHA-014)
 app.register_blueprint(create_chat_ops_blueprint(chat_service))
 app.register_blueprint(create_items_blueprint(_votes_store, socketio.emit))
 app.register_blueprint(create_trust_persona_blueprint(os.path.join(FPATH, cfg.get("source_trust_file") or "data/source_trust.json"),      # the file build_trust reads
