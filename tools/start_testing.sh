@@ -5,6 +5,7 @@
 #   bash tools/start_testing.sh start           start every available stage that is marked `auto` (the light ones)
 #   bash tools/start_testing.sh start NAME...   start the named stages (e.g. full-app)
 #   bash tools/start_testing.sh stop [NAME...]  stop the named stages (without names: the auto ones; containers only when named)
+#   bash tools/start_testing.sh restart NAME... stop and start again (a running stage keeps its old code on a plain start; the container mounts the checkout this script is in)
 #   bash tools/start_testing.sh status
 # Environment: MIA_PYTHON = python of the MIA virtualenv (needed for the stub stage if the active python lacks flask); MIA_TESTING_DIR = state folder.
 set -u
@@ -42,5 +43,8 @@ case "$cmd" in
         names=("$@")                                 # without names only the light auto stages stop; a stack you started yourself is stopped by naming it
         if [ ${#names[@]} -eq 0 ]; then for s in $(stages); do run "$s" auto && names+=("$s"); done; fi
         for s in "${names[@]}"; do echo "== $s"; run "$s" stop; done ;;
-    *) sed -n '2,10p' "$0"; exit 2 ;;
+    restart)                                         # start skips a running stage and so keeps the old code; this stops and starts it again
+        [ $# -gt 0 ] || { echo "name the stage(s) to restart"; exit 1; }
+        bash "$0" stop "$@" && bash "$0" start "$@" ;;
+    *) sed -n '2,11p' "$0"; exit 2 ;;
 esac
