@@ -58,11 +58,17 @@ COMMANDS = (
     {"command": "/full!", "description": "Switch back to the large model", "confirm": False},
     {"command": "/dream!", "description": "Sort and summarize MIA's memory", "confirm": False},
     {"command": "/time!", "description": "Send the current time to MIA", "confirm": False},
+    {"command": "/tasks", "description": "Read all tasks back, word for word", "confirm": False},
+    {"command": "/memos", "description": "Read all memos back, word for word", "confirm": False},
     {"command": "/lookup ", "description": "Look something up on the web and answer with sources: /lookup your question", "confirm": False},
     {"command": "/search ", "description": "Show the top web results for a query, no answer: /search your query", "confirm": False},
     {"command": "/goodnight!", "description": "Dream, then shut MIA down", "confirm": True},
     {"command": "/break!", "description": "Shut MIA down", "confirm": True},
 )
+
+
+RECITED_BY_COMMAND = {"/tasks": "tasks", "/memos": "memos"}
+RECITED = tuple(RECITED_BY_COMMAND.values())
 
 
 def normalize_text(text):
@@ -297,6 +303,40 @@ class ChatService:
         self._emit("score", score)
         return {"stored": True, "score": score}
 
+    # --- tasks and memos read back from their records (REQ-CHA-019) ---------------------------------------------------
+    def _item(self, kind, item_id):
+        if kind not in RECITED:
+            raise ChatError("not_found")
+        try:
+            return self._votes.get(kind, item_id)["doc"]
+        except StorageError:
+            raise ChatError("not_found")
+
+    def recite(self, kind, item_id):
+        """the text of a task or memo exactly as stored: code reads it, the model is never asked (FR-28)"""
+        return {"id": item_id, "kind": kind, "text": self._item(kind, item_id)["text"]}
+
+    def recite_all(self, kind):
+        """every task or memo as a message of its own, oldest first; returns how many"""
+        if kind not in RECITED:
+            raise ChatError("not_found")
+        ids = sorted(self._votes.ids(kind))
+        for item_id in ids:
+            self.post_assistant(self._item(kind, item_id)["text"])
+        return len(ids)
+
+    def recite_due(self):
+        """says the text of every task that has fallen due (field `due`, ISO time) once and marks it `recited`; returns how many. Called by the time check."""
+        now = datetime.datetime.fromtimestamp(self._wall_clock(), datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        count = 0
+        for item_id in sorted(self._votes.ids("tasks")):
+            doc = self._item("tasks", item_id)
+            if isinstance(doc.get("due"), str) and doc["due"] <= now and not doc.get("recited"):
+                self.post_assistant(doc["text"], auto=True)
+                self._votes.put("tasks", item_id, dict(doc, recited=now), "MIA")          # after the message: a crash in between says it twice, never not at all
+                count += 1
+        return count
+
     # --- a minus on a fact, adaptation, counters (REQ-CHA-016 to -018) ----------------------------------------------
     def note_sources(self, sources):
         """the sources behind the answer in progress, [{"url", "trust"}], reported by the lookup skill; kept with the answer"""
@@ -433,6 +473,11 @@ class ChatService:
 
     def _do_command(self, text):
         command = text.strip().lower()
+        if command in RECITED_BY_COMMAND:
+            kind = RECITED_BY_COMMAND[command]
+            if not self.recite_all(kind):
+                self.note("No %s are stored." % kind, command=command)
+            return
         if command in ("/dream!", "/goodnight!"):
             self.set_activity("dreaming")
         try:
