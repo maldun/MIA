@@ -4,7 +4,10 @@
 |---|---|---|---|---|
 | T-01 Graph rules with property test | done | `feat(graph_rules)` | `tests/test_graph_rules.py` (8 tests: TC-GTB-002, TC-GTB-003, the 500-node bound) | the contract suite of IF-301 stays green on the mock |
 | T-02 Table definitions of workflows and context graphs | done | `feat(graph_tables)` | `tests/test_graph_tables.py` (4 tests: TC-GTB-001, TC-GTB-004); the contract suite of IF-301 with `graph_tables` as the real provider (scratch run, 3 tests, `_real` side) | provides IF-301 |
-| T-03 Check the five seed entries | open | | | waits for the seed entries (root task T-10); the test is skipped with that reason, not weakened |
+| T-03 Check the five seed entries | done (skipped) | `test(seed)` | `tests/test_seed_workflows.py`: 3 tests skipped because `library/workflows` does not exist (root task T-10); in a scratch copy with five dummy entries they pass and a broken entry fails | the entry format is provisional, T-10 confirms it |
+
+## Reuse check (owner rule: use existing code)
+- `graph_rules.py` and `graph_tables.py` are new: no module of the repository checks the process/data graph rules of FR-7. `context_graph.py` is the provenance graph of run events (a different thing) and `library.py` validates the old pipeline format; both stay as they are.
 
 ## Findings
 | Finding | Task | Covered by test |
