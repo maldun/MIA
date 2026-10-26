@@ -49,6 +49,7 @@ from . import accounts_api
 from .chat_ops_api import create_chat_ops_blueprint
 from .items_api import create_items_blueprint
 from .trust_persona_api import create_trust_persona_blueprint
+from .persona import read_persona
 from .internal_auth import ensure_token, internal_headers
 from .storage import Storage
 from .storage_files import FileBackend
@@ -107,6 +108,8 @@ voc_exp = VoiceExpressor(web_url=WEB_URL+'/'+UPLOAD_ROUTE)
 
 from .communicator import Communicator
 comm = Communicator(**cfg)
+_persona_file = os.path.join(FPATH, cfg.get(CONST.PERSONA_FILE_KEY, "data/persona.json"))
+comm.persona_provider = lambda: read_persona(_persona_file)          # the persona saved on the page is the system message of every call (REQ-CHA-008)
 
 app = Flask(__name__, static_folder=STATIC_FOLDER)
 # add scheduler
