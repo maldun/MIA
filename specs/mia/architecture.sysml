@@ -1721,3 +1721,3274 @@ package MIA_Allocation {
         return verdict : VerdictKind;
     }
 }
+
+// BEGIN GENERATED: node requirements (tools/gen_node_requirements_model.py, task T-14) - do not edit by hand
+package MIA_NodeRequirements {
+    private import MIA_Common::*;
+    private import MIA_Architecture::*;
+    private import MIA_Requirements::*;
+
+    requirement def <'REQ-CLV-001'> ChatViewWithSenderAndStreaming_Clv001 {
+        subject s : WebFrontEnd;
+        doc /* When a user sends a message, the Chat and login views shall show the message with its sender and the answer as it arrives, sentence by sentence (IF-101). */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CLV-002'> StopAndQueuePosition_Clv002 {
+        subject s : WebFrontEnd;
+        doc /* While a message waits, the Chat and login views shall show its position in the queue and offer a stop button for the running answer. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CLV-003'> SharedHistoryAfterReload_Clv003 {
+        subject s : WebFrontEnd;
+        doc /* When the page loads or reloads, the Chat and login views shall show the shared history from IF-101 and add every new message live. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CLV-004'> ConnectionStateAndDrafts_Clv004 {
+        subject s : WebFrontEnd;
+        doc /* While the connection is lost, the Chat and login views shall show the connection state, reconnect by itself and keep the unsent draft. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CLV-005'> RegenerateAndSpeakAgain_Clv005 {
+        subject s : WebFrontEnd;
+        doc /* When a user asks for it, the Chat and login views shall request a regenerated last answer or the spoken form of any answer through IF-101. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CLV-006'> ChatWithoutTheCharacter_Clv006 {
+        subject s : WebFrontEnd;
+        doc /* If the character cannot load, then the Chat and login views shall keep the chat usable. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CLV-007'> CharacterAsStage_Clv007 {
+        subject s : WebFrontEnd;
+        doc /* The Chat and login views shall show the character filling the window with the chat as a side panel on wide screens and a bottom sheet on phones, collapsible to the character and a caption of the last answer. */
+        @Trace { :>> verifiedBy = (HowVerified::demonstration); }
+    }
+    requirement def <'REQ-CLV-008'> StatusLineAndAccountOfATask_Clv008 {
+        subject s : WebFrontEnd;
+        doc /* The Chat and login views shall show the status line with mood and activity and open for an answer of a task the step-by-step account delivered by the backend. */
+        @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
+    }
+    requirement def <'REQ-CLV-009'> EditorsForExpressionsGesturesAndPersona_Clv009 {
+        subject s : WebFrontEnd;
+        doc /* When a user saves the persona, the Chat and login views shall send it as data and show a change saved by another user without a reload. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CLV-010'> VotingControlsAndScore_Clv010 {
+        subject s : WebFrontEnd;
+        doc /* The Chat and login views shall offer a plus and a minus on answers, reactions and behaviours with their category, and show the scores per category and overall over time. */
+        @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
+    }
+    requirement def <'REQ-CLV-011'> TasksMemosAndMemoryViews_Clv011 {
+        subject s : WebFrontEnd;
+        doc /* The Chat and login views shall show all tasks, memos and memory records and let a logged-in user change or delete each of them. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CLV-012'> SourceTrustEdit_Clv012 {
+        subject s : WebFrontEnd;
+        doc /* When a user edits the trust value of a source, the Chat and login views shall send the edit with the source id. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CLV-013'> VariantLabel_Clv013 {
+        subject s : WebFrontEnd;
+        doc /* While a workflow with a character variant runs, the Chat and login views shall show a small label with the variant name in the chat and pass the variant to the Character view (IF-111). */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CLV-014'> LoginViewsAndPasswordChange_Clv014 {
+        subject s : WebFrontEnd;
+        doc /* The Chat and login views shall offer the login, the change of the user's own password and the account of a kept session. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CLV-015'> LoginPageStatesVisibility_Clv015 {
+        subject s : WebFrontEnd;
+        doc /* The Chat and login views shall state on the login page that everything is visible to all users. */
+        @Trace { :>> verifiedBy = (HowVerified::inspection); }
+    }
+    requirement def <'REQ-CLV-016'> AccessibilityAndDevices_Clv016 {
+        subject s : WebFrontEnd;
+        doc /* The Chat and login views shall be usable by keyboard and screen reader in a dark and a light theme with reduced motion at widths from 320 to 2560 px in current Chrome, Firefox and Safari (iOS 16 and later), with touch targets of at least 44 px. */
+        @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
+    }
+    requirement def <'REQ-CLV-017'> NoRequestLeavesTheHost_Clv017 {
+        subject s : WebFrontEnd;
+        doc /* The Chat and login views shall load no resource from outside the host. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CLV-018'> PasswordOverASecureChannel_Clv018 {
+        subject s : WebFrontEnd;
+        doc /* The Chat and login views shall send a password only over HTTPS or to localhost. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CLV-019'> PlainStack_Clv019 {
+        subject s : WebFrontEnd;
+        doc /* The Chat and login views shall be plain HTML, CSS and ES modules without a build step or a UI framework. */
+        @Trace { :>> verifiedBy = (HowVerified::inspection); }
+    }
+    requirement def <'REQ-CLV-020'> DeliveredByTheBackend_Clv020 {
+        subject s : WebFrontEnd;
+        doc /* The Chat and login views shall consist of static files that the backend container serves. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CLV-021'> UseIF101Only_Clv021 {
+        subject s : WebFrontEnd;
+        doc /* The Chat and login views shall talk to the Backend only through the interface IF-101 as specified in contracts/IF-101-chat-api.md. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHV-001'> ChatWithoutTheCharacter_Chv001 {
+        subject s : WebFrontEnd;
+        doc /* If the Character view cannot load, then it shall report the failure to the Chat and login views through IF-111 and stay hidden. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHV-002'> OneExpressionAPI_Chv002 {
+        subject s : WebFrontEnd;
+        doc /* The Character view shall drive the character only through one central expression API reached by a message bridge. */
+        @Trace { :>> verifiedBy = (HowVerified::inspection, HowVerified::test); }
+    }
+    requirement def <'REQ-CHV-003'> LivingCharacter_Chv003 {
+        subject s : WebFrontEnd;
+        doc /* While the character speaks, the Character view shall move its mouth with the audio, blend expressions smoothly, blink and play idle motion. */
+        @Trace { :>> verifiedBy = (HowVerified::demonstration); }
+    }
+    requirement def <'REQ-CHV-004'> MoodShownByTheMoodMap_Chv004 {
+        subject s : WebFrontEnd;
+        doc /* When the mood changes, the Character view shall show the expression and gesture of the mood map for it, and neutral for an unknown mood. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHV-005'> EditorsForExpressionsGesturesAndPersona_Chv005 {
+        subject s : WebFrontEnd;
+        doc /* When a user saves an expression, gesture, background, mood phrase or emotion, the Character view shall send it as data and show a change saved by another user without a reload. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHV-006'> ShockedReaction_Chv006 {
+        subject s : WebFrontEnd;
+        doc /* When a user gives a minus, the Character view shall show the shocked expression and play the shocked line sent by the backend. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHV-007'> CharacterModelSelection_Chv007 {
+        subject s : WebFrontEnd;
+        doc /* When a user selects a VRoid model, the Character view shall load it and list the presets and gestures it cannot map. */
+        @Trace { :>> verifiedBy = (HowVerified::demonstration, HowVerified::test); }
+    }
+    requirement def <'REQ-CHV-008'> VariantLabel_Chv008 {
+        subject s : WebFrontEnd;
+        doc /* When the Chat and login views pass a variant (IF-111), the Character view shall show the character in that variant, and in the chat's variant otherwise. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHV-009'> AccessibilityAndDevices_Chv009 {
+        subject s : WebFrontEnd;
+        doc /* While the user prefers reduced motion, the Character view shall reduce its idle motion. */
+        @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
+    }
+    requirement def <'REQ-CHV-010'> FrameRate_Chv010 {
+        subject s : WebFrontEnd;
+        doc /* While the character is shown, the Character view shall render at 30 frames per second or more on a phone inside the network and on a desktop browser. */
+        @Trace { :>> verifiedBy = (HowVerified::measurement); }
+    }
+    requirement def <'REQ-CHV-011'> NoRequestLeavesTheHost_Chv011 {
+        subject s : WebFrontEnd;
+        doc /* The Character view shall load no resource from outside the host. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHV-012'> CharacterInASecureContext_Chv012 {
+        subject s : WebFrontEnd;
+        doc /* The Character view shall load the character only on localhost or over HTTPS. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHV-013'> PlainStack_Chv013 {
+        subject s : WebFrontEnd;
+        doc /* The Character view shall be a Godot 4.6.1 web export in the Compatibility renderer. */
+        @Trace { :>> verifiedBy = (HowVerified::inspection); }
+    }
+    requirement def <'REQ-CHV-014'> DeliveredByTheBackend_Chv014 {
+        subject s : WebFrontEnd;
+        doc /* The Character view shall consist of static files that the backend container serves. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-VPB-001'> VoicePlayback_Vpb001 {
+        subject s : WebFrontEnd;
+        doc /* When audio for a sentence arrives, the Voice playback shall play the sentences in order. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-VPB-002'> MuteAndStopPerUser_Vpb002 {
+        subject s : WebFrontEnd;
+        doc /* When a user mutes or stops the voice, the Voice playback shall silence it on that device only. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-VPB-003'> VoiceLines_Vpb003 {
+        subject s : WebFrontEnd;
+        doc /* When the backend sends a voice line, the Voice playback shall play it, and if its audio file is missing, skip it and report it to the backend. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-VPB-004'> NoRequestLeavesTheHost_Vpb004 {
+        subject s : WebFrontEnd;
+        doc /* The Voice playback shall load no resource from outside the host. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-VPB-005'> DeliveredByTheBackend_Vpb005 {
+        subject s : WebFrontEnd;
+        doc /* The Voice playback shall consist of static files that the backend container serves. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-FE-001'> ChatViewWithSenderAndStreaming_Fe001 {
+        subject s : WebFrontEnd;
+        doc /* When a user sends a message, the Web Frontend shall show the message with its sender and the answer as it arrives, sentence by sentence (IF-101). */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-FE-002'> StopAndQueuePosition_Fe002 {
+        subject s : WebFrontEnd;
+        doc /* While a message waits, the Web Frontend shall show its position in the queue and offer a stop button for the running answer. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-FE-003'> SharedHistoryAfterReload_Fe003 {
+        subject s : WebFrontEnd;
+        doc /* When the page loads or reloads, the Web Frontend shall show the shared history from IF-101 and add every new message live. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-FE-004'> ConnectionStateAndDrafts_Fe004 {
+        subject s : WebFrontEnd;
+        doc /* While the connection is lost, the Web Frontend shall show the connection state, reconnect by itself and keep the unsent draft. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-FE-005'> RegenerateAndSpeakAgain_Fe005 {
+        subject s : WebFrontEnd;
+        doc /* When a user asks for it, the Web Frontend shall request a regenerated last answer or the spoken form of any answer through IF-101. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-FE-006'> ChatWithoutTheCharacter_Fe006 {
+        subject s : WebFrontEnd;
+        doc /* If the character cannot load, then the Web Frontend shall keep the chat usable. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-FE-007'> CharacterAsStage_Fe007 {
+        subject s : WebFrontEnd;
+        doc /* The Web Frontend shall show the character filling the window with the chat as a side panel on wide screens and a bottom sheet on phones, collapsible to the character and a caption of the last answer. */
+        @Trace { :>> verifiedBy = (HowVerified::demonstration); }
+    }
+    requirement def <'REQ-FE-008'> OneExpressionAPI_Fe008 {
+        subject s : WebFrontEnd;
+        doc /* The Web Frontend shall drive the character only through one central expression API reached by a message bridge. */
+        @Trace { :>> verifiedBy = (HowVerified::inspection, HowVerified::test); }
+    }
+    requirement def <'REQ-FE-009'> LivingCharacter_Fe009 {
+        subject s : WebFrontEnd;
+        doc /* While the character speaks, the Web Frontend shall move its mouth with the audio, blend expressions smoothly, blink and play idle motion. */
+        @Trace { :>> verifiedBy = (HowVerified::demonstration); }
+    }
+    requirement def <'REQ-FE-010'> MoodShownByTheMoodMap_Fe010 {
+        subject s : WebFrontEnd;
+        doc /* When the mood changes, the Web Frontend shall show the expression and gesture of the mood map for it, and neutral for an unknown mood. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-FE-011'> VoicePlayback_Fe011 {
+        subject s : WebFrontEnd;
+        doc /* When audio for a sentence arrives, the Web Frontend shall play the sentences in order. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-FE-012'> MuteAndStopPerUser_Fe012 {
+        subject s : WebFrontEnd;
+        doc /* When a user mutes or stops the voice, the Web Frontend shall silence it on that device only. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-FE-013'> VoiceLines_Fe013 {
+        subject s : WebFrontEnd;
+        doc /* When the backend sends a voice line, the Web Frontend shall play it, and if its audio file is missing, skip it and report it to the backend. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-FE-014'> StatusLineAndAccountOfATask_Fe014 {
+        subject s : WebFrontEnd;
+        doc /* The Web Frontend shall show the status line with mood and activity and open for an answer of a task the step-by-step account delivered by the backend. */
+        @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
+    }
+    requirement def <'REQ-FE-015'> EditorsForExpressionsGesturesAndPersona_Fe015 {
+        subject s : WebFrontEnd;
+        doc /* When a user saves an expression, gesture, background, mood phrase, emotion or the persona, the Web Frontend shall send it as data, and show a change saved by another user without a reload. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-FE-016'> VotingControlsAndScore_Fe016 {
+        subject s : WebFrontEnd;
+        doc /* The Web Frontend shall offer a plus and a minus on answers, reactions and behaviours with their category, and show the scores per category and overall over time. */
+        @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
+    }
+    requirement def <'REQ-FE-017'> ShockedReaction_Fe017 {
+        subject s : WebFrontEnd;
+        doc /* When a user gives a minus, the Web Frontend shall show the shocked expression and play the shocked line sent by the backend. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-FE-018'> TasksMemosAndMemoryViews_Fe018 {
+        subject s : WebFrontEnd;
+        doc /* The Web Frontend shall show all tasks, memos and memory records and let a logged-in user change or delete each of them. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-FE-019'> SourceTrustEdit_Fe019 {
+        subject s : WebFrontEnd;
+        doc /* When a user edits the trust value of a source, the Web Frontend shall send the edit with the source id. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-FE-020'> CharacterModelSelection_Fe020 {
+        subject s : WebFrontEnd;
+        doc /* When a user selects a VRoid model, the Web Frontend shall load it and list the presets and gestures it cannot map. */
+        @Trace { :>> verifiedBy = (HowVerified::demonstration, HowVerified::test); }
+    }
+    requirement def <'REQ-FE-021'> VariantLabel_Fe021 {
+        subject s : WebFrontEnd;
+        doc /* While a workflow with a character variant runs, the Web Frontend shall show the variant on the character and a small label in the chat. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-FE-022'> LoginViewsAndPasswordChange_Fe022 {
+        subject s : WebFrontEnd;
+        doc /* The Web Frontend shall offer the login, the change of the user's own password and the account of a kept session. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-FE-023'> LoginPageStatesVisibility_Fe023 {
+        subject s : WebFrontEnd;
+        doc /* The Web Frontend shall state on the login page that everything is visible to all users. */
+        @Trace { :>> verifiedBy = (HowVerified::inspection); }
+    }
+    requirement def <'REQ-FE-024'> AccessibilityAndDevices_Fe024 {
+        subject s : WebFrontEnd;
+        doc /* The Web Frontend shall be usable by keyboard and screen reader in a dark and a light theme with reduced motion at widths from 320 to 2560 px in current Chrome, Firefox and Safari (iOS 16 and later), with touch targets of at least 44 px. */
+        @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
+    }
+    requirement def <'REQ-FE-025'> FrameRate_Fe025 {
+        subject s : WebFrontEnd;
+        doc /* While the character is shown, the Web Frontend shall render at 30 frames per second or more on a phone inside the network and on a desktop browser. */
+        @Trace { :>> verifiedBy = (HowVerified::measurement); }
+    }
+    requirement def <'REQ-FE-026'> NoRequestLeavesTheHost_Fe026 {
+        subject s : WebFrontEnd;
+        doc /* The Web Frontend shall load no resource from outside the host. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-FE-027'> CharacterInASecureContext_Fe027 {
+        subject s : WebFrontEnd;
+        doc /* The Web Frontend shall load the character only on localhost or over HTTPS. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-FE-028'> PasswordOverASecureChannel_Fe028 {
+        subject s : WebFrontEnd;
+        doc /* The Web Frontend shall send a password only over HTTPS or to localhost. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-FE-029'> PlainStack_Fe029 {
+        subject s : WebFrontEnd;
+        doc /* The Web Frontend shall be plain HTML, CSS and ES modules without a build step or a UI framework, with the character as a Godot 4.6.1 web export in the Compatibility renderer. */
+        @Trace { :>> verifiedBy = (HowVerified::inspection); }
+    }
+    requirement def <'REQ-FE-030'> DeliveredByTheBackend_Fe030 {
+        subject s : WebFrontEnd;
+        doc /* The Web Frontend shall consist of static files that the backend container serves. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-API-001'> ChatEventsAndStreaming_Api001 {
+        subject s : WebApplication;
+        doc /* When a logged-in user sends a message, the API and accounts shall hand it to the chat agent through IF-201 and relay the events of the answer to every connected browser (IF-101). */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-API-002'> ChangesReachAllDevices_Api002 {
+        subject s : WebApplication;
+        doc /* When shared data changes in the Database, the API and accounts shall push the change to every connected device through IF-101. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-API-003'> LoginAndSession_Api003 {
+        subject s : WebApplication;
+        doc /* When a user gives the correct account and password, the API and accounts shall open a session for that device. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-API-004'> ThrottledFailedLogins_Api004 {
+        subject s : WebApplication;
+        doc /* If more than 5 logins fail within one minute for an account, then the API and accounts shall refuse further logins for that account until the minute has passed. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-API-005'> PasswordHandling_Api005 {
+        subject s : WebApplication;
+        doc /* The API and accounts shall store only salted slow hashes of passwords and write no password to any log. */
+        @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::inspection); }
+    }
+    requirement def <'REQ-API-006'> OwnPasswordAndOwnerOnlyAccounts_Api006 {
+        subject s : WebApplication;
+        doc /* The API and accounts shall let a user change their own password and let only the owner create an account. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-API-007'> EveryRequestAuthenticated_Api007 {
+        subject s : WebApplication;
+        doc /* The API and accounts shall authenticate every request by an account, check the origin and limit message rates per user. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-API-008'> PasswordsOnlyOverASecureChannel_Api008 {
+        subject s : WebApplication;
+        doc /* If a password arrives over plain HTTP from an address other than localhost, then the API and accounts shall refuse it. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-API-009'> AttributionOfChanges_Api009 {
+        subject s : WebApplication;
+        doc /* When shared data changes, the API and accounts shall record the account that made the change. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-API-010'> EverythingVisibleToAllUsers_Api010 {
+        subject s : WebApplication;
+        doc /* The API and accounts shall give every logged-in user the same access to all data and apply a change to all users at once, without roles. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-API-011'> PythonVersions_Api011 {
+        subject s : WebApplication;
+        doc /* The API and accounts shall run on Python 3.11 to 3.13, and so shall every other part of the Backend. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-API-012'> StateOnlyThroughTheStorageInterface_Api012 {
+        subject s : WebApplication;
+        doc /* The API and accounts shall keep and read accounts only through the storage interface IF-102. */
+        @Trace { :>> verifiedBy = (HowVerified::inspection, HowVerified::test); }
+    }
+    requirement def <'REQ-API-013'> ServeTheFrontend_Api013 {
+        subject s : WebApplication;
+        doc /* The API and accounts shall serve the files of the Web Frontend and run in the Backend container. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-API-014'> WorkflowAndGraphAPI_Api014 {
+        subject s : WebApplication;
+        doc /* The API and accounts shall route the requests of IF-104 under the session of the Backend to the workflow library through IF-203. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-API-015'> RealiseIF101_Api015 {
+        subject s : WebApplication;
+        doc /* The API and accounts shall realise the interface IF-101 of the Backend as specified in contracts/IF-101-chat-api.md. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-API-016'> RealiseTheRoutesOfIF104_Api016 {
+        subject s : WebApplication;
+        doc /* The API and accounts shall realise the routes of the interface IF-104 of the Backend as specified in contracts/IF-104-graph-api.md. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-001'> ChatEventsAndStreaming_Cha001 {
+        subject s : ConversationCore;
+        doc /* When the Chat agent receives a message through IF-201, it shall answer it as a stream of sentences with expression events. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-002'> OneSharedMIA_Cha002 {
+        subject s : ConversationCore;
+        doc /* The Chat agent shall answer all users in one conversation with one memory and one persona, and attribute each message to its sender. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-003'> QueueWithPositions_Cha003 {
+        subject s : ConversationCore;
+        doc /* While the model is busy, the Chat agent shall queue incoming chat messages, report each position through IF-201 and refuse a message only when the queue is full (at most 5 waiting messages in all and at most 2 per user). */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-004'> StopAnAnswer_Cha004 {
+        subject s : ConversationCore;
+        doc /* When a user asks to stop, the Chat agent shall end the running generation. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-005'> BoundedHistory_Cha005 {
+        subject s : ConversationCore;
+        doc /* The Chat agent shall keep the visible history apart from the memory, bounded in size, and delete it after a confirmation by a user. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-006'> RegenerateAndSpeakAgain_Cha006 {
+        subject s : ConversationCore;
+        doc /* When a user requests it, the Chat agent shall regenerate the last answer or speak any answer again. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-007'> VoiceLines_Cha007 {
+        subject s : ConversationCore;
+        doc /* When a mood or event occurs, the Chat agent shall choose at random one of the voice lines assigned to it and stay silent if there is none. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-008'> PersonaFromTheFile_Cha008 {
+        subject s : ConversationCore;
+        doc /* The Chat agent shall behave as the shared persona file specifies, with its names, pronouns and form of address, and address every user as master unless the file says otherwise. */
+        @Trace { :>> verifiedBy = (HowVerified::measurement); }
+    }
+    requirement def <'REQ-CHA-009'> MoodAtAllTimes_Cha009 {
+        subject s : ConversationCore;
+        doc /* While MIA is idle, thinking, speaking, waiting, greeting a user, reporting an error or offline, the Chat agent shall hold the corresponding mood, change it with events and settle it back over time. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-010'> ScoreShiftsTheMood_Cha010 {
+        subject s : ConversationCore;
+        doc /* The Chat agent shall shift the general mood by the overall feedback score. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-011'> StructuredMemory_Cha011 {
+        subject s : ConversationCore;
+        doc /* The Chat agent shall keep structured facts, preferences and commitments linked to their source and retrieve what is relevant within the token budget. */
+        @Trace { :>> verifiedBy = (HowVerified::measurement); }
+    }
+    requirement def <'REQ-CHA-012'> NoMemoryFromUntrustedText_Cha012 {
+        subject s : ConversationCore;
+        doc /* The Chat agent shall not store a fact about a user that came from web or file text. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-013'> MemoryOpenToUsers_Cha013 {
+        subject s : ConversationCore;
+        doc /* When a user inspects, corrects or deletes a memory record, the Chat agent shall apply it and show the source of the record. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-014'> SilentRepairOfBehaviourViolations_Cha014 {
+        subject s : ConversationCore;
+        doc /* If a defined behaviour rule is violated, then the Chat agent shall repair the answer silently, record the violation as a signal and keep the correction out of the conversation memory. */
+        @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::measurement); }
+    }
+    requirement def <'REQ-CHA-015'> VotesStored_Cha015 {
+        subject s : ConversationCore;
+        doc /* When a user votes, the Chat agent shall store the vote with user, time, subject and one of four categories (answer quality, reactions, character behaviour, service) and keep a score per category and overall. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-016'> AMinusOnAFactOpensACase_Cha016 {
+        subject s : ConversationCore;
+        doc /* When a user gives a minus to a factual answer, the Chat agent shall open a benchmark case and leave the stated fact unchanged. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-017'> AdaptationToNegativeFeedback_Cha017 {
+        subject s : ConversationCore;
+        doc /* When a behaviour has received at least 5 net negative votes, the Chat agent shall show it with a chance of at most 1 % per opportunity and raise the chance again after positive votes. */
+        @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::measurement); }
+    }
+    requirement def <'REQ-CHA-018'> CountersVisibleAndResettable_Cha018 {
+        subject s : ConversationCore;
+        doc /* The Chat agent shall let every user see and reset the adaptation counters, and never apply the rule to facts or safety checks. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-019'> TasksAndMemosRecitedFromRecords_Cha019 {
+        subject s : ConversationCore;
+        doc /* When a task falls due or a user asks, the Chat agent shall read the text of the task or memo from its record word for word. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-020'> StateOnlyThroughTheStorageInterface_Cha020 {
+        subject s : ConversationCore;
+        doc /* The Chat agent shall keep and read the conversation, memory, votes, tasks and memos only through the storage interface IF-102. */
+        @Trace { :>> verifiedBy = (HowVerified::inspection, HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-001'> SkillsAsTasks_Wfm001 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall perform each kind of work as a task defined by a skill file and a pipeline selectable by every user. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-002'> VersionedWorkflowLibrary_Wfm002 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall keep every pipeline and workflow as validated data in a library with the lifecycle draft, tested, trusted and retired and store every edit as a new immutable version with author and time. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-003'> NoCycles_Wfm003 {
+        subject s : TaskRuntime;
+        doc /* When a workflow is saved and before it runs, the Workflow management shall check by an algorithm that its graph has no cycle and name a cycle that it finds. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-004'> GraphRules_Wfm004 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall refuse a workflow with two adjacent data nodes or a session node without a maximum number of cycles or a maximum time. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-005'> ModelProposalsStayDrafts_Wfm005 {
+        subject s : TaskRuntime;
+        doc /* When a model proposes a library entry, the Workflow management shall keep it as a draft until a user approves it, shown as a diff and tried on the test set. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-006'> SpecificationBeforeTrust_Wfm006 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall keep a workflow without specification, context graph and benchmark with a baseline in draft status and refuse to promote it. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-007'> TimeFromIdeaToPromotion_Wfm007 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall record the time from the idea of a skill to its promotion. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-008'> ContextGraphs_Wfm008 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall keep one context graph per workflow and one for the chat and give each step the view that fits its token budget. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-009'> WorkflowScheduleAndEstimate_Wfm009 {
+        subject s : TaskRuntime;
+        doc /* When a workflow is about to run, the Workflow management shall compute its order, critical path and an estimate of time, calls and tokens from its graph and the measured costs, and refuse a run whose estimate exceeds its budget. */
+        @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::measurement); }
+    }
+    requirement def <'REQ-WFM-010'> CharacterVariantPerWorkflow_Wfm010 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall let a workflow name a character variant and send it to the frontend while the workflow runs. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-011'> CodeChecksFirst_Wfm011 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall deliver the example workflow verify as a library entry whose model steps come after every code check that exists for the claim. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-012'> UnclearWithoutEvidence_Wfm012 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall deliver the example workflow verify so that a claim with a number and no evidence gets the verdict unclear without a model call. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-013'> AFailedCheckInformsTheJudge_Wfm013 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall deliver the example workflow verify so that a failed code check reaches the judgement step as a contradiction found by code. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-014'> JudgementQuality_Wfm014 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall deliver the example workflow verify so that on the holdout it passes fewer wrong claims than the single voice and loses no more true claims among those with evidence. */
+        @Trace { :>> verifiedBy = (HowVerified::measurement); }
+    }
+    requirement def <'REQ-WFM-015'> StableVerdicts_Wfm015 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall deliver the example workflows verify and lookup so that a repeated run on the same input and the same sources gives the same verdicts and the same set of facts. */
+        @Trace { :>> verifiedBy = (HowVerified::measurement); }
+    }
+    requirement def <'REQ-WFM-016'> LookupWithSources_Wfm016 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall deliver the example workflow lookup as a library entry that answers a factual question with the sources and verbatim quotes that back it, or with unknown when nothing backs an answer. */
+        @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::measurement); }
+    }
+    requirement def <'REQ-WFM-017'> SearchCommand_Wfm017 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall deliver the search command as a library entry that lists the findings of the metasearch (title, address, short text) without composing or verifying an answer. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-018'> ReviewReport_Wfm018 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall deliver the example workflow review as a library entry that produces a report of kept and dropped sources with reasons, findings per sub-question with verbatim anchors, conflicts and open gaps. */
+        @Trace { :>> verifiedBy = (HowVerified::measurement); }
+    }
+    requirement def <'REQ-WFM-019'> ReviewInTimeSlices_Wfm019 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall deliver the example workflow review so that it works in time slices, gives an intermediate report with a recommendation at the end of each slice and continues only when the requesting user agrees. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-020'> ReviewStopsByACodeCheck_Wfm020 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall deliver the example workflow review so that it ends when a code check finds every sub-question answered or a budget is used up. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-021'> SourceRecordsAndCutOff_Wfm021 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall deliver the example workflows lookup and review so that they record where a source comes from and how far it is trusted, keep the users' edits of that trust and honour a time cut-off strictly. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-022'> MethodTransfer_Wfm022 {
+        subject s : TaskRuntime;
+        doc /* Where method transfer is switched on, the Workflow management shall deliver the example workflow method_transfer as a library entry that offers few ranked candidate methods marked as hypotheses unless an executable test on a toy instance passed. */
+        @Trace { :>> verifiedBy = (HowVerified::measurement); }
+    }
+    requirement def <'REQ-WFM-023'> ConfidenceByCode_Wfm023 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall deliver the example workflows so that confidence figures are computed by tool calls of code from anchored evidence and the limits are reported with every result. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-024'> NoInventedSource_Wfm024 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall deliver the example workflows so that no source appears in an answer that a tool did not retrieve. */
+        @Trace { :>> verifiedBy = (HowVerified::measurement); }
+    }
+    requirement def <'REQ-WFM-025'> StateOnlyThroughTheStorageInterface_Wfm025 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall keep and read workflows and context graphs only through the storage interface IF-102. */
+        @Trace { :>> verifiedBy = (HowVerified::inspection, HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-026'> WorkflowAndGraphAPI_Wfm026 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall list, read, save as a new version, show the history and diff of, and restore workflows and context graphs through IF-203, and refuse an invalid graph with the broken rule named. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-RUN-001'> InternetTasksOnlyOnCommand_Run001 {
+        subject s : TaskRuntime;
+        doc /* The Pipeline runner shall start a task that reaches the internet only by a command of a user. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-RUN-002'> SwitchTheModel_Run002 {
+        subject s : TaskRuntime;
+        doc /* When a user asks for the light or the full model and confirms, the Pipeline runner shall switch the model for all users and free GPU memory on request. */
+        @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
+    }
+    requirement def <'REQ-RUN-003'> ModelServerUnreachable_Run003 {
+        subject s : TaskRuntime;
+        doc /* If the model server is unreachable, then the Pipeline runner shall say so in plain words. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-RUN-004'> OptionalLearning_Run004 {
+        subject s : TaskRuntime;
+        doc /* Where learning is switched on, the Pipeline runner shall learn only from logged signals in discrete choices of configuration and graph weights and log every learned choice next to the default. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-RUN-005'> ContextWindowShare_Run005 {
+        subject s : TaskRuntime;
+        doc /* The Pipeline runner shall keep every model input inside 50 % of the context window. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-RUN-006'> ModelCallsOfTheFirstTry_Run006 {
+        subject s : TaskRuntime;
+        doc /* The Pipeline runner shall use fewer than 15 model calls for the first try of a question on the light model. */
+        @Trace { :>> verifiedBy = (HowVerified::measurement); }
+    }
+    requirement def <'REQ-RUN-007'> FirstTextIn10Seconds_Run007 {
+        subject s : TaskRuntime;
+        doc /* When a chat message is answered on the light model, the Pipeline runner shall send the first text within 10 s. */
+        @Trace { :>> verifiedBy = (HowVerified::measurement); }
+    }
+    requirement def <'REQ-RUN-008'> BudgetsAndWhatIsMissing_Run008 {
+        subject s : TaskRuntime;
+        doc /* If a task exceeds a budget of steps, seconds, calls or tokens, then the Pipeline runner shall end it with what it has and say what is missing. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-RUN-009'> ChatBeforeBackground_Run009 {
+        subject s : TaskRuntime;
+        doc /* While a chat message waits, the Pipeline runner shall let a long background task yield the model server. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-RUN-010'> OneModelAtATime_Run010 {
+        subject s : TaskRuntime;
+        doc /* The Pipeline runner shall use one language model at a time on the 16 GB GPU and serve several users by the queue. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-RUN-011'> UseIF103Only_Run011 {
+        subject s : TaskRuntime;
+        doc /* The Pipeline runner shall use the model server only through the interface IF-103 as specified in contracts/IF-103-model-server.md. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-RUN-012'> UseTheLibraryTheToolsAndTheLogOnlyThroughTheirInterfaces_Run012 {
+        subject s : TaskRuntime;
+        doc /* The Pipeline runner shall fetch a workflow only through IF-203, call tools only through IF-402 and write events only through IF-401. */
+        @Trace { :>> verifiedBy = (HowVerified::inspection, HowVerified::test); }
+    }
+    requirement def <'REQ-RUN-013'> KnowNoParticularWorkflow_Run013 {
+        subject s : TaskRuntime;
+        doc /* The Pipeline runner shall run any valid workflow of the library without code that names one workflow. */
+        @Trace { :>> verifiedBy = (HowVerified::inspection, HowVerified::test); }
+    }
+    requirement def <'REQ-RUN-014'> RealiseIF202_Run014 {
+        subject s : TaskRuntime;
+        doc /* The Pipeline runner shall realise the interface IF-202 of the Workflow execution as specified in contracts/IF-202-run-workflow.md. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-RUN-015'> RealiseIF105_Run015 {
+        subject s : TaskRuntime;
+        doc /* The Pipeline runner shall realise the evaluation interface IF-105 as specified in contracts/IF-105-evaluation-access.md by running a case with the same code as IF-202, recording the model pin, seed and temperature in the run_start event and returning the cost. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-TLS-001'> CodeChecksFirst_Tls001 {
+        subject s : VerificationSuite;
+        doc /* The Tools and sandbox shall offer the code checks number_check, quote_in_source and schema_check as tools that any workflow can call. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-TLS-002'> LookupWithSources_Tls002 {
+        subject s : VerificationSuite;
+        doc /* The Tools and sandbox shall offer the tools web_search and fetch_passages (findings with title, address and short text; passages with verbatim quotes) that any workflow can call. */
+        @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::measurement); }
+    }
+    requirement def <'REQ-TLS-003'> SourceRecordsAndCutOff_Tls003 {
+        subject s : VerificationSuite;
+        doc /* The Tools and sandbox shall offer the tools scholar_search and source_record, which return one record format with the origin, the trust class, the retraction state and a strictly applied date cut-off. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-TLS-004'> UntrustedTextIsData_Tls004 {
+        subject s : VerificationSuite;
+        doc /* The Tools and sandbox shall treat text from the web, papers, PDFs and users as data and never as instruction. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-TLS-005'> SandboxOrRefuse_Tls005 {
+        subject s : VerificationSuite;
+        doc /* If no isolating sandbox is present, then the Tools and sandbox shall refuse to run a model-written script or a hostile document. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-TLS-006'> NoInventedSource_Tls006 {
+        subject s : VerificationSuite;
+        doc /* The Tools and sandbox shall return every fetched passage with its source reference, so that a quote can be checked against the source text. */
+        @Trace { :>> verifiedBy = (HowVerified::measurement); }
+    }
+    requirement def <'REQ-TLS-007'> OnlyQueriesLeaveTheHost_Tls007 {
+        subject s : VerificationSuite;
+        doc /* The Tools and sandbox shall send off the host only the text of a web or scholarly query and, if configured, an e-mail address. */
+        @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::inspection); }
+    }
+    requirement def <'REQ-TLS-008'> BudgetAndTrustLabelPerToolCall_Tls008 {
+        subject s : VerificationSuite;
+        doc /* The Tools and sandbox shall count every tool call against the budgets of the run and mark the output of a tool with its trust (data from code, data from the web, data from a model). */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-LOG-001'> StepByStepAccount_Log001 {
+        subject s : Observability;
+        doc /* When a user opens the account of an answer produced by a task, the Run log shall deliver it from event data and without a model-written part. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-LOG-002'> TypedRunEvents_Log002 {
+        subject s : Observability;
+        doc /* The Run log shall write every run as typed, schema-checked events with one run id and the starting user, with secrets removed. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-LOG-003'> ReplayAndComparison_Log003 {
+        subject s : Observability;
+        doc /* The Run log shall replay a recorded run offline with an identical result and compare two runs. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-LOG-004'> StatementsTraceableToAQuery_Log004 {
+        subject s : Observability;
+        doc /* The Run log shall make every statement of an answer traceable to the query that found its source. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-LOG-005'> StateOnlyThroughTheStorageInterface_Log005 {
+        subject s : Observability;
+        doc /* The Run log shall keep run events and run results only through the storage interface IF-102. */
+        @Trace { :>> verifiedBy = (HowVerified::inspection, HowVerified::test); }
+    }
+    requirement def <'REQ-WFX-001'> StepByStepAccount_Wfx001 {
+        subject s : TaskRuntime;
+        doc /* When a user opens the account of an answer produced by a task, the Workflow execution shall deliver it from event data and without a model-written part. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFX-002'> InternetTasksOnlyOnCommand_Wfx002 {
+        subject s : TaskRuntime;
+        doc /* The Workflow execution shall start a task that reaches the internet only by a command of a user. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFX-003'> SwitchTheModel_Wfx003 {
+        subject s : TaskRuntime;
+        doc /* When a user asks for the light or the full model and confirms, the Workflow execution shall switch the model for all users and free GPU memory on request. */
+        @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
+    }
+    requirement def <'REQ-WFX-004'> ModelServerUnreachable_Wfx004 {
+        subject s : TaskRuntime;
+        doc /* If the model server is unreachable, then the Workflow execution shall say so in plain words. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFX-005'> CodeChecksFirst_Wfx005 {
+        subject s : TaskRuntime;
+        doc /* The Workflow execution shall offer the code checks number_check, quote_in_source and schema_check as tools that any workflow can call. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFX-006'> LookupWithSources_Wfx006 {
+        subject s : TaskRuntime;
+        doc /* The Workflow execution shall offer the tools web_search and fetch_passages (findings with title, address and short text; passages with verbatim quotes) that any workflow can call. */
+        @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::measurement); }
+    }
+    requirement def <'REQ-WFX-007'> SourceRecordsAndCutOff_Wfx007 {
+        subject s : TaskRuntime;
+        doc /* The Workflow execution shall offer the tools scholar_search and source_record, which return one record format with the origin, the trust class, the retraction state and a strictly applied date cut-off. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFX-008'> TypedRunEvents_Wfx008 {
+        subject s : TaskRuntime;
+        doc /* The Workflow execution shall write every run as typed, schema-checked events with one run id and the starting user, with secrets removed. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFX-009'> ReplayAndComparison_Wfx009 {
+        subject s : TaskRuntime;
+        doc /* The Workflow execution shall replay a recorded run offline with an identical result and compare two runs. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFX-010'> StatementsTraceableToAQuery_Wfx010 {
+        subject s : TaskRuntime;
+        doc /* The Workflow execution shall make every statement of an answer traceable to the query that found its source. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFX-011'> OptionalLearning_Wfx011 {
+        subject s : TaskRuntime;
+        doc /* Where learning is switched on, the Workflow execution shall learn only from logged signals in discrete choices of configuration and graph weights and log every learned choice next to the default. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFX-012'> ContextWindowShare_Wfx012 {
+        subject s : TaskRuntime;
+        doc /* The Workflow execution shall keep every model input inside 50 % of the context window. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFX-013'> ModelCallsOfTheFirstTry_Wfx013 {
+        subject s : TaskRuntime;
+        doc /* The Workflow execution shall use fewer than 15 model calls for the first try of a question on the light model. */
+        @Trace { :>> verifiedBy = (HowVerified::measurement); }
+    }
+    requirement def <'REQ-WFX-014'> UntrustedTextIsData_Wfx014 {
+        subject s : TaskRuntime;
+        doc /* The Workflow execution shall treat text from the web, papers, PDFs and users as data and never as instruction. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFX-015'> SandboxOrRefuse_Wfx015 {
+        subject s : TaskRuntime;
+        doc /* If no isolating sandbox is present, then the Workflow execution shall refuse to run a model-written script or a hostile document. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFX-016'> NoInventedSource_Wfx016 {
+        subject s : TaskRuntime;
+        doc /* The Workflow execution shall return every fetched passage with its source reference, so that a quote can be checked against the source text. */
+        @Trace { :>> verifiedBy = (HowVerified::measurement); }
+    }
+    requirement def <'REQ-WFX-017'> OnlyQueriesLeaveTheHost_Wfx017 {
+        subject s : TaskRuntime;
+        doc /* The Workflow execution shall send off the host only the text of a web or scholarly query and, if configured, an e-mail address. */
+        @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::inspection); }
+    }
+    requirement def <'REQ-WFX-018'> FirstTextIn10Seconds_Wfx018 {
+        subject s : TaskRuntime;
+        doc /* When a chat message is answered on the light model, the Workflow execution shall send the first text within 10 s. */
+        @Trace { :>> verifiedBy = (HowVerified::measurement); }
+    }
+    requirement def <'REQ-WFX-019'> BudgetsAndWhatIsMissing_Wfx019 {
+        subject s : TaskRuntime;
+        doc /* If a task exceeds a budget of steps, seconds, calls or tokens, then the Workflow execution shall end it with what it has and say what is missing. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFX-020'> ChatBeforeBackground_Wfx020 {
+        subject s : TaskRuntime;
+        doc /* While a chat message waits, the Workflow execution shall let a long background task yield the model server. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFX-021'> OneModelAtATime_Wfx021 {
+        subject s : TaskRuntime;
+        doc /* The Workflow execution shall use one language model at a time on the 16 GB GPU and serve several users by the queue. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFX-022'> StateOnlyThroughTheStorageInterface_Wfx022 {
+        subject s : TaskRuntime;
+        doc /* The Workflow execution shall store run results only through the storage interface IF-102. */
+        @Trace { :>> verifiedBy = (HowVerified::inspection, HowVerified::test); }
+    }
+    requirement def <'REQ-WFX-023'> UseIF103Only_Wfx023 {
+        subject s : TaskRuntime;
+        doc /* The Workflow execution shall use the model server only through the interface IF-103 as specified in contracts/IF-103-model-server.md. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFX-024'> RealiseIF105_Wfx024 {
+        subject s : TaskRuntime;
+        doc /* The Workflow execution shall realise the evaluation interface IF-105 as specified in contracts/IF-105-evaluation-access.md by running a case through the same runner as IF-202, recording the model pin, seed and temperature in the run_start event and returning the cost. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-VOI-001'> VoiceSynthesis_Voi001 {
+        subject s : VoiceSubsystem;
+        doc /* When an answer is written, the Voice synthesis shall synthesise it sentence by sentence with an open text-to-speech engine behind one interface on the host and apply the anime voice effect. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-VOI-002'> SpeakOnlyWhatIsMeantToBeHeard_Voi002 {
+        subject s : VoiceSubsystem;
+        doc /* The Voice synthesis shall remove markup and stage directions from the text before synthesis. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-VOI-003'> VoiceLines_Voi003 {
+        subject s : VoiceSubsystem;
+        doc /* When the Chat agent names a voice line, the Voice synthesis shall deliver its audio, skipping a missing audio file with a log entry. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-VOI-004'> DefaultVoiceLinesGenerated_Voi004 {
+        subject s : VoiceSubsystem;
+        doc /* The Voice synthesis shall generate the default voice lines with its own text-to-speech engine and voice effect. */
+        @Trace { :>> verifiedBy = (HowVerified::inspection); }
+    }
+    requirement def <'REQ-BE-001'> ChatEventsAndStreaming_Be001 {
+        subject s : WebApplication;
+        doc /* When a logged-in user sends a message, the Backend shall answer it as a stream of sentences with expression events (IF-101). */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-BE-002'> OneSharedMIA_Be002 {
+        subject s : WebApplication;
+        doc /* The Backend shall answer all users in one conversation with one memory and one persona, and attribute each message to its sender. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-BE-003'> QueueWithPositions_Be003 {
+        subject s : WebApplication;
+        doc /* While the model server is busy, the Backend shall queue incoming chat messages, report each position and refuse a message only when the queue is full (at most 5 waiting messages in all and at most 2 per user). */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-BE-004'> StopAnAnswer_Be004 {
+        subject s : WebApplication;
+        doc /* When a user asks to stop, the Backend shall end the running generation. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-BE-005'> BoundedHistory_Be005 {
+        subject s : WebApplication;
+        doc /* The Backend shall keep the visible history apart from the memory, bounded in size, and delete it after a confirmation by a user. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-BE-006'> RegenerateAndSpeakAgain_Be006 {
+        subject s : WebApplication;
+        doc /* When a user requests it, the Backend shall regenerate the last answer or speak any answer again. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-BE-007'> ChangesReachAllDevices_Be007 {
+        subject s : WebApplication;
+        doc /* When a user changes shared data, the Backend shall push the change to every connected device. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-BE-008'> LoginAndSession_Be008 {
+        subject s : WebApplication;
+        doc /* When a user gives the correct account and password, the Backend shall open a session for that device. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-BE-009'> ThrottledFailedLogins_Be009 {
+        subject s : WebApplication;
+        doc /* If more than 5 logins fail within one minute for an account, then the Backend shall refuse further logins for that account until the minute has passed. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-BE-010'> PasswordHandling_Be010 {
+        subject s : WebApplication;
+        doc /* The Backend shall store only salted slow hashes of passwords and write no password to any log. */
+        @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::inspection); }
+    }
+    requirement def <'REQ-BE-011'> OwnPasswordAndOwnerOnlyAccounts_Be011 {
+        subject s : WebApplication;
+        doc /* The Backend shall let a user change their own password and let only the owner create an account. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-BE-012'> EveryRequestAuthenticated_Be012 {
+        subject s : WebApplication;
+        doc /* The Backend shall authenticate every request by an account, check the origin and limit message rates per user. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-BE-013'> PasswordsOnlyOverASecureChannel_Be013 {
+        subject s : WebApplication;
+        doc /* If a password arrives over plain HTTP from an address other than localhost, then the Backend shall refuse it. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-BE-014'> AttributionOfChanges_Be014 {
+        subject s : WebApplication;
+        doc /* When shared data changes, the Backend shall record the account that made the change. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-BE-015'> EverythingVisibleToAllUsers_Be015 {
+        subject s : WebApplication;
+        doc /* The Backend shall give every logged-in user the same access to all data and apply a change to all users at once, without roles. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-BE-016'> VoiceSynthesis_Be016 {
+        subject s : WebApplication;
+        doc /* When an answer is written, the Backend shall synthesise it sentence by sentence with an open text-to-speech engine behind one interface on the host and apply the anime voice effect. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-BE-017'> SpeakOnlyWhatIsMeantToBeHeard_Be017 {
+        subject s : WebApplication;
+        doc /* The Backend shall remove markup and stage directions from the text before synthesis. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-BE-018'> VoiceLines_Be018 {
+        subject s : WebApplication;
+        doc /* When a mood or event occurs, the Backend shall choose at random one of the voice lines assigned to it, stay silent if there is none and skip a missing audio file with a log entry. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-BE-019'> DefaultVoiceLinesGenerated_Be019 {
+        subject s : WebApplication;
+        doc /* The Backend shall generate the default voice lines with its own text-to-speech engine and voice effect. */
+        @Trace { :>> verifiedBy = (HowVerified::inspection); }
+    }
+    requirement def <'REQ-BE-020'> StepByStepAccount_Be020 {
+        subject s : WebApplication;
+        doc /* When a user opens the account of an answer produced by a task, the Backend shall deliver it from event data and without a model-written part. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-BE-021'> PersonaFromTheFile_Be021 {
+        subject s : WebApplication;
+        doc /* The Backend shall behave as the shared persona file specifies, with its names, pronouns and form of address, and address every user as master unless the file says otherwise. */
+        @Trace { :>> verifiedBy = (HowVerified::measurement); }
+    }
+    requirement def <'REQ-BE-022'> MoodAtAllTimes_Be022 {
+        subject s : WebApplication;
+        doc /* While MIA is idle, thinking, speaking, waiting, greeting a user, reporting an error or offline, the Backend shall hold the corresponding mood, change it with events and settle it back over time. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-BE-023'> ScoreShiftsTheMood_Be023 {
+        subject s : WebApplication;
+        doc /* The Backend shall shift the general mood by the overall feedback score. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-BE-024'> StructuredMemory_Be024 {
+        subject s : WebApplication;
+        doc /* The Backend shall keep structured facts, preferences and commitments linked to their source and retrieve what is relevant within the token budget. */
+        @Trace { :>> verifiedBy = (HowVerified::measurement); }
+    }
+    requirement def <'REQ-BE-025'> NoMemoryFromUntrustedText_Be025 {
+        subject s : WebApplication;
+        doc /* The Backend shall not store a fact about a user that came from web or file text. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-BE-026'> MemoryOpenToUsers_Be026 {
+        subject s : WebApplication;
+        doc /* When a user inspects, corrects or deletes a memory record, the Backend shall apply it and show the source of the record. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-BE-027'> SilentRepairOfBehaviourViolations_Be027 {
+        subject s : WebApplication;
+        doc /* If a defined behaviour rule is violated, then the Backend shall repair the answer silently, record the violation as a signal and keep the correction out of the conversation memory. */
+        @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::measurement); }
+    }
+    requirement def <'REQ-BE-028'> VotesStored_Be028 {
+        subject s : WebApplication;
+        doc /* When a user votes, the Backend shall store the vote with user, time, subject and one of four categories (answer quality, reactions, character behaviour, service) and keep a score per category and overall. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-BE-029'> AMinusOnAFactOpensACase_Be029 {
+        subject s : WebApplication;
+        doc /* When a user gives a minus to a factual answer, the Backend shall open a benchmark case and leave the stated fact unchanged. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-BE-030'> AdaptationToNegativeFeedback_Be030 {
+        subject s : WebApplication;
+        doc /* When a behaviour has received at least 5 net negative votes, the Backend shall show it with a chance of at most 1 % per opportunity and raise the chance again after positive votes. */
+        @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::measurement); }
+    }
+    requirement def <'REQ-BE-031'> CountersVisibleAndResettable_Be031 {
+        subject s : WebApplication;
+        doc /* The Backend shall let every user see and reset the adaptation counters, and never apply the rule to facts or safety checks. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-BE-032'> TasksAndMemosRecitedFromRecords_Be032 {
+        subject s : WebApplication;
+        doc /* When a task falls due or a user asks, the Backend shall read the text of the task or memo from its record word for word. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-BE-033'> SkillsAsTasks_Be033 {
+        subject s : WebApplication;
+        doc /* The Backend shall perform each kind of work as a task defined by a skill file and a pipeline selectable by every user. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-BE-034'> InternetTasksOnlyOnCommand_Be034 {
+        subject s : WebApplication;
+        doc /* The Backend shall start a task that reaches the internet only by a command of a user. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-BE-035'> VersionedWorkflowLibrary_Be035 {
+        subject s : WebApplication;
+        doc /* The Backend shall keep every pipeline and workflow as validated data in a library with the lifecycle draft, tested, trusted and retired and store every edit as a new immutable version with author and time. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-BE-036'> NoCycles_Be036 {
+        subject s : WebApplication;
+        doc /* When a workflow is saved and before it runs, the Backend shall check by an algorithm that its graph has no cycle and name a cycle that it finds. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-BE-037'> GraphRules_Be037 {
+        subject s : WebApplication;
+        doc /* The Backend shall refuse a workflow with two adjacent data nodes or a session node without a maximum number of cycles or a maximum time. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-BE-038'> ModelProposalsStayDrafts_Be038 {
+        subject s : WebApplication;
+        doc /* When a model proposes a library entry, the Backend shall keep it as a draft until a user approves it, shown as a diff and tried on the test set. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-BE-039'> SpecificationBeforeTrust_Be039 {
+        subject s : WebApplication;
+        doc /* The Backend shall keep a workflow without specification, context graph and benchmark with a baseline in draft status and refuse to promote it. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-BE-040'> TimeFromIdeaToPromotion_Be040 {
+        subject s : WebApplication;
+        doc /* The Backend shall record the time from the idea of a skill to its promotion. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-BE-041'> ContextGraphs_Be041 {
+        subject s : WebApplication;
+        doc /* The Backend shall keep one context graph per workflow and one for the chat and give each step the view that fits its token budget. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-BE-042'> WorkflowScheduleAndEstimate_Be042 {
+        subject s : WebApplication;
+        doc /* When a workflow is about to run, the Backend shall compute its order, critical path and an estimate of time, calls and tokens from its graph and the measured costs, and refuse a run whose estimate exceeds its budget. */
+        @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::measurement); }
+    }
+    requirement def <'REQ-BE-043'> CharacterVariantPerWorkflow_Be043 {
+        subject s : WebApplication;
+        doc /* The Backend shall let a workflow name a character variant and send it to the frontend while the workflow runs. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-BE-044'> SwitchTheModel_Be044 {
+        subject s : WebApplication;
+        doc /* When a user asks for the light or the full model and confirms, the Backend shall switch the model for all users and free GPU memory on request. */
+        @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
+    }
+    requirement def <'REQ-BE-045'> ModelServerUnreachable_Be045 {
+        subject s : WebApplication;
+        doc /* If the model server is unreachable, then the Backend shall say so in plain words. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-BE-046'> CodeChecksFirst_Be046 {
+        subject s : WebApplication;
+        doc /* The Backend shall check a claim by code where a code check exists and use model judgement only for the claims that the code checks leave open. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-BE-047'> UnclearWithoutEvidence_Be047 {
+        subject s : WebApplication;
+        doc /* If a claim contains a number and has no evidence, then the Backend shall give the verdict unclear without a model call. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-BE-048'> AFailedCheckInformsTheJudge_Be048 {
+        subject s : WebApplication;
+        doc /* If a code check fails, then the Backend shall pass the failed check to the judgement style as a contradiction found by code. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-BE-049'> JudgementQuality_Be049 {
+        subject s : WebApplication;
+        doc /* The Backend shall run the chosen judgement style so that on the holdout it passes fewer wrong claims than the single voice and loses no more true claims among those with evidence. */
+        @Trace { :>> verifiedBy = (HowVerified::measurement); }
+    }
+    requirement def <'REQ-BE-050'> StableVerdicts_Be050 {
+        subject s : WebApplication;
+        doc /* When a verification is repeated on the same input and the same sources, the Backend shall give the same verdicts and the same set of facts. */
+        @Trace { :>> verifiedBy = (HowVerified::measurement); }
+    }
+    requirement def <'REQ-BE-051'> LookupWithSources_Be051 {
+        subject s : WebApplication;
+        doc /* When a user asks a factual question, the Backend shall answer with the sources and verbatim quotes that back it, or with unknown when nothing backs an answer. */
+        @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::measurement); }
+    }
+    requirement def <'REQ-BE-052'> SearchCommand_Be052 {
+        subject s : WebApplication;
+        doc /* When a user gives the search command, the Backend shall list the findings of the metasearch (title, address, short text) without composing or verifying an answer. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-BE-053'> ReviewReport_Be053 {
+        subject s : WebApplication;
+        doc /* When a user gives a research question, a cut-off date and a budget, the Backend shall produce a report of kept and dropped sources with reasons, findings per sub-question with verbatim anchors, conflicts and open gaps. */
+        @Trace { :>> verifiedBy = (HowVerified::measurement); }
+    }
+    requirement def <'REQ-BE-054'> ReviewInTimeSlices_Be054 {
+        subject s : WebApplication;
+        doc /* The Backend shall work a review in time slices, give an intermediate report with a recommendation at the end of each slice and continue only when the requesting user agrees. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-BE-055'> ReviewStopsByACodeCheck_Be055 {
+        subject s : WebApplication;
+        doc /* The Backend shall end a review when a code check finds every sub-question answered or a budget used up. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-BE-056'> SourceRecordsAndCutOff_Be056 {
+        subject s : WebApplication;
+        doc /* The Backend shall record where a source comes from and how far it is trusted, keep the users' edits of that trust and honour a time cut-off strictly. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-BE-057'> MethodTransfer_Be057 {
+        subject s : WebApplication;
+        doc /* Where method transfer is switched on, the Backend shall offer few ranked candidate methods marked as hypotheses unless an executable test on a toy instance passed. */
+        @Trace { :>> verifiedBy = (HowVerified::measurement); }
+    }
+    requirement def <'REQ-BE-058'> TypedRunEvents_Be058 {
+        subject s : WebApplication;
+        doc /* The Backend shall write every run as typed, schema-checked events with one run id and the starting user, with secrets removed. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-BE-059'> ReplayAndComparison_Be059 {
+        subject s : WebApplication;
+        doc /* The Backend shall replay a recorded run offline with an identical result and compare two runs. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-BE-060'> StatementsTraceableToAQuery_Be060 {
+        subject s : WebApplication;
+        doc /* The Backend shall make every statement of an answer traceable to the query that found its source. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-BE-061'> OptionalLearning_Be061 {
+        subject s : WebApplication;
+        doc /* Where learning is switched on, the Backend shall learn only from logged signals in discrete choices of configuration and graph weights and log every learned choice next to the default. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-BE-062'> ContextWindowShare_Be062 {
+        subject s : WebApplication;
+        doc /* The Backend shall keep every model input inside 50 % of the context window. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-BE-063'> ModelCallsOfTheFirstTry_Be063 {
+        subject s : WebApplication;
+        doc /* The Backend shall use fewer than 15 model calls for the first try of a question on the light model. */
+        @Trace { :>> verifiedBy = (HowVerified::measurement); }
+    }
+    requirement def <'REQ-BE-064'> UntrustedTextIsData_Be064 {
+        subject s : WebApplication;
+        doc /* The Backend shall treat text from the web, papers, PDFs and users as data and never as instruction. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-BE-065'> SandboxOrRefuse_Be065 {
+        subject s : WebApplication;
+        doc /* If no isolating sandbox is present, then the Backend shall refuse to run a model-written script or a hostile document. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-BE-066'> ConfidenceByCode_Be066 {
+        subject s : WebApplication;
+        doc /* The Backend shall compute confidence figures by code from anchored evidence and report the limits with every result. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-BE-067'> NoInventedSource_Be067 {
+        subject s : WebApplication;
+        doc /* The Backend shall show no source it did not retrieve. */
+        @Trace { :>> verifiedBy = (HowVerified::measurement); }
+    }
+    requirement def <'REQ-BE-068'> OnlyQueriesLeaveTheHost_Be068 {
+        subject s : WebApplication;
+        doc /* The Backend shall send off the host only the text of a web or scholarly query and, if configured, an e-mail address. */
+        @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::inspection); }
+    }
+    requirement def <'REQ-BE-069'> FirstTextIn10Seconds_Be069 {
+        subject s : WebApplication;
+        doc /* When a chat message is answered on the light model, the Backend shall send the first text within 10 s. */
+        @Trace { :>> verifiedBy = (HowVerified::measurement); }
+    }
+    requirement def <'REQ-BE-070'> BudgetsAndWhatIsMissing_Be070 {
+        subject s : WebApplication;
+        doc /* If a task exceeds a budget of steps, seconds, calls or tokens, then the Backend shall end it with what it has and say what is missing. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-BE-071'> ChatBeforeBackground_Be071 {
+        subject s : WebApplication;
+        doc /* While a chat message waits, the Backend shall let a long background task yield the model server. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-BE-072'> OneModelAtATime_Be072 {
+        subject s : WebApplication;
+        doc /* The Backend shall use one language model at a time on the 16 GB GPU and serve several users by the queue. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-BE-073'> PythonVersions_Be073 {
+        subject s : WebApplication;
+        doc /* The Backend shall run on Python 3.11 to 3.13. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-BE-074'> StateOnlyThroughTheStorageInterface_Be074 {
+        subject s : WebApplication;
+        doc /* The Backend shall keep and read shared state only through the storage interface IF-102. */
+        @Trace { :>> verifiedBy = (HowVerified::inspection, HowVerified::test); }
+    }
+    requirement def <'REQ-BE-075'> ServeTheFrontend_Be075 {
+        subject s : WebApplication;
+        doc /* The Backend shall serve the files of the Web Frontend and run as its own container. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-BE-076'> WorkflowAndGraphAPI_Be076 {
+        subject s : WebApplication;
+        doc /* The Backend shall offer the Graph app, under the Backend's session, the listing, reading, saving as a new version, history, diff and restore of workflows and context graphs, and refuse an invalid graph with the broken rule named (IF-104). */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-SLY-001'> PostgreSQLInAContainer_Sly001 {
+        subject s : Persistence;
+        doc /* The Storage layer shall be one PostgreSQL database in a container behind the storage interface IF-102. */
+        @Trace { :>> verifiedBy = (HowVerified::inspection, HowVerified::test); }
+    }
+    requirement def <'REQ-SLY-002'> SharedStateHeld_Sly002 {
+        subject s : Persistence;
+        doc /* The Storage layer shall hold every table of the shared state (history, summaries, chat log, feedback, presets, gestures, library entries and accounts) as the definitions of IF-301 and IF-302 describe them. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-SLY-003'> ImmutableVersions_Sly003 {
+        subject s : Persistence;
+        doc /* When a versioned record is edited, the Storage layer shall store the edit as a new version with author and time and keep the former version unchanged. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-SLY-004'> SchemaValidationOnWrite_Sly004 {
+        subject s : Persistence;
+        doc /* When a record is written, the Storage layer shall have it validated through IF-301 or IF-302 and refuse an invalid one with the broken rule named. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-SLY-005'> Accounts_Sly005 {
+        subject s : Persistence;
+        doc /* The Storage layer shall store accounts with a salted slow password hash and no plain password. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-SLY-006'> ChangeNotification_Sly006 {
+        subject s : Persistence;
+        doc /* When a record changes, the Storage layer shall tell every subscriber of the storage interface. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-SLY-007'> ReversibleMoveFromFiles_Sly007 {
+        subject s : Persistence;
+        doc /* When the owner starts the move from files to the database or back, the Storage layer shall perform it with one command and give identical files after the round trip. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-SLY-008'> BackupAndRestore_Sly008 {
+        subject s : Persistence;
+        doc /* The Storage layer shall allow backup and restore together with the other data of MIA. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-SLY-009'> LibraryExportAndSeed_Sly009 {
+        subject s : Persistence;
+        doc /* The Storage layer shall export library entries to files and seed them from files with identical entries. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-SLY-010'> ReachableOnlyInsideTheHostNetwork_Sly010 {
+        subject s : Persistence;
+        doc /* The Storage layer shall accept connections only from the other containers of the stack. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-SLY-011'> OwnContainer_Sly011 {
+        subject s : Persistence;
+        doc /* The Storage layer shall start as its own container alone and by the compose stack. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-SLY-012'> RealiseIF102_Sly012 {
+        subject s : Persistence;
+        doc /* The Storage layer shall realise the storage interface IF-102 as specified in contracts/IF-102-storage-interface.md. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-001'> SharedStateHeld_Gtb001 {
+        subject s : Persistence;
+        doc /* The Graph tables shall define the tables of workflows (library entries) and context graphs. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-002'> SchemaValidationOnWrite_Gtb002 {
+        subject s : Persistence;
+        doc /* When asked to validate a workflow, the Graph tables shall report the first broken rule of node identity, adjacent data nodes, adjacent process nodes, session stopping criterion and cycle (IF-301). */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-003'> ContextGraphsStored_Gtb003 {
+        subject s : Persistence;
+        doc /* The Graph tables shall define the table of context graphs as versioned records that are not deletable and are validated by the graph rules; the Storage layer keys them by workflow id or by chat. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-004'> ExampleWorkflowsAsSeedData_Gtb004 {
+        subject s : Persistence;
+        doc /* The Graph tables shall ship the example workflows lookup, verify and review, the search command and method transfer (off by default) as seed entries of the library, with their specifications, context graphs and benchmark references. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-RTB-001'> SharedStateHeld_Rtb001 {
+        subject s : Persistence;
+        doc /* The Record tables shall define the tables of the history, summaries, chat log, votes, memory, tasks, memos, presets, gestures and run results. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-RTB-002'> RunResults_Rtb002 {
+        subject s : Persistence;
+        doc /* The Record tables shall define the table of run results with the required fields workflow, workflow_version, model_pin and benchmark_version and refuse a record that lacks one. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-RTB-003'> VotesStored_Rtb003 {
+        subject s : Persistence;
+        doc /* The Record tables shall define the table of votes with the required fields user, subject, category (one of four) and value (1 or -1); the time of a vote is that of its version. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-RTB-004'> MemoryRecords_Rtb004 {
+        subject s : Persistence;
+        doc /* The Record tables shall define the table of memory records with the required fields text and source, as deletable records. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-RTB-005'> TasksAndMemosExact_Rtb005 {
+        subject s : Persistence;
+        doc /* The Record tables shall define the tables of tasks and memos with the required field text, as deletable records, and validate a document without changing it. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-RTB-006'> SourceTrustStored_Rtb006 {
+        subject s : Persistence;
+        doc /* The Record tables shall define the table of the trust values of sources as versioned records that are not deletable. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-DB-001'> PostgreSQLInAContainer_Db001 {
+        subject s : Persistence;
+        doc /* The Database shall be one PostgreSQL database in a container behind the storage interface IF-102. */
+        @Trace { :>> verifiedBy = (HowVerified::inspection, HowVerified::test); }
+    }
+    requirement def <'REQ-DB-002'> SharedStateHeld_Db002 {
+        subject s : Persistence;
+        doc /* The Database shall hold the history, summaries, chat log, feedback, presets, gestures, library entries and accounts. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-DB-003'> ImmutableVersions_Db003 {
+        subject s : Persistence;
+        doc /* When a versioned record is edited, the Database shall store the edit as a new version with author and time and keep the former version unchanged. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-DB-004'> SchemaValidationOnWrite_Db004 {
+        subject s : Persistence;
+        doc /* If a workflow or graph does not match its schema or violates a graph rule, then the Database shall refuse to store it and name the broken rule. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-DB-005'> Accounts_Db005 {
+        subject s : Persistence;
+        doc /* The Database shall store accounts with a salted slow password hash and no plain password; the Backend decides who creates an account (REQ-BE-011). */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-DB-006'> ChangeNotification_Db006 {
+        subject s : Persistence;
+        doc /* When a record changes, the Database shall tell every subscriber of the storage interface. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-DB-007'> ReversibleMoveFromFiles_Db007 {
+        subject s : Persistence;
+        doc /* When the owner starts the move from files to the database or back, the Database shall perform it with one command and give identical files after the round trip. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-DB-008'> BackupAndRestore_Db008 {
+        subject s : Persistence;
+        doc /* The Database shall allow backup and restore together with the other data of MIA. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-DB-009'> LibraryExportAndSeed_Db009 {
+        subject s : Persistence;
+        doc /* The Database shall export library entries to files and seed them from files with identical entries. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-DB-010'> RunResults_Db010 {
+        subject s : Persistence;
+        doc /* The Database shall store the run results with workflow version, model pin and benchmark version. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-DB-011'> ContextGraphsStored_Db011 {
+        subject s : Persistence;
+        doc /* The Database shall store one context graph per workflow and one for the chat as versioned records. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-DB-012'> VotesStored_Db012 {
+        subject s : Persistence;
+        doc /* The Database shall store each vote with user, time, subject and category. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-DB-013'> MemoryRecords_Db013 {
+        subject s : Persistence;
+        doc /* The Database shall store memory records with their source and delete a record when asked. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-DB-014'> TasksAndMemosExact_Db014 {
+        subject s : Persistence;
+        doc /* The Database shall store the text of tasks and memos without change. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-DB-015'> SourceTrustStored_Db015 {
+        subject s : Persistence;
+        doc /* The Database shall keep the users' edits of the trust of a source. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-DB-016'> ReachableOnlyInsideTheHostNetwork_Db016 {
+        subject s : Persistence;
+        doc /* The Database shall accept connections only from the other containers of the stack. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-DB-017'> OwnContainer_Db017 {
+        subject s : Persistence;
+        doc /* The Database shall start as its own container alone and by the compose stack. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-DB-018'> ExampleWorkflowsAsSeedData_Db018 {
+        subject s : Persistence;
+        doc /* The Database shall ship the example workflows lookup, verify and review, the search command and method transfer (off by default) as seed entries of the library, with their specifications, context graphs and benchmark references. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-EVL-001'> HarnessWithRepeats_Evl001 {
+        subject s : Evaluation;
+        doc /* The Evaluation shall run pipeline variants on fixed suites with repeats, intervals and cost counting. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-EVL-002'> DecisionsOnHeldOutCases_Evl002 {
+        subject s : Evaluation;
+        doc /* The Evaluation shall decide improvement claims only on held-out cases. */
+        @Trace { :>> verifiedBy = (HowVerified::inspection, HowVerified::test); }
+    }
+    requirement def <'REQ-EVL-003'> JudgeCalibration_Evl003 {
+        subject s : Evaluation;
+        doc /* The Evaluation shall count the verdicts of a model used as a judge only after its calibration against the users' ratings. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-EVL-004'> VersionsRecordedPerRun_Evl004 {
+        subject s : Evaluation;
+        doc /* The Evaluation shall record the workflow version, the model pin and the benchmark version of every run. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-EVL-005'> BaselinePerShippedWorkflow_Evl005 {
+        subject s : Evaluation;
+        doc /* The Evaluation shall keep a recorded baseline for every shipped workflow. */
+        @Trace { :>> verifiedBy = (HowVerified::inspection); }
+    }
+    requirement def <'REQ-EVL-006'> SkillPathDocumented_Evl006 {
+        subject s : Evaluation;
+        doc /* The Evaluation shall document the path from an idea to a promoted skill with its steps and checks. */
+        @Trace { :>> verifiedBy = (HowVerified::inspection); }
+    }
+    requirement def <'REQ-EVL-007'> MeasureLatencyAndFrameRate_Evl007 {
+        subject s : Evaluation;
+        doc /* The Evaluation shall measure the time to the first text of a chat answer and the frame rate of the character. */
+        @Trace { :>> verifiedBy = (HowVerified::measurement); }
+    }
+    requirement def <'REQ-EVL-008'> VariantsComparedOnEqualCases_Evl008 {
+        subject s : Evaluation;
+        doc /* The Evaluation shall compare variants on the same cases with the same repeats. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-EVL-009'> BenchmarksOfTheExampleWorkflows_Evl009 {
+        subject s : Evaluation;
+        doc /* The Evaluation shall hold the suites, baselines and eval criteria of the example workflows lookup, verify and review as the benchmark that decides their criteria. */
+        @Trace { :>> verifiedBy = (HowVerified::inspection, HowVerified::measurement); }
+    }
+    requirement def <'REQ-EVL-010'> ExampleWorkflowsAsProofOfConcept_Evl010 {
+        subject s : Evaluation;
+        doc /* The Evaluation shall run the lookup workflow end to end as the proof-of-concept scenario of the platform and the review workflow once it is promoted. */
+        @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
+    }
+    requirement def <'REQ-EVL-011'> ReachThePlatformOnlyThroughIF105_Evl011 {
+        subject s : Evaluation;
+        doc /* The Evaluation shall run workflows, read their cost and events and list the library only through the interface IF-105 as specified in contracts/IF-105-evaluation-access.md. */
+        @Trace { :>> verifiedBy = (HowVerified::inspection, HowVerified::test); }
+    }
+    requirement def <'REQ-OPR-001'> OneFileOneCommand_Opr001 {
+        subject s : OperationLayer;
+        doc /* When the owner runs the start command on a fresh checkout with one configuration file, the Operation shall bring MIA up with its database. */
+        @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
+    }
+    requirement def <'REQ-OPR-002'> FirstAccountAtInstallation_Opr002 {
+        subject s : OperationLayer;
+        doc /* When MIA starts for the first time, the Operation shall let the owner create the first account. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-OPR-003'> MissingOptionsReported_Opr003 {
+        subject s : OperationLayer;
+        doc /* When MIA starts after an update, the Operation shall report the options missing in the configuration file. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-OPR-004'> OrderlyShutdown_Opr004 {
+        subject s : OperationLayer;
+        doc /* When MIA is stopped, the Operation shall shut it down in order and save her memory. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-OPR-005'> BackupAndRestoreOfAllData_Opr005 {
+        subject s : OperationLayer;
+        doc /* The Operation shall back up and restore the data of MIA including the database. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-OPR-006'> Runbook_Opr006 {
+        subject s : OperationLayer;
+        doc /* The Operation shall provide a runbook with start, update of the model pins, backup and restore of the database, and a retirement plan that ends in freezing the stack with the model digests. */
+        @Trace { :>> verifiedBy = (HowVerified::inspection); }
+    }
+    requirement def <'REQ-OPR-007'> ComposeStack_Opr007 {
+        subject s : OperationLayer;
+        doc /* The Operation shall provide a compose stack that starts the containers of N-2 to N-5 alone and together with one configuration file. */
+        @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
+    }
+    requirement def <'REQ-OPR-008'> PrivateAccessOnly_Opr008 {
+        subject s : OperationLayer;
+        doc /* The Operation shall expose MIA only over HTTPS inside the home network or the tailnet, with no public port. */
+        @Trace { :>> verifiedBy = (HowVerified::inspection, HowVerified::test); }
+    }
+    requirement def <'REQ-OPR-009'> FreeAndOpen_Opr009 {
+        subject s : OperationLayer;
+        doc /* The Operation shall provide the licence GPL-3.0-or-later and use no paid API. */
+        @Trace { :>> verifiedBy = (HowVerified::inspection); }
+    }
+    requirement def <'REQ-OPR-010'> HardwareConfiguration_Opr010 {
+        subject s : OperationLayer;
+        doc /* The Operation shall configure the model server to load one model at a time. */
+        @Trace { :>> verifiedBy = (HowVerified::inspection); }
+    }
+    requirement def <'REQ-OPS-001'> HarnessWithRepeats_Ops001 {
+        subject s : Evaluation;
+        doc /* The Evaluation and operation node shall run pipeline variants on fixed suites with repeats, intervals and cost counting. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-OPS-002'> DecisionsOnHeldOutCases_Ops002 {
+        subject s : Evaluation;
+        doc /* The Evaluation and operation node shall decide improvement claims only on held-out cases. */
+        @Trace { :>> verifiedBy = (HowVerified::inspection, HowVerified::test); }
+    }
+    requirement def <'REQ-OPS-003'> JudgeCalibration_Ops003 {
+        subject s : Evaluation;
+        doc /* The Evaluation and operation node shall count the verdicts of a model used as a judge only after its calibration against the users' ratings. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-OPS-004'> VersionsRecordedPerRun_Ops004 {
+        subject s : Evaluation;
+        doc /* The Evaluation and operation node shall record the workflow version, the model pin and the benchmark version of every run. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-OPS-005'> BaselinePerShippedWorkflow_Ops005 {
+        subject s : Evaluation;
+        doc /* The Evaluation and operation node shall keep a recorded baseline for every shipped workflow. */
+        @Trace { :>> verifiedBy = (HowVerified::inspection); }
+    }
+    requirement def <'REQ-OPS-006'> SkillPathDocumented_Ops006 {
+        subject s : Evaluation;
+        doc /* The Evaluation and operation node shall document the path from an idea to a promoted skill with its steps and checks. */
+        @Trace { :>> verifiedBy = (HowVerified::inspection); }
+    }
+    requirement def <'REQ-OPS-007'> OneFileOneCommand_Ops007 {
+        subject s : Evaluation;
+        doc /* When the owner runs the start command on a fresh checkout with one configuration file, the Evaluation and operation node shall bring MIA up with its database. */
+        @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
+    }
+    requirement def <'REQ-OPS-008'> FirstAccountAtInstallation_Ops008 {
+        subject s : Evaluation;
+        doc /* When MIA starts for the first time, the Evaluation and operation node shall let the owner create the first account. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-OPS-009'> MissingOptionsReported_Ops009 {
+        subject s : Evaluation;
+        doc /* When MIA starts after an update, the Evaluation and operation node shall report the options missing in the configuration file. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-OPS-010'> OrderlyShutdown_Ops010 {
+        subject s : Evaluation;
+        doc /* When MIA is stopped, the Evaluation and operation node shall shut it down in order and save her memory. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-OPS-011'> BackupAndRestoreOfAllData_Ops011 {
+        subject s : Evaluation;
+        doc /* The Evaluation and operation node shall back up and restore the data of MIA including the database. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-OPS-012'> Runbook_Ops012 {
+        subject s : Evaluation;
+        doc /* The Evaluation and operation node shall provide a runbook with start, update of the model pins, backup and restore of the database and a retirement plan that ends in freezing the stack with the model digests. */
+        @Trace { :>> verifiedBy = (HowVerified::inspection); }
+    }
+    requirement def <'REQ-OPS-013'> ComposeStack_Ops013 {
+        subject s : Evaluation;
+        doc /* The Evaluation and operation node shall provide a compose stack that starts the containers of N-2 to N-5 alone and together with one configuration file. */
+        @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
+    }
+    requirement def <'REQ-OPS-014'> PrivateAccessOnly_Ops014 {
+        subject s : Evaluation;
+        doc /* The Evaluation and operation node shall expose MIA only over HTTPS inside the home network or the tailnet, with no public port. */
+        @Trace { :>> verifiedBy = (HowVerified::inspection, HowVerified::test); }
+    }
+    requirement def <'REQ-OPS-015'> FreeAndOpen_Ops015 {
+        subject s : Evaluation;
+        doc /* The Evaluation and operation node shall provide the licence GPL-3.0-or-later and use no paid API. */
+        @Trace { :>> verifiedBy = (HowVerified::inspection); }
+    }
+    requirement def <'REQ-OPS-016'> HardwareConfiguration_Ops016 {
+        subject s : Evaluation;
+        doc /* The Evaluation and operation node shall configure the model server to load one model at a time. */
+        @Trace { :>> verifiedBy = (HowVerified::inspection); }
+    }
+    requirement def <'REQ-OPS-017'> MeasureLatencyAndFrameRate_Ops017 {
+        subject s : Evaluation;
+        doc /* The Evaluation and operation node shall measure the time to the first text of a chat answer and the frame rate of the character. */
+        @Trace { :>> verifiedBy = (HowVerified::measurement); }
+    }
+    requirement def <'REQ-OPS-018'> VariantsComparedOnEqualCases_Ops018 {
+        subject s : Evaluation;
+        doc /* The Evaluation and operation node shall compare variants on the same cases with the same repeats. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-OPS-019'> BenchmarksOfTheExampleWorkflows_Ops019 {
+        subject s : Evaluation;
+        doc /* The Evaluation and operation node shall hold the suites, baselines and eval criteria of the example workflows lookup, verify and review as the benchmark that decides their criteria. */
+        @Trace { :>> verifiedBy = (HowVerified::inspection, HowVerified::measurement); }
+    }
+    requirement def <'REQ-OPS-020'> ExampleWorkflowsAsProofOfConcept_Ops020 {
+        subject s : Evaluation;
+        doc /* The Evaluation and operation node shall run the lookup workflow end to end as the proof-of-concept scenario of the platform and the review workflow once it is promoted. */
+        @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
+    }
+    requirement def <'REQ-GA-001'> GraphsAsNodesAndEdges_Ga001 {
+        subject s : GraphApp;
+        doc /* The Graph app shall show a workflow graph as nodes and edges. */
+        @Trace { :>> verifiedBy = (HowVerified::demonstration); }
+    }
+    requirement def <'REQ-GA-002'> EditAsJSON_Ga002 {
+        subject s : GraphApp;
+        doc /* When a logged-in user edits a node or an edge, the Graph app shall present it as a JSON dictionary of text data. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GA-003'> GraphRulesBeforeSaving_Ga003 {
+        subject s : GraphApp;
+        doc /* When a user saves, the Graph app shall check the identity of nodes, that no two data nodes are adjacent, that there is no cycle and that every session node has a stopping criterion, and name a broken rule. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GA-004'> VersionsHistoryAndDiff_Ga004 {
+        subject s : GraphApp;
+        doc /* The Graph app shall save every edit as a new version and show the version history, a diff and the restore of a former version. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GA-005'> WorkThroughTheBackendAPI_Ga005 {
+        subject s : GraphApp;
+        doc /* The Graph app shall read and write workflows and context graphs only through the workflow and graph API IF-104. */
+        @Trace { :>> verifiedBy = (HowVerified::inspection, HowVerified::test); }
+    }
+    requirement def <'REQ-GA-006'> ContextGraphsEdited_Ga006 {
+        subject s : GraphApp;
+        doc /* The Graph app shall let a logged-in user adapt a context graph, every change a new version. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GA-007'> LoginRequired_Ga007 {
+        subject s : GraphApp;
+        doc /* The Graph app shall require a login that the backend authenticates and use the backend session for every call. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GA-008'> LibraryExportAndSeed_Ga008 {
+        subject s : GraphApp;
+        doc /* The Graph app shall offer the export of the library to files and the seed from files. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GA-009'> PlainStackWithAVendoredLibrary_Ga009 {
+        subject s : GraphApp;
+        doc /* The Graph app shall be plain HTML and JavaScript with a vendored graph library and no build step. */
+        @Trace { :>> verifiedBy = (HowVerified::inspection); }
+    }
+    requirement def <'REQ-GA-010'> NoOutsideRequest_Ga010 {
+        subject s : GraphApp;
+        doc /* The Graph app shall load no resource from outside the host. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GA-011'> OwnContainer_Ga011 {
+        subject s : GraphApp;
+        doc /* The Graph app shall start as its own container alone and by the compose stack. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+
+    requirement r_req_clv_001 : ChatViewWithSenderAndStreaming_Clv001;
+    requirement r_req_clv_002 : StopAndQueuePosition_Clv002;
+    requirement r_req_clv_003 : SharedHistoryAfterReload_Clv003;
+    requirement r_req_clv_004 : ConnectionStateAndDrafts_Clv004;
+    requirement r_req_clv_005 : RegenerateAndSpeakAgain_Clv005;
+    requirement r_req_clv_006 : ChatWithoutTheCharacter_Clv006;
+    requirement r_req_clv_007 : CharacterAsStage_Clv007;
+    requirement r_req_clv_008 : StatusLineAndAccountOfATask_Clv008;
+    requirement r_req_clv_009 : EditorsForExpressionsGesturesAndPersona_Clv009;
+    requirement r_req_clv_010 : VotingControlsAndScore_Clv010;
+    requirement r_req_clv_011 : TasksMemosAndMemoryViews_Clv011;
+    requirement r_req_clv_012 : SourceTrustEdit_Clv012;
+    requirement r_req_clv_013 : VariantLabel_Clv013;
+    requirement r_req_clv_014 : LoginViewsAndPasswordChange_Clv014;
+    requirement r_req_clv_015 : LoginPageStatesVisibility_Clv015;
+    requirement r_req_clv_016 : AccessibilityAndDevices_Clv016;
+    requirement r_req_clv_017 : NoRequestLeavesTheHost_Clv017;
+    requirement r_req_clv_018 : PasswordOverASecureChannel_Clv018;
+    requirement r_req_clv_019 : PlainStack_Clv019;
+    requirement r_req_clv_020 : DeliveredByTheBackend_Clv020;
+    requirement r_req_clv_021 : UseIF101Only_Clv021;
+    requirement r_req_chv_001 : ChatWithoutTheCharacter_Chv001;
+    requirement r_req_chv_002 : OneExpressionAPI_Chv002;
+    requirement r_req_chv_003 : LivingCharacter_Chv003;
+    requirement r_req_chv_004 : MoodShownByTheMoodMap_Chv004;
+    requirement r_req_chv_005 : EditorsForExpressionsGesturesAndPersona_Chv005;
+    requirement r_req_chv_006 : ShockedReaction_Chv006;
+    requirement r_req_chv_007 : CharacterModelSelection_Chv007;
+    requirement r_req_chv_008 : VariantLabel_Chv008;
+    requirement r_req_chv_009 : AccessibilityAndDevices_Chv009;
+    requirement r_req_chv_010 : FrameRate_Chv010;
+    requirement r_req_chv_011 : NoRequestLeavesTheHost_Chv011;
+    requirement r_req_chv_012 : CharacterInASecureContext_Chv012;
+    requirement r_req_chv_013 : PlainStack_Chv013;
+    requirement r_req_chv_014 : DeliveredByTheBackend_Chv014;
+    requirement r_req_vpb_001 : VoicePlayback_Vpb001;
+    requirement r_req_vpb_002 : MuteAndStopPerUser_Vpb002;
+    requirement r_req_vpb_003 : VoiceLines_Vpb003;
+    requirement r_req_vpb_004 : NoRequestLeavesTheHost_Vpb004;
+    requirement r_req_vpb_005 : DeliveredByTheBackend_Vpb005;
+    requirement r_req_fe_001 : ChatViewWithSenderAndStreaming_Fe001;
+    requirement r_req_fe_002 : StopAndQueuePosition_Fe002;
+    requirement r_req_fe_003 : SharedHistoryAfterReload_Fe003;
+    requirement r_req_fe_004 : ConnectionStateAndDrafts_Fe004;
+    requirement r_req_fe_005 : RegenerateAndSpeakAgain_Fe005;
+    requirement r_req_fe_006 : ChatWithoutTheCharacter_Fe006;
+    requirement r_req_fe_007 : CharacterAsStage_Fe007;
+    requirement r_req_fe_008 : OneExpressionAPI_Fe008;
+    requirement r_req_fe_009 : LivingCharacter_Fe009;
+    requirement r_req_fe_010 : MoodShownByTheMoodMap_Fe010;
+    requirement r_req_fe_011 : VoicePlayback_Fe011;
+    requirement r_req_fe_012 : MuteAndStopPerUser_Fe012;
+    requirement r_req_fe_013 : VoiceLines_Fe013;
+    requirement r_req_fe_014 : StatusLineAndAccountOfATask_Fe014;
+    requirement r_req_fe_015 : EditorsForExpressionsGesturesAndPersona_Fe015;
+    requirement r_req_fe_016 : VotingControlsAndScore_Fe016;
+    requirement r_req_fe_017 : ShockedReaction_Fe017;
+    requirement r_req_fe_018 : TasksMemosAndMemoryViews_Fe018;
+    requirement r_req_fe_019 : SourceTrustEdit_Fe019;
+    requirement r_req_fe_020 : CharacterModelSelection_Fe020;
+    requirement r_req_fe_021 : VariantLabel_Fe021;
+    requirement r_req_fe_022 : LoginViewsAndPasswordChange_Fe022;
+    requirement r_req_fe_023 : LoginPageStatesVisibility_Fe023;
+    requirement r_req_fe_024 : AccessibilityAndDevices_Fe024;
+    requirement r_req_fe_025 : FrameRate_Fe025;
+    requirement r_req_fe_026 : NoRequestLeavesTheHost_Fe026;
+    requirement r_req_fe_027 : CharacterInASecureContext_Fe027;
+    requirement r_req_fe_028 : PasswordOverASecureChannel_Fe028;
+    requirement r_req_fe_029 : PlainStack_Fe029;
+    requirement r_req_fe_030 : DeliveredByTheBackend_Fe030;
+    requirement r_req_api_001 : ChatEventsAndStreaming_Api001;
+    requirement r_req_api_002 : ChangesReachAllDevices_Api002;
+    requirement r_req_api_003 : LoginAndSession_Api003;
+    requirement r_req_api_004 : ThrottledFailedLogins_Api004;
+    requirement r_req_api_005 : PasswordHandling_Api005;
+    requirement r_req_api_006 : OwnPasswordAndOwnerOnlyAccounts_Api006;
+    requirement r_req_api_007 : EveryRequestAuthenticated_Api007;
+    requirement r_req_api_008 : PasswordsOnlyOverASecureChannel_Api008;
+    requirement r_req_api_009 : AttributionOfChanges_Api009;
+    requirement r_req_api_010 : EverythingVisibleToAllUsers_Api010;
+    requirement r_req_api_011 : PythonVersions_Api011;
+    requirement r_req_api_012 : StateOnlyThroughTheStorageInterface_Api012;
+    requirement r_req_api_013 : ServeTheFrontend_Api013;
+    requirement r_req_api_014 : WorkflowAndGraphAPI_Api014;
+    requirement r_req_api_015 : RealiseIF101_Api015;
+    requirement r_req_api_016 : RealiseTheRoutesOfIF104_Api016;
+    requirement r_req_cha_001 : ChatEventsAndStreaming_Cha001;
+    requirement r_req_cha_002 : OneSharedMIA_Cha002;
+    requirement r_req_cha_003 : QueueWithPositions_Cha003;
+    requirement r_req_cha_004 : StopAnAnswer_Cha004;
+    requirement r_req_cha_005 : BoundedHistory_Cha005;
+    requirement r_req_cha_006 : RegenerateAndSpeakAgain_Cha006;
+    requirement r_req_cha_007 : VoiceLines_Cha007;
+    requirement r_req_cha_008 : PersonaFromTheFile_Cha008;
+    requirement r_req_cha_009 : MoodAtAllTimes_Cha009;
+    requirement r_req_cha_010 : ScoreShiftsTheMood_Cha010;
+    requirement r_req_cha_011 : StructuredMemory_Cha011;
+    requirement r_req_cha_012 : NoMemoryFromUntrustedText_Cha012;
+    requirement r_req_cha_013 : MemoryOpenToUsers_Cha013;
+    requirement r_req_cha_014 : SilentRepairOfBehaviourViolations_Cha014;
+    requirement r_req_cha_015 : VotesStored_Cha015;
+    requirement r_req_cha_016 : AMinusOnAFactOpensACase_Cha016;
+    requirement r_req_cha_017 : AdaptationToNegativeFeedback_Cha017;
+    requirement r_req_cha_018 : CountersVisibleAndResettable_Cha018;
+    requirement r_req_cha_019 : TasksAndMemosRecitedFromRecords_Cha019;
+    requirement r_req_cha_020 : StateOnlyThroughTheStorageInterface_Cha020;
+    requirement r_req_wfm_001 : SkillsAsTasks_Wfm001;
+    requirement r_req_wfm_002 : VersionedWorkflowLibrary_Wfm002;
+    requirement r_req_wfm_003 : NoCycles_Wfm003;
+    requirement r_req_wfm_004 : GraphRules_Wfm004;
+    requirement r_req_wfm_005 : ModelProposalsStayDrafts_Wfm005;
+    requirement r_req_wfm_006 : SpecificationBeforeTrust_Wfm006;
+    requirement r_req_wfm_007 : TimeFromIdeaToPromotion_Wfm007;
+    requirement r_req_wfm_008 : ContextGraphs_Wfm008;
+    requirement r_req_wfm_009 : WorkflowScheduleAndEstimate_Wfm009;
+    requirement r_req_wfm_010 : CharacterVariantPerWorkflow_Wfm010;
+    requirement r_req_wfm_011 : CodeChecksFirst_Wfm011;
+    requirement r_req_wfm_012 : UnclearWithoutEvidence_Wfm012;
+    requirement r_req_wfm_013 : AFailedCheckInformsTheJudge_Wfm013;
+    requirement r_req_wfm_014 : JudgementQuality_Wfm014;
+    requirement r_req_wfm_015 : StableVerdicts_Wfm015;
+    requirement r_req_wfm_016 : LookupWithSources_Wfm016;
+    requirement r_req_wfm_017 : SearchCommand_Wfm017;
+    requirement r_req_wfm_018 : ReviewReport_Wfm018;
+    requirement r_req_wfm_019 : ReviewInTimeSlices_Wfm019;
+    requirement r_req_wfm_020 : ReviewStopsByACodeCheck_Wfm020;
+    requirement r_req_wfm_021 : SourceRecordsAndCutOff_Wfm021;
+    requirement r_req_wfm_022 : MethodTransfer_Wfm022;
+    requirement r_req_wfm_023 : ConfidenceByCode_Wfm023;
+    requirement r_req_wfm_024 : NoInventedSource_Wfm024;
+    requirement r_req_wfm_025 : StateOnlyThroughTheStorageInterface_Wfm025;
+    requirement r_req_wfm_026 : WorkflowAndGraphAPI_Wfm026;
+    requirement r_req_run_001 : InternetTasksOnlyOnCommand_Run001;
+    requirement r_req_run_002 : SwitchTheModel_Run002;
+    requirement r_req_run_003 : ModelServerUnreachable_Run003;
+    requirement r_req_run_004 : OptionalLearning_Run004;
+    requirement r_req_run_005 : ContextWindowShare_Run005;
+    requirement r_req_run_006 : ModelCallsOfTheFirstTry_Run006;
+    requirement r_req_run_007 : FirstTextIn10Seconds_Run007;
+    requirement r_req_run_008 : BudgetsAndWhatIsMissing_Run008;
+    requirement r_req_run_009 : ChatBeforeBackground_Run009;
+    requirement r_req_run_010 : OneModelAtATime_Run010;
+    requirement r_req_run_011 : UseIF103Only_Run011;
+    requirement r_req_run_012 : UseTheLibraryTheToolsAndTheLogOnlyThroughTheirInterfaces_Run012;
+    requirement r_req_run_013 : KnowNoParticularWorkflow_Run013;
+    requirement r_req_run_014 : RealiseIF202_Run014;
+    requirement r_req_run_015 : RealiseIF105_Run015;
+    requirement r_req_tls_001 : CodeChecksFirst_Tls001;
+    requirement r_req_tls_002 : LookupWithSources_Tls002;
+    requirement r_req_tls_003 : SourceRecordsAndCutOff_Tls003;
+    requirement r_req_tls_004 : UntrustedTextIsData_Tls004;
+    requirement r_req_tls_005 : SandboxOrRefuse_Tls005;
+    requirement r_req_tls_006 : NoInventedSource_Tls006;
+    requirement r_req_tls_007 : OnlyQueriesLeaveTheHost_Tls007;
+    requirement r_req_tls_008 : BudgetAndTrustLabelPerToolCall_Tls008;
+    requirement r_req_log_001 : StepByStepAccount_Log001;
+    requirement r_req_log_002 : TypedRunEvents_Log002;
+    requirement r_req_log_003 : ReplayAndComparison_Log003;
+    requirement r_req_log_004 : StatementsTraceableToAQuery_Log004;
+    requirement r_req_log_005 : StateOnlyThroughTheStorageInterface_Log005;
+    requirement r_req_wfx_001 : StepByStepAccount_Wfx001;
+    requirement r_req_wfx_002 : InternetTasksOnlyOnCommand_Wfx002;
+    requirement r_req_wfx_003 : SwitchTheModel_Wfx003;
+    requirement r_req_wfx_004 : ModelServerUnreachable_Wfx004;
+    requirement r_req_wfx_005 : CodeChecksFirst_Wfx005;
+    requirement r_req_wfx_006 : LookupWithSources_Wfx006;
+    requirement r_req_wfx_007 : SourceRecordsAndCutOff_Wfx007;
+    requirement r_req_wfx_008 : TypedRunEvents_Wfx008;
+    requirement r_req_wfx_009 : ReplayAndComparison_Wfx009;
+    requirement r_req_wfx_010 : StatementsTraceableToAQuery_Wfx010;
+    requirement r_req_wfx_011 : OptionalLearning_Wfx011;
+    requirement r_req_wfx_012 : ContextWindowShare_Wfx012;
+    requirement r_req_wfx_013 : ModelCallsOfTheFirstTry_Wfx013;
+    requirement r_req_wfx_014 : UntrustedTextIsData_Wfx014;
+    requirement r_req_wfx_015 : SandboxOrRefuse_Wfx015;
+    requirement r_req_wfx_016 : NoInventedSource_Wfx016;
+    requirement r_req_wfx_017 : OnlyQueriesLeaveTheHost_Wfx017;
+    requirement r_req_wfx_018 : FirstTextIn10Seconds_Wfx018;
+    requirement r_req_wfx_019 : BudgetsAndWhatIsMissing_Wfx019;
+    requirement r_req_wfx_020 : ChatBeforeBackground_Wfx020;
+    requirement r_req_wfx_021 : OneModelAtATime_Wfx021;
+    requirement r_req_wfx_022 : StateOnlyThroughTheStorageInterface_Wfx022;
+    requirement r_req_wfx_023 : UseIF103Only_Wfx023;
+    requirement r_req_wfx_024 : RealiseIF105_Wfx024;
+    requirement r_req_voi_001 : VoiceSynthesis_Voi001;
+    requirement r_req_voi_002 : SpeakOnlyWhatIsMeantToBeHeard_Voi002;
+    requirement r_req_voi_003 : VoiceLines_Voi003;
+    requirement r_req_voi_004 : DefaultVoiceLinesGenerated_Voi004;
+    requirement r_req_be_001 : ChatEventsAndStreaming_Be001;
+    requirement r_req_be_002 : OneSharedMIA_Be002;
+    requirement r_req_be_003 : QueueWithPositions_Be003;
+    requirement r_req_be_004 : StopAnAnswer_Be004;
+    requirement r_req_be_005 : BoundedHistory_Be005;
+    requirement r_req_be_006 : RegenerateAndSpeakAgain_Be006;
+    requirement r_req_be_007 : ChangesReachAllDevices_Be007;
+    requirement r_req_be_008 : LoginAndSession_Be008;
+    requirement r_req_be_009 : ThrottledFailedLogins_Be009;
+    requirement r_req_be_010 : PasswordHandling_Be010;
+    requirement r_req_be_011 : OwnPasswordAndOwnerOnlyAccounts_Be011;
+    requirement r_req_be_012 : EveryRequestAuthenticated_Be012;
+    requirement r_req_be_013 : PasswordsOnlyOverASecureChannel_Be013;
+    requirement r_req_be_014 : AttributionOfChanges_Be014;
+    requirement r_req_be_015 : EverythingVisibleToAllUsers_Be015;
+    requirement r_req_be_016 : VoiceSynthesis_Be016;
+    requirement r_req_be_017 : SpeakOnlyWhatIsMeantToBeHeard_Be017;
+    requirement r_req_be_018 : VoiceLines_Be018;
+    requirement r_req_be_019 : DefaultVoiceLinesGenerated_Be019;
+    requirement r_req_be_020 : StepByStepAccount_Be020;
+    requirement r_req_be_021 : PersonaFromTheFile_Be021;
+    requirement r_req_be_022 : MoodAtAllTimes_Be022;
+    requirement r_req_be_023 : ScoreShiftsTheMood_Be023;
+    requirement r_req_be_024 : StructuredMemory_Be024;
+    requirement r_req_be_025 : NoMemoryFromUntrustedText_Be025;
+    requirement r_req_be_026 : MemoryOpenToUsers_Be026;
+    requirement r_req_be_027 : SilentRepairOfBehaviourViolations_Be027;
+    requirement r_req_be_028 : VotesStored_Be028;
+    requirement r_req_be_029 : AMinusOnAFactOpensACase_Be029;
+    requirement r_req_be_030 : AdaptationToNegativeFeedback_Be030;
+    requirement r_req_be_031 : CountersVisibleAndResettable_Be031;
+    requirement r_req_be_032 : TasksAndMemosRecitedFromRecords_Be032;
+    requirement r_req_be_033 : SkillsAsTasks_Be033;
+    requirement r_req_be_034 : InternetTasksOnlyOnCommand_Be034;
+    requirement r_req_be_035 : VersionedWorkflowLibrary_Be035;
+    requirement r_req_be_036 : NoCycles_Be036;
+    requirement r_req_be_037 : GraphRules_Be037;
+    requirement r_req_be_038 : ModelProposalsStayDrafts_Be038;
+    requirement r_req_be_039 : SpecificationBeforeTrust_Be039;
+    requirement r_req_be_040 : TimeFromIdeaToPromotion_Be040;
+    requirement r_req_be_041 : ContextGraphs_Be041;
+    requirement r_req_be_042 : WorkflowScheduleAndEstimate_Be042;
+    requirement r_req_be_043 : CharacterVariantPerWorkflow_Be043;
+    requirement r_req_be_044 : SwitchTheModel_Be044;
+    requirement r_req_be_045 : ModelServerUnreachable_Be045;
+    requirement r_req_be_046 : CodeChecksFirst_Be046;
+    requirement r_req_be_047 : UnclearWithoutEvidence_Be047;
+    requirement r_req_be_048 : AFailedCheckInformsTheJudge_Be048;
+    requirement r_req_be_049 : JudgementQuality_Be049;
+    requirement r_req_be_050 : StableVerdicts_Be050;
+    requirement r_req_be_051 : LookupWithSources_Be051;
+    requirement r_req_be_052 : SearchCommand_Be052;
+    requirement r_req_be_053 : ReviewReport_Be053;
+    requirement r_req_be_054 : ReviewInTimeSlices_Be054;
+    requirement r_req_be_055 : ReviewStopsByACodeCheck_Be055;
+    requirement r_req_be_056 : SourceRecordsAndCutOff_Be056;
+    requirement r_req_be_057 : MethodTransfer_Be057;
+    requirement r_req_be_058 : TypedRunEvents_Be058;
+    requirement r_req_be_059 : ReplayAndComparison_Be059;
+    requirement r_req_be_060 : StatementsTraceableToAQuery_Be060;
+    requirement r_req_be_061 : OptionalLearning_Be061;
+    requirement r_req_be_062 : ContextWindowShare_Be062;
+    requirement r_req_be_063 : ModelCallsOfTheFirstTry_Be063;
+    requirement r_req_be_064 : UntrustedTextIsData_Be064;
+    requirement r_req_be_065 : SandboxOrRefuse_Be065;
+    requirement r_req_be_066 : ConfidenceByCode_Be066;
+    requirement r_req_be_067 : NoInventedSource_Be067;
+    requirement r_req_be_068 : OnlyQueriesLeaveTheHost_Be068;
+    requirement r_req_be_069 : FirstTextIn10Seconds_Be069;
+    requirement r_req_be_070 : BudgetsAndWhatIsMissing_Be070;
+    requirement r_req_be_071 : ChatBeforeBackground_Be071;
+    requirement r_req_be_072 : OneModelAtATime_Be072;
+    requirement r_req_be_073 : PythonVersions_Be073;
+    requirement r_req_be_074 : StateOnlyThroughTheStorageInterface_Be074;
+    requirement r_req_be_075 : ServeTheFrontend_Be075;
+    requirement r_req_be_076 : WorkflowAndGraphAPI_Be076;
+    requirement r_req_sly_001 : PostgreSQLInAContainer_Sly001;
+    requirement r_req_sly_002 : SharedStateHeld_Sly002;
+    requirement r_req_sly_003 : ImmutableVersions_Sly003;
+    requirement r_req_sly_004 : SchemaValidationOnWrite_Sly004;
+    requirement r_req_sly_005 : Accounts_Sly005;
+    requirement r_req_sly_006 : ChangeNotification_Sly006;
+    requirement r_req_sly_007 : ReversibleMoveFromFiles_Sly007;
+    requirement r_req_sly_008 : BackupAndRestore_Sly008;
+    requirement r_req_sly_009 : LibraryExportAndSeed_Sly009;
+    requirement r_req_sly_010 : ReachableOnlyInsideTheHostNetwork_Sly010;
+    requirement r_req_sly_011 : OwnContainer_Sly011;
+    requirement r_req_sly_012 : RealiseIF102_Sly012;
+    requirement r_req_gtb_001 : SharedStateHeld_Gtb001;
+    requirement r_req_gtb_002 : SchemaValidationOnWrite_Gtb002;
+    requirement r_req_gtb_003 : ContextGraphsStored_Gtb003;
+    requirement r_req_gtb_004 : ExampleWorkflowsAsSeedData_Gtb004;
+    requirement r_req_rtb_001 : SharedStateHeld_Rtb001;
+    requirement r_req_rtb_002 : RunResults_Rtb002;
+    requirement r_req_rtb_003 : VotesStored_Rtb003;
+    requirement r_req_rtb_004 : MemoryRecords_Rtb004;
+    requirement r_req_rtb_005 : TasksAndMemosExact_Rtb005;
+    requirement r_req_rtb_006 : SourceTrustStored_Rtb006;
+    requirement r_req_db_001 : PostgreSQLInAContainer_Db001;
+    requirement r_req_db_002 : SharedStateHeld_Db002;
+    requirement r_req_db_003 : ImmutableVersions_Db003;
+    requirement r_req_db_004 : SchemaValidationOnWrite_Db004;
+    requirement r_req_db_005 : Accounts_Db005;
+    requirement r_req_db_006 : ChangeNotification_Db006;
+    requirement r_req_db_007 : ReversibleMoveFromFiles_Db007;
+    requirement r_req_db_008 : BackupAndRestore_Db008;
+    requirement r_req_db_009 : LibraryExportAndSeed_Db009;
+    requirement r_req_db_010 : RunResults_Db010;
+    requirement r_req_db_011 : ContextGraphsStored_Db011;
+    requirement r_req_db_012 : VotesStored_Db012;
+    requirement r_req_db_013 : MemoryRecords_Db013;
+    requirement r_req_db_014 : TasksAndMemosExact_Db014;
+    requirement r_req_db_015 : SourceTrustStored_Db015;
+    requirement r_req_db_016 : ReachableOnlyInsideTheHostNetwork_Db016;
+    requirement r_req_db_017 : OwnContainer_Db017;
+    requirement r_req_db_018 : ExampleWorkflowsAsSeedData_Db018;
+    requirement r_req_evl_001 : HarnessWithRepeats_Evl001;
+    requirement r_req_evl_002 : DecisionsOnHeldOutCases_Evl002;
+    requirement r_req_evl_003 : JudgeCalibration_Evl003;
+    requirement r_req_evl_004 : VersionsRecordedPerRun_Evl004;
+    requirement r_req_evl_005 : BaselinePerShippedWorkflow_Evl005;
+    requirement r_req_evl_006 : SkillPathDocumented_Evl006;
+    requirement r_req_evl_007 : MeasureLatencyAndFrameRate_Evl007;
+    requirement r_req_evl_008 : VariantsComparedOnEqualCases_Evl008;
+    requirement r_req_evl_009 : BenchmarksOfTheExampleWorkflows_Evl009;
+    requirement r_req_evl_010 : ExampleWorkflowsAsProofOfConcept_Evl010;
+    requirement r_req_evl_011 : ReachThePlatformOnlyThroughIF105_Evl011;
+    requirement r_req_opr_001 : OneFileOneCommand_Opr001;
+    requirement r_req_opr_002 : FirstAccountAtInstallation_Opr002;
+    requirement r_req_opr_003 : MissingOptionsReported_Opr003;
+    requirement r_req_opr_004 : OrderlyShutdown_Opr004;
+    requirement r_req_opr_005 : BackupAndRestoreOfAllData_Opr005;
+    requirement r_req_opr_006 : Runbook_Opr006;
+    requirement r_req_opr_007 : ComposeStack_Opr007;
+    requirement r_req_opr_008 : PrivateAccessOnly_Opr008;
+    requirement r_req_opr_009 : FreeAndOpen_Opr009;
+    requirement r_req_opr_010 : HardwareConfiguration_Opr010;
+    requirement r_req_ops_001 : HarnessWithRepeats_Ops001;
+    requirement r_req_ops_002 : DecisionsOnHeldOutCases_Ops002;
+    requirement r_req_ops_003 : JudgeCalibration_Ops003;
+    requirement r_req_ops_004 : VersionsRecordedPerRun_Ops004;
+    requirement r_req_ops_005 : BaselinePerShippedWorkflow_Ops005;
+    requirement r_req_ops_006 : SkillPathDocumented_Ops006;
+    requirement r_req_ops_007 : OneFileOneCommand_Ops007;
+    requirement r_req_ops_008 : FirstAccountAtInstallation_Ops008;
+    requirement r_req_ops_009 : MissingOptionsReported_Ops009;
+    requirement r_req_ops_010 : OrderlyShutdown_Ops010;
+    requirement r_req_ops_011 : BackupAndRestoreOfAllData_Ops011;
+    requirement r_req_ops_012 : Runbook_Ops012;
+    requirement r_req_ops_013 : ComposeStack_Ops013;
+    requirement r_req_ops_014 : PrivateAccessOnly_Ops014;
+    requirement r_req_ops_015 : FreeAndOpen_Ops015;
+    requirement r_req_ops_016 : HardwareConfiguration_Ops016;
+    requirement r_req_ops_017 : MeasureLatencyAndFrameRate_Ops017;
+    requirement r_req_ops_018 : VariantsComparedOnEqualCases_Ops018;
+    requirement r_req_ops_019 : BenchmarksOfTheExampleWorkflows_Ops019;
+    requirement r_req_ops_020 : ExampleWorkflowsAsProofOfConcept_Ops020;
+    requirement r_req_ga_001 : GraphsAsNodesAndEdges_Ga001;
+    requirement r_req_ga_002 : EditAsJSON_Ga002;
+    requirement r_req_ga_003 : GraphRulesBeforeSaving_Ga003;
+    requirement r_req_ga_004 : VersionsHistoryAndDiff_Ga004;
+    requirement r_req_ga_005 : WorkThroughTheBackendAPI_Ga005;
+    requirement r_req_ga_006 : ContextGraphsEdited_Ga006;
+    requirement r_req_ga_007 : LoginRequired_Ga007;
+    requirement r_req_ga_008 : LibraryExportAndSeed_Ga008;
+    requirement r_req_ga_009 : PlainStackWithAVendoredLibrary_Ga009;
+    requirement r_req_ga_010 : NoOutsideRequest_Ga010;
+    requirement r_req_ga_011 : OwnContainer_Ga011;
+
+    satisfy r_req_clv_001 by mia.frontEnd;
+    satisfy r_req_clv_002 by mia.frontEnd;
+    satisfy r_req_clv_003 by mia.frontEnd;
+    satisfy r_req_clv_004 by mia.frontEnd;
+    satisfy r_req_clv_005 by mia.frontEnd;
+    satisfy r_req_clv_006 by mia.frontEnd;
+    satisfy r_req_clv_007 by mia.frontEnd;
+    satisfy r_req_clv_008 by mia.frontEnd;
+    satisfy r_req_clv_009 by mia.frontEnd;
+    satisfy r_req_clv_010 by mia.frontEnd;
+    satisfy r_req_clv_011 by mia.frontEnd;
+    satisfy r_req_clv_012 by mia.frontEnd;
+    satisfy r_req_clv_013 by mia.frontEnd;
+    satisfy r_req_clv_014 by mia.frontEnd;
+    satisfy r_req_clv_015 by mia.frontEnd;
+    satisfy r_req_clv_016 by mia.frontEnd;
+    satisfy r_req_clv_017 by mia.frontEnd;
+    satisfy r_req_clv_018 by mia.frontEnd;
+    satisfy r_req_clv_019 by mia.frontEnd;
+    satisfy r_req_clv_020 by mia.frontEnd;
+    satisfy r_req_clv_021 by mia.frontEnd;
+    satisfy r_req_chv_001 by mia.frontEnd;
+    satisfy r_req_chv_002 by mia.frontEnd;
+    satisfy r_req_chv_003 by mia.frontEnd;
+    satisfy r_req_chv_004 by mia.frontEnd;
+    satisfy r_req_chv_005 by mia.frontEnd;
+    satisfy r_req_chv_006 by mia.frontEnd;
+    satisfy r_req_chv_007 by mia.frontEnd;
+    satisfy r_req_chv_008 by mia.frontEnd;
+    satisfy r_req_chv_009 by mia.frontEnd;
+    satisfy r_req_chv_010 by mia.frontEnd;
+    satisfy r_req_chv_011 by mia.frontEnd;
+    satisfy r_req_chv_012 by mia.frontEnd;
+    satisfy r_req_chv_013 by mia.frontEnd;
+    satisfy r_req_chv_014 by mia.frontEnd;
+    satisfy r_req_vpb_001 by mia.frontEnd;
+    satisfy r_req_vpb_002 by mia.frontEnd;
+    satisfy r_req_vpb_003 by mia.frontEnd;
+    satisfy r_req_vpb_004 by mia.frontEnd;
+    satisfy r_req_vpb_005 by mia.frontEnd;
+    satisfy r_req_fe_001 by mia.frontEnd;
+    satisfy r_req_fe_002 by mia.frontEnd;
+    satisfy r_req_fe_003 by mia.frontEnd;
+    satisfy r_req_fe_004 by mia.frontEnd;
+    satisfy r_req_fe_005 by mia.frontEnd;
+    satisfy r_req_fe_006 by mia.frontEnd;
+    satisfy r_req_fe_007 by mia.frontEnd;
+    satisfy r_req_fe_008 by mia.frontEnd;
+    satisfy r_req_fe_009 by mia.frontEnd;
+    satisfy r_req_fe_010 by mia.frontEnd;
+    satisfy r_req_fe_011 by mia.frontEnd;
+    satisfy r_req_fe_012 by mia.frontEnd;
+    satisfy r_req_fe_013 by mia.frontEnd;
+    satisfy r_req_fe_014 by mia.frontEnd;
+    satisfy r_req_fe_015 by mia.frontEnd;
+    satisfy r_req_fe_016 by mia.frontEnd;
+    satisfy r_req_fe_017 by mia.frontEnd;
+    satisfy r_req_fe_018 by mia.frontEnd;
+    satisfy r_req_fe_019 by mia.frontEnd;
+    satisfy r_req_fe_020 by mia.frontEnd;
+    satisfy r_req_fe_021 by mia.frontEnd;
+    satisfy r_req_fe_022 by mia.frontEnd;
+    satisfy r_req_fe_023 by mia.frontEnd;
+    satisfy r_req_fe_024 by mia.frontEnd;
+    satisfy r_req_fe_025 by mia.frontEnd;
+    satisfy r_req_fe_026 by mia.frontEnd;
+    satisfy r_req_fe_027 by mia.frontEnd;
+    satisfy r_req_fe_028 by mia.frontEnd;
+    satisfy r_req_fe_029 by mia.frontEnd;
+    satisfy r_req_fe_030 by mia.frontEnd;
+    satisfy r_req_api_001 by mia.webApp;
+    satisfy r_req_api_002 by mia.webApp;
+    satisfy r_req_api_003 by mia.webApp;
+    satisfy r_req_api_004 by mia.webApp;
+    satisfy r_req_api_005 by mia.webApp;
+    satisfy r_req_api_006 by mia.webApp;
+    satisfy r_req_api_007 by mia.webApp;
+    satisfy r_req_api_008 by mia.webApp;
+    satisfy r_req_api_009 by mia.webApp;
+    satisfy r_req_api_010 by mia.webApp;
+    satisfy r_req_api_011 by mia.webApp;
+    satisfy r_req_api_012 by mia.webApp;
+    satisfy r_req_api_013 by mia.webApp;
+    satisfy r_req_api_014 by mia.webApp;
+    satisfy r_req_api_015 by mia.webApp;
+    satisfy r_req_api_016 by mia.webApp;
+    satisfy r_req_cha_001 by mia.conversation;
+    satisfy r_req_cha_002 by mia.conversation;
+    satisfy r_req_cha_003 by mia.conversation;
+    satisfy r_req_cha_004 by mia.conversation;
+    satisfy r_req_cha_005 by mia.conversation;
+    satisfy r_req_cha_006 by mia.conversation;
+    satisfy r_req_cha_007 by mia.conversation;
+    satisfy r_req_cha_008 by mia.conversation;
+    satisfy r_req_cha_009 by mia.conversation;
+    satisfy r_req_cha_010 by mia.conversation;
+    satisfy r_req_cha_011 by mia.conversation;
+    satisfy r_req_cha_012 by mia.conversation;
+    satisfy r_req_cha_013 by mia.conversation;
+    satisfy r_req_cha_014 by mia.conversation;
+    satisfy r_req_cha_015 by mia.conversation;
+    satisfy r_req_cha_016 by mia.conversation;
+    satisfy r_req_cha_017 by mia.conversation;
+    satisfy r_req_cha_018 by mia.conversation;
+    satisfy r_req_cha_019 by mia.conversation;
+    satisfy r_req_cha_020 by mia.conversation;
+    satisfy r_req_wfm_001 by mia.taskRuntime;
+    satisfy r_req_wfm_002 by mia.taskRuntime;
+    satisfy r_req_wfm_003 by mia.taskRuntime;
+    satisfy r_req_wfm_004 by mia.taskRuntime;
+    satisfy r_req_wfm_005 by mia.taskRuntime;
+    satisfy r_req_wfm_006 by mia.taskRuntime;
+    satisfy r_req_wfm_007 by mia.taskRuntime;
+    satisfy r_req_wfm_008 by mia.taskRuntime;
+    satisfy r_req_wfm_009 by mia.taskRuntime;
+    satisfy r_req_wfm_010 by mia.taskRuntime;
+    satisfy r_req_wfm_011 by mia.taskRuntime;
+    satisfy r_req_wfm_012 by mia.taskRuntime;
+    satisfy r_req_wfm_013 by mia.taskRuntime;
+    satisfy r_req_wfm_014 by mia.taskRuntime;
+    satisfy r_req_wfm_015 by mia.taskRuntime;
+    satisfy r_req_wfm_016 by mia.taskRuntime;
+    satisfy r_req_wfm_017 by mia.taskRuntime;
+    satisfy r_req_wfm_018 by mia.taskRuntime;
+    satisfy r_req_wfm_019 by mia.taskRuntime;
+    satisfy r_req_wfm_020 by mia.taskRuntime;
+    satisfy r_req_wfm_021 by mia.taskRuntime;
+    satisfy r_req_wfm_022 by mia.taskRuntime;
+    satisfy r_req_wfm_023 by mia.taskRuntime;
+    satisfy r_req_wfm_024 by mia.taskRuntime;
+    satisfy r_req_wfm_025 by mia.taskRuntime;
+    satisfy r_req_wfm_026 by mia.taskRuntime;
+    satisfy r_req_run_001 by mia.taskRuntime;
+    satisfy r_req_run_002 by mia.taskRuntime;
+    satisfy r_req_run_003 by mia.taskRuntime;
+    satisfy r_req_run_004 by mia.taskRuntime;
+    satisfy r_req_run_005 by mia.taskRuntime;
+    satisfy r_req_run_006 by mia.taskRuntime;
+    satisfy r_req_run_007 by mia.taskRuntime;
+    satisfy r_req_run_008 by mia.taskRuntime;
+    satisfy r_req_run_009 by mia.taskRuntime;
+    satisfy r_req_run_010 by mia.taskRuntime;
+    satisfy r_req_run_011 by mia.taskRuntime;
+    satisfy r_req_run_012 by mia.taskRuntime;
+    satisfy r_req_run_013 by mia.taskRuntime;
+    satisfy r_req_run_014 by mia.taskRuntime;
+    satisfy r_req_run_015 by mia.taskRuntime;
+    satisfy r_req_tls_001 by mia.verifier;
+    satisfy r_req_tls_002 by mia.verifier;
+    satisfy r_req_tls_003 by mia.verifier;
+    satisfy r_req_tls_004 by mia.verifier;
+    satisfy r_req_tls_005 by mia.verifier;
+    satisfy r_req_tls_006 by mia.verifier;
+    satisfy r_req_tls_007 by mia.verifier;
+    satisfy r_req_tls_008 by mia.verifier;
+    satisfy r_req_log_001 by mia.observability;
+    satisfy r_req_log_002 by mia.observability;
+    satisfy r_req_log_003 by mia.observability;
+    satisfy r_req_log_004 by mia.observability;
+    satisfy r_req_log_005 by mia.observability;
+    satisfy r_req_wfx_001 by mia.taskRuntime;
+    satisfy r_req_wfx_002 by mia.taskRuntime;
+    satisfy r_req_wfx_003 by mia.taskRuntime;
+    satisfy r_req_wfx_004 by mia.taskRuntime;
+    satisfy r_req_wfx_005 by mia.taskRuntime;
+    satisfy r_req_wfx_006 by mia.taskRuntime;
+    satisfy r_req_wfx_007 by mia.taskRuntime;
+    satisfy r_req_wfx_008 by mia.taskRuntime;
+    satisfy r_req_wfx_009 by mia.taskRuntime;
+    satisfy r_req_wfx_010 by mia.taskRuntime;
+    satisfy r_req_wfx_011 by mia.taskRuntime;
+    satisfy r_req_wfx_012 by mia.taskRuntime;
+    satisfy r_req_wfx_013 by mia.taskRuntime;
+    satisfy r_req_wfx_014 by mia.taskRuntime;
+    satisfy r_req_wfx_015 by mia.taskRuntime;
+    satisfy r_req_wfx_016 by mia.taskRuntime;
+    satisfy r_req_wfx_017 by mia.taskRuntime;
+    satisfy r_req_wfx_018 by mia.taskRuntime;
+    satisfy r_req_wfx_019 by mia.taskRuntime;
+    satisfy r_req_wfx_020 by mia.taskRuntime;
+    satisfy r_req_wfx_021 by mia.taskRuntime;
+    satisfy r_req_wfx_022 by mia.taskRuntime;
+    satisfy r_req_wfx_023 by mia.taskRuntime;
+    satisfy r_req_wfx_024 by mia.taskRuntime;
+    satisfy r_req_voi_001 by mia.voice;
+    satisfy r_req_voi_002 by mia.voice;
+    satisfy r_req_voi_003 by mia.voice;
+    satisfy r_req_voi_004 by mia.voice;
+    satisfy r_req_be_001 by mia.webApp;
+    satisfy r_req_be_002 by mia.webApp;
+    satisfy r_req_be_003 by mia.webApp;
+    satisfy r_req_be_004 by mia.webApp;
+    satisfy r_req_be_005 by mia.webApp;
+    satisfy r_req_be_006 by mia.webApp;
+    satisfy r_req_be_007 by mia.webApp;
+    satisfy r_req_be_008 by mia.webApp;
+    satisfy r_req_be_009 by mia.webApp;
+    satisfy r_req_be_010 by mia.webApp;
+    satisfy r_req_be_011 by mia.webApp;
+    satisfy r_req_be_012 by mia.webApp;
+    satisfy r_req_be_013 by mia.webApp;
+    satisfy r_req_be_014 by mia.webApp;
+    satisfy r_req_be_015 by mia.webApp;
+    satisfy r_req_be_016 by mia.webApp;
+    satisfy r_req_be_017 by mia.webApp;
+    satisfy r_req_be_018 by mia.webApp;
+    satisfy r_req_be_019 by mia.webApp;
+    satisfy r_req_be_020 by mia.webApp;
+    satisfy r_req_be_021 by mia.webApp;
+    satisfy r_req_be_022 by mia.webApp;
+    satisfy r_req_be_023 by mia.webApp;
+    satisfy r_req_be_024 by mia.webApp;
+    satisfy r_req_be_025 by mia.webApp;
+    satisfy r_req_be_026 by mia.webApp;
+    satisfy r_req_be_027 by mia.webApp;
+    satisfy r_req_be_028 by mia.webApp;
+    satisfy r_req_be_029 by mia.webApp;
+    satisfy r_req_be_030 by mia.webApp;
+    satisfy r_req_be_031 by mia.webApp;
+    satisfy r_req_be_032 by mia.webApp;
+    satisfy r_req_be_033 by mia.webApp;
+    satisfy r_req_be_034 by mia.webApp;
+    satisfy r_req_be_035 by mia.webApp;
+    satisfy r_req_be_036 by mia.webApp;
+    satisfy r_req_be_037 by mia.webApp;
+    satisfy r_req_be_038 by mia.webApp;
+    satisfy r_req_be_039 by mia.webApp;
+    satisfy r_req_be_040 by mia.webApp;
+    satisfy r_req_be_041 by mia.webApp;
+    satisfy r_req_be_042 by mia.webApp;
+    satisfy r_req_be_043 by mia.webApp;
+    satisfy r_req_be_044 by mia.webApp;
+    satisfy r_req_be_045 by mia.webApp;
+    satisfy r_req_be_046 by mia.webApp;
+    satisfy r_req_be_047 by mia.webApp;
+    satisfy r_req_be_048 by mia.webApp;
+    satisfy r_req_be_049 by mia.webApp;
+    satisfy r_req_be_050 by mia.webApp;
+    satisfy r_req_be_051 by mia.webApp;
+    satisfy r_req_be_052 by mia.webApp;
+    satisfy r_req_be_053 by mia.webApp;
+    satisfy r_req_be_054 by mia.webApp;
+    satisfy r_req_be_055 by mia.webApp;
+    satisfy r_req_be_056 by mia.webApp;
+    satisfy r_req_be_057 by mia.webApp;
+    satisfy r_req_be_058 by mia.webApp;
+    satisfy r_req_be_059 by mia.webApp;
+    satisfy r_req_be_060 by mia.webApp;
+    satisfy r_req_be_061 by mia.webApp;
+    satisfy r_req_be_062 by mia.webApp;
+    satisfy r_req_be_063 by mia.webApp;
+    satisfy r_req_be_064 by mia.webApp;
+    satisfy r_req_be_065 by mia.webApp;
+    satisfy r_req_be_066 by mia.webApp;
+    satisfy r_req_be_067 by mia.webApp;
+    satisfy r_req_be_068 by mia.webApp;
+    satisfy r_req_be_069 by mia.webApp;
+    satisfy r_req_be_070 by mia.webApp;
+    satisfy r_req_be_071 by mia.webApp;
+    satisfy r_req_be_072 by mia.webApp;
+    satisfy r_req_be_073 by mia.webApp;
+    satisfy r_req_be_074 by mia.webApp;
+    satisfy r_req_be_075 by mia.webApp;
+    satisfy r_req_be_076 by mia.webApp;
+    satisfy r_req_sly_001 by mia.persistence;
+    satisfy r_req_sly_002 by mia.persistence;
+    satisfy r_req_sly_003 by mia.persistence;
+    satisfy r_req_sly_004 by mia.persistence;
+    satisfy r_req_sly_005 by mia.persistence;
+    satisfy r_req_sly_006 by mia.persistence;
+    satisfy r_req_sly_007 by mia.persistence;
+    satisfy r_req_sly_008 by mia.persistence;
+    satisfy r_req_sly_009 by mia.persistence;
+    satisfy r_req_sly_010 by mia.persistence;
+    satisfy r_req_sly_011 by mia.persistence;
+    satisfy r_req_sly_012 by mia.persistence;
+    satisfy r_req_gtb_001 by mia.persistence;
+    satisfy r_req_gtb_002 by mia.persistence;
+    satisfy r_req_gtb_003 by mia.persistence;
+    satisfy r_req_gtb_004 by mia.persistence;
+    satisfy r_req_rtb_001 by mia.persistence;
+    satisfy r_req_rtb_002 by mia.persistence;
+    satisfy r_req_rtb_003 by mia.persistence;
+    satisfy r_req_rtb_004 by mia.persistence;
+    satisfy r_req_rtb_005 by mia.persistence;
+    satisfy r_req_rtb_006 by mia.persistence;
+    satisfy r_req_db_001 by mia.persistence;
+    satisfy r_req_db_002 by mia.persistence;
+    satisfy r_req_db_003 by mia.persistence;
+    satisfy r_req_db_004 by mia.persistence;
+    satisfy r_req_db_005 by mia.persistence;
+    satisfy r_req_db_006 by mia.persistence;
+    satisfy r_req_db_007 by mia.persistence;
+    satisfy r_req_db_008 by mia.persistence;
+    satisfy r_req_db_009 by mia.persistence;
+    satisfy r_req_db_010 by mia.persistence;
+    satisfy r_req_db_011 by mia.persistence;
+    satisfy r_req_db_012 by mia.persistence;
+    satisfy r_req_db_013 by mia.persistence;
+    satisfy r_req_db_014 by mia.persistence;
+    satisfy r_req_db_015 by mia.persistence;
+    satisfy r_req_db_016 by mia.persistence;
+    satisfy r_req_db_017 by mia.persistence;
+    satisfy r_req_db_018 by mia.persistence;
+    satisfy r_req_evl_001 by mia.evaluation;
+    satisfy r_req_evl_002 by mia.evaluation;
+    satisfy r_req_evl_003 by mia.evaluation;
+    satisfy r_req_evl_004 by mia.evaluation;
+    satisfy r_req_evl_005 by mia.evaluation;
+    satisfy r_req_evl_006 by mia.evaluation;
+    satisfy r_req_evl_007 by mia.evaluation;
+    satisfy r_req_evl_008 by mia.evaluation;
+    satisfy r_req_evl_009 by mia.evaluation;
+    satisfy r_req_evl_010 by mia.evaluation;
+    satisfy r_req_evl_011 by mia.evaluation;
+    satisfy r_req_opr_001 by mia.operation;
+    satisfy r_req_opr_002 by mia.operation;
+    satisfy r_req_opr_003 by mia.operation;
+    satisfy r_req_opr_004 by mia.operation;
+    satisfy r_req_opr_005 by mia.operation;
+    satisfy r_req_opr_006 by mia.operation;
+    satisfy r_req_opr_007 by mia.operation;
+    satisfy r_req_opr_008 by mia.operation;
+    satisfy r_req_opr_009 by mia.operation;
+    satisfy r_req_opr_010 by mia.operation;
+    satisfy r_req_ops_001 by mia.evaluation;
+    satisfy r_req_ops_002 by mia.evaluation;
+    satisfy r_req_ops_003 by mia.evaluation;
+    satisfy r_req_ops_004 by mia.evaluation;
+    satisfy r_req_ops_005 by mia.evaluation;
+    satisfy r_req_ops_006 by mia.evaluation;
+    satisfy r_req_ops_007 by mia.evaluation;
+    satisfy r_req_ops_008 by mia.evaluation;
+    satisfy r_req_ops_009 by mia.evaluation;
+    satisfy r_req_ops_010 by mia.evaluation;
+    satisfy r_req_ops_011 by mia.evaluation;
+    satisfy r_req_ops_012 by mia.evaluation;
+    satisfy r_req_ops_013 by mia.evaluation;
+    satisfy r_req_ops_014 by mia.evaluation;
+    satisfy r_req_ops_015 by mia.evaluation;
+    satisfy r_req_ops_016 by mia.evaluation;
+    satisfy r_req_ops_017 by mia.evaluation;
+    satisfy r_req_ops_018 by mia.evaluation;
+    satisfy r_req_ops_019 by mia.evaluation;
+    satisfy r_req_ops_020 by mia.evaluation;
+    satisfy r_req_ga_001 by mia.graphApp;
+    satisfy r_req_ga_002 by mia.graphApp;
+    satisfy r_req_ga_003 by mia.graphApp;
+    satisfy r_req_ga_004 by mia.graphApp;
+    satisfy r_req_ga_005 by mia.graphApp;
+    satisfy r_req_ga_006 by mia.graphApp;
+    satisfy r_req_ga_007 by mia.graphApp;
+    satisfy r_req_ga_008 by mia.graphApp;
+    satisfy r_req_ga_009 by mia.graphApp;
+    satisfy r_req_ga_010 by mia.graphApp;
+    satisfy r_req_ga_011 by mia.graphApp;
+    allocate r_req_clv_001 to mia.frontEnd;
+    allocate r_req_clv_002 to mia.frontEnd;
+    allocate r_req_clv_003 to mia.frontEnd;
+    allocate r_req_clv_004 to mia.frontEnd;
+    allocate r_req_clv_005 to mia.frontEnd;
+    allocate r_req_clv_006 to mia.frontEnd;
+    allocate r_req_clv_007 to mia.frontEnd;
+    allocate r_req_clv_008 to mia.frontEnd;
+    allocate r_req_clv_009 to mia.frontEnd;
+    allocate r_req_clv_010 to mia.frontEnd;
+    allocate r_req_clv_011 to mia.frontEnd;
+    allocate r_req_clv_012 to mia.frontEnd;
+    allocate r_req_clv_013 to mia.frontEnd;
+    allocate r_req_clv_014 to mia.frontEnd;
+    allocate r_req_clv_015 to mia.frontEnd;
+    allocate r_req_clv_016 to mia.frontEnd;
+    allocate r_req_clv_017 to mia.frontEnd;
+    allocate r_req_clv_018 to mia.frontEnd;
+    allocate r_req_clv_019 to mia.frontEnd;
+    allocate r_req_clv_020 to mia.frontEnd;
+    allocate r_req_clv_021 to mia.frontEnd;
+    allocate r_req_chv_001 to mia.frontEnd;
+    allocate r_req_chv_002 to mia.frontEnd;
+    allocate r_req_chv_003 to mia.frontEnd;
+    allocate r_req_chv_004 to mia.frontEnd;
+    allocate r_req_chv_005 to mia.frontEnd;
+    allocate r_req_chv_006 to mia.frontEnd;
+    allocate r_req_chv_007 to mia.frontEnd;
+    allocate r_req_chv_008 to mia.frontEnd;
+    allocate r_req_chv_009 to mia.frontEnd;
+    allocate r_req_chv_010 to mia.frontEnd;
+    allocate r_req_chv_011 to mia.frontEnd;
+    allocate r_req_chv_012 to mia.frontEnd;
+    allocate r_req_chv_013 to mia.frontEnd;
+    allocate r_req_chv_014 to mia.frontEnd;
+    allocate r_req_vpb_001 to mia.frontEnd;
+    allocate r_req_vpb_002 to mia.frontEnd;
+    allocate r_req_vpb_003 to mia.frontEnd;
+    allocate r_req_vpb_004 to mia.frontEnd;
+    allocate r_req_vpb_005 to mia.frontEnd;
+    allocate r_req_fe_001 to mia.frontEnd;
+    allocate r_req_fe_002 to mia.frontEnd;
+    allocate r_req_fe_003 to mia.frontEnd;
+    allocate r_req_fe_004 to mia.frontEnd;
+    allocate r_req_fe_005 to mia.frontEnd;
+    allocate r_req_fe_006 to mia.frontEnd;
+    allocate r_req_fe_007 to mia.frontEnd;
+    allocate r_req_fe_008 to mia.frontEnd;
+    allocate r_req_fe_009 to mia.frontEnd;
+    allocate r_req_fe_010 to mia.frontEnd;
+    allocate r_req_fe_011 to mia.frontEnd;
+    allocate r_req_fe_012 to mia.frontEnd;
+    allocate r_req_fe_013 to mia.frontEnd;
+    allocate r_req_fe_014 to mia.frontEnd;
+    allocate r_req_fe_015 to mia.frontEnd;
+    allocate r_req_fe_016 to mia.frontEnd;
+    allocate r_req_fe_017 to mia.frontEnd;
+    allocate r_req_fe_018 to mia.frontEnd;
+    allocate r_req_fe_019 to mia.frontEnd;
+    allocate r_req_fe_020 to mia.frontEnd;
+    allocate r_req_fe_021 to mia.frontEnd;
+    allocate r_req_fe_022 to mia.frontEnd;
+    allocate r_req_fe_023 to mia.frontEnd;
+    allocate r_req_fe_024 to mia.frontEnd;
+    allocate r_req_fe_025 to mia.frontEnd;
+    allocate r_req_fe_026 to mia.frontEnd;
+    allocate r_req_fe_027 to mia.frontEnd;
+    allocate r_req_fe_028 to mia.frontEnd;
+    allocate r_req_fe_029 to mia.frontEnd;
+    allocate r_req_fe_030 to mia.frontEnd;
+    allocate r_req_api_001 to mia.webApp;
+    allocate r_req_api_002 to mia.webApp;
+    allocate r_req_api_003 to mia.webApp;
+    allocate r_req_api_004 to mia.webApp;
+    allocate r_req_api_005 to mia.webApp;
+    allocate r_req_api_006 to mia.webApp;
+    allocate r_req_api_007 to mia.webApp;
+    allocate r_req_api_008 to mia.webApp;
+    allocate r_req_api_009 to mia.webApp;
+    allocate r_req_api_010 to mia.webApp;
+    allocate r_req_api_011 to mia.webApp;
+    allocate r_req_api_012 to mia.webApp;
+    allocate r_req_api_013 to mia.webApp;
+    allocate r_req_api_014 to mia.webApp;
+    allocate r_req_api_015 to mia.webApp;
+    allocate r_req_api_016 to mia.webApp;
+    allocate r_req_cha_001 to mia.conversation;
+    allocate r_req_cha_002 to mia.conversation;
+    allocate r_req_cha_003 to mia.conversation;
+    allocate r_req_cha_004 to mia.conversation;
+    allocate r_req_cha_005 to mia.conversation;
+    allocate r_req_cha_006 to mia.conversation;
+    allocate r_req_cha_007 to mia.conversation;
+    allocate r_req_cha_008 to mia.conversation;
+    allocate r_req_cha_009 to mia.conversation;
+    allocate r_req_cha_010 to mia.conversation;
+    allocate r_req_cha_011 to mia.conversation;
+    allocate r_req_cha_012 to mia.conversation;
+    allocate r_req_cha_013 to mia.conversation;
+    allocate r_req_cha_014 to mia.conversation;
+    allocate r_req_cha_015 to mia.conversation;
+    allocate r_req_cha_016 to mia.conversation;
+    allocate r_req_cha_017 to mia.conversation;
+    allocate r_req_cha_018 to mia.conversation;
+    allocate r_req_cha_019 to mia.conversation;
+    allocate r_req_cha_020 to mia.conversation;
+    allocate r_req_wfm_001 to mia.taskRuntime;
+    allocate r_req_wfm_002 to mia.taskRuntime;
+    allocate r_req_wfm_003 to mia.taskRuntime;
+    allocate r_req_wfm_004 to mia.taskRuntime;
+    allocate r_req_wfm_005 to mia.taskRuntime;
+    allocate r_req_wfm_006 to mia.taskRuntime;
+    allocate r_req_wfm_007 to mia.taskRuntime;
+    allocate r_req_wfm_008 to mia.taskRuntime;
+    allocate r_req_wfm_009 to mia.taskRuntime;
+    allocate r_req_wfm_010 to mia.taskRuntime;
+    allocate r_req_wfm_011 to mia.taskRuntime;
+    allocate r_req_wfm_012 to mia.taskRuntime;
+    allocate r_req_wfm_013 to mia.taskRuntime;
+    allocate r_req_wfm_014 to mia.taskRuntime;
+    allocate r_req_wfm_015 to mia.taskRuntime;
+    allocate r_req_wfm_016 to mia.taskRuntime;
+    allocate r_req_wfm_017 to mia.taskRuntime;
+    allocate r_req_wfm_018 to mia.taskRuntime;
+    allocate r_req_wfm_019 to mia.taskRuntime;
+    allocate r_req_wfm_020 to mia.taskRuntime;
+    allocate r_req_wfm_021 to mia.taskRuntime;
+    allocate r_req_wfm_022 to mia.taskRuntime;
+    allocate r_req_wfm_023 to mia.taskRuntime;
+    allocate r_req_wfm_024 to mia.taskRuntime;
+    allocate r_req_wfm_025 to mia.taskRuntime;
+    allocate r_req_wfm_026 to mia.taskRuntime;
+    allocate r_req_run_001 to mia.taskRuntime;
+    allocate r_req_run_002 to mia.taskRuntime;
+    allocate r_req_run_003 to mia.taskRuntime;
+    allocate r_req_run_004 to mia.taskRuntime;
+    allocate r_req_run_005 to mia.taskRuntime;
+    allocate r_req_run_006 to mia.taskRuntime;
+    allocate r_req_run_007 to mia.taskRuntime;
+    allocate r_req_run_008 to mia.taskRuntime;
+    allocate r_req_run_009 to mia.taskRuntime;
+    allocate r_req_run_010 to mia.taskRuntime;
+    allocate r_req_run_011 to mia.taskRuntime;
+    allocate r_req_run_012 to mia.taskRuntime;
+    allocate r_req_run_013 to mia.taskRuntime;
+    allocate r_req_run_014 to mia.taskRuntime;
+    allocate r_req_run_015 to mia.taskRuntime;
+    allocate r_req_tls_001 to mia.verifier;
+    allocate r_req_tls_002 to mia.verifier;
+    allocate r_req_tls_003 to mia.verifier;
+    allocate r_req_tls_004 to mia.verifier;
+    allocate r_req_tls_005 to mia.verifier;
+    allocate r_req_tls_006 to mia.verifier;
+    allocate r_req_tls_007 to mia.verifier;
+    allocate r_req_tls_008 to mia.verifier;
+    allocate r_req_log_001 to mia.observability;
+    allocate r_req_log_002 to mia.observability;
+    allocate r_req_log_003 to mia.observability;
+    allocate r_req_log_004 to mia.observability;
+    allocate r_req_log_005 to mia.observability;
+    allocate r_req_wfx_001 to mia.taskRuntime;
+    allocate r_req_wfx_002 to mia.taskRuntime;
+    allocate r_req_wfx_003 to mia.taskRuntime;
+    allocate r_req_wfx_004 to mia.taskRuntime;
+    allocate r_req_wfx_005 to mia.taskRuntime;
+    allocate r_req_wfx_006 to mia.taskRuntime;
+    allocate r_req_wfx_007 to mia.taskRuntime;
+    allocate r_req_wfx_008 to mia.taskRuntime;
+    allocate r_req_wfx_009 to mia.taskRuntime;
+    allocate r_req_wfx_010 to mia.taskRuntime;
+    allocate r_req_wfx_011 to mia.taskRuntime;
+    allocate r_req_wfx_012 to mia.taskRuntime;
+    allocate r_req_wfx_013 to mia.taskRuntime;
+    allocate r_req_wfx_014 to mia.taskRuntime;
+    allocate r_req_wfx_015 to mia.taskRuntime;
+    allocate r_req_wfx_016 to mia.taskRuntime;
+    allocate r_req_wfx_017 to mia.taskRuntime;
+    allocate r_req_wfx_018 to mia.taskRuntime;
+    allocate r_req_wfx_019 to mia.taskRuntime;
+    allocate r_req_wfx_020 to mia.taskRuntime;
+    allocate r_req_wfx_021 to mia.taskRuntime;
+    allocate r_req_wfx_022 to mia.taskRuntime;
+    allocate r_req_wfx_023 to mia.taskRuntime;
+    allocate r_req_wfx_024 to mia.taskRuntime;
+    allocate r_req_voi_001 to mia.voice;
+    allocate r_req_voi_002 to mia.voice;
+    allocate r_req_voi_003 to mia.voice;
+    allocate r_req_voi_004 to mia.voice;
+    allocate r_req_be_001 to mia.webApp;
+    allocate r_req_be_002 to mia.webApp;
+    allocate r_req_be_003 to mia.webApp;
+    allocate r_req_be_004 to mia.webApp;
+    allocate r_req_be_005 to mia.webApp;
+    allocate r_req_be_006 to mia.webApp;
+    allocate r_req_be_007 to mia.webApp;
+    allocate r_req_be_008 to mia.webApp;
+    allocate r_req_be_009 to mia.webApp;
+    allocate r_req_be_010 to mia.webApp;
+    allocate r_req_be_011 to mia.webApp;
+    allocate r_req_be_012 to mia.webApp;
+    allocate r_req_be_013 to mia.webApp;
+    allocate r_req_be_014 to mia.webApp;
+    allocate r_req_be_015 to mia.webApp;
+    allocate r_req_be_016 to mia.webApp;
+    allocate r_req_be_017 to mia.webApp;
+    allocate r_req_be_018 to mia.webApp;
+    allocate r_req_be_019 to mia.webApp;
+    allocate r_req_be_020 to mia.webApp;
+    allocate r_req_be_021 to mia.webApp;
+    allocate r_req_be_022 to mia.webApp;
+    allocate r_req_be_023 to mia.webApp;
+    allocate r_req_be_024 to mia.webApp;
+    allocate r_req_be_025 to mia.webApp;
+    allocate r_req_be_026 to mia.webApp;
+    allocate r_req_be_027 to mia.webApp;
+    allocate r_req_be_028 to mia.webApp;
+    allocate r_req_be_029 to mia.webApp;
+    allocate r_req_be_030 to mia.webApp;
+    allocate r_req_be_031 to mia.webApp;
+    allocate r_req_be_032 to mia.webApp;
+    allocate r_req_be_033 to mia.webApp;
+    allocate r_req_be_034 to mia.webApp;
+    allocate r_req_be_035 to mia.webApp;
+    allocate r_req_be_036 to mia.webApp;
+    allocate r_req_be_037 to mia.webApp;
+    allocate r_req_be_038 to mia.webApp;
+    allocate r_req_be_039 to mia.webApp;
+    allocate r_req_be_040 to mia.webApp;
+    allocate r_req_be_041 to mia.webApp;
+    allocate r_req_be_042 to mia.webApp;
+    allocate r_req_be_043 to mia.webApp;
+    allocate r_req_be_044 to mia.webApp;
+    allocate r_req_be_045 to mia.webApp;
+    allocate r_req_be_046 to mia.webApp;
+    allocate r_req_be_047 to mia.webApp;
+    allocate r_req_be_048 to mia.webApp;
+    allocate r_req_be_049 to mia.webApp;
+    allocate r_req_be_050 to mia.webApp;
+    allocate r_req_be_051 to mia.webApp;
+    allocate r_req_be_052 to mia.webApp;
+    allocate r_req_be_053 to mia.webApp;
+    allocate r_req_be_054 to mia.webApp;
+    allocate r_req_be_055 to mia.webApp;
+    allocate r_req_be_056 to mia.webApp;
+    allocate r_req_be_057 to mia.webApp;
+    allocate r_req_be_058 to mia.webApp;
+    allocate r_req_be_059 to mia.webApp;
+    allocate r_req_be_060 to mia.webApp;
+    allocate r_req_be_061 to mia.webApp;
+    allocate r_req_be_062 to mia.webApp;
+    allocate r_req_be_063 to mia.webApp;
+    allocate r_req_be_064 to mia.webApp;
+    allocate r_req_be_065 to mia.webApp;
+    allocate r_req_be_066 to mia.webApp;
+    allocate r_req_be_067 to mia.webApp;
+    allocate r_req_be_068 to mia.webApp;
+    allocate r_req_be_069 to mia.webApp;
+    allocate r_req_be_070 to mia.webApp;
+    allocate r_req_be_071 to mia.webApp;
+    allocate r_req_be_072 to mia.webApp;
+    allocate r_req_be_073 to mia.webApp;
+    allocate r_req_be_074 to mia.webApp;
+    allocate r_req_be_075 to mia.webApp;
+    allocate r_req_be_076 to mia.webApp;
+    allocate r_req_sly_001 to mia.persistence;
+    allocate r_req_sly_002 to mia.persistence;
+    allocate r_req_sly_003 to mia.persistence;
+    allocate r_req_sly_004 to mia.persistence;
+    allocate r_req_sly_005 to mia.persistence;
+    allocate r_req_sly_006 to mia.persistence;
+    allocate r_req_sly_007 to mia.persistence;
+    allocate r_req_sly_008 to mia.persistence;
+    allocate r_req_sly_009 to mia.persistence;
+    allocate r_req_sly_010 to mia.persistence;
+    allocate r_req_sly_011 to mia.persistence;
+    allocate r_req_sly_012 to mia.persistence;
+    allocate r_req_gtb_001 to mia.persistence;
+    allocate r_req_gtb_002 to mia.persistence;
+    allocate r_req_gtb_003 to mia.persistence;
+    allocate r_req_gtb_004 to mia.persistence;
+    allocate r_req_rtb_001 to mia.persistence;
+    allocate r_req_rtb_002 to mia.persistence;
+    allocate r_req_rtb_003 to mia.persistence;
+    allocate r_req_rtb_004 to mia.persistence;
+    allocate r_req_rtb_005 to mia.persistence;
+    allocate r_req_rtb_006 to mia.persistence;
+    allocate r_req_db_001 to mia.persistence;
+    allocate r_req_db_002 to mia.persistence;
+    allocate r_req_db_003 to mia.persistence;
+    allocate r_req_db_004 to mia.persistence;
+    allocate r_req_db_005 to mia.persistence;
+    allocate r_req_db_006 to mia.persistence;
+    allocate r_req_db_007 to mia.persistence;
+    allocate r_req_db_008 to mia.persistence;
+    allocate r_req_db_009 to mia.persistence;
+    allocate r_req_db_010 to mia.persistence;
+    allocate r_req_db_011 to mia.persistence;
+    allocate r_req_db_012 to mia.persistence;
+    allocate r_req_db_013 to mia.persistence;
+    allocate r_req_db_014 to mia.persistence;
+    allocate r_req_db_015 to mia.persistence;
+    allocate r_req_db_016 to mia.persistence;
+    allocate r_req_db_017 to mia.persistence;
+    allocate r_req_db_018 to mia.persistence;
+    allocate r_req_evl_001 to mia.evaluation;
+    allocate r_req_evl_002 to mia.evaluation;
+    allocate r_req_evl_003 to mia.evaluation;
+    allocate r_req_evl_004 to mia.evaluation;
+    allocate r_req_evl_005 to mia.evaluation;
+    allocate r_req_evl_006 to mia.evaluation;
+    allocate r_req_evl_007 to mia.evaluation;
+    allocate r_req_evl_008 to mia.evaluation;
+    allocate r_req_evl_009 to mia.evaluation;
+    allocate r_req_evl_010 to mia.evaluation;
+    allocate r_req_evl_011 to mia.evaluation;
+    allocate r_req_opr_001 to mia.operation;
+    allocate r_req_opr_002 to mia.operation;
+    allocate r_req_opr_003 to mia.operation;
+    allocate r_req_opr_004 to mia.operation;
+    allocate r_req_opr_005 to mia.operation;
+    allocate r_req_opr_006 to mia.operation;
+    allocate r_req_opr_007 to mia.operation;
+    allocate r_req_opr_008 to mia.operation;
+    allocate r_req_opr_009 to mia.operation;
+    allocate r_req_opr_010 to mia.operation;
+    allocate r_req_ops_001 to mia.evaluation;
+    allocate r_req_ops_002 to mia.evaluation;
+    allocate r_req_ops_003 to mia.evaluation;
+    allocate r_req_ops_004 to mia.evaluation;
+    allocate r_req_ops_005 to mia.evaluation;
+    allocate r_req_ops_006 to mia.evaluation;
+    allocate r_req_ops_007 to mia.evaluation;
+    allocate r_req_ops_008 to mia.evaluation;
+    allocate r_req_ops_009 to mia.evaluation;
+    allocate r_req_ops_010 to mia.evaluation;
+    allocate r_req_ops_011 to mia.evaluation;
+    allocate r_req_ops_012 to mia.evaluation;
+    allocate r_req_ops_013 to mia.evaluation;
+    allocate r_req_ops_014 to mia.evaluation;
+    allocate r_req_ops_015 to mia.evaluation;
+    allocate r_req_ops_016 to mia.evaluation;
+    allocate r_req_ops_017 to mia.evaluation;
+    allocate r_req_ops_018 to mia.evaluation;
+    allocate r_req_ops_019 to mia.evaluation;
+    allocate r_req_ops_020 to mia.evaluation;
+    allocate r_req_ga_001 to mia.graphApp;
+    allocate r_req_ga_002 to mia.graphApp;
+    allocate r_req_ga_003 to mia.graphApp;
+    allocate r_req_ga_004 to mia.graphApp;
+    allocate r_req_ga_005 to mia.graphApp;
+    allocate r_req_ga_006 to mia.graphApp;
+    allocate r_req_ga_007 to mia.graphApp;
+    allocate r_req_ga_008 to mia.graphApp;
+    allocate r_req_ga_009 to mia.graphApp;
+    allocate r_req_ga_010 to mia.graphApp;
+    allocate r_req_ga_011 to mia.graphApp;
+
+    dependency from r_req_clv_001 to r_req_fe_001;
+    dependency from r_req_clv_002 to r_req_fe_002;
+    dependency from r_req_clv_003 to r_req_fe_003;
+    dependency from r_req_clv_004 to r_req_fe_004;
+    dependency from r_req_clv_005 to r_req_fe_005;
+    dependency from r_req_clv_006 to r_req_fe_006;
+    dependency from r_req_clv_007 to r_req_fe_007;
+    dependency from r_req_clv_008 to r_req_fe_014;
+    dependency from r_req_clv_009 to r_req_fe_015;
+    dependency from r_req_clv_010 to r_req_fe_016;
+    dependency from r_req_clv_011 to r_req_fe_018;
+    dependency from r_req_clv_012 to r_req_fe_019;
+    dependency from r_req_clv_013 to r_req_fe_021;
+    dependency from r_req_clv_014 to r_req_fe_022;
+    dependency from r_req_clv_015 to r_req_fe_023;
+    dependency from r_req_clv_016 to r_req_fe_024;
+    dependency from r_req_clv_017 to r_req_fe_026;
+    dependency from r_req_clv_018 to r_req_fe_028;
+    dependency from r_req_clv_019 to r_req_fe_029;
+    dependency from r_req_clv_020 to r_req_fe_030;
+    dependency from r_req_clv_021 to r_req_fe_001;
+    dependency from r_req_clv_021 to r_req_fe_026;
+    dependency from r_req_chv_001 to r_req_fe_006;
+    dependency from r_req_chv_002 to r_req_fe_008;
+    dependency from r_req_chv_003 to r_req_fe_009;
+    dependency from r_req_chv_004 to r_req_fe_010;
+    dependency from r_req_chv_005 to r_req_fe_015;
+    dependency from r_req_chv_006 to r_req_fe_017;
+    dependency from r_req_chv_007 to r_req_fe_020;
+    dependency from r_req_chv_008 to r_req_fe_021;
+    dependency from r_req_chv_009 to r_req_fe_024;
+    dependency from r_req_chv_010 to r_req_fe_025;
+    dependency from r_req_chv_011 to r_req_fe_026;
+    dependency from r_req_chv_012 to r_req_fe_027;
+    dependency from r_req_chv_013 to r_req_fe_029;
+    dependency from r_req_chv_014 to r_req_fe_030;
+    dependency from r_req_vpb_001 to r_req_fe_011;
+    dependency from r_req_vpb_002 to r_req_fe_012;
+    dependency from r_req_vpb_003 to r_req_fe_013;
+    dependency from r_req_vpb_004 to r_req_fe_026;
+    dependency from r_req_vpb_005 to r_req_fe_030;
+    dependency from r_req_fe_001 to fr1;
+    dependency from r_req_fe_002 to fr1;
+    dependency from r_req_fe_002 to nfr7;
+    dependency from r_req_fe_003 to fr1;
+    dependency from r_req_fe_004 to fr1;
+    dependency from r_req_fe_005 to fr1;
+    dependency from r_req_fe_006 to fr2;
+    dependency from r_req_fe_007 to fr2;
+    dependency from r_req_fe_008 to fr2;
+    dependency from r_req_fe_008 to fr23;
+    dependency from r_req_fe_009 to fr2;
+    dependency from r_req_fe_010 to fr23;
+    dependency from r_req_fe_011 to fr3;
+    dependency from r_req_fe_012 to fr3;
+    dependency from r_req_fe_013 to fr31;
+    dependency from r_req_fe_014 to fr4;
+    dependency from r_req_fe_015 to fr5;
+    dependency from r_req_fe_016 to fr27;
+    dependency from r_req_fe_016 to fr29;
+    dependency from r_req_fe_017 to fr29;
+    dependency from r_req_fe_017 to fr31;
+    dependency from r_req_fe_018 to fr28;
+    dependency from r_req_fe_018 to fr14;
+    dependency from r_req_fe_019 to fr12;
+    dependency from r_req_fe_020 to fr24;
+    dependency from r_req_fe_021 to fr32;
+    dependency from r_req_fe_022 to fr21;
+    dependency from r_req_fe_023 to con6;
+    dependency from r_req_fe_023 to nfr5;
+    dependency from r_req_fe_024 to nfr1;
+    dependency from r_req_fe_025 to nfr7;
+    dependency from r_req_fe_026 to nfr5;
+    dependency from r_req_fe_027 to con4;
+    dependency from r_req_fe_027 to nfr6;
+    dependency from r_req_fe_028 to con4;
+    dependency from r_req_fe_028 to nfr6;
+    dependency from r_req_fe_029 to con3;
+    dependency from r_req_fe_029 to nfr1;
+    dependency from r_req_fe_030 to nfr9;
+    dependency from r_req_api_001 to r_req_be_001;
+    dependency from r_req_api_002 to r_req_be_007;
+    dependency from r_req_api_003 to r_req_be_008;
+    dependency from r_req_api_004 to r_req_be_009;
+    dependency from r_req_api_005 to r_req_be_010;
+    dependency from r_req_api_006 to r_req_be_011;
+    dependency from r_req_api_007 to r_req_be_012;
+    dependency from r_req_api_008 to r_req_be_013;
+    dependency from r_req_api_009 to r_req_be_014;
+    dependency from r_req_api_010 to r_req_be_015;
+    dependency from r_req_api_011 to r_req_be_073;
+    dependency from r_req_api_012 to r_req_be_074;
+    dependency from r_req_api_013 to r_req_be_075;
+    dependency from r_req_api_014 to r_req_be_076;
+    dependency from r_req_api_015 to if101;
+    dependency from r_req_api_016 to if104;
+    dependency from r_req_cha_001 to r_req_be_001;
+    dependency from r_req_cha_002 to r_req_be_002;
+    dependency from r_req_cha_003 to r_req_be_003;
+    dependency from r_req_cha_004 to r_req_be_004;
+    dependency from r_req_cha_005 to r_req_be_005;
+    dependency from r_req_cha_006 to r_req_be_006;
+    dependency from r_req_cha_007 to r_req_be_018;
+    dependency from r_req_cha_008 to r_req_be_021;
+    dependency from r_req_cha_009 to r_req_be_022;
+    dependency from r_req_cha_010 to r_req_be_023;
+    dependency from r_req_cha_011 to r_req_be_024;
+    dependency from r_req_cha_012 to r_req_be_025;
+    dependency from r_req_cha_013 to r_req_be_026;
+    dependency from r_req_cha_014 to r_req_be_027;
+    dependency from r_req_cha_015 to r_req_be_028;
+    dependency from r_req_cha_016 to r_req_be_029;
+    dependency from r_req_cha_017 to r_req_be_030;
+    dependency from r_req_cha_018 to r_req_be_031;
+    dependency from r_req_cha_019 to r_req_be_032;
+    dependency from r_req_cha_020 to r_req_be_074;
+    dependency from r_req_wfm_001 to r_req_be_033;
+    dependency from r_req_wfm_002 to r_req_be_035;
+    dependency from r_req_wfm_003 to r_req_be_036;
+    dependency from r_req_wfm_004 to r_req_be_037;
+    dependency from r_req_wfm_005 to r_req_be_038;
+    dependency from r_req_wfm_006 to r_req_be_039;
+    dependency from r_req_wfm_007 to r_req_be_040;
+    dependency from r_req_wfm_008 to r_req_be_041;
+    dependency from r_req_wfm_009 to r_req_be_042;
+    dependency from r_req_wfm_010 to r_req_be_043;
+    dependency from r_req_wfm_011 to r_req_be_046;
+    dependency from r_req_wfm_012 to r_req_be_047;
+    dependency from r_req_wfm_013 to r_req_be_048;
+    dependency from r_req_wfm_014 to r_req_be_049;
+    dependency from r_req_wfm_015 to r_req_be_050;
+    dependency from r_req_wfm_016 to r_req_be_051;
+    dependency from r_req_wfm_017 to r_req_be_052;
+    dependency from r_req_wfm_018 to r_req_be_053;
+    dependency from r_req_wfm_019 to r_req_be_054;
+    dependency from r_req_wfm_020 to r_req_be_055;
+    dependency from r_req_wfm_021 to r_req_be_056;
+    dependency from r_req_wfm_022 to r_req_be_057;
+    dependency from r_req_wfm_023 to r_req_be_066;
+    dependency from r_req_wfm_024 to r_req_be_067;
+    dependency from r_req_wfm_025 to r_req_be_074;
+    dependency from r_req_wfm_026 to r_req_be_076;
+    dependency from r_req_run_001 to r_req_wfx_002;
+    dependency from r_req_run_002 to r_req_wfx_003;
+    dependency from r_req_run_003 to r_req_wfx_004;
+    dependency from r_req_run_004 to r_req_wfx_011;
+    dependency from r_req_run_005 to r_req_wfx_012;
+    dependency from r_req_run_006 to r_req_wfx_013;
+    dependency from r_req_run_007 to r_req_wfx_018;
+    dependency from r_req_run_008 to r_req_wfx_019;
+    dependency from r_req_run_009 to r_req_wfx_020;
+    dependency from r_req_run_010 to r_req_wfx_021;
+    dependency from r_req_run_011 to r_req_wfx_023;
+    dependency from r_req_run_012 to r_req_wfx_019;
+    dependency from r_req_run_013 to r_req_wfx_023;
+    dependency from r_req_run_014 to if202;
+    dependency from r_req_run_015 to r_req_wfx_024;
+    dependency from r_req_tls_001 to r_req_wfx_005;
+    dependency from r_req_tls_002 to r_req_wfx_006;
+    dependency from r_req_tls_003 to r_req_wfx_007;
+    dependency from r_req_tls_004 to r_req_wfx_014;
+    dependency from r_req_tls_005 to r_req_wfx_015;
+    dependency from r_req_tls_006 to r_req_wfx_016;
+    dependency from r_req_tls_007 to r_req_wfx_017;
+    dependency from r_req_tls_008 to r_req_wfx_014;
+    dependency from r_req_tls_008 to r_req_wfx_019;
+    dependency from r_req_log_001 to r_req_wfx_001;
+    dependency from r_req_log_002 to r_req_wfx_008;
+    dependency from r_req_log_003 to r_req_wfx_009;
+    dependency from r_req_log_004 to r_req_wfx_010;
+    dependency from r_req_log_005 to r_req_wfx_022;
+    dependency from r_req_wfx_001 to r_req_be_020;
+    dependency from r_req_wfx_002 to r_req_be_034;
+    dependency from r_req_wfx_003 to r_req_be_044;
+    dependency from r_req_wfx_004 to r_req_be_045;
+    dependency from r_req_wfx_005 to r_req_be_046;
+    dependency from r_req_wfx_006 to r_req_be_051;
+    dependency from r_req_wfx_007 to r_req_be_056;
+    dependency from r_req_wfx_008 to r_req_be_058;
+    dependency from r_req_wfx_009 to r_req_be_059;
+    dependency from r_req_wfx_010 to r_req_be_060;
+    dependency from r_req_wfx_011 to r_req_be_061;
+    dependency from r_req_wfx_012 to r_req_be_062;
+    dependency from r_req_wfx_013 to r_req_be_063;
+    dependency from r_req_wfx_014 to r_req_be_064;
+    dependency from r_req_wfx_015 to r_req_be_065;
+    dependency from r_req_wfx_016 to r_req_be_067;
+    dependency from r_req_wfx_017 to r_req_be_068;
+    dependency from r_req_wfx_018 to r_req_be_069;
+    dependency from r_req_wfx_019 to r_req_be_070;
+    dependency from r_req_wfx_020 to r_req_be_071;
+    dependency from r_req_wfx_021 to r_req_be_072;
+    dependency from r_req_wfx_022 to r_req_be_074;
+    dependency from r_req_wfx_023 to if103;
+    dependency from r_req_wfx_024 to if105;
+    dependency from r_req_voi_001 to r_req_be_016;
+    dependency from r_req_voi_002 to r_req_be_017;
+    dependency from r_req_voi_003 to r_req_be_018;
+    dependency from r_req_voi_004 to r_req_be_019;
+    dependency from r_req_be_001 to fr1;
+    dependency from r_req_be_002 to fr1;
+    dependency from r_req_be_002 to con6;
+    dependency from r_req_be_003 to fr1;
+    dependency from r_req_be_003 to nfr7;
+    dependency from r_req_be_004 to fr1;
+    dependency from r_req_be_005 to fr1;
+    dependency from r_req_be_006 to fr1;
+    dependency from r_req_be_007 to fr1;
+    dependency from r_req_be_007 to fr5;
+    dependency from r_req_be_007 to nfr8;
+    dependency from r_req_be_008 to fr21;
+    dependency from r_req_be_009 to fr21;
+    dependency from r_req_be_010 to fr21;
+    dependency from r_req_be_011 to fr21;
+    dependency from r_req_be_012 to nfr6;
+    dependency from r_req_be_013 to con4;
+    dependency from r_req_be_013 to nfr6;
+    dependency from r_req_be_014 to fr21;
+    dependency from r_req_be_014 to fr5;
+    dependency from r_req_be_014 to fr16;
+    dependency from r_req_be_015 to con6;
+    dependency from r_req_be_015 to fr5;
+    dependency from r_req_be_016 to fr3;
+    dependency from r_req_be_017 to fr3;
+    dependency from r_req_be_018 to fr31;
+    dependency from r_req_be_019 to fr31;
+    dependency from r_req_be_020 to fr4;
+    dependency from r_req_be_021 to fr25;
+    dependency from r_req_be_022 to fr23;
+    dependency from r_req_be_023 to fr23;
+    dependency from r_req_be_023 to fr27;
+    dependency from r_req_be_024 to fr14;
+    dependency from r_req_be_025 to fr14;
+    dependency from r_req_be_025 to nfr3;
+    dependency from r_req_be_026 to fr14;
+    dependency from r_req_be_027 to fr15;
+    dependency from r_req_be_028 to fr27;
+    dependency from r_req_be_029 to fr27;
+    dependency from r_req_be_029 to fr29;
+    dependency from r_req_be_030 to fr29;
+    dependency from r_req_be_031 to fr29;
+    dependency from r_req_be_031 to con6;
+    dependency from r_req_be_032 to fr28;
+    dependency from r_req_be_033 to fr6;
+    dependency from r_req_be_034 to fr6;
+    dependency from r_req_be_035 to fr7;
+    dependency from r_req_be_036 to fr7;
+    dependency from r_req_be_037 to fr7;
+    dependency from r_req_be_038 to fr7;
+    dependency from r_req_be_038 to fr20;
+    dependency from r_req_be_039 to fr26;
+    dependency from r_req_be_039 to fr20;
+    dependency from r_req_be_040 to fr20;
+    dependency from r_req_be_041 to fr30;
+    dependency from r_req_be_042 to fr33;
+    dependency from r_req_be_043 to fr32;
+    dependency from r_req_be_044 to fr8;
+    dependency from r_req_be_045 to fr8;
+    dependency from r_req_be_046 to fr9;
+    dependency from r_req_be_047 to fr9;
+    dependency from r_req_be_048 to fr9;
+    dependency from r_req_be_049 to fr9;
+    dependency from r_req_be_050 to fr9;
+    dependency from r_req_be_050 to fr10;
+    dependency from r_req_be_051 to fr10;
+    dependency from r_req_be_052 to fr10;
+    dependency from r_req_be_053 to fr11;
+    dependency from r_req_be_054 to fr11;
+    dependency from r_req_be_055 to fr11;
+    dependency from r_req_be_056 to fr12;
+    dependency from r_req_be_057 to fr13;
+    dependency from r_req_be_058 to fr16;
+    dependency from r_req_be_059 to fr16;
+    dependency from r_req_be_060 to fr16;
+    dependency from r_req_be_061 to fr18;
+    dependency from r_req_be_062 to nfr2;
+    dependency from r_req_be_063 to nfr2;
+    dependency from r_req_be_064 to nfr3;
+    dependency from r_req_be_065 to nfr3;
+    dependency from r_req_be_066 to nfr4;
+    dependency from r_req_be_067 to nfr4;
+    dependency from r_req_be_068 to nfr5;
+    dependency from r_req_be_069 to nfr7;
+    dependency from r_req_be_070 to nfr7;
+    dependency from r_req_be_071 to nfr7;
+    dependency from r_req_be_072 to con2;
+    dependency from r_req_be_072 to nfr7;
+    dependency from r_req_be_073 to con3;
+    dependency from r_req_be_073 to nfr9;
+    dependency from r_req_be_074 to nfr8;
+    dependency from r_req_be_074 to con7;
+    dependency from r_req_be_075 to nfr9;
+    dependency from r_req_be_076 to fr22;
+    dependency from r_req_be_076 to fr30;
+    dependency from r_req_be_076 to fr7;
+    dependency from r_req_sly_001 to r_req_db_001;
+    dependency from r_req_sly_002 to r_req_db_002;
+    dependency from r_req_sly_003 to r_req_db_003;
+    dependency from r_req_sly_004 to r_req_db_004;
+    dependency from r_req_sly_005 to r_req_db_005;
+    dependency from r_req_sly_006 to r_req_db_006;
+    dependency from r_req_sly_007 to r_req_db_007;
+    dependency from r_req_sly_008 to r_req_db_008;
+    dependency from r_req_sly_009 to r_req_db_009;
+    dependency from r_req_sly_010 to r_req_db_016;
+    dependency from r_req_sly_011 to r_req_db_017;
+    dependency from r_req_sly_012 to if102;
+    dependency from r_req_gtb_001 to r_req_db_002;
+    dependency from r_req_gtb_002 to r_req_db_004;
+    dependency from r_req_gtb_003 to r_req_db_011;
+    dependency from r_req_gtb_004 to r_req_db_018;
+    dependency from r_req_rtb_001 to r_req_db_002;
+    dependency from r_req_rtb_002 to r_req_db_010;
+    dependency from r_req_rtb_003 to r_req_db_012;
+    dependency from r_req_rtb_004 to r_req_db_013;
+    dependency from r_req_rtb_005 to r_req_db_014;
+    dependency from r_req_rtb_006 to r_req_db_015;
+    dependency from r_req_db_001 to nfr8;
+    dependency from r_req_db_001 to con7;
+    dependency from r_req_db_001 to nfr9;
+    dependency from r_req_db_002 to nfr8;
+    dependency from r_req_db_003 to fr7;
+    dependency from r_req_db_003 to fr22;
+    dependency from r_req_db_004 to fr22;
+    dependency from r_req_db_004 to fr7;
+    dependency from r_req_db_005 to fr21;
+    dependency from r_req_db_006 to nfr8;
+    dependency from r_req_db_006 to fr5;
+    dependency from r_req_db_007 to nfr8;
+    dependency from r_req_db_008 to fr19;
+    dependency from r_req_db_008 to nfr8;
+    dependency from r_req_db_009 to fr22;
+    dependency from r_req_db_010 to fr26;
+    dependency from r_req_db_011 to fr30;
+    dependency from r_req_db_012 to fr27;
+    dependency from r_req_db_013 to fr14;
+    dependency from r_req_db_014 to fr28;
+    dependency from r_req_db_015 to fr12;
+    dependency from r_req_db_016 to nfr5;
+    dependency from r_req_db_016 to nfr6;
+    dependency from r_req_db_017 to nfr9;
+    dependency from r_req_db_018 to fr20;
+    dependency from r_req_db_018 to fr26;
+    dependency from r_req_evl_001 to r_req_ops_001;
+    dependency from r_req_evl_002 to r_req_ops_002;
+    dependency from r_req_evl_003 to r_req_ops_003;
+    dependency from r_req_evl_004 to r_req_ops_004;
+    dependency from r_req_evl_005 to r_req_ops_005;
+    dependency from r_req_evl_006 to r_req_ops_006;
+    dependency from r_req_evl_007 to r_req_ops_017;
+    dependency from r_req_evl_008 to r_req_ops_018;
+    dependency from r_req_evl_009 to r_req_ops_019;
+    dependency from r_req_evl_010 to r_req_ops_020;
+    dependency from r_req_evl_011 to r_req_ops_001;
+    dependency from r_req_evl_011 to r_req_ops_004;
+    dependency from r_req_opr_001 to r_req_ops_007;
+    dependency from r_req_opr_002 to r_req_ops_008;
+    dependency from r_req_opr_003 to r_req_ops_009;
+    dependency from r_req_opr_004 to r_req_ops_010;
+    dependency from r_req_opr_005 to r_req_ops_011;
+    dependency from r_req_opr_006 to r_req_ops_012;
+    dependency from r_req_opr_007 to r_req_ops_013;
+    dependency from r_req_opr_008 to r_req_ops_014;
+    dependency from r_req_opr_009 to r_req_ops_015;
+    dependency from r_req_opr_010 to r_req_ops_016;
+    dependency from r_req_ops_001 to fr17;
+    dependency from r_req_ops_002 to fr17;
+    dependency from r_req_ops_003 to fr17;
+    dependency from r_req_ops_004 to fr26;
+    dependency from r_req_ops_005 to fr26;
+    dependency from r_req_ops_005 to fr20;
+    dependency from r_req_ops_006 to fr20;
+    dependency from r_req_ops_007 to fr19;
+    dependency from r_req_ops_008 to fr19;
+    dependency from r_req_ops_008 to fr21;
+    dependency from r_req_ops_009 to fr19;
+    dependency from r_req_ops_010 to fr19;
+    dependency from r_req_ops_011 to fr19;
+    dependency from r_req_ops_012 to fr19;
+    dependency from r_req_ops_013 to nfr9;
+    dependency from r_req_ops_014 to nfr6;
+    dependency from r_req_ops_014 to con5;
+    dependency from r_req_ops_015 to con1;
+    dependency from r_req_ops_015 to nfr5;
+    dependency from r_req_ops_016 to con2;
+    dependency from r_req_ops_016 to nfr7;
+    dependency from r_req_ops_017 to nfr7;
+    dependency from r_req_ops_018 to nfr2;
+    dependency from r_req_ops_018 to fr17;
+    dependency from r_req_ops_019 to fr9;
+    dependency from r_req_ops_019 to fr10;
+    dependency from r_req_ops_019 to fr11;
+    dependency from r_req_ops_019 to fr26;
+    dependency from r_req_ops_020 to fr20;
+    dependency from r_req_ops_020 to nfr2;
+    dependency from r_req_ops_020 to nfr4;
+    dependency from r_req_ga_001 to fr22;
+    dependency from r_req_ga_002 to fr22;
+    dependency from r_req_ga_003 to fr22;
+    dependency from r_req_ga_003 to fr7;
+    dependency from r_req_ga_004 to fr22;
+    dependency from r_req_ga_005 to fr22;
+    dependency from r_req_ga_005 to con7;
+    dependency from r_req_ga_006 to fr30;
+    dependency from r_req_ga_007 to fr21;
+    dependency from r_req_ga_007 to nfr6;
+    dependency from r_req_ga_008 to fr22;
+    dependency from r_req_ga_009 to con3;
+    dependency from r_req_ga_009 to fr22;
+    dependency from r_req_ga_010 to nfr5;
+    dependency from r_req_ga_011 to nfr9;
+}
+// END GENERATED: node requirements

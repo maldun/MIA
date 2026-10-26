@@ -36,6 +36,11 @@ for f in files:
         problems.append(f"{f.name}: depth {depth} at end")
 
 arch = arch_path.read_text()
+# the node requirements are a generated block (tools/gen_node_requirements_model.py, T-14); it is checked on its own below
+GEN_BEGIN = "// BEGIN GENERATED: node requirements"
+gen = ""
+if GEN_BEGIN in arch:
+    arch, gen = arch.split(GEN_BEGIN)[0], arch.split(GEN_BEGIN)[1]
 
 # 2. ids: model vs HLS
 hls = (spec / "high-level-spec.md").read_text()
@@ -64,6 +69,20 @@ for n in tree:
         problems.append(f"{n}: no satisfy")
     if not any(a == n for a, _, _ in al):
         problems.append(f"{n}: no allocate")
+
+if gen:
+    gdefs = set(re.findall(r"requirement def <'[^']+'> (\w+)", gen))
+    gtree = dict(re.findall(r"^\s+requirement (\w+) : (\w+);", gen, flags=re.M))
+    gsat = set(re.findall(r"satisfy (\w+) by mia[\w.]*;", gen))
+    gal = set(re.findall(r"allocate (\w+) to mia[\w.]*;", gen))
+    print("generated node requirements:", len(gdefs))
+    for n, d in gtree.items():
+        if d not in gdefs:
+            problems.append(f"generated usage {n} has unknown def {d}")
+        if n not in gsat:
+            problems.append(f"generated {n}: no satisfy")
+    for d in gdefs - set(gtree.values()):
+        problems.append(f"generated def {d} has no usage")
 
 system = arch.split("part def MiaSystem")[1].split("part mia :")[0]
 sys_parts = dict(re.findall(r"part (\w+) : (\w+);", system))
