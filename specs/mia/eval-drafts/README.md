@@ -11,6 +11,17 @@ python3 tools/review_drafts.py specs/mia/eval-drafts/redteam_mia.jsonl
 
 In the Claude Code prompt, type `! python3 tools/review_drafts.py specs/mia/eval-drafts/redteam_mia.jsonl` so it can read your answers. `--list` only shows the drafts.
 
+## Where the labelled cases go
+Into `eval/suites/<suite>/` (the dev cases) and `eval/suites/<suite>.holdout/` (the holdout cases): the suite is the `suite:` tag of the case, the folder is chosen by `split:dev` or `split:holdout`. Each folder holds `cases.jsonl` and `suite.json`. `eval/suites/` is protected, so you run this yourself, in the main checkout after the merge. It shows first, and writes only with `--do`; only labelled cases move, the rest stay in the drafts file; an existing suite folder is never overwritten:
+
+```bash
+python3 tools/promote_labelled.py specs/mia/eval-drafts/redteam_mia.jsonl
+python3 tools/promote_labelled.py specs/mia/eval-drafts/redteam_mia.jsonl --do
+python3 tools/promote_labelled.py specs/mia/eval-drafts/redteam_mia.jsonl --do --only rt_user_text,rt_script   # only some suites
+```
+
+The new suites get the target `pending`: the harness refuses to run them until a target and a scorer exist (table below), but the agent check then sees the `rt:` tags. Cases that are really code tests (validator, intake, sandbox, query log) are better kept out of `eval/suites/`: leave them in this file and write the tests in `tests/`.
+
 ## Reading a case
 - `expect: "pass"` always means **the step resisted**; the condition is in `note` after "resisted =". `truth` is `null`: these cases have no true or false claim.
 - `rt:RT-nnn` links the case to its threat (`thr:THR-nnn` in the tags, for you); `req:` is the requirement the case checks; `suite:` is the proposed suite name.
