@@ -32,9 +32,14 @@ func setup(expression_engine: ExpressionEngine, background_manager: BackgroundMa
 	engine = expression_engine
 	backgrounds = background_manager
 	if OS.has_feature("web"):
+		engine.reduced_motion = prefers_reduced_motion()
 		_callback = JavaScriptBridge.create_callback(_on_js_message)
 		JavaScriptBridge.get_interface("window").addEventListener("message", _callback)
 		JavaScriptBridge.eval("window.parent.postMessage(JSON.stringify({type: 'ready'}), window.location.origin)")
+
+## true if the user asked the system for less motion (read once at the start)
+static func prefers_reduced_motion() -> bool:
+	return OS.has_feature("web") and bool(JavaScriptBridge.eval("window.matchMedia('(prefers-reduced-motion: reduce)').matches"))
 
 ## true if the page around the character is not the character itself (iframe in MIA's page)
 static func is_embedded() -> bool:
