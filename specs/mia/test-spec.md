@@ -77,6 +77,15 @@ Setup and expected result are in the docstring of each test (the golden examples
 | TC-IF-101-06 | IF-101 | Contract | 1 (mock) and 2 (real) | golden 3: stop right after send gives chat_done with status stopped and no chat_delta. | exact |
 | TC-IF-101-07 | IF-101 | Contract | 1 (mock) and 2 (real) | empty or blank text is 422 empty_text and nothing is queued. | exact |
 | TC-IF-101-08 | IF-101 | Contract | 1 (mock) and 2 (real) | a user who connects later gets the same ordered history with senders, the assistant | exact |
+| TC-IF-101-09 | IF-101 | Contract | 1 (mock) and 2 (real) | v1: send answers with id, position and the stored message; the message and its chat_message event carry the client id; the history keeps it. REQ-CLV-001. | exact |
+| TC-IF-101-10 | IF-101 | Contract | 1 (mock) and 2 (real) | v1: whoami knows the account of a kept session; the own password changes with the old one, a wrong old one is 401, a weak new one 422, the old password stops working. REQ-CLV-014. | exact |
+| TC-IF-101-11 | IF-101 | Contract | 1 (mock) and 2 (real) | v1: regenerate queues a new try of the last answer only (404 unknown, 422 not the last); speak_again sends one audio_chunk per sentence of any answer. REQ-CLV-005. | exact |
+| TC-IF-101-12 | IF-101 | Contract | 1 (mock) and 2 (real) | v1: a vote is kept with category and value, the score per category and overall is returned and pushed; an invalid vote is 422 and stores nothing. REQ-CLV-010. | exact |
+| TC-IF-101-13 | IF-101 | Contract | 1 (mock) and 2 (real) | v1: tasks, memos and memory are listed (50 records), changed and deleted by every user, the others get item_changed, memory needs a source, text comes back byte for byte. REQ-CLV-011. | exact |
+| TC-IF-101-14 | IF-101 | Contract | 1 (mock) and 2 (real) | v1: the trust of a source is edited with old and new value and author in the event; outside 0..1 and unknown source are refused. REQ-CLV-012. | exact |
+| TC-IF-101-15 | IF-101 | Contract | 1 (mock) and 2 (real) | v1: the persona is saved as data, the others get persona_changed with the author, an empty persona is refused. REQ-CLV-009. | exact |
+| TC-IF-101-16 | IF-101 | Contract | 1 (mock) and 2 (real) | v1: the account of an answer is a list of plain sentences in order; a message that is not an answer has none. REQ-CLV-008. | exact |
+| TC-IF-101-17 | IF-101 | Contract | 1 (mock) and 2 (real) | v1: every answer announces its character variant (name or null) in the event variant. REQ-CLV-013. | exact |
 | TC-IF-102-01 | IF-102 | Contract | 1 (mock) and 2 (real) | golden 1: version 1, version 2, and version 1 reads back unchanged. | exact |
 | TC-IF-102-02 | IF-102 | Contract | 1 (mock) and 2 (real) | golden 2: each broken rule is refused with its name and nothing is stored. | exact |
 | TC-IF-102-03 | IF-102 | Contract | 1 (mock) and 2 (real) | golden 3: a cycle p->d->p is refused as a cycle and named by its ids, first id repeated at the end. | exact |

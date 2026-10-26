@@ -254,7 +254,7 @@ decomposition:
       provider: N-2
       consumers: [N-1]
       decided_by: N-0
-      version: v0
+      version: v1
       mock:
         complexity: 3               # Socket.IO events with a stream of sentences and expressions
         kind: fake
