@@ -29,7 +29,9 @@ try:
     from .constants import NEUTRAL_EMOTION_KEY, TIME_BEFORE_KEY, SIGNAL_EMOTION_KEY
     from . import utils
     from .cpu_threads import parse as parse_cpu_threads, add_to_llm_options
+    from .persona import persona_block
 except ImportError:
+    from persona import persona_block
     from mia_logger import logger
     from constants import CFG_FILE, TEXT_COLS, TIME_FORMAT, LOCALHOST
     from constants import NEUTRAL_EMOTION_KEY, TIME_BEFORE_KEY, SIGNAL_EMOTION_KEY
@@ -97,6 +99,7 @@ class Communicator:
     """
 
     TIME_UPDATE="Hi MIA it is {time}." 
+    persona_provider = None          # () -> the text of the shared persona file (web_app.py sets it); None = no persona
     FULL_PROFILE = "full"
     LIGHT_PROFILE = "light"
     
@@ -184,10 +187,16 @@ class Communicator:
                 logger.warning(f"Could not unload model {old_version}: {e}")
         return True
 
+    def persona_message(self):
+        """the system message of a call (REQ-CHA-008): the shared persona file, read again at every call so that a change on the page counts at once, with the default
+        form of address; calibration.txt is the fallback of a setup without a persona. It is not part of the history, so it is never summarized away or stored twice."""
+        text = self.persona_provider() if self.persona_provider else ""
+        return {self.ROLE_KEY:"system",self.CONTENT_KEY:persona_block(text,fallback=self._addtional_calibration)}
+
     def chat(self,msg,stream=True):
         msg_dic = self.update_history(msg,role=self.USER_ROLE)
         answer = self.client.chat(model=self.version,
-                                  messages=self._history,
+                                  messages=[self.persona_message()]+self._history,
                                   stream=stream,
                                   options=self.llm_options,
                                   think=self.think,
@@ -226,7 +235,7 @@ class Communicator:
         Furthermore an initial timestamp is added to tell MIA to look out for
         tasks.
         """
-        msg = "\n".join((EMOTION_QUESTION,self._addtional_calibration))
+        msg = EMOTION_QUESTION          # the personality is the system message of every call now (persona_message), not part of the history
         timestamp = utils.get_timestamp()[:-1]
         msg += self.time_update_msg.format(time=timestamp)
         answer_str = self._silent_conversation(msg)

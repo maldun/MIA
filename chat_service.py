@@ -67,7 +67,20 @@ COMMANDS = (
 )
 
 
-RECITED_BY_COMMAND = {"/tasks": "tasks", "/memos": "memos"}
+SETTLED_END = re.compile(r"[.!?](?=\s|$)|(?=\n)")      # a sentence end, or the place of a line end
+
+
+def settled(text):
+    """the longest prefix of a growing answer that no behaviour rule can still change: it ends at a sentence or line end and has no open emphasis, code or bracket span"""
+    for end in reversed([m.end() for m in SETTLED_END.finditer(text)]):
+        prefix = text[:end]
+        bold, single = prefix.count("**"), prefix.replace("**", "").count("*")      # an unclosed ** is as open as an unclosed *
+        if bold % 2 == 0 and single % 2 == 0 and prefix.count("`") % 2 == 0 and prefix.count("(") <= prefix.count(")") and prefix.count("[") <= prefix.count("]"):
+            return prefix
+    return ""
+
+
+RECITED_BY_COMMAND ={"/tasks": "tasks", "/memos": "memos"}
 RECITED = tuple(RECITED_BY_COMMAND.values())
 
 
@@ -110,7 +123,7 @@ class ChatError(Exception):
 class ChatService:
     def __init__(self, emit, log, mood, run_exchange, run_command=None, model_info=None, queue_size=1, user_limit=0,
                  rate_limit=(10, 60), spawn=None, clock=time.monotonic, run_lookup=None, run_search=None, votes=None, wall_clock=time.time,
-                 behaviours=None, reputable=0.6):
+                 behaviours=None, reputable=0.6, repair=None):
         self._emit = emit
         self._run_lookup = run_lookup          # (question, on_delta, on_emotion, should_stop) -> the answer, for /lookup
         self._run_search = run_search              # (query, on_delta, on_emotion, should_stop) -> the list of results, for /search
@@ -126,6 +139,7 @@ class ChatService:
         self._clock = clock
         self._votes = votes                    # the Storage layer (IF-102): the votes table
         self._wall_clock = wall_clock          # seconds since the epoch; the time of a vote and so its week
+        self._repair = repair                  # text -> the text with the violations of the behaviour rules repaired (behaviour.py); None = answers are streamed as they come
         self._behaviours = behaviours          # () -> the names of the behaviours that can be voted on (REQ-CHA-017); read at every use, the list may change; None: no list
         self._reputable = reputable            # a source with at least this trust is reputable (owner 2026-10-27: a fact has at least one reputable source)
         self._lock = threading.RLock()
@@ -498,7 +512,8 @@ class ChatService:
         self._emit("chat_start", {"id": message_id, "role": "assistant", "created": created, **({"task": task} if task != "chat" else {})})
         self._emit("variant", {"name": None})              # no workflow picks a character variant yet (REQ-CHV-008): the chat's variant stays
         self.set_activity("thinking")
-        state = {"text": "", "emotion": None, "emotions": [], "last": 0.0, "first": True}
+        state = {"text": "", "emotion": None, "emotions": [], "last": 0.0, "first": True, "shown": ""}
+        repairing = self._repair is not None and task == "chat"      # the answers of /lookup carry quotes: they are never changed
 
         def on_delta(current):
             state["text"] = current
@@ -508,7 +523,14 @@ class ChatService:
             now = self._clock()
             if now - state["last"] >= DELTA_INTERVAL:
                 state["last"] = now
-                self._emit("chat_delta", {"id": message_id, "text": current})
+                if not repairing:
+                    self._emit("chat_delta", {"id": message_id, "text": current})
+                    return
+                # the stream is held back to the settled part, which is repaired before the page sees it (REQ-CHA-014); only a text that continues what was shown is released
+                shown = self._repair(settled(current))
+                if shown and shown != state["shown"] and shown.startswith(state["shown"]):
+                    state["shown"] = shown
+                    self._emit("chat_delta", {"id": message_id, "text": shown})
 
         def on_emotion(emotion):
             state["emotions"].append(emotion)
@@ -530,6 +552,10 @@ class ChatService:
             self._emit("chat_error", {"id": message_id, "message": "MIA could not answer: %s" % exc})
         else:
             self.set_activity(None)
+        if repairing and state["text"]:
+            state["text"] = self._repair(state["text"])                 # the whole answer, silently; the last delta equals the text of chat_done
+            if state["text"] != state["shown"]:
+                self._emit("chat_delta", {"id": message_id, "text": state["text"]})
         extra = {"emotions": state["emotions"]} if len(state["emotions"]) > 1 else {}
         if task != "chat":
             extra["task"] = task
