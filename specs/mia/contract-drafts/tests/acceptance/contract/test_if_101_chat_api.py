@@ -16,7 +16,7 @@ IF = "IF-101"
 
 
 def make(**options):
-    return lambda kind: ChatApiMock(**options) if kind == "mock" else subject_for(IF, kind)
+    return lambda kind: ChatApiMock(**options) if kind == "mock" else subject_for(IF, kind, **options)
 
 
 def error_of(call):

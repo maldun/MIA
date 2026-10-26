@@ -215,8 +215,10 @@ class ChatService:
 
     def regenerate(self, account, message_id):
         """a new try for the last answer, queued like a message; the old answer stays and the question is not stored again"""
-        record = self._answer(message_id)
-        if self.log.last("assistant")["id"] != record["id"]:
+        record = self._find(message_id)
+        if record is None:
+            raise ChatError("not_found")
+        if record["role"] != "assistant" or self.log.last("assistant")["id"] != record["id"]:
             raise ChatError("not_the_last_answer")
         records = self.log.history(before=record["id"], limit=MAX_PAGE)[0]
         asked = next((m for m in reversed(records) if m["role"] == "user"), None)
