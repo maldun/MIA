@@ -406,6 +406,10 @@ def time_update_request():
         return time_update() 
 
 def time_update():
+    try:
+        chat_service.recite_due()          # tasks that have fallen due are read from their records, word for word, by code (REQ-CHA-019)
+    except Exception:
+        logger.exception("reciting the due tasks failed")
     answer, filt_answer, penalty = comm.time_update(
                                         emotion_expression=express_and_reload,
                                         _test_neutral=False,
