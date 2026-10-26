@@ -136,8 +136,9 @@ class ChatService:
         hits.append(now)
         return False
 
-    def send(self, text, client_id=None, sender="page"):
-        """accepts a message; returns the acknowledgement for the page: {"ok", "message" | "error", "queued"}"""
+    def send(self, text, client_id=None, sender="page", author=None):
+        """accepts a message; returns the acknowledgement for the page: {"ok", "message" | "error", "queued"}.
+        sender is the key of the rate limit (a connection or an account); author the account that wrote it, stored as the `sender` of the message (IF-101)"""
         text = normalize_text(text)
         if not text:
             return {"ok": False, "error": "The message is empty."}
@@ -157,7 +158,8 @@ class ChatService:
                 return {"ok": False, "error": "%s is not available." % task.capitalize()}
             record = None
             if not command:
-                record = self.log.append("user", text, client_id=client_id) if client_id else self.log.append("user", text)
+                fields = dict(({"client_id": client_id} if client_id else {}), **({"sender": author} if author else {}))
+                record = self.log.append("user", text, **fields)
                 self._emit("chat_message", record)
             queued = self._running
             self._queue.append(("command" if command else task if task is not None else "chat", argument if task is not None else text))

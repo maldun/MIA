@@ -221,7 +221,7 @@ def handle_chat_send(data=None):
     account = _account_sockets.account_of(request.sid) if _account_sockets is not None else None
     if account:
         _account_changes.record(account, "chat_send", "")                    # who wrote (REQ-API-009); the text is not recorded
-    return chat_service.send(data.get("text"), client_id=data.get("id"), sender=account or request.sid)       # the rate limit is per user (REQ-API-007)
+    return chat_service.send(data.get("text"), client_id=data.get("id"), sender=account or request.sid, author=account)       # the rate limit is per user (REQ-API-007), the message keeps its author
 
 @socketio.on('chat_stop')
 def handle_chat_stop(_=None):
