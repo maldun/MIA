@@ -15,7 +15,7 @@ HARDWARE = "Fedora, Ryzen 9 5900X (12 cores), 62 GB RAM, RX 7800 XT with 16 GB, 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("root")
+    ap.add_argument("root", nargs="?", default=".")
     ap.add_argument("--by", required=True)
     ap.add_argument("--date", default=str(datetime.date.today()))
     ap.add_argument("--accept-unflagged", action="store_true")

@@ -135,4 +135,4 @@ def main(root):
     print("%d requirements, %d assumptions, %d open for a decision" % (len(reqs), len(asms) + 1, open_count))
 
 
-main(sys.argv[1])
+main(sys.argv[1] if len(sys.argv) > 1 else ".")

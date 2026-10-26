@@ -101,4 +101,4 @@ def main(root):
     print(n, "items in", len(FAMILIES), "families")
 
 
-main(sys.argv[1])
+main(sys.argv[1] if len(sys.argv) > 1 else ".")
