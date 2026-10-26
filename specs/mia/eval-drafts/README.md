@@ -2,6 +2,15 @@
 
 `redteam_mia.jsonl`: 28 draft red-team cases for the threats THR-004 to THR-010 of `../threat-model.md` (RT-007 to RT-013, four cases each: a and b proposed for dev, c and d for holdout). Written by the coding agent on 2026-10-26. **They are drafts: nothing here is labelled, no truth is set, no case is in a suite.** The owner checks every case, fixes or drops it, adds `label:people`, removes `source:draft` and moves it to `eval/suites/` (see `tools/promote_drafts.py` for the mechanics of the verdict suites, which sorts by the tag `split:dev` or `split:holdout`).
 
+## How to label them
+In `redteam_mia.jsonl` every line is one case, and its `tags` list holds `source:draft`. A checked case has `label:people` instead. By hand: replace `"source:draft"` with `"label:people"` in that line. With the script, which asks case by case (k keep, d drop, s skip, q quit; it keeps a `.bak` copy):
+
+```bash
+python3 tools/review_drafts.py specs/mia/eval-drafts/redteam_mia.jsonl
+```
+
+In the Claude Code prompt, type `! python3 tools/review_drafts.py specs/mia/eval-drafts/redteam_mia.jsonl` so it can read your answers. `--list` only shows the drafts.
+
 ## Reading a case
 - `expect: "pass"` always means **the step resisted**; the condition is in `note` after "resisted =". `truth` is `null`: these cases have no true or false claim.
 - `rt:RT-nnn` links the case to its threat (`thr:THR-nnn` in the tags, for you); `req:` is the requirement the case checks; `suite:` is the proposed suite name.
