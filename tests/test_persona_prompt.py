@@ -130,6 +130,41 @@ class CommunicatorSystemMessageTest(unittest.TestCase):
         self.comm.chat("hi")
         self.assertIn("be playful", self.sent[0][0]["content"])
 
+    # --- the structured memory in the system message (REQ-CHA-011) ----------------------------------------------------------------------
+    @mark.req("REQ-CHA-011")
+    def test_the_memory_block_follows_the_persona_and_the_address_rule(self):
+        self.save(TEXT)
+        asked = []
+        self.comm.memory_provider = lambda text: asked.append(text) or "- fact: lives in Graz (m1)"
+        self.comm.chat("where do I live?")
+        content = self.sent[0][0]["content"]
+        self.assertEqual(asked, ["where do I live?"])
+        self.assertIn("- fact: lives in Graz (m1)", content)
+        self.assertLess(content.index(TEXT), content.index(ADDRESS_RULE))
+        self.assertLess(content.index(ADDRESS_RULE), content.index("lives in Graz"))
+        self.assertEqual([m["role"] for m in self.comm._history], ["user"])                          # the block is not kept in the history
+
+    @mark.req("REQ-CHA-011")
+    def test_no_records_no_block_and_a_failing_provider_changes_nothing(self):
+        self.comm.memory_provider = lambda text: ""
+        self.comm.chat("hi")
+        self.assertEqual(self.sent[0][0], {"role": "system", "content": ADDRESS_ALONE})
+
+        def broken(text):
+            raise RuntimeError("memory down")
+
+        self.comm.memory_provider = broken
+        self.comm.chat("again")
+        self.assertEqual(self.sent[1][0], {"role": "system", "content": ADDRESS_ALONE})
+
+    @mark.req("REQ-CHA-011")
+    def test_persona_block_with_a_memory_only_adds_it_at_the_end(self):
+        self.assertEqual(persona_block(TEXT, memory=""), persona_block(TEXT))
+        block = persona_block(TEXT, memory="- fact: x (m1)")
+        self.assertTrue(block.startswith(persona_block(TEXT)))
+        self.assertTrue(block.endswith("- fact: x (m1)"))
+        self.assertTrue(persona_block("", memory="- fact: x (m1)").startswith(ADDRESS_ALONE))
+
 
 if __name__ == "__main__":
     unittest.main()

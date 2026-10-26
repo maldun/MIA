@@ -17,9 +17,12 @@ def read_persona(path):
     return text if isinstance(text, str) else ""
 
 
-def persona_block(text, fallback=""):
-    """the system message: the persona (else the fallback text) and the default address; the default alone when there is neither"""
+MEMORY_INTRO = "What you remember from earlier conversations (records about the users and their plans, each with its kind and source). Use them when they help; do not recite them and do not mention that they are records:"
+
+
+def persona_block(text, fallback="", memory=""):
+    """the system message: the persona (else the fallback text) and the default address; the default alone when there is neither. The structured memory
+    (REQ-CHA-011), when there is any, follows at the end."""
     chosen = text if (text or "").strip() else fallback
-    if not (chosen or "").strip():
-        return ADDRESS_ALONE
-    return "%s\n\n%s" % (chosen.rstrip("\n"), ADDRESS_RULE)
+    block = ADDRESS_ALONE if not (chosen or "").strip() else "%s\n\n%s" % (chosen.rstrip("\n"), ADDRESS_RULE)
+    return "%s\n\n%s\n%s" % (block, MEMORY_INTRO, memory) if (memory or "").strip() else block

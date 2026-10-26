@@ -140,3 +140,20 @@ class MemoryRecords:
     def block(self, records):
         """the text for the prompt: one line per record with its kind and source; "" for none"""
         return "\n".join(self.line(doc) for doc in records)
+
+
+def memory_hooks(records, run_skill):
+    """what the app needs: (provider, remember). provider(message) -> the memory block for the system message ("" for none); remember(account, message_id, text) -> ids, for the
+    chat service after a plain chat turn. run_skill(inputs) runs the skill memory_write and gives its answer (a mapping with "records"); anything else, or a failure, remembers nothing.
+    The text given to remember is the user's own message by construction: the chat service calls it for plain chat turns only (never for /lookup, /search, files or pages)."""
+    def ask(text, known):
+        answer = run_skill({"text": text, "known": known})
+        return answer.get("records", []) if isinstance(answer, dict) else []
+
+    def provider(message):
+        return records.block(records.retrieve(message))
+
+    def remember(account, message_id, text):
+        return records.remember(account, message_id, text, "user", ask)
+
+    return provider, remember
