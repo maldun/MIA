@@ -76,6 +76,65 @@ class ChatTurnContract(unittest.TestCase):
         self.assertEqual([e["payload"]["status"] for e in seen if e["event"] == "chat_done"], ["stopped"])
         self.assertEqual(chat.stop(), {"stopped": False})
 
+    @mark.req("IF-201", "REQ-BE-005")
+    @each_provider(IF, make(answers=[["First answer."], ["Second answer."]]))
+    def test_regenerate_asks_again_for_the_last_answer_only(self, chat):
+        """TC-IF-201-05 (v1): regenerate of the last answer queues a new try and keeps the old answer; an older answer is not_the_last_answer; an unknown id is not_found."""
+        chat.send("anna", "q1")
+        chat.settle()
+        chat.send("anna", "q2")
+        chat.settle()
+        answers = [m["id"] for m in chat.history() if m["role"] == "assistant"]
+        self.assertEqual(code_of(lambda: chat.regenerate("anna", answers[0])), "not_the_last_answer")
+        self.assertEqual(code_of(lambda: chat.regenerate("anna", "nope")), "not_found")
+        result = chat.regenerate("anna", answers[1])
+        self.assertEqual(result["position"], 1)
+        chat.settle()
+        self.assertEqual(len([m for m in chat.history() if m["role"] == "assistant"]), 3)
+
+    @mark.req("IF-201", "REQ-BE-006")
+    @each_provider(IF, make(answers=[["One.", "Two."]]))
+    def test_speak_again_and_the_account_of_an_answer(self, chat):
+        """TC-IF-201-06 (v1): speak_again gives one audio_chunk per sentence; account lists plain steps in order; both are not_found for an id that is no answer."""
+        chat.send("anna", "hi")
+        chat.settle()
+        user, answer = chat.history()[0]["id"], chat.history()[-1]["id"]
+        seen = []
+        chat.subscribe(seen.append)
+        self.assertEqual(chat.speak_again(answer), {"sentences": 2})
+        self.assertEqual([e["payload"]["index"] for e in seen if e["event"] == "audio_chunk"], [0, 1])
+        steps = chat.account(answer)
+        self.assertEqual([s["seq"] for s in steps], sorted(s["seq"] for s in steps))
+        self.assertTrue(all(isinstance(s["plain"], str) and s["plain"] for s in steps))
+        for call in (lambda: chat.speak_again(user), lambda: chat.account(user), lambda: chat.account("nope")):
+            self.assertEqual(code_of(call), "not_found")
+
+    @mark.req("IF-201", "REQ-BE-028")
+    @each_provider(IF, make(answers=[["Fine."]]))
+    def test_votes_are_stored_and_the_score_is_given_per_week(self, chat):
+        """TC-IF-201-07 (v1): a vote is stored and returns the score with its weeks (`series`, ISO weeks, oldest first); a bad category or value is invalid_vote with the rule; an unknown answer is not_found; a score event is pushed."""
+        chat.send("anna", "hi")
+        chat.settle()
+        answer = chat.history()[-1]["id"]
+        seen = []
+        chat.subscribe(seen.append)
+        self.assertTrue(chat.vote("anna", answer, "answer_quality", 1)["stored"])
+        chat.advance_time(8 * 24 * 3600)
+        chat.vote("ben", "service", "service", -1)
+        score = chat.score()
+        self.assertEqual((score["overall"], score["votes"]), (0, 2))
+        self.assertEqual([(w["week"], w["overall"]) for w in score["series"]], [("2026-W02", 1), ("2026-W03", -1)])
+        self.assertEqual([e["payload"] for e in seen if e["event"] == "score"][-1], score)
+        for category, value, rule in (("nonsense", 1, "category"), ("service", 5, "value")):
+            try:
+                chat.vote("anna", "service", category, value)
+            except ServiceError as err:
+                self.assertEqual((err.code, err.rule), ("invalid_vote", rule))
+            else:
+                self.fail("no ServiceError raised")
+        self.assertEqual(code_of(lambda: chat.vote("anna", "nope", "answer_quality", 1)), "not_found")
+        self.assertEqual(chat.score()["votes"], 2)                                  # refused votes are not stored
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,4 +1,4 @@
-# IF-101 – Chat, expression, audio and REST API, v3
+# IF-101 – Chat, expression, audio and REST API, v4
 
 Owner (provider): N-2 Backend (child N-2.1)   Consumers: N-1 Web Frontend   Decided by: N-0   Mock complexity: 3 (stream of events, queue, clock, small stores)   Suite: `tests/acceptance/contract/test_if_101_chat_api.py`
 
@@ -22,7 +22,7 @@ The server sets the session at `login` as a cookie `mia_session` (HttpOnly, Same
 | `speak_again(session, message_id)` **[v1]** | id of any answer | `{"sentences": n}` | one `audio_chunk` per sentence to every connected page; 404 unknown id |
 | `account(session, message_id)` **[v1]** | id of an answer | list of `{"seq", "plain"}` | the step-by-step account of the answer in order (from the run log, IF-401); 404 for a message that is not an answer |
 | `vote(session, subject, category, value)` **[v1]** | subject = message id (answers) or a name; category in `answer_quality`, `reactions`, `character_behaviour`, `service`; value 1 or -1 | `{"stored": true, "score"}` | kept with user and time (REQ-BE-028); `422 invalid_vote` with rule `category` or `value`; 404 for an unknown answer |
-| `score(session)` **[v1]** | | `{"overall", "categories", "votes"}` | sums per category and overall; the event `score` pushes the same after each vote |
+| `score(session)` **[v1]** | | `{"overall", "categories", "votes", "series"}` **[v4: series]** | sums per category and overall; `series` = the same sums per ISO week of the vote's time, `[{"week": "YYYY-Www", "overall", "categories"}]`, oldest first, only weeks with a vote, so the sums of the weeks equal the totals (REQ-CLV-010); the event `score` pushes the same after each vote |
 | `items(session, kind)` **[v1]** | kind in `tasks`, `memos`, `memory` | list of `{id, text, author, created, source?}` | every user sees all records (CON-6) |
 | `save_item(session, kind, id, text, source)` **[v1]** | id None = new | the stored record | memory needs a `source` (422 `invalid_item`, rule `source`); empty text 422; 404 unknown id; text comes back byte for byte (FR-28); event `item_changed` to the others |
 | `delete_item(session, kind, id)` **[v1]** | | `{"deleted": true}` | any user may delete any record; 404 unknown id; event `item_changed` with `deleted: true` |
@@ -44,7 +44,7 @@ Events (server to every connected page):
 | `expression` | `{name}` a preset name of the mood map |
 | `chat_done` | `{id, text, emotion, status}`; status `done` or `stopped`; text equals the last delta |
 | `chat_error` | `{id?, message}` plain words |
-| `score` **[v1]** | `{overall, categories, votes}` |
+| `score` **[v1]** | `{overall, categories, votes, series}` **[v4: series]** |
 | `item_changed` **[v1]** | `{kind, id, author, deleted}` |
 | `trust_changed` **[v1]** | `{source, old, new, author}` |
 | `persona_changed` **[v1]** | `{author}` |
@@ -82,3 +82,4 @@ Events (server to every connected page):
 | v1 | 2026-10-26 | stored message and client id in the ack and the events; session as cookie; whoami, change_password, regenerate, speak_again, account, vote, score, items, save_item, delete_item, trust, set_trust, persona, save_persona; events variant, score, item_changed, trust_changed, persona_changed | A-03 |
 | v2 | 2026-10-26 | `logout` | A-04 |
 | v3 | 2026-10-27 | the errors `403 bad_origin` and `403 insecure_channel` (REQ-API-007, REQ-API-008, found in N-2.1 T-02); the title says v3 | A-05 |
+| v4 | 2026-10-27 | `score` and the event `score` carry `series`, the sums per ISO week (owner: score over time "by time", per week) | A-06 |

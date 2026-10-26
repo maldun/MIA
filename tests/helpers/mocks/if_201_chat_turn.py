@@ -7,7 +7,7 @@ except ImportError:
     from errors import ApiError, ServiceError
     from if_101_chat_api import ChatApiMock
 
-CODES = {"empty_text": "empty_text", "queue_full": "queue_full"}
+CODES = {"empty_text": "empty_text", "queue_full": "queue_full"}      # every other code of IF-101 (not_found, not_the_last_answer, invalid_vote) keeps its name
 
 
 class ChatTurnMock:
@@ -23,7 +23,7 @@ class ChatTurnMock:
         try:
             return fn()
         except ApiError as err:
-            raise ServiceError(CODES.get(err.code, err.code))
+            raise ServiceError(CODES.get(err.code, err.code), rule=err.rule)
 
     def _forward(self):
         for event in self._api.events(self._observer):
@@ -33,7 +33,33 @@ class ChatTurnMock:
     def send(self, account, text, client_id=None):
         result = self._call(lambda: self._api.send(self._sessions[account], text, client_id))
         self._forward()
+        return {"id": result["id"], "position": result["position"]}       # IF-201 has no `message` in the ack (the IF-101 v1 mock adds it)
+
+    # v1 (amendment A-06): the operations on answers and votes; the records, trust and persona go through the Database (IF-102), not through the chat agent
+    def regenerate(self, account, message_id):
+        result = self._call(lambda: self._api.regenerate(self._sessions[account], message_id))
+        self._forward()
         return result
+
+    def speak_again(self, message_id):
+        result = self._call(lambda: self._api.speak_again(self._observer, message_id))
+        self._forward()
+        return result
+
+    def account(self, message_id):
+        return self._call(lambda: self._api.account(self._observer, message_id))
+
+    def vote(self, account, subject, category, value):
+        result = self._call(lambda: self._api.vote(self._sessions[account], subject, category, value))
+        self._forward()
+        return result
+
+    def score(self):
+        return self._api.score(self._observer)
+
+    def advance_time(self, seconds):
+        """Test adapter: move the clock of the chat agent (the weeks of the score)."""
+        self._api.advance_time(seconds)
 
     def stop(self):
         return self._api.stop(self._observer)
