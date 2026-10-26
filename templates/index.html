@@ -39,6 +39,7 @@
   <div class="mood" id="mood">
     <span class="mood-emoji" id="mood-emoji" aria-hidden="true">😊</span>
     <span class="mood-text" id="mood-text" data-i18n="mood.ready">Ready when you are.</span>
+    <span class="mood-variant" id="variant" hidden></span>
   </div>
   <!-- caption: MIA's words while the chat is collapsed -->
   <div class="caption" id="caption" aria-hidden="true"></div>
@@ -112,6 +113,12 @@
         <a class="menu-item" id="gesture-editor-link" role="menuitem" href="{{ url_for('character_index') }}?gestures" target="_blank" rel="noopener">
           <svg class="icon" aria-hidden="true"><use href="#i-pencil"/></svg><span data-i18n="menu.gesture_editor">Gesture editor</span>
         </a>
+        <button class="menu-item" id="workspace-button" type="button" role="menuitem">
+          <svg class="icon" aria-hidden="true"><use href="#i-pencil"/></svg><span data-i18n="menu.workspace">Workspace</span>
+        </button>
+        <button class="menu-item" id="account-button" type="button" role="menuitem">
+          <svg class="icon" aria-hidden="true"><use href="#i-info"/></svg><span data-i18n="menu.account">Account</span>
+        </button>
         <button class="menu-item" id="settings-button" type="button" role="menuitem">
           <svg class="icon" aria-hidden="true"><use href="#i-gear"/></svg><span data-i18n="menu.settings">Settings</span>
         </button>
@@ -181,6 +188,32 @@
       <p class="form-error" id="login-error" role="alert" hidden></p>
       <div class="actions">
         <button type="submit" id="login-submit" data-i18n="login.submit">Log in</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="workspace" aria-labelledby="workspace-title">
+    <h2 id="workspace-title" data-i18n="workspace.title">Workspace</h2>
+    <p class="hint" data-i18n="workspace.hint">Shared by all users: everybody sees and may change everything here.</p>
+    <div class="tabs" id="workspace-tabs" role="tablist"></div>
+    <div class="workspace-body" id="workspace-body" role="tabpanel" aria-live="polite"></div>
+    <div class="actions">
+      <button type="button" id="workspace-close" data-i18n="about.close">Close</button>
+    </div>
+  </dialog>
+
+  <dialog id="account" aria-labelledby="account-title">
+    <h2 id="account-title" data-i18n="account.title">Account</h2>
+    <p><span data-i18n="account.logged_in">Logged in as</span> <strong id="account-name"></strong></p>
+    <form class="settings-form" id="account-form" autocomplete="off">
+      <h3 data-i18n="account.password">Change my password</h3>
+      <label class="setting"><span data-i18n="account.old">Current password</span><input type="password" id="account-old" autocomplete="current-password"></label>
+      <label class="setting"><span data-i18n="account.new">New password (at least 8 characters)</span><input type="password" id="account-new" autocomplete="new-password"></label>
+      <label class="setting"><span data-i18n="account.repeat">New password again</span><input type="password" id="account-repeat" autocomplete="new-password"></label>
+      <p class="form-error" id="account-error" role="alert" hidden></p>
+      <div class="actions">
+        <button type="button" id="account-close" data-i18n="about.close">Close</button>
+        <button type="submit" id="account-submit" data-i18n="account.change">Change password</button>
       </div>
     </form>
   </dialog>
