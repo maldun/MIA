@@ -756,7 +756,7 @@ package MIA_Requirements {
     }
     requirement def <'CON-3'> TechnologyChoices {
         subject mia : MiaSystem;
-        doc /* Python 3.11 to 3.13 (3.12 tested); Godot 4.6.1 with GDScript only and the Compatibility renderer; the chat page
+        doc /* Python 3.12 (3.11 and 3.13 are not supported for now); Godot 4.6.1 with GDScript only and the Compatibility renderer; the chat page
                in plain HTML, CSS and ES modules without build step or UI framework. */
     }
     requirement def <'CON-4'> SecureContext {
@@ -2130,7 +2130,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-API-011'> PythonVersions_Api011 {
         subject s : WebApplication;
-        doc /* The Backend shall run every one of its parts on Python 3.11 to 3.13. */
+        doc /* The Backend shall run every one of its parts on Python 3.12. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-API-012'> StateOnlyThroughTheStorageInterface_Api012 {
@@ -3030,7 +3030,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-BE-073'> PythonVersions_Be073 {
         subject s : WebApplication;
-        doc /* The Backend shall run on Python 3.11 to 3.13. */
+        doc /* The Backend shall run on Python 3.12. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-BE-074'> StateOnlyThroughTheStorageInterface_Be074 {

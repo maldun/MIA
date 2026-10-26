@@ -872,12 +872,12 @@ The server and accounts, the chat agent, workflow management, workflow execution
 
 ### REQ-BE-073 – Python versions
 - Level: high   Subject: WebApplication
-- Text: The Backend shall run on Python 3.11 to 3.13.
+- Text: The Backend shall run on Python 3.12.
 - Rationale: refines CON-3, NFR-9
 - Parent: CON-3, NFR-9
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-20: the unit tests pass on 3.12 and the import works on 3.11 and 3.13 (exact)
+- Acceptance criterion: AC-20: the unit tests pass on 3.12 (exact)
 - Verified by: TC-API-011, TC-N2-005
 - Status: Draft
 - History: –

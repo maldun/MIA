@@ -128,12 +128,12 @@ The gateway of the Backend: the Socket.IO and REST surface (IF-101, IF-104), acc
 
 ### REQ-API-011 – Python versions
 - Level: low   Subject: WebApplication
-- Text: The Backend shall run every one of its parts on Python 3.11 to 3.13.
+- Text: The Backend shall run every one of its parts on Python 3.12.
 - Rationale: refines REQ-BE-073
 - Parent: REQ-BE-073
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-20: the unit tests pass on 3.12 and the import works on 3.11 and 3.13 (exact)
+- Acceptance criterion: AC-20: the unit tests pass on 3.12 (exact)
 - Verified by: TC-API-011
 - Status: Draft
 - History: –

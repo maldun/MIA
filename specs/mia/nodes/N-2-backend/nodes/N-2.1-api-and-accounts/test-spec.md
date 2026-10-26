@@ -18,7 +18,7 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-101
 | TC-API-008 | REQ-API-008 | Component | 2 | component test with the mocks of the neighbouring interfaces | AC-14: plain HTTP from a LAN address is refused | exact |
 | TC-API-009 | REQ-API-009 | Component | 1 | unit test with the fake model server and the mocks of the interfaces | AC-15: 100 % of changes in a scripted session carry the account | as stated |
 | TC-API-010 | REQ-API-010 | Component | 2 | component test with the mocks of the neighbouring interfaces | AC-20: a second user sees and changes a first user's workflow, preset and persona | as stated |
-| TC-API-011 | REQ-API-011 | Component | 2 | component test with the mocks of the neighbouring interfaces | AC-20: the unit tests pass on 3.12 and the import works on 3.11 and 3.13 | exact |
+| TC-API-011 | REQ-API-011 | Component | 2 | component test with the mocks of the neighbouring interfaces | AC-20: the unit tests pass on 3.12 | exact |
 | TC-API-012 | REQ-API-012 | Inspection | 1 | the code and the log files of the repository | AC-15: no database driver is imported outside the storage client | as stated |
 | TC-API-013 | REQ-API-013 | System | 3 | the container started alone against the mocks of its neighbours | AC-29: the container starts alone against the mocks and serves the chat page | as stated |
 | TC-API-014 | REQ-API-014 | Component | 2 | component test with the mocks of the neighbouring interfaces | AC-16: with the fake storage each of the six operations works; an invalid graph is refused with the rule named | exact |

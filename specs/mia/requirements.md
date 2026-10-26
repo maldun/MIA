@@ -599,12 +599,12 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 
 ### CON-3 – Technology
 - Level: top   Subject: MiaSystem
-- Text: The MIA system shall use Python 3.11 to 3.13, Godot 4.6.1 with GDScript only and the Compatibility renderer, and a chat page in plain HTML, CSS and ES modules without build step or UI framework.
+- Text: The MIA system shall use Python 3.12, Godot 4.6.1 with GDScript only and the Compatibility renderer, and a chat page in plain HTML, CSS and ES modules without build step or UI framework.
 - Rationale: HLS section 3.3, CON-3
 - Parent: HLS CON-3
 - Priority: Must
 - Verification method: Inspection
-- Acceptance criterion: AC-20: Python 3.11 to 3.13; Godot 4.6.1 with GDScript and the Compatibility renderer; chat page in plain HTML, CSS and ES modules without build step
+- Acceptance criterion: AC-20: Python 3.12; Godot 4.6.1 with GDScript and the Compatibility renderer; chat page in plain HTML, CSS and ES modules without build step
 - Refined in: N-1, N-2
 - Verified by: TC-MIA-020
 - Status: Draft
