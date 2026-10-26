@@ -14,7 +14,7 @@ An independent add-on tool that shows and edits workflow and context graphs thro
 - Priority: Should
 - Verification method: Demonstration
 - Acceptance criterion: AC-16: a recorded library entry of the lookup is drawn with all its nodes and edges
-- Verified by: –
+- Verified by: TC-GA-001
 - Status: Draft
 - History: –
 
@@ -26,7 +26,7 @@ An independent add-on tool that shows and edits workflow and context graphs thro
 - Priority: Should
 - Verification method: Test
 - Acceptance criterion: AC-16: a node edited as JSON is saved as the edited dictionary (exact)
-- Verified by: –
+- Verified by: TC-GA-002
 - Status: Draft
 - History: –
 
@@ -38,7 +38,7 @@ An independent add-on tool that shows and edits workflow and context graphs thro
 - Priority: Should
 - Verification method: Test
 - Acceptance criterion: AC-27: each violation is refused with the rule named, in the app and again by the backend
-- Verified by: –
+- Verified by: TC-GA-003
 - Status: Draft
 - History: –
 
@@ -50,7 +50,7 @@ An independent add-on tool that shows and edits workflow and context graphs thro
 - Priority: Should
 - Verification method: Test
 - Acceptance criterion: AC-16: a former version is restored and saved as a new version
-- Verified by: –
+- Verified by: TC-GA-004
 - Status: Draft
 - History: –
 
@@ -62,7 +62,7 @@ An independent add-on tool that shows and edits workflow and context graphs thro
 - Priority: Should
 - Verification method: Inspection, Test
 - Acceptance criterion: AC-15: the Graph app imports no database driver (exact); every call goes to IF-104
-- Verified by: –
+- Verified by: TC-GA-005
 - Status: Draft
 - History: –
 
@@ -74,7 +74,7 @@ An independent add-on tool that shows and edits workflow and context graphs thro
 - Priority: Should
 - Verification method: Test
 - Acceptance criterion: AC-10: a context graph edit appears as a new version
-- Verified by: –
+- Verified by: TC-GA-006
 - Status: Draft
 - History: –
 
@@ -86,7 +86,7 @@ An independent add-on tool that shows and edits workflow and context graphs thro
 - Priority: Should
 - Verification method: Test
 - Acceptance criterion: AC-14: a request without a session shows the login only (exact); the Graph app holds no password check of its own
-- Verified by: –
+- Verified by: TC-GA-007
 - Status: Draft
 - History: –
 
@@ -98,7 +98,7 @@ An independent add-on tool that shows and edits workflow and context graphs thro
 - Priority: Could
 - Verification method: Test
 - Acceptance criterion: AC-16: export then seed gives identical entries (exact)
-- Verified by: –
+- Verified by: TC-GA-008
 - Status: Draft
 - History: –
 
@@ -110,7 +110,7 @@ An independent add-on tool that shows and edits workflow and context graphs thro
 - Priority: Should
 - Verification method: Inspection
 - Acceptance criterion: AC-20: no bundler files; the library is in the repository
-- Verified by: –
+- Verified by: TC-GA-009
 - Status: Draft
 - History: –
 
@@ -122,7 +122,7 @@ An independent add-on tool that shows and edits workflow and context graphs thro
 - Priority: Should
 - Verification method: Test
 - Acceptance criterion: AC-5: a browser test finds 0 requests outside the host
-- Verified by: –
+- Verified by: TC-GA-010
 - Status: Draft
 - History: –
 
@@ -134,6 +134,6 @@ An independent add-on tool that shows and edits workflow and context graphs thro
 - Priority: Should
 - Verification method: Test
 - Acceptance criterion: AC-29: starts alone against the mock of IF-104 and in the stack
-- Verified by: –
+- Verified by: TC-GA-011
 - Status: Draft
 - History: –
