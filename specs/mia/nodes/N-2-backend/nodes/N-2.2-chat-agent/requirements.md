@@ -14,7 +14,7 @@ The persona's side: the shared conversation, the answer queue, persona, mood, me
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-1: with the fake model each scripted answer arrives as ordered sentences
-- Verified by: –
+- Verified by: TC-CHA-001
 - Status: Draft
 - History: –
 
@@ -26,7 +26,7 @@ The persona's side: the shared conversation, the answer queue, persona, mood, me
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-1: two users' messages appear with their names in the same history
-- Verified by: –
+- Verified by: TC-CHA-002
 - Status: Draft
 - History: –
 
@@ -38,7 +38,7 @@ The persona's side: the shared conversation, the answer queue, persona, mood, me
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-19: with 5 waiting messages the sixth is refused with a plain message; a third waiting message of one user is refused while another user can still send; positions are reported
-- Verified by: –
+- Verified by: TC-CHA-003
 - Status: Draft
 - History: –
 
@@ -50,7 +50,7 @@ The persona's side: the shared conversation, the answer queue, persona, mood, me
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-1: after a stop request no further sentence is sent (exact)
-- Verified by: –
+- Verified by: TC-CHA-004
 - Status: Draft
 - History: –
 
@@ -62,7 +62,7 @@ The persona's side: the shared conversation, the answer queue, persona, mood, me
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-1: the bound is held; deletion without confirmation is refused
-- Verified by: –
+- Verified by: TC-CHA-005
 - Status: Draft
 - History: –
 
@@ -74,7 +74,7 @@ The persona's side: the shared conversation, the answer queue, persona, mood, me
 - Priority: Should
 - Verification method: Test
 - Acceptance criterion: AC-1: two requests give a new answer and a new audio stream
-- Verified by: –
+- Verified by: TC-CHA-006
 - Status: Draft
 - History: –
 
@@ -86,7 +86,7 @@ The persona's side: the shared conversation, the answer queue, persona, mood, me
 - Priority: Should
 - Verification method: Test
 - Acceptance criterion: AC-13: every mood of the map has a line or is declared silent; a missing file is logged and skipped
-- Verified by: –
+- Verified by: TC-CHA-007
 - Status: Draft
 - History: –
 
@@ -98,7 +98,7 @@ The persona's side: the shared conversation, the answer queue, persona, mood, me
 - Priority: Should
 - Verification method: Measurement
 - Acceptance criterion: AC-8: check dialogues pass at a rate fixed in Plan against the recorded baseline, decided statistically
-- Verified by: –
+- Verified by: TC-CHA-008
 - Status: Draft
 - History: –
 
@@ -110,7 +110,7 @@ The persona's side: the shared conversation, the answer queue, persona, mood, me
 - Priority: Should
 - Verification method: Test
 - Acceptance criterion: AC-17: for each of the 7 situations the held mood equals the mood map
-- Verified by: –
+- Verified by: TC-CHA-009
 - Status: Draft
 - History: –
 
@@ -122,7 +122,7 @@ The persona's side: the shared conversation, the answer queue, persona, mood, me
 - Priority: Could
 - Verification method: Test
 - Acceptance criterion: AC-18: a scripted score change moves the mood offset in the right direction
-- Verified by: –
+- Verified by: TC-CHA-010
 - Status: Draft
 - History: –
 
@@ -134,7 +134,7 @@ The persona's side: the shared conversation, the answer queue, persona, mood, me
 - Priority: Should
 - Verification method: Measurement
 - Acceptance criterion: AC-24: the memory test set is passed at least as well as today's dreaming at equal or lower token cost
-- Verified by: –
+- Verified by: TC-CHA-011
 - Status: Draft
 - History: –
 
@@ -146,7 +146,7 @@ The persona's side: the shared conversation, the answer queue, persona, mood, me
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-6: a page that states a fact about a user leaves the memory unchanged (exact)
-- Verified by: –
+- Verified by: TC-CHA-012
 - Status: Draft
 - History: –
 
@@ -158,7 +158,7 @@ The persona's side: the shared conversation, the answer queue, persona, mood, me
 - Priority: Should
 - Verification method: Test
 - Acceptance criterion: AC-24: the three actions work on a sample record
-- Verified by: –
+- Verified by: TC-CHA-013
 - Status: Draft
 - History: –
 
@@ -170,7 +170,7 @@ The persona's side: the shared conversation, the answer queue, persona, mood, me
 - Priority: Should
 - Verification method: Test, Measurement
 - Acceptance criterion: AC-25: the detectors keep their recorded precision and recall on the behaviour suite
-- Verified by: –
+- Verified by: TC-CHA-014
 - Status: Draft
 - History: –
 
@@ -182,7 +182,7 @@ The persona's side: the shared conversation, the answer queue, persona, mood, me
 - Priority: Should
 - Verification method: Test
 - Acceptance criterion: AC-18: 100 % of scripted votes are stored complete and the scores equal their sums
-- Verified by: –
+- Verified by: TC-CHA-015
 - Status: Draft
 - History: –
 
@@ -194,7 +194,7 @@ The persona's side: the shared conversation, the answer queue, persona, mood, me
 - Priority: Should
 - Verification method: Test
 - Acceptance criterion: AC-18, AC-11: after the minus the answer text is unchanged (exact) and one case is proposed
-- Verified by: –
+- Verified by: TC-CHA-016
 - Status: Draft
 - History: –
 
@@ -206,7 +206,7 @@ The persona's side: the shared conversation, the answer queue, persona, mood, me
 - Priority: Should
 - Verification method: Test, Measurement
 - Acceptance criterion: AC-11: in 1000 opportunities after 5 net negative votes the behaviour appears at most 10 times
-- Verified by: –
+- Verified by: TC-CHA-017
 - Status: Draft
 - History: –
 
@@ -218,7 +218,7 @@ The persona's side: the shared conversation, the answer queue, persona, mood, me
 - Priority: Should
 - Verification method: Test
 - Acceptance criterion: AC-11: a reset restores the default rate; a vote on a fact leaves counters of facts unchanged
-- Verified by: –
+- Verified by: TC-CHA-018
 - Status: Draft
 - History: –
 
@@ -230,7 +230,7 @@ The persona's side: the shared conversation, the answer queue, persona, mood, me
 - Priority: Should
 - Verification method: Test
 - Acceptance criterion: AC-12: 50 of 50 stored items are recited word for word on request and at their due time (exact)
-- Verified by: –
+- Verified by: TC-CHA-019
 - Status: Draft
 - History: –
 
@@ -242,7 +242,7 @@ The persona's side: the shared conversation, the answer queue, persona, mood, me
 - Priority: Must
 - Verification method: Inspection, Test
 - Acceptance criterion: AC-15: no database driver is imported outside the storage client
-- Verified by: –
+- Verified by: TC-CHA-020
 - Status: Draft
 - History: –
 

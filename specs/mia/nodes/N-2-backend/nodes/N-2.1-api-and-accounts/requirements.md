@@ -14,7 +14,7 @@ The gateway of the Backend: the Socket.IO and REST surface (IF-101, IF-104), acc
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-1: with the fake model each scripted answer arrives as ordered sentences
-- Verified by: –
+- Verified by: TC-API-001
 - Status: Draft
 - History: –
 
@@ -26,7 +26,7 @@ The gateway of the Backend: the Socket.IO and REST surface (IF-101, IF-104), acc
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-15: a change by one user is visible on a second connection within 5 s with its author
-- Verified by: –
+- Verified by: TC-API-002
 - Status: Draft
 - History: –
 
@@ -38,7 +38,7 @@ The gateway of the Backend: the Socket.IO and REST surface (IF-101, IF-104), acc
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-14: correct credentials open a session; wrong ones do not (exact)
-- Verified by: –
+- Verified by: TC-API-003
 - Status: Draft
 - History: –
 
@@ -50,7 +50,7 @@ The gateway of the Backend: the Socket.IO and REST surface (IF-101, IF-104), acc
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-14: the sixth failed attempt within a minute is refused even with the right password (exact)
-- Verified by: –
+- Verified by: TC-API-004
 - Status: Draft
 - History: –
 
@@ -62,7 +62,7 @@ The gateway of the Backend: the Socket.IO and REST surface (IF-101, IF-104), acc
 - Priority: Must
 - Verification method: Test, Inspection
 - Acceptance criterion: AC-14: a search of the database and all logs after 10 logins finds no password (exact)
-- Verified by: –
+- Verified by: TC-API-005
 - Status: Draft
 - History: –
 
@@ -74,7 +74,7 @@ The gateway of the Backend: the Socket.IO and REST surface (IF-101, IF-104), acc
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-14: a non-owner's create request is refused (exact)
-- Verified by: –
+- Verified by: TC-API-006
 - Status: Draft
 - History: –
 
@@ -86,7 +86,7 @@ The gateway of the Backend: the Socket.IO and REST surface (IF-101, IF-104), acc
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-14: a request without a session is refused; a foreign origin is refused; the rate limit value is set in Plan
-- Verified by: –
+- Verified by: TC-API-007
 - Status: Draft
 - History: –
 
@@ -98,7 +98,7 @@ The gateway of the Backend: the Socket.IO and REST surface (IF-101, IF-104), acc
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-14: plain HTTP from a LAN address is refused (exact)
-- Verified by: –
+- Verified by: TC-API-008
 - Status: Draft
 - History: –
 
@@ -110,7 +110,7 @@ The gateway of the Backend: the Socket.IO and REST surface (IF-101, IF-104), acc
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-15: 100 % of changes in a scripted session carry the account
-- Verified by: –
+- Verified by: TC-API-009
 - Status: Draft
 - History: –
 
@@ -122,7 +122,7 @@ The gateway of the Backend: the Socket.IO and REST surface (IF-101, IF-104), acc
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-20: a second user sees and changes a first user's workflow, preset and persona
-- Verified by: –
+- Verified by: TC-API-010
 - Status: Draft
 - History: –
 
@@ -134,7 +134,7 @@ The gateway of the Backend: the Socket.IO and REST surface (IF-101, IF-104), acc
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-20: the unit tests pass on 3.12 and the import works on 3.11 and 3.13 (exact)
-- Verified by: –
+- Verified by: TC-API-011
 - Status: Draft
 - History: –
 
@@ -146,7 +146,7 @@ The gateway of the Backend: the Socket.IO and REST surface (IF-101, IF-104), acc
 - Priority: Must
 - Verification method: Inspection, Test
 - Acceptance criterion: AC-15: no database driver is imported outside the storage client
-- Verified by: –
+- Verified by: TC-API-012
 - Status: Draft
 - History: –
 
@@ -158,7 +158,7 @@ The gateway of the Backend: the Socket.IO and REST surface (IF-101, IF-104), acc
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-29: the container starts alone against the mocks and serves the chat page
-- Verified by: –
+- Verified by: TC-API-013
 - Status: Draft
 - History: –
 
@@ -170,7 +170,7 @@ The gateway of the Backend: the Socket.IO and REST surface (IF-101, IF-104), acc
 - Priority: Should
 - Verification method: Test
 - Acceptance criterion: AC-16: with the fake storage each of the six operations works; an invalid graph is refused with the rule named (exact)
-- Verified by: –
+- Verified by: TC-API-014
 - Status: Draft
 - History: –
 
@@ -182,7 +182,7 @@ The gateway of the Backend: the Socket.IO and REST surface (IF-101, IF-104), acc
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-1, AC-14: the contract suite test_if_101_chat_api.py passes against the API and accounts (stage 2)
-- Verified by: –
+- Verified by: TC-API-015
 - Status: Draft
 - History: –
 
@@ -194,6 +194,6 @@ The gateway of the Backend: the Socket.IO and REST surface (IF-101, IF-104), acc
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-16: the contract suite test_if_104_graph_api.py passes against the API and accounts (stage 2)
-- Verified by: –
+- Verified by: TC-API-016
 - Status: Draft
 - History: –

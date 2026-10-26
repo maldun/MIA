@@ -14,7 +14,7 @@ The tools that any workflow can call, each counted against the budgets of the ru
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-2: in the run log the code checks precede the first model call of each claim
-- Verified by: –
+- Verified by: TC-TLS-001
 - Status: Draft
 - History: –
 
@@ -26,7 +26,7 @@ The tools that any workflow can call, each counted against the budgets of the ru
 - Priority: Must
 - Verification method: Test, Measurement
 - Acceptance criterion: AC-2: every answer of the lookup suite carries a source and a quote or the verdict unknown
-- Verified by: –
+- Verified by: TC-TLS-002
 - Status: Draft
 - History: –
 
@@ -38,7 +38,7 @@ The tools that any workflow can call, each counted against the budgets of the ru
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-3: 0 violations of the cut-off; retracted works are dropped and listed (exact)
-- Verified by: –
+- Verified by: TC-TLS-003
 - Status: Draft
 - History: –
 
@@ -50,7 +50,7 @@ The tools that any workflow can call, each counted against the budgets of the ru
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-6: injected instructions change no verdict and start no tool (red-team cases)
-- Verified by: –
+- Verified by: TC-TLS-004
 - Status: Draft
 - History: –
 
@@ -62,7 +62,7 @@ The tools that any workflow can call, each counted against the budgets of the ru
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-6: with the sandbox removed script checks report unavailable and nothing runs (exact)
-- Verified by: –
+- Verified by: TC-TLS-005
 - Status: Draft
 - History: –
 
@@ -74,7 +74,7 @@ The tools that any workflow can call, each counted against the budgets of the ru
 - Priority: Must
 - Verification method: Measurement
 - Acceptance criterion: AC-3: 0 invented references and 100 % of cited quotes found in their source
-- Verified by: –
+- Verified by: TC-TLS-006
 - Status: Draft
 - History: –
 
@@ -86,7 +86,7 @@ The tools that any workflow can call, each counted against the budgets of the ru
 - Priority: Must
 - Verification method: Test, Inspection
 - Acceptance criterion: AC-5: the web log lists every query that left the machine
-- Verified by: –
+- Verified by: TC-TLS-007
 - Status: Draft
 - History: –
 
@@ -98,7 +98,7 @@ The tools that any workflow can call, each counted against the budgets of the ru
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-6: a call over the budget is refused with the budget named; every output carries its trust label
-- Verified by: –
+- Verified by: TC-TLS-008
 - Status: Draft
 - History: –
 

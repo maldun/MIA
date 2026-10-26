@@ -14,7 +14,7 @@ Running a workflow under budgets: the pipeline runner, model management, verific
 - Priority: Should
 - Verification method: Test
 - Acceptance criterion: AC-21: the account equals a rendering of the logged events (exact)
-- Verified by: –
+- Verified by: TC-LOG-001, TC-N24-001
 - Status: Draft
 - History: –
 
@@ -26,7 +26,7 @@ Running a workflow under budgets: the pipeline runner, model management, verific
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-23: a chat message alone starts no internet task (exact)
-- Verified by: –
+- Verified by: TC-RUN-001, TC-N24-003
 - Status: Draft
 - History: –
 
@@ -38,7 +38,7 @@ Running a workflow under budgets: the pipeline runner, model management, verific
 - Priority: Must
 - Verification method: Test, Demonstration
 - Acceptance criterion: AC-23: /light! and /full! switch after confirmation; memory is freed on request
-- Verified by: –
+- Verified by: TC-RUN-002, TC-N24-003
 - Status: Draft
 - History: –
 
@@ -50,7 +50,7 @@ Running a workflow under budgets: the pipeline runner, model management, verific
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-23: with the fake server down the user gets the plain message (exact)
-- Verified by: –
+- Verified by: TC-RUN-003, TC-N24-003
 - Status: Draft
 - History: –
 
@@ -62,7 +62,7 @@ Running a workflow under budgets: the pipeline runner, model management, verific
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-2: in the run log the code checks precede the first model call of each claim
-- Verified by: –
+- Verified by: TC-TLS-001, TC-N24-002
 - Status: Draft
 - History: –
 
@@ -74,7 +74,7 @@ Running a workflow under budgets: the pipeline runner, model management, verific
 - Priority: Must
 - Verification method: Test, Measurement
 - Acceptance criterion: AC-2: every answer of the lookup suite carries a source and a quote or the verdict unknown
-- Verified by: –
+- Verified by: TC-TLS-002, TC-N24-002
 - Status: Draft
 - History: –
 
@@ -86,7 +86,7 @@ Running a workflow under budgets: the pipeline runner, model management, verific
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-3: 0 violations of the cut-off; retracted works are dropped and listed (exact)
-- Verified by: –
+- Verified by: TC-TLS-003, TC-N24-002
 - Status: Draft
 - History: –
 
@@ -98,7 +98,7 @@ Running a workflow under budgets: the pipeline runner, model management, verific
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-4: a secret fed to the writer does not appear in the log (exact); a log with a broken order is reported
-- Verified by: –
+- Verified by: TC-LOG-002, TC-N24-001
 - Status: Draft
 - History: –
 
@@ -110,7 +110,7 @@ Running a workflow under budgets: the pipeline runner, model management, verific
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-4: replay equals the original (exact)
-- Verified by: –
+- Verified by: TC-LOG-003, TC-N24-001
 - Status: Draft
 - History: –
 
@@ -122,7 +122,7 @@ Running a workflow under budgets: the pipeline runner, model management, verific
 - Priority: Should
 - Verification method: Test
 - Acceptance criterion: AC-4: on the recorded lookup run 100 % of statements link to a query
-- Verified by: –
+- Verified by: TC-LOG-004, TC-N24-001
 - Status: Draft
 - History: –
 
@@ -134,7 +134,7 @@ Running a workflow under budgets: the pipeline runner, model management, verific
 - Priority: Could
 - Verification method: Test
 - Acceptance criterion: AC-22: a learned choice is logged with the default and can be switched off and reversed
-- Verified by: –
+- Verified by: TC-RUN-004, TC-N24-003
 - Status: Draft
 - History: –
 
@@ -146,7 +146,7 @@ Running a workflow under budgets: the pipeline runner, model management, verific
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-22: over the lookup suites 100 % of inputs are at most 4096 tokens at num_ctx 8192
-- Verified by: –
+- Verified by: TC-RUN-005, TC-N24-003
 - Status: Draft
 - History: –
 
@@ -158,7 +158,7 @@ Running a workflow under budgets: the pipeline runner, model management, verific
 - Priority: Must
 - Verification method: Measurement
 - Acceptance criterion: AC-22: on the lookup suites the maximum is below 15
-- Verified by: –
+- Verified by: TC-RUN-006, TC-N24-003
 - Status: Draft
 - History: –
 
@@ -170,7 +170,7 @@ Running a workflow under budgets: the pipeline runner, model management, verific
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-6: injected instructions change no verdict and start no tool (red-team cases)
-- Verified by: –
+- Verified by: TC-TLS-004, TC-TLS-008, TC-N24-002
 - Status: Draft
 - History: –
 
@@ -182,7 +182,7 @@ Running a workflow under budgets: the pipeline runner, model management, verific
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-6: with the sandbox removed script checks report unavailable and nothing runs (exact)
-- Verified by: –
+- Verified by: TC-TLS-005, TC-N24-002
 - Status: Draft
 - History: –
 
@@ -194,7 +194,7 @@ Running a workflow under budgets: the pipeline runner, model management, verific
 - Priority: Must
 - Verification method: Measurement
 - Acceptance criterion: AC-3: 0 invented references and 100 % of cited quotes found in their source
-- Verified by: –
+- Verified by: TC-TLS-006, TC-N24-002
 - Status: Draft
 - History: –
 
@@ -206,7 +206,7 @@ Running a workflow under budgets: the pipeline runner, model management, verific
 - Priority: Must
 - Verification method: Test, Inspection
 - Acceptance criterion: AC-5: the web log lists every query that left the machine
-- Verified by: –
+- Verified by: TC-TLS-007, TC-N24-002
 - Status: Draft
 - History: –
 
@@ -218,7 +218,7 @@ Running a workflow under budgets: the pipeline runner, model management, verific
 - Priority: Must
 - Verification method: Measurement
 - Acceptance criterion: AC-19: median over 20 runs is within 10 s, also while a review slice runs
-- Verified by: –
+- Verified by: TC-RUN-007, TC-N24-003
 - Status: Draft
 - History: –
 
@@ -230,7 +230,7 @@ Running a workflow under budgets: the pipeline runner, model management, verific
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-19: each of the four budgets ends a scripted run with a message naming it
-- Verified by: –
+- Verified by: TC-RUN-008, TC-RUN-012, TC-TLS-008, TC-N24-003
 - Status: Draft
 - History: –
 
@@ -242,7 +242,7 @@ Running a workflow under budgets: the pipeline runner, model management, verific
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-19: with a review slice running a chat message gets its first text within 10 s
-- Verified by: –
+- Verified by: TC-RUN-009, TC-N24-003
 - Status: Draft
 - History: –
 
@@ -254,7 +254,7 @@ Running a workflow under budgets: the pipeline runner, model management, verific
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-19: two simultaneous messages are answered one after the other
-- Verified by: –
+- Verified by: TC-RUN-010, TC-N24-003
 - Status: Draft
 - History: –
 
@@ -266,7 +266,7 @@ Running a workflow under budgets: the pipeline runner, model management, verific
 - Priority: Must
 - Verification method: Inspection, Test
 - Acceptance criterion: AC-15: no database driver is imported outside the storage client
-- Verified by: –
+- Verified by: TC-LOG-005, TC-N24-001
 - Status: Draft
 - History: –
 
@@ -278,7 +278,7 @@ Running a workflow under budgets: the pipeline runner, model management, verific
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-23: the contract suite test_if_103_model_server.py passes against the Workflow execution (stage 2)
-- Verified by: –
+- Verified by: TC-RUN-011, TC-RUN-013, TC-N24-003
 - Status: Draft
 - History: –
 
@@ -290,7 +290,7 @@ Running a workflow under budgets: the pipeline runner, model management, verific
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-2, AC-8: the contract suite test_if_105_evaluation_access.py passes against the Workflow execution (stage 2)
-- Verified by: TC-IF-105-01..04
+- Verified by: TC-RUN-015, TC-N24-003
 - Status: Draft
 - History: –
 
@@ -306,6 +306,6 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-19, AC-28: the contract suite test_if_202_run_workflow.py passes against the mock (stage 1) and the Workflow execution (stage 2)
-- Verified by: TC-IF-202-01..05
+- Verified by: TC-IF-202-01..05, TC-RUN-014, TC-N24-003
 - Status: Draft
 - History: v0, amendment 5/7 (2026-10-25)

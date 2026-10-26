@@ -86,7 +86,7 @@ decomposition:
       folder: specs/mia/nodes/N-1-web-frontend/nodes/N-1.1-chat-and-login-views
       status: Planned
       children: []
-      tasks: 8                          # estimates until the node is planned
+      tasks: 8
       test_stage: 2                     # node --test "tests/js/*.test.mjs" and browser checks
 
     - id: N-1.2
@@ -116,7 +116,7 @@ decomposition:
       folder: specs/mia/nodes/N-2-backend/nodes/N-2.1-api-and-accounts
       status: Planned
       children: []
-      tasks: 6                          # estimates until the node is planned
+      tasks: 5
       test_stage: 2
       leaf_exception: "the gateway: two interfaces face outward (IF-101, IF-104) and three inward (IF-201, IF-203, IF-102); the inward ones are single-call clients, the node stays one routing layer"
 
@@ -127,7 +127,7 @@ decomposition:
       folder: specs/mia/nodes/N-2-backend/nodes/N-2.2-chat-agent
       status: Planned
       children: []
-      tasks: 8
+      tasks: 7
       test_stage: 3                     # model-dependent behaviour is decided by evals (stage 4)
       leaf_exception: "the hub of the persona: IF-201 outward, IF-202 and IF-204 as single-call clients and IF-102 as storage client; cut again by concern (conversation and queue, memory, feedback and adaptation) if the plan exceeds 8 tasks"
 
@@ -138,7 +138,7 @@ decomposition:
       folder: specs/mia/nodes/N-2-backend/nodes/N-2.3-workflow-management
       status: Planned
       children: []
-      tasks: 7
+      tasks: 8
       test_stage: 2
 
     - id: N-2.4
@@ -163,7 +163,7 @@ decomposition:
       folder: specs/mia/nodes/N-2-backend/nodes/N-2.4-workflow-execution/nodes/N-2.4.1-pipeline-runner
       status: Planned
       children: []
-      tasks: 8                          # estimates until the node is planned
+      tasks: 7
       test_stage: 3
       leaf_exception: "a hub by nature: it provides IF-202 and IF-105 (the evaluation access is a thin facade over the same run, options and cost) and consumes IF-203, IF-103, IF-401 and IF-402, every one a single-call client; it names no particular workflow"
 
@@ -174,7 +174,7 @@ decomposition:
       folder: specs/mia/nodes/N-2-backend/nodes/N-2.4-workflow-execution/nodes/N-2.4.2-tools-and-sandbox
       status: Planned
       children: []
-      tasks: 8
+      tasks: 7
       test_stage: 3
       leaf_exception: "provides IF-402 and consumes IF-401, IF-404 and IF-405; the two external sources are single-call clients, each tool is a small package"
 
@@ -195,7 +195,7 @@ decomposition:
       folder: specs/mia/nodes/N-2-backend/nodes/N-2.5-voice-synthesis
       status: Planned
       children: []
-      tasks: 4
+      tasks: 3
       test_stage: 2
 
     - id: N-4.1

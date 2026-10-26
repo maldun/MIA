@@ -14,7 +14,7 @@ The log is the source of truth: typed events with a run id, replay and compariso
 - Priority: Should
 - Verification method: Test
 - Acceptance criterion: AC-21: the account equals a rendering of the logged events (exact)
-- Verified by: –
+- Verified by: TC-LOG-001
 - Status: Draft
 - History: –
 
@@ -26,7 +26,7 @@ The log is the source of truth: typed events with a run id, replay and compariso
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-4: a secret fed to the writer does not appear in the log (exact); a log with a broken order is reported
-- Verified by: –
+- Verified by: TC-LOG-002
 - Status: Draft
 - History: –
 
@@ -38,7 +38,7 @@ The log is the source of truth: typed events with a run id, replay and compariso
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-4: replay equals the original (exact)
-- Verified by: –
+- Verified by: TC-LOG-003
 - Status: Draft
 - History: –
 
@@ -50,7 +50,7 @@ The log is the source of truth: typed events with a run id, replay and compariso
 - Priority: Should
 - Verification method: Test
 - Acceptance criterion: AC-4: on the recorded lookup run 100 % of statements link to a query
-- Verified by: –
+- Verified by: TC-LOG-004
 - Status: Draft
 - History: –
 
@@ -62,7 +62,7 @@ The log is the source of truth: typed events with a run id, replay and compariso
 - Priority: Must
 - Verification method: Inspection, Test
 - Acceptance criterion: AC-15: no database driver is imported outside the storage client
-- Verified by: –
+- Verified by: TC-LOG-005
 - Status: Draft
 - History: –
 

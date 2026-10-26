@@ -14,7 +14,7 @@ Speech on the host: filter the text, synthesise sentence by sentence with the op
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-13: each sentence of a 5-sentence answer yields one audio chunk
-- Verified by: –
+- Verified by: TC-VOI-001
 - Status: Draft
 - History: –
 
@@ -26,7 +26,7 @@ Speech on the host: filter the text, synthesise sentence by sentence with the op
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-13: on 10 answers with markup the synthesis input contains none (exact)
-- Verified by: –
+- Verified by: TC-VOI-002
 - Status: Draft
 - History: –
 
@@ -38,7 +38,7 @@ Speech on the host: filter the text, synthesise sentence by sentence with the op
 - Priority: Should
 - Verification method: Test
 - Acceptance criterion: AC-13: every mood of the map has a line or is declared silent; a missing file is logged and skipped
-- Verified by: –
+- Verified by: TC-VOI-003
 - Status: Draft
 - History: –
 
@@ -50,7 +50,7 @@ Speech on the host: filter the text, synthesise sentence by sentence with the op
 - Priority: Should
 - Verification method: Inspection
 - Acceptance criterion: AC-13: no default line is a third-party recording
-- Verified by: –
+- Verified by: TC-VOI-004
 - Status: Draft
 - History: –
 
