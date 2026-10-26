@@ -20,6 +20,17 @@
         "dreaming": {"emoji": "🌙", "texts": ["Sorting my memories ..."]},
         "offline":  {"emoji": "🔌", "texts": ["Can't reach my brain right now."]},
         "light":    {"emoji": "🔋", "texts": ["Light mode: saving energy."]},
-        "full":     {"emoji": "⚡", "texts": ["Full power!"]}
-    }
+        "full":     {"emoji": "⚡", "texts": ["Full power!"]},
+        "waiting":  {"emoji": "⏳", "texts": ["Waiting in line ..."]}
+    },
+    "situations": {
+        "idle":     {"emotion": null},
+        "thinking": {"activity": "thinking"},
+        "speaking": {"activity": "speaking"},
+        "waiting":  {"activity": "waiting"},
+        "greeting": {"emotion": "happy"},
+        "error":    {"emotion": "embarrassed"},
+        "offline":  {"activity": "offline"}
+    },
+    "score_scale": 20
 }
