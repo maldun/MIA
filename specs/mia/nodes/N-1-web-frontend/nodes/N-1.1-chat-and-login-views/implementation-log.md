@@ -69,3 +69,36 @@ Password change and the account of a kept session (REQ-CLV-014 rest), regenerate
 
 ### Reuse check
 `chat.js`, `chat-model.js`, `socket.js`, `app.js` and the dialogs of the page were extended (a few lines each); `login.js` and the mock server are new because no login existed. The stub server of the old backend stays as stage `chat-on-stub`.
+
+---
+
+## Slice 2: the ten views against IF-101 v1 (owner: "go", 2026-10-26)
+Branch `impl/n-1-1-views`. Built on the amended interface (A-03, spec draft `specs/mia/amendments/A-03/`); the mock server uses the draft mock until the installed mock is v1.
+
+| Requirement | What was done | Tests (reported green) |
+|---|---|---|
+| REQ-CLV-005 regenerate and speak again | buttons under an answer (speak, plus, minus, how, regenerate); regenerate only on the last answer that is written and stored (`lastAnswerId`) | `panels.test.mjs`, `api.test.mjs`; browser click-through |
+| REQ-CLV-008 account of an answer | button "how I got this" fetches `account` and lists the plain sentences, a second click hides them | browser click-through (2 steps listed, hidden again) |
+| REQ-CLV-009 persona | tab Persona in the workspace: read, save; a change by another user redraws the open tab (not while typing) | browser click-through; mock server test (persona_changed to the other page) |
+| REQ-CLV-010 votes and scores | plus and minus per answer (category answer_quality, one call each, marked pressed); the tab Score shows overall and four categories | `panels.test.mjs`, browser click-through (overall +1); mock server test |
+| REQ-CLV-011 tasks, memos, memory | tabs with add, edit, delete; memory asks for a source; `item_changed` redraws | `panels.test.mjs` (draft check), browser click-through, mock server test |
+| REQ-CLV-012 trust of sources | tab Sources: value 0 to 1 (comma accepted), saved with the source id | `panels.test.mjs` (`parseTrust`), browser click-through, mock server test |
+| REQ-CLV-013 variant label | the `variant` event shows "Outfit: name" next to the mood line and goes to the character (`setVariant`, IF-111 `variant`); the Godot side is deferred (N-1.2) | `character-bridge.test.mjs`, `panels.test.mjs`; browser click-through (third answer) |
+| REQ-CLV-014 rest | `whoami` and the dialog Account with the change of the own password (checked before it is sent, wrong old password told) | `panels.test.mjs`, `api.test.mjs`, browser click-through, mock server test |
+
+New files: `api.js`, `panels-model.js`, `workspace.js`, `account.js`; changed: `chat.js`, `app.js`, `character.js`, `index.html`, styles, texts (English and German, 58 keys each). Reported green: 90 JS tests (76 before), 11 chat-page tests, 11 mock-server tests (7 before). **Real browser:** the click-through `ui/tools/chat_views_e2e.js` ran in headless Chromium against the mock server with `problems: []` (login, send, answer, five actions, vote mark, account steps, regenerate moves to the new last answer, variant label, six tabs, task and memory records, trust, persona, score, account dialog).
+
+### Findings
+| Finding | Covered by test |
+|---|---|
+| Two drawings of a workspace tab at once (a save redraws, the event of the change redraws) listed every record twice | fixed: each drawing builds its own holder and only the latest is put on the page; checked in the browser run (`tasks` and `memory` listed once) |
+| Without the client id echo (IF-101 v0 mock) a message of mine appeared twice; with the v1 mock it is merged | browser run with both mocks; contract test TC-IF-101-09 |
+| `browser_check.py` hangs when an older headless Chromium still holds its debugging port; a driver that attaches to the running instance works (scratch tool, not committed) | – |
+| The score is shown as sums per category and overall, not as a curve "over time" (REQ-CLV-010 says "over time"): the interface has no series. Proposal for IF-101 v2: `score` returns votes with times, or a series per day | – |
+| The name of the REST addresses was open in the A-03 draft; fixed now in the spec (table) | `api.test.mjs`, mock server tests |
+
+### Reuse check
+The page kept its modules; `chat.js` got the answer actions (about 60 lines), the rest is new modules because no such views existed. The mock server is the same file as in slice 1, extended by the REST routes.
+
+### Not done
+Frame rate (field), the variant and model selection in Godot (deferred by the owner until after the first tests), the series of the score.

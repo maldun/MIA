@@ -113,5 +113,79 @@ class MockServer(unittest.TestCase):
         self.assertTrue({"chat_message", "chat_start", "chat_delta", "chat_done", "expression"} <= got, got)
 
 
+class RestViews(unittest.TestCase):
+    """The REST routes of IF-101 v1 that the views of the page call (templates/static/chat/api.js)."""
+
+    def setUp(self):
+        server.api.__init__(accounts=dict(server.ACCOUNTS), answers=[])
+        server.sids.clear()
+        server.tokens.clear()
+        server.turn["n"] = 0
+        self.anna = w.app.test_client()
+        login(self.anna, "anna", "pw-anna")
+        self.ben = w.app.test_client()
+        login(self.ben, "ben", "pw-ben")
+        self.ben_socket = w.socketio.test_client(w.app, flask_test_client=self.ben)
+
+    def answer(self, text="hi"):
+        sock = w.socketio.test_client(w.app, flask_test_client=self.anna)
+        sock.emit("chat_send", {"id": "c" + text, "text": text}, callback=True)
+        time.sleep(1.0)
+        return sock
+
+    @mark.req("REQ-CLV-014")
+    def test_no_session_no_rest_call(self):
+        for method, path in (("get", "/api/whoami"), ("get", "/api/score"), ("get", "/api/items?kind=tasks"), ("post", "/api/vote"), ("get", "/api/trust"), ("get", "/api/persona")):
+            self.assertEqual(getattr(w.app.test_client(), method)(path).status_code, 401, path)
+
+    @mark.req("REQ-CLV-014")
+    def test_whoami_and_the_own_password(self):
+        self.assertEqual(self.anna.get("/api/whoami").get_json(), {"user": "anna"})
+        wrong = self.anna.post("/api/change_password", json={"old": "nope", "new": "long-enough-1"})
+        self.assertEqual((wrong.status_code, wrong.get_json()["error"]), (401, "bad_credentials"))
+        weak = self.anna.post("/api/change_password", json={"old": "pw-anna", "new": "short"})
+        self.assertEqual((weak.status_code, weak.get_json()["error"]), (422, "weak_password"))
+        self.assertEqual(self.anna.post("/api/change_password", json={"old": "pw-anna", "new": "long-enough-1"}).get_json(), {"changed": True})
+        self.assertEqual(login(w.app.test_client(), "anna", "long-enough-1").status_code, 200)
+
+    @mark.req("REQ-CLV-005", "REQ-CLV-008", "REQ-CLV-010", "REQ-CLV-013")
+    def test_regenerate_vote_account_speak_and_the_variant_on_every_third_answer(self):
+        sock = self.answer("one")
+        first = [m for m in self.anna.get("/api/chat/history").get_json()["messages"] if m["role"] == "assistant"][-1]
+        self.assertEqual(self.anna.post("/api/regenerate", json={"message_id": "nope"}).status_code, 404)
+        self.assertEqual(self.anna.post("/api/regenerate", json={"message_id": first["id"]}).get_json()["position"], 1)
+        time.sleep(1.0)
+        answers = [m["text"] for m in self.anna.get("/api/chat/history").get_json()["messages"] if m["role"] == "assistant"]
+        self.assertEqual(len(answers), 2)
+        vote = self.anna.post("/api/vote", json={"subject": first["id"], "category": "answer_quality", "value": 1}).get_json()
+        self.assertEqual(vote["score"]["overall"], 1)
+        self.assertEqual(self.anna.post("/api/vote", json={"subject": first["id"], "category": "mood", "value": 1}).status_code, 422)
+        self.assertEqual(self.anna.get("/api/score").get_json()["categories"]["answer_quality"], 1)
+        self.assertEqual(len(self.anna.get("/api/account?message_id=" + first["id"]).get_json()), 2)
+        sock.get_received()
+        self.assertEqual(self.anna.post("/api/speak_again", json={"message_id": first["id"]}).get_json()["sentences"], 2)
+        self.answer("two")
+        variants = [r["args"][0]["name"] for r in self.ben_socket.get_received() if r["name"] == "variant"]
+        self.assertEqual(variants, [None, None, "summer"])                                 # answers 1 and 2 (regenerate) have none, the third has one
+
+    @mark.req("REQ-CLV-011", "REQ-CLV-009", "REQ-CLV-012")
+    def test_records_trust_and_persona_and_the_others_hear_of_the_change(self):
+        self.ben_socket.get_received()
+        task = self.anna.post("/api/items", json={"kind": "tasks", "id": None, "text": "water the plants"}).get_json()
+        self.assertEqual(self.ben.get("/api/items?kind=tasks").get_json()[0]["text"], "water the plants")
+        self.assertEqual(self.ben.post("/api/items", json={"kind": "tasks", "id": task["id"], "text": "water the herbs"}).get_json()["author"], "ben")
+        refused = self.anna.post("/api/items", json={"kind": "memory", "id": None, "text": "likes tea"})
+        self.assertEqual((refused.status_code, refused.get_json()["rule"]), (422, "source"))
+        self.assertEqual(self.anna.delete("/api/items?kind=tasks&id=" + task["id"]).get_json(), {"deleted": True})
+        self.assertEqual(self.anna.get("/api/items?kind=tasks").get_json(), [])
+        self.anna.post("/api/trust", json={"source": "example.org", "value": 0.2})
+        self.assertEqual(self.ben.get("/api/trust").get_json()["example.org"], 0.2)
+        self.assertEqual(self.anna.post("/api/trust", json={"source": "example.org", "value": 2}).status_code, 422)
+        self.anna.post("/api/persona", json={"doc": {"text": "MIA is calm."}})
+        self.assertEqual(self.ben.get("/api/persona").get_json()["text"], "MIA is calm.")
+        got = {r["name"] for r in self.ben_socket.get_received()}
+        self.assertTrue({"item_changed", "trust_changed", "persona_changed"} <= got, got)
+
+
 if __name__ == "__main__":
     unittest.main()

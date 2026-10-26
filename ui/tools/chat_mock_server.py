@@ -19,7 +19,12 @@ repo = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 link_dir = tempfile.mkdtemp()
 os.symlink(repo, os.path.join(link_dir, "MIA"))
 sys.path.insert(0, link_dir)
-sys.path.insert(0, os.path.join(repo, "tests", "helpers", "mocks"))
+# the protected mock of IF-101 (v1 since amendment A-03); until A-03 is installed the draft next to it is used
+for candidate in (os.path.join(repo, "tests", "helpers", "mocks"), os.path.join(repo, "specs", "mia", "contract-drafts", "tests", "helpers", "mocks")):
+    with open(os.path.join(candidate, "if_101_chat_api.py"), encoding="utf-8") as handle:
+        if "def whoami" in handle.read():
+            break
+sys.path.insert(0, candidate)
 
 from flask import jsonify, request  # noqa: E402
 from flask_socketio import emit  # noqa: E402
@@ -64,7 +69,8 @@ def session():
 @w.app.before_request
 def guard():
     """IF-101: a request without a session is 401 unauthenticated (the login and the static files stay open)."""
-    if request.path.startswith("/api/chat/") and request.path != "/api/chat/commands":
+    open_paths = ("/api/login", "/api/chat/commands")
+    if request.path.startswith("/api/") and request.path not in open_paths:
         if session() is None:
             return jsonify({"error": "unauthenticated"}), 401
         if request.path == "/api/chat/history":
@@ -107,11 +113,101 @@ def answer_later():
             script = dict(ANSWERS[turn["n"] % len(ANSWERS)])
             script["sentences"] = [s.format(user=owner) for s in script["sentences"]]
             api.answers.append(script)
+            api.run_with_variant("summer" if turn["n"] % 3 == 2 else None)         # every third answer comes from a workflow with a character variant
             turn["n"] += 1
             api._answer(api._queue.popleft())
             api._broadcast("chat_status", api._status())
     deliver()
     answering.clear()
+
+
+def run_api(operation):
+    """One call of the mock for the session of the request: its answer as JSON, an ApiError as {error, rule} with the status; the events it caused go out."""
+    try:
+        with lock:
+            result = operation(session())
+        status = 200
+    except ApiError as err:
+        result, status = {"error": err.code, "rule": err.rule}, err.status
+    deliver()
+    if status == 200 and answering.is_set() is False and api._queue:
+        answering.set()
+        w.socketio.start_background_task(answer_later)           # a regenerated answer waits like a message
+    return jsonify(result), status
+
+
+def body():
+    return request.get_json(silent=True) or {}
+
+
+@w.app.get("/api/whoami")
+def r_whoami():
+    return run_api(lambda s: api.whoami(s))
+
+
+@w.app.post("/api/change_password")
+def r_change_password():
+    return run_api(lambda s: api.change_password(s, body().get("old"), body().get("new")))
+
+
+@w.app.post("/api/regenerate")
+def r_regenerate():
+    return run_api(lambda s: api.regenerate(s, body().get("message_id")))
+
+
+@w.app.post("/api/speak_again")
+def r_speak_again():
+    return run_api(lambda s: api.speak_again(s, body().get("message_id")))
+
+
+@w.app.get("/api/account")
+def r_account():
+    return run_api(lambda s: api.account(s, request.args.get("message_id")))
+
+
+@w.app.post("/api/vote")
+def r_vote():
+    return run_api(lambda s: api.vote(s, body().get("subject"), body().get("category"), body().get("value")))
+
+
+@w.app.get("/api/score")
+def r_score():
+    return run_api(lambda s: api.score(s))
+
+
+@w.app.get("/api/items")
+def r_items():
+    return run_api(lambda s: api.items(s, request.args.get("kind")))
+
+
+@w.app.post("/api/items")
+def r_save_item():
+    return run_api(lambda s: api.save_item(s, body().get("kind"), body().get("id"), body().get("text"), body().get("source")))
+
+
+@w.app.delete("/api/items")
+def r_delete_item():
+    return run_api(lambda s: api.delete_item(s, request.args.get("kind"), request.args.get("id")))
+
+
+@w.app.get("/api/trust")
+def r_trust():
+    return run_api(lambda s: api.trust(s))
+
+
+@w.app.post("/api/trust")
+def r_set_trust():
+    return run_api(lambda s: api.set_trust(s, body().get("source"), body().get("value")))
+
+
+@w.app.get("/api/persona")
+def r_persona():
+    return run_api(lambda s: api.persona(s))
+
+
+@w.app.post("/api/persona")
+def r_save_persona():
+    return run_api(lambda s: api.save_persona(s, body().get("doc")))
 
 
 @w.socketio.on("connect")
@@ -143,7 +239,7 @@ def chat_send(data=None):
     try:
         with lock:
             ack = api.send(token, data.get("text"), data.get("id"))
-            message = [m for m in api.history(token, limit=200) if m["id"] == ack["id"]][0]
+            message = ack["message"]
     except ApiError as err:
         return {"ok": False, "error": {"queue_full": "The queue is full: wait for an answer.", "empty_text": "There is no text to send."}.get(err.code, err.code)}
     deliver()                                              # the broadcast of the message itself and the new queue status

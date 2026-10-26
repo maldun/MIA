@@ -1,5 +1,6 @@
 // The conversation on the page: history, live messages (chat_* events), streaming, sending with retry, paging, autoscroll.
 // The server is the source of truth (see ui/README.md, chat backend); this module only draws it.
+import { lastAnswerId, voteArgs } from './panels-model.js';
 import { clock, continuesGroup, dayKey, dayLabel, emojiFor, linkify, pipelineHeadline, pipelineLine, pipelineRows, pipelineState, queueText, relativeTime, senderName, trimOldest, upsert, MAX_IN_DOM } from './chat-model.js';
 
 export function isNearBottom(element, threshold = 80) {
@@ -14,9 +15,10 @@ function el(tag, className, text) {
 }
 
 /**
- * me(): the account of this page (null when not known); onLoginRequired(): the server says there is no session (IF-101: 401 unauthenticated).
+ * me(): the account of this page (null when not known); onLoginRequired(): the server says there is no session (IF-101: 401 unauthenticated);
+ * api: the REST calls of IF-101 v1 (api.js) for the actions under an answer: speak again, plus and minus, how I got there, regenerate.
  */
-export function initChat({ list, empty, jump, olderButton, socket, render, t, origin = location.origin, win = window, notify = () => {}, me = () => null, onLoginRequired = () => {} }) {
+export function initChat({ list, empty, jump, olderButton, socket, render, t, origin = location.origin, win = window, notify = () => {}, me = () => null, onLoginRequired = () => {}, api = null }) {
   const messages = [];          // sorted by id, what is in the DOM
   const rows = new Map();       // id -> row element
   const pendingText = new Map();
@@ -95,6 +97,17 @@ export function initChat({ list, empty, jump, olderButton, socket, render, t, or
       copy.type = 'button';
       copy.dataset.action = 'copy';
       foot.append(copy);
+      if (api) {
+        for (const [action, shown, label] of [['speak', '🔊', 'chat.speak'], ['up', '👍', 'chat.plus'], ['down', '👎', 'chat.minus'], ['how', 'ⓘ', 'chat.how'], ['regenerate', '↻', 'chat.regenerate']]) {
+          const button = el('button', 'link-button action', shown);
+          button.type = 'button';
+          button.dataset.action = action;
+          button.title = t(label);
+          button.setAttribute('aria-label', t(label));
+          button.hidden = true;                    // shown by fill() once the answer is written, "regenerate" only on the last one
+          foot.append(button);
+        }
+      }
     }
     row.append(foot);
     return row;
@@ -131,6 +144,10 @@ export function initChat({ list, empty, jump, olderButton, socket, render, t, or
     drawPipeline(row, message);
     const copy = row.querySelector('[data-action=copy]');
     if (copy) copy.hidden = !message.text;
+    for (const action of ['speak', 'up', 'down', 'how']) {
+      const button = row.querySelector(`[data-action=${action}]`);
+      if (button) button.hidden = !message.text || Boolean(message.streaming) || String(message.id).startsWith('~');
+    }
     const badge = row.querySelector('[data-role=badge]');
     if (badge) {
       badge.textContent = emojiFor(message.emotion);
@@ -209,7 +226,22 @@ export function initChat({ list, empty, jump, olderButton, socket, render, t, or
       if (messages[index + 1]) ensureSeparator(index + 1);
     }
     fill(row, stored);
+    refreshRegenerate();
     return stored;
+  }
+
+  // "regenerate" is offered on the last answer only (IF-101: not_the_last_answer is refused)
+  let regenerateId = null;
+  function showRegenerate(id, visible) {
+    const button = id ? rows.get(id)?.querySelector('[data-action=regenerate]') : null;
+    if (button) button.hidden = !visible;
+  }
+  function refreshRegenerate() {
+    if (!api) return;
+    const last = lastAnswerId(messages);
+    if (regenerateId !== last) showRegenerate(regenerateId, false);
+    showRegenerate(last, true);
+    regenerateId = last;
   }
 
   function afterAdd(message, fromServer) {
@@ -402,6 +434,43 @@ export function initChat({ list, empty, jump, olderButton, socket, render, t, or
     transmit(clientId, text, command);
   }
 
+  /** the actions under an answer (IF-101 v1); a refused call is told in plain words */
+  async function answerAction(button, row, message) {
+    const action = button.dataset.action;
+    try {
+      if (action === 'speak') {
+        await api.speakAgain(message.id);
+      } else if (action === 'up' || action === 'down') {
+        const vote = voteArgs(message, action === 'up' ? 1 : -1);
+        const result = await api.vote(vote.subject, vote.category, vote.value);
+        for (const other of row.querySelectorAll('[data-action=up],[data-action=down]')) other.setAttribute('aria-pressed', String(other === button));
+        notify(t('vote.thanks', { n: result.score?.overall ?? 0 }));
+      } else if (action === 'regenerate') {
+        await api.regenerate(message.id);
+        notify(t('chat.regenerating'));
+      } else if (action === 'how') {
+        await toggleAccount(row, message);
+      }
+    } catch (error) {
+      notify(error.code === 'queue_full' ? t('chat.queue_full') : error.status === 0 ? t('chat.offline') : t('chat.action_failed'));
+    }
+  }
+
+  /** the step-by-step account of an answer, written by the Backend in plain sentences */
+  async function toggleAccount(row, message) {
+    let block = row.querySelector('.account');
+    if (block) {
+      block.hidden = !block.hidden;
+      return;
+    }
+    const lines = await api.account(message.id);
+    block = el('ol', 'account');
+    block.setAttribute('aria-label', t('chat.how'));
+    for (const line of lines) block.append(el('li', '', line.plain));
+    if (!lines.length) block.append(el('li', '', t('chat.how_empty')));
+    row.querySelector('.msg-foot').before(block);
+  }
+
   list.addEventListener('click', async (event) => {
     const button = event.target.closest('button[data-action]');
     if (!button) return;
@@ -416,6 +485,7 @@ export function initChat({ list, empty, jump, olderButton, socket, render, t, or
         notify(t('chat.copy_failed'));
       }
     }
+    if (api && message && ['speak', 'up', 'down', 'how', 'regenerate'].includes(button.dataset.action)) await answerAction(button, row, message);
     if (button.dataset.action === 'retry' && message) {
       place({ id: message.id, local: 'sending' });
       transmit(row.dataset.client, message.text, false);

@@ -32,6 +32,22 @@ The server sets the session at `login` as a cookie `mia_session` (HttpOnly, Same
 | `advance_time(seconds)` | | | test adapter only: move the server clock (throttle window) |
 | `run_with_variant(name)` **[v1]** | name or None | | test adapter only: the next answer comes from a workflow with that character variant |
 
+REST addresses of the operations **[v1]** (JSON in and out; an error is `{"error": code, "rule"?}` with the status of the table below; the session is the cookie):
+| Operation | Method and address | Input |
+|---|---|---|
+| `login` | `POST /api/login` | `{user, password}` |
+| `whoami` | `GET /api/whoami` | |
+| `change_password` | `POST /api/change_password` | `{old, new}` |
+| `history` | `GET /api/chat/history?limit=` | |
+| `regenerate` | `POST /api/regenerate` | `{message_id}` |
+| `speak_again` | `POST /api/speak_again` | `{message_id}` |
+| `account` | `GET /api/account?message_id=` | |
+| `vote` / `score` | `POST /api/vote` / `GET /api/score` | `{subject, category, value}` |
+| `items` / `save_item` / `delete_item` | `GET /api/items?kind=` / `POST /api/items` / `DELETE /api/items?kind=&id=` | `{kind, id, text, source}` |
+| `trust` / `set_trust` | `GET /api/trust` / `POST /api/trust` | `{source, value}` |
+| `persona` / `save_persona` | `GET /api/persona` / `POST /api/persona` | `{doc}` |
+`send` and `stop` stay socket events (`chat_send`, `chat_stop`); the acknowledgement of `chat_send` is `{ok, id, position, message}` or `{ok: false, error}`.
+
 Events (server to every connected page):
 | Event | Payload |
 |---|---|

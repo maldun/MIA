@@ -35,6 +35,12 @@ test('TC-CHV-002: speaking, inset, view and background use the same bridge', () 
   assert.deepEqual(sent[0].message, { type: 'speaking', value: true });
 });
 
+test('TC-CHV-008: the variant goes to the character as one message, and null means the chat\'s variant', () => {
+  const { api, sent } = setup();
+  api.setVariant('summer'); api.setVariant(null); api.setVariant('');
+  assert.deepEqual(sent.map((s) => s.message), [{ type: 'variant', name: 'summer' }, { type: 'variant', name: null }, { type: 'variant', name: null }]);
+});
+
 test('ready: the page is told once, the server is told, and the load timer ends', () => {
   const { events, fromCharacter, sent, api } = setup();
   fromCharacter({ type: 'ready' });

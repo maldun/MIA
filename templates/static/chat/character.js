@@ -75,5 +75,7 @@ export function initCharacter({ frame, socket, origin = location.origin, enabled
     setInset: (inset) => send({ type: 'viewport_inset', ...inset }),
     setView: (name) => send({ type: 'view', name }),
     setBackground: (name) => send({ type: 'background', name }),
+    /** the outfit variant of the workflow that answers (IF-111 `variant`); null = the chat's variant */
+    setVariant: (name) => send({ type: 'variant', name: name || null }),
   };
 }

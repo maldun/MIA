@@ -11,6 +11,10 @@ import { initMenu } from './menu.js';
 import { initComposer } from './composer.js';
 import { initChat } from './chat.js';
 import { initLogin } from './login.js';
+import { createApi } from './api.js';
+import { initWorkspace } from './workspace.js';
+import { initAccount } from './account.js';
+import { variantLabel } from './panels-model.js';
 import { initMood } from './mood.js';
 import { askConfirm, initPalette, loadCommands } from './palette.js';
 import { modelLabel } from './chat-model.js';
@@ -82,6 +86,7 @@ const login = initLogin({
   onSuccess: () => location.reload(),
 });
 const socket = connect(showState, location.origin, () => login.open());
+const api = createApi({ onLoginRequired: () => login.open() });
 
 // --- the character: framing in the free area, camera view, background, captions -----------------------------
 let viewMenu = null;
@@ -141,6 +146,21 @@ const menu = initMenu({
   aboutClose: $('about-close'),
 });
 
+// --- the views of IF-101 v1: workspace (records, trust, persona, score), account, the variant label ---------------------
+const workspace = initWorkspace({ dialog: $('workspace'), tabsEl: $('workspace-tabs'), body: $('workspace-body'), closeButton: $('workspace-close'), api, socket, t, notify: toast });
+const account = initAccount({
+  dialog: $('account'), nameEl: $('account-name'), form: $('account-form'), oldInput: $('account-old'), newInput: $('account-new'), repeatInput: $('account-repeat'),
+  errorLine: $('account-error'), closeButton: $('account-close'), api, storage, t, notify: toast,
+});
+$('workspace-button').addEventListener('click', () => { menu.close(false); workspace.open(); });
+$('account-button').addEventListener('click', () => { menu.close(false); account.open(); });
+socket.on('variant', (data) => {
+  const label = variantLabel(data?.name, t);
+  $('variant').textContent = label;
+  $('variant').hidden = !label;
+  character.setVariant(data?.name);                    // the outfit of the workflow that answers; null = the chat's variant
+});
+
 viewMenu = initViewMenu({
   buttons: document.querySelectorAll('[data-view]'),
   group: $('background-group'),
@@ -174,6 +194,7 @@ chat = initChat({
   list: $('messages'), empty: $('empty'), jump: $('jump'), olderButton: $('older'), socket, render: renderMarkdown, t, notify: toast,
   me: () => storage.get('mia.account') || null,
   onLoginRequired: () => login.open(),
+  api,
 });
 
 let commands = [];
