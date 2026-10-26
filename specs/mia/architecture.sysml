@@ -1833,6 +1833,11 @@ package MIA_NodeRequirements {
         doc /* The Chat and login views shall talk to the Backend only through the interface IF-101 as specified in contracts/IF-101-chat-api.md. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
+    requirement def <'REQ-CLV-022'> Logout_Clv022 {
+        subject s : WebFrontEnd;
+        doc /* The Chat and login views shall offer a logout that ends the session at the server, closes the socket and shows the login. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
     requirement def <'REQ-CHV-001'> ChatWithoutTheCharacter_Chv001 {
         subject s : WebFrontEnd;
         doc /* If the Character view cannot load, then it shall report the failure to the Chat and login views through IF-111 and stay hidden. */
@@ -2078,6 +2083,11 @@ package MIA_NodeRequirements {
         doc /* The Web Frontend shall consist of static files that the backend container serves. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
+    requirement def <'REQ-FE-031'> Logout_Fe031 {
+        subject s : WebFrontEnd;
+        doc /* The Web Frontend shall let a signed-in user log out. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
     requirement def <'REQ-API-001'> ChatEventsAndStreaming_Api001 {
         subject s : WebApplication;
         doc /* When a logged-in user sends a message, the API and accounts shall hand it to the chat agent through IF-201 and relay the events of the answer to every connected browser (IF-101). */
@@ -2156,6 +2166,11 @@ package MIA_NodeRequirements {
     requirement def <'REQ-API-016'> RealiseTheRoutesOfIF104_Api016 {
         subject s : WebApplication;
         doc /* The API and accounts shall realise the routes of the interface IF-104 of the Backend as specified in contracts/IF-104-graph-api.md. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-API-017'> Logout_Api017 {
+        subject s : WebApplication;
+        doc /* The API and accounts shall end a session on request, drop its connected sockets and refuse it afterwards. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-CHA-001'> ChatEventsAndStreaming_Cha001 {
@@ -3048,6 +3063,11 @@ package MIA_NodeRequirements {
         doc /* The Backend shall offer the Graph app, under the Backend's session, the listing, reading, saving as a new version, history, diff and restore of workflows and context graphs, and refuse an invalid graph with the broken rule named (IF-104). */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
+    requirement def <'REQ-BE-077'> Logout_Be077 {
+        subject s : WebApplication;
+        doc /* The Backend shall end the session of a user on request, so that the session no longer authenticates a request or a socket. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
     requirement def <'REQ-SLY-001'> PostgreSQLInAContainer_Sly001 {
         subject s : Persistence;
         doc /* The Storage layer shall be one PostgreSQL database in a container behind the storage interface IF-102. */
@@ -3530,6 +3550,7 @@ package MIA_NodeRequirements {
     requirement r_req_clv_019 : PlainStack_Clv019;
     requirement r_req_clv_020 : DeliveredByTheBackend_Clv020;
     requirement r_req_clv_021 : UseIF101Only_Clv021;
+    requirement r_req_clv_022 : Logout_Clv022;
     requirement r_req_chv_001 : ChatWithoutTheCharacter_Chv001;
     requirement r_req_chv_002 : OneExpressionAPI_Chv002;
     requirement r_req_chv_003 : LivingCharacter_Chv003;
@@ -3579,6 +3600,7 @@ package MIA_NodeRequirements {
     requirement r_req_fe_028 : PasswordOverASecureChannel_Fe028;
     requirement r_req_fe_029 : PlainStack_Fe029;
     requirement r_req_fe_030 : DeliveredByTheBackend_Fe030;
+    requirement r_req_fe_031 : Logout_Fe031;
     requirement r_req_api_001 : ChatEventsAndStreaming_Api001;
     requirement r_req_api_002 : ChangesReachAllDevices_Api002;
     requirement r_req_api_003 : LoginAndSession_Api003;
@@ -3595,6 +3617,7 @@ package MIA_NodeRequirements {
     requirement r_req_api_014 : WorkflowAndGraphAPI_Api014;
     requirement r_req_api_015 : RealiseIF101_Api015;
     requirement r_req_api_016 : RealiseTheRoutesOfIF104_Api016;
+    requirement r_req_api_017 : Logout_Api017;
     requirement r_req_cha_001 : ChatEventsAndStreaming_Cha001;
     requirement r_req_cha_002 : OneSharedMIA_Cha002;
     requirement r_req_cha_003 : QueueWithPositions_Cha003;
@@ -3773,6 +3796,7 @@ package MIA_NodeRequirements {
     requirement r_req_be_074 : StateOnlyThroughTheStorageInterface_Be074;
     requirement r_req_be_075 : ServeTheFrontend_Be075;
     requirement r_req_be_076 : WorkflowAndGraphAPI_Be076;
+    requirement r_req_be_077 : Logout_Be077;
     requirement r_req_sly_001 : PostgreSQLInAContainer_Sly001;
     requirement r_req_sly_002 : SharedStateHeld_Sly002;
     requirement r_req_sly_003 : ImmutableVersions_Sly003;
@@ -3887,6 +3911,7 @@ package MIA_NodeRequirements {
     satisfy r_req_clv_019 by mia.frontEnd;
     satisfy r_req_clv_020 by mia.frontEnd;
     satisfy r_req_clv_021 by mia.frontEnd;
+    satisfy r_req_clv_022 by mia.frontEnd;
     satisfy r_req_chv_001 by mia.frontEnd;
     satisfy r_req_chv_002 by mia.frontEnd;
     satisfy r_req_chv_003 by mia.frontEnd;
@@ -3936,6 +3961,7 @@ package MIA_NodeRequirements {
     satisfy r_req_fe_028 by mia.frontEnd;
     satisfy r_req_fe_029 by mia.frontEnd;
     satisfy r_req_fe_030 by mia.frontEnd;
+    satisfy r_req_fe_031 by mia.frontEnd;
     satisfy r_req_api_001 by mia.webApp;
     satisfy r_req_api_002 by mia.webApp;
     satisfy r_req_api_003 by mia.webApp;
@@ -3952,6 +3978,7 @@ package MIA_NodeRequirements {
     satisfy r_req_api_014 by mia.webApp;
     satisfy r_req_api_015 by mia.webApp;
     satisfy r_req_api_016 by mia.webApp;
+    satisfy r_req_api_017 by mia.webApp;
     satisfy r_req_cha_001 by mia.conversation;
     satisfy r_req_cha_002 by mia.conversation;
     satisfy r_req_cha_003 by mia.conversation;
@@ -4130,6 +4157,7 @@ package MIA_NodeRequirements {
     satisfy r_req_be_074 by mia.webApp;
     satisfy r_req_be_075 by mia.webApp;
     satisfy r_req_be_076 by mia.webApp;
+    satisfy r_req_be_077 by mia.webApp;
     satisfy r_req_sly_001 by mia.persistence;
     satisfy r_req_sly_002 by mia.persistence;
     satisfy r_req_sly_003 by mia.persistence;
@@ -4243,6 +4271,7 @@ package MIA_NodeRequirements {
     allocate r_req_clv_019 to mia.frontEnd;
     allocate r_req_clv_020 to mia.frontEnd;
     allocate r_req_clv_021 to mia.frontEnd;
+    allocate r_req_clv_022 to mia.frontEnd;
     allocate r_req_chv_001 to mia.frontEnd;
     allocate r_req_chv_002 to mia.frontEnd;
     allocate r_req_chv_003 to mia.frontEnd;
@@ -4292,6 +4321,7 @@ package MIA_NodeRequirements {
     allocate r_req_fe_028 to mia.frontEnd;
     allocate r_req_fe_029 to mia.frontEnd;
     allocate r_req_fe_030 to mia.frontEnd;
+    allocate r_req_fe_031 to mia.frontEnd;
     allocate r_req_api_001 to mia.webApp;
     allocate r_req_api_002 to mia.webApp;
     allocate r_req_api_003 to mia.webApp;
@@ -4308,6 +4338,7 @@ package MIA_NodeRequirements {
     allocate r_req_api_014 to mia.webApp;
     allocate r_req_api_015 to mia.webApp;
     allocate r_req_api_016 to mia.webApp;
+    allocate r_req_api_017 to mia.webApp;
     allocate r_req_cha_001 to mia.conversation;
     allocate r_req_cha_002 to mia.conversation;
     allocate r_req_cha_003 to mia.conversation;
@@ -4486,6 +4517,7 @@ package MIA_NodeRequirements {
     allocate r_req_be_074 to mia.webApp;
     allocate r_req_be_075 to mia.webApp;
     allocate r_req_be_076 to mia.webApp;
+    allocate r_req_be_077 to mia.webApp;
     allocate r_req_sly_001 to mia.persistence;
     allocate r_req_sly_002 to mia.persistence;
     allocate r_req_sly_003 to mia.persistence;
@@ -4601,6 +4633,7 @@ package MIA_NodeRequirements {
     dependency from r_req_clv_020 to r_req_fe_030;
     dependency from r_req_clv_021 to r_req_fe_001;
     dependency from r_req_clv_021 to r_req_fe_026;
+    dependency from r_req_clv_022 to r_req_fe_031;
     dependency from r_req_chv_001 to r_req_fe_006;
     dependency from r_req_chv_002 to r_req_fe_008;
     dependency from r_req_chv_003 to r_req_fe_009;
@@ -4659,6 +4692,7 @@ package MIA_NodeRequirements {
     dependency from r_req_fe_029 to con3;
     dependency from r_req_fe_029 to nfr1;
     dependency from r_req_fe_030 to nfr9;
+    dependency from r_req_fe_031 to fr21;
     dependency from r_req_api_001 to r_req_be_001;
     dependency from r_req_api_002 to r_req_be_007;
     dependency from r_req_api_003 to r_req_be_008;
@@ -4675,6 +4709,7 @@ package MIA_NodeRequirements {
     dependency from r_req_api_014 to r_req_be_076;
     dependency from r_req_api_015 to if101;
     dependency from r_req_api_016 to if104;
+    dependency from r_req_api_017 to r_req_be_077;
     dependency from r_req_cha_001 to r_req_be_001;
     dependency from r_req_cha_002 to r_req_be_002;
     dependency from r_req_cha_003 to r_req_be_003;
@@ -4874,6 +4909,7 @@ package MIA_NodeRequirements {
     dependency from r_req_be_076 to fr22;
     dependency from r_req_be_076 to fr30;
     dependency from r_req_be_076 to fr7;
+    dependency from r_req_be_077 to fr21;
     dependency from r_req_sly_001 to r_req_db_001;
     dependency from r_req_sly_002 to r_req_db_002;
     dependency from r_req_sly_003 to r_req_db_003;

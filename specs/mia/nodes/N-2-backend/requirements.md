@@ -969,3 +969,15 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verified by: TC-IF-105-01..04, TC-RUN-015, TC-N2-003
 - Status: Approved
 - History: v0, amendment 9 (2026-10-25)
+
+### REQ-BE-077 – Logout
+- Level: high   Subject: WebApplication
+- Text: The Backend shall end the session of a user on request, so that the session no longer authenticates a request or a socket.
+- Rationale: refines FR-21; the owner found after testing that the login has no logout (2026-10-26)
+- Parent: FR-21
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-14: after the logout the same session is refused with 401 (exact)
+- Verified by: TC-N2-005, TC-API-017
+- Status: Approved
+- History: A-04 (2026-10-26)

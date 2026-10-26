@@ -197,3 +197,15 @@ The gateway of the Backend: the Socket.IO and REST surface (IF-101, IF-104), acc
 - Verified by: TC-API-016
 - Status: Approved
 - History: –
+
+### REQ-API-017 – Logout
+- Level: low   Subject: WebApplication
+- Text: The API and accounts shall end a session on request, drop its connected sockets and refuse it afterwards.
+- Rationale: refines REQ-BE-077; the owner found after testing that the login has no logout (2026-10-26)
+- Parent: REQ-BE-077
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-14: after the logout the same session is refused with 401 and its socket gets no more events (exact)
+- Verified by: TC-API-017
+- Status: Approved
+- History: A-04 (2026-10-26)

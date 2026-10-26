@@ -29,6 +29,7 @@ Tests of this part alone against the mocks of its neighbours (the mock of IF-101
 | TC-CLV-019 | REQ-CLV-019 | Inspection | 1 | the files and the page text of the repository | AC-20: no bundler files; the Godot version string is 4.6.1 | exact |
 | TC-CLV-020 | REQ-CLV-020 | System | 3 | the compose stack, a real browser | AC-29: the chat page loads from the backend container; the frontend has no container of its own | as stated |
 | TC-CLV-021 | REQ-CLV-021 | Component (browser) | 2 | a headless browser against the stub server `ui/tools/chat_stub_server.py` and the mocks of the interfaces | AC-1: with the mock of IF-101 every scenario of the chat page runs; no other request leaves the page | as stated |
+| TC-CLV-022 | REQ-CLV-022 | Component | 1 | unit test in `tests/js/` with the mocks of the interfaces (`node --test`) | AC-14: one logout request, socket closed, login shown | exact |
 
 ## Assumptions (checked in validation)
 

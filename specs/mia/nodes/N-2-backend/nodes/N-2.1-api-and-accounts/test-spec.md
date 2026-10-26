@@ -24,6 +24,7 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-101
 | TC-API-014 | REQ-API-014 | Component | 2 | component test with the mocks of the neighbouring interfaces | AC-16: with the fake storage each of the six operations works; an invalid graph is refused with the rule named | exact |
 | TC-API-015 | REQ-API-015 | Component | 2 | component test with the mocks of the neighbouring interfaces | AC-1, AC-14: the contract suite test_if_101_chat_api.py passes against the API and accounts (stage 2) | as stated |
 | TC-API-016 | REQ-API-016 | Component | 2 | component test with the mocks of the neighbouring interfaces | AC-16: the contract suite test_if_104_graph_api.py passes against the API and accounts (stage 2) | as stated |
+| TC-API-017 | REQ-API-017 | Component | 2 | component test with the mocks of the neighbouring interfaces | AC-14: after the logout the same session is refused with 401 | exact |
 
 ## Assumptions (checked in validation)
 

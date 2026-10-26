@@ -28,7 +28,7 @@ export class CharacterMock {
     if (!message || typeof message !== 'object') return;
     const s = this.state;
     switch (message.type) {
-      case 'expression': s.expression = PRESETS.includes(message.name) ? message.name : 'neutral'; break;
+      case 'expression': if (PRESETS.includes(message.name)) s.expression = message.name; break;   // A-04: an unknown name keeps the current one
       case 'speaking': s.speaking = Boolean(message.value); break;
       case 'viewport_inset': for (const key of Object.keys(s.inset)) s.inset[key] = clamp(message[key]); break;
       case 'view': s.view = message.name ?? null; break;

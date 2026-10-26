@@ -86,6 +86,7 @@ Setup and expected result are in the docstring of each test (the golden examples
 | TC-IF-101-15 | IF-101 | Contract | 1 (mock) and 2 (real) | v1: the persona is saved as data, the others get persona_changed with the author, an empty persona is refused. REQ-CLV-009. | exact |
 | TC-IF-101-16 | IF-101 | Contract | 1 (mock) and 2 (real) | v1: the account of an answer is a list of plain sentences in order; a message that is not an answer has none. REQ-CLV-008. | exact |
 | TC-IF-101-17 | IF-101 | Contract | 1 (mock) and 2 (real) | v1: every answer announces its character variant (name or null) in the event variant. REQ-CLV-013. | exact |
+| TC-IF-101-18 | IF-101 | Contract | 1 (mock) and 2 (real) | v2: logout ends that session only (401 afterwards on every operation); a second session of the account stays valid. REQ-CLV-022, REQ-BE-077. | exact |
 | TC-IF-102-01 | IF-102 | Contract | 1 (mock) and 2 (real) | golden 1: version 1, version 2, and version 1 reads back unchanged. | exact |
 | TC-IF-102-02 | IF-102 | Contract | 1 (mock) and 2 (real) | golden 2: each broken rule is refused with its name and nothing is stored. | exact |
 | TC-IF-102-03 | IF-102 | Contract | 1 (mock) and 2 (real) | golden 3: a cycle p->d->p is refused as a cycle and named by its ids, first id repeated at the end. | exact |
@@ -110,7 +111,7 @@ Setup and expected result are in the docstring of each test (the golden examples
 | TC-IF-105-03 | IF-105 | Contract | 1 (mock) and 2 (real) | golden 3: with a fake model two runs with the same inputs and options have equal outputs and equal event types and payloads. | exact |
 | TC-IF-105-04 | IF-105 | Contract | 1 (mock) and 2 (real) | a budget below the estimate is refused with the budget named; cost 0; run_start and run_end exist. | exact |
 | TC-IF-111-01 | IF-111 | Contract | 1 (mock) and 2 (real) | golden 1: after ready, an expression and the mouth follow the messages | exact |
-| TC-IF-111-02 | IF-111 | Contract | 1 (mock) and 2 (real) | golden 3: an unknown expression shows neutral | exact |
+| TC-IF-111-02 | IF-111 | Contract | 1 (mock) and 2 (real) | golden 3: an unknown expression keeps the current one | exact |
 | TC-IF-111-03 | IF-111 | Contract | 1 (mock) and 2 (real) | golden 3: a foreign origin, malformed JSON and an unknown type change nothing and raise nothing | exact |
 | TC-IF-111-04 | IF-111 | Contract | 1 (mock) and 2 (real) | golden 3: the covered area counts negative or missing values as 0 | exact |
 | TC-IF-111-05 | IF-111 | Contract | 1 (mock) and 2 (real) | golden 2: a character that cannot load says failed once | exact |

@@ -14,10 +14,11 @@ For a fresh session. Read this, then `specs/mia/plan.md` (tasks), `specs/mia/rev
 | A-01 | root order: N-1 before N-4 (steps 2 and 3 of N-0 swapped) | `tools/apply_amendment_a01.sh --do` |
 | A-02 | real providers of the Database in `contract.py` and `integration.py` | `tools/apply_amendment_a02.sh --do` |
 | A-03 | IF-101 v1: spec (`specs/mia/amendments/A-03/`), mock and suite (`contract-drafts/`) | `tools/apply_amendment_a03.sh --do` |
+| A-04 | IF-111: an unknown expression keeps the current one; IF-101 v2: `logout` (REQ-FE-031, REQ-CLV-022, REQ-BE-077, REQ-API-017) | `tools/apply_amendment_a04.sh --do` |
 The installed files of A-01 to A-03 must be **committed on `master`** (they were applied but uncommitted when this was written; a worktree then still sees the old mock).
 
 ## Open decisions (owner)
-1. **IF-111:** an unknown expression name: fall back to `neutral` (contract draft, TC-IF-111-02) or keep the current expression (Godot bridge and backend code, with tests)? One of them needs an amendment. No answer yet.
+1. **IF-111: decided 2026-10-26, keep the current expression** (amendment A-04, together with the new logout requirements). Install `tools/apply_amendment_a04.sh --do` in the main checkout.
 2. Score "over time" (REQ-CLV-010): IF-101 v2 with votes by time or a series.
 3. IF-201 (API to chat agent) probably needs the v1 operations too: draft as A-04, with N-2.1 and N-2.2 tasks.
 4. Character model selection and variants in Godot (REQ-CHV-007, -008): after the first human tests.

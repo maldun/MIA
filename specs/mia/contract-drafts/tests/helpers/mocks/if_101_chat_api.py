@@ -97,6 +97,13 @@ class ChatApiMock:
         """The account of a kept session (the page asks after a reload)."""
         return {"user": self._user(session)}
 
+    def logout(self, session):
+        """v2: end the session; the same token is unauthenticated afterwards."""
+        self._user(session)
+        del self._sessions[session]
+        self._events.pop(session, None)
+        return {"loggedOut": True}
+
     def change_password(self, session, old, new):
         """The user's own password: the old one must be right; the new one has at least MIN_PASSWORD characters."""
         user = self._user(session)
