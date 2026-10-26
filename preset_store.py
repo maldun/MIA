@@ -111,9 +111,11 @@ class PresetStore:
             raise PresetError(f"invalid preset name {name!r}: use 1-40 letters, digits, - or _", 400)
         return os.path.join(self.folder, name + ".json")
 
-    def _write(self, preset):
-        """atomic: a crash while writing never leaves a half written preset"""
+    def _write(self, preset, author=None):
+        """atomic: a crash while writing never leaves a half written preset. author: the account that made the change (REQ-API-009), recorded as updated_by"""
         stored = dict(preset, updated=datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"))
+        if author:
+            stored["updated_by"] = author
         fd, tmp = tempfile.mkstemp(dir=self.folder, suffix=".tmp")
         try:
             with os.fdopen(fd, "w") as fp:
@@ -247,14 +249,14 @@ class PresetStore:
 
     # --- changing ---------------------------------------------------------------------------------------
 
-    def create(self, raw):
+    def create(self, raw, author=None):
         preset, corrections = self.normalize(raw)
         with self._lock:
             if os.path.exists(self._path(preset["name"])):
                 raise PresetError(f"preset '{preset['name']}' exists already, change it instead", 409)
-            return self._write(preset), corrections
+            return self._write(preset, author), corrections
 
-    def update(self, name, raw, force=False):
+    def update(self, name, raw, force=False, author=None):
         """overwrites the preset; a different name in the data renames it"""
         preset, corrections = self.normalize(raw)
         with self._lock:
@@ -264,10 +266,10 @@ class PresetStore:
                     raise PresetError(f"'{name}' is used by MIA's emotions and cannot be renamed", 409)
                 if os.path.exists(self._path(preset["name"])):
                     raise PresetError(f"preset '{preset['name']}' exists already", 409)
-                stored = self._write(preset)
+                stored = self._write(preset, author)
                 os.remove(self._path(name))
                 return stored, corrections
-            return self._write(preset), corrections
+            return self._write(preset, author), corrections
 
     def delete(self, name, force=False):
         with self._lock:

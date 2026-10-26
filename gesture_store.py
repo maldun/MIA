@@ -83,9 +83,11 @@ class GestureStore:
             raise PresetError(f"invalid gesture name {name!r}: use 1-40 letters, digits, - or _", 400)
         return os.path.join(self.folder, name + ".json")
 
-    def _write(self, gesture):
-        """atomic: a crash while writing never leaves a half written gesture"""
+    def _write(self, gesture, author=None):
+        """atomic: a crash while writing never leaves a half written gesture. author: the account that made the change (REQ-API-009), recorded as updated_by"""
         stored = dict(gesture, updated=datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"))
+        if author:
+            stored["updated_by"] = author
         fd, tmp = tempfile.mkstemp(dir=self.folder, suffix=".tmp")
         try:
             with os.fdopen(fd, "w", encoding="utf-8") as fp:
@@ -189,13 +191,13 @@ class GestureStore:
         if os.path.exists(self._path(name)):
             raise PresetError(f"gesture '{name}' exists already, change it instead", 409)
 
-    def create(self, raw):
+    def create(self, raw, author=None):
         gesture, corrections = self.normalize(raw)
         with self._lock:
             self._check_free(gesture["name"])
-            return self._write(gesture), corrections
+            return self._write(gesture, author), corrections
 
-    def update(self, name, raw, force=False):
+    def update(self, name, raw, force=False, author=None):
         """overwrites the gesture `name`; a different "name" in the body renames it"""
         if name in self.shipped_names():
             raise PresetError(f"'{name}' comes with the character and cannot be changed", 409)
@@ -209,7 +211,7 @@ class GestureStore:
                 if users and not force:
                     raise PresetError(f"'{name}' is used by the presets {', '.join(users)} and cannot be renamed (they would lose the gesture)", 409)
                 self._check_free(gesture["name"])
-            stored = self._write(gesture)
+            stored = self._write(gesture, author)
             if gesture["name"] != name:
                 os.remove(old_path)
             return stored, corrections

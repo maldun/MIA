@@ -47,7 +47,7 @@ import os
 import secrets
 from urllib.parse import urlparse
 
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, g, jsonify, request
 
 try:
     from .constants import PRESETS_DIR_KEY, DEFAULT_PRESETS_DIR, EDITOR_TOKEN_KEY, EXPRESSION_FILE, TOKEN_HEADER
@@ -181,6 +181,10 @@ def create_blueprint(store, root, token=None, allowed_origins=None, generator=No
                 return error("preset too large", 413)
         return None
 
+    def account():
+        """the logged-in account of this request (accounts_api sets it), or None while the accounts are off: recorded as updated_by (REQ-API-009)"""
+        return getattr(g, "account", None)
+
     def body():
         data = request.get_json(silent=True)
         if data is None:
@@ -219,7 +223,7 @@ def create_blueprint(store, root, token=None, allowed_origins=None, generator=No
         refused = check_write()
         if refused:
             return refused
-        preset, corrections = store.create(body())
+        preset, corrections = store.create(body(), author=account())
         logger.info(f"preset '{preset['name']}' created")
         response = jsonify({"preset": preset, "corrections": corrections, "version": version()})
         response.status_code = 201
@@ -230,7 +234,7 @@ def create_blueprint(store, root, token=None, allowed_origins=None, generator=No
         refused = check_write()
         if refused:
             return refused
-        preset, corrections = store.update(name, body(), force=request.args.get("force") == "1")
+        preset, corrections = store.update(name, body(), force=request.args.get("force") == "1", author=account())
         logger.info(f"preset '{name}' saved" + (f" as '{preset['name']}'" if preset["name"] != name else ""))
         return jsonify({"preset": preset, "corrections": corrections, "version": version()})
 
@@ -269,7 +273,7 @@ def create_blueprint(store, root, token=None, allowed_origins=None, generator=No
             refused = check_write()
             if refused:
                 return refused
-            gesture, corrections = gestures.create(body())
+            gesture, corrections = gestures.create(body(), author=account())
             logger.info(f"gesture '{gesture['name']}' created")
             response = jsonify({"gesture": gesture, "corrections": corrections, "version": version()})
             response.status_code = 201
@@ -280,7 +284,7 @@ def create_blueprint(store, root, token=None, allowed_origins=None, generator=No
             refused = check_write()
             if refused:
                 return refused
-            gesture, corrections = gestures.update(name, body(), force=request.args.get("force") == "1")
+            gesture, corrections = gestures.update(name, body(), force=request.args.get("force") == "1", author=account())
             logger.info(f"gesture '{name}' saved" + (f" as '{gesture['name']}'" if gesture["name"] != name else ""))
             return jsonify({"gesture": gesture, "corrections": corrections, "version": version()})
 

@@ -87,6 +87,7 @@ Setup and expected result are in the docstring of each test (the golden examples
 | TC-IF-101-16 | IF-101 | Contract | 1 (mock) and 2 (real) | v1: the account of an answer is a list of plain sentences in order; a message that is not an answer has none. REQ-CLV-008. | exact |
 | TC-IF-101-17 | IF-101 | Contract | 1 (mock) and 2 (real) | v1: every answer announces its character variant (name or null) in the event variant. REQ-CLV-013. | exact |
 | TC-IF-101-18 | IF-101 | Contract | 1 (mock) and 2 (real) | v2: logout ends that session only (401 afterwards on every operation); a second session of the account stays valid. REQ-CLV-022, REQ-BE-077. | exact |
+| TC-IF-101-19 | IF-101 | Contract | 2 (real only) | v3: a foreign Origin is 403 bad_origin also with a session; login and change_password over plain HTTP from another machine are 403 insecure_channel without a cookie. Needs HTTP, so it is verified by the component tests of the Backend (tests/test_accounts_api.py, TC-API-007 and TC-API-008), not by the Python-level mock. REQ-API-007, REQ-API-008. | exact |
 | TC-IF-102-01 | IF-102 | Contract | 1 (mock) and 2 (real) | golden 1: version 1, version 2, and version 1 reads back unchanged. | exact |
 | TC-IF-102-02 | IF-102 | Contract | 1 (mock) and 2 (real) | golden 2: each broken rule is refused with its name and nothing is stored. | exact |
 | TC-IF-102-03 | IF-102 | Contract | 1 (mock) and 2 (real) | golden 3: a cycle p->d->p is refused as a cycle and named by its ids, first id repeated at the end. | exact |
