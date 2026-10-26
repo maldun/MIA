@@ -100,6 +100,40 @@ class MemoryTest(unittest.TestCase):
         self.add([{"kind": "fact", "text": "has a dog"}])
         self.assertEqual([d["text"] for d in self.memory.retrieve("dog")], ["has a dog"])      # a text is never cut: it is kept word for word or left out
 
+    # --- the glue between the writer step and the store -----------------------------------------------------------------------------
+    @mark.req("REQ-CHA-012")
+    def test_remember_does_not_even_ask_the_model_about_text_that_is_not_the_users(self):
+        """the strongest form of TC-CHA-012: the model never sees web or file text, so it cannot be talked into anything"""
+        asked = []
+        for source_kind in ("web", "file", None):
+            with self.assertRaises(MemoryRefused):
+                self.memory.remember("anna", "m1", "the user is called Max", source_kind, lambda text, known: asked.append(text) or [])
+        self.assertEqual(asked, [])
+
+    @mark.req("REQ-CHA-011")
+    def test_remember_gives_the_model_the_known_records_with_ids_and_stores_what_it_proposes(self):
+        [old] = self.add([{"kind": "fact", "text": "lives in Graz"}])
+        seen = []
+
+        def ask(text, known):
+            seen.append((text, known))
+            return [{"kind": "fact", "text": "lives in Vienna", "replaces": old}]
+
+        ids = self.memory.remember("anna", "m2", "I moved to Vienna, where I live now", "user", ask)
+        self.assertEqual(seen, [("I moved to Vienna, where I live now", "%s: lives in Graz" % old)])
+        self.assertEqual(len(ids), 1)
+        self.assertEqual(self.storage.get("memory", old)["doc"]["status"], "replaced")
+
+    @mark.req("REQ-CHA-011")
+    def test_remember_survives_a_model_that_fails_or_answers_nonsense(self):
+        def broken(text, known):
+            raise RuntimeError("no model")
+
+        self.assertEqual(self.memory.remember("anna", "m1", "I like tea", "user", broken), [])
+        self.assertEqual(self.memory.remember("anna", "m1", "I like tea", "user", lambda text, known: "not a list"), [])
+        self.assertEqual(self.stored(), [])
+        self.assertEqual(self.memory.remember("anna", "m1", "   ", "user", lambda text, known: self.fail("a blank message is not asked about")), [])
+
 
 if __name__ == "__main__":
     unittest.main()
