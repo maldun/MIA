@@ -57,7 +57,7 @@ def sign_test(only_a, only_b):
 
 def verification_metrics(records):
     """for the records that have a `truth`: confusion of decisions against truth and the rates that matter for a verifier"""
-    labelled = [r for r in records if r.get("truth") is not None]
+    labelled = [r for r in records if r.get("truth") is not None and r.get("counted", True)]       # a judge's verdict that is not counted is left out (REQ-EVL-003)
     counts = {"tp": 0, "fp": 0, "tn": 0, "fn": 0, "abstain_true": 0, "abstain_false": 0}
     for r in labelled:
         d = decision(r["status"])
@@ -88,13 +88,15 @@ def verification_metrics(records):
 
 def match_metrics(records):
     """for the records that have an `expect`: how many behave exactly as expected"""
-    expected = [r for r in records if r.get("expect") is not None]
+    expected = [r for r in records if r.get("expect") is not None and r.get("counted", True)]
     matched = [r for r in expected if normalize_status(r["status"]) == normalize_status(r["expect"])]
     return {"n": len(expected), "match": rate(len(matched), len(expected)), "mismatches": [r for r in expected if r not in matched]}
 
 
 def is_right(record):
-    """did the record do what the case asked: the expected status if there is one, else the right decision for the truth"""
+    """did the record do what the case asked: the expected status if there is one, else the right decision for the truth; None for a verdict that is not counted"""
+    if not record.get("counted", True):
+        return None
     if record.get("expect") is not None:
         return normalize_status(record["status"]) == normalize_status(record["expect"])
     if record.get("truth") is not None:

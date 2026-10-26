@@ -21,3 +21,17 @@ Existing tests unchanged and green: `tests/test_harness.py` (28), `tests/test_me
 | REQ-EVL-007 | `tools/measure_latency.py` (`measure`: median, min, max of the runs after warm-up, failed runs counted; `chat_ask` + the command line: login, socket, first `chat_delta`); `tools/measure_fps.mjs` (`fpsOf`: median frame time to fps) | `tests/test_measure_latency.py` (TC-EVL-007: 1.0/2.0/3.0 s cycling, 20 runs after 3 warm-up: median 2.0 s), `tests/js/measure-fps.test.mjs` (60 and 30 fps, one long frame does not matter, no frames is an error) |
 
 - **Not done:** the live mode of the latency tool (`chat_ask`) has not been run against a server; the baselines BM-MIA-001 and BM-MIA-002 of today's MIA ("measured first") need the real machine and are the owner's run. The frame times for the fps tool must be recorded in the browser; a recorder is not part of this task.
+
+## T-02 Decisions only on held-out cases (2026-10-26)
+| Requirement | What was built | Tests |
+|---|---|---|
+| REQ-EVL-002 | `tools/decide_guard.py`: refuses (NOT DECIDED, reason "dev split") any run that is not a holdout run (suite name ends in `.holdout`, or every record tagged `split:holdout`) and a mix of both; otherwise calls `eval_decide.py` of the agent-app skill with `--split holdout`. `Suite.select` leaves cases tagged `split:holdout` out of every suite that is not a `.holdout` suite, also with `only=` | `tests/test_decide_guard.py` (TC-EVL-002: dev refused, mixed refused, holdout PASS and FAIL through the real `eval_decide.py`, the harness never selects a held-out case in a dev run) |
+
+- The skill's `eval_decide.py` itself does not refuse a dev run (it only filters with `--split`); the guard is the project's check around it. Use the guard for verdict criteria; `eval_decide.py` stays read-only.
+
+## T-03 Judge calibration flag (2026-10-26)
+| Requirement | What was built | Tests |
+|---|---|---|
+| REQ-EVL-003 | a record with a `judge` field (id of the model that gave the verdict) gets `counted`: `harness.mark_judge_verdicts` with the calibration records of `harness.load_calibrations` (one JSON per judge, written by `tools/label_agreement.write_calibration`); counted only with Cohen's kappa 0.6 or more (`JUDGE_KAPPA_MIN`, OPEN-7); `Harness.run` marks its records; `metrics.is_right`, `match_metrics` and `verification_metrics` leave a not counted verdict out | `tests/test_judge_calibration.py` (TC-EVL-003: no record, kappa 0.7, kappa 0.4, the limit 0.6, a record without kappa, the numbers leave the verdict out, write and read) |
+
+- **Not done:** nothing sets `judge` on a record yet and `Harness.calibrations` is empty by default; a judging pipeline (and the choice of the calibration folder, `data/eval/calibration/` is only my proposal) comes with the first task that uses a model as judge. `label_agreement.py` compares the owner with the benchmark labels, not a judge with the users' ratings: only the record writer was added.

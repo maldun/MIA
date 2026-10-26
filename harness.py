@@ -302,6 +302,7 @@ class Harness:
         if platform is not None:
             self.targets["workflow"] = eval_platform.WorkflowTarget(platform, lambda: self.pin)
         self.targets.update(targets or {})
+        self.calibrations = {}                                       # {judge id: calibration record}, see load_calibrations
         self.counter = None
         self.pin = None
         self._fixture_runners = {}
@@ -448,6 +449,7 @@ class Harness:
                 if progress:
                     progress(len(records), total, record)
         header["finished"] = self._clock()
+        mark_judge_verdicts(records, self.calibrations)
         return Run(header, records)
 
     def _run_case(self, target, suite, case, variant, repeat):
@@ -555,6 +557,36 @@ def format_report(run, worst=8):
     cost = metrics.cost(records)
     lines += ["", "cost: %.1f s in total, %.2f s per run, %d model calls, %d characters sent, %d received" % (cost["seconds"], cost["seconds_per_run"], cost["calls"], cost["chars_in"], cost["chars_out"]) + (", %d tokens" % cost["tokens"] if cost["tokens"] else "")]
     return "\n".join(lines)
+
+
+JUDGE_KAPPA_MIN = 0.6          # OPEN-7: Cohen's kappa against the users' ratings that a judge needs before its verdicts count (to be optimised later)
+
+
+def judge_counts(calibration):
+    """does a calibration record ({"kappa", ...}) make a judge count"""
+    kappa = (calibration or {}).get("kappa")
+    return isinstance(kappa, (int, float)) and kappa >= JUDGE_KAPPA_MIN
+
+
+def mark_judge_verdicts(records, calibrations):
+    """REQ-EVL-003: a record with a `judge` (the id of the model that gave the verdict) gets `counted`: true only with a calibration record of enough kappa for that judge.
+    calibrations: {judge id: record}. Records without a judge are not touched; the metrics leave a not counted verdict out."""
+    for record in records:
+        if record.get("judge") is not None:
+            record["counted"] = judge_counts(calibrations.get(record["judge"]))
+    return records
+
+
+def load_calibrations(folder):
+    """{judge id: calibration record} from the *.json files of the folder (written by tools/label_agreement.py); no folder means no calibration"""
+    found = {}
+    if os.path.isdir(folder):
+        for name in sorted(os.listdir(folder)):
+            if name.endswith(".json"):
+                with open(os.path.join(folder, name), encoding="utf-8") as fp:
+                    record = json.load(fp)
+                found[record["judge"]] = record
+    return found
 
 
 def require_same_cases(run_a, run_b):

@@ -13,6 +13,14 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 from make_external_suite import cohen_kappa     # noqa: E402  (same formula, tested there)
 
 
+def write_calibration(path, judge, kappa, n):
+    """the calibration record of a judge (REQ-EVL-003): data/eval/calibration/<judge>.json; the harness counts the judge's verdicts only if kappa >= 0.6"""
+    record = {"judge": judge, "kappa": kappa, "n": n, "against": "users' ratings"}
+    with open(path, "w", encoding="utf8") as f:
+        json.dump(record, f, ensure_ascii=False, indent=1)
+    return record
+
+
 def main(sheet, key_file):
     key = json.load(open(key_file, encoding="utf8"))
     mine, bench, ids = [], [], []
