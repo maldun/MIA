@@ -52,4 +52,5 @@ def fake(text, on_delta, on_emotion, should_stop):
 
 w.chat_service._run_exchange = fake
 w.chat_service._rate_count = 0
-w.socketio.run(w.app, host="127.0.0.1", port=8685, allow_unsafe_werkzeug=True)
+# MIA_STUB_HOST=0.0.0.0 only inside a container whose port is published to 127.0.0.1 of the host (tools/start_testing.sh)
+w.socketio.run(w.app, host=os.environ.get("MIA_STUB_HOST", "127.0.0.1"), port=8685, allow_unsafe_werkzeug=True)
