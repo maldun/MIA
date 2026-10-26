@@ -136,6 +136,19 @@ fi
 case "${1:-}" in
   rocm|nvidia) FILES+=(-f "compose.$1.yaml"); shift ;;
 esac
+# deploy/up.sh db  (or  deploy/up.sh rocm db): also the PostgreSQL service; the password is made once and kept in .env
+# deploy/up.sh db-only: only the database, started and left alone (no page to wait for); stop it with  deploy/up.sh db down
+DB_ONLY=""
+if [ "${1:-}" = "db" ] || [ "${1:-}" = "db-only" ]; then
+  [ "$1" = "db-only" ] && DB_ONLY=1
+  shift
+  if ! grep -q '^POSTGRES_PASSWORD=' .env; then
+    pw="$(openssl rand -hex 24)"
+    printf 'POSTGRES_PASSWORD=%s\nMIA_DATABASE_URL=postgresql://mia:%s@db:5432/mia\n' "$pw" "$pw" >> .env
+    echo "deploy/.env: database password made"
+  fi
+  FILES+=(--profile db)
+fi
 # for other devices (MIA_BIND=0.0.0.0): MIA must accept the pages that come by this machine's addresses and name
 if [ -z "${MIA_PUBLIC_HOSTS:-}" ] && [ "$(envval MIA_BIND 127.0.0.1)" != "127.0.0.1" ]; then
   MIA_PUBLIC_HOSTS="$(hostname -s),$(hostname -I 2>/dev/null | tr ' ' '\n' | grep -v ':' | paste -sd, -)"
@@ -157,6 +170,10 @@ else
 fi
 
 
+if [ -n "$DB_ONLY" ]; then
+  "${RUN[@]}" up -d db && echo "database started (no port is published; the containers of the stack reach it as db:5432)"
+  exit $?
+fi
 if [ "$1" != "up" ]; then
   exec "${RUN[@]}" "$@"
 fi

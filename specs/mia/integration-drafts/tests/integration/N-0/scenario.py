@@ -8,7 +8,7 @@ LOOKUP = {"nodes": [{"id": "question", "kind": "data"}, {"id": "search", "kind":
 OPTIONS = {"model_pin": "MP-light", "seed": 7, "temperature": 0, "budget": {"calls": 15}}
 
 # requirements decided by the steps (step 0 decides none: it only proves the wiring)
-MARKS = {0: [], 1: ["NFR-8"], 2: ["FR-16"], 3: ["FR-1"], 4: ["FR-1", "FR-9", "FR-21"], 5: ["FR-22"]}
+MARKS = {0: [], 1: ["NFR-8"], 2: ["FR-1"], 3: ["FR-16"], 4: ["FR-1", "FR-9", "FR-21"], 5: ["FR-22"]}    # step 2 is N-1, step 3 is N-4 (amendment A-01)
 
 
 def run(p, t):

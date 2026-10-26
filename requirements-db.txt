@@ -1,0 +1,3 @@
+# Only for  storage: "postgres"  (N-3.1, approved by the owner as D-54). The core requirements.txt stays free of a database driver.
+#   python -m pip install -r requirements-db.txt
+psycopg[binary]>=3.2,<4

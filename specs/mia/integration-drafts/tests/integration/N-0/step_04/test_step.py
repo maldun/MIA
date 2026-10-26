@@ -12,7 +12,7 @@ from integration import need, ports  # noqa: E402
 from markers import mark             # noqa: E402
 import scenario                      # noqa: E402
 
-REAL_NODES = ('N-3', 'N-4', 'N-1', 'N-2')
+REAL_NODES = ('N-3', 'N-1', 'N-4', 'N-2')
 REAL_INTERFACES = ('IF-101', 'IF-102', 'IF-104', 'IF-105', 'IF-201', 'IF-202', 'IF-203', 'IF-204', 'IF-301', 'IF-302', 'IF-401', 'IF-402')
 
 

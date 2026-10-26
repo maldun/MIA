@@ -102,4 +102,55 @@ def subject_for(interface, kind):
             from if_405_scholarly_sources import ScholarMock
             return ScholarMock()
         raise KeyError(interface)
+    real = real_subject(interface)
+    if real is not None:
+        return real
     raise unittest.SkipTest(REAL_NOT_READY[interface])
+
+
+REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+
+class _StorageAdapter:
+    """IF-102 on the real Storage layer: the file backend in a fresh folder (stage 2), or PostgreSQL when MIA_TEST_DATABASE_URL is set (stage 3). The
+    adapter only turns the error class of the layer into the one of the mock, which the suite expects; production code does not import from tests/."""
+
+    def __init__(self):
+        import tempfile
+        from errors import StorageError
+        from storage import Storage
+        url = os.environ.get("MIA_TEST_DATABASE_URL")
+        if url:
+            from storage_postgres import PostgresBackend
+            backend = PostgresBackend(url)
+            backend._query("TRUNCATE records")
+        else:
+            from storage_files import FileBackend
+            backend = FileBackend(tempfile.mkdtemp())
+        self._store, self._error = Storage(backend), StorageError
+
+    def __getattr__(self, name):
+        from storage import StorageError as LayerError
+        method = getattr(self._store, name)
+
+        def call(*args, **kwargs):
+            try:
+                return method(*args, **kwargs)
+            except LayerError as err:
+                raise self._error(err.code, rule=err.rule, detail=err.detail)
+        return call
+
+
+def real_subject(interface):
+    """The real provider of an interface once its node is integrated (amendment A-02: IF-301, IF-302, IF-102 of the Database); None until then."""
+    if REPO not in sys.path:
+        sys.path.insert(0, REPO)
+    if interface == "IF-301":
+        import graph_tables
+        return graph_tables
+    if interface == "IF-302":
+        import record_tables
+        return record_tables
+    if interface == "IF-102":
+        return _StorageAdapter()
+    return None
