@@ -30,14 +30,20 @@ The service knows nothing about Flask or the model: `emit(event, payload)` and `
 on_emotion, should_stop)` are given to it (web_app.py), which makes it testable with a fake model.
 """
 import collections
+import datetime
 import re
 import threading
 import time
+import uuid
 
 try:
-    from .chat_log import utc_now
+    from .chat_log import utc_now, MAX_PAGE
+    from .record_tables import CATEGORIES
+    from .speech_text import speech_text
 except ImportError:  # used as plain script / in tests
-    from chat_log import utc_now
+    from chat_log import utc_now, MAX_PAGE
+    from record_tables import CATEGORIES
+    from speech_text import speech_text
 
 MAX_LENGTH = 8000
 TASK_COMMAND = re.compile(r"/(lookup|research|search)(?:\s+(.*))?", re.I | re.S)        # /lookup question, /search query; /research is the old name of /lookup
@@ -61,11 +67,19 @@ def normalize_text(text):
     if not isinstance(text, str):
         return ""
     return CONTROL_CHARACTERS.sub("", text).strip()
+SENTENCE_END = re.compile(r"(?<=[.!?])\s+")
+
+
+class ChatError(Exception):
+    """a refused operation of IF-201 (v1): `code` is not_found, not_the_last_answer, invalid_vote or queue_full; `rule` names what a vote broke"""
+    def __init__(self, code, rule=None):
+        super().__init__(code)
+        self.code, self.rule = code, rule
 
 
 class ChatService:
     def __init__(self, emit, log, mood, run_exchange, run_command=None, model_info=None, queue_size=1, user_limit=0,
-                 rate_limit=(10, 60), spawn=None, clock=time.monotonic, run_lookup=None, run_search=None):
+                 rate_limit=(10, 60), spawn=None, clock=time.monotonic, run_lookup=None, run_search=None, votes=None, wall_clock=time.time):
         self._emit = emit
         self._run_lookup = run_lookup          # (question, on_delta, on_emotion, should_stop) -> the answer, for /lookup
         self._run_search = run_search              # (query, on_delta, on_emotion, should_stop) -> the list of results, for /search
@@ -79,6 +93,8 @@ class ChatService:
         self._rate_count, self._rate_window = rate_limit
         self._spawn = spawn or (lambda target: threading.Thread(target=target, daemon=True).start())
         self._clock = clock
+        self._votes = votes                    # the Storage layer (IF-102): the votes table
+        self._wall_clock = wall_clock          # seconds since the epoch; the time of a vote and so its week
         self._lock = threading.RLock()
         self._queue = collections.deque()
         self._running = False
@@ -179,6 +195,83 @@ class ChatService:
         if running:
             self._stop.set()
         return running
+
+    # --- operations on answers and votes (IF-201 v1) --------------------------------------------------------
+    def _find(self, message_id):
+        before = None
+        while True:
+            records, older = self.log.history(before=before, limit=MAX_PAGE)
+            for record in records:
+                if record["id"] == message_id:
+                    return record
+            if not older:
+                return None
+            before = records[0]["id"]
+
+    def _answer(self, message_id):
+        record = self._find(message_id)
+        if record is None or record["role"] != "assistant":
+            raise ChatError("not_found")
+        return record
+
+    def regenerate(self, account, message_id):
+        """a new try for the last answer, queued like a message; the old answer stays and the question is not stored again"""
+        record = self._answer(message_id)
+        if self.log.last("assistant")["id"] != record["id"]:
+            raise ChatError("not_the_last_answer")
+        records = self.log.history(before=record["id"], limit=MAX_PAGE)[0]
+        asked = next((m for m in reversed(records) if m["role"] == "user"), None)
+        if asked is None:
+            raise ChatError("not_found")
+        with self._lock:
+            own = sum(1 for item in self._queue if item[2] == account)
+            if self._running and (len(self._queue) >= self.queue_size or (self.user_limit and own >= self.user_limit)):
+                raise ChatError("queue_full")
+            self._queue.append(("chat", asked["text"], account))
+            position = len(self._queue)
+            self._start_worker()
+        self.publish_status()
+        return {"position": position, "asked": asked["id"]}
+
+    def speak_again(self, message_id):
+        """one audio_chunk per sentence of any answer; the page that owns the voice plays them"""
+        record = self._answer(message_id)
+        sentences = [s for s in SENTENCE_END.split(speech_text(record["text"])) if s]
+        for index, sentence in enumerate(sentences):
+            self._emit("audio_chunk", {"id": record["id"], "index": index, "sentence": sentence})
+        return {"sentences": len(sentences)}
+
+    def account(self, message_id):
+        """the plain steps kept with the answer, in order; the domain events of the run log (kind "event") are no steps"""
+        record = self._answer(message_id)
+        plain = [e["plain"] for e in record.get("pipeline", []) if e.get("kind") != "event" and e.get("plain")]
+        return [{"seq": i, "plain": text} for i, text in enumerate(plain or ["No steps were kept for this answer."], 1)]
+
+    def vote(self, account, subject, category, value):
+        """a plus or a minus, kept with user, time, subject and category (REQ-CHA-015); the score event follows"""
+        if category not in CATEGORIES:
+            raise ChatError("invalid_vote", "category")
+        if isinstance(value, bool) or value not in (1, -1):
+            raise ChatError("invalid_vote", "value")
+        if category == "answer_quality":
+            self._answer(subject)
+        created = datetime.datetime.fromtimestamp(self._wall_clock(), datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        self._votes.put("votes", uuid.uuid4().hex, {"user": account, "subject": subject, "category": category, "value": value, "created": created}, account)
+        score = self.score()
+        self._emit("score", score)
+        return {"stored": True, "score": score}
+
+    def score(self):
+        """sums per category and overall, and the same per ISO week of the vote (oldest first, only weeks with a vote)"""
+        def sums(votes):
+            categories = {c: sum(v["value"] for v in votes if v["category"] == c) for c in CATEGORIES}
+            return {"overall": sum(categories.values()), "categories": categories}
+        votes = [self._votes.get("votes", i)["doc"] for i in self._votes.ids("votes")]
+        weeks = {}
+        for vote in votes:
+            year, week, _ = datetime.datetime.strptime(vote["created"], "%Y-%m-%dT%H:%M:%SZ").isocalendar()
+            weeks.setdefault("%d-W%02d" % (year, week), []).append(vote)
+        return dict(sums(votes), votes=len(votes), series=[dict(week=name, **sums(group)) for name, group in sorted(weeks.items())])
 
     # --- the steps of the pipeline behind an answer --------------------------------------------------------------
     def pipeline_event(self, event):
