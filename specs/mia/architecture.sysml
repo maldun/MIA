@@ -2237,8 +2237,8 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-CHA-011'> StructuredMemory_Cha011 {
         subject s : ConversationCore;
-        doc /* The Chat agent shall keep structured facts, preferences and commitments linked to their source and retrieve what is relevant within the token budget. */
-        @Trace { :>> verifiedBy = (HowVerified::measurement); }
+        doc /* The Chat agent shall keep facts, preferences and commitments as records with a kind, a time and a source, written in English, and give the model the most relevant records within a token budget. */
+        @Trace { :>> verifiedBy = (HowVerified::measurement, HowVerified::test); }
     }
     requirement def <'REQ-CHA-012'> NoMemoryFromUntrustedText_Cha012 {
         subject s : ConversationCore;

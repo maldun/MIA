@@ -128,15 +128,15 @@ The persona's side: the shared conversation, the answer queue, persona, mood, me
 
 ### REQ-CHA-011 – Structured memory
 - Level: low   Subject: ConversationCore
-- Text: The Chat agent shall keep structured facts, preferences and commitments linked to their source and retrieve what is relevant within the token budget.
-- Rationale: refines REQ-BE-024
+- Text: The Chat agent shall keep facts, preferences and commitments as records with a kind, a time and a source, written in English, and give the model the most relevant records within a token budget.
+- Rationale: refines REQ-BE-024; the design follows the literature (MemGPT, Generative Agents, Mem0, LongMemEval; specs/mia/eval-drafts/memory-design.md, D-78); English as the storage language by owner decision 2026-10-27 (D-83)
 - Parent: REQ-BE-024
 - Priority: Should
-- Verification method: Measurement
-- Acceptance criterion: AC-24: the memory test set is passed at least as well as today's dreaming at equal or lower token cost
+- Verification method: Measurement, Test
+- Acceptance criterion: AC-24: (a) on the 11 holdout cases of the checked memory sample (specs/mia/eval-drafts/memory_sample.jsonl, labelled by the owner), 3 repeats, pin MP-light with the temperature of the skill memory_write, at least 9 of 11 cases are right (every wanted record is stored in English and nothing forbidden is stored); rule: at least 9 of 11 and a Wilson 95 % lower bound of 0.5, exact error rates for a good rate of 0.95 and a bad rate of 0.5 with the re-run rule: false alarm 0.0002, miss 0.064 (false_alarm.py); a failing check is re-run once with fresh repeats; (b) the memory block never exceeds memory_budget_tokens (test, exact) and on the 20 most recent user messages of the owner it costs fewer tokens than today's dreaming memory (tools/memory_cost.py)
 - Verified by: TC-CHA-011
 - Status: Approved
-- History: –
+- History: A-12 (2026-10-27): reworded, was "keep structured facts, preferences and commitments linked to their source and retrieve what is relevant within the token budget" with AC-24 "the memory test set is passed at least as well as today's dreaming at equal or lower token cost" (owner: literature plus a checked sample of 30 instead of a large test set; n = 11 holdout cases can show a clear failure, not a small difference to dreaming). No Eval criterion line: the harness has no memory target and no suite EV-memory yet; the sample is scored by the same rules as tools/memory_dev_run.py, run by the verifier on the holdout
 
 ### REQ-CHA-012 – No memory from untrusted text
 - Level: low   Subject: ConversationCore
