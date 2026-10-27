@@ -8,12 +8,15 @@ Errors are WorkflowLibraryError with the codes of contracts/IF-203-workflow-libr
 """
 try:
     from .storage import StorageError
+    from . import context_graph
 except ImportError:
     from storage import StorageError
+    import context_graph
 
 KINDS = ("workflows", "context_graphs")
 STATUSES = ("draft", "tested", "trusted", "retired")
 NEEDS = ("specification", "benchmark")
+DEFAULT_STEP_BUDGET = 800          # tokens of the view of a step whose node names no budget (the default of context_graph.render)
 NO_COST = {"seconds": 0.0, "calls": 0, "tokens": 0}
 
 
@@ -71,6 +74,10 @@ class WorkflowLibrary:
 
     def save(self, kind, record_id, doc, author, expected_version=None):
         self._kind(kind)
+        for node in (doc.get("nodes") if isinstance(doc, dict) and isinstance(doc.get("nodes"), list) else []):
+            budget = node.get("budget_tokens") if isinstance(node, dict) else None
+            if budget is not None and (isinstance(budget, bool) or not isinstance(budget, int) or budget < 1):
+                raise WorkflowLibraryError("invalid", rule="budget_tokens", detail=node.get("id"))      # REQ-WFM-008
         if kind == "workflows" and isinstance(doc, dict) and doc.get("variant") is not None and not (isinstance(doc["variant"], str) and doc["variant"].strip()):
             raise WorkflowLibraryError("invalid", rule="variant", detail=doc["variant"])      # REQ-WFM-010: the name of a character variant
         return _storage_call(self._storage.put, kind, record_id, doc, author, expected_version)
@@ -124,6 +131,21 @@ class WorkflowLibrary:
 
     def _has_meta(self, record_id):
         return record_id in self._storage.ids(TableMeta.TABLE)
+
+    def step_view(self, record_id, events, step=None):
+        """REQ-WFM-008: the view of the run `events` that fits the token budget of `step`. The stored context graph with the id of the workflow (or `chat`) is the
+        design-time template: its process node `step` may carry `budget_tokens`; the graph itself is rebuilt from the events (context_graph.replay) and never stored.
+        Returns {"text", "budget_tokens", "expanded"}; `expanded` are the groups shown in detail."""
+        template = self.read("context_graphs", record_id)["doc"]
+        budget = DEFAULT_STEP_BUDGET
+        if step is not None:
+            node = next((n for n in template["nodes"] if n["id"] == step and n["kind"] == "process"), None)
+            if node is None:
+                raise WorkflowLibraryError("not_found", detail=step)
+            budget = node.get("budget_tokens", budget)
+        view = context_graph.default_view(context_graph.replay(events))
+        text, expanded = context_graph.render(view, budget_tokens=budget)
+        return {"text": text, "budget_tokens": budget, "expanded": expanded}
 
     def variant_of(self, record_id, version=None):
         """REQ-WFM-010: the character variant the workflow names (the key `variant` of its document), or None; the chat service sends it to the frontend while the workflow runs"""

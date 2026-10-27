@@ -9,6 +9,7 @@ import unittest
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, REPO)
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from storage import Storage                      # noqa: E402
 from storage_files import FileBackend            # noqa: E402
@@ -158,6 +159,36 @@ class WorkflowLibraryTest(unittest.TestCase):
         self.assertEqual((lib.variant_of("debate", version=1), lib.variant_of("debate")), ("serious", None))
         err = error_of(lambda: lib.save("workflows", "bad", dict(LOOKUP, variant=7), "anna"))
         self.assertEqual((err.code, err.rule), ("invalid", "variant"))
+
+    def test_the_view_of_a_step_fits_its_budget_in_tokens(self):          # REQ-WFM-008, TC-WFM-008: the stored context graph is the design-time template
+        from test_context_graph import recorded_run
+        lib = self.lib
+        template = {"nodes": [{"id": "question", "kind": "data"}, {"id": "search", "kind": "process", "budget_tokens": 40},
+                              {"id": "hits", "kind": "data"}, {"id": "judge", "kind": "process", "budget_tokens": 1500}, {"id": "verdict", "kind": "data"}],
+                    "edges": [{"from": "question", "to": "search"}, {"from": "search", "to": "hits"}, {"from": "hits", "to": "judge"}, {"from": "judge", "to": "verdict"}]}
+        lib.save("context_graphs", "lookup", template, "anna")
+        events = recorded_run()
+        small, large, plain = lib.step_view("lookup", events, "search"), lib.step_view("lookup", events, "judge"), lib.step_view("lookup", events)
+        for view in (small, large, plain):
+            self.assertLessEqual(len(view["text"]), view["budget_tokens"] * 4)
+        self.assertEqual((small["budget_tokens"], large["budget_tokens"], plain["budget_tokens"]), (40, 1500, 800))       # a step without a budget gets the default
+        self.assertLess(len(small["expanded"]), len(large["expanded"]))
+        self.assertEqual(lib.step_view("lookup", events, "search"), small)       # same events, same view
+        self.assertEqual(error_of(lambda: lib.step_view("lookup", events, "nope")).code, "not_found")
+        self.assertEqual(error_of(lambda: lib.step_view("chat", events)).code, "not_found")      # no template stored for that id
+        for bad in (0, -5, 2.5, "big", True):
+            broken = dict(template, nodes=[dict(template["nodes"][0])] + [dict(template["nodes"][1], budget_tokens=bad)] + template["nodes"][2:])
+            err = error_of(lambda: lib.save("context_graphs", "bad", broken, "anna"))
+            self.assertEqual((err.code, err.rule), ("invalid", "budget_tokens"))
+
+    def test_the_template_may_be_optimised_as_a_new_version(self):         # REQ-WFM-008: the design-time graph may change over the runtime, old versions stay
+        lib = self.lib
+        doc = {"nodes": [{"id": "d", "kind": "data"}, {"id": "p", "kind": "process", "budget_tokens": 300}], "edges": [{"from": "d", "to": "p"}]}
+        lib.save("context_graphs", "chat", doc, "anna")
+        better = {"nodes": [doc["nodes"][0], dict(doc["nodes"][1], budget_tokens=500)], "edges": doc["edges"]}
+        self.assertEqual(lib.save("context_graphs", "chat", better, "optimizer", expected_version=1), {"version": 2})
+        self.assertEqual(lib.read("context_graphs", "chat", 1)["doc"], doc)
+        self.assertEqual(lib.diff("context_graphs", "chat", 1, 2)["nodes_changed"], ["p"])
 
     def test_estimate_order_critical_path_and_session_cycles(self):     # REQ-WFM-009 (the numbers), IF-203 golden 3
         lib = self.lib
