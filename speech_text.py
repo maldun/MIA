@@ -22,6 +22,7 @@ What MIA's voice says: the text of an answer without the marks of markdown and w
   *smiles and waves*       one asterisk on each side: an expression or action, never spoken (MIA's rule, see communicator.EMOTION_QUESTION)
   2*3, 2 * 3             between digits: read as "times"
   **strong**, __strong__   emphasis does not work in speech: the words stay, the marks go
+  <b>tags</b>           html tags: removed, the words stay
   # headings, > quotes, - lists, `code`, ~~strike~~, [text](link), tables: marks removed, link texts kept, links and images dropped
 
 The chat page still shows the full text (the actions in italics); only the voice gets the filtered one.
@@ -36,6 +37,7 @@ HEADING = re.compile(r"^[ \t]{0,3}#{1,6}[ \t]*", re.M)
 QUOTE = re.compile(r"^[ \t]*>+[ \t]?", re.M)
 TABLE_RULE = re.compile(r"^[ \t]*\|?[ \t]*:?-{2,}:?[ \t]*(\|[ \t]*:?-{2,}:?[ \t]*)*\|?[ \t]*$", re.M)
 RULE = re.compile(r"^[ \t]*([-*_=][ \t]*){3,}$", re.M)
+TAG = re.compile(r"</?[A-Za-z][^<>]*>")       # <b>, </b>, <br/>: markup of the page, never spoken (a "<" before a blank or digit is no tag)
 IMAGE = re.compile(r"!\[[^\]]*\]\([^)]*\)")
 LINK = re.compile(r"\[([^\]]*)\]\([^)]*\)")
 URL = re.compile(r"https?://\S+")
@@ -58,6 +60,7 @@ def speech_text(text, final=True):
     text = RULE.sub("", text)
     text = HEADING.sub("", text)
     text = QUOTE.sub("", text)
+    text = TAG.sub("", text)
     text = IMAGE.sub(" ", text)
     text = LINK.sub(r"\1", text)
     text = URL.sub(" ", text)
