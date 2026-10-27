@@ -68,15 +68,15 @@ The library of workflows and skills as versioned data, the graph rules, specific
 
 ### REQ-WFM-006 – Specification before trust
 - Level: low   Subject: TaskRuntime
-- Text: The Workflow management shall keep a workflow without specification, context graph and benchmark with a baseline in draft status and refuse to promote it.
+- Text: The Workflow management shall keep a workflow without specification and benchmark in draft status and refuse to promote it.
 - Rationale: refines REQ-BE-039
 - Parent: REQ-BE-039
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-10: promotion of a workflow lacking any of the three is refused (exact)
+- Acceptance criterion: AC-10: promotion of a workflow lacking its specification or its benchmark is refused (exact)
 - Verified by: TC-WFM-006
 - Status: Approved
-- History: –
+- History: v1 reworded, A-16 (owner 2026-10-27: the context graph and the baseline of the benchmark are checked on the shipped workflows by inspection, TC-MIA-009, TC-MIA-010; the gate of the library checks specification and benchmark, as IF-203 says)
 
 ### REQ-WFM-007 – Time from idea to promotion
 - Level: low   Subject: TaskRuntime

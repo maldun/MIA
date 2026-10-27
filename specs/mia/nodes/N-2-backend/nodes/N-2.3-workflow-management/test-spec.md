@@ -13,7 +13,7 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-203
 | TC-WFM-003 | REQ-WFM-003 | Component | 2 | component test with the mocks of the neighbouring interfaces | AC-27: a workflow with a cycle is refused with the cycle named; property test on generated graphs: every accepted graph has a topological order | as stated |
 | TC-WFM-004 | REQ-WFM-004 | Component | 2 | component test with the mocks of the neighbouring interfaces | AC-27: each of the three violations is refused with the rule named | exact |
 | TC-WFM-005 | REQ-WFM-005 | Component | 2 | component test with the mocks of the neighbouring interfaces | AC-10: a proposed entry has status draft and cannot be run as trusted | as stated |
-| TC-WFM-006 | REQ-WFM-006 | Component | 2 | component test with the mocks of the neighbouring interfaces | AC-10: promotion of a workflow lacking any of the three is refused | exact |
+| TC-WFM-006 | REQ-WFM-006 | Component | 2 | component test with the mocks of the neighbouring interfaces | AC-10: promotion of a workflow lacking its specification or its benchmark is refused (exact) | exact |
 | TC-WFM-007 | REQ-WFM-007 | Component | 2 | component test with the mocks of the neighbouring interfaces | AC-9: the record has two time stamps for each promoted skill | as stated |
 | TC-WFM-008 | REQ-WFM-008 | Component | 2 | component test with the mocks of the neighbouring interfaces | AC-10: the view of a step stays within its budget in tokens (exact on the recorded lookup run) | as stated |
 | TC-WFM-009 | REQ-WFM-009 | Component | 2 | component test with the mocks of the neighbouring interfaces | AC-28: on the recorded lookup runs the estimate is within the factor set in Plan of the measured time | as stated |

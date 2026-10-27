@@ -2312,7 +2312,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-WFM-006'> SpecificationBeforeTrust_Wfm006 {
         subject s : TaskRuntime;
-        doc /* The Workflow management shall keep a workflow without specification, context graph and benchmark with a baseline in draft status and refuse to promote it. */
+        doc /* The Workflow management shall keep a workflow without specification and benchmark in draft status and refuse to promote it. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-WFM-007'> TimeFromIdeaToPromotion_Wfm007 {
@@ -2887,7 +2887,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-BE-039'> SpecificationBeforeTrust_Be039 {
         subject s : WebApplication;
-        doc /* The Backend shall keep a workflow without specification, context graph and benchmark with a baseline in draft status and refuse to promote it. */
+        doc /* The Backend shall keep a workflow without specification and benchmark in draft status and refuse to promote it. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-BE-040'> TimeFromIdeaToPromotion_Be040 {

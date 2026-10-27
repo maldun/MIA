@@ -464,12 +464,12 @@ The server and accounts, the chat agent, workflow management, workflow execution
 
 ### REQ-BE-039 – Specification before trust
 - Level: high   Subject: WebApplication
-- Text: The Backend shall keep a workflow without specification, context graph and benchmark with a baseline in draft status and refuse to promote it.
+- Text: The Backend shall keep a workflow without specification and benchmark in draft status and refuse to promote it.
 - Rationale: refines FR-26, FR-20
 - Parent: FR-26, FR-20
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-10: promotion of a workflow lacking any of the three is refused (exact)
+- Acceptance criterion: AC-10: promotion of a workflow lacking its specification or its benchmark is refused (exact)
 - Verified by: TC-WFM-006, TC-N2-002
 - Status: Approved
 - History: –

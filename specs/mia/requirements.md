@@ -348,7 +348,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Parent: HLS FR-26
 - Priority: Must
 - Verification method: Inspection, Test
-- Acceptance criterion: AC-10: every shipped workflow has a specification, a context graph and a benchmark with a baseline; the library refuses to promote one without them; every harness run records workflow version, model pin and benchmark version
+- Acceptance criterion: AC-10: every shipped workflow has a specification, a context graph and a benchmark with a baseline; the library refuses to promote one without a specification or a benchmark; every harness run records workflow version, model pin and benchmark version
 - Refined in: N-2.3, N-4
 - Verified by: TC-MIA-010
 - Status: Approved
