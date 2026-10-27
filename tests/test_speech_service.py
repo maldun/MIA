@@ -90,5 +90,31 @@ class SpeechServiceTest(unittest.TestCase):
             self.assertEqual(ctx.exception.code, "no_line")
 
 
+class MoodLineDeliveryTest(unittest.TestCase):
+    """REQ-VOI-003: a name given by the Chat agent is a mood of library/voice_lines.json; its audio is delivered, a missing file is skipped"""
+    def setUp(self):
+        self.mod = importlib.import_module("MIA.speech_service")
+        self.folder = tempfile.mkdtemp()
+        self.logged = []
+        config = os.path.join(self.folder, "voice_lines.json")
+        with open(config, "w") as fp:
+            fp.write('{"lines": {"annoyed": ["grr.wav", "gone.wav"], "happy": []}, "silent": ["neutral"]}')
+        with open(os.path.join(self.folder, "grr.wav"), "wb") as fp:
+            fp.write(b"RIFFgrr")
+        lines = importlib.import_module("MIA.voice_lines").VoiceLines(config, self.folder, ["annoyed", "happy", "neutral"], log=self.logged.append)
+        self.service = self.mod.SpeechService(FakeSpeaker(), self.folder, lines=lines)
+
+    def test_the_audio_of_a_mood_is_delivered_and_the_missing_file_is_skipped(self):
+        for _ in range(10):
+            self.assertEqual(self.service.voice_line("annoyed"), {"audio": b"RIFFgrr", "format": "wav"})
+        self.assertTrue(any("gone.wav" in message for message in self.logged))
+
+    def test_a_silent_mood_has_no_line(self):
+        for mood in ["happy", "neutral", "unknown"]:
+            with self.assertRaises(self.mod.SpeechError) as ctx:
+                self.service.voice_line(mood)
+            self.assertEqual(ctx.exception.code, "no_line")
+
+
 if __name__ == "__main__":
     unittest.main()

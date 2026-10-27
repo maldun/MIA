@@ -24,8 +24,9 @@ class SpeechError(Exception):
 
 
 class SpeechService:
-    def __init__(self, speaker, lines_folder):
-        self._speaker, self._folder = speaker, lines_folder
+    def __init__(self, speaker, lines_folder, lines=None):
+        # lines: the VoiceLines of the mood map (REQ-VOI-003); without it a name is a file <name>.wav in the folder
+        self._speaker, self._folder, self._lines = speaker, lines_folder, lines
 
     def synthesize(self, sentence):
         spoken = " ".join(speech_text(sentence).split())
@@ -45,6 +46,12 @@ class SpeechService:
         return {"audio": audio, "format": "wav", "spoken_text": spoken, "seconds": round(seconds, 2)}
 
     def voice_line(self, name):
+        if self._lines is not None:
+            path = self._lines.pick(name)             # a missing file is logged and skipped there; None = silent mood
+            if path is None:
+                raise SpeechError("no_line")
+            with open(path, "rb") as fp:
+                return {"audio": fp.read(), "format": "wav"}
         path = os.path.join(self._folder, str(name) + ".wav")
         if not name or os.path.basename(str(name)) != str(name) or not os.path.isfile(path):
             logger.warning("speech: voice line %r not found" % (name,))
