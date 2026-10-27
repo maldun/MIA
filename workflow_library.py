@@ -109,6 +109,20 @@ class WorkflowLibrary:
         self._meta.put(record_id, meta, author)
         return {"status": status}
 
+    def promotion_record(self, record_id):
+        """REQ-WFM-007: the two time stamps of a skill: `idea` is the time of its first version, `promoted` the time of the first step out of draft
+        (tested or trusted), None while it is a draft. Both come from the history the Storage keeps, so nothing extra is written."""
+        idea = self.history("workflows", record_id)[0]["time"]
+        promoted = None
+        for entry in _storage_call(self._storage.history, TableMeta.TABLE, record_id) if self._has_meta(record_id) else []:
+            if self._storage.get(TableMeta.TABLE, record_id, entry["version"])["doc"]["status"] in ("tested", "trusted"):
+                promoted = entry["time"]
+                break
+        return {"idea": idea, "promoted": promoted}
+
+    def _has_meta(self, record_id):
+        return record_id in self._storage.ids(TableMeta.TABLE)
+
     def estimate(self, record_id, version=None):
         """order: a topological order of the process nodes; critical path: the longest chain by seconds; sums over all nodes, a session node counts
         its maximum cycles times the cost of one cycle. The stored version was checked on save (no cycle), so the order always exists."""

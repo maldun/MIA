@@ -120,6 +120,23 @@ class WorkflowLibraryTest(unittest.TestCase):
         self.assertEqual([v["author"] for v in versions][-2:], ["ben", "anna"])
         self.assertEqual(storage.get("workflow_meta", "lookup", 1)["doc"]["status"], "draft")        # an old version never changes
 
+    def test_the_time_from_idea_to_promotion_is_recorded(self):     # REQ-WFM-007, TC-WFM-007: the idea is the first version
+        lib = self.lib
+        lib.save("workflows", "lookup", LOOKUP, "anna")
+        lib.save("workflows", "lookup", edited("x"), "ben")
+        self.assertEqual(lib.promotion_record("lookup"), {"idea": lib.history("workflows", "lookup")[0]["time"], "promoted": None})
+        lib.attach("lookup", "specification", {"inputs": "question"})
+        lib.attach("lookup", "benchmark", {"suite": "verdicts"})
+        self.assertIsNone(lib.promotion_record("lookup")["promoted"])             # attaching is no promotion
+        lib.set_status("lookup", "tested", "anna")
+        lib.set_status("lookup", "trusted", "anna")
+        record = lib.promotion_record("lookup")
+        meta = lib._storage.history("workflow_meta", "lookup")
+        self.assertEqual(record["idea"], lib.history("workflows", "lookup")[0]["time"])
+        self.assertEqual(record["promoted"], meta[-2]["time"])                    # the first step out of draft, not the later one
+        self.assertLessEqual(record["idea"], record["promoted"])
+        self.assertEqual(error_of(lambda: lib.promotion_record("nope")).code, "not_found")
+
     def test_estimate_order_critical_path_and_session_cycles(self):     # REQ-WFM-009 (the numbers), IF-203 golden 3
         lib = self.lib
         lib.save("workflows", "lookup", LOOKUP, "anna")
