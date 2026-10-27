@@ -19,7 +19,7 @@ class Definitions(unittest.TestCase):
     def test_all_tables_versioned_and_deletable_exactly_where_planned(self):
         """TC-RTB-001, TC-RTB-006."""
         tables = definitions()
-        self.assertEqual(set(tables), {"history", "memory", "votes", "tasks", "memos", "accounts", "presets", "gestures", "runs", "source_trust", "cases", "behaviours"})
+        self.assertEqual(set(tables), {"history", "memory", "votes", "tasks", "memos", "accounts", "presets", "gestures", "runs", "source_trust", "cases", "behaviours", "workflow_meta"})
         self.assertTrue(all(t["versioned"] for t in tables.values()))
         self.assertEqual({k for k, t in tables.items() if t["deletable"]}, {"history", "memory", "tasks", "memos"})
         self.assertEqual(tables["source_trust"], {"versioned": True, "deletable": False})
@@ -94,6 +94,15 @@ class Validation(unittest.TestCase):
         """history, accounts, presets, gestures and source_trust have no required field here: their shape belongs to the code that writes them."""
         for table in ("history", "accounts", "presets", "gestures", "source_trust"):
             self.assertIsNone(validate(table, {"anything": 1}))
+
+    @mark.req("REQ-WFM-002", "REQ-WFM-006", "IF-302")
+    def test_workflow_meta_keeps_the_lifecycle_of_a_workflow(self):
+        """IF-302 v3 (A-15): status is draft, tested, trusted or retired and required; specification and benchmark are free; every version is kept."""
+        self.assertEqual(definitions()["workflow_meta"], {"versioned": True, "deletable": False})
+        self.assertIsNone(validate("workflow_meta", {"status": "draft"}))
+        self.assertIsNone(validate("workflow_meta", {"status": "tested", "specification": {"inputs": "question"}, "benchmark": {"suite": "verdicts"}}))
+        self.assertEqual(validate("workflow_meta", {"specification": {}}), {"rule": "schema", "detail": "status"})
+        self.assertEqual(validate("workflow_meta", {"status": "wild"}), {"rule": "schema", "detail": "status"})
 
     @mark.req("REQ-CHA-011", "IF-302")
     def test_a_memory_record_may_carry_kind_status_subject_and_updated_and_an_old_one_stays_valid(self):

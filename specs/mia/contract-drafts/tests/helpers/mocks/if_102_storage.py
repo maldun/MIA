@@ -9,7 +9,7 @@ except ImportError:  # plain import (single test run as a script)
     from errors import StorageError
     import graph_rules
 
-TABLES = ("workflows", "context_graphs", "history", "memory", "votes", "tasks", "memos", "accounts", "presets", "gestures", "runs", "source_trust", "cases", "behaviours")
+TABLES = ("workflows", "context_graphs", "history", "memory", "votes", "tasks", "memos", "accounts", "presets", "gestures", "runs", "source_trust", "cases", "behaviours", "workflow_meta")
 IMMUTABLE = ("workflows", "context_graphs")      # versioned records are never deleted
 VALIDATED = ("workflows",)                       # graph rules are checked on write (TB-edit, second line of defence)
 

@@ -2,8 +2,8 @@
 
 Versions, history and the graph rules (cycle, adjacent data nodes, session without stopping criterion) are the job of the Storage (IF-102), which refuses
 a broken document and consumes no version; this module is the only caller of those tables for workflows (REQ-WFM-025). What the Storage does not hold
-is the lifecycle: status, specification and benchmark of a workflow are kept by `meta` (get(id) -> dict, put(id, dict)); the default is in memory until the
-table of IF-302 for them is installed.
+is the lifecycle: status, specification and benchmark of a workflow are one record of the table `workflow_meta` (IF-302 v3, amendment A-15), a new version
+for every change, so that who promoted what and when stays in the history. `meta` (get(id) -> dict, put(id, dict, author)) can be replaced in tests.
 Errors are WorkflowLibraryError with the codes of contracts/IF-203-workflow-library.md: invalid, not_found, conflict, not_promotable.
 """
 try:
@@ -23,15 +23,22 @@ class WorkflowLibraryError(Exception):
         self.code, self.rule, self.detail = code, rule, detail
 
 
-class MemoryMeta:
-    def __init__(self):
-        self._data = {}
+class TableMeta:
+    TABLE = "workflow_meta"
+
+    def __init__(self, storage):
+        self._storage = storage
 
     def get(self, record_id):
-        return dict(self._data.get(record_id, {}))
+        try:
+            return self._storage.get(self.TABLE, record_id)["doc"]
+        except StorageError as err:
+            if err.code == "not_found":
+                return {}
+            raise
 
-    def put(self, record_id, meta):
-        self._data[record_id] = dict(meta)
+    def put(self, record_id, meta, author):
+        self._storage.put(self.TABLE, record_id, dict(meta, status=meta.get("status", "draft")), author)
 
 
 def _storage_call(call, *args, **kw):
@@ -44,7 +51,7 @@ def _storage_call(call, *args, **kw):
 class WorkflowLibrary:
     def __init__(self, storage, costs=None, meta=None):
         # costs: node id -> {"seconds", "calls", "tokens"} as measured by the runs (IF-202), or a function that gives them
-        self._storage, self._meta = storage, meta or MemoryMeta()
+        self._storage, self._meta = storage, meta or TableMeta(storage)
         self._costs = costs if callable(costs) else (lambda: costs or {})
 
     @staticmethod
@@ -82,13 +89,13 @@ class WorkflowLibrary:
     def restore(self, kind, record_id, version, author):
         return self.save(kind, record_id, self.read(kind, record_id, version)["doc"], author)
 
-    def attach(self, record_id, part, doc):
+    def attach(self, record_id, part, doc, author="library"):
         if part not in NEEDS:
             raise WorkflowLibraryError("not_found", detail=part)
         self.read("workflows", record_id)
         meta = self._meta.get(record_id)
         meta[part] = doc
-        self._meta.put(record_id, meta)
+        self._meta.put(record_id, meta, author)
 
     def set_status(self, record_id, status, author):
         if status not in STATUSES:
@@ -99,7 +106,7 @@ class WorkflowLibrary:
         if status in ("tested", "trusted") and missing:
             raise WorkflowLibraryError("not_promotable", detail=missing)
         meta["status"] = status
-        self._meta.put(record_id, meta)
+        self._meta.put(record_id, meta, author)
         return {"status": status}
 
     def estimate(self, record_id, version=None):

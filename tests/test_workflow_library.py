@@ -106,6 +106,20 @@ class WorkflowLibraryTest(unittest.TestCase):
         self.assertEqual(error_of(lambda: lib.set_status("lookup", "wild", "anna")).rule, "status")
         self.assertEqual(error_of(lambda: lib.set_status("nope", "draft", "anna")).code, "not_found")
 
+    def test_the_lifecycle_survives_a_restart_and_every_change_is_kept(self):     # A-15: table workflow_meta
+        storage = Storage(FileBackend(tempfile.mkdtemp()))
+        first = WorkflowLibrary(storage, costs=COSTS)
+        first.save("workflows", "lookup", LOOKUP, "anna")
+        first.attach("lookup", "specification", {"inputs": "question"})
+        first.attach("lookup", "benchmark", {"suite": "verdicts"})
+        first.set_status("lookup", "tested", "ben")
+        second = WorkflowLibrary(storage, costs=COSTS)
+        self.assertEqual(second.read("workflows", "lookup")["status"], "tested")
+        self.assertEqual(second.set_status("lookup", "trusted", "anna"), {"status": "trusted"})       # specification and benchmark were kept
+        versions = storage.history("workflow_meta", "lookup")
+        self.assertEqual([v["author"] for v in versions][-2:], ["ben", "anna"])
+        self.assertEqual(storage.get("workflow_meta", "lookup", 1)["doc"]["status"], "draft")        # an old version never changes
+
     def test_estimate_order_critical_path_and_session_cycles(self):     # REQ-WFM-009 (the numbers), IF-203 golden 3
         lib = self.lib
         lib.save("workflows", "lookup", LOOKUP, "anna")

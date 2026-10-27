@@ -26,8 +26,8 @@ class RecordTablesContract(unittest.TestCase):
         for table in ("votes", "runs"):
             self.assertFalse(defs[table]["deletable"], table)
         self.assertTrue(all(d["versioned"] for d in defs.values()))
-        self.assertTrue({"history", "memory", "votes", "tasks", "memos", "accounts", "presets", "gestures", "runs", "source_trust", "cases", "behaviours"} <= set(defs))
-        for table in ("cases", "behaviours"):                                   # v1 (A-08): proposed benchmark cases and the adaptation counters keep every version
+        self.assertTrue({"history", "memory", "votes", "tasks", "memos", "accounts", "presets", "gestures", "runs", "source_trust", "cases", "behaviours", "workflow_meta"} <= set(defs))
+        for table in ("cases", "behaviours", "workflow_meta"):                                   # v1 (A-08): proposed benchmark cases and the adaptation counters keep every version
             self.assertEqual(defs[table], {"versioned": True, "deletable": False}, table)
 
     @mark.req("IF-302", "REQ-DB-012")
@@ -63,6 +63,15 @@ class RecordTablesContract(unittest.TestCase):
         self.assertEqual(tables.validate("memory", dict(old, kind="opinion")), {"rule": "schema", "detail": "kind"})
         self.assertEqual(tables.validate("memory", dict(old, status="deleted")), {"rule": "schema", "detail": "status"})
         self.assertEqual(tables.validate("memory", {"text": "x", "kind": "fact"}), {"rule": "schema", "detail": "source"})
+
+    @mark.req("IF-302", "REQ-WFM-002")
+    @each_provider(IF)
+    def test_workflow_meta_keeps_the_lifecycle(self, tables):
+        """TC-IF-302-05 (v3): status is required and one of draft, tested, trusted, retired; specification and benchmark are free."""
+        self.assertIsNone(tables.validate("workflow_meta", {"status": "draft"}))
+        self.assertIsNone(tables.validate("workflow_meta", {"status": "tested", "specification": {"inputs": "q"}, "benchmark": {"suite": "verdicts"}}))
+        self.assertEqual(tables.validate("workflow_meta", {"specification": {}}), {"rule": "schema", "detail": "status"})
+        self.assertEqual(tables.validate("workflow_meta", {"status": "wild"}), {"rule": "schema", "detail": "status"})
 
 
 if __name__ == "__main__":
