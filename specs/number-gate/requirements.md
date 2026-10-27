@@ -392,7 +392,7 @@ Scope of this iteration: verification of claims with numbers (the gate), the sta
 
 ### IF-003 – Result record interface
 - Level: Interface   Subject: VerificationGate
-- Text: The verification gate shall return to the harness for each claim one record with the fields verdict, status, calls, seconds and facts, where facts is a possibly empty list of triples of entity, number with unit and quote hash.
+- Text: The verification gate shall return to the harness for each claim one record with the fields verdict, status, calls, seconds and facts, where facts is a possibly empty list of triples of entity, number with unit and quote hash; from verify.number_gate@5 also the field limits, a non-empty list of {code, text} made by code (A-17, REQ-WFM-023).
 - Rationale: the harness records the cost of every run (metrics.cost) and the stability metric needs the facts (REQ-STAB-001); the verdict step has no facts, a lookup has
 - Parent: REQ-EVAL-001
 - Priority: Must

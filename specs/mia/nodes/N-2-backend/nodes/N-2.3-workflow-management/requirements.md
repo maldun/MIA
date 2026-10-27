@@ -280,7 +280,7 @@ The library of workflows and skills as versioned data, the graph rules, specific
 - Acceptance criterion: AC-3: each result shows its limits
 - Verified by: TC-WFM-023
 - Status: Approved
-- History: –
+- History: v1 interpreted, A-17 (owner 2026-10-27): "limits" are what a reader must know about a result: the limits of the evidence (no source retrieved, sources not reachable, no reputable source, evidence cut, quotes removed) and the basis of its confidence figure; each is a {code, text} made by code. The number gate verify.number_gate@5 reports the ones it can see (evidence given with the claim, cut, number check not applicable or inconclusive, what stands behind the verdict); the source-related ones belong to lookup and the research pipelines
 
 ### REQ-WFM-024 – No invented source
 - Level: low   Subject: TaskRuntime
