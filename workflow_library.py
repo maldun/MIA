@@ -71,6 +71,8 @@ class WorkflowLibrary:
 
     def save(self, kind, record_id, doc, author, expected_version=None):
         self._kind(kind)
+        if kind == "workflows" and isinstance(doc, dict) and doc.get("variant") is not None and not (isinstance(doc["variant"], str) and doc["variant"].strip()):
+            raise WorkflowLibraryError("invalid", rule="variant", detail=doc["variant"])      # REQ-WFM-010: the name of a character variant
         return _storage_call(self._storage.put, kind, record_id, doc, author, expected_version)
 
     def history(self, kind, record_id):
@@ -122,6 +124,16 @@ class WorkflowLibrary:
 
     def _has_meta(self, record_id):
         return record_id in self._storage.ids(TableMeta.TABLE)
+
+    def variant_of(self, record_id, version=None):
+        """REQ-WFM-010: the character variant the workflow names (the key `variant` of its document), or None; the chat service sends it to the frontend while the workflow runs"""
+        return self.read("workflows", record_id, version)["doc"].get("variant")
+
+    def check_budget(self, record_id, budget, version=None):
+        """REQ-WFM-009: the estimate and the budgets it exceeds (seconds, calls, tokens; a key that is absent is unlimited). The run itself is refused by the
+        Workflow execution (IF-202 `refused`)."""
+        estimate = self.estimate(record_id, version)
+        return {"estimate": estimate, "exceeded": [key for key in ("seconds", "calls", "tokens") if key in budget and estimate[key] > budget[key]]}
 
     def estimate(self, record_id, version=None):
         """order: a topological order of the process nodes; critical path: the longest chain by seconds; sums over all nodes, a session node counts

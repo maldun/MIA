@@ -137,6 +137,28 @@ class WorkflowLibraryTest(unittest.TestCase):
         self.assertLessEqual(record["idea"], record["promoted"])
         self.assertEqual(error_of(lambda: lib.promotion_record("nope")).code, "not_found")
 
+    def test_an_estimate_above_the_budget_is_named_before_the_run(self):       # REQ-WFM-009, TC-WFM-009 (the refusal itself is the run of IF-202)
+        lib = self.lib
+        lib.save("workflows", "lookup", LOOKUP, "anna")
+        self.assertEqual(lib.check_budget("lookup", {"seconds": 10, "calls": 3, "tokens": 1500})["exceeded"], [])        # equal fits
+        self.assertEqual(lib.check_budget("lookup", {"calls": 1})["exceeded"], ["calls"])                                # absent keys are unlimited
+        checked = lib.check_budget("lookup", {"seconds": 6, "calls": 2, "tokens": 9999})
+        self.assertEqual(checked["exceeded"], ["seconds", "calls"])
+        self.assertEqual(checked["estimate"], lib.estimate("lookup"))
+        self.assertEqual(lib.check_budget("lookup", {})["exceeded"], [])
+        self.assertEqual(error_of(lambda: lib.check_budget("nope", {})).code, "not_found")
+
+    def test_a_workflow_names_a_character_variant_or_none(self):               # REQ-WFM-010, TC-WFM-010
+        lib = self.lib
+        lib.save("workflows", "lookup", LOOKUP, "anna")
+        lib.save("workflows", "debate", dict(edited("x"), variant="serious"), "anna")
+        self.assertIsNone(lib.variant_of("lookup"))
+        self.assertEqual(lib.variant_of("debate"), "serious")
+        lib.save("workflows", "debate", edited("y"), "anna")                       # version 2 names none, version 1 still names one
+        self.assertEqual((lib.variant_of("debate", version=1), lib.variant_of("debate")), ("serious", None))
+        err = error_of(lambda: lib.save("workflows", "bad", dict(LOOKUP, variant=7), "anna"))
+        self.assertEqual((err.code, err.rule), ("invalid", "variant"))
+
     def test_estimate_order_critical_path_and_session_cycles(self):     # REQ-WFM-009 (the numbers), IF-203 golden 3
         lib = self.lib
         lib.save("workflows", "lookup", LOOKUP, "anna")
