@@ -18,7 +18,6 @@ REAL_NOT_READY = {
     "IF-105": "N-2 Backend not integrated yet",
     "IF-201": "N-2.2 Chat agent not integrated yet",       # real_subject since A-07 (ChatService); stop and the expression/audio events skip
     "IF-202": "N-2.4 Workflow execution not integrated yet",
-    "IF-203": "N-2.3 Workflow management not integrated yet",
     "IF-301": "N-3.2 Graph tables not integrated yet",
     "IF-302": "N-3.3 Record tables not integrated yet",
     "IF-401": "N-2.4.3 Run log not integrated yet",
@@ -413,6 +412,30 @@ class _ChatTurnAdapter:
             self._pending.pop(0)()
 
 
+class _WorkflowLibraryAdapter:
+    """IF-203 on the real WorkflowLibrary (amendment A-14): the real Storage with the file backend in a fresh folder, `costs` as IF-202 would deliver them.
+    The adapter only turns the error class of the library into the one of the mock; production code does not import from tests/."""
+
+    def __init__(self, costs=None):
+        import tempfile
+        from errors import ServiceError
+        from storage import Storage
+        from storage_files import FileBackend
+        from workflow_library import WorkflowLibrary, WorkflowLibraryError
+        self._error, self._library_error = ServiceError, WorkflowLibraryError
+        self._library = WorkflowLibrary(Storage(FileBackend(tempfile.mkdtemp())), costs=costs)
+
+    def __getattr__(self, name):
+        method = getattr(self._library, name)
+
+        def call(*args, **kwargs):
+            try:
+                return method(*args, **kwargs)
+            except self._library_error as err:
+                raise self._error(err.code, rule=err.rule, detail=err.detail) from err
+        return call
+
+
 class _SpeechAdapter:
     """IF-204 on the real SpeechService (amendment A-13): the engine is a fake Speaker that writes a short silent wav (no TTS packages, no model); the voice
     line `hello` is a wav made here. The adapter turns the error class of the service into the one of the mock; production code does not import from tests/."""
@@ -473,6 +496,8 @@ def real_subject(interface, **options):
         return _ChatApiAdapter(**options)
     if interface == "IF-201":
         return _ChatTurnAdapter(**options)
+    if interface == "IF-203":
+        return _WorkflowLibraryAdapter(**options)
     if interface == "IF-204":
         return _SpeechAdapter(**options)
     return None

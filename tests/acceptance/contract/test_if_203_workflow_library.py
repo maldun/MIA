@@ -27,7 +27,7 @@ def edited(note):
 
 
 def make(kind):
-    return WorkflowLibraryMock(costs=COSTS) if kind == "mock" else subject_for(IF, kind)
+    return WorkflowLibraryMock(costs=COSTS) if kind == "mock" else subject_for(IF, kind, costs=COSTS)
 
 
 def error_of(call):
