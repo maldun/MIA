@@ -9,6 +9,8 @@ not depend on a model are made here, in plain functions:
                              and by the style single; gate_check_line gives the line alone, for the prompts of verify.number_gate@2 that keep it outside the evidence
   gate_record(...)           the result record of IF-003 from the tally of the judgement style
   gate_abstain(plan)         the same record when nobody was asked
+  limits_of(...)             the limits of a result, made by code (REQ-WFM-023, NFR-4): a list of {code, text}; gate_record_limits and gate_abstain_limits are the records of
+                             verify.number_gate@5, which carry them (the older versions keep their record)
 """
 import re
 import time
@@ -38,7 +40,8 @@ def gate_prepare(given):
         route = "abstain"
     else:
         route = style
-    return {"route": route, "numbered": numbered, "evidence": defang(evidence)[:EVIDENCE_LIMIT], "started": time.monotonic()}
+    shown = defang(evidence)
+    return {"route": route, "numbered": numbered, "evidence": shown[:EVIDENCE_LIMIT], "cut": len(shown) > EVIDENCE_LIMIT, "started": time.monotonic()}
 
 
 def defang(evidence):
@@ -87,4 +90,35 @@ def gate_abstain(plan):
     return _record(plan, tally, checks.NOT_APPLICABLE)
 
 
-FUNCTIONS = {"gate_prepare": gate_prepare, "run_number_check": run_number_check, "gate_check_line": gate_check_line, "gate_evidence": gate_evidence, "gate_record": gate_record, "gate_abstain": gate_abstain}
+def limits_of(plan, check_status, tally):
+    """what a reader must know about a result (REQ-WFM-023): only what code can see here: the evidence came with the claim and was not checked against a source, how much of it
+    was used, whether the number check could compare, and what stands behind the verdict. Sources, fetch failures and dates belong to the
+    pipelines that retrieve sources."""
+    if plan["route"] == "abstain":
+        return [{"code": "no_evidence", "text": "no evidence given: no verdict"}]
+    limits = [{"code": "evidence_unchecked", "text": "the evidence was given with the claim; it was not checked against a source"}]
+    if plan.get("cut"):
+        limits.append({"code": "evidence_cut", "text": "the evidence was cut to %d characters" % EVIDENCE_LIMIT})
+    if not plan["numbered"]:
+        limits.append({"code": "no_number_check", "text": "no number check: the claim has no number"})
+    elif check_status == checks.INCONCLUSIVE:
+        limits.append({"code": "number_check_inconclusive", "text": "the number check could not compare the numbers of the claim with the evidence"})
+    # the tally holds one vote in both styles (the judge's ruling, or the single voice), so an "agreement" of 1.0 would suggest a confidence that nothing backs
+    basis = {"cops": "the verdict is the ruling of one judge after the arguments for and against; no vote count stands behind it",
+             "single": "the verdict is the answer of one model voice; no vote count stands behind it"}[plan["route"]]
+    limits.append({"code": "confidence_basis", "text": basis + "; it is not calibrated"})
+    limits.append({"code": "judged_by", "text": "judged by the %s style on one model" % plan["route"]})
+    return limits
+
+
+def gate_record_limits(plan, check, verdict):
+    return dict(_record(plan, verdict, check["status"]), limits=limits_of(plan, check["status"], verdict))
+
+
+def gate_abstain_limits(plan):
+    record = gate_abstain(plan)
+    return dict(record, limits=limits_of(plan, checks.NOT_APPLICABLE, record))
+
+
+FUNCTIONS = {"gate_prepare": gate_prepare, "run_number_check": run_number_check, "gate_check_line": gate_check_line, "gate_evidence": gate_evidence, "gate_record": gate_record, "gate_abstain": gate_abstain,
+             "gate_record_limits": gate_record_limits, "gate_abstain_limits": gate_abstain_limits}

@@ -1,0 +1,52 @@
+{
+ "id": "code.gate_abstain",
+ "version": 2,
+ "kind": "code",
+ "title": "No evidence, no verdict",
+ "description": "The result record when nobody was asked: verdict unclear, status inconclusive, 0 calls (REQ-GATE-006).",
+ "tags": [
+  "verify",
+  "gate",
+  "exact"
+ ],
+ "applies_to": {
+  "tasks": [
+   "research"
+  ]
+ },
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "plan"
+   ],
+   "properties": {
+    "plan": {
+     "type": "object"
+    }
+   }
+  }
+ },
+ "outputs": {
+  "schema": {
+   "type": "object"
+  }
+ },
+ "params": {},
+ "body": {
+  "function": "gate_abstain_limits",
+  "plain": "no evidence, no verdict"
+ },
+ "cost": {
+  "seconds": 0.01
+ },
+ "safety": {
+  "reads_web": false,
+  "runs_code": false
+ },
+ "status": "draft",
+ "origin": {
+  "by": "manual",
+  "note": "number gate (specs/number-gate, T-08); unit tested in tests/test_number_gate.py"
+ }
+}
