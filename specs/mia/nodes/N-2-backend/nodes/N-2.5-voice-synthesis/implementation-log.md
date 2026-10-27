@@ -14,4 +14,4 @@
 ## T-03 Default voice lines generated (2026-10-27)
 - `tools/make_voice_lines.py` renders `library/voice_line_texts.json` (owner's texts for 9 moods; spelling fixed: Hooray, embarrassed, plain apostrophe) with `Speaker` (Kokoro + voice effect) into `voice/expressions/<mood>_default.wav` and lists them in `library/voice_lines.json`. Tests: `tests/test_make_voice_lines.py` (fake Speaker; written after the code, the delegated version failed twice).
 - The wavs are made on the host (models and `setup_cfg.json` are not in a worktree) and are untracked like all of `voice/`; the texts file is the provenance for REQ-VOI-004.
-- Open: `annoyed.wav` and the other old clips of `voice/expressions` have no recorded origin; the owner says whether `annoyed` is ours or should get a generated text too (then add it to the texts file).
+- Owner 2026-10-27: the old `annoyed.wav` is an old recording; `annoyed` and `greeting` ("greet") now have generated texts, so the old file is no longer listed. The other old clips (greet, Navi, idle ...) are not in `voice_lines.json`.

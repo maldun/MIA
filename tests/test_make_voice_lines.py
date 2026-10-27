@@ -53,7 +53,7 @@ class MakeLinesTest(unittest.TestCase):
     def test_the_shipped_texts_cover_the_moods_to_be_made(self):
         with open(os.path.join(REPO, "library", "voice_line_texts.json"), encoding="utf-8") as fp:
             texts = json.load(fp)
-        self.assertEqual(set(texts), {"happy", "neutral", "angry", "surprised", "smug", "disagree", "embarrassed", "thinking", "sad"})
+        self.assertEqual(set(texts), {"happy", "neutral", "angry", "surprised", "smug", "disagree", "embarrassed", "thinking", "sad", "annoyed", "greeting"})
         self.assertTrue(all(text.strip() and text.isascii() for text in texts.values()))
 
 
