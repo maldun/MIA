@@ -16,7 +16,7 @@ IF = "IF-204"
 
 
 def make(**options):
-    return lambda kind: SpeechMock(**options) if kind == "mock" else subject_for(IF, kind)
+    return lambda kind: SpeechMock(**options) if kind == "mock" else subject_for(IF, kind, **options)
 
 
 def code_of(call):

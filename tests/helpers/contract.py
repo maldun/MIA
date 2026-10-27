@@ -19,7 +19,6 @@ REAL_NOT_READY = {
     "IF-201": "N-2.2 Chat agent not integrated yet",       # real_subject since A-07 (ChatService); stop and the expression/audio events skip
     "IF-202": "N-2.4 Workflow execution not integrated yet",
     "IF-203": "N-2.3 Workflow management not integrated yet",
-    "IF-204": "N-2.5 Voice synthesis not integrated yet",
     "IF-301": "N-3.2 Graph tables not integrated yet",
     "IF-302": "N-3.3 Record tables not integrated yet",
     "IF-401": "N-2.4.3 Run log not integrated yet",
@@ -414,6 +413,50 @@ class _ChatTurnAdapter:
             self._pending.pop(0)()
 
 
+class _SpeechAdapter:
+    """IF-204 on the real SpeechService (amendment A-13): the engine is a fake Speaker that writes a short silent wav (no TTS packages, no model); the voice
+    line `hello` is a wav made here. The adapter turns the error class of the service into the one of the mock; production code does not import from tests/."""
+
+    def __init__(self, engine_down=False, lines=None):
+        import tempfile
+        import wave
+        from errors import ServiceError
+        from speech_service import SpeechError, SpeechService
+        self._error, self._speech_error = ServiceError, SpeechError
+
+        def silent_wav(path):
+            with wave.open(path, "wb") as fp:
+                fp.setnchannels(1)
+                fp.setsampwidth(2)
+                fp.setframerate(8000)
+                fp.writeframes(b"\0\0" * 400)
+
+        folder = tempfile.mkdtemp()
+        for name in (lines if lines is not None else {"hello": b""}):
+            silent_wav(os.path.join(folder, name + ".wav"))
+
+        class FakeSpeaker:
+            def render_voice(self, msg, output_file):
+                if engine_down:
+                    raise RuntimeError("engine down")
+                silent_wav(output_file)
+                return 0.05
+
+        self._service = SpeechService(FakeSpeaker(), folder)
+
+    def _translate(self, call, *args):
+        try:
+            return call(*args)
+        except self._speech_error as err:
+            raise self._error(err.code) from err
+
+    def synthesize(self, sentence):
+        return self._translate(self._service.synthesize, sentence)
+
+    def voice_line(self, name):
+        return self._translate(self._service.voice_line, name)
+
+
 def real_subject(interface, **options):
     """The real provider of an interface once its node is integrated (amendment A-02: IF-301, IF-302, IF-102 of the Database; amendment A-05, A-07: IF-101 and IF-201 as far as built); None until then."""
     if REPO not in sys.path:
@@ -430,4 +473,6 @@ def real_subject(interface, **options):
         return _ChatApiAdapter(**options)
     if interface == "IF-201":
         return _ChatTurnAdapter(**options)
+    if interface == "IF-204":
+        return _SpeechAdapter(**options)
     return None
