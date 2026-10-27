@@ -4,6 +4,8 @@ For a fresh session. Read this, then `CLAUDE.md` (rules), `specs/mia/plan.md` (t
 
 Everything below is **merged into master** (last merge `d89d253`) unless it says otherwise. Start a new job from a worktree and check first that it branched from current master (`git log --oneline -1`, then `git merge --ff-only master`).
 
+**Newer (2026-10-27, late): `specs/mia/handover-n-2-3-continue.md`** has the state of N-2.5 (done) and N-2.3 (in progress), the dev-split evidence for REQ-WFM-014/015 and the next steps; where it differs from the sections below, it is newer.
+
 ## State by node
 - **Plan phase: approved** (tag `decomp-baseline`); about 426 requirements `Approved`; protected material: `tests/helpers`, `tests/acceptance/contract`, `tests/integration`, `contracts/`, `eval/suites`, `eval/baselines`; model in `specs/mia/architecture.sysml`. Protected files change **by amendment only** (A-01 to A-08 installed, A-09 to A-12 drafted (table below)).
 - **N-3 Database: done** (`storage*.py`, `accounts.py`, `graph_*`, `record_tables.py` now with 12 tables incl. `cases` and `behaviours`, `migrate.py`, `tools/backup.sh`, `deploy/db/`).
