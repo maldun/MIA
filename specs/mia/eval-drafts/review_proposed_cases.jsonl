@@ -20,7 +20,10 @@
   "evaluation": "drop",
   "impact": "drop",
   "analysis": "drop",
-  "vs": "drop"
+  "vs": "drop",
+  "CI/CD":"keep",
+  "continuous delivery":"keep",
+   "software deployment":"keep:
  }
 }
 {
