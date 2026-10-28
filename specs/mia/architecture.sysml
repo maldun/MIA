@@ -695,19 +695,36 @@ package MIA_AgentView {
         @TrustBoundary { boundary = "TB-user"; threats = "THR-004, THR-006"; }
         port userIn : ~UserTextPort;
     }
-    part def ReviewScreeningStep {
-        doc /* Proposed: relevance of abstracts and pieces of papers to a research question. */
-        @ModelStep { schema = "screening.schema.json"; tools = ""; tokenBudget = 8192; secondBudget = 15.0; pin = "MP-light"; criterion = "none: set in Plan"; }
-        @TrustBoundary { boundary = "TB-paper"; threats = "THR-007"; }
-        port paperIn : ~PaperTextPort;
-    }
-    part def ReviewPlannerStep {
-        doc /* Proposed: system analyser, component determiner and scheduler as views of one model. */
-        @ModelStep { schema = "review_plan.schema.json"; tools = ""; tokenBudget = 8192; secondBudget = 60.0; pin = "MP-full"; criterion = "none: set in Plan"; }
+    part def ReviewKeywordStep {
+        doc /* Keywords and written criteria from the research question (skill review_keywords, A-18). Its only input is the user's question. */
+        @ModelStep { schema = "review_keywords.schema.json"; tools = ""; tokenBudget = 8192; secondBudget = 20.0; pin = "MP-light"; criterion = "none: set in Plan"; }
         @TrustBoundary { boundary = "TB-user"; threats = "THR-004, THR-010"; }
         port userIn : ~UserTextPort;
     }
-
+    part def ReviewAbstractStep {
+        doc /* Relevance grade 0 to 3 and eligibility of one work from its title and abstract (skill review_abstract, A-18). The abstract is data; code checks the quote. */
+        @ModelStep { schema = "review_abstract.schema.json"; tools = ""; tokenBudget = 8192; secondBudget = 8.0; pin = "MP-light"; criterion = "none: set in Plan"; }
+        @TrustBoundary { boundary = "TB-paper"; threats = "THR-007"; }
+        port paperIn : ~PaperTextPort;
+    }
+    part def ReviewSectionStep {
+        doc /* Relevance grade of one section of an open access full text (skill review_section, A-18). The section is cut by code to at most 6000 characters. */
+        @ModelStep { schema = "review_section.schema.json"; tools = ""; tokenBudget = 8192; secondBudget = 6.0; pin = "MP-light"; criterion = "none: set in Plan"; }
+        @TrustBoundary { boundary = "TB-paper"; threats = "THR-007"; }
+        port paperIn : ~PaperTextPort;
+    }
+    part def ReviewFullStep {
+        doc /* Eligibility of a work from its section notes and its conclusion (skill review_full, A-18); the sections' quotes and its own are checked by code. */
+        @ModelStep { schema = "review_full.schema.json"; tools = ""; tokenBudget = 8192; secondBudget = 10.0; pin = "MP-light"; criterion = "none: set in Plan"; }
+        @TrustBoundary { boundary = "TB-paper"; threats = "THR-007"; }
+        port paperIn : ~PaperTextPort;
+    }
+    part def ReviewSummaryStep {
+        doc /* Summary of what was found, the coverage and the gaps (skill review_summary, A-18). It reads notes that derive from paper text; code removes every point that cites a work outside the report, and the figures and the coverage level are made by code. */
+        @ModelStep { schema = "review_summary.schema.json"; tools = ""; tokenBudget = 8192; secondBudget = 20.0; pin = "MP-light"; criterion = "none: set in Plan"; }
+        @TrustBoundary { boundary = "TB-paper"; threats = "THR-007"; }
+        port paperIn : ~PaperTextPort;
+    }
     part def MiaAgent {
         doc /* The app agent seen as flows of untrusted text into model steps. */
         part intake : MessageIntake;
@@ -727,19 +744,25 @@ package MIA_AgentView {
         part expression : ExpressionStep;
         part dreamer : DreamStep;
         part memoryWriter : MemoryWriteStep;
-        part screener : ReviewScreeningStep;
-        part reviewPlanner : ReviewPlannerStep;
+        part keywordPlanner : ReviewKeywordStep;
+        part abstractScreener : ReviewAbstractStep;
+        part sectionScreener : ReviewSectionStep;
+        part fullScreener : ReviewFullStep;
+        part summariser : ReviewSummaryStep;
 
         flow of UserMessage from intake.messageOut to chat.userIn;
         flow of UserMessage from intake.messageOut to planner.userIn;
         flow of UserMessage from intake.messageOut to expression.userIn;
         flow of UserMessage from intake.messageOut to memoryWriter.userIn;
-        flow of UserMessage from intake.messageOut to reviewPlanner.userIn;
+        flow of UserMessage from intake.messageOut to keywordPlanner.userIn;
         flow of FetchedPageText from fetcher.pageOut to extractor.pageIn;
         flow of FetchedPageText from fetcher.pageOut to judge.pageIn;
         flow of FetchedPageText from fetcher.pageOut to synthesiser.pageIn;
         flow of FetchedPageText from fetcher.pageOut to scriptWriter.pageIn;
-        flow of PaperText from scholar.paperOut to screener.paperIn;
+        flow of PaperText from scholar.paperOut to abstractScreener.paperIn;
+        flow of PaperText from scholar.paperOut to sectionScreener.paperIn;
+        flow of PaperText from scholar.paperOut to fullScreener.paperIn;
+        flow of PaperText from scholar.paperOut to summariser.paperIn;
         flow of ChatHistory from historyStore.historyOut to chat.historyIn;
         flow of ChatHistory from historyStore.historyOut to dreamer.historyIn;
         flow of GeneratedScript from scriptWriter.scriptOut to sandbox.scriptIn;
@@ -2372,17 +2395,17 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-WFM-018'> ReviewReport_Wfm018 {
         subject s : TaskRuntime;
-        doc /* The Workflow management shall deliver the example workflow review (keywords, search per keyword, collection, screening, review of each work, report) as a library entry that produces a report with the keywords and the query of each search, a flow count (found, duplicates, dropped before screening, excluded at the abstract and at the full text with reasons, included), for each work its keywords, decision, grade and notes with verbatim anchors, and the open gaps (keywords without an included work). */
+        doc /* The Workflow management shall deliver the example workflow review as a library entry that produces a report of kept and dropped sources with reasons, findings per sub-question with verbatim anchors, conflicts and open gaps. */
         @Trace { :>> verifiedBy = (HowVerified::measurement); }
     }
     requirement def <'REQ-WFM-019'> ReviewInTimeSlices_Wfm019 {
         subject s : TaskRuntime;
-        doc /* The Workflow management shall deliver the example workflow review so that it works in stages and time slices, gives an intermediate report with a recommendation after the stage of the abstract screening and at the end of each slice, and goes on to the full-text stage or the next slice only when the requesting user agrees. */
+        doc /* The Workflow management shall deliver the example workflow review so that it works in time slices, gives an intermediate report with a recommendation at the end of each slice and continues only when the requesting user agrees. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-WFM-020'> ReviewStopsByACodeCheck_Wfm020 {
         subject s : TaskRuntime;
-        doc /* The Workflow management shall deliver the example workflow review so that it ends when a code check finds every collected work decided and no approved keyword left to search, or a budget is used up. */
+        doc /* The Workflow management shall deliver the example workflow review so that it ends when a code check finds every sub-question answered or a budget is used up. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-WFM-021'> SourceRecordsAndCutOff_Wfm021 {
@@ -2413,16 +2436,6 @@ package MIA_NodeRequirements {
     requirement def <'REQ-WFM-026'> WorkflowAndGraphAPI_Wfm026 {
         subject s : TaskRuntime;
         doc /* The Workflow management shall list, read, save as a new version, show the history and diff of, and restore workflows and context graphs through IF-203, and refuse an invalid graph with the broken rule named. */
-        @Trace { :>> verifiedBy = (HowVerified::test); }
-    }
-    requirement def <'REQ-WFM-027'> KeywordExtensionWithApproval_Wfm027 {
-        subject s : TaskRuntime;
-        doc /* The Workflow management shall, in the example workflow review, count by code the terms that occur in the screened works and are not in the keyword set, propose every term that occurs in at least N works (N = 3, to be optimised) and extend the search with it only after the requesting user approves. */
-        @Trace { :>> verifiedBy = (HowVerified::test); }
-    }
-    requirement def <'REQ-WFM-028'> StagedScreeningWithDecisionAndGrade_Wfm028 {
-        subject s : TaskRuntime;
-        doc /* The Workflow management shall, in the example workflow review, screen each work in two stages, the abstract against the research question and the written inclusion and exclusion criteria, then each section of the open full text and its fit with the conclusion, so that each stage gives two independent judgements, the relevance of the work to the research question as a grade 0 to 3 and the eligibility as include, maybe or exclude with a reason code of a criterion, each with a short statement and a verbatim quote, code combines the stage grades by a fixed rule, no rule derives the eligibility from the grade, and a work without open full text keeps its abstract judgements marked as abstract only. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-RUN-001'> InternetTasksOnlyOnCommand_Run001 {
@@ -3686,8 +3699,6 @@ package MIA_NodeRequirements {
     requirement r_req_wfm_024 : NoInventedSource_Wfm024;
     requirement r_req_wfm_025 : StateOnlyThroughTheStorageInterface_Wfm025;
     requirement r_req_wfm_026 : WorkflowAndGraphAPI_Wfm026;
-    requirement r_req_wfm_027 : KeywordExtensionWithApproval_Wfm027;
-    requirement r_req_wfm_028 : StagedScreeningWithDecisionAndGrade_Wfm028;
     requirement r_req_run_001 : InternetTasksOnlyOnCommand_Run001;
     requirement r_req_run_002 : SwitchTheModel_Run002;
     requirement r_req_run_003 : ModelServerUnreachable_Run003;
@@ -4049,8 +4060,6 @@ package MIA_NodeRequirements {
     satisfy r_req_wfm_024 by mia.taskRuntime;
     satisfy r_req_wfm_025 by mia.taskRuntime;
     satisfy r_req_wfm_026 by mia.taskRuntime;
-    satisfy r_req_wfm_027 by mia.taskRuntime;
-    satisfy r_req_wfm_028 by mia.taskRuntime;
     satisfy r_req_run_001 by mia.taskRuntime;
     satisfy r_req_run_002 by mia.taskRuntime;
     satisfy r_req_run_003 by mia.taskRuntime;
@@ -4411,8 +4420,6 @@ package MIA_NodeRequirements {
     allocate r_req_wfm_024 to mia.taskRuntime;
     allocate r_req_wfm_025 to mia.taskRuntime;
     allocate r_req_wfm_026 to mia.taskRuntime;
-    allocate r_req_wfm_027 to mia.taskRuntime;
-    allocate r_req_wfm_028 to mia.taskRuntime;
     allocate r_req_run_001 to mia.taskRuntime;
     allocate r_req_run_002 to mia.taskRuntime;
     allocate r_req_run_003 to mia.taskRuntime;
@@ -4784,8 +4791,6 @@ package MIA_NodeRequirements {
     dependency from r_req_wfm_024 to r_req_be_067;
     dependency from r_req_wfm_025 to r_req_be_074;
     dependency from r_req_wfm_026 to r_req_be_076;
-    dependency from r_req_wfm_027 to r_req_be_053;
-    dependency from r_req_wfm_028 to r_req_be_053;
     dependency from r_req_run_001 to r_req_wfx_002;
     dependency from r_req_run_002 to r_req_wfx_003;
     dependency from r_req_run_003 to r_req_wfx_004;

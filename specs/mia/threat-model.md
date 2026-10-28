@@ -7,9 +7,9 @@ How to read it: a model step can only be steered through text, and most MIA step
 ## Trust boundaries
 | Boundary | Untrusted input (item) | Origin | Receiving step | Can it act? (tools, state, verdict) |
 |---|---|---|---|---|
-| TB-user | UserMessage | user (owner or guest, logged in; CON-6) | ChatStep, PlanStep, ExpressionStep, ReviewPlannerStep | no tools; shapes speech, mood, a plan or a preset; a plan decides which searches run |
+| TB-user | UserMessage | user (owner or guest, logged in; CON-6) | ChatStep, PlanStep, ExpressionStep, ReviewKeywordStep | no tools; shapes speech, mood, a plan or a preset; a plan decides which searches run |
 | TB-web | FetchedPageText | web | ExtractionStep, VerdictStep, SynthesisStep | no tools; decides a verdict or answer the owner relies on |
-| TB-paper | PaperText | web (scholarly APIs, PDFs) | ReviewScreeningStep | no tools; decides which sources a review keeps; the PDF is read inside a wall |
+| TB-paper | PaperText | web (scholarly APIs, PDFs) | ReviewAbstractStep, ReviewSectionStep, ReviewFullStep, ReviewSummaryStep | no tools; decides which sources a review keeps; the PDF is read inside a wall |
 | TB-history | ChatHistory | model (earlier answers, quoted web text) | ChatStep, DreamStep | no tools; the summary can become a memory record |
 | TB-code | GeneratedScript | model | ScriptWriterStep, ScriptSandbox | runs code; contained by the sandbox, no network |
 | TB-edit | WorkflowEdit | user (graph app) | WorkflowValidator, the pipeline runner | changes what runs for everyone; users are trusted (CON-6), the edit is validated and versioned |
