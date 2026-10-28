@@ -212,7 +212,7 @@ The library of workflows and skills as versioned data, the graph rules, specific
 
 ### REQ-WFM-018 – Review report
 - Level: low   Subject: TaskRuntime
-- Text: The Workflow management shall deliver the example workflow review as a library entry that produces a report of kept and dropped sources with reasons, findings per sub-question with verbatim anchors, conflicts and open gaps.
+- Text: The Workflow management shall deliver the example workflow review (keywords, search per keyword, collection, screening, review of each work, report) as a library entry that produces a report with the keywords and the query of each search, a flow count (found, duplicates, dropped before screening, excluded at the abstract and at the full text with reasons, included), for each work its keywords, decision, grade and notes with verbatim anchors, and the open gaps (keywords without an included work).
 - Rationale: refines REQ-BE-053
 - Parent: REQ-BE-053
 - Priority: Should
@@ -220,23 +220,23 @@ The library of workflows and skills as versioned data, the graph rules, specific
 - Acceptance criterion: AC-3: per tier source recall and precision against the baseline
 - Verified by: TC-WFM-018
 - Status: Approved
-- History: –
+- History: A-18 reworded (narrow variant: a literature review in fixed stages, flow count as in PRISMA 2020; was: findings per sub-question, conflicts)
 
 ### REQ-WFM-019 – Review in time slices
 - Level: low   Subject: TaskRuntime
-- Text: The Workflow management shall deliver the example workflow review so that it works in time slices, gives an intermediate report with a recommendation at the end of each slice and continues only when the requesting user agrees.
+- Text: The Workflow management shall deliver the example workflow review so that it works in stages and time slices, gives an intermediate report with a recommendation after the stage of the abstract screening and at the end of each slice, and goes on to the full-text stage or the next slice only when the requesting user agrees.
 - Rationale: refines REQ-BE-054
 - Parent: REQ-BE-054
 - Priority: Should
 - Verification method: Test
-- Acceptance criterion: AC-3: after the first slice (60 s) the run waits for agreement (exact)
+- Acceptance criterion: AC-3: after the abstract screening or the first slice (60 s), whichever comes first, the run waits for agreement; without it nothing more is read (exact)
 - Verified by: TC-WFM-019
 - Status: Approved
-- History: –
+- History: A-18 reworded (checkpoint before the full-text stage)
 
 ### REQ-WFM-020 – Review stops by a code check
 - Level: low   Subject: TaskRuntime
-- Text: The Workflow management shall deliver the example workflow review so that it ends when a code check finds every sub-question answered or a budget is used up.
+- Text: The Workflow management shall deliver the example workflow review so that it ends when a code check finds every collected work decided and no approved keyword left to search, or a budget is used up.
 - Rationale: refines REQ-BE-055
 - Parent: REQ-BE-055
 - Priority: Should
@@ -244,7 +244,7 @@ The library of workflows and skills as versioned data, the graph rules, specific
 - Acceptance criterion: AC-3: with a fake model that always says done, the run still continues until the code check holds
 - Verified by: TC-WFM-020
 - Status: Approved
-- History: –
+- History: A-18 reworded (was: every sub-question answered)
 
 ### REQ-WFM-021 – Source records and cut-off
 - Level: low   Subject: TaskRuntime
@@ -333,3 +333,27 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verified by: TC-IF-203-01..04
 - Status: Approved
 - History: v0, amendment 5/7 (2026-10-25)
+
+### REQ-WFM-027 – Keyword extension with approval
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall, in the example workflow review, count by code the terms that occur in the screened works and are not in the keyword set, propose every term that occurs in at least N works (N = 3, to be optimised) and extend the search with it only after the requesting user approves.
+- Rationale: refines REQ-BE-053; the search follows the vocabulary of the field and not only the words of the question
+- Parent: REQ-BE-053
+- Priority: Should
+- Verification method: Test
+- Acceptance criterion: AC-3: a term below N works is never proposed; a proposed term is searched only after approval; without approval the keyword set is unchanged (exact)
+- Verified by: TC-WFM-027
+- Status: Draft
+- History: A-18 new
+
+### REQ-WFM-028 – Staged screening with decision and grade
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall, in the example workflow review, screen each work in two stages, the abstract against the research question and the written inclusion and exclusion criteria, then each section of the open full text and its fit with the conclusion, so that each stage gives two independent judgements, the relevance of the work to the research question as a grade 0 to 3 and the eligibility as include, maybe or exclude with a reason code of a criterion, each with a short statement and a verbatim quote, code combines the stage grades by a fixed rule, no rule derives the eligibility from the grade, and a work without open full text keeps its abstract judgements marked as abstract only.
+- Rationale: refines REQ-BE-053; screening with criteria and reasons is the practice of systematic reviews (PRISMA 2020), the four-point graded relevance scale is the one of information retrieval evaluation (Järvelin and Kekäläinen 2002); the two judgements have different purposes (a historic work can be highly relevant and still be excluded as outdated)
+- Parent: REQ-BE-053
+- Priority: Should
+- Verification method: Test
+- Acceptance criterion: AC-3: every statement quotes its source (checked by code); the combined grade follows the rule on scripted stage results; a grade 3 work can be excluded and a grade 0 work cannot be included by the grade alone; a work without full text is marked abstract only (exact)
+- Verified by: TC-WFM-028
+- Status: Draft
+- History: A-18 new

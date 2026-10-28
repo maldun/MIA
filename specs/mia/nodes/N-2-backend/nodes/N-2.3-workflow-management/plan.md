@@ -14,7 +14,7 @@ A leaf. Each task is small, vertical, fits one session and starts from a red tes
 | T-04 Verify workflow: code checks first, unclear without evidence, failed check informs the judge | REQ-WFM-011, REQ-WFM-012, REQ-WFM-013 | TC-WFM-011, TC-WFM-012, TC-WFM-013 | T-01 |
 | T-05 Verify quality: judgement, stable verdicts, confidence by code, no invented source | REQ-WFM-014, REQ-WFM-015, REQ-WFM-023, REQ-WFM-024 | TC-WFM-014, TC-WFM-015, TC-WFM-023, TC-WFM-024 | T-01 |
 | T-06 Lookup workflow and search command | REQ-WFM-016, REQ-WFM-017 | TC-WFM-016, TC-WFM-017 | T-01 |
-| T-07 Review workflow: report, time slices, stop by code, source records | REQ-WFM-018, REQ-WFM-019, REQ-WFM-020, REQ-WFM-021 | TC-WFM-018, TC-WFM-019, TC-WFM-020, TC-WFM-021 | T-01 |
+| T-07 Review workflow: report, stages and slices, stop by code, source records, keyword extension, staged screening | REQ-WFM-018, REQ-WFM-019, REQ-WFM-020, REQ-WFM-021, REQ-WFM-027, REQ-WFM-028 | TC-WFM-018, TC-WFM-019, TC-WFM-020, TC-WFM-021, TC-WFM-027, TC-WFM-028 | T-01 |
 | T-08 Method transfer and storage only through the interface | REQ-WFM-022, REQ-WFM-025 | TC-WFM-022, TC-WFM-025 | T-01 |
 
 ## Tasks
@@ -74,8 +74,8 @@ A leaf. Each task is small, vertical, fits one session and starts from a red tes
 - Notes: Lookup is the proof-of-concept scenario.
 
 ### T-07: Review workflow: report, time slices, stop by code, source records
-- Implements: REQ-WFM-018, REQ-WFM-019, REQ-WFM-020, REQ-WFM-021
-- Tests to turn green: TC-WFM-018, TC-WFM-019, TC-WFM-020, TC-WFM-021
+- Implements: REQ-WFM-018, REQ-WFM-019, REQ-WFM-020, REQ-WFM-021, REQ-WFM-027, REQ-WFM-028
+- Tests to turn green: TC-WFM-018, TC-WFM-019, TC-WFM-020, TC-WFM-021, TC-WFM-027, TC-WFM-028
 - Touches: `library.py`, `context_graph.py`, `skill_store.py`, `plans.py`, `verification.py`, `review_*.py`, `research*.py`
 - Must not touch: tests/acceptance/, tests/helpers/, tests/smoke/, tests/integration/, benchmarks/, contracts/, eval/suites/, eval/baselines/
 - Depends on: T-01

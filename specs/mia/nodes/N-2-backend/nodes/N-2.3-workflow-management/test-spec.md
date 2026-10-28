@@ -26,7 +26,7 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-203
 | TC-WFM-016 | REQ-WFM-016 | Component | 2 | component test with the mocks of the neighbouring interfaces | AC-2: every answer of the lookup suite carries a source and a quote or the verdict unknown | as stated |
 | TC-WFM-017 | REQ-WFM-017 | Component | 2 | component test with the mocks of the neighbouring interfaces | AC-23: /search returns the list and starts no pipeline | as stated |
 | TC-WFM-018 | REQ-WFM-018 | Eval / measurement | 4 | the suite or measurement named in the criterion, on the pinned model (agent-app rules: dev split for feedback, holdout for the decision) | AC-3: per tier source recall and precision against the baseline | per the criterion; never decided on one run |
-| TC-WFM-019 | REQ-WFM-019 | Component | 2 | component test with the mocks of the neighbouring interfaces | AC-3: after the first slice (60 s) the run waits for agreement | exact |
+| TC-WFM-019 | REQ-WFM-019 | Component | 2 | component test with the mocks of the neighbouring interfaces | AC-3: after the abstract screening or the first slice (60 s) the run waits for agreement; without it nothing more is read | exact |
 | TC-WFM-020 | REQ-WFM-020 | Component | 1 | unit test with the fake model server and the mocks of the interfaces | AC-3: with a fake model that always says done, the run still continues until the code check holds | as stated |
 | TC-WFM-021 | REQ-WFM-021 | Component | 2 | component test with the mocks of the neighbouring interfaces | AC-3: 0 violations of the cut-off; retracted works are dropped and listed | exact |
 | TC-WFM-022 | REQ-WFM-022 | Eval / measurement | 4 | the suite or measurement named in the criterion, on the pinned model (agent-app rules: dev split for feedback, holdout for the decision) | AC-26: the known method is in the top 3 on the retro-discovery cases | per the criterion; never decided on one run |
@@ -34,6 +34,8 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-203
 | TC-WFM-024 | REQ-WFM-024 | Eval / measurement | 4 | the suite or measurement named in the criterion, on the pinned model (agent-app rules: dev split for feedback, holdout for the decision) | AC-3: 0 invented references and 100 % of cited quotes found in their source | per the criterion; never decided on one run |
 | TC-WFM-025 | REQ-WFM-025 | Inspection | 1 | the code and the log files of the repository | AC-15: no database driver is imported outside the storage client | as stated |
 | TC-WFM-026 | REQ-WFM-026 | Component | 2 | component test with the mocks of the neighbouring interfaces | AC-16: with the fake storage each of the six operations works; an invalid graph is refused with the rule named | exact |
+| TC-WFM-027 | REQ-WFM-027 | Component | 2 | component test with the mocks of the neighbouring interfaces | AC-3: a term below N works is never proposed; a proposed term is searched only after approval | exact |
+| TC-WFM-028 | REQ-WFM-028 | Component | 2 | component test with the fake model server and the mocks of the interfaces | AC-3: every statement quotes its source; the combined grade follows the rule; grade and eligibility are independent; abstract only is marked | exact |
 
 ## Assumptions (checked in validation)
 
