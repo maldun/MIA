@@ -1,4 +1,4 @@
-# IF-101 – Chat, expression, audio and REST API, v6
+# IF-101 – Chat, expression, audio and REST API, v7
 
 Owner (provider): N-2 Backend (child N-2.1)   Consumers: N-1 Web Frontend   Decided by: N-0   Mock complexity: 3 (stream of events, queue, clock, small stores)   Suite: `tests/acceptance/contract/test_if_101_chat_api.py`
 
@@ -15,8 +15,8 @@ The server sets the session at `login` as a cookie `mia_session` (HttpOnly, Same
 | `logout(session)` **[v2]** | | `{"loggedOut": true}` | ends the session: the same cookie is `401 unauthenticated` afterwards and its sockets are closed; the cookie is cleared (`Max-Age=0`); 401 without a valid session (REQ-BE-077) |
 | `change_password(session, old, new)` **[v1]** | the own password | `{"changed": true}` | `401 bad_credentials` if `old` is wrong; `422 weak_password` below 8 characters; the old password stops working (REQ-BE-011) |
 | `connect(session)` | session | event `chat_status` first | `{busy, activity, model, profile, queue, mood}` as today |
-| `send(session, text, client_id)` (`chat_send`) | text 1..4000 characters | ack `{"id", "position", "message"}` **[v1: message]** | `position` 1 = answered next; `message` is the stored message `{id, role, sender, text, created, client_id}`; 401 without session; 422 `empty_text`; 503 `queue_full` (5 waiting messages in all, 2 per user) |
-| `stop(session)` (`chat_stop`) | | `{"stopped": bool}` | ends the running or next answer; no `chat_delta` after the ack |
+| `send(session, text, client_id)` (`chat_send`) | text 1..4000 characters | ack `{"id", "position", "message"}` **[v1: message]** | `position` 1 = answered next; `message` is the stored message `{id, role, sender, text, created, client_id}`; 401 without session; 422 `empty_text`; 503 `queue_full` (5 waiting messages in all, 2 per user); **[v7]** the text `/review question [until YYYY-MM-DD]` starts the literature review as a task like `/lookup`; while a review waits for the answer of the user (it posts its question as a message of MIA and the status `activity` is `waiting`), the next message of the SAME account is that answer: it is stored and sent as `chat_message` like any message, the ack has `queued: false` and `position: 0`, and it does not count for `queue_full`; a message of another account is queued as usual; a command or a task command is never an answer; no answer within the waiting time (default 30 minutes) counts as "no" |
+| `stop(session)` (`chat_stop`) | | `{"stopped": bool}` | ends the running or next answer; no `chat_delta` after the ack; **[v7]** it also ends a running review, also while it waits for an answer, and the review gives its report as it stands |
 | `history(session, limit)` (`/api/chat/history`) | | list of messages, oldest first | each with `id, role, sender, text, created`, and `client_id` if the sender gave one |
 | `regenerate(session, message_id)` **[v1]** | id of the LAST answer | `{"position", "asked"}` | queued like a message; the new answer is a new message, the old one stays; 404 unknown id; 422 `not_the_last_answer`; 503 `queue_full` |
 | `speak_again(session, message_id)` **[v1]** | id of any answer | `{"sentences": n}` | one `audio_chunk` per sentence to every connected page; 404 unknown id |
@@ -88,3 +88,4 @@ Events (server to every connected page):
 | v4 | 2026-10-27 | `score` and the event `score` carry `series`, the sums per ISO week (owner: score over time "by time", per week) | A-06 |
 | v5 | 2026-10-27 | `counters`, `reset_counter` and the event `counters_changed` (REQ-BE-030, REQ-BE-031); `invalid_vote` rule `subject`; `regenerate` of a known message that is not the last answer, a user message included, is `422 not_the_last_answer` (404 stays for an unknown id); the list of behaviours is the names of `character_behaviour`: `greet`, `idle`, `no`, `talk`, `yes` for the mock | A-08 |
 | v6 | 2026-10-27 | `save_item` takes an optional `due` (tasks only) and `items` shows it; `invalid_item` gets the rule `due` (owner decision: recitation at the due time, REQ-CHA-019) | A-09 |
+| v7 | 2026-10-28 | the task `/review` (the literature review, N-2.3 T-07); a message of the requesting account while the review waits is its answer (not queued, not counted for `queue_full`); `stop` ends a waiting review (owner 2026-10-28: option 2, blocking with an answer channel) | A-20 |
