@@ -2422,7 +2422,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-WFM-028'> StagedScreeningWithDecisionAndGrade_Wfm028 {
         subject s : TaskRuntime;
-        doc /* The Workflow management shall, in the example workflow review, screen each work in two stages, the abstract against the research question and the written inclusion and exclusion criteria, then each section of the open full text and its fit with the conclusion, so that each stage gives the decision include, maybe or exclude with a reason code of a criterion, a grade 0 to 3 and a short statement with a verbatim quote, code combines the stage grades by a fixed rule, and a work without open full text keeps its abstract grade marked as abstract only. */
+        doc /* The Workflow management shall, in the example workflow review, screen each work in two stages, the abstract against the research question and the written inclusion and exclusion criteria, then each section of the open full text and its fit with the conclusion, so that each stage gives two independent judgements, the relevance of the work to the research question as a grade 0 to 3 and the eligibility as include, maybe or exclude with a reason code of a criterion, each with a short statement and a verbatim quote, code combines the stage grades by a fixed rule, no rule derives the eligibility from the grade, and a work without open full text keeps its abstract judgements marked as abstract only. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-RUN-001'> InternetTasksOnlyOnCommand_Run001 {

@@ -348,12 +348,12 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 
 ### REQ-WFM-028 – Staged screening with decision and grade
 - Level: low   Subject: TaskRuntime
-- Text: The Workflow management shall, in the example workflow review, screen each work in two stages, the abstract against the research question and the written inclusion and exclusion criteria, then each section of the open full text and its fit with the conclusion, so that each stage gives the decision include, maybe or exclude with a reason code of a criterion, a grade 0 to 3 and a short statement with a verbatim quote, code combines the stage grades by a fixed rule, and a work without open full text keeps its abstract grade marked as abstract only.
-- Rationale: refines REQ-BE-053; screening with criteria and reasons is the practice of systematic reviews (PRISMA 2020), the four-point graded relevance scale is the one of information retrieval evaluation (Järvelin and Kekäläinen 2002)
+- Text: The Workflow management shall, in the example workflow review, screen each work in two stages, the abstract against the research question and the written inclusion and exclusion criteria, then each section of the open full text and its fit with the conclusion, so that each stage gives two independent judgements, the relevance of the work to the research question as a grade 0 to 3 and the eligibility as include, maybe or exclude with a reason code of a criterion, each with a short statement and a verbatim quote, code combines the stage grades by a fixed rule, no rule derives the eligibility from the grade, and a work without open full text keeps its abstract judgements marked as abstract only.
+- Rationale: refines REQ-BE-053; screening with criteria and reasons is the practice of systematic reviews (PRISMA 2020), the four-point graded relevance scale is the one of information retrieval evaluation (Järvelin and Kekäläinen 2002); the two judgements have different purposes (a historic work can be highly relevant and still be excluded as outdated)
 - Parent: REQ-BE-053
 - Priority: Should
 - Verification method: Test
-- Acceptance criterion: AC-3: every statement quotes its source (checked by code); the combined grade follows the rule on scripted stage results; a work without full text is marked abstract only (exact)
+- Acceptance criterion: AC-3: every statement quotes its source (checked by code); the combined grade follows the rule on scripted stage results; a grade 3 work can be excluded and a grade 0 work cannot be included by the grade alone; a work without full text is marked abstract only (exact)
 - Verified by: TC-WFM-028
 - Status: Draft
 - History: A-18 new

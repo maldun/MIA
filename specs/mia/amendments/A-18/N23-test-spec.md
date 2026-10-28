@@ -35,7 +35,7 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-203
 | TC-WFM-025 | REQ-WFM-025 | Inspection | 1 | the code and the log files of the repository | AC-15: no database driver is imported outside the storage client | as stated |
 | TC-WFM-026 | REQ-WFM-026 | Component | 2 | component test with the mocks of the neighbouring interfaces | AC-16: with the fake storage each of the six operations works; an invalid graph is refused with the rule named | exact |
 | TC-WFM-027 | REQ-WFM-027 | Component | 2 | component test with the mocks of the neighbouring interfaces | AC-3: a term below N works is never proposed; a proposed term is searched only after approval | exact |
-| TC-WFM-028 | REQ-WFM-028 | Component | 2 | component test with the fake model server and the mocks of the interfaces | AC-3: every statement quotes its source; the combined grade follows the rule; abstract only is marked | exact |
+| TC-WFM-028 | REQ-WFM-028 | Component | 2 | component test with the fake model server and the mocks of the interfaces | AC-3: every statement quotes its source; the combined grade follows the rule; grade and eligibility are independent; abstract only is marked | exact |
 
 ## Assumptions (checked in validation)
 
