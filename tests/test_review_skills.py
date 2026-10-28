@@ -50,7 +50,7 @@ class ReviewSkills(unittest.TestCase):
                 skill = open(os.path.join(ROOT, "skills", name + ".md"), encoding="utf-8").read()
                 self.assertIn("profile: light", skill)
                 self.assertIn("tools: []", skill)
-                self.assertIn("pipeline: review.%s@1" % name.split("_")[1], skill)
+                self.assertIn("pipeline: review.%s@%d" % (name.split("_")[1], 2 if name in ("review_keywords", "review_full") else 1), skill)
 
     def test_the_abstract_is_delimited_as_data_and_grade_and_decision_are_asked_apart(self):
         model = Scripted(JUDGEMENT)
@@ -127,6 +127,15 @@ class ReviewSkills(unittest.TestCase):
         self.assertEqual(len(listed), 4)
         self.assertTrue(all(line.split(" | ")[1] == "3" for line in listed[:2]))
         self.assertIn("5 more works", listed[3])
+
+
+    def test_version_2_prompts_carry_the_rules_of_the_labelled_cases(self):          # RVP-001, RVP-002
+        keywords = Scripted({"concepts": [{"name": "m", "keywords": ["graph"]}], "criteria": CRITERIA})
+        run_skill_with(keywords)("review_keywords", {"question": "q?"})
+        self.assertIn("cannot be read in another sense", keywords.prompts[0])
+        full = Scripted({"fits": True, "decision": "include", "reason": "", "quote": "colouring wins", "statement": "c"})
+        run_skill_with(full)("review_full", {"question": "q?", "criteria": "- outdated: x", "abstract_statement": "a", "section_notes": "n", "conclusion": "colouring wins"})
+        self.assertIn("never on what the work found", full.prompts[0])
 
 
 if __name__ == "__main__":
