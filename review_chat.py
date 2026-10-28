@@ -6,6 +6,8 @@ scholarly search, the full text and the question to the user are handed in, as i
       ask(text) gives the reply text, or None when the user stopped the run or did not answer in time: None is "no"
   C2  yes / no and a list are read by code (parse_reply); a model never reads the reply
   C3  the report is shown as markdown; the summary says that a person has to check it
+  C4  the voice (owner 2026-10-28): each question is spoken before the review waits, and a short result at the end, from plain texts made here; the markdown report is never read out.
+      speak(text) is optional and may fail: a voice that fails must not take the report away
 """
 import re
 
@@ -79,6 +81,34 @@ def terms_prompt(proposals, n):
             % (n, listed))
 
 
+def spoken_keywords(keywords, limit=8):
+    return "I will search for these keywords: %s. Shall I start? Say yes, or send your own list." % ", ".join(keywords[:limit])
+
+
+def spoken_checkpoint(report):
+    asking = report.get("asking") or "checkpoint"
+    if asking.startswith("limit:"):
+        return "The limit %s is used up. Shall I continue?" % asking.split(":", 1)[1]
+    flow, advice = report["flow"], report.get("recommendation") or {}
+    said = "I screened %d works: %d included, %d maybe." % (flow["screened"], flow["included"], flow["maybe"])
+    if advice:
+        said += " I recommend to %s." % advice["action"]
+    return said + " Shall I read the full texts?"
+
+
+def spoken_terms(proposals, limit=8):
+    return "These terms occur in several works: %s. Shall I search for them too?" % ", ".join(p["term"] for p in proposals[:limit])
+
+
+def spoken_result(report):
+    flow = report["flow"]
+    counts = "I found %d works and included %d." % (flow["found"], flow["included"])
+    summary = report.get("summary")
+    if summary:
+        return "The review is done. %s Coverage of your question is %s. The report is in the chat, please check the summary against the sources." % (counts, summary["figures"]["level"])
+    return "I stopped the review. %s The report is in the chat as it stands." % counts
+
+
 def format_report(report, question, until):
     out = ["## Literature review", "", "**Question:** %s" % question, "**Cut-off:** %s   **Ended by:** %s" % (until, report["ended_by"])]
     summary = report.get("summary")
@@ -109,9 +139,9 @@ def format_report(report, question, until):
 
 # --- the task --------------------------------------------------------------------------------------------------------------------------
 
-def run_review(text, run_skill, scholar, full_text_source, ask, on_event=None, should_stop=None, cfg=None, today=None, min_works=3):
+def run_review(text, run_skill, scholar, full_text_source, ask, on_event=None, should_stop=None, cfg=None, today=None, min_works=3, speak=None):
     """the review of `text` ("question [until YYYY-MM-DD]") as markdown. scholar.search(query, limit, until, since, check_retraction) is Scholar.search; full_text_source(work) is a
-    FullTextSource; ask(text) -> the reply text or None. The model steps run through run_skill(name, inputs) (core.run); on_event gets {"kind": "step", "plain": text} per stage."""
+    FullTextSource; ask(text) -> the reply text or None; speak(text) says a short text aloud (None: silent). The model steps run through run_skill(name, inputs) (core.run); on_event gets {"kind": "step", "plain": text} per stage."""
     cfg = cfg or {}
     question, until = parse_request(text)
     try:
@@ -119,6 +149,14 @@ def run_review(text, run_skill, scholar, full_text_source, ask, on_event=None, s
     except RequestError as exc:
         return "I cannot start the review: %s." % exc
     started = {"shown": False}
+
+    def say(spoken):
+        if speak is None:
+            return
+        try:
+            speak(spoken)
+        except Exception:                      # a voice that fails must not take the report away
+            pass
 
     def progress(plain):
         if on_event is None:
@@ -131,6 +169,7 @@ def run_review(text, run_skill, scholar, full_text_source, ask, on_event=None, s
     progress("choosing keywords")
     concepts, criteria = review_models.plan_keywords(run_skill, question)
     keywords = [k for words in concepts.values() for k in words]
+    say(spoken_keywords(keywords))
     reply = parse_reply(ask(keywords_prompt(keywords, criteria)))
     if reply["answer"] == "no" or (reply["answer"] == "items" and not reply["items"]):
         return "The review was cancelled before the search."
@@ -151,9 +190,11 @@ def run_review(text, run_skill, scholar, full_text_source, ask, on_event=None, s
         return full(work, text_)
 
     def agree(report):
+        say(spoken_checkpoint(report))
         return parse_reply(ask(checkpoint_prompt(report)))["answer"] == "yes"
 
     def approve_terms(proposals):
+        say(spoken_terms(proposals))
         reply_ = parse_reply(ask(terms_prompt(proposals, min_works)))
         if reply_["answer"] == "yes":
             return [p["term"] for p in proposals]
@@ -166,4 +207,5 @@ def run_review(text, run_skill, scholar, full_text_source, ask, on_event=None, s
                                   summarize=review_models.make_summarizer(run_skill, question), should_stop=should_stop)
     report = run.run()
     progress("writing the report")
+    say(spoken_result(report))
     return format_report(report, question, request.until.isoformat())

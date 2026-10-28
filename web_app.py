@@ -619,7 +619,8 @@ def run_review_exchange(text, on_delta, on_emotion, should_stop, ask):
         if result.status != "done":
             raise RuntimeError(research_chat.friendly_error(result.error))
         return result.answer
-    return review_chat.run_review(text, run_skill, _scholar, _review_full_text, ask, on_event=lambda event: chat_service.pipeline_event(event), should_stop=should_stop, cfg=cfg)
+    return review_chat.run_review(text, run_skill, _scholar, _review_full_text, ask, on_event=lambda event: chat_service.pipeline_event(event), should_stop=should_stop, cfg=cfg,
+                                  speak=speak_answer if cfg.get("review_speak", True) else None)       # the questions and a short result are spoken, never the whole report
 
 def run_search_exchange(query, on_delta, on_emotion, should_stop):
     """/search: the top results of the search tool, no model"""
