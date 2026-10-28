@@ -73,6 +73,7 @@ from .pipeline_model import OllamaModel
 from . import web_tools
 from .web_tools import build_web_tools
 from . import review_chat, review_entry
+from .workflow_voice import speaker_for
 from .workflow_library import WorkflowLibrary
 from .fulltext import FullTextSource
 from .scholar import build_scholar
@@ -607,7 +608,7 @@ def speak_answer(text):
 def run_lookup_exchange(question, on_delta, on_emotion, should_stop):
     """/lookup (the old /research): the skill `research` searches, reads and answers with quotes; the steps go to the status block, the answer to the chat"""
     return research_chat.run_research(core, question, pipeline=cfg.get(CONST.RESEARCH_PIPELINE_KEY, CONST.DEFAULT_RESEARCH_PIPELINE),
-                                      on_event=lambda event: chat_service.pipeline_event(event), should_stop=should_stop, speak=speak_answer,
+                                      on_event=lambda event: chat_service.pipeline_event(event), should_stop=should_stop, speak=speaker_for(cfg, "lookup", speak_answer),
                                       on_sources=chat_service.note_sources, trust=source_trust.build_trust(cfg).for_url)      # a fresh table: the trust of sources is edited on the page
 
 def run_review_exchange(text, on_delta, on_emotion, should_stop, ask):
@@ -620,7 +621,7 @@ def run_review_exchange(text, on_delta, on_emotion, should_stop, ask):
             raise RuntimeError(research_chat.friendly_error(result.error))
         return result.answer
     return review_chat.run_review(text, run_skill, _scholar, _review_full_text, ask, on_event=lambda event: chat_service.pipeline_event(event), should_stop=should_stop, cfg=cfg,
-                                  speak=speak_answer if cfg.get("review_speak", True) else None)       # the questions and a short result are spoken, never the whole report
+                                  speak=speaker_for(cfg, "review", speak_answer))       # the questions and a short result are spoken, never the whole report
 
 def run_search_exchange(query, on_delta, on_emotion, should_stop):
     """/search: the top results of the search tool, no model"""
