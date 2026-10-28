@@ -1,0 +1,37 @@
+{
+ "id": "review.full",
+ "version": 1,
+ "title": "Eligibility from the full text",
+ "description": "Decide the eligibility of a work from its section notes and its conclusion, and say whether they fit. One model step; the workflow around it is review_stages.py.",
+ "goal": "Decide the eligibility of a work from its section notes and its conclusion, and say whether they fit.",
+ "tags": [
+  "review"
+ ],
+ "applies_to": {
+  "tasks": [
+   "review_full"
+  ]
+ },
+ "cost_class": "cheap",
+ "result": "answer",
+ "nodes": [
+  {
+   "id": "step",
+   "use": "view.review_full@1",
+   "wire": {
+    "question": "$input.question",
+    "criteria": "$input.criteria",
+    "abstract_statement": "$input.abstract_statement",
+    "section_notes": "$input.section_notes",
+    "conclusion": "$input.conclusion"
+   },
+   "output": "answer",
+   "plain": "eligibility from the full text"
+  }
+ ],
+ "status": "draft",
+ "origin": {
+  "by": "manual",
+  "note": "draft of A-18, no harness measurements yet"
+ }
+}

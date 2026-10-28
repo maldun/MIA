@@ -1,0 +1,35 @@
+{
+ "id": "review.section",
+ "version": 1,
+ "title": "Grade one section of a full text",
+ "description": "Grade how much one section helps to answer the question. One model step; the workflow around it is review_stages.py.",
+ "goal": "Grade how much one section helps to answer the question.",
+ "tags": [
+  "review"
+ ],
+ "applies_to": {
+  "tasks": [
+   "review_section"
+  ]
+ },
+ "cost_class": "cheap",
+ "result": "answer",
+ "nodes": [
+  {
+   "id": "step",
+   "use": "view.review_section@1",
+   "wire": {
+    "question": "$input.question",
+    "section": "$input.section",
+    "text": "$input.text"
+   },
+   "output": "answer",
+   "plain": "grade one section of a full text"
+  }
+ ],
+ "status": "draft",
+ "origin": {
+  "by": "manual",
+  "note": "draft of A-18, no harness measurements yet"
+ }
+}
