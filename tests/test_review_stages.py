@@ -287,5 +287,33 @@ class TestSummary(unittest.TestCase):          # the summary stage: figures and 
         self.assertNotIn("summary", stopped)
 
 
+class TestAskingAndStop(unittest.TestCase):
+    def test_the_user_is_told_what_is_asked(self):
+        asked = []
+        clock = Clock()
+
+        def slow(w):
+            clock.now += 40
+            return judge(w)
+        scripted_run(TestRun.WORKS, abstract=slow, clock=clock, agree=lambda r: asked.append(r["asking"]) or True)
+        self.assertEqual(asked[0], "limit:seconds")
+        self.assertEqual(asked[-1], "checkpoint")
+
+    def test_a_stop_ends_the_run_before_the_next_step_and_gives_no_summary(self):
+        stop = {"now": False}
+
+        def abstract(w):
+            stop["now"] = True                                   # the user presses stop during the first work
+            return judge(w)
+        request = ReviewRequest("how to schedule with graphs", until=TODAY, today=TODAY, clock=Clock())
+        run = rs.ReviewRun(request, ["graph"], CRITERIA, search=lambda k, q: [dict(w) for w in TestRun.WORKS[k]], screen_abstract=abstract, screen_full=None,
+                           full_text=lambda w: None, agree=lambda r: True, approve_terms=lambda p: [], should_stop=lambda: stop["now"],
+                           summarize=lambda r: {"found": [], "coverage": "", "gaps": []})
+        report = run.run()
+        self.assertEqual(report["flow"]["screened"], 1)
+        self.assertEqual(report["ended_by"], "stopped")
+        self.assertNotIn("summary", report)
+
+
 if __name__ == "__main__":
     unittest.main()

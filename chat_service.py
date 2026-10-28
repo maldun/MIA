@@ -32,6 +32,7 @@ on_emotion, should_stop)` are given to it (web_app.py), which makes it testable 
 import collections
 import datetime
 import json
+import queue
 import random
 import re
 import threading
@@ -49,7 +50,7 @@ except ImportError:  # used as plain script / in tests
     from speech_text import speech_text
 
 MAX_LENGTH = 8000
-TASK_COMMAND = re.compile(r"/(lookup|research|search)(?:\s+(.*))?", re.I | re.S)        # /lookup question, /search query; /research is the old name of /lookup
+TASK_COMMAND = re.compile(r"/(lookup|research|search|review)(?:\s+(.*))?", re.I | re.S)        # /lookup question, /search query, /review question [until DATE]; /research is the old name of /lookup
 DELTA_INTERVAL = 0.05          # at most about 20 deltas per second per message
 CONTROL_CHARACTERS = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
 
@@ -62,6 +63,7 @@ COMMANDS = (
     {"command": "/memos", "description": "Read all memos back, word for word", "confirm": False},
     {"command": "/lookup ", "description": "Look something up on the web and answer with sources: /lookup your question", "confirm": False},
     {"command": "/search ", "description": "Show the top web results for a query, no answer: /search your query", "confirm": False},
+    {"command": "/review ", "description": "Literature review with sources, asks you before the full texts: /review your question [until 2024-06-30]", "confirm": False},
     {"command": "/goodnight!", "description": "Dream, then shut MIA down", "confirm": True},
     {"command": "/break!", "description": "Shut MIA down", "confirm": True},
 )
@@ -123,10 +125,14 @@ class ChatError(Exception):
 class ChatService:
     def __init__(self, emit, log, mood, run_exchange, run_command=None, model_info=None, queue_size=1, user_limit=0,
                  rate_limit=(10, 60), spawn=None, clock=time.monotonic, run_lookup=None, run_search=None, votes=None, wall_clock=time.time,
-                 behaviours=None, reputable=0.6, repair=None, remember=None):
+                 behaviours=None, reputable=0.6, repair=None, remember=None, run_review=None, review_timeout=1800):
         self._emit = emit
         self._run_lookup = run_lookup          # (question, on_delta, on_emotion, should_stop) -> the answer, for /lookup
         self._run_search = run_search              # (query, on_delta, on_emotion, should_stop) -> the list of results, for /search
+        self._run_review = run_review              # (text, on_delta, on_emotion, should_stop, ask) -> the report, for /review; ask(text) posts a question and gives the reply or None
+        self._review_timeout = review_timeout      # seconds a review waits for the answer of the user; no answer in time is "no"
+        self._waiter = None                        # {"author", "replies"}: the question of a running review that waits for its answer
+        self._author = None                        # the account whose task runs
         self.log = log
         self.mood = mood
         self._run_exchange = run_exchange
@@ -219,10 +225,17 @@ class ChatService:
             command = self.is_command(text)
             task, argument = self.task_command(text) or (None, None)
             if task is not None and not argument:
-                example = "/lookup how tall is the Eiffel Tower" if task == "lookup" else "/search Eiffel Tower height"
-                return {"ok": False, "error": "Write %s after /%s, for example: %s" % ("your question" if task == "lookup" else "what to search for", task, example)}
-            if task is not None and (self._run_lookup if task == "lookup" else self._run_search) is None:
+                example = {"lookup": "/lookup how tall is the Eiffel Tower", "search": "/search Eiffel Tower height", "review": "/review do canary releases reduce failed releases? until 2024-06-30"}[task]
+                return {"ok": False, "error": "Write %s after /%s, for example: %s" % ("what to search for" if task == "search" else "your question", task, example)}
+            if task is not None and {"lookup": self._run_lookup, "search": self._run_search, "review": self._run_review}[task] is None:
                 return {"ok": False, "error": "%s is not available." % task.capitalize()}
+            waiter = self._waiter
+            if waiter is not None and not command and task is None and (not waiter["author"] or author == waiter["author"]):
+                fields = dict(({"client_id": client_id} if client_id else {}), **({"sender": author} if author else {}))
+                record = self.log.append("user", text, **fields)             # the reply to a question of the review is a message like any other, but it is not queued behind the review
+                self._emit("chat_message", record)
+                waiter["replies"].put(text)
+                return {"ok": True, "message": record, "queued": False, "command": False, "id": record["id"], "position": 0}
             record = None
             if not command:
                 fields = dict(({"client_id": client_id} if client_id else {}), **({"sender": author} if author else {}))
@@ -240,7 +253,7 @@ class ChatService:
     def stop(self):
         """stops the running answer (the text received so far stays)"""
         with self._lock:
-            running = self._running and self._current == "chat"
+            running = self._running and self._current in ("chat", "review")
         if running:
             self._stop.set()
         return running
@@ -465,6 +478,27 @@ class ChatService:
             self.publish_status()
         return record
 
+    def ask(self, text):
+        """a question of a running review: posts it as a message of MIA and waits for the next message of the same account (send() hands it over); None when the run is stopped or
+        nothing came in review_timeout seconds"""
+        waiter = {"author": self._author, "replies": queue.Queue()}
+        with self._lock:
+            self._waiter = waiter
+        self.post_assistant(text)
+        self.set_activity("waiting")
+        reply, end = None, self._clock() + self._review_timeout
+        try:
+            while reply is None and not self._stop.is_set() and self._clock() < end:
+                try:
+                    reply = waiter["replies"].get(timeout=0.1)
+                except queue.Empty:
+                    pass
+        finally:
+            with self._lock:
+                self._waiter = None
+            self.set_activity("thinking")
+        return reply
+
     # --- background work ------------------------------------------------------------------------------
     def _start_worker(self):
         if self._running:
@@ -480,7 +514,7 @@ class ChatService:
                     self._current = None
                     break
                 kind, text, _author, speaker, message_id = self._queue.popleft()
-                self._current = kind
+                self._current, self._author = kind, _author
                 self._stop.clear()
             try:
                 self._do_command(text) if kind == "command" else self._do_chat(text, kind, speaker, message_id)
@@ -541,7 +575,8 @@ class ChatService:
 
         status = "done"
         try:
-            run = {"chat": self._run_exchange, "lookup": self._run_lookup, "search": self._run_search}[task]
+            run = {"chat": self._run_exchange, "lookup": self._run_lookup, "search": self._run_search,
+                   "review": lambda q, on_delta_, on_emotion_, should_stop_: self._run_review(q, on_delta_, on_emotion_, should_stop_, self.ask)}[task]
             # the model knows who writes (accounts only); the log keeps the plain text. A lookup or search question is data for a tool and stays as it is
             final = run("[%s] %s" % (speaker, text) if speaker and task == "chat" else text, on_delta, on_emotion, self._stop.is_set)
             if final is not None:

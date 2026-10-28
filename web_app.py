@@ -72,6 +72,10 @@ from .pipeline import Tool
 from .pipeline_model import OllamaModel
 from . import web_tools
 from .web_tools import build_web_tools
+from . import review_chat, review_entry
+from .workflow_library import WorkflowLibrary
+from .fulltext import FullTextSource
+from .scholar import build_scholar
 from . import tailscale_serve
 FPATH = os.path.split(__file__)[0]
 cfg_file = os.path.join(FPATH,CFG_FILE)
@@ -549,6 +553,8 @@ content_store = ContentStore(_own_path("store_dir", "data/store"))
 content_store.prune(cfg.get("store_days", 90))
 _source_trust = source_trust.build_trust(cfg)
 _web_tools, _web_search, _web_client = build_web_tools(cfg, _runs_dir, store=content_store, trust=_source_trust.for_url)          # search (SearXNG, DuckDuckGo as fallback) and page fetcher with the safety rules
+_scholar, _scholar_http = build_scholar(cfg, _runs_dir)          # OpenAlex, Crossref, PubMed, arXiv: creating them touches no network
+_review_full_text = FullTextSource(_web_client.get)              # open access links only; a PDF only through the wall of pdf_text.py
 try:        # is SearXNG running? if not, say why searches use the fallback (and start the container if the user wants it: "searxng_autostart")
     _searx = searxng_control.ensure_searxng(cfg)
     (logger.info if _searx["reachable"] or not _searx["wanted"] else logger.warning)("web search: %s", _searx["message"])
@@ -604,12 +610,28 @@ def run_lookup_exchange(question, on_delta, on_emotion, should_stop):
                                       on_event=lambda event: chat_service.pipeline_event(event), should_stop=should_stop, speak=speak_answer,
                                       on_sources=chat_service.note_sources, trust=source_trust.build_trust(cfg).for_url)      # a fresh table: the trust of sources is edited on the page
 
+def run_review_exchange(text, on_delta, on_emotion, should_stop, ask):
+    """/review question [until DATE]: the literature review (review_chat.py); the skills run through the core, the questions to the user through the chat service"""
+    def run_skill(name, inputs):
+        result = core.run(name, inputs, should_stop=should_stop)
+        if result.status == "stopped":
+            raise RuntimeError("the review was stopped")
+        if result.status != "done":
+            raise RuntimeError(research_chat.friendly_error(result.error))
+        return result.answer
+    return review_chat.run_review(text, run_skill, _scholar, _review_full_text, ask, on_event=lambda event: chat_service.pipeline_event(event), should_stop=should_stop, cfg=cfg)
+
 def run_search_exchange(query, on_delta, on_emotion, should_stop):
     """/search: the top results of the search tool, no model"""
     return research_chat.run_search(_web_tools["web_search"][0], query, count=cfg.get(CONST.SEARCH_RESULTS_SHOWN_KEY, CONST.DEFAULT_SEARCH_RESULTS_SHOWN), should_stop=should_stop)
 
 _db_dir = os.path.join(FPATH, cfg.get(CONST.ACCOUNTS_DIR_KEY, "data/db"))
 _votes_store = Storage(FileBackend(_db_dir))                  # the votes table (REQ-CHA-015); the accounts use the same folder
+_workflow_library = WorkflowLibrary(_votes_store)             # IF-203 on the same storage; the review workflow is its first entry (a draft)
+try:
+    review_entry.ensure_review_workflow(_workflow_library)
+except Exception as exc:                                       # the entry is a description: a storage that fails must not keep the app from starting
+    print("the review workflow entry was not saved: %s" % exc)
 
 def run_memory_skill(inputs):
     """the skill memory_write: what to remember from one message of the user"""
@@ -621,7 +643,8 @@ def run_memory_skill(inputs):
 _remember = None
 if cfg.get(CONST.STRUCTURED_MEMORY_KEY, False):               # off by default: one more call of the light model after every plain chat turn
     comm.memory_provider, _remember = memory_hooks(MemoryRecords(_votes_store, budget_tokens=cfg.get(CONST.MEMORY_BUDGET_KEY, 400)), run_memory_skill)
-chat_service = ChatService(socketio.emit, chat_log, mood, run_chat_exchange, run_command=run_chat_command, run_lookup=run_lookup_exchange, run_search=run_search_exchange,
+chat_service = ChatService(socketio.emit, chat_log, mood, run_chat_exchange, run_command=run_chat_command, run_lookup=run_lookup_exchange, run_search=run_search_exchange, run_review=run_review_exchange,
+                           review_timeout=cfg.get("review_answer_seconds", 1800),
                            model_info=lambda: (comm.version, getattr(comm, "profile", None)),
                            queue_size=cfg.get(CONST.CHAT_QUEUE_KEY, 5 if cfg.get(CONST.ACCOUNTS_KEY, False) else 1),
                            user_limit=2 if cfg.get(CONST.ACCOUNTS_KEY, False) else 0,           # IF-101: 5 waiting in all, 2 per account

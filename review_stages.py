@@ -231,12 +231,13 @@ def check_summary(summary, report):
 # --- the run ------------------------------------------------------------------------------------------------------------------------
 
 class ReviewRun:
-    def __init__(self, request, keywords, criteria, search, screen_abstract, screen_full, full_text, agree, approve_terms, min_works=3, summarize=None):
+    def __init__(self, request, keywords, criteria, search, screen_abstract, screen_full, full_text, agree, approve_terms, min_works=3, summarize=None, should_stop=None):
         self.request, self.criteria = request, set(criteria)
         self.budget = request.budget
         self.pool = KeywordPool(keywords)
         self.search, self.screen_abstract, self.screen_full, self.full_text = search, screen_abstract, screen_full, full_text
         self.agree, self.approve_terms, self.min_works, self.summarize = agree, approve_terms, min_works, summarize
+        self.should_stop, self.asking = should_stop, None
         self.found, self.hits, self.queries = {}, {}, {}
         self.judged, self.ended_by, self.recommendation = {}, "complete", None
         self.collected = {"kept": [], "dropped": [], "duplicates": 0, "by_keyword": {}, "found": 0}
@@ -244,10 +245,14 @@ class ReviewRun:
     def _go(self, name=None):
         """true if the next step may run; at a used-up limit (the end of a slice included) the user is asked, and only agreement renews the limits"""
         while True:
+            if self.should_stop and self.should_stop():
+                self.ended_by = "stopped"
+                return False
             hit = self.budget.exhausted()
             if hit is None and (name is None or self.budget.spend(name)):
                 return True
             hit = hit or name
+            self.asking = "limit:" + hit
             if not self.agree(self.report()):
                 self.ended_by = "budget:" + hit
                 return False
@@ -295,6 +300,7 @@ class ReviewRun:
             if not self._search_new() or not self._screen_abstracts():
                 break
             self.recommendation = recommend({"new_sources": len(self.judged)}, open_items=self.undecided())
+            self.asking = "checkpoint"
             if not self.agree(self.report()):                  # B2: the full text only on agreement
                 self.ended_by = "user"
                 break
@@ -309,7 +315,7 @@ class ReviewRun:
             if not self.pool.to_search():
                 break
         report = self.report()
-        if self.summarize and self.ended_by != "user":
+        if self.summarize and self.ended_by not in ("user", "stopped"):
             report["summary"] = check_summary(self.summarize(report), report)
         return report
 
@@ -335,4 +341,4 @@ class ReviewRun:
         keywords = [{"keyword": k, "query": self.queries.get(k), "origin": self.pool.origin[k], "hits": self.hits.get(k, 0)} for k in self.pool.keywords() if k in self.hits]
         return {"keywords": keywords, "flow": flow, "works": works, "dropped": self.collected["dropped"], "by_keyword": self.collected["by_keyword"],
                 "gaps": [k["keyword"] for k in keywords if k["keyword"] not in included], "ended_by": self.ended_by, "recommendation": self.recommendation,
-                "limits": self.budget.state()}
+                "limits": self.budget.state(), "asking": self.asking}
