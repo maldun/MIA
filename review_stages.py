@@ -6,7 +6,7 @@ internet: the search, the screening steps and the full text are functions that a
   C1  collect(): de-duplicate, remember which keywords found a work, drop what lies after the cut-off or is retracted and say why (PRISMA identification)
   J1  every screening judgement has two independent parts: a relevance grade 0 to 3 and an eligibility include / maybe / exclude with the reason code of a criterion;
       code never derives one from the other. The quote must occur in the source, else the judgement stays but is downgraded to "maybe" and marked unverified
-  J2  combine(): the full-text decision replaces the abstract decision; the grade is the highest of abstract and section grades when the sections fit the conclusion,
+  J2  combine(): sections whose quote is not in their text do not count; the full-text decision replaces the abstract decision; the grade is the highest of abstract and section grades when the sections fit the conclusion,
       else the lowest; without open full text the abstract judgements stand and are marked abstract only
   K1  propose_terms() counts by code; a term is searched only after approve(); a term that was proposed once is not proposed again
   R1  ReviewRun: search per keyword, collect, abstract screening, a checkpoint (the user must agree before the full text is read), full-text screening, keyword extension;
@@ -109,7 +109,11 @@ def check_full(full, text, criteria):
     for section in sections:
         _check_parts(section.get("grade"), "maybe", "", criteria)
     _check_parts(0, full.get("decision"), full.get("reason", ""), criteria)
-    source = "\n".join([s.get("text", "") for s in text.get("sections", [])] + [text.get("conclusion", "")])
+    parts = text.get("sections", [])
+    for i, section in enumerate(sections):                  # a section whose quote is not in its text stays in the record but does not count for the grade
+        if section.get("quote") and i < len(parts):
+            section["verified"] = checks.quote_in_source(section["quote"], parts[i].get("text", ""))["status"] == checks.PASS
+    source = "\n".join([s.get("text", "") for s in parts] + [text.get("conclusion", "")])
     return _verify({**full, "verified": True}, source)
 
 
@@ -117,7 +121,7 @@ def combine(abstract, full=None):
     """J2: the final grade, decision and reason of a work; `abstract_only` when there is no full-text judgement"""
     if not full:
         return {"grade": abstract["grade"], "decision": abstract["decision"], "reason": abstract.get("reason", ""), "abstract_only": True}
-    grades = [s["grade"] for s in full.get("sections", [])]
+    grades = [s["grade"] for s in full.get("sections", []) if s.get("verified", True)]
     if grades:
         section_grade = sum(grades) // len(grades)
         grade = max(abstract["grade"], section_grade) if full.get("fits") else min(abstract["grade"], section_grade)

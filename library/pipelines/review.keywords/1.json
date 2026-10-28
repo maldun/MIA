@@ -1,0 +1,33 @@
+{
+ "id": "review.keywords",
+ "version": 1,
+ "title": "Keywords and criteria from a research question",
+ "description": "Split the research question into concepts and give search keywords and the written criteria. One model step; the workflow around it is review_stages.py.",
+ "goal": "Split the research question into concepts and give search keywords and the written criteria.",
+ "tags": [
+  "review"
+ ],
+ "applies_to": {
+  "tasks": [
+   "review_keywords"
+  ]
+ },
+ "cost_class": "cheap",
+ "result": "answer",
+ "nodes": [
+  {
+   "id": "step",
+   "use": "view.review_keywords@1",
+   "wire": {
+    "question": "$input.question"
+   },
+   "output": "answer",
+   "plain": "keywords and criteria from a research question"
+  }
+ ],
+ "status": "draft",
+ "origin": {
+  "by": "manual",
+  "note": "draft of A-18, no harness measurements yet"
+ }
+}

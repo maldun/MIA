@@ -1,0 +1,37 @@
+{
+ "id": "review.abstract",
+ "version": 1,
+ "title": "Screen one abstract",
+ "description": "Grade the relevance and decide the eligibility of one work from its title and abstract. One model step; the workflow around it is review_stages.py.",
+ "goal": "Grade the relevance and decide the eligibility of one work from its title and abstract.",
+ "tags": [
+  "review"
+ ],
+ "applies_to": {
+  "tasks": [
+   "review_abstract"
+  ]
+ },
+ "cost_class": "cheap",
+ "result": "answer",
+ "nodes": [
+  {
+   "id": "step",
+   "use": "view.review_abstract@1",
+   "wire": {
+    "question": "$input.question",
+    "criteria": "$input.criteria",
+    "title": "$input.title",
+    "date": "$input.date",
+    "abstract": "$input.abstract"
+   },
+   "output": "answer",
+   "plain": "screen one abstract"
+  }
+ ],
+ "status": "draft",
+ "origin": {
+  "by": "manual",
+  "note": "draft of A-18, no harness measurements yet"
+ }
+}
