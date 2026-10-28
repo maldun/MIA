@@ -15,7 +15,7 @@
   "failed releases": "drop",
   "deployment failure": "drop",
   "release failure rate": "keep",
-  "deployment errors": "keep",
+  "deployment errors": "drop",
   "comparison": "drop",
   "evaluation": "drop",
   "impact": "drop",
