@@ -1,31 +1,31 @@
 {
  "id": "RVP-001",
- "confirmed": false,
+ "confirmed": true,
  "skill": "review_keywords@1",
  "question": "Do canary releases reduce failed releases compared with big-bang deployment?",
  "what_happened": "The keyword step gave these keywords in two runs on 2026-10-28; the last five are generic single words.",
  "HOW_TO_LABEL": "Change each \"?\" below to \"keep\" or \"drop\" (a keyword you would search for this question = keep). Then change \"confirmed\" above to true.",
  "YOUR_LABELS": {
-  "canary release": "?",
-  "canary deployment": "?",
-  "canary rollout": "?",
-  "big-bang deployment": "?",
-  "big bang release": "?",
-  "all-at-once deployment": "?",
-  "failed releases": "?",
-  "deployment failure": "?",
-  "release failure rate": "?",
-  "deployment errors": "?",
-  "comparison": "?",
-  "evaluation": "?",
-  "impact": "?",
-  "analysis": "?",
-  "vs": "?"
+  "canary release": "keep",
+  "canary deployment": "keep",
+  "canary rollout": "keep",
+  "big-bang deployment": "keep",
+  "big bang release": "keep",
+  "all-at-once deployment": "keep",
+  "failed releases": "drop",
+  "deployment failure": "drop",
+  "release failure rate": "keep",
+  "deployment errors": "keep",
+  "comparison": "drop",
+  "evaluation": "drop",
+  "impact": "drop",
+  "analysis": "drop",
+  "vs": "drop"
  }
 }
 {
  "id": "RVP-002",
- "confirmed": false,
+ "confirmed": true,
  "skill": "review_abstract@1 + review_full@1",
  "question": "Do canary releases reduce failed releases compared with big-bang deployment?",
  "work": {
@@ -37,9 +37,9 @@
  "what_happened": "The model gave grade 2, wrote that the work directly examines canary releases, and still decided exclude with the reason off_topic. The toy gold lists the work as included.",
  "HOW_TO_LABEL": "Replace each \"?\" below: decision = include | maybe | exclude; reason = off_topic | outdated | wrong_type | language | none (none if include); grade = 0 | 1 | 2 | 3. In new_reason_code_wanted write a short name (for example inconclusive) if the criteria need a code that does not exist, else leave \"no\". Then change \"confirmed\" above to true.",
  "YOUR_LABELS": {
-  "decision": "?",
-  "reason": "?",
-  "grade": "?",
+  "decision": "include",
+  "reason": "none",
+  "grade": "2",
   "new_reason_code_wanted": "no"
  }
 }
