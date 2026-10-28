@@ -6,6 +6,11 @@ memory_records.memory_hooks; nothing here talks to a model itself. The skills ar
   M2  the answers are returned as they are: values and quotes are checked by review_stages (check_judgement, check_full), not here
 """
 
+try:
+    from . import review_stages
+except ImportError:
+    import review_stages
+
 CODES = ("off_topic", "outdated", "wrong_type", "language")
 
 
@@ -39,3 +44,17 @@ def make_screeners(run_skill, question, criteria, max_chars=6000, max_sections=1
         return {**final, "sections": sections}
 
     return screen_abstract, screen_full
+
+
+def make_summarizer(run_skill, question, max_works=30):
+    """-> summarize(report) for ReviewRun: the skill review_summary gets the figures made by code, the works that were not excluded (id | grade | eligibility | notes) and the keywords
+    without an included work; review_stages.check_summary then removes whatever cites a work that is not in the report"""
+    def summarize(report):
+        figures = review_stages.coverage_figures(report)
+        kept = sorted((w for w in report["works"] if w["decision"] != "exclude"), key=lambda w: -w["grade"])
+        lines = ["%s | %s | %s | %s" % (w["doi"] or w["title"], w["grade"], w["decision"], " ".join(w["notes"])[:300]) for w in kept[:max_works]]
+        if len(kept) > max_works:                              # the prompt must fit the context (about 10 000 characters of works): the best graded come first
+            lines.append("(%d more works with lower grades are not listed)" % (len(kept) - max_works))
+        return run_skill("review_summary", {"question": question, "figures": "; ".join("%s: %s" % item for item in figures.items()), "works": "\n".join(lines) or "(none)",
+                                            "gap_keywords": ", ".join(report["gaps"]) or "(none)"})
+    return summarize

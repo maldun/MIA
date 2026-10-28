@@ -45,7 +45,7 @@ def run_skill_with(model):
 
 class ReviewSkills(unittest.TestCase):
     def test_each_skill_is_one_light_step_without_tools(self):
-        for name in ("review_keywords", "review_abstract", "review_section", "review_full"):
+        for name in ("review_keywords", "review_abstract", "review_section", "review_full", "review_summary"):
             with self.subTest(skill=name):
                 skill = open(os.path.join(ROOT, "skills", name + ".md"), encoding="utf-8").read()
                 self.assertIn("profile: light", skill)
@@ -100,6 +100,33 @@ class ReviewSkills(unittest.TestCase):
         screen_full({}, {"sections": [{"name": "A", "text": "x" * 5000}], "conclusion": "y" * 5000})
         self.assertLess(len(model.prompts[0]), 1500)
         self.assertLess(len(model.prompts[1]), 2500)
+
+
+    def test_the_summary_gets_figures_by_code_and_only_works_of_the_report_survive(self):
+        report = {"works": [{"doi": "10.1/a", "title": "A", "grade": 3, "decision": "include", "reason": "", "abstract_only": False, "keywords": ["graph"], "notes": ["n1 [q]"]},
+                            {"doi": "10.1/x", "title": "X", "grade": 3, "decision": "exclude", "reason": "outdated", "abstract_only": True, "keywords": ["graph"], "notes": ["old"]}],
+                  "keywords": [{"keyword": "graph", "hits": 2}, {"keyword": "timetable", "hits": 0}], "gaps": ["timetable"]}
+        reply = {"found": [{"point": "p", "works": ["10.1/a", "10.1/zzz"]}], "coverage": "thin", "gaps": [{"gap": "no timetable work", "works": []}]}
+        model = Scripted(reply)
+        out = rs.check_summary(review_models.make_summarizer(run_skill_with(model), "q?")(report), report)
+        prompt = model.prompts[0]
+        self.assertIn("level: thin", prompt)
+        self.assertIn("10.1/a | 3 | include | n1 [q]", prompt)
+        self.assertNotIn("10.1/x |", prompt)                     # an excluded work is not summarised
+        self.assertIn("timetable", prompt.split("Keywords without an included work:")[1][:40])
+        self.assertEqual(out["found"][0]["works"], ["10.1/a"])
+        self.assertTrue(out["needs_check"])
+
+
+    def test_the_summary_lists_the_best_graded_works_when_there_are_too_many(self):
+        works = [{"doi": "10.1/%d" % i, "title": "T", "grade": i % 4, "decision": "include", "reason": "", "abstract_only": False, "keywords": ["graph"], "notes": ["n"]} for i in range(8)]
+        report = {"works": works, "keywords": [{"keyword": "graph", "hits": 8}], "gaps": []}
+        model = Scripted({"found": [], "coverage": "c", "gaps": []})
+        review_models.make_summarizer(run_skill_with(model), "q?", max_works=3)(report)
+        listed = model.prompts[0].split("<<<WORKS\n")[1].split("\n>>>")[0].splitlines()
+        self.assertEqual(len(listed), 4)
+        self.assertTrue(all(line.split(" | ")[1] == "3" for line in listed[:2]))
+        self.assertIn("5 more works", listed[3])
 
 
 if __name__ == "__main__":

@@ -151,21 +151,23 @@ class WebClient:
         self.log = log or WebLog(None)
         self.headers = {"User-Agent": user_agent, "Accept": "text/html,application/xhtml+xml,text/plain;q=0.9,*/*;q=0.1", "Accept-Language": "en,de;q=0.8"}
 
-    def get(self, url):
-        """{"url" (final), "status", "content_type", "text", "bytes", "truncated", "redirects"}; raises WebError subclasses"""
+    def get(self, url, accept=None, max_bytes=None):
+        """{"url" (final), "status", "content_type", "text", "body" (the bytes), "bytes", "truncated", "redirects"}; raises WebError subclasses.
+        accept: the content types the caller reads (default ALLOWED_TYPES; a caller that converts PDFs in a wall adds application/pdf); max_bytes: a bigger limit than the client's for this call"""
         started = time.time()
+        headers = self.headers if accept is None else {**self.headers, "Accept": ", ".join(accept) + ";q=0.9,*/*;q=0.1"}
         current, redirects = url, []
         try:
             for _ in range(self.max_redirects + 1):
                 current, _addresses = check_url(current, self.resolver, self.allow_private)
-                response = self.session.get(current, headers=self.headers, timeout=self.timeout, stream=True, allow_redirects=False)
+                response = self.session.get(current, headers=headers, timeout=self.timeout, stream=True, allow_redirects=False)
                 try:
                     if response.status_code in (301, 302, 303, 307, 308) and response.headers.get("Location"):
                         redirects.append(current)
                         current = urljoin(current, response.headers["Location"])
                         continue
                     self._check_peer(response)
-                    return self._read(response, current, redirects, started)
+                    return self._read(response, current, redirects, started, accept or ALLOWED_TYPES, max_bytes or self.max_bytes)
                 finally:
                     response.close()
             raise WebError("too many redirects")
@@ -187,20 +189,20 @@ class WebClient:
         if not ip_is_public(peer):
             raise UnsafeUrl("the connection went to a private address (%s)" % peer)
 
-    def _read(self, response, url, redirects, started):
+    def _read(self, response, url, redirects, started, accept, max_bytes):
         if response.status_code >= 400:
             raise HttpStatusError(response.status_code)
         content_type = response.headers.get("Content-Type", "").split(";")[0].strip().lower()
-        if content_type and content_type not in ALLOWED_TYPES:
+        if content_type and content_type not in accept:
             raise UnsupportedContent("content type '%s' is not read" % content_type)
         declared = response.headers.get("Content-Length", "")
-        if declared.isdigit() and int(declared) > self.max_bytes * 4:
+        if declared.isdigit() and int(declared) > max_bytes * 4:
             raise UnsupportedContent("the page is much too big (%s bytes)" % declared)
         body, truncated = bytearray(), False
         for block in response.iter_content(chunk_size=16384):
             body.extend(block)
-            if len(body) > self.max_bytes:
-                del body[self.max_bytes:]
+            if len(body) > max_bytes:
+                del body[max_bytes:]
                 truncated = True
                 break
         encoding = response.encoding or "utf-8"
@@ -210,7 +212,7 @@ class WebClient:
             text = bytes(body).decode("utf-8", errors="replace")
         self.log.record("fetch", url=url, status=response.status_code, content_type=content_type, bytes=len(body), truncated=truncated,
                         redirects=len(redirects), ms=int((time.time() - started) * 1000))
-        return {"url": url, "status": response.status_code, "content_type": content_type, "text": text, "bytes": len(body),
+        return {"url": url, "status": response.status_code, "content_type": content_type, "text": text, "body": bytes(body), "bytes": len(body),
                 "truncated": truncated, "redirects": redirects}
 
 

@@ -1,0 +1,36 @@
+{
+ "id": "review.summary",
+ "version": 1,
+ "title": "Summary of a literature review",
+ "description": "Summarise what the screened literature found, how well it covers the research question and where the gaps are. One model step; the workflow around it is review_stages.py.",
+ "goal": "Summarise what the screened literature found, how well it covers the research question and where the gaps are.",
+ "tags": [
+  "review"
+ ],
+ "applies_to": {
+  "tasks": [
+   "review_summary"
+  ]
+ },
+ "cost_class": "cheap",
+ "result": "answer",
+ "nodes": [
+  {
+   "id": "step",
+   "use": "view.review_summary@1",
+   "wire": {
+    "question": "$input.question",
+    "figures": "$input.figures",
+    "works": "$input.works",
+    "gap_keywords": "$input.gap_keywords"
+   },
+   "output": "answer",
+   "plain": "summary of a literature review"
+  }
+ ],
+ "status": "draft",
+ "origin": {
+  "by": "manual",
+  "note": "draft of A-18, no harness measurements yet"
+ }
+}

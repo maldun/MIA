@@ -127,6 +127,19 @@ class FetchTests(unittest.TestCase):
         record = self.log_lines()[0]
         self.assertEqual((record["kind"], record["url"], record["status"]), ("fetch", "https://example.com/a", 200))
 
+
+    def test_a_pdf_is_refused_unless_the_caller_accepts_it_and_then_the_bytes_come_back(self):      # REQ-WFM-028: the full text of a work
+        pdf = FakeResponse(body=b"%PDF-1.4 " + b"x" * 3000, headers={"Content-Type": "application/pdf"})
+        client = self.client({"https://example.com/p.pdf": pdf})
+        with self.assertRaises(W.UnsupportedContent):
+            client.get("https://example.com/p.pdf")
+        page = client.get("https://example.com/p.pdf", accept=W.ALLOWED_TYPES + ("application/pdf",), max_bytes=10_000)
+        self.assertEqual(page["content_type"], "application/pdf")
+        self.assertTrue(page["body"].startswith(b"%PDF-"))
+        self.assertEqual((page["bytes"], page["truncated"]), (3009, False))
+        small = client.get("https://example.com/p.pdf", accept=("application/pdf",), max_bytes=1000)
+        self.assertEqual((len(small["body"]), small["truncated"]), (1000, True))
+
     def test_redirects_are_followed_and_checked_at_every_hop(self):
         routes = {"https://example.com/start": FakeResponse(302, headers={"Location": "/next"}),
                   "https://example.com/next": FakeResponse(301, headers={"Location": "https://other.example/end"}),

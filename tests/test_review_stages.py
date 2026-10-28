@@ -134,7 +134,7 @@ class TestKeywordExtension(unittest.TestCase):  # TC-WFM-027
             pool.approve("never proposed")
 
 
-def scripted_run(works_by_keyword, agree=lambda report: True, approve=lambda proposals: [], abstract=None, full=None, full_text=None, limits=None, clock=None, n=3):
+def scripted_run(works_by_keyword, agree=lambda report: True, approve=lambda proposals: [], abstract=None, full=None, full_text=None, limits=None, clock=None, n=3, summarize=None):
     request = ReviewRequest("how to schedule with graphs", until=TODAY, today=TODAY, budget=limits, clock=clock or Clock())
     calls = {"search": [], "agree": 0, "screen_full": []}
 
@@ -151,7 +151,7 @@ def scripted_run(works_by_keyword, agree=lambda report: True, approve=lambda pro
         return full(w, text)
 
     run = rs.ReviewRun(request, ["graph"], CRITERIA, search=search, screen_abstract=abstract or (lambda w: judge(w)), screen_full=screen_full,
-                       full_text=full_text or (lambda w: None), agree=counting_agree, approve_terms=approve, min_works=n)
+                       full_text=full_text or (lambda w: None), agree=counting_agree, approve_terms=approve, min_works=n, summarize=summarize)
     return run.run(), calls
 
 
@@ -240,6 +240,51 @@ class TestRun(unittest.TestCase):
         self.assertEqual(report["dropped"][0]["code"], "after_cutoff")
         self.assertEqual(report["gaps"], ["empty"])
         self.assertEqual({k["keyword"]: k["hits"] for k in report["keywords"]}, {"graph": 2, "empty": 0})
+
+
+def report_of(grades_and_decisions, keywords=("graph", "timetable"), abstract_only=0):
+    works = [{"doi": "10.1/%d" % i, "title": "T%d" % i, "grade": g, "decision": d, "reason": "", "abstract_only": i < abstract_only, "keywords": [keywords[i % len(keywords)]],
+              "notes": ["note %d [quote]" % i]} for i, (g, d) in enumerate(grades_and_decisions)]
+    return {"works": works, "keywords": [{"keyword": k, "hits": 3} for k in keywords], "flow": {"found": len(works), "dropped": 0}, "gaps": [], "ended_by": "complete"}
+
+
+class TestSummary(unittest.TestCase):          # the summary stage: figures and level by code, the prose checked against the works
+    def test_the_coverage_level_is_made_by_code_from_the_included_works(self):
+        level = lambda pairs: rs.coverage_figures(report_of(pairs))["level"]
+        self.assertEqual(level([]), "none")
+        self.assertEqual(level([(3, "exclude"), (1, "maybe")]), "none")
+        self.assertEqual(level([(1, "include"), (1, "include"), (1, "include")]), "thin")
+        self.assertEqual(level([(3, "include"), (2, "include")]), "thin")           # fewer than 3 included
+        self.assertEqual(level([(2, "include")] * 3), "moderate")
+        self.assertEqual(level([(3, "include")] * 4 + [(2, "include")] * 4), "good")
+
+    def test_the_figures_count_grades_keywords_and_abstract_only(self):
+        figures = rs.coverage_figures(report_of([(3, "include"), (2, "include"), (0, "include"), (3, "exclude"), (1, "maybe")], abstract_only=2))
+        self.assertEqual((figures["included"], figures["maybe"], figures["grade3"], figures["grade2"], figures["abstract_only"]), (3, 1, 1, 1, 2))
+        self.assertEqual((figures["keywords"], figures["keywords_with_includes"]), (2, 2))
+
+    def test_points_citing_unknown_works_are_dropped_and_counted(self):
+        report = report_of([(3, "include"), (2, "include")])
+        summary = {"found": [{"point": "good", "works": ["10.1/0", "10.1/999"]}, {"point": "invented", "works": ["10.1/999"]}], "coverage": "thin", "gaps": [{"gap": "g", "works": []}]}
+        out = rs.check_summary(summary, report)
+        self.assertEqual(out["found"], [{"point": "good", "works": ["10.1/0"]}])
+        self.assertEqual(out["dropped_points"], 1)
+        self.assertEqual(out["gaps"], [{"gap": "g", "works": []}])
+        self.assertTrue(out["needs_check"])
+        self.assertEqual(out["figures"]["level"], "thin")
+
+    def test_the_run_adds_the_summary_and_skips_it_when_the_user_stopped(self):
+        seen = []
+
+        def summarize(report):
+            seen.append(report["flow"]["screened"])
+            return {"found": [{"point": "p", "works": ["10.1/0"]}], "coverage": "c", "gaps": []}
+        report, _ = scripted_run(TestRun.WORKS, summarize=summarize)
+        self.assertEqual(seen, [4])
+        self.assertTrue(report["summary"]["needs_check"])
+        self.assertEqual(report["summary"]["found"][0]["works"], ["10.1/0"])
+        stopped, _ = scripted_run(TestRun.WORKS, agree=lambda r: False, summarize=summarize)
+        self.assertNotIn("summary", stopped)
 
 
 if __name__ == "__main__":
