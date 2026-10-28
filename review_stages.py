@@ -9,6 +9,8 @@ internet: the search, the screening steps and the full text are functions that a
   J2  combine(): sections whose quote is not in their text do not count; the full-text decision replaces the abstract decision; the grade is the highest of abstract and section grades when the sections fit the conclusion,
       else the lowest; without open full text the abstract judgements stand and are marked abstract only
   K1  propose_terms() counts by code; a term is searched only after approve(); a term that was proposed once is not proposed again
+  S1  the summary: figures and the coverage level are made by code (coverage_figures); a model writes what was found and the gaps, every point cites works of the report, a point
+      that cites none of them is dropped (check_summary); the summary always says that a person has to check it
   R1  ReviewRun: search per keyword, collect, abstract screening, a checkpoint (the user must agree before the full text is read), full-text screening, keyword extension;
       it ends when every collected work is decided and no approved keyword is left, or a limit is used up and the user does not continue. What a model says ("done") is ignored
 """
@@ -182,15 +184,59 @@ class KeywordPool:
         self.origin[term] = "extension"
 
 
+# --- the summary --------------------------------------------------------------------------------------------------------------------
+
+# starting values of the coverage level, not validated: a person reads the summary anyway
+THIN_BELOW = 3             # fewer included works than this: thin
+GOOD_INCLUDED = 8          # at least this many included works, ...
+GOOD_STRONG = 4            # ... of which at least this many with grade 2 or 3, ...
+GOOD_KEYWORD_SHARE = 2 / 3  # ... and at least this share of the keywords with an included work
+
+
+def coverage_figures(report):
+    """counts and the level (none | thin | moderate | good) from the works of a report"""
+    works = report["works"]
+    included = [w for w in works if w["decision"] == "include"]
+    strong = [w for w in included if w["grade"] >= 2]
+    keywords = [k["keyword"] for k in report["keywords"]]
+    with_includes = [k for k in keywords if any(k in w["keywords"] for w in included)]
+    if not included:
+        level = "none"
+    elif len(included) < THIN_BELOW or not strong:
+        level = "thin"
+    elif len(included) >= GOOD_INCLUDED and len(strong) >= GOOD_STRONG and len(with_includes) >= GOOD_KEYWORD_SHARE * len(keywords):
+        level = "good"
+    else:
+        level = "moderate"
+    return {"included": len(included), "maybe": sum(1 for w in works if w["decision"] == "maybe"), "excluded": sum(1 for w in works if w["decision"] == "exclude"),
+            "grade3": sum(1 for w in included if w["grade"] == 3), "grade2": sum(1 for w in included if w["grade"] == 2),
+            "abstract_only": sum(1 for w in works if w["abstract_only"]), "keywords": len(keywords), "keywords_with_includes": len(with_includes), "level": level}
+
+
+def check_summary(summary, report):
+    """the summary of a model against the report: cited ids that are not works of the report are removed, a point left without a work is dropped"""
+    known = {w["doi"] or w["title"] for w in report["works"]}
+    dropped, found = 0, []
+    for point in summary.get("found", []):
+        cited = [i for i in point.get("works", []) if i in known]
+        if cited:
+            found.append({**point, "works": cited})
+        else:
+            dropped += 1
+    gaps = [{**g, "works": [i for i in g.get("works", []) if i in known]} for g in summary.get("gaps", [])]
+    return {"found": found, "coverage": summary.get("coverage", ""), "gaps": gaps, "dropped_points": dropped, "figures": coverage_figures(report),
+            "needs_check": True}
+
+
 # --- the run ------------------------------------------------------------------------------------------------------------------------
 
 class ReviewRun:
-    def __init__(self, request, keywords, criteria, search, screen_abstract, screen_full, full_text, agree, approve_terms, min_works=3):
+    def __init__(self, request, keywords, criteria, search, screen_abstract, screen_full, full_text, agree, approve_terms, min_works=3, summarize=None):
         self.request, self.criteria = request, set(criteria)
         self.budget = request.budget
         self.pool = KeywordPool(keywords)
         self.search, self.screen_abstract, self.screen_full, self.full_text = search, screen_abstract, screen_full, full_text
-        self.agree, self.approve_terms, self.min_works = agree, approve_terms, min_works
+        self.agree, self.approve_terms, self.min_works, self.summarize = agree, approve_terms, min_works, summarize
         self.found, self.hits, self.queries = {}, {}, {}
         self.judged, self.ended_by, self.recommendation = {}, "complete", None
         self.collected = {"kept": [], "dropped": [], "duplicates": 0, "by_keyword": {}, "found": 0}
@@ -262,7 +308,10 @@ class ReviewRun:
                 self.pool.approve(term)
             if not self.pool.to_search():
                 break
-        return self.report()
+        report = self.report()
+        if self.summarize and self.ended_by != "user":
+            report["summary"] = check_summary(self.summarize(report), report)
+        return report
 
     def undecided(self):
         return sum(1 for w in self.collected["kept"] if work_id(w) not in self.judged)
