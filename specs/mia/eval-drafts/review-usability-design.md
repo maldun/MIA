@@ -47,7 +47,7 @@ REQ-WFM-019 reworded (limits: run mode with hard caps, slicing as an option of t
 
 ## Open for the owner
 1. Hard caps: factor 10 of today's limits (e.g. 1800 s, 4M tokens) fine as a start?
-2. `.tex`: plain `article` with a table for the works, German or English headings (English proposed)?
+2. ~~`.tex` language~~ decided (owner 2026-10-29): English; plain `article` with a table for the works.
 3. Should the card stay in the chat history after the end (frozen with the final numbers) or disappear? Proposed: stays, frozen, collapsed.
 4. Syntax of the options: `/review options slice -- question` as proposed, or another separator?
 5. ~~Retention and delete~~ decided: dedicated volume, size limits in config, no automatic deletion, the user deletes in the volume (the database record in the database).
