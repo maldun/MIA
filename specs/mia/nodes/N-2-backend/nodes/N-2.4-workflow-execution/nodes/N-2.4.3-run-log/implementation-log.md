@@ -17,7 +17,7 @@ as `_real` too (8 tests, none skipped; tested on a scratch copy).
 
 Decisions made while building (small, kept inside the contract): the file is one per run, so `events(run_id)` needs no scan of a month; a half-written last line is skipped by the reader and the next event starts on a line of its own;
 the seq is counted by one writer per file (a second instance on the same file would clash: the runner writes from one process); the payload must be an object, the run id a plain name (`invalid_run`, `invalid_payload`,
-`invalid_user` are new error codes next to `unknown_type` and `unknown_run`; the contract text does not list them yet, the next amendment of IF-401 can).
+`invalid_user` are new error codes next to `unknown_type` and `unknown_run`; the contract v1 lists them since A-30, D-110, with TC-IF-401-05).
 
 Not done, for the next steps of the node cycle:
 - **The runner does not write through `RunEvents` yet** (N-2.4.1): today `EventStream` puts the events into the run record of `RunLog` (one JSON line per run, with the events inside). Two formats now exist side by side. To decide at the wiring: make the sink of `EventStream` write through `RunEvents` and let `RunLog` keep only the run record
