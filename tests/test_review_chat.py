@@ -246,7 +246,7 @@ class TestReviewOutputs(unittest.TestCase):                                     
         for text in files.values():
             self.assertIn("Off topic 100", text)                                  # also the excluded work with grade 0 is in the files
         self.assertIn(r"100\% sure", files[names[1]])
-        self.assertIn("Files: " + ", ".join(names), out)
+        self.assertNotIn("Files:", out)                                               # the links are added by the chat service (tests/test_review_chain.py)
         self.assertTrue(out.startswith("## Literature review"))
 
     def test_a_volume_that_refuses_is_told_in_the_result_and_the_record_stays(self):

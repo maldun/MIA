@@ -668,8 +668,14 @@ class ChatService:
             status = "error"
             self.set_activity("offline")
             self._emit("chat_error", {"id": message_id, "message": "MIA could not answer: %s" % exc})
+            if entry is not None and not state["text"]:
+                state["text"] = "/%s could not finish: %s" % (task, exc)       # a task that fails leaves a result that says why, not an empty message and a toast that can be missed
         else:
             self.set_activity(None)
+        if self._task_files:                                                   # the files of the task are links in its result (the route is the core's own, IF-101 v8)
+            state["text"] = (state["text"] + "\n\n" if state["text"] else "") + "Files: " + ", ".join("[%s](/api/files/%s)" % (n, n) for n in self._task_files)
+            if not late and not repairing:
+                self._emit("chat_delta", {"id": message_id, "text": state["text"]})        # the last delta equals the text of chat_done
         if repairing and state["text"]:
             state["text"] = self._repair(state["text"])                 # the whole answer, silently; the last delta equals the text of chat_done
             if state["text"] != state["shown"]:

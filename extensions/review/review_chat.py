@@ -155,8 +155,8 @@ def _keep(report, question, until, files, reports):
     if files is not None:
         stem = "review-%s-%s" % (until, "-".join(re.findall(r"[a-z0-9]+", question.lower())[:6]) or "report")
         try:
-            names = [files(stem + ".md", format_report_full(report, question, until)), files(stem + ".tex", report_tex(report, question, until))]
-            notes.append("Files: %s (in the files list of the page)." % ", ".join(names))
+            files(stem + ".md", format_report_full(report, question, until))              # the links to the files are added to the result by the chat service
+            files(stem + ".tex", report_tex(report, question, until))
         except Exception as exc:
             notes.append("The files could not be stored: %s." % exc)
     return "\n\n" + "\n".join(notes) if notes else ""
