@@ -11,6 +11,7 @@ sys.path.insert(0, ROOT)
 sys.path.insert(0, os.path.join(ROOT, "tests", "helpers"))
 
 from markers import mark                                  # noqa: E402
+from task_helper import registry_of                       # noqa: E402
 from chat_log import ChatLog                              # noqa: E402
 from chat_service import ChatService                      # noqa: E402
 from moods import MoodTracker                             # noqa: E402
@@ -39,7 +40,7 @@ class MemoryWiringTest(unittest.TestCase):
 
         self.chat = ChatService(lambda event, payload: self.events.append((event, payload)), self.log, MoodTracker(os.path.join(ROOT, "moods.json")), exchange,
                                 queue_size=5, user_limit=2, spawn=lambda target: target(), votes=self.storage,
-                                run_lookup=lambda question, on_delta, on_emotion, should_stop: "An answer.", remember=remember)
+                                tasks=registry_of(lookup=lambda question, on_delta, on_emotion, should_stop: "An answer."), remember=remember)
 
     @mark.req('REQ-CHA-011')
     def test_a_plain_chat_turn_hands_the_user_message_to_the_memory(self):

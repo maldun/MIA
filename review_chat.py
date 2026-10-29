@@ -15,23 +15,11 @@ try:
     from . import review_models, review_stages
     from .review_request import ReviewRequest, RequestError
     from .report_tex import report_tex
-    from .task_registry import Option, Task
 except ImportError:
     import review_models
     import review_stages
     from review_request import ReviewRequest, RequestError
     from report_tex import report_tex
-    from task_registry import Option, Task
-
-REVIEW_OPTIONS = (Option("slice", "flag", False, "work in time slices and ask at each limit (default: run to the end, bounded by hard caps)"),
-                  Option("cap_factor", "int", 10, "hard caps of the mode run = the limits times this number"))
-
-
-def review_task(run):
-    """/review as a task of the registry (REQ-WFM-029, -030): the skill declares its id, its options and what it needs from the core. It asks questions, so its result is the newest message."""
-    return Task("review", run, "Literature review with sources, asks you before the full texts", "your question", "/review do canary releases reduce failed releases? until 2024-06-30",
-                options=REVIEW_OPTIONS, needs=("ask", "options", "monitor", "files", "reports"))
-
 
 YES = {"yes", "y", "ok", "okay", "go", "continue", "sure", "ja", "all"}
 NO = {"no", "n", "stop", "none", "nein", "cancel"}

@@ -18,6 +18,7 @@ os.symlink(REPO, os.path.join(_LINK_DIR, "MIA"))
 sys.path.insert(0, _LINK_DIR)
 
 MOODS = os.path.join(REPO, "moods.json")
+from task_helper import registry_of  # noqa: E402
 
 
 def wait_for(condition, timeout=5.0):
@@ -47,14 +48,14 @@ class ReviewTask(unittest.TestCase):
         def exchange(text, on_delta, on_emotion, should_stop):
             return "chat"
 
-        def run_review(text, on_delta, on_emotion, should_stop, ask):
+        def run_review(text, on_delta, on_emotion, should_stop, ask=None, **unused):
             self.calls.append(text)
             self.answers.append(ask("Shall I go on?"))
             self.answers.append(ask("Really?"))
             self.release.wait(5)
             return "the report"
         return self.service_module.ChatService(lambda event, payload: self.events.append((event, payload)), self.log, self.moods.MoodTracker(MOODS), exchange,
-                                               model_info=lambda: ("m", "light"), run_lookup=lambda q, d, e, s: "found", run_review=run_review if review else None, review_timeout=ask_timeout, user_limit=2, queue_size=3)
+                                               model_info=lambda: ("m", "light"), tasks=registry_of("MIA.", lookup=lambda q, d, e, s: "found", review=run_review if review else None), unavailable=() if review else ("review",), review_timeout=ask_timeout, user_limit=2, queue_size=3)
 
     def idle(self, service):
         return wait_for(lambda: not service.status()["busy"])
@@ -141,8 +142,9 @@ class ReviewTask(unittest.TestCase):
         self.assertFalse(ack["ok"])
         self.assertIn("/review", ack["error"])
         self.assertIn("question", ack["error"])
-        self.assertFalse(self.make(review=False).send("/review a question")["ok"])
-        self.assertTrue(any(c["command"].startswith("/review") for c in self.service_module.COMMANDS))
+        self.assertTrue(any(c["command"].startswith("/review") for c in service.commands()))
+        self.assertFalse(any(c["command"].startswith("/review") for c in self.make(review=False).commands()))      # an extension that did not load has no command
+        self.assertEqual(self.make(review=False).send("/review a question")["error"], "Review is not available.")
 
 
 if __name__ == "__main__":

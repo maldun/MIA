@@ -21,7 +21,7 @@ SKILLS = ("review_keywords", "review_abstract", "review_section", "review_full",
 class ReviewWiring(unittest.TestCase):
     def test_the_chat_service_has_the_review_task_and_the_command_is_listed(self):
         task = w.chat_service._tasks.get("review")               # since A-23 the review is a task of the registry, with its options
-        self.assertIs(task.run, w.run_review_exchange)
+        self.assertTrue(task.run.__module__.endswith("extensions.review.entry"))        # since T-11 the review is an extension
         self.assertEqual([o.name for o in task.options], ["slice", "cap_factor"])
         self.assertIn("/review ", [c["command"] for c in w.chat_service.commands()])
 

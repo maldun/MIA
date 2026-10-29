@@ -1,0 +1,14 @@
+{
+  "id": "review",
+  "text": "Literature review with sources, asks you before the full texts",
+  "argument": "your question",
+  "example": "/review do canary releases reduce failed releases? until 2024-06-30",
+  "aliases": [],
+  "needs": ["ask", "options", "monitor", "files", "reports"],
+  "options": [
+    {"name": "slice", "kind": "flag", "default": false, "text": "work in time slices and ask at each limit (default: run to the end, bounded by hard caps)"},
+    {"name": "cap_factor", "kind": "int", "default": 10, "text": "hard caps of the mode run = the limits times this number"}
+  ],
+  "version": "1",
+  "entry": "entry:make"
+}

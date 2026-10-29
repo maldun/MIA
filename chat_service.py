@@ -54,7 +54,6 @@ except ImportError:  # used as plain script / in tests
     from task_registry import TaskCommandError, TaskRegistry
 
 MAX_LENGTH = 8000
-TASK_COMMAND = re.compile(r"/(lookup|research|search|review)(?:\s+(.*))?", re.I | re.S)        # /lookup question, /search query, /review question [until DATE]; /research is the old name of /lookup
 DELTA_INTERVAL = 0.05          # at most about 20 deltas per second per message
 CONTROL_CHARACTERS = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
 
@@ -65,9 +64,6 @@ COMMANDS = (
     {"command": "/time!", "description": "Send the current time to MIA", "confirm": False},
     {"command": "/tasks", "description": "Read all tasks back, word for word", "confirm": False},
     {"command": "/memos", "description": "Read all memos back, word for word", "confirm": False},
-    {"command": "/lookup ", "description": "Look something up on the web and answer with sources: /lookup your question", "confirm": False},
-    {"command": "/search ", "description": "Show the top web results for a query, no answer: /search your query", "confirm": False},
-    {"command": "/review ", "description": "Literature review with sources, asks you before the full texts: /review your question [until 2024-06-30]", "confirm": False},
     {"command": "/goodnight!", "description": "Dream, then shut MIA down", "confirm": True},
     {"command": "/break!", "description": "Shut MIA down", "confirm": True},
 )
@@ -128,28 +124,18 @@ class ChatError(Exception):
 
 class ChatService:
     def __init__(self, emit, log, mood, run_exchange, run_command=None, model_info=None, queue_size=1, user_limit=0,
-                 rate_limit=(10, 60), spawn=None, clock=time.monotonic, run_lookup=None, run_search=None, votes=None, wall_clock=time.time,
-                 behaviours=None, reputable=0.6, repair=None, remember=None, run_review=None, review_timeout=1800,
-                 tasks=None, skill_options=None, prepare_task=None, argument_commands=None, files=None):
+                 rate_limit=(10, 60), spawn=None, clock=time.monotonic, votes=None, wall_clock=time.time,
+                 behaviours=None, reputable=0.6, repair=None, remember=None, review_timeout=1800,
+                 tasks=None, skill_options=None, prepare_task=None, argument_commands=None, files=None, unavailable=()):
         self._emit = emit
         self._tasks = tasks if tasks is not None else TaskRegistry()      # REQ-WFM-029: the tasks (lookup, search, review, ...) register themselves, the core names none of them
-        if run_lookup or run_search or run_review:                         # the old arguments, until the callers pass a registry
-            try:
-                from .legacy_tasks import tasks as legacy
-            except ImportError:
-                from legacy_tasks import tasks as legacy
-            for task in legacy(run_lookup, run_search, run_review):
-                if task.id not in self._tasks.ids():
-                    self._tasks.register(task)
+        self._unavailable = {str(n).lower() for n in unavailable}         # ids of extensions that did not load: their command says so instead of going to the model
         self._skill_options = skill_options or {}                          # config `skill_options`: {task id: {option: value}}, the defaults of the options
         self._prepare_task = prepare_task                                  # (task, options, ask) -> options: before a task runs, e.g. the class of the model; may ask the user
         self._argument_commands = {k.lower(): v for k, v in (argument_commands or {}).items()}      # {name: fn(argument) -> text}: commands with an argument, e.g. /model paid <name>
         self._files = files                                                # the files volume (file_store.FileStore), None = tasks cannot store files
         self._monitor = None                                               # the status card of the running task
         self._late = False                                                 # the running task gives its result at the end (it asks questions)
-        self._run_lookup = run_lookup          # (question, on_delta, on_emotion, should_stop) -> the answer, for /lookup
-        self._run_search = run_search              # (query, on_delta, on_emotion, should_stop) -> the list of results, for /search
-        self._run_review = run_review              # (text, on_delta, on_emotion, should_stop, ask) -> the report, for /review; ask(text) posts a question and gives the reply or None
         self._review_timeout = review_timeout      # seconds a review waits for the answer of the user; no answer in time is "no"
         self._waiter = None                        # {"author", "replies"}: the question of a running review that waits for its answer
         self._author = None                        # the account whose task runs
@@ -186,22 +172,6 @@ class ChatService:
     # --- state -----------------------------------------------------------------------------------
     def is_command(self, text):
         return text.strip().lower() in self._commands
-
-    @staticmethod
-    def task_command(text):
-        """("lookup" | "search", the argument) for "/lookup question" and "/search query" (argument "" for the bare command), None for any other text.
-        "/research" is the old name of "/lookup" and gives the same task; the name is kept for the literature review that is being built (ui/REQUIREMENTS_RESEARCH.md)"""
-        match = TASK_COMMAND.fullmatch(text.strip())
-        if match is None:
-            return None
-        name = match.group(1).lower()
-        return ("lookup" if name == "research" else name, (match.group(2) or "").strip())
-
-    @classmethod
-    def lookup_question(cls, text):
-        """the question of "/lookup question" ("" for a bare /lookup), None when the text is no lookup command"""
-        found = cls.task_command(text)
-        return found[1] if found and found[0] == "lookup" else None
 
     def status(self):
         model, profile = self._model_info()
@@ -257,8 +227,9 @@ class ChatService:
                 parsed = self._tasks.parse(text, self._skill_options)
             except TaskCommandError as exc:
                 return {"ok": False, "error": str(exc)}
-            if parsed is None and self.task_command(text) is not None:            # a task name nobody registered
-                return {"ok": False, "error": "%s is not available." % self.task_command(text)[0].capitalize()}
+            gone = re.match(r"/(\w+)", text.strip())
+            if parsed is None and gone and gone.group(1).lower() in self._unavailable:
+                return {"ok": False, "error": "%s is not available." % gone.group(1).capitalize()}
             if parsed is not None and parsed["help"]:
                 self.note(parsed["text"], command=text.strip())
                 return {"ok": True, "message": None, "queued": False, "command": True, "id": None, "position": 0}
@@ -280,8 +251,8 @@ class ChatService:
             position = len(self._queue)
             self._start_worker()
         self.publish_status()
-        if text.strip().lower().startswith("/research"):
-            self.note("/research is now called /lookup: the quick look-up with sources. The name /research is kept for the literature review that is being built.")
+        if parsed is not None and parsed["name"] != parsed["task"]:
+            self.note("/%s is now called /%s; the old name still works." % (parsed["name"], parsed["task"]))
         return {"ok": True, "message": record, "queued": queued, "command": command, "id": record["id"] if record else None, "position": position}
 
     def stop(self):

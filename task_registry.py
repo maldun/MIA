@@ -79,7 +79,7 @@ class TaskRegistry:
         rest = (match.group(2) or "").strip()
         options = {o.name: o.default for o in task.options}
         options.update({k: v for k, v in ((defaults or {}).get(task.id) or {}).items() if k in options})
-        found = {"task": task.id, "argument": "", "options": options, "help": False, "text": ""}
+        found = {"task": task.id, "name": match.group(1).lower(), "argument": "", "options": options, "help": False, "text": ""}
         word = re.match(r"options(?:\s+(.*))?$", rest, re.I | re.S)
         if not word:
             if not rest:

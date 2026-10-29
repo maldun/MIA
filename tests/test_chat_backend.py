@@ -426,8 +426,8 @@ class ServiceTest(unittest.TestCase):
         self.assertEqual(self.service.status()["mood"]["emotion"], "surprised")
 
     def test_commands_are_listed_once(self):
-        listed = {c["command"] for c in self.service_module.COMMANDS}
-        self.assertEqual(listed, {"/light!", "/full!", "/dream!", "/time!", "/tasks", "/memos", "/lookup ", "/search ", "/review ", "/goodnight!", "/break!"})
+        listed = {c["command"] for c in self.service_module.COMMANDS}      # the fixed ones; the commands of the tasks come from the registry (REQ-WFM-029)
+        self.assertEqual(listed, {"/light!", "/full!", "/dream!", "/time!", "/tasks", "/memos", "/goodnight!", "/break!"})
         self.assertTrue(all(c["confirm"] for c in self.service_module.COMMANDS if c["command"] in ("/break!", "/goodnight!")))
 
 

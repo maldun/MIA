@@ -1,0 +1,11 @@
+{
+  "id": "lookup",
+  "text": "Look something up on the web and answer with sources",
+  "argument": "your question",
+  "example": "/lookup how tall is the Eiffel Tower",
+  "aliases": ["research"],
+  "needs": [],
+  "options": [],
+  "version": "1",
+  "entry": "entry:make"
+}

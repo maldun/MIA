@@ -1,0 +1,11 @@
+{
+  "id": "search",
+  "text": "Show the top web results for a query, no answer",
+  "argument": "what to search for",
+  "example": "/search Eiffel Tower height",
+  "aliases": [],
+  "needs": [],
+  "options": [],
+  "version": "1",
+  "entry": "entry:make"
+}

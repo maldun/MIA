@@ -22,6 +22,7 @@ sys.path.insert(0, _LINK_DIR)
 
 import harness as H                                   # noqa: E402
 import research_chat as RC                            # noqa: E402
+from task_helper import registry_of                   # noqa: E402
 import test_research as TR                             # noqa: E402
 from core import Core                                 # noqa: E402
 from library import Library                           # noqa: E402
@@ -225,8 +226,9 @@ class Routing(unittest.TestCase):
             self.queries.append(query)
             return "Results for \u201c%s\u201d (searxng):\n\n1. A title\n   https://x.example" % query
         return self.service_module.ChatService(lambda event, payload: self.events.append((event, payload)), self.log, self.moods.MoodTracker(MOODS), exchange,
-                                               model_info=lambda: ("m", "light"), clock=time.monotonic, run_lookup=run_lookup if research else None,
-                                               run_search=run_search if research else None)
+                                               model_info=lambda: ("m", "light"), clock=time.monotonic,
+                                               tasks=registry_of("MIA.", lookup=run_lookup if research else None, search=run_search if research else None),
+                                               unavailable=() if research else ("lookup", "search"))
 
     def idle(self, service):
         return wait_for(lambda: not service.status()["busy"])
@@ -292,11 +294,11 @@ class Routing(unittest.TestCase):
         self.assertEqual(len(self.chats), 10)
 
     def test_the_command_is_listed_for_the_palette(self):
-        entry = [c for c in self.service_module.COMMANDS if c["command"].startswith("/lookup")]
+        entry = [c for c in self.make().commands() if c["command"].startswith("/lookup")]
         self.assertEqual(len(entry), 1)
         self.assertFalse(entry[0]["confirm"])
         self.assertFalse(self.make().is_command("/lookup"))
-        self.assertEqual([c for c in self.service_module.COMMANDS if c["command"].startswith("/research")], [])         # the name is kept free for the literature review
+        self.assertEqual([c for c in self.make().commands() if c["command"].startswith("/research")], [])         # the name is kept free for the literature review
 
     def test_research_is_still_accepted_as_the_old_name_and_says_so(self):
         service = self.make()
@@ -305,7 +307,7 @@ class Routing(unittest.TestCase):
         self.assertEqual(self.questions, ["how tall is the Eiffel Tower?"])
         notes = [m["text"] for m in self.log.history(limit=10)[0] if m["role"] == "system"]
         self.assertTrue(any("now called /lookup" in n for n in notes))
-        self.assertEqual(self.service_module.ChatService.task_command("/Research x"), ("lookup", "x"))
+        self.assertEqual(self.make()._tasks.parse("/Research x")["task"], "lookup")
 
     def test_a_failure_of_the_research_is_reported_like_a_failure_of_the_chat(self):
         service = self.make()

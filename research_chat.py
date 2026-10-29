@@ -10,21 +10,10 @@ import re
 
 try:
     from .research import NO_ANSWER
-    from .task_registry import Task
 except ImportError:  # used as plain script / in tests
     from research import NO_ANSWER
-    from task_registry import Task
 
 MAX_QUOTE = 220
-
-
-def lookup_task(run):
-    """/lookup as a task of the registry (REQ-WFM-029): the skill describes itself, the chat core knows nothing about it. "/research" is the old name."""
-    return Task("lookup", run, "Look something up on the web and answer with sources", "your question", "/lookup how tall is the Eiffel Tower", aliases=("research",))
-
-
-def search_task(run):
-    return Task("search", run, "Show the top web results for a query, no answer", "what to search for", "/search Eiffel Tower height")
 
 
 def _short(quote):

@@ -30,10 +30,8 @@ from urllib.parse import urlparse
 from flask import Blueprint, jsonify, request
 
 try:
-    from .chat_service import COMMANDS
     from .constants import TOKEN_HEADER
 except ImportError:  # used as plain script / in tests
-    from chat_service import COMMANDS
     from constants import TOKEN_HEADER
 
 

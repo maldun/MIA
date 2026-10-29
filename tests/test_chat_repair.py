@@ -16,6 +16,7 @@ sys.path.insert(0, os.path.join(ROOT, "tests", "helpers"))
 
 import behaviour                                          # noqa: E402
 from markers import mark                                  # noqa: E402
+from task_helper import registry_of                       # noqa: E402
 from chat_log import ChatLog                              # noqa: E402
 from chat_service import ChatService, settled             # noqa: E402
 from moods import MoodTracker                             # noqa: E402
@@ -50,7 +51,7 @@ class StreamTest(unittest.TestCase):
             return self.tick[0]
 
         return ChatService(lambda event, payload: self.events.append((event, payload)), self.log, MoodTracker(os.path.join(ROOT, "moods.json")), stream, spawn=lambda t: t(),
-                           clock=clock, repair=repair_with, run_lookup=lookup)
+                           clock=clock, repair=repair_with, tasks=registry_of(lookup=lookup))
 
     def shown(self):
         deltas = [p["text"] for e, p in self.events if e == "chat_delta"]
