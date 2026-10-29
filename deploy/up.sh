@@ -40,7 +40,7 @@ if [ "${1:-}" = "calibration" ]; then
   exit 0
 fi
 # deploy/up.sh login on|off|status   turn the login (password check) on or off in deploy/setup_cfg.local.json (the settings of THIS machine: not in git, laid over the tracked
-# deploy/setup_cfg.compose.json); no container is needed. Apply a change with:  deploy/up.sh db up -d --no-deps --force-recreate mia
+# deploy/setup_cfg.compose.json); no container is needed. Apply a change with:  deploy/up.sh db restart mia  (the config is read when MIA starts; the other containers stay)
 ROOT="$(dirname "$HERE")"
 login_setting() {   # on|off -> the local file ;  status -> prints it
   python3 -c "
@@ -63,7 +63,7 @@ if [ "${1:-}" = "login" ]; then
   case "${2:-}" in
     on|off)
       login_setting "$2"
-      echo "login $2 in deploy/setup_cfg.local.json (a file of this machine, not in git). Apply it:  deploy/up.sh db up -d --no-deps --force-recreate mia"
+      echo "login $2 in deploy/setup_cfg.local.json (a file of this machine, not in git). Apply it:  deploy/up.sh db restart mia"
       if [ "$2" = "on" ]; then
         CONTAINER="$(mia_container)"
         if [ -n "$CONTAINER" ] && [ "$(${ENGINE:-$(command -v podman || command -v docker)} exec "$CONTAINER" "${ACCOUNT_TOOL[@]}" list --dir "$ACCOUNT_DIR" 2>/dev/null)" = "no accounts" ]; then
@@ -93,7 +93,7 @@ if [ "${1:-}" = "owner" ]; then
   fi
   login_setting on
   echo
-  echo "The login is turned on in deploy/setup_cfg.local.json (a file of this machine, not in git). Apply it:  deploy/up.sh db up -d --no-deps --force-recreate mia"
+  echo "The login is turned on in deploy/setup_cfg.local.json (a file of this machine, not in git). Apply it:  deploy/up.sh db restart mia"
   echo "Then log in at  https://localhost:8586  (a password is not accepted over plain http in the stack; the browser asks once about the certificate)"
   exit 0
 fi

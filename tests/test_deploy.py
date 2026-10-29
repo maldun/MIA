@@ -117,7 +117,7 @@ class OwnerCommand(unittest.TestCase):
         with open(tracked, "rb") as fp:
             self.assertEqual(fp.read(), before)                                       # the file that is in git is not touched
         self.assertIn("setup_cfg.local.json", done.stdout)
-        self.assertIn("force-recreate mia", done.stdout)                               # what to do to apply it
+        self.assertIn("deploy/up.sh db restart mia", done.stdout)                               # what to do to apply it
         self.assertIn("https://localhost:8586", done.stdout)
 
     def test_a_failed_account_tool_turns_nothing_on(self):
@@ -149,7 +149,7 @@ class OwnerCommand(unittest.TestCase):
         done, calls = self.run_up("login", "on", container="")
         self.assertEqual(done.returncode, 0, done.stdout + done.stderr)
         self.assertTrue(self.local()["accounts_enabled"])
-        self.assertIn("force-recreate mia", done.stdout)
+        self.assertIn("deploy/up.sh db restart mia", done.stdout)
         done, _ = self.run_up("login", "off", container="")
         self.assertFalse(self.local()["accounts_enabled"])
         done, _ = self.run_up("login", "status", container="")

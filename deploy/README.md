@@ -54,6 +54,12 @@ deploy/up.sh memories path/to/folder
 
 MIA is stopped first (it saves its history when it stops), the files are copied in and MIA starts again. What the container had before is kept as `<name>.container-previous` in the volume.
 
+## Restart, rebuild, stop
+
+- **A change of a setting** (`setup_cfg.local.json`, `deploy/.env` aside): `deploy/up.sh db restart mia`. The config is read when MIA starts; only MIA restarts, the other containers stay.
+- **New code** (after `git merge`): a full restart, so that all containers are recreated together: `deploy/up.sh db down`, then `deploy/up.sh db`. Volumes (`mia-data`, `caddy-data`, `pgdata`) survive.
+- **Do not** recreate a single service with `--force-recreate`: podman-compose then also removes its neighbours (the `https` front and `searxng`), and a plain `deploy/up.sh db` can fail with "cannot remove container ... as it is running" while the database runs. If it happens: `deploy/up.sh db up -d` starts what is missing; `podman pod rm -f pod_mia` clears a stuck pod (the volumes stay).
+
 ## The login (password check)
 
 Off by default. Turn it on and make the owner account:
@@ -65,7 +71,7 @@ deploy/up.sh owner NAME                  # asks for the password twice (at least
 The command also turns the login on, in `deploy/setup_cfg.local.json`; an account that exists already is kept (it is not created twice). To switch the password check alone, without a container: `deploy/up.sh login on|off|status` (`on` warns when no account exists yet, because you could not log in then). That file holds the settings of **this machine**, is not in git and is laid over the tracked `deploy/setup_cfg.compose.json` key by key (do not edit the tracked file for your machine). Restart MIA to apply it:
 
 ```
-deploy/up.sh db up -d --no-deps --force-recreate mia      # without "db" if the stack runs without the database
+deploy/up.sh db restart mia                              # only MIA restarts, the other containers stay; without "db" if the stack runs without the database
 ```
 
 The page then asks for the login. **In the stack log in over HTTPS: `https://localhost:8586`** (the browser asks once about the certificate of the local CA). MIA sees every connection from the podman network and not as `127.0.0.1`, so a password over plain HTTP (`http://localhost:8585`) is refused; the `https` service is named in `trusted_proxies` of `setup_cfg.compose.json`, which is why its HTTPS counts. A MIA that runs outside the stack still accepts a password from `localhost` over HTTP. From other devices use `https://<address>:8586`. Five wrong logins in a minute lock the account for a minute. The accounts live in the data volume (`data/db`), so they survive a rebuild. More accounts and a new password: `podman exec -it mia_mia_1 python /opt/mia/MIA/tools/accounts_cli.py create|password|list NAME --dir /opt/mia/MIA/data/db`; users change their own password on the page.
