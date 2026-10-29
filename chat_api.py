@@ -64,7 +64,7 @@ def create_blueprint(service, token=None, allowed_origins=None):
 
     @bp.get("/api/chat/commands")
     def commands():
-        return jsonify({"commands": list(COMMANDS)})
+        return jsonify({"commands": service.commands()})      # the fixed ones and one for each task of the registry (REQ-WFM-029)
 
     @bp.post("/api/chat/clear")
     def clear():

@@ -20,7 +20,10 @@ SKILLS = ("review_keywords", "review_abstract", "review_section", "review_full",
 
 class ReviewWiring(unittest.TestCase):
     def test_the_chat_service_has_the_review_task_and_the_command_is_listed(self):
-        self.assertIs(w.chat_service._run_review, w.run_review_exchange)
+        task = w.chat_service._tasks.get("review")               # since A-23 the review is a task of the registry, with its options
+        self.assertIs(task.run, w.run_review_exchange)
+        self.assertEqual([o.name for o in task.options], ["slice", "cap_factor"])
+        self.assertIn("/review ", [c["command"] for c in w.chat_service.commands()])
 
     def test_the_full_text_source_reads_through_the_web_client_of_the_app(self):
         self.assertEqual(w._review_full_text.get.__self__, w._web_client)

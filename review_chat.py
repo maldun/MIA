@@ -151,16 +151,24 @@ def format_report(report, question, until):
 
 # --- the task --------------------------------------------------------------------------------------------------------------------------
 
-def run_review(text, run_skill, scholar, full_text_source, ask, on_event=None, should_stop=None, cfg=None, today=None, min_works=3, speak=None):
+def run_review(text, run_skill, scholar, full_text_source, ask, on_event=None, should_stop=None, cfg=None, today=None, min_works=3, speak=None, options=None, monitor=None):
     """the review of `text` ("question [until YYYY-MM-DD]") as markdown. scholar.search(query, limit, until, since, check_retraction) is Scholar.search; full_text_source(work) is a
     FullTextSource; ask(text) -> the reply text or None; speak(text) says a short text aloud (None: silent). The model steps run through run_skill(name, inputs) (core.run); on_event gets {"kind": "step", "plain": text} per stage."""
     cfg = cfg or {}
     question, until = parse_request(text)
-    try:
-        request = ReviewRequest.from_config(question, cfg, until=until, today=today)
+    options = options or {}
+    try:       # the mode run (default) has hard caps and asks nothing at a limit; the option `slice` brings the time slices back (REQ-WFM-034)
+        request = ReviewRequest.from_config(question, cfg, until=until, today=today, mode="slice" if options.get("slice") else "run", cap_factor=options.get("cap_factor", 10))
     except RequestError as exc:
         return "I cannot start the review: %s." % exc
     started = {"shown": False}
+    budget, model_run_skill = request.budget, run_skill
+
+    def run_skill(name, inputs):                      # counts the model calls and the tokens (estimated: characters / 4, the model server reports none) for the budget and the card
+        answer = model_run_skill(name, inputs)
+        budget.spend("calls")
+        budget.spend("tokens", max(1, (len(str(inputs)) + len(str(answer))) // 4))
+        return answer
 
     def say(spoken):
         if speak is None:
@@ -171,6 +179,8 @@ def run_review(text, run_skill, scholar, full_text_source, ask, on_event=None, s
             pass
 
     def progress(plain):
+        if monitor is not None:
+            monitor.update(phase=plain)
         if on_event is None:
             return
         if not started["shown"]:
@@ -216,7 +226,7 @@ def run_review(text, run_skill, scholar, full_text_source, ask, on_event=None, s
     abstract, full = review_models.make_screeners(run_skill, question, criteria)
     run = review_stages.ReviewRun(request, keywords, {c["code"] for c in criteria} or set(review_models.CODES), search=search, screen_abstract=screen_abstract_noted,
                                   screen_full=screen_full_noted, full_text=full_text_source, agree=agree, approve_terms=approve_terms, min_works=min_works,
-                                  summarize=review_models.make_summarizer(run_skill, question), should_stop=should_stop)
+                                  summarize=review_models.make_summarizer(run_skill, question), should_stop=should_stop, monitor=monitor)
     report = run.run()
     progress("writing the report")
     say(spoken_result(report))

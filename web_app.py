@@ -73,6 +73,9 @@ from .pipeline_model import OllamaModel
 from . import web_tools
 from .web_tools import build_web_tools
 from . import review_chat, review_entry
+from .model_class import ModelClasses
+from .model_gate import make_model_command, make_prepare
+from .task_registry import TaskRegistry
 from .workflow_voice import speaker_for
 from .workflow_library import WorkflowLibrary
 from .fulltext import FullTextSource
@@ -611,7 +614,7 @@ def run_lookup_exchange(question, on_delta, on_emotion, should_stop):
                                       on_event=lambda event: chat_service.pipeline_event(event), should_stop=should_stop, speak=speaker_for(cfg, "lookup", speak_answer),
                                       on_sources=chat_service.note_sources, trust=source_trust.build_trust(cfg).for_url)      # a fresh table: the trust of sources is edited on the page
 
-def run_review_exchange(text, on_delta, on_emotion, should_stop, ask):
+def run_review_exchange(text, on_delta, on_emotion, should_stop, ask, options=None, monitor=None):
     """/review question [until DATE]: the literature review (review_chat.py); the skills run through the core, the questions to the user through the chat service"""
     def run_skill(name, inputs):
         result = core.run(name, inputs, should_stop=should_stop)
@@ -621,7 +624,7 @@ def run_review_exchange(text, on_delta, on_emotion, should_stop, ask):
             raise RuntimeError(research_chat.friendly_error(result.error))
         return result.answer
     return review_chat.run_review(text, run_skill, _scholar, _review_full_text, ask, on_event=lambda event: chat_service.pipeline_event(event), should_stop=should_stop, cfg=cfg,
-                                  speak=speaker_for(cfg, "review", speak_answer))       # the questions and a short result are spoken, never the whole report
+                                  speak=speaker_for(cfg, "review", speak_answer), options=options, monitor=monitor)       # the questions and a short result are spoken, never the whole report
 
 def run_search_exchange(query, on_delta, on_emotion, should_stop):
     """/search: the top results of the search tool, no model"""
@@ -645,7 +648,17 @@ def run_memory_skill(inputs):
 _remember = None
 if cfg.get(CONST.STRUCTURED_MEMORY_KEY, False):               # off by default: one more call of the light model after every plain chat turn
     comm.memory_provider, _remember = memory_hooks(MemoryRecords(_votes_store, budget_tokens=cfg.get(CONST.MEMORY_BUDGET_KEY, 400)), run_memory_skill)
-chat_service = ChatService(socketio.emit, chat_log, mood, run_chat_exchange, run_command=run_chat_command, run_lookup=run_lookup_exchange, run_search=run_search_exchange, run_review=run_review_exchange,
+# REQ-WFM-029: the tasks register themselves; the chat core names none of them. A new skill adds one line here (later: its own folder, see the extension rule of 2026-10-29)
+_tasks = TaskRegistry()
+_tasks.register(research_chat.lookup_task(run_lookup_exchange))
+_tasks.register(research_chat.search_task(run_search_exchange))
+_tasks.register(review_chat.review_task(run_review_exchange))
+_model_classes = ModelClasses(os.path.join(FPATH, cfg.get("model_classes_file", "data/model_classes.json")))
+_model_host = lambda: (str(cfg.get("ollama_host") or "localhost").replace("http://", "").replace("https://", "").split("/")[0].split(":")[0]) or "localhost"
+chat_service = ChatService(socketio.emit, chat_log, mood, run_chat_exchange, run_command=run_chat_command,
+                           tasks=_tasks, skill_options=cfg.get("skill_options"),
+                           prepare_task=make_prepare(_model_classes, lambda: comm.version, _model_host, lambda text: chat_service.note(text)),
+                           argument_commands={"model": make_model_command(_model_classes, lambda: comm.version, _model_host)},
                            review_timeout=cfg.get("review_answer_seconds", 1800),
                            model_info=lambda: (comm.version, getattr(comm, "profile", None)),
                            queue_size=cfg.get(CONST.CHAT_QUEUE_KEY, 5 if cfg.get(CONST.ACCOUNTS_KEY, False) else 1),

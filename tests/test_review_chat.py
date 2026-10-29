@@ -169,5 +169,46 @@ class TestVoice(unittest.TestCase):
         self.assertTrue(out.startswith("## Literature review"))
 
 
+class CardMonitor:
+    def __init__(self):
+        self.phases, self.budget, self.counts = [], {}, {}
+
+    def update(self, phase=None, budget=None, counts=None):
+        if phase:
+            self.phases.append(phase)
+        for name, figures in (budget or {}).items():
+            self.budget.setdefault(name, {}).update(figures)
+        self.counts.update(counts or {})
+
+
+class TestReviewCard(unittest.TestCase):                                         # TC-WFM-031, -032, -034
+    def test_the_card_gets_phases_counts_and_the_used_calls_and_tokens(self):
+        card = CardMonitor()
+        review(Conversation("yes", "no"), monitor=card)
+        self.assertEqual(card.phases[0], "choosing keywords")
+        self.assertIn("searching for graph colouring", card.phases)
+        self.assertEqual((card.counts["on_list"], card.counts["processed"], card.counts["to_process"], card.counts["included"]), (1, 1, 0, 1))
+        self.assertEqual(card.budget["calls"]["used"], 2)                        # the keywords and one abstract
+        self.assertGreater(card.budget["tokens"]["used"], 0)
+        self.assertEqual(card.budget["api_requests"]["used"], 2)
+
+    def test_the_mode_run_has_caps_of_ten_times_the_limits_and_the_option_slice_brings_the_limits_back(self):
+        card = CardMonitor()
+        review(Conversation("yes", "no"), monitor=card)
+        self.assertEqual((card.budget["screen"]["limit"], card.budget["seconds"]["limit"]), (400, 600))
+        card = CardMonitor()
+        review(Conversation("yes", "no"), monitor=card, options={"slice": True})
+        self.assertEqual((card.budget["screen"]["limit"], card.budget["seconds"]["limit"]), (40, 60))
+        card = CardMonitor()
+        review(Conversation("yes", "no"), monitor=card, options={"cap_factor": 2})
+        self.assertEqual(card.budget["screen"]["limit"], 80)
+
+    def test_a_cap_factor_below_one_is_refused_and_nothing_is_asked(self):
+        user = Conversation("yes")
+        out, _calls, _events, _s = review(user, options={"cap_factor": 0})
+        self.assertIn("cannot start", out)
+        self.assertEqual(user.questions, [])
+
+
 if __name__ == "__main__":
     unittest.main()

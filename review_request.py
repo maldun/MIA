@@ -7,6 +7,8 @@ of the run. Nothing here calls a model or the internet.
   B2  every K sources checked (checkpoint_every) the run stops for an intermediate report and the user decides whether to continue; a stage never continues by itself
   B2a time comes in slices (RV30a): the first is one minute; continue_run() adds one more (or a length the user names) and renews every limit that was used up by its first size; the
       intermediate report carries a recommendation made by code from what the last slice achieved (recommend())
+  B2b mode (A-23, REQ-WFM-034): "slice" is B2a as above; "run" (the default of the chat) asks no question at a used-up limit: the bound is a hard cap of limit x cap_factor (default 10) and a run that
+      reaches it ends with its result as it stands and the cap named
   B3  the cut-off defaults to today; a date in the future is refused (it would allow nothing more than today and hides a typo)
   B4  the number of domain experts is a setting of the request (RV44): 0 = none (the fixed roles and one generalist judgement), 1 = the main field, k = the main field and the k-1 most
       relevant related fields; the fixed roles (planner, collector, source expert) do not depend on it; role_models says which role runs on a model of its own (default: all on the same one)
@@ -29,7 +31,12 @@ class RequestError(ValueError):
 class Budget:
     """limits and what is used; seconds are measured from start() by the clock"""
 
-    def __init__(self, limits=None, clock=time.monotonic):
+    def __init__(self, limits=None, clock=time.monotonic, mode="slice", cap_factor=10):
+        if mode not in ("slice", "run"):
+            raise RequestError("mode must be slice or run, not %r" % (mode,))
+        if isinstance(cap_factor, bool) or not isinstance(cap_factor, (int, float)) or cap_factor < 1:
+            raise RequestError("cap_factor must be a number of at least 1, not %r" % (cap_factor,))
+        self.mode, self.cap_factor = mode, cap_factor
         merged = dict(DEFAULT_BUDGET)
         for key, value in (limits or {}).items():
             if key not in merged:
@@ -54,14 +61,18 @@ class Budget:
     def _used(self, name):
         return self.elapsed() if name == "seconds" else self.used[name]
 
+    def limit(self, name):
+        """the bound that ends the run: the limit in the mode slice, the hard cap (limit x cap_factor) in the mode run"""
+        return self.limits[name] * (self.cap_factor if self.mode == "run" else 1)
+
     def remaining(self, name):
-        return max(0, self.limits[name] - self._used(name))
+        return max(0, self.limit(name) - self._used(name))
 
     def spend(self, name, amount=1):
         """True and counted if it fits; False (and nothing counted) if it would cross the limit"""
         if name not in LIMITS or name == "seconds":
             raise RequestError("cannot spend %r" % name)
-        if self._used(name) + amount > self.limits[name]:
+        if self._used(name) + amount > self.limit(name):
             self.hit = self.hit or name
             return False
         self.used[name] += amount
@@ -111,13 +122,13 @@ class Budget:
         return 1 + sum(1 for e in self.extensions if e["name"] == "seconds")
 
     def state(self):
-        return {"limits": dict(self.limits), "used": {**self.used, "seconds": round(self.elapsed(), 1)}, "hit": self.hit, "sources_checked": self.sources_checked,
+        return {"limits": {name: (self.limit(name) if name in LIMITS else value) for name, value in self.limits.items()}, "mode": self.mode, "used": {**self.used, "seconds": round(self.elapsed(), 1)}, "hit": self.hit, "sources_checked": self.sources_checked,
                 "slices": self.slices(), "extensions": list(self.extensions)}
 
 
 class ReviewRequest:
     def __init__(self, question, until=None, since=None, languages=None, fields=None, budget=None, include_transfer=False, today=None, clock=time.monotonic,
-                 domain_experts=DEFAULT_DOMAIN_EXPERTS, expert_fields=None, role_models=None):
+                 domain_experts=DEFAULT_DOMAIN_EXPERTS, expert_fields=None, role_models=None, mode="slice", cap_factor=10):
         self.today = today or datetime.date.today()
         self.question = " ".join(str(question or "").split())
         if len(self.question) < 8:
@@ -132,7 +143,7 @@ class ReviewRequest:
             raise RequestError("'since' %s is after the cut-off %s" % (self.since, self.until))
         self.languages = [str(l).lower() for l in (languages or ["en"])]
         self.fields = [str(f) for f in (fields or [])]
-        self.budget = budget if isinstance(budget, Budget) else Budget(budget, clock=clock)
+        self.budget = budget if isinstance(budget, Budget) else Budget(budget, clock=clock, mode=mode, cap_factor=cap_factor)
         self.include_transfer = bool(include_transfer)          # RV48: methods from other fields, only on request
         if isinstance(domain_experts, bool) or not isinstance(domain_experts, int) or not 0 <= domain_experts <= MAX_DOMAIN_EXPERTS:
             raise RequestError("domain_experts must be a whole number from 0 to %d, not %r" % (MAX_DOMAIN_EXPERTS, domain_experts))
@@ -153,7 +164,8 @@ class ReviewRequest:
         cfg = cfg or {}
         kwargs.setdefault("domain_experts", cfg.get("review_domain_experts", DEFAULT_DOMAIN_EXPERTS))
         kwargs.setdefault("role_models", cfg.get("review_role_models"))
-        return cls(question, budget=Budget(cfg.get("review_budget"), clock=kwargs.pop("clock", time.monotonic)), **kwargs)
+        mode, cap_factor = kwargs.pop("mode", "slice"), kwargs.pop("cap_factor", 10)
+        return cls(question, budget=Budget(cfg.get("review_budget"), clock=kwargs.pop("clock", time.monotonic), mode=mode, cap_factor=cap_factor), **kwargs)
 
     def roles(self):
         """who takes part (RV44): the fixed roles, how many domain experts and for which fields (empty: chosen by relevance from the field graph), and the model of each role (None: the common one)"""

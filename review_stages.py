@@ -19,11 +19,11 @@ import re
 try:
     from . import scholar
     from . import checks
-    from .review_request import recommend
+    from .review_request import LIMITS, recommend
 except ImportError:
     import scholar
     import checks
-    from review_request import recommend
+    from review_request import LIMITS, recommend
 
 GRADES = (0, 1, 2, 3)
 DECISIONS = ("include", "maybe", "exclude")
@@ -231,8 +231,9 @@ def check_summary(summary, report):
 # --- the run ------------------------------------------------------------------------------------------------------------------------
 
 class ReviewRun:
-    def __init__(self, request, keywords, criteria, search, screen_abstract, screen_full, full_text, agree, approve_terms, min_works=3, summarize=None, should_stop=None):
+    def __init__(self, request, keywords, criteria, search, screen_abstract, screen_full, full_text, agree, approve_terms, min_works=3, summarize=None, should_stop=None, monitor=None):
         self.request, self.criteria = request, set(criteria)
+        self.monitor = monitor                                 # the status card (REQ-WFM-031): update(phase, budget, counts); None = silent
         self.budget = request.budget
         self.pool = KeywordPool(keywords)
         self.search, self.screen_abstract, self.screen_full, self.full_text = search, screen_abstract, screen_full, full_text
@@ -252,22 +253,39 @@ class ReviewRun:
             if hit is None and (name is None or self.budget.spend(name)):
                 return True
             hit = hit or name
+            if self.budget.mode == "run":                      # REQ-WFM-034: a hard cap ends the run, nothing is asked
+                self.ended_by = "budget:" + hit
+                return False
             self.asking = "limit:" + hit
             if not self.agree(self.report()):
                 self.ended_by = "budget:" + hit
                 return False
             self.budget.continue_run()
 
+    def _note(self, phase=None):
+        """the figures for the status card: the sources by state and the limits with what is used (REQ-WFM-032)"""
+        if self.monitor is None:
+            return
+        flow = self.report()["flow"]
+        state = self.budget.state()
+        budget = {name: {"used": state["used"][name], "limit": state["limits"][name]} for name in LIMITS if name != "seconds"}
+        budget["seconds"] = {"limit": state["limits"]["seconds"]}              # the monitor counts the active seconds itself
+        self.monitor.update(phase=phase, budget=budget, counts={
+            "on_list": len(self.collected["kept"]), "processed": flow["screened"], "to_process": flow["undecided"], "included": flow["included"], "maybe": flow["maybe"],
+            "excluded": flow["excluded_abstract"] + flow["excluded_full"], "dropped": flow["dropped"]})
+
     def _search_new(self):
         for keyword in self.pool.to_search():
             if not self._go("api_requests"):
                 return False
+            self._note("searching for %s" % keyword)
             query = build_queries({"k": [keyword]})["per_keyword"][keyword]
             self.queries[keyword] = query
             self.found[keyword] = list(self.search(keyword, query))
             self.hits[keyword] = len(self.found[keyword])
             self.pool.mark_searched(keyword)
         self.collected = collect(self.found, self.request.until, self.request.since)
+        self._note("collected %d works" % len(self.collected["kept"]))
         return True
 
     def _screen_abstracts(self):
@@ -279,6 +297,7 @@ class ReviewRun:
                 return False
             judgement = check_judgement(self.screen_abstract(work), work.get("abstract", ""), self.criteria)
             self.judged[wid] = {"abstract": judgement, "full": None}
+            self._note("screened the abstracts")
         return True
 
     def _screen_full_texts(self):
@@ -292,6 +311,7 @@ class ReviewRun:
             if not self._go("read"):
                 return False
             entry["full"] = check_full(self.screen_full(work, text), text, self.criteria)
+            self._note("read the full texts")
         return True
 
     def run(self):
