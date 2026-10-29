@@ -20,7 +20,6 @@ REAL_NOT_READY = {
     "IF-202": "N-2.4 Workflow execution not integrated yet",
     "IF-301": "N-3.2 Graph tables not integrated yet",
     "IF-302": "N-3.3 Record tables not integrated yet",
-    "IF-401": "N-2.4.3 Run log not integrated yet",
     "IF-402": "N-2.4.2 Tools and sandbox not integrated yet",
     "IF-404": "the real web client and SearXNG are only used in stage 2",
     "IF-405": "the real scholarly APIs are only used in stage 2",
@@ -548,6 +547,46 @@ class _SpeechAdapter:
         return self._translate(self._service.voice_line, name)
 
 
+class _RunEventsAdapter:
+    """IF-401 on the real run event log (amendment A-29): `run_events.RunEvents` on a fresh folder, one append-only file per run (REQ-LOG-005, A-28). The adapter only turns the error class
+    of the provider into the one of the mock, which the suite expects, and builds a broken log for the order test (`inject_event` writes a raw line); production code does not import from tests/."""
+
+    def __init__(self):
+        import tempfile
+        from errors import ServiceError
+        from run_events import RunEvents, RunEventsError
+        self._log = RunEvents(os.path.join(tempfile.mkdtemp(), "runs"))
+        self._error, self._provider_error = ServiceError, RunEventsError
+
+    def _call(self, name, *args, **kwargs):
+        try:
+            return getattr(self._log, name)(*args, **kwargs)
+        except self._provider_error as err:
+            raise self._error(err.code)
+
+    def emit(self, run_id, type, payload, user, actor=None, plain=""):
+        return self._call("emit", run_id, type, payload, user, actor=actor, plain=plain)
+
+    def events(self, run_id):
+        return self._call("events", run_id)
+
+    def account(self, run_id):
+        return self._call("account", run_id)
+
+    def check_order(self, run_id):
+        return self._call("check_order", run_id)
+
+    def compare(self, run_a, run_b):
+        return self._call("compare", run_a, run_b)
+
+    def inject_event(self, run_id, event):
+        """a raw event, bypassing emit (to build a broken log)"""
+        path = self._log.path(run_id)
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "a", encoding="utf-8") as handle:
+            handle.write(json.dumps(event) + "\n")
+
+
 def real_subject(interface, **options):
     """The real provider of an interface once its node is integrated (amendment A-02: IF-301, IF-302, IF-102 of the Database; amendment A-05, A-07: IF-101 and IF-201 as far as built); None until then."""
     if REPO not in sys.path:
@@ -566,6 +605,8 @@ def real_subject(interface, **options):
         return _ChatTurnAdapter(**options)
     if interface == "IF-203":
         return _WorkflowLibraryAdapter(**options)
+    if interface == "IF-401":
+        return _RunEventsAdapter()
     if interface == "IF-204":
         return _SpeechAdapter(**options)
     return None
