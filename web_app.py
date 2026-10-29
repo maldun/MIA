@@ -669,6 +669,7 @@ if cfg.get(CONST.ACCOUNTS_KEY, False):
     _account_service, _account_sockets = accounts_api.install(
         app, socketio, _account_store, changes=_account_changes, allowed_origins=lambda: allowed_origins,
         open_paths=("/",), open_prefixes=("/static/",),                       # the page and its files; the character, backgrounds and audio need the session
+        trusted_proxies=cfg.get("trusted_proxies") or [],                    # whose X-Forwarded-Proto counts for the rule `a password only over HTTPS`: in the compose stack ["https"]
         internal_paths=(f"/{UPLOAD_ROUTE}", f"/{CONST.TIME_ROUTE}"), internal_token=ensure_token())      # our own speech process and scheduler
 
 # the chat page loads only its own files: no inline scripts, no external hosts (ui/REQUIREMENTS_CHAT.md, 8)

@@ -17,7 +17,11 @@ import json
 import os
 import time
 
-from flask import Blueprint, g, jsonify, request
+import ipaddress
+import socket
+import time
+
+from flask import Blueprint, current_app, g, jsonify, request
 
 try:
     from .api_sessions import ApiError, SessionService
@@ -60,7 +64,7 @@ def create_accounts_blueprint(service, cookie=COOKIE):
         except ApiError as err:
             return jsonify({"error": err.code}), err.status
         response = jsonify({"ok": True})
-        response.set_cookie(cookie, session, httponly=True, samesite="Strict", secure=request.is_secure)
+        response.set_cookie(cookie, session, httponly=True, samesite="Strict", secure=https_here())
         return response
 
     @bp.get("/api/whoami")
@@ -74,7 +78,7 @@ def create_accounts_blueprint(service, cookie=COOKIE):
         except ApiError as err:
             return jsonify({"error": err.code}), err.status
         response = jsonify(result)
-        response.set_cookie(cookie, "", max_age=0, httponly=True, samesite="Strict", secure=request.is_secure)
+        response.set_cookie(cookie, "", max_age=0, httponly=True, samesite="Strict", secure=https_here())
         return response
 
     @bp.post("/api/change_password")
@@ -104,18 +108,65 @@ class ChangeLog:
         return list(self._rows)
 
 
+class ProxyTrust:
+    """the proxies whose X-Forwarded-Proto counts (config `trusted_proxies`): addresses, networks (10.89.1.0/24) or host names, which are resolved to the addresses of that container
+    (in the compose stack the https service is `https`) and kept for `ttl` seconds. Nothing is trusted by default; a name that does not resolve trusts nobody."""
+
+    def __init__(self, entries=(), resolve=None, ttl=30.0, clock=time.monotonic):
+        self._networks, self._names = [], []
+        for entry in entries:
+            try:
+                self._networks.append(ipaddress.ip_network(str(entry), strict=False))
+            except ValueError:
+                self._names.append(str(entry))
+        self._resolve = resolve or (lambda name: socket.gethostbyname_ex(name)[2])
+        self._ttl, self._clock = ttl, clock
+        self._known, self._until = set(), 0.0
+
+    def _addresses(self):
+        if self._names and self._clock() >= self._until:
+            found = set()
+            for name in self._names:
+                try:
+                    found.update(self._resolve(name))
+                except (OSError, ValueError):
+                    pass
+            self._known, self._until = found, self._clock() + self._ttl
+        return self._known
+
+    def trusts(self, address):
+        try:
+            ip = ipaddress.ip_address(address)
+        except ValueError:
+            return False
+        if any(ip in network for network in self._networks):
+            return True
+        return any(ip == ipaddress.ip_address(known) for known in self._addresses())
+
+
 def secure_channel():
-    """a password may arrive over HTTPS, or from this machine; X-Forwarded-Proto counts only when the proxy that sets it runs on this machine too"""
+    """a password may arrive over HTTPS, or from this machine; X-Forwarded-Proto counts only when the proxy that sets it runs on this machine or is named in `trusted_proxies`"""
     if request.is_secure or request.remote_addr in LOOPBACK:
         return True
     return False
 
 
 def _forwarded_https():
-    return request.remote_addr in LOOPBACK and request.headers.get("X-Forwarded-Proto", "").lower() == "https"
+    if request.headers.get("X-Forwarded-Proto", "").lower() != "https":
+        return False
+    if request.remote_addr in LOOPBACK:
+        return True
+    trust = current_app.config.get("MIA_PROXY_TRUST")
+    return bool(trust and trust.trusts(request.remote_addr))
 
 
-def install_guard(app, service, cookie=COOKIE, open_paths=("/",), open_prefixes=("/static/",), internal_paths=(), internal_token=None, allowed_origins=lambda: [], changes=None):
+def https_here():
+    """true for a request that came over HTTPS, directly or through a trusted proxy: the session cookie is then marked Secure"""
+    return request.is_secure or _forwarded_https()
+
+
+def install_guard(app, service, cookie=COOKIE, open_paths=("/",), open_prefixes=("/static/",), internal_paths=(), internal_token=None, allowed_origins=lambda: [], changes=None, trusted_proxies=(), resolve_host=None):
+    app.config["MIA_PROXY_TRUST"] = ProxyTrust(trusted_proxies, resolve_host)
     @app.before_request
     def guard():
         path = request.path

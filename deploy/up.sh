@@ -54,6 +54,8 @@ if [ "${1:-}" = "owner" ]; then
     echo "The login is not turned on yet: put  \"accounts_enabled\": true  into $CONFIG"
     echo "and restart MIA:  deploy/up.sh db up -d --no-deps --force-recreate mia"
   fi
+  echo
+  echo "Log in at  https://localhost:8586  (a password is not accepted over plain http in the stack; the browser asks once about the certificate)"
   exit 0
 fi
 # deploy/up.sh memories [folder]   take over MIA's memories of an old installation (memories.json, long_time_history.json from the MIA folder or the given folder)

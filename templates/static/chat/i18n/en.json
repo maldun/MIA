@@ -188,5 +188,6 @@
   "task.count.included": "Included",
   "task.count.maybe": "Maybe",
   "task.count.excluded": "Excluded",
-  "task.count.dropped": "Dropped before screening"
+  "task.count.dropped": "Dropped before screening",
+  "login.origin": "MIA does not know this address. Open the page by one of the addresses MIA lists at its start, or add this name to public_hosts in the configuration."
 }

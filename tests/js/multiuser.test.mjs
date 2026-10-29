@@ -76,6 +76,15 @@ test('TC-CLV-014: wrong credentials, throttling and a lost connection give three
   assert.deepEqual(results.map((r) => loginErrorKey(r.error)), ['login.bad', 'login.throttled', 'login.failed', 'login.failed']);
 });
 
+test('TC-CLV-014: a refusal of the server because of the channel or the address is named, not shown as "is MIA reachable?"', async () => {
+  const refused = (error) => async () => ({ ok: false, status: 403, json: async () => ({ error }) });
+  const insecure = await submitLogin({ user: 'anna', password: 'x', location: secure, fetchFn: refused('insecure_channel') });
+  const origin = await submitLogin({ user: 'anna', password: 'x', location: secure, fetchFn: refused('bad_origin') });
+  const other = await submitLogin({ user: 'anna', password: 'x', location: secure, fetchFn: refused('something_else') });
+  assert.deepEqual([insecure.error, origin.error, other.error], ['insecure', 'origin', 'failed']);
+  assert.deepEqual([insecure, origin, other].map((r) => loginErrorKey(r.error)), ['login.insecure', 'login.origin', 'login.failed']);
+});
+
 test('TC-CLV-014: an empty account or password is not sent', async () => {
   let calls = 0;
   const fetchFn = async () => { calls += 1; };

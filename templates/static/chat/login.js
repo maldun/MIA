@@ -10,10 +10,10 @@ export function secureChannel({ protocol, hostname }) {
 
 /** the text key for what went wrong */
 export function loginErrorKey(error) {
-  return { bad: 'login.bad', throttled: 'login.throttled', insecure: 'login.insecure', empty: 'login.empty' }[error] ?? 'login.failed';
+  return { bad: 'login.bad', throttled: 'login.throttled', insecure: 'login.insecure', origin: 'login.origin', empty: 'login.empty' }[error] ?? 'login.failed';
 }
 
-/** one login attempt: {ok: true, user} or {ok: false, error: 'bad' | 'throttled' | 'insecure' | 'empty' | 'failed'} */
+/** one login attempt: {ok: true, user} or {ok: false, error: 'bad' | 'throttled' | 'insecure' | 'origin' | 'empty' | 'failed'} */
 export async function submitLogin({ user, password, location = window.location, fetchFn = (url, init) => fetch(url, init) }) {
   if (!user || !password) return { ok: false, error: 'empty' };
   if (!secureChannel(location)) return { ok: false, error: 'insecure' };
@@ -25,6 +25,10 @@ export async function submitLogin({ user, password, location = window.location, 
       body: JSON.stringify({ user, password }),
     });
     if (response.ok) return { ok: true, user };
+    if (response.status === 403) {                                    // the server names why: not a secure channel, or an address that is not MIA's own
+      const body = await response.json().catch(() => ({}));
+      return { ok: false, error: { insecure_channel: 'insecure', bad_origin: 'origin' }[body?.error] ?? 'failed' };
+    }
     return { ok: false, error: { 401: 'bad', 429: 'throttled' }[response.status] ?? 'failed' };
   } catch (error) {
     return { ok: false, error: 'failed' };

@@ -226,6 +226,59 @@ class SecureChannel(unittest.TestCase):
         self.assertEqual(login(self.app.test_client(), "anna", "wrong", environ_overrides=LAN).status_code, 403)
 
 
+class TrustedProxy(unittest.TestCase):
+    """found 2026-10-29 in the compose stack: MIA sees every connection from the podman network (the https service is 10.89.1.5, a connection to the published port is 10.89.1.4), never from
+    127.0.0.1, so a login was refused with insecure_channel on every way in. The proxies whose X-Forwarded-Proto counts are named in the configuration (`trusted_proxies`: addresses,
+    networks or host names); nothing is trusted by default"""
+    PROXY = {"REMOTE_ADDR": "10.89.1.5"}
+    OTHER = {"REMOTE_ADDR": "10.89.1.9"}
+    HTTPS = {"X-Forwarded-Proto": "https"}
+
+    def client(self, **options):
+        return make_app(**options)[0].test_client()
+
+    def test_nothing_is_trusted_by_default(self):
+        self.assertEqual(login(self.client(), "anna", "pw-anna-1", environ_overrides=self.PROXY, headers=self.HTTPS).status_code, 403)
+
+    def test_https_forwarded_by_a_trusted_proxy_counts(self):
+        client = self.client(trusted_proxies=["10.89.1.5"])
+        self.assertEqual(login(client, "anna", "pw-anna-1", environ_overrides=self.PROXY, headers=self.HTTPS).status_code, 200)
+
+    def test_the_header_from_any_other_address_does_not_and_a_trusted_proxy_without_it_does_not(self):
+        client = self.client(trusted_proxies=["10.89.1.5"])
+        self.assertEqual(login(client, "anna", "pw-anna-1", environ_overrides=self.OTHER, headers=self.HTTPS).status_code, 403)       # anybody can write the header
+        self.assertEqual(login(client, "anna", "pw-anna-1", environ_overrides=self.PROXY).status_code, 403)                            # plain http through the proxy
+        self.assertEqual(login(client, "anna", "pw-anna-1", environ_overrides=self.PROXY, headers={"X-Forwarded-Proto": "http"}).status_code, 403)
+
+    def test_a_network_covers_its_addresses_and_only_those(self):
+        client = self.client(trusted_proxies=["10.89.1.0/24"])
+        self.assertEqual(login(client, "anna", "pw-anna-1", environ_overrides=self.OTHER, headers=self.HTTPS).status_code, 200)
+        self.assertEqual(login(client, "anna", "pw-anna-1", environ_overrides={"REMOTE_ADDR": "10.89.2.5"}, headers=self.HTTPS).status_code, 403)
+
+    def test_a_host_name_is_resolved_to_the_addresses_of_that_container(self):
+        asked = []
+
+        def resolve(name):
+            asked.append(name)
+            return ["10.89.1.5"] if name == "https" else []
+        client = self.client(trusted_proxies=["https"], resolve_host=resolve)
+        self.assertEqual(login(client, "anna", "pw-anna-1", environ_overrides=self.PROXY, headers=self.HTTPS).status_code, 200)
+        self.assertEqual(login(client, "anna", "pw-anna-1", environ_overrides=self.OTHER, headers=self.HTTPS).status_code, 403)
+        self.assertEqual(set(asked), {"https"})
+        self.assertLessEqual(len(asked), 2)                                                           # the answer is kept for a short time, not asked for every request
+
+    def test_a_name_that_does_not_resolve_trusts_nobody(self):
+        def resolve(name):
+            raise OSError("no such host")
+        client = self.client(trusted_proxies=["https"], resolve_host=resolve)
+        self.assertEqual(login(client, "anna", "pw-anna-1", environ_overrides=self.PROXY, headers=self.HTTPS).status_code, 403)
+
+    def test_the_session_cookie_is_secure_behind_a_trusted_https_proxy(self):
+        client = self.client(trusted_proxies=["10.89.1.5"])
+        reply = login(client, "anna", "pw-anna-1", environ_overrides=self.PROXY, headers=self.HTTPS)
+        self.assertIn("Secure", reply.headers["Set-Cookie"])
+
+
 class Attribution(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()

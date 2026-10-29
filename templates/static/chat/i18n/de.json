@@ -188,5 +188,6 @@
   "task.count.included": "Aufgenommen",
   "task.count.maybe": "Vielleicht",
   "task.count.excluded": "Ausgeschlossen",
-  "task.count.dropped": "Vor der Prüfung verworfen"
+  "task.count.dropped": "Vor der Prüfung verworfen",
+  "login.origin": "MIA kennt diese Adresse nicht. Öffne die Seite über eine der Adressen, die MIA beim Start nennt, oder trage diesen Namen unter public_hosts in der Konfiguration ein."
 }

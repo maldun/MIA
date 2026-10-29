@@ -67,7 +67,7 @@ then put `"accounts_enabled": true` into `deploy/setup_cfg.compose.json` (or the
 deploy/up.sh db up -d --no-deps --force-recreate mia      # without "db" if the stack runs without the database
 ```
 
-The page then asks for the login. From this machine (`http://localhost:8585`) it works over HTTP; from other devices use `https://<address>:8586` (HTTP is refused there). Five wrong logins in a minute lock the account for a minute. The accounts live in the data volume (`data/db`), so they survive a rebuild. More accounts and a new password: `podman exec -it mia_mia_1 python /opt/mia/MIA/tools/accounts_cli.py create|password|list NAME --dir /opt/mia/MIA/data/db`; users change their own password on the page.
+The page then asks for the login. **In the stack log in over HTTPS: `https://localhost:8586`** (the browser asks once about the certificate of the local CA). MIA sees every connection from the podman network and not as `127.0.0.1`, so a password over plain HTTP (`http://localhost:8585`) is refused; the `https` service is named in `trusted_proxies` of `setup_cfg.compose.json`, which is why its HTTPS counts. A MIA that runs outside the stack still accepts a password from `localhost` over HTTP. From other devices use `https://<address>:8586`. Five wrong logins in a minute lock the account for a minute. The accounts live in the data volume (`data/db`), so they survive a rebuild. More accounts and a new password: `podman exec -it mia_mia_1 python /opt/mia/MIA/tools/accounts_cli.py create|password|list NAME --dir /opt/mia/MIA/data/db`; users change their own password on the page.
 
 ## Taking over an old installation
 

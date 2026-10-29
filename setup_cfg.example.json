@@ -83,6 +83,7 @@
   "chat_queue": 1,
   "chat_rate_per_minute": 10,
   "accounts_enabled": false,
+  "trusted_proxies": [],
   "structured_memory": false,
   "behaviours_file": "library/behaviours.json",
   "persona_file": "data/persona.json",

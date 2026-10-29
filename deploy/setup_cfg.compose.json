@@ -94,5 +94,6 @@
   "feedback_log": "data/feedback_log.jsonl",
   "tailscale": false,
   "public_hosts": [],
+  "trusted_proxies": ["https"],
   "tts_warmup": true
 }

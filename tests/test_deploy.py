@@ -22,6 +22,12 @@ class DeployTests(unittest.TestCase):
         self.assertFalse(cfg["searxng_autostart"])
         self.assertTrue(os.path.isabs(cfg["history_file"]))
 
+    def test_the_https_service_is_a_trusted_proxy_so_that_a_login_works_in_the_stack(self):
+        """found 2026-10-29: MIA sees every connection from the podman network; without this the login is refused with insecure_channel on every way in"""
+        with open(os.path.join(DEPLOY, "setup_cfg.compose.json"), encoding="utf-8") as fp:
+            cfg = json.load(fp)
+        self.assertEqual(cfg.get("trusted_proxies"), ["https"])
+
     def test_up_script_is_valid_bash(self):
         done = subprocess.run(["bash", "-n", os.path.join(DEPLOY, "up.sh")], capture_output=True, text=True)
         self.assertEqual(done.returncode, 0, done.stderr)
