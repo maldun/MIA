@@ -73,7 +73,6 @@ from .pipeline import Tool
 from .pipeline_model import OllamaModel
 from . import web_tools
 from .web_tools import build_web_tools
-from . import review_chat, review_entry
 from .extension_loader import load_extensions
 from .file_store import FileStore
 from .files_api import create_files_blueprint
@@ -82,7 +81,6 @@ from .model_gate import make_model_command, make_prepare
 from .task_registry import TaskRegistry
 from .workflow_voice import speaker_for
 from .workflow_library import WorkflowLibrary
-from .fulltext import FullTextSource
 from .scholar import build_scholar
 from . import tailscale_serve
 FPATH = os.path.split(__file__)[0]
@@ -562,7 +560,6 @@ content_store.prune(cfg.get("store_days", 90))
 _source_trust = source_trust.build_trust(cfg)
 _web_tools, _web_search, _web_client = build_web_tools(cfg, _runs_dir, store=content_store, trust=_source_trust.for_url)          # search (SearXNG, DuckDuckGo as fallback) and page fetcher with the safety rules
 _scholar, _scholar_http = build_scholar(cfg, _runs_dir)          # OpenAlex, Crossref, PubMed, arXiv: creating them touches no network
-_review_full_text = FullTextSource(_web_client.get)              # open access links only; a PDF only through the wall of pdf_text.py
 try:        # is SearXNG running? if not, say why searches use the fallback (and start the container if the user wants it: "searxng_autostart")
     _searx = searxng_control.ensure_searxng(cfg)
     (logger.info if _searx["reachable"] or not _searx["wanted"] else logger.warning)("web search: %s", _searx["message"])
@@ -615,10 +612,6 @@ def speak_answer(text):
 _db_dir = os.path.join(FPATH, cfg.get(CONST.ACCOUNTS_DIR_KEY, "data/db"))
 _votes_store = Storage(FileBackend(_db_dir))                  # the votes table (REQ-CHA-015); the accounts use the same folder
 _workflow_library = WorkflowLibrary(_votes_store)             # IF-203 on the same storage; the review workflow is its first entry (a draft)
-try:
-    review_entry.ensure_review_workflow(_workflow_library)
-except Exception as exc:                                       # the entry is a description: a storage that fails must not keep the app from starting
-    print("the review workflow entry was not saved: %s" % exc)
 
 def run_memory_skill(inputs):
     """the skill memory_write: what to remember from one message of the user"""
@@ -633,7 +626,7 @@ if cfg.get(CONST.STRUCTURED_MEMORY_KEY, False):               # off by default: 
 # REQ-WFM-029: the tasks register themselves; the chat core names none of them. A new skill adds one line here (later: its own folder, see the extension rule of 2026-10-29)
 # REQ-WFM-029, -039: the tasks are the extensions in the folder `extensions/` (lookup, search, review, ...); the chat core names none of them. A new skill is a new folder there.
 _services = types.SimpleNamespace(
-    core=core, cfg=cfg, scholar=_scholar, review_full_text=_review_full_text,
+    core=core, cfg=cfg, scholar=_scholar, web_get=_web_client.get, library=_workflow_library,
     web_search=lambda: _web_tools["web_search"][0],
     pipeline_event=lambda event: chat_service.pipeline_event(event), note_sources=lambda sources: chat_service.note_sources(sources),   # the chat service is built below
     speaker=lambda task: speaker_for(cfg, task, speak_answer),                      # one voice rule for all tasks (workflow_voice.py)
