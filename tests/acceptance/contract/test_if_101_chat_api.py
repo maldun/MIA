@@ -410,7 +410,7 @@ class ChatApiContract(unittest.TestCase):
         api.send(anna, "no")
         api.settle()
         done = [e["payload"] for e in api.events(anna) if e["event"] == "chat_done"]
-        self.assertEqual([(d["text"], d["status"]) for d in done][0], ("the report", "done"))
+        self.assertEqual([(d["text"].split("\n")[0], d["status"]) for d in done][0], ("the report", "done"))                # v10: the links to the files follow the text
         self.assertEqual(len(done), 2)                                               # ben's message was answered after the review
         self.assertEqual([m["text"] for m in api.history(anna) if m["role"] == "user"], ["/review do canary releases help?", "yes", "hello from ben", "no"])
 
@@ -529,11 +529,32 @@ class ChatApiContract(unittest.TestCase):
         done = [e["payload"] for e in events if e["event"] == "chat_done"][0]
         self.assertEqual(changed, [{"name": "review-contract.md", "task": "review"}])
         self.assertEqual(done["files"], ["review-contract.md"])
+        self.assertTrue(done["text"].endswith("Files: [review-contract.md](/api/files/review-contract.md)"))        # v10: the result carries the download link
         listed = api.files(s)
         self.assertEqual([(f["name"], f["size"], f["task"]) for f in listed], [("review-contract.md", len(b"# the report\n"), "review")])
         self.assertEqual(api.file(s, "review-contract.md"), b"# the report\n")
         self.assertEqual(error_of(lambda: api.file(s, "..x.md")).code, "invalid_file_name")
         self.assertEqual((error_of(lambda: api.file(s, "nothing.md")).status, error_of(lambda: api.file(s, "nothing.md")).code), (404, "not_found"))
+
+
+    @mark.req("IF-101", "REQ-WFM-036")
+    @each_provider(IF, make(review=("First?",), review_fails="the scholarly service is down"))
+    def test_a_task_that_fails_leaves_a_result_that_says_why(self, api):
+        """TC-IF-101-31 (v10): a task that fails gives chat_error and a result message `/review could not finish: <reason>` with the status error, which is the newest message of the chat, not an empty text."""
+        s = api.login("anna", "pw-anna")
+        api.connect(s)
+        api.events(s)
+        api.send(s, "/review do canary releases help?")
+        api.settle()
+        api.send(s, "yes")
+        api.settle()
+        events = api.events(s)
+        done = [e["payload"] for e in events if e["event"] == "chat_done"][0]
+        self.assertEqual(done["status"], "error")
+        self.assertIn("the scholarly service is down", done["text"])
+        self.assertTrue(done["text"].startswith("/review could not finish"))
+        self.assertIn("chat_error", names(events))
+        self.assertIn("the scholarly service is down", api.history(s)[-1]["text"])
 
 
 if __name__ == "__main__":

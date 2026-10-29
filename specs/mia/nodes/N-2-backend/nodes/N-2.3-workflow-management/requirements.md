@@ -224,7 +224,7 @@ The library of workflows and skills as versioned data, the graph rules, specific
 
 ### REQ-WFM-019 – Review in stages, run mode and slices
 - Level: low   Subject: TaskRuntime
-- Text: The Workflow management shall deliver the example workflow review so that it works in stages, gives an intermediate report with a recommendation after the stage of the abstract screening and goes on to the full-text stage only when the requesting user agrees; in the mode run (default, REQ-WFM-034) it asks no question at a used-up limit and ends at a hard cap with the report as it stands, in the mode slice (option `slice`) it also works in time slices, gives an intermediate report at the end of each slice and continues only when the user agrees.
+- Text: The Workflow management shall deliver the example workflow review so that it works in stages, gives an intermediate report with a recommendation after the stage of the abstract screening and goes on to the full-text stage only when the requesting user agrees; in the mode run (default, REQ-WFM-034) it asks no question at a used-up limit but at a hard cap, where the user decides to continue, to summarize or to stop, in the mode slice (option `slice`) it also works in time slices, gives an intermediate report at the end of each slice and continues only when the user agrees.
 - Rationale: refines REQ-BE-054
 - Parent: REQ-BE-054
 - Priority: Should
@@ -233,7 +233,7 @@ The library of workflows and skills as versioned data, the graph rules, specific
 - Verified by: TC-WFM-019
 - Status: Approved
 - Quality: functional suitability measure: share of review runs that end with a named end reason (complete, user, stopped, or the cap that ended it); target: 100 %; context: the owner's local model, runs of minutes to hours
-- History: A-18 reworded (checkpoint before the full-text stage); A-23 reworded (run mode, slice as option)
+- History: A-18 reworded (checkpoint before the full-text stage); A-23 reworded (run mode, slice as option); A-27 reworded (the question at a hard cap)
 
 ### REQ-WFM-020 – Review stops by a code check
 - Level: low   Subject: TaskRuntime
@@ -423,17 +423,17 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Quality: reliability measure: seconds of the time budget used while a task is paused; target: 0, and stop ends a paused task every time; context: a long run that the owner pauses and resumes
 - History: A-23 new
 
-### REQ-WFM-034 – Run mode and slicing
+### REQ-WFM-034 – Run mode, hard caps and slicing
 - Level: low   Subject: TaskRuntime
-- Text: The Workflow management shall run a task with a budget in the mode run by default, without a question at a used-up limit and bounded by hard caps of the size of the limits times a configurable factor (default 10), and in the mode slice, set by the option `slice` or by the class of the model, with the limits as slices and a question at each of them; a task that reaches a hard cap ends with its result as it stands and names the cap.
+- Text: The Workflow management shall run a task with a budget in the mode run by default, without a question at a used-up limit and bounded by hard caps, a time cap of 30 minutes of work time (the time of a pause and the time the user needs to answer a question do not count; configurable) and, for each count, the limit times a configurable factor (default 10); at a hard cap it shall ask the user whether to continue for another cap, to summarize what has been read, or to stop with the result as it stands, and a missing answer summarizes; in the mode slice, set by the option `slice` or by the class of the model, it works with the limits as slices and a question at each of them.
 - Rationale: refines REQ-BE-054; local models cost no money, so asking at every limit is tedious; paid models need the slices (owner 2026-10-29)
 - Parent: REQ-BE-054
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-3: in run mode no question is asked below the cap and the run ends at the cap with the cap named; in slice mode the question comes at each limit as before (exact)
+- Acceptance criterion: AC-3: in run mode no question is asked below the cap; the time cap is 1800 s of work time and a waiting for the user does not use any of it; at the cap the question names the cap and the three answers; continue adds one more cap, summarize ends the search and writes the summary of what is read, stop gives the report without a summary, no answer summarizes; in slice mode the question comes at each limit as before (exact)
 - Verified by: TC-WFM-034
 - Status: Draft
-- History: A-23 new
+- History: A-23 new; A-27 reworded (time cap 30 minutes of work time, question at the cap; owner's hand test 2026-10-29)
 
 ### REQ-WFM-035 – Class of the model
 - Level: low   Subject: TaskRuntime
@@ -450,28 +450,28 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 
 ### REQ-WFM-036 – Result at the end of the chat
 - Level: low   Subject: TaskRuntime
-- Text: The Workflow management shall, for a task that asks questions while it runs, publish the result as a new message at the end of the chat when it is ready, and show the progress only on the status card.
+- Text: The Workflow management shall, for a task that asks questions while it runs, publish the result as a new message at the end of the chat when it is ready, show the progress only on the status card, and, when the task fails, publish a result that says what failed instead of an empty message.
 - Rationale: refines REQ-BE-033; the result must not sit in a message far above the questions and answers that came later (owner 2026-10-29)
 - Parent: REQ-BE-033
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-23: on a review with two questions the result message has a later position in the history than the last question and its answer, and no message of the task exists before the result except the questions (exact)
+- Acceptance criterion: AC-23: on a review with two questions the result message has a later position in the history than the last question and its answer, and no message of the task exists before the result except the questions; a task that fails leaves a result that contains the reason (exact)
 - Verified by: TC-WFM-036
 - Status: Draft
-- History: A-23 new
+- History: A-23 new; A-27 reworded (a failure is a visible result)
 
 ### REQ-WFM-037 – Files in a volume
 - Level: low   Subject: TaskRuntime
-- Text: The Workflow management shall let a task store generated files in a dedicated volume (a folder that the configuration can move to another volume, by default on the disk of MIA) with a limit for one file and a limit for the whole volume from the configuration, refuse and say so when a limit would be crossed, never delete a file by itself, and list the files of the volume for every signed-in user with a download.
+- Text: The Workflow management shall let a task store generated files in a dedicated volume (a folder that the configuration can move to another volume, by default on the disk of MIA) with a limit for one file and a limit for the whole volume from the configuration, refuse and say so when a limit would be crossed, never delete a file by itself, list the files of the volume for every signed-in user with a download, and add the files of a task to its result as download links.
 - Rationale: refines REQ-BE-033; generated files (report, later more) need a place that is not a button on one message (owner 2026-10-29: a files area, deleted by the user in the volume)
 - Parent: REQ-BE-033
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-23: a stored file is listed with name, size, time and task and is downloaded byte for byte; a name with a path or a type that is not allowed is refused; a file over the limit is not written and the task says so; a file deleted in the volume is gone from the list (exact)
+- Acceptance criterion: AC-23: a stored file is listed with name, size, time and task and is downloaded byte for byte; the result of the task ends with a link for each file it stored; a name with a path or a type that is not allowed is refused; a file over the limit is not written and the task says so; a file deleted in the volume is gone from the list (exact)
 - Verified by: TC-WFM-037
 - Status: Draft
 - Quality: security measure: files outside the files volume that a task can write or read through the interface; target: 0 (a name with a path or a type that is not allowed is refused); context: the files list for the trusted users
-- History: A-23 new
+- History: A-23 new; A-27 reworded (links in the result; owner's hand test 2026-10-29)
 
 ### REQ-WFM-038 – Report as a record
 - Level: low   Subject: TaskRuntime

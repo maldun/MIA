@@ -1,4 +1,4 @@
-# IF-101 – Chat, expression, audio and REST API, v9
+# IF-101 – Chat, expression, audio and REST API, v10
 
 Owner (provider): N-2 Backend (child N-2.1)   Consumers: N-1 Web Frontend   Decided by: N-0   Mock complexity: 3 (stream of events, queue, clock, small stores)   Suite: `tests/acceptance/contract/test_if_101_chat_api.py`
 
@@ -47,7 +47,7 @@ Events (server to every connected page):
 | `chat_delta` | `{id, text}` cumulative: each text starts with the previous one |
 | `audio_chunk` | `{id, index, sentence}`; one per sentence, `index` from 0, in order (the audio bytes follow on the audio route; see N-2.5) |
 | `expression` | `{name}` a preset name of the mood map |
-| `chat_done` | `{id, text, emotion, status}`; status `done` or `stopped`; text equals the last delta; **[v8]** `files` (names) when the task stored files |
+| `chat_done` | `{id, text, emotion, status}`; status `done` or `stopped`; text equals the last delta; **[v8]** `files` (names) when the task stored files, and **[v10]** the text of the result then ends with `Files: [name](/api/files/name), ...`, links that download the files; a task that fails gives a result `/<id> could not finish: <reason>` (and `chat_error`), not an empty text |
 | `chat_error` | `{id?, message}` plain words |
 | `score` **[v1]** | `{overall, categories, votes, series}` **[v4: series]** |
 | `item_changed` **[v1]** | `{kind, id, author, deleted}` |
@@ -98,3 +98,4 @@ Events (server to every connected page):
 | v7 | 2026-10-28 | the task `/review` (the literature review, N-2.3 T-07); a message of the requesting account while the review waits is its answer (not queued, not counted for `queue_full`); `stop` ends a waiting review (owner 2026-10-28: option 2, blocking with an answer channel) | A-20 |
 | v8 | 2026-10-29 | the usability of long tasks (owner's hand review): `/<id> options ... --` and `/model`; the event `task_status` (one status card per task with budget figures and counts), `pause` and `resume`; the result of a task that asks questions is the newest message; the files volume: `files`, `file` and the event `files_changed` (no delete operation: the user deletes in the volume) | A-23 |
 | v9 | 2026-10-29 | the refusal of a bad option is `422 invalid_command` (v8 said "a message of MIA"; the code and the page use the refusal of the acknowledgement); `/<id> options` answers with a note of the system; the contract suite gets TC-IF-101-26 to -30 for the events and operations of v8 (task_status, the result as the newest message, pause and resume, options, files) | A-25 |
+| v10 | 2026-10-29 | the owner's hand test: the files of a task are links at the end of its result text; a failing task leaves a result that says why; the time cap of a review is 30 minutes of work time and the review asks continue, summarize or stop at the cap (text of the skill, no change of the wire) | A-27 |

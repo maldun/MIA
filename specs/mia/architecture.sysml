@@ -2410,7 +2410,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-WFM-019'> ReviewInStagesRunModeAndSlices_Wfm019 {
         subject s : TaskRuntime;
-        doc /* The Workflow management shall deliver the example workflow review so that it works in stages, gives an intermediate report with a recommendation after the stage of the abstract screening and goes on to the full-text stage only when the requesting user agrees; in the mode run (default, REQ-WFM-034) it asks no question at a used-up limit and ends at a hard cap with the report as it stands, in the mode slice (option `slice`) it also works in time slices, gives an intermediate report at the end of each slice and continues only when the user agrees. */
+        doc /* The Workflow management shall deliver the example workflow review so that it works in stages, gives an intermediate report with a recommendation after the stage of the abstract screening and goes on to the full-text stage only when the requesting user agrees; in the mode run (default, REQ-WFM-034) it asks no question at a used-up limit but at a hard cap, where the user decides to continue, to summarize or to stop, in the mode slice (option `slice`) it also works in time slices, gives an intermediate report at the end of each slice and continues only when the user agrees. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-WFM-020'> ReviewStopsByACodeCheck_Wfm020 {
@@ -2483,9 +2483,9 @@ package MIA_NodeRequirements {
         doc /* The Workflow management shall let the requesting user pause a running task and resume it, a paused task shall not start a new step and shall not use time of its budget, and stop shall end a paused task. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
-    requirement def <'REQ-WFM-034'> RunModeAndSlicing_Wfm034 {
+    requirement def <'REQ-WFM-034'> RunModeHardCapsAndSlicing_Wfm034 {
         subject s : TaskRuntime;
-        doc /* The Workflow management shall run a task with a budget in the mode run by default, without a question at a used-up limit and bounded by hard caps of the size of the limits times a configurable factor (default 10), and in the mode slice, set by the option `slice` or by the class of the model, with the limits as slices and a question at each of them; a task that reaches a hard cap ends with its result as it stands and names the cap. */
+        doc /* The Workflow management shall run a task with a budget in the mode run by default, without a question at a used-up limit and bounded by hard caps, a time cap of 30 minutes of work time (the time of a pause and the time the user needs to answer a question do not count; configurable) and, for each count, the limit times a configurable factor (default 10); at a hard cap it shall ask the user whether to continue for another cap, to summarize what has been read, or to stop with the result as it stands, and a missing answer summarizes; in the mode slice, set by the option `slice` or by the class of the model, it works with the limits as slices and a question at each of them. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-WFM-035'> ClassOfTheModel_Wfm035 {
@@ -2495,12 +2495,12 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-WFM-036'> ResultAtTheEndOfTheChat_Wfm036 {
         subject s : TaskRuntime;
-        doc /* The Workflow management shall, for a task that asks questions while it runs, publish the result as a new message at the end of the chat when it is ready, and show the progress only on the status card. */
+        doc /* The Workflow management shall, for a task that asks questions while it runs, publish the result as a new message at the end of the chat when it is ready, show the progress only on the status card, and, when the task fails, publish a result that says what failed instead of an empty message. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-WFM-037'> FilesInAVolume_Wfm037 {
         subject s : TaskRuntime;
-        doc /* The Workflow management shall let a task store generated files in a dedicated volume (a folder that the configuration can move to another volume, by default on the disk of MIA) with a limit for one file and a limit for the whole volume from the configuration, refuse and say so when a limit would be crossed, never delete a file by itself, and list the files of the volume for every signed-in user with a download. */
+        doc /* The Workflow management shall let a task store generated files in a dedicated volume (a folder that the configuration can move to another volume, by default on the disk of MIA) with a limit for one file and a limit for the whole volume from the configuration, refuse and say so when a limit would be crossed, never delete a file by itself, list the files of the volume for every signed-in user with a download, and add the files of a task to its result as download links. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-WFM-038'> ReportAsARecord_Wfm038 {
@@ -3060,7 +3060,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-BE-054'> ReviewInRunModeOrTimeSlices_Be054 {
         subject s : WebApplication;
-        doc /* The Backend shall work a review by default without a question at a used-up limit, bounded by hard caps, and in time slices on request (option `slice`) or for a paid model, give an intermediate report with a recommendation at the end of each slice and continue only when the requesting user agrees. */
+        doc /* The Backend shall work a review by default without a question at a used-up limit, bounded by hard caps at which the user decides to continue, to summarize or to stop, and in time slices on request (option `slice`) or for a paid model, give an intermediate report with a recommendation at the end of each slice and continue only when the requesting user agrees. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-BE-055'> ReviewStopsByACodeCheck_Be055 {
@@ -3783,7 +3783,7 @@ package MIA_NodeRequirements {
     requirement r_req_wfm_031 : TaskMonitor_Wfm031;
     requirement r_req_wfm_032 : FiguresOfTheReview_Wfm032;
     requirement r_req_wfm_033 : PauseAndResume_Wfm033;
-    requirement r_req_wfm_034 : RunModeAndSlicing_Wfm034;
+    requirement r_req_wfm_034 : RunModeHardCapsAndSlicing_Wfm034;
     requirement r_req_wfm_035 : ClassOfTheModel_Wfm035;
     requirement r_req_wfm_036 : ResultAtTheEndOfTheChat_Wfm036;
     requirement r_req_wfm_037 : FilesInAVolume_Wfm037;
