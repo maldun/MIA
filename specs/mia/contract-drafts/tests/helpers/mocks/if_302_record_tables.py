@@ -9,8 +9,9 @@ DEFINITIONS = {
     "runs": {"versioned": True, "deletable": False}, "source_trust": {"versioned": True, "deletable": False},
     "cases": {"versioned": True, "deletable": False}, "behaviours": {"versioned": True, "deletable": False},      # v1 (amendment A-08)
     "workflow_meta": {"versioned": True, "deletable": False},      # v3 (amendment A-15): status, specification and benchmark of a workflow
+    "reports": {"versioned": True, "deletable": False},      # v4/v5 (amendments A-23, A-24): the finished report of a task
 }
-REQUIRED = {"workflow_meta": ("status",), "cases": ("question", "answer", "status"), "behaviours": ("name", "net", "votes"),"memory": ("text", "source"), "votes": ("user", "subject", "category", "value"), "tasks": ("text",), "memos": ("text",),
+REQUIRED = {"reports": ("task", "skill", "skill_version", "question", "account", "model_pin", "report"), "workflow_meta": ("status",), "cases": ("question", "answer", "status"), "behaviours": ("name", "net", "votes"),"memory": ("text", "source"), "votes": ("user", "subject", "category", "value"), "tasks": ("text",), "memos": ("text",),
             "runs": ("workflow", "workflow_version", "model_pin", "benchmark_version")}
 CATEGORIES = ("answer_quality", "reactions", "character_behaviour", "service")
 MEMORY_FIELDS = {"kind": ("fact", "preference", "commitment"), "status": ("active", "replaced")}      # v2 (amendment A-10): optional, checked when present
