@@ -78,5 +78,21 @@ class Lib(unittest.TestCase):
         self.assertEqual(code, 2)
 
 
+    def test_report_shows_the_changes_readably_and_changes_nothing(self):                  # owner's wish 2026-10-29
+        code, out = self.run_script("--report")
+        self.assertEqual(code, 0)
+        self.assertIn("mode: look only", out)
+        self.assertIn("DIFFERS: +2 -1 lines", out)                                       # the header of the file stays
+        self.assertIn("- 2: b", out)                                                     # a line that changed completely: the old and the new line, with their numbers
+        self.assertIn("+ 2: B", out)
+        self.assertIn("+ 4: d", out)
+        self.assertNotIn("--- installed:", out)                                          # not the unified diff
+        self.assertEqual(self.read("installed1"), "a\nb\nc\n")
+
+    def test_report_with_do_still_installs(self):
+        code, out = self.run_script("--report", "--do")
+        self.assertEqual(self.read("installed1"), "a\nB\nc\nd\n")
+
+
 if __name__ == "__main__":
     unittest.main()

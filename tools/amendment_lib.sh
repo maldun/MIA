@@ -7,17 +7,19 @@
 #   finish                      # summary table; returns 0, and exits early with a hint when files differ and --do was not given
 #
 # Options of every amendment script:  (none) show the compared files and the diff, change nothing   --do  copy the drafts over the installed files
+#                                      --report  show the change readably (changed words marked inside the line, requirements by requirement; tools/amendment_report.py) instead of the unified diff
 #                                      --full  do not cut the diff of a file after 60 lines (MAX_DIFF_LINES=n changes the cut)
 # Each file is reported as: unchanged | DIFFERS (+added -removed lines, then the diff) | updated (after --do) | MISSING (the installed file does not exist).
 # Lines with + are in the draft and not installed yet, lines with - are installed and go away.
-do_it=0; full=0; changed=0; compared=()
+do_it=0; full=0; report=0; changed=0; compared=()
 
 amendment_args() {
     for arg in "$@"; do
         case "$arg" in
             --do) do_it=1 ;;
             --full) full=1 ;;
-            *) echo "unknown option: $arg (use --do or --full)"; exit 2 ;;
+            --report) report=1 ;;
+            *) echo "unknown option: $arg (use --do, --full or --report)"; exit 2 ;;
         esac
     done
     [ "$do_it" = 1 ] && echo "mode: --do (the installed files are overwritten by the drafts)" || echo "mode: look only (nothing is changed; --do installs)"
@@ -42,8 +44,14 @@ copy() {   # draft installed
     removed=$(diff "$installed" "$draft" | grep -c '^<') || true
     echo "   DIFFERS: +$added -$removed lines"
     if [ "$full" = 1 ]; then limit=100000; fi
-    diff -u --label "installed: $installed" --label "draft: $draft" "$installed" "$draft" | sed 's/^/   /' | head -n "$limit" || true
-    if [ "$(diff -u "$installed" "$draft" | wc -l)" -gt "$limit" ]; then echo "   ... (cut after $limit lines; --full shows all)"; fi
+    if [ "$report" = 1 ]; then
+        shown=$(python3 "$(dirname "${BASH_SOURCE[0]}")/amendment_report.py" "$installed" "$draft" --color "$([ -t 1 ] && echo always || echo never)")
+        printf '%s\n' "$shown" | sed 's/^/   /' | head -n "$limit" || true
+        if [ "$(printf '%s\n' "$shown" | wc -l)" -gt "$limit" ]; then echo "   ... (cut after $limit lines; --full shows all)"; fi
+    else
+        diff -u --label "installed: $installed" --label "draft: $draft" "$installed" "$draft" | sed 's/^/   /' | head -n "$limit" || true
+        if [ "$(diff -u "$installed" "$draft" | wc -l)" -gt "$limit" ]; then echo "   ... (cut after $limit lines; --full shows all)"; fi
+    fi
     if [ "$do_it" = 1 ]; then cp "$draft" "$installed" && echo "   -> updated"; compared+=("updated   $installed (+$added -$removed)"); else compared+=("DIFFERS   $installed (+$added -$removed)"); fi
     echo
 }
