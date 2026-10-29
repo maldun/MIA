@@ -14,11 +14,13 @@ import re
 try:
     from . import review_models, review_stages
     from .review_request import ReviewRequest, RequestError
+    from .report_tex import report_tex
     from .task_registry import Option, Task
 except ImportError:
     import review_models
     import review_stages
     from review_request import ReviewRequest, RequestError
+    from report_tex import report_tex
     from task_registry import Option, Task
 
 REVIEW_OPTIONS = (Option("slice", "flag", False, "work in time slices and ask at each limit (default: run to the end, bounded by hard caps)"),
@@ -28,7 +30,7 @@ REVIEW_OPTIONS = (Option("slice", "flag", False, "work in time slices and ask at
 def review_task(run):
     """/review as a task of the registry (REQ-WFM-029, -030): the skill declares its id, its options and what it needs from the core. It asks questions, so its result is the newest message."""
     return Task("review", run, "Literature review with sources, asks you before the full texts", "your question", "/review do canary releases reduce failed releases? until 2024-06-30",
-                options=REVIEW_OPTIONS, needs=("ask", "options", "monitor"))
+                options=REVIEW_OPTIONS, needs=("ask", "options", "monitor", "files", "reports"))
 
 
 YES = {"yes", "y", "ok", "okay", "go", "continue", "sure", "ja", "all"}
@@ -149,9 +151,35 @@ def format_report(report, question, until):
     return "\n".join(out)
 
 
+def format_report_full(report, question, until):
+    """the markdown file: the report of the chat and below it every screened work with its decision (the chat shows the excluded works of relevance 2 and 3 only)"""
+    rows = ["- **%s** (%s): %s, relevance %d%s%s" % (w["title"], w["doi"] or "no DOI", w["decision"], w["grade"], ", abstract only" if w["abstract_only"] else "",
+                                                     ", reason: " + w["reason"] if w.get("reason") else "") for w in report["works"]]
+    return format_report(report, question, until) + "\n\n### All screened works\n" + "\n".join(rows or ["- none"]) + "\n"
+
+
+def _keep(report, question, until, files, reports):
+    """the finished report as a record in the database (for reference and benchmarks) and as .md and .tex files in the files volume; what fails is told, the report is never lost"""
+    notes = []
+    if reports is not None:
+        try:
+            reports(question, report)
+        except Exception as exc:
+            notes.append("The report could not be kept as a record: %s." % exc)
+    if files is not None:
+        stem = "review-%s-%s" % (until, "-".join(re.findall(r"[a-z0-9]+", question.lower())[:6]) or "report")
+        try:
+            names = [files(stem + ".md", format_report_full(report, question, until)), files(stem + ".tex", report_tex(report, question, until))]
+            notes.append("Files: %s (in the files list of the page)." % ", ".join(names))
+        except Exception as exc:
+            notes.append("The files could not be stored: %s." % exc)
+    return "\n\n" + "\n".join(notes) if notes else ""
+
+
 # --- the task --------------------------------------------------------------------------------------------------------------------------
 
-def run_review(text, run_skill, scholar, full_text_source, ask, on_event=None, should_stop=None, cfg=None, today=None, min_works=3, speak=None, options=None, monitor=None):
+def run_review(text, run_skill, scholar, full_text_source, ask, on_event=None, should_stop=None, cfg=None, today=None, min_works=3, speak=None, options=None, monitor=None,
+               files=None, reports=None):
     """the review of `text` ("question [until YYYY-MM-DD]") as markdown. scholar.search(query, limit, until, since, check_retraction) is Scholar.search; full_text_source(work) is a
     FullTextSource; ask(text) -> the reply text or None; speak(text) says a short text aloud (None: silent). The model steps run through run_skill(name, inputs) (core.run); on_event gets {"kind": "step", "plain": text} per stage."""
     cfg = cfg or {}
@@ -230,4 +258,4 @@ def run_review(text, run_skill, scholar, full_text_source, ask, on_event=None, s
     report = run.run()
     progress("writing the report")
     say(spoken_result(report))
-    return format_report(report, question, request.until.isoformat())
+    return format_report(report, question, request.until.isoformat()) + _keep(report, question, request.until.isoformat(), files, reports)

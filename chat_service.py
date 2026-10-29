@@ -130,7 +130,7 @@ class ChatService:
     def __init__(self, emit, log, mood, run_exchange, run_command=None, model_info=None, queue_size=1, user_limit=0,
                  rate_limit=(10, 60), spawn=None, clock=time.monotonic, run_lookup=None, run_search=None, votes=None, wall_clock=time.time,
                  behaviours=None, reputable=0.6, repair=None, remember=None, run_review=None, review_timeout=1800,
-                 tasks=None, skill_options=None, prepare_task=None, argument_commands=None):
+                 tasks=None, skill_options=None, prepare_task=None, argument_commands=None, files=None):
         self._emit = emit
         self._tasks = tasks if tasks is not None else TaskRegistry()      # REQ-WFM-029: the tasks (lookup, search, review, ...) register themselves, the core names none of them
         if run_lookup or run_search or run_review:                         # the old arguments, until the callers pass a registry
@@ -144,6 +144,7 @@ class ChatService:
         self._skill_options = skill_options or {}                          # config `skill_options`: {task id: {option: value}}, the defaults of the options
         self._prepare_task = prepare_task                                  # (task, options, ask) -> options: before a task runs, e.g. the class of the model; may ask the user
         self._argument_commands = {k.lower(): v for k, v in (argument_commands or {}).items()}      # {name: fn(argument) -> text}: commands with an argument, e.g. /model paid <name>
+        self._files = files                                                # the files volume (file_store.FileStore), None = tasks cannot store files
         self._monitor = None                                               # the status card of the running task
         self._late = False                                                 # the running task gives its result at the end (it asks questions)
         self._run_lookup = run_lookup          # (question, on_delta, on_emotion, should_stop) -> the answer, for /lookup
@@ -291,6 +292,23 @@ class ChatService:
             self._stop.set()
             self._unpaused.set()                      # a paused task wakes up and sees the stop
         return running
+
+    def _file_putter(self, task, message_id):
+        def put(name, data):
+            if self._files is None:
+                raise RuntimeError("no files volume is configured")
+            info = self._files.put(name, data, task=task, message_id=message_id, account=self._author)
+            self._emit("files_changed", {"name": info["name"], "task": task})
+            return info["name"]
+        return put
+
+    def _report_saver(self, entry, message_id, model):
+        def save(question, report):
+            if self._votes is None:
+                raise RuntimeError("no storage is configured")
+            self._votes.put("reports", message_id, {"task": entry.id, "skill": entry.id, "skill_version": entry.version, "question": question, "account": self._author or "page",
+                                                    "model_pin": model or "unknown", "report": report}, self._author or "page")
+        return save
 
     def _stopped(self):
         """should_stop for a task: waits here while the task is paused (so it starts no new step), then says whether it was stopped"""
@@ -667,7 +685,7 @@ class ChatService:
             if entry is None:
                 final = self._run_exchange("[%s] %s" % (speaker, text) if speaker else text, on_delta, on_emotion, self._stop.is_set)
             else:
-                handed = {"ask": self.ask, "options": options or {}, "monitor": self._monitor}
+                handed = {"ask": self.ask, "options": options or {}, "monitor": self._monitor, "files": self._file_putter(task, message_id), "reports": self._report_saver(entry, message_id, model)}
                 final = entry.run(text, on_delta, on_emotion, self._stopped, **{name: handed[name] for name in entry.needs})
             if final is not None:
                 state["text"] = final

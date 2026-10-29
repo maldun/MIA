@@ -210,5 +210,57 @@ class TestReviewCard(unittest.TestCase):                                        
         self.assertEqual(user.questions, [])
 
 
+class TestReviewOutputs(unittest.TestCase):                                      # TC-WFM-037, TC-WFM-038
+    WORKS = [work("10.1/a", "Colouring"), work("10.1/b", "Off topic 100% sure")]
+
+    def outputs(self, fail=False):
+        files, records = {}, []
+
+        def put(name, data):
+            if fail:
+                raise RuntimeError("the files volume is full")
+            files[name] = data
+            return name
+        return files, records, put, lambda question, report: records.append((question, report))
+
+    def run_it(self, **kwargs):
+        calls = []
+
+        def run_skill(name, inputs):
+            calls.append(name)
+            if name == "review_abstract":
+                off = "Off topic" in str(inputs)
+                return {"grade": 0 if off else 3, "decision": "exclude" if off else "include", "reason": "outdated" if off else "", "quote": "Graph methods for scheduling", "statement": "x"}
+            return skills([])(name, inputs)
+        return rc.run_review("How to schedule? until 2026-01-01", run_skill, FakeScholar(self.WORKS), lambda w: None, Conversation("yes", "no"), today=TODAY, **kwargs)
+
+    def test_the_report_is_kept_as_a_record_and_rendered_as_markdown_and_latex_files(self):
+        files, records, put, save = self.outputs()
+        out = self.run_it(files=put, reports=save)
+        self.assertEqual(len(records), 1)
+        question, report = records[0]
+        self.assertEqual((question, sorted(w["doi"] for w in report["works"])), ("How to schedule?", ["10.1/a", "10.1/b"]))
+        names = sorted(files)
+        self.assertEqual([n.rsplit(".", 1)[1] for n in names], ["md", "tex"])
+        self.assertTrue(all(n.startswith("review-2026-01-01-how-to-schedule") for n in names))
+        for text in files.values():
+            self.assertIn("Off topic 100", text)                                  # also the excluded work with grade 0 is in the files
+        self.assertIn(r"100\% sure", files[names[1]])
+        self.assertIn("Files: " + ", ".join(names), out)
+        self.assertTrue(out.startswith("## Literature review"))
+
+    def test_a_volume_that_refuses_is_told_in_the_result_and_the_record_stays(self):
+        files, records, put, save = self.outputs(fail=True)
+        out = self.run_it(files=put, reports=save)
+        self.assertEqual((files, len(records)), ({}, 1))
+        self.assertIn("could not be stored", out)
+        self.assertIn("the files volume is full", out)
+
+    def test_without_files_and_reports_the_result_is_as_before(self):
+        out = self.run_it()
+        self.assertNotIn("Files:", out)
+        self.assertNotIn("could not be stored", out)
+
+
 if __name__ == "__main__":
     unittest.main()

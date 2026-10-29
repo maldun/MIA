@@ -189,5 +189,27 @@ class ChatTasks(unittest.TestCase):
         self.assertFalse(service.status()["busy"])
 
 
+    def test_a_task_gets_files_and_a_report_record_bound_to_its_message_and_account(self):        # TC-WFM-037, TC-WFM-038
+        from_storage = importlib.import_module("MIA.storage")
+        backend = importlib.import_module("MIA.storage_files")
+        file_store = importlib.import_module("MIA.file_store")
+        store = from_storage.Storage(backend.FileBackend(os.path.join(self.tmp.name, "db")))
+        files = file_store.FileStore(os.path.join(self.tmp.name, "files"))
+
+        def run(argument, on_delta, on_emotion, should_stop, files=None, reports=None):
+            self.seen.append(files("r.md", "# Report"))
+            reports("the question", {"works": []})
+            return "done"
+        service = self.make([self.task(run, needs=("files", "reports"))], votes=store, files=files)
+        service.send("/demo q", author="anna")
+        self.assertTrue(self.idle(service))
+        message_id = [p for e, p in self.events if e == "chat_done"][-1]["id"]
+        self.assertEqual(self.seen, ["r.md"])
+        self.assertEqual([(f["name"], f["task"], f["message_id"]) for f in files.list()], [("r.md", "demo", message_id)])
+        self.assertIn(("files_changed", {"name": "r.md", "task": "demo"}), self.events)
+        doc = store.get("reports", message_id)["doc"]
+        self.assertEqual((doc["task"], doc["skill"], doc["question"], doc["account"], doc["model_pin"], doc["report"]), ("demo", "demo", "the question", "anna", "m", {"works": []}))
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -39,11 +39,12 @@ class Option:
 
 
 class Task:
-    def __init__(self, id, run, text, argument, example, options=(), aliases=(), needs=()):
+    def __init__(self, id, run, text, argument, example, options=(), aliases=(), needs=(), version="1"):
         """run(argument, on_delta, on_emotion, should_stop, **what it needs) -> the result text; `needs` names what the core hands over besides: "ask" (ask the user a question; a task that
-        asks gives its result as the newest message), "options" (the options of this call), "monitor" (the status card: update(phase, budget, counts))"""
+        asks gives its result as the newest message), "options" (the options of this call), "monitor" (the status card: update(phase, budget, counts)),
+        "files" (files(name, data) -> the stored name: puts a file into the files volume), "reports" (reports(question, report): keeps the finished report as a record)"""
         self.id, self.run, self.text, self.argument, self.example = id, run, text, argument, example
-        self.options, self.aliases, self.needs = tuple(options), tuple(aliases), tuple(needs)
+        self.options, self.aliases, self.needs, self.version = tuple(options), tuple(aliases), tuple(needs), version
 
 
 class TaskRegistry:

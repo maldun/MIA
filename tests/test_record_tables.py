@@ -19,7 +19,7 @@ class Definitions(unittest.TestCase):
     def test_all_tables_versioned_and_deletable_exactly_where_planned(self):
         """TC-RTB-001, TC-RTB-006."""
         tables = definitions()
-        self.assertEqual(set(tables), {"history", "memory", "votes", "tasks", "memos", "accounts", "presets", "gestures", "runs", "source_trust", "cases", "behaviours", "workflow_meta"})
+        self.assertEqual(set(tables), {"history", "memory", "votes", "tasks", "memos", "accounts", "presets", "gestures", "runs", "source_trust", "cases", "behaviours", "workflow_meta", "reports"})
         self.assertTrue(all(t["versioned"] for t in tables.values()))
         self.assertEqual({k for k, t in tables.items() if t["deletable"]}, {"history", "memory", "tasks", "memos"})
         self.assertEqual(tables["source_trust"], {"versioned": True, "deletable": False})
@@ -96,6 +96,13 @@ class Validation(unittest.TestCase):
             self.assertIsNone(validate(table, {"anything": 1}))
 
     @mark.req("REQ-WFM-002", "REQ-WFM-006", "IF-302")
+    def test_reports_keep_a_finished_report_as_a_record(self):                    # IF-302 v4, REQ-WFM-038
+        self.assertEqual(definitions()["reports"], {"versioned": True, "deletable": False})
+        doc = {"task": "review", "skill": "review", "skill_version": "1", "question": "q", "account": "anna", "model_pin": "m", "report": {"works": []}}
+        self.assertIsNone(validate("reports", doc))
+        for missing in ("task", "skill", "skill_version", "question", "account", "model_pin", "report"):
+            self.assertEqual(validate("reports", {k: v for k, v in doc.items() if k != missing}), {"rule": "schema", "detail": missing})
+
     def test_workflow_meta_keeps_the_lifecycle_of_a_workflow(self):
         """IF-302 v3 (A-15): status is draft, tested, trusted or retired and required; specification and benchmark are free; every version is kept."""
         self.assertEqual(definitions()["workflow_meta"], {"versioned": True, "deletable": False})

@@ -7,8 +7,8 @@ categories and the vote value. It never changes a document (a task or memo comes
 """
 
 TABLES = {name: {"versioned": True, "deletable": name in ("history", "memory", "tasks", "memos")}
-          for name in ("history", "memory", "votes", "tasks", "memos", "accounts", "presets", "gestures", "runs", "source_trust", "cases", "behaviours", "workflow_meta")}     # cases: proposed benchmark cases (REQ-CHA-016); behaviours: the adaptation counters (REQ-CHA-017, -018)
-REQUIRED = {"workflow_meta": ("status",), "cases": ("question", "answer", "status"), "behaviours": ("name", "net", "votes"), "memory": ("text", "source"), "votes": ("user", "subject", "category", "value"), "tasks": ("text",), "memos": ("text",),
+          for name in ("history", "memory", "votes", "tasks", "memos", "accounts", "presets", "gestures", "runs", "source_trust", "cases", "behaviours", "workflow_meta", "reports")}     # reports: the finished report of a task (REQ-WFM-038); cases: proposed benchmark cases (REQ-CHA-016); behaviours: the adaptation counters (REQ-CHA-017, -018)
+REQUIRED = {"reports": ("task", "skill", "skill_version", "question", "account", "model_pin", "report"), "workflow_meta": ("status",), "cases": ("question", "answer", "status"), "behaviours": ("name", "net", "votes"), "memory": ("text", "source"), "votes": ("user", "subject", "category", "value"), "tasks": ("text",), "memos": ("text",),
             "runs": ("workflow", "workflow_version", "model_pin", "benchmark_version")}
 CATEGORIES = ("answer_quality", "reactions", "character_behaviour", "service")
 MEMORY_KINDS = ("fact", "preference", "commitment")       # IF-302 v2 (REQ-CHA-011): the optional fields `kind` and `status` of a memory record; `subject` and `updated` are free

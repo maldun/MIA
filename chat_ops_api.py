@@ -50,6 +50,15 @@ def create_chat_ops_blueprint(chat):
     def account_of():
         return answer(lambda: chat.account(request.args.get("message_id")))
 
+    @bp.post("/api/pause")
+    def pause():
+        return jsonify({"paused": chat.pause()})          # False when nothing runs (IF-101 v8)
+
+    @bp.post("/api/resume")
+    def resume():
+        chat.resume()
+        return jsonify({"paused": False})
+
     @bp.get("/api/counters")
     def counters():
         return answer(chat.counters)

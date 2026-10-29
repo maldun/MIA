@@ -73,6 +73,8 @@ from .pipeline_model import OllamaModel
 from . import web_tools
 from .web_tools import build_web_tools
 from . import review_chat, review_entry
+from .file_store import FileStore
+from .files_api import create_files_blueprint
 from .model_class import ModelClasses
 from .model_gate import make_model_command, make_prepare
 from .task_registry import TaskRegistry
@@ -614,7 +616,7 @@ def run_lookup_exchange(question, on_delta, on_emotion, should_stop):
                                       on_event=lambda event: chat_service.pipeline_event(event), should_stop=should_stop, speak=speaker_for(cfg, "lookup", speak_answer),
                                       on_sources=chat_service.note_sources, trust=source_trust.build_trust(cfg).for_url)      # a fresh table: the trust of sources is edited on the page
 
-def run_review_exchange(text, on_delta, on_emotion, should_stop, ask, options=None, monitor=None):
+def run_review_exchange(text, on_delta, on_emotion, should_stop, ask, options=None, monitor=None, files=None, reports=None):
     """/review question [until DATE]: the literature review (review_chat.py); the skills run through the core, the questions to the user through the chat service"""
     def run_skill(name, inputs):
         result = core.run(name, inputs, should_stop=should_stop)
@@ -624,7 +626,7 @@ def run_review_exchange(text, on_delta, on_emotion, should_stop, ask, options=No
             raise RuntimeError(research_chat.friendly_error(result.error))
         return result.answer
     return review_chat.run_review(text, run_skill, _scholar, _review_full_text, ask, on_event=lambda event: chat_service.pipeline_event(event), should_stop=should_stop, cfg=cfg,
-                                  speak=speaker_for(cfg, "review", speak_answer), options=options, monitor=monitor)       # the questions and a short result are spoken, never the whole report
+                                  speak=speaker_for(cfg, "review", speak_answer), options=options, monitor=monitor, files=files, reports=reports)       # the questions and a short result are spoken, never the whole report
 
 def run_search_exchange(query, on_delta, on_emotion, should_stop):
     """/search: the top results of the search tool, no model"""
@@ -653,10 +655,12 @@ _tasks = TaskRegistry()
 _tasks.register(research_chat.lookup_task(run_lookup_exchange))
 _tasks.register(research_chat.search_task(run_search_exchange))
 _tasks.register(review_chat.review_task(run_review_exchange))
+# the files volume (REQ-WFM-037): a folder of its own, movable by `files_dir`; limits in bytes; nothing is deleted by MIA
+_file_store = FileStore(os.path.join(FPATH, cfg.get("files_dir", "data/files")), max_file_bytes=cfg.get("files_max_bytes", 1 << 30), max_total_bytes=cfg.get("files_max_total_bytes", 50 << 30))
 _model_classes = ModelClasses(os.path.join(FPATH, cfg.get("model_classes_file", "data/model_classes.json")))
 _model_host = lambda: (str(cfg.get("ollama_host") or "localhost").replace("http://", "").replace("https://", "").split("/")[0].split(":")[0]) or "localhost"
 chat_service = ChatService(socketio.emit, chat_log, mood, run_chat_exchange, run_command=run_chat_command,
-                           tasks=_tasks, skill_options=cfg.get("skill_options"),
+                           tasks=_tasks, skill_options=cfg.get("skill_options"), files=_file_store,
                            prepare_task=make_prepare(_model_classes, lambda: comm.version, _model_host, lambda text: chat_service.note(text)),
                            argument_commands={"model": make_model_command(_model_classes, lambda: comm.version, _model_host)},
                            review_timeout=cfg.get("review_answer_seconds", 1800),
@@ -669,6 +673,7 @@ chat_service = ChatService(socketio.emit, chat_log, mood, run_chat_exchange, run
                            reputable=cfg.get(CONST.REPUTABLE_TRUST_KEY, 0.6),
                            repair=lambda text: behaviour.apply_rules(text)["text"], remember=_remember)         # the stream is held back and repaired silently (REQ-CHA-014)
 app.register_blueprint(create_chat_ops_blueprint(chat_service))
+app.register_blueprint(create_files_blueprint(_file_store))
 app.register_blueprint(create_items_blueprint(_votes_store, socketio.emit))
 app.register_blueprint(create_trust_persona_blueprint(os.path.join(FPATH, cfg.get("source_trust_file") or "data/source_trust.json"),      # the file build_trust reads
                                                       os.path.join(FPATH, cfg.get(CONST.PERSONA_FILE_KEY, "data/persona.json")), socketio.emit))
