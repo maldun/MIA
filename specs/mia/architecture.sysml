@@ -426,7 +426,7 @@ package MIA_Architecture {
         }
         part reviewRequest {
             doc /* Question, scope, cut-off, budget in slices with checkpoints. */
-            @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("review_request.py"); }
+            @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("extensions/review/review_request.py"); }
         }
         part pdfReader {
             doc /* PDF to text only inside a bubblewrap wall. */
@@ -436,7 +436,7 @@ package MIA_Architecture {
             doc /* Reference cases from published reviews, reference-list parsing, scoring; real cases paused at 2c. */
             @Implementation {
                 :>> status = ImplementationStatus::partly;
-                :>> modules = ("review_case.py", "review_score.py", "tools/build_review_cases.py", "eval/suites/review_toy");
+                :>> modules = ("extensions/review/review_case.py", "extensions/review/review_score.py", "tools/build_review_cases.py", "eval/suites/review_toy");
             }
         }
         part reviewPipeline {

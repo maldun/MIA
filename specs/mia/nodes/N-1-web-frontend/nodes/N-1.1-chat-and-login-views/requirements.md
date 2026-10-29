@@ -280,6 +280,9 @@ The chat page: messages, queue, history, status line, voting, tasks and memos, e
 - Acceptance criterion: AC-17: a task_status of the mock draws the figures it carries; a second one with the same id changes the same card; pause sends one pause request and the button becomes resume; a status after done does not change the card (exact)
 - Verified by: TC-CLV-023
 - Status: Draft
+- Quality: interaction capability measure: figures of the card readable without horizontal scrolling; target: all of them at a width of 360 px; context: the owner's phone in the home network
+- Relaxed: TD-01
+- Target: the card is drawn and updated in place, with pause, resume and stop, in a browser test; and it is still there, with its final figures, after a reload
 - History: A-24 new
 
 ### REQ-CLV-024 – Files list
@@ -292,4 +295,6 @@ The chat page: messages, queue, history, status line, voting, tasks and memos, e
 - Acceptance criterion: AC-17: the list of the mock is drawn newest first, each entry links to /api/files/<name>, an event files_changed draws the list again, no delete control exists (exact)
 - Verified by: TC-CLV-024
 - Status: Draft
+- Relaxed: TD-02
+- Target: the list, the download link and the redraw after files_changed are checked in a browser test
 - History: A-24 new

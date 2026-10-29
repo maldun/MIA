@@ -232,6 +232,7 @@ The library of workflows and skills as versioned data, the graph rules, specific
 - Acceptance criterion: AC-3: after the abstract screening the run waits for agreement in both modes; in slice mode it waits for agreement after the first slice (60 s); in run mode no question comes at a used-up limit below the cap (exact)
 - Verified by: TC-WFM-019
 - Status: Approved
+- Quality: functional suitability measure: share of review runs that end with a named end reason (complete, user, stopped, or the cap that ended it); target: 100 %; context: the owner's local model, runs of minutes to hours
 - History: A-18 reworded (checkpoint before the full-text stage); A-23 reworded (run mode, slice as option)
 
 ### REQ-WFM-020 – Review stops by a code check
@@ -392,6 +393,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Acceptance criterion: AC-23: a task that reports gets a card with exactly the figures it reported; two reports within half a second give one update; the final figures stay on the card; a task that reports nothing gets the card with the time only (exact)
 - Verified by: TC-WFM-031
 - Status: Draft
+- Quality: performance efficiency measure: status updates of one task per second; target: at most 2; context: a task that reports after every step, for example one screening step per work
 - History: A-23 new
 
 ### REQ-WFM-032 – Figures of the review
@@ -404,6 +406,8 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Acceptance criterion: AC-3: on a scripted run after every step on the list = processed + still to process; included + maybe + excluded = processed; every limit shows used and limit (exact)
 - Verified by: TC-WFM-032
 - Status: Draft
+- Relaxed: TD-03
+- Target: the tokens used are the counts reported by the model server, not an estimate
 - History: A-23 new
 
 ### REQ-WFM-033 – Pause and resume
@@ -416,6 +420,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Acceptance criterion: AC-23: after pause no step starts and the used time stays constant for 5 s; after resume the task goes on from the same step; stop ends a paused task with the report as it stands (exact)
 - Verified by: TC-WFM-033
 - Status: Draft
+- Quality: reliability measure: seconds of the time budget used while a task is paused; target: 0, and stop ends a paused task every time; context: a long run that the owner pauses and resumes
 - History: A-23 new
 
 ### REQ-WFM-034 – Run mode and slicing
@@ -440,6 +445,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Acceptance criterion: AC-3: a new model is asked once, the second use is not asked; a paid model gives the warning and slice; `/model local <name>` changes the stored class; the asking and the change are shown in the chat (exact)
 - Verified by: TC-WFM-035
 - Status: Draft
+- Quality: flexibility measure: questions about the class of one model; target: 1 for each model, ever (a known model is never asked again); context: switching between local models and an occasional paid one
 - History: A-23 new
 
 ### REQ-WFM-036 – Result at the end of the chat
@@ -464,6 +470,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Acceptance criterion: AC-23: a stored file is listed with name, size, time and task and is downloaded byte for byte; a name with a path or a type that is not allowed is refused; a file over the limit is not written and the task says so; a file deleted in the volume is gone from the list (exact)
 - Verified by: TC-WFM-037
 - Status: Draft
+- Quality: security measure: files outside the files volume that a task can write or read through the interface; target: 0 (a name with a path or a type that is not allowed is refused); context: the files list for the trusted users
 - History: A-23 new
 
 ### REQ-WFM-038 – Report as a record
@@ -488,4 +495,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Acceptance criterion: AC-23: a folder added to the extensions folder appears in the list of commands, its options are parsed and its task runs; no file of the core names the id of a skill (inspection, exact)
 - Verified by: TC-WFM-039
 - Status: Draft
+- Quality: maintainability measure: files of the core that name the id of a skill in code; target: 0; context: adding a skill
+- Relaxed: TD-04
+- Target: the code of a skill lies in its folder; what several skills share is a library of the core with its own name
 - History: A-24 new
