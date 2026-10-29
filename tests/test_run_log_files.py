@@ -31,11 +31,17 @@ def imported(path):
 
 class RunLogFiles(unittest.TestCase):
     def test_the_code_of_the_run_log_imports_no_database_driver(self):
+        """TC-LOG-005: none of the four files of the Run log imports a database driver.
+        Example: run_log.py, events.py, run_explain.py and reproduce.py import none of psycopg, sqlite3, sqlalchemy ... ."""
+        # Given the four files of the Run log, when their imports are read, then none is a database driver
         for path in RUN_LOG_CODE:
             self.assertEqual(sorted(imported(path) & set(DRIVERS)), [], path)
 
     def test_the_events_of_a_run_are_appended_to_a_file_and_none_is_rewritten(self):
+        """TC-LOG-005 (A-28): a finished run, a second run and a feedback line only add to the end of the monthly file.
+        Example: after run one the file has N bytes; after run two and a thumb for run one the first N bytes are the same and the file is longer."""
         with tempfile.TemporaryDirectory() as folder:
+            # Given a log with one finished run, and the bytes of its file
             log = RunLog(folder)
             first = log.start("lookup")
             first.event({"kind": "start", "seq": 1})
@@ -44,13 +50,15 @@ class RunLogFiles(unittest.TestCase):
             path = os.path.join(folder, name)
             with open(path, "rb") as handle:
                 before = handle.read()
+            # When a second run and a feedback line for the first are written
             second = log.start("lookup")
             second.event({"kind": "start", "seq": 1})
             second.finish("done", output="b")
             log.add_feedback(first.id, "thumb", 1)
             with open(path, "rb") as handle:
                 after = handle.read()
-            self.assertTrue(after.startswith(before))                         # what was written stays as it was
+            # Then what was written stays as it was, and both runs read back in order
+            self.assertTrue(after.startswith(before))
             self.assertGreater(len(after), len(before))
             self.assertEqual([r["id"] for r in log.read()], [first.id, second.id])
 
