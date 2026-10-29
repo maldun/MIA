@@ -430,5 +430,111 @@ class ChatApiContract(unittest.TestCase):
         self.assertEqual(api.stop(s), {"stopped": False})
 
 
+    @mark.req("IF-101", "REQ-WFM-036")
+    @each_provider(IF, make(review=("First?", "Second?")))
+    def test_the_result_of_a_review_is_the_newest_message(self, api):
+        """TC-IF-101-26 (v8): a task that asks questions sends chat_start, the text and chat_done only when its result is ready, so chat_start comes after the last question of MIA and after the answer to it; start, done and the status card share one id."""
+        s = api.login("anna", "pw-anna")
+        api.connect(s)
+        api.events(s)
+        api.send(s, "/review do canary releases help?")
+        api.settle()
+        api.send(s, "yes")
+        api.settle()
+        api.send(s, "no")
+        api.settle()
+        events = api.events(s)
+        order = names(events)
+        last_message = max(i for i, e in enumerate(events) if e["event"] == "chat_message")
+        self.assertGreater(order.index("chat_start"), last_message)
+        self.assertNotIn("chat_delta", order[:order.index("chat_start")])
+        start = [e["payload"] for e in events if e["event"] == "chat_start"][0]
+        done = [e["payload"] for e in events if e["event"] == "chat_done"][0]
+        cards = {e["payload"]["id"] for e in events if e["event"] == "task_status"}
+        self.assertEqual(({start["id"]}, {done["id"]}), (cards, cards))
+        self.assertEqual([m["role"] for m in api.history(s)][-1], "assistant")
+
+    @mark.req("IF-101", "REQ-WFM-031")
+    @each_provider(IF, make(review=("First?",)))
+    def test_a_running_task_has_a_status_card_that_ends_with_done(self, api):
+        """TC-IF-101-27 (v8): the event task_status carries id, task, phase, mode, paused, done, budget (with seconds) and counts; the first has done false, the last done true; the mode is run, or slice after `/review options slice -- question`."""
+        s = api.login("anna", "pw-anna")
+        api.connect(s)
+        api.events(s)
+        api.send(s, "/review do canary releases help?")
+        api.settle()
+        api.send(s, "no")
+        api.settle()
+        cards = [e["payload"] for e in api.events(s) if e["event"] == "task_status"]
+        for key in ("id", "task", "phase", "mode", "paused", "done", "budget", "counts"):
+            self.assertIn(key, cards[0])
+        self.assertEqual((cards[0]["done"], cards[-1]["done"], cards[0]["task"], cards[0]["mode"]), (False, True, "review", "run"))
+        self.assertIn("used", cards[-1]["budget"]["seconds"])
+        api.send(s, "/review options slice -- do canary releases help?")
+        api.settle()
+        api.send(s, "no")
+        api.settle()
+        self.assertEqual([e["payload"]["mode"] for e in api.events(s) if e["event"] == "task_status"][0], "slice")
+
+    @mark.req("IF-101", "REQ-WFM-033")
+    @each_provider(IF, make(review=("First?",)))
+    def test_pause_and_resume_a_running_task_and_stop_ends_a_paused_one(self, api):
+        """TC-IF-101-28 (v8): pause answers {paused: true} for a running task and {paused: false} when nothing runs; the card says paused; resume answers {paused: false} and the card says so; stop ends a paused task with the status stopped."""
+        s = api.login("anna", "pw-anna")
+        api.connect(s)
+        self.assertEqual(api.pause(s), {"paused": False})                         # nothing runs
+        api.send(s, "/review do canary releases help?")
+        api.settle()
+        api.events(s)
+        self.assertEqual(api.pause(s), {"paused": True})
+        self.assertTrue([e["payload"]["paused"] for e in api.events(s) if e["event"] == "task_status"][-1])
+        self.assertEqual(api.resume(s), {"paused": False})
+        self.assertFalse([e["payload"]["paused"] for e in api.events(s) if e["event"] == "task_status"][-1])
+        api.pause(s)
+        self.assertEqual(api.stop(s), {"stopped": True})
+        api.settle()
+        done = [e["payload"] for e in api.events(s) if e["event"] == "chat_done"]
+        self.assertEqual([d["status"] for d in done], ["stopped"])
+
+    @mark.req("IF-101", "REQ-WFM-030")
+    @each_provider(IF)
+    def test_the_options_of_a_task_are_listed_and_a_bad_option_is_refused(self, api):
+        """TC-IF-101-29 (v8, v9): `/review options` answers with the options as a chat message and queues nothing; an unknown option, or options without `--` and a question, are refused with 422 invalid_command and queue nothing."""
+        s = api.login("anna", "pw-anna")
+        api.connect(s)
+        api.events(s)
+        ack = api.send(s, "/review options")
+        self.assertEqual((ack["position"], ack["queued"]), (0, False))
+        texts = [e["payload"]["text"] for e in api.events(s) if e["event"] == "chat_message"]
+        self.assertTrue(any("slice" in text for text in texts))
+        for bad in ("/review options fast -- a question", "/review options slice"):
+            err = error_of(lambda: api.send(s, bad))
+            self.assertEqual((err.status, err.code), (422, "invalid_command"))
+        self.assertEqual(api.history(s)[-1]["role"] == "user", False)             # nothing of the refused commands was stored as a message of the user
+
+    @mark.req("IF-101", "REQ-WFM-037")
+    @each_provider(IF, make(review=("First?",)))
+    def test_the_files_of_a_task_are_listed_and_downloaded_and_there_is_no_delete(self, api):
+        """TC-IF-101-30 (v8): a file that a task stored is announced by files_changed and named by chat_done, listed with name, size, time and task, and downloaded byte for byte; a name with a path is 422 invalid_file_name, an unknown name 404 not_found."""
+        s = api.login("anna", "pw-anna")
+        api.connect(s)
+        self.assertEqual(api.files(s), [])
+        api.events(s)
+        api.send(s, "/review do canary releases help?")
+        api.settle()
+        api.send(s, "no")
+        api.settle()
+        events = api.events(s)
+        changed = [e["payload"] for e in events if e["event"] == "files_changed"]
+        done = [e["payload"] for e in events if e["event"] == "chat_done"][0]
+        self.assertEqual(changed, [{"name": "review-contract.md", "task": "review"}])
+        self.assertEqual(done["files"], ["review-contract.md"])
+        listed = api.files(s)
+        self.assertEqual([(f["name"], f["size"], f["task"]) for f in listed], [("review-contract.md", len(b"# the report\n"), "review")])
+        self.assertEqual(api.file(s, "review-contract.md"), b"# the report\n")
+        self.assertEqual(error_of(lambda: api.file(s, "..x.md")).code, "invalid_file_name")
+        self.assertEqual((error_of(lambda: api.file(s, "nothing.md")).status, error_of(lambda: api.file(s, "nothing.md")).code), (404, "not_found"))
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -136,6 +136,7 @@ class ChatService:
         self._files = files                                                # the files volume (file_store.FileStore), None = tasks cannot store files
         self._monitor = None                                               # the status card of the running task
         self._late = False                                                 # the running task gives its result at the end (it asks questions)
+        self._task_files = []                                              # the names of the files that the running task stored: chat_done names them
         self._review_timeout = review_timeout      # seconds a review waits for the answer of the user; no answer in time is "no"
         self._waiter = None                        # {"author", "replies"}: the question of a running review that waits for its answer
         self._author = None                        # the account whose task runs
@@ -226,7 +227,7 @@ class ChatService:
             try:
                 parsed = self._tasks.parse(text, self._skill_options)
             except TaskCommandError as exc:
-                return {"ok": False, "error": str(exc)}
+                return {"ok": False, "error": str(exc), "code": "invalid_command"}
             gone = re.match(r"/(\w+)", text.strip())
             if parsed is None and gone and gone.group(1).lower() in self._unavailable:
                 return {"ok": False, "error": "%s is not available." % gone.group(1).capitalize()}
@@ -269,6 +270,7 @@ class ChatService:
             if self._files is None:
                 raise RuntimeError("no files volume is configured")
             info = self._files.put(name, data, task=task, message_id=message_id, account=self._author)
+            self._task_files.append(info["name"])
             self._emit("files_changed", {"name": info["name"], "task": task})
             return info["name"]
         return put
@@ -603,7 +605,7 @@ class ChatService:
         entry = self._tasks.get(task) if task != "chat" else None
         late = entry is not None and "ask" in entry.needs            # REQ-WFM-036: the result of a task that asks questions is the newest message, its progress is the status card
         with self._lock:
-            self._message_id, self._pipeline, self._sources, self._show_pipeline, self._late = message_id, [], [], False, late
+            self._message_id, self._pipeline, self._sources, self._show_pipeline, self._late, self._task_files = message_id, [], [], False, late, []
         model = self._model_info()[0]
         if entry is not None:
             self.set_activity("thinking")
@@ -687,7 +689,7 @@ class ChatService:
             extra["sources"] = sources
         record = self.log.append("assistant", state["text"], id=message_id, created=created, emotion=state["emotion"],
                                  status=status, model=model, **extra)
-        self._emit("chat_done", {"id": message_id, "text": record["text"], "emotion": record["emotion"], "status": status})
+        self._emit("chat_done", {"id": message_id, "text": record["text"], "emotion": record["emotion"], "status": status, **({"files": list(self._task_files)} if self._task_files else {})})
         if self._monitor is not None:
             self._monitor.finish()                      # the card keeps the final figures
             self._monitor = None

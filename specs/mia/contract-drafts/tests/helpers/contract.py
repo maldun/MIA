@@ -164,9 +164,12 @@ class _ChatApiAdapter:
         from chat_log import ChatLog
         from chat_ops_api import create_chat_ops_blueprint
         from chat_service import ChatService
+        from file_store import FileStore
+        from files_api import create_files_blueprint
         from flask import Flask, g, jsonify, request
         from items_api import create_items_blueprint
         from moods import MoodTracker
+        from task_registry import Option, Task, TaskRegistry
         from trust_persona_api import create_trust_persona_blueprint
         folder = tempfile.mkdtemp()
         store = Storage(FileBackend(os.path.join(folder, "db")))
@@ -181,10 +184,14 @@ class _ChatApiAdapter:
         trust_file = os.path.join(folder, "source_trust.json")
         with open(trust_file, "w", encoding="utf-8") as fp:
             json.dump({"classes": {name: {"prior": value, "reason": "contract suite"} for name, value in self.TRUST_SOURCES.items()}}, fp)
+        self._files = FileStore(os.path.join(folder, "files"))
+        self._tasks = TaskRegistry()              # A-25: the tasks are registered, the chat service names none; the contract suite has one scripted task, `review`
+        self._tasks.register(Task("review", self._scripted_review, "Scripted review of the contract suite", "your question", "/review a question",
+                                  options=(Option("slice", "flag", False, "time slices"),), needs=("ask", "options", "files")))
         self._chat = ChatService(self._broadcast, ChatLog(os.path.join(folder, "chat.jsonl")), MoodTracker(os.path.join(REPO, "moods.json")),
                                  self._scripted_answer, queue_size=queue_limit, user_limit=user_limit, spawn=self._spawn,
                                  votes=store, wall_clock=lambda: self.START + self._now, behaviours=lambda: self.BEHAVIOURS,
-                                 run_review=self._scripted_review, review_timeout=30)
+                                 tasks=self._tasks, files=self._files, review_timeout=30)
         self._review_questions = tuple(review)
         app = Flask(__name__)
 
@@ -196,7 +203,7 @@ class _ChatApiAdapter:
                 return jsonify({"error": err.code}), err.status
 
         for blueprint in (create_items_blueprint(store, self._broadcast), create_trust_persona_blueprint(trust_file, os.path.join(folder, "persona.json"), self._broadcast),
-                          create_chat_ops_blueprint(self._chat)):
+                          create_chat_ops_blueprint(self._chat), create_files_blueprint(self._files)):
             app.register_blueprint(blueprint)
         self._http = app.test_client()
 
@@ -218,13 +225,13 @@ class _ChatApiAdapter:
         else:
             self._pending.append(target)
 
-    def _scripted_review(self, text, on_delta, on_emotion, should_stop, ask):
-        """the review of the contract suite: asks its questions one after the other and gives the report (stopped or not)"""
+    def _scripted_review(self, text, on_delta, on_emotion, should_stop, ask=None, options=None, files=None):
+        """the review of the contract suite: asks its questions one after the other (should_stop() waits while the task is paused), stores a file and gives the report (stopped or not)"""
         for question in self._review_questions:
             ask(question)
             if should_stop():
                 break
-        on_delta("the report")
+        files("review-contract.md", "# the report\n")
         return "the report"
 
     def settle(self):
@@ -293,8 +300,27 @@ class _ChatApiAdapter:
             self._threaded = True
         ack = self._chat.send(text, client_id=client_id, sender=user, author=user)
         if not ack["ok"]:
-            raise self._error({"empty_text": 422, "queue_full": 503}.get(ack.get("code"), 429), ack.get("code") or "rate_limited")
+            raise self._error({"empty_text": 422, "queue_full": 503, "invalid_command": 422}.get(ack.get("code"), 429), ack.get("code") or "rate_limited")
         return {"id": ack["id"], "position": ack["position"], "queued": ack["queued"], "message": ack["message"]}
+
+    def pause(self, session):
+        self._call("whoami", session)
+        return self._route("post", "/api/pause", session)
+
+    def resume(self, session):
+        self._call("whoami", session)
+        return self._route("post", "/api/resume", session)
+
+    def files(self, session):
+        return self._route("get", "/api/files", session)
+
+    def file(self, session, name):
+        """the bytes of a file of the files volume"""
+        got = self._http.get("/api/files/" + name, headers={"X-Session": session or ""})
+        if got.status_code >= 400:
+            body = got.get_json(silent=True) or {}
+            raise self._error(got.status_code, body.get("error"), body.get("rule"))
+        return got.data
 
     def stop(self, session):
         self._call("whoami", session)

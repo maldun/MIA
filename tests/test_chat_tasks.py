@@ -82,6 +82,7 @@ class ChatTasks(unittest.TestCase):
         self.assertIn("slice", self.log.history(limit=5)[0][-1]["text"])
         ack = service.send("/demo options fast -- q", author="anna")
         self.assertFalse(ack["ok"])
+        self.assertEqual(ack["code"], "invalid_command")
         self.assertIn("slice", ack["error"])
         self.assertEqual(service.status()["queue"], 0)
 
@@ -205,6 +206,7 @@ class ChatTasks(unittest.TestCase):
         self.assertTrue(self.idle(service))
         message_id = [p for e, p in self.events if e == "chat_done"][-1]["id"]
         self.assertEqual(self.seen, ["r.md"])
+        self.assertEqual([p["files"] for e, p in self.events if e == "chat_done"][-1], ["r.md"])        # IF-101 v8: chat_done names the files of the task
         self.assertEqual([(f["name"], f["task"], f["message_id"]) for f in files.list()], [("r.md", "demo", message_id)])
         self.assertIn(("files_changed", {"name": "r.md", "task": "demo"}), self.events)
         doc = store.get("reports", message_id)["doc"]
