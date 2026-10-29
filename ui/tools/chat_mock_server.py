@@ -33,6 +33,20 @@ from socketio.exceptions import ConnectionRefusedError  # noqa: E402,A004  (the 
 
 from errors import ApiError  # noqa: E402
 from if_101_chat_api import ChatApiMock  # noqa: E402
+# The mock server must not depend on the private configuration of the machine (setup_cfg.json: accounts, tokens, ports, models): with `accounts_enabled` the real login guard would answer
+# instead of the mock. web_app reads its configuration through config.ensure(), so the tracked example (every option at its default, accounts off) is handed to it from a temporary folder.
+import json  # noqa: E402
+from MIA import config as _config  # noqa: E402
+
+_example = os.path.join(repo, _config.EXAMPLE)
+_cfg_dir = tempfile.mkdtemp()
+with open(_example, encoding="utf-8") as _handle:
+    _cfg = json.load(_handle)
+_cfg["accounts_enabled"] = False
+with open(os.path.join(_cfg_dir, _config.NAME), "w", encoding="utf-8") as _handle:
+    json.dump(_cfg, _handle)
+_config.ensure = lambda folder: (os.path.join(_cfg_dir, _config.NAME), False)
+
 from MIA import web_app as w  # noqa: E402
 
 ACCOUNTS = {"anna": "pw-anna", "ben": "pw-ben", "carl": "pw-carl"}
