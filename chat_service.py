@@ -43,11 +43,15 @@ try:
     from .record_tables import CATEGORIES
     from .storage import StorageError
     from .speech_text import speech_text
+    from .task_monitor import TaskMonitor
+    from .task_registry import TaskCommandError, TaskRegistry
 except ImportError:  # used as plain script / in tests
     from chat_log import utc_now, MAX_PAGE
     from record_tables import CATEGORIES
     from storage import StorageError
     from speech_text import speech_text
+    from task_monitor import TaskMonitor
+    from task_registry import TaskCommandError, TaskRegistry
 
 MAX_LENGTH = 8000
 TASK_COMMAND = re.compile(r"/(lookup|research|search|review)(?:\s+(.*))?", re.I | re.S)        # /lookup question, /search query, /review question [until DATE]; /research is the old name of /lookup
@@ -125,8 +129,23 @@ class ChatError(Exception):
 class ChatService:
     def __init__(self, emit, log, mood, run_exchange, run_command=None, model_info=None, queue_size=1, user_limit=0,
                  rate_limit=(10, 60), spawn=None, clock=time.monotonic, run_lookup=None, run_search=None, votes=None, wall_clock=time.time,
-                 behaviours=None, reputable=0.6, repair=None, remember=None, run_review=None, review_timeout=1800):
+                 behaviours=None, reputable=0.6, repair=None, remember=None, run_review=None, review_timeout=1800,
+                 tasks=None, skill_options=None, prepare_task=None, argument_commands=None):
         self._emit = emit
+        self._tasks = tasks if tasks is not None else TaskRegistry()      # REQ-WFM-029: the tasks (lookup, search, review, ...) register themselves, the core names none of them
+        if run_lookup or run_search or run_review:                         # the old arguments, until the callers pass a registry
+            try:
+                from .legacy_tasks import tasks as legacy
+            except ImportError:
+                from legacy_tasks import tasks as legacy
+            for task in legacy(run_lookup, run_search, run_review):
+                if task.id not in self._tasks.ids():
+                    self._tasks.register(task)
+        self._skill_options = skill_options or {}                          # config `skill_options`: {task id: {option: value}}, the defaults of the options
+        self._prepare_task = prepare_task                                  # (task, options, ask) -> options: before a task runs, e.g. the class of the model; may ask the user
+        self._argument_commands = {k.lower(): v for k, v in (argument_commands or {}).items()}      # {name: fn(argument) -> text}: commands with an argument, e.g. /model paid <name>
+        self._monitor = None                                               # the status card of the running task
+        self._late = False                                                 # the running task gives its result at the end (it asks questions)
         self._run_lookup = run_lookup          # (question, on_delta, on_emotion, should_stop) -> the answer, for /lookup
         self._run_search = run_search              # (query, on_delta, on_emotion, should_stop) -> the list of results, for /search
         self._run_review = run_review              # (text, on_delta, on_emotion, should_stop, ask) -> the report, for /review; ask(text) posts a question and gives the reply or None
@@ -154,6 +173,8 @@ class ChatService:
         self._running = False
         self._current = None
         self._stop = threading.Event()
+        self._unpaused = threading.Event()
+        self._unpaused.set()
         self._hits = collections.defaultdict(collections.deque)
         self._commands = {c["command"] for c in COMMANDS}
         self._message_id = None          # the answer in progress: pipeline events belong to it
@@ -223,12 +244,24 @@ class ChatService:
             if self._running and (len(self._queue) >= self.queue_size or (self.user_limit and author and own >= self.user_limit)):
                 return {"ok": False, "error": "MIA is busy, please wait until she has answered.", "code": "queue_full"}
             command = self.is_command(text)
-            task, argument = self.task_command(text) or (None, None)
-            if task is not None and not argument:
-                example = {"lookup": "/lookup how tall is the Eiffel Tower", "search": "/search Eiffel Tower height", "review": "/review do canary releases reduce failed releases? until 2024-06-30"}[task]
-                return {"ok": False, "error": "Write %s after /%s, for example: %s" % ("what to search for" if task == "search" else "your question", task, example)}
-            if task is not None and {"lookup": self._run_lookup, "search": self._run_search, "review": self._run_review}[task] is None:
-                return {"ok": False, "error": "%s is not available." % task.capitalize()}
+            given = re.fullmatch(r"/(\w+)(?:\s+(.*))?", text.strip(), re.S)
+            if given and given.group(1).lower() in self._argument_commands:
+                try:
+                    answer = self._argument_commands[given.group(1).lower()]((given.group(2) or "").strip())
+                except ValueError as exc:
+                    answer = str(exc)
+                self.note(answer, command=text.strip())
+                return {"ok": True, "message": None, "queued": False, "command": True, "id": None, "position": 0}
+            try:
+                parsed = self._tasks.parse(text, self._skill_options)
+            except TaskCommandError as exc:
+                return {"ok": False, "error": str(exc)}
+            if parsed is None and self.task_command(text) is not None:            # a task name nobody registered
+                return {"ok": False, "error": "%s is not available." % self.task_command(text)[0].capitalize()}
+            if parsed is not None and parsed["help"]:
+                self.note(parsed["text"], command=text.strip())
+                return {"ok": True, "message": None, "queued": False, "command": True, "id": None, "position": 0}
+            task, argument, options = (parsed["task"], parsed["argument"], parsed["options"]) if parsed else (None, None, None)
             waiter = self._waiter
             if waiter is not None and not command and task is None and (not waiter["author"] or author == waiter["author"]):
                 fields = dict(({"client_id": client_id} if client_id else {}), **({"sender": author} if author else {}))
@@ -242,7 +275,7 @@ class ChatService:
                 record = self.log.append("user", text, **fields)
                 self._emit("chat_message", record)
             queued = self._running
-            self._queue.append(("command" if command else task if task is not None else "chat", argument if task is not None else text, author, author, record["id"] if record else None))
+            self._queue.append(("command" if command else task if task is not None else "chat", argument if task is not None else text, author, author, record["id"] if record else None, options))
             position = len(self._queue)
             self._start_worker()
         self.publish_status()
@@ -253,10 +286,43 @@ class ChatService:
     def stop(self):
         """stops the running answer (the text received so far stays)"""
         with self._lock:
-            running = self._running and self._current in ("chat", "review")
+            running = self._running and self._current != "command"
         if running:
             self._stop.set()
+            self._unpaused.set()                      # a paused task wakes up and sees the stop
         return running
+
+    def _stopped(self):
+        """should_stop for a task: waits here while the task is paused (so it starts no new step), then says whether it was stopped"""
+        while not self._unpaused.wait(0.1):
+            if self._stop.is_set():
+                break
+        return self._stop.is_set()
+
+    def pause(self):
+        """pauses the running task: it starts no new step (its should_stop() waits) and its time stops (REQ-WFM-033); False when no task runs"""
+        with self._lock:
+            monitor = self._monitor
+        if monitor is None or monitor.paused:
+            return False
+        self._unpaused.clear()
+        monitor.pause()
+        return True
+
+    def resume(self):
+        with self._lock:
+            monitor = self._monitor
+        if monitor is None or not monitor.paused:
+            return False
+        monitor.resume()
+        self._unpaused.set()
+        return True
+
+    def commands(self):
+        """the commands for the page: the fixed ones and one for each task of the registry"""
+        tasks = self._tasks.commands()
+        ids = {c["command"].strip() for c in tasks}
+        return [c for c in COMMANDS if c["command"].strip() not in ids] + tasks
 
     # --- operations on answers and votes (IF-201 v1) --------------------------------------------------------
     def _find(self, message_id):
@@ -291,7 +357,7 @@ class ChatService:
             own = sum(1 for item in self._queue if item[2] == account)
             if self._running and (len(self._queue) >= self.queue_size or (self.user_limit and own >= self.user_limit)):
                 raise ChatError("queue_full")
-            self._queue.append(("chat", asked["text"], account, asked.get("sender"), None))        # the answer names who asked, not who clicked
+            self._queue.append(("chat", asked["text"], account, asked.get("sender"), None, None))        # the answer names who asked, not who clicked
             position = len(self._queue)
             self._start_worker()
         self.publish_status()
@@ -459,6 +525,10 @@ class ChatService:
                 return
             if event.get("kind") == "run_start":
                 self._show_pipeline = bool((event.get("payload") or {}).get("show"))
+            if self._late:
+                if self._monitor is not None and event.get("plain"):
+                    self._monitor.update(phase=event["plain"])          # the progress of a task with a card is the card, not a message
+                return
             if not self._show_pipeline:
                 return
             self._pipeline.append(event)
@@ -513,11 +583,11 @@ class ChatService:
                     self._running = False
                     self._current = None
                     break
-                kind, text, _author, speaker, message_id = self._queue.popleft()
+                kind, text, _author, speaker, message_id, options = self._queue.popleft()
                 self._current, self._author = kind, _author
                 self._stop.clear()
             try:
-                self._do_command(text) if kind == "command" else self._do_chat(text, kind, speaker, message_id)
+                self._do_command(text) if kind == "command" else self._do_chat(text, kind, speaker, message_id, options)
             except Exception as exc:       # the worker must survive anything
                 self.mood.enter("error")                   # reporting an error has its mood (REQ-CHA-009)
                 self._emit("chat_error", {"message": "Something went wrong: %s" % exc})
@@ -538,20 +608,38 @@ class ChatService:
             self.set_activity(None)
         self.note(result or "Command %s done." % command, command=command)
 
-    def _do_chat(self, text, task="chat", speaker=None, user_message_id=None):
+    def _do_chat(self, text, task="chat", speaker=None, user_message_id=None, options=None):
         message_id = self.log.new_id()
         created = utc_now()
+        entry = self._tasks.get(task) if task != "chat" else None
+        late = entry is not None and "ask" in entry.needs            # REQ-WFM-036: the result of a task that asks questions is the newest message, its progress is the status card
         with self._lock:
-            self._message_id, self._pipeline, self._sources, self._show_pipeline = message_id, [], [], False
+            self._message_id, self._pipeline, self._sources, self._show_pipeline, self._late = message_id, [], [], False, late
         model = self._model_info()[0]
-        self._emit("chat_start", {"id": message_id, "role": "assistant", "created": created, **({"task": task} if task != "chat" else {})})
-        self._emit("variant", {"name": None})              # no workflow picks a character variant yet (REQ-CHV-008): the chat's variant stays
+        if entry is not None:
+            self.set_activity("thinking")
+            if self._prepare_task is not None:
+                try:
+                    options = self._prepare_task(entry, dict(options or {}), self.ask)
+                except Exception as exc:
+                    self.note("Could not prepare /%s: %s" % (task, exc))
+            self._monitor = TaskMonitor(self._emit, message_id, task, mode="slice" if (options or {}).get("slice") else "run")
+            self._monitor.update(phase="starting")
+        starter = {"id": message_id, "role": "assistant", "created": created, **({"task": task} if task != "chat" else {})}
+
+        def start():
+            self._emit("chat_start", starter)
+            self._emit("variant", {"name": None})          # no workflow picks a character variant yet (REQ-CHV-008): the chat's variant stays
+        if not late:
+            start()
         self.set_activity("thinking")
         state = {"text": "", "emotion": None, "emotions": [], "last": 0.0, "first": True, "shown": ""}
         repairing = self._repair is not None and task == "chat"      # the answers of /lookup carry quotes: they are never changed
 
         def on_delta(current):
             state["text"] = current
+            if late:
+                return                                  # the text comes once, at the end
             if state["first"] and current:
                 state["first"] = False
                 self.set_activity("speaking")
@@ -575,10 +663,12 @@ class ChatService:
 
         status = "done"
         try:
-            run = {"chat": self._run_exchange, "lookup": self._run_lookup, "search": self._run_search,
-                   "review": lambda q, on_delta_, on_emotion_, should_stop_: self._run_review(q, on_delta_, on_emotion_, should_stop_, self.ask)}[task]
-            # the model knows who writes (accounts only); the log keeps the plain text. A lookup or search question is data for a tool and stays as it is
-            final = run("[%s] %s" % (speaker, text) if speaker and task == "chat" else text, on_delta, on_emotion, self._stop.is_set)
+            # the model knows who writes (accounts only); the log keeps the plain text. The argument of a task is data for a tool and stays as it is
+            if entry is None:
+                final = self._run_exchange("[%s] %s" % (speaker, text) if speaker else text, on_delta, on_emotion, self._stop.is_set)
+            else:
+                handed = {"ask": self.ask, "options": options or {}, "monitor": self._monitor}
+                final = entry.run(text, on_delta, on_emotion, self._stopped, **{name: handed[name] for name in entry.needs})
             if final is not None:
                 state["text"] = final
             if self._stop.is_set():
@@ -593,11 +683,15 @@ class ChatService:
             state["text"] = self._repair(state["text"])                 # the whole answer, silently; the last delta equals the text of chat_done
             if state["text"] != state["shown"]:
                 self._emit("chat_delta", {"id": message_id, "text": state["text"]})
+        if late:
+            start()
+            if state["text"]:
+                self._emit("chat_delta", {"id": message_id, "text": state["text"]})
         extra = {"emotions": state["emotions"]} if len(state["emotions"]) > 1 else {}
         if task != "chat":
             extra["task"] = task
         with self._lock:
-            steps, sources, self._message_id = self._pipeline, self._sources, None
+            steps, sources, self._message_id, self._late = self._pipeline, self._sources, None, False
         if steps:
             extra["pipeline"] = steps
         if sources:
@@ -605,6 +699,10 @@ class ChatService:
         record = self.log.append("assistant", state["text"], id=message_id, created=created, emotion=state["emotion"],
                                  status=status, model=model, **extra)
         self._emit("chat_done", {"id": message_id, "text": record["text"], "emotion": record["emotion"], "status": status})
+        if self._monitor is not None:
+            self._monitor.finish()                      # the card keeps the final figures
+            self._monitor = None
+        self._unpaused.set()
         if self._remember is not None and task == "chat" and status == "done" and user_message_id:
             try:
                 self._remember(speaker or "page", user_message_id, text)       # after the answer is out: the page never waits for the memory; a failing memory costs nothing else

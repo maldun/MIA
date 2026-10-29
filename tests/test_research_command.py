@@ -309,7 +309,7 @@ class Routing(unittest.TestCase):
 
     def test_a_failure_of_the_research_is_reported_like_a_failure_of_the_chat(self):
         service = self.make()
-        service._run_lookup = lambda *a: (_ for _ in ()).throw(RuntimeError("The web search is not reachable (x)."))
+        service._tasks.get("lookup").run = lambda *a: (_ for _ in ()).throw(RuntimeError("The web search is not reachable (x)."))      # the run function is in the registry since A-23
         service.send("/lookup anything")
         self.assertTrue(self.idle(service))
         self.assertIn("chat_error", [e for e, _ in self.events])
