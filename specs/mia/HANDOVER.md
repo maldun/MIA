@@ -4,6 +4,8 @@ For a fresh session. Read this, then `CLAUDE.md` (rules), `specs/mia/plan.md` (t
 
 Everything below is **merged into master** (last merge `d89d253`) unless it says otherwise. Start a new job from a worktree and check first that it branched from current master (`git log --oneline -1`, then `git merge --ff-only master`).
 
+**Newest of all (2026-10-30): `specs/mia/handover-2026-10-30.md`** (usability work, extensions, login in the stack, run log provider, open items, rules); it is newer than everything below.
+
 **Newest (2026-10-28, night): `specs/mia/handover-review-workflow.md`** has the state of the review workflow (/review in the chat, A-18 to A-20), what the owner tests by hand and the next steps; it is newer than the one below.
 
 **Newer (2026-10-27, late): `specs/mia/handover-n-2-3-continue.md`** has the state of N-2.5 (done) and N-2.3 (in progress), the dev-split evidence for REQ-WFM-014/015 and the next steps; where it differs from the sections below, it is newer.
