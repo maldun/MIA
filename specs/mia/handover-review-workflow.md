@@ -49,3 +49,8 @@ Today: 4 test files delegated (`rr-slices`, `ft-sections`, `rc-parse`; plus the 
 
 ## How to work (short)
 Tests: `bash tools/run_in_image.sh tests/test_x.py` (host python is 3.14; stdlib-only tests also run with `python3`; the PDF wall tests run only on the host: `python3 tests/test_pdf_text.py`). The eval/measurement tools run with `~/prog/Python/venvs/mia312/bin/python tools/<tool>.py` and need Ollama with the light model (one 12B model in 16 GB; never the compose stack or the 26B model; MIA shutdown under load caused the fatal CPU machine checks). Amendments: draft under `specs/mia/amendments/A-NN/`, `tools/apply_amendment_aNN.sh` with `tools/amendment_lib.sh`, a decision in `review-log.md`. Never set truth labels (the owner does), never edit protected files, every bad output becomes a proposed case first. A shell command that mixes `cp`, `git`, variables and heredocs is sometimes refused: use Write/Edit and small scripts in the scratchpad. End every branch job with exact merge commands and commit every file first.
+
+## Update 2026-10-29 (unattended job): items 3 and 4 are drafted
+- **A-21** (open item 3): mock, real adapter and tests TC-IF-101-24/-25 for the waiting `/review`, drafts under `specs/mia/contract-drafts/tests/`; install with `bash tools/apply_amendment_a21.sh --do` (D-97).
+- **A-22** (item 4 of `handover-n-2-3-continue.md`): `tests/acceptance/test_workflow_library.py` for TC-WFM-002/-003/-004/-026; install with `bash tools/apply_amendment_a22.sh --do` (D-98). TC-WFM-002/-004 were typed by the local coder (verdict ok).
+- Both tested on a scratch copy in the image; nothing protected was touched. Still open from that list: the owner's hand test, labels, T-07 measurements.

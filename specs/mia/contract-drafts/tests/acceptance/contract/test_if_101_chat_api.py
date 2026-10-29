@@ -386,6 +386,49 @@ class ChatApiContract(unittest.TestCase):
         api.settle()
         self.assertEqual([e["payload"] for e in api.events(s) if e["event"] == "variant"], [{"name": "summer"}])
 
+    @mark.req("IF-101", "REQ-WFM-019")
+    @each_provider(IF, make(review=("First?", "Second?")))
+    def test_a_waiting_review_takes_the_next_message_of_its_user_as_the_answer(self, api):
+        """TC-IF-101-24 (v7): `/review question` starts a task that posts its questions as messages of MIA and has the status activity `waiting`; the next message of the SAME account is the answer (stored and sent, `queued` false, position 0); a message of another account is queued and is no answer; the report comes as chat_done."""
+        anna, ben = api.login("anna", "pw-anna"), api.login("ben", "pw-ben")
+        api.connect(anna)
+        api.events(anna)
+        api.send(anna, "/review do canary releases help?")
+        api.settle()
+        events = api.events(anna)
+        self.assertEqual([e["payload"]["text"] for e in events if e["event"] == "chat_message" and e["payload"]["role"] == "assistant"], ["First?"])
+        self.assertEqual([e["payload"]["activity"] for e in events if e["event"] == "chat_status"][-1], "waiting")
+        reply = api.send(anna, "yes")
+        self.assertEqual((reply["position"], reply["queued"]), (0, False))
+        self.assertEqual(reply["message"]["text"], "yes")
+        other = api.send(ben, "hello from ben")
+        self.assertTrue(other["queued"])
+        api.settle()
+        events = api.events(anna)
+        self.assertEqual([e["payload"]["text"] for e in events if e["event"] == "chat_message" and e["payload"]["role"] == "assistant"], ["Second?"])      # ben's text answered nothing
+        self.assertNotIn("chat_done", names(events))
+        api.send(anna, "no")
+        api.settle()
+        done = [e["payload"] for e in api.events(anna) if e["event"] == "chat_done"]
+        self.assertEqual([(d["text"], d["status"]) for d in done][0], ("the report", "done"))
+        self.assertEqual(len(done), 2)                                               # ben's message was answered after the review
+        self.assertEqual([m["text"] for m in api.history(anna) if m["role"] == "user"], ["/review do canary releases help?", "yes", "hello from ben", "no"])
+
+    @mark.req("IF-101", "REQ-WFM-019")
+    @each_provider(IF, make(review=("First?",)))
+    def test_stop_ends_a_review_that_waits_for_an_answer(self, api):
+        """TC-IF-101-25 (v7): stop also ends a review that waits for an answer; the review gives its report as it stands, chat_done has the status stopped."""
+        s = api.login("anna", "pw-anna")
+        api.connect(s)
+        api.send(s, "/review do canary releases help?")
+        api.settle()
+        api.events(s)
+        self.assertEqual(api.stop(s), {"stopped": True})
+        api.settle()
+        done = [e["payload"] for e in api.events(s) if e["event"] == "chat_done"]
+        self.assertEqual([d["status"] for d in done], ["stopped"])
+        self.assertEqual(api.stop(s), {"stopped": False})
+
 
 if __name__ == "__main__":
     unittest.main()
