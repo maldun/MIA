@@ -36,3 +36,4 @@ eval/suites/verdicts_vitaminc*/
 mia.log
 out.wav
 local-tasks.jsonl
+.local-tasks/
