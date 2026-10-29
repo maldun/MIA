@@ -21,7 +21,7 @@ START = datetime.datetime(2026, 1, 5, tzinfo=datetime.timezone.utc)      # a Mon
 
 
 class ChatApiMock:
-    def __init__(self, accounts=None, answers=None, queue_limit=5, user_limit=2):
+    def __init__(self, accounts=None, answers=None, queue_limit=5, user_limit=2, review=("Shall I go on?",)):
         self.accounts = accounts or {"anna": "pw-anna", "ben": "pw-ben", "carl": "pw-carl", "dora": "pw-dora", "emil": "pw-emil"}      # v5: five voters for the counters
         self.answers = list(answers or [])            # each: a list of sentences, or {"sentences": [...], "emotion": "..."}
         self.queue_limit, self.user_limit = queue_limit, user_limit
@@ -38,6 +38,9 @@ class ChatApiMock:
         self._persona = {"text": "MIA is a friendly, curious assistant."}
         self._variant = None
         self._regenerate = set()                      # ids of queued user messages whose answer is a new try
+        self._review_questions = tuple(review)        # v7: the questions a scripted /review asks one after the other before its report "the report"
+        self._review = None                           # v7: the running review {"author", "asked", "waiting", "replies", "stop", "id"}
+        self._texts = {}                              # id of a queued user message -> its text
 
     # ------------------------------------------------------------ test adapter
     def advance_time(self, seconds):
@@ -45,8 +48,21 @@ class ChatApiMock:
 
     def settle(self):
         """Answer everything that is queued."""
-        while self._queue:
-            self._answer(self._queue.popleft())
+        while True:
+            if self._review is not None:
+                if not self._advance_review():
+                    self._broadcast("chat_status", self._status())
+                    break                                     # v7: the review waits for the answer of its user
+            elif self._queue:
+                asked = self._queue.popleft()
+                if re.match(r"/review\s+\S", self._texts.get(asked, ""), re.I):
+                    self._ids += 1
+                    self._review = {"author": self._owner.get(asked), "asked": 0, "waiting": False, "replies": [], "stop": False, "id": "m%d" % self._ids}
+                    self._broadcast("chat_start", {"id": self._review["id"], "role": "assistant", "task": "review"})
+                else:
+                    self._answer(asked)
+            else:
+                break
             self._broadcast("chat_status", self._status())
 
     # ------------------------------------------------------------ the interface
@@ -72,17 +88,30 @@ class ChatApiMock:
             raise ApiError(422, "empty_text")
         if len(self._queue) >= self.queue_limit or sum(1 for i in self._queue if self._owner.get(i) == user) >= self.user_limit:
             raise ApiError(503, "queue_full")
+        review = self._review
+        if review is not None and review["waiting"] and user == review["author"] and not text.strip().startswith("/"):
+            message = self._record("user", user, text)           # v7: the answer to a waiting review: stored and sent like a message, not queued, not counted for queue_full
+            if client_id:
+                message["client_id"] = client_id
+            self._broadcast("chat_message", message)
+            review["replies"].append(text)
+            return {"id": message["id"], "position": 0, "queued": False, "message": dict(message)}
         message = self._record("user", user, text)
         if client_id:
             message["client_id"] = client_id              # v1: the page finds its own message again by the id it made up
         self._broadcast("chat_message", message)
+        queued = bool(self._queue) or self._review is not None
         self._queue.append(message["id"])
         self._owner[message["id"]] = user
+        self._texts[message["id"]] = text
         self._broadcast("chat_status", self._status())
-        return {"id": message["id"], "position": len(self._queue), "message": dict(message)}
+        return {"id": message["id"], "position": len(self._queue), "queued": queued, "message": dict(message)}
 
     def stop(self, session):
         self._user(session)
+        if self._review is not None:
+            self._review["stop"] = True                       # v7: also while the review waits for an answer
+            return {"stopped": True}
         if not self._queue:
             return {"stopped": False}
         self._stop_next = True
@@ -303,8 +332,35 @@ class ChatApiMock:
         self._history.append(record)
         return record
 
+    def _advance_review(self):
+        """v7: one step of the scripted review: end it on stop, take a waiting reply, ask the next question, or give the report. False = it waits for the answer."""
+        review = self._review
+        if review["stop"]:
+            return self._end_review("stopped")                # the report as it stands
+        if review["waiting"]:
+            if not review["replies"]:
+                return False
+            review["replies"].pop(0)
+            review["waiting"] = False
+        if review["asked"] < len(self._review_questions):
+            question = self._record("assistant", "MIA", self._review_questions[review["asked"]])
+            review["asked"] += 1
+            review["waiting"] = True
+            self._broadcast("chat_message", question)
+            return False
+        return self._end_review("done")
+
+    def _end_review(self, status):
+        record = {"id": self._review["id"], "role": "assistant", "sender": "MIA", "text": "the report", "created": "t%d" % int(self.now)}
+        self._history.append(record)
+        self._broadcast("chat_delta", {"id": record["id"], "text": "the report"})
+        self._broadcast("chat_done", {"id": record["id"], "text": "the report", "emotion": "neutral", "status": status})
+        self._review = None
+        return True
+
     def _status(self):
-        return {"busy": bool(self._queue), "queue": len(self._queue)}
+        waiting = self._review is not None and self._review["waiting"]
+        return {"busy": bool(self._queue) or self._review is not None, "activity": "waiting" if waiting else "idle", "queue": len(self._queue)}
 
     def _broadcast(self, event, payload):
         for session in self._sessions:
