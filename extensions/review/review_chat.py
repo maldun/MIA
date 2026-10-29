@@ -53,7 +53,7 @@ def keywords_prompt(keywords, criteria):
     lines = ["I will search for these keywords:"] + ["- " + k for k in keywords]
     if criteria:
         lines += ["", "A work is ruled out by these criteria:"] + ["- %s: %s" % (c["code"], c["text"]) for c in criteria]
-    lines += ["", "Reply **yes** to start, **no** to cancel, or send your own keywords separated by commas."]
+    lines += ["", "Reply **yes** to start, **no** to cancel, or send your own keywords, separated by commas, semicolons or line breaks (a keyword may have several words)."]
     return "\n".join(lines)
 
 
@@ -77,7 +77,7 @@ def checkpoint_prompt(report):
 
 def terms_prompt(proposals, n):
     listed = ", ".join("%s (%d)" % (p["term"], p["works"]) for p in proposals)
-    return ("These terms occur in at least %d of the screened works and are not in the keyword list: %s.\nSearch for them too? Reply **yes** (all), **no**, or the terms you want, separated by commas."
+    return ("These terms occur in at least %d of the screened works and are not in the keyword list: %s.\nSearch for them too? Reply **yes** (all), **no**, or the terms you want, separated by commas, semicolons or line breaks (a term may have several words)."
             % (n, listed))
 
 
