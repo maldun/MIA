@@ -36,6 +36,16 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-203
 | TC-WFM-026 | REQ-WFM-026 | Component | 2 | component test with the mocks of the neighbouring interfaces | AC-16: with the fake storage each of the six operations works; an invalid graph is refused with the rule named | exact |
 | TC-WFM-027 | REQ-WFM-027 | Component | 2 | component test with the mocks of the neighbouring interfaces | AC-3: a term below N works is never proposed; a proposed term is searched only after approval | exact |
 | TC-WFM-028 | REQ-WFM-028 | Component | 2 | component test with the fake model server and the mocks of the interfaces | AC-3: every statement quotes its source; the combined grade follows the rule; grade and eligibility are independent; abstract only is marked | exact |
+| TC-WFM-029 | REQ-WFM-029 | Component | 2 | component test with the mocks of the neighbouring interfaces | AC-23: the list of commands shows each skill under its id; a duplicate id is refused; a new skill file appears without a change of code | exact |
+| TC-WFM-030 | REQ-WFM-030 | Component | 2 | component test with the mocks of the neighbouring interfaces | AC-23: options run, list, are refused when unknown, configured defaults are overridden by the call | exact |
+| TC-WFM-031 | REQ-WFM-031 | Component | 2 | component test with the mocks of the neighbouring interfaces | AC-23: the card shows exactly the reported figures; two reports within half a second give one update; the final figures stay | exact |
+| TC-WFM-032 | REQ-WFM-032 | Component | 2 | component test with the mocks of the neighbouring interfaces | AC-3: on a scripted run list = processed + to process and included + maybe + excluded = processed after every step; every limit shows used and limit | exact |
+| TC-WFM-033 | REQ-WFM-033 | Component | 2 | component test with the mocks of the neighbouring interfaces | AC-23: after pause no step starts and the used time is constant; resume goes on from the same step; stop ends a paused task | exact |
+| TC-WFM-034 | REQ-WFM-034 | Component | 2 | component test with the mocks of the neighbouring interfaces | AC-3: run mode asks nothing below the cap and ends at the cap with the cap named; slice mode asks at each limit | exact |
+| TC-WFM-035 | REQ-WFM-035 | Component | 2 | component test with the mocks of the neighbouring interfaces | AC-3: a new model is asked once and never again; a paid model gives the warning and slice; /model local changes the class | exact |
+| TC-WFM-036 | REQ-WFM-036 | Component | 2 | component test with the mocks of the neighbouring interfaces | AC-23: the result message is later in the history than the last question and its answer | exact |
+| TC-WFM-037 | REQ-WFM-037 | Component | 2 | component test with the mocks of the neighbouring interfaces | AC-23: a stored file is listed and downloaded byte for byte; bad names and types and files over a limit are refused; a file deleted in the volume leaves the list | exact |
+| TC-WFM-038 | REQ-WFM-038 | Component | 2 | component test with the mocks of the neighbouring interfaces | AC-3: the record read back equals the report; the markdown and LaTeX files hold every work; special characters are escaped | exact |
 
 ## Assumptions (checked in validation)
 

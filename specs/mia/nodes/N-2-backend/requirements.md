@@ -642,17 +642,17 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Status: Approved
 - History: –
 
-### REQ-BE-054 – Review in time slices
+### REQ-BE-054 – Review in run mode or time slices
 - Level: high   Subject: WebApplication
-- Text: The Backend shall work a review in time slices, give an intermediate report with a recommendation at the end of each slice and continue only when the requesting user agrees.
-- Rationale: refines FR-11
+- Text: The Backend shall work a review by default without a question at a used-up limit, bounded by hard caps, and in time slices on request (option `slice`) or for a paid model, give an intermediate report with a recommendation at the end of each slice and continue only when the requesting user agrees.
+- Rationale: refines FR-11; the hand review of 2026-10-29 found a question at every limit tedious with local models (the sentence about slices in FR-11 and the latency table of the HLS apply to the mode slice, see A-23)
 - Parent: FR-11
 - Priority: Should
 - Verification method: Test
-- Acceptance criterion: AC-3: after the first slice (60 s) the run waits for agreement (exact)
+- Acceptance criterion: AC-3: in slice mode the run waits for agreement after the first slice (60 s); in run mode it does not ask below the hard cap (exact)
 - Verified by: TC-WFM-019, TC-N2-002
 - Status: Approved
-- History: –
+- History: A-23 reworded (run mode is the default, slices are an option)
 
 ### REQ-BE-055 – Review stops by a code check
 - Level: high   Subject: WebApplication

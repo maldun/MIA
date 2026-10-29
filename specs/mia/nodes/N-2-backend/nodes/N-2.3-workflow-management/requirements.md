@@ -222,17 +222,17 @@ The library of workflows and skills as versioned data, the graph rules, specific
 - Status: Approved
 - History: A-18 reworded (narrow variant: a literature review in fixed stages, flow count as in PRISMA 2020; was: findings per sub-question, conflicts)
 
-### REQ-WFM-019 – Review in time slices
+### REQ-WFM-019 – Review in stages, run mode and slices
 - Level: low   Subject: TaskRuntime
-- Text: The Workflow management shall deliver the example workflow review so that it works in stages and time slices, gives an intermediate report with a recommendation after the stage of the abstract screening and at the end of each slice, and goes on to the full-text stage or the next slice only when the requesting user agrees.
+- Text: The Workflow management shall deliver the example workflow review so that it works in stages, gives an intermediate report with a recommendation after the stage of the abstract screening and goes on to the full-text stage only when the requesting user agrees; in the mode run (default, REQ-WFM-034) it asks no question at a used-up limit and ends at a hard cap with the report as it stands, in the mode slice (option `slice`) it also works in time slices, gives an intermediate report at the end of each slice and continues only when the user agrees.
 - Rationale: refines REQ-BE-054
 - Parent: REQ-BE-054
 - Priority: Should
 - Verification method: Test
-- Acceptance criterion: AC-3: after the abstract screening or the first slice (60 s), whichever comes first, the run waits for agreement; without it nothing more is read (exact)
+- Acceptance criterion: AC-3: after the abstract screening the run waits for agreement in both modes; in slice mode it waits for agreement after the first slice (60 s); in run mode no question comes at a used-up limit below the cap (exact)
 - Verified by: TC-WFM-019
 - Status: Approved
-- History: A-18 reworded (checkpoint before the full-text stage)
+- History: A-18 reworded (checkpoint before the full-text stage); A-23 reworded (run mode, slice as option)
 
 ### REQ-WFM-020 – Review stops by a code check
 - Level: low   Subject: TaskRuntime
@@ -357,3 +357,123 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verified by: TC-WFM-028
 - Status: Draft
 - History: A-18 new
+
+### REQ-WFM-029 – Skill id is the command
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall give every skill one unique id that is at the same time the name of its command in the chat, the name of its skill file and the id of its library entry, shall refuse a second skill with an id that is already in use, and shall build the list of commands from the library and not from a list in the code.
+- Rationale: refines REQ-BE-033; with many skills (lookup, search, review, ...) a command that is not the id of a skill is a second name to keep in step (owner 2026-10-29)
+- Parent: REQ-BE-033
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-23: the list of commands shows each skill under its id; a second skill with the same id is refused with the id named; a new skill file appears in the list without a change of code (exact)
+- Verified by: TC-WFM-029
+- Status: Draft
+- History: A-23 new
+
+### REQ-WFM-030 – Options of a skill
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall let every skill declare its options (name, type, default, a short text), accept them in the chat as `/<id> options <name>[=<value>] ... -- <argument>`, list them with their defaults for `/<id> options` alone, apply the defaults of the configuration key `skill_options` for the skills named there, and refuse an unknown option or a value of the wrong type with the options of the skill named.
+- Rationale: refines REQ-BE-033; options belong to the skill, not to the chat (owner 2026-10-29: `/review options slice`, the same pattern for every later skill)
+- Parent: REQ-BE-033
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-23: `/review options slice -- q` runs with slice and the argument q; `/review options` lists the options and defaults; an unknown option is refused and nothing runs; a configured default applies and is overridden by the call (exact)
+- Verified by: TC-WFM-030
+- Status: Draft
+- History: A-23 new
+
+### REQ-WFM-031 – Task monitor
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall let every task report its state while it runs, the phase, budget figures (used and limit) for time, tokens, model calls, API requests and the budgets of its own, and counts of its own, and shall show them on one status card per task that is updated in place at most twice per second and stays with the final figures after the task has ended.
+- Rationale: refines REQ-BE-033; a long task shows numbers and not only a sign of life (owner 2026-10-29); the card renders any budget and count the task reports, so every later task has the same monitor
+- Parent: REQ-BE-033
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-23: a task that reports gets a card with exactly the figures it reported; two reports within half a second give one update; the final figures stay on the card; a task that reports nothing gets the card with the time only (exact)
+- Verified by: TC-WFM-031
+- Status: Draft
+- History: A-23 new
+
+### REQ-WFM-032 – Figures of the review
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall report for the example workflow review at least the sources on the list, the sources processed and the sources still to process, the sources included, maybe and excluded, the sources dropped before the screening, and the limits for time, tokens, model calls, API requests, sources screened and sources read with what is used of each.
+- Rationale: refines REQ-BE-053; the figures of the owner's hand review 2026-10-29
+- Parent: REQ-BE-054
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-3: on a scripted run after every step on the list = processed + still to process; included + maybe + excluded = processed; every limit shows used and limit (exact)
+- Verified by: TC-WFM-032
+- Status: Draft
+- History: A-23 new
+
+### REQ-WFM-033 – Pause and resume
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall let the requesting user pause a running task and resume it, a paused task shall not start a new step and shall not use time of its budget, and stop shall end a paused task.
+- Rationale: refines REQ-BE-033; a run without questions must still be controllable (owner 2026-10-29)
+- Parent: REQ-BE-033
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-23: after pause no step starts and the used time stays constant for 5 s; after resume the task goes on from the same step; stop ends a paused task with the report as it stands (exact)
+- Verified by: TC-WFM-033
+- Status: Draft
+- History: A-23 new
+
+### REQ-WFM-034 – Run mode and slicing
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall run a task with a budget in the mode run by default, without a question at a used-up limit and bounded by hard caps of the size of the limits times a configurable factor (default 10), and in the mode slice, set by the option `slice` or by the class of the model, with the limits as slices and a question at each of them; a task that reaches a hard cap ends with its result as it stands and names the cap.
+- Rationale: refines REQ-BE-054; local models cost no money, so asking at every limit is tedious; paid models need the slices (owner 2026-10-29)
+- Parent: REQ-BE-054
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-3: in run mode no question is asked below the cap and the run ends at the cap with the cap named; in slice mode the question comes at each limit as before (exact)
+- Verified by: TC-WFM-034
+- Status: Draft
+- History: A-23 new
+
+### REQ-WFM-035 – Class of the model
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall keep for each model whether it is local or paid, ask the user once whether a model is paid when the model has not been used before and is not clearly local, never ask again for a model that is known, change the class only on the user's command `/model paid <name>` or `/model local <name>`, and give a warning at the start of a task with a paid model and use the mode slice by default for it.
+- Rationale: refines REQ-BE-054; commercial models must not run without slices unawares (owner 2026-10-29)
+- Parent: REQ-BE-054
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-3: a new model is asked once, the second use is not asked; a paid model gives the warning and slice; `/model local <name>` changes the stored class; the asking and the change are shown in the chat (exact)
+- Verified by: TC-WFM-035
+- Status: Draft
+- History: A-23 new
+
+### REQ-WFM-036 – Result at the end of the chat
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall, for a task that asks questions while it runs, publish the result as a new message at the end of the chat when it is ready, and show the progress only on the status card.
+- Rationale: refines REQ-BE-033; the result must not sit in a message far above the questions and answers that came later (owner 2026-10-29)
+- Parent: REQ-BE-033
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-23: on a review with two questions the result message has a later position in the history than the last question and its answer, and no message of the task exists before the result except the questions (exact)
+- Verified by: TC-WFM-036
+- Status: Draft
+- History: A-23 new
+
+### REQ-WFM-037 – Files in a volume
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall let a task store generated files in a dedicated volume (a folder that the configuration can move to another volume, by default on the disk of MIA) with a limit for one file and a limit for the whole volume from the configuration, refuse and say so when a limit would be crossed, never delete a file by itself, and list the files of the volume for every signed-in user with a download.
+- Rationale: refines REQ-BE-033; generated files (report, later more) need a place that is not a button on one message (owner 2026-10-29: a files area, deleted by the user in the volume)
+- Parent: REQ-BE-033
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-23: a stored file is listed with name, size, time and task and is downloaded byte for byte; a name with a path or a type that is not allowed is refused; a file over the limit is not written and the task says so; a file deleted in the volume is gone from the list (exact)
+- Verified by: TC-WFM-037
+- Status: Draft
+- History: A-23 new
+
+### REQ-WFM-038 – Report as a record
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall store the finished report of the example workflow review as a record in the database through the storage interface IF-102 with the question, the skill id and version, the account, the model pin and the structured report (flow figures, works with decisions, grades and notes, keywords, limits and the end reason), and shall render the files of the report (markdown and LaTeX, English headings) from this record.
+- Rationale: refines REQ-BE-053; a record can be used for further reference and for benchmarks, the files are a view of it (owner 2026-10-29)
+- Parent: REQ-BE-053
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-3: the record read back has the same figures and works as the report; the markdown and the LaTeX file made from it contain every work with its decision; the LaTeX special characters are escaped (exact)
+- Verified by: TC-WFM-038
+- Status: Draft
+- History: A-23 new

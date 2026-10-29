@@ -2395,17 +2395,17 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-WFM-018'> ReviewReport_Wfm018 {
         subject s : TaskRuntime;
-        doc /* The Workflow management shall deliver the example workflow review as a library entry that produces a report of kept and dropped sources with reasons, findings per sub-question with verbatim anchors, conflicts and open gaps. */
+        doc /* The Workflow management shall deliver the example workflow review (keywords, search per keyword, collection, screening, review of each work, report) as a library entry that produces a report with the keywords and the query of each search, a flow count (found, duplicates, dropped before screening, excluded at the abstract and at the full text with reasons, included), for each work its keywords, decision, grade and notes with verbatim anchors, and the open gaps (keywords without an included work). */
         @Trace { :>> verifiedBy = (HowVerified::measurement); }
     }
-    requirement def <'REQ-WFM-019'> ReviewInTimeSlices_Wfm019 {
+    requirement def <'REQ-WFM-019'> ReviewInStagesRunModeAndSlices_Wfm019 {
         subject s : TaskRuntime;
-        doc /* The Workflow management shall deliver the example workflow review so that it works in time slices, gives an intermediate report with a recommendation at the end of each slice and continues only when the requesting user agrees. */
+        doc /* The Workflow management shall deliver the example workflow review so that it works in stages, gives an intermediate report with a recommendation after the stage of the abstract screening and goes on to the full-text stage only when the requesting user agrees; in the mode run (default, REQ-WFM-034) it asks no question at a used-up limit and ends at a hard cap with the report as it stands, in the mode slice (option `slice`) it also works in time slices, gives an intermediate report at the end of each slice and continues only when the user agrees. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-WFM-020'> ReviewStopsByACodeCheck_Wfm020 {
         subject s : TaskRuntime;
-        doc /* The Workflow management shall deliver the example workflow review so that it ends when a code check finds every sub-question answered or a budget is used up. */
+        doc /* The Workflow management shall deliver the example workflow review so that it ends when a code check finds every collected work decided and no approved keyword left to search, or a budget is used up. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-WFM-021'> SourceRecordsAndCutOff_Wfm021 {
@@ -2436,6 +2436,66 @@ package MIA_NodeRequirements {
     requirement def <'REQ-WFM-026'> WorkflowAndGraphAPI_Wfm026 {
         subject s : TaskRuntime;
         doc /* The Workflow management shall list, read, save as a new version, show the history and diff of, and restore workflows and context graphs through IF-203, and refuse an invalid graph with the broken rule named. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-027'> KeywordExtensionWithApproval_Wfm027 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall, in the example workflow review, count by code the terms that occur in the screened works and are not in the keyword set, propose every term that occurs in at least N works (N = 3, to be optimised) and extend the search with it only after the requesting user approves. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-028'> StagedScreeningWithDecisionAndGrade_Wfm028 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall, in the example workflow review, screen each work in two stages, the abstract against the research question and the written inclusion and exclusion criteria, then each section of the open full text and its fit with the conclusion, so that each stage gives two independent judgements, the relevance of the work to the research question as a grade 0 to 3 and the eligibility as include, maybe or exclude with a reason code of a criterion, each with a short statement and a verbatim quote, code combines the stage grades by a fixed rule, no rule derives the eligibility from the grade, and a work without open full text keeps its abstract judgements marked as abstract only. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-029'> SkillIdIsTheCommand_Wfm029 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall give every skill one unique id that is at the same time the name of its command in the chat, the name of its skill file and the id of its library entry, shall refuse a second skill with an id that is already in use, and shall build the list of commands from the library and not from a list in the code. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-030'> OptionsOfASkill_Wfm030 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall let every skill declare its options (name, type, default, a short text), accept them in the chat as `/<id> options <name>[=<value>] ... -- <argument>`, list them with their defaults for `/<id> options` alone, apply the defaults of the configuration key `skill_options` for the skills named there, and refuse an unknown option or a value of the wrong type with the options of the skill named. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-031'> TaskMonitor_Wfm031 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall let every task report its state while it runs, the phase, budget figures (used and limit) for time, tokens, model calls, API requests and the budgets of its own, and counts of its own, and shall show them on one status card per task that is updated in place at most twice per second and stays with the final figures after the task has ended. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-032'> FiguresOfTheReview_Wfm032 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall report for the example workflow review at least the sources on the list, the sources processed and the sources still to process, the sources included, maybe and excluded, the sources dropped before the screening, and the limits for time, tokens, model calls, API requests, sources screened and sources read with what is used of each. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-033'> PauseAndResume_Wfm033 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall let the requesting user pause a running task and resume it, a paused task shall not start a new step and shall not use time of its budget, and stop shall end a paused task. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-034'> RunModeAndSlicing_Wfm034 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall run a task with a budget in the mode run by default, without a question at a used-up limit and bounded by hard caps of the size of the limits times a configurable factor (default 10), and in the mode slice, set by the option `slice` or by the class of the model, with the limits as slices and a question at each of them; a task that reaches a hard cap ends with its result as it stands and names the cap. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-035'> ClassOfTheModel_Wfm035 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall keep for each model whether it is local or paid, ask the user once whether a model is paid when the model has not been used before and is not clearly local, never ask again for a model that is known, change the class only on the user's command `/model paid <name>` or `/model local <name>`, and give a warning at the start of a task with a paid model and use the mode slice by default for it. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-036'> ResultAtTheEndOfTheChat_Wfm036 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall, for a task that asks questions while it runs, publish the result as a new message at the end of the chat when it is ready, and show the progress only on the status card. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-037'> FilesInAVolume_Wfm037 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall let a task store generated files in a dedicated volume (a folder that the configuration can move to another volume, by default on the disk of MIA) with a limit for one file and a limit for the whole volume from the configuration, refuse and say so when a limit would be crossed, never delete a file by itself, and list the files of the volume for every signed-in user with a download. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-038'> ReportAsARecord_Wfm038 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall store the finished report of the example workflow review as a record in the database through the storage interface IF-102 with the question, the skill id and version, the account, the model pin and the structured report (flow figures, works with decisions, grades and notes, keywords, limits and the end reason), and shall render the files of the report (markdown and LaTeX, English headings) from this record. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-RUN-001'> InternetTasksOnlyOnCommand_Run001 {
@@ -2983,9 +3043,9 @@ package MIA_NodeRequirements {
         doc /* When a user gives a research question, a cut-off date and a budget, the Backend shall produce a report of kept and dropped sources with reasons, findings per sub-question with verbatim anchors, conflicts and open gaps. */
         @Trace { :>> verifiedBy = (HowVerified::measurement); }
     }
-    requirement def <'REQ-BE-054'> ReviewInTimeSlices_Be054 {
+    requirement def <'REQ-BE-054'> ReviewInRunModeOrTimeSlices_Be054 {
         subject s : WebApplication;
-        doc /* The Backend shall work a review in time slices, give an intermediate report with a recommendation at the end of each slice and continue only when the requesting user agrees. */
+        doc /* The Backend shall work a review by default without a question at a used-up limit, bounded by hard caps, and in time slices on request (option `slice`) or for a paid model, give an intermediate report with a recommendation at the end of each slice and continue only when the requesting user agrees. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-BE-055'> ReviewStopsByACodeCheck_Be055 {
@@ -3691,7 +3751,7 @@ package MIA_NodeRequirements {
     requirement r_req_wfm_016 : LookupWithSources_Wfm016;
     requirement r_req_wfm_017 : SearchCommand_Wfm017;
     requirement r_req_wfm_018 : ReviewReport_Wfm018;
-    requirement r_req_wfm_019 : ReviewInTimeSlices_Wfm019;
+    requirement r_req_wfm_019 : ReviewInStagesRunModeAndSlices_Wfm019;
     requirement r_req_wfm_020 : ReviewStopsByACodeCheck_Wfm020;
     requirement r_req_wfm_021 : SourceRecordsAndCutOff_Wfm021;
     requirement r_req_wfm_022 : MethodTransfer_Wfm022;
@@ -3699,6 +3759,18 @@ package MIA_NodeRequirements {
     requirement r_req_wfm_024 : NoInventedSource_Wfm024;
     requirement r_req_wfm_025 : StateOnlyThroughTheStorageInterface_Wfm025;
     requirement r_req_wfm_026 : WorkflowAndGraphAPI_Wfm026;
+    requirement r_req_wfm_027 : KeywordExtensionWithApproval_Wfm027;
+    requirement r_req_wfm_028 : StagedScreeningWithDecisionAndGrade_Wfm028;
+    requirement r_req_wfm_029 : SkillIdIsTheCommand_Wfm029;
+    requirement r_req_wfm_030 : OptionsOfASkill_Wfm030;
+    requirement r_req_wfm_031 : TaskMonitor_Wfm031;
+    requirement r_req_wfm_032 : FiguresOfTheReview_Wfm032;
+    requirement r_req_wfm_033 : PauseAndResume_Wfm033;
+    requirement r_req_wfm_034 : RunModeAndSlicing_Wfm034;
+    requirement r_req_wfm_035 : ClassOfTheModel_Wfm035;
+    requirement r_req_wfm_036 : ResultAtTheEndOfTheChat_Wfm036;
+    requirement r_req_wfm_037 : FilesInAVolume_Wfm037;
+    requirement r_req_wfm_038 : ReportAsARecord_Wfm038;
     requirement r_req_run_001 : InternetTasksOnlyOnCommand_Run001;
     requirement r_req_run_002 : SwitchTheModel_Run002;
     requirement r_req_run_003 : ModelServerUnreachable_Run003;
@@ -3808,7 +3880,7 @@ package MIA_NodeRequirements {
     requirement r_req_be_051 : LookupWithSources_Be051;
     requirement r_req_be_052 : SearchCommand_Be052;
     requirement r_req_be_053 : ReviewReport_Be053;
-    requirement r_req_be_054 : ReviewInTimeSlices_Be054;
+    requirement r_req_be_054 : ReviewInRunModeOrTimeSlices_Be054;
     requirement r_req_be_055 : ReviewStopsByACodeCheck_Be055;
     requirement r_req_be_056 : SourceRecordsAndCutOff_Be056;
     requirement r_req_be_057 : MethodTransfer_Be057;
@@ -4060,6 +4132,18 @@ package MIA_NodeRequirements {
     satisfy r_req_wfm_024 by mia.taskRuntime;
     satisfy r_req_wfm_025 by mia.taskRuntime;
     satisfy r_req_wfm_026 by mia.taskRuntime;
+    satisfy r_req_wfm_027 by mia.taskRuntime;
+    satisfy r_req_wfm_028 by mia.taskRuntime;
+    satisfy r_req_wfm_029 by mia.taskRuntime;
+    satisfy r_req_wfm_030 by mia.taskRuntime;
+    satisfy r_req_wfm_031 by mia.taskRuntime;
+    satisfy r_req_wfm_032 by mia.taskRuntime;
+    satisfy r_req_wfm_033 by mia.taskRuntime;
+    satisfy r_req_wfm_034 by mia.taskRuntime;
+    satisfy r_req_wfm_035 by mia.taskRuntime;
+    satisfy r_req_wfm_036 by mia.taskRuntime;
+    satisfy r_req_wfm_037 by mia.taskRuntime;
+    satisfy r_req_wfm_038 by mia.taskRuntime;
     satisfy r_req_run_001 by mia.taskRuntime;
     satisfy r_req_run_002 by mia.taskRuntime;
     satisfy r_req_run_003 by mia.taskRuntime;
@@ -4420,6 +4504,18 @@ package MIA_NodeRequirements {
     allocate r_req_wfm_024 to mia.taskRuntime;
     allocate r_req_wfm_025 to mia.taskRuntime;
     allocate r_req_wfm_026 to mia.taskRuntime;
+    allocate r_req_wfm_027 to mia.taskRuntime;
+    allocate r_req_wfm_028 to mia.taskRuntime;
+    allocate r_req_wfm_029 to mia.taskRuntime;
+    allocate r_req_wfm_030 to mia.taskRuntime;
+    allocate r_req_wfm_031 to mia.taskRuntime;
+    allocate r_req_wfm_032 to mia.taskRuntime;
+    allocate r_req_wfm_033 to mia.taskRuntime;
+    allocate r_req_wfm_034 to mia.taskRuntime;
+    allocate r_req_wfm_035 to mia.taskRuntime;
+    allocate r_req_wfm_036 to mia.taskRuntime;
+    allocate r_req_wfm_037 to mia.taskRuntime;
+    allocate r_req_wfm_038 to mia.taskRuntime;
     allocate r_req_run_001 to mia.taskRuntime;
     allocate r_req_run_002 to mia.taskRuntime;
     allocate r_req_run_003 to mia.taskRuntime;
@@ -4791,6 +4887,18 @@ package MIA_NodeRequirements {
     dependency from r_req_wfm_024 to r_req_be_067;
     dependency from r_req_wfm_025 to r_req_be_074;
     dependency from r_req_wfm_026 to r_req_be_076;
+    dependency from r_req_wfm_027 to r_req_be_053;
+    dependency from r_req_wfm_028 to r_req_be_053;
+    dependency from r_req_wfm_029 to r_req_be_033;
+    dependency from r_req_wfm_030 to r_req_be_033;
+    dependency from r_req_wfm_031 to r_req_be_033;
+    dependency from r_req_wfm_032 to r_req_be_054;
+    dependency from r_req_wfm_033 to r_req_be_033;
+    dependency from r_req_wfm_034 to r_req_be_054;
+    dependency from r_req_wfm_035 to r_req_be_054;
+    dependency from r_req_wfm_036 to r_req_be_033;
+    dependency from r_req_wfm_037 to r_req_be_033;
+    dependency from r_req_wfm_038 to r_req_be_053;
     dependency from r_req_run_001 to r_req_wfx_002;
     dependency from r_req_run_002 to r_req_wfx_003;
     dependency from r_req_run_003 to r_req_wfx_004;

@@ -16,6 +16,8 @@ A leaf. Each task is small, vertical, fits one session and starts from a red tes
 | T-06 Lookup workflow and search command | REQ-WFM-016, REQ-WFM-017 | TC-WFM-016, TC-WFM-017 | T-01 |
 | T-07 Review workflow: report, stages and slices, stop by code, source records, keyword extension, staged screening | REQ-WFM-018, REQ-WFM-019, REQ-WFM-020, REQ-WFM-021, REQ-WFM-027, REQ-WFM-028 | TC-WFM-018, TC-WFM-019, TC-WFM-020, TC-WFM-021, TC-WFM-027, TC-WFM-028 | T-01 |
 | T-08 Method transfer and storage only through the interface | REQ-WFM-022, REQ-WFM-025 | TC-WFM-022, TC-WFM-025 | T-01 |
+| T-09 Skill ids and options, task monitor, pause, run mode, class of the model | REQ-WFM-019, REQ-WFM-029, REQ-WFM-030, REQ-WFM-031, REQ-WFM-032, REQ-WFM-033, REQ-WFM-034, REQ-WFM-035 | TC-WFM-019, TC-WFM-029 to TC-WFM-035 | T-07 |
+| T-10 Result at the end, files volume, report record | REQ-WFM-036, REQ-WFM-037, REQ-WFM-038 | TC-WFM-036, TC-WFM-037, TC-WFM-038 | T-09 |
 
 ## Tasks
 
@@ -90,3 +92,21 @@ A leaf. Each task is small, vertical, fits one session and starts from a red tes
 - Depends on: T-01
 - Done when: the listed tests are green and all other tests are unchanged
 - Notes: –
+
+### T-09: Skill ids and options, task monitor, pause, run mode, class of the model
+- Implements: REQ-WFM-019, REQ-WFM-029, REQ-WFM-030, REQ-WFM-031, REQ-WFM-032, REQ-WFM-033, REQ-WFM-034, REQ-WFM-035
+- Tests to turn green: TC-WFM-019, TC-WFM-029, TC-WFM-030, TC-WFM-031, TC-WFM-032, TC-WFM-033, TC-WFM-034, TC-WFM-035, contract suite of IF-101 v8 (events task_status, operations pause and resume)
+- Touches: `chat_service.py`, `task_monitor.py`, `skill_options.py`, `model_class.py`, `review_request.py`, `review_stages.py`, `review_chat.py`, `skills/review_*.md`, `library/`
+- Must not touch: tests/acceptance/, tests/helpers/, tests/smoke/, tests/integration/, benchmarks/, contracts/, eval/suites/, eval/baselines/
+- Depends on: T-07
+- Done when: the listed tests are green and all other tests are unchanged
+- Notes: Design: `specs/mia/eval-drafts/review-usability-design.md`. The monitor is generic (any task reports through `update`); the page work (status card) is a task of N-1 (amendment of its requirements follows with the contract tests of IF-101 v8).
+
+### T-10: Result at the end, files volume, report record
+- Implements: REQ-WFM-036, REQ-WFM-037, REQ-WFM-038
+- Tests to turn green: TC-WFM-036, TC-WFM-037, TC-WFM-038, contract suites of IF-101 v8 (files, file) and IF-302 v4 (table reports)
+- Touches: `chat_service.py`, `file_store.py`, `files_api.py`, `report_record.py`, `report_tex.py`, `review_chat.py`, `web_app.py`
+- Must not touch: tests/acceptance/, tests/helpers/, tests/smoke/, tests/integration/, benchmarks/, contracts/, eval/suites/, eval/baselines/
+- Depends on: T-09
+- Done when: the listed tests are green and all other tests are unchanged
+- Notes: The table `reports` is IF-302 v4 (new in A-23). The Files tab of the page is a task of N-1.
