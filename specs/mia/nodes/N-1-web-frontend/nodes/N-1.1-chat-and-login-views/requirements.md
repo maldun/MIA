@@ -269,3 +269,27 @@ The chat page: messages, queue, history, status line, voting, tasks and memos, e
 - Verified by: TC-CLV-022
 - Status: Approved
 - History: A-04 (2026-10-26)
+
+### REQ-CLV-023 – Status card of a task
+- Level: low   Subject: WebFrontEnd
+- Text: The Chat and login views shall show each running task on one status card that is updated in place from the event task_status with the phase, every budget as used and limit and every count the task reports, offer pause, resume and stop on it, and keep the card with the final figures after the task has ended.
+- Rationale: refines REQ-FE-014; the owner's hand review of /review 2026-10-29 (numbers instead of "...", pause for a long run)
+- Parent: REQ-FE-014
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-17: a task_status of the mock draws the figures it carries; a second one with the same id changes the same card; pause sends one pause request and the button becomes resume; a status after done does not change the card (exact)
+- Verified by: TC-CLV-023
+- Status: Draft
+- History: A-24 new
+
+### REQ-CLV-024 – Files list
+- Level: low   Subject: WebFrontEnd
+- Text: The Chat and login views shall list the files of the files volume in the workspace with name, size, time and task, offer each as a download, show a new file without a reload from the event files_changed, and offer no way to delete a file.
+- Rationale: refines REQ-FE-018; generated files are not buttons on a message (owner 2026-10-29), deleting is done in the volume
+- Parent: REQ-FE-018
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-17: the list of the mock is drawn newest first, each entry links to /api/files/<name>, an event files_changed draws the list again, no delete control exists (exact)
+- Verified by: TC-CLV-024
+- Status: Draft
+- History: A-24 new

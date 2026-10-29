@@ -1873,6 +1873,16 @@ package MIA_NodeRequirements {
         doc /* The Chat and login views shall offer a logout that ends the session at the server, closes the socket and shows the login. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
+    requirement def <'REQ-CLV-023'> StatusCardOfATask_Clv023 {
+        subject s : WebFrontEnd;
+        doc /* The Chat and login views shall show each running task on one status card that is updated in place from the event task_status with the phase, every budget as used and limit and every count the task reports, offer pause, resume and stop on it, and keep the card with the final figures after the task has ended. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CLV-024'> FilesList_Clv024 {
+        subject s : WebFrontEnd;
+        doc /* The Chat and login views shall list the files of the files volume in the workspace with name, size, time and task, offer each as a download, show a new file without a reload from the event files_changed, and offer no way to delete a file. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
     requirement def <'REQ-CHV-001'> ChatWithoutTheCharacter_Chv001 {
         subject s : WebFrontEnd;
         doc /* If the Character view cannot load, then it shall report the failure to the Chat and login views through IF-111 and stay hidden. */
@@ -2497,6 +2507,11 @@ package MIA_NodeRequirements {
         subject s : TaskRuntime;
         doc /* The Workflow management shall store the finished report of the example workflow review as a record in the database through the storage interface IF-102 with the question, the skill id and version, the account, the model pin and the structured report (flow figures, works with decisions, grades and notes, keywords, limits and the end reason), and shall render the files of the report (markdown and LaTeX, English headings) from this record. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-039'> SkillsAreSelfContainedExtensions_Wfm039 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall load each skill that runs as a task from a folder of its own (a manifest with the id, the text, the options and what the task needs from the core, the skill files and the code of the skill), so that a new skill needs no change of the chat service, the web application or the page, except a skill that adds an output view of its own, which belongs to the core. */
+        @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::inspection); }
     }
     requirement def <'REQ-RUN-001'> InternetTasksOnlyOnCommand_Run001 {
         subject s : TaskRuntime;
@@ -3646,6 +3661,8 @@ package MIA_NodeRequirements {
     requirement r_req_clv_020 : DeliveredByTheBackend_Clv020;
     requirement r_req_clv_021 : UseIF101Only_Clv021;
     requirement r_req_clv_022 : Logout_Clv022;
+    requirement r_req_clv_023 : StatusCardOfATask_Clv023;
+    requirement r_req_clv_024 : FilesList_Clv024;
     requirement r_req_chv_001 : ChatWithoutTheCharacter_Chv001;
     requirement r_req_chv_002 : OneExpressionAPI_Chv002;
     requirement r_req_chv_003 : LivingCharacter_Chv003;
@@ -3771,6 +3788,7 @@ package MIA_NodeRequirements {
     requirement r_req_wfm_036 : ResultAtTheEndOfTheChat_Wfm036;
     requirement r_req_wfm_037 : FilesInAVolume_Wfm037;
     requirement r_req_wfm_038 : ReportAsARecord_Wfm038;
+    requirement r_req_wfm_039 : SkillsAreSelfContainedExtensions_Wfm039;
     requirement r_req_run_001 : InternetTasksOnlyOnCommand_Run001;
     requirement r_req_run_002 : SwitchTheModel_Run002;
     requirement r_req_run_003 : ModelServerUnreachable_Run003;
@@ -4019,6 +4037,8 @@ package MIA_NodeRequirements {
     satisfy r_req_clv_020 by mia.frontEnd;
     satisfy r_req_clv_021 by mia.frontEnd;
     satisfy r_req_clv_022 by mia.frontEnd;
+    satisfy r_req_clv_023 by mia.frontEnd;
+    satisfy r_req_clv_024 by mia.frontEnd;
     satisfy r_req_chv_001 by mia.frontEnd;
     satisfy r_req_chv_002 by mia.frontEnd;
     satisfy r_req_chv_003 by mia.frontEnd;
@@ -4144,6 +4164,7 @@ package MIA_NodeRequirements {
     satisfy r_req_wfm_036 by mia.taskRuntime;
     satisfy r_req_wfm_037 by mia.taskRuntime;
     satisfy r_req_wfm_038 by mia.taskRuntime;
+    satisfy r_req_wfm_039 by mia.taskRuntime;
     satisfy r_req_run_001 by mia.taskRuntime;
     satisfy r_req_run_002 by mia.taskRuntime;
     satisfy r_req_run_003 by mia.taskRuntime;
@@ -4391,6 +4412,8 @@ package MIA_NodeRequirements {
     allocate r_req_clv_020 to mia.frontEnd;
     allocate r_req_clv_021 to mia.frontEnd;
     allocate r_req_clv_022 to mia.frontEnd;
+    allocate r_req_clv_023 to mia.frontEnd;
+    allocate r_req_clv_024 to mia.frontEnd;
     allocate r_req_chv_001 to mia.frontEnd;
     allocate r_req_chv_002 to mia.frontEnd;
     allocate r_req_chv_003 to mia.frontEnd;
@@ -4516,6 +4539,7 @@ package MIA_NodeRequirements {
     allocate r_req_wfm_036 to mia.taskRuntime;
     allocate r_req_wfm_037 to mia.taskRuntime;
     allocate r_req_wfm_038 to mia.taskRuntime;
+    allocate r_req_wfm_039 to mia.taskRuntime;
     allocate r_req_run_001 to mia.taskRuntime;
     allocate r_req_run_002 to mia.taskRuntime;
     allocate r_req_run_003 to mia.taskRuntime;
@@ -4765,6 +4789,8 @@ package MIA_NodeRequirements {
     dependency from r_req_clv_021 to r_req_fe_001;
     dependency from r_req_clv_021 to r_req_fe_026;
     dependency from r_req_clv_022 to r_req_fe_031;
+    dependency from r_req_clv_023 to r_req_fe_014;
+    dependency from r_req_clv_024 to r_req_fe_018;
     dependency from r_req_chv_001 to r_req_fe_006;
     dependency from r_req_chv_002 to r_req_fe_008;
     dependency from r_req_chv_003 to r_req_fe_009;
@@ -4899,6 +4925,7 @@ package MIA_NodeRequirements {
     dependency from r_req_wfm_036 to r_req_be_033;
     dependency from r_req_wfm_037 to r_req_be_033;
     dependency from r_req_wfm_038 to r_req_be_053;
+    dependency from r_req_wfm_039 to r_req_be_033;
     dependency from r_req_run_001 to r_req_wfx_002;
     dependency from r_req_run_002 to r_req_wfx_003;
     dependency from r_req_run_003 to r_req_wfx_004;

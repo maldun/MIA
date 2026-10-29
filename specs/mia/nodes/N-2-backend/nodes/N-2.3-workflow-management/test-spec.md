@@ -46,6 +46,7 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-203
 | TC-WFM-036 | REQ-WFM-036 | Component | 2 | component test with the mocks of the neighbouring interfaces | AC-23: the result message is later in the history than the last question and its answer | exact |
 | TC-WFM-037 | REQ-WFM-037 | Component | 2 | component test with the mocks of the neighbouring interfaces | AC-23: a stored file is listed and downloaded byte for byte; bad names and types and files over a limit are refused; a file deleted in the volume leaves the list | exact |
 | TC-WFM-038 | REQ-WFM-038 | Component | 2 | component test with the mocks of the neighbouring interfaces | AC-3: the record read back equals the report; the markdown and LaTeX files hold every work; special characters are escaped | exact |
+| TC-WFM-039 | REQ-WFM-039 | Component | 2 | component test with a temporary extensions folder; inspection of the core files | AC-23: a folder with a manifest is loaded, listed, parsed and run; no core file names a skill id | exact |
 
 ## Assumptions (checked in validation)
 

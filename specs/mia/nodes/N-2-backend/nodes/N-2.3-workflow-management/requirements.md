@@ -477,3 +477,15 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verified by: TC-WFM-038
 - Status: Draft
 - History: A-23 new
+
+### REQ-WFM-039 – Skills are self-contained extensions
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall load each skill that runs as a task from a folder of its own (a manifest with the id, the text, the options and what the task needs from the core, the skill files and the code of the skill), so that a new skill needs no change of the chat service, the web application or the page, except a skill that adds an output view of its own, which belongs to the core.
+- Rationale: refines REQ-BE-033; lookup and review are the models (owner 2026-10-29: skills are extensions, only a substantial addition such as a new output window goes into the core)
+- Parent: REQ-BE-033
+- Priority: Should
+- Verification method: Test, Inspection
+- Acceptance criterion: AC-23: a folder added to the extensions folder appears in the list of commands, its options are parsed and its task runs; no file of the core names the id of a skill (inspection, exact)
+- Verified by: TC-WFM-039
+- Status: Draft
+- History: A-24 new

@@ -16,6 +16,7 @@ A leaf. Each task is small, vertical, fits one session and starts from a red tes
 | T-06 Tasks, memos and memory views, editors | REQ-CLV-011, REQ-CLV-009 | TC-CLV-009, TC-CLV-011 | T-01 |
 | T-07 Layout, accessibility, devices, chat without the character | REQ-CLV-006, REQ-CLV-007, REQ-CLV-016 | TC-CLV-006, TC-CLV-007, TC-CLV-016 (phone part by checklist) | T-01 |
 | T-08 Plain stack, no outside request, delivered by the backend | REQ-CLV-017, REQ-CLV-019, REQ-CLV-020 | TC-CLV-017, TC-CLV-019, TC-CLV-020 | T-01 |
+| T-09 Status card of a task and the files list | REQ-CLV-023, REQ-CLV-024 | TC-CLV-023, TC-CLV-024 (the card and the list in the browser by checklist) | T-01 |
 
 ## Tasks
 
@@ -90,3 +91,12 @@ A leaf. Each task is small, vertical, fits one session and starts from a red tes
 - Depends on: T-01
 - Done when: the listed tests are green and all other tests are unchanged
 - Notes: The browser test records every request of a session.
+
+### T-09: Status card of a task and the files list
+- Implements: REQ-CLV-023, REQ-CLV-024
+- Tests to turn green: TC-CLV-023, TC-CLV-024
+- Touches: `templates/static/chat/task-card.js`, `task-card-model.js`, `workspace.js`, `api.js`, `app.js`, `messages.css`, `i18n/`
+- Must not touch: tests/acceptance/, tests/helpers/, tests/smoke/, tests/integration/, benchmarks/, contracts/, eval/suites/, eval/baselines/
+- Depends on: T-01
+- Done when: the listed tests are green and all other tests are unchanged
+- Notes: Built on 2026-10-29 together with N-2.3 T-09 and T-10 (the model of the card is tested in `tests/js/taskcard.test.mjs`); the DOM parts wait for the owner's look in the browser.

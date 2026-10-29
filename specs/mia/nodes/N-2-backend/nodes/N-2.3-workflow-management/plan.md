@@ -18,6 +18,7 @@ A leaf. Each task is small, vertical, fits one session and starts from a red tes
 | T-08 Method transfer and storage only through the interface | REQ-WFM-022, REQ-WFM-025 | TC-WFM-022, TC-WFM-025 | T-01 |
 | T-09 Skill ids and options, task monitor, pause, run mode, class of the model | REQ-WFM-019, REQ-WFM-029, REQ-WFM-030, REQ-WFM-031, REQ-WFM-032, REQ-WFM-033, REQ-WFM-034, REQ-WFM-035 | TC-WFM-019, TC-WFM-029 to TC-WFM-035 | T-07 |
 | T-10 Result at the end, files volume, report record | REQ-WFM-036, REQ-WFM-037, REQ-WFM-038 | TC-WFM-036, TC-WFM-037, TC-WFM-038 | T-09 |
+| T-11 Skills as extensions: lookup, search and review move into folders of their own | REQ-WFM-039 | TC-WFM-039 | T-09 |
 
 ## Tasks
 
@@ -110,3 +111,12 @@ A leaf. Each task is small, vertical, fits one session and starts from a red tes
 - Depends on: T-09
 - Done when: the listed tests are green and all other tests are unchanged
 - Notes: The table `reports` is IF-302 v4 (new in A-23). The Files tab of the page is a task of N-1.
+
+### T-11: Skills as extensions
+- Implements: REQ-WFM-039
+- Tests to turn green: TC-WFM-039
+- Touches: `task_registry.py`, `extensions/`, `legacy_tasks.py`, `chat_service.py`, `web_app.py`, `research_chat.py`, `review_chat.py`
+- Must not touch: tests/acceptance/, tests/helpers/, tests/smoke/, tests/integration/, benchmarks/, contracts/, eval/suites/, eval/baselines/
+- Depends on: T-09
+- Done when: the listed tests are green, `COMMANDS` names no skill, `legacy_tasks.py` and the old `run_*` arguments of `ChatService` are gone, and all other tests are unchanged
+- Notes: Today (A-23) each skill describes itself in its own module (`lookup_task`, `search_task`, `review_task`) and `web_app.py` registers them; the step to a folder with a manifest and a loader is this task. Open: where the code of a skill lives (a package under `extensions/<id>/`) and how its tests are found.
