@@ -3,11 +3,11 @@
 # long_time_history.json, templates/node_modules, links of .claude/worktrees ...). The plan of this script: undo only that commit (the files stay on disk, untracked again), commit again
 # only the 11 files that belong to A-22 and A-24 (contracts/, specs/, tests/), and move the branch t11-extensions onto the new master.
 # Run it in the MAIN checkout:
-#   bash tools/undo_swept_commit.sh           show what it would do (changes nothing)
+#   bash tools/undo_swept_commit.sh           show what it would do (changes nothing); from another checkout: MIA_MAIN=/path/to/main bash that/tools/undo_swept_commit.sh
 #   bash tools/undo_swept_commit.sh --do      do it
 # Refuses to run when the commit is already pushed. Idempotent: when master no longer has the swept commit it says so.
 set -eu
-cd "$(dirname "$0")/.."
+cd "${MIA_MAIN:-$(dirname "$0")/..}"
 BAD=$(git log --format=%H --grep='^plan: A-22, A-24 installed$' -n 1 master)
 if [ -z "$BAD" ]; then echo "no swept commit on master: nothing to do"; exit 0; fi
 if git branch -r --contains "$BAD" 2>/dev/null | grep -q .; then echo "the commit $BAD is already on a remote branch: do not rewrite it; ask first"; exit 1; fi
