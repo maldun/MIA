@@ -13,6 +13,7 @@ import { initChat } from './chat.js';
 import { initLogin } from './login.js';
 import { createApi } from './api.js';
 import { initWorkspace } from './workspace.js';
+import { initTaskCards } from './task-card.js';
 import { initAccount } from './account.js';
 import { variantLabel } from './panels-model.js';
 import { initMood } from './mood.js';
@@ -198,6 +199,8 @@ chat = initChat({
   onLoginRequired: () => login.open(),
   api,
 });
+
+initTaskCards({ list: $('messages'), socket, api, t, onStop: () => socket.emit('chat_stop'), notify: toast });
 
 let commands = [];
 loadCommands().then((list) => { commands = list; });

@@ -104,10 +104,11 @@ test('TC-CLV-015: the login screen has an opaque black backdrop, so the app behi
 test('TC-CLV-021: every address and socket event the page uses is one of the interface (or of the character and the voice)', () => {
   const dir = new URL('../../templates/static/chat/', import.meta.url).pathname;
   const allowedPaths = new Set(['/api/login', '/api/chat/history', '/api/chat/commands', '/character-backgrounds.json',
-    '/api/whoami', '/api/logout', '/api/change_password', '/api/regenerate', '/api/speak_again', '/api/account', '/api/vote', '/api/score', '/api/items', '/api/trust', '/api/persona']);   // IF-101 v1, v2 (logout)
+    '/api/whoami', '/api/logout', '/api/change_password', '/api/regenerate', '/api/speak_again', '/api/account', '/api/vote', '/api/score', '/api/items', '/api/trust', '/api/persona',
+    '/api/pause', '/api/resume', '/api/files', '/api/files/']);   // IF-101 v1; v8: pause, resume, files and the download of one file, v2 (logout)
   const allowedEvents = new Set(['chat_send', 'chat_stop', 'character_ready', 'audio_claim', 'audio_ended', 'chat_message', 'chat_start', 'chat_delta', 'chat_done', 'chat_status',
     'chat_pipeline', 'chat_error', 'expression', 'audio_reload', 'audio_owner', 'connect', 'disconnect', 'connect_error',
-    'variant', 'score', 'item_changed', 'trust_changed', 'persona_changed']);                                                                                                  // IF-101 v1
+    'variant', 'score', 'item_changed', 'trust_changed', 'persona_changed', 'task_status', 'files_changed']);                                                               // IF-101 v1; v8: task_status, files_changed
   const paths = new Set();
   const events = new Set();
   for (const file of readdirSync(dir).filter((f) => f.endsWith('.js'))) {

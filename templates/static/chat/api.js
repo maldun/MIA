@@ -47,6 +47,9 @@ export function createApi({ origin = location.origin, fetchFn = (url, init) => f
     deleteItem: (kind, id) => request('DELETE', '/api/items', { query: { kind, id } }),
     trust: () => request('GET', '/api/trust'),
     setTrust: (source, value) => request('POST', '/api/trust', { body: { source, value } }),
+    pause: () => request('POST', '/api/pause'),
+    resume: () => request('POST', '/api/resume'),
+    files: () => request('GET', '/api/files'),
     persona: () => request('GET', '/api/persona'),
     savePersona: (doc) => request('POST', '/api/persona', { body: { doc } }),
   };

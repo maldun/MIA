@@ -328,3 +328,15 @@ kbd {
 .pipeline-steps .step.retry::before { content: "↻"; color: var(--warn); }
 .pipeline-steps .step.error { color: var(--danger); }
 .pipeline-steps .step.error::before { content: "✗"; }
+
+/* the status card of a running task (REQ-WFM-031) */
+.task-card { margin: .5rem 0; padding: .6rem .8rem; border: 1px solid var(--border, #8884); border-radius: .5rem; font-size: .9em; }
+.task-card.done { opacity: .85; }
+.task-card-head { display: flex; gap: .6rem; align-items: baseline; flex-wrap: wrap; }
+.task-card-phase { flex: 1; opacity: .8; }
+.task-card dl { margin: .4rem 0 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: .25rem .8rem; }
+.task-card-row { display: flex; flex-wrap: wrap; gap: .4rem; align-items: baseline; }
+.task-card-row dt { opacity: .75; }
+.task-card-row dd { margin: 0; font-variant-numeric: tabular-nums; }
+.task-card progress { width: 100%; height: .35rem; }
+.task-card-buttons { margin-top: .5rem; display: flex; gap: .5rem; }

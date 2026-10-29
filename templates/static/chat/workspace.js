@@ -3,7 +3,7 @@
 // open tab is drawn again, unless the reader is typing in it: then a short note says so and nothing is overwritten.
 import { itemDraftError, parseTrust, scoreLines } from './panels-model.js';
 
-const TABS = ['tasks', 'memos', 'memory', 'trust', 'persona', 'score'];
+const TABS = ['tasks', 'memos', 'memory', 'files', 'trust', 'persona', 'score'];
 const RECORD_TABS = ['tasks', 'memos', 'memory'];
 
 function el(tag, className, text) {
@@ -123,6 +123,27 @@ export function initWorkspace({ dialog, tabsEl, body, closeButton, api, socket, 
     target.append(el('p', 'hint', t('workspace.persona_hint')), area, save);
   }
 
+  // --- files (IF-101 v8): what tasks stored in the files volume; the user deletes in the volume, so there is no delete here ------------------------------
+  function sizeText(bytes) {
+    return bytes < 1024 ? `${bytes} B` : bytes < 1048576 ? `${(bytes / 1024).toFixed(1)} KB` : `${(bytes / 1048576).toFixed(1)} MB`;
+  }
+
+  async function drawFiles(target) {
+    const files = await api.files();
+    if (!files.length) { target.append(el('p', 'hint', t('workspace.files.empty'))); return; }
+    const list = el('ul', 'workspace-list files');
+    list.setAttribute('aria-label', t('workspace.tab.files'));
+    for (const file of files) {
+      const row = el('li');
+      const link = el('a', '', file.name);
+      link.href = `/api/files/${encodeURIComponent(file.name)}`;
+      link.download = file.name;
+      row.append(link, el('span', 'hint', ` ${sizeText(file.size)} · ${file.task ?? ''} · ${file.created}`));
+      list.append(row);
+    }
+    target.append(list);
+  }
+
   // --- score -----------------------------------------------------------------------------------------
   async function drawScore(target) {
     const lines = scoreLines(await api.score(), t);
@@ -136,7 +157,7 @@ export function initWorkspace({ dialog, tabsEl, body, closeButton, api, socket, 
     target.append(list);
   }
 
-  const DRAW = { tasks: (target) => drawRecords('tasks', target), memos: (target) => drawRecords('memos', target), memory: (target) => drawRecords('memory', target), trust: drawTrust, persona: drawPersona, score: drawScore };
+  const DRAW = { tasks: (target) => drawRecords('tasks', target), memos: (target) => drawRecords('memos', target), memory: (target) => drawRecords('memory', target), files: drawFiles, trust: drawTrust, persona: drawPersona, score: drawScore };
 
   function drawTabs() {
     tabsEl.textContent = '';
@@ -177,6 +198,7 @@ export function initWorkspace({ dialog, tabsEl, body, closeButton, api, socket, 
     else show(active);
   }
   socket.on('item_changed', (event) => changedElsewhere([event?.kind]));
+  socket.on('files_changed', () => changedElsewhere(['files']));
   socket.on('trust_changed', () => changedElsewhere(['trust']));
   socket.on('persona_changed', () => changedElsewhere(['persona']));
   socket.on('score', () => changedElsewhere(['score']));
