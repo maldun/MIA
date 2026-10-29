@@ -58,6 +58,21 @@ class TestTheQuestionAtTheCap(unittest.TestCase):
         for word in ("**continue**", "**summarize**", "**stop**"):
             self.assertIn(word, text)
 
+class TestWhatTheUserIsToldMatchesWhatIsParsed(unittest.TestCase):
+    """the prompts said "separated by commas" while the parser also splits at semicolons and line breaks (hand test 2026-10-29); the text now says what the code does, and a keyword of several words stays one keyword"""
+
+    def test_the_prompts_name_commas_semicolons_and_line_breaks(self):
+        from extensions.review.review_chat import keywords_prompt, terms_prompt
+        for text in (keywords_prompt(["graph colouring"], []), terms_prompt([{"term": "bipartite", "works": 3}], 3)):
+            self.assertIn("commas", text)
+            self.assertIn("line breaks", text)
+            self.assertIn("several words", text)
+
+    def test_what_the_prompts_promise_is_parsed(self):
+        reply = parse_reply("graph colouring, timetabling;  exam scheduling\nconstraint programming")
+        self.assertEqual(reply["items"], ["graph colouring", "timetabling", "exam scheduling", "constraint programming"])
+        self.assertEqual(parse_reply("one\n\ntwo\n")["items"], ["one", "two"])
+
 
 if __name__ == '__main__':
     unittest.main()
