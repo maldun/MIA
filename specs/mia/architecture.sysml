@@ -2648,9 +2648,9 @@ package MIA_NodeRequirements {
         doc /* The Run log shall make every statement of an answer traceable to the query that found its source. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
-    requirement def <'REQ-LOG-005'> StateOnlyThroughTheStorageInterface_Log005 {
+    requirement def <'REQ-LOG-005'> RunEventsAsAppendOnlyFilesNoDatabaseDriver_Log005 {
         subject s : Observability;
-        doc /* The Run log shall keep run events and run results only through the storage interface IF-102. */
+        doc /* The Run log shall keep the events of a run as append-only files in its own log folder, shall import no database driver, and shall leave the results of benchmark runs to the storage interface IF-102 (REQ-WFX-022). */
         @Trace { :>> verifiedBy = (HowVerified::inspection, HowVerified::test); }
     }
     requirement def <'REQ-WFX-001'> StepByStepAccount_Wfx001 {
@@ -3816,7 +3816,7 @@ package MIA_NodeRequirements {
     requirement r_req_log_002 : TypedRunEvents_Log002;
     requirement r_req_log_003 : ReplayAndComparison_Log003;
     requirement r_req_log_004 : StatementsTraceableToAQuery_Log004;
-    requirement r_req_log_005 : StateOnlyThroughTheStorageInterface_Log005;
+    requirement r_req_log_005 : RunEventsAsAppendOnlyFilesNoDatabaseDriver_Log005;
     requirement r_req_wfx_001 : StepByStepAccount_Wfx001;
     requirement r_req_wfx_002 : InternetTasksOnlyOnCommand_Wfx002;
     requirement r_req_wfx_003 : SwitchTheModel_Wfx003;

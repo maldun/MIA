@@ -54,17 +54,18 @@ The log is the source of truth: typed events with a run id, replay and compariso
 - Status: Approved
 - History: –
 
-### REQ-LOG-005 – State only through the storage interface
+### REQ-LOG-005 – Run events as append-only files, no database driver
 - Level: low-2   Subject: Observability
-- Text: The Run log shall keep run events and run results only through the storage interface IF-102.
-- Rationale: refines REQ-WFX-022
+- Text: The Run log shall keep the events of a run as append-only files in its own log folder, shall import no database driver, and shall leave the results of benchmark runs to the storage interface IF-102 (REQ-WFX-022).
+- Rationale: narrows REQ-WFX-022 (owner 2026-10-29, D-107): the events of a run are a stream of logs, not the shared state that NFR-8 puts into the database (history, summaries, chat log, feedback, presets, gestures, library entries, accounts); append-only files fit the stream, the replay and the account, and are what the tools read today
 - Parent: REQ-WFX-022
 - Priority: Must
 - Verification method: Inspection, Test
-- Acceptance criterion: AC-15: no database driver is imported outside the storage client
+- Acceptance criterion: AC-15: no database driver is imported by the code of the Run log or outside the storage client; the events of a run are appended to a file of the log folder and none is rewritten (exact)
 - Verified by: TC-LOG-005
 - Status: Approved
-- History: –
+- History: A-28 reworded (was: run events and run results only through the storage interface IF-102)
+
 
 ## Interface requirements
 
