@@ -53,6 +53,22 @@ deploy/up.sh memories path/to/folder
 
 MIA is stopped first (it saves its history when it stops), the files are copied in and MIA starts again. What the container had before is kept as `<name>.container-previous` in the volume.
 
+## The login (password check)
+
+Off by default. Turn it on and make the owner account:
+
+```
+deploy/up.sh owner NAME                  # asks for the password twice (at least 8 characters); never an argument
+```
+
+then put `"accounts_enabled": true` into `deploy/setup_cfg.compose.json` (or the file `MIA_CONFIG` names; the command reminds you if it is missing) and restart MIA:
+
+```
+deploy/up.sh db up -d --no-deps --force-recreate mia      # without "db" if the stack runs without the database
+```
+
+The page then asks for the login. From this machine (`http://localhost:8585`) it works over HTTP; from other devices use `https://<address>:8586` (HTTP is refused there). Five wrong logins in a minute lock the account for a minute. The accounts live in the data volume (`data/db`), so they survive a rebuild. More accounts and a new password: `podman exec -it mia_mia_1 python /opt/mia/MIA/tools/accounts_cli.py create|password|list NAME --dir /opt/mia/MIA/data/db`; users change their own password on the page.
+
 ## Taking over an old installation
 
 The settings you made in the app (expression presets, gestures), the chat log and the editor token are files in the `data/` folder of the old installation; the container starts with an empty volume. In one go:

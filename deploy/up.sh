@@ -1,5 +1,6 @@
 #!/bin/bash
 # deploy/up.sh [rocm|nvidia] [compose arguments]   start the stack (default: up -d --build); `deploy/up.sh down` stops it
+# deploy/up.sh owner NAME   the owner account (see below); also: character, calibration, memories, data, backup, restore
 # Makes deploy/.env with a secret for SearXNG on the first call. Needs podman with a compose provider (sudo dnf install podman-compose) or docker compose.
 set -e
 HERE="$(dirname "$(readlink -f "$0")")"
@@ -34,6 +35,25 @@ if [ "${1:-}" = "calibration" ]; then
   $ENGINE cp "$FILE" "$CONTAINER:/opt/mia/MIA/data/calibration.txt"
   $ENGINE restart "$CONTAINER" >/dev/null
   echo "calibration.txt copied into the data volume, MIA restarted"
+  exit 0
+fi
+# deploy/up.sh owner NAME   make the owner account in the running MIA container (asks for the password twice, it is never an argument); the login itself is turned on
+# with "accounts_enabled": true in the config of the stack (deploy/setup_cfg.compose.json or MIA_CONFIG), which this command checks and reminds you of
+if [ "${1:-}" = "owner" ]; then
+  NAME="${2:-}"
+  if ! printf '%s' "$NAME" | grep -Eq '^[A-Za-z0-9][A-Za-z0-9._-]*$'; then
+    echo "usage: deploy/up.sh owner NAME      (letters, digits, dot, dash and underscore)"; exit 1
+  fi
+  ENGINE="$(command -v podman || command -v docker)"
+  CONTAINER="$($ENGINE ps -aq --filter "label=com.docker.compose.project=${MIA_PROJECT:-mia}" --filter label=com.docker.compose.service=mia | head -1)"
+  [ -n "$CONTAINER" ] || { echo "MIA container not found, start the stack first: deploy/up.sh"; exit 1; }
+  $ENGINE exec -it "$CONTAINER" python /opt/mia/MIA/tools/accounts_cli.py create "$NAME" --dir /opt/mia/MIA/data/db
+  CONFIG="${MIA_CONFIG:-$HERE/setup_cfg.compose.json}"
+  if ! grep -Eq '"accounts_enabled"[[:space:]]*:[[:space:]]*true' "$CONFIG" 2>/dev/null; then
+    echo
+    echo "The login is not turned on yet: put  \"accounts_enabled\": true  into $CONFIG"
+    echo "and restart MIA:  deploy/up.sh db up -d --no-deps --force-recreate mia"
+  fi
   exit 0
 fi
 # deploy/up.sh memories [folder]   take over MIA's memories of an old installation (memories.json, long_time_history.json from the MIA folder or the given folder)
