@@ -3,8 +3,10 @@
 A readable preview of what an amendment would change in one file, for the shell (used by tools/amendment_lib.sh with --report; usable alone).
 
   python3 tools/amendment_report.py INSTALLED DRAFT [--color auto|always|never] [--context N]
+  python3 tools/amendment_report.py --git COMMIT [--path specs/] [--repo DIR]     what a commit (an installed amendment) changed
 
-  - changed words are marked inside the line:  hard cap of [-600-]{+1800+} seconds   ([-removed-] red, {+added+} green with colours)
+  - changed words are marked inside the line:  hard cap of [-600-]{+1800+} seconds   (with colours: removed white on red, added black on green;
+    the fields Text, Acceptance criterion and History of a requirement are highlighted)
   - requirements.md: by requirement, only the fields that changed, new and removed requirements named
   - other text and code: by line with line numbers (~ changed, + added, - removed), unchanged runs folded
   - the generated model block of architecture.sysml: only counted (it follows the requirement files)
@@ -16,6 +18,9 @@ import re
 import sys
 
 RED, GREEN, DIM, BOLD, RESET = "\x1b[31m", "\x1b[32m", "\x1b[2m", "\x1b[1m", "\x1b[0m"
+REMOVED_WORD, ADDED_WORD = "\x1b[1;37;41m", "\x1b[1;30;42m"        # changed words: white on red, black on green (also readable without the markers [- -] {+ +})
+NEW, GONE, CHANGED, KEY = "\x1b[1;32m", "\x1b[1;31m", "\x1b[1;33m", "\x1b[1;36m"
+KEY_FIELDS = ("Text", "Acceptance criterion", "History")           # the fields one reads first in a requirement
 TOKEN = re.compile(r"\s+|\w+|[^\w\s]")
 GEN_BEGIN, GEN_END = "// BEGIN GENERATED", "// END GENERATED"
 
@@ -33,9 +38,9 @@ def word_diff(old, new, color=False):
             out.append("".join(a[i1:i2]))
             continue
         if i2 > i1:
-            out.append(_paint("[-%s-]" % "".join(a[i1:i2]), RED, color))
+            out.append(_paint("[-%s-]" % "".join(a[i1:i2]), REMOVED_WORD, color))
         if j2 > j1:
-            out.append(_paint("{+%s+}" % "".join(b[j1:j2]), GREEN, color))
+            out.append(_paint("{+%s+}" % "".join(b[j1:j2]), ADDED_WORD, color))
     return "".join(out)
 
 
@@ -47,11 +52,17 @@ def _similar(old, new):
     return ops <= {"equal", "insert"} or ops <= {"equal", "delete"} or matcher.ratio() >= 0.75      # only added or only removed words always read well inline
 
 
-def _change(label, old, new, color, indent="    "):
-    """the lines that show how `old` became `new` after `label`"""
+def _label(key, color):
+    """the name of a field; the fields one reads first are highlighted, the others are dimmed"""
+    return _paint(key + ":", KEY if key in KEY_FIELDS else DIM, color) + " "
+
+
+def _change(key, old, new, color, indent="    "):
+    """the lines that show how `old` became `new` in the field `key`"""
     if _similar(old, new):
-        return ["%s%s%s" % (indent, label, word_diff(old, new, color))]
-    return ["%s%s(rewritten)" % (indent, label), "%s  %s %s" % (indent, _paint("-", RED, color), _paint(old, RED, color)), "%s  %s %s" % (indent, _paint("+", GREEN, color), _paint(new, GREEN, color))]
+        return ["%s%s%s" % (indent, _label(key, color), word_diff(old, new, color))]
+    return ["%s%s(rewritten)" % (indent, _label(key, color)), "%s  %s %s" % (indent, _paint("-", GONE, color), _paint(old, RED, color)),
+            "%s  %s %s" % (indent, _paint("+", NEW, color), _paint(new, GREEN, color))]
 
 
 # --- by requirement --------------------------------------------------------------------------------------------------------------------
@@ -81,28 +92,28 @@ def _requirements(old, new, color):
     for rid in order:
         title, fields, _ = new_blocks[rid]
         if rid not in old_blocks:
-            lines.append("%s %s – %s" % (_paint("+ new     ", GREEN, color), rid, title))
+            lines.append("%s %s – %s" % (_paint("+ new     ", NEW, color), rid, title))
             first = next(((k, v) for k, v in fields if k == "Text"), None)
             if first:
-                lines.append("    Text: %s" % first[1])
+                lines.append("    %s%s" % (_label("Text", color), _paint(first[1], GREEN, color)))
             continue
         old_title, old_fields, _ = old_blocks[rid]
         before, after = dict(old_fields), dict(fields)
         changes = []
         for key, value in fields:
             if key not in before:
-                changes.append("    %s: %s" % (key, _paint("{+%s+}" % value, GREEN, color)))
+                changes.append("    %s%s" % (_label(key, color), _paint("{+%s+}" % value, ADDED_WORD, color)))
             elif before[key] != value:
-                changes += _change("%s: " % key, before[key], value, color)
+                changes += _change(key, before[key], value, color)
         for key, value in old_fields:
             if key not in after:
-                changes.append("    %s: %s" % (key, _paint("[-%s-]" % value, RED, color)))
+                changes.append("    %s%s" % (_label(key, color), _paint("[-%s-]" % value, REMOVED_WORD, color)))
         if old_title != title or changes:
-            lines.append("%s %s – %s" % (_paint("~ changed ", BOLD, color), rid, word_diff(old_title, title, color)))
+            lines.append("%s %s – %s" % (_paint("~ changed ", CHANGED, color), rid, word_diff(old_title, title, color)))
             lines += changes
     for rid, (title, _, _) in old_blocks.items():
         if rid not in new_blocks:
-            lines.append("%s %s – %s" % (_paint("- removed ", RED, color), rid, title))
+            lines.append("%s %s – %s" % (_paint("- removed ", GONE, color), rid, title))
     return lines or ["no difference in the requirements"]
 
 
@@ -125,13 +136,13 @@ def _lines(old, new, context, color):
             paired = [k for k in range(pairs) if _similar(a[i1 + k], b[j1 + k])]
             for k in range(pairs):
                 if k in paired:
-                    out.append("%s %s: %s" % (_paint("~", BOLD, color), str(j1 + k + 1).rjust(width), word_diff(a[i1 + k], b[j1 + k], color)))
+                    out.append("%s %s: %s" % (_paint("~", CHANGED, color), str(j1 + k + 1).rjust(width), word_diff(a[i1 + k], b[j1 + k], color)))
             for k in range(i1, i2):
                 if not (0 <= k - i1 < pairs and k - i1 in paired):
-                    out.append("%s %s: %s" % (_paint("-", RED, color), str(k + 1).rjust(width), _paint(a[k], RED, color)))
+                    out.append("%s %s: %s" % (_paint("-", GONE, color), str(k + 1).rjust(width), _paint(a[k], RED, color)))
             for k in range(j1, j2):
                 if not (0 <= k - j1 < pairs and k - j1 in paired):
-                    out.append("%s %s: %s" % (_paint("+", GREEN, color), str(k + 1).rjust(width), _paint(b[k], GREEN, color)))
+                    out.append("%s %s: %s" % (_paint("+", NEW, color), str(k + 1).rjust(width), _paint(b[k], GREEN, color)))
         last_end = group[-1][4]
     if matcher.get_grouped_opcodes(context) and last_end < len(b):
         out.append(_paint("   … %d unchanged lines …" % (len(b) - last_end), DIM, color))
@@ -159,7 +170,7 @@ def _model(old, new, color):
             if op != "equal":
                 removed += i2 - i1
                 added += j2 - j1
-        out.append("%s generated block (follows the requirement files, not read line by line): +%d -%d lines" % (_paint("~", BOLD, color), added, removed))
+        out.append("%s generated block (follows the requirement files, not read line by line): +%d -%d lines" % (_paint("~", CHANGED, color), added, removed))
     return out or ["no difference"]
 
 
@@ -181,14 +192,48 @@ def report_text(old, new, name, color=False, context=2):
     return "\n".join(body)
 
 
+def _git(repo, *args):
+    import subprocess
+    return subprocess.run(["git", "-C", repo, *args], capture_output=True, text=True)
+
+
+def report_commit(commit, repo=".", paths=(), color=False, context=2):
+    """what a commit changed, file by file in the same readable form (an installed amendment, for example)"""
+    listed = _git(repo, "diff-tree", "--no-commit-id", "--name-status", "-r", "--root", commit)
+    if listed.returncode != 0:
+        raise SystemExit("git: " + listed.stderr.strip())
+    out = []
+    for row in listed.stdout.splitlines():
+        status, _, path = row.partition("\t")
+        if paths and not any(path.startswith(p) for p in paths):
+            continue
+        if status.startswith("D"):
+            out.append("%s %s\n   %s" % ("──", path, _paint("removed file", GONE, color)))
+            continue
+        new = _git(repo, "show", "%s:%s" % (commit, path))
+        old = _git(repo, "show", "%s^:%s" % (commit, path))
+        if new.returncode != 0:
+            continue
+        out.append("%s %s\n%s" % ("──", _paint(path, BOLD, color), "\n".join("   " + l for l in report_text(old.stdout if old.returncode == 0 else None, new.stdout, path, color=color, context=context).splitlines())))
+    return "\n\n".join(out) or "no file changed"
+
+
 def main(argv=None):
-    parser = argparse.ArgumentParser(description="readable preview of the change of one file")
-    parser.add_argument("installed")
-    parser.add_argument("draft")
+    parser = argparse.ArgumentParser(description="readable preview of the change of one file, or of the files of a commit (--git)")
+    parser.add_argument("installed", nargs="?")
+    parser.add_argument("draft", nargs="?")
     parser.add_argument("--color", choices=("auto", "always", "never"), default="auto")
     parser.add_argument("--context", type=int, default=2)
+    parser.add_argument("--git", metavar="COMMIT", help="show what this commit changed instead of comparing two files")
+    parser.add_argument("--repo", default=".", help="the repository for --git")
+    parser.add_argument("--path", action="append", default=[], help="with --git: only the files below this path (repeatable)")
     args = parser.parse_args(argv)
     color = args.color == "always" or (args.color == "auto" and sys.stdout.isatty())
+    if args.git:
+        print(report_commit(args.git, args.repo, args.path, color=color, context=args.context))
+        return 0
+    if not (args.installed and args.draft):
+        parser.error("name the installed file and the draft, or use --git COMMIT")
     try:
         with open(args.installed, encoding="utf-8") as handle:
             old = handle.read()

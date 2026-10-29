@@ -100,6 +100,64 @@ class Rewritten(unittest.TestCase):
         self.assertIn("changed", out)
 
 
+class Colours(unittest.TestCase):
+    """the owner's wish of 2026-10-29: additions and removals colour coded, the key fields (Text, History, Acceptance criterion) highlighted"""
+    REMOVED, ADDED, KEY = "\x1b[1;37;41m", "\x1b[1;30;42m", "\x1b[1;36m"
+
+    def setUp(self):
+        self.out = R.report_text(OLD_REQ, NEW_REQ, "requirements.md", color=True)
+
+    def test_removed_words_are_red_and_added_words_green_with_a_background(self):
+        self.assertIn(self.REMOVED + "[-600-]", self.out)
+        self.assertIn(self.ADDED + "{+1800+}", self.out)
+
+    def test_the_key_fields_are_highlighted_and_the_others_are_not(self):
+        self.assertIn(self.KEY + "Text:", self.out)
+        self.assertIn(self.KEY + "History:", self.out)
+        self.assertNotIn(self.KEY + "Status:", self.out)
+        self.assertNotIn(self.KEY + "Rationale:", self.out)
+        out = R.report_text(OLD_REQ.replace("AC-3: the run ends at the cap", "AC-3: x"), NEW_REQ, "requirements.md", color=True)
+        self.assertIn(self.KEY + "Acceptance criterion:", out)
+
+    def test_new_and_removed_requirements_have_their_own_colours(self):
+        self.assertIn("\x1b[1;32m+ new", self.out)
+        self.assertIn("\x1b[1;31m- removed", self.out)
+
+    def test_without_colours_nothing_is_painted(self):
+        self.assertNotIn("\x1b[", R.report_text(OLD_REQ, NEW_REQ, "requirements.md", color=False))
+
+
+class FromGit(unittest.TestCase):
+    """--git COMMIT: what an installed amendment (or any commit) changed, in the same readable form"""
+
+    def test_the_files_of_a_commit_are_shown_one_after_the_other(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            def git(*args):
+                return subprocess.run(["git", "-C", tmp, "-c", "user.email=a@b", "-c", "user.name=t", *args], capture_output=True, text=True, check=True).stdout
+            git("init", "-q")
+            os.makedirs(os.path.join(tmp, "specs"))
+            with open(os.path.join(tmp, "specs", "requirements.md"), "w") as fp:
+                fp.write(OLD_REQ)
+            with open(os.path.join(tmp, "notes.md"), "w") as fp:
+                fp.write("cap 600 s\n")
+            git("add", "-A")
+            git("commit", "-q", "-m", "one")
+            with open(os.path.join(tmp, "specs", "requirements.md"), "w") as fp:
+                fp.write(NEW_REQ)
+            with open(os.path.join(tmp, "notes.md"), "w") as fp:
+                fp.write("cap 1800 s\n")
+            with open(os.path.join(tmp, "added.txt"), "w") as fp:
+                fp.write("hello\n")
+            git("add", "-A")
+            git("commit", "-q", "-m", "two")
+            done = subprocess.run([sys.executable, os.path.join(REPO, "tools", "amendment_report.py"), "--git", "HEAD", "--repo", tmp, "--color", "never"], capture_output=True, text=True)
+            self.assertEqual(done.returncode, 0, done.stderr)
+            self.assertIn("specs/requirements.md", done.stdout)
+            self.assertIn("~ changed  REQ-WFM-034", done.stdout)
+            self.assertIn("cap [-600-]{+1800+} s", done.stdout)
+            self.assertRegex(done.stdout, r"added.txt.*\n.*new file")
+
+
 class Lines(unittest.TestCase):
     def test_a_changed_line_has_its_number_and_the_changed_words(self):
         old = "".join("line %d\n" % i for i in range(1, 31))

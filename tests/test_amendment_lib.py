@@ -94,5 +94,12 @@ class Lib(unittest.TestCase):
         self.assertEqual(self.read("installed1"), "a\nB\nc\nd\n")
 
 
+    def test_color_forces_the_colours_even_when_the_output_is_not_a_terminal(self):
+        _code, out = self.run_script("--report", "--color")
+        self.assertIn("\x1b[", out)
+        _code, plain = self.run_script("--report")
+        self.assertNotIn("\x1b[", plain)                                                # a pipe or a file gets no escape codes
+
+
 if __name__ == "__main__":
     unittest.main()
