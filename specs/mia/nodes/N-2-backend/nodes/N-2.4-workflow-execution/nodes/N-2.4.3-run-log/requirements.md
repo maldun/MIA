@@ -79,6 +79,6 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-4, AC-21: the contract suite test_if_401_run_events.py passes against the mock (stage 1) and the Run log (stage 2)
-- Verified by: TC-IF-401-01..04
+- Verified by: TC-IF-401-01..05
 - Status: Approved
-- History: v0, amendment 5/7 (2026-10-25)
+- History: v0, amendment 5/7 (2026-10-25); contract v1 with the errors invalid_run, invalid_payload, invalid_user, TC-IF-401-05 (A-30, 2026-10-30)

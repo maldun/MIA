@@ -1,4 +1,4 @@
-# IF-401 – Run event log, v0
+# IF-401 – Run event log, v1
 
 Owner (provider): N-2.4.3 Run log   Consumers: N-2.4.1 Pipeline runner, N-2.4.2 Tools and sandbox   Decided by: N-2.4   Mock complexity: 2 (in-memory log)   Suite: `tests/acceptance/contract/test_if_401_run_events.py`
 
@@ -20,6 +20,11 @@ Event types: `run_start`, `run_end`, `model_call`, `tool_call`, `check_run`, `qu
 |---|---|---|
 | type not in the list | `ServiceError("unknown_type")` | nothing written |
 | unknown run | `ServiceError("unknown_run")` | nothing changed |
+| run id not a plain name: not a string, empty, longer than 100 characters, other characters than letters, digits, `.`, `_`, `-`, starts with `.`, `_` or `-`, or contains `..` (any operation) | `ServiceError("invalid_run")` | nothing written or read |
+| payload of `emit` not an object (dict) | `ServiceError("invalid_payload")` | nothing written |
+| user of `emit` not a string or empty | `ServiceError("invalid_user")` | nothing written |
+
+`emit` checks in this order: run id, type, payload, user; the first failing check names the error.
 
 ## Bounds
 | Quantity | Bound | Source |
@@ -29,10 +34,11 @@ Event types: `run_start`, `run_end`, `model_call`, `tool_call`, `check_run`, `qu
 
 ## Golden examples
 1. Typical: `run_start`, `model_call`, `run_end` give seq 1, 2, 3 with the same run id and user; `account` lists the events that have a `plain` text.
-2. Failure: `emit(..., "nonsense")` is `unknown_type`; a payload with `api_key` is stored with `[removed]`.
+2. Failure: `emit(..., "nonsense")` is `unknown_type`; a payload with `api_key` is stored with `[removed]`; `emit("../x", ...)` is `invalid_run`, a payload `"text"` is `invalid_payload`, the user `""` is `invalid_user`, and none of them writes an event.
 3. Edge: two runs with the same steps differ only in time and run id: `compare` says same; one extra `check_run` is a difference.
 
 ## Version history
 | Version | Date | Change | Amendment |
 |---|---|---|---|
 | v0 | 2026-10-25 | first draft from events.py | – |
+| v1 | 2026-10-30 | the errors `invalid_run`, `invalid_payload`, `invalid_user` and the order of the checks of `emit` (found in N-2.4.3 T-01, D-109) | A-30 |

@@ -1,6 +1,7 @@
 """Mock of IF-401, the run event log (protected). Complexity 2: an in-memory log with run ids, order and the account.
 It does not persist and does not know the full event schema of events.py, only the list of types."""
 import copy
+import re
 
 try:
     from .errors import ServiceError
@@ -10,6 +11,7 @@ except ImportError:
 TYPES = ("run_start", "run_end", "model_call", "tool_call", "check_run", "query_issued", "source_found", "passage_extracted", "claim_made",
          "claim_verified", "stop_decision", "budget_spent", "router_decision", "error")
 SECRET_WORDS = ("password", "token", "api_key", "secret")
+RUN_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,99}")   # a plain name (v1, A-30): the real log makes a file of it
 
 
 def _clean(value):
@@ -25,9 +27,19 @@ class RunEventsMock:
         self._runs = {}
         self._tick = 0
 
+    @staticmethod
+    def _check_run_id(run_id):
+        if not isinstance(run_id, str) or not RUN_ID.fullmatch(run_id) or ".." in run_id:
+            raise ServiceError("invalid_run")
+
     def emit(self, run_id, type, payload, user, actor=None, plain=""):
+        self._check_run_id(run_id)
         if type not in TYPES:
             raise ServiceError("unknown_type")
+        if not isinstance(payload, dict):
+            raise ServiceError("invalid_payload")
+        if not isinstance(user, str) or not user:
+            raise ServiceError("invalid_user")
         events = self._runs.setdefault(run_id, [])
         self._tick += 1
         events.append({"seq": len(events) + 1, "type": type, "run_id": run_id, "user": user, "actor": actor, "plain": plain,
@@ -35,6 +47,7 @@ class RunEventsMock:
         return {"seq": len(events)}
 
     def _run(self, run_id):
+        self._check_run_id(run_id)
         if run_id not in self._runs:
             raise ServiceError("unknown_run")
         return self._runs[run_id]

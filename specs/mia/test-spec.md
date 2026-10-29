@@ -148,6 +148,7 @@ Setup and expected result are in the docstring of each test (the golden examples
 | TC-IF-401-02 | IF-401 | Contract | 1 (mock) and 2 (real) | golden 2: an unknown type is refused and nothing is written; secrets in the payload are stored as [removed]. | exact |
 | TC-IF-401-03 | IF-401 | Contract | 1 (mock) and 2 (real) | a log whose first event is not run_start, or whose seq has a gap, is reported. | exact |
 | TC-IF-401-04 | IF-401 | Contract | 1 (mock) and 2 (real) | golden 3: the same steps differ only in time and run id (same); one extra check_run is a difference. | exact |
+| TC-IF-401-05 | IF-401 | Contract | 1 (mock) and 2 (real) | v1 (A-30): a run id that is not a plain name is invalid_run in every operation, a payload that is not an object is invalid_payload, an empty user is invalid_user; checked in the order run id, type, payload, user; nothing is written. | exact |
 | TC-IF-402-01 | IF-402 | Contract | 1 (mock) and 2 (real) | golden 1: 1,200 m against 1,020 m fails, 1,200 against 1,200 passes, no number in the evidence is inconclusive; all with trust code. | exact |
 | TC-IF-402-02 | IF-402 | Contract | 1 (mock) and 2 (real) | golden 3: a quote that is not verbatim fails; fetched passages carry the source reference and the web trust label. | exact |
 | TC-IF-402-03 | IF-402 | Contract | 1 (mock) and 2 (real) | golden 2: with a limit of 1 the second web_search of the run is  | exact |

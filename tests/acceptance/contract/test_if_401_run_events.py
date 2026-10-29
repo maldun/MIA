@@ -74,6 +74,28 @@ class RunEventsContract(unittest.TestCase):
         self.assertFalse(result["same"])
         self.assertTrue(result["differences"])
 
+    @mark.req("IF-401", "REQ-BE-058")
+    @each_provider(IF)
+    def test_malformed_calls_are_refused_and_write_nothing(self, log):
+        """TC-IF-401-05 (v1, A-30): a run id that is not a plain name is invalid_run in every operation, a payload that is not an object is invalid_payload, an empty user is
+        invalid_user; the run id is checked before the type, the type before the payload, the payload before the user; none of them writes an event.
+        Example: emit("../x", "run_start", {}, "anna") is invalid_run; emit("r1", "run_end", "done", "anna") is invalid_payload and r1 keeps its one event."""
+        # Given a run with one event
+        log.emit("r1", "run_start", {}, "anna")
+        # When malformed calls are made, Then each names its error
+        for bad_run in ("../x", "a/b", "", ".hidden", "x" * 101, 7):
+            self.assertEqual(code_of(lambda: log.emit(bad_run, "run_start", {}, "anna")), "invalid_run", bad_run)
+        self.assertEqual(code_of(lambda: log.events("a/b")), "invalid_run")
+        self.assertEqual(code_of(lambda: log.emit("r1", "run_end", "done", "anna")), "invalid_payload")
+        self.assertEqual(code_of(lambda: log.emit("r1", "run_end", {}, "")), "invalid_user")
+        self.assertEqual(code_of(lambda: log.emit("r1", "run_end", {}, None)), "invalid_user")
+        self.assertEqual(code_of(lambda: log.emit("../x", "nonsense", "done", "")), "invalid_run")
+        self.assertEqual(code_of(lambda: log.emit("r1", "nonsense", "done", "")), "unknown_type")
+        self.assertEqual(code_of(lambda: log.emit("r1", "run_end", "done", "")), "invalid_payload")
+        # Then nothing was written: r1 has its one event and the malformed run ids made no run
+        self.assertEqual([e["seq"] for e in log.events("r1")], [1])
+        self.assertEqual(code_of(lambda: log.events("x" * 100)), "unknown_run")
+
 
 if __name__ == "__main__":
     unittest.main()
