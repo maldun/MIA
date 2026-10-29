@@ -41,6 +41,8 @@ class ChatApiMock:
         self._review_questions = tuple(review)        # v7: the questions a scripted /review asks one after the other before its report "the report"
         self._review = None                           # v7: the running review {"author", "asked", "waiting", "replies", "stop", "id"}
         self._texts = {}                              # id of a queued user message -> its text
+        self._options = {}                            # v8: id of a queued /review -> its options
+        self._files = {}                              # v8: name -> {"data", "created", "task"}: the files volume
 
     # ------------------------------------------------------------ test adapter
     def advance_time(self, seconds):
@@ -57,8 +59,9 @@ class ChatApiMock:
                 asked = self._queue.popleft()
                 if re.match(r"/review\s+\S", self._texts.get(asked, ""), re.I):
                     self._ids += 1
-                    self._review = {"author": self._owner.get(asked), "asked": 0, "waiting": False, "replies": [], "stop": False, "id": "m%d" % self._ids}
-                    self._broadcast("chat_start", {"id": self._review["id"], "role": "assistant", "task": "review"})
+                    self._review = {"author": self._owner.get(asked), "asked": 0, "waiting": False, "replies": [], "stop": False, "id": "m%d" % self._ids, "paused": False,
+                                    "mode": "slice" if self._options.get(asked, {}).get("slice") else "run", "files": []}
+                    self._card()                                  # v8: the status card; the result (chat_start) comes at the end
                 else:
                     self._answer(asked)
             else:
@@ -88,6 +91,16 @@ class ChatApiMock:
             raise ApiError(422, "empty_text")
         if len(self._queue) >= self.queue_limit or sum(1 for i in self._queue if self._owner.get(i) == user) >= self.user_limit:
             raise ApiError(503, "queue_full")
+        queue_text, queue_options = text, {}
+        if re.match(r"/review\s+options\b", text.strip(), re.I):         # v8/v9: `/review options` lists the options, `/review options slice -- q` sets them, a bad one is refused
+            head, separator, argument = text.strip()[len("/review"):].strip()[len("options"):].partition("--")
+            if not head.strip() and not separator:
+                note = self._record("system", "MIA", "Options of /review: slice (flag, default False): work in time slices")
+                self._broadcast("chat_message", note)
+                return {"id": None, "position": 0, "queued": False, "message": dict(note)}
+            if not separator or not argument.strip() or any(token != "slice" for token in head.split()):
+                raise ApiError(422, "invalid_command")
+            queue_text, queue_options = "/review " + argument.strip(), {"slice": bool(head.split())}      # the stored message keeps the text as it was typed
         review = self._review
         if review is not None and review["waiting"] and user == review["author"] and not text.strip().startswith("/"):
             message = self._record("user", user, text)           # v7: the answer to a waiting review: stored and sent like a message, not queued, not counted for queue_full
@@ -103,7 +116,8 @@ class ChatApiMock:
         queued = bool(self._queue) or self._review is not None
         self._queue.append(message["id"])
         self._owner[message["id"]] = user
-        self._texts[message["id"]] = text
+        self._texts[message["id"]] = queue_text
+        self._options[message["id"]] = queue_options
         self._broadcast("chat_status", self._status())
         return {"id": message["id"], "position": len(self._queue), "queued": queued, "message": dict(message)}
 
@@ -337,6 +351,8 @@ class ChatApiMock:
         review = self._review
         if review["stop"]:
             return self._end_review("stopped")                # the report as it stands
+        if review["paused"]:
+            return False                                      # v8: a paused task starts no step
         if review["waiting"]:
             if not review["replies"]:
                 return False
@@ -351,12 +367,53 @@ class ChatApiMock:
         return self._end_review("done")
 
     def _end_review(self, status):
+        name = "review-contract.md"
+        self._files[name] = {"data": b"# the report\n", "created": "t%d" % int(self.now), "task": "review", "message_id": self._review["id"]}
+        self._broadcast("files_changed", {"name": name, "task": "review"})
+        self._review["files"].append(name)
         record = {"id": self._review["id"], "role": "assistant", "sender": "MIA", "text": "the report", "created": "t%d" % int(self.now)}
         self._history.append(record)
+        self._broadcast("chat_start", {"id": record["id"], "role": "assistant", "task": "review"})      # v8: the result is the newest message
         self._broadcast("chat_delta", {"id": record["id"], "text": "the report"})
-        self._broadcast("chat_done", {"id": record["id"], "text": "the report", "emotion": "neutral", "status": status})
+        self._broadcast("chat_done", {"id": record["id"], "text": "the report", "emotion": "neutral", "status": status, "files": list(self._review["files"])})
+        self._card(done=True)
         self._review = None
         return True
+
+    def _card(self, done=False):
+        """v8: the status card of the running task"""
+        review = self._review
+        self._broadcast("task_status", {"id": review["id"], "task": "review", "phase": "working", "mode": review["mode"], "paused": review["paused"], "done": done,
+                                        "budget": {"seconds": {"used": round(self.now, 1)}}, "counts": {}})
+
+    def pause(self, session):
+        """v8: pauses the running task; False when nothing runs"""
+        self._user(session)
+        if self._review is None or self._review["paused"]:
+            return {"paused": False}
+        self._review["paused"] = True
+        self._card()
+        return {"paused": True}
+
+    def resume(self, session):
+        self._user(session)
+        if self._review is not None and self._review["paused"]:
+            self._review["paused"] = False
+            self._card()
+        return {"paused": False}
+
+    def files(self, session):
+        """v8: the files of the files volume, newest first"""
+        self._user(session)
+        return [{"name": n, "size": len(f["data"]), "created": f["created"], "task": f["task"], "message_id": f.get("message_id")} for n, f in reversed(list(self._files.items()))]
+
+    def file(self, session, name):
+        self._user(session)
+        if not isinstance(name, str) or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]{0,119}", name) or ".." in name:
+            raise ApiError(422, "invalid_file_name")
+        if name not in self._files:
+            raise ApiError(404, "not_found")
+        return self._files[name]["data"]
 
     def _status(self):
         waiting = self._review is not None and self._review["waiting"]
