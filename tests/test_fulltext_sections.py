@@ -6,7 +6,7 @@ import unittest
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from fulltext import cut_sections
+from extensions.review.fulltext import cut_sections
 
 
 class TestCutSections(unittest.TestCase):

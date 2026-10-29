@@ -13,7 +13,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
 sys.path.insert(0, REPO)
 
-import review_request as RR                              # noqa: E402
+from extensions.review import review_request as RR                              # noqa: E402
 import scholar as S                                      # noqa: E402
 import source_trust as T                                 # noqa: E402
 

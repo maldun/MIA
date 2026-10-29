@@ -6,10 +6,7 @@ memory_records.memory_hooks; nothing here talks to a model itself. The skills ar
   M2  the answers are returned as they are: values and quotes are checked by review_stages (check_judgement, check_full), not here
 """
 
-try:
-    from . import review_stages
-except ImportError:
-    import review_stages
+from . import review_stages
 
 CODES = ("off_topic", "outdated", "wrong_type", "language")
 

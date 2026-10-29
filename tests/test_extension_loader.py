@@ -101,5 +101,20 @@ class ExtensionLoader(unittest.TestCase):
         self.assertEqual((task.id, task.needs, task.run()), ("alpha", ("monitor",), "x"))
 
 
+    def test_an_entry_may_register_something_with_the_services_after_it_is_made(self):               # e.g. the review puts its description into the workflow library
+        entry = ENTRY + "\n\ndef register(services):\n    services.registered.append('alpha')\n"
+        self.services.registered = []
+        self.add("alpha", manifest(), entry=entry)
+        self.assertEqual(self.load(), [])
+        self.assertEqual(self.services.registered, ["alpha"])
+
+    def test_a_register_that_fails_is_a_problem_of_that_extension_and_the_task_still_runs(self):
+        entry = ENTRY + "\n\ndef register(services):\n    raise RuntimeError('library is down')\n"
+        self.add("alpha", manifest(), entry=entry)
+        problems = self.load()
+        self.assertEqual(self.registry.ids(), ["alpha"])                                              # a description that cannot be saved must not take the skill away
+        self.assertTrue(any("alpha" in p and "library is down" in p for p in problems))
+
+
 if __name__ == "__main__":
     unittest.main()

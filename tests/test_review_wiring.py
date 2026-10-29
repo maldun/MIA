@@ -26,7 +26,7 @@ class ReviewWiring(unittest.TestCase):
         self.assertIn("/review ", [c["command"] for c in w.chat_service.commands()])
 
     def test_the_full_text_source_reads_through_the_web_client_of_the_app(self):
-        self.assertEqual(w._review_full_text.get.__self__, w._web_client)
+        self.assertEqual(w._services.web_get.__self__, w._web_client)           # the review entry builds its FullTextSource from it
 
     def test_the_scholar_is_built_from_the_configuration_and_touches_no_network(self):
         self.assertGreaterEqual(len(w._scholar.clients), 1)

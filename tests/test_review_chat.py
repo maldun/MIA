@@ -7,7 +7,7 @@ import unittest
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-import review_chat as rc
+from extensions.review import review_chat as rc
 import scholar
 
 TODAY = datetime.date(2026, 10, 28)

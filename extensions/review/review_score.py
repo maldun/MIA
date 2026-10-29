@@ -23,8 +23,8 @@ and the input says {"until": cut-off date, "key_terms": [...]}. What is measured
 import math
 
 try:
-    from . import checks, scholar
-    from .metrics import wilson
+    from ... import checks, scholar
+    from ...metrics import wilson
 except ImportError:  # used as plain script / in tests
     import checks
     import scholar

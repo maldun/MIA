@@ -5,7 +5,8 @@ command. An extension that is broken, or whose id is already taken, is skipped a
 
 manifest.json: {"id", "text", "argument", "example", "entry": "module:function", "aliases": [], "needs": [], "options": [{"name", "kind", "default", "text"}], "version"}
   needs: what the core hands to the run function besides the question (see task_registry.Task): ask, options, monitor, files, reports
-  entry: the function is called as function(services) and returns run(argument, on_delta, on_emotion, should_stop, **what it needs)
+  entry: the function is called as function(services) and returns run(argument, on_delta, on_emotion, should_stop, **what it needs); an optional register(services) of the same
+         module is called afterwards (a failure there is a problem, the task stays)
 """
 import importlib
 import json
@@ -57,8 +58,15 @@ def load_extensions(package, folder, registry, services):
         try:
             doc = read_manifest(os.path.join(folder, name))
             module, _, function = doc["entry"].partition(":")
-            make = getattr(importlib.import_module("%s.%s.%s" % (package, name, module)), function)
-            registry.register(task_from_manifest(doc, make(services)))
+            loaded = importlib.import_module("%s.%s.%s" % (package, name, module))
+            registry.register(task_from_manifest(doc, getattr(loaded, function)(services)))
         except Exception as exc:
             problems.append(str(exc) if str(exc).startswith(name + ":") else "%s: %s" % (name, exc))
+            continue
+        hook = getattr(loaded, "register", None)         # optional: the extension puts something of its own where the core keeps it (the review: its entry in the workflow library)
+        if hook is not None:
+            try:
+                hook(services)
+            except Exception as exc:
+                problems.append("%s: register failed: %s" % (name, exc))
     return problems

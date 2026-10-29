@@ -13,8 +13,8 @@ as title-only entries when they cannot be resolved. The conclusions are NOT gues
 import re
 
 try:
-    from . import scholar
-    from .web_tools import WebError
+    from ... import scholar
+    from ...web_tools import WebError
 except ImportError:  # used as plain script / in tests
     import scholar
     from web_tools import WebError

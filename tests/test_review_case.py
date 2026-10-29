@@ -11,7 +11,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
 sys.path.insert(0, REPO)
 
-import review_case as RC                                     # noqa: E402
+from extensions.review import review_case as RC                                     # noqa: E402
 from web_tools import WebError                               # noqa: E402
 
 MATRIX = """Table 2: Literature matrix

@@ -16,14 +16,14 @@ internet: the search, the screening steps and the full text are functions that a
 """
 import re
 
+from .review_request import LIMITS, recommend
+
 try:
-    from . import scholar
-    from . import checks
-    from .review_request import LIMITS, recommend
-except ImportError:
+    from ... import scholar
+    from ... import checks
+except ImportError:  # used as plain script / in tests
     import scholar
     import checks
-    from review_request import LIMITS, recommend
 
 GRADES = (0, 1, 2, 3)
 DECISIONS = ("include", "maybe", "exclude")

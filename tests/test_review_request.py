@@ -6,7 +6,7 @@ import unittest
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from review_request import Budget, RequestError, recommend
+from extensions.review.review_request import Budget, RequestError, recommend
 
 
 class Clock:

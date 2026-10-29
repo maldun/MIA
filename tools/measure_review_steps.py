@@ -22,7 +22,8 @@ from MIA.config import default_path                      # noqa: E402
 from MIA.core import Core                                # noqa: E402
 from MIA.library import Library                          # noqa: E402
 from MIA.pipeline_model import OllamaModel              # noqa: E402
-from MIA import review_stages, review_models, scholar    # noqa: E402
+from MIA.extensions.review import review_stages, review_models  # noqa: E402
+from MIA import scholar    # noqa: E402
 from MIA.review_request import ReviewRequest             # noqa: E402
 
 SUITE = os.path.join(REPO, "eval", "suites", "review_toy")

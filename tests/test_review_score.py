@@ -13,7 +13,7 @@ REPO = os.path.dirname(HERE)
 sys.path.insert(0, REPO)
 
 import harness as H                                      # noqa: E402
-import review_score as RS                                # noqa: E402
+from extensions.review import review_score as RS                                # noqa: E402
 import scholar                                           # noqa: E402
 
 SUITE = os.path.join(REPO, "eval", "suites", "review_toy")

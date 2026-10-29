@@ -9,6 +9,7 @@ Open access only: a work without a link, or one that cannot be read, stays at ab
   F5  a PDF is converted only by pdf_text.pdf_to_text (inside the wall, W1 to W3); without the wall the work stays at abstract level
   F6  the page is untrusted (TB-paper): phrases that look like instructions are listed in `signals`; the model prompts delimit the text as data
 """
+import importlib
 import re
 
 HEADINGS = {"abstract", "introduction", "background", "related work", "methods", "method", "materials and methods", "methodology", "results", "discussion", "results and discussion",
@@ -76,6 +77,14 @@ def cut_sections(text, max_chars=6000):
     return {"sections": [{"name": n, "text": t} for n, t in sections], "conclusion": conclusion[:max_chars]}
 
 
+
+def _core(name):
+    """a module of the core, loaded when it is needed: as a part of the package (python -m MIA) by its place, as a script (the tests) by its name"""
+    try:
+        return importlib.import_module("...%s" % name, package=__package__) if __package__ else importlib.import_module(name)
+    except (ImportError, ValueError):
+        return importlib.import_module(name)
+
 class FullTextSource:
     """full_text(work) for ReviewRun: the cut text of the open access link of the work, or None (the reason is in notes[id]). get(url, accept, max_bytes) is WebClient.get;
     pdf_to_text(bytes) is pdf_text.pdf_to_text; extract_text (gives {"title", "text"}) and injection_signals are those of web_tools (the defaults are loaded only when needed)"""
@@ -91,17 +100,15 @@ class FullTextSource:
         url = work.get("oa_url")
         if not url:
             return self._note(work, "no open access link")
+        web_tools = _core("web_tools")
+        ALLOWED_TYPES = web_tools.ALLOWED_TYPES
         if self._extract is None:
-            from web_tools import extract_text, injection_signals, ALLOWED_TYPES
-            self._extract, self._signals = extract_text, injection_signals
-        else:
-            from web_tools import ALLOWED_TYPES
+            self._extract, self._signals = web_tools.extract_text, web_tools.injection_signals
         try:
             page = self.get(url, accept=tuple(ALLOWED_TYPES) + (PDF_TYPE,), max_bytes=MAX_PDF_BYTES)
             if page["content_type"] == PDF_TYPE:
                 if self._pdf is None:
-                    from pdf_text import pdf_to_text
-                    self._pdf = pdf_to_text
+                    self._pdf = _core("pdf_text").pdf_to_text
                 text = self._pdf(page["body"])["text"]
             else:
                 text = self._extract(page["text"])["text"]

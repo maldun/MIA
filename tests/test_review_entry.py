@@ -7,7 +7,7 @@ import unittest
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-import review_entry as re_
+from extensions.review import review_entry as re_
 from storage import Storage
 from storage_files import FileBackend
 from workflow_library import WorkflowLibrary, WorkflowLibraryError
