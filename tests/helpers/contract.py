@@ -154,7 +154,7 @@ class _ChatApiAdapter:
     TRUST_SOURCES = {"example.org": 0.5}                            # a source the mock has and the default table does not: seeded through the override file
     START = 1767571200                                              # 2026-01-05 00:00 UTC, a Monday: the clock 0 of the mock
 
-    def __init__(self, answers=None, queue_limit=5, user_limit=2):
+    def __init__(self, answers=None, queue_limit=5, user_limit=2, review=("Shall I go on?",)):
         import tempfile
         from errors import ApiError
         from storage import Storage
@@ -173,6 +173,7 @@ class _ChatApiAdapter:
         for name, password in self.ACCOUNTS.items():
             accounts.create(store, name, password, "contract suite")
         self._now, self._events, self._pending = 0.0, {}, []
+        self._threaded, self._progress, self._seen = False, 0, 0         # A-21: a review blocks while it waits, so its worker is a thread (set by the first /review)
         self._answers = list(answers or [])                         # the same scripts as the mock: a list of sentences, or {"sentences": [...], "emotion": ...}
         if any(isinstance(a, dict) and a.get("emotion") for a in self._answers):
             raise unittest.SkipTest("IF-101 expression and audio_chunk events of an answer are not in the real Backend yet (N-2.5)")
@@ -181,8 +182,10 @@ class _ChatApiAdapter:
         with open(trust_file, "w", encoding="utf-8") as fp:
             json.dump({"classes": {name: {"prior": value, "reason": "contract suite"} for name, value in self.TRUST_SOURCES.items()}}, fp)
         self._chat = ChatService(self._broadcast, ChatLog(os.path.join(folder, "chat.jsonl")), MoodTracker(os.path.join(REPO, "moods.json")),
-                                 self._scripted_answer, queue_size=queue_limit, user_limit=user_limit, spawn=self._pending.append,
-                                 votes=store, wall_clock=lambda: self.START + self._now, behaviours=lambda: self.BEHAVIOURS)
+                                 self._scripted_answer, queue_size=queue_limit, user_limit=user_limit, spawn=self._spawn,
+                                 votes=store, wall_clock=lambda: self.START + self._now, behaviours=lambda: self.BEHAVIOURS,
+                                 run_review=self._scripted_review, review_timeout=30)
+        self._review_questions = tuple(review)
         app = Flask(__name__)
 
         @app.before_request
@@ -208,12 +211,40 @@ class _ChatApiAdapter:
             on_delta(shown)
         return shown
 
+    def _spawn(self, target):
+        if self._threaded:
+            import threading
+            threading.Thread(target=target, daemon=True).start()
+        else:
+            self._pending.append(target)
+
+    def _scripted_review(self, text, on_delta, on_emotion, should_stop, ask):
+        """the review of the contract suite: asks its questions one after the other and gives the report (stopped or not)"""
+        for question in self._review_questions:
+            ask(question)
+            if should_stop():
+                break
+        on_delta("the report")
+        return "the report"
+
     def settle(self):
-        """runs the worker of the chat agent until the queue is empty"""
-        while self._pending:
-            self._pending.pop(0)()
+        """runs the worker of the chat agent until the queue is empty; with a review: until the review waits for the next answer, or everything is answered"""
+        if not self._threaded:
+            while self._pending:
+                self._pending.pop(0)()
+            return
+        import time
+        end = time.time() + 10
+        while time.time() < end:
+            status = self._chat.status()
+            if not status["busy"] or (self._progress > self._seen and status["activity"] == "waiting"):
+                break
+            time.sleep(0.01)
+        self._seen = self._progress
 
     def _broadcast(self, event, payload):
+        if event == "chat_done" or (event == "chat_message" and payload.get("role") == "assistant"):
+            self._progress += 1
         for session in self._events:
             self._events[session].append({"event": event, "payload": payload})
 
@@ -258,10 +289,18 @@ class _ChatApiAdapter:
 
     def send(self, session, text, client_id=None):
         user = self._call("whoami", session)["user"]
+        if text.lstrip().lower().startswith("/review"):
+            self._threaded = True
         ack = self._chat.send(text, client_id=client_id, sender=user, author=user)
         if not ack["ok"]:
             raise self._error({"empty_text": 422, "queue_full": 503}.get(ack.get("code"), 429), ack.get("code") or "rate_limited")
-        return {"id": ack["id"], "position": ack["position"], "message": ack["message"]}
+        return {"id": ack["id"], "position": ack["position"], "queued": ack["queued"], "message": ack["message"]}
+
+    def stop(self, session):
+        self._call("whoami", session)
+        if not self._threaded:
+            raise unittest.SkipTest("IF-101 stop of an answer that has not started is not in the real Backend yet (N-2.2 T-01)")
+        return {"stopped": self._chat.stop()}
 
     def history(self, session, limit=50):
         self._call("whoami", session)
