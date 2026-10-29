@@ -26,7 +26,7 @@ for candidate in (os.path.join(repo, "tests", "helpers", "mocks"), os.path.join(
             break
 sys.path.insert(0, candidate)
 
-from flask import jsonify, request  # noqa: E402
+from flask import Response, jsonify, request  # noqa: E402
 from flask_socketio import emit  # noqa: E402
 
 from socketio.exceptions import ConnectionRefusedError  # noqa: E402,A004  (the one the Socket.IO server turns into connect_error)
@@ -107,14 +107,23 @@ def login():
     return response
 
 
+def demo_card(card):
+    """the mock review has only the time; so that the card can be looked at, it gets made-up figures (they are not measured)"""
+    done = card.get("done")
+    return dict(card, phase="(mock) " + str(card.get("phase") or ""), counts={"on_list": 12, "processed": 12 if done else 5, "to_process": 0 if done else 7, "included": 4, "maybe": 2, "excluded": 6 if done else 0, "dropped": 1},
+                budget=dict(card.get("budget") or {}, **{"seconds": dict((card.get("budget") or {}).get("seconds") or {}, limit=600), "tokens": {"used": 12000 if done else 4000, "limit": 4000000},
+                                                         "calls": {"used": 30 if done else 11, "limit": 1500}, "api_requests": {"used": 6, "limit": 800}}))
+
+
 def deliver():
     """Every connected session gets the events the mock has for it, one by one, so that the answer streams."""
     with lock:
         batches = {token: api.events(token) for token in list(sids)}
     pending = [(token, event) for token, events in batches.items() for event in events]
     for token, event in pending:
+        payload = demo_card(event["payload"]) if event["event"] == "task_status" else event["payload"]
         for sid in list(sids.get(token, ())):
-            w.socketio.emit(event["event"], event["payload"], to=sid)
+            w.socketio.emit(event["event"], payload, to=sid)
         if event["event"] in ("chat_delta", "audio_chunk"):
             time.sleep(EVENT_GAP)
 
@@ -122,7 +131,7 @@ def deliver():
 def answer_later():
     time.sleep(ANSWER_DELAY)
     with lock:
-        while api._queue:                                  # the mock answers the whole queue; one scripted answer per message
+        while api._queue and api._review is None and not api._texts.get(api._queue[0], "").lower().startswith("/review"):      # a review is advanced by advance_review
             owner = api._owner.get(api._queue[0], "you")
             script = dict(ANSWERS[turn["n"] % len(ANSWERS)])
             script["sentences"] = [s.format(user=owner) for s in script["sentences"]]
@@ -133,6 +142,14 @@ def answer_later():
             api._broadcast("chat_status", api._status())
     deliver()
     answering.clear()
+
+
+def advance_review():
+    """the scripted review of the mock (/review): goes as far as it can (it asks and waits for the answer of the user), then the events go out"""
+    with lock:
+        if api._review is not None or (api._queue and api._texts.get(api._queue[0], "").lower().startswith("/review")):
+            api.settle()
+    deliver()
 
 
 def run_api(operation):
@@ -218,6 +235,37 @@ for _name, _view in (("vote", r_vote), ("score", r_score), ("regenerate", r_rege
     w.app.view_functions["chat_ops_api." + _name] = _view
 
 
+@w.app.post("/api/pause")
+def r_pause():
+    return run_api(lambda s: api.pause(s))
+
+
+@w.app.post("/api/resume")
+def r_resume():
+    return run_api(lambda s: api.resume(s))
+
+
+@w.app.get("/api/files")
+def r_files():
+    return run_api(lambda s: api.files(s))
+
+
+@w.app.get("/api/files/<name>")
+def r_file(name):
+    try:
+        with lock:
+            data = api.file(session(), name)
+    except ApiError as err:
+        return jsonify({"error": err.code, "rule": err.rule}), err.status
+    return Response(data, mimetype="text/markdown", headers={"Content-Disposition": 'attachment; filename="%s"' % name})
+
+
+for _name, _view in (("pause", r_pause), ("resume", r_resume)):
+    w.app.view_functions["chat_ops_api." + _name] = _view
+w.app.view_functions["files_api.files"] = r_files
+w.app.view_functions["files_api.file"] = r_file
+
+
 @w.app.get("/api/items")
 def r_items():
     return run_api(lambda s: api.items(s, request.args.get("kind")))
@@ -294,6 +342,7 @@ def chat_send(data=None):
     except ApiError as err:
         return {"ok": False, "error": {"queue_full": "The queue is full: wait for an answer.", "empty_text": "There is no text to send."}.get(err.code, err.code)}
     deliver()                                              # the broadcast of the message itself and the new queue status
+    advance_review()
     if not answering.is_set():
         answering.set()
         w.socketio.start_background_task(answer_later)
@@ -304,7 +353,9 @@ def chat_send(data=None):
 def chat_stop(_=None):
     token = tokens.get(request.sid)
     with lock:
-        return {"stopped": api.stop(token)["stopped"] if token else False}
+        result = {"stopped": api.stop(token)["stopped"] if token else False}
+    advance_review()
+    return result
 
 
 if __name__ == "__main__":

@@ -214,5 +214,58 @@ class RestViews(unittest.TestCase):
         self.assertTrue({"item_changed", "trust_changed", "persona_changed"} <= got, got)
 
 
+class ReviewOnTheMock(unittest.TestCase):
+    """so that the status card, pause and the Files tab can be seen by hand without a model: the scripted review of the IF-101 mock runs on the mock server (TC-WFM-031, -033, -036, -037)"""
+
+    def setUp(self):
+        server.api.__init__(accounts=dict(server.ACCOUNTS), answers=[])
+        server.sids.clear()
+        server.tokens.clear()
+        server.turn["n"] = 0
+        self.client = w.app.test_client()
+        login(self.client, "anna", "pw-anna")
+        self.sock = w.socketio.test_client(w.app, flask_test_client=self.client)
+        self.sock.get_received()
+
+    def test_a_review_shows_a_card_asks_and_gives_the_result_as_the_newest_message_with_a_file(self):
+        ack = self.sock.emit("chat_send", {"id": "c1", "text": "/review do canary releases help?"}, callback=True)
+        self.assertTrue(ack["ok"])
+        first = self.sock.get_received()
+        cards = [r["args"][0] for r in first if r["name"] == "task_status"]
+        self.assertEqual((cards[-1]["task"], cards[-1]["done"]), ("review", False))
+        self.assertIn("on_list", cards[-1]["counts"])                          # the mock server adds demo figures so that the card has something to show
+        self.assertIn("Shall I go on?", [r["args"][0]["text"] for r in first if r["name"] == "chat_message"])
+        reply = self.sock.emit("chat_send", {"id": "c2", "text": "no"}, callback=True)
+        self.assertEqual((reply["ok"], reply["position"]), (True, 0))
+        second = self.sock.get_received()
+        order = names(second)
+        self.assertGreater(order.index("chat_start"), max(i for i, n in enumerate(order) if n == "chat_message"))
+        self.assertTrue([r["args"][0] for r in second if r["name"] == "task_status"][-1]["done"])
+        done = [r["args"][0] for r in second if r["name"] == "chat_done"][0]
+        self.assertEqual((done["text"], done["files"]), ("the report", ["review-contract.md"]))
+        self.assertEqual([f["name"] for f in self.client.get("/api/files").get_json()], ["review-contract.md"])
+        got = self.client.get("/api/files/review-contract.md")
+        self.assertEqual((got.status_code, got.data), (200, b"# the report\n"))
+        self.assertIn("attachment", got.headers["Content-Disposition"])
+
+    def test_pause_and_resume_reach_the_running_review_and_a_bad_file_name_is_refused(self):
+        self.assertEqual(self.client.post("/api/pause").get_json(), {"paused": False})            # nothing runs
+        self.sock.emit("chat_send", {"id": "c1", "text": "/review do canary releases help?"}, callback=True)
+        self.sock.get_received()
+        self.assertEqual(self.client.post("/api/pause").get_json(), {"paused": True})
+        self.assertTrue([r["args"][0] for r in self.sock.get_received() if r["name"] == "task_status"][-1]["paused"])
+        self.assertEqual(self.client.post("/api/resume").get_json(), {"paused": False})
+        self.assertEqual(self.client.get("/api/files/..x.md").status_code, 422)
+        self.assertEqual(self.client.get("/api/files/none.md").status_code, 404)
+        self.assertEqual(w.app.test_client().get("/api/files").status_code, 401)
+
+    def test_stop_ends_a_waiting_review_with_the_result_as_it_stands(self):
+        self.sock.emit("chat_send", {"id": "c1", "text": "/review do canary releases help?"}, callback=True)
+        self.sock.get_received()
+        self.assertEqual(self.sock.emit("chat_stop", callback=True), {"stopped": True})
+        done = [r["args"][0] for r in self.sock.get_received() if r["name"] == "chat_done"]
+        self.assertEqual([d["status"] for d in done], ["stopped"])
+
+
 if __name__ == "__main__":
     unittest.main()
