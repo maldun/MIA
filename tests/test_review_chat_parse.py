@@ -35,5 +35,29 @@ class TestParse(unittest.TestCase):
         self.assertEqual(len(parse_reply(items)["items"]), 12)
 
 
+class TestTheQuestionAtTheCap(unittest.TestCase):
+    """owner 2026-10-29: at the hard cap the review asks: continue, summarize or stop"""
+
+    def test_the_reply_is_continue_summarize_or_stop_and_no_reply_summarizes(self):
+        from extensions.review.review_chat import parse_cap_reply
+        for text in ("continue", "Continue!", "more", "yes", "go on", "weiter"):
+            self.assertEqual(parse_cap_reply(text), "continue", text)
+        for text in ("summarize", "summary", "Summarise please", "sum up", "zusammenfassen"):
+            self.assertEqual(parse_cap_reply(text), "summarize", text)
+        for text in ("stop", "no", "cancel", "enough", "stopp"):
+            self.assertEqual(parse_cap_reply(text), "stop", text)
+        self.assertEqual(parse_cap_reply(None), "summarize")                     # nobody answered: what is read is summarized, nothing is thrown away
+        self.assertEqual(parse_cap_reply("hmm, what?"), "summarize")
+
+    def test_the_question_names_the_cap_the_state_and_the_three_answers(self):
+        from extensions.review.review_chat import cap_prompt
+        report = {"limits": {"hit": "seconds", "limits": {"seconds": 1800}}, "flow": {"found": 40, "screened": 25, "undecided": 15, "included": 9, "maybe": 4, "excluded_abstract": 12, "excluded_full": 0, "duplicates": 0, "dropped": 0}}
+        text = cap_prompt(report)
+        self.assertIn("30 minutes", text)
+        self.assertIn("25", text)
+        for word in ("**continue**", "**summarize**", "**stop**"):
+            self.assertIn(word, text)
+
+
 if __name__ == '__main__':
     unittest.main()

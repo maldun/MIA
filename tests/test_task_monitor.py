@@ -68,5 +68,16 @@ class TaskMonitorTest(unittest.TestCase):
         self.assertEqual(self.monitor.state()["budget"]["seconds"]["used"], 15.0)
 
 
+    def test_time_spent_waiting_for_the_user_is_not_counted(self):
+        self.clock.now = 10.0
+        self.monitor.begin_wait()
+        self.clock.now = 70.0
+        self.assertEqual(self.monitor.state()["budget"]["seconds"]["used"], 10.0)
+        self.assertFalse(self.monitor.state()["paused"])                          # waiting is not a pause: the card does not say paused
+        self.monitor.end_wait()
+        self.clock.now = 75.0
+        self.assertEqual(self.monitor.state()["budget"]["seconds"]["used"], 15.0)
+
+
 if __name__ == '__main__':
     unittest.main()

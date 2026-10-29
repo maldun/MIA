@@ -231,9 +231,10 @@ def check_summary(summary, report):
 # --- the run ------------------------------------------------------------------------------------------------------------------------
 
 class ReviewRun:
-    def __init__(self, request, keywords, criteria, search, screen_abstract, screen_full, full_text, agree, approve_terms, min_works=3, summarize=None, should_stop=None, monitor=None):
+    def __init__(self, request, keywords, criteria, search, screen_abstract, screen_full, full_text, agree, approve_terms, min_works=3, summarize=None, should_stop=None, monitor=None, at_cap=None):
         self.request, self.criteria = request, set(criteria)
         self.monitor = monitor                                 # the status card (REQ-WFM-031): update(phase, budget, counts); None = silent
+        self.at_cap = at_cap                                   # (report) -> "continue" | "summarize" | "stop": what to do at a hard cap of the mode run; None = the run ends (owner 2026-10-29)
         self.budget = request.budget
         self.pool = KeywordPool(keywords)
         self.search, self.screen_abstract, self.screen_full, self.full_text = search, screen_abstract, screen_full, full_text
@@ -253,8 +254,16 @@ class ReviewRun:
             if hit is None and (name is None or self.budget.spend(name)):
                 return True
             hit = hit or name
-            if self.budget.mode == "run":                      # REQ-WFM-034: a hard cap ends the run, nothing is asked
-                self.ended_by = "budget:" + hit
+            if self.budget.mode == "run":                      # REQ-WFM-034: a hard cap is the only place where the mode run asks
+                if self.at_cap is None:
+                    self.ended_by = "budget:" + hit
+                    return False
+                self.asking = "cap:" + hit
+                choice = self.at_cap(self.report())
+                if choice == "continue":
+                    self.budget.continue_run()                 # one more cap of what was used up
+                    continue
+                self.ended_by = "user" if choice == "stop" else "budget:" + hit        # summarize: the search ends, the summary of what is read is written
                 return False
             self.asking = "limit:" + hit
             if not self.agree(self.report()):

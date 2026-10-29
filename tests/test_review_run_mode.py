@@ -24,16 +24,16 @@ class Monitor:
         self.updates.append((dict(self.counts), {k: dict(v) for k, v in self.budget.items()}))
 
 
-def run_with(works, abstract=None, limits=None, mode="run", cap_factor=10, clock=None, monitor=None, agree=None):
+def run_with(works, abstract=None, limits=None, mode="run", cap_factor=10, clock=None, monitor=None, agree=None, time_cap=1800, at_cap=None, summarize=None):
     clock = clock or Clock()
-    request = ReviewRequest("how to schedule with graphs", until=TODAY, today=TODAY, budget=limits, clock=clock, mode=mode, cap_factor=cap_factor)
+    request = ReviewRequest("how to schedule with graphs", until=TODAY, today=TODAY, budget=limits, clock=clock, mode=mode, cap_factor=cap_factor, time_cap=time_cap)
     asked = []
 
     def recording_agree(report):
         asked.append(report["asking"])
         return True if agree is None else agree(report)
     run = rs.ReviewRun(request, ["graph"], CRITERIA, search=lambda keyword, query: [dict(w) for w in works], screen_abstract=abstract or (lambda w: judge(w)),
-                       screen_full=lambda w, t: None, full_text=lambda w: None, agree=recording_agree, approve_terms=lambda proposals: [], monitor=monitor)
+                       screen_full=lambda w, t: None, full_text=lambda w: None, agree=recording_agree, approve_terms=lambda proposals: [], monitor=monitor, at_cap=at_cap, summarize=summarize)
     return run.run(), asked
 
 
@@ -47,10 +47,12 @@ class BudgetModes(unittest.TestCase):
         self.assertEqual((budget.hit, budget.state()["limits"]["screen"]), ("screen", 20))
         budget = Budget({"seconds": 60}, clock=clock, mode="run", cap_factor=10)
         budget.start()
-        clock.now = 599
+        clock.now = 1799                                    # the time cap is 30 minutes (owner 2026-10-29), not the limit times the factor
         self.assertIsNone(budget.exhausted())
-        clock.now = 600
+        clock.now = 1800
         self.assertEqual(budget.exhausted(), "seconds")
+        self.assertEqual(Budget({"seconds": 60}, clock=clock, mode="run", time_cap=900).limit("seconds"), 900)
+        self.assertEqual(Budget({"screen": 40}, clock=clock, mode="run", cap_factor=3).limit("screen"), 120)      # the factor stays for the counts
 
     def test_the_mode_slice_keeps_the_limits_as_they_are(self):                        # TC-WFM-034
         budget = Budget({"screen": 2}, clock=Clock())
@@ -80,9 +82,48 @@ class RunMode(unittest.TestCase):
 
     def test_the_run_ends_at_the_hard_cap_with_the_cap_named_and_asks_nothing(self):   # TC-WFM-034
         clock = Clock()
-        report, asked = run_with(self.WORKS, abstract=self.slow(clock), clock=clock, mode="run", cap_factor=1)
+        report, asked = run_with(self.WORKS, abstract=self.slow(clock), clock=clock, mode="run", time_cap=60)
         self.assertEqual((report["ended_by"], report["flow"]["screened"]), ("budget:seconds", 2))
         self.assertEqual(asked, [])
+
+
+class AtTheCap(unittest.TestCase):
+    """owner 2026-10-29: at the hard cap the run asks: continue (another cap), summarize (stop searching and write the summary of what is read) or stop (the report as it stands)"""
+    WORKS = [work("10.1/%d" % i, "T%d" % i) for i in range(4)]
+
+    def run_it(self, answers, **kwargs):
+        clock, asked = Clock(), []
+
+        def screen(w):
+            clock.now += 40
+            return judge(w)
+
+        def at_cap(report):
+            asked.append(report["asking"])
+            return answers.pop(0) if answers else "stop"
+        report, _ = run_with(self.WORKS, abstract=screen, clock=clock, time_cap=60, at_cap=at_cap, summarize=lambda r: {"found": [], "coverage": "thin", "gaps": []}, **kwargs)
+        return report, asked
+
+    def test_continue_gives_another_cap_and_the_run_goes_on(self):
+        report, asked = self.run_it(["continue", "continue", "continue"])
+        self.assertEqual(report["flow"]["screened"], 4)
+        self.assertTrue(asked and all(a == "cap:seconds" for a in asked))
+        self.assertEqual(report["limits"]["limits"]["seconds"], 60 * (1 + len(asked)))              # every continue adds the size of the cap
+
+    def test_summarize_ends_the_search_and_writes_the_summary_of_what_is_read(self):
+        report, asked = self.run_it(["summarize"])
+        self.assertEqual((report["flow"]["screened"], report["ended_by"], len(asked)), (2, "budget:seconds", 1))
+        self.assertIn("summary", report)
+
+    def test_stop_gives_the_report_as_it_stands_without_a_summary(self):
+        report, _ = self.run_it(["stop"])
+        self.assertEqual((report["flow"]["screened"], report["ended_by"]), (2, "user"))
+        self.assertNotIn("summary", report)
+
+    def test_without_a_question_function_the_run_ends_at_the_cap_as_before(self):
+        clock = Clock()
+        report, asked = run_with(self.WORKS, abstract=lambda w: (setattr(clock, "now", clock.now + 40), judge(w))[1], clock=clock, time_cap=60)
+        self.assertEqual((report["ended_by"], asked), ("budget:seconds", []))
 
 
 class Figures(unittest.TestCase):
@@ -98,7 +139,7 @@ class Figures(unittest.TestCase):
         self.assertEqual(monitor.counts, {"on_list": 5, "processed": 5, "to_process": 0, "included": 3, "maybe": 1, "excluded": 1, "dropped": 1})
         self.assertEqual(monitor.budget["screen"], {"used": 5, "limit": 400})
         self.assertEqual(monitor.budget["api_requests"]["used"], 1)
-        self.assertEqual(monitor.budget["seconds"], {"limit": 600})
+        self.assertEqual(monitor.budget["seconds"], {"limit": 1800})
         for name in ("read", "calls", "tokens"):
             self.assertIn("limit", monitor.budget[name])
         self.assertIn("to_process", [c for c, _ in monitor.updates if c.get("processed") == 2][0])

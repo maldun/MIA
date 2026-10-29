@@ -12,6 +12,7 @@ class TaskMonitor:
         self.id, self.task, self.mode = task_id, task, mode
         self.phase, self.budget, self.counts = None, {}, {}
         self.done, self._paused_at, self._paused_total = False, None, 0.0
+        self._wait_at = None                                     # the task waits for the answer of a user: that time is not work time, but the card does not say paused
         self._started, self._last = clock(), None
 
     @property
@@ -19,9 +20,20 @@ class TaskMonitor:
         return self._paused_at is not None
 
     def active_seconds(self):
-        """the time since the start without the paused time"""
+        """the time since the start without the paused time and without the time spent waiting for the user"""
         now = self._paused_at if self._paused_at is not None else self._clock()
+        if self._wait_at is not None:
+            now = min(now, self._wait_at)
         return now - self._started - self._paused_total
+
+    def begin_wait(self):
+        if self._wait_at is None:
+            self._wait_at = self._clock()
+
+    def end_wait(self):
+        if self._wait_at is not None:
+            self._paused_total += self._clock() - self._wait_at
+            self._wait_at = None
 
     def update(self, phase=None, budget=None, counts=None):
         if phase is not None:

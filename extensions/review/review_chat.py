@@ -47,6 +47,20 @@ def parse_reply(text):
     return {"answer": "items", "items": items}
 
 
+CONTINUE = {"continue", "more", "yes", "y", "go", "go on", "ok", "okay", "sure", "ja", "weiter"}
+STOP = {"stop", "no", "n", "cancel", "enough", "stopp", "nein"}
+
+
+def parse_cap_reply(text):
+    """the answer to the question at the hard cap: "continue", "summarize" or "stop"; no answer, or one that is not understood, summarizes (what is read is not thrown away)"""
+    word = (text or "").strip().lower().strip(".!?, ")
+    if word in CONTINUE:
+        return "continue"
+    if word in STOP:
+        return "stop"
+    return "summarize"
+
+
 # --- what the user reads --------------------------------------------------------------------------------------------------------------
 
 def keywords_prompt(keywords, criteria):
@@ -55,6 +69,30 @@ def keywords_prompt(keywords, criteria):
         lines += ["", "A work is ruled out by these criteria:"] + ["- %s: %s" % (c["code"], c["text"]) for c in criteria]
     lines += ["", "Reply **yes** to start, **no** to cancel, or send your own keywords separated by commas."]
     return "\n".join(lines)
+
+
+def _cap_name(report):
+    limits = report.get("limits") or {}
+    hit = limits.get("hit") or "seconds"
+    size = (limits.get("limits") or {}).get(hit, 0)
+    if hit == "seconds":
+        return "time cap of %d minutes" % round(size / 60), "%d minutes" % round(size / 60)
+    return "cap of %d for %s" % (size, hit.replace("_", " ")), "the same again"
+
+
+def cap_prompt(report):
+    """the question at the hard cap of the mode run (owner 2026-10-29): continue, summarize or stop"""
+    name, more = _cap_name(report)
+    flow = report["flow"]
+    return ("The %s is used up. %d works are screened, %d are still to screen (%d included, %d maybe, %d excluded so far).\n"
+            "Reply **continue** for another %s, **summarize** to stop screening and write the summary of what is read, or **stop** to get the report as it stands."
+            % (name, flow["screened"], flow["undecided"], flow["included"], flow["maybe"], flow["excluded_abstract"] + flow["excluded_full"], more))
+
+
+def spoken_cap(report):
+    name, _ = _cap_name(report)
+    flow = report["flow"]
+    return "The %s is used up. I screened %d works, %d are left. Shall I continue, summarize, or stop?" % (name, flow["screened"], flow["undecided"])
 
 
 def _flow_line(flow):
@@ -172,7 +210,9 @@ def run_review(text, run_skill, scholar, full_text_source, ask, on_event=None, s
     question, until = parse_request(text)
     options = options or {}
     try:       # the mode run (default) has hard caps and asks nothing at a limit; the option `slice` brings the time slices back (REQ-WFM-034)
-        request = ReviewRequest.from_config(question, cfg, until=until, today=today, mode="slice" if options.get("slice") else "run", cap_factor=options.get("cap_factor", 10))
+        clock = getattr(monitor, "active_seconds", None)         # the time budget is work time: not the time of a pause, not the time the user needs to answer
+        request = ReviewRequest.from_config(question, cfg, until=until, today=today, mode="slice" if options.get("slice") else "run", cap_factor=options.get("cap_factor", 10),
+                                            **({"clock": clock} if clock else {}))
     except RequestError as exc:
         return "I cannot start the review: %s." % exc
     started = {"shown": False}
@@ -229,6 +269,10 @@ def run_review(text, run_skill, scholar, full_text_source, ask, on_event=None, s
         say(spoken_checkpoint(report))
         return parse_reply(ask(checkpoint_prompt(report)))["answer"] == "yes"
 
+    def at_cap(report):
+        say(spoken_cap(report))
+        return parse_cap_reply(ask(cap_prompt(report)))
+
     def approve_terms(proposals):
         say(spoken_terms(proposals))
         reply_ = parse_reply(ask(terms_prompt(proposals, min_works)))
@@ -240,7 +284,7 @@ def run_review(text, run_skill, scholar, full_text_source, ask, on_event=None, s
     abstract, full = review_models.make_screeners(run_skill, question, criteria)
     run = review_stages.ReviewRun(request, keywords, {c["code"] for c in criteria} or set(review_models.CODES), search=search, screen_abstract=screen_abstract_noted,
                                   screen_full=screen_full_noted, full_text=full_text_source, agree=agree, approve_terms=approve_terms, min_works=min_works,
-                                  summarize=review_models.make_summarizer(run_skill, question), should_stop=should_stop, monitor=monitor)
+                                  summarize=review_models.make_summarizer(run_skill, question), should_stop=should_stop, monitor=monitor, at_cap=at_cap)
     report = run.run()
     progress("writing the report")
     say(spoken_result(report))

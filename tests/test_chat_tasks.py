@@ -213,5 +213,18 @@ class ChatTasks(unittest.TestCase):
         self.assertEqual((doc["task"], doc["skill"], doc["question"], doc["account"], doc["model_pin"], doc["report"]), ("demo", "demo", "the question", "anna", "m", {"works": []}))
 
 
+    def test_the_time_a_task_waits_for_the_answer_of_the_user_is_not_on_the_card(self):          # REQ-WFM-031: the budget of time is work time
+        def run(argument, on_delta, on_emotion, should_stop, ask=None):
+            ask("First?")
+            return "the report"
+        service = self.make([self.task(run, needs=("ask",))])
+        service.send("/demo q", author="anna")
+        self.assertTrue(wait_for(lambda: any(e == "chat_message" and p["role"] == "assistant" for e, p in self.events)))
+        time.sleep(0.6)                                  # the user thinks
+        service.send("yes", author="anna")
+        self.assertTrue(self.idle(service))
+        self.assertLess(self.statuses()[-1]["budget"]["seconds"]["used"], 0.4)
+
+
 if __name__ == "__main__":
     unittest.main()

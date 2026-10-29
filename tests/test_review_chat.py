@@ -195,7 +195,7 @@ class TestReviewCard(unittest.TestCase):                                        
     def test_the_mode_run_has_caps_of_ten_times_the_limits_and_the_option_slice_brings_the_limits_back(self):
         card = CardMonitor()
         review(Conversation("yes", "no"), monitor=card)
-        self.assertEqual((card.budget["screen"]["limit"], card.budget["seconds"]["limit"]), (400, 600))
+        self.assertEqual((card.budget["screen"]["limit"], card.budget["seconds"]["limit"]), (400, 1800))
         card = CardMonitor()
         review(Conversation("yes", "no"), monitor=card, options={"slice": True})
         self.assertEqual((card.budget["screen"]["limit"], card.budget["seconds"]["limit"]), (40, 60))
@@ -260,6 +260,50 @@ class TestReviewOutputs(unittest.TestCase):                                     
         out = self.run_it()
         self.assertNotIn("Files:", out)
         self.assertNotIn("could not be stored", out)
+
+
+class ClockMonitor(CardMonitor):
+    def __init__(self, clock):
+        super().__init__()
+        self.active_seconds = clock
+
+
+class TestTheCapInTheReview(unittest.TestCase):                                 # TC-WFM-034, owner 2026-10-29
+    def run_with_slow_abstracts(self, *replies, **kwargs):
+        class Clock:
+            now = 0.0
+
+            def __call__(self):
+                return self.now
+        clock, calls = Clock(), []
+        base = skills(calls)
+
+        def run_skill(name, inputs):
+            if name == "review_abstract":
+                clock.now += 1000                                              # one screening step takes 1000 s of work time
+            return base(name, inputs)
+        works = [work("10.1/%s" % c, "Work " + c) for c in "abcd"]
+        user = Conversation(*replies)
+        out = rc.run_review("How to schedule? until 2026-01-01", run_skill, FakeScholar(works), lambda w: None, user, today=TODAY, monitor=ClockMonitor(clock), **kwargs)
+        return out, user, clock
+
+    def test_the_time_cap_is_thirty_minutes_of_work_time_and_the_question_comes_there(self):
+        out, user, _ = self.run_with_slow_abstracts("yes", "summarize")
+        self.assertIn("30 minutes", user.questions[1])                         # after the keywords comes the question at the cap, before the checkpoint
+        self.assertIn("**summarize**", user.questions[1])
+        self.assertIn("Ended by:** budget:seconds", out)
+        self.assertIn("### Summary", out)
+
+    def test_continue_goes_on_stop_gives_the_report_as_it_stands(self):
+        out, user, clock = self.run_with_slow_abstracts("yes", "continue", "continue", "no")
+        self.assertGreater(clock.now, 3000)                                    # it went on past the first cap
+        out, user, _ = self.run_with_slow_abstracts("yes", "stop")
+        self.assertIn("Ended by:** user", out)
+        self.assertNotIn("### Summary", out)
+
+    def test_the_time_cap_can_be_set_in_the_configuration(self):
+        out, user, _ = self.run_with_slow_abstracts("yes", "stop", cfg={"review_time_cap": 900})
+        self.assertIn("15 minutes", user.questions[1])
 
 
 if __name__ == "__main__":

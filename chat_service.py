@@ -547,6 +547,9 @@ class ChatService:
             self._waiter = waiter
         self.post_assistant(text)
         self.set_activity("waiting")
+        monitor = self._monitor
+        if monitor is not None:
+            monitor.begin_wait()                          # the time the user needs to answer is not work time of the task
         reply, end = None, self._clock() + self._review_timeout
         try:
             while reply is None and not self._stop.is_set() and self._clock() < end:
@@ -557,6 +560,8 @@ class ChatService:
         finally:
             with self._lock:
                 self._waiter = None
+            if monitor is not None:
+                monitor.end_wait()
             self.set_activity("thinking")
         return reply
 
