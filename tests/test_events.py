@@ -301,7 +301,7 @@ class InThePipeline(unittest.TestCase):
         class Probe(chat_service.ChatService):
             def __init__(self):
                 self._lock = __import__("threading").Lock()
-                self._message_id, self._show_pipeline, self._pipeline = "m1", True, []
+                self._message_id, self._show_pipeline, self._pipeline, self._late, self._monitor = "m1", True, [], False, None
                 self._emit = lambda name, payload: shown.append((name, payload))
         probe = Probe()
         probe.pipeline_event({"kind": "start", "node": "a"})
