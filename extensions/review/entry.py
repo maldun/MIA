@@ -1,13 +1,12 @@
 """/review question [until DATE]: the literature review (review_chat.py). The skills run through the core, the questions to the user through the chat (ask), the figures to the status card
 (monitor), the report as a record and as files (reports, files). The questions and a short result are spoken, never the whole report."""
+from . import review_chat, review_entry
+from .fulltext import FullTextSource
+
 try:
-    from ... import research_chat, review_chat, review_entry
-    from ...fulltext import FullTextSource
+    from ... import research_chat
 except ImportError:  # used as plain script / in tests
     import research_chat
-    import review_chat
-    import review_entry
-    from fulltext import FullTextSource
 
 
 def register(services):

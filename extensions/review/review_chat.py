@@ -11,14 +11,12 @@ scholarly search, the full text and the question to the user are handed in, as i
 """
 import re
 
+from . import review_models, review_stages          # the review is a package of its own (extensions/review): its parts are imported by their place, the core by the dots or, as a script, by name
+from .review_request import ReviewRequest, RequestError
+
 try:
-    from . import review_models, review_stages
-    from .review_request import ReviewRequest, RequestError
-    from .report_tex import report_tex
-except ImportError:
-    import review_models
-    import review_stages
-    from review_request import ReviewRequest, RequestError
+    from ...report_tex import report_tex
+except ImportError:  # used as plain script / in tests
     from report_tex import report_tex
 
 YES = {"yes", "y", "ok", "okay", "go", "continue", "sure", "ja", "all"}

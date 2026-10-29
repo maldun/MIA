@@ -82,8 +82,8 @@ def _core(name):
     """a module of the core, loaded when it is needed: as a part of the package (python -m MIA) by its place, as a script (the tests) by its name"""
     if __package__:
         try:
-            return importlib.import_module("." + name, package=__package__)
-        except ImportError:
+            return importlib.import_module("..." + name, package=__package__)
+        except (ImportError, ValueError):             # ValueError: as a script (extensions.review.fulltext) there is no package above
             pass
     return importlib.import_module(name)
 
