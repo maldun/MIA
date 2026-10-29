@@ -22,6 +22,7 @@ services:
       - "${MIA_BIND:-127.0.0.1}:${MIA_PORT:-8585}:8585"
     volumes:
       - ${MIA_CONFIG:-./setup_cfg.compose.json}:/opt/mia/MIA/setup_cfg.json:ro,z
+      - ./setup_cfg.local.json:/opt/mia/MIA/setup_cfg.local.json:ro,z      # the settings of THIS machine (the login ...), not in git; up.sh makes it ({}) when it is missing
       - mia-data:/opt/mia/MIA/data
       - ${MIA_KOKORO_DIR:-../voice/models/kokoro}:/opt/mia/MIA/voice/models/kokoro:ro,z
       - ${MIA_CHARACTER_DIR:-../ui/godot/build/web}:/opt/mia/MIA/ui/godot/build/web:ro,z

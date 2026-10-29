@@ -17,6 +17,7 @@ import sys
 
 NAME = "setup_cfg.json"
 EXAMPLE = "setup_cfg.example.json"
+LOCAL = "setup_cfg.local.json"        # settings of ONE machine next to a tracked configuration (the compose stack); not in git; wins key by key
 
 
 def paths(folder):
@@ -32,6 +33,43 @@ def ensure(folder):
         raise FileNotFoundError("neither %s nor %s exists in %s" % (NAME, EXAMPLE, folder))
     shutil.copyfile(example, real)
     return real, True
+
+
+def local_path(path):
+    """the local overlay that belongs to the configuration file `path`"""
+    return os.path.join(os.path.dirname(os.path.abspath(path)), LOCAL)
+
+
+def load(path):
+    """the configuration of `path` with setup_cfg.local.json next to it laid over it key by key (shallow: an object in the local file replaces the whole object). A local file that
+    is not a json object is an error that names it: a typo in an override must not be ignored silently."""
+    with open(path, encoding="utf-8") as fp:
+        doc = json.load(fp)
+    local = local_path(path)
+    if os.path.exists(local):
+        try:
+            with open(local, encoding="utf-8") as fp:
+                extra = json.load(fp)
+        except ValueError as exc:
+            raise ValueError("%s is not valid json: %s" % (LOCAL, exc))
+        if not isinstance(extra, dict):
+            raise ValueError("%s must be a json object" % LOCAL)
+        doc.update(extra)
+    return doc
+
+
+def set_local(path, key, value):
+    """puts one setting into the local file of `path` (made when it is missing) and keeps the others"""
+    local = local_path(path)
+    try:
+        with open(local, encoding="utf-8") as fp:
+            extra = json.load(fp)
+    except FileNotFoundError:
+        extra = {}
+    extra[key] = value
+    with open(local, "w", encoding="utf-8") as fp:
+        json.dump(extra, fp, indent=2)
+        fp.write("\n")
 
 
 def default_path(folder):

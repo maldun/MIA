@@ -27,6 +27,7 @@ For other devices set `MIA_BIND=0.0.0.0` in `deploy/.env` and open `https://<add
 | in the container | from | why |
 |---|---|---|
 | `setup_cfg.json` | `deploy/setup_cfg.compose.json` (or `MIA_CONFIG`) | the config of the stack: `ollama_managed: false`, `ollama_host`, `searxng_url`, `sandbox_backend: none`, histories under `data/` |
+| `setup_cfg.local.json` | `deploy/setup_cfg.local.json` | the settings of this machine (the login ...), laid over the config above key by key; not in git, made by `up.sh` as `{}` |
 | `data/` | volume `mia-data` | histories, presets, logs, token |
 | `voice/models/kokoro/` | `voice/models/kokoro` (or `MIA_KOKORO_DIR`), read-only | the Kokoro model files (README of the main folder) |
 | `ui/godot/build/web/` | `ui/godot/build/web` (or `MIA_CHARACTER_DIR`), read-only | the 3D character |
@@ -61,7 +62,7 @@ Off by default. Turn it on and make the owner account:
 deploy/up.sh owner NAME                  # asks for the password twice (at least 8 characters); never an argument
 ```
 
-then put `"accounts_enabled": true` into `deploy/setup_cfg.compose.json` (or the file `MIA_CONFIG` names; the command reminds you if it is missing) and restart MIA:
+The command also turns the login on, in `deploy/setup_cfg.local.json`. That file holds the settings of **this machine**, is not in git and is laid over the tracked `deploy/setup_cfg.compose.json` key by key (do not edit the tracked file for your machine). Restart MIA to apply it:
 
 ```
 deploy/up.sh db up -d --no-deps --force-recreate mia      # without "db" if the stack runs without the database

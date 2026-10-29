@@ -98,8 +98,8 @@ UPLOAD_FOLDER = os.path.join(FPATH,UPLOAD_DIR)
 AUDIO_DIR = os.path.join(TEMPLATE_DIR,AUDIO_ROUTE)
 AUDIO_FOLDER= os.path.join(FPATH,AUDIO_DIR)
 
-with open(cfg_file,'r') as jp:
-    cfg = json.load(jp)
+from .config import load as _load_config
+cfg = _load_config(cfg_file)                    # the configuration of the file, with setup_cfg.local.json (the settings of this machine, not in git) laid over it
 TIMEOUT_OPT = "timeout"
 
 from .utils import MyMarkdown, get_url, get_websocket_url, get_timestamp
