@@ -21,7 +21,7 @@ START = datetime.datetime(2026, 1, 5, tzinfo=datetime.timezone.utc)      # a Mon
 
 
 class ChatApiMock:
-    def __init__(self, accounts=None, answers=None, queue_limit=5, user_limit=2, review=("Shall I go on?",)):
+    def __init__(self, accounts=None, answers=None, queue_limit=5, user_limit=2, review=("Shall I go on?",), review_fails=None):
         self.accounts = accounts or {"anna": "pw-anna", "ben": "pw-ben", "carl": "pw-carl", "dora": "pw-dora", "emil": "pw-emil"}      # v5: five voters for the counters
         self.answers = list(answers or [])            # each: a list of sentences, or {"sentences": [...], "emotion": "..."}
         self.queue_limit, self.user_limit = queue_limit, user_limit
@@ -38,7 +38,8 @@ class ChatApiMock:
         self._persona = {"text": "MIA is a friendly, curious assistant."}
         self._variant = None
         self._regenerate = set()                      # ids of queued user messages whose answer is a new try
-        self._review_questions = tuple(review)        # v7: the questions a scripted /review asks one after the other before its report "the report"
+        self._review_questions = tuple(review)
+        self._review_fails = review_fails             # v10: a text = the scripted review fails with it after its questions        # v7: the questions a scripted /review asks one after the other before its report "the report"
         self._review = None                           # v7: the running review {"author", "asked", "waiting", "replies", "stop", "id"}
         self._texts = {}                              # id of a queued user message -> its text
         self._options = {}                            # v8: id of a queued /review -> its options
@@ -368,14 +369,21 @@ class ChatApiMock:
 
     def _end_review(self, status):
         name = "review-contract.md"
-        self._files[name] = {"data": b"# the report\n", "created": "t%d" % int(self.now), "task": "review", "message_id": self._review["id"]}
-        self._broadcast("files_changed", {"name": name, "task": "review"})
-        self._review["files"].append(name)
-        record = {"id": self._review["id"], "role": "assistant", "sender": "MIA", "text": "the report", "created": "t%d" % int(self.now)}
+        text, extra = "the report", {}
+        if self._review_fails:                                # v10: a task that fails leaves a result that says why (and chat_error), no file
+            text, status = "/review could not finish: %s" % self._review_fails, "error"
+            self._broadcast("chat_error", {"id": self._review["id"], "message": "MIA could not answer: %s" % self._review_fails})
+        else:
+            self._files[name] = {"data": b"# the report\n", "created": "t%d" % int(self.now), "task": "review", "message_id": self._review["id"]}
+            self._broadcast("files_changed", {"name": name, "task": "review"})
+            self._review["files"].append(name)
+            text += "\n\nFiles: [%s](/api/files/%s)" % (name, name)           # v10: the files are links at the end of the result
+            extra = {"files": list(self._review["files"])}
+        record = {"id": self._review["id"], "role": "assistant", "sender": "MIA", "text": text, "created": "t%d" % int(self.now)}
         self._history.append(record)
         self._broadcast("chat_start", {"id": record["id"], "role": "assistant", "task": "review"})      # v8: the result is the newest message
-        self._broadcast("chat_delta", {"id": record["id"], "text": "the report"})
-        self._broadcast("chat_done", {"id": record["id"], "text": "the report", "emotion": "neutral", "status": status, "files": list(self._review["files"])})
+        self._broadcast("chat_delta", {"id": record["id"], "text": text})
+        self._broadcast("chat_done", dict({"id": record["id"], "text": text, "emotion": "neutral", "status": status}, **extra))
         self._card(done=True)
         self._review = None
         return True

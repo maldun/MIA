@@ -154,7 +154,7 @@ class _ChatApiAdapter:
     TRUST_SOURCES = {"example.org": 0.5}                            # a source the mock has and the default table does not: seeded through the override file
     START = 1767571200                                              # 2026-01-05 00:00 UTC, a Monday: the clock 0 of the mock
 
-    def __init__(self, answers=None, queue_limit=5, user_limit=2, review=("Shall I go on?",)):
+    def __init__(self, answers=None, queue_limit=5, user_limit=2, review=("Shall I go on?",), review_fails=None):
         import tempfile
         from errors import ApiError
         from storage import Storage
@@ -193,6 +193,7 @@ class _ChatApiAdapter:
                                  votes=store, wall_clock=lambda: self.START + self._now, behaviours=lambda: self.BEHAVIOURS,
                                  tasks=self._tasks, files=self._files, review_timeout=30)
         self._review_questions = tuple(review)
+        self._review_fails = review_fails
         app = Flask(__name__)
 
         @app.before_request
@@ -231,6 +232,8 @@ class _ChatApiAdapter:
             ask(question)
             if should_stop():
                 break
+        if self._review_fails:
+            raise RuntimeError(self._review_fails)
         files("review-contract.md", "# the report\n")
         return "the report"
 
