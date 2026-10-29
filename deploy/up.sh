@@ -1,6 +1,6 @@
 #!/bin/bash
 # deploy/up.sh [rocm|nvidia] [compose arguments]   start the stack (default: up -d --build); `deploy/up.sh down` stops it
-# deploy/up.sh owner NAME   the owner account (see below); also: character, calibration, memories, data, backup, restore
+# deploy/up.sh owner NAME | login on|off|status   the owner account and the password check (see below); also: character, calibration, memories, data, backup, restore
 # Makes deploy/.env with a secret for SearXNG on the first call. Needs podman with a compose provider (sudo dnf install podman-compose) or docker compose.
 set -e
 HERE="$(dirname "$(readlink -f "$0")")"
@@ -39,19 +39,59 @@ if [ "${1:-}" = "calibration" ]; then
   echo "calibration.txt copied into the data volume, MIA restarted"
   exit 0
 fi
-# deploy/up.sh owner NAME   make the owner account in the running MIA container (asks for the password twice, it is never an argument) and turn the login on in
-# deploy/setup_cfg.local.json (the settings of this machine; not in git, laid over the tracked deploy/setup_cfg.compose.json)
+# deploy/up.sh login on|off|status   turn the login (password check) on or off in deploy/setup_cfg.local.json (the settings of THIS machine: not in git, laid over the tracked
+# deploy/setup_cfg.compose.json); no container is needed. Apply a change with:  deploy/up.sh db up -d --no-deps --force-recreate mia
+ROOT="$(dirname "$HERE")"
+login_setting() {   # on|off -> the local file ;  status -> prints it
+  python3 -c "
+import sys
+sys.path.insert(0, sys.argv[1])
+import config
+if sys.argv[3] == 'status':
+    print('login: ' + ('on' if config.load(sys.argv[2]).get('accounts_enabled') else 'off'))
+else:
+    config.set_local(sys.argv[2], 'accounts_enabled', sys.argv[3] == 'on')
+" "$ROOT" "$HERE/setup_cfg.compose.json" "$1"
+}
+mia_container() {
+  local engine; engine="$(command -v podman || command -v docker)"
+  "$engine" ps -aq --filter "label=com.docker.compose.project=${MIA_PROJECT:-mia}" --filter label=com.docker.compose.service=mia | head -1
+}
+ACCOUNT_TOOL=(python /opt/mia/MIA/tools/accounts_cli.py)
+ACCOUNT_DIR=/opt/mia/MIA/data/db
+if [ "${1:-}" = "login" ]; then
+  case "${2:-}" in
+    on|off)
+      login_setting "$2"
+      echo "login $2 in deploy/setup_cfg.local.json (a file of this machine, not in git). Apply it:  deploy/up.sh db up -d --no-deps --force-recreate mia"
+      if [ "$2" = "on" ]; then
+        CONTAINER="$(mia_container)"
+        if [ -n "$CONTAINER" ] && [ "$(${ENGINE:-$(command -v podman || command -v docker)} exec "$CONTAINER" "${ACCOUNT_TOOL[@]}" list --dir "$ACCOUNT_DIR" 2>/dev/null)" = "no accounts" ]; then
+          echo "WARNING: no account exists yet, you could not log in. Make the owner account first:  deploy/up.sh owner NAME"
+        fi
+        echo "Log in at  https://localhost:8586  (a password is not accepted over plain http in the stack)"
+      fi ;;
+    status) login_setting status ;;
+    *) echo "usage: deploy/up.sh login on|off|status"; exit 1 ;;
+  esac
+  exit 0
+fi
+# deploy/up.sh owner NAME   make the owner account in the running MIA container (asks for the password twice, it is never an argument) and turn the login on (as  login on );
+# an account that exists already is kept and only the login is turned on
 if [ "${1:-}" = "owner" ]; then
   NAME="${2:-}"
   if ! printf '%s' "$NAME" | grep -Eq '^[A-Za-z0-9][A-Za-z0-9._-]*$'; then
     echo "usage: deploy/up.sh owner NAME      (letters, digits, dot, dash and underscore)"; exit 1
   fi
   ENGINE="$(command -v podman || command -v docker)"
-  CONTAINER="$($ENGINE ps -aq --filter "label=com.docker.compose.project=${MIA_PROJECT:-mia}" --filter label=com.docker.compose.service=mia | head -1)"
+  CONTAINER="$(mia_container)"
   [ -n "$CONTAINER" ] || { echo "MIA container not found, start the stack first: deploy/up.sh"; exit 1; }
-  $ENGINE exec -it "$CONTAINER" python /opt/mia/MIA/tools/accounts_cli.py create "$NAME" --dir /opt/mia/MIA/data/db
-  # the login is a setting of this machine: it goes into the local file (not in git), never into the tracked deploy/setup_cfg.compose.json
-  python3 -c "import sys; sys.path.insert(0, sys.argv[1]); import config; config.set_local(sys.argv[2], 'accounts_enabled', True)" "$(dirname "$HERE")" "$HERE/setup_cfg.json"
+  if $ENGINE exec "$CONTAINER" "${ACCOUNT_TOOL[@]}" list --dir "$ACCOUNT_DIR" 2>/dev/null | grep -Fxq "$NAME"; then
+    echo "The account $NAME already exists: it is kept. (A new password:  $ENGINE exec -it $CONTAINER ${ACCOUNT_TOOL[*]} password $NAME --dir $ACCOUNT_DIR )"
+  else
+    $ENGINE exec -it "$CONTAINER" "${ACCOUNT_TOOL[@]}" create "$NAME" --dir "$ACCOUNT_DIR"
+  fi
+  login_setting on
   echo
   echo "The login is turned on in deploy/setup_cfg.local.json (a file of this machine, not in git). Apply it:  deploy/up.sh db up -d --no-deps --force-recreate mia"
   echo "Then log in at  https://localhost:8586  (a password is not accepted over plain http in the stack; the browser asks once about the certificate)"

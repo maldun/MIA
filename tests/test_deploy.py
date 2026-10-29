@@ -80,11 +80,11 @@ class OwnerCommand(unittest.TestCase):
         self.log = os.path.join(self.tmp.name, "podman.log")
         stub = os.path.join(self.bin, "podman")
         with open(stub, "w") as fp:
-            fp.write('#!/bin/bash\necho "$@" >> %s\ncase "$1" in ps) [ -n "$STUB_CONTAINER" ] && echo "$STUB_CONTAINER";; exec) exit ${STUB_EXEC_EXIT:-0};; esac\nexit 0\n' % self.log)
+            fp.write('#!/bin/bash\necho "$@" >> %s\ncase "$1" in ps) [ -n "$STUB_CONTAINER" ] && echo "$STUB_CONTAINER";; exec) case " $* " in *" list "*) echo "$STUB_ACCOUNTS"; exit 0;; esac; exit ${STUB_EXEC_EXIT:-0};; esac\nexit 0\n' % self.log)
         os.chmod(stub, os.stat(stub).st_mode | stat.S_IEXEC)
 
-    def run_up(self, *args, container="abc123", exec_exit="0"):
-        env = dict(os.environ, PATH=self.bin + os.pathsep + os.environ["PATH"], STUB_CONTAINER=container, STUB_EXEC_EXIT=exec_exit)
+    def run_up(self, *args, container="abc123", exec_exit="0", accounts="no accounts"):
+        env = dict(os.environ, PATH=self.bin + os.pathsep + os.environ["PATH"], STUB_CONTAINER=container, STUB_EXEC_EXIT=exec_exit, STUB_ACCOUNTS=accounts)
         done = subprocess.run(["bash", os.path.join(self.deploy, "up.sh"), *args], capture_output=True, text=True, env=env)
         calls = open(self.log).read().splitlines() if os.path.exists(self.log) else []
         return done, calls
@@ -132,6 +132,35 @@ class OwnerCommand(unittest.TestCase):
         self.run_up("owner", "anna")
         with open(os.path.join(self.deploy, "setup_cfg.local.json"), encoding="utf-8") as fp:
             self.assertIsInstance(json.load(fp), dict)
+
+    def local(self):
+        with open(os.path.join(self.deploy, "setup_cfg.local.json"), encoding="utf-8") as fp:
+            return json.load(fp)
+
+    def test_an_account_that_exists_is_not_created_again_but_the_login_is_turned_on(self):
+        """found 2026-10-29: the account had been made by hand, `owner` stopped at the refusal to make it twice and never turned the login on"""
+        done, calls = self.run_up("owner", "master", accounts="master")
+        self.assertEqual(done.returncode, 0, done.stdout + done.stderr)
+        self.assertFalse(any(" create " in c for c in calls), calls)                      # no second creation
+        self.assertTrue(self.local()["accounts_enabled"])
+        self.assertIn("already exists", done.stdout)
+
+    def test_login_on_and_off_change_only_the_local_file_and_need_no_container(self):
+        done, calls = self.run_up("login", "on", container="")
+        self.assertEqual(done.returncode, 0, done.stdout + done.stderr)
+        self.assertTrue(self.local()["accounts_enabled"])
+        self.assertIn("force-recreate mia", done.stdout)
+        done, _ = self.run_up("login", "off", container="")
+        self.assertFalse(self.local()["accounts_enabled"])
+        done, _ = self.run_up("login", "status", container="")
+        self.assertIn("off", done.stdout)
+        self.assertNotEqual(self.run_up("login", "maybe", container="")[0].returncode, 0)
+        self.assertFalse(any(c.startswith("exec") for c in calls), calls)                 # no container is needed to switch it
+
+    def test_login_on_warns_when_no_account_exists_yet(self):
+        done, _ = self.run_up("login", "on", container="abc123", accounts="no accounts")
+        self.assertIn("no account", done.stdout)                                          # turning the login on without an account would lock the owner out
+        self.assertIn("deploy/up.sh owner", done.stdout)
 
 if __name__ == "__main__":
     unittest.main()

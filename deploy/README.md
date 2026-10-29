@@ -62,7 +62,7 @@ Off by default. Turn it on and make the owner account:
 deploy/up.sh owner NAME                  # asks for the password twice (at least 8 characters); never an argument
 ```
 
-The command also turns the login on, in `deploy/setup_cfg.local.json`. That file holds the settings of **this machine**, is not in git and is laid over the tracked `deploy/setup_cfg.compose.json` key by key (do not edit the tracked file for your machine). Restart MIA to apply it:
+The command also turns the login on, in `deploy/setup_cfg.local.json`; an account that exists already is kept (it is not created twice). To switch the password check alone, without a container: `deploy/up.sh login on|off|status` (`on` warns when no account exists yet, because you could not log in then). That file holds the settings of **this machine**, is not in git and is laid over the tracked `deploy/setup_cfg.compose.json` key by key (do not edit the tracked file for your machine). Restart MIA to apply it:
 
 ```
 deploy/up.sh db up -d --no-deps --force-recreate mia      # without "db" if the stack runs without the database
