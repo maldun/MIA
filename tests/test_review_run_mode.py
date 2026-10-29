@@ -7,8 +7,8 @@ import unittest
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-import review_stages as rs
-from review_request import Budget, ReviewRequest
+from extensions.review import review_stages as rs
+from extensions.review.review_request import Budget, ReviewRequest
 from test_review_stages import CRITERIA, TODAY, Clock, judge, work
 
 

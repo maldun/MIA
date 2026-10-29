@@ -6,7 +6,7 @@ import unittest
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from review_chat import parse_request, parse_reply
+from extensions.review.review_chat import parse_request, parse_reply
 
 
 class TestParse(unittest.TestCase):

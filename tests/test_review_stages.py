@@ -8,9 +8,9 @@ import unittest
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-import review_stages as rs
+from extensions.review import review_stages as rs
 import scholar
-from review_request import ReviewRequest
+from extensions.review.review_request import ReviewRequest
 
 TODAY = datetime.date(2026, 10, 28)
 CRITERIA = {"outdated", "off_topic", "wrong_type"}

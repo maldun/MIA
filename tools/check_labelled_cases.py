@@ -21,7 +21,7 @@ from MIA.config import default_path                      # noqa: E402
 from MIA.core import Core                                # noqa: E402
 from MIA.library import Library                          # noqa: E402
 from MIA.pipeline_model import OllamaModel              # noqa: E402
-from MIA import review_models, review_stages            # noqa: E402
+from MIA.extensions.review import review_models, review_stages            # noqa: E402
 
 CASES = os.path.join(REPO, "specs", "mia", "eval-drafts", "review_proposed_cases.jsonl")
 WORLD = os.path.join(REPO, "eval", "suites", "review_toy", "world.json")

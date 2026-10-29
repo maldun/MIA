@@ -13,8 +13,8 @@ sys.path.insert(0, os.path.join(ROOT, "tests", "helpers"))
 
 from core import Core                          # noqa: E402
 from library import Library                    # noqa: E402
-import review_models                           # noqa: E402
-import review_stages as rs                     # noqa: E402
+from extensions.review import review_models                           # noqa: E402
+from extensions.review import review_stages as rs                     # noqa: E402
 
 CRITERIA = [{"code": "outdated", "text": "older than twenty years without a lasting method"}, {"code": "off_topic", "text": "not about the question"}]
 JUDGEMENT = {"grade": 3, "quote": "Graph methods for scheduling", "statement": "directly about the question", "decision": "exclude", "reason": "outdated"}

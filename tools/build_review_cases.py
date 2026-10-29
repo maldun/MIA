@@ -7,7 +7,7 @@ import unicodedata
 
 REPO = "/home/maldun/prog/Python/MIA/.claude/worktrees/chat-c1"
 sys.path.insert(0, REPO)
-import review_case as RC                                      # noqa: E402
+from extensions.review import review_case as RC                                      # noqa: E402
 import scholar                                                # noqa: E402
 
 TMP = "/home/maldun/.claude/jobs/e483ef54/tmp/"
