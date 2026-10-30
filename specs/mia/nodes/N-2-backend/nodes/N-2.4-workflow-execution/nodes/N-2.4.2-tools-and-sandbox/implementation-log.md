@@ -63,3 +63,22 @@ Local coder: `tests/test_tool_calls_sandbox.py` (task `tls05-tests`, 1 attempt, 
 Tests reported green (feedback, not verification): `tests/test_tool_calls_sandbox.py` (5), `tests/test_tool_calls.py`, `tests/test_tool_calls_untrusted.py`, `tests/test_checks.py`, IF-402 contract suite (10), `tests/test_sandbox.py` (in the image 52 of its tests skip: no bubblewrap there; the wall itself is not changed).
 
 Open for Phase 4: the wall tests of `tests/test_sandbox.py` run only on a host with bubblewrap and podman; Verify should run them there.
+
+## T-04 Web search and fetch, only queries leave the host (2026-10-30, done; IF-404 port rule waits for A-33) – REQ-TLS-007, IF-404
+
+| Requirement | Where it is met | Test |
+|---|---|---|
+| REQ-TLS-007 only the query leaves, the web log lists every request | `web_tools.SearxngBackend` sends `q`, `format`, `safesearch` and a User-Agent, `DuckDuckGoBackend` the form field `q`; `Search` logs every backend it asked (also a failing one), `WebClient` every fetch, also a refused address (nothing sent); **changed:** the fetch record names every address a redirect passed through (`redirects`: the list, before only their number), on success and on error | `tests/test_tool_calls_web_log.py` (6), through the door `tool_calls.ToolCalls` wired to `build_web_tools` |
+| IF-404 | `web_tools.py` (search, fetch, address rules); the real side of the contract suite stays skipped (stage 2: the real web and SearXNG) | contract suite (mock side) |
+
+Findings:
+- **The web log missed the first address of a redirect** (the record named the final address and the number of redirects): test `test_every_address_of_a_redirect_is_in_the_web_log` red first, then the fix in `WebClient.get` and `_read`. Nothing read the old number (checked: `run_explain`, `test_events`, the page).
+- **IF-404 v0 refused ports 8080 and 8443, `web_tools.ALLOWED_PORTS` allows them** (and `tests/test_web_tools.py` asserts it). Owner: keep the code (D-116); A-33 drafted: IF-404 v1, mock, TC-IF-404-02 (port 22 as the refused example), test-spec row.
+
+Local coder: `tests/test_tool_calls_web_log.py` (task `tls07-tests`, 1 attempt, 76 s); fixture and every statement identical to the instruction, but the six methods were written at module level, outside the class (the file compiled, the doc check passed, unittest ran 0 tests); indented by hand, `RUN` moved up; verdict `fixed`, lesson added (the check must run the file and count the tests).
+
+Tests reported green (feedback, not verification): `tests/test_tool_calls_web_log.py` (6), `tests/test_web_tools.py`, `tests/test_events.py`, `tests/test_scholar.py`, `tests/test_fulltext_source.py`, `tests/test_script_checks.py`, the earlier tool tests, IF-404 (mock) and IF-402 contract suites.
+
+Open for Phase 4:
+- The real side of IF-404 never runs: `real_subject` has no provider for it and the suite's options (`search_down`, `max_bytes`, scripted pages) reach only the mock. A stage-2 run against the real web needs a provider class with `search`, `fetch`, `log` and a decision how the options map; an amendment for the owner.
+- What leaves the host for a scholarly query (and the e-mail address) is T-05.
