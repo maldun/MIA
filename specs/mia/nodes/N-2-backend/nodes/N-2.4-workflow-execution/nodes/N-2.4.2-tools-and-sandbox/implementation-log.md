@@ -43,3 +43,23 @@ Local coder: `tests/test_tool_calls_untrusted.py` typed from an exact instructio
 Tests reported green (feedback, not verification): `tests/test_tool_calls_untrusted.py` (6), `tests/test_tool_calls.py` (10), `tests/test_web_tools.py`, `tests/test_checks.py`.
 
 Open for Phase 4: red-team suites (`rt_paper`, `rt_user_text`) test the model steps, not the door; TC-TLS-004 is the component part. Whether the pipelines wrap every web text with `untrusted` is N-2.4.1's (the runner) and is not tested here.
+
+## T-03 Sandbox or refuse (2026-10-30, done) – REQ-TLS-005
+
+| Requirement | Where it is met | Test |
+|---|---|---|
+| REQ-TLS-005 sandbox or refuse, scripts | `tool_calls.ToolCalls(sandbox=<SandboxRouter>)` builds the script check itself (`checks.make_script_check`); `run_script` asks `sandbox.available_for(Operation("compute", "model"))` first: no router, all backends gone or `sandbox_backend: none` is `{"status": "unavailable", "stdout": ""}` and no backend is asked; with one the script runs there, `stdout` and the check's verdict (`result`) come back | `tests/test_tool_calls_sandbox.py` (4 of 5) |
+| REQ-TLS-005 sandbox or refuse, documents | `pdf_text.pdf_to_text` refuses (`PdfUnavailable`) without bubblewrap and starts no process (unchanged code) | `tests/test_tool_calls_sandbox.py` (1 of 5) |
+
+Change: the parameter `script_check` of T-01 became `sandbox` (the router), so the door can refuse before the check and the check cannot be handed in without its wall. Nothing outside the node used the old parameter.
+
+Decisions made while building (small, inside the contract):
+- The door asks for the operation `compute` by a `model` origin, untainted, normal stakes (the defaults of `script_check`): the standard tier, bubblewrap first. A script on web text (tainted, strong tier) is not offered by the door yet; IF-402 `run_script` has no argument for it.
+- `stdout` is the one of the check's evidence, clipped at 500 characters (`checks._clip`).
+- `result` (the verdict of the script check) is an extra key of the `run_script` output beyond IF-402 v1 `{status, stdout}`; consumers that rely on the contract are not affected. Proposed for the next IF-402 version.
+
+Local coder: `tests/test_tool_calls_sandbox.py` (task `tls05-tests`, 1 attempt, 50 s); the fixture block and every statement compared with the instruction by script: identical; verdict `ok`. Red before the change (3 errors: no `sandbox` parameter), green after.
+
+Tests reported green (feedback, not verification): `tests/test_tool_calls_sandbox.py` (5), `tests/test_tool_calls.py`, `tests/test_tool_calls_untrusted.py`, `tests/test_checks.py`, IF-402 contract suite (10), `tests/test_sandbox.py` (in the image 52 of its tests skip: no bubblewrap there; the wall itself is not changed).
+
+Open for Phase 4: the wall tests of `tests/test_sandbox.py` run only on a host with bubblewrap and podman; Verify should run them there.

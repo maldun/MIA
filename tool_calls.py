@@ -7,7 +7,8 @@ The one door to the tools (IF-402, part VerificationSuite of node N-2.4.2): ever
 The code checks come from checks.py and are offered to every workflow (REQ-TLS-001). Every call is counted against the limits of its run, and
 every output carries its trust: `code` (computed by code), `web` (text from the web or a paper, untrusted data) or `model` (REQ-TLS-008).
 The web, the scholarly sources, the trust table and the sandbox are handed in (web_tools.build_web_tools, scholar.build_scholar,
-source_trust.TrustTable.for_url, checks.make_script_check), so the door itself touches no network.
+source_trust.TrustTable.for_url, sandbox.create_router), so the door itself touches no network. Without an isolating sandbox a script is refused before
+anything runs, never run unprotected (REQ-TLS-005).
 """
 import hashlib
 
@@ -16,11 +17,13 @@ try:
     from .schema_check import check as check_schema
     from .web_tools import chunk_text
     from .evidence import passage_id
+    from .sandbox import Operation
 except ImportError:  # used as plain script / in tests
     import checks
     from schema_check import check as check_schema
     from web_tools import chunk_text
     from evidence import passage_id
+    from sandbox import Operation
 
 TRUST = {"number_check": "code", "quote_in_source": "code", "schema_check": "code", "run_script": "code",
          "web_search": "web", "fetch_passages": "web", "scholar_search": "web", "source_record": "web"}
@@ -37,9 +40,10 @@ class ToolCallError(Exception):
 
 
 class ToolCalls:
-    def __init__(self, web_search=None, fetch_page=None, scholar=None, trust=None, script_check=None):
-        self.web_search, self.fetch_page, self.scholar = web_search, fetch_page, scholar
-        self.trust, self.script_check = trust, script_check
+    def __init__(self, web_search=None, fetch_page=None, scholar=None, trust=None, sandbox=None):
+        self.web_search, self.fetch_page, self.scholar, self.trust = web_search, fetch_page, scholar, trust
+        self.sandbox = sandbox
+        self.script_check = checks.make_script_check(sandbox) if sandbox is not None else None
         self._used = {}
 
     def used(self, run_id):
@@ -81,10 +85,12 @@ class ToolCalls:
         return {"status": "fail" if problems else "pass", "problems": problems}
 
     def _run_script(self, code, inputs):
-        if self.script_check is None:
+        # asked before the check, with the operation the check will run: a removed sandbox must not reach any backend (REQ-TLS-005)
+        if self.script_check is None or not self.sandbox.available_for(Operation("compute", "model")):
             return {"status": "unavailable", "stdout": ""}
         found = self.script_check(code, data=inputs)
-        return {"status": "ok", "stdout": "", "result": found}
+        stdout = found["evidence"][0].get("stdout", "") if found["evidence"] else ""
+        return {"status": "ok", "stdout": stdout, "result": found}
 
     # --- web and scholarly sources (untrusted data) ---
 
