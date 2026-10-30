@@ -18,12 +18,14 @@ try:
     from .web_tools import chunk_text
     from .evidence import passage_id
     from .sandbox import Operation
+    from .scholar import RETRACTED, WITHDRAWN, clean_doi, reference_of, retraction_state
 except ImportError:  # used as plain script / in tests
     import checks
     from schema_check import check as check_schema
     from web_tools import chunk_text
     from evidence import passage_id
     from sandbox import Operation
+    from scholar import RETRACTED, WITHDRAWN, clean_doi, reference_of, retraction_state
 
 TRUST = {"number_check": "code", "quote_in_source": "code", "schema_check": "code", "run_script": "code",
          "web_search": "web", "fetch_passages": "web", "scholar_search": "web", "source_record": "web"}
@@ -40,8 +42,12 @@ class ToolCallError(Exception):
 
 
 class ToolCalls:
-    def __init__(self, web_search=None, fetch_page=None, scholar=None, trust=None, sandbox=None):
+    def __init__(self, web_search=None, fetch_page=None, scholar=None, trust=None, sandbox=None, work_trust=None, retractions=None, work_lookup=None):
+        """work_trust(work, as_of): the trust entry of a work (source_trust.TrustTable.for_work); retractions(work, errors): asks for the notices of a work
+        and merges them into it (scholar.Scholar.verify_retraction); without it only what the sources reported themselves counts; work_lookup(doi): the full
+        record of one DOI or None (scholar.CrossrefClient.lookup)"""
         self.web_search, self.fetch_page, self.scholar, self.trust = web_search, fetch_page, scholar, trust
+        self.work_trust, self.retractions, self.work_lookup = work_trust, retractions, work_lookup
         self.sandbox = sandbox
         self.script_check = checks.make_script_check(sandbox) if sandbox is not None else None
         self._used = {}
@@ -105,12 +111,35 @@ class ToolCalls:
         return {"ref": url, "hash": hashlib.sha256(text.encode("utf-8")).hexdigest()[:16], "passages": passages}
 
     def _scholar_search(self, query, until=None, since=None):
+        """IF-405 records (REQ-TLS-003): origin (`sources`), trust class, the retraction state as of the cut-off; a work retracted or withdrawn by then
+        is dropped and listed like a work after the cut-off"""
         found = self._need(self.scholar, "scholarly search").search(query, until=until, since=since)
-        return {"works": found["works"], "errors": found["errors"], "dropped": found["dropped"]}
+        errors = dict(found["errors"])
+        dropped = [{"ref": d["ref"], "title": d.get("title", ""), "reason": d.get("code") or d["reason"], "detail": d["reason"]} for d in found["dropped"]]
+        works = []
+        for work in found["works"]:
+            if self.retractions is not None:
+                self.retractions(work, errors)
+            # notices after the cut-off do not count: a run as of a past day must not know them (scholar.use_as_of)
+            state = retraction_state(work, as_of=until)
+            if state["status"] in (RETRACTED, WITHDRAWN):
+                dropped.append({"ref": reference_of(work), "title": work.get("title", ""), "reason": state["status"],
+                                "detail": "; ".join(n.get("doi") or n["type"] for n in state["notices"])})
+                continue
+            works.append(dict(work, retraction=state, trust=self.work_trust(work, until) if self.work_trust is not None else None))
+        return {"works": works, "errors": [{"source": s, "message": m} for s, m in errors.items()], "dropped": dropped}
 
     def _source_record(self, ref):
-        entry = self._need(self.trust, "trust table")(ref)
-        return {"ref": ref, "class": entry["class"], "trust": entry["score"], "retraction": None}
+        """a web page by its address (trust by domain, no retraction), a work by its DOI ("doi:10.…" or "10.…"; REQ-TLS-003: trust class and retraction state)"""
+        doi = clean_doi(ref[4:] if ref.lower().startswith("doi:") else ref) if ref.lower().startswith(("doi:", "10.")) else None
+        if doi is None:
+            entry = self._need(self.trust, "trust table")(ref)
+            return {"ref": ref, "class": entry["class"], "trust": entry["score"], "retraction": None}
+        work = self._need(self.work_lookup, "work lookup")(doi)
+        if work is None:
+            raise ToolCallError("source_error", "no record of %s" % doi)
+        entry = self._need(self.work_trust, "trust table for works")(work, None)
+        return {"ref": "doi:" + doi, "class": entry["class"], "trust": entry["score"], "retraction": retraction_state(work)}
 
     @staticmethod
     def _need(source, name):

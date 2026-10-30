@@ -82,3 +82,22 @@ Tests reported green (feedback, not verification): `tests/test_tool_calls_web_lo
 Open for Phase 4:
 - The real side of IF-404 never runs: `real_subject` has no provider for it and the suite's options (`search_down`, `max_bytes`, scripted pages) reach only the mock. A stage-2 run against the real web needs a provider class with `search`, `fetch`, `log` and a decision how the options map; an amendment for the owner.
 - What leaves the host for a scholarly query (and the e-mail address) is T-05.
+
+## T-05 Scholarly sources and the strict cut-off (2026-10-30/31, done) – REQ-TLS-003, IF-405
+
+| Requirement | Where it is met | Test |
+|---|---|---|
+| REQ-TLS-003 one record format, strict cut-off, retracted works dropped and listed | `tool_calls.ToolCalls._scholar_search` over `scholar.Scholar.search`: records in the format of IF-405 with origin (`sources`), `trust` (`work_trust`, i.e. `TrustTable.for_work` as of the cut-off) and `retraction` (`scholar.retraction_state` as of the cut-off); a work retracted or withdrawn by the cut-off is dropped with reason `retracted` / `withdrawn` and listed; the cut-off stays `scholar.within` (strict: the latest day a date could mean), its reason now also as a code (`scholar.cutoff_code`: `no_date`, `after_cutoff`, `before_since`); `errors` as the list of IF-405 | `tests/test_tool_calls_scholar.py` (6) |
+| IF-405 | `scholar.py` (unchanged but for the `code` of a dropped work); the door turns the result into the IF-405 shape; the real side of the contract suite stays skipped (stage 2: the real APIs) | contract suite (mock side) |
+
+Decisions made while building (small, inside the contracts):
+- The conversion to IF-405 is in the door, not in `Scholar.search`: the review and the tools read its result as it is; the dropped works only gain the key `code`.
+- New parameters of the door: `work_trust(work, as_of)` and `retractions(work, errors)` (production: `Scholar.verify_retraction`, one Crossref request per kept work). Without `retractions` only what the sources reported themselves counts; without `work_trust` a record's `trust` is `None`. The wiring is N-2.4.1 T-07.
+- A notice dated after the cut-off does not drop a work (`retraction_state(as_of=until)`, the rule of `scholar.use_as_of`): a run as of a past day must not know it.
+- Dropped entries carry `title` and `detail` (the readable reason) besides IF-405's `ref` and `reason`; the reasons `retracted` and `withdrawn` are beyond the codes IF-405 v0 lists. Proposed for the next IF-405 version.
+
+Local coder: `tests/test_tool_calls_scholar.py` (task `tls03-tests`, 1 attempt, 76 s); compared with the instruction by script: whitespace in three import comments, and one date (`"2001-12-01"`) dropped from the ten-date cut-off grid (the assertions still held without it); restored by hand, verdict `fixed`, lesson added. Red before the change (6 errors: unknown parameters), green after.
+
+Tests reported green (feedback, not verification): `tests/test_tool_calls_scholar.py` (6), the other tool tests, `tests/test_scholar.py`, `tests/test_source_trust.py`, IF-402 and IF-405 (mock) contract suites; all `tests/test_*.py` in the image fail only as on master (`test_config`, `test_shutdown`, `test_harness`, `test_amendment_report`).
+
+`source_record` (closed the same day at the owner's request): a reference `doi:10.…` or `10.…` asks `work_lookup(doi)` (production: `CrossrefClient.lookup`) for the full record and gives the trust class of `work_trust` and the retraction state (all notices: `source_record` has no cut-off); an unknown DOI is `source_error`; a URL is answered as before (trust by domain, `retraction: None`). Tests: 2 more in `tests/test_tool_calls_scholar.py` (8 in all), written by hand (two short methods in an existing file).

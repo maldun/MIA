@@ -182,6 +182,17 @@ def within(work, until=None, since=None):
     return True, ""
 
 
+def cutoff_code(work, until=None, since=None):
+    """the reason of within() as a code (IF-405): no_date, after_cutoff or before_since; None when the work passes"""
+    ok, _ = within(work, until, since)
+    if ok:
+        return None
+    date = work.get("date") or (str(work["year"]) if work.get("year") else None)
+    if latest_day(date) is None:
+        return "no_date"
+    return "after_cutoff" if as_date(until) is not None and latest_day(date) > as_date(until) else "before_since"
+
+
 def use_as_of(until, today=None):
     """what of a record may be used for a cut-off: citation counts and retraction notices are as of today, so they must not steer a run that pretends to be in the past"""
     until, today = as_date(until), as_date(today) or datetime.date.today()
@@ -714,7 +725,7 @@ class Scholar:
         kept, dropped = [], []
         for work in found:
             ok, reason = within(work, until, since)
-            (kept if ok else dropped).append(work if ok else {"ref": reference_of(work), "title": work["title"], "reason": reason})
+            (kept if ok else dropped).append(work if ok else {"ref": reference_of(work), "title": work["title"], "reason": reason, "code": cutoff_code(work, until, since)})
         unique, merged = dedupe(kept)
         if check_retraction:
             for work in unique:
