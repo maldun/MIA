@@ -1,4 +1,4 @@
-# IF-402 – Tool calls, v0
+# IF-402 – Tool calls, v1
 
 Owner (provider): N-2.4.2 Tools and sandbox   Consumers: N-2.4.1 Pipeline runner   Decided by: N-2.4   Mock complexity: 3 (counted calls, trust labels, scripted tools)   Suite: `tests/acceptance/contract/test_if_402_tool_calls.py`
 
@@ -11,7 +11,7 @@ The one door to everything a workflow step may do besides a model call. A tool k
 |---|---|---|
 | `number_check` | `claim`, `evidence` (list of text) | `{"status": "pass" \| "fail" \| "inconclusive", "detail"}`; a number is a pass if it agrees with a number of the evidence within rounding |
 | `quote_in_source` | `quote`, `source_text` | `{"status": "pass" \| "fail"}`; the quote must occur verbatim |
-| `schema_check` | `value`, `schema` | `{"status", "problems"}` |
+| `schema_check` | `value`, `schema` | `{"status": "pass" \| "fail", "problems"}`; each problem is a readable text that names the path and the key or rule (`$: missing 'reason'`), the text a retry tells the model |
 | `run_script` | `code`, `inputs` | `{"status": "ok" \| "unavailable", "stdout"}`; without a sandbox: `unavailable`, nothing runs |
 | `web_search` | `query` | list of `{url, title, content}` |
 | `fetch_passages` | `url`, `question` | `{"ref", "hash", "passages": [{"id","quote"}]}`; every passage keeps its source reference |
@@ -41,3 +41,4 @@ The one door to everything a workflow step may do besides a model call. A tool k
 | Version | Date | Change | Amendment |
 |---|---|---|---|
 | v0 | 2026-10-25 | first draft from the current tools | – |
+| v1 | 2026-10-30 | `schema_check` problems are readable texts with path and key, as `schema_check.py` gives them | A-32 |
