@@ -101,3 +101,18 @@ Local coder: `tests/test_tool_calls_scholar.py` (task `tls03-tests`, 1 attempt, 
 Tests reported green (feedback, not verification): `tests/test_tool_calls_scholar.py` (6), the other tool tests, `tests/test_scholar.py`, `tests/test_source_trust.py`, IF-402 and IF-405 (mock) contract suites; all `tests/test_*.py` in the image fail only as on master (`test_config`, `test_shutdown`, `test_harness`, `test_amendment_report`).
 
 `source_record` (closed the same day at the owner's request): a reference `doi:10.…` or `10.…` asks `work_lookup(doi)` (production: `CrossrefClient.lookup`) for the full record and gives the trust class of `work_trust` and the retraction state (all notices: `source_record` has no cut-off); an unknown DOI is `source_error`; a URL is answered as before (trust by domain, `retraction: None`). Tests: 2 more in `tests/test_tool_calls_scholar.py` (8 in all), written by hand (two short methods in an existing file).
+
+## T-06 Lookup with sources (2026-10-31, done) – REQ-TLS-002
+
+A tool, not a workflow (D-50): the door offers what the lookup uses, the lookup pipeline stays a library entry.
+
+| Requirement | Where it is met | Test |
+|---|---|---|
+| REQ-TLS-002 web_search and fetch_passages for every workflow | `web_search`: findings with url, title and the short text (the snippet, at most `web_tools.MAX_SNIPPET` = 400 characters); **changed:** `fetch_passages` picks the passages of the page that share most words with the question, best first, at most 2 of about 900 characters (`research.collect_passages`, the selection of the lookup), verbatim, with the page as `ref` and stable ids; before it cut the whole page into pieces and ignored the question | `tests/test_tool_calls_lookup.py` (5) |
+| AC-2 a source and a quote, or unknown | the rule of the lookup, `research.anchor_answer`, on the door's passages: an answer that quotes a passage keeps its source, a paraphrase is demoted to unknown | `tests/test_tool_calls_lookup.py` (2 of 5) |
+
+Local coder: `tests/test_tool_calls_lookup.py` (task `tls02-tests`, 1 attempt, 59 s); compared with the instruction by script: identical, verdict `ok`. My fixture was too weak at first: the page fitted into one piece of the old chunking, so all 5 tests passed on the old code; the introduction was made three times longer (the answer sentence lands in a later piece), then 2 tests were red on the old code and all green on the new.
+
+Tests reported green (feedback, not verification): `tests/test_tool_calls_lookup.py` (5), all `tests/test_tool_calls*.py`, `tests/test_research.py`, IF-402 contract suite.
+
+Open for Phase 4: REQ-TLS-002 is verified by test **and measurement**; the measurement (AC-2 on the lookup suite with the pinned model) is an eval run of the lookup pipeline, not done in this task. The lookup pipeline still gets its tools from `build_web_tools`, not through the door (N-2.4.1 T-07).

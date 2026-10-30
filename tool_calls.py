@@ -15,14 +15,14 @@ import hashlib
 try:
     from . import checks
     from .schema_check import check as check_schema
-    from .web_tools import chunk_text
+    from .research import collect_passages
     from .evidence import passage_id
     from .sandbox import Operation
     from .scholar import RETRACTED, WITHDRAWN, clean_doi, reference_of, retraction_state
 except ImportError:  # used as plain script / in tests
     import checks
     from schema_check import check as check_schema
-    from web_tools import chunk_text
+    from research import collect_passages
     from evidence import passage_id
     from sandbox import Operation
     from scholar import RETRACTED, WITHDRAWN, clean_doi, reference_of, retraction_state
@@ -105,9 +105,12 @@ class ToolCalls:
         return [{"url": r["url"], "title": r.get("title", ""), "content": r.get("snippet", "")} for r in found["results"]]
 
     def _fetch_passages(self, url, question):
+        """the passages of the page that share most words with the question, best first (REQ-TLS-002): the selection of the lookup
+        (research.collect_passages), so a workflow sees the same passages the lookup would quote from"""
         page = self._need(self.fetch_page, "page fetch")(url)
         text = page["text"]
-        passages = [{"id": passage_id(url, piece), "quote": piece} for piece in chunk_text(text)]
+        chosen = collect_passages(question, [dict(page, url=url, ref=url)])["passages"]
+        passages = [{"id": passage_id(url, p["text"]), "quote": p["text"]} for p in chosen]
         return {"ref": url, "hash": hashlib.sha256(text.encode("utf-8")).hexdigest()[:16], "passages": passages}
 
     def _scholar_search(self, query, until=None, since=None):
