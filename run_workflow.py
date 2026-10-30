@@ -148,15 +148,56 @@ class WorkflowRuns:
 
     @staticmethod
     def _median(runs, node_id):
+        """the median cost of a top node: what happened between its start and its end, so the calls of the steps inside a map or a branch count for it"""
         found = []
         for run in runs:
-            events = [e for e in run.get("events", []) if e.get("node") == node_id or e.get("actor") == node_id]
-            if not any(e.get("kind") == "start" for e in events):
+            events = run.get("events", [])
+            starts = [e["seq"] for e in events if e.get("kind") == "start" and e.get("node") == node_id]
+            if not starts:
                 continue
-            calls = [e for e in events if e.get("type") == "model_call"]
-            times = [e["at"] for e in events if isinstance(e.get("at"), (int, float))]
+            ends = [e["seq"] for e in events if e.get("kind") in ("done", "error") and e.get("node") == node_id]
+            last = max(ends) if ends else max(e.get("seq", 0) for e in events)
+            inside = [e for e in events if min(starts) <= e.get("seq", 0) <= last]
+            calls = [e for e in inside if e.get("type") == "model_call"]
+            times = [e["at"] for e in inside if isinstance(e.get("at"), (int, float))]
             found.append({"seconds": (max(times) - min(times)) if times else 0.0, "calls": len(calls),
                           "tokens": sum((c["payload"].get("tokens_in") or 0) + (c["payload"].get("tokens_out") or 0) for c in calls)})
         if not found:
             return None
         return {key: statistics.median(f[key] for f in found) for key in ("seconds", "calls", "tokens")}
+
+
+def workflow_of_skill(name, pipeline_ref, graph):
+    """the graph document of a skill (D-112): the input, then each top step of its pipeline as a process node with its output as a data node"""
+    nodes, edges = [{"id": "input", "kind": "data"}], []
+    for step in graph["nodes"]:
+        edges += [{"from": nodes[-1]["id"], "to": step["id"]}, {"from": step["id"], "to": step["id"] + "_out"}]
+        nodes += [{"id": step["id"], "kind": "process", "note": step.get("plain", "")}, {"id": step["id"] + "_out", "kind": "data"}]
+    return {"skill": name, "pipeline": pipeline_ref, "title": name, "nodes": nodes, "edges": edges}
+
+
+def sync_skills(library, core, author="sync"):
+    """one workflow per skill in the library (IF-203), a new version only when the document changed. A workflow that was not made from that skill
+    (no "skill" key, like the review draft) is kept as it is. Returns {"saved", "kept", "unchanged", "problems": {name: text}}."""
+    report = {"saved": [], "kept": [], "unchanged": [], "problems": {}}
+    existing = set(library.list_ids("workflows"))
+    for name in core.skills.names():
+        skill = core.skills.get(name)
+        try:
+            entry = core.library.resolve(skill["pipeline"], "pipeline")
+            doc = workflow_of_skill(name, "%s@%s" % (entry["id"], entry["version"]), core.graph(skill)[0])
+        except Exception as exc:                           # a skill whose pipeline does not resolve is reported, the others are synced
+            report["problems"][name] = str(exc)
+            continue
+        if name in existing:
+            current = library.read("workflows", name)["doc"]
+            if current.get("skill") != name:
+                report["kept"].append(name)
+                continue
+            if current == doc:
+                report["unchanged"].append(name)
+                continue
+        library.save("workflows", name, doc, author)
+        report["saved"].append(name)
+    report["kept"] += sorted(existing - set(core.skills.names()))
+    return report

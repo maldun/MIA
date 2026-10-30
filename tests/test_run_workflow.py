@@ -15,7 +15,7 @@ sys.path.insert(0, REPO)
 
 from core import Core                                         # noqa: E402
 from library import Library                                   # noqa: E402
-from run_workflow import RunWorkflowError, WorkflowRuns       # noqa: E402
+from run_workflow import RunWorkflowError, WorkflowRuns, sync_skills   # noqa: E402
 from storage import Storage                                   # noqa: E402
 from storage_files import FileBackend                         # noqa: E402
 from workflow_library import WorkflowLibrary                  # noqa: E402
@@ -159,6 +159,41 @@ class EvaluationAccessTests(unittest.TestCase):
         """TC-RUN-015 (workflows): the ids, versions and status of the library. Example: [graph_only [1] draft, summary [1] draft]."""
         runs, _ = make()
         self.assertEqual(runs.workflows(), [{"id": "graph_only", "versions": [1], "status": "draft"}, {"id": "summary", "versions": [1], "status": "draft"}])
+
+
+class CostTests(unittest.TestCase):
+    def test_calls_of_nested_steps_count_for_their_top_node(self):
+        """TC-RUN-014 (costs of a composite node): the model calls between the start and the end of a top node count for it, also those of the steps inside a
+        map. Example: node screen (a map) with two model calls of its inner step rate, at 1.0 s and 4.0 s -> screen: calls 2, tokens 30, seconds 3.0."""
+        call = lambda seq, at: {"kind": "event", "type": "model_call", "seq": seq, "at": at, "node": "rate", "actor": "rate",
+                                "payload": {"tokens_in": 10, "tokens_out": 5}}
+        run = {"task": "w", "events": [{"kind": "start", "node": "screen", "seq": 1, "at": 1.0}, {"kind": "start", "node": "rate", "seq": 2, "at": 1.0},
+                                       call(3, 2.0), call(4, 3.0), {"kind": "done", "node": "screen", "seq": 5, "at": 4.0},
+                                       {"kind": "event", "type": "model_call", "seq": 6, "at": 5.0, "node": None, "actor": "other", "payload": {"tokens_in": 99, "tokens_out": 1}}]}
+        self.assertEqual(WorkflowRuns._median([run], "screen"), {"seconds": 3.0, "calls": 2, "tokens": 30})
+
+
+class SyncTests(unittest.TestCase):
+    def test_every_skill_gets_a_workflow_once(self):
+        """TC-RUN-014 (sync, D-112): each skill of the shipped folder gets a workflow that names it and its pipeline, with the top steps of the pipeline as
+        process nodes; a second sync saves nothing; a workflow that is not made from a skill (the review draft) is left alone.
+        Example: summarize -> {"skill": "summarize", "pipeline": "summarize@1"}, process nodes ["summarize"]; second sync -> saved []."""
+        # Given an empty library with the review draft in it
+        runs, _ = make()
+        runs.library.save("workflows", "review", {"nodes": [{"id": "q", "kind": "data"}], "edges": [], "implemented_by": "review_chat.run_review"}, "test")
+        # When the skills are synced twice
+        first = sync_skills(runs.library, runs.core)
+        second = sync_skills(runs.library, runs.core)
+        # Then the first sync saved summarize, the second nothing, and review is untouched
+        self.assertIn("summarize", first["saved"])
+        self.assertEqual(second["saved"], [])
+        doc = runs.library.read("workflows", "summarize")["doc"]
+        self.assertEqual((doc["skill"], doc["pipeline"]), ("summarize", "summarize@1"))
+        self.assertEqual([n["id"] for n in doc["nodes"] if n["kind"] == "process"], ["summarize"])
+        self.assertNotIn("skill", runs.library.read("workflows", "review")["doc"])
+        self.assertIn("review", first["kept"])
+        # And the synced workflow runs
+        self.assertEqual(runs.run("summarize", None, INPUT, {}, "anna")["status"], "done")
 
 
 if __name__ == "__main__":
