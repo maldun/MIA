@@ -15,9 +15,7 @@ REAL_NOT_READY = {
     "IF-102": "N-3 Database not integrated yet",
     "IF-103": "the real model server is only used in stage 2",
     "IF-104": "N-2 Backend not integrated yet",
-    "IF-105": "N-2 Backend not integrated yet",
     "IF-201": "N-2.2 Chat agent not integrated yet",       # real_subject since A-07 (ChatService); stop and the expression/audio events skip
-    "IF-202": "N-2.4 Workflow execution not integrated yet",
     "IF-301": "N-3.2 Graph tables not integrated yet",
     "IF-302": "N-3.3 Record tables not integrated yet",
     "IF-402": "N-2.4.2 Tools and sandbox not integrated yet",
@@ -587,6 +585,103 @@ class _RunEventsAdapter:
             handle.write(json.dumps(event) + "\n")
 
 
+_FIXTURE_NODE = {"version": 1, "kind": "model", "title": "fixture step", "description": "a step of the contract fixtures", "tags": ["fixture"],
+                 "status": "tested", "origin": {"by": "manual", "note": "contract fixture"}}
+_FIXTURE_SKILL = """---
+name: %s
+version: 1
+description: contract fixture %s
+pipeline: %s
+budget: {steps: 20, seconds: 60}
+model: {profile: light}
+---
+"""
+
+
+class _RunWorkflowAdapter:
+    """IF-202 and IF-105 on the real runner (amendment A-31): `run_workflow.WorkflowRuns` over the real `Core` (skills, library.py, runner, run log) and the
+    real WorkflowLibrary (IF-203), all in a fresh folder, with a fake model. The fixtures are the scripts of the mocks: the workflow `lookup` (three model
+    steps search, read, judge; the answer "42") and `drifting` (two steps draft, polish with a schema; its first run needs 2 calls, every later run a retry
+    in each step, so 4). One run of each is recorded when the adapter is built, so that the estimates are 3 and 2 calls. The clock of the runner stands
+    still (the events of two equal runs are equal apart from the run id; the contract compares them without time). The pins are those of the project;
+    the fake server holds MP-light. The adapter turns the error class of the provider into the one of the mock; production code does not import from tests/."""
+
+    def __init__(self):
+        import tempfile
+        from errors import ServiceError
+        from core import Core
+        from library import Library
+        from run_workflow import RunWorkflowError, WorkflowRuns
+        from storage import Storage
+        from storage_files import FileBackend
+        from workflow_library import WorkflowLibrary
+        self._error, self._provider_error = ServiceError, RunWorkflowError
+        folder = tempfile.mkdtemp()
+        self._write_fixtures(folder)
+        self.model = _FixtureModel()
+        core = Core(os.path.join(folder, "skills"), Library(os.path.join(folder, "library")), os.path.join(folder, "runs"), model=self.model)
+        core.runner.clock = lambda: 0.0
+        self._runs = WorkflowRuns(None, core, pins={"MP-light": {"name": "gemma4:12b-it-qat", "digest": "38044be4f923"}},
+                                  held=lambda: {"gemma4:12b-it-qat": "38044be4f923e5a5"})
+        library = WorkflowLibrary(Storage(FileBackend(os.path.join(folder, "db"))), costs=self._runs.node_costs)
+        self._runs.library = library
+        for workflow, steps in (("lookup", ("search", "read", "judge")), ("drifting", ("draft", "polish"))):
+            nodes = [{"id": "input", "kind": "data"}]
+            edges = []
+            for step in steps:
+                edges.append({"from": nodes[-1]["id"], "to": step})
+                nodes += [{"id": step, "kind": "process"}, {"id": step + "_out", "kind": "data"}]
+                edges.append({"from": step, "to": step + "_out"})
+            library.save("workflows", workflow, {"skill": workflow, "nodes": nodes, "edges": edges}, "contract")
+            self._runs.run(workflow, 1, {}, {}, "contract")              # the recorded run the estimate is built from
+        self.model.drift = True
+
+    @staticmethod
+    def _write_fixtures(folder):
+        import json
+        pipelines = {"lookup": ("search", "read", "judge"), "drifting": ("draft", "polish")}
+        os.makedirs(os.path.join(folder, "skills"))
+        for name, steps in pipelines.items():
+            for step in steps:
+                body = {"template": "Step %s." % step, "retries": 1}
+                if name == "drifting":
+                    body["schema"] = {"type": "object", "required": ["text"]}
+                os.makedirs(os.path.join(folder, "library", "nodes", "view.fixture_" + step))
+                with open(os.path.join(folder, "library", "nodes", "view.fixture_" + step, "1.json"), "w") as fp:
+                    json.dump(dict(_FIXTURE_NODE, id="view.fixture_" + step, body=body), fp)
+            entry = {"id": name, "version": 1, "title": name, "description": "contract fixture", "result": steps[-1], "status": "tested",
+                     "origin": {"by": "manual", "note": "contract fixture"},
+                     "nodes": [{"id": step, "use": "view.fixture_%s@1" % step, "output": step, "plain": step} for step in steps]}
+            os.makedirs(os.path.join(folder, "library", "pipelines", name))
+            with open(os.path.join(folder, "library", "pipelines", name, "1.json"), "w") as fp:
+                json.dump(entry, fp)
+            with open(os.path.join(folder, "skills", name + ".md"), "w") as fp:
+                fp.write(_FIXTURE_SKILL % (name, name, name))
+
+    def __getattr__(self, name):
+        method = getattr(self._runs, name)
+
+        def call(*args, **kwargs):
+            try:
+                return method(*args, **kwargs)
+            except self._provider_error as err:
+                raise self._error(err.code, detail=err.detail) from err
+        return call
+
+
+class _FixtureModel:
+    """the fake model server of the fixtures: the step judge answers "42", the other text steps "ok"; a step with a schema answers valid JSON, and once
+    `drift` is on, an invalid answer to the first message of a step (so one retry: two calls a step)"""
+
+    def __init__(self):
+        self.drift = False
+
+    def chat(self, messages, schema=None, model=None, profile=None, options=None):
+        if schema is None:
+            return "42" if messages[-1]["content"] == "Step judge." else "ok"
+        return "not json" if self.drift and len(messages) == 1 else '{"text": "ok"}'
+
+
 def real_subject(interface, **options):
     """The real provider of an interface once its node is integrated (amendment A-02: IF-301, IF-302, IF-102 of the Database; amendment A-05, A-07: IF-101 and IF-201 as far as built); None until then."""
     if REPO not in sys.path:
@@ -607,6 +702,8 @@ def real_subject(interface, **options):
         return _WorkflowLibraryAdapter(**options)
     if interface == "IF-401":
         return _RunEventsAdapter()
+    if interface in ("IF-202", "IF-105"):
+        return _RunWorkflowAdapter()
     if interface == "IF-204":
         return _SpeechAdapter(**options)
     return None

@@ -22,9 +22,10 @@ Decisions made while building (small, inside the contracts):
 - The estimate has no `steps`; a budget of steps is checked during the run only.
 - `run_workflow.py` is a new module of this part (the plan names `pipeline.py`, `pipeline_model.py`, `harness.py`, `ollama_remote.py`): IF-202 and IF-105 are a thin facade over `Core` and the runner, not a part of the runner loop.
 
+Contract adapters drafted as A-31 (D-113, `specs/mia/contract-drafts/tests/helpers/contract.py`): on a scratch copy the suites of IF-202 and IF-105 pass as `_real` (18 tests, none skipped), all other contract suites and the N-2.4 integration steps as before.
+
 Tests reported green (feedback, not verification): the two new modules (15 tests); all `tests/test_*.py` in the image, failing as on master only: `test_config`, `test_harness` (suite `rt_edit` has 2 cases, wants 30), `test_shutdown`, `test_amendment_report` (no `git` in the image).
 
 Not done yet:
-- The real adapters of IF-202 and IF-105 in `tests/helpers/contract.py` (protected): amendment A-31 with the fixtures of the suites (`lookup` answers "42" with a node `judge`, `drifting` estimated at 2 calls and needing 4).
 - The sync tool (one IF-203 workflow per skill, D-112), and the wiring of `WorkflowRuns` into the app (pins from `eval-spec.md`, `held` from `ollama list`).
 - The events are written to the run log of `RunLog` only, not through IF-401 (`RunEvents`); REQ-RUN-012 (T-07) decides the wiring.
