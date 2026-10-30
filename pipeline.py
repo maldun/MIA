@@ -18,6 +18,7 @@ A reference is the string "$name" or "$name.field.0" into the context ("$input" 
 """
 import contextvars
 import json
+import math
 import random
 import re
 import threading
@@ -250,9 +251,11 @@ def validate_pipeline(graph, tools=None, functions=None, skill=None):
 # --- the run -----------------------------------------------------------------------------------------------------------
 
 class RunResult:
-    def __init__(self, run_id, status, answer, context, seconds, error=None, events=None):
+    def __init__(self, run_id, status, answer, context, seconds, error=None, events=None, missing=None, cost=None):
+        """missing: the budgets that ended the run (REQ-RUN-008); cost: {steps, seconds, calls, tokens} the run spent"""
         self.run_id, self.status, self.answer, self.context = run_id, status, answer, context
         self.seconds, self.error, self.events = seconds, error, events or []
+        self.missing, self.cost = missing or [], cost or {}
 
     @property
     def ok(self):
@@ -267,6 +270,8 @@ class _State:
         self.t0 = runner.clock()
         self.steps = 0
         self.calls = {}
+        self.model_calls = 0
+        self.tokens = 0
         self.stream = ev.EventStream(run.id if run else None, sink=run, on_event=on_event, clock=runner.clock, t0=self.t0, strict=runner.strict_events)
         self.lock = threading.Lock()
         self.budget = skill["budget"]
@@ -319,13 +324,15 @@ class Runner:
     def _run_state(self, st, skill, graph, ctx, run):
         self._emit(st, "run_start", None, plain=skill.get("description", skill["name"]),
                    payload=self._start_payload(skill, graph, ctx))
-        status, error = "done", None
+        status, error, missing = "done", None, []
         try:
             self._run_nodes(st, graph["nodes"], ctx)
+            if st.tokens > st.budget.get("tokens", math.inf):
+                raise BudgetExceeded("tokens")          # the last step passed the budget: the outputs stay, the run says what it spent
         except Stopped:
             status = "stopped"
         except BudgetExceeded as exc:
-            status, error = "budget", "budget exceeded: %s" % exc
+            status, error, missing = "budget", "budget exceeded: %s" % exc, [str(exc)]
             self._emit(st, "error", None, plain=error)
         except NodeError as exc:
             status, error = "error", str(exc)
@@ -340,7 +347,8 @@ class Runner:
         self._emit(st, "run_end", None, plain=status, payload={"status": status, "seconds": round(seconds, 3)})
         if run is not None:
             run.finish(status, {"answer": answer}, seconds, error)
-        return RunResult(run.id if run else None, status, answer, ctx, seconds, error, run.events if run else [])
+        cost = {"steps": st.steps, "seconds": round(seconds, 3), "calls": st.model_calls, "tokens": st.tokens}
+        return RunResult(run.id if run else None, status, answer, ctx, seconds, error, run.events if run else [], missing, cost)
 
     # -- events ----
     def _outline(self, nodes, ctx):
@@ -369,13 +377,14 @@ class Runner:
     def _guard(self, st):
         if st.should_stop is not None and st.should_stop():
             raise Stopped()
-        with st.lock:
-            st.steps += 1
-            steps = st.steps
-        if steps > st.budget.get("steps", 50):
-            raise BudgetExceeded("steps")
         if self.clock() - st.t0 > st.budget.get("seconds", 600):
             raise BudgetExceeded("seconds")
+        if st.tokens > st.budget.get("tokens", math.inf):
+            raise BudgetExceeded("tokens")              # known only after a call: the step that passed the budget keeps its output
+        with st.lock:
+            if st.steps >= st.budget.get("steps", 50):
+                raise BudgetExceeded("steps")
+            st.steps += 1                               # counted only when the step runs, so the cost is what was spent
 
     def _run_nodes(self, st, nodes, ctx, item=None):
         for node in nodes:
@@ -502,17 +511,17 @@ class Runner:
         settings = skill["model"] or {}
         for attempt in range(int(node.get("retries", 1)) + 1):
             prompt_hash, started = ev.digest(messages), self.clock()
-            reply = self.model.chat(messages, schema=schema, model=settings.get("name"), profile=settings.get("profile"), options=settings.get("options"))
+            reply, usage = self._ask_model(st, messages, schema, settings)
             seconds = self.clock() - started
             if schema is None:
-                self._model_call(st, settings, prompt_hash, messages, reply, seconds, True, attempt, None)
+                self._model_call(st, settings, prompt_hash, messages, reply, seconds, True, attempt, None, usage)
                 return reply
             try:
                 value = json.loads(_strip_fence(reply))
                 problems = check_schema(value, schema)
             except ValueError as exc:
                 value, problems = None, ["the reply is not valid JSON (%s)" % exc]
-            self._model_call(st, settings, prompt_hash, messages, reply, seconds, not problems, attempt, node.get("schema"))
+            self._model_call(st, settings, prompt_hash, messages, reply, seconds, not problems, attempt, node.get("schema"), usage)
             if not problems:
                 return value
             if attempt >= int(node.get("retries", 1)):
@@ -522,15 +531,33 @@ class Runner:
                                    {"role": "user", "content": "Your reply was not valid: %s. Answer again with only valid JSON that fits the schema." % "; ".join(problems[:5])}]
 
 
-    def _model_call(self, st, settings, prompt_hash, messages, reply, seconds, valid, attempt, schema_name):
+    def _ask_model(self, st, messages, schema, settings):
+        """one model call counted against the budgets calls and tokens (REQ-RUN-008); a model that reports no count is estimated at 4 characters a token"""
+        with st.lock:
+            if st.model_calls >= st.budget.get("calls", math.inf):
+                raise BudgetExceeded("calls")
+            st.model_calls += 1
+        args = dict(schema=schema, model=settings.get("name"), profile=settings.get("profile"), options=settings.get("options"))
+        if hasattr(self.model, "chat_with_usage"):
+            reply, usage = self.model.chat_with_usage(messages, **args)
+        else:
+            reply, usage = self.model.chat(messages, **args), None
+        if usage is None:
+            text = reply if isinstance(reply, str) else _text(reply)
+            usage = {"tokens_in": math.ceil(sum(len(m["content"]) for m in messages) / 4), "tokens_out": math.ceil(len(text) / 4)}
+        with st.lock:
+            st.tokens += usage["tokens_in"] + usage["tokens_out"]
+        return reply, usage
+
+    def _model_call(self, st, settings, prompt_hash, messages, reply, seconds, valid, attempt, schema_name, usage):
         """the model_call event (13d): what was asked and answered by hash, how long it took, whether the answer fitted; the digest of the model is filled in by the environment"""
         text = reply if isinstance(reply, str) else _text(reply)
         if self.store is not None and self.store_texts(st.skill["name"]):
             self.store.put(messages)                                  # the same hash as prompt_hash (events.digest and the store use one function)
             self.store.put(text)
         ev.emit("model_call", {"model": settings.get("name"), "profile": settings.get("profile"), "digest": None, "options": settings.get("options"),
-                               "prompt_hash": prompt_hash, "response_hash": ev.digest(text), "response_chars": len(text), "seconds": round(seconds, 3), "tokens_in": None,
-                               "tokens_out": None, "schema": schema_name, "valid": bool(valid), "attempt": attempt})
+                               "prompt_hash": prompt_hash, "response_hash": ev.digest(text), "response_chars": len(text), "seconds": round(seconds, 3), "tokens_in": usage["tokens_in"],
+                               "tokens_out": usage["tokens_out"], "schema": schema_name, "valid": bool(valid), "attempt": attempt})
 
 
 def _strip_fence(text):
