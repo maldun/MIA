@@ -70,7 +70,7 @@ from . import sandbox as sandbox_module
 from .core import Core
 from .library import Library
 from .pipeline import Tool
-from .pipeline_model import OllamaModel
+from .pipeline_model import ModelTurns, OllamaModel, TurnClient
 from . import web_tools
 from .web_tools import build_web_tools
 from .extension_loader import load_extensions
@@ -121,6 +121,10 @@ voc_exp = VoiceExpressor(web_url=WEB_URL+'/'+UPLOAD_ROUTE)
 
 from .communicator import Communicator
 comm = Communicator(**cfg)
+# one model server for everybody: one call at a time, a waiting chat call before the next call of a background run (REQ-RUN-009, REQ-RUN-010)
+model_turns = ModelTurns()
+_ollama = comm.client
+comm.client = TurnClient(_ollama, model_turns, "chat")
 _persona_file = os.path.join(FPATH, cfg.get(CONST.PERSONA_FILE_KEY, "data/persona.json"))
 comm.persona_provider = lambda: read_persona(_persona_file)          # the persona saved on the page is the system message of every call (REQ-CHA-008)
 
@@ -551,7 +555,7 @@ mood = MoodTracker(_own_path(CONST.MOODS_FILE_KEY, CONST.DEFAULT_MOODS_FILE),
 voice_lines = VoiceLines(os.path.join(FPATH, "library", "voice_lines.json"), VoiceExpressor.DEFAULT_PATH, mood_names(os.path.join(FPATH, CONST.DEFAULT_MOODS_FILE)),
                          log=logger.warning)                  # the line a mood says (REQ-CHA-007)
 # the tasks of MIA as skills with pipelines (ui/REQUIREMENTS_CORE.md); the chat is the first one
-pipeline_model = OllamaModel(comm.client, lambda profile: getattr(comm, "_profiles", {}).get(profile),
+pipeline_model = OllamaModel(TurnClient(_ollama, model_turns, "background"), lambda profile: getattr(comm, "_profiles", {}).get(profile),
                              lambda: (comm.version, comm.llm_options), keep_alive=comm.keep_alive)
 _runs_dir = _own_path(CONST.RUNS_DIR_KEY, CONST.DEFAULT_RUNS_DIR)
 # prompts, answers and the pages that were read are kept in full, by hash (content_store.py); conversations only with "store_chat_texts"; old texts go after "store_days"
