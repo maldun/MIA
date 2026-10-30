@@ -7,10 +7,10 @@ Back-filled on 2026-10-30, after the workflow skills introduced goals (M33–M37
 - Statement: MIA runs as the decomposed multi-user system of the approved HLS (2026-10-24): every node built and integrated, the lookup promoted by the skill path and the literature review added by the same path.
 - Exit criterion: VAL-001 to VAL-006 (`specs/mia/test-spec.md`); VAL-002 is the HLS success criterion (second workflow within one month of the lookup's promotion)
 - Supervision: supervised
-- Accepted by: Stefan Reiterer (owner)
+- Accepted by: Stefan Reiterer (owner; goal agreed 2026-10-30)
 - Line of work: goal/v1
 - Subgoals: –
-- Status: Proposed
+- Status: In progress
 
 ## Scope
 <!-- Every FR-n / NFR-n of high-level-spec.md. The nodes of decomposition.yaml carry the refined requirements; a node is not a subgoal. -->
