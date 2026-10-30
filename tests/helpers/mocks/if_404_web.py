@@ -32,7 +32,7 @@ class WebMock:
     def fetch(self, url):
         parts = urlparse(url)
         port = parts.port or (443 if parts.scheme == "https" else 80)
-        if parts.scheme not in ("http", "https") or port not in (80, 443) or PRIVATE.match(parts.hostname or ""):
+        if parts.scheme not in ("http", "https") or port not in (80, 443, 8080, 8443) or PRIVATE.match(parts.hostname or ""):
             raise ServiceError("unsafe_url")
         self.log.append(("fetch", url))
         page = self.pages.get(url) or {"text": "", "type": "text/html", "status": 404}
