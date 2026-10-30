@@ -53,6 +53,12 @@ package MIA_Common {
         attribute baseline : String[0..*];  // ids in specs/mia/baseline-requirements.md
         attribute verifiedBy : HowVerified[1..*];
     }
+
+    /* Attached to requirements and parts that a feedback item added or changed (dev-workflow conventions, 8). */
+    metadata def ChangeSource {
+        attribute feedbackId : String;   // FB-xx in specs/mia/feedback/
+        attribute iteration : Integer;   // section 8 of the HLS
+    }
 }
 
 package MIA_Architecture {
@@ -217,6 +223,13 @@ package MIA_Architecture {
             doc /* Exactly one page plays the speech audio; reports speaking state back. */
             @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("templates/static/chat/sound.js"); }
         }
+        part skillsPanel {
+            doc /* Target (FB-01): beside the chat on the same page, a tab on the phone; not a tab of the modal workspace dialog.
+                   A status card per skill run (phase, budgets, counts, pause, resume, stop), the full result and the links to its
+                   files and report; lists the runs of the shared chat history after a reload. Replaces the card in the chat list. */
+            @Implementation { :>> status = ImplementationStatus::proposed; }
+            @ChangeSource { feedbackId = "FB-01"; iteration = 1; }
+        }
     }
 
     // ---------------------------------------------------------------- host-side
@@ -237,6 +250,14 @@ package MIA_Architecture {
         part moodTracker {
             doc /* Mood and activity of the status line, phrases from moods.json, hold time. */
             @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("moods.py", "moods.json"); }
+        }
+        part skillTurnRelay {
+            doc /* Target (FB-01): hands a running skill's questions, the phases it declares worth telling and, at the end, its full
+                   result to the chat path, so that the chat model words status messages and the summary in persona like any chat
+                   turn; adds the link to the full result by code; keeps the questions, the answers, the summary and the last
+                   status message of a run in the model history. Today chat_service.py posts questions and the full result itself. */
+            @Implementation { :>> status = ImplementationStatus::proposed; }
+            @ChangeSource { feedbackId = "FB-01"; iteration = 1; }
         }
         part presetsApi {
             doc /* Presets, gestures, backgrounds; token-protected writes; expression generation from a description. */
@@ -334,6 +355,13 @@ package MIA_Architecture {
         part skillStore {
             doc /* skills/*.md with front matter, schemas, prompts, status block lines. */
             @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("skill_store.py", "skills/chat.md", "skills/research.md"); }
+        }
+        part skillRunStore {
+            doc /* Target (FB-01): one stored record per skill run (skill, who started it, state, final figures, full result, files,
+                   link to its report), so that the skills panel lists running and finished runs after a reload and a restart.
+                   Today only the review's report is a record (reports) and the card is lost on reload (TD-01). */
+            @Implementation { :>> status = ImplementationStatus::proposed; }
+            @ChangeSource { feedbackId = "FB-01"; iteration = 1; }
         }
         part pipelineRunner {
             doc /* Executes pipeline graphs of seven node kinds, enforces budgets, emits events, retries locally;
@@ -588,6 +616,7 @@ package MIA_Architecture {
 
 package MIA_AgentView {
     private import ScalarValues::*;
+    private import MIA_Common::ChangeSource;
     private import MIA_Architecture::*;
 
     // Annotations of the agent view (agent-app conventions, section 8)
@@ -623,6 +652,18 @@ package MIA_AgentView {
     port def HistoryPort { out item history : ChatHistory; }
     port def ScriptPort { out item script : GeneratedScript; }
     port def EditPort { out item edit : WorkflowEdit; }
+    item def SkillResult {
+        @Untrusted { origin = "web"; }
+        @ChangeSource { feedbackId = "FB-01"; iteration = 1; }
+        doc /* The full result of a skill run (FB-01): written by code and model steps, quotes web and paper text (TB-result). */
+    }
+    item def SkillDigest {
+        @Untrusted { origin = "model"; }
+        @ChangeSource { feedbackId = "FB-01"; iteration = 1; }
+        doc /* The digest of one piece of a long skill result, read by the chat step to write the summary (FB-01). */
+    }
+    port def SkillResultPort { out item result : SkillResult; }
+    port def SkillDigestPort { out item digest : SkillDigest; }
 
     // Code parts that hand untrusted text to model steps
     part def MessageIntake { doc /* Code: validation, rate limit, command recognition (chat_service.py). */ port messageOut : UserTextPort; }
@@ -632,6 +673,12 @@ package MIA_AgentView {
     part def GraphEditor { doc /* Code: the graph app; sends the edited node or graph as JSON (nodeEditor). */ port editOut : EditPort; }
     part def WorkflowValidator { doc /* Code, boundary TB-edit: checks graph rules and schemas, stores a new version, refuses a broken edit (pipeline_model.py, library.py). */ port editIn : ~EditPort; }
     part def ScriptSandbox { doc /* Code: runs a generated script isolated, no network (sandbox.py, broker.py). */ port scriptIn : ~ScriptPort; }
+    part def SkillRunSource {
+        doc /* Code (FB-01): the skill-turn relay; reads the full result from the run store, cuts it into pieces of a share of
+               the context, hands short results and the declared phases straight to the chat step. */
+        @ChangeSource { feedbackId = "FB-01"; iteration = 1; }
+        port resultOut : SkillResultPort;
+    }
 
     // Model steps. tokenBudget is the context window (num_ctx 8192 on both profiles today), not yet a per-step budget.
     // secondBudget (Plan draft, 2026-10-26) is the time of ONE call of the step: the seconds of today's skill file divided by its steps, rounded
@@ -644,6 +691,17 @@ package MIA_AgentView {
         @TrustBoundary { boundary = "TB-user"; threats = "THR-004, THR-006, THR-010"; }
         port userIn : ~UserTextPort;
         port historyIn : ~HistoryPort;
+        port resultIn : ~SkillResultPort;    // FB-01: a declared phase or a short result, worded as a status message or summary
+        port digestIn : ~SkillDigestPort;    // FB-01: the digests of a long result, joined into the summary
+    }
+    part def SkillDigestStep {
+        doc /* FB-01: digest of one piece of a long skill result, in order, so that the chat step can write the summary within
+               its context (map step; the chat step is the reduce step). The summary is informative; the full result is the reference. */
+        @ModelStep { schema = "none: free text"; tools = ""; tokenBudget = 8192; secondBudget = 0.0; pin = "MP-light"; criterion = "none: set in Plan"; }
+        @TrustBoundary { boundary = "TB-result"; threats = ""; }
+        @ChangeSource { feedbackId = "FB-01"; iteration = 1; }
+        port resultIn : ~SkillResultPort;
+        port digestOut : SkillDigestPort;
     }
     part def PlanStep {
         doc /* Sub-questions or a typed plan for a compound question. Skill plan_question. */
@@ -749,6 +807,8 @@ package MIA_AgentView {
         part sectionScreener : ReviewSectionStep;
         part fullScreener : ReviewFullStep;
         part summariser : ReviewSummaryStep;
+        part skillRuns : SkillRunSource;
+        part digester : SkillDigestStep;
 
         flow of UserMessage from intake.messageOut to chat.userIn;
         flow of UserMessage from intake.messageOut to planner.userIn;
@@ -767,6 +827,9 @@ package MIA_AgentView {
         flow of ChatHistory from historyStore.historyOut to dreamer.historyIn;
         flow of GeneratedScript from scriptWriter.scriptOut to sandbox.scriptIn;
         flow of WorkflowEdit from graphEditor.editOut to validator.editIn;
+        flow of SkillResult from skillRuns.resultOut to chat.resultIn;
+        flow of SkillResult from skillRuns.resultOut to digester.resultIn;
+        flow of SkillDigest from digester.digestOut to chat.digestIn;
     }
 }
 
@@ -1364,6 +1427,34 @@ package MIA_Requirements {
         @Trace { :>> baseline = ("TK-5", "TK-9"); :>> verifiedBy = (HowVerified::test, HowVerified::measurement); }
     }
 
+    // ================================================================ feedback iteration 1 (FB-01, section 8 of the HLS)
+
+    requirement def <'FR-34'> SkillsPanel {
+        subject mia : MiaSystem;
+        doc /* MIA shall show every skill run in a skills panel beside the chat on the same page, a tab on the phone: a status
+               card per run with its phase, budgets and counts, pause, resume and stop, the full result and the links to its files
+               and report. The panel lists the running and finished runs whose messages are in the shared chat history, for all
+               users, also after a reload and a restart, and is emptied when the chat history is deleted; the files and report
+               records stay. The chat holds no status card and no full result of a skill. */
+        @Trace { :>> baseline = ("CT-11", "TK-1");
+                 :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
+        @ChangeSource { feedbackId = "FB-01"; iteration = 1; }
+    }
+    requirement def <'FR-35'> SkillTurnsInTheChat {
+        subject mia : MiaSystem;
+        doc /* While a skill runs, the chat shall show only its questions, the users' answers and, for each phase the skill
+               declares worth telling, a new short status message that the chat model words in MIA's persona like any chat turn.
+               When the skill ends, the chat model shall summarize its full result in persona, reading it in pieces when it is
+               longer than its share of the context, in a summary that the prompt asks to keep within 1200 characters, followed
+               by a link to the full result that code adds; a failure is a short message with the reason and the link. These
+               messages are spoken like answers, with the same repair; the questions, the answers, the summary and the last
+               status message of each run are part of the history the chat model sees. The summary is informative only: the full
+               result in the panel is the reference. */
+        @Trace { :>> baseline = ("CT-2", "CT-7", "TK-1");
+                 :>> verifiedBy = (HowVerified::test, HowVerified::measurement); }
+        @ChangeSource { feedbackId = "FB-01"; iteration = 1; }
+    }
+
     // ================================================================ the requirement tree
 
     /* Usages, so that satisfy and verify can refer to them. Constraints first, then the high-level requirements. */
@@ -1414,6 +1505,8 @@ package MIA_Requirements {
     requirement fr31 : VoiceLines;
     requirement fr32 : CharacterVariantPerWorkflow;
     requirement fr33 : WorkflowSchedule;
+    requirement fr34 : SkillsPanel;
+    requirement fr35 : SkillTurnsInTheChat;
     requirement nfr7 : EfficientOnGivenHardware;
     requirement nfr8 : SharedStateInDatabase;
     requirement nfr9 : ContainerPerNode;
@@ -1489,6 +1582,8 @@ package MIA_Allocation {
     satisfy fr31 by mia;
     satisfy fr32 by mia;
     satisfy fr33 by mia;
+    satisfy fr34 by mia;
+    satisfy fr35 by mia;
     satisfy nfr7 by mia;
     satisfy nfr8 by mia;
     satisfy nfr9 by mia;
@@ -1662,6 +1757,13 @@ package MIA_Allocation {
     allocate fr33 to mia.taskRuntime.scheduler;
     allocate fr33 to mia.taskRuntime.pipelineRunner;
     allocate fr33 to mia.taskRuntime.workflowGraph;
+    // FB-01, iteration 1
+    allocate fr34 to mia.frontEnd.skillsPanel;
+    allocate fr34 to mia.taskRuntime.skillRunStore;
+    allocate fr35 to mia.webApp.skillTurnRelay;
+    allocate fr35 to mia.conversation.communicator;
+    allocate fr35 to mia.voice.streamer;
+    allocate fr35 to mia.frontEnd.chatPage;
     allocate fr7 to mia.taskRuntime.workflowGraph;
     allocate fr7 to mia.graphApp.graphValidator;
     allocate fr32 to mia.webApp.variantStore;
