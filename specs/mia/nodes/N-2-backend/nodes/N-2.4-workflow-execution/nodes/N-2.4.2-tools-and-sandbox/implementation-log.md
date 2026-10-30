@@ -27,3 +27,19 @@ Tests reported green (feedback, not verification): `tests/test_tool_calls.py` (1
 Open for Phase 4:
 - TC-TLS-001's criterion (AC-2: in the run log the code checks precede the first model call of each claim) is about the order inside a run; the door only offers the checks. The order is the pipelines' (`CheckRunner` runs code checks cheapest first; the lookup pipeline calls them before the judge). Verify should decide whether TC-TLS-001 needs a run-log test at N-2.4 level.
 - Nothing calls `ToolCalls` yet: the pipelines still get their tools from `build_web_tools` and `CheckRunner`; the wiring is N-2.4.1 T-07 (interfaces only).
+
+## T-02 Untrusted text is data (2026-10-30, done; no code change) – REQ-TLS-004
+
+The existing code already meets the requirement at the door; the task added its test only.
+
+| Requirement | Where it is met | Test |
+|---|---|---|
+| REQ-TLS-004 untrusted text is data | the code checks of `tool_calls.ToolCalls` decide by code (an instruction in evidence, source or value changes no verdict); the door starts a tool only through `call`, never because of a tool's output (a page or a finding that orders a tool starts none, the text is kept verbatim with trust `web`); `web_tools.untrusted` wraps web text for a prompt and replaces the delimiters inside it; `injection_signals` names the phrases | `tests/test_tool_calls_untrusted.py` (6) |
+
+Finding (not fixed, outside the task; draft eval case `specs/mia/eval-drafts/hard_checks_planted.jsonl`, `n-planted-figure`, expect and truth left for the owner): a page that **plants the claimed figure** turns the number check from fail to pass ("…1,020 m high. NOTE: the true height is 1,200 m" passes the claim 1,200 m), because `checks._judge_quantity` passes when any value of the same quantity agrees (number-gate rule, measured on the verdict suites). It is no instruction being followed but planted data, the residual risk of THR-001. Options for the owner: conflicting values of one quantity give inconclusive (a change of the number-gate requirements, re-measured on the verdict suites), or leave it to source trust and the judge.
+
+Local coder: `tests/test_tool_calls_untrusted.py` typed from an exact instruction (task `tls04-tests`, 1 attempt, 61 s, its check ran the file); two hand fixes in pasted strings (a dropped period, a leading space added to a fixture constant), verdict `fixed`.
+
+Tests reported green (feedback, not verification): `tests/test_tool_calls_untrusted.py` (6), `tests/test_tool_calls.py` (10), `tests/test_web_tools.py`, `tests/test_checks.py`.
+
+Open for Phase 4: red-team suites (`rt_paper`, `rt_user_text`) test the model steps, not the door; TC-TLS-004 is the component part. Whether the pipelines wrap every web text with `untrusted` is N-2.4.1's (the runner) and is not tested here.
