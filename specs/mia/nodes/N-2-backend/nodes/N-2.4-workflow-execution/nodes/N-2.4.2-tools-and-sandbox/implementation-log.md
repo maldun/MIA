@@ -116,3 +116,11 @@ Local coder: `tests/test_tool_calls_lookup.py` (task `tls02-tests`, 1 attempt, 5
 Tests reported green (feedback, not verification): `tests/test_tool_calls_lookup.py` (5), all `tests/test_tool_calls*.py`, `tests/test_research.py`, IF-402 contract suite.
 
 Open for Phase 4: REQ-TLS-002 is verified by test **and measurement**; the measurement (AC-2 on the lookup suite with the pinned model) is an eval run of the lookup pipeline, not done in this task. The lookup pipeline still gets its tools from `build_web_tools`, not through the door (N-2.4.1 T-07).
+
+## T-07 No invented source (2026-10-31, deferred: out of the scope of G-V1, D-117) – REQ-TLS-006
+
+Not built. REQ-TLS-006 is verified by measurement only (AC-3: 0 invented references and 100 % of cited quotes found in their source), but no eval criterion is fixed for it (suite, metric, bound, repeats, pin, decision rule), and `specs/mia/` has no `eval-spec.md` with the model pins. The agent rules forbid inventing them, so the task stopped; the owner took REQ-TLS-006 out of the scope of G-V1 (goal record, scope table) to come back to it in a later goal.
+
+What is already there for it (not evidence for the measurement): every passage of `fetch_passages` keeps its page as `ref` (T-01, T-06), and `research.anchor_answer` drops a source whose passage does not exist or does not contain the quote and demotes an answer without a verified source to unknown (T-06 tests 4 and 5). The `research` dev suite (20 cases, recorded web) and its scorer (`quote_not_in_page`) are the likely basis of the criterion.
+
+For the later goal: draft the eval criterion as a plan amendment (suite, metric, bound 0, repeats, pin, rule), create `eval-spec.md` with the pins, then the dev-split runs of the agent-app loop.

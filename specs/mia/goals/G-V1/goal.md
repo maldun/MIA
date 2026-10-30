@@ -60,6 +60,7 @@ Back-filled on 2026-10-30, after the workflow skills introduced goals (M33–M37
 | NFR-7 | in | |
 | NFR-8 | in | |
 | NFR-9 | in | |
+| REQ-TLS-006 | out | owner 2026-10-31 (D-117): no eval criterion is fixed for it yet (suite, metric, repeats, pin, rule) and MIA has no eval-spec.md with pins; back in a later goal together with that criterion. Its parents REQ-WFX-016 (N-2.4) and REQ-BE-067 (N-2) stay in; they carry the same criterion. |
 
 ## Parts
 | Part | Real or stand-in | Notes |
