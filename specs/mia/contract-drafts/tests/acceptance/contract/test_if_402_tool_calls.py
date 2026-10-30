@@ -73,12 +73,13 @@ class ToolCallsContract(unittest.TestCase):
     @mark.req("IF-402", "REQ-BE-064")
     @each_provider(IF)
     def test_every_output_carries_a_trust_label_and_a_schema_check_names_problems(self, tools):
-        """TC-IF-402-05: checks are 'code', web and scholarly tools are 'web'; schema_check names the missing keys."""
+        """TC-IF-402-05: checks are 'code', web and scholarly tools are 'web'; schema_check names the missing key in its one problem (A-32: a readable text)."""
         run = {"id": "r1", "limits": {}}
         self.assertEqual(tools.call(run, "web_search", {"query": "q"})["trust"], "web")
         self.assertEqual(tools.call(run, "scholar_search", {"query": "q"})["trust"], "web")
         check = tools.call(run, "schema_check", {"value": {"verdict": "supported"}, "schema": {"required": ["verdict", "reason"]}})
-        self.assertEqual((check["trust"], check["output"]["status"], check["output"]["problems"]), ("code", "fail", ["reason"]))
+        self.assertEqual((check["trust"], check["output"]["status"], len(check["output"]["problems"])), ("code", "fail", 1))
+        self.assertIn("reason", check["output"]["problems"][0])
 
 
 if __name__ == "__main__":

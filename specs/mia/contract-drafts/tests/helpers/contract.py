@@ -18,7 +18,6 @@ REAL_NOT_READY = {
     "IF-201": "N-2.2 Chat agent not integrated yet",       # real_subject since A-07 (ChatService); stop and the expression/audio events skip
     "IF-301": "N-3.2 Graph tables not integrated yet",
     "IF-302": "N-3.3 Record tables not integrated yet",
-    "IF-402": "N-2.4.2 Tools and sandbox not integrated yet",
     "IF-404": "the real web client and SearXNG are only used in stage 2",
     "IF-405": "the real scholarly APIs are only used in stage 2",
 }
@@ -682,8 +681,42 @@ class _FixtureModel:
         return "not json" if self.drift and len(messages) == 1 else '{"text": "ok"}'
 
 
+class _ToolCallsAdapter:
+    """IF-402 on the real Tools and sandbox (amendment A-32): tool_calls.ToolCalls with the same scripted web page, search finding, work and trust entry as
+    the mock and no sandbox (the real sandbox is stage 2 of N-2.4.2 T-03). The adapter turns the error class of the door into the one of the mock;
+    production code does not import from tests/."""
+
+    PAGE = "The tower is 330 m high. It was finished in 1889."
+
+    def __init__(self):
+        from errors import ServiceError
+        from tool_calls import ToolCallError, ToolCalls
+
+        class Scholar:
+            def search(self, query, until=None, since=None):
+                return {"works": [{"doi": "10.1/x", "title": "On towers", "date": "2001"}], "errors": {}, "dropped": []}
+
+        self._error, self._tool_error = ServiceError, ToolCallError
+        self._tools = ToolCalls(web_search=self._search, fetch_page=self._fetch, scholar=Scholar(), trust=lambda url: {"class": "web", "score": 0.5})
+
+    @staticmethod
+    def _search(query):
+        return {"query": query, "results": [{"url": "https://example.org/a", "title": "A", "snippet": "The tower is 330 m high."}]}
+
+    def _fetch(self, url):
+        if url != "https://example.org/a":
+            raise OSError("not found")
+        return {"ref": url, "url": url, "title": "A", "text": self.PAGE}
+
+    def call(self, run, tool, args):
+        try:
+            return self._tools.call(run, tool, args)
+        except self._tool_error as err:
+            raise self._error(err.code, detail=err.detail)
+
+
 def real_subject(interface, **options):
-    """The real provider of an interface once its node is integrated (amendment A-02: IF-301, IF-302, IF-102 of the Database; amendment A-05, A-07: IF-101 and IF-201 as far as built); None until then."""
+    """The real provider of an interface once its node is integrated (amendment A-02: IF-301, IF-302, IF-102 of the Database; amendment A-05, A-07: IF-101 and IF-201 as far as built; A-32: IF-402); None until then."""
     if REPO not in sys.path:
         sys.path.insert(0, REPO)
     if interface == "IF-301":
@@ -706,4 +739,6 @@ def real_subject(interface, **options):
         return _RunWorkflowAdapter()
     if interface == "IF-204":
         return _SpeechAdapter(**options)
+    if interface == "IF-402":
+        return _ToolCallsAdapter()
     return None
