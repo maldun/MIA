@@ -148,6 +148,19 @@ class StorageContract(unittest.TestCase):
         self.assertEqual(caught.exception.code, "not_found")
         self.assertEqual(seen, [{"table": "memos", "id": "m", "version": None, "author": "ben"}])
 
+    @mark.req("IF-102", "REQ-DB-004")
+    @each_provider(IF)
+    def test_the_vote_categories_are_an_operation(self, store):
+        """TC-IF-102-10 golden 5 (A-59, D-162): the storage names the vote categories, in their order, and a vote of each is stored.
+        Example: categories() -> ["answer_quality", "reactions", "character_behaviour", "service"]."""
+        # Given / When: the storage is asked
+        categories = store.categories()
+        # Then: the four in their order, each one usable in a vote
+        self.assertEqual(categories, ["answer_quality", "reactions", "character_behaviour", "service"])
+        for category in categories:
+            store.put("votes", category, {"user": "anna", "subject": "m1", "category": category, "value": 1}, "anna")
+        self.assertEqual(store.ids("votes"), sorted(categories))
+
 
 if __name__ == "__main__":
     unittest.main()
