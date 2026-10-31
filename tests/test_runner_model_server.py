@@ -84,6 +84,17 @@ class ModelServerTests(unittest.TestCase):
         self.assertNotIn("Error", UNREACHABLE)
 
     @mark.req("REQ-RUN-003")
+    def test_the_sentence_is_the_owners_wording(self):
+        """TC-RUN-003: the sentence is the one the owner chose (D-120).
+
+        Example: UNREACHABLE -> "Can't reach my brain right now beep"
+        """
+        # Given: the sentence of a down server
+        # When: it is read
+        # Then: it is the owner's wording, character by character
+        self.assertEqual(UNREACHABLE, "Can't reach my brain right now beep")
+
+    @mark.req("REQ-RUN-003")
     def test_a_down_server_while_a_stream_is_read_is_the_same_sentence(self):
         """TC-RUN-003: a down server during streaming is reported as a plain sentence.
 

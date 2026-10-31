@@ -12,7 +12,7 @@ import itertools
 import threading
 
 KINDS = ("chat", "background")
-UNREACHABLE = "The model server (Ollama) is not reachable, so I cannot answer right now."
+UNREACHABLE = "Can't reach my brain right now beep"     # the owner's wording (D-120)
 
 
 class ModelServerUnreachable(Exception):

@@ -62,7 +62,7 @@ Owner's answers (D-118): `/light!` and `/full!` ask for confirmation; the switch
 
 Files outside T-03's list: `chat_service.py` (two flags, owner's answer); `web_app.py` not touched.
 
-Wording for the owner to review (user-visible, no requirement fixes it): "The model server (Ollama) is not reachable, so I cannot answer right now."
+Wording: the owner chose "Can't reach my brain right now beep" (D-120, 2026-10-31); pinned by `test_the_sentence_is_the_owners_wording` in `tests/test_runner_model_server.py` (red before the change, green after).
 
 Live check (feedback): with the image on the host network, a client on a closed port gave the sentence; the running Ollama answered `list` through `TurnClient` (5 models). No model was loaded.
 
@@ -101,3 +101,7 @@ Checked against the shipped pipelines: the largest inputs by construction are re
 Local coder: `tests/test_runner_context_share.py` (task `run05-tests`, 1 attempt, 38 s); compared with the instruction by script: identical, verdict `ok`. Red before the change (2 failures, 1 error), green after.
 
 Tests reported green (feedback, not verification): `tests/test_runner_context_share.py` (4); all `tests/test_*.py` in the image fail only as on master; all contract suites and integration steps.
+
+## T-06 First text in 10 seconds (2026-10-31, deferred) – REQ-RUN-007
+
+Deferred by the owner (D-120): a measurement (median of 20 runs, AC-19) without an eval criterion and model pins, like REQ-RUN-006. It comes back with `eval-spec.md`. Whether REQ-RUN-007 leaves the scope of G-V1 is the owner's decision (scope table of `goal.md`).
