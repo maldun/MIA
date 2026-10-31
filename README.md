@@ -26,7 +26,7 @@ Installation
 Prerequisites:
 --------------
 
-- python 3.11 to 3.13 (3.12 recommended and tested; Python 3.10 reaches its end of life in October 2026). Nothing needs `torch` any more: the voice is Kokoro on onnxruntime with a small voice effect, RVC voice conversion and Coqui TTS were removed in October 2026 (`git log` has them)
+- Python 3.12 (the only version MIA runs on, D-63; kokoro-onnx needs below 3.14). Nothing needs `torch` any more: the voice is Kokoro on onnxruntime with a small voice effect, RVC voice conversion and Coqui TTS were removed in October 2026 (`git log` has them)
 - rocm/cuda (works with CPU but slow....)
 - docker/podman
 - (Tested on Fedora 40; should work on other systems though)
@@ -35,7 +35,7 @@ Prerequisites:
 (I made my own with blender and collected other stuff, but I don't share due to copyright reasons. Private use is one thing, publishing another ..., but the internet is full of fun stuff so go ahead.)
 
 ### Create virtual environment (example)
-- `python3.12 -m venv <venvfolder>/mia` (or `python3.11`, `python3.13`)
+- `python3.12 -m venv <venvfolder>/mia`
 - `source <venvfolder>/mia/bin/activate`
 - `python -m pip install -r requirements.txt` (web app, chat, research and the Kokoro voice with the effect; no torch)
 
