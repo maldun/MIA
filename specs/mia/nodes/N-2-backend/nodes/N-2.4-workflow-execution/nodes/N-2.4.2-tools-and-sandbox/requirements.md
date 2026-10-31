@@ -78,9 +78,9 @@ The tools that any workflow can call, each counted against the budgets of the ru
 - Status: Approved
 - History: –
 
-### REQ-TLS-007 – Only queries leave the host
+### REQ-TLS-007 – Only the request of a query leaves the host
 - Level: low-2   Subject: VerificationSuite
-- Text: The Tools and sandbox shall send off the host only the text of a web or scholarly query and, if configured, an e-mail address.
+- Text: The Tools and sandbox shall send off the host only what a web or scholarly query needs: the query text, its filters (dates, result count, fields), the DOI of a looked-up work, and, if configured, an e-mail address, an API key of the source and MIA's User-Agent.
 - Rationale: refines REQ-WFX-017
 - Parent: REQ-WFX-017
 - Priority: Must
@@ -88,7 +88,7 @@ The tools that any workflow can call, each counted against the budgets of the ru
 - Acceptance criterion: AC-5: the web log lists every query that left the machine
 - Verified by: TC-TLS-007
 - Status: Approved
-- History: –
+- History: 2026-10-31 A-41 (D-131, D-132): the text names what a scholarly request sends (filters, DOIs, API key, User-Agent), as the code does; finding 5 of the N-2.4.2 verification
 
 ### REQ-TLS-008 – Budget and trust label per tool call
 - Level: low-2   Subject: VerificationSuite
