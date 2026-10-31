@@ -172,3 +172,12 @@ Each reproduced in a failing test first, then fixed; one commit each.
 Notes: `ollama_remote.prepare` (install and start) still builds a client without the connect timeout; it waits in its own loop (`ollama_wait`, 300 s), not on the chat path. Local coder: `tests/js/confirm.test.mjs` (task `f5-confirm-js`, 2 attempts failed on an extra `)`, a dropped `});`, a cut test id; fixed by hand after a script compare, verdict `fixed`; the bracket slip is now rule 11 of the model guide), `tests/test_web_app_wiring.py` (task `n3f9-wiring-tests`, second attempt passed, script compare identical, verdict `ok`).
 
 Tests reported green (feedback, not verification): all new tests; all `tests/test_*.py` in the image fail only in `test_amendment_report`, `test_config`, `test_harness` (rt_edit count, `n-planted-figure`), `test_shutdown` (no `--init`); contract suites and integration steps; JS 115 of 115.
+
+## Re-verification 2 answers built (2026-10-31, D-130); A-39
+- Scope: the three rows of D-128 are in `goals/G-V1/goal.md` as `partly` (REQ-RUN-005, -009, -013; written by the coding agent on the owner's answer). With them the node is **Verified with findings** (re-verification 2).
+- N7 `memory_write` personal (version 7): `InTheCore` checks it is personal and not kept; `eb2b89d`.
+- N8 accepted as a deviation: only the chat run carries the real user; `/lookup`, `memory_write`, the extensions stay "mia"; a regenerate names the account that clicked.
+- N9 `sendConfirmed` takes the promise of the command list; the page passes the promise it loads; two JS tests (waiting for the list, the page goes through `sendConfirmed`), red before, green after; `95d293a`. If the list cannot be loaded at all, `loadCommands` gives an empty list and a `/light!` is sent without asking (the server does not confirm, D-128 F5): noted for the next iteration.
+- N10 A-39: REQ-RUN-003 names the 10 s connect timeout, REQ-RUN-012 AC-1 the allowed `sandbox` import, `ui/README.md` the skill key `personal`; `aa009cd`.
+
+Tests reported green (feedback, not verification): all `tests/test_*.py` in the image fail only in `test_amendment_report`, `test_config`, `test_harness` (rt_edit count, `n-planted-figure`), `test_shutdown` (no `--init`); contract suites and integration steps; JS 117 of 117.
