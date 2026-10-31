@@ -5,6 +5,7 @@ Run: python tests/test_measure_latency.py
 """
 import os
 import sys
+import threading
 import unittest
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -29,6 +30,24 @@ class FakeServer:
         self.asked += 1
 
 
+class FakeSocket:
+    """stands in for the socket.io client of the live mode: after each `chat_send` it sends the first text after 0.1 s and the end of
+    the answer after 0.5 s (in real time, from a thread, like the server), so a tool that times the previous answer's end measures ~0.5 s"""
+
+    FIRST, END = 0.1, 0.5
+
+    def __init__(self):
+        self.handlers = {}
+
+    def on(self, event, handler):
+        self.handlers[event] = handler
+
+    def call(self, event, data, timeout=None):
+        threading.Timer(self.FIRST, self.handlers["chat_delta"], args=({"text": "Hi"},)).start()
+        threading.Timer(self.END, self.handlers["chat_done"], args=({},)).start()
+        return {"ok": True}
+
+
 class Latency(unittest.TestCase):
     @mark.req("REQ-EVL-007")
     def test_median_of_twenty_runs_after_three_warmups(self):
@@ -48,6 +67,22 @@ class Latency(unittest.TestCase):
                 raise RuntimeError("no answer")
         result = ML.measure(ask, clock=lambda: 0.0, runs=4, warmup=0)
         self.assertEqual((result["runs"], result["failed"]), (2, 2))
+
+
+class LiveMode(unittest.TestCase):
+    @mark.req("REQ-EVL-007")
+    def test_the_clock_starts_after_the_previous_answer_has_ended(self):
+        """REG (Verify F1): the live mode times only the first text of the answer, not the wait for the end of the previous one.
+
+        Example: first text after 0.1 s, end of the answer after 0.5 s, 3 runs -> median about 0.1 s (it was about 0.5 s).
+        """
+        # Given: the live mode on a fake socket whose answers start after 0.1 s and end after 0.5 s
+        prepare, ask = ML.socket_ask(FakeSocket(), "Hello", timeout=5)
+        # When: three runs are timed one after the other
+        result = ML.measure(ask, prepare=prepare, runs=3, warmup=0)
+        # Then: the median is the 0.1 s of the first text; 0.1 s of slack covers the 10 ms polling and a busy test machine
+        self.assertEqual(result["runs"], 3)
+        self.assertAlmostEqual(result["median"], FakeSocket.FIRST, delta=0.1)
 
 
 if __name__ == "__main__":
