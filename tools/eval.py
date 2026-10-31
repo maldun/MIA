@@ -13,6 +13,7 @@ The evaluation harness on the command line (ui/REQUIREMENTS_CORE.md 9). Run with
   python tools/eval.py compare computable light full          the newest runs of two variants of a suite
   python tools/eval.py cases hard_checks --tag trap           show the cases
 
+Holdout suites (*.holdout) are left out of list and refused by cases and run unless --holdout is given: they are for Verify only.
 Every run needs --pin (REQ-EVL-004); a suite of kind "workflow" runs through IF-105 on the workflows of the app's storage.
 Without a name the variant is called "default". The variant options (--skill, --pipeline, --model) change what runs; everything else stays the same, so two runs can be compared.
 """
@@ -86,6 +87,20 @@ def make_harness(cfg, core):
     return harness.Harness(core, platform=build_platform(cfg, core))
 
 
+def is_holdout(name):
+    return name.endswith(".holdout")
+
+
+def open_suite(name, holdout):
+    """a suite by name; a holdout suite only with --holdout (REQ-EVL-002, D-164: the holdout is for Verify), refused before anything of it is read"""
+    if is_holdout(name) and not holdout:
+        sys.exit("%s is a holdout suite: only with --holdout (Verify)" % name)
+    suite = harness.load_suite(os.path.join(SUITES, name))
+    if is_holdout(suite.name) and not holdout:
+        sys.exit("%s is the holdout suite %s: only with --holdout (Verify)" % (name, suite.name))
+    return suite
+
+
 def show_progress(done, total, record):
     mark = "ok " if (record["expect"] is not None and harness.metrics.normalize_status(record["status"]) == harness.metrics.normalize_status(record["expect"])) or \
                     (record["expect"] is None and harness.metrics.is_right(record)) else "-- "
@@ -109,6 +124,7 @@ def main():
     parser.add_argument("--sample", type=int, metavar="N", help="a seeded sample of N active cases; the two halves of a pair stay together")
     parser.add_argument("--sample-seed", type=int, default=7, help="seed of --sample (default 7)")
     parser.add_argument("--include-retired", action="store_true", help="also run the cases tagged retired")
+    parser.add_argument("--holdout", action="store_true", help="list, show or run holdout suites (*.holdout): for Verify only, never during development")
     parser.add_argument("--results", default=None, help="folder of saved runs (default: data/eval)")
     parser.add_argument("--no-save", action="store_true")
     parser.add_argument("--quiet", action="store_true")
@@ -126,9 +142,11 @@ def main():
         return harness.load_run(path)
 
     if args.command == "list":
-        for suite in harness.list_suites(SUITES):
+        for suite in harness.list_suites(SUITES, holdout=args.holdout):
             if isinstance(suite, Exception):
                 print("PROBLEM %s" % suite)
+                continue
+            if is_holdout(suite.name) and not args.holdout:
                 continue
             tags = {}
             for case in suite.cases:
@@ -138,7 +156,7 @@ def main():
                                                                        suite.description[:150], ", ".join("%s %d" % t for t in sorted(tags.items()))))
         return
     if args.command == "cases":
-        suite = harness.load_suite(os.path.join(SUITES, args.args[0]))
+        suite = open_suite(args.args[0], args.holdout)
         for case in suite.select(args.tag or None, args.only.split(",") if args.only else None, args.limit):
             print("%-28s %-30s truth=%-5s expect=%-14s %s" % (case["id"], ",".join(case.get("tags", [])), case.get("truth"), case.get("expect"), case.get("note", "")))
         return
@@ -159,7 +177,7 @@ def main():
 
     if not args.pin:                                                # REQ-EVL-004, D-164: every run records its model pin
         sys.exit("a run needs --pin (%s)" % ", ".join(sorted(PINS)))
-    suite = harness.load_suite(os.path.join(SUITES, args.args[0]))
+    suite = open_suite(args.args[0], args.holdout)
     need_model = suite.target["kind"] in ("pipeline", "research", "plan", "workflow") or (suite.target["kind"] == "extraction" and bool(args.skill or args.pipeline))
     core = build_core(cfg, need_model, need_sandbox=need_model)
     variant = {"name": args.variant}

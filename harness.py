@@ -124,10 +124,13 @@ def load_suite(folder):
     return Suite(name, meta.get("description", ""), target, cases, folder)
 
 
-def list_suites(root):
+def list_suites(root, holdout=True):
+    """the suites of a folder (a broken one as its SuiteError); holdout=False leaves the folders *.holdout unread (REQ-EVL-002)"""
     suites = []
     if os.path.isdir(root):
         for name in sorted(os.listdir(root)):
+            if not holdout and name.endswith(".holdout"):
+                continue
             if os.path.isfile(os.path.join(root, name, "suite.json")):
                 try:
                     suites.append(load_suite(os.path.join(root, name)))
