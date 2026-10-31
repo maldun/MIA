@@ -140,7 +140,7 @@ Runs a workflow step by step under budgets: model calls and model management, pr
 
 ### REQ-RUN-012 – Use the library, the tools and the log only through their interfaces
 - Level: low-2   Subject: TaskRuntime
-- Text: The Pipeline runner shall fetch a workflow only through IF-203, call tools only through IF-402 and write events only through IF-401.
+- Text: The Pipeline runner shall fetch a workflow only through IF-203, call the tools of tool nodes only through IF-402 and write events only through IF-401.
 - Rationale: refines REQ-WFX-019
 - Parent: REQ-WFX-019
 - Priority: Must
@@ -148,7 +148,7 @@ Runs a workflow step by step under budgets: model calls and model management, pr
 - Acceptance criterion: AC-1: with the mocks of the three interfaces a scripted workflow runs end to end; no other import exists
 - Verified by: TC-RUN-012
 - Status: Approved
-- History: –
+- History: 2026-10-31 A-38 (D-128): "call tools" narrowed to the tools of tool nodes; script nodes and the web checks reach the sandbox and the web directly until the next iteration (FB-03)
 
 ### REQ-RUN-013 – Know no particular workflow
 - Level: low-2   Subject: TaskRuntime

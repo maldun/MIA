@@ -145,3 +145,84 @@ python3 -I tools/check_sysml_model.py .
 #   the same call without stream                                                                       -> ModelServerUnreachable("Can't reach my brain right now beep")
 #   Runner code node streaming through it                                                              -> error "converse: ConnectError: [Errno 111] Connection refused"
 ```
+
+## Re-verification (2026-10-31)
+
+**Branch:** goal/v1 @ 594ba5d (code as of 2ee83db; 097fab5, 3bfbf2c, bff1029, 594ba5d change only specs)   **Compared with:** the first report (5078cfa, code 99d185a), master @ 53c6766   **Reviewer:** Claude Opus 5.5 (AI, independent, a second reviewer; never saw the implementation chat or the first review's chat)
+
+Commits reviewed: `98ae7a2` (F1), `160bef6` (F15), `70a6f35` (N-2.4.2 F2: `tool_calls.build_tool_calls`, `web_app.py`), `2ee83db` (F12: `library/nodes/tool.web_search/2.json`), docs `be32ecf`, `097fab5`, `3bfbf2c` (FB-03, D-126), `bff1029`, `594ba5d` (D-127, N-4.2 only). Code changed since 9a9e794: `pipeline_model.py`, `tool_calls.py`, `web_app.py`, `library/nodes/tool.web_search/2.json`, and four test files; nothing else.
+
+### Proposed verdict
+**Not verified** (unchanged), now for one reason only: REQ-RUN-013 (Must, in scope of G-V1) has no evidence for its AC-9 review entry, because T-08 (A-35) is not started and D-126/FB-03 moved the question of "how a workflow is built" to the next iteration without taking REQ-RUN-013 (or its review part) out of G-V1. F1, the other blocker of the first report, is fixed and was confirmed on the real path.
+
+Owner decisions that block "Verified" or "Verified with findings":
+1. **REQ-RUN-013 / T-08:** do T-08 in G-V1, or take AC-9's review entry out of the scope of G-V1 (scope row in `goal.md`, with FB-03 as the destination), or accept it as a named deviation. Same decision for the `keep_texts` name of F2 (`core.py` is in the runner part).
+2. **F3, F4:** reword AC-22 of REQ-RUN-005 and AC-19 of REQ-RUN-009 to what is tested, or set the measured parts out with REQ-RUN-006/-007.
+3. **F5, F6, F9:** page-only confirmation, script nodes and web checks outside IF-402, chat runs logged as user `mia`.
+With 1 decided (out of scope or accepted) and 2 decided, the node can be proposed as **Verified with findings** (the rest are Low findings and amendments).
+
+### Per-finding state
+| # | State | Evidence |
+|---|---|---|
+| F1 | **Fixed** | `pipeline_model.py:62-65,88-104`: `_unreachable` maps `ConnectionError` and `httpx.ConnectError` (by name) in `_call` and `_stream`. Test `tests/test_runner_model_server.py:87` `test_a_stream_of_the_real_library_to_a_closed_port_is_the_sentence` uses the real ollama 0.6.3 on port 9, plain and streamed. **Red on 9a9e794** with that test file (`httpx.ConnectError [Errno 111]`, 1 error of 8), green on HEAD (8 OK), both in the image with `--network none`. The test exercises the real library, not a fake, so it covers the actual failure. **Chat path checked end to end** (probe, not a repo test): `Communicator(port=9)` with `comm.client = TurnClient(..., "chat")`, `Core(skills, library).run("chat", started_by="message", functions={"converse": lambda t: comm.exchange(t)[1]})`: on 9a9e794 the run ends `error`, `'converse: ConnectError: [Errno 111] Connection refused'`; on HEAD it ends `error`, `"Can't reach my brain right now beep"` == `pipeline_model.UNREACHABLE`. Remaining limits: N1, N2 below. The TR on fake fidelity proposed in F1 is not written (no `test-requirements.md`, see F16). |
+| F2 | **Waiting for owner** (+ T-08 open) | No commit touches T-08; `core.py:25-28` unchanged. D-126/FB-03 name T-08 but leave REQ-RUN-013 in scope (`goal.md` has no out row for it). |
+| F3 | Waiting for owner | No decision recorded (D-120..D-127); `pipeline.py` unchanged. |
+| F4 | Waiting for owner | as F3 |
+| F5 | Open (test) + waiting for owner | No JS test of the `confirm: true` dialog added (`tests/js` 110 tests, unchanged); no decision. |
+| F6 | Waiting for owner | `pipeline.py:33,465` and the allow-list in `test_runner_interfaces.py` unchanged. FB-03 lists REQ-RUN-012 as affected but decides nothing for G-V1. |
+| F7 | Open | `pipeline.py:338` default still `started_by="command"`. |
+| F8 | Open (amendment) | `contracts/IF-202-*.md` unchanged since the report. |
+| F9 | Waiting for owner | `pipeline.py:338` `user="mia"` unchanged. |
+| F10 | Open (note) | unchanged; see also N2 (a connect that never ends holds the turn). |
+| F11 | Open | `pipeline.py:498` unchanged. |
+| F12 | **Partly fixed; rest deferred by the owner (D-126, FB-03)** | `library/nodes/tool.web_search/2.json` declares input `{query}` and output `[{url,title,content}]` as IF-402 v2. Test `tests/test_library.py:131` red on 9a9e794 (1 error, `@2` missing), green on HEAD. But every shipped pipeline (7 versions of 4 research pipelines) still `use`s `tool.web_search@1`, so the declaration of the node the app actually runs through the door is still `{results:…}`. The owner moved the pipeline side to the next iteration (D-126). Acceptable as is, because output schemas of tool nodes are not checked at run time (`pipeline.py:586` checks model output only), but F12 is closed only when FB-03 is done. |
+| F13 | Open (amendment) | `decomposition.yaml:166` still `tasks: 7`; `architecture.sysml` unchanged (`check_sysml_model.py` OK). |
+| F14 | Open | `run_workflow.py:112` unchanged. |
+| F15 | **Fixed** | `tests/test_content_store.py:139` `InTheCore`: `Core(...).runner.store_texts("chat")` is False, `("summarize")` True, and `store_texts=lambda n: True` wins. Mutation on HEAD in a scratch copy: removing `or keep_texts` from `core.py:45` makes the test fail (`(True, True) != (False, True)`, 1 failure of 12); restored, 12 OK. A test-only commit is right here (the code was not wrong). |
+| F16 | Open | `test_doc_check`: `test_runner_budgets.py` 3, `test_run_workflow.py` 9 errors (unchanged); trace_check still warns REQ-RUN-008, -014, -015 without `@mark.req`; `test-spec.md` still has no `## Scenarios` (ERROR). The new tests of this round pass `test_doc_check` (their files' other errors are older tests). |
+| F17 | Open, **reproduced** | My own parallel runs: two containers mounting the same probe folder with `:Z` → the first lost access (`bash: /probe/runall.sh: Permission denied`). Re-run with separate folders. `tools/run_in_image.sh:10` unchanged. |
+
+### New findings
+| # | Finding | Severity | Needs | Proposal |
+|---|---|---|---|---|
+| N1 | `chat_service.py:675` shows the run error as `"MIA could not answer: Can't reach my brain right now beep"`. AC-23 of REQ-RUN-003 says "the plain message (exact)". The runner's part is exact; the page adds a prefix. | Low | owner decision | Owner: accept the prefix (the runner's AC is met; the page is N-2.2's) or have the chat service pass `ModelServerUnreachable` through unprefixed, with a test at the chat-service level. |
+| N2 | `pipeline_model.py:65` covers a refused connection only. A host that does not answer (remote `ollama_host`, packets dropped) gives `httpx.ConnectTimeout` (other name) or, because `ollama.Client` has `timeout=None` by default and `Communicator` sets none (`communicator.py:138`), no error at all: the chat waits forever and holds the model turn, so every background call waits too (cf. F10). Not covered by AC-23 ("fake server down"). | Low (Medium with a remote model host) | owner decision, then test | Owner: does "unreachable" in REQ-RUN-003 include a host that does not answer? If yes: a connect timeout on the clients and `ConnectTimeout` mapped too, one test each. |
+| N3 | `web_app.py:591` (the app uses `build_tool_calls`) is not guarded by any test: `AppDoorTests` (`tests/test_tool_calls.py:260`) tests `build_tool_calls` alone. Reverting `web_app.py` to `ToolCalls(...)` would pass every test. Checked by a probe instead (app imported as `tests/test_review_wiring.py` does, `--network none`): `tool_calls.work_trust/retractions/work_lookup` are `None` on 9a9e794 and set on HEAD. | Low | test | Phase 3 (N-2.4.2): one assertion in `tests/test_review_wiring.py`-style wiring test that `w.tool_calls.work_lookup` etc. are set. |
+| N4 | The new wiring is latent: the runner routes only `web_search` and `fetch_page` through the door (`web_app.py:596`, `door_tools`), and no shipped pipeline or app path calls `scholar_search`/`source_record` through `ToolCalls`. When one does, `_scholar_search` (`tool_calls.py:138`) makes one Crossref lookup per found work (rate limit 0.3 s each). | Info | – | Note for the N-2.4.2 owner and for budgets when a caller appears. |
+| N5 | An unversioned `tool.web_search` now resolves to `@2` (log, F12 paragraph). Only `library_select` and `tests/test_search_command.py:35` resolve it unversioned; no skill or pipeline does, so no eval path changed and no version bump of a pipeline is due now. | Info | – | Keep in FB-03. |
+
+No new finding on security: the changes add no tool, network path or write access; `_unreachable` matches by class name only to decide which message to show and re-raises everything else.
+
+### Check results (re-run)
+| Check | Result |
+|---|---|
+| Python tests, every `tests/test_*.py` + 17 contract suites + 24 integration steps, image `localhost/mia:latest`, `--network none`, clean scratch worktrees | goal/v1 @ 594ba5d: 183 files, 180 green. Failing tests: `test_amendment_report::FromGit.test_the_files_of_a_commit_are_shown_one_after_the_other`, `test_config::Example.test_every_option_the_code_reads_is_in_the_example`, `test_harness::ShippedSuites.test_every_shipped_suite_is_valid` (`rt_edit` has 2 cases, not 30), `test_harness::ShippedSuites.test_the_hard_checks_suite_matches_every_time` (case `n-planted-figure`, N-2.4.2, red by design until its fix). master @ 53c6766 (same runner): 171 files, 168 green; the same first three failing tests. The only test red on goal/v1 and green on master is `test_the_hard_checks_suite_matches_every_time` (N-2.4.2, owner-labelled case); no test of N-2.4.1 fails. `test_shutdown` passed on both. |
+| Node tests | `test_runner_budgets` 6, `test_run_workflow` 11, `test_model_turns` 6, `test_runner_model_server` 8, `test_runner_internet_by_command` 6, `test_runner_context_share` 4, `test_runner_interfaces` 7, `test_tool_calls` 12, `test_content_store` 12, `test_library` 37: all OK |
+| Contract suites of the node | IF-202 10, IF-105 8, IF-203 8, IF-401 10, IF-402 12 OK; IF-103 12 run, 6 skipped (real side, REQ-RUN-011 out) |
+| JavaScript | `tests/js`: 110/110 (master 103/103). JS contract + integration `.mjs`: 27 tests, 12 pass, 14 skipped, 1 fail (`N-1/step_00`), identical on master: not this node. |
+| Red before / green after | F1, F12 and N-2.4.2 F2 tests run against 9a9e794 (red) and HEAD (green); F15 by mutation (above). |
+| Protected material vs master | `git diff --stat 53c6766..HEAD -- tests/acceptance tests/helpers tests/smoke tests/integration benchmarks contracts eval/suites eval/baselines`: 8 files, each only from the A-32 (`825e54a`), A-33 (`f63dc30`), A-34 (`cca40c8`) install commits, plus `eval/suites/hard_checks/cases.jsonl` +1 (`543983a`, `n-planted-figure`, `Labelled-by: Stefan Reiterer (owner)`). `specs/mia/contract-drafts/` byte-identical to the installed files. Nothing changed in these folders since the first report (5078cfa..HEAD: empty). |
+| Eval material, prompts, pipelines | `eval/baselines` unchanged; no skill or pipeline changed; one new node version (`tool.web_search@2`, a new file, `@1` untouched). No eval, holdout, red-team or model run made. |
+| `trace_check.py` (N-2.4.1 only) | ERROR `test-spec.md` without `## Scenarios` (F16); WARN no `@mark.req` for REQ-RUN-008, -014, -015 (F16) and -004, -011 (out of scope); WARN open deferrals TD-01..TD-04 not listed in this report: they belong to REQ-CLV-023, -024, REQ-WFM-032, -039 (other nodes), none to N-2.4.1. Project-wide: no `test-requirements.md`. |
+| `test_doc_check.py` on the changed test files | `test_runner_model_server.py` 0, `test_tool_calls.py` 0; `test_content_store.py` 16 and `test_library.py` many errors, all in older tests (the new methods `InTheCore`, `test_the_web_search_node_declares_the_output_of_if_402` pass). |
+| `goal_check.py` | 0 errors, 0 warnings (the space and the D-120 citation in `goal.md:67` are still there, cosmetic). |
+| `check_sysml_model.py` | OK; no `.sysml` changed, `check_sysml.sh` not needed. |
+
+### Not checked
+- No model server, no eval, holdout or red-team run (not allowed for this review; the node has no eval criterion in G-V1).
+- No real network: the F1 path was checked only for "connection refused"; N2 (a host that does not answer) was judged from the library source, not run.
+- No browser: the page shows the chat error through `chat_service`; read in the code (N1), not seen.
+- No CI and no `stages.yaml`: all results are local runs, not CI evidence.
+
+### Evidence (commands)
+```
+git worktree add --detach <scratch>/n241-reverify-head 594ba5d; ... -master 53c6766; ... -pre 9a9e794
+podman run --rm --network none --user 0 -v "$PWD:/work:Z" -w /work localhost/mia:latest python tests/test_runner_model_server.py   # pre (test file of 98ae7a2): errors=1 ConnectError; head: OK
+podman run ... -v <probe>:/probe:Z ... python -I /probe/chat_path.py     # Communicator(port=9) + TurnClient + Core.run("chat"): pre 'converse: ConnectError…', head UNREACHABLE
+sed -i 's/store_texts=store_texts or keep_texts,/store_texts=store_texts,/' core.py; python tests/test_content_store.py   # failures=1; restored: OK
+podman run ... python -I /probe/door_wiring.py                            # app's tool_calls: pre work_trust/retractions/work_lookup None, head set
+podman run ... bash /probe/runall.sh                                      # every tests/test_*.py, contract suite, integration step; per-test FAIL/ERROR lines
+node --test "tests/js/*.test.mjs"
+python ~/.claude/skills/dev-workflow/scripts/trace_check.py --spec-dir specs/mia --tests-dir tests
+python3 ~/.claude/skills/dev-workflow/scripts/test_doc_check.py --tests-dir tests/<changed file>
+```
