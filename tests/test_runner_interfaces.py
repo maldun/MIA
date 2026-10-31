@@ -85,7 +85,7 @@ class RunnerInterfaceTests(unittest.TestCase):
         skill = parse_skill(SKILL, "towers.md")
         skill["budget"].update(budget)
         runner = Runner(functions=FUNCTIONS, tool_calls=tools, door_tools=DOOR, run_events=events)
-        return runner.run(skill, GRAPH, INPUT, user="u1")
+        return runner.run(skill, GRAPH, INPUT, user="u1", started_by="command")
 
     def types(self, events, run_id):
         return [e["type"] for e in events.events(run_id)]
@@ -205,8 +205,8 @@ class RunnerInterfaceTests(unittest.TestCase):
         check_only = {"name": "check", "version": 1, "result": "check",
                        "nodes": [{"id": "check", "kind": "tool", "tool": "number_check", "args": {"claim": "$input.claim", "evidence": ["It is 330 m."]}, "output": "check"}]}
         # When: both run
-        first = runner.run(parse_skill(SKILL, "towers.md"), GRAPH, INPUT, user="u1")
-        second = runner.run(parse_skill(SKILL, "towers.md"), check_only, INPUT, user="u1")
+        first = runner.run(parse_skill(SKILL, "towers.md"), GRAPH, INPUT, user="u1", started_by="command")
+        second = runner.run(parse_skill(SKILL, "towers.md"), check_only, INPUT, user="u1", started_by="command")
         # Then: both are done
         self.assertEqual((first.status, second.status), ("done", "done"))
     @mark.req("REQ-RUN-012")
@@ -223,7 +223,7 @@ class RunnerInterfaceTests(unittest.TestCase):
             return [{"url": "https://example.org/a", "title": "A", "content": "The tower is 330 m high."}]
         runner = Runner(functions=FUNCTIONS, tool_calls=tools, door_tools=DOOR, run_events=RunEventsMock())
         # When: the scripted workflow runs with it
-        result = runner.run(parse_skill(SKILL, "towers.md"), GRAPH, INPUT, user="u1", tools={"web_search": own_search})
+        result = runner.run(parse_skill(SKILL, "towers.md"), GRAPH, INPUT, user="u1", tools={"web_search": own_search}, started_by="command")
         # Then: its own search was asked, the door only for the other two tools
         self.assertEqual((result.status, asked), ("done", ["How high is the tower?"]))
         self.assertEqual(tools._used[result.run_id], {"fetch_passages": 1, "number_check": 1})

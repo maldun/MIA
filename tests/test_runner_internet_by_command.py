@@ -54,7 +54,54 @@ def runner(web):
     return Runner(tools={"web_search": Tool(web.search, "search_calls")}, functions={"say": lambda text: "ok " + text})
 
 
+COMMAND_PATHS = ("research_chat.py", "extensions/review/entry.py", "harness.py", "reproduce.py", "run_workflow.py")
+
+
+def runs_without_command(path):
+    """the calls of the pipeline runner in a file, core.run(...) or <...>.core.runner.run(...), that do not say started_by="command" (line numbers);
+    the check runner of the harness (runner.run(claim)) is another runner and is not counted"""
+    import ast
+    tree = ast.parse(open(os.path.join(REPO, path), encoding="utf-8").read())
+    found = []
+    for node in ast.walk(tree):
+        if not (isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) and node.func.attr == "run"):
+            continue
+        owner = node.func.value
+        is_core = getattr(owner, "id", getattr(owner, "attr", None)) == "core"
+        is_core_runner = isinstance(owner, ast.Attribute) and owner.attr == "runner" and getattr(owner.value, "attr", getattr(owner.value, "id", None)) == "core"
+        if is_core or is_core_runner:
+            said = next((k.value for k in node.keywords if k.arg == "started_by"), None)
+            if not (isinstance(said, ast.Constant) and said.value == "command"):
+                found.append(node.lineno)
+    return found
+
+
 class InternetByCommandTests(unittest.TestCase):
+    @mark.req("REQ-RUN-001")
+    def test_a_run_that_does_not_say_who_started_it_counts_as_a_message(self):
+        """TC-RUN-001 (F7 of the N-2.4.1 verification, D-133): without started_by a run counts as started by a message, so an internet task is refused (fail closed).
+
+        Example: Runner().run(web skill) without started_by -> PipelineError, the web is never asked
+        """
+        # Given: a web skill and a runner
+        web = Web()
+        # When: it is run without saying who started it
+        with self.assertRaises(PipelineError):
+            runner(web).run(parse_skill(WEB_SKILL, "webby.md"), WEB_GRAPH, {"text": "q"})
+        # Then: nothing reached the web
+        self.assertEqual(web.queries, [])
+
+    @mark.req("REQ-RUN-001")
+    def test_every_command_path_says_it_is_a_command(self):
+        """TC-RUN-001 (F7, D-133): the entries that start runs by a command (/lookup, /search, /review, the harness, reproduce, IF-202) say started_by="command".
+
+        Example: research_chat.py, extensions/review/entry.py, harness.py, reproduce.py, run_workflow.py -> no call of core.run / runner.run without it
+        """
+        for path in COMMAND_PATHS:
+            # Given: an entry of a command, When: its calls of the runner are read
+            # Then: each says started_by="command"
+            self.assertEqual(runs_without_command(path), [], path)
+
 
     @mark.req("REQ-RUN-001")
     def test_a_chat_message_starts_no_internet_task(self):

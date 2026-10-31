@@ -100,7 +100,7 @@ def run_search(web_search, query, count=MAX_RESULTS, should_stop=None):
 
 def run_research(core, question, pipeline=None, on_event=None, should_stop=None, speak=None, on_sources=None, trust=None):
     """on_sources([{"url", "trust"}]) gets the sources behind an answered question (trust: url -> {"score"}, the table of source_trust.py), so the chat can keep them"""
-    result = core.run("research", {"question": question}, pipeline=pipeline, on_event=on_event, should_stop=should_stop)
+    result = core.run("research", {"question": question}, pipeline=pipeline, on_event=on_event, should_stop=should_stop, started_by="command")
     if result.status == "stopped":
         return ""
     if result.status != "done":

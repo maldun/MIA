@@ -48,7 +48,7 @@ class WorkflowRuns:
         if too_big:
             return self._refused(workflow, version, user, options, too_big)
         skill = dict(skill, budget={**skill["budget"], **{k: v for k, v in budget.items() if k in KEYS}}, model=self._model(skill, options))
-        result = self.core.runner.run(skill, graph, inputs, task=workflow, user=user)
+        result = self.core.runner.run(skill, graph, inputs, task=workflow, user=user, started_by="command")
         status = STATUS.get(result.status, "error")
         events = [self._event(e, result.run_id, user) for e in result.events]
         events[0].update(workflow=workflow, version=version, options=dict(options) if options else None)

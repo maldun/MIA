@@ -72,7 +72,7 @@ class RealRuns(unittest.TestCase):
         self.assertEqual(len(seen), 1)
         self.assertTrue(seen[0])
         self.assertTrue(all(s["url"].startswith("http") and 0 <= s["trust"] <= 1 for s in seen[0]))
-        self.assertEqual([s["url"] for s in seen[0]], [s["url"] for s in core.run("research", {"question": QUESTION}, pipeline="research.baseline@1").answer["sources"]])
+        self.assertEqual([s["url"] for s in seen[0]], [s["url"] for s in core.run("research", {"question": QUESTION}, pipeline="research.baseline@1", started_by="command").answer["sources"]])
 
     def test_sources_pages_and_trust(self):
         core = self.core(TR.Scripted("reader"))
