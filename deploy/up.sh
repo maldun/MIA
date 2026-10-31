@@ -12,11 +12,15 @@ cd "$HERE"
 envval() { local v="${!1:-}"; if [ -z "$v" ] && [ -f .env ]; then v="$(sed -n "s/^$1=//p" .env | tail -1)"; fi; echo "${v:-$2}"; }
 # the settings of THIS machine (the login, ...) are a local file next to the tracked config; compose mounts it, so it must exist
 [ -f setup_cfg.local.json ] || echo '{}' > setup_cfg.local.json
-if [ ! -f .env ]; then
-  echo "SEARXNG_SECRET=$(openssl rand -hex 32)" > .env
-  chmod 600 .env
-  echo "deploy/.env written (the SearXNG secret of this machine)"
+# the owner may have written .env first (OLLAMA_URL ..., deploy/README.md): the secret is added when the key is missing, not only when the file is (REQ-OPR-001)
+if ! grep -q '^SEARXNG_SECRET=' .env 2>/dev/null; then
+  [ -f .env ] || { touch .env; chmod 600 .env; }
+  [ -z "$(tail -c1 .env)" ] || echo >> .env          # a file written by hand may lack the last newline
+  echo "SEARXNG_SECRET=$(openssl rand -hex 32)" >> .env
+  echo "deploy/.env: the SearXNG secret of this machine written"
 fi
+# the project name may come from .env as the other settings do (README "Settings in .env"); the environment wins
+MIA_PROJECT="$(envval MIA_PROJECT mia)"
 # deploy/up.sh character [path/to/mia-character-web-N.zip]   put the character into the stack: the zip (from your Drive) is checked against ui/character/manifest.json
 # and unpacked to ui/godot/build/web, which the container mounts; MIA is then recreated so that it sees the new folder
 if [ "${1:-}" = "character" ]; then
