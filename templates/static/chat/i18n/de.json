@@ -138,6 +138,7 @@
   "workspace.new.tasks": "Neue Aufgabe",
   "workspace.new.memos": "Neue Notiz",
   "workspace.new.memory": "Neuer Eintrag",
+  "workspace.due": "Fällig (MIA sagt die Aufgabe zu dieser Zeit)",
   "workspace.source": "Quelle (woher weiß sie das?)",
   "workspace.add": "Hinzufügen",
   "workspace.save": "Speichern",

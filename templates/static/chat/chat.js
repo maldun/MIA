@@ -374,8 +374,17 @@ export function initChat({ list, empty, jump, olderButton, socket, render, t, or
     const placed = place({ ...message, local: undefined });
     afterAdd(placed, true);
   });
+  // IF-101: place 1 is answered next, so every start moves each waiting message up one place, whoever's message is answered (F1);
+  // a message without a place (an older server) counts as place 1
+  function moveQueue() {
+    for (const m of messages.filter((w) => w.local === 'queued')) {
+      const next = (m.position ?? 1) - 1;
+      place(next >= 1 ? { id: m.id, position: next } : { id: m.id, local: undefined });
+    }
+  }
+
   socket.on('chat_start', (data) => {
-    for (const m of messages) if (m.local === 'queued') place({ id: m.id, local: undefined });
+    moveQueue();
     const placed = place({ id: data.id, role: 'assistant', text: '', streaming: true, created: data.created, status: 'done' });
     afterAdd(placed, true);
   });

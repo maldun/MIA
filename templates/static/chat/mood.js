@@ -1,6 +1,8 @@
 // The mood line: the server decides what it says (chat_status.mood), the page shows it on every device.
 // Crossfade of about 250 ms when the text changes, no flicker when it stays the same; screen readers get the new
 // text at most every 30 seconds (a separate live region, not every activity change).
+import { modelLabel } from './chat-model.js';
+import { variantLabel } from './panels-model.js';
 
 const FADE_MS = 125;
 const ANNOUNCE_MS = 30000;
@@ -58,4 +60,26 @@ export function initMood({ chip, emoji, text, live, enabled = true, win = window
       }
     },
   };
+}
+
+/** the server's status (IF-101 chat_status) drives the mood line, the busy state of the composer and the chip of the model (REQ-CLV-008) */
+export function followStatus({ socket, mood, chip, composer = () => null, t }) {
+  socket.on('chat_status', (status) => {
+    mood.update(status.mood, status.activity);
+    composer()?.setBusy(status.busy && (status.activity === 'thinking' || status.activity === 'speaking'));
+    const label = modelLabel(status.profile);
+    chip.hidden = !label;
+    chip.textContent = label ? t(`chip.${label}`) : '';
+    chip.title = status.model ?? '';
+  });
+}
+
+/** the label of the character variant next to the mood line, and the outfit for the character; null = the chat's variant (REQ-CLV-013) */
+export function followVariant({ socket, label, character, t }) {
+  socket.on('variant', (data) => {
+    const text = variantLabel(data?.name, t);
+    label.textContent = text;
+    label.hidden = !text;
+    character.setVariant(data?.name);
+  });
 }
