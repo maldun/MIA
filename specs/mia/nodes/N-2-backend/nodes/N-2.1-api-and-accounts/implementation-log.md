@@ -101,3 +101,13 @@ Open for Verify and the owner:
 4. IF-104 bounds (500 nodes, 200 ms) are a proposal in the contract; not enforced.
 5. `GET /api/<anything>` unknown to other routes now answers JSON 404 `unknown_kind`.
 6. `library.py` imports sqlite3 for its index (AC-15 reading; not N-2.1).
+
+## A-52 and TC-API-013: the container alone (2026-10-31, branch v1-n21b; D-147, finding V-0 / F-7)
+| Requirement | What was built | Tests |
+|---|---|---|
+| REQ-API-013 | nothing in MIA (the start stays as it is, D-147). Draft **A-52**: `specs/mia/contract-drafts/tests/helpers/mocks/if_103_model_server_http.py`, an Ollama-shaped HTTP stand-in of IF-103 (standard library, deterministic: `/`, `/api/version`, `/api/tags`, `/api/ps`, `/api/show`, `/api/pull`, `/api/chat` and `/api/generate` streamed or not, `format` answered with the schema's required keys, `/_calls` for the test); note `specs/mia/amendments/A-52/A-52-note.md`, install `tools/apply_amendment_a52.sh` | `tests/test_container_alone.py` (2, TC-API-013, stage 3): a pod on 127.0.0.1 with the stand-in and `localhost/mia:latest` as it is (config `setup_cfg.compose.json` with `ollama_wait` 20 s, `MIA_OLLAMA_HOST` on the stand-in); `/` is the chat page; the stand-in saw `/api/tags` and `/api/chat` (the calibration); the pod is removed. Skips without podman, the image or the installed stand-in (here: skipped, A-52 not installed) |
+
+Checked first with the client `ollama` 0.6.3 of the image against the stand-in (list, show, pull, chat streamed and with a schema, generate unload and streamed, 404 for an unknown model). Scratch copy (git files + drafts, `apply_amendment_a52.sh --do`): **green**, 2 tests in 11 s. **Red**: the installed stand-in replaced by a process that answers nothing: error after 32 s ("the mia container stopped before the page was served": MIA waits 20 s, the calibration fails, the container exits); restored: green again. No pod or container left. The row TC-API-013 of `test-spec.md` names the stand-in and the checks.
+Note: `install_lama.py` reads `setup_cfg.json` without the local overlay (`setup_cfg.local.json`), so the test writes `ollama_wait` into a copied config (a local file did not shorten the wait). Not changed (N-4.2's start; no requirement asks for it).
+Local coder: `n21b-container-alone`, verdict fixed (`:` became `:=` in two mount arguments, a filter dropped from a comprehension, `self` missing twice; found by the line compare and the run).
+Until A-52 is installed TC-API-013 skips; installed, it is the evidence of AC-29.
