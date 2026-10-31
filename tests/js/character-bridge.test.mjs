@@ -64,6 +64,7 @@ test('TC-CHV-001: a character that says failed hides the iframe, is reported onc
 
 test('TC-CHV-001: no answer within the load timeout counts as failed', () => {
   const { events, timers, frame } = setup();
+  assert.equal(LOAD_TIMEOUT_MS, 30000, 'IF-111 v3 (A-58): the page waits at most 30 s for ready');   // R3 of the re-verification (D-167)
   assert.equal(timers[0].ms, LOAD_TIMEOUT_MS);
   timers[0].fn();
   assert.equal(events.failed.length, 1);
