@@ -124,8 +124,8 @@ def load_suite(folder):
     return Suite(name, meta.get("description", ""), target, cases, folder)
 
 
-def list_suites(root, holdout=True):
-    """the suites of a folder (a broken one as its SuiteError); holdout=False leaves the folders *.holdout unread (REQ-EVL-002)"""
+def list_suites(root, holdout=False):
+    """the suites of a folder (a broken one as its SuiteError); the folders *.holdout stay unread unless holdout=True (REQ-EVL-002, D-166: Verify only)"""
     suites = []
     if os.path.isdir(root):
         for name in sorted(os.listdir(root)):
