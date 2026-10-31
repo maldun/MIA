@@ -10,7 +10,7 @@ cd /home/maldun/prog/Python/MIA/.claude/worktrees/goal-v1
 
 ## A. N-1.3 Voice playback, by ear (the status waits for these)
 
-Start the test page once: `bash tools/start_testing.sh start chat-on-stub`, then open `http://127.0.0.1:8685/?character=0` (stop it afterwards with `bash tools/start_testing.sh stop chat-on-stub`).
+**Start every stage from the goal-v1 worktree** (`cd /home/maldun/prog/Python/MIA/.claude/worktrees/goal-v1`): a stage serves the folder it is started from, and from the main folder that is master's old page (D-157; the likely cause of A4's first result). Start the test page once: `bash tools/start_testing.sh start chat-on-stub`, then open `http://127.0.0.1:8685/?character=0` (stop it afterwards with `bash tools/start_testing.sh stop chat-on-stub`).
 
 **How voice reaches the stub (corrected 2026-10-31):** the stub has no voice synthesis, so "speak again" makes no sound there. A line arrives the way the speech process delivers it, by an upload. **Click once into the page first**: the click lets the browser play sound and makes this page the one that holds the voice. Then send a line from a terminal:
 
