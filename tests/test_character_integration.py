@@ -94,6 +94,18 @@ class PresetExpressorTest(unittest.TestCase):
         self.assertEqual(expressor.express("hello"), "greet")
         self.assertEqual(expressor.express("plain"), "plain")  # default: the key itself
 
+    @mark.req("REQ-CHV-006")
+    def test_shocked_is_an_expression_with_its_own_preset(self):
+        """REQ-CHV-006 (D-143): `shocked` is an expression of MIA, so the expressor sends its preset and not the neutral fallback.
+
+        Example: express("shocked") sends "shocked"
+        """
+        # Given the shipped expressions
+        # When the shocked reaction is expressed
+        shown = self.expressor.express("shocked")
+        # Then its own preset is sent
+        self.assertEqual((shown, self.sent), ("shocked", ["shocked"]))
+
     @mark.req("REQ-CHV-002")
     @mark.req("IF-111")
     def test_unknown_expression_does_not_crash_and_shows_neutral(self):

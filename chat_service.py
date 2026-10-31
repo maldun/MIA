@@ -128,7 +128,7 @@ class ChatService:
     def __init__(self, emit, log, mood, run_exchange, run_command=None, model_info=None, queue_size=1, user_limit=0,
                  rate_limit=(10, 60), spawn=None, clock=time.monotonic, votes=None, wall_clock=time.time,
                  behaviours=None, reputable=0.6, repair=None, remember=None, review_timeout=1800,
-                 tasks=None, skill_options=None, prepare_task=None, argument_commands=None, files=None, unavailable=()):
+                 tasks=None, skill_options=None, prepare_task=None, argument_commands=None, files=None, unavailable=(), react=None):
         self._emit = emit
         self._tasks = tasks if tasks is not None else TaskRegistry()      # REQ-WFM-029: the tasks (lookup, search, review, ...) register themselves, the core names none of them
         self._unavailable = {str(n).lower() for n in unavailable}         # ids of extensions that did not load: their command says so instead of going to the model
@@ -157,12 +157,14 @@ class ChatService:
         self._repair = repair                  # text -> the text with the violations of the behaviour rules repaired (behaviour.py); None = answers are streamed as they come
         self._behaviours = behaviours          # () -> the names of the behaviours that can be voted on (REQ-CHA-017); read at every use, the list may change; None: no list
         self._remember = remember              # (account, message_id, text) -> ids: the structured memory (REQ-CHA-011); called after a plain chat turn is done, None = off
+        self._react = react                    # (expression) -> None: the character reacts outside an answer, e.g. shocked after a minus (REQ-CHV-006); None = no character
         self._reputable = reputable            # a source with at least this trust is reputable (owner 2026-10-27: a fact has at least one reputable source)
         self._lock = threading.RLock()
         self._queue = collections.deque()
         self._running = False
         self._current = None
         self._stop = threading.Event()
+        self._stop_next = False                       # a stop that came before the worker took the first message
         self._unpaused = threading.Event()
         self._unpaused.set()
         self._hits = collections.defaultdict(collections.deque)
@@ -266,7 +268,10 @@ class ChatService:
     def stop(self):
         """stops the running answer (the text received so far stays)"""
         with self._lock:
-            running = self._running and self._current != "command"
+            kind = self._current or (self._queue[0][0] if self._queue else None)
+            running = self._running and kind not in (None, "command")
+            if running and self._current is None:
+                self._stop_next = True                # the worker has not taken the message yet: it would clear the stop (REQ-CHA-004)
         if running:
             self._stop.set()
             self._unpaused.set()                      # a paused task wakes up and sees the stop
@@ -396,6 +401,11 @@ class ChatService:
         self._emit("score", score)
         self.mood.set_score(score["overall"])          # the feedback shifts the general mood (REQ-CHA-010)
         self.publish_status()
+        if value == -1 and self._react is not None:
+            try:
+                self._react("shocked")                 # every minus hurts her a little (REQ-CHV-006, D-143); the vote is kept even if the character cannot react
+            except Exception:
+                pass
         return {"stored": True, "score": score}
 
     # --- tasks and memos read back from their records (REQ-CHA-019) ---------------------------------------------------
@@ -591,7 +601,9 @@ class ChatService:
                     break
                 kind, text, _author, speaker, message_id, options = self._queue.popleft()
                 self._current, self._author = kind, _author
-                self._stop.clear()
+                if not self._stop_next:
+                    self._stop.clear()
+                self._stop_next = False
             try:
                 self._do_command(text) if kind == "command" else self._do_chat(text, kind, speaker, message_id, options)
             except Exception as exc:       # the worker must survive anything
@@ -671,7 +683,9 @@ class ChatService:
         status = "done"
         try:
             # the model knows who writes (accounts only); the log keeps the plain text. The argument of a task is data for a tool and stays as it is
-            if entry is None:
+            if self._stop.is_set():
+                final = None                                  # stopped before it started: the model is not asked
+            elif entry is None:
                 final = self._run_exchange("[%s] %s" % (speaker, text) if speaker else text, on_delta, on_emotion, self._stop.is_set)
             else:
                 handed = {"ask": self.ask, "options": options or {}, "monitor": self._monitor, "files": self._file_putter(task, message_id), "reports": self._report_saver(entry, message_id, model)}
