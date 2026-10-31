@@ -97,6 +97,25 @@ if [ "${1:-}" = "owner" ]; then
   echo "Then log in at  https://localhost:8586  (a password is not accepted over plain http in the stack; the browser asks once about the certificate)"
   exit 0
 fi
+# the first start offers the owner account once (REQ-OPR-002, D-136): on a terminal it asks for the name (empty = later), without one it prints the command.
+# The marker MIA_FIRST_ACCOUNT_OFFERED=1 in .env keeps later starts quiet, also when no account was made (the warning of  login on  stays).
+offer_first_account() {
+  [ "$(envval MIA_FIRST_ACCOUNT_OFFERED)" = 1 ] && return 0
+  local engine container name=""
+  engine="$(command -v podman || command -v docker)"
+  container="$(mia_container)"
+  [ -n "$container" ] || return 0
+  [ "$("$engine" exec "$container" "${ACCOUNT_TOOL[@]}" list --dir "$ACCOUNT_DIR" 2>/dev/null)" = "no accounts" ] || return 0
+  echo "MIA_FIRST_ACCOUNT_OFFERED=1" >> .env
+  if [ -t 0 ]; then
+    read -r -p "No account yet. Make the owner account now? Name (empty = later): " name || name=""
+  fi
+  if [ -n "$name" ]; then
+    bash "$HERE/up.sh" owner "$name" || true
+  else
+    echo "No account yet. Make the owner account when you like:  deploy/up.sh owner NAME"
+  fi
+}
 # deploy/up.sh memories [folder]   take over MIA's memories of an old installation (memories.json, long_time_history.json from the MIA folder or the given folder)
 # MIA is stopped first (it saves its history when it stops), the files are copied over the ones in the data volume, then MIA starts again. The files the
 # container had are kept next to the new ones as <name>.container-previous.
@@ -272,8 +291,14 @@ if [ "$BIND" = "127.0.0.1" ]; then
 fi
 echo "  log: deploy/up.sh logs -f mia      stop: deploy/up.sh down"
 echo -n "waiting for the page "
+READY=""
 for _ in $(seq 1 60); do
-  if curl -s -o /dev/null -m 2 "http://127.0.0.1:$PORT/"; then echo " ready."; exit 0; fi
+  if curl -s -o /dev/null -m 2 "http://127.0.0.1:$PORT/"; then READY=1; break; fi
   echo -n "."; sleep 2
 done
-echo " not yet. A model download can take long, and MIA waits for Ollama before its page starts; look at: deploy/up.sh logs -f mia"
+if [ -n "$READY" ]; then
+  echo " ready."
+else
+  echo " not yet. A model download can take long, and MIA waits for Ollama before its page starts; look at: deploy/up.sh logs -f mia"
+fi
+offer_first_account

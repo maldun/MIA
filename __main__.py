@@ -30,6 +30,8 @@ from .shutdown import install_term_handler, stop_process, graceful_shutdown, clo
 
 from .constants import CFG_FILE, LOG_FNAME
 from .config import ensure as ensure_config, warning as config_warning
+from . import first_account
+from .constants import ACCOUNTS_DIR_KEY
 fpath = os.path.split(__file__)[0]
 cfg_file = os.path.join(fpath,CFG_FILE)
 if os.path.basename(cfg_file) == "setup_cfg.json":
@@ -51,6 +53,9 @@ if __name__ == "__main__":
     https_proc = None
     speak_proc = None
     tailscale_started = False
+    # REQ-OPR-002 (D-136): the first start offers the owner account once (the page cannot make the first one); the marker lives in the data folder
+    first_account.offer(os.path.join(fpath, "data"),
+                        os.path.join(fpath, cfg.get(ACCOUNTS_DIR_KEY, "data/db")))
     # Ctrl+C, SIGTERM and the commands /break! and /goodnight! all end in the same orderly shutdown below
     install_term_handler()
     try:
