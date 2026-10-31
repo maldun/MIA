@@ -43,6 +43,19 @@ class GraphRules(unittest.TestCase):
                 self.assertEqual(violation(document)[0], rule)
 
     @mark.req("REQ-GTB-002")
+    def test_an_unknown_kind_or_an_empty_id_breaks_node_identity(self):
+        """Verify F4 (D-160): a kind other than process or data, a missing kind, an empty id and a missing id are each node_identity.
+
+        Example: {"id": "a", "kind": "tool"} -> ("node_identity", "a"); {"id": "", "kind": "data"} -> ("node_identity", "").
+        """
+        # Given
+        nodes = [{"id": "a", "kind": "tool"}, {"id": "a"}, {"id": "", "kind": "data"}, {"kind": "data"}]
+        # When
+        named = [violation({"nodes": [node], "edges": []}) for node in nodes]
+        # Then
+        self.assertEqual(named, [("node_identity", "a"), ("node_identity", "a"), ("node_identity", ""), ("node_identity", None)])
+
+    @mark.req("REQ-GTB-002")
     def test_a_cycle_is_named_by_its_ids_with_the_first_repeated(self):
         """TC-GTB-002: p->d->p is the cycle [p, d, p]; a self-loop of a process is adjacent processes, not a cycle."""
         self.assertEqual(violation(doc([("p", "process", {}), ("d", "data", {})], [("p", "d"), ("d", "p")])), ("cycle", ["p", "d", "p"]))
