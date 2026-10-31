@@ -4,6 +4,7 @@ Run log (run_log.py, events.py, run_explain.py, reproduce.py and run_events.py, 
 """
 import ast
 import os
+import re
 import sys
 import tempfile
 import unittest
@@ -36,6 +37,17 @@ class RunLogFiles(unittest.TestCase):
         # Given the five files of the Run log, when their imports are read, then none is a database driver
         for path in RUN_LOG_CODE:
             self.assertEqual(sorted(imported(path) & set(DRIVERS)), [], path)
+
+    def test_the_model_part_of_the_run_log_names_the_provider_of_if_401(self):
+        """TC-LOG-005 (D-144, F5 of the N-2.4.3 verification): the part `runLog` of specs/mia/architecture.sysml names run_events.py, the provider of IF-401, among its modules.
+        Example: modules = ("events.py", "run_log.py", "evidence.py", "run_events.py") contains run_events.py."""
+        # Given the system model
+        with open(os.path.join(REPO, "specs", "mia", "architecture.sysml"), encoding="utf-8") as handle:
+            model = handle.read()
+        # When the modules of the part runLog are read
+        modules = re.search(r"part runLog \{.*?modules = \(([^)]*)\)", model, re.S).group(1)
+        # Then run_events.py is one of them
+        self.assertIn('"run_events.py"', modules)
 
     def test_the_events_of_a_run_are_appended_to_a_file_and_none_is_rewritten(self):
         """TC-LOG-005 (A-28): a finished run, a second run and a feedback line only add to the end of the monthly file.

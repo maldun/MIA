@@ -124,3 +124,19 @@ Tests in the image (`localhost/mia:latest`, `--network none`); feedback, not ver
 - Checked: no production payload carries a number under a secret-like name (grep of the code outside `tests/`, `specs/`), so no count goes missing.
 - Green after: `test_events.py` (23), `test_run_events.py` (15), contract `test_if_401_run_events.py` (10), `test_pipeline.py` (26), `test_content_store.py` (12), `test_run_explain.py` (16),
   `test_run_log_node.py` (4), `test_runner_interfaces.py` (8).
+
+### F5: the model part `runLog` names `run_events.py` – T-05 (model), REQ-LOG-005, IF-401
+- Test: `tests/test_run_log_files.py::test_the_model_part_of_the_run_log_names_the_provider_of_if_401` reads the modules of the part `runLog` from `specs/mia/architecture.sysml`.
+  Red before (`'"run_events.py"' not found in '"events.py", "run_log.py", "evidence.py"'`), green after.
+- Fix: `architecture.sysml` part `runLog` @Implementation modules += `run_events.py` (line 518). `bash tools/check_sysml.sh specs/mia/architecture.sysml`: ok, 0 errors, 0 warnings;
+  `python3 -I tools/check_sysml_model.py .`: OK.
+
+### Still open (recorded, not part of D-144)
+- F7: the IF-101 suite does not check v11 (the account of an answer without a status block); an amendment (protected suite).
+- F8: the node's `test-spec.md` has no `## Scenarios` section (trace_check M39, 22 nodes); Phase 2.
+- F9: the IF-401 suite fails test-doc rules T2 and T3 (D-138 (4)); an amendment later.
+- Open question of F3: the empty text under a secret-like name (options above).
+
+### Full suite before the hand-over (2026-10-31)
+All 156 `tests/test_*.py`, one container each (`localhost/mia:latest`, `--network none`), this branch against goal/v1 4c18cde (git archive): the same two fail on both,
+`test_amendment_report` (no git in the image) and `test_harness` (rt_edit); no new failure. Ready for re-verification (D-144).
