@@ -9,7 +9,9 @@ import unittest
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.dirname(HERE))
+sys.path.insert(0, os.path.join(HERE, "helpers"))
 
+from markers import mark                          # noqa: E402
 from pipeline import Runner                       # noqa: E402
 from pipeline_model import OllamaModel            # noqa: E402
 from skill_store import parse_skill               # noqa: E402
@@ -59,6 +61,7 @@ def run(model, **budget):
 
 
 class RunnerBudgetTests(unittest.TestCase):
+    @mark.req("REQ-RUN-008")
     def test_model_calls_over_the_budget_end_the_run_before_the_next_call(self):
         """TC-RUN-008 (calls): with a budget of 2 model calls the third step is not asked; the run ends with budget, names calls and keeps the outputs.
         Example: three model steps, budget {calls: 2} -> 2 calls, status budget, missing ["calls"], output a and b."""
@@ -72,6 +75,7 @@ class RunnerBudgetTests(unittest.TestCase):
         self.assertEqual((result.context["a"], result.context["b"]), ("ok", "ok"))
         self.assertEqual(result.cost["calls"], 2)
 
+    @mark.req("REQ-RUN-008")
     def test_tokens_reported_by_the_model_end_the_run_when_they_pass_the_budget(self):
         """TC-RUN-008 (tokens): 60 tokens a call and a budget of 100 tokens: the second call passes the budget, the third is not asked.
         Example: tokens 60 + 60 = 120 > 100 -> status budget, missing ["tokens"], cost tokens 120."""
@@ -84,39 +88,54 @@ class RunnerBudgetTests(unittest.TestCase):
         self.assertEqual((result.status, result.missing), ("budget", ["tokens"]))
         self.assertEqual(result.cost["tokens"], 120)
 
+    @mark.req("REQ-RUN-008")
     def test_a_model_without_a_count_is_estimated_by_characters(self):
         """TC-RUN-008 (estimate): a model that reports no count is estimated at one token for four characters of prompt and answer, rounded up.
         Example: prompt 'Say something about towers.' (27 characters) + 'ok' (2) = 29 characters -> 8 tokens a call, 24 for three."""
+        # Given a model without a token count, When three steps run
         result = run(TextModel())
+        # Then the run is done and counts 8 estimated tokens a call
         self.assertEqual(result.status, "done")
         self.assertEqual(result.cost["tokens"], 24)
 
+    @mark.req("REQ-RUN-008")
     def test_a_run_within_its_budgets_reports_what_it_spent(self):
         """TC-RUN-008 (cost): a done run returns its cost with the four budget names and no missing budget.
         Example: three model steps with 10 tokens each -> steps 3, calls 3, tokens 30, missing []."""
+        # Given a model of 10 tokens a call and budgets it stays inside
+        # When the run ends
         result = run(CountingModel(10), calls=5, tokens=1000)
+        # Then it is done and its cost names the four budgets
         self.assertEqual((result.status, result.missing), ("done", []))
         self.assertEqual(set(result.cost), {"steps", "seconds", "calls", "tokens"})
         self.assertEqual((result.cost["steps"], result.cost["calls"], result.cost["tokens"]), (3, 3, 30))
 
+    @mark.req("REQ-RUN-008")
     def test_steps_and_seconds_are_named_too(self):
         """TC-RUN-008 (steps): the budget of steps ends the run as before and is now named in missing.
         Example: budget {steps: 1} -> one step runs, status budget, missing ["steps"]."""
+        # Given a budget of one step, When three steps should run
         result = run(TextModel(), steps=1)
+        # Then the budget of steps ends the run and is named
         self.assertEqual((result.status, result.missing, result.cost["steps"]), ("budget", ["steps"], 1))
 
 
 class OllamaUsageTests(unittest.TestCase):
+    @mark.req("REQ-RUN-008")
     def test_the_ollama_model_reports_prompt_and_answer_tokens(self):
         """TC-RUN-008 (Ollama count): the tokens of a call are prompt_eval_count (in) and eval_count (out) of the server's reply; a reply without them gives None
-        (the runner estimates). Example: prompt_eval_count 120, eval_count 30 -> tokens_in 120, tokens_out 30."""
+        (the runner estimates).
+        Example: prompt_eval_count 120, eval_count 30 -> tokens_in 120, tokens_out 30."""
+        # Given a server that counts the first reply and not the second
         replies = [{"message": {"content": "ok"}, "prompt_eval_count": 120, "eval_count": 30}, {"message": {"content": "ok"}}]
 
         class Client:
             def chat(self, **kwargs):
                 return replies.pop(0)
 
+        # When the model is asked twice
         model = OllamaModel(Client(), lambda profile: None, lambda: ("gemma4:12b-it-qat", {}))
+        # Then the first call has the server's count, the second none
         self.assertEqual(model.chat_with_usage([{"role": "user", "content": "hi"}]), ("ok", {"tokens_in": 120, "tokens_out": 30}))
         self.assertEqual(model.chat_with_usage([{"role": "user", "content": "hi"}]), ("ok", None))
 
