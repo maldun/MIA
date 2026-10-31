@@ -33,6 +33,8 @@ def offer(data_dir, accounts_dir, terminal=None, ask=input, show=print, run=subp
     name = ask("No account yet. Make the owner account now? Name (empty = later): ").strip() if terminal else ""
     if name:
         run([sys.executable, TOOL, "create", name, "--dir", accounts_dir])
+        # the start does not change the configuration; it says how (D-139)
+        show('The login is still off: turn it on with "accounts_enabled": true and "owner_account": "%s" in setup_cfg.json.' % name)
     else:
         show("No account yet. Make the owner account when you like:  python tools/accounts_cli.py create NAME --dir %s" % accounts_dir)
     return True

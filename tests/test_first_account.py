@@ -95,6 +95,20 @@ class FirstAccountOffer(unittest.TestCase):
         self.assertEqual(self.runs, [[sys.executable, TOOL, "create", "anna", "--dir", self.accounts]])
 
     @mark.req('REQ-OPR-002')
+    def test_after_the_owner_account_one_line_says_how_to_turn_the_login_on(self):
+        """TC-OPR-002 (D-139): `python -m MIA` does not turn the login on itself; after making the account it prints one line that says how.
+
+        Example: answer "anna" -> one line with "accounts_enabled": true and "owner_account": "anna"
+        """
+        # Given: an empty file store of accounts (setUp)
+        # When: the owner types a name on a terminal
+        self.offer(terminal=True, answer="anna")
+        # Then: one line names the two settings, with the owner's name
+        self.assertEqual(len(self.shown), 1, self.shown)
+        self.assertIn('"accounts_enabled": true', self.shown[0])
+        self.assertIn('"owner_account": "anna"', self.shown[0])
+
+    @mark.req('REQ-OPR-002')
     def test_an_empty_answer_leaves_it_for_later(self):
         """TC-OPR-002: an empty answer makes no account; the line with the command is printed and the marker is left.
 
