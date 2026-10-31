@@ -12,7 +12,7 @@ A leaf. Each task is small, vertical, fits one session and starts from a red tes
 | T-02 Step-by-step account | REQ-LOG-001 | TC-LOG-001 | T-01 |
 | T-03 Replay and comparison | REQ-LOG-003 | TC-LOG-003 | T-01 |
 | T-04 Statements traceable to a query | REQ-LOG-004 | TC-LOG-004 | T-01 |
-| T-05 State only through the storage interface | REQ-LOG-005 | TC-LOG-005 | T-01 |
+| T-05 Run events as append-only files, no database driver (A-28) | REQ-LOG-005 | TC-LOG-005 | T-01 |
 
 ## Tasks
 
@@ -52,11 +52,11 @@ A leaf. Each task is small, vertical, fits one session and starts from a red tes
 - Done when: the listed tests are green and all other tests are unchanged
 - Notes: –
 
-### T-05: State only through the storage interface
+### T-05: Run events as append-only files, no database driver (A-28)
 - Implements: REQ-LOG-005
 - Tests to turn green: TC-LOG-005
 - Touches: `run_log.py`, `events.py`, `run_explain.py`, `reproduce.py`
 - Must not touch: tests/acceptance/, tests/helpers/, tests/smoke/, tests/integration/, benchmarks/, contracts/, eval/suites/, eval/baselines/
 - Depends on: T-01
 - Done when: the listed tests are green and all other tests are unchanged
-- Notes: Needs the mock of IF-102.
+- Notes: Since A-28 (D-107) the run events are append-only files of their own, not state in the storage; the check is that the run log's code uses no database driver (TC-LOG-005, D-138).

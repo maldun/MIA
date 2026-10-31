@@ -373,6 +373,26 @@ class ServiceTest(unittest.TestCase):
         self.service._run_exchange = original
         self.assertFalse(self.service.stop())
 
+    def test_a_chat_answer_keeps_its_steps_for_the_account(self):
+        """TC-LOG-001, REQ-LOG-001 (D-138): the steps of every answer are kept for its account, also of a skill without a status block (the chat); the
+        status block itself still appears only for skills that want one.
+
+        Example: run_start (show false), step "thinking about it" -> account [{"seq": 1, "plain": "thinking about it"}], no `pipeline` in the record
+        """
+        # Given: an exchange whose pipeline does not show a status block and reports one step
+        def steps():
+            self.service.pipeline_event({"kind": "run_start", "plain": "talk", "payload": {"show": False}})
+            self.service.pipeline_event({"kind": "start", "plain": "thinking about it"})
+        self.mode["hook"] = steps
+        # When: a message is answered
+        self.service.send("Hi")
+        self.assertTrue(self.idle())
+        answer = [p for e, p in self.events if e == "chat_done"][0]
+        # Then: the account has the steps, and no status block was sent or kept
+        self.assertEqual(self.service.account(answer["id"]), [{"seq": 1, "plain": "talk"}, {"seq": 2, "plain": "thinking about it"}])
+        self.assertNotIn("chat_pipeline", self.names())
+        self.assertNotIn("pipeline", self.log.history()[0][-1])
+
     def test_the_author_of_the_running_message_is_known(self):
         """TC-LOG-001 (F9 of the N-2.4.1 re-verification, D-129): while an exchange runs, the service names the account that wrote the message; "page" without an account.
 
