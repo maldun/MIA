@@ -192,6 +192,8 @@ export function initSound({ audio, socket, character, storage, muteToggle, muteL
   });
   player.onSpeaking(speaking);
   player.onBlocked = () => { hint.hidden = false; };
+  // REQ-VPB-003 (A-50): a missing line is skipped; the report ends here, in the browser console, and nothing is shown to the user
+  player.onLineError = (id) => win.console.warn(`MIA voice: line skipped, it could not be played: ${id}`);
 
   function applyAudio() {
     player.mute(muted);
@@ -203,7 +205,8 @@ export function initSound({ audio, socket, character, storage, muteToggle, muteL
   }
 
   socket.on('audio_reload', (data) => {
-    player.enqueue({ url: data?.url ?? '/audio/out.wav', serial: data?.serial });
+    const url = data?.url ?? '/audio/out.wav';
+    player.enqueue({ id: url, url, serial: data?.serial });            // every line has its own file: the url names it
   });
 
   // --- one page plays ----------------------------------------------------------------------------------

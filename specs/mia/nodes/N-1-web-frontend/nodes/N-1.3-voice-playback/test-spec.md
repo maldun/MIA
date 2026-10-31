@@ -10,7 +10,7 @@ Tests of this part alone against the mocks of its neighbours (the mock of IF-101
 | --- | --- | --- | --- | --- | --- | --- |
 | TC-VPB-001 | REQ-VPB-001 | Component | 1 | unit test in `tests/js/` with the mocks of the interfaces (`node --test`) | AC-13: with 5 scripted audio chunks the playback order equals the arrival order and no sentence overlaps | as stated |
 | TC-VPB-002 | REQ-VPB-002 | Component | 1 | unit test in `tests/js/` with the mocks of the interfaces (`node --test`) | AC-13: after mute no audio plays on this device; a second device still plays | as stated |
-| TC-VPB-003 | REQ-VPB-003 | Component | 1 | unit test in `tests/js/` with the mocks of the interfaces (`node --test`) | AC-13: a line with a missing file produces one report event and no error shown; the conversation continues | as stated |
+| TC-VPB-003 | REQ-VPB-003 | Component | 1 | unit test in `tests/js/` with the mocks of the interfaces (`node --test`) | AC-13: a line with a missing file produces one report through `onLineError` (the page: one browser console warning) and no error shown; the conversation continues; no backend event (A-50) | as stated |
 | TC-VPB-004 | REQ-VPB-004 | Component (browser) | 2 | a headless browser against the stub server `ui/tools/chat_stub_server.py` and the mocks of the interfaces | AC-5: a browser test records every request of a session and finds 0 outside the host | exact |
 | TC-VPB-005 | REQ-VPB-005 | System | 3 | the compose stack, a real browser | AC-29: the chat page loads from the backend container; the frontend has no container of its own | as stated |
 

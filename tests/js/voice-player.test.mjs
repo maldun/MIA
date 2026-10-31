@@ -371,3 +371,13 @@ test('TC-VPB-002: a device that was muted stays muted after a reload and drops t
   await flush(); await flush();
   assert.deepEqual(p.audio.started, [{ url: '/audio/b.wav', audible: true }]);
 });
+
+test('TC-VPB-003: on the page a missing line is reported once in the browser console, no error is shown, and the next line plays (F2)', async () => {
+  const p = page({ missing: ['/audio/a.wav'] });
+  p.server('audio_reload', reload('a', 1)); p.server('audio_reload', reload('b', 2));
+  await flush(); await flush(); await flush();
+  assert.equal(p.warnings.length, 1);
+  assert.match(p.warnings[0], /\/audio\/a\.wav/);
+  assert.equal(p.els.hint.hidden, true);
+  assert.deepEqual(ids(p.audio), ['b']);
+});
