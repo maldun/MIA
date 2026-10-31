@@ -1,4 +1,4 @@
-# Hand-over for the next session (written 2026-10-31, night; updated late night): G-V1, verification queue, merge round 4
+# Hand-over for the next session (written 2026-10-31, night; updated late night): G-V1, verification queue, merge round 4 (superseded by `handover-2026-11-01.md`)
 
 This is the newest hand-over. It continues `handover-2026-10-31-pm.md`, which has the owner's rules, the lessons and how to run things; read that first. Then read `CLAUDE.md`, `specs/mia/goals/G-V1/goal.md`, `specs/mia/review-log.md` (**D-137 to D-169**), and the logs and reports of the node you work on. The checks only the owner can do are in `specs/mia/owner-checklist-2026-10-31.md` (section A done; B and C open).
 
