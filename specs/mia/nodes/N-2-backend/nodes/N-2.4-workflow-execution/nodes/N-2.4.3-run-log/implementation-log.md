@@ -105,3 +105,10 @@ Tests in the image (`localhost/mia:latest`, `--network none`); feedback, not ver
 - Red before: on a scratch copy with the mutant of F2 (`reproduce.py` `differences = []`) the test fails (the old one passed); green on the real code. No production code changed: the
   code was right, the test was the gap.
 - Green after: `test_run_log_node.py` (4), `test_run_explain.py` (16).
+
+### F4: the comparison of two runs – T-03, REQ-LOG-003, IF-401
+- Tests: `tests/test_run_events.py::test_the_same_types_with_another_payload_differ` (same types, another `run_end` payload -> different at 2) and
+  `::test_an_extra_event_at_the_end_is_a_difference` (one more event at the end -> `length 2 != 3`, and `3 != 2` the other way).
+- Red before: on scratch copies, the mutant "compare by types only" fails the first, the mutant "length check ignored" fails the second; both green on the real code. No real bug, no
+  production code changed.
+- Green after: `test_run_events.py` (14), contract `test_if_401_run_events.py` (10).

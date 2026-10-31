@@ -160,6 +160,33 @@ class Provider(unittest.TestCase):
         self.assertTrue(result["differences"])
         self.assertEqual(code_of(lambda: self.log.compare("a", "none")), "unknown_run")
 
+    def test_the_same_types_with_another_payload_differ(self):
+        """TC-LOG-003, TC-IF-401-04 (F4 of the N-2.4.3 verification): the payloads are compared, not only the types.
+        Example: run_end {"status": "done"} against run_end {"status": "error"} -> not the same, the difference is at 2."""
+        # Given two runs with the same types whose last payload differs
+        for run, status in (("a", "done"), ("b", "error")):
+            self.log.emit(run, "run_start", {"workflow": "lookup"}, "anna")
+            self.log.emit(run, "run_end", {"status": status}, "anna")
+        # When they are compared
+        result = self.log.compare("a", "b")
+        # Then they differ at the second event only
+        self.assertFalse(result["same"])
+        self.assertEqual([d.split(":")[0] for d in result["differences"]], ["at 2"])
+
+    def test_an_extra_event_at_the_end_is_a_difference(self):
+        """TC-LOG-003, TC-IF-401-04 (F4 of the N-2.4.3 verification): a run with one more event at the end is not the same, in both directions.
+        Example: a (run_start, run_end) against b (run_start, run_end, error) -> not the same, "length 2 != 3"."""
+        # Given two runs that agree on their first two events, and the second has one more
+        for run in ("a", "b"):
+            self.log.emit(run, "run_start", {"workflow": "lookup"}, "anna")
+            self.log.emit(run, "run_end", {"status": "done"}, "anna")
+        self.log.emit("b", "error", {"message": "late"}, "anna")
+        # When they are compared both ways
+        forward, backward = self.log.compare("a", "b"), self.log.compare("b", "a")
+        # Then both name the length
+        self.assertEqual(forward, {"same": False, "differences": ["length 2 != 3"]})
+        self.assertEqual(backward, {"same": False, "differences": ["length 3 != 2"]})
+
     def test_the_events_are_append_only_files_one_per_run_and_a_new_instance_goes_on_where_the_old_stopped(self):
         """TC-LOG-005 (REQ-LOG-005, A-28): the events of a run are an append-only file of their own; a restart goes on with the next seq and rewrites nothing.
         Example: runs r1 and r2 make r1.jsonl and r2.jsonl; a new instance emits seq 2 for r1 and the bytes written before are unchanged."""
