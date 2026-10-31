@@ -64,6 +64,7 @@ Back-filled on 2026-10-30, after the workflow skills introduced goals (M33–M37
 | REQ-RUN-011 | out | owner 2026-10-31 (D-118): its criterion is the IF-103 contract suite on the real side, but the suite cannot hand its scripted replies to a real provider; back in a later goal with an IF-103 provider and an amendment of the suite. Its parents stay in. |
 | REQ-RUN-004 | out | owner 2026-10-31 (D-119): optional learning is not built (LearningLayer and FR-18 proposed); back with a goal that designs the learning layer. |
 | REQ-RUN-006 | out | owner 2026-10-31 (D-119): a measurement without a fixed eval criterion and model pins, like REQ-TLS-006; back with the eval criterion and eval-spec.md. |
+ | REQ-RUN-007 | out | owner 2026-10-31 (D-120): a measurement without an eval criterion and model pins |
 
 ## Parts
 | Part | Real or stand-in | Notes |

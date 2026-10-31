@@ -104,7 +104,7 @@ Tests reported green (feedback, not verification): `tests/test_runner_context_sh
 
 ## T-06 First text in 10 seconds (2026-10-31, deferred) – REQ-RUN-007
 
-Deferred by the owner (D-120): a measurement (median of 20 runs, AC-19) without an eval criterion and model pins, like REQ-RUN-006. It comes back with `eval-spec.md`. Whether REQ-RUN-007 leaves the scope of G-V1 is the owner's decision (scope table of `goal.md`).
+Deferred by the owner (D-120): a measurement (median of 20 runs, AC-19) without an eval criterion and model pins, like REQ-RUN-006. It comes back with `eval-spec.md`. REQ-RUN-007 is out of the scope of G-V1 (owner, D-125; scope row in `goal.md`).
 
 ## T-07 Interfaces only, no particular workflow (2026-10-31, done; the review entry split out as T-08, A-35) – REQ-RUN-012, REQ-RUN-013
 

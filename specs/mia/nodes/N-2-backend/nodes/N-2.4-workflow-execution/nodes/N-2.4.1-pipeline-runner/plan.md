@@ -15,7 +15,7 @@ A leaf. Each task is small, vertical, fits one session and starts from a red tes
 | T-05 Context window share, calls of the first try, optional learning | REQ-RUN-004, REQ-RUN-005, REQ-RUN-006 | TC-RUN-004, TC-RUN-005, TC-RUN-006 | T-01 |
 | T-06 First text in 10 seconds | REQ-RUN-007 | TC-RUN-007 | T-01 |
 | T-07 Interfaces only, no particular workflow | REQ-RUN-012, REQ-RUN-013 | TC-RUN-012, TC-RUN-013 | T-01 |
-| T-08 The review as a workflow of the library (A-35, proposed) | REQ-RUN-013 (AC-9, the review entry) | TC-RUN-013, the review benchmark (TC-MIA-003) | T-07 |
+| T-08 The review as a workflow of the library (A-35) | REQ-RUN-013 (AC-9, the review entry) | TC-RUN-013, the review benchmark (TC-MIA-003) | T-07 |
 
 ## Tasks
 
@@ -82,7 +82,7 @@ A leaf. Each task is small, vertical, fits one session and starts from a red tes
 - Done when: the listed tests are green and all other tests are unchanged
 - Notes: Consumes IF-203, IF-401, IF-402; the same code runs lookup, verify and review.
 
-### T-08: The review as a workflow of the library (amendment A-35, proposed 2026-10-31; the split out of T-07 approved by the owner, D-120)
+### T-08: The review as a workflow of the library (amendment A-35, approved by the owner 2026-10-31, D-125)
 - Implements: REQ-RUN-013 (AC-9: the review entry runs with the same runner as lookup and verify)
 - Tests to turn green: TC-RUN-013 (the review entry runs through `Runner`), the review benchmark of TC-MIA-003 against its recorded baseline (eval criterion, suite and repeats to be fixed at the plan gate of this amendment)
 - Touches: `review_chat.py`, `extensions/review/`, `library/pipelines/` (a new review pipeline), `skills/review_*.md` (versions bumped)
