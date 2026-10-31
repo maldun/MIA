@@ -153,6 +153,25 @@ class SharedDatabase(unittest.TestCase):
         self.assertEqual([e["version"] for e in heard], [1, 2, 3])
 
     @mark.req("REQ-SLY-006")
+    def test_a_bad_notice_on_the_channel_does_not_end_the_listener(self):
+        """Finding R1 of the re-verification: anyone who reaches the database may notify on mia_changes; the listener logs a bad notice and goes on.
+        Example: pg_notify('mia_changes', 'not json') and pg_notify('mia_changes', '{}'), then a write on the first instance is still heard."""
+        # Given: the second instance listens, and two bad notices arrive on its channel
+        heard = []
+        self.b.subscribe("tasks", heard.append)
+        with self.assertLogs("storage", "ERROR") as logged:
+            for payload in ("not json", "{}"):
+                self.first._query("SELECT pg_notify('mia_changes', %s)", (payload,))
+            # When: a write on the first instance
+            self.a.put("tasks", "t", {"text": "after"}, "anna")
+            deadline = time.time() + 2
+            while not heard and time.time() < deadline:
+                time.sleep(0.01)
+        # Then: both bad notices were logged, and the write was heard
+        self.assertEqual(len([line for line in logged.output if "a notice on mia_changes failed" in line]), 2)
+        self.assertEqual([(e["id"], e["version"]) for e in heard], [("t", 1)])
+
+    @mark.req("REQ-SLY-006")
     def test_the_listener_connects_again_when_the_server_drops_it(self):
         """Finding F2: a dropped listening connection (a database restart) is opened again.
         Example: the server ends the LISTEN connection of the second instance; a write on the first is still heard within 5 s."""
