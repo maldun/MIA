@@ -16,6 +16,15 @@ Tests of this part alone against the mocks of its neighbours: unit tests with pl
 
 Contract test cases of IF-301: TC-IF-301-01 to the last of the suite (listed in the root `test-spec.md`).
 
+## Evidence of the acceptance criteria outside this node (Verify F6)
+
+TC-GTB-001 and TC-GTB-004 check the definitions and the validation; the storing itself is done by the Storage layer and the workflow library, so their tests are the evidence of the two acceptance criteria:
+
+| Requirement | Acceptance criterion | Verified by (test outside N-3.2) |
+| --- | --- | --- |
+| REQ-GTB-001 | AC-15: a record of each kind is written and read back identically | `tests/test_storage.py` `test_a_record_of_each_table_reads_back_equal` (TC-SLY-002, N-3.1; a workflow and a context graph among the tables) |
+| REQ-GTB-003 | AC-10: a context graph edit creates a new version | `tests/test_workflow_library.py` `test_the_template_may_be_optimised_as_a_new_version` (N-2.3: an edit of a context graph is version 2, version 1 stays readable) |
+
 ## Assumptions (checked in validation)
 
 - ASM-N3-004: the graph rules are the ones of FR-7 and `contracts/IF-301-graph-tables.md`; `graphlib` of the standard library is the reference in the property test.
