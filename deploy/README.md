@@ -1,6 +1,6 @@
 # MIA as a service (podman compose)
 
-Four containers: **mia** (this code, CPU only, Python 3.12), **https** (Caddy, TLS in front of MIA), **ollama** (the language model, the only one that may use the GPU) and **searxng** (web search). Published are `http://127.0.0.1:8585` (MIA) and `https://127.0.0.1:8586` (same page through Caddy).
+Four containers: **mia** (this code, CPU only, Python 3.12), **https** (Caddy, TLS in front of MIA), **ollama** (the language model, the only one that may use the GPU) and **searxng** (web search). Published are `http://127.0.0.1:8585` (MIA, always on loopback only) and `https://127.0.0.1:8586` (same page through Caddy; the only port that `MIA_BIND` opens to other devices, REQ-OPR-008).
 
 ## Start
 
@@ -120,7 +120,7 @@ OLLAMA_URL=http://192.168.1.50:11434
 
 ## Settings in `.env` (all optional)
 
-`OLLAMA_URL` (see above), `MIA_PORT` (8585), `MIA_HTTPS_PORT` (8586), `MIA_BIND` (127.0.0.1; `0.0.0.0` for other machines, then also set `public_hosts` in the config), `MIA_PROJECT` (mia; another name = a second stack next to the first), `MIA_CONFIG`, `MIA_KOKORO_DIR`, `MIA_CHARACTER_DIR`, `MIA_BACKGROUND_DIR`, `HSA_OVERRIDE_GFX_VERSION` (rocm, 11.0.0).
+`OLLAMA_URL` (see above), `MIA_PORT` (8585), `MIA_HTTPS_PORT` (8586), `MIA_BIND` (127.0.0.1; `0.0.0.0` for other machines, then also set `public_hosts` in the config; it moves only the https port, http 8585 stays on loopback), `MIA_PROJECT` (mia; another name = a second stack next to the first), `MIA_CONFIG`, `MIA_KOKORO_DIR`, `MIA_CHARACTER_DIR`, `MIA_BACKGROUND_DIR`, `HSA_OVERRIDE_GFX_VERSION` (rocm, 11.0.0).
 
 ## Notes
 

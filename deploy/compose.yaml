@@ -1,7 +1,8 @@
 # MIA as a service: MIA (this folder), Ollama (the language model) and SearXNG (web search).
 #   deploy/up.sh                                   first start: makes .env and the config, starts everything (CPU)
 #   deploy/up.sh rocm | nvidia                     with the GPU of Ollama (AMD / NVIDIA)
-# The page is on http://localhost:8585 (MIA_PORT / MIA_BIND in .env change that). Only MIA (http, 8585) and its https front (8586) are published; Ollama and SearXNG are reachable inside the stack.
+# The page is on http://localhost:8585 (MIA_PORT in .env changes that). Only MIA (http, 8585, always on loopback) and its https front (8586, on MIA_BIND) are published;
+# Ollama and SearXNG are reachable inside the stack. Other devices come only through https (REQ-OPR-008, A-37).
 # More in deploy/README.md.
 services:
   mia:
@@ -19,7 +20,7 @@ services:
       MIA_OLLAMA_HOST: ${OLLAMA_URL:-http://ollama:11434}      # OLLAMA_URL in .env: an Ollama that exists already, see README
       MIA_DATABASE_URL: ${MIA_DATABASE_URL:-}                  # set by  deploy/up.sh db  (the storage option picks the database)
     ports:
-      - "${MIA_BIND:-127.0.0.1}:${MIA_PORT:-8585}:8585"
+      - "127.0.0.1:${MIA_PORT:-8585}:8585"        # loopback only, whatever MIA_BIND says: the network gets the https front (REQ-OPR-008)
     volumes:
       - ${MIA_CONFIG:-./setup_cfg.compose.json}:/opt/mia/MIA/setup_cfg.json:ro,z
       - ./setup_cfg.local.json:/opt/mia/MIA/setup_cfg.local.json:ro,z      # the settings of THIS machine (the login ...), not in git; up.sh makes it ({}) when it is missing
