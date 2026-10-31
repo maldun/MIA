@@ -1,4 +1,5 @@
-# MIA as a service: MIA (this folder), Ollama (the language model) and SearXNG (web search).
+# MIA as a service: MIA (this folder), the graph page, the https front (Caddy), SearXNG (web search), Ollama (the language model; profile ollama, only without OLLAMA_URL)
+# and PostgreSQL (profile db,  deploy/up.sh db ).
 #   deploy/up.sh                                   first start: makes .env and the config, starts everything (CPU)
 #   deploy/up.sh rocm | nvidia                     with the GPU of Ollama (AMD / NVIDIA)
 # The page is on http://localhost:8585 (MIA_PORT in .env changes that). Only MIA (http, 8585, always on loopback) and its https front (8586, on MIA_BIND) are published;
