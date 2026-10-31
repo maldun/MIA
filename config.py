@@ -5,8 +5,9 @@ fight with the one in git. `setup_cfg.example.json` is tracked: it lists every o
   ensure(folder)        the path of setup_cfg.json; if the file is missing it is copied from the example (the first start on a new machine), and the caller is told
   default_path(folder)  for tools that only read: setup_cfg.json if it exists, else the example
   missing(folder)       the options of the example that this machine's file does not have (after an update that brought new options): {name: value in the example}
+  warning(folder)       the same as a text for the start of MIA and the command below, or None
 
-From a shell:  python config.py [folder]   lists them (it changes nothing; your file keeps its own formatting and values).
+At every start MIA prints that warning; from a shell:  python config.py [folder]   lists them (it changes nothing; your file keeps its own formatting and values).
 
 Every option is documented in README.md ("Configuration"); a test keeps the example complete (every option that the code reads is in it).
 """
@@ -88,12 +89,16 @@ def missing(folder):
     return {key: value for key, value in template.items() if key not in mine}
 
 
-if __name__ == "__main__":
-    folder = sys.argv[1] if len(sys.argv) > 1 else os.path.dirname(os.path.abspath(__file__))
+def warning(folder):
+    """REQ-OPR-003: the text MIA prints at start (and `python config.py` prints) when this machine's file lacks options of the example; None when nothing is missing"""
     found = missing(folder)
     if not found:
-        print("%s has every option of %s." % (NAME, EXAMPLE))
-    else:
-        print("%s lacks %d option(s) of %s (the defaults apply until you add them; README.md describes them):" % (NAME, len(found), EXAMPLE))
-        for key, value in found.items():
-            print('  "%s": %s,' % (key, json.dumps(value)))
+        return None
+    lines = ["Warning: %s lacks %d option(s) of %s (the defaults apply until you add them; README.md describes them):" % (NAME, len(found), EXAMPLE)]
+    lines += ['  "%s": %s,' % (key, json.dumps(value)) for key, value in found.items()]
+    return "\n".join(lines)
+
+
+if __name__ == "__main__":
+    folder = sys.argv[1] if len(sys.argv) > 1 else os.path.dirname(os.path.abspath(__file__))
+    print(warning(folder) or "%s has every option of %s." % (NAME, EXAMPLE))
