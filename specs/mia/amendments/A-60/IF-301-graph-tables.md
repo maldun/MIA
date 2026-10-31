@@ -10,9 +10,9 @@ What the storage layer needs to know about the tables of workflows and context g
 | `definitions()` | | `{table: {"versioned": bool, "deletable": bool}}` for `workflows` and `context_graphs` | both versioned, neither deletable |
 | `validate(table, doc)` | table name, document | `None` or `{"rule", "detail"}` | the first broken rule: `node_identity`, `adjacent_data_nodes`, `adjacent_process_nodes`, `session_stopping_criterion`, `cycle` (detail: the cycle as ids, first id repeated at the end). Any document gives a rule or `None`, never an exception (A-60) |
 
-Rules in detail (A-60, D-160):
+Rules in detail (A-60, D-160, D-162):
 - `node_identity`: every node has a non-empty text `id`, unique, and a `kind` of `process` or `data`; every edge is `{"from", "to"}` with two text ids of known nodes. A document whose `nodes` or `edges` is not a list, a node or edge that is not an object, and an edge endpoint that is not text (a list, an object, a number) are `node_identity`.
-- `session_stopping_criterion`: a process node with `session: true` has a `stop` object with `max_cycles` or `max_seconds`; each limit that is given is a positive integer (an integer >= 1, not a boolean; `-1`, `0`, `"3"`, `true`, `2.5`, NaN are refused), and a limit that is `null` counts as not given. A `stop` that is not an object is this rule too.
+- `session_stopping_criterion`: a process node with `session: true` has a `stop` object with `max_cycles` or `max_seconds`; each limit that is given is a positive integer (an integer >= 1, not a boolean; `-1`, `0`, `"3"`, `true`, `2.5`, NaN are refused), and a limit that is `null` counts as not given (D-162). A `stop` that is not an object is this rule too.
 
 ## Errors
 | Condition | Signal | What the consumer may rely on afterwards |
@@ -34,4 +34,4 @@ Rules in detail (A-60, D-160):
 | Version | Date | Change | Amendment |
 |---|---|---|---|
 | v0 | 2026-10-25 | first draft | – |
-| v1 | 2026-10-31 | a session limit is a positive integer (not a boolean, null = not given); a malformed part (a `stop` that is not an object, an edge endpoint that is not text) is named by its rule instead of raising; golden 4 | A-60 (D-160) |
+| v1 | 2026-10-31 | a session limit is a positive integer (not a boolean, null = not given); a malformed part (a `stop` that is not an object, an edge endpoint that is not text) is named by its rule instead of raising; golden 4 | A-60 (D-160, D-162) |

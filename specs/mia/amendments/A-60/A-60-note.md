@@ -12,17 +12,19 @@ The verification of N-3.2 found that a malformed edit (a `stop` that is not an o
 | `tests/helpers/mocks/graph_rules.py` | `specs/mia/contract-drafts/tests/helpers/mocks/graph_rules.py` | the mock's rules as above (`_stops`, the edge endpoint check). The mock of IF-102 uses the same file, so it gets stricter too |
 | `tests/acceptance/contract/test_if_301_graph_tables.py` | `specs/mia/contract-drafts/tests/acceptance/contract/test_if_301_graph_tables.py` | TC-IF-301-04 (golden 4) on the mock and the real side |
 | `tests/helpers/contract.py` | made by the script from the installed file, with `specs/mia/amendments/A-60/real_graph_tables.py` | (F9) the IF-301 line of `REAL_NOT_READY`: "unused: real_subject gives graph_tables" with a comment (A-02, A-60). (New finding) `real_subject("IF-301")` loads `graph_tables` with the real `graph_rules` by file path (`_real_graph_tables`): the mock side of the suite imports the mock's `graph_rules` first under the same module name, and a plain `import graph_tables` then validated with the cached **mock** rules, so the `_real` tests of the whole suite ran the mock rules (run alone they ran the real ones) |
-| `specs/mia/test-spec.md` | made by the script from the installed file | the row TC-IF-301-04 |
+| `tests/helpers/mocks/if_104_graph_api.mjs` | `specs/mia/contract-drafts/tests/helpers/mocks/if_104_graph_api.mjs` | (D-162) the JS mock's session rule: every limit given is an integer >= 1, null = not given (`stops`) |
+| `tests/acceptance/contract/test_if_104_graph_api.test.mjs` | `specs/mia/contract-drafts/tests/acceptance/contract/test_if_104_graph_api.test.mjs` | TC-IF-104-06: -1, 0, "3", true, 2.5, a valid max_cycles with max_seconds -1, a stop "x" are 422 `session_stopping_criterion`; max_cycles 1 with a null max_seconds is saved. Red first on the old mock; the real side skips as before (`REAL_NOT_READY` of `contract.mjs`) |
+| `specs/mia/test-spec.md` | made by the script from the installed file | the rows TC-IF-301-04 and TC-IF-104-06 |
 | node `requirements.md` | made by the script from the installed file | IF-301: Verified by TC-IF-301-01..04, History v1 (A-60) |
 
-`contract.py`, `test-spec.md` and `requirements.md` are built at install time from the installed files, so A-59 (N-3.1, also touches `contract.py`) and A-60 can be installed in either order.
+`contract.py`, `test-spec.md` and `requirements.md` are built at install time from the installed files, so A-59 (N-3.1, also touches `contract.py`: the IF-102 real side loaded by path) and A-60 can be installed in either order; A-60 edits only the IF-301 line of `REAL_NOT_READY`, the IF-301 branch of `real_subject` and inserts its function before `def real_subject`.
 
-Unchanged: the existing suite cases (the case `max_cycles: 0` stays), `decomposition.yaml` (IF-301 `version: v0`, node status: at the gate, F9), the JavaScript mock of IF-104 (`tests/helpers/mocks/if_104_graph_api.mjs`, it has its own copy of the session rule and still takes any truthy limit: owner to decide whether IF-104's mock follows).
+Unchanged: the existing suite cases (the case `max_cycles: 0` stays), `decomposition.yaml` (IF-301 `version: v0`, node status: at the gate, F9).
 
-The same module-name collision exists for the real side of IF-102 (`storage.py` imports `graph_tables`, which then gets the mock's `graph_rules` when the IF-102 mock ran first in the process): not changed here, `_StorageAdapter` belongs to N-3.1 and stays as it is (D-158); owner to decide.
+The same module-name collision exists for the real side of IF-102 (`storage.py` imports `graph_tables`, which then gets the mock's `graph_rules` when the IF-102 mock ran first in the process): not changed here: A-59 (N-3.1) loads the IF-102 real side by path.
 
-## Owner to confirm
-A limit that is `null` counts as not given (so `{"max_cycles": 3, "max_seconds": null}` is valid). D-160 says nothing about `null`; this reading keeps a form that sends an empty field working.
+## Decided
+D-162 (owner): a limit that is `null` counts as not given (so `{"max_cycles": 3, "max_seconds": null}` is valid); the JS mock of IF-104 follows the limit rule.
 
 ## Checked on a scratch copy (not installed)
 A copy of branch v1-n32b (with the F1/F2 fixes), script run `--do`: all six files updated; a second run reports everything unchanged (`--do` is safe to repeat). Host: the IF-301 suite 8 tests OK (4 mock, 4 real, none skipped), the IF-102 suite OK. In the image (one container at a time): the IF-301, IF-102, IF-104 (Python) and IF-203 suites, N-3 steps 00 to 03, `test_graph_rules.py`, `test_graph_tables.py`, `test_storage.py`, `test_graph_api.py`: all OK. Before the install, TC-IF-301-04 failed on the old mock (10 sub-cases) and, in the full suite, on the real side too (the collision above); after it, a mutant of the real `graph_rules.py` (a limit counts when truthy) turns only `..._real` red (6 sub-cases), so the real side now tests the real rules. A fuzz of 20 000 random documents: the drafted mock and the real rules never raise; the installed mock raises 712 times.
