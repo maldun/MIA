@@ -19,7 +19,7 @@ echo "=== T-09 start $(date -Is) variant $VARIANT pipeline $PIPELINE ==="
 
 curl -sf localhost:11434/api/tags | grep -q "$PIN_DIGEST" || { echo "STOP: the model digest is not the pin MP-light (or Ollama is not running)"; exit 1; }
 
-run() { "$PY" tools/eval.py run "$@" --variant "$VARIANT" --pipeline "$PIPELINE" --model "$MODEL" --pin MP-light --repeats 1 --quiet; }
+run() { "$PY" tools/eval.py run "$@" --variant "$VARIANT" --pipeline "$PIPELINE" --pin MP-light --repeats 1 --quiet; }
 
 # the cases of the T-06 baseline, so that every variant is compared on the same cases (cases retired since then drop out by themselves)
 baseline_ids() { "$PY" -I - "$1" <<'PY'

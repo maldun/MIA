@@ -422,9 +422,10 @@ class SampleAndPinEdges(unittest.TestCase):
 
     def test_the_pin_keeps_the_other_model_options_of_the_skill(self):
         runner = H.Harness()
-        runner.pin = {"seed": 7, "temperature": 0}
+        runner.pin = {"name": "gemma4:12b-it-qat", "seed": 7, "temperature": 0}
         skill = runner._pinned({"model": {"profile": "light", "options": {"num_ctx": 8192}}})
-        self.assertEqual(skill["model"], {"profile": "light", "options": {"num_ctx": 8192, "seed": 7, "temperature": 0}})
+        # the pin's model replaces the profile (D-166); the other options stay
+        self.assertEqual(skill["model"], {"name": "gemma4:12b-it-qat", "options": {"num_ctx": 8192, "seed": 7, "temperature": 0}})
         self.assertEqual(H.Harness()._pinned({"model": None}), {"model": None})
 
 

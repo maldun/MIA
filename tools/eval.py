@@ -4,8 +4,7 @@ The evaluation harness on the command line (ui/REQUIREMENTS_CORE.md 9). Run with
   python tools/eval.py list                                   the suites and how many cases they have
   python tools/eval.py run hard_checks --pin MP-light         run a suite (no model needed for the hard checks), print the report, save the run in data/eval/
   python tools/eval.py run computable --pin MP-light --repeats 3             the same case 3 times: shows how stable the model is
-  python tools/eval.py run computable --pin MP-light --variant light --model light
-  python tools/eval.py run computable --pin MP-light --variant full --model gemma4:26b --pipeline verify.computable@1
+  python tools/eval.py run computable --pin MP-light --variant c1 --pipeline verify.computable@1
   python tools/eval.py run hard_checks --pin MP-light --tag numeric --limit 10        only some cases
   python tools/eval.py run verdicts_vitaminc --pipeline verify.single@1 --pin MP-light --sample 100 --repeats 1     seeded sample, pinned model setting
   python tools/eval.py report hard_checks                  the report of the newest saved run of a suite (or of a file)
@@ -14,7 +13,7 @@ The evaluation harness on the command line (ui/REQUIREMENTS_CORE.md 9). Run with
   python tools/eval.py cases hard_checks --tag trap           show the cases
 
 Holdout suites (*.holdout) are left out of list and refused by cases and run unless --holdout is given: they are for Verify only.
-Every run needs --pin (REQ-EVL-004); a suite of kind "workflow" runs through IF-105 on the workflows of the app's storage.
+Every run needs --pin (REQ-EVL-004), and the pin decides the model (--model is refused next to it, D-166); a suite of kind "workflow" runs through IF-105 on the workflows of the app's storage.
 Without a name the variant is called "default". The variant options (--skill, --pipeline, --model) change what runs; everything else stays the same, so two runs can be compared.
 """
 import argparse
@@ -119,7 +118,7 @@ def main():
     parser.add_argument("--limit", type=int)
     parser.add_argument("--skill")
     parser.add_argument("--pipeline")
-    parser.add_argument("--model")
+    parser.add_argument("--model", help="refused by run: the model of a run is the one of --pin (D-166)")
     parser.add_argument("--pin", choices=sorted(PINS), help="model pin of eval-spec.md, required by run: its seed and temperature go to every model call and the pin is written to the run header")
     parser.add_argument("--sample", type=int, metavar="N", help="a seeded sample of N active cases; the two halves of a pair stay together")
     parser.add_argument("--sample-seed", type=int, default=7, help="seed of --sample (default 7)")
@@ -177,6 +176,9 @@ def main():
 
     if not args.pin:                                                # REQ-EVL-004, D-164: every run records its model pin
         sys.exit("a run needs --pin (%s)" % ", ".join(sorted(PINS)))
+    if args.model:                                                  # D-166: the pin decides the model, so the header names what ran
+        sys.exit("--model together with --pin: the pin decides the model of a run (%s); drop --model" %
+                 ", ".join("%s = %s" % (i, p["name"]) for i, p in sorted(PINS.items())))
     suite = open_suite(args.args[0], args.holdout)
     need_model = suite.target["kind"] in ("pipeline", "research", "plan", "workflow") or (suite.target["kind"] == "extraction" and bool(args.skill or args.pipeline))
     core = build_core(cfg, need_model, need_sandbox=need_model)

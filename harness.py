@@ -340,10 +340,11 @@ class Harness:
         return self._status_of(result, suite)
 
     def _pinned(self, skill):
-        """the skill with the seed and the temperature of the pin in its model options, so that they reach every model call (REQ-EVAL-003)"""
+        """the skill with the model of the pin and its seed and temperature, so that they reach every model call (REQ-EVAL-003); the pin decides
+        the model, not the skill file's profile (D-166: the header names what ran)"""
         if self.pin:
             model = skill.get("model") or {}
-            skill["model"] = dict(model, options=dict(model.get("options") or {}, seed=self.pin["seed"], temperature=self.pin["temperature"]))
+            skill["model"] = {"name": self.pin["name"], "options": dict(model.get("options") or {}, seed=self.pin["seed"], temperature=self.pin["temperature"])}
         return skill
 
     def _status_of(self, result, suite):
@@ -435,6 +436,8 @@ class Harness:
             header["pin"] = {key: pin.get(key) for key in ("id", "name", "digest", "seed", "temperature")}
         header["suite_sha1"] = suite_sha1(suite.path)
         header["benchmark_version"] = header["suite_sha1"]               # REQ-EVL-004: the version of the benchmark is the content of the suite
+        if pin and variant.get("model"):
+            raise SuiteError("%s: --model %s together with --pin: the pin decides the model of a run (D-166); drop --model" % (suite.name, variant["model"]))
         if suite.target["kind"] == "workflow" and not pin:
             raise SuiteError("%s: a workflow suite needs a pin (model, seed, temperature)" % suite.name)
         header.update(self._versions(suite, variant))
