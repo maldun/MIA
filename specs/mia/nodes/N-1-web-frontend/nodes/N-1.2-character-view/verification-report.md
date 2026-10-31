@@ -104,3 +104,93 @@ Use the https front (`https://<host>:8586/`) after the stack runs the commits up
 
 ### What could not be checked
 CI stage log (local runs only); stage-2 browser tests and stage-3 compose test (owner's stack not touched); the 2 s live update; frame rate; anything visual.
+
+# Re-verification (2026-10-31)
+
+**Goal:** G-V1 (iteration), supervised; node N-1.2 (leaf) against its mocks   **Branch:** goal/v1 @ 1e16229   **Plan baseline:** plan-baseline-it1
+**Reviewers:** – (human), Claude Opus 5.5 (AI, fresh context; never saw the implementation chat)
+**Commits reviewed:** bf527a3 (F1), 23d7efb (F2), f5b81f0 (F4), c217dbc and a262376 (A-58 draft and install, F5), 36cfadd (F8, F10), a3e3a0e (log), 85e3870 (`.uid`, D-159), merge b928bce (v1-n12c); the shocked reaction 88f484d with f8b85bc (minus vote triggers it, F3, TC-CHV-006) and 9c32979 (back to the mood's face, D-156). Decisions: D-155, D-156, D-159.
+
+## Verdict (proposal)
+**Verified with accepted deviations**, provided the owner decides R1 (below). All earlier findings F1-F10 are closed or recorded as decided; every fix has a test that fails on its mutation. Deviations to accept: REQ-CHV-010 in the field (D-62); F7 (browser checks replaced by unit tests, D-155); F9 (two IF-111 text gaps, next IF-111 amendment); F6 (test_bridge.gd as IF-111's real side, D-155). R1 means the shocked face does not show on an installation whose preset folder was filled before 88f484d (the owner's): fix it test-first or accept it with a one-time step.
+
+## Automated checks (re-run, local, not CI)
+| Check | Result |
+|---|---|
+| JS unit tests `node --test "tests/js/*.test.mjs"` | 136 pass, 0 fail |
+| IF-111 contract suite | 6 pass (mock), 6 skipped (real side, F6) |
+| Godot tests `bash ui/tools/run_godot_tests.sh` (Godot 4.6.1 Flatpak; `ui/godot/assets/mia.vrm` was present in the worktree, nothing copied) | 8 of 8 ALL PASSED (background, bridge, editor, expressions, gesture_editor, menu, pose, reduced_motion); test_editor_live skipped (needs MIA) |
+| Browser test `python3 tests/test_character_requests.py` (host; own chat-on-stub stage started and stopped by the test, mia-browser image) | 4 OK |
+| Python tests in the image: test_character_integration 34 (1 skip), test_presets_api 28, test_character_stack 6, test_converse_behaviours 6, test_make_voice_lines 3, test_voice_lines 8, test_expression_llm 25, test_character_pack 23, test_chat_answers 12 | all OK (test_character_requests skips in the image, as designed). The full suite was not re-run; known failures elsewhere: test_amendment_report, test_harness (rt_edit) |
+| Protected files | `contracts/IF-111-character-bridge.md` equals `specs/mia/amendments/A-58/IF-111-character-bridge.md` (v3, 30 s); mock and suite unchanged since A-48 (0568820); no other protected file of this node changed |
+| trace_check | exit 1 from other parts (99 errors, none for N-1.2); N-1.2 warnings only: no `req` marker for REQ-CHV-005, -008, -009 (Godot tests; -008 out of scope). The warnings for -001, -006, -012 are gone |
+| test_doc_check | test_character_requests.py, test_character_stack.py, test_converse_behaviours.py and the new tests in test_character_integration.py: 0 errors; older tests of test_character_integration.py keep their pre-existing T1/T3 errors |
+
+### Mutation runs (scratch copy of 1e16229 under the scratchpad, removed afterwards)
+| Mutation | Caught by |
+|---|---|
+| preset_api.gd `POLL_SECONDS` 1.6 / 10.0 | test_editor.gd (1 FAILED each); 1.5 passes |
+| character.js: `src` never set from `data-src` | character-bridge.test.mjs (1 fail) |
+| character.js: `src` set before the secure/enabled/WebGL checks | **not** by the unit tests (13 pass: `disable()` clears `src` again on the fake frame); caught by test_character_requests.py (2 FAILED: requests to `/character/` on `http://mia-lan:8685/` and on `?character=0`) |
+| index.html: iframe with `src=` again | character-bridge.test.mjs (1 fail) |
+| character.js: `disable()` keeps `src` | character-bridge.test.mjs (1 fail) |
+| character.js `LOAD_TIMEOUT_MS` 15000 | **survives** (R3) |
+| ui/README.md Godot pin 4.6.0 | test_character_stack.py (1 fail) |
+| expressions.json without `shocked` | test_character_integration.py and test_converse_behaviours.py (1 fail each) |
+| chat_service.py reacts on a plus instead of a minus | test_converse_behaviours.py (1 fail) |
+| web_app.py `react=None` (not wired) | test_converse_behaviours.py (1 fail, 1 error) |
+| web_app.py no return to the mood's face | test_converse_behaviours.py (1 fail) |
+
+## Earlier findings
+| # | Status | Evidence |
+|---|---|---|
+| F1 | closed | test_expressions.gd and test_editor.gd pass with 15 presets; the editor's test preset is `test_shocked` |
+| F2 | closed (D-159: 1.5 s) | `ui/godot/preset_api.gd:26`; test_editor.gd checks interval + 0.5 s <= 2 s and one version GET per poll (mutation caught). The 0.5 s for the two requests is an assumption: the owner's timing between two devices stays on the checklist |
+| F3 | closed | `expressions.json:16` `shocked`; TC-CHV-006 in test_converse_behaviours.py (minus -> `expression shocked` + line, back to the mood after the line; mutations caught). See R1, R2 for the real installation |
+| F4 | closed | `templates/index.html:36` `data-src`; `character.js:45` sets `src` only after the checks; browser test green and catches the mutation |
+| F5 | closed | A-58 installed (a262376): contract v3 says 30 s, as `character.js:3`; no test pins the value (R3) |
+| F6 | decided (D-155) | recorded only in D-155; the N-1 plan does not name test_bridge.gd yet: carry it into the N-1 integration step |
+| F7 | accepted (D-155) | TC-CHV-001 (`?character=0`) and TC-CHV-012 now also have the real browser test |
+| F8 | closed | test_character_stack.py checks 4.6.1 (mutation caught), 0 doc-check errors; `test_reduced_motion.gd.uid` tracked (85e3870, D-159) |
+| F9 | open, noted | `host_bridge.gd:77` still accepts `gesture`; `contracts/IF-111-character-bridge.md:37` still says "60 on desktop". For the next IF-111 amendment (D-155) |
+| F10 | closed | implementation-log.md records 88f484d |
+
+## Verification matrix (changes only)
+| Requirement | Method | Evidence | Result |
+|---|---|---|---|
+| REQ-CHV-001 | Test | unit tests plus browser test (`?character=0` sends no request) | Met (browser part of "a message is sent and answered" accepted under F7) |
+| REQ-CHV-002 | Inspection, Test | 15 presets load (test_expressions.gd); one bridge (unchanged) | Met |
+| REQ-CHV-005 | Test | poll 1.5 s with test; version covers presets and gestures (`presets_api.py:198`) | Met at component level; 2 s between two devices: owner check |
+| REQ-CHV-006 | Test | TC-CHV-006 (backend wire), shocked preset in the bundled library, line listed | Met on a fresh installation; **not on an existing preset folder (R1)**; line file must exist (R2) |
+| REQ-CHV-012 | Test | browser test on a plain-HTTP LAN name | Met |
+| REQ-CHV-013 | Inspection, Test | 4.6.1 pin checked | Met |
+| IF-111 | Test | contract v3 = code (30 s); mock side 6/6; real side test_bridge.gd (F6) | Met with F9 open |
+Unchanged from the first report: REQ-CHV-003 (owner check), -004 (met), -009 (unit part met, layouts: owner check), -010 (field), -011 (static scan, F7), -014 (component level), -007/-008 (out of G-V1).
+
+## Per-commit review
+- **bf527a3, 23d7efb, f5b81f0, 36cfadd, 85e3870:** each does what its finding asked, test first as logged; nothing outside the node's files apart from `ui/README.md` (poll text, pin) and the new browser driver.
+- **f8b85bc** (N-2.2 T-06): `chat_service.py:402-406` calls `react("shocked")` after a stored minus only, a failing reaction never loses the vote; `web_app.py:692` wires it. Correct and tested.
+- **9c32979** (D-156): `web_app.py:249-259` shows shocked and the line at once and returns to the mood's face after the line length (3 s without a line) in a background task. Two minus votes within one line: the first task resets the face during the second line (R4).
+- **88f484d**: the preset reaches the server's store only when the store folder is empty (R1).
+
+## New findings
+| # | Finding | Severity | Destination / proposal |
+|---|---|---|---|
+| R1 | `preset_store.py:79-80` fills the preset folder from the shipped library only when it is empty; `main.gd:307-309` -> `expression_engine.gd:120-121` replaces the bundled library by the server's; `host_bridge.gd:100` then shows `neutral` for `shocked`. On any installation seeded before 88f484d a minus vote shows neutral. Probe in the image: a folder seeded with the library of 88f484d^ has 14 presets after a restart with today's library, no `shocked`. The tests use fresh folders | Medium | Owner decision, then test-first: (proposal) the store adds shipped presets that are missing at start, never overwriting a user's preset, with a test seeded from the old library; alternative: a one-time step in the runbook (create `shocked` or empty the folder) and accept it as a deviation |
+| R2 | `voice/expressions/shocked_default.wav` is git-ignored and absent in this worktree and in the owner's master checkout; `voice_lines.py:34-44` skips a missing file (logged), so the shocked reaction is silent until `python tools/make_voice_lines.py --only shocked` runs where MIA runs | Low | Owner check (deployment step); no code change |
+| R3 | `LOAD_TIMEOUT_MS = 15000` passes every test; IF-111 v3 bounds `ready` at 30 s (A-58 was text only) | Low | Needs test: one assertion `LOAD_TIMEOUT_MS === 30000` in character-bridge.test.mjs, or accept as text-only |
+| R4 | `web_app.py:256-259`: each minus starts its own return-to-mood task; a second minus within the line length is cut short by the first task | Low | No requirement covers it; owner decision (backlog, or cancel the pending return on a new reaction, test-first) |
+| R5 | The `src`-before-checks mutation is caught only at stage 2 (browser), not by the stage-1 unit tests | Info | none: stage 2 exists and catches it |
+
+## Open deferrals and known limitations
+REQ-CHV-010 field measurement (D-62); REQ-CHV-007/-008 out of G-V1 (D-137); REQ-CHV-014 AC-29 on the compose stack not run here; F9 for the next IF-111 amendment.
+
+## Manual checks for the owner (by eye), additions to the first list
+Items 1-7 of the first list stay; item 5 now expects **2 s or less**.
+8. **Shocked on your installation (R1, R2):** after the stack runs 1e16229 (export rebuilt), give an answer a minus: MIA shows the shocked face (not neutral) and says the shocked line, then returns to her mood's face after the line. If the face stays neutral, your preset folder lacks `shocked` (R1); if she is silent, render the line (`python tools/make_voice_lines.py --only shocked`).
+9. **Two devices, 2 s (REQ-CHV-005, D-155):** save a preset on device A; on device B count until it appears without reload: 2 s or less. Same for a gesture.
+10. **Frame rate (REQ-CHV-010):** the character at 30 fps or more on the desktop and a phone in the network (field, D-62).
+11. **Two quick minus votes (R4):** two minus votes a second apart: does the face stay shocked to the end of the second line?
+
+## Not checked
+CI stage log (local runs only); the full Python suite; the compose-stack test (AC-29); the owner's running stack and its preset folder and voice files (not touched); frame rate; anything visual.

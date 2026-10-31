@@ -39,6 +39,17 @@ up /home/maldun/prog/Python/MIA/voice/expressions/happy_default.wav
 | B5 | **A stack start with the complete config.** | Start the stack once (`deploy/up.sh`), then `podman logs mia_mia_1 | head -40`; after one literature review look into the data volume for `data/cache/scholar`. | No "lacks N option(s)" warning; the cache folder exists (older than 7 days is pruned once the pruning is merged). | |
 | B6 | **Index digests (later, D-139 (6)).** | At the next pin update: replace the local digests in `deploy/compose.yaml` and `deploy/Containerfile` by the multi-platform index digests of the registry. | — | (later) |
 
+## C. N-1.2 Character view, by eye (D-155, D-167)
+
+| # | Check | Expected | Result |
+|---|---|---|---|
+| C0 | **Make the shocked line once** where MIA runs: `python tools/make_voice_lines.py --only shocked` (needs the Kokoro models). | `voice/expressions/shocked_default.wav` exists. | |
+| C1 | **Shocked after a minus.** Vote minus on an answer (after the preset fix of D-167 is merged). | Shocked face and line at once, then the face of the mood again. | |
+| C2 | **Two quick minus votes.** | The face stays shocked until the last line ends. | |
+| C3 | **2 s between two devices.** Change a preset or send a gesture on one device. | The other device shows it within 2 s. | |
+| C4 | **Frame rate** on desktop and phone. | About 30 fps, smooth. | |
+| C5 | **The look** (items 1–7 of the first N-1.2 report): the expressions, the living character, reduced motion, the layouts, `?character=0`. | As you like it. | |
+
 ## Afterwards
 
 Tell the coding agent "checklist done" (or paste this table). Results that are "not ok" become findings with a test first.
