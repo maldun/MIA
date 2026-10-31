@@ -201,3 +201,9 @@ Each image has two repo digests on this machine (`podman images --format {{.Dige
 Open questions:
 - T08-Q1 (more floating images): `docker.io/library/postgres:16` (the `db` service) and `docker.io/library/python:3.12-slim` (base of `deploy/Containerfile`) float as well; D-127 named only three. Recommendation: pin both in the same way (both are on this machine: postgres `9e2cf628...`/`f9d1e581...`, python `2b4f19da...`/`a6e34c59...`), a small follow-up.
 - T08-Q2 (index or platform digest): pin the multi-platform index digest instead (portable to another CPU type)? It needs one look at the registry (`skopeo inspect --raw docker://...`, no pull). Recommendation: yes, at the next update of the pins, by the owner.
+
+## Follow-ups of the owner's answers (2026-10-31, D-139)
+- Login hint: after the owner account is made, `python -m MIA` prints one line with `"accounts_enabled": true` and `"owner_account"`; test `test_after_the_owner_account_one_line_says_how_to_turn_the_login_on`, red before; `8435c44`.
+- Pins: `postgres:16` (compose.yaml) and the base `python:3.12-slim` (Containerfile) by their local digests, checked with `create --pull=never`; tests in `test_runbook.py`, red before; `ae54227`. Index digests at the next pin update (owner).
+- Runbook: section "Files a fresh checkout lacks" (`mia.vrm`, the two Kokoro files); test red before; `c3471ea`.
+- Recorded only: F-T06-1, `deploy/.env` in the image (D-131); the offer line in the container log stays; `up.sh db` stays the full install.
