@@ -1,4 +1,4 @@
-"""Compose stack (N-4.2 T-03): TC-OPR-008 (REQ-OPR-008), TC-OPR-010 (REQ-OPR-010). Run with: python tests/test_compose_stack.py"""
+"""Compose stack (N-4.2 T-03): TC-OPR-007 (REQ-OPR-007, the files), TC-OPR-008 (REQ-OPR-008), TC-OPR-010 (REQ-OPR-010). Run with: python tests/test_compose_stack.py"""
 import os
 import re
 import sys
@@ -87,6 +87,37 @@ class ComposeStack(unittest.TestCase):
                         offenders.append("%s:%d" % (os.path.relpath(path, REPO), number))
         # Then: none calls funnel
         self.assertEqual(offenders, [])
+
+    @mark.req('REQ-OPR-007')
+    def test_the_graph_app_has_its_own_container_from_the_mia_image(self):
+        """TC-OPR-007: the graph app (N-5) runs in its own service built from the mia image, with no published port (D-133).
+
+        Example: services.graph.image == localhost/mia:latest, no ports, its command serves graph_app.
+        """
+        # Given: the services of the base file
+        services = load("compose.yaml")
+        # When: the graph service is read
+        graph = services.get("graph") or {}
+        # Then: the mia image, no port of its own, a command that serves graph_app
+        self.assertEqual(graph.get("image"), services["mia"]["image"])
+        self.assertNotIn("ports", graph)
+        self.assertIn("graph_app", " ".join(graph.get("command") or []))
+
+    @mark.req('REQ-OPR-007')
+    def test_the_https_front_routes_graph_to_the_graph_container(self):
+        """TC-OPR-007: the https front sends /graph/ to the graph service and everything else to mia (D-133).
+
+        Example: Caddyfile has handle_path /graph/* { reverse_proxy graph:8587 } and reverse_proxy mia:8585.
+        """
+        # Given: the Caddyfile of the https front
+        with open(os.path.join(DEPLOY, "Caddyfile"), encoding="utf-8") as fp:
+            caddyfile = fp.read()
+        # When: its routes are read
+        graph_route = re.search(r"handle_path\s+/graph/\*\s*\{\s*reverse_proxy\s+graph:(\d+)", caddyfile)
+        # Then: /graph/ goes to graph on the port its command serves, the rest to mia
+        self.assertIsNotNone(graph_route)
+        self.assertIn(graph_route.group(1), load("compose.yaml")["graph"]["command"])
+        self.assertIn("reverse_proxy mia:8585", caddyfile)
 
     @mark.req('REQ-OPR-010')
     def test_the_model_server_loads_one_model_in_every_variant(self):

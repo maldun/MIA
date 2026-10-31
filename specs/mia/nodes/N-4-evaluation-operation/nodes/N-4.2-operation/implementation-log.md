@@ -103,3 +103,23 @@ Open questions for the owner:
 - T05-Q3 (trace): mark the TC-SLY-008 test in `tests/test_backup.py` also with `REQ-OPR-005` (the same test serves both test cases), or a separate test for the stack command of Q1? Recommendation: the stack test of Q1 carries REQ-OPR-005; `test_backup.py` stays with N-3.1.
 
 T-06 to T-08 not started (plan order; T-07 depends on T-03 and T-05, T-08 on T-07).
+
+## Answers of the owner (2026-10-31, D-133)
+All seven recommendations accepted: (1) http 8585 stays on loopback even with `MIA_BIND=0.0.0.0`, other devices use https; (2) `graph` = the mia image serving `graph_app/` behind the Caddy route `/graph/`, no own port (the Caddyfile is part of T-03); (3) "graph alone" = the JavaScript contract suite on the host against the files the container serves, TC-OPR-007 amended; (4) the TC-OPR-007 / SMOKE-MIA-003 test as amendment draft A-46; (5) `deploy/up.sh backup|restore` call `tools/backup.sh`/`restore.sh` with the `db` when it exists, old archives still restore (T-05's Touches widened to `deploy/up.sh`); (6) `requirements-db.txt` into the venv `mia312`; (7) the paid-API lists of `tools/check_free.py` stay for the owner's review.
+
+Venv (item 6): `/home/maldun/prog/Python/venvs/mia312` (found with `find ~ -name mia312`), `pip install -r requirements-db.txt` installed exactly `psycopg 3.3.6` and `psycopg-binary 3.3.6` (Python 3.12). `tests/test_backup.py` (TC-SLY-008) now runs on the host with this venv: 3 tests OK in 15.5 s (it starts its own `postgres:16` on 127.0.0.1 and removes it).
+
+## T-03 Compose stack (2026-10-31, done after D-133) – REQ-OPR-007 (with -008, -010 of 042a784)
+
+| Requirement | Where it is met | Test |
+|---|---|---|
+| REQ-OPR-007 one container per node | `deploy/compose.yaml`: service `graph` (N-5) from the mia image (`${MIA_IMAGE:-localhost/mia:latest}`, the same variable for `mia`), command `python -m http.server 8587 --directory /opt/mia/MIA/graph_app`, its own healthcheck, no published port; `https` depends on it. `deploy/Caddyfile`: `redir /graph /graph/`, `handle_path /graph/* { reverse_proxy graph:8587 }`, everything else to `mia:8585` (same origin for the IF-104 calls later). `mia` = N-2, `db` = N-3 (profile), none for N-4 (D-127) | `tests/test_compose_stack.py` (+2, now 6): graph has the image of mia, no ports, a command serving graph_app; the Caddyfile routes /graph/* to graph on the port of its command and the rest to mia. The stack itself: SMOKE-MIA-003 draft (A-46, below) |
+
+- Red first: both new tests failed on the old files (no `graph` service, no route).
+- `MIA_IMAGE` (new optional variable, default unchanged) lets the smoke build its own tag instead of overwriting `localhost/mia:latest`, which the owner's running `mia` uses; `tools/run_in_image.sh` already reads the same variable.
+- `caddy validate` of the new Caddyfile in `caddy:2`: valid. `podman compose config` renders the graph service.
+- Tests reported green (feedback, not verification), in the image: `test_compose_stack` (6), `test_deploy` (16).
+- A-46 (smoke draft, see the plan commit) run on a scratch copy of the branch with the draft in `tests/smoke/` and the venv `mia312`: mia alone 206 tests OK (25 skipped, the real halves), db alone 17 OK, graph alone (served files equal `graph_app/`, IF-104 JS suite 5 pass, 5 skipped), all together: 5 services run, https answers on `/` and `/graph/`, db ready -> "SMOKE-MIA-003: green", exit 0; containers, volumes, network and image tag removed afterwards.
+- Finding during the scratch run (for the owner): a first version started the stack's own `ollama` profile; MIA then began `pulling gemma4:26b` into the empty volume. I stopped the stack within about 2 minutes and removed its volumes (nothing kept). The draft now uses the model server already running on the host (`OLLAMA_URL=http://host.containers.internal:11434`, `MIA_SMOKE_OLLAMA` overrides; exit 2 when none answers) and never the ollama profile. The same pull would happen on a fresh install with the ollama profile; that is T-07's ground (TC-OPR-001), noted there.
+- Found, not changed: on a fresh checkout `ui/godot/build/web` is missing; the stack still started in the scratch run, and the missing Kokoro model only logs a traceback in `mia`. For T-07.
+

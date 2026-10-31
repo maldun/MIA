@@ -1,4 +1,5 @@
 # HTTPS in front of MIA (service "https" of compose.yaml): the certificate comes from Caddy's own local CA, for whatever name or address is used.
+# /graph/ goes to the graph app's container (D-133), everything else to mia.
 # Browsers warn once; trust the CA to avoid it (deploy/README.md). Web sockets pass through, the Host header stays as the browser sent it.
 {
 	skip_install_trust
@@ -9,5 +10,11 @@ https://:8586 {
 	tls internal {
 		on_demand
 	}
-	reverse_proxy mia:8585
+	redir /graph /graph/
+	handle_path /graph/* {
+		reverse_proxy graph:8587
+	}
+	handle {
+		reverse_proxy mia:8585
+	}
 }
