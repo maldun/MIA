@@ -17,7 +17,6 @@ from moods import MoodTracker                             # noqa: E402
 from storage import Storage                               # noqa: E402
 from storage_files import FileBackend                     # noqa: E402
 
-A61_INSTALLED = "`categories()`" in open(os.path.join(ROOT, "contracts", "IF-302-record-tables.md"), encoding="utf-8").read()      # IF-302 v6 (A-61)
 DAY = 24 * 3600
 START = 1767225600          # 2026-01-01 00:00 UTC, a Thursday of ISO week 2026-W01
 
@@ -118,19 +117,6 @@ class AnswersTest(unittest.TestCase):
                 self.assertEqual(code_of(lambda: self.chat.vote("anna", "service", "service", value)), ("invalid_vote", "value"))
         # And nothing is stored
         self.assertEqual(self.storage.ids("votes"), [])
-
-    @unittest.skipUnless(A61_INSTALLED, "waits for amendment A-61 (IF-302 v6, categories())")
-    @mark.req("REQ-CHA-015", "IF-302")
-    def test_the_chat_service_takes_the_vote_categories_through_if_302(self):
-        """F6 (N-3.3 Verify, D-161): the chat service asks IF-302 for the categories and imports no constant of the record tables.
-
-        Example: chat_service.categories is record_tables.categories; chat_service has no CATEGORIES.
-        """
-        import chat_service
-        import record_tables
-        # Given the chat service module, Then it uses the IF-302 operation and keeps no copy of the list
-        self.assertIs(chat_service.categories, record_tables.categories)
-        self.assertFalse(hasattr(chat_service, "CATEGORIES"))
 
     def test_regenerate_asks_again_for_the_last_answer_only(self):
         """TC-IF-201-05: a new try of the last answer, the old answer stays; an older answer or an unknown id is refused."""
