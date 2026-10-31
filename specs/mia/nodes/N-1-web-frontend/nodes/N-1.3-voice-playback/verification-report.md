@@ -166,3 +166,47 @@ Start: `bash tools/start_testing.sh start chat-on-stub`, open `http://127.0.0.1:
 - CI stage log (none); all results are local.
 - TC-VPB-005 on the compose stack (F7).
 - The pilot SysML parser (`tools/check_sysml.sh`).
+
+## Re-verification 2 (2026-10-31)
+**Branch:** goal/v1 @ f4da817 (fix commits of `v1-n13b`: 10c2fb0 N1, f7229dd N5, 31c8f90 F7; merged in 402a319)   **Reviewer:** Claude Opus 5.5 (AI, fresh context, never saw the implementation chat)   **Inputs:** "Re-verification (2026-10-31)" above, implementation-log.md (D-144 table, D-145 note), requirements.md, test-spec.md (TC-VPB-005 on the stack), D-140, D-141, D-142, D-144, D-145. Local runs only (no CI). The merge 402a319 touches no file under `contracts/`, `tests/acceptance/`, `tests/helpers/`, `tests/integration/` (`git diff --stat 402a319^1 402a319`: the node's log and test-spec, `voice-player.test.mjs`, three Python tests).
+
+### Verdict (re-verification 2)
+Proposed: **Verified with accepted deviations.** F7 is closed: TC-VPB-005 ran on the compose stack (not skipped, 5/5 OK) and checks what REQ-VPB-005 / AC-29 ask. N1 and N5 now have tests that fail on the defect. The remaining items are recorded by the owner for the N-1 integration step (N2..N4, D-145), the plan item F8, the tool item N6, and one new Low finding on the test's cleanup (M1: two anonymous volumes left per run), which does not touch the evidence. Condition: the owner's by-ear checks below; if one of them fails, the status is "Not verified".
+
+### Per finding
+| # | State | Evidence |
+|---|---|---|
+| F7 TC-VPB-005 on the stub | **Fixed** (31c8f90; D-144) | `python3 tests/test_delivery_on_stack.py` on the host, 18:30:12-18:32:13 UTC: 5 tests, OK, 121 s, none skipped (the 4 stack tests ran through `setUpClass`: build of `localhost/mia:vpb005` with `--pull=never`, `podman-compose -p mia-vpb005 up -d --no-build`, Chromium of `localhost/mia-browser`). What it checks against REQ-VPB-005 / AC-29: every request of the browser session (page, scripts, socket, an uploaded voice line played to `ended`) goes to the mia container's published port (`:134-144`, `:147-160`); `sound.js` over the http front and over the https front (Caddy) is byte-equal to `/opt/mia/MIA/templates/static/chat/sound.js` in the mia container (`:163-175`); the project runs exactly mia, graph, https, searxng, no frontend container (`:178-189`). That is the requirement. The red evidence (scratch copy with `<script src="https://cdn.example.org/x.js">` in `templates/index.html`: 1 FAIL with that url) is in the log; not repeated (one stack run is ~2 min and leaves volumes, M1); `CheckItself` shows `outside()` finds another host and ignores `data:`/`blob:`. Setup failures raise (error, not pass); missing tools/images/model server skip. Nothing pulled: `podman images -a` (709 entries, ids and tags) identical before and after, the `ollama` container ran throughout and still runs. Cleanup: no container, network or image tag `mia-vpb005`/`localhost/mia:vpb005` left, `deploy/setup_cfg.local.json` removed again, `git status --ignored` unchanged; but **two anonymous volumes left** (M1) |
+| N1 resolve guard untested | **Fixed** (10c2fb0) | `specAudio(..., { resolveLater: true })` and the test "a stop just after a line starts leaves the character silent ..." Reviewer mutant in a scratch copy (`sound.js:154`, `if (this.current === line)` removed from the resolve handler): `voice-player.test.mjs` 21 pass, **1 fail** (that test); unmutated: 22/22 |
+| N5 running stage reused | **Fixed** (f7229dd) | `own_stage()` (`test_page_requests.py:41-49`) matches the messages of `tools/testing_stages.d/_common.sh:25,31`. Reviewer run with the stage started by hand first: `test_page_requests.py` `OK (skipped=1)`, `test_frontend_delivery.py` `OK (skipped=1)`, the stage still ran afterwards (then stopped by hand). Stage stopped first: `test_page_requests.py` 5 OK (20 s), the stage gone afterwards. `StageUse` unit test covers the parse |
+| N2 outside pause leaves the queue waiting | **Recorded** (D-145, integration step of N-1) | mutant "no `AbortError` return" (`sound.js:159`) still survives (22/22), as expected for a recorded item |
+| N3 Stop vs. lines in synthesis | **Recorded** (D-145) | by-ear check 3 below |
+| N4 browser `--network host` | **Recorded** (D-145); applies also to `test_delivery_on_stack.py:128` | unchanged |
+| N6 trace_check reads the first id only | **Open** (tool, Info) | WARN REQ-FE-026, REQ-FE-030 unchanged |
+| F8 Scenarios, JS markers | **Open** (Plan) | trace_check ERROR "no `## Scenarios`" unchanged |
+
+### New findings
+| # | Finding | Severity | Needs | Proposal |
+|---|---|---|---|---|
+| M1 | `tests/test_delivery_on_stack.py:115-116`: the cleanup (`podman-compose ... down -v`, `network rm`) removes the named volumes but not the **anonymous volumes** of the searxng image (`VOLUME /etc/searxng /var/cache/searxng`). The reviewer's run left `a6148ff23dbd…` (holds an empty `settings.yml` mount point) and `b576255c68cb…`, created 18:31:14Z, no labels. test-spec TC-VPB-005 and the D-144 log row say the test removes its volumes; the log checked only names `mia-vpb005*`. The host has ~28 such pairs from today (several stack tests and stages), so the pattern is not unique to this test | Low (host hygiene; the evidence is not affected) | test | collect the volume mounts of the project's containers (`podman inspect` before `down`) and remove them after `down`, or `podman rm -v` the containers; add the check "no volume of the project's containers is left" to the test's own teardown. The two volumes of this run were left in place as evidence; the owner may `podman volume rm` them |
+| M2 | `tests/test_delivery_on_stack.py:111`: `--pull=never` stops image pulls, but the build's `RUN pip install -r MIA/requirements.txt` (`deploy/Containerfile:9`) still has network: when `requirements.txt` changes and the layer cache misses, the test downloads from PyPI, against "nothing pulled" (TC-VPB-005 row). In this run every layer was cached (no new image id) | Info | owner decision | `podman build --network none` in the test (a cache miss then fails the build with a clear message, or skips), or record that the test relies on the cached layers of `localhost/mia:latest` |
+| M3 | `tests/test_delivery_on_stack.py:105-109`: while the test runs it writes `deploy/setup_cfg.local.json` (`{}`) into the checkout and removes it afterwards; in a worktree shared by several sessions another process sees the file for ~2 min | Info | - | none needed now; the file is git-ignored and removed (checked) |
+
+### Check results (reviewer's runs)
+| Check | Result |
+|---|---|
+| `python3 tests/test_delivery_on_stack.py` (host) | 5 OK, 121 s (wall 2 min 1 s); details and cleanup in F7 and M1 |
+| `node --test "tests/js/*.test.mjs"` | 132 pass, 0 fail (`voice-player.test.mjs` 22) |
+| `node --test tests/acceptance/contract/*.mjs tests/integration/N-1/*.mjs` | 33 tests: 17 pass, 0 fail, 16 skipped (the `[real]` and the later N-1 steps, as before) |
+| `python3 tests/test_page_requests.py` (host) | 5 OK, 20 s, the stage started and stopped by the test; with a running stage: skipped, stage untouched (N5) |
+| Python, MIA image (`localhost/mia:latest` 22619de57b4b, `--network none`, on a `git archive HEAD` copy in the scratchpad, removed) | `test_audio_router.py` 23 OK, `test_chat_page.py` 11 OK, `test_voice_lines.py` 8 OK, `test_speech_service.py` 9 OK, `test_frontend_delivery.py` 2 OK (1 skipped: no podman in the image). On a read-only mount of the checkout three files error (`mia_logger.py` writes `mia.log` next to the package) - an environment effect, not a defect of this node |
+| trace_check (N-1.3 lines) | ERROR `test-spec.md` no `## Scenarios` (F8); WARN REQ-VPB-001..003, IF-112, REQ-FE-013 (JS markers not read), REQ-FE-026, REQ-FE-030 (N6); WARN TD-02..04 not listed here (deferrals of A-26, none concerns N-1.3) |
+| test_doc_check | `test_delivery_on_stack.py`, `test_page_requests.py`, `test_frontend_delivery.py`: 0 errors, 0 warnings |
+| Code review of 10c2fb0, f7229dd, 31c8f90 | test files and specs only, no product code; subprocess calls with fixed argument lists, no shell; the stack binds 127.0.0.1 only (`MIA_BIND`, port 127.0.0.1-mapped in `compose.yaml:24`); the model server is the host's (`OLLAMA_URL`), the `ollama` profile is never started |
+
+### Manual checks for the owner (by ear, browser)
+Unchanged from "Re-verification (2026-10-31)" above (D-145: one checklist file for N-1.3 and N-4.2, not written yet): (1) two tabs claim the voice, (2) mute per device and the autoplay hint, (3) Stop silences the voice at once, and listen for a late line and for a voice whose text is already complete (N3), (4) a missing file gives one console warning and the next line plays. Start: `bash tools/start_testing.sh start chat-on-stub`, open `http://127.0.0.1:8685/?character=0`. Optional on the stack: the same page over the https front of `deploy/up.sh` from a phone (REQ-VPB-005 by ear).
+
+### Not checked
+- Real audio output, timing and the mouth (no sound device): the checks above.
+- The planted-outside-request run of TC-VPB-005 (log evidence accepted, see F7); CI stage log (none).

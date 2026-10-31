@@ -100,3 +100,45 @@ To be decided by the owner (candidates: F3 if option b, F8, F9).
 
 ## Notes for Phase 7
 - Whether users find the account of a task (coarse steps) helpful, and whether the late task's missing account (F1) is noticed.
+
+## Re-verification (2026-10-31)
+**Branch:** goal/v1 @ f4da817 (fixes: branch v1-n243b, merged in 4be4367; commits 9b71f69, e4d678d, a633b60, 73037cb, 073ceab)   **Decisions:** D-138, D-144, D-146
+**Reviewer:** Claude Opus 5.5 (AI, independent; did not see the implementation chat). Runs in `localhost/mia:latest` (22619de57b4b), `--network none`; mutants on a scratch `git archive` copy of f4da817 (removed afterwards). No model server, no eval.
+
+### Per finding
+| # | State | Evidence |
+|---|---|---|
+| F1 late task keeps no steps | **Fixed** | `chat_service.py:527` now `if event.get("plain"):`. Test `test_chat_tasks.py::test_a_task_that_asks_keeps_its_steps_for_the_account`: mutant "re-add `and not self._late`" fails it (1 failure); green on the real code. Steps before and after the question both survive (the answer of the user does not reset `_steps`). `test_chat_backend.py` and the IF-101 suite stay green under the mutant (see F7). |
+| F2 replay result comparison untested | **Fixed** (test only) | `test_run_log_node.py::test_a_changed_run_is_reported_as_a_difference_and_not_as_a_replay` asserts status, the divergence and the lost `claim` / `draft`. Mutant `reproduce.py:156` `differences = []` fails it; green on the real code. |
+| F3 numeric secrets kept | **Fixed, decided (D-144) and applied; D-146 applied** | `events.py:49` drops the type exemption; only `""` stays. Mutant "old type exemption" fails `test_events.py` and `test_run_events.py`; mutants "remove `\"\"` too" (D-146), "keep lists/dicts", "keep `None`" each fail `test_events.py`. Matches D-146 exactly: `""` stays, every other value (0, False, None, " ", list, dict) becomes `[removed]`. No production event payload carries a number under a secret-like key (grep). The "related" items (bare `key`, `passphrase`, `password=` in plain text) stay recorded, not part of D-144. |
+| F4 compare: payloads, length | **Fixed** (test only) | Two tests in `test_run_events.py`; mutant "types only" and mutant "length ignored" each fail one; green on the real code. The IF-401 suite stays green under both (N1). |
+| F5 model part `runLog` | **Fixed** | `architecture.sysml:518` lists `run_events.py`; `test_run_log_files.py::test_the_model_part_of_the_run_log_names_the_provider_of_if_401` fails when it is removed. |
+| F6 docstrings | **Fixed** | `test_chat_backend.py:380` Example now matches the asserted account; `test_run_log_node.py` docstring names what it asserts. |
+| F7 IF-101 suite does not check v11 | **Open** (recorded) | Protected suite; needs an amendment. Confirmed again: the F1 mutant keeps `test_if_101_chat_api.py` green. |
+| F8 no `## Scenarios` in test-spec.md | **Open** (recorded, systemic) | trace_check still reports it (Phase 2, with the other nodes). |
+| F9 IF-401 suite T2/T3 | **Open** (recorded, D-138 (4)) | test_doc_check: 4×T2, 4×T3, unchanged. |
+
+### New findings
+| # | Finding | Severity | Needs | Proposal |
+|---|---|---|---|---|
+| N1 | The IF-401 contract suite does not pin the D-144 rules: `tests/acceptance/contract/test_if_401_run_events.py:42` checks only a string secret, `:64` only an extra middle event. The F3 mutant and both F4 mutants keep the suite green on mock and real; only node tests catch them (same kind as F7). | Low | amendment (protected suite) | With the F9 amendment: a numeric secret and `""` in TC-IF-401-02, a same-types/other-payload case in TC-IF-401-04. |
+| N2 | `contracts/IF-401-run-events.md:10` says secret-named keys "are stored as `[removed]`" with no exception; the code keeps `""` (D-146). Not a leak (an empty text holds no secret, REQ-LOG-002 AC-4 is met), but the contract text and the code differ. | Low | amendment (contract wording) or accepted deviation | Add "(an empty text stays `""`, D-146)" to the IF-401 row at the next IF-401 amendment. |
+
+No correctness, interface or security problem in the five fix commits. Scope: only `chat_service.py` (N-2.1, allowed by D-144), `events.py`, `architecture.sysml`, node tests and the node log; no protected file changed.
+
+### Check results
+| Check | Result |
+|---|---|
+| Node tests: `test_run_events.py` (15), `test_run_log_files.py` (3), `test_run_log_node.py` (4), `test_events.py` (23), `test_run_explain.py` (16), `test_chat_tasks.py` (12), `test_chat_backend.py` (41) | all OK |
+| IF-401 suite `test_if_401_run_events.py` | 10 OK (mock and real) |
+| IF-101 suite `test_if_101_chat_api.py` | 60 OK, 3 skipped (as before) |
+| Neighbours: `test_pipeline.py` (26), `test_runner_interfaces.py` (8), `test_run_workflow.py` (12), `test_content_store.py` (12) | all OK |
+| Mutants (9 on the scratch copy) | all 9 killed by node tests (F1, F2, F3, F4a, F4b, F5, three D-146 variants) |
+| trace_check (node lines) | 1 error: no `## Scenarios` (F8); WARN TD-01..TD-04 not listed (system-wide deferrals of other nodes, same warning on every node report) |
+| test_doc_check | node tests 0 findings; the new tests in `test_events.py`, `test_chat_tasks.py`, `test_chat_backend.py` have no finding (older tests in those files have, not this node's); IF-401 suite 4×T2, 4×T3 (F9) |
+| `bash tools/check_sysml.sh specs/mia/architecture.sysml` | ok, 0 errors, 0 warnings |
+| `python3 -I tools/check_sysml_model.py .` | OK |
+| Full suite | not rerun by me; the implementation log reports only the known failures (`test_amendment_report`, `test_harness` rt_edit) |
+
+### Proposed status
+**Verified with accepted deviations (proposed).** F1 to F6 are fixed, each with a test that fails against the mutant of the first report and passes on the code; D-144 and D-146 are applied as decided. Open items are all low and on protected or plan material (F7, F8, F9, N1, N2): they need amendments, not code, and none affects REQ-LOG-001..005 or the IF-401 / IF-101 behaviour. Candidates for accepted deviations: F7, F8, F9, N1, N2 (or N1 and N2 joined to the F9 amendment).
