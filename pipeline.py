@@ -328,8 +328,9 @@ class Runner:
         self.functions = dict(functions or {})
         self.run_log = run_log
         self.environment, self.strict_events = environment, strict_events
-        # store: a content_store.ContentStore; store_texts(skill name) says for which skills prompts and answers are kept in full (default: all; Core leaves out the chat, LG3)
-        self.store, self.store_texts = store, store_texts or (lambda name: True)
+        # store: a content_store.ContentStore; store_texts(skill) says for which skills prompts and answers are kept in full
+        # (default: all but those marked personal, LG3, D-128; the setting store_chat_texts keeps them all)
+        self.store, self.store_texts = store, store_texts or (lambda skill: not skill.get("personal"))
         self.sandbox, self.broker_factory = sandbox, broker_factory      # sandbox.SandboxRouter and a function that makes a web broker per script
         self.rng = rng or random.Random()
         self.clock = clock
@@ -622,7 +623,7 @@ class Runner:
     def _model_call(self, st, settings, prompt_hash, messages, reply, seconds, valid, attempt, schema_name, usage):
         """the model_call event (13d): what was asked and answered by hash, how long it took, whether the answer fitted; the digest of the model is filled in by the environment"""
         text = reply if isinstance(reply, str) else _text(reply)
-        if self.store is not None and self.store_texts(st.skill["name"]):
+        if self.store is not None and self.store_texts(st.skill):
             self.store.put(messages)                                  # the same hash as prompt_hash (events.digest and the store use one function)
             self.store.put(text)
         ev.emit("model_call", {"model": settings.get("name"), "profile": settings.get("profile"), "digest": None, "options": settings.get("options"),

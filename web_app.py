@@ -591,7 +591,7 @@ def _run_environment():
 tool_calls = build_tool_calls(_web_tools, _scholar, _source_trust, sandbox_router)
 run_events = RunEvents(os.path.join(_runs_dir, "events"))
 core = Core(_own_path(CONST.SKILLS_DIR_KEY, CONST.DEFAULT_SKILLS_DIR), library, _runs_dir, model=pipeline_model, sandbox=sandbox_router, environment=_run_environment,
-            store=content_store, store_texts=(lambda name: True) if cfg.get("store_chat_texts") else None,
+            store=content_store, store_texts=(lambda skill: True) if cfg.get("store_chat_texts") else None,
             broker_factory=lambda: broker_module.WebBroker(broker_module.web_handlers(_web_search, _web_client)),
             tool_calls=tool_calls, door_tools={name: budget_key for name, (_, budget_key) in _web_tools.items()}, run_events=run_events,
             functions={"chunk_text": web_tools.chunk_text, "untrusted": web_tools.untrusted, "injection_signals": web_tools.injection_signals,
