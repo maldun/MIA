@@ -1,7 +1,7 @@
 """TC-VPB-004 (REQ-VPB-004, REQ-FE-026): a real browser loads the chat page, plays one voice line and every request of the session goes to the page's own host.
 Stage 3 (D-141): the chat page from the stub server in the MIA image (tools/start_testing.sh, stage chat-on-stub, as tests/test_frontend_delivery.py),
 headless Chromium in the image localhost/mia-browser (tests/browser/Containerfile) on loopback; the requests come from Chromium's performance log.
-Skipped, never passed, where podman, one of the images or the stage is missing.
+Skipped, never passed, where podman, one of the images or the stage is missing, or where the stage runs already (N5).
 Run on the host with: python3 tests/test_page_requests.py"""
 import json
 import os
@@ -38,6 +38,32 @@ def outside(urls):
     return [url for url in urls if urlsplit(url).scheme not in NO_NETWORK_SCHEMES and urlsplit(url).netloc != OWN_HOST]
 
 
+def own_stage(output):
+    """True when the output of `start_testing.sh start chat-on-stub` says this run started the stage. A stage that runs already is never
+    used (N5): its container name is shared by every checkout and a running stage keeps its old code, so the test would check another one"""
+    if "running already" in output:
+        raise unittest.SkipTest("the stage chat-on-stub runs already (another checkout or older code); stop it first: "
+                                "bash tools/start_testing.sh stop chat-on-stub")
+    if "started" in output:
+        return True
+    raise unittest.SkipTest("the stage does not start: " + output[-200:])
+
+
+class StageUse(unittest.TestCase):
+    def test_a_stage_that_runs_already_is_not_used(self):
+        """N5: a stage that runs already may be another checkout's or carry older code, so the test skips (never passes) on it.
+
+        Example: own_stage("mia-test-chat-on-stub is running already") -> SkipTest; own_stage("mia-test-chat-on-stub started (port 8685 ...)") -> True.
+        """
+        # Given: the outputs of a start that found the stage running and of a start that started it
+        running = "== chat-on-stub\nmia-test-chat-on-stub is running already\n"
+        started = "== chat-on-stub\nmia-test-chat-on-stub started (port 8685, logs: podman logs mia-test-chat-on-stub)\n"
+        # When / Then: the running one is not used, the started one is
+        with self.assertRaises(unittest.SkipTest):
+            own_stage(running)
+        self.assertTrue(own_stage(started))
+
+
 class PageRequests(unittest.TestCase):
     session = None
 
@@ -45,11 +71,8 @@ class PageRequests(unittest.TestCase):
     def setUpClass(cls):
         if shutil.which("podman") is None or not image_exists(MIA_IMAGE) or not image_exists(BROWSER_IMAGE):
             raise unittest.SkipTest("podman or an image is missing (%s, %s)" % (MIA_IMAGE, BROWSER_IMAGE))
-        start = stage("start")
-        if "started" in start.stdout:
+        if own_stage(stage("start").stdout):
             cls.addClassCleanup(stage, "stop")                    # only a stage this test started is stopped again
-        elif "running already" not in start.stdout:
-            raise unittest.SkipTest("the stage does not start: " + start.stdout[-200:])
         with open(DRIVER, encoding="utf-8") as driver:
             run = subprocess.run(["podman", "run", "--rm", "-i", "--network", "host", BROWSER_IMAGE, "python", "-", PAGE],
                                  stdin=driver, capture_output=True, text=True, timeout=120)

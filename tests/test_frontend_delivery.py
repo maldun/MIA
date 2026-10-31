@@ -13,6 +13,9 @@ sys.path.insert(0, os.path.join(ROOT, "tests", "helpers"))
 
 from markers import mark  # noqa: E402
 
+sys.path.insert(0, os.path.join(ROOT, "tests"))
+from test_page_requests import own_stage  # noqa: E402
+
 
 class Delivery(unittest.TestCase):
     @mark.req("REQ-VPB-005", "REQ-FE-030")
@@ -45,9 +48,8 @@ class Delivery(unittest.TestCase):
         if shutil.which("podman") is None or subprocess.run(["podman", "image", "exists", "localhost/mia:latest"]).returncode != 0:
             self.skipTest("podman or the image localhost/mia:latest is not available")
         start = subprocess.run(["bash", os.path.join(ROOT, "tools", "start_testing.sh"), "start", "chat-on-stub"], capture_output=True, text=True)
-        self.addCleanup(subprocess.run, ["bash", os.path.join(ROOT, "tools", "start_testing.sh"), "stop", "chat-on-stub"], capture_output=True)
-        if "started" not in start.stdout and "running already" not in start.stdout:
-            self.skipTest("the stage does not start: " + start.stdout[-200:])
+        if own_stage(start.stdout):                    # N5: a stage that runs already is neither used nor stopped
+            self.addCleanup(subprocess.run, ["bash", os.path.join(ROOT, "tools", "start_testing.sh"), "stop", "chat-on-stub"], capture_output=True)
         for path, needle in (("/", "<title>MIA</title>"), ("/static/chat/sound.js", "class VoicePlayer"), ("/static/chat/chat.js", "import")):
             # When: the page and its scripts are requested from the container
             with urllib.request.urlopen("http://127.0.0.1:8685" + path, timeout=5) as response:
