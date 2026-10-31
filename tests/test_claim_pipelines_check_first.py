@@ -96,6 +96,20 @@ class ClaimPipelinesCheckFirst(unittest.TestCase):
 
     # REQ-WFX-005
     @mark.req("REQ-WFX-005", "REQ-TLS-001")
+    def test_the_default_pipeline_of_verify_claim_checks_first(self):
+        """TC-N24-002 (D-153): the skill verify_claim on its default pipeline (the number gate) runs a code check before its first model call, with and without a number.
+
+        Example: verify_claim without a variant, "The tower is 330 m high." and "The tower is very tall." -> check.number before the first judge.
+        """
+        for claim in (NUMBER, WORDS):
+            with self.subTest(claim=claim["claim"]):
+                # Given / When: the shipped skill without a pipeline variant
+                # Then: the code check comes first
+                self.assert_check_first("verify_claim", claim)
+                self.assertTrue(self.positions(self.run_claim("verify_claim", claim)[0]["events"])[0])
+
+    # REQ-WFX-005
+    @mark.req("REQ-WFX-005", "REQ-TLS-001")
     def test_the_other_styles_are_styles_behind_the_gate(self):
         """TC-N24-002 (D-153): the styles single, consistency, jury, cops, trial have no code check of their own and judge with the model first; AC-2 does not
         apply to them because they stand behind the gate. Pinned so that a change of this shows here.

@@ -4,6 +4,7 @@ how the votes become a verdict. Nothing here says how good a style is with a rea
 """
 import json
 import os
+import re
 import sys
 import tempfile
 import unittest
@@ -74,7 +75,7 @@ class Styles(unittest.TestCase):
         folder = tempfile.mkdtemp()
         os.makedirs(os.path.join(folder, "skills"))
         with open(os.path.join(folder, "skills", "verify_claim.md"), "w", encoding="utf-8") as fp:
-            fp.write(self.TEMPLATE.replace("pipeline: verify.single@1", "pipeline: %s@1" % pipeline))
+            fp.write(re.sub(r"(?m)^pipeline: .*$", "pipeline: %s@1" % pipeline, self.TEMPLATE))          # whatever the default of the skill is (v2: the gate, D-153)
         model = Scripted(answer)
         core = Core(os.path.join(folder, "skills"), Library(os.path.join(REPO, "library")), folder, model=model)
         result = core.run("verify_claim", {"claim": CLAIM, "evidence": EVIDENCE, **inputs})
