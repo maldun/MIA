@@ -6,8 +6,10 @@
 #                                                       addresses with their methods; `history` on the wire ({messages, older}, `before`); the operations
 #                                                       `commands` and `backgrounds`; the events chat_status, chat_pipeline, audio_owner, audio_reload; the
 #                                                       page's events audio_claim, audio_ended, character_ready; one row in the version history
-#   tests/acceptance/contract/test_if_101_chat_api.py   A-54's case "the eleventh message ... rate limited": TC-IF-101-30 -> TC-IF-101-33 (30 stays the files case)
-#   specs/mia/test-spec.md                              its row: TC-IF-101-30 -> TC-IF-101-33
+#   tests/acceptance/contract/test_if_101_chat_api.py   A-54's case "the eleventh message ... rate limited": TC-IF-101-30 -> TC-IF-101-33 (30 stays the files case);
+#                                                       the second TC-IF-101-09 (v1, the ack with the stored message) -> TC-IF-101-20 (D-167)
+#   specs/mia/test-spec.md                              the same two renumbered rows; the rows TC-IF-101-20 to -29 after TC-IF-101-19, 21..29 made from the suite
+#   tests/helpers/contract.py                           the real adapter: a refusal of send without a code is 500 `no_code`, not 429 `rate_limited` (D-167)
 # Not protected, changed with it (the allow-list follows the contract): tests/js/multiuser.test.mjs and tests/test_chat_views_browser.py, PENDING_A62 emptied.
 # Note: specs/mia/amendments/A-62/A-62-note.md. If A-54 is installed again AFTER this one (it copies whole files), run this script with --do again.
 # INSTALL IT ON THE LINE OF WORK goal/v1 after the merge of v1-n11b (the two test files above come with that branch).
@@ -121,19 +123,65 @@ if "| A-62 |" not in text:
 open(sys.argv[2], "w", encoding="utf-8").write(text)
 PY
 python3 - tests/acceptance/contract/test_if_101_chat_api.py "$TMP/test_if_101_chat_api.py" specs/mia/test-spec.md "$TMP/test-spec.md" <<'PY'
+import ast
+import re
 import sys
 suite_in, suite_out, spec_in, spec_out = sys.argv[1:5]
+# D-163, D-167 (N-2.1 R-1): the ids of the suite are unique; A-54's rate-limit case 30 -> 33 (30 stays the files case of v8), the second 09 (v1, the ack
+# with the stored message) -> 20, the id that was never given
 pairs = ((suite_in, suite_out, '"""TC-IF-101-30 (v12, A-54):', '"""TC-IF-101-33 (v12, A-54):'),
-         (spec_in, spec_out, "| TC-IF-101-30 | IF-101 | Contract | 1 (mock) and 2 (real) | v12 (A-54", "| TC-IF-101-33 | IF-101 | Contract | 1 (mock) and 2 (real) | v12 (A-54"))
-for source, target, old, new in pairs:
-    text = open(source, encoding="utf-8").read()
-    if new not in text:
-        if text.count(old) != 1:
-            sys.exit("A-54's TC-IF-101-30 is not found exactly once in %s; renumber it by hand" % source)
-        if "TC-IF-101-33" in text:
-            sys.exit("TC-IF-101-33 is taken already in %s; pick the next free number by hand" % source)
-        text = text.replace(old, new)
-    open(target, "w", encoding="utf-8").write(text)
+         (suite_in, suite_out, '"""TC-IF-101-09 (v1): send answers', '"""TC-IF-101-20 (v1): send answers'),
+         (spec_in, spec_out, "| TC-IF-101-30 | IF-101 | Contract | 1 (mock) and 2 (real) | v12 (A-54", "| TC-IF-101-33 | IF-101 | Contract | 1 (mock) and 2 (real) | v12 (A-54"),
+         (spec_in, spec_out, "| TC-IF-101-09 | IF-101 | Contract | 1 (mock) and 2 (real) | v1: send answers", "| TC-IF-101-20 | IF-101 | Contract | 1 (mock) and 2 (real) | v1: send answers"))
+texts = {suite_in: open(suite_in, encoding="utf-8").read(), spec_in: open(spec_in, encoding="utf-8").read()}
+for source, _, old, new in pairs:
+    if new not in texts[source]:
+        if texts[source].count(old) != 1:
+            sys.exit("%r is not found exactly once in %s; renumber it by hand" % (old, source))
+        if re.search(r"TC-IF-101-\d+", new).group(0) in texts[source]:
+            sys.exit("%s is taken already in %s; pick the next free number by hand" % (new, source))
+        texts[source] = texts[source].replace(old, new)
+
+# the rows TC-IF-101-20 to -29 of specs/mia/test-spec.md stand after the row of TC-IF-101-19; 21..29 are made from the cases of the suite (first
+# paragraph of the docstring, the requirements of mark.req besides IF-101)
+lines = texts[spec_in].split("\n")
+if not any(line.startswith("| TC-IF-101-21 |") for line in lines):
+    cases = {}
+    for node in ast.walk(ast.parse(texts[suite_in])):
+        doc = ast.get_docstring(node) if isinstance(node, ast.FunctionDef) else None
+        match = re.match(r"(TC-IF-101-(2[1-9])) (\(([^)]*)\))?:?\s*(.*)", (doc or "").split("\n\n")[0].replace("\n", " "))
+        if not match:
+            continue
+        reqs = [arg.value for d in node.decorator_list if isinstance(d, ast.Call) and getattr(d.func, "attr", "") == "req"
+                for arg in d.args if isinstance(arg, ast.Constant) and arg.value != "IF-101"]
+        text = ("%s: %s" % (match.group(4), match.group(5)) if match.group(4) else match.group(5)).rstrip(".").replace("|", "\\|")
+        cases[match.group(1)] = "| %s | IF-101 | Contract | 1 (mock) and 2 (real) | %s.%s | exact |" % (match.group(1), text, "".join(" " + r + "." for r in reqs))
+    missing = ["TC-IF-101-%d" % n for n in range(21, 30) if "TC-IF-101-%d" % n not in cases]
+    if missing:
+        sys.exit("the suite has no case %s; add the rows by hand" % ", ".join(missing))
+    twenty = [i for i, line in enumerate(lines) if line.startswith("| TC-IF-101-20 |")]
+    after = [i for i, line in enumerate(lines) if line.startswith("| TC-IF-101-19 |")]
+    if len(twenty) != 1 or len(after) != 1:
+        sys.exit("the rows of TC-IF-101-19 and -20 are not found exactly once in specs/mia/test-spec.md; add the rows by hand")
+    row20 = lines.pop(twenty[0])
+    at = [i for i, line in enumerate(lines) if line.startswith("| TC-IF-101-19 |")][0] + 1
+    lines[at:at] = [row20] + [cases["TC-IF-101-%d" % n] for n in range(21, 30)]
+    texts[spec_in] = "\n".join(lines)
+open(suite_out, "w", encoding="utf-8").write(texts[suite_in])
+open(spec_out, "w", encoding="utf-8").write(texts[spec_in])
+PY
+python3 - tests/helpers/contract.py "$TMP/contract.py" <<'PY'
+import sys
+# D-167 (N-2.1 R-2): a refusal of send without a code is its own error, so the real side of TC-IF-101-33 checks the code `rate_limited`
+old = ('raise self._error({"empty_text": 422, "queue_full": 503, "invalid_command": 422}.get(ack.get("code"), 429), ack.get("code") or "rate_limited")')
+new = ('raise self._error({"empty_text": 422, "queue_full": 503, "invalid_command": 422, "rate_limited": 429}.get(ack.get("code"), 500), '
+       'ack.get("code") or "no_code")      # A-62: a refusal without a code is no rate limit')
+text = open(sys.argv[1], encoding="utf-8").read()
+if new not in text:
+    if text.count(old) != 1:
+        sys.exit("the refusal of send in tests/helpers/contract.py is not what A-62 expects; change it by hand")
+    text = text.replace(old, new)
+open(sys.argv[2], "w", encoding="utf-8").write(text)
 PY
 python3 - tests/js/multiuser.test.mjs "$TMP/multiuser.test.mjs" tests/test_chat_views_browser.py "$TMP/test_chat_views_browser.py" <<'PY'
 import re
@@ -151,6 +199,7 @@ PY
 copy "$TMP/IF-101-chat-api.md" contracts/IF-101-chat-api.md
 copy "$TMP/test_if_101_chat_api.py" tests/acceptance/contract/test_if_101_chat_api.py
 copy "$TMP/test-spec.md" specs/mia/test-spec.md
+copy "$TMP/contract.py" tests/helpers/contract.py
 copy "$TMP/multiuser.test.mjs" tests/js/multiuser.test.mjs
 copy "$TMP/test_chat_views_browser.py" tests/test_chat_views_browser.py
 finish
