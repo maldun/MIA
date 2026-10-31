@@ -1,16 +1,26 @@
-// The node-and-edge view of the Graph app (REQ-GA-001, N-5 T-01). A graph is the document of IF-104:
-// {"nodes": [{"id", "kind": "process" | "data", ...}], "edges": [{"from", "to"}]}. The layout is computed here and drawn as SVG
-// markup, so the page needs no library and the drawing can be checked without a browser.
+// The node-and-edge view of the Graph app (REQ-GA-001, N-5 T-01; vis-network since D-124). A graph is the document of IF-104:
+// {"nodes": [{"id", "kind": "process" | "data", ...}], "edges": [{"from", "to"}]}. This module turns it into the nodes, edges and options of
+// vis-network; it touches no page, so it is tested without a browser. The places are computed here and physics is off, so the same graph is
+// always drawn the same way and a node the user drags stays where it is dropped.
 
-const MARGIN = 60;
-const NODE_W = 120;
-const NODE_H = 36;
+const DX = 180;
+const DY = 80;
 
-/** the graph of a document: the graph itself, or the "workflow" of a library entry (the provisional seed format of N-3.2) */
-export function graphOf(entry) {
-  const graph = entry && Array.isArray(entry.nodes) ? entry : entry?.workflow;
-  if (!graph || !Array.isArray(graph.nodes) || !Array.isArray(graph.edges)) throw new Error('no graph: expected "nodes" and "edges" lists');
-  return graph;
+const isGraph = (doc) => Boolean(doc) && Array.isArray(doc.nodes) && Array.isArray(doc.edges);
+
+/** the graphs a JSON file holds, as [{ name, graph }]: a graph itself, a library entry (its workflow and its context graph; the provisional
+ *  seed format of N-3.2), a record read through IF-104 ({id, version, doc}) or a stored record file (its list of versions: the last one) */
+export function graphsOf(entry) {
+  const record = Array.isArray(entry) ? entry.at(-1) : entry;
+  let found = [];
+  if (isGraph(record)) found = [{ name: 'graph', graph: record }];
+  else if (isGraph(record?.doc)) found = [{ name: `${record.id} version ${record.version}`, graph: record.doc }];
+  else if (isGraph(record?.workflow)) {
+    found = [{ name: 'workflow', graph: record.workflow }];
+    if (isGraph(record.context_graph)) found.push({ name: 'context graph', graph: record.context_graph });
+  }
+  if (!found.length) throw new Error('no graph: expected "nodes" and "edges" lists');
+  return found;
 }
 
 /** the layer of each node: the length of the longest path that reaches it, so every edge points to a later layer.
@@ -30,55 +40,53 @@ function layers(ids, edges) {
   return layer;
 }
 
-/** positions of the nodes (centres) and the edges between them; edges to unknown ids are left out */
-export function layout(graph, { dx = 180, dy = 80 } = {}) {
-  const ids = graph.nodes.map((node) => node.id);
-  const known = new Set(ids);
-  const edges = graph.edges.filter((edge) => known.has(edge.from) && known.has(edge.to));
-  const layer = layers(ids, edges);
+/** places of the nodes in layers (x) and rows (y). A repeated id or an edge to an unknown id is refused on save, but the graph must still
+ *  be drawn so the user sees what to fix: the first node of an id and the edges between known nodes are kept, the rest is named in problems. */
+export function layout(graph) {
+  const problems = [];
+  const unique = new Map();
+  for (const node of graph.nodes) {
+    if (unique.has(node.id)) problems.push(`node ${node.id}: the id is used twice`);
+    else unique.set(node.id, node);
+  }
+  const edges = [];
+  graph.edges.forEach(({ from, to }, index) => {
+    if (unique.has(from) && unique.has(to)) edges.push({ index, from, to });
+    else problems.push(`edge ${from}->${to}: unknown node`);
+  });
+  const layer = layers([...unique.keys()], edges);
   const rows = new Map();
-  const nodes = graph.nodes.map((node) => {
+  const nodes = [...unique.values()].map((node) => {
     const l = layer.get(node.id);
     const row = rows.get(l) ?? 0;
     rows.set(l, row + 1);
-    return { id: node.id, kind: node.kind, layer: l, row, x: MARGIN + l * dx, y: MARGIN + row * dy };
+    return { id: node.id, kind: node.kind, layer: l, row, x: l * DX, y: row * DY };
   });
-  const at = new Map(nodes.map((node) => [node.id, node]));
-  const placed = edges.map(({ from, to }) => ({ from, to, x1: at.get(from).x, y1: at.get(from).y, x2: at.get(to).x, y2: at.get(to).y }));
-  const maxLayer = Math.max(0, ...nodes.map((node) => node.layer));
-  const maxRow = Math.max(0, ...[...rows.values()].map((count) => count - 1));
-  return { nodes, edges: placed, width: 2 * MARGIN + maxLayer * dx, height: 2 * MARGIN + maxRow * dy };
+  return { nodes, edges, problems };
 }
 
-function escape(text) {
-  return String(text).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+/** the nodes and edges for vis-network: a data node is in the group "data", every other node in "process"; an edge is an arrow with the
+ *  id e<index in the document>, so a selected edge leads back to its entry. Labels are drawn as plain text on the canvas (font.multi off). */
+export function visData(graph) {
+  const { nodes, edges, problems } = layout(graph);
+  return {
+    nodes: nodes.map(({ id, kind, x, y }) => ({ id, label: String(id), group: kind === 'data' ? 'data' : 'process', x, y })),
+    edges: edges.map(({ index, from, to }) => ({ id: `e${index}`, from, to, arrows: 'to' })),
+    problems,
+  };
 }
 
-/** where a line from the centre (x1, y1) towards (x2, y2) leaves the node box, so the arrow head stays visible */
-function boxExit(x1, y1, x2, y2) {
-  const ddx = x2 - x1;
-  const ddy = y2 - y1;
-  const scale = Math.min(ddx ? (NODE_W / 2) / Math.abs(ddx) : Infinity, ddy ? (NODE_H / 2) / Math.abs(ddy) : Infinity);
-  return scale === Infinity ? [x1, y1] : [x1 + ddx * scale, y1 + ddy * scale];
-}
-
-/** the SVG markup of a graph: one <g class="node"> per node (data nodes round, process nodes square) and one
- *  <line class="edge"> per edge. Ids are user text, so they are escaped. */
-export function svgMarkup(graph) {
-  const { nodes, edges, width, height } = layout(graph);
-  const lines = edges.map(({ from, to, x1, y1, x2, y2 }) => {
-    const [ax, ay] = boxExit(x1, y1, x2, y2);
-    const [bx, by] = boxExit(x2, y2, x1, y1);
-    return `<line class="edge" data-from="${escape(from)}" data-to="${escape(to)}" x1="${ax}" y1="${ay}" x2="${bx}" y2="${by}" marker-end="url(#arrow)"/>`;
-  });
-  const boxes = nodes.map(({ id, kind, x, y }) => {
-    const radius = kind === 'data' ? NODE_H / 2 : 4;
-    return `<g class="node ${kind === 'data' ? 'data' : 'process'}" data-id="${escape(id)}">`
-      + `<rect x="${x - NODE_W / 2}" y="${y - NODE_H / 2}" width="${NODE_W}" height="${NODE_H}" rx="${radius}"/>`
-      + `<text x="${x}" y="${y}">${escape(id)}</text></g>`;
-  });
-  const arrow = '<defs><marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="8" markerHeight="8" orient="auto">'
-    + '<path d="M0,0 L10,5 L0,10 z"/></marker></defs>';
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">`
-    + arrow + lines.join('') + boxes.join('') + '</svg>';
+/** the options of the vis-network view; colors = { data, process, line, text } from the page's style */
+export function visOptions(colors) {
+  return {
+    physics: false,
+    layout: { hierarchical: false },
+    interaction: { dragNodes: true, dragView: true, zoomView: true, hover: true },
+    nodes: { font: { color: colors.text, multi: false }, borderWidth: 1 },
+    edges: { arrows: { to: { enabled: true } }, color: { color: colors.line, highlight: colors.text }, smooth: false },
+    groups: {
+      data: { shape: 'ellipse', color: colors.data },
+      process: { shape: 'box', color: colors.process },
+    },
+  };
 }
