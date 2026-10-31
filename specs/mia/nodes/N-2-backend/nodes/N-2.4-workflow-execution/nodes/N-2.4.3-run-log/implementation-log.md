@@ -82,3 +82,6 @@ Open questions (Verify and the owner):
 4. Low: the replay (`reproduce.py`) and the account of a task rest on `RunLog` records, the comparison on the IF-401 files: two formats side by side (D-120 debt); `RunEvents` keeps one counter per
    run id in memory for the life of the process (one integer per run, no limit). The contract suite `test_if_401_run_events.py` (protected) has no `Example:` lines and no Given/When/Then
    (`test_doc_check.py` T2, T3); a fix needs an amendment. Recommended: record, no change in G-V1.
+
+## Owner's answers of 2026-10-31 (D-138)
+(1) The chat log keeps the steps of every answer (the chat skill too); IF-101 wording by A-49; IF-401 by run id in the next iteration (open task, next). (2) TC-LOG-005 checks the run log only; `library.py` (sqlite3 index) reported to the N-2.4 integration step (TC-N24-001). (3) T-05's title and note corrected in plan.md. (4) Low items recorded, no change in G-V1: replay and the task account read `RunLog`, the comparison reads IF-401; `RunEvents` keeps a counter per run id for the life of the process; the IF-401 suite fails the test-doc rules T2, T3 (an amendment, later).
