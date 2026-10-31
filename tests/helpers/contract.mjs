@@ -6,6 +6,7 @@ import test from 'node:test';
 export const REAL_NOT_READY = {
   'IF-111': 'N-1.2 Character view not integrated yet',
   'IF-112': 'N-1.3 Voice playback not integrated yet',
+  'IF-104': 'N-2 Backend does not serve the routes of IF-104 yet',
 };
 
 export function eachProvider(iface, name, make, body) {
