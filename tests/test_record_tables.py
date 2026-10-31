@@ -59,6 +59,30 @@ class Validation(unittest.TestCase):
         self.assertEqual(validate("votes", {k: v for k, v in vote.items() if k != "subject"}), {"rule": "schema", "detail": "subject"})
 
     @mark.req("REQ-RTB-003")
+    def test_a_vote_lacking_any_required_field_names_it(self):
+        """F4 (D-161): each of user, subject, category and value missing gives rule schema with that field, as TC-RTB-002 does for runs.
+
+        Example: a vote without user gives {"rule": "schema", "detail": "user"}.
+        """
+        # Given a complete vote
+        vote = {"user": "anna", "subject": "m1", "category": "service", "value": -1}
+        self.assertIsNone(validate("votes", vote))
+        for field in vote:
+            with self.subTest(field=field):
+                # When one required field is missing, Then it is named
+                self.assertEqual(validate("votes", {k: v for k, v in vote.items() if k != field}), {"rule": "schema", "detail": field})
+
+    @mark.req("REQ-RTB-003")
+    def test_a_vote_of_zero_is_refused(self):
+        """F4 (D-161): a vote is a plus or a minus; 0 is neither.
+
+        Example: {"value": 0} gives {"rule": "schema", "detail": "value"}.
+        """
+        # Given a vote with value 0, When it is validated, Then the rule is schema, detail value
+        vote = {"user": "anna", "subject": "m1", "category": "reactions", "value": 0}
+        self.assertEqual(validate("votes", vote), {"rule": "schema", "detail": "value"})
+
+    @mark.req("REQ-RTB-003")
     def test_a_vote_with_a_boolean_value_is_refused(self):
         """True == 1 in Python; a vote is a number, so a flag is a schema error."""
         vote = {"user": "anna", "subject": "m1", "category": "service", "value": True}
@@ -152,6 +176,7 @@ class Validation(unittest.TestCase):
             self.assertIsNone(validate("memory", dict(old, status=status)))
         self.assertEqual(validate("memory", dict(old, kind="opinion")), {"rule": "schema", "detail": "kind"})
         self.assertEqual(validate("memory", dict(old, status="deleted")), {"rule": "schema", "detail": "status"})
+        self.assertEqual(validate("memory", dict(old, status="fact")), {"rule": "schema", "detail": "status"})          # F4: a kind is no status
         self.assertEqual(validate("memory", dict(old, kind=None)), {"rule": "schema", "detail": "kind"})
         self.assertEqual(validate("memory", {"text": "x", "kind": "fact"}), {"rule": "schema", "detail": "source"})      # the source stays required, and is checked first
         self.assertIsNone(validate("tasks", {"text": "x", "kind": "anything"}))                                           # only memory has these fields
