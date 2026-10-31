@@ -85,10 +85,10 @@ The gateway of the Backend: the Socket.IO and REST surface (IF-101, IF-104), acc
 - Parent: REQ-BE-012
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-14: a request without a session is refused; a foreign origin is refused; the rate limit value is set in Plan
+- Acceptance criterion: AC-14: a request without a session is refused; a foreign origin is refused; an account sends at most 10 messages per 60 s (the setting `chat_rate_per_minute`, default 10; all connections of the account count together), the 11th within 60 s is refused with 429 `rate_limited` (IF-101 v12) and is not stored
 - Verified by: TC-API-007
 - Status: Approved
-- History: –
+- History: 2026-10-31 D-149: the rate limit value (10 messages per 60 s per account, a setting) and the refusal 429 `rate_limited` replace "the rate limit value is set in Plan" (Verify finding V-5; IF-101 by amendment A-54)
 
 ### REQ-API-008 – Passwords only over a secure channel
 - Level: low   Subject: WebApplication

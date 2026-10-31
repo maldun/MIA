@@ -469,6 +469,23 @@ class ServiceTest(unittest.TestCase):
         self.assertTrue(service.send("other", sender="b")["ok"])
         self.gate.set()
 
+    def test_a_message_over_the_rate_limit_is_refused_with_the_code_rate_limited(self):
+        """TC-API-007 (D-149, V-5): the refusal of a message over the rate limit names the code rate_limited (IF-101: 429 rate_limited); nothing is stored.
+
+        Example: limit 2 per 60 s, a third message of "a" -> {"ok": False, "code": "rate_limited"}.
+        """
+        # Given: a limit of 2 messages and two sent
+        service = self.make(rate_limit=(2, 60), queue_size=10)
+        self.gate.clear()
+        service.send("m0", sender="a")
+        service.send("m1", sender="a")
+        # When: a third one is sent
+        ack = service.send("m2", sender="a")
+        # Then: it is refused with the code
+        self.assertEqual((ack["ok"], ack.get("code")), (False, "rate_limited"))
+        self.assertEqual(self.log.last("user")["text"], "m1")
+        self.gate.set()
+
     def test_automatic_message_is_logged_with_marker(self):
         record = self.service.post_assistant("It is noon.", emotion="surprised", auto=True)
         self.assertTrue(record["auto"])

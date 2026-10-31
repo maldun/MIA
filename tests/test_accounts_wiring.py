@@ -168,7 +168,7 @@ class ProductionWiring(unittest.TestCase):
         bens = self.send(ben, "mine")
         # Then: the first RATE pass, the next one of anna is refused, ben's passes
         self.assertEqual([ack["ok"] for ack in acks], [True] * RATE)
-        self.assertEqual(eleventh["ok"], False)
+        self.assertEqual((eleventh["ok"], eleventh.get("code")), (False, "rate_limited"))
         self.assertEqual(bens["ok"], True)
 
 if __name__ == "__main__":
