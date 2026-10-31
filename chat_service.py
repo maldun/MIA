@@ -217,7 +217,7 @@ class ChatService:
         if len(text) > MAX_LENGTH:
             return {"ok": False, "error": "The message is too long (at most %d characters)." % MAX_LENGTH, "code": "empty_text"}
         if self._rate_limited(sender):
-            return {"ok": False, "error": "Too many messages, please wait a moment."}
+            return {"ok": False, "error": "Too many messages, please wait a moment.", "code": "rate_limited"}      # IF-101: 429 rate_limited (D-149)
         with self._lock:
             own = sum(1 for item in self._queue if author and item[2] == author)
             if self._running and (len(self._queue) >= self.queue_size or (self.user_limit and author and own >= self.user_limit)):

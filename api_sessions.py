@@ -39,13 +39,15 @@ class SessionService:
 
     # -- login and sessions --
     def login(self, user, password):
+        if not isinstance(user, str):
+            raise ApiError(401, "bad_credentials")                # a list or object would break the throttle's lookup (V-3)
         now = self._clock()
         recent = [t for t in self._failed.get(user, []) if now - t < THROTTLE_SECONDS]
         self._failed[user] = recent
         if len(recent) >= MAX_FAILED_LOGINS:
             raise ApiError(429, "throttled")                      # also for the right password: the attacker learns nothing
-        if not isinstance(user, str) or not accounts.verify(self.store, user, password):
-            self._failed.setdefault(user if isinstance(user, str) else "", []).append(now)
+        if not accounts.verify(self.store, user, password):
+            self._failed.setdefault(user, []).append(now)
             raise ApiError(401, "bad_credentials")
         token = secrets.token_urlsafe(32)
         self._sessions[token] = user
