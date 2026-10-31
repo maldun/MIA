@@ -11,6 +11,8 @@ source_trust.TrustTable.for_url, sandbox.create_router), so the door itself touc
 anything runs, never run unprotected (REQ-TLS-005).
 """
 import hashlib
+import inspect
+import threading
 
 try:
     from . import checks
@@ -43,7 +45,7 @@ def build_tool_calls(web_tools, scholar, trust_table, sandbox):
 
 
 class ToolCallError(Exception):
-    """IF-402 errors. code: unknown_tool | budget (detail: the tool) | source_error (detail: what the source said)."""
+    """IF-402 errors. code: unknown_tool | budget (detail: the tool) | source_error (detail: what the source said) | bad_arguments (detail: why; nothing counted)."""
 
     def __init__(self, code, detail=None):
         super().__init__("%s%s" % (code, ": %s" % detail if detail is not None else ""))
@@ -60,6 +62,7 @@ class ToolCalls:
         self.sandbox = sandbox
         self.script_check = checks.make_script_check(sandbox) if sandbox is not None else None
         self._used = {}
+        self._lock = threading.Lock()        # the runner maps with threads: the check of the limit and the count are one step
 
     def used(self, run_id):
         return dict(self._used.get(run_id, {}))
@@ -67,14 +70,20 @@ class ToolCalls:
     def call(self, run, tool, args):
         if tool not in TRUST:
             raise ToolCallError("unknown_tool", tool)
-        used = self._used.setdefault(run["id"], {})
-        limit = (run.get("limits") or {}).get(tool)
-        if limit is not None and used.get(tool, 0) >= limit:
-            raise ToolCallError("budget", tool)
-        # counted before it runs: a source that fails has still been asked (IF-402 errors)
-        used[tool] = used.get(tool, 0) + 1
+        method = getattr(self, "_" + tool)
         try:
-            output = getattr(self, "_" + tool)(**args)
+            inspect.signature(method).bind(**args)
+        except TypeError as exc:
+            raise ToolCallError("bad_arguments", str(exc)) from exc
+        with self._lock:
+            used = self._used.setdefault(run["id"], {})
+            limit = (run.get("limits") or {}).get(tool)
+            if limit is not None and used.get(tool, 0) >= limit:
+                raise ToolCallError("budget", tool)
+            # counted before it runs: a source that fails has still been asked (IF-402 errors)
+            used[tool] = used.get(tool, 0) + 1
+        try:
+            output = method(**args)
         except ToolCallError:
             raise
         except Exception as exc:
@@ -105,7 +114,10 @@ class ToolCalls:
             return {"status": "unavailable", "stdout": ""}
         found = self.script_check(code, data=inputs)
         stdout = found["evidence"][0].get("stdout", "") if found["evidence"] else ""
-        return {"status": "ok", "stdout": stdout, "result": found}
+        ran = found["evidence"][0].get("run_status") if found["evidence"] else None
+        # ok only for a script that ran to its end; a sandbox that went away after the question above is unavailable (finding 6, D-132)
+        status = {"ok": "ok", "unavailable": "unavailable"}.get(ran, "failed")
+        return {"status": status, "stdout": stdout, "result": found}
 
     # --- web and scholarly sources (untrusted data) ---
 

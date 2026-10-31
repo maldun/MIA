@@ -38,6 +38,18 @@ class FakeBackend:
         return SandboxResult("ok", result={"holds": True, "values": {"sum": 4}}, stdout="4\n", backend=self.name)
 
 
+class EndingBackend(FakeBackend):
+    """an available backend whose run ends with `status` (crashed, rejected, unavailable: the sandbox went away after the door asked)"""
+
+    def __init__(self, status):
+        super().__init__("bubblewrap", True)
+        self.status = status
+
+    def run(self, code, data=None, **kwargs):
+        self.runs.append(code)
+        return SandboxResult(self.status, error={"message": "stopped for the test"}, problems=["policy for the test"], backend=self.name)
+
+
 def router(bubblewrap, podman):
     return SandboxRouter({"bubblewrap": FakeBackend("bubblewrap", bubblewrap), "podman": FakeBackend("podman", podman)})
 
@@ -57,7 +69,7 @@ class SandboxOrRefuseTests(unittest.TestCase):
         # Then: trust is still code
         self.assertEqual(out["trust"], "code")
 
-    @mark.req("REQ-TO-005")
+    @mark.req("REQ-TLS-005")
     def test_with_the_sandbox_removed_nothing_runs(self):
         """TC-TLS-005: with both backends unavailable, nothing runs.
 
@@ -102,6 +114,20 @@ class SandboxOrRefuseTests(unittest.TestCase):
         self.assertEqual(sandbox.backends["bubblewrap"].runs, [SCRIPT])
         # Then: podman did not run it
         self.assertEqual(sandbox.backends["podman"].runs, [])
+
+    @mark.req("REQ-TLS-005")
+    def test_a_script_that_did_not_run_to_the_end_is_not_ok(self):
+        """TC-TLS-005 (finding 6 of the N-2.4.2 verification, D-132): a crashed or rejected script is `failed`, a sandbox that went away is `unavailable`, never `ok`.
+
+        Example: backend ends crashed -> failed; rejected -> failed; unavailable -> unavailable
+        """
+        for ending, expected in (("crashed", "failed"), ("rejected", "failed"), ("unavailable", "unavailable")):
+            # Given: a sandbox whose run ends that way
+            sandbox = SandboxRouter({"bubblewrap": EndingBackend(ending), "podman": FakeBackend("podman", False)})
+            # When: a script is run through the door
+            out = ToolCalls(sandbox=sandbox).call(RUN, "run_script", {"code": SCRIPT, "inputs": {"a": 2, "b": 2}})
+            # Then: the status says what happened
+            self.assertEqual(out["output"]["status"], expected, ending)
 
     @mark.req("REQ-TLS-005")
     def test_a_pdf_is_not_converted_without_the_wall(self):

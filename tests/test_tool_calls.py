@@ -234,6 +234,46 @@ class ToolCallsTests(unittest.TestCase):
         self.assertEqual(out, {"output": fake_fetch("https://example.org/a"), "trust": "web"})
         self.assertEqual(t.used("r1"), {"fetch_page": 1})
 
+    @mark.req("REQ-TLS-001")
+    def test_wrong_arguments_are_refused_before_they_count(self):
+        """TC-TLS-001 (finding 8 of the N-2.4.2 verification, D-132): a call with arguments the tool does not take is `bad_arguments` and is not counted.
+
+        Example: number_check {"claim": "x"} (evidence missing) -> ToolCallError bad_arguments, used {}
+        """
+        # Given: the door
+        t = tools()
+        # When: number_check is called without evidence
+        code = error_of(lambda: t.call({"id": "r1", "limits": {}}, "number_check", {"claim": "x"}))[0]
+        # Then: it is refused by name and nothing was counted
+        self.assertEqual((code, t.used("r1")), ("bad_arguments", {}))
+
+    @mark.req("REQ-TLS-001")
+    def test_concurrent_calls_keep_the_limit(self):
+        """TC-TLS-001 (finding 10 of the N-2.4.2 verification, D-132): calls from many threads of one run never pass its limit (the runner maps with threads).
+
+        Example: 40 threads call web_search with limit 5 -> 5 outputs, 35 budget errors, used {"web_search": 5}
+        """
+        import threading
+        # Given: the door and a run with a limit of 5 searches
+        t, run, outcomes = tools(), {"id": "r1", "limits": {"web_search": 5}}, []
+        start = threading.Barrier(40)
+
+        def one():
+            start.wait()
+            try:
+                t.call(run, "web_search", {"query": "q"})
+                outcomes.append("ok")
+            except ToolCallError as err:
+                outcomes.append(err.code)
+        # When: 40 threads call at once
+        threads = [threading.Thread(target=one) for _ in range(40)]
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join()
+        # Then: exactly the limit passed
+        self.assertEqual((outcomes.count("ok"), outcomes.count("budget"), t.used("r1")), (5, 35, {"web_search": 5}))
+
 
 class AppTrust:
     """the trust table of the app: one entry for pages, one for works"""
