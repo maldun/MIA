@@ -13,7 +13,8 @@ extends Node
 ##                                                how many pixels of the window the page covers (chat panel); the camera
 ##                                                centers the character in the free area. width/height: size of the window.
 ##   {"type": "view", "name": "bust"}             camera view: body, bust or face
-## Unknown names or types are logged and ignored, the current expression stays.
+## An unknown expression name is logged and shows neutral (IF-111 v2, A-48). Other unknown names or types are logged
+## and ignored.
 ## After startup the bridge tells the host {"type": "ready"}.
 
 signal handled(message: Dictionary, ok: bool)
@@ -23,6 +24,7 @@ signal view_requested(view_name: String)
 
 const MAX_INSET := 0.9
 const VIEWS := ["body", "bust", "face"]
+const NEUTRAL := "neutral"
 
 var engine: ExpressionEngine
 var backgrounds: BackgroundManager
@@ -71,7 +73,7 @@ func handle(message: Dictionary) -> bool:
 	var ok := false
 	match message.get("type", ""):
 		"expression":
-			ok = engine.play(str(message.get("name", "")))
+			ok = _play_expression(str(message.get("name", "")))
 		"gesture":
 			ok = engine.gestures.play(str(message.get("name", "")))
 		"speaking":
@@ -94,6 +96,13 @@ func handle(message: Dictionary) -> bool:
 			push_warning("unknown host message type '%s'" % message.get("type", ""))
 	handled.emit(message, ok)
 	return ok
+
+## IF-111 v2: a name the library does not know shows neutral, so a stale or misspelt name never leaves an old face.
+func _play_expression(preset_name: String) -> bool:
+	if not engine.library.has(preset_name):
+		push_warning("unknown expression '%s', showing '%s'" % [preset_name, NEUTRAL])
+		preset_name = NEUTRAL
+	return engine.play(preset_name)
 
 ## pixels -> fractions of the window; refuses messages without a usable window size or with non-numbers
 func _handle_inset(message: Dictionary) -> bool:

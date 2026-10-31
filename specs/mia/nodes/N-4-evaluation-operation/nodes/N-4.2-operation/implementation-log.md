@@ -207,3 +207,6 @@ Open questions:
 - Pins: `postgres:16` (compose.yaml) and the base `python:3.12-slim` (Containerfile) by their local digests, checked with `create --pull=never`; tests in `test_runbook.py`, red before; `ae54227`. Index digests at the next pin update (owner).
 - Runbook: section "Files a fresh checkout lacks" (`mia.vrm`, the two Kokoro files); test red before; `c3471ea`.
 - Recorded only: F-T06-1, `deploy/.env` in the image (D-131); the offer line in the container log stays; `up.sh db` stays the full install.
+
+## F8 of the verification (2026-10-31, D-145)
+`specs/mia/architecture.sysml`, OperationLayer: the launcher names `first_account.py`; composeStack names graph, db, the digest pins, the runbook and the backup tools (`deploy/RUNBOOK.md`, `tools/backup.sh`, `tools/restore.sh`); a new part freeCheck for `tools/check_free.py`. check_sysml and check_sysml_model clean. Recorded (D-145): F7 podman only in the backup tools, F9 the smoke compares 4 graph files, F10 accounts_dir without the local overlay.
