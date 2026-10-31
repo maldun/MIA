@@ -43,7 +43,7 @@ class StoreTest(unittest.TestCase):
 
     def test_empty_folder_is_filled_with_the_shipped_presets(self):
         names = self.store.names()
-        self.assertEqual(len(names), 14)
+        self.assertEqual(len(names), 15)          # 14 + shocked (REQ-CHV-006, D-143)
         for expected in ["greet", "no", "annoyed", "talk", "yes", "idle", "neutral", "happy", "sad", "angry", "surprised",
                          "embarrassed", "smug", "thinking"]:
             self.assertIn(expected, names)
@@ -119,7 +119,7 @@ class StoreTest(unittest.TestCase):
         for body in [[], "text", 5, None]:
             with self.assertRaises(self.ps.PresetError):
                 self.store.create(body)
-        self.assertEqual(len(self.store.names()), 14)   # nothing was written
+        self.assertEqual(len(self.store.names()), 15)   # nothing was written
 
     def test_no_path_traversal_through_names(self):
         with self.assertRaises(self.ps.PresetError):
@@ -142,7 +142,7 @@ class StoreTest(unittest.TestCase):
     def test_files_are_valid_json_one_per_preset_and_no_temp_files_remain(self):
         self.store.create(smug())
         files = os.listdir(self.store.folder)
-        self.assertEqual(len([f for f in files if f.endswith(".json")]), 15)
+        self.assertEqual(len([f for f in files if f.endswith(".json")]), 16)          # 15 shipped + the created one
         self.assertEqual([f for f in files if f.endswith(".tmp")], [])
         with open(os.path.join(self.store.folder, "test_smug.json")) as fp:
             self.assertEqual(json.load(fp)["name"], "test_smug")
@@ -156,7 +156,7 @@ class StoreTest(unittest.TestCase):
             t.start()
         for t in threads:
             t.join()
-        self.assertEqual(len(self.store.list()), 14 + 50)
+        self.assertEqual(len(self.store.list()), 15 + 50)
 
 
 class ApiTest(unittest.TestCase):
@@ -177,7 +177,7 @@ class ApiTest(unittest.TestCase):
     def test_list_and_read(self):
         http = self.make_client()
         data = http.get("/api/presets").get_json()
-        self.assertEqual(len(data["presets"]), 14)
+        self.assertEqual(len(data["presets"]), 15)
         self.assertEqual(data["token_required"], False)
         self.assertEqual(len(data["version"]), 12)            # one number for presets and gestures together
         self.assertIn("idle", data["protected"])        # used by MIA's expressions.json
@@ -235,7 +235,7 @@ class ApiTest(unittest.TestCase):
         self.assertEqual(r.status_code, 415)
         r = http.post("/api/presets", data={"name": "x"})      # a plain html form from another site
         self.assertEqual(r.status_code, 415)
-        self.assertEqual(len(self.store.names()), 14)
+        self.assertEqual(len(self.store.names()), 15)
 
     def test_origin_rules(self):
         http = self.make_client()
@@ -253,7 +253,7 @@ class ApiTest(unittest.TestCase):
     def test_token(self):
         http = self.make_client(token=self.TOKEN)
         self.assertTrue(http.get("/api/presets").get_json()["token_required"])
-        self.assertEqual(len(http.get("/api/presets").get_json()["presets"]), 14)      # reading is open
+        self.assertEqual(len(http.get("/api/presets").get_json()["presets"]), 15)      # reading is open
         self.assertEqual(http.post("/api/presets", json=smug()).status_code, 401)
         self.assertEqual(http.post("/api/presets", json=smug(), headers={"X-MIA-Token": "wrong"}).status_code, 401)
         self.assertEqual(http.post("/api/presets", json=smug(), headers={"X-MIA-Token": self.TOKEN}).status_code, 201)
