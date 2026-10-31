@@ -524,7 +524,7 @@ class ChatService:
                 return
             if event.get("kind") == "run_start":
                 self._show_pipeline = bool((event.get("payload") or {}).get("show"))
-            if event.get("plain") and not self._late:
+            if event.get("plain"):
                 self._steps.append({"kind": event.get("kind"), "plain": event["plain"]})
             if self._late:
                 if self._monitor is not None and event.get("plain"):

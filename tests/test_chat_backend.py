@@ -377,7 +377,7 @@ class ServiceTest(unittest.TestCase):
         """TC-LOG-001, REQ-LOG-001 (D-138): the steps of every answer are kept for its account, also of a skill without a status block (the chat); the
         status block itself still appears only for skills that want one.
 
-        Example: run_start (show false), step "thinking about it" -> account [{"seq": 1, "plain": "thinking about it"}], no `pipeline` in the record
+        Example: run_start "talk" (show false), step "thinking about it" -> account [{"seq": 1, "plain": "talk"}, {"seq": 2, "plain": "thinking about it"}], no `pipeline` in the record
         """
         # Given: an exchange whose pipeline does not show a status block and reports one step
         def steps():

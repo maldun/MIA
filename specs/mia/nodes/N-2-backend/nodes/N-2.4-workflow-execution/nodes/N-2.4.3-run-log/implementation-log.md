@@ -88,3 +88,13 @@ Open questions (Verify and the owner):
 
 ## Chat account built (2026-10-31, D-138)
 `ChatService` keeps the plain steps of every answer in the record field `steps` (also when no status block is shown, e.g. the chat); `account()` reads `steps`, else the `pipeline` of older records; `pipeline` stays what the block shows. Test `test_a_chat_answer_keeps_its_steps_for_the_account` (`tests/test_chat_backend.py`), red before ("No steps were kept"), green after; the IF-101 suite passes. File outside the node (`chat_service.py`, N-2.1): the owner's decision D-138. Open: A-49, the wording of IF-101 (`account` "from the run log, IF-401" -> from the steps kept with the answer). Commit `7f0d59e`.
+
+## Verify findings fixed (2026-10-31, D-144)
+Tests in the image (`localhost/mia:latest`, `--network none`); feedback, not verification.
+
+### F1 (and F6, first half): a task that asks questions keeps its steps – T-02, REQ-LOG-001, IF-101 v11
+- Test: `tests/test_chat_tasks.py::test_a_task_that_asks_keeps_its_steps_for_the_account` (a task with `needs=("ask",)` reports two steps around its question). Red before: account
+  `[{'seq': 1, 'plain': 'No steps were kept for this answer.'}]`; green after.
+- Fix: `chat_service.py` `pipeline_event` keeps the plain steps also while `_late` (dropped `and not self._late`); the progress of such a task still goes only to the status card.
+- F6: the Example line of `tests/test_chat_backend.py::test_a_chat_answer_keeps_its_steps_for_the_account` now names the `talk` step it asserts.
+- Green after: `test_chat_tasks.py` (12), `test_chat_backend.py` (41), contract `test_if_101_chat_api.py` (60, 3 skipped). File outside the node (`chat_service.py`, N-2.1): D-144.
