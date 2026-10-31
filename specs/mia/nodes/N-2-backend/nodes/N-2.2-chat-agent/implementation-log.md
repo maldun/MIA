@@ -89,3 +89,16 @@ Starting point: every test that names an id of this node (24 files, incl. the co
   1. After the shocked reaction, does the character go back to `idle`? Options: (a, recommended) yes, after the line, in a background task so the vote request does not wait; (b) no, she stays shocked until the next answer (as built); (c) the preset in Godot decides (a one-shot gesture).
   2. IF-101 says nothing about the `expression {name: "shocked"}` that follows a minus. Options: (a, recommended) one sentence in the `vote` row of IF-101 (a small amendment) and the same event in the IF-101 mock, so N-1.2's TC-CHV-006 on the mock and the backend agree; (b) leave the contract as it is (the event exists; the reaction is the backend's business).
   3. Does a repeated minus by the same user on the same subject (the vote record is replaced, not added) make her shocked again? Options: (a, recommended) yes, every stored minus (as built: simple, and the user sees the click had an effect); (b) only a minus that changes the stored value.
+
+## After the owner's answers D-156 (2026-10-31, late)
+| Item | State | Commit |
+|---|---|---|
+| Q1: back to the mood's face after the shocked line | done | see the next commit line in git (`feat(chat): ... face of her mood ...`) |
+| Q2: IF-101 records the shocked expression after a minus | amendment draft A-57 | – |
+| Q3: every stored minus makes her shocked | as built, no change | – |
+
+### Q1 (D-156): the face of the mood returns after the line
+- Test first: TC-CHV-006 (`tests/test_converse_behaviours.py::ShockedAfterAMinus`) now also wants, in a background task, a sleep of the line's length (a 0.5 s wav made by the test) and then `expression` with the face of the current mood (`happy`); a plus gives no expression, no sound and no background task. Red before (no background task), green after.
+- Built in `web_app.py`: `character_reaction` plays the expression and the line at once, then starts `back_to_mood` with `socketio.start_background_task` (the vote request does not wait): `socketio.sleep(line_seconds(line))`, then `express_and_reload(mood_face(), sound=False)`.
+- **Choices no requirement states (for Verify):** the face of the mood is `comm.map_emotion(mood.status()["emotion"])` (emotion_map.json, the same map an answer's emotion uses), `neutral` when there is no mood (as REQ-CHV-004 says for an unknown mood); the length of the line is read from the wav header; a line that is missing or unreadable waits `REACTION_SECONDS = 3`.
+- The older wiring test `test_the_reaction_of_the_chat_shows_the_expression_and_says_its_line` now stubs the background task, so no thread outlives it.

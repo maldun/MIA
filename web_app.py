@@ -27,6 +27,7 @@ import types
 import threading
 import multiprocessing as mp
 import random
+import wave
 import re
 import shutil
 import signal
@@ -230,11 +231,32 @@ def send_expression(preset):
 pre_exp = PresetExpressor(send=send_expression)
 IDLE_EXPRESSION = "idle"
 
+REACTION_SECONDS = 3     # how long a reaction without a readable line stays before the face of the mood returns
+
+def line_seconds(path):
+    """the length of a wav line in seconds, REACTION_SECONDS when there is none or it cannot be read"""
+    try:
+        with wave.open(path,"rb") as fp:
+            return fp.getnframes()/float(fp.getframerate())
+    except (OSError, TypeError, AttributeError, EOFError, wave.Error):
+        return REACTION_SECONDS
+
+def mood_face():
+    """the expression of the current mood (the mood map of REQ-CHV-004: neutral when there is no mood)"""
+    emotion = mood.status()["emotion"]
+    return comm.map_emotion(emotion) if emotion else "neutral"
+
 def character_reaction(expression):
     """
-    The character's reaction outside an answer (the chat service asks for it, e.g. shocked after a minus, REQ-CHV-006): the expression and the line of its mood.
+    The character's reaction outside an answer (the chat service asks for it, e.g. shocked after a minus, REQ-CHV-006): the expression and the line of its mood,
+    then, in the background so the request is answered at once, the face of the current mood after the length of the line (D-156).
     """
-    express_and_reload(expression,line=voice_lines.pick(expression))
+    line = voice_lines.pick(expression)
+    express_and_reload(expression,line=line)
+    def back_to_mood(seconds):
+        socketio.sleep(seconds)
+        express_and_reload(mood_face(),sound=False)
+    socketio.start_background_task(back_to_mood,line_seconds(line))
 
 def express_and_reload(expression,sound=True,line=None):
     """
