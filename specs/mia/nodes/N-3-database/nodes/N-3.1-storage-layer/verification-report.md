@@ -120,3 +120,109 @@ None for N-3.1. The open deferrals TD-01 to TD-04 (TD-04: REQ-WFM-039) concern o
 ## Notes for Phase 7 (validation)
 - Two MIA instances on one database: whether the notices across instances feel immediate (2 s bound) and survive a database restart (F2).
 - The move of a real data folder to the database (F5) is the first thing a user with existing data will try.
+
+---
+
+# Re-verification (after v1-n31b and the A-59 install)
+
+**Goal:** G-V1 (iteration), supervised; node N-3.1 (leaf), black box with its neighbours' mocks and on both backends
+**Branch:** goal/v1 @ 1f97395   **Plan baseline:** plan-baseline-it1   **Date:** 2026-10-31
+**Reviewers:** – (human), Claude Opus 5.5 (AI, fresh context; it never saw the implementation chat)
+**Commits reviewed:** v1-n31b (merged in acf1320): 5f9cf58 (F1), 63b1b16 (F2), d4e8fbd (F3), 539a2e8 (F4), 5cbd165 (F7), 3814cd3 (F8, F9, F10), 18fbab6 (F13), 8707a9e and a4ddfff (A-59 draft), 2ae1fc5 and 6ba6322 (`categories()`, D-162), e321546; 849ac36 (A-59, A-60, A-61 installed by the owner). Inputs: D-158, D-162, IF-102 v2, `stages.yaml` step `contract-postgres`, sibling reports N-3.2 and N-3.3.
+
+## Verdict (proposal)
+**Verified with accepted deviations.** All 13 earlier findings are closed or decided: F1, F2, F3, F4 (migrate), F7, F8, F9, F10 with tests that fail on a mutant (table below), F6 and F12 by A-59 (installed files equal their drafts), F13 by the model, F5 by D-158 (REQ-SLY-007 partly, goal row), F4 (adapter) by D-158; F11 stays backlog. The D-162 collision is closed: a mutant of the real `graph_rules.py` now fails the `_real` IF-102 case in a full contract run, on files and on PostgreSQL. New findings are low: an untested guard in the listener (R1), a second backend divergence of the F9 kind (R2: NaN and non-string ids), two unspecified behaviours waiting for the owner (R3), and plan text (R4). None blocks the merge.
+
+## Automated checks (local runs, not CI)
+| Check | Result |
+|---|---|
+| Node tests in the image (`tools/run_in_image.sh`, one container at a time) | test_storage 17, test_accounts 6, test_storage_copy 7, test_migrate 10, IF-102 suite 20 (10 mock, 10 real), test_chat_answers 12 (the IF-102 mock test no longer skips): OK. test_database_stack 3 OK + 1 class skipped, test_storage_postgres and test_backup skip (no psycopg or podman in the image): expected |
+| PostgreSQL tests on the host (venv mia312, own throwaway `postgres:16`, local image, not pulled) | test_storage_postgres 24 OK in 16 s with `-W always::ResourceWarning`: **0 warnings** (F4 closed for the node's code); test_backup 3 OK |
+| Stage step `contract-postgres` (`MIA_DB_PYTHON=…/mia312/bin/python bash tools/contract_postgres.sh`) | 10/10 OK, none skipped, container removed. With a bare `python` that has no psycopg the step fails with "set MIA_DB_PYTHON" (fails loudly, not silently) |
+| Full contract run, one process (`unittest discover -s tests/acceptance/contract -p "test_if_*.py"`) | 218 tests, 18 skips (other interfaces: IF-103/404/405 stage 2, IF-201, IF-101 events), OK on files and with `MIA_TEST_DATABASE_URL` on my PostgreSQL. IF-102 on PostgreSQL still gives 10 ResourceWarnings from the protected adapter (accepted, D-158) |
+| N-3 integration steps 0–3 | 4/4 OK on the host and in the image; step 3 also OK on PostgreSQL |
+| Protected material vs. amendments | `contracts/IF-102-storage-interface.md`, `tests/helpers/mocks/if_102_storage.py`, `tests/acceptance/contract/test_if_102_storage.py`, `mocks/graph_rules.py`, `mocks/errors.py`, IF-301/IF-302 suites and mocks: byte-equal to their A-59/A-60/A-61 drafts. `tests/helpers/contract.py`: `amendments/A-59/real_storage.py` is in it verbatim; the removed lines of 849ac36 are only the old IF-102 adapter imports and the IF-301 real side (A-60). `stages.yaml` +2 lines (the step, A-59). No commit after 849ac36 touches `tests/`, `contracts/` or `stages.yaml`. The look-only run of `tools/apply_amendment_a59.sh` was denied by the session's permission check, so the comparison is by `cmp`, not by the script |
+| trace_check (whole spec) | exit 1 from other parts (99 errors); for this node: ERROR `test-spec.md` has no `## Scenarios` section (M39, R4), and WARN TD-02, -03, -06, -07 not listed in this report (listed below now). No REQ-SLY gap; the REQ-SLY-012 marker warning of the first report is gone |
+| test_doc_check (7 node test files) | 75 errors (T1 17, T2 24, T3 34), the same as before (F11); every test added by v1-n31b passes the rule |
+| `check_sysml_model.py`, `check_sysml.sh specs/mia/architecture.sysml` | OK; `storageLayer` and `database` are `partly` with their modules (F13 closed) |
+| Static, security, licence | no linter configured; manual review of the fix commits. No new dependency |
+
+### Mutation checks (scratch copy of HEAD, removed)
+| Mutation | Caught by |
+|---|---|
+| copy: documents not validated (F1) | test_storage_copy, test_migrate |
+| copy: versions not required to run 1..n (F1) | test_storage_copy |
+| copy: entry id not checked (F1) | test_storage_copy |
+| `_dispatch` lets a raising subscriber through (F2) | test_storage (files), test_storage_postgres |
+| listener returns on `OperationalError` instead of reconnecting (F2) | test_storage_postgres (`test_the_listener_connects_again...`) |
+| `_hear` does not catch a bad notice payload | **survives** (R1) |
+| `accounts.create` without `expected_version=0` (F3) | test_accounts |
+| `migrate` does not close the database (F4) | test_migrate |
+| delete sends no notice (F7) | test_storage, test_storage_postgres, IF-102 suite (files and PostgreSQL) |
+| delete notice with version 1 instead of None (F7) | test_storage, IF-102 suite (files and PostgreSQL) |
+| dry run ignored (F8) | test_migrate |
+| NUL accepted (F9) | test_storage, test_storage_postgres |
+| a missing source folder not refused (F10) | test_migrate |
+| `categories()` sorted / one missing (D-162) | test_storage, IF-102 suite (files and PostgreSQL); the missing one also test_chat_answers |
+| real `graph_rules.py` accepts two adjacent data nodes (D-162 collision), full contract run in one process | IF-102 `test_graph_rules_are_checked_on_write_real` and IF-301 `_real`, on files and on PostgreSQL, also with `-k _real` alone; in a unit discovery (`-s tests`, all modules imported) test_storage (files and PostgreSQL), test_graph_rules, test_graph_api, test_workflow_library |
+
+## Earlier findings
+| # | Status | Evidence |
+|---|---|---|
+| F1 | closed | `storage_copy._check_entries`; tests named in the log; 3 mutants caught |
+| F2 | closed | `_dispatch` catches per subscriber; listener loop reconnects; 2 mutants caught (R1 left) |
+| F3 | closed | mutant caught |
+| F4 | closed (migrate); adapter part accepted (D-158) | 0 ResourceWarnings in test_storage_postgres; 10 remain in the IF-102 suite on PostgreSQL (protected adapter) |
+| F5 | decided (D-158): REQ-SLY-007 partly, goal row, importers next iteration (FB-04) | `goals/G-V1/goal.md:72` |
+| F6 | closed (A-59) | step `contract-postgres` 10/10 |
+| F7 | closed (D-158, A-59) | IF-102 v2 golden 4, TC-IF-102-09; mutants caught |
+| F8, F9, F10 | closed | mutants caught |
+| F11 | open, backlog | 75 errors, unchanged |
+| F12 | closed (A-59) | IF-102 v2 lists the 16 tables; the deletable ones in the text (`history`, `memory`, `tasks`, `memos`) equal the code's |
+| F13 | closed | model `partly` with modules; SysML checks OK |
+
+## Verification matrix (changes against the first report only)
+| Requirement | Result now |
+|---|---|
+| REQ-SLY-003, -004, -009 | Pass; seed and migrate now refuse what `put` refuses (F1). Non-finite numbers and non-string ids: R2 |
+| REQ-SLY-005 | Pass; the race is closed (F3) |
+| REQ-SLY-006 | Pass on both backends, delete included; a raising subscriber and a dropped connection no longer stop the notices. Notices sent while the listener reconnects are lost (R3, unspecified) |
+| REQ-SLY-007 | Partly, accepted (D-158) |
+| REQ-SLY-010, -011 | unchanged: compose tests pass; container tests not re-run (two containers at once) |
+| REQ-SLY-012 | Pass: IF-102 v2 suite on mock, files and PostgreSQL (10/10 each), now staged (stage 3) |
+| REQ-SLY-001, -002, -008 | unchanged, pass |
+
+## Specification vs. code (M42), new items
+| Direction | Item | Destination |
+|---|---|---|
+| done, not specified | NUL refused with `invalid`/`schema` on every backend (`storage.py:39-50`); not in the Errors table of IF-102 v2 (`contracts/IF-102-storage-interface.md:22-27`) | R3, owner |
+| done, not specified | after a dropped listening connection notices are lost for about 1 s (`storage_postgres.py:84-96`); REQ-SLY-006 does not say what a subscriber may expect across a database restart | R3, owner |
+| specified, partly | TC-SLY-007 still names "the recorded data folder of the repository (fixtures)" (`test-spec.md:17`) after D-158 made REQ-SLY-007 partly | R4 |
+
+## Open deferrals (M26)
+None belongs to N-3.1. Open in the project: TD-01, TD-02, TD-03 (GUI), TD-04 (REQ-WFM-039), TD-06 (workflow library folder, N-3.2), TD-07 (judge calibrations, N-4.1).
+
+## New findings
+| # | Finding | Severity | Destination / proposal |
+|---|---|---|---|
+| R1 | `storage_postgres.py:98-103` (`_hear`): the guard that keeps the listener alive on a bad notice (anyone who can reach the database may `pg_notify` on `mia_changes`, or an event without `table`) has no test; removing it survives every test, and the thread then dies silently as in F2 | Low | needs test (Phase 3): `SELECT pg_notify('mia_changes', 'not json')` and one `'{}'`, then a write on another instance is still heard |
+| R2 | Backend divergence of the F9 kind: a document with `float("nan")` or `inf` is stored by the file backend (`storage_files.py:37`, `json.dump` allows NaN) and gives a raw `psycopg.errors.InvalidTextRepresentation` on PostgreSQL (`storage_postgres.py:62`); a non-string id gives a raw `TypeError` (files) or `UndefinedFunction` (PostgreSQL) instead of a `StorageError` (probes on both backends) | Low | needs test (Phase 3, test first in the `StorageBehaviour` mixin): refuse non-finite numbers and non-string ids/authors with `invalid`/`schema` in `storage.validate`/`put`, like NUL; fold into the R3 Errors row |
+| R3 | Two behaviours of the fixes that no requirement or IF-102 line states (open questions of the implementation log, no decision in `review-log.md`): NUL (and R2) refused with `invalid`/`schema`; notices lost while the listener reconnects | Low | owner decision; proposal: an Errors row "a text with NUL or a non-finite number: `invalid`, rule `schema`" in IF-102 at the next contract change with one suite case and the mock; REQ-SLY-006: state "notices sent while the database restarts may be lost" (accept) rather than add catch-up |
+| R4 | Plan text: `test-spec.md` of the node has no `## Scenarios` section (trace_check ERROR, M39, same as N-3.2 F8, N-3.3 F8); TC-SLY-007 (`test-spec.md:17`) still names the repository's recorded data folder | Low | amendment (text only): scenarios for TC-SLY-001..011 and TC-SLY-007 reworded to the node's own record format per D-158; with the F11 backlog |
+
+## Accepted deviations
+| Deviation | Reason | Accepted by |
+|---|---|---|
+| REQ-SLY-007 partly: no importers of the legacy stores | D-158, FB-04 | owner |
+| 10 ResourceWarnings of the protected `_StorageAdapter` on PostgreSQL | D-158 | owner |
+| TC-SLY-010, TC-SLY-011 container tests not re-run by the reviewer | one-container rule of this session; evidence from the implementation log | to be confirmed by the owner (`python tests/test_database_stack.py` on the host) |
+| the earlier deviations (file backend stays the app's store, run events as files, library sqlite cache) | D-139, D-107, D-147, D-152 | owner |
+
+## Not checked here
+- CI: none; all results are local feedback runs.
+- The whole test suite (only the node's files, its consumers named above and the contract suites).
+- `tools/apply_amendment_a59.sh` look-only run (denied by the permission check; compared with `cmp` instead).
+- Process note: one unit discovery (`-s tests -k …`) also ran `test_storage_postgres.py`, which started its own throwaway container for about 16 s while mine was up (two of my containers at once, both removed).
+
+## Notes for Phase 7
+- Unchanged: notices across instances after a database restart (R3); moving a real data folder (F5, next iteration).
