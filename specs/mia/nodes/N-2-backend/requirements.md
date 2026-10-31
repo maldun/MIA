@@ -104,7 +104,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 
 ### REQ-BE-009 – Throttled failed logins
 - Level: high   Subject: WebApplication
-- Text: If more than 5 logins fail within one minute for an account, then the Backend shall refuse further logins for that account until the minute has passed.
+- Text: If 5 logins fail within one minute for an account, then the Backend shall refuse every further login of that account until the minute has passed.
 - Rationale: refines FR-21
 - Parent: FR-21
 - Priority: Must
@@ -112,7 +112,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Acceptance criterion: AC-14: the sixth failed attempt within a minute is refused even with the right password (exact)
 - Verified by: TC-API-004, TC-N2-005
 - Status: Approved
-- History: –
+- History: 2026-10-31 D-153: the text says what AC-14, IF-101 and the code do (the 6th attempt is refused; it said "more than 5")
 
 ### REQ-BE-010 – Password handling
 - Level: high   Subject: WebApplication
