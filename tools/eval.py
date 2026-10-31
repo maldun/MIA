@@ -12,7 +12,7 @@ The evaluation harness on the command line (ui/REQUIREMENTS_CORE.md 9). Run with
   python tools/eval.py compare computable light full          the newest runs of two variants of a suite
   python tools/eval.py cases hard_checks --tag trap           show the cases
 
-Holdout suites (*.holdout) are left out of list and refused by cases and run unless --holdout is given: they are for Verify only.
+Holdout suites (*.holdout) are left out of list and refused by cases, run, report and compare (also their saved runs) unless --holdout is given: they are for Verify only.
 Every run needs --pin (REQ-EVL-004), and the pin decides the model (--model is refused next to it, D-166); a suite of kind "workflow" runs through IF-105 on the workflows of the app's storage.
 Without a name the variant is called "default". The variant options (--skill, --pipeline, --model) change what runs; everything else stays the same, so two runs can be compared.
 """
@@ -123,7 +123,7 @@ def main():
     parser.add_argument("--sample", type=int, metavar="N", help="a seeded sample of N active cases; the two halves of a pair stay together")
     parser.add_argument("--sample-seed", type=int, default=7, help="seed of --sample (default 7)")
     parser.add_argument("--include-retired", action="store_true", help="also run the cases tagged retired")
-    parser.add_argument("--holdout", action="store_true", help="list, show or run holdout suites (*.holdout): for Verify only, never during development")
+    parser.add_argument("--holdout", action="store_true", help="list, show, run, report or compare holdout suites and their runs (*.holdout): for Verify only, never during development")
     parser.add_argument("--results", default=None, help="folder of saved runs (default: data/eval)")
     parser.add_argument("--no-save", action="store_true")
     parser.add_argument("--quiet", action="store_true")
@@ -133,12 +133,18 @@ def main():
     results = args.results or own(cfg, "eval_dir", "data/eval")
 
     def resolve_run(name):
-        if os.path.isfile(name):
-            return harness.load_run(name)
-        path = harness.latest_run(results, name.split(":")[0], name.split(":")[1] if ":" in name else None)
-        if not path:
-            sys.exit("no saved run for '%s' in %s" % (name, results))
-        return harness.load_run(path)
+        """a saved run by file or by suite[:variant]; a run of a holdout suite only with --holdout (R5, D-172), by name before it is read"""
+        if not os.path.isfile(name):
+            suite_name = name.split(":")[0]
+            if is_holdout(suite_name) and not args.holdout:
+                sys.exit("%s is a holdout suite: its runs only with --holdout (Verify)" % suite_name)
+            name = harness.latest_run(results, suite_name, name.split(":")[1] if ":" in name else None)
+            if not name:
+                sys.exit("no saved run for '%s' in %s" % (suite_name, results))
+        run = harness.load_run(name)
+        if is_holdout(run.header["suite"]) and not args.holdout:
+            sys.exit("%s is a run of the holdout suite %s: only with --holdout (Verify)" % (name, run.header["suite"]))
+        return run
 
     if args.command == "list":
         for suite in harness.list_suites(SUITES, holdout=args.holdout):
