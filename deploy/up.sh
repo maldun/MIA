@@ -275,6 +275,12 @@ fi
 if [ "$1" != "up" ]; then
   exec "${RUN[@]}" "$@"
 fi
+# the character page is git-ignored: a fresh checkout or worktree mounts an empty folder and the page shows no character, without an error (D-171)
+CHARACTER_DIR="$(envval MIA_CHARACTER_DIR ../ui/godot/build/web)"
+case "$CHARACTER_DIR" in /*) ;; *) CHARACTER_DIR="$(cd "$HERE" && realpath -m "$CHARACTER_DIR")" ;; esac
+if [ ! -f "$CHARACTER_DIR/index.html" ]; then
+  echo "WARNING: the character folder $CHARACTER_DIR has no index.html: the page will show no character. Fill it with  deploy/up.sh character ZIP  (the zip from the owner's Drive) or build it with  ui/tools/build_web.sh , then deploy/up.sh again. The stack starts anyway."
+fi
 
 "${RUN[@]}" "$@"
 BIND="$(envval MIA_BIND 127.0.0.1)"; PORT="$(envval MIA_PORT 8585)"; SPORT="$(envval MIA_HTTPS_PORT 8586)"
