@@ -421,3 +421,20 @@ test('TC-VPB-003: on the page a missing line is reported once in the browser con
   assert.equal(p.els.hint.hidden, true);
   assert.deepEqual(ids(p.audio), ['b']);
 });
+
+// mark.req("REQ-VPB-003")
+test('TC-VPB-003: a broken line that fails before the next one arrives gives one console warning, and the next line plays to its end (A4, D-154)', async () => {
+  // Given: the page on an element that fails a broken file as Chromium does (error event with code 4, then NotSupportedError for play())
+  const p = page({ missing: ['/audio/line-000001.wav'] });
+  // When: the broken line comes alone and fails; the good line comes a moment later and ends
+  p.server('audio_reload', reload('line-000001', 1));
+  await flush(); await flush(); await flush();
+  p.server('audio_reload', reload('line-000002', 2));
+  await flush(); await flush();
+  p.audio.finish(); await flush();
+  // Then: one warning that names the broken line, the good one was heard and its end was reported with its serial
+  assert.deepEqual(p.warnings, ['MIA voice: line skipped, it could not be played: /audio/line-000001.wav']);
+  assert.deepEqual(ids(p.audio), ['line-000002']);
+  assert.deepEqual(p.socket.sent.filter(([name]) => name === 'audio_ended'), [['audio_ended', { serial: 2 }]]);
+  assert.equal(p.sound.playing, false);
+});
