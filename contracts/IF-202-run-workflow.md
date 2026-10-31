@@ -1,4 +1,4 @@
-# IF-202 – Run a workflow, v0
+# IF-202 – Run a workflow, v1
 
 Owner (provider): N-2.4 Workflow execution   Consumers: N-2.2 Chat agent, N-2.3 Workflow management   Decided by: N-2   Mock complexity: 3 (budgets, event stream, costs)   Suite: `tests/acceptance/contract/test_if_202_run_workflow.py`
 
@@ -7,7 +7,7 @@ Running a workflow version under a budget, and the measured costs the schedule i
 ## Operations
 | Name | Input | Output | Notes |
 |---|---|---|---|
-| `run(workflow, version, inputs, budget, user, options=None)` | workflow id, version number, input dict, budget `{steps, seconds, calls, tokens}` (any key may be absent = unlimited), account, optional `options` = `{"model_pin", "seed", "temperature"}` | `{"run_id", "status", "outputs", "missing", "events", "cost"}` | status `done`, `budget_exhausted` or `refused`; `events` are typed run events (`run_start` first, `run_end` last, all with the run id and the user; `run_start` carries the options); `cost` = `{"steps","seconds","calls","tokens"}` actually spent (all 0 when refused) |
+| `run(workflow, version, inputs, budget, user, options=None)` | workflow id, version number, input dict, budget `{steps, seconds, calls, tokens}` (any key may be absent = unlimited), account, optional `options` = `{"model_pin", "seed", "temperature"}` | `{"run_id", "status", "outputs", "missing", "events", "cost"}` | status `done`, `budget_exhausted`, `refused`, `stopped` (the user stopped it) or `error` (a step failed; the result then carries `error`, a plain text); `events` are typed run events (`run_start` first, `run_end` last, all with the run id and the user; `run_start` carries the options); `cost` = `{"steps","seconds","calls","tokens"}` actually spent (all 0 when refused) |
 | `costs(workflow, node_id)` | | `{"seconds", "calls", "tokens"}` or `None` | measured median of recorded runs, from the run log |
 
 ## Errors
@@ -16,6 +16,9 @@ Running a workflow version under a budget, and the measured costs the schedule i
 | unknown workflow or version | `ServiceError("unknown_workflow")` | nothing run, no event |
 | a budget is exceeded | status `budget_exhausted`, `missing` names the exceeded budgets | the partial `outputs` so far; `run_end` is written |
 | the estimate exceeds the budget | status `refused`, no model call | `run_end` is written, `outputs` empty |
+| `options.model_pin` names a pin the model server does not hold (or holds with another digest) | `ServiceError("pin_unavailable")` | nothing run, no event; never a silent fallback to another model |
+| a step fails (a tool, a check, the model server) | status `error`, `error` = a plain text | the partial `outputs` so far; `run_end` is written |
+| the user stops the run | status `stopped` | the partial `outputs` so far; `run_end` is written |
 
 ## Bounds
 | Quantity | Bound | Source |
@@ -32,3 +35,4 @@ Running a workflow version under a budget, and the measured costs the schedule i
 | Version | Date | Change | Amendment |
 |---|---|---|---|
 | v0 | 2026-10-25 | first draft; options and cost added in the plan of N-4 (F-4, amendment 9) | 8, 9 |
+| v1 | 2026-10-31 | the statuses `stopped` and `error` (with `error`) and the error `pin_unavailable`, as the provider returns them since N-2.4.1 T-01 (D-113; finding F8 of the N-2.4.1 verification) | A-43 |
