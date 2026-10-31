@@ -21,6 +21,7 @@ import json
 import math
 import random
 import re
+import secrets
 import threading
 import time
 from collections import namedtuple
@@ -44,6 +45,9 @@ MAX_LOOP = 20
 MAX_PLAIN = 160
 ON_ERROR = ("fail", "skip", "default")
 OPS = ("==", "!=", "<", "<=", ">", ">=", "in", "not_in", "empty", "not_empty", "true", "false")
+# the event types of IF-401 (contracts/IF-401-run-events.md); the other events of a run stay in the run log only
+IF401_TYPES = ("run_start", "run_end", "model_call", "tool_call", "check_run", "query_issued", "source_found", "passage_extracted", "claim_made",
+               "claim_verified", "stop_decision", "budget_spent", "router_decision", "error")
 DEFAULT_LINES = {"model": ["Thinking…"], "tool": ["Working on it…"], "code": ["Calculating…"], "map": ["One by one…"], "ask_user": ["Over to you…"]}
 
 
@@ -274,8 +278,22 @@ class RunResult:
         return self.status == "done"
 
 
+class _RunEventsSink:
+    """the run log and IF-401 side by side (REQ-RUN-012, D-120): every event goes to the run log, those of the IF-401 vocabulary also through RunEvents"""
+
+    def __init__(self, run, run_events, run_id, user):
+        self.run, self.run_events, self.run_id, self.user = run, run_events, run_id, user
+
+    def event(self, event):
+        if self.run is not None:
+            self.run.event(event)
+        kind = event.get("type") if event.get("kind") == "event" else event.get("kind")
+        if kind in IF401_TYPES:
+            self.run_events.emit(self.run_id, kind, event.get("payload") or {}, self.user, actor=event.get("actor"), plain=event.get("plain") or "")
+
+
 class _State:
-    def __init__(self, runner, skill, graph, ctx, on_event, should_stop, ask, run, functions, tools):
+    def __init__(self, runner, skill, graph, ctx, on_event, should_stop, ask, run, functions, tools, user):
         self.runner, self.skill, self.graph, self.ctx = runner, skill, graph, ctx
         self.on_event, self.should_stop, self.ask, self.run = on_event, should_stop, ask, run
         self.functions, self.tools = functions, tools
@@ -284,33 +302,41 @@ class _State:
         self.calls = {}
         self.model_calls = 0
         self.tokens = 0
-        self.stream = ev.EventStream(run.id if run else None, sink=run, on_event=on_event, clock=runner.clock, t0=self.t0, strict=runner.strict_events)
+        self.user = user
+        neighbours = runner.run_events is not None or runner.tool_calls is not None          # IF-401 and IF-402 need a run id also without a run log
+        self.run_id = run.id if run else "r-%s" % secrets.token_hex(6) if neighbours else None
+        sink = run if runner.run_events is None else _RunEventsSink(run, runner.run_events, self.run_id, user)
+        self.stream = ev.EventStream(self.run_id, sink=sink, on_event=on_event, clock=runner.clock, t0=self.t0, strict=runner.strict_events)
         self.lock = threading.Lock()
         self.budget = skill["budget"]
 
 
 class Runner:
     def __init__(self, model=None, tools=None, functions=None, run_log=None, rng=None, clock=time.monotonic, sandbox=None, broker_factory=None, environment=None, strict_events=False, store=None, store_texts=None,
-                 max_input_tokens=4096):
+                 max_input_tokens=4096, tool_calls=None, door_tools=None, run_events=None):
         """max_input_tokens: the largest model input, half of the context window (REQ-RUN-005; num_ctx 8192); a step whose options set num_ctx uses half of it.
         model: object with chat(messages, schema=None, model=None, profile=None, options=None) -> text; tools: {name: callable | Tool};
         functions: {name: callable}; run_log: RunLog or None; environment: a dict or a function returning one (events.environment()), written into run_start;
-        strict_events: a domain event that does not fit its schema raises (tests) instead of becoming a log_error event"""
+        strict_events: a domain event that does not fit its schema raises (tests) instead of becoming a log_error event;
+        tool_calls: the door of IF-402 (`call(run, tool, args)`), door_tools: {tool name: budget key or None} the tools called through it;
+        run_events: IF-401 (`emit(run_id, type, payload, user, actor, plain)`), written beside the run log (REQ-RUN-012)"""
         self.max_input_tokens = max_input_tokens
         self.model = model
         self.tools = {k: v if isinstance(v, Tool) else Tool(v, None) for k, v in (tools or {}).items()}
+        self.tool_calls, self.door_tools, self.run_events = tool_calls, dict(door_tools or {}), run_events
+        self.tools.update({name: Tool(None, key) for name, key in self.door_tools.items()})
         self.functions = dict(functions or {})
         self.run_log = run_log
         self.environment, self.strict_events = environment, strict_events
-        # store: a content_store.ContentStore; store_texts(skill name) says for which skills prompts and answers are kept in full (default: all but "chat", a conversation is personal, LG3)
-        self.store, self.store_texts = store, store_texts or (lambda name: name != "chat")
+        # store: a content_store.ContentStore; store_texts(skill name) says for which skills prompts and answers are kept in full (default: all; Core leaves out the chat, LG3)
+        self.store, self.store_texts = store, store_texts or (lambda name: True)
         self.sandbox, self.broker_factory = sandbox, broker_factory      # sandbox.SandboxRouter and a function that makes a web broker per script
         self.rng = rng or random.Random()
         self.clock = clock
 
     # -- public ----
-    def run(self, skill, graph, inputs, on_event=None, should_stop=None, ask=None, functions=None, tools=None, task=None, started_by="command"):
-        """started_by: "command" (a command of a user, the harness, a workflow run) or "message" (a chat message); a task that reaches the internet
+    def run(self, skill, graph, inputs, on_event=None, should_stop=None, ask=None, functions=None, tools=None, task=None, started_by="command", user="mia"):
+        """user: the user the events of IF-401 are attributed to; started_by: "command" (a command of a user, the harness, a workflow run) or "message" (a chat message); a task that reaches the internet
         is refused when a message started it, before any step runs (REQ-RUN-001)"""
         if started_by == "message" and reaches_internet(skill):
             raise PipelineError("'%s' reaches the internet and starts only by a command, not by a chat message" % skill.get("name"))
@@ -325,7 +351,7 @@ class Runner:
             run = self.run_log.start(task or skill["name"], skill["name"], skill["version"], graph.get("name"), graph.get("version"), model, inputs,
                                      uses=graph.get("uses"))
         ctx = {"input": inputs}
-        st = _State(self, skill, graph, ctx, on_event, should_stop, ask, run, all_functions, all_tools)
+        st = _State(self, skill, graph, ctx, on_event, should_stop, ask, run, all_functions, all_tools, user)
         with ev.activate(st.stream):
             return self._run_state(st, skill, graph, ctx, run)
 
@@ -370,7 +396,7 @@ class Runner:
         if run is not None:
             run.finish(status, {"answer": answer}, seconds, error)
         cost = {"steps": st.steps, "seconds": round(seconds, 3), "calls": st.model_calls, "tokens": st.tokens}
-        return RunResult(run.id if run else None, status, answer, ctx, seconds, error, run.events if run else [], missing, cost)
+        return RunResult(st.run_id, status, answer, ctx, seconds, error, run.events if run else [], missing, cost)
 
     # -- events ----
     def _outline(self, nodes, ctx):
@@ -468,7 +494,24 @@ class Runner:
                 ev.emit("budget_spent", {"name": tool.budget_key, "amount": 1, "used": count, "limit": limit})
             if limit is not None and count > limit:
                 raise BudgetExceeded(tool.budget_key)
-        return tool.func(**resolve(node.get("args", {}), ctx))
+        args = resolve(node.get("args", {}), ctx)
+        if node["tool"] in self.door_tools:
+            return self._call_door(st, node, args)
+        return tool.func(**args)
+
+    def _call_door(self, st, node, args):
+        """a tool of IF-402: the door counts it against the limits of the run (the same budgets) and labels its trust (REQ-RUN-012)"""
+        name = node["tool"]
+        limits = {tool: st.budget[key] for tool, key in self.door_tools.items() if key in st.budget}
+        try:
+            found = self.tool_calls.call({"id": st.run_id, "limits": limits}, name, args)
+        except Exception as exc:
+            if getattr(exc, "code", None) == "budget":
+                raise BudgetExceeded(self.door_tools[name] or name) from exc
+            raise
+        if self.run_events is not None:
+            self.run_events.emit(st.run_id, "tool_call", {"tool": name, "trust": found["trust"]}, st.user, actor=node["id"], plain=name)
+        return found["output"]
 
     def _do_ask_user(self, st, node, ctx, item):
         if st.ask is None:

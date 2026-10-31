@@ -17,6 +17,7 @@ sys.path.insert(0, HERE)
 import events as E                                       # noqa: E402
 import test_pipeline as TP                               # noqa: E402
 from content_store import ContentStore                   # noqa: E402
+from core import keep_texts                              # noqa: E402
 from pipeline import Runner                              # noqa: E402
 
 
@@ -103,6 +104,7 @@ class InThePipeline(unittest.TestCase):
     def go(self, store, name="demo", **kw):
         nodes = [{"id": "plan", "kind": "model", "prompt": "plan", "schema": "queries", "output": "out"}]
         events = []
+        kw.setdefault("store_texts", keep_texts)                         # the rule Core gives its runner (REQ-RUN-013: the runner names no workflow)
         runner = Runner(model=TP.FakeModel([json.dumps({"queries": ["a"]})]), rng=random.Random(1), store=store, **kw)
         runner.run(TP.skill(name=name), TP.graph(nodes), {"text": "why? write to me@example.org"}, on_event=events.append)
         return [e for e in events if e.get("type") == "model_call"]

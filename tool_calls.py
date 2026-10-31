@@ -28,9 +28,9 @@ except ImportError:  # used as plain script / in tests
     from scholar import RETRACTED, WITHDRAWN, clean_doi, reference_of, retraction_state
 
 TRUST = {"number_check": "code", "quote_in_source": "code", "schema_check": "code", "run_script": "code",
-         "web_search": "web", "fetch_passages": "web", "scholar_search": "web", "source_record": "web"}
+         "web_search": "web", "fetch_page": "web", "fetch_passages": "web", "scholar_search": "web", "source_record": "web"}
 TOOLS = tuple(TRUST)
-EXTERNAL = ("web_search", "fetch_passages", "scholar_search", "source_record")
+EXTERNAL = ("web_search", "fetch_page", "fetch_passages", "scholar_search", "source_record")
 
 
 class ToolCallError(Exception):
@@ -103,6 +103,11 @@ class ToolCalls:
     def _web_search(self, query):
         found = self._need(self.web_search, "web search")(query)
         return [{"url": r["url"], "title": r.get("title", ""), "content": r.get("snippet", "")} for r in found["results"]]
+
+    def _fetch_page(self, url, max_chars=None):
+        """the whole page as the fetcher gives it (title, text, clipped, the phrases that look like instructions): the page of the research pipelines (A-34)"""
+        fetch = self._need(self.fetch_page, "page fetch")
+        return fetch(url) if max_chars is None else fetch(url, max_chars=max_chars)
 
     def _fetch_passages(self, url, question):
         """the passages of the page that share most words with the question, best first (REQ-TLS-002): the selection of the lookup

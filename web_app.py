@@ -69,8 +69,9 @@ from . import checks
 from . import sandbox as sandbox_module
 from .core import Core
 from .library import Library
-from .pipeline import Tool
 from .pipeline_model import ModelTurns, OllamaModel, TurnClient
+from .run_events import RunEvents
+from .tool_calls import ToolCalls
 from . import web_tools
 from .web_tools import build_web_tools
 from .extension_loader import load_extensions
@@ -586,10 +587,13 @@ def _run_environment():
     return _environment_cache["value"]
 
 
+# the runner reaches the tools only through IF-402 and writes its events also through IF-401 (REQ-RUN-012, D-120, D-122)
+tool_calls = ToolCalls(web_search=_web_tools["web_search"][0], fetch_page=_web_tools["fetch_page"][0], scholar=_scholar, trust=_source_trust.for_url, sandbox=sandbox_router)
+run_events = RunEvents(os.path.join(_runs_dir, "events"))
 core = Core(_own_path(CONST.SKILLS_DIR_KEY, CONST.DEFAULT_SKILLS_DIR), library, _runs_dir, model=pipeline_model, sandbox=sandbox_router, environment=_run_environment,
             store=content_store, store_texts=(lambda name: True) if cfg.get("store_chat_texts") else None,
             broker_factory=lambda: broker_module.WebBroker(broker_module.web_handlers(_web_search, _web_client)),
-            tools={name: Tool(*pair) for name, pair in _web_tools.items()},
+            tool_calls=tool_calls, door_tools={name: budget_key for name, (_, budget_key) in _web_tools.items()}, run_events=run_events,
             functions={"chunk_text": web_tools.chunk_text, "untrusted": web_tools.untrusted, "injection_signals": web_tools.injection_signals,
                        **checks.build_web_checks(_web_tools["web_search"][0], _web_tools["fetch_page"][0])})
 for _name, _problems in core.check(functions={"converse": None}).items():

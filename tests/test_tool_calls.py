@@ -219,6 +219,21 @@ class ToolCallsTests(unittest.TestCase):
             self.assertIn("quote", passage)
             self.assertIn(passage["quote"], PAGE)
 
+    @mark.req("REQ-TLS-008")
+    def test_a_fetched_page_is_web_text(self):
+        """TC-TLS-008: a whole page fetched through the door is labelled as web text and counted (A-34, D-122).
+
+        Example: fetch_page {"url": "https://example.org/a"} -> output is the page of the fetcher, trust "web", used {"fetch_page": 1}
+        """
+        # Given: t = tools() and run = {"id": "r1", "limits": {"fetch_page": 1}}
+        t = tools()
+        run = {"id": "r1", "limits": {"fetch_page": 1}}
+        # When: calling fetch_page
+        out = t.call(run, "fetch_page", {"url": "https://example.org/a"})
+        # Then: the page comes back unchanged as untrusted web text and the call is counted
+        self.assertEqual(out, {"output": fake_fetch("https://example.org/a"), "trust": "web"})
+        self.assertEqual(t.used("r1"), {"fetch_page": 1})
+
 
 if __name__ == "__main__":
     unittest.main()
