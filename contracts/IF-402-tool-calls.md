@@ -1,4 +1,4 @@
-# IF-402 – Tool calls, v2
+# IF-402 – Tool calls, v3
 
 Owner (provider): N-2.4.2 Tools and sandbox   Consumers: N-2.4.1 Pipeline runner   Decided by: N-2.4   Mock complexity: 3 (counted calls, trust labels, scripted tools)   Suite: `tests/acceptance/contract/test_if_402_tool_calls.py`
 
@@ -12,17 +12,18 @@ The one door to everything a workflow step may do besides a model call. A tool k
 | `number_check` | `claim`, `evidence` (list of text) | `{"status": "pass" \| "fail" \| "inconclusive", "detail"}`; a number is a pass if it agrees with a number of the evidence within rounding |
 | `quote_in_source` | `quote`, `source_text` | `{"status": "pass" \| "fail"}`; the quote must occur verbatim |
 | `schema_check` | `value`, `schema` | `{"status": "pass" \| "fail", "problems"}`; each problem is a readable text that names the path and the key or rule (`$: missing 'reason'`), the text a retry tells the model |
-| `run_script` | `code`, `inputs` | `{"status": "ok" \| "unavailable", "stdout"}`; without a sandbox: `unavailable`, nothing runs |
+| `run_script` | `code`, `inputs` | `{"status": "ok" \| "unavailable" \| "failed", "stdout", "result"}`; `ok` only for a script that ran to its end; without a sandbox (also one that went away during the call): `unavailable`, nothing runs; a script that was rejected, crashed or timed out: `failed`; `result` is the full result of the script check (status, detail, evidence) |
 | `web_search` | `query` | list of `{url, title, content}` |
 | `fetch_page` | `url`, `max_chars` (optional) | `{"ref", "url", "title", "text", "clipped", "signals"}`: the whole page as untrusted text, clipped to `max_chars`; `signals` are the phrases that look like instructions to a model |
 | `fetch_passages` | `url`, `question` | `{"ref", "hash", "passages": [{"id","quote"}]}`; every passage keeps its source reference |
-| `scholar_search` | `query`, `until`, `since` | `{"works", "errors", "dropped"}` as IF-405 |
+| `scholar_search` | `query`, `until`, `since` | `{"works", "errors", "dropped"}` as IF-405; every dropped work is `{"ref", "title", "reason", "detail"}`, the reasons of IF-405 plus `retracted` and `withdrawn` (as of `until`) |
 | `source_record` | `ref` | `{"ref","class","trust","retraction"}` |
 
 ## Errors
 | Condition | Signal | What the consumer may rely on afterwards |
 |---|---|---|
 | unknown tool | `ServiceError("unknown_tool")` | nothing counted |
+| arguments the tool does not take (missing or unknown) | `ServiceError("bad_arguments", detail=…)` | nothing counted |
 | the tool's limit for this run is used up | `ServiceError("budget", detail=tool)` | nothing executed, nothing counted |
 | the web or a source refuses or fails | `ServiceError("source_error", detail=…)` | the budget is counted; other tools work |
 | no sandbox | `run_script` output status `unavailable` | the operation is refused, never weakened |
@@ -45,3 +46,4 @@ The one door to everything a workflow step may do besides a model call. A tool k
 | v0 | 2026-10-25 | first draft from the current tools | – |
 | v1 | 2026-10-30 | `schema_check` problems are readable texts with path and key, as `schema_check.py` gives them | A-32 |
 | v2 | 2026-10-31 | `fetch_page`: the whole page, the tool the research pipelines read pages with, so the runner reaches it through the door (REQ-RUN-012, D-122) | A-34 |
+| v3 | 2026-10-31 | `run_script` status `failed` and its `result`; the dropped works of `scholar_search`; the error `bad_arguments` (findings 6, 8, 11 of the N-2.4.2 verification, D-132) | A-42 |

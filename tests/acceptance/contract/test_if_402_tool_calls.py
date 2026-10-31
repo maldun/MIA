@@ -52,6 +52,16 @@ class ToolCallsContract(unittest.TestCase):
         self.assertTrue(out["output"]["passages"])
         self.assertTrue(all(p["quote"] in "The tower is 330 m high. It was finished in 1889." for p in out["output"]["passages"]))
 
+    @mark.req("IF-402", "REQ-BE-046")
+    @each_provider(IF)
+    def test_wrong_arguments_are_refused_uncounted(self, tools):
+        """TC-IF-402-07 (A-42): arguments the tool does not take are 'bad_arguments' and nothing is counted: a limit of 1 still allows one right call."""
+        run = {"id": "r1", "limits": {"number_check": 1}}
+        self.assertEqual(code_of(lambda: tools.call(run, "number_check", {"claim": "It is 1,200 m"}))[0], "bad_arguments")
+        self.assertEqual(code_of(lambda: tools.call(run, "number_check", {"claim": "x", "evidence": [], "unit": "m"}))[0], "bad_arguments")
+        out = tools.call(run, "number_check", {"claim": "It is 1,200 m", "evidence": ["about 1,200 m"]})
+        self.assertEqual(out["output"]["status"], "pass")
+
     @mark.req("IF-402", "REQ-BE-064")
     @each_provider(IF)
     def test_a_fetched_page_is_untrusted_web_text(self, tools):

@@ -1,5 +1,6 @@
 """Mock of IF-402, the tool calls of the Tools and sandbox (protected). Complexity 3: counted calls against budgets, trust labels, scripted tools.
 No real network and no real sandbox: pages, search results and works are scripted; the sandbox is a flag."""
+import inspect
 import re
 
 try:
@@ -29,6 +30,10 @@ class ToolCallsMock:
     def call(self, run, tool, args):
         if tool not in TOOLS:
             raise ServiceError("unknown_tool")
+        try:
+            inspect.signature(getattr(self, "_" + tool)).bind(**args)
+        except TypeError as exc:
+            raise ServiceError("bad_arguments", detail=str(exc))
         used = self._used.setdefault(run["id"], {})
         limit = run.get("limits", {}).get(tool)
         if limit is not None and used.get(tool, 0) >= limit:
