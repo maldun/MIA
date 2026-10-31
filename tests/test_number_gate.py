@@ -66,7 +66,13 @@ class Routes(unittest.TestCase):
         result, model = self.run_gate(lambda p, n: vote("refuted"), "The moon is made of cheese.", "Lunar rock is basalt.")
         self.assertEqual((result.answer["verdict"], result.answer["calls"], len(model.prompts)), ("refuted", 1, 1))
         self.assertNotIn("Number check", model.prompts[0])
-        self.assertEqual(kinds(result, "check_run"), [])
+        # D-153: the check ran and found nothing to compare; the run log says so (skipped) before the model call
+        check, calls = kinds(result, "check_run"), kinds(result, "model_call")
+        self.assertTrue(check and calls)
+        self.assertLess(check[0], calls[0])
+        payload = result.events[check[0]]["payload"]
+        self.assertEqual((payload["name"], payload["result"]), ("number_check", "skipped"))
+        self.assertTrue(payload["detail"].startswith("not_applicable"))
 
     def test_the_style_single_costs_one_call_and_cops_three(self):
         single, model = self.run_gate(lambda p, n: vote("supported"), TOWER, "The tower is 1,200 m tall.", style="single")

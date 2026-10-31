@@ -62,6 +62,7 @@ class ClaimPipelinesCheckFirst(unittest.TestCase):
             self.assertTrue(checks and checks[0] < calls[0], "%s: a model call before any code check" % (pipeline or skill))
         if401_calls = [i for i, e in enumerate(if401) if e["type"] == "model_call"]
         self.assertEqual(len(if401_calls), len(calls))                         # IF-401 holds the same model calls
+        return if401
 
     # REQ-WFX-005
     @mark.req("REQ-WFX-005", "REQ-TLS-001")
@@ -82,8 +83,12 @@ class ClaimPipelinesCheckFirst(unittest.TestCase):
         Example: "The tower is very tall." -> check.number (nothing to compare), then one judge.
         """
         # Given / When: a claim without a number through the gate
-        # Then: the code check comes first
-        self.assert_check_first("verify_claim", WORDS, self.latest("verify.number_gate"))
+        if401 = self.assert_check_first("verify_claim", WORDS, self.latest("verify.number_gate"))
+        # Then: the code check comes first, also in IF-401: the check found nothing to compare and says so (D-153)
+        checks = [i for i, e in enumerate(if401) if e["type"] == "check_run" and e["payload"]["name"] == "number_check"]
+        calls = [i for i, e in enumerate(if401) if e["type"] == "model_call"]
+        self.assertTrue(checks and calls and checks[0] < calls[0])
+        self.assertEqual(if401[checks[0]]["payload"]["result"], "skipped")
 
     # REQ-WFX-005
     @mark.req("REQ-WFX-005", "REQ-TLS-001")

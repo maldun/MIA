@@ -4,7 +4,7 @@ not depend on a model are made here, in plain functions:
 
   gate_prepare(given)        the route of a claim and the evidence cut to EVIDENCE_LIMIT characters: "abstain" (a number and no evidence: REQ-GATE-006), "single" (no
                              number: as the current release, REQ-GATE-004, or style single) or "cops" (the default for a claim with a number)
-  run_number_check(c, e)     checks.number_check, logged as a check_run event when it ran (REQ-GATE-001)
+  run_number_check(c, e)     checks.number_check, logged as a check_run event whenever it runs (REQ-GATE-001; not applicable: skipped, D-153)
   gate_evidence(plan, check) the evidence the judgement steps see: the line of the check result first, then the evidence (REQ-GATE-002, -003); used by verify.number_gate@1
                              and by the style single; gate_check_line gives the line alone, for the prompts of verify.number_gate@2 that keep it outside the evidence
   gate_record(...)           the result record of IF-003 from the tally of the judgement style
@@ -50,9 +50,11 @@ def defang(evidence):
 
 
 def run_number_check(claim, evidence):
+    """every check that ran is logged, also one that found nothing to compare (result skipped, detail not_applicable: D-153), so the run log shows the
+    code check before the first model call of each claim"""
     outcome = checks.number_check(claim, evidence)
-    if outcome["status"] != checks.NOT_APPLICABLE:
-        ev.emit("check_run", {"name": "number_check", "target": str(claim)[:380], "result": EVENT_RESULT[outcome["status"]], "detail": "%s: %s" % (outcome["status"], outcome["detail"])[:380]})
+    result = "skipped" if outcome["status"] == checks.NOT_APPLICABLE else EVENT_RESULT[outcome["status"]]
+    ev.emit("check_run", {"name": "number_check", "target": str(claim)[:380], "result": result, "detail": "%s: %s" % (outcome["status"], outcome["detail"])[:380]})
     return outcome
 
 
