@@ -136,7 +136,12 @@ class AnswersTest(unittest.TestCase):
     def test_the_chat_service_votes_on_the_if_102_mock(self):
         """D-162: the IF-102 mock offers categories() too, so the chat service runs on it.
         Example: a vote "service" +1 on the mock gives the score {"answer_quality": 0, "reactions": 0, "character_behaviour": 0, "service": 1}."""
-        from if_102_storage import StorageMock
+        mocks = os.path.join(ROOT, "tests", "helpers", "mocks")
+        sys.path.insert(0, mocks)          # only for this import: the mocks have a graph_rules of their own, which must not shadow the real one
+        try:
+            from if_102_storage import StorageMock
+        finally:
+            sys.path.remove(mocks)
         # Given: a chat service on the mock of IF-102
         chat = ChatService(lambda event, payload: None, self.log, MoodTracker(os.path.join(ROOT, "moods.json")), lambda *a: "",
                            spawn=lambda target: target(), votes=StorageMock(), wall_clock=lambda: self.now)
