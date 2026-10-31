@@ -103,3 +103,96 @@ Human review: specification side via `review-log.md`; code read in full by the r
 
 ## Reproduction
 Probe and mutation scripts (not committed): `/tmp/claude-1000/-home-maldun-prog-Python-MIA/1251f948-2f8f-400a-acca-407c0b962dbf/scratchpad/n32verify/` (`probe.py <repo>` rule probes, `probe2.py <repo>` storage, `probe3.py` IF-104 in the image, `mutate.py` 17 mutants on an export of HEAD).
+
+# Re-verification (after v1-n32b and the A-60 install)
+
+**Goal:** G-V1 (iteration), supervised; node N-3.2 (leaf), black box with its neighbours' mocks, and in the N-3 integration steps with its real siblings
+**Branch:** goal/v1 @ 6243c4d (node code as of 2ba48ac; later commits are docs only)   **Plan baseline:** plan-baseline-it1, decomp-baseline   **Date:** 2026-10-31
+**Reviewers:** – (human), Claude Opus 5.5 (AI, fresh context; it never saw the implementation chat)
+**Commits reviewed:** v1-n32b (merged in 2ba48ac): fda514a (F1), 0442a40 (F2), 97c425d (F4 part), 33db7b7 (F7), ec9c452 (F6), 75638e8 and 508ed36 (A-60 draft, D-162); 849ac36 (A-59, A-60, A-61 installed by the owner). Inputs: D-160, D-162, IF-301 v1, IF-104 JS mock and suite, sibling report N-3.1 (re-verification).
+
+## Verdict (proposal)
+**Verified with accepted deviations.** F1, F2, F4 (tested part) and F7 are closed with tests that fail on a mutant (table below); F9 and the IF-301 text of F1/F2 are closed by A-60 (installed files equal their drafts); F6 is closed by naming the outside evidence in `test-spec.md`; F3 and the rest of F4 are deferred to FB-02 (D-160, recorded in `feedback/FB-02.md:19`); F5 is decided (REQ-GTB-004 partly, `goals/G-V1/goal.md:73`, TD-06). The D-162 module collision is closed for IF-301: a mutant of the real `graph_rules.py` turns only the `_real` cases red in a full contract run in one process. New findings are low: the TD-06 record does not meet the deferral format (R1, trace_check ERROR), TC-IF-104-06 is listed for the real side but runs only on the JS mock (R2), and plan text residue (R3). None blocks the merge.
+
+## Automated checks (local runs, not CI)
+| Check | Result |
+|---|---|
+| Node tests, host | `test_graph_rules.py` 12 OK; `test_graph_tables.py` 4 OK; `test_seed_workflows.py` 3 skipped (TD-06) |
+| IF-301 suite, host | 8/8 (`_mock` 4, `_real` 4), none skipped |
+| IF-104 JS suite (`node --test tests/acceptance/contract/test_if_104_graph_api.test.mjs`) | 12: 6 pass (mock, TC-IF-104-01..06), 6 skipped (real, `REAL_NOT_READY` of `contract.mjs:9`) |
+| In the image (`tools/run_in_image.sh` on a scratch export of HEAD, one container at a time) | node tests (12, 4, 3 skipped), IF-301 8, IF-102 20, IF-104 Python 10, `test_graph_api` 10, `test_storage` 17, `test_workflow_library` 13, N-3 steps 00–03: all OK |
+| Full contract run, one process, in the image (`unittest discover -s tests/acceptance/contract -p "test_if_*.py"`) | 218 tests, 18 skipped, OK. With the real `_stops` mutated to the old truthy rule: 6 errors, all in `..._real` of TC-IF-301-04 (the by-path real side tests the real rules); the mock cases and IF-102 stay green (the IF-102 suite has no limit case) |
+| Fuzz (50 000 random documents of odd values through `graph_tables.validate`) | 0 exceptions; every result is `None` or `{rule, detail}` (IF-301 v1 "never an exception") |
+| Protected material vs. A-60 | `contracts/IF-301-graph-tables.md`, `tests/helpers/mocks/graph_rules.py`, `tests/helpers/mocks/if_104_graph_api.mjs`, IF-301 and IF-104 JS suites: byte-equal to their drafts (`cmp`). `contract.py:813-832` equals `amendments/A-60/real_graph_tables.py` (blank lines aside), `contract.py:19` the F9 line, `:839-840` the IF-301 branch. No commit after 849ac36 touches `tests/`, `contracts/`, `stages.yaml` or the node's code. The look-only run of `tools/apply_amendment_a60.sh` was denied by the session's permission check, so the comparison is by `cmp` |
+| trace_check | exit 1 tree-wide (99 errors). For this node: ERROR `test-spec.md` has no `## Scenarios` (F8); 3 ERRORs on TD-06 (R1); WARN TD-06 trigger without a date; WARN TD-01..04 not listed here (listed below now) |
+| test_doc_check (node's 4 test files) | 28 errors: the 26 of F8 plus 2 from the new protected case TC-IF-301-04 (owner-installed); every test added in v1-n32b passes the rule |
+| `check_sysml_model.py` | OK |
+| Static, security | no linter configured; manual review of the fix commits; no new dependency, no I/O in the node |
+
+### Mutation checks (scratch export of HEAD, removed)
+| Mutation | Caught by |
+|---|---|
+| edge endpoint type check removed (F1) | `test_a_malformed_stop_or_edge_endpoint_is_named_not_raised`; IF-301 TC-04 `_real` |
+| `stop` not-a-dict guard removed (F1) | the same two |
+| limit `>= 1` → `>= 0` (F2) | 4 tests of `test_graph_rules` incl. the property test; IF-301 `_real` |
+| bool allowed / float allowed / `all` → `any` / old truthy rule (F2) | `test_a_session_limit_is_a_positive_integer`; IF-301 TC-04 `_real` |
+| `null` counted as given (D-162) | the same two |
+| duplicate-id check removed (F7) | `test_a_shared_input_appears_once_in_an_accepted_graph`, the property test, `test_each_rule_is_named` |
+| mock `graph_rules.py`: truthy limit / `null` counted | IF-301 TC-04 `_mock` (and TC-02 `_mock` for the second) |
+| JS mock `stops`: truthy limit / `null` counted / a string `stop` accepted | TC-IF-104-06 (mock) |
+
+## Earlier findings
+| # | Status | Evidence |
+|---|---|---|
+| F1 | closed | `graph_rules.py:32-34` (endpoint), `:47-48` (`stop`); tests above; `test_graph_api.py:127` (422, not 500) green in the image; 2 mutants caught |
+| F2 | closed (D-160, D-162) | `graph_rules.py:44-54`; IF-301 v1 text; 6 mutants caught on real, mock and JS mock. `workflow_library.py:199` now only sees an int >= 1 or `None` (then 1) |
+| F3 | deferred to FB-02 (D-160) | `feedback/FB-02.md:19`. The docstring `graph_rules.py:13` still claims a fixed rule order (R3) |
+| F4 | tested part closed; rest deferred to FB-02 | `test_an_unknown_kind_or_an_empty_id_breaks_node_identity` (`test_graph_rules.py:46`; the log reports M2 and M11 caught, not re-run by me); duplicates, whitespace ids, session data nodes in FB-02:19 |
+| F5 | decided (D-160): REQ-GTB-004 partly, TD-06 | `goals/G-V1/goal.md:73`, `deferred.md:65-79`; record format incomplete (R1) |
+| F6 | closed | node `test-spec.md`, section "Evidence of the acceptance criteria outside this node"; both named tests green in the image |
+| F7 | closed | the new check fails on the duplicate-id mutant, the old ones alone did not |
+| F8 | open, backlog | unchanged (28 errors, see above) |
+| F9 | closed in `contract.py:19` (A-60); `decomposition.yaml:431` still says IF-301 `version: v0` and the node `status: Draft` (`:236`) | R3 |
+
+## Verification matrix (changes against the first report only)
+| Requirement | Result now |
+|---|---|
+| REQ-GTB-001, -003 | Pass, unchanged; AC-15 and AC-10 evidence named (F6) |
+| REQ-GTB-002 | Pass. Malformed parts and limits named by their rule on real, mock and JS mock; rule order and the three unspecified cases deferred (FB-02) |
+| REQ-GTB-004 | Partly, accepted by the owner (D-160, TD-06); TC-GTB-005 skipped as recorded |
+| IF-301 v1 | Pass: 8/8 alone and in the full run (by-path real side), golden 1–4 met, fuzz 0 exceptions, bound unchanged |
+
+## Specification vs. code (M42), new items
+| Direction | Item | Destination |
+|---|---|---|
+| specified, not run | TC-IF-104-06 is "1 (mock) and 2 (real)" (`specs/mia/test-spec.md`, row TC-IF-104-06), but the JS real side skips and the Python IF-104 suite (`test_if_104_graph_api.py`) has no such case; the real route is checked only by the node test `test_graph_api.py:143` of N-2.1 | R2 |
+| unspecified | `max_cycles: 2.0` in a JSON body: Python (real) refuses it as a float, the JS mock accepts it (`Number.isInteger(2.0)`); IF-301 v1 lists `2.5`, not `2.0` | R2 |
+
+## Open deferrals (M26)
+| TD | Requirement | Interim criterion verified? | Target check state | Trigger |
+|---|---|---|---|---|
+| TD-06 | REQ-GTB-004 | yes: workflow documents are stored and checked through IF-301 and the library API (tests above); TC-GTB-005 skipped | skip (`test_seed_workflows.py:24`), not marked `deferred('TD-06')` (R1) | root task T-10 or the next Plan (no date, R1) |
+| TD-01..04, TD-07 | not of this node | – | – | listed for trace_check only |
+
+## New findings
+| # | Finding | Severity | Destination / proposal |
+|---|---|---|---|
+| R1 | The TD-06 record does not meet the deferral format: trace_check gives 3 ERRORs (REQ-GTB-004 has no `Relaxed: TD-06` and no `Target` line, `requirements.md:45-53`; the target check is `TC-GTB-005`, not `skip: <reason>`, and no test carries `deferred('TD-06')`, `deferred.md:75`) and one WARN (trigger without a date, `:74`). Same pattern as TD-07 (N-4.1) | Low | amendment (text only): `Relaxed: TD-06` and `Target: TC-GTB-005 green on library/workflows` on REQ-GTB-004; TD-06 `Target check: skip: library/workflows missing (root T-10)`; a date in the trigger ("…, or 2026-12-31, whichever first"); the marker on `SeedWorkflows` comes with the rewrite of TC-GTB-005 (FB-03) |
+| R2 | TC-IF-104-06 is never run against the real provider (see M42 above); and the mock and the real side disagree on `2.0` | Low | needs test / amendment: add the TC-IF-104-06 case to the Python IF-104 suite (its real side runs) with the next IF-104 amendment, or change the test-spec row to "1 (mock); real: `test_graph_api.py:143`". Owner: say in IF-301 whether `2.0` counts as an integer (proposal: refused, as the real side does; JS cannot tell, so accept the mock gap) |
+| R3 | Plan and code text residue: `graph_rules.py:13` still says `violation()` reports the first broken rule "in this order", which F3 showed holds per edge only (deferred, but the sentence stays wrong until FB-02); `decomposition.yaml:431` IF-301 `version: v0` while the contract is v1 | Low | Phase 3 one-line docstring fix ("the first broken rule found; order per edge, FB-02"), and the version in `decomposition.yaml` at the gate (F9 rest) |
+
+## Accepted deviations
+| Deviation | Reason | Accepted by |
+|---|---|---|
+| REQ-GTB-004 partly (no seed folder) | D-160, TD-06, FB-03 | owner |
+| Rule order per edge; duplicate edges, whitespace ids, a session on a data node accepted | D-160, FB-02 (networkx redesign) | owner |
+| IF-104 real side not run by the JS suite | `REAL_NOT_READY` (N-2 serves the routes in Python; the Python suite covers 01–05) | to be confirmed with R2 |
+
+## Not checked here
+- CI: none; all results are local feedback runs.
+- The whole test suite (only the node's files, its consumers named above, the contract suites and N-3 steps); the known failures (`test_amendment_report`, `test_harness` rt_edit, `tests/acceptance/test_benchmarks.py`) were not re-run.
+- The look-only run of `tools/apply_amendment_a60.sh` (denied by the permission check; `cmp` instead).
+- The log's claims that each fix test was red before its fix (checked indirectly: each fix is caught by a mutant that restores the old code).
+
+## Notes for Phase 7
+- Unchanged from the first report; with FB-02 the rule order and the three open cases get decided in the redesign.
