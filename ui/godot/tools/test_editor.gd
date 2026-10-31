@@ -106,7 +106,7 @@ func _init() -> void:
 		server.presets[n] = copy
 	server.library_received.connect(func(presets: Array, _info): main._on_server_presets(presets))
 	server.refresh()
-	check(server.available and eng.library.size() == 14, "the library comes from the server (14 presets)")
+	check(server.available and eng.library.size() == 15, "the library comes from the server (15 presets)")
 
 	var layer := CanvasLayer.new()
 	main.add_child(layer)
@@ -175,33 +175,33 @@ func _init() -> void:
 	check(ed._save_new_button.disabled, "an invalid name cannot be saved")
 	ed._save_new()
 	check(not server.presets.has("bad name") and ed._status.text.contains("letters"), "no request for an invalid name, with a hint")
-	ed._name_edit.text = "shocked"
-	ed._name_edit.text_changed.emit("shocked")
+	ed._name_edit.text = "test_shocked"
+	ed._name_edit.text_changed.emit("test_shocked")
 	ed._description_edit.text = "very surprised"
 	ed._tags_edit.text = "surprised, test ,"
 	ed._save_new()
-	check(server.presets.has("shocked"), "'Save as new' stores the preset on the server")
-	var saved: Dictionary = server.presets["shocked"]
+	check(server.presets.has("test_shocked"), "'Save as new' stores the preset on the server")
+	var saved: Dictionary = server.presets["test_shocked"]
 	check(absf(saved["weights"]["Fcl_EYE_Surprised"] - 0.9) < 0.001 and saved["description"] == "very surprised" and saved["tags"] == ["surprised", "test"] and saved["source"] == "manual",
 			"with weights, description, tags and source")
-	check(eng.library.has("shocked") and ed.loaded_name == "shocked" and not ed.dirty, "it is in the library and selected after saving")
-	check(ed._preset_option.get_item_text(ed._preset_option.selected) == "shocked", "the list shows it")
+	check(eng.library.has("test_shocked") and ed.loaded_name == "test_shocked" and not ed.dirty, "it is in the library and selected after saving")
+	check(ed._preset_option.get_item_text(ed._preset_option.selected) == "test_shocked", "the list shows it")
 	ed.start_new()
-	ed._name_edit.text = "shocked"
-	ed._name_edit.text_changed.emit("shocked")
+	ed._name_edit.text = "test_shocked"
+	ed._name_edit.text_changed.emit("test_shocked")
 	ed._save_new()
 	check(ed._status.text.contains("exists"), "an existing name is refused with a hint")
 
 	# --- overwrite, rename, delete --------------------------------------------------------------------------------------
-	ed.load_preset("shocked")
+	ed.load_preset("test_shocked")
 	(ed._rows["Fcl_MTH_Surprised"]["slider"] as HSlider).value = 0.1
 	ed._overwrite()
-	check(absf(server.presets["shocked"]["weights"]["Fcl_MTH_Surprised"] - 0.1) < 0.001 and not ed.dirty, "'Overwrite' saves the changed sliders")
+	check(absf(server.presets["test_shocked"]["weights"]["Fcl_MTH_Surprised"] - 0.1) < 0.001 and not ed.dirty, "'Overwrite' saves the changed sliders")
 	ed._name_edit.text = "astonished"
 	ed._name_edit.text_changed.emit("astonished")
 	check(not ed._rename_button.disabled, "'Rename' is available with a new name")
 	ed._rename()
-	check(server.presets.has("astonished") and not server.presets.has("shocked") and ed.loaded_name == "astonished", "'Rename' moves the preset")
+	check(server.presets.has("astonished") and not server.presets.has("test_shocked") and ed.loaded_name == "astonished", "'Rename' moves the preset")
 	ed.load_preset("idle")
 	ed._name_edit.text = "calm_idle"
 	ed._rename()
@@ -232,6 +232,14 @@ func _init() -> void:
 	server.check_version()   # the poll finds the changed version
 	check(eng.library.size() == before + 1 and eng.library.has("from_phone"), "a preset saved on another device shows up after the poll")
 	check(main._buttons.has("expression:from_phone"), "and gets a button in the menu")
+	# TC-CHV-005 (AC-17): a change of another device shows within 2 s, so the poll plus its two requests fit in 2 s
+	server.start_polling()
+	check(not server._timer.is_stopped() and server._timer.wait_time + 0.5 <= 2.0,
+			"the version is polled often enough for 2 s, with 0.5 s for the requests (every %.1f s)" % server._timer.wait_time)
+	server.calls.clear()
+	server._timer.timeout.emit()
+	check(server.calls.has("%d /api/presets/version" % HTTPClient.METHOD_GET), "each poll asks the server for the version")
+	server._timer.stop()
 
 	# --- offline and token -------------------------------------------------------------------------------------------------------
 	server.online = false
