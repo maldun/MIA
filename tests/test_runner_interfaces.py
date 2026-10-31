@@ -4,6 +4,7 @@ tools through IF-402 (`ToolCalls.call`), the events through IF-401 (`RunEvents.e
 three interfaces a scripted workflow the repository has never seen runs end to end. Run with: python tests/test_runner_interfaces.py
 """
 import ast
+import json
 import os
 import sys
 import tempfile
@@ -81,11 +82,11 @@ def text_constants(path):
 
 class RunnerInterfaceTests(unittest.TestCase):
 
-    def run_towers(self, tools, events, **budget):
+    def run_towers(self, tools, events, graph=GRAPH, **budget):
         skill = parse_skill(SKILL, "towers.md")
         skill["budget"].update(budget)
         runner = Runner(functions=FUNCTIONS, tool_calls=tools, door_tools=DOOR, run_events=events)
-        return runner.run(skill, GRAPH, INPUT, user="u1", started_by="command")
+        return runner.run(skill, graph, INPUT, user="u1", started_by="command")
 
     def types(self, events, run_id):
         return [e["type"] for e in events.events(run_id)]
@@ -127,6 +128,24 @@ class RunnerInterfaceTests(unittest.TestCase):
         self.assertEqual(result.status, "budget")
         self.assertEqual(result.missing, ["search_calls"])
         self.assertEqual(tools._used.get(result.run_id, {}), {})
+
+    # REQ-RUN-012
+    @mark.req("REQ-RUN-012", "REQ-RUN-008")
+    def test_a_call_the_door_refuses_is_not_counted_by_the_runner(self):
+        """TC-RUN-012 (N-6 of the N-2.4.2 re-verification, N-2.4 integration step): a door tool call that IF-402 refuses as bad_arguments counts nothing, in the runner too.
+
+        Example: budget search_calls 1, a skipped search with an unknown argument, then the search of the workflow -> done, the door counted one web_search.
+        """
+        # Given: a workflow whose first search has an argument the tool does not take and may be skipped, and a budget of one search
+        graph = json.loads(json.dumps(GRAPH))
+        graph["nodes"].insert(0, {"id": "bad", "kind": "tool", "tool": "web_search", "args": {"query": "$input.question", "typo": 1}, "output": "ignored",
+                                  "on_error": "skip"})
+        tools, events = ToolCallsMock(), RunEventsMock()
+        # When: the workflow runs
+        result = self.run_towers(tools, events, search_calls=1, graph=graph)
+        # Then: the refused call used no budget, the real search ran and the run is done
+        self.assertEqual((result.status, result.missing), ("done", []))
+        self.assertEqual(tools._used[result.run_id]["web_search"], 1)
 
     # REQ-RUN-012
     @mark.req("REQ-RUN-012")
