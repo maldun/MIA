@@ -82,8 +82,8 @@ Back-filled on 2026-10-30, after the workflow skills introduced goals (M33–M37
 | Phase | State | Record or reason |
 |---|---|---|
 | Explore | done | `high-level-spec.md` approved 2026-10-24 (`review-log.md`) |
-| Plan | done | plan package approved, tags `plan-baseline-it1` and `decomp-baseline`; changes since then are amendments A-01 to A-31 |
-| Implement | in progress | node cycles of `decomposition.yaml`; open nodes in `handover-2026-10-30-late.md` |
+| Plan | done | plan package approved, tags `plan-baseline-it1` and `decomp-baseline`; changes since then are amendments A-01 to A-35 (A-34 installed `cca40c8`, A-35 approved: N-2.4.1 T-08, D-125) |
+| Implement | in progress | node cycles of `decomposition.yaml`; open nodes and work in `handover-2026-10-31-late.md`. 2026-10-31: N-2.4.1 T-01 to T-05, T-07 done (T-06 out with REQ-RUN-007, T-08 open); N-2.4.2 T-01 to T-06 done (T-07 out with REQ-TLS-006); node Verifies of N-2.4.1 and N-2.4.2 started (reports in their node folders); only N-3 integrated (`tests/helpers/integration.py` READY) |
 | Verify | open | |
 | Commit | open | |
 | Deploy | open | |
