@@ -131,6 +131,23 @@ class StorageContract(unittest.TestCase):
         self.assertEqual(store.put("source_trust", "example.org", {"trust": 0.7}, "owner"), {"version": 2})
         self.assertEqual(store.get("source_trust", "example.org", version=1)["doc"], {"trust": 0.5})
 
+    @mark.req("IF-102", "REQ-DB-006")
+    @each_provider(IF)
+    def test_a_delete_is_told_to_the_subscribers(self, store):
+        """TC-IF-102-09 golden 4 (A-59): a delete is a write and is told with version None; a refused delete tells nothing.
+        Example: delete("memos", "m", "ben") -> the subscriber of memos gets {"table": "memos", "id": "m", "version": None, "author": "ben"}."""
+        # Given: a memo and a subscriber of the memos
+        store.put("memos", "m", {"text": "x"}, "anna")
+        seen = []
+        store.subscribe("memos", seen.append)
+        # When: the memo is deleted twice
+        store.delete("memos", "m", "ben")
+        with self.assertRaises(StorageError) as caught:
+            store.delete("memos", "m", "ben")
+        # Then: one notice, for the delete that happened
+        self.assertEqual(caught.exception.code, "not_found")
+        self.assertEqual(seen, [{"table": "memos", "id": "m", "version": None, "author": "ben"}])
+
 
 if __name__ == "__main__":
     unittest.main()

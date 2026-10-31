@@ -84,3 +84,10 @@ Not done: the 75 test_doc_check errors of F11 (the new tests follow the rule; th
 - NUL is now refused on the file backend too (it stored it before). No requirement or IF-102 line says it; proposal: an Errors row in IF-102 at the next contract change, with a suite case and the mock refusing it.
 - After a dropped listening connection the PostgreSQL listener reconnects within about 1 s; notices sent in that gap are lost (no catch-up). REQ-SLY-006 does not say what a subscriber may expect across a database restart.
 - The delete notice carries `version: None` (the verification's proposal); A-59 writes it into IF-102.
+
+## Amendment A-59 (draft, not installed; D-158)
+- Drafts: `specs/mia/amendments/A-59/IF-102-storage-interface.md` (IF-102 v2: the delete notice with version None, golden 4; tables and the delete rule follow IF-301/IF-302: F7, F12), `specs/mia/contract-drafts/tests/helpers/mocks/if_102_storage.py` (delete tells the subscribers), `specs/mia/contract-drafts/tests/acceptance/contract/test_if_102_storage.py` (TC-IF-102-09). `stages.yaml` (stage-3 step `contract-postgres`, F6) and the TC-IF-102-09 row of `specs/mia/test-spec.md` are made from the installed files at install time.
+- New, not protected: `tools/contract_postgres.sh` (the step: a throwaway `postgres:16` on tmpfs, never pulled, the real side of the IF-102 suite with `MIA_TEST_DATABASE_URL`, a skip counts as a failure; `MIA_DB_PYTHON` names a python with psycopg).
+- Install: `bash tools/apply_amendment_a59.sh --do` on goal/v1 after this branch is merged.
+- Checked on a scratch copy of this branch (removed): install, then the IF-102 suite 18/18 (mock 9, files 9), `tools/contract_postgres.sh` 9/9 on PostgreSQL, the tests that use the mock in the image (test_api_events, test_api_sessions, test_accounts_api, test_api_storage_imports, IF-104 and IF-203 suites) green; a second run of the script changes nothing.
+- F13: `architecture.sysml` `storageLayer` and `database` are `partly` with their modules (model file, edited directly; check_sysml and check_sysml_model OK).

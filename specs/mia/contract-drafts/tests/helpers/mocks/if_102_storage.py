@@ -1,5 +1,6 @@
 """Mock of IF-102, the storage interface of the Database (protected; changes by amendment together with the suite).
-Complexity 2: an in-memory fake. It does not model transactions across tables, concurrent writers, backup or restore."""
+Complexity 2: an in-memory fake. It does not model transactions across tables, concurrent writers, backup or restore, and it refuses delete for
+the graph tables only (the real layer follows the table definitions of IF-301 and IF-302). A delete is told to the subscribers with version None (A-59)."""
 import copy
 
 try:
@@ -67,9 +68,11 @@ class StorageMock:
         if record_id not in rows:
             raise StorageError("not_found")
         del rows[record_id]
+        for listener in list(self._listeners[table]):
+            listener({"table": table, "id": record_id, "version": None, "author": author})
 
     def subscribe(self, table, callback):
-        """callback({"table", "id", "version", "author"}) after every write; returns a function that unsubscribes."""
+        """callback({"table", "id", "version", "author"}) after every write, a delete with version None; returns a function that unsubscribes."""
         self._table(table)
         self._listeners[table].append(callback)
         return lambda: self._listeners[table].remove(callback)
