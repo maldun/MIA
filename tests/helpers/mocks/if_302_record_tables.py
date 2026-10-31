@@ -24,8 +24,10 @@ class RecordTablesMock:
     def validate(self, table, doc):
         if table not in DEFINITIONS:
             raise ValueError("not a record table: %s" % table)
+        if not isinstance(doc, dict):      # v6 (amendment A-61): in every table, also those without a required field
+            return {"rule": "schema", "detail": "a document must be a mapping"}
         for field in REQUIRED.get(table, ()):
-            if not isinstance(doc, dict) or field not in doc:
+            if field not in doc:
                 return {"rule": "schema", "detail": field}
         if table == "memory":
             for field, allowed in MEMORY_FIELDS.items():
@@ -33,6 +35,8 @@ class RecordTablesMock:
                     return {"rule": "schema", "detail": field}
         if table == "workflow_meta" and doc["status"] not in ("draft", "tested", "trusted", "retired"):
             return {"rule": "schema", "detail": "status"}
-        if table == "votes" and (doc["category"] not in CATEGORIES or doc["value"] not in (1, -1)):
-            return {"rule": "category" if doc["category"] not in CATEGORIES else "schema", "detail": doc["category"] if doc["category"] not in CATEGORIES else "value"}
+        if table == "votes" and doc["category"] not in CATEGORIES:
+            return {"rule": "category", "detail": doc["category"]}
+        if table == "votes" and (type(doc["value"]) is not int or doc["value"] not in (1, -1)):      # v6 (A-61): a bool or a float equal to 1 is no vote value
+            return {"rule": "schema", "detail": "value"}
         return None

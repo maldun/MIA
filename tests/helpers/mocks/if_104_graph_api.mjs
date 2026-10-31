@@ -31,11 +31,17 @@ export function violation(doc) {
     if (byId.get(a).kind === 'process' && byId.get(b).kind === 'process') return ['adjacent_process_nodes', `${a}->${b}`];
   }
   for (const [id, node] of byId) {
-    const stop = node.stop || {};
-    if (node.kind === 'process' && node.session && !(stop.max_cycles || stop.max_seconds)) return ['session_stopping_criterion', id];
+    if (node.kind === 'process' && node.session && !stops(node.stop || {})) return ['session_stopping_criterion', id];
   }
   const cycle = findCycle([...byId.keys()], edges);
   return cycle ? ['cycle', cycle] : null;
+}
+
+/** A session stops when it has a limit and every limit given is an integer >= 1 (JSON has no bool/int confusion: true is not a number); null = not given (A-60, D-160, D-162). */
+function stops(stop) {
+  if (!isObject(stop)) return false;
+  const given = ['max_cycles', 'max_seconds'].map((key) => stop[key]).filter((limit) => limit !== undefined && limit !== null);
+  return given.length > 0 && given.every((limit) => Number.isInteger(limit) && limit >= 1);
 }
 
 function findCycle(ids, edges) {

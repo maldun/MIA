@@ -73,6 +73,9 @@ Back-filled on 2026-10-30, after the workflow skills introduced goals (M33–M37
 | REQ-GTB-004 | partly | owner 2026-10-31 (D-160): the workflow library folder (root task T-10) is out: TD-06; TC-GTB-005 is rewritten with FB-03; the graph rules and tables stay in |
 | REQ-RTB-006 | partly | owner 2026-10-31 (D-161): AC-3 (an edited trust value survives a restart through the record table) is out: next iteration with FB-04; the table and its rules stay in |
 | REQ-CLV-010 | partly | owner 2026-10-31 (D-163): votes on reactions and behaviours and the drawn series of the votes are out: next iteration with FB-05; votes on answers stay in |
+| REQ-EVL-005 | partly | owner 2026-10-31 (D-164): recorded baselines for the tested and trusted workflows are out: next iteration's Plan with eval-spec.md; the baseline check stays in |
+| REQ-EVL-009 | partly | owner 2026-10-31 (D-164): holdout cases for lookup and verify (labelled by the owner) are out: next iteration's Plan; the holdout guard stays in |
+| REQ-EVL-003 | partly | owner 2026-10-31 (D-166): the calibrations act only once an eval target uses a judge: TD-07; the calibration code and its tests stay in |
 | REQ-GA-002 | out | owner 2026-10-31 (D-135): N-5 T-02 (edit as JSON) waits for FB-02 (the graph form and the rules may change); back in the next iteration |
 | REQ-GA-003 | out | owner 2026-10-31 (D-135): the graph rules in the page wait for FB-02; the backend still checks the rules on save |
 | REQ-CHV-007 | out | owner 2026-10-31 (D-137): model selection after the first human tests; next iteration |

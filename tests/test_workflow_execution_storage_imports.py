@@ -94,10 +94,10 @@ class WorkflowExecutionStorage(unittest.TestCase):
 
         Example: calls of Library.add_case in the repository's .py files outside tests/ -> none.
         """
-        # Given: every Python file of the repository outside tests/, specs/ and the worktrees
+        # Given: every Python file of the repository outside tests/, specs/ and the hidden folders
         callers = []
         for folder, dirs, files in os.walk(ROOT):
-            dirs[:] = [d for d in dirs if d not in ("tests", "specs", ".git", ".claude", "node_modules", "__pycache__")]
+            dirs[:] = [d for d in dirs if not d.startswith(".") and d not in ("tests", "specs", "node_modules", "__pycache__")]      # hidden folders hold tool state (.git, .claude, .local-tasks), no code
             for name in files:
                 if name.endswith(".py") and name != "library.py":
                     # When: its calls are read

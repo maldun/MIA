@@ -75,3 +75,17 @@ Proposed on 2026-10-29 after the usability work of N-2.3 T-09 to T-11 and N-1.1 
 - Target check: TC-GTB-005
 - Decision: D-160, 2026-10-31, Stefan Reiterer
 - Status: open
+
+## TD-07 – Judge calibrations are not loaded yet
+- Kind: defer
+- Requirement: REQ-EVL-003
+- Interim criterion: the calibration functions of `harness.py` and `metrics.py` are tested on fixtures; no eval target uses a judge, so nothing is calibrated
+- Target: the harness loads the calibration of each judge and applies it in every run whose target uses that judge
+- Reason: no target has a judge in G-V1 (N-4.1 Verify, D-166)
+- Effort: about 2 h with fake-model tests
+- Risk of the gap: a first judge would run uncalibrated. Mitigation: the trigger below
+- Owner: Stefan Reiterer
+- Trigger: the first eval target with a judge
+- Target check: TC-EVL-003
+- Decision: D-166, 2026-10-31, Stefan Reiterer
+- Status: open

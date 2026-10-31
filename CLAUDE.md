@@ -39,7 +39,7 @@ Host: Fedora, Ryzen 9 5900X, RX 7800 XT with 16 GB, 62 GB RAM, podman. Models th
 You are the coding agent. The app agent (`skills/`, `library/` pipelines, model steps, tools) is the product. Load `dev-workflow`, `agent-app`, the phase skill and its `agent-app-<phase>` skill.
 
 ### Commands
-- Eval suite (dev): `python tools/eval.py run <suite> --repeats 3` (see `ui/README.md`, "Core, phase 3")
+- Eval suite (dev): `python tools/eval.py run <suite> --pin <MP-id> --repeats 3` (see `ui/README.md`, "Core, phase 3"); `--pin` is required, holdout suites need `--holdout` and are never run by an agent
 - Decide a criterion: `python ~/.claude/skills/agent-app/scripts/eval_decide.py --run <run> --baseline eval/baselines/<suite>__<variant>__baseline.jsonl --criterion "<Eval criterion line>" --select req:<ID>`
 - Agent checks: `python ~/.claude/skills/agent-app/scripts/agent_check.py --spec-dir specs/mia --eval-dir eval`
 - Fake model tests: the tests of `pipeline.py`, `harness.py` and `verification.py` use scripted replies; no model needed.

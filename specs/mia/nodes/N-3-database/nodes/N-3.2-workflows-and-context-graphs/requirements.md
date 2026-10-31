@@ -66,6 +66,6 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-27: the contract suite test_if_301_graph_tables.py passes against the mock (stage 1) and the Graph tables (stage 2)
-- Verified by: TC-IF-301-01..03
+- Verified by: TC-IF-301-01..04
 - Status: Approved
-- History: v0, amendment 5/7 (2026-10-25)
+- History: v0, amendment 5/7 (2026-10-25); v1, A-60 (2026-10-31): session limit and malformed parts

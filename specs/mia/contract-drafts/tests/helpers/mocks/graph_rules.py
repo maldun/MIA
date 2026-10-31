@@ -3,6 +3,8 @@
 A workflow is {"nodes": [{"id", "kind": "process" | "data", "session": bool, "stop": {"max_cycles", "max_seconds"}}],
                "edges": [{"from", "to"}]}.
 This is the mock's own small copy of the rules; the real implementation is written in N-2.3 and tested against the same suite.
+A-60 (IF-301 v1, D-160): a session limit is an integer >= 1 that is not a bool (null = not given); a malformed stop or edge endpoint is
+named by its rule, never raised.
 """
 
 
@@ -20,21 +22,27 @@ def violation(doc):
             return "node_identity", nid
         kind[nid] = node
     for edge in edges:
-        a, b = edge.get("from"), edge.get("to")
-        if a not in kind or b not in kind:
+        a, b = (edge.get("from"), edge.get("to")) if isinstance(edge, dict) else (None, None)
+        if not isinstance(a, str) or not isinstance(b, str) or a not in kind or b not in kind:
             return "node_identity", "%s->%s" % (a, b)
         if kind[a]["kind"] == "data" and kind[b]["kind"] == "data":
             return "adjacent_data_nodes", "%s->%s" % (a, b)
         if kind[a]["kind"] == "process" and kind[b]["kind"] == "process":
             return "adjacent_process_nodes", "%s->%s" % (a, b)
     for nid, node in kind.items():
-        stop = node.get("stop") or {}
-        if node["kind"] == "process" and node.get("session") and not (stop.get("max_cycles") or stop.get("max_seconds")):
+        if node["kind"] == "process" and node.get("session") and not _stops(node.get("stop") or {}):
             return "session_stopping_criterion", nid
     cycle = _cycle(list(kind), edges)
     if cycle:
         return "cycle", cycle
     return None
+
+
+def _stops(stop):
+    if not isinstance(stop, dict):
+        return False
+    given = [stop[key] for key in ("max_cycles", "max_seconds") if stop.get(key) is not None]
+    return bool(given) and all(isinstance(v, int) and not isinstance(v, bool) and v >= 1 for v in given)
 
 
 def _cycle(ids, edges):
