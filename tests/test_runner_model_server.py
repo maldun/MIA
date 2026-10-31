@@ -84,6 +84,24 @@ class ModelServerTests(unittest.TestCase):
         self.assertNotIn("Error", UNREACHABLE)
 
     @mark.req("REQ-RUN-003")
+    def test_a_stream_of_the_real_library_to_a_closed_port_is_the_sentence(self):
+        """TC-RUN-003: the real ollama library on a closed port gives the plain sentence also for a streamed answer (Verify finding F1 of N-2.4.1).
+
+        Example: ollama.Client("http://127.0.0.1:9").chat(stream=True), first chunk read -> ModelServerUnreachable(UNREACHABLE), not httpx.ConnectError
+        """
+        # Given: the real ollama client pointed at a port where nothing listens, behind the turns
+        import ollama
+        client = TurnClient(ollama.Client(host="http://127.0.0.1:9"), ModelTurns(), "chat")
+        for stream in (False, True):
+            # When: a chat is asked, streamed or not, and its first chunk is read
+            with self.assertRaises(ModelServerUnreachable) as caught:
+                reply = client.chat(model="m", messages=MESSAGE, stream=stream)
+                if stream:
+                    next(iter(reply))
+            # Then: the user reads exactly the sentence
+            self.assertEqual(str(caught.exception), UNREACHABLE, stream)
+
+    @mark.req("REQ-RUN-003")
     def test_the_sentence_is_the_owners_wording(self):
         """TC-RUN-003: the sentence is the one the owner chose (D-120).
 

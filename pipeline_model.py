@@ -59,6 +59,12 @@ class ModelTurns:
                 self._cond.notify_all()
 
 
+def _unreachable(exc):
+    """whether an error of the ollama library means that nothing listens: a plain call raises ConnectionError, a stream lets httpx.ConnectError through
+    (ollama 0.6.3, Verify finding F1 of N-2.4.1); httpx comes only with ollama, so it is matched by name, not imported"""
+    return isinstance(exc, ConnectionError) or type(exc).__name__ == "ConnectError"
+
+
 class TurnClient:
     """an ollama client whose chat and generate calls wait for a turn of `kind`; a streamed answer holds its turn until it is read to the end or closed"""
 
@@ -80,8 +86,10 @@ class TurnClient:
         self._turns.acquire(self.kind)
         try:
             return method(*args, **kwargs)
-        except ConnectionError as exc:              # what the ollama library raises when nothing listens
-            raise ModelServerUnreachable() from exc
+        except Exception as exc:
+            if _unreachable(exc):
+                raise ModelServerUnreachable() from exc
+            raise
         finally:
             self._turns.release()
 
@@ -89,8 +97,10 @@ class TurnClient:
         self._turns.acquire(self.kind)
         try:
             yield from method(*args, **kwargs)
-        except ConnectionError as exc:
-            raise ModelServerUnreachable() from exc
+        except Exception as exc:
+            if _unreachable(exc):
+                raise ModelServerUnreachable() from exc
+            raise
         finally:
             self._turns.release()
 
