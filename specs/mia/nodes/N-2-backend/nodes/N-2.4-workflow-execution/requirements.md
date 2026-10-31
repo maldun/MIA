@@ -61,10 +61,10 @@ Running a workflow under budgets: the pipeline runner, model management, verific
 - Parent: REQ-BE-046
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-2: in the run log the code checks precede the first model call of each claim
+- Acceptance criterion: AC-2: for a claim that goes through the number gate (verify.number_gate, the default pipeline of verify_claim), in the run log the code checks precede the first model call of that claim; the other verification styles (single, consistency, jury, cops, trial, computable) are styles behind the gate and judge only what it routes to them
 - Verified by: TC-TLS-001, TC-N24-002
 - Status: Approved
-- History: –
+- History: 2026-10-31 D-153: AC-2 holds for a claim that goes through the number gate (was: of each claim; G-4 of the N-2.4.2 verification)
 
 ### REQ-WFX-006 – Lookup with sources
 - Level: low   Subject: TaskRuntime
