@@ -43,7 +43,7 @@ export function createApi({ origin = location.origin, fetchFn = (url, init) => f
     vote: (subject, category, value) => request('POST', '/api/vote', { body: { subject, category, value } }),
     score: () => request('GET', '/api/score'),
     items: (kind) => request('GET', '/api/items', { query: { kind } }),
-    saveItem: (kind, id, text, source) => request('POST', '/api/items', { body: { kind, id, text, source } }),
+    saveItem: (kind, id, text, source, due = null) => request('POST', '/api/items', { body: { kind, id, text, source, ...(due ? { due } : {}) } }),      // IF-101 v6: no due clears it
     deleteItem: (kind, id) => request('DELETE', '/api/items', { query: { kind, id } }),
     trust: () => request('GET', '/api/trust'),
     setTrust: (source, value) => request('POST', '/api/trust', { body: { source, value } }),

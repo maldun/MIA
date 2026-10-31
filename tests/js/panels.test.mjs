@@ -2,7 +2,7 @@
 // TC-CLV-005, -008, -010, -011, -012, -013.  node --test "tests/js/*.test.mjs"
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { VOTE_CATEGORIES, itemDraftError, lastAnswerId, parseTrust, passwordProblem, scoreLines, variantLabel, voteArgs } from '../../templates/static/chat/panels-model.js';
+import { VOTE_CATEGORIES, dueFromField, dueToField, itemDraftError, lastAnswerId, parseTrust, passwordProblem, scoreLines, variantLabel, voteArgs } from '../../templates/static/chat/panels-model.js';
 
 const t = (key, vars = {}) => `${key}${Object.keys(vars).length ? JSON.stringify(vars) : ''}`;
 
@@ -59,4 +59,18 @@ test('TC-CLV-013: the variant label names the variant, and there is none without
   assert.equal(variantLabel('summer', t), 'variant.label{"name":"summer"}');
   assert.equal(variantLabel(null, t), '');
   assert.equal(variantLabel('', t), '');
+});
+
+// mark.req("REQ-CLV-011", "REQ-CHA-019")
+test('F2: a due time (UTC) is shown in the local time field and comes back as the same UTC time', () => {
+  // Given: a due time of IF-101 and the local field value of the same moment
+  const due = '2026-11-02T08:00:00Z';
+  const d = new Date(due);
+  const pad = (n) => String(n).padStart(2, '0');
+  const local = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  // When / Then: each turns into the other; an empty field is no due time
+  assert.equal(dueToField(due), local);
+  assert.equal(dueFromField(local), due);
+  assert.equal(dueToField(undefined), '');
+  assert.equal(dueFromField(''), null);
 });

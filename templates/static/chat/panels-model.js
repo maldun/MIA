@@ -56,3 +56,18 @@ export function passwordProblem(oldPassword, newPassword, repeat) {
 export function variantLabel(name, t) {
   return name ? t('variant.label', { name }) : '';
 }
+
+const pad = (n) => String(n).padStart(2, '0');
+
+/** a due time of IF-101 (UTC, YYYY-MM-DDTHH:MM:SSZ) as the value of a local date-and-time field; '' without one (REQ-CHA-019, D-163) */
+export function dueToField(due) {
+  const d = due ? new Date(due) : null;
+  if (!d || Number.isNaN(d.getTime())) return '';
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+/** the value of a local date-and-time field as a due time of IF-101 (UTC); null for an empty field: the save then clears the due time */
+export function dueFromField(value) {
+  const d = value ? new Date(value) : null;
+  return !d || Number.isNaN(d.getTime()) ? null : d.toISOString().replace(/\.\d{3}Z$/, 'Z');
+}
