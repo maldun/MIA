@@ -134,6 +134,40 @@ class SharedDatabase(unittest.TestCase):
         time.sleep(0.5)
         self.assertEqual(heard, [])
 
+    @mark.req("REQ-SLY-006")
+    def test_a_raising_subscriber_does_not_end_the_listener(self):
+        """Finding F2: the listener thread of an instance survives a subscriber that raises.
+        Example: on the second instance [raises, records]; three writes on the first; the recording subscriber hears versions 1, 2, 3."""
+        # Given: a raising and a recording subscriber on the second instance
+        heard = []
+        self.b.subscribe("tasks", lambda event: 1 / 0)
+        self.b.subscribe("tasks", heard.append)
+        # When: three writes on the first instance
+        with self.assertLogs("storage", "ERROR"):
+            for n in range(3):
+                self.a.put("tasks", "t", {"text": str(n)}, "anna")
+            deadline = time.time() + 2
+            while len(heard) < 3 and time.time() < deadline:
+                time.sleep(0.01)
+        # Then: every notice arrived
+        self.assertEqual([e["version"] for e in heard], [1, 2, 3])
+
+    @mark.req("REQ-SLY-006")
+    def test_the_listener_connects_again_when_the_server_drops_it(self):
+        """Finding F2: a dropped listening connection (a database restart) is opened again.
+        Example: the server ends the LISTEN connection of the second instance; a write on the first is still heard within 5 s."""
+        # Given: the second instance listens, and the server ends its listening connection
+        heard = []
+        self.b.subscribe("tasks", heard.append)
+        self.first._query("SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE query LIKE 'LISTEN%%' AND pid <> pg_backend_pid()")
+        # When: writes on the first instance until one is heard
+        deadline = time.time() + 5
+        while not heard and time.time() < deadline:
+            self.a.put("tasks", "t", {"text": "x"}, "anna")
+            time.sleep(0.3)
+        # Then: the second instance hears again
+        self.assertTrue(heard)
+
     @mark.req("REQ-SLY-003")
     def test_two_instances_writing_the_same_record_never_share_a_version(self):
         """The primary key lets one writer win; the other gets a conflict and no version is written twice."""

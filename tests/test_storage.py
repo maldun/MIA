@@ -130,6 +130,24 @@ class StorageBehaviour:
         self.assertEqual(len(heard), 2)
 
     @mark.req("REQ-SLY-006")
+    def test_a_raising_subscriber_does_not_stop_the_others_or_the_write(self):
+        """Finding F2 of the verification: one bad subscriber is logged and skipped.
+        Example: subscribers [raises, records]; put("tasks", "t") returns version 1 and the second one hears version 1."""
+        # Given: a subscriber that raises before one that records
+        def broken(event):
+            raise RuntimeError("a bad page")
+        heard = []
+        self.store.subscribe("tasks", broken)
+        self.store.subscribe("tasks", heard.append)
+        # When: two writes
+        with self.assertLogs("storage", "ERROR"):
+            first = self.store.put("tasks", "t", {"text": "a"}, "anna")
+            self.store.put("tasks", "t", {"text": "b"}, "anna")
+        # Then: both writes return and the second subscriber hears both
+        self.assertEqual(first, {"version": 1})
+        self.assertEqual([e["version"] for e in heard], [1, 2])
+
+    @mark.req("REQ-SLY-006")
     def test_a_notice_reaches_a_subscriber_on_another_thread_within_2_s(self):
         """TC-SLY-006: the writer is on one thread, the subscriber's callback runs and is seen from another."""
         got, seen = [], threading.Event()
@@ -178,6 +196,22 @@ class FileStorage(StorageBehaviour, unittest.TestCase):
     def reopen(self):
         return FileBackend(self.main.root)
 
+
+    @mark.req("REQ-SLY-006")
+    def test_a_raising_subscriber_does_not_stop_the_notice_to_the_other_instances(self):
+        """Finding F2: put tells the shared channel even when a subscriber of this instance raises.
+        Example: a backend with publish() and a raising subscriber; after put the channel got one notice of version 1."""
+        # Given: a file backend with a channel, and a raising subscriber
+        published = []
+        backend = self.new_backend("channel")
+        backend.publish = published.append
+        store = Storage(backend)
+        store.subscribe("tasks", lambda event: 1 / 0)
+        # When: one write
+        with self.assertLogs("storage", "ERROR"):
+            store.put("tasks", "t", {"text": "a"}, "anna")
+        # Then: the channel has the notice
+        self.assertEqual([(e["id"], e["version"]) for e in published], [("t", 1)])
 
 if __name__ == "__main__":
     unittest.main()

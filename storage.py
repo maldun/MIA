@@ -12,6 +12,7 @@ know the rules. Records are never changed in place; only append and remove (of a
 instances also offers publish(event) and listen(callback): the notices of the other instances come through that channel, tagged with the origin.
 """
 import copy
+import logging
 import threading
 import uuid
 
@@ -23,6 +24,7 @@ except ImportError:  # used as plain script / in tests
     import record_tables
     from chat_log import utc_now
 
+log = logging.getLogger("storage")
 
 class StorageError(Exception):
     """code: invalid | not_found | conflict | immutable | unknown_table; rule: the broken rule for code invalid; detail: the cycle, the current version ..."""
@@ -81,7 +83,10 @@ class Storage:
 
     def _dispatch(self, event):
         for listener in list(self._listeners.get(event["table"], ())):
-            listener(dict(event))
+            try:
+                listener(dict(event))
+            except Exception:                   # one bad subscriber must not stop the others, the write or the listener thread (F2)
+                log.exception("a subscriber of %s failed", event["table"])
 
     def get(self, table, record_id, version=None):
         self._check(table)
