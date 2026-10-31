@@ -43,3 +43,33 @@ The steps passed at once on the real parts: no adapter was missing (the three re
 2. **step_03 accepted as side by side for G-V1**: the wired test (`tests/test_workflow_execution_wired.py`) covers the wiring; a wired IF-202 adapter in the protected helpers comes in the next iteration.
 3. **The `cases` table guard stays**; the cases move behind IF-102 when they are first used.
 4. **G-1 (the measurement of REQ-TLS-002) is out of G-V1**; its scope row is `partly`.
+
+### The owner's answers of D-153 (2026-10-31) and what was done
+1. AC-2 of REQ-TLS-001 and REQ-WFX-005 reworded (history "2026-10-31 D-153"): the order holds for a claim that goes through the number gate; the styles stand behind the gate (`c3a1e2a`). The claim-pipeline test pins the styles and verify.computable as they are; the gate must hold. Not changed (not named by D-153, same old wording): the parents REQ-BE-046 (`specs/mia/nodes/N-2-backend/requirements.md`) and REQ-WFM-011 (N-2.3), and the row of TC-TLS-001 in the N-2.4.2 test-spec.
+2. verify_claim v2 with the default `verify.number_gate@5`: built and measured, **not applied**: the dev run failed REQ-VER-003 on the first run and on the re-run (table below). The change (skill v2, the test that verify_claim's default checks first, the style tests of `test_verification.py` made independent of the default) is held on the side branch `v1-n24-gate5` (`93d02a5`), not merged into `v1-n24-int`.
+3. check_run for a claim without a number (`affb113`): `run_number_check` logs every check it runs; one that does not apply is `skipped` with the detail `not_applicable: …`. Red first: `tests/test_number_gate.py` (the old test pinned the silence; changed with it, 4 variants), `tests/test_claim_pipelines_check_first.py` (the order in IF-401). Verdicts, prompts and the check line are unchanged.
+
+Regression after 1 and 3 and with the change of 2 (a copy of the working tree, image, one container): 210 files (all `tests/test_*.py`, `tests/acceptance/**/test_*.py`, integration steps); failing only `test_amendment_report` (no git), `test_harness` (rt_edit count), `tests/acceptance/test_benchmarks.py` (BM-GATE-001: `benchmarks/baseline.json` not measured, older than this work), and once `test_if_105_evaluation_access.py` `test_a_budget_below_the_estimate_is_refused_and_costs_nothing_real` (passed twice on re-runs; the host was loaded by the eval run and another agent's compose stack: timing, to watch).
+
+## Eval runs
+
+| Date | Suite | Split | Variant / versions | Pin | Repeats | Cases | Seconds | Calls |
+|---|---|---|---|---|---|---|---|---|
+| 2026-10-31 20:34 | verdicts_vitaminc | dev (the 48 active cases of the T-06 dev sample, seed 7) | d153-gate5: skill verify_claim v2 (side branch), pipeline verify.number_gate@5; harness of v1-n24-int @ c3a1e2a + the skill change | MP-light gemma4:12b-it-qat sha256:38044be4f923e5a5…, seed 7, temperature 0 | 3 | 48 | 950 (6.6 per run) | 432 |
+| 2026-10-31 20:50 | verdicts_wikidata | dev (50 cases of the T-06 sample) | the same | the same | 3 | 50 | 0.1 (all abstain, no evidence) | 0 |
+| 2026-10-31 20:51 | verdicts_vitaminc | dev | d153-gate5-rerun (re-run of the failing criterion; the pin fixes seed 7, so "fresh seeds" could only be the same pin: changing it is forbidden) | the same | 3 | 48 | 1016 (7.1 per run) | 432 |
+
+Run files (untracked, in this worktree): `data/eval/verdicts_vitaminc__d153-gate5__20261031-193448.jsonl`, `data/eval/verdicts_wikidata__d153-gate5__20261031-195039.jsonl`, `data/eval/verdicts_vitaminc__d153-gate5-rerun__20261031-195116.jsonl`. Baselines read in place (main checkout, read-only): `eval/baselines/verdicts_{vitaminc,wikidata}__{single,cops}__devsample.jsonl` (T-06, 1 repeat). Holdout not touched. Host Ollama shared with another agent's compose stack during the runs.
+
+Decision (`eval_decide.py --criterion "<line of specs/number-gate/requirements.md>" --split dev`, rule both, alpha 0.05):
+
+| Criterion | New (gate@5) | Baseline single | Baseline cops | Point | Bound | Sign test vs single / cops | Decision |
+|---|---|---|---|---|---|---|---|
+| REQ-VER-001 false pass (vitaminc) | 0 of 16 (0 to 0.19) | 2 of 18 | 2 of 18 | PASS | NOT DECIDED (0.19 > 0.10) | 0:0 / 0:0, p = 1 | NOT DECIDED |
+| REQ-VER-003 right on true (vitaminc) | 22 of 27 = 0.815 (0.63 to 0.92) | 23 of 27 = 0.852 | 20 of 27 = 0.741 | **FAIL** (< 0.90) | NOT DECIDED | 2:3 p = 1.0 / 3:1 p = 0.63 | **FAIL, re-run FAIL (identical)** |
+| REQ-VER-005 stability (vitaminc) | 48 of 48 = 1.00 (0.93 to 1.00) | – | – | PASS (harness report) | PASS | – | PASS by the harness report; `eval_decide.py` has no metric `stability` ("no case selected"): a tool gap |
+| REQ-VER-002 false pass (wikidata) | 0 of 25 (0 to 0.13) | 7 of 25 | 4 of 25 | PASS | NOT DECIDED (0.13 > 0.10) | 7:0 p = 0.016 / 4:0 p = 0.13 | NOT DECIDED |
+| REQ-VER-004 false fail (wikidata) | 0 of 25 (0 to 0.13) | 8 of 25 | 10 of 25 | PASS | NOT DECIDED | 8:0 p = 0.008 / 10:0 p = 0.002 | NOT DECIDED |
+| REQ-VER-006 stability (wikidata) | 50 of 50 = 1.00 | – | – | PASS (harness report) | PASS | – | as REQ-VER-005 |
+
+Reading: the gate passed no wrong claim in either suite (vitaminc 0 of 48 false claims over all repeats; wikidata every claim abstains because a number without evidence is never judged, so right overall is 0 % there by design). REQ-VER-003 fails because the gate's cops judges abstain on 5 of 27 true claims; the 3 cases the single baseline got right and the gate did not are cautious abstentions (transcripts read: `vc-5ed50880c9e77c000848d32c_3` "only US sales given", `vc-5ee3932ac9e77c0008cc98a5_2` "the day is not stated explicitly", `vc-5ee3949bc9e77c0008cd005a_1` "Gold certification, no sales figure"; the number check said pass on two of them). The single baseline itself is below 0.90 (0.852) on the same cases. The re-run gave identical statuses (temperature 0, seed 7). By the rule of D-153 the change is not applied; the decision goes to the owner. The dev criteria are feedback, not verification (the criteria are decided on the holdout in Verify).
