@@ -138,6 +138,7 @@
   "workspace.new.tasks": "New task",
   "workspace.new.memos": "New memo",
   "workspace.new.memory": "New memory",
+  "workspace.due": "Due (MIA says the task at this time)",
   "workspace.source": "Source (where does she know this from?)",
   "workspace.add": "Add",
   "workspace.save": "Save",

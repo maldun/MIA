@@ -55,7 +55,7 @@
   check($('workspace').open, 'the workspace opens');
   const tabs = [...$('workspace-tabs').querySelectorAll('button')].map((b) => b.textContent);
   out.tabs = tabs;
-  check(tabs.length === 6, 'six tabs');
+  check(tabs.length === 7, 'seven tabs');
   const addForm = () => $('workspace-body').querySelector('form.workspace-add');
   const setText = (el, v) => { el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); };
   setText(addForm().querySelector('input'), 'water the plants');

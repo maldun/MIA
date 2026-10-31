@@ -73,3 +73,15 @@ test('a wrong password is shown as a wrong password and does not ask for the log
   await assert.rejects(api.changePassword('x', 'long-enough-1'), (error) => error.code === 'bad_credentials');
   assert.equal(logins(), 0);
 });
+
+// mark.req("REQ-CLV-011", "REQ-CHA-019")
+test('F2: a task is saved with its due time; without one the body has no due (IF-101 v6: that clears it)', async () => {
+  // Given: the REST client
+  const { api, calls } = setup();
+  // When: a task is saved once with a due time and once without
+  await api.saveItem('tasks', 't1', 'water the plants', null, '2026-11-02T08:00:00Z');
+  await api.saveItem('tasks', 't1', 'water the plants', null, null);
+  // Then: the first body carries the due time, the second none
+  assert.deepEqual(calls[0].body, { kind: 'tasks', id: 't1', text: 'water the plants', source: null, due: '2026-11-02T08:00:00Z' });
+  assert.deepEqual(calls[1].body, { kind: 'tasks', id: 't1', text: 'water the plants', source: null });
+});

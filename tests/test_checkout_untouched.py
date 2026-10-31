@@ -16,7 +16,7 @@ REPO = os.path.dirname(HERE)
 WROTE_BEFORE = ("test_audio_router", "test_author_in_records", "test_character_integration", "test_character_stack", "test_chat_backend",
                 "test_chat_mock_server", "test_chat_page", "test_converse_behaviours", "test_cpu_threads", "test_expression_llm", "test_gestures_api",
                 "test_internal_auth", "test_ollama_remote", "test_persona_prompt", "test_presets_api", "test_requirements", "test_review_wiring",
-                "test_runner_model_server", "test_shutdown_database", "test_shutdown", "test_skill_path_doc", "test_speech_repair", "test_speech_service",
+                "test_runner_model_server", "test_shutdown_database", "test_shutdown", "test_speech_repair", "test_speech_service",
                 "test_speech_stop", "test_speech_text", "test_tailscale", "test_voice_effects")
 
 

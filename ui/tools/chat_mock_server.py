@@ -110,9 +110,15 @@ def login():
 
 
 def deliver():
-    """Every connected session gets the events the mock has for it, one by one, so that the answer streams."""
+    """Every connected session gets the events the mock has for it, one by one, so that the answer streams. A session that has just ended
+    (the logout of a page that is still connected) has no events: asking for them would be 401 and the logout a 500 (F8)."""
+    batches = {}
     with lock:
-        batches = {token: api.events(token) for token in list(sids)}
+        for token in list(sids):
+            try:
+                batches[token] = api.events(token)
+            except ApiError:
+                pass
     pending = [(token, event) for token, events in batches.items() for event in events]
     for token, event in pending:
         for sid in list(sids.get(token, ())):

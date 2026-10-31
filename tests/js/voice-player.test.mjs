@@ -336,9 +336,10 @@ function page({ stored = {}, missing = [] } = {}) {
   globalThis.document = { visibilityState: 'visible', addEventListener: () => {} };
   const audio = specAudio(missing);
   const els = { muteToggle: element(), muteLabel: element(), muteIcon: element(), volume: element(), hint: element() };
-  const sound = initSound({ audio, socket, character: { speaking: (v) => speaking.push(v) }, storage, ...els, t: (key) => key, win });
+  const time = { now: 50000 };                                         // the fake clock of the page; a test moves it by hand
+  const sound = initSound({ audio, socket, character: { speaking: (v) => speaking.push(v) }, storage, ...els, t: (key) => key, win, clock: () => time.now });
   const server = (name, data) => handlers[name]?.(data);              // an event the page does not listen to is ignored, as by socket.io
-  return { audio, socket, values, speaking, warnings, els, sound, server };
+  return { audio, socket, values, speaking, warnings, els, sound, server, time };
 }
 
 const reload = (id, serial = 1) => ({ url: `/audio/${id}.wav`, serial });
@@ -457,4 +458,25 @@ test('TC-VPB-002: after the page\'s Stop the lines of the stopped answer that st
   assert.deepEqual(afterStop, ['a']);
   assert.equal(p.sound.queued, 0);
   assert.deepEqual(ids(p.audio), ['a', 'next']);
+});
+
+// mark.req("REQ-VPB-002")
+test('TC-VPB-002: the drop after the page\'s Stop ends 3 s after it: the shocked line of a minus vote then plays (R1, D-165)', async () => {
+  // Example: Stop at t, a late line at t+2.999 s is dropped, the shocked line at t+3.5 s (no chat_start) plays
+  // Given: the page plays a line of an answer and the user stops it
+  const p = page();
+  p.server('audio_reload', reload('a', 1));
+  await flush(); await flush();
+  p.sound.stop();
+  // When: a late line of the stopped answer arrives just inside the window, then the user votes minus after it
+  p.time.now += 2999;
+  p.server('audio_reload', reload('late', 2));
+  await flush(); await flush();
+  p.time.now += 501;
+  p.server('chat_done', { status: 'stopped' });
+  p.server('expression', { name: 'shocked' });
+  p.server('audio_reload', reload('shocked', 3));
+  await flush(); await flush();
+  // Then: the late line was dropped, the shocked line played without a chat_start
+  assert.deepEqual(ids(p.audio), ['a', 'shocked']);
 });

@@ -28,12 +28,22 @@ def make_lines(texts, speaker, folder, config_path):
     return done
 
 
+def speaker_class():
+    """speak.Speaker, as the package MIA when the checkout folder is named MIA, else as a plain module (worktrees, the image's /work)"""
+    try:
+        sys.path.insert(0, os.path.dirname(ROOT))
+        from MIA.speak import Speaker
+    except ImportError:
+        sys.path.insert(0, ROOT)
+        from speak import Speaker
+    return Speaker
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     parser.add_argument("--only", default="", help="comma separated moods; default all of the texts file")
     args = parser.parse_args()
-    sys.path.insert(0, os.path.dirname(ROOT))
-    from MIA.speak import Speaker
+    Speaker = speaker_class()
     with open(os.path.join(ROOT, "library", "voice_line_texts.json"), encoding="utf-8") as fp:
         texts = json.load(fp)
     if args.only:

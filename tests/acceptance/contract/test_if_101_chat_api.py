@@ -153,7 +153,7 @@ class ChatApiContract(unittest.TestCase):
     @mark.req("IF-101", "REQ-FE-001", "REQ-CLV-001")
     @each_provider(IF)
     def test_the_acknowledgement_carries_the_stored_message_and_the_client_id_comes_back(self, api):
-        """TC-IF-101-09 (v1): send answers with id, position and the stored message; the message and its chat_message event carry the client id, so the page finds its own copy."""
+        """TC-IF-101-20 (v1): send answers with id, position and the stored message; the message and its chat_message event carry the client id, so the page finds its own copy."""
         anna, ben = api.login("anna", "pw-anna"), api.login("ben", "pw-ben")
         api.connect(ben)
         api.events(ben)
@@ -560,7 +560,7 @@ class ChatApiContract(unittest.TestCase):
     @mark.req("IF-101", "REQ-API-007")
     @each_provider(IF)
     def test_the_eleventh_message_of_an_account_within_a_minute_is_rate_limited(self, api):
-        """TC-IF-101-30 (v12, A-54): ten messages of one account within 60 s pass; the 11th is 429 rate_limited and is not stored; another account still sends."""
+        """TC-IF-101-33 (v12, A-54): ten messages of one account within 60 s pass; the 11th is 429 rate_limited and is not stored; another account still sends."""
         s, b = api.login("anna", "pw-anna"), api.login("ben", "pw-ben")
         for i in range(10):
             api.send(s, "m%d" % i)
