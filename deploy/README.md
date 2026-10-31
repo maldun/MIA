@@ -28,11 +28,18 @@ For other devices set `MIA_BIND=0.0.0.0` in `deploy/.env` and open `https://<add
 |---|---|---|
 | `setup_cfg.json` | `deploy/setup_cfg.compose.json` (or `MIA_CONFIG`) | the config of the stack: `ollama_managed: false`, `ollama_host`, `searxng_url`, `sandbox_backend: none`, histories under `data/` |
 | `setup_cfg.local.json` | `deploy/setup_cfg.local.json` | the settings of this machine (the login ...), laid over the config above key by key; not in git, made by `up.sh` as `{}` |
-| `data/` | volume `mia-data` | histories, presets, logs, token |
+| `data/` | volume `mia-data` | histories, presets, logs, token, the scholarly cache, the trust file (below) |
 | `voice/models/kokoro/` | `voice/models/kokoro` (or `MIA_KOKORO_DIR`), read-only | the Kokoro model files (README of the main folder) |
 | `ui/godot/build/web/` | `ui/godot/build/web` (or `MIA_CHARACTER_DIR`), read-only | the 3D character |
 | `backgrounds/` | `backgrounds` (or `MIA_BACKGROUND_DIR`), read-only | the pictures behind the character (`backgrounds/README.md`); a new picture appears when the page is reloaded |
 | Ollama's models | volume `ollama` | models are downloaded once |
+
+### The scholarly cache and the trust file
+
+Two files of the stack's config live in the data volume, so they are in every backup and survive a rebuild:
+
+- **`data/cache/scholar`** (`scholar_cache_dir`): the answers of the scholarly APIs (OpenAlex, Crossref, ...), one JSON file per request with its URL (the research query) and body. An entry is used for 7 days (`scholar_cache_days`); older entries are removed whenever MIA writes the cache, so the folder holds about one week of literature searches. No key is in it (the Semantic Scholar key goes in a header); `scholar_email`, when set, appears in the cached URLs. Delete the folder to empty the cache; nothing else depends on it.
+- **`data/source_trust.json`** (`source_trust_file`): your changes of the trust classes of sources, laid over `library/source_trust.json`. The stack reads it for every literature review; the page writes it through `POST /api/trust`. While the login is off (`accounts_enabled: false`) that route needs no login, so with `MIA_BIND=0.0.0.0` every device that reaches port 8586 can change the trust classes. This is accepted for trusted users in a controlled network (D-131); turn the login on (see "The login") when that does not hold.
 
 ## The personality (calibration.txt)
 
@@ -98,7 +105,7 @@ deploy/up.sh backup path/to/file.tar.gz
 deploy/up.sh restore path/to/file.tar.gz
 ```
 
-The archive holds the whole data volume: histories, chat log, presets, gestures, calibration, tokens, library index. MIA is stopped while the files are copied (it saves its history when it stops) and starts again. `restore` first saves the current state as `mia-before-restore-<time>.tar.gz`, so a wrong restore can be undone with another restore. Files that exist only in the volume are not deleted by a restore. The models of Ollama (volume `ollama`) and the character are not part of it (they come from the downloads and the zip).
+The archive holds the whole data volume: histories, chat log, presets, gestures, calibration, tokens, library index, the scholarly cache and the trust file. MIA is stopped while the files are copied (it saves its history when it stops) and starts again. `restore` first saves the current state as `mia-before-restore-<time>.tar.gz`, so a wrong restore can be undone with another restore. Files that exist only in the volume are not deleted by a restore. The models of Ollama (volume `ollama`) and the character are not part of it (they come from the downloads and the zip).
 
 With the database (`deploy/up.sh db`) the same commands also save and restore the database: the archive then holds `db.dump` and `data.tar` (made by `tools/backup.sh`, put back by `tools/restore.sh`, which saves the state before the restore next to the archive). An older archive of the volume alone is still restored and leaves the database as it is; an archive with a database is refused while the `db` service does not run.
 
