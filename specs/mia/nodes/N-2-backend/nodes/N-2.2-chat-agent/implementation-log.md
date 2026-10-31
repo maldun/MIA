@@ -50,3 +50,6 @@ What the transcripts show (read for every case that missed or added something):
 ## Run 9 (2026-10-27, before the hand-over to Verify)
 
 Skill 6 unchanged, 21 dev cases, 3 repeats, same model and digest, with the new per-case measure of the script (a case is right when the majority of its repeats stored every wanted record and, where nothing was wanted, nothing): **21 of 21 cases right, Wilson 95 % lower bound 0.85**; recall 51/51, 12 extra records, 0 stored in the 18 runs that expect nothing, 68 model seconds (`eval-drafts/runs/memory_write_v6_dev_4.jsonl`). Feedback on tuned cases only. The decision run on the holdout is for the independent verifier: `specs/mia/verify-handover-t04.md`.
+
+## Note (2026-10-31, D-137)
+REQ-CHV-006 of N-1.2 (shocked expression and line after a minus) is built together with the votes of this node: a `shocked` preset (N-1.2) and the shocked line sent by the backend.

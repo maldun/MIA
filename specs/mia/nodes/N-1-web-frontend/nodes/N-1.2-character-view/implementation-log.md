@@ -32,3 +32,6 @@ None. (The IF-111 text and TC-IF-111-02 need one, see the findings.)
 
 ## Open questions for Phase 4 and the integration step
 - The real side of the IF-111 contract suite is the Godot bridge. Its checks are the GDScript tests; a JS adapter that drives headless Godot is not planned. Proposal: the integration step lists `test_bridge.gd` as the real-side test of IF-111 and the JS suite keeps the mock.
+
+## Owner's answers of 2026-10-31 (D-137)
+REQ-CHV-007 and REQ-CHV-008 out of G-V1 (after the first human tests). REQ-CHV-006 (shocked) is built with the votes of N-2.2. IF-111 is right: an unknown expression falls back to `neutral`; the bridge and the backend change test-first (open task, next).

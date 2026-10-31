@@ -70,6 +70,8 @@ Back-filled on 2026-10-30, after the workflow skills introduced goals (M33–M37
 | REQ-RUN-009 | partly | owner 2026-10-31 (D-128, D-130): the 10 s part of AC-19 is out: with REQ-RUN-007; the order of the turns stays in |
 | REQ-GA-002 | out | owner 2026-10-31 (D-135): N-5 T-02 (edit as JSON) waits for FB-02 (the graph form and the rules may change); back in the next iteration |
 | REQ-GA-003 | out | owner 2026-10-31 (D-135): the graph rules in the page wait for FB-02; the backend still checks the rules on save |
+| REQ-CHV-007 | out | owner 2026-10-31 (D-137): model selection after the first human tests; next iteration |
+| REQ-CHV-008 | out | owner 2026-10-31 (D-137): the outfit switch in Godot comes with the model selection; the variant label in the chat stays |
 
 ## Parts
 | Part | Real or stand-in | Notes |
