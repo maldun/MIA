@@ -29,9 +29,10 @@ function fakeAudio() {
 /**
  * an audio element that settles play() as the HTML spec does (F1 of the verification): loading takes a task; a missing file fires
  * `error` and then rejects the play() promises pending at the failure with NotSupportedError; pause() and a new src reject a
- * pending play() with AbortError
+ * pending play() with AbortError; with resolveLater the element starts at once and resolves the promises it took one task later, as
+ * "notify about playing" does, so a pause() in between no longer refuses them
  */
-function specAudio(missing = []) {
+function specAudio(missing = [], { resolveLater = false } = {}) {
   const listeners = {};
   let pending = [];
   let src = '';
@@ -55,7 +56,8 @@ function specAudio(missing = []) {
         if (this.playing) this.overlaps += 1;
         this.playing = true;
         this.started.push({ url, audible: !this.muted });
-        taken.forEach(({ resolve }) => resolve());
+        const resolve = () => taken.forEach((pending) => pending.resolve());
+        if (resolveLater) setImmediate(resolve); else resolve();          // the spec resolves them in a task after "playing" (N1)
       });
       return started;
     },
@@ -288,6 +290,22 @@ test('TC-VPB-002: a stop while a line starts reports no error, and the next line
   audio.finish(); await flush();
   assert.deepEqual(ended, [8]);
   assert.deepEqual(speaking, [true, false]);
+});
+
+// mark.req("REQ-VPB-002")
+test('TC-VPB-002: a stop just after a line starts leaves the character silent, also when play() resolves a task later (N1)', async () => {
+  const speaking = [];
+  const audio = specAudio([], { resolveLater: true });
+  const player = new VoicePlayer({ audio });
+  player.onSpeaking((value) => speaking.push(value));
+  player.enqueue(line('a'));
+  await flush();
+  assert.deepEqual(ids(audio), ['a']);                  // the element plays, the play() promise is not settled yet
+  player.stop();
+  await flush(); await flush();
+  assert.equal(audio.playing, false);
+  assert.equal(player.playing, false);
+  assert.deepEqual(speaking, []);                       // without the guard on the resolve handler: [true], the character keeps talking
 });
 
 // --- the page wiring: initSound with a fake socket, storage, elements and window (F4) ----------------------------------------
