@@ -12,7 +12,7 @@ if ! curl -sf localhost:11434/api/tags > /dev/null; then
     for _ in $(seq 1 30); do curl -sf localhost:11434/api/tags > /dev/null && break; sleep 2; done
 fi
 curl -sf localhost:11434/api/tags | grep -q "gemma4:12b-it-qat" || { echo "the light model gemma4:12b-it-qat is not on this Ollama"; exit 2; }
-timeout 330 podman run --rm --user 0 --network host -v "$PWD:/work:Z" -w /work "${MIA_IMAGE:-localhost/mia:latest}" python tools/check_accounts_real.py
+timeout 330 podman run --rm --user 0 --network host -v "$PWD:/work:z" -w /work "${MIA_IMAGE:-localhost/mia:latest}" python tools/check_accounts_real.py
 code=$?
 curl -s localhost:11434/api/generate -d '{"model":"gemma4:12b-it-qat","keep_alive":0}' > /dev/null    # let the card go before anything stops
 sleep 5
