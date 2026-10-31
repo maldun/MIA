@@ -15,7 +15,8 @@ from markers import mark                         # noqa: E402
 
 RUNBOOK = os.path.join(REPO, "deploy", "RUNBOOK.md")
 COMPOSE_FILES = ("compose.yaml", "compose.rocm.yaml", "compose.nvidia.yaml")
-FLOATING = ("docker.io/ollama/ollama:latest", "docker.io/ollama/ollama:rocm", "docker.io/searxng/searxng:latest", "docker.io/library/caddy:2")
+FLOATING = ("docker.io/ollama/ollama:latest", "docker.io/ollama/ollama:rocm", "docker.io/searxng/searxng:latest", "docker.io/library/caddy:2",
+            "docker.io/library/postgres:16")                       # postgres added by D-139
 DIGEST = re.compile(r"@sha256:[0-9a-f]{64}$")
 
 
@@ -62,6 +63,20 @@ class Runbook(unittest.TestCase):
             self.assertTrue(lines, name)
             for image in lines:
                 self.assertRegex(image, DIGEST)
+
+    @mark.req('REQ-OPR-006')
+    def test_the_base_image_of_mia_is_pinned_by_digest(self):
+        """TC-OPR-006 (D-139): the base image of the mia image (python:3.12-slim) is pinned by a sha256 digest like the images of the compose files.
+
+        Example: "FROM docker.io/library/python:3.12-slim" -> "FROM docker.io/library/python:3.12-slim@sha256:<64 hex digits>"
+        """
+        # Given: the Containerfile of the mia image
+        with open(os.path.join(REPO, "deploy", "Containerfile"), encoding="utf-8") as fp:
+            # When: its FROM lines are read
+            bases = [line.split()[1] for line in fp if line.startswith("FROM ")]
+        # Then: there is one, and it ends in a digest
+        self.assertEqual(len(bases), 1)
+        self.assertRegex(bases[0], DIGEST)
 
     @mark.req('REQ-OPR-006')
     def test_the_runbook_has_the_four_parts_of_the_requirement(self):

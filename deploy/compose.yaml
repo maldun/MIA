@@ -74,7 +74,7 @@ services:
   # start of an empty volume, so the tables exist whether the container is started alone or by the stack.
   db:
     profiles: ["db"]
-    image: docker.io/library/postgres:16
+    image: docker.io/library/postgres:16@sha256:f9d1e581cde3e4c8bc696b07e6f7b7aea1d41014b33a52b27990762daae61beb
     restart: unless-stopped
     environment:
       POSTGRES_USER: mia
