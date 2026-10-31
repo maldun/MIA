@@ -13,9 +13,10 @@ envval() { local v="${!1:-}"; if [ -z "$v" ] && [ -f .env ]; then v="$(sed -n "s
 # the settings of THIS machine (the login, ...) are a local file next to the tracked config; compose mounts it, so it must exist
 [ -f setup_cfg.local.json ] || echo '{}' > setup_cfg.local.json
 # the owner may have written .env first (OLLAMA_URL ..., deploy/README.md): the secret is added when the key is missing, not only when the file is (REQ-OPR-001)
+# a file written by hand may lack the last newline: completed once here, before any line is added below (the secret, the offer's marker, the database password)
+if [ -f .env ] && [ -n "$(tail -c1 .env)" ]; then echo >> .env; fi
 if ! grep -q '^SEARXNG_SECRET=' .env 2>/dev/null; then
   [ -f .env ] || { touch .env; chmod 600 .env; }
-  [ -z "$(tail -c1 .env)" ] || echo >> .env          # a file written by hand may lack the last newline
   echo "SEARXNG_SECRET=$(openssl rand -hex 32)" >> .env
   echo "deploy/.env: the SearXNG secret of this machine written"
 fi
