@@ -22,3 +22,8 @@ None.
 
 ## Open questions for Phase 4 and the integration step
 - As for IF-301: giving the IF-302 contract suite `record_tables` as the real provider is an amendment of `tests/helpers/contract.py` at integration step 2 of N-3 (owner).
+
+## Verify fixes (D-161, 2026-10-31, branch v1-n33b)
+| Finding | Status | Commit | Tests green (reported) | Notes |
+|---|---|---|---|---|
+| F1 markers of the `reports` and `workflow_meta` tests | done | `test(record_tables)` | `tests/test_record_tables.py` 13 OK | `reports` → REQ-WFM-038, IF-302; the old marker (REQ-WFM-002, -006, IF-302) back on the `workflow_meta` test; behaviour unchanged |

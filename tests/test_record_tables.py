@@ -95,7 +95,7 @@ class Validation(unittest.TestCase):
         for table in ("history", "accounts", "presets", "gestures", "source_trust"):
             self.assertIsNone(validate(table, {"anything": 1}))
 
-    @mark.req("REQ-WFM-002", "REQ-WFM-006", "IF-302")
+    @mark.req("REQ-WFM-038", "IF-302")
     def test_reports_keep_a_finished_report_as_a_record(self):                    # IF-302 v4, REQ-WFM-038
         self.assertEqual(definitions()["reports"], {"versioned": True, "deletable": False})
         doc = {"task": "review", "skill": "review", "skill_version": "1", "question": "q", "account": "anna", "model_pin": "m", "report": {"works": []}}
@@ -103,6 +103,7 @@ class Validation(unittest.TestCase):
         for missing in ("task", "skill", "skill_version", "question", "account", "model_pin", "report"):
             self.assertEqual(validate("reports", {k: v for k, v in doc.items() if k != missing}), {"rule": "schema", "detail": missing})
 
+    @mark.req("REQ-WFM-002", "REQ-WFM-006", "IF-302")
     def test_workflow_meta_keeps_the_lifecycle_of_a_workflow(self):
         """IF-302 v3 (A-15): status is draft, tested, trusted or retired and required; specification and benchmark are free; every version is kept."""
         self.assertEqual(definitions()["workflow_meta"], {"versioned": True, "deletable": False})
