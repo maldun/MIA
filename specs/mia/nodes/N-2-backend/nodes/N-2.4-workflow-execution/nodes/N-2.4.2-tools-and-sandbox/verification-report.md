@@ -136,3 +136,65 @@ Gaps that need an eval run or a decision (not findings of the code):
 ## Notes for Phase 7 (validation)
 - Whether users notice that scholarly records carry no trust class (F-2) in the review.
 - Whether `fetch_passages`' two passages are enough for workflows other than the lookup.
+
+## Re-verification (2026-10-31)
+
+**Reviewer:** Claude Opus 5.5 (AI, independent; never saw the implementation chat). **Checked state:** goal/v1 @ 2e1d588 (frozen in a scratch worktree; includes 70a6f35, 191a8f3, 408ee77, 4892783, 0f5050d, 6fa07ff, a32ce04, and the A-40 draft 7b1a95e). Master for comparison: 53c6766. `git log 5078cfa..HEAD -- tool_calls.py checks.py scholar.py sandbox.py web_tools.py` finds only 191a8f3 besides 70a6f35 (which is before 5078cfa), 38e72de and bfeffa9 (`web_app.py` only, N-2.4.1, nothing of the door). `sandbox.py`, `scholar.py`, `web_tools.py` unchanged since the first report.
+
+**Numbering note.** The fix commits and A-42 use the owner's list of D-132: their "#10" is this report's **F-12** (lock) and their "#11" is **F-13** (dropped works). This report's F-10 (label record) and F-11 (THR-001 residual) were not addressed under those numbers; see the table.
+
+### Per finding
+| # | State | Evidence / where |
+|---|---|---|
+| F-1 planted figure | **Decided, not built** | D-132 (1) retire the case, (2) rule `open` for conflicting values, with an **open conflict** (with `open` the planted figure is inconclusive, but the expected outcome stays `fail`). A-40 drafted (7b1a95e; draft differs from the suite only in the case's line: tag `retired`), not installed. Unit test of `checks.number_check` and the IF-402 contract case not built. `tests/test_harness.py::ShippedSuites.test_the_hard_checks_suite_matches_every_time` is **still red** on goal/v1 (`[('n-planted-figure', 'not_applicable', 'fail')]`) and green on master. |
+| F-2 app door without trust sources | **Fixed** (70a6f35) | `tool_calls.build_tool_calls` hands in `for_work`, `verify_retraction`, `crossref.lookup`; `web_app.py:591` uses it (inspected; `Scholar.crossref`, `verify_retraction(work, errors)`, `TrustTable.for_work(work, as_of)` exist with these signatures). Test `AppDoorTests.test_the_door_of_the_app_has_every_source` is red before the fix only by `ImportError` (run on 160bef6); it covers the DOI record and the wiring of the retraction check; that `web_app` calls `build_tool_calls` rests on inspection (no test imports the app). |
+| F-3 trust label of `run_script` | **Deferred** to the next iteration with FB-03 | D-128 (F6: "the IF-402 trust and tier gaps go to the next iteration with FB-03"); handover-2026-10-31-pm row of N-2.4.2. Not yet in the accepted-deviation table of this report. |
+| F-4 sandbox tier of a script on web text | **Deferred** with FB-03 | as F-3 (D-128). Still: the door asks the standard tier untainted (`tool_calls.py:113`). |
+| F-5 what leaves the host | **Decided and applied (text)**; test part open, low (D-131) | A-41 (6fa07ff): REQ-TLS-007 names filters, DOI, API key, e-mail, User-Agent. Not done: a REQ-TLS-007 test for scholarly requests (`tests/test_scholar.py:282` logs them but carries no marker and does not check the fields); IF-402 v3 Bounds still says "only the text of a web or scholarly query" (N-4 below). The text does not name the address of a fetched page. |
+| F-6 `run_script` status | **Fixed** (191a8f3, A-42) | `test_a_script_that_did_not_run_to_the_end_is_not_ok` red on 6fa07ff (`'ok' != 'failed'`), green on HEAD. Host probe with real bubblewrap: a finishing script `ok`, raise / endless loop / `import os` `failed`. |
+| F-7 marker `REQ-TO-005` | **Fixed** (191a8f3) | trace_check no longer reports it. |
+| F-8 wrong arguments | **Fixed for missing, unknown and non-mapping arguments**; residual for wrong types (N-2) | `test_wrong_arguments_are_refused_before_they_count` and TC-IF-402-07 (real side) red on 6fa07ff (raw `TypeError`), green on HEAD; probes: `args` None or a list → `bad_arguments`, nothing counted. |
+| F-9 door not in the model | **Partly fixed** | 408ee77: part `verifier.toolDoor` (`tool_calls.py`); `check_sysml_model.py` OK (note: "toolDoor carries no requirement"), `check_sysml.sh` 0 errors. The two flows of the first report (`research.collect_passages`, `schema_check`) are not in the model. |
+| F-10 label record of the case | **Decided** (superseded) | D-132 (1) records the owner's decision on the case (retire, A-40). |
+| F-11 THR-001 residual | **Open** | `threat-model.md` unchanged since A-19; THR-001's residual risk still does not name the planted figure. D-132 (4) planned it as an amendment draft with #9, but the drafts took "#11" as the dropped works. |
+| F-12 lock | **Fixed** (191a8f3), test cannot fail before the fix | Lock checked by inspection (`tool_calls.py:78-84`); `test_concurrent_calls_keep_the_limit` passed on 6fa07ff too (stated in the commit). |
+| F-13 outputs beyond the contracts | **Partly fixed** (A-42) | IF-402 v3 names `run_script.result`, the dropped works and the reasons `retracted`, `withdrawn`. Still beyond the contracts: `trust` and `retraction.unconfirmed` in `scholar_search` records (IF-405 unchanged), `fetch_passages` at most 2 passages chosen by word overlap. |
+| G-1 REQ-TLS-002 measurement | **Open** | no scope row in `goals/G-V1/goal.md`, no criterion in the `eval-spec.md` draft (726dae1 names REQ-TLS-006, not -002). |
+| G-2 RT-001..003 | **Open** | no eval or red-team run (by instruction). |
+| G-3 real sides IF-404, IF-405 | **Open** | still skipped (`tests/helpers/contract.py:21-22`). |
+| G-4 REQ-TLS-001 AC-2 order | **Open** | no decision found in `review-log.md`. |
+
+### New findings
+| # | Finding | Severity | Needs | Proposal |
+|---|---|---|---|---|
+| N-1 | `number_check` with `evidence` as one string instead of a list passes the new argument check and gives a confident wrong verdict labelled `code`: `"\n".join(evidence)` splits the string into characters (`tool_calls.py:98`). Probe: claim "It is 1,200 m", evidence `"It is 1,200 m"` → `fail` ("the evidence gives another value"). A template argument of a workflow can easily resolve to a string. Older than this round (T-01), not seen in the first report. | Medium | test + fix; amendment if refused | Test first; then either refuse a non-list `evidence` as `bad_arguments` (IF-402 v3 names only missing/unknown arguments → widen by amendment) or take one string as a list of one. |
+| N-2 | Arguments of a wrong type still crash with a raw exception **after** being counted: `number_check` with `evidence: None` → `TypeError`, `schema_check` with a string schema → `AttributeError` (`tool_calls.py:85-91`: non-external tools re-raise). Residual of F-8. | Low | amendment + test | With N-1: `bad_arguments` for wrong types of the checks' arguments, before counting. |
+| N-3 | IF-402 v3 says `run_script` returns `{status, stdout, result}`, `failed` included, but the protected mock returns neither `result` nor `failed` (`tests/helpers/mocks/if_402_tool_calls.py:60-63`), the contract suite has no case for `failed`, and the door's `unavailable` output has no `result` (`tool_calls.py:114`). The mock and the door agree only on what the suite tests. | Low | amendment (mock, suite) | Next IF-402 amendment: `result` only when a script ran (say so), mock `failed` for a scripted failing script, a TC for it. |
+| N-4 | IF-402 v3 Bounds (`contracts/IF-402-tool-calls.md:35`) "only the text of a web or scholarly query" contradicts REQ-TLS-007 after A-41 (filters, DOI, API key, User-Agent). | Low (D-131) | amendment (contract text) | Align the bound with REQ-TLS-007 at the next IF-402 version. |
+| N-5 | The node's `implementation-log.md` has no entry for this round (70a6f35 is logged under N-2.4.1; 191a8f3, A-41, A-42 nowhere in the node log): which test reproduces which finding, and that the lock test cannot fail, stand only in commit messages. | Low | log | Add a section "Verify findings" to the node log with the mapping (incl. the numbering of D-132 vs this report). |
+| N-6 | (Info, N-2.4.1 / N-2.4 integration) The runner counts a door tool against its own budget before it calls the door (`pipeline.py:489-497`), so a call the door refuses as `bad_arguments` is counted by the runner anyway. Not a defect of the door (IF-402 "nothing counted" is the door's count). | Info | – | Note for the N-2.4 integration step. |
+
+The new contract test TC-IF-402-07 has no `Example:` line and no Given/When/Then comments (2 more `test_doc_check` errors, 13 in the file, 9 on master); it follows the style of the rest of that protected file. No action proposed.
+
+### Check results
+| Check | Result |
+|---|---|
+| Before/after of the new tests | on 6fa07ff (parent of 191a8f3) with the tests of 191a8f3/0f5050d: `test_tool_calls.py` 1 error (bad arguments), `test_tool_calls_sandbox.py` 1 failure (F-6), IF-402 contract 1 error (TC-IF-402-07 real); the concurrency test passes there. On 160bef6 (parent of 70a6f35): `test_tool_calls.py` ImportError. All green on HEAD. |
+| All Python tests in the image (`--init --network none`, one container per side, `python <file> -v`) | goal/v1: 185 files, 2037 tests, 137 skipped; fail: `test_amendment_report` (FromGit, no git in the image), `test_harness` 2 (`test_every_shipped_suite_is_valid`, `test_the_hard_checks_suite_matches_every_time` = F-1). master: 171 files, 1938 tests; fail: `test_amendment_report` (same test), `test_harness` 1 (`test_every_shipped_suite_is_valid`), `test_config` 1, `test_chat_review` 1 (`test_stop_ends_the_wait_with_no_answer`; green on goal/v1). **Per test, goal/v1 adds only F-1's failure.** |
+| Node tests | `test_tool_calls*.py` 14 + 6 + 8 + 5 + 6 + 6 = 45 OK; IF-402 14 OK (7 mock, 7 real); IF-404 10 OK, 5 skipped; IF-405 8 OK, 4 skipped; N-2.4 step_00 OK, step_01..03 skipped (`REAL_NODES`) |
+| JavaScript (`node --test "tests/js/*.test.mjs" tests/acceptance/contract/*.mjs`) | goal/v1 155 tests, 0 fail, 16 skipped; master 125, 0 fail, 11 skipped |
+| Bubblewrap wall on the host (Python 3.14, `test_sandbox.{Policy,Seccomp,Run,Wall,Router}Tests`) | 42 OK |
+| trace_check | 93 errors in all; for this node only the older one: its `test-spec.md` has no `## Scenarios` section. `REQ-TO-005` gone. Warnings TD-02, TD-03 "not listed in this report" (deferrals of other nodes: Files tab, token estimate). |
+| test_doc_check | `tests/test_tool_calls*.py` 0 errors each; IF-402 contract suite 13 (9 on master, see above) |
+| SysML | `check_sysml_model.py` OK; `check_sysml.sh specs/mia/architecture.sysml` 0 errors |
+| Protected folders vs master | changes only in `contracts/IF-104`, `IF-402`, `IF-404`, the IF-104 JS suite and mock, `tests/helpers/contract.{py,mjs}`, mocks IF-402 and IF-404, suites IF-402 and IF-404, and one line of `eval/suites/hard_checks/cases.jsonl` (`n-planted-figure`). Installed files equal their drafts: all eight test/helper files equal `specs/mia/contract-drafts/…`; `contracts/IF-402` = `amendments/A-42`, `IF-404` = `A-33`, `IF-104` = `A-36`; `specs/mia/test-spec.md` = `A-42/test-spec.md`. The A-42 install diff adds only TC-IF-402-07, the v3 rows and the mock's argument check. `eval/baselines`, `threat-model.md`, `stages.yaml` unchanged. |
+
+### Proposed status
+**Verified with findings** (unchanged), not *Verified*. Everything this round built is green, the new tests fail on the old code where they can, and the protected material changed only by installed amendments. What still blocks *Verified*:
+1. F-1: the stage-1 test `test_harness` hard-checks is red on goal/v1; A-40 waits for installation, and D-132's conflict (`open` vs expected `fail`) needs the owner before the replacement test is built.
+2. N-1 (Medium): a confident wrong `code` verdict from a string `evidence`.
+3. F-11 (THR-001 residual) and F-9's flows: amendments not drafted.
+4. F-3, F-4 (FB-03) and G-1..G-4: the owner's deferrals should be listed as accepted deviations with their decision (D-128 for F-3/F-4); G-1 and G-4 have no decision yet.
+
+### Could not check (this round)
+Podman wall tests, real web and scholarly requests, the app started with `build_tool_calls` (no network, no services), eval and red-team runs, CI and `merge_gate.py`.
