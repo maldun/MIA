@@ -267,12 +267,17 @@ package MIA_Architecture {
             }
         }
         part accessControl {
-            doc /* Editor and chat tokens today (to be replaced by accounts, FR-21), allowed origins, content security policy. */
-            @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("web_app.py", "presets_api.py"); }
+            doc /* Sessions guard every route while accounts are on (FR-21); editor and chat tokens while they are off; allowed origins, content security
+                   policy; the internal token of the helper processes (D-149: with accounts off every route is open, an accepted deviation). */
+            @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("web_app.py", "presets_api.py", "api_sessions.py", "internal_auth.py"); }
         }
         part accountService {
-            doc /* Target: accounts created by the owner, passwords as salted slow hashes, sessions, login throttling, password change. */
-            @Implementation { :>> status = ImplementationStatus::proposed; }
+            doc /* Accounts created by the owner, passwords as salted slow hashes, sessions, login throttling, password change (N-2.1). */
+            @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("accounts.py", "accounts_api.py", "api_sessions.py"); }
+        }
+        part graphApi {
+            doc /* The workflow and graph API for the graph app (IF-104 over HTTP) on the workflow library (IF-203), behind the session guard (N-2.1 T-04). */
+            @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("graph_api.py"); }
         }
         part variantStore {
             doc /* Target: character variants as data (shown or hidden parts, colours), stored like presets; a workflow names one, the chat has the default. */
