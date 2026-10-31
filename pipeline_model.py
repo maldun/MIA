@@ -12,6 +12,14 @@ import itertools
 import threading
 
 KINDS = ("chat", "background")
+UNREACHABLE = "The model server (Ollama) is not reachable, so I cannot answer right now."
+
+
+class ModelServerUnreachable(Exception):
+    """the model server does not answer; its message is the plain sentence the user reads (REQ-RUN-003)"""
+
+    def __init__(self):
+        super().__init__(UNREACHABLE)
 
 
 class ModelTurns:
@@ -72,6 +80,8 @@ class TurnClient:
         self._turns.acquire(self.kind)
         try:
             return method(*args, **kwargs)
+        except ConnectionError as exc:              # what the ollama library raises when nothing listens
+            raise ModelServerUnreachable() from exc
         finally:
             self._turns.release()
 
@@ -79,6 +89,8 @@ class TurnClient:
         self._turns.acquire(self.kind)
         try:
             yield from method(*args, **kwargs)
+        except ConnectionError as exc:
+            raise ModelServerUnreachable() from exc
         finally:
             self._turns.release()
 

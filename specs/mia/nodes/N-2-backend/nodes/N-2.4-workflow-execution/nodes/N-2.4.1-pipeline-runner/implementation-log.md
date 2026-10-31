@@ -50,3 +50,22 @@ Local coder: `tests/test_model_turns.py` (task `run0910-tests`, 2 attempts, both
 Tests reported green (feedback, not verification): `tests/test_model_turns.py` (6); all `tests/test_*.py` in the image fail only as on master (`test_config`, `test_shutdown`, `test_harness`, `test_amendment_report`); all 15 contract suites and all integration steps.
 
 Open for Phase 4: no live run with the real model server was made (the tests use a fake client); AC-19's 10 s with a review slice running is T-06.
+
+## T-03 Switch the model, server unreachable (2026-10-31, done; REQ-RUN-011 out of the scope of G-V1, D-118) – REQ-RUN-002, REQ-RUN-003
+
+Owner's answers (D-118): `/light!` and `/full!` ask for confirmation; the switch to the light model is the "free GPU memory on request"; REQ-RUN-011 (IF-103 only) is set out of G-V1 (the IF-103 suite cannot hand scripted replies to a real provider).
+
+| Requirement | Where it is met | Test |
+|---|---|---|
+| REQ-RUN-002 switch after confirmation, for all, memory freed | **changed:** `chat_service.COMMANDS` marks `/light!` and `/full!` `confirm: True` (the page asks before it sends them, `templates/static/chat/app.js`); `Communicator.set_profile` switches the one shared model (all users) and unloads the previous one (`generate(keep_alive=0)`), nothing when the model stays | `tests/test_runner_model_server.py` (3 of 6) |
+| REQ-RUN-003 server unreachable in plain words | **new:** `TurnClient` turns the `ConnectionError` of the ollama library (also while a stream is read) into `ModelServerUnreachable` with the sentence `pipeline_model.UNREACHABLE`; the runner ends the run with exactly that sentence as its error (no node id, no type); the chat shows it as its error note (the status line says "Can't reach my brain right now." as before) | `tests/test_runner_model_server.py` (3 of 6) |
+
+Files outside T-03's list: `chat_service.py` (two flags, owner's answer); `web_app.py` not touched.
+
+Wording for the owner to review (user-visible, no requirement fixes it): "The model server (Ollama) is not reachable, so I cannot answer right now."
+
+Live check (feedback): with the image on the host network, a client on a closed port gave the sentence; the running Ollama answered `list` through `TurnClient` (5 models). No model was loaded.
+
+Local coder: `tests/test_runner_model_server.py` (task `run0203-tests`, 2 attempts, the second passed its check); compared with the instruction by script: identical, verdict `ok`. Red before the change (no `UNREACHABLE`), green after.
+
+Tests reported green (feedback, not verification): `tests/test_runner_model_server.py` (6), `tests/test_model_turns.py`, `tests/test_runner_budgets.py`, `tests/test_run_workflow.py`, `tests/test_pipeline.py`, `tests/test_chat_backend.py`; all `tests/test_*.py` in the image fail only as on master; all contract suites and integration steps.

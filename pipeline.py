@@ -30,10 +30,12 @@ try:
     from . import events as ev
     from .schema_check import check as check_schema
     from .sandbox import Operation
+    from .pipeline_model import ModelServerUnreachable
 except ImportError:  # used as plain script / in tests
     import events as ev
     from schema_check import check as check_schema
     from sandbox import Operation
+    from pipeline_model import ModelServerUnreachable
 
 Tool = namedtuple("Tool", "func budget_key")
 
@@ -334,6 +336,9 @@ class Runner:
         except BudgetExceeded as exc:
             status, error, missing = "budget", "budget exceeded: %s" % exc, [str(exc)]
             self._emit(st, "error", None, plain=error)
+        except ModelServerUnreachable as exc:        # said as it is, without the node and the type of the error (REQ-RUN-003)
+            status, error = "error", str(exc)
+            self._emit(st, "error", None, plain=error)
         except NodeError as exc:
             status, error = "error", str(exc)
         except Exception as exc:                    # a bug in a tool or function must not take MIA down
@@ -397,7 +402,7 @@ class Runner:
         with ev.acting(node["id"], parent=start["seq"], item=item):
             try:
                 value = getattr(self, "_do_" + kind)(st, node, ctx, item)
-            except (Stopped, BudgetExceeded):
+            except (Stopped, BudgetExceeded, ModelServerUnreachable):
                 raise
             except Exception as exc:
                 message = str(exc) if isinstance(exc, NodeError) else "%s: %s" % (type(exc).__name__, exc)

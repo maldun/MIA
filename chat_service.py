@@ -58,8 +58,8 @@ DELTA_INTERVAL = 0.05          # at most about 20 deltas per second per message
 CONTROL_CHARACTERS = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
 
 COMMANDS = (
-    {"command": "/light!", "description": "Switch to the small model (saves GPU memory)", "confirm": False},
-    {"command": "/full!", "description": "Switch back to the large model", "confirm": False},
+    {"command": "/light!", "description": "Switch to the small model (saves GPU memory)", "confirm": True},      # for all users at once (REQ-RUN-002)
+    {"command": "/full!", "description": "Switch back to the large model", "confirm": True},
     {"command": "/dream!", "description": "Sort and summarize MIA's memory", "confirm": False},
     {"command": "/time!", "description": "Send the current time to MIA", "confirm": False},
     {"command": "/tasks", "description": "Read all tasks back, word for word", "confirm": False},
