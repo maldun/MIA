@@ -3,7 +3,7 @@ frontend has no container of its own.
 Stage 3 (D-144): builds its own image tag of this checkout (localhost/mia:vpb005, never pulling), starts deploy/compose.yaml under its own
 project (mia-vpb005) on 127.0.0.1 only, with the Ollama that runs on the host (OLLAMA_URL, as tests/smoke/smoke_stack.py; never the stack's
 ollama profile), loads the page over the stack's http front in headless Chromium (localhost/mia-browser, D-141, as tests/test_page_requests.py)
-and removes what it started (containers, volumes, network, image tag). Skipped, never passed, without podman, podman-compose, an image or the
+and removes what it started (containers, every volume of the project, also the anonymous ones, network, image tag). Skipped, never passed, without podman, podman-compose, an image or the
 model server. Run on the host with: python3 tests/test_delivery_on_stack.py  (about a minute)"""
 import json
 import os
@@ -87,6 +87,26 @@ def cannot_run():
     return None
 
 
+def volumes_of(project):
+    """the volumes of the project: those its containers mount (named and anonymous) and those that carry its label"""
+    ids = run("podman", "ps", "-a", "-q", "--filter", "label=io.podman.compose.project=" + project).stdout.split()
+    mounted = run("podman", "inspect", "--format", '{{range .Mounts}}{{if eq .Type "volume"}}{{.Name}} {{end}}{{end}}', *ids).stdout.split() if ids else []
+    labelled = run("podman", "volume", "ls", "-q", "--filter", "label=io.podman.compose.project=" + project).stdout.split()
+    return set(mounted) | set(labelled)
+
+
+def take_down(compose, env):
+    """stops the stack and removes every volume it had; `down -v` keeps the anonymous volumes of the searxng image (VOLUME /etc/searxng
+    /var/cache/searxng), so they are recorded before and removed after it. A volume left raises, an error of the class (M1, D-148)."""
+    volumes = volumes_of(PROJECT)
+    run(*compose, "down", "-v", env=env)
+    if volumes:
+        run("podman", "volume", "rm", "-f", *sorted(volumes))
+    left = sorted(v for v in volumes | volumes_of(PROJECT) if run("podman", "volume", "exists", v).returncode == 0)
+    if left:
+        raise AssertionError("volumes of %s left after the test: %s" % (PROJECT, left))
+
+
 class DeliveryOnStack(unittest.TestCase):
     session = None
 
@@ -113,7 +133,7 @@ class DeliveryOnStack(unittest.TestCase):
             raise AssertionError("the image does not build: " + built.stderr[-300:])
         compose = ("podman-compose", "-p", PROJECT, "-f", "deploy/compose.yaml")
         cls.addClassCleanup(run, "podman", "network", "rm", "-f", PROJECT + "_default")
-        cls.addClassCleanup(run, *compose, "down", "-v", env=env)
+        cls.addClassCleanup(take_down, compose, env)
         up = run(*compose, "up", "-d", "--no-build", env=env)
         if up.returncode != 0:
             raise AssertionError("the stack does not start: " + up.stderr[-300:])
