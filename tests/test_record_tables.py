@@ -11,6 +11,8 @@ from markers import mark                         # noqa: E402
 from record_tables import definitions, validate  # noqa: E402
 
 CATEGORIES = ("answer_quality", "reactions", "character_behaviour", "service")
+CONTRACT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "contracts", "IF-302-record-tables.md")
+A61_INSTALLED = "`categories()`" in open(CONTRACT, encoding="utf-8").read()      # IF-302 v6 (amendment A-61, D-161 F6): the vote categories as an operation
 RUN = {"workflow": "lookup", "workflow_version": 1, "model_pin": "MP-light", "benchmark_version": "B1"}
 
 
@@ -35,6 +37,17 @@ class Definitions(unittest.TestCase):
         for table in ("workflows", "context_graphs", "nope", None):
             with self.subTest(table=table), self.assertRaises(ValueError):
                 validate(table, {})
+
+    @unittest.skipUnless(A61_INSTALLED, "waits for amendment A-61 (IF-302 v6, categories())")
+    @mark.req("REQ-RTB-003", "IF-302")
+    def test_the_four_vote_categories_are_an_operation(self):
+        """F6 (D-161): IF-302 v6 gives the consumers the four vote categories, in this order, instead of a constant to import.
+
+        Example: categories() gives ("answer_quality", "reactions", "character_behaviour", "service").
+        """
+        import record_tables
+        # Given the record tables, When the categories are asked for, Then they are the four in their order
+        self.assertEqual(tuple(record_tables.categories()), CATEGORIES)
 
 
 class Validation(unittest.TestCase):
