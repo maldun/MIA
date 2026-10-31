@@ -1,6 +1,6 @@
 """TC-VPB-005 (REQ-VPB-005, REQ-FE-030): on the compose stack the chat page, its scripts and a voice line come from MIA's own server, and the
 frontend has no container of its own.
-Stage 3 (D-144): builds its own image tag of this checkout (localhost/mia:vpb005, never pulling, without network), starts deploy/compose.yaml under its own
+Stage 3 (D-144): builds its own image tag of this checkout (localhost/mia:vpb005, never pulling, without network), starts a copy of deploy/compose.yaml under its own
 project (mia-vpb005) on 127.0.0.1 only, with the Ollama that runs on the host (OLLAMA_URL, as tests/smoke/smoke_stack.py; never the stack's
 ollama profile), loads the page over the stack's http front in headless Chromium (localhost/mia-browser, D-141, as tests/test_page_requests.py)
 and removes what it started (containers, every volume of the project, also the anonymous ones, network, image tag). Skipped, never passed, without podman, podman-compose, an image or the
@@ -118,21 +118,26 @@ class DeliveryOnStack(unittest.TestCase):
         cls.port, cls.https_port = free_port(), free_port()
         cls.host = "127.0.0.1:%d" % cls.port
         cls.page = "http://%s/?character=0" % cls.host
-        empty = tempfile.mkdtemp(prefix="mia-vpb005-")                # the character's web export is not needed (?character=0)
-        cls.addClassCleanup(shutil.rmtree, empty, ignore_errors=True)
+        # the stack runs from a copy of deploy/ (M3, D-148): its setup_cfg.local.json ({}) is never written into the shared checkout, and the
+        # machine's own local settings and .env are not used
+        scratch = tempfile.mkdtemp(prefix="mia-vpb005-")
+        cls.addClassCleanup(shutil.rmtree, scratch, ignore_errors=True)
+        shutil.copytree(os.path.join(ROOT, "deploy"), os.path.join(scratch, "deploy"), ignore=shutil.ignore_patterns("setup_cfg.local.json", ".env"))
+        os.makedirs(os.path.join(scratch, "tools", "searxng"))
+        shutil.copy(os.path.join(ROOT, "tools", "searxng", "settings.yml"), os.path.join(scratch, "tools", "searxng"))
+        with open(os.path.join(scratch, "deploy", "setup_cfg.local.json"), "w", encoding="utf-8") as fp:
+            fp.write("{}\n")
+        empty = os.path.join(scratch, "character")                    # the character's web export is not needed (?character=0)
+        os.makedirs(empty)
         env = dict(os.environ, MIA_IMAGE=IMAGE, MIA_PORT=str(cls.port), MIA_HTTPS_PORT=str(cls.https_port), MIA_BIND="127.0.0.1",
-                   SEARXNG_SECRET=secrets.token_hex(16), OLLAMA_URL=OLLAMA, MIA_DATABASE_URL="", MIA_CHARACTER_DIR=empty)
-        local = os.path.join(ROOT, "deploy", "setup_cfg.local.json")
-        if not os.path.exists(local):
-            with open(local, "w", encoding="utf-8") as fp:
-                fp.write("{}\n")
-            cls.addClassCleanup(os.remove, local)
+                   SEARXNG_SECRET=secrets.token_hex(16), OLLAMA_URL=OLLAMA, MIA_DATABASE_URL="", MIA_CHARACTER_DIR=empty,
+                   MIA_KOKORO_DIR=os.path.join(ROOT, "voice", "models", "kokoro"), MIA_BACKGROUND_DIR=os.path.join(ROOT, "backgrounds"))
         cls.addClassCleanup(run, "podman", "rmi", "-f", IMAGE)
         # no network in the build (M2, D-148): a layer missing in the cache (pip install after a change of requirements.txt) fails, never downloads
         built = run("podman", "build", "--pull=never", "--network", "none", "-q", "-t", IMAGE, "-f", "deploy/Containerfile", ".", timeout=1800)
         if built.returncode != 0:
             raise AssertionError("the image does not build without network (a layer not in the cache?): " + built.stderr[-300:])
-        compose = ("podman-compose", "-p", PROJECT, "-f", "deploy/compose.yaml")
+        compose = ("podman-compose", "-p", PROJECT, "-f", os.path.join(scratch, "deploy", "compose.yaml"))
         cls.addClassCleanup(run, "podman", "network", "rm", "-f", PROJECT + "_default")
         cls.addClassCleanup(take_down, compose, env)
         up = run(*compose, "up", "-d", "--no-build", env=env)
