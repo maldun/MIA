@@ -1,7 +1,7 @@
 """TC-VPB-005 (REQ-VPB-005, REQ-FE-030): on the compose stack the chat page, its scripts and a voice line come from MIA's own server, and the
 frontend has no container of its own.
-Stage 3 (D-144): builds its own image tag of this checkout (localhost/mia:vpb005, never pulling, without network), starts a copy of deploy/compose.yaml under its own
-project (mia-vpb005) on 127.0.0.1 only, with the Ollama that runs on the host (OLLAMA_URL, as tests/smoke/smoke_stack.py; never the stack's
+Stage 3 (D-144): builds its own image tag of this checkout (localhost/mia:vpb005-<run>, never pulling, without network), starts a copy of deploy/compose.yaml under its own
+project (mia-vpb005-<run>) on 127.0.0.1 only, with the Ollama that runs on the host (OLLAMA_URL, as tests/smoke/smoke_stack.py; never the stack's
 ollama profile), loads the page over the stack's http front in headless Chromium (localhost/mia-browser, D-141, as tests/test_page_requests.py)
 and removes what it started (containers, every volume of the project, also the anonymous ones, network, image tag). Skipped, never passed, without podman, podman-compose, an image or the
 model server. Run on the host with: python3 tests/test_delivery_on_stack.py  (about a minute)"""
@@ -26,8 +26,10 @@ sys.path.insert(0, os.path.join(HERE, "helpers"))
 
 from markers import mark  # noqa: E402
 
-PROJECT = "mia-vpb005"                       # its own project and tag: the owner's stack "mia" and the smoke tests are never touched
-IMAGE = "localhost/mia:vpb005"
+# its own project and tag per run (D-150): the owner's stack "mia", the smoke tests and a run of this test from another checkout are never touched
+RUN_ID = secrets.token_hex(4)
+PROJECT = "mia-vpb005-" + RUN_ID
+IMAGE = "localhost/mia:vpb005-" + RUN_ID
 BROWSER_IMAGE = "localhost/mia-browser"
 OLLAMA = os.environ.get("MIA_SMOKE_OLLAMA", "http://host.containers.internal:11434")    # the model server on the host, as the smoke tests
 SERVICES = {"mia", "graph", "https", "searxng"}                                          # without the profiles ollama and db
@@ -120,7 +122,7 @@ class DeliveryOnStack(unittest.TestCase):
         cls.page = "http://%s/?character=0" % cls.host
         # the stack runs from a copy of deploy/ (M3, D-148): its setup_cfg.local.json ({}) is never written into the shared checkout, and the
         # machine's own local settings and .env are not used
-        scratch = tempfile.mkdtemp(prefix="mia-vpb005-")
+        scratch = tempfile.mkdtemp(prefix=PROJECT + "-")
         cls.addClassCleanup(shutil.rmtree, scratch, ignore_errors=True)
         shutil.copytree(os.path.join(ROOT, "deploy"), os.path.join(scratch, "deploy"), ignore=shutil.ignore_patterns("setup_cfg.local.json", ".env"))
         os.makedirs(os.path.join(scratch, "tools", "searxng"))
