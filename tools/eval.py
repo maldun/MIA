@@ -38,6 +38,11 @@ SUITES = os.environ.get("MIA_SUITES") or os.path.join(REPO, "eval", "suites")   
 PINS = {"MP-light": {"name": "gemma4:12b-it-qat", "digest": "sha256:38044be4f923e5a55264ed7df4eaac2676651a905f735197c504045140c02bd3", "seed": 7, "temperature": 0}}
 
 
+def pin_record(pin_id):
+    """the pin the harness gets: the entry of PINS with its id, which IF-105 takes as `model_pin` (the name is the model tag)"""
+    return dict(PINS[pin_id], id=pin_id)
+
+
 def own(cfg, key, default):
     path = cfg.get(key, default)
     return path if os.path.isabs(path) else os.path.join(REPO, path)
@@ -144,7 +149,7 @@ def main():
     count = len(suite.select(args.tag or None, only, args.limit, args.include_retired))
     print("running %s (%d cases x %d) as variant '%s' ...\n" % (suite.name, count, args.repeats, args.variant))
     run = harness.Harness(core).run(suite, variant, args.repeats, args.tag or None, only, args.limit, None if args.quiet else show_progress,
-                                    pin=PINS.get(args.pin), include_retired=args.include_retired)
+                                    pin=pin_record(args.pin) if args.pin else None, include_retired=args.include_retired)
     print("\n" + harness.format_report(run))
     if not args.no_save:
         print("\nsaved: %s" % run.save(results))

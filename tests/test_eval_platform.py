@@ -4,6 +4,7 @@ TC-EVL-008 equal cases, TC-EVL-011 the platform only through IF-105.
 Run: python tests/test_eval_platform.py
 """
 import ast
+import importlib.util
 import json
 import os
 import sys
@@ -21,8 +22,19 @@ import harness as H                                   # noqa: E402
 import metrics as M                                   # noqa: E402
 from if_105_evaluation_access import EvaluationAccessMock  # noqa: E402
 from markers import mark                              # noqa: E402
+import contract                                       # noqa: E402  (the real IF-105 provider of the contract suite, read-only)
 
-PIN = {"name": "MP-light", "digest": "sha256:test", "seed": 7, "temperature": 0}
+
+def load_eval_cli():
+    """tools/eval.py as a module (its file name would shadow the builtin `eval`)"""
+    spec = importlib.util.spec_from_file_location("eval_cli", os.path.join(REPO, "tools", "eval.py"))
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+EVAL_CLI = load_eval_cli()
+PIN = EVAL_CLI.pin_record("MP-light")                 # the shape tools/eval.py hands to the harness: id MP-light, name = the model tag
 
 
 class ScriptedPlatform(EvaluationAccessMock):
@@ -81,7 +93,7 @@ class PlatformHarness(unittest.TestCase):
         for i in range(10):
             header = self.harness.run(suite, repeats=1, pin=dict(PIN, seed=i)).header
             self.assertEqual((header["workflow"], header["workflow_version"]), ("lookup", 1))
-            self.assertEqual((header["pin"]["name"], header["pin"]["seed"], header["pin"]["temperature"]), ("MP-light", i, 0))
+            self.assertEqual((header["pin"]["id"], header["pin"]["seed"], header["pin"]["temperature"]), ("MP-light", i, 0))
             self.assertEqual(header["benchmark_version"], header["suite_sha1"])
 
     def test_the_options_reach_the_platform_and_a_run_without_a_pin_is_refused(self):
@@ -93,7 +105,7 @@ class PlatformHarness(unittest.TestCase):
 
     def test_a_pin_the_platform_does_not_know_is_an_error_record_not_a_fallback(self):
         suite = make_suite(self.tmp.name, ["pass"])
-        run = self.harness.run(suite, pin=dict(PIN, name="MP-huge"))
+        run = self.harness.run(suite, pin=dict(PIN, id="MP-huge"))
         self.assertTrue(run.records[0]["status"].startswith("error"))
         self.assertIn("pin_unavailable", run.records[0]["error"])
 
@@ -110,6 +122,28 @@ class PlatformHarness(unittest.TestCase):
         fewer = self.harness.run(make_suite(self.tmp.name, ["pass", "pass", "pass"], "s_d"), repeats=1, pin=PIN)
         with self.assertRaises(H.SuiteError):
             H.require_same_cases(a, fewer)                         # the same repeats, too
+
+
+class RealProvider(unittest.TestCase):
+    @mark.req("REQ-EVL-004", "REQ-EVL-011")
+    def test_the_pin_of_the_command_line_runs_on_the_real_provider(self):
+        """REG (Verify F2): the harness sends the pin id to IF-105, so the real provider (run_workflow.WorkflowRuns) runs the case.
+
+        Example: pin MP-light (model tag gemma4:12b-it-qat) on the workflow lookup -> status "42" (the answer); it was pin_unavailable.
+        """
+        # Given: the real IF-105 provider of the contract suite (fake model, the project's pins) and a workflow suite of one case
+        with tempfile.TemporaryDirectory() as root:
+            folder = os.path.join(root, "lookup_real")
+            os.makedirs(folder)
+            with open(os.path.join(folder, "suite.json"), "w") as fp:
+                json.dump({"name": "lookup_real", "description": "t", "target": {"kind": "workflow", "workflow": "lookup", "version": 1, "status_field": "answer"}}, fp)
+            with open(os.path.join(folder, "cases.jsonl"), "w") as fp:
+                fp.write(json.dumps({"id": "c0", "input": {"question": "q"}, "truth": True}) + "\n")
+            suite = H.load_suite(folder)
+            # When: the harness runs it with the pin as tools/eval.py builds it
+            run = H.Harness(platform=contract.real_subject("IF-105")).run(suite, pin=PIN)
+        # Then: the provider accepted the pin and ran the workflow (the fixture's judge step answers "42")
+        self.assertEqual((run.records[0]["status"], run.records[0].get("error")), ("42", None))
 
 
 class OnlyThroughIF105(unittest.TestCase):

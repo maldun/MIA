@@ -419,7 +419,7 @@ class Harness:
 
     # -- a run --
     def run(self, suite, variant=None, repeats=1, tags=None, only=None, limit=None, progress=None, pin=None, include_retired=False):
-        """pin: {"name", "digest", "seed", "temperature"} of the model setting (eval-spec.md, Model pins); seed and temperature go to every model call (REQ-EVAL-003)
+        """pin: {"id", "name", "digest", "seed", "temperature"} of the model setting (eval-spec.md, Model pins); seed and temperature go to every model call (REQ-EVAL-003)
         and the whole pin into the header (REQ-EVAL-001). Retired cases are skipped unless include_retired (REQ-EVAL-002)."""
         variant = dict({"name": "default"}, **(variant or {}))
         cases = suite.select(tags, only, limit, include_retired)
@@ -429,7 +429,7 @@ class Harness:
         self.pin = pin
         header = {"suite": suite.name, "variant": variant, "repeats": repeats, "cases": len(cases), "started": self._clock(), "target": suite.target}
         if pin:
-            header["pin"] = {key: pin.get(key) for key in ("name", "digest", "seed", "temperature")}
+            header["pin"] = {key: pin.get(key) for key in ("id", "name", "digest", "seed", "temperature")}
         header["suite_sha1"] = suite_sha1(suite.path)
         header["benchmark_version"] = header["suite_sha1"]               # REQ-EVL-004: the version of the benchmark is the content of the suite
         if suite.target["kind"] == "workflow":
