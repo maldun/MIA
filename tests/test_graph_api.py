@@ -187,5 +187,20 @@ class GraphRoutes(unittest.TestCase):
         self.assertEqual(self.anna.get("/api/workflows").get_json(), ["my flow"])
         self.assertEqual(self.anna.get(path).get_json()["id"], "my flow")
 
+    @mark.req("REQ-API-016")
+    def test_an_id_the_routes_cannot_take_is_404_not_found_in_json(self):
+        """TC-API-014 (D-149, V-7): an id with an encoded slash cannot be addressed; every route answers JSON 404 not_found and nothing is saved.
+
+        Example: GET /api/workflows/a%2Fb -> 404 {"error": "not_found"} (was Flask's HTML 404).
+        """
+        # Given
+        path = "/api/workflows/a%2Fb"
+        # When
+        answers = [self.anna.get(path), self.put(self.anna, path, GRAPH), self.anna.get(path + "/history"), self.anna.get(path + "/diff?a=1&b=2"),
+                   self.anna.post(path + "/restore", json={"version": 1})]
+        # Then
+        self.assertEqual([(a.status_code, a.get_json()) for a in answers], [(404, {"error": "not_found"})] * 5)
+        self.assertEqual(self.anna.get("/api/workflows").get_json(), [])
+
 if __name__ == "__main__":
     unittest.main()

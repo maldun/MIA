@@ -75,4 +75,9 @@ def create_graph_blueprint(library):
         version = body.get("version") if isinstance(body, dict) else None
         return answer(kind, lambda: library.restore(kind, record_id, _number(version), author()))
 
+    @bp.route("/api/<any(%s):kind>/<path:rest>" % ", ".join(KINDS), methods=["GET", "PUT", "POST"])
+    def unreachable(kind, rest):
+        """an id with a slash (sent as %2F) matches no route above: JSON not_found instead of Flask's HTML page (D-149, V-7); other prefixes are not caught"""
+        return jsonify({"error": "not_found"}), 404
+
     return bp
