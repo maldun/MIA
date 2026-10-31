@@ -103,3 +103,101 @@ Human review: specification side via `review-log.md`; code read in full by the r
 
 ## Reproduction
 Mutation script and probes ran in a scratch copy (`/tmp/claude-1000/-home-maldun-prog-Python-MIA/1251f948-2f8f-400a-acca-407c0b962dbf/scratchpad/n33-mut`, removed afterwards). Probe: `validate("votes", {"user":"a","subject":"m","category":"service","value":1.0})` → `None`.
+
+# Re-verification (after v1-n33b, v1-n31b and the A-59/A-61 install)
+
+**Goal:** G-V1 (iteration), supervised; node N-3.3 (leaf), black box with its neighbours' mocks, and in the N-3 integration steps with its real siblings
+**Branch:** goal/v1 @ 81f0ffd (node code as of 0e8e767; `chat_service.py` and `storage.py` as of acf1320; later commits are docs only)   **Plan baseline:** plan-baseline-it1, decomp-baseline   **Date:** 2026-10-31
+**Reviewers:** – (human), Claude Opus 5.5 (AI, fresh context; it never saw the implementation chat)
+**Commits reviewed:** v1-n33b (merged in 0e8e767): a626341 (F1), 5b602cb (F3, F5), 1aa6d4d (F4), df6ca82 and 73e5ef8 (F6, replaced by D-162), the `docs(record_tables)` and `plan(record_tables)` commits (F2, A-61 draft); v1-n31b: 2ae1fc5 (`categories()` in the storage), 6ba6322 (chat service asks IF-102); 849ac36 (A-59, A-60, A-61 installed by the owner). Inputs: D-161, D-162, IF-302 v6, IF-101 v14 (vote value), IF-102 v2 `categories()`, sibling re-verifications N-3.1 and N-3.2.
+
+## Verdict (proposal)
+**Verified with accepted deviations.** F1, F3, F4 and F5 are closed with tests that fail on a mutant that restores the old behaviour (table below), on the real module, the chat service, the IF-302 mock and the IF-101 mock; F6 is closed by D-162 (no module outside N-3.1 imports `record_tables`; three mutants of the chat service and the storage are caught); F2 is closed in `requirements.md`, `architecture.sysml` and TC-RTB-001; F7 is decided (REQ-RTB-006 partly, `goals/G-V1/goal.md:74`, `feedback/FB-04.md:14`). The installed IF-302, IF-101 and IF-102 files equal their A-59/A-61 drafts (look-only runs: all unchanged). Open: F8 (readability backlog) and the rest of F9 (R1). New findings are low: the IF-302 suite does not pin the deletable flags it does not name (R2), and log/plan residue (R3). None blocks the merge.
+
+## Automated checks (local runs, not CI)
+| Check | Result |
+|---|---|
+| Node tests, host | `tests/test_record_tables.py` 17 OK |
+| IF-302 suite, host | 14/14 (`_mock` 7, `_real` 7, real = `record_tables` via `contract.py:841-843`), no skip |
+| Consumers, host | `test_chat_answers.py` 12 OK, `test_chat_behaviour.py` 10 OK, `test_storage.py` 17 OK, IF-102 suite 20 OK. The IF-101 suite errors on the host's `_real` side (no flask on the host; expected) |
+| In the image (`podman run --rm --init --network none --user 0 … localhost/mia:latest`, one container at a time) | `test_record_tables.py` 17, IF-302 suite 14, IF-101 suite 64 (2 skips: TC-IF-101-04, -17, unbuilt events, as before), IF-102 suite 20, `test_chat_answers.py` 12, `test_chat_ops_api.py` 4, N-3 steps 00–03: all OK |
+| IF-101 vote cases | TC-IF-101-32 (`test_if_101_chat_api.py:576`) green on mock and real in the image; TC-IF-101 vote/score cases green |
+| Protected material vs. A-59, A-61 | `contracts/IF-302-record-tables.md` = `amendments/A-61/…` (`cmp`); IF-302 mock and suite = `contract-drafts/…` (`cmp`). Look-only runs of `tools/apply_amendment_a61.sh` and `…a59.sh` (TMPDIR in the scratchpad): every file "unchanged (identical)", incl. IF-101 contract, mock and suite, IF-102 contract, mock, suite, `contract.py`, `stages.yaml`, `specs/mia/test-spec.md` and this node's `requirements.md`. Since the first report only a262376, 424c329 and 849ac36 (owner installs) touch `tests/acceptance`, `tests/helpers`, `tests/integration`, `contracts`, `stages.yaml`; no skip/xfail in the IF-302 suite |
+| trace_check | exit 1 tree-wide (97 errors). This node: ERROR `test-spec.md` has no `## Scenarios` (F8); WARN REQ-RTB-006 "no marker" (false positive, as before: `test_record_tables.py:18` names it second); WARN TD-01..04, -06, -07 not listed here (listed below now) |
+| test_doc_check | `test_record_tables.py` 19 errors (the 19 of F8; the four tests added in v1-n33b pass the rule); IF-302 suite 13 (11 of F8 + 2 of the protected TC-IF-302-07) |
+| `goal_check.py --parent-ref master` | no findings |
+| `check_sysml_model.py`, `check_sysml.sh specs/mia/architecture.sysml` | OK; 0 errors, 0 warnings |
+| Architecture rules | `record_tables` imports nothing; its only importer outside the tests is `storage.py:24` (IF-302, modelled). `chat_service.py` has no `CATEGORIES` and no import of `record_tables`; it asks `self._votes.categories()` (`:384`, `:514`; IF-102 v2) |
+| Static, security | no linter configured; fix commits read in full (one line in `record_tables.py:42`, one in `chat_service.py:386`); no new dependency, no I/O |
+
+### Mutation checks (scratch export of HEAD, removed)
+| Mutation | Unit tests | Contract suite |
+|---|---|---|
+| `record_tables.py:42`: type check removed (float and bool pass) | killed | IF-302 killed |
+| `:42`: only bool refused (old rule, float passes) | killed | IF-302 killed |
+| `:28`: non-mapping refused only where fields are required | killed | IF-302 killed |
+| `user` not required for votes (F4) | killed | IF-302 survives (by design: suite checks fewer cases) |
+| value 0 accepted (F4) | killed | IF-302 survives |
+| memory `status` accepts a kind (F4) | killed | IF-302 survives |
+| `chat_service.py:386`: type check removed | `test_chat_answers` killed | IF-101 `_real` killed (in the image, 2 failures) |
+| `:386`: only bool refused | `test_chat_answers` killed | – |
+| `:384` / `:514`: the chat service keeps its own list of categories | `test_chat_answers` killed (both) | – |
+| `storage.py:137`: categories reordered | `test_storage` killed | IF-102 killed |
+| IF-302 mock: float allowed / non-mapping only with required fields | – | IF-302 `_mock` killed |
+| IF-101 mock: only bool refused (old rule) | – | IF-101 `_mock` killed (in the image, 1 failure) |
+| `history` not deletable / `source_trust` deletable | killed | IF-302 survives (R2) |
+
+## Earlier findings
+| # | Status | Evidence |
+|---|---|---|
+| F1 | closed | `test_record_tables.py:149` `mark.req("REQ-WFM-038", "IF-302")`, `:157` back on the `workflow_meta` test |
+| F2 | closed | `requirements.md:11` (14 tables, summaries and chat log are `history` records, History D-161), `architecture.sysml:3398`, node `test-spec.md` TC-RTB-001 |
+| F3 | closed | `record_tables.py:42`, `chat_service.py:386`; tests `test_record_tables.py:92`, `test_chat_answers.py:108`, TC-IF-302-07, TC-IF-101-32; mutants of the old rule caught on all four |
+| F4 | closed | `test_record_tables.py:62` (each vote field), `:76` (value 0), `:179` (`status="fact"`); TC-RTB-003 text widened (node `test-spec.md`); 3 mutants caught |
+| F5 | closed (A-61) | IF-302 v6 text and golden 4; mock `if_302_record_tables.py:27,40`; TC-IF-302-07; `test_record_tables.py:132` for all 14 tables; mock and real agree now |
+| F6 | closed (D-162, A-59) | IF-102 `categories()` (`storage.py:135-137`, TC-IF-102-10, `test_storage.py:208`); `test_chat_answers.py:123` (a storage with one category decides; no `CATEGORIES` in `chat_service`), `:151` (runs on the IF-102 mock); the `df6ca82` tests removed |
+| F7 | decided (D-161): REQ-RTB-006 partly | `goals/G-V1/goal.md:74`, `feedback/FB-04.md:14`; TC-RTB-006 (definition) green; AC-3 has no evidence in G-V1 (accepted deviation) |
+| F8 | open, backlog | unchanged: no `## Scenarios`, 19 + 13 test_doc_check errors; the root `test-spec.md` rows TC-IF-302-04..07 and `requirements.md:93` `Verified by: TC-IF-302-01..07` are fixed (A-61) |
+| F9 | partly closed | IF-302 header "draft v0" dropped (v6). Still open: R1 |
+| F10 | info | the fixes this time were made before the amendment, and the amendment was installed after the merge, as the log says (the real side of TC-IF-101-32 needed v1-n33b) |
+
+## Verification matrix (changes against the first report only)
+| Requirement | Result now |
+|---|---|
+| REQ-RTB-001 | Pass; text matches the code (F2) |
+| REQ-RTB-002, -004, -005 | Pass, unchanged |
+| REQ-RTB-003 | Pass: each required field, 0, 1.0, -1.0, True, False refused in the module and the chat service; AC-18 through the N-3 scenario (step_03 green) |
+| REQ-RTB-006 | Partly, accepted by the owner (D-161, FB-04): table defined, versioned, not deletable (TC-RTB-006); AC-3 next iteration |
+| IF-302 v6 | Pass: 14/14 on mock and real, golden 1–4 met; mock and real agree on all probed inputs |
+
+## Specification vs. code (M42), new items
+| Direction | Item | Destination |
+|---|---|---|
+| done, not specified | `history` is deletable and `accounts`, `presets`, `gestures`, `source_trust` are not (`record_tables.py:9`, mock `:5-9`, TC-RTB-001); IF-302 names only `memory`, `tasks`, `memos` as deletable and `votes`, `runs` as not, and its suite pins only those five | R2 |
+
+## Open deferrals (M26)
+| TD | Requirement | Interim criterion verified? | Target check state | Trigger |
+|---|---|---|---|---|
+| none for this node | REQ-RTB-006 partly is a scope decision (D-161, FB-04), no relaxed check: TC-RTB-006 runs and passes | – | – | – |
+| TD-01..04, TD-06, TD-07 | not of this node | – | – | listed for trace_check only |
+
+## New findings
+| # | Finding | Severity | Destination / proposal |
+|---|---|---|---|
+| R1 | Rest of F9: `tests/helpers/contract.py:20` still gives IF-302 the reason "N-3.3 Record tables not integrated yet" although `real_subject` returns `record_tables` since A-02 (`:841-843`); `decomposition.yaml:446` IF-302 `version: v0` (contract v6), `:246` node `status: Draft`. D-161 sent F9 to "the next amendments"; A-61 did not take it up | Low | amendment (text only), with the next one touching `contract.py`: the reason as A-60 wrote it for IF-301 (`"unused: real_subject gives record_tables"`); version and status in `decomposition.yaml` at the gate (one change with N-3.2 R3) |
+| R2 | IF-302 does not say which tables other than `memory`, `tasks`, `memos`, `votes`, `runs` are deletable; the code and the mock make `history` deletable and the rest not. The suite pins only the five named, so a provider with `history` not deletable or `source_trust` deletable passes it (two mutants survive the suite; the node test kills them). REQ-RTB-006 "not deletable" is thus guarded only by the node test | Low | owner decision, then amendment: IF-302 note "deletable are exactly `history`, `memory`, `tasks`, `memos`" and one line in TC-IF-302-01 (`deletable` set equal), with the next IF-302 amendment |
+| R3 | Residue: the implementation log still marks A-61 "drafted, not installed" (`implementation-log.md:18,35,40`) though 849ac36 installed it; plan T-01 is still "Definitions of the ten record tables" (`plan.md`) | Info | Phase 3 log line; plan text at the next node amendment |
+
+## Accepted deviations
+| Deviation | Reason | Accepted by |
+|---|---|---|
+| REQ-RTB-006 partly: AC-3 (a trust edit survives a restart through the table) not evidenced | D-161, FB-04 (legacy stores into the database next iteration) | owner |
+
+## Not checked here
+- CI: none; all results are local feedback runs.
+- PostgreSQL path (N-3.1's stage-3 step, A-59); the node is pure Python and the storage calls the same `validate`.
+- The whole test suite: only the node's file, its consumers named above, the IF-101/102/302 suites and the N-3 steps; the known failures (`test_amendment_report`, `test_harness` rt_edit, `tests/acceptance/test_benchmarks.py`) were not re-run.
+- The log's claims that each fix test was red first (checked indirectly: every fix is caught by a mutant restoring the old code).
+
+## Notes for Phase 7
+- Unchanged: with FB-04, check that a trust edit and a summary land in `source_trust` and `history` and survive a restart.
