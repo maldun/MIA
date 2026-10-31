@@ -30,16 +30,20 @@ def violation(doc):
         kind[nid] = node
     for edge in edges:
         a, b = (edge.get("from"), edge.get("to")) if isinstance(edge, dict) else (None, None)
-        if a not in kind or b not in kind:
+        if not isinstance(a, str) or not isinstance(b, str) or a not in kind or b not in kind:
             return "node_identity", "%s->%s" % (a, b)
         if kind[a]["kind"] == kind[b]["kind"]:
             return ("adjacent_data_nodes" if kind[a]["kind"] == "data" else "adjacent_process_nodes"), "%s->%s" % (a, b)
     for nid, node in kind.items():
-        stop = node.get("stop") or {}
-        if node["kind"] == "process" and node.get("session") and not (stop.get("max_cycles") or stop.get("max_seconds")):
+        if node["kind"] == "process" and node.get("session") and not _stops(node.get("stop") or {}):
             return "session_stopping_criterion", nid
     cycle = _cycle(list(kind), edges)
     return ("cycle", cycle) if cycle else None
+
+
+def _stops(stop):
+    """A session stops when its stop is a dict with a limit; a malformed stop is a broken rule, not an exception (TB-edit)."""
+    return isinstance(stop, dict) and bool(stop.get("max_cycles") or stop.get("max_seconds"))
 
 
 def _cycle(ids, edges):

@@ -24,3 +24,10 @@ None.
 
 ## Open questions for Phase 4 and the integration step
 - The contract suite of IF-301 has the mock as the only provider that runs. Making `graph_tables` the real provider is a change of the protected `tests/helpers/contract.py` at integration step 1 of N-3 (owner, amendment). The scratch check `run_contract_real.py` (job temp folder, not committed) patched `subject_for` for one run and passed all three tests.
+
+## Verify findings (verification-report.md, decision D-160), branch v1-n32b
+Each fix is test-first: the new test was red before the change and green after (reported, not verified). Rule order, duplicate edges, whitespace ids and a session on a data node (F3, rest of F4) are deferred to FB-02 (D-160) and not touched.
+
+| Finding (report) | Fix | Covered by test (red before) |
+|---|---|---|
+| F1 a malformed `stop` or edge endpoint raised (`AttributeError`, `TypeError`), so `PUT /api/workflows/<id>` answered HTTP 500 | `graph_rules.violation`: an edge endpoint that is not a text id is `node_identity`; a session's `stop` that is not a dict is `session_stopping_criterion` (`_stops`). A `stop` on a node that is not a session is still not looked at (FB-02) | `test_graph_rules.test_a_malformed_stop_or_edge_endpoint_is_named_not_raised`; `test_graph_api.test_a_malformed_graph_is_422_with_a_rule_not_500` (N-2.1 file, in the image: 500 before, 422 `invalid` with the rule after) |

@@ -123,6 +123,22 @@ class GraphRoutes(unittest.TestCase):
         self.assertEqual(self.anna.get("/api/workflows").get_json(), [])
         self.assertEqual(self.anna.get("/api/context_graphs").get_json(), [])
 
+    @mark.req("REQ-API-014", "REQ-GTB-002")
+    def test_a_malformed_graph_is_422_with_a_rule_not_500(self):
+        """N-3.2 Verify F1 (D-160): a stop that is not a dict and an edge endpoint that is a list are 422 invalid with a rule; nothing is stored.
+
+        Example: PUT a session node with "stop": "x" -> 422 {"error": "invalid", "rule": "session_stopping_criterion"}.
+        """
+        # Given
+        stop = {"nodes": [{"id": "s", "kind": "process", "session": True, "stop": "x"}], "edges": []}
+        endpoint = {"nodes": GRAPH["nodes"], "edges": [{"from": ["claim"], "to": "check"}]}
+        # When
+        answers = [self.put(self.anna, "/api/workflows/bad", stop), self.put(self.anna, "/api/workflows/bad", endpoint)]
+        # Then
+        self.assertEqual([(a.status_code, a.get_json()["error"], a.get_json()["rule"]) for a in answers],
+                         [(422, "invalid", "session_stopping_criterion"), (422, "invalid", "node_identity")])
+        self.assertEqual(self.anna.get("/api/workflows").get_json(), [])
+
     @mark.req("REQ-API-016")
     def test_unknown_kind_id_and_version_are_404(self):
         """TC-API-014: an unknown kind is 404 unknown_kind; an unknown id or version is 404 not_found.

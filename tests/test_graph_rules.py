@@ -64,6 +64,22 @@ class GraphRules(unittest.TestCase):
                 self.assertEqual(violation(bad)[0], "node_identity")
 
     @mark.req("REQ-GTB-002")
+    def test_a_malformed_stop_or_edge_endpoint_is_named_not_raised(self):
+        """Verify F1 (D-160): a stop that is not a dict is session_stopping_criterion; an edge endpoint that is not a text id is node_identity.
+
+        Example: a session node with "stop": "x" -> ("session_stopping_criterion", "s"); an edge {"from": ["a"], "to": "b"} -> node_identity.
+        """
+        # Given
+        sessions = [doc([("s", "process", {"session": True, "stop": stop})]) for stop in ("x", [1], 5)]
+        pair = [("a", "data", {}), ("b", "process", {})]
+        endpoints = [doc(pair, [(["a"], "b")]), doc(pair, [("a", {"id": "b"})]), doc(pair, [(1, "b")])]
+        # When
+        named = [violation(d) for d in sessions + endpoints]
+        # Then
+        self.assertEqual([n[0] for n in named], ["session_stopping_criterion"] * 3 + ["node_identity"] * 3)
+        self.assertEqual(named[0], ("session_stopping_criterion", "s"))
+
+    @mark.req("REQ-GTB-002")
     def test_a_graph_of_500_nodes_is_checked_within_200_ms(self):
         """IF-301 bound: validate a graph of 500 nodes in at most 200 ms."""
         nodes = [(("d%d" if n % 2 == 0 else "p%d") % n, "data" if n % 2 == 0 else "process", {}) for n in range(500)]
