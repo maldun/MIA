@@ -62,7 +62,7 @@ MIA is stopped first (it saves its history when it stops), the files are copied 
 
 ## The login (password check)
 
-Off by default. Turn it on and make the owner account:
+Off by default (`accounts_enabled: false`). **Without the login every route is open**: everyone who reaches the page (on this machine, and on the network when `MIA_BIND` opens the https front) can chat, read and change the shared data, the workflows and the persona, with no session and no origin check. That is accepted for G-V1 because MIA's users are trusted people in a controlled environment (D-131, D-149). Turn the login on before the page is reachable by anyone else. Turn it on and make the owner account:
 
 ```
 deploy/up.sh owner NAME                  # asks for the password twice (at least 8 characters); never an argument
