@@ -12,6 +12,8 @@ os.environ.update({"ANSWER_DELAY": "0.3", "EVENT_GAP": "0", "MIA_TEST": "1"})
 
 from markers import mark  # noqa: E402
 
+import checkout_copy  # noqa: E402  (MIA from a temporary copy: nothing is written into the checkout, D-169)
+_LINK_DIR = checkout_copy.use()
 spec = importlib.util.spec_from_file_location("chat_mock_server", os.path.join(REPO, "ui", "tools", "chat_mock_server.py"))
 server = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(server)

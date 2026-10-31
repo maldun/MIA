@@ -11,9 +11,8 @@ import unittest
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
 
-_LINK_DIR = tempfile.mkdtemp()
-os.symlink(REPO, os.path.join(_LINK_DIR, "MIA"))
-sys.path.insert(0, _LINK_DIR)
+import checkout_copy  # noqa: E402  (MIA from a temporary copy: nothing is written into the checkout, D-169)
+_LINK_DIR = checkout_copy.use()
 
 
 class FilterTest(unittest.TestCase):

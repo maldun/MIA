@@ -10,7 +10,8 @@ from unittest import mock
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
-sys.path.insert(0, REPO)
+import checkout_copy  # noqa: E402  (MIA from a temporary copy: nothing is written into the checkout, D-169)
+_LINK_DIR = checkout_copy.use()
 
 import internal_auth as I                             # noqa: E402
 

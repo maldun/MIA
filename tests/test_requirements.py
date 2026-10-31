@@ -12,6 +12,8 @@ import unittest
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
+import checkout_copy  # noqa: E402  (MIA from a temporary copy: nothing is written into the checkout, D-169)
+_LINK_DIR = checkout_copy.use()
 GONE = ("torch", "torchaudio", "torchvision", "coqui-tts", "tts", "rvc-python", "rvc-python", "fairseq", "pytorch-triton-rocm", "playsound", "opencv-python", "pyaudio", "faiss", "faiss-cpu")
 
 
@@ -55,8 +57,8 @@ class Imports(unittest.TestCase):
             self.assertFalse({"playsound", "cv2"} & set(found), "play_media imports a player at the top")
 
     def test_importing_the_speech_module_loads_none_of_them(self):
-        code = "import sys; sys.path.insert(0, %r); import speak, play_media, cpu_threads; print(any(m in sys.modules for m in ('torch', 'rvc_python', 'cv2', 'playsound', 'TTS', 'pyaudio')))" % REPO
-        out = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, timeout=120, cwd=REPO)
+        code = "import sys; sys.path.insert(0, %r); import speak, play_media, cpu_threads; print(any(m in sys.modules for m in ('torch', 'rvc_python', 'cv2', 'playsound', 'TTS', 'pyaudio')))" % checkout_copy.package()
+        out = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, timeout=120, cwd=checkout_copy.package())
         self.assertEqual(out.stdout.strip().splitlines()[-1] if out.stdout.strip() else out.stderr[-400:], "False")
 
     def test_the_start_code_has_no_fixed_python_version(self):

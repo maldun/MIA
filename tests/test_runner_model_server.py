@@ -10,7 +10,8 @@ import sys
 import unittest
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.dirname(HERE))
+import checkout_copy  # noqa: E402  (MIA from a temporary copy: nothing is written into the checkout, D-169)
+_LINK_DIR = checkout_copy.use()
 sys.path.insert(0, os.path.join(HERE, "helpers"))
 
 from markers import mark                                                        # noqa: E402

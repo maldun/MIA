@@ -11,6 +11,8 @@ import unittest
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
+import checkout_copy  # noqa: E402  (MIA from a temporary copy: nothing is written into the checkout, D-169)
+_LINK_DIR = checkout_copy.use()
 sys.path.insert(0, os.path.join(HERE, "helpers"))
 from markers import mark                              # noqa: E402
 
@@ -53,7 +55,7 @@ class SkillPathDoc(unittest.TestCase):
         for language, options, code in found:
             expected = int(re.search(r"exit=(\d+)", options).group(1)) if "exit=" in options else 0
             command = [sys.executable, "-c", code] if language == "python" else ["bash", "-c", "set -u\n" + code]
-            done = subprocess.run(command, cwd=REPO, env=env, capture_output=True, text=True, timeout=300)
+            done = subprocess.run(command, cwd=checkout_copy.package(), env=env, capture_output=True, text=True, timeout=300)
             self.assertEqual(done.returncode, expected, "%s block failed:\n%s\n%s\n%s" % (language, code, done.stdout[-800:], done.stderr[-800:]))
 
     @mark.req("REQ-EVL-006")

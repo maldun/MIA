@@ -14,28 +14,11 @@ import unittest
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
-sys.path.insert(0, REPO)
 sys.path.insert(0, os.path.join(HERE, "helpers"))
 sys.path.insert(0, os.path.join(HERE, "helpers", "mocks"))
 
-OWN_FILES = ("setup_cfg.json", "setup_cfg.local.json", "data", "mia.log")   # made fresh for the test, never the checkout's
-
-
-def package_with_default_config(folder):
-    """a folder MIA/ whose files are links to the checkout, with the example configuration and an empty data folder:
-    web_app reads setup_cfg.json and writes data/ next to its own file, so nothing of the checkout is changed (as in test_accounts_wiring)"""
-    package = os.path.join(folder, "MIA")
-    os.makedirs(os.path.join(package, "data"))
-    for name in os.listdir(REPO):
-        if name not in OWN_FILES:
-            os.symlink(os.path.join(REPO, name), os.path.join(package, name))
-    shutil.copy(os.path.join(REPO, "setup_cfg.example.json"), os.path.join(package, "setup_cfg.json"))
-    return package
-
-
-_PACKAGE_DIR = tempfile.mkdtemp()
-package_with_default_config(_PACKAGE_DIR)
-sys.path.insert(0, _PACKAGE_DIR)
+import checkout_copy  # noqa: E402  (MIA from a temporary copy: nothing is written into the checkout, D-169)
+_PACKAGE_DIR = checkout_copy.use()
 
 from flask import Flask                                            # noqa: E402
 from flask_socketio import SocketIO                                # noqa: E402
@@ -77,7 +60,6 @@ class AnswerReachesEveryPage(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         cls.tmp.cleanup()
-        shutil.rmtree(_PACKAGE_DIR, True)
 
     def setUp(self):
         service = self.wa.chat_service
