@@ -64,7 +64,7 @@ Runs a workflow step by step under budgets: model calls and model management, pr
 - Acceptance criterion: AC-22: over the lookup suites 100 % of inputs are at most 4096 tokens at num_ctx 8192
 - Verified by: TC-RUN-005
 - Status: Approved
-- History: –
+- History: 2026-10-31 D-128: the measurement of AC-22 (server token counts over the lookup suites) is out of G-V1, back with eval-spec.md; the refusal by estimate stays in
 
 ### REQ-RUN-006 – Model calls of the first try
 - Level: low-2   Subject: TaskRuntime
@@ -112,7 +112,7 @@ Runs a workflow step by step under budgets: model calls and model management, pr
 - Acceptance criterion: AC-19: with a review slice running a chat message gets its first text within 10 s
 - Verified by: TC-RUN-009
 - Status: Approved
-- History: –
+- History: 2026-10-31 D-128: verified by the order of the turns; the 10 s part of AC-19 is out of G-V1 with REQ-RUN-007
 
 ### REQ-RUN-010 – One model at a time
 - Level: low-2   Subject: TaskRuntime
@@ -160,7 +160,7 @@ Runs a workflow step by step under budgets: model calls and model management, pr
 - Acceptance criterion: AC-9: the lookup, verify and review entries run with the same runner; a new valid entry runs without a change of code
 - Verified by: TC-RUN-013
 - Status: Approved
-- History: –
+- History: 2026-10-31 D-128: the review entry of AC-9 is out of G-V1 (T-08 deferred to the next iteration with FB-02, FB-03); lookup and verify run on the runner
 
 ### REQ-RUN-014 – Realise IF-202
 - Level: low-2   Subject: TaskRuntime

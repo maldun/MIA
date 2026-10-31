@@ -226,3 +226,89 @@ node --test "tests/js/*.test.mjs"
 python ~/.claude/skills/dev-workflow/scripts/trace_check.py --spec-dir specs/mia --tests-dir tests
 python3 ~/.claude/skills/dev-workflow/scripts/test_doc_check.py --tests-dir tests/<changed file>
 ```
+
+## Re-verification 2 (2026-10-31)
+
+**Branch:** goal/v1 @ 3a039a3 (code as of 38e72de)   **Compared with:** the first re-verification (code 2ee83db), master @ 53c6766   **Reviewer:** Claude Opus 5.5 (AI, independent, a third reviewer; never saw the implementation chat or the earlier review chats)
+
+Commits reviewed (`git log 4f4ac64..HEAD`): `c62369a` (D-129), `9bceaa5` (F5), `bfeffa9` (F9, N3), `f9e736c` (N1), `d7d7578` (N2), `38e72de` (F2), `3a039a3` (log). Code changed: `templates/static/chat/app.js`, `chat-model.js`, `chat_service.py`, `web_app.py`, `communicator.py`, `pipeline_model.py`, `core.py`, `pipeline.py`, `skill_store.py`, `skills/chat.md`; tests `tests/js/confirm.test.mjs`, `test_chat_backend.py`, `test_web_app_wiring.py` (new), `test_runner_model_server.py`, `test_content_store.py`. Note: the log names `a0b4928` for F9/N3; that commit is not on the branch (dangling, without the test in `test_chat_backend.py`); the branch commit is `bfeffa9` (N6).
+
+### Proposed verdict
+**Verified with findings, as soon as the owner has written the scope rows of D-128 into `goal.md`.** Until then it stays formally **Not verified**, but only because of missing records, not because of code: D-128 takes the review entry of REQ-RUN-013 AC-9, the AC-22 measurement of REQ-RUN-005 and the 10 s part of REQ-RUN-009 out of G-V1. However, `goals/G-V1/goal.md` has no row for any of them (only RUN-004, -006, -007, -011 are out), and the history lines of REQ-RUN-005, -009 and -013 still say `–`. `goal.md:86` also still says "T-08 open". With those rows written, every requirement in scope has passing evidence. What stays open is Low findings, amendments and notes (below), none of them a Must requirement without evidence.
+
+To reach "Verified with findings" the owner must:
+1. Add scope rows to `goal.md` for REQ-RUN-013 (AC-9 review entry → next iteration, FB-03, D-128), REQ-RUN-005 (AC-22 measurement → with `eval-spec.md`, D-128) and REQ-RUN-009 (10 s part → with REQ-RUN-007, D-125/D-128). Also add the matching history lines in `requirements.md` (the plan side, as A-38 did for RUN-012).
+2. Optionally decide N7 (memory and tasks started from the chat) and N8 (other runs started from the chat); neither blocks.
+
+### Per-finding state
+| # | State | Evidence |
+|---|---|---|
+| F1 | Fixed (first re-verification) | still green: `test_runner_model_server.py` 10 OK |
+| F2 | **Fixed** (skill flag); T-08 **decided by the owner** (deferred, D-128), **scope row missing** | `38e72de`: `skills/chat.md` v2 `personal: true`, `skill_store.py:45`, `pipeline.py:333` default `not skill.get("personal")`, `core.keep_texts` removed. `InTheCore` is red on `c62369a` (`KeyError: 'personal'`) and green on HEAD. Mutations on HEAD: default "keep all" gives 2 failures; `personal: true` removed from `chat.md` gives 1 failure. `core.py` names no skill (AST test). T-08: `plan.md:18,85` marked deferred (D-128), FB-03 lists it. Not in `goal.md` (see verdict). |
+| F3 | Decided by the owner (D-128), **not applied**: no scope row, no history line | `goal.md` has no REQ-RUN-005 row; `requirements.md` REQ-RUN-005 History `–`; AC-22 text unchanged. |
+| F4 | Decided by the owner (D-128), **not applied**, as F3 | no REQ-RUN-009 row; History `–`. The order part is verified (`test_model_turns.py`). |
+| F5 | **Fixed**; page-only confirmation accepted by the owner (D-128) | `9bceaa5`: `chat-model.sendConfirmed`, used by `app.js:226`. `confirm.test.mjs` (5) is red on `c62369a` (no export). Mutation: removing the confirm line from `sendConfirmed` gives 4 of 5 failing. Limit: replacing the page's `onSend` with a plain `chat.send` passes all 115 JS tests (N9). |
+| F6 | **Decided and applied** (A-38) | `requirements.md` REQ-RUN-012 History: A-38 (D-128); FB-03 "Also to take up" names script nodes and web checks. AC-1 text not aligned (N10). |
+| F7 | Open | `pipeline.py:339` default `started_by="command"` unchanged |
+| F8 | Open (amendment) | `contracts/IF-202-*` unchanged |
+| F9 | **Fixed for the chat skill**; other runs started from the chat still `mia` (N8) | `bfeffa9`: `ChatService.author()`, `web_app.py:604` `user=chat_service.author()`. `test_the_author_of_the_running_message_is_known` is red on `c62369a` and green on HEAD; mutation `author()` → "page" gives a failure. `test_web_app_wiring` (AST) is red on the `web_app.py` of 9a9e794. `Runner` passes `user` to `_RunEventsSink` → `RunEvents.emit` (`pipeline.py:292,514`). |
+| F10 | Open (note) | unchanged. N2's connect timeout ends the "connect never ends" case, so a down host no longer holds the turn. |
+| F11 | Open | `pipeline.py:499` door wins, unchanged |
+| F12 | Partly fixed; rest deferred (D-126, FB-03) | unchanged |
+| F13 | Open (amendment) | `decomposition.yaml:166` `tasks: 7`; architecture unchanged |
+| F14 | Open | `run_workflow.py:112` unchanged |
+| F15 | Fixed | the test now takes the shipped chat skill; mutations above still make it fail |
+| F16 | Open | `test-spec.md` still has no `## Scenarios` (trace ERROR); no `@mark.req` for RUN-008, -014, -015; `test_doc_check` 3 + 9 errors in the T-01 files. The test changed in `38e72de`, `test_a_conversation_is_not_stored_unless_asked` (`test_content_store.py:126`), still has no docstring. All other new tests pass `test_doc_check`. |
+| F17 | Open | `tools/run_in_image.sh:10` still `:Z`; this round used separate copies, so it was not reproduced |
+| N1 | **Fixed** (D-129) | `f9e736c`: `chat_service.py:682` shows `UNREACHABLE` alone, other errors keep the prefix. The test is red on `c62369a` (`"MIA could not answer: Can't reach…" != …`) and green on HEAD. |
+| N2 | **Fixed** (D-129) | `d7d7578`: `communicator.model_client` with `(10, None, None, None)`, `ConnectTimeout` mapped (`pipeline_model.py:66`). Both tests are red on `c62369a` and green on HEAD; mutation `MODEL_TIMEOUT = None` gives a failure. **Real path** (probe in the image, `--network none`): the real ollama client from `model_client` against a loopback port whose accept queue is full gives `ModelServerUnreachable` == UNREACHABLE after 10.0 s, plain and streamed. The only other ollama client, `ollama_remote.prepare` (`ollama_remote.py:65`), has no connect timeout. It is not on the chat path (the log notes it). REQ-RUN-003 and its AC were not amended for "does not answer" and the 10 s (N10). |
+| N3 | **Fixed** | `test_web_app_wiring.test_the_door_is_built_with_every_source` fails on the `web_app.py` of 9a9e794 (`ToolCalls(...)`) and passes on HEAD. It checks only that `build_tool_calls` is called once, not that its result reaches `Core` (acceptable). |
+| N4, N5 | Info, unchanged | – |
+
+**Scope rows of D-128 in `goal.md`:** **missing**. The rows for the REQ-RUN-013 review entry, the REQ-RUN-005 measurement and the 10 s part of REQ-RUN-009 are not there; `goal.md` was last changed in `9a9e794`. Not edited (owner's).
+
+### New findings
+| # | Finding | Severity | Needs | Proposal |
+|---|---|---|---|---|
+| N7 | Privacy of chat texts beyond the chat skill. The `personal` flag covers only `chat`. `memory_write` (`web_app.py:626`, on after every chat turn when `structured_memory` is on) puts the user's chat message into its model prompt, and that prompt is kept in full in the content store (`memory_write.md` is not personal). The HLS data class (`high-level-spec.md:199`: "chat messages, memory, summaries … texts of chat off by default") counts memory with the chat. This is older than this round (the old `keep_texts` also spared only `chat`), but now it is a one-line change of a skill. | Low (pre-existing) | owner decision | Owner: mark `memory_write` (and any skill whose input is a chat message) `personal: true`, with a version bump and one test, or state that memory texts are kept. |
+| N8 | F9 is fixed only for the chat skill. Other runs a user starts from the chat still go to IF-401 as `mia`: `research_chat.py:103` (`/lookup`), `web_app.py:626` (memory_write), and the extensions that call `core.run` without `user`. `author()` would be correct for them, because they run in the same worker. For a regenerate (`chat_service.py:357`) `author()` is the account that clicked, not the one that wrote (the docstring says "wrote"). | Low | owner decision | Owner: does D-129 "chat runs" include tasks started from the chat? If yes: pass `user=` on those paths, with one wiring test each. |
+| N9 | `confirm.test.mjs` tests `sendConfirmed` alone. Replacing the page's `onSend` (`app.js:226`) with a plain send passes all 115 JS tests. Also, `commands` is `[]` until `loadCommands()` resolves (`app.js:205-206`), so a `/full!` sent in that moment needs no yes. Both are older than the fix; the second is a race. | Low | test | Phase 3 (optional): check the wiring in a test (as `test_web_app_wiring` does for Python), or treat a `!` command as needing confirmation while the list is not loaded. |
+| N10 | The spec is behind the decisions. REQ-RUN-012 AC-1 still says "no other import exists", although A-38 now allows the `sandbox` import of script nodes (the allow-list in `test_runner_interfaces.py:52`). REQ-RUN-003/AC-23 do not state the 10 s connect timeout and "a server that does not answer" (D-129). The front matter key `personal` is not in the skill key list of `ui/README.md:344`. | Low | amendment / docs | Phase 2: history lines for RUN-003 (D-129) and an AC-1 that matches A-38. Docs: add `personal` to the README list. |
+| N6 | `implementation-log.md:166-167` cites commit `a0b4928` for F9 and N3. That commit is not on goal/v1. The branch has `bfeffa9` (same message, with the extra test). `9bceaa5` is typed `test(chat)` but also moves production code (`app.js`, `chat-model.js`). | Info | log fix | Correct the hash in the log. |
+
+No new security finding. The changes add no tool, network path or write access. The connect timeout only limits connecting, and generation stays unlimited (as D-129 asks). `personal` fails safe (a missing key means "kept", as before for every non-chat skill; a string value counts as true). `author()` is read only in the single chat worker, after `_author` was set under the lock for the dequeued item, so concurrent and queued messages each get their own author.
+
+### Check results (re-run)
+| Check | Result |
+|---|---|
+| Python tests: every `tests/test_*.py` + `tests/acceptance/contract/*.py` + `tests/integration/*/step_*/test_step.py`, image `localhost/mia:latest`, `--network none`, clean scratch worktrees (separate mounts) | goal/v1 @ 3a039a3: 184 files, 181 green. master @ 53c6766: 171 files, 168 green. Failing tests on goal/v1: `test_amendment_report::FromGit.test_the_files_of_a_commit_are_shown_one_after_the_other`, `test_config::Example.test_every_option_the_code_reads_is_in_the_example`, `test_harness::ShippedSuites.test_every_shipped_suite_is_valid`, `test_harness::ShippedSuites.test_the_hard_checks_suite_matches_every_time`. The first three also fail on master. `test_config` misses fewer options on goal/v1 than on master, and none is new. The only test red on goal/v1 and green on master is `test_the_hard_checks_suite_matches_every_time` (`n-planted-figure`, N-2.4.2). No test of N-2.4.1 fails. |
+| Node tests | `test_runner_*` (5 files), `test_model_turns`, `test_run_workflow`, `test_tool_calls*`, `test_content_store`, `test_chat_backend`, `test_web_app_wiring`, `test_library`: all OK |
+| Contract suites of the node | IF-202, IF-105, IF-203, IF-401, IF-402 OK; IF-103 OK with 6 skipped (real side, RUN-011 out). Integration N-2.4 steps 00 to 03 OK (1 skip each in 01 to 03) |
+| JavaScript | `tests/js`: 115/115 (master 103/103). JS contract + integration `.mjs`: 26 tests, 11 pass, 14 skipped, 1 fail (`N-1/step_00`), the same on master: not this node |
+| Red before / green after | Every new test was run on `c62369a` (the code before the fixes, with the HEAD test files) and is red there: confirm.test.mjs (import), N2 ×2, N1, F9, F2 (`InTheCore`, `InThePipeline`), F9 wiring. N3 is red on the 9a9e794 `web_app.py`. Mutations on HEAD (F2 ×2, F5, F9, N2) each make a test fail. N2 was also confirmed on the real library path (above). |
+| Protected material vs master | `git diff --stat 53c6766..HEAD -- tests/acceptance tests/helpers tests/smoke tests/integration benchmarks contracts eval/suites eval/baselines`: the same 8 files as before, only from `825e54a` (A-32), `f63dc30` (A-33), `cca40c8` (A-34) and `543983a` (`n-planted-figure`, owner-labelled). Nothing changed there since 594ba5d. No skip or xfail was added. |
+| Eval material, skills, library | `eval/` unchanged; `skills/chat.md` 1 → 2 (front matter only, version bumped as the rule asks); `library/` unchanged; no suite or baseline pins the chat version. No eval, holdout, red-team or model run. |
+| Agent configuration | `.claude`, `CLAUDE.md` unchanged in the range |
+| `trace_check.py` (N-2.4.1 only) | ERROR `test-spec.md` without `## Scenarios` (F16). WARN no `@mark.req` for RUN-008, -014, -015 (F16) and for -004, -011 (out of scope). WARN TD-02, TD-03 not listed in this report: they belong to other nodes. Project-wide: no `test-requirements.md`. The new `REQ-LOG-001` and `TC-LOG-001` markers raise nothing. |
+| `test_doc_check.py` (changed files) | `test_web_app_wiring.py` 0, `test_runner_model_server.py` 0, `confirm.test.mjs` 0. The new methods in `test_chat_backend.py` and `test_content_store.py` have no errors. The errors in those files (68, 16) are older, plus `test_content_store.py:126` (F16). |
+| `goal_check.py` | 0 errors, 0 warnings. It does not see the missing D-128 rows: they are partial scope changes of in-scope requirements. |
+| `check_sysml_model.py` | OK; no `.sysml` changed |
+
+### Not checked
+- No model server, eval, holdout or red-team run; no real network. N2 was checked on loopback with a full accept queue, not against a real remote host.
+- No browser: the confirmation dialog and the plain sentence on the page were judged from the code and the JS tests.
+- No CI and no `stages.yaml`: all results are local runs.
+
+### Evidence (commands)
+```
+git worktree add --detach <scratch>/n241-rev2-{head,master,pre,mut} {HEAD,53c6766,c62369a,HEAD}   # removed afterwards
+podman run --rm --network none --user 0 -v <wt>:/work:Z -v <probe>:/probe:Z -w /work localhost/mia:latest bash /probe/runall.sh   # per file, FAIL/ERROR lines per test
+cp <HEAD test files> <pre>; podman run ... python tests/test_{runner_model_server,chat_backend,content_store,web_app_wiring}.py; node --test tests/js/confirm.test.mjs
+podman run ... python -I /probe/silent.py   # model_client + TurnClient against a loopback port with a full accept queue: UNREACHABLE after 10.0 s, plain and streamed
+# mutations in <mut>: pipeline.py default -> keep all; chat.md without personal; author() -> "page"; sendConfirmed without confirm; app.js onSend -> plain send; MODEL_TIMEOUT = None
+git show 9a9e794:web_app.py > web_app.py; python3 tests/test_web_app_wiring.py      # 2 failures
+node --test "tests/js/*.test.mjs"; node --test tests/acceptance/contract/*.mjs tests/integration/N-1/step_*/*.mjs
+python ~/.claude/skills/dev-workflow/scripts/trace_check.py --spec-dir specs/mia --tests-dir tests
+python3 ~/.claude/skills/dev-workflow/scripts/test_doc_check.py --tests-dir <changed file>
+python3 -I ~/.claude/skills/dev-workflow/scripts/goal_check.py --spec-dir specs/mia; python3 -I tools/check_sysml_model.py .
+```
