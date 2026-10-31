@@ -104,6 +104,21 @@ class AnswersTest(unittest.TestCase):
         self.assertEqual(self.chat.score()["votes"], 0)
         self.assertEqual(self.storage.ids("votes"), [])
 
+    @mark.req("REQ-CHA-015", "REQ-RTB-003")
+    def test_a_float_or_boolean_vote_value_is_refused(self):
+        """F3 (N-3.3 Verify, D-161): 1.0, -1.0 and True equal 1 or -1 in Python but are no vote values; nothing is stored.
+
+        Example: vote("anna", "service", "service", 1.0) is invalid_vote, rule value.
+        """
+        # Given an answer
+        self.answer()
+        for value in (1.0, -1.0, True, False):
+            with self.subTest(value=value):
+                # When a vote has a float or boolean value, Then it is refused
+                self.assertEqual(code_of(lambda: self.chat.vote("anna", "service", "service", value)), ("invalid_vote", "value"))
+        # And nothing is stored
+        self.assertEqual(self.storage.ids("votes"), [])
+
     @mark.req("REQ-CHA-015", "IF-102")
     def test_the_chat_service_takes_the_vote_categories_from_the_storage(self):
         """D-162: the chat service asks the storage (IF-102 categories()) and keeps no list of its own.

@@ -84,6 +84,17 @@ class RecordTablesContract(unittest.TestCase):
             self.assertEqual(tables.validate("reports", {k: v for k, v in doc.items() if k != field}), {"rule": "schema", "detail": field})
         self.assertEqual(tables.definitions()["reports"], {"versioned": True, "deletable": False})
 
+    @mark.req("IF-302", "REQ-DB-012")
+    @each_provider(IF)
+    def test_a_document_that_is_not_a_mapping_and_a_vote_value_that_is_no_integer_are_schema(self, tables):
+        """TC-IF-302-07 (v6, A-61) golden 4: a document that is not a mapping is rule schema in every table; a vote value 1.0, -1.0, True or False is rule schema, detail value."""
+        for table in tables.definitions():
+            for bad in (None, [], "text"):
+                self.assertEqual(tables.validate(table, bad)["rule"], "schema", (table, bad))
+        vote = {"user": "anna", "subject": "m1", "category": "service", "value": 1}
+        for value in (1.0, -1.0, True, False):
+            self.assertEqual(tables.validate("votes", dict(vote, value=value)), {"rule": "schema", "detail": "value"}, value)
+
 
 if __name__ == "__main__":
     unittest.main()

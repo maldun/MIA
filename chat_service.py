@@ -383,7 +383,7 @@ class ChatService:
         """a plus or a minus, kept with user, time, subject and category (REQ-CHA-015); the score event follows"""
         if category not in self._votes.categories():     # IF-102 names the categories (D-162); N-2 imports nothing of N-3's tables
             raise ChatError("invalid_vote", "category")
-        if isinstance(value, bool) or value not in (1, -1):
+        if type(value) is not int or value not in (1, -1):      # a bool or a float equal to 1 is no vote value (D-161)
             raise ChatError("invalid_vote", "value")
         record = self._answer(subject) if category == "answer_quality" else None
         if category == "character_behaviour" and self._behaviours is not None and subject not in self._behaviours():

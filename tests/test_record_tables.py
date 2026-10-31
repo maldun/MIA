@@ -59,10 +59,49 @@ class Validation(unittest.TestCase):
         self.assertEqual(validate("votes", {k: v for k, v in vote.items() if k != "subject"}), {"rule": "schema", "detail": "subject"})
 
     @mark.req("REQ-RTB-003")
+    def test_a_vote_lacking_any_required_field_names_it(self):
+        """F4 (D-161): each of user, subject, category and value missing gives rule schema with that field, as TC-RTB-002 does for runs.
+
+        Example: a vote without user gives {"rule": "schema", "detail": "user"}.
+        """
+        # Given a complete vote
+        vote = {"user": "anna", "subject": "m1", "category": "service", "value": -1}
+        self.assertIsNone(validate("votes", vote))
+        for field in vote:
+            with self.subTest(field=field):
+                # When one required field is missing, Then it is named
+                self.assertEqual(validate("votes", {k: v for k, v in vote.items() if k != field}), {"rule": "schema", "detail": field})
+
+    @mark.req("REQ-RTB-003")
+    def test_a_vote_of_zero_is_refused(self):
+        """F4 (D-161): a vote is a plus or a minus; 0 is neither.
+
+        Example: {"value": 0} gives {"rule": "schema", "detail": "value"}.
+        """
+        # Given a vote with value 0, When it is validated, Then the rule is schema, detail value
+        vote = {"user": "anna", "subject": "m1", "category": "reactions", "value": 0}
+        self.assertEqual(validate("votes", vote), {"rule": "schema", "detail": "value"})
+
+    @mark.req("REQ-RTB-003")
     def test_a_vote_with_a_boolean_value_is_refused(self):
         """True == 1 in Python; a vote is a number, so a flag is a schema error."""
         vote = {"user": "anna", "subject": "m1", "category": "service", "value": True}
         self.assertEqual(validate("votes", vote)["rule"], "schema")
+
+    @mark.req("REQ-RTB-003", "IF-302")
+    def test_a_vote_value_is_the_integer_one_or_minus_one(self):
+        """F3, F5 (D-161): a float or a boolean equal to 1 or -1 is no vote value, so a JSON 1.0 is not stored as a float.
+
+        Example: {"value": 1.0} gives {"rule": "schema", "detail": "value"}.
+        """
+        # Given a complete vote
+        vote = {"user": "anna", "subject": "m1", "category": "service", "value": 1}
+        for value in (1.0, -1.0, True, False):
+            with self.subTest(value=value):
+                # When its value is a float or a boolean
+                result = validate("votes", dict(vote, value=value))
+                # Then it is refused with rule schema
+                self.assertEqual(result, {"rule": "schema", "detail": "value"})
 
     @mark.req("REQ-RTB-004")
     def test_a_memory_record_needs_text_and_source(self):
@@ -89,13 +128,25 @@ class Validation(unittest.TestCase):
                 with self.subTest(table=table, bad=bad):
                     self.assertEqual(validate(table, bad)["rule"], "schema")
 
+    @mark.req("REQ-RTB-001", "IF-302")
+    def test_a_document_that_is_not_a_mapping_is_a_schema_error_in_every_table(self):
+        """F5 (D-161): also the tables without a required field refuse a document that is not a mapping.
+
+        Example: validate("history", []) gives rule schema.
+        """
+        for table in definitions():
+            for bad in (None, [], "text", 1):
+                with self.subTest(table=table, bad=bad):
+                    # Given a document that is not a mapping, When it is validated, Then the rule is schema
+                    self.assertEqual(validate(table, bad)["rule"], "schema")
+
     @mark.req("REQ-RTB-001")
     def test_tables_without_required_fields_accept_any_mapping(self):
         """history, accounts, presets, gestures and source_trust have no required field here: their shape belongs to the code that writes them."""
         for table in ("history", "accounts", "presets", "gestures", "source_trust"):
             self.assertIsNone(validate(table, {"anything": 1}))
 
-    @mark.req("REQ-WFM-002", "REQ-WFM-006", "IF-302")
+    @mark.req("REQ-WFM-038", "IF-302")
     def test_reports_keep_a_finished_report_as_a_record(self):                    # IF-302 v4, REQ-WFM-038
         self.assertEqual(definitions()["reports"], {"versioned": True, "deletable": False})
         doc = {"task": "review", "skill": "review", "skill_version": "1", "question": "q", "account": "anna", "model_pin": "m", "report": {"works": []}}
@@ -103,6 +154,7 @@ class Validation(unittest.TestCase):
         for missing in ("task", "skill", "skill_version", "question", "account", "model_pin", "report"):
             self.assertEqual(validate("reports", {k: v for k, v in doc.items() if k != missing}), {"rule": "schema", "detail": missing})
 
+    @mark.req("REQ-WFM-002", "REQ-WFM-006", "IF-302")
     def test_workflow_meta_keeps_the_lifecycle_of_a_workflow(self):
         """IF-302 v3 (A-15): status is draft, tested, trusted or retired and required; specification and benchmark are free; every version is kept."""
         self.assertEqual(definitions()["workflow_meta"], {"versioned": True, "deletable": False})
@@ -124,6 +176,7 @@ class Validation(unittest.TestCase):
             self.assertIsNone(validate("memory", dict(old, status=status)))
         self.assertEqual(validate("memory", dict(old, kind="opinion")), {"rule": "schema", "detail": "kind"})
         self.assertEqual(validate("memory", dict(old, status="deleted")), {"rule": "schema", "detail": "status"})
+        self.assertEqual(validate("memory", dict(old, status="fact")), {"rule": "schema", "detail": "status"})          # F4: a kind is no status
         self.assertEqual(validate("memory", dict(old, kind=None)), {"rule": "schema", "detail": "kind"})
         self.assertEqual(validate("memory", {"text": "x", "kind": "fact"}), {"rule": "schema", "detail": "source"})      # the source stays required, and is checked first
         self.assertIsNone(validate("tasks", {"text": "x", "kind": "anything"}))                                           # only memory has these fields
