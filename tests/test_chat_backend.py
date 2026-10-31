@@ -389,6 +389,21 @@ class ServiceTest(unittest.TestCase):
         # Then: the exchange saw anna, then "page"
         self.assertEqual(seen, ["anna", "page"])
 
+    def test_a_model_server_that_is_down_shows_only_the_sentence(self):
+        """TC-RUN-003, AC-23 (D-129, finding N1 of the N-2.4.1 re-verification): the note is the plain sentence alone, without "MIA could not answer:".
+
+        Example: the exchange fails with UNREACHABLE -> chat_error message == UNREACHABLE; another error keeps the prefix
+        """
+        # Given: the model server is down
+        unreachable = importlib.import_module("MIA.pipeline_model").UNREACHABLE
+        self.mode["error"] = unreachable
+        # When: a message is sent
+        self.service.send("Hi")
+        self.assertTrue(self.idle())
+        # Then: the user reads exactly the sentence
+        error = [p for e, p in self.events if e == "chat_error"][0]
+        self.assertEqual(error["message"], unreachable)
+
     def test_model_error_becomes_a_note_and_offline_mood(self):
         self.mode["error"] = "no route to ollama"
         self.service.send("Hi")

@@ -40,6 +40,7 @@ import time
 
 try:
     from .chat_log import utc_now, MAX_PAGE
+    from .pipeline_model import UNREACHABLE
     from .record_tables import CATEGORIES
     from .storage import StorageError
     from .speech_text import speech_text
@@ -47,6 +48,7 @@ try:
     from .task_registry import TaskCommandError, TaskRegistry
 except ImportError:  # used as plain script / in tests
     from chat_log import utc_now, MAX_PAGE
+    from pipeline_model import UNREACHABLE
     from record_tables import CATEGORIES
     from storage import StorageError
     from speech_text import speech_text
@@ -676,7 +678,8 @@ class ChatService:
         except Exception as exc:
             status = "error"
             self.set_activity("offline")
-            self._emit("chat_error", {"id": message_id, "message": "MIA could not answer: %s" % exc})
+            # a model server that is down is said in its own plain sentence, nothing before it (AC-23, D-129)
+            self._emit("chat_error", {"id": message_id, "message": UNREACHABLE if str(exc) == UNREACHABLE else "MIA could not answer: %s" % exc})
             if entry is not None and not state["text"]:
                 state["text"] = "/%s could not finish: %s" % (task, exc)       # a task that fails leaves a result that says why, not an empty message and a toast that can be missed
         else:
