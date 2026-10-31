@@ -150,6 +150,9 @@ class InTheCore(unittest.TestCase):
             # Then: not those of the chat, those of every other skill
             chat, summarize = core.skills.get("chat"), core.skills.get("summarize")
             self.assertEqual((chat["personal"], core.runner.store_texts(chat), core.runner.store_texts(summarize)), (True, False, True))
+            # Then: the memory of a conversation is as personal as the conversation (N7, D-130)
+            memory = core.skills.get("memory_write")
+            self.assertEqual((memory["personal"], core.runner.store_texts(memory)), (True, False))
             # Given, When, Then: the setting store_chat_texts (store_texts that keeps all) still wins
             core = Core(os.path.join(REPO, "skills"), Library(os.path.join(REPO, "library")), folder, store_texts=lambda skill: True)
             self.assertTrue(core.runner.store_texts(chat))
