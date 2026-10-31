@@ -111,6 +111,45 @@ test('TC-CLV-013: a variant shows its label and goes to the character; a run wit
   assert.deepEqual(variants, ['summer', null]);
 });
 
+// --- the change of password (REQ-CLV-018, F7) -------------------------------------------------------------------------
+function accountDialog(location) {
+  const doc = installDocument();
+  const make = (tag) => doc.createElement(tag);
+  const parts = { dialog: make('dialog'), nameEl: make('span'), form: make('form'), oldInput: make('input'), newInput: make('input'), repeatInput: make('input'),
+    errorLine: make('p'), closeButton: make('button'), logoutButton: make('button') };
+  const sent = [];
+  const api = { changePassword: async (...args) => { sent.push(args); return { changed: true }; }, whoami: async () => ({ user: 'anna' }) };
+  initAccount({ ...parts, api, storage: { get: () => '', set() {} }, t, location });
+  parts.oldInput.value = 'pw-anna';
+  parts.newInput.value = 'long-enough-1';
+  parts.repeatInput.value = 'long-enough-1';
+  return { parts, sent };
+}
+
+// mark.req("REQ-CLV-018")
+test('TC-CLV-018: over plain HTTP from a LAN address the change of password sends nothing and says why (F7)', async () => {
+  // Given: the account dialog of a page opened as http://192.168.1.20, filled correctly
+  const { parts, sent } = accountDialog({ protocol: 'http:', hostname: '192.168.1.20' });
+  // When: the form is sent
+  parts.form.requestSubmit();
+  await flush();
+  // Then: no request, and the reason is shown
+  assert.deepEqual(sent, []);
+  assert.equal(parts.errorLine.textContent, 'login.insecure');
+  assert.equal(parts.errorLine.hidden, false);
+});
+
+// mark.req("REQ-CLV-018", "REQ-CLV-014")
+test('TC-CLV-018: over HTTPS the same form sends the change once (F7)', async () => {
+  // Given: the same dialog on https
+  const { parts, sent } = accountDialog({ protocol: 'https:', hostname: 'mia.example' });
+  // When: the form is sent
+  parts.form.requestSubmit();
+  await flush();
+  // Then: one change with the old and the new password
+  assert.deepEqual(sent, [['pw-anna', 'long-enough-1']]);
+});
+
 // --- the logout closes the socket (REQ-CLV-022) ----------------------------------------------------------------------
 // mark.req("REQ-CLV-022")
 test('TC-CLV-022: after the logout the page closes its socket before the login is shown (F6)', async () => {

@@ -204,7 +204,16 @@ package MIA_Architecture {
             @Implementation {
                 :>> status = ImplementationStatus::built;
                 :>> modules = ("templates/index.html", "templates/static/chat/app.js",
-                               "templates/static/chat/chat.js", "templates/static/chat/mood.js");
+                               "templates/static/chat/chat.js", "templates/static/chat/chat-model.js", "templates/static/chat/mood.js",
+                               "templates/static/chat/login.js", "templates/static/chat/account.js", "templates/static/chat/api.js",
+                               "templates/static/chat/socket.js", "templates/static/chat/workspace.js", "templates/static/chat/panels-model.js",
+                               "templates/static/chat/task-card.js", "templates/static/chat/task-card-model.js",
+                               "templates/static/chat/composer.js", "templates/static/chat/palette.js", "templates/static/chat/markdown.js",
+                               "templates/static/chat/menu.js", "templates/static/chat/layout.js", "templates/static/chat/caption.js",
+                               "templates/static/chat/view-menu.js", "templates/static/chat/settings.js", "templates/static/chat/theme.js",
+                               "templates/static/chat/a11y.js", "templates/static/chat/storage.js", "templates/static/chat/i18n.js",
+                               "templates/static/chat/i18n", "templates/static/chat/tokens.css", "templates/static/chat/layout.css",
+                               "templates/static/chat/messages.css", "templates/static/chat/components.css");
             }
         }
         part characterRenderer {
