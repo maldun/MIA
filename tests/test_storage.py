@@ -130,6 +130,38 @@ class StorageBehaviour:
         self.assertEqual(len(heard), 2)
 
     @mark.req("REQ-SLY-006")
+    def test_a_raising_subscriber_does_not_stop_the_others_or_the_write(self):
+        """Finding F2 of the verification: one bad subscriber is logged and skipped.
+        Example: subscribers [raises, records]; put("tasks", "t") returns version 1 and the second one hears version 1."""
+        # Given: a subscriber that raises before one that records
+        def broken(event):
+            raise RuntimeError("a bad page")
+        heard = []
+        self.store.subscribe("tasks", broken)
+        self.store.subscribe("tasks", heard.append)
+        # When: two writes
+        with self.assertLogs("storage", "ERROR"):
+            first = self.store.put("tasks", "t", {"text": "a"}, "anna")
+            self.store.put("tasks", "t", {"text": "b"}, "anna")
+        # Then: both writes return and the second subscriber hears both
+        self.assertEqual(first, {"version": 1})
+        self.assertEqual([e["version"] for e in heard], [1, 2])
+
+    @mark.req("REQ-SLY-006")
+    def test_a_delete_is_a_change_and_is_told_with_version_none(self):
+        """Finding F7 of the verification, decision D-158: a delete sends a notice, as IF-102 says "after every write".
+        Example: delete("memos", "m", "ben") tells a subscriber {"table": "memos", "id": "m", "version": None, "author": "ben"}."""
+        # Given: a memo and a subscriber of the memos
+        self.store.put("memos", "m", {"text": "x"}, "anna")
+        heard = []
+        self.store.subscribe("memos", heard.append)
+        # When: the memo is deleted, and a refused delete follows
+        self.store.delete("memos", "m", "ben")
+        code_of(lambda: self.store.delete("memos", "m", "ben"))
+        # Then: one notice, for the delete that happened
+        self.assertEqual(heard, [{"table": "memos", "id": "m", "version": None, "author": "ben"}])
+
+    @mark.req("REQ-SLY-006")
     def test_a_notice_reaches_a_subscriber_on_another_thread_within_2_s(self):
         """TC-SLY-006: the writer is on one thread, the subscriber's callback runs and is seen from another."""
         got, seen = [], threading.Event()
@@ -161,6 +193,29 @@ class StorageBehaviour:
         self.assertEqual(self.store.put("workflows", "lookup", LOOKUP, "anna"), {"version": 1})
 
     @mark.req("REQ-SLY-004")
+    def test_a_nul_character_is_refused_on_every_backend(self):
+        """Finding F9 of the verification: PostgreSQL cannot store NUL in text, so no backend takes it, and the error is the layer's own.
+        Example: put("memos", "m", {"text": "a\\x00b"}) is ("invalid", "schema") and nothing is stored."""
+        # Given: NUL in a text, in a key, in the id and in the author
+        calls = [lambda: self.store.put("memos", "m", {"text": "a\x00b"}, "anna"), lambda: self.store.put("memos", "m", {"te\x00xt": "a"}, "anna"),
+                 lambda: self.store.put("memos", "m\x00", {"text": "a"}, "anna"), lambda: self.store.put("memos", "m", {"text": "a"}, "an\x00na")]
+        # When / Then: each is refused and nothing is stored
+        for call in calls:
+            self.assertEqual(code_of(call), ("invalid", "schema"))
+        self.assertEqual(self.store.ids("memos"), [])
+
+    @mark.req("REQ-SLY-012", "IF-102")
+    def test_the_vote_categories_are_an_operation_of_the_storage(self):
+        """D-162: IF-102 offers categories(), read from the record tables inside N-3, so a consumer imports no constant of IF-302.
+        Example: categories() gives ["answer_quality", "reactions", "character_behaviour", "service"]."""
+        # Given / When: the storage is asked
+        categories = self.store.categories()
+        # Then: the four vote categories in their order, and a vote of each is accepted
+        self.assertEqual(categories, ["answer_quality", "reactions", "character_behaviour", "service"])
+        for category in categories:
+            self.store.put("votes", category, dict(ONE_OF_EACH["votes"], category=category), "anna")
+
+    @mark.req("REQ-SLY-004")
     def test_a_refused_edit_consumes_no_version(self):
         self.store.put("workflows", "w", LOOKUP, "anna")
         code_of(lambda: self.store.put("workflows", "w", CYCLE, "anna"))
@@ -178,6 +233,22 @@ class FileStorage(StorageBehaviour, unittest.TestCase):
     def reopen(self):
         return FileBackend(self.main.root)
 
+
+    @mark.req("REQ-SLY-006")
+    def test_a_raising_subscriber_does_not_stop_the_notice_to_the_other_instances(self):
+        """Finding F2: put tells the shared channel even when a subscriber of this instance raises.
+        Example: a backend with publish() and a raising subscriber; after put the channel got one notice of version 1."""
+        # Given: a file backend with a channel, and a raising subscriber
+        published = []
+        backend = self.new_backend("channel")
+        backend.publish = published.append
+        store = Storage(backend)
+        store.subscribe("tasks", lambda event: 1 / 0)
+        # When: one write
+        with self.assertLogs("storage", "ERROR"):
+            store.put("tasks", "t", {"text": "a"}, "anna")
+        # Then: the channel has the notice
+        self.assertEqual([(e["id"], e["version"]) for e in published], [("t", 1)])
 
 if __name__ == "__main__":
     unittest.main()
