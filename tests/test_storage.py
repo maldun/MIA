@@ -204,6 +204,17 @@ class StorageBehaviour:
             self.assertEqual(code_of(call), ("invalid", "schema"))
         self.assertEqual(self.store.ids("memos"), [])
 
+    @mark.req("REQ-SLY-012", "IF-102")
+    def test_the_vote_categories_are_an_operation_of_the_storage(self):
+        """D-162: IF-102 offers categories(), read from the record tables inside N-3, so a consumer imports no constant of IF-302.
+        Example: categories() gives ["answer_quality", "reactions", "character_behaviour", "service"]."""
+        # Given / When: the storage is asked
+        categories = self.store.categories()
+        # Then: the four vote categories in their order, and a vote of each is accepted
+        self.assertEqual(categories, ["answer_quality", "reactions", "character_behaviour", "service"])
+        for category in categories:
+            self.store.put("votes", category, dict(ONE_OF_EACH["votes"], category=category), "anna")
+
     @mark.req("REQ-SLY-004")
     def test_a_refused_edit_consumes_no_version(self):
         self.store.put("workflows", "w", LOOKUP, "anna")

@@ -132,6 +132,10 @@ class Storage:
         self.backend.remove(table, record_id)
         self._tell({"table": table, "id": record_id, "version": None, "author": author})
 
+    def categories(self):
+        """The vote categories, in their order (IF-102, D-162): the consumers ask the storage instead of importing the list of IF-302."""
+        return list(record_tables.CATEGORIES)
+
     def subscribe(self, table, callback):
         """callback({"table", "id", "version", "author"}) after every write of the table, a delete with version None; returns a function that
         unsubscribes."""

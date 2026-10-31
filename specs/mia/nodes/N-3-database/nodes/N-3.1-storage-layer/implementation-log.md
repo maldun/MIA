@@ -92,3 +92,8 @@ Not done: the 75 test_doc_check errors of F11 (the new tests follow the rule; th
 - Checked on a scratch copy of this branch (removed): install, then the IF-102 suite 18/18 (mock 9, files 9), `tools/contract_postgres.sh` 9/9 on PostgreSQL, the tests that use the mock in the image (test_api_events, test_api_sessions, test_accounts_api, test_api_storage_imports, IF-104 and IF-203 suites) green; a second run of the script changes nothing.
 - F13: `architecture.sysml` `storageLayer` and `database` are `partly` with their modules (model file, edited directly; check_sysml and check_sysml_model OK).
 - Full run at the end, each `tests/test_*.py` in the image (`tools/run_in_image.sh`): 160 of 162 files OK; the 2 known failures (test_amendment_report, test_harness rt_edit). On the host (venv mia312): test_storage_postgres 23 OK, the IF-102 suite on PostgreSQL 8/8 (installed suite) and 9/9 (A-59 on a scratch copy).
+
+## Owner decision D-162 (after the Verify fixes), branch v1-n31b
+| Item | Change | Covered by test (red before) |
+|---|---|---|
+| IF-102 `categories()` | `Storage.categories()` gives the vote categories of the record tables (`record_tables.CATEGORIES`, the four of IF-302 in their order) as a list, the same on every backend. The coordinator's wording was "memory categories"; D-162 and `chat_service.py` mean the vote categories, which are the only categories IF-302 defines | `test_storage.test_the_vote_categories_are_an_operation_of_the_storage` (files and PostgreSQL) |
