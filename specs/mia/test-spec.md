@@ -189,7 +189,7 @@ Error rates from `plan-phase/scripts/false_alarm.py` (`--n 1000 --max-rate 0.01 
 | --- | --- | --- | --- | --- |
 | SMOKE-MIA-001 | FR-19, NFR-9 | the owner's workstation (Fedora 43, podman) | fresh checkout, one configuration file, one command | compose stack up with all containers; the first account can be created; a chat message is answered |
 | SMOKE-MIA-002 | NFR-6, CON-5 | a phone outside the home network | Tailscale (tailnet) and HTTPS | the chat page loads and a message is answered; no public port is open (the owner runs this; SC-03) |
-| SMOKE-MIA-003 | NFR-9 | the owner's workstation | each container (`mia`, `db`, `graph`) started alone against the mocks of its neighbours; the mocks are those of `tests/helpers`, run inside the mia image (A-37, D-127) | each container passes the contract suites of its interfaces (stage 2) |
+| SMOKE-MIA-003 | NFR-9 | the owner's workstation | each container (`mia`, `db`, `graph`) started alone against the mocks of its neighbours; the mocks are those of `tests/helpers`, run inside the mia image (A-37, D-127); for `graph` the JavaScript contract suite runs on the host against the files the container serves (A-46, D-133); then all together; `tests/smoke/smoke_stack.py` | each container passes the contract suites of its interfaces (stage 2); all start together, the https front answers on `/` and `/graph/` |
 
 ## Validation criteria (checked in Phase 7)
 
