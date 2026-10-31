@@ -1,0 +1,14 @@
+/* The Graph app follows the light and dark scheme of the system; no outside fonts (REQ-GA-010). */
+:root { color-scheme: light dark; --fg: #1d1d1f; --bg: #fafafa; --data: #dbeafe; --process: #fde68a; --line: #6b7280; }
+@media (prefers-color-scheme: dark) { :root { --fg: #e5e7eb; --bg: #18181b; --data: #1e3a8a; --process: #78350f; --line: #9ca3af; } }
+body { margin: 0; font-family: system-ui, sans-serif; color: var(--fg); background: var(--bg); }
+header { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; padding: 8px 16px; }
+h1 { font-size: 1.125rem; margin: 0; }
+#status { padding: 0 16px; min-height: 1.4em; }
+#view { overflow: auto; padding: 0 16px 16px; }
+.node rect { stroke: var(--line); }
+.node.data rect { fill: var(--data); }
+.node.process rect { fill: var(--process); }
+.node text { fill: var(--fg); font-size: 13px; text-anchor: middle; dominant-baseline: central; }
+.edge { stroke: var(--line); stroke-width: 1.5; }
+marker path { fill: var(--line); }
