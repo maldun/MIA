@@ -5,7 +5,7 @@ Back-filled on 2026-10-30, after the workflow skills introduced goals (M33–M37
 - Kind: iteration
 - Parent: –
 - Statement: MIA runs as the decomposed multi-user system of the approved HLS (2026-10-24): every node built and integrated, the lookup promoted by the skill path and the literature review added by the same path.
-- Exit criterion: VAL-001 to VAL-006 (`specs/mia/test-spec.md`); VAL-002 is the HLS success criterion (second workflow within one month of the lookup's promotion)
+- Exit criterion: VAL-001 and VAL-003 to VAL-006 (`specs/mia/test-spec.md`); VAL-002, the HLS success criterion (second workflow within one month of the lookup's promotion), moved to the next goal with the review (owner 2026-10-31, D-134)
 - Supervision: supervised
 - Accepted by: Stefan Reiterer (owner; goal agreed 2026-10-30)
 - Line of work: goal/v1
@@ -86,7 +86,7 @@ Back-filled on 2026-10-30, after the workflow skills introduced goals (M33–M37
 |---|---|---|
 | Explore | done | `high-level-spec.md` approved 2026-10-24 (`review-log.md`) |
 | Plan | done | plan package approved, tags `plan-baseline-it1` and `decomp-baseline`; changes since then are amendments A-01 to A-35 (A-34 installed `cca40c8`, A-35 approved: N-2.4.1 T-08, D-125) |
-| Implement | in progress | node cycles of `decomposition.yaml`; open nodes and work in `handover-2026-10-31-late.md`. 2026-10-31: N-2.4.1 T-01 to T-05, T-07 done (T-06 out with REQ-RUN-007, T-08 deferred to the next iteration, D-128; fixes of three verification rounds, N-2.4.1 **Verified with findings** (re-verification 2, the D-128 scope rows written by D-130); N-2.4.2 Verified with findings (proposed, its decisions open)); N-2.4.2 T-01 to T-06 done (T-07 out with REQ-TLS-006); node Verifies of N-2.4.1 and N-2.4.2 started (reports in their node folders); only N-3 integrated (`tests/helpers/integration.py` READY) |
+| Implement | in progress | node cycles of `decomposition.yaml`; open nodes and work in `handover-2026-10-31-late.md`. 2026-10-31: N-2.4.1 T-01 to T-05, T-07 done (T-06 out with REQ-RUN-007, T-08 deferred to the next iteration, D-128; fixes of three verification rounds, N-2.4.1 **Verified with findings** (re-verification 2, the D-128 scope rows written by D-130); N-2.4.2 **Verified with findings** (owner, D-134)); N-2.4.2 T-01 to T-06 done (T-07 out with REQ-TLS-006); node Verifies of N-2.4.1 and N-2.4.2 started (reports in their node folders); only N-3 integrated (`tests/helpers/integration.py` READY) |
 | Verify | open | |
 | Commit | open | |
 | Deploy | open | |
