@@ -178,3 +178,12 @@ export function pipelineHeadline(events, t) {
   const base = t('pipeline.summary', { n: rows.length, s: (state.seconds ?? 0).toFixed(1) });
   return state.status === 'done' ? base : `${base} · ${t(`pipeline.status.${state.status}`)}`;
 }
+
+// REQ-RUN-002 (D-128): a command marked `confirm` (/light!, /full! switch the model for everyone) is sent only after a yes.
+// confirm(command) asks the user and resolves to true or false; send(text) sends the text as typed.
+export async function sendConfirmed(text, commands, confirm, send) {
+  const command = commands.find((c) => c.command === text.toLowerCase());
+  if (command?.confirm && !(await confirm(command))) return false;
+  send(text);
+  return true;
+}

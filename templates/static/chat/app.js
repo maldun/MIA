@@ -18,7 +18,7 @@ import { initAccount } from './account.js';
 import { variantLabel } from './panels-model.js';
 import { initMood } from './mood.js';
 import { askConfirm, initPalette, loadCommands } from './palette.js';
-import { modelLabel } from './chat-model.js';
+import { modelLabel, sendConfirmed } from './chat-model.js';
 import { initCaption } from './caption.js';
 import { initViewMenu } from './view-menu.js';
 import { enterSends, initSettings } from './settings.js';
@@ -223,21 +223,13 @@ composer = initComposer({
   counter: $('counter'),
   storage,
   suggestions,
-  async onSend(text) {
-    const command = commands.find((c) => c.command === text.toLowerCase());
-    if (command?.confirm) {
-      const ok = await askConfirm({
-        dialog: $('confirm'),
-        message: $('confirm-text'),
-        ok: $('confirm-ok'),
-        cancel: $('confirm-cancel'),
-        text: t('confirm.command', { command: command.command, description: command.description }),
-      });
-      if (!ok) return false;
-    }
-    chat.send(text);
-    return true;
-  },
+  onSend: (text) => sendConfirmed(text, commands, (command) => askConfirm({
+    dialog: $('confirm'),
+    message: $('confirm-text'),
+    ok: $('confirm-ok'),
+    cancel: $('confirm-cancel'),
+    text: t('confirm.command', { command: command.command, description: command.description }),
+  }), (message) => chat.send(message)),
   onStop: () => socket.emit('chat_stop'),
   enterSends: () => enterSends(settings.get().enterSends, window.matchMedia?.('(pointer: coarse)').matches ?? false),
 });
