@@ -54,3 +54,31 @@ of IF-401 (`tests/test_runner_interfaces.py`); nothing showed the provider fed b
 - Seen, not changed (for Verify): the account of the IF-401 file of a run is coarse: the skill's description, the tool names, the status (`run_start`, `tool_call`, `run_end` carry a plain text);
   the node steps the chat shows ("start" events with the node's `plain`) are not in the 14 types of IF-401 and go only to `RunLog`. See question 1 of the hand-over.
 - Files outside the task's Touches: `tests/test_run_events.py` (a node test).
+
+## Hand-over for Verify (2026-10-31, evening)
+| Task | State | Commit | Tests (reported green in the image; feedback, not verification) |
+|---|---|---|---|
+| T-01 typed events, IF-401 | done (2026-10-30), wiring follow-up today | T-01 of 2026-10-30, `92ade85` | `test_run_events.py` (12), contract `test_if_401_run_events.py` (10, mock and real), `test_events.py` (23) |
+| T-02 account | done (2026-10-30) for IF-401 `account`; the chat's account not linked (question 1) | 2026-10-30 | `test_run_events.py` (TC-LOG-001) |
+| T-03 replay, comparison | done (2026-10-30) | 2026-10-30 | `test_run_log_node.py` (TC-LOG-003), `test_run_explain.py` (16) |
+| T-04 statements to a query | done (2026-10-30) | 2026-10-30 | `test_run_log_node.py` (TC-LOG-004) |
+| T-05 append-only files, no driver | done today | `0959b74` | `test_run_log_files.py` (2) |
+
+Also green after the changes: `test_runner_interfaces.py` (8), `test_pipeline.py` (26), `test_run_workflow.py` (12), `test_chat_backend.py` (40), contract `test_if_101_chat_api.py` (60, 3 skipped).
+No production code changed in this node today; no amendment drafted, no new id taken.
+
+Open questions (Verify and the owner):
+1. **The account of a chat answer is not read from IF-401** (IF-101 `account`: "from the run log, IF-401"; REQ-LOG-001). `ChatService.account` (N-2.1) renders the steps kept with the answer in the
+   chat log, and only for skills that show a status block (the chat skill does not: "No steps were kept for this answer."). Linking it is outside this node: `decomposition.yaml` lists only N-2.4.1
+   and N-2.4.2 as consumers of IF-401, the answer record keeps no run id, and the node steps the chat shows are not IF-401 types (an IF-401 account is the description, tool names and status).
+   Options: (a) N-2.1 consumes IF-401: the answer keeps its run id, `account` reads `RunEvents.account`; amendment of the decomposition and IF-101's adapter, and either an IF-401 v2 with a step
+   type or the coarser account; (b) keep the account from the events kept with the answer (event data, no model text), keep them for every answer, amend IF-101's wording; (c) defer with FB-03,
+   recorded as a deviation. Recommended: (b) for G-V1, (a) in the next iteration together with moving `RunLog` behind IF-401 (the debt of D-120).
+2. **Scope of AC-15 "or outside the storage client".** Read as the Run log only (the test), it holds. Read for the whole repository, `library.py` imports `sqlite3` for its derived index
+   (`data/library.sqlite`); no test reaches it. Options: (a) keep the reading of the test here and hand `library.py` to the N-2.4 integration step (TC-N24-001, REQ-WFX-022) as a finding;
+   (b) a repository-wide check now, which fails until the index moves behind IF-102 or is excepted as a cache by amendment. Recommended: (a).
+3. **The plan's T-05** still has the title and note before A-28 ("State only through the storage interface", "Needs the mock of IF-102"). Options: correct the two lines as a docs fix (recommended),
+   or leave them and let Verify read A-28.
+4. Low: the replay (`reproduce.py`) and the account of a task rest on `RunLog` records, the comparison on the IF-401 files: two formats side by side (D-120 debt); `RunEvents` keeps one counter per
+   run id in memory for the life of the process (one integer per run, no limit). The contract suite `test_if_401_run_events.py` (protected) has no `Example:` lines and no Given/When/Then
+   (`test_doc_check.py` T2, T3); a fix needs an amendment. Recommended: record, no change in G-V1.
