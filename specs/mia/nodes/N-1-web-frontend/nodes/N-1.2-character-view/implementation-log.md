@@ -36,3 +36,8 @@ None by this node. IF-111 v2 and TC-IF-111-02 came with A-48 (installed in 05688
 
 ## Owner's answers of 2026-10-31 (D-137)
 REQ-CHV-007 and REQ-CHV-008 out of G-V1 (after the first human tests). REQ-CHV-006 (shocked) is built with the votes of N-2.2. IF-111 is right: an unknown expression falls back to `neutral`; the bridge and the backend change test-first (open task, next).
+
+## Verify findings (D-155)
+| Finding | Status | Commit | Tests red before / green after (reported) | Notes |
+|---|---|---|---|---|
+| F1 the Godot tests pinned 14 presets and saved a "new" preset named `shocked`, which 88f484d ships | done | `test(character)` N-1.2 (F1) | **red before:** `test_editor` 4 FAILED, `test_expressions` 1 FAILED. **green after:** both ALL PASSED | `shocked` added to REQUIRED, the count is 15, the editor's test preset is `test_shocked`. Test-only change: the shipped data is right (D-143) |

@@ -3,7 +3,7 @@ extends SceneTree
 # Run: godot --headless --path ui/godot --script res://tools/test_expressions.gd
 
 const REQUIRED := ["greet", "no", "annoyed", "talk", "yes", "idle",
-		"neutral", "happy", "sad", "angry", "surprised", "embarrassed", "smug", "thinking"]
+		"neutral", "happy", "sad", "angry", "surprised", "embarrassed", "smug", "thinking", "shocked"]
 var failures := 0
 
 func check(cond: bool, what: String) -> void:
