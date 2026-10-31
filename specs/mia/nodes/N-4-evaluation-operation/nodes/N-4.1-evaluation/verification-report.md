@@ -118,3 +118,145 @@ None listed for N-4.1 in `deferred.md`.
 
 ## Not checked
 Live latency against the real stack; the frame rate in a browser; BM-MIA-001/-002; T-07 and the N-4/N-0 integration steps (skipped by design); a real-model eval run (not needed); CI stages; `test_amendment_report` (known failure, not run).
+
+---
+
+# Re-verification (2026-10-31)
+
+**Branch:** goal/v1 @ b1b3b69 (contains branch v1-n41b, merged in fa1c1a2, and the A-63 install bee8ead)   **Plan baseline:** plan-baseline-it1
+**Fix commits reviewed:** fb0db96 (F1), cab26a6 (F2), 6b2dd67 and f9be045 (F3), e3ec1aa (F5), 71d814d (F6 to F12), e67542e (A-63 draft), 4eb97ed and 97d4811 (D-166), b65beae (A-63 redraft), bee8ead (A-63 installed)
+**Decisions read:** D-164, D-166 (`specs/mia/review-log.md`), TD-07 (`specs/mia/deferred.md`), scope rows of REQ-EVL-003, -005, -009 (`specs/mia/goals/G-V1/goal.md`)
+**Reviewer:** Claude Opus 5.5 as independent reviewer (AI; never saw the implementation chat). Read-only: nothing fixed, nothing committed.
+
+## Verdict
+Proposed: **Verified with accepted deviations, once R1 is decided.** Without a decision on R1: **Not verified.**
+- All twelve findings of the first report are closed or decided. Each fix has a test that can fail: 27 of 27 mutants were killed. Two more mutants of the holdout refusal on the command line survive; they are covered by another layer (R4).
+- The node's tests are now protected in `tests/acceptance/` (A-63). Each file is byte-identical to its draft, and the tests pass on the host and in the image.
+- **R1 (new, High):** the D-166 refusal of `--model` together with `--pin` breaks the protected smoke test `tests/smoke/smoke_gate.py`. It passes both options, so SMOKE-GATE-001/-002 can no longer run. The implementation log does not mention this.
+- Accepted or deferred by the owner: REQ-EVL-003, -005 and -009 are partly in G-V1 (D-164, D-166, TD-07). REQ-EVL-010 waits for T-07, and REQ-EVL-007 waits for its figures (VAL-006, Phase 6).
+- Still open: REQ-EVL-011 for the old target kinds. No decision covers it yet (R3).
+
+No eval run was made. Every requirement could be judged from code, fake-model tests, synthetic fixtures and `agent_check.py`. No real `*.holdout` suite or `split:holdout` case was opened.
+
+## Automated checks (local runs of the reviewer, no CI)
+| Check | Result |
+|---|---|
+| Node tests on the host | `tests/acceptance/`: `test_eval_platform` 17 OK, `test_decide_guard` 11 OK (the real `eval_decide.py` ran, none skipped), `test_judge_calibration` 7 OK, `test_check_baselines` 3 OK, `test_skill_path_doc` 4 OK, `test_measure_latency` 3 OK, `test_harness_pin` 5 OK; `tests/test_metrics.py` 22 OK; `tests/test_harness.py` 29 with 1 failure (`test_every_shipped_suite_is_valid`, rt_edit: the known failure) |
+| Node tests in the image (`bash tools/run_in_image.sh`, `localhost/mia:latest`) | The same counts. `test_decide_guard` has 1 skip in the image (`eval_decide.py` of the skill is not in the image); on the host that test ran and passed. `test_harness`: the same single known failure |
+| JS | `node --test tests/js/measure-fps.test.mjs`: 3 pass |
+| Contract suite IF-105 | `tests/acceptance/contract/test_if_105_evaluation_access.py`: 8 OK against the mock and the real provider (`run_workflow.WorkflowRuns`), none skipped, on the host and in the image |
+| Integration | N-4: step_00 OK; step_01 and step_02 skipped ("N-4.1 not integrated yet"). N-0: step_00 and step_01 OK; step_02 to step_05 skipped (T-07 not built). Unchanged |
+| Protected material | `tests/acceptance/test_{eval_platform,decide_guard,judge_calibration,check_baselines,skill_path_doc,measure_latency}.py` are byte-identical (`cmp`) to `specs/mia/amendments/A-63/tests/acceptance/`, and the old `tests/` copies are gone. The IF-105 suite and mock are byte-identical to `specs/mia/contract-drafts/tests/...`. No commit since 424c329 touches `contracts/IF-105*`, `eval/suites/` or `eval/baselines/`. The other changes under `tests/helpers` and `tests/acceptance/contract` belong to other nodes' amendments (IF-101, -102, -104, -301, -302). The look mode of `tools/apply_amendment_a63.sh` was not run: the reviewer's permission check refused it (the script can delete files with `--do`), so `cmp` was used instead. `skip`/`xfail` in the six files: only the `eval_decide.py`-present guard (test_decide_guard.py:80) |
+| Mutation (scratch copy from `git archive`, removed) | **29 mutants; 27 killed:** the clock started before `prepare`; `pin["name"]` sent as `model_pin`; `pin_record` without the id; `--pin` not required; `make_harness` without a platform; `skill_version` dropped; the variant's pipeline ignored; `--model` not refused by the command line; `--model` not refused by the harness; the pin not setting the model; `list_suites` without its filter; `list_suites(holdout=True)` by default; both `open_suite` checks removed; both list filters of `eval.py` removed; `--split` not refused; reruns not checked; `--run=path` not taken out; `--rer` not recognised; the `Suite.select` holdout filter; the suite version not compared; `run` not marking judge verdicts; `verification_metrics` counting all verdicts; `is_right` ignoring `counted`; kappa `>` instead of `>=`; a pin without seed accepted; a pin without temperature accepted. **2 survived:** only the pre-read check of `open_suite` removed (tools/eval.py:95), and `eval.py list` passing `holdout=True` (tools/eval.py:144). In both cases a later layer still refuses or hides the suite, but the holdout suite is read first (R4) |
+| Guard probe (synthetic runs, removed) | `--run holdout --run mix` gives NOT DECIDED (dev split). Checked whether an abbreviation could smuggle in a run: `--ru` is ambiguous in `eval_decide.py` (`--run`, `--rule`), so argparse refuses it. `--run` is not reachable through an abbreviation. No finding |
+| `trace_check.py` | Exit 1, 97 errors over the whole spec. N-4.1 lines: **ERROR TD-07: REQ-EVL-003 does not carry `Relaxed: TD-07`; ERROR: REQ-EVL-003 has no `Target`** (R2); WARN REQ-EVL-010 has no marker (T-07); WARN: the open deferrals TD-01 to TD-04, TD-06 and TD-07 are not listed in this report (listed below now). The Scenarios error of the first report is gone |
+| `test_doc_check.py` (the six protected files, copied to a scratch folder) | 0 errors, 0 warnings (the first report had 34) |
+| `agent_check.py --spec-dir specs/mia --eval-dir eval` | Ran without being refused. Exit 1: 2 errors (A9 and A10 on `SkillDigestStep`, not N-4.1) and 640 warnings, as in the first report. A6 still reports no holdout case and no dev/holdout tags for `research` (lookup) and `verdicts` (verify). That is expected under D-164: REQ-EVL-009 is partly in G-V1 |
+| `check_baselines.py` | 5 tested or trusted workflows have no baseline; `library/baselines.json` is missing. This matches D-164 (REQ-EVL-005 partly in G-V1) |
+| Model | `check_sysml_model.py`: OK. `check_sysml.sh specs/mia/architecture.sysml`: 0 errors (F9 text present) |
+| Usability (bad inputs) | `eval.py run --pin MP-light` without a suite gives an `IndexError` traceback; an unknown suite gives a `SuiteError` traceback; an unknown pin gives an argparse error listing the pins. `decide_guard.py --split=dev` gives NOT DECIDED with the reason. `eval.py run ... --model X --pin MP-light` stops with "drop --model" (R1) |
+
+## Closure of the first report's findings
+| # | Finding | Fix | Test that fails without it (mutant) | Closed? |
+|---|---|---|---|---|
+| F1 | latency clock includes the previous answer | `measure(prepare=)`, `socket_ask` (fb0db96) | `LiveMode.test_the_clock_starts_after_the_previous_answer_has_ended` (clock-before-prepare killed) | yes |
+| F2 | pin name sent as `model_pin` | `pin_record(id)`, `pin["id"]` (cab26a6) | `RealProvider` on the real `WorkflowRuns` with the command line's pin (both mutants killed) | yes |
+| F3 | IF-105 only in tests, no pin or versions | `make_harness`, `--pin` required, `_versions` for every kind, commit in header (6b2dd67, f9be045); D-166: the pin decides the model, `--model` refused (97d4811) | `CommandLine` (3), `VersionsOfEveryKind`, `PinDecidesTheModel` (2) (7 mutants killed) | yes for REQ-EVL-001 and -004. REQ-EVL-011 for the old kinds is still undecided (R3). The `--model` refusal breaks a protected smoke test (R1) |
+| F4 | REQ-EVL-005, -009 not met | owner: partly in G-V1 (D-164, scope rows) | – | decided (accepted deviation) |
+| F5a | `--split` override, `--rerun` unchecked | `decide_guard.parse` (e3ec1aa) | `NoOptionOverridesTheHoldout` (3) (4 mutants killed) | yes |
+| F5b | holdout suites in `list`, `cases`, `run` | `--holdout` flag; `list_suites(holdout=False)` (e3ec1aa, 4eb97ed) | `HoldoutSuitesOnTheCommandLine` (3); `test_harness` `test_listing_never_opens_a_holdout_suite_unless_asked` | yes for what is shown. The "refused before it is read" layer of the command line is not tested (R4) |
+| F6 | calibration inert, 3 surviving mutants | tests (71d814d); wiring deferred, TD-07 (D-166) | `test_judge_calibration` (4 mutants killed) | yes. The relaxed requirement text is missing (R2) |
+| F7 | partial pin untested | test (71d814d) | `test_a_pin_without_id_seed_or_temperature_is_refused_per_case` (both mutants killed) | yes |
+| F8 | `require_same_cases` ignores the suite version | version check (71d814d) | `test_runs_of_different_suite_versions_are_not_compared` (killed) | yes |
+| F9 | model text | architecture.sysml (71d814d) | `check_sysml.sh` 0 errors | yes |
+| F10 | test docs, Scenarios | docstrings; `## Scenarios` drafted (71d814d) | `test_doc_check` 0; trace_check without the Scenarios error | yes. The scenarios are still a draft for the owner (R7) |
+| F11 | tests unprotected | A-63 installed (bee8ead) | `cmp` identical | yes. The A-63 note still says "proposed" (R7) |
+| F12 | "difference you can believe" | wording (71d814d) | `test_a_comparison_says_it_is_feedback_not_a_verdict` | yes |
+
+## Verification matrix (re-verification)
+| Requirement | Method | Evidence | Result |
+|---|---|---|---|
+| REQ-EVL-001 | Test | TC-EVL-001 (5 × 3, 12/15, Wilson 0.55–0.93, cost sums); `make_harness` gives the command line a `workflow` target on the real `WorkflowRuns` | **Pass** |
+| REQ-EVL-002 | Inspection, Test | `decide_guard` (host, real `eval_decide.py`); `Suite.select`; `--holdout` on the command line; `list_suites` default; mutants | **Pass** (R4 and R5 are low gaps) |
+| REQ-EVL-003 | Test | TC-EVL-003 + 3 mutant killers | **Partly, accepted** (D-166, TD-07); the requirement text lacks the `Relaxed`/`Target` lines (R2) |
+| REQ-EVL-004 | Test | TC-EVL-004 (10 runs); every `run` needs `--pin`; workflow+version / skill+skill_version+pipeline / `pipeline: None`+commit; the pin decides the model | **Pass** |
+| REQ-EVL-005 | Inspection | `check_baselines.py` works; 5 workflows without a baseline | **Partly, accepted** (D-164, scope row) |
+| REQ-EVL-006 | Inspection, doc test | `test_skill_path_doc` 4 OK; `docs/skill-path.md` shows `--pin` | **Pass** |
+| REQ-EVL-007 | Measurement | TC-EVL-007 on fakes (median 2.0 s, live clock 0.1 s); fps 60/30 | **Tool passes**; BM-MIA-001/-002 figures not measured (root T-04, VAL-006; verified in Phase 6) |
+| REQ-EVL-008 | Test | TC-EVL-008 incl. the suite version | **Pass** |
+| REQ-EVL-009 | Inspection | `agent_check`: no holdout for `research`, `verdicts` | **Partly, accepted** (D-164, scope row) |
+| REQ-EVL-010 | Test, Demonstration | T-07 not built; N-0 step_02 to step_05 skipped | **Open** (depends on N-2/N-3 integration) |
+| REQ-EVL-011 | Inspection, Test | TC-EVL-011 (`eval_platform.py` uses the standard library only); `harness.py:20–33` still imports `checks`, `pipeline.Tool` and others for the old kinds | **Partly**; no decision covers it (R3) |
+
+## Test requirements (M41)
+There is still no `test-requirements.md` (a plan-level gap shared with every node). The settings in test-spec.md are met: TC-EVL-001, -004 and -007 as in the first report. The IF-105 mock is faithful: the contract suite is green against the mock and the real provider, and the harness test's `PIN` now has the shape of `tools/eval.py` (the fake that hid F2 is gone).
+
+## Goal acceptance (M34, M36)
+| Item | Result |
+|---|---|
+| Requirements of N-4.1 | 6 pass (001, 002, 004, 006, 008; 007 for the tool); 3 partly and accepted (003, 005, 009); 1 partly and undecided (011, R3); 1 open (010) |
+| Frozen requirements | none in G-V1 |
+| Protected checks | the N-4.1 files equal approved amendment A-63. **The protected `tests/smoke/smoke_gate.py` (not changed) no longer runs because of a code change (R1)** |
+| Scope of the changes | `harness.py`, `metrics.py`, `eval_platform.py`, `tools/` (incl. the t05/t06/t09/t10 scripts), `docs/`, `ui/README.md`, `deploy/RUNBOOK.md`, `architecture.sysml`, own spec files; CLAUDE.md by the owner (bc6df53) |
+| Stop conditions | The REQ-EVL-003 stop is logged and answered (D-166). The broken protected smoke test was **not** logged (R1) |
+
+## Specification vs. code (M42)
+| Direction | Item | Destination |
+|---|---|---|
+| done, conflicts with a protected check | `--model` next to `--pin` refused (D-166) vs. `tests/smoke/smoke_gate.py:39–40` passing both | R1, owner |
+| done, not specified | `run` needs `--pin` also for code-only suites; a code target records `pipeline: None` and the commit; old runs without a suite version are compared without the version check (all listed in the log as "decisions in code") | Phase 2 text (low), with R2 |
+| done, not specified | `report`/`compare` show saved holdout runs without `--holdout` | R5, owner |
+| specified, partly done | REQ-EVL-011 for the old targets | R3, owner |
+
+## Quality evidence per characteristic (M32)
+| Characteristic | Evidence | Result | Gap |
+|---|---|---|---|
+| Functional suitability | matrix | mostly met | R3; 003/005/009 partly (accepted); 010 open |
+| Performance efficiency | TC-EVL-007 on fakes | tool right | figures: VAL-006 / Phase 6 |
+| Compatibility | IF-105 contract against mock and real; the real pin shape | met | R1 (the smoke gate's command line) |
+| Interaction capability | bad-input probes | mostly | R8 (tracebacks) |
+| Reliability | guards; 27/29 mutants killed | met | R4 |
+| Security | holdout separation (list/cases/run, guard), no shell | met | R4, R5 (low) |
+| Maintainability | test_doc_check 0; protected tests | met | R7 |
+| Flexibility | mock and real provider interchangeable | met | – |
+| Safety | not applicable | – | not now |
+
+## Open deferrals (M26)
+| TD | Requirement | Interim criterion | State |
+|---|---|---|---|
+| TD-07 | REQ-EVL-003 | calibration functions tested on fixtures; no target has a judge | met (`test_judge_calibration` 7 OK); the requirement text lacks the `Relaxed: TD-07` and `Target` lines (R2) |
+| TD-01, TD-02 | N-1.1 (browser tests) | – | not N-4.1; listed because trace_check asks for it |
+| TD-03, TD-04, TD-06 | N-2.3 (tokens estimate, lookup glue, library folder) | – | not N-4.1; listed because trace_check asks for it |
+
+## Review findings (re-verification)
+| # | Finding | Severity | Destination / proposal |
+|---|---|---|---|
+| R1 | **tests/smoke/smoke_gate.py:39–40 (protected) runs `tools/eval.py run ... --model gemma4:12b-it-qat --pin MP-light`; since 97d4811 tools/eval.py:179–181 exits "--model together with --pin ... drop --model".** Reproduced with the smoke command: exit 1 before any case runs, so SMOKE-GATE-001/-002 (number gate, Phase 6) are red by construction. The log names the t05/t06/t09/t10 scripts that dropped `--model`, but not this protected file. A stop condition ("a finding needs a changed protected test") was not raised. | High | Owner decision: (a) amendment of `tests/smoke/smoke_gate.py` (drop `--model MODEL`; the pin MP-light already decides gemma4:12b-it-qat), or (b) Phase 3: accept `--model` when it names the pin's model, with a test first. Proposal: (a), one line, through the amendment process |
+| R2 | specs/mia/nodes/N-4-evaluation-operation/nodes/N-4.1-evaluation/requirements.md:36–48: REQ-EVL-003 has no `Relaxed: TD-07` and no `Target` line while TD-07 is open. trace_check reports 2 errors | Medium | Phase 2 amendment (text): add `Relaxed: TD-07` and `Target:` as the other relaxed requirements do (e.g. N-1.1 requirements.md:284) |
+| R3 | REQ-EVL-011 ("no other import of the platform exists") holds only for the `workflow` target. harness.py:20–33 imports `checks`, `pipeline.Tool` and others and drives the in-process Core for checks, pipeline, research, plan and extraction (finding F-1 of the log). D-164 wired IF-105 in, but no decision or scope row covers the old kinds | Medium | Owner decision: a scope row "partly" in G-V1 goal.md with a TD (until the old suites become workflows of N-2), or an amendment of REQ-EVL-011 to "workflow targets" |
+| R4 | The "refused before anything of it is read" behaviour of tools/eval.py:95 (`open_suite`) and the `holdout=args.holdout` of tools/eval.py:144 have no test that fails without them: the synthetic `toy.holdout` in `HoldoutSuitesOnTheCommandLine` (tests/acceptance/test_decide_guard.py:175) is valid, so reading it is invisible. 2 surviving mutants | Low | Needs a test (protected file, so an amendment): make `toy.holdout` unreadable or invalid, as `tests/test_harness.py:95` does |
+| R5 | `eval.py report <suite>.holdout` and `compare` print the case ids, truth and statuses of a saved holdout run without `--holdout` (tools/eval.py:150–176, harness.py:520). These are run logs, not suites, and D-164 named only list, cases and run | Low | Owner decision: accept, or require `--holdout` for runs whose suite ends `.holdout` |
+| R6 | `tools/run_research_comparison.sh:12–17` calls `eval.py run` without `--pin` and now stops; history lines in `ui/README.md` (494, 528, 552, 556, 573) show runs without `--pin` | Low | Phase 3 (add `--pin MP-light` to the script; mark the README lines as history) or accept |
+| R7 | Bookkeeping: the 11 scenarios in test-spec.md are "drafted ... for the owner's review" and not yet reviewed (M39); `specs/mia/amendments/A-63/A-63-note.md:3` still says "Status: proposed" although bee8ead installed it | Low | Owner: review the scenarios (`req_review.py`); set A-63 to installed |
+| R8 | Usability: `eval.py run --pin MP-light` without a suite name gives an `IndexError` traceback (tools/eval.py:182); an unknown suite gives a `SuiteError` traceback | Low | Backlog, or Phase 3 with a test: a message naming `list` |
+
+## Accepted deviations (candidates)
+| Deviation | Reason | Accepted by |
+|---|---|---|
+| REQ-EVL-003 partly (TD-07) | no judge in G-V1 | owner, D-166 |
+| REQ-EVL-005, -009 partly | holdout cases, baselines and eval-spec in the next iteration's Plan | owner, D-164 |
+| REQ-EVL-010 open | T-07 depends on the N-2/N-3 integration | (owner, by plan) |
+| REQ-EVL-007 figures | measured in Phase 6 (VAL-006) | (owner) |
+| R3 option (a), R5 | see findings | owner (to decide) |
+
+## Notes for Phase 7
+As in the first report: BM-MIA-001 only with the fixed clock (now in place) and preferably with the websocket transport (not in the image); there is no frame-time recorder in the browser; the idea date of the skill path is not stored.
+
+## Not checked
+- Live latency against the real stack, the frame rate in a browser, BM-MIA-001/-002.
+- T-07, and N-4 step_01/02 and N-0 step_02–05 (skipped by design).
+- A real-model eval run (not needed).
+- The real holdout suites (never opened; synthetic fixtures only).
+- `smoke_gate.py` against a live Ollama: only its command line was reproduced, and that stops before any model is needed.
+- CI stages; `test_amendment_report` and `tests/acceptance/test_benchmarks.py` (known failures, not run).
+- The look mode of `tools/apply_amendment_a63.sh`: refused by the reviewer's permission check; `cmp` was used instead.
