@@ -9,6 +9,7 @@ import importlib.util
 import io
 import json
 import os
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -238,6 +239,15 @@ class RealProvider(unittest.TestCase):
         self.assertEqual((run.records[0]["status"], run.records[0].get("error")), ("42", None))
 
 
+def git_head():
+    """the commit of the checkout, or None without git (a copy, a container without the repository's .git)"""
+    try:
+        done = subprocess.run(["git", "rev-parse", "HEAD"], cwd=REPO, capture_output=True, text=True, timeout=10)
+    except (OSError, subprocess.SubprocessError):
+        return None
+    return done.stdout.strip() if done.returncode == 0 else None
+
+
 def write_suite(root, name, target, cases):
     folder = os.path.join(root, name)
     os.makedirs(folder)
@@ -289,7 +299,8 @@ class CommandLine(unittest.TestCase):
     def test_a_saved_run_names_the_pin_id_and_the_code_version(self):
         """TC-EVL-004 (regression, Verify F3): a run of a code target (no skill, no pipeline) records the pin with its id and the commit of the code that ran.
 
-        Example: `eval.py run rules_mini --pin MP-light` -> header pin id MP-light, pipeline None, commit = git HEAD of the repository.
+        Example: `eval.py run rules_mini --pin MP-light` -> header pin id MP-light, pipeline None, commit = git HEAD of the repository
+        (None where there is no git, e.g. a copy without .git: the header does not guess).
         """
         # Given: the text-rules suite and the pin MP-light
         # When: it is run and saved
@@ -300,7 +311,8 @@ class CommandLine(unittest.TestCase):
         self.assertEqual((header["pin"]["id"], header["pin"]["name"]), ("MP-light", "gemma4:12b-it-qat"))
         self.assertIn("pipeline", header)
         self.assertIsNone(header["pipeline"])
-        self.assertRegex(header.get("commit") or "", r"^[0-9a-f]{40}$")
+        self.assertIn("commit", header)
+        self.assertEqual(header["commit"], git_head())
 
     @mark.req("REQ-EVL-001", "REQ-EVL-011")
     def test_the_harness_of_the_command_line_reaches_workflows_through_if_105(self):
