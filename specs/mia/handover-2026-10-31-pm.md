@@ -9,7 +9,7 @@ The newest hand-over. It continues `handover-2026-10-31-late.md` (read its "How 
 - A person merges (dev-workflow, M27): check a merge in a throwaway worktree, run the suites on the result, give the owner the commands. The owner installs amendments with their scripts; commit the installed files if the owner did not.
 
 ## State of `goal/v1`
-Next free ids: **D-133, A-43, FB-04** (A-40 is the retirement of `n-planted-figure`, drafted; A-41, A-42 used).
+Next free ids: **D-133, A-45, FB-04** (drafts for the owner: A-40 retire `n-planted-figure`, A-43 IF-202 v1, A-44 IF-402 v4).
 
 | Node | State | Open |
 |---|---|---|
@@ -35,3 +35,16 @@ FB-02 (networkx graphs of objects, vis.js), FB-03 (re-specify how workflow pipel
 - An amendment draft that copies a whole shared file (`specs/mia/test-spec.md`) goes stale when another branch merges first: the A-42 install put back the old SMOKE-MIA-003 row of A-37 (fixed in `0f5050d`). Copy only the changed lines, or redo the copy right before the install.
 - The local coder slips on brackets (extra `)` at the end of an assert line, a dropped `});`): rule 11 of its model guide. Compare every draft with the instruction by script.
 - `git commit --amend` changes the hash: fix references in the log (N6 of the re-verification).
+
+## Afternoon, 15:10 to 15:30 (owner away; agent worked alone)
+- N-2.4.2 re-verification: **Verified with findings** proposed (report committed `086b814`). Built since: N-1 `number_check` with evidence as one string (`ad9f482`); the node log written (`ad3ed0e`); A-44 drafted (IF-402 v4 text: what leaves the host, `result` of `run_script`).
+- N-2.4.1 low findings built: F14 empty digest (`cea4d62`), F13 model part (`a2e2df0` area), F16 markers and comments (`b268743` area), F11 run-level tool wins over the door (`520626d` area), F17 shared mount label `:z` (`7f89a82` area, reproduced: 3 of 4 parallel runs failed with `:Z`), A-43 drafted (IF-202 v1). Open: F7 (`started_by` default, a decision), F10 (note), the Scenarios section of the node's test-spec (specification).
+- N-4.2 on branch `v1-n42-ops2` (`41ea5c2`): T-03 partly (`042a784`: http 8585 always on loopback, `tests/test_compose_stack.py`), T-04 done (`56ebee1`: `tools/check_free.py`), stopped at T-05 with 7 questions (its log). Trial merge into goal/v1: clean, suites as on goal/v1.
+- Full run on goal/v1 at 15:23: all `tests/test_*.py` fail only in `test_amendment_report` and `test_harness` (rt_edit count; `n-planted-figure` until A-40); contract, integration, JS all pass.
+
+## Questions for the owner on return (ask as one questionnaire)
+1. Merge `v1-n42-ops2` (clean); install A-40, A-43, A-44 with their scripts.
+2. N-4.2 Q1 http 8585 on loopback even with `MIA_BIND=0.0.0.0` (recommend keep); Q2 how `graph` is served (recommend the mia image behind a Caddy route `/graph/`); Q3 "graph alone" = the JS suite on the host against the served files (amend TC-OPR-007); Q4 the TC-OPR-007 test as an amendment draft (tests/smoke protected); Q5 `up.sh backup` calls `tools/backup.sh` incl. `db`; Q6 the database tests: install `requirements-db.txt` into the `mia312` venv; Q7 review the paid-API lists in `tools/check_free.py`.
+3. N-2.4.2: N-2 (wrong argument types: refuse as `bad_arguments` before counting?), N-3 (mock `result` and `failed`: an amendment), N-6 (the runner counts a call the door refuses), the flows of `toolDoor`, THR-001 and the planted figure, gaps G-1 to G-4 (accept as deviations or plan).
+4. N-2.4.1 F7: make `started_by="message"` the default (every command path names itself), or accept "command" as default.
+5. The `number_check` rule (D-132 conflict) when it is built.
