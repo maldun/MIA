@@ -103,3 +103,12 @@ The page kept its modules; `chat.js` got the answer actions (about 60 lines), th
 ### Not done
 Frame rate (field), the variant and model selection in Godot (deferred by the owner until after the first tests), the series of the score.
 | REQ-CLV-022 logout (A-04) | button `account-logout` in the account dialog; `api.logout` (POST `/api/logout`); `initAccount` reports `onLoggedOut`, the page closes the socket and opens the login; a 401 (session already gone) counts as logged out; other failures keep the user logged in and say so; the mock server has the route (draft mock until A-04 is installed) | `tests/js/logout.test.mjs` (4), `test_chat_mock_server.py` logout test; the allowed-address list of TC-CLV-021 got `/api/logout` |
+
+---
+
+## Verify findings (report of 2026-10-31, owner's answers D-163)
+Branch `v1-n11b` from `goal/v1` @ a262376 (A-52..A-58 installed). One commit per item, test-first.
+
+| Item | Finding | What was done | Tests (reported green; red first) | Commit |
+|---|---|---|---|---|
+| 1 | F1 (REQ-CLV-002): every `chat_start` cleared "Waiting, place n" of all waiting messages | `chat.js` `moveQueue`: a start moves each waiting message up one place (IF-101: place 1 is answered next); place 1 is cleared; a message without a place counts as place 1 | `tests/js/chat-page.test.mjs` (2, on the new fake DOM `tests/js/fake-dom.mjs`): three waiting, two starts -> places 1,2,3 -> -,1,2 -> -,-,1; a start for another user's message moves mine up, it does not clear it | see below |
