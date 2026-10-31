@@ -105,3 +105,33 @@ Tests reported green (feedback, not verification): `tests/test_runner_context_sh
 ## T-06 First text in 10 seconds (2026-10-31, deferred) – REQ-RUN-007
 
 Deferred by the owner (D-120): a measurement (median of 20 runs, AC-19) without an eval criterion and model pins, like REQ-RUN-006. It comes back with `eval-spec.md`. Whether REQ-RUN-007 leaves the scope of G-V1 is the owner's decision (scope table of `goal.md`).
+
+## T-07 Interfaces only, no particular workflow (2026-10-31, done; the review entry split out as T-08, A-35) – REQ-RUN-012, REQ-RUN-013
+
+Owner's answers (D-120, D-122): tools through IF-402 `ToolCalls`; events to IF-401 and the run log side by side; IF-402 gets `fetch_page` (A-34); the review as a pipeline is its own task (T-08, A-35); the networkx redesign waits for the next iteration (FB-02).
+
+| Requirement | Where it is met | Test |
+|---|---|---|
+| REQ-RUN-012 tools only through IF-402 | `Runner(tool_calls=, door_tools={tool: budget key})`: a tool node of the door goes to `ToolCalls.call({"id", "limits"}, tool, args)`, the limits are the budgets of the run; the runner's own count still ends the run first (`budget_spent`, `missing`), a `budget` error of the door becomes the same budget end; the app wires `web_search` and `fetch_page` through `ToolCalls` (`web_app.py`) | `tests/test_runner_interfaces.py` (1, 2, 3) |
+| REQ-RUN-012 events only through IF-401 | `_RunEventsSink`: every event goes to the run log, the 14 types of IF-401 also through `RunEvents.emit` (user of the run, actor, plain); a door call adds a `tool_call` event with tool and trust; a run without a run log gets an id `r-<hex>` | `tests/test_runner_interfaces.py` (1, 3, 4) |
+| REQ-RUN-012 the workflow only through IF-203 | `WorkflowRuns.run` reads `estimate` (IF-203) instead of `check_budget`, which IF-203 does not offer (found by the mock); `user` is passed to the run | `tests/test_runner_interfaces.py` (4) |
+| REQ-RUN-012 no other import | `pipeline.py`, `run_workflow.py` import the standard library and `events`, `schema_check`, `sandbox`, `pipeline_model`, `pipeline` only | `tests/test_runner_interfaces.py` (5) |
+| REQ-RUN-013 no workflow named | the privacy rule "the chat's texts are not kept" (LG3) moved from the runner to `core.keep_texts`; no text constant of the two modules is the name of a shipped skill | `tests/test_runner_interfaces.py` (6, 7); `tests/test_content_store.py` takes the rule from Core |
+
+Decisions made while building:
+- `run(..., user="mia")`: IF-401 needs a user; WorkflowRuns passes its user, the other paths are MIA's own.
+- `fetch_page` in the real `ToolCalls` (`tool_calls.py`, N-2.4.2's file, provider side of A-34; test `test_a_fetched_page_is_web_text`); contract, mock, contract suite and test-spec row are drafts (A-34), installed by the owner.
+- Scratch check (feedback): `research.escalate` and `research.decompose@1` on the fixture world give the same answers through the door as through the old tool map; IF-401 got 3 `tool_call` events, no order problems.
+
+Files outside T-07's list: `core.py` (pass-through, `keep_texts`), `run_workflow.py` (T-01's module of this part), `tool_calls.py` (A-34 provider side), `web_app.py` (the wiring), `tests/test_content_store.py` (see below).
+
+Open for Phase 4:
+- `tests/test_content_store.py` changed: it pinned the privacy rule as a default of `Runner`; it now takes `core.keep_texts`, the rule Core gives its runner. The behaviour of the app is unchanged; check that this is a move, not a weakening.
+- Still outside IF-402: script nodes run in the sandbox directly (`Runner._do_script`, `sandbox.Operation`), the web checks of `checks.build_web_checks` call the web functions directly, the library tools `library_select`/`library_describe` are Core's. AC-1 holds for tool nodes; whether these must move too is a question for Verify or the redesign (FB-02).
+- `ToolCalls` keeps the calls per run id in memory for the life of the app (`_used`); a long-running app grows by one small dict a run.
+- The stricter default `started_by="message"` (proposed in T-04) is not done: it changes every command path outside the runner.
+- AC-9 "lookup, verify and review on the same runner": lookup (`research`) and verify (`verify_claim`) are pipelines; review is T-08.
+
+Local coder: `tests/test_runner_interfaces.py` (task `run1213-tests`, 2 attempts, both failed only on my wrong check `--forbid 'class Runner'`, which matched `class RunnerInterfaceTests`); the draft compared with the instruction by script: two hex digests lengthened, fixed by hand, verdict `fixed`. The added test methods in `tests/test_tool_calls.py` and `tests/test_runner_model_server.py` are one method each, written by hand. Red before the change (5 errors, 1 failure), green after.
+
+Tests reported green (feedback, not verification): `tests/test_runner_interfaces.py` (7), `tests/test_tool_calls.py` (11), `tests/test_content_store.py`, `tests/test_run_workflow.py`; all `tests/test_*.py` in the image fail only as on master (`test_amendment_report`, `test_config`, `test_harness`, `test_shutdown`); all contract suites and integration steps; A-34 on a scratch copy: `test_if_402_tool_calls.py` 12 tests, all suites as before.
