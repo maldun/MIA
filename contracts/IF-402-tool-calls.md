@@ -1,4 +1,4 @@
-# IF-402 – Tool calls, v1
+# IF-402 – Tool calls, v2
 
 Owner (provider): N-2.4.2 Tools and sandbox   Consumers: N-2.4.1 Pipeline runner   Decided by: N-2.4   Mock complexity: 3 (counted calls, trust labels, scripted tools)   Suite: `tests/acceptance/contract/test_if_402_tool_calls.py`
 
@@ -14,6 +14,7 @@ The one door to everything a workflow step may do besides a model call. A tool k
 | `schema_check` | `value`, `schema` | `{"status": "pass" \| "fail", "problems"}`; each problem is a readable text that names the path and the key or rule (`$: missing 'reason'`), the text a retry tells the model |
 | `run_script` | `code`, `inputs` | `{"status": "ok" \| "unavailable", "stdout"}`; without a sandbox: `unavailable`, nothing runs |
 | `web_search` | `query` | list of `{url, title, content}` |
+| `fetch_page` | `url`, `max_chars` (optional) | `{"ref", "url", "title", "text", "clipped", "signals"}`: the whole page as untrusted text, clipped to `max_chars`; `signals` are the phrases that look like instructions to a model |
 | `fetch_passages` | `url`, `question` | `{"ref", "hash", "passages": [{"id","quote"}]}`; every passage keeps its source reference |
 | `scholar_search` | `query`, `until`, `since` | `{"works", "errors", "dropped"}` as IF-405 |
 | `source_record` | `ref` | `{"ref","class","trust","retraction"}` |
@@ -36,9 +37,11 @@ The one door to everything a workflow step may do besides a model call. A tool k
 1. Typical: `number_check("The tower is 1,200 m high", ["The tower is 1,020 m high"])` is `fail` with trust `code`.
 2. Failure: the second `web_search` of a run with limit 1 is `budget`; `run_script` without a sandbox is `unavailable` and nothing ran.
 3. Edge: a quote that is not verbatim in the source fails `quote_in_source`; `fetch_passages` returns the source reference with every passage.
+4. Typical: `fetch_page("https://example.org/a")` returns the text of the page with its reference and trust `web`; an unknown page is `source_error`.
 
 ## Version history
 | Version | Date | Change | Amendment |
 |---|---|---|---|
 | v0 | 2026-10-25 | first draft from the current tools | – |
 | v1 | 2026-10-30 | `schema_check` problems are readable texts with path and key, as `schema_check.py` gives them | A-32 |
+| v2 | 2026-10-31 | `fetch_page`: the whole page, the tool the research pipelines read pages with, so the runner reaches it through the door (REQ-RUN-012, D-122) | A-34 |

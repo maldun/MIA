@@ -7,9 +7,9 @@ try:
 except ImportError:
     from errors import ServiceError
 
-TOOLS = ("number_check", "quote_in_source", "schema_check", "run_script", "web_search", "fetch_passages", "scholar_search", "source_record")
+TOOLS = ("number_check", "quote_in_source", "schema_check", "run_script", "web_search", "fetch_page", "fetch_passages", "scholar_search", "source_record")
 TRUST = {"number_check": "code", "quote_in_source": "code", "schema_check": "code", "run_script": "code",
-         "web_search": "web", "fetch_passages": "web", "scholar_search": "web", "source_record": "web"}
+         "web_search": "web", "fetch_page": "web", "fetch_passages": "web", "scholar_search": "web", "source_record": "web"}
 NUMBER = re.compile(r"\d[\d,]*\.?\d*")
 
 
@@ -59,6 +59,13 @@ class ToolCallsMock:
 
     def _web_search(self, query):
         return list(self.results)
+
+    def _fetch_page(self, url, max_chars=None):
+        if url not in self.pages:
+            raise ServiceError("source_error", detail="not found")
+        text = self.pages[url]
+        clipped = max_chars is not None and len(text) > max_chars
+        return {"ref": url, "url": url, "title": "", "text": text[:max_chars] if clipped else text, "clipped": clipped, "signals": []}
 
     def _fetch_passages(self, url, question):
         if url not in self.pages:

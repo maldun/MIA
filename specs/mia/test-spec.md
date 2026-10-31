@@ -154,6 +154,7 @@ Setup and expected result are in the docstring of each test (the golden examples
 | TC-IF-402-03 | IF-402 | Contract | 1 (mock) and 2 (real) | golden 2: with a limit of 1 the second web_search of the run is  | exact |
 | TC-IF-402-04 | IF-402 | Contract | 1 (mock) and 2 (real) | golden 2: without a sandbox run_script is  | exact |
 | TC-IF-402-05 | IF-402 | Contract | 1 (mock) and 2 (real) | checks are `code`, web and scholarly tools are `web`; a `schema_check` that misses the key `reason` fails with one problem that names `reason` | exact |
+| TC-IF-402-06 | IF-402 | Contract | 1 (mock) and 2 (real) | golden 4 (A-34): `fetch_page` returns the text of the page with its reference and trust `web`; an unknown page is `source_error` | exact |
 | TC-IF-404-01 | IF-404 | Contract | 1 (mock) and 2 (real) | golden 1: search returns findings with url, title and content; fetch returns text, a hash and the size. | exact |
 | TC-IF-404-02 | IF-404 | Contract | 1 (mock) and 2 (real) | golden 2 and 3: a private address, localhost, port 22 and a file scheme are unsafe_url and nothing is fetched. | exact |
 | TC-IF-404-03 | IF-404 | Contract | 1 (mock) and 2 (real) | golden 2: a 404 is http_status with 404; an image is unsupported_content. | exact |
