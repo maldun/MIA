@@ -139,6 +139,22 @@ class EvaluationAccessTests(unittest.TestCase):
         self.assertEqual(code_of(lambda: other.run_case("summary", 1, INPUT, {"model_pin": "MP-light", "seed": 1, "temperature": 0})), "pin_unavailable")
         self.assertEqual(model.calls, [])
 
+    def test_an_empty_digest_is_no_pin(self):
+        """TC-RUN-015 (F14 of the N-2.4.1 verification): a model the server lists without a digest, or a pin without one, is pin_unavailable, never a match.
+
+        Example: held digest "" -> pin_unavailable; pin digest "" -> pin_unavailable; no model call
+        """
+        # Given: a server that lists the model without a digest, and a pin without one
+        empty_held, model = make(held=lambda: {"gemma4:12b-it-qat": ""})
+        empty_pin, _ = make()
+        empty_pin.pins = {"MP-light": {"name": "gemma4:12b-it-qat", "digest": ""}}
+        options = {"model_pin": "MP-light", "seed": 1, "temperature": 0}
+        # When: a case is run on either
+        # Then: both are pin_unavailable and the model is never asked
+        self.assertEqual(code_of(lambda: empty_held.run_case("summary", 1, INPUT, options)), "pin_unavailable")
+        self.assertEqual(code_of(lambda: empty_pin.run_case("summary", 1, INPUT, options)), "pin_unavailable")
+        self.assertEqual(model.calls, [])
+
     def test_run_case_runs_as_harness_and_is_reproducible(self):
         """TC-RUN-015 golden 1 and 3: the run is the harness's, returns its options, its events can be read again, and two equal runs give equal outputs and
         event types. Example: run_case twice with seed 7 -> same outputs, same sequence of event types; events(run_id) == the events of the result."""

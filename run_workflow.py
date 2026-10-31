@@ -109,7 +109,8 @@ class WorkflowRuns:
     def _check_pin(self, pin):
         wanted, held = self.pins.get(pin), self._held()
         digest = held.get(wanted["name"]) if wanted else None
-        if digest is None or not (digest.startswith(wanted["digest"]) or wanted["digest"].startswith(digest)):
+        # an empty digest on either side would match everything as a prefix (F14 of the N-2.4.1 verification)
+        if not digest or not wanted["digest"] or not (digest.startswith(wanted["digest"]) or wanted["digest"].startswith(digest)):
             raise RunWorkflowError("pin_unavailable", pin)        # never a silent fallback to another model (IF-105)
 
     def _model(self, skill, options):
