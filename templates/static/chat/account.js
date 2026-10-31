@@ -1,7 +1,7 @@
 // The account dialog (REQ-CLV-014, REQ-CLV-022): who is logged in (the account of a kept session), the change of the user's own password and the logout.
 import { passwordProblem } from './panels-model.js';
 
-export function initAccount({ dialog, nameEl, form, oldInput, newInput, repeatInput, errorLine, closeButton, logoutButton, api, storage, t, notify = () => {}, onLoggedOut = () => {} }) {
+export function initAccount({ dialog, nameEl, form, oldInput, newInput, repeatInput, errorLine, closeButton, logoutButton, api, storage, t, socket = null, notify = () => {}, onLoggedOut = () => {} }) {
   function show(key) {
     errorLine.textContent = key ? t(key) : '';
     errorLine.hidden = !key;
@@ -45,6 +45,7 @@ export function initAccount({ dialog, nameEl, form, oldInput, newInput, repeatIn
     }
     form.reset();
     dialog.close();
+    socket?.disconnect();                                  // the server ended the session; the socket would be refused anyway
     onLoggedOut();
   });
   closeButton.addEventListener('click', () => dialog.close());

@@ -62,3 +62,82 @@ test('TC-CLV-002: a start of an answer to another user\'s message moves my waiti
   // Then: mine is answered next
   assert.equal(p.state('21'), 'chat.position{"n":1}');
 });
+
+// --- F6: the drawing of the conversation ------------------------------------------------------------------------
+// mark.req("REQ-CLV-001")
+test('TC-CLV-001: a message of another account shows that name above it, mine shows "You" (F6)', () => {
+  // Given: the conversation of anna
+  const p = page();
+  // When: a message of ben and one of anna arrive
+  p.socket.fire('chat_message', { id: '31', role: 'user', sender: 'ben', text: 'hi from ben', created: at(31) });
+  p.socket.fire('chat_message', { id: '32', role: 'user', sender: 'anna', text: 'hi from anna', created: at(32) });
+  // Then: the rows name ben and "You"
+  assert.equal(p.row('31').querySelector('.msg-name').textContent, 'ben');
+  assert.equal(p.row('32').querySelector('.msg-name').textContent, 'chat.you');
+  assert.equal(p.bubble('31'), 'hi from ben');
+});
+
+// mark.req("REQ-CLV-001")
+test('TC-CLV-001: an answer streams: each delta is drawn in the same row, the end makes the actions visible (F6)', () => {
+  // Given: an answer that started
+  const p = page({ api: {} });
+  p.socket.fire('chat_start', { id: '41', role: 'assistant' });
+  // When: two deltas arrive, each drawn in the next frame
+  p.socket.fire('chat_delta', { id: '41', text: 'Hello' });
+  p.win.runFrames();
+  const first = p.bubble('41');
+  p.socket.fire('chat_delta', { id: '41', text: 'Hello anna.' });
+  p.win.runFrames();
+  // Then: the text grows in one row, and the actions wait for the end
+  assert.equal(first, 'Hello');
+  assert.equal(p.bubble('41'), 'Hello anna.');
+  assert.equal(p.chat.rows.size, 1);
+  assert.equal(p.row('41').querySelector('[data-action=up]').hidden, true);
+  // When: the answer is done
+  p.socket.fire('chat_done', { id: '41', text: 'Hello anna. Fine.', emotion: 'happy', status: 'done' });
+  // Then: the final text and the actions are shown
+  assert.equal(p.bubble('41'), 'Hello anna. Fine.');
+  assert.equal(p.row('41').querySelector('[data-action=up]').hidden, false);
+});
+
+// mark.req("REQ-CLV-003")
+test('TC-CLV-003: the page loads the last 50 messages in order and adds a live message of another user (F6)', async () => {
+  // Given: a history of three messages, sent out of order
+  const history = { older: false, messages: [
+    { id: '53', role: 'assistant', text: 'third', created: at(53) },
+    { id: '51', role: 'user', sender: 'ben', text: 'first', created: at(51) },
+    { id: '52', role: 'user', sender: 'anna', text: 'second', created: at(52) },
+  ] };
+  const p = page({ history });
+  // When: the page loads the history and another user writes
+  await p.chat.loadLatest();
+  p.socket.fire('chat_message', { id: '54', role: 'user', sender: 'carl', text: 'fourth', created: at(54) });
+  // Then: one request with limit 50, and the rows in the order of their ids
+  assert.equal(p.requests.length, 1);
+  assert.equal(new URL(p.requests[0]).pathname, '/api/chat/history');
+  assert.equal(new URL(p.requests[0]).searchParams.get('limit'), '50');
+  const order = p.list.querySelectorAll('.row').map((r) => r.dataset.id);
+  assert.deepEqual(order, ['51', '52', '53', '54']);
+});
+
+// mark.req("REQ-CLV-008")
+test('TC-CLV-008: "how I got this" draws the steps of the account under the answer, a second click hides them (F6)', async () => {
+  // Given: a written answer and a REST client that knows its account
+  const asked = [];
+  const p = page({ api: { account: async (id) => { asked.push(id); return [{ seq: 1, plain: 'I read your question.' }, { seq: 2, plain: 'I answered.' }]; } } });
+  p.socket.fire('chat_start', { id: '61', role: 'assistant' });
+  p.socket.fire('chat_done', { id: '61', text: 'Done.', status: 'done' });
+  // When: the button is clicked
+  p.row('61').querySelector('[data-action=how]').click();
+  await flush();
+  // Then: the two steps are listed, asked once
+  const block = p.row('61').querySelector('.account');
+  assert.deepEqual(block.querySelectorAll('li').map((li) => li.textContent), ['I read your question.', 'I answered.']);
+  assert.deepEqual(asked, ['61']);
+  // When: it is clicked again
+  p.row('61').querySelector('[data-action=how]').click();
+  await flush();
+  // Then: the block is hidden and not asked again
+  assert.equal(block.hidden, true);
+  assert.equal(asked.length, 1);
+});

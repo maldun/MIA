@@ -1,7 +1,9 @@
 """Runs inside localhost/mia-browser (tests/browser/Containerfile) in the network of the IF-101 mock server container (ui/tools/chat_mock_server.py):
 the stage-2 browser checks of N-1.1 (TC-CLV-006, -013, -016, -018, -021; D-163 F3, F6). Prints one JSON object {scenario: result}.
-    podman run --rm -i --network container:<mock> localhost/mia-browser python - http://127.0.0.1:8686 SCENARIO... < tests/browser/chat_views.py
-Scenarios: touch (360 px, coarse pointer: size of every visible control), layout (360/768/1440 px in dark and light: horizontal scroll).
+    podman run --rm -i --network container:<mock> -v <checkout>/ui/tools:/tools:ro,z localhost/mia-browser python - http://127.0.0.1:8686 SCENARIO... < tests/browser/chat_views.py
+Scenarios: touch (360 px, coarse pointer: size of every visible control), layout (360/768/1440 px in dark and light: horizontal scroll),
+views (the click-through /tools/chat_views_e2e.js with the character blocked; requests and socket events), lan (login over plain HTTP by a
+home-network name), offline (connection cut and back).
 """
 import json
 import sys
@@ -102,5 +104,91 @@ def layout():
         driver.quit()
 
 
-SCENARIOS = {"touch": touch, "layout": layout}
+def requests_and_events(driver):
+    """every request of the session (Chromium's performance log) and the Socket.IO events in the websocket frames, both directions
+    (the first events before the upgrade from polling to the websocket are not in the log)"""
+    urls, events = [], set()
+    for entry in driver.get_log("performance"):
+        message = json.loads(entry["message"])["message"]
+        if message["method"] == "Network.requestWillBeSent":
+            urls.append(message["params"]["request"]["url"])
+        elif message["method"] == "Network.webSocketCreated":
+            urls.append(message["params"]["url"])
+        elif message["method"] in ("Network.webSocketFrameSent", "Network.webSocketFrameReceived"):
+            payload = message["params"]["response"]["payloadData"]
+            if payload.startswith("42"):                         # Engine.IO message + Socket.IO event, maybe with an ack id: 42[...] or 4217[...]
+                events.add(json.loads(payload[2:].lstrip("0123456789"))[0])
+    return urls, sorted(events)
+
+
+def views():
+    """TC-CLV-006, -013, -021: the click-through of every view (ui/tools/chat_views_e2e.js) with the character iframe blocked, then one more
+    answer without a variant; every request and socket event of the session is recorded"""
+    driver = browser(extra=("--enable-unsafe-swiftshader",))   # WebGL, so the page really tries to load the character
+    try:
+        driver.execute_cdp_cmd("Network.enable", {})
+        driver.execute_cdp_cmd("Network.setBlockedURLs", {"urls": ["*/character/*"]})
+        login(driver, query="")
+        attempted = driver.execute_script("return document.getElementById('character').getAttribute('src')")
+        with open("/tools/chat_views_e2e.js", encoding="utf-8") as handle:
+            script = handle.read()
+        driver.set_script_timeout(180)
+        result = json.loads(driver.execute_async_script(
+            "const done = arguments[arguments.length - 1];\n(\n" + script + "\n).then(done, (e) => done(JSON.stringify({problems: ['error: ' + e]})));"))
+        label_after_variant = driver.execute_script("const v = document.getElementById('variant'); return v.hidden ? null : v.textContent")
+        answers = driver.execute_script("return %s.length" % ANSWERS)
+        send(driver, "one more")
+        until(driver, WRITTEN + ".length > %d" % answers, 20)
+        time.sleep(0.5)
+        label_after_plain = driver.execute_script("const v = document.getElementById('variant'); return v.hidden ? null : v.textContent")
+        urls, events = requests_and_events(driver)
+        return {"problems": result["problems"], "tabs": result.get("tabs"), "attempted": attempted,
+                "label_after_variant": label_after_variant, "label_after_plain": label_after_plain, "urls": urls, "events": events}
+    finally:
+        driver.quit()
+
+
+def lan():
+    """TC-CLV-018: the page reached over plain HTTP by a name of the home network (mapped to loopback): the login form is switched off
+    with its reason, and a submit sends nothing"""
+    driver = browser(extra=("--host-resolver-rules=MAP mia-lan 127.0.0.1",))
+    try:
+        driver.get(BASE.replace("127.0.0.1", "mia-lan") + "/?character=0")
+        until(driver, "document.getElementById('login').open")
+        state = driver.execute_script("""
+            const $ = (id) => document.getElementById(id);
+            $('login-user').disabled = false; $('login-password').disabled = false;          // even if a user forces the fields open
+            $('login-user').value = 'anna'; $('login-password').value = 'pw-anna';
+            $('login-form').requestSubmit();
+            return { host: location.host, submitDisabled: $('login-submit').disabled, error: $('login-error').hidden ? null : $('login-error').textContent };""")
+        time.sleep(1.0)
+        urls, _ = requests_and_events(driver)
+        return dict(state, logins=[url for url in urls if "/api/login" in url])
+    finally:
+        driver.quit()
+
+
+def offline():
+    """TC-CLV-004: the connection is cut (the socket's transport is closed): the page shows the state, keeps the draft, switches Send off and
+    comes back online without a reload"""
+    driver = browser()
+    try:
+        login(driver)
+        driver.execute_script("""
+            window.notReloaded = true;
+            const input = document.getElementById('input');
+            input.value = 'my unsent draft'; input.dispatchEvent(new Event('input', { bubbles: true }));
+            window.miaChat.socket.io.engine.close();""")
+        until(driver, "document.getElementById('connection').dataset.state !== 'online'", 5)
+        cut = driver.execute_script("""
+            const $ = (id) => document.getElementById(id);
+            return { state: $('connection').dataset.state, banner: !$('banner').hidden, send: $('send').disabled, draft: $('input').value };""")
+        back = until(driver, "document.getElementById('connection').dataset.state === 'online'", 20)
+        after = driver.execute_script("return { draft: document.getElementById('input').value, notReloaded: window.notReloaded === true }")
+        return {"cut": cut, "back": back, "after": after}
+    finally:
+        driver.quit()
+
+
+SCENARIOS = {"touch": touch, "layout": layout, "views": views, "lan": lan, "offline": offline}
 print(json.dumps({name: SCENARIOS[name]() for name in sys.argv[2:]}))

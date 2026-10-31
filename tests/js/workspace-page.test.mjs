@@ -84,3 +84,67 @@ test('F2: a new task can get a due time; memos and memory have no due field', as
   // Then: it has no due field
   assert.equal(p.body.querySelector('input.item-due'), null);
 });
+
+// --- F6: what the tabs draw and when they are drawn again ----------------------------------------------------------
+const report = { name: 'review 2026-10-31.pdf', size: 2048, created: '2026-10-31T11:00:00Z', task: 'review' };
+
+// mark.req("REQ-CLV-024")
+test('TC-CLV-024: the Files tab lists each file with a download link and offers no delete (F6)', async () => {
+  // Given: the server lists one file
+  const p = page({ files: [report] });
+  // When: the Files tab is opened
+  await p.workspace.open('files');
+  // Then: one row with a link to /api/files/<name> that downloads it, and no button
+  const rows = p.rows();
+  assert.equal(rows.length, 1);
+  const link = rows[0].querySelector('a');
+  assert.equal(link.href, '/api/files/review%202026-10-31.pdf');
+  assert.equal(link.download, report.name);
+  assert.equal(p.body.querySelectorAll('button').length, 0);
+});
+
+// mark.req("REQ-CLV-024")
+test('TC-CLV-024: files_changed draws the open Files tab again (F6)', async () => {
+  // Given: the open Files tab, listed once
+  const p = page({ files: [report] });
+  await p.workspace.open('files');
+  p.dialog.showModal();
+  // When: a task stores a new file
+  p.socket.fire('files_changed', { name: 'b.pdf', task: 'review' });
+  await flush();
+  // Then: the list is asked again
+  assert.equal(p.calls.filter((c) => c[0] === 'files').length, 2);
+});
+
+// mark.req("REQ-CLV-009")
+test('TC-CLV-009: a persona change of another user draws the open Persona tab again, but not while the reader types in it (F6)', async () => {
+  // Given: the open Persona tab
+  const p = page();
+  await p.workspace.open('persona');
+  // When: another user changes the persona
+  p.socket.fire('persona_changed', { author: 'ben' });
+  await flush();
+  // Then: the persona is read again
+  assert.equal(p.calls.filter((c) => c[0] === 'persona').length, 2);
+  // When: the reader types in the text and another change arrives
+  p.body.querySelector('textarea').focus();
+  p.socket.fire('persona_changed', { author: 'ben' });
+  await flush();
+  // Then: nothing is overwritten, a note says why
+  assert.equal(p.calls.filter((c) => c[0] === 'persona').length, 2);
+  assert.deepEqual(p.notes, ['workspace.changed_elsewhere']);
+});
+
+// mark.req("REQ-CLV-011")
+test('TC-CLV-011: item_changed draws the open tab of that kind again, another kind does not (F6)', async () => {
+  // Given: the open Tasks tab
+  const p = page({ records: { tasks: [task] } });
+  await p.workspace.open('tasks');
+  // When: a memo and then a task change elsewhere
+  p.socket.fire('item_changed', { kind: 'memos', id: 'm1', author: 'ben', deleted: false });
+  await flush();
+  p.socket.fire('item_changed', { kind: 'tasks', id: 't1', author: 'ben', deleted: true });
+  await flush();
+  // Then: the tasks are read once more, the memos never
+  assert.deepEqual(p.calls.filter((c) => c[0] === 'items').map((c) => c[1]), ['tasks', 'tasks']);
+});
