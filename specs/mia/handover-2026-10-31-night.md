@@ -1,48 +1,68 @@
-# Hand-over for the next session (written 2026-10-31, night): G-V1, the N-3 Verifies, big merge round
+# Hand-over for the next session (written 2026-10-31, night; updated late night): G-V1, verification queue, merge round 4
 
-This is the newest hand-over. It continues `handover-2026-10-31-pm.md`, which has the owner's rules, the lessons and how to run things; read that first. Then read `CLAUDE.md`, `specs/mia/goals/G-V1/goal.md`, `specs/mia/review-log.md` (**D-137 to D-161**), and the logs and reports of the node you work on. The checks only the owner can do are in `specs/mia/owner-checklist-2026-10-31.md`.
+This is the newest hand-over. It continues `handover-2026-10-31-pm.md`, which has the owner's rules, the lessons and how to run things; read that first. Then read `CLAUDE.md`, `specs/mia/goals/G-V1/goal.md`, `specs/mia/review-log.md` (**D-137 to D-169**), and the logs and reports of the node you work on. The checks only the owner can do are in `specs/mia/owner-checklist-2026-10-31.md` (section A done; B and C open).
 
-Next free ids: **D-162, A-62, FB-05, TD-07**. A-52 to A-58 are drafted and wait for the big merge round. A-59, A-60 and A-61 are being drafted by the N-3 fix agents.
+Next free ids: **D-170, A-67, FB-07, TD-08**.
+
+## State of goal/v1 (after merge round 3, `bee8ead`)
+- Merged: every branch up to round 3: `v1-a53`, `v1-n42-ops4`, `v1-n13c/d/e`, `v1-n21b`, `v1-n24-int`, `v1-n22`, `v1-n12c`, `v1-n31b`, `v1-n32b`, `v1-n33b`, `v1-n11b`, `v1-n41b`.
+- Installed and committed: A-52 to A-63. Each is equal to its draft. A-54's IF-101 lines carry A-57's lines, and IF-101 is now at v15.
+- Tests:
+  - A full run after round 3 was in progress at the time of writing.
+  - After round 2 the run was green apart from the known failures:
+    - `test_amendment_report` (no git in the image);
+    - `test_harness` (rt_edit has 2 cases and wants 30);
+    - `tests/acceptance/test_benchmarks.py` (the gate-time baseline in `benchmarks/baseline.json` was never measured).
+  - The IF-101 and IF-104 contract suites fail on the host because flask is missing there; they pass in the image.
+
+## Merge round 4 (being prepared)
+| Branch | Content | Amendment |
+|---|---|---|
+| `v1-fix167` | N-2.1: login throttle, `test_api_events` in a temp folder. N-1.2: missing presets added at start, deleted presets remembered (D-169), a second shocked face cancels the pending return, the load-timeout test, the RUNBOOK line. All web_app tests in a temp folder plus a guard test (D-169). | A-64 (stage-3 step for TC-API-013; a skip fails) |
+| `v1-n31c` | N-3.1 re-verification: listener guard test, NaN/inf/non-string ids refused, REQ-SLY-006 text, Scenarios section | A-65 (IF-102 v3 Errors row, TC-IF-102-11) |
+| `v1-n32c` | N-3.2 re-verification: the docstring fix | A-66 (JS mock refuses `2.0`, TC-IF-104-06 row, TD-06 lines) |
+
+Trial-merge the three on a scratch copy of goal/v1, install A-64, A-65 and A-66, and run everything. Then give the owner the commands. Afterwards commit the installed files, new and deleted ones included (`git status` first).
 
 ## Node states
+| Node | State |
+|---|---|
+| N-2.4.1, N-2.4.2 | Verified with findings |
+| N-2.4.3, N-4.2 | Verified with accepted deviations |
+| N-2.4 integration | done. verify_claim keeps v1; gate versus single moved to the next iteration's Plan (D-164) |
+| N-2.1 | re-verified: Verified with accepted deviations (fixes of D-167 in round 4) |
+| N-1.2 | re-verified: Verified with accepted deviations (fixes of D-167/D-169 in round 4; eye checks C0 to C5) |
+| N-1.3 | re-verification 3: Verified with accepted deviations; R1 (3 s window) and R2 (serving folder) merged in round 3, **re-verify** |
+| N-3.1 | re-verified: Verified with accepted deviations (D-168 fixes in round 4) |
+| N-3.2 | re-verified: Verified with accepted deviations (D-169 fixes in round 4) |
+| N-3.3 | **re-verification running** |
+| N-1.1 | was Not verified; fixes merged in round 3 (queue places stay counted, FB-06): **re-verify** |
+| N-4.1 | was Not verified; fixes merged in round 3 (latency, pin id, IF-105 wired, `--pin`, holdout guard, A-63): **re-verify** |
+| N-2.2, N-2.3, N-2.5 | **first Verify** |
+| N-5 | Verify after its files settle (T-02 waits for FB-02) |
 
-| Node | State | Open |
-|---|---|---|
-| N-2.4.1 Pipeline runner | Verified with findings | low findings (see the pm hand-over) |
-| N-2.4.2 Tools and sandbox | Verified with findings | the `number_check` rule (D-132 conflict) |
-| N-2.4.3 | Verified with accepted deviations | – |
-| N-2.4 integration | done on `v1-n24-int` (AC-2 reworded, check_run `skipped` event, A-55) | verify_claim keeps v1; gate versus single is decided on the holdout in the goal's Verify (D-159); branch `v1-n24-gate5` stays unmerged |
-| N-4.2 Operation | Verified with accepted deviations (D-148) | owner checklist B1 to B6 |
-| N-1.3 Voice playback | fixes on `v1-n13c` and `v1-n13d` (D-157: the page drops lines after Stop; `start_testing.sh` prints the folder and commit it serves) | owner repeats A3 (full app rebuilt from goal/v1) and A4 (stub started from the goal-v1 worktree) after the merge, then re-verify |
-| N-1.2 Character view | fixes on `v1-n12c` (F1, F2 poll 1.5 s, F4, F5 = A-58, F7 to F10; D-159) | install A-58, re-verify; put the eye checks on the checklist |
-| N-2.1 API and accounts | fixes on `v1-n21b` | re-verify after the merge |
-| N-2.2 Chat agent | done on `v1-n22` (A-56, A-57) | Verify |
-| N-3.1 Storage layer | **Verified with findings** (`ac06af9`), D-158; REQ-SLY-007 partly (FB-04) | fixes running on `v1-n31b` (F1, F2, F4, F5 migrate close, F7 delete notice, F8; A-59 = PostgreSQL stage step and IF-102 delete case) |
-| N-3.2 Workflows and context graphs | **Verified with findings** (`95052a0`), D-160; REQ-GTB-004 partly (TD-06); rule order and unchecked cases go to FB-02 | fixes running on `v1-n32b` (F1, F2 limit is a positive integer, F4 part, F7; A-60 = IF-301 text and mock) |
-| N-3.3 Record tables | **Verified with findings** (`123c1bc`), D-161; REQ-RTB-006 partly (FB-04) | fixes running on `v1-n33b` (F1, F3/F5 `schema`, F4, F6 categories through IF-302, F2 text; A-61) |
-| Not verified yet | N-1.1, N-2.3, N-2.5, N-4.1, N-5 | – |
+Verification queue, one after the other (owner): N-3.3 (running), N-1.1, N-4.1, N-1.3, N-2.2, N-2.3, N-2.5.
 
-## Big merge round (in progress at the time of writing)
-- Branches: `v1-a53`, `v1-n42-ops4`, `v1-n13c`, `v1-n21b`, `v1-n24-int`, `v1-n22`, `v1-n13d`, `v1-n12c`, merged in this order.
-- `v1-n13d` conflicted with `v1-n13c` (the N-1.3 log) and with `v1-n22` (`tests/test_converse_behaviours.py`: both sides added tests). Both were resolved on `v1-n13d` (`cb12b57`, `9e8085f`), keeping every addition.
-- The trial merge in the scratchpad (`trialmerge-big`) is clean. Its full test run was still going when this was written.
-- After the owner merges, the amendments are installed in this order: **A-52, A-53, A-54, then A-57, A-55, A-56, A-58** (A-57 is built from the installed IF-101, which A-54 changes). Commit each installed file after comparing it with its draft.
-- A later round merges `v1-n31b`, `v1-n32b` and `v1-n33b` and installs A-59, A-60 and A-61. All three can touch `tests/helpers/contract.py`, so each builds its lines at install time from the installed file.
+## Scope changes of tonight (goal.md)
+- "Partly" in G-V1:
+  - REQ-SLY-007 and REQ-RTB-006 (FB-04);
+  - REQ-GTB-004 (TD-06);
+  - REQ-CLV-010 (FB-05);
+  - REQ-EVL-005 and -009 (next iteration's Plan);
+  - REQ-EVL-003 (TD-07).
+- New feedback items: FB-04 (importers and trust edits into the record table), FB-05 (votes on reactions, series), FB-06 (queue places from the server).
+- FB-02 gained the graph rule order and the unchecked cases.
 
-## Owner checklist
-- A1 and A2: ok.
-- A3 and A4: not ok. Repeat them after the merge (see N-1.3 above).
-- The `up()` helper gives `000` when the chat-on-stub stage is not running. This note is now in the checklist (`14b935c`).
-- B1 to B6: open.
-
-## After the merge round
-1. Re-verify N-2.1, N-1.3 (after A3 and A4), N-1.2 and N-3.1 to N-3.3 (after their fixes). Verify N-2.2.
-2. Verify N-1.1, N-2.3, N-2.5, N-4.1 and N-5.
-3. Integration steps N-1, N-2, N-4, N-5 and N-0.
-4. The `number_check` rule (D-132), the WorkflowRuns wiring, and TD-01 to TD-05 (TD-05 is still only a proposal in `handover-2026-10-30.md`).
-5. Goal-level Verify (including the gate-versus-single decision on the holdout, D-159), then Commit, Deploy and Validate.
+## After the queue and round 4
+1. Re-verify what round 4 changes, as far as the verifications above did not cover it.
+2. Integration steps N-1, N-2, N-3, N-4, N-5, then N-0.
+3. The `number_check` rule (D-132), the rest of the WorkflowRuns wiring, TD-01 to TD-05, and the owner's reading of the Draft Scenarios sections (N-1.1, N-4.1).
+4. Goal-level Verify, Commit, Deploy, Validate (VAL-001, VAL-003 to VAL-006).
 
 ## Lessons of tonight
-- A stage serves the checkout it is started from. Start owner checks from the goal-v1 worktree; `start_testing.sh` now prints which folder it serves.
-- Log files conflict on every parallel branch of a node. Resolve them on the branch by keeping both sections in date order, never during the owner's merge.
-- `tests/acceptance/test_benchmarks.py` fails on the gate-time baseline in `benchmarks/baseline.json`, which was never measured. The N-2.4 agent saw this; it is not a regression.
+- A stage serves the checkout it was first started from. `start_testing.sh` now prints the real folder of a running container and warns when it differs.
+- Commit only explicit paths while the owner installs in the same worktree (`git commit -- <path>`), and check for `MERGE_HEAD` first.
+- An install commit must include the new and the deleted files as well as the modified ones. `git status --short` shows them, but `git add -u` misses the new ones.
+- A test that walks the repository must skip hidden folders: git-ignored local-model drafts live in `.local-tasks/`.
+- Log files and test files that several branches append to conflict at every merge. Resolve them on the branch by keeping both sides.
+- Verifiers must keep temp files in their scratchpad, never in `/tmp` directly.
