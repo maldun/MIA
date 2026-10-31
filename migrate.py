@@ -55,11 +55,14 @@ def main(argv=None, open_db=_open_postgres):
             counts = seed_library(Storage(files), args.folder)
         else:
             database = open_db(args.database_url)
-            source, target = (files, database) if args.command == "files-to-db" else (database, files)
-            if args.dry_run:
-                counts = copy_records(source, _Discard(target), list(table_definitions()))
-            else:
-                counts = copy_records(source, target, list(table_definitions()))
+            try:                                  # an open connection left behind is a ResourceWarning (F4) and a server slot
+                source, target = (files, database) if args.command == "files-to-db" else (database, files)
+                if args.dry_run:
+                    counts = copy_records(source, _Discard(target), list(table_definitions()))
+                else:
+                    counts = copy_records(source, target, list(table_definitions()))
+            finally:
+                database.close()
     except StorageError as err:
         print(_explain(err))
         return 1

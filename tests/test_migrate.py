@@ -77,6 +77,25 @@ class Migrate(unittest.TestCase):
         self.assertIn("nothing was written", text)
         self.assertFalse(os.path.exists(self.db))
 
+    @mark.req("REQ-SLY-007")
+    def test_the_database_is_closed_after_a_run_and_after_a_refused_one(self):
+        """Finding F4 of the verification (the psycopg ResourceWarning): migrate closes the database it opened.
+        Example: files-to-db, then db-to-files into a folder with another history (a conflict): the database was closed twice."""
+        # Given: a database stand-in that counts close()
+        closed = []
+
+        def open_db(url):
+            backend = FileBackend(self.db)
+            backend.close = lambda: closed.append(url)
+            return backend
+        self.open_db = open_db
+        Storage(FileBackend(os.path.join(self.base, "other"))).put("workflows", "lookup", dict(LOOKUP, note="other"), "carl")
+        # When: one run that copies and one that is refused
+        self.assertEqual(self.run_command("files-to-db", "--data", self.data, "--database-url", "x")[0], 0)
+        self.assertEqual(self.run_command("db-to-files", "--data", os.path.join(self.base, "other"), "--database-url", "y")[0], 1)
+        # Then: both closed their database
+        self.assertEqual(closed, ["x", "y"])
+
     @mark.req("REQ-SLY-009")
     def test_library_export_and_seed_are_one_command_each(self):
         """TC-SLY-009 through the command line: the library of a data folder into a folder and from it into an empty data folder."""

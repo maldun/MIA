@@ -52,3 +52,6 @@ class FileBackend:
             os.remove(self._path(table, record_id))
         except FileNotFoundError:
             pass
+
+    def close(self):
+        """Nothing to release; every backend can be closed, so the callers need not know which one they have."""
