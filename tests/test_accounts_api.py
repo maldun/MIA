@@ -111,7 +111,7 @@ class Routes(unittest.TestCase):
         self.assertEqual(login(self.client, "ben", "pw-ben-123").status_code, 200)
 
     def test_a_bad_body_is_a_401_and_not_a_crash(self):
-        for body in (None, {}, {"user": "anna"}, {"user": 5, "password": [1]}):
+        for body in (None, {}, {"user": "anna"}, {"user": 5, "password": [1]}, {"user": ["anna"], "password": "x"}, {"user": {}, "password": "x"}):     # V-3: a list or object as user
             self.assertEqual(self.client.post("/api/login", json=body).status_code, 401)
         self.assertEqual(self.client.post("/api/login", data="not json", content_type="text/plain").status_code, 401)
 
