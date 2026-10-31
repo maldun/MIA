@@ -432,15 +432,9 @@ class Harness:
             header["pin"] = {key: pin.get(key) for key in ("id", "name", "digest", "seed", "temperature")}
         header["suite_sha1"] = suite_sha1(suite.path)
         header["benchmark_version"] = header["suite_sha1"]               # REQ-EVL-004: the version of the benchmark is the content of the suite
-        if suite.target["kind"] == "workflow":
-            if not pin:
-                raise SuiteError("%s: a workflow suite needs a pin (model, seed, temperature)" % suite.name)
-            header["workflow"], header["workflow_version"] = suite.target["workflow"], suite.target["version"]
-        if suite.target["kind"] == "pipeline" and self.core is not None:
-            skill = self.core.skills.get(variant.get("skill") or suite.target["skill"])
-            if skill is not None:
-                header["pipeline"] = variant.get("pipeline") or skill["pipeline"]
-                header["skill_version"] = skill["version"]
+        if suite.target["kind"] == "workflow" and not pin:
+            raise SuiteError("%s: a workflow suite needs a pin (model, seed, temperature)" % suite.name)
+        header.update(self._versions(suite, variant))
         records, total = [], len(cases) * repeats
         for repeat in range(repeats):
             for case in cases:
@@ -451,6 +445,18 @@ class Harness:
         header["finished"] = self._clock()
         mark_judge_verdicts(records, self.calibrations)
         return Run(header, records)
+
+    def _versions(self, suite, variant):
+        """what ran (REQ-EVL-004): a workflow suite names the workflow and its version; a suite of a skill (pipeline, research, plan, extraction)
+        the skill, its version and the pipeline (the variant's or the skill file's); a code target (checks, text rules) has no pipeline, and the
+        command line adds the commit of the code to every header"""
+        if suite.target["kind"] == "workflow":
+            return {"workflow": suite.target["workflow"], "workflow_version": suite.target["version"]}
+        name = variant.get("skill") or suite.target.get("skill")
+        skill = self.core.skills.get(name) if name and self.core is not None else None
+        if skill is None:
+            return {"pipeline": None}
+        return {"skill": name, "skill_version": skill["version"], "pipeline": variant.get("pipeline") or skill.get("pipeline")}
 
     def _run_case(self, target, suite, case, variant, repeat):
         before = self.counter.snapshot() if self.counter else (0, 0, 0)

@@ -26,7 +26,7 @@ A skill is one file in `skills/`: the model profile, the pipeline it runs, the t
 python tools/library.py show research.baseline@1 | head -n 12
 ```
 
-The same pipeline runs here with a scripted model over the recorded web of the research suite, for the question "When did the bridge open?" (a real run is `python tools/eval.py run research --variant baseline --repeats 3`, see the section Core, phase 5c in [ui/README.md](../ui/README.md)):
+The same pipeline runs here with a scripted model over the recorded web of the research suite, for the question "When did the bridge open?" (a real run is `python tools/eval.py run research --pin MP-light --variant baseline --repeats 3`, see the section Core, phase 5c in [ui/README.md](../ui/README.md)):
 
 ```python run
 import json, os, tempfile
