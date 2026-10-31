@@ -1,4 +1,4 @@
-# IF-402 – Tool calls, v4
+# IF-402 – Tool calls, v5
 
 Owner (provider): N-2.4.2 Tools and sandbox   Consumers: N-2.4.1 Pipeline runner   Decided by: N-2.4   Mock complexity: 3 (counted calls, trust labels, scripted tools)   Suite: `tests/acceptance/contract/test_if_402_tool_calls.py`
 
@@ -9,7 +9,7 @@ The one door to everything a workflow step may do besides a model call. A tool k
 
 | Tool | Arguments | Output |
 |---|---|---|
-| `number_check` | `claim`, `evidence` (list of text) | `{"status": "pass" \| "fail" \| "inconclusive", "detail"}`; a number is a pass if it agrees with a number of the evidence within rounding |
+| `number_check` | `claim`, `evidence` (list of text, or one text = one passage) | `{"status": "pass" \| "fail" \| "inconclusive", "detail"}`; a number is a pass if it agrees with a number of the evidence within rounding |
 | `quote_in_source` | `quote`, `source_text` | `{"status": "pass" \| "fail"}`; the quote must occur verbatim |
 | `schema_check` | `value`, `schema` | `{"status": "pass" \| "fail", "problems"}`; each problem is a readable text that names the path and the key or rule (`$: missing 'reason'`), the text a retry tells the model |
 | `run_script` | `code`, `inputs` | `{"status": "ok" \| "unavailable" \| "failed", "stdout", "result"}` (`result` only when the script was handed to a sandbox, i.e. with `ok` and `failed`); `ok` only for a script that ran to its end; without a sandbox (also one that went away during the call): `unavailable`, nothing runs; a script that was rejected, crashed or timed out: `failed`; `result` is the full result of the script check (status, detail, evidence) |
@@ -23,7 +23,7 @@ The one door to everything a workflow step may do besides a model call. A tool k
 | Condition | Signal | What the consumer may rely on afterwards |
 |---|---|---|
 | unknown tool | `ServiceError("unknown_tool")` | nothing counted |
-| arguments the tool does not take (missing or unknown) | `ServiceError("bad_arguments", detail=…)` | nothing counted |
+| arguments the tool does not take (missing, unknown, or of another type than the table names: text, a list of text, a dictionary, a count) | `ServiceError("bad_arguments", detail=…)` | nothing counted |
 | the tool's limit for this run is used up | `ServiceError("budget", detail=tool)` | nothing executed, nothing counted |
 | the web or a source refuses or fails | `ServiceError("source_error", detail=…)` | the budget is counted; other tools work |
 | no sandbox | `run_script` output status `unavailable` | the operation is refused, never weakened |
@@ -48,3 +48,4 @@ The one door to everything a workflow step may do besides a model call. A tool k
 | v2 | 2026-10-31 | `fetch_page`: the whole page, the tool the research pipelines read pages with, so the runner reaches it through the door (REQ-RUN-012, D-122) | A-34 |
 | v3 | 2026-10-31 | `run_script` status `failed` and its `result`; the dropped works of `scholar_search`; the error `bad_arguments` (findings 6, 8, 11 of the N-2.4.2 verification, D-132) | A-42 |
 | v4 | 2026-10-31 | text only: the Bounds row says what leaves the host as REQ-TLS-007 does since A-41; `result` of `run_script` only when the script reached a sandbox (findings N-3, N-4 of the N-2.4.2 re-verification) | A-44 |
+| v5 | 2026-10-31 | `bad_arguments` also for an argument of the wrong type; `evidence` of `number_check` may be one text (findings N-1, N-2 of the N-2.4.2 re-verification, D-133) | A-45 |
