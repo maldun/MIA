@@ -151,3 +151,5 @@ Not fixed, for the owner:
 - The decisions F2 to F6 of the N-2.4.1 report and the medium findings of N-2.4.2.
 
 Tests reported green (feedback, not verification): the three new tests; all `tests/test_*.py` in the image fail only in `test_amendment_report`, `test_config`, `test_harness` (incl. the case `n-planted-figure`), `test_shutdown` (the zombie without `--init`, found by the N-4.2 agent); all contract suites and integration steps.
+
+F12 (owner 2026-10-31: "align the node's output schema with IF-402"): `library/nodes/tool.web_search/2.json`, input `query` only and output a list of `{url, title, content}`, as IF-402 v2. Version 1 is not edited: it has recorded runs (the research baselines). Test `test_the_web_search_node_declares_the_output_of_if_402` (`tests/test_library.py`), red before, green after. The six research pipelines still `use` `tool.web_search@1`; moving them to `@2` is a new version of each pipeline and, by the agent-app rules, a logged dev eval run on MP-light: with the eval-spec gate. An unversioned `tool.web_search` (the planning tool `library_select`) now resolves to `@2`.

@@ -128,6 +128,22 @@ class ShippedTests(unittest.TestCase):
             self.assertTrue(lib.resolve(ref, "node")["safety"]["reads_web"])
         self.assertFalse(lib.resolve("code.chunk_text", "node")["safety"]["reads_web"])
 
+    def test_the_web_search_node_declares_the_output_of_if_402(self):
+        """TC-RUN-012: the web search node declares what the door of IF-402 returns (Verify finding F12 of N-2.4.1); version 1 stays for its recorded runs.
+
+        Example: tool.web_search@2 -> input only query, output a list of {url, title, content}; tool.web_search@1 still resolves
+        """
+        # Given: the shipped library
+        lib = L.Library(SHIPPED)
+        # When: the new and the recorded version of the web search node are read
+        new, old = lib.resolve("tool.web_search@2", "node"), lib.resolve("tool.web_search@1", "node")
+        # Then: the new one declares the input and output of IF-402, the old one is unchanged
+        self.assertEqual(new["inputs"]["schema"]["required"], ["query"])
+        self.assertEqual(list(new["inputs"]["schema"]["properties"]), ["query"])
+        self.assertEqual(new["outputs"]["schema"]["type"], "array")
+        self.assertEqual(new["outputs"]["schema"]["items"]["required"], ["url", "title", "content"])
+        self.assertEqual((old["version"], old["outputs"]["schema"]["required"]), (1, ["results"]))
+
 
 class LoadingTests(Base):
     def test_files_must_match_their_entry(self):
