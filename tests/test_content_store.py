@@ -17,7 +17,8 @@ sys.path.insert(0, HERE)
 import events as E                                       # noqa: E402
 import test_pipeline as TP                               # noqa: E402
 from content_store import ContentStore                   # noqa: E402
-from core import keep_texts                              # noqa: E402
+from core import Core, keep_texts                        # noqa: E402
+from library import Library                              # noqa: E402
 from pipeline import Runner                              # noqa: E402
 
 
@@ -133,6 +134,23 @@ class InThePipeline(unittest.TestCase):
     def test_no_store_no_files_and_the_run_is_unchanged(self):
         calls = self.go(None)
         self.assertEqual(calls[0]["payload"]["valid"], True)
+
+
+class InTheCore(unittest.TestCase):
+    def test_the_core_gives_its_runner_the_rule_that_keeps_the_chat_out(self):
+        """LG3 (Verify finding F15 of N-2.4.1): the runner that Core builds keeps the texts of every skill but the chat, unless the setting asks for them.
+
+        Example: Core(...).runner.store_texts("chat") -> False, ("summarize") -> True; with store_texts=lambda name: True -> ("chat") True
+        """
+        # Given: a Core with the shipped skills and no setting for the chat texts
+        with tempfile.TemporaryDirectory() as folder:
+            core = Core(os.path.join(REPO, "skills"), Library(os.path.join(REPO, "library")), folder, store=ContentStore(folder))
+            # When: its runner is asked which texts it keeps
+            # Then: not those of the chat, those of every other skill
+            self.assertEqual((core.runner.store_texts("chat"), core.runner.store_texts("summarize")), (False, True))
+            # Given, When, Then: the setting store_chat_texts (store_texts that keeps all) still wins
+            core = Core(os.path.join(REPO, "skills"), Library(os.path.join(REPO, "library")), folder, store_texts=lambda name: True)
+            self.assertTrue(core.runner.store_texts("chat"))
 
 
 if __name__ == "__main__":
