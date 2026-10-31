@@ -17,6 +17,7 @@ from moods import MoodTracker                             # noqa: E402
 from storage import Storage                               # noqa: E402
 from storage_files import FileBackend                     # noqa: E402
 
+A59_INSTALLED = "`categories()`" in open(os.path.join(ROOT, "contracts", "IF-102-storage-interface.md"), encoding="utf-8").read()   # IF-102 v2 (A-59)
 DAY = 24 * 3600
 START = 1767225600          # 2026-01-01 00:00 UTC, a Thursday of ISO week 2026-W01
 
@@ -102,6 +103,52 @@ class AnswersTest(unittest.TestCase):
         self.assertEqual(code_of(lambda: self.chat.vote("anna", "nope", "answer_quality", 1)), ("not_found", None))
         self.assertEqual(self.chat.score()["votes"], 0)
         self.assertEqual(self.storage.ids("votes"), [])
+
+    @mark.req("REQ-CHA-015", "IF-102")
+    def test_the_chat_service_takes_the_vote_categories_from_the_storage(self):
+        """D-162: the chat service asks the storage (IF-102 categories()) and keeps no list of its own.
+        Example: a storage that lists only "service": a vote "reactions" is invalid_vote/category and the score has only "service"."""
+        import chat_service
+
+        class OnlyService:
+            def __init__(self, store):
+                self._store = store
+
+            def categories(self):
+                return ["service"]
+
+            def __getattr__(self, name):
+                return getattr(self._store, name)
+        # Given: a chat service on a storage that lists one category
+        chat = ChatService(lambda event, payload: None, self.log, MoodTracker(os.path.join(ROOT, "moods.json")), lambda *a: "",
+                           spawn=lambda target: target(), votes=OnlyService(self.storage), wall_clock=lambda: self.now)
+        # When: a vote of another category and one of the listed one
+        with self.assertRaises(ChatError) as caught:
+            chat.vote("anna", "wave", "reactions", 1)
+        chat.vote("anna", "voice", "service", 1)
+        # Then: the storage's list decides, and the module has no copy
+        self.assertEqual((caught.exception.code, caught.exception.rule), ("invalid_vote", "category"))
+        self.assertEqual(chat.score()["categories"], {"service": 1})
+        self.assertFalse(hasattr(chat_service, "CATEGORIES"))
+
+    @unittest.skipUnless(A59_INSTALLED, "waits for amendment A-59 (IF-102 v2, categories())")
+    @mark.req("REQ-CHA-015", "IF-102")
+    def test_the_chat_service_votes_on_the_if_102_mock(self):
+        """D-162: the IF-102 mock offers categories() too, so the chat service runs on it.
+        Example: a vote "service" +1 on the mock gives the score {"answer_quality": 0, "reactions": 0, "character_behaviour": 0, "service": 1}."""
+        mocks = os.path.join(ROOT, "tests", "helpers", "mocks")
+        sys.path.insert(0, mocks)          # only for this import: the mocks have a graph_rules of their own, which must not shadow the real one
+        try:
+            from if_102_storage import StorageMock
+        finally:
+            sys.path.remove(mocks)
+        # Given: a chat service on the mock of IF-102
+        chat = ChatService(lambda event, payload: None, self.log, MoodTracker(os.path.join(ROOT, "moods.json")), lambda *a: "",
+                           spawn=lambda target: target(), votes=StorageMock(), wall_clock=lambda: self.now)
+        # When: one vote
+        chat.vote("anna", "voice", "service", 1)
+        # Then: the four categories are scored
+        self.assertEqual(chat.score()["categories"], {"answer_quality": 0, "reactions": 0, "character_behaviour": 0, "service": 1})
 
     @mark.req("REQ-CHV-006")
     @mark.req("REQ-CHA-015")

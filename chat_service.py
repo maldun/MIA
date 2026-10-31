@@ -41,7 +41,6 @@ import time
 try:
     from .chat_log import utc_now, MAX_PAGE
     from .pipeline_model import UNREACHABLE
-    from .record_tables import CATEGORIES
     from .storage import StorageError
     from .speech_text import speech_text
     from .task_monitor import TaskMonitor
@@ -49,7 +48,6 @@ try:
 except ImportError:  # used as plain script / in tests
     from chat_log import utc_now, MAX_PAGE
     from pipeline_model import UNREACHABLE
-    from record_tables import CATEGORIES
     from storage import StorageError
     from speech_text import speech_text
     from task_monitor import TaskMonitor
@@ -383,7 +381,7 @@ class ChatService:
 
     def vote(self, account, subject, category, value):
         """a plus or a minus, kept with user, time, subject and category (REQ-CHA-015); the score event follows"""
-        if category not in CATEGORIES:
+        if category not in self._votes.categories():     # IF-102 names the categories (D-162); N-2 imports nothing of N-3's tables
             raise ChatError("invalid_vote", "category")
         if isinstance(value, bool) or value not in (1, -1):
             raise ChatError("invalid_vote", "value")
@@ -513,8 +511,10 @@ class ChatService:
 
     def score(self):
         """sums per category and overall, and the same per ISO week of the vote (oldest first, only weeks with a vote)"""
+        names = self._votes.categories()
+
         def sums(votes):
-            categories = {c: sum(v["value"] for v in votes if v["category"] == c) for c in CATEGORIES}
+            categories = {c: sum(v["value"] for v in votes if v["category"] == c) for c in names}
             return {"overall": sum(categories.values()), "categories": categories}
         votes = [self._votes.get("votes", i)["doc"] for i in self._votes.ids("votes")]
         weeks = {}

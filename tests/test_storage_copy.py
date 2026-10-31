@@ -93,6 +93,31 @@ class Copy(unittest.TestCase):
         self.assertEqual(caught.exception.code, "conflict")
         self.assertEqual(tree(self.path("b")), before)
 
+    @mark.req("REQ-SLY-004", "REQ-SLY-009")
+    def test_a_seed_with_an_invalid_document_or_a_gap_in_the_versions_is_refused_and_writes_nothing(self):
+        """Finding F1 of the verification: a copy checks what it writes, as put does.
+        Example: a library folder with a workflow p->d->p is refused as ("invalid", "cycle"); versions [1, 3] as ("invalid", "versions")."""
+        # Given: three broken library folders, written past the rules, and a target with one record
+        cycle = {"nodes": [{"id": "p", "kind": "process"}, {"id": "d", "kind": "data"}], "edges": [{"from": "p", "to": "d"}, {"from": "d", "to": "p"}]}
+        entry = lambda record_id, version, doc: {"id": record_id, "version": version, "author": "anna", "time": "2026-01-01T00:00:00Z", "doc": doc}
+        broken = {"cycle": [("w", entry("w", 1, cycle))], "versions": [("w", entry("w", 1, LOOKUP)), ("w", entry("w", 3, LOOKUP))],
+                  "id": [("w", entry("other", 1, LOOKUP))]}
+        target = Storage(FileBackend(self.path("b")))
+        target.put("workflows", "kept", LOOKUP, "anna")
+        before = tree(self.path("b"))
+        for rule, entries in broken.items():
+            folder = FileBackend(self.path("broken-" + rule))
+            folder.append("workflows", "good", entry("good", 1, LOOKUP))
+            for record_id, raw in entries:
+                folder.append("workflows", record_id, raw)
+            # When: the folder is seeded
+            with self.assertRaises(StorageError) as caught:
+                seed_library(target, folder.root)
+            # Then: refused with the rule and the record, and nothing of the folder is written
+            self.assertEqual((caught.exception.code, caught.exception.rule), ("invalid", rule))
+            self.assertEqual((caught.exception.detail["table"], caught.exception.detail["id"]), ("workflows", "w"))
+            self.assertEqual(tree(self.path("b")), before)
+
     @mark.req("REQ-SLY-007")
     def test_an_unknown_table_is_refused(self):
         with self.assertRaises(StorageError):

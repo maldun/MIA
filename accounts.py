@@ -9,6 +9,11 @@ import hashlib
 import hmac
 import os
 
+try:
+    from .storage import StorageError
+except ImportError:  # used as plain script / in tests
+    from storage import StorageError
+
 N, R, P = 2 ** 14, 8, 1          # scrypt: about 16 MiB and tens of milliseconds per check
 KEY_BYTES = 32
 
@@ -32,7 +37,12 @@ def create(store, name, password, author):
     _check_input(name, password)
     if name in store.ids("accounts"):
         raise ValueError("the account exists: %s" % name)
-    store.put("accounts", name, dict(_record(password), name=name), author)
+    try:                                         # expected_version 0: a creation that raced another one cannot change its password (F3)
+        store.put("accounts", name, dict(_record(password), name=name), author, expected_version=0)
+    except StorageError as err:
+        if err.code != "conflict":
+            raise
+        raise ValueError("the account exists: %s" % name) from None
 
 
 def set_password(store, name, password, author):

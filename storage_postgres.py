@@ -9,6 +9,7 @@ no database driver.
     hears every write, its own included
 """
 import json
+import logging
 import os
 import threading
 
@@ -20,6 +21,8 @@ except ImportError:  # used as plain script / in tests
     from storage import StorageError
 
 CHANNEL = "mia_changes"
+RECONNECT_S = 1
+log = logging.getLogger("storage")
 SCHEMA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "deploy", "db")
 
 
@@ -73,23 +76,31 @@ class PostgresBackend:
         """callback(event) for every notice of any instance, on a thread of its own."""
         if self._listener:
             return
-        connection = psycopg.connect(self.url, autocommit=True)
-        connection.execute("LISTEN " + CHANNEL)
         ready = threading.Event()
-
-        def loop():
-            ready.set()
-            try:
-                while not self._stop.is_set():
-                    for notice in connection.notifies(timeout=0.2):
-                        callback(json.loads(notice.payload))
-            except psycopg.OperationalError:        # the server went away: the listener ends, a new Storage listens again
-                pass
-            finally:
-                connection.close()
-        self._listener = threading.Thread(target=loop, daemon=True, name="storage-listen")
+        self._listener = threading.Thread(target=self._listen, args=(callback, ready), daemon=True, name="storage-listen")
         self._listener.start()
         ready.wait(2)
+
+    def _listen(self, callback, ready):
+        """Listens until close(). A connection the server drops (a restart of the database) is opened again after a pause, so the instance keeps
+        hearing the others (F2); the notices sent in that gap are lost."""
+        while not self._stop.is_set():
+            try:
+                with psycopg.connect(self.url, autocommit=True) as connection:
+                    connection.execute("LISTEN " + CHANNEL)
+                    ready.set()
+                    while not self._stop.is_set():
+                        for notice in connection.notifies(timeout=0.2):
+                            self._hear(callback, notice.payload)
+            except psycopg.OperationalError:
+                self._stop.wait(RECONNECT_S)
+
+    @staticmethod
+    def _hear(callback, payload):
+        try:
+            callback(json.loads(payload))
+        except Exception:                           # anyone may notify on the channel: a bad notice must not end the listener
+            log.exception("a notice on %s failed: %.200s", CHANNEL, payload)
 
     def close(self):
         self._stop.set()
