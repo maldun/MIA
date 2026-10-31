@@ -7,7 +7,7 @@ Migration between the file storage and the database, and the library export and 
   python -m MIA.migrate library-seed   --data DIR --folder DIR
 
 Each direction is one command and both use the same code (storage_copy.copy_records), so a round trip gives back the files. A second run copies
-nothing; a target with a different history is a conflict (exit code 1) and nothing is written. The database side is opened only when it is needed,
+nothing; a target with a different history is a conflict, a record that put would refuse is named (exit code 1 for both) and nothing is written. The database side is opened only when it is needed,
 so a file-only installation never imports a database driver.
 """
 import argparse
@@ -61,10 +61,18 @@ def main(argv=None, open_db=_open_postgres):
             else:
                 counts = copy_records(source, target, list(table_definitions()))
     except StorageError as err:
-        print("conflict: %s (nothing was written)" % (err.detail,) if err.code == "conflict" else "error: %s" % err)
+        print(_explain(err))
         return 1
     print("%scopied %d records, skipped %d, added %d versions" % ("dry run: " if args.dry_run else "", counts["copied"], counts["skipped"], counts["added_versions"]))
     return 0
+
+
+def _explain(err):
+    if err.code == "conflict":
+        return "conflict: %s (nothing was written)" % (err.detail,)
+    if err.code == "invalid":
+        return "refused: %s/%s (%s: %s) (nothing was written)" % (err.detail["table"], err.detail["id"], err.rule, err.detail["detail"])
+    return "error: %s" % err
 
 
 class _Discard:

@@ -38,6 +38,14 @@ def table_definitions():
     return tables
 
 
+def validate(table, doc):
+    """Raises StorageError("invalid", rule, detail) for a document the table definitions refuse (REQ-SLY-004); put and the copies use it."""
+    validator = graph_tables if table in graph_tables.TABLES else record_tables
+    broken = validator.validate(table, doc)
+    if broken:
+        raise StorageError("invalid", rule=broken["rule"], detail=broken["detail"])
+
+
 class Storage:
     def __init__(self, backend):
         self.backend = backend
@@ -51,16 +59,10 @@ class Storage:
         if table not in self.tables:
             raise StorageError("unknown_table", detail=table)
 
-    def _validate(self, table, doc):
-        validator = graph_tables if table in graph_tables.TABLES else record_tables
-        broken = validator.validate(table, doc)
-        if broken:
-            raise StorageError("invalid", rule=broken["rule"], detail=broken["detail"])
-
     def put(self, table, record_id, doc, author, expected_version=None):
         """Write a new version; returns {"version": n}."""
         self._check(table)
-        self._validate(table, doc)
+        validate(table, doc)
         with self._lock:                      # one writer at a time per process: the numbers of the versions have no gap
             current = len(self.backend.versions(table, record_id))
             if expected_version is not None and expected_version != current:

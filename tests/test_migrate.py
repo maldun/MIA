@@ -62,6 +62,21 @@ class Migrate(unittest.TestCase):
         self.assertIn("conflict", text)
         self.assertEqual(tree(self.db), before)
 
+    @mark.req("REQ-SLY-004", "REQ-SLY-007")
+    def test_a_record_that_put_would_refuse_is_named_and_nothing_is_moved(self):
+        """Finding F1: files-to-db validates as put does.
+        Example: a data folder with a vote of category "mood" gives exit code 1, "refused: votes/v (category ...)" and an empty database."""
+        # Given: a vote written into the data folder past the rules
+        FileBackend(self.data).append("votes", "v", {"id": "v", "version": 1, "author": "anna", "time": "2026-01-01T00:00:00Z",
+                                                     "doc": {"user": "anna", "subject": "m", "category": "mood", "value": 1}})
+        # When: the folder is moved
+        code, text = self.run_command("files-to-db", "--data", self.data, "--database-url", "x")
+        # Then: refused, with the record and the rule, and nothing written
+        self.assertEqual(code, 1)
+        self.assertIn("refused: votes/v (category", text)
+        self.assertIn("nothing was written", text)
+        self.assertFalse(os.path.exists(self.db))
+
     @mark.req("REQ-SLY-009")
     def test_library_export_and_seed_are_one_command_each(self):
         """TC-SLY-009 through the command line: the library of a data folder into a folder and from it into an empty data folder."""

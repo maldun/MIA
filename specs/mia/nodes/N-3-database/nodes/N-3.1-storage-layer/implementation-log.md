@@ -63,3 +63,10 @@ None.
 
 ## Hand-over of N-3.1
 All eight tasks are done; every task has a commit and tests. Open for the integration step of N-3 (owner, amendments): the real providers in `tests/helpers/contract.py` for IF-301, IF-302 and IF-102 (error class translation), and the text of IF-102.
+
+## Verify findings (verification-report.md, decisions D-158), branch v1-n31b
+Each fix is test-first: the new test was red before the change and green after (reported, not verified).
+
+| Finding (report) | Fix | Covered by test (red before) |
+|---|---|---|
+| F1 seed and migrate wrote without validation or version check | `storage_copy.copy_records` checks every version of the source before the first write: the entry's `id` is the record's, versions run 1..n, each document passes `storage.validate` (the function `put` uses, now module level). A refused record refuses the whole copy with `invalid` (rule, `detail.table`, `detail.id`); `migrate.py` prints "refused: table/id (rule: detail) (nothing was written)", exit 1 | `test_storage_copy.test_a_seed_with_an_invalid_document_or_a_gap_in_the_versions_is_refused_and_writes_nothing`, `test_migrate.test_a_record_that_put_would_refuse_is_named_and_nothing_is_moved` |
