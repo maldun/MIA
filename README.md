@@ -169,7 +169,7 @@ Stopping MIA:
 ===================
 
 Ctrl+C in the terminal, the commands `/break!` and `/goodnight!` (the latter lets MIA dream first) and SIGTERM all lead to the same orderly shutdown:
-MIA saves its history, stops the HTTPS proxy and then the speech process, one step after the other with a pause of `shutdown_pause` seconds in between.
+MIA saves its history, closes the database, stops the HTTPS proxy and then the speech process, one step after the other with a pause of `shutdown_pause` seconds in between.
 The helper processes run in their own session, so Ctrl+C reaches only MIA. Before, everything was signalled at the same instant and the commands killed the whole process group.
 A helper that does not end within 10 seconds is killed. The Ollama container keeps running.
 

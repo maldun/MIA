@@ -23,6 +23,7 @@ Before, Ctrl+C reached MIA and all its helper processes (speech, https proxy) in
 commands /break! and /goodnight! killed the whole process group with SIGTERM. Now the helper processes run in their own
 session (Ctrl+C reaches only MIA), and MIA stops them one after the other with a short pause in between:
 Ctrl+C, /break!, /goodnight! and SIGTERM all end up in the same orderly path.
+The order (REQ-OPR-004): save the history, close the database, then stop the helpers.
 """
 import os
 import signal
@@ -78,6 +79,15 @@ def stop_process(proc, name="process", timeout=STOP_TIMEOUT, group=False):
             pass
         proc.wait()
         return False
+
+def close_database(storage):
+    """
+    REQ-OPR-004: closes the connection of the database after the last write. Every write is stored when it is made
+    (the file backend renames, PostgreSQL commits at once), so closing loses nothing; the file backend has nothing to close.
+    """
+    close = getattr(getattr(storage, "backend", None), "close", None)
+    if close is not None:
+        close()
 
 def graceful_shutdown(steps, pause=DEFAULT_PAUSE):
     """

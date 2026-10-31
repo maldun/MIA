@@ -21,12 +21,12 @@ import signal
 import subprocess
 import sys
 import threading
-from .web_app import socketio, app, comm, WEB_PORT, scheduler, time_update_trigger
+from .web_app import socketio, app, comm, WEB_PORT, scheduler, time_update_trigger, _votes_store
 from .utils import get_own_ip
 from .tls_proxy import start_https_proxy
 from . import tailscale_serve
 from .constants import HTTPS_PORT_KEY, TAILSCALE_KEY
-from .shutdown import install_term_handler, stop_process, graceful_shutdown, DEFAULT_PAUSE
+from .shutdown import install_term_handler, stop_process, graceful_shutdown, close_database, DEFAULT_PAUSE
 
 from .constants import CFG_FILE, LOG_FNAME
 from .config import ensure as ensure_config, warning as config_warning
@@ -98,6 +98,7 @@ if __name__ == "__main__":
     finally:
         # one step after the other with a short pause, instead of everything at the same instant
         graceful_shutdown([("save history", comm.dump_history),
+                           ("close the database", lambda: close_database(_votes_store)),
                            ("stop tailscale serve", lambda: tailscale_serve.stop_serve(WEB_PORT) if tailscale_started else None),
                            ("stop https proxy", lambda: stop_process(https_proc,"https proxy",group=True)),
                            ("stop speech process", lambda: stop_process(speak_proc,"speech process",group=True))],

@@ -32,3 +32,17 @@ Open questions for the owner:
 - Touches beyond the plan's list (approved by D-120): `tests/test_config.py`, `__main__.py`, `README.md`.
 - Tests reported green (feedback, not verification), in the image: `test_missing_options` (5), `test_config` (14), `test_config_local`, `test_deploy`, `test_requirements`.
 - Open for Verify: the warning ignores `setup_cfg.local.json` (an option set only in the local overlay is still reported missing); no requirement says whether the overlay counts.
+
+## T-02 Orderly shutdown with the database (2026-10-31, done) – REQ-OPR-004
+
+| Requirement | Where it is met | Test |
+|---|---|---|
+| REQ-OPR-004 orderly shutdown, memory saved | `shutdown.close_database(storage)` (new): closes the backend when it has `close()` (PostgreSQL), nothing for the file backend or None; `__main__.py` runs it as the step "close the database" right after "save history" and before the helpers stop | `tests/test_shutdown_database.py` (5): close once / nothing to close; SIGTERM, Ctrl+C and /goodnight! on the harness each save the history and keep the memory record, identical on the next start, in the order history, database, proxy, speech; `tests/test_shutdown.py` `MiaCodeUsesIt` asserts the step in `__main__.py` after "save history" |
+
+- `tests/shutdown_harness.py` (test support, not protected) takes an optional data folder: a history in memory saved to `memories.json` at shutdown and one memory record in a file database (`Storage(FileBackend)`, `MemoryRecords`), closed by `close_database`.
+- /goodnight! is tested as the signal it ends in (SIGINT to MIA itself, after dreaming): `test_shutdown.test_commands_ask_for_an_orderly_shutdown` already shows that /goodnight! dreams and then requests the shutdown; dreaming needs the model and is not run here.
+- Red first: the 5 new tests failed on the old `shutdown.py` (no `close_database`: 2 errors, 3 harness failures); the new assertion in `test_shutdown.py` fails on the old `__main__.py`.
+- Touches beyond `shutdown.py` (trivial, logged): `__main__.py` (one import, one step), `README.md` ("Stopping MIA" names the database), `tests/test_shutdown.py`, `tests/shutdown_harness.py`.
+- Local coder: `tests/test_shutdown_database.py` typed by the local model (task `n42-t02-shutdown-db`, 1 attempt, 59 s); fixture lines and every statement found verbatim by script; verdict `ok`.
+- Tests reported green (feedback, not verification), in the image: `test_shutdown_database` (5), `test_storage` (12); `test_shutdown` 14 of 15 (the known failure `test_group_stop_also_ends_the_helpers_of_the_process`, also on master: in the container the killed `sleep` stays a zombie without an init, so `os.kill(pid, 0)` still finds it; checked: with `podman run --init` all 15 pass). Proposal: `--init` in `tools/run_in_image.sh` (outside this node; owner decides).
+- Open for Verify: the app's database today is the file backend (`web_app._votes_store`); the PostgreSQL path of `close_database` is shown with a fake backend only. Requests of web threads that are still running after the close would fail (the web server has stopped accepting by then).

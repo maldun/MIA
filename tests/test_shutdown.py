@@ -180,6 +180,8 @@ class MiaCodeUsesIt(unittest.TestCase):
         self.assertIn("subprocess.Popen(cmd_speak,start_new_session=True)", source)
         self.assertIn("install_term_handler()", source)
         self.assertIn("graceful_shutdown(", source)
+        # REQ-OPR-004: the database is closed right after the history is saved, before the helpers stop
+        self.assertLess(source.index('("save history", comm.dump_history)'), source.index('("close the database", lambda: close_database(_votes_store))'))
         self.assertNotIn("killpg", source)
         self.assertNotIn("exchange_file", source)   # was never defined (NameError on Ctrl+C)
         with open(os.path.join(REPO, "tls_proxy.py")) as fp:
