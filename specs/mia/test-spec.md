@@ -112,7 +112,7 @@ Setup and expected result are in the docstring of each test (the golden examples
 | TC-IF-105-03 | IF-105 | Contract | 1 (mock) and 2 (real) | golden 3: with a fake model two runs with the same inputs and options have equal outputs and equal event types and payloads. | exact |
 | TC-IF-105-04 | IF-105 | Contract | 1 (mock) and 2 (real) | a budget below the estimate is refused with the budget named; cost 0; run_start and run_end exist. | exact |
 | TC-IF-111-01 | IF-111 | Contract | 1 (mock) and 2 (real) | golden 1: after ready, an expression and the mouth follow the messages | exact |
-| TC-IF-111-02 | IF-111 | Contract | 1 (mock) and 2 (real) | golden 3: an unknown expression keeps the current one | exact |
+| TC-IF-111-02 | IF-111 | Contract | 1 (mock) and 2 (real) | golden 3: an unknown expression shows `neutral` (A-48) | exact |
 | TC-IF-111-03 | IF-111 | Contract | 1 (mock) and 2 (real) | golden 3: a foreign origin, malformed JSON and an unknown type change nothing and raise nothing | exact |
 | TC-IF-111-04 | IF-111 | Contract | 1 (mock) and 2 (real) | golden 3: the covered area counts negative or missing values as 0 | exact |
 | TC-IF-111-05 | IF-111 | Contract | 1 (mock) and 2 (real) | golden 2: a character that cannot load says failed once | exact |
