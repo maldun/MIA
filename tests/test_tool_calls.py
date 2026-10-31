@@ -262,6 +262,22 @@ class ToolCallsTests(unittest.TestCase):
         self.assertEqual((code, t.used("r1")), ("bad_arguments", {}))
 
     @mark.req("REQ-TLS-001")
+    def test_arguments_of_the_wrong_type_are_refused_before_they_count(self):
+        """TC-TLS-001 (N-2 of the N-2.4.2 re-verification, D-133): an argument of a type IF-402 does not name is `bad_arguments` and nothing is counted.
+
+        Example: number_check evidence 1200 -> bad_arguments; web_search query ["a"] -> bad_arguments; schema_check schema "x" -> bad_arguments; used {}
+        """
+        # Given: the door and a run
+        t, run = tools(), {"id": "r1", "limits": {}}
+        # When: tools get arguments of the wrong type
+        codes = [error_of(lambda: t.call(run, "number_check", {"claim": "It is 1,200 m", "evidence": 1200}))[0],
+                 error_of(lambda: t.call(run, "web_search", {"query": ["a"]}))[0],
+                 error_of(lambda: t.call(run, "schema_check", {"value": {}, "schema": "x"}))[0],
+                 error_of(lambda: t.call(run, "fetch_page", {"url": "https://example.org/a", "max_chars": "many"}))[0]]
+        # Then: each is refused by name and nothing was counted
+        self.assertEqual((codes, t.used("r1")), (["bad_arguments"] * 4, {}))
+
+    @mark.req("REQ-TLS-001")
     def test_concurrent_calls_keep_the_limit(self):
         """TC-TLS-001 (finding 10 of the N-2.4.2 verification, D-132): calls from many threads of one run never pass its limit (the runner maps with threads).
 

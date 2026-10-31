@@ -32,6 +32,12 @@ except ImportError:  # used as plain script / in tests
 TRUST = {"number_check": "code", "quote_in_source": "code", "schema_check": "code", "run_script": "code",
          "web_search": "web", "fetch_page": "web", "fetch_passages": "web", "scholar_search": "web", "source_record": "web"}
 TOOLS = tuple(TRUST)
+TEXT, OPTIONAL_TEXT, OPTIONAL_COUNT = (str,), (str, type(None)), (int, type(None))
+# the types of the arguments IF-402 names; an argument not listed may be any value (schema_check's value). A string of evidence is one passage (N-1).
+ARGUMENT_TYPES = {"number_check": {"claim": TEXT, "evidence": (str, list)}, "quote_in_source": {"quote": TEXT, "source_text": TEXT},
+                  "schema_check": {"schema": (dict,)}, "run_script": {"code": TEXT, "inputs": (dict,)}, "web_search": {"query": TEXT},
+                  "fetch_page": {"url": TEXT, "max_chars": OPTIONAL_COUNT}, "fetch_passages": {"url": TEXT, "question": TEXT},
+                  "scholar_search": {"query": TEXT, "until": OPTIONAL_TEXT, "since": OPTIONAL_TEXT}, "source_record": {"ref": TEXT}}
 EXTERNAL = ("web_search", "fetch_page", "fetch_passages", "scholar_search", "source_record")
 
 
@@ -42,6 +48,14 @@ def build_tool_calls(web_tools, scholar, trust_table, sandbox):
     return ToolCalls(web_search=web_tools["web_search"][0], fetch_page=web_tools["fetch_page"][0], scholar=scholar, trust=trust_table.for_url,
                      sandbox=sandbox, work_trust=trust_table.for_work, retractions=scholar.verify_retraction,
                      work_lookup=scholar.crossref.lookup if scholar.crossref is not None else None)
+
+
+def _is_a(value, kinds):
+    if isinstance(value, bool) and bool not in kinds:            # True is an int to Python, not a count to IF-402
+        return False
+    if isinstance(value, list):
+        return list in kinds and all(isinstance(item, str) for item in value)
+    return isinstance(value, kinds)
 
 
 class ToolCallError(Exception):
@@ -75,6 +89,9 @@ class ToolCalls:
             inspect.signature(method).bind(**args)
         except TypeError as exc:
             raise ToolCallError("bad_arguments", str(exc)) from exc
+        wrong = [name for name, kinds in ARGUMENT_TYPES[tool].items() if name in args and not _is_a(args[name], kinds)]
+        if wrong:                                   # refused before it counts, like a missing argument (N-2, D-133)
+            raise ToolCallError("bad_arguments", "%s: wrong type of %s" % (tool, ", ".join(wrong)))
         with self._lock:
             used = self._used.setdefault(run["id"], {})
             limit = (run.get("limits") or {}).get(tool)
