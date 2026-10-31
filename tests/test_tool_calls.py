@@ -235,6 +235,20 @@ class ToolCallsTests(unittest.TestCase):
         self.assertEqual(t.used("r1"), {"fetch_page": 1})
 
     @mark.req("REQ-TLS-001")
+    def test_evidence_as_one_text_is_read_as_one_passage(self):
+        """TC-TLS-001 (N-1 of the N-2.4.2 re-verification): evidence given as one string, not a list, is one passage, never cut into single characters.
+
+        Example: number_check {"claim": "The tower is 330 m high", "evidence": "It is 330 m high."} -> pass, the same as with ["It is 330 m high."]
+        """
+        # Given: the door and the same evidence as a string and as a list
+        t, run = tools(), {"id": "r1", "limits": {}}
+        # When: both are checked
+        as_text = t.call(run, "number_check", {"claim": "The tower is 330 m high", "evidence": "It is 330 m high."})
+        as_list = t.call(run, "number_check", {"claim": "The tower is 330 m high", "evidence": ["It is 330 m high."]})
+        # Then: both pass
+        self.assertEqual((as_text["output"]["status"], as_list["output"]["status"]), ("pass", "pass"))
+
+    @mark.req("REQ-TLS-001")
     def test_wrong_arguments_are_refused_before_they_count(self):
         """TC-TLS-001 (finding 8 of the N-2.4.2 verification, D-132): a call with arguments the tool does not take is `bad_arguments` and is not counted.
 

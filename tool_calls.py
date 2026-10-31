@@ -95,7 +95,8 @@ class ToolCalls:
     # --- code checks (REQ-TLS-001) ---
 
     def _number_check(self, claim, evidence):
-        found = checks.number_check(claim, "\n".join(evidence))
+        # one string is one passage: joined as a list it would be cut into single characters (N-1 of the N-2.4.2 re-verification)
+        found = checks.number_check(claim, evidence if isinstance(evidence, str) else "\n".join(evidence))
         # IF-402 knows three statuses: nothing to compare is not a verdict either way
         status = found["status"] if found["status"] in ("pass", "fail") else "inconclusive"
         return {"status": status, "detail": found["detail"]}
