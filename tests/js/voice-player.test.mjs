@@ -337,7 +337,7 @@ function page({ stored = {}, missing = [] } = {}) {
   const audio = specAudio(missing);
   const els = { muteToggle: element(), muteLabel: element(), muteIcon: element(), volume: element(), hint: element() };
   const sound = initSound({ audio, socket, character: { speaking: (v) => speaking.push(v) }, storage, ...els, t: (key) => key, win });
-  const server = (name, data) => handlers[name](data);
+  const server = (name, data) => handlers[name]?.(data);              // an event the page does not listen to is ignored, as by socket.io
   return { audio, socket, values, speaking, warnings, els, sound, server };
 }
 
@@ -437,4 +437,24 @@ test('TC-VPB-003: a broken line that fails before the next one arrives gives one
   assert.deepEqual(ids(p.audio), ['line-000002']);
   assert.deepEqual(p.socket.sent.filter(([name]) => name === 'audio_ended'), [['audio_ended', { serial: 2 }]]);
   assert.equal(p.sound.playing, false);
+});
+
+// mark.req("REQ-VPB-002")
+test('TC-VPB-002: after the page\'s Stop the lines of the stopped answer that still arrive are dropped; the next answer\'s lines play (A3, D-157)', async () => {
+  // Given: the page plays a line of an answer
+  const p = page();
+  p.server('audio_reload', reload('a', 1));
+  await flush(); await flush();
+  // When: the user stops, a late line of that answer arrives, then the next answer begins with its own line
+  p.sound.stop();
+  p.server('audio_reload', reload('late', 2));
+  await flush(); await flush();
+  const afterStop = ids(p.audio);
+  p.server('chat_start', { id: 'm2', role: 'assistant' });
+  p.server('audio_reload', reload('next', 3));
+  await flush(); await flush();
+  // Then: the late line was not played, the next answer's line was
+  assert.deepEqual(afterStop, ['a']);
+  assert.equal(p.sound.queued, 0);
+  assert.deepEqual(ids(p.audio), ['a', 'next']);
 });
