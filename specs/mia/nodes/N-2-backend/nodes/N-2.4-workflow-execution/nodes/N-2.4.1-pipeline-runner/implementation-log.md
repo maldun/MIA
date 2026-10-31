@@ -69,3 +69,21 @@ Live check (feedback): with the image on the host network, a client on a closed 
 Local coder: `tests/test_runner_model_server.py` (task `run0203-tests`, 2 attempts, the second passed its check); compared with the instruction by script: identical, verdict `ok`. Red before the change (no `UNREACHABLE`), green after.
 
 Tests reported green (feedback, not verification): `tests/test_runner_model_server.py` (6), `tests/test_model_turns.py`, `tests/test_runner_budgets.py`, `tests/test_run_workflow.py`, `tests/test_pipeline.py`, `tests/test_chat_backend.py`; all `tests/test_*.py` in the image fail only as on master; all contract suites and integration steps.
+
+## T-04 Internet tasks only on command (2026-10-31, done) – REQ-RUN-001
+
+Before the task the property held by construction only: a chat message runs the skill `chat` (one node, `converse`, no tools), internet skills start through commands (`/lookup`, `/search`, `/review`), and the `triggers` of the skills are parsed but used nowhere. Now it is enforced:
+
+| Requirement | Where it is met | Test |
+|---|---|---|
+| REQ-RUN-001 internet tasks only by a command | `pipeline.reaches_internet(skill)`: a web tool of `INTERNET_TOOLS` or `max_safety.reads_web`; `Runner.run(..., started_by=)`: a run that reaches the internet and was started by a `"message"` raises `PipelineError` before any step; `validate_pipeline` reports an internet skill that declares `triggers` (so `Core.check` at start and every run refuse it); `web_app.run_chat_exchange` passes `started_by="message"` | `tests/test_runner_internet_by_command.py` (6, one of them over all shipped skills: `research` reaches the internet, no internet skill has triggers) |
+
+Decisions made while building:
+- `started_by` defaults to `"command"`, so the command paths, the harness, `reproduce.py` and `run_workflow.py` stay as they are; only the one entry of chat messages says `"message"`. A safer default (`"message"`) would need every command path changed (outside the task); proposed for the wiring of T-07.
+- `INTERNET_TOOLS` names the web and scholarly tools of N-2.4.2 (IF-402) besides the two the runner has today.
+
+File outside T-04's list: `web_app.py` (one argument at the chat entry, the wiring the owner approved in T-02).
+
+Local coder: `tests/test_runner_internet_by_command.py` (task `run01-tests`, 1 attempt, 53 s); compared with the instruction by script: identical, verdict `ok`. Red before the change (no `reaches_internet`), green after.
+
+Tests reported green (feedback, not verification): `tests/test_runner_internet_by_command.py` (6), `tests/test_pipeline.py`; all `tests/test_*.py` in the image fail only as on master; all contract suites and integration steps.

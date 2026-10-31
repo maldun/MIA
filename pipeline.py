@@ -172,6 +172,14 @@ def _condition_problems(cond, where):
 
 # --- validation of a pipeline file ----------------------------------------------------------------------------------
 
+INTERNET_TOOLS = ("web_search", "fetch_page", "fetch_passages", "scholar_search", "source_record")
+
+
+def reaches_internet(skill):
+    """a skill whose task reaches the internet: it lists a web tool or allows scripts that read the web (REQ-RUN-001)"""
+    return bool(set(skill.get("tools") or []) & set(INTERNET_TOOLS)) or bool((skill.get("max_safety") or {}).get("reads_web"))
+
+
 def validate_pipeline(graph, tools=None, functions=None, skill=None):
     """returns the problems of a pipeline (empty = valid); tools/functions: names that exist (None = not checked); skill: the prompts, schemas and tools are checked against it"""
     problems = []
@@ -247,6 +255,8 @@ def validate_pipeline(graph, tools=None, functions=None, skill=None):
     walk(graph["nodes"], "pipeline")
     if not graph.get("result"):
         problems.append("the pipeline needs 'result' (the context name of the final answer)")
+    if skill and reaches_internet(skill) and skill.get("triggers"):
+        problems.append("a skill that reaches the internet starts only by a command: remove its triggers %s (REQ-RUN-001)" % skill["triggers"])
     return problems
 
 
@@ -296,7 +306,11 @@ class Runner:
         self.clock = clock
 
     # -- public ----
-    def run(self, skill, graph, inputs, on_event=None, should_stop=None, ask=None, functions=None, tools=None, task=None):
+    def run(self, skill, graph, inputs, on_event=None, should_stop=None, ask=None, functions=None, tools=None, task=None, started_by="command"):
+        """started_by: "command" (a command of a user, the harness, a workflow run) or "message" (a chat message); a task that reaches the internet
+        is refused when a message started it, before any step runs (REQ-RUN-001)"""
+        if started_by == "message" and reaches_internet(skill):
+            raise PipelineError("'%s' reaches the internet and starts only by a command, not by a chat message" % skill.get("name"))
         all_functions = {**self.functions, **(functions or {})}
         all_tools = {**self.tools, **{k: v if isinstance(v, Tool) else Tool(v, None) for k, v in (tools or {}).items()}}
         problems = validate_pipeline(graph, tools=all_tools, functions=all_functions, skill=skill)

@@ -597,7 +597,7 @@ for _name, _problems in core.check(functions={"converse": None}).items():
 
 def run_chat_exchange(text, on_delta, on_emotion, should_stop):
     """the answer of the chat skill: the pipeline runs `converse` (the exchange with MIA) and reports its steps to the page"""
-    result = core.run("chat", {"text": text}, on_event=lambda event: chat_service.pipeline_event(event), should_stop=should_stop,
+    result = core.run("chat", {"text": text}, started_by="message", on_event=lambda event: chat_service.pipeline_event(event), should_stop=should_stop,
                       functions={"converse": lambda text: converse(text, on_delta, on_emotion, should_stop)})
     if result.status == "error":
         raise RuntimeError(result.error)
