@@ -170,3 +170,8 @@ To install on goal/v1 after the merge: `bash tools/apply_amendment_a52.sh --do` 
 
 ## V-10 decided by D-153 (corrects D-149), 2026-10-31
 The code stays (after 5 failed logins within a minute the 6th attempt is refused, 429 `throttled`). REQ-API-004's text and acceptance criterion now say exactly that, history line "2026-10-31 D-153 (corrects D-149)". Commit 979d9fd changed only this log (no code or test), so nothing is reverted; the options (a)/(b) of the V-10 entry above are settled as (b).
+
+## Re-verification findings (D-167), 2026-10-31, branch v1-fix167
+| Finding | Status | Tests red before / green after (reported, in the image) | Notes |
+|---|---|---|---|
+| R-3 the login throttle kept an entry for every user name ever tried | done | `tests/test_api_sessions.py` `test_failed_logins_older_than_a_minute_leave_no_entry` (3,000 distinct wrong names, fake clock + 61 s, one more failure): **red** (3,001 entries), **green** after; test_api_sessions 9, test_accounts_api 30, test_accounts_wiring 6, IF-101 suite 64 (2 skipped) OK | `api_sessions.login` first drops every failure older than 60 s and every name left without one (`_forget_old_failures`), then checks the account. Cost per login: the failures of the last minute. The test skips the password hash (`accounts.verify` patched to False; 30 ms each, not under test) |
