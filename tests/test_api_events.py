@@ -6,6 +6,7 @@ Needs flask: run with the image:  bash tools/run_in_image.sh tests/test_api_even
 """
 import importlib
 import os
+import shutil
 import sys
 import tempfile
 import time
@@ -16,9 +17,25 @@ REPO = os.path.dirname(HERE)
 sys.path.insert(0, REPO)
 sys.path.insert(0, os.path.join(HERE, "helpers"))
 sys.path.insert(0, os.path.join(HERE, "helpers", "mocks"))
-_LINK_DIR = tempfile.mkdtemp()
-os.symlink(REPO, os.path.join(_LINK_DIR, "MIA"))
-sys.path.insert(0, _LINK_DIR)
+
+OWN_FILES = ("setup_cfg.json", "setup_cfg.local.json", "data", "mia.log")   # made fresh for the test, never the checkout's
+
+
+def package_with_default_config(folder):
+    """a folder MIA/ whose files are links to the checkout, with the example configuration and an empty data folder:
+    web_app reads setup_cfg.json and writes data/ next to its own file, so nothing of the checkout is changed (as in test_accounts_wiring)"""
+    package = os.path.join(folder, "MIA")
+    os.makedirs(os.path.join(package, "data"))
+    for name in os.listdir(REPO):
+        if name not in OWN_FILES:
+            os.symlink(os.path.join(REPO, name), os.path.join(package, name))
+    shutil.copy(os.path.join(REPO, "setup_cfg.example.json"), os.path.join(package, "setup_cfg.json"))
+    return package
+
+
+_PACKAGE_DIR = tempfile.mkdtemp()
+package_with_default_config(_PACKAGE_DIR)
+sys.path.insert(0, _PACKAGE_DIR)
 
 from flask import Flask                                            # noqa: E402
 from flask_socketio import SocketIO                                # noqa: E402
@@ -60,6 +77,7 @@ class AnswerReachesEveryPage(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         cls.tmp.cleanup()
+        shutil.rmtree(_PACKAGE_DIR, True)
 
     def setUp(self):
         service = self.wa.chat_service
@@ -112,6 +130,16 @@ class AnswerReachesEveryPage(unittest.TestCase):
             self.assertEqual(positions, sorted(positions))
             done = payloads(received, "chat_done")[0]
             self.assertEqual((done["text"], done["status"]), (deltas[-1], "done"))
+
+    def test_web_app_writes_into_its_own_data_folder_not_the_checkout(self):
+        """R-6 of the N-2.1 re-verification (D-167): the imported web_app keeps its data (token, library, presets, workflows) in a temporary folder.
+
+        Example: data/ of the imported web_app is a real folder under the temporary directory, not a link into the checkout.
+        """
+        # Given: the web_app this test imported
+        data = os.path.realpath(os.path.join(self.wa.FPATH, "data"))
+        # Then: its data folder lies outside the checkout
+        self.assertFalse(data.startswith(os.path.realpath(REPO) + os.sep), data)
 
 
 class ChangesReachEveryDevice(unittest.TestCase):
