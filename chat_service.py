@@ -201,6 +201,10 @@ class ChatService:
         hits.append(now)
         return False
 
+    def author(self):
+        """the account that wrote the message whose exchange runs now, "page" without an account: the user of the run events of a chat (REQ-LOG-001, D-129)"""
+        return self._author or "page"
+
     def send(self, text, client_id=None, sender="page", author=None):
         """accepts a message; returns the acknowledgement for the page: {"ok", "message" | "error", "queued"}.
         sender is the key of the rate limit (a connection or an account); author the account that wrote it, stored as the `sender` of the message (IF-101)"""

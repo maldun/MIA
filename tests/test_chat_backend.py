@@ -373,6 +373,22 @@ class ServiceTest(unittest.TestCase):
         self.service._run_exchange = original
         self.assertFalse(self.service.stop())
 
+    def test_the_author_of_the_running_message_is_known(self):
+        """TC-LOG-001 (F9 of the N-2.4.1 re-verification, D-129): while an exchange runs, the service names the account that wrote the message; "page" without an account.
+
+        Example: send("Hi", author="anna") -> author() == "anna" during the exchange; send("Hi") -> "page"
+        """
+        # Given: an exchange that notes the author it sees
+        seen = []
+        self.mode["hook"] = lambda: seen.append(self.service.author())
+        # When: anna writes, then a page without an account
+        self.service.send("Hi", sender="anna", author="anna")
+        self.assertTrue(self.idle())
+        self.service.send("Hi again")
+        self.assertTrue(self.idle())
+        # Then: the exchange saw anna, then "page"
+        self.assertEqual(seen, ["anna", "page"])
+
     def test_model_error_becomes_a_note_and_offline_mood(self):
         self.mode["error"] = "no route to ollama"
         self.service.send("Hi")
