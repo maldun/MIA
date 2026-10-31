@@ -603,13 +603,18 @@ def load_calibrations(folder):
 
 
 def require_same_cases(run_a, run_b):
-    """REQ-EVL-008: two runs are compared only on the same cases with the same repeats; the differing case is named"""
+    """REQ-EVL-008: two runs are compared only on the same cases with the same repeats and of the same suite version (D-164: the same ids
+    can hide changed cases); the differing case is named. A run saved before the version was recorded has none and is not checked for it."""
     ids_a, ids_b = {r["case"] for r in run_a.records}, {r["case"] for r in run_b.records}
     if ids_a != ids_b:
         differing = sorted(ids_a ^ ids_b)
         raise SuiteError("the runs do not have the same cases (%d differ: %s)" % (len(differing), ", ".join(differing[:10])))
     if run_a.header["repeats"] != run_b.header["repeats"]:
         raise SuiteError("the runs do not have the same repeats (%s and %s)" % (run_a.header["repeats"], run_b.header["repeats"]))
+    version_a, version_b = (run.header.get("benchmark_version") or run.header.get("suite_sha1") for run in (run_a, run_b))
+    if version_a and version_b and version_a != version_b:
+        changed = sorted(name for name in set(version_a) | set(version_b) if version_a.get(name) != version_b.get(name))
+        raise SuiteError("the runs are not of the same suite version (changed: %s)" % ", ".join(changed))
 
 
 def format_compare(run_a, run_b):
@@ -618,7 +623,7 @@ def format_compare(run_a, run_b):
     lines = ["A = %s    B = %s" % (name(run_a), name(run_b)), "on the %d cases both ran (a case with repeats counts as the share of right runs):" % c["cases"],
              "   A right on %.1f, B right on %.1f" % (c["a_right"], c["b_right"]),
              "   only A right: %d   only B right: %d   exact sign test p = %.3f %s" % (len(c["only_a"]), len(c["only_b"]), c["p_value"],
-                                                                                         "(a difference you can believe)" if c["p_value"] < 0.05 else "(not distinguishable from chance with these cases)")]
+                                                                                         "(dev feedback, not a verdict: decide on the holdout)" if c["p_value"] < 0.05 else "(not distinguishable from chance with these cases)")]
     if c["only_a"]:
         lines.append("   only A: " + ", ".join(c["only_a"][:15]))
     if c["only_b"]:

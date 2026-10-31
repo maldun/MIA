@@ -51,28 +51,43 @@ class FakeSocket:
 class Latency(unittest.TestCase):
     @mark.req("REQ-EVL-007")
     def test_median_of_twenty_runs_after_three_warmups(self):
+        """TC-EVL-007: the latency tool reports the median of the timed runs and their number; warm-up runs are made but not timed.
+
+        Example: answers after 1.0, 2.0, 3.0 s cycling, 20 runs after 3 warm-ups -> median 2.0 s, min 1.0, max 3.0, 23 runs made.
+        """
+        # Given: a fake server on its own clock (no real waiting)
         server = FakeServer()
+        # When: 20 runs are timed after 3 warm-ups
         result = ML.measure(server.ask, clock=server.clock, runs=20, warmup=3)
+        # Then: 20 timed runs, the median within 0.1 s of 2.0 s
         self.assertEqual(result["runs"], 20)
         self.assertEqual(server.asked, 23)                          # the warm-up runs are made but not counted
         self.assertAlmostEqual(result["median"], 2.0, delta=0.1)
         self.assertEqual((result["min"], result["max"]), (1.0, 3.0))
 
+    @mark.req("REQ-EVL-007")
     def test_a_failing_run_is_counted_not_hidden(self):
+        """TC-EVL-007: a run that fails is counted as failed and not timed, so a broken server cannot look fast.
+
+        Example: every second of 4 runs raises -> runs 2, failed 2.
+        """
+        # Given: a server whose every second answer fails
         calls = {"n": 0}
 
         def ask():
             calls["n"] += 1
             if calls["n"] % 2 == 0:
                 raise RuntimeError("no answer")
+        # When: 4 runs are timed
         result = ML.measure(ask, clock=lambda: 0.0, runs=4, warmup=0)
+        # Then: two timed, two failed
         self.assertEqual((result["runs"], result["failed"]), (2, 2))
 
 
 class LiveMode(unittest.TestCase):
     @mark.req("REQ-EVL-007")
     def test_the_clock_starts_after_the_previous_answer_has_ended(self):
-        """REG (Verify F1): the live mode times only the first text of the answer, not the wait for the end of the previous one.
+        """TC-EVL-007 (regression, Verify F1): the live mode times only the first text of the answer, not the wait for the end of the previous one.
 
         Example: first text after 0.1 s, end of the answer after 0.5 s, 3 runs -> median about 0.1 s (it was about 0.5 s).
         """

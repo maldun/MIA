@@ -24,3 +24,78 @@ Tests of the harness and the measurement tools against the mock of IF-105; model
 
 - ASM-N4-001: `eval_decide.py`, `agent_check.py` and `eval_*` helpers of the agent-app skill are the decision tools; they are read-only for this project (the skill is not part of the repository).
 - **OPEN-7** (decided by the owner on 2026-10-26, to be optimised later): the judge counts only after a calibration of Cohen's kappa 0.6 or more against the users' ratings (the labels audit of 2026-10-24 reached 0.85 between the owner and the benchmark; 0.6 is the usual limit for "substantial"). Used by TC-EVL-003.
+
+## Scenarios
+
+Drafted in Phase 3 after Verify F10 (D-164), from the table above and the tests as built; for the owner's review (M39).
+
+### TC-EVL-001 – Repeats, intervals and cost of a workflow suite
+- Verifies: REQ-EVL-001
+- Given: the harness against the mock of IF-105 and a suite of 5 cases whose outcomes are scripted (4 pass, 1 fails)
+- When: the suite runs with 3 repeats and the pin MP-light
+- Then: the report lists every case with 3 of 3 or 0 of 3 passes, 12 of 15 overall with the 95 % Wilson interval 0.55 to 0.93
+- And: the cost is the sum of the runs' `cost`: 45 calls, 27000 tokens, 135 s
+
+### TC-EVL-002 – Decisions only on held-out cases
+- Verifies: REQ-EVL-002
+- Given: a run of the dev split and a run of the holdout split (synthetic records), and `tools/decide_guard.py` around `eval_decide.py`
+- When: a verdict criterion is decided on each, also with `--split dev` or a dev run as `--rerun` among the options
+- Then: the dev run, the mix and every split option are NOT DECIDED with the reason named; the holdout run is decided PASS or FAIL by the rule
+- And: a dev run of the harness never selects a case tagged `split:holdout`, and `tools/eval.py` neither lists, shows nor runs a holdout suite without `--holdout`
+
+### TC-EVL-003 – A judge counts only after calibration
+- Verifies: REQ-EVL-003
+- Given: records of the judge judge-light and calibration records of Cohen's kappa 0.7, 0.4 and none
+- When: the harness marks the records and the metrics count them
+- Then: with 0.7 the verdicts count; with 0.4 and without a record they are "not counted" and left out of every number
+
+### TC-EVL-004 – Versions recorded per run
+- Verifies: REQ-EVL-004
+- Given: the harness against the mock of IF-105 and the pin of `tools/eval.py` (id MP-light)
+- When: 10 runs are made with seeds 0 to 9
+- Then: every header carries workflow, workflow version, the pin (id, name, digest, seed, temperature) and the benchmark version
+- And: `tools/eval.py run` refuses to start without `--pin`, and a suite of a skill records the skill, its version and the pipeline
+
+### TC-EVL-005 – A baseline per shipped workflow
+- Verifies: REQ-EVL-005
+- Given: the workflows of the library with status tested or trusted and a folder of baselines
+- When: `tools/check_baselines.py` runs
+- Then: each workflow without its `<suite>__<variant>__baseline.jsonl` is named with the reason; one with its file is not
+
+### TC-EVL-006 – The skill path is documented and its examples run
+- Verifies: REQ-EVL-006
+- Given: `docs/skill-path.md` with the lookup as its example
+- When: the sections are read and the blocks marked `run` are executed with a scripted model
+- Then: all seven steps have a section, every block ends with its expected exit code and every relative link resolves
+
+### TC-EVL-007 – Time to the first text and frame rate
+- Verifies: REQ-EVL-007
+- Given: a fake server that answers after 1.0, 2.0 and 3.0 s in turn; a fake socket whose first text comes after 0.1 s and whose answer ends after 0.5 s
+- When: the latency tool times 20 runs after 3 warm-ups, and 3 runs on the fake socket
+- Then: the median is 2.0 s (within 0.1 s) with 20 runs, and 0.1 s on the socket (the wait for the previous answer is not timed)
+- And: the frame-rate tool gives 60 fps for 16.7 ms frames and 30 fps for 33.3 ms (within 1 fps)
+
+### TC-EVL-008 – Variants compared on equal cases
+- Verifies: REQ-EVL-008
+- Given: two runs of the same suite under two variants, a run without case c2, a run with other repeats and a run of another suite version
+- When: they are compared
+- Then: the first pair is compared; the others are refused with c2, the repeats or "suite version" named
+
+### TC-EVL-009 – Suites of lookup and verify with holdout and baseline
+- Verifies: REQ-EVL-009
+- Given: the suites of lookup and verify in `eval/`
+- When: `agent_check.py --spec-dir specs/mia --eval-dir eval` runs
+- Then: each has a dev part, a holdout part and a recorded baseline, and the A-checks report no error for them
+
+### TC-EVL-010 – The lookup as the proof of concept
+- Verifies: REQ-EVL-010
+- Given: the lookup scenario through IF-105 against the mocks (step 0), then against each real node as it is integrated
+- When: a question is asked
+- Then: the answer carries a source and a verbatim quote, or unknown
+- And: the library holds the time stamps idea and promotion of the lookup
+
+### TC-EVL-011 – The platform only through IF-105
+- Verifies: REQ-EVL-011
+- Given: the source of the harness adapter `eval_platform.py`
+- When: its imports are collected
+- Then: all of them are in the standard library: no runner, library or store

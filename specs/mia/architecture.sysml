@@ -547,16 +547,19 @@ package MIA_Architecture {
     part def Evaluation {
         doc /* Harness, suites, metrics and baselines. Offline, on recorded data. */
         part harness {
-            doc /* Variants x repeats x suites, cost counting, intervals, paired sign test. */
-            @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("harness.py", "metrics.py", "tools/eval.py"); }
+            doc /* Variants x repeats x suites, cost counting, intervals, paired sign test; workflows through IF-105 (eval_platform.py), the holdout guard
+                    around eval_decide.py, the baseline check, and the measurement tools for the first text and the frame rate (N-4.1). */
+            @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("harness.py", "metrics.py", "tools/eval.py", "eval_platform.py", "tools/decide_guard.py",
+                                                                                       "tools/check_baselines.py", "tools/measure_latency.py", "tools/measure_fps.mjs"); }
         }
         part suites {
             doc /* hard_checks, computable, extraction, verdicts, research, research_compound, plans, web_checks, behaviour, review_toy. */
             @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("eval/suites", "eval/baselines"); }
         }
         part judgeCalibration {
-            doc /* LLM judge with a rubric calibrated on the owner's ratings. */
-            @Implementation { :>> status = ImplementationStatus::proposed; }
+            doc /* LLM judge with a rubric calibrated on the owner's ratings. Built: the calibration record and the flag that leaves an uncalibrated
+                    judge's verdicts out (REQ-EVL-003); no judge and no loading of the records yet. */
+            @Implementation { :>> status = ImplementationStatus::partly; :>> modules = ("harness.py", "tools/label_agreement.py"); }
         }
     }
 

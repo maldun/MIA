@@ -41,9 +41,12 @@ PIN = EVAL_CLI.pin_record("MP-light")                 # the shape tools/eval.py 
 
 
 class ScriptedPlatform(EvaluationAccessMock):
-    """the mock of IF-105 whose outcome per case is scripted: the input names the verdict"""
+    """the mock of IF-105 whose outcome per case is scripted: the input names the verdict; `started` counts the runs it was asked for"""
+
+    started = 0
 
     def run_case(self, workflow, version, inputs, options):
+        self.started += 1
         result = super().run_case(workflow, version, inputs, options)
         result["outputs"] = dict(result["outputs"], status=inputs["verdict"])
         return result
@@ -68,9 +71,15 @@ class PlatformHarness(unittest.TestCase):
 
     @mark.req("REQ-EVL-001", "REQ-EVL-011")
     def test_five_cases_three_repeats_counts_intervals_and_the_cost_of_the_runs(self):
-        """TC-EVL-001"""
+        """TC-EVL-001: the report lists every case with its repeats and passes, the 95 % Wilson interval and the summed cost of the runs.
+
+        Example: 5 cases (4 pass, 1 fails) x 3 repeats on the mock of IF-105 -> 12 of 15, interval 0.55 to 0.93, 45 calls, 27000 tokens, 135 s.
+        """
+        # Given: a suite of 5 scripted cases
         suite = make_suite(self.tmp.name, ["pass", "pass", "pass", "pass", "fail"])
+        # When: it runs 3 times through the mock
         run = self.harness.run(suite, repeats=3, pin=PIN)
+        # Then: 15 records, the passes per case, the interval (Wilson, checked by hand: 0.548 to 0.930) and the cost
         self.assertEqual(len(run.records), 15)
         table = {row["case"]: row for row in M.case_table(run.records)}
         self.assertEqual([table["c%d" % i]["passes"] for i in range(5)], [3, 3, 3, 3, 0])
@@ -79,45 +88,77 @@ class PlatformHarness(unittest.TestCase):
         self.assertEqual((overall["k"], overall["n"], round(overall["low"], 2), round(overall["high"], 2)), (12, 15, 0.55, 0.93))
         cost = M.cost(run.records)                                 # the mock's cost per run: 3 calls, 1800 tokens, 9.0 s
         self.assertEqual((cost["calls"], cost["tokens"], cost["seconds"]), (45, 27000, 135.0))
+        # And: the report prints the table per case
         report = H.format_report(run)
         self.assertIn("27000", report)
         self.assertIn("per case (passes / repeats):", report)
         self.assertRegex(report, r"c0 +3 of 3")
         self.assertRegex(report, r"c4 +0 of 3")
 
+    @mark.req("REQ-EVL-001")
     def test_report_without_repeats_has_no_case_table(self):
+        """TC-EVL-001: a run without repeats has no table per case (one run per case says nothing about stability).
+
+        Example: 2 cases x 1 run -> no "per case" in the report.
+        """
         suite = make_suite(self.tmp.name, ["pass", "fail"])
         self.assertNotIn("per case", H.format_report(self.harness.run(suite, repeats=1, pin=PIN)))
 
     @mark.req("REQ-EVL-004")
     def test_every_header_carries_the_versions(self):
-        """TC-EVL-004: 10 runs"""
+        """TC-EVL-004: every run header carries workflow, workflow version, model pin, seed, temperature and benchmark version.
+
+        Example: 10 runs of lookup v1 with seeds 0..9 -> each header: lookup, 1, MP-light, its seed, 0, benchmark_version = suite_sha1.
+        """
+        # Given: a workflow suite of one case
         suite = make_suite(self.tmp.name, ["pass"])
         for i in range(10):
+            # When: run i with seed i
             header = self.harness.run(suite, repeats=1, pin=dict(PIN, seed=i)).header
+            # Then: the header names all of it
             self.assertEqual((header["workflow"], header["workflow_version"]), ("lookup", 1))
             self.assertEqual((header["pin"]["id"], header["pin"]["seed"], header["pin"]["temperature"]), ("MP-light", i, 0))
             self.assertEqual(header["benchmark_version"], header["suite_sha1"])
 
+    @mark.req("REQ-EVL-004")
     def test_the_options_reach_the_platform_and_a_run_without_a_pin_is_refused(self):
+        """TC-EVL-004: a workflow suite runs with a pin, and without one it is refused before any case runs.
+
+        Example: one case with the pin MP-light -> status pass; the same without a pin -> SuiteError.
+        """
+        # Given / When: a run with the pin
         suite = make_suite(self.tmp.name, ["pass"])
         run = self.harness.run(suite, pin=PIN)
         self.assertEqual(run.records[0]["status"], "pass")
+        # Then: without it the harness refuses
         with self.assertRaises(H.SuiteError):
             self.harness.run(suite)
 
+    @mark.req("REQ-EVL-004")
     def test_a_pin_the_platform_does_not_know_is_an_error_record_not_a_fallback(self):
+        """TC-EVL-004: a pin the platform does not hold makes every case an error record, never a run on another model.
+
+        Example: the pin id MP-huge -> status error..., error names pin_unavailable.
+        """
+        # Given / When: a run with a pin the mock does not know
         suite = make_suite(self.tmp.name, ["pass"])
         run = self.harness.run(suite, pin=dict(PIN, id="MP-huge"))
+        # Then: an error record
         self.assertTrue(run.records[0]["status"].startswith("error"))
         self.assertIn("pin_unavailable", run.records[0]["error"])
 
     @mark.req("REQ-EVL-008")
     def test_runs_with_different_case_lists_are_not_compared(self):
-        """TC-EVL-008"""
-        a = self.harness.run(make_suite(self.tmp.name, ["pass", "pass", "pass"], "s_a"), repeats=2, pin=PIN)
-        same = self.harness.run(make_suite(self.tmp.name, ["pass", "fail", "pass"], "s_b"), repeats=2, pin=PIN)
-        H.require_same_cases(a, same)                              # no error
+        """TC-EVL-008: runs on the same cases with the same repeats are compared; a different case list or other repeats are refused.
+
+        Example: one suite under two variants -> compared; a suite without c2 -> refused naming c2; 1 repeat against 2 -> refused.
+        """
+        # Given: the same suite under two variants
+        suite = make_suite(self.tmp.name, ["pass", "pass", "pass"], "s_a")
+        a = self.harness.run(suite, {"name": "one"}, repeats=2, pin=PIN)
+        same = self.harness.run(suite, {"name": "two"}, repeats=2, pin=PIN)
+        H.require_same_cases(a, same)                              # no error: the same suite, two variants
+        # When / Then: a run without c2 is refused with c2 named, a run with other repeats too
         other = self.harness.run(make_suite(self.tmp.name, ["pass", "pass"], "s_c"), repeats=2, pin=PIN)
         with self.assertRaises(H.SuiteError) as caught:
             H.require_same_cases(a, other)
@@ -126,11 +167,59 @@ class PlatformHarness(unittest.TestCase):
         with self.assertRaises(H.SuiteError):
             H.require_same_cases(a, fewer)                         # the same repeats, too
 
+    @mark.req("REQ-EVL-008")
+    def test_runs_of_different_suite_versions_are_not_compared(self):
+        """TC-EVL-008 (regression, Verify F8, D-164): two runs with the same case ids but different suite contents (benchmark version) are not compared.
+
+        Example: s_a with c0..c2 all pass, s_b with c0..c2 where c1 is scripted to fail -> "not the same suite version".
+        """
+        # Given: two suites with the same case ids and repeats but different contents
+        a = self.harness.run(make_suite(self.tmp.name, ["pass", "pass", "pass"], "s_a"), repeats=2, pin=PIN)
+        b = self.harness.run(make_suite(self.tmp.name, ["pass", "fail", "pass"], "s_b"), repeats=2, pin=PIN)
+        # When: they are compared, Then: refused, the version named
+        with self.assertRaises(H.SuiteError) as caught:
+            H.require_same_cases(a, b)
+        self.assertIn("suite version", str(caught.exception))
+
+    @mark.req("REQ-EVL-004")
+    def test_a_pin_without_id_seed_or_temperature_is_refused_per_case(self):
+        """TC-EVL-004 (regression, Verify F7): a pin that lacks id, seed or temperature does not reach IF-105; every case is an error that names the missing pin parts.
+
+        Example: the pin MP-light without seed -> the record "error:ValueError", "needs a pin with id, seed and temperature"; the mock ran nothing.
+        """
+        suite = make_suite(self.tmp.name, ["pass"])
+        for key in ("id", "seed", "temperature"):
+            # Given: a pin without one key, When: a case runs
+            platform = ScriptedPlatform()
+            run = H.Harness(platform=platform).run(suite, pin={k: v for k, v in PIN.items() if k != key})
+            # Then: an error record, no run on the platform
+            self.assertEqual(run.records[0]["status"], "error:ValueError", key)
+            self.assertIn("id, seed and temperature", run.records[0]["error"])
+            self.assertEqual(platform.started, 0, key)
+
+    @mark.req("REQ-EVL-008", "REQ-EVL-002")
+    def test_a_comparison_says_it_is_feedback_not_a_verdict(self):
+        """TC-EVL-008 (regression, Verify F12): the compare report does not call a dev difference believable; REQ-EVL-002 decides only on held-out cases.
+
+        Example: A right on 30 cases, B on none (sign test p < 0.001) -> "dev feedback, not a verdict"; no "a difference you can believe".
+        """
+        # Given: two runs of the same suite where only A is right
+        suite = make_suite(self.tmp.name, ["pass"] * 30, "s_w")
+        a = self.harness.run(suite, {"name": "a"}, pin=PIN)
+        b = self.harness.run(suite, {"name": "b"}, pin=PIN)
+        for record in b.records:
+            record["status"] = "fail"
+        # When: the report is formatted
+        text = H.format_compare(a, b)
+        # Then: the wording is feedback
+        self.assertNotIn("a difference you can believe", text)
+        self.assertIn("dev feedback, not a verdict", text)
+
 
 class RealProvider(unittest.TestCase):
     @mark.req("REQ-EVL-004", "REQ-EVL-011")
     def test_the_pin_of_the_command_line_runs_on_the_real_provider(self):
-        """REG (Verify F2): the harness sends the pin id to IF-105, so the real provider (run_workflow.WorkflowRuns) runs the case.
+        """TC-EVL-004 (regression, Verify F2): the harness sends the pin id to IF-105, so the real provider (run_workflow.WorkflowRuns) runs the case.
 
         Example: pin MP-light (model tag gemma4:12b-it-qat) on the workflow lookup -> status "42" (the answer); it was pin_unavailable.
         """
@@ -183,7 +272,7 @@ class CommandLine(unittest.TestCase):
 
     @mark.req("REQ-EVL-004")
     def test_a_run_without_a_pin_is_refused_with_the_pins_named(self):
-        """REG (Verify F3): every run of tools/eval.py needs --pin; without it the run stops before anything runs.
+        """TC-EVL-004 (regression, Verify F3): every run of tools/eval.py needs --pin; without it the run stops before anything runs.
 
         Example: `eval.py run rules_mini` -> exit "a run needs --pin (MP-light)", no run saved.
         """
@@ -198,7 +287,7 @@ class CommandLine(unittest.TestCase):
 
     @mark.req("REQ-EVL-004")
     def test_a_saved_run_names_the_pin_id_and_the_code_version(self):
-        """REG (Verify F3): a run of a code target (no skill, no pipeline) records the pin with its id and the commit of the code that ran.
+        """TC-EVL-004 (regression, Verify F3): a run of a code target (no skill, no pipeline) records the pin with its id and the commit of the code that ran.
 
         Example: `eval.py run rules_mini --pin MP-light` -> header pin id MP-light, pipeline None, commit = git HEAD of the repository.
         """
@@ -215,7 +304,7 @@ class CommandLine(unittest.TestCase):
 
     @mark.req("REQ-EVL-001", "REQ-EVL-011")
     def test_the_harness_of_the_command_line_reaches_workflows_through_if_105(self):
-        """REG (Verify F3): the harness of tools/eval.py has the target `workflow` on the real IF-105 provider with the pins of eval-spec.md.
+        """TC-EVL-001 (regression, Verify F3): the harness of tools/eval.py has the target `workflow` on the real IF-105 provider with the pins of eval-spec.md.
 
         Example: make_harness(cfg, core) -> targets["workflow"] runs on run_workflow.WorkflowRuns whose pins are {"MP-light": name, digest}.
         """
@@ -232,7 +321,7 @@ class CommandLine(unittest.TestCase):
 class VersionsOfEveryKind(unittest.TestCase):
     @mark.req("REQ-EVL-004")
     def test_every_skill_kind_records_its_skill_and_pipeline_versions(self):
-        """REG (Verify F3): the header of a run of every suite kind that runs a skill names the skill, its version and the pipeline.
+        """TC-EVL-004 (regression, Verify F3): the header of a run of every suite kind that runs a skill names the skill, its version and the pipeline.
 
         Example: a research suite on the skill research -> header skill research, skill_version 3, pipeline research.escalate@1 (the skill file's);
         with the variant pipeline research.baseline@1 that one.
@@ -258,12 +347,19 @@ class VersionsOfEveryKind(unittest.TestCase):
 class OnlyThroughIF105(unittest.TestCase):
     @mark.req("REQ-EVL-011")
     def test_the_adapter_imports_no_runner_library_or_store(self):
-        """TC-EVL-011 (inspection) for the module that talks to the platform; the older targets of harness.py still use the in-process Core (see implementation-log)"""
+        """TC-EVL-011 (inspection): the module that talks to the platform imports only the standard library, no runner, library or store.
+
+        Example: the imports of eval_platform.py minus the standard library -> the empty set. The older targets of harness.py still use the
+        in-process Core (implementation log, F-1).
+        """
+        # Given: the syntax tree of the adapter
         with open(os.path.join(REPO, "eval_platform.py"), encoding="utf-8") as fp:
             tree = ast.parse(fp.read())
+        # When: its imported top-level modules are collected
         imported = {n.names[0].name.split(".")[0] for n in ast.walk(tree) if isinstance(n, ast.Import)}
         imported |= {(n.module or "").split(".")[0] for n in ast.walk(tree) if isinstance(n, ast.ImportFrom)}
         imported.discard("")
+        # Then: all of them are in the standard library
         self.assertEqual(imported - set(sys.stdlib_module_names), set())
 
 

@@ -44,13 +44,24 @@ class Guard(unittest.TestCase):
 
     @mark.req("REQ-EVL-002")
     def test_a_dev_split_run_is_refused(self):
+        """TC-EVL-002: a run of the dev split is not decided; the reason says dev split.
+
+        Example: a run of the suite verdicts (no holdout name, no tags), 20 right -> ok False, "dev split".
+        """
+        # Given: a dev run
         run = write_run(self.tmp.name, "dev.jsonl", "verdicts", [True] * 20)
+        # When: the guard checks it
         verdict = G.check_runs([run])
+        # Then: refused
         self.assertFalse(verdict["ok"])
         self.assertIn("dev split", verdict["reason"])
 
     @mark.req("REQ-EVL-002")
     def test_a_mixed_or_unlabelled_run_is_refused_too(self):
+        """TC-EVL-002: one dev run among holdout runs spoils the decision, and no run at all is no decision.
+
+        Example: [verdicts.holdout, verdicts] -> ok False; [] -> ok False.
+        """
         dev = write_run(self.tmp.name, "dev.jsonl", "verdicts", [True] * 5)
         hold = write_run(self.tmp.name, "hold.jsonl", "verdicts.holdout", [True] * 5)
         self.assertFalse(G.check_runs([hold, dev])["ok"])           # one dev run among the holdout runs spoils the decision
@@ -58,6 +69,10 @@ class Guard(unittest.TestCase):
 
     @mark.req("REQ-EVL-002")
     def test_holdout_runs_are_accepted_by_the_suite_name_or_the_tag(self):
+        """TC-EVL-002: a holdout run is known by its suite name (*.holdout) or by every record tagged split:holdout.
+
+        Example: verdicts.holdout, and verdicts with every record tagged split:holdout -> ok True.
+        """
         by_name = write_run(self.tmp.name, "a.jsonl", "verdicts.holdout", [True] * 5)
         by_tag = write_run(self.tmp.name, "b.jsonl", "verdicts", [True] * 5, tag="split:holdout")
         self.assertTrue(G.check_runs([by_name, by_tag])["ok"])
@@ -65,9 +80,15 @@ class Guard(unittest.TestCase):
     @unittest.skipUnless(os.path.exists(DECIDE), "eval_decide.py of the agent-app skill is not installed")
     @mark.req("REQ-EVL-002")
     def test_a_holdout_run_is_decided_by_the_rule_and_a_dev_run_is_not_decided(self):
+        """TC-EVL-002: the holdout run is decided by eval_decide.py of the agent-app skill; the dev run is not decided.
+
+        Example: 40 of 40 right -> PASS (min 0.9, low 0.8); 0 of 40 -> FAIL; a dev run of 40 right -> NOT DECIDED "dev split".
+        """
+        # Given: a good and a bad holdout run and a good dev run
         good = write_run(self.tmp.name, "good.jsonl", "verdicts.holdout", [True] * 40)
         bad = write_run(self.tmp.name, "bad.jsonl", "verdicts.holdout", [False] * 40)
         dev = write_run(self.tmp.name, "dev.jsonl", "verdicts", [True] * 40)
+        # When / Then: the rule decides the holdout runs, the guard refuses the dev run
         self.assertEqual(G.decide([good], ["--metric", "right", "--min", "0.9", "--low", "0.8", "--fold", "majority"])["decision"], "PASS")
         self.assertEqual(G.decide([bad], ["--metric", "right", "--min", "0.9", "--low", "0.8"])["decision"], "FAIL")
         refused = G.decide([dev], ["--metric", "right", "--min", "0.9"])
@@ -93,7 +114,7 @@ class NoOptionOverridesTheHoldout(unittest.TestCase):
 
     @mark.req("REQ-EVL-002")
     def test_a_split_option_is_refused_in_every_spelling(self):
-        """REG (Verify F5a): `--split dev` after a holdout run decided on dev records; now any option that argparse reads as --split is refused.
+        """TC-EVL-002 (regression, Verify F5a): `--split dev` after a holdout run decided on dev records; now any option that argparse reads as --split is refused.
 
         Example: --run hold.jsonl --split dev -> NOT DECIDED "--split", exit 2; the same for --split=dev and the abbreviation --spl dev.
         """
@@ -107,7 +128,7 @@ class NoOptionOverridesTheHoldout(unittest.TestCase):
 
     @mark.req("REQ-EVL-002")
     def test_a_rerun_of_the_dev_split_is_refused_like_a_run(self):
-        """REG (Verify F5a): the files of --rerun (fresh seeds after a FAIL) were passed on unchecked; now they must be holdout runs too.
+        """TC-EVL-002 (regression, Verify F5a): the files of --rerun (fresh seeds after a FAIL) were passed on unchecked; now they must be holdout runs too.
 
         Example: --run hold.jsonl --rerun dev.jsonl -> NOT DECIDED "dev split: dev.jsonl"; also as --rerun=dev.jsonl and --rer dev.jsonl.
         """
@@ -121,7 +142,7 @@ class NoOptionOverridesTheHoldout(unittest.TestCase):
 
     @mark.req("REQ-EVL-002")
     def test_a_holdout_rerun_is_passed_on_as_a_rerun(self):
-        """the files of --rerun reach eval_decide.py as --rerun after the check, with --split holdout fixed.
+        """TC-EVL-002: the files of --rerun reach eval_decide.py as --rerun after the check, with --split holdout fixed.
 
         Example: --run hold.jsonl --rerun hold2.jsonl -> eval_decide.py gets --split holdout --run hold.jsonl --rerun hold2.jsonl.
         """
@@ -179,7 +200,7 @@ class HoldoutSuitesOnTheCommandLine(unittest.TestCase):
 
     @mark.req("REQ-EVL-002")
     def test_list_shows_no_holdout_suite(self):
-        """REG (Verify F5b): `eval.py list` loaded and counted every holdout suite.
+        """TC-EVL-002 (regression, Verify F5b): `eval.py list` loaded and counted every holdout suite.
 
         Example: suites toy and toy.holdout -> list names toy only.
         """
@@ -191,7 +212,7 @@ class HoldoutSuitesOnTheCommandLine(unittest.TestCase):
 
     @mark.req("REQ-EVL-002")
     def test_cases_and_run_refuse_a_holdout_suite_without_the_flag(self):
-        """REG (Verify F5b): `cases toy.holdout` printed the held-out cases and `run toy.holdout` ran them.
+        """TC-EVL-002 (regression, Verify F5b): `cases toy.holdout` printed the held-out cases and `run toy.holdout` ran them.
 
         Example: cases toy.holdout -> exit "toy.holdout is a holdout suite: only with --holdout (Verify)"; no case id printed, no run saved.
         """
@@ -206,7 +227,7 @@ class HoldoutSuitesOnTheCommandLine(unittest.TestCase):
 
     @mark.req("REQ-EVL-002")
     def test_with_the_flag_the_holdout_suite_is_listed_and_shown(self):
-        """with --holdout (the Verify run) the holdout suite is listed and its cases are shown.
+        """TC-EVL-002: with --holdout (the Verify run) the holdout suite is listed and its cases are shown.
 
         Example: list --holdout -> toy and toy.holdout; cases toy.holdout --holdout -> the synthetic case secret-case.
         """
@@ -217,6 +238,10 @@ class HoldoutSuitesOnTheCommandLine(unittest.TestCase):
 class HarnessKeepsHoldoutOut(unittest.TestCase):
     @mark.req("REQ-EVL-002")
     def test_a_dev_run_never_selects_a_case_tagged_split_holdout(self):
+        """TC-EVL-002: the harness never reads a case tagged split:holdout in a dev run, not even by name; a holdout suite has all.
+
+        Example: cases a, b (split:holdout), c (split:dev) -> the suite verdicts selects a, c; only=["b"] selects nothing; verdicts.holdout selects a, b, c.
+        """
         cases = [{"id": "a", "tags": []}, {"id": "b", "tags": ["split:holdout"]}, {"id": "c", "tags": ["split:dev"]}]
         dev = H.Suite("verdicts", "", {"kind": "fake"}, cases)
         self.assertEqual([c["id"] for c in dev.select()], ["a", "c"])
