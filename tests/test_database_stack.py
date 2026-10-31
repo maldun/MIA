@@ -42,7 +42,7 @@ class ComposeFile(unittest.TestCase):
         db = self.compose["services"]["db"]
         self.assertNotIn("ports", db)
         self.assertEqual(db["profiles"], ["db"])
-        self.assertEqual(db["image"], IMAGE)
+        self.assertEqual(db["image"].split("@")[0], IMAGE)                 # pinned by a digest since D-139; the name stays
 
     @mark.req("REQ-SLY-011")
     def test_health_check_volume_and_schema_at_the_first_start(self):
