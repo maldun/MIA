@@ -2,13 +2,13 @@
 
 **Parent:** `specs/mia/nodes/N-3-database/requirements.md` (N-3)   **Decomposition:** `specs/mia/decomposition.yaml`   **Status:** Draft (Plan, 2026-10-25)
 
-The tables of the history, summaries, chat log, memory, votes, tasks, memos, presets, gestures, run results and trust values, with their schemas and rules for deletion. Provides IF-302. Refines the top-level requirements named in each `Parent`; the details of low-level nodes follow when this node is cut. Numbers marked *Plan* are fixed in the node that owns the measurement.
+The 14 record tables of IF-302 (history, which also holds the summaries and the chat log, memory, votes, tasks, memos, accounts, presets, gestures, run results, trust values, cases, behaviours, workflow lifecycles and reports), with their schemas and rules for deletion. Provides IF-302. Refines the top-level requirements named in each `Parent`; the details of low-level nodes follow when this node is cut. Numbers marked *Plan* are fixed in the node that owns the measurement.
 
 ## Requirements
 
 ### REQ-RTB-001 – Shared state held
 - Level: low   Subject: Persistence
-- Text: The Record tables shall define the tables of the history, summaries, chat log, votes, memory, tasks, memos, presets, gestures and run results.
+- Text: The Record tables shall define the 14 tables of IF-302 v5: history, memory, votes, tasks, memos, accounts, presets, gestures, runs (run results), source_trust (trust values of sources), cases, behaviours, workflow_meta and reports; summaries and the chat log are records of history.
 - Rationale: refines REQ-DB-002
 - Parent: REQ-DB-002
 - Priority: Must
@@ -16,7 +16,7 @@ The tables of the history, summaries, chat log, memory, votes, tasks, memos, pre
 - Acceptance criterion: AC-15: a record of each kind is written and read back identically
 - Verified by: TC-RTB-001
 - Status: Approved
-- History: –
+- History: 2026-10-31 D-161: the 14 tables of IF-302 v5 listed (it named summaries and a chat log, which are records of history, and missed six tables)
 
 ### REQ-RTB-002 – Run results
 - Level: low   Subject: Persistence
