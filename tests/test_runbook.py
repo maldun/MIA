@@ -162,5 +162,22 @@ class Runbook(unittest.TestCase):
         self.assertIn("OLLAMA_URL", text)
         self.assertIn("never pulls", text)
 
+    @mark.req('REQ-API-007', 'REQ-OPR-006')
+    def test_runbook_and_readme_say_that_without_the_login_every_route_is_open(self):
+        """D-149 (V-4, an accepted deviation): with accounts_enabled off every route is open to everyone who reaches the page (trusted users, D-131);
+        the runbook and deploy/README.md say so and how to turn the login on.
+
+        Example: both texts name accounts_enabled, "every route is open", D-131 and deploy/up.sh owner NAME
+        """
+        # Given: the runbook (setUp) and deploy/README.md
+        with open(os.path.join(REPO, "deploy", "README.md"), encoding="utf-8") as fp:
+            readme = fp.read()
+        # When: both texts are searched
+        texts = {"RUNBOOK.md": self.text, "README.md": readme}
+        # Then: each says that the routes are open without the login, why, and how to turn it on
+        for name, text in texts.items():
+            for words in ("accounts_enabled", "every route is open", "D-131", "deploy/up.sh owner NAME"):
+                self.assertIn(words, text, name)
+
 if __name__ == '__main__':
     unittest.main()

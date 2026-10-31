@@ -219,14 +219,17 @@ class Speaker:
 
         return self.speak_chunks(self.split_into_chunks(msg))
 
-    def speak_chunks(self,chunks):
+    def speak_chunks(self,chunks,cancelled=None):
         """
         Speaks the text chunks one after another and returns the play length
         of the last played chunk. chunks can be any iterable, which may
         produce its chunks over time (e.g. sentences of an answer which is
         still being generated). Every chunk is rendered as soon as it arrives,
         while the previous one is still playing.
+        cancelled (a threading.Event): once set, no further chunk is played and
+        the waiting ones are not rendered (the chat was stopped, owner check A3).
         """
+        cancelled = cancelled or threading.Event()
         rendered = queue.Queue()
         finished = object()
         with tempfile.TemporaryDirectory() as tmp_dir, ThreadPoolExecutor(max_workers=1) as renderer:
@@ -251,7 +254,10 @@ class Speaker:
                 if chunk_duration > 0:
                     duration = chunk_duration
                     # wait until the previous chunk is played
-                    time.sleep(max(0,play_end - time.time()))
+                    cancelled.wait(max(0,play_end - time.time()))
+                    if cancelled.is_set():
+                        renderer.shutdown(wait=False,cancel_futures=True)
+                        break
                     self.play_voice(fname)
                     play_end = time.time() + duration + self._sentence_pause
                 item = rendered.get()
@@ -280,10 +286,12 @@ class SoundHandler(socketserver.StreamRequestHandler):
         return out, time
     
     
-    def _read_stream(self,first_msg):
+    def _read_stream(self,first_msg,cancelled):
         """
         Generator for the sentences of a stream request,
         starting with the one from the first line.
+        A client that closes the connection before the end marker, or before the
+        sentences are spoken, stops the stream: cancelled is set (the chat was stopped).
         """
         msg = first_msg
         while True:
@@ -293,11 +301,21 @@ class SoundHandler(socketserver.StreamRequestHandler):
                     yield sentences[0]
             line = self.rfile.readline().strip()
             if len(line) == 0:
-                return # connection closed
+                cancelled.set() # connection closed
+                return
             dic = json.loads(line)
             if dic.get(STREAM_END_REQ) is True:
+                threading.Thread(target=self._watch_close,args=(cancelled,),daemon=True).start()
                 return
             msg = dic.get(SPEECH_REQ)
+
+    def _watch_close(self,cancelled):
+        """after the end marker the client only waits for the reply: anything else, the end of the connection above all, is a stop"""
+        try:
+            self.rfile.readline()
+        except (OSError,ValueError):
+            pass
+        cancelled.set()
 
     def handle(self):
         # self.rfile is a file-like object created by the handler;
@@ -311,8 +329,11 @@ class SoundHandler(socketserver.StreamRequestHandler):
         speaker = self.server.speaker
         if json.loads(self.data).get(STREAM_REQ) is True:
             # sentences follow line by line until the end marker
-            duration = speaker.speak_chunks(self._read_stream(msg))
-            time.sleep(duration+0.5)
+            cancelled = threading.Event()
+            duration = speaker.speak_chunks(self._read_stream(msg,cancelled),cancelled=cancelled)
+            if cancelled.wait(duration+0.5):
+                logger.info(f"Stream stopped by the client at {time_stamp}")
+                return
             answer = "Stream played!"
             logger.info(answer+f"at {time_stamp}")
             self.wfile.write(json.dumps({SOUND_REQ:answer,TIME_REQ:time_stamp}).encode(U8))

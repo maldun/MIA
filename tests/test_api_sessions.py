@@ -47,36 +47,53 @@ class Sessions(unittest.TestCase):
 
     @mark.req("REQ-API-003")
     def test_the_right_password_opens_a_session_and_a_wrong_one_does_not(self):
-        """TC-API-003"""
+        """TC-API-003: the right password opens a session (a new one at every login); a wrong password, an unknown account or no password is 401 bad_credentials.
+
+        Example: login(anna, pw-anna-1) -> a token; login(nobody, pw-anna-1) -> 401 bad_credentials.
+        """
+        # When / Then: two logins of anna give two different sessions
         token = self.api.login("anna", "pw-anna-1")
         self.assertTrue(token)
         self.assertNotEqual(token, self.api.login("anna", "pw-anna-1"))             # every login is its own session
+        # When / Then: every wrong pair is refused the same way
         for user, password in (("anna", "wrong"), ("nobody", "pw-anna-1"), ("anna", None)):
             err = error_of(lambda: self.api.login(user, password))
             self.assertEqual((err.status, err.code), (401, "bad_credentials"))       # an unknown account and a wrong password look the same
 
     @mark.req("REQ-API-004")
     def test_the_sixth_failed_login_in_a_minute_is_refused_even_with_the_right_password(self):
-        """TC-API-004"""
+        """TC-API-004: after five failed logins within a minute the next login of that account is 429 throttled, even with the right password; other accounts are not affected; after 61 s it works again.
+
+        Example: 5 x login(anna, wrong) -> 401; login(anna, pw-anna-1) -> 429 throttled; 61 s later -> a token.
+        """
+        # Given: five failed logins of anna
         for _ in range(5):
             self.assertEqual(error_of(lambda: self.api.login("anna", "wrong")).status, 401)
+        # When / Then: the right password is refused, ben still logs in
         err = error_of(lambda: self.api.login("anna", "pw-anna-1"))
         self.assertEqual((err.status, err.code), (429, "throttled"))
         self.assertTrue(self.api.login("ben", "pw-ben-123"))                         # another account is not affected
+        # When / Then: a minute later anna logs in again
         self.clock.now += 61
         self.assertTrue(self.api.login("anna", "pw-anna-1"))
 
     @mark.req("REQ-API-005")
     def test_no_password_is_stored_or_logged_after_ten_logins(self):
-        """TC-API-005"""
+        """TC-API-005: after ten rounds of logins, right and wrong, no password is in the stored accounts or in the log (level DEBUG).
+
+        Example: logins with pw-anna-1, pw-ben-123 and wrong-password-0..3 -> none of these texts in the store or the log.
+        """
+        # Given: everything that is logged is captured
         stream = io.StringIO()
         handler = logging.StreamHandler(stream)
         logging.getLogger().addHandler(handler)
         logging.getLogger().setLevel(logging.DEBUG)
         self.addCleanup(logging.getLogger().removeHandler, handler)
+        # When: ten rounds of logins, four of ben's wrong
         for i in range(10):
             self.api.login("anna", "pw-anna-1")
             error_of(lambda: self.api.login("ben", "wrong-password-%d" % i)) if i < 4 else self.api.login("ben", "pw-ben-123")
+        # Then: no password is in the store or the log
         stored = json.dumps([self.store.get("accounts", n) for n in self.store.ids("accounts")])
         for secret in ("pw-anna-1", "pw-ben-123", "wrong-password"):
             self.assertNotIn(secret, stored)
@@ -84,26 +101,43 @@ class Sessions(unittest.TestCase):
 
     @mark.req("REQ-API-006")
     def test_the_service_has_no_way_to_create_an_account(self):
-        """TC-API-006: accounts are made by the owner on the machine (tools/accounts_cli.py), a request cannot create one"""
+        """TC-API-006: accounts are made by the owner on the machine (tools/accounts_cli.py); the session service has no operation that creates one.
+
+        Example: the service has no create_account; the store holds no account carl.
+        """
         self.assertFalse(hasattr(self.api, "create_account"))
         self.assertNotIn("carl", self.store.ids("accounts"))
 
     @mark.req("REQ-API-003")
     def test_whoami_and_the_own_password(self):
+        """TC-API-003: a session knows its account; a user changes the own password with the old one (a wrong old one or a weak new one is refused), and then only the new one works.
+
+        Example: change_password(ben's session, pw-ben-123, long-enough-1) -> {changed: true}; login(ben, pw-ben-123) -> 401.
+        """
+        # Given: ben's session
         token = self.api.login("ben", "pw-ben-123")
+        # When / Then: whoami names ben, a made-up session is 401
         self.assertEqual(self.api.whoami(token), {"user": "ben"})
         self.assertEqual(error_of(lambda: self.api.whoami("made-up")).status, 401)
+        # When / Then: a wrong old password and a weak new one are refused, the right change passes
         self.assertEqual(error_of(lambda: self.api.change_password(token, "wrong", "long-enough-1")).code, "bad_credentials")
         self.assertEqual(error_of(lambda: self.api.change_password(token, "pw-ben-123", "short")).code, "weak_password")
         self.assertEqual(self.api.change_password(token, "pw-ben-123", "long-enough-1"), {"changed": True})
+        # Then: only the new password logs in
         self.assertEqual(error_of(lambda: self.api.login("ben", "pw-ben-123")).status, 401)                    # the old password stops working
         self.assertTrue(self.api.login("ben", "long-enough-1"))
 
     @mark.req("REQ-API-017", "REQ-BE-077")
     def test_after_the_logout_the_same_session_is_refused(self):
-        """TC-API-017"""
+        """TC-API-017: after the logout every call with that session is 401 unauthenticated; another session of the account and the account itself still work.
+
+        Example: logout(first) -> {loggedOut: true}; whoami(first) -> 401 unauthenticated; whoami(second) -> {user: anna}.
+        """
+        # Given: two sessions of anna
         first, second = self.api.login("anna", "pw-anna-1"), self.api.login("anna", "pw-anna-1")
+        # When: the first one logs out
         self.assertEqual(self.api.logout(first), {"loggedOut": True})
+        # Then: the first one is refused everywhere, the second and the account still work
         for call in (lambda: self.api.whoami(first), lambda: self.api.logout(first), lambda: self.api.change_password(first, "pw-anna-1", "long-enough-1")):
             err = error_of(call)
             self.assertEqual((err.status, err.code), (401, "unauthenticated"))
@@ -112,16 +146,29 @@ class Sessions(unittest.TestCase):
 
     @mark.req("REQ-API-017")
     def test_the_sockets_of_the_session_are_dropped_by_the_listener(self):
+        """TC-API-017: the end of a session is told to the listener (which drops its sockets) exactly once, also when the logout is repeated.
+
+        Example: logout(token) -> the listener gets [token]; a second logout -> refused, still [token].
+        """
+        # Given: a listener of ended sessions and anna's session
         ended = []
         self.api.on_end(ended.append)
         token = self.api.login("anna", "pw-anna-1")
+        # When / Then: the logout tells the listener once
         self.api.logout(token)
         self.assertEqual(ended, [token])
+        # When / Then: a repeated logout is refused and tells nothing
         error_of(lambda: self.api.logout(token))
         self.assertEqual(ended, [token])                                              # a refused logout drops nothing twice
 
     def test_user_of_gives_the_account_to_the_other_layers(self):
+        """The socket and the REST layer ask the service for the account of a session; after the logout there is none.
+
+        Example: user_of(ben's session) -> ben; after the logout -> None.
+        """
+        # Given: ben's session
         token = self.api.login("ben", "pw-ben-123")
+        # When / Then: it names ben until the logout
         self.assertEqual(self.api.user_of(token), "ben")
         self.api.logout(token)
         self.assertIsNone(self.api.user_of(token))

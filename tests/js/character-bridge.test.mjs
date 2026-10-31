@@ -1,13 +1,14 @@
 // The page side of IF-111 (N-1.2 T-01, T-04): TC-CHV-001, TC-CHV-002, TC-CHV-012. node --test "tests/js/*.test.mjs"
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { initCharacter, LOAD_TIMEOUT_MS } from '../../templates/static/chat/character.js';
 
 const ORIGIN = 'https://mia.local';
 
 function setup(options = {}) {
   const sent = [];
-  const frame = { hidden: false, src: '/character/index.html', contentWindow: { postMessage: (text, origin) => sent.push({ message: JSON.parse(text), origin }) },
+  const frame = { hidden: false, src: null, dataset: { src: '/character/' }, contentWindow: { postMessage: (text, origin) => sent.push({ message: JSON.parse(text), origin }) },
                   removeAttribute(name) { if (name === 'src') this.src = null; } };
   const handlers = {};
   const socket = { on: (name, fn) => { handlers[name] = fn; }, emit: (name) => sent.push({ emitted: name }) };
@@ -86,8 +87,23 @@ test('TC-CHV-012: over plain HTTP from a LAN address (not a secure context) the 
 test('TC-CHV-012: on localhost or over HTTPS (a secure context) it loads', () => {
   const { events, frame, timers } = setup({ secure: true });
   assert.equal(frame.hidden, false);
+  assert.equal(frame.src, '/character/');
   assert.deepEqual(events.failed, []);
   assert.equal(timers.length, 1);
+});
+
+test('TC-CHV-001: with ?character=0 the iframe never gets an address', () => {
+  const { events, frame } = setup({ enabled: false });
+  assert.equal(frame.src, null);
+  assert.equal(frame.hidden, true);
+  assert.deepEqual(events.failed, []);
+});
+
+test('TC-CHV-012: the page gives the iframe no address of its own; only character.js sets it after its checks', () => {
+  const html = readFileSync(new URL('../../templates/index.html', import.meta.url), 'utf8');
+  const iframe = html.match(/<iframe id="character"[^>]*>/)[0];
+  assert.match(iframe, / data-src="/);
+  assert.doesNotMatch(iframe, / src="/);
 });
 
 test('a message from another origin, from another window, or that is not JSON is ignored', () => {

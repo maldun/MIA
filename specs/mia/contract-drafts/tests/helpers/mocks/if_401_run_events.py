@@ -15,8 +15,9 @@ RUN_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,99}")   # a plain name (v1, A-
 
 
 def _clean(value):
+    # v2 (A-53, D-144, D-146): a secret-like key loses its value whatever the type; an empty text holds nothing and stays
     if isinstance(value, dict):
-        return {k: "[removed]" if any(w in k.lower() for w in SECRET_WORDS) else _clean(v) for k, v in value.items()}
+        return {k: "[removed]" if any(w in k.lower() for w in SECRET_WORDS) and v != "" else _clean(v) for k, v in value.items()}
     if isinstance(value, list):
         return [_clean(v) for v in value]
     return value

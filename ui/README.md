@@ -131,7 +131,7 @@ The chat page connects to the socket of the address it was loaded from, so the s
 - **Safety:** writing needs `Content-Type: application/json` (no cross-site form posts), a known origin if the browser sends one
   (the page's own address is always fine), and the header `X-MIA-Token`. The token is created on the first start (`data/editor_token.txt`, mode 600, not in version control, printed at start); `editor_token` in the configuration overrides it, `""` switches it off. Desktop clients (tests) read it from `MIA_TOKEN` or the file `MIA_TOKEN_FILE`. Names are 1-40 letters, digits, `-`, `_`
   (no paths), files are written atomically, bodies over 64 KB are refused.
-- **Character:** `godot/preset_api.gd` (client, polls the version every 10 s so other devices' changes show up; offline it keeps the
+- **Character:** `godot/preset_api.gd` (client, polls the version every 1.5 s so other devices' changes show up within 2 s; offline it keeps the
   bundled presets), `godot/expression_editor.gd` (the panel: right side on wide screens, bottom sheet on phones, big slider handles,
   solid background), `godot/presets/shape_keys.json` (categories and descriptions of the 57 shape keys, also used for validation and,
   later, for the LLM prompt). `?editor` opens the editor at start, the dev menu has an "Expression editor" button.

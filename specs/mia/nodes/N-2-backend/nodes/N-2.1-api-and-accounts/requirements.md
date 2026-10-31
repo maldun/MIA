@@ -44,15 +44,15 @@ The gateway of the Backend: the Socket.IO and REST surface (IF-101, IF-104), acc
 
 ### REQ-API-004 – Throttled failed logins
 - Level: low   Subject: WebApplication
-- Text: If more than 5 logins fail within one minute for an account, then the API and accounts shall refuse further logins for that account until the minute has passed.
+- Text: If 5 logins of an account have failed within one minute, then the API and accounts shall refuse every further login of that account, also with the right password, until fewer than 5 of its failed logins are younger than one minute.
 - Rationale: refines REQ-BE-009
 - Parent: REQ-BE-009
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-14: the sixth failed attempt within a minute is refused even with the right password (exact)
+- Acceptance criterion: AC-14: after 5 failed logins within a minute the 6th login attempt is refused with 429 `throttled`, even with the right password; another account is not affected; 61 s after the failures the right password works again (exact)
 - Verified by: TC-API-004
 - Status: Approved
-- History: –
+- History: 2026-10-31 D-153 (corrects D-149): the text said "more than 5 fail", which would allow a 6th failure; it now says what the code, IF-101, TC-IF-101-02, REQ-BE-009's criterion and AC-14 say: after 5 failures the 6th attempt is refused (Verify finding V-10)
 
 ### REQ-API-005 – Password handling
 - Level: low   Subject: WebApplication
@@ -85,10 +85,10 @@ The gateway of the Backend: the Socket.IO and REST surface (IF-101, IF-104), acc
 - Parent: REQ-BE-012
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-14: a request without a session is refused; a foreign origin is refused; the rate limit value is set in Plan
+- Acceptance criterion: AC-14: a request without a session is refused; a foreign origin is refused; an account sends at most 10 messages per 60 s (the setting `chat_rate_per_minute`, default 10; all connections of the account count together), the 11th within 60 s is refused with 429 `rate_limited` (IF-101 v12) and is not stored
 - Verified by: TC-API-007
 - Status: Approved
-- History: –
+- History: 2026-10-31 D-149: the rate limit value (10 messages per 60 s per account, a setting) and the refusal 429 `rate_limited` replace "the rate limit value is set in Plan" (Verify finding V-5; IF-101 by amendment A-54)
 
 ### REQ-API-008 – Passwords only over a secure channel
 - Level: low   Subject: WebApplication

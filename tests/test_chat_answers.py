@@ -118,6 +118,24 @@ class AnswersTest(unittest.TestCase):
         # And nothing is stored
         self.assertEqual(self.storage.ids("votes"), [])
 
+    @mark.req("REQ-CHV-006")
+    @mark.req("REQ-CHA-015")
+    def test_a_minus_makes_the_character_shocked(self):
+        """REQ-CHV-006 (D-137, D-143): every stored minus, in any category, lets the character react `shocked`; a plus or a refused vote does not.
+
+        Example: plus on the answer -> no reaction; minus on the service -> react("shocked"); minus with value 5 -> refused, no reaction
+        """
+        # Given a service whose character reactions are recorded
+        reactions = []
+        self.chat._react = reactions.append
+        answer = self.answer()
+        # When a plus, a minus and a refused minus arrive
+        self.chat.vote("anna", answer, "answer_quality", 1)
+        self.chat.vote("ben", "voice", "service", -1)
+        code_of(lambda: self.chat.vote("ben", "voice", "service", 5))
+        # Then only the stored minus gives the shocked reaction
+        self.assertEqual(reactions, ["shocked"])
+
     def test_regenerate_asks_again_for_the_last_answer_only(self):
         """TC-IF-201-05: a new try of the last answer, the old answer stays; an older answer or an unknown id is refused."""
         first = self.answer("q1")

@@ -28,8 +28,23 @@ class FakeStreamer:
     def finish(self, text):
         pass
 
-    def wait(self):
+    def wait(self, should_stop=None):
         pass
+
+
+class SpokenStreamer(FakeStreamer):
+    """records what the wait for the voice saw: the answer is complete (finish), then the user presses Stop while it is spoken"""
+    last = None
+
+    def __init__(self, *args, **kwargs):
+        SpokenStreamer.last = self
+        self.finished, self.stopped_while_spoken = False, None
+
+    def finish(self, text):
+        self.finished = True
+
+    def wait(self, should_stop=None):
+        self.stopped_while_spoken = should_stop is not None and should_stop()
 
     def abort(self):
         pass
@@ -87,6 +102,86 @@ class ConverseBehaviours(unittest.TestCase):
         w.converse("hi")
         self.assertEqual(self.played[:2], [("yes", True, "/lines/agree.wav"), ("no", False)])
 
+
+    @mark.req("REQ-VPB-002", "REQ-FE-012")
+    def test_a_stop_while_the_answer_is_spoken_reaches_the_wait_for_the_voice(self):
+        """A3 (D-154): the chat's stop reaches the wait for the voice of a complete answer, so the speech process can end the stream.
+
+        Example: the answer is complete, Stop is pressed while it is spoken -> the streamer's wait sees should_stop() == True.
+        """
+        # Given: a converse whose stop becomes true once the whole answer went to the voice
+        w.SpeechStreamer = SpokenStreamer
+        w.chat_service.show_behaviour = lambda name: True
+        # When: the answer is spoken
+        w.converse("hi", should_stop=lambda: SpokenStreamer.last.finished)
+        # Then: the wait for the voice was told about the stop
+        self.assertTrue(SpokenStreamer.last.stopped_while_spoken)
+
+    @mark.req("REQ-CHV-006")
+    def test_the_reaction_of_the_chat_shows_the_expression_and_says_its_line(self):
+        """REQ-CHV-006 (D-143): the reaction the chat service asks for after a minus shows `shocked` and plays the shocked line of the voice lines.
+
+        Example: chat_service._react("shocked") -> express_and_reload("shocked", sound=True, line="/lines/shocked.wav")
+        """
+        # Given voice lines with a shocked line (the return to the mood's face is left in the background, TC-CHV-006 checks it)
+        w.voice_lines.pick = lambda mood: "/lines/%s.wav" % mood
+        saved = w.socketio.start_background_task
+        self.addCleanup(setattr, w.socketio, "start_background_task", saved)
+        w.socketio.start_background_task = lambda target, *args, **kwargs: None
+        # When the chat service lets the character react
+        w.chat_service._react("shocked")
+        # Then the character shows shocked and says its line
+        self.assertEqual(self.played, [("shocked", True, "/lines/shocked.wav")])
+
+
+class ShockedAfterAMinus(unittest.TestCase):
+    """TC-CHV-006 (REQ-CHV-006, D-143, D-155): the backend side of the shocked reaction, from the vote to the wire."""
+
+    @mark.req("REQ-CHV-006")
+    def test_a_minus_vote_sends_the_shocked_expression_and_plays_the_shocked_line(self):
+        """TC-CHV-006 (D-156): a minus through the chat service of the app sends `expression {name: "shocked"}` to the pages and plays the shocked line; in the
+        background, after the length of the line, the face of the current mood follows; a plus does none of it.
+
+        Example: mood "happy", line of 0.5 s; vote(anna, "voice", "service", -1) -> ("expression", shocked), play_sound(line), sleep 0.5 in the background,
+        ("expression", happy)
+        """
+        import tempfile
+        import wave
+        # Given the app's chat service on a fresh votes table, a happy mood, a shocked line of 0.5 s, and the socket, the sound player and the background recorded
+        folder = tempfile.mkdtemp()
+        line = os.path.join(folder, "shocked_default.wav")
+        with wave.open(line, "wb") as fp:
+            fp.setnchannels(1)
+            fp.setsampwidth(2)
+            fp.setframerate(8000)
+            fp.writeframes(b"\0\0" * 4000)
+        sent, played, background, slept = [], [], [], []
+        saved = (w.socketio.emit, w.socketio.start_background_task, w.socketio.sleep, w.play_sound, w.chat_service._votes, w.voice_lines.pick, w.mood)
+        self.addCleanup(lambda: (setattr(w.socketio, "emit", saved[0]), setattr(w.socketio, "start_background_task", saved[1]), setattr(w.socketio, "sleep", saved[2]),
+                                 setattr(w, "play_sound", saved[3]), setattr(w.chat_service, "_votes", saved[4]), setattr(w.voice_lines, "pick", saved[5]),
+                                 setattr(w, "mood", saved[6])))
+        w.socketio.emit = lambda event, payload=None, **kw: sent.append((event, payload))
+        w.socketio.start_background_task = lambda target, *args, **kwargs: background.append(lambda: target(*args, **kwargs))
+        w.socketio.sleep = slept.append
+        w.play_sound = lambda path, url=None: played.append(path)
+        w.voice_lines.pick = lambda mood: line if mood == "shocked" else None
+        w.chat_service._votes = w.Storage(w.FileBackend(folder))          # the app's own storage classes
+        w.mood = type("Mood", (), {"status": lambda self: {"emotion": "happy"}})()
+        faces = lambda: [p["name"] for e, p in sent if e == "expression"]
+        # When anna gives a plus
+        w.chat_service.vote("anna", "voice", "service", 1)
+        # Then nothing happens to the character
+        self.assertEqual((faces(), played, background), ([], [], []))
+        # When anna gives a minus
+        w.chat_service.vote("anna", "voice", "service", -1)
+        # Then she is shocked and says the line at once, and the return waits in the background
+        self.assertEqual((faces(), played), (["shocked"], [line]))
+        self.assertEqual(len(background), 1)
+        background.pop()()
+        # and after the length of the line she shows the face of her mood again
+        self.assertEqual(slept, [0.5])
+        self.assertEqual(faces(), ["shocked", "happy"])
+        self.assertEqual(played, [line])
 
 if __name__ == "__main__":
     unittest.main()

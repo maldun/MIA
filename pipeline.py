@@ -44,6 +44,7 @@ KINDS = ("model", "tool", "code", "script", "map", "branch", "loop", "ask_user")
 MAX_LOOP = 20
 MAX_PLAIN = 160
 ON_ERROR = ("fail", "skip", "default")
+NOT_COUNTED = ("unknown_tool", "bad_arguments", "budget")      # the errors of IF-402 after which the door has counted nothing
 OPS = ("==", "!=", "<", "<=", ">", ">=", "in", "not_in", "empty", "not_empty", "true", "false")
 # the event types of IF-401 (contracts/IF-401-run-events.md); the other events of a run stay in the run log only
 IF401_TYPES = ("run_start", "run_end", "model_call", "tool_call", "check_run", "query_issued", "source_found", "passage_extracted", "claim_made",
@@ -487,19 +488,34 @@ class Runner:
 
     def _do_tool(self, st, node, ctx, item):
         tool = st.tools[node["tool"]]
-        if tool.budget_key:
-            with st.lock:
-                st.calls[tool.budget_key] = st.calls.get(tool.budget_key, 0) + 1
-                count = st.calls[tool.budget_key]
-            limit = st.budget.get(tool.budget_key)
-            if limit is not None:
-                ev.emit("budget_spent", {"name": tool.budget_key, "amount": 1, "used": count, "limit": limit})
+        key = tool.budget_key
+        door = tool.func is None                 # a tool of the door; one handed to this run (run(tools=)) has its own function and wins (F11)
+        count = limit = None
+        if key:
+            with st.lock:                        # reserved before the call: a budget key may be shared by several tools, and map items run in parallel
+                st.calls[key] = st.calls.get(key, 0) + 1
+                count = st.calls[key]
+            limit = st.budget.get(key)
+            if limit is not None and (count > limit or not door):
+                ev.emit("budget_spent", {"name": key, "amount": 1, "used": count, "limit": limit})
             if limit is not None and count > limit:
-                raise BudgetExceeded(tool.budget_key)
+                raise BudgetExceeded(key)
         args = resolve(node.get("args", {}), ctx)
-        if tool.func is None:                    # a tool of the door; one handed to this run (run(tools=)) has its own function and wins (F11)
-            return self._call_door(st, node, args)
-        return tool.func(**args)
+        if not door:
+            return tool.func(**args)
+        try:
+            found = self._call_door(st, node, args)
+        except Exception as exc:
+            refusal = exc.__cause__ if isinstance(exc, BudgetExceeded) else exc       # _call_door turns the door's `budget` into BudgetExceeded
+            if key and getattr(refusal, "code", None) in NOT_COUNTED:
+                with st.lock:                    # IF-402: a call the door refuses counts nothing, so the runner gives the reserved call back (N-6)
+                    st.calls[key] -= 1
+            elif limit is not None:
+                ev.emit("budget_spent", {"name": key, "amount": 1, "used": count, "limit": limit})
+            raise
+        if limit is not None:
+            ev.emit("budget_spent", {"name": key, "amount": 1, "used": count, "limit": limit})
+        return found
 
     def _call_door(self, st, node, args):
         """a tool of IF-402: the door counts it against the limits of the run (the same budgets) and labels its trust (REQ-RUN-012)"""

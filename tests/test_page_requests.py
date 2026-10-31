@@ -49,6 +49,16 @@ def own_stage(output):
     raise unittest.SkipTest("the stage does not start: " + output[-200:])
 
 
+def browse(*args):
+    """one session of the headless browser on the page (tests/browser/page_requests.py); returns its JSON {played, urls, console}"""
+    with open(DRIVER, encoding="utf-8") as driver:
+        run = subprocess.run(["podman", "run", "--rm", "-i", "--network", "host", BROWSER_IMAGE, "python", "-", PAGE, *args],
+                             stdin=driver, capture_output=True, text=True, timeout=120)
+    if run.returncode != 0:
+        raise AssertionError("the browser run failed: " + run.stderr[-500:])
+    return json.loads(run.stdout.strip().splitlines()[-1])
+
+
 class StageUse(unittest.TestCase):
     def test_a_stage_that_runs_already_is_not_used(self):
         """N5: a stage that runs already may be another checkout's or carry older code, so the test skips (never passes) on it.
@@ -73,12 +83,8 @@ class PageRequests(unittest.TestCase):
             raise unittest.SkipTest("podman or an image is missing (%s, %s)" % (MIA_IMAGE, BROWSER_IMAGE))
         if own_stage(stage("start").stdout):
             cls.addClassCleanup(stage, "stop")                    # only a stage this test started is stopped again
-        with open(DRIVER, encoding="utf-8") as driver:
-            run = subprocess.run(["podman", "run", "--rm", "-i", "--network", "host", BROWSER_IMAGE, "python", "-", PAGE],
-                                 stdin=driver, capture_output=True, text=True, timeout=120)
-        if run.returncode != 0:
-            raise AssertionError("the browser run failed: " + run.stderr[-500:])
-        cls.session = json.loads(run.stdout.strip().splitlines()[-1])
+        cls.session = browse()
+        cls.broken = browse("broken")                             # owner check A4 (D-154): a broken line, then a good one
 
     @mark.req("REQ-VPB-004", "REQ-FE-026")
     def test_every_request_of_a_session_goes_to_the_page_host(self):
@@ -121,6 +127,23 @@ class PageRequests(unittest.TestCase):
         blocked = [message for message in console if "Content Security Policy" in message]
         # Then: there are none
         self.assertEqual(blocked, [])
+
+    @mark.req("REQ-VPB-003", "REQ-VPB-001")
+    def test_a_broken_line_gives_one_console_warning_and_the_next_line_plays(self):
+        """TC-VPB-003 in a real browser (owner check A4, D-154): a text file uploaded as broken.wav is skipped with exactly one console
+        warning that names its line, and the good line uploaded after it plays to its end.
+
+        Example: played == ["error", "playing", "ended"]; console has one "MIA voice: line skipped, it could not be played: /audio/line-000007.wav".
+        """
+        # Given: a session in which a broken line and then a good line were uploaded (setUpClass)
+        lines = [url for url in self.broken["urls"] if urlsplit(url).path.startswith("/audio/")]
+        # When: the warnings of the voice are picked from the console
+        warnings = [message for message in self.broken["console"] if "MIA voice: line skipped" in message]
+        # Then: one warning for the first line, and the second line played to its end
+        self.assertEqual(len(lines), 2)
+        self.assertEqual(len(warnings), 1, self.broken["console"])
+        self.assertIn(urlsplit(lines[0]).path, warnings[0])
+        self.assertEqual(self.broken["played"], ["error", "playing", "ended"])
 
     def test_the_check_finds_an_outside_request(self):
         """TC-VPB-004: the check itself sees a request to another host and ignores data: and blob: urls.

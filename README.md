@@ -57,7 +57,7 @@ Prerequisites:
 - Install/Check requirements in requirements.txt (`python -m pip install -r requirements.txt`)
 
 ### Running as a service (podman compose)
-MIA, Ollama and SearXNG as three containers with one command (`deploy/up.sh`), including the zipped 3D character (`deploy/up.sh character <zip>`): see `deploy/README.md`.
+MIA with Ollama, SearXNG, the graph page, an HTTPS front and PostgreSQL as containers with one command (`deploy/up.sh db`), including the zipped 3D character (`deploy/up.sh character <zip>`): see `deploy/README.md`.
 
 ### Looking at what MIA did
 `python tools/run_explain.py list | show | explain | cost | problems | diff | export | call | reproduce` reads the run log (`data/runs`) and the content store (`data/store`): `show` prints a run as a graph within a token budget, `explain` leads a sentence of an answer back through claim, quote, page and search to the query, `diff` compares two runs, `reproduce` repeats a run offline from its recording and says whether it came out the same (a change of code, prompt or library that changes what a run does shows up as a divergence). Prompts, answers and pages are kept for the tasks but not for the chat (`store_chat_texts`).

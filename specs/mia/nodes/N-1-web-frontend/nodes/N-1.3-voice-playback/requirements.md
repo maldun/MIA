@@ -25,10 +25,10 @@ Playing the audio of the answers and the voice lines in this browser: queue, cla
 - Parent: REQ-FE-012
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-13: after mute no audio plays on this device; a second device still plays
+- Acceptance criterion: AC-13: after mute no audio plays on this device; a second device still plays; after Stop no line of the stopped answer plays on this device, also one that arrives later, until the next answer begins (its lines play)
 - Verified by: TC-VPB-002
 - Status: Approved
-- History: –
+- History: 2026-10-31 D-157: the acceptance criterion adds the lines of a stopped answer that arrive after the Stop (owner check A3); lines carry no answer id, so "the stopped answer" ends when the next one begins (`chat_start`)
 
 ### REQ-VPB-003 – Voice lines
 - Level: low   Subject: WebFrontEnd
