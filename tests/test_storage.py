@@ -193,6 +193,18 @@ class StorageBehaviour:
         self.assertEqual(self.store.put("workflows", "lookup", LOOKUP, "anna"), {"version": 1})
 
     @mark.req("REQ-SLY-004")
+    def test_a_nul_character_is_refused_on_every_backend(self):
+        """Finding F9 of the verification: PostgreSQL cannot store NUL in text, so no backend takes it, and the error is the layer's own.
+        Example: put("memos", "m", {"text": "a\\x00b"}) is ("invalid", "schema") and nothing is stored."""
+        # Given: NUL in a text, in a key, in the id and in the author
+        calls = [lambda: self.store.put("memos", "m", {"text": "a\x00b"}, "anna"), lambda: self.store.put("memos", "m", {"te\x00xt": "a"}, "anna"),
+                 lambda: self.store.put("memos", "m\x00", {"text": "a"}, "anna"), lambda: self.store.put("memos", "m", {"text": "a"}, "an\x00na")]
+        # When / Then: each is refused and nothing is stored
+        for call in calls:
+            self.assertEqual(code_of(call), ("invalid", "schema"))
+        self.assertEqual(self.store.ids("memos"), [])
+
+    @mark.req("REQ-SLY-004")
     def test_a_refused_edit_consumes_no_version(self):
         self.store.put("workflows", "w", LOOKUP, "anna")
         code_of(lambda: self.store.put("workflows", "w", CYCLE, "anna"))

@@ -40,8 +40,22 @@ def table_definitions():
     return tables
 
 
+def refuse_nul(*values):
+    """Raises StorageError("invalid", "schema") when a text anywhere in the values (keys included) holds a NUL character: PostgreSQL cannot store
+    it, so no backend takes it and both refuse it the same way (F9)."""
+    def has_nul(value):
+        if isinstance(value, str):
+            return "\x00" in value
+        if isinstance(value, dict):
+            return any(has_nul(k) or has_nul(v) for k, v in value.items())
+        return isinstance(value, list) and any(has_nul(v) for v in value)
+    if any(has_nul(value) for value in values):
+        raise StorageError("invalid", rule="schema", detail="a NUL character")
+
+
 def validate(table, doc):
     """Raises StorageError("invalid", rule, detail) for a document the table definitions refuse (REQ-SLY-004); put and the copies use it."""
+    refuse_nul(doc)
     validator = graph_tables if table in graph_tables.TABLES else record_tables
     broken = validator.validate(table, doc)
     if broken:
@@ -64,6 +78,7 @@ class Storage:
     def put(self, table, record_id, doc, author, expected_version=None):
         """Write a new version; returns {"version": n}."""
         self._check(table)
+        refuse_nul(record_id, author)
         validate(table, doc)
         with self._lock:                      # one writer at a time per process: the numbers of the versions have no gap
             current = len(self.backend.versions(table, record_id))
