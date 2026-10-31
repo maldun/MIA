@@ -93,7 +93,7 @@ Starting point: every test that names an id of this node (24 files, incl. the co
 ## After the owner's answers D-156 (2026-10-31, late)
 | Item | State | Commit |
 |---|---|---|
-| Q1: back to the mood's face after the shocked line | done | see the next commit line in git (`feat(chat): ... face of her mood ...`) |
+| Q1: back to the mood's face after the shocked line | done | `9c32979` (log line fixed in the next commit) |
 | Q2: IF-101 records the shocked expression after a minus | amendment draft A-57 | – |
 | Q3: every stored minus makes her shocked | as built, no change | – |
 
@@ -102,3 +102,8 @@ Starting point: every test that names an id of this node (24 files, incl. the co
 - Built in `web_app.py`: `character_reaction` plays the expression and the line at once, then starts `back_to_mood` with `socketio.start_background_task` (the vote request does not wait): `socketio.sleep(line_seconds(line))`, then `express_and_reload(mood_face(), sound=False)`.
 - **Choices no requirement states (for Verify):** the face of the mood is `comm.map_emotion(mood.status()["emotion"])` (emotion_map.json, the same map an answer's emotion uses), `neutral` when there is no mood (as REQ-CHV-004 says for an unknown mood); the length of the line is read from the wav header; a line that is missing or unreadable waits `REACTION_SECONDS = 3`.
 - The older wiring test `test_the_reaction_of_the_chat_shows_the_expression_and_says_its_line` now stubs the background task, so no thread outlives it.
+
+### Q2 (D-156): amendment draft A-57
+- Note `specs/mia/amendments/A-57/A-57-note.md`, script `tools/apply_amendment_a57.sh`. It builds both files from the INSTALLED ones at install time: `contracts/IF-101-chat-api.md` (title one version up, one sentence at the end of the `vote` row, one version row) and `tests/helpers/mocks/if_101_chat_api.py` (a minus also broadcasts `expression {name: "shocked"}` after `score`). It is safe to run twice ("unchanged").
+- Scratch check with A-54's drafts from `v1-n21b` (two copies of HEAD in the job scratch folder): (1) A-54 then A-57: contract v13, IF-101 suite 62 OK (3 skips); (2) A-57, then A-54 (A-54 copies whole files and takes A-57 out), then A-57 again: the same two files byte for byte as in (1), suite 62 OK; a further run reports both unchanged. A direct call of the installed mock: a plus gives only `score`, a minus also gives `expression {name: "shocked"}`.
+- **For the owner:** install A-54 first, or run A-57 once more after A-54 (in the note). No contract test was added: the real side of the IF-101 suite has no character; TC-CHV-006 (`tests/test_converse_behaviours.py`) checks the real Backend.
