@@ -40,3 +40,17 @@ inspection read the four files named in D-107 (A-28) and not `run_events.py`, th
   AC-15 also says "or outside the storage client": read as a check of the whole repository, `library.py` (the derived index `data/library.sqlite`, not Run log code) imports `sqlite3`;
   `tests/test_workflow_storage_imports.py` does not reach it. Question 2 of the hand-over below.
 - Files outside the task's Touches: `tests/test_run_log_files.py` (a node test, free).
+
+## T-01 follow-up: the runner writes through RunEvents (2026-10-31) – REQ-LOG-002, REQ-LOG-001, IF-401
+State found: the open item of T-01 "the runner does not write through `RunEvents` yet" was closed by N-2.4.1 T-07 (`356f90b`: `pipeline._RunEventsSink`, wired in `web_app.py` as `run_events`, folder
+`<runs>/events`, D-120: both formats side by side, moving `RunLog` behind IF-401 is technical debt); chat runs carry the real user (D-129, N8 of D-130). The runner was tested only against the mock
+of IF-401 (`tests/test_runner_interfaces.py`); nothing showed the provider fed by the real runner.
+- Added: `tests/test_run_events.py::RunnerWritesThroughTheLog` (1 test): a run of the real `Runner` written through the real `RunEvents` is `run_start` .. `run_end`, `check_order` empty, one
+  run id and the user `anna`, the question's bearer token and e-mail address are `[removed]` in the stored file, the account is the plain texts of its events.
+- Red before: against `pipeline.py` of `356f90b^` (before the wiring) `TypeError: Runner.__init__() got an unexpected keyword argument 'run_events'`; green on the current code. A mutation of
+  `run_events.py` without `redact` keeps the test green: the stream of `events.py` already removes the secrets before the sink, so the writer's own removal is a second layer (its unit test
+  catches the mutation). No production code changed.
+- Green after (image, feedback): `test_run_events.py` (12), `test_runner_interfaces.py` (8), `test_pipeline.py` (26).
+- Seen, not changed (for Verify): the account of the IF-401 file of a run is coarse: the skill's description, the tool names, the status (`run_start`, `tool_call`, `run_end` carry a plain text);
+  the node steps the chat shows ("start" events with the node's `plain`) are not in the 14 types of IF-401 and go only to `RunLog`. See question 1 of the hand-over.
+- Files outside the task's Touches: `tests/test_run_events.py` (a node test).

@@ -1,7 +1,7 @@
 """
 TC-LOG-001, TC-LOG-002, TC-LOG-003, TC-IF-401 (REQ-LOG-001 to -003, IF-401): the provider of the run event log, `run_events.RunEvents`: typed events with one run id and the starting user, secrets
 removed, an order that can be checked, the account of a run from its events only, two runs compared, and the events kept as append-only files (REQ-LOG-005, A-28), one file per run.
-The golden cases of the contract suite (tests/acceptance/contract/test_if_401_run_events.py) are repeated here on the real provider until the adapter of the suite is installed.
+The golden cases of the contract suite (tests/acceptance/contract/test_if_401_run_events.py) are repeated here on the real provider; the last class feeds it from the real runner.
 Run: python tests/test_run_events.py
 """
 import json
@@ -18,7 +18,21 @@ sys.path.insert(0, REPO)
 sys.path.insert(0, os.path.join(HERE, "helpers", "mocks"))
 
 import if_401_run_events as mock  # noqa: E402  (the list of types of the contract)
+from pipeline import Runner  # noqa: E402  (the consumer that writes the events of a run, N-2.4.1 T-07)
 from run_events import RunEvents, RunEventsError, TYPES  # noqa: E402
+from skill_store import parse_skill  # noqa: E402
+
+SKILL = """---
+name: echo
+version: 1
+description: Repeat the question
+budget: {steps: 5, seconds: 30}
+pipeline: echo
+---
+"""
+GRAPH = {"name": "echo", "version": 1, "result": "said",
+         "nodes": [{"id": "say", "kind": "code", "function": "say", "args": {"text": "$input.question"}, "output": "said", "plain": "Repeating"}]}
+SECRET_QUESTION = "Repeat Bearer abc123secret456 and write to anna@example.org"
 
 
 def code_of(call):
@@ -194,6 +208,31 @@ class Provider(unittest.TestCase):
         # Then it has the eight fields and a numeric time
         self.assertEqual(sorted(line), ["actor", "payload", "plain", "run_id", "seq", "time", "type", "user"])
         self.assertTrue(re.fullmatch(r"[0-9.]+", repr(line["time"])))
+
+
+class RunnerWritesThroughTheLog(unittest.TestCase):
+    def test_a_run_of_the_runner_is_complete_in_order_with_its_user_and_without_its_secrets(self):
+        """TC-LOG-002, TC-LOG-001 (the wiring of N-2.4.1 T-07): a run of the real runner written through RunEvents is one run id from run_start to run_end, in order, with the
+        starting user; a bearer token and an e-mail address in its question are not in the file; its account is the plain texts of its events.
+        Example: anna runs "echo" on "Repeat Bearer abc123secret456 ..." -> run_start first, run_end last, check_order [], user anna, "abc123secret456" not in the file."""
+        with tempfile.TemporaryDirectory() as folder:
+            # Given the runner writing through a run event log
+            log = RunEvents(folder)
+            runner = Runner(functions={"say": lambda text: text}, run_events=log)
+            # When anna runs a skill whose question carries a secret
+            result = runner.run(parse_skill(SKILL, "echo.md"), GRAPH, {"question": SECRET_QUESTION}, user="anna", started_by="command")
+            events = log.events(result.run_id)
+            with open(log.path(result.run_id), encoding="utf-8") as handle:
+                stored = handle.read()
+            # Then the run is complete and in order, of one run id and one user, without the secrets, and its account renders its events
+            self.assertEqual(result.status, "done")
+            self.assertEqual((events[0]["type"], events[-1]["type"]), ("run_start", "run_end"))
+            self.assertEqual(log.check_order(result.run_id), [])
+            self.assertEqual({(e["run_id"], e["user"]) for e in events}, {(result.run_id, "anna")})
+            self.assertEqual(events[0]["payload"]["question"], "Repeat [removed] and write to [removed]")
+            self.assertNotIn("abc123secret456", stored)
+            self.assertNotIn("anna@example.org", stored)
+            self.assertEqual(log.account(result.run_id), [{"seq": e["seq"], "plain": e["plain"]} for e in events if e["plain"]])
 
 
 if __name__ == "__main__":
