@@ -190,3 +190,6 @@ An empty digest (held by the server or in the pin) matched every pin as a prefix
 
 ## F16, tests (2026-10-31, afternoon)
 Markers `@mark.req` for REQ-RUN-008, -014, -015 and Given/When/Then comments in `tests/test_runner_budgets.py` and `tests/test_run_workflow.py` (no assertion changed; test_doc_check clean; trace_check finds the markers); commit `b244f8c`. Still open: the Scenarios section of the node's `test-spec.md` (specification, written by people; the agent can draft it).
+
+## F11 fixed (2026-10-31, afternoon)
+A tool handed to one run (`run(..., tools=)`) was ignored when the door had a tool of the same name. `_do_tool` now goes to the door only for a tool without its own function; test `test_a_tool_given_to_one_run_wins_over_the_door`, red before, green after; commit `2fafbe3`.
