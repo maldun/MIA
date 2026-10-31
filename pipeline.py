@@ -290,10 +290,13 @@ class _State:
 
 
 class Runner:
-    def __init__(self, model=None, tools=None, functions=None, run_log=None, rng=None, clock=time.monotonic, sandbox=None, broker_factory=None, environment=None, strict_events=False, store=None, store_texts=None):
-        """model: object with chat(messages, schema=None, model=None, profile=None, options=None) -> text; tools: {name: callable | Tool};
+    def __init__(self, model=None, tools=None, functions=None, run_log=None, rng=None, clock=time.monotonic, sandbox=None, broker_factory=None, environment=None, strict_events=False, store=None, store_texts=None,
+                 max_input_tokens=4096):
+        """max_input_tokens: the largest model input, half of the context window (REQ-RUN-005; num_ctx 8192); a step whose options set num_ctx uses half of it.
+        model: object with chat(messages, schema=None, model=None, profile=None, options=None) -> text; tools: {name: callable | Tool};
         functions: {name: callable}; run_log: RunLog or None; environment: a dict or a function returning one (events.environment()), written into run_start;
         strict_events: a domain event that does not fit its schema raises (tests) instead of becoming a log_error event"""
+        self.max_input_tokens = max_input_tokens
         self.model = model
         self.tools = {k: v if isinstance(v, Tool) else Tool(v, None) for k, v in (tools or {}).items()}
         self.functions = dict(functions or {})
@@ -552,6 +555,11 @@ class Runner:
 
     def _ask_model(self, st, messages, schema, settings):
         """one model call counted against the budgets calls and tokens (REQ-RUN-008); a model that reports no count is estimated at 4 characters a token"""
+        num_ctx = (settings.get("options") or {}).get("num_ctx")
+        limit = num_ctx // 2 if num_ctx else self.max_input_tokens
+        estimate = math.ceil(sum(len(str(m["content"])) for m in messages) / 4)
+        if estimate > limit:                        # refused before the call, so it is not counted either (REQ-RUN-005)
+            raise NodeError("the input is about %d tokens, more than half of the context window (%d tokens)" % (estimate, limit))
         with st.lock:
             if st.model_calls >= st.budget.get("calls", math.inf):
                 raise BudgetExceeded("calls")

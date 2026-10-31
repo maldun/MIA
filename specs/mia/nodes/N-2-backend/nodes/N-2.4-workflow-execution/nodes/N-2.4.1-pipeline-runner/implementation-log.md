@@ -87,3 +87,17 @@ File outside T-04's list: `web_app.py` (one argument at the chat entry, the wiri
 Local coder: `tests/test_runner_internet_by_command.py` (task `run01-tests`, 1 attempt, 53 s); compared with the instruction by script: identical, verdict `ok`. Red before the change (no `reaches_internet`), green after.
 
 Tests reported green (feedback, not verification): `tests/test_runner_internet_by_command.py` (6), `tests/test_pipeline.py`; all `tests/test_*.py` in the image fail only as on master; all contract suites and integration steps.
+
+## T-05 Context window share (2026-10-31, done; REQ-RUN-004 and REQ-RUN-006 out of the scope of G-V1, D-119) – REQ-RUN-005
+
+| Requirement | Where it is met | Test |
+|---|---|---|
+| REQ-RUN-005 every model input inside 50 % of the context window | `Runner._ask_model`: the input is estimated at 4 characters a token (as the budget does); over the limit the step fails before the call, not counted, with "the input is about N tokens, more than half of the context window (L tokens)" (the run error starts with the step id); the limit is half of `num_ctx` when the step's options set it, else `Runner(max_input_tokens=4096)` | `tests/test_runner_context_share.py` (4) |
+
+Owner's answers (D-119): refuse, do not cut; REQ-RUN-004 (optional learning) and REQ-RUN-006 (fewer than 15 calls, a measurement) out of the scope of G-V1.
+
+Checked against the shipped pipelines: the largest inputs by construction are review sections (`extensions/review/fulltext.py`, 6000 characters, about 1500 tokens) and the passages of a lookup (budget 6000 characters): inside the limit. The measurement over the lookup suites (AC-22: 100 % at most 4096 tokens by the server's count, `tokens_in` of the `model_call` events) is not made here.
+
+Local coder: `tests/test_runner_context_share.py` (task `run05-tests`, 1 attempt, 38 s); compared with the instruction by script: identical, verdict `ok`. Red before the change (2 failures, 1 error), green after.
+
+Tests reported green (feedback, not verification): `tests/test_runner_context_share.py` (4); all `tests/test_*.py` in the image fail only as on master; all contract suites and integration steps.

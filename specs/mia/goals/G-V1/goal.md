@@ -62,6 +62,8 @@ Back-filled on 2026-10-30, after the workflow skills introduced goals (M33–M37
 | NFR-9 | in | |
 | REQ-TLS-006 | out | owner 2026-10-31 (D-117): no eval criterion is fixed for it yet (suite, metric, repeats, pin, rule) and MIA has no eval-spec.md with pins; back in a later goal together with that criterion. Its parents REQ-WFX-016 (N-2.4) and REQ-BE-067 (N-2) stay in; they carry the same criterion. |
 | REQ-RUN-011 | out | owner 2026-10-31 (D-118): its criterion is the IF-103 contract suite on the real side, but the suite cannot hand its scripted replies to a real provider; back in a later goal with an IF-103 provider and an amendment of the suite. Its parents stay in. |
+| REQ-RUN-004 | out | owner 2026-10-31 (D-119): optional learning is not built (LearningLayer and FR-18 proposed); back with a goal that designs the learning layer. |
+| REQ-RUN-006 | out | owner 2026-10-31 (D-119): a measurement without a fixed eval criterion and model pins, like REQ-TLS-006; back with the eval criterion and eval-spec.md. |
 
 ## Parts
 | Part | Real or stand-in | Notes |
