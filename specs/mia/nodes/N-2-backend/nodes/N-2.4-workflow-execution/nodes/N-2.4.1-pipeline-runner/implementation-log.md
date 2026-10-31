@@ -184,3 +184,6 @@ Tests reported green (feedback, not verification): all `tests/test_*.py` in the 
 
 ## F14 fixed (2026-10-31, afternoon)
 An empty digest (held by the server or in the pin) matched every pin as a prefix. `WorkflowRuns._check_pin` now requires both; test `test_an_empty_digest_is_no_pin` (`tests/test_run_workflow.py`), red before, green after; IF-105 and IF-202 contract suites pass. Commit `cea4d62`.
+
+## F13, model part (2026-10-31, afternoon)
+`pipelineRunner` in `specs/mia/architecture.sysml` now names `run_workflow.py` and `tools/sync_workflows.py` (`check_sysml.sh` and `check_sysml_model.py` clean); commit `4baadae`. Still open: `decomposition.yaml` (protected) says 7 tasks for N-2.4.1, the plan has 8 (T-08, A-35): a one-line amendment for the owner.
