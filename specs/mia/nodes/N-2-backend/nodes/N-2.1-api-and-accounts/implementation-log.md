@@ -150,3 +150,20 @@ Options for the owner: (a) keep the decision: an amendment (a new id, e.g. A-55)
 - Test docs: every test of `test_accounts_api.py`, `test_author_in_records.py`, `test_api_sessions.py`, `test_accounts_cli.py`, `test_internal_auth.py` has a docstring with the test case id, an `Example:` line and Given / When / Then comments: `test_doc_check.py` 0 errors for each (was 40, 11, 10, 5, 4). No code line changed: checked by script (the AST of each file without docstrings equals the one of HEAD; for `test_accounts_api.py` HEAD minus the removed dummy class). All green in the image (30, 9, 8, 3, 3).
 - TC-API-010: the dummy route `/api/data` of `test_accounts_api.py` (class `Everyone`) is replaced by `test_a_second_user_sees_and_changes_the_workflow_preset_and_persona_of_the_first` in `tests/test_accounts_wiring.py`, on the real `web_app` with accounts on: anna saves a workflow, a preset (with the editor token) and the persona, ben reads all three and saves his own, anna reads ben's (author ben). Green on the code as it is (no gap); a mutation on a scratch copy (a workflow may only be changed by its author, 403) makes it red.
 - Local coder: `n21b-doc-*` (5 tasks): two failed (a syntax error; no code block for the 395-line file), three passed the checks but were rejected in review (bare ids as docstrings, wrong examples, comments in the wrong places); the docs were written by me and inserted by a script. Lesson recorded.
+
+## Hand-over of branch v1-n21b (2026-10-31; D-147, D-149)
+| Finding | State | Commit |
+|---|---|---|
+| V-0 / F-7 (TC-API-013) | test written, skips until **A-52** is installed (draft, scratch-tested red/green) | `e440a24` |
+| V-1 | done (`tests/test_accounts_wiring.py`, M7, M8, M9, M15, M17 killed) | `30a1b40` |
+| V-3 | done (red, then `isinstance(user, str)`) | `7fb8ac9` |
+| V-4 | accepted deviation documented (README, RUNBOOK, test_runbook) | `fcbe633` |
+| V-5 | done in the code and REQ-API-007; IF-101 v12 waits for the install of **A-54** (draft, scratch-tested) | `5c982a7` |
+| V-7 | done (JSON `not_found`) | `8e467ee` |
+| V-9 | done (docs, TC-API-010 on the real routes) | `10ca9bf` |
+| V-10 | **stopped**: contradicts IF-101, AC-14, REQ-BE-009's criterion and the protected TC-IF-101-02; options (a)/(b) above | `979d9fd` |
+| V-2, V-6 | decided by D-147 (REQ-API-002 is what IF-101's events cover; IF-104 bounds stay a proposal, measured in Validate); nothing to build here | – |
+| V-8, V-11 | not this branch (V-8: the model, commit 348175f on goal/v1; V-11: at the N-2 integration step) | – |
+
+Full run before this entry (in the image, 178 files: `tests/test_*.py` and the Python contract suites): all pass except the known two, `test_amendment_report` (no git in the image) and `test_harness` (rt_edit). `test_container_alone` skips in the image (no podman) and on the host until A-52 is installed. Feedback, not verification.
+To install on goal/v1 after the merge: `bash tools/apply_amendment_a52.sh --do` (then TC-API-013 runs on the host: `python3 tests/test_container_alone.py`), `bash tools/apply_amendment_a54.sh --do`.
