@@ -3,7 +3,7 @@
 The newest hand-over. It continues `handover-2026-10-31.md` ("How to work" and the rules there still hold). Then read `CLAUDE.md`, `specs/mia/goals/G-V1/goal.md`, `specs/mia/review-log.md` (**D-120 to D-125** are new) and the `implementation-log.md` of the node you work on.
 
 ## State of `goal/v1` (HEAD `99d185a`)
-Line of work: branch `goal/v1`, worktree `.claude/worktrees/goal-v1`; master is still at `53c6766`. Next free ids: **D-126, A-36, FB-03** (check `goal/v1` and master before you write one).
+Line of work: branch `goal/v1`, worktree `.claude/worktrees/goal-v1`; master is still at `53c6766`. Next free ids: **D-127, A-37, FB-04** (check `goal/v1` and master before you write one).
 
 | Commit | What |
 |---|---|
@@ -46,3 +46,11 @@ Line of work: branch `goal/v1`, worktree `.claude/worktrees/goal-v1`; master is 
 
 ## Start prompt for the next session
 > Continue G-V1 on branch goal/v1 (worktree .claude/worktrees/goal-v1). Load dev-workflow, agent-app and the phase skills you need, and local-coder. Read CLAUDE.md, specs/mia/handover-2026-10-31-late.md, goals/G-V1/goal.md and the N-2.4.1 verification report. First go through the findings of the report with me, then ask me the open points of "Waiting for the owner" 2 and 3, then start the Verify of N-2.4.2 in a fresh context.
+
+## Later the same evening (after the hand-over above was written)
+- Verify reports committed (`5078cfa`): N-2.4.1 **Not verified** (F1 to F17), N-2.4.2 **Verified with findings** (11 findings, 4 gaps). Full paths: `specs/mia/nodes/N-2-backend/nodes/N-2.4-workflow-execution/nodes/N-2.4.1-pipeline-runner/verification-report.md`, `…/N-2.4.2-tools-and-sandbox/verification-report.md`.
+- Fixed test-first on `goal/v1`: F1 streamed "ConnectError" now the owner's sentence (`98ae7a2`), F15 a test that Core keeps the chat out of the store (`160bef6`), N-2.4.2 F2 the app's door gets trust of works, retractions, DOI lookup (`build_tool_calls`, `70a6f35`), F12 `tool.web_search@2` as IF-402 (`2ee83db`; the 7 versions of the 4 research pipelines still use `@1`). Logged in the N-2.4.1 implementation log.
+- FB-03 (D-126): re-specify how workflow pipelines are built, next iteration **after Validate**, with FB-02.
+- Branches made today, **not merged into goal/v1**: `v1-n42-ops` (N-4.2 T-01 rest `35a3597`, T-02 `32338f3`, stop at T-03 `8e41c7f`), `v1-n5-visjs` (vis-network mockup `2b66c1a`, A-36 drafts IF-104 JS mock `66b952d`), `v1-eval-spec` (`specs/mia/eval-spec.md` draft `726dae1`). A-36 is taken by the N-5 drafts.
+- Waiting for the owner, in addition to the list above: N-2.4.1 decisions F2 (chat rule as skill flag or move `core.py`), F3 (REQ-RUN-005), F4 (REQ-RUN-009), F5 (`/light!` confirm server-side?), F6 (scripts through IF-402?); `n-planted-figure` case fix or retire (it returns `not_applicable` and turns `test_harness` red); N-2.4.2 medium findings 3 to 5 (amendments); N-4.2 T-03 questions 1 to 4 and `--init` in `tools/run_in_image.sh` (the `test_shutdown` failure is a zombie without an init process); N-5 vis-network 10.1.2 file (sha256 `fc674cfa…1ad4`), A-36 with the IF-104 HTTP bodies, Q-2; eval-spec decisions 1 to 5 (no lookup or review suite has a holdout yet); when to merge the three branches. Then a re-verify of N-2.4.1 in a fresh context.
+- Owner's rule: always give the full path of a report.
