@@ -163,6 +163,7 @@ class ChatService:
         self._running = False
         self._current = None
         self._stop = threading.Event()
+        self._stop_next = False                       # a stop that came before the worker took the first message
         self._unpaused = threading.Event()
         self._unpaused.set()
         self._hits = collections.defaultdict(collections.deque)
@@ -266,7 +267,10 @@ class ChatService:
     def stop(self):
         """stops the running answer (the text received so far stays)"""
         with self._lock:
-            running = self._running and self._current != "command"
+            kind = self._current or (self._queue[0][0] if self._queue else None)
+            running = self._running and kind not in (None, "command")
+            if running and self._current is None:
+                self._stop_next = True                # the worker has not taken the message yet: it would clear the stop (REQ-CHA-004)
         if running:
             self._stop.set()
             self._unpaused.set()                      # a paused task wakes up and sees the stop
@@ -591,7 +595,9 @@ class ChatService:
                     break
                 kind, text, _author, speaker, message_id, options = self._queue.popleft()
                 self._current, self._author = kind, _author
-                self._stop.clear()
+                if not self._stop_next:
+                    self._stop.clear()
+                self._stop_next = False
             try:
                 self._do_command(text) if kind == "command" else self._do_chat(text, kind, speaker, message_id, options)
             except Exception as exc:       # the worker must survive anything
@@ -671,7 +677,9 @@ class ChatService:
         status = "done"
         try:
             # the model knows who writes (accounts only); the log keeps the plain text. The argument of a task is data for a tool and stays as it is
-            if entry is None:
+            if self._stop.is_set():
+                final = None                                  # stopped before it started: the model is not asked
+            elif entry is None:
                 final = self._run_exchange("[%s] %s" % (speaker, text) if speaker else text, on_delta, on_emotion, self._stop.is_set)
             else:
                 handed = {"ask": self.ask, "options": options or {}, "monitor": self._monitor, "files": self._file_putter(task, message_id), "reports": self._report_saver(entry, message_id, model)}

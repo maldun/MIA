@@ -53,3 +53,17 @@ Skill 6 unchanged, 21 dev cases, 3 repeats, same model and digest, with the new 
 
 ## Note (2026-10-31, D-137)
 REQ-CHV-006 of N-1.2 (shocked expression and line after a minus) is built together with the votes of this node: a `shocked` preset (N-1.2) and the shocked line sent by the backend.
+
+## Session 2026-10-31 (evening, fresh context, branch `v1-n22` from goal/v1 `ee64d7d`)
+
+Starting point: every test that names an id of this node (24 files, incl. the contract suites IF-101, IF-201, IF-302) and `test_chat_backend.py`, `test_chat_tasks.py`, `test_behaviour.py`, `test_record_tables.py` ran green in the image before any change. Skips: IF-201 (expression and audio of an answer: N-2.5; `stop` before the answer started: T-01), IF-101 (the same two and the variant event: REQ-CHV-008, out of G-V1).
+
+| Task | State | Commit | Tests reported green (feedback, not verification) |
+|---|---|---|---|
+| T-01 | done before except the stop of an answer that has not started: **done now** | see below | `test_chat_backend.py` 42 OK (new: `test_stop_before_the_answer_starts`, red first: a chat_delta came after the stop) |
+
+### T-01 rest: stop before the answer starts (REQ-CHA-004, TC-CHA-004, TC-IF-201-04, TC-IF-101-06)
+- Finding (test first): a `stop` between `send` and the moment the worker takes the message returned True but was lost: `_work` cleared the stop flag when it took the message, and the answer ran in full. Test: `tests/test_chat_backend.py::ServiceTest::test_stop_before_the_answer_starts`.
+- Fix (`chat_service.py`): `stop()` looks at the running item or, before the worker took one, the head of the queue (a command is still not stoppable); a stop before the first item sets `_stop_next`, which keeps the flag when the worker takes it; `_do_chat` does not ask the model when the stop is already set (chat_done `stopped`, text empty, logged). The next message is answered as usual (same test).
+- **Shared code with N-1.3:** this touches `ChatService.stop` and `_work` (the stop path that the N-1.3 agent on `v1-n13d` may also touch); the change is 10 lines, a merge conflict there is resolved by keeping both.
+- **A-56 (draft):** the real sides of TC-IF-201-04 and TC-IF-101-06 skip in the protected adapters of `tests/helpers/contract.py`. Note `specs/mia/amendments/A-56/A-56-note.md`, script `tools/apply_amendment_a56.sh` (builds the change from the installed file at install time). Scratch check (copy of HEAD in the job scratch folder, `--do`): with the old `chat_service.py` both suites red (1 failure each: the stop), with the new one IF-201 16 OK (1 skip: N-2.5), IF-101 60 OK (2 skips: N-2.5, REQ-CHV-008); a second run reports the file unchanged.
