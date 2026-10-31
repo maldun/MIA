@@ -16,6 +16,7 @@ case "${1:-}" in
                start_background chat-on-stub "$py" ui/tools/chat_stub_server.py
            fi && echo "open $URL (without ?character=0 the character loads if its web export is built)" ;;
     stop) stop_container "$NAME"; is_running chat-on-stub && stop_background chat-on-stub ;;
-    status) if container_running "$NAME" || is_running chat-on-stub; then echo "running: $URL"; else echo "stopped"; fi ;;
+    status) if container_running "$NAME"; then echo "running: $URL, $(serving_container "$NAME")"
+            elif is_running chat-on-stub; then echo "running: $URL"; else echo "stopped"; fi ;;
     *) echo "usage: $0 describe|available|auto|start|stop|status"; exit 2 ;;
 esac
