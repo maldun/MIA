@@ -80,15 +80,15 @@ Installing, configuring, starting and stopping MIA: the compose stack with one c
 
 ### REQ-OPR-007 – Compose stack
 - Level: low   Subject: OperationLayer
-- Text: The Operation shall provide a compose stack that starts the containers of N-2 to N-5 alone and together with one configuration file.
-- Rationale: refines REQ-OPS-013
+- Text: The Operation shall provide a compose stack that starts the containers of N-2 (`mia`), N-3 (`db`) and N-5 (`graph`) alone and together with one configuration file.
+- Rationale: refines REQ-OPS-013; N-4 has no container of its own, the evaluation runs as a command in the mia image (D-127)
 - Parent: REQ-OPS-013
 - Priority: Must
 - Verification method: Test, Demonstration
 - Acceptance criterion: AC-29: each container starts alone against the mocks; all start together
 - Verified by: TC-OPR-007
 - Status: Approved
-- History: –
+- History: 2026-10-31 A-37 (D-127): the containers named (was "the containers of N-2 to N-5")
 
 ### REQ-OPR-008 – Private access only
 - Level: low   Subject: OperationLayer
