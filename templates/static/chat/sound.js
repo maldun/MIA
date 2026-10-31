@@ -238,6 +238,8 @@ export function initSound({ audio, socket, character, storage, muteToggle, muteL
         first = false;
       }
     },
+    /** the user stops the voice on this device (the composer's Stop button) */
+    stop: () => player.stop(),
     get queued() { return player.queued; },
     get playing() { return player.playing; },
   };

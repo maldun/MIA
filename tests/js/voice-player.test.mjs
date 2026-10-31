@@ -1,7 +1,8 @@
 // The voice player (N-1.3, IF-112): TC-VPB-001 to TC-VPB-003 on a fake audio element. node --test "tests/js/*.test.mjs"
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { VoicePlayer, CLAIM_EVERY_MS } from '../../templates/static/chat/sound.js';
+import { readFileSync } from 'node:fs';
+import { VoicePlayer, CLAIM_EVERY_MS, initSound } from '../../templates/static/chat/sound.js';
 
 /** an audio element that plays one line at a time and tells when two overlap */
 function fakeAudio() {
@@ -271,4 +272,70 @@ test('TC-VPB-002: a stop while a line starts reports no error, and the next line
   audio.finish(); await flush();
   assert.deepEqual(ended, [8]);
   assert.deepEqual(speaking, [true, false]);
+});
+
+// --- the page wiring: initSound with a fake socket, storage, elements and window (F4) ----------------------------------------
+
+function element(extra = {}) {
+  const listeners = {};
+  const attributes = {};
+  return {
+    hidden: true, value: '', textContent: '', ...extra, attributes,
+    setAttribute(name, value) { attributes[name] = value; },
+    addEventListener(name, fn) { (listeners[name] ||= []).push(fn); },
+    click() { (listeners.click || []).forEach((f) => f()); },
+  };
+}
+
+/** the page of initSound on fakes; `stored` is what the device remembered */
+function page({ stored = {}, missing = [] } = {}) {
+  const handlers = {};
+  const socket = { id: 'me', sent: [], on(name, fn) { handlers[name] = fn; }, emit(name, data) { this.sent.push([name, data]); } };
+  const values = { ...stored };
+  const storage = { get: (key, fallback) => (key in values ? values[key] : fallback), set: (key, value) => { values[key] = String(value); } };
+  const speaking = [];
+  const warnings = [];
+  const win = {
+    setInterval: () => 1, clearInterval: () => {}, addEventListener: () => {},
+    console: { warn: (...args) => warnings.push(args.join(' ')) },
+  };
+  globalThis.document = { visibilityState: 'visible', addEventListener: () => {} };
+  const audio = specAudio(missing);
+  const els = { muteToggle: element(), muteLabel: element(), muteIcon: element(), volume: element(), hint: element() };
+  const sound = initSound({ audio, socket, character: { speaking: (v) => speaking.push(v) }, storage, ...els, t: (key) => key, win });
+  const server = (name, data) => handlers[name](data);
+  return { audio, socket, values, speaking, warnings, els, sound, server };
+}
+
+const reload = (id, serial = 1) => ({ url: `/audio/${id}.wav`, serial });
+
+test('TC-VPB-002: the page can stop the voice: the playing line ends, the queue is empty, the character stops talking (F5)', async () => {
+  const p = page();
+  p.server('audio_reload', reload('a')); p.server('audio_reload', reload('b'));
+  await flush(); await flush();
+  assert.equal(p.sound.playing, true);
+  p.sound.stop();
+  await flush();
+  assert.equal(p.audio.playing, false);
+  assert.equal(p.sound.queued, 0);
+  assert.equal(p.speaking.at(-1), false);
+  assert.deepEqual(ids(p.audio), ['a']);
+});
+
+test('TC-VPB-002: the composer\'s Stop button also stops the voice (F5)', () => {
+  const app = readFileSync(new URL('../../templates/static/chat/app.js', import.meta.url), 'utf8');
+  const composer = app.slice(app.indexOf('composer = initComposer('));
+  assert.match(composer.slice(0, composer.indexOf('});')), /onStop: \(\) => \{ socket\.emit\('chat_stop'\); sound\.stop\(\); \}/);
+});
+
+test('TC-VPB-002: a page that is told another page plays stays silent, and plays again when it gets the voice back (F4)', async () => {
+  const p = page();
+  p.server('audio_owner', { sid: 'other' });
+  p.server('audio_reload', reload('a'));
+  await flush(); await flush();
+  assert.deepEqual(p.audio.started, []);
+  p.server('audio_owner', { sid: 'me' });
+  p.server('audio_reload', reload('b'));
+  await flush(); await flush();
+  assert.deepEqual(ids(p.audio), ['b']);
 });
