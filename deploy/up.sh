@@ -248,7 +248,11 @@ fi
 echo
 echo "MIA is starting (it first waits for Ollama, the first start may download the models):"
 for h in "${HOSTS[@]}"; do
-  echo "  http://$h:$PORT    https://$h:$SPORT   (self-signed certificate: the browser asks once)"
+  if [ "$h" = localhost ]; then
+    echo "  http://$h:$PORT    https://$h:$SPORT   (self-signed certificate: the browser asks once)"
+  else
+    echo "  https://$h:$SPORT   (http stays on this machine)"
+  fi
 done
 if [ "$BIND" = "127.0.0.1" ]; then
   echo "  other devices: MIA_BIND=0.0.0.0 in deploy/.env, then deploy/up.sh again"
