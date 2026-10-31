@@ -232,6 +232,14 @@ func _init() -> void:
 	server.check_version()   # the poll finds the changed version
 	check(eng.library.size() == before + 1 and eng.library.has("from_phone"), "a preset saved on another device shows up after the poll")
 	check(main._buttons.has("expression:from_phone"), "and gets a button in the menu")
+	# TC-CHV-005 (AC-17): a change of another device shows within 2 s, so the poll plus its two requests fit in 2 s
+	server.start_polling()
+	check(not server._timer.is_stopped() and server._timer.wait_time + 0.5 <= 2.0,
+			"the version is polled often enough for 2 s, with 0.5 s for the requests (every %.1f s)" % server._timer.wait_time)
+	server.calls.clear()
+	server._timer.timeout.emit()
+	check(server.calls.has("%d /api/presets/version" % HTTPClient.METHOD_GET), "each poll asks the server for the version")
+	server._timer.stop()
 
 	# --- offline and token -------------------------------------------------------------------------------------------------------
 	server.online = false
