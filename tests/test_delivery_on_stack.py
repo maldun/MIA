@@ -1,6 +1,6 @@
 """TC-VPB-005 (REQ-VPB-005, REQ-FE-030): on the compose stack the chat page, its scripts and a voice line come from MIA's own server, and the
 frontend has no container of its own.
-Stage 3 (D-144): builds its own image tag of this checkout (localhost/mia:vpb005, never pulling), starts deploy/compose.yaml under its own
+Stage 3 (D-144): builds its own image tag of this checkout (localhost/mia:vpb005, never pulling, without network), starts deploy/compose.yaml under its own
 project (mia-vpb005) on 127.0.0.1 only, with the Ollama that runs on the host (OLLAMA_URL, as tests/smoke/smoke_stack.py; never the stack's
 ollama profile), loads the page over the stack's http front in headless Chromium (localhost/mia-browser, D-141, as tests/test_page_requests.py)
 and removes what it started (containers, every volume of the project, also the anonymous ones, network, image tag). Skipped, never passed, without podman, podman-compose, an image or the
@@ -128,9 +128,10 @@ class DeliveryOnStack(unittest.TestCase):
                 fp.write("{}\n")
             cls.addClassCleanup(os.remove, local)
         cls.addClassCleanup(run, "podman", "rmi", "-f", IMAGE)
-        built = run("podman", "build", "--pull=never", "-q", "-t", IMAGE, "-f", "deploy/Containerfile", ".", timeout=1800)
+        # no network in the build (M2, D-148): a layer missing in the cache (pip install after a change of requirements.txt) fails, never downloads
+        built = run("podman", "build", "--pull=never", "--network", "none", "-q", "-t", IMAGE, "-f", "deploy/Containerfile", ".", timeout=1800)
         if built.returncode != 0:
-            raise AssertionError("the image does not build: " + built.stderr[-300:])
+            raise AssertionError("the image does not build without network (a layer not in the cache?): " + built.stderr[-300:])
         compose = ("podman-compose", "-p", PROJECT, "-f", "deploy/compose.yaml")
         cls.addClassCleanup(run, "podman", "network", "rm", "-f", PROJECT + "_default")
         cls.addClassCleanup(take_down, compose, env)
