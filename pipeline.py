@@ -336,9 +336,10 @@ class Runner:
         self.clock = clock
 
     # -- public ----
-    def run(self, skill, graph, inputs, on_event=None, should_stop=None, ask=None, functions=None, tools=None, task=None, started_by="command", user="mia"):
+    def run(self, skill, graph, inputs, on_event=None, should_stop=None, ask=None, functions=None, tools=None, task=None, started_by="message", user="mia"):
         """user: the user the events of IF-401 are attributed to; started_by: "command" (a command of a user, the harness, a workflow run) or "message" (a chat message); a task that reaches the internet
-        is refused when a message started it, before any step runs (REQ-RUN-001)"""
+        is refused when a message started it, before any step runs (REQ-RUN-001). The default is "message": a run that does not say who started it is
+        treated as the less trusted one (fail closed, D-133); every command path says started_by="command"."""
         if started_by == "message" and reaches_internet(skill):
             raise PipelineError("'%s' reaches the internet and starts only by a command, not by a chat message" % skill.get("name"))
         all_functions = {**self.functions, **(functions or {})}

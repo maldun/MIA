@@ -71,7 +71,7 @@ def main():
 
     def run_skill(name, inputs):
         before = len(calls)
-        result = core.run(name, inputs)
+        result = core.run(name, inputs, started_by="command")
         per_skill.setdefault(name, []).extend(calls[before:])
         if result.status != "done":
             raise RuntimeError("%s: %s" % (name, result.error))

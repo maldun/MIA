@@ -333,7 +333,7 @@ class Harness:
         if variant.get("budget"):
             skill["budget"] = dict(skill["budget"], **variant["budget"])
         graph = self.core.graph(skill)[0]
-        result = self.core.runner.run(self._pinned(skill), graph, case["input"], task="eval:" + suite.name)
+        result = self.core.runner.run(self._pinned(skill), graph, case["input"], task="eval:" + suite.name, started_by="command")
         return self._status_of(result, suite)
 
     def _pinned(self, skill):
@@ -371,7 +371,7 @@ class Harness:
         for key in ("pipeline", "model"):
             if variant.get(key):
                 skill[key] = variant[key] if key == "pipeline" else ({"profile": variant[key]} if variant[key] in ("light", "full", "current") else {"name": variant[key]})
-        result = self.core.runner.run(self._pinned(skill), self.core.graph(skill)[0], case["input"], task="eval:" + suite.name)
+        result = self.core.runner.run(self._pinned(skill), self.core.graph(skill)[0], case["input"], task="eval:" + suite.name, started_by="command")
         if result.status != "done" or not isinstance(result.answer, dict):
             return "error:" + (result.status if result.status != "done" else "no_answer"), {"error": result.error, "answer": result.answer}
         score = plans.score_plan(result.answer, case["gold"], case["input"]["question"])
@@ -392,7 +392,7 @@ class Harness:
             with open(os.path.join(suite.path, suite.target["fixtures"]), encoding="utf-8") as fp:
                 fixtures = self._fixtures[suite.name] = json.load(fp)
         tools, session = fixture_tools(fixtures)
-        result = self.core.runner.run(self._pinned(skill), self.core.graph(skill)[0], case["input"], task="eval:" + suite.name, tools=tools)
+        result = self.core.runner.run(self._pinned(skill), self.core.graph(skill)[0], case["input"], task="eval:" + suite.name, tools=tools, started_by="command")
         if result.status != "done" or not isinstance(result.answer, dict):
             return "error:" + (result.status if result.status != "done" else "no_answer"), {"error": result.error, "answer": result.answer}
         score = research_score.score_research(result.answer, case["gold"], fixtures)
@@ -408,7 +408,7 @@ class Harness:
         for key in ("pipeline", "model"):
             if variant.get(key):
                 skill[key] = variant[key] if key == "pipeline" else ({"profile": variant[key]} if variant[key] in ("light", "full", "current") else {"name": variant[key]})
-        result = self.core.runner.run(self._pinned(skill), self.core.graph(skill)[0], case["input"], task="eval:" + suite.name)
+        result = self.core.runner.run(self._pinned(skill), self.core.graph(skill)[0], case["input"], task="eval:" + suite.name, started_by="command")
         if result.status != "done" or not isinstance(result.answer, dict):
             return "error:" + (result.status if result.status != "done" else "no_answer"), {"error": result.error, "answer": result.answer}
         claims = result.answer.get("claims")

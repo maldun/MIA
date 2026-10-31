@@ -511,10 +511,10 @@ class CoreTests(Base):
         core = self.core(library, {"closed": skill.replace("name: research_test", "name: closed") % "", "open": skill.replace("name: research_test", "name: open") % "max_safety: {reads_web: true}\n"},
                          tools={"web_search": Tool(lambda query: {"results": [query]}, "search_calls")})
         with self.assertRaises(PipelineError) as raised:
-            core.run("closed", {"text": "q"})
+            core.run("closed", {"text": "q"}, started_by="command")
         self.assertIn("reads_web", str(raised.exception))
         self.assertIn("closed", core.check())
-        result = core.run("open", {"text": "q"})
+        result = core.run("open", {"text": "q"}, started_by="command")
         self.assertEqual((result.status, result.answer), ("done", {"results": ["q"]}))
         self.assertNotIn("open", core.check())
 

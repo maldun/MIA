@@ -151,7 +151,7 @@ def reproduce(record, store, core_factory):
     model, replay = ReplayModel(recording, store), ReplayTools(recording, store)
     core = core_factory(model, replay.tools())
     pipeline = "%s@%s" % (record["pipeline"], record["pipeline_version"]) if record.get("pipeline") and record.get("pipeline_version") else None
-    result = core.run(record["task"], record.get("input"), pipeline=pipeline)
+    result = core.run(record["task"], record.get("input"), pipeline=pipeline, started_by="command")
     new = core.run_log.read()[-1]
     differences = CG.diff(CG.replay_run(record), CG.replay_run(new))
     divergences = model.divergences + replay.divergences
