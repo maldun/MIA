@@ -15,6 +15,15 @@ cmd="${1:-list}"; shift || true
 stages() { for f in "$DIR"/[0-9]*.sh; do basename "$f" .sh | sed 's/^[0-9]*-//'; done; }
 file_of() { ls "$DIR"/[0-9]*-"$1".sh 2>/dev/null | head -1; }
 run() { bash "$(file_of "$1")" "$2"; }
+# the checkout the stages serve (they mount or build this folder): the owner's check A4 once ran against another one (D-157)
+ROOT="$(cd "$DIR/../.." && pwd)"
+serving() {
+    local commit branch
+    if commit=$(git -C "$ROOT" rev-parse --short HEAD 2>/dev/null); then
+        branch=$(git -C "$ROOT" symbolic-ref --short -q HEAD || echo detached)
+        echo "serving $ROOT at $commit ($branch)"
+    else echo "serving $ROOT (not a git checkout)"; fi
+}
 
 list() {
     printf '%-14s %-10s %s\n' STAGE STATE DESCRIPTION
@@ -27,8 +36,9 @@ list() {
 
 case "$cmd" in
     list) list ;;
-    status) for s in $(stages); do printf '%-14s ' "$s"; run "$s" status; done ;;
+    status) serving; for s in $(stages); do printf '%-14s ' "$s"; run "$s" status; done ;;
     start)
+        serving
         names=("$@")
         if [ ${#names[@]} -eq 0 ]; then
             for s in $(stages); do run "$s" auto && names+=("$s"); done

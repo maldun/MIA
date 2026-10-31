@@ -176,6 +176,7 @@ export function initSound({ audio, socket, character, storage, muteToggle, muteL
   let level = Math.min(100, Math.max(0, Number(storage.get('mia.volume', 100)) || 0));
   let first = true;
   let heartbeat = 0;
+  let stopped = false;          // the user stopped the voice: lines of that answer that still arrive are dropped until the next answer begins (D-157)
 
   // --- the character talks while a line plays or lines are waiting --------------------------------
   function speaking(value) {
@@ -205,9 +206,13 @@ export function initSound({ audio, socket, character, storage, muteToggle, muteL
   }
 
   socket.on('audio_reload', (data) => {
+    if (stopped) return;
     const url = data?.url ?? '/audio/out.wav';
     player.enqueue({ id: url, url, serial: data?.serial });            // every line has its own file: the url names it
   });
+
+  // lines carry no answer id: a line after the Stop belongs to the stopped answer until the next one starts (REQ-VPB-002, D-157)
+  socket.on('chat_start', () => { stopped = false; });
 
   // --- one page plays ----------------------------------------------------------------------------------
   const claimIfUsed = () => player.claimIfUsed(document.visibilityState === 'visible');
@@ -243,7 +248,10 @@ export function initSound({ audio, socket, character, storage, muteToggle, muteL
       }
     },
     /** the user stops the voice on this device (the composer's Stop button) */
-    stop: () => player.stop(),
+    stop() {
+      stopped = true;
+      player.stop();
+    },
     get queued() { return player.queued; },
     get playing() { return player.playing; },
   };
