@@ -85,3 +85,6 @@ Open questions (Verify and the owner):
 
 ## Owner's answers of 2026-10-31 (D-138)
 (1) The chat log keeps the steps of every answer (the chat skill too); IF-101 wording by A-49; IF-401 by run id in the next iteration (open task, next). (2) TC-LOG-005 checks the run log only; `library.py` (sqlite3 index) reported to the N-2.4 integration step (TC-N24-001). (3) T-05's title and note corrected in plan.md. (4) Low items recorded, no change in G-V1: replay and the task account read `RunLog`, the comparison reads IF-401; `RunEvents` keeps a counter per run id for the life of the process; the IF-401 suite fails the test-doc rules T2, T3 (an amendment, later).
+
+## Chat account built (2026-10-31, D-138)
+`ChatService` keeps the plain steps of every answer in the record field `steps` (also when no status block is shown, e.g. the chat); `account()` reads `steps`, else the `pipeline` of older records; `pipeline` stays what the block shows. Test `test_a_chat_answer_keeps_its_steps_for_the_account` (`tests/test_chat_backend.py`), red before ("No steps were kept"), green after; the IF-101 suite passes. File outside the node (`chat_service.py`, N-2.1): the owner's decision D-138. Open: A-49, the wording of IF-101 (`account` "from the run log, IF-401" -> from the steps kept with the answer). Commit `7f0d59e`.
