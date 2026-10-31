@@ -169,6 +169,7 @@ class ChatService:
         self._commands = {c["command"] for c in COMMANDS}
         self._message_id = None          # the answer in progress: pipeline events belong to it
         self._pipeline = []
+        self._steps = []                            # the steps of every answer, kept for its account (D-138); _pipeline is only what the block shows
         self._sources = []
         self._show_pipeline = False
 
@@ -369,9 +370,10 @@ class ChatService:
         return {"sentences": len(sentences)}
 
     def account(self, message_id):
-        """the plain steps kept with the answer, in order; the domain events of the run log (kind "event") are no steps"""
+        """the plain steps kept with the answer, in order; the domain events of the run log (kind "event") are no steps. Answers kept before D-138 have
+        their steps only in `pipeline` (and only when a block was shown)"""
         record = self._answer(message_id)
-        plain = [e["plain"] for e in record.get("pipeline", []) if e.get("kind") != "event" and e.get("plain")]
+        plain = [e["plain"] for e in record.get("steps") or record.get("pipeline", []) if e.get("kind") != "event" and e.get("plain")]
         return [{"seq": i, "plain": text} for i, text in enumerate(plain or ["No steps were kept for this answer."], 1)]
 
     def vote(self, account, subject, category, value):
@@ -522,6 +524,8 @@ class ChatService:
                 return
             if event.get("kind") == "run_start":
                 self._show_pipeline = bool((event.get("payload") or {}).get("show"))
+            if event.get("plain") and not self._late:
+                self._steps.append({"kind": event.get("kind"), "plain": event["plain"]})
             if self._late:
                 if self._monitor is not None and event.get("plain"):
                     self._monitor.update(phase=event["plain"])          # the progress of a task with a card is the card, not a message
@@ -617,6 +621,7 @@ class ChatService:
         late = entry is not None and "ask" in entry.needs            # REQ-WFM-036: the result of a task that asks questions is the newest message, its progress is the status card
         with self._lock:
             self._message_id, self._pipeline, self._sources, self._show_pipeline, self._late, self._task_files = message_id, [], [], False, late, []
+            self._steps = []
         model = self._model_info()[0]
         if entry is not None:
             self.set_activity("thinking")
@@ -700,9 +705,11 @@ class ChatService:
         if task != "chat":
             extra["task"] = task
         with self._lock:
-            steps, sources, self._message_id, self._late = self._pipeline, self._sources, None, False
-        if steps:
-            extra["pipeline"] = steps
+            shown, kept, sources, self._message_id, self._late = self._pipeline, self._steps, self._sources, None, False
+        if shown:
+            extra["pipeline"] = shown
+        if kept:
+            extra["steps"] = kept                     # the account of the answer, also when no block was shown (D-138)
         if sources:
             extra["sources"] = sources
         record = self.log.append("assistant", state["text"], id=message_id, created=created, emotion=state["emotion"],
