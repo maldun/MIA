@@ -41,3 +41,8 @@ Each fix is test-first: the new test was red before the change and green after (
 Full run of `tests/test_*.py` in the image after the six commits (162 files, one container at a time): all OK except the two known failures, `test_amendment_report` (1 error) and `test_harness` (`rt_edit`: 2 cases, needs 30).
 
 D-162 (owner, after the hand-over): `null` = not given is confirmed and written into IF-301 v1 of A-60; A-60 also brings the JS mock of IF-104 (`if_104_graph_api.mjs`, `stops`) to the limit rule with suite case TC-IF-104-06 (red first on the old mock in a scratch copy: 1 fail; after the install 6 pass, 6 skipped real). Scratch copy: `--do` updates 8 files, a second run "nothing to do"; IF-301 8/8, IF-102 16 OK. The contract.py edits stay built at install time against three anchors (the IF-301 line of `REAL_NOT_READY`, the IF-301 branch of `real_subject`, `def real_subject`), so A-59's change of the IF-102 side can go before or after; the order could not be run because that A-59 version is not committed yet.
+
+## Re-verification findings (verification-report.md "Re-verification", decision D-169), branch v1-n32c
+| Finding | Change | Check |
+|---|---|---|
+| R3 the docstring of `graph_rules.py` claimed a fixed rule order | it says what `violation()` does: the first broken rule found, the order R1..R5 per edge; a fixed order is FB-02 (D-160). The version of IF-301 in `decomposition.yaml` is left for the gate (D-169) | text only; `test_graph_rules.py` OK |
