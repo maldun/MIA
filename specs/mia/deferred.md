@@ -15,9 +15,9 @@ Proposed on 2026-10-29 after the usability work of N-2.3 T-09 to T-11 and N-1.1 
 - Effort: about 1 day for the harness, half a day for the kept card (a field in the history record and in the amendment of IF-101)
 - Risk of the gap: a broken layout or a dead button is found only by a person; on a phone the card may be too wide. Mitigation: the hand test list in `handover-review-workflow.md` and the owner's look before the release
 - Owner: Stefan Reiterer
-- Trigger: a browser test harness exists for N-1, or 2026-12-31, whichever first
+- Trigger: the chat mock server sends `task_status` and files events, or the Plan of FB-01, or 2026-12-31, whichever first (the browser harness exists since D-141; D-172)
 - Target check: specified only
-- Decision: proposed 2026-10-29, to be confirmed by Stefan Reiterer
+- Decision: confirmed by Stefan Reiterer, 2026-11-01 (D-172)
 - Status: open
 
 ## TD-02 – The Files tab is not tested in a browser
@@ -29,9 +29,9 @@ Proposed on 2026-10-29 after the usability work of N-2.3 T-09 to T-11 and N-1.1 
 - Effort: part of the harness of TD-01, about half a day more
 - Risk of the gap: a wrong link or a list that does not redraw is found by a person only. Mitigation: hand test, step 4 of the list
 - Owner: Stefan Reiterer
-- Trigger: a browser test harness exists for N-1, or 2026-12-31, whichever first
+- Trigger: the chat mock server sends `task_status` and files events, or the Plan of FB-01, or 2026-12-31, whichever first (the browser harness exists since D-141; D-172)
 - Target check: specified only
-- Decision: proposed 2026-10-29, to be confirmed by Stefan Reiterer
+- Decision: confirmed by Stefan Reiterer, 2026-11-01 (D-172)
 - Status: open
 
 ## TD-03 – Tokens on the card are an estimate
@@ -88,4 +88,18 @@ Proposed on 2026-10-29 after the usability work of N-2.3 T-09 to T-11 and N-1.1 
 - Trigger: the first eval target with a judge
 - Target check: TC-EVL-003
 - Decision: D-166, 2026-10-31, Stefan Reiterer
+- Status: open
+
+## TD-08 – Older eval suite kinds run the in-process Core
+- Kind: defer
+- Requirement: REQ-EVL-011
+- Interim criterion: workflow targets run through IF-105 with the pinned model and the recorded versions; the older suite kinds run the in-process Core with `--pin` and the versions in the header
+- Target: every suite kind runs through IF-105
+- Reason: the older suite kinds are research experiments whose form FB-03 re-specifies (N-4.1 re-verification R3, D-172)
+- Effort: about half a day after FB-03's Plan
+- Risk of the gap: an older suite kind could measure a path the app does not take. Mitigation: the header names the pin and the versions
+- Owner: Stefan Reiterer
+- Trigger: the Plan of FB-03, or 2026-12-31, whichever first
+- Target check: TC-EVL-011
+- Decision: D-172, 2026-11-01, Stefan Reiterer
 - Status: open
