@@ -193,3 +193,6 @@ Markers `@mark.req` for REQ-RUN-008, -014, -015 and Given/When/Then comments in 
 
 ## F11 fixed (2026-10-31, afternoon)
 A tool handed to one run (`run(..., tools=)`) was ignored when the door had a tool of the same name. `_do_tool` now goes to the door only for a tool without its own function; test `test_a_tool_given_to_one_run_wins_over_the_door`, red before, green after; commit `2fafbe3`.
+
+## F17 fixed (2026-10-31, afternoon)
+Reproduced: four containers at once with `:Z` on the same checkout, three got "Permission denied" on `/work`; with `:z` all four read it. `tools/run_in_image.sh` and `tools/check_accounts_real.sh` mount with `:z`; `tests/test_run_in_image.py` guards `:z` and `--init` (it reads the scripts; it fails on the old `:Z`). Commit `181d74f`.
