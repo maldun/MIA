@@ -373,6 +373,33 @@ class ServiceTest(unittest.TestCase):
         self.service._run_exchange = original
         self.assertFalse(self.service.stop())
 
+    def test_stop_before_the_answer_starts(self):
+        """TC-CHA-004, REQ-CHA-004 (TC-IF-201-04): a stop that comes before the worker has taken the message ends that answer without asking the model;
+        the next message is answered as usual.
+
+        Example: send "story", stop -> True; then the worker runs: no chat_delta, chat_done "stopped", the model never called; stop again -> False
+        """
+        # Given a service whose worker runs only when the test lets it
+        pending, asked = [], []
+        self.service = self.make(spawn=pending.append)
+        original = self.service._run_exchange
+        self.service._run_exchange = lambda text, *rest: asked.append(text) or original(text, *rest)
+        # When a message is sent and stopped before the worker starts
+        self.service.send("story")
+        self.assertTrue(self.service.stop())
+        while pending:
+            pending.pop(0)()
+        # Then the answer ends stopped, without a sentence and without the model
+        self.assertNotIn("chat_delta", self.names())
+        self.assertEqual([p["status"] for e, p in self.events if e == "chat_done"], ["stopped"])
+        self.assertEqual(asked, [])
+        self.assertFalse(self.service.stop())
+        # and the stop does not carry over to the next message
+        self.service.send("again")
+        while pending:
+            pending.pop(0)()
+        self.assertEqual([p["status"] for e, p in self.events if e == "chat_done"], ["stopped", "done"])
+
     def test_a_chat_answer_keeps_its_steps_for_the_account(self):
         """TC-LOG-001, REQ-LOG-001 (D-138): the steps of every answer are kept for its account, also of a skill without a status block (the chat); the
         status block itself still appears only for skills that want one.
