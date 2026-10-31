@@ -57,6 +57,26 @@ class GraphRules(unittest.TestCase):
                 self.assertEqual(result and result[0], expected)
 
     @mark.req("REQ-GTB-002")
+    def test_a_session_limit_is_a_positive_integer(self):
+        """Verify F2 (D-160): a limit is an int >= 1 that is not a bool; every limit given must be one, and a null limit counts as not given.
+
+        Example: {"max_cycles": -1} -> session_stopping_criterion; {"max_cycles": 1} -> None.
+        """
+        # Given
+        refused = [{"max_cycles": v} for v in (-1, 0, "0", "3", True, float("nan"), float("inf"), 2.5, [3])] + \
+                  [{"max_seconds": v} for v in (-5, False, 1.0)] + [{"max_cycles": 3, "max_seconds": -1}, {"max_cycles": "x", "max_seconds": 60}]
+        accepted = [{"max_cycles": 1}, {"max_seconds": 1}, {"max_cycles": 3, "max_seconds": 60}, {"max_cycles": 3, "max_seconds": None}]
+        # When
+        named = lambda stop: violation(doc([("s", "process", {"session": True, "stop": stop})]))
+        # Then
+        for stop in refused:
+            with self.subTest(stop=stop):
+                self.assertEqual(named(stop), ("session_stopping_criterion", "s"))
+        for stop in accepted:
+            with self.subTest(stop=stop):
+                self.assertIsNone(named(stop))
+
+    @mark.req("REQ-GTB-002")
     def test_a_document_that_is_not_a_graph_is_refused(self):
         """A missing or non-list nodes/edges is node_identity, never an exception."""
         for bad in ({}, {"nodes": "x", "edges": []}, {"nodes": [], "edges": None}, [], None):
