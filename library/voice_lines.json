@@ -41,6 +41,9 @@
     "full": [],
     "greeting": [
       "greeting_default.wav"
+    ],
+    "shocked": [
+      "shocked_default.wav"
     ]
   }
 }

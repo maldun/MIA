@@ -70,9 +70,9 @@ class ConfigFiles(unittest.TestCase):
         for key, entry in self.expressions.items():
             self.assertNotIn("vid", entry, key)
 
-    def test_all_14_required_presets_exist(self):
+    def test_all_15_required_presets_exist(self):
         required = {"greet", "no", "annoyed", "talk", "yes", "idle", "neutral", "happy", "sad", "angry",
-                    "surprised", "embarrassed", "smug", "thinking"}
+                    "surprised", "embarrassed", "smug", "thinking", "shocked"}          # shocked: REQ-CHV-006, D-143
         self.assertEqual(required, self.presets)
 
 
