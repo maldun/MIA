@@ -203,7 +203,7 @@ chat = initChat({
 initTaskCards({ list: $('messages'), socket, api, t, onStop: () => socket.emit('chat_stop'), notify: toast });
 
 let commands = [];
-loadCommands().then((list) => { commands = list; });
+const commandsReady = loadCommands().then((list) => { commands = list; return list; });
 
 const suggestions = document.querySelectorAll('[data-suggestion]');
 for (const suggestion of suggestions) suggestion.dataset.text = t(suggestion.dataset.suggestion);
@@ -223,7 +223,7 @@ composer = initComposer({
   counter: $('counter'),
   storage,
   suggestions,
-  onSend: (text) => sendConfirmed(text, commands, (command) => askConfirm({
+  onSend: (text) => sendConfirmed(text, commandsReady, (command) => askConfirm({
     dialog: $('confirm'),
     message: $('confirm-text'),
     ok: $('confirm-ok'),

@@ -58,3 +58,22 @@ test('TC-RUN-002: a command without confirmation and a plain message are sent wi
   assert.deepEqual(r.asked, []);
   assert.deepEqual(r.sent, ['/lookup', 'Hello MIA']);
 });
+
+test('TC-RUN-002: before the command list has loaded, /full! waits for it and asks (N9, D-130)', async () => {
+  const r = recorder(false);
+  let loaded;
+  const ready = new Promise((resolve) => { loaded = resolve; });
+  const pending = sendConfirmed('/full!', ready, r.confirm, r.send);
+  assert.deepEqual(r.sent, []);
+  loaded(COMMANDS);
+  assert.equal(await pending, false);
+  assert.deepEqual(r.asked, ['/full!']);
+  assert.deepEqual(r.sent, []);
+});
+
+test('TC-RUN-002: the page sends every message through sendConfirmed with the list it loads (N9, D-130)', async () => {
+  const { readFile } = await import('node:fs/promises');
+  const page = await readFile(new URL('../../templates/static/chat/app.js', import.meta.url), 'utf8');
+  assert.match(page, /const commandsReady = loadCommands\(\)/);
+  assert.match(page, /onSend: \(text\) => sendConfirmed\(text, commandsReady,/);
+});
