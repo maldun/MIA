@@ -70,7 +70,7 @@ MIA, Ollama and SearXNG as three containers with one command (`deploy/up.sh`), i
   `setup_cfg.example.json`: it lists every option (108 at the moment; the values are those of the development machine, adjust paths, models and ports). On the first start `python -m MIA` copies the example to
   `setup_cfg.json` and says so; after that only your file is read. When a new version of MIA brings new options, they appear in the example; a test (`tests/test_config.py`) keeps the example complete.
   Two options mean something different when they are *present*, so they are not in the example: `editor_token` and `chat_token` (see below).
-  After an update, MIA warns at start about the options of the example that your `setup_cfg.json` does not have yet, and `python config.py` lists them too (both only report; the defaults apply until you add them).
+  After an update, MIA warns at start about the options of the example that neither your `setup_cfg.json` nor its local file `setup_cfg.local.json` has yet, and `python config.py` lists them too (both only report; the defaults apply until you add them).
 - Configure setup_cfg.json to your liking (the list below describes the options; "optional" options are in the example with their default):
 
     - "name":"ollama", (docker name)

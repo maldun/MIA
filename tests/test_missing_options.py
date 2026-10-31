@@ -100,6 +100,21 @@ class MissingOptions(unittest.TestCase):
         self.assertIsNone(config.warning(self.folder))
 
     @mark.req("REQ-OPR-003")
+    def test_an_option_of_the_local_file_counts_as_present(self):
+        """TC-OPR-003, Verify finding F2: an option set only in setup_cfg.local.json (the settings of one machine, laid over setup_cfg.json) is not reported missing.
+
+        Example: setup_cfg.json without web_port and voice_effect, setup_cfg.local.json {"web_port": 9000} -> {"voice_effect": ...} only.
+        """
+        # Given: the configuration lacks two options and the local file sets one of them
+        self.write_config_without(REMOVED)
+        with open(os.path.join(self.folder, "setup_cfg.local.json"), "w", encoding="utf-8") as fp:
+            json.dump({"web_port": 9000}, fp)
+        # When: the missing options are asked for
+        found = config.missing(self.folder)
+        # Then: only the option that neither file has is named
+        self.assertEqual(found, {"voice_effect": self.example["voice_effect"]})
+
+    @mark.req("REQ-OPR-003")
     def test_mia_prints_the_warning_at_start(self):
         """TC-OPR-003 (D-120 Q2): __main__.py prints config.warning after it made sure setup_cfg.json exists.
 

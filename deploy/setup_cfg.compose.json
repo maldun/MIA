@@ -5,6 +5,7 @@
   "ollama_host": "http://ollama:11434",
   "ollama_managed": false,
   "ollama_wait": 600,
+  "ollama_pull": true,
   "version": "gemma4:26b",
   "llm_options": {
     "num_ctx": 8192
@@ -20,6 +21,7 @@
   "timeout": 3,
   "web_port": 8585,
   "https_port": null,
+  "public_https_port": null,
   "sound_port": 8595,
   "address": "localhost",
   "protocol": "http",
@@ -70,6 +72,32 @@
   "sandbox_backend": "none",
   "sandbox_degrade": false,
   "sandbox_image": "localhost/mia-sandbox:1",
+  "scholar_backends": [
+    "openalex",
+    "crossref",
+    "pubmed",
+    "arxiv"
+  ],
+  "scholar_results": 10,
+  "scholar_email": null,
+  "semantic_scholar_key": null,
+  "scholar_cache_dir": "data/cache/scholar",
+  "scholar_cache_days": 7,
+  "store_dir": "data/store",
+  "store_days": 90,
+  "store_chat_texts": false,
+  "source_trust_file": "data/source_trust.json",
+  "review_domain_experts": 3,
+  "review_role_models": {},
+  "review_budget": {
+    "screen": 40,
+    "read": 10,
+    "calls": 150,
+    "tokens": 400000,
+    "seconds": 60,
+    "api_requests": 80,
+    "checkpoint_every": 10
+  },
   "skills_dir": "skills",
   "library_dir": "library",
   "user_library_dir": "data/library",
@@ -87,6 +115,17 @@
   "chat_log_max_messages": 10000,
   "chat_queue": 1,
   "chat_rate_per_minute": 10,
+  "accounts_enabled": false,
+  "trusted_proxies": [
+    "https"
+  ],
+  "structured_memory": false,
+  "behaviours_file": "library/behaviours.json",
+  "persona_file": "data/persona.json",
+  "reputable_trust": 0.6,
+  "memory_budget_tokens": 400,
+  "accounts_dir": "data/db",
+  "changes_log": "data/changes.jsonl",
   "moods_file": "moods.json",
   "mood_hold_minutes": 10,
   "expression_model": null,
@@ -94,6 +133,13 @@
   "feedback_log": "data/feedback_log.jsonl",
   "tailscale": false,
   "public_hosts": [],
-  "trusted_proxies": ["https"],
-  "tts_warmup": true
+  "tts_warmup": true,
+  "files_dir": "data/files",
+  "files_max_bytes": 1073741824,
+  "files_max_total_bytes": 53687091200,
+  "model_classes_file": "data/model_classes.json",
+  "review_answer_seconds": 1800,
+  "skill_options": {},
+  "workflow_speak": true,
+  "workflow_speak_tasks": {}
 }
