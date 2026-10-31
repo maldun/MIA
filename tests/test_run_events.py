@@ -107,6 +107,18 @@ class Provider(unittest.TestCase):
         for secret in ("sk-123", "hunter2", "me@example.org"):
             self.assertNotIn(secret, raw)
 
+    def test_a_secret_that_is_a_number_is_removed_too(self):
+        """TC-LOG-002, TC-IF-401-02 (D-144, F3 of the N-2.4.3 verification): a payload key named like a password is stored as [removed] also when its value is a number.
+        Example: emit {"password": 123456, "steps": 3} -> stored {"password": "[removed]", "steps": 3}; 123456 is not in the file."""
+        # Given a run
+        self.log.emit("r1", "run_start", {}, "anna")
+        # When an event with a numeric password is written
+        self.log.emit("r1", "tool_call", {"password": 123456, "steps": 3}, "anna")
+        # Then the stored payload has [removed], the count stays, and the file never had the number
+        self.assertEqual(self.log.events("r1")[1]["payload"], {"password": "[removed]", "steps": 3})
+        with open(self.log.path("r1"), encoding="utf-8") as handle:
+            self.assertNotIn("123456", handle.read())
+
     def test_the_payload_must_be_an_object_and_the_run_id_a_plain_name(self):
         """TC-LOG-002: a payload that is not an object and a run id that could leave the folder are refused before anything is written.
         Example: payload "text" is invalid_payload; run id "../x" is invalid_run and the folder stays empty."""

@@ -112,3 +112,15 @@ Tests in the image (`localhost/mia:latest`, `--network none`); feedback, not ver
 - Red before: on scratch copies, the mutant "compare by types only" fails the first, the mutant "length check ignored" fails the second; both green on the real code. No real bug, no
   production code changed.
 - Green after: `test_run_events.py` (14), contract `test_if_401_run_events.py` (10).
+
+### F3: a secret-named value is removed whatever its type – T-01, REQ-LOG-002, IF-401
+- Tests: `tests/test_events.py::test_a_secret_named_value_is_removed_whatever_its_type_and_an_empty_text_stays` (replaces `test_empty_and_non_text_values_stay`, which pinned the
+  old exemption the owner reversed in D-144) and `tests/test_run_events.py::test_a_secret_that_is_a_number_is_removed_too` (`{"password": 123456}` through `RunEvents.emit`).
+- Red before: `123456 != '[removed]'` in both; green after.
+- Fix: `events.redact` no longer exempts numbers, booleans and `None` under a secret-like name; a list or dict there is removed whole.
+- Kept, open to the owner: an empty text (`""`) under such a name stays `""` (it holds nothing; the old rule had the same exemption). D-144 speaks of the type only. Options:
+  (a) keep `""` (recommended: nothing to hide, and a log that shows "no token was set" helps), (b) remove it too.
+- Not changed (verification report, F3 "related"): a bare `key` or `passphrase` is not matched, and `password=…` inside a plain text stays. Recorded, not part of D-144.
+- Checked: no production payload carries a number under a secret-like name (grep of the code outside `tests/`, `specs/`), so no count goes missing.
+- Green after: `test_events.py` (23), `test_run_events.py` (15), contract `test_if_401_run_events.py` (10), `test_pipeline.py` (26), `test_content_store.py` (12), `test_run_explain.py` (16),
+  `test_run_log_node.py` (4), `test_runner_interfaces.py` (8).
