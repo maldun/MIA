@@ -9,7 +9,7 @@ The newest hand-over. It continues `handover-2026-10-31-late.md` (read its "How 
 - A person merges (dev-workflow, M27): check a merge in a throwaway worktree, run the suites on the result, give the owner the commands. The owner installs amendments with their scripts; commit the installed files if the owner did not.
 
 ## State of `goal/v1`
-Next free ids: **D-133, A-45, FB-04** (drafts for the owner: A-40 retire `n-planted-figure`, A-43 IF-202 v1, A-44 IF-402 v4).
+Next free ids: **D-137, A-48, FB-04** (A-47 is reserved for the N-4.2 agent if T-07/T-08 need a protected change).
 
 | Node | State | Open |
 |---|---|---|
@@ -48,3 +48,10 @@ FB-02 (networkx graphs of objects, vis.js), FB-03 (re-specify how workflow pipel
 3. N-2.4.2: N-2 (wrong argument types: refuse as `bad_arguments` before counting?), N-3 (mock `result` and `failed`: an amendment), N-6 (the runner counts a call the door refuses), the flows of `toolDoor`, THR-001 and the planted figure, gaps G-1 to G-4 (accept as deviations or plan).
 4. N-2.4.1 F7: make `started_by="message"` the default (every command path names itself), or accept "command" as default.
 5. The `number_check` rule (D-132 conflict) when it is built.
+
+## Evening, 16:00 to 17:40
+- Decisions D-133 to D-136: merges and installs; N-4.2's seven recommendations; F7 default "message"; N-2 type checks; VAL-002 moved to the next goal (G-V1's exit criterion is VAL-001, VAL-003 to VAL-006); N-2.4.2 **Verified with findings**; N-5 T-02 waits for FB-02 (REQ-GA-002, -003 out); N-4.2 T-06/T-07 answers.
+- Merged by the owner: `v1-n42-ops2` (twice), `v1-f7-n2`. Installed: A-40, A-43, A-44, A-45, A-46 (all committed by the agent, each equal to its draft).
+- **Run the stack smoke with the venv's Python:** `/home/maldun/prog/Python/venvs/mia312/bin/python tests/smoke/smoke_stack.py` (psycopg 3.3.6 is only there; with another python its db part skips, which counts as red). It needs the host's Ollama running (`podman start ollama`).
+- Running at 17:40: the N-4.2 agent on `v1-n42-ops2` for T-06 to T-08 (until 20:00 at most); its new commits need another merge.
+- Open: the `number_check` rule (D-132 conflict); N-2.4.2's N-3, N-6, flows of `toolDoor`, THR-001, G-1 to G-4; N-2.4.1 F10 (note) and the Scenarios sections; the nodes N-2.1, N-2.2, N-2.3, N-2.4.3, N-4.1, N-1 and their Verifies; the integration steps (N-2.4 first, after N-2.4.3 is verified); then Verify, Commit, Deploy, Validate of G-V1.
