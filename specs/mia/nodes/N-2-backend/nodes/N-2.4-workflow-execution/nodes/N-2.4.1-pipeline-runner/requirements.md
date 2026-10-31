@@ -32,7 +32,7 @@ Runs a workflow step by step under budgets: model calls and model management, pr
 
 ### REQ-RUN-003 – Model server unreachable
 - Level: low-2   Subject: TaskRuntime
-- Text: If the model server is unreachable, then the Pipeline runner shall say so in plain words.
+- Text: If the model server is unreachable or does not accept the connection within 10 s, then the Pipeline runner shall say so in plain words.
 - Rationale: refines REQ-WFX-004
 - Parent: REQ-WFX-004
 - Priority: Must
@@ -40,7 +40,7 @@ Runs a workflow step by step under budgets: model calls and model management, pr
 - Acceptance criterion: AC-23: with the fake server down the user gets the plain message (exact)
 - Verified by: TC-RUN-003
 - Status: Approved
-- History: –
+- History: 2026-10-31 A-39 (D-129, D-130): the connect timeout of 10 s named; the time of a generation is not limited
 
 ### REQ-RUN-004 – Optional learning
 - Level: low-2   Subject: TaskRuntime
@@ -145,10 +145,10 @@ Runs a workflow step by step under budgets: model calls and model management, pr
 - Parent: REQ-WFX-019
 - Priority: Must
 - Verification method: Inspection, Test
-- Acceptance criterion: AC-1: with the mocks of the three interfaces a scripted workflow runs end to end; no other import exists
+- Acceptance criterion: AC-1: with the mocks of the three interfaces a scripted workflow runs end to end; no other import of a neighbour exists (the `sandbox` import of the script nodes is allowed until FB-03, A-38)
 - Verified by: TC-RUN-012
 - Status: Approved
-- History: 2026-10-31 A-38 (D-128): "call tools" narrowed to the tools of tool nodes; script nodes and the web checks reach the sandbox and the web directly until the next iteration (FB-03)
+- History: 2026-10-31 A-38 (D-128): "call tools" narrowed to the tools of tool nodes; script nodes and the web checks reach the sandbox and the web directly until the next iteration (FB-03); 2026-10-31 A-39 (D-130): AC-1 names the allowed `sandbox` import
 
 ### REQ-RUN-013 – Know no particular workflow
 - Level: low-2   Subject: TaskRuntime

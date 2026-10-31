@@ -341,7 +341,7 @@ You set the angles of the **final pose**; the character moves there from the neu
 
 The plan is in `REQUIREMENTS_CORE.md`. Phase 1 is the foundation; the chat now runs on it (behaviour unchanged).
 
-- `skills/*.md`: one file per task (front matter: name, version, model profile, pipeline, tools, budget, `status_block`; sections `prompts`, `schemas`, `lines`, `examples`).
+- `skills/*.md`: one file per task (front matter: name, version, model profile, pipeline, tools, budget, `status_block`, `personal` (true: a conversation of a person, its prompts and answers are not kept in the content store unless `store_chat_texts` asks for them; chat and memory_write); sections `prompts`, `schemas`, `lines`, `examples`).
   Changed files are reloaded, a broken file is only logged. Shipped: `chat`, `summarize` (a small example that uses the model).
 - Pipelines (since phase 1b entries of the library, see below): the steps of a skill as a tree of nodes (`model`, `tool`, `code`, `map`, `branch`, `loop`, `ask_user`) with references (`$name.field`), conditions
   without code, retries for answers that do not fit their schema, and budgets (steps, seconds, calls per tool). The format is documented at the top of `pipeline.py`.
