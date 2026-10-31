@@ -65,6 +65,9 @@ Back-filled on 2026-10-30, after the workflow skills introduced goals (M33–M37
 | REQ-RUN-004 | out | owner 2026-10-31 (D-119): optional learning is not built (LearningLayer and FR-18 proposed); back with a goal that designs the learning layer. |
 | REQ-RUN-006 | out | owner 2026-10-31 (D-119): a measurement without a fixed eval criterion and model pins, like REQ-TLS-006; back with the eval criterion and eval-spec.md. |
  | REQ-RUN-007 | out | owner 2026-10-31 (D-120): a measurement without an eval criterion and model pins |
+| REQ-RUN-013 | partly | owner 2026-10-31 (D-128, D-130): the review entry of AC-9 is out: T-08 deferred to the next iteration with FB-02, FB-03; lookup and verify run on the runner |
+| REQ-RUN-005 | partly | owner 2026-10-31 (D-128, D-130): the measurement of AC-22 is out: server token counts over the lookup suites come back with eval-spec.md; the refusal by estimate stays in |
+| REQ-RUN-009 | partly | owner 2026-10-31 (D-128, D-130): the 10 s part of AC-19 is out: with REQ-RUN-007; the order of the turns stays in |
 
 ## Parts
 | Part | Real or stand-in | Notes |
@@ -83,7 +86,7 @@ Back-filled on 2026-10-30, after the workflow skills introduced goals (M33–M37
 |---|---|---|
 | Explore | done | `high-level-spec.md` approved 2026-10-24 (`review-log.md`) |
 | Plan | done | plan package approved, tags `plan-baseline-it1` and `decomp-baseline`; changes since then are amendments A-01 to A-35 (A-34 installed `cca40c8`, A-35 approved: N-2.4.1 T-08, D-125) |
-| Implement | in progress | node cycles of `decomposition.yaml`; open nodes and work in `handover-2026-10-31-late.md`. 2026-10-31: N-2.4.1 T-01 to T-05, T-07 done (T-06 out with REQ-RUN-007, T-08 deferred to the next iteration, D-128; fixes of three verification rounds, re-verification 2: Verified with findings once the D-128 scope rows are in); N-2.4.2 T-01 to T-06 done (T-07 out with REQ-TLS-006); node Verifies of N-2.4.1 and N-2.4.2 started (reports in their node folders); only N-3 integrated (`tests/helpers/integration.py` READY) |
+| Implement | in progress | node cycles of `decomposition.yaml`; open nodes and work in `handover-2026-10-31-late.md`. 2026-10-31: N-2.4.1 T-01 to T-05, T-07 done (T-06 out with REQ-RUN-007, T-08 deferred to the next iteration, D-128; fixes of three verification rounds, N-2.4.1 **Verified with findings** (re-verification 2, the D-128 scope rows written by D-130); N-2.4.2 Verified with findings (proposed, its decisions open)); N-2.4.2 T-01 to T-06 done (T-07 out with REQ-TLS-006); node Verifies of N-2.4.1 and N-2.4.2 started (reports in their node folders); only N-3 integrated (`tests/helpers/integration.py` READY) |
 | Verify | open | |
 | Commit | open | |
 | Deploy | open | |
