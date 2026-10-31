@@ -357,10 +357,25 @@ class ResponseCache:
             return
         try:
             os.makedirs(self.folder, exist_ok=True)
+            self._prune()
             with open(self._path(key), "w", encoding="utf-8") as fp:
                 json.dump({"at": self._clock(), "key": key, "body": body}, fp)
         except OSError:
             pass
+
+    def _prune(self):
+        # expired entries are never read again, but the folder sits in the data volume and every backup (N-4.2 N1, D-148).
+        # By the file's time, not its content: a file another thread is writing is fresh and never half-read; a file that
+        # vanished in between is skipped.
+        for name in os.listdir(self.folder):
+            if not name.endswith(".json"):
+                continue
+            path = os.path.join(self.folder, name)
+            try:
+                if self._clock() - os.path.getmtime(path) > self.seconds:
+                    os.remove(path)
+            except OSError:
+                pass
 
 
 class ApiHttp:
