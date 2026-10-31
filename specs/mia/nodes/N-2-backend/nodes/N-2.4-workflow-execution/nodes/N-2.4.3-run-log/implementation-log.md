@@ -29,3 +29,14 @@ Both checks pass on the existing code; nothing in the production code changed (t
 web of the research suite, scripted model, no network). It follows the new rule for readable tests (conventions §5: test ID first, an `Example:` line, Given / When / Then; `test_doc_check.py`: 0 findings); the earlier test files of this
 node (`test_run_events.py`, `test_run_log_files.py`) were brought up to the same form.
 Still open in the node: the runner does not write through `RunEvents` yet (N-2.4.1), the chat's account is not linked to IF-401, and the three new error codes are not in the contract text.
+
+## T-05 run events as append-only files, no database driver (2026-10-31) – REQ-LOG-005 (A-28)
+State found (test first, owner's rule of T-01): `tests/test_run_log_files.py` (TC-LOG-005) and `tests/test_run_events.py` (append-only file per run, restart goes on with the next seq) green. Gap: the
+inspection read the four files named in D-107 (A-28) and not `run_events.py`, the provider of IF-401 built later (D-109), which is now the file the runner writes through.
+- Changed: `tests/test_run_log_files.py` inspects five files (`run_events.py` added). Red before: on a scratch copy with `import sqlite3` planted in `run_events.py` the old test passed and the new one
+  failed (`['sqlite3'] != []`); green on the real code. No production code changed.
+- Green after (image, feedback, not verification): `test_run_log_files.py` (2), `test_run_events.py` (11), `test_run_log_node.py` (4), contract `test_if_401_run_events.py` (10).
+- Not changed, for Verify: the plan's title of T-05 ("State only through the storage interface", Notes "Needs the mock of IF-102") is the wording before A-28; the code of the Run log needs no IF-102.
+  AC-15 also says "or outside the storage client": read as a check of the whole repository, `library.py` (the derived index `data/library.sqlite`, not Run log code) imports `sqlite3`;
+  `tests/test_workflow_storage_imports.py` does not reach it. Question 2 of the hand-over below.
+- Files outside the task's Touches: `tests/test_run_log_files.py` (a node test, free).
