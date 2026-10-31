@@ -181,3 +181,6 @@ Tests reported green (feedback, not verification): all new tests; all `tests/tes
 - N10 A-39: REQ-RUN-003 names the 10 s connect timeout, REQ-RUN-012 AC-1 the allowed `sandbox` import, `ui/README.md` the skill key `personal`; `aa009cd`.
 
 Tests reported green (feedback, not verification): all `tests/test_*.py` in the image fail only in `test_amendment_report`, `test_config`, `test_harness` (rt_edit count, `n-planted-figure`), `test_shutdown` (no `--init`); contract suites and integration steps; JS 117 of 117.
+
+## F14 fixed (2026-10-31, afternoon)
+An empty digest (held by the server or in the pin) matched every pin as a prefix. `WorkflowRuns._check_pin` now requires both; test `test_an_empty_digest_is_no_pin` (`tests/test_run_workflow.py`), red before, green after; IF-105 and IF-202 contract suites pass. Commit `cea4d62`.
