@@ -209,7 +209,7 @@ class ChatApiMock:
     def vote(self, session, message_id, category, value):
         """A plus or a minus on an answer (or a reaction, a behaviour, the service) with its category; every vote is kept with user and time."""
         user = self._user(session)
-        if category not in CATEGORIES or value not in (1, -1) or isinstance(value, bool):
+        if category not in CATEGORIES or value not in (1, -1) or type(value) is not int:      # A-61: a bool or a float equal to 1 is no vote value
             raise ApiError(422, "invalid_vote", rule="category" if category not in CATEGORIES else "value")
         if category == "answer_quality" and message_id not in [m["id"] for m in self._history]:
             raise ApiError(404, "not_found")

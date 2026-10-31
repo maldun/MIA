@@ -131,6 +131,36 @@ class StorageContract(unittest.TestCase):
         self.assertEqual(store.put("source_trust", "example.org", {"trust": 0.7}, "owner"), {"version": 2})
         self.assertEqual(store.get("source_trust", "example.org", version=1)["doc"], {"trust": 0.5})
 
+    @mark.req("IF-102", "REQ-DB-006")
+    @each_provider(IF)
+    def test_a_delete_is_told_to_the_subscribers(self, store):
+        """TC-IF-102-09 golden 4 (A-59): a delete is a write and is told with version None; a refused delete tells nothing.
+        Example: delete("memos", "m", "ben") -> the subscriber of memos gets {"table": "memos", "id": "m", "version": None, "author": "ben"}."""
+        # Given: a memo and a subscriber of the memos
+        store.put("memos", "m", {"text": "x"}, "anna")
+        seen = []
+        store.subscribe("memos", seen.append)
+        # When: the memo is deleted twice
+        store.delete("memos", "m", "ben")
+        with self.assertRaises(StorageError) as caught:
+            store.delete("memos", "m", "ben")
+        # Then: one notice, for the delete that happened
+        self.assertEqual(caught.exception.code, "not_found")
+        self.assertEqual(seen, [{"table": "memos", "id": "m", "version": None, "author": "ben"}])
+
+    @mark.req("IF-102", "REQ-DB-004")
+    @each_provider(IF)
+    def test_the_vote_categories_are_an_operation(self, store):
+        """TC-IF-102-10 golden 5 (A-59, D-162): the storage names the vote categories, in their order, and a vote of each is stored.
+        Example: categories() -> ["answer_quality", "reactions", "character_behaviour", "service"]."""
+        # Given / When: the storage is asked
+        categories = store.categories()
+        # Then: the four in their order, each one usable in a vote
+        self.assertEqual(categories, ["answer_quality", "reactions", "character_behaviour", "service"])
+        for category in categories:
+            store.put("votes", category, {"user": "anna", "subject": "m1", "category": category, "value": 1}, "anna")
+        self.assertEqual(store.ids("votes"), sorted(categories))
+
 
 if __name__ == "__main__":
     unittest.main()
