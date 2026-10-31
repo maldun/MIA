@@ -27,4 +27,6 @@ Unchanged: the mock of IF-101 and the adapters (`tests/helpers/contract.py`): th
 - `bash tools/apply_amendment_a62.sh --do`: IF-101 suite in the image 62 tests OK, 2 skipped; JS tests 160 pass with `PENDING_A62` empty; `tests/test_chat_views_browser.py` 10 OK with `PENDING_A62` empty. A second run reports every file unchanged.
 - A-61 first, then A-62 (and the reverse): titles v15, version rows in install order, TC-IF-101-32 and -33 both present; the IF-101 suite has one failure, the real side of A-61's TC-IF-101-32, which needs the code of branch v1-n33b (as A-61's note says).
 
+- Re-checked after merging goal/v1 with A-59..A-61 installed (IF-101 v14): A-62 gives **v15**, the IF-101 suite 64 OK (2 skipped), JS 160 pass.
+
 Install (on goal/v1 after the merge of v1-n11b): `bash tools/apply_amendment_a62.sh` (look), then `--do`, commit as "plan: A-62 installed".
