@@ -48,22 +48,41 @@ class Presets(unittest.TestCase):
 
     @mark.req("REQ-API-009")
     def test_create_and_update_record_who_did_it(self):
+        """TC-API-009: a preset records the account that made it and the account that changed it last, in the file and in the answer.
+
+        Example: anna creates test_smug -> updated_by anna; ben updates it -> updated_by ben, description warmer.
+        """
+        # When / Then: anna creates it
         stored, _ = self.store.create(preset(), author="anna")
         self.assertEqual(stored["updated_by"], "anna")
         self.assertEqual(self.store.get("test_smug")["updated_by"], "anna")                       # it is in the file, not only in the answer
+        # When / Then: ben changes it
         stored, _ = self.store.update("test_smug", preset(description="warmer"), author="ben")
         self.assertEqual((stored["updated_by"], self.store.get("test_smug")["description"]), ("ben", "warmer"))
 
     def test_without_an_account_nothing_is_added_and_a_client_cannot_write_the_field(self):
+        """TC-API-009: without an account a preset gets no updated_by, even when the client sends one; with an account the field names the account, not what the client sent.
+
+        Example: create with updated_by mallory and no account -> no updated_by; update by anna with updated_by mallory -> updated_by anna.
+        """
+        # When / Then: a client's own updated_by is dropped without an account
         stored, _ = self.store.create(preset(updated_by="mallory"))
         self.assertNotIn("updated_by", stored)
         self.assertNotIn("updated_by", self.store.get("test_smug"))
+        # When / Then: with an account the account wins
         stored, _ = self.store.update("test_smug", dict(preset(), updated_by="mallory"), author="anna")
         self.assertEqual(stored["updated_by"], "anna")                                              # the account, not what the client sent
 
     def test_a_rename_keeps_the_new_author(self):
+        """TC-API-009: a preset renamed by another account names that account as its author under the new name.
+
+        Example: anna creates test_smug, ben renames it test_smug2 -> name test_smug2, updated_by ben.
+        """
+        # Given: anna's preset
         self.store.create(preset(), author="anna")
+        # When: ben renames it
         stored, _ = self.store.update("test_smug", preset(name="test_smug2"), author="ben")
+        # Then: the new name carries ben
         self.assertEqual((stored["name"], stored["updated_by"]), ("test_smug2", "ben"))
 
 
@@ -77,12 +96,21 @@ class Gestures(unittest.TestCase):
 
     @mark.req("REQ-API-009")
     def test_create_and_update_record_who_did_it(self):
+        """TC-API-009: a gesture records the account that made it and the account that changed it last.
+
+        Example: anna creates cheer_v -> updated_by anna; ben updates it -> updated_by ben.
+        """
+        # When / Then: anna creates it, ben changes it
         stored, _ = self.store.create(gesture(), author="anna")
         self.assertEqual(stored["updated_by"], "anna")
         stored, _ = self.store.update("cheer_v", gesture(description="arms way up"), author="ben")
         self.assertEqual(stored["updated_by"], "ben")
 
     def test_without_an_account_nothing_is_added(self):
+        """TC-API-009: without an account a gesture gets no updated_by, also when the client sends one.
+
+        Example: create cheer_v with updated_by mallory and no account -> no updated_by.
+        """
         stored, _ = self.store.create(gesture(updated_by="mallory"))
         self.assertNotIn("updated_by", stored)
 
@@ -111,17 +139,28 @@ class Api(unittest.TestCase):
 
     @mark.req("REQ-API-009")
     def test_the_account_of_the_request_is_recorded_in_the_preset_and_the_gesture(self):
+        """TC-API-009: the routes pass the account of the request (g.account) to the stores: the preset and the gesture made by anna and saved by ben name each of them.
+
+        Example: POST /api/presets as anna -> updated_by anna; PUT as ben -> updated_by ben; the same for /api/gestures.
+        """
+        # Given: a browser that names its account per request
         client = self.app.test_client()
+        # When / Then: anna makes the preset, ben saves it
         made = client.post("/api/presets", json=preset(), headers={"X-Test-Account": "anna"}).get_json()["preset"]
         self.assertEqual(made["updated_by"], "anna")
         saved = client.put("/api/presets/test_smug", json=preset(description="softer"), headers={"X-Test-Account": "ben"}).get_json()["preset"]
         self.assertEqual(saved["updated_by"], "ben")
+        # When / Then: anna makes the gesture, ben saves it
         gesture_made = client.post("/api/gestures", json=gesture(), headers={"X-Test-Account": "anna"}).get_json()["gesture"]
         self.assertEqual(gesture_made["updated_by"], "anna")
         gesture_saved = client.put("/api/gestures/cheer_v", json=gesture(description="more"), headers={"X-Test-Account": "ben"}).get_json()["gesture"]
         self.assertEqual(gesture_saved["updated_by"], "ben")
 
     def test_without_an_account_the_record_is_as_before(self):
+        """TC-API-009: a preset made without an account (the open backend) has no updated_by, as before.
+
+        Example: POST /api/presets {name: plain} without an account -> no updated_by.
+        """
         made = self.app.test_client().post("/api/presets", json=preset(name="plain")).get_json()["preset"]
         self.assertNotIn("updated_by", made)
 
@@ -144,7 +183,13 @@ class Messages(unittest.TestCase):
 
     @mark.req("REQ-API-009")
     def test_a_message_carries_the_sender_account_and_the_rate_key_is_separate(self):
+        """TC-API-009: a chat message names its account as sender in the acknowledgement and in the log; the connection id is only the rate key and is not stored.
+
+        Example: send(hello, sender sid-1, author anna) -> message.sender anna; the stored record has sender anna and no sid-1.
+        """
+        # When: anna sends over the connection sid-1
         ack = self.service.send("hello", client_id="c1", sender="sid-1", author="anna")
+        # Then: the acknowledgement and the log name anna, never the connection
         self.assertTrue(ack["ok"])
         self.assertEqual(ack["message"]["sender"], "anna")
         stored = [r for r in self.user_records() if r["text"] == "hello"][0]
@@ -152,6 +197,10 @@ class Messages(unittest.TestCase):
         self.assertNotIn("sid-1", str(stored))                                                     # the connection id is a rate key, not a name
 
     def test_without_an_account_the_message_has_no_sender(self):
+        """TC-API-009: without an account a chat message has no sender.
+
+        Example: send(hello again, sender sid-1) -> the message has no sender.
+        """
         ack = self.service.send("hello again", sender="sid-1")
         self.assertNotIn("sender", ack["message"])
 

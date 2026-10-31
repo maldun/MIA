@@ -19,6 +19,8 @@ up() { curl -s -o /dev/null -w "%{http_code}\n" -F "file=@$1" http://127.0.0.1:8
 up /home/maldun/prog/Python/MIA/voice/expressions/happy_default.wav
 ```
 
+`000` means nothing answers on port 8685: the chat-on-stub stage is not running (`bash tools/start_testing.sh status` shows which stage runs). Start it first. `up` is for the stub only. On the full stack (port 8585/8586) the speech process sends the lines, so for A3 you just chat.
+
 | # | Check | Expected | Result |
 |---|---|---|---|
 | A1 | **Two tabs claim the voice.** Open tab A and tab B (or phone and computer). Click in A, `up …happy_default.wav`; click in B, `up …sad_default.wav`; close B, `up …surprised_default.wav`. | Only A plays the first line; only B plays the second and A is silent; after closing B, A plays the third. | ok (owner, 2026-10-31) |

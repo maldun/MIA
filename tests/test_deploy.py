@@ -52,6 +52,22 @@ class DeployTests(unittest.TestCase):
         # Then: none is missing
         self.assertEqual(absent, [])
 
+    def test_the_readme_names_the_cache_and_the_trust_file_the_stack_uses(self):
+        """Re-verification finding N1 (D-148): the stack's config turns on the scholarly cache and the trust file; the operation docs say where they are"""
+        with open(os.path.join(DEPLOY, "setup_cfg.compose.json"), encoding="utf-8") as fp:
+            cfg = json.load(fp)
+        with open(os.path.join(DEPLOY, "README.md"), encoding="utf-8") as fp:
+            readme = fp.read()
+        self.assertIn(cfg["scholar_cache_dir"], readme)
+        self.assertIn("%s days" % cfg["scholar_cache_days"], readme)
+        self.assertIn(cfg["source_trust_file"], readme)
+        self.assertIn("/api/trust", readme)
+
+    def test_the_main_readme_does_not_count_the_containers_of_the_stack(self):
+        """Re-verification finding N2 (D-148): the stack has six containers, deploy/README.md lists them"""
+        with open(os.path.join(REPO, "README.md"), encoding="utf-8") as fp:
+            self.assertNotIn("three containers", fp.read())
+
     def test_up_script_is_valid_bash(self):
         done = subprocess.run(["bash", "-n", os.path.join(DEPLOY, "up.sh")], capture_output=True, text=True)
         self.assertEqual(done.returncode, 0, done.stderr)

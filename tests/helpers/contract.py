@@ -323,8 +323,6 @@ class _ChatApiAdapter:
 
     def stop(self, session):
         self._call("whoami", session)
-        if not self._threaded:
-            raise unittest.SkipTest("IF-101 stop of an answer that has not started is not in the real Backend yet (N-2.2 T-01)")
         return {"stopped": self._chat.stop()}
 
     def history(self, session, limit=50):
@@ -388,8 +386,8 @@ class _ChatApiAdapter:
 
 class _ChatTurnAdapter:
     """IF-201 on the real chat agent (amendment A-07): the ChatService with a scripted model and a worker that runs when the test calls `settle`. The accounts are
-    plain names (the Backend has checked them). What is not built yet (expression and audio_chunk of an answer: N-2.5; `stop` of an answer that has not started:
-    N-2.2 T-01) skips the test. The adapter turns the error class of the service into the one of the mock; production code does not import from tests/."""
+    plain names (the Backend has checked them). What is not built yet (expression and audio_chunk of an answer: N-2.5) skips
+    the test; `stop` is real since A-56. The adapter turns the error class of the service into the one of the mock; production code does not import from tests/."""
 
     START = 1767571200                                              # 2026-01-05 00:00 UTC, a Monday: the clock 0 of the mock
 
@@ -459,7 +457,7 @@ class _ChatTurnAdapter:
         self._now += seconds
 
     def stop(self):
-        raise unittest.SkipTest("IF-201 stop of an answer that has not started is not in the real chat agent yet (N-2.2 T-01)")
+        return {"stopped": self._chat.stop()}
 
     def history(self, limit=50):
         return [dict(r, sender=r.get("sender") or "MIA") for r in self._chat.log.history(limit=limit)[0]]

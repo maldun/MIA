@@ -41,6 +41,8 @@ export function initCharacter({ frame, socket, origin = location.origin, enabled
   } else if (!hasWebgl()) {
     disable(true, 'no WebGL');
   } else {
+    // the address is in data-src, so nothing loads before these checks (plain HTTP, ?character=0)
+    frame.src = frame.dataset.src;
     timer = win.setTimeout(() => { if (!ready) disable(true, 'timeout'); }, LOAD_TIMEOUT_MS);
   }
 

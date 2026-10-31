@@ -101,3 +101,72 @@ Open for Verify and the owner:
 4. IF-104 bounds (500 nodes, 200 ms) are a proposal in the contract; not enforced.
 5. `GET /api/<anything>` unknown to other routes now answers JSON 404 `unknown_kind`.
 6. `library.py` imports sqlite3 for its index (AC-15 reading; not N-2.1).
+
+## A-52 and TC-API-013: the container alone (2026-10-31, branch v1-n21b; D-147, finding V-0 / F-7)
+| Requirement | What was built | Tests |
+|---|---|---|
+| REQ-API-013 | nothing in MIA (the start stays as it is, D-147). Draft **A-52**: `specs/mia/contract-drafts/tests/helpers/mocks/if_103_model_server_http.py`, an Ollama-shaped HTTP stand-in of IF-103 (standard library, deterministic: `/`, `/api/version`, `/api/tags`, `/api/ps`, `/api/show`, `/api/pull`, `/api/chat` and `/api/generate` streamed or not, `format` answered with the schema's required keys, `/_calls` for the test); note `specs/mia/amendments/A-52/A-52-note.md`, install `tools/apply_amendment_a52.sh` | `tests/test_container_alone.py` (2, TC-API-013, stage 3): a pod on 127.0.0.1 with the stand-in and `localhost/mia:latest` as it is (config `setup_cfg.compose.json` with `ollama_wait` 20 s, `MIA_OLLAMA_HOST` on the stand-in); `/` is the chat page; the stand-in saw `/api/tags` and `/api/chat` (the calibration); the pod is removed. Skips without podman, the image or the installed stand-in (here: skipped, A-52 not installed) |
+
+Checked first with the client `ollama` 0.6.3 of the image against the stand-in (list, show, pull, chat streamed and with a schema, generate unload and streamed, 404 for an unknown model). Scratch copy (git files + drafts, `apply_amendment_a52.sh --do`): **green**, 2 tests in 11 s. **Red**: the installed stand-in replaced by a process that answers nothing: error after 32 s ("the mia container stopped before the page was served": MIA waits 20 s, the calibration fails, the container exits); restored: green again. No pod or container left. The row TC-API-013 of `test-spec.md` names the stand-in and the checks.
+Note: `install_lama.py` reads `setup_cfg.json` without the local overlay (`setup_cfg.local.json`), so the test writes `ollama_wait` into a copied config (a local file did not shorten the wait). Not changed (N-4.2's start; no requirement asks for it).
+Local coder: `n21b-container-alone`, verdict fixed (`:` became `:=` in two mount arguments, a filter dropped from a comprehension, `self` missing twice; found by the line compare and the run).
+Until A-52 is installed TC-API-013 skips; installed, it is the evidence of AC-29.
+
+## V-1: a test of the production wiring of web_app.py (2026-10-31, branch v1-n21b)
+| Requirement | What was built | Tests |
+|---|---|---|
+| REQ-API-007, REQ-API-009, REQ-API-014 | nothing in the code (the wiring was right, the reviewer's hand run said so; nothing kept it right) | `tests/test_accounts_wiring.py` (5): the real `web_app` imported from a temporary folder `MIA/` of links to the checkout with its own `setup_cfg.json` (the example, `accounts_enabled: true`, `chat_rate_per_minute` 10) and an empty `data/`, so the checkout is not written; a scripted answer instead of the model. 401 on `/api/workflows` without session and anna's PUT is version 1 by anna (TC-API-014); a socket without session refused (TC-API-007); `chat_send` ack `message.sender` = anna and one change-record line `{ben, chat_send, ""}` (TC-API-009); 10 messages over two of anna's sockets pass, her 11th over a third is refused, ben's passes (TC-API-007) |
+
+Mutants of the verification on a scratch copy (git archive of HEAD + the test, each reverted), all killed: M7 (no `author` in `chat_service.send`, error), M8 (rate key `request.sid`), M9 (no change record of `chat_send`), M15 (no socket guard, 3 failures 1 error), M17 (graph blueprint not registered). The test is green on the code as it is (in the image, 5 tests).
+Importing `web_app` starts its APScheduler thread (line 142) and builds an ollama client without connecting, as in the eleven other tests that import it (`test_api_events`, `test_chat_page`, ...); no model server is started or called, so no deep mocking was needed.
+Local coder: `n21b-web-app-wiring`, verdict fixed: the target name I gave was an existing tracked test (`tests/test_web_app_wiring.py`, overwritten by the run and restored from git, the new file renamed); one non-ASCII character in the docstring.
+
+## V-3: a login whose user is a list or object (2026-10-31, branch v1-n21b)
+Finding V-3 of the verification: `api_sessions.py` looked the user up in the throttle (`self._failed.get(user)`) before checking its type, so a JSON list or object as `user` raised TypeError: 500 instead of 401 `bad_credentials` (IF-101). Test first: `test_a_bad_body_is_a_401_and_not_a_crash` (`tests/test_accounts_api.py`) also posts `{"user": ["anna"], ...}` and `{"user": {}, ...}`: **red** (500 != 401). Fix: `login` refuses a user that is not a string with 401 `bad_credentials` before the throttle; such a login no longer counts as a failed attempt of the empty name `""` (no account can be called that). **Green**: test_accounts_api 31, test_api_sessions 8, test_accounts 5 (image).
+
+## V-4: the open routes without the login, documented (2026-10-31, branch v1-n21b; D-149)
+D-149 accepts V-4 as a deviation: with `accounts_enabled` off (the shipped default) every route is open (trusted users, D-131). Test first: `tests/test_runbook.py` `test_runbook_and_readme_say_that_without_the_login_every_route_is_open` (both `deploy/RUNBOOK.md` and `deploy/README.md` name `accounts_enabled`, "every route is open", D-131 and `deploy/up.sh owner NAME`): **red**, then the README's section "The login" and a "Login" line of the runbook's "Start and stop" say it, with how to turn the login on (`deploy/up.sh owner NAME`, `deploy/up.sh login on`, restart MIA): **green** (9 tests). For the verification report: the candidate deviation "V-4 login off by default" is accepted by D-149.
+
+## V-5: the message rate limit, 10 per 60 s, refused with 429 rate_limited (2026-10-31, branch v1-n21b; D-149, draft A-54)
+| Requirement | What was built | Tests |
+|---|---|---|
+| REQ-API-007 | the acceptance criterion names the value (10 messages per 60 s per account, the setting `chat_rate_per_minute`, all connections of the account together; the 11th is 429 `rate_limited`, not stored), history line "2026-10-31 D-149"; `chat_service.send` answers the refusal with `"code": "rate_limited"` (it had none); the comment of `CHAT_RATE_KEY` says per account | `tests/test_chat_backend.py` `test_a_message_over_the_rate_limit_is_refused_with_the_code_rate_limited`: **red** (`(False, None)`), then **green** (42); `tests/test_accounts_wiring.py`: the 11th of anna is refused with `rate_limited` |
+| IF-101 | draft **A-54** (`specs/mia/amendments/A-54/A-54-note.md`, the contract v12 in `specs/mia/amendments/A-54/`, mock and suite under `specs/mia/contract-drafts/`, `tools/apply_amendment_a54.sh`; the test-spec row TC-IF-101-30 is made at install time) | scratch copy `--do`: IF-101 suite 62 OK, 3 skipped; red with the old mock (1 failure); `test_chat_page`, `test_chat_mock_server`, `test_api_events`, `test_accounts_wiring` green on the new mock |
+
+Note: the real side of TC-IF-101-30 would pass without the code too (the adapter of `contract.py` defaults to 429 `rate_limited`); the code is held by the two unit tests above. `specs/mia/test-spec.md` has no rows for TC-IF-101-20 to -29 (cases of v4 to v10 in the suite); A-54 adds its row after TC-IF-101-19 and does not fill that gap (for the owner / Plan).
+
+## V-7: an id the IF-104 routes cannot take answers JSON not_found (2026-10-31, branch v1-n21b; D-149)
+Test first: `tests/test_graph_api.py` `test_an_id_the_routes_cannot_take_is_404_not_found_in_json`: GET, PUT, history, diff and restore on `/api/workflows/a%2Fb` (the slash is decoded before routing, so no route of IF-104 matches) all answer 404 `{"error": "not_found"}` and nothing is saved: **red** (Flask's HTML 404). Fix: `graph_api.py` registers one more route `/api/<any(workflows, context_graphs)>/<path:rest>` (GET, PUT, POST) that answers JSON `not_found`; only the kinds of IF-104 are caught, so no other `/api/...` path changes. **Green**: test_graph_api 8, IF-104 suite 10 (mock and real), test_accounts_wiring, test_presets_api, test_chat_page.
+D-149 accepts the extra rule fields (`budget_tokens`, `variant`) and `immutable` → 409 as they are; nothing changed for them. IF-104's text says nothing about ids with a slash; no amendment was asked for (open point for the owner if the contract should name the id charset).
+
+## V-10: stopped, the decision contradicts other requirements and a protected test (2026-10-31, branch v1-n21b; D-149)
+D-149 (V-10): "the code follows REQ-API-004's text: a login is refused only after more than 5 failed attempts (the 7th attempt within the minute); the acceptance criterion is corrected with it". Not built, nothing changed, because:
+- the protected IF-101 suite, TC-IF-101-02 (`test_the_sixth_failed_login_in_a_minute_is_throttled`), runs on the real side (A-05 adapter on the real `api_sessions`): five failures, then the 6th login (right password) must be 429 `throttled`. With the change the real side turns red: a changed protected test is needed;
+- IF-101 (line of `login`: "5 failed logins per minute per account, then 429 throttled"; golden example 2: "sixth wrong login within a minute is 429"), the mock (`len(failures) >= MAX_FAILED_LOGINS`), the parent REQ-BE-009's criterion ("the sixth failed attempt within a minute is refused") and the HLS's AC-14 ("at most 5 failed logins per minute per account are accepted") all say the 6th attempt is refused; only the EARS text of REQ-API-004 and REQ-BE-009 ("more than 5 fail") allows a 6th failure;
+- the only amendment ids given to this work are A-52 and A-54.
+Options for the owner: (a) keep the decision: an amendment (a new id, e.g. A-55) changes IF-101 (v13: login row and golden 2), the mock (`>` instead of `>=`), TC-IF-101-02 (six failures, then 429), REQ-BE-009's and REQ-API-004's criteria and the HLS's AC-14; then the code (`api_sessions.py` `>`) and TC-API-004 test-first. (b) the code stays (6th refused, as AC-14, IF-101 and the suite say) and the TEXT of REQ-API-004 and REQ-BE-009 is aligned: "If 5 logins have failed within one minute for an account, then ... refuse further logins ..." (the reviewer's original proposal of V-10; no protected file changes). Recommendation: (b), one place changes instead of seven and the security posture stays as the HLS states it.
+
+## V-9: the test documentation of T-01/T-02 and TC-API-010 on the real routes (2026-10-31, branch v1-n21b; D-149)
+- Test docs: every test of `test_accounts_api.py`, `test_author_in_records.py`, `test_api_sessions.py`, `test_accounts_cli.py`, `test_internal_auth.py` has a docstring with the test case id, an `Example:` line and Given / When / Then comments: `test_doc_check.py` 0 errors for each (was 40, 11, 10, 5, 4). No code line changed: checked by script (the AST of each file without docstrings equals the one of HEAD; for `test_accounts_api.py` HEAD minus the removed dummy class). All green in the image (30, 9, 8, 3, 3).
+- TC-API-010: the dummy route `/api/data` of `test_accounts_api.py` (class `Everyone`) is replaced by `test_a_second_user_sees_and_changes_the_workflow_preset_and_persona_of_the_first` in `tests/test_accounts_wiring.py`, on the real `web_app` with accounts on: anna saves a workflow, a preset (with the editor token) and the persona, ben reads all three and saves his own, anna reads ben's (author ben). Green on the code as it is (no gap); a mutation on a scratch copy (a workflow may only be changed by its author, 403) makes it red.
+- Local coder: `n21b-doc-*` (5 tasks): two failed (a syntax error; no code block for the 395-line file), three passed the checks but were rejected in review (bare ids as docstrings, wrong examples, comments in the wrong places); the docs were written by me and inserted by a script. Lesson recorded.
+
+## Hand-over of branch v1-n21b (2026-10-31; D-147, D-149)
+| Finding | State | Commit |
+|---|---|---|
+| V-0 / F-7 (TC-API-013) | test written, skips until **A-52** is installed (draft, scratch-tested red/green) | `e440a24` |
+| V-1 | done (`tests/test_accounts_wiring.py`, M7, M8, M9, M15, M17 killed) | `30a1b40` |
+| V-3 | done (red, then `isinstance(user, str)`) | `7fb8ac9` |
+| V-4 | accepted deviation documented (README, RUNBOOK, test_runbook) | `fcbe633` |
+| V-5 | done in the code and REQ-API-007; IF-101 v12 waits for the install of **A-54** (draft, scratch-tested) | `5c982a7` |
+| V-7 | done (JSON `not_found`) | `8e467ee` |
+| V-9 | done (docs, TC-API-010 on the real routes) | `10ca9bf` |
+| V-10 | **stopped**: contradicts IF-101, AC-14, REQ-BE-009's criterion and the protected TC-IF-101-02; options (a)/(b) above | `979d9fd` |
+| V-2, V-6 | decided by D-147 (REQ-API-002 is what IF-101's events cover; IF-104 bounds stay a proposal, measured in Validate); nothing to build here | – |
+| V-8, V-11 | not this branch (V-8: the model, commit 348175f on goal/v1; V-11: at the N-2 integration step) | – |
+
+Full run before this entry (in the image, 178 files: `tests/test_*.py` and the Python contract suites): all pass except the known two, `test_amendment_report` (no git in the image) and `test_harness` (rt_edit). `test_container_alone` skips in the image (no podman) and on the host until A-52 is installed. Feedback, not verification.
+To install on goal/v1 after the merge: `bash tools/apply_amendment_a52.sh --do` (then TC-API-013 runs on the host: `python3 tests/test_container_alone.py`), `bash tools/apply_amendment_a54.sh --do`.
+
+## V-10 decided by D-153 (corrects D-149), 2026-10-31
+The code stays (after 5 failed logins within a minute the 6th attempt is refused, 429 `throttled`). REQ-API-004's text and acceptance criterion now say exactly that, history line "2026-10-31 D-153 (corrects D-149)". Commit 979d9fd changed only this log (no code or test), so nothing is reverted; the options (a)/(b) of the V-10 entry above are settled as (b).

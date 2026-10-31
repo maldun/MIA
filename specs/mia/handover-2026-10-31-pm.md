@@ -1,6 +1,6 @@
 # Hand-over for the next session (written 2026-10-31, afternoon): G-V1, N-2.4.1 verified with findings, N-2.4.2 in re-verification, N-4.2 T-03 running
 
-The newest hand-over. It continues `handover-2026-10-31-late.md` (read its "How to work" and "Later the same evening"). Then read `CLAUDE.md`, `specs/mia/goals/G-V1/goal.md`, `specs/mia/review-log.md` (**D-120 to D-132**) and the `implementation-log.md` and `verification-report.md` of the node you work on.
+Superseded by `handover-2026-10-31-night.md`. It continues `handover-2026-10-31-late.md` (read its "How to work" and "Later the same evening"). Then read `CLAUDE.md`, `specs/mia/goals/G-V1/goal.md`, `specs/mia/review-log.md` (**D-120 to D-132**) and the `implementation-log.md` and `verification-report.md` of the node you work on.
 
 ## Owner's rules (new today, keep them)
 - **Decisions as a questionnaire, then the steps** (also in the dev-workflow skill): ask every open decision at once with a question tool, each question standing alone with a recommended option first; after the answers, list the steps by which each answer is applied, then do them.

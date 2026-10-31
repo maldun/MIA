@@ -61,3 +61,17 @@ Proposed on 2026-10-29 after the usability work of N-2.3 T-09 to T-11 and N-1.1 
 - Target check: specified only
 - Decision: proposed 2026-10-29, to be confirmed by Stefan Reiterer
 - Status: open
+
+## TD-06 – The workflow library folder is not there yet
+- Kind: defer
+- Requirement: REQ-GTB-004
+- Interim criterion: workflow documents are stored and checked through the graph tables (IF-301) and the library API; TC-GTB-005 stays skipped
+- Target: `library/workflows` exists (root task T-10) and TC-GTB-005, rewritten for the entry format after D-108 and D-112, runs green
+- Reason: T-10 never ran; the entry format of the test predates D-108/D-112, and FB-03 re-specifies how workflows are built
+- Effort: about half a day after FB-03's Explore
+- Risk of the gap: workflow documents have no folder form to back up or review by hand. Mitigation: the database backup (N-4.2)
+- Owner: Stefan Reiterer
+- Trigger: root task T-10, or the Plan of the next iteration, whichever first
+- Target check: TC-GTB-005
+- Decision: D-160, 2026-10-31, Stefan Reiterer
+- Status: open
