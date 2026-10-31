@@ -5,7 +5,7 @@ Storage holds the rules and a backend holds the bytes, so the file backend and t
   - every put is a new immutable version, counted from 1 per record, with author and time; expected_version guards against a lost update
   - the tables, and whether a record may be deleted, come from the Graph tables (IF-301) and the Record tables (IF-302)
   - a document is validated by the table definitions before anything is written; a refused document consumes no version
-  - subscribers are told after every write
+  - subscribers are told after every write, a delete included (version None; D-158)
 
 A backend offers: versions(table, id) -> list of entries (oldest first), append(table, id, entry), ids(table), remove(table, id). It does not
 know the rules. Records are never changed in place; only append and remove (of a deletable table) touch the data. A backend shared by several
@@ -71,11 +71,13 @@ class Storage:
                 raise StorageError("conflict", detail={"current": current})
             entry = {"id": record_id, "version": current + 1, "author": author, "time": utc_now(), "doc": copy.deepcopy(doc)}
             self.backend.append(table, record_id, entry)
-        event = {"table": table, "id": record_id, "version": entry["version"], "author": author}
+        self._tell({"table": table, "id": record_id, "version": entry["version"], "author": author})
+        return {"version": entry["version"]}
+
+    def _tell(self, event):
         self._dispatch(event)                   # the subscribers of this instance hear it at once ...
         if hasattr(self.backend, "publish"):    # ... the other instances of a shared database through its channel
             self.backend.publish(dict(event, origin=self._id))
-        return {"version": entry["version"]}
 
     def _on_remote(self, event):
         if event.get("origin") != self._id:     # this instance has told its own subscribers already
@@ -113,9 +115,11 @@ class Storage:
         if not self.backend.versions(table, record_id):
             raise StorageError("not_found")
         self.backend.remove(table, record_id)
+        self._tell({"table": table, "id": record_id, "version": None, "author": author})
 
     def subscribe(self, table, callback):
-        """callback({"table", "id", "version", "author"}) after every write of the table; returns a function that unsubscribes."""
+        """callback({"table", "id", "version", "author"}) after every write of the table, a delete with version None; returns a function that
+        unsubscribes."""
         self._check(table)
         if hasattr(self.backend, "listen") and not self._listening:
             self.backend.listen(self._on_remote)

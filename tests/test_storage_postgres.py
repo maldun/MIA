@@ -168,6 +168,23 @@ class SharedDatabase(unittest.TestCase):
         # Then: the second instance hears again
         self.assertTrue(heard)
 
+    @mark.req("REQ-SLY-006")
+    def test_a_delete_on_one_instance_is_heard_on_the_other(self):
+        """Finding F7, D-158: the delete notice goes through the channel like a write.
+        Example: the first instance deletes memo "m"; the second hears {"table": "memos", "id": "m", "version": None, "author": "ben"} once."""
+        # Given: a memo, and the second instance listening
+        self.a.put("memos", "m", {"text": "x"}, "anna")
+        heard = []
+        self.b.subscribe("memos", heard.append)
+        # When: the first instance deletes it
+        self.a.delete("memos", "m", "ben")
+        deadline = time.time() + 2
+        while not heard and time.time() < deadline:
+            time.sleep(0.01)
+        time.sleep(0.3)
+        # Then: one notice of the delete
+        self.assertEqual(heard, [{"table": "memos", "id": "m", "version": None, "author": "ben"}])
+
     @mark.req("REQ-SLY-003")
     def test_two_instances_writing_the_same_record_never_share_a_version(self):
         """The primary key lets one writer win; the other gets a conflict and no version is written twice."""

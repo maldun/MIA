@@ -148,6 +148,20 @@ class StorageBehaviour:
         self.assertEqual([e["version"] for e in heard], [1, 2])
 
     @mark.req("REQ-SLY-006")
+    def test_a_delete_is_a_change_and_is_told_with_version_none(self):
+        """Finding F7 of the verification, decision D-158: a delete sends a notice, as IF-102 says "after every write".
+        Example: delete("memos", "m", "ben") tells a subscriber {"table": "memos", "id": "m", "version": None, "author": "ben"}."""
+        # Given: a memo and a subscriber of the memos
+        self.store.put("memos", "m", {"text": "x"}, "anna")
+        heard = []
+        self.store.subscribe("memos", heard.append)
+        # When: the memo is deleted, and a refused delete follows
+        self.store.delete("memos", "m", "ben")
+        code_of(lambda: self.store.delete("memos", "m", "ben"))
+        # Then: one notice, for the delete that happened
+        self.assertEqual(heard, [{"table": "memos", "id": "m", "version": None, "author": "ben"}])
+
+    @mark.req("REQ-SLY-006")
     def test_a_notice_reaches_a_subscriber_on_another_thread_within_2_s(self):
         """TC-SLY-006: the writer is on one thread, the subscriber's callback runs and is seen from another."""
         got, seen = [], threading.Event()
