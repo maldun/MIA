@@ -30,11 +30,17 @@ def offer(data_dir, accounts_dir, terminal=None, ask=input, show=print, run=subp
     open(marker, "w").close()
     if terminal is None:
         terminal = sys.stdin.isatty()
-    name = ask("No account yet. Make the owner account now? Name (empty = later): ").strip() if terminal else ""
-    if name:
-        run([sys.executable, TOOL, "create", name, "--dir", accounts_dir])
+    name = ""
+    if terminal:
+        try:
+            name = ask("No account yet. Make the owner account now? Name (empty = later): ").strip()
+        except EOFError:          # Ctrl+D is "later", as up.sh reads it; it must not stop the start (Verify F5)
+            pass
+    if name and run([sys.executable, TOOL, "create", name, "--dir", accounts_dir]).returncode == 0:
         # the start does not change the configuration; it says how (D-139)
         show('The login is still off: turn it on with "accounts_enabled": true and "owner_account": "%s" in setup_cfg.json.' % name)
+    elif name:
+        show("The account was not made (see above). Make it when you like:  python tools/accounts_cli.py create NAME --dir %s" % accounts_dir)
     else:
         show("No account yet. Make the owner account when you like:  python tools/accounts_cli.py create NAME --dir %s" % accounts_dir)
     return True

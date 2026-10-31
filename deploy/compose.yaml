@@ -1,4 +1,5 @@
-# MIA as a service: MIA (this folder), Ollama (the language model) and SearXNG (web search).
+# MIA as a service: MIA (this folder), the graph page, the https front (Caddy), SearXNG (web search), Ollama (the language model; profile ollama, only without OLLAMA_URL)
+# and PostgreSQL (profile db,  deploy/up.sh db ).
 #   deploy/up.sh                                   first start: makes .env and the config, starts everything (CPU)
 #   deploy/up.sh rocm | nvidia                     with the GPU of Ollama (AMD / NVIDIA)
 # The page is on http://localhost:8585 (MIA_PORT in .env changes that). Only MIA (http, 8585, always on loopback) and its https front (8586, on MIA_BIND) are published;
@@ -18,7 +19,7 @@ services:
       MIA_PUBLIC_HTTPS_PORT: ${MIA_HTTPS_PORT:-8586}      # the pages that come through the https service may use the socket
       MIA_PUBLIC_HOSTS: ${MIA_PUBLIC_HOSTS:-}              # addresses of this machine for other devices (up.sh fills it with MIA_BIND=0.0.0.0)
       MIA_OLLAMA_HOST: ${OLLAMA_URL:-http://ollama:11434}      # OLLAMA_URL in .env: an Ollama that exists already, see README
-      MIA_DATABASE_URL: ${MIA_DATABASE_URL:-}                  # set by  deploy/up.sh db  (the storage option picks the database)
+      MIA_DATABASE_URL: ${MIA_DATABASE_URL:-}                  # set by  deploy/up.sh db; nothing in MIA reads it yet: its store stays the file backend until it moves to PostgreSQL (D-139)
     ports:
       - "127.0.0.1:${MIA_PORT:-8585}:8585"        # loopback only, whatever MIA_BIND says: the network gets the https front (REQ-OPR-008)
     volumes:

@@ -91,6 +91,34 @@ class Runbook(unittest.TestCase):
             self.assertIn(name, part)
 
     @mark.req('REQ-OPR-006')
+    def test_the_runbook_names_the_character_folder_the_stack_mounts(self):
+        """TC-OPR-006, Verify finding F4: the stack mounts ui/godot/build/web (not mia.vrm), installed with deploy/up.sh character.
+
+        Example: section "## Files a fresh checkout lacks" names ui/godot/build/web and deploy/up.sh character
+        """
+        # Given: the runbook (setUp), When: its section on the missing files is read
+        part = section(self.text, "Files a fresh checkout lacks")
+        # Then: it names the mounted folder and the command that fills it
+        self.assertIn("ui/godot/build/web", part)
+        self.assertIn("deploy/up.sh character", part)
+
+    @mark.req('REQ-OPR-006')
+    def test_the_pin_update_names_every_pinned_image_and_both_kinds_of_ollama(self):
+        """TC-OPR-006, Verify finding F4: the update of the pins names every image pinned in the compose files and the Containerfile, and how to read the models of the stack's own Ollama besides a host Ollama.
+
+        Example: "Update of the model pins" names caddy:2, ollama:latest, ollama:rocm, searxng:latest, postgres:16, python:3.12-slim, OLLAMA_URL and deploy/up.sh exec ollama
+        """
+        # Given: the pinned images as name:tag (compose files and the FROM line of the Containerfile)
+        with open(os.path.join(REPO, "deploy", "Containerfile"), encoding="utf-8") as fp:
+            bases = [line.split()[1] for line in fp if line.startswith("FROM ")]
+        pinned = {image.split("@")[0].rsplit("/", 1)[-1] for image in image_lines() + bases if "@sha256:" in image}      # not the local build of mia
+        # When: the part on the pins is read
+        part = section(self.text, "Update of the model pins")
+        # Then: each image and both ways to reach Ollama are named
+        for name in sorted(pinned) + ["OLLAMA_URL", "deploy/up.sh exec ollama"]:
+            self.assertIn(name, part)
+
+    @mark.req('REQ-OPR-006')
     def test_the_runbook_has_the_four_parts_of_the_requirement(self):
         """TC-OPR-006: the runbook has start, update of the model pins, backup and restore of the database, and the retirement plan.
 

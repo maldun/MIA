@@ -4,7 +4,7 @@ fight with the one in git. `setup_cfg.example.json` is tracked: it lists every o
 
   ensure(folder)        the path of setup_cfg.json; if the file is missing it is copied from the example (the first start on a new machine), and the caller is told
   default_path(folder)  for tools that only read: setup_cfg.json if it exists, else the example
-  missing(folder)       the options of the example that this machine's file does not have (after an update that brought new options): {name: value in the example}
+  missing(folder)       the options of the example that this machine's file (with its local file) does not have (after an update that brought new options): {name: value in the example}
   warning(folder)       the same as a text for the start of MIA and the command below, or None
 
 At every start MIA prints that warning; from a shell:  python config.py [folder]   lists them (it changes nothing; your file keeps its own formatting and values).
@@ -84,8 +84,7 @@ def missing(folder):
         template = json.load(fp)
     if not os.path.exists(real):
         return dict(template)
-    with open(real, encoding="utf-8") as fp:
-        mine = json.load(fp)
+    mine = load(real)        # an option set only in the local file of this machine is present too (Verify F2, D-144)
     return {key: value for key, value in template.items() if key not in mine}
 
 

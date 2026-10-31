@@ -1,6 +1,6 @@
 # MIA as a service (podman compose)
 
-Four containers: **mia** (this code, CPU only, Python 3.12), **https** (Caddy, TLS in front of MIA), **ollama** (the language model, the only one that may use the GPU) and **searxng** (web search). Published are `http://127.0.0.1:8585` (MIA, always on loopback only) and `https://127.0.0.1:8586` (same page through Caddy; the only port that `MIA_BIND` opens to other devices, REQ-OPR-008).
+The containers: **mia** (this code, CPU only, Python 3.12), **graph** (the graph page, from the mia image, behind `/graph/`), **https** (Caddy, TLS in front of MIA and the graph page), **searxng** (web search), **ollama** (the language model, the only one that may use the GPU; only when `deploy/.env` names no `OLLAMA_URL`) and **db** (PostgreSQL; only with `deploy/up.sh db`). Published are `http://127.0.0.1:8585` (MIA, always on loopback only) and `https://127.0.0.1:8586` (same page through Caddy; the only port that `MIA_BIND` opens to other devices, REQ-OPR-008).
 
 ## Start
 

@@ -11,16 +11,17 @@ REQ-OPR-006. For the owner who runs MIA on the workstation (Fedora, podman, one 
 - Fresh-install check (TC-OPR-001, SMOKE-MIA-001): `python tests/smoke/smoke_fresh_install.py` after the commit to be checked. It uses the Ollama that runs already (`OLLAMA_URL`, default `http://host.containers.internal:11434`) and never pulls the models or images: when a model of `setup_cfg.compose.json` or an image of the stack is missing it stops with exit 2. Pull what is missing yourself first, never inside a test.
 
 ## Files a fresh checkout lacks
-Three files are git-ignored and do not come with a checkout; MIA runs without them (the chat answers; no character, no voice), so a fresh install works before they are there (D-139):
-- `ui/godot/assets/mia.vrm`, the character model: made by `ui/tools/export_character.sh` from the VRoid source, or copied from an existing install.
+Three items are git-ignored and do not come with a checkout; MIA runs without them (the chat answers; no character, no voice), so a fresh install works before they are there (D-139):
+- `ui/godot/build/web`, the character page the stack mounts into `mia`: `deploy/up.sh character path/to/mia-character-web-N.zip` (the zip from the owner's Drive, checked against `ui/character/manifest.json`; `deploy/README.md`, "The 3D character"). No Godot is needed.
+- `ui/godot/assets/mia.vrm`, the character model: only to build that page yourself (`ui/tools/export_character.sh` from the VRoid source, or copied from an existing install); the stack never reads it.
 - `voice/models/kokoro/kokoro-v1.0.onnx` and `voices-v1.0.bin`, the Kokoro voice: from https://github.com/thewh1teagle/kokoro-onnx/releases/tag/model-files-v1.0 (README.md, "Kokoro TTS").
 
 ## Update of the model pins
 The pins are `MP-light` and `MP-full` in `specs/mia/eval-spec.md` (name, digest, quantization, options); `version` and `version_light` of `deploy/setup_cfg.compose.json` name the same models. A new model or a new digest of the same name is a plan amendment and needs a new eval baseline.
-1. Read the digests the server holds: `curl -s http://127.0.0.1:11434/api/tags` (or `podman exec ollama ollama list`) and compare them with `eval-spec.md`.
-2. To change a pin: write the amendment (new pin line), then pull the model by hand (`podman exec ollama ollama pull NAME`), record its digest, and run the baselines of the affected suites (`python tools/eval.py run <suite> --repeats 3`, see `ui/README.md`).
+1. Read the digests the server holds and compare them with `eval-spec.md`. A host Ollama (`OLLAMA_URL` in `deploy/.env`, e.g. the podman container `ollama` on this machine): `curl -s http://127.0.0.1:11434/api/tags` or `podman exec ollama ollama list`. The stack's own Ollama (no `OLLAMA_URL`; the service `ollama` publishes no port): `deploy/up.sh exec ollama ollama list`.
+2. To change a pin: write the amendment (new pin line), then pull the model by hand (host: `podman exec ollama ollama pull NAME`; stack: `deploy/up.sh exec ollama ollama pull NAME`), record its digest, and run the baselines of the affected suites (`python tools/eval.py run <suite> --repeats 3`, see `ui/README.md`).
 3. Change `version` / `version_light` only together with the amendment; restart MIA (`deploy/up.sh db restart mia`).
-4. Images: the floating images are pinned by digest in the compose files (`ollama`, `searxng`, `caddy`, D-127). To update one: pull the tag by hand, read the digest with `podman image inspect --format '{{.Digest}}' IMAGE`, replace the digest in the compose file, run `tests/test_runbook.py` and the stack smoke tests.
+4. Images: every image from a registry is pinned by digest (D-127, D-139): in the compose files `ollama:latest`, `ollama:rocm`, `searxng:latest`, `caddy:2`, `postgres:16`, and in `deploy/Containerfile` the base `python:3.12-slim` of the mia image. To update one: pull the tag by hand, read the digest with `podman image inspect --format '{{.Digest}}' IMAGE`, replace the digest in the compose file or the Containerfile, run `tests/test_runbook.py` and the stack smoke tests.
 
 ## Backup and restore
 - What: everything in the data volume and, with the `db` service, the database, in one archive (REQ-OPR-005).

@@ -3,6 +3,7 @@ Run with: python tests/test_first_account.py
 """
 
 import os
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -33,18 +34,26 @@ class FirstAccountOffer(unittest.TestCase):
         self.shown = []
         self.asked = []
         self.runs = []
+        self.returncode = 0              # what the stand-in account tool gives back
+
+    def run_tool(self, cmd):
+        """a stand-in for subprocess.run that records the command and gives self.returncode"""
+        self.runs.append(cmd)
+        return subprocess.CompletedProcess(cmd, self.returncode)
 
     def ask(self, answer):
         """a stand-in for input() that records the question and gives the answer"""
         def ask(question):
             self.asked.append(question)
+            if isinstance(answer, BaseException):
+                raise answer
             return answer
         return ask
 
     def offer(self, terminal, answer=""):
         """runs first_account.offer with recording stand-ins; gives its return value"""
         return first_account.offer(self.data, self.accounts, terminal=terminal, ask=self.ask(answer),
-                                   show=self.shown.append, run=self.runs.append)
+                                   show=self.shown.append, run=self.run_tool)
 
     @mark.req('REQ-OPR-002')
     def test_the_first_start_without_a_terminal_prints_one_line_and_leaves_the_marker(self):
@@ -123,6 +132,38 @@ class FirstAccountOffer(unittest.TestCase):
         self.assertEqual(len(self.shown), 1, self.shown)
         self.assertIn("accounts_cli.py create NAME", self.shown[0])
         self.assertTrue(os.path.exists(os.path.join(self.data, first_account.MARKER)))
+
+    @mark.req('REQ-OPR-002')
+    def test_ctrl_d_at_the_prompt_counts_as_later(self):
+        """TC-OPR-002, Verify finding F5: Ctrl+D at the prompt (EOFError of input()) is an empty answer and does not stop the start.
+
+        Example: answer EOFError -> no exception, no run, one line with the command, marker exists
+        """
+        # Given: an empty file store of accounts (setUp)
+        # When: the owner presses Ctrl+D at the prompt
+        result = self.offer(terminal=True, answer=EOFError())
+        # Then: it is left for later as with an empty answer
+        self.assertTrue(result)
+        self.assertEqual(self.runs, [])
+        self.assertEqual(len(self.shown), 1, self.shown)
+        self.assertIn("accounts_cli.py create NAME", self.shown[0])
+        self.assertTrue(os.path.exists(os.path.join(self.data, first_account.MARKER)))
+
+    @mark.req('REQ-OPR-002')
+    def test_a_failed_create_prints_the_command_instead_of_the_login_hint(self):
+        """TC-OPR-002, Verify finding F5: when the account tool fails (e.g. the passwords differ), no login hint is printed but the command to make the account later.
+
+        Example: answer "anna", account tool exits 1 -> one line with "accounts_cli.py create NAME", none with "accounts_enabled"
+        """
+        # Given: an empty file store of accounts and an account tool that fails
+        self.returncode = 1
+        # When: the owner types a name on a terminal
+        self.offer(terminal=True, answer="anna")
+        # Then: the tool ran once, and the one line printed is the command, not the login hint
+        self.assertEqual(len(self.runs), 1, self.runs)
+        self.assertEqual(len(self.shown), 1, self.shown)
+        self.assertIn("accounts_cli.py create NAME", self.shown[0])
+        self.assertNotIn("accounts_enabled", self.shown[0])
 
     @mark.req('REQ-OPR-002')
     def test_no_offer_when_an_account_exists(self):

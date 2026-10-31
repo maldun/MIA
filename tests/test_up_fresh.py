@@ -54,13 +54,13 @@ class FreshCheckout(unittest.TestCase):
             os.chmod(path, os.stat(path).st_mode | stat.S_IEXEC)
         self.log = os.path.join(root, "calls.log")
 
-    def start(self):
-        """runs the start of deploy/up.sh without a terminal (OLLAMA_URL and SEARXNG_SECRET only from deploy/.env); gives (output, list of recorded calls)"""
+    def start(self, *args, accounts="anna"):
+        """runs the start of deploy/up.sh (with the given arguments, e.g. db) without a terminal (OLLAMA_URL and SEARXNG_SECRET only from deploy/.env); gives (output, list of recorded calls)"""
         env = dict(os.environ, PATH=os.path.join(self.tmp.name, "bin") + os.pathsep + os.environ["PATH"], STUB_LOG=self.log,
-                   STUB_ACCOUNTS="anna", COMPOSE=os.path.join(self.tmp.name, "bin", "compose"))
+                   STUB_ACCOUNTS=accounts, COMPOSE=os.path.join(self.tmp.name, "bin", "compose"))
         env.pop("OLLAMA_URL", None)
         env.pop("SEARXNG_SECRET", None)
-        done = subprocess.run(["bash", os.path.join(self.tmp.name, "deploy", "up.sh")], stdin=subprocess.DEVNULL, capture_output=True, text=True,
+        done = subprocess.run(["bash", os.path.join(self.tmp.name, "deploy", "up.sh"), *args], stdin=subprocess.DEVNULL, capture_output=True, text=True,
                               env=env, cwd=self.tmp.name, timeout=60)
         output = done.stdout + done.stderr
         self.assertEqual(done.returncode, 0, output)
@@ -133,6 +133,36 @@ class FreshCheckout(unittest.TestCase):
         lookups = [call for call in calls if call.startswith("podman ps ")]
         self.assertTrue(lookups, calls)
         self.assertTrue(all("label=com.docker.compose.project=other" in call for call in lookups), lookups)
+
+    @mark.req('REQ-OPR-001')
+    def test_the_marker_of_the_offer_gets_a_line_of_its_own(self):
+        """TC-OPR-001, Verify finding F6: a hand-written .env without its last newline (secret already there) keeps its last line when up.sh adds the marker of the first-account offer.
+
+        Example: .env "SEARXNG_SECRET=s\nOLLAMA_URL=http://h:11434" (no last newline), no account -> lines "OLLAMA_URL=http://h:11434" and "MIA_FIRST_ACCOUNT_OFFERED=1"
+        """
+        # Given: deploy/.env with the secret and an address on a last line without newline
+        self.write_env("SEARXNG_SECRET=s\nOLLAMA_URL=http://host.containers.internal:11434")
+        # When: the stack starts with no account, so the offer leaves its marker
+        self.start(accounts="no accounts")
+        # Then: the address and the marker are separate lines
+        lines = self.env_text().splitlines()
+        self.assertIn("OLLAMA_URL=http://host.containers.internal:11434", lines)
+        self.assertIn("MIA_FIRST_ACCOUNT_OFFERED=1", lines)
+
+    @mark.req('REQ-OPR-001')
+    def test_the_database_password_gets_a_line_of_its_own(self):
+        """TC-OPR-001, Verify finding F6: a hand-written .env without its last newline (secret already there) keeps its last line when up.sh db adds the database password.
+
+        Example: .env "SEARXNG_SECRET=s\nOLLAMA_URL=http://h:11434" (no last newline), up.sh db -> lines "OLLAMA_URL=http://h:11434" and "POSTGRES_PASSWORD=<hex>"
+        """
+        # Given: deploy/.env with the secret and an address on a last line without newline
+        self.write_env("SEARXNG_SECRET=s\nOLLAMA_URL=http://host.containers.internal:11434")
+        # When: the stack starts with its database
+        self.start("db")
+        # Then: the address and the password are separate lines
+        lines = self.env_text().splitlines()
+        self.assertIn("OLLAMA_URL=http://host.containers.internal:11434", lines)
+        self.assertTrue(any(line.startswith("POSTGRES_PASSWORD=") for line in lines), lines)
 
 if __name__ == '__main__':
     unittest.main()

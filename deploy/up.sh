@@ -13,9 +13,10 @@ envval() { local v="${!1:-}"; if [ -z "$v" ] && [ -f .env ]; then v="$(sed -n "s
 # the settings of THIS machine (the login, ...) are a local file next to the tracked config; compose mounts it, so it must exist
 [ -f setup_cfg.local.json ] || echo '{}' > setup_cfg.local.json
 # the owner may have written .env first (OLLAMA_URL ..., deploy/README.md): the secret is added when the key is missing, not only when the file is (REQ-OPR-001)
+# a file written by hand may lack the last newline: completed once here, before any line is added below (the secret, the offer's marker, the database password)
+if [ -f .env ] && [ -n "$(tail -c1 .env)" ]; then echo >> .env; fi
 if ! grep -q '^SEARXNG_SECRET=' .env 2>/dev/null; then
   [ -f .env ] || { touch .env; chmod 600 .env; }
-  [ -z "$(tail -c1 .env)" ] || echo >> .env          # a file written by hand may lack the last newline
   echo "SEARXNG_SECRET=$(openssl rand -hex 32)" >> .env
   echo "deploy/.env: the SearXNG secret of this machine written"
 fi
@@ -179,16 +180,16 @@ if [ "${1:-}" = "backup" ] || [ "${1:-}" = "restore" ]; then
   DB_ARGS=(--db-container "$DB" --db-user mia --db-name mia)
   TOOLS="$(dirname "$HERE")/tools"
   DATA=/opt/mia/MIA/data
-  make_backup() {      # $1: archive; MIA is stopped before and started after by the caller
-    local tmp; tmp="$(mktemp -d)"
-    $ENGINE cp "$CONTAINER:$DATA/." "$tmp/"
-    if [ -n "$DB" ]; then bash "$TOOLS/backup.sh" "$1" "${DB_ARGS[@]}" --data "$tmp"; else tar -czf "$1" -C "$tmp" .; fi
+  make_backup() {      # $1: archive; MIA is stopped before and started after by the caller; fails without leaving the copy of the volume (histories, account hashes) behind
+    local tmp ok=""; tmp="$(mktemp -d)"
+    if $ENGINE cp "$CONTAINER:$DATA/." "$tmp/" && if [ -n "$DB" ]; then bash "$TOOLS/backup.sh" "$1" "${DB_ARGS[@]}" --data "$tmp"; else tar -czf "$1" -C "$tmp" .; fi; then ok=1; fi
     rm -rf "$tmp"
+    [ -n "$ok" ]
   }
   if [ "$MODE" = "backup" ]; then
     OUT="$(abspath "${2:-mia-backup-$(date +%Y%m%d-%H%M).tar.gz}")"
     $ENGINE stop "$CONTAINER" >/dev/null
-    make_backup "$OUT"
+    make_backup "$OUT" || { $ENGINE start "$CONTAINER" >/dev/null; echo "the backup failed (see above); MIA started again"; exit 1; }
     $ENGINE start "$CONTAINER" >/dev/null
     echo "backup written: $OUT ($(du -h "$OUT" | cut -f1))"
   else
@@ -205,7 +206,7 @@ if [ "${1:-}" = "backup" ] || [ "${1:-}" = "restore" ]; then
       bash "$TOOLS/restore.sh" "$IN" "${DB_ARGS[@]}" --data "$TMP" || { $ENGINE start "$CONTAINER" >/dev/null; rm -rf "$TMP"; exit 1; }
     else
       SAFE="$CALLER/mia-before-restore-$(date +%Y%m%d-%H%M%S).tar.gz"
-      make_backup "$SAFE"
+      make_backup "$SAFE" || { $ENGINE start "$CONTAINER" >/dev/null; rm -rf "$TMP"; echo "the backup of the state before the restore failed (see above): nothing restored, MIA started again"; exit 1; }
       echo "state before the restore saved: $SAFE"
       tar -xzf "$IN" -C "$TMP" --no-same-owner
     fi

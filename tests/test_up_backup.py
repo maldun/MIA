@@ -52,9 +52,11 @@ class UpBackup(unittest.TestCase):
             os.chmod(path, os.stat(path).st_mode | stat.S_IEXEC)
         self.log = os.path.join(root, "calls.log")
 
-    def run_up(self, *args, db="mia_db_1"):
+    def run_up(self, *args, db="mia_db_1", tmpdir=None):
         """runs deploy/up.sh in the temporary folder; gives (completed process, list of recorded calls)"""
         env = dict(os.environ, PATH=os.path.join(self.tmp.name, "bin") + os.pathsep + os.environ["PATH"], STUB_LOG=self.log, STUB_DB=db)
+        if tmpdir:
+            env["TMPDIR"] = tmpdir
         done = subprocess.run(["bash", os.path.join(self.tmp.name, "deploy", "up.sh"), *args], capture_output=True, text=True, env=env, cwd=self.tmp.name)
         calls = open(self.log).read().splitlines() if os.path.exists(self.log) else []
         return done, calls
@@ -150,6 +152,48 @@ class UpBackup(unittest.TestCase):
         self.assertNotEqual(done.returncode, 0)
         self.assertIn("deploy/up.sh db", done.stdout + done.stderr)
         self.assertFalse(any(c.startswith("podman cp ") and c.endswith("mia1:/opt/mia/MIA/data/") for c in calls), calls)
+
+    def failing_backup_tool(self):
+        """replaces the stub tools/backup.sh with one that records its call and fails (a pg_dump of an unhealthy db); gives the folder mktemp uses"""
+        path = os.path.join(self.tmp.name, "tools", "backup.sh")
+        with open(path, "w") as fp:
+            fp.write(TOOL_STUB.replace("exit 0", "exit 1"))
+        scratch = os.path.join(self.tmp.name, "scratch")
+        os.makedirs(scratch)
+        return scratch
+
+    @mark.req('REQ-OPR-005')
+    def test_a_failing_backup_starts_mia_again_and_leaves_no_copy(self):
+        """TC-OPR-005, Verify finding F1: when tools/backup.sh fails, MIA is started again and the temporary copy of the volume is removed.
+
+        Example: up.sh backup out.tar.gz, backup.sh exits 1 -> exit != 0, "podman start mia1" called, mktemp folder empty
+        """
+        # Given: a stack with a db container and a backup tool that fails
+        scratch = self.failing_backup_tool()
+        # When: the backup command runs
+        done, calls = self.run_up("backup", os.path.join(self.tmp.name, "out.tar.gz"), tmpdir=scratch)
+        # Then: it fails, MIA runs again and no copy of the volume is left
+        self.assertNotEqual(done.returncode, 0)
+        self.assertIn("podman start mia1", calls)
+        self.assertEqual(os.listdir(scratch), [])
+
+    @mark.req('REQ-OPR-005')
+    def test_a_failing_backup_before_a_restore_starts_mia_again_and_leaves_no_copy(self):
+        """TC-OPR-005, Verify finding F1: the backup of the state before the restore of an old archive fails -> MIA runs again, nothing is copied in, no copy left.
+
+        Example: up.sh restore old.tar.gz (history.json only), backup.sh exits 1 -> exit != 0, "podman start mia1", no "podman cp ... mia1:/opt/mia/MIA/data/", mktemp folders empty
+        """
+        # Given: an old archive of the volume and a backup tool that fails
+        old = self.archive("old.tar.gz", ["history.json"])
+        scratch = self.failing_backup_tool()
+        # When: the restore command runs
+        done, calls = self.run_up("restore", old, tmpdir=scratch)
+        # Then: it fails before anything is copied in, MIA runs again and no copy is left
+        self.assertNotEqual(done.returncode, 0)
+        self.assertIn("podman start mia1", calls)
+        self.assertFalse(any(c.startswith("podman cp ") and c.endswith("mia1:/opt/mia/MIA/data/") for c in calls), calls)
+        self.assertEqual(os.listdir(scratch), [])
+
 
 if __name__ == "__main__":
     unittest.main()
