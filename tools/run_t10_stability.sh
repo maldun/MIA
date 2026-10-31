@@ -35,7 +35,7 @@ for style in single gate cops; do
     fi
     echo; echo "--- $style ($pipeline), $suite, 3 repeats"
     start=$(date +%s)
-    "$PY" tools/eval.py run "$suite" --variant "t10-$style" --pipeline "$pipeline" --model "$MODEL" --pin MP-light --repeats 3 --quiet \
+    "$PY" tools/eval.py run "$suite" --variant "t10-$style" --pipeline "$pipeline" --pin MP-light --repeats 3 --quiet \
           --only "$(baseline_ids "$BASELINES/${suite}__single__devsample.jsonl")"
     echo "seconds: $(( $(date +%s) - start ))"
   done

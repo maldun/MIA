@@ -2,10 +2,11 @@
 """
 Decide a criterion only on held-out cases (REQ-EVL-002): a guard around eval_decide.py of the agent-app skill.
 
-  python tools/decide_guard.py --run <holdout run> [--run ...] [eval_decide.py options ...]
+  python tools/decide_guard.py --run <holdout run> [--run ...] [--rerun <holdout run> ...] [eval_decide.py options ...]
 
-Every run file must be a holdout run (suite name ends in `.holdout`, or every record carries the tag `split:holdout`). A dev-split run (or a mix) is
-NOT DECIDED with the reason "dev split": feedback runs are not verification (CLAUDE.md). Otherwise eval_decide.py decides with `--split holdout`.
+Every run file, also of --rerun, must be a holdout run (suite name ends in `.holdout`, or every record carries the tag `split:holdout`). A dev-split run
+(or a mix) is NOT DECIDED with the reason "dev split": feedback runs are not verification (CLAUDE.md). Otherwise eval_decide.py decides with
+`--split holdout`; an option that would change the split (`--split`, also as `--split=...` or abbreviated) is refused (Verify F5a).
 Exit code as eval_decide.py: 0 PASS, 1 FAIL, 2 NOT DECIDED. Standard library only.
 """
 import json
@@ -47,14 +48,16 @@ def check_runs(paths):
     return {"ok": True, "reason": ""}
 
 
-def decide(paths, options=()):
-    """{"decision": PASS | FAIL | NOT DECIDED, "reason", "report"}; options are passed on to eval_decide.py"""
-    verdict = check_runs(paths)
+def decide(paths, options=(), reruns=()):
+    """{"decision": PASS | FAIL | NOT DECIDED, "reason", "report"}; reruns are checked like paths; options are passed on to eval_decide.py"""
+    verdict = check_runs(list(paths) + list(reruns))
     if not verdict["ok"]:
         return {"decision": "NOT DECIDED", "reason": verdict["reason"], "report": None}
     command = [sys.executable, "-I", DECIDE, "--json", "--split", "holdout"]
     for path in paths:
         command += ["--run", path]
+    for path in reruns:
+        command += ["--rerun", path]
     result = subprocess.run(command + list(options), capture_output=True, text=True)
     try:
         report = json.loads(result.stdout)
@@ -63,16 +66,42 @@ def decide(paths, options=()):
     return {"decision": report["verdict"], "reason": "", "report": report}
 
 
-def main(argv):
-    paths, options, i = [], [], 0
+def _option(token):
+    """the option of eval_decide.py a token stands for, as argparse reads it (exact, `--name=value`, or an unambiguous abbreviation): run, rerun,
+    split or None for anything else"""
+    name = token.split("=", 1)[0]
+    if name == "--run":
+        return "run"
+    if len(name) >= 5 and "--rerun".startswith(name):            # --rer ... --rerun
+        return "rerun"
+    if len(name) >= 4 and "--split".startswith(name):            # --sp ... --split
+        return "split"
+    return None
+
+
+def parse(argv):
+    """(runs, reruns, options, refusal): the run files are taken out of the options so that they are checked; a split option is a refusal"""
+    files, options, i = {"run": [], "rerun": []}, [], 0
     while i < len(argv):
-        if argv[i] == "--run" and i + 1 < len(argv):
-            paths.append(argv[i + 1])
+        token, kind = argv[i], _option(argv[i])
+        if kind == "split":
+            spelled = token if token.startswith("--split") else "%s (= --split)" % token
+            return [], [], [], "the option %s would change the split; a verdict is decided on the holdout split only" % spelled
+        if kind and "=" in token:
+            files[kind].append(token.split("=", 1)[1])
+            i += 1
+        elif kind and i + 1 < len(argv):
+            files[kind].append(argv[i + 1])
             i += 2
         else:
-            options.append(argv[i])
+            options.append(token)
             i += 1
-    result = decide(paths, options)
+    return files["run"], files["rerun"], options, None
+
+
+def main(argv):
+    paths, reruns, options, refusal = parse(argv)
+    result = {"decision": "NOT DECIDED", "reason": refusal, "report": None} if refusal else decide(paths, options, reruns)
     if result["report"] is None:
         print("NOT DECIDED: " + result["reason"])
         return 2

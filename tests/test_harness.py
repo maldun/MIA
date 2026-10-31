@@ -12,8 +12,10 @@ import unittest
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
 sys.path.insert(0, REPO)
+sys.path.insert(0, os.path.join(HERE, "helpers"))
 
 import harness as H                                   # noqa: E402
+from markers import mark                              # noqa: E402
 import metrics as M                                   # noqa: E402
 from core import Core                                 # noqa: E402
 from library import Library                           # noqa: E402
@@ -88,6 +90,20 @@ class SuiteLoading(unittest.TestCase):
         write_suite(self.tmp.name, "bad", [case("a")])
         found = H.list_suites(self.tmp.name)
         self.assertEqual([type(s).__name__ for s in found], ["SuiteError", "Suite"])
+
+    @mark.req("REQ-EVL-002")
+    def test_listing_never_opens_a_holdout_suite_unless_asked(self):
+        """TC-EVL-002 (D-166): the suites of a folder are listed without the *.holdout ones, which are not even read; holdout=True lists them (Verify).
+
+        Example: good and toy.holdout (whose case says neither truth nor expect) -> [good]; with holdout=True the broken toy.holdout shows as a SuiteError.
+        """
+        # Given: a dev suite and a holdout suite that is refused whenever it is read
+        write_suite(self.tmp.name, "good", [case("a", truth=True)])
+        write_suite(self.tmp.name, "toy.holdout", [case("a")])
+        # When / Then: the default listing has only the dev suite, so the holdout file was never parsed
+        self.assertEqual([s.name for s in H.list_suites(self.tmp.name)], ["good"])
+        # And: asked for, it is read (and its problem shows)
+        self.assertEqual([type(s).__name__ for s in H.list_suites(self.tmp.name, holdout=True)], ["Suite", "SuiteError"])
 
 
 class Running(unittest.TestCase):
@@ -406,9 +422,10 @@ class SampleAndPinEdges(unittest.TestCase):
 
     def test_the_pin_keeps_the_other_model_options_of_the_skill(self):
         runner = H.Harness()
-        runner.pin = {"seed": 7, "temperature": 0}
+        runner.pin = {"name": "gemma4:12b-it-qat", "seed": 7, "temperature": 0}
         skill = runner._pinned({"model": {"profile": "light", "options": {"num_ctx": 8192}}})
-        self.assertEqual(skill["model"], {"profile": "light", "options": {"num_ctx": 8192, "seed": 7, "temperature": 0}})
+        # the pin's model replaces the profile (D-166); the other options stay
+        self.assertEqual(skill["model"], {"name": "gemma4:12b-it-qat", "options": {"num_ctx": 8192, "seed": 7, "temperature": 0}})
         self.assertEqual(H.Harness()._pinned({"model": None}), {"model": None})
 
 

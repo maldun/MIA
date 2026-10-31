@@ -58,3 +58,51 @@ Existing tests unchanged and green: `tests/test_harness.py` (28), `tests/test_me
 - TC-EVL-001: `format_report` prints "per case (passes / repeats)" with the Wilson interval when repeats > 1 (test in `tests/test_eval_platform.py`).
 - Live mode of `tools/measure_latency.py` ran against the IF-101 mock (`chat-with-login`, in the image with `--network host`). Findings, fixed: the ack of `chat_send` was ignored (a full queue looked like a hang), and the next run counted the deltas of the previous answer. Now the ack is checked and each run waits for `chat_done` of the previous one, untimed.
 - Caveat: the image has no `websocket-client`, so only long-polling is used; the mock gave a median of 5.0 s (5 runs) while a direct probe saw the first delta within 1 s. Treat the number as polling-bound, not a latency result; a real measurement needs the websocket transport (a dependency: owner decision).
+
+## Verify fixes (2026-10-31, branch v1-n41b from goal/v1 at dc1ddc8, decision D-164)
+Each finding first as a failing test (red seen), then the fix. Fake models and synthetic fixtures only; no eval run, no holdout suite or case opened.
+
+| Finding | Commit | What changed | Tests (red, then green) |
+|---|---|---|---|
+| F1 (High) latency clock | fb0db96 | `measure(..., prepare=)`: `prepare` runs before the clock starts; the live mode returns `(prepare, ask)`, `socket_ask(client, ...)` takes any connected client; `prepare` waits for the previous `chat_done` | `test_the_clock_starts_after_the_previous_answer_has_ended`: fake socket, first text 0.1 s, end 0.5 s, 3 runs -> median ~0.1 s (red: `socket_ask` missing; the old code timed ~0.5 s) |
+| F2 pin id | cab26a6 | `tools/eval.py` `pin_record(id)` = the PINS entry with its `id`; `WorkflowTarget` sends `pin["id"]` and needs id, seed, temperature; the header pin has the id too | `RealProvider` test on the real `run_workflow.WorkflowRuns` of the contract suite with the pin of `tools/eval.py` (red: `pin_unavailable`); the test `PIN` is now the shape of `tools/eval.py` |
+| F3 IF-105 on the command line | 6b2dd67, f9be045 | `make_harness(cfg, core)` = `Harness(core, platform=WorkflowRuns(WorkflowLibrary(Storage(FileBackend(accounts_dir))), core, pins by id, held = digests of the model server))`; `run` exits "a run needs --pin (MP-light)"; `Harness._versions`: workflow + version, or skill + skill_version + pipeline for pipeline/research/plan/extraction, `pipeline: None` for code targets; the command line adds `commit` (git HEAD, None without git); docs (`ui/README.md`, `docs/skill-path.md`, `deploy/RUNBOOK.md`) show `--pin` | `CommandLine` (3 tests) and `VersionsOfEveryKind` in `tests/test_eval_platform.py` |
+| F5a guard options | e3ec1aa | `decide_guard.parse`: `--run`/`--rerun` files (also `--x=path`, argparse abbreviations `--rer`) are taken out of the options and all checked; any spelling of `--split` (`--split=`, `--sp`, `--spl`) is NOT DECIDED; re-runs are passed as `--rerun` | `NoOptionOverridesTheHoldout` (3 tests; `eval_decide.py` replaced by a stub that fails if called before the refusal) |
+| F5b holdout on the command line | e3ec1aa | `tools/eval.py --holdout`; without it `list` skips `*.holdout` folders unread (`harness.list_suites(root, holdout=)`, default unchanged), `cases` and `run` exit before reading the suite | `HoldoutSuitesOnTheCommandLine` (3 tests, synthetic `toy`/`toy.holdout` in a temp folder) |
+| F8 suite version | 71d814d | `require_same_cases` also compares `benchmark_version` (else `suite_sha1`) and names the changed files | `test_runs_of_different_suite_versions_are_not_compared`; TC-EVL-008's "same" pair is now one suite under two variants |
+| F6 mutants, F7 partial pin | 71d814d | none (tests only) | `test_a_run_of_the_harness_marks_the_judged_records`, `..._left_out_of_the_verification_numbers`, `test_is_right_has_no_answer_...`, `test_a_pin_without_id_seed_or_temperature_is_refused_per_case`; mutation probe on a scratch copy (removed): the 4 surviving mutants of Verify and the new version check are killed |
+| F12 wording | 71d814d | compare: "(dev feedback, not a verdict: decide on the holdout)" instead of "a difference you can believe" | `test_a_comparison_says_it_is_feedback_not_a_verdict` |
+| F9 model | 71d814d | `architecture.sysml` Evaluation: harness lists `eval_platform.py`, `tools/decide_guard.py`, `tools/check_baselines.py`, `tools/measure_latency.py`, `tools/measure_fps.mjs`; `judgeCalibration` partly (`harness.py`, `tools/label_agreement.py`); no new part | `check_sysml.sh`: 0 errors; `check_sysml_model.py`: OK |
+| F10 test docs, scenarios | 71d814d | every test of the six node files: TC id first, `Example:`, Given/When/Then (also missing `req` markers added); test-spec.md `## Scenarios` (11 blocks, draft for review) | `test_doc_check.py` on the six files: 0 errors (was 34); `trace_check.py`: the N-4.1 Scenarios error is gone |
+| F11 protected tests | e67542e | amendment A-63 drafted, not installed (see below) | checked on a scratch copy |
+
+### A-63 (proposed, not installed)
+`bash tools/apply_amendment_a63.sh` (look), `--do` installs: creates `tests/acceptance/test_{eval_platform,decide_guard,judge_calibration,check_baselines,skill_path_doc,measure_latency}.py` from the drafts in `specs/mia/amendments/A-63/tests/acceptance/` (three path lines one folder deeper and the `Run:` line), builds the node's test-spec.md (note line, each row names its file) and `docs/skill-path.md` from the installed files, runs the six protected tests on the host and removes the old `tests/` copies only when all pass. It refuses when an old copy changed after the drafts (`A63_DRAFT=1` redrafts). Scratch check: all six OK, `trace_check.py` output identical before and after, `test_doc_check.py` clean for them, a second run "nothing to do". The scratch check found that the F3 commit test needed git (f9be045).
+
+### Stop: REQ-EVL-003 calibrations are never loaded (missing feature, needs a decision)
+`Harness.calibrations` is `{}` everywhere: `load_calibrations` is called by no production code, and no target sets `judge` on a record, so the flag of REQ-EVL-003 never acts. The three surviving mutants are killed at unit level (the run test adds `judge` to its records itself). Wiring it (which folder, `data/eval/calibration/` was only a proposal of T-03; which target writes `judge`) is a feature for the first task that uses a model as judge; eval-spec.md has no judge in G-V1. Not built; question for the owner: accept as "built when the first judge comes" (scope row partly), or a task now.
+
+### Decisions in code that no requirement states (for Verify / Plan, P25)
+- `run` without `--pin` exits for every suite kind, also the code-only ones (D-164 says "every run requires --pin").
+- A run saved before `benchmark_version`/`suite_sha1` existed is compared without the version check (old runs in `data/eval/` stay comparable); runs whose suite files differ in any byte are refused, also after only retiring a case.
+- The header of a code target records `pipeline: None` and the git commit; a run without git records `commit: None`.
+- The `--pin` sets seed, temperature and the header of the old targets, not the model: `--model full --pin MP-light` runs gemma4:26b with a header naming MP-light (unchanged behaviour, known since number-gate REQ-EVAL-003; open question).
+- `held` asks the model server for the pin's digest at the first workflow run; no server means `pin_unavailable` per case, never a fallback.
+
+### Open points
+- `CLAUDE.md` (agent configuration, not mine to change) shows `python tools/eval.py run <suite> --repeats 3` without `--pin`; it now exits with the hint. Proposed text: `python tools/eval.py run <suite> --pin MP-light --repeats 3`.
+- `agent_check.py --spec-dir specs/mia --eval-dir eval`: refused by this session's sandbox (the word as an argument); no file under `eval/`, skills or requirements changed, so its result should be the one of the Verify report. For the owner to run.
+- `tests/test_harness.py::test_every_shipped_suite_is_valid` loads every suite of `eval/suites`, holdout ones included (no content printed); with `list_suites(holdout=False)` it could leave them out, but that would stop validating the holdout suites: owner's choice.
+- The frame-rate half of TC-EVL-007 (`tests/js/measure-fps.test.mjs`) stays unprotected (no JS runner in `tests/acceptance/`).
+- `decide_guard` checks `--run` and `--rerun`, not `--baseline` (a baseline may be a dev run by design).
+
+## Owner decision D-166 (2026-10-31)
+goal/v1 merged first (fc749e0; CLAUDE.md's eval line with `--pin`/`--holdout` comes from there, not edited here). REQ-EVL-003 stays partly with TD-07: nothing built, the stop above is answered.
+
+| Item | Commit | What changed | Tests (red, then green) |
+|---|---|---|---|
+| test_harness never opens holdout suites | 4eb97ed | `harness.list_suites(root, holdout=False)` by default: `*.holdout` folders stay unread; `tools/eval.py` passes `--holdout` explicitly; `test_every_shipped_suite_is_valid` therefore skips them | `test_listing_never_opens_a_holdout_suite_unless_asked` (synthetic `toy.holdout` that is refused when read) |
+| the pin decides the model | 97d4811 | `_pinned` replaces the skill's model by `{"name": pin name, options + seed, temperature}`; `Harness.run` refuses a variant `model` next to a pin; `tools/eval.py run` exits "--model together with --pin ... drop --model" before building a core; t05/t06/t09/t10 scripts drop `--model` (it equalled the pin's model); README and the usage text follow; the unit test of `_pinned` now expects the pin's model | `PinDecidesTheModel` (2 tests: every call of a pinned verify_claim run names gemma4:12b-it-qat; refusal in harness and command line) |
+| A-63 re-checked | this commit | drafts redrafted (test_eval_platform.py changed); on a scratch copy of the merged branch: six protected tests OK, old copies removed, trace_check unchanged, test_doc_check clean, second run "nothing to do" | |
+
+The open point "--pin does not set the model of the old targets" above is closed by 97d4811; "test_harness opens holdout suites" by 4eb97ed; CLAUDE.md by the owner (bc6df53).

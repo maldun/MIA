@@ -2,17 +2,18 @@
 The evaluation harness on the command line (ui/REQUIREMENTS_CORE.md 9). Run with the MIA virtualenv from the MIA folder:
 
   python tools/eval.py list                                   the suites and how many cases they have
-  python tools/eval.py run hard_checks                        run a suite (no model needed for the hard checks), print the report, save the run in data/eval/
-  python tools/eval.py run computable --repeats 3             the same case 3 times: shows how stable the model is
-  python tools/eval.py run computable --variant light --model light
-  python tools/eval.py run computable --variant full --model gemma4:26b --pipeline verify.computable@1
-  python tools/eval.py run hard_checks --tag numeric --limit 10        only some cases
+  python tools/eval.py run hard_checks --pin MP-light         run a suite (no model needed for the hard checks), print the report, save the run in data/eval/
+  python tools/eval.py run computable --pin MP-light --repeats 3             the same case 3 times: shows how stable the model is
+  python tools/eval.py run computable --pin MP-light --variant c1 --pipeline verify.computable@1
+  python tools/eval.py run hard_checks --pin MP-light --tag numeric --limit 10        only some cases
   python tools/eval.py run verdicts_vitaminc --pipeline verify.single@1 --pin MP-light --sample 100 --repeats 1     seeded sample, pinned model setting
   python tools/eval.py report hard_checks                  the report of the newest saved run of a suite (or of a file)
   python tools/eval.py compare data/eval/a.jsonl data/eval/b.jsonl     the same cases under two variants, with the exact sign test
   python tools/eval.py compare computable light full          the newest runs of two variants of a suite
   python tools/eval.py cases hard_checks --tag trap           show the cases
 
+Holdout suites (*.holdout) are left out of list and refused by cases and run unless --holdout is given: they are for Verify only.
+Every run needs --pin (REQ-EVL-004), and the pin decides the model (--model is refused next to it, D-166); a suite of kind "workflow" runs through IF-105 on the workflows of the app's storage.
 Without a name the variant is called "default". The variant options (--skill, --pipeline, --model) change what runs; everything else stays the same, so two runs can be compared.
 """
 import argparse
@@ -30,12 +31,22 @@ from MIA.config import default_path as default_config  # noqa: E402
 
 from MIA import harness  # noqa: E402
 from MIA.core import Core  # noqa: E402
+from MIA.events import environment, model_digests  # noqa: E402
 from MIA.library import Library  # noqa: E402
+from MIA.run_workflow import WorkflowRuns  # noqa: E402
 from MIA.sandbox import create_router  # noqa: E402
+from MIA.storage import Storage  # noqa: E402
+from MIA.storage_files import FileBackend  # noqa: E402
+from MIA.workflow_library import WorkflowLibrary  # noqa: E402
 
 SUITES = os.environ.get("MIA_SUITES") or os.path.join(REPO, "eval", "suites")       # a worktree finds the labelled suites of the main checkout this way
 # the model pins of specs/number-gate/eval-spec.md ("Model pins"); a change of a pin is an amendment there first
 PINS = {"MP-light": {"name": "gemma4:12b-it-qat", "digest": "sha256:38044be4f923e5a55264ed7df4eaac2676651a905f735197c504045140c02bd3", "seed": 7, "temperature": 0}}
+
+
+def pin_record(pin_id):
+    """the pin the harness gets: the entry of PINS with its id, which IF-105 takes as `model_pin` (the name is the model tag)"""
+    return dict(PINS[pin_id], id=pin_id)
 
 
 def own(cfg, key, default):
@@ -46,15 +57,47 @@ def own(cfg, key, default):
 def build_core(cfg, need_model, need_sandbox):
     model = None
     if need_model:
-        from ollama import Client
         from MIA.pipeline_model import OllamaModel
         profiles = {"full": (cfg["version"], cfg.get("llm_options")), "light": (cfg.get("version_light"), cfg.get("llm_options_light"))}
         current = profiles["light"] if cfg.get("default_profile") == "light" and cfg.get("version_light") else profiles["full"]
-        client = Client(host="http://%s:%s" % (cfg.get("address", "localhost"), cfg.get("port", 11434)))
+        client = model_client(cfg)
         model = OllamaModel(client, lambda p: profiles.get(p) if profiles.get(p, (None,))[0] else None, lambda: current, keep_alive=cfg.get("keep_alive"))
     work = tempfile.mkdtemp(prefix="mia-eval-")
     library = Library(own(cfg, "library_dir", "library"), None, os.path.join(work, "library.sqlite"))
     return Core(own(cfg, "skills_dir", "skills"), library, work, model=model, sandbox=create_router(cfg) if need_sandbox else None)
+
+
+def model_client(cfg):
+    from ollama import Client
+    return Client(host="http://%s:%s" % (cfg.get("address", "localhost"), cfg.get("port", 11434)))
+
+
+def build_platform(cfg, core):
+    """IF-105 for workflow suites (REQ-EVL-011, D-164): the runner of the app over the workflow library in the app's storage, with the pins of
+    PINS by id; a pin runs only when the model server holds its digest (asked at the first run, never a fallback to another model)"""
+    library = WorkflowLibrary(Storage(FileBackend(own(cfg, "accounts_dir", "data/db"))))
+
+    def held():
+        return {d["name"]: d["digest"] for d in model_digests(model_client(cfg), [p["name"] for p in PINS.values()]) if d["digest"]}
+    return WorkflowRuns(library, core, pins={i: {"name": p["name"], "digest": p["digest"]} for i, p in PINS.items()}, held=held)
+
+
+def make_harness(cfg, core):
+    return harness.Harness(core, platform=build_platform(cfg, core))
+
+
+def is_holdout(name):
+    return name.endswith(".holdout")
+
+
+def open_suite(name, holdout):
+    """a suite by name; a holdout suite only with --holdout (REQ-EVL-002, D-164: the holdout is for Verify), refused before anything of it is read"""
+    if is_holdout(name) and not holdout:
+        sys.exit("%s is a holdout suite: only with --holdout (Verify)" % name)
+    suite = harness.load_suite(os.path.join(SUITES, name))
+    if is_holdout(suite.name) and not holdout:
+        sys.exit("%s is the holdout suite %s: only with --holdout (Verify)" % (name, suite.name))
+    return suite
 
 
 def show_progress(done, total, record):
@@ -75,11 +118,12 @@ def main():
     parser.add_argument("--limit", type=int)
     parser.add_argument("--skill")
     parser.add_argument("--pipeline")
-    parser.add_argument("--model")
-    parser.add_argument("--pin", choices=sorted(PINS), help="model pin of eval-spec.md: its seed and temperature go to every model call and the pin is written to the run header")
+    parser.add_argument("--model", help="refused by run: the model of a run is the one of --pin (D-166)")
+    parser.add_argument("--pin", choices=sorted(PINS), help="model pin of eval-spec.md, required by run: its seed and temperature go to every model call and the pin is written to the run header")
     parser.add_argument("--sample", type=int, metavar="N", help="a seeded sample of N active cases; the two halves of a pair stay together")
     parser.add_argument("--sample-seed", type=int, default=7, help="seed of --sample (default 7)")
     parser.add_argument("--include-retired", action="store_true", help="also run the cases tagged retired")
+    parser.add_argument("--holdout", action="store_true", help="list, show or run holdout suites (*.holdout): for Verify only, never during development")
     parser.add_argument("--results", default=None, help="folder of saved runs (default: data/eval)")
     parser.add_argument("--no-save", action="store_true")
     parser.add_argument("--quiet", action="store_true")
@@ -97,9 +141,11 @@ def main():
         return harness.load_run(path)
 
     if args.command == "list":
-        for suite in harness.list_suites(SUITES):
+        for suite in harness.list_suites(SUITES, holdout=args.holdout):
             if isinstance(suite, Exception):
                 print("PROBLEM %s" % suite)
+                continue
+            if is_holdout(suite.name) and not args.holdout:
                 continue
             tags = {}
             for case in suite.cases:
@@ -109,7 +155,7 @@ def main():
                                                                        suite.description[:150], ", ".join("%s %d" % t for t in sorted(tags.items()))))
         return
     if args.command == "cases":
-        suite = harness.load_suite(os.path.join(SUITES, args.args[0]))
+        suite = open_suite(args.args[0], args.holdout)
         for case in suite.select(args.tag or None, args.only.split(",") if args.only else None, args.limit):
             print("%-28s %-30s truth=%-5s expect=%-14s %s" % (case["id"], ",".join(case.get("tags", [])), case.get("truth"), case.get("expect"), case.get("note", "")))
         return
@@ -128,8 +174,13 @@ def main():
         print(harness.format_compare(run_a, run_b))
         return
 
-    suite = harness.load_suite(os.path.join(SUITES, args.args[0]))
-    need_model = suite.target["kind"] in ("pipeline", "research", "plan") or (suite.target["kind"] == "extraction" and bool(args.skill or args.pipeline))
+    if not args.pin:                                                # REQ-EVL-004, D-164: every run records its model pin
+        sys.exit("a run needs --pin (%s)" % ", ".join(sorted(PINS)))
+    if args.model:                                                  # D-166: the pin decides the model, so the header names what ran
+        sys.exit("--model together with --pin: the pin decides the model of a run (%s); drop --model" %
+                 ", ".join("%s = %s" % (i, p["name"]) for i, p in sorted(PINS.items())))
+    suite = open_suite(args.args[0], args.holdout)
+    need_model = suite.target["kind"] in ("pipeline", "research", "plan", "workflow") or (suite.target["kind"] == "extraction" and bool(args.skill or args.pipeline))
     core = build_core(cfg, need_model, need_sandbox=need_model)
     variant = {"name": args.variant}
     for key in ("skill", "pipeline", "model"):
@@ -143,8 +194,9 @@ def main():
         only = sampled
     count = len(suite.select(args.tag or None, only, args.limit, args.include_retired))
     print("running %s (%d cases x %d) as variant '%s' ...\n" % (suite.name, count, args.repeats, args.variant))
-    run = harness.Harness(core).run(suite, variant, args.repeats, args.tag or None, only, args.limit, None if args.quiet else show_progress,
-                                    pin=PINS.get(args.pin), include_retired=args.include_retired)
+    run = make_harness(cfg, core).run(suite, variant, args.repeats, args.tag or None, only, args.limit, None if args.quiet else show_progress,
+                                      pin=pin_record(args.pin), include_retired=args.include_retired)
+    run.header["commit"] = environment(root=REPO)["commit"]          # the version of the code that ran (the only one of a code target)
     print("\n" + harness.format_report(run))
     if not args.no_save:
         print("\nsaved: %s" % run.save(results))

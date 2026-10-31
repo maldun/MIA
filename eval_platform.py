@@ -10,14 +10,15 @@ The status of a case is the output field `status_field` of a run that ended `don
 
 class WorkflowTarget:
     def __init__(self, platform, pin_of):
-        """platform: a provider of IF-105; pin_of: a function that gives the pin of the running harness ({"name", "seed", "temperature"})"""
+        """platform: a provider of IF-105; pin_of: a function that gives the pin of the running harness ({"id", "name", "digest", "seed", "temperature"});
+        IF-105 takes the pin id (e.g. "MP-light") as `model_pin`, the name is only the model tag (Verify F2)"""
         self.platform, self._pin_of = platform, pin_of
 
     def options(self, variant, suite):
         pin = self._pin_of()
-        if not pin or any(pin.get(k) is None for k in ("name", "seed", "temperature")):
-            raise ValueError("a workflow suite needs a pin with name, seed and temperature")
-        options = {"model_pin": pin["name"], "seed": pin["seed"], "temperature": pin["temperature"]}
+        if not pin or any(pin.get(k) is None for k in ("id", "seed", "temperature")):
+            raise ValueError("a workflow suite needs a pin with id, seed and temperature")
+        options = {"model_pin": pin["id"], "seed": pin["seed"], "temperature": pin["temperature"]}
         budget = variant.get("budget") or suite.target.get("budget")
         if budget:
             options["budget"] = dict(budget)

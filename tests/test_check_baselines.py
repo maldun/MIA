@@ -34,20 +34,35 @@ class Baselines(unittest.TestCase):
 
     @mark.req("REQ-EVL-005")
     def test_only_tested_and_trusted_workflows_are_checked_and_all_lack_a_baseline_at_first(self):
+        """TC-EVL-005: every library workflow with status tested or trusted needs a baseline; drafts and retired ones are not checked.
+
+        Example: the shipped library and no baselines.json -> behaviour.speech, chat, extract.rules, summarize, verify.computable named.
+        """
         missing = self.missing()
         self.assertEqual(sorted(missing), ["behaviour.speech", "chat", "extract.rules", "summarize", "verify.computable"])     # no draft, no retired
         self.assertTrue(all("baselines.json" in reason for reason in missing.values()))                                       # no registry yet
 
     @mark.req("REQ-EVL-005")
     def test_a_registered_workflow_needs_its_file_and_is_fine_with_it(self):
+        """TC-EVL-005: a registered workflow is named with its missing file and is fine once the file exists.
+
+        Example: summarize -> review/single: "review__single__baseline.jsonl" named; after the file is made, summarize is not named, chat still is.
+        """
+        # Given: summarize registered to the suite review, variant single
         with open(self.registry, "w") as fp:
             json.dump({"summarize": {"suite": "review", "variant": "single"}}, fp)
+        # When / Then: without the file it is named with the file, with it no more
         self.assertIn("review__single__baseline.jsonl", self.missing()["summarize"])                  # registered, file missing: the file is named
         open(os.path.join(self.baselines, "review__single__baseline.jsonl"), "w").close()
         self.assertNotIn("summarize", self.missing())
         self.assertIn("chat", self.missing())                                                         # the others are still named
 
+    @mark.req("REQ-EVL-005")
     def test_a_workflow_that_has_no_suite_says_so_and_still_counts_as_missing(self):
+        """TC-EVL-005: a workflow registered without a suite still counts as missing, and the reason says so.
+
+        Example: {"chat": null} -> chat named with "no suite".
+        """
         with open(self.registry, "w") as fp:
             json.dump({"chat": None}, fp)
         self.assertIn("no suite", self.missing()["chat"])
