@@ -9,10 +9,10 @@ versions of the source gets the missing ones. A target with a different history 
 whole copy is refused before the first write (two passes), so a half copy cannot happen.
 """
 try:
-    from .storage import StorageError, refuse_nul, table_definitions, validate
+    from .storage import StorageError, check_names, table_definitions, validate
     from .storage_files import FileBackend
 except ImportError:  # used as plain script / in tests
-    from storage import StorageError, refuse_nul, table_definitions, validate
+    from storage import StorageError, check_names, table_definitions, validate
     from storage_files import FileBackend
 
 LIBRARY_TABLES = ("workflows", "context_graphs")
@@ -55,7 +55,7 @@ def _check_entries(table, record_id, entries):
         if entry.get("version") != number:
             refuse("versions", [e.get("version") for e in entries])
         try:
-            refuse_nul(record_id, entry.get("author"))
+            check_names(record_id, entry.get("author"))
             validate(table, entry.get("doc"))
         except StorageError as err:
             refuse(err.rule, err.detail)
