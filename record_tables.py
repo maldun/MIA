@@ -39,6 +39,6 @@ def validate(table, doc):
     if table == "votes":
         if doc["category"] not in CATEGORIES:
             return {"rule": "category", "detail": doc["category"]}
-        if isinstance(doc["value"], bool) or doc["value"] not in (1, -1):
+        if type(doc["value"]) is not int or doc["value"] not in (1, -1):      # a bool or a float equal to 1 is no vote value (D-161)
             return {"rule": "schema", "detail": "value"}
     return None

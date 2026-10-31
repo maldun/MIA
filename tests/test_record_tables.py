@@ -64,6 +64,21 @@ class Validation(unittest.TestCase):
         vote = {"user": "anna", "subject": "m1", "category": "service", "value": True}
         self.assertEqual(validate("votes", vote)["rule"], "schema")
 
+    @mark.req("REQ-RTB-003", "IF-302")
+    def test_a_vote_value_is_the_integer_one_or_minus_one(self):
+        """F3, F5 (D-161): a float or a boolean equal to 1 or -1 is no vote value, so a JSON 1.0 is not stored as a float.
+
+        Example: {"value": 1.0} gives {"rule": "schema", "detail": "value"}.
+        """
+        # Given a complete vote
+        vote = {"user": "anna", "subject": "m1", "category": "service", "value": 1}
+        for value in (1.0, -1.0, True, False):
+            with self.subTest(value=value):
+                # When its value is a float or a boolean
+                result = validate("votes", dict(vote, value=value))
+                # Then it is refused with rule schema
+                self.assertEqual(result, {"rule": "schema", "detail": "value"})
+
     @mark.req("REQ-RTB-004")
     def test_a_memory_record_needs_text_and_source(self):
         """TC-RTB-004: without source the rule is schema, detail source."""
@@ -87,6 +102,18 @@ class Validation(unittest.TestCase):
         for table in ("runs", "votes", "memory", "tasks"):
             for bad in (None, [], "text"):
                 with self.subTest(table=table, bad=bad):
+                    self.assertEqual(validate(table, bad)["rule"], "schema")
+
+    @mark.req("REQ-RTB-001", "IF-302")
+    def test_a_document_that_is_not_a_mapping_is_a_schema_error_in_every_table(self):
+        """F5 (D-161): also the tables without a required field refuse a document that is not a mapping.
+
+        Example: validate("history", []) gives rule schema.
+        """
+        for table in definitions():
+            for bad in (None, [], "text", 1):
+                with self.subTest(table=table, bad=bad):
+                    # Given a document that is not a mapping, When it is validated, Then the rule is schema
                     self.assertEqual(validate(table, bad)["rule"], "schema")
 
     @mark.req("REQ-RTB-001")
