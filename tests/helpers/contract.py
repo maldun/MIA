@@ -16,7 +16,7 @@ REAL_NOT_READY = {
     "IF-103": "the real model server is only used in stage 2",
     "IF-104": "N-2 Backend not integrated yet",       # real_subject since A-51: the routes of graph_api.py behind the guard of accounts_api
     "IF-201": "N-2.2 Chat agent not integrated yet",       # real_subject since A-07 (ChatService); stop and the expression/audio events skip
-    "IF-301": "N-3.2 Graph tables not integrated yet",
+    "IF-301": "unused: real_subject gives graph_tables",       # real_subject since A-02 (graph_tables); the reason fixed by A-60 (F9)
     "IF-302": "N-3.3 Record tables not integrated yet",
     "IF-404": "the real web client and SearXNG are only used in stage 2",
     "IF-405": "the real scholarly APIs are only used in stage 2",
@@ -106,6 +106,36 @@ def subject_for(interface, kind, **options):
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
+_REAL_STORAGE = {}
+
+
+def _real_storage_module(name):
+    """A module of the real Storage layer (storage, storage_files, storage_postgres), loaded by file path together with the real graph_rules and
+    graph_tables (A-59, D-162). The mocks have a module of the same name, graph_rules, and the mock side of a suite imports it first; a plain
+    `import storage` (or a storage imported earlier in the process) then validated with the cached mock rules, so in a full run the real side of
+    IF-102 tested the mock. Each module is loaded once per process; sys.modules is left as it was."""
+    if name not in _REAL_STORAGE:
+        import importlib.util
+        chain = [n for n in ("graph_rules", "graph_tables", "storage", name) if n != name] + [name]
+        saved = {n: sys.modules.get(n) for n in chain}
+        try:
+            for n in chain:
+                if n not in _REAL_STORAGE:
+                    spec = importlib.util.spec_from_file_location(n, os.path.join(REPO, n + ".py"))
+                    module = importlib.util.module_from_spec(spec)
+                    sys.modules[n] = module
+                    spec.loader.exec_module(module)
+                    _REAL_STORAGE[n] = module
+                sys.modules[n] = _REAL_STORAGE[n]
+        finally:
+            for n, module in saved.items():
+                if module is None:
+                    sys.modules.pop(n, None)
+                else:
+                    sys.modules[n] = module
+    return _REAL_STORAGE[name]
+
+
 class _StorageAdapter:
     """IF-102 on the real Storage layer: the file backend in a fresh folder (stage 2), or PostgreSQL when MIA_TEST_DATABASE_URL is set (stage 3). The
     adapter only turns the error class of the layer into the one of the mock, which the suite expects; production code does not import from tests/."""
@@ -113,25 +143,22 @@ class _StorageAdapter:
     def __init__(self):
         import tempfile
         from errors import StorageError
-        from storage import Storage
+        layer = _real_storage_module("storage")          # by file path with the real graph rules (A-59)
         url = os.environ.get("MIA_TEST_DATABASE_URL")
         if url:
-            from storage_postgres import PostgresBackend
-            backend = PostgresBackend(url)
+            backend = _real_storage_module("storage_postgres").PostgresBackend(url)
             backend._query("TRUNCATE records")
         else:
-            from storage_files import FileBackend
-            backend = FileBackend(tempfile.mkdtemp())
-        self._store, self._error = Storage(backend), StorageError
+            backend = _real_storage_module("storage_files").FileBackend(tempfile.mkdtemp())
+        self._store, self._error, self._layer_error = layer.Storage(backend), StorageError, layer.StorageError
 
     def __getattr__(self, name):
-        from storage import StorageError as LayerError
         method = getattr(self._store, name)
 
         def call(*args, **kwargs):
             try:
                 return method(*args, **kwargs)
-            except LayerError as err:
+            except self._layer_error as err:
                 raise self._error(err.code, rule=err.rule, detail=err.detail)
         return call
 
@@ -783,13 +810,34 @@ class _NoSockets:
         pass
 
 
+def _real_graph_tables():
+    """graph_tables with the real graph_rules (A-60). The mocks have a module of the same name, graph_rules, and the mock side of a suite
+    imports it first; a plain `import graph_tables` would then validate with the cached mock rules, so the real side tested the mock."""
+    import importlib.util
+
+    def load(name):
+        spec = importlib.util.spec_from_file_location(name, os.path.join(REPO, name + ".py"))
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return module
+
+    mock = sys.modules.get("graph_rules")
+    sys.modules["graph_rules"] = load("graph_rules")
+    try:
+        return load("graph_tables")
+    finally:
+        if mock is None:
+            sys.modules.pop("graph_rules")
+        else:
+            sys.modules["graph_rules"] = mock
+
+
 def real_subject(interface, **options):
     """The real provider of an interface once its node is integrated (amendment A-02: IF-301, IF-302, IF-102 of the Database; amendment A-05, A-07: IF-101 and IF-201 as far as built; A-32: IF-402); None until then."""
     if REPO not in sys.path:
         sys.path.insert(0, REPO)
     if interface == "IF-301":
-        import graph_tables
-        return graph_tables
+        return _real_graph_tables()
     if interface == "IF-302":
         import record_tables
         return record_tables

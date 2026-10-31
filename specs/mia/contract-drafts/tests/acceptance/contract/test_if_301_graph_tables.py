@@ -49,6 +49,23 @@ class GraphTablesContract(unittest.TestCase):
         with self.assertRaises(ValueError):
             tables.validate("memory", {})
 
+    @mark.req("IF-301", "REQ-DB-004")
+    @each_provider(IF)
+    def test_a_session_limit_is_a_positive_integer_and_a_malformed_part_is_named(self, tables):
+        """TC-IF-301-04 golden 4 (A-60): a limit that is not an integer >= 1 (or is a bool) and a stop that is not an object are
+        session_stopping_criterion; an edge endpoint that is not text is node_identity; max_cycles 1 is valid. Nothing raises."""
+        session = lambda stop: {"nodes": [{"id": "s", "kind": "process", "session": True, "stop": stop}], "edges": []}
+        for stop in ({"max_cycles": -1}, {"max_cycles": "3"}, {"max_cycles": True}, {"max_cycles": 2.5}, {"max_cycles": float("nan")},
+                     {"max_cycles": 3, "max_seconds": -1}, "x", [1]):
+            with self.subTest(stop=stop):
+                self.assertEqual(tables.validate("workflows", session(stop))["rule"], "session_stopping_criterion")
+        self.assertIsNone(tables.validate("workflows", session({"max_cycles": 1})))
+        self.assertIsNone(tables.validate("workflows", session({"max_cycles": 2, "max_seconds": None})))
+        for endpoint in (["q"], {"id": "q"}, 1):
+            with self.subTest(endpoint=endpoint):
+                doc = {"nodes": GOOD["nodes"], "edges": [{"from": endpoint, "to": "p"}]}
+                self.assertEqual(tables.validate("context_graphs", doc)["rule"], "node_identity")
+
 
 if __name__ == "__main__":
     unittest.main()

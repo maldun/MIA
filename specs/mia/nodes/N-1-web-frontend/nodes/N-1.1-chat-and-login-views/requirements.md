@@ -128,15 +128,15 @@ The chat page: messages, queue, history, status line, voting, tasks and memos, e
 
 ### REQ-CLV-011 – Tasks, memos and memory views
 - Level: low   Subject: WebFrontEnd
-- Text: The Chat and login views shall show all tasks, memos and memory records and let a logged-in user change or delete each of them.
-- Rationale: refines REQ-FE-018
+- Text: The Chat and login views shall show all tasks, memos and memory records and let a logged-in user change or delete each of them; a task shows its due time, and the user can set, change or clear it.
+- Rationale: refines REQ-FE-018; the due time makes the reminder of REQ-CHA-019 reachable from the page (D-163)
 - Parent: REQ-FE-018
 - Priority: Should
 - Verification method: Test
-- Acceptance criterion: AC-12, AC-24: with 50 mock records all are listed; an edit and a delete send one event each
+- Acceptance criterion: AC-12, AC-24: with 50 mock records all are listed; an edit and a delete send one event each; an edit of a task's text keeps its due time
 - Verified by: TC-CLV-011
 - Status: Approved
-- History: –
+- History: 2026-10-31 D-165: the due time of a task added (N-1.1 Verify F2, D-163)
 
 ### REQ-CLV-012 – Source trust edit
 - Level: low   Subject: WebFrontEnd

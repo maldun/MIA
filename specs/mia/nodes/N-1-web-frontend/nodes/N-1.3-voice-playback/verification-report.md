@@ -210,3 +210,67 @@ Unchanged from "Re-verification (2026-10-31)" above (D-145: one checklist file f
 ### Not checked
 - Real audio output, timing and the mouth (no sound device): the checks above.
 - The planted-outside-request run of TC-VPB-005 (log evidence accepted, see F7); CI stage log (none).
+
+## Re-verification 3 (2026-10-31)
+**Branch:** goal/v1 @ b072735 (fix commits of `v1-n13c`: 71d3743 M1, 512ddff M2, 45c8e21 M3, 73130c0 log, b22df4f D-150, 3597b9e runbook; merged in 63b7324. Fix commits of `v1-n13d`: 76f02a0 A4 test, a9c62b6 A3 speech stop, b825e8c A3 page drop (D-157), 525e8f8 A4 trap, 5965fd8 test skip; merged in 3620732; e032c94 is unrelated)   **Reviewer:** Claude Opus 5.5 (AI, fresh context, never saw the implementation chat)   **Inputs:** Re-verification 2 above, implementation-log.md (D-148, D-150, D-154, D-157 tables), requirements.md (REQ-VPB-002 AC with D-157), test-spec.md, IF-112, IF-101 v14, D-144, D-145, D-148, D-150, D-154, D-157, owner checklist `specs/mia/owner-checklist-2026-10-31.md` section A. Local runs only (no CI); scratch copies (`git archive HEAD`) in the reviewer's scratchpad, removed afterwards.
+
+### Verdict (re-verification 3)
+Proposed: **Verified with accepted deviations**, on one condition: the owner decides R1 below (accept it as a deviation, or route the small fix). Every earlier finding that was to be fixed in this node is closed with a test that fails on the defect (mutants below); M1..M3 are shown on a real stack run; the owner's by-ear checks A1..A4 are all ok (A3, A4 on the re-run). R1 (Medium) is new behaviour of b825e8c that goes beyond REQ-VPB-002's amended criterion: after a Stop the page drops *every* line until the next `chat_start`, also lines that do not belong to the stopped answer (the shocked line of a minus vote, IF-101 v13). If the owner rejects R1 as a deviation and wants it fixed, the status is "Verified with findings" until the fix commit is reviewed.
+
+### Verification matrix (changes only)
+| Requirement | Method | Evidence (this round) | Result |
+|---|---|---|---|
+| REQ-VPB-001 | Test | `node --test "tests/js/*.test.mjs"` 136/136 (`voice-player.test.mjs` 24/24); owner A1 ok | Met (unchanged) |
+| REQ-VPB-002 (AC amended, D-157) | Test + by ear | page: `voice-player.test.mjs` "after the page's Stop the lines of the stopped answer that still arrive are dropped ..." (3 mutants killed, below); backend: `tests/test_speech_stop.py` 4/4 (three runs in the image), `tests/test_converse_behaviours.py` 6/6 (5 mutants killed); owner A2 ok, A3 ok on the re-run on the full app rebuilt from goal/v1 | Met; R1 (behaviour beyond the AC) |
+| REQ-VPB-003 | Test + by ear | `tests/test_page_requests.py` `test_a_broken_line_gives_one_console_warning_and_the_next_line_plays` (headless Chromium, own stub stage): green on HEAD, **red** with master's `sound.js` (53c6766) in a scratch copy (`0 != 1` warnings); owner A4 ok on the re-run | Met |
+| REQ-VPB-004 | Test | `tests/test_page_requests.py` (host) 6/6 OK, 28 s, none skipped, the stage started and removed by the test | Met (unchanged) |
+| REQ-VPB-005 | Test | `tests/test_delivery_on_stack.py` (host) 5/5 OK, 127 s, none skipped; cleanup clean (M1..M3 below) | Met (unchanged) |
+| IF-112 | Test | contract suite: 5 [mock] pass, 5 [real] skipped "not integrated yet" (the integration step of N-1, as before) | Mock side met; real side open at N-1 step |
+
+### Per finding
+| # | State | Evidence |
+|---|---|---|
+| M1 anonymous searxng volumes left | **Fixed** (71d3743, b22df4f) | reviewer's stack run 21:15:56-21:18:03 UTC: `podman volume ls` 19 before, 19 after, identical; networks identical; no container or tag `vpb005` left |
+| M2 the build could reach PyPI | **Fixed** (512ddff, 3597b9e) | `podman build --pull=never --network none` built from cache in that run; nothing pulled. `podman images -a` 734 -> 733: one dangling id `a3f58e712025` gone, most likely the cached layer of an earlier run of the same checkout that this run tagged and `rmi -f` removed (another session also ran test containers at that time, so not attributed with certainty) |
+| M3 file written into the checkout | **Fixed** (45c8e21) | `git status --short --ignored` identical before and after the run (25 lines). Note: a `deploy/setup_cfg.local.json` (`{}`, 20:22) exists in the worktree from before the run; it is not from this test |
+| A3 Stop, then the voice started again (D-154) | **Fixed** (a9c62b6 backend, b825e8c page) | mutants, each on a scratch copy, in the MIA image `--network none`: `web_app.py:432` `streamer.wait()` without `should_stop` -> converse test FAIL; `speech_stream.py:122` stop ignored -> 1 FAIL; `speak.py:304` closed connection not a stop -> 1 FAIL; `speak.py:308` no watch after the end marker -> 2 FAIL; `speak.py:257-260` no cancel check -> 3 FAIL. Page: `sound.js:209` no drop, `:215` `chat_start` does not clear, `:252` Stop does not mark -> each 1 FAIL (23/24). Owner A3 ok on the re-run |
+| A4 no console warning for a broken line (D-154) | **Closed** (test 76f02a0; cause: the stage served master) | browser test red with master's `sound.js`, green on HEAD (see matrix); owner A4 ok on the re-run from the goal-v1 worktree |
+| A4 trap: which checkout a stage serves (D-157) | **Fixed for a stage it starts** (525e8f8, 5965fd8); see R2 | `tests/test_testing_stages.py` on the host 4/4; mutant "no `serving` in `start`" -> 1 FAIL, "no `serving` in `status`" -> 2 FAIL |
+| N2 outside pause leaves the queue waiting | **Recorded** (D-145, N-1 step) | mutant `sound.js:159` still survives (24/24), as expected |
+| N3 Stop vs. lines in synthesis | **Partly closed** by A3 (a9c62b6, b825e8c): lines still being made after `chat_stop` are no longer spoken or played. Open part (D-145): no Stop button once the answer's text is complete |
+| N4 browser `--network host` | **Recorded** (D-145) | unchanged |
+| N6 trace_check reads the first id only | **Open** (tool, Info) | WARN REQ-FE-012, -026, -030 unchanged (e.g. `test_speech_stop.py` marks `REQ-VPB-002, REQ-FE-012`) |
+| F8 Scenarios section | **Open** (Plan) | trace_check ERROR "no `## Scenarios`" unchanged |
+
+### New findings
+| # | Finding | Severity | Needs | Proposal |
+|---|---|---|---|---|
+| R1 | `templates/static/chat/sound.js:209,215,252`: after the page's Stop, `initSound` drops **every** `audio_reload` until the next `chat_start`. REQ-VPB-002's amended AC (D-157) speaks of "the lines of the stopped answer" only. Lines outside an answer are dropped as well: a minus vote calls `character_reaction("shocked")` (`chat_service.py:404` -> `web_app.py:249-254`), which IF-101 v13 (`vote` row) says is "followed by ... the shocked line on the audio route". Typical path: the user stops an answer they dislike and votes minus on it -> MIA's shocked line is silent; the same for a minus by another user while this page holds the voice (multi-user), and for lines of a task whose `chat_start` comes late (IF-101 v8). Shown by a reviewer test on a scratch copy of `voice-player.test.mjs` (`page()`, `stop()`, `chat_done {status: stopped}`, `expression shocked`, `audio_reload shocked`): played `['a']`, expected `['a', 'shocked']` | Medium (a contract behaviour silently lost on a plausible path; no crash, no wrong audio) | owner decision, then test (and an AC line) | let the mark end at the next `chat_start` **or** a short time after the Stop (late lines of the stopped answer arrive within the ~0.2 s poll plus one upload; e.g. 3 s), test-first with the fake clock of `page()`: "a shocked line 3 s after the Stop plays"; record the window in REQ-VPB-002's AC. Alternative: accept as a deviation until lines carry an answer id (option (a) of D-154) |
+| R2 | `tools/start_testing.sh:39-41` with `tools/testing_stages.d/_common.sh:25`: `start` prints `serving <this checkout> at <hash>` and then, when the stage's container runs already, only `<name> is running already`, although that container mounts the folder it was first started from. The log (D-157 row) says "its `running already` line says so", but the line names no folder. The A4 trap (a stage started from the main folder, then `start` from the worktree) still prints the worktree as served | Low (tooling; the checklist now says to start from the worktree) | test | in `start_container`, when the container runs, read its mount (`podman inspect -f '{{range .Mounts}}{{if eq .Destination "/opt/mia/MIA"}}{{.Source}}{{end}}{{end}}'`) and print `... running already, serving <that folder>`, with a warning when it differs from `ROOT`; same in `status`. Test in `ServedCheckout` with a dummy stage |
+| R3 | `requirements.md` REQ-VPB-002: the AC was changed on the implementation branch (b825e8c) by the owner's decision D-157, with a history line but without an amendment number (A-50 had one) | Info | - | none, if the owner's decision counts as the approval; otherwise give it an A-number in the amendment list |
+
+### Per-commit review (both directions, M42)
+- 71d3743, 512ddff, 45c8e21, b22df4f (`tests/test_delivery_on_stack.py`): test code only; fixed argument lists, no shell; own project, tag and ports per run (`secrets.token_hex`, `free_port`); a volume left raises; skips without tools, images or the model server. 3597b9e: runbook text. Nothing outside the task.
+- a9c62b6 (`speak.py`, `speech_stream.py`, `web_app.py:432`): outside the node, allowed by D-154. Correct: the end of the client's connection before the end marker (`_read_stream`) or while it waits for the reply (`_watch_close`) sets `cancelled`; `speak_chunks` waits on the event instead of sleeping and stops rendering; the handler sends no reply to a client that went away. `wait()` without `should_stop` behaves as before (one blocking `recv`). The watch thread sets `cancelled` also after a normal reply, when the connection closes; harmless (the stream is done). Tests mirror the A3 scenarios (Given/When/Then, `Example:`). No spec gap beyond R1.
+- b825e8c (`sound.js`, requirements/test-spec AC, JS test): implements D-157 option (b); R1 is its only gap. IF-112 unaffected (the mark is in `initSound`, not in `VoicePlayer`).
+- 76f02a0, 525e8f8, 5965fd8: tests and tooling; R2.
+- Protected files: neither branch touches `tests/acceptance/`, `tests/helpers/`, `tests/integration/`, `tests/smoke/`, `contracts/`, `benchmarks/`, `stages.yaml`. The IF-112 contract, suite and mock are unchanged since re-verification 2 and equal `specs/mia/contract-drafts/`. The protected changes since f4da817 (IF-101 v14 and others) come only from the owner's install commits a262376, 424c329, 849ac36 (A-52..A-61), none of them in IF-112.
+
+### Check results (reviewer's runs)
+| Check | Result |
+|---|---|
+| `node --test "tests/js/*.test.mjs"` | 136 pass, 0 fail |
+| contract suites `tests/acceptance/contract/*.mjs`, `tests/integration/N-1/*.mjs` | 35 tests: 18 pass, 0 fail, 17 skipped (IF-112 [real] and later N-1 steps) |
+| Python in `localhost/mia:latest` (2bed302a3cd2), `--network none`, on a `git archive HEAD` copy | `test_speech_stop.py` 4 OK (3 runs), `test_converse_behaviours.py` 6 OK, `test_audio_router.py` 23 OK, `test_chat_page.py` 11 OK, `test_voice_lines.py` 8 OK, `test_speech_service.py` 9 OK, `test_frontend_delivery.py` 2 OK (1 skipped: no podman in the image), `test_testing_stages.py` 4 OK (1 skipped: no git in the image) |
+| host | `test_testing_stages.py` 4 OK; `test_page_requests.py` 6 OK (28 s); `test_delivery_on_stack.py` 5 OK (127 s); no container of the tests left; the owner's `mia_*`, `mia-searxng` and `ollama` untouched |
+| `trace_check.py` (N-1.3 lines) | ERROR no `## Scenarios` (F8); WARN IF-112, REQ-FE-011/012/013/026/030, REQ-VPB-001 (JS markers not read, N6); REQ-VPB-002, -003 no longer WARN (Python markers now). WARN TD-03, TD-04, TD-06 not listed: open deferrals of other nodes (A-26, D-160), none concerns N-1.3 |
+| `test_doc_check.py` | the new or changed tests (`test_speech_stop.py`, the A3 test of `test_converse_behaviours.py`, `ServedCheckout`, the A4 browser test): 0 errors; `test_converse_behaviours.py:86,93,99` have errors from before this round |
+| `check_sysml_model.py` | OK (REQ-VPB-002's `doc`, the requirement text, unchanged) |
+
+### Owner's by-ear results (evidence, checklist section A)
+A1 two tabs claim the voice: ok. A2 mute per device and the autoplay hint: ok. A3 Stop silences the voice: first run not ok (D-154), ok on the re-run after D-157 on the full app rebuilt from goal/v1. A4 a broken line file: first run not ok (served master's page, D-157), ok on the re-run from the goal-v1 worktree. All by the owner, 2026-10-31.
+
+### Not checked
+- Real audio, timing and the mouth by the reviewer (no sound device): covered by the owner's A1..A4.
+- A3 end to end with real speech synthesis and a model (no model server allowed): covered by `test_speech_stop.py` (real speech process, recording speaker) and the owner's A3 re-run.
+- IF-112 against the real player in the contract suite: open until the N-1 integration step (as before). CI stage log: none.

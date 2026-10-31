@@ -78,6 +78,17 @@ eachProvider('IF-104', 'TC-IF-104-04 golden 2: a cycle is 422 with the rule; no 
   assert.deepEqual((await call(api, 'GET', '/api/workflows')).body, []);
 });
 
+// mark.req("IF-104", "REQ-GA-003")
+eachProvider('IF-104', 'TC-IF-104-06 (A-60): a session limit that is not an integer >= 1 is 422 session_stopping_criterion; max_cycles 1, or a null max_seconds next to it, is saved', make, async (api) => {
+  await login(api, 'anna', 'pw-anna');
+  const session = (stop) => ({ nodes: [{ id: 'debate', kind: 'process', session: true, stop }], edges: [] });
+  for (const stop of [{ max_cycles: -1 }, { max_cycles: 0 }, { max_cycles: '3' }, { max_cycles: true }, { max_cycles: 2.5 }, { max_cycles: 3, max_seconds: -1 }, 'x']) {
+    const refused = await save(api, 'workflows', 'loop', session(stop));
+    assert.deepEqual([refused.status, refused.body.rule], [422, 'session_stopping_criterion'], JSON.stringify(stop));
+  }
+  assert.deepEqual((await save(api, 'workflows', 'loop', session({ max_cycles: 1, max_seconds: null }))).body, { version: 1 });
+});
+
 // mark.req("IF-104")
 eachProvider('IF-104', 'TC-IF-104-05 golden 3: unknown id and kind are 404; a stale expected_version is 409 with the current version', make, async (api) => {
   await login(api, 'anna', 'pw-anna');

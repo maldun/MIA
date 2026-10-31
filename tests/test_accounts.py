@@ -24,6 +24,19 @@ def dump(folder):
     return "\n".join(out)
 
 
+class Stale:
+    """The store as another process saw it a moment ago: no ids yet, every other call goes to the store."""
+
+    def __init__(self, store):
+        self._store = store
+
+    def ids(self, table):
+        return []
+
+    def __getattr__(self, name):
+        return getattr(self._store, name)
+
+
 class Accounts(unittest.TestCase):
     def setUp(self):
         self.dir = tempfile.mkdtemp()
@@ -67,6 +80,20 @@ class Accounts(unittest.TestCase):
         with self.assertRaises(ValueError):
             accounts.create(self.store, "anna", "other", "owner")
         self.assertTrue(accounts.verify(self.store, "anna", "pw"))
+
+    @mark.req("REQ-SLY-005")
+    def test_a_second_create_that_lost_the_race_is_refused_and_keeps_the_first_password(self):
+        """Finding F3 of the verification: create writes with expected_version 0, so a racing second create cannot change the password.
+        Example: "anna" is created with "first" while a second create with "second" still saw no account; the second is a ValueError and "first" verifies."""
+        # Given: a store whose list of ids is stale, as for a creation that checked before the other one wrote
+        accounts.create(self.store, "anna", "first", "owner")
+        stale = Stale(self.store)
+        # When: the second creation of the same name
+        with self.assertRaises(ValueError):
+            accounts.create(stale, "anna", "second", "owner")
+        # Then: one version, and the first password still works
+        self.assertEqual(len(self.store.history("accounts", "anna")), 1)
+        self.assertTrue(accounts.verify(self.store, "anna", "first"))
 
     @mark.req("REQ-SLY-005")
     def test_non_ascii_passwords_work(self):

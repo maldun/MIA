@@ -578,18 +578,23 @@ package MIA_Architecture {
     }
 
     part def Persistence {
-        doc /* Everything is files on the host (JSON, JSON lines, Markdown, one SQLite index). Target: PostgreSQL in a container behind a storage layer (proposed). */
+        doc /* Everything is files on the host (JSON, JSON lines, Markdown, one SQLite index). Target: PostgreSQL in a container behind the storage layer (partly built, N-3.1). */
         part files {
             doc /* data/, memories.json, long_time_history.json, presets, gestures, chat log, runs, store, library. */
             @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("config.py", "constants.py"); }
         }
         part storageLayer {
-            doc /* Interfaces over the file stores so that the database can replace them (stage 0 of the database plan). */
-            @Implementation { :>> status = ImplementationStatus::proposed; }
+            doc /* The one door to the shared state (IF-102, N-3.1): versions, validation by the table definitions, notices, a file backend and a
+                   PostgreSQL backend, accounts, the copy between backends (library export and seed, migration). Partly: the old file stores are
+                   not behind it yet (N-2 tasks, D-67, D-105). */
+            @Implementation { :>> status = ImplementationStatus::partly;
+                              :>> modules = ("storage.py", "storage_files.py", "storage_postgres.py", "storage_copy.py", "migrate.py", "accounts.py"); }
         }
         part database {
-            doc /* PostgreSQL in a container with a volume, a health check, migration from files and back, backup and restore. */
-            @Implementation { :>> status = ImplementationStatus::proposed; :>> modules = ("deploy/REQUIREMENTS_DB.md"); }
+            doc /* PostgreSQL in a container with a volume, a health check, migration from files and back, backup and restore (N-3.1). Partly: the
+                   database runs in the stack (profile db), but nothing in MIA reads MIA_DATABASE_URL yet (D-139). */
+            @Implementation { :>> status = ImplementationStatus::partly;
+                              :>> modules = ("deploy/compose.yaml", "deploy/db/001_records.sql", "tools/backup.sh", "tools/restore.sh"); }
         }
     }
 
@@ -3381,7 +3386,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-RTB-001'> SharedStateHeld_Rtb001 {
         subject s : Persistence;
-        doc /* The Record tables shall define the tables of the history, summaries, chat log, votes, memory, tasks, memos, presets, gestures and run results. */
+        doc /* The Record tables shall define the 14 tables of IF-302 v5: history, memory, votes, tasks, memos, accounts, presets, gestures, runs (run results), source_trust (trust values of sources), cases, behaviours, workflow_meta and reports; summaries and the chat log are records of history. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-RTB-002'> RunResults_Rtb002 {

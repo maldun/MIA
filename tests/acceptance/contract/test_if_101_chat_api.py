@@ -570,5 +570,16 @@ class ChatApiContract(unittest.TestCase):
         self.assertNotIn("m10", [m["text"] for m in api.history(s, 50)])
         self.assertEqual(api.send(b, "b1")["position"], 1)
 
+    @mark.req("IF-101", "REQ-CHA-015")
+    @each_provider(IF)
+    def test_a_vote_value_that_is_no_integer_is_refused(self, api):
+        """TC-IF-101-32 (A-61, D-162): a vote value 1.0, -1.0 or True is 422 invalid_vote with the rule value and is not stored."""
+        anna = api.login("anna", "pw-anna")
+        for value in (1.0, -1.0, True):
+            err = error_of(lambda: api.vote(anna, "service", "service", value))
+            self.assertEqual((err.status, err.code, err.rule), (422, "invalid_vote", "value"), value)
+        self.assertEqual(api.score(anna)["votes"], 0)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -62,6 +62,40 @@ class Migrate(unittest.TestCase):
         self.assertIn("conflict", text)
         self.assertEqual(tree(self.db), before)
 
+    @mark.req("REQ-SLY-004", "REQ-SLY-007")
+    def test_a_record_that_put_would_refuse_is_named_and_nothing_is_moved(self):
+        """Finding F1: files-to-db validates as put does.
+        Example: a data folder with a vote of category "mood" gives exit code 1, "refused: votes/v (category ...)" and an empty database."""
+        # Given: a vote written into the data folder past the rules
+        FileBackend(self.data).append("votes", "v", {"id": "v", "version": 1, "author": "anna", "time": "2026-01-01T00:00:00Z",
+                                                     "doc": {"user": "anna", "subject": "m", "category": "mood", "value": 1}})
+        # When: the folder is moved
+        code, text = self.run_command("files-to-db", "--data", self.data, "--database-url", "x")
+        # Then: refused, with the record and the rule, and nothing written
+        self.assertEqual(code, 1)
+        self.assertIn("refused: votes/v (category", text)
+        self.assertIn("nothing was written", text)
+        self.assertFalse(os.path.exists(self.db))
+
+    @mark.req("REQ-SLY-007")
+    def test_the_database_is_closed_after_a_run_and_after_a_refused_one(self):
+        """Finding F4 of the verification (the psycopg ResourceWarning): migrate closes the database it opened.
+        Example: files-to-db, then db-to-files into a folder with another history (a conflict): the database was closed twice."""
+        # Given: a database stand-in that counts close()
+        closed = []
+
+        def open_db(url):
+            backend = FileBackend(self.db)
+            backend.close = lambda: closed.append(url)
+            return backend
+        self.open_db = open_db
+        Storage(FileBackend(os.path.join(self.base, "other"))).put("workflows", "lookup", dict(LOOKUP, note="other"), "carl")
+        # When: one run that copies and one that is refused
+        self.assertEqual(self.run_command("files-to-db", "--data", self.data, "--database-url", "x")[0], 0)
+        self.assertEqual(self.run_command("db-to-files", "--data", os.path.join(self.base, "other"), "--database-url", "y")[0], 1)
+        # Then: both closed their database
+        self.assertEqual(closed, ["x", "y"])
+
     @mark.req("REQ-SLY-009")
     def test_library_export_and_seed_are_one_command_each(self):
         """TC-SLY-009 through the command line: the library of a data folder into a folder and from it into an empty data folder."""
@@ -71,6 +105,51 @@ class Migrate(unittest.TestCase):
         self.assertEqual(self.run_command("library-seed", "--data", fresh, "--folder", export)[0], 0)
         self.assertEqual(tree(os.path.join(fresh, "workflows")), tree(os.path.join(self.data, "workflows")))
         self.assertFalse(os.path.exists(os.path.join(fresh, "memory")))
+
+    @mark.req("REQ-SLY-009")
+    def test_a_dry_run_of_the_library_commands_writes_nothing(self):
+        """Finding F8 of the verification: --dry-run was accepted and ignored by library-export and library-seed.
+        Example: library-export --dry-run into a new folder prints "dry run: copied 1 records" and the folder does not exist."""
+        # Given: an exported library and an empty data folder
+        export, fresh = os.path.join(self.base, "library"), os.path.join(self.base, "fresh")
+        self.run_command("library-export", "--data", self.data, "--folder", export)
+        # When: both commands run dry into places that do not exist yet
+        dry_export = self.run_command("library-export", "--data", self.data, "--folder", os.path.join(self.base, "dry"), "--dry-run")
+        dry_seed = self.run_command("library-seed", "--data", fresh, "--folder", export, "--dry-run")
+        # Then: both say what they would copy and write nothing
+        self.assertEqual((dry_export, dry_seed), ((0, "dry run: copied 1 records, skipped 0, added 0 versions\n"),) * 2)
+        self.assertFalse(os.path.exists(os.path.join(self.base, "dry")) or os.path.exists(fresh))
+
+    @mark.req("REQ-SLY-007")
+    def test_a_missing_source_folder_or_an_unreachable_database_is_one_line_and_exit_code_1(self):
+        """Finding F10 of the verification: no traceback and no "copied 0 records" for a typo.
+        Example: files-to-db --data /no/such/folder prints "no such folder: /no/such/folder", exit code 1."""
+        # Given: a misspelt folder and a database that cannot be reached
+        missing = os.path.join(self.base, "dta")
+
+        def unreachable(url):
+            raise migrate.CannotOpen("connection refused")
+        # When / Then: each is one line with exit code 1, and nothing is created
+        for argv in (["files-to-db", "--data", missing, "--database-url", "x"], ["library-export", "--data", missing, "--folder", self.db],
+                     ["library-seed", "--data", self.db, "--folder", missing]):
+            self.assertEqual(self.run_command(*argv), (1, "no such folder: %s\n" % missing), argv)
+        self.open_db = unreachable
+        self.assertEqual(self.run_command("files-to-db", "--data", self.data, "--database-url", "x"),
+                         (1, "cannot open the database: connection refused\n"))
+        self.assertFalse(os.path.exists(self.db))
+
+    @mark.req("REQ-SLY-007")
+    def test_the_real_database_opener_turns_a_refused_connection_into_one_line(self):
+        """Finding F10: the PostgreSQL side, with psycopg or without it, ends in one line, not a traceback.
+        Example: --database-url postgresql://127.0.0.1:1/x gives exit code 1 and "cannot open the database: ..."."""
+        # Given / When: a port where nothing listens, through the real opener
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            code = migrate.main(["files-to-db", "--data", self.data, "--database-url", "postgresql://u:p@127.0.0.1:1/x?connect_timeout=2"])
+        # Then: one line
+        self.assertEqual(code, 1)
+        self.assertTrue(out.getvalue().startswith("cannot open the database: "), out.getvalue())
+        self.assertEqual(out.getvalue().count("\n"), 1)
 
     @mark.req("REQ-SLY-007")
     def test_a_missing_option_or_direction_is_a_usage_error(self):
