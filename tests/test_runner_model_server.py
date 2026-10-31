@@ -102,6 +102,47 @@ class ModelServerTests(unittest.TestCase):
             self.assertEqual(str(caught.exception), UNREACHABLE, stream)
 
     @mark.req("REQ-RUN-003")
+    def test_a_server_that_does_not_answer_the_connection_is_the_sentence(self):
+        """TC-RUN-003 (D-129, finding N2 of the N-2.4.1 re-verification): a connect timeout gives the plain sentence, streamed or not.
+
+        Example: chat raises httpx.ConnectTimeout -> ModelServerUnreachable(UNREACHABLE)
+        """
+        # Given: a client whose server never accepts the connection (httpx comes with ollama)
+        import httpx
+
+        class SilentClient:
+            def chat(self, **kwargs):
+                if kwargs.get("stream"):
+                    return self._stream()
+                raise httpx.ConnectTimeout("timed out")
+
+            def _stream(self):
+                raise httpx.ConnectTimeout("timed out")
+                yield None
+        client = TurnClient(SilentClient(), ModelTurns(), "chat")
+        for stream in (False, True):
+            # When: a chat is asked and its first chunk read
+            with self.assertRaises(ModelServerUnreachable) as caught:
+                reply = client.chat(model="m", messages=MESSAGE, stream=stream)
+                if stream:
+                    next(iter(reply))
+            # Then: the user reads exactly the sentence
+            self.assertEqual(str(caught.exception), UNREACHABLE, stream)
+
+    @mark.req("REQ-RUN-003")
+    def test_the_client_of_mia_waits_10_s_to_connect_and_never_cuts_a_generation(self):
+        """TC-RUN-003 (D-129, N2): the ollama client MIA builds has a connect timeout of 10 s and no limit on reading, writing or the pool.
+
+        Example: model_client("http://127.0.0.1:9", {}) -> Timeout(connect=10, read=None, write=None, pool=None)
+        """
+        # Given: the builder of MIA's model client
+        from communicator import model_client
+        # When: a client is built
+        timeout = model_client("http://127.0.0.1:9", {})._client.timeout
+        # Then: only the connection is limited
+        self.assertEqual((timeout.connect, timeout.read, timeout.write, timeout.pool), (10, None, None, None))
+
+    @mark.req("REQ-RUN-003")
     def test_the_sentence_is_the_owners_wording(self):
         """TC-RUN-003: the sentence is the one the owner chose (D-120).
 

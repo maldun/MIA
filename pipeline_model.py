@@ -60,9 +60,10 @@ class ModelTurns:
 
 
 def _unreachable(exc):
-    """whether an error of the ollama library means that nothing listens: a plain call raises ConnectionError, a stream lets httpx.ConnectError through
-    (ollama 0.6.3, Verify finding F1 of N-2.4.1); httpx comes only with ollama, so it is matched by name, not imported"""
-    return isinstance(exc, ConnectionError) or type(exc).__name__ == "ConnectError"
+    """whether an error of the ollama library means that the model server cannot be reached: a plain call raises ConnectionError, a stream lets
+    httpx.ConnectError through (ollama 0.6.3, F1 of N-2.4.1), a server that does not accept the connection in time httpx.ConnectTimeout (N2, D-129);
+    httpx comes only with ollama, so it is matched by name, not imported"""
+    return isinstance(exc, ConnectionError) or type(exc).__name__ in ("ConnectError", "ConnectTimeout")
 
 
 class TurnClient:
