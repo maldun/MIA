@@ -156,3 +156,19 @@ F12 (owner 2026-10-31: "align the node's output schema with IF-402"): `library/n
 
 ## Owner's answers to F2 to F6 and T-08 (2026-10-31, D-128); A-38
 F2 skill flag for the chat's privacy rule (to build); F3 the AC-22 measurement of REQ-RUN-005 out of G-V1; F4 REQ-RUN-009 by the order, the 10 s part out with REQ-RUN-007; F5 a JavaScript test of the confirmation (to build); F6 REQ-RUN-012 narrowed to tool nodes (A-38, `requirements.md` history line), the rest to FB-03; T-08 deferred to the next iteration (plan marked). The re-verification (appended to `verification-report.md`) also names F9 and new findings N1 to N3 for the owner.
+
+## Re-verification findings built (2026-10-31, D-128, D-129)
+Each reproduced in a failing test first, then fixed; one commit each.
+
+| Finding | Fix | Test (red before, green after) | Commit |
+|---|---|---|---|
+| F5 confirmation of `/light!`, `/full!` | the confirmation moved into `chat-model.sendConfirmed`, used by the page unchanged | `tests/js/confirm.test.mjs` (5) | `9bceaa5` |
+| F9 chat runs as user "mia" | `ChatService.author()` ("page" without an account); `run_chat_exchange` passes `user=` | `test_the_author_of_the_running_message_is_known` (`tests/test_chat_backend.py`); `tests/test_web_app_wiring.py` (inspection of `web_app.py`, which starts the app when imported) | `a0b4928` |
+| N3 nothing tested the app's door | – (wired in `70a6f35`) | `test_the_door_is_built_with_every_source` (`tests/test_web_app_wiring.py`; passes, guards the wiring) | `a0b4928` |
+| N1 "MIA could not answer: Can't reach…" | `chat_service` shows `UNREACHABLE` alone; other errors keep the prefix | `test_a_model_server_that_is_down_shows_only_the_sentence` | `f9e736c` |
+| N2 a server that does not accept the connection hangs the chat | `communicator.model_client`: connect timeout 10 s, reading not limited; `ConnectTimeout` becomes `ModelServerUnreachable` | `test_a_server_that_does_not_answer_the_connection_is_the_sentence`, `test_the_client_of_mia_waits_10_s_to_connect_and_never_cuts_a_generation` | `d7d7578` |
+| F2 `core.keep_texts` named "chat" | `chat.md` v2 `personal: true`; `skill_store` reads it; `Runner.store_texts(skill)` keeps all but personal skills by default; `keep_texts` removed | `InTheCore` (the shipped chat is personal, its texts are not kept, `core.py` names no skill); `InThePipeline` uses a personal skill of another name | `38e72de` |
+
+Notes: `ollama_remote.prepare` (install and start) still builds a client without the connect timeout; it waits in its own loop (`ollama_wait`, 300 s), not on the chat path. Local coder: `tests/js/confirm.test.mjs` (task `f5-confirm-js`, 2 attempts failed on an extra `)`, a dropped `});`, a cut test id; fixed by hand after a script compare, verdict `fixed`; the bracket slip is now rule 11 of the model guide), `tests/test_web_app_wiring.py` (task `n3f9-wiring-tests`, second attempt passed, script compare identical, verdict `ok`).
+
+Tests reported green (feedback, not verification): all new tests; all `tests/test_*.py` in the image fail only in `test_amendment_report`, `test_config`, `test_harness` (rt_edit count, `n-planted-figure`), `test_shutdown` (no `--init`); contract suites and integration steps; JS 115 of 115.
