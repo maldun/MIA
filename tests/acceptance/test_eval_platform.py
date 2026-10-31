@@ -1,7 +1,7 @@
 """
 Tests of the harness against the mock of IF-105 (N-4.1 T-01): TC-EVL-001 repeats, intervals and cost, TC-EVL-004 versions in every header,
 TC-EVL-008 equal cases, TC-EVL-011 the platform only through IF-105.
-Run: python tests/test_eval_platform.py
+Protected since A-63 (D-164). Run: python tests/acceptance/test_eval_platform.py
 """
 import ast
 import contextlib
@@ -16,10 +16,10 @@ import unittest
 import unittest.mock
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-REPO = os.path.dirname(HERE)
+REPO = os.path.dirname(os.path.dirname(HERE))
 sys.path.insert(0, REPO)
-sys.path.insert(0, os.path.join(HERE, "helpers"))
-sys.path.insert(0, os.path.join(HERE, "helpers", "mocks"))
+sys.path.insert(0, os.path.join(os.path.dirname(HERE), "helpers"))
+sys.path.insert(0, os.path.join(os.path.dirname(HERE), "helpers", "mocks"))
 
 import eval_platform as EP                            # noqa: E402
 import harness as H                                   # noqa: E402

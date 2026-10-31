@@ -1,7 +1,7 @@
 """
 TC-EVL-006 (N-4.1 T-06): the document of the skill path (docs/skill-path.md) has every step, its examples run with the fake model, and its links resolve.
 A fenced block marked `python run` or `bash run` is executed from the repository root (`bash run exit=1` says that exit code 1 is the expected result).
-Run: python tests/test_skill_path_doc.py
+Protected since A-63 (D-164). Run: python tests/acceptance/test_skill_path_doc.py
 """
 import os
 import re
@@ -10,8 +10,8 @@ import sys
 import unittest
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-REPO = os.path.dirname(HERE)
-sys.path.insert(0, os.path.join(HERE, "helpers"))
+REPO = os.path.dirname(os.path.dirname(HERE))
+sys.path.insert(0, os.path.join(os.path.dirname(HERE), "helpers"))
 from markers import mark                              # noqa: E402
 
 DOC = os.path.join(REPO, "docs", "skill-path.md")

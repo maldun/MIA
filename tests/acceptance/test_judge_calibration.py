@@ -1,6 +1,6 @@
 """
 TC-EVL-003 (N-4.1 T-03): the verdicts of a model used as judge count only after a calibration against the users' ratings (Cohen's kappa 0.6 or more, OPEN-7).
-Run: python tests/test_judge_calibration.py
+Protected since A-63 (D-164). Run: python tests/acceptance/test_judge_calibration.py
 """
 import json
 import os
@@ -9,10 +9,10 @@ import tempfile
 import unittest
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-REPO = os.path.dirname(HERE)
+REPO = os.path.dirname(os.path.dirname(HERE))
 sys.path.insert(0, REPO)
 sys.path.insert(0, os.path.join(REPO, "tools"))
-sys.path.insert(0, os.path.join(HERE, "helpers"))
+sys.path.insert(0, os.path.join(os.path.dirname(HERE), "helpers"))
 
 import harness as H                                   # noqa: E402
 import label_agreement as LA                          # noqa: E402

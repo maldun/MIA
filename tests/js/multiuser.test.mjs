@@ -114,8 +114,7 @@ test('TC-CLV-015: the login screen has an opaque black backdrop, so the app behi
 // /api/<name>; a name in brackets after it, (`chat_send`), and a name after the word event are socket events; an address in backquotes is a path;
 // the first column of every events table is an event.
 // Used by the page and the backend but not yet in IF-101 v13: amendment A-62 adds them to IF-101 v14 and empties this set.
-const PENDING_A62 = new Set(['/api/chat/commands', '/character-backgrounds.json',
-  'chat_pipeline', 'audio_claim', 'audio_owner', 'audio_reload', 'audio_ended', 'character_ready']);
+const PENDING_A62 = new Set();      // A-62 installed: IF-101 names the whole wire
 const SOCKET_IO_OWN = new Set(['connect', 'disconnect', 'connect_error']);          // events of the Socket.IO client itself, never on the wire
 
 function contractWire(text) {

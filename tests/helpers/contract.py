@@ -326,7 +326,7 @@ class _ChatApiAdapter:
             self._threaded = True
         ack = self._chat.send(text, client_id=client_id, sender=user, author=user)
         if not ack["ok"]:
-            raise self._error({"empty_text": 422, "queue_full": 503, "invalid_command": 422}.get(ack.get("code"), 429), ack.get("code") or "rate_limited")
+            raise self._error({"empty_text": 422, "queue_full": 503, "invalid_command": 422, "rate_limited": 429}.get(ack.get("code"), 500), ack.get("code") or "no_code")      # A-62: a refusal without a code is no rate limit
         return {"id": ack["id"], "position": ack["position"], "queued": ack["queued"], "message": ack["message"]}
 
     def pause(self, session):
@@ -456,7 +456,7 @@ class _ChatTurnAdapter:
     def send(self, account, text, client_id=None):
         ack = self._chat.send(text, client_id=client_id, sender=account, author=account)
         if not ack["ok"]:
-            raise self._error(ack.get("code") or "rate_limited")
+            raise self._error(ack.get("code") or "no_code")      # A-62: a refusal without a code is no rate limit
         return {"id": ack["id"], "position": ack["position"]}
 
     def regenerate(self, account, message_id):

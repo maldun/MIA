@@ -33,8 +33,7 @@ TOUCH_PX = 44                                  # REQ-CLV-016 AC-1
 PAGE_PATHS = ("/", "/favicon.ico")
 PAGE_PREFIXES = ("/static/", "/character/", "/socket.io/")
 # used by the page and the backend, but not yet in IF-101 v13 (D-163 F4): amendment A-62 adds them to IF-101 v14 and empties this set
-PENDING_A62 = {"/api/chat/commands", "/character-backgrounds.json",
-               "chat_pipeline", "audio_claim", "audio_owner", "audio_reload", "audio_ended", "character_ready"}
+PENDING_A62 = set()      # A-62 installed: IF-101 names the whole wire
 
 
 def image_exists(name):

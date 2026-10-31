@@ -1,7 +1,7 @@
 """
 TC-EVL-005 (N-4.1 T-04): every library workflow with status tested or trusted has a baseline file eval/baselines/<suite>__<variant>__baseline.jsonl;
 the link from a workflow to its suite and variant is library/baselines.json. The check names the ones that lack it.
-Run: python tests/test_check_baselines.py
+Protected since A-63 (D-164). Run: python tests/acceptance/test_check_baselines.py
 """
 import json
 import os
@@ -10,10 +10,10 @@ import tempfile
 import unittest
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-REPO = os.path.dirname(HERE)
+REPO = os.path.dirname(os.path.dirname(HERE))
 sys.path.insert(0, REPO)
 sys.path.insert(0, os.path.join(REPO, "tools"))
-sys.path.insert(0, os.path.join(HERE, "helpers"))
+sys.path.insert(0, os.path.join(os.path.dirname(HERE), "helpers"))
 
 import check_baselines as C                           # noqa: E402
 from markers import mark                              # noqa: E402

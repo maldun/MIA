@@ -1,7 +1,7 @@
 """
 TC-EVL-002 (N-4.1 T-02): a verdict is decided only on held-out cases. The guard refuses a dev-split run, decides a holdout run with eval_decide.py of the agent-app skill,
 and the harness leaves cases tagged split:holdout out of a dev run.
-Run: python tests/test_decide_guard.py
+Protected since A-63 (D-164). Run: python tests/acceptance/test_decide_guard.py
 """
 import contextlib
 import importlib.util
@@ -14,10 +14,10 @@ import unittest
 import unittest.mock
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-REPO = os.path.dirname(HERE)
+REPO = os.path.dirname(os.path.dirname(HERE))
 sys.path.insert(0, REPO)
 sys.path.insert(0, os.path.join(REPO, "tools"))
-sys.path.insert(0, os.path.join(HERE, "helpers"))
+sys.path.insert(0, os.path.join(os.path.dirname(HERE), "helpers"))
 
 import decide_guard as G                              # noqa: E402
 import harness as H                                   # noqa: E402

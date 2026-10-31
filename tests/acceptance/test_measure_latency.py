@@ -1,7 +1,7 @@
 """
 TC-EVL-007 (N-4.1 T-05): the latency tool against a fake server that answers after 1.0, 2.0 and 3.0 s (20 runs after 3 warm-up runs, cycling);
 the frame-rate tool is tested in tests/js/measure-fps.test.mjs.
-Run: python tests/test_measure_latency.py
+Protected since A-63 (D-164). Run: python tests/acceptance/test_measure_latency.py
 """
 import os
 import sys
@@ -9,8 +9,8 @@ import threading
 import unittest
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.join(os.path.dirname(HERE), "tools"))
-sys.path.insert(0, os.path.join(HERE, "helpers"))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(HERE)), "tools"))
+sys.path.insert(0, os.path.join(os.path.dirname(HERE), "helpers"))
 
 import measure_latency as ML                          # noqa: E402
 from markers import mark                              # noqa: E402
