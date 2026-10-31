@@ -424,6 +424,10 @@ package MIA_Architecture {
             doc /* The only way a sandboxed script reaches the web, over stdin and stdout. */
             @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("broker.py"); }
         }
+        part toolDoor {
+            doc /* the one door to the tools of a workflow step (IF-402): counts the calls of a run, labels every output with its trust; A-42 */
+            @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("tool_calls.py"); }
+        }
         part claimExtractor {
             doc /* Claims out of prose with anchored quotes; rule-based and model-based variants. */
             @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("extraction.py", "skills/extract_claims.md"); }
