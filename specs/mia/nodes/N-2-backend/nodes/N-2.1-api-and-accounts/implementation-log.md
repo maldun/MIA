@@ -111,3 +111,12 @@ Checked first with the client `ollama` 0.6.3 of the image against the stand-in (
 Note: `install_lama.py` reads `setup_cfg.json` without the local overlay (`setup_cfg.local.json`), so the test writes `ollama_wait` into a copied config (a local file did not shorten the wait). Not changed (N-4.2's start; no requirement asks for it).
 Local coder: `n21b-container-alone`, verdict fixed (`:` became `:=` in two mount arguments, a filter dropped from a comprehension, `self` missing twice; found by the line compare and the run).
 Until A-52 is installed TC-API-013 skips; installed, it is the evidence of AC-29.
+
+## V-1: a test of the production wiring of web_app.py (2026-10-31, branch v1-n21b)
+| Requirement | What was built | Tests |
+|---|---|---|
+| REQ-API-007, REQ-API-009, REQ-API-014 | nothing in the code (the wiring was right, the reviewer's hand run said so; nothing kept it right) | `tests/test_accounts_wiring.py` (5): the real `web_app` imported from a temporary folder `MIA/` of links to the checkout with its own `setup_cfg.json` (the example, `accounts_enabled: true`, `chat_rate_per_minute` 10) and an empty `data/`, so the checkout is not written; a scripted answer instead of the model. 401 on `/api/workflows` without session and anna's PUT is version 1 by anna (TC-API-014); a socket without session refused (TC-API-007); `chat_send` ack `message.sender` = anna and one change-record line `{ben, chat_send, ""}` (TC-API-009); 10 messages over two of anna's sockets pass, her 11th over a third is refused, ben's passes (TC-API-007) |
+
+Mutants of the verification on a scratch copy (git archive of HEAD + the test, each reverted), all killed: M7 (no `author` in `chat_service.send`, error), M8 (rate key `request.sid`), M9 (no change record of `chat_send`), M15 (no socket guard, 3 failures 1 error), M17 (graph blueprint not registered). The test is green on the code as it is (in the image, 5 tests).
+Importing `web_app` starts its APScheduler thread (line 142) and builds an ollama client without connecting, as in the eleven other tests that import it (`test_api_events`, `test_chat_page`, ...); no model server is started or called, so no deep mocking was needed.
+Local coder: `n21b-web-app-wiring`, verdict fixed: the target name I gave was an existing tracked test (`tests/test_web_app_wiring.py`, overwritten by the run and restored from git, the new file renamed); one non-ASCII character in the docstring.
