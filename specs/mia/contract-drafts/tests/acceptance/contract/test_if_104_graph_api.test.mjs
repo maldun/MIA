@@ -89,6 +89,17 @@ eachProvider('IF-104', 'TC-IF-104-06 (A-60): a session limit that is not an inte
   assert.deepEqual((await save(api, 'workflows', 'loop', session({ max_cycles: 1, max_seconds: null }))).body, { version: 1 });
 });
 
+// mark.req("IF-104", "REQ-GA-003")
+eachProvider('IF-104', 'TC-IF-104-07 (A-66, D-169): max_cycles written as 2.0 in the JSON body is 422 session_stopping_criterion, as the real rules refuse a float; 2 is saved', make, async (api) => {
+  await login(api, 'anna', 'pw-anna');
+  // JSON.stringify writes 2.0 as 2, so the body is written by hand, as another client could send it
+  const body = (limit) => `{"doc": {"nodes": [{"id": "debate", "kind": "process", "session": true, "stop": {"max_cycles": ${limit}}}], "edges": []}}`;
+  const put = (limit) => call(api, 'PUT', '/api/workflows/loop', undefined, { headers: { 'Content-Type': 'application/json' }, body: body(limit) });
+  const refused = await put('2.0');
+  assert.deepEqual([refused.status, refused.body.rule], [422, 'session_stopping_criterion']);
+  assert.deepEqual((await put('2')).body, { version: 1 });
+});
+
 // mark.req("IF-104")
 eachProvider('IF-104', 'TC-IF-104-05 golden 3: unknown id and kind are 404; a stale expected_version is 409 with the current version', make, async (api) => {
   await login(api, 'anna', 'pw-anna');
