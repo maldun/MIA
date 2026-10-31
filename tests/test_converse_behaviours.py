@@ -88,5 +88,46 @@ class ConverseBehaviours(unittest.TestCase):
         self.assertEqual(self.played[:2], [("yes", True, "/lines/agree.wav"), ("no", False)])
 
 
+    @mark.req("REQ-CHV-006")
+    def test_the_reaction_of_the_chat_shows_the_expression_and_says_its_line(self):
+        """REQ-CHV-006 (D-143): the reaction the chat service asks for after a minus shows `shocked` and plays the shocked line of the voice lines.
+
+        Example: chat_service._react("shocked") -> express_and_reload("shocked", sound=True, line="/lines/shocked.wav")
+        """
+        # Given voice lines with a shocked line
+        w.voice_lines.pick = lambda mood: "/lines/%s.wav" % mood
+        # When the chat service lets the character react
+        w.chat_service._react("shocked")
+        # Then the character shows shocked and says its line
+        self.assertEqual(self.played, [("shocked", True, "/lines/shocked.wav")])
+
+
+class ShockedAfterAMinus(unittest.TestCase):
+    """TC-CHV-006 (REQ-CHV-006, D-143, D-155): the backend side of the shocked reaction, from the vote to the wire."""
+
+    @mark.req("REQ-CHV-006")
+    def test_a_minus_vote_sends_the_shocked_expression_and_plays_the_shocked_line(self):
+        """TC-CHV-006: a minus through the chat service of the app sends `expression {name: "shocked"}` to the pages and plays the shocked line; a plus does neither.
+
+        Example: vote(anna, "voice", "service", -1) -> socket event ("expression", {"name": "shocked"}), play_sound(".../shocked_default.wav")
+        """
+        import tempfile
+        # Given the app's chat service on a fresh votes table, with the socket and the sound player recorded
+        sent, played = [], []
+        saved = (w.socketio.emit, w.play_sound, w.chat_service._votes, w.voice_lines.pick)
+        self.addCleanup(lambda: (setattr(w.socketio, "emit", saved[0]), setattr(w, "play_sound", saved[1]), setattr(w.chat_service, "_votes", saved[2]),
+                                 setattr(w.voice_lines, "pick", saved[3])))
+        w.socketio.emit = lambda event, payload=None, **kw: sent.append((event, payload))
+        w.play_sound = lambda path, url=None: played.append(path)
+        w.voice_lines.pick = lambda mood: "/voice/expressions/%s_default.wav" % mood
+        w.chat_service._votes = w.Storage(w.FileBackend(tempfile.mkdtemp()))          # the app's own storage classes
+        # When anna gives a plus and then a minus
+        w.chat_service.vote("anna", "voice", "service", 1)
+        self.assertNotIn(("expression", {"name": "shocked"}), sent)
+        w.chat_service.vote("anna", "voice", "service", -1)
+        # Then the pages get the shocked expression and the shocked line is played once
+        self.assertIn(("expression", {"name": "shocked"}), sent)
+        self.assertEqual(played, ["/voice/expressions/shocked_default.wav"])
+
 if __name__ == "__main__":
     unittest.main()

@@ -230,6 +230,12 @@ def send_expression(preset):
 pre_exp = PresetExpressor(send=send_expression)
 IDLE_EXPRESSION = "idle"
 
+def character_reaction(expression):
+    """
+    The character's reaction outside an answer (the chat service asks for it, e.g. shocked after a minus, REQ-CHV-006): the expression and the line of its mood.
+    """
+    express_and_reload(expression,line=voice_lines.pick(expression))
+
 def express_and_reload(expression,sound=True,line=None):
     """
     Lets the character make the expression (and plays its voice clip, or the line of the mood when there is one).
@@ -660,7 +666,8 @@ chat_service = ChatService(socketio.emit, chat_log, mood, run_chat_exchange, run
                            spawn=socketio.start_background_task, votes=_votes_store,
                            behaviours=behaviours_from_file(os.path.join(FPATH, cfg.get(CONST.BEHAVIOURS_FILE_KEY, "library/behaviours.json"))),
                            reputable=cfg.get(CONST.REPUTABLE_TRUST_KEY, 0.6),
-                           repair=lambda text: behaviour.apply_rules(text)["text"], remember=_remember)         # the stream is held back and repaired silently (REQ-CHA-014)
+                           repair=lambda text: behaviour.apply_rules(text)["text"], remember=_remember,         # the stream is held back and repaired silently (REQ-CHA-014)
+                           react=lambda expression: character_reaction(expression))         # shocked after a minus (REQ-CHV-006)
 app.register_blueprint(create_chat_ops_blueprint(chat_service))
 app.register_blueprint(create_files_blueprint(_file_store))
 app.register_blueprint(create_items_blueprint(_votes_store, socketio.emit))

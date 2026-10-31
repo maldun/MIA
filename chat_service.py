@@ -128,7 +128,7 @@ class ChatService:
     def __init__(self, emit, log, mood, run_exchange, run_command=None, model_info=None, queue_size=1, user_limit=0,
                  rate_limit=(10, 60), spawn=None, clock=time.monotonic, votes=None, wall_clock=time.time,
                  behaviours=None, reputable=0.6, repair=None, remember=None, review_timeout=1800,
-                 tasks=None, skill_options=None, prepare_task=None, argument_commands=None, files=None, unavailable=()):
+                 tasks=None, skill_options=None, prepare_task=None, argument_commands=None, files=None, unavailable=(), react=None):
         self._emit = emit
         self._tasks = tasks if tasks is not None else TaskRegistry()      # REQ-WFM-029: the tasks (lookup, search, review, ...) register themselves, the core names none of them
         self._unavailable = {str(n).lower() for n in unavailable}         # ids of extensions that did not load: their command says so instead of going to the model
@@ -157,6 +157,7 @@ class ChatService:
         self._repair = repair                  # text -> the text with the violations of the behaviour rules repaired (behaviour.py); None = answers are streamed as they come
         self._behaviours = behaviours          # () -> the names of the behaviours that can be voted on (REQ-CHA-017); read at every use, the list may change; None: no list
         self._remember = remember              # (account, message_id, text) -> ids: the structured memory (REQ-CHA-011); called after a plain chat turn is done, None = off
+        self._react = react                    # (expression) -> None: the character reacts outside an answer, e.g. shocked after a minus (REQ-CHV-006); None = no character
         self._reputable = reputable            # a source with at least this trust is reputable (owner 2026-10-27: a fact has at least one reputable source)
         self._lock = threading.RLock()
         self._queue = collections.deque()
@@ -400,6 +401,11 @@ class ChatService:
         self._emit("score", score)
         self.mood.set_score(score["overall"])          # the feedback shifts the general mood (REQ-CHA-010)
         self.publish_status()
+        if value == -1 and self._react is not None:
+            try:
+                self._react("shocked")                 # every minus hurts her a little (REQ-CHV-006, D-143); the vote is kept even if the character cannot react
+            except Exception:
+                pass
         return {"stored": True, "score": score}
 
     # --- tasks and memos read back from their records (REQ-CHA-019) ---------------------------------------------------
