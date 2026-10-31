@@ -5,14 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>MIA Graph app</title>
   <link rel="stylesheet" href="graph.css">
+  <script src="vendor/vis-network.min.js"></script>
   <script type="module" src="app.js"></script>
 </head>
 <body>
   <header>
     <h1>Graph app</h1>
     <label class="open">Open a graph (JSON) <input id="file" type="file" accept=".json,application/json"></label>
+    <label class="pick" hidden>Graph <select id="pick"></select></label>
   </header>
   <p id="status" role="status"></p>
-  <main id="view" aria-label="graph"></main>
+  <div class="work">
+    <main id="view" aria-label="graph"></main>
+    <aside aria-label="selected node">
+      <h2>Selected</h2>
+      <pre id="detail">Click a node or an edge. Drag a node to move it.</pre>
+    </aside>
+  </div>
 </body>
 </html>
