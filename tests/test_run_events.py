@@ -107,6 +107,18 @@ class Provider(unittest.TestCase):
         for secret in ("sk-123", "hunter2", "me@example.org"):
             self.assertNotIn(secret, raw)
 
+    def test_a_secret_that_is_a_number_is_removed_too(self):
+        """TC-LOG-002, TC-IF-401-02 (D-144, F3 of the N-2.4.3 verification): a payload key named like a password is stored as [removed] also when its value is a number.
+        Example: emit {"password": 123456, "steps": 3} -> stored {"password": "[removed]", "steps": 3}; 123456 is not in the file."""
+        # Given a run
+        self.log.emit("r1", "run_start", {}, "anna")
+        # When an event with a numeric password is written
+        self.log.emit("r1", "tool_call", {"password": 123456, "steps": 3}, "anna")
+        # Then the stored payload has [removed], the count stays, and the file never had the number
+        self.assertEqual(self.log.events("r1")[1]["payload"], {"password": "[removed]", "steps": 3})
+        with open(self.log.path("r1"), encoding="utf-8") as handle:
+            self.assertNotIn("123456", handle.read())
+
     def test_the_payload_must_be_an_object_and_the_run_id_a_plain_name(self):
         """TC-LOG-002: a payload that is not an object and a run id that could leave the folder are refused before anything is written.
         Example: payload "text" is invalid_payload; run id "../x" is invalid_run and the folder stays empty."""
@@ -159,6 +171,33 @@ class Provider(unittest.TestCase):
         self.assertFalse(result["same"])
         self.assertTrue(result["differences"])
         self.assertEqual(code_of(lambda: self.log.compare("a", "none")), "unknown_run")
+
+    def test_the_same_types_with_another_payload_differ(self):
+        """TC-LOG-003, TC-IF-401-04 (F4 of the N-2.4.3 verification): the payloads are compared, not only the types.
+        Example: run_end {"status": "done"} against run_end {"status": "error"} -> not the same, the difference is at 2."""
+        # Given two runs with the same types whose last payload differs
+        for run, status in (("a", "done"), ("b", "error")):
+            self.log.emit(run, "run_start", {"workflow": "lookup"}, "anna")
+            self.log.emit(run, "run_end", {"status": status}, "anna")
+        # When they are compared
+        result = self.log.compare("a", "b")
+        # Then they differ at the second event only
+        self.assertFalse(result["same"])
+        self.assertEqual([d.split(":")[0] for d in result["differences"]], ["at 2"])
+
+    def test_an_extra_event_at_the_end_is_a_difference(self):
+        """TC-LOG-003, TC-IF-401-04 (F4 of the N-2.4.3 verification): a run with one more event at the end is not the same, in both directions.
+        Example: a (run_start, run_end) against b (run_start, run_end, error) -> not the same, "length 2 != 3"."""
+        # Given two runs that agree on their first two events, and the second has one more
+        for run in ("a", "b"):
+            self.log.emit(run, "run_start", {"workflow": "lookup"}, "anna")
+            self.log.emit(run, "run_end", {"status": "done"}, "anna")
+        self.log.emit("b", "error", {"message": "late"}, "anna")
+        # When they are compared both ways
+        forward, backward = self.log.compare("a", "b"), self.log.compare("b", "a")
+        # Then both name the length
+        self.assertEqual(forward, {"same": False, "differences": ["length 2 != 3"]})
+        self.assertEqual(backward, {"same": False, "differences": ["length 3 != 2"]})
 
     def test_the_events_are_append_only_files_one_per_run_and_a_new_instance_goes_on_where_the_old_stopped(self):
         """TC-LOG-005 (REQ-LOG-005, A-28): the events of a run are an append-only file of their own; a restart goes on with the next seq and rewrites nothing.

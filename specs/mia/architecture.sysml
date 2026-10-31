@@ -515,7 +515,7 @@ package MIA_Architecture {
 
         part runLog {
             doc /* Typed events with schema, secret removal, run id. */
-            @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("events.py", "run_log.py", "evidence.py"); }
+            @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("events.py", "run_log.py", "evidence.py", "run_events.py"); }
         }
         part contentStore {
             doc /* Prompts, answers and pages by hash, retention by age. */

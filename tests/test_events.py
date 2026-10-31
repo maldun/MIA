@@ -65,11 +65,20 @@ class Secrets(unittest.TestCase):
         self.assertIn("write to", out["text"])
         self.assertEqual(data["editor_token"], "abc123")                                 # a copy; the original is untouched
 
-    def test_empty_and_non_text_values_stay(self):
-        out = E.redact({"token": "", "email": None, "password": False, "key": 1})
-        self.assertEqual(out["token"], "")
-        self.assertIsNone(out["email"])
-        self.assertIs(out["password"], False)
+    def test_a_secret_named_value_is_removed_whatever_its_type_and_an_empty_text_stays(self):
+        """REQ-LOG-002, IF-401 (D-144, F3 of the N-2.4.3 verification): a value under a secret-like name is removed whatever its type (number, boolean, null, list);
+        an empty text holds no secret and stays, and a name that is not secret-like (`key`, `tokens`) keeps its number.
+
+        Example: {"password": 123456, "email": None} -> both "[removed]"; {"token": ""} -> ""; {"key": 1} -> 1
+        """
+        # Given secret-named keys with values of every type, an empty text and two harmless names
+        data = {"password": 123456, "pin_secret": 4.5, "email": None, "cookie": False, "api_key": ["a", "b"], "token": "", "key": 1, "tokens": 5}
+        # When it is redacted
+        out = E.redact(data)
+        # Then every secret-named value is removed, and the rest stays as it was
+        for key in ("password", "pin_secret", "email", "cookie", "api_key"):
+            self.assertEqual(out[key], E.REDACTED, key)
+        self.assertEqual((out["token"], out["key"], out["tokens"]), ("", 1, 5))
 
     def test_digest(self):
         self.assertEqual(E.digest("a"), E.digest("a"))

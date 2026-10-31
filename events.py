@@ -41,11 +41,12 @@ class EventError(ValueError):
 # --- secrets, hashes ----------------------------------------------------------------------------------------------------------------------
 
 def redact(value, _depth=0):
-    """a copy without secrets (V3): values of fields with a secret-like name, e-mail addresses and bearer tokens in strings"""
+    """a copy without secrets (V3): values of fields with a secret-like name whatever their type (IF-401, D-144; an empty text holds nothing), e-mail addresses and bearer
+    tokens in strings"""
     if _depth > 12:
         return REDACTED
     if isinstance(value, dict):
-        return {k: (REDACTED if isinstance(k, str) and _SECRET_KEY.search(k) and not isinstance(v, (bool, int, float, type(None))) and v != "" else redact(v, _depth + 1))
+        return {k: (REDACTED if isinstance(k, str) and _SECRET_KEY.search(k) and v != "" else redact(v, _depth + 1))
                 for k, v in value.items()}
     if isinstance(value, (list, tuple)):
         return [redact(v, _depth + 1) for v in value]

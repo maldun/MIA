@@ -88,3 +88,55 @@ Open questions (Verify and the owner):
 
 ## Chat account built (2026-10-31, D-138)
 `ChatService` keeps the plain steps of every answer in the record field `steps` (also when no status block is shown, e.g. the chat); `account()` reads `steps`, else the `pipeline` of older records; `pipeline` stays what the block shows. Test `test_a_chat_answer_keeps_its_steps_for_the_account` (`tests/test_chat_backend.py`), red before ("No steps were kept"), green after; the IF-101 suite passes. File outside the node (`chat_service.py`, N-2.1): the owner's decision D-138. Open: A-49, the wording of IF-101 (`account` "from the run log, IF-401" -> from the steps kept with the answer). Commit `7f0d59e`.
+
+## Verify findings fixed (2026-10-31, D-144)
+Tests in the image (`localhost/mia:latest`, `--network none`); feedback, not verification.
+
+### F1 (and F6, first half): a task that asks questions keeps its steps – T-02, REQ-LOG-001, IF-101 v11
+- Test: `tests/test_chat_tasks.py::test_a_task_that_asks_keeps_its_steps_for_the_account` (a task with `needs=("ask",)` reports two steps around its question). Red before: account
+  `[{'seq': 1, 'plain': 'No steps were kept for this answer.'}]`; green after.
+- Fix: `chat_service.py` `pipeline_event` keeps the plain steps also while `_late` (dropped `and not self._late`); the progress of such a task still goes only to the status card.
+- F6: the Example line of `tests/test_chat_backend.py::test_a_chat_answer_keeps_its_steps_for_the_account` now names the `talk` step it asserts.
+- Green after: `test_chat_tasks.py` (12), `test_chat_backend.py` (41), contract `test_if_101_chat_api.py` (60, 3 skipped). File outside the node (`chat_service.py`, N-2.1): D-144.
+
+### F2 (and F6, second half): the replay names its differences – T-03, REQ-LOG-003
+- Test: `tests/test_run_log_node.py::test_a_changed_run_is_reported_as_a_difference_and_not_as_a_replay` now asserts the status (`done` / `error`), the named divergence (the search
+  that was not recorded) and that the claim and the draft of the original are named "only in the first run"; its docstring says so (F6).
+- Red before: on a scratch copy with the mutant of F2 (`reproduce.py` `differences = []`) the test fails (the old one passed); green on the real code. No production code changed: the
+  code was right, the test was the gap.
+- Green after: `test_run_log_node.py` (4), `test_run_explain.py` (16).
+
+### F4: the comparison of two runs – T-03, REQ-LOG-003, IF-401
+- Tests: `tests/test_run_events.py::test_the_same_types_with_another_payload_differ` (same types, another `run_end` payload -> different at 2) and
+  `::test_an_extra_event_at_the_end_is_a_difference` (one more event at the end -> `length 2 != 3`, and `3 != 2` the other way).
+- Red before: on scratch copies, the mutant "compare by types only" fails the first, the mutant "length check ignored" fails the second; both green on the real code. No real bug, no
+  production code changed.
+- Green after: `test_run_events.py` (14), contract `test_if_401_run_events.py` (10).
+
+### F3: a secret-named value is removed whatever its type – T-01, REQ-LOG-002, IF-401
+- Tests: `tests/test_events.py::test_a_secret_named_value_is_removed_whatever_its_type_and_an_empty_text_stays` (replaces `test_empty_and_non_text_values_stay`, which pinned the
+  old exemption the owner reversed in D-144) and `tests/test_run_events.py::test_a_secret_that_is_a_number_is_removed_too` (`{"password": 123456}` through `RunEvents.emit`).
+- Red before: `123456 != '[removed]'` in both; green after.
+- Fix: `events.redact` no longer exempts numbers, booleans and `None` under a secret-like name; a list or dict there is removed whole.
+- Kept, open to the owner: an empty text (`""`) under such a name stays `""` (it holds nothing; the old rule had the same exemption). D-144 speaks of the type only. Options:
+  (a) keep `""` (recommended: nothing to hide, and a log that shows "no token was set" helps), (b) remove it too.
+- Not changed (verification report, F3 "related"): a bare `key` or `passphrase` is not matched, and `password=…` inside a plain text stays. Recorded, not part of D-144.
+- Checked: no production payload carries a number under a secret-like name (grep of the code outside `tests/`, `specs/`), so no count goes missing.
+- Green after: `test_events.py` (23), `test_run_events.py` (15), contract `test_if_401_run_events.py` (10), `test_pipeline.py` (26), `test_content_store.py` (12), `test_run_explain.py` (16),
+  `test_run_log_node.py` (4), `test_runner_interfaces.py` (8).
+
+### F5: the model part `runLog` names `run_events.py` – T-05 (model), REQ-LOG-005, IF-401
+- Test: `tests/test_run_log_files.py::test_the_model_part_of_the_run_log_names_the_provider_of_if_401` reads the modules of the part `runLog` from `specs/mia/architecture.sysml`.
+  Red before (`'"run_events.py"' not found in '"events.py", "run_log.py", "evidence.py"'`), green after.
+- Fix: `architecture.sysml` part `runLog` @Implementation modules += `run_events.py` (line 518). `bash tools/check_sysml.sh specs/mia/architecture.sysml`: ok, 0 errors, 0 warnings;
+  `python3 -I tools/check_sysml_model.py .`: OK.
+
+### Still open (recorded, not part of D-144)
+- F7: the IF-101 suite does not check v11 (the account of an answer without a status block); an amendment (protected suite).
+- F8: the node's `test-spec.md` has no `## Scenarios` section (trace_check M39, 22 nodes); Phase 2.
+- F9: the IF-401 suite fails test-doc rules T2 and T3 (D-138 (4)); an amendment later.
+- Open question of F3: the empty text under a secret-like name (options above).
+
+### Full suite before the hand-over (2026-10-31)
+All 156 `tests/test_*.py`, one container each (`localhost/mia:latest`, `--network none`), this branch against goal/v1 4c18cde (git archive): the same two fail on both,
+`test_amendment_report` (no git in the image) and `test_harness` (rt_edit); no new failure. Ready for re-verification (D-144).
