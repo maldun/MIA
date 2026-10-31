@@ -13,7 +13,7 @@ sys.path.insert(0, os.path.dirname(HERE))
 sys.path.insert(0, os.path.join(HERE, "helpers"))
 
 from markers import mark                                  # noqa: E402
-from tool_calls import ToolCalls, ToolCallError, TOOLS   # noqa: E402
+from tool_calls import ToolCalls, ToolCallError, TOOLS, build_tool_calls   # noqa: E402
 
 PAGE = "The tower is 330 m high. It was finished in 1889."
 
@@ -233,6 +233,45 @@ class ToolCallsTests(unittest.TestCase):
         # Then: the page comes back unchanged as untrusted web text and the call is counted
         self.assertEqual(out, {"output": fake_fetch("https://example.org/a"), "trust": "web"})
         self.assertEqual(t.used("r1"), {"fetch_page": 1})
+
+
+class AppTrust:
+    """the trust table of the app: one entry for pages, one for works"""
+    def for_url(self, url):
+        return {"class": "web", "score": 0.5}
+
+    def for_work(self, work, as_of=None):
+        return {"class": "journal", "score": 0.9}
+
+
+class AppScholar(FakeScholar):
+    """the scholar of the app: a Crossref client for one DOI and the retraction check"""
+    def __init__(self):
+        self.crossref = self
+        self.asked = []
+
+    def lookup(self, doi):
+        return {"doi": doi, "title": "On towers"} if doi == "10.1/x" else None
+
+    def verify_retraction(self, work, errors=None):
+        self.asked.append(work.get("doi"))
+
+
+class AppDoorTests(unittest.TestCase):
+    @mark.req("REQ-TLS-003")
+    def test_the_door_of_the_app_has_every_source(self):
+        """TC-TLS-003: the door the app builds gets the trust of works, the retraction check and the DOI lookup (Verify finding F2 of N-2.4.2).
+
+        Example: build_tool_calls(...).call(run, "source_record", {"ref": "doi:10.1/x"}) -> trust 0.9 of the work, not source_error
+        """
+        # Given: the web tools, the scholar and the trust table of the app
+        scholar = AppScholar()
+        door = build_tool_calls({"web_search": (fake_search, "search_calls"), "fetch_page": (fake_fetch, "fetch_calls")}, scholar, AppTrust(), None)
+        # When: a DOI is looked up through the door
+        out = door.call({"id": "r1", "limits": {}}, "source_record", {"ref": "doi:10.1/x"})
+        # Then: the record carries the trust of the work, and the retraction check is wired
+        self.assertEqual((out["output"]["ref"], out["output"]["class"], out["output"]["trust"]), ("doi:10.1/x", "journal", 0.9))
+        self.assertEqual(door.retractions, scholar.verify_retraction)
 
 
 if __name__ == "__main__":

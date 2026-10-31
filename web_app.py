@@ -71,7 +71,7 @@ from .core import Core
 from .library import Library
 from .pipeline_model import ModelTurns, OllamaModel, TurnClient
 from .run_events import RunEvents
-from .tool_calls import ToolCalls
+from .tool_calls import build_tool_calls
 from . import web_tools
 from .web_tools import build_web_tools
 from .extension_loader import load_extensions
@@ -588,7 +588,7 @@ def _run_environment():
 
 
 # the runner reaches the tools only through IF-402 and writes its events also through IF-401 (REQ-RUN-012, D-120, D-122)
-tool_calls = ToolCalls(web_search=_web_tools["web_search"][0], fetch_page=_web_tools["fetch_page"][0], scholar=_scholar, trust=_source_trust.for_url, sandbox=sandbox_router)
+tool_calls = build_tool_calls(_web_tools, _scholar, _source_trust, sandbox_router)
 run_events = RunEvents(os.path.join(_runs_dir, "events"))
 core = Core(_own_path(CONST.SKILLS_DIR_KEY, CONST.DEFAULT_SKILLS_DIR), library, _runs_dir, model=pipeline_model, sandbox=sandbox_router, environment=_run_environment,
             store=content_store, store_texts=(lambda name: True) if cfg.get("store_chat_texts") else None,

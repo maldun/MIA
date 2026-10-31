@@ -33,6 +33,15 @@ TOOLS = tuple(TRUST)
 EXTERNAL = ("web_search", "fetch_page", "fetch_passages", "scholar_search", "source_record")
 
 
+def build_tool_calls(web_tools, scholar, trust_table, sandbox):
+    """the door as the app builds it: web_tools of web_tools.build_web_tools, scholar of scholar.build_scholar, trust_table of source_trust.build_trust,
+    sandbox of sandbox.create_router. Every source is handed in, so the trust of works, the retraction check and the DOI lookup work in the app, not only
+    in tests (REQ-TLS-003, Verify finding F2 of N-2.4.2)"""
+    return ToolCalls(web_search=web_tools["web_search"][0], fetch_page=web_tools["fetch_page"][0], scholar=scholar, trust=trust_table.for_url,
+                     sandbox=sandbox, work_trust=trust_table.for_work, retractions=scholar.verify_retraction,
+                     work_lookup=scholar.crossref.lookup if scholar.crossref is not None else None)
+
+
 class ToolCallError(Exception):
     """IF-402 errors. code: unknown_tool | budget (detail: the tool) | source_error (detail: what the source said)."""
 
