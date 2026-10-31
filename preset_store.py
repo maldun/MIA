@@ -64,8 +64,8 @@ def _is_number(value):
 class PresetStore:
     def __init__(self, folder, defaults_file=None, shape_keys_file=None, gestures_file=None, protected=None, gestures_provider=None):
         """
-        folder: where the preset files live (created, and filled from defaults_file when empty)
-        defaults_file: {"presets": [...]} used to fill an empty folder (the library shipped with the character)
+        folder: where the preset files live (created; the shipped presets it lacks are added from defaults_file at every start)
+        defaults_file: {"presets": [...]}, the library shipped with the character
         shape_keys_file / gestures_file: names that are accepted (None: no check)
         protected: function returning the preset names that must not be deleted or renamed
         """
@@ -76,7 +76,7 @@ class PresetStore:
         self._known_gestures = self._read_names(gestures_file, "gestures")
         self._gestures_provider = gestures_provider      # function() -> every gesture name (built in and made in the editor)
         os.makedirs(folder, exist_ok=True)
-        if defaults_file and not self.names():
+        if defaults_file:
             self._seed(defaults_file)
 
     @property
@@ -96,15 +96,22 @@ class PresetStore:
             return {entry["name"] for entry in json.load(fp)[key]}
 
     def _seed(self, defaults_file):
+        """adds the shipped presets the folder lacks and never overwrites one that exists: a folder filled by an older version gets the
+        presets shipped since (shocked, REQ-CHV-006) and keeps the user's edits (R1 of the N-1.2 re-verification, D-167)"""
         with open(defaults_file) as fp:
             presets = json.load(fp)["presets"]
+        existing, added = set(self.names()), 0
         for raw in presets:
+            if raw.get("name") in existing:
+                continue
             try:
                 preset, _ = self.normalize(raw)
                 self._write(preset)
+                added += 1
             except PresetError as exc:
                 logger.error(f"default preset {raw.get('name')} skipped: {exc.message}")
-        logger.info(f"preset folder {self.folder} filled with {len(self.names())} default presets")
+        if added:
+            logger.info(f"preset folder {self.folder}: {added} shipped presets added")
 
     def _path(self, name):
         if not isinstance(name, str) or not NAME_RE.match(name):

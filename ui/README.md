@@ -123,7 +123,7 @@ The chat page connects to the socket of the address it was loaded from, so the s
 
 - **Backend:** the preset API is part of MIA's Flask app (`presets_api.py`, storage in `preset_store.py`), not a second FastAPI server:
   the page, the character and the presets come from one server with one set of access rules (HTTPS proxy, allowed origins, token).
-  One json file per preset in `presets_dir` (default `data/presets`, git-ignored), filled from `godot/presets/library.json` on first use.
+  One json file per preset in `presets_dir` (default `data/presets`, git-ignored), at every start the presets of `godot/presets/library.json` the folder lacks are added (an existing preset is never overwritten).
   REST: `GET /api/presets` (all + version + `token_required` + protected names), `GET /api/presets/version`, `GET /api/presets/<name>`,
   `POST /api/presets`, `PUT /api/presets/<name>` (a different name in the body renames), `DELETE /api/presets/<name>` (409 for presets
   MIA's emotions use, `?force=1` overrides), `GET /api/shape-keys`, `GET /api/gestures`.
