@@ -1,4 +1,5 @@
-// The voice player (N-1.3, IF-112): TC-VPB-001 to TC-VPB-003 on a fake audio element. node --test "tests/js/*.test.mjs"
+// The voice player (N-1.3, IF-112): TC-VPB-001 to TC-VPB-003 on fake audio elements, and the page wiring of initSound. node --test "tests/js/*.test.mjs"
+// Markers: `// mark.req(...)` above a test, as in the contract suites (trace_check reads Python markers only).
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -74,6 +75,7 @@ function make(extra = {}) {
   return { audio, player, speaking };
 }
 
+// mark.req("REQ-VPB-001")
 test('TC-VPB-001: five lines play in the order they arrive and never overlap', async () => {
   const { audio, player, speaking } = make();
   ['a', 'b', 'c', 'd', 'e'].forEach((id) => player.enqueue(line(id)));
@@ -84,6 +86,7 @@ test('TC-VPB-001: five lines play in the order they arrive and never overlap', a
   assert.deepEqual(speaking, [true, false]);
 });
 
+// mark.req("REQ-VPB-001")
 test('TC-VPB-001: a line that arrives while another plays waits for it', async () => {
   const { audio, player } = make();
   player.enqueue(line('a'));
@@ -95,6 +98,7 @@ test('TC-VPB-001: a line that arrives while another plays waits for it', async (
   assert.deepEqual(ids(audio), ['a', 'b']);
 });
 
+// mark.req("REQ-VPB-001")
 test('TC-VPB-001: the end of a line is reported with the line, so the server can follow the serial', async () => {
   const ended = [];
   const { audio, player } = make({ onEnded: (l) => ended.push(l.serial) });
@@ -104,6 +108,7 @@ test('TC-VPB-001: the end of a line is reported with the line, so the server can
   assert.deepEqual(ended, [7]);
 });
 
+// mark.req("REQ-VPB-002")
 test('TC-VPB-002: a muted device plays no sound and a second device still does', async () => {
   const one = make();
   const two = make();
@@ -117,6 +122,7 @@ test('TC-VPB-002: a muted device plays no sound and a second device still does',
   assert.equal(one.audio.muted, false);
 });
 
+// mark.req("REQ-VPB-002")
 test('TC-VPB-002: stop ends the playing line, clears the queue and ends speaking', async () => {
   const { audio, player, speaking } = make();
   ['a', 'b', 'c'].forEach((id) => player.enqueue(line(id)));
@@ -129,6 +135,7 @@ test('TC-VPB-002: stop ends the playing line, clears the queue and ends speaking
   assert.equal(player.queued, 0);
 });
 
+// mark.req("REQ-VPB-002")
 test('TC-VPB-002: a page that is not the owner of the voice stays silent', async () => {
   const { audio, player } = make();
   player.setOwner(false);
@@ -141,6 +148,7 @@ test('TC-VPB-002: a page that is not the owner of the voice stays silent', async
   assert.deepEqual(ids(audio), ['b']);
 });
 
+// mark.req("REQ-VPB-002")
 test('TC-VPB-002: losing the voice while a line plays stops it and drops the queue', async () => {
   const { audio, player } = make();
   player.enqueue(line('a')); player.enqueue(line('b'));
@@ -150,6 +158,7 @@ test('TC-VPB-002: losing the voice while a line plays stops it and drops the que
   assert.equal(player.queued, 0);
 });
 
+// mark.req("REQ-VPB-003")
 test('TC-VPB-003: a line that cannot be loaded is reported once and the next one plays', async () => {
   const failed = [];
   const { audio, player } = make();
@@ -162,6 +171,7 @@ test('TC-VPB-003: a line that cannot be loaded is reported once and the next one
   assert.deepEqual(ids(audio), ['a', 'b', 'c']);
 });
 
+// mark.req("REQ-VPB-003")
 test('TC-VPB-003: a line whose play() fails is skipped, reported once, and the conversation goes on', async () => {
   const failed = [];
   const { audio, player } = make();
@@ -173,6 +183,7 @@ test('TC-VPB-003: a line whose play() fails is skipped, reported once, and the c
   assert.deepEqual(ids(audio), ['b']);
 });
 
+// mark.req("IF-112", "REQ-VPB-001")
 test('blocked autoplay holds the lines, nothing is lost, and allowAutoplay plays them in order', async () => {
   const blocked = [];
   const { audio, player, speaking } = make();
@@ -190,6 +201,7 @@ test('blocked autoplay holds the lines, nothing is lost, and allowAutoplay plays
   assert.deepEqual(ids(audio), ['a', 'b', 'c']);
 });
 
+// mark.req("IF-112", "REQ-VPB-001")
 test('while autoplay is blocked no new attempt is made and onBlocked is called once, even when the refusal is immediate', async () => {
   const blocked = [];
   const audio = fakeAudio();
@@ -210,6 +222,7 @@ test('while autoplay is blocked no new attempt is made and onBlocked is called o
   assert.deepEqual(ids(audio), ['a', 'b', 'c']);
 });
 
+// mark.req("IF-112", "REQ-VPB-001")
 test('a stop forgets a held autoplay: the next line is tried again', async () => {
   const blocked = [];
   const { audio, player } = make();
@@ -225,6 +238,7 @@ test('a stop forgets a held autoplay: the next line is tried again', async () =>
   assert.deepEqual(ids(audio), ['b']);
 });
 
+// mark.req("IF-112")
 test('claim is asked at most every 3 s', () => {
   const sent = [];
   let now = 10000;
@@ -238,6 +252,7 @@ test('claim is asked at most every 3 s', () => {
   assert.deepEqual(sent.at(-1), { initial: true });
 });
 
+// mark.req("REQ-VPB-003")
 test('TC-VPB-003: on a spec-like element a missing line is reported once and the next lines are heard (F1)', async () => {
   const failed = [];
   const audio = specAudio(['/audio/a.wav']);
@@ -254,6 +269,7 @@ test('TC-VPB-003: on a spec-like element a missing line is reported once and the
   assert.equal(audio.overlaps, 0);
 });
 
+// mark.req("REQ-VPB-002")
 test('TC-VPB-002: a stop while a line starts reports no error, and the next line keeps its serial (F1)', async () => {
   const failed = [];
   const ended = [];
@@ -309,6 +325,7 @@ function page({ stored = {}, missing = [] } = {}) {
 
 const reload = (id, serial = 1) => ({ url: `/audio/${id}.wav`, serial });
 
+// mark.req("REQ-VPB-002")
 test('TC-VPB-002: the page can stop the voice: the playing line ends, the queue is empty, the character stops talking (F5)', async () => {
   const p = page();
   p.server('audio_reload', reload('a')); p.server('audio_reload', reload('b'));
@@ -322,12 +339,14 @@ test('TC-VPB-002: the page can stop the voice: the playing line ends, the queue 
   assert.deepEqual(ids(p.audio), ['a']);
 });
 
+// mark.req("REQ-VPB-002")
 test('TC-VPB-002: the composer\'s Stop button also stops the voice (F5)', () => {
   const app = readFileSync(new URL('../../templates/static/chat/app.js', import.meta.url), 'utf8');
   const composer = app.slice(app.indexOf('composer = initComposer('));
   assert.match(composer.slice(0, composer.indexOf('});')), /onStop: \(\) => \{ socket\.emit\('chat_stop'\); sound\.stop\(\); \}/);
 });
 
+// mark.req("REQ-VPB-002")
 test('TC-VPB-002: a page that is told another page plays stays silent, and plays again when it gets the voice back (F4)', async () => {
   const p = page();
   p.server('audio_owner', { sid: 'other' });
@@ -340,6 +359,7 @@ test('TC-VPB-002: a page that is told another page plays stays silent, and plays
   assert.deepEqual(ids(p.audio), ['b']);
 });
 
+// mark.req("REQ-VPB-002")
 test('TC-VPB-002: a muted player drops the waiting lines and the new ones, as IF-112 says; the playing line ends without sound (F6)', async () => {
   const { audio, player, speaking } = make();
   ['a', 'b', 'c'].forEach((id) => player.enqueue(line(id)));
@@ -357,6 +377,7 @@ test('TC-VPB-002: a muted player drops the waiting lines and the new ones, as IF
   assert.deepEqual(ids(audio), ['a', 'e']);
 });
 
+// mark.req("REQ-VPB-002")
 test('TC-VPB-002: a device that was muted stays muted after a reload and drops the lines; the toggle brings the voice back (F6, F4)', async () => {
   const p = page({ stored: { 'mia.muted': '1' } });
   assert.equal(p.audio.muted, true);
@@ -372,6 +393,7 @@ test('TC-VPB-002: a device that was muted stays muted after a reload and drops t
   assert.deepEqual(p.audio.started, [{ url: '/audio/b.wav', audible: true }]);
 });
 
+// mark.req("REQ-VPB-003")
 test('TC-VPB-003: on the page a missing line is reported once in the browser console, no error is shown, and the next line plays (F2)', async () => {
   const p = page({ missing: ['/audio/a.wav'] });
   p.server('audio_reload', reload('a', 1)); p.server('audio_reload', reload('b', 2));

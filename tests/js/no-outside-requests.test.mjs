@@ -14,6 +14,7 @@ function sources() {
   return [INDEX, ...files].map((path) => ({ path, text: readFileSync(path, 'utf8') }));
 }
 
+// mark.req("REQ-VPB-004")
 test('TC-VPB-004: no source of the chat page names an address outside the host', () => {
   const found = [];
   for (const { path, text } of sources()) {
@@ -25,6 +26,7 @@ test('TC-VPB-004: no source of the chat page names an address outside the host',
   assert.deepEqual(found, []);
 });
 
+// mark.req("REQ-VPB-004")
 test('TC-VPB-004: the page loads its scripts and styles from its own host only', () => {
   const html = readFileSync(INDEX, 'utf8');
   for (const match of html.matchAll(/(?:src|href)="([^"]+)"/g)) {
@@ -33,6 +35,7 @@ test('TC-VPB-004: the page loads its scripts and styles from its own host only',
   }
 });
 
+// mark.req("REQ-VPB-004")
 test('TC-VPB-004: the voice player only reads the url the server gave it (relative to the host)', () => {
   const text = readFileSync(join(STATIC, 'sound.js'), 'utf8');
   assert.ok(!/fetch\(|XMLHttpRequest|new WebSocket/.test(text), 'sound.js makes no request of its own');
