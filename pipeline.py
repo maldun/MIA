@@ -496,7 +496,7 @@ class Runner:
             if limit is not None and count > limit:
                 raise BudgetExceeded(tool.budget_key)
         args = resolve(node.get("args", {}), ctx)
-        if node["tool"] in self.door_tools:
+        if tool.func is None:                    # a tool of the door; one handed to this run (run(tools=)) has its own function and wins (F11)
             return self._call_door(st, node, args)
         return tool.func(**args)
 
