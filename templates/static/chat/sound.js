@@ -43,7 +43,7 @@ export function mayClaim({ visible, now, lastClaim, every = CLAIM_EVERY_MS }) {
 
 /**
  * Plays lines one after the other on one audio element (IF-112, REQ-VPB-001 to REQ-VPB-003).
- * Muting silences this device only: the lines still run (without sound), so the character and the server keep in step.
+ * Muting silences this device only: the waiting lines and the new ones are dropped (IF-112); the playing line ends without sound.
  */
 export class VoicePlayer {
   constructor({ audio, onEnded = () => {}, emitClaim = () => {}, clock = Date.now }) {
@@ -77,13 +77,14 @@ export class VoicePlayer {
   }
 
   enqueue(line) {
-    if (!this.owner) return;
+    if (!this.owner || this.audio.muted) return;
     this.queue.push(line);
     if (!this.current && !this._held) this._startNext();      // held: the browser refused autoplay, nothing is tried before allowAutoplay()
   }
 
   mute(value) {
     this.audio.muted = Boolean(value);
+    if (this.audio.muted) this.queue.clear();
   }
 
   /** ends the playing line and clears the queue */

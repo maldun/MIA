@@ -339,3 +339,35 @@ test('TC-VPB-002: a page that is told another page plays stays silent, and plays
   await flush(); await flush();
   assert.deepEqual(ids(p.audio), ['b']);
 });
+
+test('TC-VPB-002: a muted player drops the waiting lines and the new ones, as IF-112 says; the playing line ends without sound (F6)', async () => {
+  const { audio, player, speaking } = make();
+  ['a', 'b', 'c'].forEach((id) => player.enqueue(line(id)));
+  await flush();
+  player.mute(true);
+  assert.equal(player.queued, 0);
+  player.enqueue(line('d'));
+  assert.equal(player.queued, 0);
+  audio.finish(); await flush();
+  assert.deepEqual(ids(audio), ['a']);
+  assert.deepEqual(speaking, [true, false]);
+  player.mute(false);
+  player.enqueue(line('e'));
+  await flush();
+  assert.deepEqual(ids(audio), ['a', 'e']);
+});
+
+test('TC-VPB-002: a device that was muted stays muted after a reload and drops the lines; the toggle brings the voice back (F6, F4)', async () => {
+  const p = page({ stored: { 'mia.muted': '1' } });
+  assert.equal(p.audio.muted, true);
+  p.server('audio_reload', reload('a'));
+  await flush(); await flush();
+  assert.deepEqual(p.audio.started, []);
+  assert.deepEqual(p.speaking, []);
+  p.els.muteToggle.click();
+  assert.equal(p.values['mia.muted'], '0');
+  assert.equal(p.els.muteToggle.attributes['aria-checked'], 'false');
+  p.server('audio_reload', reload('b'));
+  await flush(); await flush();
+  assert.deepEqual(p.audio.started, [{ url: '/audio/b.wav', audible: true }]);
+});
