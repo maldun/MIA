@@ -141,3 +141,6 @@ Each reproduced in a failing test first where it can fail; built by the coordina
 | N-1 of the re-verification: evidence as one string cut into characters | a string is one passage | `test_evidence_as_one_text_is_read_as_one_passage` | `ad9f482` |
 
 Decided, not built: 1 (the planted figure; A-40 drafted to retire the case; the rule for conflicting values and its conflict with the label `fail`, D-132). Deferred: 3, 4 (FB-03). Open from the re-verification: N-2 (wrong types counted, then a raw error), N-3 (the mock has no `result` and no `failed`), N-4 (the Bounds row of IF-402 still says only the query leaves the host), N-6 (the runner counts a call the door refuses with `bad_arguments`), F-9 flows of `toolDoor`, THR-001 without the planted figure, the gaps G-1 to G-4. Numbering note: the owner's questionnaire (D-132) numbered the report's F-12 and F-13 as #10 and #11.
+
+## Re-verification findings N-2 built (2026-10-31, D-133; branch v1-f7-n2)
+The door checks the argument types IF-402 names (text, a list of text, a dictionary, a count; True is not a count) and refuses with `bad_arguments` before counting; test `test_arguments_of_the_wrong_type_are_refused_before_they_count`, red before (raw TypeError). Commit `b667a43`. Contract text: A-45 (IF-402 v5), drafted on goal/v1 (`56425f6`). Open: the mock does not check types (N-3 with it).
