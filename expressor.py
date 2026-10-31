@@ -82,7 +82,8 @@ class PresetExpressor(ExpressorInterface):
     The preset is the "preset" entry of the expression (default: the expression key itself).
     """
     DATA_TYPE_KEY = PRESET_KEY
-    UNKNOWN_EXPRESSION_MSG = "Unknown expression {key}, keeping the current one!"
+    UNKNOWN_EXPRESSION_MSG = "Unknown expression {key}, showing neutral!"
+    NEUTRAL = "neutral"
 
     def __init__(self,expressions=EXPRESSION_FILE,send=None):
         """
@@ -100,12 +101,12 @@ class PresetExpressor(ExpressorInterface):
     def express(self,key):
         """
         Sends the preset of the expression to the character and returns its name.
-        Unknown expressions are logged and ignored, they must not crash MIA.
+        An unknown expression is logged and shows neutral (IF-111 v2, A-48); it must not crash MIA.
         """
         if key not in self._expressions:
             logger.error(self.UNKNOWN_EXPRESSION_MSG.format(key=key))
-            return None
-        preset = getattr(self,key)
+            key = self.NEUTRAL
+        preset = getattr(self,key,self.NEUTRAL)
         self.current = preset
         if self._send is not None:
             self._send(preset)
