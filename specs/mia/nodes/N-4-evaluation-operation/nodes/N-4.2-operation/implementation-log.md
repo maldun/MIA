@@ -207,3 +207,8 @@ Open questions:
 - Pins: `postgres:16` (compose.yaml) and the base `python:3.12-slim` (Containerfile) by their local digests, checked with `create --pull=never`; tests in `test_runbook.py`, red before; `ae54227`. Index digests at the next pin update (owner).
 - Runbook: section "Files a fresh checkout lacks" (`mia.vrm`, the two Kokoro files); test red before; `c3471ea`.
 - Recorded only: F-T06-1, `deploy/.env` in the image (D-131); the offer line in the container log stays; `up.sh db` stays the full install.
+
+## Fixes of the Verify findings (2026-10-31, D-144, branch `v1-n42-ops3`)
+Each finding test-first: the new test red against goal/v1 (4c18cde), then the fix. Tests reported green are feedback, not verification.
+
+- F1 (medium, REQ-OPR-005): `deploy/up.sh` `make_backup` now fails without leaving the copy of the volume (it removes its mktemp folder whatever the tools do), and both callers start MIA again on failure (backup; the backup of the state before the restore of an old archive also removes the restore folder, nothing is copied in). Tests in `tests/test_up_backup.py` (failing `backup.sh` stub, `TMPDIR` in the test folder): `test_a_failing_backup_starts_mia_again_and_leaves_no_copy`, `test_a_failing_backup_before_a_restore_starts_mia_again_and_leaves_no_copy`; red before (2 failures: no `podman start mia1`), green after; `test_up_backup` 7, `test_up_fresh` 4, `test_first_account_up` 4 green on the host. A partial archive a failing tool may leave is not removed (the tool's own business).

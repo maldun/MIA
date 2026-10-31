@@ -179,16 +179,16 @@ if [ "${1:-}" = "backup" ] || [ "${1:-}" = "restore" ]; then
   DB_ARGS=(--db-container "$DB" --db-user mia --db-name mia)
   TOOLS="$(dirname "$HERE")/tools"
   DATA=/opt/mia/MIA/data
-  make_backup() {      # $1: archive; MIA is stopped before and started after by the caller
-    local tmp; tmp="$(mktemp -d)"
-    $ENGINE cp "$CONTAINER:$DATA/." "$tmp/"
-    if [ -n "$DB" ]; then bash "$TOOLS/backup.sh" "$1" "${DB_ARGS[@]}" --data "$tmp"; else tar -czf "$1" -C "$tmp" .; fi
+  make_backup() {      # $1: archive; MIA is stopped before and started after by the caller; fails without leaving the copy of the volume (histories, account hashes) behind
+    local tmp ok=""; tmp="$(mktemp -d)"
+    if $ENGINE cp "$CONTAINER:$DATA/." "$tmp/" && if [ -n "$DB" ]; then bash "$TOOLS/backup.sh" "$1" "${DB_ARGS[@]}" --data "$tmp"; else tar -czf "$1" -C "$tmp" .; fi; then ok=1; fi
     rm -rf "$tmp"
+    [ -n "$ok" ]
   }
   if [ "$MODE" = "backup" ]; then
     OUT="$(abspath "${2:-mia-backup-$(date +%Y%m%d-%H%M).tar.gz}")"
     $ENGINE stop "$CONTAINER" >/dev/null
-    make_backup "$OUT"
+    make_backup "$OUT" || { $ENGINE start "$CONTAINER" >/dev/null; echo "the backup failed (see above); MIA started again"; exit 1; }
     $ENGINE start "$CONTAINER" >/dev/null
     echo "backup written: $OUT ($(du -h "$OUT" | cut -f1))"
   else
@@ -205,7 +205,7 @@ if [ "${1:-}" = "backup" ] || [ "${1:-}" = "restore" ]; then
       bash "$TOOLS/restore.sh" "$IN" "${DB_ARGS[@]}" --data "$TMP" || { $ENGINE start "$CONTAINER" >/dev/null; rm -rf "$TMP"; exit 1; }
     else
       SAFE="$CALLER/mia-before-restore-$(date +%Y%m%d-%H%M%S).tar.gz"
-      make_backup "$SAFE"
+      make_backup "$SAFE" || { $ENGINE start "$CONTAINER" >/dev/null; rm -rf "$TMP"; echo "the backup of the state before the restore failed (see above): nothing restored, MIA started again"; exit 1; }
       echo "state before the restore saved: $SAFE"
       tar -xzf "$IN" -C "$TMP" --no-same-owner
     fi
