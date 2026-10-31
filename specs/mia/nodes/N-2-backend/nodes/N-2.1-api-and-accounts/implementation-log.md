@@ -83,3 +83,21 @@ Local coder: `n21-t05-storage-imports` ok; `n21-t05-python-version` fixed (quote
 
 - **F-7 (TC-API-013 red, not fixed): the container alone does not serve the chat page.** Reproduced on a copy of this branch: `podman run --network none --user 0 -v <copy>:/opt/mia/MIA:z localhost/mia:latest` with `deploy/setup_cfg.compose.json` (and `ollama_wait` 1 s instead of 600): `__main__.py` line 76 `comm.calibrate()` talks to the model server and the start ends with `ModelServerUnreachable` ("Can't reach my brain right now"); with the default wait it waits 600 s first ("The page starts when it answers"). AC-29 asks "the container starts alone against the mocks and serves the chat page". There is no mock of the model server that speaks HTTP (the IF-103 mock is an in-process object, `tests/helpers/mocks/if_103_model_server.py`). Options (question Q-4 of the report): (a) amendment A-52: an HTTP mock of IF-103 (an Ollama-shaped stand-in with `/api/tags`, `/api/chat` streaming, `/api/show`) in `tests/helpers/mocks/` and a stage-3 test that starts the image alone against it and fetches `/`; MIA's start stays as it is; (b) MIA starts without a model server (the calibration is skipped with a log line when the server does not answer after `ollama_wait`, the page says "can't reach my brain" as the chat does already): a change of the start behaviour, so a requirement first (N-4.2 owns `__main__.py`); (c) accept SMOKE-MIA-003 (D-133: "mia alone" = the Python contract suites in the image) plus the full stack as the evidence of AC-29 for N-2.1. Recommendation: (a).
 - Observation (not N-2.1): `library.py` (the pipeline library of the core) imports `sqlite3` for its search index `data/library.sqlite` (a cache built from the files, "can be deleted any time"); AC-15 of the root says "no database driver is imported outside the storage client". Whether a rebuildable index counts is for the owner of `library.py` (N-2.4) or Verify.
+
+## Hand-over for Verify (2026-10-31, branch v1-n21)
+| Task | State | Commits |
+|---|---|---|
+| T-01, T-02 | done before | see above |
+| T-03 | done (tests for TC-API-001, TC-API-002; IF-101 suite real side 57 pass, 3 skip for N-2.2, N-2.5 or out of scope) | `7452f85` |
+| T-04 | done in the code (TC-API-014); TC-API-016 waits for the install of **A-51** (draft, scratch-tested) | `bbe695e`, draft `63cd505` |
+| T-05 | TC-API-011, TC-API-012 done; **TC-API-013 stopped at a decision** (F-7) | `bfa1e3e` |
+
+Full run before the hand-over (in the image, 175 files: `tests/test_*.py` and the Python contract suites): all pass except the known two, `test_amendment_report` (no git in the image) and `test_harness` (rt_edit has 2 cases, wants 30). JS: `tests/js` 131 pass; JS contract suites 16 pass, 16 skipped (the real sides). Feedback, not verification.
+
+Open for Verify and the owner:
+1. F-7 / TC-API-013: the container alone needs a model server; options (a) A-52 HTTP mock of IF-103, (b) start without a model server (requirement first), (c) accept SMOKE-MIA-003 as the evidence.
+2. A-51 to install (TC-API-016 real side); the JS real side of IF-104 needs a running Backend (integration step of N-2).
+3. Q-T03-1: REQ-API-002 "shared data": presets, gestures and workflow saves send no IF-101 event (none exists in the contract).
+4. IF-104 bounds (500 nodes, 200 ms) are a proposal in the contract; not enforced.
+5. `GET /api/<anything>` unknown to other routes now answers JSON 404 `unknown_kind`.
+6. `library.py` imports sqlite3 for its index (AC-15 reading; not N-2.1).
