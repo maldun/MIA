@@ -330,6 +330,64 @@ class CommandLine(unittest.TestCase):
         self.assertEqual(platform.pins, {"MP-light": {"name": "gemma4:12b-it-qat", "digest": EVAL_CLI.PINS["MP-light"]["digest"]}})
 
 
+class PinDecidesTheModel(unittest.TestCase):
+    """D-166: the pin decides the model of a run, and a model of the variant next to a pin is refused, so the header always names what ran"""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+
+    @mark.req("REQ-EVL-004")
+    def test_every_model_call_of_a_pinned_run_uses_the_model_of_the_pin(self):
+        """TC-EVL-004 (D-166): a pinned run of a skill suite calls the model named by the pin, whatever the skill file names.
+
+        Example: verify_claim (light profile in its skill file) with the pin MP-light -> every call has model gemma4:12b-it-qat.
+        """
+        # Given: the shipped skill verify_claim on a scripted model that remembers the model it was asked for
+        from core import Core
+        from gate_lab import Scripted, vote
+        from library import Library
+
+        class Remembering(Scripted):
+            def chat(self, messages, schema=None, model=None, profile=None, options=None):
+                self.models = getattr(self, "models", []) + [model]
+                return super().chat(messages, schema, model, profile, options)
+        model = Remembering(lambda p, n: vote("supported"))
+        core = Core(os.path.join(REPO, "skills"), Library(os.path.join(REPO, "library")), os.path.join(self.tmp.name, "runs"), model=model)
+        claim = {"claim": "The tower is 100 m tall.", "evidence": "", "rounds": 3, "experts": []}
+        suite = H.load_suite(write_suite(self.tmp.name, "claims", {"kind": "pipeline", "skill": "verify_claim"}, [{"id": "c0", "input": claim, "truth": True}]))
+        # When: it runs with the pin of the command line
+        H.Harness(core).run(suite, pin=PIN)
+        # Then: every call names the pin's model
+        self.assertTrue(model.models)
+        self.assertEqual(set(model.models), {"gemma4:12b-it-qat"})
+
+    @mark.req("REQ-EVL-004")
+    def test_a_variant_model_next_to_a_pin_is_refused(self):
+        """TC-EVL-004 (D-166): the harness and the command line refuse --model together with --pin before anything runs.
+
+        Example: variant model full with the pin MP-light -> SuiteError naming --model and --pin; `eval.py run ... --pin MP-light --model full` -> exit with the same.
+        """
+        # Given: a suite and a variant that names a model
+        suite = H.load_suite(write_suite(self.tmp.name, "rules_m", {"kind": "text_rules"}, [{"id": "c0", "input": {"text": "Hello."}, "gold": {"rules": []}, "expect": "pass"}]))
+        # When / Then: the harness refuses
+        with self.assertRaises(H.SuiteError) as caught:
+            H.Harness().run(suite, {"model": "full"}, pin=PIN)
+        self.assertIn("--model", str(caught.exception))
+        self.assertIn("--pin", str(caught.exception))
+        # And: the command line refuses too, before a core is built
+        cfg = os.path.join(self.tmp.name, "cfg.json")
+        with open(cfg, "w") as fp:
+            json.dump({"accounts_dir": os.path.join(self.tmp.name, "db"), "eval_dir": os.path.join(self.tmp.name, "runs")}, fp)
+        self.addCleanup(setattr, EVAL_CLI, "SUITES", EVAL_CLI.SUITES)
+        EVAL_CLI.SUITES = self.tmp.name
+        argv = ["eval.py", "run", "rules_m", "--pin", "MP-light", "--model", "full", "--cfg", cfg]
+        with unittest.mock.patch.object(sys, "argv", argv), contextlib.redirect_stdout(io.StringIO()), self.assertRaises(SystemExit) as stopped:
+            EVAL_CLI.main()
+        self.assertIn("--model", str(stopped.exception.code))
+        self.assertFalse(os.path.isdir(os.path.join(self.tmp.name, "runs")))
+
+
 class VersionsOfEveryKind(unittest.TestCase):
     @mark.req("REQ-EVL-004")
     def test_every_skill_kind_records_its_skill_and_pipeline_versions(self):

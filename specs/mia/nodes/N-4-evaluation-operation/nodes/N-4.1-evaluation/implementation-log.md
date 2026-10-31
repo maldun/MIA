@@ -95,3 +95,14 @@ Each finding first as a failing test (red seen), then the fix. Fake models and s
 - `tests/test_harness.py::test_every_shipped_suite_is_valid` loads every suite of `eval/suites`, holdout ones included (no content printed); with `list_suites(holdout=False)` it could leave them out, but that would stop validating the holdout suites: owner's choice.
 - The frame-rate half of TC-EVL-007 (`tests/js/measure-fps.test.mjs`) stays unprotected (no JS runner in `tests/acceptance/`).
 - `decide_guard` checks `--run` and `--rerun`, not `--baseline` (a baseline may be a dev run by design).
+
+## Owner decision D-166 (2026-10-31)
+goal/v1 merged first (fc749e0; CLAUDE.md's eval line with `--pin`/`--holdout` comes from there, not edited here). REQ-EVL-003 stays partly with TD-07: nothing built, the stop above is answered.
+
+| Item | Commit | What changed | Tests (red, then green) |
+|---|---|---|---|
+| test_harness never opens holdout suites | 4eb97ed | `harness.list_suites(root, holdout=False)` by default: `*.holdout` folders stay unread; `tools/eval.py` passes `--holdout` explicitly; `test_every_shipped_suite_is_valid` therefore skips them | `test_listing_never_opens_a_holdout_suite_unless_asked` (synthetic `toy.holdout` that is refused when read) |
+| the pin decides the model | 97d4811 | `_pinned` replaces the skill's model by `{"name": pin name, options + seed, temperature}`; `Harness.run` refuses a variant `model` next to a pin; `tools/eval.py run` exits "--model together with --pin ... drop --model" before building a core; t05/t06/t09/t10 scripts drop `--model` (it equalled the pin's model); README and the usage text follow; the unit test of `_pinned` now expects the pin's model | `PinDecidesTheModel` (2 tests: every call of a pinned verify_claim run names gemma4:12b-it-qat; refusal in harness and command line) |
+| A-63 re-checked | this commit | drafts redrafted (test_eval_platform.py changed); on a scratch copy of the merged branch: six protected tests OK, old copies removed, trace_check unchanged, test_doc_check clean, second run "nothing to do" | |
+
+The open point "--pin does not set the model of the old targets" above is closed by 97d4811; "test_harness opens holdout suites" by 4eb97ed; CLAUDE.md by the owner (bc6df53).
