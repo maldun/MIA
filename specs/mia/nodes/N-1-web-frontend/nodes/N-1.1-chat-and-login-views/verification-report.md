@@ -153,3 +153,145 @@ Start `bash tools/start_testing.sh start chat-with-login`, open `http://127.0.0.
 - Whether users read "Waiting, place 1" as "answered next" (wording decision of slice 1).
 - Whether the score as totals is enough or users want to see it per week (F5).
 - FB-01 moves the status card to a skills panel (next iteration); TD-01's reload part goes with it.
+
+---
+
+# Re-verification (2026-10-31)
+
+**Branch:** goal/v1 @ bee8ead at the start (v1-n11b merged as ecdd7e6; A-62 and A-63 installed in bee8ead); HEAD moved to be07be2 during the review (9ef60c3, d502c4e, be07be2: docs and N-3.3 only; `git diff --stat 9ef60c3 be07be2 -- templates tests/js tests/browser ui/tools contracts tests/helpers <node folder>` is empty)
+**Reviewer:** Claude Opus 5.5 (AI, fresh context; it never saw the implementation chat)   **Commits reviewed:** 7bb96db (F1), 7e33b08 (F3), b8d4360 (F2), fb19571 (F6), 29d5cdd (F7, F8, F9 and lows), e434ee1, 7801375, 5c19fd0 (A-62 draft), 3bfb690, 07a59de (log); bee8ead (A-62 installed)
+**Inputs:** previous report above (F1..F13), implementation log (sections "Verify findings", "After D-165", "After D-167"), D-163, D-165, D-167, FB-05, FB-06, IF-101 v15, A-62 note
+
+## Verdict (proposal)
+**Verified with accepted deviations.** Every earlier finding is closed by a test that fails on its defect (24 of 24 cheap mutants killed by the committed tests, see below) or by an owner decision. The deviations to accept: REQ-CLV-002 (a late `chat_start`, e.g. of a task, moves the shown places one step early; D-167, FB-06), REQ-CLV-010 partly (D-163, FB-05, scope row in G-V1), REQ-CLV-007 and the phone / Firefox / Safari / screen-reader part of REQ-CLV-016 by the owner's checklist, REQ-CLV-023/-024 under TD-01/TD-02. Four new findings, all Low or Info (R1..R4); none blocks.
+
+## Automated checks (reviewer's local runs, no CI)
+| Check | Result |
+|---|---|
+| JS unit tests `node --test "tests/js/*.test.mjs"` | 161 pass, 0 fail |
+| JS contracts + N-1 integration (`tests/acceptance/contract/*.mjs tests/integration/N-1/*.mjs`) | 35: 18 pass, 17 skipped (`[real]` sides, later N-1 steps), 0 fail |
+| IF-101 suite, mock and real, MIA image `localhost/mia:latest` 0d88c874 (built 2026-10-31 22:35 UTC), `--network none` | 64 tests OK, 2 skipped (TC-IF-101-17 variant: REQ-CHV-008 out; TC-IF-101-04 expression/audio_chunk: N-2.5) |
+| Node's Python tests, same image, `--network none`, one container at a time | `test_chat_mock_server.py` 14 OK; `test_chat_page.py` 11 OK; `test_files_api.py` 4 OK |
+| Stage-2 browser test `python3 tests/test_chat_views_browser.py` (own `n11-views-<random>` mock with `--network none`, Chromium of `localhost/mia-browser` ea481da5 in its namespace; both removed) | 10 OK (48 s) |
+| Reviewer's extra browser run (own `n11rv-mock-<random>`, same isolation, removed): phone emulation 360 px, `pointer: coarse` true; every visible `button, select, summary, a[href], input, textarea, [role=button], [role=tab]` of the chat, of all 7 workspace tabs (with the due field of Tasks) and of the account dialog | 0 controls under 44 x 44 px (11 in the chat, 8..12 per tab, 5 in the account dialog) |
+| Protected material | since 3620732 every change of `contracts/IF-101-chat-api.md`, the IF-101 suite, `tests/helpers/contract.py` and the IF-101 mock is an "A-nn installed" commit (a262376, 849ac36, bee8ead); v1-n11b touches no protected file. Look-only run `bash tools/apply_amendment_a62.sh`: every file "unchanged ... nothing to do: everything is installed already" (installed = draft), and its suite runs IF-101 64 OK (2 skipped), IF-201 16 OK (1 skipped), JS 161 pass. `PENDING_A62` is empty in `tests/js/multiuser.test.mjs:117` and `tests/test_chat_views_browser.py:36` |
+| `trace_check.py` | no ERROR for N-1.1 (the Scenarios ERROR is gone); WARN "no mark.req marker" now for 9 (was 15): REQ-CLV-003, -008, -009, -010, -012, -017, -020, -023, -024 (JS tests, and the tool reads the first id of a marker only: N6 of N-1.3); WARN TD-03, -04, -06, -07 "not listed" (not this node's deferrals, listed below) |
+| `test_doc_check.py` | 0 findings in `test_chat_mock_server.py`, `test_chat_page.py`, `test_files_api.py`, `test_chat_views_browser.py` (F13 closed) |
+| Model | `check_sysml_model.py .` OK; `check_sysml.sh specs/mia/architecture.sysml` ok; `chatPage` `modules` (`architecture.sysml:206-215`) lists every file of `templates/static/chat/*.js` except `sound.js` (N-1.3) and `character.js` (IF-111 bridge) (F10 closed) |
+| Static / security | no linter configured. New code: due field through `input()` and `textContent`; `secureChannel` before the change of password; no `innerHTML` with data; `tests/js/fake-dom.mjs` is local test code, no new dependency |
+
+## Mutation checks (scratch copy `git archive HEAD`, removed afterwards)
+Each mutant alone, all JS tests; the CSS and `app.js` mutants also through the browser test, the mock mutant through `test_chat_mock_server.py` in the image.
+
+| Finding | Mutant | Killed by |
+|---|---|---|
+| F1 | `chat_start` clears every waiting place (old code); places never move up | `chat-page.test.mjs` TC-CLV-002 (2 each) |
+| F3 | the `pointer: coarse` rule of `.link-button.action` removed | browser test TC-CLV-016 (speak..regenerate 32 x 44) |
+| F2 | `api.saveItem` drops `due`; an edit sends no `due`; the Tasks tab has no due field; the stored `due` re-encoded (seconds lost) | `api.test.mjs` (1); `workspace-page.test.mjs` (1, 2, 1) |
+| F7 | `account.js` without the channel check; `secureChannel` always true | `page-wiring.test.mjs` TC-CLV-018 (1); `multiuser.test.mjs` + page wiring (3) |
+| F8 | mock `deliver()` without skipping the ended session | `test_chat_mock_server.py` logout with a connected socket |
+| F6 (the 12 of the old report) | history limit 20; sender ignored; a new card per `task_status`; a delete button in Files; pause posts resume; `persona_changed` / `files_changed` not redrawn; `chat_delta` ignored; account lines not drawn; logout without `socket.disconnect()` (now in `account.js`); mood line not updated; variant not passed to the character | 12 of 12 killed (`chat-page`, `workspace-page`, `page-wiring` tests, 1..2 each) |
+| F4 / TC-CLV-021 | an address outside IF-101 in `api.js` (`/api/scores`); the row `chat_pipeline` deleted from the contract | `api.test.mjs` + TC-CLV-021 (2); TC-CLV-021 (1): the allow-list is read from the contract |
+| moved wiring | `followVariant(...)` call removed from `app.js` | browser test TC-CLV-006 and TC-CLV-013 |
+| moved wiring | `socket` not passed to `initAccount` in `app.js:153` | **survives** JS and browser tests (R1) |
+
+## Earlier findings
+| # | Status | Evidence |
+|---|---|---|
+| F1 | closed (fix) + accepted deviation | `chat.js` `moveQueue`: each start moves every waiting place up, place 1 cleared; mutants killed. Remaining: a `chat_start` that answers no waiting message (task result, regenerate) also moves the places; accepted for G-V1 (D-167), FB-06 for the next iteration |
+| F2 | closed | due field per task and in the add form; a stored `due` goes back byte for byte (the backend keeps `recited` only for an unchanged `due`, `items_api.py:90`); REQ-CLV-011 amended (D-165) |
+| F3 | closed | `components.css:440`; browser test + reviewer's full measurement |
+| F4 | closed | A-62 installed (IF-101 v15, REST address table, page events); TC-CLV-021 static and browser read the contract; `PENDING_A62` empty |
+| F5 | closed by decision | D-163: REQ-CLV-010 partly in G-V1, scope row `goals/G-V1/goal.md:75`, FB-05 |
+| F6 | closed | page tests on a fake DOM, stage-2 browser test for TC-CLV-004, -006, -013, -016, -018, -021; one residual wiring gap (R1) |
+| F7 | closed | channel check before the change of password; test killed its mutant |
+| F8 | closed | test with a connected socket; mutant killed |
+| F9 | closed | `chat_views_e2e.js` expects 7 tabs; the browser test runs it |
+| F10 | closed | model lists the page modules |
+| F11 | partly | Scenarios section exists (24 blocks) but is **Draft** awaiting the owner (D-165); JS markers still not read (shared N6); TD-01/-02 still "proposed" (R3) |
+| F12 | note | carried to the commit phase; also R4 |
+| F13 | closed | test_doc_check 0 findings in the node's Python tests |
+
+## Verification matrix (changes against the first report)
+| Requirement | Evidence now | Result |
+|---|---|---|
+| REQ-CLV-001 | `chat-page.test.mjs` sender name, streaming in one row (mutants killed); browser click-through | **Met** |
+| REQ-CLV-002 | TC-CLV-002 page tests (places 1,2,3 -> -,1,2 -> -,-,1; another user's start moves mine up); stop as before | **Met with accepted deviation** (D-167, FB-06) |
+| REQ-CLV-003 | `chat-page.test.mjs` history `limit=50` in order plus a live message (mutant killed) | **Met** |
+| REQ-CLV-004 | browser test: offline, banner, Send off, draft kept, back without reload | **Met** |
+| REQ-CLV-006 | browser test with `*/character/*` blocked, click-through without problems | **Met** |
+| REQ-CLV-007 | unchanged | **Open: owner's checklist** |
+| REQ-CLV-008 | page tests: mood line, account lines (mutants killed) | **Met** |
+| REQ-CLV-009 | `workspace-page.test.mjs` persona redraw, not while typing (mutant killed) | **Met** |
+| REQ-CLV-010 | unchanged code; scope decided | **Partly, accepted** (D-163, FB-05) |
+| REQ-CLV-011 | due field, edit keeps due (AC-24 part), 4 mutants killed | **Met** |
+| REQ-CLV-013 | browser test (label comes and goes), page test (variant to the character) | **Met** |
+| REQ-CLV-016 | browser test: 44 px at 360 px coarse, no sideways scroll at 360/768/1440 dark and light; reviewer: dialogs too | **Met** for the measured part; keyboard, screen reader, Firefox, Safari iOS, reduced motion by the owner's checklist (accepted-deviation candidate) |
+| REQ-CLV-017 | browser test: every request on the page's host | **Met** |
+| REQ-CLV-018 | browser test `lan` (forced submit sends nothing); page test for the change of password | **Met** (the LAN address is a mapped name on loopback, not a second machine) |
+| REQ-CLV-021 | static scan and browser session against the contract's wire (IF-101 v15) | **Met** |
+| REQ-CLV-022 | `page-wiring.test.mjs` closes the socket; mock logout 200 with a connected page | **Met** (R1: the wiring line in `app.js` untested) |
+| REQ-CLV-023 / -024 | page tests: card in place, pause/resume/stop, done card; Files links without delete, redraw on `files_changed` | **Interim criteria met**, TD-01/-02 open (R3) |
+| REQ-CLV-005, -012, -014, -015, -019, -020 | unchanged since the first report | **Met** |
+
+## Test requirements (M41)
+`test-requirements.md` still has no TR items (global WARN). Credibility of the stand-ins: the IF-101 mock and the real side both pass the IF-101 suite (64/2 skipped); the page-level mock server still has no `task_status`, `pause`, `files`, so the card and the Files tab are tested on the fake DOM only.
+
+## Goal acceptance (node part)
+| Item | Result |
+|---|---|
+| Requirements | 24: 19 met (001, 003, 004, 005, 006, 008, 009, 011, 012, 013, 014, 015, 016 measured part, 017, 018, 019, 020, 021, 022), 1 met with accepted deviation (002), 1 partly by decision (010), 1 open demonstration (007), 2 under deferral (023, 024) |
+| Protected checks vs. baseline | yes, every change an installed amendment; A-62 installed equals its draft |
+| Nothing outside the node's parts | v1-n11b also changes `architecture.sysml` (F10), `specs/mia/test-spec.md` and `tests/helpers/contract.py` only through A-62 (owner-installed), `tools/apply_amendment_a62.sh` (draft tool) |
+| Stop conditions logged | yes: the D-165 stop on F1 (IF-101 lacks per-message places) is logged and was decided (D-167) |
+
+## Specification vs. code (M42)
+| Direction | Item | Finding |
+|---|---|---|
+| done, not specified | none new: the due field is now in REQ-CLV-011 (D-165); the wire is in IF-101 v15 | – |
+| specified, not done | REQ-CLV-002 server-ordered places; REQ-CLV-010 reactions/behaviours/series | accepted (D-167, D-163) |
+
+## Quality evidence per characteristic (M32)
+| Characteristic | Result | Gap |
+|---|---|---|
+| Functional suitability | met, with the accepted deviations | – |
+| Performance efficiency | met (`test_chat_page.py` budget) | – |
+| Compatibility | partly | Chromium only; Firefox, Safari iOS by the owner |
+| Interaction capability | met for the measured part | keyboard, screen reader, reduced motion by the owner |
+| Reliability | met (browser test TC-CLV-004) | – |
+| Security | met (CSP test, TC-CLV-017/-018 in a browser, channel check before the change of password) | – |
+| Maintainability | met | R1, R4 |
+| Flexibility, Safety | not now | no requirement for this node |
+
+## Open deferrals (M26)
+| TD | Requirement | Interim criterion | Target check state | Note |
+|---|---|---|---|---|
+| TD-01 | REQ-CLV-023 | met, stronger than before (page tests of the card on the fake DOM) | specified only | trigger "browser harness for N-1" is met; Decision still "proposed" (R3) |
+| TD-02 | REQ-CLV-024 | met (routes, TC-IF-101-30, page tests of the tab) | specified only | as TD-01 |
+| TD-03, TD-04, TD-06, TD-07 | not requirements of N-1.1 | – | – | listed here only because `trace_check` asks every report |
+
+## New findings
+| # | Finding | Severity | Needs | Proposal |
+|---|---|---|---|---|
+| R1 | `templates/static/chat/app.js:153`: the `socket` handed to `initAccount` (the F6 move of the logout's `socket.disconnect()` into `account.js`) has no test: removing it survives all JS tests and the browser test (the click-through has no logout). The server closes the session's sockets anyway (IF-101 `logout`), so the effect is a reconnect attempt that the 401 sends to the login | Low | test | add a logout step to the browser click-through (`tests/browser/chat_views.py`): log out with the page connected, expect the login shown, the socket disconnected and no "Logging out failed." (also covers F8 on the stage) |
+| R2 | `tests/browser/chat_views.py:79`: TC-CLV-016's touch scenario measures the chat view only (dialogs closed; `input`, `a`, `textarea`, tabs not in the selector). The reviewer measured the 7 workspace tabs and the account dialog: all >= 44 px, so the requirement holds today, but a regression there would pass | Low | test | open the workspace (each tab) and the account dialog in the scenario and add `input, textarea, a[href], [role=tab]` to the selector |
+| R3 | `specs/mia/deferred.md:20` and `:34`: TD-01/TD-02 still "proposed, to be confirmed"; their trigger (a browser harness for N-1) is met; the target needs `task_status` and `files` in the mock server | Low | owner decision | confirm both with a new trigger ("the IF-101 mock server sends `task_status` and `files`", or FB-01) and keep the reload part with FB-01; or close TD-02 by a browser step once the mock lists files |
+| R4 | `test-spec.md` `## Scenarios` is Draft (written in Phase 3, owner review pending, D-165); the REQ-CLV-002 deviation is recorded in D-167 and FB-06 but has no row in `goals/G-V1/goal.md` (REQ-CLV-010 has one, `:75`); the F6 commit fb19571 moved three handlers out of `app.js` without a separate `refactor:` commit (behaviour unchanged: the mutants of all three are killed or R1) | Info | owner decision | owner reviews the Scenarios; a G-V1 scope row "REQ-CLV-002 – in, accepted deviation, FB-06 (D-167)"; note for the commit phase |
+
+Shared, not repeated: N6 of N-1.3 (`trace_check` reads the first id of a marker; JS markers). Note: the browser part of TC-CLV-021 sees socket events after the upgrade to the websocket only; the static scan of the same test covers every `emit`/`on` of the page.
+
+## Accepted deviations (to be confirmed by the owner)
+- REQ-CLV-002: places counted down per `chat_start` (D-167, FB-06).
+- REQ-CLV-010: votes on answers only, totals only (D-163, FB-05).
+- REQ-CLV-007 and the keyboard / screen reader / Firefox / Safari iOS / reduced-motion part of REQ-CLV-016: owner's checklist (`ui/CHECKLIST_CHAT_PHONE.md`).
+- REQ-CLV-023 / -024: TD-01 / TD-02 (R3).
+
+## What could not be checked
+- Firefox, Safari iOS, a real phone, a screen reader, reduced motion (Chromium 156 headless only).
+- The status card and the Files tab in a browser (the mock server has no `task_status`, `pause`, `files`).
+- REQ-CLV-018 from a real second machine (the browser test maps a LAN name to loopback).
+- The real backend behind the page in a browser (no model server); the CI stage log (none exists).
+
+## Notes for Phase 7
+- Whether users notice places that move early while a task runs (FB-06).
+- Whether a local date-and-time field is the way users set a task's due time, or they prefer to say it in the chat.
