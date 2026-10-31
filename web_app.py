@@ -401,7 +401,7 @@ def converse(message,on_delta=None,on_emotion=None,should_stop=None):
         return filt_answer
 
     streamer.finish(filt_answer)
-    streamer.wait()
+    streamer.wait(should_stop=should_stop)        # a stop while the answer is spoken ends its voice (owner check A3)
     if len(filt_answer) == 0:
         # if no speech wait a bit
         time.sleep(TIMEOUT)

@@ -35,6 +35,9 @@ except ImportError:
     from speech_text import speech_text
 
 
+STOP_POLL_SECONDS = 0.2   # how often the wait for the voice looks at the chat's stop
+
+
 class SpeechStreamer:
     """
     Sends the sentences of a growing answer to the sound server, so that
@@ -100,14 +103,26 @@ class SpeechStreamer:
                 self._failed = True
                 self.abort()
 
-    def wait(self):
+    def wait(self,should_stop=None):
         """
-        Waits until everything is spoken.
+        Waits until everything is spoken. should_stop() ends the wait early and
+        closes the connection, so the sound server speaks no further sentence
+        of this answer (the chat was stopped, owner check A3).
         """
         if self._sock is None:
             return
         try:
-            received = json.loads(str(self._sock.recv(MESSAGE_SIZE),U8))
+            if should_stop is not None:
+                self._sock.settimeout(STOP_POLL_SECONDS)
+            while True:
+                try:
+                    data = self._sock.recv(MESSAGE_SIZE)
+                    break
+                except socket.timeout:
+                    if should_stop():
+                        logger.info("Speech stopped with the chat")
+                        return
+            received = json.loads(str(data,U8))
             if SOUND_REQ in received and received.get(TIME_REQ) == self._timestamp:
                 logger.info("Speech played!")
             else:

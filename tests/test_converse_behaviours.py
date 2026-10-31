@@ -28,8 +28,23 @@ class FakeStreamer:
     def finish(self, text):
         pass
 
-    def wait(self):
+    def wait(self, should_stop=None):
         pass
+
+
+class SpokenStreamer(FakeStreamer):
+    """records what the wait for the voice saw: the answer is complete (finish), then the user presses Stop while it is spoken"""
+    last = None
+
+    def __init__(self, *args, **kwargs):
+        SpokenStreamer.last = self
+        self.finished, self.stopped_while_spoken = False, None
+
+    def finish(self, text):
+        self.finished = True
+
+    def wait(self, should_stop=None):
+        self.stopped_while_spoken = should_stop is not None and should_stop()
 
     def abort(self):
         pass
@@ -86,6 +101,21 @@ class ConverseBehaviours(unittest.TestCase):
         w.voice_lines.pick = lambda mood: "/lines/%s.wav" % mood if mood == "agree" else None
         w.converse("hi")
         self.assertEqual(self.played[:2], [("yes", True, "/lines/agree.wav"), ("no", False)])
+
+
+    @mark.req("REQ-VPB-002", "REQ-FE-012")
+    def test_a_stop_while_the_answer_is_spoken_reaches_the_wait_for_the_voice(self):
+        """A3 (D-154): the chat's stop reaches the wait for the voice of a complete answer, so the speech process can end the stream.
+
+        Example: the answer is complete, Stop is pressed while it is spoken -> the streamer's wait sees should_stop() == True.
+        """
+        # Given: a converse whose stop becomes true once the whole answer went to the voice
+        w.SpeechStreamer = SpokenStreamer
+        w.chat_service.show_behaviour = lambda name: True
+        # When: the answer is spoken
+        w.converse("hi", should_stop=lambda: SpokenStreamer.last.finished)
+        # Then: the wait for the voice was told about the stop
+        self.assertTrue(SpokenStreamer.last.stopped_while_spoken)
 
 
 if __name__ == "__main__":
