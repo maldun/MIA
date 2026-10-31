@@ -84,16 +84,22 @@ class RunLogOnRecordedRuns(unittest.TestCase):
 
     @mark.req("REQ-LOG-003")
     def test_a_changed_run_is_reported_as_a_difference_and_not_as_a_replay(self):
-        """TC-LOG-003 (the other side): a run whose input was changed is not reproduced; the difference is named.
-        Example: the baseline lookup with another question diverges: reproduced is False."""
+        """TC-LOG-003 (the other side, F2 of the N-2.4.3 verification): a run whose input was changed is not reproduced; the divergence and the differences of the result are named.
+        Example: the baseline lookup with another question diverges at the search "Who designed ...", status done / error, and the claim and the draft of the
+        original are named "only in the first run"."""
         # Given a recorded run whose input question is changed after the recording
         record = self.lab.baseline("reader")
         changed = copy.deepcopy(record)
         changed["input"] = dict(changed["input"], question="Who designed the Rivertown Bridge?") if isinstance(changed.get("input"), dict) else "Who designed the Rivertown Bridge?"
         # When it is reproduced from the events of the original
         result = RP.reproduce(changed, self.lab.store, self.lab.factory())
-        # Then it is not a replay
+        # Then it is not a replay, and the divergence and the lost statements are named
         self.assertFalse(result["reproduced"])
+        self.assertEqual(result["status"], ("done", "error"))
+        self.assertEqual([d["what"] for d in result["divergences"]], ["a search that was not recorded: 'Who designed the Rivertown Bridge?'"])
+        lost = [line.split()[-2] for line in result["differences"] if line.startswith("only in the first run: ")]
+        self.assertIn("claim", lost)
+        self.assertIn("draft", lost)
 
 
 if __name__ == "__main__":

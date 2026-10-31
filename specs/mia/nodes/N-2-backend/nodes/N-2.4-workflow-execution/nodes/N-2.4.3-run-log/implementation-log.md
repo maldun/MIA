@@ -98,3 +98,10 @@ Tests in the image (`localhost/mia:latest`, `--network none`); feedback, not ver
 - Fix: `chat_service.py` `pipeline_event` keeps the plain steps also while `_late` (dropped `and not self._late`); the progress of such a task still goes only to the status card.
 - F6: the Example line of `tests/test_chat_backend.py::test_a_chat_answer_keeps_its_steps_for_the_account` now names the `talk` step it asserts.
 - Green after: `test_chat_tasks.py` (12), `test_chat_backend.py` (41), contract `test_if_101_chat_api.py` (60, 3 skipped). File outside the node (`chat_service.py`, N-2.1): D-144.
+
+### F2 (and F6, second half): the replay names its differences – T-03, REQ-LOG-003
+- Test: `tests/test_run_log_node.py::test_a_changed_run_is_reported_as_a_difference_and_not_as_a_replay` now asserts the status (`done` / `error`), the named divergence (the search
+  that was not recorded) and that the claim and the draft of the original are named "only in the first run"; its docstring says so (F6).
+- Red before: on a scratch copy with the mutant of F2 (`reproduce.py` `differences = []`) the test fails (the old one passed); green on the real code. No production code changed: the
+  code was right, the test was the gap.
+- Green after: `test_run_log_node.py` (4), `test_run_explain.py` (16).
