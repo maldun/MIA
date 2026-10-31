@@ -2,7 +2,7 @@
 # Backup of the shared state: the PostgreSQL database and the data folder as ONE archive (REQ-SLY-008).
 #   tools/backup.sh OUT.tar.gz --db-container NAME [--db-user postgres] [--db-name postgres] [--data DIR]
 # The archive holds db.dump (pg_dump custom format, all tables with all versions) and, with --data, data.tar (the folder with histories, presets,
-# calibration ...). It is a script, not a list of steps: restore.sh puts both back. `deploy/up.sh backup` keeps covering the compose data volume.
+# calibration ...). It is a script, not a list of steps: restore.sh puts both back. `deploy/up.sh backup|restore` call these two with the db container of the stack (D-133).
 set -eu
 usage() { echo "usage: $0 OUT.tar.gz --db-container NAME [--db-user USER] [--db-name NAME] [--data DIR]" >&2; exit 2; }
 [ $# -ge 1 ] || usage

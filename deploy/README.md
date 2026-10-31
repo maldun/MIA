@@ -98,6 +98,8 @@ deploy/up.sh restore path/to/file.tar.gz
 
 The archive holds the whole data volume: histories, chat log, presets, gestures, calibration, tokens, library index. MIA is stopped while the files are copied (it saves its history when it stops) and starts again. `restore` first saves the current state as `mia-before-restore-<time>.tar.gz`, so a wrong restore can be undone with another restore. Files that exist only in the volume are not deleted by a restore. The models of Ollama (volume `ollama`) and the character are not part of it (they come from the downloads and the zip).
 
+With the database (`deploy/up.sh db`) the same commands also save and restore the database: the archive then holds `db.dump` and `data.tar` (made by `tools/backup.sh`, put back by `tools/restore.sh`, which saves the state before the restore next to the archive). An older archive of the volume alone is still restored and leaves the database as it is; an archive with a database is refused while the `db` service does not run.
+
 ## The 3D character
 
 The character is not in the image or in git. Put the zip from your Drive in with one command:

@@ -9,7 +9,7 @@ services:
     build:
       context: ..
       dockerfile: deploy/Containerfile
-    image: localhost/mia:latest
+    image: ${MIA_IMAGE:-localhost/mia:latest}      # MIA_IMAGE: another tag of the same build (the smoke test of the stack uses its own)
     restart: unless-stopped
     depends_on:
       - searxng
@@ -29,11 +29,24 @@ services:
       - ${MIA_CHARACTER_DIR:-../ui/godot/build/web}:/opt/mia/MIA/ui/godot/build/web:ro,z
       - ${MIA_BACKGROUND_DIR:-../backgrounds}:/opt/mia/MIA/backgrounds:ro,z      # new pictures appear on a reload of the page, no rebuild
 
+  # The graph app (N-5, REQ-OPR-007, D-133): its own container from the mia image, serving the static page of graph_app/. No published port:
+  # the https front routes /graph/ to it, so the page and the IF-104 calls to mia share one origin.
+  graph:
+    image: ${MIA_IMAGE:-localhost/mia:latest}      # MIA_IMAGE: another tag of the same build (the smoke test of the stack uses its own)
+    restart: unless-stopped
+    command: ["python", "-m", "http.server", "8587", "--directory", "/opt/mia/MIA/graph_app"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request as u; u.urlopen('http://127.0.0.1:8587/', timeout=4)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
   https:
     image: docker.io/library/caddy:2
     restart: unless-stopped
     depends_on:
       - mia
+      - graph
     ports:
       - "${MIA_BIND:-127.0.0.1}:${MIA_HTTPS_PORT:-8586}:8586"
     volumes:

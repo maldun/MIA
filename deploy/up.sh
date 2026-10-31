@@ -142,19 +142,24 @@ if [ "${1:-}" = "data" ]; then
   echo "$COPIED item(s) taken over from $DIR, MIA started again"
   exit 0
 fi
-# deploy/up.sh backup [file.tar.gz]    everything MIA keeps (data volume: histories, presets, gestures, chat log, calibration, library index ...) as one archive
-# deploy/up.sh restore file.tar.gz     put it back (after a backup of the current state, made automatically as mia-before-restore-<time>.tar.gz)
+# deploy/up.sh backup [file.tar.gz]    everything MIA keeps (data volume: histories, presets, gestures, chat log, calibration, library index ...) as one archive;
+#                                      with the db service (deploy/up.sh db) the archive also holds the database: tools/backup.sh makes it (REQ-OPR-005, D-133)
+# deploy/up.sh restore file.tar.gz     put it back (after a backup of the current state, made automatically as mia-before-restore-<time>.tar.gz);
+#                                      an archive with the database goes through tools/restore.sh; an old archive of the volume alone is still accepted
 # MIA is stopped while the files are copied (it saves its history when it stops) and started again.
 if [ "${1:-}" = "backup" ] || [ "${1:-}" = "restore" ]; then
   MODE="$1"
   ENGINE="$(command -v podman || command -v docker)"
   CONTAINER="$($ENGINE ps -aq --filter "label=com.docker.compose.project=${MIA_PROJECT:-mia}" --filter label=com.docker.compose.service=mia | head -1)"
   [ -n "$CONTAINER" ] || { echo "MIA container not found, start the stack first: deploy/up.sh"; exit 1; }
+  DB="$($ENGINE ps -q --filter "label=com.docker.compose.project=${MIA_PROJECT:-mia}" --filter label=com.docker.compose.service=db | head -1)"
+  DB_ARGS=(--db-container "$DB" --db-user mia --db-name mia)
+  TOOLS="$(dirname "$HERE")/tools"
   DATA=/opt/mia/MIA/data
   make_backup() {      # $1: archive; MIA is stopped before and started after by the caller
     local tmp; tmp="$(mktemp -d)"
     $ENGINE cp "$CONTAINER:$DATA/." "$tmp/"
-    tar -czf "$1" -C "$tmp" .
+    if [ -n "$DB" ]; then bash "$TOOLS/backup.sh" "$1" "${DB_ARGS[@]}" --data "$tmp"; else tar -czf "$1" -C "$tmp" .; fi
     rm -rf "$tmp"
   }
   if [ "$MODE" = "backup" ]; then
@@ -166,13 +171,21 @@ if [ "${1:-}" = "backup" ] || [ "${1:-}" = "restore" ]; then
   else
     [ -n "${2:-}" ] || { echo "usage: deploy/up.sh restore file.tar.gz"; exit 1; }
     IN="$(abspath "$2")"
-    [ -f "$IN" ] && tar -tzf "$IN" >/dev/null 2>&1 || { echo "not a readable .tar.gz: $IN"; exit 1; }
+    MEMBERS="$([ -f "$IN" ] && tar -tzf "$IN" 2>/dev/null)" || { echo "not a readable .tar.gz: $IN"; exit 1; }
+    WITH_DB=0; printf '%s\n' "$MEMBERS" | grep -qE '^(\./)?db\.dump$' && WITH_DB=1
+    [ "$WITH_DB" = 0 ] || [ -n "$DB" ] || { echo "$IN holds a database, but the db service does not run: start it with  deploy/up.sh db  first"; exit 1; }
     $ENGINE stop "$CONTAINER" >/dev/null
-    SAFE="$CALLER/mia-before-restore-$(date +%Y%m%d-%H%M%S).tar.gz"
-    make_backup "$SAFE"
-    echo "state before the restore saved: $SAFE"
     TMP="$(mktemp -d)"
-    tar -xzf "$IN" -C "$TMP" --no-same-owner
+    if [ "$WITH_DB" = 1 ]; then      # restore.sh saves the state before (database and volume) next to the archive and replaces both
+      SAFE="the mia-before-restore archive next to $IN"
+      $ENGINE cp "$CONTAINER:$DATA/." "$TMP/"
+      bash "$TOOLS/restore.sh" "$IN" "${DB_ARGS[@]}" --data "$TMP" || { $ENGINE start "$CONTAINER" >/dev/null; rm -rf "$TMP"; exit 1; }
+    else
+      SAFE="$CALLER/mia-before-restore-$(date +%Y%m%d-%H%M%S).tar.gz"
+      make_backup "$SAFE"
+      echo "state before the restore saved: $SAFE"
+      tar -xzf "$IN" -C "$TMP" --no-same-owner
+    fi
     $ENGINE cp "$TMP/." "$CONTAINER:$DATA/"
     rm -rf "$TMP"
     $ENGINE start "$CONTAINER" >/dev/null
