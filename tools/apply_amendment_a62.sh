@@ -8,8 +8,8 @@
 #                                                       page's events audio_claim, audio_ended, character_ready; one row in the version history
 #   tests/acceptance/contract/test_if_101_chat_api.py   A-54's case "the eleventh message ... rate limited": TC-IF-101-30 -> TC-IF-101-33 (30 stays the files case);
 #                                                       the second TC-IF-101-09 (v1, the ack with the stored message) -> TC-IF-101-20 (D-167)
-#   specs/mia/test-spec.md                              the same two renumbered rows; the rows TC-IF-101-20 to -29 after TC-IF-101-19, 21..29 made from the suite
-#   tests/helpers/contract.py                           the real adapter: a refusal of send without a code is 500 `no_code`, not 429 `rate_limited` (D-167)
+#   specs/mia/test-spec.md                              the same two renumbered rows; the rows TC-IF-101-20 to -31 after TC-IF-101-19, 21..31 made from the suite
+#   tests/helpers/contract.py                           the real adapters of IF-101 and IF-201: a refusal of send without a code is `no_code`, not `rate_limited` (D-167)
 # Not protected, changed with it (the allow-list follows the contract): tests/js/multiuser.test.mjs and tests/test_chat_views_browser.py, PENDING_A62 emptied.
 # Note: specs/mia/amendments/A-62/A-62-note.md. If A-54 is installed again AFTER this one (it copies whole files), run this script with --do again.
 # INSTALL IT ON THE LINE OF WORK goal/v1 after the merge of v1-n11b (the two test files above come with that branch).
@@ -142,23 +142,24 @@ for source, _, old, new in pairs:
             sys.exit("%s is taken already in %s; pick the next free number by hand" % (new, source))
         texts[source] = texts[source].replace(old, new)
 
-# the rows TC-IF-101-20 to -29 of specs/mia/test-spec.md stand after the row of TC-IF-101-19; 21..29 are made from the cases of the suite (first
-# paragraph of the docstring, the requirements of mark.req besides IF-101)
+# the rows TC-IF-101-20 to -31 of specs/mia/test-spec.md stand after the row of TC-IF-101-19; 21..31 are made from the cases of the suite (first
+# paragraph of the docstring, the requirements of mark.req besides IF-101); 30 is the files case of v8, 31 the failing task of v10
+cases = {}
+for node in ast.walk(ast.parse(texts[suite_in])):
+    doc = ast.get_docstring(node) if isinstance(node, ast.FunctionDef) else None
+    match = re.match(r"(TC-IF-101-(2[1-9]|3[01])) (\(([^)]*)\))?:?\s*(.*)", (doc or "").split("\n\n")[0].replace("\n", " "))
+    if not match:
+        continue
+    reqs = [arg.value for d in node.decorator_list if isinstance(d, ast.Call) and getattr(d.func, "attr", "") == "req"
+            for arg in d.args if isinstance(arg, ast.Constant) and arg.value != "IF-101"]
+    text = ("%s: %s" % (match.group(4), match.group(5)) if match.group(4) else match.group(5)).rstrip(".").replace("|", "\\|")
+    cases[match.group(1)] = "| %s | IF-101 | Contract | 1 (mock) and 2 (real) | %s.%s | exact |" % (match.group(1), text, "".join(" " + r + "." for r in reqs))
+missing = ["TC-IF-101-%d" % n for n in range(21, 32) if "TC-IF-101-%d" % n not in cases]
+if missing:
+    sys.exit("the suite has no case %s; add the rows by hand" % ", ".join(missing))
 lines = texts[spec_in].split("\n")
-if not any(line.startswith("| TC-IF-101-21 |") for line in lines):
-    cases = {}
-    for node in ast.walk(ast.parse(texts[suite_in])):
-        doc = ast.get_docstring(node) if isinstance(node, ast.FunctionDef) else None
-        match = re.match(r"(TC-IF-101-(2[1-9])) (\(([^)]*)\))?:?\s*(.*)", (doc or "").split("\n\n")[0].replace("\n", " "))
-        if not match:
-            continue
-        reqs = [arg.value for d in node.decorator_list if isinstance(d, ast.Call) and getattr(d.func, "attr", "") == "req"
-                for arg in d.args if isinstance(arg, ast.Constant) and arg.value != "IF-101"]
-        text = ("%s: %s" % (match.group(4), match.group(5)) if match.group(4) else match.group(5)).rstrip(".").replace("|", "\\|")
-        cases[match.group(1)] = "| %s | IF-101 | Contract | 1 (mock) and 2 (real) | %s.%s | exact |" % (match.group(1), text, "".join(" " + r + "." for r in reqs))
-    missing = ["TC-IF-101-%d" % n for n in range(21, 30) if "TC-IF-101-%d" % n not in cases]
-    if missing:
-        sys.exit("the suite has no case %s; add the rows by hand" % ", ".join(missing))
+has = lambda n: any(line.startswith("| TC-IF-101-%d |" % n) for line in lines)
+if not has(21):
     twenty = [i for i, line in enumerate(lines) if line.startswith("| TC-IF-101-20 |")]
     after = [i for i, line in enumerate(lines) if line.startswith("| TC-IF-101-19 |")]
     if len(twenty) != 1 or len(after) != 1:
@@ -166,7 +167,12 @@ if not any(line.startswith("| TC-IF-101-21 |") for line in lines):
     row20 = lines.pop(twenty[0])
     at = [i for i, line in enumerate(lines) if line.startswith("| TC-IF-101-19 |")][0] + 1
     lines[at:at] = [row20] + [cases["TC-IF-101-%d" % n] for n in range(21, 30)]
-    texts[spec_in] = "\n".join(lines)
+if not has(30) and not has(31):
+    at = [i for i, line in enumerate(lines) if line.startswith("| TC-IF-101-29 |")][0] + 1
+    lines[at:at] = [cases["TC-IF-101-30"], cases["TC-IF-101-31"]]
+elif has(30) != has(31):
+    sys.exit("only one of the rows TC-IF-101-30 and -31 is in specs/mia/test-spec.md; add the other by hand")
+texts[spec_in] = "\n".join(lines)
 open(suite_out, "w", encoding="utf-8").write(texts[suite_in])
 open(spec_out, "w", encoding="utf-8").write(texts[spec_in])
 PY
@@ -176,11 +182,15 @@ import sys
 old = ('raise self._error({"empty_text": 422, "queue_full": 503, "invalid_command": 422}.get(ack.get("code"), 429), ack.get("code") or "rate_limited")')
 new = ('raise self._error({"empty_text": 422, "queue_full": 503, "invalid_command": 422, "rate_limited": 429}.get(ack.get("code"), 500), '
        'ack.get("code") or "no_code")      # A-62: a refusal without a code is no rate limit')
+# the same for the IF-201 adapter (the chat agent): a refusal without a code is ServiceError("no_code"), not "rate_limited"
+old_201 = 'raise self._error(ack.get("code") or "rate_limited")'
+new_201 = 'raise self._error(ack.get("code") or "no_code")      # A-62: a refusal without a code is no rate limit'
 text = open(sys.argv[1], encoding="utf-8").read()
-if new not in text:
-    if text.count(old) != 1:
-        sys.exit("the refusal of send in tests/helpers/contract.py is not what A-62 expects; change it by hand")
-    text = text.replace(old, new)
+for before, after in ((old, new), (old_201, new_201)):
+    if after not in text:
+        if text.count(before) != 1:
+            sys.exit("a refusal of send in tests/helpers/contract.py is not what A-62 expects (%s); change it by hand" % before[:40])
+        text = text.replace(before, after)
 open(sys.argv[2], "w", encoding="utf-8").write(text)
 PY
 python3 - tests/js/multiuser.test.mjs "$TMP/multiuser.test.mjs" tests/test_chat_views_browser.py "$TMP/test_chat_views_browser.py" <<'PY'
@@ -204,5 +214,5 @@ copy "$TMP/multiuser.test.mjs" tests/js/multiuser.test.mjs
 copy "$TMP/test_chat_views_browser.py" tests/test_chat_views_browser.py
 finish
 echo
-bash tools/run_in_image.sh tests/acceptance/contract/test_if_101_chat_api.py
+bash tools/run_in_image.sh tests/acceptance/contract/test_if_101_chat_api.py tests/acceptance/contract/test_if_201_chat_turn.py
 node --test "tests/js/*.test.mjs" 2>&1 | grep -E '^# (pass|fail)|^not ok'
