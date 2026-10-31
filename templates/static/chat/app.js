@@ -230,7 +230,7 @@ composer = initComposer({
     cancel: $('confirm-cancel'),
     text: t('confirm.command', { command: command.command, description: command.description }),
   }), (message) => chat.send(message)),
-  onStop: () => socket.emit('chat_stop'),
+  onStop: () => { socket.emit('chat_stop'); sound.stop(); },             // Stop also silences the voice on this device (D-140)
   enterSends: () => enterSends(settings.get().enterSends, window.matchMedia?.('(pointer: coarse)').matches ?? false),
 });
 

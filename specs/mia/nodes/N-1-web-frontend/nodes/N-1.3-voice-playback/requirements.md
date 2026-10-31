@@ -32,15 +32,15 @@ Playing the audio of the answers and the voice lines in this browser: queue, cla
 
 ### REQ-VPB-003 – Voice lines
 - Level: low   Subject: WebFrontEnd
-- Text: When the backend sends a voice line, the Voice playback shall play it, and if its audio file is missing, skip it and report it to the backend.
+- Text: When the backend sends a voice line, the Voice playback shall play it, and if its audio file is missing, skip it and report it through the IF-112 callback `onLineError`; no event goes to the backend.
 - Rationale: refines REQ-FE-013
 - Parent: REQ-FE-013
 - Priority: Should
 - Verification method: Test
-- Acceptance criterion: AC-13: a line with a missing file produces one report event and no error shown; the conversation continues
+- Acceptance criterion: AC-13: a line with a missing file produces one report through `onLineError` and no error shown; the conversation continues
 - Verified by: TC-VPB-003
 - Status: Approved
-- History: –
+- History: 2026-10-31 A-50 (D-140): narrowed, the report ends at the IF-112 callback (the page writes it to the browser console); no backend event
 
 ### REQ-VPB-004 – No request leaves the host
 - Level: low   Subject: WebFrontEnd

@@ -2073,7 +2073,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-VPB-003'> VoiceLines_Vpb003 {
         subject s : WebFrontEnd;
-        doc /* When the backend sends a voice line, the Voice playback shall play it, and if its audio file is missing, skip it and report it to the backend. */
+        doc /* When the backend sends a voice line, the Voice playback shall play it, and if its audio file is missing, skip it and report it through the IF-112 callback onLineError; no event goes to the backend (A-50). */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-VPB-004'> NoRequestLeavesTheHost_Vpb004 {
@@ -2148,7 +2148,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-FE-013'> VoiceLines_Fe013 {
         subject s : WebFrontEnd;
-        doc /* When the backend sends a voice line, the Web Frontend shall play it, and if its audio file is missing, skip it and report it to the backend. */
+        doc /* When the backend sends a voice line, the Web Frontend shall play it, and if its audio file is missing, skip it and report it in the page (IF-112 callback); no event goes to the backend (A-50). */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-FE-014'> StatusLineAndAccountOfATask_Fe014 {

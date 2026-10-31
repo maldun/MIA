@@ -43,7 +43,7 @@ export function mayClaim({ visible, now, lastClaim, every = CLAIM_EVERY_MS }) {
 
 /**
  * Plays lines one after the other on one audio element (IF-112, REQ-VPB-001 to REQ-VPB-003).
- * Muting silences this device only: the lines still run (without sound), so the character and the server keep in step.
+ * Muting silences this device only: the waiting lines and the new ones are dropped (IF-112); the playing line ends without sound.
  */
 export class VoicePlayer {
   constructor({ audio, onEnded = () => {}, emitClaim = () => {}, clock = Date.now }) {
@@ -77,13 +77,14 @@ export class VoicePlayer {
   }
 
   enqueue(line) {
-    if (!this.owner) return;
+    if (!this.owner || this.audio.muted) return;
     this.queue.push(line);
     if (!this.current && !this._held) this._startNext();      // held: the browser refused autoplay, nothing is tried before allowAutoplay()
   }
 
   mute(value) {
     this.audio.muted = Boolean(value);
+    if (this.audio.muted) this.queue.clear();
   }
 
   /** ends the playing line and clears the queue */
@@ -148,11 +149,14 @@ export class VoicePlayer {
       return;
     }
     // a browser answers with a promise; an element that plays at once (a test double) is taken as started
-    if (started && typeof started.then === 'function') started.then(() => this._setSpeaking(true), (error) => this._notStarted(line, error));
-    else this._setSpeaking(true);
+    if (started && typeof started.then === 'function') {
+      // the promise may settle after its line was ended (error event, stop, a new src): then it no longer speaks for the player
+      started.then(() => { if (this.current === line) this._setSpeaking(true); }, (error) => { if (this.current === line) this._notStarted(line, error); });
+    } else this._setSpeaking(true);
   }
 
   _notStarted(line, error) {
+    if (error?.name === 'AbortError') return;           // pause() or a new src ended this start: whoever did it decides what comes next
     if (error?.name === 'NotAllowedError') {
       // the browser wants a click first: the line waits at the front
       this.queue.unshift(line);
@@ -188,6 +192,8 @@ export function initSound({ audio, socket, character, storage, muteToggle, muteL
   });
   player.onSpeaking(speaking);
   player.onBlocked = () => { hint.hidden = false; };
+  // REQ-VPB-003 (A-50): a missing line is skipped; the report ends here, in the browser console, and nothing is shown to the user
+  player.onLineError = (id) => win.console.warn(`MIA voice: line skipped, it could not be played: ${id}`);
 
   function applyAudio() {
     player.mute(muted);
@@ -199,7 +205,8 @@ export function initSound({ audio, socket, character, storage, muteToggle, muteL
   }
 
   socket.on('audio_reload', (data) => {
-    player.enqueue({ url: data?.url ?? '/audio/out.wav', serial: data?.serial });
+    const url = data?.url ?? '/audio/out.wav';
+    player.enqueue({ id: url, url, serial: data?.serial });            // every line has its own file: the url names it
   });
 
   // --- one page plays ----------------------------------------------------------------------------------
@@ -235,6 +242,8 @@ export function initSound({ audio, socket, character, storage, muteToggle, muteL
         first = false;
       }
     },
+    /** the user stops the voice on this device (the composer's Stop button) */
+    stop: () => player.stop(),
     get queued() { return player.queued; },
     get playing() { return player.playing; },
   };

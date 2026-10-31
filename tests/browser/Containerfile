@@ -1,0 +1,16 @@
+# The headless browser of the stage-2/3 browser tests (D-141; TC-VPB-004): Debian's chromium and chromium-driver, selenium from PyPI.
+# Built locally once; it downloads Debian and PyPI packages only while it is built. The tests run it on loopback (--network host) and
+# skip when the image is missing.
+#   podman build --pull=never -f tests/browser/Containerfile -t localhost/mia-browser tests/browser
+# The base is the image of deploy/Containerfile (python:3.12-slim, Debian 13), pinned by its digest.
+FROM docker.io/library/python:3.12-slim@sha256:2b4f19dae3a777dfc3b76730bda1e82e1f66ab2a2686fa93ca78edbfb4f04ffe
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends chromium chromium-driver fonts-dejavu-core \
+ && rm -rf /var/lib/apt/lists/* \
+ && dpkg-query -W chromium chromium-driver > /browser-versions.txt
+RUN pip install --no-cache-dir selenium==4.25.0 && pip show selenium | grep '^Version' >> /browser-versions.txt
+# selenium must never fetch a driver: the tests give it /usr/bin/chromedriver
+ENV SE_OFFLINE=true
+RUN useradd -m browser
+USER browser
+WORKDIR /home/browser
