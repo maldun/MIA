@@ -171,5 +171,33 @@ class ProductionWiring(unittest.TestCase):
         self.assertEqual((eleventh["ok"], eleventh.get("code")), (False, "rate_limited"))
         self.assertEqual(bens["ok"], True)
 
+    @mark.req("REQ-API-010")
+    def test_a_second_user_sees_and_changes_the_workflow_preset_and_persona_of_the_first(self):
+        """TC-API-010 (AC-20): no roles and no data per user: ben reads and changes the workflow, the preset and the persona that anna saved, and anna sees his changes.
+
+        Example: anna saves the workflow shared, the preset test_shared and the persona "anna's persona" -> ben reads all three and saves his own -> anna reads ben's.
+        """
+        # Given: anna's and ben's browsers, the editor token of the presets and the data of each
+        anna, ben = self.login("anna", "pw-anna-1"), self.login("ben", "pw-ben-123")
+        token = {"X-MIA-Token": self.wa.app.config["EDITOR_TOKEN_INFO"][0] or ""}
+        preset = {"name": "test_shared", "description": "anna's", "weights": {"Fcl_MTH_Fun": 0.6}, "bones": {}, "gesture": "hand_on_hip",
+                  "speaking": False, "tags": [], "source": "manual"}
+        bens_graph = {"nodes": [dict(node, note="ben") for node in GRAPH["nodes"]], "edges": GRAPH["edges"]}
+        # When: anna saves all three, ben reads them and saves his own versions
+        saved = [anna.put("/api/workflows/shared", json={"doc": GRAPH}).status_code, anna.post("/api/presets", json=preset, headers=token).status_code,
+                 anna.post("/api/persona", json={"doc": {"text": "anna's persona"}}).status_code]
+        seen = (ben.get("/api/workflows/shared").get_json()["doc"], ben.get("/api/presets/test_shared").get_json()["description"],
+                ben.get("/api/persona").get_json()["text"])
+        changed = [ben.put("/api/workflows/shared", json={"doc": bens_graph, "expected_version": 1}).status_code,
+                   ben.put("/api/presets/test_shared", json=dict(preset, description="ben's"), headers=token).status_code,
+                   ben.post("/api/persona", json={"doc": {"text": "ben's persona"}}).status_code]
+        # Then: ben saw anna's data, his changes passed and anna sees them
+        self.assertEqual(saved, [200, 201, 200])
+        self.assertEqual(seen, (GRAPH, "anna's", "anna's persona"))
+        self.assertEqual(changed, [200, 200, 200])
+        self.assertEqual(anna.get("/api/workflows/shared").get_json()["author"], "ben")
+        self.assertEqual(anna.get("/api/presets/test_shared").get_json()["description"], "ben's")
+        self.assertEqual(anna.get("/api/persona").get_json()["text"], "ben's persona")
+
 if __name__ == "__main__":
     unittest.main()
