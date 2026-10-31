@@ -67,10 +67,10 @@ MIA, Ollama and SearXNG as three containers with one command (`deploy/up.sh`), i
 
 ### Configuration
 - The real configuration of a machine is `setup_cfg.json`. It is **not in version control** (a deployment on another machine would otherwise fight with the one in git at every commit). The tracked template is
-  `setup_cfg.example.json`: it lists every option (91 at the moment; the values are those of the development machine, adjust paths, models and ports). On the first start `python -m MIA` copies the example to
+  `setup_cfg.example.json`: it lists every option (108 at the moment; the values are those of the development machine, adjust paths, models and ports). On the first start `python -m MIA` copies the example to
   `setup_cfg.json` and says so; after that only your file is read. When a new version of MIA brings new options, they appear in the example; a test (`tests/test_config.py`) keeps the example complete.
   Two options mean something different when they are *present*, so they are not in the example: `editor_token` and `chat_token` (see below).
-  After an update, `python config.py` lists the options of the example that your `setup_cfg.json` does not have yet (it only reports; the defaults apply until you add them).
+  After an update, MIA warns at start about the options of the example that your `setup_cfg.json` does not have yet, and `python config.py` lists them too (both only report; the defaults apply until you add them).
 - Configure setup_cfg.json to your liking (the list below describes the options; "optional" options are in the example with their default):
 
     - "name":"ollama", (docker name)
@@ -125,6 +125,11 @@ MIA, Ollama and SearXNG as three containers with one command (`deploy/up.sh`), i
     - "skills_dir":"skills", "library_dir":"library", "user_library_dir":"data/library", "library_index":"data/library.sqlite", "runs_dir":"data/runs", (the skills, the library of nodes and pipelines (shipped and your own), its index and the run log)
     - "chat_token", "editor_token": (not in the example, because their presence changes the behaviour: `editor_token` set to a text is the token for the expression editor, `""` switches the check off, missing = a random token in `editor_token_file`; `chat_token` defaults to the editor token)
     - "editor_token_file":"data/editor_token.txt", (the file with the random editor token that is made at the first start when "editor_token" is not set)
+    - "files_dir":"data/files", "files_max_bytes":1073741824, "files_max_total_bytes":53687091200, (the files volume: the folder tasks put generated files into (a report as .md and .tex), the largest file in bytes (1 GiB) and the largest volume in bytes (50 GiB); MIA never deletes a file there)
+    - "model_classes_file":"data/model_classes.json", (whether a model is local or paid, per model name; a model not in the file that does not run on this machine is asked about once)
+    - "review_answer_seconds":1800, (how long a running review waits for your answer to its question; no answer in time counts as "no")
+    - "skill_options":{}, (optional: other defaults for the options of a task, {task id: {option: value}}; `{}` keeps the defaults of the skills)
+    - "workflow_speak":true, "workflow_speak_tasks":{}, (whether the tasks that run beside the chat (/lookup, /review, workflows) speak what they have to say; `workflow_speak_tasks` overrides it for single tasks, e.g. {"review": false}; the chat answers are always spoken)
 
 - The character on the page is a 3D model (Godot web export, see `ui/README.md`). Build it once with `ui/tools/build_web.sh`; MIA serves it under `/character/` and shows it in the page. It replaces the old pre-rendered videos.
 - Configure expressions.json: every expression has a `preset` (expression of the character, see `ui/godot/presets/library.json`; default: the expression key itself), the spoken `text` and the `voice` clip (`null` = no voice clip yet).

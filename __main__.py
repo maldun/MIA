@@ -29,13 +29,17 @@ from .constants import HTTPS_PORT_KEY, TAILSCALE_KEY
 from .shutdown import install_term_handler, stop_process, graceful_shutdown, DEFAULT_PAUSE
 
 from .constants import CFG_FILE, LOG_FNAME
-from .config import ensure as ensure_config
+from .config import ensure as ensure_config, warning as config_warning
 fpath = os.path.split(__file__)[0]
 cfg_file = os.path.join(fpath,CFG_FILE)
 if os.path.basename(cfg_file) == "setup_cfg.json":
     cfg_file, _created = ensure_config(fpath)
     if _created:
         print("First start on this machine: setup_cfg.json was made from setup_cfg.example.json. Adjust it (paths, models, ports) and start MIA again if needed.")
+    # REQ-OPR-003: after an update the example may have options this machine's file lacks; their defaults apply, so this only warns
+    _missing_options = config_warning(fpath)
+    if _missing_options:
+        print(_missing_options)
 TEMPLATE_DIR = "templates"
 STATIC_DIR = os.path.join(TEMPLATE_DIR,"static")
 static_folder = os.path.join(fpath,STATIC_DIR)

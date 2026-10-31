@@ -81,6 +81,40 @@ class MissingOptions(unittest.TestCase):
         self.assertEqual(found, {})
         self.assertEqual([line for line in out.splitlines() if REPORTED.match(line)], [])
 
+    @mark.req("REQ-OPR-003")
+    def test_the_start_warning_names_both_and_no_others(self):
+        """TC-OPR-003: the warning MIA prints at start names the two removed options and no others; a complete configuration gives no warning.
+
+        Example: setup_cfg.json without web_port and voice_effect -> "Warning: ..." with two option lines; nothing removed -> None.
+        """
+        # Given: the configuration lacks two options of the example
+        self.write_config_without(REMOVED)
+        # When: the start warning is made
+        text = config.warning(self.folder)
+        # Then: it is a warning with exactly these two option lines
+        self.assertTrue(text.startswith("Warning: "))
+        named = [m.group(1) for m in (REPORTED.match(line) for line in text.splitlines()) if m]
+        self.assertEqual(sorted(named), sorted(REMOVED))
+        # And: with every option present there is no warning
+        self.write_config_without(())
+        self.assertIsNone(config.warning(self.folder))
+
+    @mark.req("REQ-OPR-003")
+    def test_mia_prints_the_warning_at_start(self):
+        """TC-OPR-003 (D-120 Q2): __main__.py prints config.warning after it made sure setup_cfg.json exists.
+
+        Example: __main__.py has "ensure_config(fpath)" and, after it, a print of "config_warning(fpath)".
+        """
+        # Given: the start code of MIA
+        with open(os.path.join(REPO, "__main__.py"), encoding="utf-8") as fp:
+            source = fp.read()
+        # When: the call of the warning is looked for
+        at = source.find("config_warning(fpath)")
+        # Then: it is imported from config and comes after ensure_config
+        self.assertIn("from .config import ensure as ensure_config, warning as config_warning", source)
+        self.assertGreater(at, source.find("ensure_config(fpath)"))
+        self.assertGreater(source.find("ensure_config(fpath)"), 0)
+
 
 if __name__ == "__main__":
     unittest.main()
