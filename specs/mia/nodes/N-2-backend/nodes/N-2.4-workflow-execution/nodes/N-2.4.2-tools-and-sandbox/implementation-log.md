@@ -124,3 +124,20 @@ Not built. REQ-TLS-006 is verified by measurement only (AC-3: 0 invented referen
 What is already there for it (not evidence for the measurement): every passage of `fetch_passages` keeps its page as `ref` (T-01, T-06), and `research.anchor_answer` drops a source whose passage does not exist or does not contain the quote and demotes an answer without a verified source to unknown (T-06 tests 4 and 5). The `research` dev suite (20 cases, recorded web) and its scorer (`quote_not_in_page`) are the likely basis of the criterion.
 
 For the later goal: draft the eval criterion as a plan amendment (suite, metric, bound 0, repeats, pin, rule), create `eval-spec.md` with the pins, then the dev-split runs of the agent-app loop.
+
+## Verify findings built (2026-10-31, D-128, D-131, D-132)
+Each reproduced in a failing test first where it can fail; built by the coordinating agent on goal/v1.
+
+| Finding (first report) | Fix | Test | Commit |
+|---|---|---|---|
+| 2 the app's door without trust of works, retractions, DOI lookup | `build_tool_calls`, used by `web_app.py` | `AppDoorTests`, `tests/test_web_app_wiring.py` | `70a6f35`, `bfeffa9` |
+| 5 REQ-TLS-007 against what scholarly requests send | A-41: the text lists it (privacy low, D-131) | – | `6fa07ff` |
+| 6 `run_script` `ok` for a script that did not finish | `failed` / `unavailable` from the run status the script check now records | `test_a_script_that_did_not_run_to_the_end_is_not_ok` | `191a8f3` |
+| 7 unknown id REQ-TO-005 | REQ-TLS-005 | trace_check | `191a8f3` |
+| 8 wrong arguments counted, raw TypeError | `bad_arguments` before counting (signature) | `test_wrong_arguments_are_refused_before_they_count` | `191a8f3` |
+| 9 `tool_calls.py` not in the model | part `toolDoor` (its flows still missing) | check_sysml | `408ee77` |
+| 10 (report F-12) count without a lock | one locked step | `test_concurrent_calls_keep_the_limit` (passes also before: the race does not show under the GIL) | `191a8f3` |
+| 11 (report F-13) outputs beyond the contract | IF-402 v3 (A-42 installed) | TC-IF-402-07 | `408ee77`, `0f5050d` |
+| N-1 of the re-verification: evidence as one string cut into characters | a string is one passage | `test_evidence_as_one_text_is_read_as_one_passage` | `ad9f482` |
+
+Decided, not built: 1 (the planted figure; A-40 drafted to retire the case; the rule for conflicting values and its conflict with the label `fail`, D-132). Deferred: 3, 4 (FB-03). Open from the re-verification: N-2 (wrong types counted, then a raw error), N-3 (the mock has no `result` and no `failed`), N-4 (the Bounds row of IF-402 still says only the query leaves the host), N-6 (the runner counts a call the door refuses with `bad_arguments`), F-9 flows of `toolDoor`, THR-001 without the planted figure, the gaps G-1 to G-4. Numbering note: the owner's questionnaire (D-132) numbered the report's F-12 and F-13 as #10 and #11.
