@@ -135,3 +135,19 @@ Open for Phase 4:
 Local coder: `tests/test_runner_interfaces.py` (task `run1213-tests`, 2 attempts, both failed only on my wrong check `--forbid 'class Runner'`, which matched `class RunnerInterfaceTests`); the draft compared with the instruction by script: two hex digests lengthened, fixed by hand, verdict `fixed`. The added test methods in `tests/test_tool_calls.py` and `tests/test_runner_model_server.py` are one method each, written by hand. Red before the change (5 errors, 1 failure), green after.
 
 Tests reported green (feedback, not verification): `tests/test_runner_interfaces.py` (7), `tests/test_tool_calls.py` (11), `tests/test_content_store.py`, `tests/test_run_workflow.py`; all `tests/test_*.py` in the image fail only as on master (`test_amendment_report`, `test_config`, `test_harness`, `test_shutdown`); all contract suites and integration steps; A-34 on a scratch copy: `test_if_402_tool_calls.py` 12 tests, all suites as before.
+
+## Verify findings fixed (2026-10-31, owner: "go ahead with 1") – REQ-RUN-003, REQ-RUN-013, REQ-TLS-003, REQ-RUN-012
+
+The verification report (`verification-report.md`, status *Not verified*) and the one of N-2.4.2 named findings with a clear fix; each was reproduced in a failing test first.
+
+| Finding | Fix | Test (red before, green after) | Commit |
+|---|---|---|---|
+| F1 (N-2.4.1): a streamed chat to a server that is down showed "converse: ConnectError" | `pipeline_model._unreachable`: ollama 0.6.3 raises `ConnectionError` for a plain call but lets `httpx.ConnectError` through for a stream; both now become `ModelServerUnreachable` (httpx is matched by name, it comes only with ollama) | `test_a_stream_of_the_real_library_to_a_closed_port_is_the_sentence` (the real library on port 9, plain and streamed); the old fake raised the wrong error | `98ae7a2` |
+| F15 (N-2.4.1): nothing guarded that Core keeps the chat's texts out of the store | – (code unchanged) | `InTheCore.test_the_core_gives_its_runner_the_rule_that_keeps_the_chat_out` fails when `or keep_texts` is removed from `core.py` | `160bef6` |
+| F2 (N-2.4.2): the app's `ToolCalls` had no `work_trust`, `retractions`, `work_lookup` | `tool_calls.build_tool_calls(web_tools, scholar, trust_table, sandbox)`, used by `web_app.py` | `AppDoorTests.test_the_door_of_the_app_has_every_source` (`source_record` of a DOI gives the work's trust, not `source_error`); smoke import of the app in the image: all three wired | `70a6f35` |
+
+Not fixed, for the owner:
+- F12 (N-2.4.1): `tool.web_search@1` declares `{"results": ...}`, the door returns IF-402's list. Only a declaration: library output schemas are checked for their form, not against the output, and `research.top_urls` reads both shapes. The proper fix is `tool.web_search@2` plus new versions of the six research pipelines that use `@1`, which by the agent-app rules needs a logged dev eval run on MP-light: proposed together with the eval-spec gate (`v1-eval-spec`, `specs/mia/eval-spec.md`).
+- The decisions F2 to F6 of the N-2.4.1 report and the medium findings of N-2.4.2.
+
+Tests reported green (feedback, not verification): the three new tests; all `tests/test_*.py` in the image fail only in `test_amendment_report`, `test_config`, `test_harness` (incl. the case `n-planted-figure`), `test_shutdown` (the zombie without `--init`, found by the N-4.2 agent); all contract suites and integration steps.
