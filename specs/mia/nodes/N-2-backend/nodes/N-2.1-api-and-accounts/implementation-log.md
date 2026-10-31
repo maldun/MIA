@@ -167,3 +167,6 @@ Options for the owner: (a) keep the decision: an amendment (a new id, e.g. A-55)
 
 Full run before this entry (in the image, 178 files: `tests/test_*.py` and the Python contract suites): all pass except the known two, `test_amendment_report` (no git in the image) and `test_harness` (rt_edit). `test_container_alone` skips in the image (no podman) and on the host until A-52 is installed. Feedback, not verification.
 To install on goal/v1 after the merge: `bash tools/apply_amendment_a52.sh --do` (then TC-API-013 runs on the host: `python3 tests/test_container_alone.py`), `bash tools/apply_amendment_a54.sh --do`.
+
+## V-10 decided by D-153 (corrects D-149), 2026-10-31
+The code stays (after 5 failed logins within a minute the 6th attempt is refused, 429 `throttled`). REQ-API-004's text and acceptance criterion now say exactly that, history line "2026-10-31 D-153 (corrects D-149)". Commit 979d9fd changed only this log (no code or test), so nothing is reverted; the options (a)/(b) of the V-10 entry above are settled as (b).
