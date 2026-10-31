@@ -365,10 +365,12 @@ package MIA_Architecture {
         }
         part pipelineRunner {
             doc /* Executes pipeline graphs of seven node kinds, enforces budgets, emits events, retries locally;
-                   core.py loads a skill, takes its pipeline from the library and runs it. */
+                   core.py loads a skill, takes its pipeline from the library and runs it;
+                   run_workflow.py runs a workflow of the library (IF-202) and gives the harness its access (IF-105),
+                   tools/sync_workflows.py writes one library workflow per skill (D-112). */
             @Implementation {
                 :>> status = ImplementationStatus::built;
-                :>> modules = ("core.py", "pipeline.py", "pipeline_model.py", "schema_check.py");
+                :>> modules = ("core.py", "pipeline.py", "pipeline_model.py", "schema_check.py", "run_workflow.py", "tools/sync_workflows.py");
             }
         }
         part libraryStore {
