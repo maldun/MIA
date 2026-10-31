@@ -97,6 +97,7 @@ class ServedCheckout(unittest.TestCase):
         self.git("-c", "user.name=t", "-c", "user.email=t@example.org", "commit", "-q", "-m", "x")
         return self.git("rev-parse", "--short", "HEAD")
 
+    @unittest.skipUnless(shutil.which("git"), "needs git (the test image has none); runs on the host")
     def test_start_and_status_say_which_folder_and_commit_they_serve(self):
         """A4 (D-157): start and status name the folder, the short commit and the branch of the checkout the stages serve.
 
