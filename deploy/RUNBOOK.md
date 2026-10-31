@@ -37,6 +37,8 @@ The pins are `MP-light` and `MP-full` in `specs/mia/eval-spec.md` (name, digest,
 | Perfective | improvements users asked for (feedback items) | per iteration | owner |
 | Preventive | dependency upgrades (`tools/check_free.py` after each), removal of dead code | each quarter | owner |
 
+After a change of `requirements.txt` build the image once with network, from the MIA folder: `podman build --pull=never -f deploy/Containerfile -t localhost/mia:pip-cache .`; the stack test (`tests/test_delivery_on_stack.py`) builds without network and fails until the pip layer is in the cache (D-148, D-150).
+
 ## Incidents
 | Date | What happened | Cause | Fix (test first) | Finding routed to |
 |---|---|---|---|---|
