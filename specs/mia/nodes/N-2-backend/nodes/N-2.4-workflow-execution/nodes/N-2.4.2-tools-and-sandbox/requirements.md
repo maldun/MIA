@@ -13,7 +13,7 @@ The tools that any workflow can call, each counted against the budgets of the ru
 - Parent: REQ-WFX-005
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-2: for a claim that goes through the number gate (verify.number_gate, the default pipeline of verify_claim), in the run log the code checks precede the first model call of that claim; the other verification styles (single, consistency, jury, cops, trial, computable) are styles behind the gate and judge only what it routes to them
+- Acceptance criterion: AC-2: for a claim that goes through the number gate (verify.number_gate), in the run log the code checks precede the first model call of that claim; the other verification styles (single, consistency, jury, cops, trial, computable) are styles behind the gate and judge only what it routes to them
 - Verified by: TC-TLS-001
 - Status: Approved
 - History: 2026-10-31 D-153: AC-2 holds for a claim that goes through the number gate (was: of each claim; G-4 of the N-2.4.2 verification)
