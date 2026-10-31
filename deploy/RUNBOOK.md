@@ -10,6 +10,11 @@ REQ-OPR-006. For the owner who runs MIA on the workstation (Fedora, podman, one 
 - Health check: `curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:8585/` gives 200; `podman ps --filter label=io.podman.compose.project=mia` lists every service as up.
 - Fresh-install check (TC-OPR-001, SMOKE-MIA-001): `python tests/smoke/smoke_fresh_install.py` after the commit to be checked. It uses the Ollama that runs already (`OLLAMA_URL`, default `http://host.containers.internal:11434`) and never pulls the models or images: when a model of `setup_cfg.compose.json` or an image of the stack is missing it stops with exit 2. Pull what is missing yourself first, never inside a test.
 
+## Files a fresh checkout lacks
+Three files are git-ignored and do not come with a checkout; MIA runs without them (the chat answers; no character, no voice), so a fresh install works before they are there (D-139):
+- `ui/godot/assets/mia.vrm`, the character model: made by `ui/tools/export_character.sh` from the VRoid source, or copied from an existing install.
+- `voice/models/kokoro/kokoro-v1.0.onnx` and `voices-v1.0.bin`, the Kokoro voice: from https://github.com/thewh1teagle/kokoro-onnx/releases/tag/model-files-v1.0 (README.md, "Kokoro TTS").
+
 ## Update of the model pins
 The pins are `MP-light` and `MP-full` in `specs/mia/eval-spec.md` (name, digest, quantization, options); `version` and `version_light` of `deploy/setup_cfg.compose.json` name the same models. A new model or a new digest of the same name is a plan amendment and needs a new eval baseline.
 1. Read the digests the server holds: `curl -s http://127.0.0.1:11434/api/tags` (or `podman exec ollama ollama list`) and compare them with `eval-spec.md`.

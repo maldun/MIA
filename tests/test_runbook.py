@@ -78,6 +78,18 @@ class Runbook(unittest.TestCase):
         self.assertEqual(len(bases), 1)
         self.assertRegex(bases[0], DIGEST)
 
+    @mark.req('REQ-OPR-001')
+    def test_the_runbook_names_the_files_a_fresh_checkout_lacks(self):
+        """TC-OPR-001 (D-139): the runbook says where the git-ignored character model and voice files come from, and that MIA runs without them.
+
+        Example: section "## Files a fresh checkout lacks" names ui/godot/assets/mia.vrm, kokoro-v1.0.onnx and voices-v1.0.bin
+        """
+        # Given: the runbook (setUp), When: its section on the missing files is read
+        part = section(self.text, "Files a fresh checkout lacks")
+        # Then: it names the three files and says that the chat works without them
+        for name in ("ui/godot/assets/mia.vrm", "kokoro-v1.0.onnx", "voices-v1.0.bin", "without them"):
+            self.assertIn(name, part)
+
     @mark.req('REQ-OPR-006')
     def test_the_runbook_has_the_four_parts_of_the_requirement(self):
         """TC-OPR-006: the runbook has start, update of the model pins, backup and restore of the database, and the retirement plan.
