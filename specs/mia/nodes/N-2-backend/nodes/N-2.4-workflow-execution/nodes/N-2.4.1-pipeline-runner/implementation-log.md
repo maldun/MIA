@@ -187,3 +187,6 @@ An empty digest (held by the server or in the pin) matched every pin as a prefix
 
 ## F13, model part (2026-10-31, afternoon)
 `pipelineRunner` in `specs/mia/architecture.sysml` now names `run_workflow.py` and `tools/sync_workflows.py` (`check_sysml.sh` and `check_sysml_model.py` clean); commit `4baadae`. Still open: `decomposition.yaml` (protected) says 7 tasks for N-2.4.1, the plan has 8 (T-08, A-35): a one-line amendment for the owner.
+
+## F16, tests (2026-10-31, afternoon)
+Markers `@mark.req` for REQ-RUN-008, -014, -015 and Given/When/Then comments in `tests/test_runner_budgets.py` and `tests/test_run_workflow.py` (no assertion changed; test_doc_check clean; trace_check finds the markers); commit `b244f8c`. Still open: the Scenarios section of the node's `test-spec.md` (specification, written by people; the agent can draft it).
