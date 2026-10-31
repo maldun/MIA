@@ -71,6 +71,7 @@ Back-filled on 2026-10-30, after the workflow skills introduced goals (M33–M37
 | REQ-TLS-002 | partly | owner 2026-10-31 (D-152): the measurement part (an eval run with a criterion and pins) is out: back with eval-spec.md and FB-03; the passages with their source references stay in |
 | REQ-SLY-007 | partly | owner 2026-10-31 (D-158): the importers of outside data are out: next iteration with FB-04; storage, versions and the change notices stay in |
 | REQ-GTB-004 | partly | owner 2026-10-31 (D-160): the workflow library folder (root task T-10) is out: TD-06; TC-GTB-005 is rewritten with FB-03; the graph rules and tables stay in |
+| REQ-RTB-006 | partly | owner 2026-10-31 (D-161): AC-3 (an edited trust value survives a restart through the record table) is out: next iteration with FB-04; the table and its rules stay in |
 | REQ-GA-002 | out | owner 2026-10-31 (D-135): N-5 T-02 (edit as JSON) waits for FB-02 (the graph form and the rules may change); back in the next iteration |
 | REQ-GA-003 | out | owner 2026-10-31 (D-135): the graph rules in the page wait for FB-02; the backend still checks the rules on save |
 | REQ-CHV-007 | out | owner 2026-10-31 (D-137): model selection after the first human tests; next iteration |
