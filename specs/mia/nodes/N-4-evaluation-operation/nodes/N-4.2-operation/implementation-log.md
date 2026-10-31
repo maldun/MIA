@@ -178,3 +178,26 @@ Open questions (T06-Q5, Q6) and a finding:
 Open questions:
 - T07-Q1 ("with its database"): the one command is `deploy/up.sh db`; plain `deploy/up.sh` still starts without the `db` service (and without `MIA_DATABASE_URL`, so the app's store stays the file backend). Options: (a) keep, the README and A-47 name `deploy/up.sh db` as the one command; (b) make the db profile the default of `deploy/up.sh` (every start gets PostgreSQL and its password in `.env`). Recommendation: (a) until the app's store moves to PostgreSQL (N-3.1), then (b).
 - T07-Q2 (fresh checkout without the character and the voice): `ui/godot/build/web` and the Kokoro model are not in git; the stack starts and answers chat without them (the page has no 3D character, `mia` logs a traceback for the voice). Recommendation: leave it to the runbook (T-08: `deploy/up.sh character`, the Kokoro files) rather than to the one command.
+
+## T-08 Runbook (2026-10-31, done; the walkthrough TC-OPR-006 is the owner's, stage 4) – REQ-OPR-006
+
+| Requirement | Where it is met | Test |
+|---|---|---|
+| REQ-OPR-006 runbook | `deploy/RUNBOOK.md` (new, from `dev-workflow/assets/runbook.md`): start and stop (services, the one file `deploy/.env`, `deploy/up.sh db`, health check, the fresh-install check with a running Ollama that never pulls, D-136 item 5), update of the model pins (MP-light/MP-full of `eval-spec.md`, digests from `/api/tags`, a new pin is an amendment with a new baseline; image pins), backup and restore of the database (`deploy/up.sh backup|restore`, the database with `db`), kinds of maintenance, incidents, retirement plan ending in the freeze with the image and model digests | `tests/test_runbook.py` (4): the floating images pinned by a sha256 digest in the compose files; the four parts present and not empty; backup names `deploy/up.sh db`, `backup`, `restore`; retirement names "digest" and "freeze"; the fresh-install check names `tests/smoke/smoke_fresh_install.py`, `OLLAMA_URL`, "never pulls". The walkthrough itself: TC-OPR-006, the owner on a clean machine |
+| D-127 image pins | `deploy/compose.yaml`, `deploy/compose.rocm.yaml`: `caddy:2`, `ollama:latest`, `ollama:rocm` (the ROCm variant of the same service) and `searxng:latest` as `tag@sha256:...` | same test, first case |
+
+Digests (read with `podman image inspect --format '{{.Digest}}'` from the images on this machine, nothing pulled; each reference checked with `podman create --pull=never`, the containers removed):
+- `docker.io/library/caddy:2@sha256:173b26306d711395accaeba8b67afcaad2a085ccb1e6bf26010bfe8c095a5229` (image created 2026-10-05)
+- `docker.io/ollama/ollama:latest@sha256:40c61dbf5091e0b4cc46f406f912fb061cfeca51208f0f7173c87c3b5f795c95` (2026-10-17)
+- `docker.io/ollama/ollama:rocm@sha256:33134349fb026a3bce537379640637f8175b4766bdc4e888d61f182817bcbcee` (2026-10-15)
+- `docker.io/searxng/searxng:latest@sha256:2fc7a1ee644edac36b7ab2b7885b83b991720da8d81a03838ddf8c228893ca4e` (2026-10-17)
+Each image has two repo digests on this machine (`podman images --format {{.Digest}}` shows the other one, e.g. caddy `685ae3d7...`); both resolve locally. Which one is the multi-platform index cannot be told without the registry; the pinned one is the image's own digest of `podman image inspect`. Open: none of the three images was missing.
+
+- Red first: all 4 tests failed (no runbook; the pins absent).
+- Local coder: `tests/test_runbook.py` (task `n42-t08-runbook`, 1 attempt, 84 s): the draft was right (fixture verbatim, every statement found by script), but the task counted as failed because my own check `--forbid '():'` matched the fixture's `def image_lines():`; draft taken as it was, verdict `ok`, lesson added.
+- Touches: `deploy/RUNBOOK.md` (plan); `deploy/compose.yaml` (pins, one header line), `deploy/compose.rocm.yaml` (pin) for D-127; new `tests/test_runbook.py`.
+- Tests reported green (feedback, not verification), on the host: `test_runbook` (4), `test_compose_stack` (6), `test_deploy` (16), `test_up_fresh` (4), `test_first_account_up` (4), `test_up_backup` (5); `podman-compose config` renders the pinned images.
+
+Open questions:
+- T08-Q1 (more floating images): `docker.io/library/postgres:16` (the `db` service) and `docker.io/library/python:3.12-slim` (base of `deploy/Containerfile`) float as well; D-127 named only three. Recommendation: pin both in the same way (both are on this machine: postgres `9e2cf628...`/`f9d1e581...`, python `2b4f19da...`/`a6e34c59...`), a small follow-up.
+- T08-Q2 (index or platform digest): pin the multi-platform index digest instead (portable to another CPU type)? It needs one look at the registry (`skopeo inspect --raw docker://...`, no pull). Recommendation: yes, at the next update of the pins, by the owner.

@@ -1,7 +1,7 @@
 # AMD GPU for Ollama (as MIA's own start does): deploy/up.sh rocm
 services:
   ollama:
-    image: docker.io/ollama/ollama:rocm
+    image: docker.io/ollama/ollama:rocm@sha256:33134349fb026a3bce537379640637f8175b4766bdc4e888d61f182817bcbcee
     devices:
       - /dev/kfd
       - /dev/dri

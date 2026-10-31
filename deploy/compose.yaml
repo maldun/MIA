@@ -3,7 +3,7 @@
 #   deploy/up.sh rocm | nvidia                     with the GPU of Ollama (AMD / NVIDIA)
 # The page is on http://localhost:8585 (MIA_PORT in .env changes that). Only MIA (http, 8585, always on loopback) and its https front (8586, on MIA_BIND) are published;
 # Ollama and SearXNG are reachable inside the stack. Other devices come only through https (REQ-OPR-008, A-37).
-# More in deploy/README.md.
+# The images from registries are pinned by digest (D-127); deploy/RUNBOOK.md says how to update a pin. More in deploy/README.md.
 services:
   mia:
     build:
@@ -42,7 +42,7 @@ services:
       retries: 3
 
   https:
-    image: docker.io/library/caddy:2
+    image: docker.io/library/caddy:2@sha256:173b26306d711395accaeba8b67afcaad2a085ccb1e6bf26010bfe8c095a5229
     restart: unless-stopped
     depends_on:
       - mia
@@ -55,7 +55,7 @@ services:
 
   ollama:
     profiles: ["ollama"]          # only without OLLAMA_URL (up.sh switches the profile)
-    image: docker.io/ollama/ollama:latest
+    image: docker.io/ollama/ollama:latest@sha256:40c61dbf5091e0b4cc46f406f912fb061cfeca51208f0f7173c87c3b5f795c95
     restart: unless-stopped
     environment:
       OLLAMA_MAX_LOADED_MODELS: "1"
@@ -91,7 +91,7 @@ services:
       start_period: 10s
 
   searxng:
-    image: docker.io/searxng/searxng:latest
+    image: docker.io/searxng/searxng:latest@sha256:2fc7a1ee644edac36b7ab2b7885b83b991720da8d81a03838ddf8c228893ca4e
     restart: unless-stopped
     environment:
       SEARXNG_SECRET: ${SEARXNG_SECRET:?run deploy/up.sh, it makes .env}
