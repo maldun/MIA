@@ -10,7 +10,7 @@ deploy/up.sh                             # CPU      | deploy/up.sh rocm   (AMD) 
 deploy/up.sh down                        # stop (the volumes stay); deploy/up.sh logs -f mia
 ```
 
-The first call writes `deploy/.env` (the SearXNG secret of this machine, not in git). MIA waits for Ollama and pulls `version` and `version_light` of the config through its API when they are missing (the first start downloads the models, the log says so).
+A fresh checkout needs one file and one command (REQ-OPR-001): `deploy/.env` with the settings of this machine (all optional, see below; e.g. `OLLAMA_URL` for an Ollama that runs already), then `deploy/up.sh db` (the stack with its database). The first call adds the SearXNG secret of this machine to `deploy/.env` (not in git), also when you wrote the file yourself, and offers the owner account once (see "The login"). MIA waits for Ollama and pulls `version` and `version_light` of the config through its API when they are missing (the first start downloads the models, the log says so).
 
 ## HTTPS
 
@@ -68,6 +68,8 @@ Off by default. Turn it on and make the owner account:
 deploy/up.sh owner NAME                  # asks for the password twice (at least 8 characters); never an argument
 ```
 
+The first start offers this once (REQ-OPR-002): `deploy/up.sh` asks for the name on a terminal (empty = later) and otherwise prints the command; then it writes `MIA_FIRST_ACCOUNT_OFFERED=1` into `deploy/.env` and later starts stay quiet, also without an account. `python -m MIA` outside the stack does the same with `tools/accounts_cli.py create NAME`; its marker is the empty file `data/first_account_offered`.
+
 The command also turns the login on, in `deploy/setup_cfg.local.json`; an account that exists already is kept (it is not created twice). To switch the password check alone, without a container: `deploy/up.sh login on|off|status` (`on` warns when no account exists yet, because you could not log in then). That file holds the settings of **this machine**, is not in git and is laid over the tracked `deploy/setup_cfg.compose.json` key by key (do not edit the tracked file for your machine). Restart MIA to apply it:
 
 ```
@@ -122,7 +124,7 @@ OLLAMA_URL=http://192.168.1.50:11434
 
 ## Settings in `.env` (all optional)
 
-`OLLAMA_URL` (see above), `MIA_PORT` (8585), `MIA_HTTPS_PORT` (8586), `MIA_BIND` (127.0.0.1; `0.0.0.0` for other machines, then also set `public_hosts` in the config; it moves only the https port, http 8585 stays on loopback), `MIA_PROJECT` (mia; another name = a second stack next to the first), `MIA_CONFIG`, `MIA_KOKORO_DIR`, `MIA_CHARACTER_DIR`, `MIA_BACKGROUND_DIR`, `HSA_OVERRIDE_GFX_VERSION` (rocm, 11.0.0).
+`OLLAMA_URL` (see above), `MIA_PORT` (8585), `MIA_HTTPS_PORT` (8586), `MIA_BIND` (127.0.0.1; `0.0.0.0` for other machines, then also set `public_hosts` in the config; it moves only the https port, http 8585 stays on loopback), `MIA_PROJECT` (mia; another name = a second stack next to the first, with its own containers and volumes), `MIA_IMAGE` (localhost/mia:latest; the tag the build makes and both mia and graph run), `MIA_CONFIG`, `MIA_KOKORO_DIR`, `MIA_CHARACTER_DIR`, `MIA_BACKGROUND_DIR`, `HSA_OVERRIDE_GFX_VERSION` (rocm, 11.0.0).
 
 ## Notes
 

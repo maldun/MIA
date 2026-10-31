@@ -12,11 +12,15 @@ cd "$HERE"
 envval() { local v="${!1:-}"; if [ -z "$v" ] && [ -f .env ]; then v="$(sed -n "s/^$1=//p" .env | tail -1)"; fi; echo "${v:-$2}"; }
 # the settings of THIS machine (the login, ...) are a local file next to the tracked config; compose mounts it, so it must exist
 [ -f setup_cfg.local.json ] || echo '{}' > setup_cfg.local.json
-if [ ! -f .env ]; then
-  echo "SEARXNG_SECRET=$(openssl rand -hex 32)" > .env
-  chmod 600 .env
-  echo "deploy/.env written (the SearXNG secret of this machine)"
+# the owner may have written .env first (OLLAMA_URL ..., deploy/README.md): the secret is added when the key is missing, not only when the file is (REQ-OPR-001)
+if ! grep -q '^SEARXNG_SECRET=' .env 2>/dev/null; then
+  [ -f .env ] || { touch .env; chmod 600 .env; }
+  [ -z "$(tail -c1 .env)" ] || echo >> .env          # a file written by hand may lack the last newline
+  echo "SEARXNG_SECRET=$(openssl rand -hex 32)" >> .env
+  echo "deploy/.env: the SearXNG secret of this machine written"
 fi
+# the project name may come from .env as the other settings do (README "Settings in .env"); the environment wins
+MIA_PROJECT="$(envval MIA_PROJECT mia)"
 # deploy/up.sh character [path/to/mia-character-web-N.zip]   put the character into the stack: the zip (from your Drive) is checked against ui/character/manifest.json
 # and unpacked to ui/godot/build/web, which the container mounts; MIA is then recreated so that it sees the new folder
 if [ "${1:-}" = "character" ]; then
@@ -97,6 +101,25 @@ if [ "${1:-}" = "owner" ]; then
   echo "Then log in at  https://localhost:8586  (a password is not accepted over plain http in the stack; the browser asks once about the certificate)"
   exit 0
 fi
+# the first start offers the owner account once (REQ-OPR-002, D-136): on a terminal it asks for the name (empty = later), without one it prints the command.
+# The marker MIA_FIRST_ACCOUNT_OFFERED=1 in .env keeps later starts quiet, also when no account was made (the warning of  login on  stays).
+offer_first_account() {
+  [ "$(envval MIA_FIRST_ACCOUNT_OFFERED)" = 1 ] && return 0
+  local engine container name=""
+  engine="$(command -v podman || command -v docker)"
+  container="$(mia_container)"
+  [ -n "$container" ] || return 0
+  [ "$("$engine" exec "$container" "${ACCOUNT_TOOL[@]}" list --dir "$ACCOUNT_DIR" 2>/dev/null)" = "no accounts" ] || return 0
+  echo "MIA_FIRST_ACCOUNT_OFFERED=1" >> .env
+  if [ -t 0 ]; then
+    read -r -p "No account yet. Make the owner account now? Name (empty = later): " name || name=""
+  fi
+  if [ -n "$name" ]; then
+    bash "$HERE/up.sh" owner "$name" || true
+  else
+    echo "No account yet. Make the owner account when you like:  deploy/up.sh owner NAME"
+  fi
+}
 # deploy/up.sh memories [folder]   take over MIA's memories of an old installation (memories.json, long_time_history.json from the MIA folder or the given folder)
 # MIA is stopped first (it saves its history when it stops), the files are copied over the ones in the data volume, then MIA starts again. The files the
 # container had are kept next to the new ones as <name>.container-previous.
@@ -272,8 +295,14 @@ if [ "$BIND" = "127.0.0.1" ]; then
 fi
 echo "  log: deploy/up.sh logs -f mia      stop: deploy/up.sh down"
 echo -n "waiting for the page "
+READY=""
 for _ in $(seq 1 60); do
-  if curl -s -o /dev/null -m 2 "http://127.0.0.1:$PORT/"; then echo " ready."; exit 0; fi
+  if curl -s -o /dev/null -m 2 "http://127.0.0.1:$PORT/"; then READY=1; break; fi
   echo -n "."; sleep 2
 done
-echo " not yet. A model download can take long, and MIA waits for Ollama before its page starts; look at: deploy/up.sh logs -f mia"
+if [ -n "$READY" ]; then
+  echo " ready."
+else
+  echo " not yet. A model download can take long, and MIA waits for Ollama before its page starts; look at: deploy/up.sh logs -f mia"
+fi
+offer_first_account

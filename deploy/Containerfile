@@ -1,6 +1,6 @@
 # MIA without a GPU and without Ollama (that is its own service, see compose.yaml).
 # Build from the MIA folder:  podman build -f deploy/Containerfile -t mia .
-FROM docker.io/library/python:3.12-slim
+FROM docker.io/library/python:3.12-slim@sha256:2b4f19dae3a777dfc3b76730bda1e82e1f66ab2a2686fa93ca78edbfb4f04ffe
 
 ENV PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1 PIP_DISABLE_PIP_VERSION_CHECK=1
 # the code lives in a folder called MIA, the package is started from its parent (python -m MIA)
