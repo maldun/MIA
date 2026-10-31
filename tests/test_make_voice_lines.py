@@ -7,7 +7,7 @@ import unittest
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(REPO, "tools"))
-from make_voice_lines import make_lines  # noqa: E402
+from make_voice_lines import make_lines, speaker_class  # noqa: E402
 
 
 class FakeSpeaker:
@@ -55,6 +55,18 @@ class MakeLinesTest(unittest.TestCase):
             texts = json.load(fp)
         self.assertEqual(set(texts), {"happy", "neutral", "angry", "surprised", "smug", "disagree", "embarrassed", "thinking", "sad", "annoyed", "greeting", "shocked"})   # shocked: REQ-CHV-006, D-143
         self.assertTrue(all(text.strip() and text.isascii() for text in texts.values()))
+
+    def test_the_speaker_is_found_in_a_checkout_not_named_mia(self):
+        """Owner's finding (2026-10-31): in the worktree goal-v1 the tool stopped with "No module named MIA", because it imported only MIA.speak.
+
+        Example: a checkout folder named goal-v1 (or /work in the image) -> speaker_class() is speak.Speaker
+        """
+        # Given: this checkout, whose folder is not named MIA (the worktree or the image's /work)
+        self.assertNotEqual(os.path.basename(REPO), "MIA")
+        # When: the tool looks for the speaker
+        found = speaker_class()
+        # Then: it is the Speaker of speak.py
+        self.assertEqual((found.__name__, found.__module__.split(".")[-1]), ("Speaker", "speak"))
 
 
 if __name__ == "__main__":
