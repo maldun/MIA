@@ -124,7 +124,9 @@ class GraphRules(unittest.TestCase):
 
 
 def generated(seed):
-    """A random graph with shared inputs, session nodes, and now and then a broken rule; returns (doc, reference_ok)."""
+    """A random graph with shared inputs, session nodes, and now and then a broken rule; returns (doc, reference_ok, order).
+
+    Now and then a shared input is listed twice (the mistake "one copy of the input per reader"), which breaks node identity (Verify F7)."""
     rng = random.Random(seed)
     count = rng.randint(2, 12)
     kinds = [rng.choice(("data", "process")) for _ in range(count)]
@@ -142,8 +144,12 @@ def generated(seed):
         if rng.random() < 0.85 and kinds[a] == kinds[b]:                 # mostly alternate data and process, so cycles and sessions decide
             continue
         edges.append({"from": ids[a], "to": ids[b]})
+    shared = sorted(shared_inputs(nodes, edges))
+    if shared and rng.random() < 0.3:                                    # drawn last, so the graphs of the other seeds stay as they were
+        nodes.append(dict(next(n for n in nodes if n["id"] == shared[0])))
     document = {"nodes": nodes, "edges": edges}
     kind = dict(zip(ids, kinds))
+    duplicated = len(nodes) != len(ids)
     adjacent = any(kind[e["from"]] == kind[e["to"]] for e in edges)
     session_bad = any(n.get("session") and not (n["stop"].get("max_cycles") or n["stop"].get("max_seconds")) for n in nodes if n["kind"] == "process")
     graph = {i: set() for i in ids}
@@ -154,7 +160,17 @@ def generated(seed):
         cyclic = False
     except graphlib.CycleError:
         order, cyclic = None, True
-    return document, not (adjacent or session_bad or cyclic), order
+    return document, not (duplicated or adjacent or session_bad or cyclic), order
+
+
+def shared_inputs(nodes, edges):
+    """The data nodes that two or more processes read, with their readers."""
+    kind = {n["id"]: n["kind"] for n in nodes}
+    readers = {}
+    for e in edges:
+        if kind[e["from"]] == "data" and kind[e["to"]] == "process":
+            readers.setdefault(e["from"], set()).add(e["to"])
+    return {d: r for d, r in readers.items() if len(r) >= 2}
 
 
 class Property(unittest.TestCase):
@@ -169,10 +185,29 @@ class Property(unittest.TestCase):
             accepted += result is None
             if (result is None) != reference_ok:
                 failures.append((seed, result))
-            elif result is None:
-                self.assertEqual(len(order), len(document["nodes"]))     # every accepted graph has a topological order, each node once
         self.assertEqual(failures, [])
         self.assertGreater(accepted, 100)                                # the generator does produce valid graphs, otherwise the test says nothing
+
+    @mark.req("REQ-GTB-002")
+    def test_a_shared_input_appears_once_in_an_accepted_graph(self):
+        """TC-GTB-003 (Verify F7): in every accepted graph a data node read by two processes is listed once and comes once in the order, before its readers.
+
+        Example: q->p1, q->p2 with q listed twice is refused; with q listed once it is accepted and q precedes p1 and p2.
+        """
+        # Given
+        checked = 0
+        for seed in range(1, 1001):
+            document, _, order = generated(seed)
+            # When
+            if violation(document) is not None:
+                continue
+            # Then
+            listed = [n["id"] for n in document["nodes"]]
+            for data, readers in shared_inputs(document["nodes"], document["edges"]).items():
+                self.assertEqual((listed.count(data), order.count(data)), (1, 1), (seed, data))
+                self.assertTrue(all(order.index(data) < order.index(r) for r in readers), (seed, data))
+                checked += 1
+        self.assertGreater(checked, 10)                                  # enough shared inputs reach the check, otherwise it says nothing
 
     @mark.req("REQ-GTB-002")
     def test_a_named_cycle_follows_real_edges(self):
