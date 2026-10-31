@@ -7,6 +7,7 @@
 
 export const CLAIM_EVERY_MS = 3000;       // a page that is used claims the voice at most this often
 export const HEARTBEAT_MS = 1500;         // "speaking" is repeated while a line plays (the character has a watchdog)
+export const STOP_DROP_MS = 3000;         // after a Stop, late lines of that answer arrive within the ~0.2 s poll plus one upload (D-165)
 
 /** the lines that are waiting to be played */
 export class LineQueue {
@@ -171,12 +172,12 @@ export class VoicePlayer {
   }
 }
 
-export function initSound({ audio, socket, character, storage, muteToggle, muteLabel, muteIcon, volume, hint, t, win = window }) {
+export function initSound({ audio, socket, character, storage, muteToggle, muteLabel, muteIcon, volume, hint, t, win = window, clock = Date.now }) {
   let muted = storage.get('mia.muted') === '1';
   let level = Math.min(100, Math.max(0, Number(storage.get('mia.volume', 100)) || 0));
   let first = true;
   let heartbeat = 0;
-  let stopped = false;          // the user stopped the voice: lines of that answer that still arrive are dropped until the next answer begins (D-157)
+  let stoppedAt = null;         // the user stopped the voice: late lines of that answer are dropped (REQ-VPB-002, D-157, D-165)
 
   // --- the character talks while a line plays or lines are waiting --------------------------------
   function speaking(value) {
@@ -206,13 +207,14 @@ export function initSound({ audio, socket, character, storage, muteToggle, muteL
   }
 
   socket.on('audio_reload', (data) => {
-    if (stopped) return;
+    if (stoppedAt !== null && clock() - stoppedAt < STOP_DROP_MS) return;
     const url = data?.url ?? '/audio/out.wav';
     player.enqueue({ id: url, url, serial: data?.serial });            // every line has its own file: the url names it
   });
 
-  // lines carry no answer id: a line after the Stop belongs to the stopped answer until the next one starts (REQ-VPB-002, D-157)
-  socket.on('chat_start', () => { stopped = false; });
+  // lines carry no answer id: a line after the Stop belongs to the stopped answer until the next one starts or the window
+  // ends; later lines (the shocked line of a minus vote) are not part of it (REQ-VPB-002, D-157, D-165)
+  socket.on('chat_start', () => { stoppedAt = null; });
 
   // --- one page plays ----------------------------------------------------------------------------------
   const claimIfUsed = () => player.claimIfUsed(document.visibilityState === 'visible');
@@ -249,7 +251,7 @@ export function initSound({ audio, socket, character, storage, muteToggle, muteL
     },
     /** the user stops the voice on this device (the composer's Stop button) */
     stop() {
-      stopped = true;
+      stoppedAt = clock();
       player.stop();
     },
     get queued() { return player.queued; },
