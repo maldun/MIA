@@ -148,11 +148,14 @@ export class VoicePlayer {
       return;
     }
     // a browser answers with a promise; an element that plays at once (a test double) is taken as started
-    if (started && typeof started.then === 'function') started.then(() => this._setSpeaking(true), (error) => this._notStarted(line, error));
-    else this._setSpeaking(true);
+    if (started && typeof started.then === 'function') {
+      // the promise may settle after its line was ended (error event, stop, a new src): then it no longer speaks for the player
+      started.then(() => { if (this.current === line) this._setSpeaking(true); }, (error) => { if (this.current === line) this._notStarted(line, error); });
+    } else this._setSpeaking(true);
   }
 
   _notStarted(line, error) {
+    if (error?.name === 'AbortError') return;           // pause() or a new src ended this start: whoever did it decides what comes next
     if (error?.name === 'NotAllowedError') {
       // the browser wants a click first: the line waits at the front
       this.queue.unshift(line);

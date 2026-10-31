@@ -24,6 +24,43 @@ function fakeAudio() {
   return audio;
 }
 
+/**
+ * an audio element that settles play() as the HTML spec does (F1 of the verification): loading takes a task; a missing file fires
+ * `error` and then rejects the play() promises pending at the failure with NotSupportedError; pause() and a new src reject a
+ * pending play() with AbortError
+ */
+function specAudio(missing = []) {
+  const listeners = {};
+  let pending = [];
+  let src = '';
+  const fire = (name) => (listeners[name] || []).forEach((f) => f());
+  const take = () => { const taken = pending; pending = []; return taken; };
+  const refuse = (taken, name) => taken.forEach(({ reject }) => { const e = new Error(name); e.name = name; reject(e); });
+  return {
+    muted: false, volume: 1, playing: false, overlaps: 0, started: [],
+    get src() { return src; },
+    set src(value) { refuse(take(), 'AbortError'); src = value; this.playing = false; },
+    addEventListener(name, fn) { (listeners[name] ||= []).push(fn); },
+    removeAttribute() { src = ''; },
+    pause() { refuse(take(), 'AbortError'); this.playing = false; },
+    play() {
+      const url = src;
+      const started = new Promise((resolve, reject) => pending.push({ resolve, reject }));
+      setImmediate(() => {
+        if (url !== src || !pending.length) return;                       // aborted by pause() or a new src
+        const taken = take();
+        if (missing.includes(url)) { fire('error'); refuse(taken, 'NotSupportedError'); return; }
+        if (this.playing) this.overlaps += 1;
+        this.playing = true;
+        this.started.push({ url, audible: !this.muted });
+        taken.forEach(({ resolve }) => resolve());
+      });
+      return started;
+    },
+    finish() { this.playing = false; fire('ended'); },
+  };
+}
+
 const line = (id, extra = {}) => ({ id, url: `/audio/${id}.wav`, serial: 1, ...extra });
 const ids = (audio) => audio.started.map((s) => s.url.match(/\/audio\/(.*)\.wav/)[1]);
 const flush = () => new Promise((resolve) => setImmediate(resolve));
@@ -198,4 +235,40 @@ test('claim is asked at most every 3 s', () => {
   assert.equal(sent.length, 2);
   player.claim({ initial: true, force: true });
   assert.deepEqual(sent.at(-1), { initial: true });
+});
+
+test('TC-VPB-003: on a spec-like element a missing line is reported once and the next lines are heard (F1)', async () => {
+  const failed = [];
+  const audio = specAudio(['/audio/a.wav']);
+  const player = new VoicePlayer({ audio });
+  player.onLineError = (id) => failed.push(id);
+  ['a', 'b', 'c'].forEach((id) => player.enqueue(line(id)));
+  await flush(); await flush(); await flush();
+  assert.deepEqual(failed, ['a']);
+  assert.deepEqual(ids(audio), ['b']);
+  assert.equal(player.playing, true);
+  audio.finish(); await flush(); await flush();
+  assert.deepEqual(ids(audio), ['b', 'c']);
+  assert.deepEqual(failed, ['a']);
+  assert.equal(audio.overlaps, 0);
+});
+
+test('TC-VPB-002: a stop while a line starts reports no error, and the next line keeps its serial (F1)', async () => {
+  const failed = [];
+  const ended = [];
+  const speaking = [];
+  const audio = specAudio();
+  const player = new VoicePlayer({ audio, onEnded: (l) => ended.push(l?.serial) });
+  player.onLineError = (id) => failed.push(id);
+  player.onSpeaking((value) => speaking.push(value));
+  player.enqueue(line('a'));
+  player.stop();
+  player.enqueue(line('b', { serial: 8 }));
+  await flush(); await flush();
+  assert.deepEqual(failed, []);
+  assert.deepEqual(ids(audio), ['b']);
+  assert.equal(player.playing, true);
+  audio.finish(); await flush();
+  assert.deepEqual(ended, [8]);
+  assert.deepEqual(speaking, [true, false]);
 });

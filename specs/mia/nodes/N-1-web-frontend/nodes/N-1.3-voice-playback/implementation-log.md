@@ -26,3 +26,8 @@ None.
 ## Open questions for Phase 4 and the integration step
 - The real provider in the IF-112 suite needs the adapter of the scratch run in `tests/acceptance/contract/test_if_112_voice_player.test.mjs` (its `make`) and `tests/helpers/contract.mjs` (owner, amendment at the integration step of N-1, step 1).
 - IF-112 text: "queued lines are dropped while muted" should say that muted lines run without sound.
+
+## Verify findings (D-140, D-141), branch `v1-n13`, 2026-10-31
+| Finding | Task | Change | Test red before / green after |
+|---|---|---|---|
+| F1 a missing line reported twice, the next line lost; a stop while a line starts reported as an error | T-03 | `sound.js`: the settle handlers of `play()` act only while their line is still `current`; an AbortError (pause, new src) is no failure | `voice-player.test.mjs`: `specAudio`, a fake element that settles `play()` as the HTML spec does (error event, then NotSupportedError for the promises pending at the failure; AbortError on `pause()` and a new src). Before: reports `['a','a']`..., the stop test reports `['a']`; after: 15 of 15 |
