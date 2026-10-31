@@ -592,8 +592,8 @@ package MIA_Architecture {
             @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("config.py", "setup_cfg.example.json"); }
         }
         part launcher {
-            doc /* python -m MIA: Ollama, speech process, web app, HTTPS proxy. */
-            @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("__main__.py", "mia_logger.py"); }
+            doc /* python -m MIA: Ollama, speech process, web app, HTTPS proxy; offers the first account once (REQ-OPR-002, D-136). */
+            @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("__main__.py", "mia_logger.py", "first_account.py"); }
         }
         part shutdownSequence {
             doc /* Orderly stop for Ctrl+C, /break!, /goodnight!, SIGTERM; saves the history. */
@@ -604,11 +604,16 @@ package MIA_Architecture {
             @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("tls_proxy.py", "tailscale_serve.py", "deploy/Caddyfile"); }
         }
         part composeStack {
-            doc /* MIA, Ollama, SearXNG and Caddy as containers; ROCm and NVIDIA overrides; up.sh. */
+            doc /* MIA, the graph app (graph), the database (db, profile db), Ollama, SearXNG and Caddy as containers, images pinned by digest; ROCm and NVIDIA
+                   overrides; up.sh (start, first account, backup and restore); the runbook (D-127, D-133, D-139, D-145). */
             @Implementation {
                 :>> status = ImplementationStatus::built;
-                :>> modules = ("deploy/compose.yaml", "deploy/Containerfile", "deploy/up.sh");
+                :>> modules = ("deploy/compose.yaml", "deploy/Containerfile", "deploy/up.sh", "deploy/RUNBOOK.md", "tools/backup.sh", "tools/restore.sh");
             }
+        }
+        part freeCheck {
+            doc /* The licence and dependency check: GPL-3-or-later, no paid-API client, no paid host in the web log (REQ-OPR-009, D-145). */
+            @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("tools/check_free.py"); }
         }
         part characterTools {
             doc /* Scripts that build the character from its source, export the VRM, pack and unpack the compiled web export. */

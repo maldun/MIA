@@ -18,6 +18,9 @@ REPO = os.path.dirname(HERE)
 _LINK_DIR = tempfile.mkdtemp()
 os.symlink(REPO, os.path.join(_LINK_DIR, "MIA"))
 sys.path.insert(0, _LINK_DIR)
+sys.path.insert(0, os.path.join(HERE, "helpers"))
+
+from markers import mark  # noqa: E402
 
 
 def load_json(name):
@@ -67,9 +70,9 @@ class ConfigFiles(unittest.TestCase):
         for key, entry in self.expressions.items():
             self.assertNotIn("vid", entry, key)
 
-    def test_all_14_required_presets_exist(self):
+    def test_all_15_required_presets_exist(self):
         required = {"greet", "no", "annoyed", "talk", "yes", "idle", "neutral", "happy", "sad", "angry",
-                    "surprised", "embarrassed", "smug", "thinking"}
+                    "surprised", "embarrassed", "smug", "thinking", "shocked"}          # shocked: REQ-CHV-006, D-143
         self.assertEqual(required, self.presets)
 
 
@@ -91,11 +94,53 @@ class PresetExpressorTest(unittest.TestCase):
         self.assertEqual(expressor.express("hello"), "greet")
         self.assertEqual(expressor.express("plain"), "plain")  # default: the key itself
 
-    def test_unknown_expression_does_not_crash_and_keeps_the_current_one(self):
+    @mark.req("REQ-CHV-002")
+    @mark.req("IF-111")
+    def test_unknown_expression_does_not_crash_and_shows_neutral(self):
+        """An unknown expression name shows neutral (IF-111 v2, A-48; v1 kept the current one).
+
+        Example: after "yes", express("nonsense") sends "neutral" and returns it.
+        """
+        # Given the character shows "yes"
         self.expressor.express("yes")
-        self.assertIsNone(self.expressor.express("nonsense"))
-        self.assertEqual(self.expressor.current, "yes")
-        self.assertEqual(self.sent, ["yes"])
+        # When an unknown name arrives
+        shown = self.expressor.express("nonsense")
+        # Then the neutral preset is sent and is the current one
+        self.assertEqual(shown, "neutral")
+        self.assertEqual(self.expressor.current, "neutral")
+        self.assertEqual(self.sent, ["yes", "neutral"])
+
+    @mark.req("REQ-CHV-002")
+    @mark.req("IF-111")
+    def test_unknown_expression_without_a_neutral_entry_still_sends_neutral(self):
+        """The fallback does not depend on a "neutral" entry in the expression file (IF-111 v2).
+
+        Example: expressions {"hello": ...}, express("nonsense") sends "neutral".
+        """
+        # Given expressions without a "neutral" entry
+        expressor = self.expressor_module.PresetExpressor(
+            expressions={"hello": {"preset": "greet"}}, send=self.sent.append)
+        # When an unknown name arrives
+        shown = expressor.express("nonsense")
+        # Then the neutral preset is sent
+        self.assertEqual(shown, "neutral")
+        self.assertEqual(self.sent, ["neutral"])
+
+    @mark.req("REQ-CHV-004")
+    @mark.req("IF-111")
+    def test_an_unknown_mood_and_an_unknown_name_show_the_same_face(self):
+        """The mood fallback (REQ-CHV-004) and the name fallback (IF-111 v2) agree on neutral.
+
+        Example: map_emotion("nonsense") expressed and express("nonsense") both send "neutral".
+        """
+        # Given the mood map of the communicator
+        communicator = importlib.import_module("MIA.communicator")
+        # When an unknown mood is mapped and expressed, and an unknown name is expressed
+        by_mood = self.expressor.express(communicator.Communicator.map_emotion("nonsense"))
+        by_name = self.expressor.express("nonsense")
+        # Then both show neutral
+        self.assertEqual(by_mood, "neutral")
+        self.assertEqual(by_name, "neutral")
 
     def test_works_without_a_send_function(self):
         expressor = self.expressor_module.PresetExpressor(expressions=os.path.join(REPO, "expressions.json"))
@@ -137,13 +182,23 @@ class WebAppEvents(unittest.TestCase):
         events = [e for e in client.get_received() if e["name"] == "expression"]
         self.assertEqual(events[-1]["args"][0], {"name": "smug"})
 
-    def test_unknown_expression_is_ignored(self):
+    @mark.req("REQ-CHV-002")
+    @mark.req("IF-111")
+    def test_unknown_expression_shows_neutral(self):
+        """An unknown expression name reaches the page as neutral (IF-111 v2, A-48; v1 ignored it).
+
+        Example: after "smug", express_and_reload("does_not_exist") emits expression {name: "neutral"}.
+        """
+        # Given a page and the character showing "smug"
         wa = self.web_app
         wa.express_and_reload("smug", sound=False)
         client = wa.socketio.test_client(wa.app)
         client.get_received()
+        # When an unknown name is expressed
         wa.express_and_reload("does_not_exist", sound=False)  # must not raise
-        self.assertEqual([e for e in client.get_received() if e["name"] == "expression"], [])
+        # Then the page is told to show neutral
+        events = [e for e in client.get_received() if e["name"] == "expression"]
+        self.assertEqual(events[-1]["args"][0], {"name": "neutral"})
 
     def test_character_files_are_served_with_the_right_types(self):
         wa = self.web_app
