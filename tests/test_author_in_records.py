@@ -175,7 +175,8 @@ class Messages(unittest.TestCase):
         self.gate = threading.Event()
         self.service = self.service_module.ChatService(
             lambda event, payload: None, self.log, self.moods.MoodTracker(os.path.join(self.tmp.name, "moods.json")),
-            lambda text, on_delta, on_emotion, should_stop: (on_delta("ok"), "ok")[1], model_info=lambda: ("test-model", "full"), clock=time.monotonic)
+            lambda text, on_delta, on_emotion, should_stop: (on_delta("ok"), "ok")[1], model_info=lambda: ("test-model", "full"), clock=time.monotonic,
+            spawn=lambda target: target())      # the worker runs in the test: a thread that outlives it writes into the folder that cleanup removes
 
     def user_records(self):
         return [r for r in self.log.history(limit=100)[0] if r["role"] == "user"]
@@ -202,6 +203,15 @@ class Messages(unittest.TestCase):
         """
         ack = self.service.send("hello again", sender="sid-1")
         self.assertNotIn("sender", ack["message"])
+
+    def test_the_answer_is_made_before_the_test_ends(self):
+        """Finding of the G-V1 merge gate: the answer ran in a thread that outlived the test and wrote into the temporary folder while it was removed (flaky `Directory not empty`).
+
+        Example: send(hello) -> the worker has left and the log holds the user message and the answer.
+        """
+        self.service.send("hello", sender="sid-1")
+        self.assertFalse(self.service._running)                                                    # the fixture runs the worker in the test's own thread
+        self.assertEqual([r["role"] for r in self.log.history(limit=100)[0]], ["user", "assistant"])
 
 
 if __name__ == "__main__":
