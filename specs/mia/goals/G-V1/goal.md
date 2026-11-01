@@ -78,6 +78,10 @@ Back-filled on 2026-10-30, after the workflow skills introduced goals (M33–M37
 | REQ-EVL-003 | partly | owner 2026-10-31 (D-166): the calibrations act only once an eval target uses a judge: TD-07; the calibration code and its tests stay in |
 | REQ-EVL-011 | partly | owner 2026-11-01 (D-172): the older suite kinds still run the in-process Core: TD-08 with FB-03; workflow targets run through IF-105 |
 | REQ-CLV-002 | partly | owner 2026-11-01 (D-172, D-167): a late `chat_start` can shift the counted waiting places: FB-06; the waiting text and its count stay in |
+| REQ-CHA-005 | partly | owner 2026-11-01 (D-173): deleting the history after a confirmation is out: TD-09; the bound on the history stays in |
+| REQ-CHA-008 | partly | owner 2026-11-01 (D-173): AC-8 (the check dialogues) comes after the field test: TD-10; the persona mechanism and its tests stay in |
+| REQ-WFM-022 | out | owner 2026-11-01 (D-173): optional and off by default (FR-13, AC-26); back in a later goal with the review pipeline it depends on |
+| REQ-VOI-001 | partly | owner 2026-11-01 (D-173): the app speaks through SpeechStreamer; the chat audio through IF-204 and `audio_chunk` is TD-11; the sentence-by-sentence synthesis and the markup filter stay in |
 | REQ-GA-002 | out | owner 2026-10-31 (D-135): N-5 T-02 (edit as JSON) waits for FB-02 (the graph form and the rules may change); back in the next iteration |
 | REQ-GA-003 | out | owner 2026-10-31 (D-135): the graph rules in the page wait for FB-02; the backend still checks the rules on save |
 | REQ-CHV-007 | out | owner 2026-10-31 (D-137): model selection after the first human tests; next iteration |
