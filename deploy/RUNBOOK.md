@@ -12,10 +12,11 @@ REQ-OPR-006. For the owner who runs MIA on the workstation (Fedora, podman, one 
 - Fresh-install check (TC-OPR-001, SMOKE-MIA-001): `python tests/smoke/smoke_fresh_install.py` after the commit to be checked. It uses the Ollama that runs already (`OLLAMA_URL`, default `http://host.containers.internal:11434`) and never pulls the models or images: when a model of `setup_cfg.compose.json` or an image of the stack is missing it stops with exit 2. Pull what is missing yourself first, never inside a test.
 
 ## Files a fresh checkout lacks
-Three items are git-ignored and do not come with a checkout; MIA runs without them (the chat answers; no character, no voice), so a fresh install works before they are there (D-139):
+Four items are git-ignored or made on the machine and do not come with a checkout; MIA runs without them (the chat answers; no character, no voice), so a fresh install works before they are there (D-139):
 - `ui/godot/build/web`, the character page the stack mounts into `mia`: `deploy/up.sh character path/to/mia-character-web-N.zip` (the zip from the owner's Drive, checked against `ui/character/manifest.json`; `deploy/README.md`, "The 3D character"). No Godot is needed.
 - `ui/godot/assets/mia.vrm`, the character model: only to build that page yourself (`ui/tools/export_character.sh` from the VRoid source, or copied from an existing install); the stack never reads it.
 - `voice/models/kokoro/kokoro-v1.0.onnx` and `voices-v1.0.bin`, the Kokoro voice: from https://github.com/thewh1teagle/kokoro-onnx/releases/tag/model-files-v1.0 (README.md, "Kokoro TTS").
+- `voice/expressions/*.wav`, the 12 voice lines of MIA's moods (`library/voice_line_texts.json`, among them `shocked_default.wav` of the shocked reaction after a minus vote, REQ-CHV-006): a fresh checkout or worktree has the folder empty. Render them once where MIA runs with `python tools/make_voice_lines.py` (all lines; `--only shocked` when only that one is missing; needs the Kokoro voice). For the stack, render them in the checkout and then start the stack again with a rebuild (`deploy/up.sh`, which runs `up -d --build`): the image copies the folder when it is built. Without them the faces show and MIA stays silent (D-167, D-171).
 
 ## Update of the model pins
 The pins are `MP-light` and `MP-full` in `specs/mia/eval-spec.md` (name, digest, quantization, options); `version` and `version_light` of `deploy/setup_cfg.compose.json` name the same models. A new model or a new digest of the same name is a plan amendment and needs a new eval baseline.

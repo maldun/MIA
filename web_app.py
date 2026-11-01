@@ -250,13 +250,20 @@ def character_reaction(expression):
     """
     The character's reaction outside an answer (the chat service asks for it, e.g. shocked after a minus, REQ-CHV-006): the expression and the line of its mood,
     then, in the background so the request is answered at once, the face of the current mood after the length of the line (D-156).
+    A newer reaction cancels the pending return, so the face stays to the end of the last line (R4 of the N-1.2 re-verification, D-167).
     """
+    global _latest_reaction
+    _latest_reaction += 1
+    reaction = _latest_reaction
     line = voice_lines.pick(expression)
     express_and_reload(expression,line=line)
     def back_to_mood(seconds):
         socketio.sleep(seconds)
-        express_and_reload(mood_face(),sound=False)
+        if reaction == _latest_reaction:
+            express_and_reload(mood_face(),sound=False)
     socketio.start_background_task(back_to_mood,line_seconds(line))
+
+_latest_reaction = 0     # the number of the last reaction; only its return to the mood shows
 
 def express_and_reload(expression,sound=True,line=None):
     """

@@ -16,9 +16,11 @@ import threading
 import time
 
 repo = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-link_dir = tempfile.mkdtemp()
-os.symlink(repo, os.path.join(link_dir, "MIA"))
-sys.path.insert(0, link_dir)
+import importlib.util  # noqa: E402
+if importlib.util.find_spec("MIA") is None:      # the tests bring their own copy of the package (tests/checkout_copy.py, D-169)
+    link_dir = tempfile.mkdtemp()
+    os.symlink(repo, os.path.join(link_dir, "MIA"))
+    sys.path.insert(0, link_dir)
 # the protected mock of IF-101 (v2 since amendment A-04); until A-04 is installed the draft next to it is used
 for candidate in (os.path.join(repo, "tests", "helpers", "mocks"), os.path.join(repo, "specs", "mia", "contract-drafts", "tests", "helpers", "mocks")):
     with open(os.path.join(candidate, "if_101_chat_api.py"), encoding="utf-8") as handle:

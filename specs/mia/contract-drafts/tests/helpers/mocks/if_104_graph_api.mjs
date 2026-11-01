@@ -44,6 +44,13 @@ function stops(stop) {
   return given.length > 0 && given.every((limit) => Number.isInteger(limit) && limit >= 1);
 }
 
+/** JSON.parse reviver: a session limit written with a fraction or an exponent (2.0, 1e0) keeps its source text, so stops() refuses it as the
+ * real rules refuse a float (A-66, D-169); JavaScript would otherwise read 2.0 as the integer 2. Needs the source text of JSON.parse (Node 21+). */
+function keepFloatLimits(key, value, context) {
+  const limit = key === 'max_cycles' || key === 'max_seconds';
+  return limit && typeof value === 'number' && /[.eE]/.test(context?.source ?? '') ? context.source : value;
+}
+
 function findCycle(ids, edges) {
   const out = new Map(ids.map((id) => [id, []]));
   for (const edge of edges) out.get(edge.from).push(edge.to);
@@ -82,7 +89,7 @@ export class GraphApiMock {
     const url = new URL(String(input), this.origin);
     const method = (init.method ?? 'GET').toUpperCase();
     let body;
-    try { body = init.body === undefined ? undefined : JSON.parse(init.body); } catch (error) { body = undefined; }
+    try { body = init.body === undefined ? undefined : JSON.parse(init.body, keepFloatLimits); } catch (error) { body = undefined; }
     this.requests.push({ method, path: url.pathname, query: Object.fromEntries(url.searchParams), body });
     try {
       const [status, answer] = this._route(method, url, body ?? {}, init.credentials === 'omit' ? null : this.cookie);

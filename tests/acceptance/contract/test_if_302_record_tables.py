@@ -19,13 +19,14 @@ class RecordTablesContract(unittest.TestCase):
     @mark.req("IF-302", "REQ-DB-013")
     @each_provider(IF)
     def test_what_may_be_deleted(self, tables):
-        """TC-IF-302-01 golden 3: memory, tasks and memos are deletable, votes and runs are not; every table is versioned."""
+        """TC-IF-302-01 golden 3: deletable are exactly history, memory, tasks and memos (v7, A-67), so votes, runs and source_trust are not; every table is versioned."""
         defs = tables.definitions()
         for table in ("memory", "tasks", "memos"):
             self.assertTrue(defs[table]["deletable"], table)
         for table in ("votes", "runs"):
             self.assertFalse(defs[table]["deletable"], table)
         self.assertTrue(all(d["versioned"] for d in defs.values()))
+        self.assertEqual({t for t, d in defs.items() if d["deletable"]}, {"history", "memory", "tasks", "memos"})      # v7 (A-67): the whole set
         self.assertTrue({"history", "memory", "votes", "tasks", "memos", "accounts", "presets", "gestures", "runs", "source_trust", "cases", "behaviours", "workflow_meta", "reports"} <= set(defs))
         for table in ("cases", "behaviours", "workflow_meta", "reports"):                                   # v1 (A-08): proposed benchmark cases and the adaptation counters keep every version
             self.assertEqual(defs[table], {"versioned": True, "deletable": False}, table)

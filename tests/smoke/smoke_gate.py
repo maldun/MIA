@@ -37,7 +37,7 @@ def server_digest(url, name=MODEL):
 def run_smoke_cases(suite, results):
     """the cases tagged smoke of a suite through the gate; returns (header, records) of the saved run"""
     command = [sys.executable, os.path.join(REPO, "tools", "eval.py"), "run", suite, "--tag", "smoke", "--variant", "smoke-gate", "--pipeline", "verify.number_gate@4",
-               "--model", MODEL, "--pin", "MP-light", "--results", results, "--quiet"]
+               "--pin", "MP-light", "--results", results, "--quiet"]       # the pin decides the model (D-166); --model next to --pin is refused
     done = subprocess.run(command, capture_output=True, text=True, timeout=900)
     saved = sorted(glob.glob(os.path.join(results, "%s__smoke-gate__*.jsonl" % suite)))
     if done.returncode != 0 or not saved:

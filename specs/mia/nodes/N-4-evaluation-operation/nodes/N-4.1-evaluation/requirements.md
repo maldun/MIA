@@ -40,7 +40,9 @@ The harness, the decisions on held-out cases, the baselines and benchmarks of th
 - Acceptance criterion: AC-22: an uncalibrated judge's verdicts are marked not counted
 - Verified by: TC-EVL-003
 - Status: Approved
-- History: –
+- Relaxed: TD-07
+- Target: the harness loads the calibration of each judge and applies it in every run whose target uses that judge
+- History: D-166 partly in G-V1 (TD-07)
 
 ### REQ-EVL-004 – Versions recorded per run
 - Level: low   Subject: Evaluation

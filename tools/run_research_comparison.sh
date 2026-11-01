@@ -9,12 +9,12 @@ OUT="${1:-data/eval/comparison-$(date +%Y%m%d)}"
 mkdir -p "$OUT"
 run() { "$PYTHON" -W ignore tools/eval.py "$@"; }
 # 1. the typed planner alone (variant C) against the checked planner (B), 36 plans
-run run plans --variant typed --pipeline plan.typed@1 --repeats 3 --quiet > "$OUT/plans_typed.txt" 2>&1
+run run plans --pin MP-light --variant typed --pipeline plan.typed@1 --repeats 3 --quiet > "$OUT/plans_typed.txt" 2>&1
 # 2. the pipelines with the typed plan (escalate@3) on both research suites
-run run research_compound --variant escalate3 --pipeline research.escalate@3 --repeats 3 --quiet > "$OUT/compound_escalate3.txt" 2>&1
-run run research --variant escalate3 --pipeline research.escalate@3 --repeats 3 --quiet > "$OUT/research_escalate3.txt" 2>&1
+run run research_compound --pin MP-light --variant escalate3 --pipeline research.escalate@3 --repeats 3 --quiet > "$OUT/compound_escalate3.txt" 2>&1
+run run research --pin MP-light --variant escalate3 --pipeline research.escalate@3 --repeats 3 --quiet > "$OUT/research_escalate3.txt" 2>&1
 # 3. escalate@2 again, now with the fix of the verbatim rule (the first measurement had the bug)
-run run research_compound --variant escalate2b --pipeline research.escalate@2 --repeats 3 --quiet > "$OUT/compound_escalate2b.txt" 2>&1
+run run research_compound --pin MP-light --variant escalate2b --pipeline research.escalate@2 --repeats 3 --quiet > "$OUT/compound_escalate2b.txt" 2>&1
 # 4. paired comparisons (the variants plans/checked, research_compound/escalate and research/escalate are in data/eval already if it was not cleaned)
 run compare plans checked typed > "$OUT/cmp_plans.txt" 2>&1
 run compare research_compound escalate escalate3 > "$OUT/cmp_compound_escalate3.txt" 2>&1

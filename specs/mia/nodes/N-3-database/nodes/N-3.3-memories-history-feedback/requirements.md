@@ -92,4 +92,4 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Acceptance criterion: AC-18, AC-24: the contract suite test_if_302_record_tables.py passes against the mock (stage 1) and the Record tables (stage 2)
 - Verified by: TC-IF-302-01..07
 - Status: Approved
-- History: v0, amendment 5/7 (2026-10-25); 2026-10-31 A-61 (D-161): IF-302 v6; Verified by names TC-IF-302-01..07 (it said 01..03)
+- History: v0, amendment 5/7 (2026-10-25); 2026-10-31 A-61 (D-161): IF-302 v6; Verified by names TC-IF-302-01..07 (it said 01..03); 2026-10-31 A-67 (D-170): IF-302 v7, deletable are exactly history, memory, tasks, memos

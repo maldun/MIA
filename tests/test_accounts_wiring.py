@@ -20,27 +20,11 @@ REPO = os.path.dirname(HERE)
 sys.path.insert(0, os.path.join(HERE, "helpers"))
 
 from markers import mark  # noqa: E402
+import checkout_copy  # noqa: E402  (the shared setup of D-169)
 
-OWN_FILES = ("setup_cfg.json", "setup_cfg.local.json", "data")       # made fresh for the test, never the checkout's
 GRAPH = {"nodes": [{"id": "claim", "kind": "data"}, {"id": "check", "kind": "process"}, {"id": "verdict", "kind": "data"}],
          "edges": [{"from": "claim", "to": "check"}, {"from": "check", "to": "verdict"}]}
 RATE = 10                 # messages per 60 s and account (chat_rate_per_minute)
-
-
-def package_with_accounts(folder):
-    """a folder MIA/ whose files are links to the checkout, with its own configuration (the example with accounts on) and an empty data folder:
-    web_app reads setup_cfg.json and writes data/ next to its own file, so nothing of the checkout is changed"""
-    package = os.path.join(folder, "MIA")
-    os.makedirs(os.path.join(package, "data"))
-    for name in os.listdir(REPO):
-        if name not in OWN_FILES:
-            os.symlink(os.path.join(REPO, name), os.path.join(package, name))
-    with open(os.path.join(REPO, "setup_cfg.example.json"), encoding="utf-8") as fp:
-        cfg = json.load(fp)
-    cfg.update({"accounts_enabled": True, "chat_rate_per_minute": RATE})
-    with open(os.path.join(package, "setup_cfg.json"), "w", encoding="utf-8") as fp:
-        json.dump(cfg, fp)
-    return package
 
 
 def wait_for(condition, timeout=5.0):
@@ -57,9 +41,8 @@ class ProductionWiring(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.folder = tempfile.mkdtemp()
-        cls.addClassCleanup(shutil.rmtree, cls.folder, True)
-        cls.package = package_with_accounts(cls.folder)
+        cls.folder = checkout_copy.make({"accounts_enabled": True, "chat_rate_per_minute": RATE})    # the example with accounts on, its own data/
+        cls.package = os.path.join(cls.folder, "MIA")
         sys.path.insert(0, cls.folder)
         os.environ.setdefault("MIA_TEST", "1")
         from MIA import accounts, web_app

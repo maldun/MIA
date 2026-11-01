@@ -164,5 +164,45 @@ class FreshCheckout(unittest.TestCase):
         self.assertIn("OLLAMA_URL=http://host.containers.internal:11434", lines)
         self.assertTrue(any(line.startswith("POSTGRES_PASSWORD=") for line in lines), lines)
 
+    @mark.req('REQ-OPR-001')
+    def test_an_empty_character_folder_is_warned_about_and_the_stack_still_starts(self):
+        """TC-OPR-001, D-171: without index.html in the character folder (default ui/godot/build/web) up.sh warns, names the folder and the two ways
+        to fill it, and starts the stack all the same.
+
+        Example: no ui/godot/build/web/index.html -> "WARNING ... ui/godot/build/web ... deploy/up.sh character ZIP ... ui/tools/build_web.sh", compose up called
+        """
+        # Given: a fresh checkout without the character page
+        # When: the stack starts
+        output, calls = self.start()
+        # Then: the warning names the folder and both ways to fill it, and compose was asked to start the stack
+        warning = [line for line in output.splitlines() if "WARNING" in line and "index.html" in line]
+        self.assertEqual(len(warning), 1, output)
+        for text in ("ui/godot/build/web", "deploy/up.sh character", "ui/tools/build_web.sh"):
+            self.assertIn(text, warning[0])
+        self.assertTrue(any(call.startswith("compose ") and " up " in call + " " for call in calls), calls)
+
+    @mark.req('REQ-OPR-001')
+    def test_a_character_folder_with_its_page_gives_no_warning(self):
+        """TC-OPR-001, D-171: the default folder with index.html, or MIA_CHARACTER_DIR in deploy/.env naming one, starts without the warning; an empty
+        MIA_CHARACTER_DIR is named in the warning.
+
+        Example: ui/godot/build/web/index.html exists -> no warning; MIA_CHARACTER_DIR=/x/empty -> the warning names /x/empty
+        """
+        # Given: the character page in the default folder
+        web = os.path.join(self.tmp.name, "ui", "godot", "build", "web")
+        os.makedirs(web)
+        open(os.path.join(web, "index.html"), "w").close()
+        # When / Then: no warning
+        self.assertNotIn("index.html", self.start()[0])
+        # Given: deploy/.env names another folder, which is empty
+        other = os.path.join(self.tmp.name, "character")
+        os.makedirs(other)
+        self.write_env("SEARXNG_SECRET=s\nMIA_CHARACTER_DIR=%s\n" % other)
+        # When / Then: the warning names that folder
+        self.assertIn(other, self.start()[0])
+        # Given: that folder gets its page; When / Then: no warning
+        open(os.path.join(other, "index.html"), "w").close()
+        self.assertNotIn("index.html", self.start()[0])
+
 if __name__ == '__main__':
     unittest.main()

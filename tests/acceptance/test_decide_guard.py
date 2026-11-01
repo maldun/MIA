@@ -198,17 +198,33 @@ class HoldoutSuitesOnTheCommandLine(unittest.TestCase):
             self.cli.main()
         return out.getvalue()
 
+    def watch_reads(self):
+        """the names of the suite folders that harness.load_suite is asked to read from now on: the fixtures are valid, so the only sign that a
+        held-out suite was opened is the call itself (A-68, N-4.1 R4)"""
+        reads = []
+        real = self.cli.harness.load_suite
+
+        def spy(folder):
+            reads.append(os.path.basename(os.path.normpath(folder)))
+            return real(folder)
+        patcher = unittest.mock.patch.object(self.cli.harness, "load_suite", spy)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+        return reads
+
     @mark.req("REQ-EVL-002")
     def test_list_shows_no_holdout_suite(self):
         """TC-EVL-002 (regression, Verify F5b): `eval.py list` loaded and counted every holdout suite.
 
         Example: suites toy and toy.holdout -> list names toy only.
         """
+        reads = self.watch_reads()
         # When: the suites are listed without --holdout
         out = self.main("list")
-        # Then: only the dev suite is there
+        # Then: only the dev suite is there, and the holdout suite was not even read
         self.assertIn("toy ", out)
         self.assertNotIn("toy.holdout", out)
+        self.assertNotIn("toy.holdout", reads)
 
     @mark.req("REQ-EVL-002")
     def test_cases_and_run_refuse_a_holdout_suite_without_the_flag(self):
@@ -216,6 +232,7 @@ class HoldoutSuitesOnTheCommandLine(unittest.TestCase):
 
         Example: cases toy.holdout -> exit "toy.holdout is a holdout suite: only with --holdout (Verify)"; no case id printed, no run saved.
         """
+        reads = self.watch_reads()
         for argv in (("cases", "toy.holdout"), ("run", "toy.holdout", "--pin", "MP-light")):
             # When: a holdout suite is named without --holdout
             with self.assertRaises(SystemExit) as stopped:
@@ -224,6 +241,8 @@ class HoldoutSuitesOnTheCommandLine(unittest.TestCase):
             self.assertIn("--holdout", str(stopped.exception.code), argv)
             self.assertNotIn("secret-case", str(stopped.exception.code))
         self.assertFalse(os.path.isdir(os.path.join(self.tmp.name, "runs")))
+        # And: refused before anything of it was read (A-68, N-4.1 R4)
+        self.assertNotIn("toy.holdout", reads)
 
     @mark.req("REQ-EVL-002")
     def test_with_the_flag_the_holdout_suite_is_listed_and_shown(self):

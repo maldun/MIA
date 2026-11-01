@@ -216,6 +216,20 @@ class StorageBehaviour:
             self.store.put("votes", category, dict(ONE_OF_EACH["votes"], category=category), "anna")
 
     @mark.req("REQ-SLY-004")
+    def test_a_non_finite_number_or_an_id_that_is_not_text_is_refused_on_every_backend(self):
+        """Finding R2 of the re-verification, D-168: the file backend stored NaN and PostgreSQL raised its own error; an id that is not text
+        raised a TypeError. Both are the layer's ("invalid", "schema") now, and nothing is stored.
+        Example: put("memos", "m", {"text": "a", "score": float("nan")}) and put("memos", 7, {"text": "a"}) are ("invalid", "schema")."""
+        # Given: NaN, inf and -inf in a document (also nested in a list), and ids that are not text
+        docs = [{"text": "a", "score": float("nan")}, {"text": "a", "score": float("inf")}, {"text": "a", "scores": [1, float("-inf")]}]
+        calls = [lambda doc=doc: self.store.put("memos", "m", doc, "anna") for doc in docs]
+        calls += [lambda record_id=record_id: self.store.put("memos", record_id, {"text": "a"}, "anna") for record_id in (7, None, b"m", ("m",))]
+        # When / Then: each is refused by the layer and nothing is stored
+        for call in calls:
+            self.assertEqual(code_of(call), ("invalid", "schema"))
+        self.assertEqual(self.store.ids("memos"), [])
+
+    @mark.req("REQ-SLY-004")
     def test_a_refused_edit_consumes_no_version(self):
         self.store.put("workflows", "w", LOOKUP, "anna")
         code_of(lambda: self.store.put("workflows", "w", CYCLE, "anna"))

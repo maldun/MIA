@@ -74,9 +74,9 @@ Each finding first as a failing test (red seen), then the fix. Fake models and s
 | F12 wording | 71d814d | compare: "(dev feedback, not a verdict: decide on the holdout)" instead of "a difference you can believe" | `test_a_comparison_says_it_is_feedback_not_a_verdict` |
 | F9 model | 71d814d | `architecture.sysml` Evaluation: harness lists `eval_platform.py`, `tools/decide_guard.py`, `tools/check_baselines.py`, `tools/measure_latency.py`, `tools/measure_fps.mjs`; `judgeCalibration` partly (`harness.py`, `tools/label_agreement.py`); no new part | `check_sysml.sh`: 0 errors; `check_sysml_model.py`: OK |
 | F10 test docs, scenarios | 71d814d | every test of the six node files: TC id first, `Example:`, Given/When/Then (also missing `req` markers added); test-spec.md `## Scenarios` (11 blocks, draft for review) | `test_doc_check.py` on the six files: 0 errors (was 34); `trace_check.py`: the N-4.1 Scenarios error is gone |
-| F11 protected tests | e67542e | amendment A-63 drafted, not installed (see below) | checked on a scratch copy |
+| F11 protected tests | e67542e | amendment A-63 drafted; installed in `bee8ead` (see below) | checked on a scratch copy |
 
-### A-63 (proposed, not installed)
+### A-63 (installed in `bee8ead`; the text below is the proposal)
 `bash tools/apply_amendment_a63.sh` (look), `--do` installs: creates `tests/acceptance/test_{eval_platform,decide_guard,judge_calibration,check_baselines,skill_path_doc,measure_latency}.py` from the drafts in `specs/mia/amendments/A-63/tests/acceptance/` (three path lines one folder deeper and the `Run:` line), builds the node's test-spec.md (note line, each row names its file) and `docs/skill-path.md` from the installed files, runs the six protected tests on the host and removes the old `tests/` copies only when all pass. It refuses when an old copy changed after the drafts (`A63_DRAFT=1` redrafts). Scratch check: all six OK, `trace_check.py` output identical before and after, `test_doc_check.py` clean for them, a second run "nothing to do". The scratch check found that the F3 commit test needed git (f9be045).
 
 ### Stop: REQ-EVL-003 calibrations are never loaded (missing feature, needs a decision)
@@ -106,3 +106,14 @@ goal/v1 merged first (fc749e0; CLAUDE.md's eval line with `--pin`/`--holdout` co
 | A-63 re-checked | this commit | drafts redrafted (test_eval_platform.py changed); on a scratch copy of the merged branch: six protected tests OK, old copies removed, trace_check unchanged, test_doc_check clean, second run "nothing to do" | |
 
 The open point "--pin does not set the model of the old targets" above is closed by 97d4811; "test_harness opens holdout suites" by 4eb97ed; CLAUDE.md by the owner (bc6df53).
+
+## Re-verification fixes (D-172, 2026-11-01)
+| Finding | Commit | What | Test that fails without it |
+|---|---|---|---|
+| R5 `report`/`compare` show holdout runs | 2864a11 | only with `--holdout` | `SavedHoldoutRuns` (3) |
+| R8 missing or unknown suite | 27972e9 | `open_suite` exits with one line: "no suite 'x' (there are: ...)", "'../x' is not a suite name", the harness's problem text for a broken suite | `UnknownSuites` (3) |
+| R6 `--pin` in written commands | 27972e9 | `tools/run_research_comparison.sh` and the commands in `ui/README.md` carry `--pin MP-light` | `PinInTheWrittenCommands` (2) |
+| R2 REQ-EVL-003 | 27972e9 | `Relaxed: TD-07` and `Target` lines; this log says A-63 is installed (`bee8ead`) | trace check |
+| R1 smoke gate, R4 guard mutants | this commit | amendment **A-68** drafted, not installed: `bash tools/apply_amendment_a68.sh`. Scratch check: 11 tests OK; the early refusal of `open_suite` and `holdout=True` in `list` as mutants are both killed; second run "nothing to do" | `test_decide_guard.py` (spy on `load_suite`) |
+
+`specs/mia/architecture.sysml` was not regenerated here: the generator also writes other nodes' requirement changes, which belong to their own branches; my edit changes no `doc` text.

@@ -10,7 +10,8 @@ A workflow or context graph is {"nodes": [{"id", "kind": "process" | "data", "se
   R4  session_stopping_criterion  a session node has a max_cycles or max_seconds, and each one given is an integer >= 1 (not a bool, D-160)
   R5  cycle                       the graph is a DAG; a cycle is reported by its ids, the first repeated at the end
 
-violation() reports the first broken rule in this order, so the caller (and the user) always sees the same one.
+violation() reports the first broken rule it finds: node identity of the nodes, then each edge in turn (its identity, then the adjacency
+rules), then the sessions, then the cycle. So the order R1..R5 holds per edge, not across the whole graph; a fixed rule order is FB-02 (D-160).
 """
 
 KINDS = ("process", "data")
