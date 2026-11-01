@@ -273,3 +273,31 @@ Proposed on 2026-10-29 after the usability work of N-2.3 T-09 to T-11 and N-1.1 
 - Target check: specified only
 - Decision: D-178, 2026-11-01, Stefan Reiterer
 - Status: open
+
+## TD-21 – The state is in PostgreSQL
+- Kind: defer
+- Requirement: NFR-8, CON-7
+- Interim criterion: the storage layer behind IF-102 works on files and is tested there (`tests/test_storage.py`, the IF-102 contract suite on the file backend) and on PostgreSQL where psycopg exists (`tests/test_storage_postgres.py`, `tools/contract_postgres.sh`, not run in the goal Verify); the stack starts the database and `deploy/up.sh backup` and `restore` save and restore it together with the data folder; the app keeps its state in the file backend (`web_app.py`), accounts, history, records and workflows alike
+- Target: the app reads `MIA_DATABASE_URL`, the `mia` image holds psycopg (`requirements-db.txt`), the shared state is in PostgreSQL, files to database and back give identical files, a change by one user is visible on a second connection within 5 s with its author, and backup and restore return the same records (AC-15, TC-MIA-015)
+- Reason: the storage layer was built and verified node by node (N-3.1 to N-3.3), but wiring the app and the image to it was never planned as a task; recorded at node level (D-139 (4), N-4.2 F3) and found at the goal Verify (F-01); the owner chose to defer it (D-180)
+- Effort: about 2 days (wire `web_app.py` to `Storage` on PostgreSQL, add psycopg to the image, the move command, run the PostgreSQL contract suites, rebuild the image) (proposed)
+- Risk of the gap: a lost or damaged data volume loses the state; the database that runs is empty. Mitigation: `deploy/up.sh backup` saves the data folder, to be done before every update
+- Owner: Stefan Reiterer
+- Trigger: the Plan of the next iteration, or 2026-12-31, whichever first
+- Target check: specified only
+- Decision: D-180, 2026-11-01, Stefan Reiterer
+- Status: open
+
+## TD-22 – Red-team cases of the untrusted inputs
+- Kind: defer
+- Requirement: NFR-3
+- Interim criterion: the deterministic mitigations pass: the tool door and its untrusted-input handling (`tests/test_tool_calls_untrusted.py`, `tests/test_tool_calls_web_log.py`), the sandbox tests, the injection signal checks and the PDF wall (`tests/test_pdf_text.py` with bwrap); the compose stack runs with `sandbox_backend: none`, so the script check is off there
+- Target: 0 failures over all red-team cases: the seven `rt_*` suites hold enough labelled cases (not 2 each, target kind `pending`) and the injection suites `verdicts_injection` run with their holdouts on MP-light (TC-MIA-006, AC-6)
+- Reason: the red-team suites are drafts of 2 cases each, their cases are the owner's to label and the runs belong to the stage 4 evals that were deferred (D-178); `tests/test_harness.py` fails on the same fact (rt_edit has 2 cases, wants 30); found at the goal Verify (F-02), the owner chose to defer it (D-180)
+- Effort: about 3 days plus GPU time, the labelling is the owner's (proposed)
+- Risk of the gap: an injected instruction in a page or paper may change a verdict or start a tool without a test noticing. Mitigation: the tool set per step is the protection (THR entries), the deterministic tests above, and the users are trusted (CON-6)
+- Owner: Stefan Reiterer
+- Trigger: the Plan of the next iteration, or 2026-12-31, whichever first
+- Target check: specified only
+- Decision: D-180, 2026-11-01, Stefan Reiterer
+- Status: open

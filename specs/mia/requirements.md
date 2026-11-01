@@ -510,7 +510,9 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Refined in: N-2.4
 - Verified by: TC-MIA-006
 - Status: Approved
-- History: –
+- Relaxed: TD-22
+- Target: 0 failures over all red-team cases: the seven `rt_*` suites hold enough labelled cases (not 2 each, target kind `pending`) and the injection suites `verdicts_injection` run with their holdouts on MP-light (TC-MIA-006, AC-6)
+- History: A-86 (2026-11-01): Relaxed TD-22 (D-180)
 
 ### NFR-4 – Honest confidence
 - Level: top   Subject: MiaSystem
@@ -584,7 +586,9 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Refined in: N-3, N-2.1
 - Verified by: TC-MIA-015
 - Status: Approved
-- History: –
+- Relaxed: TD-21
+- Target: the app reads `MIA_DATABASE_URL`, the `mia` image holds psycopg (`requirements-db.txt`), the shared state is in PostgreSQL, files to database and back give identical files, a change by one user is visible on a second connection within 5 s with its author, and backup and restore return the same records (AC-15, TC-MIA-015)
+- History: A-86 (2026-11-01): Relaxed TD-21 (D-180)
 
 ### NFR-9 – A container per node
 - Level: top   Subject: MiaSystem
@@ -688,4 +692,6 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Refined in: N-3
 - Verified by: TC-MIA-015
 - Status: Approved
-- History: –
+- Relaxed: TD-21
+- Target: the app reads `MIA_DATABASE_URL`, the `mia` image holds psycopg (`requirements-db.txt`), the shared state is in PostgreSQL, files to database and back give identical files, a change by one user is visible on a second connection within 5 s with its author, and backup and restore return the same records (AC-15, TC-MIA-015)
+- History: A-86 (2026-11-01): Relaxed TD-21 (D-180)
