@@ -8,12 +8,12 @@ A leaf of the Database. Each task is small, vertical, fits one session and start
 
 | Task | Implements | Green when | Depends on |
 | --- | --- | --- | --- |
-| T-01 Definitions of the ten record tables | REQ-RTB-001, REQ-RTB-006 | TC-RTB-001, TC-RTB-006, TC-IF-302-01 | – |
+| T-01 Definitions of the 14 record tables | REQ-RTB-001, REQ-RTB-006 | TC-RTB-001, TC-RTB-006, TC-IF-302-01 | – |
 | T-02 Required fields and validation | REQ-RTB-002, REQ-RTB-003, REQ-RTB-004, REQ-RTB-005 | TC-RTB-002..005, TC-IF-302-02, TC-IF-302-03 | T-01 |
 
 ## Tasks
 
-### T-01: Definitions of the ten record tables
+### T-01: Definitions of the 14 record tables
 - Implements: REQ-RTB-001, REQ-RTB-006
 - Tests to turn green: TC-RTB-001, TC-RTB-006, TC-IF-302-01
 - Touches: `record_tables.py` (new)
