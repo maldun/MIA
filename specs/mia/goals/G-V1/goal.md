@@ -37,7 +37,7 @@ Back-filled on 2026-10-30, after the workflow skills introduced goals (M33–M37
 | FR-19 | in | |
 | FR-20 | in | |
 | FR-21 | in | |
-| FR-22 | in | |
+| FR-22 | out | owner 2026-11-01 (D-177): the Graph app N-5 moves to the next iteration and is redesigned with FB-02; its requirements REQ-GA-001 to -011 are out (below). What stays: the backend routes of IF-104 and the graph tables (N-2.1, N-3.2), the static page `graph_app/` and its `graph` container as they are |
 | FR-23 | in | |
 | FR-24 | in | |
 | FR-25 | in | |
@@ -59,7 +59,7 @@ Back-filled on 2026-10-30, after the workflow skills introduced goals (M33–M37
 | NFR-6 | in | |
 | NFR-7 | in | |
 | NFR-8 | in | |
-| NFR-9 | in | |
+| NFR-9 | in | the container of the Graph app (N-5) is the static page of the T-01 mockup, nothing more (D-177) |
 | REQ-TLS-006 | out | owner 2026-10-31 (D-117): no eval criterion is fixed for it yet (suite, metric, repeats, pin, rule) and MIA has no eval-spec.md with pins; back in a later goal together with that criterion. Its parents REQ-WFX-016 (N-2.4) and REQ-BE-067 (N-2) stay in; they carry the same criterion. |
 | REQ-RUN-011 | out | owner 2026-10-31 (D-118): its criterion is the IF-103 contract suite on the real side, but the suite cannot hand its scripted replies to a real provider; back in a later goal with an IF-103 provider and an amendment of the suite. Its parents stay in. |
 | REQ-RUN-004 | out | owner 2026-10-31 (D-119): optional learning is not built (LearningLayer and FR-18 proposed); back with a goal that designs the learning layer. |
@@ -82,7 +82,16 @@ Back-filled on 2026-10-30, after the workflow skills introduced goals (M33–M37
 | REQ-CHA-008 | partly | owner 2026-11-01 (D-173): AC-8 (the check dialogues) comes after the field test: TD-10; the persona mechanism and its tests stay in |
 | REQ-WFM-022 | out | owner 2026-11-01 (D-173): optional and off by default (FR-13, AC-26); back in a later goal with the review pipeline it depends on |
 | REQ-VOI-001 | partly | owner 2026-11-01 (D-173): the app speaks through SpeechStreamer; the chat audio through IF-204 and `audio_chunk` is TD-11; the sentence-by-sentence synthesis and the markup filter stay in |
-| REQ-GA-002 | out | owner 2026-10-31 (D-135): N-5 T-02 (edit as JSON) waits for FB-02 (the graph form and the rules may change); back in the next iteration |
+| REQ-GA-001 | out | owner 2026-11-01 (D-177): the T-01 mockup stays as it is; TC-GA-001 (the owner's demonstration) is not part of G-V1; back with the redesign of the Graph app in the next iteration (FB-02) |
+| REQ-GA-004 | out | owner 2026-11-01 (D-177): versions, history, diff and restore in the app (T-03); back with the redesign of the Graph app in the next iteration (FB-02) |
+| REQ-GA-005 | out | owner 2026-11-01 (D-177): the app's calls through IF-104 and its login (T-04); back with the redesign of the Graph app in the next iteration (FB-02) |
+| REQ-GA-006 | out | owner 2026-11-01 (D-177): context graphs edited in the app (T-03); back with the redesign of the Graph app in the next iteration (FB-02) |
+| REQ-GA-007 | out | owner 2026-11-01 (D-177): the app's login page (T-04); back with the redesign of the Graph app in the next iteration (FB-02) |
+| REQ-GA-008 | out | owner 2026-11-01 (D-177): library export and seed in the app (T-05); back with the redesign of the Graph app in the next iteration (FB-02) |
+| REQ-GA-009 | out | owner 2026-11-01 (D-177): the node as a whole moves; the plain-stack files and their tests (`graph-app-files.test.mjs`) stay and keep passing; the library choice is part of the redesign |
+| REQ-GA-010 | out | owner 2026-11-01 (D-177): as REQ-GA-009; the static no-outside-address test stays, the headless-browser test (TC-GA-010) is not built |
+| REQ-GA-011 | out | owner 2026-11-01 (D-177): the `graph` service in `deploy/compose.yaml` stays (N-4.2); TC-GA-011 (stage 3) is not part of G-V1 |
+| REQ-GA-002 | out | owner 2026-10-31 (D-135, D-177): N-5 T-02 (edit as JSON) waits for FB-02 (the graph form and the rules may change); back in the next iteration with the redesign |
 | REQ-GA-003 | out | owner 2026-10-31 (D-135): the graph rules in the page wait for FB-02; the backend still checks the rules on save |
 | REQ-CHV-007 | out | owner 2026-10-31 (D-137): model selection after the first human tests; next iteration |
 | REQ-CHV-008 | out | owner 2026-10-31 (D-137): the outfit switch in Godot comes with the model selection; the variant label in the chat stays |

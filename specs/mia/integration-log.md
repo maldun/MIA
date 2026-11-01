@@ -9,3 +9,6 @@
 - New: `tests/test_system_inspection.py` (TC-MIA-020: chat page without build step, login notice), 3 tests, 3 mutants killed. The licence, paid packages and web log of AC-20 were already held by `tools/check_free.py`; Python 3.12, Godot and the roles by TC-API-011, TC-CHV-013, TC-API-010.
 - `specs/mia/tc-mia-status.md` and `tools/tc_mia_inventory.py`: which tests lie near each root check (inventory, not verification).
 - Not done, by decision of the facts: the C rows (stage 4) need eval criteria and pins; the B rows need a root Verify. N-0 step 05 waits for N-5.
+
+## N-5 (2026-11-01, D-177)
+N-5 moves to the next iteration. N-0 step_05 stays a skip ("N-5 not integrated yet"): an accepted deviation of G-V1, to be recorded in the goal Verify. Steps 02 to 04 are the last root steps of this goal.

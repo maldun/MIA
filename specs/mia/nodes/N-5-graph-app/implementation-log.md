@@ -37,3 +37,6 @@
 
 ## Owner's answers of 2026-10-31 (D-135)
 Q-2: T-02 waits for FB-02 (REQ-GA-002, REQ-GA-003 out of G-V1). Q-4: the JSON panel and the status line stay; T-02 turns the panel into the editor. Q-5, Q-6: run context graphs and saved positions with FB-02. Mocks: both IF-104 mocks check the rules also for context graphs, by an amendment when T-03 starts. Next tasks of G-V1: T-03 to T-06.
+
+## Deferred to the next iteration (D-177, owner 2026-11-01)
+The node moves out of G-V1 and is redesigned with FB-02. State at the cut: T-01 is the vis-network mockup (8 tests), the plain-stack files and their 5 tests stand, T-02 waits for FB-02, T-03, T-04, T-05 and the tests TC-GA-002 to -008 were never started. No Verify, no integration step. The log above is otherwise unchanged; the next iteration starts from the redesign, not from this plan.

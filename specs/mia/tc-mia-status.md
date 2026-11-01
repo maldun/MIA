@@ -21,7 +21,7 @@ Kinds: **A** a root-level test written for the row; **B** the parts of the scena
 | TC-MIA-013 | FR-3, FR-31 | 3 | B | character_integration, chat_answers, converse_behaviours, if_112_voice_player, if_204_speech, page_requests, presets_api, speech_stop ... (12 files) |
 | TC-MIA-014 | FR-21, NFR-6, CON-4, CON-5 | 3 | B | accounts, accounts_api, accounts_wiring, api_sessions, author_in_records, character_requests, chat_mock_server, chat_views_browser ... (17 files) |
 | TC-MIA-015 | NFR-8, CON-7, FR-5, CON-6 | 3 | B | accounts_api, accounts_wiring, api_events, api_storage_imports, author_in_records, backup, chat_mock_server, chat_views_browser ... (18 files) |
-| TC-MIA-016 | FR-22 | 3 | B | accounts_wiring, graph_api, graph_rules, if_102_storage, if_104_graph_api, if_301_graph_tables, migrate, storage ... (11 files) |
+| TC-MIA-016 | FR-22 | 3 | D | FR-22 and the Graph app N-5 are out of G-V1 (D-177); N-0 step_05 stays a skip |
 | TC-MIA-017 | FR-24, FR-32, FR-2, FR-23, FR-5 | 3 | B | accounts_api, accounts_wiring, api_events, author_in_records, character_integration, character_requests, chat_mock_server, chat_mood_wiring ... (21 files) |
 | TC-MIA-018 | FR-27 | 3 | B | chat_answers, chat_behaviour, chat_mock_server, chat_views_browser, if_101_chat_api, if_201_chat_turn, if_302_record_tables, mood_score ... (9 files) |
 | TC-MIA-019 | NFR-7, CON-2 | 4 | C | benchmarks BM-MIA-001/-002 on the reference hardware; the 10 s part is out (REQ-RUN-009 partly, D-128) |
@@ -36,6 +36,6 @@ Kinds: **A** a root-level test written for the row; **B** the parts of the scena
 | TC-MIA-028 | FR-33 | 4 | C | estimate against measured time on recorded lookup runs (factor 3); needs the recorded runs |
 | TC-MIA-029 | NFR-9 | 3 | B | character_stack, compose_stack, container_alone, container_alone_step, database_stack, delivery_on_stack, frontend_delivery, python_version ... (9 files) |
 
-Count: A 1, B 17, C 9, D 2.
+Count: A 1, B 16, C 9, D 3 (TC-MIA-016 moved to D by D-177).
 
 Not yet decided by anyone: the C rows need `eval-spec.md` criteria and pins for most of them (the same gap as REQ-TLS-006, REQ-RUN-006/-007); the B rows need a root Verify that reads their scenario against the node evidence. N-0 step_05 (FR-22, TC-MIA-016) waits for N-5 and FB-02.
