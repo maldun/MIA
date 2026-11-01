@@ -53,12 +53,12 @@ Back-filled on 2026-10-30, after the workflow skills introduced goals (M33–M37
 | FR-35 | out | FB-01, as FR-34 |
 | NFR-1 | in | |
 | NFR-2 | in | |
-| NFR-3 | in | |
+| NFR-3 | partly | owner 2026-11-01 (D-180, TD-22): the red-team half of TC-MIA-006 (0 failures over all red-team cases) is deferred; the deterministic mitigations (tool door, sandbox, injection signal checks, PDF wall) stay in |
 | NFR-4 | in | |
 | NFR-5 | in | |
 | NFR-6 | in | |
 | NFR-7 | in | |
-| NFR-8 | in | |
+| NFR-8 | partly | owner 2026-11-01 (D-180, TD-21): the app keeps its state in the file backend; moving it to PostgreSQL (and CON-7) is deferred; the storage layer, the database service and backup and restore stay in |
 | NFR-9 | in | the container of the Graph app (N-5) is the static page of the T-01 mockup, nothing more (D-177) |
 | REQ-TLS-006 | out | owner 2026-10-31 (D-117): no eval criterion is fixed for it yet (suite, metric, repeats, pin, rule) and MIA has no eval-spec.md with pins; back in a later goal together with that criterion. Its parents REQ-WFX-016 (N-2.4) and REQ-BE-067 (N-2) stay in; they carry the same criterion. |
 | REQ-RUN-011 | out | owner 2026-10-31 (D-118): its criterion is the IF-103 contract suite on the real side, but the suite cannot hand its scripted replies to a real provider; back in a later goal with an IF-103 provider and an amendment of the suite. Its parents stay in. |
@@ -112,9 +112,9 @@ Back-filled on 2026-10-30, after the workflow skills introduced goals (M33–M37
 | Phase | State | Record or reason |
 |---|---|---|
 | Explore | done | `high-level-spec.md` approved 2026-10-24 (`review-log.md`) |
-| Plan | done | plan package approved, tags `plan-baseline-it1` and `decomp-baseline`; changes since then are amendments A-01 to A-35 (A-34 installed `cca40c8`, A-35 approved: N-2.4.1 T-08, D-125) |
+| Plan | done | plan package approved, tags `plan-baseline-it1` and `decomp-baseline`; changes since then are amendments A-01 to A-86 (see `specs/mia/amendments/` and the review log; A-72 to A-85 installed on 2026-11-01) |
 | Implement | in progress | node cycles of `decomposition.yaml`; open nodes and work in `handover-2026-10-31-late.md`. 2026-10-31: N-2.4.1 T-01 to T-05, T-07 done (T-06 out with REQ-RUN-007, T-08 deferred to the next iteration, D-128; fixes of three verification rounds, N-2.4.1 **Verified with findings** (re-verification 2, the D-128 scope rows written by D-130); N-2.4.2 **Verified with findings** (owner, D-134); N-2.4.3 and N-4.2 **Verified with accepted deviations** (owner, D-148); N-1.3 waits for the owner's checks by ear; N-2.1 Verify: not verified yet (D-147 A-52, findings V-0 to V-11)); N-2.4.2 T-01 to T-06 done (T-07 out with REQ-TLS-006); node Verifies of N-2.4.1 and N-2.4.2 started (reports in their node folders); only N-3 integrated (`tests/helpers/integration.py` READY) |
-| Verify | open | |
+| Verify | in progress | `specs/mia/verification-report.md` (reviewer in a fresh context, commit e4dbbef): verdict proposal Verified with accepted deviations, conditional on the owner's decisions D-1 to D-9 of the report; the owner decided TD-21, TD-22 and the process gaps on 2026-11-01 (D-180); approval of the report is still open |
 | Commit | open | |
 | Deploy | open | |
 | Validate | open | |

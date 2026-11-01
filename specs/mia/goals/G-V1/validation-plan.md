@@ -47,7 +47,7 @@ Effectiveness (VAL-001), efficiency (VAL-006), satisfaction (VAL-003), freedom f
 - Numeric agreement is not claimed anywhere in this validation; small user numbers are reported descriptively (counts, medians, quotes), without p-values.
 
 ## Open deferrals to review in this phase
-For each TD-01 to TD-04, TD-06 to TD-20: does the interim criterion still serve the purpose after a week of use? Decide per record: keep the trigger, schedule, extend with a reason, or drop with a reason. TD-12 to TD-20 are the nine stage 4 checks; the findings of VAL-001 and VAL-006 are the first real data for TC-MIA-002 and TC-MIA-019.
+For each TD-01 to TD-04, TD-06 to TD-22: does the interim criterion still serve the purpose after a week of use? Decide per record: keep the trigger, schedule, extend with a reason, or drop with a reason. TD-12 to TD-20 are the nine stage 4 checks; the findings of VAL-001 and VAL-006 are the first real data for TC-MIA-002 and TC-MIA-019.
 
 ## Triage and decision
 Every finding gets a type, priority and destination (`validate-phase`, "Triage"): bad output with a covered category → Implement (case first); an uncovered category → Plan (new cases); unsafe tool use → Plan, threat model, high; an assumption falsified → Plan or Deploy; usable but not trusted → Explore. Then the team decides: next iteration (a new goal, scoped again; FB-01 to FB-06 and the Graph app redesign are the known input), accept as is, or stop. FB items close only after re-validation in a deployed version and, for bad outputs, after their case is in a suite.

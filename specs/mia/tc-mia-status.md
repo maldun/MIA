@@ -11,7 +11,7 @@ Kinds: **A** a root-level test written for the row; **B** the parts of the scena
 | TC-MIA-003 | FR-11, FR-12, NFR-4 | 4 | C | review benchmark per tier; the review entry is out of G-V1 (REQ-RUN-013 partly, D-128/D-130) |
 | TC-MIA-004 | FR-16 | 3 | B | accounts_api, accounts_wiring, author_in_records, if_202_run_workflow, if_401_run_events, run_log_node |
 | TC-MIA-005 | NFR-5 | 3 | B | character_stack, chat_views_browser, check_free, database_stack, if_404_web, no-outside-requests, page_requests, tool_calls_web_log |
-| TC-MIA-006 | NFR-3 | 3 | B | if_101_chat_api, if_402_tool_calls, if_404_web, memory_records, memory_write_skill, tool_calls, tool_calls_sandbox, tool_calls_untrusted |
+| TC-MIA-006 | NFR-3 | 3 | B (red-team half deferred, TD-22) | if_101_chat_api, if_402_tool_calls, if_404_web, memory_records, memory_write_skill, tool_calls, tool_calls_sandbox, tool_calls_untrusted |
 | TC-MIA-007 | FR-19 | 3 | B | backup, first_account, first_account_up, missing_options, runbook, shutdown_database, up_backup, up_fresh |
 | TC-MIA-008 | FR-25 | 4 | D | AC-8 comes after the field test (TD-10, D-173); persona mechanism tests stay in |
 | TC-MIA-009 | FR-20, FR-10, FR-11 | 4 | C | inspection of the skill path and time stamps; the review part (VAL-002) moved to the next goal (D-134) |
@@ -20,7 +20,7 @@ Kinds: **A** a root-level test written for the row; **B** the parts of the scena
 | TC-MIA-012 | FR-28 | 2 | B | api, chat_mock_server, chat_recitation, chat_views_browser, if_101_chat_api, if_102_storage, if_302_record_tables, panels ... (10 files) |
 | TC-MIA-013 | FR-3, FR-31 | 3 | B | character_integration, chat_answers, converse_behaviours, if_112_voice_player, if_204_speech, page_requests, presets_api, speech_stop ... (12 files) |
 | TC-MIA-014 | FR-21, NFR-6, CON-4, CON-5 | 3 | B | accounts, accounts_api, accounts_wiring, api_sessions, author_in_records, character_requests, chat_mock_server, chat_views_browser ... (17 files) |
-| TC-MIA-015 | NFR-8, CON-7, FR-5, CON-6 | 3 | B | accounts_api, accounts_wiring, api_events, api_storage_imports, author_in_records, backup, chat_mock_server, chat_views_browser ... (18 files) |
+| TC-MIA-015 | NFR-8, CON-7, FR-5, CON-6 | 3 | B (NFR-8 not met in the product, deferred, TD-21) | accounts_api, accounts_wiring, api_events, api_storage_imports, author_in_records, backup, chat_mock_server, chat_views_browser ... (18 files) |
 | TC-MIA-016 | FR-22 | 3 | D | FR-22 and the Graph app N-5 are out of G-V1 (D-177); N-0 step_05 stays a skip |
 | TC-MIA-017 | FR-24, FR-32, FR-2, FR-23, FR-5 | 3 | B | accounts_api, accounts_wiring, api_events, author_in_records, character_integration, character_requests, chat_mock_server, chat_mood_wiring ... (21 files) |
 | TC-MIA-018 | FR-27 | 3 | B | chat_answers, chat_behaviour, chat_mock_server, chat_views_browser, if_101_chat_api, if_201_chat_turn, if_302_record_tables, mood_score ... (9 files) |

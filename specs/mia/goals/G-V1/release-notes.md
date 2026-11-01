@@ -6,7 +6,7 @@
 - The character: expressions, gestures and mouth follow the mood and the voice; the chat works without the character.
 - The voice: answers synthesised on the host with the anime effect and played sentence by sentence in the browser; voice lines per mood; mute and stop per device.
 - Workflows as library data with specifications and versions, the pipeline runner with budgets, tools behind one door with a sandbox, a run log that can be replayed and explained, the evaluation harness behind IF-105.
-- State in PostgreSQL behind one storage layer; backup and restore; a compose stack with one configuration file.
+- A storage layer behind one interface (files, and PostgreSQL in the code), a PostgreSQL service in the compose stack, backup and restore of the data folder and the database, a compose stack with one configuration file. **The app itself still keeps its state in files**; moving it to PostgreSQL is deferred (NFR-8, CON-7, TD-21).
 
 ## Changed
 - The chat runs on the pipeline runner (skill `chat` v2); memory writing is a skill (`memory_write` v7).
@@ -19,10 +19,11 @@
 
 ## Goal
 - G-V1: MIA runs as the decomposed multi-user system of the approved HLS; exit criterion VAL-001 and VAL-003 to VAL-006 (field validation, still to be done); out of scope: N-5 Graph app and FR-22 (D-177), FR-34, FR-35, the review entry (VAL-002 moved to the next goal), the items in `specs/mia/goals/G-V1/goal.md`.
-- Provisional values to be settled in validation: <<list `Provisional:` requirements from the verification report; `grep -rn "Provisional" specs/mia`>>.
+- Provisional values to be settled in validation: none (no `Provisional:` line in the requirements of the goal, verification report and `validation-plan.md`).
 
 ## Known issues and open deferrals
 - Failing test files and skips by design: see the merge request.
+- Not met or not held: NFR-8/CON-7 (state in PostgreSQL, TD-21); the red-team half of TC-MIA-006 (TD-22); no `test-requirements.md` yet; the 36 eval-suite files added without an amendment are to be confirmed by the owner (D-180).
 - Stage 4 checks not decided: TC-MIA-002, -003, -009, -011, -019, -022, -024, -025, -028 (TD-12 to TD-20, D-178). No claim about answer quality, speed on the phones or memory quality is made by this release.
 - Open deferrals:
 
@@ -47,6 +48,8 @@
 | TD-18 | Memory that improves (TC-MIA-024) | FR-14 | the Plan of the next iteration (eval-spec.md with criteria, suites and pins), or 2026-12-31, whichever first |
 | TD-19 | Speech rules (TC-MIA-025) | FR-15 | the Plan of the next iteration (eval-spec.md with criteria, suites and pins), or 2026-12-31, whichever first |
 | TD-20 | Estimate before a run (TC-MIA-028) | FR-33 | the Plan of the next iteration (eval-spec.md with criteria, suites and pins), or 2026-12-31, whichever first |
+| TD-21 | The state is in PostgreSQL | NFR-8, CON-7 | the Plan of the next iteration, or 2026-12-31, whichever first |
+| TD-22 | Red-team cases of the untrusted inputs | NFR-3 | the Plan of the next iteration, or 2026-12-31, whichever first |
 
 ## Agent changes
 See the merge request ("Agent changes"): MP-light unchanged, skills and pipelines as listed there, no eval result, no new baseline.

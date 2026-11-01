@@ -7,18 +7,18 @@
 **HLS:** specs/mia/high-level-spec.md
 **Goal record:** specs/mia/goals/G-V1/goal.md
 **Plan:** specs/mia/plan.md and the node plans below specs/mia/nodes/
-**Verification report:** specs/mia/verification-report.md (verdict: **<<pending: the goal Verify is done by a reviewer in a fresh session, handover-goal-verify.md>>**)
+**Verification report:** specs/mia/verification-report.md (verdict proposal: **Verified with accepted deviations, conditional on the owner's decisions D-1 to D-9 of the report**; reviewer in a fresh context, commit e4dbbef; the owner's decisions on the findings are D-180, the report is not yet approved)
 **Implementation logs:** specs/mia/nodes/*/implementation-log.md, specs/mia/integration-log.md and the integration logs of N-1, N-2, N-4
 
 ### What changes
 MIA as the decomposed multi-user system of the approved HLS (2026-10-24): one tree: the root N-0, 5 high-level nodes (N-1 to N-5) and 13 low-level nodes, one of them (N-2.4) cut again into N-2.4.1 to N-2.4.3.
 - **N-1 Web Frontend:** chat and login views (N-1.1), the character view with the Godot bridge (N-1.2), voice playback (N-1.3).
 - **N-2 Backend:** API and accounts (N-2.1), chat agent (N-2.2), workflow management (N-2.3), workflow execution with the pipeline runner, tools and sandbox, and the run log (N-2.4.1 to N-2.4.3), voice synthesis (N-2.5).
-- **N-3 Database:** storage layer (N-3.1, files and PostgreSQL), graph tables (N-3.2), record tables (N-3.3).
+- **N-3 Database:** storage layer (N-3.1, files and PostgreSQL), graph tables (N-3.2), record tables (N-3.3). **The app keeps its state in the file backend**; wiring it to PostgreSQL is deferred (TD-21).
 - **N-4 Evaluation and operation:** the evaluation harness behind IF-105 (N-4.1), the compose stack, backup, shutdown and configuration (N-4.2).
 - **N-5 Graph app:** not part of this release (D-177); the static T-01 mockup page and its `graph` container stay as they are.
 - **Integration:** N-1 (A-72 to A-74), N-2 (A-77 to A-80, with A-55 for N-2.4), N-3 (A-02), N-4 (A-75, A-76); the root scenario runs with every Python node real (N-0 steps 02 to 04, A-81). N-0 step 05 stays a skip (N-5).
-- **Scope of this request:** goal/v1 is 40 commits ahead of master. Master took the earlier merge rounds of the goal (`git rev-list --count 53c6766..master` = 400); the whole goal is the history since 53c6766, `git diff --stat master...goal/v1` is the open delta (74 files, A-72 to A-84, the verification and deferral records, D-137 to D-178).
+- **Scope of this request:** goal/v1 is ahead of master by `git rev-list --count master..goal/v1` commits (47 on 2026-11-01). Master took the earlier merge rounds of the goal (`git rev-list --count 53c6766..master` = 400); the whole goal is the history since 53c6766, `git diff --stat master...goal/v1` is the open delta (87 files on 2026-11-01: A-72 to A-86, the verification report and deferral records, D-137 to D-180).
 
 ### Requirements implemented
 Nodes and their verification state (the reports are in each node folder; N-2.1, N-2.2, N-2.3, N-2.5 proposed their verdict "once the owner decides", the owner's answers are D-173):
@@ -39,10 +39,10 @@ Nodes and their verification state (the reports are in each node folder; N-2.1, 
 | N-4.1 Evaluation, N-4.2 Operation | Verified with accepted deviations | nodes/N-4-evaluation-operation/nodes/ |
 | N-5 Graph app | out of G-V1 (D-177) | – |
 
-<<The "with findings" verdicts of N-2.4.1 and N-2.4.2 are to be accepted by the owner in the goal Verify.>> The status of the root checks is in specs/mia/tc-mia-status.md (A-82).
+The "with findings" verdicts of N-2.4.1 and N-2.4.2 are deviation D-7 of the verification report: the owner accepts them with the report. The status of the root checks is in specs/mia/tc-mia-status.md (A-82).
 
 ### Plan amendments
-A-01 to A-84 (`specs/mia/amendments/`, decisions in `specs/mia/review-log.md`). Installed by the owner: all up to A-83; A-84 (the TD-15 sign-off) is drafted. No joint amendment of a frozen requirement (the goal has no subgoals).
+A-01 to A-86 (`specs/mia/amendments/`, decisions in `specs/mia/review-log.md`). Installed by the owner: all up to A-85; A-86 (TD-21, TD-22) is drafted. No joint amendment of a frozen requirement (the goal has no subgoals).
 
 ### Frozen requirements unchanged (goal_check.py --parent-ref)
 The goal has no parent and no frozen requirements (`goal_check.py --spec-dir specs/mia`: 0 errors, 0 warnings on 2026-11-01).
@@ -53,8 +53,9 @@ None resolved in this release. FB-01 to FB-06 are *Triaged* and go to the next i
 ### Known issues / accepted deviations
 - **Failing test files, known:** `tests/test_amendment_report.py` (no git in the image), `tests/test_harness.py` (rt_edit has 2 cases, wants 30), `tests/acceptance/test_benchmarks.py` (the gate-time baseline was never measured); `tests/test_author_in_records.py` failed once in a full run and passes alone.
 - **Skips by design:** N-0 step 05 (N-5); IF-201 keeps 1 and IF-101 2 skipped cases (`audio_chunk` and `expression` events of an answer not built, TD-11, D-173; REQ-CHV-008 out); the JS real cases of IF-111 (the real side is `ui/godot/tools/test_bridge.gd`, D-155, D-175); N-1.1, N-4.1, N-4.2 integration steps add no coverage over their own tests (D-176).
-- **Trace check:** 47 error lines (known: missing `## Scenarios` sections in 19 test-specs and others), ~290 warnings.
+- **Trace check:** 46 to 48 error lines depending on the open sign-off of TD-22 (known: missing `## Scenarios` sections in about 20 test-specs and others), ~290 warnings.
 - **Environment:** the IF-101 and IF-104 real suites and N-2 step 05 / N-0 step 04 need flask (the image or the requirements venv).
+- **Not met or not held:** NFR-8 and CON-7 (state in PostgreSQL, TD-21); the red-team half of TC-MIA-006 (TD-22); no `test-requirements.md`; 36 `eval/suites` files added by `271176c` without an amendment (owner confirms the labels, D-180); the contract suites of IF-103, IF-404, IF-405 have no real side (F-03).
 - **Not decided here:** nine stage 4 checks (TC-MIA-002, -003, -009, -011, -019, -022, -024, -025, -028) are deferred (TD-12 to TD-20, D-178); VAL-001 and VAL-003 to VAL-006 are field validation.
 
 Open deferrals:
@@ -80,6 +81,8 @@ Open deferrals:
 | TD-18 | Memory that improves (TC-MIA-024) | FR-14 | the Plan of the next iteration (eval-spec.md with criteria, suites and pins), or 2026-12-31, whichever first |
 | TD-19 | Speech rules (TC-MIA-025) | FR-15 | the Plan of the next iteration (eval-spec.md with criteria, suites and pins), or 2026-12-31, whichever first |
 | TD-20 | Estimate before a run (TC-MIA-028) | FR-33 | the Plan of the next iteration (eval-spec.md with criteria, suites and pins), or 2026-12-31, whichever first |
+| TD-21 | The state is in PostgreSQL | NFR-8, CON-7 | the Plan of the next iteration, or 2026-12-31, whichever first |
+| TD-22 | Red-team cases of the untrusted inputs | NFR-3 | the Plan of the next iteration, or 2026-12-31, whichever first |
 
 Out of scope or partly in scope (from goal.md):
 
@@ -149,7 +152,7 @@ The review entry itself is out of G-V1 (REQ-RUN-013 partly, D-128, D-130). Versi
 
 **Eval results (holdout).** None: the stage 4 checks are deferred (D-178). Release notes must not say "better" for any agent behaviour.
 
-**Red-team and budgets.** Not run for this draft; <<from the verification report>>.
+**Red-team and budgets.** Not run (the stage 4 evals and the red-team half of TC-MIA-006 are deferred, TD-12 to TD-22); the verification report records what was and was not measured.
 
 **Baselines.** No new baseline files; `eval/baselines/` is unchanged. After the merge the deciding runs would be copied there (agent-app-commit step 4): there are none to copy.
 

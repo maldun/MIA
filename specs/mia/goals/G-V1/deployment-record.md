@@ -40,7 +40,7 @@ Blanks `<<...>>` are filled by the owner at the deployment. Template: `deploy-ph
 None (FB-01 to FB-06 are triaged for the next iteration).
 
 ## Known issues and open deferrals
-See `release-notes.md`; TD-01 to TD-04, TD-06 to TD-20.
+See `release-notes.md`; TD-01 to TD-04, TD-06 to TD-22.
 
 ## Ready for validation
 <<Yes/No>>. Versions and pins are frozen during validation.

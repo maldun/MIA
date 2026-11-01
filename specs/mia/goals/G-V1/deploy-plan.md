@@ -44,7 +44,7 @@ Prepared by the coding agent while the goal Verify is still to be done. Nothing 
 - No `deploy/build.sh`, no CI log: `merge_gate.py` and the stage log have nothing to read yet.
 
 ## Open deferrals that go with the release
-TD-01 to TD-04, TD-06 to TD-11, TD-12 to TD-20 (`specs/mia/deferred.md`); listed in the release notes.
+TD-01 to TD-04, TD-06 to TD-11, TD-12 to TD-22 (`specs/mia/deferred.md`); listed in the release notes.
 
 ## Hand-over to Validate
 The validation plan is `validation-plan.md` in this folder. Give the users the URL, their accounts, the release notes and the feedback channel.
