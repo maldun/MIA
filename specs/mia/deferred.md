@@ -146,3 +146,129 @@ Proposed on 2026-10-29 after the usability work of N-2.3 T-09 to T-11 and N-1.1 
 - Target check: skip: the IF-204 side of the chat is not wired (TD-11); the skipped cases carry deferred('TD-11') until green
 - Decision: D-173, 2026-11-01, Stefan Reiterer
 - Status: open
+
+## TD-12 – Verify before asserting; lookup (TC-MIA-002)
+- Kind: defer
+- Requirement: FR-9, FR-10
+- Interim criterion: the node tests of the row pass (listed for the row in `specs/mia/tc-mia-status.md`), among them the number gate (`tests/acceptance/test_number_gate.py`), `tests/test_claim_pipelines_check_first.py`, `tests/test_verify_workflow.py`, `tests/test_search_command.py`; the pipelines run on the fake model
+- Target: the suites of the verify workflow (VitaminC and Wikidata, holdout, MP-light, single voice as baseline, 3 repeats) are decided by `eval_decide.py` against the baseline: the chosen gate passes fewer wrong claims and loses no more true claims among those with evidence (AC-2)
+- Reason: the criteria, suites, holdout labels and model pins are not fixed (no `eval-spec.md` for MIA); the holdout is the owner's; the stage 4 rows of the root table were deferred at the goal Verify of G-V1
+- Effort: about 2 days plus GPU time (proposed)
+- Risk of the gap: a gate that passes more wrong claims than the single voice is not seen; the owner's use shows it
+- Owner: Stefan Reiterer
+- Trigger: the Plan of the next iteration (eval-spec.md with criteria, suites and pins), or 2026-12-31, whichever first
+- Target check: specified only
+- Decision: D-178, 2026-11-01, Stefan Reiterer
+- Status: open
+
+## TD-13 – Literature review quality (TC-MIA-003)
+- Kind: defer
+- Requirement: FR-11, FR-12, NFR-4
+- Interim criterion: the node tests of the row pass (listed for the row in `specs/mia/tc-mia-status.md`), among them `tests/test_review_stages.py`, `tests/test_review_request.py`, `tests/test_gate_limits.py` and the scholarly source contract (IF-405)
+- Target: the review benchmark per tier: source recall and precision against the recorded baseline, 0 violations of the cut-off, 0 invented references, 100 % of quotes anchored (AC-3)
+- Reason: the review entry is out of G-V1 (REQ-RUN-013 partly, D-128, D-130) and no benchmark with baseline exists; the stage 4 rows of the root table were deferred at the goal Verify of G-V1
+- Effort: about 3 days plus GPU time and the owner's labels (proposed)
+- Risk of the gap: invented references or unanchored quotes in a review are found by a reader only; the cut-off and the retraction rules are tested in code
+- Owner: Stefan Reiterer
+- Trigger: the Plan of the next iteration (eval-spec.md with criteria, suites and pins), or 2026-12-31, whichever first
+- Target check: specified only
+- Decision: D-178, 2026-11-01, Stefan Reiterer
+- Status: open
+
+## TD-14 – The skill path (TC-MIA-009)
+- Kind: defer
+- Requirement: FR-20
+- Interim criterion: the node tests of the row pass (listed for the row in `specs/mia/tc-mia-status.md`), among them `tests/test_skill_path_doc.py`, `tests/test_seed_workflows.py`, `tests/test_check_baselines.py`, `tests/test_workflow_library.py`
+- Target: the record of the skill path: lookup as the documented example, the literature review added by the same path with specification, context graph and benchmark with holdout and baseline, and the review promoted within one month of the lookup (AC-9)
+- Reason: the review is the next goal's (VAL-002 moved, D-134) and benchmarks with baselines are not recorded; the stage 4 rows of the root table were deferred at the goal Verify of G-V1
+- Effort: about 1 day to read the record once the review is promoted (proposed)
+- Risk of the gap: the path may not work for a second workflow; found when the review is added
+- Owner: Stefan Reiterer
+- Trigger: the Plan of the next iteration (eval-spec.md with criteria, suites and pins), or 2026-12-31, whichever first
+- Target check: specified only
+- Decision: D-178, 2026-11-01, Stefan Reiterer
+- Status: open
+
+## TD-15 – Adaptation to negative feedback (TC-MIA-011)
+- Kind: defer
+- Requirement: FR-29
+- Interim criterion: the node tests of the row pass (listed for the row in `specs/mia/tc-mia-status.md`), among them `tests/test_chat_behaviour.py`, `tests/test_converse_behaviours.py`, `tests/test_chat_answers.py`
+- Target: the statistical run of AC-11: after 5 net negative votes at most 10 appearances in 1000 opportunities with fixed seeds, a higher rate after a positive vote, a vote on a fact leaves the fact unchanged; the implemented rate is 0.5 %, not 1 % (finding F-1 of the test table)
+- Reason: the statistical run is stage 4 and its seeds, repeats and rate (0.5 % against 1 %) are not yet decided; the stage 4 rows of the root table were deferred at the goal Verify of G-V1
+- Effort: about half a day (proposed)
+- Risk of the gap: the rate after votes may differ from the wording; the unit tests of the mechanism pass
+- Owner: Stefan Reiterer
+- Trigger: the Plan of the next iteration (eval-spec.md with criteria, suites and pins), or 2026-12-31, whichever first
+- Target check: specified only
+- Decision: D-178, 2026-11-01, Stefan Reiterer
+- Status: open
+
+## TD-16 – Speed and frame rate (TC-MIA-019)
+- Kind: defer
+- Requirement: NFR-7
+- Interim criterion: the node tests of the row pass (listed for the row in `specs/mia/tc-mia-status.md`), among them `tests/test_measure_latency.py`, `tests/test_runner_budgets.py`, `tests/test_model_turns.py`; the order of the turns is tested
+- Target: BM-MIA-001 (first text within 10 s on MP-light, also while a review slice runs) and BM-MIA-002 (30 fps or more on any phone inside the network and on desktop), median of repeated runs on the reference hardware (AC-19)
+- Reason: the 10 s part is out of G-V1 (REQ-RUN-009 partly, D-128; REQ-RUN-007) and the phones' frame rate is a field measurement (D-62); the stage 4 rows of the root table were deferred at the goal Verify of G-V1
+- Effort: about 1 day plus the field measurement (proposed)
+- Risk of the gap: slow first text or low frame rates are found by the users; VAL-006 collects them in use
+- Owner: Stefan Reiterer
+- Trigger: the Plan of the next iteration (eval-spec.md with criteria, suites and pins), or 2026-12-31, whichever first
+- Target check: specified only
+- Decision: D-178, 2026-11-01, Stefan Reiterer
+- Status: open
+
+## TD-17 – Cost of the first try; comparing variants; learned choices (TC-MIA-022)
+- Kind: defer
+- Requirement: NFR-2, FR-17, FR-18
+- Interim criterion: the node tests of the row pass (listed for the row in `specs/mia/tc-mia-status.md`), among them `tests/test_runner_context_share.py`, `tests/test_eval_platform.py`, `tests/test_judge_calibration.py`
+- Target: the lookup suites on MP-light: fewer than 15 model calls per question, every model input at most 50 % of the context window, variants compared on the same cases with repeats, a learned choice logged next to the default and reversible (AC-22)
+- Reason: the AC-22 measurement is out of G-V1 (REQ-RUN-005 partly, D-128) and the learning layer is not built (REQ-RUN-004 out, D-119); the stage 4 rows of the root table were deferred at the goal Verify of G-V1
+- Effort: about 2 days plus GPU time (proposed)
+- Risk of the gap: the first try may need more calls than planned; the budget refusal of the runner holds
+- Owner: Stefan Reiterer
+- Trigger: the Plan of the next iteration (eval-spec.md with criteria, suites and pins), or 2026-12-31, whichever first
+- Target check: specified only
+- Decision: D-178, 2026-11-01, Stefan Reiterer
+- Status: open
+
+## TD-18 – Memory that improves (TC-MIA-024)
+- Kind: defer
+- Requirement: FR-14
+- Interim criterion: the node tests of the row pass (listed for the row in `specs/mia/tc-mia-status.md`), among them `tests/test_memory_records.py`, `tests/test_chat_memory.py`, `tests/test_items_api.py`, `tests/test_memory_write_skill.py`
+- Target: the memory test set (store, update, contradict, recall, unknown) is passed at least as well as today's summary-based dreaming at equal or lower token cost; every record shows its source and can be corrected and deleted (AC-24)
+- Reason: the check is marked later and Should in the root table; the test set and its labels do not exist; the stage 4 rows of the root table were deferred at the goal Verify of G-V1
+- Effort: about 3 days plus GPU time (proposed)
+- Risk of the gap: memory quality is judged by the users; records can be corrected and deleted
+- Owner: Stefan Reiterer
+- Trigger: the Plan of the next iteration (eval-spec.md with criteria, suites and pins), or 2026-12-31, whichever first
+- Target check: specified only
+- Decision: D-178, 2026-11-01, Stefan Reiterer
+- Status: open
+
+## TD-19 – Speech rules (TC-MIA-025)
+- Kind: defer
+- Requirement: FR-15
+- Interim criterion: the node tests of the row pass (listed for the row in `specs/mia/tc-mia-status.md`), among them `tests/test_chat_repair.py` and `tests/test_speech_repair.py`
+- Target: the behaviour suite with the speech-rule detectors keeps the recorded precision and recall; a violation is repaired silently and never enters the memory as a scolding (AC-25)
+- Reason: the recorded precision and recall and the behaviour suite are not in `eval/baselines`; the stage 4 rows of the root table were deferred at the goal Verify of G-V1
+- Effort: about 1 day (proposed)
+- Risk of the gap: a detector may drift without a number; the repair tests pass
+- Owner: Stefan Reiterer
+- Trigger: the Plan of the next iteration (eval-spec.md with criteria, suites and pins), or 2026-12-31, whichever first
+- Target check: specified only
+- Decision: D-178, 2026-11-01, Stefan Reiterer
+- Status: open
+
+## TD-20 – Estimate before a run (TC-MIA-028)
+- Kind: defer
+- Requirement: FR-33
+- Interim criterion: the node tests of the row pass (listed for the row in `specs/mia/tc-mia-status.md`), among them `tests/test_workflow_library.py` and the IF-202 and IF-203 contract suites; the refusal of a run whose estimate exceeds its budget is tested
+- Target: on the recorded lookup runs the estimate of time, calls and tokens lies within a factor of 3 of the measured time, either way (AC-28, OPEN-3)
+- Reason: no recorded lookup runs exist as a reference set and the lookup suites have no eval-spec; the stage 4 rows of the root table were deferred at the goal Verify of G-V1
+- Effort: about 1 day once runs are recorded (proposed)
+- Risk of the gap: the estimate may be off by more than 3; the user sees the estimate and the run still works
+- Owner: Stefan Reiterer
+- Trigger: the Plan of the next iteration (eval-spec.md with criteria, suites and pins), or 2026-12-31, whichever first
+- Target check: specified only
+- Decision: D-178, 2026-11-01, Stefan Reiterer
+- Status: open

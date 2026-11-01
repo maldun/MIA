@@ -126,7 +126,9 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Refined in: N-2.3, N-2.4, N-3, N-4
 - Verified by: TC-MIA-002
 - Status: Approved
-- History: –
+- Relaxed: TD-12
+- Target: the suites of the verify workflow (VitaminC and Wikidata, holdout, MP-light, single voice as baseline, 3 repeats) are decided by `eval_decide.py` against the baseline: the chosen gate passes fewer wrong claims and loses no more true claims among those with evidence (AC-2)
+- History: A-83 (2026-11-01): Relaxed TD-12 (D-178)
 
 ### FR-10 – Lookup
 - Level: top   Subject: MiaSystem
@@ -139,7 +141,9 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Refined in: N-2.3, N-2.4, N-3, N-4
 - Verified by: TC-MIA-002, TC-MIA-009, TC-MIA-023
 - Status: Approved
-- History: –
+- Relaxed: TD-12
+- Target: the suites of the verify workflow (VitaminC and Wikidata, holdout, MP-light, single voice as baseline, 3 repeats) are decided by `eval_decide.py` against the baseline: the chosen gate passes fewer wrong claims and loses no more true claims among those with evidence (AC-2)
+- History: A-83 (2026-11-01): Relaxed TD-12 (D-178)
 
 ### FR-11 – Literature review
 - Level: top   Subject: MiaSystem
@@ -152,7 +156,9 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Refined in: N-2.3, N-2.4, N-3, N-4
 - Verified by: TC-MIA-003, TC-MIA-009
 - Status: Approved
-- History: –
+- Relaxed: TD-13
+- Target: the review benchmark per tier: source recall and precision against the recorded baseline, 0 violations of the cut-off, 0 invented references, 100 % of quotes anchored (AC-3)
+- History: A-83 (2026-11-01): Relaxed TD-13 (D-178)
 
 ### FR-12 – Knowledge of sources
 - Level: top   Subject: MiaSystem
@@ -165,7 +171,9 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Refined in: N-2.3, N-2.4, N-3.3
 - Verified by: TC-MIA-003
 - Status: Approved
-- History: –
+- Relaxed: TD-13
+- Target: the review benchmark per tier: source recall and precision against the recorded baseline, 0 violations of the cut-off, 0 invented references, 100 % of quotes anchored (AC-3)
+- History: A-83 (2026-11-01): Relaxed TD-13 (D-178)
 
 ### FR-13 – Method transfer
 - Level: top   Subject: MiaSystem
@@ -191,7 +199,9 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Refined in: N-2.2, N-3.3
 - Verified by: TC-MIA-024
 - Status: Approved
-- History: –
+- Relaxed: TD-18
+- Target: the memory test set (store, update, contradict, recall, unknown) is passed at least as well as today's summary-based dreaming at equal or lower token cost; every record shows its source and can be corrected and deleted (AC-24)
+- History: A-83 (2026-11-01): Relaxed TD-18 (D-178)
 
 ### FR-15 – Behaviour rules and feedback
 - Level: top   Subject: MiaSystem
@@ -204,7 +214,9 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Refined in: N-2.2
 - Verified by: TC-MIA-025
 - Status: Approved
-- History: –
+- Relaxed: TD-19
+- Target: the behaviour suite with the speech-rule detectors keeps the recorded precision and recall; a violation is repaired silently and never enters the memory as a scolding (AC-25)
+- History: A-83 (2026-11-01): Relaxed TD-19 (D-178)
 
 ### FR-16 – Traceability
 - Level: top   Subject: MiaSystem
@@ -230,7 +242,9 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Refined in: N-4
 - Verified by: TC-MIA-002, TC-MIA-022
 - Status: Approved
-- History: –
+- Relaxed: TD-17
+- Target: the lookup suites on MP-light: fewer than 15 model calls per question, every model input at most 50 % of the context window, variants compared on the same cases with repeats, a learned choice logged next to the default and reversible (AC-22)
+- History: A-83 (2026-11-01): Relaxed TD-17 (D-178)
 
 ### FR-18 – Optional learning
 - Level: top   Subject: MiaSystem
@@ -243,7 +257,9 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Refined in: N-2.4
 - Verified by: TC-MIA-022
 - Status: Approved
-- History: –
+- Relaxed: TD-17
+- Target: the lookup suites on MP-light: fewer than 15 model calls per question, every model input at most 50 % of the context window, variants compared on the same cases with repeats, a learned choice logged next to the default and reversible (AC-22)
+- History: A-83 (2026-11-01): Relaxed TD-17 (D-178)
 
 ### FR-19 – Operable
 - Level: top   Subject: MiaSystem
@@ -271,7 +287,9 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Refined in: N-2.3, N-4
 - Verified by: TC-MIA-009
 - Status: Approved
-- History: –
+- Relaxed: TD-14
+- Target: the record of the skill path: lookup as the documented example, the literature review added by the same path with specification, context graph and benchmark with holdout and baseline, and the review promoted within one month of the lookup (AC-9)
+- History: A-83 (2026-11-01): Relaxed TD-14 (D-178)
 
 ### FR-21 – Accounts and login
 - Level: top   Subject: MiaSystem
@@ -391,7 +409,9 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Refined in: N-2.2
 - Verified by: TC-MIA-011
 - Status: Approved
-- History: –
+- Relaxed: TD-15
+- Target: the statistical run of AC-11: after 5 net negative votes at most 10 appearances in 1000 opportunities with fixed seeds, a higher rate after a positive vote, a vote on a fact leaves the fact unchanged; the implemented rate is 0.5 %, not 1 % (finding F-1 of the test table)
+- History: A-83 (2026-11-01): Relaxed TD-15 (D-178)
 
 ### FR-30 – Workflow context graph
 - Level: top   Subject: MiaSystem
@@ -444,7 +464,9 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Refined in: N-2.3
 - Verified by: TC-MIA-028
 - Status: Approved
-- History: –
+- Relaxed: TD-20
+- Target: on the recorded lookup runs the estimate of time, calls and tokens lies within a factor of 3 of the measured time, either way (AC-28, OPEN-3)
+- History: A-83 (2026-11-01): Relaxed TD-20 (D-178)
 
 ### NFR-1 – Accessibility and device range
 - Level: top   Subject: MiaSystem
@@ -472,7 +494,9 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Refined in: N-2.4
 - Verified by: TC-MIA-022
 - Status: Approved
-- History: –
+- Relaxed: TD-17
+- Target: the lookup suites on MP-light: fewer than 15 model calls per question, every model input at most 50 % of the context window, variants compared on the same cases with repeats, a learned choice logged next to the default and reversible (AC-22)
+- History: A-83 (2026-11-01): Relaxed TD-17 (D-178)
 
 ### NFR-3 – Untrusted input stays data
 - Level: top   Subject: MiaSystem
@@ -500,7 +524,9 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Refined in: N-2.3, N-2.4, N-4
 - Verified by: TC-MIA-003
 - Status: Approved
-- History: –
+- Relaxed: TD-13
+- Target: the review benchmark per tier: source recall and precision against the recorded baseline, 0 violations of the cut-off, 0 invented references, 100 % of quotes anchored (AC-3)
+- History: A-83 (2026-11-01): Relaxed TD-13 (D-178)
 
 ### NFR-5 – Local-first privacy
 - Level: top   Subject: MiaSystem
@@ -542,7 +568,9 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Refined in: N-1.2, N-2.1, N-2.4
 - Verified by: TC-MIA-019
 - Status: Approved
-- History: –
+- Relaxed: TD-16
+- Target: BM-MIA-001 (first text within 10 s on MP-light, also while a review slice runs) and BM-MIA-002 (30 fps or more on any phone inside the network and on desktop), median of repeated runs on the reference hardware (AC-19)
+- History: A-83 (2026-11-01): Relaxed TD-16 (D-178)
 
 ### NFR-8 – Shared state in a database
 - Level: top   Subject: MiaSystem
