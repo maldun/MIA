@@ -4,7 +4,7 @@
 import test from 'node:test';
 
 export const REAL_NOT_READY = {
-  'IF-111': 'N-1.2 Character view not integrated yet',
+  'IF-111': 'real side: ui/godot/tools/test_bridge.gd in Godot (D-155, A-73)',
   'IF-104': 'N-2 Backend does not serve the routes of IF-104 yet',
 };
 

@@ -6,7 +6,7 @@ import { CharacterMock } from './mocks/if_111_character_bridge.mjs';
 import { VoicePlayerMock } from './mocks/if_112_voice_player.mjs';
 import { RealVoicePlayer } from './real/if_112_voice_player.mjs';
 
-export const READY = new Set(['N-1.3']);    // nodes whose integration step has been done (A-72: the Voice playback)
+export const READY = new Set(['N-1.3', 'N-1.2']);    // nodes whose integration step has been done (A-72: the Voice playback; A-73: the Character view)
 
 export function need(nodes) {
   const missing = nodes.filter((n) => !READY.has(n));
@@ -15,6 +15,8 @@ export function need(nodes) {
 
 function realSubject(iface) {
   if (iface === 'IF-112') return new RealVoicePlayer();     // A-72: the Voice playback N-1.3
+  // A-73 (D-175): the real Character view is Godot; its bridge is checked by ui/godot/tools/test_bridge.gd, not inside this scenario
+  if (iface === 'IF-111') return new CharacterMock();
   throw new Error(`the real adapter of ${iface} is added by the integration step of its node`);
 }
 
