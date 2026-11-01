@@ -15,7 +15,7 @@ The harness, the decisions on held-out cases, the baselines and benchmarks of th
 - Verification method: Test
 - Acceptance criterion: AC-22: variants are compared on the same cases with 3 repeats and 95 % intervals
 - Verified by: TC-EVL-001
-- Status: Approved
+- Status: Verified
 - History: –
 
 ### REQ-EVL-002 – Decisions on held-out cases
@@ -27,7 +27,7 @@ The harness, the decisions on held-out cases, the baselines and benchmarks of th
 - Verification method: Inspection, Test
 - Acceptance criterion: AC-2: a decision script refuses a dev-split run for a verdict
 - Verified by: TC-EVL-002
-- Status: Approved
+- Status: Verified
 - History: –
 
 ### REQ-EVL-003 – Judge calibration
@@ -53,7 +53,7 @@ The harness, the decisions on held-out cases, the baselines and benchmarks of th
 - Verification method: Test
 - Acceptance criterion: AC-10: 100 % of runs carry the three versions
 - Verified by: TC-EVL-004
-- Status: Approved
+- Status: Verified
 - History: –
 
 ### REQ-EVL-005 – Baseline per shipped workflow
@@ -77,7 +77,7 @@ The harness, the decisions on held-out cases, the baselines and benchmarks of th
 - Verification method: Inspection
 - Acceptance criterion: AC-9: the lookup is documented as the example
 - Verified by: TC-EVL-006
-- Status: Approved
+- Status: Verified
 - History: –
 
 ### REQ-EVL-007 – Measure latency and frame rate
@@ -89,7 +89,7 @@ The harness, the decisions on held-out cases, the baselines and benchmarks of th
 - Verification method: Measurement
 - Acceptance criterion: AC-19: the measurement tool reports both with the median of repeated runs
 - Verified by: TC-EVL-007
-- Status: Approved
+- Status: Verified
 - History: –
 
 ### REQ-EVL-008 – Variants compared on equal cases
@@ -101,7 +101,7 @@ The harness, the decisions on held-out cases, the baselines and benchmarks of th
 - Verification method: Test
 - Acceptance criterion: AC-22: a comparison with different case lists is refused
 - Verified by: TC-EVL-008
-- Status: Approved
+- Status: Verified
 - History: –
 
 ### REQ-EVL-009 – Benchmarks of the example workflows
@@ -125,7 +125,7 @@ The harness, the decisions on held-out cases, the baselines and benchmarks of th
 - Verification method: Test, Demonstration
 - Acceptance criterion: AC-9: the lookup scenario runs on the mocks (step 0 of the integration tests) and again with each real node; the time from idea to promotion is recorded
 - Verified by: TC-EVL-010
-- Status: Approved
+- Status: Verified
 - History: –
 
 ### REQ-EVL-011 – Reach the platform only through IF-105

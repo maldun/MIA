@@ -15,7 +15,7 @@ Playing the audio of the answers and the voice lines in this browser: queue, cla
 - Verification method: Test
 - Acceptance criterion: AC-13: with 5 scripted audio chunks the playback order equals the arrival order and no sentence overlaps
 - Verified by: TC-VPB-001
-- Status: Approved
+- Status: Verified
 - History: –
 
 ### REQ-VPB-002 – Mute and stop per user
@@ -27,7 +27,7 @@ Playing the audio of the answers and the voice lines in this browser: queue, cla
 - Verification method: Test
 - Acceptance criterion: AC-13: after mute no audio plays on this device; a second device still plays; after Stop no line of the stopped answer plays on this device, also one that arrives later, until the next answer begins or 3 s after the Stop, whichever comes first (its lines play, and so does a line that arrives later, such as the shocked line of a minus vote)
 - Verified by: TC-VPB-002
-- Status: Approved
+- Status: Verified
 - History: 2026-10-31 D-157: the acceptance criterion adds the lines of a stopped answer that arrive after the Stop (owner check A3); lines carry no answer id, so "the stopped answer" ends when the next one begins (`chat_start`); 2026-10-31 D-165: the drop ends 3 s after the Stop at the latest, so lines outside the stopped answer (the shocked line of a minus vote, IF-101 v13) still play (re-verification 3, R1)
 
 ### REQ-VPB-003 – Voice lines
@@ -39,7 +39,7 @@ Playing the audio of the answers and the voice lines in this browser: queue, cla
 - Verification method: Test
 - Acceptance criterion: AC-13: a line with a missing file produces one report through `onLineError` and no error shown; the conversation continues
 - Verified by: TC-VPB-003
-- Status: Approved
+- Status: Verified
 - History: 2026-10-31 A-50 (D-140): narrowed, the report ends at the IF-112 callback (the page writes it to the browser console); no backend event
 
 ### REQ-VPB-004 – No request leaves the host
@@ -51,7 +51,7 @@ Playing the audio of the answers and the voice lines in this browser: queue, cla
 - Verification method: Test
 - Acceptance criterion: AC-5: a browser test records every request of a session and finds 0 outside the host (exact)
 - Verified by: TC-VPB-004
-- Status: Approved
+- Status: Verified
 - History: –
 
 ### REQ-VPB-005 – Delivered by the backend
@@ -63,7 +63,7 @@ Playing the audio of the answers and the voice lines in this browser: queue, cla
 - Verification method: Test
 - Acceptance criterion: AC-29: the chat page loads from the backend container; the frontend has no container of its own
 - Verified by: TC-VPB-005
-- Status: Approved
+- Status: Verified
 - History: –
 
 ## Interface requirements
@@ -79,5 +79,5 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-13: the contract suite test_if_112_voice_player.test.mjs passes against the mock (stage 1) and the Voice playback (stage 2)
 - Verified by: TC-IF-112-01..05
-- Status: Approved
+- Status: Verified
 - History: v0, amendment 5/7 (2026-10-25)

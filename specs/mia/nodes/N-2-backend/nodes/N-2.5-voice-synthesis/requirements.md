@@ -29,7 +29,7 @@ Speech on the host: filter the text, synthesise sentence by sentence with the op
 - Verification method: Test
 - Acceptance criterion: AC-13: on 10 answers with markup the synthesis input contains none (exact)
 - Verified by: TC-VOI-002
-- Status: Approved
+- Status: Verified
 - History: –
 
 ### REQ-VOI-003 – Voice lines
@@ -41,7 +41,7 @@ Speech on the host: filter the text, synthesise sentence by sentence with the op
 - Verification method: Test
 - Acceptance criterion: AC-13: every mood of the map has a line or is declared silent; a missing file is logged and skipped
 - Verified by: TC-VOI-003
-- Status: Approved
+- Status: Verified
 - History: –
 
 ### REQ-VOI-004 – Default voice lines generated
@@ -53,7 +53,7 @@ Speech on the host: filter the text, synthesise sentence by sentence with the op
 - Verification method: Inspection
 - Acceptance criterion: AC-13: no default line is a third-party recording
 - Verified by: TC-VOI-004
-- Status: Approved
+- Status: Verified
 - History: –
 
 ## Interface requirements
@@ -69,5 +69,5 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-13: the contract suite test_if_204_speech.py passes against the mock (stage 1) and the Voice synthesis (stage 2)
 - Verified by: TC-IF-204-01..03
-- Status: Approved
+- Status: Verified
 - History: v0, amendment 5/7 (2026-10-25)

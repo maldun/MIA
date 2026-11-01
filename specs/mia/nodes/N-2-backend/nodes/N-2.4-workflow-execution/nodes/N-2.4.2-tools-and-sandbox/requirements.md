@@ -15,7 +15,7 @@ The tools that any workflow can call, each counted against the budgets of the ru
 - Verification method: Test
 - Acceptance criterion: AC-2: for a claim that goes through the number gate (verify.number_gate), in the run log the code checks precede the first model call of that claim; the other verification styles (single, consistency, jury, cops, trial, computable) are styles behind the gate and judge only what it routes to them
 - Verified by: TC-TLS-001
-- Status: Approved
+- Status: Verified
 - History: 2026-10-31 D-153: AC-2 holds for a claim that goes through the number gate (was: of each claim; G-4 of the N-2.4.2 verification)
 
 ### REQ-TLS-002 – Lookup with sources
@@ -39,7 +39,7 @@ The tools that any workflow can call, each counted against the budgets of the ru
 - Verification method: Test
 - Acceptance criterion: AC-3: 0 violations of the cut-off; retracted works are dropped and listed (exact)
 - Verified by: TC-TLS-003
-- Status: Approved
+- Status: Verified
 - History: –
 
 ### REQ-TLS-004 – Untrusted text is data
@@ -51,7 +51,7 @@ The tools that any workflow can call, each counted against the budgets of the ru
 - Verification method: Test
 - Acceptance criterion: AC-6: injected instructions change no verdict and start no tool (red-team cases)
 - Verified by: TC-TLS-004
-- Status: Approved
+- Status: Verified
 - History: –
 
 ### REQ-TLS-005 – Sandbox or refuse
@@ -89,7 +89,7 @@ The tools that any workflow can call, each counted against the budgets of the ru
 - Verification method: Test, Inspection
 - Acceptance criterion: AC-5: the web log lists every query that left the machine
 - Verified by: TC-TLS-007
-- Status: Approved
+- Status: Verified
 - History: 2026-10-31 A-41 (D-131, D-132): the text names what a scholarly request sends (filters, DOIs, API key, User-Agent), as the code does; finding 5 of the N-2.4.2 verification
 
 ### REQ-TLS-008 – Budget and trust label per tool call
@@ -101,7 +101,7 @@ The tools that any workflow can call, each counted against the budgets of the ru
 - Verification method: Test
 - Acceptance criterion: AC-6: a call over the budget is refused with the budget named; every output carries its trust label
 - Verified by: TC-TLS-008
-- Status: Approved
+- Status: Verified
 - History: –
 
 ## Interface requirements
@@ -117,7 +117,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-2, AC-5, AC-6: the contract suite test_if_402_tool_calls.py passes against the mock (stage 1) and the Tools and sandbox (stage 2)
 - Verified by: TC-IF-402-01..05
-- Status: Approved
+- Status: Verified
 - History: v0, amendment 5/7 (2026-10-25)
 
 ### IF-404 – Web search and fetch (external)
