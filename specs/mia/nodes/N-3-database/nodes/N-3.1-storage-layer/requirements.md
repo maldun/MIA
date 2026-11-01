@@ -68,15 +68,15 @@ The PostgreSQL database and the one door to it (IF-102): immutable versions, acc
 
 ### REQ-SLY-006 – Change notification
 - Level: low   Subject: Persistence
-- Text: When a record changes, the Storage layer shall tell every subscriber of the storage interface.
-- Rationale: refines REQ-DB-006
+- Text: When a record changes, the Storage layer shall tell every subscriber of the storage interface. Notices sent while an instance's listening connection to the database is being opened again (a database restart) may be lost.
+- Rationale: refines REQ-DB-006; a catch-up after a restart is not worth its cost for a personal assistant (D-168)
 - Parent: REQ-DB-006
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-15: a second subscriber is notified within 2 s
 - Verified by: TC-SLY-006
 - Status: Approved
-- History: –
+- History: 2026-10-31 D-168: notices sent during a reconnect may be lost (N-3.1 re-verification R3b)
 
 ### REQ-SLY-007 – Reversible move from files
 - Level: low   Subject: Persistence
