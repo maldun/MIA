@@ -21,7 +21,8 @@ steps:
   - {id: unit,         stage: 1, cmd: "python -m unittest discover -s tests -q", needs: []}
   - {id: contract-mocks, stage: 1, cmd: "python -m unittest discover -s tests/acceptance/contract -p \"test_if_*.py\" -k _mock", needs: [unit]}
   - {id: contract-js,  stage: 1, cmd: "node --test tests/acceptance/contract/test_if_111_character_bridge.test.mjs tests/acceptance/contract/test_if_112_voice_player.test.mjs", needs: []}
-  - {id: acceptance,   stage: 2, cmd: "python -m unittest discover -s tests/acceptance -p \"test_*.py\" -q", needs: [unit]}
+  # one process per file: test_stability.py (protected) puts tests/ on sys.path, so one discover run fails on the names that tests/ and tests/acceptance/ share (test_workflow_library, test_number_gate)
+  - {id: acceptance,   stage: 2, cmd: "rc=0; for f in tests/acceptance/test_*.py; do python \"$f\" || rc=1; done; exit $rc", needs: [unit]}
   - {id: contract-real, stage: 2, cmd: "python -m unittest discover -s tests/acceptance/contract -p \"test_if_*.py\" -k _real", needs: [acceptance]}
   # contract-postgres (A-59): the IF-102 suite on a throwaway postgres:16 (local image, never pulled); MIA_DB_PYTHON names a python with psycopg 3
   - {id: contract-postgres, stage: 3, cmd: "bash tools/contract_postgres.sh", needs: [contract-real]}
