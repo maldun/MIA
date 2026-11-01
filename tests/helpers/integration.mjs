@@ -6,7 +6,7 @@ import { CharacterMock } from './mocks/if_111_character_bridge.mjs';
 import { VoicePlayerMock } from './mocks/if_112_voice_player.mjs';
 import { RealVoicePlayer } from './real/if_112_voice_player.mjs';
 
-export const READY = new Set(['N-1.3', 'N-1.2']);    // nodes whose integration step has been done (A-72: the Voice playback; A-73: the Character view)
+export const READY = new Set(['N-1.3', 'N-1.2', 'N-1.1']);    // nodes whose integration step has been done (A-72: the Voice playback; A-73: the Character view; A-74: the Chat and login views)
 
 export function need(nodes) {
   const missing = nodes.filter((n) => !READY.has(n));
