@@ -4,8 +4,9 @@
 // realSubject() its adapter; both edits are amendments of this protected file, made with the owner.
 import { CharacterMock } from './mocks/if_111_character_bridge.mjs';
 import { VoicePlayerMock } from './mocks/if_112_voice_player.mjs';
+import { RealVoicePlayer } from './real/if_112_voice_player.mjs';
 
-export const READY = new Set();    // nodes whose integration step has been done, e.g. new Set(['N-1.3'])
+export const READY = new Set(['N-1.3']);    // nodes whose integration step has been done (A-72: the Voice playback)
 
 export function need(nodes) {
   const missing = nodes.filter((n) => !READY.has(n));
@@ -13,6 +14,7 @@ export function need(nodes) {
 }
 
 function realSubject(iface) {
+  if (iface === 'IF-112') return new RealVoicePlayer();     // A-72: the Voice playback N-1.3
   throw new Error(`the real adapter of ${iface} is added by the integration step of its node`);
 }
 

@@ -5,7 +5,8 @@ import assert from 'node:assert/strict';
 import { eachProvider } from '../../helpers/contract.mjs';
 import { VoicePlayerMock } from '../../helpers/mocks/if_112_voice_player.mjs';
 
-const make = (kind) => (kind === 'mock' ? new VoicePlayerMock() : null);
+import { RealVoicePlayer } from '../../helpers/real/if_112_voice_player.mjs';
+const make = (kind) => (kind === 'mock' ? new VoicePlayerMock() : new RealVoicePlayer());
 const line = (id, extra = {}) => ({ id, url: `/audio/${id}.wav`, serial: 1, ...extra });
 const watch = (player) => { const seen = []; player.onSpeaking((v) => seen.push(v)); return seen; };
 
