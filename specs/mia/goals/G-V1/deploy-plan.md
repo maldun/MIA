@@ -12,7 +12,7 @@ Prepared by the coding agent while the goal Verify is still to be done. Nothing 
 | Models | pulled by digest: MP-light `gemma4:12b-it-qat` `sha256:38044be4f923...`, MP-full `gemma4:26b` `sha256:001e5dafc3c7...` (drafts `specs/mia/eval-spec.md`, `specs/number-gate/eval-spec.md`); `deploy/setup_cfg.compose.json` names the same two |
 
 ## Steps
-1. **Before anything:** `deploy/up.sh db backup` (the archive holds the database and the data folder, REQ-OPR-005); keep the previous image and do not `ollama rm` any model.
+1. **Before anything:** `deploy/up.sh backup` (the archive holds the database and the data folder, REQ-OPR-005); keep the previous image and do not `ollama rm` any model.
 2. **Preflight:** `bash deploy/preflight.sh` (new in this draft; tested by `tests/test_preflight.py`). It checks podman, free space, ports, GPU devices, what a fresh checkout lacks, the sandbox backend, and the model server against the pins (`deploy/preflight_agent.py`). FAIL stops; a moved digest is a model change (amendment), never an install detail.
 3. **Install from the tag:** check out the tag in a new folder, copy `deploy/.env`, run `deploy/up.sh db` (AMD: `deploy/up.sh rocm db`). The first start adds the SearXNG secret and the database password and offers the owner account once.
 4. **Smoke tests on the target** (below). Red: roll back or fix; never hand a failing deployment to validation.
