@@ -106,3 +106,14 @@ goal/v1 merged first (fc749e0; CLAUDE.md's eval line with `--pin`/`--holdout` co
 | A-63 re-checked | this commit | drafts redrafted (test_eval_platform.py changed); on a scratch copy of the merged branch: six protected tests OK, old copies removed, trace_check unchanged, test_doc_check clean, second run "nothing to do" | |
 
 The open point "--pin does not set the model of the old targets" above is closed by 97d4811; "test_harness opens holdout suites" by 4eb97ed; CLAUDE.md by the owner (bc6df53).
+
+## Re-verification fixes (D-172, 2026-11-01)
+| Finding | Commit | What | Test that fails without it |
+|---|---|---|---|
+| R5 `report`/`compare` show holdout runs | 2864a11 | only with `--holdout` | `SavedHoldoutRuns` (3) |
+| R8 missing or unknown suite | 27972e9 | `open_suite` exits with one line: "no suite 'x' (there are: ...)", "'../x' is not a suite name", the harness's problem text for a broken suite | `UnknownSuites` (3) |
+| R6 `--pin` in written commands | 27972e9 | `tools/run_research_comparison.sh` and the commands in `ui/README.md` carry `--pin MP-light` | `PinInTheWrittenCommands` (2) |
+| R2 REQ-EVL-003 | 27972e9 | `Relaxed: TD-07` and `Target` lines; this log says A-63 is installed (`bee8ead`) | trace check |
+| R1 smoke gate, R4 guard mutants | this commit | amendment **A-68** drafted, not installed: `bash tools/apply_amendment_a68.sh`. Scratch check: 11 tests OK; the early refusal of `open_suite` and `holdout=True` in `list` as mutants are both killed; second run "nothing to do" | `test_decide_guard.py` (spy on `load_suite`) |
+
+`specs/mia/architecture.sysml` was not regenerated here: the generator also writes other nodes' requirement changes, which belong to their own branches; my edit changes no `doc` text.
