@@ -42,3 +42,6 @@ local-tasks.jsonl
 
 .venv-gate/
 .stages/
+# editor autosave and lock files (Emacs, Kate)
+\#*#
+.#*
