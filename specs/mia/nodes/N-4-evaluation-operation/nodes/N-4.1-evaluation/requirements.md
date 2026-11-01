@@ -138,4 +138,6 @@ The harness, the decisions on held-out cases, the baselines and benchmarks of th
 - Acceptance criterion: AC-22: with the mock of IF-105 every scenario of the harness runs; no other import of the platform exists
 - Verified by: TC-EVL-011
 - Status: Approved
-- History: –
+- Relaxed: TD-08
+- Target: every suite kind runs through IF-105
+- History: A-70 (2026-11-01): Relaxed TD-08 (D-172, D-174)

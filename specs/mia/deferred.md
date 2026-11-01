@@ -85,8 +85,8 @@ Proposed on 2026-10-29 after the usability work of N-2.3 T-09 to T-11 and N-1.1 
 - Effort: about 2 h with fake-model tests
 - Risk of the gap: a first judge would run uncalibrated. Mitigation: the trigger below
 - Owner: Stefan Reiterer
-- Trigger: the first eval target with a judge
-- Target check: TC-EVL-003
+- Trigger: the first eval target with a judge, or 2026-12-31, whichever first
+- Target check: specified only
 - Decision: D-166, 2026-10-31, Stefan Reiterer
 - Status: open
 
@@ -100,7 +100,7 @@ Proposed on 2026-10-29 after the usability work of N-2.3 T-09 to T-11 and N-1.1 
 - Risk of the gap: an older suite kind could measure a path the app does not take. Mitigation: the header names the pin and the versions
 - Owner: Stefan Reiterer
 - Trigger: the Plan of FB-03, or 2026-12-31, whichever first
-- Target check: TC-EVL-011
+- Target check: specified only
 - Decision: D-172, 2026-11-01, Stefan Reiterer
 - Status: open
 
