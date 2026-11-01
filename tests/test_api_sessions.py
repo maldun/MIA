@@ -9,6 +9,7 @@ import logging
 import os
 import sys
 import unittest
+from unittest import mock
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
@@ -76,6 +77,23 @@ class Sessions(unittest.TestCase):
         # When / Then: a minute later anna logs in again
         self.clock.now += 61
         self.assertTrue(self.api.login("anna", "pw-anna-1"))
+
+    @mark.req("REQ-API-004")
+    def test_failed_logins_older_than_a_minute_leave_no_entry(self):
+        """TC-API-004 (R-3 of the re-verification, D-167): the throttle forgets failures older than 60 s, so many wrong user names do not grow the memory without limit.
+
+        Example: 3,000 logins with distinct wrong names; 61 s later one more login -> at most 1 entry in the throttle, none of the old names.
+        """
+        # Given: 3,000 failed logins, each with its own user name (the password hash is skipped: it costs 30 ms each and is not under test)
+        with mock.patch.object(S.accounts, "verify", return_value=False):
+            for i in range(3000):
+                error_of(lambda: self.api.login("nobody-%d" % i, "wrong"))
+        # When: a minute later one more login fails
+        self.clock.now += 61
+        error_of(lambda: self.api.login("late", "wrong"))
+        # Then: only the new failure is kept; no stale entry or empty list remains
+        self.assertEqual(len(self.api._failed), 1)
+        self.assertEqual(self.api._failed, {"late": [self.clock.now]})
 
     @mark.req("REQ-API-005")
     def test_no_password_is_stored_or_logged_after_ten_logins(self):

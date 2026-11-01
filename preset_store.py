@@ -46,6 +46,7 @@ SOURCES = ("manual", "llm", "llm_edited")
 MAX_DESCRIPTION = 300
 MAX_TAGS = 12
 MAX_TAG_LENGTH = 30
+DELETED_FILE = ".deleted_shipped.json"     # the shipped presets the user deleted or renamed (D-169)
 
 
 class PresetError(Exception):
@@ -64,8 +65,8 @@ def _is_number(value):
 class PresetStore:
     def __init__(self, folder, defaults_file=None, shape_keys_file=None, gestures_file=None, protected=None, gestures_provider=None):
         """
-        folder: where the preset files live (created, and filled from defaults_file when empty)
-        defaults_file: {"presets": [...]} used to fill an empty folder (the library shipped with the character)
+        folder: where the preset files live (created; the shipped presets it lacks are added from defaults_file at every start)
+        defaults_file: {"presets": [...]}, the library shipped with the character
         shape_keys_file / gestures_file: names that are accepted (None: no check)
         protected: function returning the preset names that must not be deleted or renamed
         """
@@ -75,8 +76,9 @@ class PresetStore:
         self.known_shape_keys = self._read_names(shape_keys_file, "shape_keys")
         self._known_gestures = self._read_names(gestures_file, "gestures")
         self._gestures_provider = gestures_provider      # function() -> every gesture name (built in and made in the editor)
+        self._shipped = set()                             # the names of the library shipped with the character
         os.makedirs(folder, exist_ok=True)
-        if defaults_file and not self.names():
+        if defaults_file:
             self._seed(defaults_file)
 
     @property
@@ -96,15 +98,41 @@ class PresetStore:
             return {entry["name"] for entry in json.load(fp)[key]}
 
     def _seed(self, defaults_file):
+        """adds the shipped presets the folder lacks and never overwrites one that exists: a folder filled by an older version gets the
+        presets shipped since (shocked, REQ-CHV-006) and keeps the user's edits (R1 of the N-1.2 re-verification, D-167); a shipped preset the user
+        deleted or renamed stays away (D-169)"""
         with open(defaults_file) as fp:
             presets = json.load(fp)["presets"]
+        self._shipped = {raw.get("name") for raw in presets}
+        skip, added = set(self.names()) | self._deleted_shipped(), 0
         for raw in presets:
+            if raw.get("name") in skip:
+                continue
             try:
                 preset, _ = self.normalize(raw)
                 self._write(preset)
+                added += 1
             except PresetError as exc:
                 logger.error(f"default preset {raw.get('name')} skipped: {exc.message}")
-        logger.info(f"preset folder {self.folder} filled with {len(self.names())} default presets")
+        if added:
+            logger.info(f"preset folder {self.folder}: {added} shipped presets added")
+
+    def _deleted_shipped(self):
+        """the shipped presets the user deleted or renamed (DELETED_FILE in the folder; its leading dot keeps it out of names())"""
+        try:
+            with open(os.path.join(self.folder, DELETED_FILE)) as fp:
+                return set(json.load(fp))
+        except (OSError, ValueError, TypeError):
+            return set()
+
+    def _remember_deleted(self, name):
+        """a shipped preset that goes away is not restored at the next start (D-169)"""
+        if name not in self._shipped:
+            return
+        path = os.path.join(self.folder, DELETED_FILE)
+        with open(path + ".tmp", "w") as fp:
+            json.dump(sorted(self._deleted_shipped() | {name}), fp)
+        os.replace(path + ".tmp", path)
 
     def _path(self, name):
         if not isinstance(name, str) or not NAME_RE.match(name):
@@ -268,6 +296,7 @@ class PresetStore:
                     raise PresetError(f"preset '{preset['name']}' exists already", 409)
                 stored = self._write(preset, author)
                 os.remove(self._path(name))
+                self._remember_deleted(name)
                 return stored, corrections
             return self._write(preset, author), corrections
 
@@ -277,3 +306,4 @@ class PresetStore:
             if name in self.protected() and not force:
                 raise PresetError(f"'{name}' is used by MIA's emotions and cannot be deleted", 409)
             os.remove(self._path(name))
+            self._remember_deleted(name)

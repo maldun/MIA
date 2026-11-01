@@ -6,6 +6,7 @@ Needs flask: run with the image:  bash tools/run_in_image.sh tests/test_api_even
 """
 import importlib
 import os
+import shutil
 import sys
 import tempfile
 import time
@@ -13,12 +14,11 @@ import unittest
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
-sys.path.insert(0, REPO)
 sys.path.insert(0, os.path.join(HERE, "helpers"))
 sys.path.insert(0, os.path.join(HERE, "helpers", "mocks"))
-_LINK_DIR = tempfile.mkdtemp()
-os.symlink(REPO, os.path.join(_LINK_DIR, "MIA"))
-sys.path.insert(0, _LINK_DIR)
+
+import checkout_copy  # noqa: E402  (MIA from a temporary copy: nothing is written into the checkout, D-169)
+_PACKAGE_DIR = checkout_copy.use()
 
 from flask import Flask                                            # noqa: E402
 from flask_socketio import SocketIO                                # noqa: E402
@@ -112,6 +112,16 @@ class AnswerReachesEveryPage(unittest.TestCase):
             self.assertEqual(positions, sorted(positions))
             done = payloads(received, "chat_done")[0]
             self.assertEqual((done["text"], done["status"]), (deltas[-1], "done"))
+
+    def test_web_app_writes_into_its_own_data_folder_not_the_checkout(self):
+        """R-6 of the N-2.1 re-verification (D-167): the imported web_app keeps its data (token, library, presets, workflows) in a temporary folder.
+
+        Example: data/ of the imported web_app is a real folder under the temporary directory, not a link into the checkout.
+        """
+        # Given: the web_app this test imported
+        data = os.path.realpath(os.path.join(self.wa.FPATH, "data"))
+        # Then: its data folder lies outside the checkout
+        self.assertFalse(data.startswith(os.path.realpath(REPO) + os.sep), data)
 
 
 class ChangesReachEveryDevice(unittest.TestCase):

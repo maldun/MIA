@@ -42,9 +42,8 @@ class SessionService:
         if not isinstance(user, str):
             raise ApiError(401, "bad_credentials")                # a list or object would break the throttle's lookup (V-3)
         now = self._clock()
-        recent = [t for t in self._failed.get(user, []) if now - t < THROTTLE_SECONDS]
-        self._failed[user] = recent
-        if len(recent) >= MAX_FAILED_LOGINS:
+        self._forget_old_failures(now)
+        if len(self._failed.get(user, [])) >= MAX_FAILED_LOGINS:
             raise ApiError(429, "throttled")                      # also for the right password: the attacker learns nothing
         if not accounts.verify(self.store, user, password):
             self._failed.setdefault(user, []).append(now)
@@ -52,6 +51,11 @@ class SessionService:
         token = secrets.token_urlsafe(32)
         self._sessions[token] = user
         return token
+
+    def _forget_old_failures(self, now):
+        """Drops failures older than THROTTLE_SECONDS and the names left without any: each wrong user name would otherwise stay in memory for good (R-3, D-167)."""
+        self._failed = {name: kept for name, kept in
+                        ((name, [t for t in times if now - t < THROTTLE_SECONDS]) for name, times in self._failed.items()) if kept}
 
     def user_of(self, token):
         """the account of a session, or None; for the other layers (the socket, the REST calls)"""

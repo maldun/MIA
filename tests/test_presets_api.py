@@ -14,9 +14,11 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
 
 # the code uses relative imports as package "MIA": make the repository importable under that name
-_LINK_DIR = tempfile.mkdtemp()
-os.symlink(REPO, os.path.join(_LINK_DIR, "MIA"))
-sys.path.insert(0, _LINK_DIR)
+import checkout_copy  # noqa: E402  (MIA from a temporary copy: nothing is written into the checkout, D-169)
+_LINK_DIR = checkout_copy.use()
+sys.path.insert(0, os.path.join(HERE, "helpers"))
+
+from markers import mark  # noqa: E402
 
 SHIPPED = os.path.join(REPO, "ui", "godot", "presets")
 
@@ -58,6 +60,51 @@ class StoreTest(unittest.TestCase):
         self.store.update("smug", changed)
         again = self.ps.PresetStore(self.store.folder, defaults_file=os.path.join(SHIPPED, "library.json"))
         self.assertEqual(again.get("smug")["description"], "my own")
+
+    @mark.req("REQ-CHV-006")
+    def test_a_start_adds_the_missing_shipped_presets_and_keeps_the_users_own(self):
+        """R1 of the N-1.2 re-verification (D-167): a folder filled before `shocked` was shipped gets it at the next start; a preset the user edited stays as edited.
+
+        Example: folder seeded with the library without shocked, smug edited to "my own" -> after a start shocked exists and smug says "my own".
+        """
+        # Given: a folder seeded from the library as it was before shocked (88f484d^), with smug edited by the user
+        with open(os.path.join(SHIPPED, "library.json")) as fp:
+            library = json.load(fp)
+        old_library = os.path.join(self.tmp.name, "old_library.json")
+        with open(old_library, "w") as fp:
+            json.dump({"presets": [p for p in library["presets"] if p["name"] != "shocked"]}, fp)
+        folder = os.path.join(self.tmp.name, "old_presets")
+        old = self.ps.PresetStore(folder, defaults_file=old_library)
+        self.assertNotIn("shocked", old.names())
+        edited = old.get("smug")
+        edited["description"] = "my own"
+        old.update("smug", edited)
+        # When: MIA starts with today's library
+        again = self.ps.PresetStore(folder, defaults_file=os.path.join(SHIPPED, "library.json"))
+        # Then: shocked is there, the edited smug is not overwritten
+        self.assertIn("shocked", again.names())
+        self.assertEqual(again.get("smug")["description"], "my own")
+
+    @mark.req("REQ-CHV-006")
+    def test_a_shipped_preset_the_user_deleted_stays_deleted_after_a_start(self):
+        """D-169: the store remembers the shipped presets the user deleted or renamed and does not restore them at start; another shipped preset the folder lacks still comes back.
+
+        Example: delete shocked, rename smug to my_smug, remove sad.json by hand -> after a start: no shocked, no smug, my_smug and sad are there.
+        """
+        # Given: the user deleted shocked and renamed smug; sad.json went missing outside the store
+        self.store.delete("shocked")
+        renamed = self.store.get("smug")
+        renamed["name"] = "my_smug"
+        self.store.update("smug", renamed)
+        os.remove(os.path.join(self.store.folder, "sad.json"))
+        # When: MIA starts again with the shipped library
+        again = self.ps.PresetStore(self.store.folder, defaults_file=os.path.join(SHIPPED, "library.json"))
+        # Then: the deleted and the renamed preset stay away, the missing one is back
+        names = again.names()
+        self.assertNotIn("shocked", names)
+        self.assertNotIn("smug", names)
+        self.assertIn("my_smug", names)
+        self.assertIn("sad", names)
 
     def test_create_get_update_delete(self):
         created, corrections = self.store.create(smug())

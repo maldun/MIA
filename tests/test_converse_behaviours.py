@@ -12,6 +12,8 @@ os.environ.update({"ANSWER_DELAY": "0.3", "EVENT_GAP": "0", "MIA_TEST": "1"})
 
 from markers import mark  # noqa: E402
 
+import checkout_copy  # noqa: E402  (MIA from a temporary copy: nothing is written into the checkout, D-169)
+_LINK_DIR = checkout_copy.use()
 spec = importlib.util.spec_from_file_location("chat_mock_server", os.path.join(REPO, "ui", "tools", "chat_mock_server.py"))
 server = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(server)
@@ -137,17 +139,11 @@ class ConverseBehaviours(unittest.TestCase):
 class ShockedAfterAMinus(unittest.TestCase):
     """TC-CHV-006 (REQ-CHV-006, D-143, D-155): the backend side of the shocked reaction, from the vote to the wire."""
 
-    @mark.req("REQ-CHV-006")
-    def test_a_minus_vote_sends_the_shocked_expression_and_plays_the_shocked_line(self):
-        """TC-CHV-006 (D-156): a minus through the chat service of the app sends `expression {name: "shocked"}` to the pages and plays the shocked line; in the
-        background, after the length of the line, the face of the current mood follows; a plus does none of it.
-
-        Example: mood "happy", line of 0.5 s; vote(anna, "voice", "service", -1) -> ("expression", shocked), play_sound(line), sleep 0.5 in the background,
-        ("expression", happy)
-        """
+    def record_the_app(self):
+        """the app's chat service on a fresh votes table, a happy mood, a shocked line of 0.5 s, and the socket, the sound player and the background
+        recorded; returns (the faces sent so far, the sounds played, the background tasks, the sleeps, the line)"""
         import tempfile
         import wave
-        # Given the app's chat service on a fresh votes table, a happy mood, a shocked line of 0.5 s, and the socket, the sound player and the background recorded
         folder = tempfile.mkdtemp()
         line = os.path.join(folder, "shocked_default.wav")
         with wave.open(line, "wb") as fp:
@@ -168,6 +164,18 @@ class ShockedAfterAMinus(unittest.TestCase):
         w.chat_service._votes = w.Storage(w.FileBackend(folder))          # the app's own storage classes
         w.mood = type("Mood", (), {"status": lambda self: {"emotion": "happy"}})()
         faces = lambda: [p["name"] for e, p in sent if e == "expression"]
+        return faces, played, background, slept, line
+
+    @mark.req("REQ-CHV-006")
+    def test_a_minus_vote_sends_the_shocked_expression_and_plays_the_shocked_line(self):
+        """TC-CHV-006 (D-156): a minus through the chat service of the app sends `expression {name: "shocked"}` to the pages and plays the shocked line; in the
+        background, after the length of the line, the face of the current mood follows; a plus does none of it.
+
+        Example: mood "happy", line of 0.5 s; vote(anna, "voice", "service", -1) -> ("expression", shocked), play_sound(line), sleep 0.5 in the background,
+        ("expression", happy)
+        """
+        # Given the app's chat service on a fresh votes table, a happy mood, a shocked line of 0.5 s, and the socket, the sound player and the background recorded
+        faces, played, background, slept, line = self.record_the_app()
         # When anna gives a plus
         w.chat_service.vote("anna", "voice", "service", 1)
         # Then nothing happens to the character
@@ -182,6 +190,25 @@ class ShockedAfterAMinus(unittest.TestCase):
         self.assertEqual(slept, [0.5])
         self.assertEqual(faces(), ["shocked", "happy"])
         self.assertEqual(played, [line])
+
+    @mark.req("REQ-CHV-006")
+    def test_a_second_minus_within_the_line_keeps_the_face_shocked_to_its_end(self):
+        """R4 of the N-1.2 re-verification (D-167): a new shocked reaction cancels the pending return to the mood, so the face returns only after the last line.
+
+        Example: two minus votes within one line -> two background returns; the first, after its 0.5 s, sends nothing; the second sends happy.
+        """
+        # Given the app recorded, a happy mood and a shocked line of 0.5 s
+        faces, played, background, slept, line = self.record_the_app()
+        # When anna and ben give a minus within the length of one line
+        w.chat_service.vote("anna", "voice", "service", -1)
+        w.chat_service.vote("ben", "voice", "service", -1)
+        self.assertEqual((faces(), len(background)), (["shocked", "shocked"], 2))
+        # Then the first return ends without changing the face
+        background.pop(0)()
+        self.assertEqual(faces(), ["shocked", "shocked"])
+        # and the return of the second line brings the face of the mood
+        background.pop(0)()
+        self.assertEqual(faces(), ["shocked", "shocked", "happy"])
 
 if __name__ == "__main__":
     unittest.main()
