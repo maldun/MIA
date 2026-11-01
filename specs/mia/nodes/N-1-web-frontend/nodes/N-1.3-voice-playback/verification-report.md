@@ -274,3 +274,93 @@ A1 two tabs claim the voice: ok. A2 mute per device and the autoplay hint: ok. A
 - Real audio, timing and the mouth by the reviewer (no sound device): covered by the owner's A1..A4.
 - A3 end to end with real speech synthesis and a model (no model server allowed): covered by `test_speech_stop.py` (real speech process, recording speaker) and the owner's A3 re-run.
 - IF-112 against the real player in the contract suite: open until the N-1 integration step (as before). CI stage log: none.
+
+## Re-verification 4 (2026-11-01)
+**Branch:** goal/v1 @ 269c615 (merge round 4 merged, A-64..A-68 installed). Fix commits under review, from `v1-n13e` (merged in round 3): 76c4a58 R1 (3 s drop window after Stop), d46dc95 R2 (the folder a running stage serves). Since d46dc95, round 4 changed none of `templates/static/chat/sound.js`, `tests/js/voice-player.test.mjs`, `tools/start_testing.sh`, `tools/testing_stages.d/`, `tests/test_testing_stages.py`, or the IF-112 contract, suite and mock.   **Reviewer:** Claude Opus 5.5 (AI, fresh context, never saw the implementation chat).   **Inputs:** Re-verification 3 above, implementation-log.md (D-165 table), requirements.md (REQ-VPB-002 AC with D-165), test-spec.md (TC-VPB-002 row), D-165, D-172, hand-overs of 2026-10-31 pm/night and 2026-11-01. Local runs only (no CI). Scratch copies (`git archive HEAD`) were made in the reviewer's job folder, never in the real files, and removed afterwards.
+
+Note: an earlier "Re-verification 4" (51a3aad) was committed on `master` only, on db7beb7, before round 4. This section replaces it and was written from scratch. The reviewer read that earlier attempt only after finishing their own mutants, and then checked its one extra point (Q1) independently.
+
+### Verdict (re-verification 4)
+Proposed: **Verified with accepted deviations** (unchanged from re-verification 3). R1 and R2 are fixed as D-165 asks. Each fix has a test that fails without it (mutants below), and R2 was also shown on real podman 5.7.1 containers. Round 4 broke nothing in N-1.3: the JS suite and the IF-112 contract suite pass, and the node's Python tests pass in the image. The new findings are Low or Info and concern tests and tooling only. The deviations and recorded items of the earlier rounds stay as they were (N2, the open part of N3, and N4 at the N-1 step; N6 tool; F8 Plan).
+
+### Verification matrix (changes only)
+| Requirement | Method | Evidence (this round) | Result |
+|---|---|---|---|
+| REQ-VPB-002 (AC with D-165 window) | Test + inspection | `tests/js/voice-player.test.mjs:464` (fake clock: a late line at +2.999 s is dropped, the shocked line at +3.5 s plays without `chat_start`) and `:444` (D-157: the next `chat_start` ends the drop). 25/25. Code `sound.js:10,210,217,254`. The page `app.js:126` passes no clock, so `Date.now` is used (inspection; see Q1). The AC, the TC-VPB-002 row and the code agree | Met; Q1, Q3 (test gaps) |
+| REQ-VPB-001, -003 | Test | `node --test "tests/js/*.test.mjs"` 161/161; image: `test_audio_router.py` 23, `test_voice_lines.py` 8, `test_converse_behaviours.py` 7, `test_chat_page.py` 11, all OK | Met (unchanged) |
+| REQ-VPB-005 | Test | image: `test_frontend_delivery.py` 2 OK (1 skipped: no podman in the image); stack test not rerun (see Not checked) | Met (unchanged, re-verification 3 evidence) |
+| IF-112 | Test | `tests/acceptance/contract/test_if_112_voice_player.test.mjs`: 5 [mock] pass, 5 [real] skipped "not integrated yet" (the N-1 integration step, as before) | Mock side met; real side open at the N-1 step |
+| D-165 R2 (tooling, A4 trap) | Test + demonstration | `tests/test_testing_stages.py` 7/7 on the host (python3), 7 with 1 skipped (no git) in the image. Real podman: a container named `mia-test-chat-on-stub` mounting the main checkout `:O`; `start chat-on-stub` and `status` from this worktree print `serving /home/maldun/prog/Python/MIA` and the WARNING naming the worktree. The real `serving_container` on three throwaway containers: an `:O` mount of the worktree gives `serving <worktree>` with no warning; a bind of `<worktree>/tools` gives that folder and a warning; no mount gives `serving an unknown folder` and a warning. `podman inspect` confirms the `:O` source is podman's `.../overlay/<n>/merge` folder with one `lowerdir=<checkout>` option, as the test's fake assumes | Met |
+
+### Per finding
+| # | State | Evidence |
+|---|---|---|
+| R1 every line dropped after Stop until `chat_start` | **Fixed** (76c4a58) | `audio_reload` is dropped only while `clock() - stoppedAt < STOP_DROP_MS` (3000 ms) and no `chat_start` came. Mutants: window unbounded, Stop not starting the window, no drop, real clock instead of the injected one, `chat_start` not ending the window, window 4000 ms, window 2999 ms are all killed |
+| R2 a running stage named only this checkout | **Fixed** (d46dc95) | see the matrix. Mutants: warning removed, `start` without the folder, `status` of `chat-on-stub` without the folder, `lowerdir` ignored, folders never compared, always warns are all killed |
+| R3 AC changed without an A-number | **Closed** by D-165 (R3): D-157 counts as the approval | - |
+| N2, N3 (open part), N4, N6, F8 | Unchanged | `trace_check.py`: ERROR no `## Scenarios` (F8); WARN IF-112, REQ-FE-011/012/013/026/030, REQ-VPB-001 (JS markers not read, N6). The new WARN TD-07, TD-08 are N-4.1 eval deferrals and do not concern N-1.3 |
+
+### Mutants (scratch copy, each applied alone, unique exact replacement)
+| Mutant | Tests run | Result |
+|---|---|---|
+| control: whitespace or comment only (sound.js, `_common.sh`) | voice-player / test_testing_stages | survived (as it should) |
+| R1 `STOP_DROP_MS = Infinity` (window unbounded) | voice-player | killed (`:464`) |
+| R1 `stop()` sets `stoppedAt = null` (Stop does not start the window) | voice-player | killed (`:444`, `:464`) |
+| R1 the drop line removed | voice-player | killed (2) |
+| R1 `Date.now()` instead of the injected clock in the check | voice-player | killed (2) |
+| R1 `chat_start` does not clear | voice-player | killed (`:444`) |
+| R1 window 4000 ms | voice-player | killed |
+| R1 window 2999 ms | voice-player | killed |
+| R1 window 3500 ms | voice-player | **survived** (Q3) |
+| R1 `<` becomes `<=` | voice-player | **survived** (Q3) |
+| R1 the default `clock` of `initSound` frozen (`() => 0`) or `performance.now` (2 mutants) | voice-player + sound.test | **both survived** (Q1) |
+| R2 the WARNING line removed | test_testing_stages | killed (2) |
+| R2 `start_container` does not name the folder | test_testing_stages | killed (2) |
+| R2 `status` of `10-chat-on-stub.sh` does not name the folder | test_testing_stages | killed (2) |
+| R2 `status` of `15-chat-with-login.sh` does not name the folder | test_testing_stages | **survived** (Q2) |
+| R2 `lowerdir` ignored (names podman's merge folder) | test_testing_stages | killed (2) |
+| R2 folders never compared | test_testing_stages | killed (2) |
+| R2 always warns | test_testing_stages | killed (1) |
+| R2 an unknown folder (no mount) gives no warning | test_testing_stages | **survived** (Q4) |
+| R2 `${lower%%:*}` becomes `${lower}` | test_testing_stages | **survived** (Q5, Info) |
+
+Killed: 13 of the 20 real mutants (R1 7 of 11, R2 6 of 9). All survivors are listed as findings below.
+
+### New findings
+| # | Finding | Severity | Needs | Proposal |
+|---|---|---|---|---|
+| Q1 | `sound.js:175`: the default `clock = Date.now` of `initSound` is used only by the real page (`app.js:126`), and no test calls `initSound` without an injected clock. A wrong default (frozen, or another time base) would bring R1 back on the page (every line dropped after a Stop until the next `chat_start`) with every test green. The earlier attempt 51a3aad found the same point (its P1); this reviewer confirmed it with two mutants of their own | Low (the code is right by inspection) | test (backlog, Phase 3) | one unit test that calls `initSound` without `clock`, stubs `Date.now`, and checks that the shocked line plays 3.5 s after the Stop |
+| Q2 | `tests/test_testing_stages.py:153`: `RunningContainerStage` copies only `10-chat-on-stub.sh`. The same `status` change in `15-chat-with-login.sh:19` is untested (mutant survives). The line is identical by inspection | Low (tooling) | test (backlog) | run the class for both container stages |
+| Q3 | `voice-player.test.mjs:464` pins the window only between 2999 ms and 3500 ms. A window of up to 3.5 s, or `<=`, passes, although the AC says 3 s | Low (test precision) | test (backlog) | add one line at exactly +3000 ms after the Stop (it must play) |
+| Q4 | `_common.sh:43-46`: the warning for a container whose mount cannot be read ("serves an unknown folder") is untested (mutant survives). It works on real podman (see the matrix) | Low (tooling) | test (backlog) | a fake podman that prints no mount; expect the WARNING |
+| Q5 | `_common.sh:40` `${lower%%:*}` (the first of several `lowerdir` layers) is not exercised. Real podman 5.7.1 gives one `lowerdir` for a `:O` bind mount, so this has no effect today | Info | - | none |
+| Q6 | `start` and `status` still print the header line `serving <this checkout> at <hash> (<branch>)` above a WARNING that says the stage serves another folder. The warning is explicit, but the two lines contradict each other | Info (tooling wording) | owner, optional | none required; possibly word the header "this checkout is <folder> at <hash>" |
+| Q7 | Commit d46dc95 names `Requirements: REQ-VPB-003` for a tooling fix (the A4 trap is the REQ-VPB-003 owner check) | Info (traceability) | - | none |
+
+### Per-commit review (both directions, M42)
+- 76c4a58 (`sound.js`, JS test, requirements/test-spec AC, log): implements D-165 R1 exactly. No change to `VoicePlayer` or IF-112. Test-first evidence in the log (red `['a']`); the reviewer's mutant "window unbounded" reproduces that red. Nothing outside the task.
+- d46dc95 (`_common.sh`, the two container stages' `status`, test, log): implements D-165 R2. Only read-only `podman inspect`, no new shell input: the container name comes from the stage scripts and the folder is only printed and passed to `realpath -m`. Outside D-165's two named files, but the stage scripts are needed for `status`, as the log says.
+- Round 4 (merge commits up to cbc2557, install 269c615): no N-1.3 file is changed. The changes next to the node (`app.js` moves the variant and status listeners into `mood.js`; `chat.js` queue places, N-1.1 F1; `web_app.py` a newer reaction cancels the pending return to the mood face, N-1.2 D-167) leave the voice path unchanged: `initSound` gets the same arguments, and `character_reaction` still sends the shocked line through `express_and_reload`.
+- Protected files: round 4 changes protected files only in 269c615 (A-64..A-68). None of them is in IF-112, and IF-112's contract, suite and mock are identical to re-verification 3 (`git diff b072735 HEAD` is empty). A-68's two files are byte-identical to `specs/mia/amendments/A-68/` (cmp). The A-64..A-67 drafts are notes for other nodes and were not compared here (see Not checked).
+
+### Check results (reviewer's runs)
+| Check | Result |
+|---|---|
+| `node --test "tests/js/*.test.mjs"` (node 22.22.0) | 161 pass, 0 fail (voice-player 25/25) |
+| IF-112 contract suite | 5 pass [mock], 5 skipped [real], 0 fail |
+| host `python3 tests/test_testing_stages.py` | 7 OK |
+| image (`tools/run_in_image.sh`) | `test_testing_stages.py` 7 OK (1 skipped, no git); `test_converse_behaviours.py` 7, `test_audio_router.py` 23, `test_chat_page.py` 11, `test_voice_lines.py` 8 OK; `test_frontend_delivery.py` 2 OK (1 skipped) |
+| `check_sysml_model.py` | OK |
+| `trace_check.py` (N-1.3 lines) | as before (F8 ERROR, N6 WARN); TD-07/TD-08 WARN belong to N-4.1 |
+| `test_doc_check.py` | 0 errors in `tests/test_testing_stages.py` |
+| containers | three `n13rv4-*` and one `mia-test-chat-on-stub` of the reviewer, all `--network none`, all removed; no `mia-test*` container left |
+
+### Notes for Phase 7
+- By design (D-165), a minus vote cast within 3 s of a Stop stays silent: its shocked line falls inside the window. Owners who stop and vote at once may notice. Lines with an answer id (D-154 option (a)) would remove the window.
+
+### Not checked
+- Browser and stack tests: `tests/test_page_requests.py` (headless Chromium) and `tests/test_delivery_on_stack.py` (compose stack, not allowed this session). `tests/test_speech_stop.py` (real speech synthesis) was not rerun either; `speak.py` and `speech_stream.py` are unchanged since re-verification 3. Round 4 changed page modules that the browser test loads (`app.js`, `chat.js`, `mood.js`, `workspace.js`). The static check `tests/js/no-outside-requests.test.mjs` (REQ-VPB-004) passes in the JS run, but the browser recording of REQ-VPB-004 should be rerun at the N-1 integration step.
+- Real audio and the R1 window by ear (no sound device). Owner check: stop an answer, wait more than 3 s, vote minus, and hear the shocked line.
+- A full Python run of goal/v1 (out of scope; the known failures belong to other nodes).
+- A-64..A-67 against their drafts: they touch other nodes' files only (the N-2.1, N-3.x and N-4.1 verifications own them).
+- IF-112 against the real player: open until the N-1 integration step (as before). CI: none.
