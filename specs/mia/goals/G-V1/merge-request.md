@@ -1,13 +1,13 @@
 # G-V1: first version of MIA, merge request (DRAFT, v0.1.0 proposed)
 
-**Draft of 2026-11-01. Do not merge before the verification report is approved.** Written by the coding agent from the repository; the human reads and merges. Refreshed 2026-11-01 (goal/v1 at `e6495f0`, after the local merge gate run on `c4377aa`).
+**Draft of 2026-11-01. The verification report is approved (D-183); do not merge before the gate is green on the merge commit and you have given the gate approval.** Written by the coding agent from the repository; the human reads and merges. Refreshed 2026-11-01 (goal/v1 at `e6495f0`, after the local merge gate run on `c4377aa`).
 
 **Goal:** G-V1 (iteration, supervised)   **Branch:** goal/v1 → master (the project's main branch)
 **Accepted by:** Stefan Reiterer (owner; supervised goal, a person merges and tags)
 **HLS:** specs/mia/high-level-spec.md
 **Goal record:** specs/mia/goals/G-V1/goal.md
 **Plan:** specs/mia/plan.md and the node plans below specs/mia/nodes/
-**Verification report:** specs/mia/verification-report.md (verdict proposal: **Verified with accepted deviations, conditional on the owner's decisions D-1 to D-9 of the report**; reviewer in a fresh context, commit e4dbbef; the owner's decisions on the findings are D-180 to D-182; the report is not yet approved)
+**Verification report:** specs/mia/verification-report.md (verdict proposal: **Verified with accepted deviations, conditional on the owner's decisions D-1 to D-9 of the report**; reviewer in a fresh context, commit e4dbbef; the owner's decisions on the findings are D-180 to D-182; **the owner approved the report on 2026-11-01, D-183**)
 **Implementation logs:** specs/mia/nodes/*/implementation-log.md, specs/mia/integration-log.md and the integration logs of N-1, N-2, N-4
 
 ### What changes
@@ -165,7 +165,7 @@ The review entry itself is out of G-V1 (REQ-RUN-013 partly, D-128, D-130). Versi
 ### Steps for the human
 1. Install A-88: `bash tools/apply_amendment_a88.sh` (look), then `--do`, then `git commit -am "plan: A-88 installed"`.
 2. goal/v1 is updated with master (`d4e4a13`). Re-run the gate on the commit you merge: `MIA_GATE_UPTO=3 bash tools/run_merge_gate.sh` (about 7 minutes; stage 3 starts podman containers, back up first; no CI exists, so the gate needs `--allow-local`). Expect all steps green.
-3. Approve the verification report; then `python ~/.claude/skills/dev-workflow/scripts/merge_gate.py --stages stages.yaml --log .stages/log.jsonl --commit HEAD --allow-local --approved-by "<name>"` (only a person supplies the name).
+3. The verification report is approved (D-183). Give the gate approval: `python ~/.claude/skills/dev-workflow/scripts/merge_gate.py --stages stages.yaml --log .stages/log.jsonl --commit HEAD --allow-local --approved-by "<name>"` (only a person supplies the name).
 4. Merge into master (a fast-forward), check the result (no CI: run the gate on master; red: revert first).
 5. Check the model digests on the reference host (`ollama show gemma4:12b-it-qat` against the MP-light digest above), then tag the version you choose (proposal `v0.1.0`: first version, not yet validated; the exit criteria VAL-001, VAL-003 to VAL-006 are field checks) and let CI build the artifact from the tag. **`deploy/build.sh` does not exist** (Deploy finding): the image is built from `deploy/Containerfile`.
 6. Copy `release-notes.md` and `CHANGELOG.md` entries (drafts in this folder and the repository root), set the requirement statuses (Implemented → Verified) and the goal record (Commit: done, merge commit).

@@ -2,8 +2,8 @@
 
 **Goal:** G-V1 (iteration, no subgoals), supervised, accepted by Stefan Reiterer
 **Branch:** goal/v1 @ 7091b62 (reviewed in the worktree branch `v1-verify`, equal to goal/v1)   **Parent line of work:** master   **Plan baselines:** `plan-baseline-it1` (4336393), `decomp-baseline` (fe819ca)
-**Date:** 2026-11-01   **Reviewers:** Claude Sonnet 5.5 (AI, independent: never saw the implementation chat); human review: pending (the owner)
-**Status of this report:** a proposal. I did not approve, merge, tag or install anything.
+**Date:** 2026-11-01   **Reviewers:** Claude Sonnet 5.5 (AI, independent: never saw the implementation chat); human review: Stefan Reiterer, 2026-11-01 (D-183)
+**Status of this report:** **approved by the owner on 2026-11-01 (D-183): Verified with accepted deviations.** The text below is the reviewer's report as written, unchanged; the owner's decisions on D-1 to D-9 are in `review-log.md` (D-173 to D-183). The reviewer did not approve, merge, tag or install anything.
 
 ## Verdict (proposal)
 
@@ -269,7 +269,7 @@ Severity: blocker / high / medium / low. Destination: Implement, Plan amendment,
 No blocker is raised on its own: F-01, F-02 and F-07 are the three items that decide between "Verified with accepted deviations" and "Not verified".
 
 ## Accepted deviations
-Not accepted by anyone yet: the owner decides D-1 to D-9 above. Already decided by the owner (recorded): D-3 (D-178/D-179), D-4 (D-177), the partly/out scope rows of goal.md, TD-01 to TD-04, TD-06 to TD-11.
+**Accepted by the owner, Stefan Reiterer, 2026-11-01 (D-183): D-1 to D-9 above.** Decided earlier and recorded: D-1 (D-180, TD-21), D-2 (D-180, TD-22), D-3 (D-178/D-179), D-4 (D-177), D-5 and D-8 (D-181, TD-23, TD-24), D-9 (D-180); D-6 and D-7 are accepted here for the first time (D-6: the two red tests are strict expected failures since A-87 and the third, `test_amendment_report`, fails only without git in the image; D-7: the findings of N-2.4.1 and N-2.4.2 are accepted with the report). Also recorded: the partly/out scope rows of goal.md, TD-01 to TD-04, TD-06 to TD-11, TD-12 to TD-25.
 
 ## Agent verification (agent-app-verify)
 
