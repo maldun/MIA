@@ -80,6 +80,37 @@ class SpeechServiceTest(unittest.TestCase):
             self.service(down=True).synthesize("Hello.")
         self.assertEqual(ctx.exception.code, "unavailable")
 
+    def test_an_engine_that_renders_nothing_is_unavailable(self):       # IF-204 (V2, first Verify of N-2.5)
+        """An engine that returns without writing any audio gives `unavailable`, not an empty chunk.
+
+        Example: render_voice writes a file of 0 bytes -> SpeechError("unavailable"); a wav of 0.5 s -> a chunk.
+        """
+        # Given: an engine whose output file is empty
+        class Silent(FakeSpeaker):
+            def render_voice(self, msg, output_file):
+                open(output_file, "wb").close()
+                return 0.0
+        service = self.mod.SpeechService(Silent(), self.folder)
+        # When / Then: the sentence is refused as unavailable
+        with self.assertRaises(self.mod.SpeechError) as raised:
+            service.synthesize("Hello there.")
+        self.assertEqual(raised.exception.code, "unavailable")
+
+    def test_a_line_name_cannot_leave_the_folder(self):                 # REQ-VOI-003 (V2, first Verify of N-2.5)
+        """Without a mood map a voice line is a file of the lines folder; a name with a path out of it is `no_line` even if that file exists.
+
+        Example: voice_line("../outside") with outside.wav next to the folder -> SpeechError("no_line"); voice_line("hello") -> its audio.
+        """
+        # Given: a file next to the lines folder
+        with open(os.path.join(os.path.dirname(self.folder), "outside.wav"), "wb") as fp:
+            fp.write(b"RIFFoutside")
+        self.addCleanup(os.remove, os.path.join(os.path.dirname(self.folder), "outside.wav"))
+        # When / Then: its name through the folder is refused, a name inside it is delivered
+        with self.assertRaises(self.mod.SpeechError) as raised:
+            self.service().voice_line("../outside")
+        self.assertEqual(raised.exception.code, "no_line")
+        self.assertEqual(self.service().voice_line("hello")["audio"], b"RIFFhello")
+
     def test_voice_line_and_missing_line(self):
         service = self.service()
         self.assertEqual(service.voice_line("hello"), {"audio": b"RIFFhello", "format": "wav"})
