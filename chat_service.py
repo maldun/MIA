@@ -191,6 +191,17 @@ class ChatService:
         if self.mood.set_activity(activity):
             self.publish_status()
 
+    def greet(self):
+        """a user's page connected (REQ-CHA-009): she holds the mood of the situation greeting and the pages hear it; an answer in progress is never
+        broken off for it; returns whether the mood changed"""
+        with self._lock:
+            if self._running:
+                return False
+        if self.mood.enter("greeting"):
+            self.publish_status()
+            return True
+        return False
+
     # --- the page sends -------------------------------------------------------------------------------
     def _rate_limited(self, key):
         if not self._rate_count:

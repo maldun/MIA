@@ -296,6 +296,7 @@ def handle_connect(_auth=None):
     if _account_sockets is not None:
         accounts_api.guard_connect(_account_sockets)                  # no session, no socket (IF-101)
     audio_router.connect(request.sid)
+    chat_service.greet()                                              # a user arrives: the greeting mood (REQ-CHA-009)
     emit('chat_status', chat_service.status())
 
 def penalize(penalty):
@@ -689,7 +690,7 @@ chat_service = ChatService(socketio.emit, chat_log, mood, run_chat_exchange, run
                            argument_commands={"model": make_model_command(_model_classes, lambda: comm.version, _model_host)},
                            review_timeout=cfg.get("review_answer_seconds", 1800),
                            model_info=lambda: (comm.version, getattr(comm, "profile", None)),
-                           queue_size=cfg.get(CONST.CHAT_QUEUE_KEY, 5 if cfg.get(CONST.ACCOUNTS_KEY, False) else 1),
+                           queue_size=cfg.get(CONST.CHAT_QUEUE_KEY, 5),
                            user_limit=2 if cfg.get(CONST.ACCOUNTS_KEY, False) else 0,           # IF-101: 5 waiting in all, 2 per account
                            rate_limit=(cfg.get(CONST.CHAT_RATE_KEY, 10), 60),
                            spawn=socketio.start_background_task, votes=_votes_store,

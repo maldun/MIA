@@ -13,6 +13,8 @@ from flask import Flask, g                                  # noqa: E402
 from items_api import create_items_blueprint                # noqa: E402
 from storage import Storage                                 # noqa: E402
 from storage_files import FileBackend                       # noqa: E402
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "helpers"))
+from markers import mark                                  # noqa: E402
 
 TEXT = "  water the plants\n\tfirst the ficus — «ß» é  \n"          # blanks, tab, newline and non-ASCII must come back unchanged
 
@@ -37,6 +39,7 @@ class ItemsApiTest(unittest.TestCase):
     def save(self, kind, text, id=None, source=None, due=None):
         return self.client.post("/api/items", json={"kind": kind, "id": id, "text": text, "source": source, "due": due})
 
+    @mark.req("REQ-CHA-013")
     def test_a_new_record_comes_back_byte_for_byte_and_is_listed(self):
         got = self.save("tasks", TEXT)
         self.assertEqual(got.status_code, 200)
@@ -60,6 +63,7 @@ class ItemsApiTest(unittest.TestCase):
             self.now[0] += 0.001
         self.assertEqual([r["id"] for r in self.client.get("/api/items?kind=tasks").get_json()], ids)
 
+    @mark.req("REQ-CHA-013")
     def test_memory_needs_a_source(self):
         bad = self.save("memory", "likes tea")
         self.assertEqual((bad.status_code, bad.get_json()), (422, {"error": "invalid_item", "rule": "source"}))
@@ -76,6 +80,7 @@ class ItemsApiTest(unittest.TestCase):
         self.assertEqual(self.client.get("/api/items?kind=tasks").get_json(), [])
         self.assertEqual(self.events, [])
 
+    @mark.req("REQ-CHA-013")
     def test_delete_and_the_event_for_the_others(self):
         record = self.save("tasks", "x").get_json()
         self.assertEqual(self.events[-1], ("item_changed", {"kind": "tasks", "id": record["id"], "author": "anna", "deleted": False}))

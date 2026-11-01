@@ -39,7 +39,9 @@ def keyword(call, name):
 
 class WebAppWiringTests(unittest.TestCase):
 
-    @mark.req("REQ-RUN-012", "REQ-TLS-003")
+    @mark.req("REQ-RUN-012")
+
+    @mark.req("REQ-TLS-003")
     def test_the_door_is_built_with_every_source(self):
         """TC-RUN-012: the app builds its door of the tools with build_tool_calls, never with ToolCalls directly (N3).
 
@@ -78,6 +80,40 @@ class WebAppWiringTests(unittest.TestCase):
         started_by = keyword(run, "started_by")
         # Then: it is the text "message"
         self.assertEqual(started_by.value, "message")
+
+class ChatAgentWiringTests(unittest.TestCase):
+    """the chat agent's wiring in web_app.py, read from its source (D-173, first Verify of N-2.2)"""
+
+    @mark.req("REQ-CHA-003")
+    def test_the_queue_holds_five_with_or_without_accounts(self):
+        """TC-CHA-003 (F2): the default of the chat queue is 5 whether accounts are enabled or not; only the limit per user needs accounts.
+
+        Example: queue_size=cfg.get(CHAT_QUEUE_KEY, 5 if accounts else 1) -> 1 without accounts, wrong; cfg.get(CHAT_QUEUE_KEY, 5) -> right.
+        """
+        # Given: the call that builds the chat service
+        call = calls_to("ChatService")[0]
+        # When: the default of queue_size is read
+        queue = keyword(call, "queue_size")
+        # Then: it is the constant 5, not a choice that depends on the accounts
+        self.assertIsInstance(queue, ast.Call)
+        self.assertIsInstance(queue.args[1], ast.Constant)
+        self.assertEqual(queue.args[1].value, 5)
+
+    @mark.req("REQ-CHA-009")
+    def test_a_connecting_page_greets_after_the_login_guard(self):
+        """TC-CHA-009 (F4): handle_connect calls chat_service.greet() after the session guard, so only a logged-in page makes her greet.
+
+        Example: guard_connect(...) then greet() -> right; greet() before the guard or not at all -> wrong.
+        """
+        # Given: the calls of the connect handler in source order
+        order = [(node.lineno, node.func.attr) for node in ast.walk(function("handle_connect")) if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)]
+        names = [name for _, name in sorted(order)]
+        # When: the guard and the greeting are looked up
+        # Then: the greeting is there and comes after the guard
+        self.assertIn("greet", names)
+        self.assertIn("guard_connect", names)
+        self.assertLess(names.index("guard_connect"), names.index("greet"))
+
 
 if __name__ == "__main__":
     unittest.main()

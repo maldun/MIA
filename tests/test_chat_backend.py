@@ -15,6 +15,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
 
 import checkout_copy  # noqa: E402  (MIA from a temporary copy: nothing is written into the checkout, D-169)
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "helpers"))
+from markers import mark                                  # noqa: E402
 _LINK_DIR = checkout_copy.use()
 
 MOODS = os.path.join(REPO, "moods.json")
@@ -81,6 +83,7 @@ class LogTest(unittest.TestCase):
         self.assertEqual([m["text"] for m in again.history()[0]], ["one", "two"])
         self.assertGreater(again.new_id(), self.log.last()["id"])
 
+    @mark.req("REQ-CHA-005")
     def test_oldest_are_dropped_over_the_limit(self):
         small = self.chat_log.ChatLog(os.path.join(self.tmp.name, "small.jsonl"), max_messages=10)
         for i in range(25):
@@ -228,6 +231,7 @@ class ServiceTest(unittest.TestCase):
     def names(self):
         return [e for e, _ in self.events]
 
+    @mark.req("REQ-CHA-001")
     def test_send_streams_and_logs_the_answer(self):
         ack = self.service.send("Hi MIA", client_id="c1")
         self.assertTrue(ack["ok"])
@@ -348,6 +352,7 @@ class ServiceTest(unittest.TestCase):
         roles = [m["role"] for m in self.log.history()[0]]
         self.assertEqual(roles, ["user", "user", "assistant", "assistant"])
 
+    @mark.req("REQ-CHA-004")
     def test_stop_keeps_the_text_received(self):
         self.mode["words"] = ["a", "ab", "abc", "abcd"]
         gate = self.gate
@@ -598,6 +603,7 @@ class WebAppChat(unittest.TestCase):
     def tearDown(self):
         self.wa.chat_service._run_exchange = self._exchange
 
+    @mark.req("REQ-CHA-002")
     def test_two_clients_see_the_same_conversation(self):
         wa = self.wa
         a = wa.socketio.test_client(wa.app)
