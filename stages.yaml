@@ -26,4 +26,6 @@ steps:
   # contract-postgres (A-59): the IF-102 suite on a throwaway postgres:16 (local image, never pulled); MIA_DB_PYTHON names a python with psycopg 3
   - {id: contract-postgres, stage: 3, cmd: "bash tools/contract_postgres.sh", needs: [contract-real]}
   - {id: integration,  stage: 2, cmd: "python3 -I tools/run_integration_steps.py .", needs: [contract-real]}
+  # container-alone (A-64): TC-API-013, the mia image alone in a pod against the HTTP stand-in of IF-103; needs podman and localhost/mia:latest (never pulled); a skip fails the step (D-169)
+  - {id: container-alone, stage: 3, cmd: "bash tools/container_alone.sh", needs: [unit]}
   - {id: smoke,        stage: 3, cmd: "python -m unittest discover -s tests/smoke -p \"test_*.py\" -q", needs: [integration]}

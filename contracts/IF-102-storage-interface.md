@@ -1,4 +1,4 @@
-# IF-102 – Storage interface, v2
+# IF-102 – Storage interface, v3
 
 Owner (provider): N-3 Database   Consumers: N-2 Backend   Decided by: N-0   Mock complexity: 2 (in-memory fake)   Suite: `tests/acceptance/contract/test_if_102_storage.py`
 
@@ -25,6 +25,7 @@ Tables: the tables of IF-301 (`workflows`, `context_graphs`) and IF-302 (`histor
 | `expected_version` differs from the current version | `conflict` with `detail.current` | nothing changed |
 | delete on a table that is not deletable | `immutable` | nothing changed |
 | a workflow breaks a graph rule | `invalid` with `rule` in `node_identity`, `adjacent_data_nodes`, `adjacent_process_nodes`, `session_stopping_criterion`, `cycle` (detail: the cycle as ids) | nothing stored, no version consumed |
+| a text with a NUL character (in the document, its keys or the id), a number that is not finite (NaN, inf) or an id that is not text (A-65) | `invalid` with `rule` `schema` | nothing stored, no version consumed |
 
 ## Bounds
 | Quantity | Bound | Source |
@@ -45,3 +46,4 @@ Tables: the tables of IF-301 (`workflows`, `context_graphs`) and IF-302 (`histor
 | v0 | 2026-10-25 | first draft | – |
 | v1 | 2026-10-26 | tables `runs` (run results with workflow version, model pin and benchmark version) and `source_trust` added, as IF-302 defines them (finding F-5) | 9 |
 | v2 | 2026-10-31 | a delete is told to the subscribers with version None (golden 4, TC-IF-102-09; D-158, N-3.1 Verify F7); the tables and the delete rule follow the definitions of IF-301 and IF-302 (D-67 decision 2, D-69; N-3.1 Verify F12). The mock refuses delete for the graph tables only (complexity 2). `categories()`, the vote categories (golden 5, TC-IF-102-10; D-162) | A-59 |
+| v3 | 2026-10-31 | values that not every backend keeps alike are refused with `invalid`/`schema`: NUL, numbers that are not finite, ids that are not text (TC-IF-102-11; D-168, N-3.1 re-verification R3a) | A-65 |

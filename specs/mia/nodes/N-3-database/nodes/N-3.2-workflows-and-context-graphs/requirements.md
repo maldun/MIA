@@ -52,7 +52,9 @@ The tables of workflows and context graphs and the graph rules that every write 
 - Acceptance criterion: AC-9, AC-10: after a seed from files the library holds the five entries; export then seed gives identical entries (exact)
 - Verified by: TC-GTB-005
 - Status: Approved
-- History: –
+- Relaxed: TD-06
+- Target: the five seed entries in `library/workflows` pass validate(workflows, ...) and TC-GTB-005, rewritten for the entry format of FB-03, runs green
+- History: A-66 (2026-10-31): Relaxed TD-06 (D-160, D-169)
 
 ## Interface requirements
 

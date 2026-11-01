@@ -71,8 +71,8 @@ Proposed on 2026-10-29 after the usability work of N-2.3 T-09 to T-11 and N-1.1 
 - Effort: about half a day after FB-03's Explore
 - Risk of the gap: workflow documents have no folder form to back up or review by hand. Mitigation: the database backup (N-4.2)
 - Owner: Stefan Reiterer
-- Trigger: root task T-10, or the Plan of the next iteration, whichever first
-- Target check: TC-GTB-005
+- Trigger: root task T-10, or 2026-12-31, whichever first
+- Target check: skip: `library/workflows` is missing (root task T-10); TC-GTB-005 is rewritten with FB-03 and then carries deferred('TD-06') until green
 - Decision: D-160, 2026-10-31, Stefan Reiterer
 - Status: open
 

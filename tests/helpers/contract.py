@@ -17,7 +17,7 @@ REAL_NOT_READY = {
     "IF-104": "N-2 Backend not integrated yet",       # real_subject since A-51: the routes of graph_api.py behind the guard of accounts_api
     "IF-201": "N-2.2 Chat agent not integrated yet",       # real_subject since A-07 (ChatService); stop and the expression/audio events skip
     "IF-301": "unused: real_subject gives graph_tables",       # real_subject since A-02 (graph_tables); the reason fixed by A-60 (F9)
-    "IF-302": "N-3.3 Record tables not integrated yet",
+    "IF-302": "unused: real_subject gives record_tables",       # real_subject since A-02 (record_tables); the reason fixed by A-67 (R1)
     "IF-404": "the real web client and SearXNG are only used in stage 2",
     "IF-405": "the real scholarly APIs are only used in stage 2",
 }

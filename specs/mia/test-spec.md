@@ -111,6 +111,7 @@ Setup and expected result are in the docstring of each test (the golden examples
 | TC-IF-102-08 | IF-102 | Contract | 1 (mock) and 2 (real) | F-5: a run result and a source trust value are written and read back as versions; the second write of a source is version 2. | exact |
 | TC-IF-102-09 | IF-102 | Contract | 1 (mock), 2 (real, files) and 3 (real, PostgreSQL) | golden 4 (A-59): a delete is told to the subscribers with version None; a refused delete tells nothing. | exact |
 | TC-IF-102-10 | IF-102 | Contract | 1 (mock), 2 (real, files) and 3 (real, PostgreSQL) | golden 5 (A-59, D-162): categories() gives the four vote categories in their order; a vote of each is stored. | exact |
+| TC-IF-102-11 | IF-102 | Contract | 1 (mock), 2 (real, files) and 3 (real, PostgreSQL) | A-65 (D-168): a NUL character, a number that is not finite and an id that is not text are refused with invalid/schema; nothing is stored. | exact |
 | TC-IF-103-01 | IF-103 | Contract | 1 (mock) and 2 (real) | golden 1: message, model and token counts. | exact |
 | TC-IF-103-02 | IF-103 | Contract | 1 (mock) and 2 (real) | a JSON text or a dict that has the required keys is returned as a dict. | exact |
 | TC-IF-103-03 | IF-103 | Contract | 1 (mock) and 2 (real) | golden 2: text that is not JSON and JSON that lacks a required key are bad_output with the raw reply in detail. | exact |
@@ -122,7 +123,8 @@ Setup and expected result are in the docstring of each test (the golden examples
 | TC-IF-104-03 | IF-104 | Contract | 1 (mock) and 2 (real) | golden 3: wrong credentials and a made-up token are 401 and change nothing. | exact |
 | TC-IF-104-04 | IF-104 | Contract | 1 (mock) and 2 (real) | golden 2: a cycle is 422 with the rule; no id and no version appear. | exact |
 | TC-IF-104-05 | IF-104 | Contract | 1 (mock) and 2 (real) | golden 3: unknown id and kind are 404; a stale expected_version is 409 with the current version. | exact |
-| TC-IF-104-06 | IF-104 | Contract | 1 (mock) and 2 (real) | (A-60, D-162) a session limit that is not an integer >= 1 is 422 session_stopping_criterion; max_cycles 1 with a null max_seconds is saved. | exact |
+| TC-IF-104-06 | IF-104 | Contract | 1 (mock); real: `tests/test_graph_api.py` `test_a_session_limit_that_is_not_a_positive_integer_is_422` (the routes of N-2.1; the JS real side skips) | (A-60, D-162) a session limit that is not an integer >= 1 is 422 session_stopping_criterion; max_cycles 1 with a null max_seconds is saved. | exact |
+| TC-IF-104-07 | IF-104 | Contract | 1 (mock); real: `tests/test_graph_rules.py` `test_a_session_limit_is_a_positive_integer` (a float such as 1.0 or 2.5 is refused) | (A-66, D-169) max_cycles written as 2.0 in the JSON body is 422 session_stopping_criterion; 2 is saved. | exact |
 | TC-IF-105-01 | IF-105 | Contract | 1 (mock) and 2 (real) | golden 1: done; the run_start event carries model pin, seed and temperature; the run belongs to the user harness; the cost is returned. | exact |
 | TC-IF-105-02 | IF-105 | Contract | 1 (mock) and 2 (real) | golden 2: no seed is bad_options, the pin MP-huge is pin_unavailable, an unknown workflow is unknown_workflow; nothing runs. | exact |
 | TC-IF-105-03 | IF-105 | Contract | 1 (mock) and 2 (real) | golden 3: with a fake model two runs with the same inputs and options have equal outputs and equal event types and payloads. | exact |
@@ -158,7 +160,7 @@ Setup and expected result are in the docstring of each test (the golden examples
 | TC-IF-301-02 | IF-301 | Contract | 1 (mock) and 2 (real) | golden 1 and 2: a valid graph gives None; each broken rule is named. | exact |
 | TC-IF-301-03 | IF-301 | Contract | 1 (mock) and 2 (real) | golden 3: p->d->p is a cycle named as [p, d, p]; a table that is not a graph table is a ValueError. | exact |
 | TC-IF-301-04 | IF-301 | Contract | 1 (mock) and 2 (real) | golden 4 (A-60): a session limit that is not an integer >= 1 (or is a bool) and a stop that is not an object are session_stopping_criterion; an edge endpoint that is not text is node_identity; max_cycles 1 is valid; nothing raises. | exact |
-| TC-IF-302-01 | IF-302 | Contract | 1 (mock) and 2 (real) | golden 3: memory, tasks and memos are deletable, votes and runs are not; every table is versioned. | exact |
+| TC-IF-302-01 | IF-302 | Contract | 1 (mock) and 2 (real) | golden 3: deletable are exactly history, memory, tasks and memos (A-67), so votes, runs and source_trust are not; every table is versioned. | exact |
 | TC-IF-302-02 | IF-302 | Contract | 1 (mock) and 2 (real) | golden 1 and 2: the four categories are valid; another category is rule category; a value other than 1 or -1 is rule schema. | exact |
 | TC-IF-302-03 | IF-302 | Contract | 1 (mock) and 2 (real) | a memory record needs a source (rule schema, detail source); text with newlines, quotes and non-ASCII characters is valid; a foreign table is a ValueError. | exact |
 | TC-IF-302-04 | IF-302 | Contract | 1 (mock) and 2 (real) | v2: a memory record's kind (fact, preference, commitment) and status (active, replaced) are checked when present, subject and updated are free; a record of v1 stays valid; the source stays required. | exact |
