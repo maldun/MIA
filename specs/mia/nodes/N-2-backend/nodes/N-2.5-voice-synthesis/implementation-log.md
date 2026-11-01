@@ -15,3 +15,7 @@
 - `tools/make_voice_lines.py` renders `library/voice_line_texts.json` (owner's texts for 9 moods; spelling fixed: Hooray, embarrassed, plain apostrophe) with `Speaker` (Kokoro + voice effect) into `voice/expressions/<mood>_default.wav` and lists them in `library/voice_lines.json`. Tests: `tests/test_make_voice_lines.py` (fake Speaker; written after the code, the delegated version failed twice).
 - The wavs are made on the host (models and `setup_cfg.json` are not in a worktree) and are untracked like all of `voice/`; the texts file is the provenance for REQ-VOI-004.
 - Owner 2026-10-27: the old `annoyed.wav` is an old recording; `annoyed` and `greeting` ("greet") now have generated texts, so the old file is no longer listed. The other old clips (greet, Navi, idle ...) are not in `voice_lines.json`.
+
+## Fixes of the first Verify (2026-11-01, D-173)
+- V2: `test_an_engine_that_renders_nothing_is_unavailable` and `test_a_line_name_cannot_leave_the_folder` in `tests/test_speech_service.py`; both old surviving mutants fail now.
+- V1: REQ-VOI-001 is partly in G-V1: the app speaks through `SpeechStreamer`, the chat audio through IF-204 and `audio_chunk` is TD-11 (D-173, amendment A-69).

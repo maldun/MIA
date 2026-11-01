@@ -107,3 +107,13 @@ Starting point: every test that names an id of this node (24 files, incl. the co
 - Note `specs/mia/amendments/A-57/A-57-note.md`, script `tools/apply_amendment_a57.sh`. It builds both files from the INSTALLED ones at install time: `contracts/IF-101-chat-api.md` (title one version up, one sentence at the end of the `vote` row, one version row) and `tests/helpers/mocks/if_101_chat_api.py` (a minus also broadcasts `expression {name: "shocked"}` after `score`). It is safe to run twice ("unchanged").
 - Scratch check with A-54's drafts from `v1-n21b` (two copies of HEAD in the job scratch folder): (1) A-54 then A-57: contract v13, IF-101 suite 62 OK (3 skips); (2) A-57, then A-54 (A-54 copies whole files and takes A-57 out), then A-57 again: the same two files byte for byte as in (1), suite 62 OK; a further run reports both unchanged. A direct call of the installed mock: a plus gives only `score`, a minus also gives `expression {name: "shocked"}`.
 - **For the owner:** install A-54 first, or run A-57 once more after A-54 (in the note). No contract test was added: the real side of the IF-101 suite has no character; TC-CHV-006 (`tests/test_converse_behaviours.py`) checks the real Backend.
+
+## Fixes of the first Verify (2026-11-01, D-173)
+| Finding | What | Test (red first, or shown by a mutant) |
+|---|---|---|
+| F2 queue | `web_app.py`: the default of `chat_queue` is 5 with or without accounts; the limit of 2 per user stays tied to accounts | `test_web_app_wiring.py::test_the_queue_holds_five_with_or_without_accounts` (red before) |
+| F4 greeting | `ChatService.greet()` holds the mood of the situation greeting and publishes the status; it does nothing while an answer runs; `handle_connect` calls it after the session guard | `test_chat_mood_wiring.py` (3, red before), `test_a_connecting_page_greets_after_the_login_guard`; mutants (no guard of the running answer; no call) fail |
+| F5 error mood | the crash handler of the worker had no test; a crash after the exchange (here the repair step) now has one | `test_a_crash_after_the_answer_puts_her_in_the_error_mood`; the old surviving mutant fails. Finding on the way: a crash of the exchange itself is the offline mood, the handler covers the rest of the turn |
+| F1 markers | `req` markers for REQ-CHA-001, -002, -004, -005, -013 on the tests that check them | `trace_check.py` |
+| F9 skill v7 | `skills/memory_write.md` version 7 (`eb2b89d`) only adds `personal: true` (its texts are not kept in the run log store); the prompt is the one of version 6, so the T-04 holdout result still applies | `git show eb2b89d` |
+Not changed: F3 and F7 are deferrals (TD-09, TD-10, amendment A-69); F6 (test documentation) stays in the backlog.

@@ -92,3 +92,8 @@ Suite `verdicts_vitaminc`, tag `number`, 100 seeded dev cases (88 labelled: 36 f
 - Four commits after the refactoring rule M31 (fix, feature, `refactor(extensions)`, test imports); `refactor_check.py`: 0 findings.
 - Finding with test: `FullTextSource` imported `web_tools` and `pdf_text` by plain name inside a method; under `python -m MIA` the full-text stage of `/review` failed with `ModuleNotFoundError` (`tests/test_fulltext_package_mode.py`, red before, green after). The owner's first hand test had not reached that stage.
 - Open: the lookup and search glue still imports `research_chat` from the core; `ui/tools/chat_mock_server.py` does not mock the card, pause or files (a version of it was built and taken back by the owner); the page parts (card, Files tab) are untested in a browser.
+
+## Fixes of the first Verify (2026-11-01, D-173)
+- N4: `req` markers from the `TC-WFM` tags of the tests (one decorator per id: the trace check reads only the first id of a multi-id marker, found on the way); REQ-WFM-016 still has no test (N2).
+- N5: `test_withdrawn_works_are_dropped_and_listed_like_retracted_ones` (REQ-WFM-021) and `test_the_number_of_domain_experts_is_bounded` (REQ-WFM-019); both old surviving mutants fail now. The mutant of the coverage level "good" (5 instead of 8 works) stays: the thresholds are start values to be set on more cases.
+- N1 (REQ-WFM-022 out), N2 (holdouts written by the owner), N3 (TD-03, TD-04 confirmed, REQ-WFM-027 to -039 stay Draft until the FB-01 Plan): D-173, amendment A-69.
