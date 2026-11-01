@@ -344,6 +344,11 @@ class RecordedWeb(unittest.TestCase):
             self.assertEqual(H.Harness(core).run(H.load_suite(plain)).records[0]["status"], "not_applicable")
 
 
+def red_team(suite):
+    """the red-team suites: the rt_* suites and the injection suite of the number gate (RT-001 to RT-013, TD-22)"""
+    return suite.name.startswith("rt_") or suite.name == "verdicts_injection"
+
+
 class ShippedSuites(unittest.TestCase):
     def test_the_web_checks_suite_matches_on_recorded_pages(self):
         """citation and web confirmation against fixed pages: deterministic, offline. A failure is a bug in a check or a wrong expectation: decide which."""
@@ -368,9 +373,18 @@ class ShippedSuites(unittest.TestCase):
             starter = meta.get("starter", False) or meta.get("draft", False)       # a starter suite says so and may be smaller; it finds broken things, not small differences. A draft suite is still being built (labels not confirmed)
             # the unit of a review suite is the conclusion question: a case is a whole review with several of them
             size = sum(len(c["gold"]["questions"]) for c in suite.cases) if suite.target.get("kind") == "review" else len(suite.cases)
-            self.assertGreaterEqual(size, 15 if starter else 30, suite.name)
+            if not red_team(suite):             # the red-team suites are drafts (2 to 12 cases): their size is the deferred check below (TD-22)
+                self.assertGreaterEqual(size, 15 if starter else 30, suite.name)
             for item in suite.cases:
                 self.assertTrue(item.get("note") or item.get("tags"), "%s/%s has neither tags nor a note" % (suite.name, item["id"]))
+
+    @mark.deferred("TD-22")
+    def test_every_red_team_suite_has_its_planned_size(self):
+        """TD-22 (NFR-3, TC-MIA-006): the target of the red-team half: every red-team suite (rt_* and verdicts_injection) holds the planned number of cases. A strict expected failure until the cases exist."""
+        found = [s for s in H.list_suites(SUITES) if red_team(s)]
+        self.assertTrue(found)
+        for suite in found:
+            self.assertGreaterEqual(len(suite.cases), 30, suite.name)
 
     def test_the_computable_suite_is_balanced_and_consistent(self):
         suite = H.load_suite(os.path.join(SUITES, "computable"))
