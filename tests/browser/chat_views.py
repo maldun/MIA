@@ -63,23 +63,70 @@ ANSWERS = "[...document.querySelectorAll('#messages .row.assistant')]"
 WRITTEN = ANSWERS + ".filter((r) => !r.querySelector('[data-action=up]').hidden)"
 
 
+MEASURE = """
+    const shown = (e) => e.getClientRects().length > 0 && !e.closest('dialog:not([open])') && getComputedStyle(e).visibility !== 'hidden';
+    const name = (e) => e.id || e.dataset.action || e.getAttribute('aria-label') || e.textContent.trim().slice(0, 20) || e.tagName;
+    const measure = (root) => [...root.querySelectorAll('button, select, summary, [role=button], input:not([type=hidden]), textarea')].filter(shown)
+      .map((e) => { const r = e.getBoundingClientRect(); return { name: name(e), w: Math.round(r.width), h: Math.round(r.height) }; });
+"""
+
+
 def touch():
-    """TC-CLV-016 AC-1: on a phone (coarse pointer, 360 px) every visible control of the chat, the answer actions included, is 44 x 44 px or more"""
+    """TC-CLV-016 AC-1: on a phone (coarse pointer, 360 px) every visible control of the chat, the answer actions included, is 44 x 44 px or more;
+    re-verification R2: also in the account dialog and in every tab of the workspace"""
     driver = browser(mobile=True)
     try:
         login(driver)
         send(driver, "hello")
         until(driver, WRITTEN + ".length >= 1", 20)
-        return driver.execute_script("""
-            const shown = (e) => e.getClientRects().length > 0 && !e.closest('dialog:not([open])') && getComputedStyle(e).visibility !== 'hidden';
-            const name = (e) => e.id || e.dataset.action || e.getAttribute('aria-label') || e.textContent.trim().slice(0, 20) || e.tagName;
+        out = driver.execute_script(MEASURE + """
             return {
               coarse: matchMedia('(pointer: coarse)').matches,
               width: innerWidth,
-              controls: [...document.querySelectorAll('button, select, summary, [role=button]')].filter(shown)
-                .map((e) => { const r = e.getBoundingClientRect(); return { name: name(e), w: Math.round(r.width), h: Math.round(r.height) }; }),
+              controls: measure(document),
               actions: [...document.querySelectorAll('#messages .row.assistant [data-action]')].filter(shown).map((e) => e.dataset.action),
             };""")
+        driver.execute_script("document.getElementById('menu-button').click(); document.getElementById('account-button').click();")
+        until(driver, "document.getElementById('account').open", 5)
+        time.sleep(0.3)
+        out["account"] = driver.execute_script(MEASURE + "return measure(document.getElementById('account'));")
+        driver.execute_script("document.getElementById('account').close(); document.getElementById('menu-button').click();"
+                              " document.getElementById('workspace-button').click();")
+        until(driver, "document.getElementById('workspace').open && document.querySelectorAll('#workspace-tabs button').length > 0", 10)
+        labels = driver.execute_script("return [...document.querySelectorAll('#workspace-tabs button')].map((b) => b.textContent);")
+        out["tabs"] = {}
+        for index, label in enumerate(labels):
+            driver.execute_script("document.querySelectorAll('#workspace-tabs button')[arguments[0]].click();", index)
+            time.sleep(0.8)
+            out["tabs"][label] = driver.execute_script(MEASURE + "return measure(document.getElementById('workspace'));")
+        return out
+    finally:
+        driver.quit()
+
+
+def logout():
+    """TC-CLV-022 (re-verification R1): log out from the account dialog while the page is connected: the page itself closes its socket (counted
+    on the socket object), the login is shown and no "Logging out failed." note appears"""
+    driver = browser()
+    try:
+        login(driver)
+        driver.execute_script("""
+            const socket = window.miaChat.socket;
+            const close = socket.disconnect.bind(socket);
+            window.closedByPage = 0;
+            socket.disconnect = () => { window.closedByPage += 1; return close(); };
+            window.reasons = [];
+            socket.on('disconnect', (reason) => window.reasons.push(reason));
+            document.getElementById('menu-button').click();
+            document.getElementById('account-button').click();""")
+        until(driver, "document.getElementById('account').open", 5)
+        driver.execute_script("document.getElementById('account-logout').click()")
+        shown = until(driver, "document.getElementById('login').open", 10)
+        time.sleep(0.5)
+        return dict(driver.execute_script("""
+            return { closedByPage: window.closedByPage, connected: window.miaChat.socket.connected, reasons: window.reasons,
+                     failed: [...document.querySelectorAll('#messages .note')].map((n) => n.textContent).filter((t) => t.includes('Logging out failed')) };"""),
+                    login=shown)
     finally:
         driver.quit()
 
@@ -190,5 +237,5 @@ def offline():
         driver.quit()
 
 
-SCENARIOS = {"touch": touch, "layout": layout, "views": views, "lan": lan, "offline": offline}
+SCENARIOS = {"touch": touch, "layout": layout, "logout": logout, "views": views, "lan": lan, "offline": offline}
 print(json.dumps({name: SCENARIOS[name]() for name in sys.argv[2:]}))

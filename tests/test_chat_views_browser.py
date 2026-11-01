@@ -162,7 +162,7 @@ class ChatViewsInBrowser(unittest.TestCase):
             raise unittest.SkipTest("podman or an image is missing (%s, %s)" % (MIA_IMAGE, BROWSER_IMAGE))
         container = start_mock()
         cls.addClassCleanup(stop_mock, container)
-        cls.results = browse(container, "touch", "layout", "lan", "offline", "views")
+        cls.results = browse(container, "touch", "layout", "lan", "offline", "logout", "views")
 
     @mark.req("REQ-CLV-016")
     def test_every_visible_control_on_a_phone_is_44_px_or_more(self):
@@ -179,6 +179,24 @@ class ChatViewsInBrowser(unittest.TestCase):
         found = too_small(touch["controls"])
         # Then: there are none
         self.assertEqual(found, [])
+
+    @mark.req("REQ-CLV-016")
+    def test_every_control_of_the_account_dialog_and_each_workspace_tab_is_44_px_or_more(self):
+        """TC-CLV-016 (re-verification R2): on the phone the account dialog and every tab of the workspace have visible controls, and each is at
+        least 44 x 44 px.
+
+        Example: the Delete button of the Tasks tab 32 x 30 px -> too small; 44 x 44 px -> [].
+        """
+        # Given: the phone run that opened the account dialog and clicked through the tabs
+        touch = self.results["touch"]
+        self.assertTrue(touch["account"], "the account dialog showed no control")
+        self.assertGreaterEqual(len(touch["tabs"]), 7, list(touch["tabs"]))
+        # When: the controls below 44 px are picked from every place
+        found = {"account": too_small(touch["account"])}
+        found.update({tab: too_small(controls) for tab, controls in touch["tabs"].items()})
+        # Then: there are none, and every tab had controls to measure
+        self.assertEqual({k: v for k, v in found.items() if v}, {})
+        self.assertTrue(all(touch["tabs"].values()), [t for t, c in touch["tabs"].items() if not c])
 
     @mark.req("REQ-CLV-016")
     def test_no_viewport_scrolls_sideways_in_either_theme(self):
@@ -254,6 +272,21 @@ class ChatViewsInBrowser(unittest.TestCase):
         self.assertTrue(lan["submitDisabled"])
         self.assertIn("HTTPS", lan["error"] or "")
         self.assertEqual(lan["logins"], [])
+
+    @mark.req("REQ-CLV-022")
+    def test_a_logout_with_a_connected_page_closes_the_socket_and_shows_the_login(self):
+        """TC-CLV-022 (re-verification R1, F8): logging out from the account dialog of a connected page: the page closes its own socket once,
+        the socket is no longer connected, the login is shown and no "Logging out failed." note appears.
+
+        Example: closedByPage == 1, connected is False, login is True, failed == []; without `socket` in initAccount closedByPage == 0.
+        """
+        # Given: the run that logged out with the page connected
+        logout = self.results["logout"]
+        # When / Then: the page closed the socket itself, the login came and nothing failed
+        self.assertEqual(logout["closedByPage"], 1, logout)
+        self.assertFalse(logout["connected"])
+        self.assertTrue(logout["login"])
+        self.assertEqual(logout["failed"], [])
 
     @mark.req("REQ-CLV-004")
     def test_a_cut_connection_keeps_the_draft_and_comes_back_without_a_reload(self):
