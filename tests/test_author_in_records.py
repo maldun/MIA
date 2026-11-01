@@ -173,9 +173,18 @@ class Messages(unittest.TestCase):
         self.addCleanup(self.tmp.cleanup)
         self.log = self.chat_log.ChatLog(os.path.join(self.tmp.name, "log.jsonl"))
         self.gate = threading.Event()
+        self.workers = []
+
+        def spawn(target):                                  # the answer of a message is written by a worker thread: keep it to wait for it
+            worker = threading.Thread(target=target, daemon=True)
+            self.workers.append(worker)
+            worker.start()
+
+        # registered after the cleanup of the folder, so it runs before it: the worker must be done writing into the folder when the folder is removed (D-182)
+        self.addCleanup(lambda: [worker.join(10) for worker in self.workers])
         self.service = self.service_module.ChatService(
             lambda event, payload: None, self.log, self.moods.MoodTracker(os.path.join(self.tmp.name, "moods.json")),
-            lambda text, on_delta, on_emotion, should_stop: (on_delta("ok"), "ok")[1], model_info=lambda: ("test-model", "full"), clock=time.monotonic)
+            lambda text, on_delta, on_emotion, should_stop: (on_delta("ok"), "ok")[1], model_info=lambda: ("test-model", "full"), clock=time.monotonic, spawn=spawn)
 
     def user_records(self):
         return [r for r in self.log.history(limit=100)[0] if r["role"] == "user"]
