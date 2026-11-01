@@ -64,7 +64,9 @@ The persona's side: the shared conversation, the answer queue, persona, mood, me
 - Acceptance criterion: AC-1: the bound is held; deletion without confirmation is refused
 - Verified by: TC-CHA-005
 - Status: Approved
-- History: –
+- Relaxed: TD-09
+- Target: a user deletes the history on the page after a confirmation dialog, and the backend refuses a deletion without a confirmation
+- History: A-69 (2026-11-01): Relaxed TD-09 (D-173)
 
 ### REQ-CHA-006 – Regenerate and speak again
 - Level: low   Subject: ConversationCore
@@ -100,7 +102,9 @@ The persona's side: the shared conversation, the answer queue, persona, mood, me
 - Acceptance criterion: AC-8: check dialogues pass at a rate fixed in Plan against the recorded baseline, decided statistically
 - Verified by: TC-CHA-008
 - Status: Approved
-- History: –
+- Relaxed: TD-10
+- Target: AC-8 is decided: the check dialogues pass at the rate fixed in Plan against the recorded baseline
+- History: A-69 (2026-11-01): Relaxed TD-10 (D-173)
 
 ### REQ-CHA-009 – Mood at all times
 - Level: low   Subject: ConversationCore

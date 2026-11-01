@@ -45,7 +45,7 @@ Proposed on 2026-10-29 after the usability work of N-2.3 T-09 to T-11 and N-1.1 
 - Owner: Stefan Reiterer
 - Trigger: the first review run that ends at the cap of tokens, or 2026-12-31, whichever first
 - Target check: specified only
-- Decision: proposed 2026-10-29, to be confirmed by Stefan Reiterer
+- Decision: D-173, 2026-11-01, Stefan Reiterer
 - Status: open
 
 ## TD-04 – The glue of lookup and search stays in the core
@@ -59,7 +59,7 @@ Proposed on 2026-10-29 after the usability work of N-2.3 T-09 to T-11 and N-1.1 
 - Owner: Stefan Reiterer
 - Trigger: the fourth skill is added, or 2026-12-31, whichever first
 - Target check: specified only
-- Decision: proposed 2026-10-29, to be confirmed by Stefan Reiterer
+- Decision: D-173, 2026-11-01, Stefan Reiterer
 - Status: open
 
 ## TD-06 – The workflow library folder is not there yet
@@ -102,4 +102,47 @@ Proposed on 2026-10-29 after the usability work of N-2.3 T-09 to T-11 and N-1.1 
 - Trigger: the Plan of FB-03, or 2026-12-31, whichever first
 - Target check: TC-EVL-011
 - Decision: D-172, 2026-11-01, Stefan Reiterer
+- Status: open
+
+## TD-09 – Deleting the chat history after a confirmation
+- Kind: defer
+- Requirement: REQ-CHA-005
+- Interim criterion: the history is bounded and the oldest messages are dropped over the limit (`test_oldest_are_dropped_over_the_limit`); the only deletion is the token-guarded legacy route `POST /api/chat/clear`, which the page does not offer
+- Target: a user deletes the history on the page after a confirmation dialog; the backend refuses a deletion without `confirm: true`; the IF-101 contract names the operation
+- Reason: no page control and no confirmation parameter exist; privacy is not an issue for now (D-131); it needs an IF-101 amendment and a page change
+- Effort: about half a day (backend flag, button and dialog, amendment, tests)
+- Risk of the gap: a user cannot delete the history on his or her own. Mitigation: the operator deletes the `history` records
+- Owner: Stefan Reiterer
+- Trigger: the first request to delete a history, or 2026-12-31, whichever first
+- Target check: specified only
+- Sign-off: Stefan Reiterer, 2026-11-01
+- Decision: D-173, 2026-11-01, Stefan Reiterer
+- Status: open
+
+## TD-10 – Persona check dialogues (AC-8)
+- Kind: defer
+- Requirement: REQ-CHA-008
+- Interim criterion: the persona file is read at every call, the default address is "master", and the persona message is the system message of every call (`tests/test_persona_prompt.py`)
+- Target: AC-8 is decided statistically: check dialogues against the baseline of today's MIA, with the rule fixed in Plan (D-52)
+- Reason: it needs the labelled dialogues and a baseline run; the owner postponed it to after the field test (2026-10-26)
+- Effort: about one day plus GPU time
+- Risk of the gap: the persona can drift without a number. Mitigation: the owner's use
+- Owner: Stefan Reiterer
+- Trigger: the first iteration after the field test
+- Target check: specified only
+- Decision: D-173, 2026-11-01, Stefan Reiterer
+- Status: open
+
+## TD-11 – The voice goes through IF-204
+- Kind: defer
+- Requirement: REQ-VOI-001
+- Interim criterion: the app speaks through `SpeechStreamer` and `Speaker.render_voice` with the `speech_text` filter; `SpeechService` passes the IF-204 contract suite and TC-VOI-001 to -003
+- Target: the chat agent's audio goes through `SpeechService`, the `audio_chunk` event of an answer is built, and the skipped cases of IF-201 and IF-101 and the integration step 1 of N-2 run green
+- Reason: the older route works on the host; changing it risks the working voice for no gain to the user now
+- Effort: about one day
+- Risk of the gap: two routes may diverge. Mitigation: both use `speech_text` and `render_voice`
+- Owner: Stefan Reiterer
+- Trigger: the Plan of the next iteration, or 2026-12-31, whichever first
+- Target check: skip: the IF-204 side of the chat is not wired (TD-11); the skipped cases carry deferred('TD-11') until green
+- Decision: D-173, 2026-11-01, Stefan Reiterer
 - Status: open
