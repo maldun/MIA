@@ -274,3 +274,61 @@ A1 two tabs claim the voice: ok. A2 mute per device and the autoplay hint: ok. A
 - Real audio, timing and the mouth by the reviewer (no sound device): covered by the owner's A1..A4.
 - A3 end to end with real speech synthesis and a model (no model server allowed): covered by `test_speech_stop.py` (real speech process, recording speaker) and the owner's A3 re-run.
 - IF-112 against the real player in the contract suite: open until the N-1 integration step (as before). CI stage log: none.
+
+## Re-verification 4 (2026-11-01)
+**Branch:** goal/v1 @ db7beb7 (fix commits of `v1-n13e`: 76c4a58 R1, d46dc95 R2; merged in 4cd5e29; no later change of `templates/static/chat/`, `tools/testing_stages.d/`, `tools/start_testing.sh`, `tests/js/voice-player.test.mjs` or `tests/test_testing_stages.py`)   **Reviewer:** Claude Opus 5.5 (AI, fresh context, never saw the implementation chat; an earlier attempt of this round was stopped and is not used)   **Scope:** only R1 and R2 of re-verification 3 (D-165). **Inputs:** re-verification 3 above, implementation-log.md (D-165 table), requirements.md (REQ-VPB-002 AC with D-165), test-spec.md (TC-VPB-002), D-165, D-172. Local runs only (no CI); mutants on a `git archive HEAD` copy in the reviewer's scratchpad, never on the real files.
+
+### Verdict (re-verification 4)
+Proposed: **Verified with accepted deviations** (unchanged from re-verification 3). R1 and R2 are fixed as D-165 asks, each with a test that fails without the fix (mutants below), and R2 is shown on real podman containers. No new finding above Low. The accepted deviations and recorded items of the earlier rounds stay (N2, N3 open part, N4 at the N-1 step; N6 tool; F8 Plan). Condition, as before: if an owner by-ear check fails, the status is "Not verified".
+
+### Per finding
+| # | State | Evidence |
+|---|---|---|
+| R1 the drop after Stop also silenced the shocked line of a minus vote | **Fixed** (76c4a58) | `sound.js:210`: `audio_reload` is dropped only while `clock() - stoppedAt < STOP_DROP_MS` (3000 ms) and no `chat_start` came (`:217`); `stop()` records `clock()` (`:254`); the page (`app.js:126`) passes no clock, so `Date.now` (inspection). Matches REQ-VPB-002's AC (D-165) and the TC-VPB-002 row. Test "the drop after the page's Stop ends 3 s after it ..." (`voice-player.test.mjs`, fake clock: late line at +2.999 s dropped, shocked line at +3.5 s plays). 6 of 8 mutants killed (below) |
+| R2 a running stage named only this checkout | **Fixed** (d46dc95) | `_common.sh` `served_folder`/`serving_container`, `start_container` and the `status` lines of `10-chat-on-stub.sh` and `15-chat-with-login.sh`. `test_testing_stages.py` `RunningContainerStage` (fake podman, 3 tests). Reviewer's real podman 5.7.1 run (three throwaway containers of `localhost/mia:latest`, `--network none`, removed): `:O` mount of this worktree -> `serving <worktree>`, no warning; `:O` mount of another folder -> that folder and the WARNING; plain bind of another folder -> that folder and the WARNING. The real `:O` options list one `lowerdir=<folder>`, as the code expects. 5 of 7 mutants killed (below) |
+
+### Mutants (scratch copy, each applied alone, file restored after)
+| Mutant | Test | Result |
+|---|---|---|
+| R1-a old rule: drop until `chat_start` (no window) | `voice-player.test.mjs` | killed (R1 test fails, 24/25) |
+| R1-b no drop at all | same | killed (2 fail: D-157 and R1 tests) |
+| R1-c `<` -> `<=` (drop also at exactly 3000 ms) | same | **survived** (the test probes 2999 and 3500 ms; a 1 ms boundary, Info) |
+| R1-d `STOP_DROP_MS` 4000 | same | killed |
+| R1-e `STOP_DROP_MS` 2000 | same | killed |
+| R1-f `chat_start` does not clear | same | killed (D-157 test) |
+| R1-g `stop()` does not record the time | same | killed (2 fail) |
+| R1-h default clock `() => 0` instead of `Date.now` | same | **survived** (every test injects a clock; the page's path is checked by inspection only, P1) |
+| R2-a `start` without `serving` on a running container | `test_testing_stages.py` | killed (2 fail) |
+| R2-b no `lowerdir` (overlay `.Source` only) | same | killed (2 fail) |
+| R2-c whole `lowerdir` value (no `%%:*` cut) | same | **survived** (fake and real podman give one lowerdir; equivalent on this host, Info) |
+| R2-d no WARNING line | same | killed (2 fail) |
+| R2-e always warn | same | killed (1 fail) |
+| R2-f `10-chat-on-stub.sh` status without `serving` | same | killed (2 fail) |
+| R2-g `15-chat-with-login.sh` status without `serving` | same | **survived** (the test copies only the stub stage, P2) |
+
+### New findings
+| # | Finding | Severity | Needs | Proposal |
+|---|---|---|---|---|
+| P1 | `sound.js:175` default `clock = Date.now` is reached only by the real page, and no test runs `initSound` without an injected clock (mutant R1-h survives). A wrong default would drop every line after a Stop until the next `chat_start` (R1 back) without a red test | Low (the code is right by inspection) | test (backlog) | one unit test that calls `initSound` without `clock` and moves `Date.now` (or `mock.timers`), or cover it at the N-1 integration step with the real page |
+| P2 | `tests/test_testing_stages.py` `RunningContainerStage` copies only `10-chat-on-stub.sh`; the same `status` change in `15-chat-with-login.sh` is untested (mutant R2-g survives). Checked by inspection: the line is identical | Low (tooling) | test (backlog) | parametrize the class over both container stages |
+| P3 | Commit d46dc95 names `Requirements: REQ-VPB-003` for a tooling fix (the A4 trap of the REQ-VPB-003 owner check). Traceability only | Info | - | none |
+
+Phase 7 notes: a minus vote within 3 s of the Stop still loses its shocked line, and a line of the stopped answer that arrives later than 3 s plays; both are the window D-165 chose (the backend stop of A3 makes late lines rare). The owner's by-ear check A3 covers the usual path.
+
+### Check results (reviewer's runs)
+| Check | Result |
+|---|---|
+| `node --test "tests/js/*.test.mjs"` (node 22.22.0) | 161 pass, 0 fail (`voice-player.test.mjs` 25/25) |
+| contract suites `tests/acceptance/contract/*.mjs`, `tests/integration/N-1/*.mjs` | 35 tests: 18 pass, 0 fail, 17 skipped (IF-112 [real] and later N-1 steps, as before); IF-112 [mock] 5/5 |
+| host `python3 tests/test_testing_stages.py` | 7 OK |
+| `bash tools/run_in_image.sh` (`localhost/mia:latest` e37a87782beb) | `test_testing_stages.py` 7 OK (1 skipped: no git in the image), `test_chat_page.py` 11 OK, `test_voice_lines.py` 8 OK, `test_speech_stop.py` 4 OK, `test_frontend_delivery.py` 2 OK (1 skipped: no podman in the image) |
+| Protected files | the merge 4cd5e29 and the fix commits touch nothing under `tests/acceptance/`, `tests/helpers/`, `tests/smoke/`, `tests/integration/`, `contracts/`, `benchmarks/`, `eval/`, `stages.yaml`. The IF-112 contract, suite and mock are unchanged since re-verification 3 (3ef5af3). The only protected change since then is the owner's install bee8ead (A-62, A-63, N-4.1), not N-1.3 |
+| `trace_check.py` (N-1.3 lines) | unchanged: ERROR no `## Scenarios` (F8); WARN IF-112, REQ-FE-011/012/013/026/030, REQ-VPB-001 (JS markers not read, N6); WARN TD-07, TD-08 not listed here (deferrals of N-4.1, none concerns N-1.3). The tool's other errors (TC-MIA ids, system level) are outside this node |
+| `test_doc_check.py` | `tests/test_testing_stages.py`: 0 errors, 0 warnings |
+| `check_sysml_model.py` | OK; no `.sysml` file changed (REQ-VPB-002's `doc` is the requirement text, unchanged), so the pilot parser was not run |
+| Cleanup | no test container left (`rv4-*` removed); the owner's containers untouched; scratch files in the reviewer's scratchpad only |
+
+### Not checked
+- Real audio and the R1 path by ear (no sound device): the owner's A3 check; a re-run of A3 with a minus vote after the Stop would show R1 on the real page.
+- The full Python suite and the stack test `test_delivery_on_stack.py`: outside this round's scope (R1, R2 change neither); the full run belongs to the round-4 trial merge.
+- CI stage log: none.
