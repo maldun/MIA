@@ -8,6 +8,7 @@ import importlib.util
 import io
 import json
 import os
+import re
 import sys
 import tempfile
 import unittest
@@ -118,6 +119,98 @@ class SavedHoldoutRuns(CommandLine):
         # Then: the report is printed
         self.assertIsNone(message)
         self.assertIn("suite toy, variant v", printed)
+
+
+class UnknownSuites(CommandLine):
+    def make_suite(self, name):
+        folder = os.path.join(EVAL_CLI.SUITES, name)
+        os.makedirs(folder)
+        with open(os.path.join(folder, "suite.json"), "w") as fp:
+            json.dump({"name": name, "target": {"kind": "fake"}}, fp)
+        with open(os.path.join(folder, "cases.jsonl"), "w") as fp:
+            fp.write(json.dumps({"id": "a", "expect": "pass"}) + "\n")
+
+    @mark.req("REQ-EVL-001")
+    def test_a_missing_suite_is_a_one_line_error_that_names_the_suites_there_are(self):
+        """TC-EVL-001 (R8, D-172): `run` and `cases` of a suite that does not exist stop with one line, not a traceback; the line names the
+        suite asked for and the suites there are.
+
+        Example: run nosuch --pin MP-light -> exit "no suite 'nosuch' (there are: toy)".
+        """
+        # Given: one suite, toy
+        self.make_suite("toy")
+        for argv in (("run", "nosuch", "--pin", "MP-light"), ("cases", "nosuch")):
+            # When: a suite that is not there is asked for
+            message, printed = self.main(*argv)
+            # Then: the exit message names it and the suite that exists
+            self.assertIn("no suite 'nosuch'", message or "", argv)
+            self.assertIn("toy", message or "", argv)
+            self.assertNotIn("\n", message or "", argv)
+
+    @mark.req("REQ-EVL-001")
+    def test_a_name_with_a_path_is_not_a_suite_name(self):
+        """TC-EVL-001 (R8): a suite is a name in the suites folder; a name that climbs out of it or holds a slash is refused before any file
+        is looked at.
+
+        Example: run ../etc --pin MP-light -> exit "'../etc' is not a suite name".
+        """
+        # Given: the suites folder, and a folder next to it
+        os.makedirs(os.path.join(self.tmp.name, "other"))
+        for name in ("../other", "a/b", "."):
+            # When: such a name is asked for
+            message, _ = self.main("run", name, "--pin", "MP-light")
+            # Then: refused as a name, in one line
+            self.assertIn("is not a suite name", message or "", name)
+            self.assertIn(name, message or "", name)
+
+    @mark.req("REQ-EVL-001")
+    def test_a_broken_suite_is_a_one_line_error_too(self):
+        """TC-EVL-001 (R8): a suite whose files are wrong ends the command with the harness's message, not with a traceback.
+
+        Example: suite.json names another suite -> exit "... 'name' must be the folder name 'toy'".
+        """
+        # Given: a suite whose suite.json carries another name
+        self.make_suite("toy")
+        with open(os.path.join(EVAL_CLI.SUITES, "toy", "suite.json"), "w") as fp:
+            json.dump({"name": "other", "target": {"kind": "fake"}}, fp)
+        # When: its cases are listed
+        message, _ = self.main("cases", "toy")
+        # Then: the exit message is the problem, nothing raised
+        self.assertIn("must be the folder name 'toy'", message or "")
+
+
+class PinInTheWrittenCommands(unittest.TestCase):
+    """`run` refuses a call without --pin (D-166), so a command written down for a person must carry it"""
+
+    @mark.req("REQ-EVL-004")
+    def test_the_research_comparison_script_pins_every_run(self):
+        """TC-EVL-004 (R6, D-172): each `run run ...` line of tools/run_research_comparison.sh names a pin that exists.
+
+        Example: `run run plans --variant typed ...` -> missing; `run run plans --pin MP-light ...` -> ok.
+        """
+        # Given: the lines of the script that start a run
+        with open(os.path.join(REPO, "tools", "run_research_comparison.sh")) as fp:
+            lines = [line for line in fp if line.startswith("run run ")]
+        self.assertGreaterEqual(len(lines), 4)
+        # When: the lines without a known pin are picked
+        found = [line.strip() for line in lines if not any("--pin %s " % pin in line for pin in EVAL_CLI.PINS)]
+        # Then: there are none
+        self.assertEqual(found, [])
+
+    @mark.req("REQ-EVL-004")
+    def test_the_commands_in_the_ui_readme_pin_every_run(self):
+        """TC-EVL-004 (R6, D-172): each command of ui/README.md that calls `eval.py run` has --pin with a pin that exists.
+
+        Example: `python tools/eval.py run research --repeats 3` -> missing; ... `--pin MP-light` -> ok.
+        """
+        # Given: the code spans of the README that call eval.py run
+        with open(os.path.join(REPO, "ui", "README.md"), encoding="utf-8") as fp:
+            spans = [m for m in re.findall(r"`([^`\n]*eval\.py run[^`\n]*)`", fp.read())]
+        self.assertGreaterEqual(len(spans), 5)
+        # When: the spans without a known pin are picked
+        found = [span for span in spans if not any(re.search(r"--pin %s\b" % re.escape(pin), span) for pin in EVAL_CLI.PINS)]
+        # Then: there are none
+        self.assertEqual(found, [])
 
 
 if __name__ == "__main__":

@@ -92,9 +92,17 @@ def is_holdout(name):
 
 def open_suite(name, holdout):
     """a suite by name; a holdout suite only with --holdout (REQ-EVL-002, D-164: the holdout is for Verify), refused before anything of it is read"""
+    if not name or name in (".", "..") or "/" in name or os.sep in name:
+        sys.exit("'%s' is not a suite name (a suite is a folder name in %s)" % (name, SUITES))
     if is_holdout(name) and not holdout:
         sys.exit("%s is a holdout suite: only with --holdout (Verify)" % name)
-    suite = harness.load_suite(os.path.join(SUITES, name))
+    if not os.path.isfile(os.path.join(SUITES, name, "suite.json")):
+        known = sorted(n for n in os.listdir(SUITES) if os.path.isfile(os.path.join(SUITES, n, "suite.json")) and (holdout or not is_holdout(n)))
+        sys.exit("no suite '%s' (there are: %s)" % (name, ", ".join(known) or "none"))
+    try:
+        suite = harness.load_suite(os.path.join(SUITES, name))
+    except harness.SuiteError as exc:
+        sys.exit(str(exc))
     if is_holdout(suite.name) and not holdout:
         sys.exit("%s is the holdout suite %s: only with --holdout (Verify)" % (name, suite.name))
     return suite
