@@ -37,3 +37,6 @@ mia.log
 out.wav
 local-tasks.jsonl
 .local-tasks/
+
+.venv-gate/
+.stages/
