@@ -29,4 +29,4 @@ steps:
   - {id: integration,  stage: 2, cmd: "python3 -I tools/run_integration_steps.py .", needs: [contract-real]}
   # container-alone (A-64): TC-API-013, the mia image alone in a pod against the HTTP stand-in of IF-103; needs podman and localhost/mia:latest (never pulled); a skip fails the step (D-169)
   - {id: container-alone, stage: 3, cmd: "bash tools/container_alone.sh", needs: [unit]}
-  - {id: smoke,        stage: 3, cmd: "python -m unittest discover -s tests/smoke -p \"test_*.py\" -q", needs: [integration]}
+  # no smoke step (A-88, TD-25): tests/smoke/ runs on the owner's workstation in the Deploy phase (goals/G-V1/deploy-plan.md)

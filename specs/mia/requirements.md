@@ -601,7 +601,9 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Refined in: N-4, N-2, N-3, N-5
 - Verified by: TC-MIA-029
 - Status: Approved
-- History: –
+- Relaxed: TD-25
+- Target: the smoke tests of `tests/smoke/` have run on the owner's workstation in the Deploy phase of G-V1 (`goals/G-V1/deploy-plan.md`), their results are in `deployment-record.md`, and the stage ladder has a smoke step that finds them (pattern `smoke_*.py`)
+- History: A-88 (2026-11-01): Relaxed TD-25 (D-182)
 
 ### CON-1 – Free and open
 - Level: top   Subject: MiaSystem

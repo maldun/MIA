@@ -330,3 +330,17 @@ Proposed on 2026-10-29 after the usability work of N-2.3 T-09 to T-11 and N-1.1 
 - Target check: specified only
 - Decision: D-181, 2026-11-01, Stefan Reiterer
 - Status: open
+
+## TD-25 – The smoke tests are not part of the merge gate
+- Kind: defer
+- Requirement: NFR-9
+- Interim criterion: the same ground is covered by the stage 3 steps `container-alone` (TC-API-013) and `contract-postgres` (IF-102 on a throwaway postgres:16), by the stage 2 integration steps and by the tests of the compose files (`tests/test_deploy.py`, `tests/test_delivery_on_stack.py`); the smoke tests themselves are run in Deploy
+- Target: the smoke tests of `tests/smoke/` have run on the owner's workstation in the Deploy phase of G-V1 (`goals/G-V1/deploy-plan.md`), their results are in `deployment-record.md`, and the stage ladder has a smoke step that finds them (pattern `smoke_*.py`)
+- Reason: `tests/smoke/` holds `smoke_fresh_install.py` (SMOKE-MIA-001), `smoke_stack.py` (SMOKE-MIA-003) and `smoke_gate.py` (SMOKE-GATE-001, -002). The step `smoke` used the pattern `test_*.py`, found no test and failed with NO TESTS RAN. The files themselves say they run on the owner's workstation in Phase 6: the first two bring up the whole compose stack (this machine cannot run it, fatal CPU machine checks at shutdown under load), the third runs the number gate through the real Ollama, which is an eval-style run (none belongs in this Verify, D-178); found at the merge gate of G-V1, the owner chose this (D-182)
+- Effort: about half a day on the workstation (three commands, then the record), and one line in `stages.yaml`
+- Risk of the gap: a fresh install that does not start, or a stack whose front does not answer, is found in Deploy and not at the merge. Mitigation: `container-alone`, `contract-postgres` and the stack test of N-1.3 run in the gate
+- Owner: Stefan Reiterer
+- Trigger: the Deploy phase of G-V1, or 2026-12-31, whichever first
+- Target check: specified only
+- Decision: D-182, 2026-11-01, Stefan Reiterer
+- Status: open
