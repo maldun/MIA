@@ -43,13 +43,17 @@ class ProductionWiring(unittest.TestCase):
     def setUpClass(cls):
         cls.folder = checkout_copy.make({"accounts_enabled": True, "chat_rate_per_minute": RATE})    # the example with accounts on, its own data/
         cls.package = os.path.join(cls.folder, "MIA")
-        sys.path.insert(0, cls.folder)
+        cls._swap = checkout_copy.swap_in(cls.folder)       # a fresh MIA with accounts on, even when another test module of the process imported the default web_app
         os.environ.setdefault("MIA_TEST", "1")
         from MIA import accounts, web_app
         cls.wa = web_app
         accounts.create(web_app._account_store, "anna", "pw-anna-1", "setup")
         accounts.create(web_app._account_store, "ben", "pw-ben-123", "setup")
         web_app.chat_service._run_exchange = lambda text, on_delta, on_emotion, should_stop: (on_delta("Fine."), "Fine.")[1]
+
+    @classmethod
+    def tearDownClass(cls):
+        checkout_copy.swap_back(cls._swap)
 
     def setUp(self):
         self.wa.chat_service._hits.clear()                 # every test starts with an empty rate window

@@ -52,3 +52,47 @@ def use():
 def package():
     """the MIA/ folder of the copy of this process (for subprocesses: cwd or sys.path)"""
     return os.path.join(use(), "MIA")
+
+
+def load_isolated(name, path):
+    """load a script that decorates MIA.web_app at import (ui/tools/chat_mock_server.py) onto its OWN web_app, and put the shared one back afterwards: the script adds routes, a 401 guard
+    and patches config.ensure, which would break every later test of the same process, and a second load would fail on the duplicate route"""
+    import importlib
+    import importlib.util
+    use()
+    package = importlib.import_module("MIA")
+    config = importlib.import_module("MIA.config")
+    saved_ensure = config.ensure
+    saved_module = sys.modules.pop("MIA.web_app", None)
+    saved_attr = package.__dict__.pop("web_app", None)
+    try:
+        spec = importlib.util.spec_from_file_location(name, path)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return module
+    finally:
+        config.ensure = saved_ensure
+        sys.modules.pop("MIA.web_app", None)
+        package.__dict__.pop("web_app", None)
+        if saved_module is not None:
+            sys.modules["MIA.web_app"] = saved_module
+        if saved_attr is not None:
+            package.web_app = saved_attr
+
+
+def swap_in(folder):
+    """make `import MIA.x` load a fresh package from `folder` (made by make()), whatever an earlier test of the process imported; give the returned token to swap_back() in tearDownClass.
+    For a test that needs a web_app with other settings than the default one that the other test modules share"""
+    token = ({name: sys.modules.pop(name) for name in [n for n in sys.modules if n == "MIA" or n.startswith("MIA.")]}, list(sys.path))
+    for path in (os.path.join(folder, "MIA"), folder):
+        sys.path.insert(0, path)
+    return token
+
+
+def swap_back(token):
+    """the modules and the import path as swap_in() found them"""
+    saved, path = token
+    for name in [n for n in sys.modules if n == "MIA" or n.startswith("MIA.")]:
+        del sys.modules[name]
+    sys.modules.update(saved)
+    sys.path[:] = path

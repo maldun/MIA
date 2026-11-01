@@ -12,9 +12,7 @@ os.environ.update({"ANSWER_DELAY": "0.3", "EVENT_GAP": "0", "MIA_TEST": "1"})
 
 import checkout_copy  # noqa: E402  (MIA from a temporary copy: nothing is written into the checkout, D-169)
 _LINK_DIR = checkout_copy.use()
-spec = importlib.util.spec_from_file_location("chat_mock_server", os.path.join(REPO, "ui", "tools", "chat_mock_server.py"))
-server = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(server)
+server = checkout_copy.load_isolated("chat_mock_server", os.path.join(REPO, "ui", "tools", "chat_mock_server.py"))      # its own web_app: the mock must not change the one the other tests share
 w = server.w                                       # the real web_app, imported by the mock server
 
 SKILLS = ("review_keywords", "review_abstract", "review_section", "review_full", "review_summary")
