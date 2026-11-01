@@ -14,6 +14,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from storage import Storage                      # noqa: E402
 from storage_files import FileBackend            # noqa: E402
 from workflow_library import WorkflowLibrary, WorkflowLibraryError   # noqa: E402
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "helpers"))
+from markers import mark                                  # noqa: E402
 
 COSTS = {"search": {"seconds": 2.0, "calls": 0, "tokens": 0}, "judge": {"seconds": 5.0, "calls": 3, "tokens": 1500}}
 LOOKUP = {"nodes": [{"id": "question", "kind": "data"}, {"id": "search", "kind": "process"}, {"id": "hits", "kind": "data"},
@@ -39,6 +41,7 @@ class WorkflowLibraryTest(unittest.TestCase):
     def setUp(self):
         self.lib = WorkflowLibrary(Storage(FileBackend(tempfile.mkdtemp())), costs=COSTS)
 
+    @mark.req("REQ-WFM-002")
     def test_versions_diff_and_restore(self):                       # REQ-WFM-002
         lib = self.lib
         self.assertEqual(lib.save("workflows", "lookup", LOOKUP, "anna"), {"version": 1})
@@ -58,6 +61,9 @@ class WorkflowLibraryTest(unittest.TestCase):
         self.assertEqual(error_of(lambda: self.lib.list_ids("recipes")).code, "not_found")
         self.assertEqual(self.lib.list_ids("workflows"), ["lookup"])
 
+    @mark.req("REQ-WFM-003")
+
+    @mark.req("REQ-WFM-004")
     def test_a_broken_graph_is_refused_with_the_rule(self):         # REQ-WFM-003, REQ-WFM-004
         cyc = {"nodes": [{"id": "p", "kind": "process"}, {"id": "d", "kind": "data"}], "edges": [{"from": "p", "to": "d"}, {"from": "d", "to": "p"}]}
         adj = {"nodes": [{"id": "a", "kind": "data"}, {"id": "b", "kind": "data"}], "edges": [{"from": "a", "to": "b"}]}
@@ -68,6 +74,7 @@ class WorkflowLibraryTest(unittest.TestCase):
         self.assertEqual(error_of(lambda: self.lib.save("workflows", "bad", cyc, "anna")).detail, ["p", "d", "p"])     # the cycle is named
         self.assertEqual(self.lib.list_ids("workflows"), [])
 
+    @mark.req("REQ-WFM-003")
     def test_every_accepted_generated_graph_has_a_topological_order(self):    # TC-WFM-003 property test; the generator is seeded, it is no statistical check
         import random
         rng = random.Random(7)
@@ -93,6 +100,9 @@ class WorkflowLibraryTest(unittest.TestCase):
         self.assertGreater(accepted, 20)
         self.assertGreater(refused, 20)
 
+    @mark.req("REQ-WFM-002")
+
+    @mark.req("REQ-WFM-006")
     def test_promotion_needs_specification_and_benchmark(self):     # REQ-WFM-002, REQ-WFM-006 (the gate itself)
         lib = self.lib
         lib.save("workflows", "lookup", LOOKUP, "anna")
@@ -121,6 +131,7 @@ class WorkflowLibraryTest(unittest.TestCase):
         self.assertEqual([v["author"] for v in versions][-2:], ["ben", "anna"])
         self.assertEqual(storage.get("workflow_meta", "lookup", 1)["doc"]["status"], "draft")        # an old version never changes
 
+    @mark.req("REQ-WFM-007")
     def test_the_time_from_idea_to_promotion_is_recorded(self):     # REQ-WFM-007, TC-WFM-007: the idea is the first version
         lib = self.lib
         lib.save("workflows", "lookup", LOOKUP, "anna")
@@ -138,6 +149,7 @@ class WorkflowLibraryTest(unittest.TestCase):
         self.assertLessEqual(record["idea"], record["promoted"])
         self.assertEqual(error_of(lambda: lib.promotion_record("nope")).code, "not_found")
 
+    @mark.req("REQ-WFM-009")
     def test_an_estimate_above_the_budget_is_named_before_the_run(self):       # REQ-WFM-009, TC-WFM-009 (the refusal itself is the run of IF-202)
         lib = self.lib
         lib.save("workflows", "lookup", LOOKUP, "anna")
@@ -149,6 +161,7 @@ class WorkflowLibraryTest(unittest.TestCase):
         self.assertEqual(lib.check_budget("lookup", {})["exceeded"], [])
         self.assertEqual(error_of(lambda: lib.check_budget("nope", {})).code, "not_found")
 
+    @mark.req("REQ-WFM-010")
     def test_a_workflow_names_a_character_variant_or_none(self):               # REQ-WFM-010, TC-WFM-010
         lib = self.lib
         lib.save("workflows", "lookup", LOOKUP, "anna")
@@ -160,6 +173,7 @@ class WorkflowLibraryTest(unittest.TestCase):
         err = error_of(lambda: lib.save("workflows", "bad", dict(LOOKUP, variant=7), "anna"))
         self.assertEqual((err.code, err.rule), ("invalid", "variant"))
 
+    @mark.req("REQ-WFM-008")
     def test_the_view_of_a_step_fits_its_budget_in_tokens(self):          # REQ-WFM-008, TC-WFM-008: the stored context graph is the design-time template
         from test_context_graph import recorded_run
         lib = self.lib
@@ -181,6 +195,7 @@ class WorkflowLibraryTest(unittest.TestCase):
             err = error_of(lambda: lib.save("context_graphs", "bad", broken, "anna"))
             self.assertEqual((err.code, err.rule), ("invalid", "budget_tokens"))
 
+    @mark.req("REQ-WFM-008")
     def test_the_template_may_be_optimised_as_a_new_version(self):         # REQ-WFM-008: the design-time graph may change over the runtime, old versions stay
         lib = self.lib
         doc = {"nodes": [{"id": "d", "kind": "data"}, {"id": "p", "kind": "process", "budget_tokens": 300}], "edges": [{"from": "d", "to": "p"}]}
@@ -190,6 +205,7 @@ class WorkflowLibraryTest(unittest.TestCase):
         self.assertEqual(lib.read("context_graphs", "chat", 1)["doc"], doc)
         self.assertEqual(lib.diff("context_graphs", "chat", 1, 2)["nodes_changed"], ["p"])
 
+    @mark.req("REQ-WFM-009")
     def test_estimate_order_critical_path_and_session_cycles(self):     # REQ-WFM-009 (the numbers), IF-203 golden 3
         lib = self.lib
         lib.save("workflows", "lookup", LOOKUP, "anna")

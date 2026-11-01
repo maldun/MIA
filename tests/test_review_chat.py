@@ -9,6 +9,8 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from extensions.review import review_chat as rc
 import scholar
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "helpers"))
+from markers import mark                                  # noqa: E402
 
 TODAY = datetime.date(2026, 10, 28)
 TEXT = "Graph methods for scheduling in practice."
@@ -181,6 +183,13 @@ class CardMonitor:
         self.counts.update(counts or {})
 
 
+@mark.req("REQ-WFM-031")
+
+
+@mark.req("REQ-WFM-032")
+
+
+@mark.req("REQ-WFM-034")
 class TestReviewCard(unittest.TestCase):                                         # TC-WFM-031, -032, -034
     def test_the_card_gets_phases_counts_and_the_used_calls_and_tokens(self):
         card = CardMonitor()
@@ -210,6 +219,10 @@ class TestReviewCard(unittest.TestCase):                                        
         self.assertEqual(user.questions, [])
 
 
+@mark.req("REQ-WFM-037")
+
+
+@mark.req("REQ-WFM-038")
 class TestReviewOutputs(unittest.TestCase):                                      # TC-WFM-037, TC-WFM-038
     WORKS = [work("10.1/a", "Colouring"), work("10.1/b", "Off topic 100% sure")]
 
@@ -268,6 +281,7 @@ class ClockMonitor(CardMonitor):
         self.active_seconds = clock
 
 
+@mark.req("REQ-WFM-034")
 class TestTheCapInTheReview(unittest.TestCase):                                 # TC-WFM-034, owner 2026-10-29
     def run_with_slow_abstracts(self, *replies, **kwargs):
         class Clock:

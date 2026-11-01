@@ -11,6 +11,8 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from extensions.review import review_stages as rs
 import scholar
 from extensions.review.review_request import ReviewRequest
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "helpers"))
+from markers import mark                                  # noqa: E402
 
 TODAY = datetime.date(2026, 10, 28)
 CRITERIA = {"outdated", "off_topic", "wrong_type"}
@@ -43,6 +45,7 @@ class TestQueries(unittest.TestCase):
         self.assertEqual(q["combined"], '("graph colouring" OR "scheduling") AND ("timetable")')
 
 
+@mark.req("REQ-WFM-021")
 class TestCollect(unittest.TestCase):          # TC-WFM-021
     def test_merges_duplicates_and_remembers_the_keywords(self):
         a = work("10.1/a", "A")
@@ -63,7 +66,24 @@ class TestCollect(unittest.TestCase):          # TC-WFM-021
         self.assertEqual({d["work"]["doi"]: d["code"] for d in out["dropped"]},
                          {"10.1/late": "after_cutoff", "10.1/ret": "retracted", "10.1/nodate": "no_date"})
 
+    @mark.req("REQ-WFM-021")
+    def test_withdrawn_works_are_dropped_and_listed_like_retracted_ones(self):          # TC-WFM-021 (N5, first Verify of N-2.3)
+        """A work with a notice of withdrawal is dropped as `retracted` and listed, like a retracted one; a work with a correction stays.
 
+        Example: notices [withdrawn] -> dropped with code retracted; notices [correction] -> kept.
+        """
+        # Given: a withdrawn work, one with a correction and an untouched one
+        withdrawn, corrected, plain = work("10.1/wd", "wd", "2018-01-01"), work("10.1/co", "co", "2018-02-01"), work("10.1/ok", "ok", "2018-03-01")
+        withdrawn["retraction"] = {"status": "withdrawn", "notices": [{"type": "withdrawn", "date": "2019"}], "hints": []}
+        corrected["retraction"] = {"status": "correction", "notices": [{"type": "correction", "date": "2019"}], "hints": []}
+        # When: the works are collected
+        out = rs.collect({"k": [withdrawn, corrected, plain]}, until=datetime.date(2024, 12, 31))
+        # Then: only the withdrawn one is dropped, and it is listed
+        self.assertEqual(sorted(w["doi"] for w in out["kept"]), ["10.1/co", "10.1/ok"])
+        self.assertEqual({d["work"]["doi"]: d["code"] for d in out["dropped"]}, {"10.1/wd": "retracted"})
+
+
+@mark.req("REQ-WFM-028")
 class TestJudgement(unittest.TestCase):        # TC-WFM-028
     def test_a_quote_that_is_not_in_the_source_makes_the_judgement_unverified(self):
         w = work("10.1/a", "A")
@@ -107,6 +127,7 @@ class TestJudgement(unittest.TestCase):        # TC-WFM-028
         self.assertEqual(rs.combine(judge(w, 1), {**base, "sections": sections, "fits": False})["grade"], 1)
 
 
+@mark.req("REQ-WFM-027")
 class TestKeywordExtension(unittest.TestCase):  # TC-WFM-027
     TEXTS = ["bipartite matching helps", "bipartite matching and flows", "a bipartite approach", "matching only here"]
 
@@ -158,6 +179,7 @@ def scripted_run(works_by_keyword, agree=lambda report: True, approve=lambda pro
 class TestRun(unittest.TestCase):
     WORKS = {"graph": [work("10.1/%d" % i, "T%d" % i) for i in range(4)]}
 
+    @mark.req("REQ-WFM-019")
     def test_the_run_waits_after_the_abstract_screening_and_reads_no_full_text_without_agreement(self):   # TC-WFM-019
         report, calls = scripted_run(self.WORKS, agree=lambda r: False, full_text=lambda w: {"sections": [], "conclusion": ""})
         self.assertEqual(calls["agree"], 1)
@@ -178,6 +200,7 @@ class TestRun(unittest.TestCase):
         self.assertEqual((by_doi["10.1/0"]["grade"], by_doi["10.1/0"]["abstract_only"]), (3, False))
         self.assertTrue(by_doi["10.1/3"]["abstract_only"])
 
+    @mark.req("REQ-WFM-019")
     def test_the_slice_ends_at_a_budget_and_the_run_continues_only_on_agreement(self):    # TC-WFM-019
         def timed():
             clock = Clock()
@@ -195,6 +218,7 @@ class TestRun(unittest.TestCase):
         self.assertEqual(stopped["flow"]["screened"], 2)       # 80 s are used after the second work: the slice is over
         self.assertEqual(stopped["ended_by"], "budget:seconds")
 
+    @mark.req("REQ-WFM-020")
     def test_a_model_that_says_done_does_not_end_the_run(self):              # TC-WFM-020
         def eager(w):
             return {**judge(w), "done": True}
@@ -202,12 +226,16 @@ class TestRun(unittest.TestCase):
         self.assertEqual(report["flow"]["screened"], 4)
         self.assertEqual(report["flow"]["undecided"], 0)
 
+    @mark.req("REQ-WFM-020")
     def test_a_used_up_budget_ends_the_run_and_lists_the_undecided_works(self):      # TC-WFM-020
         report, _ = scripted_run(self.WORKS, limits={"screen": 2}, agree=lambda r: False)
         self.assertEqual(report["flow"]["screened"], 2)
         self.assertEqual(report["flow"]["undecided"], 2)
         self.assertEqual(report["ended_by"], "budget:screen")
 
+    @mark.req("REQ-WFM-020")
+
+    @mark.req("REQ-WFM-027")
     def test_approved_keywords_extend_the_search_and_the_run_ends_when_none_is_left(self):    # TC-WFM-027, -020
         works = {"graph": [work("10.1/%d" % i, "T%d" % i, abstract="Bipartite methods for scheduling.") for i in range(3)],
                  "bipartite": [work("10.1/x", "X", abstract="A bipartite note.")]}
@@ -222,12 +250,16 @@ class TestRun(unittest.TestCase):
         self.assertIn("bipartite", asked[0])
         self.assertEqual(len(asked), 1)                         # the second round proposes nothing new and ends the loop
 
+    @mark.req("REQ-WFM-027")
     def test_without_approval_the_keyword_set_is_unchanged(self):            # TC-WFM-027
         works = {"graph": [work("10.1/%d" % i, "T%d" % i, abstract="Bipartite methods for scheduling.") for i in range(3)]}
         report, calls = scripted_run(works, approve=lambda proposals: [])
         self.assertEqual(calls["search"], ["graph"])
         self.assertEqual([k["keyword"] for k in report["keywords"]], ["graph"])
 
+    @mark.req("REQ-WFM-018")
+
+    @mark.req("REQ-WFM-021")
     def test_the_report_has_flow_counts_keywords_gaps_and_dropped_works(self):       # TC-WFM-018, -021
         works = {"graph": [work("10.1/a", "A"), work("10.1/late", "L", "2027-01-01")], "empty": []}
         request = ReviewRequest("how to schedule with graphs", until=TODAY, today=TODAY, clock=Clock())

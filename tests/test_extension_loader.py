@@ -15,6 +15,8 @@ sys.path.insert(0, os.path.dirname(HERE))
 
 from extension_loader import load_extensions, read_manifest, task_from_manifest  # noqa: E402
 from task_registry import TaskRegistry  # noqa: E402
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "helpers"))
+from markers import mark                                  # noqa: E402
 
 ENTRY = "def make(services):\n    return lambda argument, on_delta, on_emotion, should_stop, **kw: services.prefix + argument\n"
 
@@ -51,6 +53,7 @@ class ExtensionLoader(unittest.TestCase):
     def load(self):
         return load_extensions(self.package, self.folder, self.registry, self.services)
 
+    @mark.req("REQ-WFM-039")
     def test_a_folder_with_a_manifest_and_an_entry_becomes_a_task_that_runs_with_the_services(self):
         self.add("alpha", manifest(aliases=["a"], needs=["ask", "options"], version="3",
                                    options=[{"name": "slice", "kind": "flag", "default": False, "text": "slices"}, {"name": "cap_factor", "kind": "int", "default": 10, "text": "caps"}]))

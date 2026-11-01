@@ -19,6 +19,8 @@ sys.path.insert(0, HERE)
 _LINK_DIR = tempfile.mkdtemp()
 os.symlink(REPO, os.path.join(_LINK_DIR, "MIA"))
 sys.path.insert(0, _LINK_DIR)
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "helpers"))
+from markers import mark                                  # noqa: E402
 
 MOODS = os.path.join(REPO, "moods.json")
 
@@ -63,6 +65,7 @@ class ChatTasks(unittest.TestCase):
     def statuses(self):
         return [p for e, p in self.events if e == "task_status"]
 
+    @mark.req("REQ-WFM-030")
     def test_options_reach_the_run_and_the_configured_defaults_apply(self):                   # TC-WFM-030
         def run(argument, on_delta, on_emotion, should_stop, options=None):
             self.seen.append((argument, dict(options)))
@@ -75,6 +78,7 @@ class ChatTasks(unittest.TestCase):
         self.assertTrue(self.idle(service))
         self.assertEqual(self.seen, [("the question", {"slice": True}), ("plain", {"slice": False})])
 
+    @mark.req("REQ-WFM-030")
     def test_options_alone_is_answered_by_a_note_and_an_unknown_option_runs_nothing(self):   # TC-WFM-030
         service = self.make([self.task(lambda *a: "x", options=(self.registry_module.Option("slice", "flag", False, "work in slices"),))])
         ack = service.send("/demo options", author="anna")
@@ -86,6 +90,7 @@ class ChatTasks(unittest.TestCase):
         self.assertIn("slice", ack["error"])
         self.assertEqual(service.status()["queue"], 0)
 
+    @mark.req("REQ-WFM-031")
     def test_every_task_has_a_status_card_that_ends_with_done_and_names_the_mode(self):        # TC-WFM-031
         slice_option = self.registry_module.Option("slice", "flag", False, "work in slices")
 
@@ -103,6 +108,7 @@ class ChatTasks(unittest.TestCase):
         self.assertTrue(self.idle(service))
         self.assertEqual(self.statuses()[-1]["mode"], "run")
 
+    @mark.req("REQ-WFM-031")
     def test_a_task_that_reports_nothing_still_has_a_card_with_the_time(self):                 # TC-WFM-031
         service = self.make([self.task(lambda *a: "done")])
         service.send("/demo q", author="anna")
@@ -120,6 +126,7 @@ class ChatTasks(unittest.TestCase):
             return "done"
         return run
 
+    @mark.req("REQ-WFM-033")
     def test_a_paused_task_starts_no_step_and_resume_goes_on(self):                             # TC-WFM-033
         service = self.make([self.task(self._pausing_run())])
         service.send("/demo q", author="anna")
@@ -134,6 +141,7 @@ class ChatTasks(unittest.TestCase):
         self.assertEqual(self.steps, [0, 1])
         self.assertFalse(service.pause())               # nothing runs
 
+    @mark.req("REQ-WFM-033")
     def test_stop_ends_a_paused_task_with_the_result_as_it_stands(self):                        # TC-WFM-033
         service = self.make([self.task(self._pausing_run())])
         service.send("/demo q", author="anna")
@@ -147,6 +155,7 @@ class ChatTasks(unittest.TestCase):
         done = [p for e, p in self.events if e == "chat_done"][-1]
         self.assertEqual((done["text"], done["status"]), ("as it stands", "stopped"))
 
+    @mark.req("REQ-WFM-036")
     def test_the_result_of_a_task_that_asks_is_the_newest_message(self):                         # TC-WFM-036
         def run(argument, on_delta, on_emotion, should_stop, ask=None):
             self.seen.append(ask("First?"))
@@ -188,6 +197,7 @@ class ChatTasks(unittest.TestCase):
         self.assertEqual(result["text"], "the report")
         self.assertEqual(service.account(result["id"]), [{"seq": 1, "plain": "reading"}, {"seq": 2, "plain": "writing"}])
 
+    @mark.req("REQ-WFM-035")
     def test_prepare_task_may_ask_and_change_the_options(self):                                  # TC-WFM-035
         def run(argument, on_delta, on_emotion, should_stop, options=None):
             self.seen.append(dict(options))
@@ -205,6 +215,7 @@ class ChatTasks(unittest.TestCase):
         self.assertTrue(self.idle(service))
         self.assertEqual((asked, self.seen), (["yes"], [{"slice": True}]))
 
+    @mark.req("REQ-WFM-035")
     def test_a_command_with_an_argument_is_answered_by_a_note_and_not_queued(self):             # TC-WFM-035
         service = self.make([], argument_commands={"model": lambda argument: "model class set: " + argument})
         ack = service.send("/model paid big-model", author="anna")
@@ -213,6 +224,10 @@ class ChatTasks(unittest.TestCase):
         self.assertFalse(service.status()["busy"])
 
 
+    @mark.req("REQ-WFM-037")
+
+
+    @mark.req("REQ-WFM-038")
     def test_a_task_gets_files_and_a_report_record_bound_to_its_message_and_account(self):        # TC-WFM-037, TC-WFM-038
         from_storage = importlib.import_module("MIA.storage")
         backend = importlib.import_module("MIA.storage_files")
@@ -236,6 +251,7 @@ class ChatTasks(unittest.TestCase):
         self.assertEqual((doc["task"], doc["skill"], doc["question"], doc["account"], doc["model_pin"], doc["report"]), ("demo", "demo", "the question", "anna", "m", {"works": []}))
 
 
+    @mark.req("REQ-WFM-031")
     def test_the_time_a_task_waits_for_the_answer_of_the_user_is_not_on_the_card(self):          # REQ-WFM-031: the budget of time is work time
         def run(argument, on_delta, on_emotion, should_stop, ask=None):
             ask("First?")

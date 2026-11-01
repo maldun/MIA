@@ -14,6 +14,8 @@ from core import Core                     # noqa: E402
 from library import Library               # noqa: E402
 from pipeline import PipelineError        # noqa: E402
 from skill_store import SkillStore        # noqa: E402
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "helpers"))
+from markers import mark                                  # noqa: E402
 
 PIPELINE = {"id": "demo.double", "version": 1, "title": "Checks a computable claim", "tags": ["demo"], "result": "out",
             "nodes": [{"id": "calc", "use": "code.hard_checks_offline@2", "wire": {"claim": "$input.claim"}, "output": "out"}]}
@@ -34,6 +36,7 @@ class SkillsAsTasks(unittest.TestCase):
         with open(os.path.join(self.skills, name + ".md"), "w") as fp:
             fp.write("---\nname: %s\npipeline: %s\nmax_safety: {runs_code: true}\n---\n" % (name, pipeline))
 
+    @mark.req("REQ-WFM-001")
     def test_the_selectable_list_shows_every_skill_file(self):        # REQ-WFM-001, TC-WFM-001
         shipped = SkillStore(os.path.join(REPO, "skills"))
         files = sorted(f[:-3] for f in os.listdir(os.path.join(REPO, "skills")) if f.endswith(".md"))
@@ -41,6 +44,7 @@ class SkillsAsTasks(unittest.TestCase):
         self.assertEqual(shipped.names(), files)
         self.assertTrue(all(shipped.get(name)["pipeline"] for name in files))
 
+    @mark.req("REQ-WFM-001")
     def test_a_selected_skill_runs_its_pipeline(self):                # REQ-WFM-001, TC-WFM-001
         self.library.add_draft("pipeline", PIPELINE)
         self.library.set_status("demo.double@1", "trusted")
@@ -53,6 +57,7 @@ class SkillsAsTasks(unittest.TestCase):
         with self.assertRaises(PipelineError):
             core.run("nothing", {})
 
+    @mark.req("REQ-WFM-005")
     def test_a_proposed_pipeline_stays_a_draft_and_cannot_run_as_trusted(self):      # REQ-WFM-005, TC-WFM-005
         ref = self.library.add_draft("pipeline", PIPELINE, by="gemma4")
         self.assertEqual(self.library.resolve(ref, "pipeline", allow_draft=True)["status"], "draft")

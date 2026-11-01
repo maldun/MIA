@@ -11,6 +11,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.dirname(HERE))
 
 from task_registry import Option, Task, TaskCommandError, TaskRegistry  # noqa: E402
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "helpers"))
+from markers import mark                                  # noqa: E402
 
 
 def noop(*args):
@@ -37,11 +39,13 @@ class TaskRegistryTest(unittest.TestCase):
     def setUp(self):
         self.registry = make()
 
+    @mark.req("REQ-WFM-029")
     def test_a_second_skill_with_the_same_id_is_refused_with_the_id_named(self):          # TC-WFM-029
         message = error_of_value(lambda: self.registry.register(Task("review", noop, "again", "q", "/review q")))
         self.assertIn("review", message)
         self.assertEqual(self.registry.ids(), ["lookup", "review"])
 
+    @mark.req("REQ-WFM-029")
     def test_the_commands_are_built_from_the_registry(self):                              # TC-WFM-029
         commands = self.registry.commands()
         self.assertEqual([c["command"] for c in commands], ["/lookup ", "/review "])
@@ -49,6 +53,7 @@ class TaskRegistryTest(unittest.TestCase):
         self.registry.register(Task("verify", noop, "Check a claim", "the claim", "/verify the earth is flat"))
         self.assertEqual([c["command"] for c in self.registry.commands()][-1], "/verify ")
 
+    @mark.req("REQ-WFM-030")
     def test_a_plain_command_gives_the_argument_and_the_default_options(self):            # TC-WFM-030
         found = self.registry.parse("/review do canary releases help? until 2024-06-30")
         self.assertEqual((found["task"], found["argument"], found["options"]), ("review", "do canary releases help? until 2024-06-30", {"slice": False, "cap_factor": 10}))
@@ -56,10 +61,12 @@ class TaskRegistryTest(unittest.TestCase):
         self.assertIsNone(self.registry.parse("hello"))
         self.assertIsNone(self.registry.parse("/reviews are nice"))
 
+    @mark.req("REQ-WFM-030")
     def test_options_are_set_before_the_separator(self):                                  # TC-WFM-030
         found = self.registry.parse("/review options slice cap_factor=5 -- the question -- with a dash")
         self.assertEqual((found["argument"], found["options"]), ("the question -- with a dash", {"slice": True, "cap_factor": 5}))
 
+    @mark.req("REQ-WFM-030")
     def test_options_alone_lists_the_options_with_their_defaults(self):                   # TC-WFM-030
         found = self.registry.parse("/review options")
         self.assertTrue(found["help"])
@@ -67,6 +74,7 @@ class TaskRegistryTest(unittest.TestCase):
         self.assertIn("cap_factor", found["text"])
         self.assertIn("10", found["text"])
 
+    @mark.req("REQ-WFM-030")
     def test_an_unknown_option_or_a_wrong_value_is_refused_with_the_options_named(self):  # TC-WFM-030
         message = error_of(lambda: self.registry.parse("/review options fast -- q"))
         self.assertIn("fast", message)
@@ -75,6 +83,7 @@ class TaskRegistryTest(unittest.TestCase):
         self.assertIn("--", error_of(lambda: self.registry.parse("/review options slice")))
         self.assertIn("no options", error_of(lambda: self.registry.parse("/lookup options slice -- q")))
 
+    @mark.req("REQ-WFM-030")
     def test_a_configured_default_applies_and_the_call_overrides_it(self):                # TC-WFM-030
         defaults = {"review": {"slice": True}}
         self.assertTrue(self.registry.parse("/review q", defaults)["options"]["slice"])
