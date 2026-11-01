@@ -200,6 +200,7 @@ Proposed on 2026-10-29 after the usability work of N-2.3 T-09 to T-11 and N-1.1 
 - Owner: Stefan Reiterer
 - Trigger: the Plan of the next iteration (eval-spec.md with criteria, suites and pins), or 2026-12-31, whichever first
 - Target check: specified only
+- Sign-off: Stefan Reiterer, 2026-11-01
 - Decision: D-178, 2026-11-01, Stefan Reiterer
 - Status: open
 
