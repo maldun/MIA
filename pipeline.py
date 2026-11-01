@@ -21,6 +21,7 @@ import json
 import math
 import random
 import re
+import secrets
 import threading
 import time
 from collections import namedtuple
@@ -30,10 +31,12 @@ try:
     from . import events as ev
     from .schema_check import check as check_schema
     from .sandbox import Operation
+    from .pipeline_model import ModelServerUnreachable
 except ImportError:  # used as plain script / in tests
     import events as ev
     from schema_check import check as check_schema
     from sandbox import Operation
+    from pipeline_model import ModelServerUnreachable
 
 Tool = namedtuple("Tool", "func budget_key")
 
@@ -41,7 +44,11 @@ KINDS = ("model", "tool", "code", "script", "map", "branch", "loop", "ask_user")
 MAX_LOOP = 20
 MAX_PLAIN = 160
 ON_ERROR = ("fail", "skip", "default")
+NOT_COUNTED = ("unknown_tool", "bad_arguments", "budget")      # the errors of IF-402 after which the door has counted nothing
 OPS = ("==", "!=", "<", "<=", ">", ">=", "in", "not_in", "empty", "not_empty", "true", "false")
+# the event types of IF-401 (contracts/IF-401-run-events.md); the other events of a run stay in the run log only
+IF401_TYPES = ("run_start", "run_end", "model_call", "tool_call", "check_run", "query_issued", "source_found", "passage_extracted", "claim_made",
+               "claim_verified", "stop_decision", "budget_spent", "router_decision", "error")
 DEFAULT_LINES = {"model": ["Thinking…"], "tool": ["Working on it…"], "code": ["Calculating…"], "map": ["One by one…"], "ask_user": ["Over to you…"]}
 
 
@@ -170,6 +177,14 @@ def _condition_problems(cond, where):
 
 # --- validation of a pipeline file ----------------------------------------------------------------------------------
 
+INTERNET_TOOLS = ("web_search", "fetch_page", "fetch_passages", "scholar_search", "source_record")
+
+
+def reaches_internet(skill):
+    """a skill whose task reaches the internet: it lists a web tool or allows scripts that read the web (REQ-RUN-001)"""
+    return bool(set(skill.get("tools") or []) & set(INTERNET_TOOLS)) or bool((skill.get("max_safety") or {}).get("reads_web"))
+
+
 def validate_pipeline(graph, tools=None, functions=None, skill=None):
     """returns the problems of a pipeline (empty = valid); tools/functions: names that exist (None = not checked); skill: the prompts, schemas and tools are checked against it"""
     problems = []
@@ -245,6 +260,8 @@ def validate_pipeline(graph, tools=None, functions=None, skill=None):
     walk(graph["nodes"], "pipeline")
     if not graph.get("result"):
         problems.append("the pipeline needs 'result' (the context name of the final answer)")
+    if skill and reaches_internet(skill) and skill.get("triggers"):
+        problems.append("a skill that reaches the internet starts only by a command: remove its triggers %s (REQ-RUN-001)" % skill["triggers"])
     return problems
 
 
@@ -262,8 +279,22 @@ class RunResult:
         return self.status == "done"
 
 
+class _RunEventsSink:
+    """the run log and IF-401 side by side (REQ-RUN-012, D-120): every event goes to the run log, those of the IF-401 vocabulary also through RunEvents"""
+
+    def __init__(self, run, run_events, run_id, user):
+        self.run, self.run_events, self.run_id, self.user = run, run_events, run_id, user
+
+    def event(self, event):
+        if self.run is not None:
+            self.run.event(event)
+        kind = event.get("type") if event.get("kind") == "event" else event.get("kind")
+        if kind in IF401_TYPES:
+            self.run_events.emit(self.run_id, kind, event.get("payload") or {}, self.user, actor=event.get("actor"), plain=event.get("plain") or "")
+
+
 class _State:
-    def __init__(self, runner, skill, graph, ctx, on_event, should_stop, ask, run, functions, tools):
+    def __init__(self, runner, skill, graph, ctx, on_event, should_stop, ask, run, functions, tools, user):
         self.runner, self.skill, self.graph, self.ctx = runner, skill, graph, ctx
         self.on_event, self.should_stop, self.ask, self.run = on_event, should_stop, ask, run
         self.functions, self.tools = functions, tools
@@ -272,29 +303,46 @@ class _State:
         self.calls = {}
         self.model_calls = 0
         self.tokens = 0
-        self.stream = ev.EventStream(run.id if run else None, sink=run, on_event=on_event, clock=runner.clock, t0=self.t0, strict=runner.strict_events)
+        self.user = user
+        neighbours = runner.run_events is not None or runner.tool_calls is not None          # IF-401 and IF-402 need a run id also without a run log
+        self.run_id = run.id if run else "r-%s" % secrets.token_hex(6) if neighbours else None
+        sink = run if runner.run_events is None else _RunEventsSink(run, runner.run_events, self.run_id, user)
+        self.stream = ev.EventStream(self.run_id, sink=sink, on_event=on_event, clock=runner.clock, t0=self.t0, strict=runner.strict_events)
         self.lock = threading.Lock()
         self.budget = skill["budget"]
 
 
 class Runner:
-    def __init__(self, model=None, tools=None, functions=None, run_log=None, rng=None, clock=time.monotonic, sandbox=None, broker_factory=None, environment=None, strict_events=False, store=None, store_texts=None):
-        """model: object with chat(messages, schema=None, model=None, profile=None, options=None) -> text; tools: {name: callable | Tool};
+    def __init__(self, model=None, tools=None, functions=None, run_log=None, rng=None, clock=time.monotonic, sandbox=None, broker_factory=None, environment=None, strict_events=False, store=None, store_texts=None,
+                 max_input_tokens=4096, tool_calls=None, door_tools=None, run_events=None):
+        """max_input_tokens: the largest model input, half of the context window (REQ-RUN-005; num_ctx 8192); a step whose options set num_ctx uses half of it.
+        model: object with chat(messages, schema=None, model=None, profile=None, options=None) -> text; tools: {name: callable | Tool};
         functions: {name: callable}; run_log: RunLog or None; environment: a dict or a function returning one (events.environment()), written into run_start;
-        strict_events: a domain event that does not fit its schema raises (tests) instead of becoming a log_error event"""
+        strict_events: a domain event that does not fit its schema raises (tests) instead of becoming a log_error event;
+        tool_calls: the door of IF-402 (`call(run, tool, args)`), door_tools: {tool name: budget key or None} the tools called through it;
+        run_events: IF-401 (`emit(run_id, type, payload, user, actor, plain)`), written beside the run log (REQ-RUN-012)"""
+        self.max_input_tokens = max_input_tokens
         self.model = model
         self.tools = {k: v if isinstance(v, Tool) else Tool(v, None) for k, v in (tools or {}).items()}
+        self.tool_calls, self.door_tools, self.run_events = tool_calls, dict(door_tools or {}), run_events
+        self.tools.update({name: Tool(None, key) for name, key in self.door_tools.items()})
         self.functions = dict(functions or {})
         self.run_log = run_log
         self.environment, self.strict_events = environment, strict_events
-        # store: a content_store.ContentStore; store_texts(skill name) says for which skills prompts and answers are kept in full (default: all but "chat", a conversation is personal, LG3)
-        self.store, self.store_texts = store, store_texts or (lambda name: name != "chat")
+        # store: a content_store.ContentStore; store_texts(skill) says for which skills prompts and answers are kept in full
+        # (default: all but those marked personal, LG3, D-128; the setting store_chat_texts keeps them all)
+        self.store, self.store_texts = store, store_texts or (lambda skill: not skill.get("personal"))
         self.sandbox, self.broker_factory = sandbox, broker_factory      # sandbox.SandboxRouter and a function that makes a web broker per script
         self.rng = rng or random.Random()
         self.clock = clock
 
     # -- public ----
-    def run(self, skill, graph, inputs, on_event=None, should_stop=None, ask=None, functions=None, tools=None, task=None):
+    def run(self, skill, graph, inputs, on_event=None, should_stop=None, ask=None, functions=None, tools=None, task=None, started_by="message", user="mia"):
+        """user: the user the events of IF-401 are attributed to; started_by: "command" (a command of a user, the harness, a workflow run) or "message" (a chat message); a task that reaches the internet
+        is refused when a message started it, before any step runs (REQ-RUN-001). The default is "message": a run that does not say who started it is
+        treated as the less trusted one (fail closed, D-133); every command path says started_by="command"."""
+        if started_by == "message" and reaches_internet(skill):
+            raise PipelineError("'%s' reaches the internet and starts only by a command, not by a chat message" % skill.get("name"))
         all_functions = {**self.functions, **(functions or {})}
         all_tools = {**self.tools, **{k: v if isinstance(v, Tool) else Tool(v, None) for k, v in (tools or {}).items()}}
         problems = validate_pipeline(graph, tools=all_tools, functions=all_functions, skill=skill)
@@ -306,7 +354,7 @@ class Runner:
             run = self.run_log.start(task or skill["name"], skill["name"], skill["version"], graph.get("name"), graph.get("version"), model, inputs,
                                      uses=graph.get("uses"))
         ctx = {"input": inputs}
-        st = _State(self, skill, graph, ctx, on_event, should_stop, ask, run, all_functions, all_tools)
+        st = _State(self, skill, graph, ctx, on_event, should_stop, ask, run, all_functions, all_tools, user)
         with ev.activate(st.stream):
             return self._run_state(st, skill, graph, ctx, run)
 
@@ -334,6 +382,9 @@ class Runner:
         except BudgetExceeded as exc:
             status, error, missing = "budget", "budget exceeded: %s" % exc, [str(exc)]
             self._emit(st, "error", None, plain=error)
+        except ModelServerUnreachable as exc:        # said as it is, without the node and the type of the error (REQ-RUN-003)
+            status, error = "error", str(exc)
+            self._emit(st, "error", None, plain=error)
         except NodeError as exc:
             status, error = "error", str(exc)
         except Exception as exc:                    # a bug in a tool or function must not take MIA down
@@ -348,7 +399,7 @@ class Runner:
         if run is not None:
             run.finish(status, {"answer": answer}, seconds, error)
         cost = {"steps": st.steps, "seconds": round(seconds, 3), "calls": st.model_calls, "tokens": st.tokens}
-        return RunResult(run.id if run else None, status, answer, ctx, seconds, error, run.events if run else [], missing, cost)
+        return RunResult(st.run_id, status, answer, ctx, seconds, error, run.events if run else [], missing, cost)
 
     # -- events ----
     def _outline(self, nodes, ctx):
@@ -397,7 +448,7 @@ class Runner:
         with ev.acting(node["id"], parent=start["seq"], item=item):
             try:
                 value = getattr(self, "_do_" + kind)(st, node, ctx, item)
-            except (Stopped, BudgetExceeded):
+            except (Stopped, BudgetExceeded, ModelServerUnreachable):
                 raise
             except Exception as exc:
                 message = str(exc) if isinstance(exc, NodeError) else "%s: %s" % (type(exc).__name__, exc)
@@ -437,16 +488,48 @@ class Runner:
 
     def _do_tool(self, st, node, ctx, item):
         tool = st.tools[node["tool"]]
-        if tool.budget_key:
-            with st.lock:
-                st.calls[tool.budget_key] = st.calls.get(tool.budget_key, 0) + 1
-                count = st.calls[tool.budget_key]
-            limit = st.budget.get(tool.budget_key)
-            if limit is not None:
-                ev.emit("budget_spent", {"name": tool.budget_key, "amount": 1, "used": count, "limit": limit})
+        key = tool.budget_key
+        door = tool.func is None                 # a tool of the door; one handed to this run (run(tools=)) has its own function and wins (F11)
+        count = limit = None
+        if key:
+            with st.lock:                        # reserved before the call: a budget key may be shared by several tools, and map items run in parallel
+                st.calls[key] = st.calls.get(key, 0) + 1
+                count = st.calls[key]
+            limit = st.budget.get(key)
+            if limit is not None and (count > limit or not door):
+                ev.emit("budget_spent", {"name": key, "amount": 1, "used": count, "limit": limit})
             if limit is not None and count > limit:
-                raise BudgetExceeded(tool.budget_key)
-        return tool.func(**resolve(node.get("args", {}), ctx))
+                raise BudgetExceeded(key)
+        args = resolve(node.get("args", {}), ctx)
+        if not door:
+            return tool.func(**args)
+        try:
+            found = self._call_door(st, node, args)
+        except Exception as exc:
+            refusal = exc.__cause__ if isinstance(exc, BudgetExceeded) else exc       # _call_door turns the door's `budget` into BudgetExceeded
+            if key and getattr(refusal, "code", None) in NOT_COUNTED:
+                with st.lock:                    # IF-402: a call the door refuses counts nothing, so the runner gives the reserved call back (N-6)
+                    st.calls[key] -= 1
+            elif limit is not None:
+                ev.emit("budget_spent", {"name": key, "amount": 1, "used": count, "limit": limit})
+            raise
+        if limit is not None:
+            ev.emit("budget_spent", {"name": key, "amount": 1, "used": count, "limit": limit})
+        return found
+
+    def _call_door(self, st, node, args):
+        """a tool of IF-402: the door counts it against the limits of the run (the same budgets) and labels its trust (REQ-RUN-012)"""
+        name = node["tool"]
+        limits = {tool: st.budget[key] for tool, key in self.door_tools.items() if key in st.budget}
+        try:
+            found = self.tool_calls.call({"id": st.run_id, "limits": limits}, name, args)
+        except Exception as exc:
+            if getattr(exc, "code", None) == "budget":
+                raise BudgetExceeded(self.door_tools[name] or name) from exc
+            raise
+        if self.run_events is not None:
+            self.run_events.emit(st.run_id, "tool_call", {"tool": name, "trust": found["trust"]}, st.user, actor=node["id"], plain=name)
+        return found["output"]
 
     def _do_ask_user(self, st, node, ctx, item):
         if st.ask is None:
@@ -533,6 +616,11 @@ class Runner:
 
     def _ask_model(self, st, messages, schema, settings):
         """one model call counted against the budgets calls and tokens (REQ-RUN-008); a model that reports no count is estimated at 4 characters a token"""
+        num_ctx = (settings.get("options") or {}).get("num_ctx")
+        limit = num_ctx // 2 if num_ctx else self.max_input_tokens
+        estimate = math.ceil(sum(len(str(m["content"])) for m in messages) / 4)
+        if estimate > limit:                        # refused before the call, so it is not counted either (REQ-RUN-005)
+            raise NodeError("the input is about %d tokens, more than half of the context window (%d tokens)" % (estimate, limit))
         with st.lock:
             if st.model_calls >= st.budget.get("calls", math.inf):
                 raise BudgetExceeded("calls")
@@ -552,7 +640,7 @@ class Runner:
     def _model_call(self, st, settings, prompt_hash, messages, reply, seconds, valid, attempt, schema_name, usage):
         """the model_call event (13d): what was asked and answered by hash, how long it took, whether the answer fitted; the digest of the model is filled in by the environment"""
         text = reply if isinstance(reply, str) else _text(reply)
-        if self.store is not None and self.store_texts(st.skill["name"]):
+        if self.store is not None and self.store_texts(st.skill):
             self.store.put(messages)                                  # the same hash as prompt_hash (events.digest and the store use one function)
             self.store.put(text)
         ev.emit("model_call", {"model": settings.get("name"), "profile": settings.get("profile"), "digest": None, "options": settings.get("options"),

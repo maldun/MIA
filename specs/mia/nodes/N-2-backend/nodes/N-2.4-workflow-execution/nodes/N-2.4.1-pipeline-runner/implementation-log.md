@@ -30,3 +30,172 @@ Not done yet:
 - The wiring of `WorkflowRuns` into the app and the harness (pins from `eval-spec.md`, `held` from `ollama list`, the sync at start or by hand), and nothing calls it yet: the chat and the extensions still call `Core.run` directly.
 - The review is not a pipeline (`implemented_by: review_chat.run_review`): it cannot run through IF-202 yet (REQ-RUN-013, T-07).
 - The events are written to the run log of `RunLog` only, not through IF-401 (`RunEvents`); REQ-RUN-012 (T-07) decides the wiring.
+
+## T-02 One model at a time, chat before background (2026-10-31, done) – REQ-RUN-009, REQ-RUN-010
+
+| Requirement | Where it is met | Test |
+|---|---|---|
+| REQ-RUN-010 one model at a time, users served by the queue | `pipeline_model.ModelTurns`: one call at a time on the one model server, the waiting calls in the order they came; `TurnClient` puts an ollama client behind the turns (`chat`, `generate`; a streamed answer holds its turn until it is read to the end or closed; the holder may call again without waiting for itself; other methods pass through) | `tests/test_model_turns.py` (5 of 6) |
+| REQ-RUN-009 chat before background | a waiting chat call gets the next turn before any waiting background call, so a background run yields the server between its calls | `tests/test_model_turns.py` (1 of 6: b1, chat, b2, b3) |
+
+Wiring (owner's approval 2026-10-31: "arbiter + wiring now", a deviation from the file list of T-02): `web_app.py` makes one `ModelTurns`; the communicator's client becomes `TurnClient(…, "chat")` (the chat answer, the expression model of the editor, the model switch), the runner's `OllamaModel` gets `TurnClient(…, "background")` (every pipeline). `communicator.py` is not changed. The chat skill's pipeline has the single node `converse`, which talks through the communicator: chat answers take chat turns.
+
+Decisions made while building:
+- Every pipeline call is background, also a `/lookup` or `/search` typed in the chat: they are tasks and yield between their calls to a waiting chat message. The communicator's own background work (dreaming, summaries) takes chat turns, as it runs through the chat's client.
+- A running call is never interrupted: a chat message waits at most for the background call that runs. Whether that keeps the first text within 10 s (AC-19) depends on the length of one background call (a review slice); measured in T-06 (stage 4).
+- A stream takes its turn when it is first read (Ollama starts the request then), not when `chat(stream=True)` returns.
+
+Local coder: `tests/test_model_turns.py` (task `run0910-tests`, 2 attempts, both failed on a syntax slip: an extra `)` on three lines); the last draft compared with the instruction by script: every statement there; fixed by hand, verdict `fixed`. Red before the change (no `ModelTurns`), green after.
+
+Tests reported green (feedback, not verification): `tests/test_model_turns.py` (6); all `tests/test_*.py` in the image fail only as on master (`test_config`, `test_shutdown`, `test_harness`, `test_amendment_report`); all 15 contract suites and all integration steps.
+
+Open for Phase 4: no live run with the real model server was made (the tests use a fake client); AC-19's 10 s with a review slice running is T-06.
+
+## T-03 Switch the model, server unreachable (2026-10-31, done; REQ-RUN-011 out of the scope of G-V1, D-118) – REQ-RUN-002, REQ-RUN-003
+
+Owner's answers (D-118): `/light!` and `/full!` ask for confirmation; the switch to the light model is the "free GPU memory on request"; REQ-RUN-011 (IF-103 only) is set out of G-V1 (the IF-103 suite cannot hand scripted replies to a real provider).
+
+| Requirement | Where it is met | Test |
+|---|---|---|
+| REQ-RUN-002 switch after confirmation, for all, memory freed | **changed:** `chat_service.COMMANDS` marks `/light!` and `/full!` `confirm: True` (the page asks before it sends them, `templates/static/chat/app.js`); `Communicator.set_profile` switches the one shared model (all users) and unloads the previous one (`generate(keep_alive=0)`), nothing when the model stays | `tests/test_runner_model_server.py` (3 of 6) |
+| REQ-RUN-003 server unreachable in plain words | **new:** `TurnClient` turns the `ConnectionError` of the ollama library (also while a stream is read) into `ModelServerUnreachable` with the sentence `pipeline_model.UNREACHABLE`; the runner ends the run with exactly that sentence as its error (no node id, no type); the chat shows it as its error note (the status line says "Can't reach my brain right now." as before) | `tests/test_runner_model_server.py` (3 of 6) |
+
+Files outside T-03's list: `chat_service.py` (two flags, owner's answer); `web_app.py` not touched.
+
+Wording: the owner chose "Can't reach my brain right now beep" (D-120, 2026-10-31); pinned by `test_the_sentence_is_the_owners_wording` in `tests/test_runner_model_server.py` (red before the change, green after).
+
+Live check (feedback): with the image on the host network, a client on a closed port gave the sentence; the running Ollama answered `list` through `TurnClient` (5 models). No model was loaded.
+
+Local coder: `tests/test_runner_model_server.py` (task `run0203-tests`, 2 attempts, the second passed its check); compared with the instruction by script: identical, verdict `ok`. Red before the change (no `UNREACHABLE`), green after.
+
+Tests reported green (feedback, not verification): `tests/test_runner_model_server.py` (6), `tests/test_model_turns.py`, `tests/test_runner_budgets.py`, `tests/test_run_workflow.py`, `tests/test_pipeline.py`, `tests/test_chat_backend.py`; all `tests/test_*.py` in the image fail only as on master; all contract suites and integration steps.
+
+## T-04 Internet tasks only on command (2026-10-31, done) – REQ-RUN-001
+
+Before the task the property held by construction only: a chat message runs the skill `chat` (one node, `converse`, no tools), internet skills start through commands (`/lookup`, `/search`, `/review`), and the `triggers` of the skills are parsed but used nowhere. Now it is enforced:
+
+| Requirement | Where it is met | Test |
+|---|---|---|
+| REQ-RUN-001 internet tasks only by a command | `pipeline.reaches_internet(skill)`: a web tool of `INTERNET_TOOLS` or `max_safety.reads_web`; `Runner.run(..., started_by=)`: a run that reaches the internet and was started by a `"message"` raises `PipelineError` before any step; `validate_pipeline` reports an internet skill that declares `triggers` (so `Core.check` at start and every run refuse it); `web_app.run_chat_exchange` passes `started_by="message"` | `tests/test_runner_internet_by_command.py` (6, one of them over all shipped skills: `research` reaches the internet, no internet skill has triggers) |
+
+Decisions made while building:
+- `started_by` defaults to `"command"`, so the command paths, the harness, `reproduce.py` and `run_workflow.py` stay as they are; only the one entry of chat messages says `"message"`. A safer default (`"message"`) would need every command path changed (outside the task); proposed for the wiring of T-07.
+- `INTERNET_TOOLS` names the web and scholarly tools of N-2.4.2 (IF-402) besides the two the runner has today.
+
+File outside T-04's list: `web_app.py` (one argument at the chat entry, the wiring the owner approved in T-02).
+
+Local coder: `tests/test_runner_internet_by_command.py` (task `run01-tests`, 1 attempt, 53 s); compared with the instruction by script: identical, verdict `ok`. Red before the change (no `reaches_internet`), green after.
+
+Tests reported green (feedback, not verification): `tests/test_runner_internet_by_command.py` (6), `tests/test_pipeline.py`; all `tests/test_*.py` in the image fail only as on master; all contract suites and integration steps.
+
+## T-05 Context window share (2026-10-31, done; REQ-RUN-004 and REQ-RUN-006 out of the scope of G-V1, D-119) – REQ-RUN-005
+
+| Requirement | Where it is met | Test |
+|---|---|---|
+| REQ-RUN-005 every model input inside 50 % of the context window | `Runner._ask_model`: the input is estimated at 4 characters a token (as the budget does); over the limit the step fails before the call, not counted, with "the input is about N tokens, more than half of the context window (L tokens)" (the run error starts with the step id); the limit is half of `num_ctx` when the step's options set it, else `Runner(max_input_tokens=4096)` | `tests/test_runner_context_share.py` (4) |
+
+Owner's answers (D-119): refuse, do not cut; REQ-RUN-004 (optional learning) and REQ-RUN-006 (fewer than 15 calls, a measurement) out of the scope of G-V1.
+
+Checked against the shipped pipelines: the largest inputs by construction are review sections (`extensions/review/fulltext.py`, 6000 characters, about 1500 tokens) and the passages of a lookup (budget 6000 characters): inside the limit. The measurement over the lookup suites (AC-22: 100 % at most 4096 tokens by the server's count, `tokens_in` of the `model_call` events) is not made here.
+
+Local coder: `tests/test_runner_context_share.py` (task `run05-tests`, 1 attempt, 38 s); compared with the instruction by script: identical, verdict `ok`. Red before the change (2 failures, 1 error), green after.
+
+Tests reported green (feedback, not verification): `tests/test_runner_context_share.py` (4); all `tests/test_*.py` in the image fail only as on master; all contract suites and integration steps.
+
+## T-06 First text in 10 seconds (2026-10-31, deferred) – REQ-RUN-007
+
+Deferred by the owner (D-120): a measurement (median of 20 runs, AC-19) without an eval criterion and model pins, like REQ-RUN-006. It comes back with `eval-spec.md`. REQ-RUN-007 is out of the scope of G-V1 (owner, D-125; scope row in `goal.md`).
+
+## T-07 Interfaces only, no particular workflow (2026-10-31, done; the review entry split out as T-08, A-35) – REQ-RUN-012, REQ-RUN-013
+
+Owner's answers (D-120, D-122): tools through IF-402 `ToolCalls`; events to IF-401 and the run log side by side; IF-402 gets `fetch_page` (A-34); the review as a pipeline is its own task (T-08, A-35); the networkx redesign waits for the next iteration (FB-02).
+
+| Requirement | Where it is met | Test |
+|---|---|---|
+| REQ-RUN-012 tools only through IF-402 | `Runner(tool_calls=, door_tools={tool: budget key})`: a tool node of the door goes to `ToolCalls.call({"id", "limits"}, tool, args)`, the limits are the budgets of the run; the runner's own count still ends the run first (`budget_spent`, `missing`), a `budget` error of the door becomes the same budget end; the app wires `web_search` and `fetch_page` through `ToolCalls` (`web_app.py`) | `tests/test_runner_interfaces.py` (1, 2, 3) |
+| REQ-RUN-012 events only through IF-401 | `_RunEventsSink`: every event goes to the run log, the 14 types of IF-401 also through `RunEvents.emit` (user of the run, actor, plain); a door call adds a `tool_call` event with tool and trust; a run without a run log gets an id `r-<hex>` | `tests/test_runner_interfaces.py` (1, 3, 4) |
+| REQ-RUN-012 the workflow only through IF-203 | `WorkflowRuns.run` reads `estimate` (IF-203) instead of `check_budget`, which IF-203 does not offer (found by the mock); `user` is passed to the run | `tests/test_runner_interfaces.py` (4) |
+| REQ-RUN-012 no other import | `pipeline.py`, `run_workflow.py` import the standard library and `events`, `schema_check`, `sandbox`, `pipeline_model`, `pipeline` only | `tests/test_runner_interfaces.py` (5) |
+| REQ-RUN-013 no workflow named | the privacy rule "the chat's texts are not kept" (LG3) moved from the runner to `core.keep_texts`; no text constant of the two modules is the name of a shipped skill | `tests/test_runner_interfaces.py` (6, 7); `tests/test_content_store.py` takes the rule from Core |
+
+Decisions made while building:
+- `run(..., user="mia")`: IF-401 needs a user; WorkflowRuns passes its user, the other paths are MIA's own.
+- `fetch_page` in the real `ToolCalls` (`tool_calls.py`, N-2.4.2's file, provider side of A-34; test `test_a_fetched_page_is_web_text`); contract, mock, contract suite and test-spec row are drafts (A-34), installed by the owner.
+- Scratch check (feedback): `research.escalate` and `research.decompose@1` on the fixture world give the same answers through the door as through the old tool map; IF-401 got 3 `tool_call` events, no order problems.
+
+Files outside T-07's list: `core.py` (pass-through, `keep_texts`), `run_workflow.py` (T-01's module of this part), `tool_calls.py` (A-34 provider side), `web_app.py` (the wiring), `tests/test_content_store.py` (see below).
+
+Open for Phase 4:
+- `tests/test_content_store.py` changed: it pinned the privacy rule as a default of `Runner`; it now takes `core.keep_texts`, the rule Core gives its runner. The behaviour of the app is unchanged; check that this is a move, not a weakening.
+- Still outside IF-402: script nodes run in the sandbox directly (`Runner._do_script`, `sandbox.Operation`), the web checks of `checks.build_web_checks` call the web functions directly, the library tools `library_select`/`library_describe` are Core's. AC-1 holds for tool nodes; whether these must move too is a question for Verify or the redesign (FB-02).
+- `ToolCalls` keeps the calls per run id in memory for the life of the app (`_used`); a long-running app grows by one small dict a run.
+- The stricter default `started_by="message"` (proposed in T-04) is not done: it changes every command path outside the runner.
+- AC-9 "lookup, verify and review on the same runner": lookup (`research`) and verify (`verify_claim`) are pipelines; review is T-08.
+
+Local coder: `tests/test_runner_interfaces.py` (task `run1213-tests`, 2 attempts, both failed only on my wrong check `--forbid 'class Runner'`, which matched `class RunnerInterfaceTests`); the draft compared with the instruction by script: two hex digests lengthened, fixed by hand, verdict `fixed`. The added test methods in `tests/test_tool_calls.py` and `tests/test_runner_model_server.py` are one method each, written by hand. Red before the change (5 errors, 1 failure), green after.
+
+Tests reported green (feedback, not verification): `tests/test_runner_interfaces.py` (7), `tests/test_tool_calls.py` (11), `tests/test_content_store.py`, `tests/test_run_workflow.py`; all `tests/test_*.py` in the image fail only as on master (`test_amendment_report`, `test_config`, `test_harness`, `test_shutdown`); all contract suites and integration steps; A-34 on a scratch copy: `test_if_402_tool_calls.py` 12 tests, all suites as before.
+
+## Verify findings fixed (2026-10-31, owner: "go ahead with 1") – REQ-RUN-003, REQ-RUN-013, REQ-TLS-003, REQ-RUN-012
+
+The verification report (`verification-report.md`, status *Not verified*) and the one of N-2.4.2 named findings with a clear fix; each was reproduced in a failing test first.
+
+| Finding | Fix | Test (red before, green after) | Commit |
+|---|---|---|---|
+| F1 (N-2.4.1): a streamed chat to a server that is down showed "converse: ConnectError" | `pipeline_model._unreachable`: ollama 0.6.3 raises `ConnectionError` for a plain call but lets `httpx.ConnectError` through for a stream; both now become `ModelServerUnreachable` (httpx is matched by name, it comes only with ollama) | `test_a_stream_of_the_real_library_to_a_closed_port_is_the_sentence` (the real library on port 9, plain and streamed); the old fake raised the wrong error | `98ae7a2` |
+| F15 (N-2.4.1): nothing guarded that Core keeps the chat's texts out of the store | – (code unchanged) | `InTheCore.test_the_core_gives_its_runner_the_rule_that_keeps_the_chat_out` fails when `or keep_texts` is removed from `core.py` | `160bef6` |
+| F2 (N-2.4.2): the app's `ToolCalls` had no `work_trust`, `retractions`, `work_lookup` | `tool_calls.build_tool_calls(web_tools, scholar, trust_table, sandbox)`, used by `web_app.py` | `AppDoorTests.test_the_door_of_the_app_has_every_source` (`source_record` of a DOI gives the work's trust, not `source_error`); smoke import of the app in the image: all three wired | `70a6f35` |
+
+Not fixed, for the owner:
+- F12 (N-2.4.1): `tool.web_search@1` declares `{"results": ...}`, the door returns IF-402's list. Only a declaration: library output schemas are checked for their form, not against the output, and `research.top_urls` reads both shapes. The proper fix is `tool.web_search@2` plus new versions of the research pipelines that use `@1` (4 pipelines in 7 versions), which by the agent-app rules needs a logged dev eval run on MP-light: proposed together with the eval-spec gate (`v1-eval-spec`, `specs/mia/eval-spec.md`).
+- The decisions F2 to F6 of the N-2.4.1 report and the medium findings of N-2.4.2.
+
+Tests reported green (feedback, not verification): the three new tests; all `tests/test_*.py` in the image fail only in `test_amendment_report`, `test_config`, `test_harness` (incl. the case `n-planted-figure`), `test_shutdown` (the zombie without `--init`, found by the N-4.2 agent); all contract suites and integration steps.
+
+F12 (owner 2026-10-31: "align the node's output schema with IF-402"): `library/nodes/tool.web_search/2.json`, input `query` only and output a list of `{url, title, content}`, as IF-402 v2. Version 1 is not edited: it has recorded runs (the research baselines). Test `test_the_web_search_node_declares_the_output_of_if_402` (`tests/test_library.py`), red before, green after. All 7 versions of the 4 research pipelines (baseline, decompose, escalate, typed; all `draft`) still `use` `tool.web_search@1`. The skill `research` runs `research.escalate@1`; moving it (and the baseline it runs first) to `@2` is a new version of each and, by the agent-app rules, a logged dev eval run on MP-light: with the eval-spec gate. An unversioned `tool.web_search` (the planning tool `library_select`) now resolves to `@2`.
+
+## Owner's answers to F2 to F6 and T-08 (2026-10-31, D-128); A-38
+F2 skill flag for the chat's privacy rule (to build); F3 the AC-22 measurement of REQ-RUN-005 out of G-V1; F4 REQ-RUN-009 by the order, the 10 s part out with REQ-RUN-007; F5 a JavaScript test of the confirmation (to build); F6 REQ-RUN-012 narrowed to tool nodes (A-38, `requirements.md` history line), the rest to FB-03; T-08 deferred to the next iteration (plan marked). The re-verification (appended to `verification-report.md`) also names F9 and new findings N1 to N3 for the owner.
+
+## Re-verification findings built (2026-10-31, D-128, D-129)
+Each reproduced in a failing test first, then fixed; one commit each.
+
+| Finding | Fix | Test (red before, green after) | Commit |
+|---|---|---|---|
+| F5 confirmation of `/light!`, `/full!` | the confirmation moved into `chat-model.sendConfirmed`, used by the page unchanged | `tests/js/confirm.test.mjs` (5) | `9bceaa5` |
+| F9 chat runs as user "mia" | `ChatService.author()` ("page" without an account); `run_chat_exchange` passes `user=` | `test_the_author_of_the_running_message_is_known` (`tests/test_chat_backend.py`); `tests/test_web_app_wiring.py` (inspection of `web_app.py`, which starts the app when imported) | `bfeffa9` |
+| N3 nothing tested the app's door | – (wired in `70a6f35`) | `test_the_door_is_built_with_every_source` (`tests/test_web_app_wiring.py`; passes, guards the wiring) | `bfeffa9` |
+| N1 "MIA could not answer: Can't reach…" | `chat_service` shows `UNREACHABLE` alone; other errors keep the prefix | `test_a_model_server_that_is_down_shows_only_the_sentence` | `f9e736c` |
+| N2 a server that does not accept the connection hangs the chat | `communicator.model_client`: connect timeout 10 s, reading not limited; `ConnectTimeout` becomes `ModelServerUnreachable` | `test_a_server_that_does_not_answer_the_connection_is_the_sentence`, `test_the_client_of_mia_waits_10_s_to_connect_and_never_cuts_a_generation` | `d7d7578` |
+| F2 `core.keep_texts` named "chat" | `chat.md` v2 `personal: true`; `skill_store` reads it; `Runner.store_texts(skill)` keeps all but personal skills by default; `keep_texts` removed | `InTheCore` (the shipped chat is personal, its texts are not kept, `core.py` names no skill); `InThePipeline` uses a personal skill of another name | `38e72de` |
+
+Notes: `ollama_remote.prepare` (install and start) still builds a client without the connect timeout; it waits in its own loop (`ollama_wait`, 300 s), not on the chat path. Local coder: `tests/js/confirm.test.mjs` (task `f5-confirm-js`, 2 attempts failed on an extra `)`, a dropped `});`, a cut test id; fixed by hand after a script compare, verdict `fixed`; the bracket slip is now rule 11 of the model guide), `tests/test_web_app_wiring.py` (task `n3f9-wiring-tests`, second attempt passed, script compare identical, verdict `ok`).
+
+Tests reported green (feedback, not verification): all new tests; all `tests/test_*.py` in the image fail only in `test_amendment_report`, `test_config`, `test_harness` (rt_edit count, `n-planted-figure`), `test_shutdown` (no `--init`); contract suites and integration steps; JS 115 of 115.
+
+## Re-verification 2 answers built (2026-10-31, D-130); A-39
+- Scope: the three rows of D-128 are in `goals/G-V1/goal.md` as `partly` (REQ-RUN-005, -009, -013; written by the coding agent on the owner's answer). With them the node is **Verified with findings** (re-verification 2).
+- N7 `memory_write` personal (version 7): `InTheCore` checks it is personal and not kept; `eb2b89d`.
+- N8 accepted as a deviation: only the chat run carries the real user; `/lookup`, `memory_write`, the extensions stay "mia"; a regenerate names the account that clicked.
+- N9 `sendConfirmed` takes the promise of the command list; the page passes the promise it loads; two JS tests (waiting for the list, the page goes through `sendConfirmed`), red before, green after; `95d293a`. If the list cannot be loaded at all, `loadCommands` gives an empty list and a `/light!` is sent without asking (the server does not confirm, D-128 F5): noted for the next iteration.
+- N10 A-39: REQ-RUN-003 names the 10 s connect timeout, REQ-RUN-012 AC-1 the allowed `sandbox` import, `ui/README.md` the skill key `personal`; `aa009cd`.
+
+Tests reported green (feedback, not verification): all `tests/test_*.py` in the image fail only in `test_amendment_report`, `test_config`, `test_harness` (rt_edit count, `n-planted-figure`), `test_shutdown` (no `--init`); contract suites and integration steps; JS 117 of 117.
+
+## F14 fixed (2026-10-31, afternoon)
+An empty digest (held by the server or in the pin) matched every pin as a prefix. `WorkflowRuns._check_pin` now requires both; test `test_an_empty_digest_is_no_pin` (`tests/test_run_workflow.py`), red before, green after; IF-105 and IF-202 contract suites pass. Commit `cea4d62`.
+
+## F13, model part (2026-10-31, afternoon)
+`pipelineRunner` in `specs/mia/architecture.sysml` now names `run_workflow.py` and `tools/sync_workflows.py` (`check_sysml.sh` and `check_sysml_model.py` clean); commit `4baadae`. Still open: `decomposition.yaml` (protected) says 7 tasks for N-2.4.1, the plan has 8 (T-08, A-35): a one-line amendment for the owner.
+
+## F16, tests (2026-10-31, afternoon)
+Markers `@mark.req` for REQ-RUN-008, -014, -015 and Given/When/Then comments in `tests/test_runner_budgets.py` and `tests/test_run_workflow.py` (no assertion changed; test_doc_check clean; trace_check finds the markers); commit `b244f8c`. Still open: the Scenarios section of the node's `test-spec.md` (specification, written by people; the agent can draft it).
+
+## F11 fixed (2026-10-31, afternoon)
+A tool handed to one run (`run(..., tools=)`) was ignored when the door had a tool of the same name. `_do_tool` now goes to the door only for a tool without its own function; test `test_a_tool_given_to_one_run_wins_over_the_door`, red before, green after; commit `2fafbe3`.
+
+## F17 fixed (2026-10-31, afternoon)
+Reproduced: four containers at once with `:Z` on the same checkout, three got "Permission denied" on `/work`; with `:z` all four read it. `tools/run_in_image.sh` and `tools/check_accounts_real.sh` mount with `:z`; `tests/test_run_in_image.py` guards `:z` and `--init` (it reads the scripts; it fails on the old `:Z`). Commit `181d74f`.
+
+## F7 fixed (2026-10-31, D-133; branch v1-f7-n2)
+`Runner.run(started_by=)` defaults to "message": a run that does not say who started it cannot reach the internet (fail closed). Every command path says "command": `research_chat` (/lookup, /search), `extensions/review/entry.py` (/review), `harness.py` (4 calls), `reproduce.py`, `run_workflow.py`, `tools/measure_review_steps.py`, `tools/check_labelled_cases.py`. Tests: `test_a_run_that_does_not_say_who_started_it_counts_as_a_message`, `test_every_command_path_says_it_is_a_command` (a source check of the pipeline runner calls; the check runner of the harness is another runner), both red before; tests that stand for a command now say so (`test_runner_interfaces`, `test_evidence`, `test_library`), the scripted core of `test_review_chain` accepts the argument. Commit `cc70eae` (a docstring slip of the first try broke `pipeline.py`; caught by the full run, fixed before the commit).

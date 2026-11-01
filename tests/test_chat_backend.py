@@ -373,6 +373,84 @@ class ServiceTest(unittest.TestCase):
         self.service._run_exchange = original
         self.assertFalse(self.service.stop())
 
+    def test_stop_before_the_answer_starts(self):
+        """TC-CHA-004, REQ-CHA-004 (TC-IF-201-04): a stop that comes before the worker has taken the message ends that answer without asking the model;
+        the next message is answered as usual.
+
+        Example: send "story", stop -> True; then the worker runs: no chat_delta, chat_done "stopped", the model never called; stop again -> False
+        """
+        # Given a service whose worker runs only when the test lets it
+        pending, asked = [], []
+        self.service = self.make(spawn=pending.append)
+        original = self.service._run_exchange
+        self.service._run_exchange = lambda text, *rest: asked.append(text) or original(text, *rest)
+        # When a message is sent and stopped before the worker starts
+        self.service.send("story")
+        self.assertTrue(self.service.stop())
+        while pending:
+            pending.pop(0)()
+        # Then the answer ends stopped, without a sentence and without the model
+        self.assertNotIn("chat_delta", self.names())
+        self.assertEqual([p["status"] for e, p in self.events if e == "chat_done"], ["stopped"])
+        self.assertEqual(asked, [])
+        self.assertFalse(self.service.stop())
+        # and the stop does not carry over to the next message
+        self.service.send("again")
+        while pending:
+            pending.pop(0)()
+        self.assertEqual([p["status"] for e, p in self.events if e == "chat_done"], ["stopped", "done"])
+
+    def test_a_chat_answer_keeps_its_steps_for_the_account(self):
+        """TC-LOG-001, REQ-LOG-001 (D-138): the steps of every answer are kept for its account, also of a skill without a status block (the chat); the
+        status block itself still appears only for skills that want one.
+
+        Example: run_start "talk" (show false), step "thinking about it" -> account [{"seq": 1, "plain": "talk"}, {"seq": 2, "plain": "thinking about it"}], no `pipeline` in the record
+        """
+        # Given: an exchange whose pipeline does not show a status block and reports one step
+        def steps():
+            self.service.pipeline_event({"kind": "run_start", "plain": "talk", "payload": {"show": False}})
+            self.service.pipeline_event({"kind": "start", "plain": "thinking about it"})
+        self.mode["hook"] = steps
+        # When: a message is answered
+        self.service.send("Hi")
+        self.assertTrue(self.idle())
+        answer = [p for e, p in self.events if e == "chat_done"][0]
+        # Then: the account has the steps, and no status block was sent or kept
+        self.assertEqual(self.service.account(answer["id"]), [{"seq": 1, "plain": "talk"}, {"seq": 2, "plain": "thinking about it"}])
+        self.assertNotIn("chat_pipeline", self.names())
+        self.assertNotIn("pipeline", self.log.history()[0][-1])
+
+    def test_the_author_of_the_running_message_is_known(self):
+        """TC-LOG-001 (F9 of the N-2.4.1 re-verification, D-129): while an exchange runs, the service names the account that wrote the message; "page" without an account.
+
+        Example: send("Hi", author="anna") -> author() == "anna" during the exchange; send("Hi") -> "page"
+        """
+        # Given: an exchange that notes the author it sees
+        seen = []
+        self.mode["hook"] = lambda: seen.append(self.service.author())
+        # When: anna writes, then a page without an account
+        self.service.send("Hi", sender="anna", author="anna")
+        self.assertTrue(self.idle())
+        self.service.send("Hi again")
+        self.assertTrue(self.idle())
+        # Then: the exchange saw anna, then "page"
+        self.assertEqual(seen, ["anna", "page"])
+
+    def test_a_model_server_that_is_down_shows_only_the_sentence(self):
+        """TC-RUN-003, AC-23 (D-129, finding N1 of the N-2.4.1 re-verification): the note is the plain sentence alone, without "MIA could not answer:".
+
+        Example: the exchange fails with UNREACHABLE -> chat_error message == UNREACHABLE; another error keeps the prefix
+        """
+        # Given: the model server is down
+        unreachable = importlib.import_module("MIA.pipeline_model").UNREACHABLE
+        self.mode["error"] = unreachable
+        # When: a message is sent
+        self.service.send("Hi")
+        self.assertTrue(self.idle())
+        # Then: the user reads exactly the sentence
+        error = [p for e, p in self.events if e == "chat_error"][0]
+        self.assertEqual(error["message"], unreachable)
+
     def test_model_error_becomes_a_note_and_offline_mood(self):
         self.mode["error"] = "no route to ollama"
         self.service.send("Hi")
@@ -416,6 +494,23 @@ class ServiceTest(unittest.TestCase):
         results = [service.send("m%d" % i, sender="a")["ok"] for i in range(5)]
         self.assertEqual(results, [True, True, True, False, False])
         self.assertTrue(service.send("other", sender="b")["ok"])
+        self.gate.set()
+
+    def test_a_message_over_the_rate_limit_is_refused_with_the_code_rate_limited(self):
+        """TC-API-007 (D-149, V-5): the refusal of a message over the rate limit names the code rate_limited (IF-101: 429 rate_limited); nothing is stored.
+
+        Example: limit 2 per 60 s, a third message of "a" -> {"ok": False, "code": "rate_limited"}.
+        """
+        # Given: a limit of 2 messages and two sent
+        service = self.make(rate_limit=(2, 60), queue_size=10)
+        self.gate.clear()
+        service.send("m0", sender="a")
+        service.send("m1", sender="a")
+        # When: a third one is sent
+        ack = service.send("m2", sender="a")
+        # Then: it is refused with the code
+        self.assertEqual((ack["ok"], ack.get("code")), (False, "rate_limited"))
+        self.assertEqual(self.log.last("user")["text"], "m1")
         self.gate.set()
 
     def test_automatic_message_is_logged_with_marker(self):

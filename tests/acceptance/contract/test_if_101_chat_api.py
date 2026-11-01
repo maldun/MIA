@@ -153,7 +153,7 @@ class ChatApiContract(unittest.TestCase):
     @mark.req("IF-101", "REQ-FE-001", "REQ-CLV-001")
     @each_provider(IF)
     def test_the_acknowledgement_carries_the_stored_message_and_the_client_id_comes_back(self, api):
-        """TC-IF-101-09 (v1): send answers with id, position and the stored message; the message and its chat_message event carry the client id, so the page finds its own copy."""
+        """TC-IF-101-20 (v1): send answers with id, position and the stored message; the message and its chat_message event carry the client id, so the page finds its own copy."""
         anna, ben = api.login("anna", "pw-anna"), api.login("ben", "pw-ben")
         api.connect(ben)
         api.events(ben)
@@ -555,6 +555,30 @@ class ChatApiContract(unittest.TestCase):
         self.assertTrue(done["text"].startswith("/review could not finish"))
         self.assertIn("chat_error", names(events))
         self.assertIn("the scholarly service is down", api.history(s)[-1]["text"])
+
+
+    @mark.req("IF-101", "REQ-API-007")
+    @each_provider(IF)
+    def test_the_eleventh_message_of_an_account_within_a_minute_is_rate_limited(self, api):
+        """TC-IF-101-33 (v12, A-54): ten messages of one account within 60 s pass; the 11th is 429 rate_limited and is not stored; another account still sends."""
+        s, b = api.login("anna", "pw-anna"), api.login("ben", "pw-ben")
+        for i in range(10):
+            api.send(s, "m%d" % i)
+            api.settle()
+        err = error_of(lambda: api.send(s, "m10"))
+        self.assertEqual((err.status, err.code), (429, "rate_limited"))
+        self.assertNotIn("m10", [m["text"] for m in api.history(s, 50)])
+        self.assertEqual(api.send(b, "b1")["position"], 1)
+
+    @mark.req("IF-101", "REQ-CHA-015")
+    @each_provider(IF)
+    def test_a_vote_value_that_is_no_integer_is_refused(self, api):
+        """TC-IF-101-32 (A-61, D-162): a vote value 1.0, -1.0 or True is 422 invalid_vote with the rule value and is not stored."""
+        anna = api.login("anna", "pw-anna")
+        for value in (1.0, -1.0, True):
+            err = error_of(lambda: api.vote(anna, "service", "service", value))
+            self.assertEqual((err.status, err.code, err.rule), (422, "invalid_vote", "value"), value)
+        self.assertEqual(api.score(anna)["votes"], 0)
 
 
 if __name__ == "__main__":

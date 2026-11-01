@@ -124,10 +124,13 @@ def load_suite(folder):
     return Suite(name, meta.get("description", ""), target, cases, folder)
 
 
-def list_suites(root):
+def list_suites(root, holdout=False):
+    """the suites of a folder (a broken one as its SuiteError); the folders *.holdout stay unread unless holdout=True (REQ-EVL-002, D-166: Verify only)"""
     suites = []
     if os.path.isdir(root):
         for name in sorted(os.listdir(root)):
+            if not holdout and name.endswith(".holdout"):
+                continue
             if os.path.isfile(os.path.join(root, name, "suite.json")):
                 try:
                     suites.append(load_suite(os.path.join(root, name)))
@@ -333,14 +336,15 @@ class Harness:
         if variant.get("budget"):
             skill["budget"] = dict(skill["budget"], **variant["budget"])
         graph = self.core.graph(skill)[0]
-        result = self.core.runner.run(self._pinned(skill), graph, case["input"], task="eval:" + suite.name)
+        result = self.core.runner.run(self._pinned(skill), graph, case["input"], task="eval:" + suite.name, started_by="command")
         return self._status_of(result, suite)
 
     def _pinned(self, skill):
-        """the skill with the seed and the temperature of the pin in its model options, so that they reach every model call (REQ-EVAL-003)"""
+        """the skill with the model of the pin and its seed and temperature, so that they reach every model call (REQ-EVAL-003); the pin decides
+        the model, not the skill file's profile (D-166: the header names what ran)"""
         if self.pin:
             model = skill.get("model") or {}
-            skill["model"] = dict(model, options=dict(model.get("options") or {}, seed=self.pin["seed"], temperature=self.pin["temperature"]))
+            skill["model"] = {"name": self.pin["name"], "options": dict(model.get("options") or {}, seed=self.pin["seed"], temperature=self.pin["temperature"])}
         return skill
 
     def _status_of(self, result, suite):
@@ -371,7 +375,7 @@ class Harness:
         for key in ("pipeline", "model"):
             if variant.get(key):
                 skill[key] = variant[key] if key == "pipeline" else ({"profile": variant[key]} if variant[key] in ("light", "full", "current") else {"name": variant[key]})
-        result = self.core.runner.run(self._pinned(skill), self.core.graph(skill)[0], case["input"], task="eval:" + suite.name)
+        result = self.core.runner.run(self._pinned(skill), self.core.graph(skill)[0], case["input"], task="eval:" + suite.name, started_by="command")
         if result.status != "done" or not isinstance(result.answer, dict):
             return "error:" + (result.status if result.status != "done" else "no_answer"), {"error": result.error, "answer": result.answer}
         score = plans.score_plan(result.answer, case["gold"], case["input"]["question"])
@@ -392,7 +396,7 @@ class Harness:
             with open(os.path.join(suite.path, suite.target["fixtures"]), encoding="utf-8") as fp:
                 fixtures = self._fixtures[suite.name] = json.load(fp)
         tools, session = fixture_tools(fixtures)
-        result = self.core.runner.run(self._pinned(skill), self.core.graph(skill)[0], case["input"], task="eval:" + suite.name, tools=tools)
+        result = self.core.runner.run(self._pinned(skill), self.core.graph(skill)[0], case["input"], task="eval:" + suite.name, tools=tools, started_by="command")
         if result.status != "done" or not isinstance(result.answer, dict):
             return "error:" + (result.status if result.status != "done" else "no_answer"), {"error": result.error, "answer": result.answer}
         score = research_score.score_research(result.answer, case["gold"], fixtures)
@@ -408,7 +412,7 @@ class Harness:
         for key in ("pipeline", "model"):
             if variant.get(key):
                 skill[key] = variant[key] if key == "pipeline" else ({"profile": variant[key]} if variant[key] in ("light", "full", "current") else {"name": variant[key]})
-        result = self.core.runner.run(self._pinned(skill), self.core.graph(skill)[0], case["input"], task="eval:" + suite.name)
+        result = self.core.runner.run(self._pinned(skill), self.core.graph(skill)[0], case["input"], task="eval:" + suite.name, started_by="command")
         if result.status != "done" or not isinstance(result.answer, dict):
             return "error:" + (result.status if result.status != "done" else "no_answer"), {"error": result.error, "answer": result.answer}
         claims = result.answer.get("claims")
@@ -419,7 +423,7 @@ class Harness:
 
     # -- a run --
     def run(self, suite, variant=None, repeats=1, tags=None, only=None, limit=None, progress=None, pin=None, include_retired=False):
-        """pin: {"name", "digest", "seed", "temperature"} of the model setting (eval-spec.md, Model pins); seed and temperature go to every model call (REQ-EVAL-003)
+        """pin: {"id", "name", "digest", "seed", "temperature"} of the model setting (eval-spec.md, Model pins); seed and temperature go to every model call (REQ-EVAL-003)
         and the whole pin into the header (REQ-EVAL-001). Retired cases are skipped unless include_retired (REQ-EVAL-002)."""
         variant = dict({"name": "default"}, **(variant or {}))
         cases = suite.select(tags, only, limit, include_retired)
@@ -429,18 +433,14 @@ class Harness:
         self.pin = pin
         header = {"suite": suite.name, "variant": variant, "repeats": repeats, "cases": len(cases), "started": self._clock(), "target": suite.target}
         if pin:
-            header["pin"] = {key: pin.get(key) for key in ("name", "digest", "seed", "temperature")}
+            header["pin"] = {key: pin.get(key) for key in ("id", "name", "digest", "seed", "temperature")}
         header["suite_sha1"] = suite_sha1(suite.path)
         header["benchmark_version"] = header["suite_sha1"]               # REQ-EVL-004: the version of the benchmark is the content of the suite
-        if suite.target["kind"] == "workflow":
-            if not pin:
-                raise SuiteError("%s: a workflow suite needs a pin (model, seed, temperature)" % suite.name)
-            header["workflow"], header["workflow_version"] = suite.target["workflow"], suite.target["version"]
-        if suite.target["kind"] == "pipeline" and self.core is not None:
-            skill = self.core.skills.get(variant.get("skill") or suite.target["skill"])
-            if skill is not None:
-                header["pipeline"] = variant.get("pipeline") or skill["pipeline"]
-                header["skill_version"] = skill["version"]
+        if pin and variant.get("model"):
+            raise SuiteError("%s: --model %s together with --pin: the pin decides the model of a run (D-166); drop --model" % (suite.name, variant["model"]))
+        if suite.target["kind"] == "workflow" and not pin:
+            raise SuiteError("%s: a workflow suite needs a pin (model, seed, temperature)" % suite.name)
+        header.update(self._versions(suite, variant))
         records, total = [], len(cases) * repeats
         for repeat in range(repeats):
             for case in cases:
@@ -451,6 +451,18 @@ class Harness:
         header["finished"] = self._clock()
         mark_judge_verdicts(records, self.calibrations)
         return Run(header, records)
+
+    def _versions(self, suite, variant):
+        """what ran (REQ-EVL-004): a workflow suite names the workflow and its version; a suite of a skill (pipeline, research, plan, extraction)
+        the skill, its version and the pipeline (the variant's or the skill file's); a code target (checks, text rules) has no pipeline, and the
+        command line adds the commit of the code to every header"""
+        if suite.target["kind"] == "workflow":
+            return {"workflow": suite.target["workflow"], "workflow_version": suite.target["version"]}
+        name = variant.get("skill") or suite.target.get("skill")
+        skill = self.core.skills.get(name) if name and self.core is not None else None
+        if skill is None:
+            return {"pipeline": None}
+        return {"skill": name, "skill_version": skill["version"], "pipeline": variant.get("pipeline") or skill.get("pipeline")}
 
     def _run_case(self, target, suite, case, variant, repeat):
         before = self.counter.snapshot() if self.counter else (0, 0, 0)
@@ -594,13 +606,18 @@ def load_calibrations(folder):
 
 
 def require_same_cases(run_a, run_b):
-    """REQ-EVL-008: two runs are compared only on the same cases with the same repeats; the differing case is named"""
+    """REQ-EVL-008: two runs are compared only on the same cases with the same repeats and of the same suite version (D-164: the same ids
+    can hide changed cases); the differing case is named. A run saved before the version was recorded has none and is not checked for it."""
     ids_a, ids_b = {r["case"] for r in run_a.records}, {r["case"] for r in run_b.records}
     if ids_a != ids_b:
         differing = sorted(ids_a ^ ids_b)
         raise SuiteError("the runs do not have the same cases (%d differ: %s)" % (len(differing), ", ".join(differing[:10])))
     if run_a.header["repeats"] != run_b.header["repeats"]:
         raise SuiteError("the runs do not have the same repeats (%s and %s)" % (run_a.header["repeats"], run_b.header["repeats"]))
+    version_a, version_b = (run.header.get("benchmark_version") or run.header.get("suite_sha1") for run in (run_a, run_b))
+    if version_a and version_b and version_a != version_b:
+        changed = sorted(name for name in set(version_a) | set(version_b) if version_a.get(name) != version_b.get(name))
+        raise SuiteError("the runs are not of the same suite version (changed: %s)" % ", ".join(changed))
 
 
 def format_compare(run_a, run_b):
@@ -609,7 +626,7 @@ def format_compare(run_a, run_b):
     lines = ["A = %s    B = %s" % (name(run_a), name(run_b)), "on the %d cases both ran (a case with repeats counts as the share of right runs):" % c["cases"],
              "   A right on %.1f, B right on %.1f" % (c["a_right"], c["b_right"]),
              "   only A right: %d   only B right: %d   exact sign test p = %.3f %s" % (len(c["only_a"]), len(c["only_b"]), c["p_value"],
-                                                                                         "(a difference you can believe)" if c["p_value"] < 0.05 else "(not distinguishable from chance with these cases)")]
+                                                                                         "(dev feedback, not a verdict: decide on the holdout)" if c["p_value"] < 0.05 else "(not distinguishable from chance with these cases)")]
     if c["only_a"]:
         lines.append("   only A: " + ", ".join(c["only_a"][:15]))
     if c["only_b"]:

@@ -42,7 +42,7 @@ class Chain(unittest.TestCase):
         self.events, self.calls = [], []
         skills = T.skills(self.calls)
 
-        def run(name, inputs, should_stop=None):
+        def run(name, inputs, should_stop=None, started_by=None):
             return types.SimpleNamespace(status="done", answer=skills(name, inputs), error=None)
         self.services = types.SimpleNamespace(
             core=types.SimpleNamespace(run=run), cfg={}, scholar=T.FakeScholar([T.work("10.1/a", "Colouring"), T.work("10.1/b", "Timetabling")]), web_get=lambda *a, **k: None,

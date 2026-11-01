@@ -24,7 +24,7 @@ if ! curl -sf localhost:11434/api/tags | grep -q "$PIN_DIGEST"; then
 fi
 echo "digest of $MODEL is the pin"
 
-run() { "$PY" tools/eval.py run "$@" --model "$MODEL" --pin MP-light --repeats 1 --quiet; }
+run() { "$PY" tools/eval.py run "$@" --pin MP-light --repeats 1 --quiet; }
 
 for suite in verdicts_vitaminc verdicts_wikidata; do
   for style in single cops; do

@@ -1,7 +1,9 @@
 // The account dialog (REQ-CLV-014, REQ-CLV-022): who is logged in (the account of a kept session), the change of the user's own password and the logout.
+// A password goes only over HTTPS or to this computer, as at the login (REQ-CLV-018).
 import { passwordProblem } from './panels-model.js';
+import { secureChannel } from './login.js';
 
-export function initAccount({ dialog, nameEl, form, oldInput, newInput, repeatInput, errorLine, closeButton, logoutButton, api, storage, t, notify = () => {}, onLoggedOut = () => {} }) {
+export function initAccount({ dialog, nameEl, form, oldInput, newInput, repeatInput, errorLine, closeButton, logoutButton, api, storage, t, socket = null, location = globalThis.location, notify = () => {}, onLoggedOut = () => {} }) {
   function show(key) {
     errorLine.textContent = key ? t(key) : '';
     errorLine.hidden = !key;
@@ -25,6 +27,7 @@ export function initAccount({ dialog, nameEl, form, oldInput, newInput, repeatIn
     event.preventDefault();
     const problem = passwordProblem(oldInput.value, newInput.value, repeatInput.value);
     if (problem) { show(`account.${problem}`); return; }
+    if (!secureChannel(location)) { show('login.insecure'); return; }      // F7: nothing is sent, the server would refuse it after reading both
     try {
       await api.changePassword(oldInput.value, newInput.value);
     } catch (error) {
@@ -45,6 +48,7 @@ export function initAccount({ dialog, nameEl, form, oldInput, newInput, repeatIn
     }
     form.reset();
     dialog.close();
+    socket?.disconnect();                                  // the server ended the session; the socket would be refused anyway
     onLoggedOut();
   });
   closeButton.addEventListener('click', () => dialog.close());

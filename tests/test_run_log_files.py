@@ -1,9 +1,10 @@
 """
 TC-LOG-005 (REQ-LOG-005, reworded by A-28): the Run log keeps the events of a run as append-only files in its own folder and imports no database driver. Inspection of the code of the
-Run log (run_log.py, events.py, run_explain.py, reproduce.py) and a check of the files. Run: python tests/test_run_log_files.py
+Run log (run_log.py, events.py, run_explain.py, reproduce.py and run_events.py, the provider of IF-401) and a check of the files. Run: python tests/test_run_log_files.py
 """
 import ast
 import os
+import re
 import sys
 import tempfile
 import unittest
@@ -13,7 +14,7 @@ sys.path.insert(0, REPO)
 
 from run_log import RunLog  # noqa: E402
 
-RUN_LOG_CODE = ("run_log.py", "events.py", "run_explain.py", "reproduce.py")
+RUN_LOG_CODE = ("run_log.py", "events.py", "run_explain.py", "reproduce.py", "run_events.py")
 DRIVERS = ("psycopg", "psycopg2", "asyncpg", "pg8000", "sqlalchemy", "sqlite3", "pymysql", "mysql", "redis", "pymongo")
 
 
@@ -31,11 +32,22 @@ def imported(path):
 
 class RunLogFiles(unittest.TestCase):
     def test_the_code_of_the_run_log_imports_no_database_driver(self):
-        """TC-LOG-005: none of the four files of the Run log imports a database driver.
-        Example: run_log.py, events.py, run_explain.py and reproduce.py import none of psycopg, sqlite3, sqlalchemy ... ."""
-        # Given the four files of the Run log, when their imports are read, then none is a database driver
+        """TC-LOG-005: none of the five files of the Run log imports a database driver.
+        Example: run_log.py, events.py, run_explain.py, reproduce.py and run_events.py import none of psycopg, sqlite3, sqlalchemy ... ."""
+        # Given the five files of the Run log, when their imports are read, then none is a database driver
         for path in RUN_LOG_CODE:
             self.assertEqual(sorted(imported(path) & set(DRIVERS)), [], path)
+
+    def test_the_model_part_of_the_run_log_names_the_provider_of_if_401(self):
+        """TC-LOG-005 (D-144, F5 of the N-2.4.3 verification): the part `runLog` of specs/mia/architecture.sysml names run_events.py, the provider of IF-401, among its modules.
+        Example: modules = ("events.py", "run_log.py", "evidence.py", "run_events.py") contains run_events.py."""
+        # Given the system model
+        with open(os.path.join(REPO, "specs", "mia", "architecture.sysml"), encoding="utf-8") as handle:
+            model = handle.read()
+        # When the modules of the part runLog are read
+        modules = re.search(r"part runLog \{.*?modules = \(([^)]*)\)", model, re.S).group(1)
+        # Then run_events.py is one of them
+        self.assertIn('"run_events.py"', modules)
 
     def test_the_events_of_a_run_are_appended_to_a_file_and_none_is_rewritten(self):
         """TC-LOG-005 (A-28): a finished run, a second run and a feedback line only add to the end of the monthly file.

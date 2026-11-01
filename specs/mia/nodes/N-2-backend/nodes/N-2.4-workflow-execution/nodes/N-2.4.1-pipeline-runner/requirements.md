@@ -32,7 +32,7 @@ Runs a workflow step by step under budgets: model calls and model management, pr
 
 ### REQ-RUN-003 – Model server unreachable
 - Level: low-2   Subject: TaskRuntime
-- Text: If the model server is unreachable, then the Pipeline runner shall say so in plain words.
+- Text: If the model server is unreachable or does not accept the connection within 10 s, then the Pipeline runner shall say so in plain words.
 - Rationale: refines REQ-WFX-004
 - Parent: REQ-WFX-004
 - Priority: Must
@@ -40,7 +40,7 @@ Runs a workflow step by step under budgets: model calls and model management, pr
 - Acceptance criterion: AC-23: with the fake server down the user gets the plain message (exact)
 - Verified by: TC-RUN-003
 - Status: Approved
-- History: –
+- History: 2026-10-31 A-39 (D-129, D-130): the connect timeout of 10 s named; the time of a generation is not limited
 
 ### REQ-RUN-004 – Optional learning
 - Level: low-2   Subject: TaskRuntime
@@ -64,7 +64,7 @@ Runs a workflow step by step under budgets: model calls and model management, pr
 - Acceptance criterion: AC-22: over the lookup suites 100 % of inputs are at most 4096 tokens at num_ctx 8192
 - Verified by: TC-RUN-005
 - Status: Approved
-- History: –
+- History: 2026-10-31 D-128: the measurement of AC-22 (server token counts over the lookup suites) is out of G-V1, back with eval-spec.md; the refusal by estimate stays in
 
 ### REQ-RUN-006 – Model calls of the first try
 - Level: low-2   Subject: TaskRuntime
@@ -112,7 +112,7 @@ Runs a workflow step by step under budgets: model calls and model management, pr
 - Acceptance criterion: AC-19: with a review slice running a chat message gets its first text within 10 s
 - Verified by: TC-RUN-009
 - Status: Approved
-- History: –
+- History: 2026-10-31 D-128: verified by the order of the turns; the 10 s part of AC-19 is out of G-V1 with REQ-RUN-007
 
 ### REQ-RUN-010 – One model at a time
 - Level: low-2   Subject: TaskRuntime
@@ -140,15 +140,15 @@ Runs a workflow step by step under budgets: model calls and model management, pr
 
 ### REQ-RUN-012 – Use the library, the tools and the log only through their interfaces
 - Level: low-2   Subject: TaskRuntime
-- Text: The Pipeline runner shall fetch a workflow only through IF-203, call tools only through IF-402 and write events only through IF-401.
+- Text: The Pipeline runner shall fetch a workflow only through IF-203, call the tools of tool nodes only through IF-402 and write events only through IF-401.
 - Rationale: refines REQ-WFX-019
 - Parent: REQ-WFX-019
 - Priority: Must
 - Verification method: Inspection, Test
-- Acceptance criterion: AC-1: with the mocks of the three interfaces a scripted workflow runs end to end; no other import exists
+- Acceptance criterion: AC-1: with the mocks of the three interfaces a scripted workflow runs end to end; no other import of a neighbour exists (the `sandbox` import of the script nodes is allowed until FB-03, A-38)
 - Verified by: TC-RUN-012
 - Status: Approved
-- History: –
+- History: 2026-10-31 A-38 (D-128): "call tools" narrowed to the tools of tool nodes; script nodes and the web checks reach the sandbox and the web directly until the next iteration (FB-03); 2026-10-31 A-39 (D-130): AC-1 names the allowed `sandbox` import
 
 ### REQ-RUN-013 – Know no particular workflow
 - Level: low-2   Subject: TaskRuntime
@@ -160,7 +160,7 @@ Runs a workflow step by step under budgets: model calls and model management, pr
 - Acceptance criterion: AC-9: the lookup, verify and review entries run with the same runner; a new valid entry runs without a change of code
 - Verified by: TC-RUN-013
 - Status: Approved
-- History: –
+- History: 2026-10-31 D-128: the review entry of AC-9 is out of G-V1 (T-08 deferred to the next iteration with FB-02, FB-03); lookup and verify run on the runner
 
 ### REQ-RUN-014 – Realise IF-202
 - Level: low-2   Subject: TaskRuntime

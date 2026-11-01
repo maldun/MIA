@@ -98,5 +98,13 @@
   "feedback_log": "data/feedback_log.jsonl",
   "tailscale": false,
   "public_hosts": [],
-  "tts_warmup": true
+  "tts_warmup": true,
+  "files_dir": "data/files",
+  "files_max_bytes": 1073741824,
+  "files_max_total_bytes": 53687091200,
+  "model_classes_file": "data/model_classes.json",
+  "review_answer_seconds": 1800,
+  "skill_options": {},
+  "workflow_speak": true,
+  "workflow_speak_tasks": {}
 }

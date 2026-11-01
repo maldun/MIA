@@ -8,6 +8,7 @@ import json
 import os
 import sys
 import tempfile
+import time
 import unittest
 
 import requests
@@ -270,6 +271,22 @@ class Http(unittest.TestCase):
             clock[0] += 2 * 86400
             http.get(self.URL, {"search": "a"})
             self.assertEqual(len(session.calls), 3)
+
+    def test_writing_the_cache_removes_entries_older_than_its_lifetime(self):
+        # N-4.2 N1, D-148: the stack's cache lives in the data volume and its backups; expired entries must not pile up there
+        with tempfile.TemporaryDirectory() as folder:
+            now = time.time()
+            for name, days in (("old.json", 8), ("fresh.json", 6), ("note.txt", 30)):
+                path = os.path.join(folder, name)
+                with open(path, "w", encoding="utf-8") as fp:
+                    json.dump({"at": now - days * 86400, "key": name, "body": "x"}, fp)
+                os.utime(path, (now - days * 86400, now - days * 86400))
+            S.ResponseCache(folder, days=7).put("new", "body")
+            names = sorted(os.listdir(folder))
+            self.assertNotIn("old.json", names)
+            self.assertIn("fresh.json", names)
+            self.assertIn("note.txt", names)
+            self.assertEqual(len(names), 3)
 
     def test_errors_are_not_cached(self):
         with tempfile.TemporaryDirectory() as folder:

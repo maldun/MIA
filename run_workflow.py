@@ -43,11 +43,12 @@ class WorkflowRuns:
         budget = dict(budget or {})
         if options and options.get("model_pin") is not None:
             self._check_pin(options["model_pin"])
-        too_big = self.library.check_budget(workflow, budget, version)["exceeded"]
+        estimate = self.library.estimate(workflow, version)          # IF-203; the budgets a run may not exceed, an absent key is unlimited
+        too_big = [key for key in ("seconds", "calls", "tokens") if key in budget and estimate[key] > budget[key]]
         if too_big:
             return self._refused(workflow, version, user, options, too_big)
         skill = dict(skill, budget={**skill["budget"], **{k: v for k, v in budget.items() if k in KEYS}}, model=self._model(skill, options))
-        result = self.core.runner.run(skill, graph, inputs, task=workflow)
+        result = self.core.runner.run(skill, graph, inputs, task=workflow, user=user, started_by="command")
         status = STATUS.get(result.status, "error")
         events = [self._event(e, result.run_id, user) for e in result.events]
         events[0].update(workflow=workflow, version=version, options=dict(options) if options else None)
@@ -108,7 +109,8 @@ class WorkflowRuns:
     def _check_pin(self, pin):
         wanted, held = self.pins.get(pin), self._held()
         digest = held.get(wanted["name"]) if wanted else None
-        if digest is None or not (digest.startswith(wanted["digest"]) or wanted["digest"].startswith(digest)):
+        # an empty digest on either side would match everything as a prefix (F14 of the N-2.4.1 verification)
+        if not digest or not wanted["digest"] or not (digest.startswith(wanted["digest"]) or wanted["digest"].startswith(digest)):
             raise RunWorkflowError("pin_unavailable", pin)        # never a silent fallback to another model (IF-105)
 
     def _model(self, skill, options):

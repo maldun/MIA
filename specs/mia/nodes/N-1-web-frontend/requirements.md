@@ -152,15 +152,15 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 
 ### REQ-FE-013 – Voice lines
 - Level: high   Subject: WebFrontEnd
-- Text: When the backend sends a voice line, the Web Frontend shall play it, and if its audio file is missing, skip it and report it to the backend.
+- Text: When the backend sends a voice line, the Web Frontend shall play it, and if its audio file is missing, skip it and report it in the page (IF-112 callback); no event goes to the backend.
 - Rationale: refines FR-31
 - Parent: FR-31
 - Priority: Should
 - Verification method: Test
-- Acceptance criterion: AC-13: a line with a missing file produces one report event and no error shown; the conversation continues
+- Acceptance criterion: AC-13: a line with a missing file produces one report in the page (a console warning) and no error shown; the conversation continues
 - Verified by: TC-N1-001, TC-VPB-003
 - Status: Approved
-- History: –
+- History: 2026-10-31 A-50 (D-140, D-142): the report stays in the page (IF-112 callback), no backend event
 
 ### REQ-FE-014 – Status line and account of a task
 - Level: high   Subject: WebFrontEnd

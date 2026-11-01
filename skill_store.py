@@ -42,6 +42,7 @@ def parse_skill(text, path=""):
     skill["budget"] = {**DEFAULT_BUDGET, **(meta.get("budget") or {})}
     skill["model"] = meta.get("model") or {}
     skill["status_block"] = bool(meta.get("status_block", True))
+    skill["personal"] = bool(meta.get("personal", False))       # a conversation of a person: its prompts and answers are not kept in full (LG3, D-128)
     skill["prompts"] = {k: v.strip() for k, v in sections.get("prompts", {}).items()}
     skill["examples"] = {k: v.strip() for k, v in sections.get("examples", {}).items()}
     skill["lines"] = {k: _bullets(v) for k, v in sections.get("lines", {}).items()}

@@ -2,6 +2,7 @@
 Tests for the content store (content_store.py, ui/REQUIREMENTS_CORE.md CG14): put and get by hash, secrets removed before hashing, idempotence, a store that cannot write,
 retention, and the link to the model_call events of the pipeline runner. Run with the MIA virtualenv: python tests/test_content_store.py
 """
+import ast
 import json
 import os
 import random
@@ -17,6 +18,8 @@ sys.path.insert(0, HERE)
 import events as E                                       # noqa: E402
 import test_pipeline as TP                               # noqa: E402
 from content_store import ContentStore                   # noqa: E402
+from core import Core                                    # noqa: E402
+from library import Library                              # noqa: E402
 from pipeline import Runner                              # noqa: E402
 
 
@@ -103,8 +106,9 @@ class InThePipeline(unittest.TestCase):
     def go(self, store, name="demo", **kw):
         nodes = [{"id": "plan", "kind": "model", "prompt": "plan", "schema": "queries", "output": "out"}]
         events = []
+        personal = kw.pop("personal", False)
         runner = Runner(model=TP.FakeModel([json.dumps({"queries": ["a"]})]), rng=random.Random(1), store=store, **kw)
-        runner.run(TP.skill(name=name), TP.graph(nodes), {"text": "why? write to me@example.org"}, on_event=events.append)
+        runner.run(TP.skill(name=name, personal=personal), TP.graph(nodes), {"text": "why? write to me@example.org"}, on_event=events.append)
         return [e for e in events if e.get("type") == "model_call"]
 
     def test_prompt_and_answer_are_in_the_store_under_the_hashes_of_the_event(self):
@@ -122,15 +126,40 @@ class InThePipeline(unittest.TestCase):
     def test_a_conversation_is_not_stored_unless_asked(self):
         with tempfile.TemporaryDirectory() as folder:
             store = ContentStore(folder)
-            calls = self.go(store, name="chat")
+            calls = self.go(store, name="talk", personal=True)                  # a skill that declares itself personal (D-128), whatever its name
             self.assertEqual(store.stats()["files"], 0)
             self.assertTrue(calls[0]["payload"]["prompt_hash"].startswith("h:"))             # the hash is in the event all the same
-            self.go(ContentStore(folder), name="chat", store_texts=lambda name: True)
+            self.go(ContentStore(folder), name="talk", personal=True, store_texts=lambda skill: True)
             self.assertEqual(ContentStore(folder).stats()["files"], 2)
 
     def test_no_store_no_files_and_the_run_is_unchanged(self):
         calls = self.go(None)
         self.assertEqual(calls[0]["payload"]["valid"], True)
+
+
+class InTheCore(unittest.TestCase):
+    def test_the_core_gives_its_runner_the_rule_that_keeps_the_chat_out(self):
+        """LG3 (F15, F2 of N-2.4.1, D-128): the runner that Core builds keeps the texts of every skill but those marked personal (the shipped chat), unless the setting asks for them; core.py names no skill.
+
+        Example: store_texts(chat skill) -> False, (summarize skill) -> True; with store_texts=lambda skill: True -> (chat skill) True; no text constant of core.py is a skill name
+        """
+        # Given: a Core with the shipped skills and no setting for the chat texts
+        with tempfile.TemporaryDirectory() as folder:
+            core = Core(os.path.join(REPO, "skills"), Library(os.path.join(REPO, "library")), folder, store=ContentStore(folder))
+            # When: its runner is asked which texts it keeps
+            # Then: not those of the chat, those of every other skill
+            chat, summarize = core.skills.get("chat"), core.skills.get("summarize")
+            self.assertEqual((chat["personal"], core.runner.store_texts(chat), core.runner.store_texts(summarize)), (True, False, True))
+            # Then: the memory of a conversation is as personal as the conversation (N7, D-130)
+            memory = core.skills.get("memory_write")
+            self.assertEqual((memory["personal"], core.runner.store_texts(memory)), (True, False))
+            # Given, When, Then: the setting store_chat_texts (store_texts that keeps all) still wins
+            core = Core(os.path.join(REPO, "skills"), Library(os.path.join(REPO, "library")), folder, store_texts=lambda skill: True)
+            self.assertTrue(core.runner.store_texts(chat))
+            # Then: core.py names no shipped skill (REQ-RUN-013)
+            names = {f[:-3] for f in os.listdir(os.path.join(REPO, "skills")) if f.endswith(".md")}
+            tree = ast.parse(open(os.path.join(REPO, "core.py"), encoding="utf-8").read())
+            self.assertEqual({n.value for n in ast.walk(tree) if isinstance(n, ast.Constant) and isinstance(n.value, str)} & names, set())
 
 
 if __name__ == "__main__":

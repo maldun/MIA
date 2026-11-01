@@ -2,7 +2,7 @@
 
 The path every workflow takes in MIA (FR-20, REQ-EVL-006): a user has an idea, writes a skill file and a pipeline, checks them, specifies and measures them, declares what they may do, keeps them as a draft until a person promotes them, and the time from the idea to the promotion is on record. Nothing on this path changes the platform: a new workflow is a new valid library entry.
 
-The example all the way is the **lookup**: "answer a factual question with sources and verbatim quotes, or say unknown" (FR-10). Its simplest form is the pipeline `research.baseline@1` (search, read the first pages, choose passages, one model call, quotes checked in code); the skill `research` points to the strategies built on it. Every block marked *run* below is executed by `tests/test_skill_path_doc.py` with a scripted model, so the examples stay true. Nothing here needs the real model, a network or Ollama; the real-model commands are shown without the mark.
+The example all the way is the **lookup**: "answer a factual question with sources and verbatim quotes, or say unknown" (FR-10). Its simplest form is the pipeline `research.baseline@1` (search, read the first pages, choose passages, one model call, quotes checked in code); the skill `research` points to the strategies built on it. Every block marked *run* below is executed by `tests/acceptance/test_skill_path_doc.py` with a scripted model, so the examples stay true. Nothing here needs the real model, a network or Ollama; the real-model commands are shown without the mark.
 
 | Step | You | Where it lives |
 |---|---|---|
@@ -26,7 +26,7 @@ A skill is one file in `skills/`: the model profile, the pipeline it runs, the t
 python tools/library.py show research.baseline@1 | head -n 12
 ```
 
-The same pipeline runs here with a scripted model over the recorded web of the research suite, for the question "When did the bridge open?" (a real run is `python tools/eval.py run research --variant baseline --repeats 3`, see the section Core, phase 5c in [ui/README.md](../ui/README.md)):
+The same pipeline runs here with a scripted model over the recorded web of the research suite, for the question "When did the bridge open?" (a real run is `python tools/eval.py run research --pin MP-light --variant baseline --repeats 3`, see the section Core, phase 5c in [ui/README.md](../ui/README.md)):
 
 ```python run
 import json, os, tempfile

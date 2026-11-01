@@ -54,7 +54,7 @@ def main():
     core = Core(os.path.join(REPO, "skills"), Library(os.path.join(REPO, "library"), os.path.join(work_dir, "user"), os.path.join(work_dir, "library.sqlite")), work_dir, model=model)
 
     def run_skill(name, inputs):
-        result = core.run(name, inputs)
+        result = core.run(name, inputs, started_by="command")
         if result.status != "done":
             raise RuntimeError("%s: %s" % (name, result.error))
         return result.answer

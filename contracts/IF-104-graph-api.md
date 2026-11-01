@@ -1,6 +1,6 @@
-# IF-104 – Workflow and graph API (REST with the backend's session), v0
+# IF-104 – Workflow and graph API (REST with the backend's session), v1
 
-Owner (provider): N-2 Backend (child N-2.1, workflow logic in N-2.3)   Consumers: N-5 Graph app   Decided by: N-0   Mock complexity: 2 (fake REST server on the storage mock)   Suite: `tests/acceptance/contract/test_if_104_graph_api.py`
+Owner (provider): N-2 Backend (child N-2.1, workflow logic in N-2.3)   Consumers: N-5 Graph app   Decided by: N-0   Mock complexity: 2 (fake REST server on the storage mock; for the JavaScript consumer a fake `fetch` on the routes, `tests/helpers/mocks/if_104_graph_api.mjs`)   Suite: `tests/acceptance/contract/test_if_104_graph_api.py` (operations) and `tests/acceptance/contract/test_if_104_graph_api.test.mjs` (the same cases on the routes)
 
 Added by amendment 7 (D-47): the graph app has no database access and no login of its own. The adapter methods below stand for HTTP routes (`POST /api/login`, `GET /api/{kind}`, `GET/PUT /api/{kind}/{id}`, `GET /api/{kind}/{id}/history`, `GET /api/{kind}/{id}/diff?a&b`, `POST /api/{kind}/{id}/restore`); `kind` is `workflows` or `context_graphs`. Draft v0.
 
@@ -14,6 +14,21 @@ Added by amendment 7 (D-47): the graph app has no database access and no login o
 | `history(session, kind, id)` | | list of `{"version","author","time"}` | |
 | `diff(session, kind, id, a, b)` | two versions | `{"nodes_added","nodes_removed","nodes_changed","edges_added","edges_removed"}` | edges as `from->to` |
 | `restore(session, kind, id, version)` | | `{"version": n}` | saves the former content as a new version; the former version stays |
+
+## Wire (HTTP) **[v1]**
+The session is the cookie `mia_session` that `POST /api/login` sets, as in IF-101 v1; the page keeps no token and sends the cookie with every call (`credentials: 'same-origin'`). Bodies are JSON.
+
+| Operation | Route | Request body | Answer (200) |
+|---|---|---|---|
+| `login` | `POST /api/login` | `{"user", "password"}` | `{"ok": true}` and the cookie |
+| `list_ids` | `GET /api/{kind}` | | the sorted ids (a list) |
+| `read` | `GET /api/{kind}/{id}` or `?version=n` | | `{"id","version","author","time","doc"}` |
+| `save` | `PUT /api/{kind}/{id}` | `{"doc"}` or `{"doc", "expected_version"}` | `{"version": n}` |
+| `history` | `GET /api/{kind}/{id}/history` | | list of `{"version","author","time"}` |
+| `diff` | `GET /api/{kind}/{id}/diff?a=&b=` | | the diff of the operations table |
+| `restore` | `POST /api/{kind}/{id}/restore` | `{"version"}` | `{"version": n}` |
+
+An error answers its status with `{"error": code}`, plus `"rule"` for 422 and `"detail"` where the table below names one (`{"current": n}` for 409, the broken node, edge or cycle for 422). The id in the path is URL-encoded.
 
 ## Errors
 | Condition | Signal | What the consumer may rely on afterwards |
@@ -39,3 +54,4 @@ Added by amendment 7 (D-47): the graph app has no database access and no login o
 | Version | Date | Change | Amendment |
 |---|---|---|---|
 | v0 | 2026-10-25 | first draft | 7 |
+| v1 | 2026-10-31 | the wire of the routes (bodies, cookie, error body), a JavaScript mock of the routes for the Graph app and the same contract cases on them (N-5 Q-3, D-122); the operations are unchanged | A-36 |

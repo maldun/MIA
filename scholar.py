@@ -182,6 +182,17 @@ def within(work, until=None, since=None):
     return True, ""
 
 
+def cutoff_code(work, until=None, since=None):
+    """the reason of within() as a code (IF-405): no_date, after_cutoff or before_since; None when the work passes"""
+    ok, _ = within(work, until, since)
+    if ok:
+        return None
+    date = work.get("date") or (str(work["year"]) if work.get("year") else None)
+    if latest_day(date) is None:
+        return "no_date"
+    return "after_cutoff" if as_date(until) is not None and latest_day(date) > as_date(until) else "before_since"
+
+
 def use_as_of(until, today=None):
     """what of a record may be used for a cut-off: citation counts and retraction notices are as of today, so they must not steer a run that pretends to be in the past"""
     until, today = as_date(until), as_date(today) or datetime.date.today()
@@ -346,10 +357,25 @@ class ResponseCache:
             return
         try:
             os.makedirs(self.folder, exist_ok=True)
+            self._prune()
             with open(self._path(key), "w", encoding="utf-8") as fp:
                 json.dump({"at": self._clock(), "key": key, "body": body}, fp)
         except OSError:
             pass
+
+    def _prune(self):
+        # expired entries are never read again, but the folder sits in the data volume and every backup (N-4.2 N1, D-148).
+        # By the file's time, not its content: a file another thread is writing is fresh and never half-read; a file that
+        # vanished in between is skipped.
+        for name in os.listdir(self.folder):
+            if not name.endswith(".json"):
+                continue
+            path = os.path.join(self.folder, name)
+            try:
+                if self._clock() - os.path.getmtime(path) > self.seconds:
+                    os.remove(path)
+            except OSError:
+                pass
 
 
 class ApiHttp:
@@ -714,7 +740,7 @@ class Scholar:
         kept, dropped = [], []
         for work in found:
             ok, reason = within(work, until, since)
-            (kept if ok else dropped).append(work if ok else {"ref": reference_of(work), "title": work["title"], "reason": reason})
+            (kept if ok else dropped).append(work if ok else {"ref": reference_of(work), "title": work["title"], "reason": reason, "code": cutoff_code(work, until, since)})
         unique, merged = dedupe(kept)
         if check_retraction:
             for work in unique:

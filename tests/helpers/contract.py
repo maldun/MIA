@@ -14,11 +14,10 @@ REAL_NOT_READY = {
     "IF-101": "N-2 Backend not integrated yet",       # real_subject: A-05 login, session, logout; A-07 the routes and the chat service; only the unbuilt events skip
     "IF-102": "N-3 Database not integrated yet",
     "IF-103": "the real model server is only used in stage 2",
-    "IF-104": "N-2 Backend not integrated yet",
+    "IF-104": "N-2 Backend not integrated yet",       # real_subject since A-51: the routes of graph_api.py behind the guard of accounts_api
     "IF-201": "N-2.2 Chat agent not integrated yet",       # real_subject since A-07 (ChatService); stop and the expression/audio events skip
-    "IF-301": "N-3.2 Graph tables not integrated yet",
+    "IF-301": "unused: real_subject gives graph_tables",       # real_subject since A-02 (graph_tables); the reason fixed by A-60 (F9)
     "IF-302": "N-3.3 Record tables not integrated yet",
-    "IF-402": "N-2.4.2 Tools and sandbox not integrated yet",
     "IF-404": "the real web client and SearXNG are only used in stage 2",
     "IF-405": "the real scholarly APIs are only used in stage 2",
 }
@@ -107,6 +106,36 @@ def subject_for(interface, kind, **options):
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
+_REAL_STORAGE = {}
+
+
+def _real_storage_module(name):
+    """A module of the real Storage layer (storage, storage_files, storage_postgres), loaded by file path together with the real graph_rules and
+    graph_tables (A-59, D-162). The mocks have a module of the same name, graph_rules, and the mock side of a suite imports it first; a plain
+    `import storage` (or a storage imported earlier in the process) then validated with the cached mock rules, so in a full run the real side of
+    IF-102 tested the mock. Each module is loaded once per process; sys.modules is left as it was."""
+    if name not in _REAL_STORAGE:
+        import importlib.util
+        chain = [n for n in ("graph_rules", "graph_tables", "storage", name) if n != name] + [name]
+        saved = {n: sys.modules.get(n) for n in chain}
+        try:
+            for n in chain:
+                if n not in _REAL_STORAGE:
+                    spec = importlib.util.spec_from_file_location(n, os.path.join(REPO, n + ".py"))
+                    module = importlib.util.module_from_spec(spec)
+                    sys.modules[n] = module
+                    spec.loader.exec_module(module)
+                    _REAL_STORAGE[n] = module
+                sys.modules[n] = _REAL_STORAGE[n]
+        finally:
+            for n, module in saved.items():
+                if module is None:
+                    sys.modules.pop(n, None)
+                else:
+                    sys.modules[n] = module
+    return _REAL_STORAGE[name]
+
+
 class _StorageAdapter:
     """IF-102 on the real Storage layer: the file backend in a fresh folder (stage 2), or PostgreSQL when MIA_TEST_DATABASE_URL is set (stage 3). The
     adapter only turns the error class of the layer into the one of the mock, which the suite expects; production code does not import from tests/."""
@@ -114,25 +143,22 @@ class _StorageAdapter:
     def __init__(self):
         import tempfile
         from errors import StorageError
-        from storage import Storage
+        layer = _real_storage_module("storage")          # by file path with the real graph rules (A-59)
         url = os.environ.get("MIA_TEST_DATABASE_URL")
         if url:
-            from storage_postgres import PostgresBackend
-            backend = PostgresBackend(url)
+            backend = _real_storage_module("storage_postgres").PostgresBackend(url)
             backend._query("TRUNCATE records")
         else:
-            from storage_files import FileBackend
-            backend = FileBackend(tempfile.mkdtemp())
-        self._store, self._error = Storage(backend), StorageError
+            backend = _real_storage_module("storage_files").FileBackend(tempfile.mkdtemp())
+        self._store, self._error, self._layer_error = layer.Storage(backend), StorageError, layer.StorageError
 
     def __getattr__(self, name):
-        from storage import StorageError as LayerError
         method = getattr(self._store, name)
 
         def call(*args, **kwargs):
             try:
                 return method(*args, **kwargs)
-            except LayerError as err:
+            except self._layer_error as err:
                 raise self._error(err.code, rule=err.rule, detail=err.detail)
         return call
 
@@ -300,7 +326,7 @@ class _ChatApiAdapter:
             self._threaded = True
         ack = self._chat.send(text, client_id=client_id, sender=user, author=user)
         if not ack["ok"]:
-            raise self._error({"empty_text": 422, "queue_full": 503, "invalid_command": 422}.get(ack.get("code"), 429), ack.get("code") or "rate_limited")
+            raise self._error({"empty_text": 422, "queue_full": 503, "invalid_command": 422, "rate_limited": 429}.get(ack.get("code"), 500), ack.get("code") or "no_code")      # A-62: a refusal without a code is no rate limit
         return {"id": ack["id"], "position": ack["position"], "queued": ack["queued"], "message": ack["message"]}
 
     def pause(self, session):
@@ -324,8 +350,6 @@ class _ChatApiAdapter:
 
     def stop(self, session):
         self._call("whoami", session)
-        if not self._threaded:
-            raise unittest.SkipTest("IF-101 stop of an answer that has not started is not in the real Backend yet (N-2.2 T-01)")
         return {"stopped": self._chat.stop()}
 
     def history(self, session, limit=50):
@@ -389,8 +413,8 @@ class _ChatApiAdapter:
 
 class _ChatTurnAdapter:
     """IF-201 on the real chat agent (amendment A-07): the ChatService with a scripted model and a worker that runs when the test calls `settle`. The accounts are
-    plain names (the Backend has checked them). What is not built yet (expression and audio_chunk of an answer: N-2.5; `stop` of an answer that has not started:
-    N-2.2 T-01) skips the test. The adapter turns the error class of the service into the one of the mock; production code does not import from tests/."""
+    plain names (the Backend has checked them). What is not built yet (expression and audio_chunk of an answer: N-2.5) skips
+    the test; `stop` is real since A-56. The adapter turns the error class of the service into the one of the mock; production code does not import from tests/."""
 
     START = 1767571200                                              # 2026-01-05 00:00 UTC, a Monday: the clock 0 of the mock
 
@@ -432,7 +456,7 @@ class _ChatTurnAdapter:
     def send(self, account, text, client_id=None):
         ack = self._chat.send(text, client_id=client_id, sender=account, author=account)
         if not ack["ok"]:
-            raise self._error(ack.get("code") or "rate_limited")
+            raise self._error(ack.get("code") or "no_code")      # A-62: a refusal without a code is no rate limit
         return {"id": ack["id"], "position": ack["position"]}
 
     def regenerate(self, account, message_id):
@@ -460,7 +484,7 @@ class _ChatTurnAdapter:
         self._now += seconds
 
     def stop(self):
-        raise unittest.SkipTest("IF-201 stop of an answer that has not started is not in the real chat agent yet (N-2.2 T-01)")
+        return {"stopped": self._chat.stop()}
 
     def history(self, limit=50):
         return [dict(r, sender=r.get("sender") or "MIA") for r in self._chat.log.history(limit=limit)[0]]
@@ -682,13 +706,138 @@ class _FixtureModel:
         return "not json" if self.drift and len(messages) == 1 else '{"text": "ok"}'
 
 
+class _ToolCallsAdapter:
+    """IF-402 on the real Tools and sandbox (amendment A-32): tool_calls.ToolCalls with the same scripted web page, search finding, work and trust entry as
+    the mock and no sandbox (the real sandbox is stage 2 of N-2.4.2 T-03). The adapter turns the error class of the door into the one of the mock;
+    production code does not import from tests/."""
+
+    PAGE = "The tower is 330 m high. It was finished in 1889."
+
+    def __init__(self):
+        from errors import ServiceError
+        from tool_calls import ToolCallError, ToolCalls
+
+        class Scholar:
+            def search(self, query, until=None, since=None):
+                return {"works": [{"doi": "10.1/x", "title": "On towers", "date": "2001"}], "errors": {}, "dropped": []}
+
+        self._error, self._tool_error = ServiceError, ToolCallError
+        self._tools = ToolCalls(web_search=self._search, fetch_page=self._fetch, scholar=Scholar(), trust=lambda url: {"class": "web", "score": 0.5})
+
+    @staticmethod
+    def _search(query):
+        return {"query": query, "results": [{"url": "https://example.org/a", "title": "A", "snippet": "The tower is 330 m high."}]}
+
+    def _fetch(self, url):
+        if url != "https://example.org/a":
+            raise OSError("not found")
+        return {"ref": url, "url": url, "title": "A", "text": self.PAGE}
+
+    def call(self, run, tool, args):
+        try:
+            return self._tools.call(run, tool, args)
+        except self._tool_error as err:
+            raise self._error(err.code, detail=err.detail)
+
+
+class _GraphApiAdapter:
+    """IF-104 on the real routes of the Backend (amendment A-51, N-2.1 T-04): `graph_api.create_graph_blueprint` on the real WorkflowLibrary (IF-203) and the
+    Storage layer with the file backend in a fresh folder, behind the real guard and login of `accounts_api` (the cookie `mia_session` of IF-104 v1). The
+    session token of the suite is the value of that cookie; every call is one HTTP request of a client without a cookie jar that sends it. The adapter
+    only turns the error body of a route into the error class of the mock; production code does not import from tests/."""
+
+    ACCOUNTS = {"anna": "pw-anna", "ben": "pw-ben"}                  # the accounts of the mock, so that the same suite runs on both
+
+    def __init__(self):
+        import tempfile
+        from urllib.parse import quote
+        from errors import ApiError
+        from flask import Flask
+        from storage import Storage
+        from storage_files import FileBackend
+        from workflow_library import WorkflowLibrary
+        import accounts
+        import accounts_api
+        from graph_api import create_graph_blueprint
+        store = Storage(FileBackend(tempfile.mkdtemp()))
+        for name, password in self.ACCOUNTS.items():
+            accounts.create(store, name, password, "contract suite")
+        app = Flask(__name__)
+        accounts_api.install(app, _NoSockets(), store, allowed_origins=lambda: [])
+        app.register_blueprint(create_graph_blueprint(WorkflowLibrary(store)))
+        self._http, self._error, self._quote, self._cookie = app.test_client(use_cookies=False), ApiError, quote, accounts_api.COOKIE
+
+    def _request(self, method, path, session=None, **kwargs):
+        headers = {"Cookie": "%s=%s" % (self._cookie, session)} if session else {}
+        got = getattr(self._http, method)(path, headers=headers, **kwargs)
+        body = got.get_json(silent=True)
+        if got.status_code >= 400:
+            body = body if isinstance(body, dict) else {}
+            raise self._error(got.status_code, body.get("error"), rule=body.get("rule"), detail=body.get("detail"))
+        return got, body
+
+    def _path(self, kind, record_id=None, action=None):
+        return "/".join(["/api", self._quote(kind, safe="")] + [self._quote(part, safe="") for part in (record_id, action) if part is not None])
+
+    def login(self, user, password):
+        got, _ = self._request("post", "/api/login", json={"user": user, "password": password})
+        return next(value.split("=", 1)[1].split(";", 1)[0] for value in got.headers.getlist("Set-Cookie") if value.startswith(self._cookie + "="))
+
+    def list_ids(self, session, kind):
+        return self._request("get", self._path(kind), session)[1]
+
+    def read(self, session, kind, record_id, version=None):
+        return self._request("get", self._path(kind, record_id), session, query_string={} if version is None else {"version": version})[1]
+
+    def save(self, session, kind, record_id, doc, expected_version=None):
+        body = {"doc": doc} if expected_version is None else {"doc": doc, "expected_version": expected_version}
+        return self._request("put", self._path(kind, record_id), session, json=body)[1]
+
+    def history(self, session, kind, record_id):
+        return self._request("get", self._path(kind, record_id, "history"), session)[1]
+
+    def diff(self, session, kind, record_id, a, b):
+        return self._request("get", self._path(kind, record_id, "diff"), session, query_string={"a": a, "b": b})[1]
+
+    def restore(self, session, kind, record_id, version):
+        return self._request("post", self._path(kind, record_id, "restore"), session, json={"version": version})[1]
+
+
+class _NoSockets:
+    """the Socket.IO server that accounts_api.install expects; IF-104 has no sockets"""
+
+    def disconnect(self, sid):
+        pass
+
+
+def _real_graph_tables():
+    """graph_tables with the real graph_rules (A-60). The mocks have a module of the same name, graph_rules, and the mock side of a suite
+    imports it first; a plain `import graph_tables` would then validate with the cached mock rules, so the real side tested the mock."""
+    import importlib.util
+
+    def load(name):
+        spec = importlib.util.spec_from_file_location(name, os.path.join(REPO, name + ".py"))
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return module
+
+    mock = sys.modules.get("graph_rules")
+    sys.modules["graph_rules"] = load("graph_rules")
+    try:
+        return load("graph_tables")
+    finally:
+        if mock is None:
+            sys.modules.pop("graph_rules")
+        else:
+            sys.modules["graph_rules"] = mock
+
+
 def real_subject(interface, **options):
-    """The real provider of an interface once its node is integrated (amendment A-02: IF-301, IF-302, IF-102 of the Database; amendment A-05, A-07: IF-101 and IF-201 as far as built); None until then."""
+    """The real provider of an interface once its node is integrated (amendment A-02: IF-301, IF-302, IF-102 of the Database; amendment A-05, A-07: IF-101 and IF-201 as far as built; A-32: IF-402); None until then."""
     if REPO not in sys.path:
         sys.path.insert(0, REPO)
     if interface == "IF-301":
-        import graph_tables
-        return graph_tables
+        return _real_graph_tables()
     if interface == "IF-302":
         import record_tables
         return record_tables
@@ -706,4 +855,8 @@ def real_subject(interface, **options):
         return _RunWorkflowAdapter()
     if interface == "IF-204":
         return _SpeechAdapter(**options)
+    if interface == "IF-402":
+        return _ToolCallsAdapter()
+    if interface == "IF-104":
+        return _GraphApiAdapter()
     return None

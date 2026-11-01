@@ -22,7 +22,8 @@ signal matched(data: Dictionary)
 ## the token changed because it was entered somewhere else (the chat page)
 signal token_changed(new_token: String)
 
-const POLL_SECONDS := 10.0
+# REQ-CHV-005 (AC-17): another device's change shows within 2 s; the version request and the reload need part of it
+const POLL_SECONDS := 1.5
 const TOKEN_HEADER := "X-MIA-Token"
 const TOKEN_STORAGE_KEY := "mia_token"
 const GENERATE_TIMEOUT := 180.0   # a local model may need a while to load

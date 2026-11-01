@@ -23,7 +23,8 @@ except ImportError:  # used as plain script / in tests
 
 
 class Core:
-    def __init__(self, skills_dir, library, runs_dir, model=None, tools=None, functions=None, rng=None, sandbox=None, broker_factory=None, environment=None, store=None, store_texts=None):
+    def __init__(self, skills_dir, library, runs_dir, model=None, tools=None, functions=None, rng=None, sandbox=None, broker_factory=None, environment=None, store=None, store_texts=None,
+                 tool_calls=None, door_tools=None, run_events=None):
         """sandbox: a sandbox.SandboxRouter (None = no scripts can run); broker_factory: makes a web broker per script (broker.WebBroker), None = scripts have no web"""
         self.skills = SkillStore(skills_dir)
         self.library = library
@@ -34,7 +35,9 @@ class Core:
         self.sandbox = sandbox
         functions = {**checks.OFFLINE_FUNCTIONS, **extraction.FUNCTIONS, **behaviour.FUNCTIONS, **verification.FUNCTIONS, **number_gate.FUNCTIONS, **research.FUNCTIONS, **checks.build_script_checks(sandbox, broker_factory), **(functions or {})}
         self.runner = Runner(model=model, tools=tools, functions=functions, run_log=self.run_log, rng=rng, sandbox=sandbox, broker_factory=broker_factory,
-                             environment=environment, store=store, store_texts=store_texts)
+                             environment=environment, store=store,
+                             store_texts=store_texts,
+                             tool_calls=tool_calls, door_tools=door_tools, run_events=run_events)
         # the hard checks of the library, picked per claim (checks.CheckRunner); the web variant needs a skill that may read the web
         self.checks = checks.CheckRunner(library, lambda: self.runner.functions, lambda: list(self.runner.tools), sandbox=sandbox)
         self.runner.functions.setdefault("hard_checks_offline", lambda claim, fail_fast=True: self.checks.run(claim, include_web=False, fail_fast=fail_fast))

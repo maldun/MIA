@@ -172,10 +172,10 @@ class WebClient:
                     response.close()
             raise WebError("too many redirects")
         except WebError as exc:
-            self.log.record("fetch", url=url, final=current, error=str(exc), kind_of_error=type(exc).__name__, ms=int((time.time() - started) * 1000))
+            self.log.record("fetch", url=url, final=current, redirects=redirects, error=str(exc), kind_of_error=type(exc).__name__, ms=int((time.time() - started) * 1000))
             raise
         except requests.RequestException as exc:
-            self.log.record("fetch", url=url, final=current, error=str(exc), ms=int((time.time() - started) * 1000))
+            self.log.record("fetch", url=url, final=current, redirects=redirects, error=str(exc), ms=int((time.time() - started) * 1000))
             raise WebError("the page could not be loaded: %s" % exc)
 
     def _check_peer(self, response):
@@ -210,8 +210,9 @@ class WebClient:
             text = bytes(body).decode(encoding, errors="replace")
         except LookupError:
             text = bytes(body).decode("utf-8", errors="replace")
+        # every address a redirect passed through left the host too, so the log names each of them (REQ-TLS-007)
         self.log.record("fetch", url=url, status=response.status_code, content_type=content_type, bytes=len(body), truncated=truncated,
-                        redirects=len(redirects), ms=int((time.time() - started) * 1000))
+                        redirects=redirects, ms=int((time.time() - started) * 1000))
         return {"url": url, "status": response.status_code, "content_type": content_type, "text": text, "body": bytes(body), "bytes": len(body),
                 "truncated": truncated, "redirects": redirects}
 

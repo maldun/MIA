@@ -16,6 +16,7 @@ case "${1:-}" in
                start_background chat-with-login "$py" ui/tools/chat_mock_server.py
            fi && echo "open $URL   (log in as anna / pw-anna; a second browser as ben / pw-ben)" ;;
     stop) stop_container "$NAME"; is_running chat-with-login && stop_background chat-with-login ;;
-    status) if container_running "$NAME" || is_running chat-with-login; then echo "running: $URL"; else echo "stopped"; fi ;;
+    status) if container_running "$NAME"; then echo "running: $URL, $(serving_container "$NAME")"
+            elif is_running chat-with-login; then echo "running: $URL"; else echo "stopped"; fi ;;
     *) echo "usage: $0 describe|available|auto|start|stop|status"; exit 2 ;;
 esac

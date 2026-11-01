@@ -40,14 +40,14 @@ import time
 
 try:
     from .chat_log import utc_now, MAX_PAGE
-    from .record_tables import CATEGORIES
+    from .pipeline_model import UNREACHABLE
     from .storage import StorageError
     from .speech_text import speech_text
     from .task_monitor import TaskMonitor
     from .task_registry import TaskCommandError, TaskRegistry
 except ImportError:  # used as plain script / in tests
     from chat_log import utc_now, MAX_PAGE
-    from record_tables import CATEGORIES
+    from pipeline_model import UNREACHABLE
     from storage import StorageError
     from speech_text import speech_text
     from task_monitor import TaskMonitor
@@ -58,8 +58,8 @@ DELTA_INTERVAL = 0.05          # at most about 20 deltas per second per message
 CONTROL_CHARACTERS = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
 
 COMMANDS = (
-    {"command": "/light!", "description": "Switch to the small model (saves GPU memory)", "confirm": False},
-    {"command": "/full!", "description": "Switch back to the large model", "confirm": False},
+    {"command": "/light!", "description": "Switch to the small model (saves GPU memory)", "confirm": True},      # for all users at once (REQ-RUN-002)
+    {"command": "/full!", "description": "Switch back to the large model", "confirm": True},
     {"command": "/dream!", "description": "Sort and summarize MIA's memory", "confirm": False},
     {"command": "/time!", "description": "Send the current time to MIA", "confirm": False},
     {"command": "/tasks", "description": "Read all tasks back, word for word", "confirm": False},
@@ -126,7 +126,7 @@ class ChatService:
     def __init__(self, emit, log, mood, run_exchange, run_command=None, model_info=None, queue_size=1, user_limit=0,
                  rate_limit=(10, 60), spawn=None, clock=time.monotonic, votes=None, wall_clock=time.time,
                  behaviours=None, reputable=0.6, repair=None, remember=None, review_timeout=1800,
-                 tasks=None, skill_options=None, prepare_task=None, argument_commands=None, files=None, unavailable=()):
+                 tasks=None, skill_options=None, prepare_task=None, argument_commands=None, files=None, unavailable=(), react=None):
         self._emit = emit
         self._tasks = tasks if tasks is not None else TaskRegistry()      # REQ-WFM-029: the tasks (lookup, search, review, ...) register themselves, the core names none of them
         self._unavailable = {str(n).lower() for n in unavailable}         # ids of extensions that did not load: their command says so instead of going to the model
@@ -155,18 +155,21 @@ class ChatService:
         self._repair = repair                  # text -> the text with the violations of the behaviour rules repaired (behaviour.py); None = answers are streamed as they come
         self._behaviours = behaviours          # () -> the names of the behaviours that can be voted on (REQ-CHA-017); read at every use, the list may change; None: no list
         self._remember = remember              # (account, message_id, text) -> ids: the structured memory (REQ-CHA-011); called after a plain chat turn is done, None = off
+        self._react = react                    # (expression) -> None: the character reacts outside an answer, e.g. shocked after a minus (REQ-CHV-006); None = no character
         self._reputable = reputable            # a source with at least this trust is reputable (owner 2026-10-27: a fact has at least one reputable source)
         self._lock = threading.RLock()
         self._queue = collections.deque()
         self._running = False
         self._current = None
         self._stop = threading.Event()
+        self._stop_next = False                       # a stop that came before the worker took the first message
         self._unpaused = threading.Event()
         self._unpaused.set()
         self._hits = collections.defaultdict(collections.deque)
         self._commands = {c["command"] for c in COMMANDS}
         self._message_id = None          # the answer in progress: pipeline events belong to it
         self._pipeline = []
+        self._steps = []                            # the steps of every answer, kept for its account (D-138); _pipeline is only what the block shows
         self._sources = []
         self._show_pipeline = False
 
@@ -201,6 +204,10 @@ class ChatService:
         hits.append(now)
         return False
 
+    def author(self):
+        """the account that wrote the message whose exchange runs now, "page" without an account: the user of the run events of a chat (REQ-LOG-001, D-129)"""
+        return self._author or "page"
+
     def send(self, text, client_id=None, sender="page", author=None):
         """accepts a message; returns the acknowledgement for the page: {"ok", "message" | "error", "queued"}.
         sender is the key of the rate limit (a connection or an account); author the account that wrote it, stored as the `sender` of the message (IF-101)"""
@@ -210,7 +217,7 @@ class ChatService:
         if len(text) > MAX_LENGTH:
             return {"ok": False, "error": "The message is too long (at most %d characters)." % MAX_LENGTH, "code": "empty_text"}
         if self._rate_limited(sender):
-            return {"ok": False, "error": "Too many messages, please wait a moment."}
+            return {"ok": False, "error": "Too many messages, please wait a moment.", "code": "rate_limited"}      # IF-101: 429 rate_limited (D-149)
         with self._lock:
             own = sum(1 for item in self._queue if author and item[2] == author)
             if self._running and (len(self._queue) >= self.queue_size or (self.user_limit and author and own >= self.user_limit)):
@@ -259,7 +266,10 @@ class ChatService:
     def stop(self):
         """stops the running answer (the text received so far stays)"""
         with self._lock:
-            running = self._running and self._current != "command"
+            kind = self._current or (self._queue[0][0] if self._queue else None)
+            running = self._running and kind not in (None, "command")
+            if running and self._current is None:
+                self._stop_next = True                # the worker has not taken the message yet: it would clear the stop (REQ-CHA-004)
         if running:
             self._stop.set()
             self._unpaused.set()                      # a paused task wakes up and sees the stop
@@ -363,16 +373,17 @@ class ChatService:
         return {"sentences": len(sentences)}
 
     def account(self, message_id):
-        """the plain steps kept with the answer, in order; the domain events of the run log (kind "event") are no steps"""
+        """the plain steps kept with the answer, in order; the domain events of the run log (kind "event") are no steps. Answers kept before D-138 have
+        their steps only in `pipeline` (and only when a block was shown)"""
         record = self._answer(message_id)
-        plain = [e["plain"] for e in record.get("pipeline", []) if e.get("kind") != "event" and e.get("plain")]
+        plain = [e["plain"] for e in record.get("steps") or record.get("pipeline", []) if e.get("kind") != "event" and e.get("plain")]
         return [{"seq": i, "plain": text} for i, text in enumerate(plain or ["No steps were kept for this answer."], 1)]
 
     def vote(self, account, subject, category, value):
         """a plus or a minus, kept with user, time, subject and category (REQ-CHA-015); the score event follows"""
-        if category not in CATEGORIES:
+        if category not in self._votes.categories():     # IF-102 names the categories (D-162); N-2 imports nothing of N-3's tables
             raise ChatError("invalid_vote", "category")
-        if isinstance(value, bool) or value not in (1, -1):
+        if type(value) is not int or value not in (1, -1):      # a bool or a float equal to 1 is no vote value (D-161)
             raise ChatError("invalid_vote", "value")
         record = self._answer(subject) if category == "answer_quality" else None
         if category == "character_behaviour" and self._behaviours is not None and subject not in self._behaviours():
@@ -388,6 +399,11 @@ class ChatService:
         self._emit("score", score)
         self.mood.set_score(score["overall"])          # the feedback shifts the general mood (REQ-CHA-010)
         self.publish_status()
+        if value == -1 and self._react is not None:
+            try:
+                self._react("shocked")                 # every minus hurts her a little (REQ-CHV-006, D-143); the vote is kept even if the character cannot react
+            except Exception:
+                pass
         return {"stored": True, "score": score}
 
     # --- tasks and memos read back from their records (REQ-CHA-019) ---------------------------------------------------
@@ -495,8 +511,10 @@ class ChatService:
 
     def score(self):
         """sums per category and overall, and the same per ISO week of the vote (oldest first, only weeks with a vote)"""
+        names = self._votes.categories()
+
         def sums(votes):
-            categories = {c: sum(v["value"] for v in votes if v["category"] == c) for c in CATEGORIES}
+            categories = {c: sum(v["value"] for v in votes if v["category"] == c) for c in names}
             return {"overall": sum(categories.values()), "categories": categories}
         votes = [self._votes.get("votes", i)["doc"] for i in self._votes.ids("votes")]
         weeks = {}
@@ -516,6 +534,8 @@ class ChatService:
                 return
             if event.get("kind") == "run_start":
                 self._show_pipeline = bool((event.get("payload") or {}).get("show"))
+            if event.get("plain"):
+                self._steps.append({"kind": event.get("kind"), "plain": event["plain"]})
             if self._late:
                 if self._monitor is not None and event.get("plain"):
                     self._monitor.update(phase=event["plain"])          # the progress of a task with a card is the card, not a message
@@ -581,7 +601,9 @@ class ChatService:
                     break
                 kind, text, _author, speaker, message_id, options = self._queue.popleft()
                 self._current, self._author = kind, _author
-                self._stop.clear()
+                if not self._stop_next:
+                    self._stop.clear()
+                self._stop_next = False
             try:
                 self._do_command(text) if kind == "command" else self._do_chat(text, kind, speaker, message_id, options)
             except Exception as exc:       # the worker must survive anything
@@ -611,6 +633,7 @@ class ChatService:
         late = entry is not None and "ask" in entry.needs            # REQ-WFM-036: the result of a task that asks questions is the newest message, its progress is the status card
         with self._lock:
             self._message_id, self._pipeline, self._sources, self._show_pipeline, self._late, self._task_files = message_id, [], [], False, late, []
+            self._steps = []
         model = self._model_info()[0]
         if entry is not None:
             self.set_activity("thinking")
@@ -660,7 +683,9 @@ class ChatService:
         status = "done"
         try:
             # the model knows who writes (accounts only); the log keeps the plain text. The argument of a task is data for a tool and stays as it is
-            if entry is None:
+            if self._stop.is_set():
+                final = None                                  # stopped before it started: the model is not asked
+            elif entry is None:
                 final = self._run_exchange("[%s] %s" % (speaker, text) if speaker else text, on_delta, on_emotion, self._stop.is_set)
             else:
                 handed = {"ask": self.ask, "options": options or {}, "monitor": self._monitor, "files": self._file_putter(task, message_id), "reports": self._report_saver(entry, message_id, model)}
@@ -672,7 +697,8 @@ class ChatService:
         except Exception as exc:
             status = "error"
             self.set_activity("offline")
-            self._emit("chat_error", {"id": message_id, "message": "MIA could not answer: %s" % exc})
+            # a model server that is down is said in its own plain sentence, nothing before it (AC-23, D-129)
+            self._emit("chat_error", {"id": message_id, "message": UNREACHABLE if str(exc) == UNREACHABLE else "MIA could not answer: %s" % exc})
             if entry is not None and not state["text"]:
                 state["text"] = "/%s could not finish: %s" % (task, exc)       # a task that fails leaves a result that says why, not an empty message and a toast that can be missed
         else:
@@ -693,9 +719,11 @@ class ChatService:
         if task != "chat":
             extra["task"] = task
         with self._lock:
-            steps, sources, self._message_id, self._late = self._pipeline, self._sources, None, False
-        if steps:
-            extra["pipeline"] = steps
+            shown, kept, sources, self._message_id, self._late = self._pipeline, self._steps, self._sources, None, False
+        if shown:
+            extra["pipeline"] = shown
+        if kept:
+            extra["steps"] = kept                     # the account of the answer, also when no block was shown (D-138)
         if sources:
             extra["sources"] = sources
         record = self.log.append("assistant", state["text"], id=message_id, created=created, emotion=state["emotion"],

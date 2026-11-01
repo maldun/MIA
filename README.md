@@ -26,7 +26,7 @@ Installation
 Prerequisites:
 --------------
 
-- python 3.11 to 3.13 (3.12 recommended and tested; Python 3.10 reaches its end of life in October 2026). Nothing needs `torch` any more: the voice is Kokoro on onnxruntime with a small voice effect, RVC voice conversion and Coqui TTS were removed in October 2026 (`git log` has them)
+- Python 3.12 (the only version MIA runs on, D-63; kokoro-onnx needs below 3.14). Nothing needs `torch` any more: the voice is Kokoro on onnxruntime with a small voice effect, RVC voice conversion and Coqui TTS were removed in October 2026 (`git log` has them)
 - rocm/cuda (works with CPU but slow....)
 - docker/podman
 - (Tested on Fedora 40; should work on other systems though)
@@ -35,7 +35,7 @@ Prerequisites:
 (I made my own with blender and collected other stuff, but I don't share due to copyright reasons. Private use is one thing, publishing another ..., but the internet is full of fun stuff so go ahead.)
 
 ### Create virtual environment (example)
-- `python3.12 -m venv <venvfolder>/mia` (or `python3.11`, `python3.13`)
+- `python3.12 -m venv <venvfolder>/mia`
 - `source <venvfolder>/mia/bin/activate`
 - `python -m pip install -r requirements.txt` (web app, chat, research and the Kokoro voice with the effect; no torch)
 
@@ -57,7 +57,7 @@ Prerequisites:
 - Install/Check requirements in requirements.txt (`python -m pip install -r requirements.txt`)
 
 ### Running as a service (podman compose)
-MIA, Ollama and SearXNG as three containers with one command (`deploy/up.sh`), including the zipped 3D character (`deploy/up.sh character <zip>`): see `deploy/README.md`.
+MIA with Ollama, SearXNG, the graph page, an HTTPS front and PostgreSQL as containers with one command (`deploy/up.sh db`), including the zipped 3D character (`deploy/up.sh character <zip>`): see `deploy/README.md`.
 
 ### Looking at what MIA did
 `python tools/run_explain.py list | show | explain | cost | problems | diff | export | call | reproduce` reads the run log (`data/runs`) and the content store (`data/store`): `show` prints a run as a graph within a token budget, `explain` leads a sentence of an answer back through claim, quote, page and search to the query, `diff` compares two runs, `reproduce` repeats a run offline from its recording and says whether it came out the same (a change of code, prompt or library that changes what a run does shows up as a divergence). Prompts, answers and pages are kept for the tasks but not for the chat (`store_chat_texts`).
@@ -67,10 +67,10 @@ MIA, Ollama and SearXNG as three containers with one command (`deploy/up.sh`), i
 
 ### Configuration
 - The real configuration of a machine is `setup_cfg.json`. It is **not in version control** (a deployment on another machine would otherwise fight with the one in git at every commit). The tracked template is
-  `setup_cfg.example.json`: it lists every option (91 at the moment; the values are those of the development machine, adjust paths, models and ports). On the first start `python -m MIA` copies the example to
+  `setup_cfg.example.json`: it lists every option (108 at the moment; the values are those of the development machine, adjust paths, models and ports). On the first start `python -m MIA` copies the example to
   `setup_cfg.json` and says so; after that only your file is read. When a new version of MIA brings new options, they appear in the example; a test (`tests/test_config.py`) keeps the example complete.
   Two options mean something different when they are *present*, so they are not in the example: `editor_token` and `chat_token` (see below).
-  After an update, `python config.py` lists the options of the example that your `setup_cfg.json` does not have yet (it only reports; the defaults apply until you add them).
+  After an update, MIA warns at start about the options of the example that neither your `setup_cfg.json` nor its local file `setup_cfg.local.json` has yet, and `python config.py` lists them too (both only report; the defaults apply until you add them).
 - Configure setup_cfg.json to your liking (the list below describes the options; "optional" options are in the example with their default):
 
     - "name":"ollama", (docker name)
@@ -125,6 +125,11 @@ MIA, Ollama and SearXNG as three containers with one command (`deploy/up.sh`), i
     - "skills_dir":"skills", "library_dir":"library", "user_library_dir":"data/library", "library_index":"data/library.sqlite", "runs_dir":"data/runs", (the skills, the library of nodes and pipelines (shipped and your own), its index and the run log)
     - "chat_token", "editor_token": (not in the example, because their presence changes the behaviour: `editor_token` set to a text is the token for the expression editor, `""` switches the check off, missing = a random token in `editor_token_file`; `chat_token` defaults to the editor token)
     - "editor_token_file":"data/editor_token.txt", (the file with the random editor token that is made at the first start when "editor_token" is not set)
+    - "files_dir":"data/files", "files_max_bytes":1073741824, "files_max_total_bytes":53687091200, (the files volume: the folder tasks put generated files into (a report as .md and .tex), the largest file in bytes (1 GiB) and the largest volume in bytes (50 GiB); MIA never deletes a file there)
+    - "model_classes_file":"data/model_classes.json", (whether a model is local or paid, per model name; a model not in the file that does not run on this machine is asked about once)
+    - "review_answer_seconds":1800, (how long a running review waits for your answer to its question; no answer in time counts as "no")
+    - "skill_options":{}, (optional: other defaults for the options of a task, {task id: {option: value}}; `{}` keeps the defaults of the skills)
+    - "workflow_speak":true, "workflow_speak_tasks":{}, (whether the tasks that run beside the chat (/lookup, /review, workflows) speak what they have to say; `workflow_speak_tasks` overrides it for single tasks, e.g. {"review": false}; the chat answers are always spoken)
 
 - The character on the page is a 3D model (Godot web export, see `ui/README.md`). Build it once with `ui/tools/build_web.sh`; MIA serves it under `/character/` and shows it in the page. It replaces the old pre-rendered videos.
 - Configure expressions.json: every expression has a `preset` (expression of the character, see `ui/godot/presets/library.json`; default: the expression key itself), the spoken `text` and the `voice` clip (`null` = no voice clip yet).
@@ -164,7 +169,7 @@ Stopping MIA:
 ===================
 
 Ctrl+C in the terminal, the commands `/break!` and `/goodnight!` (the latter lets MIA dream first) and SIGTERM all lead to the same orderly shutdown:
-MIA saves its history, stops the HTTPS proxy and then the speech process, one step after the other with a pause of `shutdown_pause` seconds in between.
+MIA saves its history, closes the database, stops the HTTPS proxy and then the speech process, one step after the other with a pause of `shutdown_pause` seconds in between.
 The helper processes run in their own session, so Ctrl+C reaches only MIA. Before, everything was signalled at the same instant and the commands killed the whole process group.
 A helper that does not end within 10 seconds is killed. The Ollama container keeps running.
 

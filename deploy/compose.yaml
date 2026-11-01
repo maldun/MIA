@@ -1,14 +1,16 @@
-# MIA as a service: MIA (this folder), Ollama (the language model) and SearXNG (web search).
+# MIA as a service: MIA (this folder), the graph page, the https front (Caddy), SearXNG (web search), Ollama (the language model; profile ollama, only without OLLAMA_URL)
+# and PostgreSQL (profile db,  deploy/up.sh db ).
 #   deploy/up.sh                                   first start: makes .env and the config, starts everything (CPU)
 #   deploy/up.sh rocm | nvidia                     with the GPU of Ollama (AMD / NVIDIA)
-# The page is on http://localhost:8585 (MIA_PORT / MIA_BIND in .env change that). Only MIA (http, 8585) and its https front (8586) are published; Ollama and SearXNG are reachable inside the stack.
-# More in deploy/README.md.
+# The page is on http://localhost:8585 (MIA_PORT in .env changes that). Only MIA (http, 8585, always on loopback) and its https front (8586, on MIA_BIND) are published;
+# Ollama and SearXNG are reachable inside the stack. Other devices come only through https (REQ-OPR-008, A-37).
+# The images from registries are pinned by digest (D-127); deploy/RUNBOOK.md says how to update a pin. More in deploy/README.md.
 services:
   mia:
     build:
       context: ..
       dockerfile: deploy/Containerfile
-    image: localhost/mia:latest
+    image: ${MIA_IMAGE:-localhost/mia:latest}      # MIA_IMAGE: another tag of the same build (the smoke test of the stack uses its own)
     restart: unless-stopped
     depends_on:
       - searxng
@@ -17,9 +19,9 @@ services:
       MIA_PUBLIC_HTTPS_PORT: ${MIA_HTTPS_PORT:-8586}      # the pages that come through the https service may use the socket
       MIA_PUBLIC_HOSTS: ${MIA_PUBLIC_HOSTS:-}              # addresses of this machine for other devices (up.sh fills it with MIA_BIND=0.0.0.0)
       MIA_OLLAMA_HOST: ${OLLAMA_URL:-http://ollama:11434}      # OLLAMA_URL in .env: an Ollama that exists already, see README
-      MIA_DATABASE_URL: ${MIA_DATABASE_URL:-}                  # set by  deploy/up.sh db  (the storage option picks the database)
+      MIA_DATABASE_URL: ${MIA_DATABASE_URL:-}                  # set by  deploy/up.sh db; nothing in MIA reads it yet: its store stays the file backend until it moves to PostgreSQL (D-139)
     ports:
-      - "${MIA_BIND:-127.0.0.1}:${MIA_PORT:-8585}:8585"
+      - "127.0.0.1:${MIA_PORT:-8585}:8585"        # loopback only, whatever MIA_BIND says: the network gets the https front (REQ-OPR-008)
     volumes:
       - ${MIA_CONFIG:-./setup_cfg.compose.json}:/opt/mia/MIA/setup_cfg.json:ro,z
       - ./setup_cfg.local.json:/opt/mia/MIA/setup_cfg.local.json:ro,z      # the settings of THIS machine (the login ...), not in git; up.sh makes it ({}) when it is missing
@@ -28,11 +30,24 @@ services:
       - ${MIA_CHARACTER_DIR:-../ui/godot/build/web}:/opt/mia/MIA/ui/godot/build/web:ro,z
       - ${MIA_BACKGROUND_DIR:-../backgrounds}:/opt/mia/MIA/backgrounds:ro,z      # new pictures appear on a reload of the page, no rebuild
 
+  # The graph app (N-5, REQ-OPR-007, D-133): its own container from the mia image, serving the static page of graph_app/. No published port:
+  # the https front routes /graph/ to it, so the page and the IF-104 calls to mia share one origin.
+  graph:
+    image: ${MIA_IMAGE:-localhost/mia:latest}      # MIA_IMAGE: another tag of the same build (the smoke test of the stack uses its own)
+    restart: unless-stopped
+    command: ["python", "-m", "http.server", "8587", "--directory", "/opt/mia/MIA/graph_app"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request as u; u.urlopen('http://127.0.0.1:8587/', timeout=4)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
   https:
-    image: docker.io/library/caddy:2
+    image: docker.io/library/caddy:2@sha256:173b26306d711395accaeba8b67afcaad2a085ccb1e6bf26010bfe8c095a5229
     restart: unless-stopped
     depends_on:
       - mia
+      - graph
     ports:
       - "${MIA_BIND:-127.0.0.1}:${MIA_HTTPS_PORT:-8586}:8586"
     volumes:
@@ -41,7 +56,7 @@ services:
 
   ollama:
     profiles: ["ollama"]          # only without OLLAMA_URL (up.sh switches the profile)
-    image: docker.io/ollama/ollama:latest
+    image: docker.io/ollama/ollama:latest@sha256:40c61dbf5091e0b4cc46f406f912fb061cfeca51208f0f7173c87c3b5f795c95
     restart: unless-stopped
     environment:
       OLLAMA_MAX_LOADED_MODELS: "1"
@@ -60,7 +75,7 @@ services:
   # start of an empty volume, so the tables exist whether the container is started alone or by the stack.
   db:
     profiles: ["db"]
-    image: docker.io/library/postgres:16
+    image: docker.io/library/postgres:16@sha256:f9d1e581cde3e4c8bc696b07e6f7b7aea1d41014b33a52b27990762daae61beb
     restart: unless-stopped
     environment:
       POSTGRES_USER: mia
@@ -77,7 +92,7 @@ services:
       start_period: 10s
 
   searxng:
-    image: docker.io/searxng/searxng:latest
+    image: docker.io/searxng/searxng:latest@sha256:2fc7a1ee644edac36b7ab2b7885b83b991720da8d81a03838ddf8c228893ca4e
     restart: unless-stopped
     environment:
       SEARXNG_SECRET: ${SEARXNG_SECRET:?run deploy/up.sh, it makes .env}

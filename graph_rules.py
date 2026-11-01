@@ -7,7 +7,7 @@ A workflow or context graph is {"nodes": [{"id", "kind": "process" | "data", "se
   R1  node_identity               every node has a unique, non-empty text id and a kind; every edge joins two known ids
   R2  adjacent_data_nodes         no edge joins two data nodes (two processes that read the same input share one data node)
   R3  adjacent_process_nodes      no edge joins two process nodes
-  R4  session_stopping_criterion  a session node has a positive max_cycles or max_seconds
+  R4  session_stopping_criterion  a session node has a max_cycles or max_seconds, and each one given is an integer >= 1 (not a bool, D-160)
   R5  cycle                       the graph is a DAG; a cycle is reported by its ids, the first repeated at the end
 
 violation() reports the first broken rule in this order, so the caller (and the user) always sees the same one.
@@ -30,16 +30,28 @@ def violation(doc):
         kind[nid] = node
     for edge in edges:
         a, b = (edge.get("from"), edge.get("to")) if isinstance(edge, dict) else (None, None)
-        if a not in kind or b not in kind:
+        if not isinstance(a, str) or not isinstance(b, str) or a not in kind or b not in kind:
             return "node_identity", "%s->%s" % (a, b)
         if kind[a]["kind"] == kind[b]["kind"]:
             return ("adjacent_data_nodes" if kind[a]["kind"] == "data" else "adjacent_process_nodes"), "%s->%s" % (a, b)
     for nid, node in kind.items():
-        stop = node.get("stop") or {}
-        if node["kind"] == "process" and node.get("session") and not (stop.get("max_cycles") or stop.get("max_seconds")):
+        if node["kind"] == "process" and node.get("session") and not _stops(node.get("stop") or {}):
             return "session_stopping_criterion", nid
     cycle = _cycle(list(kind), edges)
     return ("cycle", cycle) if cycle else None
+
+
+def _stops(stop):
+    """A session stops when its stop is a dict with at least one limit and every limit given is a positive integer (D-160); null is not given.
+    A malformed stop is a broken rule, not an exception (TB-edit), and the cost estimate multiplies by max_cycles only after this check."""
+    if not isinstance(stop, dict):
+        return False
+    given = [stop[key] for key in ("max_cycles", "max_seconds") if stop.get(key) is not None]
+    return bool(given) and all(_positive_integer(limit) for limit in given)
+
+
+def _positive_integer(value):
+    return isinstance(value, int) and not isinstance(value, bool) and value >= 1
 
 
 def _cycle(ids, edges):

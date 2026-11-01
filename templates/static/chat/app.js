@@ -15,10 +15,9 @@ import { createApi } from './api.js';
 import { initWorkspace } from './workspace.js';
 import { initTaskCards } from './task-card.js';
 import { initAccount } from './account.js';
-import { variantLabel } from './panels-model.js';
-import { initMood } from './mood.js';
+import { followStatus, followVariant, initMood } from './mood.js';
 import { askConfirm, initPalette, loadCommands } from './palette.js';
-import { modelLabel } from './chat-model.js';
+import { sendConfirmed } from './chat-model.js';
 import { initCaption } from './caption.js';
 import { initViewMenu } from './view-menu.js';
 import { enterSends, initSettings } from './settings.js';
@@ -151,18 +150,13 @@ const menu = initMenu({
 const workspace = initWorkspace({ dialog: $('workspace'), tabsEl: $('workspace-tabs'), body: $('workspace-body'), closeButton: $('workspace-close'), api, socket, t, notify: toast });
 const account = initAccount({
   dialog: $('account'), nameEl: $('account-name'), form: $('account-form'), oldInput: $('account-old'), newInput: $('account-new'), repeatInput: $('account-repeat'),
-  errorLine: $('account-error'), closeButton: $('account-close'), logoutButton: $('account-logout'), api, storage, t, notify: toast,
-  onLoggedOut: () => { socket.disconnect(); login.open(); },      // the server ended the session; the socket would be refused anyway
+  errorLine: $('account-error'), closeButton: $('account-close'), logoutButton: $('account-logout'), api, storage, t, socket, notify: toast,
+  onLoggedOut: () => login.open(),
 });
 $('workspace-button').addEventListener('click', () => { menu.close(false); workspace.open(); });
 $('account-button').addEventListener('click', () => { menu.close(false); account.open(); });
 $('account-logout').addEventListener('click', () => menu.close(false));       // the logout itself is in account.js
-socket.on('variant', (data) => {
-  const label = variantLabel(data?.name, t);
-  $('variant').textContent = label;
-  $('variant').hidden = !label;
-  character.setVariant(data?.name);                    // the outfit of the workflow that answers; null = the chat's variant
-});
+followVariant({ socket, label: $('variant'), character, t });
 
 viewMenu = initViewMenu({
   buttons: document.querySelectorAll('[data-view]'),
@@ -176,15 +170,7 @@ viewMenu = initViewMenu({
 // --- mood line and header chip, driven by the server --------------------------------------------------
 mood = initMood({ chip: $('mood'), emoji: $('mood-emoji'), text: $('mood-text'), live: $('mood-live'), enabled: settings.get().showMood });
 
-socket.on('chat_status', (status) => {
-  mood.update(status.mood, status.activity);
-  composer?.setBusy(status.busy && (status.activity === 'thinking' || status.activity === 'speaking'));
-  const chip = $('model-chip');
-  const label = modelLabel(status.profile);
-  chip.hidden = !label;
-  chip.textContent = label ? t(`chip.${label}`) : '';
-  chip.title = status.model ?? '';
-});
+followStatus({ socket, mood, chip: $('model-chip'), composer: () => composer, t });
 
 // --- the conversation --------------------------------------------------------------------------------
 function toast(message) {
@@ -203,7 +189,7 @@ chat = initChat({
 initTaskCards({ list: $('messages'), socket, api, t, onStop: () => socket.emit('chat_stop'), notify: toast });
 
 let commands = [];
-loadCommands().then((list) => { commands = list; });
+const commandsReady = loadCommands().then((list) => { commands = list; return list; });
 
 const suggestions = document.querySelectorAll('[data-suggestion]');
 for (const suggestion of suggestions) suggestion.dataset.text = t(suggestion.dataset.suggestion);
@@ -223,22 +209,14 @@ composer = initComposer({
   counter: $('counter'),
   storage,
   suggestions,
-  async onSend(text) {
-    const command = commands.find((c) => c.command === text.toLowerCase());
-    if (command?.confirm) {
-      const ok = await askConfirm({
-        dialog: $('confirm'),
-        message: $('confirm-text'),
-        ok: $('confirm-ok'),
-        cancel: $('confirm-cancel'),
-        text: t('confirm.command', { command: command.command, description: command.description }),
-      });
-      if (!ok) return false;
-    }
-    chat.send(text);
-    return true;
-  },
-  onStop: () => socket.emit('chat_stop'),
+  onSend: (text) => sendConfirmed(text, commandsReady, (command) => askConfirm({
+    dialog: $('confirm'),
+    message: $('confirm-text'),
+    ok: $('confirm-ok'),
+    cancel: $('confirm-cancel'),
+    text: t('confirm.command', { command: command.command, description: command.description }),
+  }), (message) => chat.send(message)),
+  onStop: () => { socket.emit('chat_stop'); sound.stop(); },             // Stop also silences the voice on this device (D-140)
   enterSends: () => enterSends(settings.get().enterSends, window.matchMedia?.('(pointer: coarse)').matches ?? false),
 });
 

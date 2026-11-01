@@ -37,3 +37,154 @@ Tests of this part alone against the mocks of its neighbours (the mock of IF-101
 
 - ASM-N1-001: a headless Chromium is available for the browser tests (`ui/tools/browser_check.py` uses it today); where it is not, the stage 2 tests are skipped, never weakened.
 - ASM-N1-002: the phone figure (30 fps on any phone inside the network) is measured on the phones the owner has at hand; no particular device is named (HLS amendment 9).
+
+## Scenarios
+
+Status: **Draft** (written in Phase 3 after the verification, finding F11 / D-163; to be reviewed by the owner). Each block describes what its tests check today: the unit tests in `tests/js/` on fakes (a fake DOM, socket and REST client), the stage-2 browser tests in `tests/test_chat_views_browser.py` (the real page on the IF-101 mock server, headless Chromium, loopback only).
+
+### TC-CLV-001 – Two users and a streamed answer
+- Verifies: REQ-CLV-001
+- Given: the page of anna and the mock of IF-101
+- When: a message of ben and one of anna arrive, then an answer starts and two cumulative deltas and the end arrive
+- Then: ben's message is headed "ben", anna's "You"; the answer grows in one row ("Hello", then "Hello anna."), its actions appear only at the end
+- And: two users in a row are two groups
+
+### TC-CLV-002 – Queue places and stop
+- Verifies: REQ-CLV-002
+- Given: three messages acknowledged at places 1, 2 and 3
+- When: an answer starts, then the next one
+- Then: the places read "–, 1, 2", then "–, –, 1"; a start for another user's message moves mine up instead of clearing it
+- And: Stop sends `chat_stop` once (the page's Stop button)
+
+### TC-CLV-003 – Shared history after a reload
+- Verifies: REQ-CLV-003
+- Given: the mock history holds three messages, sent out of order
+- When: the page loads and another user writes
+- Then: one request `/api/chat/history?limit=50`; the rows stand in the order of their ids and the live message is added last
+
+### TC-CLV-004 – Connection cut and back
+- Verifies: REQ-CLV-004
+- Given: the page online in a browser with "my unsent draft" typed
+- When: the socket's transport is closed
+- Then: the state is offline or reconnecting with a banner, Send is off, the draft stays
+- And: the page is online again within 20 s without a reload, the draft still there
+
+### TC-CLV-005 – Regenerate and speak again
+- Verifies: REQ-CLV-005
+- Given: two written answers
+- When: the controls under the last answer are used
+- Then: each sends one call (`/api/regenerate`, `/api/speak_again`); regenerate is offered on the last answer only and moves to the new answer
+
+### TC-CLV-006 – Chat without the character
+- Verifies: REQ-CLV-006
+- Given: a browser with WebGL whose requests to `*/character/*` are blocked
+- When: the click-through of every view runs
+- Then: the page tried to load `/character/`, and messages are sent and answered and every view works (no problem reported)
+
+### TC-CLV-007 – The character as stage
+- Verifies: REQ-CLV-007
+- Given: the owner's checklist `ui/CHECKLIST_CHAT_PHONE.md`
+- When: the page is viewed at 360, 768 and 1440 px
+- Then: the layout of each size is shown; the collapsed view shows the caption
+
+### TC-CLV-008 – Status line and the account of an answer
+- Verifies: REQ-CLV-008
+- Given: a status of the server (mood "curious", activity thinking, light model) and a written answer whose account has two steps
+- When: the status arrives, and "how I got this" is clicked twice
+- Then: the mood line, the busy composer and the model chip follow the status; the two steps are listed under the answer, asked once, and hidden by the second click
+
+### TC-CLV-009 – The persona, live
+- Verifies: REQ-CLV-009
+- Given: the open Persona tab
+- When: another user changes the persona; then again while the reader types in it
+- Then: the persona is read and drawn again; while typing nothing is overwritten and a note says why
+
+### TC-CLV-010 – A vote and the score
+- Verifies: REQ-CLV-010
+- Given: a written answer
+- When: plus is clicked and the Score tab is opened
+- Then: one vote with category `answer_quality` and the answer as subject; plus is marked pressed; the score shows overall and four categories
+
+### TC-CLV-011 – Tasks, memos and memory
+- Verifies: REQ-CLV-011
+- Given: the Tasks tab with a task that is due
+- When: its text is edited and saved; a record changes elsewhere
+- Then: the save carries the text and the same due time; a memory without a source is refused before sending; `item_changed` of the open kind draws it again, another kind does not
+
+### TC-CLV-012 – The trust of a source
+- Verifies: REQ-CLV-012
+- Given: the Sources tab
+- When: a value is typed ("0,2", "1.5", "50%") and saved
+- Then: 0.2 is sent with the source id; values outside 0..1 are refused before sending; the server's event carries old and new
+
+### TC-CLV-013 – The variant label
+- Verifies: REQ-CLV-013
+- Given: the mock answers every third message from a workflow with the variant summer
+- When: that answer and the next one arrive
+- Then: "Outfit: summer" is shown and the variant goes to the character; with the next answer the label goes and the character gets none (the chat's variant)
+
+### TC-CLV-014 – Login, password, account
+- Verifies: REQ-CLV-014
+- Given: the login and the account dialog
+- When: a login, a wrong login, a throttled login and a change of password are sent
+- Then: one request each; each failure is named differently; the passwords are checked before they are sent
+
+### TC-CLV-015 – The login page says everything is visible
+- Verifies: REQ-CLV-015
+- Given: the page and its English and German texts
+- When: the login text is read
+- Then: it states that everything is visible to all users, in both languages
+
+### TC-CLV-016 – Touch targets and sizes
+- Verifies: REQ-CLV-016
+- Given: a browser that emulates a phone (360 px, coarse pointer) with one written answer; a desktop browser in dark and light
+- When: every visible control is measured; the window is set to 360, 768 and 1440 px
+- Then: every control, the five answer actions included, is at least 44 x 44 px; no size scrolls sideways in either theme
+
+### TC-CLV-017 – No request leaves the host
+- Verifies: REQ-CLV-017
+- Given: a browser session of the click-through (and TC-VPB-004's session with a voice line)
+- When: every request is recorded
+- Then: none goes to another host
+
+### TC-CLV-018 – Password only over HTTPS or to localhost
+- Verifies: REQ-CLV-018
+- Given: the page opened as `http://mia-lan:8686` (a home-network name over plain HTTP)
+- When: the login form is forced open and sent; the change of password is sent from such an address
+- Then: the form is off and names HTTPS; no request reaches `/api/login` or `/api/change_password`
+
+### TC-CLV-019 – Plain stack
+- Verifies: REQ-CLV-019
+- Given: the repository
+- When: its files are inspected
+- Then: no bundler files; ES modules and vendored libraries; the Godot version string is 4.6.1
+
+### TC-CLV-020 – Delivered by the backend
+- Verifies: REQ-CLV-020
+- Given: the compose stack
+- When: the chat page is loaded in a real browser
+- Then: it comes from the backend container; the frontend has no container of its own
+
+### TC-CLV-021 – Only IF-101 on the wire
+- Verifies: REQ-CLV-021
+- Given: the click-through of every view against the mock of IF-101, with every request and websocket event recorded
+- When: the paths and events are compared with `contracts/IF-101-chat-api.md`
+- Then: every one is named there (the page's files, the character page and the socket transport aside); none goes to another host
+
+### TC-CLV-022 – Logout
+- Verifies: REQ-CLV-022
+- Given: a logged-in page with an open socket
+- When: the user logs out
+- Then: one `/api/logout`, the socket is closed, then the login is shown; a lost connection keeps the user logged in and says so
+
+### TC-CLV-023 – The status card of a task
+- Verifies: REQ-CLV-023
+- Given: `task_status` events of one task
+- When: a second status, Pause, Resume, Stop and the final status arrive
+- Then: one card, updated in place; Pause and Resume call their operation; Stop is sent; the finished card stays with the final figures and without buttons
+
+### TC-CLV-024 – The files list
+- Verifies: REQ-CLV-024
+- Given: the server lists a file
+- When: the Files tab is opened and a task stores another file
+- Then: the file is a download link `/api/files/<name>`, no delete is offered; `files_changed` draws the list again

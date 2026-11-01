@@ -204,7 +204,16 @@ package MIA_Architecture {
             @Implementation {
                 :>> status = ImplementationStatus::built;
                 :>> modules = ("templates/index.html", "templates/static/chat/app.js",
-                               "templates/static/chat/chat.js", "templates/static/chat/mood.js");
+                               "templates/static/chat/chat.js", "templates/static/chat/chat-model.js", "templates/static/chat/mood.js",
+                               "templates/static/chat/login.js", "templates/static/chat/account.js", "templates/static/chat/api.js",
+                               "templates/static/chat/socket.js", "templates/static/chat/workspace.js", "templates/static/chat/panels-model.js",
+                               "templates/static/chat/task-card.js", "templates/static/chat/task-card-model.js",
+                               "templates/static/chat/composer.js", "templates/static/chat/palette.js", "templates/static/chat/markdown.js",
+                               "templates/static/chat/menu.js", "templates/static/chat/layout.js", "templates/static/chat/caption.js",
+                               "templates/static/chat/view-menu.js", "templates/static/chat/settings.js", "templates/static/chat/theme.js",
+                               "templates/static/chat/a11y.js", "templates/static/chat/storage.js", "templates/static/chat/i18n.js",
+                               "templates/static/chat/i18n", "templates/static/chat/tokens.css", "templates/static/chat/layout.css",
+                               "templates/static/chat/messages.css", "templates/static/chat/components.css");
             }
         }
         part characterRenderer {
@@ -267,12 +276,17 @@ package MIA_Architecture {
             }
         }
         part accessControl {
-            doc /* Editor and chat tokens today (to be replaced by accounts, FR-21), allowed origins, content security policy. */
-            @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("web_app.py", "presets_api.py"); }
+            doc /* Sessions guard every route while accounts are on (FR-21); editor and chat tokens while they are off; allowed origins, content security
+                   policy; the internal token of the helper processes (D-149: with accounts off every route is open, an accepted deviation). */
+            @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("web_app.py", "presets_api.py", "api_sessions.py", "internal_auth.py"); }
         }
         part accountService {
-            doc /* Target: accounts created by the owner, passwords as salted slow hashes, sessions, login throttling, password change. */
-            @Implementation { :>> status = ImplementationStatus::proposed; }
+            doc /* Accounts created by the owner, passwords as salted slow hashes, sessions, login throttling, password change (N-2.1). */
+            @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("accounts.py", "accounts_api.py", "api_sessions.py"); }
+        }
+        part graphApi {
+            doc /* The workflow and graph API for the graph app (IF-104 over HTTP) on the workflow library (IF-203), behind the session guard (N-2.1 T-04). */
+            @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("graph_api.py"); }
         }
         part variantStore {
             doc /* Target: character variants as data (shown or hidden parts, colours), stored like presets; a workflow names one, the chat has the default. */
@@ -365,10 +379,12 @@ package MIA_Architecture {
         }
         part pipelineRunner {
             doc /* Executes pipeline graphs of seven node kinds, enforces budgets, emits events, retries locally;
-                   core.py loads a skill, takes its pipeline from the library and runs it. */
+                   core.py loads a skill, takes its pipeline from the library and runs it;
+                   run_workflow.py runs a workflow of the library (IF-202) and gives the harness its access (IF-105),
+                   tools/sync_workflows.py writes one library workflow per skill (D-112). */
             @Implementation {
                 :>> status = ImplementationStatus::built;
-                :>> modules = ("core.py", "pipeline.py", "pipeline_model.py", "schema_check.py");
+                :>> modules = ("core.py", "pipeline.py", "pipeline_model.py", "schema_check.py", "run_workflow.py", "tools/sync_workflows.py");
             }
         }
         part libraryStore {
@@ -423,6 +439,10 @@ package MIA_Architecture {
         part webBroker {
             doc /* The only way a sandboxed script reaches the web, over stdin and stdout. */
             @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("broker.py"); }
+        }
+        part toolDoor {
+            doc /* the one door to the tools of a workflow step (IF-402): counts the calls of a run, labels every output with its trust; A-42 */
+            @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("tool_calls.py"); }
         }
         part claimExtractor {
             doc /* Claims out of prose with anchored quotes; rule-based and model-based variants. */
@@ -509,7 +529,7 @@ package MIA_Architecture {
 
         part runLog {
             doc /* Typed events with schema, secret removal, run id. */
-            @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("events.py", "run_log.py", "evidence.py"); }
+            @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("events.py", "run_log.py", "evidence.py", "run_events.py"); }
         }
         part contentStore {
             doc /* Prompts, answers and pages by hash, retention by age. */
@@ -536,16 +556,19 @@ package MIA_Architecture {
     part def Evaluation {
         doc /* Harness, suites, metrics and baselines. Offline, on recorded data. */
         part harness {
-            doc /* Variants x repeats x suites, cost counting, intervals, paired sign test. */
-            @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("harness.py", "metrics.py", "tools/eval.py"); }
+            doc /* Variants x repeats x suites, cost counting, intervals, paired sign test; workflows through IF-105 (eval_platform.py), the holdout guard
+                    around eval_decide.py, the baseline check, and the measurement tools for the first text and the frame rate (N-4.1). */
+            @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("harness.py", "metrics.py", "tools/eval.py", "eval_platform.py", "tools/decide_guard.py",
+                                                                                       "tools/check_baselines.py", "tools/measure_latency.py", "tools/measure_fps.mjs"); }
         }
         part suites {
             doc /* hard_checks, computable, extraction, verdicts, research, research_compound, plans, web_checks, behaviour, review_toy. */
             @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("eval/suites", "eval/baselines"); }
         }
         part judgeCalibration {
-            doc /* LLM judge with a rubric calibrated on the owner's ratings. */
-            @Implementation { :>> status = ImplementationStatus::proposed; }
+            doc /* LLM judge with a rubric calibrated on the owner's ratings. Built: the calibration record and the flag that leaves an uncalibrated
+                    judge's verdicts out (REQ-EVL-003); no judge and no loading of the records yet. */
+            @Implementation { :>> status = ImplementationStatus::partly; :>> modules = ("harness.py", "tools/label_agreement.py"); }
         }
     }
 
@@ -564,18 +587,23 @@ package MIA_Architecture {
     }
 
     part def Persistence {
-        doc /* Everything is files on the host (JSON, JSON lines, Markdown, one SQLite index). Target: PostgreSQL in a container behind a storage layer (proposed). */
+        doc /* Everything is files on the host (JSON, JSON lines, Markdown, one SQLite index). Target: PostgreSQL in a container behind the storage layer (partly built, N-3.1). */
         part files {
             doc /* data/, memories.json, long_time_history.json, presets, gestures, chat log, runs, store, library. */
             @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("config.py", "constants.py"); }
         }
         part storageLayer {
-            doc /* Interfaces over the file stores so that the database can replace them (stage 0 of the database plan). */
-            @Implementation { :>> status = ImplementationStatus::proposed; }
+            doc /* The one door to the shared state (IF-102, N-3.1): versions, validation by the table definitions, notices, a file backend and a
+                   PostgreSQL backend, accounts, the copy between backends (library export and seed, migration). Partly: the old file stores are
+                   not behind it yet (N-2 tasks, D-67, D-105). */
+            @Implementation { :>> status = ImplementationStatus::partly;
+                              :>> modules = ("storage.py", "storage_files.py", "storage_postgres.py", "storage_copy.py", "migrate.py", "accounts.py"); }
         }
         part database {
-            doc /* PostgreSQL in a container with a volume, a health check, migration from files and back, backup and restore. */
-            @Implementation { :>> status = ImplementationStatus::proposed; :>> modules = ("deploy/REQUIREMENTS_DB.md"); }
+            doc /* PostgreSQL in a container with a volume, a health check, migration from files and back, backup and restore (N-3.1). Partly: the
+                   database runs in the stack (profile db), but nothing in MIA reads MIA_DATABASE_URL yet (D-139). */
+            @Implementation { :>> status = ImplementationStatus::partly;
+                              :>> modules = ("deploy/compose.yaml", "deploy/db/001_records.sql", "tools/backup.sh", "tools/restore.sh"); }
         }
     }
 
@@ -586,8 +614,8 @@ package MIA_Architecture {
             @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("config.py", "setup_cfg.example.json"); }
         }
         part launcher {
-            doc /* python -m MIA: Ollama, speech process, web app, HTTPS proxy. */
-            @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("__main__.py", "mia_logger.py"); }
+            doc /* python -m MIA: Ollama, speech process, web app, HTTPS proxy; offers the first account once (REQ-OPR-002, D-136). */
+            @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("__main__.py", "mia_logger.py", "first_account.py"); }
         }
         part shutdownSequence {
             doc /* Orderly stop for Ctrl+C, /break!, /goodnight!, SIGTERM; saves the history. */
@@ -598,11 +626,16 @@ package MIA_Architecture {
             @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("tls_proxy.py", "tailscale_serve.py", "deploy/Caddyfile"); }
         }
         part composeStack {
-            doc /* MIA, Ollama, SearXNG and Caddy as containers; ROCm and NVIDIA overrides; up.sh. */
+            doc /* MIA, the graph app (graph), the database (db, profile db), Ollama, SearXNG and Caddy as containers, images pinned by digest; ROCm and NVIDIA
+                   overrides; up.sh (start, first account, backup and restore); the runbook (D-127, D-133, D-139, D-145). */
             @Implementation {
                 :>> status = ImplementationStatus::built;
-                :>> modules = ("deploy/compose.yaml", "deploy/Containerfile", "deploy/up.sh");
+                :>> modules = ("deploy/compose.yaml", "deploy/Containerfile", "deploy/up.sh", "deploy/RUNBOOK.md", "tools/backup.sh", "tools/restore.sh");
             }
+        }
+        part freeCheck {
+            doc /* The licence and dependency check: GPL-3-or-later, no paid-API client, no paid host in the web log (REQ-OPR-009, D-145). */
+            @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("tools/check_free.py"); }
         }
         part characterTools {
             doc /* Scripts that build the character from its source, export the VRM, pack and unpack the compiled web export. */
@@ -2067,7 +2100,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-VPB-003'> VoiceLines_Vpb003 {
         subject s : WebFrontEnd;
-        doc /* When the backend sends a voice line, the Voice playback shall play it, and if its audio file is missing, skip it and report it to the backend. */
+        doc /* When the backend sends a voice line, the Voice playback shall play it, and if its audio file is missing, skip it and report it through the IF-112 callback onLineError; no event goes to the backend (A-50). */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-VPB-004'> NoRequestLeavesTheHost_Vpb004 {
@@ -2142,7 +2175,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-FE-013'> VoiceLines_Fe013 {
         subject s : WebFrontEnd;
-        doc /* When the backend sends a voice line, the Web Frontend shall play it, and if its audio file is missing, skip it and report it to the backend. */
+        doc /* When the backend sends a voice line, the Web Frontend shall play it, and if its audio file is missing, skip it and report it in the page (IF-112 callback); no event goes to the backend (A-50). */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-FE-014'> StatusLineAndAccountOfATask_Fe014 {
@@ -3362,7 +3395,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-RTB-001'> SharedStateHeld_Rtb001 {
         subject s : Persistence;
-        doc /* The Record tables shall define the tables of the history, summaries, chat log, votes, memory, tasks, memos, presets, gestures and run results. */
+        doc /* The Record tables shall define the 14 tables of IF-302 v5: history, memory, votes, tasks, memos, accounts, presets, gestures, runs (run results), source_trust (trust values of sources), cases, behaviours, workflow_meta and reports; summaries and the chat log are records of history. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-RTB-002'> RunResults_Rtb002 {

@@ -18,7 +18,7 @@ def make(services):
     full_text = FullTextSource(services.web_get)                  # open access links only; a PDF only through the wall of pdf_text.py
     def run(text, on_delta, on_emotion, should_stop, ask=None, options=None, monitor=None, files=None, reports=None):
         def run_skill(name, inputs):
-            result = services.core.run(name, inputs, should_stop=should_stop)
+            result = services.core.run(name, inputs, should_stop=should_stop, started_by="command")
             if result.status == "stopped":
                 raise RuntimeError("the review was stopped")
             if result.status != "done":

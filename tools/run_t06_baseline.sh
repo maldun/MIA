@@ -25,7 +25,7 @@ for style in single cops; do
   for suite in verdicts_vitaminc verdicts_wikidata; do
     echo; echo "--- $suite, $style, 50 cases"
     start=$(date +%s)
-    "$PY" tools/eval.py run "$suite" --variant "t06-$style" --pipeline "verify.$style@1" --model "$MODEL" --pin MP-light \
+    "$PY" tools/eval.py run "$suite" --variant "t06-$style" --pipeline "verify.$style@1" --pin MP-light \
           --repeats 1 --sample 50 --sample-seed 7 --quiet
     echo "seconds: $(( $(date +%s) - start ))"
   done

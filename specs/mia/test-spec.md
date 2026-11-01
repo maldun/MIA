@@ -77,7 +77,6 @@ Setup and expected result are in the docstring of each test (the golden examples
 | TC-IF-101-06 | IF-101 | Contract | 1 (mock) and 2 (real) | golden 3: stop right after send gives chat_done with status stopped and no chat_delta. | exact |
 | TC-IF-101-07 | IF-101 | Contract | 1 (mock) and 2 (real) | empty or blank text is 422 empty_text and nothing is queued. | exact |
 | TC-IF-101-08 | IF-101 | Contract | 1 (mock) and 2 (real) | a user who connects later gets the same ordered history with senders, the assistant | exact |
-| TC-IF-101-09 | IF-101 | Contract | 1 (mock) and 2 (real) | v1: send answers with id, position and the stored message; the message and its chat_message event carry the client id; the history keeps it. REQ-CLV-001. | exact |
 | TC-IF-101-10 | IF-101 | Contract | 1 (mock) and 2 (real) | v1: whoami knows the account of a kept session; the own password changes with the old one, a wrong old one is 401, a weak new one 422, the old password stops working. REQ-CLV-014. | exact |
 | TC-IF-101-11 | IF-101 | Contract | 1 (mock) and 2 (real) | v1: regenerate queues a new try of the last answer only (404 unknown, 422 not the last); speak_again sends one audio_chunk per sentence of any answer. REQ-CLV-005. | exact |
 | TC-IF-101-12 | IF-101 | Contract | 1 (mock) and 2 (real) | v1: a vote is kept with category and value, the score per category and overall is returned and pushed; an invalid vote is 422 and stores nothing. REQ-CLV-010. | exact |
@@ -88,6 +87,20 @@ Setup and expected result are in the docstring of each test (the golden examples
 | TC-IF-101-17 | IF-101 | Contract | 1 (mock) and 2 (real) | v1: every answer announces its character variant (name or null) in the event variant. REQ-CLV-013. | exact |
 | TC-IF-101-18 | IF-101 | Contract | 1 (mock) and 2 (real) | v2: logout ends that session only (401 afterwards on every operation); a second session of the account stays valid. REQ-CLV-022, REQ-BE-077. | exact |
 | TC-IF-101-19 | IF-101 | Contract | 2 (real only) | v3: a foreign Origin is 403 bad_origin also with a session; login and change_password over plain HTTP from another machine are 403 insecure_channel without a cookie. Needs HTTP, so it is verified by the component tests of the Backend (tests/test_accounts_api.py, TC-API-007 and TC-API-008), not by the Python-level mock. REQ-API-007, REQ-API-008. | exact |
+| TC-IF-101-20 | IF-101 | Contract | 1 (mock) and 2 (real) | v1: send answers with id, position and the stored message; the message and its chat_message event carry the client id; the history keeps it. REQ-CLV-001. | exact |
+| TC-IF-101-21 | IF-101 | Contract | 1 (mock) and 2 (real) | v4: `series` has the sums of each ISO week with a vote, oldest first; the sums of the weeks add up to the totals; a refused vote is in no week. REQ-BE-028. REQ-CLV-010. | exact |
+| TC-IF-101-22 | IF-101 | Contract | 1 (mock) and 2 (real) | v5: every behaviour of the list has a counter; 5 net negative votes make its chance at most 0.01; any user resets it, the others hear of it, the votes stay; a name that is not on the list is refused. REQ-BE-030. REQ-BE-031. REQ-CHA-017. REQ-CHA-018. | exact |
+| TC-IF-101-23 | IF-101 | Contract | 1 (mock) and 2 (real) | v6: a task keeps and lists its `due` (UTC, to the second); a save without it clears it; another format, or a due time on memos or memory, is 422 invalid_item with the rule `due` and stores nothing. REQ-CHA-019. REQ-BE-032. | exact |
+| TC-IF-101-24 | IF-101 | Contract | 1 (mock) and 2 (real) | v7: `/review question` starts a task that posts its questions as messages of MIA and has the status activity `waiting`; the next message of the SAME account is the answer (stored and sent, `queued` false, position 0); a message of another account is queued and is no answer; the report comes as chat_done. REQ-WFM-019. | exact |
+| TC-IF-101-25 | IF-101 | Contract | 1 (mock) and 2 (real) | v7: stop also ends a review that waits for an answer; the review gives its report as it stands, chat_done has the status stopped. REQ-WFM-019. | exact |
+| TC-IF-101-26 | IF-101 | Contract | 1 (mock) and 2 (real) | v8: a task that asks questions sends chat_start, the text and chat_done only when its result is ready, so chat_start comes after the last question of MIA and after the answer to it; start, done and the status card share one id. REQ-WFM-036. | exact |
+| TC-IF-101-27 | IF-101 | Contract | 1 (mock) and 2 (real) | v8: the event task_status carries id, task, phase, mode, paused, done, budget (with seconds) and counts; the first has done false, the last done true; the mode is run, or slice after `/review options slice -- question`. REQ-WFM-031. | exact |
+| TC-IF-101-28 | IF-101 | Contract | 1 (mock) and 2 (real) | v8: pause answers {paused: true} for a running task and {paused: false} when nothing runs; the card says paused; resume answers {paused: false} and the card says so; stop ends a paused task with the status stopped. REQ-WFM-033. | exact |
+| TC-IF-101-29 | IF-101 | Contract | 1 (mock) and 2 (real) | v8, v9: `/review options` answers with the options as a chat message and queues nothing; an unknown option, or options without `--` and a question, are refused with 422 invalid_command and queue nothing. REQ-WFM-030. | exact |
+| TC-IF-101-30 | IF-101 | Contract | 1 (mock) and 2 (real) | v8: a file that a task stored is announced by files_changed and named by chat_done, listed with name, size, time and task, and downloaded byte for byte; a name with a path is 422 invalid_file_name, an unknown name 404 not_found. REQ-WFM-037. | exact |
+| TC-IF-101-31 | IF-101 | Contract | 1 (mock) and 2 (real) | v10: a task that fails gives chat_error and a result message `/review could not finish: <reason>` with the status error, which is the newest message of the chat, not an empty text. REQ-WFM-036. | exact |
+| TC-IF-101-33 | IF-101 | Contract | 1 (mock) and 2 (real) | v12 (A-54, D-149): ten messages of one account within 60 s pass; the 11th is 429 rate_limited and is not stored; another account still sends. REQ-API-007. | exact |
+| TC-IF-101-32 | IF-101 | Contract | 1 (mock) and 2 (real) | A-61 (D-162): a vote value 1.0, -1.0 or True is 422 invalid_vote with the rule value and is not stored. | exact |
 | TC-IF-102-01 | IF-102 | Contract | 1 (mock) and 2 (real) | golden 1: version 1, version 2, and version 1 reads back unchanged. | exact |
 | TC-IF-102-02 | IF-102 | Contract | 1 (mock) and 2 (real) | golden 2: each broken rule is refused with its name and nothing is stored. | exact |
 | TC-IF-102-03 | IF-102 | Contract | 1 (mock) and 2 (real) | golden 3: a cycle p->d->p is refused as a cycle and named by its ids, first id repeated at the end. | exact |
@@ -96,6 +109,8 @@ Setup and expected result are in the docstring of each test (the golden examples
 | TC-IF-102-06 | IF-102 | Contract | 1 (mock) and 2 (real) | a subscriber gets one notice per write; after unsubscribe none. | exact |
 | TC-IF-102-07 | IF-102 | Contract | 1 (mock) and 2 (real) | text with odd characters comes back byte for byte (the word-for-word recital of FR-28). | exact |
 | TC-IF-102-08 | IF-102 | Contract | 1 (mock) and 2 (real) | F-5: a run result and a source trust value are written and read back as versions; the second write of a source is version 2. | exact |
+| TC-IF-102-09 | IF-102 | Contract | 1 (mock), 2 (real, files) and 3 (real, PostgreSQL) | golden 4 (A-59): a delete is told to the subscribers with version None; a refused delete tells nothing. | exact |
+| TC-IF-102-10 | IF-102 | Contract | 1 (mock), 2 (real, files) and 3 (real, PostgreSQL) | golden 5 (A-59, D-162): categories() gives the four vote categories in their order; a vote of each is stored. | exact |
 | TC-IF-103-01 | IF-103 | Contract | 1 (mock) and 2 (real) | golden 1: message, model and token counts. | exact |
 | TC-IF-103-02 | IF-103 | Contract | 1 (mock) and 2 (real) | a JSON text or a dict that has the required keys is returned as a dict. | exact |
 | TC-IF-103-03 | IF-103 | Contract | 1 (mock) and 2 (real) | golden 2: text that is not JSON and JSON that lacks a required key are bad_output with the raw reply in detail. | exact |
@@ -107,12 +122,13 @@ Setup and expected result are in the docstring of each test (the golden examples
 | TC-IF-104-03 | IF-104 | Contract | 1 (mock) and 2 (real) | golden 3: wrong credentials and a made-up token are 401 and change nothing. | exact |
 | TC-IF-104-04 | IF-104 | Contract | 1 (mock) and 2 (real) | golden 2: a cycle is 422 with the rule; no id and no version appear. | exact |
 | TC-IF-104-05 | IF-104 | Contract | 1 (mock) and 2 (real) | golden 3: unknown id and kind are 404; a stale expected_version is 409 with the current version. | exact |
+| TC-IF-104-06 | IF-104 | Contract | 1 (mock) and 2 (real) | (A-60, D-162) a session limit that is not an integer >= 1 is 422 session_stopping_criterion; max_cycles 1 with a null max_seconds is saved. | exact |
 | TC-IF-105-01 | IF-105 | Contract | 1 (mock) and 2 (real) | golden 1: done; the run_start event carries model pin, seed and temperature; the run belongs to the user harness; the cost is returned. | exact |
 | TC-IF-105-02 | IF-105 | Contract | 1 (mock) and 2 (real) | golden 2: no seed is bad_options, the pin MP-huge is pin_unavailable, an unknown workflow is unknown_workflow; nothing runs. | exact |
 | TC-IF-105-03 | IF-105 | Contract | 1 (mock) and 2 (real) | golden 3: with a fake model two runs with the same inputs and options have equal outputs and equal event types and payloads. | exact |
 | TC-IF-105-04 | IF-105 | Contract | 1 (mock) and 2 (real) | a budget below the estimate is refused with the budget named; cost 0; run_start and run_end exist. | exact |
 | TC-IF-111-01 | IF-111 | Contract | 1 (mock) and 2 (real) | golden 1: after ready, an expression and the mouth follow the messages | exact |
-| TC-IF-111-02 | IF-111 | Contract | 1 (mock) and 2 (real) | golden 3: an unknown expression keeps the current one | exact |
+| TC-IF-111-02 | IF-111 | Contract | 1 (mock) and 2 (real) | golden 3: an unknown expression shows `neutral` (A-48) | exact |
 | TC-IF-111-03 | IF-111 | Contract | 1 (mock) and 2 (real) | golden 3: a foreign origin, malformed JSON and an unknown type change nothing and raise nothing | exact |
 | TC-IF-111-04 | IF-111 | Contract | 1 (mock) and 2 (real) | golden 3: the covered area counts negative or missing values as 0 | exact |
 | TC-IF-111-05 | IF-111 | Contract | 1 (mock) and 2 (real) | golden 2: a character that cannot load says failed once | exact |
@@ -141,21 +157,28 @@ Setup and expected result are in the docstring of each test (the golden examples
 | TC-IF-301-01 | IF-301 | Contract | 1 (mock) and 2 (real) | workflows and context_graphs are defined, versioned, not deletable. | exact |
 | TC-IF-301-02 | IF-301 | Contract | 1 (mock) and 2 (real) | golden 1 and 2: a valid graph gives None; each broken rule is named. | exact |
 | TC-IF-301-03 | IF-301 | Contract | 1 (mock) and 2 (real) | golden 3: p->d->p is a cycle named as [p, d, p]; a table that is not a graph table is a ValueError. | exact |
+| TC-IF-301-04 | IF-301 | Contract | 1 (mock) and 2 (real) | golden 4 (A-60): a session limit that is not an integer >= 1 (or is a bool) and a stop that is not an object are session_stopping_criterion; an edge endpoint that is not text is node_identity; max_cycles 1 is valid; nothing raises. | exact |
 | TC-IF-302-01 | IF-302 | Contract | 1 (mock) and 2 (real) | golden 3: memory, tasks and memos are deletable, votes and runs are not; every table is versioned. | exact |
 | TC-IF-302-02 | IF-302 | Contract | 1 (mock) and 2 (real) | golden 1 and 2: the four categories are valid; another category is rule category; a value other than 1 or -1 is rule schema. | exact |
 | TC-IF-302-03 | IF-302 | Contract | 1 (mock) and 2 (real) | a memory record needs a source (rule schema, detail source); text with newlines, quotes and non-ASCII characters is valid; a foreign table is a ValueError. | exact |
+| TC-IF-302-04 | IF-302 | Contract | 1 (mock) and 2 (real) | v2: a memory record's kind (fact, preference, commitment) and status (active, replaced) are checked when present, subject and updated are free; a record of v1 stays valid; the source stays required. | exact |
+| TC-IF-302-05 | IF-302 | Contract | 1 (mock) and 2 (real) | v3: the status of workflow_meta is required and one of draft, tested, trusted, retired; specification and benchmark are free. | exact |
+| TC-IF-302-06 | IF-302 | Contract | 1 (mock) and 2 (real) | v4, v5: a reports record needs task, skill, skill_version, question, account, model_pin and report; a missing field is rule schema with that field as detail; the table is versioned and not deletable. | exact |
+| TC-IF-302-07 | IF-302 | Contract | 1 (mock) and 2 (real) | golden 4 (v6, A-61): a document that is not a mapping is rule schema in every table; a vote value 1.0, -1.0, True or False is rule schema, detail value. | exact |
 | TC-IF-401-01 | IF-401 | Contract | 1 (mock) and 2 (real) | golden 1: three events give seq 1, 2, 3, each with the run id and the starting user; the account lists the events with a plain text. | exact |
-| TC-IF-401-02 | IF-401 | Contract | 1 (mock) and 2 (real) | golden 2: an unknown type is refused and nothing is written; secrets in the payload are stored as [removed]. | exact |
+| TC-IF-401-02 | IF-401 | Contract | 1 (mock) and 2 (real) | golden 2 (v2, A-53): an unknown type is refused and nothing is written; a value under a secret-like key is stored as [removed] whatever its type (text, number, null, list, object, at any depth), an empty text "" stays (D-144, D-146). | exact |
 | TC-IF-401-03 | IF-401 | Contract | 1 (mock) and 2 (real) | a log whose first event is not run_start, or whose seq has a gap, is reported. | exact |
-| TC-IF-401-04 | IF-401 | Contract | 1 (mock) and 2 (real) | golden 3: the same steps differ only in time and run id (same); one extra check_run is a difference. | exact |
+| TC-IF-401-04 | IF-401 | Contract | 1 (mock) and 2 (real) | golden 3 (v2, A-53): the same steps differ only in time and run id (same); one extra check_run is a difference, so are the same types with another payload and one extra event at the end. | exact |
 | TC-IF-401-05 | IF-401 | Contract | 1 (mock) and 2 (real) | v1 (A-30): a run id that is not a plain name is invalid_run in every operation, a payload that is not an object is invalid_payload, an empty user is invalid_user; checked in the order run id, type, payload, user; nothing is written. | exact |
 | TC-IF-402-01 | IF-402 | Contract | 1 (mock) and 2 (real) | golden 1: 1,200 m against 1,020 m fails, 1,200 against 1,200 passes, no number in the evidence is inconclusive; all with trust code. | exact |
 | TC-IF-402-02 | IF-402 | Contract | 1 (mock) and 2 (real) | golden 3: a quote that is not verbatim fails; fetched passages carry the source reference and the web trust label. | exact |
 | TC-IF-402-03 | IF-402 | Contract | 1 (mock) and 2 (real) | golden 2: with a limit of 1 the second web_search of the run is  | exact |
 | TC-IF-402-04 | IF-402 | Contract | 1 (mock) and 2 (real) | golden 2: without a sandbox run_script is  | exact |
-| TC-IF-402-05 | IF-402 | Contract | 1 (mock) and 2 (real) | checks are  | exact |
+| TC-IF-402-05 | IF-402 | Contract | 1 (mock) and 2 (real) | checks are `code`, web and scholarly tools are `web`; a `schema_check` that misses the key `reason` fails with one problem that names `reason` | exact |
+| TC-IF-402-06 | IF-402 | Contract | 1 (mock) and 2 (real) | golden 4 (A-34): `fetch_page` returns the text of the page with its reference and trust `web`; an unknown page is `source_error` | exact |
+| TC-IF-402-07 | IF-402 | Contract | 1 (mock) and 2 (real) | A-42: arguments the tool does not take are `bad_arguments`, nothing counted (a limit of 1 still allows one right call) | exact |
 | TC-IF-404-01 | IF-404 | Contract | 1 (mock) and 2 (real) | golden 1: search returns findings with url, title and content; fetch returns text, a hash and the size. | exact |
-| TC-IF-404-02 | IF-404 | Contract | 1 (mock) and 2 (real) | golden 2 and 3: a private address, localhost, port 8080 and a file scheme are unsafe_url and nothing is fetched. | exact |
+| TC-IF-404-02 | IF-404 | Contract | 1 (mock) and 2 (real) | golden 2 and 3: a private address, localhost, port 22 and a file scheme are unsafe_url and nothing is fetched. | exact |
 | TC-IF-404-03 | IF-404 | Contract | 1 (mock) and 2 (real) | golden 2: a 404 is http_status with 404; an image is unsupported_content. | exact |
 | TC-IF-404-04 | IF-404 | Contract | 1 (mock) and 2 (real) | golden 2: a search service that fails is search_error, with no partial list. | exact |
 | TC-IF-404-05 | IF-404 | Contract | 1 (mock) and 2 (real) | golden 3: a page over the limit comes back truncated with exactly the limit in bytes. | exact |
@@ -187,7 +210,7 @@ Error rates from `plan-phase/scripts/false_alarm.py` (`--n 1000 --max-rate 0.01 
 | --- | --- | --- | --- | --- |
 | SMOKE-MIA-001 | FR-19, NFR-9 | the owner's workstation (Fedora 43, podman) | fresh checkout, one configuration file, one command | compose stack up with all containers; the first account can be created; a chat message is answered |
 | SMOKE-MIA-002 | NFR-6, CON-5 | a phone outside the home network | Tailscale (tailnet) and HTTPS | the chat page loads and a message is answered; no public port is open (the owner runs this; SC-03) |
-| SMOKE-MIA-003 | NFR-9 | the owner's workstation | each container started alone against the mocks of its neighbours | each container passes the contract suites of its interfaces (stage 2) |
+| SMOKE-MIA-003 | NFR-9 | the owner's workstation | each container (`mia`, `db`, `graph`) started alone against the mocks of its neighbours; the mocks are those of `tests/helpers`, run inside the mia image (A-37, D-127); for `graph` the JavaScript contract suite runs on the host against the files the container serves (A-46, D-133); then all together; `tests/smoke/smoke_stack.py` | each container passes the contract suites of its interfaces (stage 2); all start together, the https front answers on `/` and `/graph/` |
 
 ## Validation criteria (checked in Phase 7)
 

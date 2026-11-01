@@ -1,7 +1,7 @@
 """
 TC-LOG-001, TC-LOG-002, TC-LOG-003, TC-IF-401 (REQ-LOG-001 to -003, IF-401): the provider of the run event log, `run_events.RunEvents`: typed events with one run id and the starting user, secrets
 removed, an order that can be checked, the account of a run from its events only, two runs compared, and the events kept as append-only files (REQ-LOG-005, A-28), one file per run.
-The golden cases of the contract suite (tests/acceptance/contract/test_if_401_run_events.py) are repeated here on the real provider until the adapter of the suite is installed.
+The golden cases of the contract suite (tests/acceptance/contract/test_if_401_run_events.py) are repeated here on the real provider; the last class feeds it from the real runner.
 Run: python tests/test_run_events.py
 """
 import json
@@ -18,7 +18,21 @@ sys.path.insert(0, REPO)
 sys.path.insert(0, os.path.join(HERE, "helpers", "mocks"))
 
 import if_401_run_events as mock  # noqa: E402  (the list of types of the contract)
+from pipeline import Runner  # noqa: E402  (the consumer that writes the events of a run, N-2.4.1 T-07)
 from run_events import RunEvents, RunEventsError, TYPES  # noqa: E402
+from skill_store import parse_skill  # noqa: E402
+
+SKILL = """---
+name: echo
+version: 1
+description: Repeat the question
+budget: {steps: 5, seconds: 30}
+pipeline: echo
+---
+"""
+GRAPH = {"name": "echo", "version": 1, "result": "said",
+         "nodes": [{"id": "say", "kind": "code", "function": "say", "args": {"text": "$input.question"}, "output": "said", "plain": "Repeating"}]}
+SECRET_QUESTION = "Repeat Bearer abc123secret456 and write to anna@example.org"
 
 
 def code_of(call):
@@ -93,6 +107,18 @@ class Provider(unittest.TestCase):
         for secret in ("sk-123", "hunter2", "me@example.org"):
             self.assertNotIn(secret, raw)
 
+    def test_a_secret_that_is_a_number_is_removed_too(self):
+        """TC-LOG-002, TC-IF-401-02 (D-144, F3 of the N-2.4.3 verification): a payload key named like a password is stored as [removed] also when its value is a number.
+        Example: emit {"password": 123456, "steps": 3} -> stored {"password": "[removed]", "steps": 3}; 123456 is not in the file."""
+        # Given a run
+        self.log.emit("r1", "run_start", {}, "anna")
+        # When an event with a numeric password is written
+        self.log.emit("r1", "tool_call", {"password": 123456, "steps": 3}, "anna")
+        # Then the stored payload has [removed], the count stays, and the file never had the number
+        self.assertEqual(self.log.events("r1")[1]["payload"], {"password": "[removed]", "steps": 3})
+        with open(self.log.path("r1"), encoding="utf-8") as handle:
+            self.assertNotIn("123456", handle.read())
+
     def test_the_payload_must_be_an_object_and_the_run_id_a_plain_name(self):
         """TC-LOG-002: a payload that is not an object and a run id that could leave the folder are refused before anything is written.
         Example: payload "text" is invalid_payload; run id "../x" is invalid_run and the folder stays empty."""
@@ -146,6 +172,33 @@ class Provider(unittest.TestCase):
         self.assertTrue(result["differences"])
         self.assertEqual(code_of(lambda: self.log.compare("a", "none")), "unknown_run")
 
+    def test_the_same_types_with_another_payload_differ(self):
+        """TC-LOG-003, TC-IF-401-04 (F4 of the N-2.4.3 verification): the payloads are compared, not only the types.
+        Example: run_end {"status": "done"} against run_end {"status": "error"} -> not the same, the difference is at 2."""
+        # Given two runs with the same types whose last payload differs
+        for run, status in (("a", "done"), ("b", "error")):
+            self.log.emit(run, "run_start", {"workflow": "lookup"}, "anna")
+            self.log.emit(run, "run_end", {"status": status}, "anna")
+        # When they are compared
+        result = self.log.compare("a", "b")
+        # Then they differ at the second event only
+        self.assertFalse(result["same"])
+        self.assertEqual([d.split(":")[0] for d in result["differences"]], ["at 2"])
+
+    def test_an_extra_event_at_the_end_is_a_difference(self):
+        """TC-LOG-003, TC-IF-401-04 (F4 of the N-2.4.3 verification): a run with one more event at the end is not the same, in both directions.
+        Example: a (run_start, run_end) against b (run_start, run_end, error) -> not the same, "length 2 != 3"."""
+        # Given two runs that agree on their first two events, and the second has one more
+        for run in ("a", "b"):
+            self.log.emit(run, "run_start", {"workflow": "lookup"}, "anna")
+            self.log.emit(run, "run_end", {"status": "done"}, "anna")
+        self.log.emit("b", "error", {"message": "late"}, "anna")
+        # When they are compared both ways
+        forward, backward = self.log.compare("a", "b"), self.log.compare("b", "a")
+        # Then both name the length
+        self.assertEqual(forward, {"same": False, "differences": ["length 2 != 3"]})
+        self.assertEqual(backward, {"same": False, "differences": ["length 3 != 2"]})
+
     def test_the_events_are_append_only_files_one_per_run_and_a_new_instance_goes_on_where_the_old_stopped(self):
         """TC-LOG-005 (REQ-LOG-005, A-28): the events of a run are an append-only file of their own; a restart goes on with the next seq and rewrites nothing.
         Example: runs r1 and r2 make r1.jsonl and r2.jsonl; a new instance emits seq 2 for r1 and the bytes written before are unchanged."""
@@ -194,6 +247,31 @@ class Provider(unittest.TestCase):
         # Then it has the eight fields and a numeric time
         self.assertEqual(sorted(line), ["actor", "payload", "plain", "run_id", "seq", "time", "type", "user"])
         self.assertTrue(re.fullmatch(r"[0-9.]+", repr(line["time"])))
+
+
+class RunnerWritesThroughTheLog(unittest.TestCase):
+    def test_a_run_of_the_runner_is_complete_in_order_with_its_user_and_without_its_secrets(self):
+        """TC-LOG-002, TC-LOG-001 (the wiring of N-2.4.1 T-07): a run of the real runner written through RunEvents is one run id from run_start to run_end, in order, with the
+        starting user; a bearer token and an e-mail address in its question are not in the file; its account is the plain texts of its events.
+        Example: anna runs "echo" on "Repeat Bearer abc123secret456 ..." -> run_start first, run_end last, check_order [], user anna, "abc123secret456" not in the file."""
+        with tempfile.TemporaryDirectory() as folder:
+            # Given the runner writing through a run event log
+            log = RunEvents(folder)
+            runner = Runner(functions={"say": lambda text: text}, run_events=log)
+            # When anna runs a skill whose question carries a secret
+            result = runner.run(parse_skill(SKILL, "echo.md"), GRAPH, {"question": SECRET_QUESTION}, user="anna", started_by="command")
+            events = log.events(result.run_id)
+            with open(log.path(result.run_id), encoding="utf-8") as handle:
+                stored = handle.read()
+            # Then the run is complete and in order, of one run id and one user, without the secrets, and its account renders its events
+            self.assertEqual(result.status, "done")
+            self.assertEqual((events[0]["type"], events[-1]["type"]), ("run_start", "run_end"))
+            self.assertEqual(log.check_order(result.run_id), [])
+            self.assertEqual({(e["run_id"], e["user"]) for e in events}, {(result.run_id, "anna")})
+            self.assertEqual(events[0]["payload"]["question"], "Repeat [removed] and write to [removed]")
+            self.assertNotIn("abc123secret456", stored)
+            self.assertNotIn("anna@example.org", stored)
+            self.assertEqual(log.account(result.run_id), [{"seq": e["seq"], "plain": e["plain"]} for e in events if e["plain"]])
 
 
 if __name__ == "__main__":

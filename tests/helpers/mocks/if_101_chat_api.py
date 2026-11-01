@@ -12,6 +12,7 @@ except ImportError:
 MAX_FAILED_LOGINS = 5
 THROTTLE_SECONDS = 60
 MAX_TEXT = 4000
+RATE_LIMIT, RATE_SECONDS = 10, 60                  # v12: messages per account within 60 s (REQ-API-007, D-149)
 ITEM_KINDS = ("tasks", "memos", "memory")             # v1
 CATEGORIES = ("answer_quality", "reactions", "character_behaviour", "service")
 TRUST = {"example.org": 0.5, "wikipedia.org": 0.8}
@@ -28,6 +29,7 @@ class ChatApiMock:
         self._owner = {}                              # message id -> account of the queued user message
         self.now = 0.0
         self._failed = collections.defaultdict(list)  # account -> times of failed logins
+        self._sent = collections.defaultdict(list)    # v12: account -> times of its messages within the rate window
         self._sessions = {}                           # token -> account
         self._events = {}                             # token -> events not yet read
         self._history, self._queue, self._stop_next, self._ids = [], collections.deque(), False, 0
@@ -90,6 +92,10 @@ class ChatApiMock:
         user = self._user(session)
         if not isinstance(text, str) or not text.strip() or len(text) > MAX_TEXT:
             raise ApiError(422, "empty_text")
+        recent = [t for t in self._sent[user] if self.now - t < RATE_SECONDS]
+        if len(recent) >= RATE_LIMIT:
+            raise ApiError(429, "rate_limited")               # v12: nothing queued or stored
+        self._sent[user] = recent + [self.now]
         if len(self._queue) >= self.queue_limit or sum(1 for i in self._queue if self._owner.get(i) == user) >= self.user_limit:
             raise ApiError(503, "queue_full")
         queue_text, queue_options = text, {}
@@ -203,7 +209,7 @@ class ChatApiMock:
     def vote(self, session, message_id, category, value):
         """A plus or a minus on an answer (or a reaction, a behaviour, the service) with its category; every vote is kept with user and time."""
         user = self._user(session)
-        if category not in CATEGORIES or value not in (1, -1) or isinstance(value, bool):
+        if category not in CATEGORIES or value not in (1, -1) or type(value) is not int:      # A-61: a bool or a float equal to 1 is no vote value
             raise ApiError(422, "invalid_vote", rule="category" if category not in CATEGORIES else "value")
         if category == "answer_quality" and message_id not in [m["id"] for m in self._history]:
             raise ApiError(404, "not_found")
@@ -214,6 +220,8 @@ class ChatApiMock:
         self._votes.append({"user": user, "subject": message_id, "category": category, "value": value, "created": "t%d" % int(self.now), "at": self.now})
         score = self.score(session)
         self._broadcast("score", score)
+        if value == -1:
+            self._broadcast("expression", {"name": "shocked"})      # A-57: a minus hurts her (REQ-CHV-006, D-156)
         return {"stored": True, "score": score}
 
     def _counter(self, name):

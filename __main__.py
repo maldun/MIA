@@ -21,21 +21,27 @@ import signal
 import subprocess
 import sys
 import threading
-from .web_app import socketio, app, comm, WEB_PORT, scheduler, time_update_trigger
+from .web_app import socketio, app, comm, WEB_PORT, scheduler, time_update_trigger, _votes_store
 from .utils import get_own_ip
 from .tls_proxy import start_https_proxy
 from . import tailscale_serve
 from .constants import HTTPS_PORT_KEY, TAILSCALE_KEY
-from .shutdown import install_term_handler, stop_process, graceful_shutdown, DEFAULT_PAUSE
+from .shutdown import install_term_handler, stop_process, graceful_shutdown, close_database, DEFAULT_PAUSE
 
 from .constants import CFG_FILE, LOG_FNAME
-from .config import ensure as ensure_config
+from .config import ensure as ensure_config, warning as config_warning
+from . import first_account
+from .constants import ACCOUNTS_DIR_KEY
 fpath = os.path.split(__file__)[0]
 cfg_file = os.path.join(fpath,CFG_FILE)
 if os.path.basename(cfg_file) == "setup_cfg.json":
     cfg_file, _created = ensure_config(fpath)
     if _created:
         print("First start on this machine: setup_cfg.json was made from setup_cfg.example.json. Adjust it (paths, models, ports) and start MIA again if needed.")
+    # REQ-OPR-003: after an update the example may have options this machine's file lacks; their defaults apply, so this only warns
+    _missing_options = config_warning(fpath)
+    if _missing_options:
+        print(_missing_options)
 TEMPLATE_DIR = "templates"
 STATIC_DIR = os.path.join(TEMPLATE_DIR,"static")
 static_folder = os.path.join(fpath,STATIC_DIR)
@@ -47,6 +53,9 @@ if __name__ == "__main__":
     https_proc = None
     speak_proc = None
     tailscale_started = False
+    # REQ-OPR-002 (D-136): the first start offers the owner account once (the page cannot make the first one); the marker lives in the data folder
+    first_account.offer(os.path.join(fpath, "data"),
+                        os.path.join(fpath, cfg.get(ACCOUNTS_DIR_KEY, "data/db")))
     # Ctrl+C, SIGTERM and the commands /break! and /goodnight! all end in the same orderly shutdown below
     install_term_handler()
     try:
@@ -94,6 +103,7 @@ if __name__ == "__main__":
     finally:
         # one step after the other with a short pause, instead of everything at the same instant
         graceful_shutdown([("save history", comm.dump_history),
+                           ("close the database", lambda: close_database(_votes_store)),
                            ("stop tailscale serve", lambda: tailscale_serve.stop_serve(WEB_PORT) if tailscale_started else None),
                            ("stop https proxy", lambda: stop_process(https_proc,"https proxy",group=True)),
                            ("stop speech process", lambda: stop_process(speak_proc,"speech process",group=True))],

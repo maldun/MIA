@@ -110,14 +110,50 @@ test('TC-CLV-015: the login screen has an opaque black backdrop, so the app behi
 });
 
 // --- TC-CLV-021: the page uses the calls of IF-101 only ------------------------------------------------------
-test('TC-CLV-021: every address and socket event the page uses is one of the interface (or of the character and the voice)', () => {
+// The allow-list is read from the contract (D-163 F4), by the rules of contractWire in tests/test_chat_views_browser.py: an operation `name(...)` is at
+// /api/<name>; a name in brackets after it, (`chat_send`), and a name after the word event are socket events; an address in backquotes is a path;
+// the first column of every events table is an event.
+// Used by the page and the backend but not yet in IF-101 v13: amendment A-62 adds them to IF-101 v14 and empties this set.
+const PENDING_A62 = new Set();      // A-62 installed: IF-101 names the whole wire
+const SOCKET_IO_OWN = new Set(['connect', 'disconnect', 'connect_error']);          // events of the Socket.IO client itself, never on the wire
+
+function contractWire(text) {
+  const paths = new Set();
+  const events = new Set();
+  let inEvents = false;
+  for (const line of text.split('\n')) {
+    inEvents ||= line.startsWith('Events (');
+    if (!line.startsWith('| `')) continue;
+    const cell = line.split('|')[1];
+    if (inEvents) {
+      const first = cell.match(/`([a-z_]+)`/);
+      if (first) events.add(first[1]);
+      continue;
+    }
+    for (const m of cell.matchAll(/`([a-z_]+)\(/g)) paths.add(`/api/${m[1]}`);
+    for (const m of cell.matchAll(/\(`([a-z_]+)`\)/g)) events.add(m[1]);
+    for (const m of line.matchAll(/event `([a-z_]+)`/g)) events.add(m[1]);
+    for (const m of cell.matchAll(/`(\/[a-z_/.<>-]+)`/g)) paths.add(m[1].split('<')[0]);
+  }
+  return { paths, events };
+}
+
+test('TC-CLV-021: the wire is read from the contract text by the same rules as the browser test', () => {
+  // Given: rows of the operations table and of the events table
+  const text = ['| `send(session, text)` (`chat_send`) | text | ack |', '| `file(session, name)` (`/api/files/<name>`) | name | bytes |',
+    '| `connect(session)` | session | event `chat_status` first | |', 'Events (server to every connected page):', '| `chat_start` | `{id}` |'].join('\n');
+  // When: the wire is read
+  const { paths, events } = contractWire(text);
+  // Then: the paths and events of the rows, nothing else
+  assert.deepEqual([...paths].sort(), ['/api/connect', '/api/file', '/api/files/', '/api/send']);
+  assert.deepEqual([...events].sort(), ['chat_send', 'chat_start', 'chat_status']);
+});
+
+test('TC-CLV-021: every address and socket event the page uses is named in IF-101 (D-163 F4)', () => {
   const dir = new URL('../../templates/static/chat/', import.meta.url).pathname;
-  const allowedPaths = new Set(['/api/login', '/api/chat/history', '/api/chat/commands', '/character-backgrounds.json',
-    '/api/whoami', '/api/logout', '/api/change_password', '/api/regenerate', '/api/speak_again', '/api/account', '/api/vote', '/api/score', '/api/items', '/api/trust', '/api/persona',
-    '/api/pause', '/api/resume', '/api/files', '/api/files/']);   // IF-101 v1; v8: pause, resume, files and the download of one file, v2 (logout)
-  const allowedEvents = new Set(['chat_send', 'chat_stop', 'character_ready', 'audio_claim', 'audio_ended', 'chat_message', 'chat_start', 'chat_delta', 'chat_done', 'chat_status',
-    'chat_pipeline', 'chat_error', 'expression', 'audio_reload', 'audio_owner', 'connect', 'disconnect', 'connect_error',
-    'variant', 'score', 'item_changed', 'trust_changed', 'persona_changed', 'task_status', 'files_changed']);                                                               // IF-101 v1; v8: task_status, files_changed
+  const wire = contractWire(readFileSync(new URL('../../contracts/IF-101-chat-api.md', import.meta.url).pathname, 'utf8'));
+  const allowedPaths = new Set([...wire.paths, ...PENDING_A62]);
+  const allowedEvents = new Set([...wire.events, ...PENDING_A62, ...SOCKET_IO_OWN]);
   const paths = new Set();
   const events = new Set();
   for (const file of readdirSync(dir).filter((f) => f.endsWith('.js'))) {

@@ -629,7 +629,7 @@ def make_script_check(router, broker_factory=None, web=False):
                 run = router.run(script, data, operation=operation, broker=broker, timeout=timeout or 60)
         else:
             run = router.run(script, data, operation=operation, timeout=timeout or 10)
-        evidence = {"script_hash": run.script_hash, "script": _clip(script, 1500), "backend": run.backend, "tier": run.tier, "degraded": run.degraded,
+        evidence = {"run_status": run.status, "script_hash": run.script_hash, "script": _clip(script, 1500), "backend": run.backend, "tier": run.tier, "degraded": run.degraded,
                     "seconds": round(run.seconds, 3), "stdout": _clip(run.stdout, 500), "result": run.result}
         if broker is not None:
             evidence["web_log"] = broker.log

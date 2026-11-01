@@ -27,6 +27,7 @@ import types
 import threading
 import multiprocessing as mp
 import random
+import wave
 import re
 import shutil
 import signal
@@ -49,6 +50,7 @@ from .chat_api import create_blueprint as create_chat_blueprint
 from . import accounts_api
 from .chat_ops_api import create_chat_ops_blueprint
 from .items_api import create_items_blueprint
+from .graph_api import create_graph_blueprint
 from .trust_persona_api import create_trust_persona_blueprint
 from .persona import read_persona
 from .internal_auth import ensure_token, internal_headers
@@ -69,8 +71,9 @@ from . import checks
 from . import sandbox as sandbox_module
 from .core import Core
 from .library import Library
-from .pipeline import Tool
-from .pipeline_model import OllamaModel
+from .pipeline_model import ModelTurns, OllamaModel, TurnClient
+from .run_events import RunEvents
+from .tool_calls import build_tool_calls
 from . import web_tools
 from .web_tools import build_web_tools
 from .extension_loader import load_extensions
@@ -121,6 +124,10 @@ voc_exp = VoiceExpressor(web_url=WEB_URL+'/'+UPLOAD_ROUTE)
 
 from .communicator import Communicator
 comm = Communicator(**cfg)
+# one model server for everybody: one call at a time, a waiting chat call before the next call of a background run (REQ-RUN-009, REQ-RUN-010)
+model_turns = ModelTurns()
+_ollama = comm.client
+comm.client = TurnClient(_ollama, model_turns, "chat")
 _persona_file = os.path.join(FPATH, cfg.get(CONST.PERSONA_FILE_KEY, "data/persona.json"))
 comm.persona_provider = lambda: read_persona(_persona_file)          # the persona saved on the page is the system message of every call (REQ-CHA-008)
 
@@ -223,6 +230,33 @@ def send_expression(preset):
 
 pre_exp = PresetExpressor(send=send_expression)
 IDLE_EXPRESSION = "idle"
+
+REACTION_SECONDS = 3     # how long a reaction without a readable line stays before the face of the mood returns
+
+def line_seconds(path):
+    """the length of a wav line in seconds, REACTION_SECONDS when there is none or it cannot be read"""
+    try:
+        with wave.open(path,"rb") as fp:
+            return fp.getnframes()/float(fp.getframerate())
+    except (OSError, TypeError, AttributeError, EOFError, wave.Error):
+        return REACTION_SECONDS
+
+def mood_face():
+    """the expression of the current mood (the mood map of REQ-CHV-004: neutral when there is no mood)"""
+    emotion = mood.status()["emotion"]
+    return comm.map_emotion(emotion) if emotion else "neutral"
+
+def character_reaction(expression):
+    """
+    The character's reaction outside an answer (the chat service asks for it, e.g. shocked after a minus, REQ-CHV-006): the expression and the line of its mood,
+    then, in the background so the request is answered at once, the face of the current mood after the length of the line (D-156).
+    """
+    line = voice_lines.pick(expression)
+    express_and_reload(expression,line=line)
+    def back_to_mood(seconds):
+        socketio.sleep(seconds)
+        express_and_reload(mood_face(),sound=False)
+    socketio.start_background_task(back_to_mood,line_seconds(line))
 
 def express_and_reload(expression,sound=True,line=None):
     """
@@ -395,7 +429,7 @@ def converse(message,on_delta=None,on_emotion=None,should_stop=None):
         return filt_answer
 
     streamer.finish(filt_answer)
-    streamer.wait()
+    streamer.wait(should_stop=should_stop)        # a stop while the answer is spoken ends its voice (owner check A3)
     if len(filt_answer) == 0:
         # if no speech wait a bit
         time.sleep(TIMEOUT)
@@ -551,7 +585,7 @@ mood = MoodTracker(_own_path(CONST.MOODS_FILE_KEY, CONST.DEFAULT_MOODS_FILE),
 voice_lines = VoiceLines(os.path.join(FPATH, "library", "voice_lines.json"), VoiceExpressor.DEFAULT_PATH, mood_names(os.path.join(FPATH, CONST.DEFAULT_MOODS_FILE)),
                          log=logger.warning)                  # the line a mood says (REQ-CHA-007)
 # the tasks of MIA as skills with pipelines (ui/REQUIREMENTS_CORE.md); the chat is the first one
-pipeline_model = OllamaModel(comm.client, lambda profile: getattr(comm, "_profiles", {}).get(profile),
+pipeline_model = OllamaModel(TurnClient(_ollama, model_turns, "background"), lambda profile: getattr(comm, "_profiles", {}).get(profile),
                              lambda: (comm.version, comm.llm_options), keep_alive=comm.keep_alive)
 _runs_dir = _own_path(CONST.RUNS_DIR_KEY, CONST.DEFAULT_RUNS_DIR)
 # prompts, answers and the pages that were read are kept in full, by hash (content_store.py); conversations only with "store_chat_texts"; old texts go after "store_days"
@@ -582,10 +616,13 @@ def _run_environment():
     return _environment_cache["value"]
 
 
+# the runner reaches the tools only through IF-402 and writes its events also through IF-401 (REQ-RUN-012, D-120, D-122)
+tool_calls = build_tool_calls(_web_tools, _scholar, _source_trust, sandbox_router)
+run_events = RunEvents(os.path.join(_runs_dir, "events"))
 core = Core(_own_path(CONST.SKILLS_DIR_KEY, CONST.DEFAULT_SKILLS_DIR), library, _runs_dir, model=pipeline_model, sandbox=sandbox_router, environment=_run_environment,
-            store=content_store, store_texts=(lambda name: True) if cfg.get("store_chat_texts") else None,
+            store=content_store, store_texts=(lambda skill: True) if cfg.get("store_chat_texts") else None,
             broker_factory=lambda: broker_module.WebBroker(broker_module.web_handlers(_web_search, _web_client)),
-            tools={name: Tool(*pair) for name, pair in _web_tools.items()},
+            tool_calls=tool_calls, door_tools={name: budget_key for name, (_, budget_key) in _web_tools.items()}, run_events=run_events,
             functions={"chunk_text": web_tools.chunk_text, "untrusted": web_tools.untrusted, "injection_signals": web_tools.injection_signals,
                        **checks.build_web_checks(_web_tools["web_search"][0], _web_tools["fetch_page"][0])})
 for _name, _problems in core.check(functions={"converse": None}).items():
@@ -593,7 +630,7 @@ for _name, _problems in core.check(functions={"converse": None}).items():
 
 def run_chat_exchange(text, on_delta, on_emotion, should_stop):
     """the answer of the chat skill: the pipeline runs `converse` (the exchange with MIA) and reports its steps to the page"""
-    result = core.run("chat", {"text": text}, on_event=lambda event: chat_service.pipeline_event(event), should_stop=should_stop,
+    result = core.run("chat", {"text": text}, started_by="message", user=chat_service.author(), on_event=lambda event: chat_service.pipeline_event(event), should_stop=should_stop,
                       functions={"converse": lambda text: converse(text, on_delta, on_emotion, should_stop)})
     if result.status == "error":
         raise RuntimeError(result.error)
@@ -651,10 +688,12 @@ chat_service = ChatService(socketio.emit, chat_log, mood, run_chat_exchange, run
                            spawn=socketio.start_background_task, votes=_votes_store,
                            behaviours=behaviours_from_file(os.path.join(FPATH, cfg.get(CONST.BEHAVIOURS_FILE_KEY, "library/behaviours.json"))),
                            reputable=cfg.get(CONST.REPUTABLE_TRUST_KEY, 0.6),
-                           repair=lambda text: behaviour.apply_rules(text)["text"], remember=_remember)         # the stream is held back and repaired silently (REQ-CHA-014)
+                           repair=lambda text: behaviour.apply_rules(text)["text"], remember=_remember,         # the stream is held back and repaired silently (REQ-CHA-014)
+                           react=lambda expression: character_reaction(expression))         # shocked after a minus (REQ-CHV-006)
 app.register_blueprint(create_chat_ops_blueprint(chat_service))
 app.register_blueprint(create_files_blueprint(_file_store))
 app.register_blueprint(create_items_blueprint(_votes_store, socketio.emit))
+app.register_blueprint(create_graph_blueprint(_workflow_library))          # IF-104 for the Graph app, under the same session
 app.register_blueprint(create_trust_persona_blueprint(os.path.join(FPATH, cfg.get("source_trust_file") or "data/source_trust.json"),      # the file build_trust reads
                                                       os.path.join(FPATH, cfg.get(CONST.PERSONA_FILE_KEY, "data/persona.json")), socketio.emit))
 _chat_token = cfg.get(CONST.CHAT_TOKEN_KEY, app.config["EDITOR_TOKEN_INFO"][0])

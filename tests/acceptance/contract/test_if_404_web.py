@@ -43,8 +43,8 @@ class WebContract(unittest.TestCase):
     @mark.req("IF-404", "REQ-BE-064")
     @each_provider(IF)
     def test_unsafe_addresses_are_refused_before_any_request(self, web):
-        """TC-IF-404-02 golden 2 and 3: a private address, localhost, port 8080 and a file scheme are unsafe_url and nothing is fetched."""
-        for url in ("http://192.168.1.10/admin", "http://localhost/x", "https://example.org:8080/x", "file:///etc/passwd", "http://10.0.0.5/"):
+        """TC-IF-404-02 golden 2 and 3: a private address, localhost, port 22 and a file scheme are unsafe_url and nothing is fetched."""
+        for url in ("http://192.168.1.10/admin", "http://localhost/x", "https://example.org:22/x", "file:///etc/passwd", "http://10.0.0.5/"):
             self.assertEqual(code_of(lambda: web.fetch(url)), ("unsafe_url", None), url)
         self.assertEqual(web.log, [])
 

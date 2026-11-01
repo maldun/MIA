@@ -1,4 +1,4 @@
-# IF-111 – Character bridge, v0
+# IF-111 – Character bridge, v3
 
 Owner (provider): N-1.2 Character view   Consumers: N-1.1 Chat and login views   Decided by: N-1   Mock complexity: 2 (a fake character that keeps its last state)   Suite: `tests/acceptance/contract/test_if_111_character_bridge.test.mjs` (`node --test`)
 
@@ -8,7 +8,7 @@ The wire between the chat page and the character iframe. Draft v0 from today's `
 Page to character (`character.receive(jsonString, origin)`):
 | type | fields | effect |
 |---|---|---|
-| `expression` | `name` | the character shows the preset; an unknown name changes nothing: the character keeps the expression it shows (A-04) |
+| `expression` | `name` | the character shows the preset; an unknown name shows `neutral` (A-48; v1 kept the expression it showed, A-04) |
 | `speaking` | `value` bool | the mouth moves while true (the page repeats it while a line plays) |
 | `viewport_inset` | `left, right, top, bottom, width, height` | the area covered by the chat; negative values count as 0 |
 | `view` | `name` | camera view |
@@ -33,16 +33,18 @@ Character to page (callback `onMessage(jsonString)`):
 ## Bounds
 | Quantity | Bound | Source |
 |---|---|---|
-| time from iframe load to `ready` | at most 15 s, else the page treats it as failed (`LOAD_TIMEOUT_MS`) | REQ-FE-006 |
+| time from iframe load to `ready` | at most 30 s, else the page treats it as failed (`LOAD_TIMEOUT_MS`; A-58, v2 said 15 s) | REQ-FE-006 |
 | frame rate while shown | 30 fps or more on a mid-range phone, 60 on desktop | NFR-7 |
 
 ## Golden examples
 1. Typical: after `ready`, `expression {name: "happy"}` shows happy; `speaking {value: true}` then `false` moves and stops the mouth.
 2. Failure: a load failure sends `failed`; messages afterwards change nothing and cause no error.
-3. Edge: after `happy`, an expression `nonsense` leaves `happy` shown; a message with a foreign origin or `{not json` is ignored; `viewport_inset` with `left: -5` counts as 0.
+3. Edge: after `happy`, an expression `nonsense` shows `neutral`; a message with a foreign origin or `{not json` is ignored; `viewport_inset` with `left: -5` counts as 0.
 
 ## Version history
 | Version | Date | Change | Amendment |
 |---|---|---|---|
 | v0 | 2026-10-25 | first draft from character.js | – |
 | v1 | 2026-10-26 | an unknown expression name keeps the current expression (was: neutral), as the Godot bridge and the backend do | A-04 |
+| v2 | 2026-10-31 | an unknown expression name shows `neutral` again (owner); the Godot bridge and the backend follow | A-48 |
+| v3 | 2026-10-31 | the page waits up to 30 s for `ready` (was 15 s), as `character.js` does (owner, D-155) | A-58 |

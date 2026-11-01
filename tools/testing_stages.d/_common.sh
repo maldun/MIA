@@ -22,7 +22,7 @@ have_image() { command -v podman >/dev/null 2>&1 && podman image exists "$IMAGE"
 container_running() { [ "$(podman inspect -f '{{.State.Running}}' "$1" 2>/dev/null)" = "true" ]; }
 start_container() {              # name host-port container-port command... (extra environment: MIA_CONTAINER_ENV="A=1 B=2")
     local name="$1" hport="$2" cport="$3"; shift 3
-    if container_running "$name"; then echo "$name is running already"; return 0; fi
+    if container_running "$name"; then echo "$name is running already, $(serving_container "$name")"; return 0; fi
     podman rm -f "$name" >/dev/null 2>&1
     local env=() e; for e in ${MIA_CONTAINER_ENV:-}; do env+=(-e "$e"); done
     podman run -d --name "$name" --user 0:0 -p "127.0.0.1:$hport:$cport" "${env[@]}" -v "$ROOT:/opt/mia/MIA:O" "$IMAGE" "$@" >/dev/null || return 1
@@ -30,6 +30,21 @@ start_container() {              # name host-port container-port command... (ext
     until curl -s -o /dev/null "http://127.0.0.1:$hport/" || [ $waited -ge 30 ]; do sleep 1; waited=$((waited + 1)); done
     if curl -s -o /dev/null "http://127.0.0.1:$hport/"; then echo "$name started (port $hport, logs: podman logs $name)"
     else echo "$name did not answer in 30 s; last lines:"; podman logs "$name" 2>&1 | tail -5; return 1; fi
+}
+# A running container keeps the folder it was started from, which may be another checkout (A4, R2, D-165). With ":O" the mount's source is
+# podman's overlay folder; the checkout is its lowerdir option.
+served_folder() {
+    local mount lower
+    mount=$(podman inspect -f '{{range .Mounts}}{{if eq .Destination "/opt/mia/MIA"}}{{range .Options}}{{println .}}{{end}}source={{.Source}}{{end}}{{end}}' "$1" 2>/dev/null)
+    lower=$(sed -n 's/^lowerdir=//p' <<<"$mount" | head -1)
+    if [ -n "$lower" ]; then echo "${lower%%:*}"; else sed -n 's/^source=//p' <<<"$mount" | head -1; fi
+}
+serving_container() {           # name: "serving <folder>", and a warning line when that folder is not this checkout
+    local src; src=$(served_folder "$1")
+    echo "serving ${src:-an unknown folder}"
+    if [ -z "$src" ] || [ "$(realpath -m "$src")" != "$(realpath -m "$ROOT")" ]; then
+        echo "WARNING: $1 serves ${src:-an unknown folder}, not this checkout $ROOT; restart the stage from here to test this checkout (start_testing.sh restart <stage>)"
+    fi
 }
 stop_container() { podman rm -f "$1" >/dev/null 2>&1 && echo "$1 stopped" || echo "$1 is not running"; }
 

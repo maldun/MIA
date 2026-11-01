@@ -50,3 +50,60 @@ What the transcripts show (read for every case that missed or added something):
 ## Run 9 (2026-10-27, before the hand-over to Verify)
 
 Skill 6 unchanged, 21 dev cases, 3 repeats, same model and digest, with the new per-case measure of the script (a case is right when the majority of its repeats stored every wanted record and, where nothing was wanted, nothing): **21 of 21 cases right, Wilson 95 % lower bound 0.85**; recall 51/51, 12 extra records, 0 stored in the 18 runs that expect nothing, 68 model seconds (`eval-drafts/runs/memory_write_v6_dev_4.jsonl`). Feedback on tuned cases only. The decision run on the holdout is for the independent verifier: `specs/mia/verify-handover-t04.md`.
+
+## Note (2026-10-31, D-137)
+REQ-CHV-006 of N-1.2 (shocked expression and line after a minus) is built together with the votes of this node: a `shocked` preset (N-1.2) and the shocked line sent by the backend.
+
+## Session 2026-10-31 (evening, fresh context, branch `v1-n22` from goal/v1 `ee64d7d`)
+
+Starting point: every test that names an id of this node (24 files, incl. the contract suites IF-101, IF-201, IF-302) and `test_chat_backend.py`, `test_chat_tasks.py`, `test_behaviour.py`, `test_record_tables.py` ran green in the image before any change. Skips: IF-201 (expression and audio of an answer: N-2.5; `stop` before the answer started: T-01), IF-101 (the same two and the variant event: REQ-CHV-008, out of G-V1).
+
+| Task | State | Commit | Tests reported green (feedback, not verification) |
+|---|---|---|---|
+| T-01 | done before except the stop of an answer that has not started: **done now** | `0498fa2` | `test_chat_backend.py` 42 OK (new: `test_stop_before_the_answer_starts`, red first: a chat_delta came after the stop) |
+| T-02, T-03, T-05, T-07 | done before (their tests green unchanged: `test_chat_regenerate_speak`, `test_voice_lines`, `test_persona_prompt`, `test_moods_situations`, `test_mood_score`, `test_chat_repair`, `test_speech_repair`, `test_chat_recitation`, `test_items_api`, `test_chat_storage_imports`); TC-CHA-008 (AC-8 persona) and TC-CHA-014's precision and recall (AC-25) stay postponed to the field test (owner 2026-10-26, `handover-n-2-5-start.md`) | – | as listed |
+| T-04 | done before; its Verify waits for the owner's transcript review and the Memory tab demonstration (`verification-report.md`); nothing changed here, no holdout material opened | – | `test_memory_records`, `test_chat_memory`, `test_memory_write_skill` |
+| T-06 | votes, case on a minus, adaptation and counters done before (D-76); **the shocked reaction (REQ-CHV-006, D-137, D-143, D-155) done now** | `f8b85bc` | `test_chat_answers` 9 OK, `test_character_integration` 34 OK, `test_converse_behaviours` 5 OK (one new test each and TC-CHV-006, all red first) |
+
+### T-01 rest: stop before the answer starts (REQ-CHA-004, TC-CHA-004, TC-IF-201-04, TC-IF-101-06)
+- Finding (test first): a `stop` between `send` and the moment the worker takes the message returned True but was lost: `_work` cleared the stop flag when it took the message, and the answer ran in full. Test: `tests/test_chat_backend.py::ServiceTest::test_stop_before_the_answer_starts`.
+- Fix (`chat_service.py`): `stop()` looks at the running item or, before the worker took one, the head of the queue (a command is still not stoppable); a stop before the first item sets `_stop_next`, which keeps the flag when the worker takes it; `_do_chat` does not ask the model when the stop is already set (chat_done `stopped`, text empty, logged). The next message is answered as usual (same test).
+- **Shared code with N-1.3:** this touches `ChatService.stop` and `_work` (the stop path that the N-1.3 agent on `v1-n13d` may also touch); the change is 10 lines, a merge conflict there is resolved by keeping both.
+- **A-56 (draft):** the real sides of TC-IF-201-04 and TC-IF-101-06 skip in the protected adapters of `tests/helpers/contract.py`. Note `specs/mia/amendments/A-56/A-56-note.md`, script `tools/apply_amendment_a56.sh` (builds the change from the installed file at install time). Scratch check (copy of HEAD in the job scratch folder, `--do`): with the old `chat_service.py` both suites red (1 failure each: the stop), with the new one IF-201 16 OK (1 skip: N-2.5), IF-101 60 OK (2 skips: N-2.5, REQ-CHV-008); a second run reports the file unchanged.
+
+### T-06 rest: a minus makes the character shocked (REQ-CHV-006, D-137, D-143; with REQ-CHA-015)
+- How expressions and lines travel (read, not changed): `web_app.express_and_reload(expression, sound, line)` sends the preset through `PresetExpressor` (the IF-101 event `expression {name}`, which the page hands to the character over IF-111) and plays a line through `play_sound` on the audio route; `voice_lines.pick(mood)` picks a line of `library/voice_lines.json` (`shocked` -> `shocked_default.wav`, commit `88f484d`).
+- Findings (tests first): (1) `ChatService.vote` had no way to let the character react (`test_chat_answers.py::test_a_minus_makes_the_character_shocked`: no reaction); (2) `expressions.json` had no `shocked`, so `PresetExpressor` would have sent the `neutral` fallback of IF-111 v2 (`test_character_integration.py::test_shocked_is_an_expression_with_its_own_preset`); (3) nothing in `web_app.py` connected the two (`test_converse_behaviours.py::test_the_reaction_of_the_chat_shows_the_expression_and_says_its_line`).
+- Built: `ChatService(react=...)`, called with `"shocked"` after every stored minus (any category; a plus or a refused vote does not react; a failing reaction never loses the vote); `expressions.json` entry `shocked` (preset `shocked`, no clip of its own: the line comes from the voice lines); `web_app.character_reaction(expression)` = `express_and_reload(expression, line=voice_lines.pick(expression))`, wired as `react`.
+- **Outside the task's "Touches"** (which name `chat_service.py` and the model-side modules only): `web_app.py` (2 places: the function and the wiring, as for `remember` in D-84) and `expressions.json` (one entry). Needed for D-137 (the backend sends the shocked expression and line); no other node's file and nothing protected.
+- **TC-CHV-006 (D-155, the owner after finding F3 of the N-1.2 verification):** `tests/test_converse_behaviours.py::ShockedAfterAMinus` drives the app's own chat service (fresh votes table, socket and sound player recorded): a plus sends nothing; a minus sends the socket event `expression {name: "shocked"}` and plays the shocked line once. Red on the code before this task (scratch copy of `0498fa2`), green now. The F3 finding itself (no `shocked` in `expressions.json`) is the finding (2) above.
+- No new interface: the event `expression {name}` and the audio route exist in IF-101; the vote row of IF-101 does not mention that a minus is followed by `expression {name: "shocked"}` (question 2 of the hand-over below). No model step changed, so no eval run.
+
+### Hand-over to Verify (2026-10-31)
+- All seven tasks done or postponed by the owner: T-01 and T-06 finished in this session (`0498fa2`, `f8b85bc`); T-04's Verify open at the owner (transcript review, Memory tab demonstration; holdout not to be re-run); AC-8 (TC-CHA-008) and AC-25 (TC-CHA-014 precision and recall) postponed to the field test.
+- No prompt, skill, schema or pipeline changed in this session, so no version bump and no eval run (the T-04 runs above stand). No draft eval cases.
+- Full `tests/test_*.py` in the image (162 files, before the last commit): all pass except the known two, `test_amendment_report` (no git in the image) and `test_harness` (`rt_edit` has 2 cases, wants 30). JS tests 132 pass. Contract suites IF-101 (3 skips), IF-201 (2 skips) and IF-302 pass; with A-56 installed one skip fewer each (scratch check above). Trace check: one warning fewer than on `ee64d7d` (REQ-CHV-006 now has a marked test), no new error.
+- Amendment for the owner: **A-56** (install after the merge of `v1-n22`).
+- For the verifier: (a) the stop path (`ChatService.stop`, `_work`, `_do_chat`) may meet the N-1.3 changes of `v1-n13d` at the merge; (b) the shocked reaction leaves the character in the `shocked` preset until the next answer returns her to `idle` (question 1); (c) `web_app.py` and `expressions.json` were changed outside T-06's "Touches" (see T-06 rest).
+- Open questions (for the coordinator's questionnaire):
+  1. After the shocked reaction, does the character go back to `idle`? Options: (a, recommended) yes, after the line, in a background task so the vote request does not wait; (b) no, she stays shocked until the next answer (as built); (c) the preset in Godot decides (a one-shot gesture).
+  2. IF-101 says nothing about the `expression {name: "shocked"}` that follows a minus. Options: (a, recommended) one sentence in the `vote` row of IF-101 (a small amendment) and the same event in the IF-101 mock, so N-1.2's TC-CHV-006 on the mock and the backend agree; (b) leave the contract as it is (the event exists; the reaction is the backend's business).
+  3. Does a repeated minus by the same user on the same subject (the vote record is replaced, not added) make her shocked again? Options: (a, recommended) yes, every stored minus (as built: simple, and the user sees the click had an effect); (b) only a minus that changes the stored value.
+
+## After the owner's answers D-156 (2026-10-31, late)
+| Item | State | Commit |
+|---|---|---|
+| Q1: back to the mood's face after the shocked line | done | `9c32979` (log line fixed in the next commit) |
+| Q2: IF-101 records the shocked expression after a minus | amendment draft A-57 | – |
+| Q3: every stored minus makes her shocked | as built, no change | – |
+
+### Q1 (D-156): the face of the mood returns after the line
+- Test first: TC-CHV-006 (`tests/test_converse_behaviours.py::ShockedAfterAMinus`) now also wants, in a background task, a sleep of the line's length (a 0.5 s wav made by the test) and then `expression` with the face of the current mood (`happy`); a plus gives no expression, no sound and no background task. Red before (no background task), green after.
+- Built in `web_app.py`: `character_reaction` plays the expression and the line at once, then starts `back_to_mood` with `socketio.start_background_task` (the vote request does not wait): `socketio.sleep(line_seconds(line))`, then `express_and_reload(mood_face(), sound=False)`.
+- **Choices no requirement states (for Verify):** the face of the mood is `comm.map_emotion(mood.status()["emotion"])` (emotion_map.json, the same map an answer's emotion uses), `neutral` when there is no mood (as REQ-CHV-004 says for an unknown mood); the length of the line is read from the wav header; a line that is missing or unreadable waits `REACTION_SECONDS = 3`.
+- The older wiring test `test_the_reaction_of_the_chat_shows_the_expression_and_says_its_line` now stubs the background task, so no thread outlives it.
+
+### Q2 (D-156): amendment draft A-57
+- Note `specs/mia/amendments/A-57/A-57-note.md`, script `tools/apply_amendment_a57.sh`. It builds both files from the INSTALLED ones at install time: `contracts/IF-101-chat-api.md` (title one version up, one sentence at the end of the `vote` row, one version row) and `tests/helpers/mocks/if_101_chat_api.py` (a minus also broadcasts `expression {name: "shocked"}` after `score`). It is safe to run twice ("unchanged").
+- Scratch check with A-54's drafts from `v1-n21b` (two copies of HEAD in the job scratch folder): (1) A-54 then A-57: contract v13, IF-101 suite 62 OK (3 skips); (2) A-57, then A-54 (A-54 copies whole files and takes A-57 out), then A-57 again: the same two files byte for byte as in (1), suite 62 OK; a further run reports both unchanged. A direct call of the installed mock: a plus gives only `score`, a minus also gives `expression {name: "shocked"}`.
+- **For the owner:** install A-54 first, or run A-57 once more after A-54 (in the note). No contract test was added: the real side of the IF-101 suite has no character; TC-CHV-006 (`tests/test_converse_behaviours.py`) checks the real Backend.

@@ -39,6 +39,15 @@ except ImportError:
     from cpu_threads import parse as parse_cpu_threads, add_to_llm_options
 
 curr_path = os.path.split(__file__)[0]
+# a model server that does not accept the connection is reported after 10 s (REQ-RUN-003, D-129); reading has no limit, a long answer is not cut.
+# (connect, read, write, pool) in seconds, as httpx takes it, so httpx need not be imported
+MODEL_TIMEOUT = (10, None, None, None)
+
+
+def model_client(host, headers):
+    """the ollama client of MIA, with the connect timeout"""
+    return Client(host=host, headers=headers, timeout=MODEL_TIMEOUT)
+
 EMOTION_EXPRESSION_MAP = os.path.join(curr_path,"emotion_map.json")
 PENALTIES_MAP = os.path.join(curr_path,"penalties.json")
 POSSIBLE_PENALTIES_KEY = "possible"
@@ -135,7 +144,7 @@ class Communicator:
         # ollama_host (a full URL, e.g. http://ollama:11434 in a compose stack) replaces protocol/address/port for Ollama
         ollama_host = os.environ.get("MIA_OLLAMA_HOST") or ollama_host
         self.host = str(ollama_host).rstrip("/") if ollama_host else protocol + "://" + address + ':' + str(port)
-        self.client = Client(host=self.host,headers=self.DEFAULT_HEADER)
+        self.client = model_client(self.host, self.DEFAULT_HEADER)
         # if file is not provided with path -> store in current dir
         if os.path.split(history_file)[0] == "":
             self.history_file = os.path.join(curr_path,history_file)

@@ -165,6 +165,29 @@ class ChatTasks(unittest.TestCase):
         self.assertEqual(records[-1]["text"], "the report")
         self.assertEqual([p["text"] for e, p in self.events if e == "chat_delta"][-1], "the report")
 
+    def test_a_task_that_asks_keeps_its_steps_for_the_account(self):
+        """TC-LOG-001, REQ-LOG-001 (IF-101 v11, D-144, F1 of the N-2.4.3 verification): the result of a task that asks questions keeps its steps for the account,
+        like every other answer; its progress still goes to the status card.
+
+        Example: /demo with needs ("ask",), steps "reading" and "writing" -> account [{"seq": 1, "plain": "reading"}, {"seq": 2, "plain": "writing"}]
+        """
+        # Given: a task that asks a question and reports two steps of its pipeline
+        def run(argument, on_delta, on_emotion, should_stop, ask=None):
+            service.pipeline_event({"kind": "start", "plain": "reading"})
+            self.seen.append(ask("First?"))
+            service.pipeline_event({"kind": "start", "plain": "writing"})
+            return "the report"
+        service = self.make([self.task(run, needs=("ask",))])
+        # When: the task runs and the question is answered
+        service.send("/demo q", author="anna")
+        self.assertTrue(wait_for(lambda: any(e == "chat_message" and p["role"] == "assistant" for e, p in self.events)))
+        service.send("yes", author="anna")
+        self.assertTrue(self.idle(service))
+        # Then: the account of the result has both steps
+        result = self.log.history(limit=20)[0][-1]
+        self.assertEqual(result["text"], "the report")
+        self.assertEqual(service.account(result["id"]), [{"seq": 1, "plain": "reading"}, {"seq": 2, "plain": "writing"}])
+
     def test_prepare_task_may_ask_and_change_the_options(self):                                  # TC-WFM-035
         def run(argument, on_delta, on_emotion, should_stop, options=None):
             self.seen.append(dict(options))

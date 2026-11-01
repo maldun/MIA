@@ -1,6 +1,6 @@
 # MIA as a service (podman compose)
 
-Four containers: **mia** (this code, CPU only, Python 3.12), **https** (Caddy, TLS in front of MIA), **ollama** (the language model, the only one that may use the GPU) and **searxng** (web search). Published are `http://127.0.0.1:8585` (MIA) and `https://127.0.0.1:8586` (same page through Caddy).
+The containers: **mia** (this code, CPU only, Python 3.12), **graph** (the graph page, from the mia image, behind `/graph/`), **https** (Caddy, TLS in front of MIA and the graph page), **searxng** (web search), **ollama** (the language model, the only one that may use the GPU; only when `deploy/.env` names no `OLLAMA_URL`) and **db** (PostgreSQL; only with `deploy/up.sh db`). Published are `http://127.0.0.1:8585` (MIA, always on loopback only) and `https://127.0.0.1:8586` (same page through Caddy; the only port that `MIA_BIND` opens to other devices, REQ-OPR-008).
 
 ## Start
 
@@ -10,7 +10,7 @@ deploy/up.sh                             # CPU      | deploy/up.sh rocm   (AMD) 
 deploy/up.sh down                        # stop (the volumes stay); deploy/up.sh logs -f mia
 ```
 
-The first call writes `deploy/.env` (the SearXNG secret of this machine, not in git). MIA waits for Ollama and pulls `version` and `version_light` of the config through its API when they are missing (the first start downloads the models, the log says so).
+A fresh checkout needs one file and one command (REQ-OPR-001): `deploy/.env` with the settings of this machine (all optional, see below; e.g. `OLLAMA_URL` for an Ollama that runs already), then `deploy/up.sh db` (the stack with its database). The first call adds the SearXNG secret of this machine to `deploy/.env` (not in git), also when you wrote the file yourself, and offers the owner account once (see "The login"). MIA waits for Ollama and pulls `version` and `version_light` of the config through its API when they are missing (the first start downloads the models, the log says so).
 
 ## HTTPS
 
@@ -28,11 +28,18 @@ For other devices set `MIA_BIND=0.0.0.0` in `deploy/.env` and open `https://<add
 |---|---|---|
 | `setup_cfg.json` | `deploy/setup_cfg.compose.json` (or `MIA_CONFIG`) | the config of the stack: `ollama_managed: false`, `ollama_host`, `searxng_url`, `sandbox_backend: none`, histories under `data/` |
 | `setup_cfg.local.json` | `deploy/setup_cfg.local.json` | the settings of this machine (the login ...), laid over the config above key by key; not in git, made by `up.sh` as `{}` |
-| `data/` | volume `mia-data` | histories, presets, logs, token |
+| `data/` | volume `mia-data` | histories, presets, logs, token, the scholarly cache, the trust file (below) |
 | `voice/models/kokoro/` | `voice/models/kokoro` (or `MIA_KOKORO_DIR`), read-only | the Kokoro model files (README of the main folder) |
 | `ui/godot/build/web/` | `ui/godot/build/web` (or `MIA_CHARACTER_DIR`), read-only | the 3D character |
 | `backgrounds/` | `backgrounds` (or `MIA_BACKGROUND_DIR`), read-only | the pictures behind the character (`backgrounds/README.md`); a new picture appears when the page is reloaded |
 | Ollama's models | volume `ollama` | models are downloaded once |
+
+### The scholarly cache and the trust file
+
+Two files of the stack's config live in the data volume, so they are in every backup and survive a rebuild:
+
+- **`data/cache/scholar`** (`scholar_cache_dir`): the answers of the scholarly APIs (OpenAlex, Crossref, ...), one JSON file per request with its URL (the research query) and body. An entry is used for 7 days (`scholar_cache_days`); older entries are removed whenever MIA writes the cache, so the folder holds about one week of literature searches. No key is in it (the Semantic Scholar key goes in a header); `scholar_email`, when set, appears in the cached URLs. Delete the folder to empty the cache; nothing else depends on it.
+- **`data/source_trust.json`** (`source_trust_file`): your changes of the trust classes of sources, laid over `library/source_trust.json`. The stack reads it for every literature review; the page writes it through `POST /api/trust`. While the login is off (`accounts_enabled: false`) that route needs no login, so with `MIA_BIND=0.0.0.0` every device that reaches port 8586 can change the trust classes. This is accepted for trusted users in a controlled network (D-131); turn the login on (see "The login") when that does not hold.
 
 ## The personality (calibration.txt)
 
@@ -62,11 +69,13 @@ MIA is stopped first (it saves its history when it stops), the files are copied 
 
 ## The login (password check)
 
-Off by default. Turn it on and make the owner account:
+Off by default (`accounts_enabled: false`). **Without the login every route is open**: everyone who reaches the page (on this machine, and on the network when `MIA_BIND` opens the https front) can chat, read and change the shared data, the workflows and the persona, with no session and no origin check. That is accepted for G-V1 because MIA's users are trusted people in a controlled environment (D-131, D-149). Turn the login on before the page is reachable by anyone else. Turn it on and make the owner account:
 
 ```
 deploy/up.sh owner NAME                  # asks for the password twice (at least 8 characters); never an argument
 ```
+
+The first start offers this once (REQ-OPR-002): `deploy/up.sh` asks for the name on a terminal (empty = later) and otherwise prints the command; then it writes `MIA_FIRST_ACCOUNT_OFFERED=1` into `deploy/.env` and later starts stay quiet, also without an account. `python -m MIA` outside the stack does the same with `tools/accounts_cli.py create NAME`; its marker is the empty file `data/first_account_offered`.
 
 The command also turns the login on, in `deploy/setup_cfg.local.json`; an account that exists already is kept (it is not created twice). To switch the password check alone, without a container: `deploy/up.sh login on|off|status` (`on` warns when no account exists yet, because you could not log in then). That file holds the settings of **this machine**, is not in git and is laid over the tracked `deploy/setup_cfg.compose.json` key by key (do not edit the tracked file for your machine). Restart MIA to apply it:
 
@@ -96,7 +105,9 @@ deploy/up.sh backup path/to/file.tar.gz
 deploy/up.sh restore path/to/file.tar.gz
 ```
 
-The archive holds the whole data volume: histories, chat log, presets, gestures, calibration, tokens, library index. MIA is stopped while the files are copied (it saves its history when it stops) and starts again. `restore` first saves the current state as `mia-before-restore-<time>.tar.gz`, so a wrong restore can be undone with another restore. Files that exist only in the volume are not deleted by a restore. The models of Ollama (volume `ollama`) and the character are not part of it (they come from the downloads and the zip).
+The archive holds the whole data volume: histories, chat log, presets, gestures, calibration, tokens, library index, the scholarly cache and the trust file. MIA is stopped while the files are copied (it saves its history when it stops) and starts again. `restore` first saves the current state as `mia-before-restore-<time>.tar.gz`, so a wrong restore can be undone with another restore. Files that exist only in the volume are not deleted by a restore. The models of Ollama (volume `ollama`) and the character are not part of it (they come from the downloads and the zip).
+
+With the database (`deploy/up.sh db`) the same commands also save and restore the database: the archive then holds `db.dump` and `data.tar` (made by `tools/backup.sh`, put back by `tools/restore.sh`, which saves the state before the restore next to the archive). An older archive of the volume alone is still restored and leaves the database as it is; an archive with a database is refused while the `db` service does not run.
 
 ## The 3D character
 
@@ -120,7 +131,7 @@ OLLAMA_URL=http://192.168.1.50:11434
 
 ## Settings in `.env` (all optional)
 
-`OLLAMA_URL` (see above), `MIA_PORT` (8585), `MIA_HTTPS_PORT` (8586), `MIA_BIND` (127.0.0.1; `0.0.0.0` for other machines, then also set `public_hosts` in the config), `MIA_PROJECT` (mia; another name = a second stack next to the first), `MIA_CONFIG`, `MIA_KOKORO_DIR`, `MIA_CHARACTER_DIR`, `MIA_BACKGROUND_DIR`, `HSA_OVERRIDE_GFX_VERSION` (rocm, 11.0.0).
+`OLLAMA_URL` (see above), `MIA_PORT` (8585), `MIA_HTTPS_PORT` (8586), `MIA_BIND` (127.0.0.1; `0.0.0.0` for other machines, then also set `public_hosts` in the config; it moves only the https port, http 8585 stays on loopback), `MIA_PROJECT` (mia; another name = a second stack next to the first, with its own containers and volumes), `MIA_IMAGE` (localhost/mia:latest; the tag the build makes and both mia and graph run), `MIA_CONFIG`, `MIA_KOKORO_DIR`, `MIA_CHARACTER_DIR`, `MIA_BACKGROUND_DIR`, `HSA_OVERRIDE_GFX_VERSION` (rocm, 11.0.0).
 
 ## Notes
 

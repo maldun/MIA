@@ -12,17 +12,21 @@ import statistics
 import time
 
 
-def measure(ask, clock=time.monotonic, runs=20, warmup=3):
-    """ask(): blocks until the first text of an answer has arrived. Failed runs are counted and not timed."""
+def measure(ask, clock=time.monotonic, runs=20, warmup=3, prepare=None):
+    """ask(): blocks until the first text of an answer has arrived. prepare(): runs before each run, outside the timed part
+    (e.g. waits until the previous answer has ended). Failed runs are counted and not timed."""
+    prepare = prepare or (lambda: None)
     for _ in range(warmup):
         try:
+            prepare()
             ask()
         except Exception:                                   # a warm-up that fails is no result
             pass
     times, failed = [], 0
     for _ in range(runs):
-        started = clock()
         try:
+            prepare()
+            started = clock()
             ask()
         except Exception:
             failed += 1
@@ -35,7 +39,7 @@ def measure(ask, clock=time.monotonic, runs=20, warmup=3):
 
 
 def chat_ask(url, user, password, text, timeout=120):
-    """a function for `measure` that talks to a running page: login, one socket, one message per call"""
+    """`prepare` and `ask` for `measure` that talk to a running page: login, one socket, one message per run"""
     import socketio                                        # only the live mode needs it
     import requests
     session = requests.Session()
@@ -43,7 +47,13 @@ def chat_ask(url, user, password, text, timeout=120):
     reply.raise_for_status()
     client = socketio.Client(http_session=session)
     client.connect(url, headers={"Cookie": "; ".join("%s=%s" % (c.name, c.value) for c in session.cookies)}, wait_timeout=10)
-    first = {"seen": None, "done": None}
+    return socket_ask(client, text, timeout)
+
+
+def socket_ask(client, text, timeout=120):
+    """(prepare, ask) on a connected socket.io client: prepare waits for the end of the previous answer, so the next run starts on
+    an idle server and that wait is not timed (Verify F1); ask sends one message and waits for its first `chat_delta`"""
+    first = {"seen": None, "done": True}                                    # nothing is running yet
     client.on("chat_delta", lambda *_: first.update(seen=True) if first["seen"] is None else None)
     client.on("chat_done", lambda *_: first.update(done=True))
 
@@ -54,16 +64,16 @@ def chat_ask(url, user, password, text, timeout=120):
                 raise TimeoutError("no %s in %d s" % (what, timeout))
             time.sleep(0.01)
 
-    first["done"] = True                                                    # nothing is running yet
+    def prepare():
+        wait("done", "end of the previous answer")
 
     def ask():
-        wait("done", "end of the previous answer")                          # not timed with the next run: it starts on an idle server
         first["seen"] = first["done"] = None
         ack = client.call("chat_send", {"id": "latency-%d" % time.monotonic_ns(), "text": text}, timeout=10)
         if not (isinstance(ack, dict) and ack.get("ok")):                  # e.g. a full queue must not look like a slow answer
             raise RuntimeError("message refused: %s" % (ack,))
         wait("seen", "first text")
-    return ask
+    return prepare, ask
 
 
 def main():
@@ -75,7 +85,8 @@ def main():
     parser.add_argument("--warmup", type=int, default=3)
     parser.add_argument("--text", default="Hello")
     args = parser.parse_args()
-    print(json.dumps(measure(chat_ask(args.url, args.user, args.password, args.text), runs=args.runs, warmup=args.warmup), indent=2))
+    prepare, ask = chat_ask(args.url, args.user, args.password, args.text)
+    print(json.dumps(measure(ask, prepare=prepare, runs=args.runs, warmup=args.warmup), indent=2))
 
 
 if __name__ == "__main__":

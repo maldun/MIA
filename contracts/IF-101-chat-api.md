@@ -1,11 +1,11 @@
-# IF-101 – Chat, expression, audio and REST API, v10
+# IF-101 – Chat, expression, audio and REST API, v15
 
 Owner (provider): N-2 Backend (child N-2.1)   Consumers: N-1 Web Frontend   Decided by: N-0   Mock complexity: 3 (stream of events, queue, clock, small stores)   Suite: `tests/acceptance/contract/test_if_101_chat_api.py`
 
 The wire between the browser and the server. v0 started from today's Socket.IO events (`web_app.py`, `chat_service.py`, `audio_router.py`); **v1 (amendment A-03, owner 2026-10-26)** adds what the views of N-1.1 need: the stored message in the acknowledgement, the session as a cookie, the own password, regenerate and speak again, votes and scores, the records of tasks, memos and memory, the trust of sources, the persona, the account of an answer and the character variant. Additions of v1 are marked **[v1]**, those of v0 **[new]** against today's code.
 
 ## Session
-The server sets the session at `login` as a cookie `mia_session` (HttpOnly, SameSite=Strict, Secure on HTTPS) **[v1]**. The page keeps no token: REST calls and the socket carry the cookie. A request or a socket without a valid session is `401 unauthenticated` (a refused socket connection has the error message `unauthenticated`). The REST address of an operation is `/api/<operation>`; the socket events carry the same operations where noted.
+The server sets the session at `login` as a cookie `mia_session` (HttpOnly, SameSite=Strict, Secure on HTTPS) **[v1]**. The page keeps no token: REST calls and the socket carry the cookie. A request or a socket without a valid session is `401 unauthenticated` (a refused socket connection has the error message `unauthenticated`). The REST address of an operation is `/api/<operation>`; the socket events carry the same operations where noted. **[v15]** The table *REST addresses* gives the method and the address of every operation the page calls; where it differs from `/api/<operation>`, the table holds.
 
 ## Operations and events
 | Name | Input | Output | Notes |
@@ -15,16 +15,18 @@ The server sets the session at `login` as a cookie `mia_session` (HttpOnly, Same
 | `logout(session)` **[v2]** | | `{"loggedOut": true}` | ends the session: the same cookie is `401 unauthenticated` afterwards and its sockets are closed; the cookie is cleared (`Max-Age=0`); 401 without a valid session (REQ-BE-077) |
 | `change_password(session, old, new)` **[v1]** | the own password | `{"changed": true}` | `401 bad_credentials` if `old` is wrong; `422 weak_password` below 8 characters; the old password stops working (REQ-BE-011) |
 | `connect(session)` | session | event `chat_status` first | `{busy, activity, model, profile, queue, mood}` as today |
-| `send(session, text, client_id)` (`chat_send`) | text 1..4000 characters | ack `{"id", "position", "message"}` **[v1: message]** | `position` 1 = answered next; `message` is the stored message `{id, role, sender, text, created, client_id}`; 401 without session; 422 `empty_text`; 503 `queue_full` (5 waiting messages in all, 2 per user); **[v7]** the text `/review question [until YYYY-MM-DD]` starts the literature review as a task like `/lookup`; while a review waits for the answer of the user (it posts its question as a message of MIA and the status `activity` is `waiting`), the next message of the SAME account is that answer: it is stored and sent as `chat_message` like any message, the ack has `queued: false` and `position: 0`, and it does not count for `queue_full`; a message of another account is queued as usual; a command or a task command is never an answer; no answer within the waiting time (default 30 minutes) counts as "no"; **[v8]** every task command has the form `/<id>` with `<id>` = the id of the skill (REQ-WFM-029), `/<id> options <name>[=<value>] ... -- <argument>` sets options of that skill, `/<id> options` alone answers with the options and their defaults as a message in the chat (`chat_message`, a note of the system), an unknown option, a wrong value or an option list without `--` and a question is refused with the acknowledgement error `invalid_command` (422) and a plain text that names the options, and nothing runs **[v9]**; `/model paid <name>` and `/model local <name>` change the class of a model (REQ-WFM-035) and are answered by a note; a model that is new and not clearly local is asked once, as a question like that of a review (the next message of the same account is the answer) |
+| `send(session, text, client_id)` (`chat_send`) | text 1..4000 characters | ack `{"id", "position", "message"}` **[v1: message]** | `position` 1 = answered next; `message` is the stored message `{id, role, sender, text, created, client_id}`; 401 without session; 422 `empty_text`; 503 `queue_full` (5 waiting messages in all, 2 per user); **[v12]** 429 `rate_limited` for the 11th message of an account within 60 s (10 messages per 60 s per account, all its connections together; a setting of the Backend, REQ-API-007); **[v7]** the text `/review question [until YYYY-MM-DD]` starts the literature review as a task like `/lookup`; while a review waits for the answer of the user (it posts its question as a message of MIA and the status `activity` is `waiting`), the next message of the SAME account is that answer: it is stored and sent as `chat_message` like any message, the ack has `queued: false` and `position: 0`, and it does not count for `queue_full`; a message of another account is queued as usual; a command or a task command is never an answer; no answer within the waiting time (default 30 minutes) counts as "no"; **[v8]** every task command has the form `/<id>` with `<id>` = the id of the skill (REQ-WFM-029), `/<id> options <name>[=<value>] ... -- <argument>` sets options of that skill, `/<id> options` alone answers with the options and their defaults as a message in the chat (`chat_message`, a note of the system), an unknown option, a wrong value or an option list without `--` and a question is refused with the acknowledgement error `invalid_command` (422) and a plain text that names the options, and nothing runs **[v9]**; `/model paid <name>` and `/model local <name>` change the class of a model (REQ-WFM-035) and are answered by a note; a model that is new and not clearly local is asked once, as a question like that of a review (the next message of the same account is the answer) |
 | `stop(session)` (`chat_stop`) | | `{"stopped": bool}` | ends the running or next answer; no `chat_delta` after the ack; **[v7]** it also ends a running review, also while it waits for an answer, and the review gives its report as it stands |
 | `pause(session)` / `resume(session)` **[v8]** | | `{"paused": bool}` | pauses or resumes the running task of the chat (a review, a lookup, later every task); a paused task starts no new step and uses no time of its budget; event `task_status` with `paused`; `{"paused": false}` for `pause` when nothing runs; `stop` also ends a paused task |
 | `files(session)` **[v8]** | | list of `{name, size, created, task, message_id?}`, newest first | the files that tasks stored in the files volume (REQ-WFM-037); every user sees all of them (CON-6); a file deleted in the volume is no longer listed |
 | `file(session, name)` (`/api/files/<name>`) **[v8]** | name from the list | the bytes, as an attachment with the type of the file | 404 `not_found` for a name that is not in the volume; 422 `invalid_file_name` for a name with a path |
-| `history(session, limit)` (`/api/chat/history`) | | list of messages, oldest first | each with `id, role, sender, text, created`, and `client_id` if the sender gave one |
+| `history(session, limit)` (`/api/chat/history`) | | list of messages, oldest first | each with `id, role, sender, text, created`, and `client_id` if the sender gave one; **[v15]** on the wire `GET /api/chat/history?limit=<n>&before=<id>` answers `{"messages", "older"}`: the list, and whether older messages exist; `before` (optional) is the id of the oldest message the page has, the answer then holds the messages before it; the page asks with `limit` 50, the server gives at most 200 |
+| `commands(session)` (`/api/chat/commands`) **[v15]** | | `{"commands": [{"command", "description", "confirm"}]}` | the slash commands of the palette: the fixed ones and one per task of the registry (REQ-WFM-029); `confirm` true = the page asks before it sends the command (REQ-RUN-002) |
+| `backgrounds(session)` (`/character-backgrounds.json`) **[v15]** | | `{"files": [name], "default"}` | the background pictures the character can show and the configured one; the character (IF-111) loads a picture from `/character-backgrounds/<name>` |
 | `regenerate(session, message_id)` **[v1]** | id of the LAST answer | `{"position", "asked"}` | queued like a message; the new answer is a new message, the old one stays; 404 unknown id; 422 `not_the_last_answer`; 503 `queue_full` |
 | `speak_again(session, message_id)` **[v1]** | id of any answer | `{"sentences": n}` | one `audio_chunk` per sentence to every connected page; 404 unknown id |
-| `account(session, message_id)` **[v1]** | id of an answer | list of `{"seq", "plain"}` | the step-by-step account of the answer in order (from the run log, IF-401); 404 for a message that is not an answer |
-| `vote(session, subject, category, value)` **[v1]** | subject = message id (answers) or a name; category in `answer_quality`, `reactions`, `character_behaviour`, `service`; value 1 or -1 | `{"stored": true, "score"}` | kept with user and time (REQ-BE-028); `422 invalid_vote` with rule `category` or `value`, or **[v5]** `subject` (a `character_behaviour` vote on a name that is not on the list of behaviours); 404 for an unknown answer |
+| `account(session, message_id)` **[v1]** | id of an answer | list of `{"seq", "plain"}` | the step-by-step account of the answer in order: the plain steps of its pipeline kept with the answer, for every answer (also without a status block) **[v11]**; read from the run log IF-401 in a later version; 404 for a message that is not an answer |
+| `vote(session, subject, category, value)` **[v1]** | subject = message id (answers) or a name; category in `answer_quality`, `reactions`, `character_behaviour`, `service`; value 1 or -1 | `{"stored": true, "score"}` | kept with user and time (REQ-BE-028); `422 invalid_vote` with rule `category` or `value` (**[v14]** `value` is the integer 1 or -1: `1.0` or `true` is rule `value`), or **[v5]** `subject` (a `character_behaviour` vote on a name that is not on the list of behaviours); 404 for an unknown answer; **[v13]** a minus (value -1) is followed by the event `expression {name: "shocked"}` to every connected page, with the shocked line on the audio route; the face of the current mood follows after the line (REQ-CHV-006, D-143, D-156) |
 | `score(session)` **[v1]** | | `{"overall", "categories", "votes", "series"}` **[v4: series]** | sums per category and overall; `series` = the same sums per ISO week of the vote's time, `[{"week": "YYYY-Www", "overall", "categories"}]`, oldest first, only weeks with a vote, so the sums of the weeks equal the totals (REQ-CLV-010); the event `score` pushes the same after each vote |
 | `counters(session)` **[v5]** | | `{name: {"net", "votes", "chance", "reset_at"}}` for every behaviour of the list | the adaptation counters (REQ-BE-031, REQ-CHA-018): `net` = sum of the `character_behaviour` votes on that name since the last reset, `chance` = how likely the behaviour is shown at one opportunity (1.0, and at most 0.01 from a `net` of -5 or less; REQ-BE-030), `reset_at` = time of the last reset or `null`; every user sees them (CON-6) |
 | `reset_counter(session, name)` **[v5]** | name of a behaviour | the counter of that name after the reset | back to the default rate, the votes stay stored and only later ones count; event `counters_changed {name, author}`; 404 `not_found` for a name that is not on the list |
@@ -37,6 +39,35 @@ The server sets the session at `login` as a cookie `mia_session` (HttpOnly, Same
 | `settle()` | | | test adapter only: let the server finish all queued work (the mock runs it; the real adapter waits) |
 | `advance_time(seconds)` | | | test adapter only: move the server clock (throttle window) |
 | `run_with_variant(name)` **[v1]** | name or None | | test adapter only: the next answer comes from a workflow with that character variant |
+
+REST addresses **[v15]** (the session cookie on every call; a body is JSON):
+| Address | Method | Operation | Input |
+|---|---|---|---|
+| `/api/login` | POST | `login` | `{user, password}` |
+| `/api/whoami` | GET | `whoami` | |
+| `/api/logout` | POST | `logout` | |
+| `/api/change_password` | POST | `change_password` | `{old, new}` |
+| `/api/chat/history` | GET | `history` | query `limit`, `before` |
+| `/api/chat/commands` | GET | `commands` | |
+| `/api/regenerate` | POST | `regenerate` | `{message_id}` |
+| `/api/speak_again` | POST | `speak_again` | `{message_id}` |
+| `/api/account` | GET | `account` | query `message_id` |
+| `/api/vote` | POST | `vote` | `{subject, category, value}` |
+| `/api/score` | GET | `score` | |
+| `/api/counters` | GET | `counters` | |
+| `/api/reset_counter` | POST | `reset_counter` | `{name}` |
+| `/api/items` | GET | `items` | query `kind` |
+| `/api/items` | POST | `save_item` | `{kind, id, text, source, due}` (`due` left out = no due time) |
+| `/api/items` | DELETE | `delete_item` | query `kind`, `id` |
+| `/api/trust` | GET | `trust` | |
+| `/api/trust` | POST | `set_trust` | `{source, value}` |
+| `/api/persona` | GET | `persona` | |
+| `/api/persona` | POST | `save_persona` | `{doc}` |
+| `/api/pause` | POST | `pause` | |
+| `/api/resume` | POST | `resume` | |
+| `/api/files` | GET | `files` | |
+| `/api/files/<name>` | GET | `file` | the name, URL-encoded |
+| `/character-backgrounds.json` | GET | `backgrounds` | |
 
 Events (server to every connected page):
 | Event | Payload |
@@ -56,6 +87,19 @@ Events (server to every connected page):
 | `counters_changed` **[v5]** | `{name, author}` |
 | `task_status` **[v8]** | `{id, task, phase, mode, paused, done, budget: {name: {used, limit}}, counts: {name: n}}`: one card per task `id` (the id of the message the result will get), replaced in place by the page, sent at most twice per second and once more with `done: true` and the final figures; `budget` has at least `seconds`, `tokens`, `calls` and `api_requests` when the task has them and the budgets of the task, `counts` the counts of the task (the review: `on_list`, `processed`, `to_process`, `included`, `maybe`, `excluded`, `dropped`); `mode` is `run` or `slice` |
 | `files_changed` **[v8]** | `{name, task}` after a task stored a file |
+| `chat_status` **[v15]** | `{busy, activity, model, profile, queue, mood}`: first after `connect`, then after every change |
+| `chat_pipeline` **[v15]** | `{id, event}`: one step of the pipeline that makes the answer `id`, for skills with a status block; the page shows the steps above the answer |
+| `audio_owner` **[v15]** | `{sid}`: the socket that plays the voice now; every other page stays silent (one page plays, REQ-VPB-002) |
+| `audio_reload` **[v15]** | `{url, serial, message}` to the playing page only: a voice line at `url` (`/audio/<file>`) with its serial number, in order (IF-112 on the page) |
+
+Events (page to server) **[v15]**:
+| Event | Payload |
+|---|---|
+| `chat_send` | the operation `send` |
+| `chat_stop` | the operation `stop` |
+| `audio_claim` | `{initial}`: this page is seen or touched and wants to play the voice; ack `{owner}`; `initial` true on the first claim of a loaded page |
+| `audio_ended` | `{serial}`: the line with this serial number ended on this page |
+| `character_ready` | none: the character of this page loaded; the server answers with `expression` of the current face |
 
 ## Errors
 | Condition | Signal | What the consumer may rely on afterwards |
@@ -67,6 +111,7 @@ Events (server to every connected page):
 | too many failed logins | 429 `throttled` | right password works again after 60 s |
 | empty text | 422 `empty_text` | nothing queued or stored |
 | queue full | 503 `queue_full` | nothing queued; queued messages unaffected |
+| more than 10 messages of one account within 60 s **[v12]** | 429 `rate_limited` | nothing queued or stored; other accounts are not affected; a message is taken again when the oldest of the last 10 is older than 60 s |
 | unknown message, record or source | 404 `not_found` | nothing changed |
 | a document or value the rules refuse | 422 with the code of the operation (`invalid_vote`, `invalid_item`, `invalid_trust`, `invalid_persona`, `weak_password`) | nothing stored |
 | an option the skill does not have, or a value of the wrong type **[v8, v9]** | 422 `invalid_command` with a plain text that names the options of the skill | nothing queued or stored, nothing runs |
@@ -99,3 +144,8 @@ Events (server to every connected page):
 | v8 | 2026-10-29 | the usability of long tasks (owner's hand review): `/<id> options ... --` and `/model`; the event `task_status` (one status card per task with budget figures and counts), `pause` and `resume`; the result of a task that asks questions is the newest message; the files volume: `files`, `file` and the event `files_changed` (no delete operation: the user deletes in the volume) | A-23 |
 | v9 | 2026-10-29 | the refusal of a bad option is `422 invalid_command` (v8 said "a message of MIA"; the code and the page use the refusal of the acknowledgement); `/<id> options` answers with a note of the system; the contract suite gets TC-IF-101-26 to -30 for the events and operations of v8 (task_status, the result as the newest message, pause and resume, options, files) | A-25 |
 | v10 | 2026-10-29 | the owner's hand test: the files of a task are links at the end of its result text; a failing task leaves a result that says why; the time cap of a review is 30 minutes of work time and the review asks continue, summarize or stop at the cap (text of the skill, no change of the wire) | A-27 |
+| v11 | 2026-10-31 | `account`: the steps kept with every answer, not the run log IF-401 (owner, D-138; the chat answer had none) | A-49 |
+| v12 | 2026-10-31 | `send`: a message over the rate limit (10 per 60 s per account) is `429 rate_limited` (D-149, Verify finding V-5 of N-2.1) | A-54 |
+| v13 | 2026-10-31 | `vote`: a minus is followed by the event `expression {name: "shocked"}` and the shocked line, then the face of the mood (REQ-CHV-006, D-156) | A-57 |
+| v14 | 2026-10-31 | `vote`: the value is the integer 1 or -1; `1.0` or `true` is `422 invalid_vote`, rule `value`, as the chat service and the Record tables (IF-302 v6) refuse it; the mock follows (D-162) | A-61 |
+| v15 | 2026-10-31 | the whole wire of the chat page (D-163, F4 of the N-1.1 verification): the REST addresses with their methods; `history` on the wire is `{messages, older}` with `before`; the operations `commands` (`/api/chat/commands`) and `backgrounds` (`/character-backgrounds.json`); the events `chat_status`, `chat_pipeline`, `audio_owner`, `audio_reload`; the page's events `audio_claim`, `audio_ended`, `character_ready` | A-62 |

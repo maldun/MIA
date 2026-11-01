@@ -131,7 +131,7 @@ The chat page connects to the socket of the address it was loaded from, so the s
 - **Safety:** writing needs `Content-Type: application/json` (no cross-site form posts), a known origin if the browser sends one
   (the page's own address is always fine), and the header `X-MIA-Token`. The token is created on the first start (`data/editor_token.txt`, mode 600, not in version control, printed at start); `editor_token` in the configuration overrides it, `""` switches it off. Desktop clients (tests) read it from `MIA_TOKEN` or the file `MIA_TOKEN_FILE`. Names are 1-40 letters, digits, `-`, `_`
   (no paths), files are written atomically, bodies over 64 KB are refused.
-- **Character:** `godot/preset_api.gd` (client, polls the version every 10 s so other devices' changes show up; offline it keeps the
+- **Character:** `godot/preset_api.gd` (client, polls the version every 1.5 s so other devices' changes show up within 2 s; offline it keeps the
   bundled presets), `godot/expression_editor.gd` (the panel: right side on wide screens, bottom sheet on phones, big slider handles,
   solid background), `godot/presets/shape_keys.json` (categories and descriptions of the 57 shape keys, also used for validation and,
   later, for the LLM prompt). `?editor` opens the editor at start, the dev menu has an "Expression editor" button.
@@ -341,7 +341,7 @@ You set the angles of the **final pose**; the character moves there from the neu
 
 The plan is in `REQUIREMENTS_CORE.md`. Phase 1 is the foundation; the chat now runs on it (behaviour unchanged).
 
-- `skills/*.md`: one file per task (front matter: name, version, model profile, pipeline, tools, budget, `status_block`; sections `prompts`, `schemas`, `lines`, `examples`).
+- `skills/*.md`: one file per task (front matter: name, version, model profile, pipeline, tools, budget, `status_block`, `personal` (true: a conversation of a person, its prompts and answers are not kept in the content store unless `store_chat_texts` asks for them; chat and memory_write); sections `prompts`, `schemas`, `lines`, `examples`).
   Changed files are reloaded, a broken file is only logged. Shipped: `chat`, `summarize` (a small example that uses the model).
 - Pipelines (since phase 1b entries of the library, see below): the steps of a skill as a tree of nodes (`model`, `tool`, `code`, `map`, `branch`, `loop`, `ask_user`) with references (`$name.field`), conditions
   without code, retries for answers that do not fit their schema, and budgets (steps, seconds, calls per tool). The format is documented at the top of `pipeline.py`.
@@ -488,7 +488,7 @@ Changes to a check, a prompt, a pipeline or a model are judged by running the sa
 - **Numbers** (`metrics.py`): for verifiers the dangerous error comes first, the **false pass** (a wrong claim that passed), then false fail, coverage (how much is decided at all), accuracy among the decided and overall,
   precision of pass and of fail; everything with 95 percent Wilson intervals, because 30 cases cannot say much (an honest "0 of 44 false passes" has an upper bound of 8 percent). Also per tag, stability over repeats
   (the same status every time?), cost (seconds, model calls, characters), and the paired comparison of two runs with the exact sign test.
-- **Runs** (`harness.py`, `tools/eval.py`): `python tools/eval.py run <suite> [--variant name] [--repeats n] [--tag t] [--model light|full|name] [--pipeline id@version] [--skill s]`; the variant is saved with the run
+- **Runs** (`harness.py`, `tools/eval.py`): `python tools/eval.py run <suite> --pin MP-light [--variant name] [--repeats n] [--tag t] [--pipeline id@version] [--skill s]`; the variant is saved with the run
   in `data/eval/`; `report <suite|file>`, `compare <fileA> <fileB>` or `compare <suite> <variantA> <variantB>`, `list`, `cases <suite>`. A case that breaks the target is an `error:` result, not the end of the run.
 - **The rule** from here on: a check or pipeline change that touches behaviour gets a case first (a failing one), then the fix. `tests/test_harness.py` runs the `hard_checks` suite as a regression (every case
   must match, no false pass, deterministic); the model suites are run by hand (`tools/eval.py run computable`) because they need the model and take minutes.

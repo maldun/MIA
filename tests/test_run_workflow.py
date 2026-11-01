@@ -12,7 +12,9 @@ import unittest
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
 sys.path.insert(0, REPO)
+sys.path.insert(0, os.path.join(HERE, "helpers"))
 
+from markers import mark                                      # noqa: E402
 from core import Core                                         # noqa: E402
 from library import Library                                   # noqa: E402
 from run_workflow import RunWorkflowError, WorkflowRuns, sync_skills   # noqa: E402
@@ -61,6 +63,7 @@ def code_of(call):
 
 
 class RunTests(unittest.TestCase):
+    @mark.req("REQ-RUN-014")
     def test_a_run_is_done_with_outputs_events_and_cost(self):
         """TC-RUN-014 golden 1: a run under budget is done; run_start first, run_end last, every event has the run id and the user; the cost is what was spent.
         Example: summary v1, budget {calls: 15} -> done, outputs.summary 'A tall tower.', cost calls 1, tokens 60."""
@@ -76,15 +79,20 @@ class RunTests(unittest.TestCase):
         self.assertTrue(all(e["run_id"] == result["run_id"] and e["user"] == "anna" for e in events))
         self.assertEqual((result["cost"]["calls"], result["cost"]["tokens"], result["missing"]), (1, 60, []))
 
+    @mark.req("REQ-RUN-008", "REQ-RUN-014")
     def test_a_run_over_its_token_budget_ends_with_what_it_has(self):
         """TC-RUN-008, TC-RUN-014 golden 2: the last step passes the token budget: budget_exhausted, missing names tokens, the outputs so far are kept.
         Example: 60 tokens spent, budget {tokens: 50}, no measured cost yet (estimate 0) -> budget_exhausted, ["tokens"], summary kept."""
+        # Given the workflow summary and no recorded cost yet
         runs, _ = make()
+        # When it runs with a budget of 50 tokens
         result = runs.run("summary", 1, INPUT, {"tokens": 50}, "anna")
+        # Then the budget ends it, named, and the summary is kept
         self.assertEqual((result["status"], result["missing"]), ("budget_exhausted", ["tokens"]))
         self.assertEqual(result["outputs"]["summary"], "A tall tower.")
         self.assertEqual((result["events"][-1]["type"], result["events"][-1]["status"]), ("run_end", "budget_exhausted"))
 
+    @mark.req("REQ-RUN-014")
     def test_an_estimate_over_the_budget_is_refused_before_any_call(self):
         """TC-RUN-014 golden 3: once a run is recorded, the estimate of summary is 1 call and 60 tokens; a budget of 30 tokens is refused, nothing is asked.
         Example: estimate tokens 60 > budget 30 -> refused, missing ["tokens"], events run_start and run_end, cost all 0."""
@@ -99,39 +107,55 @@ class RunTests(unittest.TestCase):
         self.assertEqual(result["cost"], {"steps": 0, "seconds": 0, "calls": 0, "tokens": 0})
         self.assertEqual(len(model.calls), 1)
 
+    @mark.req("REQ-RUN-014")
     def test_unknown_or_unrunnable_workflows_are_unknown_workflow(self):
         """TC-RUN-014 (errors): an unknown id, an unknown version and a workflow that names no skill are unknown_workflow; nothing is run.
         Example: run("nothing", 1, ...) -> unknown_workflow; run("graph_only", 1, ...) -> unknown_workflow."""
+        # Given a library with summary and the skill-less graph_only
         runs, model = make()
+        # When an unknown id, an unknown version and graph_only are run
+        # Then each is unknown_workflow and the model is never asked
         for workflow, version in (("nothing", 1), ("summary", 9), ("graph_only", 1)):
             self.assertEqual(code_of(lambda: runs.run(workflow, version, INPUT, {}, "anna")), "unknown_workflow", workflow)
         self.assertEqual(model.calls, [])
 
+    @mark.req("REQ-RUN-014")
     def test_measured_costs_of_a_node(self):
         """TC-RUN-014 (costs): the costs of a node are the median of the recorded runs; a node that never ran is None.
         Example: two runs of summary -> costs("summary", "summarize") calls 1, tokens 60; costs("summary", "nope") None."""
+        # Given two recorded runs of summary
         runs, _ = make()
         runs.run("summary", 1, INPUT, {}, "anna")
         runs.run("summary", 1, INPUT, {}, "ben")
+        # When the costs of its node are asked
         costs = runs.costs("summary", "summarize")
+        # Then they are the median of the runs, and an unknown node has none
         self.assertEqual((set(costs), costs["calls"], costs["tokens"]), ({"seconds", "calls", "tokens"}, 1, 60))
         self.assertIsNone(runs.costs("summary", "nope"))
 
+    @mark.req("REQ-RUN-014")
     def test_options_are_recorded_and_reach_the_model(self):
         """TC-RUN-014 (options): the pin, seed and temperature are in run_start; the model is asked with the pinned name, the seed and the temperature.
         Example: MP-light, seed 7, temperature 0 -> model 'gemma4:12b-it-qat', options {seed: 7, temperature: 0}."""
+        # Given a pin, a seed and a temperature
         runs, model = make()
         options = {"model_pin": "MP-light", "seed": 7, "temperature": 0}
+        # When the workflow runs with them
         result = runs.run("summary", 1, INPUT, {}, "anna", options=options)
+        # Then run_start records them and the model gets them
         self.assertEqual(result["events"][0]["options"], options)
         self.assertEqual(model.calls[0]["model"], "gemma4:12b-it-qat")
         self.assertEqual((model.calls[0]["options"]["seed"], model.calls[0]["options"]["temperature"]), (7, 0))
 
 
 class EvaluationAccessTests(unittest.TestCase):
+    @mark.req("REQ-RUN-015")
     def test_run_case_needs_the_options_and_a_held_pin(self):
         """TC-RUN-015 golden 2: options without seed are bad_options; an unknown pin and a pin whose digest the server does not hold are pin_unavailable.
         Example: {model_pin, temperature} -> bad_options ["seed"]; MP-huge -> pin_unavailable; held digest 'other' -> pin_unavailable."""
+        # Given the evaluation access, and one whose server holds another digest
+        # When cases run without a seed, with an unknown pin and with the other digest
+        # Then they are refused and the model is never asked
         runs, model = make()
         self.assertEqual(code_of(lambda: runs.run_case("summary", 1, INPUT, {"model_pin": "MP-light", "temperature": 0})), "bad_options")
         self.assertEqual(code_of(lambda: runs.run_case("summary", 1, INPUT, {"model_pin": "MP-huge", "seed": 1, "temperature": 0})), "pin_unavailable")
@@ -139,9 +163,28 @@ class EvaluationAccessTests(unittest.TestCase):
         self.assertEqual(code_of(lambda: other.run_case("summary", 1, INPUT, {"model_pin": "MP-light", "seed": 1, "temperature": 0})), "pin_unavailable")
         self.assertEqual(model.calls, [])
 
+    @mark.req("REQ-RUN-015")
+    def test_an_empty_digest_is_no_pin(self):
+        """TC-RUN-015 (F14 of the N-2.4.1 verification): a model the server lists without a digest, or a pin without one, is pin_unavailable, never a match.
+
+        Example: held digest "" -> pin_unavailable; pin digest "" -> pin_unavailable; no model call
+        """
+        # Given: a server that lists the model without a digest, and a pin without one
+        empty_held, model = make(held=lambda: {"gemma4:12b-it-qat": ""})
+        empty_pin, _ = make()
+        empty_pin.pins = {"MP-light": {"name": "gemma4:12b-it-qat", "digest": ""}}
+        options = {"model_pin": "MP-light", "seed": 1, "temperature": 0}
+        # When: a case is run on either
+        # Then: both are pin_unavailable and the model is never asked
+        self.assertEqual(code_of(lambda: empty_held.run_case("summary", 1, INPUT, options)), "pin_unavailable")
+        self.assertEqual(code_of(lambda: empty_pin.run_case("summary", 1, INPUT, options)), "pin_unavailable")
+        self.assertEqual(model.calls, [])
+
+    @mark.req("REQ-RUN-015")
     def test_run_case_runs_as_harness_and_is_reproducible(self):
         """TC-RUN-015 golden 1 and 3: the run is the harness's, returns its options, its events can be read again, and two equal runs give equal outputs and
-        event types. Example: run_case twice with seed 7 -> same outputs, same sequence of event types; events(run_id) == the events of the result."""
+        event types.
+        Example: run_case twice with seed 7 -> same outputs, same sequence of event types; events(run_id) == the events of the result."""
         # Given the evaluation access
         runs, _ = make()
         options = {"model_pin": "MP-light", "seed": 7, "temperature": 0, "budget": {"calls": 15}}
@@ -155,25 +198,33 @@ class EvaluationAccessTests(unittest.TestCase):
         self.assertEqual(runs.events(first["run_id"]), first["events"])
         self.assertEqual(code_of(lambda: runs.events("r-none")), "unknown_run")
 
+    @mark.req("REQ-RUN-015")
     def test_workflows_lists_the_library(self):
-        """TC-RUN-015 (workflows): the ids, versions and status of the library. Example: [graph_only [1] draft, summary [1] draft]."""
+        """TC-RUN-015 (workflows): the ids, versions and status of the library.
+        Example: [graph_only [1] draft, summary [1] draft]."""
+        # Given a library with two workflows, When it is listed, Then both are there with versions and status
         runs, _ = make()
         self.assertEqual(runs.workflows(), [{"id": "graph_only", "versions": [1], "status": "draft"}, {"id": "summary", "versions": [1], "status": "draft"}])
 
 
 class CostTests(unittest.TestCase):
+    @mark.req("REQ-RUN-014")
     def test_calls_of_nested_steps_count_for_their_top_node(self):
         """TC-RUN-014 (costs of a composite node): the model calls between the start and the end of a top node count for it, also those of the steps inside a
-        map. Example: node screen (a map) with two model calls of its inner step rate, at 1.0 s and 4.0 s -> screen: calls 2, tokens 30, seconds 3.0."""
+        map.
+        Example: node screen (a map) with two model calls of its inner step rate, at 1.0 s and 4.0 s -> screen: calls 2, tokens 30, seconds 3.0."""
+        # Given a run log with two calls inside the map screen and one call outside it
         call = lambda seq, at: {"kind": "event", "type": "model_call", "seq": seq, "at": at, "node": "rate", "actor": "rate",
                                 "payload": {"tokens_in": 10, "tokens_out": 5}}
         run = {"task": "w", "events": [{"kind": "start", "node": "screen", "seq": 1, "at": 1.0}, {"kind": "start", "node": "rate", "seq": 2, "at": 1.0},
                                        call(3, 2.0), call(4, 3.0), {"kind": "done", "node": "screen", "seq": 5, "at": 4.0},
                                        {"kind": "event", "type": "model_call", "seq": 6, "at": 5.0, "node": None, "actor": "other", "payload": {"tokens_in": 99, "tokens_out": 1}}]}
+        # When the costs of screen are read, Then only the two calls inside count
         self.assertEqual(WorkflowRuns._median([run], "screen"), {"seconds": 3.0, "calls": 2, "tokens": 30})
 
 
 class SyncTests(unittest.TestCase):
+    @mark.req("REQ-RUN-014")
     def test_every_skill_gets_a_workflow_once(self):
         """TC-RUN-014 (sync, D-112): each skill of the shipped folder gets a workflow that names it and its pipeline, with the top steps of the pipeline as
         process nodes; a second sync saves nothing; a workflow that is not made from a skill (the review draft) is left alone.

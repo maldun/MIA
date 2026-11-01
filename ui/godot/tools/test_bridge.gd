@@ -22,8 +22,9 @@ func _init() -> void:
 	check(eng.current_name == "surprised", "the character shows 'surprised' (got '%s')" % eng.current_name)
 	check(eng.gestures.current == "hands_up", "its gesture starts")
 
-	check(not bridge.handle_json('{"type": "expression", "name": "no_such_face"}'), "unknown expression is rejected")
-	check(eng.current_name == "surprised", "the current expression stays after an unknown name")
+	# IF-111 v2 (A-48, D-140): an unknown name shows neutral (v1 kept the current expression)
+	check(bridge.handle_json('{"type": "expression", "name": "no_such_face"}'), "an unknown expression name is handled")
+	check(eng.current_name == "neutral", "an unknown name shows 'neutral' (got '%s')" % eng.current_name)
 	check(not bridge.handle_json("not json at all"), "garbage is rejected")
 	check(not bridge.handle_json('{"type": "dance"}'), "unknown message type is rejected")
 	check(bridge.handle_json('{"type": "ready"}'), "'ready' (own echo outside an iframe) is harmless")

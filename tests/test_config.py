@@ -21,7 +21,9 @@ EXAMPLE = os.path.join(REPO, "setup_cfg.example.json")
 # options that mean something different when they are present, so they cannot be listed with a neutral value (README.md explains them)
 OMITTED = {"editor_token", "chat_token"}
 # names found by the scan below that are not options of the file
-NOT_OPTIONS = {"options", "profile", "EDITOR_TOKEN_INFO"}
+NOT_OPTIONS = {"options", "profile", "EDITOR_TOKEN_INFO",
+               "MIA_PROXY_TRUST",          # Flask app.config of accounts_api.py (D-120 Q1)
+               "budget", "model_pin"}      # options of one workflow run in run_workflow.py, not of the file (D-120 Q1)
 
 
 def options_read_by_the_code():

@@ -52,6 +52,25 @@ class ToolCallsContract(unittest.TestCase):
         self.assertTrue(out["output"]["passages"])
         self.assertTrue(all(p["quote"] in "The tower is 330 m high. It was finished in 1889." for p in out["output"]["passages"]))
 
+    @mark.req("IF-402", "REQ-BE-046")
+    @each_provider(IF)
+    def test_wrong_arguments_are_refused_uncounted(self, tools):
+        """TC-IF-402-07 (A-42): arguments the tool does not take are 'bad_arguments' and nothing is counted: a limit of 1 still allows one right call."""
+        run = {"id": "r1", "limits": {"number_check": 1}}
+        self.assertEqual(code_of(lambda: tools.call(run, "number_check", {"claim": "It is 1,200 m"}))[0], "bad_arguments")
+        self.assertEqual(code_of(lambda: tools.call(run, "number_check", {"claim": "x", "evidence": [], "unit": "m"}))[0], "bad_arguments")
+        out = tools.call(run, "number_check", {"claim": "It is 1,200 m", "evidence": ["about 1,200 m"]})
+        self.assertEqual(out["output"]["status"], "pass")
+
+    @mark.req("IF-402", "REQ-BE-064")
+    @each_provider(IF)
+    def test_a_fetched_page_is_untrusted_web_text(self, tools):
+        """TC-IF-402-06 golden 4 (A-34): fetch_page returns the text of the page with its reference and the web trust label; an unknown page is 'source_error'."""
+        run = {"id": "r1", "limits": {}}
+        out = tools.call(run, "fetch_page", {"url": "https://example.org/a"})
+        self.assertEqual((out["trust"], out["output"]["ref"], out["output"]["text"]), ("web", "https://example.org/a", "The tower is 330 m high. It was finished in 1889."))
+        self.assertEqual(code_of(lambda: tools.call(run, "fetch_page", {"url": "https://example.org/missing"}))[0], "source_error")
+
     @mark.req("IF-402", "REQ-BE-070", "REQ-BE-064")
     @each_provider(IF)
     def test_budgets_per_tool_and_run(self, tools):
@@ -73,12 +92,13 @@ class ToolCallsContract(unittest.TestCase):
     @mark.req("IF-402", "REQ-BE-064")
     @each_provider(IF)
     def test_every_output_carries_a_trust_label_and_a_schema_check_names_problems(self, tools):
-        """TC-IF-402-05: checks are 'code', web and scholarly tools are 'web'; schema_check names the missing keys."""
+        """TC-IF-402-05: checks are 'code', web and scholarly tools are 'web'; schema_check names the missing key in its one problem (A-32: a readable text)."""
         run = {"id": "r1", "limits": {}}
         self.assertEqual(tools.call(run, "web_search", {"query": "q"})["trust"], "web")
         self.assertEqual(tools.call(run, "scholar_search", {"query": "q"})["trust"], "web")
         check = tools.call(run, "schema_check", {"value": {"verdict": "supported"}, "schema": {"required": ["verdict", "reason"]}})
-        self.assertEqual((check["trust"], check["output"]["status"], check["output"]["problems"]), ("code", "fail", ["reason"]))
+        self.assertEqual((check["trust"], check["output"]["status"], len(check["output"]["problems"])), ("code", "fail", 1))
+        self.assertIn("reason", check["output"]["problems"][0])
 
 
 if __name__ == "__main__":

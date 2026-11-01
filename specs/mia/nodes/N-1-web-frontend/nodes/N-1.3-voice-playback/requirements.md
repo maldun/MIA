@@ -25,22 +25,22 @@ Playing the audio of the answers and the voice lines in this browser: queue, cla
 - Parent: REQ-FE-012
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-13: after mute no audio plays on this device; a second device still plays
+- Acceptance criterion: AC-13: after mute no audio plays on this device; a second device still plays; after Stop no line of the stopped answer plays on this device, also one that arrives later, until the next answer begins or 3 s after the Stop, whichever comes first (its lines play, and so does a line that arrives later, such as the shocked line of a minus vote)
 - Verified by: TC-VPB-002
 - Status: Approved
-- History: –
+- History: 2026-10-31 D-157: the acceptance criterion adds the lines of a stopped answer that arrive after the Stop (owner check A3); lines carry no answer id, so "the stopped answer" ends when the next one begins (`chat_start`); 2026-10-31 D-165: the drop ends 3 s after the Stop at the latest, so lines outside the stopped answer (the shocked line of a minus vote, IF-101 v13) still play (re-verification 3, R1)
 
 ### REQ-VPB-003 – Voice lines
 - Level: low   Subject: WebFrontEnd
-- Text: When the backend sends a voice line, the Voice playback shall play it, and if its audio file is missing, skip it and report it to the backend.
+- Text: When the backend sends a voice line, the Voice playback shall play it, and if its audio file is missing, skip it and report it through the IF-112 callback `onLineError`; no event goes to the backend.
 - Rationale: refines REQ-FE-013
 - Parent: REQ-FE-013
 - Priority: Should
 - Verification method: Test
-- Acceptance criterion: AC-13: a line with a missing file produces one report event and no error shown; the conversation continues
+- Acceptance criterion: AC-13: a line with a missing file produces one report through `onLineError` and no error shown; the conversation continues
 - Verified by: TC-VPB-003
 - Status: Approved
-- History: –
+- History: 2026-10-31 A-50 (D-140): narrowed, the report ends at the IF-112 callback (the page writes it to the browser console); no backend event
 
 ### REQ-VPB-004 – No request leaves the host
 - Level: low   Subject: WebFrontEnd

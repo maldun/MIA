@@ -7,6 +7,7 @@
 
 export const CLAIM_EVERY_MS = 3000;       // a page that is used claims the voice at most this often
 export const HEARTBEAT_MS = 1500;         // "speaking" is repeated while a line plays (the character has a watchdog)
+export const STOP_DROP_MS = 3000;         // after a Stop, late lines of that answer arrive within the ~0.2 s poll plus one upload (D-165)
 
 /** the lines that are waiting to be played */
 export class LineQueue {
@@ -43,7 +44,7 @@ export function mayClaim({ visible, now, lastClaim, every = CLAIM_EVERY_MS }) {
 
 /**
  * Plays lines one after the other on one audio element (IF-112, REQ-VPB-001 to REQ-VPB-003).
- * Muting silences this device only: the lines still run (without sound), so the character and the server keep in step.
+ * Muting silences this device only: the waiting lines and the new ones are dropped (IF-112); the playing line ends without sound.
  */
 export class VoicePlayer {
   constructor({ audio, onEnded = () => {}, emitClaim = () => {}, clock = Date.now }) {
@@ -77,13 +78,14 @@ export class VoicePlayer {
   }
 
   enqueue(line) {
-    if (!this.owner) return;
+    if (!this.owner || this.audio.muted) return;
     this.queue.push(line);
     if (!this.current && !this._held) this._startNext();      // held: the browser refused autoplay, nothing is tried before allowAutoplay()
   }
 
   mute(value) {
     this.audio.muted = Boolean(value);
+    if (this.audio.muted) this.queue.clear();
   }
 
   /** ends the playing line and clears the queue */
@@ -148,11 +150,14 @@ export class VoicePlayer {
       return;
     }
     // a browser answers with a promise; an element that plays at once (a test double) is taken as started
-    if (started && typeof started.then === 'function') started.then(() => this._setSpeaking(true), (error) => this._notStarted(line, error));
-    else this._setSpeaking(true);
+    if (started && typeof started.then === 'function') {
+      // the promise may settle after its line was ended (error event, stop, a new src): then it no longer speaks for the player
+      started.then(() => { if (this.current === line) this._setSpeaking(true); }, (error) => { if (this.current === line) this._notStarted(line, error); });
+    } else this._setSpeaking(true);
   }
 
   _notStarted(line, error) {
+    if (error?.name === 'AbortError') return;           // pause() or a new src ended this start: whoever did it decides what comes next
     if (error?.name === 'NotAllowedError') {
       // the browser wants a click first: the line waits at the front
       this.queue.unshift(line);
@@ -167,11 +172,12 @@ export class VoicePlayer {
   }
 }
 
-export function initSound({ audio, socket, character, storage, muteToggle, muteLabel, muteIcon, volume, hint, t, win = window }) {
+export function initSound({ audio, socket, character, storage, muteToggle, muteLabel, muteIcon, volume, hint, t, win = window, clock = Date.now }) {
   let muted = storage.get('mia.muted') === '1';
   let level = Math.min(100, Math.max(0, Number(storage.get('mia.volume', 100)) || 0));
   let first = true;
   let heartbeat = 0;
+  let stoppedAt = null;         // the user stopped the voice: late lines of that answer are dropped (REQ-VPB-002, D-157, D-165)
 
   // --- the character talks while a line plays or lines are waiting --------------------------------
   function speaking(value) {
@@ -188,6 +194,8 @@ export function initSound({ audio, socket, character, storage, muteToggle, muteL
   });
   player.onSpeaking(speaking);
   player.onBlocked = () => { hint.hidden = false; };
+  // REQ-VPB-003 (A-50): a missing line is skipped; the report ends here, in the browser console, and nothing is shown to the user
+  player.onLineError = (id) => win.console.warn(`MIA voice: line skipped, it could not be played: ${id}`);
 
   function applyAudio() {
     player.mute(muted);
@@ -199,8 +207,14 @@ export function initSound({ audio, socket, character, storage, muteToggle, muteL
   }
 
   socket.on('audio_reload', (data) => {
-    player.enqueue({ url: data?.url ?? '/audio/out.wav', serial: data?.serial });
+    if (stoppedAt !== null && clock() - stoppedAt < STOP_DROP_MS) return;
+    const url = data?.url ?? '/audio/out.wav';
+    player.enqueue({ id: url, url, serial: data?.serial });            // every line has its own file: the url names it
   });
+
+  // lines carry no answer id: a line after the Stop belongs to the stopped answer until the next one starts or the window
+  // ends; later lines (the shocked line of a minus vote) are not part of it (REQ-VPB-002, D-157, D-165)
+  socket.on('chat_start', () => { stoppedAt = null; });
 
   // --- one page plays ----------------------------------------------------------------------------------
   const claimIfUsed = () => player.claimIfUsed(document.visibilityState === 'visible');
@@ -234,6 +248,11 @@ export function initSound({ audio, socket, character, storage, muteToggle, muteL
         player.claim({ initial: first, force: true });
         first = false;
       }
+    },
+    /** the user stops the voice on this device (the composer's Stop button) */
+    stop() {
+      stoppedAt = clock();
+      player.stop();
     },
     get queued() { return player.queued; },
     get playing() { return player.playing; },

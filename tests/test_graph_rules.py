@@ -43,6 +43,19 @@ class GraphRules(unittest.TestCase):
                 self.assertEqual(violation(document)[0], rule)
 
     @mark.req("REQ-GTB-002")
+    def test_an_unknown_kind_or_an_empty_id_breaks_node_identity(self):
+        """Verify F4 (D-160): a kind other than process or data, a missing kind, an empty id and a missing id are each node_identity.
+
+        Example: {"id": "a", "kind": "tool"} -> ("node_identity", "a"); {"id": "", "kind": "data"} -> ("node_identity", "").
+        """
+        # Given
+        nodes = [{"id": "a", "kind": "tool"}, {"id": "a"}, {"id": "", "kind": "data"}, {"kind": "data"}]
+        # When
+        named = [violation({"nodes": [node], "edges": []}) for node in nodes]
+        # Then
+        self.assertEqual(named, [("node_identity", "a"), ("node_identity", "a"), ("node_identity", ""), ("node_identity", None)])
+
+    @mark.req("REQ-GTB-002")
     def test_a_cycle_is_named_by_its_ids_with_the_first_repeated(self):
         """TC-GTB-002: p->d->p is the cycle [p, d, p]; a self-loop of a process is adjacent processes, not a cycle."""
         self.assertEqual(violation(doc([("p", "process", {}), ("d", "data", {})], [("p", "d"), ("d", "p")])), ("cycle", ["p", "d", "p"]))
@@ -57,11 +70,47 @@ class GraphRules(unittest.TestCase):
                 self.assertEqual(result and result[0], expected)
 
     @mark.req("REQ-GTB-002")
+    def test_a_session_limit_is_a_positive_integer(self):
+        """Verify F2 (D-160): a limit is an int >= 1 that is not a bool; every limit given must be one, and a null limit counts as not given.
+
+        Example: {"max_cycles": -1} -> session_stopping_criterion; {"max_cycles": 1} -> None.
+        """
+        # Given
+        refused = [{"max_cycles": v} for v in (-1, 0, "0", "3", True, float("nan"), float("inf"), 2.5, [3])] + \
+                  [{"max_seconds": v} for v in (-5, False, 1.0)] + [{"max_cycles": 3, "max_seconds": -1}, {"max_cycles": "x", "max_seconds": 60}]
+        accepted = [{"max_cycles": 1}, {"max_seconds": 1}, {"max_cycles": 3, "max_seconds": 60}, {"max_cycles": 3, "max_seconds": None}]
+        # When
+        named = lambda stop: violation(doc([("s", "process", {"session": True, "stop": stop})]))
+        # Then
+        for stop in refused:
+            with self.subTest(stop=stop):
+                self.assertEqual(named(stop), ("session_stopping_criterion", "s"))
+        for stop in accepted:
+            with self.subTest(stop=stop):
+                self.assertIsNone(named(stop))
+
+    @mark.req("REQ-GTB-002")
     def test_a_document_that_is_not_a_graph_is_refused(self):
         """A missing or non-list nodes/edges is node_identity, never an exception."""
         for bad in ({}, {"nodes": "x", "edges": []}, {"nodes": [], "edges": None}, [], None):
             with self.subTest(bad=bad):
                 self.assertEqual(violation(bad)[0], "node_identity")
+
+    @mark.req("REQ-GTB-002")
+    def test_a_malformed_stop_or_edge_endpoint_is_named_not_raised(self):
+        """Verify F1 (D-160): a stop that is not a dict is session_stopping_criterion; an edge endpoint that is not a text id is node_identity.
+
+        Example: a session node with "stop": "x" -> ("session_stopping_criterion", "s"); an edge {"from": ["a"], "to": "b"} -> node_identity.
+        """
+        # Given
+        sessions = [doc([("s", "process", {"session": True, "stop": stop})]) for stop in ("x", [1], 5)]
+        pair = [("a", "data", {}), ("b", "process", {})]
+        endpoints = [doc(pair, [(["a"], "b")]), doc(pair, [("a", {"id": "b"})]), doc(pair, [(1, "b")])]
+        # When
+        named = [violation(d) for d in sessions + endpoints]
+        # Then
+        self.assertEqual([n[0] for n in named], ["session_stopping_criterion"] * 3 + ["node_identity"] * 3)
+        self.assertEqual(named[0], ("session_stopping_criterion", "s"))
 
     @mark.req("REQ-GTB-002")
     def test_a_graph_of_500_nodes_is_checked_within_200_ms(self):
@@ -75,7 +124,9 @@ class GraphRules(unittest.TestCase):
 
 
 def generated(seed):
-    """A random graph with shared inputs, session nodes, and now and then a broken rule; returns (doc, reference_ok)."""
+    """A random graph with shared inputs, session nodes, and now and then a broken rule; returns (doc, reference_ok, order).
+
+    Now and then a shared input is listed twice (the mistake "one copy of the input per reader"), which breaks node identity (Verify F7)."""
     rng = random.Random(seed)
     count = rng.randint(2, 12)
     kinds = [rng.choice(("data", "process")) for _ in range(count)]
@@ -93,8 +144,12 @@ def generated(seed):
         if rng.random() < 0.85 and kinds[a] == kinds[b]:                 # mostly alternate data and process, so cycles and sessions decide
             continue
         edges.append({"from": ids[a], "to": ids[b]})
+    shared = sorted(shared_inputs(nodes, edges))
+    if shared and rng.random() < 0.3:                                    # drawn last, so the graphs of the other seeds stay as they were
+        nodes.append(dict(next(n for n in nodes if n["id"] == shared[0])))
     document = {"nodes": nodes, "edges": edges}
     kind = dict(zip(ids, kinds))
+    duplicated = len(nodes) != len(ids)
     adjacent = any(kind[e["from"]] == kind[e["to"]] for e in edges)
     session_bad = any(n.get("session") and not (n["stop"].get("max_cycles") or n["stop"].get("max_seconds")) for n in nodes if n["kind"] == "process")
     graph = {i: set() for i in ids}
@@ -105,7 +160,17 @@ def generated(seed):
         cyclic = False
     except graphlib.CycleError:
         order, cyclic = None, True
-    return document, not (adjacent or session_bad or cyclic), order
+    return document, not (duplicated or adjacent or session_bad or cyclic), order
+
+
+def shared_inputs(nodes, edges):
+    """The data nodes that two or more processes read, with their readers."""
+    kind = {n["id"]: n["kind"] for n in nodes}
+    readers = {}
+    for e in edges:
+        if kind[e["from"]] == "data" and kind[e["to"]] == "process":
+            readers.setdefault(e["from"], set()).add(e["to"])
+    return {d: r for d, r in readers.items() if len(r) >= 2}
 
 
 class Property(unittest.TestCase):
@@ -120,10 +185,29 @@ class Property(unittest.TestCase):
             accepted += result is None
             if (result is None) != reference_ok:
                 failures.append((seed, result))
-            elif result is None:
-                self.assertEqual(len(order), len(document["nodes"]))     # every accepted graph has a topological order, each node once
         self.assertEqual(failures, [])
         self.assertGreater(accepted, 100)                                # the generator does produce valid graphs, otherwise the test says nothing
+
+    @mark.req("REQ-GTB-002")
+    def test_a_shared_input_appears_once_in_an_accepted_graph(self):
+        """TC-GTB-003 (Verify F7): in every accepted graph a data node read by two processes is listed once and comes once in the order, before its readers.
+
+        Example: q->p1, q->p2 with q listed twice is refused; with q listed once it is accepted and q precedes p1 and p2.
+        """
+        # Given
+        checked = 0
+        for seed in range(1, 1001):
+            document, _, order = generated(seed)
+            # When
+            if violation(document) is not None:
+                continue
+            # Then
+            listed = [n["id"] for n in document["nodes"]]
+            for data, readers in shared_inputs(document["nodes"], document["edges"]).items():
+                self.assertEqual((listed.count(data), order.count(data)), (1, 1), (seed, data))
+                self.assertTrue(all(order.index(data) < order.index(r) for r in readers), (seed, data))
+                checked += 1
+        self.assertGreater(checked, 10)                                  # enough shared inputs reach the check, otherwise it says nothing
 
     @mark.req("REQ-GTB-002")
     def test_a_named_cycle_follows_real_edges(self):
