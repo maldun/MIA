@@ -38,4 +38,4 @@ Kinds: **A** a root-level test written for the row; **B** the parts of the scena
 
 Count: A 1, B 16, C 9, D 3 (TC-MIA-016 moved to D by D-177).
 
-Not yet decided by anyone: the C rows need `eval-spec.md` criteria and pins for most of them (the same gap as REQ-TLS-006, REQ-RUN-006/-007); the B rows need a root Verify that reads their scenario against the node evidence. N-0 step_05 (FR-22, TC-MIA-016) waits for N-5 and FB-02.
+Not yet decided by anyone: the C rows need approved criteria, holdouts and recorded baselines (`specs/mia/eval-spec.md` and `specs/number-gate/eval-spec.md` exist as drafts with the pins MP-light and MP-full; they cover TC-MIA-002, -003, -019 and -022 in part and say nothing on -011, -024, -025, -028); the B rows need a root Verify that reads their scenario against the node evidence. N-0 step_05 (FR-22, TC-MIA-016) waits for N-5 and FB-02.

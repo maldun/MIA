@@ -130,7 +130,7 @@ master is 3 commits ahead of goal/v1 (merges and the report of the N-1.3 re-veri
 ### Agent changes
 (from `agent-app-commit/assets/release-notes-agent.md`; no eval decided for this release)
 
-**Models.** MP-light = `gemma4:12b-it-qat`, digest `sha256:38044be4f923e5a55264ed7df4eaac2676651a905f735197c504045140c02bd3` (`tools/eval.py` PINS, seed 7, temperature 0), unchanged; the full model `gemma4:26b` and `num_ctx` 8192 are configuration (CLAUDE.md), not pinned in `eval-spec.md` (there is none: TD-12 to TD-20). <<Check the digests on the reference host before the tag: `ollama show`.>>
+**Models.** MP-light = `gemma4:12b-it-qat`, digest `sha256:38044be4f923e5a55264ed7df4eaac2676651a905f735197c504045140c02bd3` (`tools/eval.py` PINS, seed 7, temperature 0), unchanged; MP-full = `gemma4:26b` (`sha256:001e5dafc3c7...`, not used for criteria in G-V1); both pins are in the drafts `specs/mia/eval-spec.md` and `specs/number-gate/eval-spec.md` (not approved), `tools/eval.py` PINS holds MP-light only; `num_ctx` 8192 is configuration (CLAUDE.md). <<Check the digests on the reference host before the tag: `ollama show`.>>
 
 **Skills and pipelines (since plan-baseline-it1).**
 
