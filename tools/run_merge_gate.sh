@@ -5,6 +5,8 @@
 #   MIA_GATE_UPTO=3 bash tools/run_merge_gate.sh also stage 3: it starts podman containers (container-alone, a throwaway postgres:16, the compose stack). Do this when the
 #                                                machine is idle; there is a hardware problem at MIA shutdown (fatal CPU machine checks), back up first.
 #   MIA_GATE_DRY=1 bash tools/run_merge_gate.sh  only prints the steps (no venv, no run)
+# Note: the step `unit` (stage 1) discovers every test file, and the files that need podman skip only when podman is missing: on this machine they build and start
+# throwaway test containers (own project names, --pull=never). So even without MIA_GATE_UPTO=3 run it while the machine is idle and nothing else heavy runs.
 # The log is .stages/log.jsonl (not in git). Refuses on a dirty tracked tree: the gate reads the exact commit.
 set -eu
 cd "$(dirname "$0")/.."
