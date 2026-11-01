@@ -260,3 +260,91 @@ As in the first report: BM-MIA-001 only with the fixed clock (now in place) and 
 - `smoke_gate.py` against a live Ollama: only its command line was reproduced, and that stops before any model is needed.
 - CI stages; `test_amendment_report` and `tests/acceptance/test_benchmarks.py` (known failures, not run).
 - The look mode of `tools/apply_amendment_a63.sh`: refused by the reviewer's permission check; `cmp` was used instead.
+
+---
+
+# Re-verification 2 (2026-11-01)
+**Branch:** goal/v1 @ 269c615 (merge round 4: `v1-n41c` merged in e1a57a7; A-64 to A-68 installed in 269c615)   **Plan baseline:** plan-baseline-it1
+**Fix commits reviewed:** 2864a11 (R5), 27972e9 (R8, R6, R2), e4cfdab (A-68 draft: R1, R4), 269c615 (A-68 installed). R3 by the owner's decision (D-172, `ef07a03`: scope row, TD-08)
+**Decisions read:** D-164, D-166, D-172 (`specs/mia/review-log.md`); TD-07, TD-08 (`specs/mia/deferred.md`); the REQ-EVL-011 scope row (`specs/mia/goals/G-V1/goal.md:79`)
+**Reviewer:** Claude Opus 5.5 as independent reviewer (AI; never saw the implementation chat). Read-only: nothing fixed. Scratch copies (`git archive HEAD`) in a hidden, never committed folder of the reviewer's worktree (`.rv2-scratch/`), removed afterwards (the session scratchpad was gone).
+
+## Verdict
+Proposed: **Verified with accepted deviations.**
+- R1 to R8 of the re-verification are closed or decided. R1 and R4 are closed by A-68, which is byte-identical to its draft. Both R4 mutants are now killed, and the smoke gate's own command line reaches the run (shown without a model, below).
+- 10 of 12 mutants of the fixes are killed, and 4 of 5 regression mutants of the earlier guards are killed. The fifth is equivalent: it cannot be reached.
+- New findings: S3 (Medium, plan text) and S1, S2, S4 (Low). None of them breaks a requirement that is in G-V1's scope. S3 is the same bookkeeping gap that R2 was, now for REQ-EVL-011.
+- Unchanged and accepted by the owner: REQ-EVL-003 (TD-07), REQ-EVL-005 and -009 (D-164), REQ-EVL-011 (TD-08, D-172) are partly in G-V1. REQ-EVL-010 waits for T-07. The REQ-EVL-007 figures are for Phase 6 (VAL-006).
+
+No eval run and no model call were made. No `*.holdout` suite or `split:holdout` case was opened, and `--holdout` was never used: holdout behaviour was checked by code reading and by the tests' synthetic fixtures only.
+
+## Automated checks (local runs of the reviewer, no CI)
+| Check | Result |
+|---|---|
+| Node tests in the image (`bash tools/run_in_image.sh`, `localhost/mia:latest` e37a87782beb) | `tests/acceptance/`: `test_eval_platform` 17 OK, `test_decide_guard` 11 OK (1 skipped: the skill's `eval_decide.py` is not in the image, as before), `test_judge_calibration` 7 OK, `test_check_baselines` 3 OK, `test_skill_path_doc` 4 OK, `test_measure_latency` 3 OK, `test_harness_pin` 5 OK; `tests/test_eval_cli.py` 8 OK; `tests/test_metrics.py` 22 OK |
+| The same on the host (`python3`) | the same counts, none skipped (`test_decide_guard` ran the real `eval_decide.py`) |
+| R1: the smoke gate's command line, no model | Reviewer probe: loads `tests/smoke/smoke_gate.py`, takes the command of `run_smoke_cases` from a stubbed `subprocess.run`, and feeds it to `tools/eval.py` `main()` with `build_core` and `make_harness` stubbed (no Ollama). The installed file (A-68) **reaches the run** for both `verdicts_vitaminc` and `verdicts_wikidata`: variant `smoke-gate`, pipeline `verify.number_gate@4`, tag `smoke`, pin `MP-light` = `gemma4:12b-it-qat`. The file before A-68 (`269c615^`) **stops**: "--model together with --pin ... drop --model". Note: `verdicts_vitaminc` is git-ignored (`.gitignore:33`), so in a worktree the probe needs `MIA_SUITES=<main checkout>/eval/suites` (S5) |
+| Protected material | `tests/smoke/smoke_gate.py` and `tests/acceptance/test_decide_guard.py` are byte-identical (`cmp`) to `specs/mia/amendments/A-68/`. The A-68 draft differs from the A-63 draft of `test_decide_guard.py` only by `watch_reads` and its three uses (21 diff lines; the one removed line is a reworded comment). The other five A-63 files are still byte-identical to their drafts. No commit since b1b3b69 touches `eval/suites/`, `eval/baselines/` or IF-105 (contract, suite, mock), and nothing protected changed after 269c615. The other protected files of 269c615 (IF-102, IF-104, IF-302, `tests/helpers/contract.py`, `stages.yaml`) belong to A-64 to A-67 (other nodes) and were not compared here |
+| Mutation (scratch copy, one mutant at a time, file restored after each) | **Fix mutants: 12, 10 killed.** R4-a (early refusal of `open_suite` removed) and R4-b (`list_suites(..., holdout=True)`): both killed by `test_decide_guard` (A-68); these were the 2 survivors of the last round. R5-b (no refusal by the run's header), R5-c (header refusal ignores `--holdout`); R8-a (no path-like check), R8-b (no missing-suite check), R8-c (no `SuiteError` catch); R6-a (a script line without `--pin`), R6-b (an unknown pin in the script), R6-c (a README command without `--pin`): all killed by `test_eval_cli`. **Survived:** R5-a, the refusal by name before a saved run is read (S1); R8-d, holdout names in the "there are" list (S2). **Regression mutants of earlier guards: 5, 4 killed:** `--pin` not required, `--model` not refused, the `list_suites` default, and the `Suite.select` holdout filter. OLD-3 (the late holdout check of `open_suite`, `tools/eval.py:106`) survives but is **equivalent**: `harness.load_suite` refuses a suite whose name differs from its folder (`harness.py:69-70`), so a folder without `.holdout` can never load as a holdout suite (S6) |
+| `trace_check.py` | Exit 1, 94 errors over the whole spec. The REQ-EVL-003 errors of the last round are gone (R2). New for N-4.1: **ERROR TD-08: REQ-EVL-011 does not carry `Relaxed: TD-08` and has no `Target`** (S3); **ERROR TD-07 and TD-08: open, but no test with `deferred(...)` and the target check is not `skip:` or `specified only`** (S4); WARN TD-07: the trigger has no date (S4); WARN REQ-EVL-010: no marker (T-07, as before) |
+| `check_sysml_model.py` | OK. No `.sysml` file changed in these commits, so the pilot parser was not run |
+| `agent_check.py --spec-dir specs/mia --eval-dir eval` | Exit 1, with the same picture as the last round: errors A9/A10 on `SkillDigestStep` (not N-4.1), about 640 warnings (A7 case requirements outside the feature, A6 no holdout for `research` and `verdicts`, which is expected under D-164) |
+| Cleanup | no container or file of this run left; only containers of another project from 2025 exist, and they were left alone |
+
+## Closure of the re-verification's findings
+| # | Finding | Fix | Test that fails without it | Closed? |
+|---|---|---|---|---|
+| R1 | the smoke gate passes `--model` with `--pin` and stops | A-68: `smoke_gate.py:39-40` without `--model` (installed 269c615) | reviewer probe: before A-68 the command stops, after A-68 it reaches the run. A live run against Ollama was not made (Phase 6, owner) | **yes** |
+| R2 | REQ-EVL-003 without `Relaxed`/`Target` | 27972e9: `Relaxed: TD-07`, `Target:` lines | trace_check: the two errors are gone | **yes** |
+| R3 | REQ-EVL-011 for the old suite kinds | owner D-172: scope row "partly" (`goal.md:79`), TD-08 (`deferred.md:93`) | – | **decided**; the requirement text lacks `Relaxed: TD-08` and `Target` (S3) |
+| R4 | the guard tests could not see a read | A-68: `watch_reads` spy on `harness.load_suite` | mutants R4-a and R4-b killed | **yes** |
+| R5 | `report`/`compare` showed saved holdout runs | 2864a11: `resolve_run` refuses by name, then by header (`tools/eval.py:143-155`) | `SavedHoldoutRuns` (3): R5-b and R5-c killed | **yes**; the by-name layer is untested (S1) |
+| R6 | `--pin` missing in written commands | 27972e9: `run_research_comparison.sh` and `ui/README.md` | `PinInTheWrittenCommands` (2): R6-a, -b, -c killed | **yes** |
+| R7 | scenarios not reviewed; A-63 note "proposed" | the log names A-63 as installed (`implementation-log.md:116`) | – | **partly**: the scenarios are still the owner's; the note itself still says "proposed" (S7) |
+| R8 | tracebacks for a missing or unknown suite | 27972e9: one-line exits in `open_suite` (`tools/eval.py:93-107`) | `UnknownSuites` (3): R8-a, -b, -c killed | **yes**; S2 for the holdout names |
+
+## Verification matrix (re-verification 2, changes only)
+| Requirement | Method | Evidence | Result |
+|---|---|---|---|
+| REQ-EVL-001 | Test | `UnknownSuites` (R8): one-line exits; mutants killed | **Pass** (unchanged) |
+| REQ-EVL-002 | Inspection, Test | `test_decide_guard` with `watch_reads` (A-68), `SavedHoldoutRuns` (R5); mutants R4-a/b, R5-b/c and OLD-4/5 killed | **Pass** (S1, S2 low gaps) |
+| REQ-EVL-003 | Test | TC-EVL-003; `Relaxed: TD-07`, `Target` present | **Partly, accepted** (D-166, TD-07); S4 |
+| REQ-EVL-004 | Test | `--pin` required (OLD-1), `--model` refused (OLD-2); written commands pinned (R6); the smoke gate's command now carries the pin alone (R1) | **Pass** |
+| REQ-EVL-011 | Inspection, Test | TC-EVL-011 for workflow targets; the old kinds use the in-process Core | **Partly, accepted** (D-172, TD-08); S3 |
+| others | – | not touched by these commits | as in the re-verification |
+
+## Specification vs. code (M42)
+| Direction | Item | Destination |
+|---|---|---|
+| done, specified | everything D-172 asked of R1, R2, R4, R5, R6 and R8 | – |
+| specified, partly done | D-172 R2: "the A-63 note says installed". The log says it; the note does not (S7) | owner |
+| done, not specified | the "no suite" exit lists the suites there are; a path-like name is refused (R8) | D-172 asked for clear errors; no text needed |
+
+## Review findings (re-verification 2)
+| # | Finding | Severity | Destination / proposal |
+|---|---|---|---|
+| S1 | `tools/eval.py:147-148`: the refusal of a saved holdout run **by name, before its file is read** (as the 2864a11 message says) has no test that fails without it. The refusal by header (`:153-154`) catches the same case after `harness.load_run` read the run. Mutant R5-a survives. It is the R4 pattern again, now for runs | Low | Phase 3 (`tests/test_eval_cli.py` is not protected): spy on `harness.load_run` in `SavedHoldoutRuns`, as A-68 does for `load_suite`, and assert that the holdout run was not read |
+| S2 | `tools/eval.py:101-102`: the "no suite 'x' (there are: ...)" exit leaves holdout suites out without `--holdout`. That is correct, and seen on the real suites, but untested: the `UnknownSuites` fixture has no holdout suite, so mutant R8-d (every name listed) survives. Listing holdout names would contradict D-164 ("left out of list") | Low | Phase 3: add `toy.holdout` to the fixture of `test_a_missing_suite_...` (`tests/test_eval_cli.py:134`) and assert that it is not named |
+| S3 | `specs/mia/nodes/N-4-evaluation-operation/nodes/N-4.1-evaluation/requirements.md`, REQ-EVL-011: no `Relaxed: TD-08` and no `Target` line, although TD-08 is open (trace_check: 2 errors). It is the gap that R2 closed for REQ-EVL-003 | Medium (plan text; the same rating as R2) | Phase 2 text: `Relaxed: TD-08` and `Target: every suite kind runs through IF-105` (the Target of TD-08), with a history line D-172 |
+| S4 | `specs/mia/deferred.md` TD-07 and TD-08: "Target check: TC-EVL-003 / TC-EVL-011", but no test carries `@pytest.mark.deferred('TD-07')` or `deferred('TD-08')` (trace_check: 2 errors); TD-07's trigger has no date (WARN). TD-06 was brought into the form `skip: <reason>` in round 4 | Low | Owner: give both the form of TD-06 (`Target check: skip: ...` or `specified only`), and give TD-07 a date in its trigger; or an amendment that adds the `deferred` marker to the protected TC-EVL-003/-011 tests |
+| S5 | `tests/smoke/smoke_gate.py` reads `verdicts_vitaminc`, which is git-ignored and only in the main checkout. Run from a worktree, SMOKE-GATE stops with "no suite 'verdicts_vitaminc'" unless `MIA_SUITES` points at the main checkout. Its docstring says so | Info | Phase 6: the smoke gate runs from the main checkout or with `MIA_SUITES` set; mention it in the RUNBOOK if it is not there |
+| S6 | `tools/eval.py:106`, the late holdout check of `open_suite`, cannot be reached (`harness.py:69-70` refuses a name that differs from its folder). It is an equivalent mutant, not a gap | Info | none (defence in depth) |
+| S7 | `specs/mia/amendments/A-63/A-63-note.md:3` still says "Status: proposed". D-172 R2 asked for the note; the fix wrote it into the implementation log. Every note A-52 to A-68 says "proposed" after its install, so this is a project-wide convention | Info | Owner: either the notes stay drafts (and D-172 R2 is satisfied by the log), or the install step sets "installed" in the note |
+
+## Accepted deviations (candidates)
+| Deviation | Reason | Accepted by |
+|---|---|---|
+| REQ-EVL-003 partly (TD-07) | no judge in G-V1 | owner, D-166 |
+| REQ-EVL-005, -009 partly | holdout cases, baselines, eval-spec in the next iteration's Plan | owner, D-164 |
+| REQ-EVL-011 partly (TD-08) | the old suite kinds are re-specified with FB-03 | owner, D-172 |
+| REQ-EVL-010 open | T-07 depends on the N-2/N-3 integration | (owner, by plan) |
+| REQ-EVL-007 figures | measured in Phase 6 (VAL-006) | (owner) |
+| S1, S2 (if not fixed now) | the second layer still refuses or hides | owner (to decide) |
+
+## Not checked
+- `smoke_gate.py` against a live Ollama (SMOKE-GATE-001/-002): no model runs were allowed. Only its command line was shown to reach the run. It stays with the owner for Phase 6.
+- The real holdout suites and runs: never opened; synthetic fixtures and code reading only.
+- A-64 to A-67 against their drafts: other nodes' amendments, outside this re-verification.
+- The full Python suite: only the N-4.1 files and `test_eval_cli.py` were run. The round-4 full run belongs to the merge.
+- Live latency, the browser frame rate, BM-MIA-001/-002, T-07, and the N-4/N-0 integration steps: as in the re-verification.
+- CI stages: none.
