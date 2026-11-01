@@ -14,7 +14,7 @@ steps:
   - {id: model-ids,    stage: 0, cmd: "python3 -I tools/check_sysml_model.py .", needs: []}
   # trace joins this ladder with T-14 (node requirements in the model): until then trace_check.py reports their ids as missing in architecture.sysml
   # - {id: trace,      stage: 1, cmd: "python3 -I ~/.claude/skills/dev-workflow/scripts/trace_check.py --spec-dir specs/mia --tests-dir tests", needs: []}
-  - {id: quality,      stage: 1, cmd: "python3 -I ~/.claude/skills/plan-phase/scripts/quality_check.py --quality specs/mia/quality.md --requirements specs/mia/requirements.md", needs: []}
+  - {id: quality,      stage: 1, cmd: "python3 -I ~/.claude/skills/plan-phase/scripts/quality_check.py --quality specs/mia/quality.md --requirements specs/mia/requirements.md specs/mia/nodes/*/requirements.md specs/mia/nodes/*/nodes/*/requirements.md specs/mia/nodes/*/nodes/*/nodes/*/requirements.md", needs: []}
   - {id: decomposition, stage: 1, cmd: "python3 -I ~/.claude/skills/decomposition/scripts/decomp_check.py --record specs/mia/decomposition.yaml --root .", needs: []}
   - {id: sysml-parse,  stage: 1, cmd: "bash tools/check_sysml.sh", needs: [model-ids]}
   - {id: js,           stage: 1, cmd: "node --test \"tests/js/*.test.mjs\"", needs: []}

@@ -7,6 +7,9 @@ the same decorators without importing pytest; under pytest they are plain attrib
 """
 
 
+import unittest  # noqa: E402
+
+
 class _Mark:
     @staticmethod
     def req(*ids):
@@ -20,6 +23,14 @@ class _Mark:
         def decorate(fn):
             fn.feedback_ids = tuple(getattr(fn, "feedback_ids", ())) + tuple(ids)
             return fn
+        return decorate
+
+    @staticmethod
+    def deferred(td):
+        """a check whose target is deferred (M26, deferred.md): a strict expected failure that names its record; it fails (an unexpected success) as soon as the check passes"""
+        def decorate(fn):
+            fn.deferred_td = td
+            return unittest.expectedFailure(fn)
         return decorate
 
     @staticmethod

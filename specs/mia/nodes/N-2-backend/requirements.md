@@ -944,7 +944,9 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Acceptance criterion: AC-23: the contract suite test_if_103_model_server.py passes against the mock (stage 1) and the pinned Ollama (stage 2)
 - Verified by: TC-IF-103-01..06, TC-RUN-011, TC-RUN-013, TC-N2-003
 - Status: Approved
-- History: v0, amendment 5/7 (2026-10-25)
+- Relaxed: TD-23
+- Target: the three suites run their real side: IF-404 against the web client and SearXNG, IF-405 against the scholarly APIs, IF-103 against a real model-server provider (stage 2, decomposition rule 3); the IF-104 JS real cases name `tests/test_graph_api.py` as their real side or run against the routes
+- History: v0, amendment 5/7 (2026-10-25); A-87 (2026-11-01): Relaxed TD-23 (D-181)
 
 ### IF-104 – Workflow and graph API for the Graph app
 - Level: high   Subject: WebApplication

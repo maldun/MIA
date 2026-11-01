@@ -16,6 +16,7 @@ from markers import mark                                 # noqa: E402
 
 
 class Benchmarks(unittest.TestCase):
+    @mark.deferred("TD-16")
     @mark.req("NFR-BUD-001")
     def test_the_baseline_of_the_gate_time_is_measured_and_inside_the_budget(self):
         """BM-GATE-001: benchmarks/baseline.json holds the measured median (seconds per claim, MP-light, 100 claims) and it is at most 10 s."""

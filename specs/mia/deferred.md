@@ -208,7 +208,7 @@ Proposed on 2026-10-29 after the usability work of N-2.3 T-09 to T-11 and N-1.1 
 - Kind: defer
 - Requirement: NFR-7
 - Interim criterion: the node tests of the row pass (listed for the row in `specs/mia/tc-mia-status.md`), among them `tests/test_measure_latency.py`, `tests/test_runner_budgets.py`, `tests/test_model_turns.py`; the order of the turns is tested
-- Target: BM-MIA-001 (first text within 10 s on MP-light, also while a review slice runs) and BM-MIA-002 (30 fps or more on any phone inside the network and on desktop), median of repeated runs on the reference hardware (AC-19)
+- Target: BM-MIA-001 (first text within 10 s on MP-light, also while a review slice runs) and BM-MIA-002 (30 fps or more on any phone inside the network and on desktop), median of repeated runs on the reference hardware (AC-19); and the baseline of BM-GATE-001 (seconds per claim of the number gate on MP-light, `benchmarks/baseline.json`) is measured, so that `tests/acceptance/test_benchmarks.py` turns green
 - Reason: the eval specs are drafts the owner has not approved (`specs/mia/eval-spec.md`, `specs/number-gate/eval-spec.md`), no baseline run is recorded as a .jsonl in `eval/baselines`, and the goal Verify did not run stage 4 (D-178); the benchmark REQ-RUN-007 is a proposal of the draft that needs an amendment to live under `benchmarks/` (open question 4), the 10 s part is out of G-V1 (REQ-RUN-009 partly, D-128) and the frame rate on the phones is a field measurement (D-62); the stage 4 rows of the root table were deferred at the goal Verify of G-V1
 - Effort: about 1 day plus the field measurement (proposed)
 - Risk of the gap: slow first text or low frame rates are found by the users; VAL-006 collects them in use
@@ -301,4 +301,32 @@ Proposed on 2026-10-29 after the usability work of N-2.3 T-09 to T-11 and N-1.1 
 - Target check: specified only
 - Sign-off: Stefan Reiterer, 2026-11-01
 - Decision: D-180, 2026-11-01, Stefan Reiterer
+- Status: open
+
+## TD-23 – Real sides of the contract suites IF-103, IF-404, IF-405
+- Kind: defer
+- Requirement: IF-404, IF-405, IF-103
+- Interim criterion: the mock side of each suite is green and the providers are covered by node tests (`tests/test_tool_calls*.py`, `tests/test_scholar.py`, the fake model server of the chat and runner tests); IF-111 has `ui/godot/tools/test_bridge.gd` as its real side (D-155, D-175), IF-102 on PostgreSQL is in TD-21
+- Target: the three suites run their real side: IF-404 against the web client and SearXNG, IF-405 against the scholarly APIs, IF-103 against a real model-server provider (stage 2, decomposition rule 3); the IF-104 JS real cases name `tests/test_graph_api.py` as their real side or run against the routes
+- Reason: the real sides need the network, the search engine or the model server, and the IF-103 suite cannot hand its scripted replies to a real provider (REQ-RUN-011 out, D-118); found at the goal Verify (D-5, F-03); the owner chose to give them a record (D-181)
+- Effort: about 2 days (the IF-103 provider and a suite amendment included) (proposed)
+- Risk of the gap: a mock that differs from the real service goes unnoticed; the node tests and the owner's use are the check
+- Owner: Stefan Reiterer
+- Trigger: the Plan of the next iteration, or 2026-12-31, whichever first
+- Target check: specified only
+- Decision: D-181, 2026-11-01, Stefan Reiterer
+- Status: open
+
+## TD-24 – Sandbox backend in the deployed stack
+- Kind: defer
+- Requirement: REQ-TLS-005
+- Interim criterion: REQ-TLS-005 holds by its refuse branch: with `sandbox_backend: none` a script check reports unavailable and nothing runs (the sandbox tests, `tests/test_sandbox*.py`, pass with bubblewrap on the host); the PDF wall and the tool door do not depend on it
+- Target: the deployed stack has a sandbox backend (bubblewrap or podman) so that the script checks run there, and the red-team cases for scripts (THR-005) are run against it
+- Reason: `deploy/setup_cfg.compose.json` sets `sandbox_backend` to `none`, so the script check is off in the stack; found at the goal Verify (D-8, F-15); the owner chose to give it a record (D-181)
+- Effort: about 1 day (a backend in the image or next to it, the config, a smoke test) (proposed)
+- Risk of the gap: the checks that run model-written code are not available in the deployed system, MIA refuses them; nothing unsafe runs
+- Owner: Stefan Reiterer
+- Trigger: the Plan of the next iteration, or 2026-12-31, whichever first
+- Target check: specified only
+- Decision: D-181, 2026-11-01, Stefan Reiterer
 - Status: open

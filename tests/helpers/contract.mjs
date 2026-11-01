@@ -5,7 +5,7 @@ import test from 'node:test';
 
 export const REAL_NOT_READY = {
   'IF-111': 'real side: ui/godot/tools/test_bridge.gd in Godot (D-155, A-73)',
-  'IF-104': 'N-2 Backend does not serve the routes of IF-104 yet',
+  'IF-104': 'real side: tests/test_graph_api.py in the image (A-60, A-66); the JS real cases skip (TD-23)',
 };
 
 export function eachProvider(iface, name, make, body) {

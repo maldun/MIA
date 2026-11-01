@@ -64,7 +64,9 @@ The tools that any workflow can call, each counted against the budgets of the ru
 - Acceptance criterion: AC-6: with the sandbox removed script checks report unavailable and nothing runs (exact)
 - Verified by: TC-TLS-005
 - Status: Approved
-- History: –
+- Relaxed: TD-24
+- Target: the deployed stack has a sandbox backend (bubblewrap or podman) so that the script checks run there, and the red-team cases for scripts (THR-005) are run against it
+- History: A-87 (2026-11-01): Relaxed TD-24 (D-181)
 
 ### REQ-TLS-006 – No invented source
 - Level: low-2   Subject: VerificationSuite
@@ -128,7 +130,9 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Acceptance criterion: AC-5, AC-6: the contract suite test_if_404_web.py passes against the mock (stage 1) and the real web client with SearXNG (stage 2)
 - Verified by: TC-IF-404-01..04
 - Status: Approved
-- History: v0, amendment 5/7 (2026-10-25)
+- Relaxed: TD-23
+- Target: the three suites run their real side: IF-404 against the web client and SearXNG, IF-405 against the scholarly APIs, IF-103 against a real model-server provider (stage 2, decomposition rule 3); the IF-104 JS real cases name `tests/test_graph_api.py` as their real side or run against the routes
+- History: v0, amendment 5/7 (2026-10-25); A-87 (2026-11-01): Relaxed TD-23 (D-181)
 
 ### IF-405 – Scholarly sources (external)
 - Level: low-2   Subject: VerificationSuite
@@ -140,4 +144,6 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Acceptance criterion: AC-3: the contract suite test_if_405_scholarly_sources.py passes against the mock (stage 1) and the real APIs (stage 2)
 - Verified by: TC-IF-405-01..04
 - Status: Approved
-- History: v0, amendment 5/7 (2026-10-25)
+- Relaxed: TD-23
+- Target: the three suites run their real side: IF-404 against the web client and SearXNG, IF-405 against the scholarly APIs, IF-103 against a real model-server provider (stage 2, decomposition rule 3); the IF-104 JS real cases name `tests/test_graph_api.py` as their real side or run against the routes
+- History: v0, amendment 5/7 (2026-10-25); A-87 (2026-11-01): Relaxed TD-23 (D-181)
