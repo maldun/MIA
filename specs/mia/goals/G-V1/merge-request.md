@@ -1,13 +1,13 @@
 # G-V1: first version of MIA, merge request (DRAFT, v0.1.0 proposed)
 
-**Draft of 2026-11-01. Do not merge before the verification report is approved.** Written by the coding agent from the repository; the human reads, completes the marked blanks (`<<...>>`) and merges.
+**Draft of 2026-11-01. Do not merge before the verification report is approved.** Written by the coding agent from the repository; the human reads and merges. Blanks filled 2026-11-01 (goal/v1 at the merge of master, `d4e4a13`).
 
 **Goal:** G-V1 (iteration, supervised)   **Branch:** goal/v1 → master (the project's main branch)
 **Accepted by:** Stefan Reiterer (owner; supervised goal, a person merges and tags)
 **HLS:** specs/mia/high-level-spec.md
 **Goal record:** specs/mia/goals/G-V1/goal.md
 **Plan:** specs/mia/plan.md and the node plans below specs/mia/nodes/
-**Verification report:** specs/mia/verification-report.md (verdict proposal: **Verified with accepted deviations, conditional on the owner's decisions D-1 to D-9 of the report**; reviewer in a fresh context, commit e4dbbef; the owner's decisions on the findings are D-180, the report is not yet approved)
+**Verification report:** specs/mia/verification-report.md (verdict proposal: **Verified with accepted deviations, conditional on the owner's decisions D-1 to D-9 of the report**; reviewer in a fresh context, commit e4dbbef; the owner's decisions on the findings are D-180 and D-181; the report is not yet approved)
 **Implementation logs:** specs/mia/nodes/*/implementation-log.md, specs/mia/integration-log.md and the integration logs of N-1, N-2, N-4
 
 ### What changes
@@ -18,7 +18,7 @@ MIA as the decomposed multi-user system of the approved HLS (2026-10-24): one tr
 - **N-4 Evaluation and operation:** the evaluation harness behind IF-105 (N-4.1), the compose stack, backup, shutdown and configuration (N-4.2).
 - **N-5 Graph app:** not part of this release (D-177); the static T-01 mockup page and its `graph` container stay as they are.
 - **Integration:** N-1 (A-72 to A-74), N-2 (A-77 to A-80, with A-55 for N-2.4), N-3 (A-02), N-4 (A-75, A-76); the root scenario runs with every Python node real (N-0 steps 02 to 04, A-81). N-0 step 05 stays a skip (N-5).
-- **Scope of this request:** goal/v1 is ahead of master by `git rev-list --count master..goal/v1` commits (47 on 2026-11-01). Master took the earlier merge rounds of the goal (`git rev-list --count 53c6766..master` = 400); the whole goal is the history since 53c6766, `git diff --stat master...goal/v1` is the open delta (87 files on 2026-11-01: A-72 to A-86, the verification report and deferral records, D-137 to D-180).
+- **Scope of this request:** goal/v1 is ahead of master by `git rev-list --count master..goal/v1` commits (56 on 2026-11-01, at `d4e4a13`). Master took the earlier merge rounds of the goal (`git rev-list --count 53c6766..master` = 400); the whole goal is the history since 53c6766, `git diff --stat master...goal/v1` is the open delta (101 files on 2026-11-01: A-72 to A-87, the verification report and deferral records TD-12 to TD-24, D-137 to D-181).
 
 ### Requirements implemented
 Nodes and their verification state (the reports are in each node folder; N-2.1, N-2.2, N-2.3, N-2.5 proposed their verdict "once the owner decides", the owner's answers are D-173):
@@ -42,7 +42,7 @@ Nodes and their verification state (the reports are in each node folder; N-2.1, 
 The "with findings" verdicts of N-2.4.1 and N-2.4.2 are deviation D-7 of the verification report: the owner accepts them with the report. The status of the root checks is in specs/mia/tc-mia-status.md (A-82).
 
 ### Plan amendments
-A-01 to A-86 (`specs/mia/amendments/`, decisions in `specs/mia/review-log.md`). Installed by the owner: all up to A-85; A-86 (TD-21, TD-22) is drafted. No joint amendment of a frozen requirement (the goal has no subgoals).
+A-01 to A-87 (`specs/mia/amendments/`, decisions in `specs/mia/review-log.md`). Installed: all up to A-87 (A-86: TD-21, TD-22; A-87: TD-23, TD-24, `mark.deferred`, the merge gate helper, D-181). No joint amendment of a frozen requirement (the goal has no subgoals).
 
 ### Frozen requirements unchanged (goal_check.py --parent-ref)
 The goal has no parent and no frozen requirements (`goal_check.py --spec-dir specs/mia`: 0 errors, 0 warnings on 2026-11-01).
@@ -128,12 +128,12 @@ Out of scope or partly in scope (from goal.md):
 | REQ-CHV-008 | out | owner 2026-10-31 (D-137): the outfit switch in Godot comes with the model selection; the variant label in the chat stays |
 
 ### Conflict resolutions after rebase
-master is 3 commits ahead of goal/v1 (merges and the report of the N-1.3 re-verification 4, one file). A trial merge (`git merge-tree`) of master into goal/v1 on 2026-11-01 is clean. <<Redo after the last change; note any resolution here.>>
+master had 3 commits that goal/v1 lacked (`51a3aad` and two merges of an early N-1.3 re-verification 4, one file). goal/v1 had replaced that attempt, and master's second merge (`deb346f`) had committed conflict markers into `N-1.3-voice-playback/verification-report.md`; `git merge-tree` called the merge clean but would have kept them. Resolved on goal/v1 by `d4e4a13` (merge of master, that file set to goal/v1's version): the tree is identical to `cfb215c`, master is now an ancestor of goal/v1 and the merge into master is a fast-forward. No other file differed.
 
 ### Agent changes
 (from `agent-app-commit/assets/release-notes-agent.md`; no eval decided for this release)
 
-**Models.** MP-light = `gemma4:12b-it-qat`, digest `sha256:38044be4f923e5a55264ed7df4eaac2676651a905f735197c504045140c02bd3` (`tools/eval.py` PINS, seed 7, temperature 0), unchanged; MP-full = `gemma4:26b` (`sha256:001e5dafc3c7...`, not used for criteria in G-V1); both pins are in the drafts `specs/mia/eval-spec.md` and `specs/number-gate/eval-spec.md` (not approved), `tools/eval.py` PINS holds MP-light only; `num_ctx` 8192 is configuration (CLAUDE.md). <<Check the digests on the reference host before the tag: `ollama show`.>>
+**Models.** MP-light = `gemma4:12b-it-qat`, digest `sha256:38044be4f923e5a55264ed7df4eaac2676651a905f735197c504045140c02bd3` (`tools/eval.py` PINS, seed 7, temperature 0), unchanged; MP-full = `gemma4:26b` (`sha256:001e5dafc3c7...`, not used for criteria in G-V1); both pins are in the drafts `specs/mia/eval-spec.md` and `specs/number-gate/eval-spec.md` (not approved), `tools/eval.py` PINS holds MP-light only; `num_ctx` 8192 is configuration (CLAUDE.md). Not checked by the agent (no `ollama` on the path of the session): step 4 below asks the owner to check the digests on the host.
 
 **Skills and pipelines (since plan-baseline-it1).**
 
@@ -160,7 +160,7 @@ The review entry itself is out of G-V1 (REQ-RUN-013 partly, D-128, D-130). Versi
 
 ### Steps for the human
 1. Approve the verification report; run `merge_gate.py --approved-by "<name>"` (only a person supplies the name).
-2. Update goal/v1 with master (`git merge master`), re-run stages 1 to 3 in CI, redo the trial merge line above.
+2. goal/v1 is updated with master (`d4e4a13`). Re-run stages 1 to 3 on that commit (`bash tools/run_merge_gate.sh`, `MIA_GATE_UPTO=3` for stage 3; no CI exists, so the gate needs `--allow-local`).
 3. Merge into master, check CI on master (red: revert first).
-4. Tag the version you choose (proposal `v0.1.0`: first version, not yet validated; the exit criteria VAL-001, VAL-003 to VAL-006 are field checks) and let CI build the artifact from the tag. **`deploy/build.sh` does not exist** (Deploy finding): the image is built from `deploy/Containerfile`.
+4. Check the model digests on the reference host (`ollama show gemma4:12b-it-qat` against the MP-light digest above), then tag the version you choose (proposal `v0.1.0`: first version, not yet validated; the exit criteria VAL-001, VAL-003 to VAL-006 are field checks) and let CI build the artifact from the tag. **`deploy/build.sh` does not exist** (Deploy finding): the image is built from `deploy/Containerfile`.
 5. Copy `release-notes.md` and `CHANGELOG.md` entries (drafts in this folder and the repository root), set the requirement statuses (Implemented → Verified) and the goal record (Commit: done, merge commit).
