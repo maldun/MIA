@@ -148,6 +148,27 @@ package MIA_Architecture {
 
     // ---------------------------------------------------------------- the system
 
+    part def ContextGraphBuilder {
+        doc /* Target (iteration 2, FR-41, FR-42; its own node N-6 or part of N-5, open): builds up context graphs from runs and
+               reviews, documents the owner adds, web research results and manual editing. Items derived by a model start as
+               proposals with source and quote; steps read only confirmed items (TB-context). */
+        part contextStore {
+            doc /* The context graphs as typed directed graphs (categories and edge types as JSON schemas); several workflows may share one. */
+            @Implementation { :>> status = ImplementationStatus::proposed; }
+            @ChangeSource { feedbackId = "NOTE-2026-11-02"; iteration = 2; }
+        }
+        part proposer {
+            doc /* Model step that proposes nodes and edges from untrusted text; it can only propose. */
+            @Implementation { :>> status = ImplementationStatus::proposed; }
+            @ChangeSource { feedbackId = "NOTE-2026-11-02"; iteration = 2; }
+        }
+        part confirmation {
+            doc /* The owner confirms or rejects proposals before steps may read them. */
+            @Implementation { :>> status = ImplementationStatus::proposed; }
+            @ChangeSource { feedbackId = "NOTE-2026-11-02"; iteration = 2; }
+        }
+    }
+
     part def MiaSystem {
         doc /* The whole of MIA on one host: browser-side parts (served by MIA) and host-side parts.
                One owner, one running exchange at a time, one memory. */
@@ -172,6 +193,7 @@ package MIA_Architecture {
         part learning : LearningLayer;
         part persistence : Persistence;
         part operation : OperationLayer;
+        part contextGraphBuilder : ContextGraphBuilder;
 
         // boundary ports are delegated to the parts that own the conversation
         bind chat = webApp.chat;
@@ -238,6 +260,13 @@ package MIA_Architecture {
                    files and report; lists the runs of the shared chat history after a reload. Replaces the card in the chat list. */
             @Implementation { :>> status = ImplementationStatus::proposed; }
             @ChangeSource { feedbackId = "FB-01"; iteration = 1; }
+        }
+        part skillsWindow {
+            doc /* Target (iteration 2, FR-43): a window of its own, apart from the skills panel of FB-01 that shows runs: lists skills,
+                   shows and edits workflow graphs and context graphs, versions and diff. Only the owner writes; promotion draft,
+                   tested, trusted. Redesign of the graph app (N-5) takes it up; the graph drawing library is not chosen (FB-02). */
+            @Implementation { :>> status = ImplementationStatus::proposed; }
+            @ChangeSource { feedbackId = "NOTE-2026-11-02"; iteration = 2; }
         }
     }
 
@@ -413,6 +442,25 @@ package MIA_Architecture {
                 :>> status = ImplementationStatus::built;
                 :>> modules = ("install_lama.py", "ollama_remote.py", "cpu_threads.py");
             }
+        }
+        part toolbox {
+            doc /* Target (iteration 2, FR-38): transforms by ID in a form that can be stored and exchanged outside MIA; status
+                   untrusted, trusted; a node whose transform is not trusted does not run (TB-exchange). */
+            @Implementation { :>> status = ImplementationStatus::proposed; }
+            @ChangeSource { feedbackId = "NOTE-2026-11-02"; iteration = 2; }
+        }
+        part debateRunner {
+            doc /* Target (iteration 2, FR-39): runs the debate definition of a master node on MIA's own runner: agents (models with
+                   skill files, or routines), the relation graph, variants per machine, finalization criterion as a function
+                   (check, judge or vote, person, budget end), budgets, calibrated judge. */
+            @Implementation { :>> status = ImplementationStatus::proposed; :>> modules = ("pipeline.py", "verification.py"); }
+            @ChangeSource { feedbackId = "NOTE-2026-11-02"; iteration = 2; }
+        }
+        part skillConverter {
+            doc /* Target (iteration 2, FR-45): moves one skill and its pipeline onto the new graph form; the old runner keeps the
+                   skill until the converted version reproduces the old outcomes on the same suite with the same pins. */
+            @Implementation { :>> status = ImplementationStatus::proposed; }
+            @ChangeSource { feedbackId = "NOTE-2026-11-02"; iteration = 2; }
         }
         part skillScaffold {
             doc /* Target: template, checklist and time record for the path from idea to promoted skill (FR-20). */
@@ -598,6 +646,13 @@ package MIA_Architecture {
                    not behind it yet (N-2 tasks, D-67, D-105). */
             @Implementation { :>> status = ImplementationStatus::partly;
                               :>> modules = ("storage.py", "storage_files.py", "storage_postgres.py", "storage_copy.py", "migrate.py", "accounts.py"); }
+        }
+        part graphRecords {
+            doc /* Target (iteration 2, FR-40, overlaps TD-21): workflow and context graphs as node and edge records (ID plus JSON
+                   with a fixed type) in PostgreSQL through the storage layer; data classes rebuilt from a type ID, types as JSON
+                   schemas, versions never deleted. Today a graph is one versioned document (graph_tables.py). */
+            @Implementation { :>> status = ImplementationStatus::proposed; :>> modules = ("graph_tables.py", "graph_rules.py"); }
+            @ChangeSource { feedbackId = "NOTE-2026-11-02"; iteration = 2; }
         }
         part database {
             doc /* PostgreSQL in a container with a volume, a health check, migration from files and back, backup and restore (N-3.1). Partly: the
@@ -1488,6 +1543,99 @@ package MIA_Requirements {
         @ChangeSource { feedbackId = "FB-01"; iteration = 1; }
     }
 
+    requirement def <'FR-36'> SkillDefinition {
+        subject mia : MiaSystem;
+        doc /* MIA shall define every skill as one versioned record of an ID, a command, a workflow graph and the ID of an
+               associated context graph. The skill file, the extension manifest and the pipeline reference of today are
+               replaced by it, one skill at a time (FR-45). */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+        @ChangeSource { feedbackId = "NOTE-2026-11-02"; iteration = 2; }
+    }
+    requirement def <'FR-37'> WorkflowGraphModel {
+        subject mia : MiaSystem;
+        doc /* MIA shall hold a workflow as a directed acyclic graph of three node types: data nodes (a dictionary or dataclass
+               that can be written as JSON), transform nodes (a function of the toolbox, FR-38) and master nodes (an agent task
+               with an acceptance criterion, FR-39). A graph carries an ID, the ID of its context graph, the ID of its
+               testbench (FR-44) and a description. The graph rules of FR-7 (unique identity, no cycle, a stopping criterion
+               where one is needed, data nodes connected only through processes) stay unless Plan changes them. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+        @ChangeSource { feedbackId = "NOTE-2026-11-02"; iteration = 2; }
+    }
+    requirement def <'FR-38'> ToolboxAndTransformExchange {
+        subject mia : MiaSystem;
+        doc /* MIA shall collect transforms in a toolbox, reference them by ID, and keep them in a form that can be stored and
+               exchanged outside MIA. An imported or exchanged transform has the status untrusted until the owner marks it
+               trusted; a node whose transform is not trusted does not run. A review process for exchanged transforms is a
+               later goal. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+        @ChangeSource { feedbackId = "NOTE-2026-11-02"; iteration = 2; }
+    }
+    requirement def <'FR-39'> MasterNodesAndDebates {
+        subject mia : MiaSystem;
+        doc /* MIA shall let a master node hold a debate definition: its agents (language models with skill files, model,
+               prompts, parameters and input and output formats, or routines with an executable, parameters and formats), a
+               small graph of the relations between the participants (a single node is allowed), variants for different
+               machines, and the means to reuse an existing definition. The outcome is decided by a finalization criterion that
+               is a function; the predefined kinds are a deterministic check, a judge or vote, approval by a person and the end
+               of a budget. Debates run on MIA's own runner within their budgets (decision 8). A judge counts only with a
+               calibration record. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+        @ChangeSource { feedbackId = "NOTE-2026-11-02"; iteration = 2; }
+    }
+    requirement def <'FR-40'> GraphStorage {
+        subject mia : MiaSystem;
+        doc /* MIA shall store workflow and context graphs in PostgreSQL through the Storage layer as records: nodes as an ID
+               with a JSON field that holds a fixed type, edges as an ID, a start and an end node and a JSON field, with the
+               extended JSON fields of transform and master nodes. A data class is rebuilt from a stored type ID; no
+               language-specific serialisation is used. The types are given as JSON schemas. Every edit is a new version and
+               versions are never deleted. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+        @ChangeSource { feedbackId = "NOTE-2026-11-02"; iteration = 2; }
+    }
+    requirement def <'FR-41'> ContextGraphModel {
+        subject mia : MiaSystem;
+        doc /* MIA shall keep context graphs as general typed directed graphs: node categories and edge types given as JSON
+               schemas, every element an ID and a JSON entry. Several workflows may share one. A step reads the confirmed part
+               of its context graph into its prompt within a token budget; work and reviews extend it over time. A knowledge
+               graph is one kind of context graph. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+        @ChangeSource { feedbackId = "NOTE-2026-11-02"; iteration = 2; }
+    }
+    requirement def <'FR-42'> ContextGraphBuildTool {
+        subject mia : MiaSystem;
+        doc /* MIA shall provide a tool that builds up a context graph from runs and reviews, documents the owner adds, web
+               research results and manual editing. Items derived by a model from runs, documents or web text start as
+               proposals with their source and quote; only confirmed items are readable by steps (TB-context). */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+        @ChangeSource { feedbackId = "NOTE-2026-11-02"; iteration = 2; }
+    }
+    requirement def <'FR-43'> SkillsWindow {
+        subject mia : MiaSystem;
+        doc /* MIA shall show skills in a window of their own in the web interface, apart from the skills panel of FR-34 that
+               shows runs. The window lists skills, shows and edits workflow graphs and context graphs (selecting and moving
+               nodes, editing an element's JSON) and shows versions and a diff. Only the owner writes; other accounts read.
+               Every edit is checked against the graph rules before it is saved as a new version. The owner promotes a version
+               from draft to tested to trusted. */
+        @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
+        @ChangeSource { feedbackId = "NOTE-2026-11-02"; iteration = 2; }
+    }
+    requirement def <'FR-44'> TestbenchAndBudgets {
+        subject mia : MiaSystem;
+        doc /* MIA shall let every workflow name a testbench, an eval suite with people-labelled truth and a dev/holdout split
+               plus measured budgets of time, tokens and VRAM, and shall set a workflow to tested or trusted only when its
+               testbench passes. */
+        @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::measurement); }
+        @ChangeSource { feedbackId = "NOTE-2026-11-02"; iteration = 2; }
+    }
+    requirement def <'FR-45'> SkillMigration {
+        subject mia : MiaSystem;
+        doc /* MIA shall convert today's skills and pipelines one by one onto the new form. A skill runs on the old runner
+               until its converted version reproduces the old outcomes on the same suite with the same pins; then the old form
+               of that skill is retired. */
+        @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::measurement); }
+        @ChangeSource { feedbackId = "NOTE-2026-11-02"; iteration = 2; }
+    }
+
     // ================================================================ the requirement tree
 
     /* Usages, so that satisfy and verify can refer to them. Constraints first, then the high-level requirements. */
@@ -1540,6 +1688,16 @@ package MIA_Requirements {
     requirement fr33 : WorkflowSchedule;
     requirement fr34 : SkillsPanel;
     requirement fr35 : SkillTurnsInTheChat;
+    requirement fr36 : SkillDefinition;
+    requirement fr37 : WorkflowGraphModel;
+    requirement fr38 : ToolboxAndTransformExchange;
+    requirement fr39 : MasterNodesAndDebates;
+    requirement fr40 : GraphStorage;
+    requirement fr41 : ContextGraphModel;
+    requirement fr42 : ContextGraphBuildTool;
+    requirement fr43 : SkillsWindow;
+    requirement fr44 : TestbenchAndBudgets;
+    requirement fr45 : SkillMigration;
     requirement nfr7 : EfficientOnGivenHardware;
     requirement nfr8 : SharedStateInDatabase;
     requirement nfr9 : ContainerPerNode;
@@ -1617,6 +1775,16 @@ package MIA_Allocation {
     satisfy fr33 by mia;
     satisfy fr34 by mia;
     satisfy fr35 by mia;
+    satisfy fr36 by mia;
+    satisfy fr37 by mia;
+    satisfy fr38 by mia;
+    satisfy fr39 by mia;
+    satisfy fr40 by mia;
+    satisfy fr41 by mia;
+    satisfy fr42 by mia;
+    satisfy fr43 by mia;
+    satisfy fr44 by mia;
+    satisfy fr45 by mia;
     satisfy nfr7 by mia;
     satisfy nfr8 by mia;
     satisfy nfr9 by mia;
@@ -1797,6 +1965,24 @@ package MIA_Allocation {
     allocate fr35 to mia.conversation.communicator;
     allocate fr35 to mia.voice.streamer;
     allocate fr35 to mia.frontEnd.chatPage;
+    allocate fr36 to mia.taskRuntime.skillStore;
+    allocate fr36 to mia.persistence.graphRecords;
+    allocate fr37 to mia.taskRuntime.workflowGraph;
+    allocate fr37 to mia.graphApp.graphValidator;
+    allocate fr38 to mia.taskRuntime.toolbox;
+    allocate fr39 to mia.taskRuntime.debateRunner;
+    allocate fr40 to mia.persistence.graphRecords;
+    allocate fr40 to mia.persistence.storageLayer;
+    allocate fr41 to mia.persistence.graphRecords;
+    allocate fr41 to mia.contextGraphBuilder.contextStore;
+    allocate fr42 to mia.contextGraphBuilder.proposer;
+    allocate fr42 to mia.contextGraphBuilder.confirmation;
+    allocate fr43 to mia.frontEnd.skillsWindow;
+    allocate fr43 to mia.graphApp.graphView;
+    allocate fr43 to mia.graphApp.nodeEditor;
+    allocate fr44 to mia.evaluation.harness;
+    allocate fr44 to mia.evaluation.suites;
+    allocate fr45 to mia.taskRuntime.skillConverter;
     allocate fr7 to mia.taskRuntime.workflowGraph;
     allocate fr7 to mia.graphApp.graphValidator;
     allocate fr32 to mia.webApp.variantStore;
