@@ -31,6 +31,9 @@ The pins are `MP-light` and `MP-full` in `specs/mia/eval-spec.md` (name, digest,
 - Restore: `deploy/up.sh restore file.tar.gz`. It first saves the current state (`mia-before-restore-...`: next to the archive for one with a database, else in the current folder). An archive with a database needs the `db` service running; an old archive of the volume alone still restores.
 - Restore test: once per quarter restore the newest archive into a second stack (`MIA_PROJECT=mia-restore` in a copy of the checkout) and open the page. Last restore test: <date>.
 
+## Rollback to the previous image
+Before an update keep the running image under its own tag (`podman tag localhost/mia:latest localhost/mia:pre-vX`) and run `deploy/up.sh backup`. Back (tested for v0.1.0 on 2026-11-02): `podman tag localhost/mia:pre-vX localhost/mia:latest`, `podman rm -f mia_mia_1 mia_graph_1`, `deploy/up.sh db up -d --no-build`; the containers hold no data (the volume `mia-data` and the database stay). Check `podman inspect mia_mia_1 --format '{{.Image}}'` and `bash deploy/preflight.sh` (the model digests are the pins). `MIA_IMAGE` alone does not recreate a running container under podman-compose, and `deploy/up.sh` without `--no-build` rebuilds from the Containerfile. If the old code cannot read newer data: `deploy/up.sh restore ARCHIVE`.
+
 ## Kinds of maintenance
 | Kind | What | Schedule | Owner |
 |---|---|---|---|

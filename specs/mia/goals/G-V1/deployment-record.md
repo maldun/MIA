@@ -34,7 +34,7 @@ Blanks `<<...>>` are filled by the owner at the deployment. Template: `deploy-ph
 | Search engine | SearXNG container <<up>> |
 | Smoke eval | <<cases run; tolerance: the same outcome on every smoke case>> |
 | VRAM after the run (`ollama ps`) | <<>> |
-| Rollback tested | <<yes/no, date>>; old digests confirmed <<>> |
+| Rollback tested | yes, 2026-11-02: `localhost/mia:pre-v0.1.0` (`e37a87782beb`) retagged as `latest`, `mia` and `graph` recreated with `--no-build`, container ran image `e37a87782beb`; then forward again <<confirm>>. `MIA_IMAGE` alone did not recreate the container under podman-compose (RUNBOOK, "Rollback to the previous image"). Old model digests: unchanged host Ollama, <<preflight P3 after the rollback>> |
 
 ## Resolved feedback
 None (FB-01 to FB-06 are triaged for the next iteration).
