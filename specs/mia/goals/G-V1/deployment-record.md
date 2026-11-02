@@ -18,17 +18,17 @@ Blanks `<<...>>` are filled by the owner at the deployment. Template: `deploy-ph
 ## Smoke results
 | ID | Result | Notes |
 |---|---|---|
-| SMOKE-MIA-001 | <<>> | |
+| SMOKE-MIA-001 | green (2026-11-02) | fresh clone, one config file, page answers, offer printed once, 5 services, first account, chat answered by the real model |
 | SMOKE-MIA-002 | <<>> | phone, tailnet |
-| SMOKE-MIA-003 | <<>> | |
-| SMOKE-GATE-001, -002 | <<>> | |
+| SMOKE-MIA-003 | green (2026-11-02) | mia alone 220 tests OK (18 skipped), db alone 26 OK, graph alone 14 (7 pass, 7 skipped, TD-23), all 5 services together |
+| SMOKE-GATE-001, -002 | green (2026-11-02) | 5 cases on MP-light through the real server; header digest equals /api/tags |
 | Recovery (kill and restart) | <<>> | |
 
 ## Agent section
 | Item | Found |
 |---|---|
-| MP-light digest | <<`ollama show gemma4:12b-it-qat`>> (pin `sha256:38044be4f923e5a55264ed7df4eaac2676651a905f735197c504045140c02bd3`) |
-| MP-full digest | <<>> (pin `sha256:001e5dafc3c77684c2307ebc6ab8e336e10c9b18eca52acf547d72fc83c3ca8c`) |
+| MP-light digest | `sha256:38044be4f923...` = pin (host Ollama 0.40.5, `deploy/preflight.sh` P3 PASS) (pin `sha256:38044be4f923e5a55264ed7df4eaac2676651a905f735197c504045140c02bd3`) |
+| MP-full digest | `sha256:001e5dafc3c7...` = pin (P3 PASS) (pin `sha256:001e5dafc3c77684c2307ebc6ab8e336e10c9b18eca52acf547d72fc83c3ca8c`) |
 | Options in the config | `num_ctx` 8192; temperature and seed for evaluation only |
 | Sandbox | `sandbox_backend` <<none>>: the `script` check is off |
 | Search engine | SearXNG container <<up>> |
@@ -38,6 +38,10 @@ Blanks `<<...>>` are filled by the owner at the deployment. Template: `deploy-ph
 
 ## Resolved feedback
 None (FB-01 to FB-06 are triaged for the next iteration).
+
+## Deviations from "install from the tag"
+- Kokoro files were missing in the clone (untracked, RUNBOOK): `MIA_KOKORO_DIR` pointed at the main checkout's folder. Preflight check, `tools/fetch_kokoro.sh` and `deploy/up.sh voice` added afterwards (commit `ae9cba2`, REQ-OPR-001); the deployed tree is `v0.1.0` without that commit.
+- Voice lines (`voice/expressions/*.wav`) are git-ignored and copied at image build: <<present in the install or MIA silent on mood lines>>.
 
 ## Known issues and open deferrals
 See `release-notes.md`; TD-01 to TD-04, TD-06 to TD-22.
