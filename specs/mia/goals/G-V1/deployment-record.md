@@ -28,7 +28,7 @@ Run on the host before the install (the ports 8585/8586 were free then) and agai
 | ID | Result | Notes |
 |---|---|---|
 | SMOKE-MIA-001 | green (2026-11-02) | fresh clone, one config file, page answers, offer printed once, 5 services, first account, chat answered by the real model |
-| SMOKE-MIA-002 | **not run** | owner's decision 2026-11-02: Tailscale is not installed on the workstation (never tried against a real tailnet, baseline OP-4). NFR-6 / CON-5 evidence by this smoke test is missing; the loopback binding is shown by `ss` (`127.0.0.1:8585`, `:8586`) |
+| SMOKE-MIA-002 | **not run** (deferred, TD-26, D-184) | owner's decision 2026-11-02: Tailscale is not installed on the workstation (never tried against a real tailnet, baseline OP-4). NFR-6 / CON-5 evidence by this smoke test is missing; the loopback binding is shown by `ss` (`127.0.0.1:8585`, `:8586`) |
 | SMOKE-MIA-003 | green (2026-11-02) | mia alone 220 tests OK (18 skipped), db alone 26 OK, graph alone 14 (7 pass, 7 skipped, TD-23), all 5 services together |
 | SMOKE-GATE-001, -002 | green (2026-11-02) | 5 cases on MP-light through the real server; header digest equals /api/tags |
 | Recovery (kill and restart) | green (2026-11-02) | `tools/recovery_check.sh` (`1652ddd`): SIGKILL of `mia` while an answer streamed, restart, page back, marker stored, 1004 files with content intact, database answers, new message answered. Note: the check looked at `data/` files only (history is still file-based, TD-21) |

@@ -345,3 +345,17 @@ Proposed on 2026-10-29 after the usability work of N-2.3 T-09 to T-11 and N-1.1 
 - Decision: D-182, 2026-11-01, Stefan Reiterer
 - Progress 2026-11-02: the three smoke scripts ran green on the owner's workstation (`goals/G-V1/deployment-record.md`); still open: a smoke step in `stages.yaml` that finds `smoke_*.py`
 - Status: open
+
+## TD-26 – The Tailscale smoke test SMOKE-MIA-002 was not run in Deploy
+- Kind: defer
+- Requirement: NFR-6, CON-5 (OP-4 of the baseline: Tailscale never tried against a real tailnet)
+- Interim criterion: MIA is published on 127.0.0.1 only (`ss`: `127.0.0.1:8585` and `:8586`, shown in the deployment record); the https front of the stack answers in the smoke test SMOKE-MIA-003; `tests/test_tailscale.py` covers `tailscale_serve.py` and `ui/tools/remote.sh` with a fake `tailscale`
+- Target: SMOKE-MIA-002 run once on a phone outside the home network (`ui/tools/remote.sh up`, page loads, a message is answered, `tailscale serve status` shows no Funnel, no public port), result in `goals/G-V1/deployment-record.md`; it is a precondition of VAL-004
+- Reason: Tailscale is not installed on the workstation (2026-11-02); the owner defers the setup (account, MagicDNS, HTTPS certificates) to a different run
+- Effort: about an hour once (install, `tailscale up`, admin console, phone), then five minutes
+- Risk of the gap: the phone path over the tailnet (origin handling, certificate, secure context for the 3D character) is untested; VAL-004 cannot be judged without it; a finding is possible
+- Owner: Stefan Reiterer
+- Trigger: before VAL-004 starts, or 2026-12-31, whichever first
+- Target check: specified only
+- Decision: D-184, 2026-11-02, Stefan Reiterer
+- Status: open

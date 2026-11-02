@@ -4,7 +4,9 @@ For a fresh session. Read this, then `CLAUDE.md` (rules), `specs/mia/plan.md` (t
 
 Everything below is **merged into master** (last merge `d89d253`) unless it says otherwise. Start a new job from a worktree and check first that it branched from current master (`git log --oneline -1`, then `git merge --ff-only master`).
 
-**Newest of all (2026-10-31): `specs/mia/handover-2026-10-31.md`** (the goal G-V1 and its line of work `goal/v1`, N-2.4.2 done, N-2.4.1 T-02 to T-05, the first parallel agents, the questions waiting for the owner); it continues the one below. **Since 2026-10-31 task work goes to `goal/v1`, not to master.**
+**Newest of all (2026-11-02): `specs/mia/handover-2026-11-02-validate.md`** (G-V1 deployed as v0.1.0, Validate is next, TD-26 Tailscale check deferred); it continues the ones below.
+
+**Before it (2026-10-31): `specs/mia/handover-2026-10-31.md`** (the goal G-V1 and its line of work `goal/v1`, N-2.4.2 done, N-2.4.1 T-02 to T-05, the first parallel agents, the questions waiting for the owner); it continues the one below. **Since 2026-10-31 task work goes to `goal/v1`, not to master.**
 
 **Before it (2026-10-30, late): `specs/mia/handover-2026-10-30-late.md`** (A-30, FB-01 up to the HLS gate with `handover-fb-01-plan.md`, N-2.4.1 T-01 and A-31, the nodes still to build, rules for parallel sessions); it continues the one below.
 
