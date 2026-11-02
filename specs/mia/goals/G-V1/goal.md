@@ -117,7 +117,7 @@ Back-filled on 2026-10-30, after the workflow skills introduced goals (M33–M37
 | Verify | done | `specs/mia/verification-report.md` (reviewer in a fresh context, commit e4dbbef): **Verified with accepted deviations**, approved by the owner Stefan Reiterer on 2026-11-01 (D-183) after his decisions D-180 to D-182 on the findings; the gate steps are in `goals/G-V1/merge-request.md` |
 | Commit | done | goal/v1 merged into master by fast-forward on 2026-11-01, merge commit `67818fb`, tag `v0.1.0` (annotated, by the owner). Local merge gate on `67818fb`: stages 0 to 3 green (no CI, `--allow-local`), approved by the owner; `smoke` left the gate with A-88 (TD-25, D-182); verification report approved (D-183). Not pushed yet |
 | Deploy | done | `goals/G-V1/deployment-record.md` (2026-11-02, owner's workstation): preflight and pins green, SMOKE-MIA-001, -003 and SMOKE-GATE-001/-002 green, recovery check and rollback to `mia:pre-v0.1.0` tested; **SMOKE-MIA-002 (Tailscale) not run** by the owner's decision (NFR-6, CON-5 evidence open); smoke eval only for the number gate; no voice lines in the image |
-| Validate | open | |
+| Validate | closed, accepted as is, **not validated** | owner Stefan Reiterer, 2026-11-02 (D-185): v0.1.0 is accepted without the validation week because the skill rework (`specs/mia/skill_rework.md`) comes first. VAL-001 and VAL-003 to VAL-006 stay unrated and move to the exit criterion of the next goal; the check material is kept (`validation-plan.md`, `validation/VAL-003-check-sheet.md`); requirements stay `Verified`, none becomes `Validated`; FB-01 to FB-06 stay open; SMOKE-MIA-002 stays open (TD-26) |
 
 ## Joint amendments
 | ID | Requirement | Agreed by | Date |

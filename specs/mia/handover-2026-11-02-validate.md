@@ -1,4 +1,4 @@
-# Hand-over for the next session (written 2026-11-02): G-V1 is deployed, Validate is next
+# Hand-over for the next session (written 2026-11-02): G-V1 is deployed and closed without validation (D-185); the skill rework is next
 
 Newest hand-over; it replaces `handover-2026-11-01-release.md`. Read `CLAUDE.md`, then `specs/mia/goals/G-V1/goal.md`, `deployment-record.md`, `validation-plan.md` and the last entries of `specs/mia/review-log.md` (D-183, **D-184**).
 
@@ -13,6 +13,9 @@ Next free ids: **D-185, A-89, FB-07, TD-27**.
 
 ## Commits after the tag (master, not pushed; the owner pushes)
 `ae9cba2` Kokoro preflight, `tools/fetch_kokoro.sh`, `deploy/up.sh voice` · `1652ddd` `tools/recovery_check.sh` · `c0f1f27` rollback recipe in the RUNBOOK · `5366eff`, `49f486c`, `b053df8`, `8ac7e17` deployment record, Deploy done, TD-25 progress · and the commit of this hand-over and TD-26/D-184. The deployed tree is `v0.1.0` **without** these; they are tools and docs. If a patch version is cut, they go in.
+
+## Update after D-185 (same day)
+The owner closed G-V1 as accepted without validation (D-185) because the skill rework comes first (`specs/mia/skill_rework.md`, the owner's untracked note: skills in their own window with viewer/editor, a defined data structure of the graphs (data, transform and master nodes), a context graph per skill, JSON storage in PostgreSQL with type ids, benchmarks). It is a **new goal**, so the next phase is Explore (`explore-phase`, `agent-app-explore`: update the HLS, interview, spikes), not Implement. Related and already decided: D-108, D-177, TD-21. Next free ids: D-186, A-89, FB-07, TD-27. The items 2 and 3 below about Validate are carried to the next goal; item 1 (Tailscale / TD-26, login, consent) is only needed when a validation week is planned again.
 
 ## Open, in this order
 1. **Before Validate starts (owner):**

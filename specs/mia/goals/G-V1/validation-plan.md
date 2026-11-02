@@ -1,4 +1,4 @@
-# Validation plan: G-V1 (DRAFT of 2026-11-01)
+# Validation plan: G-V1 (DRAFT of 2026-11-01; **not run**: G-V1 closed without validation, D-185; this material is kept for the next goal)
 
 Prepared by the coding agent for the owner. People judge; the agent prepares sessions and analyses the run logs locally (run logs are confidential: nothing goes to a remote model or service). Phase 7 skills: `validate-phase`, `agent-app-validate`. Exit criterion of G-V1: **VAL-001 and VAL-003 to VAL-006** (VAL-002 moved to the next goal, D-134). Template of the result: `validate-phase/assets/validation-report.md` plus `agent-app-validate/assets/validation-report-agent.md`.
 
