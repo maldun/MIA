@@ -33,7 +33,15 @@ if [ -e /dev/kfd ] && [ -e /dev/dri ]; then ok "GPU devices /dev/kfd and /dev/dr
 
 # what a fresh checkout lacks (deploy/RUNBOOK.md): MIA runs without them, but without character and voice
 [ -d ui/godot/build/web ] || warn "ui/godot/build/web is missing: no character page (deploy/up.sh character <zip>)"
-[ -f voice/models/kokoro/kokoro-v1.0.onnx ] || warn "voice/models/kokoro is missing: no voice (README, Kokoro TTS)"
+# the folder the stack mounts (compose.yaml: MIA_KOKORO_DIR, default voice/models/kokoro); both files must be there or speak.py crashes at its start
+kdir="${MIA_KOKORO_DIR:-}"
+if [ -z "$kdir" ] && [ -f deploy/.env ]; then kdir=$(grep -E '^MIA_KOKORO_DIR=' deploy/.env | tail -1 | cut -d= -f2-); fi
+kdir="${kdir:-voice/models/kokoro}"
+kmissing=0
+for f in kokoro-v1.0.onnx voices-v1.0.bin; do
+    [ -f "$kdir/$f" ] || { warn "$f missing in $kdir: no voice, speak.py crashes at its start (bash tools/fetch_kokoro.sh; MIA_KOKORO_DIR in deploy/.env)"; kmissing=1; }
+done
+[ "$kmissing" = 0 ] && ok "Kokoro voice files in $kdir"
 ls voice/expressions/*.wav >/dev/null 2>&1 || warn "voice/expressions/*.wav is missing: no voice lines of the moods"
 
 # the sandbox: the compose config switches the script check off

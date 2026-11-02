@@ -48,7 +48,7 @@ Prerequisites:
 
 
 ### Kokoro TTS (the voice; the packages are in `requirements.txt`):
-- Download `kokoro-v1.0.onnx` and `voices-v1.0.bin` from https://github.com/thewh1teagle/kokoro-onnx/releases/tag/model-files-v1.0 into `voice/models/kokoro/`
+- `bash tools/fetch_kokoro.sh` downloads `kokoro-v1.0.onnx` and `voices-v1.0.bin` from https://github.com/thewh1teagle/kokoro-onnx/releases/tag/model-files-v1.0 into `voice/models/kokoro/` and checks their SHA-256 (by hand: the same two files into that folder)
 - Compare voices and effect presets with `python voice_lab.py` (writes samples to `voice/samples/lab/`)
 
 ### Clone

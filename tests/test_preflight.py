@@ -101,7 +101,7 @@ class Server(unittest.TestCase):
 class HostScript(unittest.TestCase):
     """deploy/preflight.sh: the host checks round the model check; a stub podman and a fake server stand in for the real ones"""
 
-    def script(self, url, with_podman=True):
+    def script(self, url, with_podman=True, **extra):
         import tempfile
         stubs = tempfile.mkdtemp()
         if with_podman:
@@ -109,7 +109,7 @@ class HostScript(unittest.TestCase):
             with open(path, "w") as fp:
                 fp.write("#!/bin/sh\nexit 0\n")
             os.chmod(path, 0o755)
-        env = dict(os.environ, OLLAMA_URL=url, PATH=stubs + ":/usr/bin:/bin:" + os.path.dirname(__import__("shutil").which("python3") or sys.executable), MIA_PREFLIGHT_MIN_GB="1", PODMAN="podman" if with_podman else "no-such-podman")
+        env = dict(os.environ, OLLAMA_URL=url, PATH=stubs + ":/usr/bin:/bin:" + os.path.dirname(__import__("shutil").which("python3") or sys.executable), MIA_PREFLIGHT_MIN_GB="1", PODMAN="podman" if with_podman else "no-such-podman", **extra)
         return subprocess.run(["bash", os.path.join(REPO, "deploy", "preflight.sh")], capture_output=True, text=True, env=env, cwd=REPO)
 
     @mark.req("REQ-OPR-001")
@@ -123,6 +123,26 @@ class HostScript(unittest.TestCase):
         self.assertEqual(out.returncode, 0, out.stdout + out.stderr)
         self.assertIn("Preflight OK", out.stdout)
         self.assertIn("sandbox_backend", out.stdout)
+
+    @mark.req("REQ-OPR-001")
+    def test_the_kokoro_check_follows_mia_kokoro_dir_and_wants_both_files(self):
+        """Given MIA_KOKORO_DIR with no files, with one file, and with both, When deploy/preflight.sh runs, Then it warns naming the folder and the missing file, and is quiet with both"""
+        import tempfile
+        url, stop = fake_ollama([{"name": "gemma4:12b-it-qat", "digest": LIGHT}, {"name": "gemma4:26b", "digest": FULL}])
+        try:
+            folder = tempfile.mkdtemp()
+            empty = self.script(url, MIA_KOKORO_DIR=folder)
+            open(os.path.join(folder, "kokoro-v1.0.onnx"), "w").close()
+            half = self.script(url, MIA_KOKORO_DIR=folder)
+            open(os.path.join(folder, "voices-v1.0.bin"), "w").close()
+            full = self.script(url, MIA_KOKORO_DIR=folder)
+        finally:
+            stop()
+        self.assertIn("WARN: kokoro-v1.0.onnx missing in " + folder, empty.stdout)
+        self.assertIn("WARN: voices-v1.0.bin missing in " + folder, half.stdout)
+        self.assertNotIn("kokoro-v1.0.onnx missing", half.stdout)
+        self.assertIn("ok:   Kokoro voice files in " + folder, full.stdout)
+        self.assertEqual(full.returncode, 0, full.stdout)
 
     @mark.req("REQ-OPR-001")
     def test_no_podman_and_a_moved_digest_each_stop_it(self):

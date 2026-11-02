@@ -41,6 +41,10 @@ Two files of the stack's config live in the data volume, so they are in every ba
 - **`data/cache/scholar`** (`scholar_cache_dir`): the answers of the scholarly APIs (OpenAlex, Crossref, ...), one JSON file per request with its URL (the research query) and body. An entry is used for 7 days (`scholar_cache_days`); older entries are removed whenever MIA writes the cache, so the folder holds about one week of literature searches. No key is in it (the Semantic Scholar key goes in a header); `scholar_email`, when set, appears in the cached URLs. Delete the folder to empty the cache; nothing else depends on it.
 - **`data/source_trust.json`** (`source_trust_file`): your changes of the trust classes of sources, laid over `library/source_trust.json`. The stack reads it for every literature review; the page writes it through `POST /api/trust`. While the login is off (`accounts_enabled: false`) that route needs no login, so with `MIA_BIND=0.0.0.0` every device that reaches port 8586 can change the trust classes. This is accepted for trusted users in a controlled network (D-131); turn the login on (see "The login") when that does not hold.
 
+## The voice (Kokoro)
+
+The Kokoro model files are not in git. `deploy/up.sh voice` downloads them (checked by SHA-256, `tools/fetch_kokoro.sh`) into the folder the stack mounts (`MIA_KOKORO_DIR` in `deploy/.env`, default `voice/models/kokoro`) and restarts MIA. It is safe to repeat.
+
 ## The personality (calibration.txt)
 
 `calibration.txt` (how MIA addresses you, her character) is your own file and not in git, so the container starts without it. Copy it into the data volume once, and again after you change it:

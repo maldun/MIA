@@ -204,5 +204,36 @@ class FreshCheckout(unittest.TestCase):
         open(os.path.join(other, "index.html"), "w").close()
         self.assertNotIn("index.html", self.start()[0])
 
+    @mark.req('REQ-OPR-001')
+    def test_voice_fetches_the_kokoro_files_into_the_mounted_folder_and_restarts_mia(self):
+        """TC-OPR-001: deploy/up.sh voice runs tools/fetch_kokoro.sh into MIA_KOKORO_DIR (default voice/models/kokoro of the checkout) and restarts the mia container.
+
+        Example: MIA_KOKORO_DIR=/x/k in deploy/.env -> /x/k holds both files, "podman restart mia1" recorded
+        """
+        # Given: the script in the checkout, a source folder (file://) and a target named in deploy/.env
+        with open(os.path.join(self.tmp.name, "bin", "curl"), "w") as fp:       # the stub of the other tests only fakes the page; here the real one fetches file://
+            fp.write("#!/bin/bash\nexec %s \"$@\"\n" % shutil.which("curl"))
+        tools = os.path.join(self.tmp.name, "tools")
+        os.makedirs(tools)
+        shutil.copy(os.path.join(REPO, "tools", "fetch_kokoro.sh"), tools)
+        src = os.path.join(self.tmp.name, "src")
+        os.makedirs(src)
+        for name in ("kokoro-v1.0.onnx", "voices-v1.0.bin"):
+            with open(os.path.join(src, name), "wb") as fp:
+                fp.write(name.encode())
+        target = os.path.join(self.tmp.name, "k")
+        self.write_env("SEARXNG_SECRET=s\nMIA_KOKORO_DIR=%s\n" % target)
+        import hashlib
+        os.environ["MIA_KOKORO_BASE_URL"] = "file://" + src
+        os.environ["KOKORO_SHA_ONNX"] = hashlib.sha256(b"kokoro-v1.0.onnx").hexdigest()
+        os.environ["KOKORO_SHA_VOICES"] = hashlib.sha256(b"voices-v1.0.bin").hexdigest()
+        self.addCleanup(lambda: [os.environ.pop(k, None) for k in ("MIA_KOKORO_BASE_URL", "KOKORO_SHA_ONNX", "KOKORO_SHA_VOICES")])
+        # When: voice runs
+        output, calls = self.start("voice")
+        # Then: both files are in the named folder and MIA was restarted
+        for name in ("kokoro-v1.0.onnx", "voices-v1.0.bin"):
+            self.assertTrue(os.path.isfile(os.path.join(target, name)), output)
+        self.assertIn("podman restart mia1", calls)
+
 if __name__ == '__main__':
     unittest.main()

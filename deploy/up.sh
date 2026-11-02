@@ -1,6 +1,6 @@
 #!/bin/bash
 # deploy/up.sh [rocm|nvidia] [compose arguments]   start the stack (default: up -d --build); `deploy/up.sh down` stops it
-# deploy/up.sh owner NAME | login on|off|status   the owner account and the password check (see below); also: character, calibration, memories, data, backup, restore
+# deploy/up.sh owner NAME | login on|off|status   the owner account and the password check (see below); also: character, voice, calibration, memories, data, backup, restore
 # Makes deploy/.env with a secret for SearXNG on the first call. Needs podman with a compose provider (sudo dnf install podman-compose) or docker compose.
 set -e
 HERE="$(dirname "$(readlink -f "$0")")"
@@ -30,6 +30,18 @@ if [ "${1:-}" = "character" ]; then
   if [ -n "$ZIP" ] && [ ! "$ZIP" -ef "$ROOT/ui/character/$(basename "$ZIP")" ]; then cp "$ZIP" "$ROOT/ui/character/"; fi
   python3 "$ROOT/ui/tools/character_pack.py" install web
   exec "$0" up -d --no-deps --force-recreate mia
+fi
+# deploy/up.sh voice   download the Kokoro voice files (tools/fetch_kokoro.sh, checked by SHA-256) into the folder the stack mounts (MIA_KOKORO_DIR, default voice/models/kokoro)
+# and restart MIA, whose speech process loads them at its start
+if [ "${1:-}" = "voice" ]; then
+  ROOT="$(dirname "$HERE")"
+  KOKORO_DIR="$(envval MIA_KOKORO_DIR ../voice/models/kokoro)"
+  case "$KOKORO_DIR" in /*) ;; *) KOKORO_DIR="$(realpath -m "$HERE/$KOKORO_DIR")" ;; esac
+  bash "$ROOT/tools/fetch_kokoro.sh" "$KOKORO_DIR"
+  ENGINE="$(command -v podman || command -v docker)"
+  CONTAINER="$($ENGINE ps -aq --filter "label=com.docker.compose.project=${MIA_PROJECT:-mia}" --filter label=com.docker.compose.service=mia | head -1)"
+  if [ -n "$CONTAINER" ]; then $ENGINE restart "$CONTAINER" >/dev/null && echo "MIA restarted"; else echo "MIA container not found: the voice is loaded when the stack starts (deploy/up.sh)"; fi
+  exit 0
 fi
 # deploy/up.sh calibration [path/to/calibration.txt]   the personality text of MIA ("address me master ...") is not in git; copy it into the data volume
 # (default: calibration.txt of the MIA folder) and restart MIA, which reads it at the start
