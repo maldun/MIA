@@ -343,4 +343,5 @@ Proposed on 2026-10-29 after the usability work of N-2.3 T-09 to T-11 and N-1.1 
 - Trigger: the Deploy phase of G-V1, or 2026-12-31, whichever first
 - Target check: specified only
 - Decision: D-182, 2026-11-01, Stefan Reiterer
+- Progress 2026-11-02: the three smoke scripts ran green on the owner's workstation (`goals/G-V1/deployment-record.md`); still open: a smoke step in `stages.yaml` that finds `smoke_*.py`
 - Status: open
