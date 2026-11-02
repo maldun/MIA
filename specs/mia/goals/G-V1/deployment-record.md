@@ -22,7 +22,7 @@ Blanks `<<...>>` are filled by the owner at the deployment. Template: `deploy-ph
 | SMOKE-MIA-002 | <<>> | phone, tailnet |
 | SMOKE-MIA-003 | green (2026-11-02) | mia alone 220 tests OK (18 skipped), db alone 26 OK, graph alone 14 (7 pass, 7 skipped, TD-23), all 5 services together |
 | SMOKE-GATE-001, -002 | green (2026-11-02) | 5 cases on MP-light through the real server; header digest equals /api/tags |
-| Recovery (kill and restart) | <<>> | |
+| Recovery (kill and restart) | green (2026-11-02) | `tools/recovery_check.sh` (`1652ddd`): SIGKILL of `mia` while an answer streamed, restart, page back, marker stored, 1004 files with content intact, database answers, new message answered. Note: the check looked at `data/` files only (history is still file-based, TD-21) |
 
 ## Agent section
 | Item | Found |
