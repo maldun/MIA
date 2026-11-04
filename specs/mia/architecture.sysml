@@ -149,7 +149,7 @@ package MIA_Architecture {
     // ---------------------------------------------------------------- the system
 
     part def ContextGraphBuilder {
-        doc /* Target (iteration 2, FR-41, FR-42; its own node N-6 or part of N-5, open): builds up context graphs from runs and
+        doc /* Target (iteration 2, FR-41, FR-42; its own standalone node N-6, decided 2026-11-04): builds up context graphs from runs and
                reviews, documents the owner adds, web research results and manual editing. Items derived by a model start as
                proposals with source and quote; steps read only confirmed items (TB-context). */
         part contextStore {
@@ -1660,6 +1660,15 @@ package MIA_Requirements {
         @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
         @ChangeSource { feedbackId = "NOTE-2026-11-02"; iteration = 2; }
     }
+    requirement def <'FR-47'> SkillSetSnapshots {
+        subject mia : MiaSystem;
+        doc /* MIA shall let the owner take a named snapshot of the whole skill set (skills, workflow graphs, context graphs,
+               the toolbox with the status of its transforms, debate definitions, and the model pins they were tested with),
+               list snapshots, keep them and restore one. A restore first keeps the current state as a snapshot of its own,
+               gives every element the version and status it had in the snapshot, and deletes no version (FR-40). */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+        @ChangeSource { feedbackId = "NOTE-2026-11-02"; iteration = 2; }
+    }
 
     // ================================================================ the requirement tree
 
@@ -1724,6 +1733,7 @@ package MIA_Requirements {
     requirement fr44 : TestbenchAndBudgets;
     requirement fr45 : SkillMigration;
     requirement fr46 : SkillSubwindow;
+    requirement fr47 : SkillSetSnapshots;
     requirement nfr7 : EfficientOnGivenHardware;
     requirement nfr8 : SharedStateInDatabase;
     requirement nfr9 : ContainerPerNode;
@@ -1812,6 +1822,7 @@ package MIA_Allocation {
     satisfy fr44 by mia;
     satisfy fr45 by mia;
     satisfy fr46 by mia;
+    satisfy fr47 by mia;
     satisfy nfr7 by mia;
     satisfy nfr8 by mia;
     satisfy nfr9 by mia;
@@ -2011,6 +2022,7 @@ package MIA_Allocation {
     allocate fr44 to mia.evaluation.suites;
     allocate fr45 to mia.taskRuntime.skillConverter;
     allocate fr46 to mia.frontEnd.skillsWindow;
+    allocate fr47 to mia.persistence.graphRecords;
     allocate fr7 to mia.taskRuntime.workflowGraph;
     allocate fr7 to mia.graphApp.graphValidator;
     allocate fr32 to mia.webApp.variantStore;
