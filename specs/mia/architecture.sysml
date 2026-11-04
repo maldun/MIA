@@ -1636,6 +1636,17 @@ package MIA_Requirements {
         @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::measurement); }
         @ChangeSource { feedbackId = "NOTE-2026-11-02"; iteration = 2; }
     }
+    requirement def <'FR-46'> SkillSubwindow {
+        subject mia : MiaSystem;
+        doc /* MIA shall give every skill a subwindow of its own in the web interface that holds everything of a run that is
+               not spoken: status card, phases, budgets, pause, resume and stop, the questions and answer fields of the
+               skill, the full result, intermediate material and the links to files and report. The chat shall contain only
+               text that is spoken, each a shortened or summed-up form worded in MIA's persona, with a link to the subwindow
+               where the full result is the reference; no card, log line, table or full result is put into the chat. This
+               revises FR-34 and FR-35. */
+        @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
+        @ChangeSource { feedbackId = "NOTE-2026-11-02"; iteration = 2; }
+    }
 
     // ================================================================ the requirement tree
 
@@ -1699,6 +1710,7 @@ package MIA_Requirements {
     requirement fr43 : SkillsWindow;
     requirement fr44 : TestbenchAndBudgets;
     requirement fr45 : SkillMigration;
+    requirement fr46 : SkillSubwindow;
     requirement nfr7 : EfficientOnGivenHardware;
     requirement nfr8 : SharedStateInDatabase;
     requirement nfr9 : ContainerPerNode;
@@ -1786,6 +1798,7 @@ package MIA_Allocation {
     satisfy fr43 by mia;
     satisfy fr44 by mia;
     satisfy fr45 by mia;
+    satisfy fr46 by mia;
     satisfy nfr7 by mia;
     satisfy nfr8 by mia;
     satisfy nfr9 by mia;
@@ -1984,6 +1997,7 @@ package MIA_Allocation {
     allocate fr44 to mia.evaluation.harness;
     allocate fr44 to mia.evaluation.suites;
     allocate fr45 to mia.taskRuntime.skillConverter;
+    allocate fr46 to mia.frontEnd.skillsWindow;
     allocate fr7 to mia.taskRuntime.workflowGraph;
     allocate fr7 to mia.graphApp.graphValidator;
     allocate fr32 to mia.webApp.variantStore;
