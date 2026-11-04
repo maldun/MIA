@@ -1595,8 +1595,9 @@ package MIA_Requirements {
     requirement def <'FR-41'> ContextGraphModel {
         subject mia : MiaSystem;
         doc /* MIA shall keep context graphs as general typed directed graphs: node categories and edge types given as JSON
-               schemas, every element an ID and a JSON entry. Several workflows may share one. A step reads the confirmed part
-               of its context graph into its prompt within a token budget; work and reviews extend it over time. A knowledge
+               schemas, every element an ID and a JSON entry. Every skill names exactly one context graph by its ID; different
+               skills may name the same one, and the chat has one too. A run records the ID and version it read. A step reads
+               the confirmed part of its context graph into its prompt within a token budget; work and reviews extend it over time. A knowledge
                graph is one kind of context graph. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
         @ChangeSource { feedbackId = "NOTE-2026-11-02"; iteration = 2; }
