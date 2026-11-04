@@ -1,0 +1,1172 @@
+[
+ {
+  "id": "I001",
+  "doc": "Citation",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I002",
+  "doc": "Citation",
+  "decision": "trivial",
+  "note": ""
+ },
+ {
+  "id": "I003",
+  "doc": "Citation",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I004",
+  "doc": "Citation",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I005",
+  "doc": "Citation",
+  "decision": "trivial",
+  "note": ""
+ },
+ {
+  "id": "I006",
+  "doc": "Citation",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I007",
+  "doc": "Citation",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I008",
+  "doc": "Citation",
+  "decision": "trivial",
+  "note": ""
+ },
+ {
+  "id": "I009",
+  "doc": "Citation",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I010",
+  "doc": "Citation",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I011",
+  "doc": "Citation",
+  "decision": "trivial",
+  "note": ""
+ },
+ {
+  "id": "I012",
+  "doc": "Citation",
+  "decision": "trivial",
+  "note": ""
+ },
+ {
+  "id": "I013",
+  "doc": "Citation",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I014",
+  "doc": "Citation",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I015",
+  "doc": "Citation",
+  "decision": "wrong",
+  "note": "edge says Bluebook derived from inline citations; the text says systems derived from the Bluebook"
+ },
+ {
+  "id": "I016",
+  "doc": "Citation",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I017",
+  "doc": "Citation",
+  "decision": "trivial",
+  "note": ""
+ },
+ {
+  "id": "I018",
+  "doc": "Citation",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I019",
+  "doc": "Citation",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I020",
+  "doc": "Citation",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I021",
+  "doc": "Knowledge_graph",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I022",
+  "doc": "Knowledge_graph",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I023",
+  "doc": "Knowledge_graph",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I024",
+  "doc": "Knowledge_graph",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I025",
+  "doc": "Knowledge_graph",
+  "decision": "trivial",
+  "note": ""
+ },
+ {
+  "id": "I026",
+  "doc": "Knowledge_graph",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I027",
+  "doc": "Knowledge_graph",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I028",
+  "doc": "Knowledge_graph",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I029",
+  "doc": "Knowledge_graph",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I030",
+  "doc": "Knowledge_graph",
+  "decision": "trivial",
+  "note": ""
+ },
+ {
+  "id": "I031",
+  "doc": "Knowledge_graph",
+  "decision": "trivial",
+  "note": "duplicate of I022"
+ },
+ {
+  "id": "I032",
+  "doc": "Knowledge_graph",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I033",
+  "doc": "Knowledge_graph",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I034",
+  "doc": "Knowledge_graph",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I035",
+  "doc": "Knowledge_graph",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I036",
+  "doc": "Knowledge_graph",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I037",
+  "doc": "Knowledge_graph",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I038",
+  "doc": "Knowledge_graph",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I039",
+  "doc": "Knowledge_graph",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I040",
+  "doc": "Knowledge_graph",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I041",
+  "doc": "Meta_analysis",
+  "decision": "wrong",
+  "note": "name cut from 'PRIMSA flow diagram'"
+ },
+ {
+  "id": "I042",
+  "doc": "Meta_analysis",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I043",
+  "doc": "Meta_analysis",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I044",
+  "doc": "Meta_analysis",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I045",
+  "doc": "Meta_analysis",
+  "decision": "trivial",
+  "note": ""
+ },
+ {
+  "id": "I046",
+  "doc": "Meta_analysis",
+  "decision": "trivial",
+  "note": "duplicate of I044 (case only)"
+ },
+ {
+  "id": "I047",
+  "doc": "Meta_analysis",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I048",
+  "doc": "Meta_analysis",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I049",
+  "doc": "Meta_analysis",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I050",
+  "doc": "Meta_analysis",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I051",
+  "doc": "Meta_analysis",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I052",
+  "doc": "Meta_analysis",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I053",
+  "doc": "Meta_analysis",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I054",
+  "doc": "Meta_analysis",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I055",
+  "doc": "Meta_analysis",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I056",
+  "doc": "Meta_analysis",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I057",
+  "doc": "Meta_analysis",
+  "decision": "invented",
+  "note": "text only says Boolean operators assist literature searches and lists PubMed as a database"
+ },
+ {
+  "id": "I058",
+  "doc": "Meta_analysis",
+  "decision": "wrong",
+  "note": "same mangled node as I041"
+ },
+ {
+  "id": "I059",
+  "doc": "Meta_analysis",
+  "decision": "invented",
+  "note": "same inference for Embase"
+ },
+ {
+  "id": "I060",
+  "doc": "Meta_analysis",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I061",
+  "doc": "Ontology_information_science",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I062",
+  "doc": "Ontology_information_science",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I063",
+  "doc": "Ontology_information_science",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I064",
+  "doc": "Ontology_information_science",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I065",
+  "doc": "Ontology_information_science",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I066",
+  "doc": "Ontology_information_science",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I067",
+  "doc": "Ontology_information_science",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I068",
+  "doc": "Ontology_information_science",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I069",
+  "doc": "Ontology_information_science",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I070",
+  "doc": "Ontology_information_science",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I071",
+  "doc": "Ontology_information_science",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I072",
+  "doc": "Ontology_information_science",
+  "decision": "trivial",
+  "note": ""
+ },
+ {
+  "id": "I073",
+  "doc": "Ontology_information_science",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I074",
+  "doc": "Ontology_information_science",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I075",
+  "doc": "Ontology_information_science",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I076",
+  "doc": "Ontology_information_science",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I077",
+  "doc": "Ontology_information_science",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I078",
+  "doc": "Ontology_information_science",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I079",
+  "doc": "Ontology_information_science",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I080",
+  "doc": "Ontology_information_science",
+  "decision": "trivial",
+  "note": "duplicate of I073"
+ },
+ {
+  "id": "I081",
+  "doc": "Peer_review",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I082",
+  "doc": "Peer_review",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I083",
+  "doc": "Peer_review",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I084",
+  "doc": "Peer_review",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I085",
+  "doc": "Peer_review",
+  "decision": "trivial",
+  "note": ""
+ },
+ {
+  "id": "I086",
+  "doc": "Peer_review",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I087",
+  "doc": "Peer_review",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I088",
+  "doc": "Peer_review",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I089",
+  "doc": "Peer_review",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I090",
+  "doc": "Peer_review",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I091",
+  "doc": "Peer_review",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I092",
+  "doc": "Peer_review",
+  "decision": "trivial",
+  "note": ""
+ },
+ {
+  "id": "I093",
+  "doc": "Peer_review",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I094",
+  "doc": "Peer_review",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I095",
+  "doc": "Peer_review",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I096",
+  "doc": "Peer_review",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I097",
+  "doc": "Peer_review",
+  "decision": "trivial",
+  "note": "target node 'Technical Review' is a paraphrase of 'engineering review' (I092), duplicate chain"
+ },
+ {
+  "id": "I098",
+  "doc": "Peer_review",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I099",
+  "doc": "Peer_review",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I100",
+  "doc": "Peer_review",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I101",
+  "doc": "Prompt_injection",
+  "decision": "trivial",
+  "note": ""
+ },
+ {
+  "id": "I102",
+  "doc": "Prompt_injection",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I103",
+  "doc": "Prompt_injection",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I104",
+  "doc": "Prompt_injection",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I105",
+  "doc": "Prompt_injection",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I106",
+  "doc": "Prompt_injection",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I107",
+  "doc": "Prompt_injection",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I108",
+  "doc": "Prompt_injection",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I109",
+  "doc": "Prompt_injection",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I110",
+  "doc": "Prompt_injection",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I111",
+  "doc": "Prompt_injection",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I112",
+  "doc": "Prompt_injection",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I113",
+  "doc": "Prompt_injection",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I114",
+  "doc": "Prompt_injection",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I115",
+  "doc": "Prompt_injection",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I116",
+  "doc": "Prompt_injection",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I117",
+  "doc": "Prompt_injection",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I118",
+  "doc": "Prompt_injection",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I119",
+  "doc": "Prompt_injection",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I120",
+  "doc": "Prompt_injection",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I121",
+  "doc": "Retrieval_augmented_generation",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I122",
+  "doc": "Retrieval_augmented_generation",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I123",
+  "doc": "Retrieval_augmented_generation",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I124",
+  "doc": "Retrieval_augmented_generation",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I125",
+  "doc": "Retrieval_augmented_generation",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I126",
+  "doc": "Retrieval_augmented_generation",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I127",
+  "doc": "Retrieval_augmented_generation",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I128",
+  "doc": "Retrieval_augmented_generation",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I129",
+  "doc": "Retrieval_augmented_generation",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I130",
+  "doc": "Retrieval_augmented_generation",
+  "decision": "trivial",
+  "note": ""
+ },
+ {
+  "id": "I131",
+  "doc": "Retrieval_augmented_generation",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I132",
+  "doc": "Retrieval_augmented_generation",
+  "decision": "trivial",
+  "note": ""
+ },
+ {
+  "id": "I133",
+  "doc": "Retrieval_augmented_generation",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I134",
+  "doc": "Retrieval_augmented_generation",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I135",
+  "doc": "Retrieval_augmented_generation",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I136",
+  "doc": "Retrieval_augmented_generation",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I137",
+  "doc": "Retrieval_augmented_generation",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I138",
+  "doc": "Retrieval_augmented_generation",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I139",
+  "doc": "Retrieval_augmented_generation",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I140",
+  "doc": "Retrieval_augmented_generation",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I141",
+  "doc": "Systematic_review",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I142",
+  "doc": "Systematic_review",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I143",
+  "doc": "Systematic_review",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I144",
+  "doc": "Systematic_review",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I145",
+  "doc": "Systematic_review",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I146",
+  "doc": "Systematic_review",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I147",
+  "doc": "Systematic_review",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I148",
+  "doc": "Systematic_review",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I149",
+  "doc": "Systematic_review",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I150",
+  "doc": "Systematic_review",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I151",
+  "doc": "Systematic_review",
+  "decision": "trivial",
+  "note": ""
+ },
+ {
+  "id": "I152",
+  "doc": "Systematic_review",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I153",
+  "doc": "Systematic_review",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I154",
+  "doc": "Systematic_review",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I155",
+  "doc": "Systematic_review",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I156",
+  "doc": "Systematic_review",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I157",
+  "doc": "Systematic_review",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I158",
+  "doc": "Systematic_review",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I159",
+  "doc": "Systematic_review",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I160",
+  "doc": "Systematic_review",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I161",
+  "doc": "arxiv_2005.11401",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I162",
+  "doc": "arxiv_2005.11401",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I163",
+  "doc": "arxiv_2005.11401",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I164",
+  "doc": "arxiv_2005.11401",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I165",
+  "doc": "arxiv_2005.11401",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I166",
+  "doc": "arxiv_2005.11401",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I167",
+  "doc": "arxiv_2005.11401",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I168",
+  "doc": "arxiv_2005.11401",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I169",
+  "doc": "arxiv_2005.11401",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I170",
+  "doc": "arxiv_2005.11401",
+  "decision": "trivial",
+  "note": ""
+ },
+ {
+  "id": "I171",
+  "doc": "arxiv_2005.11401",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I172",
+  "doc": "arxiv_2005.11401",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I173",
+  "doc": "arxiv_2005.11401",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I174",
+  "doc": "arxiv_2005.11401",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I175",
+  "doc": "arxiv_2005.11401",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I176",
+  "doc": "arxiv_2005.11401",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I177",
+  "doc": "arxiv_2005.11401",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I178",
+  "doc": "arxiv_2005.11401",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I179",
+  "doc": "arxiv_2005.11401",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I180",
+  "doc": "arxiv_2005.11401",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I181",
+  "doc": "arxiv_2410.05779",
+  "decision": "trivial",
+  "note": ""
+ },
+ {
+  "id": "I182",
+  "doc": "arxiv_2410.05779",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I183",
+  "doc": "arxiv_2410.05779",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I184",
+  "doc": "arxiv_2410.05779",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I185",
+  "doc": "arxiv_2410.05779",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I186",
+  "doc": "arxiv_2410.05779",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I187",
+  "doc": "arxiv_2410.05779",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I188",
+  "doc": "arxiv_2410.05779",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I189",
+  "doc": "arxiv_2410.05779",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I190",
+  "doc": "arxiv_2410.05779",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I191",
+  "doc": "arxiv_2410.05779",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I192",
+  "doc": "arxiv_2410.05779",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I193",
+  "doc": "arxiv_2410.05779",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I194",
+  "doc": "arxiv_2410.05779",
+  "decision": "right",
+  "note": ""
+ },
+ {
+  "id": "I195",
+  "doc": "arxiv_2410.05779",
+  "decision": "right",
+  "note": ""
+ }
+]
