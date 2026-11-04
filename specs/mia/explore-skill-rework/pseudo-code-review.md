@@ -33,13 +33,13 @@ A skill names one context graph by ID; two skills may name the same one. Effects
 ## 4. Context-graph creation with LightRAG (interview 13)
 Creation was already in scope (FR-42, candidate goal C). New is the engine.
 
-What LightRAG is (from the upstream project; the search found only mirrors, so every point below is **to be verified in a spike on the real package**): a retrieval library that extracts entities and relations from documents with an LLM, keeps a knowledge graph plus vectors, offers query modes (local, global, hybrid), supports Ollama, and has PostgreSQL storage backends. Mirrors of its README say it wants a model of at least 32B parameters and a context of at least 32K tokens (64K recommended).
+What LightRAG is (from the upstream project; the search found only mirrors, so every point below is **to be verified in a spike on the real package**): a retrieval library that extracts entities and relations from documents with an LLM, keeps a knowledge graph plus vectors, offers query modes (local, global, hybrid), supports Ollama, and has PostgreSQL storage backends. Mirrors of its README *recommend* a model of at least 32B parameters and a context of at least 32K tokens (64K); this is guidance, not a limit. Chunk size and the number of extra passes are settings, so the prompt can be made to fit 8K; the open question is the extraction quality of the 12B.
 
 Fit against our rules:
 | Topic | Our rule | Question to LightRAG |
 |---|---|---|
 | Dependency | none without approval (CLAUDE.md) | needs approval; check its dependency tree, licence, and whether it can run without cloud services |
-| Models | 12B QAT, `num_ctx` 8192, one model on 16 GB (CON-2); 26B only on request | extraction quality and context needs on the 12B at 8K: **the main risk**; chunking may fit, prompts may not |
+| Models | 12B QAT, `num_ctx` 8192, one model on 16 GB (CON-2); 26B only on request | extraction quality of the 12B at 8K: **the main risk**; the output uses a custom delimiter format, not JSON, and entity names must stay consistent across chunks |
 | Element form | every node and edge = ID + JSON, types as JSON schema (note, FR-41) | LightRAG has its own fixed entity/relation fields (name, type, description, source ids); we would map them into our JSON, or keep ours as the master and use LightRAG only as extractor |
 | Proposed vs confirmed | model-derived items are proposals until confirmed (FR-42, TB-context) | LightRAG inserts directly; we need a staging step: take its extraction output as proposals, write only confirmed items into the stored graph |
 | Storage | PostgreSQL through the Storage layer, nodes and edges as records (FR-40) | LightRAG has its own PostgreSQL tables; either two stores (ours + its index) or an adapter; the "one source of truth" rule says ours is master and its index is rebuildable |
@@ -51,6 +51,15 @@ Fit against our rules:
 **Recommendation (for the owner to confirm):** keep FR-41/FR-42 engine-neutral. Treat LightRAG as the candidate *extractor and index* behind a `ContextBuilder` interface; our JSON records stay the master copy, builder output enters as proposals. Decide go or no-go on LightRAG after one spike (below), not before.
 
 **Spike C (proposed, none run; throwaway code in `spikes/`, not eval cases):** install LightRAG in a throwaway venv (needs the owner's OK, it is a dependency only for the spike), Ollama + 12B at `num_ctx` 8192, 10 documents chosen by the owner, 3 repeats. Look at: does extraction complete at 8K, items per document, how many the owner marks wrong or invented, run time, VRAM, whether the output maps onto our ID+JSON form and onto proposals. Record in `spikes.md`. Merges with the builder spike (b) of the handover.
+
+**Staged plan for the models (proposed; every stage is a throwaway spike, not an eval run).** Skills and chat stay on MP-light (`gemma4:12b-it-qat`); no skill is known to need the 26B (`eval-spec.md`: MP-full unused for criteria in G-V1).
+| Stage | Model, context | Question | Go on to the next stage only if |
+|---|---|---|---|
+| 0 | MP-light, `num_ctx` 8192 | Option 1 (own builder) versus LightRAG on the same 10 documents; the owner marks wrong and invented items; also debate spike (a) | both fall short of a bar the owner sets before the run |
+| 1 | MP-light, 16K (more KV cache, some layers on CPU) | does a longer context fix the failures of stage 0? | the owner approves a new context length (plan amendment) |
+| 2 | MP-full `gemma4:26b`, 8192, builder and debate judge only | is the bigger model needed for those two uses? 18.7 GB on a 16 GB card, part on CPU, slower; background jobs only | stage 1 failed **and** the owner accepts the machine-check risk (`crash-fatal-mce-cpu`: no long CPU-heavy runs until understood); run short, 3 repeats, no full stack |
+| 3 | another machine or a remote service | only if stage 2 is not acceptable or fails | the owner approves explicitly; remote only for non-confidential documents (CLAUDE.md) |
+Rules: a stage-2 or stage-3 model needs a pin, a baseline and a plan amendment before it counts for anything beyond the spike (CLAUDE.md); a debate variant that names it is a per-machine variant (answer 10); chat and existing skills are not changed by these stages.
 
 ## 5. Decisions needed from the owner
 1. Spike C as above, and approval for the throwaway install of LightRAG in a venv (not in `requirements.txt`).
