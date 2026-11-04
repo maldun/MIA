@@ -1553,11 +1553,12 @@ package MIA_Requirements {
     }
     requirement def <'FR-37'> WorkflowGraphModel {
         subject mia : MiaSystem;
-        doc /* MIA shall hold a workflow as a directed acyclic graph of three node types: data nodes (a dictionary or dataclass
-               that can be written as JSON), transform nodes (a function of the toolbox, FR-38) and master nodes (an agent task
-               with an acceptance criterion, FR-39). A graph carries an ID, the ID of its context graph, the ID of its
-               testbench (FR-44) and a description. The graph rules of FR-7 (unique identity, no cycle, a stopping criterion
-               where one is needed, data nodes connected only through processes) stay unless Plan changes them. */
+        doc /* MIA shall hold a workflow as a directed acyclic graph of three node types: data nodes (a dictionary or
+               dataclass that can be written as JSON), transform nodes (a function of the toolbox, FR-38) and master nodes
+               (an agent task with an acceptance criterion, FR-39). A graph carries an ID, the ID of its context graph, the
+               ID of its testbench (FR-44) and a description. The graph rules of FR-7 (unique identity, no cycle, a stopping
+               criterion where one is needed, data nodes connected only through processes) stay unless Plan changes them. A
+               data node has at most one transform that writes it; several transforms may read it. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
         @ChangeSource { feedbackId = "NOTE-2026-11-02"; iteration = 2; }
     }
@@ -1575,10 +1576,11 @@ package MIA_Requirements {
         doc /* MIA shall let a master node hold a debate definition: its agents (language models with skill files, model,
                prompts, parameters and input and output formats, or routines with an executable, parameters and formats), a
                small graph of the relations between the participants (a single node is allowed), variants for different
-               machines, and the means to reuse an existing definition. The outcome is decided by a finalization criterion that
-               is a function; the predefined kinds are a deterministic check, a judge or vote, approval by a person and the end
-               of a budget. Debates run on MIA's own runner within their budgets (decision 8). A judge counts only with a
-               calibration record. */
+               machines, and the means to reuse an existing definition. The outcome is decided by a finalization criterion
+               that is a function; the predefined kinds are a deterministic check, a judge or vote, approval by a person and
+               the end of a budget. Debates run on MIA's own runner within their budgets (decision 8). A judge counts only
+               with a calibration record. The graph of the participants is stored inside the master node's JSON; the viewer
+               opens it in another view with the same layout. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
         @ChangeSource { feedbackId = "NOTE-2026-11-02"; iteration = 2; }
     }
@@ -1595,10 +1597,13 @@ package MIA_Requirements {
     requirement def <'FR-41'> ContextGraphModel {
         subject mia : MiaSystem;
         doc /* MIA shall keep context graphs as general typed directed graphs: node categories and edge types given as JSON
-               schemas, every element an ID and a JSON entry. Every skill names exactly one context graph by its ID; different
-               skills may name the same one, and the chat has one too. A run records the ID and version it read. A step reads
-               the confirmed part of its context graph into its prompt within a token budget; work and reviews extend it over time. A knowledge
-               graph is one kind of context graph. */
+               schemas, every element an ID and a JSON entry. Every skill names exactly one context graph by its ID;
+               different skills may name the same one, and the chat has one too. A run records the ID and version it read. A
+               step reads the confirmed part of its context graph into its prompt within a token budget; work and reviews
+               extend it over time. A knowledge graph is one kind of context graph. A tested or trusted skill pins the
+               version of its context graph and a draft follows the latest; a new version of a graph marks the testbenches of
+               the skills that name it as stale. The chat's context graph is the one of a skill record with the ID `chat`.
+               Every item carries a data class, and a step reads only the classes its definition allows. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
         @ChangeSource { feedbackId = "NOTE-2026-11-02"; iteration = 2; }
     }
@@ -1615,8 +1620,14 @@ package MIA_Requirements {
         doc /* MIA shall show skills in a window of their own in the web interface, apart from the skills panel of FR-34 that
                shows runs. The window lists skills, shows and edits workflow graphs and context graphs (selecting and moving
                nodes, editing an element's JSON) and shows versions and a diff. Only the owner writes; other accounts read.
-               Every edit is checked against the graph rules before it is saved as a new version. The owner promotes a version
-               from draft to tested to trusted. */
+               Every edit is checked against the graph rules before it is saved as a new version. The owner promotes a
+               version from draft to tested to trusted. Workflow graphs are drawn left to right, context graphs as a free
+               network, both by one viewer that draws with a vendored library without a build step (vis-network, the owner's
+               choice; a new dependency to be pinned and licence-checked in Plan). An element's JSON is edited as text and
+               validated by the server. Proposed items of a context graph are drawn dashed and can be confirmed or rejected,
+               with a filter by source and by skill. A graph shows the skills that use it. Two versions are compared in one
+               overlay that colours added, removed and changed elements. On the phone graphs are view-only. Where the run
+               events allow it at small cost, a running skill's current step is highlighted on its workflow graph. */
         @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
         @ChangeSource { feedbackId = "NOTE-2026-11-02"; iteration = 2; }
     }
