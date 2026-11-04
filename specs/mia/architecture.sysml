@@ -1639,11 +1639,13 @@ package MIA_Requirements {
     requirement def <'FR-46'> SkillSubwindow {
         subject mia : MiaSystem;
         doc /* MIA shall give every skill a subwindow of its own in the web interface that holds everything of a run that is
-               not spoken: status card, phases, budgets, pause, resume and stop, the questions and answer fields of the
-               skill, the full result, intermediate material and the links to files and report. The chat shall contain only
-               text that is spoken, each a shortened or summed-up form worded in MIA's persona, with a link to the subwindow
-               where the full result is the reference; no card, log line, table or full result is put into the chat. This
-               revises FR-34 and FR-35. */
+               not spoken: status card, phases, budgets, pause, resume and stop, the full result, intermediate material, the
+               links to files and report, and a confirmation of each answer the user gave, so that the subwindow is the
+               history of the run. The chat shall contain only text that is spoken, each a shortened or summed-up form worded
+               in MIA's persona: the skill's questions are spoken in the chat and the users' answers are given in the chat;
+               the full result is referenced by a link to the subwindow; no card, log line, table or full result is put into
+               the chat. On the page the character stands in a rectangular box, the chat is left of it and the skill
+               subwindow is below it. This revises FR-34 (position) and FR-35. */
         @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
         @ChangeSource { feedbackId = "NOTE-2026-11-02"; iteration = 2; }
     }
