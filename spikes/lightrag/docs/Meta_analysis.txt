@@ -1,0 +1,187 @@
+Meta-analysis is a method of synthesis of quantitative data from multiple independent studies addressing a common research question. An important part of this method involves computing a combined effect size across all of the studies. As such, this statistical approach involves extracting effect sizes and variance measures from various studies. By combining these effect sizes the statistical power is improved and can resolve uncertainties or discrepancies found in individual studies. Meta-analyses are integral in supporting research grant proposals, shaping treatment guidelines, and influencing health policies. They are also pivotal in summarizing existing research to guide future studies, thereby cementing their role as a fundamental methodology in metascience. Meta-analyses are often, but not always, important components of a systematic review.
+
+
+== History ==
+The term "meta-analysis" was coined in 1976 by the statistician Gene V. Glass, who, in an article in Educational Researcher that year, stated: "meta-analysis refers to the analysis of analyses". Glass's work aimed at describing aggregated measures of relationships and effects. While Glass is credited with authoring the first modern meta-analysis, a 1904 paper by the statistician Karl Pearson published in the British Medical Journal collated data from several studies of typhoid inoculation; it is seen as the first time a meta-analytic approach was used to aggregate the outcomes of multiple clinical studies. Numerous other examples of early meta-analyses can be found, including in occupational aptitude testing and agriculture.
+The first model meta-analysis was published in 1978 on the effectiveness of psychotherapy by Mary Lee Smith and Glass. After publication of their article, there was pushback on the usefulness and validity of meta-analysis as a tool for evidence synthesis. The first example of this was by Hans Eysenck, who, in a 1978 article in response to the work done by Smith and Glass, called meta-analysis an "exercise in mega-silliness". Later, Eysenck would refer to meta-analysis as "statistical alchemy". Despite these criticisms, the use of meta-analysis has only grown since its introduction. By 1991 there were 334 published meta-analyses and this had grown to 9,135 by 2014.
+The field of meta-analysis expanded greatly after the 1970s and touches multiple disciplines; including psychology, medicine, and ecology. Further, the more recent creation of evidence synthesis communities has increased cross-pollination of ideas and methods and the creation of software tools across disciplines.
+
+
+== Literature search ==
+One of the most important steps in a meta-analysis is data collection. For an efficient database search, appropriate keywords and search limits need to be identified. The use of Boolean operators and search limits can assist the literature search. A number of databases are available (e.g., PubMed, Embase, PsycINFO), but it is up to the researcher to choose the most appropriate sources for their research area. Indeed, many scientists use duplicate search terms within two or more databases to cover multiple sources. The reference lists of eligible studies can also be searched for eligible studies (i.e., snowballing). The initial search may return a large volume of studies. Quite often, the abstract or the title of the manuscript reveals that the study is not eligible for inclusion, based on the pre-specified criteria. These studies can be discarded. However, if the study appears eligible (or even if there is some doubt), the full paper can be retained for closer inspection. The reference lists of eligible articles can also be searched for any relevant articles. These search results need to be detailed in a PRIMSA flow diagram, which details the flow of information through all stages of the review. Thus, it is important how many studies were returned after using the specified search terms, how many were discarded, and why. The search terms and strategy should be specific enough for a reader to reproduce the search. The date range of studies, along with the date (or date period) the search was conducted, should also be provided.
+A data-collection form provides a standardized means of collecting data from eligible studies. For a meta-analysis of correlational data, effect size information is usually collected as Pearson correlation coefficient (r). Partial correlations are often reported in research; however, these may inflate relationships in comparison to zero-order correlations. A 2024 simulation study found that standard meta-analysis methods are biased away from zero when applied to partial correlations, and proposed a correction that adjust the degrees of freedom used to compute the correlations. Moreover, the partialed-out variables will likely vary from study to study. As a consequence, many meta-analyses exclude partial correlations from their analysis. As a final resort, plot digitizers can be used to scrape data points from scatterplots (if available) for the calculation of Pearson's r. Data on important study characteristics that may moderate observed effects, such as the mean age of participants, should also be collected. A measure of study quality can also be included in these forms to assess the quality of evidence from each study. There are more than 80 tools available to assess the quality and risk of bias in observational studies, reflecting the diversity of research approaches between fields. These tools usually include an assessment of how dependent variables were measured, appropriate selection of participants, and appropriate control for confounding factors. Other quality measures that may be more relevant to correlational studies include sample size, psychometric properties, and method reporting.
+A final consideration is whether to include studies from the grey literature, which is defined as research that has not been formally published. This type of literature includes conference abstracts, dissertations, and pre-prints. While the inclusion of grey literature reduces the risk of publication bias, the methodological quality of the work is often (but not always) lower than formally published work. Reports from conference proceedings, which are the most common source of grey literature, are poorly reported, and data in the subsequent publication are often inconsistent, with differences observed in almost 20% of published studies.
+
+
+== Methods and assumptions ==
+
+
+=== Approaches ===
+In general, two types of evidence can be distinguished when performing a meta-analysis: individual participant data (IPD), and aggregate data (AD). The aggregate data can be direct or indirect.
+AD is more commonly available (e.g. from the literature) and typically represents summary estimates such as odds ratios or relative risks. This can be directly synthesized across conceptually similar studies using several approaches. On the other hand, indirect aggregate data measures the effect of two treatments that were each compared against a similar control group in a meta-analysis. For example, if treatment A and treatment B were directly compared vs placebo in separate meta-analyses, we can use these two pooled results to get an estimate of the effects of A vs B in an indirect comparison as effect A vs Placebo minus effect B vs Placebo.
+IPD evidence represents raw data as collected by the study centers. This distinction has raised the need for different meta-analytic methods when evidence synthesis is desired, and has led to the development of one-stage and two-stage methods. In one-stage methods the IPD from all studies are modeled simultaneously whilst accounting for the clustering of participants within studies. Two-stage methods first compute summary statistics for AD from each study and then calculate overall statistics as a weighted average of the study statistics. By reducing IPD to AD, two-stage methods can also be applied when IPD is available; this makes them an appealing choice when performing a meta-analysis. Although it is conventionally believed that one-stage and two-stage methods yield similar results, recent studies have shown that they may occasionally lead to different conclusions.
+
+
+=== Statistical models for aggregate data ===
+
+
+==== Fixed effect model ====
+
+The fixed effect model provides a weighted average of a series of study estimates. The inverse of the estimates' variance is commonly used as study weight, so that larger studies tend to contribute more than smaller studies to the weighted average. Consequently, when studies within a meta-analysis are dominated by a very large study, the findings from smaller studies are practically ignored. Most importantly, the fixed effects model assumes that all included studies investigate the same population, use the same variable and outcome definitions, etc. This assumption is typically unrealistic as research is often prone to several sources of heterogeneity.
+If we start with a collection of independent effect size estimates, each estimate a corresponding effect size  
+  
+    
+      
+        i
+        =
+        1
+        ,
+        …
+        ,
+        k
+      
+    
+    {\displaystyle i=1,\ldots ,k}
+  
+  we can assume that 
+  
+    
+      
+        
+          y
+          
+            i
+          
+        
+        =
+        
+          θ
+          
+            i
+          
+        
+        +
+        
+          e
+          
+            i
+          
+        
+      
+    
+    {\textstyle y_{i}=\theta _{i}+e_{i}}
+  
+ where 
+  
+    
+      
+        
+          y
+          
+            i
+          
+        
+      
+    
+    {\displaystyle y_{i}}
+  
+ denotes the observed effect in the 
+  
+    
+      
+        i
+      
+    
+    {\displaystyle i}
+  
+-th study, 
+  
+    
+      
+        
+          θ
+          
+            i
+          
+        
+      
+    
+    {\displaystyle \theta _{i}}
+  
+ the corresponding (unknown) true effect, 
+  
+    
+      
+        
+          e
+          
+            i
+          
+        
+      
+    
+    {\displaystyle e_{i}}
+  
+ is the sampling error, and 
+  
+    
+      
+        
+          e
+          
+            i
+          
+        
+        ∼
+        N
+        (
+        0
+        ,
+        
+          v
+          
+            i
+          
+        
+        )
+      
+    
+    {\displaystyle e_{i}\thicksim N(0,v_{i})}
+  
+.  Therefore, the 
+  
+    
+      
+        
+          y
+          
+            i
+          
+        
+      
+    
+    {\displaystyle y_{i}}
+  
+'s are assumed to be unbiased and normally distributed estimates of their corresponding true effects. The sampling variances (i.e., 
+  
+    
+      
+        
+          v
+          
+            i
+          
+        
+      
+    
+    {\displaystyle v_{i}}
+  
+ values) are assumed to be known.
+
+
+==== Random effects model ====
+Most meta-analyses are based on sets of studies that are not exactly identical in their methods and/or the characteristics of the included samples. Differences in the methods and sample characteristics may introduce variability ("heterogeneity") among the true effects. One way to model the heterogeneity is to treat it as purely random. The weight that is applied in this process of weighted averaging with a random effects meta-analysis is achieved in two steps:
+
+Step 1: Inverse variance weighting
+Step 2: Un-weighting of this inverse variance weighting by applying a random effects variance component (REVC) that is simply derived from the extent of variability of the effect sizes of the underlying studies.
+This means that the greater this variability in effect sizes (otherwise known as heterogeneity), the greater the un-weighting and this can reach a point when the random effects meta-analysis result becomes simply the un-weighted average effect size across the studies. At the other extreme, when all effect sizes are similar (or variability does not exceed sampling error), no REVC is applied and the random effects meta-analysis defaults to simply a fixed effect meta-analy

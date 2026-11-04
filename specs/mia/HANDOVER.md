@@ -4,7 +4,9 @@ For a fresh session. Read this, then `CLAUDE.md` (rules), `specs/mia/plan.md` (t
 
 Everything below is **merged into master** (last merge `d89d253`) unless it says otherwise. Start a new job from a worktree and check first that it branched from current master (`git log --oneline -1`, then `git merge --ff-only master`).
 
-**Newest of all (2026-11-03): `specs/mia/handover-2026-11-03-explore-skill-rework.md`** (Explore of the skill rework: HLS draft of iteration 2 waits for the owner's review, spikes not run); it continues the next one.
+**Newest of all (2026-11-05): `specs/mia/handover-2026-11-05-explore-skill-rework.md`** (Explore of the skill rework: owner review done, 20 interview answers, spike C waits for the owner's marking); it continues the next one.
+
+**Before it (2026-11-03): `specs/mia/handover-2026-11-03-explore-skill-rework.md`** (Explore of the skill rework: HLS draft of iteration 2 waits for the owner's review, spikes not run); it continues the next one.
 
 **Before it (2026-11-02): `specs/mia/handover-2026-11-02-validate.md`** (G-V1 deployed as v0.1.0, Validate is next, TD-26 Tailscale check deferred); it continues the ones below.
 
