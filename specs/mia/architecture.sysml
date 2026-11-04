@@ -1580,7 +1580,8 @@ package MIA_Requirements {
                that is a function; the predefined kinds are a deterministic check, a judge or vote, approval by a person and
                the end of a budget. Debates run on MIA's own runner within their budgets (decision 8). A judge counts only
                with a calibration record. The graph of the participants is stored inside the master node's JSON; the viewer
-               opens it in another view with the same layout. */
+               opens it in another view with the same layout. The limits of a debate (rounds, model calls, seconds) are
+               configuration values of its definition, per machine variant. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
         @ChangeSource { feedbackId = "NOTE-2026-11-02"; iteration = 2; }
     }
@@ -1603,7 +1604,8 @@ package MIA_Requirements {
                extend it over time. A knowledge graph is one kind of context graph. A tested or trusted skill pins the
                version of its context graph and a draft follows the latest; a new version of a graph marks the testbenches of
                the skills that name it as stale. The chat's context graph is the one of a skill record with the ID `chat`.
-               Every item carries a data class, and a step reads only the classes its definition allows. */
+               Every item carries a data class, and a step reads only the classes its definition allows. The share of a
+               step's context that may come from the context graph is a configuration value. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
         @ChangeSource { feedbackId = "NOTE-2026-11-02"; iteration = 2; }
     }
@@ -1611,7 +1613,8 @@ package MIA_Requirements {
         subject mia : MiaSystem;
         doc /* MIA shall provide a tool that builds up a context graph from runs and reviews, documents the owner adds, web
                research results and manual editing. Items derived by a model from runs, documents or web text start as
-               proposals with their source and quote; only confirmed items are readable by steps (TB-context). */
+               proposals with their source and quote; only confirmed items are readable by steps (TB-context). The limits of
+               the builder (items and seconds per document) are configuration values. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
         @ChangeSource { feedbackId = "NOTE-2026-11-02"; iteration = 2; }
     }
