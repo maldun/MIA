@@ -1,0 +1,406 @@
+{
+ "accepted": [
+  {
+   "name": "systematic review",
+   "quote": "A systematic review is a scholarly synthesis of the evidence on a clearly presented topic using critical methods to identify, define and assess research on the topic.",
+   "kind": "entity"
+  },
+  {
+   "name": "meta-analyses",
+   "quote": "Systematic reviews, sometimes along with meta-analyses, are generally considered the highest level in the hierarchy of evidence in scientific and medical research.",
+   "kind": "entity"
+  },
+  {
+   "name": "narrative review",
+   "quote": "Systematic reviews contrast with a type of review often called a narrative review.",
+   "kind": "entity"
+  },
+  {
+   "name": "literature review",
+   "quote": "Systematic reviews and narrative reviews both review the literature (the scientific literature), but the term literature review without further specification refers to a narrative review.",
+   "kind": "entity"
+  },
+  {
+   "source": "systematic review",
+   "relation": "closely related to",
+   "target": "meta-analyses",
+   "quote": "Systematic reviews are closely related to meta-analyses, and often the same instance will combine both (being published with a subtitle of \"a systematic review and meta-analysis\").",
+   "kind": "relation"
+  },
+  {
+   "source": "systematic review",
+   "relation": "contrast with",
+   "target": "narrative review",
+   "quote": "Systematic reviews contrast with a type of review often called a narrative review.",
+   "kind": "relation"
+  },
+  {
+   "source": "literature review",
+   "relation": "refers to",
+   "target": "narrative review",
+   "quote": "Systematic reviews and narrative reviews both review the literature (the scientific literature), but the term literature review without further specification refers to a narrative review.",
+   "kind": "relation"
+  },
+  {
+   "name": "Cochrane Library",
+   "quote": "Scoring levels are sometimes used to rate the quality of the evidence depending on the methodology used, although this is discouraged by the Cochrane Library.",
+   "kind": "entity"
+  },
+  {
+   "name": "EPPI-Centre",
+   "quote": "The EPPI-Centre, Cochrane, and the Joanna Briggs Institute have been influential in developing methods for combining both qualitative and quantitative research in systematic reviews.",
+   "kind": "entity"
+  },
+  {
+   "name": "Cochrane",
+   "quote": "The EPPI-Centre, Cochrane, and the Joanna Briggs Institute have been influential in developing methods for combining both qualitative and quantitative research in systematic reviews.",
+   "kind": "entity"
+  },
+  {
+   "name": "Joanna Briggs Institute",
+   "quote": "The EPPI-Centre, Cochrane, and the Joanna Briggs Institute have been influential in developing methods for combining both qualitative and quantitative research in systematic reviews.",
+   "kind": "entity"
+  },
+  {
+   "name": "Preferred Reporting Items for Systematic Reviews and Meta-Analyses (PRISMA)",
+   "quote": "The Preferred Reporting Items for Systematic Reviews and Meta-Analyses (PRISMA) statement suggests a standardized way to ensure a transparent and complete reporting of systematic reviews, and is now required for this kind of research by more than 170 medical journals worldwide.",
+   "kind": "entity"
+  },
+  {
+   "name": "PRISMA 2020",
+   "quote": "The latest version of this commonly used statement corresponds to PRISMA 2020 (the respective article was published in 2021).",
+   "kind": "entity"
+  },
+  {
+   "name": "PRISMA-P",
+   "quote": "Several specialized PRISMA guideline extensions have been developed to support particular types of studies or aspects of the review process, including PRISMA-P for review protocols and PRISMA-ScR for scoping reviews.",
+   "kind": "entity"
+  },
+  {
+   "name": "PRISMA-ScR",
+   "quote": "Several specialized PRISMA guideline extensions have been developed to support particular types of studies or aspects of the review process, including PRISMA-P for review protocols and PRISMA-ScR for scoping reviews.",
+   "kind": "entity"
+  },
+  {
+   "name": "EQUATOR (Enhancing the QUAlity and Transparency Of health Research) Network",
+   "quote": "A list of PRISMA guideline extensions is hosted by the EQUATOR (Enhancing the QUAlity and Transparency Of health Research) Network.",
+   "kind": "entity"
+  },
+  {
+   "name": "Non-Interventional, Reproducible, and Open (NIRO) Systematic Reviews",
+   "quote": "As a result, Non-Interventional, Reproducible, and Open (NIRO) Systematic Reviews was created to counter this limitation.",
+   "kind": "entity"
+  },
+  {
+   "name": "ENTREQ (Enhancing transparency in reporting the synthesis of qualitative research)",
+   "quote": "For qualitative reviews, reporting guidelines include ENTREQ (Enhancing transparency in reporting the synthesis of qualitative research) for qualitative evidence syntheses; RAMESES (Realist And MEta-narrative Evidence Syntheses: Evolving Standards) for meta-narrative and realist reviews; and eMERGe (Improving reporting of Meta-Ethnography) for meta-ethnograph.",
+   "kind": "entity"
+  },
+  {
+   "name": "RAMESES (Realist And MEta-narrative Evidence Syntheses: Evolving Standards)",
+   "quote": "For qualitative reviews, reporting guidelines include ENTREQ (Enhancing transparency in reporting the synthesis of qualitative research) for qualitative evidence syntheses; RAMESES (Realist And MEta-narrative Evidence Syntheses: Evolving Standards) for meta-narrative and realist reviews; and eMERGe (Improving reporting of Meta-Ethnography) for meta-ethnograph.",
+   "kind": "entity"
+  },
+  {
+   "name": "eMERGe (Improving reporting of Meta-Ethnography)",
+   "quote": "For qualitative reviews, reporting guidelines include ENTREQ (Enhancing transparency in reporting the synthesis of qualitative research) for qualitative evidence syntheses; RAMESES (Realist And MEta-narrative Evidence Syntheses: Evolving Standards) for meta-narrative and realist reviews; and eMERGe (Improving reporting of Meta-Ethnography) for meta-ethnograph.",
+   "kind": "entity"
+  },
+  {
+   "source": "Preferred Reporting Items for Systematic Reviews and Meta-Analyses (PRISMA)",
+   "relation": "corresponds to",
+   "target": "PRISMA 2020",
+   "quote": "The latest version of this commonly used statement corresponds to PRISMA 2020 (the respective article was published in 2021).",
+   "kind": "relation"
+  },
+  {
+   "source": "PRISMA-P",
+   "relation": "is a specialized PRISMA guideline extension",
+   "target": "PRISMA",
+   "quote": "Several specialized PRISMA guideline extensions have been developed to support particular types of studies or aspects of the review process, including PRISMA-P for review protocols and PRISMA-ScR for scoping reviews.",
+   "kind": "relation"
+  },
+  {
+   "source": "PRISMA-ScR",
+   "relation": "is a specialized PRISMA guideline extension",
+   "target": "PRISMA",
+   "quote": "Several specialized PRISMA guideline extensions have been developed to support particular types of studies or aspects of the review process, including PRISMA-P for review protocols and PRISMA-ScR for scoping reviews.",
+   "kind": "relation"
+  },
+  {
+   "source": "EQUATOR (Enhancing the QUAlity and Transparency Of health Research) Network",
+   "relation": "hosts a list of",
+   "target": "PRISMA guideline extensions",
+   "quote": "A list of PRISMA guideline extensions is hosted by the EQUATOR (Enhancing the QUAlity and Transparency Of health Research) Network.",
+   "kind": "relation"
+  },
+  {
+   "name": "scoping review",
+   "quote": "A scoping review is an attempt to search for concepts by mapping the language and data which surrounds those concepts and adjusting the search method iteratively to synthesize evidence and assess the scope of an area of inquiry.",
+   "kind": "entity"
+  },
+  {
+   "name": "academic publishers",
+   "quote": "As a scoping review should be systematically conducted and reported (with a transparent and repeatable method), some academic publishers categorize them as a kind of 'systematic review', which may cause confusion.",
+   "kind": "entity"
+  },
+  {
+   "name": "Preferred Reporting Items for Systematic Reviews and Meta-Analyses (PRISMA) guideline extension for scoping reviews (PRISMA-ScR)",
+   "quote": "There have been several attempts to improve the standardisation of the method, for example via a Preferred Reporting Items for Systematic Reviews and Meta-Analyses (PRISMA) guideline extension for scoping reviews (PRISMA-ScR).",
+   "kind": "entity"
+  },
+  {
+   "name": "PROSPERO (the International Prospective Register of Systematic Reviews)",
+   "quote": "PROSPERO (the International Prospective Register of Systematic Reviews) does not permit the submission of protocols of scoping reviews, although some journals will publish protocols for scoping reviews.",
+   "kind": "entity"
+  },
+  {
+   "name": "PICO",
+   "quote": "Clinical reviews of quantitative data are often structured using the mnemonic PICO, which stands for 'Population or Problem', 'Intervention or Exposure', 'Comparison', and 'Outcome', with other variations existing for other kinds of research.",
+   "kind": "entity"
+  },
+  {
+   "source": "scoping review",
+   "relation": "preliminary stage before",
+   "target": "systematic review",
+   "quote": "A scoping review may often be a preliminary stage before a systematic review, which 'scopes' out an area of inquiry and maps the language and key concepts to determine if a systematic review is possible or appropriate, or to lay the groundwork for a full systematic review.",
+   "kind": "relation"
+  },
+  {
+   "source": "academic publishers",
+   "relation": "categorize them as a kind of",
+   "target": "systematic review",
+   "quote": "As a scoping review should be systematically conducted and reported (with a transparent and repeatable method), some academic publishers categorize them as a kind of 'systematic review', which may cause confusion.",
+   "kind": "relation"
+  },
+  {
+   "source": "PROSPERO (the International Prospective Register of Systematic Reviews)",
+   "relation": "does not permit the submission of protocols of",
+   "target": "scoping reviews",
+   "quote": "PROSPERO (the International Prospective Register of Systematic Reviews) does not permit the submission of protocols of scoping reviews, although some journals will publish protocols for scoping reviews.",
+   "kind": "relation"
+  },
+  {
+   "name": "methodology section",
+   "quote": "The methodology section of a systematic review should list all of the databases and citation indices that were searched.",
+   "kind": "entity"
+  },
+  {
+   "name": "databases",
+   "quote": "The methodology section of a systematic review should list all of the databases and citation indices that were searched.",
+   "kind": "entity"
+  },
+  {
+   "name": "citation indices",
+   "quote": "The methodology section of a systematic review should list all of the databases and citation indices that were searched.",
+   "kind": "entity"
+  },
+  {
+   "name": "Preferred Reporting Items for Systematic Reviews and Meta-Analyses (PRISMA) statement",
+   "quote": "Each included study may be assigned an objective assessment of methodological quality, preferably by using methods conforming to the Preferred Reporting Items for Systematic Reviews and Meta-Analyses (PRISMA) statement, or the standards of Cochrane.",
+   "kind": "entity"
+  },
+  {
+   "name": "standards of Cochrane",
+   "quote": "Each included study may be assigned an objective assessment of methodological quality, preferably by using methods conforming to the Preferred Reporting Items for Systematic Reviews and Meta-Analyses (PRISMA) statement, or the standards of Cochrane.",
+   "kind": "entity"
+  },
+  {
+   "name": "MEDLINE",
+   "quote": "Common information sources used in searches include scholarly databases of peer-reviewed articles such as MEDLINE, Web of Science, Embase, and PubMed, as well as sources of unpublished literature such as clinical trial registries and grey literature collections.",
+   "kind": "entity"
+  },
+  {
+   "name": "Web of Science",
+   "quote": "Common information sources used in searches include scholarly databases of peer-reviewed articles such as MEDLINE, Web of Science, Embase, and PubMed, as well as sources of unpublished literature such as clinical trial registries and grey literature collections.",
+   "kind": "entity"
+  },
+  {
+   "name": "Embase",
+   "quote": "Common information sources used in searches include scholarly databases of peer-reviewed articles such as MEDLINE, Web of Science, Embase, and PubMed, as well as sources of unpublished literature such as clinical trial registries and grey literature collections.",
+   "kind": "entity"
+  },
+  {
+   "name": "PubMed",
+   "quote": "Common information sources used in searches include scholarly databases of peer-reviewed articles such as MEDLINE, Web of Science, Embase, and PubMed, as well as sources of unpublished literature such as clinical trial registries and grey literature collections.",
+   "kind": "entity"
+  },
+  {
+   "name": "clinical trial registries",
+   "quote": "Common information sources used in searches include scholarly databases of peer-reviewed articles such as MEDLINE, Web of Science, Embase, and PubMed, as well as sources of unpublished literature such as clinical trial registries and grey literature collections.",
+   "kind": "entity"
+  },
+  {
+   "name": "grey literature collections",
+   "quote": "Common information sources used in searches include scholarly databases of peer-reviewed articles such as MEDLINE, Web of Science, Embase, and PubMed, as well as sources of unpublished literature such as clinical trial registries and grey literature collections.",
+   "kind": "entity"
+  },
+  {
+   "name": "database subject headings",
+   "quote": "To be systematic, searchers must use a combination of search skills and tools such as database subject headings, keyword searching, Boolean operators, and proximity searching while attempting to balance sensitivity (systematicity) and precision (accuracy).",
+   "kind": "entity"
+  },
+  {
+   "name": "keyword searching",
+   "quote": "To be systematic, searchers must use a combination of search skills and tools such as database subject headings, keyword searching, Boolean operators, and proximity searching while attempting to balance sensitivity (systematicity) and precision (accuracy).",
+   "kind": "entity"
+  },
+  {
+   "name": "Boolean operators",
+   "quote": "To be systematic, searchers must use a combination of search skills and tools such as database subject headings, keyword searching, Boolean operators, and proximity searching while attempting to balance sensitivity (systematicity) and precision (accuracy).",
+   "kind": "entity"
+  },
+  {
+   "name": "proximity searching",
+   "quote": "To be systematic, searchers must use a combination of search skills and tools such as database subject headings, keyword searching, Boolean operators, and proximity searching while attempting to balance sensitivity (systematicity) and precision (accuracy).",
+   "kind": "entity"
+  },
+  {
+   "name": "experienced information professional or librarian",
+   "quote": "Inviting and involving an experienced information professional or librarian can improve the quality of systematic review search strategies and reporting.",
+   "kind": "entity"
+  },
+  {
+   "name": "intervention effect review",
+   "quote": "Relevant data are being extracted and 'combined' in an intervention effect review, where a meta-analysis is possible.",
+   "kind": "entity"
+  },
+  {
+   "name": "meta-analysis",
+   "quote": "Relevant data are being extracted and 'combined' in an intervention effect review, where a meta-analysis is possible.",
+   "kind": "entity"
+  },
+  {
+   "name": "Software programmes",
+   "quote": "Software programmes can be used to support the selection process, including text mining tools and machine learning, which can automate aspects of the process.",
+   "kind": "entity"
+  },
+  {
+   "name": "text mining tools",
+   "quote": "Software programmes can be used to support the selection process, including text mining tools and machine learning, which can automate aspects of the process.",
+   "kind": "entity"
+  },
+  {
+   "name": "machine learning",
+   "quote": "Software programmes can be used to support the selection process, including text mining tools and machine learning, which can automate aspects of the process.",
+   "kind": "entity"
+  },
+  {
+   "source": "methodology section",
+   "relation": "should list",
+   "target": "databases",
+   "quote": "The methodology section of a systematic review should list all of the databases and citation indices that were searched.",
+   "kind": "relation"
+  },
+  {
+   "source": "methodology section",
+   "relation": "should list",
+   "target": "citation indices",
+   "quote": "The methodology section of a systematic review should list all of the databases and citation indices that were searched.",
+   "kind": "relation"
+  },
+  {
+   "source": "Preferred Reporting Items for Systematic Reviews and Meta-Analyses (PRISMA) statement",
+   "relation": "conforming to",
+   "target": "methodological quality",
+   "quote": "Each included study may be assigned an objective assessment of methodological quality, preferably by using methods conforming to the Preferred Reporting Items for Systematic Reviews and Meta-Analyses (PRISMA) statement, or the standards of Cochrane.",
+   "kind": "relation"
+  },
+  {
+   "source": "MEDLINE",
+   "relation": "such as",
+   "target": "scholarly databases of peer-reviewed articles",
+   "quote": "Common information sources used in searches include scholarly databases of peer-reviewed articles such as MEDLINE, Web of Science, Embase, and PubMed, as well as sources of unpublished literature such as clinical trial registries and grey literature collections.",
+   "kind": "relation"
+  },
+  {
+   "source": "Web of Science",
+   "relation": "such as",
+   "target": "scholarly databases of peer-reviewed articles",
+   "quote": "Common information sources used in searches include scholarly databases of peer-reviewed articles such as MEDLINE, Web of Science, Embase, and PubMed, as well as sources of unpublished literature such as clinical trial registries and grey literature collections.",
+   "kind": "relation"
+  },
+  {
+   "source": "Embase",
+   "relation": "such as",
+   "target": "scholarly databases of peer-reviewed articles",
+   "quote": "Common information sources used in searches include scholarly databases of peer-reviewed articles such as MEDLINE, Web of Science, Embase, and PubMed, as well as sources of unpublished literature such as clinical trial registries and grey literature collections.",
+   "kind": "relation"
+  },
+  {
+   "source": "PubMed",
+   "relation": "such as",
+   "target": "scholarly databases of peer-reviewed articles",
+   "quote": "Common information sources used in searches include scholarly databases of peer-reviewed articles such as MEDLINE, Web of Science, Embase, and PubMed, as well as sources of unpublished literature such as clinical trial registries and grey literature collections.",
+   "kind": "relation"
+  },
+  {
+   "source": "clinical trial registries",
+   "relation": "such as",
+   "target": "sources of unpublished literature",
+   "quote": "Common information sources used in searches include scholarly databases of peer-reviewed articles such as MEDLINE, Web of Science, Embase, and PubMed, as well as sources of unpublished literature such as clinical trial registries and grey literature collections.",
+   "kind": "relation"
+  },
+  {
+   "source": "grey literature collections",
+   "relation": "such as",
+   "target": "sources of unpublished literature",
+   "quote": "Common information sources used in searches include scholarly databases of peer-reviewed articles such as MEDLINE, Web of Science, Embase, and PubMed, as well as sources of unpublished literature such as clinical trial registries and grey literature collections.",
+   "kind": "relation"
+  },
+  {
+   "source": "experienced information professional or librarian",
+   "relation": "can improve the quality of",
+   "target": "systematic review search strategies",
+   "quote": "Inviting and involving an experienced information professional or librarian can improve the quality of systematic review search strategies and reporting.",
+   "kind": "relation"
+  },
+  {
+   "source": "meta-analysis",
+   "relation": "is possible in",
+   "target": "intervention effect review",
+   "quote": "Relevant data are being extracted and 'combined' in an intervention effect review, where a meta-analysis is possible.",
+   "kind": "relation"
+  },
+  {
+   "source": "Software programmes",
+   "relation": "can be used to support",
+   "target": "the selection process",
+   "quote": "Software programmes can be used to support the selection process, including text mining tools and machine learning, which can automate aspects of the process.",
+   "kind": "relation"
+  },
+  {
+   "source": "text mining tools",
+   "relation": "including",
+   "target": "Software programmes",
+   "quote": "Software programmes can be used to support the selection process, including text mining tools and machine learning, which can automate aspects of the process.",
+   "kind": "relation"
+  },
+  {
+   "source": "machine learning",
+   "relation": "including",
+   "target": "Software programmes",
+   "quote": "Software programmes can be used to support the selection process, including text mining tools and machine learning, which can automate aspects of the process.",
+   "kind": "relation"
+  },
+  {
+   "name": "Systematic Review Toolbox",
+   "quote": "The 'Systematic Review Toolbox' is a community-driven, web-based catalog of tools, to help reviewers chose appropriate tools for reviews.",
+   "kind": "entity"
+  }
+ ],
+ "refused": [
+  {
+   "item": {
+    "source": "Non-Interventional, Reproducible, and Open (NIRO) Systematic Reviews",
+    "relation": "was created to counter the limitation of",
+    "target": "PRISMA guidelines",
+    "quote": "As a result, Non-Interventional, Reproducible, and Open (NIRO) Systematic Reviews was created to counter this limitation.",
+    "kind": "relation"
+   },
+   "reason": "quote does not contain both ends"
+  }
+ ],
+ "chunks": 5,
+ "seconds": 104.1
+}

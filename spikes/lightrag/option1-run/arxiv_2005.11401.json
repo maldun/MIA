@@ -1,0 +1,80 @@
+{
+ "accepted": [
+  {
+   "name": "Large pre-trained language models",
+   "quote": "Large pre-trained language models have been shown to store factual knowledge in their parameters, and achieve state-of-the-art results when fine-tuned on downstream NLP tasks.",
+   "kind": "entity"
+  },
+  {
+   "name": "retrieval-augmented generation (RAG)",
+   "quote": "We explore a general-purpose fine-tuning recipe for retrieval-augmented generation (RAG) -- models which combine pre-trained parametric and non-parametric memory for language generation.",
+   "kind": "entity"
+  },
+  {
+   "name": "parametric memory",
+   "quote": "We introduce RAG models where the parametric memory is a pre-trained seq2seq model and the non-parametric memory is a dense vector index of Wikipedia, accessed with a pre-trained neural retriever.",
+   "kind": "entity"
+  },
+  {
+   "name": "pre-trained seq2seq model",
+   "quote": "We introduce RAG models where the parametric memory is a pre-trained seq2seq model and the non-parametric memory is a dense vector index of Wikipedia, accessed with a pre-trained neural retriever.",
+   "kind": "entity"
+  },
+  {
+   "name": "non-parametric memory",
+   "quote": "We introduce RAG models where the parametric memory is a pre-trained seq2seq model and the non-parametric memory is a dense vector index of Wikipedia, accessed with a pre-trained neural retriever.",
+   "kind": "entity"
+  },
+  {
+   "name": "dense vector index of Wikipedia",
+   "quote": "We introduce RAG models where the parametric memory is a pre-trained seq2seq model and the non-parametric memory is a dense vector index of Wikipedia, accessed with a pre-trained neural retriever.",
+   "kind": "entity"
+  },
+  {
+   "name": "pre-trained neural retriever",
+   "quote": "We introduce RAG models where the parametric memory is a pre-trained seq2seq model and the non-parametric memory is a dense vector index of Wikipedia, accessed with a pre-trained neural retriever.",
+   "kind": "entity"
+  },
+  {
+   "name": "parametric seq2seq models",
+   "quote": "We fine-tune and evaluate our models on a wide range of knowledge-intensive NLP tasks and set the state-of-the-art on three open domain QA tasks, outperforming parametric seq2seq models and task-specific retrieve-and-extract architectures.",
+   "kind": "entity"
+  },
+  {
+   "name": "task-specific retrieve-and-extract architectures",
+   "quote": "We fine-tune and evaluate our models on a wide range of knowledge-intensive NLP tasks and set the state-of-the-art on three open domain QA tasks, outperforming parametric seq2seq models and task-specific retrieve-and-extract architectures.",
+   "kind": "entity"
+  },
+  {
+   "source": "retrieval-augmented generation (RAG)",
+   "relation": "combine",
+   "target": "pre-trained parametric and non-parametric memory",
+   "quote": "We explore a general-purpose fine-tuning recipe for retrieval-augmented generation (RAG) -- models which combine pre-trained parametric and non-parametric memory for language generation.",
+   "kind": "relation"
+  },
+  {
+   "source": "parametric memory",
+   "relation": "is a",
+   "target": "pre-trained seq2seq model",
+   "quote": "We introduce RAG models where the parametric memory is a pre-trained seq2seq model and the non-parametric memory is a dense vector index of Wikipedia, accessed with a pre-trained neural retriever.",
+   "kind": "relation"
+  },
+  {
+   "source": "non-parametric memory",
+   "relation": "is a",
+   "target": "dense vector index of Wikipedia",
+   "quote": "We introduce RAG models where the parametric memory is a pre-trained seq2seq model and the non-parametric memory is a dense vector index of Wikipedia, accessed with a pre-trained neural retriever.",
+   "kind": "relation"
+  },
+  {
+   "source": "dense vector index of Wikipedia",
+   "relation": "accessed with",
+   "target": "pre-trained neural retriever",
+   "quote": "We introduce RAG models where the parametric memory is a pre-trained seq2seq model and the non-parametric memory is a dense vector index of Wikipedia, accessed with a pre-trained neural retriever.",
+   "kind": "relation"
+  }
+ ],
+ "refused": [],
+ "chunks": 1,
+ "seconds": 78.8
+}

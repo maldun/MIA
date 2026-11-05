@@ -1,0 +1,418 @@
+{
+ "accepted": [
+  {
+   "name": "Peer review",
+   "quote": "Peer review is the evaluation of work by one or more people with similar competencies as the producers of the work (peers).",
+   "kind": "entity"
+  },
+  {
+   "name": "Henry Oldenburg (1619\u20131677)",
+   "quote": "Henry Oldenburg (1619\u20131677) was a German-born British philosopher who is seen as the 'father' of modern scientific peer review.",
+   "kind": "entity"
+  },
+  {
+   "name": "Nature",
+   "quote": "It developed over the following centuries with, for example, the journal Nature making it standard practice in 1973.",
+   "kind": "entity"
+  },
+  {
+   "name": "Higher School of Economics",
+   "quote": "A monument to peer review has been at the Higher School of Economics in Moscow since 2017.",
+   "kind": "entity"
+  },
+  {
+   "name": "Ish\u0101q ibn \u02bbAl\u012b al-Ruh\u0101w\u012b (854\u2013931)",
+   "quote": "A prototype professional peer review process was recommended in the Ethics of the Physician written by Ish\u0101q ibn \u02bbAl\u012b al-Ruh\u0101w\u012b (854\u2013931).",
+   "kind": "entity"
+  },
+  {
+   "name": "Ethics of the Physician",
+   "quote": "A prototype professional peer review process was recommended in the Ethics of the Physician written by Ish\u0101q ibn \u02bbAl\u012b al-Ruh\u0101w\u012b (854\u2013931).",
+   "kind": "entity"
+  },
+  {
+   "name": "Bloom's taxonomy",
+   "quote": "Peer review is used in education to achieve certain learning objectives, particularly as a tool to reach higher order processes in the affective and cognitive domains as defined by Bloom's taxonomy.",
+   "kind": "entity"
+  },
+  {
+   "source": "Henry Oldenburg (1619\u20131677)",
+   "relation": "is seen as the 'father' of",
+   "target": "modern scientific peer review",
+   "quote": "Henry Oldenburg (1619\u20131677) was a German-born British philosopher who is seen as the 'father' of modern scientific peer review.",
+   "kind": "relation"
+  },
+  {
+   "source": "Ish\u0101q ibn \u02bbAl\u012b al-Ruh\u0101w\u012b (854\u2013931)",
+   "relation": "written",
+   "target": "Ethics of the Physician",
+   "quote": "A prototype professional peer review process was recommended in the Ethics of the Physician written by Ish\u0101q ibn \u02bbAl\u012b al-Ruh\u0101w\u012b (854\u2013931).",
+   "kind": "relation"
+  },
+  {
+   "name": "progressing proficient practice assessment",
+   "quote": "It is a piece of progressing proficient practice assessment and centered proficient practice assessment\u2014significant supporters of supplier credentialing and privileging.",
+   "kind": "entity"
+  },
+  {
+   "name": "centered proficient practice assessment",
+   "quote": "It is a piece of progressing proficient practice assessment and centered proficient practice assessment\u2014significant supporters of supplier credentialing and privileging.",
+   "kind": "entity"
+  },
+  {
+   "name": "supplier credentialing",
+   "quote": "It is a piece of progressing proficient practice assessment and centered proficient practice assessment\u2014significant supporters of supplier credentialing and privileging.",
+   "kind": "entity"
+  },
+  {
+   "name": "privileging",
+   "quote": "It is a piece of progressing proficient practice assessment and centered proficient practice assessment\u2014significant supporters of supplier credentialing and privileging.",
+   "kind": "entity"
+  },
+  {
+   "name": "physicians",
+   "quote": "Peer evaluation of clinical teaching skills for both physicians and nurses.",
+   "kind": "entity"
+  },
+  {
+   "name": "nurses",
+   "quote": "Peer evaluation of clinical teaching skills for both physicians and nurses.",
+   "kind": "entity"
+  },
+  {
+   "name": "medical peer review",
+   "quote": "Additionally, \"medical peer review\" has been used by the American Medical Association to refer not only to the process of improving quality and safety in health care organizations, but also to the process of rating clinical behavior or compliance with professional society membership standards.",
+   "kind": "entity"
+  },
+  {
+   "name": "American Medical Association",
+   "quote": "Additionally, \"medical peer review\" has been used by the American Medical Association to refer not only to the process of improving quality and safety in health care organizations, but also to the process of rating clinical behavior or compliance with professional society membership standards.",
+   "kind": "entity"
+  },
+  {
+   "name": "the clinical network",
+   "quote": "The clinical network believes it to be the most ideal method of guaranteeing that distributed exploration is dependable and that any clinical medicines that it advocates are protected and viable for individuals.",
+   "kind": "entity"
+  },
+  {
+   "name": "technical peer review",
+   "quote": "In engineering, technical peer review is a type of engineering review.",
+   "kind": "entity"
+  },
+  {
+   "name": "engineering review",
+   "quote": "In engineering, technical peer review is a type of engineering review.",
+   "kind": "entity"
+  },
+  {
+   "name": "European Union",
+   "quote": "The European Union has been using peer review in the \"Open Method of Co-ordination\" of policies in the fields of active labour market policy since 1999.",
+   "kind": "entity"
+  },
+  {
+   "name": "Open Method of Co-ordination",
+   "quote": "The European Union has been using peer review in the \"Open Method of Co-ordination\" of policies in the fields of active labour market policy since 1999.",
+   "kind": "entity"
+  },
+  {
+   "name": "United Nations Economic Commission for Europe",
+   "quote": "The United Nations Economic Commission for Europe, through UNECE Environmental Performance Reviews, uses peer review, referred to as \"peer learning\", to evaluate progress made by its member countries in improving their environmental policies.",
+   "kind": "entity"
+  },
+  {
+   "name": "UNECE Environmental Performance Reviews",
+   "quote": "The United Nations Economic Commission for Europe, through UNECE Environmental Performance Reviews, uses peer review, referred to as \"peer learning\", to evaluate progress made by its member countries in improving their environmental policies.",
+   "kind": "entity"
+  },
+  {
+   "name": "State of California",
+   "quote": "The State of California is the only U.S. state to mandate scientific peer review.",
+   "kind": "entity"
+  },
+  {
+   "name": "Governor of California",
+   "quote": "In 1997, the Governor of California signed into law Senate Bill 1320 (Sher), Chapter 295, statutes of 1997, which mandates that, before any CalEPA Board, Department, or Office adopts a final version of a rule-making, the scientific findings, conclusions, and assumptions on which the proposed rule are based must be submitted for independent external scientific peer review.",
+   "kind": "entity"
+  },
+  {
+   "name": "Senate Bill 1320 (Sher)",
+   "quote": "In 1997, the Governor of California signed into law Senate Bill 1320 (Sher), Chapter 295, statutes of 1997, which mandates that, before any CalEPA Board, Department, or Office adopts a final version of a rule-making, the scientific findings, conclusions, and assumptions on which the proposed rule are based must be submitted for independent external scientific peer review.",
+   "kind": "entity"
+  },
+  {
+   "name": "CalEPA Board",
+   "quote": "In 1997, the Governor of California signed into law Senate Bill 1320 (Sher), Chapter 295, statutes of 1997, which mandates that, before any CalEPA Board, Department, or Office adopts a final version of a rule-making, the scientific findings, conclusions, and assumptions on which the proposed rule are based must be submitted for independent external scientific peer review.",
+   "kind": "entity"
+  },
+  {
+   "source": "progressing proficient practice assessment",
+   "relation": "significant supporters of",
+   "target": "supplier credentialing",
+   "quote": "It is a piece of progressing proficient practice assessment and centered proficient practice assessment\u2014significant supporters of supplier credentialing and privileging.",
+   "kind": "relation"
+  },
+  {
+   "source": "progressing proficient practice assessment",
+   "relation": "significant supporters of",
+   "target": "privileging",
+   "quote": "It is a piece of progressing proficient practice assessment and centered proficient practice assessment\u2014significant supporters of supplier credentialing and privileging.",
+   "kind": "relation"
+  },
+  {
+   "source": "centered proficient practice assessment",
+   "relation": "significant supporters of",
+   "target": "supplier credentialing",
+   "quote": "It is a piece of progressing proficient practice assessment and centered proficient practice assessment\u2014significant supporters of supplier credentialing and privileging.",
+   "kind": "relation"
+  },
+  {
+   "source": "centered proficient practice assessment",
+   "relation": "significant supporters of",
+   "target": "privileging",
+   "quote": "It is a piece of progressing proficient practice assessment and centered proficient practice assessment\u2014significant supporters of supplier credentialing and privileging.",
+   "kind": "relation"
+  },
+  {
+   "source": "American Medical Association",
+   "relation": "used \"medical peer review\" to refer to",
+   "target": "medical peer review",
+   "quote": "Additionally, \"medical peer review\" has been used by the American Medical Association to refer not only to the process of improving quality and safety in health care organizations, but also to the process of rating clinical behavior or compliance with professional society membership standards.",
+   "kind": "relation"
+  },
+  {
+   "source": "technical peer review",
+   "relation": "is a type of",
+   "target": "engineering review",
+   "quote": "In engineering, technical peer review is a type of engineering review.",
+   "kind": "relation"
+  },
+  {
+   "source": "European Union",
+   "relation": "has been using peer review in the",
+   "target": "Open Method of Co-ordination",
+   "quote": "The European Union has been using peer review in the \"Open Method of Co-ordination\" of policies in the fields of active labour market policy since 1999.",
+   "kind": "relation"
+  },
+  {
+   "source": "United Nations Economic Commission for Europe",
+   "relation": "through",
+   "target": "UNECE Environmental Performance Reviews",
+   "quote": "The United Nations Economic Commission for Europe, through UNECE Environmental Performance Reviews, uses peer review, referred to as \"peer learning\", to evaluate progress made by its member countries in improving their environmental policies.",
+   "kind": "relation"
+  },
+  {
+   "source": "Governor of California",
+   "relation": "signed into law",
+   "target": "Senate Bill 1320 (Sher)",
+   "quote": "In 1997, the Governor of California signed into law Senate Bill 1320 (Sher), Chapter 295, statutes of 1997, which mandates that, before any CalEPA Board, Department, or Office adopts a final version of a rule-making, the scientific findings, conclusions, and assumptions on which the proposed rule are based must be submitted for independent external scientific peer review.",
+   "kind": "relation"
+  },
+  {
+   "name": "California Health and Safety Code Section 57004",
+   "quote": "This requirement is incorporated into the California Health and Safety Code Section 57004.",
+   "kind": "entity"
+  },
+  {
+   "name": "Richard Smith",
+   "quote": "\"Who wants to read something that doesn't work?\" asks Richard Smith in the Journal of the Royal Society of Medicine.",
+   "kind": "entity"
+  },
+  {
+   "name": "Journal of the Royal Society of Medicine",
+   "quote": "\"Who wants to read something that doesn't work?\" asks Richard Smith in the Journal of the Royal Society of Medicine.",
+   "kind": "entity"
+  },
+  {
+   "name": "Registered reports",
+   "quote": "Registered reports and peer-replication can mitigate the replication crisis.",
+   "kind": "entity"
+  },
+  {
+   "name": "peer-replication",
+   "quote": "Registered reports and peer-replication can mitigate the replication crisis.",
+   "kind": "entity"
+  },
+  {
+   "name": "replication crisis",
+   "quote": "Registered reports and peer-replication can mitigate the replication crisis.",
+   "kind": "entity"
+  },
+  {
+   "name": "Adversarial systems",
+   "quote": "Adversarial systems can reduce ideological biases.",
+   "kind": "entity"
+  },
+  {
+   "name": "visual peer review",
+   "quote": "The concept of peer review has been extended to other practices, including the use of visual peer review for evaluating peer-produced data visualizations.",
+   "kind": "entity"
+  },
+  {
+   "source": "This requirement",
+   "relation": "is incorporated into",
+   "target": "California Health and Safety Code Section 57004",
+   "quote": "This requirement is incorporated into the California Health and Safety Code Section 57004.",
+   "kind": "relation"
+  },
+  {
+   "source": "Richard Smith",
+   "relation": "asks in",
+   "target": "Journal of the Royal Society of Medicine",
+   "quote": "\"Who wants to read something that doesn't work?\" asks Richard Smith in the Journal of the Royal Society of Medicine.",
+   "kind": "relation"
+  },
+  {
+   "source": "interviews in a survey",
+   "relation": "by",
+   "target": "Nature",
+   "quote": "The (possibly not declared) use of artificial intelligence to assist or perform the process of peer review has been confirmed by interviews in a survey by Nature.",
+   "kind": "relation"
+  },
+  {
+   "source": "Registered reports and peer-replication",
+   "relation": "can mitigate",
+   "target": "the replication crisis",
+   "quote": "Registered reports and peer-replication can mitigate the replication crisis.",
+   "kind": "relation"
+  },
+  {
+   "source": "Adversarial systems",
+   "relation": "can reduce",
+   "target": "ideological biases",
+   "quote": "Adversarial systems can reduce ideological biases.",
+   "kind": "relation"
+  },
+  {
+   "name": "students",
+   "quote": "It has been found that students are more positive than negative when reviewing their classmates' writing.",
+   "kind": "entity"
+  },
+  {
+   "name": "Peer seminar",
+   "quote": "Peer seminar is a method that involves a speaker that presents ideas to an audience that also acts as a \"contest\".",
+   "kind": "entity"
+  },
+  {
+   "name": "speaker",
+   "quote": "Peer seminar is a method that involves a speaker that presents ideas to an audience that also acts as a \"contest\".",
+   "kind": "entity"
+  },
+  {
+   "name": "audience",
+   "quote": "Peer seminar is a method that involves a speaker that presents ideas to an audience that also acts as a \"contest\".",
+   "kind": "entity"
+  },
+  {
+   "name": "Professional peer review",
+   "quote": "Professional peer review focuses on the performance of professionals, with a view to improving quality, upholding standards, or providing certification.",
+   "kind": "entity"
+  },
+  {
+   "name": "Peer review in writing",
+   "quote": "Peer review in writing is a pivotal component among various peer review mechanisms, often spearheaded by educators and involving student participation, particularly in academic settings.",
+   "kind": "entity"
+  },
+  {
+   "name": "educators",
+   "quote": "Peer review in writing is a pivotal component among various peer review mechanisms, often spearheaded by educators and involving student participation, particularly in academic settings.",
+   "kind": "entity"
+  },
+  {
+   "name": "Magda Tigchelaar",
+   "quote": "Magda Tigchelaar compares peer review with self-assessment through an experiment that divided students into three groups: self-assessment, peer review, and no review.",
+   "kind": "entity"
+  },
+  {
+   "name": "self-assessment",
+   "quote": "Magda Tigchelaar compares peer review with self-assessment through an experiment that divided students into three groups: self-assessment, peer review, and no review.",
+   "kind": "entity"
+  },
+  {
+   "source": "Peer review",
+   "relation": "helps",
+   "target": "students",
+   "quote": "Peer review can help students not get discouraged but rather feel determined to improve their writing.",
+   "kind": "relation"
+  },
+  {
+   "source": "Peer seminar",
+   "relation": "involves",
+   "target": "speaker",
+   "quote": "Peer seminar is a method that involves a speaker that presents ideas to an audience that also acts as a \"contest\".",
+   "kind": "relation"
+  },
+  {
+   "source": "speaker",
+   "relation": "presents ideas to",
+   "target": "audience",
+   "quote": "Peer seminar is a method that involves a speaker that presents ideas to an audience that also acts as a \"contest\".",
+   "kind": "relation"
+  },
+  {
+   "source": "Peer review in writing",
+   "relation": "spearheaded by",
+   "target": "educators",
+   "quote": "Peer review in writing is a pivotal component among various peer review mechanisms, often spearheaded by educators and involving student participation, particularly in academic settings.",
+   "kind": "relation"
+  },
+  {
+   "source": "Peer review in writing",
+   "relation": "involving",
+   "target": "students",
+   "quote": "Peer review in writing is a pivotal component among various peer review mechanisms, often spearheaded by educators and involving student participation, particularly in academic settings.",
+   "kind": "relation"
+  },
+  {
+   "source": "Magda Tigchelaar",
+   "relation": "compares",
+   "target": "peer review",
+   "quote": "Magda Tigchelaar compares peer review with self-assessment through an experiment that divided students into three groups: self-assessment, peer review, and no review.",
+   "kind": "relation"
+  },
+  {
+   "source": "Magda Tigchelaar",
+   "relation": "compares",
+   "target": "self-assessment",
+   "quote": "Magda Tigchelaar compares peer review with self-assessment through an experiment that divided students into three groups: self-assessment, peer review, and no review.",
+   "kind": "relation"
+  },
+  {
+   "name": "author",
+   "quote": "In contrast, the effectiveness of peer review is often limited due to the lack of structured feedback, characterized by scattered, meaningless summaries and evaluations that fail to meet the author's expectations for revising their work.",
+   "kind": "entity"
+  },
+  {
+   "name": "school related assignments",
+   "quote": "Some educators recommend that for any school related assignments, instead of h",
+   "kind": "entity"
+  },
+  {
+   "source": "peer review",
+   "relation": "fails to meet expectations of",
+   "target": "author",
+   "quote": "In contrast, the effectiveness of peer review is often limited due to the lack of structured feedback, characterized by scattered, meaningless summaries and evaluations that fail to meet the author's expectations for revising their work.",
+   "kind": "relation"
+  },
+  {
+   "source": "educators",
+   "relation": "recommend for",
+   "target": "school related assignments",
+   "quote": "Some educators recommend that for any school related assignments, instead of h",
+   "kind": "relation"
+  }
+ ],
+ "refused": [
+  {
+   "item": {
+    "source": "Nature",
+    "relation": "making it standard practice in 1973",
+    "target": "Peer review",
+    "quote": "It developed over the following centuries with, for example, the journal Nature making it standard practice in 1973.",
+    "kind": "relation"
+   },
+   "reason": "quote does not contain both ends"
+  }
+ ],
+ "chunks": 5,
+ "seconds": 96.2
+}

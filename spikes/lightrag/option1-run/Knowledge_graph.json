@@ -1,0 +1,550 @@
+{
+ "accepted": [
+  {
+   "name": "knowledge graph",
+   "quote": "In knowledge representation and reasoning, a knowledge graph is a knowledge base that uses a graph-structured data model or topology to represent and operate on data.",
+   "kind": "entity"
+  },
+  {
+   "name": "Google",
+   "quote": "They are also historically associated with and used by search engines such as Google, Bing, and Yahoo; knowledge engines and question-answering services such as WolframAlpha, Apple's Siri, and Amazon Alexa; and social networks such as LinkedIn and Facebook.",
+   "kind": "entity"
+  },
+  {
+   "name": "Bing",
+   "quote": "They are also historically associated with and used by search engines such as Google, Bing, and Yahoo; knowledge engines and question-answering services such as WolframAlpha, Apple's Siri, and Amazon Alexa; and social networks such as LinkedIn and Facebook.",
+   "kind": "entity"
+  },
+  {
+   "name": "Yahoo",
+   "quote": "They are also historically associated with and used by search engines such as Google, Bing, and Yahoo; knowledge engines and question-answering services such as WolframAlpha, Apple's Siri, and Amazon Alexa; and social networks such as LinkedIn and Facebook.",
+   "kind": "entity"
+  },
+  {
+   "name": "WolframAlpha",
+   "quote": "They are also historically associated with and used by search engines such as Google, Bing, and Yahoo; knowledge engines and question-answering services such as WolframAlpha, Apple's Siri, and Amazon Alexa; and social networks such as LinkedIn and Facebook.",
+   "kind": "entity"
+  },
+  {
+   "name": "Apple's Siri",
+   "quote": "They are also historically associated with and used by search engines such as Google, Bing, and Yahoo; knowledge engines and question-answering services such as WolframAlpha, Apple's Siri, and Amazon Alexa; and social networks such as LinkedIn and Facebook.",
+   "kind": "entity"
+  },
+  {
+   "name": "Amazon Alexa",
+   "quote": "They are also historically associated with and used by search engines such as Google, Bing, and Yahoo; knowledge engines and question-answering services such as WolframAlpha, Apple's Siri, and Amazon Alexa; and social networks such as LinkedIn and Facebook.",
+   "kind": "entity"
+  },
+  {
+   "name": "LinkedIn",
+   "quote": "They are also historically associated with and used by search engines such as Google, Bing, and Yahoo; knowledge engines and question-answering services such as WolframAlpha, Apple's Siri, and Amazon Alexa; and social networks such as LinkedIn and Facebook.",
+   "kind": "entity"
+  },
+  {
+   "name": "Facebook",
+   "quote": "They are also historically associated with and used by search engines such as Google, Bing, and Yahoo; knowledge engines and question-answering services such as WolframAlpha, Apple's Siri, and Amazon Alexa; and social networks such as LinkedIn and Facebook.",
+   "kind": "entity"
+  },
+  {
+   "name": "Human Resources Research Organization (HumRRO)",
+   "quote": "In December 1968, the Human Resources Research Organization (HumRRO) delivered a presentation for the Society for General Systems Research's Annual Meeting in which they described the \"Subject-Matter Map,\" and formalized the idea of representing knowledge as a graph.",
+   "kind": "entity"
+  },
+  {
+   "name": "Society for General Systems Research",
+   "quote": "In December 1968, the Human Resources Research Organization (HumRRO) delivered a presentation for the Society for General Systems Research's Annual Meeting in which they described the \"Subject-Matter Map,\" and formalized the idea of representing knowledge as a graph.",
+   "kind": "entity"
+  },
+  {
+   "name": "Edgar W. Schneider",
+   "quote": "In 1972, the Austrian linguist Edgar W. Schneider cited HumRRO's presentation in his discussion of how to build modular instructional systems for courses, and coined the term \"Knowledge Graph.\"",
+   "kind": "entity"
+  },
+  {
+   "name": "University of Groningen",
+   "quote": "In the late 1980s, the University of Groningen and University of Twente jointly began a project called Knowledge Graphs, focusing on the design of semantic networks with edges restricted to a limited set of relations, to facilitate algebras on the graph.",
+   "kind": "entity"
+  },
+  {
+   "name": "University of Twente",
+   "quote": "In the late 1980s, the University of Groningen and University of Twente jointly began a project called Knowledge Graphs, focusing on the design of semantic networks with edges restricted to a limited set of relations, to facilitate algebras on the graph.",
+   "kind": "entity"
+  },
+  {
+   "name": "Wordnet",
+   "quote": "In 1985, Wordnet was founded, capturing semantic relationships between words and meanings \u2013 an application of this idea to language itself.",
+   "kind": "entity"
+  },
+  {
+   "name": "Marc Wirk",
+   "quote": "In 2005, Marc Wirk founded Geonames to capture relationships between different geographic names and locales and associated entities.",
+   "kind": "entity"
+  },
+  {
+   "name": "Geonames",
+   "quote": "In 2005, Marc Wirk founded Geonames to capture relationships between different geographic names and locales and associated entities.",
+   "kind": "entity"
+  },
+  {
+   "name": "Andrew Edmonds",
+   "quote": "In 1998, Andrew Edmonds of Science in Finance Ltd in the UK created a system called ThinkBase that offered fuzzy-logic based reasoning in a graphical context.",
+   "kind": "entity"
+  },
+  {
+   "name": "Science in Finance Ltd",
+   "quote": "In 1998, Andrew Edmonds of Science in Finance Ltd in the UK created a system called ThinkBase that offered fuzzy-logic based reasoning in a graphical context.",
+   "kind": "entity"
+  },
+  {
+   "name": "ThinkBase",
+   "quote": "In 1998, Andrew Edmonds of Science in Finance Ltd in the UK created a system called ThinkBase that offered fuzzy-logic based reasoning in a graphical context.",
+   "kind": "entity"
+  },
+  {
+   "name": "DBpedia",
+   "quote": "In 2007, both DBpedia and Freebase were founded as graph-based knowledge repositories for general-purpose knowledge.",
+   "kind": "entity"
+  },
+  {
+   "name": "Freebase",
+   "quote": "In 2007, both DBpedia and Freebase were founded as graph-based knowledge repositories for general-purpose knowledge.",
+   "kind": "entity"
+  },
+  {
+   "name": "Wikipedia",
+   "quote": "DBpedia focused exclusively on data extracted from Wikipedia, while Freebase also included a range of public datasets.",
+   "kind": "entity"
+  },
+  {
+   "source": "Human Resources Research Organization (HumRRO)",
+   "relation": "delivered a presentation for",
+   "target": "Society for General Systems Research",
+   "quote": "In December 1968, the Human Resources Research Organization (HumRRO) delivered a presentation for the Society for General Systems Research's Annual Meeting in which they described the \"Subject-Matter Map,\" and formalized the idea of representing knowledge as a graph.",
+   "kind": "relation"
+  },
+  {
+   "source": "Edgar W. Schneider",
+   "relation": "cited",
+   "target": "HumRRO",
+   "quote": "In 1972, the Austrian linguist Edgar W. Schneider cited HumRRO's presentation in his discussion of how to build modular instructional systems for courses, and coined the term \"Knowledge Graph.\"",
+   "kind": "relation"
+  },
+  {
+   "source": "University of Groningen",
+   "relation": "jointly began a project with",
+   "target": "University of Twente",
+   "quote": "In the late 1980s, the University of Groningen and University of Twente jointly began a project called Knowledge Graphs, focusing on the design of semantic networks with edges restricted to a limited set of relations, to facilitate algebras on the graph.",
+   "kind": "relation"
+  },
+  {
+   "source": "Marc Wirk",
+   "relation": "founded",
+   "target": "Geonames",
+   "quote": "In 2005, Marc Wirk founded Geonames to capture relationships between different geographic names and locales and associated entities.",
+   "kind": "relation"
+  },
+  {
+   "source": "Andrew Edmonds",
+   "relation": "of",
+   "target": "Science in Finance Ltd",
+   "quote": "In 1998, Andrew Edmonds of Science in Finance Ltd in the UK created a system called ThinkBase that offered fuzzy-logic based reasoning in a graphical context.",
+   "kind": "relation"
+  },
+  {
+   "source": "DBpedia",
+   "relation": "focused exclusively on data extracted from",
+   "target": "Wikipedia",
+   "quote": "DBpedia focused exclusively on data extracted from Wikipedia, while Freebase also included a range of public datasets.",
+   "kind": "relation"
+  },
+  {
+   "source": "Google",
+   "relation": "introduced their Knowledge Graph, building on",
+   "target": "DBpedia",
+   "quote": "In 2012, Google introduced their Knowledge Graph, building on DBpedia and Freebase among other sources.",
+   "kind": "relation"
+  },
+  {
+   "source": "Google",
+   "relation": "introduced their Knowledge Graph, building on",
+   "target": "Freebase",
+   "quote": "In 2012, Google introduced their Knowledge Graph, building on DBpedia and Freebase among other sources.",
+   "kind": "relation"
+  },
+  {
+   "name": "RDFa",
+   "quote": "They later incorporated RDFa, Microdata, JSON-LD content extracted from indexed web pages, including the CIA World Factbook, Wikidata, and Wikipedia.",
+   "kind": "entity"
+  },
+  {
+   "name": "Microdata",
+   "quote": "They later incorporated RDFa, Microdata, JSON-LD content extracted from indexed web pages, including the CIA World Factbook, Wikidata, and Wikipedia.",
+   "kind": "entity"
+  },
+  {
+   "name": "JSON-LD",
+   "quote": "They later incorporated RDFa, Microdata, JSON-LD content extracted from indexed web pages, including the CIA World Factbook, Wikidata, and Wikipedia.",
+   "kind": "entity"
+  },
+  {
+   "name": "CIA World Factbook",
+   "quote": "They later incorporated RDFa, Microdata, JSON-LD content extracted from indexed web pages, including the CIA World Factbook, Wikidata, and Wikipedia.",
+   "kind": "entity"
+  },
+  {
+   "name": "Wikidata",
+   "quote": "They later incorporated RDFa, Microdata, JSON-LD content extracted from indexed web pages, including the CIA World Factbook, Wikidata, and Wikipedia.",
+   "kind": "entity"
+  },
+  {
+   "name": "schema.org",
+   "quote": "Entity and relationship types associated with this knowledge graph have been further organized using terms from the schema.org vocabulary.",
+   "kind": "entity"
+  },
+  {
+   "name": "Google Knowledge Graph",
+   "quote": "The Google Knowledge Graph became a complement to string-based search within Google, and its popularity online brought the term into more common use.",
+   "kind": "entity"
+  },
+  {
+   "name": "Airbnb",
+   "quote": "These include Facebook, LinkedIn, Airbnb, Microsoft, Amazon, Uber and eBay.",
+   "kind": "entity"
+  },
+  {
+   "name": "Microsoft",
+   "quote": "These include Facebook, LinkedIn, Airbnb, Microsoft, Amazon, Uber and eBay.",
+   "kind": "entity"
+  },
+  {
+   "name": "Amazon",
+   "quote": "These include Facebook, LinkedIn, Airbnb, Microsoft, Amazon, Uber and eBay.",
+   "kind": "entity"
+  },
+  {
+   "name": "Uber",
+   "quote": "These include Facebook, LinkedIn, Airbnb, Microsoft, Amazon, Uber and eBay.",
+   "kind": "entity"
+  },
+  {
+   "name": "eBay",
+   "quote": "These include Facebook, LinkedIn, Airbnb, Microsoft, Amazon, Uber and eBay.",
+   "kind": "entity"
+  },
+  {
+   "name": "IEEE",
+   "quote": "In 2019, IEEE combined its annual international conferences on \"Big Knowledge\" and \"Data Mining and Intelligent Computing\" into the International Conference on Knowledge Graph.",
+   "kind": "entity"
+  },
+  {
+   "name": "International Conference on Knowledge Graph",
+   "quote": "In 2019, IEEE combined its annual international conferences on \"Big Knowledge\" and \"Data Mining and Intelligent Computing\" into the International Conference on Knowledge Graph.",
+   "kind": "entity"
+  },
+  {
+   "name": "Microsoft Research's GraphRAG (2024)",
+   "quote": "Microsoft Research's GraphRAG (2024) exemplified this development by integrating LLM-generated graphs into retrieval-augmented generation.",
+   "kind": "entity"
+  },
+  {
+   "source": "Google Knowledge Graph",
+   "relation": "complement to",
+   "target": "string-based search within Google",
+   "quote": "The Google Knowledge Graph became a complement to string-based search within Google, and its popularity online brought the term into more common use.",
+   "kind": "relation"
+  },
+  {
+   "source": "Facebook",
+   "relation": "advertised their use of knowledge graphs",
+   "target": "knowledge graphs",
+   "quote": "Since then, several large multinationals have advertised their use of knowledge graphs, further popularising the term. These include Facebook, LinkedIn, Airbnb, Microsoft, Amazon, Uber and eBay.",
+   "kind": "relation"
+  },
+  {
+   "source": "LinkedIn",
+   "relation": "advertised their use of knowledge graphs",
+   "target": "knowledge graphs",
+   "quote": "Since then, several large multinationals have advertised their use of knowledge graphs, further popularising the term. These include Facebook, LinkedIn, Airbnb, Microsoft, Amazon, Uber and eBay.",
+   "kind": "relation"
+  },
+  {
+   "source": "Airbnb",
+   "relation": "advertised their use of knowledge graphs",
+   "target": "knowledge graphs",
+   "quote": "Since then, several large multinationals have advertised their use of knowledge graphs, further popularising the term. These include Facebook, LinkedIn, Airbnb, Microsoft, Amazon, Uber and eBay.",
+   "kind": "relation"
+  },
+  {
+   "source": "Microsoft",
+   "relation": "advertised their use of knowledge graphs",
+   "target": "knowledge graphs",
+   "quote": "Since then, several large multinationals have advertised their use of knowledge graphs, further popularising the term. These include Facebook, LinkedIn, Airbnb, Microsoft, Amazon, Uber and eBay.",
+   "kind": "relation"
+  },
+  {
+   "source": "Amazon",
+   "relation": "advertised their use of knowledge graphs",
+   "target": "knowledge graphs",
+   "quote": "Since then, several large multinationals have advertised their use of knowledge graphs, further popularising the term. These include Facebook, LinkedIn, Airbnb, Microsoft, Amazon, Uber and eBay.",
+   "kind": "relation"
+  },
+  {
+   "source": "Uber",
+   "relation": "advertised their use of knowledge graphs",
+   "target": "knowledge graphs",
+   "quote": "Since then, several large multinationals have advertised their use of knowledge graphs, further popularising the term. These include Facebook, LinkedIn, Airbnb, Microsoft, Amazon, Uber and eBay.",
+   "kind": "relation"
+  },
+  {
+   "source": "eBay",
+   "relation": "advertised their use of knowledge graphs",
+   "target": "knowledge graphs",
+   "quote": "Since then, several large multinationals have advertised their use of knowledge graphs, further popularising the term. These include Facebook, LinkedIn, Airbnb, Microsoft, Amazon, Uber and eBay.",
+   "kind": "relation"
+  },
+  {
+   "source": "IEEE",
+   "relation": "combined its annual international conferences... into",
+   "target": "International Conference on Knowledge Graph",
+   "quote": "In 2019, IEEE combined its annual international conferences on \"Big Knowledge\" and \"Data Mining and Intelligent Computing\" into the International Conference on Knowledge Graph.",
+   "kind": "relation"
+  },
+  {
+   "name": "YAGO",
+   "quote": "In addition to the above examples, the term has been used to describe open knowledge projects such as YAGO and Wikidata;",
+   "kind": "entity"
+  },
+  {
+   "name": "Linked Open Data cloud",
+   "quote": "In addition to the above examples, the term has been used to describe open knowledge projects such as YAGO and Wikidata; federations like the Linked Open Data cloud;",
+   "kind": "entity"
+  },
+  {
+   "name": "Yahoo's semantic search assistant Spark",
+   "quote": "In addition to the above examples, the term has been used to describe open knowledge projects such as YAGO and Wikidata; federations like the Linked Open Data cloud; a range of commercial search tools, including Yahoo's semantic search assistant Spark, Google's Knowledge Graph, and Microsoft's Satori;",
+   "kind": "entity"
+  },
+  {
+   "name": "Google's Knowledge Graph",
+   "quote": "In addition to the above examples, the term has been used to describe open knowledge projects such as YAGO and Wikidata; federations like the Linked Open Data cloud; a range of commercial search tools, including Yahoo's semantic search assistant Spark, Google's Knowledge Graph, and Microsoft's Satori;",
+   "kind": "entity"
+  },
+  {
+   "name": "Microsoft's Satori",
+   "quote": "In addition to the above examples, the term has been used to describe open knowledge projects such as YAGO and Wikidata; federations like the Linked Open Data cloud; a range of commercial search tools, including Yahoo's semantic search assistant Spark, Google's Knowledge Graph, and Microsoft's Satori;",
+   "kind": "entity"
+  },
+  {
+   "name": "graph databases",
+   "quote": "The popularization of knowledge graphs and their accompanying methods have led to the development of graph databases.",
+   "kind": "entity"
+  },
+  {
+   "name": "virtual knowledge graphs",
+   "quote": "In contrast, virtual knowledge graphs do not store information in specialized databases.",
+   "kind": "entity"
+  },
+  {
+   "name": "relational database",
+   "quote": "They rely on an underlying relational database or data lake to answer queries on the graph.",
+   "kind": "entity"
+  },
+  {
+   "name": "data lake",
+   "quote": "They rely on an underlying relational database or data lake to answer queries on the graph.",
+   "kind": "entity"
+  },
+  {
+   "name": "knowledge graphs",
+   "quote": "Knowledge graphs may make use of ontologies as a schema layer.",
+   "kind": "entity"
+  },
+  {
+   "name": "ontologies",
+   "quote": "Knowledge graphs may make use of ontologies as a schema layer.",
+   "kind": "entity"
+  },
+  {
+   "name": "knowledge graph embeddings",
+   "quote": "These knowledge graph embeddings allow them to be connected to machine learning methods that require feature vectors like word embeddings.",
+   "kind": "entity"
+  },
+  {
+   "name": "graph neural networks (GNNs)",
+   "quote": "Models for generating useful knowledge graph embeddings are commonly the domain of graph neural networks (GNNs).",
+   "kind": "entity"
+  },
+  {
+   "source": "knowledge graphs",
+   "relation": "make use of",
+   "target": "ontologies",
+   "quote": "Knowledge graphs may make use of ontologies as a schema layer.",
+   "kind": "relation"
+  },
+  {
+   "source": "knowledge graph embeddings",
+   "relation": "connected to",
+   "target": "machine learning methods",
+   "quote": "These knowledge graph embeddings allow them to be connected to machine learning methods that require feature vectors like word embeddings.",
+   "kind": "relation"
+  },
+  {
+   "source": "graph neural networks (GNNs)",
+   "relation": "domain of",
+   "target": "knowledge graph embeddings",
+   "quote": "Models for generating useful knowledge graph embeddings are commonly the domain of graph neural networks (GNNs).",
+   "kind": "relation"
+  },
+  {
+   "name": "knowledge graph entity alignment",
+   "quote": "This task is known as knowledge graph entity alignment, and is an active area of research.",
+   "kind": "entity"
+  },
+  {
+   "name": "large language models (LLMs)",
+   "quote": "In 2023, researchers found success in using large language models (LLMs) in the task of entity alignment.",
+   "kind": "entity"
+  },
+  {
+   "name": "Diffbot",
+   "quote": "Diffbot is building the biggest-ever knowledge graph by applying image recognition and natural-language processing to billions of web pages.",
+   "kind": "entity"
+  },
+  {
+   "name": "Wikibase",
+   "quote": "Wikibase- Mediawiki Software extensions for creating knowledge bases",
+   "kind": "entity"
+  },
+  {
+   "name": "YAGO (database)",
+   "quote": "YAGO (database) \u2013 Open-source information repository",
+   "kind": "entity"
+  },
+  {
+   "name": "Vadalog",
+   "quote": "Vadalog \u2013 Type of Knowledge Graph Management System",
+   "kind": "entity"
+  },
+  {
+   "source": "Diffbot",
+   "relation": "building",
+   "target": "knowledge graph",
+   "quote": "Diffbot is building the biggest-ever knowledge graph by applying image recognition and natural-language processing to billions of web pages.",
+   "kind": "relation"
+  }
+ ],
+ "refused": [
+  {
+   "item": {
+    "source": "knowledge graph",
+    "relation": "used by",
+    "target": "Google",
+    "quote": "They are also historically associated with and used by search engines such as Google, Bing, and Yahoo; knowledge engines and question-answering services such as WolframAlpha, Apple's Siri, and Amazon Alexa; and social networks such as LinkedIn and Facebook.",
+    "kind": "relation"
+   },
+   "reason": "quote does not contain both ends"
+  },
+  {
+   "item": {
+    "source": "knowledge graph",
+    "relation": "used by",
+    "target": "Bing",
+    "quote": "They are also historically associated with and used by search engines such as Google, Bing, and Yahoo; knowledge engines and question-answering services such as WolframAlpha, Apple's Siri, and Amazon Alexa; and social networks such as LinkedIn and Facebook.",
+    "kind": "relation"
+   },
+   "reason": "quote does not contain both ends"
+  },
+  {
+   "item": {
+    "source": "knowledge graph",
+    "relation": "used by",
+    "target": "Yahoo",
+    "quote": "They are also historically associated with and used by search engines such as Google, Bing, and Yahoo; knowledge engines and question-answering services such as WolframAlpha, Apple's Siri, and Amazon Alexa; and social networks such as LinkedIn and Facebook.",
+    "kind": "relation"
+   },
+   "reason": "quote does not contain both ends"
+  },
+  {
+   "item": {
+    "source": "knowledge graph",
+    "relation": "used by",
+    "target": "WolframAlpha",
+    "quote": "They are also historically associated with and used by search engines such as Google, Bing, and Yahoo; knowledge engines and question-answering services such as WolframAlpha, Apple's Siri, and Amazon Alexa; and social networks such as LinkedIn and Facebook.",
+    "kind": "relation"
+   },
+   "reason": "quote does not contain both ends"
+  },
+  {
+   "item": {
+    "source": "knowledge graph",
+    "relation": "used by",
+    "target": "Apple's Siri",
+    "quote": "They are also historically associated with and used by search engines such as Google, Bing, and Yahoo; knowledge engines and question-answering services such as WolframAlpha, Apple's Siri, and Amazon Alexa; and social networks such as LinkedIn and Facebook.",
+    "kind": "relation"
+   },
+   "reason": "quote does not contain both ends"
+  },
+  {
+   "item": {
+    "source": "knowledge graph",
+    "relation": "used by",
+    "target": "Amazon Alexa",
+    "quote": "They are also historically associated with and used by search engines such as Google, Bing, and Yahoo; knowledge engines and question-answering services such as WolframAlpha, Apple's Siri, and Amazon Alexa; and social networks such as LinkedIn and Facebook.",
+    "kind": "relation"
+   },
+   "reason": "quote does not contain both ends"
+  },
+  {
+   "item": {
+    "source": "knowledge graph",
+    "relation": "used by",
+    "target": "LinkedIn",
+    "quote": "They are also historically associated with and used by search engines such as Google, Bing, and Yahoo; knowledge engines and question-answering services such as WolframAlpha, Apple's Siri, and Amazon Alexa; and social networks such as LinkedIn and Facebook.",
+    "kind": "relation"
+   },
+   "reason": "quote does not contain both ends"
+  },
+  {
+   "item": {
+    "source": "knowledge graph",
+    "relation": "used by",
+    "target": "Facebook",
+    "quote": "They are also historically associated with and used by search engines such as Google, Bing, and Yahoo; knowledge engines and question-answering services such as WolframAlpha, Apple's Siri, and Amazon Alexa; and social networks such as LinkedIn and Facebook.",
+    "kind": "relation"
+   },
+   "reason": "quote does not contain both ends"
+  },
+  {
+   "item": {
+    "source": "virtual knowledge graphs",
+    "relation": "rely on",
+    "target": "relational database",
+    "quote": "They rely on an underlying relational database or data lake to answer queries on the graph.",
+    "kind": "relation"
+   },
+   "reason": "quote does not contain both ends"
+  },
+  {
+   "item": {
+    "source": "virtual knowledge graphs",
+    "relation": "rely on",
+    "target": "data lake",
+    "quote": "They rely on an underlying relational database or data lake to answer queries on the graph.",
+    "kind": "relation"
+   },
+   "reason": "quote does not contain both ends"
+  },
+  {
+   "item": {
+    "source": "large language models (LLMs)",
+    "relation": "used in",
+    "target": "knowledge graph entity alignment",
+    "quote": "In 2023, researchers found success in using large language models (LLMs) in the task of entity alignment.",
+    "kind": "relation"
+   },
+   "reason": "quote does not contain both ends"
+  }
+ ],
+ "chunks": 4,
+ "seconds": 126.2
+}
