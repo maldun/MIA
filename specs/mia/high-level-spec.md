@@ -1,6 +1,6 @@
 # High-Level Specification: MIA
 
-**Status:** Approved (owner, 2026-10-24: review steps 1 to 7 confirmed, all acceptance criteria accepted; see review-log.md). **Iteration 1 (FB-01): draft of 2026-10-30, waiting for the HLS gate** (section 8) **Iteration 2 (skill rework): Approved (owner, 2026-11-05, D-186)** (section 8a); the wording of FR-36 to FR-47 and AC-31 to AC-40 is reviewed in Plan
+**Status:** Approved (owner, 2026-10-24: review steps 1 to 7 confirmed, all acceptance criteria accepted; see review-log.md). **Iteration 1 (FB-01): draft of 2026-10-30, waiting for the HLS gate** (section 8) **Iteration 2 (skill rework): Approved (owner, 2026-11-05, D-186)** (section 8a); numbers of the acceptance criteria are set in Plan
 **Owner:** Stefan Reiterer   **Date:** 2026-10-24
 **Project / deliverable:** MIA, "MIA Is not an Assistant": a personal virtual assistant with a 3D character, a local voice, and a research core for small local language models
 
