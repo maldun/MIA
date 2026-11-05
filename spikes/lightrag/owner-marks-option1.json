@@ -1,0 +1,1911 @@
+{
+ "items": [
+  {
+   "id": "O017",
+   "doc": "Citation",
+   "kind": "relation",
+   "key": [
+    "Canadian Guide to Uniform Legal Citation (AKA McGill Guide)",
+    "McGill Law Journal"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O101",
+   "doc": "Prompt_injection",
+   "kind": "entity",
+   "key": [
+    "isolating external content"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O058",
+   "doc": "Meta_analysis",
+   "kind": "relation",
+   "key": [
+    "Partial correlations",
+    "zero-order correlations"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O183",
+   "doc": "arxiv_2410.05779",
+   "kind": "relation",
+   "key": [
+    "Retrieval-Augmented Generation (RAG) systems",
+    "large language models (LLMs)"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O011",
+   "doc": "Citation",
+   "kind": "entity",
+   "key": [
+    "Canadian Guide to Uniform Legal Citation (AKA McGill Guide)"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O045",
+   "doc": "Meta_analysis",
+   "kind": "entity",
+   "key": [
+    "Mary Lee Smith"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O053",
+   "doc": "Meta_analysis",
+   "kind": "relation",
+   "key": [
+    "plot digitizers",
+    "scatterplots"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O135",
+   "doc": "Retrieval_augmented_generation",
+   "kind": "relation",
+   "key": [
+    "Supervised retriever optimization",
+    "the generator model's likelihood distribution"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O001",
+   "doc": "Citation",
+   "kind": "entity",
+   "key": [
+    "Modern Language Association"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O082",
+   "doc": "Peer_review",
+   "kind": "entity",
+   "key": [
+    "European Union"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O151",
+   "doc": "Systematic_review",
+   "kind": "entity",
+   "key": [
+    "Preferred Reporting Items for Systematic Reviews and Meta-Analyses (PRISMA) statement"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O168",
+   "doc": "arxiv_2005.11401",
+   "kind": "entity",
+   "key": [
+    "task-specific retrieve-and-extract architectures"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O099",
+   "doc": "Peer_review",
+   "kind": "relation",
+   "key": [
+    "American Medical Association",
+    "medical peer review"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O136",
+   "doc": "Retrieval_augmented_generation",
+   "kind": "relation",
+   "key": [
+    "approximate nearest neighbor (ANN) searches",
+    "K-nearest neighbors (KNN) searches"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O137",
+   "doc": "Retrieval_augmented_generation",
+   "kind": "relation",
+   "key": [
+    "Retro",
+    "RAG scheme avoided"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O178",
+   "doc": "arxiv_2410.05779",
+   "kind": "entity",
+   "key": [
+    "dual-level retrieval system"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O038",
+   "doc": "Knowledge_graph",
+   "kind": "relation",
+   "key": [
+    "Uber",
+    "knowledge graphs"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O089",
+   "doc": "Peer_review",
+   "kind": "entity",
+   "key": [
+    "Richard Smith"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O028",
+   "doc": "Knowledge_graph",
+   "kind": "entity",
+   "key": [
+    "RDFa"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O076",
+   "doc": "Ontology_information_science",
+   "kind": "relation",
+   "key": [
+    "ontology editors",
+    "modules"
+   ],
+   "decision": "wrong",
+   "comment": ""
+  },
+  {
+   "id": "O037",
+   "doc": "Knowledge_graph",
+   "kind": "relation",
+   "key": [
+    "Google Knowledge Graph",
+    "string-based search within Google"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O122",
+   "doc": "Retrieval_augmented_generation",
+   "kind": "entity",
+   "key": [
+    "Sparse vectors"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O182",
+   "doc": "arxiv_2410.05779",
+   "kind": "relation",
+   "key": [
+    "LightRAG",
+    "graph structures"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O027",
+   "doc": "Knowledge_graph",
+   "kind": "entity",
+   "key": [
+    "WolframAlpha"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O177",
+   "doc": "arxiv_2410.05779",
+   "kind": "entity",
+   "key": [
+    "LightRAG"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O158",
+   "doc": "Systematic_review",
+   "kind": "relation",
+   "key": [
+    "Preferred Reporting Items for Systematic Reviews and Meta-Analyses (PRISMA)",
+    "PRISMA 2020"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O081",
+   "doc": "Peer_review",
+   "kind": "entity",
+   "key": [
+    "Open Method of Co-ordination"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O013",
+   "doc": "Citation",
+   "kind": "relation",
+   "key": [
+    "bibliographic citation",
+    "book, article, web page, or other published item"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O033",
+   "doc": "Knowledge_graph",
+   "kind": "relation",
+   "key": [
+    "graph neural networks (GNNs)",
+    "knowledge graph embeddings"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O016",
+   "doc": "Citation",
+   "kind": "relation",
+   "key": [
+    "MHRA Style Guide",
+    "Modern Humanities Research Association (MHRA)"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O036",
+   "doc": "Knowledge_graph",
+   "kind": "relation",
+   "key": [
+    "knowledge graph embeddings",
+    "machine learning methods"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O147",
+   "doc": "Systematic_review",
+   "kind": "entity",
+   "key": [
+    "methodology section"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O055",
+   "doc": "Meta_analysis",
+   "kind": "relation",
+   "key": [
+    "2024 simulation study",
+    "partial correlations"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O175",
+   "doc": "arxiv_2410.05779",
+   "kind": "entity",
+   "key": [
+    "Retrieval-Augmented Generation (RAG) systems"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O050",
+   "doc": "Meta_analysis",
+   "kind": "entity",
+   "key": [
+    "2024 simulation study"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O063",
+   "doc": "Ontology_information_science",
+   "kind": "entity",
+   "key": [
+    "ontologies"
+   ],
+   "decision": "trivial",
+   "comment": ""
+  },
+  {
+   "id": "O128",
+   "doc": "Retrieval_augmented_generation",
+   "kind": "entity",
+   "key": [
+    "Retro"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O143",
+   "doc": "Systematic_review",
+   "kind": "entity",
+   "key": [
+    "EQUATOR (Enhancing the QUAlity and Transparency Of health Research) Network"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O093",
+   "doc": "Peer_review",
+   "kind": "relation",
+   "key": [
+    "educators",
+    "school related assignments"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O118",
+   "doc": "Prompt_injection",
+   "kind": "relation",
+   "key": [
+    "isolating external content",
+    "OWASP"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O074",
+   "doc": "Ontology_information_science",
+   "kind": "relation",
+   "key": [
+    "Ontology",
+    "philosophy of language"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O065",
+   "doc": "Ontology_information_science",
+   "kind": "entity",
+   "key": [
+    "upper ontology"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O049",
+   "doc": "Meta_analysis",
+   "kind": "entity",
+   "key": [
+    "grey literature"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O073",
+   "doc": "Ontology_information_science",
+   "kind": "relation",
+   "key": [
+    "natural language processing",
+    "knowledge representation"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O138",
+   "doc": "Retrieval_augmented_generation",
+   "kind": "relation",
+   "key": [
+    "RAG",
+    "large language model outputs"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O002",
+   "doc": "Citation",
+   "kind": "entity",
+   "key": [
+    "citation system"
+   ],
+   "decision": "trivial",
+   "comment": ""
+  },
+  {
+   "id": "O113",
+   "doc": "Prompt_injection",
+   "kind": "relation",
+   "key": [
+    "Leading AI providers",
+    "Google"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O088",
+   "doc": "Peer_review",
+   "kind": "entity",
+   "key": [
+    "Ishāq ibn ʻAlī al-Ruhāwī (854–931)"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O170",
+   "doc": "arxiv_2005.11401",
+   "kind": "relation",
+   "key": [
+    "non-parametric memory",
+    "dense vector index of Wikipedia"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O149",
+   "doc": "Systematic_review",
+   "kind": "entity",
+   "key": [
+    "PRISMA-ScR"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O112",
+   "doc": "Prompt_injection",
+   "kind": "entity",
+   "key": [
+    "data-author"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O083",
+   "doc": "Peer_review",
+   "kind": "entity",
+   "key": [
+    "supplier credentialing"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O134",
+   "doc": "Retrieval_augmented_generation",
+   "kind": "relation",
+   "key": [
+    "documents",
+    "training data"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O146",
+   "doc": "Systematic_review",
+   "kind": "entity",
+   "key": [
+    "Embase"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O015",
+   "doc": "Citation",
+   "kind": "relation",
+   "key": [
+    "Turabian style",
+    "it"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O115",
+   "doc": "Prompt_injection",
+   "kind": "relation",
+   "key": [
+    "business employees",
+    "generative artificial intelligence"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O005",
+   "doc": "Citation",
+   "kind": "entity",
+   "key": [
+    "Plato"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O020",
+   "doc": "Citation",
+   "kind": "relation",
+   "key": [
+    "Chicago Manual of Style",
+    "parenthetical and note citation systems"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O152",
+   "doc": "Systematic_review",
+   "kind": "entity",
+   "key": [
+    "machine learning"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O098",
+   "doc": "Peer_review",
+   "kind": "relation",
+   "key": [
+    "centered proficient practice assessment",
+    "privileging"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O014",
+   "doc": "Citation",
+   "kind": "relation",
+   "key": [
+    "citation",
+    "in-body citation and the bibliographic entry"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O159",
+   "doc": "Systematic_review",
+   "kind": "relation",
+   "key": [
+    "systematic review",
+    "narrative review"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O008",
+   "doc": "Citation",
+   "kind": "entity",
+   "key": [
+    "MLA"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O031",
+   "doc": "Knowledge_graph",
+   "kind": "entity",
+   "key": [
+    "Human Resources Research Organization (HumRRO)"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O129",
+   "doc": "Retrieval_augmented_generation",
+   "kind": "entity",
+   "key": [
+    "RAG scheme"
+   ],
+   "decision": "trivial",
+   "comment": ""
+  },
+  {
+   "id": "O169",
+   "doc": "arxiv_2005.11401",
+   "kind": "entity",
+   "key": [
+    "non-parametric memory"
+   ],
+   "decision": "trivial",
+   "comment": ""
+  },
+  {
+   "id": "O047",
+   "doc": "Meta_analysis",
+   "kind": "entity",
+   "key": [
+    "Educational Researcher"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O077",
+   "doc": "Ontology_information_science",
+   "kind": "relation",
+   "key": [
+    "ontology editors",
+    "visual navigation possibilities"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O148",
+   "doc": "Systematic_review",
+   "kind": "entity",
+   "key": [
+    "experienced information professional or librarian"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O142",
+   "doc": "Systematic_review",
+   "kind": "entity",
+   "key": [
+    "PROSPERO (the International Prospective Register of Systematic Reviews)"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O021",
+   "doc": "Knowledge_graph",
+   "kind": "entity",
+   "key": [
+    "Diffbot"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O181",
+   "doc": "arxiv_2410.05779",
+   "kind": "relation",
+   "key": [
+    "graph structures",
+    "vector representations"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "O059",
+   "doc": "Meta_analysis",
+   "kind": "relation",
+   "key": [
+    "Karl Pearson",
+    "British Medical Journal"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O094",
+   "doc": "Peer_review",
+   "kind": "relation",
+   "key": [
+    "Adversarial systems",
+    "ideological biases"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O176",
+   "doc": "arxiv_2410.05779",
+   "kind": "entity",
+   "key": [
+    "incremental update algorithm"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O133",
+   "doc": "Retrieval_augmented_generation",
+   "kind": "relation",
+   "key": [
+    "RAG",
+    "large language models (LLMs)"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O057",
+   "doc": "Meta_analysis",
+   "kind": "relation",
+   "key": [
+    "Mary Lee Smith",
+    "Glass"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O174",
+   "doc": "arxiv_2410.05779",
+   "kind": "entity",
+   "key": [
+    "vector representations"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O141",
+   "doc": "Systematic_review",
+   "kind": "entity",
+   "key": [
+    "narrative review"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O126",
+   "doc": "Retrieval_augmented_generation",
+   "kind": "entity",
+   "key": [
+    "Inverse Cloze Task (ICT)"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O025",
+   "doc": "Knowledge_graph",
+   "kind": "entity",
+   "key": [
+    "Amazon Alexa"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O124",
+   "doc": "Retrieval_augmented_generation",
+   "kind": "entity",
+   "key": [
+    "authoritative sources"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O153",
+   "doc": "Systematic_review",
+   "kind": "relation",
+   "key": [
+    "EQUATOR (Enhancing the QUAlity and Transparency Of health Research) Network",
+    "PRISMA guideline extensions"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O056",
+   "doc": "Meta_analysis",
+   "kind": "relation",
+   "key": [
+    "scatterplots",
+    "Pearson's r"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O041",
+   "doc": "Meta_analysis",
+   "kind": "entity",
+   "key": [
+    "fixed effects model"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O100",
+   "doc": "Peer_review",
+   "kind": "relation",
+   "key": [
+    "Ishāq ibn ʻAlī al-Ruhāwī (854–931)",
+    "Ethics of the Physician"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O080",
+   "doc": "Ontology_information_science",
+   "kind": "relation",
+   "key": [
+    "ontology editors",
+    "meta-ontologies"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O004",
+   "doc": "Citation",
+   "kind": "entity",
+   "key": [
+    "in-body citation"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O121",
+   "doc": "Retrieval_augmented_generation",
+   "kind": "entity",
+   "key": [
+    "large language models (LLMs)"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O032",
+   "doc": "Knowledge_graph",
+   "kind": "entity",
+   "key": [
+    "YAGO (database)"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O096",
+   "doc": "Peer_review",
+   "kind": "relation",
+   "key": [
+    "centered proficient practice assessment",
+    "supplier credentialing"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O097",
+   "doc": "Peer_review",
+   "kind": "relation",
+   "key": [
+    "This requirement",
+    "California Health and Safety Code Section 57004"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O029",
+   "doc": "Knowledge_graph",
+   "kind": "entity",
+   "key": [
+    "Google"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O110",
+   "doc": "Prompt_injection",
+   "kind": "entity",
+   "key": [
+    "OpenAI Codex"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O139",
+   "doc": "Retrieval_augmented_generation",
+   "kind": "relation",
+   "key": [
+    "Retrieval-augmented generation (RAG)",
+    "large language models (LLMs)"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O145",
+   "doc": "Systematic_review",
+   "kind": "entity",
+   "key": [
+    "proximity searching"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O034",
+   "doc": "Knowledge_graph",
+   "kind": "relation",
+   "key": [
+    "LinkedIn",
+    "knowledge graphs"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O062",
+   "doc": "Ontology_information_science",
+   "kind": "entity",
+   "key": [
+    "foundation ontology"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O023",
+   "doc": "Knowledge_graph",
+   "kind": "entity",
+   "key": [
+    "Vadalog"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O052",
+   "doc": "Meta_analysis",
+   "kind": "entity",
+   "key": [
+    "zero-order correlations"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O108",
+   "doc": "Prompt_injection",
+   "kind": "entity",
+   "key": [
+    "DeepSeek-R1"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O051",
+   "doc": "Meta_analysis",
+   "kind": "entity",
+   "key": [
+    "scatterplots"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O030",
+   "doc": "Knowledge_graph",
+   "kind": "entity",
+   "key": [
+    "Uber"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O111",
+   "doc": "Prompt_injection",
+   "kind": "entity",
+   "key": [
+    "Data hygiene"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O079",
+   "doc": "Ontology_information_science",
+   "kind": "relation",
+   "key": [
+    "Ontology",
+    "epistemology"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O165",
+   "doc": "arxiv_2005.11401",
+   "kind": "entity",
+   "key": [
+    "pre-trained neural retriever"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O035",
+   "doc": "Knowledge_graph",
+   "kind": "relation",
+   "key": [
+    "eBay",
+    "knowledge graphs"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O123",
+   "doc": "Retrieval_augmented_generation",
+   "kind": "entity",
+   "key": [
+    "LLMs"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O171",
+   "doc": "arxiv_2005.11401",
+   "kind": "relation",
+   "key": [
+    "dense vector index of Wikipedia",
+    "pre-trained neural retriever"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O092",
+   "doc": "Peer_review",
+   "kind": "entity",
+   "key": [
+    "engineering review"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O116",
+   "doc": "Prompt_injection",
+   "kind": "relation",
+   "key": [
+    "attackers",
+    "filter"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O084",
+   "doc": "Peer_review",
+   "kind": "entity",
+   "key": [
+    "Professional peer review"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O156",
+   "doc": "Systematic_review",
+   "kind": "relation",
+   "key": [
+    "Preferred Reporting Items for Systematic Reviews and Meta-Analyses (PRISMA) statement",
+    "methodological quality"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O022",
+   "doc": "Knowledge_graph",
+   "kind": "entity",
+   "key": [
+    "Amazon"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O007",
+   "doc": "Citation",
+   "kind": "entity",
+   "key": [
+    "Modern Humanities Research Association (MHRA)"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O095",
+   "doc": "Peer_review",
+   "kind": "relation",
+   "key": [
+    "United Nations Economic Commission for Europe",
+    "UNECE Environmental Performance Reviews"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O072",
+   "doc": "Ontology_information_science",
+   "kind": "entity",
+   "key": [
+    "Ontology editors"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O066",
+   "doc": "Ontology_information_science",
+   "kind": "entity",
+   "key": [
+    "machine translation"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O060",
+   "doc": "Meta_analysis",
+   "kind": "relation",
+   "key": [
+    "e_i",
+    "N(0, v_i)"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O048",
+   "doc": "Meta_analysis",
+   "kind": "entity",
+   "key": [
+    "data-collection form"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O085",
+   "doc": "Peer_review",
+   "kind": "entity",
+   "key": [
+    "peer-replication"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O154",
+   "doc": "Systematic_review",
+   "kind": "relation",
+   "key": [
+    "PubMed",
+    "scholarly databases of peer-reviewed articles"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O117",
+   "doc": "Prompt_injection",
+   "kind": "relation",
+   "key": [
+    "Prompt injection",
+    "code injection attack"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O107",
+   "doc": "Prompt_injection",
+   "kind": "entity",
+   "key": [
+    "documents"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O161",
+   "doc": "arxiv_2005.11401",
+   "kind": "entity",
+   "key": [
+    "retrieval-augmented generation (RAG)"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O010",
+   "doc": "Citation",
+   "kind": "entity",
+   "key": [
+    "scientific citation"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O009",
+   "doc": "Citation",
+   "kind": "entity",
+   "key": [
+    "Chicago style (CMOS)"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O069",
+   "doc": "Ontology_information_science",
+   "kind": "entity",
+   "key": [
+    "meta-ontologies"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O086",
+   "doc": "Peer_review",
+   "kind": "entity",
+   "key": [
+    "United Nations Economic Commission for Europe"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O061",
+   "doc": "Ontology_information_science",
+   "kind": "entity",
+   "key": [
+    "artificial intelligence (AI)"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O132",
+   "doc": "Retrieval_augmented_generation",
+   "kind": "entity",
+   "key": [
+    "LLM embeddings"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O054",
+   "doc": "Meta_analysis",
+   "kind": "relation",
+   "key": [
+    "conference proceedings",
+    "grey literature"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O157",
+   "doc": "Systematic_review",
+   "kind": "relation",
+   "key": [
+    "Embase",
+    "scholarly databases of peer-reviewed articles"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O071",
+   "doc": "Ontology_information_science",
+   "kind": "entity",
+   "key": [
+    "BFO"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O103",
+   "doc": "Prompt_injection",
+   "kind": "entity",
+   "key": [
+    "November 2024 OWASP report"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O024",
+   "doc": "Knowledge_graph",
+   "kind": "entity",
+   "key": [
+    "Google Knowledge Graph"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O042",
+   "doc": "Meta_analysis",
+   "kind": "entity",
+   "key": [
+    "pre-prints"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O130",
+   "doc": "Retrieval_augmented_generation",
+   "kind": "entity",
+   "key": [
+    "RAG"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O043",
+   "doc": "Meta_analysis",
+   "kind": "entity",
+   "key": [
+    "aggregate data (AD)"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O172",
+   "doc": "arxiv_2005.11401",
+   "kind": "relation",
+   "key": [
+    "retrieval-augmented generation (RAG)",
+    "pre-trained parametric and non-parametric memory"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O114",
+   "doc": "Prompt_injection",
+   "kind": "relation",
+   "key": [
+    "intentional and direct injection",
+    "developer"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O144",
+   "doc": "Systematic_review",
+   "kind": "entity",
+   "key": [
+    "Web of Science"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O091",
+   "doc": "Peer_review",
+   "kind": "entity",
+   "key": [
+    "Henry Oldenburg (1619–1677)"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O179",
+   "doc": "arxiv_2410.05779",
+   "kind": "entity",
+   "key": [
+    "large language models (LLMs)"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O109",
+   "doc": "Prompt_injection",
+   "kind": "entity",
+   "key": [
+    "Preamble"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O026",
+   "doc": "Knowledge_graph",
+   "kind": "entity",
+   "key": [
+    "large language models (LLMs)"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O180",
+   "doc": "arxiv_2410.05779",
+   "kind": "entity",
+   "key": [
+    "graph structures"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O166",
+   "doc": "arxiv_2005.11401",
+   "kind": "entity",
+   "key": [
+    "parametric seq2seq models"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O012",
+   "doc": "Citation",
+   "kind": "entity",
+   "key": [
+    "Harvard referencing"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O131",
+   "doc": "Retrieval_augmented_generation",
+   "kind": "entity",
+   "key": [
+    "Barack Hussein Obama"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O120",
+   "doc": "Prompt_injection",
+   "kind": "relation",
+   "key": [
+    "Leading AI providers",
+    "Microsoft"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O044",
+   "doc": "Meta_analysis",
+   "kind": "entity",
+   "key": [
+    "Gene V. Glass"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O125",
+   "doc": "Retrieval_augmented_generation",
+   "kind": "entity",
+   "key": [
+    "vector search"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O067",
+   "doc": "Ontology_information_science",
+   "kind": "entity",
+   "key": [
+    "information extraction"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O119",
+   "doc": "Prompt_injection",
+   "kind": "relation",
+   "key": [
+    "ChatGPT",
+    "OpenAI"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O039",
+   "doc": "Knowledge_graph",
+   "kind": "relation",
+   "key": [
+    "DBpedia",
+    "Wikipedia"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O078",
+   "doc": "Ontology_information_science",
+   "kind": "relation",
+   "key": [
+    "natural language processing",
+    "machine translation"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O140",
+   "doc": "Retrieval_augmented_generation",
+   "kind": "relation",
+   "key": [
+    "RAG",
+    "frequent model retraining"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O106",
+   "doc": "Prompt_injection",
+   "kind": "entity",
+   "key": [
+    "OpenAI"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O068",
+   "doc": "Ontology_information_science",
+   "kind": "entity",
+   "key": [
+    "Ontology learning"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O090",
+   "doc": "Peer_review",
+   "kind": "entity",
+   "key": [
+    "school related assignments"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O003",
+   "doc": "Citation",
+   "kind": "entity",
+   "key": [
+    "academic disciplines"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O155",
+   "doc": "Systematic_review",
+   "kind": "relation",
+   "key": [
+    "grey literature collections",
+    "sources of unpublished literature"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O019",
+   "doc": "Citation",
+   "kind": "relation",
+   "key": [
+    "Council of Science Editors (CSE)",
+    "citation-name system"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O046",
+   "doc": "Meta_analysis",
+   "kind": "entity",
+   "key": [
+    "Pearson correlation coefficient (r)"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O070",
+   "doc": "Ontology_information_science",
+   "kind": "entity",
+   "key": [
+    "OWL-S"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O102",
+   "doc": "Prompt_injection",
+   "kind": "entity",
+   "key": [
+    "enterprise applications"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O163",
+   "doc": "arxiv_2005.11401",
+   "kind": "entity",
+   "key": [
+    "dense vector index of Wikipedia"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O040",
+   "doc": "Knowledge_graph",
+   "kind": "relation",
+   "key": [
+    "Diffbot",
+    "knowledge graph"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O173",
+   "doc": "arxiv_2005.11401",
+   "kind": "relation",
+   "key": [
+    "parametric memory",
+    "pre-trained seq2seq model"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O105",
+   "doc": "Prompt_injection",
+   "kind": "entity",
+   "key": [
+    "Bing Chat (Microsoft Copilot)"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O006",
+   "doc": "Citation",
+   "kind": "entity",
+   "key": [
+    "footnotes"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O162",
+   "doc": "arxiv_2005.11401",
+   "kind": "entity",
+   "key": [
+    "Large pre-trained language models"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O075",
+   "doc": "Ontology_information_science",
+   "kind": "relation",
+   "key": [
+    "Archeologia Philosophica Nova or New Principles of Philosophy (1663)",
+    "Gideon Harvey"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O167",
+   "doc": "arxiv_2005.11401",
+   "kind": "entity",
+   "key": [
+    "pre-trained seq2seq model"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O164",
+   "doc": "arxiv_2005.11401",
+   "kind": "entity",
+   "key": [
+    "parametric memory"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O064",
+   "doc": "Ontology_information_science",
+   "kind": "entity",
+   "key": [
+    "ontology"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O127",
+   "doc": "Retrieval_augmented_generation",
+   "kind": "entity",
+   "key": [
+    "Retrieval-augmented generation (RAG)"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O018",
+   "doc": "Citation",
+   "kind": "relation",
+   "key": [
+    "The Bluebook",
+    "American academic legal writing"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O150",
+   "doc": "Systematic_review",
+   "kind": "entity",
+   "key": [
+    "literature review"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O160",
+   "doc": "Systematic_review",
+   "kind": "relation",
+   "key": [
+    "Web of Science",
+    "scholarly databases of peer-reviewed articles"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O087",
+   "doc": "Peer_review",
+   "kind": "entity",
+   "key": [
+    "visual peer review"
+   ],
+   "decision": null,
+   "comment": ""
+  },
+  {
+   "id": "O104",
+   "doc": "Prompt_injection",
+   "kind": "entity",
+   "key": [
+    "Indirect injection"
+   ],
+   "decision": null,
+   "comment": ""
+  }
+ ],
+ "missing": [
+  {
+   "doc": "all",
+   "note": ""
+  }
+ ]
+}

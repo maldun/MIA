@@ -24,3 +24,16 @@
 
   Over all 818 items of repeat 1, check D flags 9 of 494 entities (1.8 %) and 9 of 324 relations (2.8 %). The distance rule (B, C) flags correct relations that span sentences and is not worth it. D is cheap and has no false flags here, but it **cannot** catch a reversed or inferred relation (I015, I057, I059): those need the source quote of the relation plus a judge (model) that asks whether the quote states the relation, calibrated against the owner.
 - **Reading:** on the agent's labels LightRAG on the 12B clears the owner's bar by a wide margin on right and invented. This is an opinion until the owner's marks exist; the agreement of the two sets decides whether a model can serve as a judge (kappa >= 0.6).
+
+## Spike C result (owner's marks, 2026-11-05; files `spikes/lightrag/owner-marks-*.json`, scored with `score_marks.py`)
+Bar (owner): at least 68 % right, at most 5 % invented, shares of the marked items.
+
+| Method | Marked | Right | Useless | Wrong | Invented | Bar |
+|---|---|---|---|---|---|---|
+| LightRAG on the 12B | 195 of 195 | 167 (85.6 %) | 4 (2.1 %) | 9 (4.6 %) | 15 (7.7 %, one sigma about 5.8 to 9.6 %) | right passes, **invented fails** |
+| Option 1 (own builder: sentence chunks, quote per item, whole-document name check) | 72 of 183, random order, stopped by the owner | 67 (93.1 %) | 4 (5.6 %) | 1 (1.4 %) | 0 (95 % upper bound about 4 %) | passes both, on a smaller sample |
+
+- Option 1 run: 10 documents, 18 minutes, 716 accepted and 45 refused proposals (36 relation quotes without both ends, 5 without the name, 4 not a passage of the document, 0 names missing from the document).
+- The agent's blind labels disagreed with the owner's: agreement 76.9 %, kappa 0.11 (0.17 for right vs not). The agent had marked 2 items invented, the owner 15. **A model reading like the agent's first opinion is not a usable judge**; the plan for a repeatable 26B judge is not started. If a judge is wanted, calibrate it on these marks first.
+- Caveats: the two samples differ (LightRAG unfiltered, option 1 after its checks); option 1 has 72 marks, enough for the stop rule but a wide range; "invented" for LightRAG is mostly entities whose description or place in the shown passage the owner could not find in the text.
+- Reading: LightRAG as it is does not meet the owner's bar on invented items. Option 1 meets it on the sample marked so far. The go / no-go for LightRAG is for the owner to decide; the agent's recommendation is no-go as the builder, option 1 as the base, with a larger sample in Plan.
