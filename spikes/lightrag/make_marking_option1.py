@@ -8,10 +8,20 @@ from pathlib import Path
 run, docs_dir, out = Path(sys.argv[1]), Path(sys.argv[2]), Path(sys.argv[3])
 per_doc = int(sys.argv[4]) if len(sys.argv) > 4 else 20
 rng = random.Random(1)
+TALLY = """function tally(){const d=cards.map(c=>(c.querySelector('input[type=radio]:checked')||{}).value).filter(Boolean),n=d.length;
+ const r=d.filter(x=>x==='right').length,k=d.filter(x=>x==='invented').length;let t='';
+ if(n>=10){const p=r/n,s=Math.sqrt(p*(1-p)/n),z=1.645,q=k/n,up=(q+z*z/(2*n)+z*Math.sqrt(q*(1-q)/n+z*z/(4*n*n)))/(1+z*z/n);
+  const okR=p-s>=0.68,okI=up<=0.05,bad=p+s<0.68||(k/n-Math.sqrt(q*(1-q)/n))>0.05;
+  t=' | right '+(100*p).toFixed(0)+' % (1 sigma: '+(100*(p-s)).toFixed(0)+' to '+(100*(p+s)).toFixed(0)+' %), invented '+k+' (95 % upper bound '+(100*up).toFixed(1)+' %)'+
+   (n>=30&&okR&&okI?' | bar met, you may stop':bad?' | below the bar, keep going or stop and tell me':' | not decided yet');}
+ document.getElementById('count').textContent+=t;}
+document.addEventListener('input',()=>{store();tally();});store();tally();"""
+
 here = Path(__file__).resolve().parent
 PAGE = re.search(r'PAGE = """(.*?)"""\n', (here / "make_marking.py").read_text(), re.S).group(1)
 PAGE = (PAGE.replace("Spike C: mark the extracted items", "Spike C, option 1: mark the proposed items")
         .replace("(LightRAG, gemma4:12b-it-qat, num_ctx 8192)", "(own builder, gemma4:12b-it-qat, num_ctx 8192; the model's quote is shown on each card)")
+        .replace("document.addEventListener('input',store);store();", TALLY)
         .replace("mia-spike-c-marking", "mia-spike-c-option1-marking").replace("spike-c-marks.json", "spike-c-option1-marks.json"))
 
 
@@ -48,14 +58,12 @@ for f in sorted(run.glob("*.json")):
         items.append(dict(id=f"O{len(items) + 1:03d}", doc=f.stem, kind=a["kind"], key=names, head=head,
                           quote=a["quote"], source=mark(context(text, a["quote"]) or a["quote"], names)))
 
-cards, last = [], None
+rng.shuffle(items)  # random order across documents, so marking can stop early (see the running tally)
+cards = ['<p class="miss"><label>Important things the text says that are missing from the items (optional, name the document): '
+         '<input data-doc="all" class="missing" placeholder="short note or empty"></label></p>']
 for it in items:
-    if it["doc"] != last:
-        last = it["doc"]
-        cards.append(f'<h2 class="doc">{html.escape(last)}</h2><p class="miss"><label>Important things the text says that are missing from the items: '
-                     f'<input data-doc="{html.escape(last)}" class="missing" placeholder="short note or empty"></label></p>')
     cards.append(f"""<section class="card" data-id="{it['id']}">
-<h3>{it['id']} · {it['kind']}: {html.escape(it['head'])}</h3>
+<h3>{it['id']} · {html.escape(it['doc'])} · {it['kind']}: {html.escape(it['head'])}</h3>
 <p class="desc">Model's quote: “{html.escape(it['quote'])}”</p>
 <details><summary>Source passage</summary><div class='src'>{it['source']}</div></details>
 <p class="opts"><label><input type="radio" name="d-{it['id']}" value="right"> right</label>
