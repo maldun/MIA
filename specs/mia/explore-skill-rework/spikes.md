@@ -37,3 +37,19 @@ Bar (owner): at least 68 % right, at most 5 % invented, shares of the marked ite
 - The agent's blind labels disagreed with the owner's: agreement 76.9 %, kappa 0.11 (0.17 for right vs not). The agent had marked 2 items invented, the owner 15. **A model reading like the agent's first opinion is not a usable judge**; the plan for a repeatable 26B judge is not started. If a judge is wanted, calibrate it on these marks first.
 - Caveats: the two samples differ (LightRAG unfiltered, option 1 after its checks); option 1 has 72 marks, enough for the stop rule but a wide range; "invented" for LightRAG is mostly entities whose description or place in the shown passage the owner could not find in the text.
 - Reading: LightRAG as it is does not meet the owner's bar on invented items. Option 1 meets it on the sample marked so far. The go / no-go for LightRAG is for the owner to decide; the agent's recommendation is no-go as the builder, option 1 as the base, with a larger sample in Plan.
+
+## Spike (a) result: verify.cops and verify.jury as debates on the 12B (2026-11-05)
+Throwaway `spikes/debate/debate_spike.py` (loop tests green with a scripted model), raw rows `spikes/debate/run1.jsonl`. `gemma4:12b-it-qat`, num_ctx 8192, temperature 0.7, seeds 1 to 3, caps 3 rounds / 12 calls / 300 s. **10 own claims** (4 near-miss false numbers or dates, 3 true numbers, 1 myth, 2 unverifiable), truth set by the coding agent for this spike only; 90 runs in about 8 minutes. Not an eval run, not eval cases.
+
+| Variant | Right | False pass (non-true claim passed) | False fail | Seconds per claim (mean) | Model calls (mean) | Rounds |
+|---|---|---|---|---|---|---|
+| single | 21 of 30 | 7 | 2 | 1.4 | 1.0 | 1 |
+| cops as a debate | 23 of 30 | 4 | 2 | 8.1 | 4.2 | 1 in 23 runs, 3 (cap) in 6, 1 run failed (cut-off JSON) |
+| jury as a debate | **29 of 30** | **0** | 1 | 7.3 | 4.6 | 1 in 17 runs, 2 in 10, 3 (cap) in 3 |
+
+- **The jury debate fixed the near-miss numbers** that a single voice passes: Burj Khalifa, Everest 8,948 m and Moon 284,000 km were refuted in 3 of 3 runs (single: 0, 1 and 1 of 3). Disagreement in round 1 was resolved after the experts saw each other's reasons; 29 of 30 debates ended in agreement. The old one-shot jury changed nothing (`eval/baselines/verdicts-styles.md`), so the rebuttal round is what helps, not the three personas alone.
+- **The cops debate helped only on the Burj Khalifa** and ran to the round cap on the near-miss claims where the judge never became sure; the old one-shot cops had fixed all three near-miss numbers, so this cops form is not better than the existing one.
+- Both debate forms stayed far below the caps: at most 9 calls and well under a minute per claim in this run; the 12-call and 5-minute caps never fired (the budget path is covered by the unit test only).
+- The true claim "Everest is about 8,849 m" is the one error left (single 1 of 3, jury 2 of 3): the 12B does not know the figure reliably; that is a knowledge gap, not a debate failure.
+- **Caution:** 10 claims of which 4 are near-miss numbers, 3 seeds per claim are not independent, and the whole gain rests on three claims, as in the old styles baseline. This shows that the debate form works on the 12B within the caps; it does not rank the styles. The numbers 3 rounds / 12 calls / 5 minutes stay as defaults; the measured need is one to two rounds and about 5 calls.
+- Seen on the way: one cops run failed on a model reply cut off in the middle of a JSON string; the debate step needs a retry or a fallback for malformed replies (a requirement for Plan).
