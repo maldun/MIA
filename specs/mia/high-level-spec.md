@@ -1,6 +1,6 @@
 # High-Level Specification: MIA
 
-**Status:** Approved (owner, 2026-10-24: review steps 1 to 7 confirmed, all acceptance criteria accepted; see review-log.md). **Iteration 1 (FB-01): draft of 2026-10-30, waiting for the HLS gate** (section 8) **Iteration 2 (skill rework): draft of 2026-11-03, waiting for the HLS gate** (section 8a)
+**Status:** Approved (owner, 2026-10-24: review steps 1 to 7 confirmed, all acceptance criteria accepted; see review-log.md). **Iteration 1 (FB-01): draft of 2026-10-30, waiting for the HLS gate** (section 8) **Iteration 2 (skill rework): Approved (owner, 2026-11-05, D-186)** (section 8a); the wording of FR-36 to FR-47 and AC-31 to AC-40 is reviewed in Plan
 **Owner:** Stefan Reiterer   **Date:** 2026-10-24
 **Project / deliverable:** MIA, "MIA Is not an Assistant": a personal virtual assistant with a 3D character, a local voice, and a research core for small local language models
 
@@ -471,7 +471,7 @@ Quick thought per requirement: is there a precedent, does a rough estimate fit, 
 Plausible without a spike: FR-1 to FR-8, FR-10, FR-12, FR-16, FR-17, FR-19, FR-21, NFR-1 to NFR-6, NFR-8 (built, or standard technology).
 
 ## 8. Changes in iteration 1 (feedback)
-Explore of 2026-10-30 (`research-fb-01.md`, interview with the owner the same day). State: **draft, for the HLS gate**.
+Explore of 2026-10-30 (`research-fb-01.md`, interview with the owner the same day). State: **approved 2026-11-05 (D-186)**.
 
 | Feedback item | Effect on goals, scope or architecture |
 |---|---|
@@ -504,7 +504,7 @@ Explore of 2026-10-30 (`research-fb-01.md`, interview with the owner the same da
 | 10 | **Python 3.12 only** (owner, 2026-10-26, D-63): CON-3 reads Python 3.12; 3.11 and 3.13 are not supported for now (the code may run on them, nothing tests it); the host `python3` 3.14 is outside the constraint, the project venv uses 3.12. The README, `requirements.txt` and the Containerfile still say 3.11 to 3.13 and change with the first Implement task that touches them | CON-3, AC-20, REQ-BE-073, REQ-API-011 |
 
 ## 8a. Changes in iteration 2 (skill rework)
-Explore of 2026-11-02 and 2026-11-03: the owner's note `explore-skill-rework/inputs/skill_rework.md` with two drawings, `research.md` (facts with references) and `interview.md` (the owner's answers, 11 so far). State: **draft, for the HLS gate**. Not yet an FB item: the input is the owner's direction (iteration 1 decisions D-108 and D-177, FB-02 and TD-21 already pointed the same way).
+Explore of 2026-11-02 and 2026-11-03: the owner's note `explore-skill-rework/inputs/skill_rework.md` with two drawings, `research.md` (facts with references) and `interview.md` (the owner's answers, 11 so far). State: **approved 2026-11-05 (D-186)**. Not yet an FB item: the input is the owner's direction (iteration 1 decisions D-108 and D-177, FB-02 and TD-21 already pointed the same way).
 
 | Input | Effect on goals, scope or architecture |
 |---|---|
