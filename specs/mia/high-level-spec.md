@@ -333,7 +333,7 @@ The top-level cut follows the owner's suggestion of 2026-10-25; the mapping of t
 | N-3 Database | workflows, memories, history, user feedback, context graphs, accounts, behind the storage layer | Persistence | N-3.1 storage layer and accounts tables, N-3.2 workflows and context graphs, N-3.3 memories, history and user feedback |
 | N-4 Evaluation and operation | harness, suites, baselines, compose stack, backups, shutdown | Evaluation, OperationLayer | none yet (one concern) |
 | N-5 Graph app (add-on, integrated last) | shows and edits the workflow graphs and context graphs as nodes and edges; an independent tool | GraphApp | none (one concern) |
-| N-6 Context-graph builder (iteration 2, standalone) | builds up context graphs from runs and reviews, documents, web research and manual input; proposals with source and quote, confirmation; engine behind an interface (LightRAG is a candidate, decided by a spike) | ContextGraphBuilder | none yet |
+| N-6 Context-graph builder (iteration 2, standalone) | builds up context graphs from runs and reviews, documents, web research and manual input; proposals with source and quote, confirmation; engine behind an interface (spike C, 2026-11-05: LightRAG not used as the builder, it failed the bar on invented items; base is an own builder as a model step with a schema, chunks at sentence borders, a quote per item and a check of every name against the whole document, `spikes.md`, interview row 21) | ContextGraphBuilder | none yet |
 
 Containers (amendment 6, NFR-9): N-2, N-3, N-4, N-5 and (iteration 2) N-6 are one container each under podman; N-1 is static files in the image of the backend container, so it has no container of its own and its tests run in a browser against the mock of IF-101. Voice synthesis (N-2.5) runs in the backend container or as a second container of the same node (decided when N-2 is cut).
 
@@ -513,7 +513,7 @@ Explore of 2026-11-02 and 2026-11-03: the owner's note `explore-skill-rework/inp
 2. Transforms can be stored outside MIA for exchange; a review process for them comes later (a later goal).
 3. Until then an imported transform is stored but not runnable; a person marks it trusted.
 4. The finalization criterion of a master node is a function; four kinds are predefined (deterministic check, judge or vote, person approves, budget end), more can be added; a user-added function is a transform and follows decision 3.
-5. A context graph is knowledge the agent reads at run time. A knowledge graph is one kind of context graph. A tool builds it up; decided 2026-11-04: it is a standalone node N-6, separate from N-5 (the graph app), because it brings its own engine (LightRAG candidate) and stays replaceable.
+5. A context graph is knowledge the agent reads at run time. A knowledge graph is one kind of context graph. A tool builds it up; decided 2026-11-04: it is a standalone node N-6, separate from N-5 (the graph app), because its engine stays replaceable (LightRAG was the candidate; spike C 2026-11-05 decided against it, see interview row 21).
 6. The builder takes runs and reviews, documents the owner adds, web research results and manual editing.
 7. A testbench is an eval suite plus budgets; a workflow becomes tested or trusted only when it passes.
 8. Debates are built on MIA's own runner; no framework (no langgraph), no new dependency for that.
