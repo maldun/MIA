@@ -15,6 +15,7 @@ Blueprint M25. Approved 2026-10-25 (amendment 5, D-45). Source of the entries: "
 | SC-06 | SysML text was not parsed by a tool until the pilot parser check | no tool installed | model errors hidden | `tools/check_sysml.sh` (now available, run after every change) | open until all models pass |
 | SC-07 | Users see and may edit everything, no roles (CON-6) | trusted circle | one wrong edit changes MIA for all | roles, only if the circle grows (quality.md step-up path) | accepted |
 | SC-08 | MIA state is files and one SQLite index | built first | no sharing between apps | NFR-8, node N-3 (Database) | open |
+| SC-09 | Iteration 2: a transform marked trusted by one person runs in the MIA process, unsandboxed (`sandbox_backend: none`, TD-24); imported transforms are stored untrusted and not runnable by default | no review process or sandbox backend yet | foreign code with MIA's permissions if a transform is marked trusted by mistake | the review process for exchanged transforms or a sandbox backend (later goal, TD-24) | open |
 
 ## Exit criteria before leaving research use
 - [ ] Every shortcut is resolved or explicitly accepted (owner, reason)

@@ -40,3 +40,16 @@ Q-1 (decided): ISO/IEC 25010:2023. A quality requirement (`Quality:` line) is wr
 ## Added 2026-10-29 (A-26, proposal for the owner)
 - Q-4 (proposed): an extension (a folder in `extensions/`) is code of the repository, reviewed like any code; the loader imports it from the repository folder at the start and installs nothing from the network or from a user. If skills are ever shared between people or installed from outside, redo the security row first (signed folders, a permission list per skill).
 - Quality in use, efficiency: for a long task the owner can see where it is (numbers, not a sign of life) and can pause it. Measure in Validate: how often a review is paused or stopped by the owner, and how often it ends at a hard cap.
+
+## Added 2026-11-05 (skill rework, proposals accepted by the owner; Q-5)
+Targets in the rows are starting values; numbers that are configuration values are set in Plan and fine-tuned in Validation.
+| Characteristic | Requirement or target |
+|---|---|
+| Functional suitability | context-graph builder: at least 68 % of marked items right and at most 5 % invented (the owner's bar, spike C); 0 accepted proposals whose name is not in the source document; skill conversion (FR-45): same outcomes on its suite as before |
+| Performance efficiency | builder: at most 50 items and 5 minutes per document; debate: 3 rounds, 12 calls, 5 minutes (to be checked by spike (a)); context-graph share of a step's context at most 20 %, about 1 500 tokens (all configuration values) |
+| Interaction capability | FR-46: the chat holds only spoken text; a skill result in the chat is a short spoken summary with a link; every answer to a skill's question has a confirmation in the subwindow |
+| Reliability | FR-47: a snapshot of the skill set can be restored and the former state is kept as a snapshot; a new version of a context graph marks dependent testbenches stale, none is silently reused |
+| Security | no proposal is readable by a step before it is confirmed (TB-context); an imported transform is stored untrusted and never run until the owner marks it (one person's decision while `sandbox_backend: none`) |
+| Maintainability | skill, context graph and transform are separate records with IDs and versions; N-6 runs in its own container |
+
+Quality in use, effectiveness: share of builder proposals the owner confirms in a sample of each new document type (68 % right, 5 % invented as the start; fixed in Validation). Satisfaction and efficiency stay as above.
