@@ -32,6 +32,8 @@ Sampling: per document **10 entities and 6 relations** (changed from 6 and 4 on 
 
 ## 6. Done and next steps
 - Done 2026-11-07: builder run on the 3 documents (`spikes/lightrag/option1-run-n6/`, 107 accepted, 7 refused, strict relation rule kept for comparability); 48 items drawn; marking page `forms/n6-sample-marking.html` (generator `spikes/lightrag/make_marking_n6.py`, answers saved as `n6-sample-marks.json`).
+- **Result (2026-11-07):** 120 marks, 113 right, 0 invented: the rule (at most 4 invented, at least 91 right) is met; details and caveats in `spikes.md`.
+- **Neighbour rule is unmeasured:** 35 of the 43 refused relations would pass it; none is marked. Before the second FR-42 sentence is proposed, the owner marks a sample of them (suggestion: all 35 are too many; 20, drawn with a fixed seed, same four classes, same at most 5 % invented bar). Until then FR-42 uses the strict text.
 - Open:
 - Pick the 3 documents and fix the seed; run option 1 once per document (spike folder `spikes/lightrag/`, throwaway) and draw 6 entities and 4 relations per document; prepare the marking form like `forms/spike-c-option1-marking.html`.
 - The owner marks 48 new items (plus the 72 given, if drawn the same way); score with `score_marks.py`.
