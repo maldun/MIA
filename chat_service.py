@@ -663,7 +663,7 @@ class ChatService:
         if not late:
             start()
         self.set_activity("thinking")
-        state = {"text": "", "emotion": None, "emotions": [], "last": 0.0, "first": True, "shown": ""}
+        state = {"text": "", "emotion": None, "emotions": [], "last": 0.0, "first": True, "shown": "", "sent": ""}
         repairing = self._repair is not None and task == "chat"      # the answers of /lookup carry quotes: they are never changed
 
         def on_delta(current):
@@ -677,6 +677,7 @@ class ChatService:
             if now - state["last"] >= DELTA_INTERVAL:
                 state["last"] = now
                 if not repairing:
+                    state["sent"] = current
                     self._emit("chat_delta", {"id": message_id, "text": current})
                     return
                 # the stream is held back to the settled part, which is repaired before the page sees it (REQ-CHA-014); only a text that continues what was shown is released
@@ -716,8 +717,8 @@ class ChatService:
             self.set_activity(None)
         if self._task_files:                                                   # the files of the task are links in its result (the route is the core's own, IF-101 v8)
             state["text"] = (state["text"] + "\n\n" if state["text"] else "") + "Files: " + ", ".join("[%s](/api/files/%s)" % (n, n) for n in self._task_files)
-            if not late and not repairing:
-                self._emit("chat_delta", {"id": message_id, "text": state["text"]})        # the last delta equals the text of chat_done
+        if not late and not repairing and state["text"] != state["sent"] and (status != "stopped" or self._task_files):
+            self._emit("chat_delta", {"id": message_id, "text": state["text"]})        # the last delta equals the text of chat_done, also when the throttle held it back (IF-101 chat_done)
         if repairing and state["text"]:
             state["text"] = self._repair(state["text"])                 # the whole answer, silently; the last delta equals the text of chat_done
             if state["text"] != state["shown"]:
@@ -726,6 +727,9 @@ class ChatService:
             start()
             if state["text"]:
                 self._emit("chat_delta", {"id": message_id, "text": state["text"]})
+        sentences = [x for x in SENTENCE_END.split(speech_text(state["text"])) if x] if status == "done" and task == "chat" else []
+        for index, sentence in enumerate(sentences):          # the text of the voice, one per sentence; the audio is the page's (IF-101 audio_chunk, REQ-VOI-001)
+            self._emit("audio_chunk", {"id": message_id, "index": index, "sentence": sentence})
         extra = {"emotions": state["emotions"]} if len(state["emotions"]) > 1 else {}
         if task != "chat":
             extra["task"] = task
