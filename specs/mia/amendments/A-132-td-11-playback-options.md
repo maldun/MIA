@@ -1,6 +1,6 @@
 # A-132 (Draft): Plan step of TD-11, the backend playback route of the chat agent's voice, and "Speak again"
 
-Status: **owner chose option B (2026-11-07, D-277); Draft requirements pending review. Nothing here is approved as a whole.** Decision id: **D-277** (logged in `review-log.md`). Follows D-275 (TD-11 narrowed) and D-276 (finding: "Speak again" does nothing). No model step is involved (agent-app additions: no eval criterion, suite or threat entry; the steps stay the existing ones). Everything below was read in the code, nothing was run. `contracts/`, `tests/` and the files of G-V2 (except one note in `parallel-work.md`) and G-V3 are untouched.
+Status: **owner chose option B (2026-11-07, D-277); Draft requirements pending review. Nothing here is approved as a whole.** Decision ids: **D-277** (option B, the replacement of TD-11) and **D-278** (the follow-up answers: speak again for any message of MIA, TD-61 confirmed, the mock server, TD-11 dropped), both logged in `review-log.md`. Follows D-275 (TD-11 narrowed) and D-276 (finding: "Speak again" does nothing). No model step is involved (agent-app additions: no eval criterion, suite or threat entry; the steps stay the existing ones). Everything below was read in the code, nothing was run. `contracts/`, `tests/` and the files of G-V2 (except one note in `parallel-work.md`) and G-V3 are untouched.
 
 ## 1. The question
 
@@ -38,7 +38,7 @@ A second, hidden fault of the same button: after a Stop, the page drops every `a
 
 ## 4. Decision (owner, 2026-11-07, D-277)
 
-**B now.** The rest of TD-11 is replaced by a new deferral for a single engine path, **TD-61** (draft in `deferred.md`: target one voice path; the app has two today, the sound server and `SpeechService`). TD-11 is closed (Status done, `Closed:` names TD-61 and D-277). `REQ-VOI-001` keeps its text and `Target:`; only its `Relaxed:` marker moves from TD-11 to TD-61, with a History line (an approved requirement's marker; flagged for the owner here and in the report).
+**B now.** The rest of TD-11 is replaced by a new deferral for a single engine path, **TD-61** (draft in `deferred.md`: target one voice path; the app has two today, the sound server and `SpeechService`). TD-11 is closed (Status **dropped**, `Closed:` names TD-61, D-275 and D-277; owner, D-278). TD-61 is **confirmed as drafted** (trigger and effort), Status open (D-278). `REQ-VOI-001` keeps its text and `Target:`; only its `Relaxed:` marker moves from TD-11 to TD-61, with a History line (an approved requirement's marker; flagged for the owner here and in the report).
 
 ## 5. Requirements for option B (Drafts)
 
@@ -58,7 +58,7 @@ Ids: `REQ-CHA-030` to `REQ-CHA-034` in N-2.2 and `REQ-VPB-006` in N-1.3. The own
 | TC-CHA-034 | REQ-CHA-034 | component, 2 | two speak-again requests do not overlap |
 | **TC-CHA-036 (new level)** | REQ-CHA-031, 032, 034 | component, 2 | the hand-over to the sound server: the real `SoundServer` and `SoundHandler` on a localhost port, real TCP clients, a **fake sink** instead of the engine: order of sentences, a second request queued behind the first, a closed connection cancels the rest. Confirms by observation what the plausibility table (section 10) only read from the code. |
 | TC-VPB-006 | REQ-VPB-006 | component, 1 (`node --test`) | speak again within 3 s of a stop: the lines are enqueued (real `sound.js` on `tests/js/fake-dom.mjs`, fake clock) |
-| **TC-VPB-007 (new level)** | REQ-VPB-006 | component (browser), 2 | the existing browser harness (`tests/browser/`, Chromium, the chat mock server) **fits with a small addition**: the mock sends `audio_reload {url, serial, message}` after the speaker button and serves a short wav; the driver checks the page's audio element. The mock is test tooling under `ui/tools/`, not protected. |
+| **TC-VPB-007 (new level)** | REQ-VPB-006 | component (browser), 2 | the existing browser harness (`tests/browser/`, Chromium, the chat mock server) **fits with a small addition**: the mock sends `audio_reload {url, serial, message}` after the speaker button and serves a short wav; the driver checks the page's audio element. The mock is test tooling under `ui/tools/`, not protected; the owner allows Step 4 to change `ui/tools/chat_mock_server.py` for this check (D-278). |
 | TC-CHA-035 | REQ-CHA-030, 032 | demonstration, 4 | **shortened** hand check on the host (section 7) |
 
 `stages.yaml` needs no new step: stage 1 `unit` and `js` find `tests/test_*.py` and `tests/js/*.test.mjs` by pattern; the two stage 2 Python checks run in the existing `unit` discover run (the browser one is skipped, never passed, where podman or the images are missing, like the other browser checks). No smoke test now (owner Q7).
@@ -104,10 +104,9 @@ No number is introduced, so there is no measured reference to give; a time limit
 
 Decided: Q1 option B; Q2 TD-11 replaced by TD-61 (single engine path); Q3 speak again during a live answer is queued; Q4 route down: silent, one log line, no new text; Q5 contracts unchanged; Q6 id ranges reserved; Q7 automation levels as in section 6, no smoke test; Q8 any message of MIA with an id.
 
-New open questions:
-1. Q8 says "any chat message with an id". A message of a **user** is `not_found` for `speak_again` today (IF-201, TC-IF-201-06, unchanged by Q5). I read Q8 as: any message **of MIA** (answers, spoken digests, skill questions). Is that right, or should a user's message also be spoken?
-2. TD-61 trigger and effort are proposals ("the Plan of an iteration that changes the voice, or 2026-12-31"; 3 to 5 days). The owner confirms or changes them.
-3. TC-VPB-007 needs the chat mock server (`ui/tools/chat_mock_server.py`) to send `audio_reload` and serve a wav. It is test tooling; is a change of it acceptable in Step 4 as it was for TD-01 and TD-02?
+Decided in the follow-up (D-278): Q8 means any message **of MIA** with an id (answers, spoken digests, skill questions); a message of a user stays `not_found` (IF-201, TC-IF-201-06) and contracts stay unchanged. TD-61 is accepted as drafted, trigger and effort included (status open). Step 4 may change `ui/tools/chat_mock_server.py` for TC-VPB-007. TD-11 is dropped (not done), replaced by TD-61.
+
+No open question is left for this Plan step; the Draft requirements REQ-CHA-030 to 034 and REQ-VPB-006, the checks and the test requirements still wait for the batched review.
 
 ## 12. What Step 4 (red tests) would need
 

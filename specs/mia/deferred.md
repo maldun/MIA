@@ -149,8 +149,8 @@ Proposed on 2026-10-29 after the usability work of N-2.3 T-09 to T-11 and N-1.1 
 - Decision: D-173, 2026-11-01, Stefan Reiterer
 - Note: 2026-11-07, owner Stefan Reiterer (D-275): narrowed. The IF-201 part is done (answer events, helper fixes D-272 and D-274, `chat_service.py`); the `expression` event is split out of TD-11 (A-130 section 8, draft TD-60, not yet adopted). What stays open is the playback route. A Plan step has to come first: an amendment for the audio route, a requirement for stop and ordering, and host hand-test criteria. See `amendments/A-130-note.md`.
 - Note: 2026-11-07, found in the hand test on the host (owner Stefan Reiterer, D-276): the button "Speak again" does nothing. `/api/speak_again` only emits `audio_chunk` events and no page code handles them (`templates/static/chat/` has no `audio_chunk` handler); live answers are spoken by the backend sound server. Not caused by the TD-11 work (`speak_again` is unchanged). Folded into the Plan step of this deferral: speak again plays through the backend voice route; the Plan step needs a requirement and a failing test first.
-- Status: done
-- Closed: 2026-11-07, replaced by TD-61 on the owner's decision (D-277). What TD-11 could deliver is done (answer events, `chat_delta` flush, helper fixes D-272 and D-274); "Speak again" is planned as the requirements REQ-CHA-030 to 034 (A-132, option B), not as a deferral; the single voice path moves to TD-61.
+- Status: dropped
+- Closed: 2026-11-07, replaced by TD-61 (owner decision, D-278); the IF-201 work (answer events, `chat_delta` flush, helper fixes) is recorded in D-275 and D-277; "Speak again" is planned as the requirements REQ-CHA-030 to 034 (A-132, option B), not as a deferral
 
 ## TD-12 – Verify before asserting; lookup (TC-MIA-002)
 - Kind: defer
@@ -374,7 +374,7 @@ Proposed on 2026-10-29 after the usability work of N-2.3 T-09 to T-11 and N-1.1 
 - Effort: about 3 to 5 days (estimate of A-132, not measured), after its own Plan step
 - Risk of the gap: two routes may diverge. Mitigation: both use `speech_text` and `render_voice`; the sound-server hand-over has its own check (TC-CHA-036)
 - Owner: Stefan Reiterer
-- Trigger: the Plan of an iteration that changes the voice, or 2026-12-31, whichever first (proposed, to be confirmed by Stefan Reiterer)
+- Trigger: the Plan of an iteration that changes the voice, or 2026-12-31, whichever first
 - Target check: specified only
-- Decision: **Draft**: Stefan Reiterer chose on 2026-11-07 to replace the rest of TD-11 by one deferral for a single engine path (D-277); the wording, the trigger and the effort are proposals that he confirms or changes
+- Decision: confirmed by Stefan Reiterer, 2026-11-07 (D-278)
 - Status: open
