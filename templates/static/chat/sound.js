@@ -254,8 +254,8 @@ export function initSound({ audio, socket, character, storage, muteToggle, muteL
       stoppedAt = clock();
       player.stop();
     },
-    /** the user asks to speak an answer again (the speaker button): TD-11 option B, stub of Plan step 4, does nothing yet */
-    speakAgain() {},
+    /** the user asks to speak an answer again (the speaker button): its lines are wanted, also within STOP_DROP_MS of a Stop (REQ-VPB-006) */
+    speakAgain() { stoppedAt = null; },
     get queued() { return player.queued; },
     get playing() { return player.playing; },
   };
