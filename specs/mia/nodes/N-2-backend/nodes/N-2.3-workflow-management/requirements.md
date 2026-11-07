@@ -765,7 +765,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Parent: FR-45
 - Group: CV
 - Priority: Must
-- Verification method: Evaluation
+- Verification method: Measurement
 - Acceptance criterion: AC-34: per skill, the criterion of the Eval criterion line passes on the dev split; see the open numbers in the plan notes
 - Eval criterion: suite=<suite of the skill, EV-…>; select=all; metric=pass (the suite's own); min=baseline-0.10 (per skill, from its v0.1.0 baseline); n=dev cases of the suite; repeats=3, fold all; pin=MP-light; rule=threshold; alpha=0.05; false_alarm=0.0045 (n=20; computed per suite size); split=dev; settings version=1 (REQ-WFM-069)
 - Verified by: TC-WFM-059

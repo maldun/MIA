@@ -444,8 +444,14 @@ package MIA_Architecture {
             }
         }
         part toolbox {
-            doc /* Target (iteration 2, FR-38): transforms by ID in a form that can be stored and exchanged outside MIA; status
-                   untrusted, trusted; a node whose transform is not trusted does not run (TB-exchange). */
+            doc /* Target (iteration 2, FR-38): transforms by ID in a form that can be stored and exchanged outside MIA; two independent
+                   states: trust (untrusted, trusted: security) and lifecycle (draft, tested, retired: performance, D-187); a node whose
+                   transform is not trusted does not run (TB-exchange). */
+            @Implementation { :>> status = ImplementationStatus::proposed; }
+            @ChangeSource { feedbackId = "NOTE-2026-11-02"; iteration = 2; }
+        }
+        part snapshotStore {
+            doc /* Target (iteration 2, FR-47, G-V2): named snapshots of the skill set (skills, workflow graphs, context graphs, transforms with trust status and lifecycle, model pins), list, restore; a restore keeps the former state as a snapshot and deletes no version; owner only. */
             @Implementation { :>> status = ImplementationStatus::proposed; }
             @ChangeSource { feedbackId = "NOTE-2026-11-02"; iteration = 2; }
         }
@@ -646,6 +652,11 @@ package MIA_Architecture {
                    not behind it yet (N-2 tasks, D-67, D-105). */
             @Implementation { :>> status = ImplementationStatus::partly;
                               :>> modules = ("storage.py", "storage_files.py", "storage_postgres.py", "storage_copy.py", "migrate.py", "accounts.py"); }
+        }
+        part typeRegistry {
+            doc /* Target (iteration 2, FR-40, G-V2): the registry of data classes by type ID with the JSON schema of each type; rebuilds a node's class from the stored type ID, refuses an unknown type ID, no pickle. */
+            @Implementation { :>> status = ImplementationStatus::proposed; }
+            @ChangeSource { feedbackId = "NOTE-2026-11-02"; iteration = 2; }
         }
         part graphRecords {
             doc /* Target (iteration 2, FR-40, overlaps TD-21): workflow and context graphs as node and edge records (ID plus JSON
@@ -2026,6 +2037,8 @@ package MIA_Allocation {
     allocate fr45 to mia.taskRuntime.skillConverter;
     allocate fr46 to mia.frontEnd.skillsWindow;
     allocate fr47 to mia.persistence.graphRecords;
+    allocate fr47 to mia.taskRuntime.snapshotStore;
+    allocate fr40 to mia.persistence.typeRegistry;
     allocate fr7 to mia.taskRuntime.workflowGraph;
     allocate fr7 to mia.graphApp.graphValidator;
     allocate fr32 to mia.webApp.variantStore;
@@ -2179,7 +2192,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-CLV-011'> TasksMemosAndMemoryViews_Clv011 {
         subject s : WebFrontEnd;
-        doc /* The Chat and login views shall show all tasks, memos and memory records and let a logged-in user change or delete each of them. */
+        doc /* The Chat and login views shall show all tasks, memos and memory records and let a logged-in user change or delete each of them; a task shows its due time, and the user can set, change or clear it. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-CLV-012'> SourceTrustEdit_Clv012 {
@@ -2329,7 +2342,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-VPB-003'> VoiceLines_Vpb003 {
         subject s : WebFrontEnd;
-        doc /* When the backend sends a voice line, the Voice playback shall play it, and if its audio file is missing, skip it and report it through the IF-112 callback onLineError; no event goes to the backend (A-50). */
+        doc /* When the backend sends a voice line, the Voice playback shall play it, and if its audio file is missing, skip it and report it through the IF-112 callback `onLineError`; no event goes to the backend. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-VPB-004'> NoRequestLeavesTheHost_Vpb004 {
@@ -2404,7 +2417,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-FE-013'> VoiceLines_Fe013 {
         subject s : WebFrontEnd;
-        doc /* When the backend sends a voice line, the Web Frontend shall play it, and if its audio file is missing, skip it and report it in the page (IF-112 callback); no event goes to the backend (A-50). */
+        doc /* When the backend sends a voice line, the Web Frontend shall play it, and if its audio file is missing, skip it and report it in the page (IF-112 callback); no event goes to the backend. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-FE-014'> StatusLineAndAccountOfATask_Fe014 {
@@ -2514,7 +2527,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-API-004'> ThrottledFailedLogins_Api004 {
         subject s : WebApplication;
-        doc /* If more than 5 logins fail within one minute for an account, then the API and accounts shall refuse further logins for that account until the minute has passed. */
+        doc /* If 5 logins of an account have failed within one minute, then the API and accounts shall refuse every further login of that account, also with the right password, until fewer than 5 of its failed logins are younger than one minute. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-API-005'> PasswordHandling_Api005 {
@@ -2877,6 +2890,161 @@ package MIA_NodeRequirements {
         doc /* The Workflow management shall load each skill that runs as a task from a folder of its own (a manifest with the id, the text, the options and what the task needs from the core, the skill files and the code of the skill), so that a new skill needs no change of the chat service, the web application or the page, except a skill that adds an output view of its own, which belongs to the core. */
         @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::inspection); }
     }
+    requirement def <'REQ-WFM-040'> SkillRecord_Wfm040 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall store each skill as one versioned record of an ID, a command, a workflow graph ID and a context graph ID. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-041'> SkillTakenFromItsRecord_Wfm041 {
+        subject s : TaskRuntime;
+        doc /* While a skill has a skill record, the Workflow management shall take its command, workflow graph and context graph from that record and not from its skill file, extension manifest or pipeline reference. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-042'> CommandUsedOnce_Wfm042 {
+        subject s : TaskRuntime;
+        doc /* If a skill record names a command that another skill already uses, then the Workflow management shall refuse the record and name that skill. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-043'> ThreeNodeTypes_Wfm043 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall accept a workflow graph only if every node is a data node, a transform node or a master node. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-044'> GraphDescription_Wfm044 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall keep with each workflow graph an ID, the ID of its context graph, the ID of its testbench and a description. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-045'> DataAndTransformAlternate_Wfm045 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall refuse a workflow graph that has an edge between two data nodes or between two nodes that are not data nodes. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-046'> OneWriterPerDataNode_Wfm046 {
+        subject s : TaskRuntime;
+        doc /* If a data node is written by more than one transform or master node, then the Workflow management shall refuse the workflow graph and name the data node. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-047'> NoCycle_Wfm047 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall refuse a workflow graph that has a cycle and name the cycle. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-048'> MasterNodeStops_Wfm048 {
+        subject s : TaskRuntime;
+        doc /* If a master node has neither a maximum number of cycles nor a maximum time, then the Workflow management shall refuse the workflow graph and name the node. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-049'> ParametersOfADataNode_Wfm049 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall let each data node hold its parameters, such as a folder to store into, in a field apart from its value. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-050'> TransformsByID_Wfm050 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall keep every transform in a toolbox under an ID that is unique in the toolbox. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-051'> TrustStatusOfATransform_Wfm051 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall give every transform in the toolbox the trust status untrusted or trusted. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-052'> ImportedMeansUntrusted_Wfm052 {
+        subject s : TaskRuntime;
+        doc /* When a transform is imported from outside MIA, the Workflow management shall store it with the status untrusted. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-053'> ImportRunsNoCode_Wfm053 {
+        subject s : TaskRuntime;
+        doc /* When a transform is imported, the Workflow management shall not run any code of the transform. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-054'> OnlyTheOwnerTrusts_Wfm054 {
+        subject s : TaskRuntime;
+        doc /* If an account other than the owner asks to set the status of a transform to trusted, then the Workflow management shall refuse the change. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-055'> ExchangeForm_Wfm055 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall export a transform as one JSON file that holds its ID, version, input and output schemas and its code as text, and import the same file. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-056'> ShippedTransforms_Wfm056 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall seed the toolbox with the transforms that MIA ships, each with the status trusted. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-057'> OldRunnerUntilProven_Wfm057 {
+        subject s : TaskRuntime;
+        doc /* While the converted version of a skill has not passed its equivalence check, the Workflow management shall run the skill from its old skill file and pipeline. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-058'> SameModelCalls_Wfm058 {
+        subject s : TaskRuntime;
+        doc /* When a converted skill runs on scripted model replies, the Workflow management shall make the same model calls as the old runner, in the same order with the same prompts and options. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-059'> SameOutcomesOnTheSuite_Wfm059 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall accept the converted version of a skill only if it reproduces the outcomes of the old version on the dev split of its suite with the same pin. */
+        @Trace { :>> verifiedBy = (HowVerified::measurement); }
+    }
+    requirement def <'REQ-WFM-060'> RecordOfTheCheck_Wfm060 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall record for each skill the suite, run, pins and verdict of its equivalence check, or the reason it is not converted. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-061'> TakeASnapshot_Wfm061 {
+        subject s : TaskRuntime;
+        doc /* When the owner asks for a snapshot with a name, the Workflow management shall store the skills, workflow graphs, context graphs, transforms with trust status and lifecycle, and their model pins. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-062'> ListSnapshots_Wfm062 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall list the snapshots with name, time and author. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-063'> RestoreKeepsTheFormerState_Wfm063 {
+        subject s : TaskRuntime;
+        doc /* When the owner restores a snapshot, the Workflow management shall first store the current state as a snapshot of its own. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-064'> RestoreGivesVersionAndStatuses_Wfm064 {
+        subject s : TaskRuntime;
+        doc /* When the owner restores a snapshot, the Workflow management shall give every item in the snapshot the version, trust status and lifecycle it had in the snapshot. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-065'> RestoreDeletesNothing_Wfm065 {
+        subject s : TaskRuntime;
+        doc /* When the owner restores a snapshot, the Workflow management shall delete no version of any item. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-066'> SnapshotsOnlyByTheOwner_Wfm066 {
+        subject s : TaskRuntime;
+        doc /* If an account other than the owner asks to take or restore a snapshot, then the Workflow management shall refuse the request. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-067'> LifecycleOfATransform_Wfm067 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall give every transform in the toolbox the lifecycle draft, tested or retired, apart from its trust status. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-068'> ARetiredItemStaysUsableAsBaseline_Wfm068 {
+        subject s : TaskRuntime;
+        doc /* While a transform or a skill is retired, the Workflow management shall keep it runnable by a check as a baseline. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-069'> SettingsOfTheEquivalenceCheckAreConfiguration_Wfm069 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall read the margin, repeats and rule of the equivalence check from a versioned configuration record with defaults, and record the version used with every result. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-070'> ARetiredItemIsNotOffered_Wfm070 {
+        subject s : TaskRuntime;
+        doc /* While a transform or a skill is retired, the Workflow management shall not offer it for a new graph or a new run. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
     requirement def <'REQ-RUN-001'> InternetTasksOnlyOnCommand_Run001 {
         subject s : TaskRuntime;
         doc /* The Pipeline runner shall start a task that reaches the internet only by a command of a user. */
@@ -2889,7 +3057,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-RUN-003'> ModelServerUnreachable_Run003 {
         subject s : TaskRuntime;
-        doc /* If the model server is unreachable, then the Pipeline runner shall say so in plain words. */
+        doc /* If the model server is unreachable or does not accept the connection within 10 s, then the Pipeline runner shall say so in plain words. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-RUN-004'> OptionalLearning_Run004 {
@@ -2934,7 +3102,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-RUN-012'> UseTheLibraryTheToolsAndTheLogOnlyThroughTheirInterfaces_Run012 {
         subject s : TaskRuntime;
-        doc /* The Pipeline runner shall fetch a workflow only through IF-203, call tools only through IF-402 and write events only through IF-401. */
+        doc /* The Pipeline runner shall fetch a workflow only through IF-203, call the tools of tool nodes only through IF-402 and write events only through IF-401. */
         @Trace { :>> verifiedBy = (HowVerified::inspection, HowVerified::test); }
     }
     requirement def <'REQ-RUN-013'> KnowNoParticularWorkflow_Run013 {
@@ -2950,6 +3118,21 @@ package MIA_NodeRequirements {
     requirement def <'REQ-RUN-015'> RealiseIF105_Run015 {
         subject s : TaskRuntime;
         doc /* The Pipeline runner shall realise the evaluation interface IF-105 as specified in contracts/IF-105-evaluation-access.md by running a case with the same code as IF-202, recording the model pin, seed and temperature in the run_start event and returning the cost. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-RUN-016'> RunInTopologicalOrder_Run016 {
+        subject s : TaskRuntime;
+        doc /* When a workflow graph is run, the Pipeline runner shall run its transforms in a topological order, giving each the contents of its input data nodes and writing its result into its output data nodes. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-RUN-017'> UntrustedDoesNotRun_Run017 {
+        subject s : TaskRuntime;
+        doc /* If a workflow graph contains a transform whose status is untrusted, then the Pipeline runner shall refuse to start the run, naming the transform and its status. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-RUN-018'> MasterNodeNotRunYet_Run018 {
+        subject s : TaskRuntime;
+        doc /* If a workflow graph contains a master node, then the Pipeline runner shall refuse to start the run, saying that master nodes cannot be run yet. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-TLS-001'> CodeChecksFirst_Tls001 {
@@ -2982,9 +3165,9 @@ package MIA_NodeRequirements {
         doc /* The Tools and sandbox shall return every fetched passage with its source reference, so that the quote check compares the quote with the source text. */
         @Trace { :>> verifiedBy = (HowVerified::measurement); }
     }
-    requirement def <'REQ-TLS-007'> OnlyQueriesLeaveTheHost_Tls007 {
+    requirement def <'REQ-TLS-007'> OnlyTheRequestOfAQueryLeavesTheHost_Tls007 {
         subject s : VerificationSuite;
-        doc /* The Tools and sandbox shall send off the host only the text of a web or scholarly query and, if configured, an e-mail address. */
+        doc /* The Tools and sandbox shall send off the host only what a web or scholarly query needs: the query text, its filters (dates, result count, fields), the DOI of a looked-up work, and, if configured, an e-mail address, an API key of the source and MIA's User-Agent. */
         @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::inspection); }
     }
     requirement def <'REQ-TLS-008'> BudgetAndTrustLabelPerToolCall_Tls008 {
@@ -3199,7 +3382,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-BE-009'> ThrottledFailedLogins_Be009 {
         subject s : WebApplication;
-        doc /* If more than 5 logins fail within one minute for an account, then the Backend shall refuse further logins for that account until the minute has passed. */
+        doc /* If 5 logins fail within one minute for an account, then the Backend shall refuse every further login of that account until the minute has passed. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-BE-010'> PasswordHandling_Be010 {
@@ -3569,7 +3752,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-SLY-006'> ChangeNotification_Sly006 {
         subject s : Persistence;
-        doc /* When a record changes, the Storage layer shall tell every subscriber of the storage interface. */
+        doc /* When a record changes, the Storage layer shall tell every subscriber of the storage interface. Notices sent while an instance's listening connection to the database is being opened again (a database restart) may be lost. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-SLY-007'> ReversibleMoveFromFiles_Sly007 {
@@ -3620,6 +3803,61 @@ package MIA_NodeRequirements {
     requirement def <'REQ-GTB-004'> ExampleWorkflowsAsSeedData_Gtb004 {
         subject s : Persistence;
         doc /* The Graph tables shall ship the example workflows lookup, verify and review, the search command and method transfer (off by default) as seed entries of the library, with their specifications, context graphs and benchmark references. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-005'> NodeRecords_Gtb005 {
+        subject s : Persistence;
+        doc /* The Graph tables shall store each node of a workflow or context graph as a record of an ID and a JSON field that holds a fixed type. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-006'> EdgeRecords_Gtb006 {
+        subject s : Persistence;
+        doc /* The Graph tables shall store each edge as a record of an ID, a start node, an end node and a JSON field. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-007'> FieldsOfTransformNodes_Gtb007 {
+        subject s : Persistence;
+        doc /* The Graph tables shall hold the toolbox ID of its transform in the JSON field of a transform node. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-008'> FieldsOfMasterNodes_Gtb008 {
+        subject s : Persistence;
+        doc /* The Graph tables shall hold the definition of its task and its stopping criterion in the JSON field of a master node. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-009'> ClassFromTypeID_Gtb009 {
+        subject s : Persistence;
+        doc /* When a stored node is read, the Graph tables shall rebuild its data class from the stored type ID. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-010'> UnknownType_Gtb010 {
+        subject s : Persistence;
+        doc /* If a stored or written node has a type ID that no registered data class has, then the Graph tables shall refuse it and name the type ID. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-011'> TypesAsSchemas_Gtb011 {
+        subject s : Persistence;
+        doc /* The Graph tables shall check the JSON field of each node and edge on write against the JSON schema of its type. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-012'> NoLanguageSpecificSerialisation_Gtb012 {
+        subject s : Persistence;
+        doc /* The Graph tables shall not use a language-specific serialisation to store or rebuild a graph. */
+        @Trace { :>> verifiedBy = (HowVerified::inspection); }
+    }
+    requirement def <'REQ-GTB-013'> VersionsKept_Gtb013 {
+        subject s : Persistence;
+        doc /* When a node, an edge or a graph is edited, the Graph tables shall store the edit as a new version and keep every earlier version. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-014'> RebuiltEqualsStored_Gtb014 {
+        subject s : Persistence;
+        doc /* When a stored graph is read and rebuilt, the Graph tables shall give a graph equal to the one that was stored. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-015'> DocumentFormDuringTheTransition_Gtb015 {
+        subject s : Persistence;
+        doc /* While IF-301 v1 and IF-203 v1 are in use, the Graph tables shall return a stored workflow also in the document form of those interfaces. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-RTB-001'> SharedStateHeld_Rtb001 {
@@ -3829,7 +4067,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-OPR-007'> ComposeStack_Opr007 {
         subject s : OperationLayer;
-        doc /* The Operation shall provide a compose stack that starts the containers of N-2 to N-5 alone and together with one configuration file. */
+        doc /* The Operation shall provide a compose stack that starts the containers of N-2 (`mia`), N-3 (`db`) and N-5 (`graph`) alone and together with one configuration file. */
         @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
     }
     requirement def <'REQ-OPR-008'> PrivateAccessOnly_Opr008 {
@@ -4153,6 +4391,37 @@ package MIA_NodeRequirements {
     requirement r_req_wfm_037 : FilesInAVolume_Wfm037;
     requirement r_req_wfm_038 : ReportAsARecord_Wfm038;
     requirement r_req_wfm_039 : SkillsAreSelfContainedExtensions_Wfm039;
+    requirement r_req_wfm_040 : SkillRecord_Wfm040;
+    requirement r_req_wfm_041 : SkillTakenFromItsRecord_Wfm041;
+    requirement r_req_wfm_042 : CommandUsedOnce_Wfm042;
+    requirement r_req_wfm_043 : ThreeNodeTypes_Wfm043;
+    requirement r_req_wfm_044 : GraphDescription_Wfm044;
+    requirement r_req_wfm_045 : DataAndTransformAlternate_Wfm045;
+    requirement r_req_wfm_046 : OneWriterPerDataNode_Wfm046;
+    requirement r_req_wfm_047 : NoCycle_Wfm047;
+    requirement r_req_wfm_048 : MasterNodeStops_Wfm048;
+    requirement r_req_wfm_049 : ParametersOfADataNode_Wfm049;
+    requirement r_req_wfm_050 : TransformsByID_Wfm050;
+    requirement r_req_wfm_051 : TrustStatusOfATransform_Wfm051;
+    requirement r_req_wfm_052 : ImportedMeansUntrusted_Wfm052;
+    requirement r_req_wfm_053 : ImportRunsNoCode_Wfm053;
+    requirement r_req_wfm_054 : OnlyTheOwnerTrusts_Wfm054;
+    requirement r_req_wfm_055 : ExchangeForm_Wfm055;
+    requirement r_req_wfm_056 : ShippedTransforms_Wfm056;
+    requirement r_req_wfm_057 : OldRunnerUntilProven_Wfm057;
+    requirement r_req_wfm_058 : SameModelCalls_Wfm058;
+    requirement r_req_wfm_059 : SameOutcomesOnTheSuite_Wfm059;
+    requirement r_req_wfm_060 : RecordOfTheCheck_Wfm060;
+    requirement r_req_wfm_061 : TakeASnapshot_Wfm061;
+    requirement r_req_wfm_062 : ListSnapshots_Wfm062;
+    requirement r_req_wfm_063 : RestoreKeepsTheFormerState_Wfm063;
+    requirement r_req_wfm_064 : RestoreGivesVersionAndStatuses_Wfm064;
+    requirement r_req_wfm_065 : RestoreDeletesNothing_Wfm065;
+    requirement r_req_wfm_066 : SnapshotsOnlyByTheOwner_Wfm066;
+    requirement r_req_wfm_067 : LifecycleOfATransform_Wfm067;
+    requirement r_req_wfm_068 : ARetiredItemStaysUsableAsBaseline_Wfm068;
+    requirement r_req_wfm_069 : SettingsOfTheEquivalenceCheckAreConfiguration_Wfm069;
+    requirement r_req_wfm_070 : ARetiredItemIsNotOffered_Wfm070;
     requirement r_req_run_001 : InternetTasksOnlyOnCommand_Run001;
     requirement r_req_run_002 : SwitchTheModel_Run002;
     requirement r_req_run_003 : ModelServerUnreachable_Run003;
@@ -4168,13 +4437,16 @@ package MIA_NodeRequirements {
     requirement r_req_run_013 : KnowNoParticularWorkflow_Run013;
     requirement r_req_run_014 : RealiseIF202_Run014;
     requirement r_req_run_015 : RealiseIF105_Run015;
+    requirement r_req_run_016 : RunInTopologicalOrder_Run016;
+    requirement r_req_run_017 : UntrustedDoesNotRun_Run017;
+    requirement r_req_run_018 : MasterNodeNotRunYet_Run018;
     requirement r_req_tls_001 : CodeChecksFirst_Tls001;
     requirement r_req_tls_002 : LookupWithSources_Tls002;
     requirement r_req_tls_003 : SourceRecordsAndCutOff_Tls003;
     requirement r_req_tls_004 : UntrustedTextIsData_Tls004;
     requirement r_req_tls_005 : SandboxOrRefuse_Tls005;
     requirement r_req_tls_006 : NoInventedSource_Tls006;
-    requirement r_req_tls_007 : OnlyQueriesLeaveTheHost_Tls007;
+    requirement r_req_tls_007 : OnlyTheRequestOfAQueryLeavesTheHost_Tls007;
     requirement r_req_tls_008 : BudgetAndTrustLabelPerToolCall_Tls008;
     requirement r_req_log_001 : StepByStepAccount_Log001;
     requirement r_req_log_002 : TypedRunEvents_Log002;
@@ -4302,6 +4574,17 @@ package MIA_NodeRequirements {
     requirement r_req_gtb_002 : SchemaValidationOnWrite_Gtb002;
     requirement r_req_gtb_003 : ContextGraphsStored_Gtb003;
     requirement r_req_gtb_004 : ExampleWorkflowsAsSeedData_Gtb004;
+    requirement r_req_gtb_005 : NodeRecords_Gtb005;
+    requirement r_req_gtb_006 : EdgeRecords_Gtb006;
+    requirement r_req_gtb_007 : FieldsOfTransformNodes_Gtb007;
+    requirement r_req_gtb_008 : FieldsOfMasterNodes_Gtb008;
+    requirement r_req_gtb_009 : ClassFromTypeID_Gtb009;
+    requirement r_req_gtb_010 : UnknownType_Gtb010;
+    requirement r_req_gtb_011 : TypesAsSchemas_Gtb011;
+    requirement r_req_gtb_012 : NoLanguageSpecificSerialisation_Gtb012;
+    requirement r_req_gtb_013 : VersionsKept_Gtb013;
+    requirement r_req_gtb_014 : RebuiltEqualsStored_Gtb014;
+    requirement r_req_gtb_015 : DocumentFormDuringTheTransition_Gtb015;
     requirement r_req_rtb_001 : SharedStateHeld_Rtb001;
     requirement r_req_rtb_002 : RunResults_Rtb002;
     requirement r_req_rtb_003 : VotesStored_Rtb003;
@@ -4529,6 +4812,37 @@ package MIA_NodeRequirements {
     satisfy r_req_wfm_037 by mia.taskRuntime;
     satisfy r_req_wfm_038 by mia.taskRuntime;
     satisfy r_req_wfm_039 by mia.taskRuntime;
+    satisfy r_req_wfm_040 by mia.taskRuntime;
+    satisfy r_req_wfm_041 by mia.taskRuntime;
+    satisfy r_req_wfm_042 by mia.taskRuntime;
+    satisfy r_req_wfm_043 by mia.taskRuntime;
+    satisfy r_req_wfm_044 by mia.taskRuntime;
+    satisfy r_req_wfm_045 by mia.taskRuntime;
+    satisfy r_req_wfm_046 by mia.taskRuntime;
+    satisfy r_req_wfm_047 by mia.taskRuntime;
+    satisfy r_req_wfm_048 by mia.taskRuntime;
+    satisfy r_req_wfm_049 by mia.taskRuntime;
+    satisfy r_req_wfm_050 by mia.taskRuntime;
+    satisfy r_req_wfm_051 by mia.taskRuntime;
+    satisfy r_req_wfm_052 by mia.taskRuntime;
+    satisfy r_req_wfm_053 by mia.taskRuntime;
+    satisfy r_req_wfm_054 by mia.taskRuntime;
+    satisfy r_req_wfm_055 by mia.taskRuntime;
+    satisfy r_req_wfm_056 by mia.taskRuntime;
+    satisfy r_req_wfm_057 by mia.taskRuntime;
+    satisfy r_req_wfm_058 by mia.taskRuntime;
+    satisfy r_req_wfm_059 by mia.taskRuntime;
+    satisfy r_req_wfm_060 by mia.taskRuntime;
+    satisfy r_req_wfm_061 by mia.taskRuntime;
+    satisfy r_req_wfm_062 by mia.taskRuntime;
+    satisfy r_req_wfm_063 by mia.taskRuntime;
+    satisfy r_req_wfm_064 by mia.taskRuntime;
+    satisfy r_req_wfm_065 by mia.taskRuntime;
+    satisfy r_req_wfm_066 by mia.taskRuntime;
+    satisfy r_req_wfm_067 by mia.taskRuntime;
+    satisfy r_req_wfm_068 by mia.taskRuntime;
+    satisfy r_req_wfm_069 by mia.taskRuntime;
+    satisfy r_req_wfm_070 by mia.taskRuntime;
     satisfy r_req_run_001 by mia.taskRuntime;
     satisfy r_req_run_002 by mia.taskRuntime;
     satisfy r_req_run_003 by mia.taskRuntime;
@@ -4544,6 +4858,9 @@ package MIA_NodeRequirements {
     satisfy r_req_run_013 by mia.taskRuntime;
     satisfy r_req_run_014 by mia.taskRuntime;
     satisfy r_req_run_015 by mia.taskRuntime;
+    satisfy r_req_run_016 by mia.taskRuntime;
+    satisfy r_req_run_017 by mia.taskRuntime;
+    satisfy r_req_run_018 by mia.taskRuntime;
     satisfy r_req_tls_001 by mia.verifier;
     satisfy r_req_tls_002 by mia.verifier;
     satisfy r_req_tls_003 by mia.verifier;
@@ -4678,6 +4995,17 @@ package MIA_NodeRequirements {
     satisfy r_req_gtb_002 by mia.persistence;
     satisfy r_req_gtb_003 by mia.persistence;
     satisfy r_req_gtb_004 by mia.persistence;
+    satisfy r_req_gtb_005 by mia.persistence;
+    satisfy r_req_gtb_006 by mia.persistence;
+    satisfy r_req_gtb_007 by mia.persistence;
+    satisfy r_req_gtb_008 by mia.persistence;
+    satisfy r_req_gtb_009 by mia.persistence;
+    satisfy r_req_gtb_010 by mia.persistence;
+    satisfy r_req_gtb_011 by mia.persistence;
+    satisfy r_req_gtb_012 by mia.persistence;
+    satisfy r_req_gtb_013 by mia.persistence;
+    satisfy r_req_gtb_014 by mia.persistence;
+    satisfy r_req_gtb_015 by mia.persistence;
     satisfy r_req_rtb_001 by mia.persistence;
     satisfy r_req_rtb_002 by mia.persistence;
     satisfy r_req_rtb_003 by mia.persistence;
@@ -4904,6 +5232,37 @@ package MIA_NodeRequirements {
     allocate r_req_wfm_037 to mia.taskRuntime;
     allocate r_req_wfm_038 to mia.taskRuntime;
     allocate r_req_wfm_039 to mia.taskRuntime;
+    allocate r_req_wfm_040 to mia.taskRuntime;
+    allocate r_req_wfm_041 to mia.taskRuntime;
+    allocate r_req_wfm_042 to mia.taskRuntime;
+    allocate r_req_wfm_043 to mia.taskRuntime;
+    allocate r_req_wfm_044 to mia.taskRuntime;
+    allocate r_req_wfm_045 to mia.taskRuntime;
+    allocate r_req_wfm_046 to mia.taskRuntime;
+    allocate r_req_wfm_047 to mia.taskRuntime;
+    allocate r_req_wfm_048 to mia.taskRuntime;
+    allocate r_req_wfm_049 to mia.taskRuntime;
+    allocate r_req_wfm_050 to mia.taskRuntime;
+    allocate r_req_wfm_051 to mia.taskRuntime;
+    allocate r_req_wfm_052 to mia.taskRuntime;
+    allocate r_req_wfm_053 to mia.taskRuntime;
+    allocate r_req_wfm_054 to mia.taskRuntime;
+    allocate r_req_wfm_055 to mia.taskRuntime;
+    allocate r_req_wfm_056 to mia.taskRuntime;
+    allocate r_req_wfm_057 to mia.taskRuntime;
+    allocate r_req_wfm_058 to mia.taskRuntime;
+    allocate r_req_wfm_059 to mia.taskRuntime;
+    allocate r_req_wfm_060 to mia.taskRuntime;
+    allocate r_req_wfm_061 to mia.taskRuntime;
+    allocate r_req_wfm_062 to mia.taskRuntime;
+    allocate r_req_wfm_063 to mia.taskRuntime;
+    allocate r_req_wfm_064 to mia.taskRuntime;
+    allocate r_req_wfm_065 to mia.taskRuntime;
+    allocate r_req_wfm_066 to mia.taskRuntime;
+    allocate r_req_wfm_067 to mia.taskRuntime;
+    allocate r_req_wfm_068 to mia.taskRuntime;
+    allocate r_req_wfm_069 to mia.taskRuntime;
+    allocate r_req_wfm_070 to mia.taskRuntime;
     allocate r_req_run_001 to mia.taskRuntime;
     allocate r_req_run_002 to mia.taskRuntime;
     allocate r_req_run_003 to mia.taskRuntime;
@@ -4919,6 +5278,9 @@ package MIA_NodeRequirements {
     allocate r_req_run_013 to mia.taskRuntime;
     allocate r_req_run_014 to mia.taskRuntime;
     allocate r_req_run_015 to mia.taskRuntime;
+    allocate r_req_run_016 to mia.taskRuntime;
+    allocate r_req_run_017 to mia.taskRuntime;
+    allocate r_req_run_018 to mia.taskRuntime;
     allocate r_req_tls_001 to mia.verifier;
     allocate r_req_tls_002 to mia.verifier;
     allocate r_req_tls_003 to mia.verifier;
@@ -5053,6 +5415,17 @@ package MIA_NodeRequirements {
     allocate r_req_gtb_002 to mia.persistence;
     allocate r_req_gtb_003 to mia.persistence;
     allocate r_req_gtb_004 to mia.persistence;
+    allocate r_req_gtb_005 to mia.persistence;
+    allocate r_req_gtb_006 to mia.persistence;
+    allocate r_req_gtb_007 to mia.persistence;
+    allocate r_req_gtb_008 to mia.persistence;
+    allocate r_req_gtb_009 to mia.persistence;
+    allocate r_req_gtb_010 to mia.persistence;
+    allocate r_req_gtb_011 to mia.persistence;
+    allocate r_req_gtb_012 to mia.persistence;
+    allocate r_req_gtb_013 to mia.persistence;
+    allocate r_req_gtb_014 to mia.persistence;
+    allocate r_req_gtb_015 to mia.persistence;
     allocate r_req_rtb_001 to mia.persistence;
     allocate r_req_rtb_002 to mia.persistence;
     allocate r_req_rtb_003 to mia.persistence;
@@ -5290,6 +5663,37 @@ package MIA_NodeRequirements {
     dependency from r_req_wfm_037 to r_req_be_033;
     dependency from r_req_wfm_038 to r_req_be_053;
     dependency from r_req_wfm_039 to r_req_be_033;
+    dependency from r_req_wfm_040 to fr36;
+    dependency from r_req_wfm_041 to fr36;
+    dependency from r_req_wfm_042 to fr36;
+    dependency from r_req_wfm_043 to fr37;
+    dependency from r_req_wfm_044 to fr37;
+    dependency from r_req_wfm_045 to fr37;
+    dependency from r_req_wfm_046 to fr37;
+    dependency from r_req_wfm_047 to fr37;
+    dependency from r_req_wfm_048 to fr37;
+    dependency from r_req_wfm_049 to fr37;
+    dependency from r_req_wfm_050 to fr38;
+    dependency from r_req_wfm_051 to fr38;
+    dependency from r_req_wfm_052 to fr38;
+    dependency from r_req_wfm_053 to fr38;
+    dependency from r_req_wfm_054 to fr38;
+    dependency from r_req_wfm_055 to fr38;
+    dependency from r_req_wfm_056 to fr38;
+    dependency from r_req_wfm_057 to fr45;
+    dependency from r_req_wfm_058 to fr45;
+    dependency from r_req_wfm_059 to fr45;
+    dependency from r_req_wfm_060 to fr45;
+    dependency from r_req_wfm_061 to fr47;
+    dependency from r_req_wfm_062 to fr47;
+    dependency from r_req_wfm_063 to fr47;
+    dependency from r_req_wfm_064 to fr47;
+    dependency from r_req_wfm_065 to fr47;
+    dependency from r_req_wfm_066 to fr47;
+    dependency from r_req_wfm_067 to fr38;
+    dependency from r_req_wfm_068 to fr45;
+    dependency from r_req_wfm_069 to fr45;
+    dependency from r_req_wfm_070 to fr45;
     dependency from r_req_run_001 to r_req_wfx_002;
     dependency from r_req_run_002 to r_req_wfx_003;
     dependency from r_req_run_003 to r_req_wfx_004;
@@ -5305,6 +5709,9 @@ package MIA_NodeRequirements {
     dependency from r_req_run_013 to r_req_wfx_023;
     dependency from r_req_run_014 to if202;
     dependency from r_req_run_015 to r_req_wfx_024;
+    dependency from r_req_run_016 to fr37;
+    dependency from r_req_run_017 to fr38;
+    dependency from r_req_run_018 to fr37;
     dependency from r_req_tls_001 to r_req_wfx_005;
     dependency from r_req_tls_002 to r_req_wfx_006;
     dependency from r_req_tls_003 to r_req_wfx_007;
@@ -5460,6 +5867,17 @@ package MIA_NodeRequirements {
     dependency from r_req_gtb_002 to r_req_db_004;
     dependency from r_req_gtb_003 to r_req_db_011;
     dependency from r_req_gtb_004 to r_req_db_018;
+    dependency from r_req_gtb_005 to fr40;
+    dependency from r_req_gtb_006 to fr40;
+    dependency from r_req_gtb_007 to fr40;
+    dependency from r_req_gtb_008 to fr40;
+    dependency from r_req_gtb_009 to fr40;
+    dependency from r_req_gtb_010 to fr40;
+    dependency from r_req_gtb_011 to fr40;
+    dependency from r_req_gtb_012 to fr40;
+    dependency from r_req_gtb_013 to fr40;
+    dependency from r_req_gtb_014 to fr40;
+    dependency from r_req_gtb_015 to fr40;
     dependency from r_req_rtb_001 to r_req_db_002;
     dependency from r_req_rtb_002 to r_req_db_010;
     dependency from r_req_rtb_003 to r_req_db_012;
