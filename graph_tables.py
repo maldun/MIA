@@ -116,9 +116,11 @@ def _check_members(data, stored):
     return None
 
 
-def _check(table, record, categories, stored):
+def _check(table, record, categories, stored, record_id=None):
     if not isinstance(record, dict) or not isinstance(record.get("id"), str) or not record["id"]:
         return _refusal("record_identity", "id" if isinstance(record, dict) else "record")
+    if record_id is not None and record_id != record["id"]:     # a header pins by the ID inside, the storage finds by the record ID (REQ-GTB-021)
+        return _refusal("record_identity", "id")
     if table == "graph_edges":
         for end in ("from", "to"):
             if not isinstance(record.get(end), str) or not record[end]:
@@ -141,14 +143,15 @@ def _check(table, record, categories, stored):
     return _check_members(data, stored) if table == "graphs" else None
 
 
-def check_record(table, record, categories=None, stored=None, record_id=None):   # record_id: A-92, not used yet (T-06)
-    """None, or {"rule", "detail"} of the first broken rule of a record of graph_nodes, graph_edges, graphs or skills (REQ-GTB-010, 011, 016, 019, 020).
+def check_record(table, record, categories=None, stored=None, record_id=None):
+    """None, or {"rule", "detail"} of the first broken rule of a record of graph_nodes, graph_edges, graphs or skills (REQ-GTB-010, 011, 016, 019, 020, 021).
+    `record_id` is the ID the caller writes the record under: when given and different from the `id` inside the record, record_identity names `id`.
     Pure: it stores nothing and changes neither the record nor `stored`. Any record gives a rule or None, never an exception (as A-60);
     a table that is not one of the four is a ValueError."""
     if table not in RECORD_TABLES:
         raise ValueError("not a record table of the graphs: %s" % (table,))
     try:
-        return _check(table, record, categories, stored)
+        return _check(table, record, categories, stored, record_id)
     except Exception:                           # a malformed record (for example a header whose members are not objects) is refused, not raised
         return _refusal("record_identity", "record")
 

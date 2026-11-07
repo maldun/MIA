@@ -316,6 +316,31 @@ class StorageBehaviour:
         self.assertEqual(self.store.put("graph_edges", "e1", edge, "anna"), {"version": 1})
         self.assertEqual(self.store.put("graphs", "wf1", header(2), "anna"), {"version": 1})
 
+    @mark.req("REQ-GTB-021")
+    def test_a_graph_record_is_stored_under_its_own_id(self):
+        """TC-GTB-022 on the Storage layer, for each of the four tables: a record written under a record ID that differs from the ID inside it is refused naming id, and nothing is stored under that ID.
+
+        Example: {"id": "n1", "data": {"type": "data"}} written under "x" -> invalid, record_identity, "id"; under "n1" -> version 1.
+        """
+        # Given: two stored nodes and one record of each table, each with its own ID
+        for node_id in ("n1", "n2"):
+            self.store.put("graph_nodes", node_id, {"id": node_id, "data": {"type": "data"}}, "anna")
+        records = {"graph_nodes": {"id": "n3", "data": {"type": "data"}},
+                   "graph_edges": {"id": "e1", "from": "n1", "to": "n2", "data": {}},
+                   "graphs": {"id": "wf1", "data": {"kind": "workflow", "context_graph_id": "c", "testbench_id": "", "description": "d",
+                                                   "nodes": [{"id": "n1", "version": 1}], "edges": []}},
+                   "skills": {"id": "lookup", "data": {"command": "/lookup", "workflow_graph_id": "wf1", "context_graph_id": "c"}}}
+        for table, record in records.items():
+            with self.subTest(table=table):
+                # When: the record is written under the record ID x
+                with self.assertRaises(StorageError) as caught:
+                    self.store.put(table, "x", record, "anna")
+                # Then: it is refused as record_identity naming id, and nothing is stored under x
+                self.assertEqual((caught.exception.code, caught.exception.rule, caught.exception.detail), ("invalid", "record_identity", "id"))
+                self.assertNotIn("x", self.store.ids(table))
+                # And: under its own ID the same record is accepted (the twin differs only in the broken rule)
+                self.assertEqual(self.store.put(table, record["id"], record, "anna"), {"version": 1})
+
 
 class FileStorage(StorageBehaviour, unittest.TestCase):
     def new_backend(self, label):
