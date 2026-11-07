@@ -1,6 +1,6 @@
 # Plan: G-V2.STORE (graph records, storage)
 
-**Goal:** specs/mia/goals/G-V2.STORE/goal.md   **Requirements:** REQ-GTB-005..020 in `nodes/N-3-database/nodes/N-3.2-workflows-and-context-graphs/requirements.md`, interface IF-301 v2 (`contracts/IF-301-graph-tables.md`)   **Test specs:** `test-spec.md` next to the requirements (scenarios "iteration 2, G-V2.STORE"), test requirements TR-GTB-001..006 in `test-requirements.md` next to it   **Status:** Draft (Plan Step 5, 2026-11-07), for the owner's review
+**Goal:** specs/mia/goals/G-V2.STORE/goal.md   **Requirements:** REQ-GTB-005..020 in `nodes/N-3-database/nodes/N-3.2-workflows-and-context-graphs/requirements.md`, interface IF-301 v2 (`contracts/IF-301-graph-tables.md`)   **Test specs:** `test-spec.md` next to the requirements (scenarios "iteration 2, G-V2.STORE"), test requirements TR-GTB-001..006 in `test-requirements.md` next to it   **Status:** Approved by the owner, 2026-11-07 (Plan Step 5)
 
 Line of work `goal/v2.store`; supervised. Five small tasks, pure logic and one wiring: no model step, no prompt, no eval suite, no eval budget. The red tests were written in a session of their own (Step 4) and are installed (tag `plan-baseline-it2-store`); the implementing session never edits `tests/acceptance/`, `tests/helpers/`, `tests/smoke/`, `contracts/`, `benchmarks/`, `eval/suites/` or `eval/baselines/`.
 
@@ -73,7 +73,8 @@ T-01 first (everything else needs the record checks); T-02, then T-03; T-04 may 
 ## Size check (splitting)
 16 requirements and one interface, five tasks of one session each, two nodes (N-3.2 in T-01 to T-03 and T-05, N-3.1 in T-04). The leaf limit (about 8 tasks, 3 interfaces) is kept; no split is suggested, the goal record's "keep together" stands. T-04 is the only change outside N-3.2 and touches one file.
 
-## For the owner to decide
-1. The cut of five tasks, and that T-05 is an amendment (A-91) the owner installs, because the skip lives in a protected suite.
-2. `requirements.txt` gets `jsonschema==4.23.0` in T-01 (D-187 approved the validator; the pin is the version of TR-GTB-003). MODEL's T-01 adds `networkx` to the same file: the merge of the two lines is trivial.
-3. Whether T-04 should also copy the four tables in `storage_copy.py` (file to PostgreSQL migration); proposed: no, CONVERT decides when it converts the first skill.
+## Decided by the owner (2026-11-07)
+1. A-90 (contract text of IF-301 v2 with its Clarifications, installed) is approved, and A-91 in principle: T-05 removes the skip of the v2 suite by an amendment the owner installs; the agent drafts its script for a look-only review when T-05 comes.
+2. The cut of five tasks stands.
+3. `requirements.txt` gets `jsonschema==4.23.0` in T-01 (D-187; MODEL's `networkx` line merges as a union).
+4. `storage_copy.py` is not changed in T-04; CONVERT decides about copying the record tables.
