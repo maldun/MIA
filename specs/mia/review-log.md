@@ -457,3 +457,9 @@ The first version was silent until the end and could take 20 minutes or more: th
 | TC-GTB-008 | check | 035e1928092a | Stefan Reiterer | 2026-11-07 | approved |  |
 | TR-GTB-001 | test requirement | b641dab63ed9 | Stefan Reiterer | 2026-11-07 | approved |  |
 | TR-GTB-002 | test requirement | d0620f8441d1 | Stefan Reiterer | 2026-11-07 | approved | shortened to the IF-102 suite on the owner's remark |
+| TC-GTB-009 | check | fdeb39cd656b | Stefan Reiterer | 2026-11-07 | approved | 003: version on the host is enough (no exact pin) |
+| TC-GTB-010 | check | b0a036319b53 | Stefan Reiterer | 2026-11-07 | approved | 003: version on the host is enough (no exact pin) |
+| TC-GTB-011 | check | 904bf83490f5 | Stefan Reiterer | 2026-11-07 | approved | 003: version on the host is enough (no exact pin) |
+| TC-GTB-012 | check | 06b401bf5d7d | Stefan Reiterer | 2026-11-07 | approved | 003: version on the host is enough (no exact pin) |
+| TR-GTB-003 | test requirement | 5277fdb2c0ed | Stefan Reiterer | 2026-11-07 | approved | 003: version on the host is enough (no exact pin) |
+| TR-GTB-005 | test requirement | 9b7486a16fb0 | Stefan Reiterer | 2026-11-07 | approved | 003: version on the host is enough (no exact pin) |
