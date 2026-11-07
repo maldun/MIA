@@ -482,6 +482,13 @@ plausibility:
       rated: '2026-10-26'
       rated_by: maldun
       rating: questionable
+    FR-40:
+      basis:
+      - all 12 refining requirements (REQ-GTB-005 to 016) are rated plausible and verified by TC-GTB-016, 006 to 015 and 017; PostgreSQL is part of the stack already (rated by the owner, D-260 rule for top-level items)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: maldun
+      rating: plausible
     IF-101:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
@@ -2668,9 +2675,11 @@ plausibility:
       rating: plausible
     REQ-GTB-016:
       basis:
-      - 'a refused write leaves the stored record alone; versions are written only after the checks pass; no number depends on it (proposal of the agent, 2026-11-07; to be rated by the owner)'
+      - 'a refused write leaves the stored record alone; versions are written only after the checks pass; no number depends on it (proposal of the agent, 2026-11-07; rated by the owner)'
       hardware: HW-target
-      rating: unknown
+      rated: '2026-11-07'
+      rated_by: maldun
+      rating: plausible
     REQ-LOG-001:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
