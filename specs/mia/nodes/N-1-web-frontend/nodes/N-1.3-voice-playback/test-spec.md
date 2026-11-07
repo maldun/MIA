@@ -13,6 +13,15 @@ Tests of this part alone against the mocks of its neighbours (the mock of IF-101
 | TC-VPB-003 | REQ-VPB-003 | Component | 1 | unit test in `tests/js/` with the mocks of the interfaces (`node --test`) | AC-13: a line with a missing file produces one report through `onLineError` (the page: one browser console warning) and no error shown; the conversation continues; no backend event (A-50) | as stated |
 | TC-VPB-004 | REQ-VPB-004 | Component (browser) | 3 | `tests/test_page_requests.py` (D-141): the stub server `ui/tools/chat_stub_server.py` in the MIA image (stage `chat-on-stub`), headless Chromium of `localhost/mia-browser` (`tests/browser/Containerfile`) on loopback; the page is loaded, one voice line is uploaded and played, every request comes from Chromium's performance log; skipped (never passed) without podman or an image. Stage 1 keeps the source scan `tests/js/no-outside-requests.test.mjs` | AC-5: a browser test records every request of a session and finds 0 outside the host; the console shows no CSP violation | exact |
 | TC-VPB-005 | REQ-VPB-005 | System | 3 | the compose stack, a real browser (D-144): `tests/test_delivery_on_stack.py` builds its own image tag of the checkout (`localhost/mia:vpb005`, `--pull=never`) and starts `deploy/compose.yaml` under its own project (`mia-vpb005`) on 127.0.0.1 only, with the host's Ollama through `OLLAMA_URL` (never the `ollama` profile, nothing pulled); headless Chromium of `localhost/mia-browser` (D-141) loads the page over the stack's http front and plays one voice line; every request comes from Chromium's performance log; the test removes its containers, volumes, network and image tag; skipped (never passed) without podman, podman-compose, an image or the model server. `tests/test_frontend_delivery.py` keeps the quick checks on `deploy/compose.yaml`, the Containerfile and the stub stage | AC-29: the chat page loads from the backend container; the frontend has no container of its own. Checked as: every request of the session (page, scripts, socket, the voice line) goes to the stack's own host and the line plays to its end; `sound.js` over the http and the https front equals the file in the `mia` container; the running services of the project are exactly mia, graph, https, searxng | as stated |
+| TC-VPB-006 | REQ-VPB-006 | Component | 1 | unit test in `tests/js/` on the fake page of `tests/js/fake-dom.mjs` with a clock (`node --test`), A-132 | AC-1: with a stop 1 s ago a line that arrives after the speak-again request is enqueued; without the request it is still dropped | exact |
+
+## Scenarios (speak again, A-132; the older checks of this file have none yet)
+
+### TC-VPB-006 – speak again right after a stop
+- Verifies: REQ-VPB-006
+- Given: the voice player of the page with a clock, a Stop pressed 1 s ago
+- When: the user asks to speak an answer again and an audio_reload arrives; in a second run no request is made and an audio_reload arrives
+- Then: in the first run the line is enqueued; in the second run it is dropped, as before
 
 ## Assumptions (checked in validation)
 

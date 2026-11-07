@@ -4,6 +4,11 @@
 
 Playing the audio of the answers and the voice lines in this browser: queue, claim of the voice by one page, mute, stop. Provides IF-112. Refines the top-level requirements named in each `Parent`; the details of low-level nodes follow when this node is cut. Numbers marked *Plan* are fixed in the node that owns the measurement.
 
+## Groups
+| Order | Group | What it covers | Requirements |
+|---|---|---|---|
+| 1 | SA | Speak again is heard also right after a stop (A-132, TD-11). The older requirements of this file have no group yet; they predate the rule. | REQ-VPB-006 |
+
 ## Requirements
 
 ### REQ-VPB-001 – Voice playback
@@ -65,6 +70,19 @@ Playing the audio of the answers and the voice lines in this browser: queue, cla
 - Verified by: TC-VPB-005
 - Status: Verified
 - History: –
+
+### REQ-VPB-006 – Speak again after a stop is heard
+- Level: low   Subject: WebFrontEnd
+- Text: When a user asks to speak an answer again, the Voice playback shall play the lines that follow, also within 3 seconds after a stop.
+- Rationale: refines REQ-VPB-002; after a stop the page drops every audio_reload for STOP_DROP_MS = 3000 ms (sound.js), so speak again right after a stop would stay silent (A-132); the 3 s is that constant
+- Parent: REQ-VPB-002
+- Priority: Should
+- Verification method: Test
+- Acceptance criterion: AC-1: with a stop 1 s ago a line that arrives after the speak-again request is enqueued; without the request it is still dropped (exact)
+- Verified by: TC-VPB-006
+- Status: Draft
+- Group: SA
+- History: proposed in A-132 (Draft), not approved
 
 ## Interface requirements
 

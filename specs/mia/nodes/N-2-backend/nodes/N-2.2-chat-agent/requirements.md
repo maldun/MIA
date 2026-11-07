@@ -4,6 +4,11 @@
 
 The persona's side: the shared conversation, the answer queue, persona, mood, memory, behaviour rules, votes, adaptation, tasks and memos. Provides IF-201; consumes IF-202 (runs the answer pipelines), IF-204 (speech) and IF-102. Refines the top-level requirements named in each `Parent`; the details of low-level nodes follow when this node is cut. Numbers marked *Plan* are fixed in the node that owns the measurement.
 
+## Groups
+| Order | Group | What it covers | Requirements |
+|---|---|---|---|
+| 1 | SA | Speak again: the answer is heard again through the voice route of live answers (A-132, TD-11). The older requirements of this file have no group yet; they predate the rule. | REQ-CHA-030, REQ-CHA-031, REQ-CHA-032, REQ-CHA-033, REQ-CHA-034 |
+
 ## Requirements
 
 ### REQ-CHA-001 – Chat events and streaming
@@ -249,6 +254,71 @@ The persona's side: the shared conversation, the answer queue, persona, mood, me
 - Verified by: TC-CHA-020
 - Status: Verified
 - History: –
+
+### REQ-CHA-030 – Speak again is spoken
+- Level: low   Subject: ConversationCore
+- Text: When a user asks to speak an answer again, the Chat agent shall have the stored text of that answer spoken on the voice route that live answers use.
+- Rationale: refines REQ-CHA-006; REQ-BE-006 says 'a new audio stream' but the check counted only audio_chunk events (D-276); the voice route is the sound server of live answers (A-132 option B)
+- Parent: REQ-CHA-006
+- Priority: Should
+- Verification method: Test, Demonstration
+- Acceptance criterion: AC-1: speak again of a stored answer of three sentences hands exactly its three spoken sentences to the voice route, and on the host the answer is heard
+- Verified by: TC-CHA-030, TC-CHA-031, TC-CHA-035
+- Status: Draft
+- Group: SA
+- History: proposed in A-132 (Draft), not approved
+
+### REQ-CHA-031 – Speak again keeps the order
+- Level: low   Subject: ConversationCore
+- Text: The Chat agent shall hand the sentences of an answer that is spoken again to the voice route in the order of the answer.
+- Rationale: refines REQ-CHA-006; the order of sentences is part of the voice (TD-11)
+- Parent: REQ-CHA-006
+- Priority: Should
+- Verification method: Test
+- Acceptance criterion: AC-1: the sentences of a stored answer reach the voice route in the order of the text (exact)
+- Verified by: TC-CHA-030
+- Status: Draft
+- Group: SA
+- History: proposed in A-132 (Draft), not approved
+
+### REQ-CHA-032 – Stop ends speak again
+- Level: low   Subject: ConversationCore
+- Text: When a user presses stop, the Chat agent shall end a spoken-again playback that is running or waiting, also when no answer is being generated.
+- Rationale: refines REQ-CHA-004; stop() today does nothing when no answer runs, and speak again has no answer running
+- Parent: REQ-CHA-004
+- Priority: Should
+- Verification method: Test, Demonstration
+- Acceptance criterion: AC-1: after a stop request no further sentence of the answer spoken again is handed to the voice route, and the playback in progress is cancelled
+- Verified by: TC-CHA-032, TC-CHA-035
+- Status: Draft
+- Group: SA
+- History: proposed in A-132 (Draft), not approved
+
+### REQ-CHA-033 – Speak again without a voice route
+- Level: low   Subject: ConversationCore
+- Text: If the voice route is not available, then the Chat agent shall still answer a speak-again request with the number of sentences and log the failure.
+- Rationale: refines REQ-CHA-006; the chat continues without voice (IF-204, IF-101 audio_chunk)
+- Parent: REQ-CHA-006
+- Priority: Should
+- Verification method: Test, Demonstration
+- Acceptance criterion: AC-1: with a failing voice route the request returns the sentence count, the next message is answered, one error is logged
+- Verified by: TC-CHA-033, TC-CHA-035
+- Status: Draft
+- Group: SA
+- History: proposed in A-132 (Draft), not approved
+
+### REQ-CHA-034 – One speak again at a time
+- Level: low   Subject: ConversationCore
+- Text: The Chat agent shall start the playback of one spoken-again answer only after the playback of the previous spoken-again answer has ended.
+- Rationale: refines REQ-CHA-006; two voices at once are an echo (REQ-FE-011 for lines in the page); the order against the voice of a live answer is kept by the sound server (one connection at a time, to be confirmed in the hand test)
+- Parent: REQ-CHA-006
+- Priority: Should
+- Verification method: Test, Demonstration
+- Acceptance criterion: AC-1: two speak-again requests in a row reach the voice route one after the other, never overlapping (exact)
+- Verified by: TC-CHA-034, TC-CHA-035
+- Status: Draft
+- Group: SA
+- History: proposed in A-132 (Draft), not approved
 
 ## Interface requirements
 
