@@ -18,7 +18,7 @@ Spike C used 8 Wikipedia pages and 2 abstracts, all general English prose. Candi
 - a long arXiv abstract plus introduction of a technical paper,
 - a documentation page (MIA's own `ui/README.md` section is local, not confidential),
 - a news-style or forum text with pronouns and quotes (the weak spot: 36 of 45 refusals were relation quotes without both ends).
-Sampling: per document 6 entities and 4 relations, random order, seed written down before the run; the builder runs once per document (temperature 0), no tuning on these documents after the marking.
+Sampling: per document **10 entities and 6 relations** (changed from 6 and 4 on 2026-11-07 with the owner's OK: 3 x 16 = 48 new marks), random order, seed 20261107 written down before the draw; the builder runs once per document (temperature 0), no tuning on these documents after the marking.
 
 ## 4. Candidate text for FR-42 (technology independent; for the Plan review, not applied)
 - "When MIA builds a context graph from a document, it shall refuse every proposed item whose name does not occur in that document."
@@ -30,7 +30,9 @@ Sampling: per document 6 entities and 4 relations, random order, seed written do
 2. **Documents added:** arXiv abstract + introduction, MIA's own README section, news or forum text. The German Wikipedia page is not added.
 3. **Relation rule:** neighbouring sentences are allowed for the ends of a relation (pronoun case). Before it becomes a requirement, check it on the 36 refused relations of the spike C run.
 
-## 6. Next steps (none started)
+## 6. Done and next steps
+- Done 2026-11-07: builder run on the 3 documents (`spikes/lightrag/option1-run-n6/`, 107 accepted, 7 refused, strict relation rule kept for comparability); 48 items drawn; marking page `forms/n6-sample-marking.html` (generator `spikes/lightrag/make_marking_n6.py`, answers saved as `n6-sample-marks.json`).
+- Open:
 - Pick the 3 documents and fix the seed; run option 1 once per document (spike folder `spikes/lightrag/`, throwaway) and draw 6 entities and 4 relations per document; prepare the marking form like `forms/spike-c-option1-marking.html`.
 - The owner marks 48 new items (plus the 72 given, if drawn the same way); score with `score_marks.py`.
 - FR-42 text (section 4, second sentence with neighbours) goes into the Plan review of goal C; not applied here.
