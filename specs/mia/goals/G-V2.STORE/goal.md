@@ -46,6 +46,10 @@ Top-level items it serves: FR-40. Requirements by ID (inside G-V2's scope):
 | REQ-GTB-013 | in | |
 | REQ-GTB-014 | in | |
 | REQ-GTB-015 | in | |
+| REQ-GTB-016 | in | |
+| REQ-GTB-017 | in | |
+| REQ-GTB-018 | in | |
+| REQ-GTB-019 | in | |
 | IF-301 | in | |
 
 ## Parts

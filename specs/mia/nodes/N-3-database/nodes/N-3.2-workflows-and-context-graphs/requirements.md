@@ -82,6 +82,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 | 2 | TY | Types: rebuilding data classes from type IDs, schemas (FR-40) | REQ-GTB-009, REQ-GTB-010, REQ-GTB-011, REQ-GTB-012 |
 | 3 | VR | Versions and round trip: edits as versions, stored equals rebuilt (FR-40) | REQ-GTB-013, REQ-GTB-014, REQ-GTB-016 |
 | 4 | CP | Compatibility: the document form during the transition (FR-40) | REQ-GTB-015 |
+| 5 | HD | Graph header and skill record: which members make a graph version, the skill table (FR-40, FR-36) | REQ-GTB-017, REQ-GTB-018, REQ-GTB-019 |
 
 ### REQ-GTB-005 – Node records
 - Level: low   Subject: Persistence
@@ -238,3 +239,42 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verified by: TC-GTB-017
 - Status: Draft
 - History: G-V2.STORE Plan step 3 review (2026-11-07), new
+
+### REQ-GTB-017 – Graph header with pinned members
+- Level: low   Subject: Persistence
+- Text: The Graph tables shall store the header of each graph as a record of its ID, kind, context graph ID, testbench ID, description and the ID and version of each of its nodes and edges.
+- Rationale: refines FR-40; without a header nothing says which nodes and edges make graph X in version n (MODEL question c2, c3; D-264)
+- Parent: FR-40
+- Group: HD
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-31: a graph header read back has the same fields and members; after one node is edited and a new header version is stored, header version 1 still names the old node version and reads the old node (exact)
+- Verified by: TC-GTB-018
+- Status: Draft
+- History: G-V2.STORE Plan step 3, 2026-11-07, new (D-264: found by the MODEL session, IF-301 v2 draft)
+
+### REQ-GTB-018 – Skill table
+- Level: low   Subject: Persistence
+- Text: The Graph tables shall store each skill as a versioned record of its ID, command, workflow graph ID and context graph ID.
+- Rationale: refines FR-40 and supports REQ-WFM-040 (the Workflow management checks the content, REQ-WFM-042 stays there); D-264
+- Parent: FR-40
+- Group: HD
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-31: a skill written and read back has the same four fields; an edit is a new version and the earlier one is unchanged; a record without a command is refused naming the field (exact)
+- Verified by: TC-GTB-019
+- Status: Draft
+- History: G-V2.STORE Plan step 3, 2026-11-07, new (D-264: found by the MODEL session, IF-301 v2 draft)
+
+### REQ-GTB-019 – Header names stored members
+- Level: low   Subject: Persistence
+- Text: If a graph header names a node or edge version that is not stored, then the Graph tables shall refuse the header and name that node or edge ID.
+- Rationale: refines FR-40; a header with a missing member would give a graph that cannot be rebuilt (REQ-GTB-014); D-264
+- Parent: FR-40
+- Group: HD
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-31: a header that names n1 at version 5 when n1 has only versions 1 and 2 is refused naming n1; the same header with version 2 is accepted (exact)
+- Verified by: TC-GTB-020
+- Status: Draft
+- History: G-V2.STORE Plan step 3, 2026-11-07, new (D-264: found by the MODEL session, IF-301 v2 draft)

@@ -3870,6 +3870,21 @@ package MIA_NodeRequirements {
         doc /* If an edit of a node, an edge or a graph is refused by a check, then the Graph tables shall keep the stored version unchanged and create no new version. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
+    requirement def <'REQ-GTB-017'> GraphHeaderWithPinnedMembers_Gtb017 {
+        subject s : Persistence;
+        doc /* The Graph tables shall store the header of each graph as a record of its ID, kind, context graph ID, testbench ID, description and the ID and version of each of its nodes and edges. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-018'> SkillTable_Gtb018 {
+        subject s : Persistence;
+        doc /* The Graph tables shall store each skill as a versioned record of its ID, command, workflow graph ID and context graph ID. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-019'> HeaderNamesStoredMembers_Gtb019 {
+        subject s : Persistence;
+        doc /* If a graph header names a node or edge version that is not stored, then the Graph tables shall refuse the header and name that node or edge ID. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
     requirement def <'REQ-RTB-001'> SharedStateHeld_Rtb001 {
         subject s : Persistence;
         doc /* The Record tables shall define the 14 tables of IF-302 v5: history, memory, votes, tasks, memos, accounts, presets, gestures, runs (run results), source_trust (trust values of sources), cases, behaviours, workflow_meta and reports; summaries and the chat log are records of history. */
@@ -4597,6 +4612,9 @@ package MIA_NodeRequirements {
     requirement r_req_gtb_014 : RebuiltEqualsStored_Gtb014;
     requirement r_req_gtb_015 : DocumentFormDuringTheTransition_Gtb015;
     requirement r_req_gtb_016 : ARefusedEditChangesNothing_Gtb016;
+    requirement r_req_gtb_017 : GraphHeaderWithPinnedMembers_Gtb017;
+    requirement r_req_gtb_018 : SkillTable_Gtb018;
+    requirement r_req_gtb_019 : HeaderNamesStoredMembers_Gtb019;
     requirement r_req_rtb_001 : SharedStateHeld_Rtb001;
     requirement r_req_rtb_002 : RunResults_Rtb002;
     requirement r_req_rtb_003 : VotesStored_Rtb003;
@@ -5020,6 +5038,9 @@ package MIA_NodeRequirements {
     satisfy r_req_gtb_014 by mia.persistence;
     satisfy r_req_gtb_015 by mia.persistence;
     satisfy r_req_gtb_016 by mia.persistence;
+    satisfy r_req_gtb_017 by mia.persistence;
+    satisfy r_req_gtb_018 by mia.persistence;
+    satisfy r_req_gtb_019 by mia.persistence;
     satisfy r_req_rtb_001 by mia.persistence;
     satisfy r_req_rtb_002 by mia.persistence;
     satisfy r_req_rtb_003 by mia.persistence;
@@ -5442,6 +5463,9 @@ package MIA_NodeRequirements {
     allocate r_req_gtb_014 to mia.persistence;
     allocate r_req_gtb_015 to mia.persistence;
     allocate r_req_gtb_016 to mia.persistence;
+    allocate r_req_gtb_017 to mia.persistence;
+    allocate r_req_gtb_018 to mia.persistence;
+    allocate r_req_gtb_019 to mia.persistence;
     allocate r_req_rtb_001 to mia.persistence;
     allocate r_req_rtb_002 to mia.persistence;
     allocate r_req_rtb_003 to mia.persistence;
@@ -5896,6 +5920,9 @@ package MIA_NodeRequirements {
     dependency from r_req_gtb_014 to fr40;
     dependency from r_req_gtb_015 to fr40;
     dependency from r_req_gtb_016 to fr40;
+    dependency from r_req_gtb_017 to fr40;
+    dependency from r_req_gtb_018 to fr40;
+    dependency from r_req_gtb_019 to fr40;
     dependency from r_req_rtb_001 to r_req_db_002;
     dependency from r_req_rtb_002 to r_req_db_010;
     dependency from r_req_rtb_003 to r_req_db_012;
