@@ -219,8 +219,8 @@ def announce_line(token):
 @w.app.post("/api/speak_again")
 def r_speak_again():
     response = run_api(lambda s: api.speak_again(s, body().get("message_id")))
-    if response[1] == 200:
-        announce_line(session())                           # the backend plays the answer again: the page gets its line
+    if response[1] == 200 and os.environ.get("MOCK_VOICE"):
+        announce_line(session())                           # the backend plays the answer again: the page gets its line (only where asked: the wire check TC-CLV-021 allows no audio fetch)
     return response
 
 

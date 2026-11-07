@@ -31,7 +31,7 @@ def image_exists(name):
 def start_mock():
     """the mock server in a container of its own, without network; returns its name once the page answers"""
     name = "n13-speak-%s" % uuid.uuid4().hex[:8]
-    subprocess.run(["podman", "run", "-d", "--name", name, "--user", "0:0", "--network", "none", "-e", "ANSWER_DELAY=1", "-e", "EVENT_GAP=0.05",
+    subprocess.run(["podman", "run", "-d", "--name", name, "--user", "0:0", "--network", "none", "-e", "ANSWER_DELAY=1", "-e", "EVENT_GAP=0.05", "-e", "MOCK_VOICE=1",
                     "-v", "%s:/opt/mia/MIA:O" % ROOT, MIA_IMAGE, "python", "MIA/ui/tools/chat_mock_server.py"], check=True, capture_output=True)
     probe = "import urllib.request; urllib.request.urlopen('%s/')" % BASE
     for _ in range(60):
