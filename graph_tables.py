@@ -141,7 +141,7 @@ def _check(table, record, categories, stored):
     return _check_members(data, stored) if table == "graphs" else None
 
 
-def check_record(table, record, categories=None, stored=None):
+def check_record(table, record, categories=None, stored=None, record_id=None):   # record_id: A-92, not used yet (T-06)
     """None, or {"rule", "detail"} of the first broken rule of a record of graph_nodes, graph_edges, graphs or skills (REQ-GTB-010, 011, 016, 019, 020).
     Pure: it stores nothing and changes neither the record nor `stored`. Any record gives a rule or None, never an exception (as A-60);
     a table that is not one of the four is a ValueError."""
