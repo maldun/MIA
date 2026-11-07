@@ -499,3 +499,367 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Relaxed: TD-04
 - Target: the code of a skill lies in its folder; what several skills share is a library of the core with its own name
 - History: A-24 new
+
+## Iteration 2 (goal G-V2, skill rework: foundation)
+
+## Groups
+| Order | Group | What it covers | Requirements |
+|---|---|---|---|
+| 1 | SK | Skill record: the skill as one versioned record (FR-36) | REQ-WFM-040, REQ-WFM-041, REQ-WFM-042 |
+| 2 | GM | Graph model: data, transform and master nodes and their rules (FR-37) | REQ-WFM-043, REQ-WFM-044, REQ-WFM-045, REQ-WFM-046, REQ-WFM-047, REQ-WFM-048, REQ-WFM-049 |
+| 3 | TB | Toolbox and trust: transforms by ID, status, import and export (FR-38) | REQ-WFM-050, REQ-WFM-051, REQ-WFM-052, REQ-WFM-053, REQ-WFM-054, REQ-WFM-055, REQ-WFM-056 |
+| 4 | CV | Conversion: moving today's skills onto the records, one by one (FR-45) | REQ-WFM-057, REQ-WFM-058, REQ-WFM-059, REQ-WFM-060 |
+| 5 | SN | Snapshots: the skill set kept and restored (FR-47) | REQ-WFM-061, REQ-WFM-062, REQ-WFM-063, REQ-WFM-064, REQ-WFM-065, REQ-WFM-066 |
+
+### REQ-WFM-040 – Skill record
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall store each skill as one versioned record of an ID, a command, a workflow graph ID and a context graph ID.
+- Rationale: refines FR-36
+- Parent: FR-36
+- Group: SK
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-31: a skill record is stored, read back and equal to the stored one (exact); an edit is a new version
+- Verified by: TC-WFM-040
+- Status: Draft
+- History: G-V2 Plan step 1 (2026-11-07), new
+
+### REQ-WFM-041 – Skill taken from its record
+- Level: low   Subject: TaskRuntime
+- Text: While a skill has a skill record, the Workflow management shall take its command, workflow graph and context graph from that record and not from its skill file, extension manifest or pipeline reference.
+- Rationale: refines FR-36; the old form is replaced one skill at a time (FR-45)
+- Parent: FR-36
+- Group: SK
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-31: with the old skill file of a converted skill removed, the skill is listed and runs unchanged (exact)
+- Verified by: TC-WFM-041
+- Status: Draft
+- History: G-V2 Plan step 1 (2026-11-07), new
+
+### REQ-WFM-042 – Command used once
+- Level: low   Subject: TaskRuntime
+- Text: If a skill record names a command that another skill already uses, then the Workflow management shall refuse the record and name that skill.
+- Rationale: refines FR-36; two skills with one command would make the chat command ambiguous (REQ-WFM-029) Suggestion of the agent, not in the HLS text; the owner decides at review.
+- Parent: FR-36
+- Group: SK
+- Priority: Should
+- Verification method: Test
+- Acceptance criterion: AC-31: a second record with the command of the first is refused with the first skill's ID (exact)
+- Verified by: TC-WFM-042
+- Status: Draft
+- History: G-V2 Plan step 1 (2026-11-07), new
+
+### REQ-WFM-043 – Three node types
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall accept a workflow graph only if every node is a data node, a transform node or a master node.
+- Rationale: refines FR-37
+- Parent: FR-37
+- Group: GM
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-31: a graph with a node of another type is refused naming the node (exact)
+- Verified by: TC-WFM-043
+- Status: Draft
+- History: G-V2 Plan step 1 (2026-11-07), new
+
+### REQ-WFM-044 – Graph description
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall keep with each workflow graph an ID, the ID of its context graph, the ID of its testbench and a description.
+- Rationale: refines FR-37; the testbench ID may be empty until the testbench exists (FR-44, a later goal)
+- Parent: FR-37
+- Group: GM
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-31: the four fields are read back as stored; an empty testbench ID is accepted
+- Verified by: TC-WFM-044
+- Status: Draft
+- History: G-V2 Plan step 1 (2026-11-07), new
+
+### REQ-WFM-045 – Data and transform alternate
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall refuse a workflow graph that has an edge between two data nodes or between two nodes that are not data nodes.
+- Rationale: refines FR-37; the owner's note: between all nodes there is a transform, a nil transform if need be; this is rules R2 and R3 of FR-7 with the new node types
+- Parent: FR-37
+- Group: GM
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-31: an edge data-data and an edge transform-master are refused naming the edge (exact)
+- Verified by: TC-WFM-045
+- Status: Draft
+- History: G-V2 Plan step 1 (2026-11-07), new
+
+### REQ-WFM-046 – One writer per data node
+- Level: low   Subject: TaskRuntime
+- Text: If a data node is written by more than one transform or master node, then the Workflow management shall refuse the workflow graph and name the data node.
+- Rationale: refines FR-37; several transforms may read a data node
+- Parent: FR-37
+- Group: GM
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-31: two writers of one data node are refused with its ID; two readers are accepted (exact)
+- Verified by: TC-WFM-046
+- Status: Draft
+- History: G-V2 Plan step 1 (2026-11-07), new
+
+### REQ-WFM-047 – No cycle
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall refuse a workflow graph that has a cycle and name the cycle.
+- Rationale: refines FR-37 and REQ-WFM-003; the rule stays as in FR-7
+- Parent: FR-37
+- Group: GM
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-31: a graph with a cycle is refused with the cycle as ids, first id repeated at the end (exact); every accepted graph has a topological order (property test)
+- Verified by: TC-WFM-047
+- Status: Draft
+- History: G-V2 Plan step 1 (2026-11-07), new
+
+### REQ-WFM-048 – Master node stops
+- Level: low   Subject: TaskRuntime
+- Text: If a master node has neither a maximum number of cycles nor a maximum time, then the Workflow management shall refuse the workflow graph and name the node.
+- Rationale: refines FR-37; rule R4 of FR-7 for master nodes
+- Parent: FR-37
+- Group: GM
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-31: a master node without a stopping criterion is refused; with max_cycles 1 it is accepted (exact)
+- Verified by: TC-WFM-048
+- Status: Draft
+- History: G-V2 Plan step 1 (2026-11-07), new
+
+### REQ-WFM-049 – Parameters of a data node
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall let each data node hold its parameters, such as a folder to store into, in a field apart from its value.
+- Rationale: refines FR-37; the owner's note: output nodes can hold parameters like a folder, so there should be a dedicated field Suggestion of the agent, not in the HLS text; the owner decides at review.
+- Parent: FR-37
+- Group: GM
+- Priority: Should
+- Verification method: Test
+- Acceptance criterion: AC-31: a data node with parameters is stored and read back with the parameters apart from the value (exact)
+- Verified by: TC-WFM-049
+- Status: Draft
+- History: G-V2 Plan step 1 (2026-11-07), new
+
+### REQ-WFM-050 – Transforms by ID
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall keep every transform in a toolbox under an ID that is unique in the toolbox.
+- Rationale: refines FR-38
+- Parent: FR-38
+- Group: TB
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-32: a second transform with an existing ID is refused (exact)
+- Verified by: TC-WFM-050
+- Status: Draft
+- History: G-V2 Plan step 1 (2026-11-07), new
+
+### REQ-WFM-051 – Transform status
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall give every transform in the toolbox the status untrusted or trusted.
+- Rationale: refines FR-38; the statuses tested and retired belong to workflows (FR-7, FR-44)
+- Parent: FR-38
+- Group: TB
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-32: a transform has one of the two statuses; any other value is refused (exact)
+- Verified by: TC-WFM-051
+- Status: Draft
+- History: G-V2 Plan step 1 (2026-11-07), new
+
+### REQ-WFM-052 – Imported means untrusted
+- Level: low   Subject: TaskRuntime
+- Text: When a transform is imported from outside MIA, the Workflow management shall store it with the status untrusted.
+- Rationale: refines FR-38; SC-09
+- Parent: FR-38
+- Group: TB
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-32: a transform imported with the field status set to trusted is stored untrusted (exact)
+- Verified by: TC-WFM-052
+- Status: Draft
+- History: G-V2 Plan step 1 (2026-11-07), new
+
+### REQ-WFM-053 – Import runs no code
+- Level: low   Subject: TaskRuntime
+- Text: When a transform is imported, the Workflow management shall not run any code of the transform.
+- Rationale: refines FR-38; TB-exchange
+- Parent: FR-38
+- Group: TB
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-32: the marker side effect in the imported transform does not happen on import (exact)
+- Verified by: TC-WFM-053
+- Status: Draft
+- History: G-V2 Plan step 1 (2026-11-07), new
+
+### REQ-WFM-054 – Only the owner trusts
+- Level: low   Subject: TaskRuntime
+- Text: If an account other than the owner asks to set the status of a transform to trusted, then the Workflow management shall refuse the change.
+- Rationale: refines FR-38; exception to CON-6 (A-89, owner 2026-11-05): everyone edits data nodes and graphs, only the owner marks a transform trusted
+- Parent: FR-38
+- Group: TB
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-32: the owner's account changes the status, any other account is refused and the status stays (exact)
+- Verified by: TC-WFM-054
+- Status: Draft
+- History: G-V2 Plan step 1 (2026-11-07), new
+
+### REQ-WFM-055 – Exchange form
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall export a transform as one JSON file that holds its ID, version, input and output schemas and its code as text, and import the same file.
+- Rationale: refines FR-38 ('a form that can be stored and exchanged outside MIA'); the file format is the agent's proposal, the sandbox for the code text is TD-24 Suggestion of the agent, not in the HLS text; the owner decides at review.
+- Parent: FR-38
+- Group: TB
+- Priority: Should
+- Verification method: Test
+- Acceptance criterion: AC-32: export then import into an empty toolbox gives a transform with the same ID, version and schemas (exact)
+- Verified by: TC-WFM-055
+- Status: Draft
+- History: G-V2 Plan step 1 (2026-11-07), new
+
+### REQ-WFM-056 – Shipped transforms
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall seed the toolbox with the transforms that MIA ships, each with the status trusted.
+- Rationale: refines FR-38 and FR-45; the nodes of `library/nodes` are MIA's own code and the converted skills need them to run Suggestion of the agent, not in the HLS text; the owner decides at review.
+- Parent: FR-38
+- Group: TB
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-32: after a first start every shipped node is in the toolbox as trusted (exact)
+- Verified by: TC-WFM-056
+- Status: Draft
+- History: G-V2 Plan step 1 (2026-11-07), new
+
+### REQ-WFM-057 – Old runner until proven
+- Level: low   Subject: TaskRuntime
+- Text: While the converted version of a skill has not passed its equivalence check, the Workflow management shall run the skill from its old skill file and pipeline.
+- Rationale: refines FR-45 and AC-34: a skill with a failing run stays on the old runner
+- Parent: FR-45
+- Group: CV
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-34: a skill marked unconverted runs on the old runner; its converted version is not used (exact)
+- Verified by: TC-WFM-057
+- Status: Draft
+- History: G-V2 Plan step 1 (2026-11-07), new
+
+### REQ-WFM-058 – Same model calls
+- Level: low   Subject: TaskRuntime
+- Text: When a converted skill runs on scripted model replies, the Workflow management shall make the same model calls as the old runner, in the same order with the same prompts and options.
+- Rationale: refines FR-45; a deterministic first check before the eval run, so a changed prompt or step order is caught without a model Suggestion of the agent, not in the HLS text; the owner decides at review.
+- Parent: FR-45
+- Group: CV
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-34: per skill, the list of model calls of the old and the converted run on scripted replies is equal (exact, a diff is shown)
+- Verified by: TC-WFM-058
+- Status: Draft
+- History: G-V2 Plan step 1 (2026-11-07), new
+
+### REQ-WFM-059 – Same outcomes on the suite
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall accept the converted version of a skill only if it reproduces the outcomes of the old version on the dev split of its suite with the same pin.
+- Rationale: refines FR-45 and AC-34; numbers (repeats, margin, rule) are fixed in Plan before the first run
+- Parent: FR-45
+- Group: CV
+- Priority: Must
+- Verification method: Evaluation
+- Acceptance criterion: AC-34: per skill, the criterion of the Eval criterion line passes on the dev split; see the open numbers in the plan notes
+- Eval criterion: OPEN – suite per skill, metric = the suite's own metric, rule = non-inferiority to the v0.1.0 baseline, margin, n and repeats to be fixed with the owner (see G-V2 plan notes), pin=MP-light, split=dev
+- Verified by: TC-WFM-059
+- Status: Draft
+- History: G-V2 Plan step 1 (2026-11-07), new
+
+### REQ-WFM-060 – Record of the check
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall record for each skill the suite, run, pins and verdict of its equivalence check, or the reason it is not converted.
+- Rationale: refines FR-45 ('or stays on the old runner for a named reason', exit criterion of G-V2) Suggestion of the agent, not in the HLS text; the owner decides at review.
+- Parent: FR-45
+- Group: CV
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-34: the record of each existing skill names the form it runs on and either a verdict with suite, run and pins or a reason (inspection)
+- Verified by: TC-WFM-060
+- Status: Draft
+- History: G-V2 Plan step 1 (2026-11-07), new
+
+### REQ-WFM-061 – Take a snapshot
+- Level: low   Subject: TaskRuntime
+- Text: When the owner asks for a snapshot with a name, the Workflow management shall store the skills, workflow graphs, context graphs, toolbox transforms with their status, and the model pins they were tested with.
+- Rationale: refines FR-47; debate definitions are added when they exist (goal D)
+- Parent: FR-47
+- Group: SN
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-40: a snapshot holds every item named, each with its version and status (exact)
+- Verified by: TC-WFM-061
+- Status: Draft
+- History: G-V2 Plan step 1 (2026-11-07), new
+
+### REQ-WFM-062 – List snapshots
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall list the snapshots with name, time and author.
+- Rationale: refines FR-47
+- Parent: FR-47
+- Group: SN
+- Priority: Should
+- Verification method: Test
+- Acceptance criterion: AC-40: two snapshots are listed with the three fields (exact)
+- Verified by: TC-WFM-062
+- Status: Draft
+- History: G-V2 Plan step 1 (2026-11-07), new
+
+### REQ-WFM-063 – Restore keeps the former state
+- Level: low   Subject: TaskRuntime
+- Text: When the owner restores a snapshot, the Workflow management shall first store the current state as a snapshot of its own.
+- Rationale: refines FR-47; Q-5 reliability
+- Parent: FR-47
+- Group: SN
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-40: after a restore a new snapshot with the state before it exists and can be restored (exact)
+- Verified by: TC-WFM-063
+- Status: Draft
+- History: G-V2 Plan step 1 (2026-11-07), new
+
+### REQ-WFM-064 – Restore gives version and status
+- Level: low   Subject: TaskRuntime
+- Text: When the owner restores a snapshot, the Workflow management shall give every item in the snapshot the version and status it had in the snapshot.
+- Rationale: refines FR-47
+- Parent: FR-47
+- Group: SN
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-40: a skill, a workflow graph, a context graph and a transform status are changed, then restored, and equal the stored ones; a transform untrusted in the snapshot is untrusted (exact)
+- Verified by: TC-WFM-064
+- Status: Draft
+- History: G-V2 Plan step 1 (2026-11-07), new
+
+### REQ-WFM-065 – Restore deletes nothing
+- Level: low   Subject: TaskRuntime
+- Text: When the owner restores a snapshot, the Workflow management shall delete no version of any item.
+- Rationale: refines FR-47 and FR-40
+- Parent: FR-47
+- Group: SN
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-40: the list of versions before the restore is a prefix of the list after it (exact)
+- Verified by: TC-WFM-065
+- Status: Draft
+- History: G-V2 Plan step 1 (2026-11-07), new
+
+### REQ-WFM-066 – Snapshots only by the owner
+- Level: low   Subject: TaskRuntime
+- Text: If an account other than the owner asks to take or restore a snapshot, then the Workflow management shall refuse the request.
+- Rationale: refines FR-47 ('let the owner'); consistent with owner-only editing of skills (interview 11) Suggestion of the agent, not in the HLS text; the owner decides at review.
+- Parent: FR-47
+- Group: SN
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-40: a non-owner account is refused for both, the state stays (exact)
+- Verified by: TC-WFM-066
+- Status: Draft
+- History: G-V2 Plan step 1 (2026-11-07), new
+

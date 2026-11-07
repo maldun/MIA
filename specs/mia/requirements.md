@@ -99,7 +99,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Refined in: N-2.3, N-3.2
 - Verified by: TC-MIA-010, TC-MIA-027
 - Status: Verified
-- History: –
+- History: Proposed A-89 (G-V2, not yet approved; this version stays in force): revised by FR-37 (data, transform and master nodes) and FR-40 (storage as node and edge records); graph rules stay.
 
 ### FR-8 – Model management
 - Level: top   Subject: MiaSystem
@@ -316,7 +316,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Refined in: N-5, N-2.3, N-3.2
 - Verified by: TC-MIA-016
 - Status: Approved
-- History: –
+- History: Proposed A-89 (G-V2, not yet approved; this version stays in force): library vis-network (owner's choice, Plan pins version and licence); only the owner marks a transform trusted, everyone else edits data nodes and graphs. The window itself is goal B.
 
 ### FR-23 – Mood in every situation
 - Level: top   Subject: MiaSystem
@@ -424,7 +424,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Refined in: N-2.3, N-3.2, N-5
 - Verified by: TC-MIA-010
 - Status: Verified
-- History: –
+- History: Proposed A-89 (G-V2, not yet approved; this version stays in force): revised by FR-41 (goal C): context graphs by ID, a skill names exactly one, a trusted skill pins a version.
 
 ### FR-31 – Voice lines
 - Level: top   Subject: MiaSystem
@@ -681,7 +681,7 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Refined in: N-1.1, N-2.1
 - Verified by: TC-MIA-015, TC-MIA-020
 - Status: Verified
-- History: –
+- History: Proposed A-89 (G-V2, not yet approved; this version stays in force): exception, marking a transform trusted is the owner's act (REQ-WFM-054).
 
 ### CON-7 – One shared database
 - Level: top   Subject: MiaSystem
@@ -697,3 +697,98 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Relaxed: TD-21
 - Target: the app reads `MIA_DATABASE_URL`, the `mia` image holds psycopg (`requirements-db.txt`), the shared state is in PostgreSQL, files to database and back give identical files, a change by one user is visible on a second connection within 5 s with its author, and backup and restore return the same records (AC-15, TC-MIA-015)
 - History: A-86 (2026-11-01): Relaxed TD-21 (D-180)
+
+
+## Iteration 2 (goal G-V2, skill rework: foundation)
+
+The HLS requirements FR-36 to FR-47 in EARS form; only those in the scope of G-V2 are refined here (see `goals/G-V2/goal.md`). 
+## Groups
+| Order | Group | What it covers | Requirements |
+|---|---|---|---|
+| 1 | Skill and graph | skill record, graph model, storage (details in the node files) | FR-36, FR-37, FR-40 |
+| 2 | Toolbox and trust | transforms by ID with a trust status | FR-38 |
+| 3 | Conversion and snapshots | skills moved one by one, the skill set kept | FR-45, FR-47 |
+
+### FR-36 – Skill definition
+- Level: top   Subject: MiaSystem
+- Text: The MIA system shall define every skill as one versioned record of an ID, a command, a workflow graph and the ID of a context graph.
+- Rationale: HLS section 3.1, FR-36
+- Parent: HLS FR-36
+- Group: Skill and graph
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-31
+- Refined in: N-2.3
+- Verified by: TC-WFM-040
+- Status: Draft
+- History: G-V2 Plan step 1 (2026-11-07), new
+
+### FR-37 – Workflow graph model
+- Level: top   Subject: MiaSystem
+- Text: The MIA system shall hold a workflow as a directed acyclic graph of data nodes, transform nodes and master nodes, with at most one writing transform per data node.
+- Rationale: HLS section 3.1, FR-37
+- Parent: HLS FR-37
+- Group: Skill and graph
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-31
+- Refined in: N-2.3, N-2.4.1
+- Verified by: TC-WFM-043
+- Status: Draft
+- History: G-V2 Plan step 1 (2026-11-07), new
+
+### FR-38 – Toolbox and exchange of transforms
+- Level: top   Subject: MiaSystem
+- Text: The MIA system shall keep transforms in a toolbox by ID, each with a trust status that decides whether it runs.
+- Rationale: HLS section 3.1, FR-38
+- Parent: HLS FR-38
+- Group: Toolbox and trust
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-32
+- Refined in: N-2.3, N-2.4.1
+- Verified by: TC-WFM-050
+- Status: Draft
+- History: G-V2 Plan step 1 (2026-11-07), new
+
+### FR-40 – Storage of graphs
+- Level: top   Subject: MiaSystem
+- Text: The MIA system shall store workflow and context graphs as node and edge records with JSON fields in PostgreSQL, rebuild data classes from type IDs and keep every edit as a version.
+- Rationale: HLS section 3.1, FR-40
+- Parent: HLS FR-40
+- Group: Skill and graph
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-31
+- Refined in: N-3.2
+- Verified by: TC-GTB-005
+- Status: Draft
+- History: G-V2 Plan step 1 (2026-11-07), new
+
+### FR-45 – Migration of existing skills
+- Level: top   Subject: MiaSystem
+- Text: The MIA system shall convert today's skills one by one onto the skill record, each only after it reproduces the old outcomes on the same suite and pins.
+- Rationale: HLS section 3.1, FR-45
+- Parent: HLS FR-45
+- Group: Conversion and snapshots
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-34
+- Refined in: N-2.3
+- Verified by: TC-WFM-058
+- Status: Draft
+- History: G-V2 Plan step 1 (2026-11-07), new
+
+### FR-47 – Snapshots of the skill set
+- Level: top   Subject: MiaSystem
+- Text: The MIA system shall let the owner take, list and restore named snapshots of the skill set, keeping the state before a restore as a snapshot and deleting no version.
+- Rationale: HLS section 3.1, FR-47
+- Parent: HLS FR-47
+- Group: Conversion and snapshots
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-40
+- Refined in: N-2.3
+- Verified by: TC-WFM-061
+- Status: Draft
+- History: G-V2 Plan step 1 (2026-11-07), new

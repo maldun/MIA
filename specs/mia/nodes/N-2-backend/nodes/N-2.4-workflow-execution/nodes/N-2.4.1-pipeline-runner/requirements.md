@@ -185,3 +185,50 @@ Runs a workflow step by step under budgets: model calls and model management, pr
 - Verified by: TC-RUN-015
 - Status: Verified
 - History: –
+
+## Iteration 2 (goal G-V2, skill rework: foundation)
+
+## Groups
+| Order | Group | What it covers | Requirements |
+|---|---|---|---|
+| 1 | EX | Execution of the new graph: order, trust, master nodes (FR-37, FR-38) | REQ-RUN-016, REQ-RUN-017, REQ-RUN-018 |
+
+### REQ-RUN-016 – Run in topological order
+- Level: low-2   Subject: TaskRuntime
+- Text: When a workflow graph is run, the Pipeline runner shall run its transforms in a topological order, giving each the contents of its input data nodes and writing its result into its output data nodes.
+- Rationale: refines FR-37; the owner's note (algorithm)
+- Parent: FR-37
+- Group: EX
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-31: a graph with three transforms runs in an order that respects its edges and the output nodes hold the results (exact)
+- Verified by: TC-RUN-016
+- Status: Draft
+- History: G-V2 Plan step 1 (2026-11-07), new
+
+### REQ-RUN-017 – Untrusted does not run
+- Level: low-2   Subject: TaskRuntime
+- Text: If a workflow graph contains a transform whose status is untrusted, then the Pipeline runner shall refuse to start the run, naming the transform and its status.
+- Rationale: refines FR-38; SC-09, AC-32
+- Parent: FR-38
+- Group: EX
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-32: the marker side effect of an untrusted transform does not happen and the refusal names its ID (exact); after the owner sets it trusted the same graph runs
+- Verified by: TC-RUN-017
+- Status: Draft
+- History: G-V2 Plan step 1 (2026-11-07), new
+
+### REQ-RUN-018 – Master node not run yet
+- Level: low-2   Subject: TaskRuntime
+- Text: If a workflow graph contains a master node, then the Pipeline runner shall refuse to start the run, saying that master nodes cannot be run yet.
+- Rationale: refines FR-37; debates (FR-39) are a later goal, so a master node is stored but has no runner; avoids a silently skipped node Suggestion of the agent, not in the HLS text; the owner decides at review.
+- Parent: FR-37
+- Group: EX
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-31: a graph with a master node is stored, a run is refused with the message (exact)
+- Verified by: TC-RUN-018
+- Status: Draft
+- History: G-V2 Plan step 1 (2026-11-07), new
+
