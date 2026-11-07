@@ -215,14 +215,14 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 
 ### REQ-GTB-015 – Document form during the transition
 - Level: low   Subject: Persistence
-- Text: While IF-301 v1 and IF-203 v1 are in use, the Graph tables shall return a stored workflow also in the document form of those interfaces.
+- Text: While IF-301 v1 and IF-203 v0 are in use, the Graph tables shall return a stored workflow also in the document form of those interfaces.
 - Rationale: refines FR-40; owner decision 2026-11-05 (conflict 2): the document form stays readable during the transition
 - Parent: FR-40
 - Group: CP
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-31: the contract suites of IF-301 v1 and IF-203 v1 still pass unchanged on converted skills (exact)
+- Acceptance criterion: AC-31: the contract suites of IF-301 v1 and IF-203 v0 still pass unchanged on converted skills (exact)
 - Verified by: TC-GTB-015
 - Status: Draft
-- History: G-V2 Plan step 1 (2026-11-07), new
+- History: G-V2 Plan step 1 (2026-11-07), new; 2026-11-07 review: IF-203 v1 corrected to v0, the old interface, consistent with A-90 (owner approved)
 
