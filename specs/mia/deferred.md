@@ -148,6 +148,7 @@ Proposed on 2026-10-29 after the usability work of N-2.3 T-09 to T-11 and N-1.1 
 - Target check: specified only (the IF-201 case TC-IF-201-01 is green; the IF-101 case TC-IF-101-04 stays skipped until the expression event exists, see A-130 section 8)
 - Decision: D-173, 2026-11-01, Stefan Reiterer
 - Note: 2026-11-07, owner Stefan Reiterer (D-275): narrowed. The IF-201 part is done (answer events, helper fixes D-272 and D-274, `chat_service.py`); the `expression` event is split out of TD-11 (A-130 section 8, draft TD-60, not yet adopted). What stays open is the playback route. A Plan step has to come first: an amendment for the audio route, a requirement for stop and ordering, and host hand-test criteria. See `amendments/A-130-note.md`.
+- Note: 2026-11-07, found in the hand test on the host (owner Stefan Reiterer, D-276): the button "Speak again" does nothing. `/api/speak_again` only emits `audio_chunk` events and no page code handles them (`templates/static/chat/` has no `audio_chunk` handler); live answers are spoken by the backend sound server. Not caused by the TD-11 work (`speak_again` is unchanged). Folded into the Plan step of this deferral: speak again plays through the backend voice route; the Plan step needs a requirement and a failing test first.
 - Status: open
 
 ## TD-12 – Verify before asserting; lookup (TC-MIA-002)
