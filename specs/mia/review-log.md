@@ -519,3 +519,6 @@ The first version was silent until the end and could take 20 minutes or more: th
 | D-267 | **G-V2.STORE review complete, owner Stefan Reiterer, 2026-11-07.** REQ-GTB-020 and TC-GTB-021 approved, plausibility of REQ-GTB-020 rated plausible. With D-265 and D-266 every STORE requirement (REQ-GTB-005 to 020), check (TC-GTB-006 to 021) and test requirement (TR-GTB-001 to 006) is approved and rated, and the IF-301 v2 contract text is approved. Open for STORE: Step 4 only (mock, contract suite and red tests, staged for the owner to install). |
 | REQ-GTB-020 | requirement | 3f204045e556 | Stefan Reiterer | 2026-11-07 | approved | plausibility of GTB-020 rated plausible |
 | TC-GTB-021 | check | 66ea1122e284 | Stefan Reiterer | 2026-11-07 | approved | plausibility of GTB-020 rated plausible |
+| G-V2.STORE | goal | b24d9010d897 | Stefan Reiterer | 2026-11-07 | approved | scope and applies-to list extended with REQ-GTB-016..020 and TC-GTB-018..021, no change in meaning |
+| TR-GTB-001 | test requirement | db848f7b8e3b | Stefan Reiterer | 2026-11-07 | approved | scope and applies-to list extended with REQ-GTB-016..020 and TC-GTB-018..021, no change in meaning |
+| TR-GTB-002 | test requirement | 50feb8ff7302 | Stefan Reiterer | 2026-11-07 | approved | scope and applies-to list extended with REQ-GTB-016..020 and TC-GTB-018..021, no change in meaning |
