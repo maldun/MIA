@@ -10,7 +10,7 @@ Back-filled on 2026-10-30, after the workflow skills introduced goals (M33–M37
 - Accepted by: Stefan Reiterer (owner; goal agreed 2026-10-30)
 - Line of work: goal/v1
 - Subgoals: –
-- Status: In progress
+- Status: Closed
 
 ## Scope
 <!-- Every FR-n / NFR-n of high-level-spec.md. The nodes of decomposition.yaml carry the refined requirements; a node is not a subgoal. -->
@@ -51,6 +51,18 @@ Back-filled on 2026-10-30, after the workflow skills introduced goals (M33–M37
 | FR-33 | in | |
 | FR-34 | out | FB-01, HLS iteration 1, still waiting for the HLS gate; it becomes its own goal once the gate is approved |
 | FR-35 | out | FB-01, as FR-34 |
+| FR-36 | out | iteration 2 (skill rework): scoped in G-V2 and later goals |
+| FR-37 | out | iteration 2 (skill rework): scoped in G-V2 and later goals |
+| FR-38 | out | iteration 2 (skill rework): scoped in G-V2 and later goals |
+| FR-39 | out | iteration 2 (skill rework): scoped in G-V2 and later goals |
+| FR-40 | out | iteration 2 (skill rework): scoped in G-V2 and later goals |
+| FR-41 | out | iteration 2 (skill rework): scoped in G-V2 and later goals |
+| FR-42 | out | iteration 2 (skill rework): scoped in G-V2 and later goals |
+| FR-43 | out | iteration 2 (skill rework): scoped in G-V2 and later goals |
+| FR-44 | out | iteration 2 (skill rework): scoped in G-V2 and later goals |
+| FR-45 | out | iteration 2 (skill rework): scoped in G-V2 and later goals |
+| FR-46 | out | iteration 2 (skill rework): scoped in G-V2 and later goals |
+| FR-47 | out | iteration 2 (skill rework): scoped in G-V2 and later goals |
 | NFR-1 | in | |
 | NFR-2 | in | |
 | NFR-3 | partly | owner 2026-11-01 (D-180, TD-22): the red-team half of TC-MIA-006 (0 failures over all red-team cases) is deferred; the deterministic mitigations (tool door, sandbox, injection signal checks, PDF wall) stay in |
@@ -113,11 +125,11 @@ Back-filled on 2026-10-30, after the workflow skills introduced goals (M33–M37
 |---|---|---|
 | Explore | done | `high-level-spec.md` approved 2026-10-24 (`review-log.md`) |
 | Plan | done | plan package approved, tags `plan-baseline-it1` and `decomp-baseline`; changes since then are amendments A-01 to A-86 (see `specs/mia/amendments/` and the review log; A-72 to A-85 installed on 2026-11-01) |
-| Implement | in progress | node cycles of `decomposition.yaml`; open nodes and work in `handover-2026-10-31-late.md`. 2026-10-31: N-2.4.1 T-01 to T-05, T-07 done (T-06 out with REQ-RUN-007, T-08 deferred to the next iteration, D-128; fixes of three verification rounds, N-2.4.1 **Verified with findings** (re-verification 2, the D-128 scope rows written by D-130); N-2.4.2 **Verified with findings** (owner, D-134); N-2.4.3 and N-4.2 **Verified with accepted deviations** (owner, D-148); N-1.3 waits for the owner's checks by ear; N-2.1 Verify: not verified yet (D-147 A-52, findings V-0 to V-11)); N-2.4.2 T-01 to T-06 done (T-07 out with REQ-TLS-006); node Verifies of N-2.4.1 and N-2.4.2 started (reports in their node folders); only N-3 integrated (`tests/helpers/integration.py` READY) |
+| Implement | done | node cycles of `decomposition.yaml`; open nodes and work in `handover-2026-10-31-late.md`. 2026-10-31: N-2.4.1 T-01 to T-05, T-07 done (T-06 out with REQ-RUN-007, T-08 deferred to the next iteration, D-128; fixes of three verification rounds, N-2.4.1 **Verified with findings** (re-verification 2, the D-128 scope rows written by D-130); N-2.4.2 **Verified with findings** (owner, D-134); N-2.4.3 and N-4.2 **Verified with accepted deviations** (owner, D-148); N-1.3 waits for the owner's checks by ear; N-2.1 Verify: not verified yet (D-147 A-52, findings V-0 to V-11)); N-2.4.2 T-01 to T-06 done (T-07 out with REQ-TLS-006); node Verifies of N-2.4.1 and N-2.4.2 started (reports in their node folders); only N-3 integrated (`tests/helpers/integration.py` READY) |
 | Verify | done | `specs/mia/verification-report.md` (reviewer in a fresh context, commit e4dbbef): **Verified with accepted deviations**, approved by the owner Stefan Reiterer on 2026-11-01 (D-183) after his decisions D-180 to D-182 on the findings; the gate steps are in `goals/G-V1/merge-request.md` |
 | Commit | done | goal/v1 merged into master by fast-forward on 2026-11-01, merge commit `67818fb`, tag `v0.1.0` (annotated, by the owner). Local merge gate on `67818fb`: stages 0 to 3 green (no CI, `--allow-local`), approved by the owner; `smoke` left the gate with A-88 (TD-25, D-182); verification report approved (D-183). Not pushed yet |
 | Deploy | done | `goals/G-V1/deployment-record.md` (2026-11-02, owner's workstation): preflight and pins green, SMOKE-MIA-001, -003 and SMOKE-GATE-001/-002 green, recovery check and rollback to `mia:pre-v0.1.0` tested; **SMOKE-MIA-002 (Tailscale) not run** by the owner's decision (NFR-6, CON-5 evidence open); smoke eval only for the number gate; no voice lines in the image |
-| Validate | closed, accepted as is, **not validated** | owner Stefan Reiterer, 2026-11-02 (D-185): v0.1.0 is accepted without the validation week because the skill rework (`specs/mia/skill_rework.md`) comes first. VAL-001 and VAL-003 to VAL-006 stay unrated and move to the exit criterion of the next goal; the check material is kept (`validation-plan.md`, `validation/VAL-003-check-sheet.md`); requirements stay `Verified`, none becomes `Validated`; FB-01 to FB-06 stay open; SMOKE-MIA-002 stays open (TD-26) |
+| Validate | empty | closed, accepted as is, **not validated**: owner Stefan Reiterer, 2026-11-02 (D-185): v0.1.0 is accepted without the validation week because the skill rework (`specs/mia/skill_rework.md`) comes first. VAL-001 and VAL-003 to VAL-006 stay unrated and move to the exit criterion of the next goal; the check material is kept (`validation-plan.md`, `validation/VAL-003-check-sheet.md`); requirements stay `Verified`, none becomes `Validated`; FB-01 to FB-06 stay open; SMOKE-MIA-002 stays open (TD-26) |
 
 ## Joint amendments
 | ID | Requirement | Agreed by | Date |
