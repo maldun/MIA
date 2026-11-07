@@ -26,7 +26,7 @@ All skips are `raise unittest.SkipTest(...)` in the protected helper, gated on a
 2. The backend path of the chat agent's voice (`web_app.py`) takes its audio from `SpeechService.synthesize` instead of calling `SpeechStreamer` and `render_voice` directly. This is wiring inside N-2; no new part (SpeechService exists), no new dependency, no interface change. Risk (from TD-11): the working voice. Mitigation: `test_speech_service.py`, `test_speech_stop.py`, `test_speech_repair.py`, the page tests; hand test on the host.
 3. The expression event of an answer: separate question, see below.
 
-## 5. Proposal for the protected helper (**pending owner approval**, not applied; `tests/helpers/` untouched)
+## 5. Protected helper (**approved by the owner, Stefan Reiterer, 2026-11-07, as drafted (D-272); not yet applied**: `tests/helpers/` untouched)
 - Line 431: remove the skip for an answer with `emotion` in `_ChatTurnAdapter` once step 4.1 is green (the adapter already builds the real `ChatService`).
 - Line 205: remove the skip in `_RealBackendAdapter` only when step 4.1 and the expression event are green; until then narrow the reason text to "the `expression` event of an answer is not in the real Backend yet" so that it no longer names N-2.5 and voice.
 - No test file under `tests/acceptance/` changes; the new versions are written outside the implementing session after approval.
