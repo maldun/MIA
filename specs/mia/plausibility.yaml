@@ -1689,6 +1689,41 @@ plausibility:
       rated: '2026-10-26'
       rated_by: maldun
       rating: plausible
+    REQ-CHA-030:
+      basis:
+      - no number or model quality depends on it; speak_answer in web_app.py already runs SpeechStreamer.finish and wait, the route live answers use; the hand check TC-CHA-035 passed on the host (2026-11-08)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CHA-031:
+      basis:
+      - no number or model quality depends on it; the sentences are handed over in order by one loop; TC-CHA-030 and TC-CHA-036 (the real sound server with a fake sink) observed the order
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CHA-032:
+      basis:
+      - no number or model quality depends on it; SpeechStreamer.wait(should_stop) closes the connection and the sound server cancels on it; observed by TC-CHA-036 and by the hand check (2026-11-08)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CHA-033:
+      basis:
+      - no number or model quality depends on it; the playback catches a failing route and logs once; observed by TC-CHA-033
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CHA-034:
+      basis:
+      - no number or model quality depends on it; a lock covers two repeats (TC-CHA-034); the queue behind a live answer rests on the single-threaded SoundServer, observed green by TC-CHA-036 with real TCP clients, which settles the open point of A-132 section 10
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
     REQ-CHA-035:
       basis:
       - no number or model quality depends on it; publish_status and set_activity exist and are used at the same places for answers (read in chat_service.py); the page already shows Stop for busy and speaking (mood.js, composer.js); checked by TC-CHA-037 (A-133)
@@ -3472,6 +3507,13 @@ plausibility:
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
       rated: '2026-10-26'
+      rated_by: maldun
+      rating: plausible
+    REQ-VPB-006:
+      basis:
+      - no number or model quality depends on it; the stop window is one variable in sound.js that speakAgain() clears; observed by TC-VPB-006 (node) and TC-VPB-007 (Chromium)
+      hardware: HW-target
+      rated: '2026-11-08'
       rated_by: maldun
       rating: plausible
     REQ-WFM-001:

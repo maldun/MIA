@@ -17,7 +17,7 @@ Requirements on the checks TC-CHA-030 to TC-CHA-036, TC-VPB-006 and TC-VPB-007 (
 - Rationale: these checks must run in stage 1 and 2 without sound, and they only prove the Chat agent's side of the call; the sound server's side is TC-CHA-036.
 - Credibility aspect: stand-in fidelity
 - Verified by: TC-CHA-036
-- Status: Draft
+- Status: Approved
 
 ### TR-VOICE-002 – the short hand check is the only check of the real engine
 - Applies to: TC-CHA-035
@@ -28,7 +28,7 @@ Requirements on the checks TC-CHA-030 to TC-CHA-036, TC-VPB-006 and TC-VPB-007 (
 - Rationale: no automatic check hears the engine or the browser's real audio output; the fakes of TR-VOICE-001 and TR-VOICE-004 are only as good as this check shows. The check is kept short on purpose: order, queue, failure and mute are checked automatically.
 - Credibility aspect: stand-in fidelity
 - Verified by: verification report
-- Status: Draft
+- Status: Approved
 
 ### TR-VOICE-003 – sentences and order written by hand
 - Applies to: TC-CHA-030, TC-CHA-031, TC-CHA-034, TC-CHA-036
@@ -39,7 +39,7 @@ Requirements on the checks TC-CHA-030 to TC-CHA-036, TC-VPB-006 and TC-VPB-007 (
 - Rationale: a split that is wrong in the same way on both sides would pass; the example "One. Two. Three." gives three calls by hand, and the markup example gives two calls.
 - Credibility aspect: reference accuracy
 - Verified by: known answer
-- Status: Draft
+- Status: Approved
 
 ### TR-VOICE-004 – the sound-server check runs the real server with a fake sink
 - Applies to: TC-CHA-036
@@ -50,7 +50,7 @@ Requirements on the checks TC-CHA-030 to TC-CHA-036, TC-VPB-006 and TC-VPB-007 (
 - Rationale: the queue behind a live answer and the cancel on a closed connection are properties of the server and its single-threaded `TCPServer`; a fake of the server would only repeat what we believe. The sink hides the engine, which TR-VOICE-002 covers.
 - Credibility aspect: stand-in fidelity
 - Verified by: TC-CHA-035
-- Status: Draft
+- Status: Approved
 
 ### TR-VOICE-005 – the page checks use the real page code and the real audio message
 - Applies to: TC-VPB-006, TC-VPB-007
@@ -61,4 +61,4 @@ Requirements on the checks TC-CHA-030 to TC-CHA-036, TC-VPB-006 and TC-VPB-007 (
 - Rationale: the fault is in the page's drop window; a fake player would hide it. The mock is only as faithful as `publish_audio` and `AudioRouter.announce` in `web_app.py` and `audio_router.py`; the short hand check TC-CHA-035 compares it with the real thing.
 - Credibility aspect: stand-in fidelity
 - Verified by: TC-CHA-035
-- Status: Draft
+- Status: Approved
