@@ -1,6 +1,6 @@
 # A-133 (Draft): the stop button while a message is spoken again
 
-Status: **proposed; the requirements REQ-CHA-035 and REQ-CHA-036 are Draft and wait for the owner's review. Nothing is implemented.** Decision ids: **D-282** (owner choices of 2026-11-08). Follows A-132 (TD-11 option B), D-279 to D-281. No model step is involved.
+Status: **approved by the owner 2026-11-08 (D-283): REQ-CHA-035 and REQ-CHA-036 are Approved as written, the scenario of TC-CHA-037 and the plausibility rating are approved.** Decision ids: **D-282** (owner choices of 2026-11-08), **D-283** (the approvals). Follows A-132 (TD-11 option B), D-279 to D-281. No model step is involved.
 
 ## 1. The finding
 Hand check TC-CHA-035 (2026-11-08, owner): the stop button is missing while the voice is repeated. Step 3 of the check ("press the speaker button, then Stop") could not be done.

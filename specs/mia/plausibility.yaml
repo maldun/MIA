@@ -1689,6 +1689,20 @@ plausibility:
       rated: '2026-10-26'
       rated_by: maldun
       rating: plausible
+    REQ-CHA-035:
+      basis:
+      - no number or model quality depends on it; publish_status and set_activity exist and are used at the same places for answers (read in chat_service.py); the page already shows Stop for busy and speaking (mood.js, composer.js); checked by TC-CHA-037 (A-133)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CHA-036:
+      basis:
+      - no number or model quality depends on it; the end of a playback is one place (_play_again, finally) and set_activity(None) is what an answer does at its end (read in chat_service.py); checked by TC-CHA-037 (A-133)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
     REQ-CHV-001:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed

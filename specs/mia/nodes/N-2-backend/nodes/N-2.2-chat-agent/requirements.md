@@ -329,9 +329,9 @@ The persona's side: the shared conversation, the answer queue, persona, mood, me
 - Verification method: Test, Demonstration
 - Acceptance criterion: AC-1: with a fake voice route that blocks, after a speak-again request the chat_status event with busy true and activity speaking was published and the status says so, also for a second request that waits (exact); on the host the stop button is shown during the repeat
 - Verified by: TC-CHA-037, TC-CHA-035
-- Status: Draft
+- Status: Approved
 - Group: SA
-- History: proposed in A-133 (Draft), not approved
+- History: proposed in A-133; approved by the owner 2026-11-08 (D-283)
 
 ### REQ-CHA-036 – The status returns when the speak again has ended
 - Level: low   Subject: ConversationCore
@@ -342,9 +342,9 @@ The persona's side: the shared conversation, the answer queue, persona, mood, me
 - Verification method: Test
 - Acceptance criterion: AC-1: after the playback ended by itself, and after a stop, the last chat_status event has busy false and an activity other than speaking, and the status says so (exact)
 - Verified by: TC-CHA-037
-- Status: Draft
+- Status: Approved
 - Group: SA
-- History: proposed in A-133 (Draft), not approved
+- History: proposed in A-133; approved by the owner 2026-11-08 (D-283)
 
 ## Interface requirements
 
