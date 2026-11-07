@@ -447,3 +447,6 @@ The first version was silent until the end and could take 20 minutes or more: th
 | REQ-GTB-013 | requirement | 642a8cc43676 | Stefan Reiterer | 2026-11-07 | approved | 015 corrected to IF-203 v0 before approval |
 | REQ-GTB-014 | requirement | 526081ed246d | Stefan Reiterer | 2026-11-07 | approved | 015 corrected to IF-203 v0 before approval |
 | REQ-GTB-015 | requirement | 24d061b9f9f8 | Stefan Reiterer | 2026-11-07 | approved | 015 corrected to IF-203 v0 before approval |
+| REQ-GTB-005 | requirement | c8e3a644dfa1 | Stefan Reiterer | 2026-11-07 | approved | 005 re-approved with Verified by TC-GTB-016; plausibility of GTB-005..015 rated plausible |
+| FR-40 | requirement | 54f2cefd7337 | Stefan Reiterer | 2026-11-07 | approved | 005 re-approved with Verified by TC-GTB-016; plausibility of GTB-005..015 rated plausible |
+| G-V2.STORE | goal | 4649386666e0 | Stefan Reiterer | 2026-11-07 | approved | 005 re-approved with Verified by TC-GTB-016; plausibility of GTB-005..015 rated plausible |

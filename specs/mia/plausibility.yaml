@@ -2589,6 +2589,83 @@ plausibility:
       rated: '2026-10-26'
       rated_by: maldun
       rating: plausible
+    REQ-GTB-005:
+      basis:
+      - 'node and edge records are plain rows with a JSON column; the behaviour is fixed by an exact acceptance criterion (proposal of the agent, 2026-11-07; rated by the owner)'
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: maldun
+      rating: plausible
+    REQ-GTB-006:
+      basis:
+      - 'as REQ-GTB-005 (proposal of the agent, 2026-11-07; rated by the owner)'
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: maldun
+      rating: plausible
+    REQ-GTB-007:
+      basis:
+      - 'as REQ-GTB-005 (proposal of the agent, 2026-11-07; rated by the owner)'
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: maldun
+      rating: plausible
+    REQ-GTB-008:
+      basis:
+      - 'as REQ-GTB-005 (proposal of the agent, 2026-11-07; rated by the owner)'
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: maldun
+      rating: plausible
+    REQ-GTB-009:
+      basis:
+      - 'the registry maps a type ID to a class; no number or model quality depends on it (proposal of the agent, 2026-11-07; rated by the owner)'
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: maldun
+      rating: plausible
+    REQ-GTB-010:
+      basis:
+      - 'a lookup that finds no class; no number depends on it (proposal of the agent, 2026-11-07; rated by the owner)'
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: maldun
+      rating: plausible
+    REQ-GTB-011:
+      basis:
+      - 'jsonschema 4.23.0 is installed on the host (D-187); schema checks of small JSON fields are exact (proposal of the agent, 2026-11-07; rated by the owner)'
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: maldun
+      rating: plausible
+    REQ-GTB-012:
+      basis:
+      - 'a static check of imports; no number depends on it (proposal of the agent, 2026-11-07; rated by the owner)'
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: maldun
+      rating: plausible
+    REQ-GTB-013:
+      basis:
+      - 'versions exist for workflows and context graphs already (TC-GTB-001: both tables versioned, neither deletable) (proposal of the agent, 2026-11-07; rated by the owner)'
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: maldun
+      rating: plausible
+    REQ-GTB-014:
+      basis:
+      - 'the 1000-seed property test follows TC-GTB-003, which already runs at stage 1 in under 2 minutes (proposal of the agent, 2026-11-07; rated by the owner)'
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: maldun
+      rating: plausible
+    REQ-GTB-015:
+      basis:
+      - 'the v1 and v0 suites exist and pass today; the document form is rebuilt from records (proposal of the agent, 2026-11-07; rated by the owner)'
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: maldun
+      rating: plausible
     REQ-LOG-001:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed

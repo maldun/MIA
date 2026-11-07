@@ -92,9 +92,9 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-31: a node written and read has the same ID and JSON field, the type is present (exact)
-- Verified by: TC-GTB-005
+- Verified by: TC-GTB-016
 - Status: Draft
-- History: G-V2 Plan step 1 (2026-11-07), new
+- History: G-V2 Plan step 1 (2026-11-07), new; Step 3 (2026-11-07): Verified by TC-GTB-016 instead of TC-GTB-005, which is the existing check of REQ-GTB-004 (ID collision)
 
 ### REQ-GTB-006 – Edge records
 - Level: low   Subject: Persistence

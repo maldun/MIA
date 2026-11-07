@@ -761,9 +761,9 @@ The HLS requirements FR-36 to FR-47 in EARS form; only those in the scope of G-V
 - Verification method: Test
 - Acceptance criterion: AC-31
 - Refined in: N-3.2
-- Verified by: TC-GTB-005
+- Verified by: TC-GTB-016, TC-GTB-013, TC-GTB-014
 - Status: Draft
-- History: G-V2 Plan step 1 (2026-11-07), new
+- History: G-V2 Plan step 1 (2026-11-07), new; Step 3 (2026-11-07): TC-GTB-016 instead of TC-GTB-005 (ID collision)
 
 ### FR-45 – Migration of existing skills
 - Level: top   Subject: MiaSystem
