@@ -35,6 +35,7 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-201
 | TC-CHA-034 | REQ-CHA-034 | Component | 2 | same test file; the fake voice route sleeps 0.2 s per call and records start and end times | AC-1: with two requests in a row the second playback starts after the first has ended | exact order, no overlap |
 | TC-CHA-035 | REQ-CHA-030, REQ-CHA-032 | Demonstration | 4 | the short hand check on the host with the real sound server and the real engine (the owner, about 5 minutes): only what automation cannot hear | AC-1: the speaker button is heard in the same voice and in order; Stop silences it; it is heard right after a Stop | as stated |
 | TC-CHA-036 | REQ-CHA-031, REQ-CHA-032, REQ-CHA-034 | Component | 2 | `tests/test_sound_server_handover.py` (A-132): the real `SoundServer` and `SoundHandler` of `speak.py` on a localhost port with a fake speaker as sink (records each chunk it is asked to play, in order, and honours `cancelled`), real TCP clients | AC-1: the sentences of one request reach the sink in order; a second request that arrives during the first is played after it; a client that closes its connection cancels the rest | exact order, no overlap, cancel within 2 s (test limit) |
+| TC-CHA-037 | REQ-CHA-035, REQ-CHA-036 | Component | 1 | `tests/test_chat_speak_again.py` with the fake voice route (A-133): the events `chat_status` and the status of the service | AC-1: while a speak again runs or waits the status is busy with the activity speaking; after it ended or was stopped it is not busy and not speaking | exact |
 
 ## Scenarios (speak again, A-132; the older checks of this file have none yet)
 
@@ -79,6 +80,12 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-201
 - Given: the real `SoundServer` and `SoundHandler` on a localhost port with a fake speaker as sink that records every chunk in order and stops on `cancelled`
 - When: client 1 sends the sentences `One.`, `Two.`, `Three.` and the end marker slowly; client 2 connects during that and sends `Four.` and the end marker; in a second run client 1 closes its connection after `One.`
 - Then: the sink got `One.`, `Two.`, `Three.` and only then `Four.`; in the second run it got `One.` and not `Two.` or `Three.`
+
+### TC-CHA-037 – the status while a message is spoken again
+- Verifies: REQ-CHA-035, REQ-CHA-036
+- Given: the Chat agent with a fake voice route that blocks until it is told to stop, a stored answer of two sentences, no answer being generated
+- When: a user asks to speak it again; later the user presses stop; in a second run the fake does not block and the playback ends by itself
+- Then: after the request a chat_status event with busy true and activity speaking was published and the status says the same; after the stop, and after the playback that ended by itself, the last chat_status event has busy false and an activity other than speaking, and the status says the same
 
 ## Assumptions (checked in validation)
 

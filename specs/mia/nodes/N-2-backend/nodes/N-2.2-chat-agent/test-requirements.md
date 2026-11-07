@@ -9,7 +9,7 @@ Requirements on the checks TC-CHA-030 to TC-CHA-036, TC-VPB-006 and TC-VPB-007 (
 | 2 | Exact values | Sentences and order written by hand | TR-VOICE-003 |
 
 ### TR-VOICE-001 – the fake voice route records and obeys stop
-- Applies to: TC-CHA-030, TC-CHA-031, TC-CHA-032, TC-CHA-033, TC-CHA-034
+- Applies to: TC-CHA-030, TC-CHA-031, TC-CHA-032, TC-CHA-033, TC-CHA-034, TC-CHA-037
 - Requirement: REQ-CHA-030
 - Group: Stand-ins
 - Kind: setup

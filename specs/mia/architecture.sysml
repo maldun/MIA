@@ -2725,6 +2725,16 @@ package MIA_NodeRequirements {
         doc /* While a message is being spoken, the Chat agent shall have a spoken-again message wait until that speech has ended. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
+    requirement def <'REQ-CHA-035'> StopIsOfferedWhileSpokenAgain_Cha035 {
+        subject s : ConversationCore;
+        doc /* While a message is being spoken again or waits to be spoken again, the Chat agent shall report the status busy with the activity speaking. */
+        @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
+    }
+    requirement def <'REQ-CHA-036'> StatusReturnsAfterSpeakAgain_Cha036 {
+        subject s : ConversationCore;
+        doc /* When the last message that is spoken again has been spoken or stopped, the Chat agent shall report the status as it was before, not busy and without the activity speaking. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
     requirement def <'REQ-WFM-001'> SkillsAsTasks_Wfm001 {
         subject s : TaskRuntime;
         doc /* The Workflow management shall perform each kind of work as a task defined by a skill file and a pipeline selectable by every user. */
@@ -4418,6 +4428,8 @@ package MIA_NodeRequirements {
     requirement r_req_cha_032 : StopEndsSpeakAgain_Cha032;
     requirement r_req_cha_033 : SpeakAgainWithoutAVoiceRoute_Cha033;
     requirement r_req_cha_034 : OneSpeakAgainAtATime_Cha034;
+    requirement r_req_cha_035 : StopIsOfferedWhileSpokenAgain_Cha035;
+    requirement r_req_cha_036 : StatusReturnsAfterSpeakAgain_Cha036;
     requirement r_req_wfm_001 : SkillsAsTasks_Wfm001;
     requirement r_req_wfm_002 : VersionedWorkflowLibrary_Wfm002;
     requirement r_req_wfm_003 : NoCycles_Wfm003;
@@ -4851,6 +4863,8 @@ package MIA_NodeRequirements {
     satisfy r_req_cha_032 by mia.conversation;
     satisfy r_req_cha_033 by mia.conversation;
     satisfy r_req_cha_034 by mia.conversation;
+    satisfy r_req_cha_035 by mia.conversation;
+    satisfy r_req_cha_036 by mia.conversation;
     satisfy r_req_wfm_001 by mia.taskRuntime;
     satisfy r_req_wfm_002 by mia.taskRuntime;
     satisfy r_req_wfm_003 by mia.taskRuntime;
@@ -5283,6 +5297,8 @@ package MIA_NodeRequirements {
     allocate r_req_cha_032 to mia.conversation;
     allocate r_req_cha_033 to mia.conversation;
     allocate r_req_cha_034 to mia.conversation;
+    allocate r_req_cha_035 to mia.conversation;
+    allocate r_req_cha_036 to mia.conversation;
     allocate r_req_wfm_001 to mia.taskRuntime;
     allocate r_req_wfm_002 to mia.taskRuntime;
     allocate r_req_wfm_003 to mia.taskRuntime;
@@ -5726,6 +5742,8 @@ package MIA_NodeRequirements {
     dependency from r_req_cha_032 to r_req_cha_004;
     dependency from r_req_cha_033 to r_req_cha_006;
     dependency from r_req_cha_034 to r_req_cha_006;
+    dependency from r_req_cha_035 to r_req_cha_032;
+    dependency from r_req_cha_036 to r_req_cha_035;
     dependency from r_req_wfm_001 to r_req_be_033;
     dependency from r_req_wfm_002 to r_req_be_035;
     dependency from r_req_wfm_003 to r_req_be_036;

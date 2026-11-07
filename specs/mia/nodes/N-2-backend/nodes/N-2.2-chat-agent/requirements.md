@@ -7,7 +7,7 @@ The persona's side: the shared conversation, the answer queue, persona, mood, me
 ## Groups
 | Order | Group | What it covers | Requirements |
 |---|---|---|---|
-| 1 | SA | Speak again: the answer is heard again through the voice route of live answers (A-132, TD-11). The older requirements of this file have no group yet; they predate the rule. | REQ-CHA-030, REQ-CHA-031, REQ-CHA-032, REQ-CHA-033, REQ-CHA-034 |
+| 1 | SA | Speak again: the answer is heard again through the voice route of live answers (A-132, TD-11). The older requirements of this file have no group yet; they predate the rule. | REQ-CHA-030, REQ-CHA-031, REQ-CHA-032, REQ-CHA-033, REQ-CHA-034, REQ-CHA-035, REQ-CHA-036 |
 
 ## Requirements
 
@@ -319,6 +319,32 @@ The persona's side: the shared conversation, the answer queue, persona, mood, me
 - Status: Draft
 - Group: SA
 - History: proposed in A-132 (Draft), not approved
+
+### REQ-CHA-035 – Stop is offered while a message is spoken again
+- Level: low   Subject: ConversationCore
+- Text: While a message is being spoken again or waits to be spoken again, the Chat agent shall report the status busy with the activity speaking.
+- Rationale: refines REQ-CHA-032; the page offers its stop button only while the status is busy and speaking (REQ-CLV-002, mood.js followStatus), and a speak again has no running answer, so the host hand check TC-CHA-035 found no stop button during a repeat (owner, 2026-11-08; A-133). IF-101 chat_status already has these fields and values: no contract change
+- Parent: REQ-CHA-032
+- Priority: Should
+- Verification method: Test, Demonstration
+- Acceptance criterion: AC-1: with a fake voice route that blocks, after a speak-again request the chat_status event with busy true and activity speaking was published and the status says so, also for a second request that waits (exact); on the host the stop button is shown during the repeat
+- Verified by: TC-CHA-037, TC-CHA-035
+- Status: Draft
+- Group: SA
+- History: proposed in A-133 (Draft), not approved
+
+### REQ-CHA-036 – The status returns when the speak again has ended
+- Level: low   Subject: ConversationCore
+- Text: When the last message that is spoken again has been spoken or stopped, the Chat agent shall report the status as it was before, not busy and without the activity speaking.
+- Rationale: refines REQ-CHA-035; a stop button that stays after the voice has ended would be wrong; an answer that is running keeps its own status (A-133)
+- Parent: REQ-CHA-035
+- Priority: Should
+- Verification method: Test
+- Acceptance criterion: AC-1: after the playback ended by itself, and after a stop, the last chat_status event has busy false and an activity other than speaking, and the status says so (exact)
+- Verified by: TC-CHA-037
+- Status: Draft
+- Group: SA
+- History: proposed in A-133 (Draft), not approved
 
 ## Interface requirements
 
