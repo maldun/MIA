@@ -645,14 +645,14 @@ def run_chat_exchange(text, on_delta, on_emotion, should_stop):
     behaviour.record_signals(core.run_log, result.run_id, result.answer or "", node="converse")     # the violations of the text the model wrote are signals (BF2); the chat service repairs the text silently before the page sees it, and nobody is scolded
     return result.answer
 
-def speak_answer(text):
-    """MIA says the answer of a research (not its list of sources)"""
+def speak_answer(text, should_stop=None):
+    """MIA says the answer of a research (not its list of sources); should_stop() ends the wait and closes the connection, so the sound server speaks no more"""
     spoken = speech_text(text)
     if not spoken:
         return
     streamer = SpeechStreamer(get_websocket_url(address=ADDRESS, protocol=PROTOCOL), SOUND_PORT)
     streamer.finish(spoken)
-    streamer.wait()
+    streamer.wait(should_stop)
 
 _db_dir = os.path.join(FPATH, cfg.get(CONST.ACCOUNTS_DIR_KEY, "data/db"))
 _votes_store = Storage(FileBackend(_db_dir))                  # the votes table (REQ-CHA-015); the accounts use the same folder
@@ -694,6 +694,7 @@ chat_service = ChatService(socketio.emit, chat_log, mood, run_chat_exchange, run
                            user_limit=2 if cfg.get(CONST.ACCOUNTS_KEY, False) else 0,           # IF-101: 5 waiting in all, 2 per account
                            rate_limit=(cfg.get(CONST.CHAT_RATE_KEY, 10), 60),
                            spawn=socketio.start_background_task, votes=_votes_store,
+                           speak=speak_answer,                                                  # speak again uses the voice route of live answers (REQ-CHA-030)
                            behaviours=behaviours_from_file(os.path.join(FPATH, cfg.get(CONST.BEHAVIOURS_FILE_KEY, "library/behaviours.json"))),
                            reputable=cfg.get(CONST.REPUTABLE_TRUST_KEY, 0.6),
                            repair=lambda text: behaviour.apply_rules(text)["text"], remember=_remember,         # the stream is held back and repaired silently (REQ-CHA-014)
