@@ -6,18 +6,19 @@ Check with `trace_check.py` (records, `Relaxed`/`Target` links, `deferred` marke
 Proposed on 2026-10-29 after the usability work of N-2.3 T-09 to T-11 and N-1.1 T-09 (A-23, A-24, D-101, D-103). Every record below is a proposal: the owner confirms, changes or drops it
 (the line `Decision` names the person who has to decide).
 
-## TD-01 – The status card is not tested in a browser and is gone after a reload
+## TD-01 – The status card is gone after a reload
 - Kind: defer
 - Requirement: REQ-CLV-023
-- Interim criterion: the model of the card (figures, state, a late status after done) is tested with `node --test` (`tests/js/taskcard.test.mjs`); the drawing, the buttons and the placement in the chat are looked at by the owner (hand test); the card lives as long as the page is open
-- Target: a browser test that draws the card from a `task_status` of the mock, updates it in place, presses pause, resume and stop, and a card that is still there, with its final figures, after a reload
-- Reason: the repository has no browser test harness for the page yet (no DOM library in `tests/js`); a card after a reload needs the status to be kept with the history, which is a change of the interface (IF-101)
-- Effort: about 1 day for the harness, half a day for the kept card (a field in the history record and in the amendment of IF-101)
-- Risk of the gap: a broken layout or a dead button is found only by a person; on a phone the card may be too wide. Mitigation: the hand test list in `handover-review-workflow.md` and the owner's look before the release
+- Interim criterion: the card is checked in a browser (`tests/test_task_files_browser.py`, TC-CLV-023: draw, update in place, pause, resume, stop, late status after done, 360 px) and its model with `node --test` (`tests/js/taskcard.test.mjs`); the card lives as long as the page is open
+- Target: a card that is still there, with its final figures, after a reload (browser test)
+- Reason: a card after a reload needs the status to be kept with the history, which is a change of the interface (IF-101)
+- Effort: about half a day for the kept card (a field in the history record and in the amendment of IF-101)
+- Risk of the gap: after a reload the user sees no final figures of a finished task. Mitigation: the report and the files tab keep the result
 - Owner: Stefan Reiterer
 - Trigger: the chat mock server sends `task_status` and files events, or the Plan of FB-01, or 2026-12-31, whichever first (the browser harness exists since D-141; D-172)
 - Target check: specified only
 - Decision: confirmed by Stefan Reiterer, 2026-11-01 (D-172)
+- Note: narrowed to the reload target on 2026-11-07 on the owner's instruction; the browser part is done (branch `td-01-02-browser-tests`). FR-46 (goal B) moves the card into the skill subwindow, so the reload target may be redone there.
 - Status: open
 
 ## TD-02 – The Files tab is not tested in a browser
@@ -32,7 +33,8 @@ Proposed on 2026-10-29 after the usability work of N-2.3 T-09 to T-11 and N-1.1 
 - Trigger: the chat mock server sends `task_status` and files events, or the Plan of FB-01, or 2026-12-31, whichever first (the browser harness exists since D-141; D-172)
 - Target check: specified only
 - Decision: confirmed by Stefan Reiterer, 2026-11-01 (D-172)
-- Status: open
+- Status: done
+- Closed: 2026-11-07, marked done on the owner's instruction; browser test `tests/test_task_files_browser.py` (TC-CLV-024: newest first, download links, redraw after `files_changed`, no delete control)
 
 ## TD-03 – Tokens on the card are an estimate
 - Kind: relax
