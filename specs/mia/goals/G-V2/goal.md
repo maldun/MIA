@@ -9,7 +9,7 @@ Drafted 2026-11-07 in Plan Step 0 from the approved HLS of iteration 2 (D-186). 
 - Supervision: supervised
 - Accepted by: Stefan Reiterer (owner)
 - Line of work: goal/v2
-- Subgoals: G-V2.STORE, G-V2.MODEL, G-V2.TRUST, G-V2.CONVERT
+- Subgoals: G-V2.STORE, G-V2.MODEL, G-V2.TOOLBOX, G-V2.CONVERT
 - Status: Proposed
 
 ## Outcome criteria
@@ -35,6 +35,7 @@ Drafted 2026-11-07 in Plan Step 0 from the approved HLS of iteration 2 (D-186). 
 | splitting the rework into A to D | split: this goal is A only | owner decision 2026-11-07; B, C, D are later goals | 2026-11-07 |
 | splitting A along nodes (N-2.3, N-3.2, N-2.4.1) | keep together (reversed below) | 3 nodes, 41 new requirements, one chain (record, storage, run, convert); the checker's large-scope warning counts all inherited requirements | 2026-11-07 |
 | splitting A for review and build: STORE (11), MODEL (12), TRUST (11), CONVERT (11) requirements | split into four subgoals | owner 2026-11-07: reviewing 45 requirements and 6 top-level items at once is too much; seam is the storage interface; TRUST is its own risk (OC-3); CONVERT needs the others real | 2026-11-07 |
+| cut with fewer dependencies: REQ-RUN-017 (refusal to run) moves from TRUST to MODEL, TRUST becomes TOOLBOX; STORE (11), MODEL (13), TOOLBOX (10), CONVERT (11, with snapshots) | adopted | owner 2026-11-07: STORE, MODEL and TOOLBOX are independent behind IF-301 v2 and IF-203 v1; only CONVERT needs all three real; OC-3 is seen in MODEL (refuses) and TOOLBOX (status) and checked together in CONVERT | 2026-11-07 |
 
 ## Scope
 Acceptance criteria in scope: AC-31, AC-32, AC-34, AC-38, AC-40. Out: AC-33, AC-35, AC-36, AC-37, AC-39. Amendments carried by this goal: A-89 (FR-7, FR-22, FR-30 entries) and conflicts 1 to 3 of the Explore hand-over (owner-only trust marking as exception to CON-6; FR-40 against IF-301/IF-203; imported transforms untrusted, SC-09). Open for Plan: numbers inside the in-scope criteria (for example the conversion margin).
@@ -110,15 +111,15 @@ Acceptance criteria in scope: AC-31, AC-32, AC-34, AC-38, AC-40. Out: AC-33, AC-
 ## Frozen requirements
 | Requirement | Shared by | Reason |
 |---|---|---|
-| IF-301 | STORE, MODEL, TRUST, CONVERT | graph tables v2 (A-90, approved 2026-11-07): STORE provides it, the others use it through a mock until STORE is merged |
-| IF-203 | MODEL, TRUST, CONVERT | workflow library v1 (A-90, approved 2026-11-07): all three extend it |
+| IF-301 | STORE, MODEL, CONVERT | graph tables v2 (A-90, approved 2026-11-07): STORE provides it, the others use it through a mock until STORE is merged |
+| IF-203 | MODEL, TOOLBOX, CONVERT | workflow library v1 (A-90, approved 2026-11-07): all three extend it |
 
 ## Agreement
 | Subgoal | Agreed by | Date |
 |---|---|---|
 | G-V2.STORE | Stefan Reiterer (owner) | 2026-11-07 |
 | G-V2.MODEL | Stefan Reiterer (owner) | 2026-11-07 |
-| G-V2.TRUST | Stefan Reiterer (owner) | 2026-11-07 |
+| G-V2.TOOLBOX | Stefan Reiterer (owner) | 2026-11-07 |
 | G-V2.CONVERT | Stefan Reiterer (owner) | 2026-11-07 |
 
 ## Phases

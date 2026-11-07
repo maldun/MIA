@@ -1,6 +1,6 @@
-# Goal G-V2.TRUST – Toolbox and trust
+# Goal G-V2.TOOLBOX – Toolbox and trust
 
-Drafted 2026-11-07 when the owner asked to split G-V2 into four subgoals for review and build (cut: STORE, MODEL, TRUST, CONVERT).
+Drafted 2026-11-07 when the owner asked to split G-V2 into subgoals; renamed from TRUST and REQ-RUN-017 moved to MODEL when the owner asked for a cut with fewer dependencies (same day).
 
 - Kind: subgoal
 - Parent: G-V2
@@ -8,15 +8,15 @@ Drafted 2026-11-07 when the owner asked to split G-V2 into four subgoals for rev
 - Exit criterion: OC-1, OC-2, OC-3, with the checks of its requirements below
 - Supervision: supervised
 - Accepted by: Stefan Reiterer (owner)
-- Line of work: goal/v2.trust
+- Line of work: goal/v2.toolbox
 - Subgoals: –
 - Status: Proposed
 
 ## Outcome criteria
 | ID | Expected outcome | Derived from |
 |---|---|---|
-| OC-1 | Given a step that arrives from outside MIA, when someone tries to use it, then it does not run and says why | FR-38, NFR-3, OC-3 |
-| OC-2 | Given such a step, when only the owner allows it, then it runs; nobody else can allow it | FR-38, OC-3 |
+| OC-1 | Given a step that arrives from outside MIA, when someone looks it up, then it is shown as untrusted, with the reason, and cannot be marked trusted by anyone but the owner | FR-38, NFR-3, OC-3 |
+| OC-2 | Given such a step, when the owner marks it trusted, then it is shown as trusted; when anyone else tries, it is refused and says why | FR-38, OC-3 |
 | OC-3 | Given a step that is retired, when someone looks for a step to use, then it is not offered, but it can still serve as the reference of a comparison | FR-38, OC-1 |
 
 ## Dependencies and bounds
@@ -27,7 +27,7 @@ Drafted 2026-11-07 when the owner asked to split G-V2 into four subgoals for rev
 ## Split check
 | Suggestion | Decision (split / keep together) | Reason | Date |
 |---|---|---|---|
-| further cut | keep together | 11 items in scope, one chain | 2026-11-07 |
+| further cut | keep together | 10 items in scope, one chain | 2026-11-07 |
 
 ## Scope
 Top-level items it serves: FR-38. Requirements by ID (inside G-V2's scope):
@@ -44,17 +44,13 @@ Top-level items it serves: FR-38. Requirements by ID (inside G-V2's scope):
 | REQ-WFM-067 | in | |
 | REQ-WFM-068 | in | |
 | REQ-WFM-070 | in | |
-| REQ-RUN-017 | in | |
-| IF-301 | in | frozen at G-V2 (A-90, approved 2026-11-07); used through its mock until the provider is merged |
 | IF-203 | in | frozen at G-V2 (A-90, approved 2026-11-07); used through its mock until the provider is merged |
 
 ## Parts
 | Part | Real or stand-in | Notes |
 |---|---|---|
 | N-2.3 toolbox | real |  |
-| N-2.4.1 pipeline runner (refusal) | real | REQ-RUN-017 |
-| graph model, skill record | stand-in | G-V2.MODEL contract, used through IF-203 v1 mock until merged |
-| N-3.2 graph tables | stand-in | IF-301 v2 mock |
+| IF-203 v1 library (kind `transforms`) | stand-in | mock until the provider is merged; transforms are records of the library, the toolbox needs no graph |
 
 ## Frozen requirements
 | Requirement | Shared by | Reason |

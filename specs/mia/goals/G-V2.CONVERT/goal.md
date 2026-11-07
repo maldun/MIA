@@ -53,7 +53,7 @@ Top-level items it serves: FR-45, FR-47. Requirements by ID (inside G-V2's scope
 |---|---|---|
 | N-2.3 converter, snapshotStore | real |  |
 | N-2.4.1 pipeline runner | real | old runner side by side |
-| G-V2.STORE, MODEL, TRUST | real | merged before this subgoal starts |
+| G-V2.STORE, MODEL, TOOLBOX | real | merged before this subgoal starts |
 | model server (Ollama) | real | equivalence on MP-light |
 
 ## Frozen requirements
