@@ -41,7 +41,7 @@
 - Requirement: REQ-WFM-047
 - Group: Rule checks
 - Kind: setup
-- Text: The check shall use 200 generated graphs with seeds 1 to 200, at least 60 with a cycle of 2 to 5 nodes and at least 60 without, and shall test the topological order by checking that every edge points forward, not by calling the function under test again.
+- Text: The check shall use 200 generated graphs with seeds 1 to 200, at least 60 with a cycle of 2 or 4 nodes (odd cycles cannot alternate data and other nodes, REQ-WFM-045) and at least 60 without, shall add one fixed 5-node cycle as a negative example that is refused, and shall test the topological order by checking that every edge points forward, not by calling the function under test again.
 - Rationale: seeds are fixed so a failure is reproducible; the lower counts keep both outcomes covered at this size; an independent oracle avoids a check that agrees with a wrong implementation. Not a statistical acceptance check: the expected failure count is exactly 0.
 - Credibility aspect: repetitions and seeds
 - Verified by: known answer (three hand-drawn graphs with their cycles) and mutation

@@ -109,9 +109,10 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-203
 
 ### TC-WFM-047 – no cycle
 - Verifies: REQ-WFM-047
-- Given: 200 generated graphs (seeds 1 to 200), about half with one cycle of 2 to 5 nodes added
+- Given: 200 generated graphs (seeds 1 to 200), about half with one cycle of 2 or 4 nodes added (a cycle alternates data and other nodes, REQ-WFM-045, so its length is even); and one fixed negative example, a cycle of 5 nodes
 - When: each is saved
-- Then: each graph with a cycle is refused with the cycle as IDs, the first ID repeated at the end; each accepted graph has a topological order in which every edge points forward (0 failures)
+- Then: each graph with a cycle of 2 or 4 nodes is refused with the cycle as IDs, the first ID repeated at the end; each accepted graph has a topological order in which every edge points forward (0 failures)
+- And: the graph with the 5-node cycle is refused; it breaks REQ-WFM-045 as well, so the refusal need not name the cycle
 
 ### TC-WFM-048 – master node stops
 - Verifies: REQ-WFM-048
