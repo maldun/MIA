@@ -40,10 +40,10 @@ _MEMBERS = {"type": "array", "items": {"type": "object", "properties": {"id": {"
                                        "required": ["id", "version"]}}
 # The fixed list of workflow node types (REQ-GTB-009, REQ-GTB-011); a new type is an amendment of IF-301. The JSON field of a node names its type.
 TYPE_SCHEMAS = {
-    "data": {"type": "object", "properties": {"type": {"const": "data"}, "value": {}, "parameters": {"type": "object"}}, "required": ["type"]},
+    "data": {"type": "object", "properties": {"type": {"const": "data"}, "value": {}, "parameters": {"type": "object"}}, "required": ["type"], "additionalProperties": False},
     "master": {"type": "object", "properties": {"type": {"const": "master"}, "toolbox_id": {"type": "string"}, "stop": _STOP, "task": {"type": "object"}},
-               "required": ["type", "toolbox_id", "stop"]},
-    "transform": {"type": "object", "properties": {"type": {"const": "transform"}, "toolbox_id": {"type": "string"}}, "required": ["type", "toolbox_id"]},
+               "required": ["type", "toolbox_id", "stop"], "additionalProperties": False},
+    "transform": {"type": "object", "properties": {"type": {"const": "transform"}, "toolbox_id": {"type": "string"}}, "required": ["type", "toolbox_id"], "additionalProperties": False},
 }
 _RECORD_SCHEMAS = {
     "graph_edges": {"type": "object"},
@@ -68,18 +68,27 @@ def types():
     return {type_id: copy.deepcopy(TYPE_SCHEMAS[type_id]) for type_id in sorted(TYPE_SCHEMAS)}
 
 
+def _error_path(error):
+    """(order, named): the path of a schema error as text and the path that names the broken field. A missing required key is named by that key
+    but ordered at the path of its object; an additional field is named by its own key, the first in sorted order when there are several (REQ-GTB-022)."""
+    path = [str(p) for p in error.absolute_path]
+    if error.validator == "required":
+        return path, path + [next(k for k in error.validator_value if k not in error.instance)]
+    if error.validator == "additionalProperties":
+        extra = min(k for k in error.instance if k not in error.schema.get("properties", {}))
+        return path + [extra], path + [extra]
+    return path, path
+
+
 def _broken_path(schema, data):
-    """The path of the first field that breaks the schema, as jsonschema names it (TR-GTB-003), or None. A missing required key is named by that key."""
+    """The path of the first field that breaks the schema, in text order of the paths (TR-GTB-003), or None."""
     key = id(schema)
     if key not in _validators:                  # built once: 500 node and 500 edge records must be checked in 500 ms
         _validators[key] = jsonschema.Draft202012Validator(schema)
-    errors = sorted(_validators[key].iter_errors(data), key=lambda e: [str(p) for p in e.absolute_path])
-    if not errors:
+    paths = sorted(_error_path(error) for error in _validators[key].iter_errors(data))
+    if not paths:
         return _non_finite_path(data)
-    path = list(errors[0].absolute_path)
-    if errors[0].validator == "required":
-        path.append(next(k for k in errors[0].validator_value if k not in errors[0].instance))
-    return ".".join(str(p) for p in path) or "data"
+    return ".".join(paths[0][1]) or "data"
 
 
 def _non_finite_path(value, path=()):

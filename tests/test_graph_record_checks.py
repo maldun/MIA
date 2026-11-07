@@ -1,13 +1,17 @@
 """Unit tests of the record checks of the Graph tables (N-3.2, G-V2.STORE T-01) beyond the acceptance tests: edge cases found while writing check_record.
 Run with: python tests/test_graph_record_checks.py"""
 import os
+import shutil
 import sys
+import tempfile
 import unittest
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.dirname(HERE))
 
 import graph_tables  # noqa: E402
+from storage import Storage, StorageError  # noqa: E402
+from storage_files import FileBackend  # noqa: E402
 
 
 def master(**fields):
@@ -62,6 +66,42 @@ class RecordCheckEdges(unittest.TestCase):
         self.assertEqual(graph_tables.check_record("graph_nodes", {"id": "a", "data": {"type": ["x"]}})["rule"], "unknown_type")
         self.assertEqual(graph_tables.check_record("graph_nodes", {"id": "a", "data": {"type": "data"}}, categories={}),
                          {"rule": "unknown_type", "detail": "data"})
+
+
+class FixedFieldsOfANode(unittest.TestCase):
+    """REQ-GTB-022 (A-93, T-07): a node has only the fields its type lists, on write and on read."""
+
+    def test_an_extra_field_or_an_id_inside_data_is_refused_naming_it(self):
+        """check_record and to_object refuse a node with a field its type does not list, and never raise.
+
+        Example: {"type": "data", "foo": 1} -> schema_break foo; {"type": "data", "id": "x"} -> schema_break id.
+        """
+        # Given
+        cases = {"foo": {"type": "data", "foo": 1}, "id": {"type": "data", "id": "x"}}
+        for field, data in cases.items():
+            record = {"id": "n1", "data": data}
+            # When/Then
+            self.assertEqual(graph_tables.check_record("graph_nodes", record), {"rule": "schema_break", "detail": field})
+            self.assertEqual(graph_tables.to_object(record), {"refused": {"rule": "schema_break", "detail": field}})
+
+    def test_several_extra_fields_name_the_first_in_sorted_order(self):
+        """Example: {"type": "data", "zed": 1, "bar": 2} -> detail bar; a missing key is named before an extra field."""
+        # Given/When/Then
+        self.assertEqual(graph_tables.check_record("graph_nodes", {"id": "n", "data": {"type": "data", "zed": 1, "bar": 2}})["detail"], "bar")
+        self.assertEqual(graph_tables.check_record("graph_nodes", {"id": "n", "data": {"type": "transform", "foo": 1}})["detail"], "toolbox_id")
+
+    def test_storage_put_refuses_an_extra_field_and_stores_nothing(self):
+        """Example: put("graph_nodes", "n1", {"id": "n1", "data": {"type": "data", "foo": 1}}) -> invalid, schema_break, foo; ids() is empty."""
+        # Given
+        directory = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, directory)
+        store = Storage(FileBackend(os.path.join(directory, "main")))
+        # When
+        with self.assertRaises(StorageError) as caught:
+            store.put("graph_nodes", "n1", {"id": "n1", "data": {"type": "data", "foo": 1}}, "anna")
+        # Then
+        self.assertEqual((caught.exception.code, caught.exception.rule, caught.exception.detail), ("invalid", "schema_break", "foo"))
+        self.assertEqual(list(store.ids("graph_nodes")), [])
 
 
 if __name__ == "__main__":

@@ -10,6 +10,7 @@ Goal: G-V2.STORE   Line of work: goal/v2.store   Supervision: supervised (accept
 | T-04 The Storage layer takes the four tables | done | 2728b06 | 3 new tests in `tests/test_storage.py` (TC-GTB-013, 016/006/018/019, 017, 020, 021 on `Storage`), on the file backend and on a throwaway postgres:16 (`tests/test_storage_postgres.py`: 29 tests OK, `tools/contract_postgres.sh`: IF-102 suite OK); IF-102 real side, IF-301 v1, IF-203 v0 and the old storage tests unchanged green; full unit suite: the same 3 failures and 61 errors as the baseline, by name | Run with a python from a throwaway venv (`requirements-db.txt` plus `jsonschema==4.23.0`) because the host python has no psycopg. Reported, not verified. |
 | T-05 Integration: the real side of the suite without skip | done | 2d21f44 | A-91 installed by the owner: the v2 suite 30 tests OK on both sides, no skip; v1 suite, IF-203 v0 suite and TC-GTB-015 OK (reported with the system python that has jsonschema; the owner's shell needed `pip install -r requirements.txt` first) | Reported, not verified. |
 | T-06 Record under its own ID | done | 4d0690d | TC-GTB-022 (`test_graph_record_identity.py`) and the real side of TC-IF-301-20 (green after A-92; the whole v2 suite OK), new unit test in `tests/test_storage.py` for the four tables (red first: 4 failures, then green); file backend and a throwaway postgres:16 (`test_storage_postgres.py` OK, `contract_postgres.sh` OK); `test_graph_records.py`, the IF-301 v1, IF-102 and IF-203 v0 suites and all unit tests of this goal unchanged green; full unit suite: the same 3 failures and 61 errors as the baseline, by name | Reported, not verified. |
+| T-07 Fixed fields of a node | done | (this commit) | TC-GTB-023 (`test_graph_node_fields.py`, 2 tests) and the real side of TC-IF-301-21 (v2 suite 34 tests OK, mock and real); 3 new unit tests in `tests/test_graph_record_checks.py` (red first: 2 failures, 1 error, the record was accepted; then 7 OK); `test_graph_records.py` (20, TC-GTB-014 N = 1000), `test_graph_record_identity.py`, `test_graph_tables.py`, `test_storage.py` (22), `test_graph_record_objects.py`, `test_graph_document_form.py` and the IF-301 v1 suite unchanged green. `test_storage_postgres.py` not run (no psycopg 3 in this environment, 2 skipped; installing it would be a new dependency step). | Reported, not verified. |
 
 ## Findings
 | Finding | Task | Covered by test |
@@ -32,6 +33,13 @@ Goal: G-V2.STORE   Line of work: goal/v2.store   Supervision: supervised (accept
 - Kind: amendment
 - Status: approved and installed 2026-11-07 (`d80fdb5`, `d67e7d9`)
 - Approved by: Stefan Reiterer, 2026-11-07
+
+### A-93: a node has only the fields of its type (REQ-GTB-022, TC-GTB-023, TC-IF-301-21, IF-301 v2)
+- Found in: Verify of G-V2.STORE (F-01: an extra field in a node broke `to_object` with TypeError)
+- Decision: the three node schemas are closed (`additionalProperties` false); `_broken_path` orders by path text and names an extra field by its own key; task T-07
+- Kind: amendment
+- Status: approved and installed 2026-11-08, implemented in T-07
+- Approved by: Stefan Reiterer
 
 ## Stop conditions hit
 | Date | Task | Condition | Escalated to | Outcome |
