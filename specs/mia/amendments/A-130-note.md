@@ -1,6 +1,6 @@
 # A-130: the skipped IF-101 and IF-201 cases of an answer (TD-11, REQ-VOI-001)
 
-Status: **Draft, proposed by the agent; not approved, nothing applied.** Decision id proposed: D-268 (master's last is D-267; not yet in `review-log.md`, log it on approval). Owner answers of 2026-11-07 behind it: the protected `tests/helpers/contract.py` may change only through an amendment the owner approves first; `audio_chunk` stays text, the page keeps the voice; Plan step only.
+Status: **Draft; not approved as a whole, nothing applied.** Owner decisions so far (2026-11-07): Q1 split the `expression` event out of TD-11 (decided); Q2 helper change not approved yet (pending); Q3 new TD-11 target wording proposed, awaiting the owner's decision. Decision id proposed: D-268 (master's last is D-267; not yet in `review-log.md`, log it on approval). Owner answers of 2026-11-07 behind it: the protected `tests/helpers/contract.py` may change only through an amendment the owner approves first; `audio_chunk` stays text, the page keeps the voice; Plan step only.
 
 ## 1. Does text-only `audio_chunk` need a contract change?
 **No.** IF-101 v15 (line 79) already defines `audio_chunk` as `{id, index, sentence}`, one per sentence, `index` from 0, in order, "the audio bytes follow on the audio route". IF-201 (`subscribe`, golden 1) gives the same payloads. IF-204 is Python calls only (`synthesize`, `voice_line`); the gateway relays chunks "(IF-101 `audio_chunk`)" and the page plays voice lines through `audio_reload` and `/audio/<file>` (v15). So the contract texts of IF-101, IF-201 and IF-204 stay as they are. The gap is in the real `ChatService`, not in the contracts.
@@ -26,7 +26,7 @@ All skips are `raise unittest.SkipTest(...)` in the protected helper, gated on a
 2. The backend path of the chat agent's voice (`web_app.py`) takes its audio from `SpeechService.synthesize` instead of calling `SpeechStreamer` and `render_voice` directly. This is wiring inside N-2; no new part (SpeechService exists), no new dependency, no interface change. Risk (from TD-11): the working voice. Mitigation: `test_speech_service.py`, `test_speech_stop.py`, `test_speech_repair.py`, the page tests; hand test on the host.
 3. The expression event of an answer: separate question, see below.
 
-## 5. Proposal for the protected helper (not applied, owner decides)
+## 5. Proposal for the protected helper (**pending owner approval**, not applied; `tests/helpers/` untouched)
 - Line 431: remove the skip for an answer with `emotion` in `_ChatTurnAdapter` once step 4.1 is green (the adapter already builds the real `ChatService`).
 - Line 205: remove the skip in `_RealBackendAdapter` only when step 4.1 and the expression event are green; until then narrow the reason text to "the `expression` event of an answer is not in the real Backend yet" so that it no longer names N-2.5 and voice.
 - No test file under `tests/acceptance/` changes; the new versions are written outside the implementing session after approval.
@@ -34,7 +34,19 @@ All skips are `raise unittest.SkipTest(...)` in the protected helper, gated on a
 ## 6. Requirements and test rows
 None needed. REQ-VOI-001 (Relaxed TD-11, with its Target), REQ-BE-016, the N-2.2 requirement "stream of sentences with expression events", TC-VOI-001, TC-IF-201-01 and TC-IF-101-04 already cover the behaviour. The approved text of REQ-VOI-001 is not touched. If the owner wants the per-sentence emission of a live answer stated on its own, that is a new requirement for the owner to ask for.
 
-## 7. Questions for the owner
-1. Split the `expression` event of an answer out of TD-11 (a new deferral or part of the character node), so that TD-11 turns TC-IF-201-01 green and TC-IF-101-04 stays skipped with a narrower reason? Recommended.
-2. Approve the helper change of section 5 (lines 431 now, 205 later)?
-3. Correct the TD-11 target wording to "the skipped IF-201 case" (and the IF-101 case after the expression event)? Not done here; the Target and Decision lines are unchanged.
+## 7. Owner decisions
+1. **Decided (owner, 2026-11-07):** the `expression` event of an answer is split out of TD-11. TD-11 covers only TC-IF-201-01; TC-IF-101-04 stays skipped with a narrower reason (section 5, line 205, pending approval).
+2. **Pending:** approve the helper change of section 5. Not approved; nothing in `tests/helpers/` changes until then.
+3. **Proposal, awaiting the owner's decision** (the Target and Decision lines in `deferred.md` stay unchanged until then). Proposed new target of TD-11 and of the `Target:` line of REQ-VOI-001:
+   > the chat agent emits one `audio_chunk` event per sentence during an answer, its voice audio comes from `SpeechService` (IF-204) on the backend path, and the skipped IF-201 case TC-IF-201-01 runs green; the IF-101 case TC-IF-101-04 stays skipped until the expression event of an answer exists (TD-60)
+
+## 8. Proposed deferral for the expression event (Draft, proposed only)
+The `expression` event of an answer is not emitted by the real `ChatService` (the expression goes through `web_app.py`). It needs its own deferral or goal; the owner chooses. If a deferral, a draft from the parent range:
+
+- TD-60 (**Draft, proposed, not in `deferred.md`**) – The real chat agent does not emit the `expression` event of an answer
+- Kind: defer
+- Requirement: the N-2.2 requirement "answer as a stream of sentences with expression events"; IF-101 `expression`; related REQ-CHV (character)
+- Interim criterion: expressions reach the page through `web_app.py` (`on_emotion`, `PresetExpressor`)
+- Target: `ChatService` emits `expression {name}` during an answer; the skip at `tests/helpers/contract.py:205` is removed and TC-IF-101-04 runs green
+- Decision: open (owner)
+- Status: Draft
