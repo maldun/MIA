@@ -9,12 +9,14 @@ positions in the queue, scripted answers. For trying the page by hand and for th
 It is the real page (templates/, served by web_app.py) with the chat handlers replaced by the mock of the protected helper
 tests/helpers/mocks/if_101_chat_api.py. The session is a cookie (HttpOnly, same site); the page keeps no token.
 """
+import io
 import os
 import re
 import sys
 import tempfile
 import threading
 import time
+import wave
 
 repo = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import importlib.util  # noqa: E402
@@ -204,9 +206,41 @@ def r_regenerate():
     return run_api(lambda s: api.regenerate(s, body().get("message_id")))
 
 
+def announce_line(token):
+    """what publish_audio and AudioRouter.announce do for a rendered line: audio_reload {url, serial, message} to the page of the session
+    (TC-VPB-007, TR-VOICE-005). The line is a short silent wav served by this mock at /mock/audio/<name>."""
+    with lock:
+        turn["line"] = turn.get("line", 0) + 1
+        serial = turn["line"]
+    for sid in list(sids.get(token, ())):
+        w.socketio.emit("audio_reload", {"url": "/mock/audio/line-%06d.wav" % serial, "serial": serial, "message": "mock"}, to=sid)
+
+
 @w.app.post("/api/speak_again")
 def r_speak_again():
-    return run_api(lambda s: api.speak_again(s, body().get("message_id")))
+    response = run_api(lambda s: api.speak_again(s, body().get("message_id")))
+    if response[1] == 200:
+        announce_line(session())                           # the backend plays the answer again: the page gets its line
+    return response
+
+
+@w.app.post("/mock/audio_reload")
+def r_mock_audio_reload():
+    """a line of the voice without any request of the page (a late line of a stopped answer): the check TC-VPB-007 sends it"""
+    announce_line(session())
+    return jsonify({"ok": True})
+
+
+@w.app.get("/mock/audio/<name>")
+def r_mock_audio(name):
+    """0.2 s of silence as a wav (8 kHz, 16 bit, mono) for every line name"""
+    buffer = io.BytesIO()
+    with wave.open(buffer, "wb") as wav:
+        wav.setnchannels(1)
+        wav.setsampwidth(2)
+        wav.setframerate(8000)
+        wav.writeframes(b"\x00\x00" * 1600)
+    return Response(buffer.getvalue(), mimetype="audio/wav")
 
 
 @w.app.get("/api/account")
