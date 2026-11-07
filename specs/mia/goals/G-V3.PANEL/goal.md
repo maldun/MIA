@@ -15,9 +15,9 @@ Drafted 2026-11-07 when the owner decided to split G-V3 into PANEL and CHAT (Q-3
 ## Outcome criteria
 | ID | Expected outcome | Derived from |
 |---|---|---|
-| OC-1 | Given a skill is running, when the user looks at the Skill run view, then it shows what the skill is doing now, its phases, figures and budgets, and buttons to pause, resume and stop it, and each button does what it says | G-V3 OC-1, FR-34, FR-46 |
+| OC-1 | Given any skill is running (lookup and search included), when the user looks at the Skill run view, then it shows what the skill is doing now, its phases, figures and budgets, and buttons to pause, resume and stop it, and each button does what it says | G-V3 OC-1, FR-34, FR-46 |
 | OC-2 | Given a run has ended, when the user looks at the view, then it shows the full result, the material found on the way, the links to the files and the report, and every answer the user gave, in order | G-V3 OC-2, FR-46 |
-| OC-3 | Given no skill runs, when the user looks at the view, then it shows the last run; given several skills run, then it shows the one started most recently | G-V3 OC-2, FR-46 |
+| OC-3 | Given no skill runs, when the user looks at the view, then it shows the last run, and no earlier one (a run list is a later addition); given several skills run, then it shows the one started most recently | G-V3 OC-2, FR-46 |
 | OC-4 | Given a run that has ended, when the page is reloaded or MIA is restarted, then the view shows the same run with its final figures; deleting the chat history empties the view and keeps the files | G-V3 OC-3, FR-34 |
 | OC-5 | Given a run that fails or is stopped, when it ends, then the view shows the reason | G-V3 OC-5, FR-34 |
 | OC-6 | Given a wide screen, when the page is shown, then the character box, the chat on its left and the view below the box do not overlap and the page does not scroll; given a phone, the parts are stacked and every part can be reached | G-V3 OC-6, NFR-1 |

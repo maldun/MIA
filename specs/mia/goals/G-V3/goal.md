@@ -6,13 +6,17 @@ Drafted 2026-11-07 in Plan Step 0 on the owner's wish to start with the GUI chan
 - Voice: "Chat text change only": the voice path stays as it is; TD-11 stays independent.
 - Supervision and depth: "Plan Step 0, supervised".
 
-Owner decisions of 2026-11-07 (answers to the open questions, relayed by the coordinator; logged as D-271):
+Owner decisions of 2026-11-07 (answers to the open questions, relayed by the coordinator; logged as D-271, Q-8 to Q-11 as D-273):
 - Q-1: G-V3 is its own goal; work may overlap with the G-V2 sessions.
 - Q-2: when no skill runs, the window shows the last run; with several running skills the most recently started one is shown.
 - Q-3: the digest step IS in G-V3, as its own subgoal.
 - Q-4: the window is called **Skill run view** (kept apart from FR-43's skills window).
 - Q-5: follows Q-3: two subgoals, G-V3.PANEL (no model) and G-V3.CHAT (the digest step and the spoken-only chat).
 - Q-6 (the owner's own words): "I want to drop the status card as I want that the chat gives a summary at the end. The current implementation is confusing. However, a small summary should be put inside the text. Another thing which may be ambiguous is that only text in the chat should be spoken. Therefore, status summaries or questions to answer should land in the chat. Status of the skill, buttons etc. should be in the window."
+- Q-8: only the last run is reachable in the Skill run view (a run list is a later addition).
+- Q-9: all skills, lookup and search too, get a run in the view and end with a short spoken summary in the chat.
+- Q-10: G-V3.CHAT is supervised throughout; there is no unsupervised prompt-tuning subgoal now.
+- Q-11: yes to the PANEL/CHAT cut, with the IF-101 amendment owned by PANEL alone and CHAT using a mock of it (Agreement rows filled; logged as D-273).
 - Q-7: G-V3 is a second, parallel iteration goal. `goal_check.py` GL1 ("more than one open iteration goal") reports it as an ERROR for G-V2 and G-V3 and has no field to explain it; the error stays, is not weakened or hidden, and this decision is its explanation.
 
 What the HLS says: FR-34 and FR-35 (FB-01, the skills panel and the skill turns in the chat) are proposed, were out of G-V1 and are not built; FR-46 revises both. So this goal builds FR-34 and FR-35 in the revised form of FR-46. The status card is in the chat today (REQ-CLV-023); it leaves the chat entirely (A-131 lists what is retired and what stays).
@@ -30,10 +34,10 @@ What the HLS says: FR-34 and FR-35 (FB-01, the skills panel and the skill turns 
 ## Outcome criteria
 | ID | Expected outcome | Derived from |
 |---|---|---|
-| OC-1 | Given a skill is running, when the user looks at the page, then the Skill run view shows that run: what it is doing now, its phases, figures and budgets, and buttons to pause, resume and stop it; none of this is in the chat | FR-46, FR-34 |
+| OC-1 | Given any skill is running (lookup and search included), when the user looks at the page, then the Skill run view shows that run: what it is doing now, its phases, figures and budgets, and buttons to pause, resume and stop it; none of this is in the chat | FR-46, FR-34 |
 | OC-2 | Given a run has ended, when the user looks at the Skill run view, then it shows the full result, the material found on the way, the links to its files and report, and every answer the user gave, in order; when no skill runs it shows the last run, and with several running skills the most recently started one | FR-46, FR-34 |
 | OC-3 | Given a run that has ended, when the page is reloaded or MIA is restarted, then the Skill run view still shows that run with its final figures; deleting the chat history empties the view and keeps the files | FR-34, FR-46 |
-| OC-4 | Given a skill that asks questions and takes three phases, when it runs, then the chat shows only text that is spoken: the questions to answer, the users' answers, a short status summary for each phase the skill names, and at the end a short summary in the text with a link to the Skill run view; no card, table, log line or full result is in the chat, and nothing in the chat is unspoken | FR-46, FR-35, FR-3 |
+| OC-4 | Given any skill (lookup and search included), for example one that asks questions and takes three phases, when it runs, then the chat shows only text that is spoken: the questions to answer, the users' answers, a short status summary for each phase the skill names (a skill without phases, such as lookup, has none), and at the end a short summary in the text with a link to the Skill run view; no card, table, log line or full result is in the chat, and nothing in the chat is unspoken | FR-46, FR-35, FR-3 |
 | OC-5 | Given a run that fails or is stopped, when it ends, then the Skill run view shows the reason and the chat holds one short spoken message with a link | FR-34, FR-35 |
 | OC-6 | Given a wide screen, when the page is shown, then the character stands in a box with the chat on its left and the Skill run view below it without overlap and without scrolling the page; given a phone, the parts are stacked and every part can be reached | FR-46, NFR-1 |
 | OC-7 | Given any skill that reports progress and results the way skills do today, or a scripted stand-in for it, when it runs, then OC-1 to OC-6 hold without the skill knowing about the Skill run view | FR-46, owner decision on independence |
@@ -150,14 +154,11 @@ None yet: the IF-101 amendment is provided by PANEL only and CHAT works against 
 ## Agreement
 | Subgoal | Agreed by | Date |
 |---|---|---|
-| G-V3.PANEL | pending the owner (cut proposed 2026-11-07) | – |
-| G-V3.CHAT | pending the owner (cut proposed 2026-11-07) | – |
+| G-V3.PANEL | Stefan Reiterer (owner), IF-101 amendment owned by PANEL alone | 2026-11-07 |
+| G-V3.CHAT | Stefan Reiterer (owner), CHAT uses a mock of the IF-101 amendment | 2026-11-07 |
 
 ## Open questions for the owner
-- Q-8 Earlier runs: the Skill run view shows the last run (Q-2). Are earlier runs of the shared history reachable in any way (FR-34 listed all runs), or only the last one?
-- Q-9 Lookup and search (no questions, short): do they also give a short summary in the chat and a run in the Skill run view (the HLS says the same rule for every skill)?
-- Q-10 Supervision of G-V3.CHAT: supervised throughout (proposed), or the prompt tuning of the digest step later as an unsupervised subgoal as agent-app suggests?
-- Q-11 Agreement of G-V3.PANEL and G-V3.CHAT to the cut (both rows are pending).
+None open for Step 0 (Q-1 to Q-11 answered, D-271 and D-273). Left for Plan Step 1: the exact content of the run view's last-run rule when a run is stopped, and the later run list (not in this goal).
 
 ## Phases
 | Phase | State | Record or reason |

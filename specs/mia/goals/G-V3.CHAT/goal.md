@@ -15,7 +15,7 @@ Drafted 2026-11-07 when the owner decided to split G-V3 into PANEL and CHAT (Q-3
 ## Outcome criteria
 | ID | Expected outcome | Derived from |
 |---|---|---|
-| OC-1 | Given a skill that asks questions and takes three phases, when it runs, then the chat shows the questions to answer, the users' answers, a short status summary for each phase the skill names, and at the end a short summary in the text with a link to the Skill run view | G-V3 OC-4, FR-35, FR-46 |
+| OC-1 | Given any skill (lookup and search included), for example one that asks questions and takes three phases, when it runs, then the chat shows the questions to answer, the users' answers, a short status summary for each phase the skill names, and at the end a short summary in the text with a link to the Skill run view | G-V3 OC-4, FR-35, FR-46 |
 | OC-2 | Given any run, when the chat shows text, then all of it is spoken, and no card, table, log line or full result is in the chat | G-V3 OC-4, FR-3, FR-46 |
 | OC-3 | Given a run that fails or is stopped, when it ends, then the chat holds one short spoken message with the reason and a link | G-V3 OC-5, FR-35 |
 | OC-4 | Given a long result, when the summary is written, then it says what the result says, misstates nothing and sounds like MIA's persona | FR-35, G-V3 OC-4 |
@@ -33,7 +33,7 @@ Drafted 2026-11-07 when the owner decided to split G-V3 into PANEL and CHAT (Q-3
 ## Split check
 | Suggestion | Decision (split / keep together) | Reason | Date |
 |---|---|---|---|
-| prompt tuning of the digest step as an unsupervised subgoal | open, owner decides (Q-10 of G-V3) | agent-app rule; not needed before the suite and baseline exist | 2026-11-07 |
+| prompt tuning of the digest step as an unsupervised subgoal | keep together, supervised throughout | owner 2026-11-07 (Q-10): no unsupervised prompt-tuning subgoal now; it can be proposed again once the suite and the baseline exist | 2026-11-07 |
 | further cut | keep together | one model step, five requirements to revise | 2026-11-07 |
 
 ## Scope
