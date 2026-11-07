@@ -463,3 +463,8 @@ The first version was silent until the end and could take 20 minutes or more: th
 | TC-GTB-012 | check | 06b401bf5d7d | Stefan Reiterer | 2026-11-07 | approved | 003: version on the host is enough (no exact pin) |
 | TR-GTB-003 | test requirement | 5277fdb2c0ed | Stefan Reiterer | 2026-11-07 | approved | 003: version on the host is enough (no exact pin) |
 | TR-GTB-005 | test requirement | 9b7486a16fb0 | Stefan Reiterer | 2026-11-07 | approved | 003: version on the host is enough (no exact pin) |
+| TC-GTB-013 | check | 16b07cd9819a | Stefan Reiterer | 2026-11-07 | approved | 013: new REQ-GTB-016 and TC-GTB-017 added at the owner's request; 014: N is a parameter, default 1000; 015: stage 2 |
+| TC-GTB-014 | check | 92c29d3f571a | Stefan Reiterer | 2026-11-07 | approved | 013: new REQ-GTB-016 and TC-GTB-017 added at the owner's request; 014: N is a parameter, default 1000; 015: stage 2 |
+| TC-GTB-015 | check | 4a4567896c24 | Stefan Reiterer | 2026-11-07 | approved | 013: new REQ-GTB-016 and TC-GTB-017 added at the owner's request; 014: N is a parameter, default 1000; 015: stage 2 |
+| TR-GTB-004 | test requirement | 0275a14a3e99 | Stefan Reiterer | 2026-11-07 | approved | 013: new REQ-GTB-016 and TC-GTB-017 added at the owner's request; 014: N is a parameter, default 1000; 015: stage 2 |
+| TR-GTB-006 | test requirement | 8474111010db | Stefan Reiterer | 2026-11-07 | approved | 013: new REQ-GTB-016 and TC-GTB-017 added at the owner's request; 014: N is a parameter, default 1000; 015: stage 2 |

@@ -3857,7 +3857,12 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-GTB-015'> DocumentFormDuringTheTransition_Gtb015 {
         subject s : Persistence;
-        doc /* While IF-301 v1 and IF-203 v1 are in use, the Graph tables shall return a stored workflow also in the document form of those interfaces. */
+        doc /* While IF-301 v1 and IF-203 v0 are in use, the Graph tables shall return a stored workflow also in the document form of those interfaces. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-016'> ARefusedEditChangesNothing_Gtb016 {
+        subject s : Persistence;
+        doc /* If an edit of a node, an edge or a graph is refused by a check, then the Graph tables shall keep the stored version unchanged and create no new version. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-RTB-001'> SharedStateHeld_Rtb001 {
@@ -4585,6 +4590,7 @@ package MIA_NodeRequirements {
     requirement r_req_gtb_013 : VersionsKept_Gtb013;
     requirement r_req_gtb_014 : RebuiltEqualsStored_Gtb014;
     requirement r_req_gtb_015 : DocumentFormDuringTheTransition_Gtb015;
+    requirement r_req_gtb_016 : ARefusedEditChangesNothing_Gtb016;
     requirement r_req_rtb_001 : SharedStateHeld_Rtb001;
     requirement r_req_rtb_002 : RunResults_Rtb002;
     requirement r_req_rtb_003 : VotesStored_Rtb003;
@@ -5006,6 +5012,7 @@ package MIA_NodeRequirements {
     satisfy r_req_gtb_013 by mia.persistence;
     satisfy r_req_gtb_014 by mia.persistence;
     satisfy r_req_gtb_015 by mia.persistence;
+    satisfy r_req_gtb_016 by mia.persistence;
     satisfy r_req_rtb_001 by mia.persistence;
     satisfy r_req_rtb_002 by mia.persistence;
     satisfy r_req_rtb_003 by mia.persistence;
@@ -5426,6 +5433,7 @@ package MIA_NodeRequirements {
     allocate r_req_gtb_013 to mia.persistence;
     allocate r_req_gtb_014 to mia.persistence;
     allocate r_req_gtb_015 to mia.persistence;
+    allocate r_req_gtb_016 to mia.persistence;
     allocate r_req_rtb_001 to mia.persistence;
     allocate r_req_rtb_002 to mia.persistence;
     allocate r_req_rtb_003 to mia.persistence;
@@ -5878,6 +5886,7 @@ package MIA_NodeRequirements {
     dependency from r_req_gtb_013 to fr40;
     dependency from r_req_gtb_014 to fr40;
     dependency from r_req_gtb_015 to fr40;
+    dependency from r_req_gtb_016 to fr40;
     dependency from r_req_rtb_001 to r_req_db_002;
     dependency from r_req_rtb_002 to r_req_db_010;
     dependency from r_req_rtb_003 to r_req_db_012;
