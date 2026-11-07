@@ -1,8 +1,11 @@
 # Plan: G-V2.MODEL (skill record and graph model)
 
-**Goal:** specs/mia/goals/G-V2.MODEL/goal.md   **Requirements:** REQ-WFM-040..049 in `nodes/N-2-backend/nodes/N-2.3-workflow-management/requirements.md`, REQ-RUN-016..019 in `nodes/N-2-backend/nodes/N-2.4-workflow-execution/nodes/N-2.4.1-pipeline-runner/requirements.md`   **Test specs:** the `test-spec.md` next to each, scenarios at the end; test requirements TR-MODEL-001..005 in `specs/mia/test-requirements.md`   **Status:** Draft (Plan Step 5, 2026-11-07)
+**Goal:** specs/mia/goals/G-V2.MODEL/goal.md   **Requirements:** REQ-WFM-040..049 in `nodes/N-2-backend/nodes/N-2.3-workflow-management/requirements.md`, REQ-RUN-016..019 in `nodes/N-2-backend/nodes/N-2.4-workflow-execution/nodes/N-2.4.1-pipeline-runner/requirements.md`   **Test specs:** the `test-spec.md` next to each, scenarios at the end; test requirements TR-MODEL-001..005 in `specs/mia/test-requirements.md`   **Status:** Approved by the owner, 2026-11-07 (Plan Step 5)
 
 Line of work `goal/v2.model`; supervised. Five small tasks, pure logic: no model step, no prompt, no eval suite, no eval budget. The red tests are written first in a session of their own (Step 4) and installed by the owner; the implementing session never edits `tests/acceptance/`, `tests/helpers/`, `tests/smoke/`, `contracts/`, `benchmarks/`, `eval/suites/` or `eval/baselines/`.
+
+## Interface fixed by the red tests
+The stubs `graph_model.py`, `skill_record.py` and `graph_run.py` in the repository root carry the interface the installed tests expect; T-01 to T-04 replace the stubs with the real code and keep these signatures: `GraphModel(tables).save_graph(graph)`, `read_graph(graph_id, version=None)`, `topological_order(graph_id)`; `SkillRecords(tables).store(record)`, `read(skill_id, version=None)`; `SkillCatalog(records, legacy).list()`, `start(skill_id)`; `GraphRunner(trust).run(graph, nodes, inputs)`. The result shapes are in the stub docstrings. A change of a signature is a plan amendment, not a code change.
 
 ## Task list
 | Task | Implements | Green when | Depends on |
@@ -22,7 +25,7 @@ Line of work `goal/v2.model`; supervised. Five small tasks, pure logic: no model
 - Must not touch: protected material (above), `graph_rules.py` and `graph_tables.py` (N-3.2, G-V2.STORE), `pipeline.py`
 - Depends on: red tests installed
 - Done when: the listed tests are green, all other tests unchanged
-- Notes: the cycle is reported as IDs with the first repeated at the end (WFM-047); the order check of TC-WFM-047 must not reuse the function under test (TR-MODEL-003). Not decided here: whether STORE's write validation (TC-SLY-004) calls these rules or keeps its own; the owner or the parent session settles it before Implement.
+- Notes: the cycle is reported as IDs with the first repeated at the end (WFM-047); the cycles of TC-WFM-047 have 2 or 4 nodes (odd cycles break the alternation of REQ-WFM-045), and a fixed 5-node cycle is only refused, without naming the cycle; the order check must not reuse the function under test (TR-MODEL-003). STORE's write validation does not call these rules: the graph rules of the new node types stay in the Workflow management only (D-262).
 
 ### T-02: Skill record
 - Implements: REQ-WFM-040, REQ-WFM-041, REQ-WFM-042
@@ -66,7 +69,7 @@ T-01 and T-02 are independent; T-03 needs T-01; T-04 needs T-03; T-05 waits for 
 ## Size check (splitting)
 14 requirements, five tasks of one session each, no task across two nodes except T-02 (N-2.3 only) and T-03/T-04 (N-2.4.1 only). No split is suggested; the goal record's "keep together" stands.
 
-## Open for the owner
-1. Module names (`graph_model.py`, `skill_record.py`, `graph_run.py`) and that no existing module changes except the skill listing in T-02.
-2. Whether STORE's write validation shares the rules of T-01.
-3. `requirements.txt` gets `networkx` in T-01 (D-187), `jsonschema` is already installed.
+## Decided by the owner (2026-11-07)
+1. Module names `graph_model.py`, `skill_record.py`, `graph_run.py` are fine; the only existing code that changes is the skill listing in T-02 (`library.py`, `extension_loader.py`).
+2. STORE's write validation does not share the rules of T-01 (D-262, point 1).
+3. `requirements.txt` gets `networkx` in T-01 (D-187); `jsonschema` is already installed.
