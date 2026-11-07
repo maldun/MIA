@@ -6,6 +6,7 @@ layer refuses a bad edit on write (TB-edit, second line of defence behind the Ba
 """
 import copy
 import math
+from dataclasses import dataclass, field
 
 import jsonschema
 
@@ -152,12 +153,64 @@ def check_record(table, record, categories=None, stored=None):
         return _refusal("record_identity", "record")
 
 
+@dataclass
+class DataNode:
+    id: str
+    value: object = None
+    parameters: dict = field(default_factory=dict)
+
+
+@dataclass
+class TransformNode:
+    id: str
+    toolbox_id: str = ""
+
+
+@dataclass
+class MasterNode:
+    id: str
+    toolbox_id: str = ""
+    stop: dict = field(default_factory=dict)
+    task: object = None
+
+
+@dataclass
+class ContextNode:
+    """A node of a context graph: its category (type), and the rest of its JSON field."""
+    id: str
+    type: str
+    fields: dict = field(default_factory=dict)
+
+
+# the class of each type ID (REQ-GTB-009): the type ID alone decides, so a new type is a new class here and a new schema above
+CLASSES = {"data": DataNode, "transform": TransformNode, "master": MasterNode}
+
+
 def to_object(record, categories=None):
-    return {"refused": {"rule": "unknown_type", "detail": ""}}
+    """{"object": obj} for a node record, or {"refused": {"rule", "detail"}} with the rule of check_record (REQ-GTB-009, REQ-GTB-010).
+    Nothing in the record is executed: a task definition is data only (REQ-GTB-008)."""
+    refused = check_record("graph_nodes", record, categories=categories)
+    if refused:
+        return {"refused": refused}
+    data = copy.deepcopy(record["data"])
+    if categories is not None:
+        return {"object": ContextNode(record["id"], data.pop("type"), data)}
+    type_id = data.pop("type")
+    return {"object": CLASSES[type_id](record["id"], **data)}
 
 
 def to_record(obj):
-    return {}
+    """The node record of an object of a listed class; to_object(to_record(x)) equals x (REQ-GTB-014). An optional field that is None is left out."""
+    if isinstance(obj, ContextNode):
+        return {"id": obj.id, "data": dict({"type": obj.type}, **copy.deepcopy(obj.fields))}
+    type_id = next((t for t, cls in CLASSES.items() if type(obj) is cls), None)
+    if type_id is None:
+        raise TypeError("not an object of a listed class: %r" % (obj,))
+    data = {"type": type_id}
+    data.update({name: copy.deepcopy(value) for name, value in vars(obj).items() if name != "id" and value is not None})
+    if type_id == "data":
+        data.setdefault("parameters", {})
+    return {"id": obj.id, "data": data}
 
 
 def to_document(nodes, edges):
