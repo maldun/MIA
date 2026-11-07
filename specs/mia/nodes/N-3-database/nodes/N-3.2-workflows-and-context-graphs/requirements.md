@@ -79,10 +79,10 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 | Order | Group | What it covers | Requirements |
 |---|---|---|---|
 | 1 | NR | Node and edge records: graphs as records (FR-40) | REQ-GTB-005, REQ-GTB-006, REQ-GTB-007, REQ-GTB-008 |
-| 2 | TY | Types: rebuilding data classes from type IDs, schemas (FR-40) | REQ-GTB-009, REQ-GTB-010, REQ-GTB-011, REQ-GTB-012 |
+| 2 | TY | Types: rebuilding data classes from type IDs, schemas (FR-40) | REQ-GTB-009, REQ-GTB-010, REQ-GTB-011, REQ-GTB-012, REQ-GTB-022 |
 | 3 | VR | Versions and round trip: edits as versions, stored equals rebuilt (FR-40) | REQ-GTB-013, REQ-GTB-014, REQ-GTB-016 |
 | 4 | CP | Compatibility: the document form during the transition (FR-40) | REQ-GTB-015 |
-| 5 | HD | Graph header and skill record: which members make a graph version, the skill table (FR-40, FR-36) | REQ-GTB-017, REQ-GTB-018, REQ-GTB-019, REQ-GTB-020 |
+| 5 | HD | Graph header and skill record: which members make a graph version, the skill table (FR-40, FR-36) | REQ-GTB-017, REQ-GTB-018, REQ-GTB-019, REQ-GTB-020, REQ-GTB-021 |
 
 ### REQ-GTB-005 – Node records
 - Level: low   Subject: Persistence
@@ -304,3 +304,16 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verified by: TC-GTB-022
 - Status: Draft
 - History: G-V2.STORE Implement T-04, 2026-11-07, new (A-92, proposed)
+
+### REQ-GTB-022 – Fixed fields of a node
+- Level: low   Subject: Persistence
+- Text: If a node is written or read with a field in its JSON field that its type's schema does not list, then the Graph tables shall refuse the node as `schema_break` naming that field.
+- Rationale: refines FR-40, REQ-GTB-009, REQ-GTB-011 and REQ-GTB-014; the list of types is fixed, a node that passes the write check but cannot be rebuilt breaks the round trip, and dropping the field would lose data; found in G-V2.STORE Verify (F-01, decided 2026-11-07, A-93)
+- Parent: FR-40
+- Group: TY
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-31: a data node with a field `foo` and a data node with a key `id` inside its JSON field are refused as `schema_break` naming `foo` and `id`, when written and when read; the same nodes without the field are accepted (exact)
+- Verified by: TC-GTB-023
+- Status: Draft
+- History: G-V2.STORE Verify F-01, 2026-11-07, new (A-93, proposed)

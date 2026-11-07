@@ -2,7 +2,7 @@
 
 **Goal:** specs/mia/goals/G-V2.STORE/goal.md   **Requirements:** REQ-GTB-005..020 in `nodes/N-3-database/nodes/N-3.2-workflows-and-context-graphs/requirements.md`, interface IF-301 v2 (`contracts/IF-301-graph-tables.md`)   **Test specs:** `test-spec.md` next to the requirements (scenarios "iteration 2, G-V2.STORE"), test requirements TR-GTB-001..006 in `test-requirements.md` next to it   **Status:** Approved by the owner, 2026-11-07 (Plan Step 5)
 
-Line of work `goal/v2.store`; supervised. Six small tasks (T-06 added with A-92), pure logic and one wiring: no model step, no prompt, no eval suite, no eval budget. The red tests were written in a session of their own (Step 4) and are installed (tag `plan-baseline-it2-store`); the implementing session never edits `tests/acceptance/`, `tests/helpers/`, `tests/smoke/`, `contracts/`, `benchmarks/`, `eval/suites/` or `eval/baselines/`.
+Line of work `goal/v2.store`; supervised. Seven small tasks (T-06 added with A-92, T-07 with A-93), pure logic and one wiring: no model step, no prompt, no eval suite, no eval budget. The red tests were written in a session of their own (Step 4) and are installed (tag `plan-baseline-it2-store`); the implementing session never edits `tests/acceptance/`, `tests/helpers/`, `tests/smoke/`, `contracts/`, `benchmarks/`, `eval/suites/` or `eval/baselines/`.
 
 ## Interface fixed by the red tests and the contract
 The stubs in `graph_tables.py` (`record_definitions`, `types`, `check_record`, `to_object`, `to_record`, `to_document`, `from_document`) carry the signatures of IF-301 v2; T-01 to T-03 replace them and keep the signatures and result shapes of the contract (`definitions()` stays the two tables of v1; the four record tables are in `record_definitions()`). Where the contract text left a point open, the section "Clarifications" of the contract and the v2 mock (`tests/helpers/mocks/if_301_graph_tables_v2.py`) are the reference. A change of a signature is a plan amendment, not a code change.
@@ -18,6 +18,7 @@ How the checks reach the code: the acceptance tests `tests/acceptance/test_graph
 | T-04 The Storage layer takes the four tables | REQ-GTB-013, 016, 005, 006 (on the real storage) | new unit tests of the Storage layer (TC-GTB-013, 016, 017 on `Storage` with the file backend), IF-102 suite on the real side unchanged | T-01 |
 | T-05 Integration: the real side of the suite without skip | REQ-GTB-015, IF-301 | the v2 suite passes on the real Graph tables with no skip; TC-GTB-015 with the real storage | T-03, T-04; amendment A-91 (owner installs) |
 | T-06 Record under its own ID | REQ-GTB-021 | TC-GTB-022; real side of TC-IF-301-20; a new unit test of the Storage layer | T-04; amendment A-92 (installed) |
+| T-07 Fixed fields of a node | REQ-GTB-022 | TC-GTB-023; real side of TC-IF-301-21; new unit tests of `check_record` and `to_object` | T-06; amendment A-93 (installed) |
 
 TC-GTB-012 (no pickle, marshal, shelve) is green today and must stay green after every task; TC-GTB-014's N (default 1000) is raised by the owner or the verifier with `TC_GTB_014_N`.
 
@@ -77,11 +78,20 @@ TC-GTB-012 (no pickle, marshal, shelve) is green today and must stay green after
 - Done when: the listed tests are green, all other tests unchanged (the three contract suites, `test_graph_records.py`, `test_storage.py`, `test_storage_postgres.py` on a throwaway postgres:16)
 - Notes: the stub of `check_record` accepts `record_id` and ignores it since the draft of A-92; `validate()` (used by the copy tools) has no record ID and stays as it is; the document form is not affected. No new part, interface or dependency.
 
+### T-07: Fixed fields of a node
+- Implements: REQ-GTB-022 (A-93, F-01 of the verification report)
+- Tests to turn green: TC-GTB-023 (`tests/acceptance/test_graph_node_fields.py`); the real side of TC-IF-301-21 (`test_a_node_with_an_extra_field_is_refused_naming_it_real`); new unit tests in `tests/test_graph_record_checks.py` that fail first: `check_record` and `to_object` of `{"type": "data", "foo": 1}` and of `{"type": "data", "id": "x"}`, and `Storage.put` of the first (refused as `invalid`, `schema_break`, `foo`, nothing stored)
+- Touches: `graph_tables.py` (the three schemas of `TYPE_SCHEMAS` get `"additionalProperties": False`; `_broken_path` names an additional field by its own key, the first in sorted order when several, and orders the errors by these paths as text, so a missing key at the same level is named first); `tests/test_graph_record_checks.py`
+- Must not touch: protected material, `contracts/` (A-93 changed IF-301 already), `storage.py` (it calls `check_record` already), `graph_rules.py`, the schemas of `graphs`, `skills` and `graph_edges`, the schemas of context-graph nodes (they come from the caller's categories)
+- Depends on: T-06; A-93 installed
+- Done when: the listed tests are green, all other tests unchanged (the three contract suites, `test_graph_records.py`, `test_graph_record_identity.py`, `test_storage.py`, `test_storage_postgres.py` on a throwaway postgres:16, TC-GTB-014 with N = 1000)
+- Notes: `to_object` needs no change of its own: it calls `check_record` first, so a node with an extra field is refused before `CLASSES[type_id](id, **data)` is reached. The schemas that `types()` returns carry the setting (TC-IF-301-21 checks it). `_STOP`, the member lists and the edge schema are not changed. No new part, interface or dependency.
+
 ## Order and checks
-T-01 first (everything else needs the record checks); T-02, then T-03; T-04 may run beside T-02 and T-03 (it needs only T-01); T-06 after T-04. After each task: `python tests/acceptance/test_graph_records.py` and `IF301_V2_REAL=1 python tests/acceptance/contract/test_if_301_v2_graph_tables.py -k _real` for the progress of the red tests, `python tests/test_graph_tables.py` and `python tests/test_storage.py` for the old behaviour, then the stage 1 and 2 steps of `stages.yaml`. Before the hand-over: `trace_check`, `goal_check`, `req_graph`.
+T-01 first (everything else needs the record checks); T-02, then T-03; T-04 may run beside T-02 and T-03 (it needs only T-01); T-06 after T-04; T-07 after T-06 and the install of A-93. After each task: `python tests/acceptance/test_graph_records.py` and `IF301_V2_REAL=1 python tests/acceptance/contract/test_if_301_v2_graph_tables.py -k _real` for the progress of the red tests, `python tests/test_graph_tables.py` and `python tests/test_storage.py` for the old behaviour, then the stage 1 and 2 steps of `stages.yaml`. Before the hand-over: `trace_check`, `goal_check`, `req_graph`.
 
 ## Size check (splitting)
-17 requirements and one interface, six tasks of one session each, two nodes (N-3.2 in T-01 to T-03, T-05 and T-06, N-3.1 in T-04 and T-06). The leaf limit (about 8 tasks, 3 interfaces) is kept; no split is suggested, the goal record's "keep together" stands. T-04 is the only change outside N-3.2 and touches one file.
+18 requirements and one interface, seven tasks of one session each, two nodes (N-3.2 in T-01 to T-03 and T-05 to T-07, N-3.1 in T-04 and T-06). The leaf limit (about 8 tasks, 3 interfaces) is kept; no split is suggested, the goal record's "keep together" stands. T-04 is the only change outside N-3.2 and touches one file.
 
 ## Decided by the owner (2026-11-07)
 1. A-90 (contract text of IF-301 v2 with its Clarifications, installed) is approved, and A-91 in principle: T-05 removes the skip of the v2 suite by an amendment the owner installs; the agent drafts its script for a look-only review when T-05 comes.
@@ -89,3 +99,4 @@ T-01 first (everything else needs the record checks); T-02, then T-03; T-04 may 
 3. `requirements.txt` gets `jsonschema==4.23.0` in T-01 (D-187; MODEL's `networkx` line merges as a union).
 4. `storage_copy.py` is not changed in T-04; CONVERT decides about copying the record tables.
 5. A-92 (record under its own ID, REQ-GTB-021, TC-GTB-022, the optional `record_id` of `check_record` in IF-301 v2) is approved and installed; T-06 is added to this plan on the owner's word (2026-11-07).
+6. A-93 (fixed fields of a node, REQ-GTB-022, TC-GTB-023, TC-IF-301-21, IF-301 v2) follows the decision of F-01 on 2026-11-07, which the owner delegated to the reviewer and may overrule; T-07 is added to this plan on that decision, the owner installs the amendment after a look-only review.

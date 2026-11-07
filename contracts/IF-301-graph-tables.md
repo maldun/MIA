@@ -57,6 +57,8 @@ Workflow nodes only (D-263); the rules of the whole graph are checked by the Wor
 | `master` | `task` | object, shape open until the debates goal | optional | REQ-GTB-008 |
 The graph description (ID, context graph ID, testbench ID, description) is not a node field: it is in the graph header.
 
+The list is closed for the fields of a type too (A-93, REQ-GTB-022): the schema of each type sets `additionalProperties: false`, so the JSON field of a node holds `type`, the fields of the table above and nothing else. A node with another field, or with a key `id` inside `data`, is `{"rule": "schema_break", "detail": "<that field>"}` in `check_record` and in `to_object` (a stored node is refused on read; `to_object` never raises). This holds for workflow nodes only: the schema of a context-graph node comes from its categories (decision 5). The schemas that `types()` returns carry the setting.
+
 ## Golden examples
 1. Typical: a valid lookup graph gives `None`.
 2. Failure: an edge between two data nodes gives `adjacent_data_nodes`.
@@ -73,6 +75,7 @@ The graph description (ID, context graph ID, testbench ID, description) is not a
 13. Context graph (v2): a node of category `entity` with `categories = {"entity": <schema>}` and a field that fits gives `None`; the same node without `categories` gives `{"rule": "unknown_type", "detail": "entity"}`.
 14. Document form (v2): `to_document` of a graph with a master node gives `{"refused": {"rule": "not_representable", "detail": "<master node ID>"}}`.
 15. Record identity (v2): a node record whose `id` is `n1`, checked with `record_id="x"`, gives `{"rule": "record_identity", "detail": "id"}`; with `record_id="n1"` or without `record_id` it gives `None`.
+16. Extra field (v2): a node record `{"id": "d1", "data": {"type": "data", "foo": 1}}` gives `{"rule": "schema_break", "detail": "foo"}` in `check_record`, and `to_object` of it gives `{"refused": {"rule": "schema_break", "detail": "foo"}}`; a key `id` inside `data` is named `id`; the same node without the extra field gives `None`.
 
 ## Decisions of the owner, 2026-11-07 (D-262, D-263, D-264, D-266)
 1. **Graph rules for the new node types** stay in the Workflow management only. IF-301 keeps the v1 rules for the document form and adds only the record rules; A-90's "validate also reports ..." is read as `check_record`.
@@ -87,6 +90,7 @@ The graph description (ID, context graph ID, testbench ID, description) is not a
 10. **Review of 2026-11-07 (D-266):** `check_record` gets the argument `stored` for the rules that need to know what is stored; `to_document` maps `transform` to `process`; an edge must name stored nodes (`unknown_endpoint`, REQ-GTB-020); golden examples (here 10 to 14) added; stale wording corrected.
 11. **Plan step 4 (owner, 2026-11-07):** `definitions()` stays the two tables of v1 and the four record tables come from `record_definitions()`, because the v1 suite (TC-IF-301-01) and REQ-GTB-001 say exactly two tables.
 12. **A-92 (found in Implement T-04, 2026-11-07):** a record written under a record ID that differs from the `id` inside it is refused; the rule stays in the Graph tables (REQ-GTB-021), so `check_record` takes the optional `record_id` and the Storage layer passes the ID it writes under. v2 is not merged yet, so the argument is part of v2.
+13. **A-93 (Verify finding F-01, 2026-11-07; the owner delegated the choice to the reviewer and may overrule):** the fixed list is closed for the fields of a type too: a node with a field its type does not list is refused as `schema_break` naming the field, on write and on read. Before, such a node was stored and then `to_object` raised (the mock silently dropped the field). Why: the list of types is fixed (decision 4), REQ-GTB-014 needs the round trip exact, and a silent drop would lose data. Context-graph nodes are not affected (decision 5). Several breaks in one record: the detail is the first path in text order, a missing key counting at the path of its object and an extra field at its own path, so a missing `toolbox_id` is named before an extra `foo`. v2 is not merged yet, so this is part of v2.
 
 ## Clarifications fixed by the v2 mock and suite (for approval with this text; the approved text of D-262 to D-266 was silent on them)
 - `types()` returns a dict `{type ID: JSON schema}` whose keys are the three type IDs in sorted order: `data`, `master`, `transform`.
@@ -94,6 +98,7 @@ The graph description (ID, context graph ID, testbench ID, description) is not a
 - An edge has no type; the JSON field `data` of an edge must be an object, else `schema_break` with the detail `data`. A record whose `data` is missing or is not an object is `schema_break` with the detail `data`.
 - The category of a context-graph node is in `data["type"]`, as the type of a workflow node. Given `categories` (even empty) a record is a context-graph record: its type must be one of the categories.
 - The detail of `schema_break` is the path of the field with dots (`stop.max_repetitions`); a missing required key is named by that key. The contract suite fixes only top-level paths.
+- An additional field of a node's JSON field is named by its own key (`foo`; `id` for a key `id` inside `data`); when several are extra, the first in sorted order is named (decision 13).
 - A graph header that names the same member ID twice is `record_identity` with the detail `nodes` or `edges` (the mock does so; the suite only requires a refusal in TC-GTB-017).
 - The document form carries the other fields of a node flat beside `id` and `kind`, and the JSON field of an edge under `data` with its `id`; an edge of a v1 document without an ID gets `e1`, `e2`, ... in order. A node record converted from a v1 document is not checked (a `process` node has no `toolbox_id`, so the record breaks the schema of `transform` until a toolbox ID is added).
 
@@ -102,4 +107,4 @@ The graph description (ID, context graph ID, testbench ID, description) is not a
 |---|---|---|---|
 | v0 | 2026-10-25 | first draft | – |
 | v1 | 2026-10-31 | a session limit is a positive integer (not a boolean, null = not given); a malformed part (a `stop` that is not an object, an edge endpoint that is not text) is named by its rule instead of raising; golden 4 | A-60 (D-160, D-162) |
-| v2 | 2026-11-07 | tables `graph_nodes`, `graph_edges`, `graphs`, `skills` (listed by `record_definitions()`); fixed list of types; `types`, `check_record`, `to_object`, `to_record`, `to_document`, `from_document`; rules `record_identity`, `unknown_type`, `schema_break`, `unknown_member`, `unknown_endpoint`; golden 5 to 15, `record_id` of `check_record` | A-90 (D-188, D-262 to D-266), A-92 |
+| v2 | 2026-11-07 | tables `graph_nodes`, `graph_edges`, `graphs`, `skills` (listed by `record_definitions()`); fixed list of types; `types`, `check_record`, `to_object`, `to_record`, `to_document`, `from_document`; rules `record_identity`, `unknown_type`, `schema_break`, `unknown_member`, `unknown_endpoint`; golden 5 to 16, `record_id` of `check_record`, the fixed types forbid additional fields | A-90 (D-188, D-262 to D-266), A-92, A-93 |

@@ -98,6 +98,35 @@ class GraphTablesV2Contract(unittest.TestCase):
         # And: one class per type ID
         self.assertEqual(len(classes), 3)
 
+    @mark.req("IF-301", "REQ-GTB-022")
+    @each_provider(IF, make=subject)
+    def test_a_node_with_an_extra_field_is_refused_naming_it(self, tables):
+        """TC-IF-301-21 golden 16: a node with a field its type does not list gives schema_break naming that field, in check_record and in to_object.
+
+        Example: {"id": "d1", "data": {"type": "data", "foo": 1}} -> {"rule": "schema_break", "detail": "foo"}; a key id inside data -> detail "id".
+        """
+        # Given: one node per type with an extra field foo, and a data node with a key id inside its JSON field
+        stop = {"max_repetitions": 1}
+        cases = [(node("d1", "data", foo=1), "foo"),
+                 (node("t1", "transform", toolbox_id="t", foo=1), "foo"),
+                 (node("m1", "master", toolbox_id="t", stop=stop, foo=1), "foo"),
+                 (node("d2", "data", id="x"), "id")]
+        for record, field in cases:
+            with self.subTest(record=record):
+                # When/Then: the check and the rebuild both refuse it as schema_break naming the field, and the rebuild does not raise
+                refusal = {"rule": "schema_break", "detail": field}
+                self.assertEqual(tables.check_record("graph_nodes", record), refusal)
+                self.assertEqual(tables.to_object(record), {"refused": refusal})
+        # And: the twins without the extra field are accepted
+        for record in (node("d1", "data"), node("t1", "transform", toolbox_id="t"), node("m1", "master", toolbox_id="t", stop=stop)):
+            self.assertIsNone(tables.check_record("graph_nodes", record))
+        # And: a missing required key is named before an extra field (decision 13)
+        self.assertEqual(tables.check_record("graph_nodes", node("t1", "transform", foo=1)), {"rule": "schema_break", "detail": "toolbox_id"})
+        # And: the schemas of the fixed list say so, and the node of a context graph keeps the fields of its own category
+        for type_id, schema in tables.types().items():
+            self.assertIs(schema.get("additionalProperties"), False, type_id)
+        self.assertIsNone(tables.check_record("graph_nodes", node("c1", "entity", foo=1), categories={"entity": {"type": "object"}}))
+
     @mark.req("IF-301", "REQ-GTB-010")
     @each_provider(IF, make=subject)
     def test_an_unknown_type_is_refused_naming_it(self, tables):
@@ -335,24 +364,6 @@ class GraphTablesV2Contract(unittest.TestCase):
             self.assertEqual(results, [None] * 1000)
         # And: the fastest run is within the bound of the contract (0.5 s)
         self.assertLessEqual(min(timings), 0.5)
-
-    @mark.req("IF-301", "REQ-GTB-021")
-    @each_provider(IF, make=subject)
-    def test_a_record_under_another_id_is_refused(self, tables):
-        """TC-IF-301-20 golden 15: a record whose id is n1, checked with record_id x, gives record_identity naming id; with record_id n1, or without, it gives None.
-
-        Example: {"id": "n1", "data": {"type": "data"}} with record_id="x" -> {"rule": "record_identity", "detail": "id"}.
-        """
-        # Given: a node record with its own ID n1
-        record = node("n1", "data")
-        # When/Then: under another record ID it is refused naming the field id; the twin under its own ID and the call without record_id are accepted
-        self.assertEqual(tables.check_record("graph_nodes", record, record_id="x"), {"rule": "record_identity", "detail": "id"})
-        self.assertIsNone(tables.check_record("graph_nodes", record, record_id="n1"))
-        self.assertIsNone(tables.check_record("graph_nodes", record))
-        # And: the same holds for the other three tables
-        for table, other in (("graph_edges", edge("e1", "n1", "n2")), ("skills", {"id": "s1", "data": {"command": "/s", "workflow_graph_id": "w", "context_graph_id": "c"}})):
-            self.assertEqual(tables.check_record(table, other, record_id="x"), {"rule": "record_identity", "detail": "id"})
-            self.assertIsNone(tables.check_record(table, other, record_id=other["id"]))
 
     @mark.req("IF-301", "REQ-GTB-021")
     @each_provider(IF, make=subject)

@@ -9,6 +9,8 @@ The real Graph tables (N-3.2) are written against the same suite. Interpretation
   stop, task); a context-graph node object is a ContextNode (id, type, fields).
 - an edge has no type; its JSON field `data` must be an object, else schema_break with the detail `data`.
 - the type of a context-graph node is in `data["type"]`, as for a workflow node.
+- a field of a node's JSON field that the schema of its type does not list is schema_break naming that field, in check_record and in to_object (A-93); the
+  detail is the first path in text order, a missing key counting at the path of its object, an extra field at its own path.
 - the detail of a schema_break is the path of the field with dots; a missing required key is named as the key.
 - the document form carries the other fields of a node flat beside id and kind and the JSON field of an edge under `data`; an edge of a
   v1 document without an ID gets e1, e2, ... in order.
@@ -34,10 +36,11 @@ _MEMBERS = {"type": "array", "items": {"type": "object", "properties": {"id": {"
 
 # the fixed list of workflow node types: the JSON field of a node names the type ID (REQ-GTB-009, REQ-GTB-011)
 TYPE_SCHEMAS = {
-    "data": {"type": "object", "properties": {"type": {"const": "data"}, "value": {}, "parameters": {"type": "object"}}, "required": ["type"]},
+    "data": {"type": "object", "properties": {"type": {"const": "data"}, "value": {}, "parameters": {"type": "object"}}, "required": ["type"],
+             "additionalProperties": False},
     "master": {"type": "object", "properties": {"type": {"const": "master"}, "toolbox_id": {"type": "string"}, "stop": _STOP, "task": {"type": "object"}},
-               "required": ["type", "toolbox_id", "stop"]},
-    "transform": {"type": "object", "properties": {"type": {"const": "transform"}, "toolbox_id": {"type": "string"}}, "required": ["type", "toolbox_id"]},
+               "required": ["type", "toolbox_id", "stop"], "additionalProperties": False},
+    "transform": {"type": "object", "properties": {"type": {"const": "transform"}, "toolbox_id": {"type": "string"}}, "required": ["type", "toolbox_id"], "additionalProperties": False},
 }
 EDGE_SCHEMA = {"type": "object"}
 HEADER_SCHEMA = {"type": "object",
@@ -57,16 +60,27 @@ def _validator(schema):
     return _VALIDATORS[key]
 
 
+def _extra(error):
+    """The first additional field of an additionalProperties error, in sorted order (REQ-GTB-022)."""
+    return min(k for k in error.instance if k not in error.schema.get("properties", {}))
+
+
 def _broken_path(schema, data):
     """The path of the first field that breaks the schema, or None. The path is the validator's error path (TR-GTB-003); for a missing
-    required key it is that key, appended to the path of the object that lacks it."""
-    errors = sorted(_validator(schema).iter_errors(data), key=lambda e: [str(p) for p in e.absolute_path])
+    required key it is that key, appended to the path of the object that lacks it; for an additional field it is that field (A-93). The
+    first is the first in the order of these paths as text, a missing key counting at the path of its object."""
+    def order(error):
+        return [str(p) for p in error.absolute_path] + ([_extra(error)] if error.validator == "additionalProperties" else [])
+
+    errors = sorted(_validator(schema).iter_errors(data), key=order)
     if not errors:
         return None
     error = errors[0]
     path = list(error.absolute_path)
     if error.validator == "required":
         path.append([k for k in error.validator_value if k not in error.instance][0])
+    elif error.validator == "additionalProperties":
+        path.append(_extra(error))
     return ".".join(str(p) for p in path) or "data"
 
 
@@ -110,8 +124,6 @@ def _check(table, record, categories, stored, record_id=None):
     if not isinstance(record, dict):
         return {"rule": "record_identity", "detail": "record"}
     if not isinstance(record.get("id"), str) or not record["id"]:
-        return {"rule": "record_identity", "detail": "id"}
-    if record_id is not None and record_id != record["id"]:      # the record is stored under the ID it carries (REQ-GTB-021)
         return {"rule": "record_identity", "detail": "id"}
     if record_id is not None and record_id != record["id"]:      # the record is stored under the ID it carries (REQ-GTB-021)
         return {"rule": "record_identity", "detail": "id"}

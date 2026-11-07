@@ -29,6 +29,7 @@ Tests of this part alone against the mocks of its neighbours: unit tests with pl
 | TC-GTB-020 | REQ-GTB-019 | Unit | 1 | a header naming n1 at version 5 when n1 has versions 1 and 2; the same header with version 2 | the first is refused naming `n1`; the second is accepted | exact |
 | TC-GTB-021 | REQ-GTB-020 | Unit | 1 | an edge e1 from n1 to n9 with only n1 stored; the same edge with n9 stored | the first is refused naming `n9`; the second is accepted | exact |
 | TC-GTB-022 | REQ-GTB-021 | Unit | 1 | a node with its own ID n1, written under the record ID n1 and under the record ID x | the first is accepted; the second is refused naming `id`; nothing is stored under x | exact |
+| TC-GTB-023 | REQ-GTB-022 | Unit | 1 | a node of each type with an extra field `foo`, and a data node with a key `id` in its JSON field, each written and, put past the check, read; the same nodes without the field | the first group is refused on write and on read naming the field; the twins are accepted | exact |
 | TC-GTB-015 | REQ-GTB-015 | Component | 2 | the contract suites of IF-301 v1 and IF-203 v0, run unchanged, with the graphs stored as records | both suites pass | exact |
 
 Contract test cases of IF-301: TC-IF-301-01 to the last of the suite (listed in the root `test-spec.md`).
@@ -147,12 +148,12 @@ Examples use only what the requirements fix. The registered types are those the 
 - Then: the write under `x` is refused and names `id`
 - And: nothing is stored under `x`; the write under `n1` is accepted (the twin differs only in the broken rule)
 
-### TC-GTB-022 – A record under another ID is refused
-- Verifies: REQ-GTB-021
-- Given: a node whose own ID is `n1`
-- When: it is written under the record ID `x`, and then under the record ID `n1`
-- Then: the write under `x` is refused and names `id`
-- And: nothing is stored under `x`; the write under `n1` is accepted (the twin differs only in the broken rule)
+### TC-GTB-023 – A node with an extra field is refused
+- Verifies: REQ-GTB-022
+- Given: one node of each type with an extra field `foo`, and a data node with a key `id` inside its JSON field
+- When: each is written, and each is read as a record already in storage
+- Then: each write is refused and each read is refused, both as `schema_break` naming the extra field (`foo`, `id`)
+- And: the refused writes store nothing; the same nodes without the extra field are accepted, and a context-graph node keeps the fields its category allows (the twins differ only in the broken rule)
 
 ### TC-GTB-015 – The document form still works
 - Verifies: REQ-GTB-015
