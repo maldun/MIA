@@ -45,8 +45,8 @@ Top-level items it serves: FR-45, FR-47. Requirements by ID (inside G-V2's scope
 | REQ-WFM-065 | in | |
 | REQ-WFM-066 | in | |
 | REQ-WFM-069 | in | |
-| IF-301 | in | frozen at G-V2 (A-90, proposed); used through its mock until the provider is merged |
-| IF-203 | in | frozen at G-V2 (A-90, proposed); used through its mock until the provider is merged |
+| IF-301 | in | frozen at G-V2 (A-90, approved 2026-11-07); used through its mock until the provider is merged |
+| IF-203 | in | frozen at G-V2 (A-90, approved 2026-11-07); used through its mock until the provider is merged |
 
 ## Parts
 | Part | Real or stand-in | Notes |

@@ -110,8 +110,8 @@ Acceptance criteria in scope: AC-31, AC-32, AC-34, AC-38, AC-40. Out: AC-33, AC-
 ## Frozen requirements
 | Requirement | Shared by | Reason |
 |---|---|---|
-| IF-301 | STORE, MODEL, TRUST, CONVERT | graph tables v2 (A-90, proposed): STORE provides it, the others use it through a mock until STORE is merged |
-| IF-203 | MODEL, TRUST, CONVERT | workflow library v1 (A-90, proposed): all three extend it |
+| IF-301 | STORE, MODEL, TRUST, CONVERT | graph tables v2 (A-90, approved 2026-11-07): STORE provides it, the others use it through a mock until STORE is merged |
+| IF-203 | MODEL, TRUST, CONVERT | workflow library v1 (A-90, approved 2026-11-07): all three extend it |
 
 ## Agreement
 | Subgoal | Agreed by | Date |

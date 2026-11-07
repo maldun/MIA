@@ -1,6 +1,6 @@
 # A-90: interfaces of the skill rework foundation (G-V2)
 
-Status: **proposed** (draft of Plan step 2, 2026-11-07); the protected contract suites and the contract files change only after the owner approves this amendment. Decisions behind it: D-186, D-187, interview rows 12, 22.
+Status: **approved 2026-11-07** by the owner as written (D-188); not yet applied: the contract files and the protected contract suites change in Plan step 4, with the contract text reviewed by the owner first. Decisions behind it: D-186, D-187, interview rows 12, 22.
 
 | Interface | Change |
 |---|---|
