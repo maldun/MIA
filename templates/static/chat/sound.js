@@ -254,6 +254,8 @@ export function initSound({ audio, socket, character, storage, muteToggle, muteL
       stoppedAt = clock();
       player.stop();
     },
+    /** the user asks to speak an answer again (the speaker button): TD-11 option B, stub of Plan step 4, does nothing yet */
+    speakAgain() {},
     get queued() { return player.queued; },
     get playing() { return player.playing; },
   };
