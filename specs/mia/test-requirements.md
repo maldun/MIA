@@ -13,16 +13,17 @@
 | 2 | Rule checks | Checks that must refuse a wrong graph and accept a right one | TR-MODEL-002, TR-MODEL-003 |
 | 3 | Exact values | Names and IDs in messages, versions | TR-MODEL-005 |
 
-### TR-MODEL-001 – storage stand-in is the contract mock
+### TR-MODEL-001 – storage stand-in is a minimal fake with a known gap
 - Applies to: TC-WFM-040, TC-WFM-041, TC-WFM-042, TC-WFM-044, TC-WFM-049
 - Requirement: REQ-WFM-040
 - Group: Stand-ins
 - Kind: setup
-- Text: The checks shall use as fake storage only the mock of IF-301 v2 that passes the contract suite of IF-301 v2 at stage 1.
-- Rationale: a free-hand fake could keep versions or parameters in a way the real graph tables do not; the contract suite is what ties the fake to the real provider (A-90). Until the suite for v2 exists (STORE subgoal), these checks stay red or skipped with the reason "IF-301 v2 not integrated yet".
+- Text: The checks shall use a minimal fake of the graph tables that keeps versions and fields, and the fake shall be run against the contract suite of IF-301 v2 as soon as that suite exists.
+- Rationale: owner decision 2026-11-07: the checks do not wait for the IF-301 v2 mock of STORE. The fake is only as faithful as the contract suite shows; until the suite exists the gap is known, and a fake that fails the suite later is a finding for these checks.
 - Credibility aspect: stand-in fidelity
 - Verified by: contract suite
 - Status: Draft
+- History: changed at review (2026-11-07) from "use only the IF-301 v2 mock" at the owner's answer
 
 ### TR-MODEL-002 – every refusal has an accepted twin
 - Applies to: TC-WFM-042, TC-WFM-043, TC-WFM-045, TC-WFM-046, TC-WFM-048
