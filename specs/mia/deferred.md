@@ -147,6 +147,7 @@ Proposed on 2026-10-29 after the usability work of N-2.3 T-09 to T-11 and N-1.1 
 - Trigger: the Plan of the next iteration, or 2026-12-31, whichever first
 - Target check: skip: the IF-204 side of the chat is not wired (TD-11); the skipped cases carry deferred('TD-11') until green
 - Decision: D-173, 2026-11-01, Stefan Reiterer
+- Note: 2026-11-07, proposed in `amendments/A-130-note.md` (not approved): the skips live in the protected `tests/helpers/contract.py` (lines 205 and 431) and need an owner-approved change; the target text does not match the real skip lines (they are gated on answers with an `emotion`, so the IF-101 case also needs the `expression` event, which is not voice); text-only `audio_chunk` needs no contract change
 - Status: open
 
 ## TD-12 – Verify before asserting; lookup (TC-MIA-002)
