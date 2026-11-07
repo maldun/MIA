@@ -23,8 +23,38 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-202
 | TC-RUN-013 | REQ-RUN-013 | Inspection | 1 | the code and the log files of the repository | AC-9: the lookup, verify and review entries run with the same runner; a new valid entry runs without a change of code | as stated |
 | TC-RUN-014 | REQ-RUN-014 | Component | 2 | component test with the mocks of the neighbouring interfaces | AC-19, AC-28: the contract suite test_if_202_run_workflow.py passes against the Pipeline runner (stage 2) | as stated |
 | TC-RUN-015 | REQ-RUN-015 | Component | 2 | component test with the mocks of the neighbouring interfaces | AC-2, AC-8: the contract suite test_if_105_evaluation_access.py passes against the Pipeline runner (stage 2) | as stated |
+| TC-RUN-016 | REQ-RUN-016 | Component | 2 | unit test with the fake model server and scripted transforms | AC-31: a graph with three transforms runs in an order that respects its edges and the output data nodes hold the results | exact |
+| TC-RUN-017 | REQ-RUN-017 | Component | 2 | unit test with a transform whose only effect is writing a marker file | AC-32: the marker is not written and the refusal names the node and its status untrusted; after the owner sets it trusted the same graph runs and writes the marker | exact |
+| TC-RUN-018 | REQ-RUN-018 | Component | 2 | unit test with a master node between two data nodes | AC-31: the master node runs once after its input data node is written and its output data node holds the result | exact |
+| TC-RUN-019 | REQ-RUN-019 | Component | 2 | unit test with three scripted transforms, the second failing | AC-31: the third transform does not run and the run result names the second | exact |
 
 ## Assumptions (checked in validation)
 
 - ASM-N2-001: the model server is replaced by the fake model server of `pipeline.py` in all stage 1 to 3 tests; no test needs a GPU before stage 4.
 - ASM-N2-002: the storage is the mock of IF-102 until N-3 is integrated (step 1 of N-0).
+
+## Scenarios (G-V2.MODEL; the older checks of this file have none yet)
+
+### TC-RUN-016 – topological order
+- Verifies: REQ-RUN-016
+- Given: a graph D1 -> T1 -> D2 -> T2 -> D3 and D1 -> T3 -> D4, with scripted transforms that append their ID to a list and write a result
+- When: the graph is run
+- Then: T1 ran before T2; D2 and D3 hold the results of T1 and T2; D4 holds the result of T3; each transform got the contents of its input data nodes
+
+### TC-RUN-017 – untrusted does not run
+- Verifies: REQ-RUN-017
+- Given: a graph with a trusted transform and an untrusted transform `T9` that writes a marker file when it runs
+- When: the graph is run; then the owner sets `T9` trusted and it is run again
+- Then: the first run is refused before any node ran, no marker exists and the refusal names `T9` and `untrusted`; the second run writes the marker
+
+### TC-RUN-018 – master node runs like a transform
+- Verifies: REQ-RUN-018
+- Given: a graph D1 -> M1 -> D2 with a trusted master node `M1` (maximum of 3 repetitions) that writes a result; a copy where `M1` is untrusted
+- When: each graph is run
+- Then: in the first, `M1` ran once and D2 holds its result; the second is refused naming `M1` and `untrusted`
+
+### TC-RUN-019 – failed node stops the run
+- Verifies: REQ-RUN-019
+- Given: a chain T1 -> T2 -> T3 where T2 raises an error
+- When: the graph is run
+- Then: T3 did not run and the run result names `T2`

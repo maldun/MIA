@@ -2902,7 +2902,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-WFM-042'> CommandUsedOnce_Wfm042 {
         subject s : TaskRuntime;
-        doc /* If a skill record names a command that another skill already uses, then the Workflow management shall refuse the record and name that skill. */
+        doc /* If a skill record names a command that a skill with another ID already uses, then the Workflow management shall refuse the record and name that skill. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-WFM-043'> ThreeNodeTypes_Wfm043 {
@@ -2932,7 +2932,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-WFM-048'> MasterNodeStops_Wfm048 {
         subject s : TaskRuntime;
-        doc /* If a master node has neither a maximum number of cycles nor a maximum time, then the Workflow management shall refuse the workflow graph and name the node. */
+        doc /* If a master node has neither a maximum number of repetitions nor a maximum time, then the Workflow management shall refuse the workflow graph and name the node. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-WFM-049'> ParametersOfADataNode_Wfm049 {
@@ -3152,17 +3152,22 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-RUN-016'> RunInTopologicalOrder_Run016 {
         subject s : TaskRuntime;
-        doc /* When a workflow graph is run, the Pipeline runner shall run its transforms in a topological order, giving each the contents of its input data nodes and writing its result into its output data nodes. */
+        doc /* When a workflow graph is run, the Pipeline runner shall run its transforms and master nodes in a topological order, each reading its input data nodes and writing its output data nodes. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-RUN-017'> UntrustedDoesNotRun_Run017 {
         subject s : TaskRuntime;
-        doc /* If a workflow graph contains a transform whose status is untrusted, then the Pipeline runner shall refuse to start the run, naming the transform and its status. */
+        doc /* If a workflow graph contains a transform or master node whose status is untrusted, then the Pipeline runner shall refuse to start the run, naming the node and its status. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
-    requirement def <'REQ-RUN-018'> MasterNodeNotRunYet_Run018 {
+    requirement def <'REQ-RUN-018'> MasterNodeRunsLikeATransform_Run018 {
         subject s : TaskRuntime;
-        doc /* If a workflow graph contains a master node, then the Pipeline runner shall refuse to start the run, saying that master nodes cannot be run yet. */
+        doc /* When a workflow graph contains a master node, the Pipeline runner shall run it once, at its place in the topological order, as it runs a transform. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-RUN-019'> FailedNodeStopsTheRun_Run019 {
+        subject s : TaskRuntime;
+        doc /* If a transform or master node fails during a run, then the Pipeline runner shall stop the run and name the failed node in the run result. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-TLS-001'> CodeChecksFirst_Tls001 {
@@ -3890,6 +3895,11 @@ package MIA_NodeRequirements {
         doc /* While IF-301 v1 and IF-203 v0 are in use, the Graph tables shall return a stored workflow also in the document form of those interfaces. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
+    requirement def <'REQ-GTB-016'> ARefusedEditChangesNothing_Gtb016 {
+        subject s : Persistence;
+        doc /* If an edit of a node, an edge or a graph is refused by a check, then the Graph tables shall keep the stored version unchanged and create no new version. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
     requirement def <'REQ-RTB-001'> SharedStateHeld_Rtb001 {
         subject s : Persistence;
         doc /* The Record tables shall define the 14 tables of IF-302 v5: history, memory, votes, tasks, memos, accounts, presets, gestures, runs (run results), source_trust (trust values of sources), cases, behaviours, workflow_meta and reports; summaries and the chat log are records of history. */
@@ -4475,7 +4485,8 @@ package MIA_NodeRequirements {
     requirement r_req_run_015 : RealiseIF105_Run015;
     requirement r_req_run_016 : RunInTopologicalOrder_Run016;
     requirement r_req_run_017 : UntrustedDoesNotRun_Run017;
-    requirement r_req_run_018 : MasterNodeNotRunYet_Run018;
+    requirement r_req_run_018 : MasterNodeRunsLikeATransform_Run018;
+    requirement r_req_run_019 : FailedNodeStopsTheRun_Run019;
     requirement r_req_tls_001 : CodeChecksFirst_Tls001;
     requirement r_req_tls_002 : LookupWithSources_Tls002;
     requirement r_req_tls_003 : SourceRecordsAndCutOff_Tls003;
@@ -4621,6 +4632,7 @@ package MIA_NodeRequirements {
     requirement r_req_gtb_013 : VersionsKept_Gtb013;
     requirement r_req_gtb_014 : RebuiltEqualsStored_Gtb014;
     requirement r_req_gtb_015 : DocumentFormDuringTheTransition_Gtb015;
+    requirement r_req_gtb_016 : ARefusedEditChangesNothing_Gtb016;
     requirement r_req_rtb_001 : SharedStateHeld_Rtb001;
     requirement r_req_rtb_002 : RunResults_Rtb002;
     requirement r_req_rtb_003 : VotesStored_Rtb003;
@@ -4903,6 +4915,7 @@ package MIA_NodeRequirements {
     satisfy r_req_run_016 by mia.taskRuntime;
     satisfy r_req_run_017 by mia.taskRuntime;
     satisfy r_req_run_018 by mia.taskRuntime;
+    satisfy r_req_run_019 by mia.taskRuntime;
     satisfy r_req_tls_001 by mia.verifier;
     satisfy r_req_tls_002 by mia.verifier;
     satisfy r_req_tls_003 by mia.verifier;
@@ -5048,6 +5061,7 @@ package MIA_NodeRequirements {
     satisfy r_req_gtb_013 by mia.persistence;
     satisfy r_req_gtb_014 by mia.persistence;
     satisfy r_req_gtb_015 by mia.persistence;
+    satisfy r_req_gtb_016 by mia.persistence;
     satisfy r_req_rtb_001 by mia.persistence;
     satisfy r_req_rtb_002 by mia.persistence;
     satisfy r_req_rtb_003 by mia.persistence;
@@ -5329,6 +5343,7 @@ package MIA_NodeRequirements {
     allocate r_req_run_016 to mia.taskRuntime;
     allocate r_req_run_017 to mia.taskRuntime;
     allocate r_req_run_018 to mia.taskRuntime;
+    allocate r_req_run_019 to mia.taskRuntime;
     allocate r_req_tls_001 to mia.verifier;
     allocate r_req_tls_002 to mia.verifier;
     allocate r_req_tls_003 to mia.verifier;
@@ -5474,6 +5489,7 @@ package MIA_NodeRequirements {
     allocate r_req_gtb_013 to mia.persistence;
     allocate r_req_gtb_014 to mia.persistence;
     allocate r_req_gtb_015 to mia.persistence;
+    allocate r_req_gtb_016 to mia.persistence;
     allocate r_req_rtb_001 to mia.persistence;
     allocate r_req_rtb_002 to mia.persistence;
     allocate r_req_rtb_003 to mia.persistence;
@@ -5766,6 +5782,7 @@ package MIA_NodeRequirements {
     dependency from r_req_run_016 to fr37;
     dependency from r_req_run_017 to fr38;
     dependency from r_req_run_018 to fr37;
+    dependency from r_req_run_019 to fr37;
     dependency from r_req_tls_001 to r_req_wfx_005;
     dependency from r_req_tls_002 to r_req_wfx_006;
     dependency from r_req_tls_003 to r_req_wfx_007;
@@ -5932,6 +5949,7 @@ package MIA_NodeRequirements {
     dependency from r_req_gtb_013 to fr40;
     dependency from r_req_gtb_014 to fr40;
     dependency from r_req_gtb_015 to fr40;
+    dependency from r_req_gtb_016 to fr40;
     dependency from r_req_rtb_001 to r_req_db_002;
     dependency from r_req_rtb_002 to r_req_db_010;
     dependency from r_req_rtb_003 to r_req_db_012;

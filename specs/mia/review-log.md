@@ -447,6 +447,18 @@ The first version was silent until the end and could take 20 minutes or more: th
 | REQ-WFM-064 | requirement | 26201216b196 | Stefan Reiterer | 2026-11-07 | approved | G-V2.CONVERT review, SN group; 066 kept as Must |
 | REQ-WFM-065 | requirement | 93a11a6250f4 | Stefan Reiterer | 2026-11-07 | approved | G-V2.CONVERT review, SN group; 066 kept as Must |
 | REQ-WFM-066 | requirement | 4d52f1fab7fc | Stefan Reiterer | 2026-11-07 | approved | G-V2.CONVERT review, SN group; 066 kept as Must |
+| REQ-WFM-040 | requirement | b6388eb48834 | Stefan Reiterer | 2026-11-07 | approved | 042: raised to Must, same-ID new version allowed |
+| REQ-WFM-041 | requirement | 915890589bcc | Stefan Reiterer | 2026-11-07 | approved | 042: raised to Must, same-ID new version allowed |
+| REQ-WFM-042 | requirement | d5404916a98e | Stefan Reiterer | 2026-11-07 | approved | 042: raised to Must, same-ID new version allowed |
+| REQ-WFM-043 | requirement | a7ffbc48ad0d | Stefan Reiterer | 2026-11-07 | approved | 048 reworded: repetitions; 049 stays Should |
+| REQ-WFM-044 | requirement | f015f2c7ae26 | Stefan Reiterer | 2026-11-07 | approved | 048 reworded: repetitions; 049 stays Should |
+| REQ-WFM-045 | requirement | 603d101770f5 | Stefan Reiterer | 2026-11-07 | approved | 048 reworded: repetitions; 049 stays Should |
+| REQ-WFM-046 | requirement | db37266f6da0 | Stefan Reiterer | 2026-11-07 | approved | 048 reworded: repetitions; 049 stays Should |
+| REQ-WFM-047 | requirement | d8fd38e757a7 | Stefan Reiterer | 2026-11-07 | approved | 048 reworded: repetitions; 049 stays Should |
+| REQ-WFM-048 | requirement | 5f8a62c77cd5 | Stefan Reiterer | 2026-11-07 | approved | 048 reworded: repetitions; 049 stays Should |
+| REQ-WFM-049 | requirement | c7ecfd1f2ad6 | Stefan Reiterer | 2026-11-07 | approved | 048 reworded: repetitions; 049 stays Should |
+| REQ-RUN-016 | requirement | 774fcdb8d6ca | Stefan Reiterer | 2026-11-07 | approved | text widened to master nodes per owner answer |
+| REQ-RUN-017 | requirement | 91ac5e7cd789 | Stefan Reiterer | 2026-11-07 | approved | text widened to master nodes per owner answer |
 | REQ-GTB-005 | requirement | edd37f723442 | Stefan Reiterer | 2026-11-07 | approved |  |
 | REQ-GTB-006 | requirement | 6f8defed046e | Stefan Reiterer | 2026-11-07 | approved |  |
 | REQ-GTB-007 | requirement | 5ec57e7aa265 | Stefan Reiterer | 2026-11-07 | approved |  |
@@ -461,9 +473,53 @@ The first version was silent until the end and could take 20 minutes or more: th
 | REQ-GTB-005 | requirement | c8e3a644dfa1 | Stefan Reiterer | 2026-11-07 | approved | 005 re-approved with Verified by TC-GTB-016; plausibility of GTB-005..015 rated plausible |
 | FR-40 | requirement | 54f2cefd7337 | Stefan Reiterer | 2026-11-07 | approved | 005 re-approved with Verified by TC-GTB-016; plausibility of GTB-005..015 rated plausible |
 | G-V2.STORE | goal | 4649386666e0 | Stefan Reiterer | 2026-11-07 | approved | 005 re-approved with Verified by TC-GTB-016; plausibility of GTB-005..015 rated plausible |
+| REQ-RUN-016 | requirement | afd497ea2cd8 | Stefan Reiterer | 2026-11-07 | approved | shortened to 35 words (L1-LENGTH), same meaning; re-marked by the agent for the owner to confirm |
 | D-260 | **Plausibility decisions for G-V2, owner Stefan Reiterer, 2026-11-07.** (B) The basis for "only the owner" (REQ-WFM-054, 066, REQ-RUN-017 after the owner sets trusted) is the account that creates accounts (TC-MIA-014); rating plausible on that basis. Note of the owner: several accounts on one instance are for testing only; a later goal is one user per instance with its own database and model. (C) REQ-WFM-058: model replies and tool results are both scripted, replayed from a recording of the old run; a recording tool for tool results may be needed (a small task, no new part). (D) REQ-WFM-059 is rated *questionable with a probe*: record the baselines of the converted skills on MP-light in Plan Step 4 (results only), then judge the margin 0.10 against them (D-187: numbers are educated guesses to improve by running). (E) The six top-level items FR-36, 37, 38, 40, 45, 47 are rated by the owner one by one, with a basis the owner gives, after their subgoals are rated; the agent proposes nothing for them before. The sessions of MODEL, TOOLBOX and CONVERT write the records of their own scope with these bases and the owner rates them at their reviews. |
 | REQ-WFM-059 | requirement | cac0237d56df | Stefan Reiterer | 2026-11-07 | approved | G-V2.CONVERT: 059 acceptance rule after the split per skill; 062 Must; 063 name rule; 066 owner defined (D-260 B) |
 | REQ-WFM-062 | requirement | a9c5909b60ee | Stefan Reiterer | 2026-11-07 | approved | G-V2.CONVERT: 059 acceptance rule after the split per skill; 062 Must; 063 name rule; 066 owner defined (D-260 B) |
 | REQ-WFM-063 | requirement | 37f3ad7f4319 | Stefan Reiterer | 2026-11-07 | approved | G-V2.CONVERT: 059 acceptance rule after the split per skill; 062 Must; 063 name rule; 066 owner defined (D-260 B) |
 | REQ-WFM-066 | requirement | 6d1f5fe71bcc | Stefan Reiterer | 2026-11-07 | approved | G-V2.CONVERT: 059 acceptance rule after the split per skill; 062 Must; 063 name rule; 066 owner defined (D-260 B) |
 | REQ-WFM-115 | requirement | 04fce64f6e37 | Stefan Reiterer | 2026-11-07 | approved | G-V2.CONVERT: agent suggestion kept as Must; equality instead of a rate for a rule-based skill |
+| REQ-RUN-018 | requirement | c9dfa8f51ee1 | Stefan Reiterer | 2026-11-07 | approved | RUN-016 mark confirmed by the owner the same day |
+| REQ-RUN-019 | requirement | 5b3652cd5237 | Stefan Reiterer | 2026-11-07 | approved | RUN-016 mark confirmed by the owner the same day |
+| TC-WFM-040 | check | c56411fcb17b | Stefan Reiterer | 2026-11-07 | approved |  |
+| TC-WFM-041 | check | 46fa660640a8 | Stefan Reiterer | 2026-11-07 | approved |  |
+| TC-WFM-042 | check | 3fba42246a0b | Stefan Reiterer | 2026-11-07 | approved |  |
+| TC-WFM-043 | check | 9e4e7b1be4f0 | Stefan Reiterer | 2026-11-07 | approved |  |
+| TC-WFM-044 | check | a51ba8d7f324 | Stefan Reiterer | 2026-11-07 | approved |  |
+| TC-WFM-045 | check | 801d7371bae8 | Stefan Reiterer | 2026-11-07 | approved |  |
+| TC-WFM-046 | check | b11a7ca50505 | Stefan Reiterer | 2026-11-07 | approved |  |
+| TC-WFM-047 | check | 24a29873e34e | Stefan Reiterer | 2026-11-07 | approved |  |
+| TC-WFM-048 | check | 07fac3c94c6c | Stefan Reiterer | 2026-11-07 | approved |  |
+| TC-WFM-049 | check | 088905c35ebb | Stefan Reiterer | 2026-11-07 | approved |  |
+| TC-RUN-016 | check | 5bbf3c34c592 | Stefan Reiterer | 2026-11-07 | approved |  |
+| TC-RUN-017 | check | 19840141d85c | Stefan Reiterer | 2026-11-07 | approved |  |
+| TC-RUN-018 | check | 03d05662c589 | Stefan Reiterer | 2026-11-07 | approved |  |
+| TC-RUN-019 | check | 8ed49453cffa | Stefan Reiterer | 2026-11-07 | approved |  |
+| TR-MODEL-002 | test requirement | b93d160b04f5 | Stefan Reiterer | 2026-11-07 | approved |  |
+| TR-MODEL-003 | test requirement | 0b0835c632d6 | Stefan Reiterer | 2026-11-07 | approved |  |
+| TR-MODEL-001 | test requirement | 83d30e98e910 | Stefan Reiterer | 2026-11-07 | approved |  |
+| TR-MODEL-004 | test requirement | 726d58b2407b | Stefan Reiterer | 2026-11-07 | approved |  |
+| TR-MODEL-005 | test requirement | d8cd0646f0ec | Stefan Reiterer | 2026-11-07 | skimmed |  |
+| TC-GTB-016 | check | e211790ffd5d | Stefan Reiterer | 2026-11-07 | approved |  |
+| TC-GTB-006 | check | 15b4ee1b7300 | Stefan Reiterer | 2026-11-07 | approved |  |
+| TC-GTB-007 | check | fd56a6aeaff2 | Stefan Reiterer | 2026-11-07 | approved |  |
+| TC-GTB-008 | check | 035e1928092a | Stefan Reiterer | 2026-11-07 | approved |  |
+| TR-GTB-001 | test requirement | b641dab63ed9 | Stefan Reiterer | 2026-11-07 | approved |  |
+| TR-GTB-002 | test requirement | d0620f8441d1 | Stefan Reiterer | 2026-11-07 | approved | shortened to the IF-102 suite on the owner's remark |
+| TC-GTB-009 | check | fdeb39cd656b | Stefan Reiterer | 2026-11-07 | approved | 003: version on the host is enough (no exact pin) |
+| TC-GTB-010 | check | b0a036319b53 | Stefan Reiterer | 2026-11-07 | approved | 003: version on the host is enough (no exact pin) |
+| TC-GTB-011 | check | 904bf83490f5 | Stefan Reiterer | 2026-11-07 | approved | 003: version on the host is enough (no exact pin) |
+| TC-GTB-012 | check | 06b401bf5d7d | Stefan Reiterer | 2026-11-07 | approved | 003: version on the host is enough (no exact pin) |
+| TR-GTB-003 | test requirement | 5277fdb2c0ed | Stefan Reiterer | 2026-11-07 | approved | 003: version on the host is enough (no exact pin) |
+| TR-GTB-005 | test requirement | 9b7486a16fb0 | Stefan Reiterer | 2026-11-07 | approved | 003: version on the host is enough (no exact pin) |
+| TC-GTB-013 | check | 16b07cd9819a | Stefan Reiterer | 2026-11-07 | approved | 013: new REQ-GTB-016 and TC-GTB-017 added at the owner's request; 014: N is a parameter, default 1000; 015: stage 2 |
+| TC-GTB-014 | check | 92c29d3f571a | Stefan Reiterer | 2026-11-07 | approved | 013: new REQ-GTB-016 and TC-GTB-017 added at the owner's request; 014: N is a parameter, default 1000; 015: stage 2 |
+| TC-GTB-015 | check | 4a4567896c24 | Stefan Reiterer | 2026-11-07 | approved | 013: new REQ-GTB-016 and TC-GTB-017 added at the owner's request; 014: N is a parameter, default 1000; 015: stage 2 |
+| TR-GTB-004 | test requirement | 0275a14a3e99 | Stefan Reiterer | 2026-11-07 | approved | 013: new REQ-GTB-016 and TC-GTB-017 added at the owner's request; 014: N is a parameter, default 1000; 015: stage 2 |
+| TR-GTB-006 | test requirement | 8474111010db | Stefan Reiterer | 2026-11-07 | approved | 013: new REQ-GTB-016 and TC-GTB-017 added at the owner's request; 014: N is a parameter, default 1000; 015: stage 2 |
+| REQ-GTB-016 | requirement | b68f817e03cb | Stefan Reiterer | 2026-11-07 | approved |  |
+| D-261 | **Plausibility of G-V2.STORE closed, owner Stefan Reiterer, 2026-11-07.** REQ-GTB-016 and FR-40 rated plausible by the owner (FR-40 on the basis that all 12 refining requirements REQ-GTB-005 to 016 are plausible). With REQ-GTB-005 to 015 rated earlier, every STORE requirement has a plausible record. |
+| D-262 | **IF-301 v2 contract draft, owner answers, 2026-11-07.** (1) Graph rules for the new node types stay in the Workflow management only; IF-301 keeps the v1 rules and adds the record rules (`check_record`: `record_identity`, `unknown_type`, `schema_break`). (2) A refused record is a result with the rule, as in v1 (A-60), not an exception. (3) `to_document` refuses a graph with a master node (`not_representable`). (4) Node types are a fixed list inside the Graph tables; other parts do not register types; a new type is an amendment of IF-301. The draft is `amendments/A-90-draft-IF-301-v2.md`; the type list is open until the MODEL session confirms REQ-WFM-043 to 049. `contracts/` is untouched. |
+| D-263 | **Node types of context graphs in IF-301 v2, owner answer, 2026-11-07.** The fixed list of D-262 holds for workflow graphs only (data, transform, master; FR-37). A context graph has no fixed list: a node names a category whose JSON schema comes from the context graph's definition (FR-41, goal C); `check_record` and `to_object` take it as `categories`. Where the definition is stored is decided in goal C. REQ-GTB-005 to 016 keep their text ("workflow or context graph"). |
+| D-264 | **IF-301 v2 contract draft, the gaps found by the MODEL session, owner answers, 2026-11-07.** (1) A master node has `toolbox_id` (required), `stop` (required) and `task` (optional); data nodes have `value` and `parameters`; the graph description is not a node field. (2) A versioned table `graphs` holds the graph header and lists its nodes and edges with their versions; a graph version pins its members. (3) A versioned table `skills` in IF-301 holds the skill record; STORE defines it, the Workflow management checks the content (REQ-WFM-042 stays there). (4) The Workflow management calls `check_record` itself before it writes; the Storage layer calls it again as a guard; IF-102 is unchanged. Written into `amendments/A-90-draft-IF-301-v2.md`; `contracts/` is untouched. |

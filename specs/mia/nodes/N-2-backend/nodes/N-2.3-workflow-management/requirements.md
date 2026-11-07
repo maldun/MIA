@@ -540,13 +540,13 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 
 ### REQ-WFM-042 – Command used once
 - Level: low   Subject: TaskRuntime
-- Text: If a skill record names a command that another skill already uses, then the Workflow management shall refuse the record and name that skill.
-- Rationale: refines FR-36; two skills with one command would make the chat command ambiguous (REQ-WFM-029) Suggestion of the agent, not in the HLS text; the owner decides at review.
+- Text: If a skill record names a command that a skill with another ID already uses, then the Workflow management shall refuse the record and name that skill.
+- Rationale: refines FR-36; two skills with one command would make the chat command ambiguous (REQ-WFM-029); a new version of the same skill ID may keep its command. Suggestion of the agent, not in the HLS text; the owner decided at review (2026-11-07): Must, as in OC-2 of G-V2.MODEL.
 - Parent: FR-36
 - Group: SK
-- Priority: Should
+- Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-31: a second record with the command of the first is refused with the first skill's ID (exact)
+- Acceptance criterion: AC-31: a second record with the command of the first is refused with the first skill's ID (exact); a new version of the same skill keeps its command and is accepted (exact)
 - Verified by: TC-WFM-042
 - Status: Draft
 - History: G-V2 Plan step 1 (2026-11-07), new
@@ -618,13 +618,13 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 
 ### REQ-WFM-048 – Master node stops
 - Level: low   Subject: TaskRuntime
-- Text: If a master node has neither a maximum number of cycles nor a maximum time, then the Workflow management shall refuse the workflow graph and name the node.
-- Rationale: refines FR-37; rule R4 of FR-7 for master nodes
+- Text: If a master node has neither a maximum number of repetitions nor a maximum time, then the Workflow management shall refuse the workflow graph and name the node.
+- Rationale: refines FR-37; rule R4 of FR-7 for master nodes (R4 says 'cycles'; a repetition of the master node itself, not a cycle of the graph, which REQ-WFM-047 refuses)
 - Parent: FR-37
 - Group: GM
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-31: a master node without a stopping criterion is refused; with max_cycles 1 it is accepted (exact)
+- Acceptance criterion: AC-31: a master node without a stopping criterion is refused; with a maximum of 1 repetition it is accepted (exact)
 - Verified by: TC-WFM-048
 - Status: Draft
 - History: G-V2 Plan step 1 (2026-11-07), new

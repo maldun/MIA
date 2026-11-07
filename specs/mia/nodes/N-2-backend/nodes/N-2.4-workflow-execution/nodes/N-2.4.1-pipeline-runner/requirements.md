@@ -191,11 +191,11 @@ Runs a workflow step by step under budgets: model calls and model management, pr
 ## Groups
 | Order | Group | What it covers | Requirements |
 |---|---|---|---|
-| 1 | EX | Execution of the new graph: order, trust, master nodes (FR-37, FR-38) | REQ-RUN-016, REQ-RUN-017, REQ-RUN-018 |
+| 1 | EX | Execution of the new graph: order, trust, master nodes, failure (FR-37, FR-38) | REQ-RUN-016, REQ-RUN-017, REQ-RUN-018, REQ-RUN-019 |
 
 ### REQ-RUN-016 – Run in topological order
 - Level: low-2   Subject: TaskRuntime
-- Text: When a workflow graph is run, the Pipeline runner shall run its transforms in a topological order, giving each the contents of its input data nodes and writing its result into its output data nodes.
+- Text: When a workflow graph is run, the Pipeline runner shall run its transforms and master nodes in a topological order, each reading its input data nodes and writing its output data nodes.
 - Rationale: refines FR-37; the owner's note (algorithm)
 - Parent: FR-37
 - Group: EX
@@ -208,7 +208,7 @@ Runs a workflow step by step under budgets: model calls and model management, pr
 
 ### REQ-RUN-017 – Untrusted does not run
 - Level: low-2   Subject: TaskRuntime
-- Text: If a workflow graph contains a transform whose status is untrusted, then the Pipeline runner shall refuse to start the run, naming the transform and its status.
+- Text: If a workflow graph contains a transform or master node whose status is untrusted, then the Pipeline runner shall refuse to start the run, naming the node and its status.
 - Rationale: refines FR-38; SC-09, AC-32
 - Parent: FR-38
 - Group: EX
@@ -219,16 +219,28 @@ Runs a workflow step by step under budgets: model calls and model management, pr
 - Status: Draft
 - History: G-V2 Plan step 1 (2026-11-07), new
 
-### REQ-RUN-018 – Master node not run yet
+### REQ-RUN-018 – Master node runs like a transform
 - Level: low-2   Subject: TaskRuntime
-- Text: If a workflow graph contains a master node, then the Pipeline runner shall refuse to start the run, saying that master nodes cannot be run yet.
-- Rationale: refines FR-37; debates (FR-39) are a later goal, so a master node is stored but has no runner; avoids a silently skipped node Suggestion of the agent, not in the HLS text; the owner decides at review.
+- Text: When a workflow graph contains a master node, the Pipeline runner shall run it once, at its place in the topological order, as it runs a transform.
+- Rationale: refines FR-37; the owner decided at review (2026-11-07): a master node is a special case of a transform and is treated the same; repeating it up to its stop criterion (debates, FR-39) is a later goal
 - Parent: FR-37
 - Group: EX
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-31: a graph with a master node is stored, a run is refused with the message (exact)
+- Acceptance criterion: AC-31: a master node between two data nodes runs once after its input data nodes are written and its output data node holds the result (exact); a master node with status untrusted is refused as in REQ-RUN-017
 - Verified by: TC-RUN-018
 - Status: Draft
-- History: G-V2 Plan step 1 (2026-11-07), new
+- History: G-V2 Plan step 1 (2026-11-07), new; rewritten at review (2026-11-07): was "refuse a run with a master node"
 
+### REQ-RUN-019 – Failed node stops the run
+- Level: low-2   Subject: TaskRuntime
+- Text: If a transform or master node fails during a run, then the Pipeline runner shall stop the run and name the failed node in the run result.
+- Rationale: refines FR-37; unhappy path of REQ-RUN-016 found at review (2026-11-07), added at the owner's answer; nodes after the failed one must not run on missing data
+- Parent: FR-37
+- Group: EX
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-31: with the second of three transforms failing, the third does not run and the result names the second (exact)
+- Verified by: TC-RUN-019
+- Status: Draft
+- History: G-V2 Plan step 1 (2026-11-07), new at review
