@@ -332,6 +332,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-10, AC-16, AC-28: the contract suite test_if_203_workflow_library.py passes against the mock (stage 1) and the Workflow management (stage 2)
 - Verified by: TC-IF-203-01..04
+- Frozen: G-V2
 - Status: Verified
 - History: v0, amendment 5/7 (2026-10-25)
 
