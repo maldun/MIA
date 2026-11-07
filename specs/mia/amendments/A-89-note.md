@@ -12,3 +12,6 @@ Status: **proposed** (draft; applied to `requirements.md` and `baseline-requirem
 
 ## Not done here
 `requirements.md` and `baseline-requirements.md` are plan-phase artifacts and are not touched in Explore. Interfaces IF-301 and IF-203 and their protected contract suites change only through a plan amendment.
+
+## Later amendments (decided 2026-11-07, D-187)
+- Workflows get the same two independent states as transforms (trust: untrusted/trusted; lifecycle: draft/tested/retired) instead of the mixed list of REQ-WFM-002. Not in G-V2; REQ-WFM-002 stays as it is until that amendment.
