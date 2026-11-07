@@ -1,0 +1,197 @@
+{
+ "accepted": [
+  {
+   "name": "Canadian scientists",
+   "quote": "Canadian scientists protest Harper's attacks on science Monday, October 13, 2008",
+   "kind": "entity"
+  },
+  {
+   "name": "Harper",
+   "quote": "Canadian scientists protest Harper's attacks on science Monday, October 13, 2008",
+   "kind": "entity"
+  },
+  {
+   "name": "Conservative government",
+   "quote": "Citing actions taken by the Conservative government since winning a minority government in 2006, 85 scientists across Canada have signed an open letter to all national party leaders calling on them to state how they will 'improve Canada\u2019s track record' regarding the objectivity of science.",
+   "kind": "entity"
+  },
+  {
+   "name": "Queen's University",
+   "quote": "Queen's University climate researcher John Smol lamented the need for scientists to protest in a public forum.",
+   "kind": "entity"
+  },
+  {
+   "name": "John Smol",
+   "quote": "Queen's University climate researcher John Smol lamented the need for scientists to protest in a public forum.",
+   "kind": "entity"
+  },
+  {
+   "name": "CBC News",
+   "quote": "But as far as the environment is concerned, the problem is so bad and the consequences are so terrible if we do not act,\" he told CBC News.",
+   "kind": "entity"
+  },
+  {
+   "name": "Harper government",
+   "quote": "The Harper government was cited for actions across the academic spectrum, from nuclear safety to human health to climate science.",
+   "kind": "entity"
+  },
+  {
+   "name": "Environment Canada",
+   "quote": "Within the government's own Environment Canada the Conservatives have been accused of muzzling the department, even interfering with the release of one researcher's science fiction novel.",
+   "kind": "entity"
+  },
+  {
+   "name": "Conservatives",
+   "quote": "Within the government's own Environment Canada the Conservatives have been accused of muzzling the department, even interfering with the release of one researcher's science fiction novel.",
+   "kind": "entity"
+  },
+  {
+   "name": "Rona Ambrose",
+   "quote": "Then-Environmental Minister Rona Ambrose ordered the scientist not to attend talks to promote his novel where his job title was given.",
+   "kind": "entity"
+  },
+  {
+   "name": "Andrew Weaver",
+   "quote": "\u201cIt\u2019s absolutely Orwellian what\u2019s going on here in science in Canada,\u201d said environmental scientist Andrew Weaver in an interview with The Georgia Straight.",
+   "kind": "entity"
+  },
+  {
+   "name": "The Georgia Straight",
+   "quote": "\u201cIt\u2019s absolutely Orwellian what\u2019s going on here in science in Canada,\u201d said environmental scientist Andrew Weaver in an interview with The Georgia Straight.",
+   "kind": "entity"
+  },
+  {
+   "name": "Intergovernmental Panel on Climate Change",
+   "quote": "Weaver, lead author on three Intergovernmental Panel on Climate Change reports and the recently published \"Keeping Our Cool: Canada in a Warming World\", was not surprised when references to the UN's IPCC reports were removed from Canadian government websites.",
+   "kind": "entity"
+  },
+  {
+   "name": "Insite",
+   "quote": "Vancouver's Safe Injections Site project, Insite, a program designed to provide intravenous drug users with a medically-supervised location, is an internationally recognized model of successful harm-reduction public health policy, supported by both provincial and municipal governments.",
+   "kind": "entity"
+  },
+  {
+   "source": "Canadian scientists",
+   "relation": "protest",
+   "target": "Harper",
+   "quote": "Canadian scientists protest Harper's attacks on science Monday, October 13, 2008",
+   "kind": "relation"
+  },
+  {
+   "source": "John Smol",
+   "relation": "climate researcher at",
+   "target": "Queen's University",
+   "quote": "Queen's University climate researcher John Smol lamented the need for scientists to protest in a public forum.",
+   "kind": "relation"
+  },
+  {
+   "source": "Conservatives",
+   "relation": "accused of muzzling",
+   "target": "Environment Canada",
+   "quote": "Within the government's own Environment Canada the Conservatives have been accused of muzzling the department, even interfering with the release of one researcher's science fiction novel.",
+   "kind": "relation"
+  },
+  {
+   "name": "Royal Canadian Mounted Police",
+   "quote": "The national police force, the Royal Canadian Mounted Police, engaged in a campaign to undermine the project according to documents discovered in a Freedom of Information Act query, including financing politically-motivated research.",
+   "kind": "entity"
+  },
+  {
+   "name": "Supreme Court of British Columbia",
+   "quote": "The conservative government has been antagonistic to the program since coming to power, and though losing its case at every level of courts has appealed the Supreme Court of British Columbia ruling which struck down portions of Canada's drug laws as unconstitutional.",
+   "kind": "entity"
+  },
+  {
+   "name": "Canada's drug laws",
+   "quote": "The conservative government has been antagonistic to the program since coming to power, and though losing its case at every level of courts has appealed the Supreme Court of British Columbia ruling which struck down portions of Canada's drug laws as unconstitutional.",
+   "kind": "entity"
+  },
+  {
+   "name": "Charter Right of addicts to health care",
+   "quote": "The judge gave the government one year to pass replacement legislation which addresses the Charter Right of addicts to health care which may save their life.",
+   "kind": "entity"
+  },
+  {
+   "name": "Tony Clement",
+   "quote": "Conservative Health Minister Tony Clement has questioned the ethics of physicians who support the harm-reduction model of Insite.",
+   "kind": "entity"
+  },
+  {
+   "name": "Brian Day",
+   "quote": "\"The minister was off base in calling into question the ethics of physicians involved in harm reduction,\" CMA president Brian Day responded.",
+   "kind": "entity"
+  },
+  {
+   "name": "Stephen Harper's government",
+   "quote": "Climate scientist claims Stephen Harper's government has muzzled experts \u2014 The Georgia Straight, 25 September 2008",
+   "kind": "entity"
+  },
+  {
+   "source": "Royal Canadian Mounted Police",
+   "relation": "engaged in a campaign to undermine the project",
+   "target": "the project",
+   "quote": "The national police force, the Royal Canadian Mounted Police, engaged in a campaign to undermine the project according to documents discovered in a Freedom of Information Act query, including financing politically-motivated research.",
+   "kind": "relation"
+  },
+  {
+   "source": "conservative government",
+   "relation": "has been antagonistic to",
+   "target": "the program",
+   "quote": "The conservative government has been antagonistic to the program since coming to power, and though losing its case at every level of courts has appealed the Supreme Court of British Columbia ruling which struck down portions of Canada's drug laws as unconstitutional.",
+   "kind": "relation"
+  },
+  {
+   "source": "conservative government",
+   "relation": "has appealed",
+   "target": "Supreme Court of British Columbia ruling",
+   "quote": "The conservative government has been antagonistic to the program since coming to power, and though losing its case at every level of courts has appealed the Supreme Court of British Columbia ruling which struck down portions of Canada's drug laws as unconstitutional.",
+   "kind": "relation"
+  },
+  {
+   "source": "Supreme Court of British Columbia ruling",
+   "relation": "struck down portions of",
+   "target": "Canada's drug laws",
+   "quote": "The conservative government has been antagonistic to the program since coming to power, and though losing its case at every level of courts has appealed the Supreme Court of British Columbia ruling which struck down portions of Canada's drug laws as unconstitutional.",
+   "kind": "relation"
+  },
+  {
+   "source": "Tony Clement",
+   "relation": "has questioned the ethics of physicians who support the harm-reduction model of",
+   "target": "Insite",
+   "quote": "Conservative Health Minister Tony Clement has questioned the ethics of physicians who support the harm-reduction model of Insite.",
+   "kind": "relation"
+  }
+ ],
+ "refused": [
+  {
+   "item": {
+    "source": "Andrew Weaver",
+    "relation": "lead author on",
+    "target": "Intergovernmental Panel on Climate Change",
+    "quote": "Weaver, lead author on three Intergovernmental Panel on Climate Change reports and the recently published \"Keeping Our Cool: Canada in a Warming World\", was not surprised when references to the UN's IPCC reports were removed from Canadian government websites.",
+    "kind": "relation"
+   },
+   "reason": "quote does not contain both ends"
+  },
+  {
+   "item": {
+    "name": "Canadian Medical Association",
+    "quote": "\"The minister was off base in calling into question the ethics of physicians involved in harm reduction,\" CMA president Brian Day responded.",
+    "kind": "entity"
+   },
+   "reason": "quote does not contain the name"
+  },
+  {
+   "item": {
+    "source": "Brian Day",
+    "relation": "CMA president",
+    "target": "Canadian Medical Association",
+    "quote": "\"The minister was off base in calling into question the ethics of physicians involved in harm reduction,\" CMA president Brian Day responded.",
+    "kind": "relation"
+   },
+   "reason": "quote does not contain both ends"
+  }
+ ],
+ "chunks": 2,
+ "seconds": 44.3
+}
