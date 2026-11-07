@@ -20,6 +20,7 @@ Before a merge, in the subgoal's worktree: `git rebase master` (or `git merge ma
 | TR- prefix | TR-GTB- | TR-MODEL- | TR-TOOLBOX- | TR-CONVERT- | – |
 | VAL- | VAL-008 | VAL-009 | VAL-010 | VAL-007 and VAL-011 | VAL-012 and up |
 | FB- | – | – | – | – | FB-07 and up |
+Outside the four subgoals, TD-11 (branch `td-11-plan`, A-132, owner decision 2026-11-07, D-277) reserves: REQ-CHA-030 to 039, TC-CHA-030 to 039, REQ-VPB-006 to 009, TC-VPB-006 to 009, TR-VOICE-nnn, TD-61 (draft, in `deferred.md`), D-277, A-132. TD-60 stays the draft of A-130.
 Test check IDs follow their requirement (TC-WFM-nnn for REQ-WFM-nnn); a check with no requirement of its own takes the next free number of the requirement range of its subgoal.
 
 ## Shared files and how each is handled

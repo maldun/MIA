@@ -2355,6 +2355,11 @@ package MIA_NodeRequirements {
         doc /* The Voice playback shall consist of static files that the backend container serves. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
+    requirement def <'REQ-VPB-006'> SpeakAgainAfterAStopIsHeard_Vpb006 {
+        subject s : WebFrontEnd;
+        doc /* When a user asks to speak an answer again, the Voice playback shall play the lines that follow, also within 3 seconds after a stop. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
     requirement def <'REQ-FE-001'> ChatViewWithSenderAndStreaming_Fe001 {
         subject s : WebFrontEnd;
         doc /* When a user sends a message, the Web Frontend shall show the message with its sender and the answer as it arrives, sentence by sentence (IF-101). */
@@ -2694,6 +2699,31 @@ package MIA_NodeRequirements {
         subject s : ConversationCore;
         doc /* The Chat agent shall keep and read the conversation, memory, votes, tasks and memos only through the storage interface IF-102. */
         @Trace { :>> verifiedBy = (HowVerified::inspection, HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-030'> SpeakAgainIsSpoken_Cha030 {
+        subject s : ConversationCore;
+        doc /* When a user asks to speak a message of MIA again, the Chat agent shall have the stored text of that message spoken on the voice route that live answers use. */
+        @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
+    }
+    requirement def <'REQ-CHA-031'> SpeakAgainKeepsTheOrder_Cha031 {
+        subject s : ConversationCore;
+        doc /* The Chat agent shall hand the sentences of an answer that is spoken again to the voice route in the order of the answer. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-032'> StopEndsSpeakAgain_Cha032 {
+        subject s : ConversationCore;
+        doc /* When a user presses stop, the Chat agent shall end a spoken-again playback that is running or waiting, also when no answer is being generated. */
+        @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
+    }
+    requirement def <'REQ-CHA-033'> SpeakAgainWithoutAVoiceRoute_Cha033 {
+        subject s : ConversationCore;
+        doc /* If the voice route is not available, then the Chat agent shall still answer a speak-again request with the number of sentences and log the failure once. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-034'> OneSpeakAgainAtATime_Cha034 {
+        subject s : ConversationCore;
+        doc /* While a message is being spoken, the Chat agent shall have a spoken-again message wait until that speech has ended. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-WFM-001'> SkillsAsTasks_Wfm001 {
         subject s : TaskRuntime;
@@ -4314,6 +4344,7 @@ package MIA_NodeRequirements {
     requirement r_req_vpb_003 : VoiceLines_Vpb003;
     requirement r_req_vpb_004 : NoRequestLeavesTheHost_Vpb004;
     requirement r_req_vpb_005 : DeliveredByTheBackend_Vpb005;
+    requirement r_req_vpb_006 : SpeakAgainAfterAStopIsHeard_Vpb006;
     requirement r_req_fe_001 : ChatViewWithSenderAndStreaming_Fe001;
     requirement r_req_fe_002 : StopAndQueuePosition_Fe002;
     requirement r_req_fe_003 : SharedHistoryAfterReload_Fe003;
@@ -4382,6 +4413,11 @@ package MIA_NodeRequirements {
     requirement r_req_cha_018 : CountersVisibleAndResettable_Cha018;
     requirement r_req_cha_019 : TasksAndMemosRecitedFromRecords_Cha019;
     requirement r_req_cha_020 : StateOnlyThroughTheStorageInterface_Cha020;
+    requirement r_req_cha_030 : SpeakAgainIsSpoken_Cha030;
+    requirement r_req_cha_031 : SpeakAgainKeepsTheOrder_Cha031;
+    requirement r_req_cha_032 : StopEndsSpeakAgain_Cha032;
+    requirement r_req_cha_033 : SpeakAgainWithoutAVoiceRoute_Cha033;
+    requirement r_req_cha_034 : OneSpeakAgainAtATime_Cha034;
     requirement r_req_wfm_001 : SkillsAsTasks_Wfm001;
     requirement r_req_wfm_002 : VersionedWorkflowLibrary_Wfm002;
     requirement r_req_wfm_003 : NoCycles_Wfm003;
@@ -4741,6 +4777,7 @@ package MIA_NodeRequirements {
     satisfy r_req_vpb_003 by mia.frontEnd;
     satisfy r_req_vpb_004 by mia.frontEnd;
     satisfy r_req_vpb_005 by mia.frontEnd;
+    satisfy r_req_vpb_006 by mia.frontEnd;
     satisfy r_req_fe_001 by mia.frontEnd;
     satisfy r_req_fe_002 by mia.frontEnd;
     satisfy r_req_fe_003 by mia.frontEnd;
@@ -4809,6 +4846,11 @@ package MIA_NodeRequirements {
     satisfy r_req_cha_018 by mia.conversation;
     satisfy r_req_cha_019 by mia.conversation;
     satisfy r_req_cha_020 by mia.conversation;
+    satisfy r_req_cha_030 by mia.conversation;
+    satisfy r_req_cha_031 by mia.conversation;
+    satisfy r_req_cha_032 by mia.conversation;
+    satisfy r_req_cha_033 by mia.conversation;
+    satisfy r_req_cha_034 by mia.conversation;
     satisfy r_req_wfm_001 by mia.taskRuntime;
     satisfy r_req_wfm_002 by mia.taskRuntime;
     satisfy r_req_wfm_003 by mia.taskRuntime;
@@ -5167,6 +5209,7 @@ package MIA_NodeRequirements {
     allocate r_req_vpb_003 to mia.frontEnd;
     allocate r_req_vpb_004 to mia.frontEnd;
     allocate r_req_vpb_005 to mia.frontEnd;
+    allocate r_req_vpb_006 to mia.frontEnd;
     allocate r_req_fe_001 to mia.frontEnd;
     allocate r_req_fe_002 to mia.frontEnd;
     allocate r_req_fe_003 to mia.frontEnd;
@@ -5235,6 +5278,11 @@ package MIA_NodeRequirements {
     allocate r_req_cha_018 to mia.conversation;
     allocate r_req_cha_019 to mia.conversation;
     allocate r_req_cha_020 to mia.conversation;
+    allocate r_req_cha_030 to mia.conversation;
+    allocate r_req_cha_031 to mia.conversation;
+    allocate r_req_cha_032 to mia.conversation;
+    allocate r_req_cha_033 to mia.conversation;
+    allocate r_req_cha_034 to mia.conversation;
     allocate r_req_wfm_001 to mia.taskRuntime;
     allocate r_req_wfm_002 to mia.taskRuntime;
     allocate r_req_wfm_003 to mia.taskRuntime;
@@ -5595,6 +5643,7 @@ package MIA_NodeRequirements {
     dependency from r_req_vpb_003 to r_req_fe_013;
     dependency from r_req_vpb_004 to r_req_fe_026;
     dependency from r_req_vpb_005 to r_req_fe_030;
+    dependency from r_req_vpb_006 to r_req_vpb_002;
     dependency from r_req_fe_001 to fr1;
     dependency from r_req_fe_002 to fr1;
     dependency from r_req_fe_002 to nfr7;
@@ -5672,6 +5721,11 @@ package MIA_NodeRequirements {
     dependency from r_req_cha_018 to r_req_be_031;
     dependency from r_req_cha_019 to r_req_be_032;
     dependency from r_req_cha_020 to r_req_be_074;
+    dependency from r_req_cha_030 to r_req_cha_006;
+    dependency from r_req_cha_031 to r_req_cha_006;
+    dependency from r_req_cha_032 to r_req_cha_004;
+    dependency from r_req_cha_033 to r_req_cha_006;
+    dependency from r_req_cha_034 to r_req_cha_006;
     dependency from r_req_wfm_001 to r_req_be_033;
     dependency from r_req_wfm_002 to r_req_be_035;
     dependency from r_req_wfm_003 to r_req_be_036;
