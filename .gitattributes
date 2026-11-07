@@ -1,0 +1,4 @@
+
+# G-V2 parallel sessions (specs/mia/goals/G-V2/parallel-work.md): both files only ever gain rows or blocks
+specs/mia/review-log.md merge=union
+specs/mia/test-requirements.md merge=union

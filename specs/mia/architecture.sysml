@@ -3887,7 +3887,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-GTB-015'> DocumentFormDuringTheTransition_Gtb015 {
         subject s : Persistence;
-        doc /* While IF-301 v1 and IF-203 v1 are in use, the Graph tables shall return a stored workflow also in the document form of those interfaces. */
+        doc /* While IF-301 v1 and IF-203 v0 are in use, the Graph tables shall return a stored workflow also in the document form of those interfaces. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-RTB-001'> SharedStateHeld_Rtb001 {

@@ -122,6 +122,9 @@ Acceptance criteria in scope: AC-31, AC-32, AC-34, AC-38, AC-40. Out: AC-33, AC-
 | G-V2.TOOLBOX | Stefan Reiterer (owner) | 2026-11-07 |
 | G-V2.CONVERT | Stefan Reiterer (owner) | 2026-11-07 |
 
+## Parallel work
+Merge order STORE, MODEL, TOOLBOX, CONVERT; reserved IDs per session and rules for shared files: `parallel-work.md` (2026-11-07).
+
 ## Phases
 | Phase | State | Record or reason |
 |---|---|---|
