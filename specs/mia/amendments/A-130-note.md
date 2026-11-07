@@ -36,8 +36,8 @@ None needed. REQ-VOI-001 (Relaxed TD-11, with its Target), REQ-BE-016, the N-2.2
 
 ## 7. Owner decisions
 1. **Decided (owner, 2026-11-07):** the `expression` event of an answer is split out of TD-11. TD-11 covers only TC-IF-201-01; TC-IF-101-04 stays skipped with a narrower reason (section 5, line 205, pending approval).
-2. **Pending:** approve the helper change of section 5. Not approved; nothing in `tests/helpers/` changes until then.
-3. **Proposal, awaiting the owner's decision** (the Target and Decision lines in `deferred.md` stay unchanged until then). Proposed new target of TD-11 and of the `Target:` line of REQ-VOI-001:
+2. **Decided and applied (owner, 2026-11-07, D-272, D-274):** the helper change of section 5 and a second one (dict form of the scripted answer of the IF-201 adapter), `161d156` and `36aa640`.
+3. **Superseded by D-275 (owner, 2026-11-07):** step 2 (playback through `SpeechService`) turned out to be a new playback pipeline, not wiring; TD-11 stays open narrowed to that route and needs a Plan step. The wording below is kept for the record; the Target in `deferred.md` follows D-275, not this text. Proposed new target of TD-11 and of the `Target:` line of REQ-VOI-001:
    > the chat agent emits one `audio_chunk` event per sentence during an answer, its voice audio comes from `SpeechService` (IF-204) on the backend path, and the skipped IF-201 case TC-IF-201-01 runs green; the IF-101 case TC-IF-101-04 stays skipped until the expression event of an answer exists (TD-60)
 
 ## 8. Proposed deferral for the expression event (Draft, proposed only)
