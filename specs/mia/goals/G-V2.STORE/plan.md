@@ -12,8 +12,8 @@ How the checks reach the code: the acceptance tests `tests/acceptance/test_graph
 ## Task list
 | Task | Implements | Green when | Depends on |
 |---|---|---|---|
-| T-01 Record tables, types and record checks | REQ-GTB-005, 006, 011, 013 (flag), 016 (the check), 017, 018, 019, 020; REQ-GTB-007, 008, 010 (write side) | TC-GTB-006, 011, 013, 016, 017, 018, 019, 020, 021; real side of TC-IF-301-05, 06, 08, 09, 10, 13, 14, 15, 18, 19 | red tests installed |
-| T-02 Classes from type IDs | REQ-GTB-007, 008, 009, 010 (read side), 014 | TC-GTB-007, 008, 009, 010, 014; real side of TC-IF-301-07, 16 | T-01 |
+| T-01 Record tables, types and record checks | REQ-GTB-005, 006, 011, 013 (flag), 016 (the check), 017, 018, 019, 020; REQ-GTB-007, 008, 010 (write side) | TC-GTB-006, 011, 013, 016, 017, 018, 019, 020, 021; real side of TC-IF-301-05, 06, 09, 10, 13, 14, 15, 19 | red tests installed |
+| T-02 Classes from type IDs | REQ-GTB-007, 008, 009, 010 (read side), 014 | TC-GTB-007, 008, 009, 010, 014; real side of TC-IF-301-07, 08, 16, 18 | T-01 |
 | T-03 Document form both ways | REQ-GTB-015 | TC-GTB-015; real side of TC-IF-301-11, 12, 17 | T-02 |
 | T-04 The Storage layer takes the four tables | REQ-GTB-013, 016, 005, 006 (on the real storage) | new unit tests of the Storage layer (TC-GTB-013, 016, 017 on `Storage` with the file backend), IF-102 suite on the real side unchanged | T-01 |
 | T-05 Integration: the real side of the suite without skip | REQ-GTB-015, IF-301 | the v2 suite passes on the real Graph tables with no skip; TC-GTB-015 with the real storage | T-03, T-04; amendment A-91 (owner installs) |
@@ -24,7 +24,7 @@ TC-GTB-012 (no pickle, marshal, shelve) is green today and must stay green after
 
 ### T-01: Record tables, types and record checks
 - Implements: REQ-GTB-005, REQ-GTB-006, REQ-GTB-011, REQ-GTB-013, REQ-GTB-016, REQ-GTB-017, REQ-GTB-018, REQ-GTB-019, REQ-GTB-020; the write side of REQ-GTB-007, REQ-GTB-008, REQ-GTB-010
-- Tests to turn green: TC-GTB-006, TC-GTB-011, TC-GTB-013, TC-GTB-016, TC-GTB-017, TC-GTB-018, TC-GTB-019, TC-GTB-020, TC-GTB-021; with `IF301_V2_REAL=1` the real side of TC-IF-301-05, 06, 08, 09, 10, 13, 14, 15, 18, 19
+- Tests to turn green: TC-GTB-006, TC-GTB-011, TC-GTB-013, TC-GTB-016, TC-GTB-017, TC-GTB-018, TC-GTB-019, TC-GTB-020, TC-GTB-021; with `IF301_V2_REAL=1` the real side of TC-IF-301-05, 06, 09, 10, 13, 14, 15, 19
 - Touches: `graph_tables.py` (the stubs `record_definitions`, `types`, `check_record`; a new module for the type list and its schemas only if `graph_tables.py` grows past what is readable, and then imported by `graph_tables.py` so TC-GTB-012 sees it); `requirements.txt` (adds `jsonschema==4.23.0`: approved D-187, the version TR-GTB-003 names, installed on the host)
 - Must not touch: protected material (above), `graph_rules.py` (the document rules of v1), `storage.py` (T-04), `pipeline.py`
 - Depends on: red tests installed
@@ -33,7 +33,7 @@ TC-GTB-012 (no pickle, marshal, shelve) is green today and must stay green after
 
 ### T-02: Classes from type IDs
 - Implements: REQ-GTB-007, REQ-GTB-008, REQ-GTB-009, REQ-GTB-010 (read side), REQ-GTB-014
-- Tests to turn green: TC-GTB-007, TC-GTB-008, TC-GTB-009, TC-GTB-010, TC-GTB-014; real side of TC-IF-301-07 and TC-IF-301-16
+- Tests to turn green: TC-GTB-007, TC-GTB-008, TC-GTB-009, TC-GTB-010, TC-GTB-014; real side of TC-IF-301-07, 08, 16 and 18 (they also call `to_object`)
 - Touches: `graph_tables.py` (the stubs `to_object`, `to_record`; the three data classes and `ContextNode`, in `graph_tables.py` or in the new module of T-01)
 - Must not touch: protected material, `storage.py`, `graph_rules.py`
 - Depends on: T-01
