@@ -82,7 +82,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 | 2 | TY | Types: rebuilding data classes from type IDs, schemas (FR-40) | REQ-GTB-009, REQ-GTB-010, REQ-GTB-011, REQ-GTB-012 |
 | 3 | VR | Versions and round trip: edits as versions, stored equals rebuilt (FR-40) | REQ-GTB-013, REQ-GTB-014, REQ-GTB-016 |
 | 4 | CP | Compatibility: the document form during the transition (FR-40) | REQ-GTB-015 |
-| 5 | HD | Graph header and skill record: which members make a graph version, the skill table (FR-40, FR-36) | REQ-GTB-017, REQ-GTB-018, REQ-GTB-019 |
+| 5 | HD | Graph header and skill record: which members make a graph version, the skill table (FR-40, FR-36) | REQ-GTB-017, REQ-GTB-018, REQ-GTB-019, REQ-GTB-020 |
 
 ### REQ-GTB-005 – Node records
 - Level: low   Subject: Persistence
@@ -278,3 +278,16 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verified by: TC-GTB-020
 - Status: Draft
 - History: G-V2.STORE Plan step 3, 2026-11-07, new (D-264: found by the MODEL session, IF-301 v2 draft)
+
+### REQ-GTB-020 – Edge names stored nodes
+- Level: low   Subject: Persistence
+- Text: If an edge names a start or end node that is not stored, then the Graph tables shall refuse the edge and name that node ID.
+- Rationale: refines FR-40 and REQ-GTB-006; an edge to a missing node cannot be rebuilt (REQ-GTB-014); found when the IF-301 v2 text was reviewed (D-266)
+- Parent: FR-40
+- Group: HD
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-31: an edge from n1 to n9, with only n1 stored, is refused naming n9; the same edge with n9 stored is accepted (exact)
+- Verified by: TC-GTB-021
+- Status: Draft
+- History: G-V2.STORE Plan step 4, 2026-11-07, new (D-266)

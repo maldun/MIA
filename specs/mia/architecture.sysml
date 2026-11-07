@@ -3885,6 +3885,11 @@ package MIA_NodeRequirements {
         doc /* If a graph header names a node or edge version that is not stored, then the Graph tables shall refuse the header and name that node or edge ID. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
+    requirement def <'REQ-GTB-020'> EdgeNamesStoredNodes_Gtb020 {
+        subject s : Persistence;
+        doc /* If an edge names a start or end node that is not stored, then the Graph tables shall refuse the edge and name that node ID. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
     requirement def <'REQ-RTB-001'> SharedStateHeld_Rtb001 {
         subject s : Persistence;
         doc /* The Record tables shall define the 14 tables of IF-302 v5: history, memory, votes, tasks, memos, accounts, presets, gestures, runs (run results), source_trust (trust values of sources), cases, behaviours, workflow_meta and reports; summaries and the chat log are records of history. */
@@ -4615,6 +4620,7 @@ package MIA_NodeRequirements {
     requirement r_req_gtb_017 : GraphHeaderWithPinnedMembers_Gtb017;
     requirement r_req_gtb_018 : SkillTable_Gtb018;
     requirement r_req_gtb_019 : HeaderNamesStoredMembers_Gtb019;
+    requirement r_req_gtb_020 : EdgeNamesStoredNodes_Gtb020;
     requirement r_req_rtb_001 : SharedStateHeld_Rtb001;
     requirement r_req_rtb_002 : RunResults_Rtb002;
     requirement r_req_rtb_003 : VotesStored_Rtb003;
@@ -5041,6 +5047,7 @@ package MIA_NodeRequirements {
     satisfy r_req_gtb_017 by mia.persistence;
     satisfy r_req_gtb_018 by mia.persistence;
     satisfy r_req_gtb_019 by mia.persistence;
+    satisfy r_req_gtb_020 by mia.persistence;
     satisfy r_req_rtb_001 by mia.persistence;
     satisfy r_req_rtb_002 by mia.persistence;
     satisfy r_req_rtb_003 by mia.persistence;
@@ -5466,6 +5473,7 @@ package MIA_NodeRequirements {
     allocate r_req_gtb_017 to mia.persistence;
     allocate r_req_gtb_018 to mia.persistence;
     allocate r_req_gtb_019 to mia.persistence;
+    allocate r_req_gtb_020 to mia.persistence;
     allocate r_req_rtb_001 to mia.persistence;
     allocate r_req_rtb_002 to mia.persistence;
     allocate r_req_rtb_003 to mia.persistence;
@@ -5923,6 +5931,7 @@ package MIA_NodeRequirements {
     dependency from r_req_gtb_017 to fr40;
     dependency from r_req_gtb_018 to fr40;
     dependency from r_req_gtb_019 to fr40;
+    dependency from r_req_gtb_020 to fr40;
     dependency from r_req_rtb_001 to r_req_db_002;
     dependency from r_req_rtb_002 to r_req_db_010;
     dependency from r_req_rtb_003 to r_req_db_012;

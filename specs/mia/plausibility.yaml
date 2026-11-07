@@ -2701,6 +2701,11 @@ plausibility:
       rated: '2026-11-07'
       rated_by: maldun
       rating: plausible
+    REQ-GTB-020:
+      basis:
+      - 'a lookup of the two end nodes before the write; no number depends on it (proposal of the agent, 2026-11-07; to be rated by the owner)'
+      hardware: HW-target
+      rating: unknown
     REQ-LOG-001:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
