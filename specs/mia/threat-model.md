@@ -12,6 +12,7 @@ How to read it: a model step can only be steered through text, and most MIA step
 | TB-paper | PaperText | web (scholarly APIs, PDFs) | ReviewAbstractStep, ReviewSectionStep, ReviewFullStep, ReviewSummaryStep | no tools; decides which sources a review keeps; the PDF is read inside a wall |
 | TB-history | ChatHistory | model (earlier answers, quoted web text) | ChatStep, DreamStep | no tools; the summary can become a memory record |
 | TB-code | GeneratedScript | model | ScriptWriterStep, ScriptSandbox | runs code; contained by the sandbox, no network |
+| TB-exchange (G-V2) | ImportedTransform | a transform file from outside MIA | the toolbox, then the pipeline runner | foreign code with MIA's permissions if it runs; stored untrusted, never run until the owner marks it (SC-09, TD-24) |
 | TB-edit | WorkflowEdit | user (graph app) | WorkflowValidator, the pipeline runner | changes what runs for everyone; users are trusted (CON-6), the edit is validated and versioned |
 
 ## Threats
@@ -110,3 +111,12 @@ How to read it: a model step can only be steered through text, and most MIA step
 - **Poisoned or wrong labels in the open benchmarks** (VitaminC, Wikidata): a data-integrity risk of the evaluation, not of the app agent; handled by the audit sample and the ambiguous tag.
 - **Exposure beyond trusted users** (CON-5, CON-6): MIA runs on a private network for a few trusted people. Per-user permissions, an audit log of edits and a penetration test belong to the day this changes (quality.md).
 - **Theft of model weights or of the host**: the host is the owner's machine.
+
+### THR-011 – An imported transform that does harm when it runs (G-V2)
+- Boundary: TB-exchange
+- Category: LLM03 Supply chain, LLM06 Excessive agency
+- Impact: code of a foreign transform runs inside the MIA process and can read or delete files or send data out; the sandbox backend is off (TD-24)
+- Mitigation: REQ-WFM-053 (stored untrusted), REQ-WFM-054 (import runs no code), REQ-WFM-055 (only the owner marks it trusted), REQ-RUN-017 (an untrusted transform blocks the run), NFR-3
+- Red-team cases: none yet; the marker side-effect case of AC-32 is a deterministic test, not an eval case; red-team cases are proposed in Step 4 for a person to label
+- Residual risk: a transform the owner marks trusted by mistake runs unsandboxed (SC-09); the review process and a sandbox backend are later goals
+- Status: Draft
