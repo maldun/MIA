@@ -100,8 +100,10 @@ for path in sys.argv[1:]:
                 print("DOUBLE: %s %s.%s x%d" % (path, cls.name, name, count)); bad += 1
 print("none" if not bad else "%d double(s)" % bad)
 PY2
-    echo "== trace_check, errors about GTB (none expected: 'scenario defined 2 times' is gone)"
-    python3 ~/.claude/skills/dev-workflow/scripts/trace_check.py --spec-dir specs/mia --tests-dir tests 2>&1 | grep -E "GTB" || echo none
+    echo "== trace_check: 'scenario defined 2 times' must be gone (none expected); the total is the known baseline of 517 errors (TC-GTB-001..005 and others are part of it)"
+    python3 ~/.claude/skills/dev-workflow/scripts/trace_check.py --spec-dir specs/mia --tests-dir tests > "$WORK/trace.txt" 2>&1 || true
+    grep "defined 2 times" "$WORK/trace.txt" || echo none
+    echo "total errors: $(grep -c '| ERROR |' "$WORK/trace.txt")"
     echo "== the checks of the cleaned files"
     python tests/acceptance/contract/test_if_301_v2_graph_tables.py -k _mock 2>&1 | tail -1
     python tests/acceptance/test_graph_record_identity.py 2>&1 | tail -1
