@@ -507,8 +507,8 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 |---|---|---|---|
 | 1 | SK | Skill record: the skill as one versioned record (FR-36) | REQ-WFM-040, REQ-WFM-041, REQ-WFM-042 |
 | 2 | GM | Graph model: data, transform and master nodes and their rules (FR-37) | REQ-WFM-043, REQ-WFM-044, REQ-WFM-045, REQ-WFM-046, REQ-WFM-047, REQ-WFM-048, REQ-WFM-049 |
-| 3 | TB | Toolbox and trust: transforms by ID, status, import and export (FR-38) | REQ-WFM-050, REQ-WFM-051, REQ-WFM-052, REQ-WFM-053, REQ-WFM-054, REQ-WFM-055, REQ-WFM-056 |
-| 4 | CV | Conversion: moving today's skills onto the records, one by one (FR-45) | REQ-WFM-057, REQ-WFM-058, REQ-WFM-059, REQ-WFM-060 |
+| 3 | TB | Toolbox and trust: transforms by ID, status, import and export (FR-38) | REQ-WFM-050, REQ-WFM-051, REQ-WFM-052, REQ-WFM-053, REQ-WFM-054, REQ-WFM-055, REQ-WFM-056, REQ-WFM-067 |
+| 4 | CV | Conversion: moving today's skills onto the records, one by one (FR-45) | REQ-WFM-057, REQ-WFM-058, REQ-WFM-059, REQ-WFM-060, REQ-WFM-068, REQ-WFM-069, REQ-WFM-070 |
 | 5 | SN | Snapshots: the skill set kept and restored (FR-47) | REQ-WFM-061, REQ-WFM-062, REQ-WFM-063, REQ-WFM-064, REQ-WFM-065, REQ-WFM-066 |
 
 ### REQ-WFM-040 – Skill record
@@ -654,15 +654,15 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Status: Draft
 - History: G-V2 Plan step 1 (2026-11-07), new
 
-### REQ-WFM-051 – Transform status
+### REQ-WFM-051 – Trust status of a transform
 - Level: low   Subject: TaskRuntime
-- Text: The Workflow management shall give every transform in the toolbox the status untrusted or trusted.
-- Rationale: refines FR-38; the statuses tested and retired belong to workflows (FR-7, FR-44)
+- Text: The Workflow management shall give every transform in the toolbox the trust status untrusted or trusted.
+- Rationale: refines FR-38; trust is about security (may it run at all); performance is the separate lifecycle of REQ-WFM-067 (owner 2026-11-07)
 - Parent: FR-38
 - Group: TB
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-32: a transform has one of the two statuses; any other value is refused (exact)
+- Acceptance criterion: AC-32: a transform has one of the two trust statuses; any other value is refused (exact)
 - Verified by: TC-WFM-051
 - Status: Draft
 - History: G-V2 Plan step 1 (2026-11-07), new
@@ -761,13 +761,13 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 ### REQ-WFM-059 – Same outcomes on the suite
 - Level: low   Subject: TaskRuntime
 - Text: The Workflow management shall accept the converted version of a skill only if it reproduces the outcomes of the old version on the dev split of its suite with the same pin.
-- Rationale: refines FR-45 and AC-34; numbers (repeats, margin, rule) are fixed in Plan before the first run
+- Rationale: refines FR-45 and AC-34; starting values by educated guess (owner 2026-11-07: start with suggestions, improve by running and re-evaluating); the values are configuration (REQ-WFM-069), a run uses one fixed version of them
 - Parent: FR-45
 - Group: CV
 - Priority: Must
 - Verification method: Evaluation
 - Acceptance criterion: AC-34: per skill, the criterion of the Eval criterion line passes on the dev split; see the open numbers in the plan notes
-- Eval criterion: OPEN – suite per skill, metric = the suite's own metric, rule = non-inferiority to the v0.1.0 baseline, margin, n and repeats to be fixed with the owner (see G-V2 plan notes), pin=MP-light, split=dev
+- Eval criterion: suite=<suite of the skill, EV-…>; select=all; metric=pass (the suite's own); min=baseline-0.10 (per skill, from its v0.1.0 baseline); n=dev cases of the suite; repeats=3, fold all; pin=MP-light; rule=threshold; alpha=0.05; false_alarm=0.0045 (n=20; computed per suite size); split=dev; settings version=1 (REQ-WFM-069)
 - Verified by: TC-WFM-059
 - Status: Draft
 - History: G-V2 Plan step 1 (2026-11-07), new
@@ -787,13 +787,13 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 
 ### REQ-WFM-061 – Take a snapshot
 - Level: low   Subject: TaskRuntime
-- Text: When the owner asks for a snapshot with a name, the Workflow management shall store the skills, workflow graphs, context graphs, toolbox transforms with their status, and the model pins they were tested with.
+- Text: When the owner asks for a snapshot with a name, the Workflow management shall store the skills, workflow graphs, context graphs, transforms with trust status and lifecycle, and their model pins.
 - Rationale: refines FR-47; debate definitions are added when they exist (goal D)
 - Parent: FR-47
 - Group: SN
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-40: a snapshot holds every item named, each with its version and status (exact)
+- Acceptance criterion: AC-40: a snapshot holds every item named, each with its version, trust status and lifecycle (exact)
 - Verified by: TC-WFM-061
 - Status: Draft
 - History: G-V2 Plan step 1 (2026-11-07), new
@@ -824,9 +824,9 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Status: Draft
 - History: G-V2 Plan step 1 (2026-11-07), new
 
-### REQ-WFM-064 – Restore gives version and status
+### REQ-WFM-064 – Restore gives version and statuses
 - Level: low   Subject: TaskRuntime
-- Text: When the owner restores a snapshot, the Workflow management shall give every item in the snapshot the version and status it had in the snapshot.
+- Text: When the owner restores a snapshot, the Workflow management shall give every item in the snapshot the version, trust status and lifecycle it had in the snapshot.
 - Rationale: refines FR-47
 - Parent: FR-47
 - Group: SN
@@ -863,3 +863,54 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Status: Draft
 - History: G-V2 Plan step 1 (2026-11-07), new
 
+### REQ-WFM-067 – Lifecycle of a transform
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall give every transform in the toolbox the lifecycle draft, tested or retired, apart from its trust status.
+- Rationale: refines FR-38 (owner 2026-11-07: trusted/untrusted is about security, tested/retired about performance); a change to tested names the evidence (a check or run) that justifies it; the automatic gate by a testbench is FR-44 in goal D, until then the owner sets it
+- Parent: FR-38
+- Group: TB
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-32: a transform has one lifecycle value and one trust status independently of each other; any other lifecycle value is refused; a change to tested without a named evidence is refused (exact)
+- Verified by: TC-WFM-067
+- Status: Draft
+- History: G-V2 Plan step 1 (2026-11-07), new, owner answer of 2026-11-07
+
+### REQ-WFM-068 – A retired item stays usable as baseline
+- Level: low   Subject: TaskRuntime
+- Text: While a transform or a skill is retired, the Workflow management shall keep it runnable by a check as a baseline.
+- Rationale: refines FR-38 and FR-45 (owner 2026-11-07: a retired skill may serve as baseline, for example the old form of a converted skill)
+- Parent: FR-45
+- Group: CV
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-34: a retired transform runs when a check names it (exact)
+- Verified by: TC-WFM-068
+- Status: Draft
+- History: G-V2 Plan step 1 (2026-11-07), new, owner answer of 2026-11-07
+
+### REQ-WFM-069 – Settings of the equivalence check are configuration
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall read the margin, repeats and rule of the equivalence check from a versioned configuration record with defaults, and record the version used with every result.
+- Rationale: refines FR-45 (owner 2026-11-07: start with educated guesses, adjustable and continuously improved by running and re-evaluating); M19 stays: a run uses one fixed version, a change is a new version that applies to later runs only and is never applied to a result already seen
+- Parent: FR-45
+- Group: CV
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-34: a change of the margin creates settings version n+1, a new result names n+1 and an earlier result still names n (exact)
+- Verified by: TC-WFM-069
+- Status: Draft
+- History: G-V2 Plan step 1 (2026-11-07), new, owner answer of 2026-11-07
+
+### REQ-WFM-070 – A retired item is not offered
+- Level: low   Subject: TaskRuntime
+- Text: While a transform or a skill is retired, the Workflow management shall not offer it for a new graph or a new run.
+- Rationale: refines FR-38 and FR-45; keeps the baseline from being used by accident
+- Parent: FR-45
+- Group: CV
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-34: a retired transform is absent from the list for a new graph and a retired skill from the command list (exact)
+- Verified by: TC-WFM-070
+- Status: Draft
+- History: G-V2 Plan step 1 (2026-11-07), new, owner answer of 2026-11-07

@@ -739,7 +739,7 @@ The HLS requirements FR-36 to FR-47 in EARS form; only those in the scope of G-V
 
 ### FR-38 – Toolbox and exchange of transforms
 - Level: top   Subject: MiaSystem
-- Text: The MIA system shall keep transforms in a toolbox by ID, each with a trust status that decides whether it runs.
+- Text: The MIA system shall keep transforms in a toolbox by ID, each with a trust status that decides whether it runs and a lifecycle that records its performance.
 - Rationale: HLS section 3.1, FR-38
 - Parent: HLS FR-38
 - Group: Toolbox and trust
