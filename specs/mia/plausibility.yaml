@@ -2682,19 +2682,25 @@ plausibility:
       rating: plausible
     REQ-GTB-017:
       basis:
-      - 'a header is one row with a list of member IDs and versions; no number depends on it (proposal of the agent, 2026-11-07; to be rated by the owner)'
+      - 'a header is one row with a list of member IDs and versions; no number depends on it (proposal of the agent, 2026-11-07; rated by the owner)'
       hardware: HW-target
-      rating: unknown
+      rated: '2026-11-07'
+      rated_by: maldun
+      rating: plausible
     REQ-GTB-018:
       basis:
-      - 'a versioned row with four fields; the same kind of record as the older tables (proposal of the agent, 2026-11-07; to be rated by the owner)'
+      - 'a versioned row with four fields; the same kind of record as the older tables (proposal of the agent, 2026-11-07; rated by the owner)'
       hardware: HW-target
-      rating: unknown
+      rated: '2026-11-07'
+      rated_by: maldun
+      rating: plausible
     REQ-GTB-019:
       basis:
-      - 'a lookup of each named member version before the write; no number depends on it (proposal of the agent, 2026-11-07; to be rated by the owner)'
+      - 'a lookup of each named member version before the write; no number depends on it (proposal of the agent, 2026-11-07; rated by the owner)'
       hardware: HW-target
-      rating: unknown
+      rated: '2026-11-07'
+      rated_by: maldun
+      rating: plausible
     REQ-LOG-001:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
