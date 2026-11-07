@@ -15,9 +15,9 @@ Drafted 2026-11-07 in Plan Step 0 from the approved HLS of iteration 2 (D-186). 
 ## Outcome criteria
 | ID | Expected outcome | Derived from |
 |---|---|---|
-| OC-1 | Given each skill MIA had in v0.1.0, when the owner uses it after the rework, then it gives the same results on its test cases as before, or it stays as it was and the reason is written down | FR-36, FR-45 |
-| OC-2 | Given a skill, when the owner or anyone looks at what it is made of, then the same description gives its command, its steps and the knowledge it uses, and a wrong description is refused with the reason | FR-36, FR-37, FR-40 |
-| OC-3 | Given a step that arrives from outside MIA, when someone tries to use it, then it does not run and says why; only the owner can allow it, and after that it runs | FR-38, NFR-3 |
+| OC-1 | Given each skill MIA had in v0.1.0, when the owner uses it after the rework, then it gives the same results on its test cases as before, or it stays as it was and the reason is written down | FR-6, FR-36, FR-45 |
+| OC-2 | Given a skill, when the owner or anyone looks at what it is made of, then the same description gives its command, its steps and the knowledge it uses, and a wrong description is refused with the reason | FR-7, FR-30, FR-36, FR-37, FR-40 |
+| OC-3 | Given a step that arrives from outside MIA, when someone tries to use it, then it does not run and says why; only the owner can allow it, and after that it runs | FR-22, FR-38, NFR-3 |
 | OC-4 | Given the skill set at a moment the owner has named, when the owner later changes things and goes back to that moment, then everything is as it was and the state before going back is kept as well | FR-47, FR-40 |
 | OC-5 | Given MIA is started from a fresh copy with one configuration file and one command, when it is up, then everything that worked before still works | NFR-9 |
 
@@ -65,7 +65,7 @@ Acceptance criteria in scope: AC-31, AC-32, AC-34, AC-38, AC-40. Out: AC-33, AC-
 | FR-23 | out | built in G-V1 (v0.1.0); this goal does not change it |
 | FR-24 | out | built in G-V1 (v0.1.0); this goal does not change it |
 | FR-25 | out | built in G-V1 (v0.1.0); this goal does not change it |
-| FR-26 | partly | the per-workflow specification stays; the testbench with budgets (FR-44) is goal D |
+| FR-26 | out | the testbench with budgets is goal D; nothing of FR-26 changes in this goal |
 | FR-27 | out | built in G-V1 (v0.1.0); this goal does not change it |
 | FR-28 | out | built in G-V1 (v0.1.0); this goal does not change it |
 | FR-29 | out | built in G-V1 (v0.1.0); this goal does not change it |
