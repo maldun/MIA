@@ -4,6 +4,7 @@ Four subgoal sessions plan in parallel, each in its own git worktree and branch 
 
 ## Merge order and routine
 1. STORE (already on master). 2. MODEL. 3. TOOLBOX. 4. CONVERT (its Implement waits for 1 to 3).
+Tags: the single tag `plan-baseline-it2` is set by the owner on master after every subgoal has its red tests installed. Until then each subgoal tags its own commit `plan-baseline-it2-<name>` (`-store`, `-model`, `-toolbox`, `-convert`), local, never pushed by an agent. The tag marks the state at that commit: red tests that are only staged (not yet installed under `tests/`) are not protected by it.
 Before a merge, in the subgoal's worktree: `git rebase master` (or `git merge master`), fix conflicts as below, then run `goal_check.py`, `trace_check.py`, `req_graph.py`, `req_lint.py` and `bash tools/check_sysml.sh`. The owner merges. After each merge the next session rebases again.
 
 ## Reserved IDs (do not take numbers outside your range; if you already did, renumber in your branch before the merge)
