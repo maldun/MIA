@@ -5,12 +5,35 @@ Drafted 2026-11-07 in Plan Step 0 from the approved HLS of iteration 2 (D-186). 
 - Kind: iteration
 - Parent: –
 - Statement: Every existing skill runs from the new records (skill record, workflow graph of data, transform and master nodes, graphs stored as node and edge records, toolbox with trust status), or stays on the old runner for a named reason, with the same outcomes on its suite; the owner can take and restore a snapshot of the skill set.
-- Exit criterion: AC-34 (per-skill equivalence with v0.1.0 on the same suite and pins) together with AC-31, AC-32, AC-38 and AC-40; a validation criterion VAL-007 is written in Plan Step 3 (not yet existing)
+- Exit criterion: OC-1 to OC-5, checked by AC-34 (per-skill equivalence with v0.1.0 on the same suite and pins) together with AC-31, AC-32, AC-38 and AC-40; a validation criterion VAL-007 is written in Plan Step 3 (not yet existing)
 - Supervision: supervised
 - Accepted by: Stefan Reiterer (owner)
 - Line of work: goal/v2
 - Subgoals: –
 - Status: Proposed
+
+## Outcome criteria
+| ID | Expected outcome | Derived from |
+|---|---|---|
+| OC-1 | Given each skill MIA had in v0.1.0, when the owner uses it after the rework, then it gives the same results on its test cases as before, or it stays as it was and the reason is written down | FR-36, FR-45 |
+| OC-2 | Given a skill, when the owner or anyone looks at what it is made of, then the same description gives its command, its steps and the knowledge it uses, and a wrong description is refused with the reason | FR-36, FR-37, FR-40 |
+| OC-3 | Given a step that arrives from outside MIA, when someone tries to use it, then it does not run and says why; only the owner can allow it, and after that it runs | FR-38 |
+| OC-4 | Given the skill set at a moment the owner has named, when the owner later changes things and goes back to that moment, then everything is as it was and the state before going back is kept as well | FR-47, FR-40 |
+| OC-5 | Given MIA is started from a fresh copy with one configuration file and one command, when it is up, then everything that worked before still works | NFR-9 |
+
+## Dependencies and bounds
+| Item (DEP-n / HR-nnn) | Real or stand-in | Note |
+|---|---|---|
+| model server with the pins of `eval-spec.md` | real | equivalence runs on MP-light |
+| PostgreSQL (TD-21) | real | graph records; the file backend stays for the document form during the transition |
+| `networkx`, `jsonschema` | real | approved 2026-11-07 (D-187), added to `requirements.txt` in Implement |
+| vis-network | out | goal B |
+
+## Split check
+| Suggestion | Decision (split / keep together) | Reason | Date |
+|---|---|---|---|
+| splitting the rework into A to D | split: this goal is A only | owner decision 2026-11-07; B, C, D are later goals | 2026-11-07 |
+| splitting A along nodes (N-2.3, N-3.2, N-2.4.1) | keep together | 3 nodes, 41 new requirements, one chain (record, storage, run, convert); the checker's large-scope warning counts all inherited requirements | 2026-11-07 |
 
 ## Scope
 Acceptance criteria in scope: AC-31, AC-32, AC-34, AC-38, AC-40. Out: AC-33, AC-35, AC-36, AC-37, AC-39. Amendments carried by this goal: A-89 (FR-7, FR-22, FR-30 entries) and conflicts 1 to 3 of the Explore hand-over (owner-only trust marking as exception to CON-6; FR-40 against IF-301/IF-203; imported transforms untrusted, SC-09). Open for Plan: numbers inside the in-scope criteria (for example the conversion margin).
