@@ -5,7 +5,7 @@ Drafted 2026-11-07 when the owner asked to split G-V2 into four subgoals for rev
 - Kind: subgoal
 - Parent: G-V2
 - Statement: A skill is one versioned record that names its command, workflow graph and context graph, and its graph consists of data, transform and master nodes under fixed rules.
-- Exit criterion: OC-1, OC-2, OC-3, with the checks of its requirements below
+- Exit criterion: OC-1, OC-2, OC-3, with the checks of its requirements below, and VAL-009 (`specs/mia/test-spec.md`) in the Validate of G-V2
 - Supervision: supervised
 - Accepted by: Stefan Reiterer (owner)
 - Line of work: goal/v2.model
