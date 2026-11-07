@@ -27,6 +27,7 @@ Tests of this part alone against the mocks of its neighbours: unit tests with pl
 | TC-GTB-018 | REQ-GTB-017 | Unit | 1 | a header `wf1` naming nodes n1 and n2 and edge e1 at version 1, stored; then n1 edited (version 2) and a second header version naming n1 at version 2 | header version 1 reads n1 at version 1 with its old content; header version 2 reads n1 at version 2; all other fields equal what was stored | exact |
 | TC-GTB-019 | REQ-GTB-018 | Unit | 1 | a skill with ID `lookup`, command `/lookup`, a workflow graph ID and a context graph ID; then an edit of the context graph ID; a record without a command | read back equal; the edit is version 2 and version 1 is unchanged; the record without a command is refused naming `command` | exact |
 | TC-GTB-020 | REQ-GTB-019 | Unit | 1 | a header naming n1 at version 5 when n1 has versions 1 and 2; the same header with version 2 | the first is refused naming `n1`; the second is accepted | exact |
+| TC-GTB-021 | REQ-GTB-020 | Unit | 1 | an edge e1 from n1 to n9 with only n1 stored; the same edge with n9 stored | the first is refused naming `n9`; the second is accepted | exact |
 | TC-GTB-015 | REQ-GTB-015 | Component | 2 | the contract suites of IF-301 v1 and IF-203 v0, run unchanged, with the graphs stored as records | both suites pass | exact |
 
 Contract test cases of IF-301: TC-IF-301-01 to the last of the suite (listed in the root `test-spec.md`).
@@ -130,6 +131,13 @@ Examples use only what the requirements fix. The registered types are those the 
 - When: each is stored
 - Then: the first is refused and names `n1`
 - And: the second is accepted (the twin differs only in the broken rule, as TR-GTB-001 and the older checks)
+
+### TC-GTB-021 – An edge to a missing node is refused
+- Verifies: REQ-GTB-020
+- Given: node n1 stored; an edge e1 from n1 to n9, and the same edge after n9 is stored
+- When: each is stored
+- Then: the first is refused and names `n9`
+- And: the second is accepted (the twin differs only in the broken rule)
 
 ### TC-GTB-015 – The document form still works
 - Verifies: REQ-GTB-015
