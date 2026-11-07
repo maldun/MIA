@@ -438,7 +438,10 @@ class _ChatTurnAdapter:
             callback({"event": event, "payload": payload})
 
     def _scripted_answer(self, text, on_delta, on_emotion, should_stop):
-        sentences = self._answers.pop(0) if self._answers else ["Hello."]
+        answer = self._answers.pop(0) if self._answers else ["Hello."]
+        sentences, emotion = (answer["sentences"], answer.get("emotion")) if isinstance(answer, dict) else (answer, None)
+        if emotion:
+            on_emotion(emotion)
         shown = ""
         for sentence in sentences:
             shown = (shown + " " + sentence).strip()
