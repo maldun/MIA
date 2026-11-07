@@ -47,8 +47,80 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-203
 | TC-WFM-037 | REQ-WFM-037 | Component | 2 | component test with the mocks of the neighbouring interfaces | AC-23: a stored file is listed and downloaded; the result ends with a link for each file; bad names and types and files over a limit are refused; a file deleted in the volume leaves the list | exact |
 | TC-WFM-038 | REQ-WFM-038 | Component | 2 | component test with the mocks of the neighbouring interfaces | AC-3: the record read back equals the report; the markdown and LaTeX files hold every work; special characters are escaped | exact |
 | TC-WFM-039 | REQ-WFM-039 | Component | 2 | component test with a temporary extensions folder; inspection of the core files | AC-23: a folder with a manifest is loaded, listed, parsed and run; no core file names a skill id | exact |
+| TC-WFM-040 | REQ-WFM-040 | Component | 1 | unit test with the fake storage (IF-301 v2 mock) | AC-31: a skill record is stored, read back equal to the stored one; an edit gives version 2 and leaves version 1 unchanged | exact |
+| TC-WFM-041 | REQ-WFM-041 | Component | 1 | unit test with the fake storage; a skill that has a record and an old skill file, manifest and pipeline reference | AC-31: with the old files removed the skill is listed and runs unchanged; with the record's command changed, the record's command is listed | exact |
+| TC-WFM-042 | REQ-WFM-042 | Component | 1 | unit test with the fake storage and two skill records | AC-31: a second skill with the command of the first is refused naming the first skill's ID; a new version of the first skill keeps its command and is accepted | exact |
+| TC-WFM-043 | REQ-WFM-043 | Component | 1 | unit test, graphs written as data | AC-31: a graph with a node of another type is refused naming the node; a graph of the three types is accepted | exact |
+| TC-WFM-044 | REQ-WFM-044 | Component | 1 | unit test with the fake storage | AC-31: ID, context graph ID, testbench ID and description read back as stored; an empty testbench ID is accepted | exact |
+| TC-WFM-045 | REQ-WFM-045 | Component | 1 | unit test, graphs written as data | AC-31: an edge data-data and an edge transform-master are refused naming the edge; data-transform and master-data edges are accepted | exact |
+| TC-WFM-046 | REQ-WFM-046 | Component | 1 | unit test, graphs written as data | AC-31: two writers of one data node (a transform and a master node) are refused with its ID; two readers are accepted | exact |
+| TC-WFM-047 | REQ-WFM-047 | Property | 1 | generated graphs (seeds 1 to 200) with and without a cycle | AC-31: a cycle is refused as IDs with the first repeated at the end; every accepted graph has a topological order | exact (0 failures) |
+| TC-WFM-048 | REQ-WFM-048 | Component | 1 | unit test, graphs written as data | AC-31: a master node with neither a maximum of repetitions nor a maximum time is refused naming it; with a maximum of 1 repetition it is accepted | exact |
+| TC-WFM-049 | REQ-WFM-049 | Component | 1 | unit test with the fake storage | AC-31: a data node with parameters is stored and read back with the parameters apart from its value | exact |
 
 ## Assumptions (checked in validation)
 
 - ASM-N2-001: the model server is replaced by the fake model server of `pipeline.py` in all stage 1 to 3 tests; no test needs a GPU before stage 4.
 - ASM-N2-002: the storage is the mock of IF-102 until N-3 is integrated (step 1 of N-0).
+
+## Scenarios (G-V2.MODEL; the older checks of this file have none yet)
+
+### TC-WFM-040 – skill record
+- Verifies: REQ-WFM-040
+- Given: the fake storage and a skill record with ID `lookup`, command `/lookup`, a workflow graph ID and a context graph ID
+- When: the record is stored, read back, then edited (another context graph ID) and stored again
+- Then: the first read equals what was stored; the edit is version 2; version 1 still reads as first stored
+
+### TC-WFM-041 – the record wins
+- Verifies: REQ-WFM-041
+- Given: a skill with a record, and the same skill still present as skill file, extension manifest and pipeline reference, each naming a different command
+- When: the skills are listed, then the old files are removed and the list is made and a run started
+- Then: both lists show the record's command; the run is the one of the record's workflow graph
+
+### TC-WFM-042 – command used once
+- Verifies: REQ-WFM-042
+- Given: the skill `lookup` with command `/lookup` stored
+- When: a record `review` with command `/lookup` is stored; then version 2 of `lookup` with command `/lookup` is stored
+- Then: the first is refused and the refusal names `lookup`; the second is accepted
+
+### TC-WFM-043 – three node types
+- Verifies: REQ-WFM-043
+- Given: a graph with one data, one transform and one master node, and a copy where one node has the type `sink`
+- When: both are saved
+- Then: the first is accepted; the second is refused and names the node
+
+### TC-WFM-044 – graph description
+- Verifies: REQ-WFM-044
+- Given: a workflow graph with ID, context graph ID, description and an empty testbench ID, and one with a testbench ID
+- When: both are stored and read back
+- Then: all four fields read back as stored; the empty testbench ID is accepted
+
+### TC-WFM-045 – data and transform alternate
+- Verifies: REQ-WFM-045
+- Given: graphs with one edge each: data to data, transform to master, data to transform, master to data
+- When: each is saved
+- Then: the first two are refused naming the edge; the last two are accepted
+
+### TC-WFM-046 – one writer per data node
+- Verifies: REQ-WFM-046
+- Given: a data node written by a transform and by a master node; another data node read by two transforms
+- When: each graph is saved
+- Then: the first is refused naming the data node; the second is accepted
+
+### TC-WFM-047 – no cycle
+- Verifies: REQ-WFM-047
+- Given: 200 generated graphs (seeds 1 to 200), about half with one cycle of 2 to 5 nodes added
+- When: each is saved
+- Then: each graph with a cycle is refused with the cycle as IDs, the first ID repeated at the end; each accepted graph has a topological order in which every edge points forward (0 failures)
+
+### TC-WFM-048 – master node stops
+- Verifies: REQ-WFM-048
+- Given: a graph with a master node without a maximum of repetitions and without a maximum time; the same with a maximum of 1 repetition
+- When: each is saved
+- Then: the first is refused naming the master node; the second is accepted
+
+### TC-WFM-049 – parameters of a data node
+- Verifies: REQ-WFM-049
+- Given: a data node with the value `"text"` and the parameters `{"folder": "out"}`
+- When: it is stored and read back
+- Then: the value reads `"text"` and the parameters read `{"folder": "out"}`, in separate fields
