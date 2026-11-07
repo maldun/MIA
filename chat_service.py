@@ -43,6 +43,7 @@ try:
     from .pipeline_model import UNREACHABLE
     from .storage import StorageError
     from .speech_text import speech_text
+    from .mia_logger import logger
     from .task_monitor import TaskMonitor
     from .task_registry import TaskCommandError, TaskRegistry
 except ImportError:  # used as plain script / in tests
@@ -50,6 +51,7 @@ except ImportError:  # used as plain script / in tests
     from pipeline_model import UNREACHABLE
     from storage import StorageError
     from speech_text import speech_text
+    from mia_logger import logger
     from task_monitor import TaskMonitor
     from task_registry import TaskCommandError, TaskRegistry
 
@@ -128,7 +130,8 @@ class ChatService:
                  behaviours=None, reputable=0.6, repair=None, remember=None, review_timeout=1800,
                  tasks=None, skill_options=None, prepare_task=None, argument_commands=None, files=None, unavailable=(), react=None, speak=None):
         self._emit = emit
-        self._speak = speak                                                # (text, should_stop) -> None: the voice route of live answers; TD-11 option B, stub of Plan step 4, not used yet
+        self._speak = speak                                                # (sentence, should_stop) -> None: the voice route of live answers (sound server); None = speak again stays silent (REQ-CHA-030)
+        self._speak_lock = threading.Lock()                                # one spoken-again playback at a time (REQ-CHA-034)
         self._tasks = tasks if tasks is not None else TaskRegistry()      # REQ-WFM-029: the tasks (lookup, search, review, ...) register themselves, the core names none of them
         self._unavailable = {str(n).lower() for n in unavailable}         # ids of extensions that did not load: their command says so instead of going to the model
         self._skill_options = skill_options or {}                          # config `skill_options`: {task id: {option: value}}, the defaults of the options
@@ -382,7 +385,20 @@ class ChatService:
         sentences = [s for s in SENTENCE_END.split(speech_text(record["text"])) if s]
         for index, sentence in enumerate(sentences):
             self._emit("audio_chunk", {"id": record["id"], "index": index, "sentence": sentence})
+        if self._speak is not None and sentences:
+            self._spawn(lambda: self._play_again(sentences))      # the request must not wait until the speech has ended
         return {"sentences": len(sentences)}
+
+    def _play_again(self, sentences):
+        """hands the sentences one by one to the voice route, after any playback that is still running (REQ-CHA-030, 031, 034); a route that fails
+        is logged once and the rest is dropped: the chat goes on without voice (REQ-CHA-033)"""
+        with self._speak_lock:
+            for sentence in sentences:
+                try:
+                    self._speak(sentence, lambda: False)
+                except Exception as exc:
+                    logger.error("Speak again: the voice route failed: %s", exc)
+                    return
 
     def account(self, message_id):
         """the plain steps kept with the answer, in order; the domain events of the run log (kind "event") are no steps. Answers kept before D-138 have
