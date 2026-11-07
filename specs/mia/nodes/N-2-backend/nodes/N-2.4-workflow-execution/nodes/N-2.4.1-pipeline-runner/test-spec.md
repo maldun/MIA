@@ -23,10 +23,10 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-202
 | TC-RUN-013 | REQ-RUN-013 | Inspection | 1 | the code and the log files of the repository | AC-9: the lookup, verify and review entries run with the same runner; a new valid entry runs without a change of code | as stated |
 | TC-RUN-014 | REQ-RUN-014 | Component | 2 | component test with the mocks of the neighbouring interfaces | AC-19, AC-28: the contract suite test_if_202_run_workflow.py passes against the Pipeline runner (stage 2) | as stated |
 | TC-RUN-015 | REQ-RUN-015 | Component | 2 | component test with the mocks of the neighbouring interfaces | AC-2, AC-8: the contract suite test_if_105_evaluation_access.py passes against the Pipeline runner (stage 2) | as stated |
-| TC-RUN-016 | REQ-RUN-016 | Component | 1 | unit test with the fake model server and scripted transforms | AC-31: a graph with three transforms runs in an order that respects its edges and the output data nodes hold the results | exact |
-| TC-RUN-017 | REQ-RUN-017 | Component | 1 | unit test with a transform whose only effect is writing a marker file | AC-32: the marker is not written and the refusal names the node and its status untrusted; after the owner sets it trusted the same graph runs and writes the marker | exact |
-| TC-RUN-018 | REQ-RUN-018 | Component | 1 | unit test with a master node between two data nodes | AC-31: the master node runs once after its input data node is written and its output data node holds the result | exact |
-| TC-RUN-019 | REQ-RUN-019 | Component | 1 | unit test with three scripted transforms, the second failing | AC-31: the third transform does not run and the run result names the second | exact |
+| TC-RUN-016 | REQ-RUN-016 | Component | 2 | unit test with the fake model server and scripted transforms | AC-31: a graph with three transforms runs in an order that respects its edges and the output data nodes hold the results | exact |
+| TC-RUN-017 | REQ-RUN-017 | Component | 2 | unit test with a transform whose only effect is writing a marker file | AC-32: the marker is not written and the refusal names the node and its status untrusted; after the owner sets it trusted the same graph runs and writes the marker | exact |
+| TC-RUN-018 | REQ-RUN-018 | Component | 2 | unit test with a master node between two data nodes | AC-31: the master node runs once after its input data node is written and its output data node holds the result | exact |
+| TC-RUN-019 | REQ-RUN-019 | Component | 2 | unit test with three scripted transforms, the second failing | AC-31: the third transform does not run and the run result names the second | exact |
 
 ## Assumptions (checked in validation)
 
