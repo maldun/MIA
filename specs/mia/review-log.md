@@ -466,3 +466,22 @@ The first version was silent until the end and could take 20 minutes or more: th
 | D-260 | **Plausibility decisions for G-V2, owner Stefan Reiterer, 2026-11-07.** (B) The basis for "only the owner" (REQ-WFM-054, 066, REQ-RUN-017 after the owner sets trusted) is the account that creates accounts (TC-MIA-014); rating plausible on that basis. Note of the owner: several accounts on one instance are for testing only; a later goal is one user per instance with its own database and model. (C) REQ-WFM-058: model replies and tool results are both scripted, replayed from a recording of the old run; a recording tool for tool results may be needed (a small task, no new part). (D) REQ-WFM-059 is rated *questionable with a probe*: record the baselines of the converted skills on MP-light in Plan Step 4 (results only), then judge the margin 0.10 against them (D-187: numbers are educated guesses to improve by running). (E) The six top-level items FR-36, 37, 38, 40, 45, 47 are rated by the owner one by one, with a basis the owner gives, after their subgoals are rated; the agent proposes nothing for them before. The sessions of MODEL, TOOLBOX and CONVERT write the records of their own scope with these bases and the owner rates them at their reviews. |
 | REQ-RUN-018 | requirement | c9dfa8f51ee1 | Stefan Reiterer | 2026-11-07 | approved | RUN-016 mark confirmed by the owner the same day |
 | REQ-RUN-019 | requirement | 5b3652cd5237 | Stefan Reiterer | 2026-11-07 | approved | RUN-016 mark confirmed by the owner the same day |
+| TC-WFM-040 | check | c56411fcb17b | Stefan Reiterer | 2026-11-07 | approved |  |
+| TC-WFM-041 | check | 46fa660640a8 | Stefan Reiterer | 2026-11-07 | approved |  |
+| TC-WFM-042 | check | 3fba42246a0b | Stefan Reiterer | 2026-11-07 | approved |  |
+| TC-WFM-043 | check | 9e4e7b1be4f0 | Stefan Reiterer | 2026-11-07 | approved |  |
+| TC-WFM-044 | check | a51ba8d7f324 | Stefan Reiterer | 2026-11-07 | approved |  |
+| TC-WFM-045 | check | 801d7371bae8 | Stefan Reiterer | 2026-11-07 | approved |  |
+| TC-WFM-046 | check | b11a7ca50505 | Stefan Reiterer | 2026-11-07 | approved |  |
+| TC-WFM-047 | check | 24a29873e34e | Stefan Reiterer | 2026-11-07 | approved |  |
+| TC-WFM-048 | check | 07fac3c94c6c | Stefan Reiterer | 2026-11-07 | approved |  |
+| TC-WFM-049 | check | 088905c35ebb | Stefan Reiterer | 2026-11-07 | approved |  |
+| TC-RUN-016 | check | 5bbf3c34c592 | Stefan Reiterer | 2026-11-07 | approved |  |
+| TC-RUN-017 | check | 19840141d85c | Stefan Reiterer | 2026-11-07 | approved |  |
+| TC-RUN-018 | check | 03d05662c589 | Stefan Reiterer | 2026-11-07 | approved |  |
+| TC-RUN-019 | check | 8ed49453cffa | Stefan Reiterer | 2026-11-07 | approved |  |
+| TR-MODEL-002 | test requirement | b93d160b04f5 | Stefan Reiterer | 2026-11-07 | approved |  |
+| TR-MODEL-003 | test requirement | 0b0835c632d6 | Stefan Reiterer | 2026-11-07 | approved |  |
+| TR-MODEL-001 | test requirement | 83d30e98e910 | Stefan Reiterer | 2026-11-07 | approved |  |
+| TR-MODEL-004 | test requirement | 726d58b2407b | Stefan Reiterer | 2026-11-07 | approved |  |
+| TR-MODEL-005 | test requirement | d8cd0646f0ec | Stefan Reiterer | 2026-11-07 | skimmed |  |
