@@ -202,7 +202,7 @@ class _ChatApiAdapter:
         self._threaded, self._progress, self._seen = False, 0, 0         # A-21: a review blocks while it waits, so its worker is a thread (set by the first /review)
         self._answers = list(answers or [])                         # the same scripts as the mock: a list of sentences, or {"sentences": [...], "emotion": ...}
         if any(isinstance(a, dict) and a.get("emotion") for a in self._answers):
-            raise unittest.SkipTest("IF-101 expression and audio_chunk events of an answer are not in the real Backend yet (N-2.5)")
+            raise unittest.SkipTest("IF-101 the expression event of an answer is not in the real Backend yet (A-130)")
         self._service, self._service_error, self._error = api_sessions.SessionService(store, clock=lambda: self._now), api_sessions.ApiError, ApiError
         trust_file = os.path.join(folder, "source_trust.json")
         with open(trust_file, "w", encoding="utf-8") as fp:
@@ -427,8 +427,6 @@ class _ChatTurnAdapter:
         from storage import Storage
         from storage_files import FileBackend
         self._answers, self._now, self._pending, self._callbacks = list(answers or []), 0.0, [], []
-        if any(isinstance(a, dict) and a.get("emotion") for a in self._answers):
-            raise unittest.SkipTest("IF-201 expression and audio_chunk events of an answer are not in the real chat agent yet (N-2.5)")
         folder = tempfile.mkdtemp()
         self._error, self._chat_error = ServiceError, ChatError
         self._chat = ChatService(self._deliver, ChatLog(os.path.join(folder, "chat.jsonl")), MoodTracker(os.path.join(REPO, "moods.json")), self._scripted_answer,
