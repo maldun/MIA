@@ -58,10 +58,10 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-203
 | TC-WFM-060 | REQ-WFM-060 | Inspection | 1 | the record of the 15 skills of v0.1.0 read by a script and by a person | AC-34: each skill names its form and either a verdict with suite, run and pins or a reason; the nine interface skills carry the reason of the owner of 2026-11-07 | exact |
 | TC-WFM-061 | REQ-WFM-061 | Component | 2 | component test with the mocks of the neighbouring interfaces; a state of 2 skills, 2 workflow graphs, 1 context graph, 3 transforms (trusted tested, trusted draft, untrusted retired) and the pin MP-light | AC-40: the snapshot "before-rework" holds all 8 items with version, trust and lifecycle and the pin | exact |
 | TC-WFM-062 | REQ-WFM-062 | Component | 2 | component test with the mocks of the neighbouring interfaces; two snapshots taken at two different times by the owner | AC-40: both are listed with name, time and author | exact |
-| TC-WFM-063 | REQ-WFM-063 | Component | 2 | component test with the mocks of the neighbouring interfaces; state S2 differs from snapshot "a" | AC-40: restoring "a" first creates a snapshot of S2; restoring that snapshot gives S2 back | exact |
+| TC-WFM-063 | REQ-WFM-063 | Component | 2 | component test with the mocks of the neighbouring interfaces; state S2 differs from snapshot "a" | AC-40: restoring "a" first creates a snapshot named "before restore of a" with S2 and the owner as author; restoring that snapshot gives S2 back | exact |
 | TC-WFM-064 | REQ-WFM-064 | Component | 2 | component test with the mocks of the neighbouring interfaces; after "a" a skill, a workflow graph, a context graph and a transform status are changed | AC-40: after the restore each item has the version, trust and lifecycle of "a"; the transform untrusted in "a" is untrusted | exact |
 | TC-WFM-065 | REQ-WFM-065 | Component | 2 | component test with the mocks of the neighbouring interfaces; the lists of versions of every item before and after a restore | AC-40: each list before is a prefix of the list after (no version deleted) | exact |
-| TC-WFM-066 | REQ-WFM-066 | Component | 2 | component test with the mocks of the neighbouring interfaces; a non-owner account and the owner account | AC-40: the non-owner is refused for take and restore and the state is unchanged; the owner succeeds | exact |
+| TC-WFM-066 | REQ-WFM-066 | Component | 2 | component test with the mocks of the neighbouring interfaces; the owner account (the account that creates accounts) and a second account created by it | AC-40: the non-owner is refused for take and restore and the state is unchanged; the owner succeeds | exact |
 | TC-WFM-069 | REQ-WFM-069 | Component | 2 | component test with the mocks of the neighbouring interfaces; the equivalence settings at version 1 (margin 0.10, repeats 3, rule threshold) and a change of the margin to 0.05 | AC-34: version 2 is created; a new result names 2; the earlier result still names 1 and is not decided again | exact |
 | TC-WFM-115 | REQ-WFM-115 | Component | 2 | the old runner and the converted skill extract_claims_rules on the 51 dev cases of EV-extraction, no model | AC-34: the 51 outputs are equal; a planted difference in one output is reported as a diff | exact |
 
@@ -110,7 +110,7 @@ TC-WFM-110 to 114 (the five eval criteria of the converted skills) are statistic
 - Verifies: REQ-WFM-063
 - Given: state S1 stored as snapshot "a"; later state S2 differs from S1 in 4 items
 - When: the owner restores "a"
-- Then: before anything is replaced a snapshot of S2 exists; the state equals S1; restoring that new snapshot gives S2 again
+- Then: before anything is replaced a snapshot named "before restore of a" exists with S2 and the owner as author; the state equals S1; restoring that new snapshot gives S2 again
 
 ### TC-WFM-064 – Restore gives version and statuses
 - Verifies: REQ-WFM-064
@@ -126,7 +126,7 @@ TC-WFM-110 to 114 (the five eval criteria of the converted skills) are statistic
 
 ### TC-WFM-066 – Snapshots only by the owner
 - Verifies: REQ-WFM-066
-- Given: the owner account and an account that is not the owner; snapshot "a" and a changed state
+- Given: the owner account (the account that creates accounts) and a second account created by it; snapshot "a" and a changed state
 - When: the other account asks to take a snapshot and to restore "a"; then the owner does both
 - Then: both requests of the other account are refused and the list of snapshots and the state are unchanged; the owner succeeds
 

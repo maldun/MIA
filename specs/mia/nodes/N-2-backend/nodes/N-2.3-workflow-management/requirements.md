@@ -804,12 +804,12 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Rationale: refines FR-47
 - Parent: FR-47
 - Group: SN
-- Priority: Should
+- Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-40: two snapshots are listed with the three fields (exact)
 - Verified by: TC-WFM-062
 - Status: Draft
-- History: G-V2 Plan step 1 (2026-11-07), new
+- History: G-V2 Plan step 1 (2026-11-07), new; Plan step 3 (2026-11-07): Should raised to Must (owner: a restore asks for a name, and the snapshots of REQ-WFM-063 would be invisible without a list)
 
 ### REQ-WFM-063 – Restore keeps the former state
 - Level: low   Subject: TaskRuntime
@@ -819,10 +819,10 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Group: SN
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-40: after a restore a new snapshot with the state before it exists and can be restored (exact)
+- Acceptance criterion: AC-40: after a restore of snapshot "a" a new snapshot named "before restore of a" with the state before it and the owner as author exists and can be restored (exact)
 - Verified by: TC-WFM-063
 - Status: Draft
-- History: G-V2 Plan step 1 (2026-11-07), new
+- History: G-V2 Plan step 1 (2026-11-07), new; Plan step 3 (2026-11-07): name and author of the automatic snapshot added to the criterion (owner); text unchanged
 
 ### REQ-WFM-064 – Restore gives version and statuses
 - Level: low   Subject: TaskRuntime
@@ -852,7 +852,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 
 ### REQ-WFM-066 – Snapshots only by the owner
 - Level: low   Subject: TaskRuntime
-- Text: If an account other than the owner asks to take or restore a snapshot, then the Workflow management shall refuse the request.
+- Text: If an account other than the owner account, the account that creates accounts, asks to take or restore a snapshot, then the Workflow management shall refuse the request.
 - Rationale: refines FR-47 ('let the owner'); consistent with owner-only editing of skills (interview 11). Suggestion of the agent, not in the HLS text; the owner decides at review.
 - Parent: FR-47
 - Group: SN
@@ -861,7 +861,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Acceptance criterion: AC-40: a non-owner account is refused for both, the state stays (exact)
 - Verified by: TC-WFM-066
 - Status: Draft
-- History: G-V2 Plan step 1 (2026-11-07), new
+- History: G-V2 Plan step 1 (2026-11-07), new; Plan step 3 (2026-11-07): "owner" defined in the text as the account that creates accounts (owner, D-260 B; TC-MIA-014)
 
 ### REQ-WFM-067 – Lifecycle of a transform
 - Level: low   Subject: TaskRuntime

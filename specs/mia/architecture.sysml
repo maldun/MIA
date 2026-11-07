@@ -3022,7 +3022,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-WFM-066'> SnapshotsOnlyByTheOwner_Wfm066 {
         subject s : TaskRuntime;
-        doc /* If an account other than the owner asks to take or restore a snapshot, then the Workflow management shall refuse the request. */
+        doc /* If an account other than the owner account, the account that creates accounts, asks to take or restore a snapshot, then the Workflow management shall refuse the request. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-WFM-067'> LifecycleOfATransform_Wfm067 {
