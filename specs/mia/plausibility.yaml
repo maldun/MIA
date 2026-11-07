@@ -777,6 +777,13 @@ plausibility:
       rated: '2026-11-07'
       rated_by: Stefan Reiterer
       rating: plausible
+    REQ-API-004:
+      basis:
+      - limits are exact counts (5 failed logins, a 60 s window) judged on the host clock, no measurement uncertainty; the text of D-153 matches the code, IF-101 and TC-IF-101-02; realised and Verified in v0.1.0 (owner rating 2026-11-08)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: Stefan Reiterer
+      rating: plausible
     REQ-API-005:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
@@ -791,6 +798,13 @@ plausibility:
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
       rated: '2026-11-07'
+      rated_by: Stefan Reiterer
+      rating: plausible
+    REQ-API-007:
+      basis:
+      - the limit is an exact count (10 messages per 60 s, the setting chat_rate_per_minute, default 10) and the refusal is rate_limited; fixed by D-149 and A-54 (IF-101 v12); realised and Verified in v0.1.0; whether 10 suits real use is for Validate (owner rating 2026-11-08)
+      hardware: HW-target
+      rated: '2026-11-08'
       rated_by: Stefan Reiterer
       rating: plausible
     REQ-API-008:
@@ -1934,6 +1948,13 @@ plausibility:
       rated: '2026-11-07'
       rated_by: Stefan Reiterer
       rating: plausible
+    REQ-CLV-011:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour (list, change, delete, due time of a task) is fixed by an acceptance criterion and a mock; realised and Verified in v0.1.0 (D-163, D-165; owner rating 2026-11-08)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: Stefan Reiterer
+      rating: plausible
     REQ-CLV-012:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
@@ -2789,6 +2810,13 @@ plausibility:
       rated: '2026-11-07'
       rated_by: Stefan Reiterer
       rating: plausible
+    REQ-GTB-022:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion, a contract mock and golden 16; realised in T-07 (27cba26) with the contract suite, TC-GTB-023 and the old suites green (owner rating 2026-11-08)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: Stefan Reiterer
+      rating: plausible
     REQ-LOG-001:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
@@ -3511,6 +3539,13 @@ plausibility:
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
       rated: '2026-11-07'
+      rated_by: Stefan Reiterer
+      rating: plausible
+    REQ-VPB-002:
+      basis:
+      - the window is 3 s after the Stop or until the next answer begins, checked by the browser check TC-VPB-007 on the reference browser; the 3 s are a product guess because lines carry no answer id (D-157, D-165); realised and Verified in v0.1.0; whether 3 s suits real use is for Validate (owner rating 2026-11-08)
+      hardware: HW-target
+      rated: '2026-11-08'
       rated_by: Stefan Reiterer
       rating: plausible
     REQ-VPB-003:
