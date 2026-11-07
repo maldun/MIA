@@ -28,7 +28,7 @@ Drafted 2026-11-07 when the owner asked to split G-V2 into four subgoals for rev
 ## Split check
 | Suggestion | Decision (split / keep together) | Reason | Date |
 |---|---|---|---|
-| further cut | keep together | 13 items in scope, one chain | 2026-11-07 |
+| further cut | keep together | 14 items in scope, one chain | 2026-11-07 |
 
 ## Scope
 Top-level items it serves: FR-36, FR-37. Requirements by ID (inside G-V2's scope):
@@ -48,6 +48,7 @@ Top-level items it serves: FR-36, FR-37. Requirements by ID (inside G-V2's scope
 | REQ-RUN-016 | in | |
 | REQ-RUN-017 | in | |
 | REQ-RUN-018 | in | |
+| REQ-RUN-019 | in | added at review 2026-11-07 (failed node stops the run) |
 | IF-301 | in | frozen at G-V2 (A-90, approved 2026-11-07); used through its mock until the provider is merged |
 | IF-203 | in | frozen at G-V2 (A-90, approved 2026-11-07); used through its mock until the provider is merged |
 
@@ -55,7 +56,7 @@ Top-level items it serves: FR-36, FR-37. Requirements by ID (inside G-V2's scope
 | Part | Real or stand-in | Notes |
 |---|---|---|
 | N-2.3 workflow management (skill record, graph model) | real |  |
-| N-2.4.1 pipeline runner | real | topological order, refusal of untrusted transforms and master nodes |
+| N-2.4.1 pipeline runner | real | topological order, refusal of untrusted nodes, master nodes run like transforms |
 | N-3.2 graph tables | stand-in | IF-301 v2 mock until G-V2.STORE is merged |
 
 ## Frozen requirements

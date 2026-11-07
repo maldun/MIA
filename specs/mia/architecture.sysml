@@ -2902,7 +2902,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-WFM-042'> CommandUsedOnce_Wfm042 {
         subject s : TaskRuntime;
-        doc /* If a skill record names a command that another skill already uses, then the Workflow management shall refuse the record and name that skill. */
+        doc /* If a skill record names a command that a skill with another ID already uses, then the Workflow management shall refuse the record and name that skill. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-WFM-043'> ThreeNodeTypes_Wfm043 {
@@ -2932,7 +2932,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-WFM-048'> MasterNodeStops_Wfm048 {
         subject s : TaskRuntime;
-        doc /* If a master node has neither a maximum number of cycles nor a maximum time, then the Workflow management shall refuse the workflow graph and name the node. */
+        doc /* If a master node has neither a maximum number of repetitions nor a maximum time, then the Workflow management shall refuse the workflow graph and name the node. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-WFM-049'> ParametersOfADataNode_Wfm049 {
@@ -3122,17 +3122,22 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-RUN-016'> RunInTopologicalOrder_Run016 {
         subject s : TaskRuntime;
-        doc /* When a workflow graph is run, the Pipeline runner shall run its transforms in a topological order, giving each the contents of its input data nodes and writing its result into its output data nodes. */
+        doc /* When a workflow graph is run, the Pipeline runner shall run its transforms and master nodes in a topological order, giving each the contents of its input data nodes and writing its result into its output data nodes. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-RUN-017'> UntrustedDoesNotRun_Run017 {
         subject s : TaskRuntime;
-        doc /* If a workflow graph contains a transform whose status is untrusted, then the Pipeline runner shall refuse to start the run, naming the transform and its status. */
+        doc /* If a workflow graph contains a transform or master node whose status is untrusted, then the Pipeline runner shall refuse to start the run, naming the node and its status. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
-    requirement def <'REQ-RUN-018'> MasterNodeNotRunYet_Run018 {
+    requirement def <'REQ-RUN-018'> MasterNodeRunsLikeATransform_Run018 {
         subject s : TaskRuntime;
-        doc /* If a workflow graph contains a master node, then the Pipeline runner shall refuse to start the run, saying that master nodes cannot be run yet. */
+        doc /* When a workflow graph contains a master node, the Pipeline runner shall run it once, at its place in the topological order, as it runs a transform. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-RUN-019'> FailedNodeStopsTheRun_Run019 {
+        subject s : TaskRuntime;
+        doc /* If a transform or master node fails during a run, then the Pipeline runner shall stop the run and name the failed node in the run result. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-TLS-001'> CodeChecksFirst_Tls001 {
@@ -4439,7 +4444,8 @@ package MIA_NodeRequirements {
     requirement r_req_run_015 : RealiseIF105_Run015;
     requirement r_req_run_016 : RunInTopologicalOrder_Run016;
     requirement r_req_run_017 : UntrustedDoesNotRun_Run017;
-    requirement r_req_run_018 : MasterNodeNotRunYet_Run018;
+    requirement r_req_run_018 : MasterNodeRunsLikeATransform_Run018;
+    requirement r_req_run_019 : FailedNodeStopsTheRun_Run019;
     requirement r_req_tls_001 : CodeChecksFirst_Tls001;
     requirement r_req_tls_002 : LookupWithSources_Tls002;
     requirement r_req_tls_003 : SourceRecordsAndCutOff_Tls003;
@@ -4861,6 +4867,7 @@ package MIA_NodeRequirements {
     satisfy r_req_run_016 by mia.taskRuntime;
     satisfy r_req_run_017 by mia.taskRuntime;
     satisfy r_req_run_018 by mia.taskRuntime;
+    satisfy r_req_run_019 by mia.taskRuntime;
     satisfy r_req_tls_001 by mia.verifier;
     satisfy r_req_tls_002 by mia.verifier;
     satisfy r_req_tls_003 by mia.verifier;
@@ -5281,6 +5288,7 @@ package MIA_NodeRequirements {
     allocate r_req_run_016 to mia.taskRuntime;
     allocate r_req_run_017 to mia.taskRuntime;
     allocate r_req_run_018 to mia.taskRuntime;
+    allocate r_req_run_019 to mia.taskRuntime;
     allocate r_req_tls_001 to mia.verifier;
     allocate r_req_tls_002 to mia.verifier;
     allocate r_req_tls_003 to mia.verifier;
@@ -5712,6 +5720,7 @@ package MIA_NodeRequirements {
     dependency from r_req_run_016 to fr37;
     dependency from r_req_run_017 to fr38;
     dependency from r_req_run_018 to fr37;
+    dependency from r_req_run_019 to fr37;
     dependency from r_req_tls_001 to r_req_wfx_005;
     dependency from r_req_tls_002 to r_req_wfx_006;
     dependency from r_req_tls_003 to r_req_wfx_007;
