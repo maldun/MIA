@@ -3157,27 +3157,31 @@ plausibility:
       rating: plausible
     REQ-RUN-016:
       basis:
-      - 'no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on plain data and a scripted run, no model (proposal of the agent, 2026-11-07, G-V2.MODEL; the owner rates at review)'
+      - 'no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on plain data and a scripted run, no model (proposal of the agent, 2026-11-07, G-V2.MODEL; rated by the owner 2026-11-07)'
       hardware: HW-target
       rated: '2026-11-07'
+      rated_by: maldun
       rating: plausible
     REQ-RUN-017:
       basis:
-      - 'only the owner can set a transform trusted: the account that creates accounts (TC-MIA-014), basis of D-260 (B); the rest is an exact acceptance criterion on a scripted run, no model (proposal of the agent, 2026-11-07, G-V2.MODEL; the owner rates at review)'
+      - 'only the owner can set a transform trusted: the account that creates accounts (TC-MIA-014), basis of D-260 (B); the rest is an exact acceptance criterion on a scripted run, no model (proposal of the agent, 2026-11-07, G-V2.MODEL; rated by the owner 2026-11-07)'
       hardware: HW-target
       rated: '2026-11-07'
+      rated_by: maldun
       rating: plausible
     REQ-RUN-018:
       basis:
-      - 'no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on plain data and a scripted run, no model (proposal of the agent, 2026-11-07, G-V2.MODEL; the owner rates at review)'
+      - 'no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on plain data and a scripted run, no model (proposal of the agent, 2026-11-07, G-V2.MODEL; rated by the owner 2026-11-07)'
       hardware: HW-target
       rated: '2026-11-07'
+      rated_by: maldun
       rating: plausible
     REQ-RUN-019:
       basis:
-      - 'no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on plain data and a scripted run, no model (proposal of the agent, 2026-11-07, G-V2.MODEL; the owner rates at review)'
+      - 'no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on plain data and a scripted run, no model (proposal of the agent, 2026-11-07, G-V2.MODEL; rated by the owner 2026-11-07)'
       hardware: HW-target
       rated: '2026-11-07'
+      rated_by: maldun
       rating: plausible
     REQ-SLY-001:
       basis:
@@ -3652,63 +3656,73 @@ plausibility:
       rating: plausible
     REQ-WFM-040:
       basis:
-      - 'no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on plain data and a scripted run, no model (proposal of the agent, 2026-11-07, G-V2.MODEL; the owner rates at review)'
+      - 'no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on plain data and a scripted run, no model (proposal of the agent, 2026-11-07, G-V2.MODEL; rated by the owner 2026-11-07)'
       hardware: HW-target
       rated: '2026-11-07'
+      rated_by: maldun
       rating: plausible
     REQ-WFM-041:
       basis:
-      - 'no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on plain data and a scripted run, no model (proposal of the agent, 2026-11-07, G-V2.MODEL; the owner rates at review)'
+      - 'no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on plain data and a scripted run, no model (proposal of the agent, 2026-11-07, G-V2.MODEL; rated by the owner 2026-11-07)'
       hardware: HW-target
       rated: '2026-11-07'
+      rated_by: maldun
       rating: plausible
     REQ-WFM-042:
       basis:
-      - 'no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on plain data and a scripted run, no model (proposal of the agent, 2026-11-07, G-V2.MODEL; the owner rates at review)'
+      - 'no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on plain data and a scripted run, no model (proposal of the agent, 2026-11-07, G-V2.MODEL; rated by the owner 2026-11-07)'
       hardware: HW-target
       rated: '2026-11-07'
+      rated_by: maldun
       rating: plausible
     REQ-WFM-043:
       basis:
-      - 'no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on plain data and a scripted run, no model (proposal of the agent, 2026-11-07, G-V2.MODEL; the owner rates at review)'
+      - 'no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on plain data and a scripted run, no model (proposal of the agent, 2026-11-07, G-V2.MODEL; rated by the owner 2026-11-07)'
       hardware: HW-target
       rated: '2026-11-07'
+      rated_by: maldun
       rating: plausible
     REQ-WFM-044:
       basis:
-      - 'no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on plain data and a scripted run, no model (proposal of the agent, 2026-11-07, G-V2.MODEL; the owner rates at review)'
+      - 'no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on plain data and a scripted run, no model (proposal of the agent, 2026-11-07, G-V2.MODEL; rated by the owner 2026-11-07)'
       hardware: HW-target
       rated: '2026-11-07'
+      rated_by: maldun
       rating: plausible
     REQ-WFM-045:
       basis:
-      - 'no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on plain data and a scripted run, no model (proposal of the agent, 2026-11-07, G-V2.MODEL; the owner rates at review)'
+      - 'no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on plain data and a scripted run, no model (proposal of the agent, 2026-11-07, G-V2.MODEL; rated by the owner 2026-11-07)'
       hardware: HW-target
       rated: '2026-11-07'
+      rated_by: maldun
       rating: plausible
     REQ-WFM-046:
       basis:
-      - 'no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on plain data and a scripted run, no model (proposal of the agent, 2026-11-07, G-V2.MODEL; the owner rates at review)'
+      - 'no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on plain data and a scripted run, no model (proposal of the agent, 2026-11-07, G-V2.MODEL; rated by the owner 2026-11-07)'
       hardware: HW-target
       rated: '2026-11-07'
+      rated_by: maldun
       rating: plausible
     REQ-WFM-047:
       basis:
-      - 'no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on plain data and a scripted run, no model (proposal of the agent, 2026-11-07, G-V2.MODEL; the owner rates at review)'
+      - 'no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on plain data and a scripted run, no model (proposal of the agent, 2026-11-07, G-V2.MODEL; rated by the owner 2026-11-07)'
       hardware: HW-target
       rated: '2026-11-07'
+      rated_by: maldun
       rating: plausible
     REQ-WFM-048:
       basis:
-      - 'no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on plain data and a scripted run, no model (proposal of the agent, 2026-11-07, G-V2.MODEL; the owner rates at review)'
+      - 'no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on plain data and a scripted run, no model (proposal of the agent, 2026-11-07, G-V2.MODEL; rated by the owner 2026-11-07)'
       hardware: HW-target
       rated: '2026-11-07'
+      rated_by: maldun
       rating: plausible
     REQ-WFM-049:
       basis:
-      - 'no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on plain data and a scripted run, no model (proposal of the agent, 2026-11-07, G-V2.MODEL; the owner rates at review)'
+      - 'no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on plain data and a scripted run, no model (proposal of the agent, 2026-11-07, G-V2.MODEL; rated by the owner 2026-11-07)'
       hardware: HW-target
       rated: '2026-11-07'
+      rated_by: maldun
       rating: plausible
     REQ-WFX-001:
       basis:
