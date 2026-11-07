@@ -126,8 +126,9 @@ class ChatService:
     def __init__(self, emit, log, mood, run_exchange, run_command=None, model_info=None, queue_size=1, user_limit=0,
                  rate_limit=(10, 60), spawn=None, clock=time.monotonic, votes=None, wall_clock=time.time,
                  behaviours=None, reputable=0.6, repair=None, remember=None, review_timeout=1800,
-                 tasks=None, skill_options=None, prepare_task=None, argument_commands=None, files=None, unavailable=(), react=None):
+                 tasks=None, skill_options=None, prepare_task=None, argument_commands=None, files=None, unavailable=(), react=None, speak=None):
         self._emit = emit
+        self._speak = speak                                                # (text, should_stop) -> None: the voice route of live answers; TD-11 option B, stub of Plan step 4, not used yet
         self._tasks = tasks if tasks is not None else TaskRegistry()      # REQ-WFM-029: the tasks (lookup, search, review, ...) register themselves, the core names none of them
         self._unavailable = {str(n).lower() for n in unavailable}         # ids of extensions that did not load: their command says so instead of going to the model
         self._skill_options = skill_options or {}                          # config `skill_options`: {task id: {option: value}}, the defaults of the options
