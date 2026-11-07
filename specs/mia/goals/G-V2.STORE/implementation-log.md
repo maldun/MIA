@@ -7,6 +7,7 @@ Goal: G-V2.STORE   Line of work: goal/v2.store   Supervision: supervised (accept
 | T-01 Record tables, types and record checks | done | 0f1543e | `test_graph_records.py`: TC-GTB-006, 011, 013, 016, 017, 018, 019, 020, 021 (the 6 left are T-02 and T-03); v2 contract suite real side (`IF301_V2_REAL=1`): TC-IF-301-05, 06, 09, 10, 13, 14, 15, 18, 19; new `tests/test_graph_record_checks.py` (4); the v1 IF-301, IF-102 and IF-203 suites and `tests/test_graph_tables.py`, `test_storage.py` unchanged green | 500 + 500 records: about 7 ms (bound 500 ms). Reported, not verified. |
 | T-02 Classes from type IDs | done | ef3295e | `test_graph_records.py`: TC-GTB-007, 008, 009, 010, 014 (N = 1000, and once N = 5000: 0 failures); v2 contract suite real side: TC-IF-301-07, 08, 16, 18; new `tests/test_graph_record_objects.py` (5); only TC-GTB-015 and TC-IF-301-11, 12, 17 (T-03) are still red; old suites unchanged green | Reported, not verified. |
 | T-03 Document form both ways | done | fd9ee76 | `test_graph_records.py`: all 20 (TC-GTB-015 with the unchanged v1 IF-301 and v0 IF-203 suites and their recorded hashes); v2 contract suite real side: all 15; new `tests/test_graph_document_form.py` (4); old suites unchanged green; MODEL's `test_graph_model.py` (10 failures) and `test_graph_run.py` (4) are red on master as well | Reported, not verified. |
+| T-04 The Storage layer takes the four tables | done | 2728b06 | 3 new tests in `tests/test_storage.py` (TC-GTB-013, 016/006/018/019, 017, 020, 021 on `Storage`), on the file backend and on a throwaway postgres:16 (`tests/test_storage_postgres.py`: 29 tests OK, `tools/contract_postgres.sh`: IF-102 suite OK); IF-102 real side, IF-301 v1, IF-203 v0 and the old storage tests unchanged green; full unit suite: the same 3 failures and 61 errors as the baseline, by name | Run with a python from a throwaway venv (`requirements-db.txt` plus `jsonschema==4.23.0`) because the host python has no psycopg. Reported, not verified. |
 
 ## Findings
 | Finding | Task | Covered by test |
@@ -27,6 +28,7 @@ none
 | Decision | Where in code | Proposed requirement or amendment |
 |---|---|---|
 | null and absent are not told apart for `value` and `task` | `graph_tables.to_record` | none needed: JSON null carries no meaning for these fields; say so in the next IF-301 text revision |
+| A graph record is written under a record ID that differs from the `id` inside it (`put("graph_nodes", "x", {"id": "y", ...})`): accepted; a header pins by the `id` inside, the storage finds by the record ID | `storage.py` `put` | question for the owner: refuse it as `record_identity` (a new requirement or a line in IF-301), or leave it; no test written (needs an amendment) |
 | NaN and infinity in a record are `schema_break` with the path of the number | `graph_tables._non_finite_path` | none needed: same rule as v1 (A-60) and the Storage layer's `refuse_unstorable`; mention in the next IF-301 text revision |
 
 ## Decisions
