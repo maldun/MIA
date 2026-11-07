@@ -22,3 +22,32 @@ def validate(table, doc):
         raise ValueError("not a graph table: %s" % (table,))
     broken = graph_rules.violation(doc)
     return None if broken is None else {"rule": broken[0], "detail": broken[1]}
+
+
+# IF-301 v2 (A-90, G-V2.STORE): stubs so the red tests import. Each returns a wrong-but-valid value; N-3.2 Implement replaces them.
+def record_definitions():
+    return {}
+
+
+def types():
+    return {}
+
+
+def check_record(table, record, categories=None, stored=None):
+    return None
+
+
+def to_object(record, categories=None):
+    return {"refused": {"rule": "unknown_type", "detail": ""}}
+
+
+def to_record(obj):
+    return {}
+
+
+def to_document(nodes, edges):
+    return {"document": {"nodes": [], "edges": []}}
+
+
+def from_document(doc):
+    return {"nodes": [], "edges": []}
