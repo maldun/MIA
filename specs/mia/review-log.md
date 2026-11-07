@@ -462,3 +462,4 @@ The first version was silent until the end and could take 20 minutes or more: th
 | REQ-GTB-005 | requirement | c8e3a644dfa1 | Stefan Reiterer | 2026-11-07 | approved | 005 re-approved with Verified by TC-GTB-016; plausibility of GTB-005..015 rated plausible |
 | FR-40 | requirement | 54f2cefd7337 | Stefan Reiterer | 2026-11-07 | approved | 005 re-approved with Verified by TC-GTB-016; plausibility of GTB-005..015 rated plausible |
 | G-V2.STORE | goal | 4649386666e0 | Stefan Reiterer | 2026-11-07 | approved | 005 re-approved with Verified by TC-GTB-016; plausibility of GTB-005..015 rated plausible |
+| REQ-RUN-016 | requirement | afd497ea2cd8 | Stefan Reiterer | 2026-11-07 | approved | shortened to 35 words (L1-LENGTH), same meaning; re-marked by the agent for the owner to confirm |

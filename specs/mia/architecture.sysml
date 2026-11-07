@@ -3122,7 +3122,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-RUN-016'> RunInTopologicalOrder_Run016 {
         subject s : TaskRuntime;
-        doc /* When a workflow graph is run, the Pipeline runner shall run its transforms and master nodes in a topological order, giving each the contents of its input data nodes and writing its result into its output data nodes. */
+        doc /* When a workflow graph is run, the Pipeline runner shall run its transforms and master nodes in a topological order, each reading its input data nodes and writing its output data nodes. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-RUN-017'> UntrustedDoesNotRun_Run017 {
@@ -3862,7 +3862,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-GTB-015'> DocumentFormDuringTheTransition_Gtb015 {
         subject s : Persistence;
-        doc /* While IF-301 v1 and IF-203 v1 are in use, the Graph tables shall return a stored workflow also in the document form of those interfaces. */
+        doc /* While IF-301 v1 and IF-203 v0 are in use, the Graph tables shall return a stored workflow also in the document form of those interfaces. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-RTB-001'> SharedStateHeld_Rtb001 {

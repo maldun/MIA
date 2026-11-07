@@ -195,7 +195,7 @@ Runs a workflow step by step under budgets: model calls and model management, pr
 
 ### REQ-RUN-016 – Run in topological order
 - Level: low-2   Subject: TaskRuntime
-- Text: When a workflow graph is run, the Pipeline runner shall run its transforms and master nodes in a topological order, giving each the contents of its input data nodes and writing its result into its output data nodes.
+- Text: When a workflow graph is run, the Pipeline runner shall run its transforms and master nodes in a topological order, each reading its input data nodes and writing its output data nodes.
 - Rationale: refines FR-37; the owner's note (algorithm)
 - Parent: FR-37
 - Group: EX
