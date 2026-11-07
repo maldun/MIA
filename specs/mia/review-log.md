@@ -466,3 +466,4 @@ The first version was silent until the end and could take 20 minutes or more: th
 | REQ-WFM-062 | requirement | a9c5909b60ee | Stefan Reiterer | 2026-11-07 | approved | G-V2.CONVERT: 059 acceptance rule after the split per skill; 062 Must; 063 name rule; 066 owner defined (D-260 B) |
 | REQ-WFM-063 | requirement | 37f3ad7f4319 | Stefan Reiterer | 2026-11-07 | approved | G-V2.CONVERT: 059 acceptance rule after the split per skill; 062 Must; 063 name rule; 066 owner defined (D-260 B) |
 | REQ-WFM-066 | requirement | 6d1f5fe71bcc | Stefan Reiterer | 2026-11-07 | approved | G-V2.CONVERT: 059 acceptance rule after the split per skill; 062 Must; 063 name rule; 066 owner defined (D-260 B) |
+| REQ-WFM-115 | requirement | 04fce64f6e37 | Stefan Reiterer | 2026-11-07 | approved | G-V2.CONVERT: agent suggestion kept as Must; equality instead of a rate for a rule-based skill |
