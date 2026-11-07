@@ -448,3 +448,17 @@ The first version was silent until the end and could take 20 minutes or more: th
 | REQ-WFM-049 | requirement | c7ecfd1f2ad6 | Stefan Reiterer | 2026-11-07 | approved | 048 reworded: repetitions; 049 stays Should |
 | REQ-RUN-016 | requirement | 774fcdb8d6ca | Stefan Reiterer | 2026-11-07 | approved | text widened to master nodes per owner answer |
 | REQ-RUN-017 | requirement | 91ac5e7cd789 | Stefan Reiterer | 2026-11-07 | approved | text widened to master nodes per owner answer |
+| REQ-GTB-005 | requirement | edd37f723442 | Stefan Reiterer | 2026-11-07 | approved |  |
+| REQ-GTB-006 | requirement | 6f8defed046e | Stefan Reiterer | 2026-11-07 | approved |  |
+| REQ-GTB-007 | requirement | 5ec57e7aa265 | Stefan Reiterer | 2026-11-07 | approved |  |
+| REQ-GTB-008 | requirement | 08ef1d989549 | Stefan Reiterer | 2026-11-07 | approved |  |
+| REQ-GTB-009 | requirement | 73499bc1eaad | Stefan Reiterer | 2026-11-07 | approved | 010 (agent suggestion) accepted; 012 list of three modules is enough |
+| REQ-GTB-010 | requirement | a77086c56074 | Stefan Reiterer | 2026-11-07 | approved | 010 (agent suggestion) accepted; 012 list of three modules is enough |
+| REQ-GTB-011 | requirement | 4860ddac710b | Stefan Reiterer | 2026-11-07 | approved | 010 (agent suggestion) accepted; 012 list of three modules is enough |
+| REQ-GTB-012 | requirement | 31c55607972d | Stefan Reiterer | 2026-11-07 | approved | 010 (agent suggestion) accepted; 012 list of three modules is enough |
+| REQ-GTB-013 | requirement | 642a8cc43676 | Stefan Reiterer | 2026-11-07 | approved | 015 corrected to IF-203 v0 before approval |
+| REQ-GTB-014 | requirement | 526081ed246d | Stefan Reiterer | 2026-11-07 | approved | 015 corrected to IF-203 v0 before approval |
+| REQ-GTB-015 | requirement | 24d061b9f9f8 | Stefan Reiterer | 2026-11-07 | approved | 015 corrected to IF-203 v0 before approval |
+| REQ-GTB-005 | requirement | c8e3a644dfa1 | Stefan Reiterer | 2026-11-07 | approved | 005 re-approved with Verified by TC-GTB-016; plausibility of GTB-005..015 rated plausible |
+| FR-40 | requirement | 54f2cefd7337 | Stefan Reiterer | 2026-11-07 | approved | 005 re-approved with Verified by TC-GTB-016; plausibility of GTB-005..015 rated plausible |
+| G-V2.STORE | goal | 4649386666e0 | Stefan Reiterer | 2026-11-07 | approved | 005 re-approved with Verified by TC-GTB-016; plausibility of GTB-005..015 rated plausible |
