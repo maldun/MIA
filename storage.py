@@ -37,6 +37,7 @@ class StorageError(Exception):
 
 def table_definitions():
     tables = graph_tables.definitions()
+    tables.update(graph_tables.record_definitions())
     tables.update(record_tables.definitions())
     return tables
 
@@ -70,10 +71,26 @@ def check_names(record_id, author):
 def validate(table, doc):
     """Raises StorageError("invalid", rule, detail) for a document the table definitions refuse (REQ-SLY-004); put and the copies use it."""
     refuse_unstorable(doc)
-    validator = graph_tables if table in graph_tables.TABLES else record_tables
-    broken = validator.validate(table, doc)
+    if table in graph_tables.RECORD_TABLES:         # the records of the graphs: put calls check_record again with what is stored
+        broken = graph_tables.check_record(table, doc)
+    else:
+        validator = graph_tables if table in graph_tables.TABLES else record_tables
+        broken = validator.validate(table, doc)
     if broken:
         raise StorageError("invalid", rule=broken["rule"], detail=broken["detail"])
+
+
+def _named_ids(table, doc):
+    """The IDs a record of the graphs names, as ([node IDs], [edge IDs]): an edge's two ends, a header's members. A malformed record names none
+    (check_record refuses it before it looks at what is stored)."""
+    try:
+        if table == "graph_edges":
+            return [doc["from"], doc["to"]], []
+        if table == "graphs":
+            return [m["id"] for m in doc["data"]["nodes"]], [m["id"] for m in doc["data"]["edges"]]
+    except (KeyError, TypeError):
+        pass
+    return [], []
 
 
 class Storage:
@@ -95,6 +112,7 @@ class Storage:
         check_names(record_id, author)
         validate(table, doc)
         with self._lock:                      # one writer at a time per process: the numbers of the versions have no gap
+            self._check_graph_record(table, doc)
             current = len(self.backend.versions(table, record_id))
             if expected_version is not None and expected_version != current:
                 raise StorageError("conflict", detail={"current": current})
@@ -102,6 +120,19 @@ class Storage:
             self.backend.append(table, record_id, entry)
         self._tell({"table": table, "id": record_id, "version": entry["version"], "author": author})
         return {"version": entry["version"]}
+
+    def _check_graph_record(self, table, doc):
+        """A record of the graphs must name what is stored (REQ-GTB-019, REQ-GTB-020): the checks need only the versions of the IDs it names. Refused
+        before the version number is taken, so a refused edit changes nothing (REQ-GTB-016)."""
+        if table not in graph_tables.RECORD_TABLES:
+            return
+        node_ids, edge_ids = _named_ids(table, doc)
+        stored = {"nodes": {i: [v["version"] for v in self.backend.versions("graph_nodes", i)] for i in node_ids if isinstance(i, str)},
+                  "edges": {i: [v["version"] for v in self.backend.versions("graph_edges", i)] for i in edge_ids if isinstance(i, str)}}
+        stored = {kind: {i: versions for i, versions in found.items() if versions} for kind, found in stored.items()}
+        broken = graph_tables.check_record(table, doc, stored=stored)
+        if broken:
+            raise StorageError("invalid", rule=broken["rule"], detail=broken["detail"])
 
     def _tell(self, event):
         self._dispatch(event)                   # the subscribers of this instance hear it at once ...

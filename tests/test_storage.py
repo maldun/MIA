@@ -235,6 +235,87 @@ class StorageBehaviour:
         code_of(lambda: self.store.put("workflows", "w", CYCLE, "anna"))
         self.assertEqual(self.store.put("workflows", "w", LOOKUP, "ben"), {"version": 2})
 
+    def refusal_of(self, table, record_id, record):
+        """Writes a record that must be refused: returns (rule, detail) and checks that the stored versions stayed as they were."""
+        before = {t: {i: len(self.store.history(t, i)) for i in self.store.ids(t)} for t in ("graph_nodes", "graph_edges", "graphs", "skills")}
+        with self.assertRaises(StorageError) as caught:
+            self.store.put(table, record_id, record, "anna")
+        self.assertEqual(caught.exception.code, "invalid")
+        after = {t: {i: len(self.store.history(t, i)) for i in self.store.ids(t)} for t in before}
+        self.assertEqual(after, before)
+        return caught.exception.rule, caught.exception.detail
+
+    @mark.req("REQ-GTB-005", "REQ-GTB-006", "REQ-GTB-013")
+    def test_the_graph_records_are_stored_as_versions_and_never_deleted(self):
+        """TC-GTB-013 and TC-GTB-016 on the Storage layer: a node, an edge, a header and a skill read back equal; an edit is version 2 and version 1 is unchanged; none can be deleted.
+
+        Example: node n1 with toolbox "t-old" edited to "t-new" -> history [1, 2], version 1 still names "t-old"; delete of n1 -> immutable.
+        """
+        # Given: one record of each of the four tables
+        n1, n2 = {"id": "n1", "data": {"type": "transform", "toolbox_id": "t-old"}}, {"id": "n2", "data": {"type": "data"}}
+        e1 = {"id": "e1", "from": "n1", "to": "n2", "data": {"label": "x"}}
+        wf = {"id": "wf1", "data": {"kind": "workflow", "context_graph_id": "ctx", "testbench_id": "", "description": "d",
+                                    "nodes": [{"id": "n1", "version": 1}, {"id": "n2", "version": 1}], "edges": [{"id": "e1", "version": 1}]}}
+        skill = {"id": "lookup", "data": {"command": "/lookup", "workflow_graph_id": "wf1", "context_graph_id": "ctx"}}
+        # When: each is written and read back
+        for table, record in (("graph_nodes", n1), ("graph_nodes", n2), ("graph_edges", e1), ("graphs", wf), ("skills", skill)):
+            self.assertEqual(self.store.put(table, record["id"], record, "anna"), {"version": 1})
+            # Then: it reads back equal
+            self.assertEqual(self.store.get(table, record["id"])["doc"], record)
+        # When: n1 is edited
+        n1b = {"id": "n1", "data": {"type": "transform", "toolbox_id": "t-new"}}
+        self.assertEqual(self.store.put("graph_nodes", "n1", n1b, "ben"), {"version": 2})
+        # Then: both versions exist and version 1 is unchanged
+        self.assertEqual([h["version"] for h in self.store.history("graph_nodes", "n1")], [1, 2])
+        self.assertEqual(self.store.get("graph_nodes", "n1", version=1)["doc"], n1)
+        # And: none of the four tables allows a delete
+        for table, record_id in (("graph_nodes", "n1"), ("graph_edges", "e1"), ("graphs", "wf1"), ("skills", "lookup")):
+            self.assertEqual(code_of(lambda: self.store.delete(table, record_id, "anna")), ("immutable", None))
+
+    @mark.req("REQ-GTB-016", "REQ-GTB-011", "REQ-GTB-010")
+    def test_a_refused_graph_edit_changes_nothing(self):
+        """TC-GTB-017 on the Storage layer: an unknown type, a schema break and a member named twice are refused with rule and detail, and the latest version stays 1.
+
+        Example: node n1 edited to type x.unknown -> invalid, unknown_type, "x.unknown"; history of n1 is still [1].
+        """
+        # Given: a stored graph at version 1
+        n1, n2 = {"id": "n1", "data": {"type": "transform", "toolbox_id": "t"}}, {"id": "n2", "data": {"type": "data"}}
+        e1 = {"id": "e1", "from": "n1", "to": "n2", "data": {}}
+        wf = {"id": "wf1", "data": {"kind": "workflow", "context_graph_id": "ctx", "testbench_id": "", "description": "d",
+                                    "nodes": [{"id": "n1", "version": 1}, {"id": "n2", "version": 1}], "edges": [{"id": "e1", "version": 1}]}}
+        for table, record in (("graph_nodes", n1), ("graph_nodes", n2), ("graph_edges", e1), ("graphs", wf)):
+            self.store.put(table, record["id"], record, "anna")
+        # When/Then: each breaking edit is refused with its rule and detail
+        self.assertEqual(self.refusal_of("graph_nodes", "n1", {"id": "n1", "data": {"type": "x.unknown"}}), ("unknown_type", "x.unknown"))
+        self.assertEqual(self.refusal_of("graph_edges", "e1", {"id": "e1", "from": "n1", "to": "n2", "data": "x"}), ("schema_break", "data"))
+        twice = {"id": "wf1", "data": dict(wf["data"], nodes=[{"id": "n1", "version": 1}, {"id": "n1", "version": 1}])}
+        self.assertEqual(self.refusal_of("graphs", "wf1", twice)[0], "record_identity")
+        # And: the latest versions are still 1 with their content, and a refused write took no number (the next edit is version 2)
+        for table, record in (("graph_nodes", n1), ("graph_edges", e1), ("graphs", wf)):
+            self.assertEqual(self.store.get(table, record["id"]), dict(self.store.get(table, record["id"]), version=1, doc=record))
+        self.assertEqual(self.store.put("graph_nodes", "n1", {"id": "n1", "data": {"type": "transform", "toolbox_id": "t2"}}, "ben"), {"version": 2})
+
+    @mark.req("REQ-GTB-019", "REQ-GTB-020")
+    def test_an_edge_and_a_header_must_name_stored_things(self):
+        """TC-GTB-020 and TC-GTB-021 on the Storage layer: an edge to a node that is not stored and a header naming a version that is not stored are refused naming the ID; the twins are accepted.
+
+        Example: edge e1 from n1 to n9 with only n1 stored -> unknown_endpoint "n9"; header naming n1 at version 5 of [1, 2] -> unknown_member "n1".
+        """
+        # Given: n1 stored with versions 1 and 2
+        self.store.put("graph_nodes", "n1", {"id": "n1", "data": {"type": "data"}}, "anna")
+        self.store.put("graph_nodes", "n1", {"id": "n1", "data": {"type": "data", "value": 1}}, "anna")
+        edge = {"id": "e1", "from": "n1", "to": "n9", "data": {}}
+        def header(version):
+            return {"id": "wf1", "data": {"kind": "workflow", "context_graph_id": "c", "testbench_id": "", "description": "d",
+                                          "nodes": [{"id": "n1", "version": version}], "edges": []}}
+        # When/Then: the edge to the missing node and the header with version 5 are refused, naming the ID
+        self.assertEqual(self.refusal_of("graph_edges", "e1", edge), ("unknown_endpoint", "n9"))
+        self.assertEqual(self.refusal_of("graphs", "wf1", header(5)), ("unknown_member", "n1"))
+        # And: the same edge after n9 is stored, and the header naming version 2, are accepted
+        self.store.put("graph_nodes", "n9", {"id": "n9", "data": {"type": "data"}}, "anna")
+        self.assertEqual(self.store.put("graph_edges", "e1", edge, "anna"), {"version": 1})
+        self.assertEqual(self.store.put("graphs", "wf1", header(2), "anna"), {"version": 1})
+
 
 class FileStorage(StorageBehaviour, unittest.TestCase):
     def new_backend(self, label):
