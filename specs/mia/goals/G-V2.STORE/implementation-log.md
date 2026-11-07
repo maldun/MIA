@@ -6,6 +6,7 @@ Goal: G-V2.STORE   Line of work: goal/v2.store   Supervision: supervised (accept
 |---|---|---|---|---|
 | T-01 Record tables, types and record checks | done | 0f1543e | `test_graph_records.py`: TC-GTB-006, 011, 013, 016, 017, 018, 019, 020, 021 (the 6 left are T-02 and T-03); v2 contract suite real side (`IF301_V2_REAL=1`): TC-IF-301-05, 06, 09, 10, 13, 14, 15, 18, 19; new `tests/test_graph_record_checks.py` (4); the v1 IF-301, IF-102 and IF-203 suites and `tests/test_graph_tables.py`, `test_storage.py` unchanged green | 500 + 500 records: about 7 ms (bound 500 ms). Reported, not verified. |
 | T-02 Classes from type IDs | done | ef3295e | `test_graph_records.py`: TC-GTB-007, 008, 009, 010, 014 (N = 1000, and once N = 5000: 0 failures); v2 contract suite real side: TC-IF-301-07, 08, 16, 18; new `tests/test_graph_record_objects.py` (5); only TC-GTB-015 and TC-IF-301-11, 12, 17 (T-03) are still red; old suites unchanged green | Reported, not verified. |
+| T-03 Document form both ways | done | fd9ee76 | `test_graph_records.py`: all 20 (TC-GTB-015 with the unchanged v1 IF-301 and v0 IF-203 suites and their recorded hashes); v2 contract suite real side: all 15; new `tests/test_graph_document_form.py` (4); old suites unchanged green; MODEL's `test_graph_model.py` (10 failures) and `test_graph_run.py` (4) are red on master as well | Reported, not verified. |
 
 ## Findings
 | Finding | Task | Covered by test |
