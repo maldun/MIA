@@ -3626,6 +3626,76 @@ plausibility:
       rated: '2026-10-26'
       rated_by: maldun
       rating: plausible
+    REQ-WFM-059:
+      basis:
+      - 'umbrella over the per-skill criteria REQ-WFM-110 to 115; its own behaviour is exact, the numbers sit in 110 to 114 (D-260 D: questionable with a probe)'
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: maldun
+      rating: questionable
+      probe: {what: "record the baselines of the converted skills on MP-light (dev split, 3 repeats, results only) in Plan Step 4 of G-V2.CONVERT, then judge the margin 0.10 against them", who: maldun, when: "Plan Step 4 of G-V2.CONVERT"}
+    REQ-WFM-110:
+      basis:
+      - REF-CONVERT-1
+      - 'the margin 0.10 is an educated guess (D-187); rated questionable with a probe: baselines are recorded in Plan Step 4, then the margin is judged against them (owner, D-260 D)'
+      claims:
+      - {kind: floor, value: 0.82, unit: '1', against: REF-CONVERT-1}
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: maldun
+      rating: questionable
+      probe: {what: "record the baselines of the converted skills on MP-light (dev split, 3 repeats, results only) in Plan Step 4 of G-V2.CONVERT, then judge the margin 0.10 against them", who: maldun, when: "Plan Step 4 of G-V2.CONVERT"}
+    REQ-WFM-111:
+      basis:
+      - REF-CONVERT-2
+      - 'the margin 0.10 is an educated guess (D-187); rated questionable with a probe: baselines are recorded in Plan Step 4, then the margin is judged against them (owner, D-260 D)'
+      claims:
+      - {kind: floor, value: 0.54, unit: '1', against: REF-CONVERT-2}
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: maldun
+      rating: questionable
+      probe: {what: "record the baselines of the converted skills on MP-light (dev split, 3 repeats, results only) in Plan Step 4 of G-V2.CONVERT, then judge the margin 0.10 against them", who: maldun, when: "Plan Step 4 of G-V2.CONVERT"}
+    REQ-WFM-112:
+      basis:
+      - REF-CONVERT-3
+      - 'the margin 0.10 is an educated guess (D-187); rated questionable with a probe: baselines are recorded in Plan Step 4, then the margin is judged against them (owner, D-260 D)'
+      claims:
+      - {kind: floor, value: 0.83, unit: '1', against: REF-CONVERT-3}
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: maldun
+      rating: questionable
+      probe: {what: "record the baselines of the converted skills on MP-light (dev split, 3 repeats, results only) in Plan Step 4 of G-V2.CONVERT, then judge the margin 0.10 against them", who: maldun, when: "Plan Step 4 of G-V2.CONVERT"}
+    REQ-WFM-113:
+      basis:
+      - REF-CONVERT-4
+      - 'the margin 0.10 is an educated guess (D-187); rated questionable with a probe: baselines are recorded in Plan Step 4, then the margin is judged against them (owner, D-260 D)'
+      claims:
+      - {kind: floor, value: 0.82, unit: '1', against: REF-CONVERT-4}
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: maldun
+      rating: questionable
+      probe: {what: "record the baselines of the converted skills on MP-light (dev split, 3 repeats, results only) in Plan Step 4 of G-V2.CONVERT, then judge the margin 0.10 against them", who: maldun, when: "Plan Step 4 of G-V2.CONVERT"}
+    REQ-WFM-114:
+      basis:
+      - REF-CONVERT-5
+      - 'the margin 0.10 is an educated guess (D-187); rated questionable with a probe: baselines are recorded in Plan Step 4, then the margin is judged against them (owner, D-260 D)'
+      claims:
+      - {kind: floor, value: 0.59, unit: '1', against: REF-CONVERT-5}
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: maldun
+      rating: questionable
+      probe: {what: "record the baselines of the converted skills on MP-light (dev split, 3 repeats, results only) in Plan Step 4 of G-V2.CONVERT, then judge the margin 0.10 against them", who: maldun, when: "Plan Step 4 of G-V2.CONVERT"}
+    REQ-WFM-066:
+      basis:
+      - 'only the owner = the account that creates accounts (TC-MIA-014); several accounts on one instance are for testing only, a later goal is one user per instance (owner, D-260 B)'
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: maldun
+      rating: plausible
     REQ-WFX-001:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed

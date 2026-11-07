@@ -2061,3 +2061,43 @@ proposal:
     attention: ['eval criterion: margin 0.10 is smaller than the uncertainty of the reference (REF-CONVERT-5), the rule cannot see a loss of 0.15 (miss 0.36 to 0.51)']
     basis: ["reference REF-CONVERT-5 measured on the baseline of v0.1.0; the guard against a silent change is REQ-WFM-058 (agent proposal, a person decides)"]
     claims: [{kind: floor, value: 0.59, unit: "1", against: REF-CONVERT-5}]
+  REQ-WFM-057:
+    text: 'While the converted version of a skill has not passed its equivalence check, the Workflow management shall run the skill from its old skill file and pipeline.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on scripted inputs (proposal of the agent, 2026-11-07; the owner rates)"
+  REQ-WFM-058:
+    text: 'When a converted skill runs on scripted model replies, the Workflow management shall make the same model calls as the old runner, in the same order with the same prompts and options.'
+    proposed: plausible
+    basis: "model replies and tool results are both scripted, replayed from a recording of the old run; a recording tool for tool results may be needed, a small task and no new part (owner, D-260 C; proposal of the agent, the owner rates)"
+  REQ-WFM-060:
+    text: 'The Workflow management shall record for each skill the suite, run, pins and verdict of its equivalence check, or the reason it is not converted.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on scripted inputs (proposal of the agent, 2026-11-07; the owner rates)"
+  REQ-WFM-061:
+    text: 'When the owner asks for a snapshot with a name, the Workflow management shall store the skills, workflow graphs, context graphs, transforms with trust status and lifecycle, and their model pins.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on scripted inputs (proposal of the agent, 2026-11-07; the owner rates)"
+  REQ-WFM-062:
+    text: 'The Workflow management shall list the snapshots with name, time and author.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on scripted inputs (proposal of the agent, 2026-11-07; the owner rates)"
+  REQ-WFM-063:
+    text: 'When the owner restores a snapshot, the Workflow management shall first store the current state as a snapshot of its own.'
+    proposed: plausible
+    basis: "as the snapshot store behaviour of REQ-WFM-061; the name rule of the criterion is checked exactly (proposal of the agent; the owner rates)"
+  REQ-WFM-064:
+    text: 'When the owner restores a snapshot, the Workflow management shall give every item in the snapshot the version, trust status and lifecycle it had in the snapshot.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on scripted inputs (proposal of the agent, 2026-11-07; the owner rates)"
+  REQ-WFM-065:
+    text: 'When the owner restores a snapshot, the Workflow management shall delete no version of any item.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on scripted inputs (proposal of the agent, 2026-11-07; the owner rates)"
+  REQ-WFM-069:
+    text: 'The Workflow management shall read the margin, repeats and rule of the equivalence check from a versioned configuration record with defaults, and record the version used with every result.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on scripted inputs (proposal of the agent, 2026-11-07; the owner rates)"
+  REQ-WFM-115:
+    text: 'The Workflow management shall run the converted skill extract_claims_rules so that it gives the same output as the old runner on every dev case of EV-extraction.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on scripted inputs (proposal of the agent, 2026-11-07; the owner rates)"
