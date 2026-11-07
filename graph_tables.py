@@ -213,9 +213,44 @@ def to_record(obj):
     return {"id": obj.id, "data": data}
 
 
+# the type of a record and the kind of the same node in the v1 document (REQ-GTB-015); a master node has no document form
+_KIND_OF_TYPE = {"data": "data", "transform": "process"}
+_TYPE_OF_KIND = {kind: type_id for type_id, kind in _KIND_OF_TYPE.items()}
+
+
 def to_document(nodes, edges):
-    return {"document": {"nodes": [], "edges": []}}
+    """The v1 document {"nodes", "edges"} of node and edge records of one workflow, or {"refused": {"rule", "detail"}} (REQ-GTB-015).
+    transform becomes kind process, data stays data; the other fields of a node go flat beside id and kind, the JSON field of an edge under
+    `data` with its id, so from_document gives the records back. A master node is not_representable, any other type unknown_type."""
+    document_nodes = []
+    for node in nodes:
+        type_id = node["data"]["type"]
+        if type_id == "master":
+            return {"refused": _refusal("not_representable", node["id"])}
+        if type_id not in _KIND_OF_TYPE:
+            return {"refused": _refusal("unknown_type", str(type_id))}
+        rest = {name: copy.deepcopy(value) for name, value in node["data"].items() if name != "type"}
+        document_nodes.append(dict({"id": node["id"], "kind": _KIND_OF_TYPE[type_id]}, **rest))
+    document_edges = [{"id": e["id"], "from": e["from"], "to": e["to"], "data": copy.deepcopy(e["data"])} for e in edges]
+    return {"document": {"nodes": document_nodes, "edges": document_edges}}
 
 
 def from_document(doc):
-    return {"nodes": [], "edges": []}
+    """{"nodes": [...], "edges": [...]} (records) of a v1 document: process becomes transform, data stays data. An edge without an id gets e1, e2, ...
+    in order. The records are not checked: a v1 process node has no toolbox_id, so its record breaks the schema of transform until one is added."""
+    nodes, edges = (doc.get("nodes"), doc.get("edges")) if isinstance(doc, dict) else (None, None)
+    if not isinstance(nodes, list) or not isinstance(edges, list):
+        return {"refused": _refusal("node_identity", "nodes and edges must be lists")}
+    records = []
+    for node in nodes:
+        kind = node.get("kind") if isinstance(node, dict) else None
+        if kind not in _TYPE_OF_KIND:
+            return {"refused": _refusal("node_identity", node.get("id") if isinstance(node, dict) else None)}
+        rest = {name: copy.deepcopy(value) for name, value in node.items() if name not in ("id", "kind")}
+        records.append({"id": node["id"], "data": dict({"type": _TYPE_OF_KIND[kind]}, **rest)})
+    try:
+        edge_records = [{"id": e.get("id", "e%d" % (n + 1)), "from": e["from"], "to": e["to"], "data": copy.deepcopy(e.get("data", {}))}
+                        for n, e in enumerate(edges)]
+    except (AttributeError, KeyError, TypeError):
+        return {"refused": _refusal("node_identity", "an edge needs from and to")}
+    return {"nodes": records, "edges": edge_records}
