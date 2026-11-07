@@ -31,6 +31,6 @@ steps:
   - {id: container-alone, stage: 3, cmd: "bash tools/container_alone.sh", needs: [unit]}
   # no smoke step (A-88, TD-25): tests/smoke/ runs on the owner's workstation in the Deploy phase (goals/G-V1/deploy-plan.md)
   # G-V2.CONVERT (Plan step 3, 2026-11-07): stage 4 holds TC-WFM-110 to 114, one eval run of each converted skill on its dev suite, e.g.
-  #   python tools/eval.py run <suite> --pin MP-light --repeats 3   then   eval_decide.py --criterion "<Eval criterion of REQ-WFM-07x>"
+  #   python tools/eval.py run <suite> --pin MP-light --repeats 3   then   eval_decide.py --criterion "<Eval criterion of REQ-WFM-110 to 114>"
   # They are not steps yet: the converted runner and the tags split:dev (A-120) do not exist. The Implement task that builds the runner adds them here
   # (stage 4, needs: [acceptance]); TC-WFM-057 to 066, 069 and 115 run in stage 2 with the acceptance step, TC-WFM-060 (inspection) in stage 1.
