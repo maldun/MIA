@@ -36,10 +36,10 @@ out = lambda name, text: open(os.path.join(work, name), "w", encoding="utf-8").w
 
 def once(text, old, new, where, done=None):
     """Replace `old` by `new` when `old` occurs exactly once; skip when the edit is done already; refuse otherwise."""
+    if text.count(done or new) >= 1:      # first: `new` usually still contains `old`, so the anchor test alone applied the edit again (F-04, A-94)
+        return text
     if text.count(old) == 1:
         return text.replace(old, new, 1)
-    if text.count(done or new) >= 1:
-        return text
     sys.exit("%s: anchor not found exactly once (%s); install A-92 by hand" % (where, old[:70]))
 
 
