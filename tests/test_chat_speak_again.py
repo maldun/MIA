@@ -1,4 +1,4 @@
-"""Chat agent N-2.2, speak again (A-132, TD-11 option B): TC-CHA-030 to TC-CHA-034 with a fake voice route (TR-VOICE-001, TR-VOICE-003).
+"""Chat agent N-2.2, speak again (A-132, TD-11 option B; A-133): TC-CHA-030 to TC-CHA-034 and TC-CHA-037 with a fake voice route (TR-VOICE-001, TR-VOICE-003).
 The fake is the injected `speak(text, should_stop)` of ChatService; it only proves the Chat agent's side of the call (the sound server's side is TC-CHA-036).
 Run with: python tests/test_chat_speak_again.py"""
 import os
@@ -92,6 +92,12 @@ class SpeakAgainTest(unittest.TestCase):
     def chunks(self, message_id):
         """(index, sentence) of the audio_chunk events of one message, in the order they were sent"""
         return [(p["index"], p["sentence"]) for event, p in self.events if event == "audio_chunk" and p["id"] == message_id]
+
+    def last_status(self):
+        """the newest chat_status event since the last events.clear()"""
+        published = [payload for event, payload in self.events if event == "chat_status"]
+        self.assertTrue(published, "no chat_status was published")
+        return published[-1]
 
     # TC-CHA-030
     @mark.req("REQ-CHA-030", "REQ-CHA-031")
@@ -203,6 +209,58 @@ class SpeakAgainTest(unittest.TestCase):
         # Then the call of answer 2 started after the call of answer 1 had ended
         self.assertEqual(self.voice.texts, ["First answer.", "Second answer."])
         self.assertGreaterEqual(self.voice.calls[1]["start"], self.voice.calls[0]["end"])
+
+
+    # TC-CHA-037 (A-133)
+    @mark.req("REQ-CHA-035")
+    def test_the_status_is_busy_and_speaking_while_a_message_is_spoken_again(self):
+        """TC-CHA-037 (REQ-CHA-035): while a speak again runs or waits, the status is busy with the activity speaking, so the page offers its stop button.
+        Example: the fake blocks on "One."; a second request waits behind it; the last chat_status is {"busy": true, "activity": "speaking"}."""
+        # Given a fake voice route that blocks until it is told to stop, a stored answer of two sentences, no answer being generated
+        self.voice = FakeVoice(block=True)
+        chat = self.chat()
+        answer = self.stored_answer(chat, "One. Two.")
+        self.events.clear()
+        # When the user asks to speak it again, and a second request waits behind the first
+        first = Asked(chat, answer)
+        self.assertTrue(self.voice.started.wait(WAIT), "the voice route was not called")
+        second = Asked(chat, answer)
+        # Then the published status and the status of the service are busy and speaking
+        status = self.last_status()
+        self.assertEqual((status["busy"], status["activity"]), (True, "speaking"))
+        self.assertEqual((chat.status()["busy"], chat.status()["activity"]), (True, "speaking"))
+        chat.stop()
+        self.assertTrue(first.done(1) and second.done(1), "a request did not end within 1 s of the stop")
+
+    @mark.req("REQ-CHA-036")
+    def test_the_status_is_as_before_after_a_stop_and_after_a_playback_that_ended_by_itself(self):
+        """TC-CHA-037 (REQ-CHA-036): after a stop and after a playback that ended by itself, the status is not busy and not speaking.
+        Example: stop of a blocked repeat, then a repeat of "One. Two." that ends alone: both times the last chat_status is {"busy": false, "activity": not "speaking"}."""
+        # Given a fake voice route that blocks, a stored answer of two sentences, no answer being generated
+        self.voice = FakeVoice(block=True)
+        chat = self.chat()
+        answer = self.stored_answer(chat, "One. Two.")
+        self.events.clear()
+        # When a repeat is stopped
+        stopped = Asked(chat, answer)
+        self.assertTrue(self.voice.started.wait(WAIT), "the voice route was not called")
+        chat.stop()
+        self.assertTrue(stopped.done(1), "the request did not end within 1 s of the stop")
+        # Then the status is as before
+        status = self.last_status()
+        self.assertEqual((status["busy"], status["activity"] != "speaking"), (False, True))
+        self.assertEqual((chat.status()["busy"], chat.status()["activity"] != "speaking"), (False, True))
+        # When a repeat with a fake that does not block ends by itself
+        self.voice = FakeVoice()
+        chat = self.chat()
+        answer = self.stored_answer(chat, "One. Two.")
+        self.events.clear()
+        ended = Asked(chat, answer)
+        self.assertTrue(ended.done(), "the request did not end")
+        # Then it was busy and speaking while it ran, and the last status is as before
+        published = [payload for event, payload in self.events if event == "chat_status"]
+        self.assertIn((True, "speaking"), [(p["busy"], p["activity"]) for p in published])
+        self.assertEqual((published[-1]["busy"], published[-1]["activity"] != "speaking"), (False, True))
 
 
 if __name__ == "__main__":
