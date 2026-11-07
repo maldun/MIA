@@ -134,6 +134,7 @@ class ChatService:
         self._speak_lock = threading.Lock()                                # one spoken-again playback at a time (REQ-CHA-034)
         self._speak_pending = 0                                            # spoken-again playbacks that run or wait
         self._speak_generation = 0                                         # a stop moves it on: a playback of an older generation ends (REQ-CHA-032)
+        self._speak_before = None                                          # (activity,) before a spoken-again playback took the status; None = it took none (REQ-CHA-035)
         self._tasks = tasks if tasks is not None else TaskRegistry()      # REQ-WFM-029: the tasks (lookup, search, review, ...) register themselves, the core names none of them
         self._unavailable = {str(n).lower() for n in unavailable}         # ids of extensions that did not load: their command says so instead of going to the model
         self._skill_options = skill_options or {}                          # config `skill_options`: {task id: {option: value}}, the defaults of the options
@@ -187,7 +188,7 @@ class ChatService:
         model, profile = self._model_info()
         mood = self.mood.status()
         with self._lock:
-            return {"busy": self._running, "activity": mood["activity"] or "idle", "model": model, "profile": profile,
+            return {"busy": self._running or self._speak_pending > 0, "activity": mood["activity"] or "idle", "model": model, "profile": profile,
                     "queue": len(self._queue), "mood": mood}
 
     def publish_status(self):
@@ -394,6 +395,12 @@ class ChatService:
             with self._lock:
                 self._speak_pending += 1
                 generation = self._speak_generation
+                takes_status = self._speak_pending == 1 and not self._running      # a running answer has its own status
+                if takes_status:
+                    self._speak_before = (self.mood.status()["activity"],)
+            if takes_status:
+                self.mood.set_activity("speaking")
+            self.publish_status()                                  # busy and speaking: the page offers its stop button (REQ-CHA-035)
             self._spawn(lambda: self._play_again(sentences, generation))      # the request must not wait until the speech has ended
         return {"sentences": len(sentences)}
 
@@ -414,6 +421,12 @@ class ChatService:
         finally:
             with self._lock:
                 self._speak_pending -= 1
+                before = self._speak_before if self._speak_pending == 0 and not self._running else None
+                if self._speak_pending == 0:
+                    self._speak_before = None
+            if before is not None:
+                self.mood.set_activity(before[0])                  # as it was before; an answer that has started keeps its own (REQ-CHA-036)
+            self.publish_status()
 
     def account(self, message_id):
         """the plain steps kept with the answer, in order; the domain events of the run log (kind "event") are no steps. Answers kept before D-138 have

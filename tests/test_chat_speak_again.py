@@ -170,7 +170,7 @@ class SpeakAgainTest(unittest.TestCase):
     @mark.req("REQ-CHA-033")
     def test_without_a_voice_route_the_request_still_answers_and_one_error_line_is_logged(self):
         """TC-CHA-033 (REQ-CHA-033): a failing voice route does not fail the request, the next message, or the page; one error line is logged.
-        Example: the fake raises OSError for "Alpha. Beta."; the result is {"sentences": 2}, one ERROR record, no new event but the audio_chunk ones."""
+        Example: the fake raises OSError for "Alpha. Beta."; the result is {"sentences": 2}, one ERROR record, no new event but audio_chunk and chat_status."""
         # Given a fake voice route that fails with a connection error and a stored answer of two sentences
         self.voice = FakeVoice(fail=True)
         chat = self.chat()
@@ -184,10 +184,11 @@ class SpeakAgainTest(unittest.TestCase):
         events_of_the_request = [event for event, _ in self.events]
         self.answers.append("Next answer.")
         chat.send("and now?", author="anna")
-        # Then the request returned the count, one error line is in the log, nothing but audio_chunk reached the page, nothing was stored, the message was answered
+        # Then the request returned the count, one error line is in the log, nothing but audio_chunk and the status reached the page, nothing was stored, the message was answered
         self.assertEqual((asked.result, asked.error), ({"sentences": 2}, None))
         self.assertEqual(len(logged.records), 1)
-        self.assertEqual(set(events_of_the_request), {"audio_chunk"})
+        self.assertLessEqual(set(events_of_the_request), {"audio_chunk", "chat_status"})     # no chat_message or note; the status events are those of REQ-CHA-035 (A-133)
+        self.assertFalse(chat.status()["busy"])                                                  # a failed repeat does not leave the stop button
         self.assertEqual(len(self.log), stored + 2)        # only the question and the answer of the normal message
         self.assertEqual(self.log.last("assistant")["text"], "Next answer.")
 
@@ -225,6 +226,7 @@ class SpeakAgainTest(unittest.TestCase):
         first = Asked(chat, answer)
         self.assertTrue(self.voice.started.wait(WAIT), "the voice route was not called")
         second = Asked(chat, answer)
+        time.sleep(0.2)                                    # the second request is in line behind the first before the stop comes
         # Then the published status and the status of the service are busy and speaking
         status = self.last_status()
         self.assertEqual((status["busy"], status["activity"]), (True, "speaking"))

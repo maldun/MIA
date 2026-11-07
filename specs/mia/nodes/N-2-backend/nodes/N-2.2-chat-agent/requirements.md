@@ -301,11 +301,11 @@ The persona's side: the shared conversation, the answer queue, persona, mood, me
 - Parent: REQ-CHA-006
 - Priority: Should
 - Verification method: Test
-- Acceptance criterion: AC-1: with a failing voice route the request returns the sentence count, the next message is answered, one error line is logged and no event or text for the page is added
+- Acceptance criterion: AC-1: with a failing voice route the request returns the sentence count, the next message is answered, one error line is logged and no text and no event but audio_chunk and chat_status is added to the page (A-133: the status is busy while the repeat runs)
 - Verified by: TC-CHA-033
 - Status: Draft
 - Group: SA
-- History: proposed in A-132 (Draft), not approved
+- History: proposed in A-132 (Draft), not approved; AC-1 clarified in A-133 (the status events of REQ-CHA-035 are not an event added by the failure), still Draft
 
 ### REQ-CHA-034 – One speak again at a time
 - Level: low   Subject: ConversationCore

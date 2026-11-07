@@ -35,3 +35,8 @@ REQ-CHA-035, 036: plausible: `publish_status` and `set_activity` exist and are u
 
 ## 8. Open for the owner
 Review of REQ-CHA-035 and REQ-CHA-036 and the scenario of TC-CHA-037 (approve, change or reject); the hand-check step 3 stays as written.
+
+## 9. Implemented (2026-11-08) and one consequence for REQ-CHA-033
+- `chat_service.py`: `status()` reports `busy` also while a repeat is pending; a repeat that finds no running answer takes the activity `speaking` (remembering the former one) and publishes the status; the last playback that ends restores the former activity unless an answer has started meanwhile, and publishes. The page, IF-101 and `web_app.py` are unchanged. Tests green by my own run: all 8 of `tests/test_chat_speak_again.py`, `tests/test_chat_*.py` (166), `tests/test_speech*.py`, the IF-201 contract suite, `tests/test_sound_server_handover.py`.
+- **Consequence (needs the owner's confirmation):** REQ-CHA-033 AC-1 said that after a failing voice route "no event or text for the page is added", and TC-CHA-033 asserted that only `audio_chunk` events were sent. A repeat now also publishes `chat_status`, so the literal wording contradicts REQ-CHA-035. I read the intent of D-277 Q4 as "no new text for the user" and clarified the Draft REQ-CHA-033 AC-1, the table row and the test: no text and no event but `audio_chunk` and `chat_status`; the test also asserts the status is not busy afterwards. REQ-CHA-033 is still Draft, so no approved text changed. If you read it differently, say so and the test changes back or the requirement does.
+- Not covered by a test: a repeat requested while an answer is running (the answer keeps its own status). The code path is the `not self._running` guard; it is a candidate for a Phase 4 check.
