@@ -291,3 +291,16 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verified by: TC-GTB-021
 - Status: Draft
 - History: G-V2.STORE Plan step 4, 2026-11-07, new (D-266)
+
+### REQ-GTB-021 – Record under its own ID
+- Level: low   Subject: Persistence
+- Text: If a record of a graph table is written under a record ID that differs from the ID inside the record, then the Graph tables shall refuse the record and name the field `id`.
+- Rationale: refines FR-40 and REQ-GTB-005; a graph header pins its members by the ID inside the record while the storage finds them by the record ID, so a record under another ID cannot be found again (REQ-GTB-014); found in G-V2.STORE Implement T-04 (A-92)
+- Parent: FR-40
+- Group: HD
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-31: a node whose own ID is n1, written under the record ID x, is refused naming `id` and nothing is stored under x; written under n1 it is accepted (exact)
+- Verified by: TC-GTB-022
+- Status: Draft
+- History: G-V2.STORE Implement T-04, 2026-11-07, new (A-92, proposed)

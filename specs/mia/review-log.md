@@ -522,3 +522,7 @@ The first version was silent until the end and could take 20 minutes or more: th
 | G-V2.STORE | goal | b24d9010d897 | Stefan Reiterer | 2026-11-07 | approved | scope and applies-to list extended with REQ-GTB-016..020 and TC-GTB-018..021, no change in meaning |
 | TR-GTB-001 | test requirement | db848f7b8e3b | Stefan Reiterer | 2026-11-07 | approved | scope and applies-to list extended with REQ-GTB-016..020 and TC-GTB-018..021, no change in meaning |
 | TR-GTB-002 | test requirement | 50feb8ff7302 | Stefan Reiterer | 2026-11-07 | approved | scope and applies-to list extended with REQ-GTB-016..020 and TC-GTB-018..021, no change in meaning |
+| REQ-GTB-021 | requirement | 07589037882d | Stefan Reiterer | 2026-11-07 | approved | A-92: record under its own ID; TR-GTB-001 applies to TC-GTB-022; scope row REQ-GTB-021 |
+| TC-GTB-022 | check | b9eed201d1c0 | Stefan Reiterer | 2026-11-07 | approved | A-92: record under its own ID; TR-GTB-001 applies to TC-GTB-022; scope row REQ-GTB-021 |
+| TR-GTB-001 | test requirement | d3d0c86173d3 | Stefan Reiterer | 2026-11-07 | approved | A-92: record under its own ID; TR-GTB-001 applies to TC-GTB-022; scope row REQ-GTB-021 |
+| G-V2.STORE | goal | c44f8cf3f707 | Stefan Reiterer | 2026-11-07 | approved | A-92: record under its own ID; TR-GTB-001 applies to TC-GTB-022; scope row REQ-GTB-021 |

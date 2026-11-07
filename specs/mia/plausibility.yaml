@@ -1,4 +1,4 @@
-# Plausibility record (L2b). Written by tools/apply_plausibility.py from plausibility-proposal.yaml, rated by maldun.
+# Plausibility record (L2b). Written by tools/apply_plausibility.py from plausibility-proposal.yaml, rated by Stefan Reiterer.
 plausibility:
   hardware:
     HW-target: Fedora, Ryzen 9 5900X (12 cores), 62 GB RAM, RX 7800 XT with 16 GB,
@@ -6,182 +6,182 @@ plausibility:
   items:
     ASM-MU-001:
       accepted_risk:
-        decided: 2026-10-26 by maldun
+        decided: 2026-10-26 by Stefan Reiterer
         follow_up: VAL-003
-        owner: 'maldun'
+        owner: 'Stefan Reiterer'
         reason: the number of simultaneous users is a fact about use; the field shows
           it
       basis:
       - decided by the owner on 2026-10-26; checked in the field with the first users
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: questionable
     ASM-N1-001:
       basis:
       - Chromium runs headless through flatpak on the host (ui/tools/browser_check.py
         uses it today)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     ASM-N1-002:
       basis:
       - personal use only small user group
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     ASM-N2-001:
       basis:
       - 'a design decision of the plan: the fake model server of pipeline.py exists
         and its tests run without a model'
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     ASM-N2-002:
       basis:
       - 'a design decision of the plan: the mock of IF-102 exists (contract-drafts)'
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     ASM-N3-001:
       basis:
       - podman 5.7.1 is installed on the host (checked 2026-10-26); the tests skip,
         never weaken, where it is not
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     ASM-N3-002:
       basis:
       - hashlib.scrypt exists in the standard library (checked on the host 2026-10-26)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     ASM-N3-003:
       basis:
       - psycopg 3 approved by the owner (D-54)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     ASM-N3-004:
       basis:
       - graphlib is in the standard library (checked on the host 2026-10-26)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     ASM-N3-005:
       basis:
       - a design decision of the plan, fixed in contracts/IF-302-record-tables.md
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     ASM-N4-001:
       basis:
       - the scripts eval_decide.py and agent_check.py exist in the agent-app skill
         (checked 2026-10-26)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     ASM-N4-002:
       basis:
       - podman 5.7.1 is installed on the host (checked 2026-10-26); the tests skip,
         never weaken, where it is not
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     ASM-N4-003:
       basis:
       - deploy/compose.yaml runs the model server and the search service today
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     ASM-N5-001:
       basis:
       - Chromium runs headless through flatpak on the host (ui/tools/browser_check.py
         uses it today)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     ASM-N5-002:
       basis:
       - decided by the owner on 2026-10-25 (the Graph app is an add-on)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     CON-1:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     CON-2:
       accepted_risk:
-        decided: 2026-10-26 by maldun
+        decided: 2026-10-26 by Stefan Reiterer
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: 'Stefan Reiterer'
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
       - the figure depends on the real model, hardware and use; it is measured in
         the field and tuned in later iterations (owner decision 2026-10-26)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: questionable
     CON-3:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     CON-4:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     CON-5:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     CON-6:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     CON-7:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     FR-1:
       basis:
@@ -189,86 +189,86 @@ plausibility:
         a fixed fixture or an inspection, and the part exists in the code base or
         is a plain table (agent proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     FR-10:
       basis:
       - It is the safe variant to avoid wrong judgement
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     FR-11:
       accepted_risk:
-        decided: '2026-10-26 by maldun'
+        decided: '2026-11-07 by Stefan Reiterer'
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: 'Stefan Reiterer'
         reason: criteria may be adjusted later if it is not working
       basis:
       - hard to check outside field tests also should used at small scale
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: questionable
     FR-12:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     FR-13:
       accepted_risk:
-        decided: '2026-10-26 by maldun'
+        decided: '2026-11-07 by Stefan Reiterer'
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: 'Stefan Reiterer'
         reason: criteria may be adjusted later if it is not working
       basis:
       - hard to check outside field tests also should used at small scale also small
         scale us with little users
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: questionable
     FR-14:
       basis:
       - Not critical can adjusted later
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     FR-15:
       basis:
       - Not critical can adjusted later
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     FR-16:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     FR-17:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     FR-18:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     FR-19:
       basis:
@@ -276,16 +276,16 @@ plausibility:
         a fixed fixture or an inspection, and the part exists in the code base or
         is a plain table (agent proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     FR-2:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     FR-20:
       basis:
@@ -293,24 +293,24 @@ plausibility:
         a fixed fixture or an inspection, and the part exists in the code base or
         is a plain table (agent proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     FR-21:
       basis:
       - there should be a starting point and improve over time. PErsonal use so hardware
         is known
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     FR-22:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     FR-23:
       basis:
@@ -318,23 +318,23 @@ plausibility:
         a fixed fixture or an inspection, and the part exists in the code base or
         is a plain table (agent proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     FR-24:
       basis:
       - Model should not deviate too much
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     FR-25:
       basis:
       - Not critical can adjusted later. Only for personal use so hardware constraints
         are ok
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     FR-26:
       basis:
@@ -342,16 +342,16 @@ plausibility:
         a fixed fixture or an inspection, and the part exists in the code base or
         is a plain table (agent proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     FR-27:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     FR-28:
       basis:
@@ -359,45 +359,45 @@ plausibility:
         a fixed fixture or an inspection, and the part exists in the code base or
         is a plain table (agent proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     FR-29:
       accepted_risk:
-        decided: '2026-10-26 by maldun'
+        decided: '2026-11-07 by Stefan Reiterer'
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: 'Stefan Reiterer'
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
       - hard to tell without field test
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: questionable
     FR-3:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     FR-30:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     FR-31:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     FR-32:
       basis:
@@ -405,113 +405,154 @@ plausibility:
         a fixed fixture or an inspection, and the part exists in the code base or
         is a plain table (agent proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     FR-33:
       accepted_risk:
-        decided: 2026-10-26 by maldun
+        decided: 2026-10-26 by Stefan Reiterer
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: 'Stefan Reiterer'
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
       - the figure depends on the real model, hardware and use; it is measured in
         the field and tuned in later iterations (owner decision 2026-10-26)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: questionable
+    FR-36:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
+      rating: plausible
+    FR-37:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
+      rating: plausible
+    FR-38:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
+      rating: plausible
     FR-4:
       basis:
       - flagged by a number or a quality line only; the check is deterministic code,
         a fixed fixture or an inspection, and the part exists in the code base or
         is a plain table (agent proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
+      rating: plausible
+    FR-40:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
+      rating: plausible
+    FR-45:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
+      rating: plausible
+    FR-47:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     FR-5:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     FR-6:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     FR-7:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     FR-8:
       accepted_risk:
-        decided: 2026-10-26 by maldun
+        decided: 2026-10-26 by Stefan Reiterer
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: 'Stefan Reiterer'
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
       - the figure depends on the real model, hardware and use; it is measured in
         the field and tuned in later iterations (owner decision 2026-10-26)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: questionable
     FR-9:
       accepted_risk:
-        decided: '2026-10-26 by maldun'
+        decided: '2026-11-07 by Stefan Reiterer'
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: 'Stefan Reiterer'
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
       - hard to check outside field tests
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
-      rating: questionable
-    FR-40:
-      basis:
-      - all 12 refining requirements (REQ-GTB-005 to 016) are rated plausible and verified by TC-GTB-016, 006 to 015 and 017; PostgreSQL is part of the stack already (rated by the owner, D-260 rule for top-level items)
-      hardware: HW-target
       rated: '2026-11-07'
-      rated_by: maldun
-      rating: plausible
+      rated_by: Stefan Reiterer
+      rating: questionable
     IF-101:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     IF-102:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     IF-103:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     IF-104:
       basis:
@@ -519,112 +560,112 @@ plausibility:
         a fixed fixture or an inspection, and the part exists in the code base or
         is a plain table (agent proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     IF-105:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     IF-111:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     IF-112:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     IF-201:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     IF-202:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     IF-203:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     IF-204:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     IF-301:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     IF-302:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     IF-401:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     IF-402:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     IF-404:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     IF-405:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     NFR-1:
       basis:
@@ -632,67 +673,67 @@ plausibility:
         a fixed fixture or an inspection, and the part exists in the code base or
         is a plain table (agent proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     NFR-2:
       accepted_risk:
-        decided: 2026-10-26 by maldun
+        decided: 2026-10-26 by Stefan Reiterer
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: 'Stefan Reiterer'
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
       - the figure depends on the real model, hardware and use; it is measured in
         the field and tuned in later iterations (owner decision 2026-10-26)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: questionable
     NFR-3:
       basis:
       - there should be a starting point and improve over time. PErsonal use so hardware
         is known
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     NFR-4:
       basis:
       - should be precise.
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     NFR-5:
       basis:
       - there should be a starting point and improve over time. PErsonal use so hardware
         is known
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     NFR-6:
       basis:
       - there should be a starting point and improve over time. PErsonal use so hardware
         is known
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     NFR-7:
       accepted_risk:
-        decided: 2026-10-26 by maldun
+        decided: 2026-10-26 by Stefan Reiterer
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: 'Stefan Reiterer'
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
       - the figure depends on the real model, hardware and use; it is measured in
         the field and tuned in later iterations (owner decision 2026-10-26)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: questionable
     NFR-8:
       basis:
@@ -700,24 +741,24 @@ plausibility:
         a fixed fixture or an inspection, and the part exists in the code base or
         is a plain table (agent proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     NFR-9:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-API-001:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-API-002:
       basis:
@@ -725,56 +766,40 @@ plausibility:
         decision 2026-10-26, ASM-MU-001); the queue and the live update are the same
         code for one user
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-API-003:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
-      rating: plausible
-    REQ-API-004:
-      basis:
-      - no number, measurement or model quality depends on it; the behaviour is fixed
-        by an acceptance criterion and a contract mock (proposal)
-      hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-API-005:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-API-006:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
-      rating: plausible
-    REQ-API-007:
-      basis:
-      - no number, measurement or model quality depends on it; the behaviour is fixed
-        by an acceptance criterion and a contract mock (proposal)
-      hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-API-008:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-API-009:
       basis:
@@ -782,80 +807,88 @@ plausibility:
         a fixed fixture or an inspection, and the part exists in the code base or
         is a plain table (agent proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-API-010:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-API-011:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-API-012:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-API-013:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-API-014:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-API-015:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-API-016:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
+      rating: plausible
+    REQ-API-017:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-001:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-002:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-003:
       basis:
@@ -863,32 +896,32 @@ plausibility:
         decision 2026-10-26, ASM-MU-001); the queue and the live update are the same
         code for one user
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-004:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-005:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-006:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-007:
       basis:
@@ -896,56 +929,56 @@ plausibility:
         decision 2026-10-26, ASM-MU-001); the queue and the live update are the same
         code for one user
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-008:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-009:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-010:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-011:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-012:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-013:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-014:
       basis:
@@ -953,110 +986,110 @@ plausibility:
         a fixed fixture or an inspection, and the part exists in the code base or
         is a plain table (agent proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-015:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-016:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-017:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-018:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-019:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-020:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-021:
       basis:
       - Not critical can adjusted later. Only for personal use so hardware constraints
         are ok
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-022:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-023:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-024:
       basis:
       - Not critical can adjusted later
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-025:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-026:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-027:
       basis:
       - Not critical can adjusted later
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-028:
       basis:
@@ -1064,37 +1097,37 @@ plausibility:
         a fixed fixture or an inspection, and the part exists in the code base or
         is a plain table (agent proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-029:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-030:
       accepted_risk:
-        decided: '2026-10-26 by maldun'
+        decided: '2026-11-07 by Stefan Reiterer'
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: 'Stefan Reiterer'
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
       - hard to tell without a field test
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: questionable
     REQ-BE-031:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-032:
       basis:
@@ -1102,56 +1135,56 @@ plausibility:
         a fixed fixture or an inspection, and the part exists in the code base or
         is a plain table (agent proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-033:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-034:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-035:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-036:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-037:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-038:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-039:
       basis:
@@ -1159,76 +1192,76 @@ plausibility:
         a fixed fixture or an inspection, and the part exists in the code base or
         is a plain table (agent proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-040:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-041:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-042:
       accepted_risk:
-        decided: 2026-10-26 by maldun
+        decided: 2026-10-26 by Stefan Reiterer
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: 'Stefan Reiterer'
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
       - the figure depends on the real model, hardware and use; it is measured in
         the field and tuned in later iterations (owner decision 2026-10-26)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: questionable
     REQ-BE-043:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-044:
       accepted_risk:
-        decided: 2026-10-26 by maldun
+        decided: 2026-10-26 by Stefan Reiterer
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: 'Stefan Reiterer'
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
       - the figure depends on the real model, hardware and use; it is measured in
         the field and tuned in later iterations (owner decision 2026-10-26)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: questionable
     REQ-BE-045:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-046:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-047:
       basis:
@@ -1236,129 +1269,129 @@ plausibility:
         a fixed fixture or an inspection, and the part exists in the code base or
         is a plain table (agent proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-048:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-049:
       accepted_risk:
-        decided: '2026-10-26 by maldun'
+        decided: '2026-11-07 by Stefan Reiterer'
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: 'Stefan Reiterer'
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
       - hard to check outside field tests
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: questionable
     REQ-BE-050:
       accepted_risk:
-        decided: '2026-10-26 by maldun'
+        decided: '2026-11-07 by Stefan Reiterer'
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: 'Stefan Reiterer'
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
       - hard to check outside field tests also should used at small scale
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: questionable
     REQ-BE-051:
       basis:
       - There should be no more cases left
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-052:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-053:
       accepted_risk:
-        decided: '2026-10-26 by maldun'
+        decided: '2026-11-07 by Stefan Reiterer'
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: 'Stefan Reiterer'
         reason: criteria may be adjusted later if it is not working
       basis:
       - hard to check outside field tests also should used at small scale also small
         scale us with little users
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: questionable
     REQ-BE-054:
       accepted_risk:
-        decided: 2026-10-26 by maldun
+        decided: 2026-10-26 by Stefan Reiterer
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: 'Stefan Reiterer'
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
       - the figure depends on the real model, hardware and use; it is measured in
         the field and tuned in later iterations (owner decision 2026-10-26)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: questionable
     REQ-BE-055:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-056:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-057:
       accepted_risk:
-        decided: '2026-10-26 by maldun'
+        decided: '2026-11-07 by Stefan Reiterer'
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: 'Stefan Reiterer'
         reason: criteria may be adjusted later if it is not working
       basis:
       - hard to check outside field tests also should used at small scale also small
         scale us with little users
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: questionable
     REQ-BE-058:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-059:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-060:
       basis:
@@ -1366,68 +1399,68 @@ plausibility:
         a fixed fixture or an inspection, and the part exists in the code base or
         is a plain table (agent proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-061:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-062:
       accepted_risk:
-        decided: 2026-10-26 by maldun
+        decided: 2026-10-26 by Stefan Reiterer
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: 'Stefan Reiterer'
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
       - the figure depends on the real model, hardware and use; it is measured in
         the field and tuned in later iterations (owner decision 2026-10-26)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: questionable
     REQ-BE-063:
       accepted_risk:
-        decided: 2026-10-26 by maldun
+        decided: 2026-10-26 by Stefan Reiterer
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: 'Stefan Reiterer'
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
       - the figure depends on the real model, hardware and use; it is measured in
         the field and tuned in later iterations (owner decision 2026-10-26)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: questionable
     REQ-BE-064:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-065:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-066:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-067:
       basis:
@@ -1435,52 +1468,52 @@ plausibility:
         a fixed fixture or an inspection, and the part exists in the code base or
         is a plain table (agent proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-068:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-069:
       accepted_risk:
-        decided: 2026-10-26 by maldun
+        decided: 2026-10-26 by Stefan Reiterer
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: 'Stefan Reiterer'
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
       - the figure depends on the real model, hardware and use; it is measured in
         the field and tuned in later iterations (owner decision 2026-10-26)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: questionable
     REQ-BE-070:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-071:
       accepted_risk:
-        decided: 2026-10-26 by maldun
+        decided: 2026-10-26 by Stefan Reiterer
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: 'Stefan Reiterer'
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
       - the figure depends on the real model, hardware and use; it is measured in
         the field and tuned in later iterations (owner decision 2026-10-26)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: questionable
     REQ-BE-072:
       basis:
@@ -1488,56 +1521,64 @@ plausibility:
         decision 2026-10-26, ASM-MU-001); the queue and the live update are the same
         code for one user
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-073:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-074:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-075:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-BE-076:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
+      rating: plausible
+    REQ-BE-077:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-CHA-001:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-CHA-002:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-CHA-003:
       basis:
@@ -1545,94 +1586,94 @@ plausibility:
         decision 2026-10-26, ASM-MU-001); the queue and the live update are the same
         code for one user
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-CHA-004:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-CHA-005:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-CHA-006:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-CHA-007:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-CHA-008:
       basis:
       - Not critical can adjusted later. Only for personal use so hardware constraints
         are ok
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-CHA-009:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-CHA-010:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-CHA-011:
       basis:
       - Not critical can adjusted later
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-CHA-012:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-CHA-013:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-CHA-014:
       basis:
       - Not critical can adjusted later
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-CHA-015:
       basis:
@@ -1640,37 +1681,37 @@ plausibility:
         a fixed fixture or an inspection, and the part exists in the code base or
         is a plain table (agent proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-CHA-016:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-CHA-017:
       accepted_risk:
-        decided: '2026-10-26 by maldun'
+        decided: '2026-11-07 by Stefan Reiterer'
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: 'Stefan Reiterer'
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
       - hard to tell without a field test
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: questionable
     REQ-CHA-018:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-CHA-019:
       basis:
@@ -1678,32 +1719,32 @@ plausibility:
         a fixed fixture or an inspection, and the part exists in the code base or
         is a plain table (agent proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-CHA-020:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-CHV-001:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-CHV-002:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-CHV-003:
       basis:
@@ -1711,16 +1752,16 @@ plausibility:
         a fixed fixture or an inspection, and the part exists in the code base or
         is a plain table (agent proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-CHV-004:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-CHV-005:
       basis:
@@ -1728,102 +1769,102 @@ plausibility:
         decision 2026-10-26, ASM-MU-001); the queue and the live update are the same
         code for one user
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-CHV-006:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-CHV-007:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-CHV-008:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-CHV-009:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-CHV-010:
       accepted_risk:
-        decided: 2026-10-26 by maldun
+        decided: 2026-10-26 by Stefan Reiterer
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: 'Stefan Reiterer'
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
       - the figure depends on the real model, hardware and use; it is measured in
         the field and tuned in later iterations (owner decision 2026-10-26)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: questionable
     REQ-CHV-011:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-CHV-012:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-CHV-013:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-CHV-014:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-CLV-001:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-CLV-002:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-CLV-003:
       basis:
@@ -1831,8 +1872,8 @@ plausibility:
         a fixed fixture or an inspection, and the part exists in the code base or
         is a plain table (agent proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-CLV-004:
       basis:
@@ -1840,24 +1881,24 @@ plausibility:
         a fixed fixture or an inspection, and the part exists in the code base or
         is a plain table (agent proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-CLV-005:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-CLV-006:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-CLV-007:
       basis:
@@ -1865,16 +1906,16 @@ plausibility:
         a fixed fixture or an inspection, and the part exists in the code base or
         is a plain table (agent proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-CLV-008:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-CLV-009:
       basis:
@@ -1882,56 +1923,48 @@ plausibility:
         decision 2026-10-26, ASM-MU-001); the queue and the live update are the same
         code for one user
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-CLV-010:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
-      rating: plausible
-    REQ-CLV-011:
-      basis:
-      - no number, measurement or model quality depends on it; the behaviour is fixed
-        by an acceptance criterion and a contract mock (proposal)
-      hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-CLV-012:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-CLV-013:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-CLV-014:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-CLV-015:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-CLV-016:
       basis:
@@ -1939,88 +1972,104 @@ plausibility:
         a fixed fixture or an inspection, and the part exists in the code base or
         is a plain table (agent proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-CLV-017:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-CLV-018:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-CLV-019:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-CLV-020:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-CLV-021:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
+      rating: plausible
+    REQ-CLV-022:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
+      rating: plausible
+    REQ-CLV-024:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-DB-001:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-DB-002:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-DB-003:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-DB-004:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-DB-005:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-DB-006:
       basis:
@@ -2028,48 +2077,48 @@ plausibility:
         decision 2026-10-26, ASM-MU-001); the queue and the live update are the same
         code for one user
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-DB-007:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-DB-008:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-DB-009:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-DB-010:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-DB-011:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-DB-012:
       basis:
@@ -2077,16 +2126,16 @@ plausibility:
         a fixed fixture or an inspection, and the part exists in the code base or
         is a plain table (agent proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-DB-013:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-DB-014:
       basis:
@@ -2094,40 +2143,40 @@ plausibility:
         a fixed fixture or an inspection, and the part exists in the code base or
         is a plain table (agent proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-DB-015:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-DB-016:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-DB-017:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-DB-018:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-EVL-001:
       basis:
@@ -2135,24 +2184,24 @@ plausibility:
         a fixed fixture or an inspection, and the part exists in the code base or
         is a plain table (agent proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-EVL-002:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-EVL-003:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-EVL-004:
       basis:
@@ -2160,85 +2209,85 @@ plausibility:
         a fixed fixture or an inspection, and the part exists in the code base or
         is a plain table (agent proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-EVL-005:
       basis:
       - there should be a starting point and improve over time
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-EVL-006:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-EVL-007:
       accepted_risk:
-        decided: 2026-10-26 by maldun
+        decided: 2026-10-26 by Stefan Reiterer
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: 'Stefan Reiterer'
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
       - the figure depends on the real model, hardware and use; it is measured in
         the field and tuned in later iterations (owner decision 2026-10-26)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: questionable
     REQ-EVL-008:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-EVL-009:
       basis:
       - there should be a starting point and improve over time. PErsonal use so hardware
         is known
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-EVL-010:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-EVL-011:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-FE-001:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-FE-002:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-FE-003:
       basis:
@@ -2246,8 +2295,8 @@ plausibility:
         a fixed fixture or an inspection, and the part exists in the code base or
         is a plain table (agent proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-FE-004:
       basis:
@@ -2255,24 +2304,24 @@ plausibility:
         a fixed fixture or an inspection, and the part exists in the code base or
         is a plain table (agent proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-FE-005:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-FE-006:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-FE-007:
       basis:
@@ -2280,16 +2329,16 @@ plausibility:
         a fixed fixture or an inspection, and the part exists in the code base or
         is a plain table (agent proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-FE-008:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-FE-009:
       basis:
@@ -2297,48 +2346,48 @@ plausibility:
         a fixed fixture or an inspection, and the part exists in the code base or
         is a plain table (agent proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-FE-010:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-FE-011:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-FE-012:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-FE-013:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-FE-014:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-FE-015:
       basis:
@@ -2346,72 +2395,72 @@ plausibility:
         decision 2026-10-26, ASM-MU-001); the queue and the live update are the same
         code for one user
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-FE-016:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-FE-017:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-FE-018:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-FE-019:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-FE-020:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-FE-021:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-FE-022:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-FE-023:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-FE-024:
       basis:
@@ -2419,318 +2468,350 @@ plausibility:
         a fixed fixture or an inspection, and the part exists in the code base or
         is a plain table (agent proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-FE-025:
       accepted_risk:
-        decided: 2026-10-26 by maldun
+        decided: 2026-10-26 by Stefan Reiterer
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: 'Stefan Reiterer'
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
       - the figure depends on the real model, hardware and use; it is measured in
         the field and tuned in later iterations (owner decision 2026-10-26)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: questionable
     REQ-FE-026:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-FE-027:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-FE-028:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-FE-029:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-FE-030:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
+      rating: plausible
+    REQ-FE-031:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-GA-001:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-GA-002:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-GA-003:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-GA-004:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-GA-005:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-GA-006:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-GA-007:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-GA-008:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-GA-009:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-GA-010:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-GA-011:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-GTB-001:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-GTB-002:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-GTB-003:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-GTB-004:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-GTB-005:
       basis:
-      - 'node and edge records are plain rows with a JSON column; the behaviour is fixed by an exact acceptance criterion (proposal of the agent, 2026-11-07; rated by the owner)'
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
       rated: '2026-11-07'
-      rated_by: maldun
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-GTB-006:
       basis:
-      - 'as REQ-GTB-005 (proposal of the agent, 2026-11-07; rated by the owner)'
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
       rated: '2026-11-07'
-      rated_by: maldun
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-GTB-007:
       basis:
-      - 'as REQ-GTB-005 (proposal of the agent, 2026-11-07; rated by the owner)'
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
       rated: '2026-11-07'
-      rated_by: maldun
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-GTB-008:
       basis:
-      - 'as REQ-GTB-005 (proposal of the agent, 2026-11-07; rated by the owner)'
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
       rated: '2026-11-07'
-      rated_by: maldun
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-GTB-009:
       basis:
-      - 'the registry maps a type ID to a class; no number or model quality depends on it (proposal of the agent, 2026-11-07; rated by the owner)'
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
       rated: '2026-11-07'
-      rated_by: maldun
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-GTB-010:
       basis:
-      - 'a lookup that finds no class; no number depends on it (proposal of the agent, 2026-11-07; rated by the owner)'
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
       rated: '2026-11-07'
-      rated_by: maldun
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-GTB-011:
       basis:
-      - 'jsonschema 4.23.0 is installed on the host (D-187); schema checks of small JSON fields are exact (proposal of the agent, 2026-11-07; rated by the owner)'
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
       rated: '2026-11-07'
-      rated_by: maldun
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-GTB-012:
       basis:
-      - 'a static check of imports; no number depends on it (proposal of the agent, 2026-11-07; rated by the owner)'
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
       rated: '2026-11-07'
-      rated_by: maldun
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-GTB-013:
       basis:
-      - 'versions exist for workflows and context graphs already (TC-GTB-001: both tables versioned, neither deletable) (proposal of the agent, 2026-11-07; rated by the owner)'
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
       rated: '2026-11-07'
-      rated_by: maldun
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-GTB-014:
       basis:
-      - 'the 1000-seed property test follows TC-GTB-003, which already runs at stage 1 in under 2 minutes (proposal of the agent, 2026-11-07; rated by the owner)'
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
       rated: '2026-11-07'
-      rated_by: maldun
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-GTB-015:
       basis:
-      - 'the v1 and v0 suites exist and pass today; the document form is rebuilt from records (proposal of the agent, 2026-11-07; rated by the owner)'
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
       rated: '2026-11-07'
-      rated_by: maldun
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-GTB-016:
       basis:
-      - 'a refused write leaves the stored record alone; versions are written only after the checks pass; no number depends on it (proposal of the agent, 2026-11-07; rated by the owner)'
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
       rated: '2026-11-07'
-      rated_by: maldun
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-GTB-017:
       basis:
-      - 'a header is one row with a list of member IDs and versions; no number depends on it (proposal of the agent, 2026-11-07; rated by the owner)'
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
       rated: '2026-11-07'
-      rated_by: maldun
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-GTB-018:
       basis:
-      - 'a versioned row with four fields; the same kind of record as the older tables (proposal of the agent, 2026-11-07; rated by the owner)'
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
       rated: '2026-11-07'
-      rated_by: maldun
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-GTB-019:
       basis:
-      - 'a lookup of each named member version before the write; no number depends on it (proposal of the agent, 2026-11-07; rated by the owner)'
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
       rated: '2026-11-07'
-      rated_by: maldun
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-GTB-020:
       basis:
-      - 'a lookup of the two end nodes before the write; no number depends on it (proposal of the agent, 2026-11-07; rated by the owner)'
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
       rated: '2026-11-07'
-      rated_by: maldun
+      rated_by: Stefan Reiterer
+      rating: plausible
+    REQ-GTB-021:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-LOG-001:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-LOG-002:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-LOG-003:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-LOG-004:
       basis:
@@ -2738,96 +2819,96 @@ plausibility:
         a fixed fixture or an inspection, and the part exists in the code base or
         is a plain table (agent proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-LOG-005:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-OPR-001:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-OPR-002:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-OPR-003:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-OPR-004:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-OPR-005:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-OPR-006:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-OPR-007:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-OPR-008:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-OPR-009:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-OPR-010:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-OPS-001:
       basis:
@@ -2835,24 +2916,24 @@ plausibility:
         a fixed fixture or an inspection, and the part exists in the code base or
         is a plain table (agent proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-OPS-002:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-OPS-003:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-OPS-004:
       basis:
@@ -2860,157 +2941,157 @@ plausibility:
         a fixed fixture or an inspection, and the part exists in the code base or
         is a plain table (agent proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-OPS-005:
       basis:
       - there should be a starting point and improve over time
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-OPS-006:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-OPS-007:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-OPS-008:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-OPS-009:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-OPS-010:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-OPS-011:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-OPS-012:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-OPS-013:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-OPS-014:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-OPS-015:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-OPS-016:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-OPS-017:
       accepted_risk:
-        decided: 2026-10-26 by maldun
+        decided: 2026-10-26 by Stefan Reiterer
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: 'Stefan Reiterer'
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
       - the figure depends on the real model, hardware and use; it is measured in
         the field and tuned in later iterations (owner decision 2026-10-26)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: questionable
     REQ-OPS-018:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-OPS-019:
       basis:
       - there should be a starting point and improve over time. PErsonal use so hardware
         is known
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-OPS-020:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-RTB-001:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-RTB-002:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-RTB-003:
       basis:
@@ -3018,16 +3099,16 @@ plausibility:
         a fixed fixture or an inspection, and the part exists in the code base or
         is a plain table (agent proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-RTB-004:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-RTB-005:
       basis:
@@ -3035,118 +3116,118 @@ plausibility:
         a fixed fixture or an inspection, and the part exists in the code base or
         is a plain table (agent proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-RTB-006:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-RUN-001:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-RUN-002:
       accepted_risk:
-        decided: 2026-10-26 by maldun
+        decided: 2026-10-26 by Stefan Reiterer
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: 'Stefan Reiterer'
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
       - the figure depends on the real model, hardware and use; it is measured in
         the field and tuned in later iterations (owner decision 2026-10-26)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: questionable
     REQ-RUN-003:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-RUN-004:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-RUN-005:
       accepted_risk:
-        decided: 2026-10-26 by maldun
+        decided: 2026-10-26 by Stefan Reiterer
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: 'Stefan Reiterer'
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
       - the figure depends on the real model, hardware and use; it is measured in
         the field and tuned in later iterations (owner decision 2026-10-26)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: questionable
     REQ-RUN-006:
       accepted_risk:
-        decided: 2026-10-26 by maldun
+        decided: 2026-10-26 by Stefan Reiterer
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: 'Stefan Reiterer'
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
       - the figure depends on the real model, hardware and use; it is measured in
         the field and tuned in later iterations (owner decision 2026-10-26)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: questionable
     REQ-RUN-007:
       accepted_risk:
-        decided: 2026-10-26 by maldun
+        decided: 2026-10-26 by Stefan Reiterer
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: 'Stefan Reiterer'
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
       - the figure depends on the real model, hardware and use; it is measured in
         the field and tuned in later iterations (owner decision 2026-10-26)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: questionable
     REQ-RUN-008:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-RUN-009:
       accepted_risk:
-        decided: 2026-10-26 by maldun
+        decided: 2026-10-26 by Stefan Reiterer
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: 'Stefan Reiterer'
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
       - the figure depends on the real model, hardware and use; it is measured in
         the field and tuned in later iterations (owner decision 2026-10-26)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: questionable
     REQ-RUN-010:
       basis:
@@ -3154,116 +3235,120 @@ plausibility:
         decision 2026-10-26, ASM-MU-001); the queue and the live update are the same
         code for one user
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-RUN-011:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-RUN-012:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-RUN-013:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-RUN-014:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-RUN-015:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-RUN-016:
       basis:
-      - 'no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on plain data and a scripted run, no model (proposal of the agent, 2026-11-07, G-V2.MODEL; rated by the owner 2026-11-07)'
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
       rated: '2026-11-07'
-      rated_by: maldun
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-RUN-017:
       basis:
-      - 'only the owner can set a transform trusted: the account that creates accounts (TC-MIA-014), basis of D-260 (B); the rest is an exact acceptance criterion on a scripted run, no model (proposal of the agent, 2026-11-07, G-V2.MODEL; rated by the owner 2026-11-07)'
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
       rated: '2026-11-07'
-      rated_by: maldun
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-RUN-018:
       basis:
-      - 'no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on plain data and a scripted run, no model (proposal of the agent, 2026-11-07, G-V2.MODEL; rated by the owner 2026-11-07)'
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
       rated: '2026-11-07'
-      rated_by: maldun
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-RUN-019:
       basis:
-      - 'no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on plain data and a scripted run, no model (proposal of the agent, 2026-11-07, G-V2.MODEL; rated by the owner 2026-11-07)'
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
       rated: '2026-11-07'
-      rated_by: maldun
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-SLY-001:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-SLY-002:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-SLY-003:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-SLY-004:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-SLY-005:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-SLY-006:
       basis:
@@ -3271,64 +3356,64 @@ plausibility:
         decision 2026-10-26, ASM-MU-001); the queue and the live update are the same
         code for one user
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-SLY-007:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-SLY-008:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-SLY-009:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-SLY-010:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-SLY-011:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-SLY-012:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-TLS-001:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-TLS-002:
       basis:
@@ -3336,32 +3421,32 @@ plausibility:
         a fixed fixture or an inspection, and the part exists in the code base or
         is a plain table (agent proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-TLS-003:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-TLS-004:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-TLS-005:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-TLS-006:
       basis:
@@ -3369,136 +3454,128 @@ plausibility:
         a fixed fixture or an inspection, and the part exists in the code base or
         is a plain table (agent proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-TLS-007:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-TLS-008:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-VOI-001:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-VOI-002:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-VOI-003:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-VOI-004:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-VPB-001:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
-      rating: plausible
-    REQ-VPB-002:
-      basis:
-      - no number, measurement or model quality depends on it; the behaviour is fixed
-        by an acceptance criterion and a contract mock (proposal)
-      hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-VPB-003:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-VPB-004:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-VPB-005:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-WFM-001:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-WFM-002:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-WFM-003:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-WFM-004:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-WFM-005:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-WFM-006:
       basis:
@@ -3506,54 +3583,54 @@ plausibility:
         a fixed fixture or an inspection, and the part exists in the code base or
         is a plain table (agent proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-WFM-007:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-WFM-008:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-WFM-009:
       accepted_risk:
-        decided: 2026-10-26 by maldun
+        decided: 2026-10-26 by Stefan Reiterer
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: 'Stefan Reiterer'
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
       - the figure depends on the real model, hardware and use; it is measured in
         the field and tuned in later iterations (owner decision 2026-10-26)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: questionable
     REQ-WFM-010:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-WFM-011:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-WFM-012:
       basis:
@@ -3561,115 +3638,115 @@ plausibility:
         a fixed fixture or an inspection, and the part exists in the code base or
         is a plain table (agent proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-WFM-013:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-WFM-014:
       accepted_risk:
-        decided: '2026-10-26 by maldun'
+        decided: '2026-11-07 by Stefan Reiterer'
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: 'Stefan Reiterer'
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
       - hard to check outside field tests also should used at small scale
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: questionable
     REQ-WFM-015:
       basis:
       - 2 sigma is reasonable for this use case.
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-WFM-016:
       basis:
       - There should be no more cases left
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-WFM-017:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-WFM-018:
       accepted_risk:
-        decided: '2026-10-26 by maldun'
+        decided: '2026-11-07 by Stefan Reiterer'
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: 'Stefan Reiterer'
         reason: criteria may be adjusted later if it is not working
       basis:
       - hard to check outside field tests also should used at small scale also small
         scale us with little users
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: questionable
     REQ-WFM-019:
       accepted_risk:
-        decided: 2026-10-26 by maldun
+        decided: 2026-10-26 by Stefan Reiterer
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: 'Stefan Reiterer'
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
       - the figure depends on the real model, hardware and use; it is measured in
         the field and tuned in later iterations (owner decision 2026-10-26)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: questionable
     REQ-WFM-020:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-WFM-021:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-WFM-022:
       accepted_risk:
-        decided: '2026-10-26 by maldun'
+        decided: '2026-11-07 by Stefan Reiterer'
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: 'Stefan Reiterer'
         reason: criteria may be adjusted later if it is not working
       basis:
       - hard to check outside field tests also should used at small scale also small
         scale us with little users
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: questionable
     REQ-WFM-023:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-WFM-024:
       basis:
@@ -3677,140 +3754,358 @@ plausibility:
         a fixed fixture or an inspection, and the part exists in the code base or
         is a plain table (agent proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-WFM-025:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-WFM-026:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
+      rating: plausible
+    REQ-WFM-027:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
+      rating: plausible
+    REQ-WFM-028:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
+      rating: plausible
+    REQ-WFM-029:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
+      rating: plausible
+    REQ-WFM-030:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
+      rating: plausible
+    REQ-WFM-032:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
+      rating: plausible
+    REQ-WFM-036:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
+      rating: plausible
+    REQ-WFM-038:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-WFM-040:
       basis:
-      - 'no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on plain data and a scripted run, no model (proposal of the agent, 2026-11-07, G-V2.MODEL; rated by the owner 2026-11-07)'
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
       rated: '2026-11-07'
-      rated_by: maldun
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-WFM-041:
       basis:
-      - 'no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on plain data and a scripted run, no model (proposal of the agent, 2026-11-07, G-V2.MODEL; rated by the owner 2026-11-07)'
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
       rated: '2026-11-07'
-      rated_by: maldun
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-WFM-042:
       basis:
-      - 'no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on plain data and a scripted run, no model (proposal of the agent, 2026-11-07, G-V2.MODEL; rated by the owner 2026-11-07)'
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
       rated: '2026-11-07'
-      rated_by: maldun
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-WFM-043:
       basis:
-      - 'no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on plain data and a scripted run, no model (proposal of the agent, 2026-11-07, G-V2.MODEL; rated by the owner 2026-11-07)'
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
       rated: '2026-11-07'
-      rated_by: maldun
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-WFM-044:
       basis:
-      - 'no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on plain data and a scripted run, no model (proposal of the agent, 2026-11-07, G-V2.MODEL; rated by the owner 2026-11-07)'
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
       rated: '2026-11-07'
-      rated_by: maldun
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-WFM-045:
       basis:
-      - 'no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on plain data and a scripted run, no model (proposal of the agent, 2026-11-07, G-V2.MODEL; rated by the owner 2026-11-07)'
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
       rated: '2026-11-07'
-      rated_by: maldun
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-WFM-046:
       basis:
-      - 'no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on plain data and a scripted run, no model (proposal of the agent, 2026-11-07, G-V2.MODEL; rated by the owner 2026-11-07)'
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
       rated: '2026-11-07'
-      rated_by: maldun
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-WFM-047:
       basis:
-      - 'no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on plain data and a scripted run, no model (proposal of the agent, 2026-11-07, G-V2.MODEL; rated by the owner 2026-11-07)'
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
       rated: '2026-11-07'
-      rated_by: maldun
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-WFM-048:
       basis:
-      - 'no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on plain data and a scripted run, no model (proposal of the agent, 2026-11-07, G-V2.MODEL; rated by the owner 2026-11-07)'
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
       rated: '2026-11-07'
-      rated_by: maldun
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-WFM-049:
       basis:
-      - 'no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on plain data and a scripted run, no model (proposal of the agent, 2026-11-07, G-V2.MODEL; rated by the owner 2026-11-07)'
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
       rated: '2026-11-07'
-      rated_by: maldun
+      rated_by: Stefan Reiterer
+      rating: plausible
+    REQ-WFM-050:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
+      rating: plausible
+    REQ-WFM-051:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
+      rating: plausible
+    REQ-WFM-052:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
+      rating: plausible
+    REQ-WFM-053:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
+      rating: plausible
+    REQ-WFM-054:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
+      rating: plausible
+    REQ-WFM-055:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
+      rating: plausible
+    REQ-WFM-056:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
+      rating: plausible
+    REQ-WFM-057:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
+      rating: plausible
+    REQ-WFM-058:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
+      rating: plausible
+    REQ-WFM-060:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
+      rating: plausible
+    REQ-WFM-061:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
+      rating: plausible
+    REQ-WFM-062:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
+      rating: plausible
+    REQ-WFM-063:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
+      rating: plausible
+    REQ-WFM-064:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
+      rating: plausible
+    REQ-WFM-065:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
+      rating: plausible
+    REQ-WFM-066:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
+      rating: plausible
+    REQ-WFM-067:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
+      rating: plausible
+    REQ-WFM-069:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
+      rating: plausible
+    REQ-WFM-070:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-WFX-001:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-WFX-002:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-WFX-003:
       accepted_risk:
-        decided: 2026-10-26 by maldun
+        decided: 2026-10-26 by Stefan Reiterer
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: 'Stefan Reiterer'
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
       - the figure depends on the real model, hardware and use; it is measured in
         the field and tuned in later iterations (owner decision 2026-10-26)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: questionable
     REQ-WFX-004:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-WFX-005:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-WFX-006:
       basis:
@@ -3818,32 +4113,32 @@ plausibility:
         a fixed fixture or an inspection, and the part exists in the code base or
         is a plain table (agent proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-WFX-007:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-WFX-008:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-WFX-009:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-WFX-010:
       basis:
@@ -3851,60 +4146,60 @@ plausibility:
         a fixed fixture or an inspection, and the part exists in the code base or
         is a plain table (agent proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-WFX-011:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-WFX-012:
       accepted_risk:
-        decided: 2026-10-26 by maldun
+        decided: 2026-10-26 by Stefan Reiterer
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: 'Stefan Reiterer'
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
       - the figure depends on the real model, hardware and use; it is measured in
         the field and tuned in later iterations (owner decision 2026-10-26)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: questionable
     REQ-WFX-013:
       accepted_risk:
-        decided: 2026-10-26 by maldun
+        decided: 2026-10-26 by Stefan Reiterer
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: 'Stefan Reiterer'
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
       - the figure depends on the real model, hardware and use; it is measured in
         the field and tuned in later iterations (owner decision 2026-10-26)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: questionable
     REQ-WFX-014:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-WFX-015:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-WFX-016:
       basis:
@@ -3912,52 +4207,52 @@ plausibility:
         a fixed fixture or an inspection, and the part exists in the code base or
         is a plain table (agent proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-WFX-017:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-WFX-018:
       accepted_risk:
-        decided: 2026-10-26 by maldun
+        decided: 2026-10-26 by Stefan Reiterer
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: 'Stefan Reiterer'
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
       - the figure depends on the real model, hardware and use; it is measured in
         the field and tuned in later iterations (owner decision 2026-10-26)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: questionable
     REQ-WFX-019:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-WFX-020:
       accepted_risk:
-        decided: 2026-10-26 by maldun
+        decided: 2026-10-26 by Stefan Reiterer
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: 'Stefan Reiterer'
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
       - the figure depends on the real model, hardware and use; it is measured in
         the field and tuned in later iterations (owner decision 2026-10-26)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: questionable
     REQ-WFX-021:
       basis:
@@ -3965,31 +4260,31 @@ plausibility:
         decision 2026-10-26, ASM-MU-001); the queue and the live update are the same
         code for one user
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-WFX-022:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-WFX-023:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
     REQ-WFX-024:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
-      rated: '2026-10-26'
-      rated_by: maldun
+      rated: '2026-11-07'
+      rated_by: Stefan Reiterer
       rating: plausible
   references: {}

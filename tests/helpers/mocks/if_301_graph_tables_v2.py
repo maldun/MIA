@@ -106,10 +106,14 @@ def _dup(members):
     return len(ids) != len(set(ids))
 
 
-def _check(table, record, categories, stored):
+def _check(table, record, categories, stored, record_id=None):
     if not isinstance(record, dict):
         return {"rule": "record_identity", "detail": "record"}
     if not isinstance(record.get("id"), str) or not record["id"]:
+        return {"rule": "record_identity", "detail": "id"}
+    if record_id is not None and record_id != record["id"]:      # the record is stored under the ID it carries (REQ-GTB-021)
+        return {"rule": "record_identity", "detail": "id"}
+    if record_id is not None and record_id != record["id"]:      # the record is stored under the ID it carries (REQ-GTB-021)
         return {"rule": "record_identity", "detail": "id"}
     if table == "graph_edges":
         for end in ("from", "to"):
@@ -185,11 +189,11 @@ class GraphTablesV2Mock:
     def types(self):
         return {type_id: copy.deepcopy(TYPE_SCHEMAS[type_id]) for type_id in sorted(TYPE_SCHEMAS)}
 
-    def check_record(self, table, record, categories=None, stored=None):
+    def check_record(self, table, record, categories=None, stored=None, record_id=None):
         if table not in NEW_TABLES:
             raise ValueError("not a record table of the graphs: %s" % (table,))
         try:
-            return _check(table, record, categories, stored)
+            return _check(table, record, categories, stored, record_id)
         except Exception:  # any input gives a rule or None, never an exception (A-60)
             return {"rule": "record_identity", "detail": "record"}
 

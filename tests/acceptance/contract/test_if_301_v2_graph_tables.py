@@ -336,6 +336,42 @@ class GraphTablesV2Contract(unittest.TestCase):
         # And: the fastest run is within the bound of the contract (0.5 s)
         self.assertLessEqual(min(timings), 0.5)
 
+    @mark.req("IF-301", "REQ-GTB-021")
+    @each_provider(IF, make=subject)
+    def test_a_record_under_another_id_is_refused(self, tables):
+        """TC-IF-301-20 golden 15: a record whose id is n1, checked with record_id x, gives record_identity naming id; with record_id n1, or without, it gives None.
+
+        Example: {"id": "n1", "data": {"type": "data"}} with record_id="x" -> {"rule": "record_identity", "detail": "id"}.
+        """
+        # Given: a node record with its own ID n1
+        record = node("n1", "data")
+        # When/Then: under another record ID it is refused naming the field id; the twin under its own ID and the call without record_id are accepted
+        self.assertEqual(tables.check_record("graph_nodes", record, record_id="x"), {"rule": "record_identity", "detail": "id"})
+        self.assertIsNone(tables.check_record("graph_nodes", record, record_id="n1"))
+        self.assertIsNone(tables.check_record("graph_nodes", record))
+        # And: the same holds for the other three tables
+        for table, other in (("graph_edges", edge("e1", "n1", "n2")), ("skills", {"id": "s1", "data": {"command": "/s", "workflow_graph_id": "w", "context_graph_id": "c"}})):
+            self.assertEqual(tables.check_record(table, other, record_id="x"), {"rule": "record_identity", "detail": "id"})
+            self.assertIsNone(tables.check_record(table, other, record_id=other["id"]))
+
+    @mark.req("IF-301", "REQ-GTB-021")
+    @each_provider(IF, make=subject)
+    def test_a_record_under_another_id_is_refused(self, tables):
+        """TC-IF-301-20 golden 15: a record whose id is n1, checked with record_id x, gives record_identity naming id; with record_id n1, or without, it gives None.
+
+        Example: {"id": "n1", "data": {"type": "data"}} with record_id="x" -> {"rule": "record_identity", "detail": "id"}.
+        """
+        # Given: a node record with its own ID n1
+        record = node("n1", "data")
+        # When/Then: under another record ID it is refused naming the field id; the twin under its own ID and the call without record_id are accepted
+        self.assertEqual(tables.check_record("graph_nodes", record, record_id="x"), {"rule": "record_identity", "detail": "id"})
+        self.assertIsNone(tables.check_record("graph_nodes", record, record_id="n1"))
+        self.assertIsNone(tables.check_record("graph_nodes", record))
+        # And: the same holds for the other three tables
+        for table, other in (("graph_edges", edge("e1", "n1", "n2")), ("skills", {"id": "s1", "data": {"command": "/s", "workflow_graph_id": "w", "context_graph_id": "c"}})):
+            self.assertEqual(tables.check_record(table, other, record_id="x"), {"rule": "record_identity", "detail": "id"})
+            self.assertIsNone(tables.check_record(table, other, record_id=other["id"]))
+
 
 if __name__ == "__main__":
     unittest.main()

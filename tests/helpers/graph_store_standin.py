@@ -35,7 +35,7 @@ class GraphStoreStandIn(StorageMock):
     def put(self, table, record_id, doc, author, expected_version=None, categories=None):
         if table in RECORD_TABLES:
             import graph_tables
-            refused = graph_tables.check_record(table, doc, categories=categories, stored=self.stored())
+            refused = graph_tables.check_record(table, doc, categories=categories, stored=self.stored(), record_id=record_id)
             if refused:
                 raise StorageError("invalid", rule=refused["rule"], detail=refused["detail"])
         return super().put(table, record_id, doc, author, expected_version)

@@ -28,6 +28,7 @@ Tests of this part alone against the mocks of its neighbours: unit tests with pl
 | TC-GTB-019 | REQ-GTB-018 | Unit | 1 | a skill with ID `lookup`, command `/lookup`, a workflow graph ID and a context graph ID; then an edit of the context graph ID; a record without a command | read back equal; the edit is version 2 and version 1 is unchanged; the record without a command is refused naming `command` | exact |
 | TC-GTB-020 | REQ-GTB-019 | Unit | 1 | a header naming n1 at version 5 when n1 has versions 1 and 2; the same header with version 2 | the first is refused naming `n1`; the second is accepted | exact |
 | TC-GTB-021 | REQ-GTB-020 | Unit | 1 | an edge e1 from n1 to n9 with only n1 stored; the same edge with n9 stored | the first is refused naming `n9`; the second is accepted | exact |
+| TC-GTB-022 | REQ-GTB-021 | Unit | 1 | a node with its own ID n1, written under the record ID n1 and under the record ID x | the first is accepted; the second is refused naming `id`; nothing is stored under x | exact |
 | TC-GTB-015 | REQ-GTB-015 | Component | 2 | the contract suites of IF-301 v1 and IF-203 v0, run unchanged, with the graphs stored as records | both suites pass | exact |
 
 Contract test cases of IF-301: TC-IF-301-01 to the last of the suite (listed in the root `test-spec.md`).
@@ -138,6 +139,20 @@ Examples use only what the requirements fix. The registered types are those the 
 - When: each is stored
 - Then: the first is refused and names `n9`
 - And: the second is accepted (the twin differs only in the broken rule)
+
+### TC-GTB-022 – A record under another ID is refused
+- Verifies: REQ-GTB-021
+- Given: a node whose own ID is `n1`
+- When: it is written under the record ID `x`, and then under the record ID `n1`
+- Then: the write under `x` is refused and names `id`
+- And: nothing is stored under `x`; the write under `n1` is accepted (the twin differs only in the broken rule)
+
+### TC-GTB-022 – A record under another ID is refused
+- Verifies: REQ-GTB-021
+- Given: a node whose own ID is `n1`
+- When: it is written under the record ID `x`, and then under the record ID `n1`
+- Then: the write under `x` is refused and names `id`
+- And: nothing is stored under `x`; the write under `n1` is accepted (the twin differs only in the broken rule)
 
 ### TC-GTB-015 – The document form still works
 - Verifies: REQ-GTB-015

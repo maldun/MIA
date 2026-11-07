@@ -16,7 +16,7 @@ proposal:
     basis: ["the figure depends on the real model, hardware and use; it is measured in the field and tuned in later iterations (owner decision 2026-10-26)"]
     accepted_risk: {reason: "performance and resource figures are validated in the field (phase 7, VAL-006) and tuned in later iterations", owner: "{by}", decided: "2026-10-26 by {by}", follow_up: "VAL-006"}
   CON-3:
-    text: 'The MIA system shall use Python 3.11 to 3.13, Godot 4.6.1 with GDScript only and the Compatibility renderer, and a chat page in plain HTML, CSS and ES modules w'
+    text: 'The MIA system shall use Python 3.12, Godot 4.6.1 with GDScript only and the Compatibility renderer, and a chat page in plain HTML, CSS and ES modules without b'
     proposed: plausible
     basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
   CON-4:
@@ -172,11 +172,35 @@ proposal:
     decision: questionable
     basis: ["the figure depends on the real model, hardware and use; it is measured in the field and tuned in later iterations (owner decision 2026-10-26)"]
     accepted_risk: {reason: "performance and resource figures are validated in the field (phase 7, VAL-006) and tuned in later iterations", owner: "{by}", decided: "2026-10-26 by {by}", follow_up: "VAL-006"}
+  FR-36:
+    text: 'The MIA system shall define every skill as one versioned record of an ID, a command, a workflow graph and the ID of a context graph.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  FR-37:
+    text: 'The MIA system shall hold a workflow as a directed acyclic graph of data nodes, transform nodes and master nodes, with at most one writing transform per data no'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  FR-38:
+    text: 'The MIA system shall keep transforms in a toolbox by ID, each with a trust status that decides whether it runs and a lifecycle that records its performance.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
   FR-4:
     text: 'The MIA system shall show every user in one short line how she feels and what she is doing, and let a user open for any answer produced by a task an account of '
     proposed: plausible
     category: deterministic
     basis: "flagged by a number or a quality line only; the check is deterministic code, a fixed fixture or an inspection, and the part exists in the code base or is a plain table (agent proposal)"
+  FR-40:
+    text: 'The MIA system shall store workflow and context graphs as node and edge records with JSON fields in PostgreSQL, rebuild data classes from type IDs and keep ever'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  FR-45:
+    text: "The MIA system shall convert today's skills one by one onto the skill record, each only after it reproduces the old outcomes on the same suite and pins."
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  FR-47:
+    text: 'The MIA system shall let the owner take, list and restore named snapshots of the skill set, keeping the state before a restore as a snapshot and deleting no ver'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
   FR-5:
     text: 'The MIA system shall let every user change expressions, gestures, backgrounds, mood phrases, emotions and the persona as data without changing code, apply a sav'
     proposed: plausible
@@ -341,9 +365,11 @@ proposal:
     proposed: plausible
     basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
   REQ-API-004:
-    text: 'If more than 5 logins fail within one minute for an account, then the API and accounts shall refuse further logins for that account until the minute has passed.'
-    proposed: plausible
-    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+    text: 'If 5 logins of an account have failed within one minute, then the API and accounts shall refuse every further login of that account, also with the right passwor'
+    proposed: questionable
+    attention: ['numeric bound in the criterion']
+    decision:                     # plausible | questionable | implausible
+    basis: []                     # references or sourced text (10 characters or more)
   REQ-API-005:
     text: 'The API and accounts shall store only salted slow hashes of passwords and write no password to any log.'
     proposed: plausible
@@ -354,8 +380,10 @@ proposal:
     basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
   REQ-API-007:
     text: 'The API and accounts shall authenticate every request by an account, check the origin and limit message rates per user.'
-    proposed: plausible
-    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+    proposed: questionable
+    attention: ['numeric bound in the criterion']
+    decision:                     # plausible | questionable | implausible
+    basis: []                     # references or sourced text (10 characters or more)
   REQ-API-008:
     text: 'If a password arrives over plain HTTP from an address other than localhost, then the API and accounts shall refuse it.'
     proposed: plausible
@@ -370,7 +398,7 @@ proposal:
     proposed: plausible
     basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
   REQ-API-011:
-    text: 'The Backend shall run every one of its parts on Python 3.11 to 3.13.'
+    text: 'The Backend shall run every one of its parts on Python 3.12.'
     proposed: plausible
     basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
   REQ-API-012:
@@ -391,6 +419,10 @@ proposal:
     basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
   REQ-API-016:
     text: 'The API and accounts shall realise the routes of the interface IF-104 of the Backend as specified in contracts/IF-104-graph-api.md.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-API-017:
+    text: 'The API and accounts shall end a session on request, drop its connected sockets and refuse it afterwards.'
     proposed: plausible
     basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
   REQ-BE-001:
@@ -430,7 +462,7 @@ proposal:
     proposed: plausible
     basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
   REQ-BE-009:
-    text: 'If more than 5 logins fail within one minute for an account, then the Backend shall refuse further logins for that account until the minute has passed.'
+    text: 'If 5 logins fail within one minute for an account, then the Backend shall refuse every further login of that account until the minute has passed.'
     proposed: plausible
     basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
   REQ-BE-010:
@@ -561,7 +593,7 @@ proposal:
     proposed: plausible
     basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
   REQ-BE-039:
-    text: 'The Backend shall keep a workflow without specification, context graph and benchmark with a baseline in draft status and refuse to promote it.'
+    text: 'The Backend shall keep a workflow without specification and benchmark in draft status and refuse to promote it.'
     proposed: plausible
     category: deterministic
     basis: "flagged by a number or a quality line only; the check is deterministic code, a fixed fixture or an inspection, and the part exists in the code base or is a plain table (agent proposal)"
@@ -639,7 +671,7 @@ proposal:
     decision:                     # plausible | questionable | implausible
     basis: []                     # references or sourced text (10 characters or more)
   REQ-BE-054:
-    text: 'The Backend shall work a review in time slices, give an intermediate report with a recommendation at the end of each slice and continue only when the requesting'
+    text: 'The Backend shall work a review by default without a question at a used-up limit, bounded by hard caps at which the user decides to continue, to summarize or to'
     proposed: questionable
     category: field
     attention: ['numeric bound in the criterion']
@@ -741,7 +773,7 @@ proposal:
     decision: plausible
     basis: ['controlled environment with a few users who rarely work at the same time (owner decision 2026-10-26, ASM-MU-001); the queue and the live update are the same code for one user']
   REQ-BE-073:
-    text: 'The Backend shall run on Python 3.11 to 3.13.'
+    text: 'The Backend shall run on Python 3.12.'
     proposed: plausible
     basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
   REQ-BE-074:
@@ -754,6 +786,10 @@ proposal:
     basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
   REQ-BE-076:
     text: "The Backend shall offer the Graph app, under the Backend's session, the listing, reading, saving as a new version, history, diff and restore of workflows and co"
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-BE-077:
+    text: 'The Backend shall end the session of a user on request, so that the session no longer authenticates a request or a socket.'
     proposed: plausible
     basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
   REQ-CHA-001:
@@ -801,9 +837,9 @@ proposal:
     proposed: plausible
     basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
   REQ-CHA-011:
-    text: 'The Chat agent shall keep structured facts, preferences and commitments linked to their source and retrieve what is relevant within the token budget.'
+    text: 'The Chat agent shall keep facts, preferences and commitments as records with a kind, a time and a source, written in English, and give the model the most releva'
     proposed: questionable
-    attention: ['decided by a measurement']
+    attention: ['decided by a measurement', 'numeric bound in the criterion', 'depends on the model, a GPU or a phone']
     decision:                     # plausible | questionable | implausible
     basis: []                     # references or sourced text (10 characters or more)
   REQ-CHA-012:
@@ -957,9 +993,11 @@ proposal:
     proposed: plausible
     basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
   REQ-CLV-011:
-    text: 'The Chat and login views shall show all tasks, memos and memory records and let a logged-in user change or delete each of them.'
-    proposed: plausible
-    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+    text: 'The Chat and login views shall show all tasks, memos and memory records and let a logged-in user change or delete each of them; a task shows its due time, and t'
+    proposed: questionable
+    attention: ['numeric bound in the criterion']
+    decision:                     # plausible | questionable | implausible
+    basis: []                     # references or sourced text (10 characters or more)
   REQ-CLV-012:
     text: 'When a user edits the trust value of a source, the Chat and login views shall send the edit with the source id.'
     proposed: plausible
@@ -999,6 +1037,20 @@ proposal:
     basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
   REQ-CLV-021:
     text: 'The Chat and login views shall talk to the Backend only through the interface IF-101 as specified in contracts/IF-101-chat-api.md.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-CLV-022:
+    text: 'The Chat and login views shall offer a logout that ends the session at the server, closes the socket and shows the login.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-CLV-023:
+    text: 'The Chat and login views shall show each running task on one status card that is updated in place from the event task_status with the phase, every budget as use'
+    proposed: questionable
+    attention: ['quality requirement with a target']
+    decision:                     # plausible | questionable | implausible
+    basis: []                     # references or sourced text (10 characters or more)
+  REQ-CLV-024:
+    text: 'The Chat and login views shall list the files of the files volume in the workspace with name, size, time and task, offer each as a download, show a new file wit'
     proposed: plausible
     basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
   REQ-DB-001:
@@ -1184,7 +1236,7 @@ proposal:
     proposed: plausible
     basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
   REQ-FE-013:
-    text: 'When the backend sends a voice line, the Web Frontend shall play it, and if its audio file is missing, skip it and report it to the backend.'
+    text: 'When the backend sends a voice line, the Web Frontend shall play it, and if its audio file is missing, skip it and report it in the page (IF-112 callback); no e'
     proposed: plausible
     basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
   REQ-FE-014:
@@ -1262,6 +1314,10 @@ proposal:
     text: 'The Web Frontend shall consist of static files that the backend container serves.'
     proposed: plausible
     basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-FE-031:
+    text: 'The Web Frontend shall let a signed-in user log out.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
   REQ-GA-001:
     text: 'The Graph app shall show a workflow graph as nodes and edges.'
     proposed: plausible
@@ -1322,6 +1378,74 @@ proposal:
     text: 'The Graph tables shall ship the example workflows lookup, verify and review, the search command and method transfer (off by default) as seed entries of the libr'
     proposed: plausible
     basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-GTB-005:
+    text: 'The Graph tables shall store each node of a workflow or context graph as a record of an ID and a JSON field that holds a fixed type.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-GTB-006:
+    text: 'The Graph tables shall store each edge as a record of an ID, a start node, an end node and a JSON field.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-GTB-007:
+    text: 'The Graph tables shall hold the toolbox ID of its transform in the JSON field of a transform node.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-GTB-008:
+    text: 'The Graph tables shall hold the definition of its task and its stopping criterion in the JSON field of a master node.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-GTB-009:
+    text: 'When a stored node is read, the Graph tables shall rebuild its data class from the stored type ID.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-GTB-010:
+    text: 'If a stored or written node has a type ID that no registered data class has, then the Graph tables shall refuse it and name the type ID.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-GTB-011:
+    text: 'The Graph tables shall check the JSON field of each node and edge on write against the JSON schema of its type.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-GTB-012:
+    text: 'The Graph tables shall not use a language-specific serialisation to store or rebuild a graph.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-GTB-013:
+    text: 'When a node, an edge or a graph is edited, the Graph tables shall store the edit as a new version and keep every earlier version.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-GTB-014:
+    text: 'When a stored graph is read and rebuilt, the Graph tables shall give a graph equal to the one that was stored.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-GTB-015:
+    text: 'While IF-301 v1 and IF-203 v0 are in use, the Graph tables shall return a stored workflow also in the document form of those interfaces.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-GTB-016:
+    text: 'If an edit of a node, an edge or a graph is refused by a check, then the Graph tables shall keep the stored version unchanged and create no new version.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-GTB-017:
+    text: 'The Graph tables shall store the header of each graph as a record of its ID, kind, context graph ID, testbench ID, description and the ID and version of each of'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-GTB-018:
+    text: 'The Graph tables shall store each skill as a versioned record of its ID, command, workflow graph ID and context graph ID.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-GTB-019:
+    text: 'If a graph header names a node or edge version that is not stored, then the Graph tables shall refuse the header and name that node or edge ID.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-GTB-020:
+    text: 'If an edge names a start or end node that is not stored, then the Graph tables shall refuse the edge and name that node ID.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-GTB-021:
+    text: 'If a record of a graph table is written under a record ID that differs from the ID inside the record, then the Graph tables shall refuse the record and name the'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
   REQ-LOG-001:
     text: 'When a user opens the account of an answer produced by a task, the Run log shall deliver it from event data and without a model-written part.'
     proposed: plausible
@@ -1340,7 +1464,7 @@ proposal:
     category: deterministic
     basis: "flagged by a number or a quality line only; the check is deterministic code, a fixed fixture or an inspection, and the part exists in the code base or is a plain table (agent proposal)"
   REQ-LOG-005:
-    text: 'The Run log shall keep run events and run results only through the storage interface IF-102.'
+    text: 'The Run log shall keep the events of a run as append-only files in its own log folder, shall import no database driver, and shall leave the results of benchmark'
     proposed: plausible
     basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
   REQ-OPR-001:
@@ -1368,7 +1492,7 @@ proposal:
     proposed: plausible
     basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
   REQ-OPR-007:
-    text: 'The Operation shall provide a compose stack that starts the containers of N-2 to N-5 alone and together with one configuration file.'
+    text: 'The Operation shall provide a compose stack that starts the containers of N-2 (`mia`), N-3 (`db`) and N-5 (`graph`) alone and together with one configuration fi'
     proposed: plausible
     basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
   REQ-OPR-008:
@@ -1474,7 +1598,7 @@ proposal:
     proposed: plausible
     basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
   REQ-RTB-001:
-    text: 'The Record tables shall define the tables of the history, summaries, chat log, votes, memory, tasks, memos, presets, gestures and run results.'
+    text: 'The Record tables shall define the 14 tables of IF-302 v5: history, memory, votes, tasks, memos, accounts, presets, gestures, runs (run results), source_trust ('
     proposed: plausible
     basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
   REQ-RTB-002:
@@ -1512,7 +1636,7 @@ proposal:
     basis: ["the figure depends on the real model, hardware and use; it is measured in the field and tuned in later iterations (owner decision 2026-10-26)"]
     accepted_risk: {reason: "performance and resource figures are validated in the field (phase 7, VAL-006) and tuned in later iterations", owner: "{by}", decided: "2026-10-26 by {by}", follow_up: "VAL-006"}
   REQ-RUN-003:
-    text: 'If the model server is unreachable, then the Pipeline runner shall say so in plain words.'
+    text: 'If the model server is unreachable or does not accept the connection within 10 s, then the Pipeline runner shall say so in plain words.'
     proposed: plausible
     basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
   REQ-RUN-004:
@@ -1566,7 +1690,7 @@ proposal:
     proposed: plausible
     basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
   REQ-RUN-012:
-    text: 'The Pipeline runner shall fetch a workflow only through IF-203, call tools only through IF-402 and write events only through IF-401.'
+    text: 'The Pipeline runner shall fetch a workflow only through IF-203, call the tools of tool nodes only through IF-402 and write events only through IF-401.'
     proposed: plausible
     basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
   REQ-RUN-013:
@@ -1579,6 +1703,22 @@ proposal:
     basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
   REQ-RUN-015:
     text: 'The Pipeline runner shall realise the evaluation interface IF-105 as specified in contracts/IF-105-evaluation-access.md by running a case with the same code as '
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-RUN-016:
+    text: 'When a workflow graph is run, the Pipeline runner shall run its transforms and master nodes in a topological order, each reading its input data nodes and writin'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-RUN-017:
+    text: 'If a workflow graph contains a transform or master node whose status is untrusted, then the Pipeline runner shall refuse to start the run, naming the node and i'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-RUN-018:
+    text: 'When a workflow graph contains a master node, the Pipeline runner shall run it once, at its place in the topological order, as it runs a transform.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-RUN-019:
+    text: 'If a transform or master node fails during a run, then the Pipeline runner shall stop the run and name the failed node in the run result.'
     proposed: plausible
     basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
   REQ-SLY-001:
@@ -1602,7 +1742,7 @@ proposal:
     proposed: plausible
     basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
   REQ-SLY-006:
-    text: 'When a record changes, the Storage layer shall tell every subscriber of the storage interface.'
+    text: "When a record changes, the Storage layer shall tell every subscriber of the storage interface. Notices sent while an instance's listening connection to the data"
     proposed: plausible
     category: multi-user
     decision: plausible
@@ -1658,7 +1798,7 @@ proposal:
     category: deterministic
     basis: "flagged by a number or a quality line only; the check is deterministic code, a fixed fixture or an inspection, and the part exists in the code base or is a plain table (agent proposal)"
   REQ-TLS-007:
-    text: 'The Tools and sandbox shall send off the host only the text of a web or scholarly query and, if configured, an e-mail address.'
+    text: 'The Tools and sandbox shall send off the host only what a web or scholarly query needs: the query text, its filters (dates, result count, fields), the DOI of a '
     proposed: plausible
     basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
   REQ-TLS-008:
@@ -1687,10 +1827,12 @@ proposal:
     basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
   REQ-VPB-002:
     text: 'When a user mutes or stops the voice, the Voice playback shall silence it on that device only.'
-    proposed: plausible
-    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+    proposed: questionable
+    attention: ['numeric bound in the criterion']
+    decision:                     # plausible | questionable | implausible
+    basis: []                     # references or sourced text (10 characters or more)
   REQ-VPB-003:
-    text: 'When the backend sends a voice line, the Voice playback shall play it, and if its audio file is missing, skip it and report it to the backend.'
+    text: 'When the backend sends a voice line, the Voice playback shall play it, and if its audio file is missing, skip it and report it through the IF-112 callback `onLi'
     proposed: plausible
     basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
   REQ-VPB-004:
@@ -1722,7 +1864,7 @@ proposal:
     proposed: plausible
     basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
   REQ-WFM-006:
-    text: 'The Workflow management shall keep a workflow without specification, context graph and benchmark with a baseline in draft status and refuse to promote it.'
+    text: 'The Workflow management shall keep a workflow without specification and benchmark in draft status and refuse to promote it.'
     proposed: plausible
     category: deterministic
     basis: "flagged by a number or a quality line only; the check is deterministic code, a fixed fixture or an inspection, and the part exists in the code base or is a plain table (agent proposal)"
@@ -1782,21 +1924,21 @@ proposal:
     proposed: plausible
     basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
   REQ-WFM-018:
-    text: 'The Workflow management shall deliver the example workflow review as a library entry that produces a report of kept and dropped sources with reasons, findings p'
+    text: 'The Workflow management shall deliver the example workflow review (keywords, search per keyword, collection, screening, review of each work, report) as a librar'
     proposed: questionable
     attention: ['decided by a measurement', 'depends on the model, a GPU or a phone']
     decision:                     # plausible | questionable | implausible
     basis: []                     # references or sourced text (10 characters or more)
   REQ-WFM-019:
-    text: 'The Workflow management shall deliver the example workflow review so that it works in time slices, gives an intermediate report with a recommendation at the end'
+    text: 'The Workflow management shall deliver the example workflow review so that it works in stages, gives an intermediate report with a recommendation after the stage'
     proposed: questionable
     category: field
-    attention: ['numeric bound in the criterion']
+    attention: ['quality requirement with a target', 'numeric bound in the criterion']
     decision: questionable
     basis: ["the figure depends on the real model, hardware and use; it is measured in the field and tuned in later iterations (owner decision 2026-10-26)"]
     accepted_risk: {reason: "performance and resource figures are validated in the field (phase 7, VAL-006) and tuned in later iterations", owner: "{by}", decided: "2026-10-26 by {by}", follow_up: "VAL-006"}
   REQ-WFM-020:
-    text: 'The Workflow management shall deliver the example workflow review so that it ends when a code check finds every sub-question answered or a budget is used up.'
+    text: 'The Workflow management shall deliver the example workflow review so that it ends when a code check finds every collected work decided and no approved keyword l'
     proposed: plausible
     basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
   REQ-WFM-021:
@@ -1824,6 +1966,198 @@ proposal:
     basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
   REQ-WFM-026:
     text: 'The Workflow management shall list, read, save as a new version, show the history and diff of, and restore workflows and context graphs through IF-203, and refu'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-WFM-027:
+    text: 'The Workflow management shall, in the example workflow review, count by code the terms that occur in the screened works and are not in the keyword set, propose '
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-WFM-028:
+    text: 'The Workflow management shall, in the example workflow review, screen each work in two stages, the abstract against the research question and the written inclus'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-WFM-029:
+    text: 'The Workflow management shall give every skill one unique id that is at the same time the name of its command in the chat, the name of its skill file and the id'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-WFM-030:
+    text: 'The Workflow management shall let every skill declare its options (name, type, default, a short text), accept them in the chat as `/<id> options <name>[=<value>'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-WFM-031:
+    text: 'The Workflow management shall let every task report its state while it runs, the phase, budget figures (used and limit) for time, tokens, model calls, API reque'
+    proposed: questionable
+    attention: ['quality requirement with a target']
+    decision:                     # plausible | questionable | implausible
+    basis: []                     # references or sourced text (10 characters or more)
+  REQ-WFM-032:
+    text: 'The Workflow management shall report for the example workflow review at least the sources on the list, the sources processed and the sources still to process, t'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-WFM-033:
+    text: 'The Workflow management shall let the requesting user pause a running task and resume it, a paused task shall not start a new step and shall not use time of its'
+    proposed: questionable
+    attention: ['quality requirement with a target', 'numeric bound in the criterion']
+    decision:                     # plausible | questionable | implausible
+    basis: []                     # references or sourced text (10 characters or more)
+  REQ-WFM-034:
+    text: 'The Workflow management shall run a task with a budget in the mode run by default, without a question at a used-up limit and bounded by hard caps, a time cap of'
+    proposed: questionable
+    attention: ['numeric bound in the criterion']
+    decision:                     # plausible | questionable | implausible
+    basis: []                     # references or sourced text (10 characters or more)
+  REQ-WFM-035:
+    text: 'The Workflow management shall keep for each model whether it is local or paid, ask the user once whether a model is paid when the model has not been used before'
+    proposed: questionable
+    attention: ['quality requirement with a target']
+    decision:                     # plausible | questionable | implausible
+    basis: []                     # references or sourced text (10 characters or more)
+  REQ-WFM-036:
+    text: 'The Workflow management shall, for a task that asks questions while it runs, publish the result as a new message at the end of the chat when it is ready, show t'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-WFM-037:
+    text: 'The Workflow management shall let a task store generated files in a dedicated volume (a folder that the configuration can move to another volume, by default on '
+    proposed: questionable
+    attention: ['quality requirement with a target']
+    decision:                     # plausible | questionable | implausible
+    basis: []                     # references or sourced text (10 characters or more)
+  REQ-WFM-038:
+    text: 'The Workflow management shall store the finished report of the example workflow review as a record in the database through the storage interface IF-102 with the'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-WFM-039:
+    text: 'The Workflow management shall load each skill that runs as a task from a folder of its own (a manifest with the id, the text, the options and what the task need'
+    proposed: questionable
+    attention: ['quality requirement with a target']
+    decision:                     # plausible | questionable | implausible
+    basis: []                     # references or sourced text (10 characters or more)
+  REQ-WFM-040:
+    text: 'The Workflow management shall store each skill as one versioned record of an ID, a command, a workflow graph ID and a context graph ID.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-WFM-041:
+    text: 'While a skill has a skill record, the Workflow management shall take its command, workflow graph and context graph from that record and not from its skill file,'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-WFM-042:
+    text: 'If a skill record names a command that a skill with another ID already uses, then the Workflow management shall refuse the record and name that skill.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-WFM-043:
+    text: 'The Workflow management shall accept a workflow graph only if every node is a data node, a transform node or a master node.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-WFM-044:
+    text: 'The Workflow management shall keep with each workflow graph an ID, the ID of its context graph, the ID of its testbench and a description.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-WFM-045:
+    text: 'The Workflow management shall refuse a workflow graph that has an edge between two data nodes or between two nodes that are not data nodes.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-WFM-046:
+    text: 'If a data node is written by more than one transform or master node, then the Workflow management shall refuse the workflow graph and name the data node.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-WFM-047:
+    text: 'The Workflow management shall refuse a workflow graph that has a cycle and name the cycle.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-WFM-048:
+    text: 'If a master node has neither a maximum number of repetitions nor a maximum time, then the Workflow management shall refuse the workflow graph and name the node.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-WFM-049:
+    text: 'The Workflow management shall let each data node hold its parameters, such as a folder to store into, in a field apart from its value.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-WFM-050:
+    text: 'The Workflow management shall keep every transform in a toolbox under an ID that is unique in the toolbox.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-WFM-051:
+    text: 'The Workflow management shall give every transform in the toolbox the trust status untrusted or trusted.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-WFM-052:
+    text: 'When a transform is imported from outside MIA, the Workflow management shall store it with the status untrusted.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-WFM-053:
+    text: 'When a transform is imported, the Workflow management shall not run any code of the transform.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-WFM-054:
+    text: 'If an account other than the owner asks to set the status of a transform to trusted, then the Workflow management shall refuse the change.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-WFM-055:
+    text: 'The Workflow management shall export a transform as one JSON file that holds its ID, version, input and output schemas and its code as text, and import the same'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-WFM-056:
+    text: 'The Workflow management shall seed the toolbox with the transforms that MIA ships, each with the status trusted.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-WFM-057:
+    text: 'While the converted version of a skill has not passed its equivalence check, the Workflow management shall run the skill from its old skill file and pipeline.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-WFM-058:
+    text: 'When a converted skill runs on scripted model replies, the Workflow management shall make the same model calls as the old runner, in the same order with the sam'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-WFM-059:
+    text: 'The Workflow management shall accept the converted version of a skill only if it reproduces the outcomes of the old version on the dev split of its suite with t'
+    proposed: questionable
+    attention: ['decided by a measurement', 'depends on the model, a GPU or a phone']
+    decision:                     # plausible | questionable | implausible
+    basis: []                     # references or sourced text (10 characters or more)
+  REQ-WFM-060:
+    text: 'The Workflow management shall record for each skill the suite, run, pins and verdict of its equivalence check, or the reason it is not converted.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-WFM-061:
+    text: 'When the owner asks for a snapshot with a name, the Workflow management shall store the skills, workflow graphs, context graphs, transforms with trust status an'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-WFM-062:
+    text: 'The Workflow management shall list the snapshots with name, time and author.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-WFM-063:
+    text: 'When the owner restores a snapshot, the Workflow management shall first store the current state as a snapshot of its own.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-WFM-064:
+    text: 'When the owner restores a snapshot, the Workflow management shall give every item in the snapshot the version, trust status and lifecycle it had in the snapshot'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-WFM-065:
+    text: 'When the owner restores a snapshot, the Workflow management shall delete no version of any item.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-WFM-066:
+    text: 'If an account other than the owner asks to take or restore a snapshot, then the Workflow management shall refuse the request.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-WFM-067:
+    text: 'The Workflow management shall give every transform in the toolbox the lifecycle draft, tested or retired, apart from its trust status.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-WFM-068:
+    text: 'While a transform or a skill is retired, the Workflow management shall keep it runnable by a check as a baseline.'
+    proposed: questionable
+    attention: ['depends on the model, a GPU or a phone']
+    decision:                     # plausible | questionable | implausible
+    basis: []                     # references or sourced text (10 characters or more)
+  REQ-WFM-069:
+    text: 'The Workflow management shall read the margin, repeats and rule of the equivalence check from a versioned configuration record with defaults, and record the ver'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-WFM-070:
+    text: 'While a transform or a skill is retired, the Workflow management shall not offer it for a new graph or a new run.'
     proposed: plausible
     basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
   REQ-WFX-001:
