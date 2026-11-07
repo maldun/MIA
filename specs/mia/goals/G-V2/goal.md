@@ -17,7 +17,7 @@ Drafted 2026-11-07 in Plan Step 0 from the approved HLS of iteration 2 (D-186). 
 |---|---|---|
 | OC-1 | Given each skill MIA had in v0.1.0, when the owner uses it after the rework, then it gives the same results on its test cases as before, or it stays as it was and the reason is written down | FR-36, FR-45 |
 | OC-2 | Given a skill, when the owner or anyone looks at what it is made of, then the same description gives its command, its steps and the knowledge it uses, and a wrong description is refused with the reason | FR-36, FR-37, FR-40 |
-| OC-3 | Given a step that arrives from outside MIA, when someone tries to use it, then it does not run and says why; only the owner can allow it, and after that it runs | FR-38 |
+| OC-3 | Given a step that arrives from outside MIA, when someone tries to use it, then it does not run and says why; only the owner can allow it, and after that it runs | FR-38, NFR-3 |
 | OC-4 | Given the skill set at a moment the owner has named, when the owner later changes things and goes back to that moment, then everything is as it was and the state before going back is kept as well | FR-47, FR-40 |
 | OC-5 | Given MIA is started from a fresh copy with one configuration file and one command, when it is up, then everything that worked before still works | NFR-9 |
 
@@ -90,10 +90,10 @@ Acceptance criteria in scope: AC-31, AC-32, AC-34, AC-38, AC-40. Out: AC-33, AC-
 | NFR-1 | out | built in G-V1 (v0.1.0); this goal does not change it |
 | NFR-2 | out | built in G-V1 (v0.1.0); this goal does not change it |
 | NFR-3 | partly | applies to the toolbox: an untrusted transform never runs (TB-exchange) |
-| NFR-4 | in | kept as built |
+| NFR-4 | out | not changed by this goal; the existing checks keep running |
 | NFR-5 | out | built in G-V1 (v0.1.0); this goal does not change it |
 | NFR-6 | out | built in G-V1 (v0.1.0); this goal does not change it |
-| NFR-7 | in | kept as built |
+| NFR-7 | out | not changed by this goal; the existing checks keep running |
 | NFR-8 | out | built in G-V1 (v0.1.0); this goal does not change it |
 | NFR-9 | partly | only AC-38: the stack still starts all containers; the container of N-6 comes with goal C |
 
