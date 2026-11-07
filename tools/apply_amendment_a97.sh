@@ -22,7 +22,7 @@ import sys
 path, work = sys.argv[1:3]
 text = open(path, encoding="utf-8").read()
 
-HEAD = "      hardware: HW-target\n      rated: '2026-11-08'\n      rated_by: Stefan Reiterer\n      rating: plausible\n"
+HEAD = "      hardware: HW-target\n      rated: '2026-11-08'\n      rated_by: maldun\n      rating: plausible\n"
 NEW = {
     "REQ-CLV-023": "a mock-driven browser check with exact figures; no measured number depends on it; the part that is deferred is recorded as TD-01 (owner rating 2026-11-08)",
     "REQ-WFM-031": "exact figures on a card that the task reported, at most 2 updates per second is a rate limit on a timer; a task that reports nothing gets the time only (owner rating 2026-11-08)",

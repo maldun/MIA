@@ -6,7 +6,7 @@ Status: **draft for the owner's look-only review, 2026-11-08**; `tools/apply_ame
 The global `req_plausibility` run shows nine requirements without any record: REQ-CLV-023 and REQ-WFM-031, 033, 034, 035, 037, 039, 059, 068 (finding F-14 of the third Verify run). All are `Draft` and belong to Workflow-management goals that are not built yet, so they are not a blocker of G-V2.STORE; the owner chose to rate them now. All nine were rated **plausible** on 2026-11-08 (REQ-WFM-031, 033, 035 and 037 after a second question; REQ-WFM-059 although its numbers are open: the basis says the rating is of the rule, not of a number).
 
 ## What the script does
-Inserts nine records in sorted place in `specs/mia/plausibility.yaml` (`rated_by: Stefan Reiterer`, `rated: '2026-11-08'`, `hardware: HW-target`, one basis text per requirement that names what the check rests on). Nothing else in the file changes. A record that is there already is skipped.
+Inserts nine records in sorted place in `specs/mia/plausibility.yaml` (`rated_by: maldun` as decided for A-96, `rated: '2026-11-08'`, `hardware: HW-target`, one basis text per requirement that names what the check rests on). Nothing else in the file changes. A record that is there already is skipped.
 
 ## Checked by the drafter (scratch copy)
 - `--do` twice: the second run changes nothing (checksum identical); 63 lines added; the keys stay sorted (515 items, was 506).
