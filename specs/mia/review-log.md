@@ -485,3 +485,24 @@ The first version was silent until the end and could take 20 minutes or more: th
 | TR-MODEL-001 | test requirement | 83d30e98e910 | Stefan Reiterer | 2026-11-07 | approved |  |
 | TR-MODEL-004 | test requirement | 726d58b2407b | Stefan Reiterer | 2026-11-07 | approved |  |
 | TR-MODEL-005 | test requirement | d8cd0646f0ec | Stefan Reiterer | 2026-11-07 | skimmed |  |
+| TC-GTB-016 | check | e211790ffd5d | Stefan Reiterer | 2026-11-07 | approved |  |
+| TC-GTB-006 | check | 15b4ee1b7300 | Stefan Reiterer | 2026-11-07 | approved |  |
+| TC-GTB-007 | check | fd56a6aeaff2 | Stefan Reiterer | 2026-11-07 | approved |  |
+| TC-GTB-008 | check | 035e1928092a | Stefan Reiterer | 2026-11-07 | approved |  |
+| TR-GTB-001 | test requirement | b641dab63ed9 | Stefan Reiterer | 2026-11-07 | approved |  |
+| TR-GTB-002 | test requirement | d0620f8441d1 | Stefan Reiterer | 2026-11-07 | approved | shortened to the IF-102 suite on the owner's remark |
+| TC-GTB-009 | check | fdeb39cd656b | Stefan Reiterer | 2026-11-07 | approved | 003: version on the host is enough (no exact pin) |
+| TC-GTB-010 | check | b0a036319b53 | Stefan Reiterer | 2026-11-07 | approved | 003: version on the host is enough (no exact pin) |
+| TC-GTB-011 | check | 904bf83490f5 | Stefan Reiterer | 2026-11-07 | approved | 003: version on the host is enough (no exact pin) |
+| TC-GTB-012 | check | 06b401bf5d7d | Stefan Reiterer | 2026-11-07 | approved | 003: version on the host is enough (no exact pin) |
+| TR-GTB-003 | test requirement | 5277fdb2c0ed | Stefan Reiterer | 2026-11-07 | approved | 003: version on the host is enough (no exact pin) |
+| TR-GTB-005 | test requirement | 9b7486a16fb0 | Stefan Reiterer | 2026-11-07 | approved | 003: version on the host is enough (no exact pin) |
+| TC-GTB-013 | check | 16b07cd9819a | Stefan Reiterer | 2026-11-07 | approved | 013: new REQ-GTB-016 and TC-GTB-017 added at the owner's request; 014: N is a parameter, default 1000; 015: stage 2 |
+| TC-GTB-014 | check | 92c29d3f571a | Stefan Reiterer | 2026-11-07 | approved | 013: new REQ-GTB-016 and TC-GTB-017 added at the owner's request; 014: N is a parameter, default 1000; 015: stage 2 |
+| TC-GTB-015 | check | 4a4567896c24 | Stefan Reiterer | 2026-11-07 | approved | 013: new REQ-GTB-016 and TC-GTB-017 added at the owner's request; 014: N is a parameter, default 1000; 015: stage 2 |
+| TR-GTB-004 | test requirement | 0275a14a3e99 | Stefan Reiterer | 2026-11-07 | approved | 013: new REQ-GTB-016 and TC-GTB-017 added at the owner's request; 014: N is a parameter, default 1000; 015: stage 2 |
+| TR-GTB-006 | test requirement | 8474111010db | Stefan Reiterer | 2026-11-07 | approved | 013: new REQ-GTB-016 and TC-GTB-017 added at the owner's request; 014: N is a parameter, default 1000; 015: stage 2 |
+| REQ-GTB-016 | requirement | b68f817e03cb | Stefan Reiterer | 2026-11-07 | approved |  |
+| D-261 | **Plausibility of G-V2.STORE closed, owner Stefan Reiterer, 2026-11-07.** REQ-GTB-016 and FR-40 rated plausible by the owner (FR-40 on the basis that all 12 refining requirements REQ-GTB-005 to 016 are plausible). With REQ-GTB-005 to 015 rated earlier, every STORE requirement has a plausible record. |
+| D-262 | **IF-301 v2 contract draft, owner answers, 2026-11-07.** (1) Graph rules for the new node types stay in the Workflow management only; IF-301 keeps the v1 rules and adds the record rules (`check_record`: `record_identity`, `unknown_type`, `schema_break`). (2) A refused record is a result with the rule, as in v1 (A-60), not an exception. (3) `to_document` refuses a graph with a master node (`not_representable`). (4) Node types are a fixed list inside the Graph tables; other parts do not register types; a new type is an amendment of IF-301. The draft is `amendments/A-90-draft-IF-301-v2.md`; the type list is open until the MODEL session confirms REQ-WFM-043 to 049. `contracts/` is untouched. |
+| D-263 | **Node types of context graphs in IF-301 v2, owner answer, 2026-11-07.** The fixed list of D-262 holds for workflow graphs only (data, transform, master; FR-37). A context graph has no fixed list: a node names a category whose JSON schema comes from the context graph's definition (FR-41, goal C); `check_record` and `to_object` take it as `categories`. Where the definition is stored is decided in goal C. REQ-GTB-005 to 016 keep their text ("workflow or context graph"). |

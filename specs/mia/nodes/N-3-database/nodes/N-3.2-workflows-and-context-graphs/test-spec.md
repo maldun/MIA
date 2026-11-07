@@ -22,7 +22,8 @@ Tests of this part alone against the mocks of its neighbours: unit tests with pl
 | TC-GTB-011 | REQ-GTB-011 | Unit | 1 | for a node and for an edge: one field that breaks its type's schema (a missing required key, a wrong value type) | each write is refused; the message names the path of the field | exact |
 | TC-GTB-012 | REQ-GTB-012 | Inspection | 1 | all modules of the Graph tables, read as source (syntax tree) | none imports `pickle`, `marshal` or `shelve` | exact |
 | TC-GTB-013 | REQ-GTB-013, FR-40 | Unit | 1 | a graph stored, then one node edited, then one edge edited, then the graph edited | after each edit versions n and n+1 both exist and version n is unchanged | exact |
-| TC-GTB-014 | REQ-GTB-014, FR-40 | Property | 1 | 1000 generated graphs (seeds 1 to 1000) of the three node types, with edges, written, read and rebuilt | every rebuilt graph equals the stored one | 0 failures over 1000 seeds |
+| TC-GTB-014 | REQ-GTB-014, FR-40 | Property | 1 | N generated graphs (seeds 1 to N; N is a parameter, default 1000) of the three node types, with edges, written, read and rebuilt | every rebuilt graph equals the stored one | 0 failures over N seeds |
+| TC-GTB-017 | REQ-GTB-016 | Unit | 1 | a stored graph at version 1; one edit of a node, one of an edge and one of the whole graph, each breaking a check (unknown type, schema break, a duplicate ID) | each edit is refused; the latest version is still 1 and its content is unchanged; no version 2 exists | exact |
 | TC-GTB-015 | REQ-GTB-015 | Component | 2 | the contract suites of IF-301 v1 and IF-203 v0, run unchanged, with the graphs stored as records | both suites pass | exact |
 
 Contract test cases of IF-301: TC-IF-301-01 to the last of the suite (listed in the root `test-spec.md`).
@@ -94,10 +95,17 @@ Examples use only what the requirements fix. The registered types are those the 
 
 ### TC-GTB-014 – A stored graph is rebuilt equal
 - Verifies: REQ-GTB-014, FR-40
-- Given: 1000 generated graphs (seeds 1 to 1000) with nodes of all three types and edges
+- Given: N generated graphs (seeds 1 to N) with nodes of all three types and edges; N is a parameter of the check, its default is 1000
 - When: each is written, read and rebuilt
 - Then: the rebuilt graph equals the stored one
 - And: a failing seed is reported with the graph, so it can be replayed
+
+### TC-GTB-017 – A refused edit changes nothing
+- Verifies: REQ-GTB-016
+- Given: a stored graph at version 1, and three edits that each break a check: a node of the type `x.unknown`, a field that breaks its schema, an ID that already exists
+- When: each edit is made
+- Then: each is refused
+- And: the latest version is still 1, its content is unchanged and no version 2 exists
 
 ### TC-GTB-015 – The document form still works
 - Verifies: REQ-GTB-015

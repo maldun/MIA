@@ -80,7 +80,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 |---|---|---|---|
 | 1 | NR | Node and edge records: graphs as records (FR-40) | REQ-GTB-005, REQ-GTB-006, REQ-GTB-007, REQ-GTB-008 |
 | 2 | TY | Types: rebuilding data classes from type IDs, schemas (FR-40) | REQ-GTB-009, REQ-GTB-010, REQ-GTB-011, REQ-GTB-012 |
-| 3 | VR | Versions and round trip: edits as versions, stored equals rebuilt (FR-40) | REQ-GTB-013, REQ-GTB-014 |
+| 3 | VR | Versions and round trip: edits as versions, stored equals rebuilt (FR-40) | REQ-GTB-013, REQ-GTB-014, REQ-GTB-016 |
 | 4 | CP | Compatibility: the document form during the transition (FR-40) | REQ-GTB-015 |
 
 ### REQ-GTB-005 – Node records
@@ -226,3 +226,15 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Status: Draft
 - History: G-V2 Plan step 1 (2026-11-07), new; 2026-11-07 review: IF-203 v1 corrected to v0, the old interface, consistent with A-90 (owner approved)
 
+### REQ-GTB-016 – A refused edit changes nothing
+- Level: low   Subject: Persistence
+- Text: If an edit of a node, an edge or a graph is refused by a check, then the Graph tables shall keep the stored version unchanged and create no new version.
+- Rationale: refines FR-40 and REQ-GTB-013; asked for by the owner at the review of TC-GTB-013, 2026-11-07
+- Parent: FR-40
+- Group: VR
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-31: after a refused edit the latest version number is the one before the edit and its content is unchanged (exact)
+- Verified by: TC-GTB-017
+- Status: Draft
+- History: G-V2.STORE Plan step 3 review (2026-11-07), new

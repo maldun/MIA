@@ -12,7 +12,7 @@ Requirements on the checks TC-GTB-006 to TC-GTB-016. The older checks TC-GTB-001
 | 5 | Compatibility | the old suites stay the old suites | TR-GTB-006 |
 
 ### TR-GTB-001 – Exact values written by hand
-- Applies to: TC-GTB-016, TC-GTB-006, TC-GTB-007, TC-GTB-008, TC-GTB-009, TC-GTB-010, TC-GTB-011, TC-GTB-013
+- Applies to: TC-GTB-016, TC-GTB-006, TC-GTB-007, TC-GTB-008, TC-GTB-009, TC-GTB-010, TC-GTB-011, TC-GTB-013, TC-GTB-017
 - Requirement: REQ-GTB-005
 - Group: Round trip
 - Kind: unit
@@ -22,13 +22,13 @@ Requirements on the checks TC-GTB-006 to TC-GTB-016. The older checks TC-GTB-001
 - Verified by: known answer
 - Status: Draft
 
-### TR-GTB-002 – The storage stand-in is a faithful stand-in
+### TR-GTB-002 – The storage under the checks passes IF-102
 - Applies to: TC-GTB-016, TC-GTB-006, TC-GTB-013, TC-GTB-014
 - Requirement: REQ-GTB-005
 - Group: Round trip
 - Kind: setup
-- Text: The storage used by the checks of stage 1 shall pass the contract suite of IF-102 before the checks run, and the checks TC-GTB-016, TC-GTB-006, TC-GTB-013 and TC-GTB-014 shall be run again on PostgreSQL at stage 3.
-- Rationale: The requirements say PostgreSQL (FR-40); a stand-in that stores more loosely (no JSON column type, no uniqueness) could hide a record that the real database refuses.
+- Text: The storage used by these checks at stage 1 shall pass the contract suite of IF-102 before the checks run.
+- Rationale: whether PostgreSQL keeps JSON and versions faithfully is the job of the database and of IF-102, whose suite already runs on the real postgres:16 at stage 3 (contract-postgres); this subgoal only needs the stand-in to be one that suite accepts. Shortened on the owner's remark, 2026-11-07 (the repeat of four checks on PostgreSQL was dropped).
 - Credibility aspect: stand-in fidelity
 - Verified by: contract suite
 - Status: Draft
@@ -49,8 +49,8 @@ Requirements on the checks TC-GTB-006 to TC-GTB-016. The older checks TC-GTB-001
 - Requirement: REQ-GTB-014
 - Group: Generated graphs
 - Kind: setup
-- Text: The check shall run the seeds 1 to 1000, build graphs with 1 to 20 nodes of all three types and up to 40 edges, compare with the equality of node IDs, types, fields and edge ends, and count any difference as a failure.
-- Rationale: The criterion is exact ('equal'), so one counterexample fails it and no rate is needed; the number follows TC-GTB-003. The 1000 seeds are fixed so a failure can be replayed; a larger sample only runs when the generator changes. The size bounds are a starting guess (D-187).
+- Text: The check shall run the seeds 1 to N, with N a parameter of the check and 1000 as its default, build graphs with 1 to 20 nodes of all three types and up to 40 edges, compare with the equality of node IDs, types, fields and edge ends, and count any difference as a failure.
+- Rationale: the criterion is exact ('equal'), so one counterexample fails it and no rate is needed; the default follows TC-GTB-003. Fixed seeds let a failure be replayed; the owner can raise N (2026-11-07, review), for example when the generator changes. The size bounds and the stage 1 time are a starting guess, measured in Step 4 (D-187).
 - Credibility aspect: repetitions and seeds
 - Verified by: property test with a deliberately broken writer (mutation)
 - Status: Draft
