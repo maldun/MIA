@@ -20,10 +20,11 @@ Spike C used 8 Wikipedia pages and 2 abstracts, all general English prose. Candi
 - a news-style or forum text with pronouns and quotes (the weak spot: 36 of 45 refusals were relation quotes without both ends).
 Sampling: per document **10 entities and 6 relations** (changed from 6 and 4 on 2026-11-07 with the owner's OK: 3 x 16 = 48 new marks), random order, seed 20261107 written down before the draw; the builder runs once per document (temperature 0), no tuning on these documents after the marking.
 
-## 4. Candidate text for FR-42 (technology independent; for the Plan review, not applied)
+## 4. FR-42 candidate text (technology independent; Draft, proposed 2026-11-08, not applied to any requirement file)
 - "When MIA builds a context graph from a document, it shall refuse every proposed item whose name does not occur in that document."
-- "Every relation in a built context graph shall carry the sentence of the document that states it, and both ends of the relation shall occur in that sentence or in its two neighbouring sentences." (relaxes the pronoun case; check against the 36 refused relations first)
-- Outcome (Given / When / Then): given a document with a known list of 12 marked items, when the owner marks a random sample of at least 120 proposals, then at most 4 are marked invented and at least 91 right.
+- "Every relation in a built context graph shall carry the passage of the document that states it, and both ends of the relation shall occur in that passage or in the sentences directly before or after it."
+- Outcome (Given / When / Then): given proposals built from a document, when the owner marks a random sample of at least 120 of them, then at most 4 are marked invented and at least 91 right. (Evidence so far: 113 right, 0 invented of 120.)
+- **Provisional (owner, 2026-11-08):** the neighbour part of the second sentence is proposed now on thin evidence (20 of 20 right, invented bound about 14 %) and is improved in Validate: the owner marks more relations that only the neighbour rule accepts (target: at least 60 in all with at most 3 invented, so that the invented bound is at most 5 %), drawn with a fixed seed from real runs. A `Provisional: VAL-nnn` mark and the id are given in Plan of goal C (ids are held by the G-V2 session). If the check fails, the sentence falls back to the strict text ("... in that passage").
 
 ## 5. Owner's answers (2026-11-07; decision id to be assigned when merged, ids are held by the G-V2 session)
 1. **Size:** 120 marked items, at most 4 invented, kept for now; the sample may be **extended later** (a larger n is then a new, written decision before the extra marks are looked at).
@@ -36,6 +37,7 @@ Sampling: per document **10 entities and 6 relations** (changed from 6 and 4 on 
 - **Neighbour rule is unmeasured:** 35 of the 43 refused relations would pass it; none is marked. Before the second FR-42 sentence is proposed, the owner marks a sample of them (suggestion: all 35 are too many; 20, drawn with a fixed seed, same four classes, same at most 5 % invented bar). Until then FR-42 uses the strict text.
 - Drawn 2026-11-07: 20 of the 35 neighbour-rule relations, seed 20261108 (candidates sorted by document, source, relation, target before the draw); page `forms/n6-neighbour-marking.html`, answers saved as `n6-neighbour-marks.json` (generator `spikes/lightrag/make_marking_neighbour.py`). Bar for the relaxed rule: at most 5 % invented, at least 68 % right, as in spike C.
 - **Neighbour sample marked (2026-11-07):** 20 right, 0 invented (`forms/n6-neighbour-marks.json`). The 68 % right bar is shown, the 5 % invented bar is not (upper bound about 14 %). Choice for the owner: propose the neighbour sentence in FR-42 now as a Draft with this evidence, or mark more first (about 40 more marks would bring the bound to 5 % only if 0 stay invented: 0 of 60 gives about 4.9 %).
+- **Owner's decision 2026-11-08:** propose the neighbour sentence now as a Draft, improve it in Validate (section 4).
 - Open:
 - Pick the 3 documents and fix the seed; run option 1 once per document (spike folder `spikes/lightrag/`, throwaway) and draw 6 entities and 4 relations per document; prepare the marking form like `forms/spike-c-option1-marking.html`.
 - The owner marks 48 new items (plus the 72 given, if drawn the same way); score with `score_marks.py`.
