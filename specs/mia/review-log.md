@@ -526,3 +526,7 @@ The first version was silent until the end and could take 20 minutes or more: th
 | TC-GTB-022 | check | b9eed201d1c0 | Stefan Reiterer | 2026-11-07 | approved | A-92: record under its own ID; TR-GTB-001 applies to TC-GTB-022; scope row REQ-GTB-021 |
 | TR-GTB-001 | test requirement | d3d0c86173d3 | Stefan Reiterer | 2026-11-07 | approved | A-92: record under its own ID; TR-GTB-001 applies to TC-GTB-022; scope row REQ-GTB-021 |
 | G-V2.STORE | goal | c44f8cf3f707 | Stefan Reiterer | 2026-11-07 | approved | A-92: record under its own ID; TR-GTB-001 applies to TC-GTB-022; scope row REQ-GTB-021 |
+| REQ-GTB-022 | requirement | 87b9ca35cf8e | Stefan Reiterer | 2026-11-08 | approved | A-93: fixed fields of a node; owner's review answer 2026-11-08 |
+| TC-GTB-023 | check | 427d9c196ed3 | Stefan Reiterer | 2026-11-08 | approved | A-93: fixed fields of a node; owner's review answer 2026-11-08 |
+| TR-GTB-001 | test requirement | 11f66c33c552 | Stefan Reiterer | 2026-11-08 | approved | A-93: fixed fields of a node; owner's review answer 2026-11-08 |
+| G-V2.STORE | goal | cdadd6d63fbd | Stefan Reiterer | 2026-11-08 | approved | A-93: fixed fields of a node; owner's review answer 2026-11-08 |
