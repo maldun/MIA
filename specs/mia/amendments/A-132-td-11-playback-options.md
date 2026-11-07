@@ -1,6 +1,6 @@
 # A-132 (Draft): Plan step of TD-11, the backend playback route of the chat agent's voice, and "Speak again"
 
-Status: **Draft, written 2026-11-07 for owner review; nothing here is approved.** Decision id proposed: **D-277** (not logged). Follows D-275 (TD-11 narrowed) and D-276 (finding: "Speak again" does nothing). No model step is involved (agent-app additions: no eval criterion, suite or threat entry; the steps stay the existing ones). Everything below was read in the code, nothing was run. `contracts/`, `tests/` and the files of G-V2 and G-V3 are untouched.
+Status: **owner chose option B (2026-11-07, D-277); Draft requirements pending review. Nothing here is approved as a whole.** Decision id: **D-277** (logged in `review-log.md`). Follows D-275 (TD-11 narrowed) and D-276 (finding: "Speak again" does nothing). No model step is involved (agent-app additions: no eval criterion, suite or threat entry; the steps stay the existing ones). Everything below was read in the code, nothing was run. `contracts/`, `tests/` and the files of G-V2 (except one note in `parallel-work.md`) and G-V3 are untouched.
 
 ## 1. The question
 
@@ -25,73 +25,68 @@ A second, hidden fault of the same button: after a Stop, the page drops every `a
 
 ## 3. The options
 
-| | **A: a backend playback pipeline on `SpeechService`** | **B: keep the sound server, make "Speak again" use it (recommended)** |
+| | **A: a backend playback pipeline on `SpeechService`** | **B: keep the sound server, make "Speak again" use it (chosen)** |
 |---|---|---|
 | What changes | The sound server and `SpeechStreamer` are replaced. A new part takes sentences, calls `SpeechService.synthesize` (one worker, to render ahead), writes the wav, assigns serials, calls `publish_audio`, and cancels on stop, for live answers and speak again. | `ChatService` gets one more injected function `speak(text, should_stop)`. `web_app.py` implements it with the existing `speak_answer` (`SpeechStreamer.finish` + `wait(should_stop)`). `stop()` also ends a speak-again playback. The page forgets the 3 s drop window when the user asks to speak again. |
 | New parts / dependencies | One new part (the playback pipeline); `Speaker` (Kokoro, the voice effect) would have to live in the web app process or the pipeline would call the sound server's engine some other way. | None. |
-| Interfaces | IF-204 needs ordering, pipelining and cancel (v1); IF-101 `audio_chunk` text (audio on the audio route) becomes true for the first time; the upload route (`/upload`, internal token) either stays or goes; IF-112 unchanged. | No contract text must change: IF-101 already says the audio follows on the audio route, IF-201 says `speak_again` gives `{"sentences": n}`. One optional clarifying sentence in IF-101 and IF-201 is proposed in section 8. |
-| Effort (estimate, not measured) | 3 to 5 days: the pipeline, moving or sharing the engine, stop, repair, serials, a host test of every voice path, plus a Plan for the new part. | 0.5 to 1 day: `ChatService`, `web_app.py`, `sound.js`, three stage 1 or 2 tests, one node test. |
+| Interfaces | IF-204 needs ordering, pipelining and cancel (v1); IF-101 `audio_chunk` text (audio on the audio route) becomes true for the first time; the upload route (`/upload`, internal token) either stays or goes; IF-112 unchanged. | **None** (owner, D-277: contracts unchanged). IF-101 already says the audio follows on the audio route; IF-201 says `speak_again` gives `{"sentences": n}`. |
+| Effort (estimate, not measured) | 3 to 5 days: the pipeline, moving or sharing the engine, stop, repair, serials, a host test of every voice path, plus a Plan for the new part. | 1 to 1.5 days: `ChatService`, `web_app.py`, `sound.js`, the stage 1 and 2 checks of section 6, one node test, one browser check with a small addition to the mock. |
 | Risk to the working voice | **High.** The proven rendering-ahead and cancel logic of `speak_chunks` would be replaced; the process split (engine in its own process) would change; every live answer is affected. | **Low.** Live answers use the unchanged route. Only a new caller (speak again) is added; if it fails, the chat continues without that voice (REQ-CHA-033). |
 | What the user gets | The same voice as today, one engine path. No visible gain. | "Speak again" works, also after a Stop. |
-| Hand test | Full: every live answer, stop in the middle, speak again, mute, two pages, a long answer, an engine failure. About 30 minutes, repeated after each fix. | Short: speak again, speak again during a live answer, stop during speak again, speak again right after a Stop. About 10 minutes. |
-| What it leaves open | Nothing of TD-11. | TD-11 "through `SpeechService`" stays unmet; `SpeechService` stays a tested but unused interface. |
+| Hand check | Full: every live answer, stop in the middle, speak again, mute, two pages, a long answer, an engine failure. About 30 minutes, repeated after each fix. | Short (TC-CHA-035, about 5 minutes): only what automation cannot hear (section 7). |
+| What it leaves open | Nothing of TD-11. | The single voice path: moved to the new deferral **TD-61** (section 9). |
 
-## 4. Recommendation
+## 4. Decision (owner, 2026-11-07, D-277)
 
-**B now; keep A as a narrowed TD-11 with no trigger date.** The only thing the user feels is that "Speak again" does not work (REQ-BE-006 is Verified but not met). B fixes that with no new part and no change to the live voice. A costs several days and puts the working voice at risk to give the user nothing visible; its only gain is one engine path, and nobody asked for that. If the owner wants A anyway, it needs its own Plan (the pipeline as a part with its requirements, an IF-204 v1 and a contract suite for ordering and cancel) before any code, which this paper does not provide.
+**B now.** The rest of TD-11 is replaced by a new deferral for a single engine path, **TD-61** (draft in `deferred.md`: target one voice path; the app has two today, the sound server and `SpeechService`). TD-11 is closed (Status done, `Closed:` names TD-61 and D-277). `REQ-VOI-001` keeps its text and `Target:`; only its `Relaxed:` marker moves from TD-11 to TD-61, with a History line (an approved requirement's marker; flagged for the owner here and in the report).
 
-Decisions for the owner: B or A; whether TD-11 stays open for A (and with which trigger), is dropped, or is replaced by a new deferral for the single engine path (section 9, question 2).
+## 5. Requirements for option B (Drafts)
 
-## 5. Requirements for option B (Drafts, ids chosen free on master and on the branches I looked at)
+Ids: `REQ-CHA-030` to `REQ-CHA-034` in N-2.2 and `REQ-VPB-006` in N-1.3. The owner reserved `REQ-CHA-030..039`, `TC-CHA-030..039`, `REQ-VPB-006..009` and `TC-VPB-006..009` for TD-11 (row in `specs/mia/goals/G-V2/parallel-work.md`). Texts in the node files, Status Draft:
 
-Ids: `REQ-CHA-030` to `REQ-CHA-034` in N-2.2 and `REQ-VPB-006` in N-1.3. The G-V3 goal records name the ids they will take only by node, so the parent session has to reserve `REQ-CHA-030` to `039`, `TC-CHA-030` to `039` and `REQ-VPB-006` to `009`, `TC-VPB-006` to `009` for TD-11 (they are the numbers after the highest ones on master, goal/v3 and goal/v2.convert today). The texts are in the node files, Status Draft:
-
-- `specs/mia/nodes/N-2-backend/nodes/N-2.2-chat-agent/requirements.md`: REQ-CHA-030 speak again plays (the answer is spoken on the voice route), 031 order of the sentences, 032 stop ends it, 033 no voice route, no failure, 034 one speak again at a time (a speak again does not overlap the previous speak again; its order against the voice of a live answer is kept by the sound server, not by this requirement). New `## Groups` table (the file had none); old requirements keep no group, as before.
+- `specs/mia/nodes/N-2-backend/nodes/N-2.2-chat-agent/requirements.md`: REQ-CHA-030 speak again is spoken (any message of MIA with an id: an answer, a spoken summary, a question of a skill; owner Q8), 031 order of the sentences, 032 stop ends it, 033 no voice route: silent, one log line, no new text (owner Q4), 034 a speak-again during a live answer, or another speak-again, waits behind it (owner Q3). New `## Groups` table.
 - `specs/mia/nodes/N-1-web-frontend/nodes/N-1.3-voice-playback/requirements.md`: REQ-VPB-006 lines of a requested speak again are played also within 3 s of a stop. New `## Groups` table.
 
-## 6. Checks and scenarios
-
-The check rows and plain-language scenarios (Verifies / Given / When / Then) are in `test-spec.md` of N-2.2 (TC-CHA-030 to 035, new `## Scenarios` section) and of N-1.3 (TC-VPB-006). Summary:
+## 6. Checks and levels (owner Q7: automate "events and page only"; real sound stays a short hand check)
 
 | Check | Verifies | Level, stage | What |
 |---|---|---|---|
-| TC-CHA-030 | REQ-CHA-030, 031 | component, 1 | a stored answer of three sentences, a fake voice route: speak again hands the three spoken sentences over in order; the result and the events are as before |
-| TC-CHA-031 | REQ-CHA-030 | component, 1 | the fake receives the stored text, not a repaired copy (the stored text is what the page shows, REQ-CHA-014) |
+| TC-CHA-030 | REQ-CHA-030, 031 | component, 1 | a stored answer of three sentences and a stored question of a skill, a fake voice route: speak again hands over the spoken sentences in order; result and events as before |
+| TC-CHA-031 | REQ-CHA-030 | component, 1 | the fake receives the stored text after the speech filter |
 | TC-CHA-032 | REQ-CHA-032 | component, 2 | stop ends a speak again that is running, also when no answer is being generated |
-| TC-CHA-033 | REQ-CHA-033 | component, 1 | the voice route fails: the result and the next chat message are unaffected, the failure is logged |
-| TC-CHA-034 | REQ-CHA-034 | component, 2 | two speak again requests do not overlap |
-| TC-VPB-006 | REQ-VPB-006 | component, 1 (`node --test`) | speak again within 3 s of a stop: the lines are enqueued |
-| TC-CHA-035 | REQ-CHA-030, 032, 033, 034 | demonstration, 4 | hand test on the host (section 7) |
+| TC-CHA-033 | REQ-CHA-033 | component, 1 | the voice route fails: result and next message unaffected, one log line, nothing new for the page |
+| TC-CHA-034 | REQ-CHA-034 | component, 2 | two speak-again requests do not overlap |
+| **TC-CHA-036 (new level)** | REQ-CHA-031, 032, 034 | component, 2 | the hand-over to the sound server: the real `SoundServer` and `SoundHandler` on a localhost port, real TCP clients, a **fake sink** instead of the engine: order of sentences, a second request queued behind the first, a closed connection cancels the rest. Confirms by observation what the plausibility table (section 10) only read from the code. |
+| TC-VPB-006 | REQ-VPB-006 | component, 1 (`node --test`) | speak again within 3 s of a stop: the lines are enqueued (real `sound.js` on `tests/js/fake-dom.mjs`, fake clock) |
+| **TC-VPB-007 (new level)** | REQ-VPB-006 | component (browser), 2 | the existing browser harness (`tests/browser/`, Chromium, the chat mock server) **fits with a small addition**: the mock sends `audio_reload {url, serial, message}` after the speaker button and serves a short wav; the driver checks the page's audio element. The mock is test tooling under `ui/tools/`, not protected. |
+| TC-CHA-035 | REQ-CHA-030, 032 | demonstration, 4 | **shortened** hand check on the host (section 7) |
 
-**Failing first (a finding gets a test first):** TC-CHA-030 is the test of the finding. Against today's code it fails by assertion: the fake voice route receives no sentence (`[] != [...]`) because `ChatService` has no `speak` and `speak_again` never calls one. Step 4 needs only a minimal stub (a `speak=None` keyword) so the test imports and then fails for the right reason, not with an `ImportError`. TC-VPB-006 is red for the same reason on the page side (the line is dropped inside the window).
+`stages.yaml` needs no new step: stage 1 `unit` and `js` find `tests/test_*.py` and `tests/js/*.test.mjs` by pattern; the two stage 2 Python checks run in the existing `unit` discover run (the browser one is skipped, never passed, where podman or the images are missing, like the other browser checks). No smoke test now (owner Q7).
 
-## 7. Hand test on the host (TC-CHA-035, the checklist for the owner)
+**Failing first (a finding gets a test first):** TC-CHA-030 is the test of the finding. Against today's code it fails by assertion: the fake voice route receives no sentence (`[] != [...]`) because `ChatService` has no `speak` and `speak_again` never calls one. Step 4 needs only a minimal stub (a `speak=None` keyword) so the test imports and then fails for the right reason. TC-VPB-006 and TC-VPB-007 are red for the same reason on the page side (the line is dropped inside the window). TC-CHA-036 is a characterization of today's server and is expected green from the start; if it is red, that is a finding about the sound server (queue or cancel), reported before any fix.
+
+## 7. The short hand check (TC-CHA-035, only what automation cannot hear)
 
 1. Start MIA in the venv, open the page on `localhost`, ask a question with three or more sentences, wait until it is spoken.
-2. Press the 🔊 under the answer: the same answer is spoken again, in order, in the same voice.
-3. Press 🔊 while a new answer is being spoken: the live voice is not cut; the speak again follows after it.
-4. Press 🔊, then Stop while it speaks: it ends within about a second and nothing is spoken afterwards.
-5. Press Stop while an answer is spoken, then press 🔊 within 3 s: it is spoken (no silent drop).
-6. Mute the page, press 🔊: nothing is heard and the next answer speaks normally after un-muting.
-7. Stop the sound server (or kill its process), press 🔊: the chat continues, the next message gets an answer; the log has one error line.
+2. Press the speaker button under the answer: the same answer is heard again, in order, in the same voice.
+3. Press the speaker button, then Stop while it speaks: it ends within about a second and nothing is heard afterwards.
+4. Press Stop while an answer is spoken, then the speaker button within 3 s: it is heard (no silent drop).
 
-## 8. Contract text (proposal, optional; `contracts/` untouched)
+Order, the queue behind a live answer, the failing route and mute are checked automatically (TC-CHA-030 to 034, 036, TC-VPB-006, 007) and are not part of the hand check.
 
-Not required for B. If the owner wants the realization written down:
-- IF-101, row `speak_again`, Notes: "one `audio_chunk` per sentence to every connected page; the answer is also spoken on the voice route (the audio follows on the audio route); 404 unknown id".
-- IF-201, row `speak_again`, Notes: the same sentence.
-Each is a version bump (IF-101 v16, IF-201 v3) and a change of a protected contract text, so it is an amendment decided by the owner. **Overlap:** G-V3.PANEL owns the IF-101 amendment alone and G-V3.CHAT amends IF-201. The text above must be given to them as an extra line of their amendments, or applied in a separate small bump before theirs; two separate bumps of the same contract in two branches would conflict.
+## 8. Contracts (owner Q5)
+
+**Unchanged.** TD-11 touches no contract: IF-101 line 79 already says the audio bytes follow on the audio route, IF-201 `speak_again` is unchanged. The optional clarifying sentences of the first draft are dropped. No overlap with the IF-101 amendment of G-V3.PANEL or the IF-201 amendment of G-V3.CHAT remains at the contract level.
 
 ## 9. Where TD-11 meets G-V3 (read-only look at `goal/v3`)
 
 | Point | G-V3 says | What must be agreed |
 |---|---|---|
 | The voice path | G-V3 and A-131: "the voice path stays as it is"; every chat text is spoken as today; TD-11 independent. | Option B keeps this true for live answers. |
-| "Speak again" of a short spoken summary | In G-V3 the chat holds only spoken texts (summaries, questions). "Speak again" under such a message must play it too. | REQ-CHA-030 is about "any answer" (IF-201 `speak_again` takes any answer id); G-V3.CHAT has to name it in its scope so that its new message kinds (summary, question) are answers for this purpose. |
-| IF-101 / IF-201 text | PANEL owns the IF-101 amendment, CHAT amends IF-201. | The optional lines in section 8, as above. |
+| "Speak again" of a spoken summary or a question of a skill | In G-V3 the chat holds only spoken texts (summaries, questions). | Settled by the owner (Q8): any message of MIA with an id counts. G-V3.CHAT only has to give its new messages an id and a stored text. |
 | `ChatService` | G-V3 changes the chat events and removes the status card. | Option B touches `ChatService.__init__` (one parameter), `speak_again` and `stop`. G-V3 may touch the same functions; whoever merges second rebases. |
-| `sound.js` / `app.js` | PANEL builds the Skill run view in the page. | REQ-VPB-006 touches only the voice code (`sound.js`, one call in `chat.js` for the 🔊 action). Low overlap; note it for PANEL. |
-| TC-CHA-006, REQ-CHA-006 | G-V3 does not change them. | They stay; TC-CHA-030 to 035 add the check that was missing. |
+| `sound.js` / `chat.js` | PANEL builds the Skill run view in the page. | REQ-VPB-006 touches only the voice code (`sound.js`, one call in `chat.js` for the speaker action). Low overlap; note it for PANEL. |
+| TD-61 | Not in G-V3. | A voice-path merge would conflict with a G-V3 change of how chat texts are spoken; it is planned only after G-V3. |
 
 ## 10. Plausibility (proposals only; people rate; `plausibility.yaml` untouched)
 
@@ -100,25 +95,24 @@ Each is a version bump (IF-101 v16, IF-201 v3) and a change of a protected contr
 | REQ-CHA-030, 031 | plausible | `speak_answer(text)` in `web_app.py` already runs `SpeechStreamer.finish` and `wait`; it is the route live answers use. |
 | REQ-CHA-032 | plausible | `SpeechStreamer.wait(should_stop)` closes the socket and `SoundHandler._watch_close` sets `cancelled`; this is the mechanism of the existing chat stop (owner check A3). The new part is that `stop()` today does nothing when no answer runs. |
 | REQ-CHA-033 | plausible | `SpeechStreamer` already catches `OSError` and logs it. |
-| REQ-CHA-034 | plausible | A lock around the voice call of speak again is plain code. Against a live answer, `SoundServer` is a single-threaded `TCPServer`, so a second connection waits for the first handler; that is read from the class, not observed, and is not part of this requirement. The hand test step 3 observes it. |
+| REQ-CHA-034 | questionable until TC-CHA-036 ran | A lock around the voice call covers two speak-again requests. Against a live answer the queue rests on `SoundServer` being a single-threaded `TCPServer` (a second connection waits for the first handler), read from the class and not observed. Probe: TC-CHA-036, which runs the real server with a fake sink; it decides the rating before approval. |
 | REQ-VPB-006 | plausible | `stoppedAt` is a plain variable in `initSound`; clearing it on the speak-again action is one line. |
 
-No number is introduced, so there is no measured reference to give; a time limit for "ends within about a second" is deliberately **not** a requirement (the poll interval is 0.2 s and the engine's sentence in progress finishes; the hand test only observes it). If the owner wants a limit, it needs a measurement on the host first.
+No number is introduced, so there is no measured reference to give; a time limit for "ends within about a second" is deliberately **not** a requirement (the poll interval is 0.2 s and the engine's sentence in progress finishes; the checks use generous test limits).
 
-## 11. Open questions for the owner (to turn into a questionnaire)
+## 11. Decided (owner, D-277) and what is still open
 
-1. Option B (recommended) or A.
-2. Under B: TD-11's remaining target "through `SpeechService`" is kept open without a trigger date, dropped, or replaced by a new deferral for a single engine path?
-3. Is `speak_again` while an answer is being generated queued behind the live voice (proposed, REQ-CHA-034) or refused?
-4. If the voice route is down: silent with a log line (proposed, REQ-CHA-033) or a visible note on the page?
-5. Add the optional one-sentence clarifications to IF-101 and IF-201 (section 8), and who applies them (G-V3 amendment lines or a separate bump)?
-6. Reserve the id ranges of section 5 for TD-11 (parent session).
-7. Is the hand test of TC-CHA-035 enough, or should a smoke test on the stack follow (the stack has no sound server today; see TD-24 and TD-25 for the same gap)?
+Decided: Q1 option B; Q2 TD-11 replaced by TD-61 (single engine path); Q3 speak again during a live answer is queued; Q4 route down: silent, one log line, no new text; Q5 contracts unchanged; Q6 id ranges reserved; Q7 automation levels as in section 6, no smoke test; Q8 any message of MIA with an id.
+
+New open questions:
+1. Q8 says "any chat message with an id". A message of a **user** is `not_found` for `speak_again` today (IF-201, TC-IF-201-06, unchanged by Q5). I read Q8 as: any message **of MIA** (answers, spoken digests, skill questions). Is that right, or should a user's message also be spoken?
+2. TD-61 trigger and effort are proposals ("the Plan of an iteration that changes the voice, or 2026-12-31"; 3 to 5 days). The owner confirms or changes them.
+3. TC-VPB-007 needs the chat mock server (`ui/tools/chat_mock_server.py`) to send `audio_reload` and serve a wav. It is test tooling; is a change of it acceptable in Step 4 as it was for TD-01 and TD-02?
 
 ## 12. What Step 4 (red tests) would need
 
 - A dedicated session, not the implementing one; the minimal stub `ChatService(..., speak=None)` so the tests import.
-- Under `tests/` (not `tests/acceptance/`, `helpers/` or `smoke/` unless the owner moves the checks there): `tests/test_chat_speak_again.py` for TC-CHA-030 to 034 with a fake voice route (records sentences and honours `should_stop`), and `tests/js/sound-speak-again.test.mjs` for TC-VPB-006 on the fake DOM of `tests/js/fake-dom.mjs`. A new fake in `tests/helpers/` would need the owner's approval as before (D-272, D-274).
-- The hand-calculated check for TC-CHA-030: three sentences "A. B. C." give exactly three hand-over calls with the texts `A.`, `B.`, `C.` in that order.
-- `stages.yaml` rows for the six new checks; `plan.md` with two or three tasks (ChatService and stop; `web_app.py` wiring; `sound.js`), the third independent of the first two.
+- New files under `tests/` (not `tests/acceptance/`, `helpers/` or `smoke/` unless the owner moves the checks there): `tests/test_chat_speak_again.py` (TC-CHA-030 to 034, a fake voice route), `tests/test_sound_server_handover.py` (TC-CHA-036, the real server with a fake sink on a free localhost port), `tests/js/sound-speak-again.test.mjs` (TC-VPB-006, fake DOM, fake clock), `tests/test_speak_again_browser.py` with a driver in `tests/browser/` (TC-VPB-007). A new fake in `tests/helpers/` would need the owner's approval as before (D-272, D-274).
+- The hand-calculated check for TC-CHA-030: "One. Two. Three." gives exactly three hand-over calls with `One.`, `Two.`, `Three.` in that order; TC-CHA-036: client 1 `One.`, `Two.`, `Three.`, client 2 `Four.` give the sink order `One.`, `Two.`, `Three.`, `Four.`.
+- `plan.md` with three or four tasks (ChatService and stop; `web_app.py` wiring; `sound.js`; the mock server for TC-VPB-007), the page task independent of the others.
 - The existing suites that must stay green: `tests/test_chat_answers.py` (TC-IF-201-06), `tests/test_speech_*.py`, the IF-204 and IF-201 contract suites, `node --test`.

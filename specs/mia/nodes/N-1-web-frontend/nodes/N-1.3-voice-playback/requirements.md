@@ -78,8 +78,8 @@ Playing the audio of the answers and the voice lines in this browser: queue, cla
 - Parent: REQ-VPB-002
 - Priority: Should
 - Verification method: Test
-- Acceptance criterion: AC-1: with a stop 1 s ago a line that arrives after the speak-again request is enqueued; without the request it is still dropped (exact)
-- Verified by: TC-VPB-006
+- Acceptance criterion: AC-1: with a stop 1 s ago a line that arrives after the speak-again request is enqueued, in the node test and in the browser; without the request it is still dropped (exact)
+- Verified by: TC-VPB-006, TC-VPB-007
 - Status: Draft
 - Group: SA
 - History: proposed in A-132 (Draft), not approved

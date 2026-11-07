@@ -16,9 +16,9 @@ Speech on the host: filter the text, synthesise sentence by sentence with the op
 - Acceptance criterion: AC-13: each sentence of a 5-sentence answer yields one audio chunk
 - Verified by: TC-VOI-001
 - Status: Approved
-- Relaxed: TD-11
+- Relaxed: TD-61
 - Target: the chat agent's audio goes through the speech interface IF-204 and an audio_chunk event carries each sentence
-- History: A-69 (2026-11-01): Relaxed TD-11 (D-173)
+- History: A-69 (2026-11-01): Relaxed TD-11 (D-173); A-132 (2026-11-07, proposed, D-277): `Relaxed:` points to TD-61, which replaces TD-11; text and Target unchanged
 
 ### REQ-VOI-002 – Speak only what is meant to be heard
 - Level: low   Subject: VoiceSubsystem

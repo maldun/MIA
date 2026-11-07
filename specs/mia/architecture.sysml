@@ -2702,7 +2702,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-CHA-030'> SpeakAgainIsSpoken_Cha030 {
         subject s : ConversationCore;
-        doc /* When a user asks to speak an answer again, the Chat agent shall have the stored text of that answer spoken on the voice route that live answers use. */
+        doc /* When a user asks to speak a message of MIA again, the Chat agent shall have the stored text of that message spoken on the voice route that live answers use. */
         @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
     }
     requirement def <'REQ-CHA-031'> SpeakAgainKeepsTheOrder_Cha031 {
@@ -2717,13 +2717,13 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-CHA-033'> SpeakAgainWithoutAVoiceRoute_Cha033 {
         subject s : ConversationCore;
-        doc /* If the voice route is not available, then the Chat agent shall still answer a speak-again request with the number of sentences and log the failure. */
-        @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
+        doc /* If the voice route is not available, then the Chat agent shall still answer a speak-again request with the number of sentences and log the failure once. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-CHA-034'> OneSpeakAgainAtATime_Cha034 {
         subject s : ConversationCore;
-        doc /* The Chat agent shall start the playback of one spoken-again answer only after the playback of the previous spoken-again answer has ended. */
-        @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
+        doc /* While a message is being spoken, the Chat agent shall have a spoken-again message wait until that speech has ended. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-WFM-001'> SkillsAsTasks_Wfm001 {
         subject s : TaskRuntime;

@@ -28,20 +28,21 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-201
 | TC-CHA-018 | REQ-CHA-018 | Component | 2 | component test with the mocks of the neighbouring interfaces | AC-11: a reset restores the default rate; a vote on a fact leaves counters of facts unchanged | as stated |
 | TC-CHA-019 | REQ-CHA-019 | Component | 2 | component test with the mocks of the neighbouring interfaces | AC-12: 50 of 50 stored items are recited word for word on request and at their due time | exact |
 | TC-CHA-020 | REQ-CHA-020 | Inspection | 1 | the code and the log files of the repository | AC-15: no database driver is imported outside the storage client | as stated |
-| TC-CHA-030 | REQ-CHA-030, REQ-CHA-031 | Component | 1 | `tests/test_chat_speak_again.py` with the fake voice route (A-132): a function that records the texts it gets and `should_stop` | AC-1: speak again of a stored answer of three sentences hands exactly its three spoken sentences, in order, to the voice route; the result and the audio_chunk events are as before | exact |
+| TC-CHA-030 | REQ-CHA-030, REQ-CHA-031 | Component | 1 | `tests/test_chat_speak_again.py` with the fake voice route (A-132): a function that records the texts it gets and `should_stop` | AC-1: speak again of a stored answer of three sentences, and of a stored question of a skill, hands exactly their spoken sentences, in order, to the voice route; the result and the audio_chunk events are as before | exact |
 | TC-CHA-031 | REQ-CHA-030 | Component | 1 | same test file; a stored answer whose text carries markup and a stage direction | AC-1: the voice route gets the stored text after the speech filter, nothing that the page does not show | exact |
 | TC-CHA-032 | REQ-CHA-032 | Component | 2 | same test file; the fake voice route blocks until its `should_stop` is true; no answer is being generated | AC-1: a stop request makes `should_stop` true and ends the blocked playback; no further sentence is handed over | the end within 1 s (test limit; the fake polls every 0.05 s) |
-| TC-CHA-033 | REQ-CHA-033 | Component | 1 | same test file; the fake voice route raises `OSError` | AC-1: the request returns the sentence count, the next message is answered, one error line is logged | exact |
+| TC-CHA-033 | REQ-CHA-033 | Component | 1 | same test file; the fake voice route raises `OSError` | AC-1: the request returns the sentence count, the next message is answered, one error line is logged, no event or text for the page is added | exact |
 | TC-CHA-034 | REQ-CHA-034 | Component | 2 | same test file; the fake voice route sleeps 0.2 s per call and records start and end times | AC-1: with two requests in a row the second playback starts after the first has ended | exact order, no overlap |
-| TC-CHA-035 | REQ-CHA-030, REQ-CHA-032, REQ-CHA-033, REQ-CHA-034 | Demonstration | 4 | the hand test on the host with the real sound server, steps in the scenario below (the owner, about 10 minutes) | AC-1: the speak-again button is heard, also right after a stop; stop ends it; a failing sound server leaves the chat working | as stated |
+| TC-CHA-035 | REQ-CHA-030, REQ-CHA-032 | Demonstration | 4 | the short hand check on the host with the real sound server and the real engine (the owner, about 5 minutes): only what automation cannot hear | AC-1: the speaker button is heard in the same voice and in order; Stop silences it; it is heard right after a Stop | as stated |
+| TC-CHA-036 | REQ-CHA-031, REQ-CHA-032, REQ-CHA-034 | Component | 2 | `tests/test_sound_server_handover.py` (A-132): the real `SoundServer` and `SoundHandler` of `speak.py` on a localhost port with a fake speaker as sink (records each chunk it is asked to play, in order, and honours `cancelled`), real TCP clients | AC-1: the sentences of one request reach the sink in order; a second request that arrives during the first is played after it; a client that closes its connection cancels the rest | exact order, no overlap, cancel within 2 s (test limit) |
 
 ## Scenarios (speak again, A-132; the older checks of this file have none yet)
 
 ### TC-CHA-030 – speak again goes to the voice route
 - Verifies: REQ-CHA-030, REQ-CHA-031
-- Given: the Chat agent with a fake voice route and a stored answer "One. Two. Three."
-- When: a user asks to speak that answer again
-- Then: the fake voice route got the texts `One.`, `Two.`, `Three.` in that order and nothing else; the result is `{"sentences": 3}`; three audio_chunk events with index 0, 1, 2 were sent
+- Given: the Chat agent with a fake voice route, a stored answer "One. Two. Three." and a stored question of a skill "Shall I go on?"
+- When: a user asks to speak the answer again, and then the question
+- Then: the fake voice route got `One.`, `Two.`, `Three.` in that order, then `Shall I go on?`, and nothing else; the results are `{"sentences": 3}` and `{"sentences": 1}`; the audio_chunk events have the index 0, 1, 2 and 0
 
 ### TC-CHA-031 – the stored text is spoken
 - Verifies: REQ-CHA-030
@@ -59,7 +60,7 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-201
 - Verifies: REQ-CHA-033
 - Given: a fake voice route that fails with a connection error
 - When: a user asks to speak a stored answer of two sentences again, and then sends a normal message
-- Then: the first request returned `{"sentences": 2}`, one error line is in the log, the normal message was answered
+- Then: the first request returned `{"sentences": 2}`, one error line is in the log, no event or text for the page was added, the normal message was answered
 
 ### TC-CHA-034 – one speak again at a time
 - Verifies: REQ-CHA-034
@@ -67,12 +68,17 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-201
 - When: a user asks to speak answer 1 again and at once answer 2 again
 - Then: the call of answer 2 started after the call of answer 1 had ended
 
-### TC-CHA-035 – hand test on the host
-- Verifies: REQ-CHA-030, REQ-CHA-032, REQ-CHA-033, REQ-CHA-034
-- Note: the step after a stop also exercises the page rule of N-1.3 on the real page; the page rule itself is checked alone by TC-VPB-006
-- Given: MIA running on the host with the real sound server, the page open on localhost, an answer of three or more sentences just spoken
-- When: the owner presses the speaker button under the answer; presses it while a new answer is spoken; presses it and then Stop; presses Stop while an answer is spoken and the button within 3 s; mutes and presses it; stops the sound server and presses it
-- Then: the answer is heard again in order in the same voice; the live voice is not cut and the repeat follows it; the repeat ends at Stop; the repeat is heard right after a Stop; nothing is heard while muted; with the sound server down the chat still answers and the log has one error line
+### TC-CHA-035 – short hand check on the host
+- Verifies: REQ-CHA-030, REQ-CHA-032
+- Given: MIA running on the host with the real sound server and engine, the page open on localhost, an answer of three or more sentences just spoken
+- When: the owner presses the speaker button under the answer; presses it and then Stop; presses Stop while an answer is spoken and the button within 3 s
+- Then: the answer is heard again in order in the same voice; the repeat ends at Stop; the repeat is heard right after a Stop. Everything else (order, queue behind a live answer, failure of the route, mute) is checked by the automatic checks and is not part of this check
+
+### TC-CHA-036 – the hand-over to the sound server
+- Verifies: REQ-CHA-031, REQ-CHA-032, REQ-CHA-034
+- Given: the real `SoundServer` and `SoundHandler` on a localhost port with a fake speaker as sink that records every chunk in order and stops on `cancelled`
+- When: client 1 sends the sentences `One.`, `Two.`, `Three.` and the end marker slowly; client 2 connects during that and sends `Four.` and the end marker; in a second run client 1 closes its connection after `One.`
+- Then: the sink got `One.`, `Two.`, `Three.` and only then `Four.`; in the second run it got `One.` and not `Two.` or `Three.`
 
 ## Assumptions (checked in validation)
 
