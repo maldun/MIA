@@ -111,3 +111,50 @@ See `specs/mia/test-spec.md` VAL-001 to VAL-006; VAL-006 ("fast and light enough
 3. T-08: the recall threshold and bound (proposal min 0.70, low 0.50 at n = 7, only to catch a broken pipeline), or first a larger review suite (tier 1).
 4. REQ-RUN-007 as a benchmark under `benchmarks/` (a plan amendment that installs it).
 5. The rule for `n-planted-figure` in `number_check` (conflicting values `fail` or `open`): it changes EV-hard_checks and is re-measured on the verdict suites of the number gate.
+
+## G-V2.CONVERT: conversion of the skills (REQ-WFM-057 to 066, 069, 110 to 115)
+
+Written 2026-11-07 in Plan step 3. A skill is converted when its converted record reproduces the outcomes of the v0.1.0 skill on the dev split of its own suite on the same pin (REQ-WFM-059); the numbers are in the criterion lines of REQ-WFM-110 to 114 (starting guesses under D-187: margin 0.10, 3 repeats, threshold rule, settings version 1 of REQ-WFM-069). These are dev-split equivalence checks, not holdout decisions: the suites are starter suites without holdout (see Suites above), so they show that nothing got worse, not that a skill is good.
+
+### Which suite belongs to which skill
+| Skill (v0.1.0 pipeline) | Suite that decides | Dev cases | Other suites (run, reported, not decided) | Requirement | Form after this goal |
+|---|---|---|---|---|---|
+| research (research.escalate@1) | EV-research | 20 | EV-research_compound (16) | REQ-WFM-110 | converted if the criterion passes |
+| plan_question (plan.free@1) | EV-plans | 36 | – | REQ-WFM-111 | converted if the criterion passes |
+| verify_claim (verify.single@1) | EV-verdicts | 50 | EV-verdicts_injection (12), EV-verdicts_wikidata (184) | REQ-WFM-112 | converted if the criterion passes |
+| verify_computable (verify.computable@2) | EV-computable | 39 | – | REQ-WFM-113 | converted if the criterion passes |
+| extract_claims (extract.llm@1) | EV-extraction | 51 | – | REQ-WFM-114 | converted if the criterion passes |
+| extract_claims_rules (extract.rules) | EV-extraction | 51 | – | REQ-WFM-115 (equal outputs, no model) | converted if all 51 outputs are equal |
+| chat, check_speech, memory_write, summarize | none | – | – | none | old runner; reason: part of the user interface (owner 2026-11-07), revisited in another goal |
+| review_abstract, review_full, review_keywords, review_section, review_summary | none of their own (EV-review_toy exercises the review as a whole, 7 cases) | – | – | none | old runner; the same reason |
+
+The skill-to-suite link is the `target.skill` field of each `suite.json`; EV-behaviour (target kind `text_rules`) and EV-review_toy (target skill `review`, no skill of that name) name no skill of the table and decide nothing here. Two skills share EV-extraction; their baselines differ by variant (`extraction__rules__baseline.jsonl`, `extraction__llm-light__baseline.jsonl`). The reason for the nine skills is the text REQ-WFM-060 requires; the owner gave it as one reason for all nine.
+
+### Baselines of the converted skills (A-120 records them; none is a committed run file yet)
+| Skill | Variant | Reference now (case share behaving as expected) | Source | Repeats | To do before any converted run |
+|---|---|---|---|---|---|
+| research | research.escalate@1 | 0.92 (55 of 60 case-repeats, 0.917) | eval/baselines/research-escalate.md, 2026-10-19 | 3 | record the run file |
+| plan_question | plan.free@1 | 0.64 (69 of 108) | eval/baselines/research-planners.md, 2026-10-19/20 | 3 | record the run file |
+| verify_claim | verify.single@1 | 0.93 (43 of 46 with a known truth; 4 of 4 undecidable right) | eval/baselines/verdicts-single.md, 2026-10-19 | 1 | re-record at 3 repeats |
+| verify_computable | verify.computable@2 | 0.92 | eval/baselines/computable-gemma4-12b.md, 2026-10-18 | 1 | re-record at 3 repeats |
+| extract_claims | extract.llm@1 | 0.69 (35 of 51 perfect) | eval/baselines/extraction-llm-light.md, 2026-10-18 | 1 | re-record at 3 repeats |
+| extract_claims_rules | extract.rules | 0.63 (32 of 51), deterministic | eval/baselines/extraction-rules.md, 2026-10-18 | 1 (deterministic) | record the run file for the equality check |
+
+### Error rates (M19, fixed before any run)
+`false_alarm.py --n <n> --min-rate <min> --good <reference> --bad <reference - loss> --rerun`, computed 2026-11-07.
+
+| Requirement | n | Minimum (k of n) | Good rate | False alarm | Miss at a loss of 0.25 | Miss at a loss of 0.15 |
+|---|---|---|---|---|---|---|
+| REQ-WFM-110 | 20 | 0.82 (17) | 0.92 | 0.0050 | 0.1242 | 0.4981 |
+| REQ-WFM-111 | 36 | 0.54 (20) | 0.64 | 0.0122 | 0.0638 | 0.4637 |
+| REQ-WFM-112 | 50 | 0.83 (42) | 0.93 | 0.0001 | 0.0171 | 0.3586 |
+| REQ-WFM-113 | 39 | 0.82 (32) | 0.92 | 0.0001 | 0.0577 | 0.5053 |
+| REQ-WFM-114 | 51 | 0.59 (31) | 0.69 | 0.0064 | 0.0233 | 0.3652 |
+
+Reading: a conversion that loses a quarter of the right cases is caught with a miss of at most 0.12; one that loses 0.15 passes in 36 to 51 % of the checks. The suites are too small to see a small loss, so the guard against a silently changed prompt or step order is REQ-WFM-058 (same model calls, exact, no model). The reference rates of four suites come from one repeat and carry their own uncertainty (Wilson 95 % half-width 0.07 to 0.15 over the cases), larger than the margin of 0.10 for three of them; a bigger suite or more repeats would narrow it, which is the owner's call (settings version 2 of REQ-WFM-069).
+
+### Case scenarios
+No new cases are written for G-V2.CONVERT: the five suites exist and are labelled by the owner; the only change of eval material is the tag `split:dev` and the baseline files (A-120, protected, applied by the owner).
+
+### Where and when they run
+Stage 4 (test-spec.md, TC-WFM-110 to 114), on MP-light with one model loaded, after the converted skill passes TC-WFM-058 and TC-WFM-115 and before it is switched from the old runner (REQ-WFM-057). The dev runs of Implement are feedback; the decision run for the record of REQ-WFM-060 is made once per skill, re-run once on a FAIL, and logged with the versions of skill, pipeline and settings.

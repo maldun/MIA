@@ -3775,4 +3775,9 @@ plausibility:
       rated: '2026-10-26'
       rated_by: maldun
       rating: plausible
-  references: {}
+  references:
+    REF-CONVERT-1: {quantity: "research.escalate@1 on EV-research, share of cases behaving as expected", value: 0.92, unit: "1", uncertainty: 0.13, kind: measured, basis: "eval/baselines/research-escalate.md: 55 of 60 case-repeats (20 cases x 3 repeats), Wilson 95 % half-width over 20 cases", hardware: HW-target, date: "2026-10-19"}
+    REF-CONVERT-2: {quantity: "plan.free@1 on EV-plans, share of plans as they should be", value: 0.64, unit: "1", uncertainty: 0.15, kind: measured, basis: "eval/baselines/research-planners.md: 69 of 108 (36 plans x 3 repeats), Wilson half-width over 36 cases", hardware: HW-target, date: "2026-10-20"}
+    REF-CONVERT-3: {quantity: "verify.single@1 on EV-verdicts, share of right decisions", value: 0.93, unit: "1", uncertainty: 0.07, kind: measured, basis: "eval/baselines/verdicts-single.md: 43 of 46 claims with a known truth, 1 run, Wilson half-width over 50 cases", hardware: HW-target, date: "2026-10-19"}
+    REF-CONVERT-4: {quantity: "verify.computable@2 on EV-computable, share of right decisions", value: 0.92, unit: "1", uncertainty: 0.09, kind: measured, basis: "eval/baselines/computable-gemma4-12b.md: right overall 92 % of 39 cases, 1 run, Wilson half-width over 39 cases", hardware: HW-target, date: "2026-10-18"}
+    REF-CONVERT-5: {quantity: "extract.llm@1 on EV-extraction, share of texts extracted perfectly", value: 0.69, unit: "1", uncertainty: 0.12, kind: measured, basis: "eval/baselines/extraction-llm-light.md: 35 of 51 texts, 1 run, Wilson half-width over 51 cases", hardware: HW-target, date: "2026-10-18"}

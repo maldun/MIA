@@ -2026,3 +2026,38 @@ proposal:
     decision: questionable
     basis: ["decided by the owner on 2026-10-26; checked in the field with the first users"]
     accepted_risk: {reason: "the number of simultaneous users is a fact about use; the field shows it", owner: "{by}", decided: "2026-10-26 by {by}", follow_up: "VAL-003"}
+  REQ-WFM-110:
+    text: 'The Workflow management shall run the converted skill so that it behaves as expected in at least 82 % of the dev cases of EV-research.'
+    proposed: questionable
+    category: baseline
+    attention: ['eval criterion: margin 0.10 is smaller than the uncertainty of the reference (REF-CONVERT-1), the rule cannot see a loss of 0.15 (miss 0.36 to 0.51)']
+    basis: ["reference REF-CONVERT-1 measured on the baseline of v0.1.0; the guard against a silent change is REQ-WFM-058 (agent proposal, a person decides)"]
+    claims: [{kind: floor, value: 0.82, unit: "1", against: REF-CONVERT-1}]
+  REQ-WFM-111:
+    text: 'The Workflow management shall run the converted skill so that it behaves as expected in at least 54 % of the dev cases of EV-plans.'
+    proposed: questionable
+    category: baseline
+    attention: ['eval criterion: margin 0.10 is smaller than the uncertainty of the reference (REF-CONVERT-2), the rule cannot see a loss of 0.15 (miss 0.36 to 0.51)']
+    basis: ["reference REF-CONVERT-2 measured on the baseline of v0.1.0; the guard against a silent change is REQ-WFM-058 (agent proposal, a person decides)"]
+    claims: [{kind: floor, value: 0.54, unit: "1", against: REF-CONVERT-2}]
+  REQ-WFM-112:
+    text: 'The Workflow management shall run the converted skill so that it behaves as expected in at least 83 % of the dev cases of EV-verdicts.'
+    proposed: questionable
+    category: baseline
+    attention: ['eval criterion: margin 0.10 is smaller than the uncertainty of the reference (REF-CONVERT-3), the rule cannot see a loss of 0.15 (miss 0.36 to 0.51)']
+    basis: ["reference REF-CONVERT-3 measured on the baseline of v0.1.0; the guard against a silent change is REQ-WFM-058 (agent proposal, a person decides)"]
+    claims: [{kind: floor, value: 0.83, unit: "1", against: REF-CONVERT-3}]
+  REQ-WFM-113:
+    text: 'The Workflow management shall run the converted skill so that it behaves as expected in at least 82 % of the dev cases of EV-computable.'
+    proposed: questionable
+    category: baseline
+    attention: ['eval criterion: margin 0.10 is smaller than the uncertainty of the reference (REF-CONVERT-4), the rule cannot see a loss of 0.15 (miss 0.36 to 0.51)']
+    basis: ["reference REF-CONVERT-4 measured on the baseline of v0.1.0; the guard against a silent change is REQ-WFM-058 (agent proposal, a person decides)"]
+    claims: [{kind: floor, value: 0.82, unit: "1", against: REF-CONVERT-4}]
+  REQ-WFM-114:
+    text: 'The Workflow management shall run the converted skill so that it behaves as expected in at least 59 % of the dev cases of EV-extraction.'
+    proposed: questionable
+    category: baseline
+    attention: ['eval criterion: margin 0.10 is smaller than the uncertainty of the reference (REF-CONVERT-5), the rule cannot see a loss of 0.15 (miss 0.36 to 0.51)']
+    basis: ["reference REF-CONVERT-5 measured on the baseline of v0.1.0; the guard against a silent change is REQ-WFM-058 (agent proposal, a person decides)"]
+    claims: [{kind: floor, value: 0.59, unit: "1", against: REF-CONVERT-5}]

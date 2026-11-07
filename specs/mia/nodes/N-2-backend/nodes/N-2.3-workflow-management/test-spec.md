@@ -48,6 +48,132 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-203
 | TC-WFM-038 | REQ-WFM-038 | Component | 2 | component test with the mocks of the neighbouring interfaces | AC-3: the record read back equals the report; the markdown and LaTeX files hold every work; special characters are escaped | exact |
 | TC-WFM-039 | REQ-WFM-039 | Component | 2 | component test with a temporary extensions folder; inspection of the core files | AC-23: a folder with a manifest is loaded, listed, parsed and run; no core file names a skill id | exact |
 
+## Test cases of G-V2.CONVERT (REQ-WFM-057 to 066, 069, 115)
+
+| Test ID | Verifies | Level | Stage | Setup / inputs | Expected result | Limit / tolerance |
+| --- | --- | --- | --- | --- | --- | --- |
+| TC-WFM-057 | REQ-WFM-057 | Component | 2 | component test with the mocks of the neighbouring interfaces; one skill marked unconverted, one marked converted, each with an old and a converted version | AC-34: the unconverted skill runs its old skill file and pipeline and its converted version is never used; the converted skill runs the converted version | exact |
+| TC-WFM-058 | REQ-WFM-058 | Component | 2 | the fake model server of `pipeline.py` with scripted replies; old runner and converted skill run the same input for each of the 5 converted skills that call a model | AC-34: the recorded lists of model calls (order, prompt, options) are equal; one changed option or prompt makes the check fail and names the first differing call | exact |
+| TC-WFM-059 | REQ-WFM-059 | Component | 2 | scripted run files of `eval_decide.py` for three skills: 17 of 20 right, 15 of 20 right twice, and a run of another suite | AC-34: the first skill is accepted; the second stays unconverted after the re-run; the third is not decided and stays unconverted | exact |
+| TC-WFM-060 | REQ-WFM-060 | Inspection | 1 | the record of the 15 skills of v0.1.0 read by a script and by a person | AC-34: each skill names its form and either a verdict with suite, run and pins or a reason; the nine interface skills carry the reason of the owner of 2026-11-07 | exact |
+| TC-WFM-061 | REQ-WFM-061 | Component | 2 | component test with the mocks of the neighbouring interfaces; a state of 2 skills, 2 workflow graphs, 1 context graph, 3 transforms (trusted tested, trusted draft, untrusted retired) and the pin MP-light | AC-40: the snapshot "before-rework" holds all 8 items with version, trust and lifecycle and the pin | exact |
+| TC-WFM-062 | REQ-WFM-062 | Component | 2 | component test with the mocks of the neighbouring interfaces; two snapshots taken at two different times by the owner | AC-40: both are listed with name, time and author | exact |
+| TC-WFM-063 | REQ-WFM-063 | Component | 2 | component test with the mocks of the neighbouring interfaces; state S2 differs from snapshot "a" | AC-40: restoring "a" first creates a snapshot of S2; restoring that snapshot gives S2 back | exact |
+| TC-WFM-064 | REQ-WFM-064 | Component | 2 | component test with the mocks of the neighbouring interfaces; after "a" a skill, a workflow graph, a context graph and a transform status are changed | AC-40: after the restore each item has the version, trust and lifecycle of "a"; the transform untrusted in "a" is untrusted | exact |
+| TC-WFM-065 | REQ-WFM-065 | Component | 2 | component test with the mocks of the neighbouring interfaces; the lists of versions of every item before and after a restore | AC-40: each list before is a prefix of the list after (no version deleted) | exact |
+| TC-WFM-066 | REQ-WFM-066 | Component | 2 | component test with the mocks of the neighbouring interfaces; a non-owner account and the owner account | AC-40: the non-owner is refused for take and restore and the state is unchanged; the owner succeeds | exact |
+| TC-WFM-069 | REQ-WFM-069 | Component | 2 | component test with the mocks of the neighbouring interfaces; the equivalence settings at version 1 (margin 0.10, repeats 3, rule threshold) and a change of the margin to 0.05 | AC-34: version 2 is created; a new result names 2; the earlier result still names 1 and is not decided again | exact |
+| TC-WFM-115 | REQ-WFM-115 | Component | 2 | the old runner and the converted skill extract_claims_rules on the 51 dev cases of EV-extraction, no model | AC-34: the 51 outputs are equal; a planted difference in one output is reported as a diff | exact |
+
+TC-WFM-110 to 114 (the five eval criteria of the converted skills) are statistical checks at stage 4 and are in the table "Statistical checks" of the root `test-spec.md`. The eval runs need the cases tagged `split:dev` (amendment A-120, proposed) and the v0.1.0 baselines recorded with 3 repeats (see `eval-spec.md`, section G-V2.CONVERT).
+
+## Scenarios (G-V2.CONVERT, for the owner's review, M39)
+
+### TC-WFM-057 – Old runner until proven
+- Verifies: REQ-WFM-057
+- Given: skills A (unconverted) and B (converted), each with its old file and pipeline and a converted record, the fake model server
+- When: a command of A and a command of B are run
+- Then: A runs its old skill file and pipeline (the converted record of A is not read); B runs the converted record
+- And: marking A converted without a passed check is refused
+
+### TC-WFM-058 – Same model calls
+- Verifies: REQ-WFM-058
+- Given: the fake model server with scripted replies and, for each of the 5 converted skills that call a model (research, plan_question, verify_claim, verify_computable, extract_claims), one input
+- When: the old runner and the converted skill run that input
+- Then: the lists of model calls (order, prompt text, options) are equal; with one option changed in the converted version (temperature 0 to 0.2) the check fails and names call 1 of that skill
+
+### TC-WFM-059 – Accept only on the criterion
+- Verifies: REQ-WFM-059
+- Given: three scripted run files for criterion lines of REQ-WFM-110: 17 of 20 cases right, 15 of 20 right in the first run and again in the re-run, and a run whose header names the suite plans
+- When: `eval_decide.py` decides each and the acceptance rule applies the result
+- Then: 17 of 20 (0.85, limit 0.82) is PASS and the skill is accepted; 15 of 20 (0.75) is FAIL after the re-run and the skill stays unconverted; the wrong-suite run is NOT DECIDED and the skill stays unconverted
+
+### TC-WFM-060 – Record of the check
+- Verifies: REQ-WFM-060
+- Given: the record of the 15 skills of v0.1.0: chat, check_speech, memory_write, summarize, research, plan_question, verify_claim, verify_computable, extract_claims, extract_claims_rules, review_abstract, review_full, review_keywords, review_section, review_summary
+- When: a script lists the record and a person reads it
+- Then: every skill names the form it runs on; the six skills with an equivalence requirement carry suite, run, pins and verdict (or the reason that it stays old); the nine others (chat, check_speech, memory_write, summarize and the five review skills) carry the reason "part of the user interface, stays on the old runner, revisited in a later goal" (owner, 2026-11-07)
+
+### TC-WFM-061 – Take a snapshot
+- Verifies: REQ-WFM-061
+- Given: a state of 2 skills, 2 workflow graphs, 1 context graph and 3 transforms (trusted and tested, trusted and draft, untrusted and retired), the pin MP-light, and the owner account
+- When: the owner takes the snapshot "before-rework"
+- Then: the snapshot holds 8 items, each with version; the 3 transforms also with trust and lifecycle; and the pin MP-light
+
+### TC-WFM-062 – List snapshots
+- Verifies: REQ-WFM-062
+- Given: two snapshots "a" and "b" taken at two times by the owner
+- When: the owner lists the snapshots
+- Then: two entries, each with name, time and author (3 fields)
+
+### TC-WFM-063 – Restore keeps the former state
+- Verifies: REQ-WFM-063
+- Given: state S1 stored as snapshot "a"; later state S2 differs from S1 in 4 items
+- When: the owner restores "a"
+- Then: before anything is replaced a snapshot of S2 exists; the state equals S1; restoring that new snapshot gives S2 again
+
+### TC-WFM-064 – Restore gives version and statuses
+- Verifies: REQ-WFM-064
+- Given: snapshot "a"; afterwards a skill gets a new version, a workflow graph and a context graph are edited, one transform is set trusted that was untrusted in "a", another is retired
+- When: the owner restores "a"
+- Then: each of the 4 changed items equals the stored one in version, trust and lifecycle; the transform untrusted in "a" is untrusted
+
+### TC-WFM-065 – Restore deletes nothing
+- Verifies: REQ-WFM-065
+- Given: the lists of versions of 8 items before a restore
+- When: the owner restores a snapshot that is older than the last 3 versions
+- Then: for every item the list before the restore is a prefix of the list after it
+
+### TC-WFM-066 – Snapshots only by the owner
+- Verifies: REQ-WFM-066
+- Given: the owner account and an account that is not the owner; snapshot "a" and a changed state
+- When: the other account asks to take a snapshot and to restore "a"; then the owner does both
+- Then: both requests of the other account are refused and the list of snapshots and the state are unchanged; the owner succeeds
+
+### TC-WFM-069 – Settings are versioned configuration
+- Verifies: REQ-WFM-069
+- Given: settings version 1 (margin 0.10, repeats 3, rule threshold) and one result recorded with it
+- When: the margin is changed to 0.05 and a second result is recorded
+- Then: settings version 2 exists; the new result names 2; the earlier result still names 1 and is not decided again
+
+### TC-WFM-115 – Same outputs of the rule-based skill
+- Verifies: REQ-WFM-115
+- Given: the old runner and the converted extract_claims_rules, the 51 dev cases of EV-extraction (no model); a copy of the converted skill with one output changed
+- When: both run all 51 cases
+- Then: the 51 outputs are equal; the changed copy is reported with a diff naming the case
+
+### TC-WFM-110 – Equivalence of research
+- Verifies: REQ-WFM-110
+- Given: suite EV-research dev (20 cases, tagged split:dev), pin MP-light (digest in eval-spec.md), 3 repeats folded by majority, the converted skill research, the v0.1.0 baseline recorded at 3 repeats (reference 0.92)
+- When: one run of the suite with `python tools/eval.py run research --pin MP-light --repeats 3`
+- Then: `eval_decide.py` on the criterion of REQ-WFM-110: PASS with at least 17 of 20 cases right (0.82); a FAIL is re-run once with fresh seeds and only the re-run counts
+- And: the secondary suite EV-research_compound is run and reported, not decided
+
+### TC-WFM-111 – Equivalence of plan_question
+- Verifies: REQ-WFM-111
+- Given: suite EV-plans dev (36 cases, split:dev), MP-light, 3 repeats, the converted skill plan_question, baseline of plan.free@1 (reference 0.64)
+- When: one run of the suite
+- Then: PASS with at least 20 of 36 cases right (0.54); a FAIL is re-run once
+
+### TC-WFM-112 – Equivalence of verify_claim
+- Verifies: REQ-WFM-112
+- Given: suite EV-verdicts dev (50 cases, split:dev), MP-light, 3 repeats, the converted skill verify_claim, baseline of verify.single@1 re-recorded at 3 repeats (reference 0.93 from 1 run)
+- When: one run of the suite
+- Then: PASS with at least 42 of 50 cases right (0.83); a FAIL is re-run once
+- And: EV-verdicts_injection and EV-verdicts_wikidata are run and reported, not decided
+
+### TC-WFM-113 – Equivalence of verify_computable
+- Verifies: REQ-WFM-113
+- Given: suite EV-computable dev (39 cases, split:dev), MP-light, 3 repeats, the converted skill verify_computable, baseline of verify.computable@2 re-recorded at 3 repeats (reference 0.92 from 1 run)
+- When: one run of the suite
+- Then: PASS with at least 32 of 39 cases right (0.82); a FAIL is re-run once
+
+### TC-WFM-114 – Equivalence of extract_claims
+- Verifies: REQ-WFM-114
+- Given: suite EV-extraction dev (51 cases, split:dev), MP-light, 3 repeats, the converted skill extract_claims, baseline of extract.llm@1 re-recorded at 3 repeats (reference 0.69 from 1 run)
+- When: one run of the suite
+- Then: PASS with at least 31 of 51 cases right (0.59); a FAIL is re-run once
+
 ## Assumptions (checked in validation)
 
 - ASM-N2-001: the model server is replaced by the fake model server of `pipeline.py` in all stage 1 to 3 tests; no test needs a GPU before stage 4.

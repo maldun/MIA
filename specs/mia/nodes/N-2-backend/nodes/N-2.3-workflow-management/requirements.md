@@ -509,7 +509,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 | 1 | SK | Skill record: the skill as one versioned record (FR-36) | REQ-WFM-040, REQ-WFM-041, REQ-WFM-042 |
 | 2 | GM | Graph model: data, transform and master nodes and their rules (FR-37) | REQ-WFM-043, REQ-WFM-044, REQ-WFM-045, REQ-WFM-046, REQ-WFM-047, REQ-WFM-048, REQ-WFM-049 |
 | 3 | TB | Toolbox and trust: transforms by ID, status, import and export (FR-38) | REQ-WFM-050, REQ-WFM-051, REQ-WFM-052, REQ-WFM-053, REQ-WFM-054, REQ-WFM-055, REQ-WFM-056, REQ-WFM-067 |
-| 4 | CV | Conversion: moving today's skills onto the records, one by one (FR-45) | REQ-WFM-057, REQ-WFM-058, REQ-WFM-059, REQ-WFM-060, REQ-WFM-068, REQ-WFM-069, REQ-WFM-070 |
+| 4 | CV | Conversion: moving today's skills onto the records, one by one (FR-45) | REQ-WFM-057, REQ-WFM-058, REQ-WFM-059, REQ-WFM-060, REQ-WFM-068, REQ-WFM-069, REQ-WFM-070, REQ-WFM-110, REQ-WFM-111, REQ-WFM-112, REQ-WFM-113, REQ-WFM-114, REQ-WFM-115 |
 | 5 | SN | Snapshots: the skill set kept and restored (FR-47) | REQ-WFM-061, REQ-WFM-062, REQ-WFM-063, REQ-WFM-064, REQ-WFM-065, REQ-WFM-066 |
 
 ### REQ-WFM-040 – Skill record
@@ -749,7 +749,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 ### REQ-WFM-058 – Same model calls
 - Level: low   Subject: TaskRuntime
 - Text: When a converted skill runs on scripted model replies, the Workflow management shall make the same model calls as the old runner, in the same order with the same prompts and options.
-- Rationale: refines FR-45; a deterministic first check before the eval run, so a changed prompt or step order is caught without a model Suggestion of the agent, not in the HLS text; the owner decides at review.
+- Rationale: refines FR-45; a deterministic first check before the eval run, so a changed prompt or step order is caught without a model. Suggestion of the agent, not in the HLS text; the owner decides at review.
 - Parent: FR-45
 - Group: CV
 - Priority: Must
@@ -761,22 +761,21 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 
 ### REQ-WFM-059 – Same outcomes on the suite
 - Level: low   Subject: TaskRuntime
-- Text: The Workflow management shall accept the converted version of a skill only if it reproduces the outcomes of the old version on the dev split of its suite with the same pin.
-- Rationale: refines FR-45 and AC-34; starting values by educated guess (owner 2026-11-07: start with suggestions, improve by running and re-evaluating); the values are configuration (REQ-WFM-069), a run uses one fixed version of them
+- Text: The Workflow management shall mark the converted version of a skill as accepted only if the criterion of that skill's equivalence requirement passed on the dev split with the pin MP-light.
+- Rationale: refines FR-45 and AC-34; the numbers sit in the per-skill requirements REQ-WFM-110 to 115 (split per skill on the owner's decision of 2026-11-07, because one criterion line holds one suite); starting values by educated guess (owner 2026-11-07), configuration (REQ-WFM-069), a run uses one fixed version of them
 - Parent: FR-45
 - Group: CV
 - Priority: Must
-- Verification method: Measurement
-- Acceptance criterion: AC-34: per skill, the criterion of the Eval criterion line passes on the dev split; see the open numbers in the plan notes
-- Eval criterion: suite=<suite of the skill, EV-…>; select=all; metric=pass (the suite's own); min=baseline-0.10 (per skill, from its v0.1.0 baseline); n=dev cases of the suite; repeats=3, fold all; pin=MP-light; rule=threshold; alpha=0.05; false_alarm=0.0045 (n=20; computed per suite size); split=dev; settings version=1 (REQ-WFM-069)
+- Verification method: Test
+- Acceptance criterion: AC-34: on scripted run files, a skill whose criterion passes is accepted; a skill whose criterion fails or is not decided stays unconverted (exact)
 - Verified by: TC-WFM-059
 - Status: Draft
-- History: G-V2 Plan step 1 (2026-11-07), new
+- History: G-V2 Plan step 1 (2026-11-07), new; Plan step 3 (2026-11-07): the Eval criterion line did not parse (agent_check A2), so the criteria moved to REQ-WFM-110 to 114 and the text became the acceptance rule (owner: split per skill); approved text of the review of 2026-11-07 superseded, back to review
 
 ### REQ-WFM-060 – Record of the check
 - Level: low   Subject: TaskRuntime
 - Text: The Workflow management shall record for each skill the suite, run, pins and verdict of its equivalence check, or the reason it is not converted.
-- Rationale: refines FR-45 ('or stays on the old runner for a named reason', exit criterion of G-V2) Suggestion of the agent, not in the HLS text; the owner decides at review.
+- Rationale: refines FR-45 ('or stays on the old runner for a named reason', exit criterion of G-V2). Suggestion of the agent, not in the HLS text; the owner decides at review.
 - Parent: FR-45
 - Group: CV
 - Priority: Must
@@ -854,7 +853,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 ### REQ-WFM-066 – Snapshots only by the owner
 - Level: low   Subject: TaskRuntime
 - Text: If an account other than the owner asks to take or restore a snapshot, then the Workflow management shall refuse the request.
-- Rationale: refines FR-47 ('let the owner'); consistent with owner-only editing of skills (interview 11) Suggestion of the agent, not in the HLS text; the owner decides at review.
+- Rationale: refines FR-47 ('let the owner'); consistent with owner-only editing of skills (interview 11). Suggestion of the agent, not in the HLS text; the owner decides at review.
 - Parent: FR-47
 - Group: SN
 - Priority: Must
@@ -915,3 +914,86 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verified by: TC-WFM-070
 - Status: Draft
 - History: G-V2 Plan step 1 (2026-11-07), new, owner answer of 2026-11-07
+
+### REQ-WFM-110 – Same outcomes: research
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall run the converted skill research so that it behaves as expected in at least 82 % of the dev cases of EV-research.
+- Rationale: refines FR-45 and AC-34; v0.1.0 baseline 0.92 (research-escalate.md, 20 questions, 3 repeats) minus the margin 0.10, a starting guess under D-187 (REQ-WFM-069); the secondary suite EV-research_compound is run and reported, not decided
+- Parent: FR-45
+- Group: CV
+- Priority: Must
+- Verification method: Evaluation
+- Acceptance criterion: AC-34: the share of right cases of the converted skill on the dev split of EV-research is at least 0.82 (3 repeats folded by majority, MP-light), decided by the rule, not by eye
+- Eval criterion: suite=EV-research; select=; metric=right; min=0.82; n=20; repeats=3; pin=MP-light; rule=threshold; alpha=0.05; false_alarm=0.0050; split=dev
+- Verified by: TC-WFM-110, EV-research
+- Status: Draft
+- History: G-V2 Plan step 3 (2026-11-07), new, split from REQ-WFM-059 (owner)
+
+### REQ-WFM-111 – Same outcomes: plan_question
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall run the converted skill plan_question so that it behaves as expected in at least 54 % of the dev cases of EV-plans.
+- Rationale: refines FR-45 and AC-34; v0.1.0 baseline 0.64 (research-planners.md, 36 plans, 3 repeats, plan.free@1) minus the margin 0.10, a starting guess under D-187 (REQ-WFM-069); the baseline is low on purpose: the skill runs plan.free@1 today, the checked planner is a later change
+- Parent: FR-45
+- Group: CV
+- Priority: Must
+- Verification method: Evaluation
+- Acceptance criterion: AC-34: the share of right cases of the converted skill on the dev split of EV-plans is at least 0.54 (3 repeats folded by majority, MP-light), decided by the rule, not by eye
+- Eval criterion: suite=EV-plans; select=; metric=right; min=0.54; n=36; repeats=3; pin=MP-light; rule=threshold; alpha=0.05; false_alarm=0.0122; split=dev
+- Verified by: TC-WFM-111, EV-plans
+- Status: Draft
+- History: G-V2 Plan step 3 (2026-11-07), new, split from REQ-WFM-059 (owner)
+
+### REQ-WFM-112 – Same outcomes: verify_claim
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall run the converted skill verify_claim so that it behaves as expected in at least 83 % of the dev cases of EV-verdicts.
+- Rationale: refines FR-45 and AC-34; v0.1.0 baseline 0.93 (verdicts-single.md, 50 claims, 1 run, verify.single@1) minus the margin 0.10, a starting guess under D-187 (REQ-WFM-069); the baseline has one repeat; it is re-recorded at 3 repeats before any converted run; the suites EV-verdicts_injection and EV-verdicts_wikidata are run and reported, not decided
+- Parent: FR-45
+- Group: CV
+- Priority: Must
+- Verification method: Evaluation
+- Acceptance criterion: AC-34: the share of right cases of the converted skill on the dev split of EV-verdicts is at least 0.83 (3 repeats folded by majority, MP-light), decided by the rule, not by eye
+- Eval criterion: suite=EV-verdicts; select=; metric=right; min=0.83; n=50; repeats=3; pin=MP-light; rule=threshold; alpha=0.05; false_alarm=0.0001; split=dev
+- Verified by: TC-WFM-112, EV-verdicts
+- Status: Draft
+- History: G-V2 Plan step 3 (2026-11-07), new, split from REQ-WFM-059 (owner)
+
+### REQ-WFM-113 – Same outcomes: verify_computable
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall run the converted skill verify_computable so that it behaves as expected in at least 82 % of the dev cases of EV-computable.
+- Rationale: refines FR-45 and AC-34; v0.1.0 baseline 0.92 (computable-gemma4-12b.md, 39 cases, 1 run, verify.computable@2) minus the margin 0.10, a starting guess under D-187 (REQ-WFM-069); the baseline has one repeat; it is re-recorded at 3 repeats before any converted run
+- Parent: FR-45
+- Group: CV
+- Priority: Must
+- Verification method: Evaluation
+- Acceptance criterion: AC-34: the share of right cases of the converted skill on the dev split of EV-computable is at least 0.82 (3 repeats folded by majority, MP-light), decided by the rule, not by eye
+- Eval criterion: suite=EV-computable; select=; metric=right; min=0.82; n=39; repeats=3; pin=MP-light; rule=threshold; alpha=0.05; false_alarm=0.0001; split=dev
+- Verified by: TC-WFM-113, EV-computable
+- Status: Draft
+- History: G-V2 Plan step 3 (2026-11-07), new, split from REQ-WFM-059 (owner)
+
+### REQ-WFM-114 – Same outcomes: extract_claims
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall run the converted skill extract_claims so that it behaves as expected in at least 59 % of the dev cases of EV-extraction.
+- Rationale: refines FR-45 and AC-34; v0.1.0 baseline 0.69 (extraction-llm-light.md, 51 texts, 1 run, extract.llm@1) minus the margin 0.10, a starting guess under D-187 (REQ-WFM-069); the baseline has one repeat; it is re-recorded at 3 repeats before any converted run
+- Parent: FR-45
+- Group: CV
+- Priority: Must
+- Verification method: Evaluation
+- Acceptance criterion: AC-34: the share of right cases of the converted skill on the dev split of EV-extraction is at least 0.59 (3 repeats folded by majority, MP-light), decided by the rule, not by eye
+- Eval criterion: suite=EV-extraction; select=; metric=right; min=0.59; n=51; repeats=3; pin=MP-light; rule=threshold; alpha=0.05; false_alarm=0.0064; split=dev
+- Verified by: TC-WFM-114, EV-extraction
+- Status: Draft
+- History: G-V2 Plan step 3 (2026-11-07), new, split from REQ-WFM-059 (owner)
+
+### REQ-WFM-115 – Same outputs: extract_claims_rules
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall run the converted skill extract_claims_rules so that it gives the same output as the old runner on every dev case of EV-extraction.
+- Rationale: refines FR-45 and AC-34; the skill is rule-based, no model: the same input gives the same output, so equality is checked instead of a rate (Suggestion of the agent, the owner decides at review)
+- Parent: FR-45
+- Group: CV
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-34: the 51 outputs of the converted and the old run on the dev cases of EV-extraction are equal (exact, a diff is shown)
+- Verified by: TC-WFM-115
+- Status: Draft
+- History: G-V2 Plan step 3 (2026-11-07), new, split from REQ-WFM-059 (owner)
