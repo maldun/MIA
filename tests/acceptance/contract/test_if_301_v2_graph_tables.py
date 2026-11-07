@@ -1,8 +1,6 @@
 """IF-301 v2 graph tables (record tables, types, record checks, conversion; A-90): the contract suite runs against the mock (stage 1, green) and the
-real Graph tables (stage 2, skipped with the reason below until N-3.2 is integrated). The v1 cases stay in test_if_301_graph_tables.py (unchanged).
+real Graph tables (stage 2; no skip since A-91, N-3.2 integrated). The v1 cases stay in test_if_301_graph_tables.py (unchanged).
 Protected after the Plan gate. Run with: python tests/acceptance/contract/test_if_301_v2_graph_tables.py
-The real side runs on request while N-3.2 is built:  IF301_V2_REAL=1 python tests/acceptance/contract/test_if_301_v2_graph_tables.py -k _real
-Removing the skip (the environment switch) is part of the integration step of N-3.2.
 """
 import copy
 import os
@@ -24,12 +22,10 @@ NODE_RECORD_TABLES = {t: {"versioned": True, "deletable": False} for t in ("grap
 
 
 def subject(kind):
-    """The provider of this suite: the v2 mock, or the real Graph tables once N-3.2 is integrated."""
+    """The provider of this suite: the v2 mock, or the real Graph tables (A-91: no skip, N-3.2 is integrated)."""
     if kind == "mock":
         from if_301_graph_tables_v2 import GraphTablesV2Mock
         return GraphTablesV2Mock()
-    if os.environ.get("IF301_V2_REAL") != "1":
-        raise unittest.SkipTest("N-3.2 not integrated yet")
     return contract_module._real_graph_tables()
 
 
