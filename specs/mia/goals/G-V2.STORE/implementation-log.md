@@ -38,8 +38,8 @@ Goal: G-V2.STORE   Line of work: goal/v2.store   Supervision: supervised (accept
 - Found in: Verify of G-V2.STORE (F-01: an extra field in a node broke `to_object` with TypeError)
 - Decision: the three node schemas are closed (`additionalProperties` false); `_broken_path` orders by path text and names an extra field by its own key; task T-07
 - Kind: amendment
-- Status: approved and installed 2026-11-08, implemented in T-07
-- Approved by: Stefan Reiterer
+- Status: installed by the owner 2026-11-08 after a look-only review, implemented in T-07; the review of REQ-GTB-022, TC-GTB-023 and TR-GTB-001 is still open (Draft)
+- Approved by: open (the owner delegated the F-01 choice to the reviewer on 2026-11-07 and may overrule it)
 
 ## Stop conditions hit
 | Date | Task | Condition | Escalated to | Outcome |
