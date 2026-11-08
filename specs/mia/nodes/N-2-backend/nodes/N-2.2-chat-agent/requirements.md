@@ -264,9 +264,9 @@ The persona's side: the shared conversation, the answer queue, persona, mood, me
 - Verification method: Test, Demonstration
 - Acceptance criterion: AC-1: speak again of a stored answer of three sentences, and of a stored question of a skill, hands exactly their spoken sentences to the voice route; on the host the answer is heard
 - Verified by: TC-CHA-030, TC-CHA-031, TC-CHA-035
-- Status: Approved
+- Status: Verified
 - Group: SA
-- History: proposed in A-132 (Draft); approved by the owner 2026-11-08 (D-285)
+- History: proposed in A-132 (Draft); approved by the owner 2026-11-08 (D-285); verified 2026-11-08 (A-132-verification-report.md, approved by the owner)
 
 ### REQ-CHA-031 – Speak again keeps the order
 - Level: low   Subject: ConversationCore
@@ -277,9 +277,9 @@ The persona's side: the shared conversation, the answer queue, persona, mood, me
 - Verification method: Test
 - Acceptance criterion: AC-1: the sentences of a stored answer reach the voice route in the order of the text (exact)
 - Verified by: TC-CHA-030, TC-CHA-036
-- Status: Approved
+- Status: Verified
 - Group: SA
-- History: proposed in A-132 (Draft); approved by the owner 2026-11-08 (D-285)
+- History: proposed in A-132 (Draft); approved by the owner 2026-11-08 (D-285); verified 2026-11-08 (A-132-verification-report.md, approved by the owner)
 
 ### REQ-CHA-032 – Stop ends speak again
 - Level: low   Subject: ConversationCore
@@ -290,9 +290,9 @@ The persona's side: the shared conversation, the answer queue, persona, mood, me
 - Verification method: Test, Demonstration
 - Acceptance criterion: AC-1: after a stop request no further sentence of the answer spoken again is handed to the voice route, and the playback in progress is cancelled
 - Verified by: TC-CHA-032, TC-CHA-036, TC-CHA-035
-- Status: Approved
+- Status: Verified
 - Group: SA
-- History: proposed in A-132 (Draft); approved by the owner 2026-11-08 (D-285)
+- History: proposed in A-132 (Draft); approved by the owner 2026-11-08 (D-285); verified 2026-11-08 (A-132-verification-report.md, approved by the owner)
 
 ### REQ-CHA-033 – Speak again without a voice route
 - Level: low   Subject: ConversationCore
@@ -303,9 +303,9 @@ The persona's side: the shared conversation, the answer queue, persona, mood, me
 - Verification method: Test
 - Acceptance criterion: AC-1: with a failing voice route the request returns the sentence count, the next message is answered, one error line of the Chat agent is logged (a failing route may log its own line too: the sound server streamer does, A-135) and no text and no event but audio_chunk and chat_status is added to the page (A-133: the status is busy while the repeat runs)
 - Verified by: TC-CHA-033
-- Status: Approved
+- Status: Verified
 - Group: SA
-- History: proposed in A-132 (Draft); approved by the owner 2026-11-08 (D-285); AC-1 clarified in A-133 (the status events of REQ-CHA-035 are not an event added by the failure), confirmed by the owner 2026-11-08 (D-284)
+- History: proposed in A-132 (Draft); approved by the owner 2026-11-08 (D-285); AC-1 clarified in A-133 (the status events of REQ-CHA-035 are not an event added by the failure), confirmed by the owner 2026-11-08 (D-284); verified 2026-11-08 (A-132-verification-report.md, approved by the owner)
 
 ### REQ-CHA-034 – One speak again at a time
 - Level: low   Subject: ConversationCore
@@ -316,9 +316,9 @@ The persona's side: the shared conversation, the answer queue, persona, mood, me
 - Verification method: Test
 - Acceptance criterion: AC-1: two speak-again requests in a row, and a speak-again while a live answer is spoken, reach the voice route one after the other, never overlapping (exact)
 - Verified by: TC-CHA-034, TC-CHA-036
-- Status: Approved
+- Status: Verified
 - Group: SA
-- History: proposed in A-132 (Draft); approved by the owner 2026-11-08 (D-285)
+- History: proposed in A-132 (Draft); approved by the owner 2026-11-08 (D-285); verified 2026-11-08 (A-132-verification-report.md, approved by the owner)
 
 ### REQ-CHA-035 – Stop is offered while a message is spoken again
 - Level: low   Subject: ConversationCore
@@ -329,9 +329,9 @@ The persona's side: the shared conversation, the answer queue, persona, mood, me
 - Verification method: Test, Demonstration
 - Acceptance criterion: AC-1: with a fake voice route that blocks, after a speak-again request the chat_status event with busy true and activity speaking was published and the status says so, also for a second request that waits (exact); on the host the stop button is shown during the repeat
 - Verified by: TC-CHA-037, TC-CHA-035
-- Status: Approved
+- Status: Verified
 - Group: SA
-- History: proposed in A-133; approved by the owner 2026-11-08 (D-283)
+- History: proposed in A-133; approved by the owner 2026-11-08 (D-283); verified 2026-11-08 (A-132-verification-report.md, approved by the owner)
 
 ### REQ-CHA-036 – The status returns when the speak again has ended
 - Level: low   Subject: ConversationCore
@@ -342,9 +342,9 @@ The persona's side: the shared conversation, the answer queue, persona, mood, me
 - Verification method: Test
 - Acceptance criterion: AC-1: after the playback ended by itself, and after a stop, the last chat_status event has busy false and an activity other than speaking, and the status says so (exact)
 - Verified by: TC-CHA-037
-- Status: Approved
+- Status: Verified
 - Group: SA
-- History: proposed in A-133; approved by the owner 2026-11-08 (D-283)
+- History: proposed in A-133; approved by the owner 2026-11-08 (D-283); verified 2026-11-08 (A-132-verification-report.md, approved by the owner)
 
 ## Interface requirements
 

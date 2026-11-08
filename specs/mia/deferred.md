@@ -378,3 +378,17 @@ Proposed on 2026-10-29 after the usability work of N-2.3 T-09 to T-11 and N-1.1 
 - Target check: specified only
 - Decision: confirmed by Stefan Reiterer, 2026-11-07 (D-278)
 - Status: open
+
+## TD-62 – The unit test without Tailscale runs the real `tailscale up` on a host that has it
+- Kind: defer
+- Requirement: NFR-6, CON-5 (test of `ui/tools/remote.sh`, `tests/test_tailscale.py`)
+- Interim criterion: the other tests of `tests/test_tailscale.py` pass with a fake `tailscale`; on a host without Tailscale the test `ScriptTest.test_without_tailscale_it_says_how_to_install` passes; the stage `unit` is red on this host for that one test (the merge gate of TD-11 ran locally with this deviation)
+- Target: the lookup of `tailscale` in that test ignores the host's `PATH`, so the test gives the same result on every host; the stage `unit` is green here
+- Reason: `/usr/bin/tailscale` is installed on the workstation, so the test runs the real `tailscale up` and times out after 30 s; neither `remote.sh` nor the test changed in TD-11; the owner defers the fix to a later goal (2026-11-08)
+- Effort: about an hour (proposed), test first
+- Risk of the gap: the stage `unit` stays red on this host and hides a real failure; mitigation: the single red test is known by name
+- Owner: Stefan Reiterer
+- Trigger: the Plan of the next iteration, or 2026-12-31, whichever first
+- Target check: `tests/test_tailscale.py::ScriptTest::test_without_tailscale_it_says_how_to_install` (exists, red on a host with Tailscale)
+- Decision: D-289, 2026-11-08, Stefan Reiterer
+- Status: open
