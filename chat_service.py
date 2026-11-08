@@ -129,8 +129,9 @@ class ChatService:
                  rate_limit=(10, 60), spawn=None, clock=time.monotonic, votes=None, wall_clock=time.time,
                  behaviours=None, reputable=0.6, repair=None, remember=None, review_timeout=1800,
                  tasks=None, skill_options=None, prepare_task=None, argument_commands=None, files=None, unavailable=(), react=None, speak=None,
-                 digest=None, declared_phases=None):
+                 digest=None, declared_phases=None, recorder=None):
         self._emit = emit
+        self._recorder = recorder                                          # G-V3.PANEL (REQ-WFM-130..138): the SkillRunRecorder; a SkillRunObserver made in _do_chat reports every task run to it (stub of Plan step 4: not used yet)
         self._digest = digest                                              # G-V3.CHAT (A-142): the SkillDigestStep that words the status, summary, failure and stop messages of a skill run
         self._declared_phases = declared_phases                            # run -> the phases the manifest of its skill declares worth telling (REQ-WFM-039)
         self._speak = speak                                                # (sentence, should_stop) -> None: the voice route of live answers (sound server); None = speak again stays silent (REQ-CHA-030)
