@@ -116,7 +116,7 @@ Top-level items: FR-34, FR-35, FR-46 (all in, as one revised unit); FR-3 only as
 | FR-45 | out | G-V2 |
 | FR-46 | in | the Skill run view (PANEL) and the spoken-only chat (CHAT); wording changed by the owner 2026-11-07, one view for the running skill (proposal A-131) |
 | FR-47 | out | G-V2 |
-| NFR-1 | partly | the Skill run view and the new layout meet the same accessibility and device range (320 to 2560 px, 44 px targets, themes) |
+| NFR-1 | partly | the Skill run view and the new layout meet the same accessibility and device range (320 to 2560 px, themes); 44 px targets on the phone layout only, the compact strip keeps smaller buttons on a wide screen (owner 2026-11-08, REQ-CLV-042) |
 | NFR-2 | out | not changed by this goal; the digest step, if in scope, keeps its input inside half the context (Plan) |
 | NFR-3 | partly | the full result quotes web and paper text: shown as text in the Skill run view and the chat, it acts on nothing (TB-result) |
 | NFR-4 | out | not changed by this goal; the existing checks keep running |
