@@ -1,6 +1,6 @@
 # Plan: G-V3.PANEL (the Skill run view)
 
-**Goal:** specs/mia/goals/G-V3.PANEL/goal.md   **Requirements:** REQ-FE-032 (N-1), REQ-CLV-024 and 030..047 (N-1.1), REQ-WFM-031, 036 (the link and the failure message belong to G-V3.CHAT), 038, 039 and 130..138 (N-2.3), REQ-RTB-007 (N-3.3), the contracts IF-101 v16, IF-302 v8, IF-102 v4 (A-140, A-141)   **Status:** Draft (for the owner's review)
+**Goal:** specs/mia/goals/G-V3.PANEL/goal.md   **Requirements:** REQ-FE-032 (N-1), REQ-CLV-024 and 030..047 (N-1.1), REQ-WFM-031, 036 (the link and the failure message belong to G-V3.CHAT), 038, 039 and 130..138 (N-2.3), REQ-RTB-007 (N-3.3), the contracts IF-101 v16, IF-302 v8, IF-102 v4 (A-140, A-141)   **Status:** Approved (owner maldun, 2026-11-08, task by task in three batches, D-307)
 
 Line of work `goal/v3.panel`; supervised; no model step, no prompt, no eval suite. The red tests were written first in a session of their own (Step 4, commits `2f8867f`, `72bce48`, `e705709`) and installed by the owner; the implementing sessions never edit `tests/acceptance/`, `tests/helpers/`, `contracts/`, `eval/` or `test-requirements.md` (a change there is a plan amendment).
 
@@ -117,10 +117,9 @@ The stubs carry the interface the installed tests expect; the tasks replace the 
 - Done when: no card in the chat, all remaining tests green except the ones that wait for G-V3.CHAT, documentation updated
 
 ## Split check
-10 tasks, above the usual 8. The cut would run between T-01 to T-05 (the run records and the wire, no browser) and T-06 to T-10 (the page), which can run in parallel after the red tests. Proposal: keep one plan and one line of work (the page needs the wire from T-05 for its browser checks), and let the owner decide; each half already ends with checks of its own.
+10 tasks, above the usual 8. The cut would run between T-01 to T-05 (the run records and the wire, no browser) and T-06 to T-10 (the page), which can run in parallel after the red tests. **Decided by the owner (2026-11-08, D-307): keep one plan and one line of work**; the page needs the wire from T-05 for its browser checks, and each half already ends with checks of its own.
 
 ## Open before Implement starts
-1. `elements` in the run record (IF-302 v8, IF-101 run record): contract amendment or requirement change.
-2. The dark theme of TR-PANEL-001 in the browser driver.
-3. TC-WFM-136 and TC-CLV-038 (written after T-03).
-4. `skill_turns` suites need `"starter": true` to pass `test_harness.ShippedSuites` (CHAT, same decision).
+1. TC-WFM-136 and TC-CLV-038 are written in a session of their own after the T-03 spike (the events of a skill today; how a test starts the real backend twice).
+2. TR-PANEL-001 (the harness versions were added in Step 4) is to be marked again in `req_review`.
+(Closed on 2026-11-08: `elements` in the run record by A-143, D-306; the dark theme in the browser driver; the `starter` flag of the `skill_turns` suites.)
