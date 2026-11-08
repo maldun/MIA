@@ -102,6 +102,23 @@ Mutations in a scratch copy of the tree (`git archive` to the job's tmp folder; 
 9. TD-61 (not in scope): the sound server's handler ends only after the client closes; `SpeechStreamer.wait` always closes, so today's route is not hit. Per-sentence connections lose the rendering ahead of the engine (D-280): please listen to a long answer spoken again on the host (not in the hand check).
 10. Overlap with `goal/v3` (A-132 section 9): I did not diff that branch; it may change `chat_service.py`, `sound.js` and `chat.js` too.
 
+## 7a. Decisions of the owner (2026-11-08, answered in the Verify session; the Verify session decided none of them)
+
+Questions 1 to 8 of section 7 are answered; 9 and 10 are tasks. The verdict does not change until the fixes below are verified.
+
+| Question | Decision | Steps | Who |
+|---|---|---|---|
+| F1 (4) | The route raises | failing test of the real `speak_answer` on a closed port (raise; `_play_again` logs once and drops the rest); make `speak_answer` / `SpeechStreamer` raise on a failed connection; re-run TC-CHA-033 and the new test | Phase 3 |
+| F2 (5) | Status is busy and speaking while any repeat runs or waits, also over a running answer; the former activity returns when the last one ends | amendment of REQ-CHA-035/036; failing overlap tests for both orders (repeat then answer, answer then repeat); fix `chat_service.py`; mutants M12 and M13 must then turn red | owner approves the amendment, then Phase 3 |
+| F7 (8) | Change the `Parent` of the eight requirements | amendment: parent one level up for REQ-CHA-030..036 and REQ-VPB-006, the sibling stays as a `dependency`; re-run `check_sysml.sh` and `decomp_check.py` (expected 65 to 57 errors); update trace links | owner approves, then Phase 2 |
+| F3 (6) | `stop()` returns True only when an answer was stopped; it still ends a repeat | test that pins the value; change the return to `running`; contracts stay unchanged | Phase 3 |
+| TC-CHA-035 (1) | Repeat the hand check after the F1 and F2 fixes | record per step 1 to 4 the result, the browser, the audio device and the commit; the evidence stays incomplete until then | owner |
+| Test place (2) | New tests stay in `tests/` | none; the F1 to F3 fixes can edit them without an amendment | none |
+| 3 s claim (3) | Accept the plausibility warning | add REQ-VPB-006 to `plausibility.yaml` as accepted risk (maldun), like the other 40 | owner approves, then Phase 2 |
+| F4 limits (7) | Accept as is | known limitation, to revisit with TD-61 | none |
+
+Still open as tasks (not decisions): listen to a long answer spoken again on the host (together with the hand-check repeat; question 9), and diff `goal/v3` against the TD-11 files before the merge (question 10).
+
 ## 8. Next step
 
-Owner decides F1, F2, F7 (and the questions above). Fixes come as Phase 3 tasks with a failing test first (F1: real `speak_answer` on a closed port; F2: overlap status; F3: `stop()` value), or as amendments. After the fixes the automated checks run again in full; the TD-11 change set is already on master, so Phase 5 is the tag, the release-notes line and the status update to Verified once this report is approved.
+The owner has decided (section 7a). Fixes come as Phase 3 tasks with a failing test first (F1: real `speak_answer` on a closed port; F2: overlap status; F3: `stop()` value), or as amendments. After the fixes the automated checks run again in full; the TD-11 change set is already on master, so Phase 5 is the tag, the release-notes line and the status update to Verified once this report is approved.
