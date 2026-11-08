@@ -797,7 +797,7 @@ package MIA_AgentView {
         doc /* FB-01, G-V3.CHAT: digest of one piece of a long skill result, in order (map), then the end summary, the failure message
                and the status message per declared phase, all on MP-light and in persona (owner 2026-11-08). The summary is informative;
                the full result is the reference. */
-        @ModelStep { schema = "none: free text"; tools = ""; tokenBudget = 4096; secondBudget = 0.0; pin = "MP-light"; criterion = "REQ-CHA-049, REQ-CHA-053, REQ-CHA-054"; }
+        @ModelStep { schema = "none: free text"; tools = ""; tokenBudget = 4096; secondBudget = 20.0; pin = "MP-light"; criterion = "REQ-CHA-049, REQ-CHA-053, REQ-CHA-054"; }
         @TrustBoundary { boundary = "TB-result"; threats = "THR-012"; }
         @ChangeSource { feedbackId = "FB-01"; iteration = 1; }
         port resultIn : ~SkillResultPort;
@@ -2826,12 +2826,12 @@ package MIA_NodeRequirements {
         doc /* While a message is being spoken, the Chat agent shall have a spoken-again message wait until that speech has ended. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
-    requirement def <'REQ-CHA-035'> StopIsOfferedWhileSpokenAgain_Cha035 {
+    requirement def <'REQ-CHA-035'> StopIsOfferedWhileAMessageIsSpokenAgain_Cha035 {
         subject s : ConversationCore;
         doc /* While a message is being spoken again or waits to be spoken again, the Chat agent shall report the status busy with the activity speaking. */
         @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
     }
-    requirement def <'REQ-CHA-036'> StatusReturnsAfterSpeakAgain_Cha036 {
+    requirement def <'REQ-CHA-036'> TheStatusReturnsWhenTheSpeakAgainHasEnded_Cha036 {
         subject s : ConversationCore;
         doc /* When the last message that is spoken again has been spoken or stopped, the Chat agent shall report the status as it was before, not busy and without the activity speaking. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
@@ -4723,8 +4723,8 @@ package MIA_NodeRequirements {
     requirement r_req_cha_032 : StopEndsSpeakAgain_Cha032;
     requirement r_req_cha_033 : SpeakAgainWithoutAVoiceRoute_Cha033;
     requirement r_req_cha_034 : OneSpeakAgainAtATime_Cha034;
-    requirement r_req_cha_035 : StopIsOfferedWhileSpokenAgain_Cha035;
-    requirement r_req_cha_036 : StatusReturnsAfterSpeakAgain_Cha036;
+    requirement r_req_cha_035 : StopIsOfferedWhileAMessageIsSpokenAgain_Cha035;
+    requirement r_req_cha_036 : TheStatusReturnsWhenTheSpeakAgainHasEnded_Cha036;
     requirement r_req_cha_040 : QuestionsOfASkillInTheChat_Cha040;
     requirement r_req_cha_041 : StatusMessagePerDeclaredPhase_Cha041;
     requirement r_req_cha_042 : NoStatusForOtherPhases_Cha042;
@@ -6115,7 +6115,6 @@ package MIA_NodeRequirements {
     dependency from r_req_vpb_003 to r_req_fe_013;
     dependency from r_req_vpb_004 to r_req_fe_026;
     dependency from r_req_vpb_005 to r_req_fe_030;
-    dependency from r_req_vpb_006 to r_req_vpb_002;
     dependency from r_req_vpb_006 to r_req_fe_012;
     dependency from r_req_fe_001 to fr1;
     dependency from r_req_fe_002 to fr1;
@@ -6195,19 +6194,12 @@ package MIA_NodeRequirements {
     dependency from r_req_cha_018 to r_req_be_031;
     dependency from r_req_cha_019 to r_req_be_032;
     dependency from r_req_cha_020 to r_req_be_074;
-    dependency from r_req_cha_030 to r_req_cha_006;
     dependency from r_req_cha_030 to r_req_be_006;
-    dependency from r_req_cha_031 to r_req_cha_006;
     dependency from r_req_cha_031 to r_req_be_006;
-    dependency from r_req_cha_032 to r_req_cha_004;
     dependency from r_req_cha_032 to r_req_be_006;
-    dependency from r_req_cha_033 to r_req_cha_006;
     dependency from r_req_cha_033 to r_req_be_006;
-    dependency from r_req_cha_034 to r_req_cha_006;
     dependency from r_req_cha_034 to r_req_be_006;
-    dependency from r_req_cha_035 to r_req_cha_032;
     dependency from r_req_cha_035 to r_req_be_006;
-    dependency from r_req_cha_036 to r_req_cha_035;
     dependency from r_req_cha_036 to r_req_be_006;
     dependency from r_req_cha_040 to r_req_be_078;
     dependency from r_req_cha_041 to r_req_be_078;
