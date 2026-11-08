@@ -656,3 +656,7 @@ The first version was silent until the end and could take 20 minutes or more: th
 | TR-CHAT-001 | test requirement | d0224442df99 | maldun | 2026-11-08 | approved | G-V3.CHAT checks round 6; TR-CHAT-001: pin options, repeats as stability, VAL-013 |
 | TR-CHAT-002 | test requirement | 1874abc3b280 | maldun | 2026-11-08 | approved | G-V3.CHAT checks round 6; TR-CHAT-001: pin options, repeats as stability, VAL-013 |
 | TR-CHAT-003 | test requirement | e5b5016ba406 | maldun | 2026-11-08 | approved | G-V3.CHAT checks round 6; TR-CHAT-001: pin options, repeats as stability, VAL-013 |
+| TR-CHAT-004 | test requirement | 0935bbdb2bdd | maldun | 2026-11-08 | approved | G-V3.CHAT checks round 7 |
+| TR-CHAT-005 | test requirement | 8ae6367ba632 | maldun | 2026-11-08 | approved | G-V3.CHAT checks round 7 |
+| TR-CHAT-006 | test requirement | 212e32c45209 | maldun | 2026-11-08 | approved | G-V3.CHAT checks round 7 |
+| TR-CHAT-007 | test requirement | 9954dee32895 | maldun | 2026-11-08 | approved | G-V3.CHAT checks round 7 |
