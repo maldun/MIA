@@ -1,6 +1,6 @@
-# Validation report: TD-11 option B, speak again (DRAFT of 2026-11-08, ratings are proposals)
+# Validation report: TD-11 option B, speak again (2026-11-08, closed: accepted as is by the owner)
 
-**Goal:** none (change set on master)   **Exit criterion:** TD11-V1 to V5 (`A-132-validation-plan.md`); the 3 s under VAL-006   **Met:** partly, first session only
+**Goal:** none (change set on master)   **Exit criterion:** TD11-V1 to V5 (`A-132-validation-plan.md`); the 3 s under VAL-006   **Met:** yes, accepted as is by the owner (V2 partial, FB-07 accepted)
 **Deployed version:** master at `95e74a1`, no tag (deployment record: `A-132-deployment-record.md`, Phase 6 empty)
 **Period:** 2026-11-08, one session 14:20 to 14:21; the multi-day use of task 1 has not happened yet   **Validators:** the owner   **Facilitator:** none (self-run)
 Code state, audio device: Firefox on this system; the device name was not given, "Firefox sound on this system".
@@ -17,7 +17,7 @@ Code state, audio device: Firefox on this system; the device name was not given,
 ## Provisional requirements settled (M37)
 | Requirement | Proposed value | Settled by | Observed | Result |
 |---|---|---|---|---|
-| REQ-VPB-006 | 3 s (`STOP_DROP_MS`) | VAL-006 session | no opinion on too long or too short | **still open:** needs the owner's view after some days of use; new criterion: no repeat swallowed and no late line of a stopped answer heard in the days of use |
+| REQ-VPB-006 | 3 s (`STOP_DROP_MS`) | VAL-006 session | no opinion on too long or too short | **confirmed as is** by the owner's acceptance (2026-11-08): the 3 s stays; no measurement and no opinion on the length were given, so the accepted risk of A-136 stays as recorded (follow-up under VAL-006) |
 
 ## Quality in use
 | Dimension | Observed | Contexts not covered |
@@ -31,11 +31,11 @@ Code state, audio device: Firefox on this system; the device name was not given,
 ## Open deferrals reviewed (M26)
 | TD | Still serves the purpose? | Trigger | Decision (proposed) |
 |---|---|---|---|
-| TD-61 | yes, but FB-07 is a first sign that one connection per sentence is audible | next voice iteration or 2026-12-31 | keep; add FB-07 to its Plan step; the owner decides |
+| TD-61 | yes; FB-07 (lines fed bit by bit on a repeat, noticed, accepted) is input for its Plan step | next voice iteration or 2026-12-31 | keep (`deferred.md` is protected: the pointer to FB-07 lives here and in FB-07) |
 | TD-62 | unrelated | unchanged | keep |
 
 ## Feedback items
-- FB-07 (usability, New): short stops between sentences on a repeat.
+- FB-07 (No action, Triaged): short stops between sentences on a repeat; accepted as is, revisit with TD-61.
 
-## Not decided here
-The owner decides: whether FB-07 is disturbing enough to bring forward; whether the validation is closed after the multi-day use or accepted as is; the 3 s.
+## Decision
+Accepted as is and validation closed by the owner on 2026-11-08, after one session (14:20 to 14:21) and without the multi-day use. Limits stay as written under "Quality in use" (one browser and device, no phone, no several users, device name not recorded). Status updates: REQ-CHA-030..036 and REQ-VPB-006 are Validated. The 3 s stays an accepted risk (A-136). No new iteration is started for TD-11; FB-07 and TD-61 wait for the next voice iteration or 2026-12-31.
