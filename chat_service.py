@@ -188,7 +188,8 @@ class ChatService:
         model, profile = self._model_info()
         mood = self.mood.status()
         with self._lock:
-            return {"busy": self._running or self._speak_pending > 0, "activity": mood["activity"] or "idle", "model": model, "profile": profile,
+            speaking = self._speak_pending > 0            # a repeat that runs or waits owns the stop button, also over a running answer (REQ-CHA-035)
+            return {"busy": self._running or speaking, "activity": "speaking" if speaking else mood["activity"] or "idle", "model": model, "profile": profile,
                     "queue": len(self._queue), "mood": mood}
 
     def publish_status(self):
