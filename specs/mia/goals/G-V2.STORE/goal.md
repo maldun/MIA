@@ -51,6 +51,14 @@ Top-level items it serves: FR-40. Requirements by ID (inside G-V2's scope):
 | REQ-GTB-018 | in | |
 | REQ-GTB-019 | in | |
 | REQ-GTB-020 | in | |
+| REQ-GTB-021 | in | A-92 |
+| REQ-GTB-022 | in | A-93 |
+| REQ-GTB-023 | in | A-98 |
+| REQ-GTB-024 | in | A-98 |
+| REQ-GTB-025 | in | A-98 |
+| REQ-GTB-026 | in | A-98 |
+| REQ-GTB-027 | in | A-98 |
+| REQ-GTB-028 | in | A-102 |
 | IF-301 | in | |
 
 ## Parts
@@ -73,8 +81,8 @@ Top-level items it serves: FR-40. Requirements by ID (inside G-V2's scope):
 | Phase | State | Record or reason |
 |---|---|---|
 | Explore | done | HLS of iteration 2 approved 2026-11-05 (D-186) |
-| Plan | in progress | requirements drafted in G-V2 Plan step 1; checks in Step 3 |
-| Implement | open | |
+| Plan | done | requirements REQ-GTB-005..020 and checks approved (D-265..D-267); red tests, IF-301 v2 mock and suite installed (tag `plan-baseline-it2-store`); A-90 contract text installed; `plan.md` approved 2026-11-07 |
+| Implement | done | T-01 to T-13 done (`implementation-log.md`); A-91 to A-104 installed; hand-over to Verify |
 | Verify | open | |
 | Commit | open | |
 | Deploy | open | |
