@@ -1531,11 +1531,12 @@ package MIA_Requirements {
 
     requirement def <'FR-34'> SkillsPanel {
         subject mia : MiaSystem;
-        doc /* MIA shall show every skill run in a skills panel beside the chat on the same page, a tab on the phone: a status
-               card per run with its phase, budgets and counts, pause, resume and stop, the full result and the links to its files
-               and report. The panel lists the running and finished runs whose messages are in the shared chat history, for all
-               users, also after a reload and a restart, and is emptied when the chat history is deleted; the files and report
-               records stay. The chat holds no status card and no full result of a skill. */
+        doc /* MIA shall show the status of a skill run in the Skill run view, a compact strip across the full width below the
+               character box and the chat (stacked on the phone: character, chat, view): the phase, budgets and counts, pause,
+               resume and stop, the full result and the links to its files and report, for the skill that runs and, when none
+               runs, for the last run, also after a reload and a restart; the view is emptied when the chat history is deleted
+               (a delete of the history records in the storage); the files and report records stay. The chat holds no status
+               card and no full result of a skill. */
         @Trace { :>> baseline = ("CT-11", "TK-1");
                  :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
         @ChangeSource { feedbackId = "FB-01"; iteration = 1; }
@@ -1543,13 +1544,13 @@ package MIA_Requirements {
     requirement def <'FR-35'> SkillTurnsInTheChat {
         subject mia : MiaSystem;
         doc /* While a skill runs, the chat shall show only its questions, the users' answers and, for each phase the skill
-               declares worth telling, a new short status message that the chat model words in MIA's persona like any chat turn.
-               When the skill ends, the chat model shall summarize its full result in persona, reading it in pieces when it is
-               longer than its share of the context, in a summary that the prompt asks to keep within 1200 characters, followed
-               by a link to the full result that code adds; a failure is a short message with the reason and the link. These
-               messages are spoken like answers, with the same repair; the questions, the answers, the summary and the last
-               status message of each run are part of the history the chat model sees. The summary is informative only: the full
-               result in the panel is the reference. */
+               declares worth telling, a new short status message that the chat model words in MIA's persona like any chat
+               turn. When the skill ends, the chat model shall summarize its full result in persona, reading it in pieces when
+               it is longer than its share of the context, in a summary that the prompt asks to keep within 1200 characters,
+               followed by a link to the Skill run view that code adds; a failure is a short message with the reason and the
+               link. These messages, the status messages included, are spoken like answers, with the same repair; the
+               questions, the answers, the summary and the last status message of each run are part of the history the chat
+               model sees. The summary is informative only: the full result in the Skill run view is the reference. */
         @Trace { :>> baseline = ("CT-2", "CT-7", "TK-1");
                  :>> verifiedBy = (HowVerified::test, HowVerified::measurement); }
         @ChangeSource { feedbackId = "FB-01"; iteration = 1; }
@@ -1664,14 +1665,18 @@ package MIA_Requirements {
     }
     requirement def <'FR-46'> SkillSubwindow {
         subject mia : MiaSystem;
-        doc /* MIA shall give every skill a subwindow of its own in the web interface that holds everything of a run that is
-               not spoken: status card, phases, budgets, pause, resume and stop, the full result, intermediate material, the
-               links to files and report, and a confirmation of each answer the user gave, so that the subwindow is the
-               history of the run. The chat shall contain only text that is spoken, each a shortened or summed-up form worded
-               in MIA's persona: the skill's questions are spoken in the chat and the users' answers are given in the chat;
-               the full result is referenced by a link to the subwindow; no card, log line, table or full result is put into
-               the chat. On the page the character stands in a rectangular box, the chat is left of it and the skill
-               subwindow is below it. This revises FR-34 (position) and FR-35. */
+        doc /* MIA shall show, in one view of the web interface, the Skill run view, the skill that is currently running and
+               everything of its run that is not spoken: status, phases, budgets, pause, resume and stop, the full result,
+               intermediate material, the links to files and report, and a confirmation of each answer the user gave, so that
+               the view is the history of the run. When no skill runs, the view shows the last run, and no earlier one; when
+               several skills run, it shows the one started most recently. Every skill, lookup and search included, has a run
+               in the view and ends with a short spoken summary in the chat. The chat shall contain only text that is spoken,
+               each a shortened or summed-up form worded in MIA's persona: the skill's questions to answer and the users'
+               answers, a status summary for each phase the skill names, and at the end a short summary in the text with a link
+               to the Skill run view; no status card, log line, table or full result is put into the chat, and no text is put
+               into the chat that is not spoken. On the page the character stands in a large rectangular box on the left, the
+               chat is right of it and the Skill run view is a compact strip across the full width below both. This revises
+               FR-34 (position, and the card) and FR-35. */
         @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
         @ChangeSource { feedbackId = "NOTE-2026-11-02"; iteration = 2; }
     }
