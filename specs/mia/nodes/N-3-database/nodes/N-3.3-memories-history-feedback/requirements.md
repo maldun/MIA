@@ -17,6 +17,7 @@ The 14 record tables of IF-302 (history, which also holds the summaries and the 
 - Verified by: TC-RTB-001
 - Status: Verified
 - History: 2026-10-31 D-161: the 14 tables of IF-302 v5 listed (it named summaries and a chat log, which are records of history, and missed six tables)
+- Proposed (A-141, G-V3.PANEL, 2026-11-08): the approved text above stays in force until A-141 is approved; the text would then name 15 tables, skill_runs added after reports (REQ-RTB-007).
 
 ### REQ-RTB-002 – Run results
 - Level: low   Subject: Persistence
@@ -77,6 +78,18 @@ The 14 record tables of IF-302 (history, which also holds the summaries and the 
 - Verified by: TC-RTB-006
 - Status: Approved
 - History: –
+
+### REQ-RTB-007 – Skill runs stored
+- Level: low   Subject: Persistence
+- Text: The Record tables shall define the table skill_runs with the required fields run, skill, skill_version, account, started and state, as versioned records that are deletable.
+- Rationale: refines REQ-DB-002; one record per skill run for the Skill run view, A-141 (FR-46)
+- Parent: REQ-DB-002
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: definitions() names skill_runs as versioned and deletable; a run record lacking one of the six fields is rule schema with that field as detail; a complete one is accepted (exact)
+- Verified by: TC-RTB-007
+- Status: Draft
+- History: A-141 (proposed 2026-11-08, G-V3.PANEL), new; owner 2026-11-08: a new table skill_runs, REQ-RTB-007
 
 ## Interface requirements
 

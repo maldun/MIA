@@ -990,16 +990,16 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 
 ### REQ-WFM-135 – Chat history deleted
 - Level: low   Subject: TaskRuntime
-- Text: When the chat history is deleted, the Workflow management shall delete the run records of the account and keep the files of the files volume.
+- Text: When the history records of an account are deleted in the storage, the Workflow management shall delete that account's run records and keep the files of the files volume.
 - Rationale: refines REQ-BE-033; owner decision of 2026-11-07 (OC-3 of G-V3)
 - Parent: REQ-BE-033
 - Group: RV
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-39: after the deletion no run is named and every file of the volume is still listed (exact)
+- Acceptance criterion: AC-39: after the history records of the account are deleted through IF-102 no run is named for it, the page is told by skill_run_changed, and every file of the volume is still listed (exact)
 - Verified by: TC-WFM-135
 - Status: Draft
-- History: A-131 (proposed 2026-11-08, G-V3.PANEL), new
+- History: A-131 (proposed 2026-11-08, G-V3.PANEL), new; reworded after approval in batch 1 (owner 2026-11-08: no operation deletes the chat history today, the trigger is the delete of history records in the storage, notified by IF-102 `subscribe`)
 
 ### REQ-WFM-136 – Runs without knowledge of the view
 - Level: low   Subject: TaskRuntime

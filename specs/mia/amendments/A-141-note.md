@@ -12,7 +12,7 @@ Status: **proposed** (Draft). `contracts/IF-302-record-tables.md` (v7), `contrac
 | `reports` | unchanged: the review report stays there (REQ-WFM-038), the run record names its files |
 
 ## Requirement it needs
-A requirement of N-3.3 next to REQ-RTB-001 ("The Record tables shall define the table skill_runs with the required fields ..."), and REQ-RTB-001 (14 tables) changes to 15 on approval. Not written yet: N-3.3 is outside G-V3's files and `REQ-RTB-` is not in the owner's id ranges; **the owner assigns the number** (stop and report).
+REQ-RTB-007 (N-3.3, Draft, number given by the owner 2026-11-08): "The Record tables shall define the table skill_runs with the required fields run, skill, skill_version, account, started and state, as versioned records that are deletable." Check TC-RTB-007. REQ-RTB-001 (14 tables) carries the proposal for 15 next to its approved text. The deletion of all run records of an account needs no new IF-102 operation: `ids(table)` and `get` find them, `delete` removes them.
 
 ## Why not elsewhere
 Owner chose it over extending `reports` (which would make a run without a report a 'report') and over a file store (not versioned, not backed up with the database).

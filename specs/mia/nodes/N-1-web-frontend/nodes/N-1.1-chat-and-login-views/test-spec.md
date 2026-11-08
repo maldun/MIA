@@ -266,7 +266,7 @@ Status: **Draft** (written in Phase 3 after the verification, finding F11 / D-16
 ### TC-CLV-039 – View without a run
 - Verifies: REQ-CLV-039
 - Given: the mock names no run
-- When: the page loads, and again after the chat history is deleted
+- When: the page loads, and again after the history records are deleted in the storage and `skill_run_changed` arrives with no id
 - Then: the view shows that no skill has run yet and has no button
 
 ### TC-CLV-040 – Layout on a wide screen

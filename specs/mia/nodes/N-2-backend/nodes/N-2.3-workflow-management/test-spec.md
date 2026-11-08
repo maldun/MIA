@@ -170,8 +170,8 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-203
 ### TC-WFM-135 – Chat history deleted
 - Verifies: REQ-WFM-135
 - Given: two accounts with one finished run and one stored file each
-- When: the first account deletes its chat history
-- Then: no run is named for the first account, its records are gone; its file and the files of the second account are still listed; the second account's run is still named
+- When: the history records of the first account are deleted through the fake storage and its `subscribe` notification arrives
+- Then: no run is named for the first account, its records are gone, `skill_run_changed` with no id is sent; its file and the files of the second account are still listed; the second account's run is still named
 
 ### TC-WFM-136 – Runs without knowledge of the view
 - Verifies: REQ-WFM-136
