@@ -2,6 +2,8 @@
 
 Drafted 2026-11-07 when the owner asked to split G-V2 into subgoals; renamed from TRUST and REQ-RUN-017 moved to MODEL when the owner asked for a cut with fewer dependencies (same day).
 
+Amended 2026-11-08 after the toolbox prototype (`prototype/toolbox`, owner decisions D1 to D5 and the answers on the open points): TOOLBOX adds the `transforms` part of IF-203 v1 itself; four new requirements (REQ-WFM-090..093) and a changed REQ-WFM-054; a new table in IF-302 (A-110, proposed). The draft plan is `specs/mia/prototypes/toolbox/plan.md` on that branch.
+
 - Kind: subgoal
 - Parent: G-V2
 - Statement: Transforms are kept in a toolbox by ID with a trust status and a lifecycle; a step from outside is stored but never runs until the owner allows it.
@@ -23,11 +25,15 @@ Drafted 2026-11-07 when the owner asked to split G-V2 into subgoals; renamed fro
 | Item (DEP-n / HR-nnn) | Real or stand-in | Note |
 |---|---|---|
 | jsonschema | real | exchange file check |
+| IF-203 v1, kind `transforms` | real | TOOLBOX adds it (kind, `set_trust`, `set_lifecycle`) in its own block of `workflow_library.py`; MODEL and CONVERT add their own parts; merge order STORE, MODEL, TOOLBOX, CONVERT |
+| IF-302, table of transform meta | real | new table for trust, lifecycle, evidence and baseline allowance (A-110, proposed, owner 2026-11-08); needs its contract suite in Plan Step 4 |
+| IF-401 run events | stand-in | the event of REQ-WFM-093 goes through a stand-in in the tests |
 
 ## Split check
 | Suggestion | Decision (split / keep together) | Reason | Date |
 |---|---|---|---|
 | further cut | keep together | 10 items in scope, one chain | 2026-11-07 |
+| further cut, after the amendment of 2026-11-08 | open | 15 requirement and interface items in scope (14 requirements, IF-203) plus the IF-302 table, still one chain, six tasks in the draft plan; the owner decides at the Plan gate | 2026-11-08 |
 
 ## Scope
 Top-level items it serves: FR-38. Requirements by ID (inside G-V2's scope):
@@ -44,13 +50,19 @@ Top-level items it serves: FR-38. Requirements by ID (inside G-V2's scope):
 | REQ-WFM-067 | in | |
 | REQ-WFM-068 | in | |
 | REQ-WFM-070 | in | |
-| IF-203 | in | frozen at G-V2 (A-90, approved 2026-11-07); used through its mock until the provider is merged |
+| REQ-WFM-090 | in | new, proposed 2026-11-08: the reason an untrusted transform is untrusted is shown on look-up |
+| REQ-WFM-091 | in | new, proposed 2026-11-08: the owner's allowance for an untrusted retired transform to run as baseline |
+| REQ-WFM-092 | in | new, proposed 2026-11-08: a newer version replaces the code and keeps trust and lifecycle; an equal or lower version is refused |
+| REQ-WFM-093 | in | new, proposed 2026-11-08: replacing a trusted transform's code records an event |
+| IF-203 | in | frozen at G-V2 (A-90, approved 2026-11-07); TOOLBOX provides the `transforms` part itself (owner 2026-11-08) |
+| IF-302 | in | one new table for transform meta (A-110, proposed); no other change |
 
 ## Parts
 | Part | Real or stand-in | Notes |
 |---|---|---|
 | N-2.3 toolbox | real |  |
-| IF-203 v1 library (kind `transforms`) | stand-in | mock until the provider is merged; transforms are records of the library, the toolbox needs no graph |
+| IF-203 v1 library (kind `transforms`) | real | built by this goal (owner 2026-11-08); until it is merged the toolbox runs against a mock of it in the tests; transforms are records of the library, the toolbox needs no graph |
+| IF-302 table of transform meta | real | new, A-110 (proposed) |
 
 ## Frozen requirements
 | Requirement | Shared by | Reason |
@@ -66,7 +78,7 @@ Top-level items it serves: FR-38. Requirements by ID (inside G-V2's scope):
 | Phase | State | Record or reason |
 |---|---|---|
 | Explore | done | HLS of iteration 2 approved 2026-11-05 (D-186) |
-| Plan | in progress | requirements drafted in G-V2 Plan step 1; checks in Step 3 |
+| Plan | in progress | requirements drafted in G-V2 Plan step 1; amended 2026-11-08 (REQ-WFM-090..093, A-110); checks in Step 3 |
 | Implement | open | |
 | Verify | open | |
 | Commit | open | |
