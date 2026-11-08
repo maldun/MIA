@@ -623,3 +623,7 @@ The first version was silent until the end and could take 20 minutes or more: th
 | REQ-CHA-048 | requirement | 6b8e3e4005d0 | maldun | 2026-11-08 | approved | G-V3.CHAT one by one, round 6 |
 | REQ-CHA-061 | requirement | d7f5f71951b3 | maldun | 2026-11-08 | approved | G-V3.CHAT one by one, round 6 |
 | REQ-CHA-050 | requirement | 1b9369864ce0 | maldun | 2026-11-08 | approved | G-V3.CHAT one by one, round 7 |
+| REQ-CHA-049 | requirement | 78f9a6630494 | maldun | 2026-11-08 | approved | G-V3.CHAT one by one, round 8 |
+| REQ-CHA-051 | requirement | 11549b0d7527 | maldun | 2026-11-08 | approved | G-V3.CHAT one by one, round 8 |
+| REQ-CHA-052 | requirement | 57f9cd9621f2 | maldun | 2026-11-08 | approved | G-V3.CHAT one by one, round 8 |
+| REQ-CHA-062 | requirement | edbdf4deeac6 | maldun | 2026-11-08 | approved | G-V3.CHAT one by one, round 8 |
