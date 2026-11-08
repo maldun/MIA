@@ -43,6 +43,7 @@ try:
     from .pipeline_model import UNREACHABLE
     from .storage import StorageError
     from .speech_text import speech_text
+    from .mia_logger import logger
     from .task_monitor import TaskMonitor
     from .task_registry import TaskCommandError, TaskRegistry
 except ImportError:  # used as plain script / in tests
@@ -50,6 +51,7 @@ except ImportError:  # used as plain script / in tests
     from pipeline_model import UNREACHABLE
     from storage import StorageError
     from speech_text import speech_text
+    from mia_logger import logger
     from task_monitor import TaskMonitor
     from task_registry import TaskCommandError, TaskRegistry
 
@@ -126,8 +128,13 @@ class ChatService:
     def __init__(self, emit, log, mood, run_exchange, run_command=None, model_info=None, queue_size=1, user_limit=0,
                  rate_limit=(10, 60), spawn=None, clock=time.monotonic, votes=None, wall_clock=time.time,
                  behaviours=None, reputable=0.6, repair=None, remember=None, review_timeout=1800,
-                 tasks=None, skill_options=None, prepare_task=None, argument_commands=None, files=None, unavailable=(), react=None):
+                 tasks=None, skill_options=None, prepare_task=None, argument_commands=None, files=None, unavailable=(), react=None, speak=None):
         self._emit = emit
+        self._speak = speak                                                # (sentence, should_stop) -> None: the voice route of live answers (sound server); None = speak again stays silent (REQ-CHA-030)
+        self._speak_lock = threading.Lock()                                # one spoken-again playback at a time (REQ-CHA-034)
+        self._speak_pending = 0                                            # spoken-again playbacks that run or wait
+        self._speak_generation = 0                                         # a stop moves it on: a playback of an older generation ends (REQ-CHA-032)
+        self._speak_before = None                                          # (activity,) before a spoken-again playback took the status; None = it took none (REQ-CHA-035)
         self._tasks = tasks if tasks is not None else TaskRegistry()      # REQ-WFM-029: the tasks (lookup, search, review, ...) register themselves, the core names none of them
         self._unavailable = {str(n).lower() for n in unavailable}         # ids of extensions that did not load: their command says so instead of going to the model
         self._skill_options = skill_options or {}                          # config `skill_options`: {task id: {option: value}}, the defaults of the options
@@ -181,7 +188,8 @@ class ChatService:
         model, profile = self._model_info()
         mood = self.mood.status()
         with self._lock:
-            return {"busy": self._running, "activity": mood["activity"] or "idle", "model": model, "profile": profile,
+            speaking = self._speak_pending > 0            # a repeat that runs or waits owns the stop button, also over a running answer (REQ-CHA-035)
+            return {"busy": self._running or speaking, "activity": "speaking" if speaking else mood["activity"] or "idle", "model": model, "profile": profile,
                     "queue": len(self._queue), "mood": mood}
 
     def publish_status(self):
@@ -275,12 +283,15 @@ class ChatService:
         return {"ok": True, "message": record, "queued": queued, "command": command, "id": record["id"] if record else None, "position": position}
 
     def stop(self):
-        """stops the running answer (the text received so far stays)"""
+        """stops the running answer (the text received so far stays) and any spoken-again playback; True only when an answer was stopped (IF-201: nothing running is stopped false)"""
         with self._lock:
             kind = self._current or (self._queue[0][0] if self._queue else None)
             running = self._running and kind not in (None, "command")
             if running and self._current is None:
                 self._stop_next = True                # the worker has not taken the message yet: it would clear the stop (REQ-CHA-004)
+            speaking = self._speak_pending > 0
+            if speaking:
+                self._speak_generation += 1           # ends the spoken-again playbacks that run or wait; with none, nothing is left set (REQ-CHA-032)
         if running:
             self._stop.set()
             self._unpaused.set()                      # a paused task wakes up and sees the stop
@@ -381,7 +392,42 @@ class ChatService:
         sentences = [s for s in SENTENCE_END.split(speech_text(record["text"])) if s]
         for index, sentence in enumerate(sentences):
             self._emit("audio_chunk", {"id": record["id"], "index": index, "sentence": sentence})
+        if self._speak is not None and sentences:
+            with self._lock:
+                self._speak_pending += 1
+                generation = self._speak_generation
+                takes_status = self._speak_pending == 1 and not self._running      # a running answer has its own status
+                if takes_status:
+                    self._speak_before = (self.mood.status()["activity"],)
+            if takes_status:
+                self.mood.set_activity("speaking")
+            self.publish_status()                                  # busy and speaking: the page offers its stop button (REQ-CHA-035)
+            self._spawn(lambda: self._play_again(sentences, generation))      # the request must not wait until the speech has ended
         return {"sentences": len(sentences)}
+
+    def _play_again(self, sentences, generation):
+        """hands the sentences one by one to the voice route, after any playback that is still running (REQ-CHA-030, 031, 034); a stop since the
+        request ends it (REQ-CHA-032); a route that fails is logged once and the rest is dropped: the chat goes on without voice (REQ-CHA-033)"""
+        stopped = lambda: self._speak_generation != generation
+        try:
+            with self._speak_lock:
+                for sentence in sentences:
+                    if stopped():
+                        return
+                    try:
+                        self._speak(sentence, stopped)
+                    except Exception as exc:
+                        logger.error("Speak again: the voice route failed: %s", exc)
+                        return
+        finally:
+            with self._lock:
+                self._speak_pending -= 1
+                before = self._speak_before if self._speak_pending == 0 and not self._running else None
+                if self._speak_pending == 0:
+                    self._speak_before = None
+            if before is not None:
+                self.mood.set_activity(before[0])                  # as it was before; an answer that has started keeps its own (REQ-CHA-036)
+            self.publish_status()
 
     def account(self, message_id):
         """the plain steps kept with the answer, in order; the domain events of the run log (kind "event") are no steps. Answers kept before D-138 have
@@ -663,7 +709,7 @@ class ChatService:
         if not late:
             start()
         self.set_activity("thinking")
-        state = {"text": "", "emotion": None, "emotions": [], "last": 0.0, "first": True, "shown": ""}
+        state = {"text": "", "emotion": None, "emotions": [], "last": 0.0, "first": True, "shown": "", "sent": ""}
         repairing = self._repair is not None and task == "chat"      # the answers of /lookup carry quotes: they are never changed
 
         def on_delta(current):
@@ -677,6 +723,7 @@ class ChatService:
             if now - state["last"] >= DELTA_INTERVAL:
                 state["last"] = now
                 if not repairing:
+                    state["sent"] = current
                     self._emit("chat_delta", {"id": message_id, "text": current})
                     return
                 # the stream is held back to the settled part, which is repaired before the page sees it (REQ-CHA-014); only a text that continues what was shown is released
@@ -716,8 +763,8 @@ class ChatService:
             self.set_activity(None)
         if self._task_files:                                                   # the files of the task are links in its result (the route is the core's own, IF-101 v8)
             state["text"] = (state["text"] + "\n\n" if state["text"] else "") + "Files: " + ", ".join("[%s](/api/files/%s)" % (n, n) for n in self._task_files)
-            if not late and not repairing:
-                self._emit("chat_delta", {"id": message_id, "text": state["text"]})        # the last delta equals the text of chat_done
+        if not late and not repairing and state["text"] != state["sent"] and (status != "stopped" or self._task_files):
+            self._emit("chat_delta", {"id": message_id, "text": state["text"]})        # the last delta equals the text of chat_done, also when the throttle held it back (IF-101 chat_done)
         if repairing and state["text"]:
             state["text"] = self._repair(state["text"])                 # the whole answer, silently; the last delta equals the text of chat_done
             if state["text"] != state["shown"]:
@@ -726,6 +773,9 @@ class ChatService:
             start()
             if state["text"]:
                 self._emit("chat_delta", {"id": message_id, "text": state["text"]})
+        sentences = [x for x in SENTENCE_END.split(speech_text(state["text"])) if x] if status == "done" and task == "chat" else []
+        for index, sentence in enumerate(sentences):          # the text of the voice, one per sentence; the audio is the page's (IF-101 audio_chunk, REQ-VOI-001)
+            self._emit("audio_chunk", {"id": message_id, "index": index, "sentence": sentence})
         extra = {"emotions": state["emotions"]} if len(state["emotions"]) > 1 else {}
         if task != "chat":
             extra["task"] = task

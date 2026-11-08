@@ -183,6 +183,7 @@ chat = initChat({
   list: $('messages'), empty: $('empty'), jump: $('jump'), olderButton: $('older'), socket, render: renderMarkdown, t, notify: toast,
   me: () => storage.get('mia.account') || null,
   onLoginRequired: () => login.open(),
+  onSpeakAgain: () => sound.speakAgain(),
   api,
 });
 

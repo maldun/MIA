@@ -17,8 +17,9 @@ function el(tag, className, text) {
 /**
  * me(): the account of this page (null when not known); onLoginRequired(): the server says there is no session (IF-101: 401 unauthenticated);
  * api: the REST calls of IF-101 v1 (api.js) for the actions under an answer: speak again, plus and minus, how I got there, regenerate.
+ * onSpeakAgain: called when the user asks to speak an answer again, before the request (the voice player then accepts the lines that follow; REQ-VPB-006).
  */
-export function initChat({ list, empty, jump, olderButton, socket, render, t, origin = location.origin, win = window, notify = () => {}, me = () => null, onLoginRequired = () => {}, api = null }) {
+export function initChat({ list, empty, jump, olderButton, socket, render, t, origin = location.origin, win = window, notify = () => {}, me = () => null, onLoginRequired = () => {}, onSpeakAgain = () => {}, api = null }) {
   const messages = [];          // sorted by id, what is in the DOM
   const rows = new Map();       // id -> row element
   const pendingText = new Map();
@@ -448,6 +449,7 @@ export function initChat({ list, empty, jump, olderButton, socket, render, t, or
     const action = button.dataset.action;
     try {
       if (action === 'speak') {
+        onSpeakAgain();                      // before the request: the line may arrive while it is still open (REQ-VPB-006)
         await api.speakAgain(message.id);
       } else if (action === 'up' || action === 'down') {
         const vote = voteArgs(message, action === 'up' ? 1 : -1);
