@@ -157,7 +157,7 @@ The PostgreSQL database and the one door to it (IF-102): immutable versions, acc
 - Parent: REQ-SLY-004
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-16: a document nested 200 levels (the document is level 1) is stored, one nested 201, 600 and 990 levels is refused as StorageError `invalid` and nothing is stored, for a graph table (rule `schema_break`, detail `data`) and for another table (rule `schema`, detail `nested too deep`), on the file backend and on PostgreSQL (exact)
+- Acceptance criterion: AC-16: a document whose deepest value (an object, a list or a scalar; the document is level 1 and every value below it is one level deeper than its parent) is at level 200 is stored, one whose deepest value is at level 201, 600 or 990 is refused as StorageError `invalid` and nothing is stored, for a graph table (rule `schema_break`, detail `data`) and for another table (rule `schema`, detail `nested too deep`), on the file backend and on PostgreSQL (exact)
 - Verified by: TC-SLY-012
 - Status: Draft
 - History: G-V2.STORE Verify F-20, 2026-11-08, new (A-100, proposed)

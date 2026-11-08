@@ -379,10 +379,10 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Group: TY
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-31: a data node whose value is nested 300 levels is refused naming `data`, one nested 150 levels is accepted; a category whose schema is {"type": 5} is refused naming `type`; nothing raises (exact)
+- Acceptance criterion: AC-31: a data node whose deepest value is at level 300 is refused naming `data`, one at level 150 or exactly at level 200 is accepted, one at level 201 is refused (a level is the record, an object, a list or a scalar: the record is level 1 and every value below it is one level deeper than its parent, so a scalar in the 200th object is level 201); a category whose schema is {"type": 5} is refused naming `type`; nothing raises (exact)
 - Verified by: TC-GTB-028
 - Status: Draft
-- History: G-V2.STORE Verify F-02/F-09, 2026-11-08, new (A-98, proposed)
+- History: G-V2.STORE Verify F-02/F-09, 2026-11-08, new (A-98, proposed); 2026-11-08 the acceptance criterion says what a level is (F-23, A-104)
 
 ### REQ-GTB-028 – Size of a record
 - Level: low   Subject: Persistence
