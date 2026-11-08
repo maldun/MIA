@@ -2842,6 +2842,13 @@ plausibility:
       rated: '2026-11-08'
       rated_by: maldun
       rating: plausible
+    REQ-GTB-028:
+      basis:
+      - one fixed number, 100,000 values with every path counted, checked exactly on both sides (99,995 numbers in a data node value are 100,000 values and accepted, 99,996 refused); about 190 times the largest stored document in the repository (529 values, probe of 202 files on 2026-11-08); the walk is iterative and stops at the limit, so it takes a few milliseconds and a record that shares sub-objects is refused at once (owner rating 2026-11-08)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
     REQ-LOG-001:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
@@ -3466,6 +3473,13 @@ plausibility:
     REQ-SLY-014:
       basis:
       - the only number is the limit of one second; the walk is iterative and visits each container once, so the limit has a very large margin; only Python callers can build such a document, JSON has no cycles; behaviour is exact (refused or not) and is tested with a time limit on both backends (owner rating 2026-11-08)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-SLY-015:
+      basis:
+      - the same number and basis as REQ-GTB-028 for the Storage layer; the walk memoises shared containers and stops at the limit, so the refusal of a document with 2**30 paths takes far less than the limit of one second; behaviour is exact and tested with a time limit on both backends (owner rating 2026-11-08)
       hardware: HW-target
       rated: '2026-11-08'
       rated_by: maldun
