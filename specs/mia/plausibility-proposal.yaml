@@ -2186,6 +2186,30 @@ proposal:
     text: 'While a transform or a skill is retired, the Workflow management shall not offer it for a new graph or a new run.'
     proposed: plausible
     basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a contract mock (proposal)"
+  REQ-WFM-090:
+    text: 'see requirements.md of N-2.3 (G-V2.TOOLBOX, new 2026-11-08)'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a mock of the library part; the prototype of G-V2.TOOLBOX shows it works (proposal, not a rating)"
+  REQ-WFM-091:
+    text: 'see requirements.md of N-2.3 (G-V2.TOOLBOX, new 2026-11-08)'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a mock of the library part; the prototype of G-V2.TOOLBOX shows it works (proposal, not a rating)"
+  REQ-WFM-092:
+    text: 'see requirements.md of N-2.3 (G-V2.TOOLBOX, new 2026-11-08)'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a mock of the library part; the prototype of G-V2.TOOLBOX shows it works (proposal, not a rating)"
+  REQ-WFM-093:
+    text: 'see requirements.md of N-2.3 (G-V2.TOOLBOX, new 2026-11-08)'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a mock of the library part; the prototype of G-V2.TOOLBOX shows it works (proposal, not a rating)"
+  REQ-WFM-094:
+    text: 'see requirements.md of N-2.3 (G-V2.TOOLBOX, new 2026-11-08)'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a mock of the library part; the prototype of G-V2.TOOLBOX shows it works (proposal, not a rating)"
+  REQ-WFM-095:
+    text: 'see requirements.md of N-2.3 (G-V2.TOOLBOX, new 2026-11-08)'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion and a mock of the library part; the prototype of G-V2.TOOLBOX shows it works (proposal, not a rating)"
   REQ-WFX-001:
     text: 'When a user opens the account of an answer produced by a task, the Workflow execution shall deliver it from event data and without a model-written part.'
     proposed: plausible

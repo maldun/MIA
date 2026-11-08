@@ -18,6 +18,11 @@
 | 7 | Untrusted text | The fixed list of hostile strings (G-V3.PANEL) | TR-PANEL-005 |
 | 9 | Eval setup (CHAT) | Pin, holdout, labels, hard checks and error rates of EV-skill_turns (G-V3.CHAT) | TR-CHAT-001, TR-CHAT-002, TR-CHAT-003, TR-CHAT-004, TR-CHAT-005, TR-CHAT-007 |
 | 10 | Fakes (CHAT) | The fake model server (G-V3.CHAT) | TR-CHAT-006 |
+| 11 | Stand-ins (TOOLBOX) | The mock of the library part and the event record (G-V2.TOOLBOX) | TR-TOOLBOX-001, TR-TOOLBOX-006 |
+| 12 | Untrusted code (TOOLBOX) | The marker that proves no code ran (G-V2.TOOLBOX) | TR-TOOLBOX-002 |
+| 13 | Accounts (TOOLBOX) | Owner and other accounts of the refusal checks (G-V2.TOOLBOX) | TR-TOOLBOX-003 |
+| 14 | Shipped nodes (TOOLBOX) | The fixed copy of shipped nodes (G-V2.TOOLBOX) | TR-TOOLBOX-004 |
+| 15 | Exact values (TOOLBOX) | IDs, versions, statuses and refusals (G-V2.TOOLBOX) | TR-TOOLBOX-005 |
 | 8 | Exact values (PANEL) | Names, states, orders and figures (G-V3.PANEL) | TR-PANEL-006 |
 
 ### TR-MODEL-001 – storage stand-in is a minimal fake with a known gap
@@ -248,4 +253,78 @@
 - Verified by: tag rt:RT-nnn on each case
 - Status: Draft
 - History: G-V3.CHAT Plan step 3 (2026-11-08), new
+
+## G-V2.TOOLBOX (Plan step 3, 2026-11-08; prefix TR-TOOLBOX-)
+
+### TR-TOOLBOX-001 – the mock of the library part is run against the contract suite
+- Applies to: TC-WFM-050, TC-WFM-051, TC-WFM-052, TC-WFM-053, TC-WFM-054, TC-WFM-055, TC-WFM-056, TC-WFM-067, TC-WFM-068, TC-WFM-070, TC-WFM-090, TC-WFM-091, TC-WFM-092, TC-WFM-093, TC-WFM-094, TC-WFM-095
+- Requirement: REQ-WFM-050
+- Group: Stand-ins (TOOLBOX)
+- Kind: setup
+- Text: The checks shall use a mock of the library part for the kind transforms that keeps versions, the trust and lifecycle records and refuses unknown values, and the mock shall be run against the IF-203 v1 contract suite for transforms as soon as that suite exists.
+- Rationale: TOOLBOX builds this part itself (owner 2026-11-08); until the suite exists the mock is only as faithful as the requirements, and a mock that fails the suite later is a finding for these checks
+- Credibility aspect: stand-in fidelity
+- Verified by: the contract suite run in task T-06 of the plan
+- Status: Draft
+- History: G-V2.TOOLBOX Plan step 3 (2026-11-08), new, from the toolbox prototype and the owner's answers of 2026-11-08
+
+### TR-TOOLBOX-002 – the marker file proves that no code ran
+- Applies to: TC-WFM-052, TC-WFM-053, TC-WFM-054, TC-WFM-090, TC-WFM-091, TC-WFM-092
+- Requirement: REQ-WFM-053
+- Group: Untrusted code (TOOLBOX)
+- Kind: setup
+- Text: The sample transform shall carry a code text that writes a marker file at the moment it is compiled or run, the marker folder shall be new and empty for every check, and a check that expects no run shall read the folder after the action.
+- Rationale: an untrusted transform that does not run leaves no trace of its own; only a side effect shows that code ran, and a shared folder would show the marker of an earlier check
+- Credibility aspect: reference data
+- Verified by: inspection of the sample transform and of the folder set-up in the plan review
+- Status: Draft
+- History: G-V2.TOOLBOX Plan step 3 (2026-11-08), new, from the toolbox prototype and the owner's answers of 2026-11-08
+
+### TR-TOOLBOX-003 – the accounts come from a fixed lookup
+- Applies to: TC-WFM-054, TC-WFM-091, TC-WFM-095
+- Requirement: REQ-WFM-054
+- Group: Accounts (TOOLBOX)
+- Kind: setup
+- Text: The checks shall take the owner and at least one other account from a fixed lookup of the test, and every refusal check shall use an account that is not the owner and has the same rights otherwise.
+- Rationale: the accounts of IF-101 are not part of this goal; a refusal that depends on a missing account instead of a missing right would pass for the wrong reason
+- Credibility aspect: stand-in fidelity
+- Verified by: inspection of the lookup and of the refused accounts in the plan review
+- Status: Draft
+- History: G-V2.TOOLBOX Plan step 3 (2026-11-08), new, from the toolbox prototype and the owner's answers of 2026-11-08
+
+### TR-TOOLBOX-004 – the shipped nodes of a check are a fixed copy
+- Applies to: TC-WFM-056, TC-WFM-094
+- Requirement: REQ-WFM-056
+- Group: Shipped nodes (TOOLBOX)
+- Kind: setup
+- Text: The checks shall seed the toolbox from a fixed copy of three shipped nodes in which one ID has two versions, and one further check shall run against the folder library/nodes of the checkout and expect every ID once.
+- Rationale: library/nodes changes over time and has IDs with several versions (finding of the prototype); a fixed copy keeps the expected values exact, the second check keeps the copy honest
+- Credibility aspect: reference data
+- Verified by: the copy in the test fixtures and the run against the folder of the checkout
+- Status: Draft
+- History: G-V2.TOOLBOX Plan step 3 (2026-11-08), new, from the toolbox prototype and the owner's answers of 2026-11-08
+
+### TR-TOOLBOX-005 – names, versions and statuses are exact
+- Applies to: TC-WFM-050, TC-WFM-051, TC-WFM-055, TC-WFM-067, TC-WFM-068, TC-WFM-070, TC-WFM-090
+- Requirement: REQ-WFM-051
+- Group: Exact values (TOOLBOX)
+- Kind: unit
+- Text: The checks shall compare IDs, version numbers, status values, the list of offered transforms and the words of a refusal by exact equality, with every refusal checked together with an accepted twin.
+- Rationale: a refusal check alone passes when everything is refused; the accepted twin shows that the rule, not a general failure, did the refusing
+- Credibility aspect: exact values
+- Verified by: signed off as a group in the plan review
+- Status: Draft
+- History: G-V2.TOOLBOX Plan step 3 (2026-11-08), new, from the toolbox prototype and the owner's answers of 2026-11-08
+
+### TR-TOOLBOX-006 – the event record is a list in order
+- Applies to: TC-WFM-093
+- Requirement: REQ-WFM-093
+- Group: Stand-ins (TOOLBOX)
+- Kind: setup
+- Text: The check shall use a stand-in for the event record that keeps every event with its fields in the order recorded and is run against the contract of IF-401 as soon as the check of that interface covers an event of this kind.
+- Rationale: REQ-WFM-093 writes through IF-401; the stand-in must not drop fields or reorder events or the check cannot see a missing one
+- Credibility aspect: stand-in fidelity
+- Verified by: inspection of the stand-in in the plan review
+- Status: Draft
+- History: G-V2.TOOLBOX Plan step 3 (2026-11-08), new, from the toolbox prototype and the owner's answers of 2026-11-08
 

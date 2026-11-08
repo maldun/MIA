@@ -66,6 +66,22 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-203
 | TC-WFM-136 | REQ-WFM-136 | Component | 1 | unit test with the fake storage of `skill_runs` and a fake clock | AC-39: a skill that sends only today's events gets a record and a view | exact |
 | TC-WFM-137 | REQ-WFM-137 | Component | 1 | unit test with the fake storage of `skill_runs` and a fake clock | AC-39: stored and read back byte for byte; no tool call | exact |
 | TC-WFM-138 | REQ-WFM-138 | Component | 1 | unit test with the fake storage of `skill_runs` and a fake clock | AC-39: two reported elements are in task_status and in the run record; none gives an empty list | exact |
+| TC-WFM-050 | REQ-WFM-050 | Component | 1 | unit test with the mock of the library part for transforms; a transform with an ID that is already in the toolbox and a version that is not higher | AC-32: refused naming the ID; the first stays unchanged | exact |
+| TC-WFM-051 | REQ-WFM-051 | Component | 1 | unit test with the mock of the library part for transforms; a transform with each trust value and each lifecycle value, and values outside the lists | AC-32: only untrusted or trusted, and only draft, tested or retired are accepted; any other value is refused; trust and lifecycle change independently | exact |
+| TC-WFM-052 | REQ-WFM-052 | Component | 1 | unit test with the mock of the library part for transforms; an exchange file whose status field says trusted | AC-32: stored untrusted | exact |
+| TC-WFM-053 | REQ-WFM-053 | Component | 1 | unit test with the mock of the library part for transforms; an exchange file whose code text writes a marker file | AC-32: the marker file does not exist after the import | exact |
+| TC-WFM-054 | REQ-WFM-054 | Component | 1 | unit test with the mock of the library part for transforms; an imported transform; the owner, a second account | AC-32: the second account is refused with the reason and the status stays; the owner's change shows trusted; any account may set it back to untrusted | exact |
+| TC-WFM-055 | REQ-WFM-055 | Component | 1 | unit test with the mock of the library part for transforms; a transform exported to one JSON file and imported into an empty toolbox, and a file that lacks a required field | AC-32: ID, version, schemas and code read back equal; the incomplete file is refused | exact |
+| TC-WFM-056 | REQ-WFM-056 | Component | 1 | unit test with the mock of the library part for transforms; a fixed copy of three shipped nodes, one ID with two versions | AC-32: each ID once, trusted, marked shipped, highest version | exact |
+| TC-WFM-067 | REQ-WFM-067 | Component | 1 | unit test with the mock of the library part for transforms; a transform moved to tested without and with a named evidence | AC-32: the first is refused, the second accepted; trust is unchanged | exact |
+| TC-WFM-068 | REQ-WFM-068 | Component | 1 | unit test with the mock of the library part for transforms; a retired trusted transform and a check that names it | AC-32: the check runs it | exact |
+| TC-WFM-070 | REQ-WFM-070 | Component | 1 | unit test with the mock of the library part for transforms; a toolbox with one live and one retired transform | AC-32: only the live one is in the list for a new graph | exact |
+| TC-WFM-090 | REQ-WFM-090 | Component | 1 | unit test with the mock of the library part for transforms; an imported untrusted transform | AC-32: the look-up names that it came from outside MIA and was not reviewed | exact |
+| TC-WFM-091 | REQ-WFM-091 | Component | 1 | unit test with the mock of the library part for transforms; a retired untrusted transform with and without the owner's allowance | AC-32: with the allowance a check runs it; without it the run is refused; as a graph step it is refused in both cases | exact |
+| TC-WFM-092 | REQ-WFM-092 | Component | 1 | unit test with the mock of the library part for transforms; a trusted version 1 and a version 2 with different code | AC-32: the entry is version 2, still trusted, runs the new code | exact |
+| TC-WFM-093 | REQ-WFM-093 | Component | 1 | unit test with the mock of the library part for transforms; a trusted and an untrusted transform, each replaced by a newer version | AC-32: one event for the trusted one with ID, old and new version and author, none for the untrusted one | exact |
+| TC-WFM-094 | REQ-WFM-094 | Component | 1 | unit test with the mock of the library part for transforms; one shipped and one imported transform | AC-32: the export of the shipped one is refused; the imported one exports | exact |
+| TC-WFM-095 | REQ-WFM-095 | Component | 1 | unit test with the mock of the library part for transforms; a retired untrusted transform; the owner, a second account | AC-32: the second account is refused and the allowance stays unset | exact |
 
 ## Assumptions (checked in validation)
 
@@ -190,3 +206,101 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-203
 - Given: a scripted skill that reports two elements and one that reports none
 - When: both run and end
 - Then: the first has two label and text pairs in `task_status` and in the run record; the second has an empty list in both
+
+## Scenarios (G-V2.TOOLBOX, checks TC-WFM-050 to 056, 067, 068, 070, 090 to 095)
+
+### TC-WFM-050 – entries are keyed by ID
+- Verifies: REQ-WFM-050
+- Given: a toolbox with a transform `t.one` in version 2
+- When: a transform with the ID `t.one` in version 2, and another in version 1, is added
+- Then: both are refused and name the ID; `t.one` is unchanged
+
+### TC-WFM-051 – two statuses
+- Verifies: REQ-WFM-051
+- Given: one transform
+- When: trust is set to each of its two values, lifecycle to each of its three, and to `fine`; trust is changed while lifecycle stays
+- Then: every listed value is accepted, `fine` is refused for both, and each status changes without the other
+
+### TC-WFM-052 – imported means untrusted
+- Verifies: REQ-WFM-052
+- Given: an exchange file whose field `status` says `trusted`
+- When: it is imported
+- Then: the transform is stored as untrusted
+
+### TC-WFM-053 – import runs no code
+- Verifies: REQ-WFM-053
+- Given: an exchange file whose code text writes a marker file when it is compiled or run
+- When: it is imported
+- Then: the marker file does not exist
+
+### TC-WFM-054 – only the owner trusts
+- Verifies: REQ-WFM-054
+- Given: an imported transform, the owner's account and a second account
+- When: the second account sets trusted, then the owner does, then the second account sets untrusted
+- Then: the first change is refused with a reason and the status stays untrusted; the owner's change shows trusted; the last change shows untrusted
+
+### TC-WFM-055 – exchange form
+- Verifies: REQ-WFM-055
+- Given: an imported transform, an empty toolbox and an exchange file without its `code` field
+- When: the transform is exported, the file is imported into the empty toolbox, and the incomplete file is imported
+- Then: ID, version, schemas and code are equal to the first; the incomplete file is refused naming the missing field
+
+### TC-WFM-056 – shipped transforms
+- Verifies: REQ-WFM-056
+- Given: a copy of three shipped nodes of which one ID has the versions 1 and 2, and an empty toolbox
+- When: the toolbox is seeded
+- Then: it holds three entries, each trusted and marked shipped, and the double ID is in version 2
+
+### TC-WFM-067 – lifecycle
+- Verifies: REQ-WFM-067
+- Given: an imported transform
+- When: its lifecycle is set to `tested` without evidence, then with the evidence `run-17`
+- Then: the first is refused; the second is accepted and the trust status is still untrusted
+
+### TC-WFM-068 – a retired trusted transform is a baseline
+- Verifies: REQ-WFM-068
+- Given: a trusted transform that is retired and a check that names it as its baseline
+- When: the check runs
+- Then: the transform runs
+
+### TC-WFM-070 – a retired transform is not offered
+- Verifies: REQ-WFM-070
+- Given: a live transform and a retired one
+- When: the list for a new graph is read
+- Then: it holds the live one only
+
+### TC-WFM-090 – the reason is shown
+- Verifies: REQ-WFM-090
+- Given: an imported transform
+- When: it is looked up
+- Then: the look-up shows untrusted and says it came from outside MIA and was not reviewed
+
+### TC-WFM-091 – baseline of an untrusted retired transform
+- Verifies: REQ-WFM-091
+- Given: a retired untrusted transform, once with and once without the owner's allowance
+- When: a check names it as its baseline, and a graph names it as a step
+- Then: with the allowance the check runs it; without it the check is refused; the graph step is refused in both cases
+
+### TC-WFM-092 – a newer version replaces the code
+- Verifies: REQ-WFM-092
+- Given: a trusted transform in version 1 and a version 2 with different code
+- When: version 2 is imported
+- Then: the entry is in version 2, still trusted, and a run gives the result of the new code
+
+### TC-WFM-093 – a replaced trusted transform leaves a trace
+- Verifies: REQ-WFM-093
+- Given: a trusted and an untrusted transform
+- When: each is replaced by a newer version, by the account `guest`
+- Then: one event exists, for the trusted one, with its ID, both versions and `guest`; none exists for the untrusted one
+
+### TC-WFM-094 – a shipped transform is not exported
+- Verifies: REQ-WFM-094
+- Given: one shipped transform and one imported transform
+- When: both are exported
+- Then: the shipped one is refused and the answer says it has no code text; the imported one is exported
+
+### TC-WFM-095 – only the owner allows a baseline
+- Verifies: REQ-WFM-095
+- Given: a retired untrusted transform, the owner's account and a second account
+- When: the second account sets the allowance, then the owner does
+- Then: the first is refused and the allowance stays unset; the owner's allowance is set

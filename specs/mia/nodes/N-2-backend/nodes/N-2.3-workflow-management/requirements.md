@@ -508,7 +508,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 |---|---|---|---|
 | 1 | SK | Skill record: the skill as one versioned record (FR-36) | REQ-WFM-040, REQ-WFM-041, REQ-WFM-042 |
 | 2 | GM | Graph model: data, transform and master nodes and their rules (FR-37) | REQ-WFM-043, REQ-WFM-044, REQ-WFM-045, REQ-WFM-046, REQ-WFM-047, REQ-WFM-048, REQ-WFM-049 |
-| 3 | TB | Toolbox and trust: transforms by ID, status, import and export (FR-38) | REQ-WFM-050, REQ-WFM-051, REQ-WFM-052, REQ-WFM-053, REQ-WFM-054, REQ-WFM-055, REQ-WFM-056, REQ-WFM-067 |
+| 3 | TB | Toolbox and trust: transforms by ID, status, import and export (FR-38) | REQ-WFM-050, REQ-WFM-051, REQ-WFM-052, REQ-WFM-053, REQ-WFM-054, REQ-WFM-055, REQ-WFM-056, REQ-WFM-067, REQ-WFM-090, REQ-WFM-091, REQ-WFM-092, REQ-WFM-093, REQ-WFM-094, REQ-WFM-095 |
 | 4 | CV | Conversion: moving today's skills onto the records, one by one (FR-45) | REQ-WFM-057, REQ-WFM-058, REQ-WFM-059, REQ-WFM-060, REQ-WFM-068, REQ-WFM-069, REQ-WFM-070 |
 | 5 | SN | Snapshots: the skill set kept and restored (FR-47) | REQ-WFM-061, REQ-WFM-062, REQ-WFM-063, REQ-WFM-064, REQ-WFM-065, REQ-WFM-066 |
 
@@ -650,7 +650,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Group: TB
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-32: a second transform with an existing ID is refused (exact)
+- Acceptance criterion: AC-32: a second transform with an existing ID and a version that is not higher is refused (exact); a higher version is REQ-WFM-092
 - Verified by: TC-WFM-050
 - Status: Draft
 - History: G-V2 Plan step 1 (2026-11-07), new
@@ -702,7 +702,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Group: TB
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-32: the owner's account changes the status, any other account is refused and the status stays (exact)
+- Acceptance criterion: AC-32: the owner's account sets trusted, any other account is refused and the status stays; any account sets trusted back to untrusted (exact)
 - Verified by: TC-WFM-054
 - Status: Draft
 - History: G-V2 Plan step 1 (2026-11-07), new
@@ -722,16 +722,94 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 
 ### REQ-WFM-056 – Shipped transforms
 - Level: low   Subject: TaskRuntime
-- Text: The Workflow management shall seed the toolbox with the transforms that MIA ships, each with the status trusted.
+- Text: The Workflow management shall seed the toolbox with the transforms that MIA ships, each with the status trusted and marked as shipped.
 - Rationale: refines FR-38 and FR-45; the nodes of `library/nodes` are MIA's own code and the converted skills need them to run Suggestion of the agent, not in the HLS text; the owner decides at review.
 - Parent: FR-38
 - Group: TB
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-32: after a first start every shipped node is in the toolbox as trusted (exact)
+- Acceptance criterion: AC-32: after a first start every shipped node is in the toolbox once, as trusted and marked shipped, with its highest version that is not retired (exact)
 - Verified by: TC-WFM-056
 - Status: Draft
 - History: G-V2 Plan step 1 (2026-11-07), new
+
+### REQ-WFM-090 – The reason is shown
+- Level: low   Subject: TaskRuntime
+- Text: When someone looks up an untrusted transform, the Workflow management shall show the reason it is untrusted.
+- Rationale: refines FR-38; OC-1 of G-V2.TOOLBOX ('shown as untrusted, with the reason')
+- Parent: FR-38
+- Group: TB
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-32a: the look-up of an imported transform names that it came from outside MIA and has not been reviewed (exact)
+- Verified by: TC-WFM-090
+- Status: Draft
+- History: G-V2.TOOLBOX Plan step 3 (2026-11-08), new, from the toolbox prototype and the owner's answers of 2026-11-08
+
+### REQ-WFM-091 – Baseline of a retired untrusted transform
+- Level: low   Subject: TaskRuntime
+- Text: Where the owner allowed it when retiring an untrusted transform, the Workflow management shall run it as the baseline of a check.
+- Rationale: refines FR-38 and REQ-WFM-068 (owner 2026-11-08: a retired transform may be a baseline, an untrusted one only by the owner's allowance, so that OC-1 stays true)
+- Parent: FR-38
+- Group: TB
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-32c: a retired untrusted transform with the allowance runs when a check names it; without the allowance it is refused as baseline; in no case does it run in a graph (exact)
+- Verified by: TC-WFM-091
+- Status: Draft
+- History: G-V2.TOOLBOX Plan step 3 (2026-11-08), new, from the toolbox prototype and the owner's answers of 2026-11-08
+
+### REQ-WFM-092 – A newer version replaces the code
+- Level: low   Subject: TaskRuntime
+- Text: When a transform arrives with the ID of an entry and a higher version, the Workflow management shall replace the code of the entry and keep its trust status and lifecycle.
+- Rationale: refines FR-38 (owner 2026-11-08: one entry per ID, the latest version; trust carries over); risk: new code runs without a new decision, therefore REQ-WFM-093
+- Parent: FR-38
+- Group: TB
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-32b: after version 2 replaces a trusted version 1, the entry is version 2, still trusted, and runs the new code (exact)
+- Verified by: TC-WFM-092
+- Status: Draft
+- History: G-V2.TOOLBOX Plan step 3 (2026-11-08), new, from the toolbox prototype and the owner's answers of 2026-11-08
+
+### REQ-WFM-093 – A replaced trusted transform leaves a trace
+- Level: low   Subject: TaskRuntime
+- Text: When the code of a trusted transform is replaced by a newer version, the Workflow management shall record an event with the ID, the old and the new version and the author.
+- Rationale: refines FR-38; the owner can see afterwards that trusted transforms changed (owner 2026-11-08)
+- Parent: FR-38
+- Group: TB
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-32b: one event per replace of a trusted transform with the four fields; none when the replaced transform is untrusted (exact)
+- Verified by: TC-WFM-093
+- Status: Draft
+- History: G-V2.TOOLBOX Plan step 3 (2026-11-08), new, from the toolbox prototype and the owner's answers of 2026-11-08
+
+### REQ-WFM-094 – A shipped transform is not exported
+- Level: low   Subject: TaskRuntime
+- Text: If an export is asked for a shipped transform, then the Workflow management shall refuse it.
+- Rationale: refines FR-38 and REQ-WFM-055 (owner 2026-11-08: shipped nodes are in the toolbox, flagged shipped; they are modules of MIA and have no code text)
+- Parent: FR-38
+- Group: TB
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-32: the export of a shipped transform is refused and says why; an imported transform exports (exact)
+- Verified by: TC-WFM-094
+- Status: Draft
+- History: G-V2.TOOLBOX Plan step 3 (2026-11-08), new, from the toolbox prototype and the owner's answers of 2026-11-08
+
+### REQ-WFM-095 – Only the owner allows a baseline
+- Level: low   Subject: TaskRuntime
+- Text: If an account other than the owner asks to allow an untrusted retired transform as a baseline, then the Workflow management shall refuse the allowance.
+- Rationale: refines FR-38 and REQ-WFM-054; the allowance is a second owner-only act (owner 2026-11-08)
+- Parent: FR-38
+- Group: TB
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-32c: the owner's account sets the allowance, any other account is refused and the allowance stays unset (exact)
+- Verified by: TC-WFM-095
+- Status: Draft
+- History: G-V2.TOOLBOX Plan step 3 (2026-11-08), new, from the toolbox prototype and the owner's answers of 2026-11-08
 
 ### REQ-WFM-057 – Old runner until proven
 - Level: low   Subject: TaskRuntime
@@ -885,7 +963,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Group: CV
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-34: a retired transform runs when a check names it (exact)
+- Acceptance criterion: AC-34: a retired trusted transform runs when a check names it (exact); an untrusted one only under REQ-WFM-091
 - Verified by: TC-WFM-068
 - Status: Draft
 - History: G-V2 Plan step 1 (2026-11-07), new, owner answer of 2026-11-07

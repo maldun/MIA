@@ -2821,12 +2821,12 @@ package MIA_NodeRequirements {
         doc /* While a message is being spoken, the Chat agent shall have a spoken-again message wait until that speech has ended. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
-    requirement def <'REQ-CHA-035'> StopIsOfferedWhileSpokenAgain_Cha035 {
+    requirement def <'REQ-CHA-035'> StopIsOfferedWhileAMessageIsSpokenAgain_Cha035 {
         subject s : ConversationCore;
         doc /* While a message is being spoken again or waits to be spoken again, the Chat agent shall report the status busy with the activity speaking. */
         @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
     }
-    requirement def <'REQ-CHA-036'> StatusReturnsAfterSpeakAgain_Cha036 {
+    requirement def <'REQ-CHA-036'> TheStatusReturnsWhenTheSpeakAgainHasEnded_Cha036 {
         subject s : ConversationCore;
         doc /* When the last message that is spoken again has been spoken or stopped, the Chat agent shall report the status as it was before, not busy and without the activity speaking. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
@@ -3228,7 +3228,37 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-WFM-056'> ShippedTransforms_Wfm056 {
         subject s : TaskRuntime;
-        doc /* The Workflow management shall seed the toolbox with the transforms that MIA ships, each with the status trusted. */
+        doc /* The Workflow management shall seed the toolbox with the transforms that MIA ships, each with the status trusted and marked as shipped. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-090'> TheReasonIsShown_Wfm090 {
+        subject s : TaskRuntime;
+        doc /* When someone looks up an untrusted transform, the Workflow management shall show the reason it is untrusted. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-091'> BaselineOfARetiredUntrustedTransform_Wfm091 {
+        subject s : TaskRuntime;
+        doc /* Where the owner allowed it when retiring an untrusted transform, the Workflow management shall run it as the baseline of a check. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-092'> ANewerVersionReplacesTheCode_Wfm092 {
+        subject s : TaskRuntime;
+        doc /* When a transform arrives with the ID of an entry and a higher version, the Workflow management shall replace the code of the entry and keep its trust status and lifecycle. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-093'> AReplacedTrustedTransformLeavesATrace_Wfm093 {
+        subject s : TaskRuntime;
+        doc /* When the code of a trusted transform is replaced by a newer version, the Workflow management shall record an event with the ID, the old and the new version and the author. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-094'> AShippedTransformIsNotExported_Wfm094 {
+        subject s : TaskRuntime;
+        doc /* If an export is asked for a shipped transform, then the Workflow management shall refuse it. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-095'> OnlyTheOwnerAllowsABaseline_Wfm095 {
+        subject s : TaskRuntime;
+        doc /* If an account other than the owner asks to allow an untrusted retired transform as a baseline, then the Workflow management shall refuse the allowance. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-WFM-057'> OldRunnerUntilProven_Wfm057 {
@@ -4773,8 +4803,8 @@ package MIA_NodeRequirements {
     requirement r_req_cha_032 : StopEndsSpeakAgain_Cha032;
     requirement r_req_cha_033 : SpeakAgainWithoutAVoiceRoute_Cha033;
     requirement r_req_cha_034 : OneSpeakAgainAtATime_Cha034;
-    requirement r_req_cha_035 : StopIsOfferedWhileSpokenAgain_Cha035;
-    requirement r_req_cha_036 : StatusReturnsAfterSpeakAgain_Cha036;
+    requirement r_req_cha_035 : StopIsOfferedWhileAMessageIsSpokenAgain_Cha035;
+    requirement r_req_cha_036 : TheStatusReturnsWhenTheSpeakAgainHasEnded_Cha036;
     requirement r_req_cha_040 : QuestionsOfASkillInTheChat_Cha040;
     requirement r_req_cha_041 : StatusMessagePerDeclaredPhase_Cha041;
     requirement r_req_cha_042 : NoStatusForOtherPhases_Cha042;
@@ -4855,6 +4885,12 @@ package MIA_NodeRequirements {
     requirement r_req_wfm_054 : OnlyTheOwnerTrusts_Wfm054;
     requirement r_req_wfm_055 : ExchangeForm_Wfm055;
     requirement r_req_wfm_056 : ShippedTransforms_Wfm056;
+    requirement r_req_wfm_090 : TheReasonIsShown_Wfm090;
+    requirement r_req_wfm_091 : BaselineOfARetiredUntrustedTransform_Wfm091;
+    requirement r_req_wfm_092 : ANewerVersionReplacesTheCode_Wfm092;
+    requirement r_req_wfm_093 : AReplacedTrustedTransformLeavesATrace_Wfm093;
+    requirement r_req_wfm_094 : AShippedTransformIsNotExported_Wfm094;
+    requirement r_req_wfm_095 : OnlyTheOwnerAllowsABaseline_Wfm095;
     requirement r_req_wfm_057 : OldRunnerUntilProven_Wfm057;
     requirement r_req_wfm_058 : SameModelCalls_Wfm058;
     requirement r_req_wfm_059 : SameOutcomesOnTheSuite_Wfm059;
@@ -5355,6 +5391,12 @@ package MIA_NodeRequirements {
     satisfy r_req_wfm_054 by mia.taskRuntime;
     satisfy r_req_wfm_055 by mia.taskRuntime;
     satisfy r_req_wfm_056 by mia.taskRuntime;
+    satisfy r_req_wfm_090 by mia.taskRuntime;
+    satisfy r_req_wfm_091 by mia.taskRuntime;
+    satisfy r_req_wfm_092 by mia.taskRuntime;
+    satisfy r_req_wfm_093 by mia.taskRuntime;
+    satisfy r_req_wfm_094 by mia.taskRuntime;
+    satisfy r_req_wfm_095 by mia.taskRuntime;
     satisfy r_req_wfm_057 by mia.taskRuntime;
     satisfy r_req_wfm_058 by mia.taskRuntime;
     satisfy r_req_wfm_059 by mia.taskRuntime;
@@ -5854,6 +5896,12 @@ package MIA_NodeRequirements {
     allocate r_req_wfm_054 to mia.taskRuntime;
     allocate r_req_wfm_055 to mia.taskRuntime;
     allocate r_req_wfm_056 to mia.taskRuntime;
+    allocate r_req_wfm_090 to mia.taskRuntime;
+    allocate r_req_wfm_091 to mia.taskRuntime;
+    allocate r_req_wfm_092 to mia.taskRuntime;
+    allocate r_req_wfm_093 to mia.taskRuntime;
+    allocate r_req_wfm_094 to mia.taskRuntime;
+    allocate r_req_wfm_095 to mia.taskRuntime;
     allocate r_req_wfm_057 to mia.taskRuntime;
     allocate r_req_wfm_058 to mia.taskRuntime;
     allocate r_req_wfm_059 to mia.taskRuntime;
@@ -6198,7 +6246,6 @@ package MIA_NodeRequirements {
     dependency from r_req_vpb_003 to r_req_fe_013;
     dependency from r_req_vpb_004 to r_req_fe_026;
     dependency from r_req_vpb_005 to r_req_fe_030;
-    dependency from r_req_vpb_006 to r_req_vpb_002;
     dependency from r_req_vpb_006 to r_req_fe_012;
     dependency from r_req_fe_001 to fr1;
     dependency from r_req_fe_002 to fr1;
@@ -6278,19 +6325,12 @@ package MIA_NodeRequirements {
     dependency from r_req_cha_018 to r_req_be_031;
     dependency from r_req_cha_019 to r_req_be_032;
     dependency from r_req_cha_020 to r_req_be_074;
-    dependency from r_req_cha_030 to r_req_cha_006;
     dependency from r_req_cha_030 to r_req_be_006;
-    dependency from r_req_cha_031 to r_req_cha_006;
     dependency from r_req_cha_031 to r_req_be_006;
-    dependency from r_req_cha_032 to r_req_cha_004;
     dependency from r_req_cha_032 to r_req_be_006;
-    dependency from r_req_cha_033 to r_req_cha_006;
     dependency from r_req_cha_033 to r_req_be_006;
-    dependency from r_req_cha_034 to r_req_cha_006;
     dependency from r_req_cha_034 to r_req_be_006;
-    dependency from r_req_cha_035 to r_req_cha_032;
     dependency from r_req_cha_035 to r_req_be_006;
-    dependency from r_req_cha_036 to r_req_cha_035;
     dependency from r_req_cha_036 to r_req_be_006;
     dependency from r_req_cha_040 to r_req_be_078;
     dependency from r_req_cha_041 to r_req_be_078;
@@ -6372,6 +6412,12 @@ package MIA_NodeRequirements {
     dependency from r_req_wfm_054 to fr38;
     dependency from r_req_wfm_055 to fr38;
     dependency from r_req_wfm_056 to fr38;
+    dependency from r_req_wfm_090 to fr38;
+    dependency from r_req_wfm_091 to fr38;
+    dependency from r_req_wfm_092 to fr38;
+    dependency from r_req_wfm_093 to fr38;
+    dependency from r_req_wfm_094 to fr38;
+    dependency from r_req_wfm_095 to fr38;
     dependency from r_req_wfm_057 to fr45;
     dependency from r_req_wfm_058 to fr45;
     dependency from r_req_wfm_059 to fr45;

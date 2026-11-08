@@ -2,7 +2,7 @@
 
 Drafted 2026-11-07 when the owner asked to split G-V2 into subgoals; renamed from TRUST and REQ-RUN-017 moved to MODEL when the owner asked for a cut with fewer dependencies (same day).
 
-Amended 2026-11-08 after the toolbox prototype (`prototype/toolbox`, owner decisions D1 to D5 and the answers on the open points): TOOLBOX adds the `transforms` part of IF-203 v1 itself; four new requirements (REQ-WFM-090..093) and a changed REQ-WFM-054; a new table in IF-302 (A-110, proposed). The draft plan is `specs/mia/prototypes/toolbox/plan.md` on that branch.
+Amended 2026-11-08 after the toolbox prototype (`prototype/toolbox`, owner decisions D1 to D5 and the answers on the open points): TOOLBOX adds the `transforms` part of IF-203 v1 itself; six new requirements (REQ-WFM-090..095) and a changed REQ-WFM-054; a new table in IF-302 (A-110, proposed). The draft plan is `specs/mia/prototypes/toolbox/plan.md` on that branch.
 
 - Kind: subgoal
 - Parent: G-V2
@@ -33,7 +33,7 @@ Amended 2026-11-08 after the toolbox prototype (`prototype/toolbox`, owner decis
 | Suggestion | Decision (split / keep together) | Reason | Date |
 |---|---|---|---|
 | further cut | keep together | 10 items in scope, one chain | 2026-11-07 |
-| further cut, after the amendment of 2026-11-08 | open | 15 requirement and interface items in scope (14 requirements, IF-203) plus the IF-302 table, still one chain, six tasks in the draft plan; the owner decides at the Plan gate | 2026-11-08 |
+| further cut, after the amendment of 2026-11-08 | open | 17 requirement and interface items in scope (16 requirements, IF-203) plus the IF-302 table, still one chain, six tasks in the draft plan; the owner decides at the Plan gate | 2026-11-08 |
 
 ## Scope
 Top-level items it serves: FR-38. Requirements by ID (inside G-V2's scope):
@@ -54,6 +54,8 @@ Top-level items it serves: FR-38. Requirements by ID (inside G-V2's scope):
 | REQ-WFM-091 | in | new, proposed 2026-11-08: the owner's allowance for an untrusted retired transform to run as baseline |
 | REQ-WFM-092 | in | new, proposed 2026-11-08: a newer version replaces the code and keeps trust and lifecycle; an equal or lower version is refused |
 | REQ-WFM-093 | in | new, proposed 2026-11-08: replacing a trusted transform's code records an event |
+| REQ-WFM-094 | in | new, proposed 2026-11-08: a shipped transform is not exported |
+| REQ-WFM-095 | in | new, proposed 2026-11-08: only the owner allows the baseline of an untrusted retired transform |
 | IF-203 | in | frozen at G-V2 (A-90, approved 2026-11-07); TOOLBOX provides the `transforms` part itself (owner 2026-11-08) |
 | IF-302 | in | one new table for transform meta (A-110, proposed); no other change |
 
@@ -78,7 +80,7 @@ Top-level items it serves: FR-38. Requirements by ID (inside G-V2's scope):
 | Phase | State | Record or reason |
 |---|---|---|
 | Explore | done | HLS of iteration 2 approved 2026-11-05 (D-186) |
-| Plan | in progress | requirements drafted in G-V2 Plan step 1; amended 2026-11-08 (REQ-WFM-090..093, A-110); checks in Step 3 |
+| Plan | in progress | requirements drafted in G-V2 Plan step 1; amended 2026-11-08 (REQ-WFM-090..095, A-110); checks in Step 3 |
 | Implement | open | |
 | Verify | open | |
 | Commit | open | |
