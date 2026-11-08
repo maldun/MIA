@@ -70,11 +70,15 @@ def load_extensions(package, folder, registry, services, catalog=None):
                 records[name] = None
                 problems.append("%s: the record could not be looked up, the skill is registered as the manifest says: %s" % (name, exc))
     # The record store does not know skills that exist only as manifest, nor the aliases of a manifest, so the loader refuses a record command that is the
-    # command or an alias of another skill (REQ-WFM-042); names are compared in the form the registry looks them up.
-    taken = {normal_command(n) for n in names if records.get(n) is None}
+    # folder name of a skill without a record or an alias of ANOTHER skill (REQ-WFM-042); a skill never clashes with its own alias (F-17). Names are compared
+    # in the form the registry looks them up; `taken` maps such a name to the skills that hold it, with the reason for the problem text.
+    taken = {}
     for name in names:
+        if records.get(name) is None:
+            taken.setdefault(normal_command(name), []).append((name, "the name of the skill %s" % name))
         try:
-            taken.update(normal_command(a) for a in read_manifest(os.path.join(folder, name)).get("aliases", []))
+            for alias in read_manifest(os.path.join(folder, name)).get("aliases", []):
+                taken.setdefault(normal_command(alias), []).append((name, "an alias of the skill %s" % name))
         except Exception:       # a broken manifest is a problem of its own below
             pass
     for name in names:
@@ -86,8 +90,10 @@ def load_extensions(package, folder, registry, services, catalog=None):
             if records.get(name) is not None:
                 graph_id, command = records[name]
                 problem = command_problem(command)      # records are data from outside: a command that cannot be registered skips the skill (F-03)
-                if problem is None and name != normal_command(command) and normal_command(command) in taken:
-                    problem = "the command %r is already the command or an alias of a skill without a record" % (command,)
+                if problem is None:
+                    clash = [why for holder, why in taken.get(normal_command(command), []) if holder != name]
+                    if clash:
+                        problem = "the command %r is already %s" % (command, " and ".join(clash))
                 if problem is not None:
                     raise ValueError("%s: the record is not used: %s" % (name, problem))
                 task.id, task.workflow_graph_id = normal_command(command), graph_id

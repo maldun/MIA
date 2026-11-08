@@ -327,7 +327,7 @@ class SkillRecordOnRealStorage:
         Example: {"max_repetitions": -1}, {"max_seconds": True}, {"max_repetitions": 2.5}, {"max_seconds": "5"} and "x" are refused by both; {"max_seconds": 0.5} and {"max_repetitions": 2, "max_time": 1} by neither.
         """
         # Given: every stop made of two limits out of a pool of good and bad values (absent included), the stops with another key, and stops that are no object
-        pool = [0, 1, -1, 2, 0.5, 2.0, 2.5, -0.5, True, False, "5", "", None, [], {}, 10 ** 12, float("inf"), float("-inf"), float("nan"), 1e308]
+        pool = [0, 1, -1, 2, 0.5, 2.0, 2.5, -0.5, True, False, "5", "", None, [], {}, 10 ** 12, float("inf"), float("-inf"), float("nan"), 1e308, 10 ** 400, -10 ** 400]
         absent = object()
         stops = []
         for first in pool + [absent]:
@@ -344,6 +344,23 @@ class SkillRecordOnRealStorage:
                 disagreements.append((stop, by_model, by_storage))
         # Then: they never disagree
         self.assertEqual(disagreements, [])
+
+    @mark.req("REQ-WFM-048")
+    def test_an_integer_limit_beyond_the_float_range_gives_the_answer_of_the_record_check_and_no_exception(self):
+        """F-19 (REQ-WFM-048): `check_graph` does not raise `OverflowError` for an integer above the float range; the answer is the one of the record check (a big positive integer is a valid limit).
+
+        Example: stops {"max_seconds": 10**400}, {"max_repetitions": 10**400}, both together are accepted; {"max_seconds": -10**400} is refused naming ["M1"]; the record check agrees.
+        """
+        for stop, accepted in (({"max_seconds": 10 ** 400}, True), ({"max_repetitions": 10 ** 400}, True), ({"max_repetitions": 10 ** 400, "max_seconds": 10 ** 400}, True),
+                               ({"max_seconds": -10 ** 400}, False), ({"max_repetitions": -10 ** 400}, False)):
+            with self.subTest(stop=str(stop)[:12] + "..", accepted=accepted):
+                # Given: a master node whose stop holds an integer that float() cannot take
+                node = {"id": "M1", "data": {"type": "master", "toolbox_id": "m1", "stop": stop}}
+                # When: the model checks the graph and the record check judges the node
+                named = check_graph(make_graph("wf-big", [data_node("D1"), node, data_node("D2")], [make_edge("D1", "M1"), make_edge("M1", "D2")]))
+                # Then: no exception, both answer alike, and the answer is the expected one
+                self.assertEqual((named == [], check_record("graph_nodes", node, record_id="M1") is None), (accepted, accepted))
+                self.assertEqual(named, [] if accepted else ["M1"])
 
     @mark.req("REQ-WFM-048")
     def test_a_stop_the_record_check_refuses_is_refused_by_the_model_on_both_sides(self):

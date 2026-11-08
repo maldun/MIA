@@ -69,7 +69,8 @@ def _limit(value, whole):
         return False
     if whole:
         return value >= 1 and (isinstance(value, int) or value.is_integer())
-    return value > 0 and math.isfinite(value)
+    # an int is finite by nature and float() fails for one above the float range, so only a float is asked (F-19); the Storage layer accepts such a number
+    return value > 0 and (isinstance(value, int) or math.isfinite(value))
 
 
 def stop_is_valid(stop):

@@ -7,6 +7,7 @@ Run with: python tests/test_graph_run_findings.py
 import os
 import shutil
 import sys
+import time
 import unittest
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -154,6 +155,58 @@ class GraphRunFindings(unittest.TestCase):
         self.assertEqual(check_graph(chain), [])
         self.assertEqual(check_graph(closed), ids + ["D0"])
         self.assertEqual(find_cycle(ids, closed["edges"]), ids + ["D0"])
+
+    @mark.req("REQ-RUN-016")
+    def test_find_cycle_finds_a_self_loop_on_the_last_node_and_a_self_loop_in_the_runner(self):
+        """T-10 gap (REQ-RUN-016, mutants: the last node is skipped; a self-loop ignored): the only cycle may be an edge from a node to itself, on any node.
+
+        Example: `find_cycle(["a","b","c"], [c->c])` is ["c","c"]; the runner refuses a graph with the edge T1 -> T1 naming ["T1","T1"], no node runs, trust not asked.
+        """
+        # Given: three IDs where the only cycle is a self-loop on the last one, and a graph whose only cycle is a self-loop of a transform
+        # When: the cycle is searched and the graph is run
+        asked = []
+        runner = GraphRunner(lambda node_id: asked.append(node_id) or "trusted")
+        loop = make_graph("wf-loop", [data_node("D1"), transform_node("T1")], [make_edge("D1", "T1"), make_edge("T1", "T1")])
+        result = runner.run(loop, self.nodes("T1"), {"D1": "x"})
+        # Then: the self-loop is the cycle, the run is refused naming it without asking the trust callback
+        self.assertEqual(find_cycle(["a", "b", "c"], [{"from": "c", "to": "c"}]), ["c", "c"])
+        self.assertEqual(find_cycle(["a", "b", "c"], [{"from": "a", "to": "b"}, {"from": "b", "to": "c"}]), None)
+        self.assertEqual((result.status, result.named, result.named_status), ("refused", ["T1", "T1"], None))
+        self.assertEqual((asked, self.script.marker_exists("T1")), ([], False))
+
+    @mark.req("REQ-RUN-016")
+    def test_find_cycle_returns_the_cycle_and_not_the_path_that_leads_to_it(self):
+        """T-10 gap (REQ-RUN-016, mutant: the whole path is returned): the nodes before the cycle are not part of it.
+
+        Example: a -> b -> c -> b gives ["b","c","b"], not ["a","b","c","b"].
+        """
+        # Given: a path a -> b -> c that ends in a cycle back to b
+        edges = [{"from": "a", "to": "b"}, {"from": "b", "to": "c"}, {"from": "c", "to": "b"}]
+        # When: the cycle is searched
+        # Then: only b and c are in it, b repeated at the end
+        self.assertEqual(find_cycle(["a", "b", "c"], edges), ["b", "c", "b"])
+
+    @mark.req("REQ-RUN-016")
+    def test_find_cycle_visits_a_node_once_and_a_ladder_of_diamonds_is_fast(self):
+        """T-10 gap (REQ-RUN-016, mutant: no done mark): a node that is done is not walked again, otherwise the paths of a ladder of diamonds are counted one by one.
+
+        Example: 22 diamonds in a row (2**22 paths) without a cycle give None within one second; with an edge from the end back to the start the cycle is found.
+        """
+        # Given: 22 diamonds s(i) -> l(i), r(i) -> s(i+1)
+        ids, edges = [], []
+        for i in range(22):
+            ids += ["s%d" % i, "l%d" % i, "r%d" % i]
+            edges += [{"from": "s%d" % i, "to": "l%d" % i}, {"from": "s%d" % i, "to": "r%d" % i},
+                      {"from": "l%d" % i, "to": "s%d" % (i + 1)}, {"from": "r%d" % i, "to": "s%d" % (i + 1)}]
+        ids.append("s22")
+        # When: the cycle is searched, with and without an edge back
+        started = time.monotonic()
+        none = find_cycle(ids, edges)
+        closed = find_cycle(ids, edges + [{"from": "s22", "to": "s0"}])
+        # Then: no cycle in the ladder, the closed one is found, and both are quick
+        self.assertIsNone(none)
+        self.assertEqual((closed[0], closed[-1], len(closed)), ("s0", "s0", 46))
+        self.assertLess(time.monotonic() - started, 1)
 
 
 if __name__ == "__main__":

@@ -20,7 +20,7 @@ sys.path.insert(0, ROOT)
 sys.path.insert(0, os.path.join(HERE, "helpers"))
 
 from extension_loader import load_extensions                  # noqa: E402
-from skill_record import SkillCatalog, SkillRecords           # noqa: E402
+from skill_record import SkillCatalog, SkillRecords, command_problem           # noqa: E402
 from storage import Storage                                   # noqa: E402
 from storage_files import FileBackend                         # noqa: E402
 from task_registry import Task, TaskRegistry                  # noqa: E402
@@ -43,6 +43,16 @@ class SkillCatalogLoader(unittest.TestCase):
         self.catalog = SkillCatalog(self.records)
         self.registry = TaskRegistry()
         self.services = types.SimpleNamespace(prefix="got: ")
+
+    def reset(self):
+        """a fresh folder of skills, fresh records and a fresh registry inside one test (for subTests)"""
+        for name in os.listdir(self.folder):
+            if os.path.isdir(os.path.join(self.folder, name)):
+                shutil.rmtree(os.path.join(self.folder, name))
+        shutil.rmtree(os.path.join(self.root, "db"), True)
+        self.records = SkillRecords(Storage(FileBackend(os.path.join(self.root, "db"))), "anna")
+        self.catalog = SkillCatalog(self.records)
+        self.registry = TaskRegistry()
 
     def add(self, name, aliases=()):
         folder = os.path.join(self.folder, name)
@@ -246,6 +256,154 @@ class SkillCatalogLoader(unittest.TestCase):
         Example: `zeta` with the record `/research` and `lookup` (alias `research`, no record): `lookup` is registered, `zeta` is skipped with a problem naming `research`.
         """
         self.alias_case("zeta")
+
+    @mark.req("REQ-WFM-042")
+    def test_a_record_command_equal_to_an_alias_of_its_own_manifest_registers_the_skill(self):
+        """F-17 (REQ-WFM-042, regression of T-09): a record does not clash with its own manifest; the skill is registered with the record's command and its alias still resolves.
+
+        Example: `lookup` (alias `research`, no other skill) with the record `{"id": "lookup", "command": "/research"}`: the registry holds `research`, no problem; `/research x` and the old `/lookup x` both answer.
+        """
+        # Given: the skill lookup with the alias research and a record whose command is that alias
+        self.add("lookup", aliases=("research",))
+        self.record("lookup", "/research", "wf-lookup")
+        # When: loaded with the catalog
+        problems = self.load(catalog=self.catalog)
+        # Then: no problem, the skill carries the record's command and graph, and the alias still resolves to it
+        self.assertEqual(problems, [])
+        self.assertEqual(self.registry.ids(), ["research"])
+        self.assertEqual(self.registry.get("research").workflow_graph_id, "wf-lookup")
+        self.assertEqual(self.registry.parse("/research x")["task"], "research")
+
+    @mark.req("REQ-WFM-042")
+    def test_a_record_command_that_clashes_with_another_skill_names_that_cause_and_not_a_missing_record(self):
+        """F-17 (REQ-WFM-042): a real clash with a skill without a record or with the alias of another skill is skipped with a problem that says so; the skill with the record is named.
+
+        Example: `alpha` with `/beta` and manifest-only `beta`: the problem names `beta`; `alpha` with `/research` and `lookup` (alias `research`): the problem names `lookup`; neither says "record" is missing.
+        """
+        for command, other, aliases in (("/beta", "beta", ()), ("/research", "lookup", ("research",))):
+            with self.subTest(command=command):
+                # Given: alpha with a record whose command is the folder name or an alias of the manifest-only skill `other`
+                self.reset()
+                self.add("alpha")
+                self.add(other, aliases=aliases)
+                self.record("alpha", command, "wf-alpha")
+                # When: loaded
+                problems = self.load(catalog=self.catalog)
+                # Then: alpha is skipped, one problem names alpha, the command and the other skill, and does not claim a missing record
+                self.assertEqual(self.registry.ids(), [other])
+                self.assertEqual(len(problems), 1)
+                self.assertTrue(problems[0].startswith("alpha:"))
+                self.assertIn(other, problems[0])
+                self.assertIn(command.lstrip("/"), problems[0])
+                self.assertNotIn("without a record", problems[0])
+
+    @mark.req("REQ-WFM-042")
+    def test_the_own_alias_of_a_record_skill_does_not_hide_the_clash_with_another_skill_with_that_alias(self):
+        """F-17 (REQ-WFM-042): the own folder name and the own alias are left out of the comparison, the other skills' are not.
+
+        Example: `alpha` (alias `research`) with the record `/research` and `zeta` (alias `research`, no record), in both folder orders: alpha is skipped with a problem, zeta keeps `research`.
+        """
+        for first, second in (("alpha", "zeta"), ("zeta", "alpha")):
+            with self.subTest(record_skill=first):
+                # Given: a record skill whose command is its own alias, and another manifest-only skill with the same alias
+                self.reset()
+                self.add(first, aliases=("research",))
+                self.add(second, aliases=("research",))
+                self.record(first, "/research", "wf-" + first)
+                # When: loaded
+                problems = self.load(catalog=self.catalog)
+                # Then: the record skill is skipped with a problem, the other skill is registered and answers /research
+                self.assertEqual(self.registry.ids(), [second])
+                self.assertEqual([p.split(":")[0] for p in problems], [first])
+                self.assertEqual(self.registry.parse("/research x")["task"], second)
+
+    @mark.req("REQ-WFM-042")
+    def test_the_folder_name_of_a_skill_with_a_record_is_free_for_another_record_command(self):
+        """T-10 gap (REQ-WFM-042, mutant: folder names of skills with a record also taken): swapping commands between two skills with records is allowed.
+
+        Example: `alpha` with `/zeta` and `zeta` with `/other`: both load, `/zeta x` runs alpha's graph, `/other x` zeta's.
+        """
+        # Given: alpha takes the folder name of zeta, which has moved to another command
+        self.add("alpha")
+        self.add("zeta")
+        self.record("alpha", "/zeta", "wf-alpha")
+        self.record("zeta", "/other", "wf-zeta")
+        # When: loaded
+        problems = self.load(catalog=self.catalog)
+        # Then: no problem, both are registered under their record commands
+        self.assertEqual(problems, [])
+        self.assertEqual(sorted(self.registry.ids()), ["other", "zeta"])
+        self.assertEqual(self.registry.get("zeta").workflow_graph_id, "wf-alpha")
+        self.assertEqual(self.registry.get("other").workflow_graph_id, "wf-zeta")
+
+    @mark.req("REQ-WFM-042")
+    def test_the_alias_of_a_skill_with_a_record_still_counts_for_the_commands_of_other_records(self):
+        """T-10 gap (REQ-WFM-042, mutant: aliases of skills with a record not taken): the alias of a skill with a record keeps resolving to it, so another record cannot take it.
+
+        Example: `lookup` (alias `research`) with the record `/ask` and `alpha` with `/research`: alpha is skipped with a problem; `/research x` still reaches lookup (as `ask`).
+        """
+        # Given: lookup with a record under another command, alpha with a record on lookup's alias
+        self.add("alpha")
+        self.add("lookup", aliases=("research",))
+        self.record("lookup", "/ask", "wf-lookup")
+        self.record("alpha", "/research", "wf-alpha")
+        # When: loaded
+        problems = self.load(catalog=self.catalog)
+        # Then: alpha is skipped, lookup keeps the alias
+        self.assertEqual(self.registry.ids(), ["ask"])
+        self.assertEqual([p.split(":")[0] for p in problems], ["alpha"])
+        self.assertEqual(self.registry.parse("/research x")["task"], "ask")
+
+    @mark.req("REQ-WFM-042")
+    def test_aliases_and_folder_names_are_compared_in_the_form_the_registry_looks_them_up(self):
+        """T-10 gap (REQ-WFM-042, mutants: alias or folder name compared without the normal form): capitals and a slash in an alias or in a folder name do not hide a clash.
+
+        Example: manifest alias `/Research` and record `/research` clash; folder `Beta` (manifest-only, id = folder) and record `/beta` clash.
+        """
+        for name, aliases, command in (("lookup", ("/Research",), "/research"), ("Beta", (), "/beta")):
+            with self.subTest(other=name):
+                # Given: a manifest-only skill with a capital in its alias or its folder name, and alpha with a record on the lower case form
+                self.reset()
+                self.add("alpha")
+                self.add(name, aliases=aliases)
+                self.record("alpha", command, "wf-alpha")
+                # When: loaded
+                problems = self.load(catalog=self.catalog)
+                # Then: alpha is skipped with one problem, the other skill is registered
+                self.assertEqual(self.registry.ids(), [name])
+                self.assertEqual([p.split(":")[0] for p in problems], ["alpha"])
+
+    @mark.req("REQ-WFM-041")
+    def test_a_command_with_an_underscore_is_skipped_with_a_problem(self):
+        """T-10 gap (REQ-WFM-041, mutant: `_` allowed): only ASCII letters and digits are commands, an underscore is not.
+
+        Example: a record written around the store with the command `/a_b` skips the skill with a problem; `command_problem("/a_b")` gives a reason, `command_problem("/ab")` gives None.
+        """
+        # Given: a skill with a record whose command has an underscore (written around the store)
+        self.add("alpha")
+        self.records.tables.put("skills", "alpha", {"id": "alpha", "data": {"command": "/a_b", "workflow_graph_id": "wf-alpha", "context_graph_id": "ctx-alpha"}}, "anna")
+        # When: the command is judged and the extensions are loaded
+        problems = self.load(catalog=self.catalog)
+        # Then: the reason is given, the skill is skipped with a problem
+        self.assertTrue(command_problem("/a_b"))
+        self.assertIsNone(command_problem("/ab"))
+        self.assertEqual(self.registry.ids(), [])
+        self.assertEqual([p.split(":")[0] for p in problems], ["alpha"])
+
+    @mark.req("REQ-WFM-029")
+    def test_a_command_followed_by_a_non_ascii_space_is_no_task_command(self):
+        """F-18 (REQ-WFM-029), accepted side effect of `re.A` on the registry (owner decision 2026-11-08): the separator must be an ASCII space; `parse` gives None, no error.
+
+        Example: `/lookup\\u00a0x`, `/lookup\\u2003x` (em space) and `/lookup\\u3000x` (ideographic space) give None; `/lookup x` gives the task.
+        """
+        # Given: the registry with the skill lookup
+        self.add("lookup")
+        self.load()
+        # When/Then: a non-breaking, em and ideographic space after the command do not make a command (re.A makes \s ASCII only); the plain space does
+        for space in (" ", " ", "　"):
+            with self.subTest(space=repr(space)):
+                self.assertIsNone(self.registry.parse("/lookup%sx y" % space))
+        self.assertEqual(self.registry.parse("/lookup x y")["argument"], "x y")
 
     @mark.req("REQ-WFM-041")
     def test_no_command_with_a_character_the_registry_cannot_look_up_is_registered_and_parse_never_raises(self):
