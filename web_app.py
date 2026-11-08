@@ -55,6 +55,7 @@ from .trust_persona_api import create_trust_persona_blueprint
 from .persona import read_persona
 from .internal_auth import ensure_token, internal_headers
 from .storage import Storage
+from .skill_record import SkillCatalog, SkillRecords
 from .storage_files import FileBackend
 from .moods import MoodTracker
 from .memory_records import MemoryRecords, memory_hooks
@@ -675,7 +676,8 @@ _services = types.SimpleNamespace(
     speaker=lambda task: speaker_for(cfg, task, speak_answer),                      # one voice rule for all tasks (workflow_voice.py)
     trust_for_url=lambda: source_trust.build_trust(cfg).for_url)
 _tasks = TaskRegistry()
-_extension_problems = load_extensions(__package__ + ".extensions", os.path.join(FPATH, "extensions"), _tasks, _services)
+_skill_catalog = SkillCatalog(SkillRecords(_votes_store))          # REQ-WFM-041: a skill with a record takes its command and workflow graph from it
+_extension_problems = load_extensions(__package__ + ".extensions", os.path.join(FPATH, "extensions"), _tasks, _services, catalog=_skill_catalog)
 for _problem in _extension_problems:
     print("an extension was not loaded: %s" % _problem)
 # the files volume (REQ-WFM-037): a folder of its own, movable by `files_dir`; limits in bytes; nothing is deleted by MIA
