@@ -3,7 +3,9 @@ Run with: python tests/test_graph_record_checks.py"""
 import os
 import shutil
 import sys
+import http.server
 import tempfile
+import threading
 import unittest
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -159,6 +161,89 @@ class RobustnessOfTheChecks(unittest.TestCase):
         for table in ("graph_nodes", "context_nodes"):
             self.assertEqual(graph_tables.check_record(table, {"id": "n", "data": {"type": "entity"}}, categories=categories),
                              {"rule": "schema_break", "detail": "type"}, table)
+
+
+def nested_record(levels):
+    """A data node record with exactly `levels` levels of objects: the record is level 1, its data level 2."""
+    value = {}
+    for _ in range(levels - 3):
+        value = {"k": value}
+    return {"id": "n", "data": {"type": "data", "value": value}}
+
+
+class RecordCheckBounds(unittest.TestCase):
+    def test_exactly_200_levels_are_accepted_and_201_refused(self):
+        """F-16: the boundary of REQ-GTB-027, the record is level 1.
+
+        Example: nested_record(200) -> None; nested_record(201) -> schema_break "data"; 1000 levels -> schema_break "data".
+        """
+        # When/Then
+        self.assertIsNone(graph_tables.check_record("graph_nodes", nested_record(200)))
+        for levels in (201, 1000):
+            self.assertEqual(graph_tables.check_record("graph_nodes", nested_record(levels)), {"rule": "schema_break", "detail": "data"}, levels)
+
+    def test_the_validator_cache_is_bounded_and_shares_equal_schemas(self):
+        """F-16: 20 000 distinct categories keep the cache at its bound, 1000 equal ones (fresh dicts) keep one entry.
+
+        Example: 20 000 categories {"t": {"type": "object", "title": str(i)}} -> len(_validators) <= _MAX_VALIDATORS; 1000 equal -> 1.
+        """
+        record = {"id": "n", "data": {"type": "t"}}
+        # Given/When: distinct schemas
+        graph_tables._validators.clear()
+        for i in range(20000):
+            graph_tables.check_record("graph_nodes", record, categories={"t": {"type": "object", "title": str(i)}})
+        # Then: bounded
+        self.assertLessEqual(len(graph_tables._validators), graph_tables._MAX_VALIDATORS)
+        # Given/When: equal schemas in fresh dicts
+        graph_tables._validators.clear()
+        for _ in range(1000):
+            graph_tables.check_record("graph_nodes", record, categories={"t": {"type": "object", "title": "same"}})
+        # Then: one entry
+        self.assertEqual(len(graph_tables._validators), 1)
+
+
+class RecordCheckRemoteReference(unittest.TestCase):
+    def test_a_remote_reference_of_a_category_schema_is_never_fetched(self):
+        """F-17: untrusted text gets no network access; a $ref to a URL must not make the checker send a request.
+
+        Example: schema {"properties": {"x": {"$ref": "http://127.0.0.1:<port>/s.json"}}} -> schema_break "type", the server saw 0 requests.
+        """
+        # Given: a local server that counts its requests, and a category schema that points to it
+        requests = []
+
+        class Handler(http.server.BaseHTTPRequestHandler):
+            def do_GET(self):
+                requests.append(self.path)
+                body = b'{"type": "string"}'
+                self.send_response(200)
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+
+            def log_message(self, *args):
+                pass
+        server = http.server.HTTPServer(("127.0.0.1", 0), Handler)
+        threading.Thread(target=server.serve_forever, daemon=True).start()
+        self.addCleanup(server.server_close)
+        self.addCleanup(server.shutdown)
+        url = "http://127.0.0.1:%d/s.json" % server.server_port
+        categories = {"entity": {"type": "object", "properties": {"x": {"$ref": url}}}}
+        graph_tables._validators.clear()
+        # When/Then: both tables refuse and no request arrives
+        results = [graph_tables.check_record(table, {"id": "n", "data": {"type": "entity", "x": 1}}, categories=categories)
+                   for table in ("graph_nodes", "context_nodes")]
+        self.assertEqual(requests, [])
+        self.assertEqual(results, [{"rule": "schema_break", "detail": "type"}] * 2)
+
+    def test_a_local_reference_still_works(self):
+        """The registry that refuses remote references keeps `#/$defs/...` working.
+
+        Example: {"$defs": {"s": {"type": "string"}}, "properties": {"x": {"$ref": "#/$defs/s"}}}: x 1 -> schema_break "x", x "a" -> None.
+        """
+        categories = {"entity": {"type": "object", "$defs": {"s": {"type": "string"}}, "properties": {"x": {"$ref": "#/$defs/s"}}}}
+        self.assertEqual(graph_tables.check_record("context_nodes", {"id": "n", "data": {"type": "entity", "x": 1}}, categories=categories),
+                         {"rule": "schema_break", "detail": "x"})
+        self.assertIsNone(graph_tables.check_record("context_nodes", {"id": "n", "data": {"type": "entity", "x": "a"}}, categories=categories))
 
 
 if __name__ == "__main__":

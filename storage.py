@@ -44,13 +44,22 @@ def table_definitions():
 
 def _unstorable(value):
     """What one backend would keep and another refuse, or None: a NUL character in a text (PostgreSQL refuses it, F9) and a number that is not
-    finite (NaN, inf: JSON has no such number and PostgreSQL refuses it, R2). Keys are looked at too."""
-    if isinstance(value, str):
-        return "a NUL character" if "\x00" in value else None
-    if isinstance(value, float):
-        return None if math.isfinite(value) else "a number that is not finite"
-    items = [*value.keys(), *value.values()] if isinstance(value, dict) else value if isinstance(value, (list, tuple)) else ()
-    return next((found for found in map(_unstorable, items) if found), None)
+    finite (NaN, inf: JSON has no such number and PostgreSQL refuses it, R2). Keys are looked at too. Iterative: a document nested deeper than the
+    recursion limit must be refused by a rule, not end in a RecursionError (F-15)."""
+    todo = [value]
+    while todo:
+        value = todo.pop()
+        if isinstance(value, str):
+            if "\x00" in value:
+                return "a NUL character"
+        elif isinstance(value, float):
+            if not math.isfinite(value):
+                return "a number that is not finite"
+        elif isinstance(value, dict):
+            todo.extend([*value.keys(), *value.values()])
+        elif isinstance(value, (list, tuple)):
+            todo.extend(value)
+    return None
 
 
 def refuse_unstorable(*values):
@@ -58,6 +67,15 @@ def refuse_unstorable(*values):
     found = next((found for found in map(_unstorable, values) if found), None)
     if found:
         raise StorageError("invalid", rule="schema", detail=found)
+
+
+def _copy(doc):
+    """A copy the backend keeps. deepcopy recurses, so a document of a table without a depth rule that is nested a few hundred levels deep is
+    refused here instead of raising a RecursionError (F-15)."""
+    try:
+        return copy.deepcopy(doc)
+    except RecursionError:
+        raise StorageError("invalid", rule="schema", detail="nested too deep") from None
 
 
 def check_names(record_id, author):
@@ -75,7 +93,10 @@ def validate(table, doc):
         broken = graph_tables.check_record(table, doc)
     else:
         validator = graph_tables if table in graph_tables.TABLES else record_tables
-        broken = validator.validate(table, doc)
+        try:
+            broken = validator.validate(table, doc)
+        except RecursionError:                      # the rules of the document tables recurse; a document this deep is refused, not raised (F-15)
+            raise StorageError("invalid", rule="schema", detail="nested too deep") from None
     if broken:
         raise StorageError("invalid", rule=broken["rule"], detail=broken["detail"])
 
@@ -116,7 +137,7 @@ class Storage:
             current = len(self.backend.versions(table, record_id))
             if expected_version is not None and expected_version != current:
                 raise StorageError("conflict", detail={"current": current})
-            entry = {"id": record_id, "version": current + 1, "author": author, "time": utc_now(), "doc": copy.deepcopy(doc)}
+            entry = {"id": record_id, "version": current + 1, "author": author, "time": utc_now(), "doc": _copy(doc)}
             self.backend.append(table, record_id, entry)
         self._tell({"table": table, "id": record_id, "version": entry["version"], "author": author})
         return {"version": entry["version"]}

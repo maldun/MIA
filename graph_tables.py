@@ -11,6 +11,8 @@ import re
 from dataclasses import dataclass, field
 
 import jsonschema
+import referencing
+import referencing.exceptions
 
 try:
     from . import graph_rules
@@ -59,6 +61,15 @@ _RECORD_SCHEMAS = {
                "properties": {"command": {"type": "string"}, "workflow_graph_id": {"type": "string"}, "context_graph_id": {"type": "string"}},
                "required": ["command", "workflow_graph_id", "context_graph_id"]},
 }
+
+
+def _no_remote(uri):
+    raise referencing.exceptions.NoSuchResource(ref=uri)
+
+
+# A category schema comes from the caller and may hold text of the web: a $ref to a URL must never make the checker fetch it (F-17, CLAUDE.md);
+# local references (#/...) are resolved inside the schema and keep working.
+_NO_REMOTE = referencing.Registry(retrieve=_no_remote)
 _validators = {}                                # keyed by the schema's JSON, so a caller's fresh but equal categories share one validator
 _MAX_VALIDATORS = 128                           # bound: a caller with ever new schemas must not grow the cache without end (F-03)
 MAX_DEPTH = 200                                 # levels of a record, the record itself is level 1 (REQ-GTB-027)
@@ -97,7 +108,7 @@ def _validator(schema):
         if len(_validators) >= _MAX_VALIDATORS:
             _validators.clear()
         jsonschema.Draft202012Validator.check_schema(schema)
-        _validators[key] = jsonschema.Draft202012Validator(schema)
+        _validators[key] = jsonschema.Draft202012Validator(schema, registry=_NO_REMOTE)
     return _validators[key]
 
 
@@ -210,7 +221,8 @@ def check_record(table, record, categories=None, stored=None, record_id=None):
         raise ValueError("not a record table of the graphs: %s" % (table,))
     try:
         return _check(table, record, categories, stored, record_id)
-    except jsonschema.SchemaError:              # only a category's schema comes from the caller and can be no schema (REQ-GTB-027)
+    # only a category's schema comes from the caller: it can be no schema, or hold a reference that cannot be followed without the network (F-17)
+    except (jsonschema.SchemaError, referencing.exceptions.Unresolvable):
         return _refusal("schema_break", "type")
     except Exception:                           # a malformed record (for example a header whose members are not objects) is refused, not raised
         return _refusal("record_identity", "record")

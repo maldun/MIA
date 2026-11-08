@@ -229,6 +229,32 @@ class StorageBehaviour:
             self.assertEqual(code_of(call), ("invalid", "schema"))
         self.assertEqual(self.store.ids("memos"), [])
 
+    @mark.req("REQ-GTB-027")
+    def test_a_document_nested_very_deep_is_refused_never_a_recursion_error(self):
+        """F-15 (fourth Verify run): the recursive scan for what a backend cannot keep ran before the depth check and gave a RecursionError
+        for 600 levels and more.
+        Example: put("graph_nodes", "n", record with a value nested 900 levels) is ("invalid", "schema_break", "data"), as with 300 levels."""
+        # Given: records of a graph table and documents of a table that is not a graph table, nested 300, 600 and 900 levels
+        def nested(levels):
+            value = {}
+            for _ in range(levels - 3):
+                value = {"k": value}
+            return value
+        for levels in (300, 600, 900):
+            record = {"id": "n", "data": {"type": "data", "value": [nested(levels)]}}
+            document = {"nodes": [], "edges": [], "note": nested(levels)}
+            # When / Then: a graph table refuses with the rule and the detail of REQ-GTB-027, the other table with a StorageError
+            with self.subTest(levels=levels, table="graph_nodes"):
+                with self.assertRaises(StorageError) as caught:
+                    self.store.put("graph_nodes", "n", record, "anna")
+                self.assertEqual((caught.exception.code, caught.exception.rule, caught.exception.detail), ("invalid", "schema_break", "data"))
+            if levels == 300:                   # a table that is not a graph table may keep such a document: the point is only the error
+                continue
+            with self.subTest(levels=levels, table="workflows"):
+                with self.assertRaises(StorageError):
+                    self.store.put("workflows", "w", document, "anna")
+        self.assertEqual((self.store.ids("graph_nodes"), self.store.ids("workflows")), ([], []))
+
     @mark.req("REQ-SLY-004")
     def test_a_refused_edit_consumes_no_version(self):
         self.store.put("workflows", "w", LOOKUP, "anna")
