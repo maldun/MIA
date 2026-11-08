@@ -42,29 +42,71 @@ def table_definitions():
     return tables
 
 
-def _unstorable(value):
-    """What one backend would keep and another refuse, or None: a NUL character in a text (PostgreSQL refuses it, F9) and a number that is not
-    finite (NaN, inf: JSON has no such number and PostgreSQL refuses it, R2). Keys are looked at too. Iterative: a document nested deeper than the
-    recursion limit must be refused by a rule, not end in a RecursionError (F-15)."""
-    todo = [value]
-    while todo:
-        value = todo.pop()
-        if isinstance(value, str):
-            if "\x00" in value:
-                return "a NUL character"
-        elif isinstance(value, float):
-            if not math.isfinite(value):
-                return "a number that is not finite"
-        elif isinstance(value, dict):
-            todo.extend([*value.keys(), *value.values()])
-        elif isinstance(value, (list, tuple)):
-            todo.extend(value)
-    return None
+MAX_DEPTH = 200                                 # levels of a document for every table, the document itself is level 1 (REQ-SLY-013)
 
 
-def refuse_unstorable(*values):
+class _Cycle(Exception):
+    pass
+
+
+def _unstorable(value, check_depth=True):
+    """What one backend would keep and another refuse, or None: a NUL character in a text (PostgreSQL refuses it, F9), a number that is not
+    finite (NaN, inf: JSON has no such number and PostgreSQL refuses it, R2), a container that contains itself ("cyclic", REQ-SLY-014) and more
+    than MAX_DEPTH levels of objects and lists ("nested too deep", REQ-SLY-013). Keys are looked at too.
+    Iterative, so a deep document is refused by a rule, not by a RecursionError (F-15); each container is walked once, however often the document
+    names it, so a document of many paths through shared objects cannot make the check exponential (F-19). The depth is the height of the
+    root, which an object shared on a short and a long path gets from the long one."""
+    problem = None
+    heights = {}                                # finished containers by id: their height
+    on_path = set()                             # the containers being walked: meeting one again is a cycle
+    stack = []                                  # [container, iterator over its parts, height of the highest part so far]
+
+    def enter(part):
+        """The height of a part that is known at once, or None after the part was put on the stack."""
+        nonlocal problem
+        if isinstance(part, str):
+            if "\x00" in part:
+                problem = problem or "a NUL character"
+        elif isinstance(part, float):
+            if not math.isfinite(part):
+                problem = problem or "a number that is not finite"
+        elif isinstance(part, (dict, list, tuple)):
+            if id(part) in on_path:
+                raise _Cycle
+            if id(part) in heights:
+                return heights[id(part)]
+            on_path.add(id(part))
+            stack.append([part, iter([*part.keys(), *part.values()] if isinstance(part, dict) else part), 0])
+            return None
+        return 0
+
+    try:
+        top = enter(value)
+        while stack:
+            frame = stack[-1]
+            for part in frame[1]:
+                height = enter(part)
+                if height is None:
+                    break                       # the part is the new top of the stack
+                frame[2] = max(frame[2], height)
+            else:
+                stack.pop()
+                on_path.discard(id(frame[0]))
+                heights[id(frame[0])] = height = frame[2] + 1
+                if stack:
+                    stack[-1][2] = max(stack[-1][2], height)
+                else:
+                    top = height
+    except _Cycle:
+        return "cyclic"
+    if problem:
+        return problem
+    return "nested too deep" if check_depth and top > MAX_DEPTH else None
+
+
+def refuse_unstorable(*values, check_depth=True):
     """Raises StorageError("invalid", "schema") for a value that not every backend can keep the same way, so all of them refuse it alike."""
-    found = next((found for found in map(_unstorable, values) if found), None)
+    found = next((found for found in (_unstorable(value, check_depth) for value in values) if found), None)
     if found:
         raise StorageError("invalid", rule="schema", detail=found)
 
@@ -88,7 +130,8 @@ def check_names(record_id, author):
 
 def validate(table, doc):
     """Raises StorageError("invalid", rule, detail) for a document the table definitions refuse (REQ-SLY-004); put and the copies use it."""
-    refuse_unstorable(doc)
+    # a record of the graphs that is too deep is refused by check_record with its rule (schema_break, data), after the identity checks (REQ-GTB-027)
+    refuse_unstorable(doc, check_depth=table not in graph_tables.RECORD_TABLES)
     if table in graph_tables.RECORD_TABLES:         # the records of the graphs: put calls check_record again with what is stored
         broken = graph_tables.check_record(table, doc)
     else:

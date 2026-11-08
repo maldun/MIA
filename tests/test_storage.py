@@ -12,7 +12,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "helpers"))
 
 from markers import mark                         # noqa: E402
-from storage import Storage, StorageError, validate  # noqa: E402
+from storage import Storage, StorageError, refuse_unstorable, validate  # noqa: E402
 from storage_files import FileBackend            # noqa: E402
 
 LOOKUP = {"nodes": [{"id": "q", "kind": "data"}, {"id": "p", "kind": "process"}, {"id": "a", "kind": "data"}],
@@ -255,6 +255,72 @@ class StorageBehaviour:
                     self.store.put("workflows", "w", document, "anna")
         self.assertEqual((self.store.ids("graph_nodes"), self.store.ids("workflows")), ([], []))
 
+    @mark.req("REQ-SLY-013")
+    def test_one_depth_limit_of_200_levels_holds_for_every_table(self):
+        """TC-SLY-012 (F-20, fifth Verify run): only the graph tables had a depth limit; another table kept 600 levels or refused 990 with an accident.
+        Example: a workflows document nested 200 levels is version 1; at 201, 600 and 990 levels put is ("invalid", "schema", "nested too deep"); graph_nodes gives ("invalid", "schema_break", "data").
+        """
+        # Given: documents nested n levels (the document is level 1; of a graph node the record is level 1 and the value sits inside data)
+        def chain(levels):
+            value = {}
+            for _ in range(levels - 1):
+                value = {"k": value}
+            return value
+        def workflow(levels):
+            return {"nodes": [], "edges": [], "note": chain(levels - 1)}
+        def node(levels):
+            return {"id": "n", "data": {"type": "data", "value": chain(levels - 2)}}
+        # When / Then: 200 levels are stored as version 1 in both kinds of table
+        self.assertEqual(self.store.put("workflows", "w", workflow(200), "anna"), {"version": 1})
+        self.assertEqual(self.store.put("graph_nodes", "n", node(200), "anna"), {"version": 1})
+        # And: 201, 600 and 990 levels are refused with the rule of the table and nothing is stored
+        for levels in (201, 600, 990):
+            with self.subTest(levels=levels):
+                with self.assertRaises(StorageError) as other:
+                    self.store.put("workflows", "w2", workflow(levels), "anna")
+                self.assertEqual((other.exception.code, other.exception.rule, other.exception.detail), ("invalid", "schema", "nested too deep"))
+                with self.assertRaises(StorageError) as graph:
+                    self.store.put("graph_nodes", "n2", node(levels), "anna")
+                self.assertEqual((graph.exception.code, graph.exception.rule, graph.exception.detail), ("invalid", "schema_break", "data"))
+        self.assertEqual((self.store.ids("workflows"), self.store.ids("graph_nodes")), (["w"], ["n"]))
+
+    @mark.req("REQ-SLY-014")
+    def test_a_document_that_contains_itself_is_refused_within_a_second(self):
+        """TC-SLY-013 (F-19): a list that contains itself ran without end, a dict that contains itself twice was exponential.
+        Example: l = []; l.append(l) and d["a"] = d; d["b"] = d, as a workflows document or as the value of a graph node: put raises StorageError at once.
+        """
+        # Given: three documents that contain themselves
+        looping_list = []
+        looping_list.append(looping_list)
+        looping_dict = {}
+        looping_dict["a"] = looping_dict
+        looping_dict["b"] = looping_dict
+        node_dict = {}
+        node_dict["a"] = node_dict
+        node_dict["b"] = node_dict
+        calls = {"list": lambda: self.store.put("workflows", "w", looping_list, "anna"),
+                 "dict": lambda: self.store.put("workflows", "w", looping_dict, "anna"),
+                 "node value": lambda: self.store.put("graph_nodes", "n", {"id": "n", "data": {"type": "data", "value": node_dict}}, "anna")}
+        for label, call in calls.items():
+            # When: put runs in a thread, so a hang fails the test and does not stall the suite
+            outcome = []
+            def run(call=call):
+                try:
+                    call()
+                    outcome.append("stored")
+                except StorageError as err:
+                    outcome.append((err.code, err.rule))
+                except BaseException as err:         # a RecursionError is an accident, not a refusal
+                    outcome.append(type(err).__name__)
+            thread = threading.Thread(target=run, daemon=True)
+            thread.start()
+            thread.join(1.0)
+            # Then: it finished within the second with a refusal and nothing is stored
+            with self.subTest(document=label):
+                self.assertFalse(thread.is_alive(), "put did not finish within one second")
+                self.assertEqual(outcome, [("invalid", "schema")])
+        self.assertEqual((self.store.ids("workflows"), self.store.ids("graph_nodes")), ([], []))
+
     @mark.req("REQ-SLY-004")
     def test_a_refused_edit_consumes_no_version(self):
         self.store.put("workflows", "w", LOOKUP, "anna")
@@ -420,6 +486,26 @@ class StorageBehaviour:
         self.assertEqual(self.store.put("graphs", "h1", header("context", "c1"), "anna"), {"version": 1})
         for table, record_id in (("context_nodes", "c1"), ("context_edges", "e1")):
             self.assertEqual(code_of(lambda: self.store.delete(table, record_id, "anna")), ("immutable", None))
+
+
+class SharedContainers(unittest.TestCase):
+    @mark.req("REQ-SLY-014")
+    def test_a_document_that_names_the_same_object_many_times_is_scanned_in_linear_time(self):
+        """TC-SLY-013 (F-19): the walk goes through each shared container once, so a document of 2^30 paths cannot make the check exponential.
+        Example: 30 levels, each naming the next one twice (the same object): the check answers in under a second and finds nothing wrong.
+        """
+        # Given: 30 levels in which every level names the level below twice
+        document = {}
+        for _ in range(30):
+            document = {"a": document, "b": document}
+        # When: the check of what a backend cannot keep runs in a thread (a hang fails the test)
+        outcome = []
+        thread = threading.Thread(target=lambda: outcome.append(refuse_unstorable(document)), daemon=True)
+        thread.start()
+        thread.join(1.0)
+        # Then: it finished within the second and the document is fine (31 levels)
+        self.assertFalse(thread.is_alive(), "the check did not finish within one second")
+        self.assertEqual(outcome, [None])
 
 
 class FileStorage(StorageBehaviour, unittest.TestCase):

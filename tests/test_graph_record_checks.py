@@ -240,7 +240,9 @@ class RecordCheckRemoteReference(unittest.TestCase):
 
         Example: {"$defs": {"s": {"type": "string"}}, "properties": {"x": {"$ref": "#/$defs/s"}}}: x 1 -> schema_break "x", x "a" -> None.
         """
+        # Given: a category whose schema refers to its own `$defs`
         categories = {"entity": {"type": "object", "$defs": {"s": {"type": "string"}}, "properties": {"x": {"$ref": "#/$defs/s"}}}}
+        # When / Then: the reference is followed, so a wrong x is named and a right x passes
         self.assertEqual(graph_tables.check_record("context_nodes", {"id": "n", "data": {"type": "entity", "x": 1}}, categories=categories),
                          {"rule": "schema_break", "detail": "x"})
         self.assertIsNone(graph_tables.check_record("context_nodes", {"id": "n", "data": {"type": "entity", "x": "a"}}, categories=categories))
