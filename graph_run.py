@@ -20,13 +20,20 @@ RunResult = namedtuple("RunResult", "status named named_status values")
 
 class GraphRunner:
     def __init__(self, trust):
-        self.trust = trust      # used by T-04 (REQ-RUN-017), not yet
+        self.trust = trust
 
     def run(self, graph, nodes, inputs):
         kinds = {n["id"]: n["data"]["type"] for n in graph["nodes"]}
         reads = {i: [] for i in kinds}
         for edge in graph["edges"]:
             reads[edge["to"]].append(edge["from"])
+        # REQ-RUN-017: check every transform and master node before the first one runs. Any status except "trusted"
+        # counts as untrusted, so an unknown status never lets a node run.
+        refused = {i: self.trust(i) for i, k in kinds.items() if k != "data"}
+        refused = {i: s for i, s in refused.items() if s != "trusted"}
+        if refused:
+            named = [i for i in order_of(graph) if i in refused]
+            return RunResult("refused", named, refused[named[0]], _data_values(kinds, dict(inputs)))
         values = dict(inputs)
         for node_id in order_of(graph):
             if kinds[node_id] == "data":
