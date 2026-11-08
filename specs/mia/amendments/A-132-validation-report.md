@@ -17,7 +17,7 @@ Code state, audio device: Firefox on this system; the device name was not given,
 ## Provisional requirements settled (M37)
 | Requirement | Proposed value | Settled by | Observed | Result |
 |---|---|---|---|---|
-| REQ-VPB-006 | 3 s (`STOP_DROP_MS`) | VAL-006 session | no opinion on too long or too short | **confirmed as is** by the owner's acceptance (2026-11-08): the 3 s stays; no measurement and no opinion on the length were given, so the accepted risk of A-136 stays as recorded (follow-up under VAL-006) |
+| REQ-VPB-006 | 3 s (`STOP_DROP_MS`) | VAL-006 session | the stop window was never the limit in use | **confirmed** by the owner (2026-11-08): "3 s is fine, in practice it never needed 3 s" (the owner's observation in use, no measurement); the value stays, the accepted risk of A-136 stays as recorded (follow-up under VAL-006) |
 
 ## Quality in use
 | Dimension | Observed | Contexts not covered |
