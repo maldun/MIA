@@ -159,7 +159,7 @@ The PostgreSQL database and the one door to it (IF-102): immutable versions, acc
 - Verification method: Test
 - Acceptance criterion: AC-16: a document whose deepest value (an object, a list or a scalar; the document is level 1 and every value below it is one level deeper than its parent) is at level 200 is stored, one whose deepest value is at level 201, 600 or 990 is refused as StorageError `invalid` and nothing is stored, for a graph table (rule `schema_break`, detail `data`) and for another table (rule `schema`, detail `nested too deep`), on the file backend and on PostgreSQL (exact)
 - Verified by: TC-SLY-012
-- Status: Draft
+- Status: Verified
 - History: G-V2.STORE Verify F-20, 2026-11-08, new (A-100, proposed)
 
 ### REQ-SLY-014 – A document that contains itself
@@ -171,7 +171,7 @@ The PostgreSQL database and the one door to it (IF-102): immutable versions, acc
 - Verification method: Test
 - Acceptance criterion: AC-16: a list or dict that contains itself, also twice in one dict, is refused as StorageError `invalid` within one second for a graph table and for another table, on the file backend and on PostgreSQL, and nothing is stored (exact, time limit 1 s)
 - Verified by: TC-SLY-013
-- Status: Draft
+- Status: Verified
 - History: G-V2.STORE Verify F-19, 2026-11-08, new (A-100, proposed)
 
 ### REQ-SLY-015 – Size of a document
@@ -183,5 +183,5 @@ The PostgreSQL database and the one door to it (IF-102): immutable versions, acc
 - Verification method: Test
 - Acceptance criterion: AC-16: a document with 100,000 values is stored, one with 100,001 is refused as StorageError `invalid` and nothing is stored, for a graph table (rule `schema_break`, detail `data`) and for another table (rule `schema`, detail `too large`); a document that names the same child twice on 30 levels is refused within one second, on the file backend and on PostgreSQL (exact, time limit 1 s)
 - Verified by: TC-SLY-014
-- Status: Draft
+- Status: Verified
 - History: G-V2.STORE Verify F-22, 2026-11-08, new (A-102, proposed)

@@ -95,7 +95,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-31: a node written and read has the same ID and JSON field, the type is present (exact)
 - Verified by: TC-GTB-016
-- Status: Draft
+- Status: Verified
 - History: G-V2 Plan step 1 (2026-11-07), new; Step 3 (2026-11-07): Verified by TC-GTB-016 instead of TC-GTB-005, which is the existing check of REQ-GTB-004 (ID collision)
 
 ### REQ-GTB-006 – Edge records
@@ -108,7 +108,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-31: an edge read back has the same four fields (exact)
 - Verified by: TC-GTB-006
-- Status: Draft
+- Status: Verified
 - History: G-V2 Plan step 1 (2026-11-07), new
 
 ### REQ-GTB-007 – Fields of transform nodes
@@ -121,7 +121,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-31: a transform node read back names the same toolbox ID (exact)
 - Verified by: TC-GTB-007
-- Status: Draft
+- Status: Verified
 - History: G-V2 Plan step 1 (2026-11-07), new
 
 ### REQ-GTB-008 – Fields of master nodes
@@ -134,7 +134,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-31: a master node read back has the same definition and stopping criterion (exact)
 - Verified by: TC-GTB-008
-- Status: Draft
+- Status: Verified
 - History: G-V2 Plan step 1 (2026-11-07), new
 
 ### REQ-GTB-009 – Class from type ID
@@ -147,7 +147,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-31: a node of each type is rebuilt with that class and equal values (exact)
 - Verified by: TC-GTB-009
-- Status: Draft
+- Status: Verified
 - History: G-V2 Plan step 1 (2026-11-07), new
 
 ### REQ-GTB-010 – Unknown type
@@ -160,7 +160,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-31: a node with the type ID 'x.unknown' is refused with that ID (exact)
 - Verified by: TC-GTB-010
-- Status: Draft
+- Status: Verified
 - History: G-V2 Plan step 1 (2026-11-07), new
 
 ### REQ-GTB-011 – Types as schemas
@@ -173,7 +173,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-31: a node whose field breaks its schema is refused naming the path of the field (exact)
 - Verified by: TC-GTB-011
-- Status: Draft
+- Status: Verified
 - History: G-V2 Plan step 1 (2026-11-07), new
 
 ### REQ-GTB-012 – No language-specific serialisation
@@ -186,7 +186,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Inspection
 - Acceptance criterion: AC-31: no module of the Graph tables imports pickle, marshal or shelve (inspection, exact)
 - Verified by: TC-GTB-012
-- Status: Draft
+- Status: Verified
 - History: G-V2 Plan step 1 (2026-11-07), new
 
 ### REQ-GTB-013 – Versions kept
@@ -199,7 +199,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-31: after an edit versions n and n+1 both exist and version n is unchanged (exact)
 - Verified by: TC-GTB-013
-- Status: Draft
+- Status: Verified
 - History: G-V2 Plan step 1 (2026-11-07), new
 
 ### REQ-GTB-014 – Rebuilt equals stored
@@ -212,7 +212,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-31: property test on generated graphs: write, read, rebuild, equal (exact)
 - Verified by: TC-GTB-014
-- Status: Draft
+- Status: Verified
 - History: G-V2 Plan step 1 (2026-11-07), new
 
 ### REQ-GTB-015 – Document form during the transition
@@ -225,7 +225,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-31: the contract suites of IF-301 v1 and IF-203 v0 still pass unchanged on converted skills (exact)
 - Verified by: TC-GTB-015
-- Status: Draft
+- Status: Verified
 - History: G-V2 Plan step 1 (2026-11-07), new; 2026-11-07 review: IF-203 v1 corrected to v0, the old interface, consistent with A-90 (owner approved)
 
 ### REQ-GTB-016 – A refused edit changes nothing
@@ -238,7 +238,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-31: after a refused edit the latest version number is the one before the edit and its content is unchanged (exact)
 - Verified by: TC-GTB-017
-- Status: Draft
+- Status: Verified
 - History: G-V2.STORE Plan step 3 review (2026-11-07), new
 
 ### REQ-GTB-017 – Graph header with pinned members
@@ -251,7 +251,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-31: a graph header read back has the same fields and members; after one node is edited and a new header version is stored, header version 1 still names the old node version and reads the old node (exact)
 - Verified by: TC-GTB-018
-- Status: Draft
+- Status: Verified
 - History: G-V2.STORE Plan step 3, 2026-11-07, new (D-264: found by the MODEL session, IF-301 v2 draft)
 
 ### REQ-GTB-018 – Skill table
@@ -264,7 +264,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-31: a skill written and read back has the same four fields; an edit is a new version and the earlier one is unchanged; a record without a command is refused naming the field (exact)
 - Verified by: TC-GTB-019
-- Status: Draft
+- Status: Verified
 - History: G-V2.STORE Plan step 3, 2026-11-07, new (D-264: found by the MODEL session, IF-301 v2 draft)
 
 ### REQ-GTB-019 – Header names stored members
@@ -277,7 +277,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-31: a header that names n1 at version 5 when n1 has only versions 1 and 2 is refused naming n1; the same header with version 2 is accepted (exact)
 - Verified by: TC-GTB-020
-- Status: Draft
+- Status: Verified
 - History: G-V2.STORE Plan step 3, 2026-11-07, new (D-264: found by the MODEL session, IF-301 v2 draft)
 
 ### REQ-GTB-020 – Edge names stored nodes
@@ -290,7 +290,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-31: an edge from n1 to n9, with only n1 stored, is refused naming n9; the same edge with n9 stored is accepted (exact)
 - Verified by: TC-GTB-021
-- Status: Draft
+- Status: Verified
 - History: G-V2.STORE Plan step 4, 2026-11-07, new (D-266)
 
 ### REQ-GTB-021 – Record under its own ID
@@ -303,7 +303,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-31: a node whose own ID is n1, written under the record ID x, is refused naming `id` and nothing is stored under x; written under n1 it is accepted (exact)
 - Verified by: TC-GTB-022
-- Status: Draft
+- Status: Verified
 - History: G-V2.STORE Implement T-04, 2026-11-07, new (A-92, proposed)
 
 ### REQ-GTB-022 – Fixed fields of a node
@@ -316,7 +316,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-31: a data node with a field `foo` and a data node with a key `id` inside its JSON field are refused as `schema_break` naming `foo` and `id`, when written and when read; the same nodes without the field are accepted (exact)
 - Verified by: TC-GTB-023
-- Status: Draft
+- Status: Verified
 - History: G-V2.STORE Verify F-01, 2026-11-07, new (A-93, proposed)
 
 ### REQ-GTB-023 – Context graph tables
@@ -329,7 +329,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-31: the definitions of the Graph tables list six record tables; a context node written twice has the versions 1 and 2; a delete of a context node or edge is refused as immutable (exact)
 - Verified by: TC-GTB-024
-- Status: Draft
+- Status: Verified
 - History: G-V2.STORE Verify F-02/F-09, 2026-11-08, new (A-98, proposed)
 
 ### REQ-GTB-024 – Context record shape
@@ -342,7 +342,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-31: a context node with data {} is refused naming `type`, one without data naming `data`, an edge without `to` naming `to`; the same records with the field are accepted (exact)
 - Verified by: TC-GTB-025
-- Status: Draft
+- Status: Verified
 - History: G-V2.STORE Verify F-02/F-09, 2026-11-08, new (A-98, proposed)
 
 ### REQ-GTB-025 – Context edge ends
@@ -355,7 +355,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-31: an edge from c1 to c9 with only c1 stored is refused naming `c9`, also when a workflow node has the ID c9; an edge between stored context nodes is accepted (exact)
 - Verified by: TC-GTB-026
-- Status: Draft
+- Status: Verified
 - History: G-V2.STORE Verify F-02/F-09, 2026-11-08, new (A-98, proposed)
 
 ### REQ-GTB-026 – Context header members
@@ -368,7 +368,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-31: a context header naming c9 with only c1 stored is refused naming `c9`; a workflow header naming the context node c1 is refused naming `c1`; a context header naming c1 is accepted (exact)
 - Verified by: TC-GTB-027
-- Status: Draft
+- Status: Verified
 - History: G-V2.STORE Verify F-02/F-09, 2026-11-08, new (A-98, proposed)
 
 ### REQ-GTB-027 – Input that cannot be checked
@@ -381,7 +381,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-31: a data node whose deepest value is at level 300 is refused naming `data`, one at level 150 or exactly at level 200 is accepted, one at level 201 is refused (a level is the record, an object, a list or a scalar: the record is level 1 and every value below it is one level deeper than its parent, so a scalar in the 200th object is level 201); a category whose schema is {"type": 5} is refused naming `type`; nothing raises (exact)
 - Verified by: TC-GTB-028
-- Status: Draft
+- Status: Verified
 - History: G-V2.STORE Verify F-02/F-09, 2026-11-08, new (A-98, proposed); 2026-11-08 the acceptance criterion says what a level is (F-23, A-104)
 
 ### REQ-GTB-028 – Size of a record
@@ -394,5 +394,5 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-31: a data node whose value is a list of 99,995 numbers (100,000 values with the record, its id, its data object, its type and the list) is accepted, one of 99,996 is refused naming `data`; a record that names the same child twice on 30 levels (2**30 paths) is refused naming `data` within 5 s; nothing raises (exact)
 - Verified by: TC-GTB-029
-- Status: Draft
+- Status: Verified
 - History: G-V2.STORE Verify F-22, 2026-11-08, new (A-102, proposed)

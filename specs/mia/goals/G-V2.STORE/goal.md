@@ -82,10 +82,10 @@ Top-level items it serves: FR-40. Requirements by ID (inside G-V2's scope):
 |---|---|---|
 | Explore | done | HLS of iteration 2 approved 2026-11-05 (D-186) |
 | Plan | done | requirements REQ-GTB-005..020 and checks approved (D-265..D-267); red tests, IF-301 v2 mock and suite installed (tag `plan-baseline-it2-store`); A-90 contract text installed; `plan.md` approved 2026-11-07 |
-| Implement | done | T-01 to T-13 done (`implementation-log.md`); A-91 to A-104 installed; hand-over to Verify |
-| Verify | open | |
-| Commit | open | |
-| Deploy | open | |
+| Implement | done | T-01 to T-16 done (`implementation-log.md`); A-91 to A-104 installed |
+| Verify | done | `goals/G-V2.STORE/verification-report.md`: nine runs by fresh reviewers; the ninth (commit `4fdcccf`, code as of T-16 `29abd08`) is **Verified with accepted deviations**; the deviations are F-13(a), F-07, F-08 and F-18, accepted by the owner on 2026-11-08; the owner merged the branch after the ninth run |
+| Commit | done | master merged into `goal/v2.store` without conflicts (`b5e687b`); trace_check 547 = master 544 + TC-SLY-012..014 (known), goal and contract suites, PostgreSQL (43, no skip) and JS tests green; merged into master by the owner as `b250450` on 2026-11-08; no version and no tag (subgoal of G-V2); requirement statuses Draft to Verified in this update |
+| Deploy | empty | a storage layer inside the backend: nothing that users can reach on its own; it is delivered with the iteration goal G-V2 |
 | Validate | open | |
 
 ## Joint amendments
