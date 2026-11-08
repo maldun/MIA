@@ -26,7 +26,7 @@ Phase: **Plan, Step 5 drafted**, supervised, both subgoals. Reviewer name in the
 | TC-CHA-040..048, 050..052, 055..063 | written, installed, red (stubs `skill_digest.py`, `ChatService.skill_turn`, `model_history`) |
 | TC-CLV JS part (030, 031, 032, 033, 034, 039, 044) | written, installed, red (stub `skill-run-model.js` throws) |
 | TC-CLV browser part (030, 032, 035, 036, 037, 040, 041, 042, 043, 045, 046, 047) | written, installed, red (all fail at the first missing page hook); the assertions behind the first lookup are not yet checked against a page |
-| **TC-WFM-136**, **TC-CLV-038** | **not written**: after the T-03 spike of PANEL (the events of a skill today; how a test starts the real backend on file-backed storage with a seeded run record) |
+| **TC-WFM-136**, **TC-CLV-038** | **not written yet**; the T-03 spike note `goals/G-V3.PANEL/skill-events-today.md` is **approved** (D-309): TC-WFM-136 against a `SkillRunObserver` (new module `skill_run_observer.py`, called at six places of `ChatService._do_chat`), phases only by exact declared name, optional `elements` argument of `TaskMonitor.update`; TC-CLV-038 with a new stub `ui/tools/real_backend_stub.py` (data folder, seeded account, started twice), to be tried first |
 | scorer and target of EV-skill_turns: TC-CHA-064..067 (`tests/acceptance/test_digest_score.py`) | written, installed, red (stubs `digest_score.py`, `Harness._digest` raise NotImplementedError); note `goals/G-V3.CHAT/eval-target-note.md` approved; new draft spec items TC-CHA-064..067 (N-2.2 test-spec) and TR-CHAT-008 for the owner's review |
 | AC-39 integration check | not written (CHAT T-06) |
 
