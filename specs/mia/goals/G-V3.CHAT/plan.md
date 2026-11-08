@@ -1,6 +1,6 @@
 # Plan: G-V3.CHAT (the spoken-only chat and the digest step)
 
-**Goal:** specs/mia/goals/G-V3.CHAT/goal.md   **Requirements:** REQ-BE-078 (N-2), REQ-CHA-040..063, REQ-CHA-008 and 014 (rev B), REQ-WFM-036 (N-2.2, N-2.3), IF-201 v3 (A-142), THR-012, `SkillDigestStep` in `architecture.sysml`   **Test specs:** `nodes/N-2-backend/nodes/N-2.2-chat-agent/test-spec.md` (TC-CHA-040..063, EV-skill_turns), `eval-spec.md`, `test-requirements.md` (TR-CHAT-001..007)   **Status:** Draft (for the owner's review)
+**Goal:** specs/mia/goals/G-V3.CHAT/goal.md   **Requirements:** REQ-BE-078 (N-2), REQ-CHA-040..063, REQ-CHA-008 and 014 (rev B), REQ-WFM-036 (N-2.2, N-2.3), IF-201 v3 (A-142), THR-012, `SkillDigestStep` in `architecture.sysml`   **Test specs:** `nodes/N-2-backend/nodes/N-2.2-chat-agent/test-spec.md` (TC-CHA-040..063, EV-skill_turns), `eval-spec.md`, `test-requirements.md` (TR-CHAT-001..007)   **Status:** Approved (owner maldun, 2026-11-08, task by task in two batches, D-308)
 
 Line of work `goal/v3.chat`; supervised throughout (no unsupervised prompt-tuning subgoal, owner Q-10). The red tests were written first in a session of their own (Step 4, commit `f7953ca`) and installed by the owner; the implementing sessions never edit `tests/acceptance/`, `tests/helpers/`, `contracts/`, `eval/suites/`, `eval/baselines/`, red-team cases or `test-requirements.md`, never set truth labels, and never read, run or tune on the holdout (TR-CHAT-002). CHAT works against the mock of IF-101 v16 and the recorder of PANEL only through the interfaces; the real hook-up is an integration step after both subgoals are merged (T-06).
 
@@ -43,7 +43,7 @@ The stubs carry the interface the installed tests expect; the tasks replace the 
 ### T-03: History for the chat model
 - Implements: REQ-CHA-046, REQ-CHA-059
 - Tests to turn green: TC-CHA-046, TC-CHA-059
-- Touches: `chat_service.py` (`model_history`); the one call in `communicator.py` that takes the messages of a run from `model_history()` (outside the service: ask the owner before this part, CLAUDE.md "files outside the task's bounds")
+- Touches: `chat_service.py` (`model_history`); the one call in `communicator.py` that takes the messages of a run from `model_history()` (outside the service; **the owner gave the go-ahead for this one call on 2026-11-08, D-308**; any other change there stops and reports)
 - Must not touch: protected material, the memory and summary logic of `communicator.py` beyond that call
 - Depends on: T-02
 - Done when: the listed tests are green, `tests/test_chat_memory.py` and all other tests unchanged
@@ -51,12 +51,12 @@ The stubs carry the interface the installed tests expect; the tasks replace the 
 
 ### T-04: Harness target and scorer of EV-skill_turns
 - Implements: the means to decide REQ-CHA-049, 053, 054 (not the requirements themselves)
-- Tests to turn green: new acceptance tests of the scorer, written first in a session of their own (Step 4b) after the owner approves the note of the first step; then `python tools/eval.py list` shows `skill_turns` with a target other than `pending`
-- Touches: `harness.py`, `metrics.py` (a target kind for the digest step and the scorer: the hard checks of TR-CHAT-004 (every number and quoted name occurs in the full result, no table or log line, a link only from code) and the people's labels for `faithful` and `persona`, `pass` for the injected-instruction cases), `tools/eval.py`
+- Tests to turn green: TC-CHA-064 to 067 (`tests/acceptance/test_digest_score.py`, written in Step 4 and installed, commit `a6884aa`); then `python tools/eval.py list` shows `skill_turns` with a target other than `pending`
+- Touches: `harness.py` (`Harness._digest`, replacing the stub), a new `digest_score.py` (replacing the stub), a generator and an apply script for the label form in `tools/`, `tools/eval.py`; the scorer is: ( the hard checks of TR-CHAT-004 (every number and quoted name occurs in the full result, no table or log line, a link only from code) and the people's labels for `faithful` and `persona`, `pass` for the injected-instruction cases), `tools/eval.py`
 - Must not touch: protected material, `eval/suites/` (the suite target in `suite.json` is the owner's to change), `eval/baselines/`, the decision rules
 - Depends on: T-01
 - Done when: the scorer's tests are green; a dry run on the dev split with a scripted model runs end to end; nothing of the holdout is run
-- Notes: **a new part: stop and ask the owner before the first line** (CLAUDE.md "a task needs a new part"): a spike writes a short note first (target kind, fields of a case input, where the labels are read); the rule `both` of REQ-CHA-053 and 054 needs a baseline file with outputs: the empty baseline of D-304 gives NOT DECIDED or FAIL in `eval_decide.py`, which the owner decides (change of the rule or acceptance); no threshold, repeat, seed or n is changed to get a PASS
+- Notes: the note `eval-target-note.md` is approved (2026-11-08): a target `digest` on the production step, hard checks of TR-CHAT-004 plus the owner's labels in `eval/labels/` (set only by the owner; key: case and SHA-1 of the output); an unlabelled injection case is `open`; the rule `both` of REQ-CHA-053 and 054 needs a baseline file with outputs: the empty baseline of D-304 gives NOT DECIDED or FAIL in `eval_decide.py`, which the owner decides (change of the rule or acceptance); no threshold, repeat, seed or n is changed to get a PASS
 
 ### T-05: Dev runs and prompt tuning
 - Implements: REQ-CHA-049, 053, 054 as feedback (the holdout decides in Verify)
@@ -77,11 +77,9 @@ The stubs carry the interface the installed tests expect; the tasks replace the 
 - Notes: until this task the two subgoals meet only through the contracts and their mocks (the cost of the split, recorded in G-V3)
 
 ## Split check
-6 tasks, within the usual 8; T-04 and T-05 are the model-dependent half and need Ollama; T-01 to T-03 need none (fake model). No further cut proposed.
+6 tasks, within the usual 8; T-04 and T-05 are the model-dependent half and need Ollama; T-01 to T-03 need none (fake model). **Decided by the owner (2026-11-08, D-308): keep one plan.** `goal_check` warns GL11 (29 requirements in scope, no subgoals) since the scope rows were added; the goal's Split check already says keep together, and no row is added to the approved goal (the warning stays as a known one).
 
 ## Open before Implement starts
-1. The harness target and scorer of EV-skill_turns (T-04) are a new part: the owner approves the note first.
-2. The rule `both` of REQ-CHA-053 and 054 against the empty baseline.
-3. The suite size for `test_harness.ShippedSuites`: `"starter": true` in the two `suite.json` files (24 cases per split are the agreed n).
-4. The call in `communicator.py` (T-03) is outside the Chat agent service: owner's go-ahead at the start of that task.
-5. The integration check of AC-39 (T-06) and the scorer tests (T-04) are written outside the implementing sessions.
+1. The integration check of AC-39 (T-06) is written outside the implementing session (Step 4b), before T-06 starts; it is not needed for T-01 to T-05.
+2. After T-04 the owner sets `"target": {"kind": "digest"}` in the two `suite.json` of `skill_turns` (one-line command, no case text) and creates `eval/labels/`; the labelling of dev outputs is the owner's work for T-05.
+(Closed on 2026-11-08: the harness target and scorer note, the `starter` flag, the rule `both` kept (D-306), the one call in `communicator.py` allowed.)
