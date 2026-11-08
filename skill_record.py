@@ -6,7 +6,13 @@ A skill record names the command, the workflow graph and the context graph of a 
 
 from collections import namedtuple
 
-StoreResult = namedtuple("StoreResult", "stored version named")
+try:
+    from .storage import StorageError
+except ImportError:  # used as plain script / in tests
+    from storage import StorageError
+
+# `named` lists the other skills of a command clash; `rule` and `detail` are those of a StorageError("invalid") of the record checks.
+StoreResult = namedtuple("StoreResult", "stored version named rule detail", defaults=(None, None))
 
 SKILLS = "skills"
 # The fake tables only know one ID at a time, so the IDs of all skills are kept in one index record; the Storage layer lists them itself.
@@ -36,9 +42,14 @@ class SkillRecords:
         if named:
             return StoreResult(False, None, named)
         if self.real:
-            # A record that the record checks of the Storage layer refuse raises StorageError("invalid", rule, detail): nothing is stored.
+            # A record the record checks of the Storage layer refuse is a refused result like the clash, nothing is stored; other errors raise.
             data = {key: value for key, value in record.items() if key != "id"}
-            version = self.tables.put(SKILLS, skill_id, {"id": skill_id, "data": data}, self.author)["version"]
+            try:
+                version = self.tables.put(SKILLS, skill_id, {"id": skill_id, "data": data}, self.author)["version"]
+            except StorageError as refusal:
+                if refusal.code != "invalid":
+                    raise
+                return StoreResult(False, None, [], refusal.rule, refusal.detail)
         else:
             version = self.tables.put(SKILLS, skill_id, record)
             if skill_id not in self.ids():

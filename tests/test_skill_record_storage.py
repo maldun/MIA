@@ -190,19 +190,29 @@ class SkillRecordOnRealStorage:
         self.assertEqual(real, {"saved": (True, 1), "value": "text", "parameters": {"folder": "out"}})
 
     @mark.req("REQ-WFM-040")
-    def test_a_record_the_record_checks_refuse_is_not_stored(self):
+    def test_a_record_the_record_checks_refuse_is_a_refused_result_and_not_stored(self):
         """Finding for TR-MODEL-001: the record checks of IF-301 v2 refuse a skill without a context graph ID; the fake takes it.
 
-        Example: a skill with no `context_graph_id` raises StorageError invalid on the real side and the ID list stays empty; the fake lists it.
+        Example: a skill with no `context_graph_id` gives a refused result with the rule and detail of the Storage refusal, the ID stays unknown and the list empty; the fake stores it.
         """
-        # Given: a skill record without context_graph_id
+        # Given: a skill record without context_graph_id, and the refusal the Storage layer itself gives for its document
         broken = {"id": "lookup", "command": "/lookup", "workflow_graph_id": "wf-lookup"}
+        with self.assertRaises(StorageError) as expected:
+            self.storage.put("skills", "lookup", {"id": "lookup", "data": {k: v for k, v in broken.items() if k != "id"}}, AUTHOR)
+        self.assertEqual(expected.exception.code, "invalid")
         # When: it is stored on the real side
-        with self.assertRaises(StorageError) as caught:
-            self.records.store(broken)
-        # Then: it is refused as invalid and nothing is listed
-        self.assertEqual(caught.exception.code, "invalid")
+        result = self.records.store(broken)
+        # Then: it is a refused result (no exception) carrying the rule and detail of the refusal, nothing stored
+        self.assertEqual((result.stored, result.version, result.named), (False, None, []))
+        self.assertEqual((result.rule, result.detail), (expected.exception.rule, expected.exception.detail))
         self.assertEqual(self.records.ids(), [])
+        with self.assertRaises(StorageError) as unknown:
+            self.records.read("lookup")
+        self.assertEqual(unknown.exception.code, "not_found")
+        # And: another refusal of the Storage layer (an unknown table) still raises
+        with self.assertRaises(StorageError) as other:
+            SkillRecords(self.storage, AUTHOR).tables.put("no_such_table", "x", {"id": "x"}, AUTHOR)
+        self.assertEqual(other.exception.code, "unknown_table")
         # And: the fake accepts it (the known gap of the fake, which checks nothing)
         self.assertTrue(self.fake_records.store(broken).stored)
 
