@@ -647,3 +647,8 @@ The first version was silent until the end and could take 20 minutes or more: th
 | TC-CHA-051 | check | fec02b6152fe | maldun | 2026-11-08 | approved | G-V3.CHAT checks round 4 |
 | TC-CHA-052 | check | 736ab7fe6a3d | maldun | 2026-11-08 | approved | G-V3.CHAT checks round 4 |
 | TC-CHA-058 | check | 2fe87ef8a71e | maldun | 2026-11-08 | approved | G-V3.CHAT checks round 4 |
+| TC-CHA-059 | check | 74f30453a6ab | maldun | 2026-11-08 | approved | G-V3.CHAT checks round 5 |
+| TC-CHA-060 | check | eb9a74539267 | maldun | 2026-11-08 | approved | G-V3.CHAT checks round 5 |
+| TC-CHA-061 | check | 68df90299f69 | maldun | 2026-11-08 | approved | G-V3.CHAT checks round 5 |
+| TC-CHA-062 | check | 3286b06eae16 | maldun | 2026-11-08 | approved | G-V3.CHAT checks round 5 |
+| TC-CHA-063 | check | 7d30401ccf2e | maldun | 2026-11-08 | approved | G-V3.CHAT checks round 5 |
