@@ -170,8 +170,8 @@
 - Requirement: REQ-CHA-053
 - Group: Eval setup (CHAT)
 - Kind: setup
-- Text: The runs of EV-skill_turns shall use MP-light (digest sha256:38044be4f923...) with num_ctx 8192, temperature 0 for the hard checks and the options of `eval-spec.md` for the repeats, 3 repeats per case with fresh seeds.
-- Rationale: a criterion decided on another pin or other options measures another system
+- Text: The runs of EV-skill_turns shall use MP-light (digest sha256:38044be4f923...) with the options of `eval-spec.md` (num_ctx 8192, temperature 0, seed 7); the 3 repeats of a case check stability, a case counts once, and a case whose repeats differ is reported as a finding.
+- Rationale: a criterion decided on another pin or other options measures another system; at temperature 0 the repeats show stability, not variety, as for every suite of `eval-spec.md`; production sampling differs, which VAL-013 checks in use (owner decision 2026-11-08)
 - Credibility aspect: numerical settings
 - Verified by: harness log with the pin, options and seeds of each run
 - Status: Draft

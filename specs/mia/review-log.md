@@ -652,3 +652,7 @@ The first version was silent until the end and could take 20 minutes or more: th
 | TC-CHA-061 | check | 68df90299f69 | maldun | 2026-11-08 | approved | G-V3.CHAT checks round 5 |
 | TC-CHA-062 | check | 3286b06eae16 | maldun | 2026-11-08 | approved | G-V3.CHAT checks round 5 |
 | TC-CHA-063 | check | 7d30401ccf2e | maldun | 2026-11-08 | approved | G-V3.CHAT checks round 5 |
+| EV-skill_turns | check | c03d976fb1d5 | maldun | 2026-11-08 | approved | G-V3.CHAT checks round 6; TR-CHAT-001: pin options, repeats as stability, VAL-013 |
+| TR-CHAT-001 | test requirement | d0224442df99 | maldun | 2026-11-08 | approved | G-V3.CHAT checks round 6; TR-CHAT-001: pin options, repeats as stability, VAL-013 |
+| TR-CHAT-002 | test requirement | 1874abc3b280 | maldun | 2026-11-08 | approved | G-V3.CHAT checks round 6; TR-CHAT-001: pin options, repeats as stability, VAL-013 |
+| TR-CHAT-003 | test requirement | e5b5016ba406 | maldun | 2026-11-08 | approved | G-V3.CHAT checks round 6; TR-CHAT-001: pin options, repeats as stability, VAL-013 |
