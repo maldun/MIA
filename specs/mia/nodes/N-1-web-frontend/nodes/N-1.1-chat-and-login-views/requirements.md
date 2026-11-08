@@ -282,19 +282,235 @@ The chat page: messages, queue, history, status line, voting, tasks and memos, e
 - Status: Draft
 - Quality: interaction capability measure: figures of the card readable without horizontal scrolling; target: all of them at a width of 360 px; context: the owner's phone in the home network
 - Relaxed: TD-01
-- Target: the card is drawn and updated in place, with pause, resume and stop, in a browser test; and it is still there, with its final figures, after a reload
+- Target: the card is still there, with its final figures, after a reload (browser test)
 - History: A-24 new
+- Proposed (A-131, G-V3.PANEL, 2026-11-08): superseded by REQ-CLV-030 to REQ-CLV-039 once A-131 is approved; the card leaves the chat and the reload target of TD-01 is met by REQ-CLV-038.
 
 ### REQ-CLV-024 – Files list
 - Level: low   Subject: WebFrontEnd
-- Text: The Chat and login views shall list the files of the files volume in the workspace with name, size, time and task, offer each as a download, show a new file without a reload from the event files_changed, and offer no way to delete a file.
-- Rationale: refines REQ-FE-018; generated files are not buttons on a message (owner 2026-10-29), deleting is done in the volume
+- Text: The Chat and login views shall list the files of the run shown in the Full run part of the Skill run view with name, size, time and task, offer each as a download, show a new file without a reload from the event files_changed, and offer no way to delete a file.
+- Rationale: refines REQ-FE-018; generated files are not buttons on a message (owner 2026-10-29); deleting is done in the volume; the list lives in the view (A-131)
 - Parent: REQ-FE-018
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-17: the list of the mock is drawn newest first, each entry links to /api/files/<name>, an event files_changed draws the list again, no delete control exists (exact)
+- Acceptance criterion: AC-17 and AC-39: the list of the mock is drawn newest first inside the Full run part, each entry links to /api/files/<name>, an event files_changed draws the list again, no delete control exists (exact)
 - Verified by: TC-CLV-024
 - Status: Draft
-- Relaxed: TD-02
-- Target: the list, the download link and the redraw after files_changed are checked in a browser test
-- History: A-24 new
+- History: A-24 new; A-131 (proposed 2026-11-08): the list moves from the Files tab into the Full run part
+
+### REQ-CLV-030 – Run header
+- Level: low   Subject: WebFrontEnd
+- Text: The Chat and login views shall show in the header line of the Skill run view the skill name, the start time and the state of the run.
+- Rationale: refines REQ-FE-032 (FR-46, A-131); owner layout of 2026-11-08, mockup `explore-skill-rework/forms/skill-run-view-mockup.html`
+- Parent: REQ-FE-032
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: the header of a scripted run shows name, start time and the states running, paused, done, failed and stopped as the mock reports them (exact)
+- Verified by: TC-CLV-030
+- Status: Draft
+- History: A-131 (proposed 2026-11-08, G-V3.PANEL), new
+
+### REQ-CLV-031 – Phases of a run
+- Level: low   Subject: WebFrontEnd
+- Text: The Chat and login views shall show the declared phases of a run as pills in the Skill run view and mark the current phase and the phase of a failure or stop.
+- Rationale: refines REQ-FE-032 (FR-46, A-131); owner layout of 2026-11-08, mockup `explore-skill-rework/forms/skill-run-view-mockup.html`
+- Parent: REQ-FE-032
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: a scripted run with three phases shows three pills; the second is marked while it runs; a failure in the third marks the third (exact)
+- Verified by: TC-CLV-031
+- Status: Draft
+- History: A-131 (proposed 2026-11-08, G-V3.PANEL), new
+
+### REQ-CLV-032 – Budgets and counts of a run
+- Level: low   Subject: WebFrontEnd
+- Text: The Chat and login views shall show every budget that the run reports as used and limit and every count that it reports in the Skill run view, updated in place from the event task_status.
+- Rationale: refines REQ-FE-032 (FR-46, A-131); owner layout of 2026-11-08, mockup `explore-skill-rework/forms/skill-run-view-mockup.html`
+- Parent: REQ-FE-032
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: the Time and Searches meters of the mock show the figures sent; a second task_status with the same id changes the same meters; a status after done changes nothing (exact); readable at a width of 360 px
+- Verified by: TC-CLV-032
+- Status: Draft
+- History: A-131 (proposed 2026-11-08, G-V3.PANEL), new
+
+### REQ-CLV-033 – Controls of a run
+- Level: low   Subject: WebFrontEnd
+- Text: When the user presses pause, resume or stop in the Skill run view, the Chat and login views shall send that request once to IF-101 and show the state the backend reports.
+- Rationale: refines REQ-FE-032 (FR-46, A-131); owner layout of 2026-11-08, mockup `explore-skill-rework/forms/skill-run-view-mockup.html`
+- Parent: REQ-FE-032
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: pause sends one pause request and the button becomes resume; stop sends one stop; no button acts on a run that has ended (exact)
+- Verified by: TC-CLV-033
+- Status: Draft
+- History: A-131 (proposed 2026-11-08, G-V3.PANEL), new
+
+### REQ-CLV-034 – Run that is shown
+- Level: low   Subject: WebFrontEnd
+- Text: The Chat and login views shall show in the Skill run view the run that the backend names as shown (REQ-WFM-134).
+- Rationale: refines REQ-FE-032 (FR-46, A-131); owner layout of 2026-11-08, mockup `explore-skill-rework/forms/skill-run-view-mockup.html`
+- Parent: REQ-FE-032
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: with two scripted runs started one after the other the view shows the second; when both have ended it shows the one that ended last (exact)
+- Verified by: TC-CLV-034
+- Status: Draft
+- History: A-131 (proposed 2026-11-08, G-V3.PANEL), new
+
+### REQ-CLV-035 – Reason of a failed or stopped run
+- Level: low   Subject: WebFrontEnd
+- Text: When a run fails or is stopped, the Chat and login views shall show its reason in one line in the strip of the Skill run view.
+- Rationale: refines REQ-FE-032 (FR-46, A-131); owner layout of 2026-11-08, mockup `explore-skill-rework/forms/skill-run-view-mockup.html`
+- Parent: REQ-FE-032
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: a failed scripted run shows its reason; a stopped one shows that the user stopped it; the line is one line at 1440 px (exact)
+- Verified by: TC-CLV-035
+- Status: Draft
+- History: A-131 (proposed 2026-11-08, G-V3.PANEL), new
+
+### REQ-CLV-036 – Full run part
+- Level: low   Subject: WebFrontEnd
+- Text: The Chat and login views shall keep the Full run part of the Skill run view collapsed until opened, at most the user's share of the viewport height (default 34 %), scrolling inside.
+- Rationale: refines REQ-FE-032 (FR-46, A-131); owner layout of 2026-11-08, mockup `explore-skill-rework/forms/skill-run-view-mockup.html`
+- Parent: REQ-FE-032
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: the part is collapsed after the page loads; opened, it holds the result, the answers in order, the material found, the files and the counts and with the default is not higher than 306 px at 1440 x 900 px (34 % of 900 px) and with the share set to 25 % not higher than 225 px (exact); the page does not move when it scrolls
+- Verified by: TC-CLV-036
+- Status: Draft
+- History: A-131 (proposed 2026-11-08, G-V3.PANEL), new; reworded after approval in batch 3 (owner at the check review of 2026-11-08: sizes relative to the viewport and configurable)
+
+### REQ-CLV-037 – Link from the chat
+- Level: low   Subject: WebFrontEnd
+- Text: When the user follows a chat link to the Skill run view, the Chat and login views shall open the Full run part of the linked run and bring the view into sight.
+- Rationale: refines REQ-FE-032 (FR-46, A-131); owner layout of 2026-11-08, mockup `explore-skill-rework/forms/skill-run-view-mockup.html`
+- Parent: REQ-FE-032
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: a click on the link of the summary opens the Full run part of that run, also on a phone; the view is inside the viewport afterwards (exact)
+- Verified by: TC-CLV-037
+- Status: Draft
+- History: A-131 (proposed 2026-11-08, G-V3.PANEL), new
+
+### REQ-CLV-038 – Run after a reload
+- Level: low   Subject: WebFrontEnd
+- Text: When the page loads, the Chat and login views shall show in the Skill run view the run that the backend names as shown, with its final figures if it has ended.
+- Rationale: refines REQ-FE-032 (FR-46, A-131); owner layout of 2026-11-08, mockup `explore-skill-rework/forms/skill-run-view-mockup.html`
+- Parent: REQ-FE-032
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: after a reload and after a restart of the backend the view shows the same run with the same figures (exact, browser test); meets the reload target of TD-01
+- Verified by: TC-CLV-038
+- Status: Draft
+- History: A-131 (proposed 2026-11-08, G-V3.PANEL), new
+
+### REQ-CLV-039 – View without a run
+- Level: low   Subject: WebFrontEnd
+- Text: While the backend names no run, the Chat and login views shall show in the Skill run view the text that no skill has run yet and no control.
+- Rationale: refines REQ-FE-032 (FR-46, A-131); owner layout of 2026-11-08, mockup `explore-skill-rework/forms/skill-run-view-mockup.html`
+- Parent: REQ-FE-032
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: after the chat history is deleted the view shows that text and no button (exact)
+- Verified by: TC-CLV-039
+- Status: Draft
+- History: A-131 (proposed 2026-11-08, G-V3.PANEL), new
+
+### REQ-CLV-040 – Layout on a wide screen
+- Level: low   Subject: WebFrontEnd
+- Text: Where the window is wider than 820 px, the Chat and login views shall place the character box left, the chat right and the Skill run view as a strip below both, without overlap.
+- Rationale: refines REQ-FE-032 (FR-46, A-131); owner layout of 2026-11-08, mockup `explore-skill-rework/forms/skill-run-view-mockup.html`
+- Parent: REQ-FE-032
+- Priority: Must
+- Verification method: Test, Demonstration
+- Acceptance criterion: AC-39: at 1440 x 900 px the strip spans the full width, the boxes do not overlap and the page has no scroll bar with the Full run part closed; the character box is wider than the chat (exact); the layout is the one of the mockup of 2026-11-08
+- Verified by: TC-CLV-040
+- Status: Draft
+- History: A-131 (proposed 2026-11-08, G-V3.PANEL), new
+
+### REQ-CLV-041 – Height of the strip
+- Level: low   Subject: WebFrontEnd
+- Text: Where the window is wider than 820 px, the Chat and login views shall keep the Skill run view strip, Full run part closed, at most the user's viewport height share (default 16 %).
+- Rationale: refines REQ-FE-032 (FR-46, A-131); owner layout of 2026-11-08, mockup `explore-skill-rework/forms/skill-run-view-mockup.html`
+- Parent: REQ-FE-032
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: with the default the strip of a running scripted skill with three phases measures at most 144 px at 1440 x 900 px and at most 172.8 px at 1920 x 1080 px; with the share set to 20 % at most 180 px at 900 px; at 360 x 800 px the strip is as high as its content (exact, browser test)
+- Verified by: TC-CLV-041
+- Status: Draft
+- Provisional: VAL-012 – the owner judges in use whether the strip is small enough and still readable (16 % follows the 140 px of 900 px of the mockup of 2026-11-08, a limit not a measured need; the user can change the share)
+- History: A-131 (proposed 2026-11-08, G-V3.PANEL), new; reworded after approval in batch 3 (owner at the check review of 2026-11-08: sizes relative to the viewport and configurable)
+
+### REQ-CLV-042 – Layout on a phone
+- Level: low   Subject: WebFrontEnd
+- Text: Where the window is at most 820 px wide, the Chat and login views shall stack the character box, the chat and the Skill run view in this order, every control at least 44 px.
+- Rationale: refines REQ-FE-032 (FR-46, A-131); owner layout of 2026-11-08, mockup `explore-skill-rework/forms/skill-run-view-mockup.html`
+- Parent: REQ-FE-032
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: at 360 px the order is character, chat, view; every control can be reached by scrolling the page; targets measure at least 44 px (exact)
+- Verified by: TC-CLV-042
+- Status: Draft
+- History: A-131 (proposed 2026-11-08, G-V3.PANEL), new
+
+### REQ-CLV-043 – Texts of a run are text
+- Level: low   Subject: WebFrontEnd
+- Text: The Chat and login views shall show every text of a run (result, material found, answers, reason) as plain text that starts no action and loads nothing.
+- Rationale: refines REQ-FE-032 (FR-46, A-131); owner layout of 2026-11-08, mockup `explore-skill-rework/forms/skill-run-view-mockup.html`
+- Parent: REQ-FE-032
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: a result with a script tag, a link tag and the sentence "ignore all rules" is shown as characters; no request goes out and no control appears (exact)
+- Verified by: TC-CLV-043
+- Status: Draft
+- History: A-131 (proposed 2026-11-08, G-V3.PANEL), new
+
+### REQ-CLV-044 – Elements of a skill
+- Level: low   Subject: WebFrontEnd
+- Text: Where a run reports elements of its own, the Chat and login views shall show each as a label with its text in the strip of the Skill run view beside the common ones.
+- Rationale: refines REQ-FE-032; owner at the review of 2026-11-08: skill specific elements can be added per skill; text only, so OC-8 holds
+- Parent: REQ-FE-032
+- Priority: Should
+- Verification method: Test
+- Acceptance criterion: AC-39: a scripted skill that reports the elements `Works read: 12` and `Grade: B` shows both labels and texts in the strip; a skill that reports none shows only the common elements; an element with markup is shown as characters (exact)
+- Verified by: TC-CLV-044
+- Status: Draft
+- History: A-131 (proposed 2026-11-08, G-V3.PANEL), new; owner at review of batch 2: skill specific elements can be added per skill
+
+### REQ-CLV-045 – Sizes set by the user
+- Level: low   Subject: WebFrontEnd
+- Text: The Chat and login views shall let the user set the viewport height share of the strip (12 to 40 %) and of the Full run part (20 to 60 %).
+- Rationale: refines REQ-FE-032; owner at the check review of 2026-11-08: sizes relative to the viewport and a setting of each user in the browser
+- Parent: REQ-FE-032
+- Priority: Should
+- Verification method: Test
+- Acceptance criterion: AC-39: a value in range is applied at once; 11 and 41 for the strip and 19 and 61 for the Full run part are refused and the last valid value stays (exact)
+- Verified by: TC-CLV-045
+- Status: Draft
+- History: A-131 (proposed 2026-11-08, G-V3.PANEL), new; owner at the check review of 2026-11-08: sizes relative to the viewport and a setting of each user in the browser
+
+### REQ-CLV-046 – Sizes kept in the browser
+- Level: low   Subject: WebFrontEnd
+- Text: The Chat and login views shall keep the two shares in the browser, apply them at every load and use 16 % and 34 % when none is kept or the browser refuses to store.
+- Rationale: refines REQ-FE-032; owner at the check review of 2026-11-08: sizes relative to the viewport and a setting of each user in the browser; a blocked storage must not break the page
+- Parent: REQ-FE-032
+- Priority: Should
+- Verification method: Test
+- Acceptance criterion: AC-39: after a reload the set shares apply; with a fresh browser profile 16 % and 34 % apply; with storage blocked the page works with 16 % and 34 % (exact)
+- Verified by: TC-CLV-046
+- Status: Draft
+- History: A-131 (proposed 2026-11-08, G-V3.PANEL), new; owner at the check review of 2026-11-08: sizes relative to the viewport and a setting of each user in the browser
+
+### REQ-CLV-047 – Strip content that does not fit
+- Level: low   Subject: WebFrontEnd
+- Text: When the content of the strip does not fit its height, the Chat and login views shall scroll the content inside the strip and not move the page.
+- Rationale: refines REQ-FE-032; owner at the check review of 2026-11-08: the shares apply on the wide layout, the strip content scrolls inside when it does not fit
+- Parent: REQ-FE-032
+- Priority: Should
+- Verification method: Test
+- Acceptance criterion: AC-39: at the strip share 12 % at 1440 x 900 px (108 px) a run with three phases and two elements has a strip not higher than 108 px whose content scrolls and the page does not scroll (exact)
+- Verified by: TC-CLV-047
+- Status: Draft
+- History: A-131 (proposed 2026-11-08, G-V3.PANEL), new; owner at the check review of 2026-11-08: the shares apply on the wide layout, the strip content scrolls inside when it does not fit

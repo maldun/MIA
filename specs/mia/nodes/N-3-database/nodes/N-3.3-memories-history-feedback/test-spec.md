@@ -14,9 +14,18 @@ Tests of this part alone against the mocks of its neighbours: unit tests with pl
 | TC-RTB-004 | REQ-RTB-004 | Unit | 1 | validate(memory, doc) with and without source; definitions() | without source: rule schema, detail source; memory is deletable | exact |
 | TC-RTB-005 | REQ-RTB-005 | Unit | 1 | validate(tasks, doc) and validate(memos, doc) for text with newlines, tabs, quotes, non-ASCII characters and 20,000 characters; the document compared before and after | None; the document is equal before and after (validation changes nothing); a document without text gives rule schema | exact |
 | TC-RTB-006 | REQ-RTB-006 | Unit | 1 | definitions() entry source_trust | versioned, not deletable | exact |
+| TC-RTB-007 | REQ-RTB-007 | Unit | 1 | definitions() entry skill_runs and validate(skill_runs, doc) for a complete run record and for six documents each lacking one required field | versioned and deletable; the complete one accepted; each incomplete one is rule schema with the missing field as detail | exact |
 
 Contract test cases of IF-302: TC-IF-302-01 to the last of the suite (listed in the root `test-spec.md`).
 
 ## Assumptions (checked in validation)
 
 - ASM-N3-005: the required fields of the record tables are the ones of `contracts/IF-302-record-tables.md`; other fields are kept as given.
+
+## Scenarios (G-V3.PANEL, TC-RTB-007; the older checks of this file have none yet)
+
+### TC-RTB-007 – Skill runs stored
+- Verifies: REQ-RTB-007
+- Given: the Record tables with the table skill_runs of IF-302 v8 (proposed) and a run record with run, skill, skill_version, account, started and state
+- When: definitions() is read; the record is validated; then six copies, each lacking one of the six fields, are validated
+- Then: skill_runs is versioned and deletable; the complete record is accepted; each incomplete copy is refused as rule schema naming its missing field

@@ -6,18 +6,19 @@ Check with `trace_check.py` (records, `Relaxed`/`Target` links, `deferred` marke
 Proposed on 2026-10-29 after the usability work of N-2.3 T-09 to T-11 and N-1.1 T-09 (A-23, A-24, D-101, D-103). Every record below is a proposal: the owner confirms, changes or drops it
 (the line `Decision` names the person who has to decide).
 
-## TD-01 – The status card is not tested in a browser and is gone after a reload
+## TD-01 – The status card is gone after a reload
 - Kind: defer
 - Requirement: REQ-CLV-023
-- Interim criterion: the model of the card (figures, state, a late status after done) is tested with `node --test` (`tests/js/taskcard.test.mjs`); the drawing, the buttons and the placement in the chat are looked at by the owner (hand test); the card lives as long as the page is open
-- Target: a browser test that draws the card from a `task_status` of the mock, updates it in place, presses pause, resume and stop, and a card that is still there, with its final figures, after a reload
-- Reason: the repository has no browser test harness for the page yet (no DOM library in `tests/js`); a card after a reload needs the status to be kept with the history, which is a change of the interface (IF-101)
-- Effort: about 1 day for the harness, half a day for the kept card (a field in the history record and in the amendment of IF-101)
-- Risk of the gap: a broken layout or a dead button is found only by a person; on a phone the card may be too wide. Mitigation: the hand test list in `handover-review-workflow.md` and the owner's look before the release
+- Interim criterion: the card is checked in a browser (`tests/test_task_files_browser.py`, TC-CLV-023: draw, update in place, pause, resume, stop, late status after done, 360 px) and its model with `node --test` (`tests/js/taskcard.test.mjs`); the card lives as long as the page is open
+- Target: a card that is still there, with its final figures, after a reload (browser test)
+- Reason: a card after a reload needs the status to be kept with the history, which is a change of the interface (IF-101)
+- Effort: about half a day for the kept card (a field in the history record and in the amendment of IF-101)
+- Risk of the gap: after a reload the user sees no final figures of a finished task. Mitigation: the report and the files tab keep the result
 - Owner: Stefan Reiterer
 - Trigger: the chat mock server sends `task_status` and files events, or the Plan of FB-01, or 2026-12-31, whichever first (the browser harness exists since D-141; D-172)
 - Target check: specified only
 - Decision: confirmed by Stefan Reiterer, 2026-11-01 (D-172)
+- Note: narrowed to the reload target on 2026-11-07 on the owner's instruction; the browser part is done (branch `td-01-02-browser-tests`). FR-46 (goal B) moves the card into the skill subwindow, so the reload target may be redone there.
 - Status: open
 
 ## TD-02 – The Files tab is not tested in a browser
@@ -32,7 +33,8 @@ Proposed on 2026-10-29 after the usability work of N-2.3 T-09 to T-11 and N-1.1 
 - Trigger: the chat mock server sends `task_status` and files events, or the Plan of FB-01, or 2026-12-31, whichever first (the browser harness exists since D-141; D-172)
 - Target check: specified only
 - Decision: confirmed by Stefan Reiterer, 2026-11-01 (D-172)
-- Status: open
+- Status: done
+- Closed: 2026-11-07, marked done on the owner's instruction; browser test `tests/test_task_files_browser.py` (TC-CLV-024: newest first, download links, redraw after `files_changed`, no delete control)
 
 ## TD-03 – Tokens on the card are an estimate
 - Kind: relax
@@ -136,16 +138,19 @@ Proposed on 2026-10-29 after the usability work of N-2.3 T-09 to T-11 and N-1.1 
 ## TD-11 – The voice goes through IF-204
 - Kind: defer
 - Requirement: REQ-VOI-001
-- Interim criterion: the app speaks through `SpeechStreamer` and `Speaker.render_voice` with the `speech_text` filter; `SpeechService` passes the IF-204 contract suite and TC-VOI-001 to -003
-- Target: the chat agent's audio goes through `SpeechService`, the `audio_chunk` event of an answer is built, and the skipped cases of IF-201 and IF-101 and the integration step 1 of N-2 run green
-- Reason: the older route works on the host; changing it risks the working voice for no gain to the user now
-- Effort: about one day
+- Interim criterion: the app speaks through `SpeechStreamer`, the sound server (`speak.py`) and `Speaker.render_voice` with the `speech_text` filter; `SpeechService` passes the IF-204 contract suite and TC-VOI-001 to -003; the chat agent emits one `audio_chunk` per sentence of an answer (TC-IF-201-01 green, `tests/test_chat_answer_events.py`)
+- Target: the playback of the chat agent's voice on the backend goes through `SpeechService` (IF-204) instead of `SpeechStreamer` and the sound server, with the order of sentences, stop, speak again and repair (REQ-CHA-014) kept; needs a Plan step first (see the Note)
+- Reason: the older route works on the host; `SpeechService.synthesize` renders one sentence to bytes and has no playing, ordering, pipelining or cancel, so routing the playback through it means a new backend playback pipeline (probably a changed audio-route contract), not wiring; it risks the working voice for no gain to the user now
+- Effort: open until the Plan step (the agent's first estimate of one day was for wiring only)
 - Risk of the gap: two routes may diverge. Mitigation: both use `speech_text` and `render_voice`
 - Owner: Stefan Reiterer
 - Trigger: the Plan of the next iteration, or 2026-12-31, whichever first
-- Target check: skip: the IF-204 side of the chat is not wired (TD-11); the skipped cases carry deferred('TD-11') until green
+- Target check: specified only (the IF-201 case TC-IF-201-01 is green; the IF-101 case TC-IF-101-04 stays skipped until the expression event exists, see A-130 section 8)
 - Decision: D-173, 2026-11-01, Stefan Reiterer
-- Status: open
+- Note: 2026-11-07, owner Stefan Reiterer (D-275): narrowed. The IF-201 part is done (answer events, helper fixes D-272 and D-274, `chat_service.py`); the `expression` event is split out of TD-11 (A-130 section 8, draft TD-60, not yet adopted). What stays open is the playback route. A Plan step has to come first: an amendment for the audio route, a requirement for stop and ordering, and host hand-test criteria. See `amendments/A-130-note.md`.
+- Note: 2026-11-07, found in the hand test on the host (owner Stefan Reiterer, D-276): the button "Speak again" does nothing. `/api/speak_again` only emits `audio_chunk` events and no page code handles them (`templates/static/chat/` has no `audio_chunk` handler); live answers are spoken by the backend sound server. Not caused by the TD-11 work (`speak_again` is unchanged). Folded into the Plan step of this deferral: speak again plays through the backend voice route; the Plan step needs a requirement and a failing test first.
+- Status: dropped
+- Closed: 2026-11-07, replaced by TD-61 (owner decision, D-278); the IF-201 work (answer events, `chat_delta` flush, helper fixes) is recorded in D-275 and D-277; "Speak again" is planned as the requirements REQ-CHA-030 to 034 (A-132, option B), not as a deferral
 
 ## TD-12 – Verify before asserting; lookup (TC-MIA-002)
 - Kind: defer
@@ -358,4 +363,33 @@ Proposed on 2026-10-29 after the usability work of N-2.3 T-09 to T-11 and N-1.1 
 - Trigger: before VAL-004 starts, or 2026-12-31, whichever first
 - Target check: specified only
 - Decision: D-184, 2026-11-02, Stefan Reiterer
+- Status: open
+
+## TD-61 – The app has two voice paths: the sound server and SpeechService
+- Kind: defer
+- Requirement: REQ-VOI-001
+- Interim criterion: live answers and "Speak again" are spoken through `SpeechStreamer` and the sound server (`speak.py`), with `Speaker.render_voice` and the `speech_text` filter; `SpeechService` (IF-204) passes its contract suite and TC-VOI-001 to -003 but nothing in the app calls it; both paths share `speech_text` and `render_voice`
+- Target: one voice path: the sentences of every answer and of every spoken-again message are rendered and played through one component built on `SpeechService` (IF-204), with the order of sentences, rendering ahead, stop and the repair of REQ-CHA-014 kept, and the sound server and `SpeechStreamer` removed or reduced to that one path
+- Reason: merging the paths means a backend playback pipeline (render ahead, serials, cancel, upload or direct publish) and probably an IF-204 v1 and a changed audio-route contract (A-132 option A); it risks the working voice for no gain the user can see now
+- Effort: about 3 to 5 days (estimate of A-132, not measured), after its own Plan step
+- Risk of the gap: two routes may diverge. Mitigation: both use `speech_text` and `render_voice`; the sound-server hand-over has its own check (TC-CHA-036)
+- Owner: Stefan Reiterer
+- Trigger: the Plan of an iteration that changes the voice, or 2026-12-31, whichever first
+- Target check: specified only
+- Decision: confirmed by Stefan Reiterer, 2026-11-07 (D-278)
+- Status: open
+
+## TD-62 – The unit test without Tailscale runs the real `tailscale up` on a host that has it
+- Kind: defer
+- Requirement: NFR-6, CON-5 (test of `ui/tools/remote.sh`, `tests/test_tailscale.py`)
+- Interim criterion: the other tests of `tests/test_tailscale.py` pass with a fake `tailscale`; on a host without Tailscale the test `ScriptTest.test_without_tailscale_it_says_how_to_install` passes; the stage `unit` is red on this host for that one test (the merge gate of TD-11 ran locally with this deviation)
+- Target: the lookup of `tailscale` in that test ignores the host's `PATH`, so the test gives the same result on every host; the stage `unit` is green here
+- Reason: `/usr/bin/tailscale` is installed on the workstation, so the test runs the real `tailscale up` and times out after 30 s; neither `remote.sh` nor the test changed in TD-11; the owner defers the fix to a later goal (2026-11-08)
+- Effort: about an hour (proposed), test first
+- Risk of the gap: the stage `unit` stays red on this host and hides a real failure; mitigation: the single red test is known by name
+- Owner: Stefan Reiterer
+- Trigger: the Plan of the next iteration, or 2026-12-31, whichever first
+- Target check: `tests/test_tailscale.py::ScriptTest::test_without_tailscale_it_says_how_to_install` (exists, red on a host with Tailscale)
+- Decision: D-289, 2026-11-08, Stefan Reiterer
+- Sign-off: maldun, 2026-11-08
 - Status: open

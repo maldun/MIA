@@ -37,3 +37,4 @@ Used by the requirements linter (L1) and as context for the LLM assessor (L3). T
 | Tools and sandbox | Node N-2.4.2: the tools any workflow can call (code checks, web, scholarly sources, source records) and the sandbox, counted against the budgets of a run | VerificationSuite | – | tool box |
 | Run log | Node N-2.4.3: typed events of runs, replay, comparison, the account of an answer | Observability | – | trace store |
 | example workflow | A workflow delivered as library data to prove the platform and to serve as a blueprint: lookup, verify, review, method transfer; its criteria are decided by the benchmark | – | – | built-in skill |
+| faithful (summary) | A summary of a skill run is faithful when it contains no claim, figure or name that the full result does not contain and leaves out nothing that changes what the result says; judged by people's labels after the hard checks (G-V3.CHAT, suite EV-skill_turns) | ConversationCore | – | accurate |

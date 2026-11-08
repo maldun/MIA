@@ -1,5 +1,22 @@
 # Changelog
 
+## [Unreleased] – 2026-11-08, TD-11 option B: speak again through the voice route (verified, not released)
+
+### Fixed
+- The speaker button under a message ("Speak again") is heard: the chat agent hands the stored text sentence by sentence, in order and through the speech filter, to the voice route of live answers, one repeat at a time (REQ-CHA-030, REQ-CHA-031, REQ-CHA-034). Before, it only sent audio_chunk events that no page played (D-276).
+- Stop ends a spoken-again playback, also when no answer is generated (REQ-CHA-032); the Stop button is shown while a message is spoken again, also over a running answer, and the status returns afterwards (REQ-CHA-035, REQ-CHA-036); a spoken-again line is heard within 3 s after a Stop (REQ-VPB-006).
+- A voice route that is not reachable does not break the chat: one connection attempt, the rest of that repeat is dropped (REQ-CHA-033).
+
+### Changed
+- `stop()` returns true only when an answer was stopped (IF-101 and IF-201 unchanged).
+- Specification: parents of REQ-CHA-030..036 and REQ-VPB-006 one level up (A-134); REQ-CHA-033 AC-1 reworded (A-135); the 3 s of REQ-VPB-006 recorded as an accepted risk (A-136).
+
+### Known limitations
+- `/api/speak_again` has no rate limit and no cap on waiting repeats (F4, accepted; revisit with TD-61). TD-61 is open: two voice paths. A failed repeat logs two error lines (A-135). Hand check TC-CHA-035 is owner-reported, device and commit not recorded. The 3 s of REQ-VPB-006 is an accepted risk (VAL-006). Open deviations of the ladder: TD-62 (tailscale unit test), the plan backlog of `decomposition` and the red G-V2.MODEL acceptance tests (other goals). Production changes on master since v0.1.0 that this verification did not cover: `deploy/preflight.sh`, `deploy/up.sh voice`, `tools/recovery_check.sh`, `tools/fetch_kokoro.sh`, `tools/fetch_benchmarks.py`, the G-V2.MODEL stubs.
+
+### Release record
+- Verified (verification report approved 2026-11-08, `specs/mia/amendments/A-132-verification-report.md`), on master since the merges of 2026-11-08; no tag (the owner, 2026-11-08: the tag comes with iteration 2). The ladder ran locally on master `1732666`, stages 0 to 3, no CI.
+
 ## [0.1.0] – 2026-11-01, G-V1 first version of MIA (not yet validated)
 
 ### Added
