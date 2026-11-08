@@ -9,7 +9,7 @@ Did "Speak again" become something the owner would use: heard when pressed, in o
 The owner on the host (Firefox; the audio device is written down this time, which the hand check lacked). Trusted users only if the owner invites them. No personal data beyond the chat itself; nothing is recorded; notes stay local.
 
 ## Criteria
-`test-spec.md` has no VAL id for this change. **Name clash:** A-136 and `plausibility.yaml` call the 3 s follow-up "VAL-006", but VAL-006 in `test-spec.md` is the G-V1 criterion "fast and light enough in daily use". Proposal: keep the 3 s as an item of that VAL-006 session (it is a daily-use timing) and say so in the report; or give it a new id, the owner decides.
+`test-spec.md` has no VAL id for this change. **Decided (owner, 2026-11-08):** the 3 s of REQ-VPB-006 stays under VAL-006 (`test-spec.md`: "fast and light enough in daily use", the G-V1 criterion that A-136 and `plausibility.yaml` already name as follow-up); no new id. The 3 s is judged in the VAL-006 session (TD11-V3 below only collects the observation for it); the report says so.
 
 | ID | Criterion | Rating by |
 |---|---|---|
