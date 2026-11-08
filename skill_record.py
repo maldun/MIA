@@ -4,6 +4,7 @@ A skill record names the command, the workflow graph and the context graph of a 
 (skill file, extension manifest, pipeline reference); skills without a record are listed from the old forms unchanged.
 """
 
+import re
 from collections import namedtuple
 
 try:
@@ -23,7 +24,9 @@ def normal_command(command):
 
 
 def command_problem(command):
-    """None for a command the task registry can register and parse, else the reason in words. One optional slash, then a name without space, slash or capital letter."""
+    """None for a command the task registry can register and parse, else the reason in words. One optional slash, then ASCII lower case letters and digits.
+    Other characters are refused: the registry matches without regard to case and looks the lower case of the text up, which fails for letters such as
+    `ς` or `ſ` whose upper case or lower case is another letter (F-15); no existing command uses any punctuation."""
     name = command[1:] if isinstance(command, str) and command.startswith("/") else command
     if not isinstance(name, str) or not name:
         return "the command is empty"
@@ -31,7 +34,10 @@ def command_problem(command):
         return "the command %r has a space or a second slash" % command
     if name != name.lower():
         return "the command %r has capital letters, the task registry looks commands up in lower case" % command
+    if not re.fullmatch(r"[a-z0-9]+", name):
+        return "the command %r has a character that is no ASCII lower case letter or digit" % command
     return None
+
 
 # The fake tables only know one ID at a time, so the IDs of all skills are kept in one index record; the Storage layer lists them itself.
 INDEX = ("skill_index", "all")

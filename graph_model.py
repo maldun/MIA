@@ -9,6 +9,7 @@ Node fields are the proposal of goal.md: data nodes `value`, `parameters`; trans
 ({"max_repetitions": n} and/or {"max_seconds": s}, the names of IF-301 v2). The cycle search is a plain depth-first search, so no new dependency is needed.
 """
 
+import math
 from collections import namedtuple
 
 try:
@@ -34,34 +35,50 @@ def _node_type(node):
     return node.get("data", {}).get("type")
 
 
-def _find_cycle(ids, edges):
-    """One cycle as node IDs, first ID repeated at the end, or None."""
+def find_cycle(ids, edges):
+    """One cycle as node IDs, first ID repeated at the end, or None. Iterative, so a long chain does not depend on the Python stack (F-12)."""
     following = {i: [] for i in ids}
     for edge in edges:
         following[edge["from"]].append(edge["to"])
     state = {}      # 1 = on the current path, 2 = done
     path = []
-
-    def visit(node):
-        state[node] = 1
-        path.append(node)
-        for nxt in following[node]:
-            if state.get(nxt) == 1:
-                return path[path.index(nxt):] + [nxt]
-            if nxt not in state:
-                found = visit(nxt)
-                if found:
-                    return found
-        path.pop()
-        state[node] = 2
-        return None
-
-    for node in ids:
-        if node not in state:
-            found = visit(node)
-            if found:
-                return found
+    for root in ids:
+        if root in state:
+            continue
+        state[root] = 1
+        path.append(root)
+        walk = [iter(following[root])]      # one iterator of followers per node on the path
+        while walk:
+            for nxt in walk[-1]:
+                if state.get(nxt) == 1:
+                    return path[path.index(nxt):] + [nxt]
+                if nxt not in state:
+                    state[nxt] = 1
+                    path.append(nxt)
+                    walk.append(iter(following[nxt]))
+                    break
+            else:
+                state[path.pop()] = 2
+                walk.pop()
     return None
+
+
+def _limit(value, whole):
+    """A positive limit: a whole number from 1 when `whole` (2.0 counts, as in the Storage layer), else a finite number above 0; a boolean is none."""
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return False
+    if whole:
+        return value >= 1 and (isinstance(value, int) or value.is_integer())
+    return value > 0 and math.isfinite(value)
+
+
+def stop_is_valid(stop):
+    """True when `stop` is a valid stop of a master node (IF-301 v2, REQ-WFM-048): an object with `max_repetitions` (whole number, at least 1) and/or
+    `max_seconds` (finite number above 0), at least one of them, each one that is there valid (null is not valid); other keys are ignored. Kept here, not
+    taken from the Storage layer: T-01 does not depend on STORE (D-262)."""
+    if not isinstance(stop, dict) or not ({"max_repetitions", "max_seconds"} & stop.keys()):
+        return False
+    return ("max_repetitions" not in stop or _limit(stop["max_repetitions"], True)) and ("max_seconds" not in stop or _limit(stop["max_seconds"], False))
 
 
 def check_graph(graph):
@@ -87,13 +104,11 @@ def check_graph(graph):
     if bad:
         return bad
     # REQ-WFM-048: a master node has a maximum of repetitions or a maximum time (`max_seconds`)
-    bad = [i for i, n in nodes.items()
-           if _node_type(n) == "master" and not (n["data"].get("stop") or {}).get("max_repetitions")
-           and not (n["data"].get("stop") or {}).get("max_seconds")]
+    bad = [i for i, n in nodes.items() if _node_type(n) == "master" and not stop_is_valid(n["data"].get("stop"))]
     if bad:
         return bad
     # REQ-WFM-047: no cycle
-    return _find_cycle(list(nodes), edges) or []
+    return find_cycle(list(nodes), edges) or []
 
 
 def order_of(graph):

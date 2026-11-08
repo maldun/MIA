@@ -16,6 +16,7 @@ sys.path.insert(0, os.path.join(HERE, "helpers"))
 from markers import mark                                              # noqa: E402
 from graph_model_fakes import Script, data_node, make_edge, make_graph, transform_node   # noqa: E402
 from graph_run import GraphRunner                                     # noqa: E402
+from graph_model import check_graph, find_cycle                       # noqa: E402
 
 
 class GraphRunFindings(unittest.TestCase):
@@ -109,6 +110,50 @@ class GraphRunFindings(unittest.TestCase):
         result = self.runner.run(graph, self.nodes("T1", "T2"), {"D1": "s"})
         # Then: both are named in the order of the run and the status is the one of T1
         self.assertEqual((result.status, result.named, result.named_status), ("refused", ["T1", "T2"], "untrusted"))
+
+    @mark.req("REQ-RUN-016")
+    def test_a_cycle_is_named_with_the_first_id_repeated_at_the_end_as_an_exact_list(self):
+        """T-08 test gap (REQ-RUN-016, REQ-WFM-047): the cycle is reported as IDs, the first repeated at the end, compared as a list; `named_status` is None; the trust callback is not asked.
+
+        Example: D1 -> T1 -> D1 gives named ["D1", "T1", "D1"]; the 4-node cycle gives ["D1", "T1", "D2", "T2", "D1"]; named_status None, no trust call.
+        """
+        asked = []
+        runner = GraphRunner(lambda node_id: asked.append(node_id) or "trusted")
+        two = make_graph("wf-two-cycle", [data_node("D1"), transform_node("T1")], [make_edge("D1", "T1"), make_edge("T1", "D1")])
+        for graph, expected in ((two, ["D1", "T1", "D1"]), (self.cyclic_graph(), ["D1", "T1", "D2", "T2", "D1"])):
+            with self.subTest(graph=graph["id"]):
+                # Given: a graph with a cycle and a trust callback that records its calls
+                # When: it is run
+                result = runner.run(graph, self.nodes("T0", "T1", "T2"), {"D0": "s", "D1": "x"})
+                # Then: refused, the cycle is the exact list, no status is named, the callback was not asked
+                self.assertEqual((result.status, result.named, result.named_status), ("refused", expected, None))
+                self.assertEqual(asked, [])
+
+    @mark.req("REQ-RUN-016")
+    def test_a_chain_and_a_cycle_of_three_thousand_nodes_do_not_depend_on_the_python_stack(self):
+        """F-12 (REQ-RUN-016): the cycle search is iterative; a long chain runs, a long cycle is refused naming it, nothing raises RecursionError.
+
+        Example: D0 -> T0 -> D1 -> ... with 3000 nodes runs to "done"; the same chain closed by an edge back to D0 is "refused" with 3001 IDs, the first repeated at the end.
+        """
+        # Given: a chain of 3000 nodes of alternating data and transform nodes, and the same chain closed to a cycle
+        ids = [("D%d" if i % 2 == 0 else "T%d") % (i // 2) for i in range(3000)]
+        kinds = {i: (data_node if i[0] == "D" else transform_node)(i) for i in ids}
+        edges = [make_edge(a, b) for a, b in zip(ids, ids[1:])]
+        chain = make_graph("wf-chain", list(kinds.values()), edges)
+        closed = make_graph("wf-closed", list(kinds.values()), edges + [make_edge(ids[-1], ids[0])])
+        # (the last node is a transform, so the closing edge goes transform -> data D0)
+        self.assertEqual((len(ids), ids[-1][0]), (3000, "T"))
+        scripted = {i: (lambda inputs: "v") for i in ids if i[0] == "T"}
+        # When: both are run, and the rules of the model are asked
+        done = self.runner.run(chain, scripted, {"D0": "s"})
+        refused = self.runner.run(closed, scripted, {"D0": "s"})
+        # Then: the chain is done, the cycle is refused with the whole cycle named; the model agrees
+        self.assertEqual((done.status, done.named), ("done", []))
+        self.assertEqual((refused.status, refused.named_status), ("refused", None))
+        self.assertEqual(refused.named, ids + ["D0"])
+        self.assertEqual(check_graph(chain), [])
+        self.assertEqual(check_graph(closed), ids + ["D0"])
+        self.assertEqual(find_cycle(ids, closed["edges"]), ids + ["D0"])
 
 
 if __name__ == "__main__":

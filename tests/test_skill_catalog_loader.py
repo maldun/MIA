@@ -7,6 +7,7 @@ Run: python tests/test_skill_catalog_loader.py
 import ast
 import json
 import os
+import random
 import shutil
 import sys
 import tempfile
@@ -43,11 +44,11 @@ class SkillCatalogLoader(unittest.TestCase):
         self.registry = TaskRegistry()
         self.services = types.SimpleNamespace(prefix="got: ")
 
-    def add(self, name):
+    def add(self, name, aliases=()):
         folder = os.path.join(self.folder, name)
         os.makedirs(folder)
         open(os.path.join(folder, "__init__.py"), "w").close()
-        doc = {"id": name, "text": "Do " + name, "argument": "your question", "example": "/%s x" % name, "entry": "entry:make"}
+        doc = {"id": name, "text": "Do " + name, "argument": "your question", "example": "/%s x" % name, "entry": "entry:make", "aliases": list(aliases)}
         with open(os.path.join(folder, "manifest.json"), "w", encoding="utf-8") as handle:
             json.dump(doc, handle)
         with open(os.path.join(folder, "entry.py"), "w", encoding="utf-8") as handle:
@@ -168,6 +169,111 @@ class SkillCatalogLoader(unittest.TestCase):
         self.assertEqual(self.registry.ids(), ["beta"])
         self.assertEqual([p.split(":")[0] for p in problems], ["alpha"])
         self.assertEqual(self.registry.parse("/beta x")["task"], "beta")
+
+    @mark.req("REQ-WFM-041")
+    def test_a_catalog_that_fails_does_not_stop_the_loader_and_the_skills_load_as_the_manifest_says(self):
+        """F-13 (REQ-WFM-041): a catalog whose `start` raises (storage down) gives one problem per skill, the skills are registered as the manifests say, nothing is raised.
+
+        Example: `alpha` and `beta` with a record for `alpha` (`/alpha2`) and a catalog that raises ConnectionError("storage down"): load returns two problems naming alpha and beta, the tasks are `alpha` and `beta`.
+        """
+        # Given: two extension folders, a record for one, and a catalog whose lookup fails
+        self.add("alpha")
+        self.add("beta")
+        self.record("alpha", "/alpha2", "wf-alpha")
+
+        class Down(SkillCatalog):
+            def start(self, skill_id):
+                raise ConnectionError("storage down")
+
+        # When: the extensions are loaded
+        problems = self.load(catalog=Down(self.records))
+        # Then: no exception, both skills are registered as the manifest says, one problem each
+        self.assertEqual(self.registry.ids(), ["alpha", "beta"])
+        self.assertEqual([self.registry.get(i).workflow_graph_id for i in ("alpha", "beta")], [None, None])
+        self.assertEqual(sorted(p.split(":")[0] for p in problems), ["alpha", "beta"])
+        self.assertTrue(all("storage down" in p for p in problems))
+
+    @mark.req("REQ-WFM-041")
+    def test_a_failing_lookup_of_one_skill_leaves_the_other_skills_with_their_records(self):
+        """F-13 (REQ-WFM-041): the lookup of one skill fails, the others are not affected: a skill with a record still takes the command of the record.
+
+        Example: the lookup of `alpha` raises, `beta` has the record `/beta2`: tasks `alpha` (manifest) and `beta2`, one problem naming alpha.
+        """
+        # Given: two folders with records for both, and a catalog that fails for alpha only
+        self.add("alpha")
+        self.add("beta")
+        self.record("alpha", "/alpha2", "wf-alpha")
+        self.record("beta", "/beta2", "wf-beta")
+
+        class Flaky(SkillCatalog):
+            def start(self, skill_id):
+                if skill_id == "alpha":
+                    raise ConnectionError("storage down")
+                return super().start(skill_id)
+
+        # When: loaded
+        problems = self.load(catalog=Flaky(self.records))
+        # Then: alpha is the manifest's, beta is the record's with its graph, one problem for alpha
+        self.assertEqual(self.registry.ids(), ["alpha", "beta2"])
+        self.assertEqual(self.registry.get("beta2").workflow_graph_id, "wf-beta")
+        self.assertEqual([p.split(":")[0] for p in problems], ["alpha"])
+
+    def alias_case(self, record_skill):
+        # Given: a skill with a record whose command is an alias of the manifest-only skill lookup (the folder order is by name)
+        self.add(record_skill)
+        self.add("lookup", aliases=("research",))
+        self.record(record_skill, "/research", "wf-" + record_skill)
+        # When: loaded with the catalog
+        problems = self.load(catalog=self.catalog)
+        # Then: lookup keeps its alias, the record skill is skipped and the problem names the command
+        self.assertEqual(self.registry.ids(), ["lookup"])
+        self.assertEqual(self.registry.parse("/research x")["task"], "lookup")
+        self.assertEqual([p.split(":")[0] for p in problems], [record_skill])
+        self.assertIn("research", problems[0].lower())
+
+    @mark.req("REQ-WFM-042")
+    def test_a_record_command_that_is_an_alias_of_a_manifest_skill_is_refused_when_the_record_skill_sorts_first(self):
+        """F-14 (REQ-WFM-042): a record command equal to an alias of another skill's manifest skips the record skill, the manifest skill keeps its alias.
+
+        Example: `alpha` with the record `/research` and `lookup` (alias `research`, no record): `lookup` is registered and answers `/research x`, `alpha` is skipped with a problem naming `research`.
+        """
+        self.alias_case("alpha")
+
+    @mark.req("REQ-WFM-042")
+    def test_a_record_command_that_is_an_alias_of_a_manifest_skill_is_refused_when_the_record_skill_sorts_last(self):
+        """F-14 (REQ-WFM-042): the same with the record skill sorted after the manifest skill.
+
+        Example: `zeta` with the record `/research` and `lookup` (alias `research`, no record): `lookup` is registered, `zeta` is skipped with a problem naming `research`.
+        """
+        self.alias_case("zeta")
+
+    @mark.req("REQ-WFM-041")
+    def test_no_command_with_a_character_the_registry_cannot_look_up_is_registered_and_parse_never_raises(self):
+        """F-15 (REQ-WFM-041): a record command is ASCII lower case letters and digits; a Unicode lower case letter whose upper case is another letter is skipped with a problem and `parse` does not raise.
+
+        Example: records `/ς`, `/µ`, `/ſ`, `/ı` and `/ab1` (the last is fine): only `ab1` is registered; `/Σ x`, `/ſearch x`, and 20000 random texts give None or a result, never a KeyError.
+        """
+        # Given: skills whose record commands hold characters the registry cannot look up again, one good skill, and the manifest skill search
+        names = ["alpha", "beta", "delta", "gamma", "search", "good"]
+        for name in names:
+            self.add(name)
+        for name, command in zip(names, ("/ς", "/µ", "/ſ", "/ı", None, "/ab1")):
+            if command is not None:
+                self.records.tables.put("skills", name, {"id": name, "data": {"command": command, "workflow_graph_id": "wf-" + name,
+                                                                             "context_graph_id": "ctx-" + name}}, "anna")
+        # When: the extensions are loaded and many texts are parsed
+        problems = self.load(catalog=self.catalog)
+        rng = random.Random(15)
+        texts = ["/Σ x", "/ς x", "/ſearch x", "/SEARCH x", "/ab1 x", "/AB1 x"]
+        texts += ["/" + "".join(chr(rng.randrange(0x110000)) for _ in range(rng.randrange(1, 5))) + " x" for _ in range(20000)]
+        texts += ["/" + "".join(rng.choice("sſkKiIıİab1 ") for _ in range(rng.randrange(1, 6))) + " x" for _ in range(20000)]
+        for text in texts:
+            self.registry.parse(text)       # must not raise a KeyError (or anything else but TaskCommandError)
+        # Then: only the good skills are tasks, four problems name the others
+        self.assertEqual(self.registry.ids(), ["ab1", "search"])
+        self.assertEqual(sorted(p.split(":")[0] for p in problems), ["alpha", "beta", "delta", "gamma"])
+        self.assertEqual(self.registry.parse("/AB1 x")["task"], "ab1")
+        self.assertEqual(self.registry.parse("/ſearch x"), None)
 
     @mark.req("REQ-WFM-041")
     def test_web_app_creates_the_catalog_over_the_storage_and_passes_it_to_the_loader(self):

@@ -12,9 +12,9 @@ Real behaviour comes with plan tasks T-03 and T-04 (REQ-RUN-016 to 019). The tes
 from collections import namedtuple
 
 try:
-    from .graph_model import _find_cycle, order_of
+    from .graph_model import find_cycle, order_of
 except ImportError:
-    from graph_model import _find_cycle, order_of
+    from graph_model import find_cycle, order_of
 
 RunResult = namedtuple("RunResult", "status named named_status values")
 
@@ -27,7 +27,7 @@ class GraphRunner:
         kinds = {n["id"]: n["data"]["type"] for n in graph["nodes"]}
         # REQ-RUN-016: a graph without an order is not run (the writers of IF-102 do not run the graph rules, D-262)
         unknown = [e["id"] for e in graph["edges"] if e["from"] not in kinds or e["to"] not in kinds]
-        cycle = None if unknown else _find_cycle(list(kinds), graph["edges"])
+        cycle = None if unknown else find_cycle(list(kinds), graph["edges"])
         if unknown or cycle:
             return RunResult("refused", unknown or cycle, None, _data_values(kinds, dict(inputs)))
         reads = {i: [] for i in kinds}

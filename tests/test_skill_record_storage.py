@@ -19,7 +19,8 @@ sys.path.insert(0, HERE)
 from markers import mark                                                                                    # noqa: E402
 from graph_model_fakes import (FakeGraphTables, data_node, make_edge, make_graph, make_skill,               # noqa: E402
                                master_node, make_node, transform_node)
-from graph_model import GraphModel                                                                          # noqa: E402
+from graph_model import GraphModel, check_graph                                                             # noqa: E402
+from graph_tables import check_record                                                                      # noqa: E402
 from skill_record import SkillCatalog, SkillRecords                                                         # noqa: E402
 from storage import Storage, StorageError                                                                   # noqa: E402
 from storage_files import FileBackend                                                                       # noqa: E402
@@ -304,19 +305,60 @@ class SkillRecordOnRealStorage:
     def test_a_command_that_cannot_be_registered_is_refused_on_both_sides(self):
         """F-03 (REQ-WFM-041): empty, `/`, a command with a space, a second slash or an uppercase letter is a refused result with a rule, nothing stored.
 
-        Example: commands "", "/", "/a b", "//a", "/Alpha" give stored False with rule "schema" and no ID in the list; "/alpha" and "beta" are stored.
+        Example: commands "", "/", "/a b", "//a", "/Alpha", "/ς", "/µ", "/é" (F-15: only ASCII letters and digits) give stored False with rule "schema" and no ID in the list; "/alpha" and "beta" are stored.
         """
         # Given: records with bad commands, on each side
         for records in (self.fake_records, self.records):
             # When: each is stored
-            results = [records.store(make_skill("alpha", command)) for command in ("", "/", "/a b", "//a", "/Alpha")]
+            results = [records.store(make_skill("alpha", command)) for command in ("", "/", "/a b", "//a", "/Alpha", "/ς", "/µ", "/ſ", "/ı", "/é", "/a-b", "/a.b", "/日本")]
             # Then: each is refused with a rule and a detail, and nothing is stored
-            self.assertEqual([(r.stored, r.version, r.rule) for r in results], [(False, None, "schema")] * 5)
+            self.assertEqual([(r.stored, r.version, r.rule) for r in results], [(False, None, "schema")] * 13)
             self.assertTrue(all(r.detail for r in results))
             self.assertEqual(records.ids(), [])
             # And: the plain forms are stored
             self.assertTrue(records.store(make_skill("alpha", "/alpha")).stored)
             self.assertTrue(records.store(make_skill("beta", "beta")).stored)
+            self.assertTrue(records.store(make_skill("gamma", "/ab12")).stored)
+
+    @mark.req("REQ-WFM-048")
+    def test_the_stop_rule_of_the_model_agrees_with_the_record_check_for_every_stop(self):
+        """F-16 (REQ-WFM-048): the rule of T-01 (a limit is a positive number, an integer for the repetitions, not a boolean) accepts and refuses the same stops as the record check.
+
+        Example: {"max_repetitions": -1}, {"max_seconds": True}, {"max_repetitions": 2.5}, {"max_seconds": "5"} and "x" are refused by both; {"max_seconds": 0.5} and {"max_repetitions": 2, "max_time": 1} by neither.
+        """
+        # Given: every stop made of two limits out of a pool of good and bad values (absent included), the stops with another key, and stops that are no object
+        pool = [0, 1, -1, 2, 0.5, 2.0, 2.5, -0.5, True, False, "5", "", None, [], {}, 10 ** 12, float("inf"), float("-inf"), float("nan"), 1e308]
+        absent = object()
+        stops = []
+        for first in pool + [absent]:
+            for second in pool + [absent]:
+                stops.append({k: v for k, v in (("max_repetitions", first), ("max_seconds", second)) if v is not absent})
+        stops += [{"max_time": 5}, {"max_cycles": 3}, {"max_repetitions": 2, "max_time": 1}, {"max_seconds": 1, "x": None}, "x", "", 3, 0, None, [], [1], True, {"max_repetitions": 1, "max_seconds": 1}]
+        disagreements = []
+        for stop in stops:
+            node = {"id": "M1", "data": {"type": "master", "toolbox_id": "m1", "stop": stop}}
+            # When: the rule of the model and the record check judge the node
+            by_model = check_graph(make_graph("wf-stop", [data_node("D1"), node, data_node("D2")], [make_edge("D1", "M1"), make_edge("M1", "D2")])) == []
+            by_storage = check_record("graph_nodes", node, record_id="M1") is None
+            if by_model != by_storage:
+                disagreements.append((stop, by_model, by_storage))
+        # Then: they never disagree
+        self.assertEqual(disagreements, [])
+
+    @mark.req("REQ-WFM-048")
+    def test_a_stop_the_record_check_refuses_is_refused_by_the_model_on_both_sides(self):
+        """F-16 (REQ-WFM-048): the fake and the Storage layer give the same answer for a negative, boolean, fractional or text limit, naming the master node.
+
+        Example: stops {"max_repetitions": -1}, {"max_seconds": True}, {"max_repetitions": 2.5}, {"max_seconds": "5"} are refused naming ["M1"] on the fake and on the Storage layer.
+        """
+        # Given: master nodes with four bad stops, on each side
+        for model in (self.fake_model, self.model):
+            for name, stop in (("neg", {"max_repetitions": -1}), ("bool", {"max_seconds": True}), ("frac", {"max_repetitions": 2.5}), ("text", {"max_seconds": "5"})):
+                # When: the graph is saved
+                result = model.save_graph(self.master_graph("wf-bad-" + name, stop))
+                # Then: it is refused naming M1, as a graph rule, and a good one next to it is saved
+                self.assertEqual((result.saved, result.named), (False, ["M1"]))
+            self.assertTrue(model.save_graph(self.master_graph("wf-good", {"max_seconds": 0.5})).saved)
 
 
 class FileStorageSkillRecords(SkillRecordOnRealStorage, unittest.TestCase):

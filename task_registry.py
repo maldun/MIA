@@ -74,7 +74,7 @@ class TaskRegistry:
     def parse(self, text, defaults=None):
         """None if `text` is no task command; else {"task", "argument", "options", "help", "text"}; raises TaskCommandError for a command that cannot run"""
         names = "|".join(re.escape(n) for n in sorted(self._names, key=len, reverse=True))
-        match = re.fullmatch(r"/(%s)(?:\s+(.*))?" % names, text.strip(), re.I | re.S) if names else None
+        match = re.fullmatch(r"/(%s)(?:\s+(.*))?" % names, text.strip(), re.I | re.S | re.A) if names else None
         if not match:
             return None
         task = self._tasks[self._names[match.group(1).lower()]]

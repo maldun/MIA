@@ -58,22 +58,36 @@ def load_extensions(package, folder, registry, services, catalog=None):
         names = sorted(n for n in os.listdir(folder) if os.path.isfile(os.path.join(folder, n, "manifest.json")))
     except FileNotFoundError:
         return ["the extensions folder %s does not exist" % folder]
-    # The record store does not know skills that exist only as manifest, so the loader refuses a record command that is the command of one of them (REQ-WFM-042).
-    manifest_only = set()
+    # One lookup per skill: its record (graph ID and command) or None. A catalog that fails for a skill (storage down) does not stop the loader: the skill is
+    # registered as the manifest says and the failure is a problem; the other skills are not affected.
+    records = {}
     if catalog is not None:
-        manifest_only = {n for n in names if catalog.start(n) is None}
+        for name in names:
+            try:
+                graph_id = catalog.start(name)
+                records[name] = None if graph_id is None else (graph_id, catalog.records.read(name)["command"])
+            except Exception as exc:
+                records[name] = None
+                problems.append("%s: the record could not be looked up, the skill is registered as the manifest says: %s" % (name, exc))
+    # The record store does not know skills that exist only as manifest, nor the aliases of a manifest, so the loader refuses a record command that is the
+    # command or an alias of another skill (REQ-WFM-042); names are compared in the form the registry looks them up.
+    taken = {normal_command(n) for n in names if records.get(n) is None}
+    for name in names:
+        try:
+            taken.update(normal_command(a) for a in read_manifest(os.path.join(folder, name)).get("aliases", []))
+        except Exception:       # a broken manifest is a problem of its own below
+            pass
     for name in names:
         try:
             doc = read_manifest(os.path.join(folder, name))
             module, _, function = doc["entry"].partition(":")
             loaded = importlib.import_module("%s.%s.%s" % (package, name, module))
             task = task_from_manifest(doc, getattr(loaded, function)(services))
-            graph_id = catalog.start(name) if catalog is not None else None
-            if graph_id is not None:
-                command = catalog.records.read(name)["command"]
+            if records.get(name) is not None:
+                graph_id, command = records[name]
                 problem = command_problem(command)      # records are data from outside: a command that cannot be registered skips the skill (F-03)
-                if problem is None and name != normal_command(command) and normal_command(command) in manifest_only:
-                    problem = "the command %r is the command of the skill %s" % (command, normal_command(command))
+                if problem is None and name != normal_command(command) and normal_command(command) in taken:
+                    problem = "the command %r is already the command or an alias of a skill without a record" % (command,)
                 if problem is not None:
                     raise ValueError("%s: the record is not used: %s" % (name, problem))
                 task.id, task.workflow_graph_id = normal_command(command), graph_id
