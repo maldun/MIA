@@ -7,7 +7,10 @@ Phase: **Plan, Step 5 drafted**, supervised, both subgoals. Reviewer name in the
 ## Commits of the last sessions (all on `goal/v3`, newest first)
 | Commit | What |
 |---|---|
-| (next commit) | A-143 and its payload, D-306, the starter flag of the skill_turns suites, this hand-over |
+| (next commit) | scorer tests TC-CHA-064..067, stubs `digest_score.py` and `Harness._digest`, test-spec rows and TR-CHAT-008 |
+| `e9f62d3` | note on the harness target `digest` and the scorer, approved |
+| `e71f4a6`, `ecb72fe` | dark-theme browser runner (driver fixed), A-143 installed (IF-302 v9, IF-101 v17) |
+| `73a4962` | A-143 and payloads, D-306, starter flag, hand-over |
 | `d7a75eb` | `plan.md` of G-V3.PANEL (10 tasks) and G-V3.CHAT (6 tasks), drafts |
 | `e705709` | red tests batch 3: the Skill run view in a browser (12 tests), stub server, TR-PANEL-001 names the harness |
 | `72bce48` | red tests batch 2: JS model `skill-run-model.js` (7 tests) |
@@ -24,7 +27,8 @@ Phase: **Plan, Step 5 drafted**, supervised, both subgoals. Reviewer name in the
 | TC-CLV JS part (030, 031, 032, 033, 034, 039, 044) | written, installed, red (stub `skill-run-model.js` throws) |
 | TC-CLV browser part (030, 032, 035, 036, 037, 040, 041, 042, 043, 045, 046, 047) | written, installed, red (all fail at the first missing page hook); the assertions behind the first lookup are not yet checked against a page |
 | **TC-WFM-136**, **TC-CLV-038** | **not written**: after the T-03 spike of PANEL (the events of a skill today; how a test starts the real backend on file-backed storage with a seeded run record) |
-| scorer tests of EV-skill_turns, AC-39 integration check | not written (CHAT T-04, T-06) |
+| scorer and target of EV-skill_turns: TC-CHA-064..067 (`tests/acceptance/test_digest_score.py`) | written, installed, red (stubs `digest_score.py`, `Harness._digest` raise NotImplementedError); note `goals/G-V3.CHAT/eval-target-note.md` approved; new draft spec items TC-CHA-064..067 (N-2.2 test-spec) and TR-CHAT-008 for the owner's review |
+| AC-39 integration check | not written (CHAT T-06) |
 
 How the red tests were made (use the same way): the permission classifier blocks edits of `tests/acceptance/`, `tests/helpers/` and `contracts/` by the agent. Write the files in a sandbox copy in the scratchpad, run them red against the stubs, check the assertions against a throwaway reference implementation, store the files as a payload in `specs/mia/goals/G-V3/red-tests/payload/` (contract change: `.../contract-change/payload/`) and let the owner run `install.py [--do]` there. The owner installed all payloads; `install.py` lists nothing as changed now. Interface notes the owner approved: `goals/G-V3.PANEL/run-recorder-interface.md`, `skill-run-view-interface-note.md` (eight exports, not six: `applyStatus` and `controlAction` were added), `goals/G-V3.CHAT/digest-step-interface.md`.
 
@@ -38,7 +42,7 @@ How the red tests were made (use the same way): the permission classifier blocks
 
 ## Open (in this order)
 1. Install the two payloads above and run the four contract suites and the browser tests (see the table). Then commit the installed files (message: `test: ...` for the contract amendment and the dark-theme runner).
-2. **EV-skill_turns target and scorer (CHAT T-04):** a new part; the owner approves a short note before any code; the suites have target `pending`.
+2. **EV-skill_turns target and scorer (CHAT T-04):** the note is approved (2026-11-08) and the scorer tests are installed; the code follows in T-04; after it the owner sets `"target": {"kind": "digest"}` in the two `suite.json` (one-line command, no case text) and creates `eval/labels/`; `faithful` is false after a failed hard check even without a label (refinement of the note, TR-CHAT-004).
 3. **TR-PANEL-001** (text changed with the harness versions) comes back in `req_review`; mark it again.
 4. **The two plans:** review them (small batches) and rule on the PANEL split (10 tasks; proposal: keep together, cut between T-05 and T-06 if wanted) and on the open items at the end of each plan (TC-WFM-136 and TC-CLV-038 after the T-03 spike, the call in `communicator.py`).
 5. After approval: protect the paths (deny rules in `.claude/settings.json` for `tests/acceptance/`, `tests/helpers/`, `tests/smoke/`, `benchmarks/`, `contracts/`, `test-requirements.md`, `stages.yaml`, `plausibility.yaml`, `deferred.md`), tag `plan-baseline` (ask for the name of the iteration tag), run the gate checks.

@@ -16,7 +16,7 @@
 | 5 | Stand-in (PANEL) | The scripted skill, the fake of skill_runs, the clock (G-V3.PANEL) | TR-PANEL-002, TR-PANEL-003, TR-PANEL-007 |
 | 6 | Persistence | A restart is a new process (G-V3.PANEL) | TR-PANEL-004 |
 | 7 | Untrusted text | The fixed list of hostile strings (G-V3.PANEL) | TR-PANEL-005 |
-| 9 | Eval setup (CHAT) | Pin, holdout, labels, hard checks and error rates of EV-skill_turns (G-V3.CHAT) | TR-CHAT-001, TR-CHAT-002, TR-CHAT-003, TR-CHAT-004, TR-CHAT-005, TR-CHAT-007 |
+| 9 | Eval setup (CHAT) | Pin, holdout, labels, hard checks and error rates of EV-skill_turns (G-V3.CHAT) | TR-CHAT-001, TR-CHAT-002, TR-CHAT-003, TR-CHAT-004, TR-CHAT-005, TR-CHAT-007, TR-CHAT-008 |
 | 10 | Fakes (CHAT) | The fake model server (G-V3.CHAT) | TR-CHAT-006 |
 | 8 | Exact values (PANEL) | Names, states, orders and figures (G-V3.PANEL) | TR-PANEL-006 |
 
@@ -249,3 +249,14 @@
 - Status: Draft
 - History: G-V3.CHAT Plan step 3 (2026-11-08), new
 
+### TR-CHAT-008 – the scorer is checked on fixed outputs
+- Applies to: TC-CHA-064, TC-CHA-065, TC-CHA-066, TC-CHA-067
+- Requirement: REQ-CHA-053
+- Group: Eval setup (CHAT)
+- Kind: unit
+- Text: The checks of the scorer and of the target digest shall use outputs, sources and labels written in the test with known results, and shall call no model except the scripted fake model of TR-CHAT-006.
+- Rationale: the scorer decides REQ-CHA-049, 053 and 054; a scorer that is only checked on model output could hide its own mistakes
+- Credibility aspect: reference accuracy
+- Verified by: inspection of the checks: none starts a model server
+- Status: Draft
+- History: G-V3.CHAT Plan step 4 (2026-11-08), new, with the note `goals/G-V3.CHAT/eval-target-note.md`
