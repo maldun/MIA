@@ -282,7 +282,7 @@ class ChatService:
         return {"ok": True, "message": record, "queued": queued, "command": command, "id": record["id"] if record else None, "position": position}
 
     def stop(self):
-        """stops the running answer (the text received so far stays) and any spoken-again playback; True when something was stopped"""
+        """stops the running answer (the text received so far stays) and any spoken-again playback; True only when an answer was stopped (IF-201: nothing running is stopped false)"""
         with self._lock:
             kind = self._current or (self._queue[0][0] if self._queue else None)
             running = self._running and kind not in (None, "command")
@@ -294,7 +294,7 @@ class ChatService:
         if running:
             self._stop.set()
             self._unpaused.set()                      # a paused task wakes up and sees the stop
-        return running or speaking
+        return running
 
     def _file_putter(self, task, message_id):
         def put(name, data):
