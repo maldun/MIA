@@ -543,3 +543,4 @@ The first version was silent until the end and could take 20 minutes or more: th
 | TR-GTB-001 | test requirement | 2c7e72b58139 | Stefan Reiterer | 2026-11-08 | approved | A-98: context graph tables and input that cannot be checked; owner's review answer 2026-11-08 |
 | G-V2.STORE | goal | ae15a6044531 | Stefan Reiterer | 2026-11-08 | approved | A-98: context graph tables and input that cannot be checked; owner's review answer 2026-11-08 |
 | G-V2.STORE | goal | ae15a6044531 | Stefan Reiterer | 2026-11-08 | approved | F-10: Implement row of goal.md in progress, T-01 to T-09 done, A-91 to A-99 installed; owner's review answer 2026-11-08 |
+| G-V2.STORE | goal | ae15a6044531 | Stefan Reiterer | 2026-11-08 | approved | Implement row done after T-10 (F-10); owner's review answer 2026-11-08 |
