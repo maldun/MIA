@@ -639,3 +639,7 @@ The first version was silent until the end and could take 20 minutes or more: th
 | TC-CHA-056 | check | 2c77f23b90b4 | maldun | 2026-11-08 | approved | G-V3.CHAT checks round 2 |
 | TC-CHA-057 | check | eda8cbc11722 | maldun | 2026-11-08 | approved | G-V3.CHAT checks round 2 |
 | REQ-CHA-057 | requirement | fa3e95f0dc77 | maldun | 2026-11-08 | approved | G-V3.CHAT checks round 2 |
+| TC-CHA-045 | check | 1cf6e65b63a9 | maldun | 2026-11-08 | approved | G-V3.CHAT checks round 3 |
+| TC-CHA-046 | check | 75eb7b71551f | maldun | 2026-11-08 | approved | G-V3.CHAT checks round 3 |
+| TC-CHA-047 | check | df3f7aef9e6f | maldun | 2026-11-08 | approved | G-V3.CHAT checks round 3 |
+| TC-CHA-048 | check | 829f78e5ed27 | maldun | 2026-11-08 | approved | G-V3.CHAT checks round 3 |
