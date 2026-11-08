@@ -2,7 +2,7 @@
 
 **Goal:** specs/mia/goals/G-V2.MODEL/goal.md   **Requirements:** REQ-WFM-040..049 in `nodes/N-2-backend/nodes/N-2.3-workflow-management/requirements.md`, REQ-RUN-016..019 in `nodes/N-2-backend/nodes/N-2.4-workflow-execution/nodes/N-2.4.1-pipeline-runner/requirements.md`   **Test specs:** the `test-spec.md` next to each, scenarios at the end; test requirements TR-MODEL-001..005 in `specs/mia/test-requirements.md`   **Status:** Approved by the owner, 2026-11-07 (Plan Step 5)
 
-Line of work `goal/v2.model`; supervised. Six small tasks, pure logic: no model step, no prompt, no eval suite, no eval budget. The red tests are written first in a session of their own (Step 4) and installed by the owner; the implementing session never edits `tests/acceptance/`, `tests/helpers/`, `tests/smoke/`, `contracts/`, `benchmarks/`, `eval/suites/` or `eval/baselines/`.
+Line of work `goal/v2.model`; supervised. Seven small tasks, pure logic: no model step, no prompt, no eval suite, no eval budget. The red tests are written first in a session of their own (Step 4) and installed by the owner; the implementing session never edits `tests/acceptance/`, `tests/helpers/`, `tests/smoke/`, `contracts/`, `benchmarks/`, `eval/suites/` or `eval/baselines/`.
 
 ## Interface fixed by the red tests
 The stubs `graph_model.py`, `skill_record.py` and `graph_run.py` in the repository root carry the interface the installed tests expect; T-01 to T-04 replace the stubs with the real code and keep these signatures: `GraphModel(tables).save_graph(graph)`, `read_graph(graph_id, version=None)`, `topological_order(graph_id)`; `SkillRecords(tables).store(record)`, `read(skill_id, version=None)`; `SkillCatalog(records, legacy).list()`, `start(skill_id)`; `GraphRunner(trust).run(graph, nodes, inputs)`. The result shapes are in the stub docstrings. A change of a signature is a plan amendment, not a code change.
@@ -16,6 +16,7 @@ The stubs `graph_model.py`, `skill_record.py` and `graph_run.py` in the reposito
 | T-04 Untrusted node refuses the run | REQ-RUN-017 | TC-RUN-017 | T-03 |
 | T-05 Skill records on the real Storage layer (adapter test) | REQ-WFM-040 (TR-MODEL-001) | the five scenarios of TC-WFM-040, 041, 042, 044, 049 give the same answers on the fake and on the real Storage layer, in `tests/test_skill_record_storage.py` | T-02; G-V2.STORE merged |
 | T-06 Skill listing and start take the record | REQ-WFM-041 | new tests (marked TC-WFM-041) for `library.py` and `extension_loader.py`, written first | T-05 |
+| T-07 Graph model on the record tables | REQ-WFM-043..049 (stored form), REQ-WFM-044 | the adapter test of T-05 runs the graph scenarios (TC-WFM-044, 049) on the real Storage through `graph_model.py` itself, without the test-side mapping | T-05 |
 
 ## Tasks
 
@@ -73,11 +74,20 @@ The stubs `graph_model.py`, `skill_record.py` and `graph_run.py` in the reposito
 - Done when: the listing and the start of a skill with a record use the record, and a skill without a record behaves as before (the existing tests of both modules stay green)
 - Notes: left out of T-02 on purpose (no test needed it); owner decision 2026-11-08: own task after T-05.
 
+### T-07: Graph model on the record tables
+- Implements: REQ-WFM-043, REQ-WFM-044, REQ-WFM-045, REQ-WFM-046, REQ-WFM-047, REQ-WFM-048, REQ-WFM-049 (the stored form of a graph; the rules themselves are T-01)
+- Tests to turn green: the graph scenarios of the adapter test `tests/test_skill_record_storage.py` (TC-WFM-044, TC-WFM-049) with the test-side class `RealGraphTables` removed, so that `GraphModel(Storage)` itself saves a graph as `graph_nodes` and `graph_edges` records plus a `graphs` header that pins the member versions, and reads it back; a graph refused by the record checks of the Storage layer is a refused result naming the rule and detail, not an exception; the 10 protected tests in `tests/acceptance/test_graph_model.py` stay green on the fake
+- Touches: `graph_model.py` (detects the real Storage as `SkillRecords` does; the `workflow_graphs` table name stays only for the fake path), `tests/test_skill_record_storage.py` (the mapping moves out of the test)
+- Must not touch: protected material (`tests/acceptance/`, `tests/helpers/`, `contracts/`), STORE's files (`storage.py`, `graph_tables.py`, `storage_copy.py`)
+- Depends on: T-05 (independent of T-06)
+- Done when: the graph scenarios give the same answers on the fake, the file backend and PostgreSQL with the production wiring; the rules of T-01 are checked before the write (the record checks of STORE check each record again); a graph header that names an unknown member version is refused with the rule of the Storage layer
+- Notes: finding 3 of T-05 (2026-11-08): `GraphModel` saved into `workflow_graphs`, which the real Storage does not have (`unknown_table`), and the real Storage returns `put` as `{"version": n}` and `get` as an entry with `doc`. A difference that is not an adapter detail is a finding for TR-MODEL-001, reported, not changed in the fake (`tests/helpers` is protected).
+
 ## Order and checks
-T-01 and T-02 are independent; T-03 needs T-01; T-04 needs T-03; T-05 waits for STORE; T-06 needs T-05. After each task: `python tests/test_<name>.py` for its tests, then the stage 1 and 2 steps of `stages.yaml`.
+T-01 and T-02 are independent; T-03 needs T-01; T-04 needs T-03; T-05 waits for STORE; T-06 and T-07 need T-05 and are independent of each other. After each task: `python tests/test_<name>.py` for its tests, then the stage 1 and 2 steps of `stages.yaml`.
 
 ## Size check (splitting)
-14 requirements, six tasks of one session each, no task across two nodes except T-02 (N-2.3 only), T-05 and T-06 (N-2.3 only) and T-03/T-04 (N-2.4.1 only). No split is suggested; the goal record's "keep together" stands.
+14 requirements, seven tasks of one session each, no task across two nodes except T-02 (N-2.3 only), T-05, T-06 and T-07 (N-2.3 only) and T-03/T-04 (N-2.4.1 only). No split is suggested; the goal record's "keep together" stands.
 
 ## Decided by the owner (2026-11-07)
 1. Module names `graph_model.py`, `skill_record.py`, `graph_run.py` are fine; the only existing code that changes is the skill listing in T-02 (`library.py`, `extension_loader.py`).
