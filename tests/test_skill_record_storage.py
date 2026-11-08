@@ -18,7 +18,7 @@ sys.path.insert(0, HERE)
 
 from markers import mark                                                                                    # noqa: E402
 from graph_model_fakes import (FakeGraphTables, data_node, make_edge, make_graph, make_skill,               # noqa: E402
-                               master_node, transform_node)
+                               master_node, make_node, transform_node)
 from graph_model import GraphModel                                                                          # noqa: E402
 from skill_record import SkillCatalog, SkillRecords                                                         # noqa: E402
 from storage import Storage, StorageError                                                                   # noqa: E402
@@ -262,6 +262,61 @@ class SkillRecordOnRealStorage:
         self.assertEqual(old["nodes"][0], first["nodes"][0])
         self.assertEqual(latest["nodes"][0], second["nodes"][0])
         self.assertEqual(self.model.topological_order("wf-v"), ["D1", "T1", "D2", "M1", "D3"])
+
+
+    def master_graph(self, graph_id, stop):
+        nodes = [data_node("D1"), make_node("master", "M1", toolbox_id="m1", stop=stop), data_node("D2")]
+        return make_graph(graph_id, nodes, [make_edge("D1", "M1"), make_edge("M1", "D2")])
+
+    @mark.req("REQ-WFM-048")
+    def test_the_stop_of_a_master_node_uses_the_field_names_of_if_301_on_both_sides(self):
+        """F-01 (REQ-WFM-048): a master node with `max_seconds` only is accepted; `max_time` only and an empty stop are refused naming the node.
+
+        Example: stop {"max_seconds": 5} is saved (version 1); {"max_repetitions": 3} is saved; {"max_time": 5} and {} are refused naming ["M1"] on the fake and the Storage layer.
+        """
+        # Given: the same master node with four different stops, on each side
+        for model in (self.fake_model, self.model):
+            # When: each graph is saved
+            results = {name: model.save_graph(self.master_graph("wf-" + name, stop))
+                       for name, stop in (("seconds", {"max_seconds": 5}), ("repetitions", {"max_repetitions": 3}), ("time", {"max_time": 5}), ("empty", {}))}
+            # Then: max_seconds and max_repetitions are accepted, max_time and the empty stop are refused naming M1
+            self.assertEqual([(n, results[n].saved) for n in ("seconds", "repetitions", "time", "empty")],
+                             [("seconds", True), ("repetitions", True), ("time", False), ("empty", False)])
+            self.assertEqual((results["seconds"].version, results["time"].named, results["empty"].named), (1, ["M1"], ["M1"]))
+
+    @mark.req("REQ-WFM-042")
+    def test_a_command_is_compared_in_the_form_the_loader_registers_on_both_sides(self):
+        """F-02 (REQ-WFM-042): a command that differs only in the leading slash or in case counts as the command of the other skill.
+
+        Example: `lookup` has `/lookup`; `review` with `/Lookup` and with `lookup` is refused naming ["lookup"]; `review` with `/review` is stored.
+        """
+        # Given: the skill lookup with /lookup, on each side
+        for records in (self.fake_records, self.records):
+            records.store(make_skill("lookup", "/lookup"))
+            # When: review is stored with the command in another case and without the slash
+            upper, bare = records.store(make_skill("review", "/Lookup")), records.store(make_skill("review", "lookup"))
+            fine = records.store(make_skill("review", "/review"))
+            # Then: both are refused naming lookup, a different command is stored
+            self.assertEqual([(upper.stored, upper.named), (bare.stored, bare.named)], [(False, ["lookup"]), (False, ["lookup"])])
+            self.assertTrue(fine.stored)
+
+    @mark.req("REQ-WFM-041")
+    def test_a_command_that_cannot_be_registered_is_refused_on_both_sides(self):
+        """F-03 (REQ-WFM-041): empty, `/`, a command with a space, a second slash or an uppercase letter is a refused result with a rule, nothing stored.
+
+        Example: commands "", "/", "/a b", "//a", "/Alpha" give stored False with rule "schema" and no ID in the list; "/alpha" and "beta" are stored.
+        """
+        # Given: records with bad commands, on each side
+        for records in (self.fake_records, self.records):
+            # When: each is stored
+            results = [records.store(make_skill("alpha", command)) for command in ("", "/", "/a b", "//a", "/Alpha")]
+            # Then: each is refused with a rule and a detail, and nothing is stored
+            self.assertEqual([(r.stored, r.version, r.rule) for r in results], [(False, None, "schema")] * 5)
+            self.assertTrue(all(r.detail for r in results))
+            self.assertEqual(records.ids(), [])
+            # And: the plain forms are stored
+            self.assertTrue(records.store(make_skill("alpha", "/alpha")).stored)
+            self.assertTrue(records.store(make_skill("beta", "beta")).stored)
 
 
 class FileStorageSkillRecords(SkillRecordOnRealStorage, unittest.TestCase):

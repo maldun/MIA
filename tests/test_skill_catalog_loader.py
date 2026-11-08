@@ -133,6 +133,43 @@ class SkillCatalogLoader(unittest.TestCase):
         self.assertIn(("gamma", "/gamma"), [(s["id"], s["command"]) for s in self.catalog.list()])
 
     @mark.req("REQ-WFM-041")
+    def test_a_stored_bad_command_is_skipped_with_a_problem_and_never_raises(self):
+        """F-03 (REQ-WFM-041): a record whose command cannot be registered (written around the record store) skips that skill and adds a problem; the others stay.
+
+        Example: records `alpha` with "/" and `delta` with "/Delta" (stored raw), manifest-only `beta`: `beta` is a task, `alpha` and `delta` are not, two problems name them, `/lookup`-style parse does not raise.
+        """
+        # Given: three extension folders; two have records that the record store would refuse, put into the Storage directly
+        for name in ("alpha", "beta", "delta"):
+            self.add(name)
+        for skill_id, command in (("alpha", "/"), ("delta", "/Delta")):
+            self.records.tables.put("skills", skill_id, {"id": skill_id, "data": {"command": command, "workflow_graph_id": "wf-" + skill_id,
+                                                                                  "context_graph_id": "ctx-" + skill_id}}, "anna")
+        # When: the extensions are loaded with the catalog
+        problems = self.load(catalog=self.catalog)
+        # Then: only the manifest-only skill is registered, no empty ID, and the two skills are named in the problems
+        self.assertEqual(self.registry.ids(), ["beta"])
+        self.assertEqual(sorted(p.split(":")[0] for p in problems), ["alpha", "delta"])
+        self.assertIsNone(self.registry.parse("/ text"))
+        self.assertEqual(self.registry.parse("/delta x"), None)
+
+    @mark.req("REQ-WFM-042")
+    def test_a_record_command_that_is_a_manifest_only_skill_is_refused_by_the_loader(self):
+        """F-02 (REQ-WFM-042): the record store cannot know manifest-only skills, so the loader refuses the record command with a problem; both skills keep their own form.
+
+        Example: record `alpha` with `/beta` and manifest-only `beta`: `alpha` is skipped with a problem, `beta` is registered and answers `/beta x`.
+        """
+        # Given: alpha with a record whose command is the id of the manifest-only skill beta
+        self.add("alpha")
+        self.add("beta")
+        self.record("alpha", "/beta", "wf-alpha")
+        # When: the extensions are loaded with the catalog
+        problems = self.load(catalog=self.catalog)
+        # Then: beta is registered as itself, alpha is skipped and named in a problem
+        self.assertEqual(self.registry.ids(), ["beta"])
+        self.assertEqual([p.split(":")[0] for p in problems], ["alpha"])
+        self.assertEqual(self.registry.parse("/beta x")["task"], "beta")
+
+    @mark.req("REQ-WFM-041")
     def test_web_app_creates_the_catalog_over_the_storage_and_passes_it_to_the_loader(self):
         """TC-WFM-041: web_app.py (not importable without the server) builds SkillCatalog(SkillRecords(<Storage>)) and passes catalog= to load_extensions.
 

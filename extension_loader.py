@@ -13,8 +13,10 @@ import json
 import os
 
 try:
+    from .skill_record import command_problem, normal_command
     from .task_registry import Option, Task
 except ImportError:  # used as plain script / in tests
+    from skill_record import command_problem, normal_command
     from task_registry import Option, Task
 
 NEEDS = ("ask", "options", "monitor", "files", "reports")
@@ -56,6 +58,10 @@ def load_extensions(package, folder, registry, services, catalog=None):
         names = sorted(n for n in os.listdir(folder) if os.path.isfile(os.path.join(folder, n, "manifest.json")))
     except FileNotFoundError:
         return ["the extensions folder %s does not exist" % folder]
+    # The record store does not know skills that exist only as manifest, so the loader refuses a record command that is the command of one of them (REQ-WFM-042).
+    manifest_only = set()
+    if catalog is not None:
+        manifest_only = {n for n in names if catalog.start(n) is None}
     for name in names:
         try:
             doc = read_manifest(os.path.join(folder, name))
@@ -64,7 +70,13 @@ def load_extensions(package, folder, registry, services, catalog=None):
             task = task_from_manifest(doc, getattr(loaded, function)(services))
             graph_id = catalog.start(name) if catalog is not None else None
             if graph_id is not None:
-                task.id, task.workflow_graph_id = catalog.records.read(name)["command"].lstrip("/"), graph_id
+                command = catalog.records.read(name)["command"]
+                problem = command_problem(command)      # records are data from outside: a command that cannot be registered skips the skill (F-03)
+                if problem is None and name != normal_command(command) and normal_command(command) in manifest_only:
+                    problem = "the command %r is the command of the skill %s" % (command, normal_command(command))
+                if problem is not None:
+                    raise ValueError("%s: the record is not used: %s" % (name, problem))
+                task.id, task.workflow_graph_id = normal_command(command), graph_id
             registry.register(task)
         except Exception as exc:
             problems.append(str(exc) if str(exc).startswith(name + ":") else "%s: %s" % (name, exc))

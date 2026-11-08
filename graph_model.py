@@ -6,7 +6,7 @@
 - topological_order(graph_id) -> the node IDs of a stored graph in an order in which every edge points forward.
 
 Node fields are the proposal of goal.md: data nodes `value`, `parameters`; transform and master `toolbox_id`; master `stop`
-({"max_repetitions": n} and/or {"max_time": s}). The cycle search is a plain depth-first search, so no new dependency is needed.
+({"max_repetitions": n} and/or {"max_seconds": s}, the names of IF-301 v2). The cycle search is a plain depth-first search, so no new dependency is needed.
 """
 
 from collections import namedtuple
@@ -86,10 +86,10 @@ def check_graph(graph):
     bad = [i for i, w in writers.items() if len(w) > 1]
     if bad:
         return bad
-    # REQ-WFM-048: a master node has a maximum of repetitions or a maximum time
+    # REQ-WFM-048: a master node has a maximum of repetitions or a maximum time (`max_seconds`)
     bad = [i for i, n in nodes.items()
            if _node_type(n) == "master" and not (n["data"].get("stop") or {}).get("max_repetitions")
-           and not (n["data"].get("stop") or {}).get("max_time")]
+           and not (n["data"].get("stop") or {}).get("max_seconds")]
     if bad:
         return bad
     # REQ-WFM-047: no cycle
