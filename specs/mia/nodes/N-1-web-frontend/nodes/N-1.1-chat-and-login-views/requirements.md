@@ -372,15 +372,15 @@ The chat page: messages, queue, history, status line, voting, tasks and memos, e
 
 ### REQ-CLV-036 – Full run part
 - Level: low   Subject: WebFrontEnd
-- Text: The Chat and login views shall keep the Full run part of the Skill run view collapsed until opened, at most 34 % of the viewport high, scrolling inside.
+- Text: The Chat and login views shall keep the Full run part of the Skill run view collapsed until opened, at most the user's share of the viewport height (default 34 %), scrolling inside.
 - Rationale: refines REQ-FE-032 (FR-46, A-131); owner layout of 2026-11-08, mockup `explore-skill-rework/forms/skill-run-view-mockup.html`
 - Parent: REQ-FE-032
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-39: the part is collapsed after the page loads; opened, it holds the result, the answers in order, the material found, the files and the counts and is not higher than 34 % of the viewport at 1440 x 900 px (exact); the page does not move when it scrolls
+- Acceptance criterion: AC-39: the part is collapsed after the page loads; opened, it holds the result, the answers in order, the material found, the files and the counts and with the default is not higher than 306 px at 1440 x 900 px (34 % of 900 px) and with the share set to 25 % not higher than 225 px (exact); the page does not move when it scrolls
 - Verified by: TC-CLV-036
 - Status: Draft
-- History: A-131 (proposed 2026-11-08, G-V3.PANEL), new
+- History: A-131 (proposed 2026-11-08, G-V3.PANEL), new; reworded after approval in batch 3 (owner at the check review of 2026-11-08: sizes relative to the viewport and configurable)
 
 ### REQ-CLV-037 – Link from the chat
 - Level: low   Subject: WebFrontEnd
@@ -432,16 +432,16 @@ The chat page: messages, queue, history, status line, voting, tasks and memos, e
 
 ### REQ-CLV-041 – Height of the strip
 - Level: low   Subject: WebFrontEnd
-- Text: The Chat and login views shall keep the strip of the Skill run view, with the Full run part closed, at most 150 px high at a width of 1440 px.
+- Text: The Chat and login views shall keep the strip of the Skill run view, with the Full run part closed, at most the user's share of the viewport height (default 16 %).
 - Rationale: refines REQ-FE-032 (FR-46, A-131); owner layout of 2026-11-08, mockup `explore-skill-rework/forms/skill-run-view-mockup.html`
 - Parent: REQ-FE-032
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-39: the strip of a running scripted skill with three phases measures at most 150 px at 1440 x 900 px (exact, browser test)
+- Acceptance criterion: AC-39: with the default the strip of a running scripted skill with three phases measures at most 144 px at 1440 x 900 px and at most 172.8 px at 1920 x 1080 px; with the share set to 20 % at most 180 px at 900 px (exact, browser test)
 - Verified by: TC-CLV-041
 - Status: Draft
-- Provisional: VAL-012 – the owner judges in use whether the strip is small enough and still readable (150 px follows the mockup of 2026-11-08, 140 px measured, a limit not a measured need)
-- History: A-131 (proposed 2026-11-08, G-V3.PANEL), new
+- Provisional: VAL-012 – the owner judges in use whether the strip is small enough and still readable (16 % follows the 140 px of 900 px of the mockup of 2026-11-08, a limit not a measured need; the user can change the share)
+- History: A-131 (proposed 2026-11-08, G-V3.PANEL), new; reworded after approval in batch 3 (owner at the check review of 2026-11-08: sizes relative to the viewport and configurable)
 
 ### REQ-CLV-042 – Layout on a phone
 - Level: low   Subject: WebFrontEnd
@@ -478,3 +478,27 @@ The chat page: messages, queue, history, status line, voting, tasks and memos, e
 - Verified by: TC-CLV-044
 - Status: Draft
 - History: A-131 (proposed 2026-11-08, G-V3.PANEL), new; owner at review of batch 2: skill specific elements can be added per skill
+
+### REQ-CLV-045 – Sizes set by the user
+- Level: low   Subject: WebFrontEnd
+- Text: The Chat and login views shall let the user set the viewport height share of the strip (12 to 40 %) and of the Full run part (20 to 60 %).
+- Rationale: refines REQ-FE-032; owner at the check review of 2026-11-08: sizes relative to the viewport and a setting of each user in the browser
+- Parent: REQ-FE-032
+- Priority: Should
+- Verification method: Test
+- Acceptance criterion: AC-39: a value in range is applied at once; 11 and 41 for the strip and 19 and 61 for the Full run part are refused and the last valid value stays (exact)
+- Verified by: TC-CLV-045
+- Status: Draft
+- History: A-131 (proposed 2026-11-08, G-V3.PANEL), new; owner at the check review of 2026-11-08: sizes relative to the viewport and a setting of each user in the browser
+
+### REQ-CLV-046 – Sizes kept in the browser
+- Level: low   Subject: WebFrontEnd
+- Text: The Chat and login views shall keep the two shares in the browser, apply them at every load and use 16 % and 34 % when none is kept or the browser refuses to store.
+- Rationale: refines REQ-FE-032; owner at the check review of 2026-11-08: sizes relative to the viewport and a setting of each user in the browser; a blocked storage must not break the page
+- Parent: REQ-FE-032
+- Priority: Should
+- Verification method: Test
+- Acceptance criterion: AC-39: after a reload the set shares apply; with a fresh browser profile 16 % and 34 % apply; with storage blocked the page works with 16 % and 34 % (exact)
+- Verified by: TC-CLV-046
+- Status: Draft
+- History: A-131 (proposed 2026-11-08, G-V3.PANEL), new; owner at the check review of 2026-11-08: sizes relative to the viewport and a setting of each user in the browser

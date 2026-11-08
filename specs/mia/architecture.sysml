@@ -2292,7 +2292,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-CLV-036'> FullRunPart_Clv036 {
         subject s : WebFrontEnd;
-        doc /* The Chat and login views shall keep the Full run part of the Skill run view collapsed until opened, at most 34 % of the viewport high, scrolling inside. */
+        doc /* The Chat and login views shall keep the Full run part of the Skill run view collapsed until opened, at most the user's share of the viewport height (default 34 %), scrolling inside. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-CLV-037'> LinkFromTheChat_Clv037 {
@@ -2317,7 +2317,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-CLV-041'> HeightOfTheStrip_Clv041 {
         subject s : WebFrontEnd;
-        doc /* The Chat and login views shall keep the strip of the Skill run view, with the Full run part closed, at most 150 px high at a width of 1440 px. */
+        doc /* The Chat and login views shall keep the strip of the Skill run view, with the Full run part closed, at most the user's share of the viewport height (default 16 %). */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-CLV-042'> LayoutOnAPhone_Clv042 {
@@ -2333,6 +2333,16 @@ package MIA_NodeRequirements {
     requirement def <'REQ-CLV-044'> ElementsOfASkill_Clv044 {
         subject s : WebFrontEnd;
         doc /* Where a run reports elements of its own, the Chat and login views shall show each as a label with its text in the strip of the Skill run view beside the common ones. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CLV-045'> SizesSetByTheUser_Clv045 {
+        subject s : WebFrontEnd;
+        doc /* The Chat and login views shall let the user set the viewport height share of the strip (12 to 40 %) and of the Full run part (20 to 60 %). */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CLV-046'> SizesKeptInTheBrowser_Clv046 {
+        subject s : WebFrontEnd;
+        doc /* The Chat and login views shall keep the two shares in the browser, apply them at every load and use 16 % and 34 % when none is kept or the browser refuses to store. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-CHV-001'> ChatWithoutTheCharacter_Chv001 {
@@ -4435,6 +4445,8 @@ package MIA_NodeRequirements {
     requirement r_req_clv_042 : LayoutOnAPhone_Clv042;
     requirement r_req_clv_043 : TextsOfARunAreText_Clv043;
     requirement r_req_clv_044 : ElementsOfASkill_Clv044;
+    requirement r_req_clv_045 : SizesSetByTheUser_Clv045;
+    requirement r_req_clv_046 : SizesKeptInTheBrowser_Clv046;
     requirement r_req_chv_001 : ChatWithoutTheCharacter_Chv001;
     requirement r_req_chv_002 : OneExpressionAPI_Chv002;
     requirement r_req_chv_003 : LivingCharacter_Chv003;
@@ -4887,6 +4899,8 @@ package MIA_NodeRequirements {
     satisfy r_req_clv_042 by mia.frontEnd;
     satisfy r_req_clv_043 by mia.frontEnd;
     satisfy r_req_clv_044 by mia.frontEnd;
+    satisfy r_req_clv_045 by mia.frontEnd;
+    satisfy r_req_clv_046 by mia.frontEnd;
     satisfy r_req_chv_001 by mia.frontEnd;
     satisfy r_req_chv_002 by mia.frontEnd;
     satisfy r_req_chv_003 by mia.frontEnd;
@@ -5338,6 +5352,8 @@ package MIA_NodeRequirements {
     allocate r_req_clv_042 to mia.frontEnd;
     allocate r_req_clv_043 to mia.frontEnd;
     allocate r_req_clv_044 to mia.frontEnd;
+    allocate r_req_clv_045 to mia.frontEnd;
+    allocate r_req_clv_046 to mia.frontEnd;
     allocate r_req_chv_001 to mia.frontEnd;
     allocate r_req_chv_002 to mia.frontEnd;
     allocate r_req_chv_003 to mia.frontEnd;
@@ -5791,6 +5807,8 @@ package MIA_NodeRequirements {
     dependency from r_req_clv_042 to r_req_fe_032;
     dependency from r_req_clv_043 to r_req_fe_032;
     dependency from r_req_clv_044 to r_req_fe_032;
+    dependency from r_req_clv_045 to r_req_fe_032;
+    dependency from r_req_clv_046 to r_req_fe_032;
     dependency from r_req_chv_001 to r_req_fe_006;
     dependency from r_req_chv_002 to r_req_fe_008;
     dependency from r_req_chv_003 to r_req_fe_009;

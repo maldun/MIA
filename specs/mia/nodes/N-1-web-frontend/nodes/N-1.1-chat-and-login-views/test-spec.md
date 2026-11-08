@@ -47,6 +47,8 @@ Tests of this part alone against the mocks of its neighbours (the mock of IF-101
 | TC-CLV-042 | REQ-CLV-042 | Component (browser) | 2 | a headless browser against the stub server `ui/tools/chat_stub_server.py` with the scripted stand-in skill | AC-39: stacked order; every control reachable; 44 px targets | exact; 44 px |
 | TC-CLV-043 | REQ-CLV-043 | Component (browser) | 2 | a headless browser against the stub server `ui/tools/chat_stub_server.py` with the scripted stand-in skill | AC-39: no markup effect, no request, no control | exact |
 | TC-CLV-044 | REQ-CLV-044 | Component | 1 | unit test in `tests/js/` with the mocks of the interfaces (`node --test`) | AC-39: two reported elements are shown as label and text; none gives only the common elements; markup shows as characters | exact |
+| TC-CLV-045 | REQ-CLV-045 | Component (browser) | 2 | a headless browser against the stub server `ui/tools/chat_stub_server.py` with the scripted stand-in skill | AC-39: a value in range is applied at once; values just outside the ranges are refused | exact |
+| TC-CLV-046 | REQ-CLV-046 | Component (browser) | 2 | a headless browser against the stub server `ui/tools/chat_stub_server.py` with the scripted stand-in skill; a fresh profile, and a profile with storage blocked | AC-39: the shares survive a reload; defaults for a fresh profile and for blocked storage | exact |
 
 ## Assumptions (checked in validation)
 
@@ -246,7 +248,7 @@ Status: **Draft** (written in Phase 3 after the verification, finding F11 / D-16
 - Verifies: REQ-CLV-036
 - Given: a finished review with a long result (about 6000 characters), two answers, five pieces of material, two files and the counts, window 1440 x 900 px
 - When: the page loads, the Full run part is opened and scrolled
-- Then: it is collapsed after the load; opened, it shows result, answers in order, material, files and counts; its height is at most 306 px (34 % of 900 px); the page itself does not scroll
+- Then: it is collapsed after the load; opened, it shows result, answers in order, material, files and counts; its height is at most 306 px (34 % of 900 px) with the default and at most 225 px with the share set to 25 %; the page itself does not scroll
 
 ### TC-CLV-037 – Link from the chat
 - Verifies: REQ-CLV-037
@@ -274,9 +276,9 @@ Status: **Draft** (written in Phase 3 after the verification, finding F11 / D-16
 
 ### TC-CLV-041 – Height of the strip
 - Verifies: REQ-CLV-041
-- Given: window 1440 x 900 px, a running skill with three phases, Full run part closed
+- Given: window 1440 x 900 px, then 1920 x 1080 px, a running skill with three phases, Full run part closed; the whole Skill run view element, header included, is measured
 - When: the page is shown
-- Then: the strip measures at most 150 px in height
+- Then: with the default the strip measures at most 144 px (16 % of 900 px) here and at most 172.8 px at 1920 x 1080 px; with the share set to 20 % at most 180 px at 900 px
 
 ### TC-CLV-042 – Layout on a phone
 - Verifies: REQ-CLV-042
@@ -295,3 +297,15 @@ Status: **Draft** (written in Phase 3 after the verification, finding F11 / D-16
 - Given: a scripted skill that reports the elements `Works read` = `12` and `Grade` = `B<b>x</b>`, and one that reports none
 - When: both run and the Skill run view is drawn
 - Then: the first strip shows both labels with their texts, the second `<b>x</b>` appearing as characters; the second skill's strip shows only the common elements
+
+### TC-CLV-045 – Sizes set by the user
+- Verifies: REQ-CLV-045
+- Given: window 1440 x 900 px and a running skill
+- When: the user sets the strip share to 20 %, then to 11 % and 41 %, and the Full run share to 25 %, then to 19 % and 61 %
+- Then: the strip is at most 180 px high at once; 11 % and 41 % are refused and 20 % stays; the Full run part is at most 225 px high; 19 % and 61 % are refused and 25 % stays
+
+### TC-CLV-046 – Sizes kept in the browser
+- Verifies: REQ-CLV-046
+- Given: shares of 20 % and 25 % set; a fresh browser profile; a profile that refuses to store
+- When: the page is reloaded; the fresh profile loads the page; the blocked profile loads the page and the user sets a share
+- Then: the reloaded page uses 20 % and 25 %; the fresh profile uses 16 % and 34 %; the blocked profile works, uses 16 % and 34 % after the load and shows no error
