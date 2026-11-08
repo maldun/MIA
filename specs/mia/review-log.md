@@ -530,3 +530,15 @@ The first version was silent until the end and could take 20 minutes or more: th
 | TC-GTB-023 | check | 427d9c196ed3 | Stefan Reiterer | 2026-11-08 | approved | A-93: fixed fields of a node; owner's review answer 2026-11-08 |
 | TR-GTB-001 | test requirement | 11f66c33c552 | Stefan Reiterer | 2026-11-08 | approved | A-93: fixed fields of a node; owner's review answer 2026-11-08 |
 | G-V2.STORE | goal | cdadd6d63fbd | Stefan Reiterer | 2026-11-08 | approved | A-93: fixed fields of a node; owner's review answer 2026-11-08 |
+| REQ-GTB-023 | requirement | 0599c3969eda | Stefan Reiterer | 2026-11-08 | approved | A-98: context graph tables and input that cannot be checked; owner's review answer 2026-11-08 |
+| REQ-GTB-024 | requirement | 7bf04f7ec3f9 | Stefan Reiterer | 2026-11-08 | approved | A-98: context graph tables and input that cannot be checked; owner's review answer 2026-11-08 |
+| REQ-GTB-025 | requirement | e8fb6ee4b797 | Stefan Reiterer | 2026-11-08 | approved | A-98: context graph tables and input that cannot be checked; owner's review answer 2026-11-08 |
+| REQ-GTB-026 | requirement | 447848717095 | Stefan Reiterer | 2026-11-08 | approved | A-98: context graph tables and input that cannot be checked; owner's review answer 2026-11-08 |
+| REQ-GTB-027 | requirement | 48af89f01b82 | Stefan Reiterer | 2026-11-08 | approved | A-98: context graph tables and input that cannot be checked; owner's review answer 2026-11-08 |
+| TC-GTB-024 | check | a153740d7a35 | Stefan Reiterer | 2026-11-08 | approved | A-98: context graph tables and input that cannot be checked; owner's review answer 2026-11-08 |
+| TC-GTB-025 | check | 8e9a9fc9611b | Stefan Reiterer | 2026-11-08 | approved | A-98: context graph tables and input that cannot be checked; owner's review answer 2026-11-08 |
+| TC-GTB-026 | check | ba3b21d2aad4 | Stefan Reiterer | 2026-11-08 | approved | A-98: context graph tables and input that cannot be checked; owner's review answer 2026-11-08 |
+| TC-GTB-027 | check | f996cd0c22d0 | Stefan Reiterer | 2026-11-08 | approved | A-98: context graph tables and input that cannot be checked; owner's review answer 2026-11-08 |
+| TC-GTB-028 | check | 5d73ee6e5e9d | Stefan Reiterer | 2026-11-08 | approved | A-98: context graph tables and input that cannot be checked; owner's review answer 2026-11-08 |
+| TR-GTB-001 | test requirement | 2c7e72b58139 | Stefan Reiterer | 2026-11-08 | approved | A-98: context graph tables and input that cannot be checked; owner's review answer 2026-11-08 |
+| G-V2.STORE | goal | ae15a6044531 | Stefan Reiterer | 2026-11-08 | approved | A-98: context graph tables and input that cannot be checked; owner's review answer 2026-11-08 |
