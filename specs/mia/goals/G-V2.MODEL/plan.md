@@ -15,7 +15,7 @@ The stubs `graph_model.py`, `skill_record.py` and `graph_run.py` in the reposito
 | T-03 Run in topological order, master node like a transform, failed node stops | REQ-RUN-016, 018, 019 | TC-RUN-016, 018, 019 | T-01 |
 | T-04 Untrusted node refuses the run | REQ-RUN-017 | TC-RUN-017 | T-03 |
 | T-05 Skill records on the real Storage layer (adapter test) | REQ-WFM-040 (TR-MODEL-001) | the five scenarios of TC-WFM-040, 041, 042, 044, 049 give the same answers on the fake and on the real Storage layer, in `tests/test_skill_record_storage.py` | T-02; G-V2.STORE merged |
-| T-06 Skill listing and start take the record | REQ-WFM-041 | new tests (marked TC-WFM-041) for `library.py` and `extension_loader.py`, written first | T-05 |
+| T-06 Skill listing and start take the record (extension loader) | REQ-WFM-041 | new tests (marked TC-WFM-041) for `extension_loader.py` and the wiring, written first | T-05 |
 | T-07 Graph model on the record tables | REQ-WFM-043..049 (stored form), REQ-WFM-044 | the adapter test of T-05 runs the graph scenarios (TC-WFM-044, 049) on the real Storage through `graph_model.py` itself, without the test-side mapping | T-05 |
 
 ## Tasks
@@ -65,14 +65,14 @@ The stubs `graph_model.py`, `skill_record.py` and `graph_run.py` in the reposito
 - Done when: the adapter test is green on the file backend (and on PostgreSQL where available, no skip there), the fake and the real Storage layer give the same answers for the five scenarios, or each difference is reported as a finding for these checks
 - Notes: T-05 stopped on 2026-11-08 because the fake cannot pass the contract suite of IF-301 v2 (key-value store against record checks); A-105 is the answer. A skill record that the real record checks refuse is a finding for the skill record (REQ-WFM-040), not a reason to change STORE.
 
-### T-06: Skill listing and start take the record
+### T-06: Skill listing and start take the record (extension loader)
 - Implements: REQ-WFM-041
-- Tests to turn green: new tests marked TC-WFM-041 for the real skill listing and start, written first
-- Touches: `library.py`, `extension_loader.py` (a skill with a record takes its command and its graph IDs from the record; the old forms stay for a skill without a record), their tests
-- Must not touch: protected material, STORE's files
+- Tests to turn green: new tests marked TC-WFM-041, written first: (1) `load_extensions` with a `catalog` registers a skill that has a record under the record's command and its task carries the record's `workflow_graph_id`; (2) a skill without a record is registered exactly as before; (3) a record-only skill (no manifest folder) is not invented as a runnable task; the listing of commands (`TaskRegistry.commands`) shows the record's command; (4) the wiring in `web_app.py` creates the catalog from the Storage layer and passes it (as far as a test without a running server can show it)
+- Touches: `extension_loader.py` (new optional parameter `catalog`, default None = behaviour as today), `task_registry.py` (one new attribute `workflow_graph_id` on `Task`, default None), `web_app.py` (create the `SkillCatalog` over `SkillRecords` and pass it to `load_extensions`), their tests
+- Must not touch: protected material, STORE's files (`storage.py`, `graph_tables.py`, `storage_copy.py`), `library.py` (it has no skill listing: the plan's first wording was wrong)
 - Depends on: T-05
-- Done when: the listing and the start of a skill with a record use the record, and a skill without a record behaves as before (the existing tests of both modules stay green)
-- Notes: left out of T-02 on purpose (no test needed it); owner decision 2026-11-08: own task after T-05.
+- Done when: the listing and the start of a skill with a record use the record, and a skill without a record behaves as before (the existing tests of the three modules stay green)
+- Notes: A-107 (2026-11-08): the first wording named `library.py`, which has no skill listing or start; the T-06 agent stopped and reported. Owner decision: option A (the extension loader) and the two extra files in the bounds. What runs when a record exists but no entry module does is not decided here: such a skill is listed by its command but is not made runnable by T-06 (report as a note, G-V2.CONVERT moves the skills one by one).
 
 ### T-07: Graph model on the record tables
 - Implements: REQ-WFM-043, REQ-WFM-044, REQ-WFM-045, REQ-WFM-046, REQ-WFM-047, REQ-WFM-048, REQ-WFM-049 (the stored form of a graph; the rules themselves are T-01)
