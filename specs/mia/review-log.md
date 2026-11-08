@@ -608,3 +608,5 @@ The first version was silent until the end and could take 20 minutes or more: th
 | REQ-BE-078 | requirement | 1e24c0b499f6 | maldun | 2026-11-08 | approved | G-V3.CHAT one by one: approved as it is |
 | REQ-CHA-040 | requirement | 702bb2af303f | maldun | 2026-11-08 | approved | G-V3.CHAT one by one: approved as it is |
 | REQ-CHA-041 | requirement | d68d3f626d17 | maldun | 2026-11-08 | approved | G-V3.CHAT one by one: approved as it is |
+| REQ-CHA-042 | requirement | 00fe1565533d | maldun | 2026-11-08 | approved | G-V3.CHAT one by one |
+| REQ-CHA-055 | requirement | 2d28788d4dd4 | maldun | 2026-11-08 | approved | G-V3.CHAT one by one |

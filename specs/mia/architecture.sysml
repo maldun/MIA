@@ -2808,12 +2808,12 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-CHA-043'> EndSummaryWithALink_Cha043 {
         subject s : ConversationCore;
-        doc /* When a skill run ends done, the Chat agent shall add one summary of the full result worded by SkillDigestStep, followed by a link to the run that code adds. */
+        doc /* When a skill run ends done, the Chat agent shall add one summary of the full result worded by SkillDigestStep. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
-    requirement def <'REQ-CHA-044'> FailedOrStoppedRunInTheChat_Cha044 {
+    requirement def <'REQ-CHA-044'> FailedRunInTheChat_Cha044 {
         subject s : ConversationCore;
-        doc /* When a skill run fails or is stopped, the Chat agent shall add one message with the reason, worded in MIA's persona, followed by a link to the run that code adds. */
+        doc /* When a skill run fails, the Chat agent shall add one message with the reason, worded in MIA's persona. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-CHA-045'> OnlySpokenTextInTheChat_Cha045 {
@@ -2869,6 +2869,16 @@ package MIA_NodeRequirements {
     requirement def <'REQ-CHA-055'> NoStatusMessageForASkillWithoutPhases_Cha055 {
         subject s : ConversationCore;
         doc /* While a skill without declared phases runs, the Chat agent shall add no status message. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-056'> LinkAddedByCode_Cha056 {
+        subject s : ConversationCore;
+        doc /* The Chat agent shall end each summary, failure message and stop message of a run with the link `[Open in the Skill run view](#run=<id>)` that code adds, never one taken from the model text. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-057'> StoppedRunInTheChat_Cha057 {
+        subject s : ConversationCore;
+        doc /* When a skill run is stopped, the Chat agent shall add one message that says the run was stopped, worded in MIA's persona. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-WFM-001'> SkillsAsTasks_Wfm001 {
@@ -4636,7 +4646,7 @@ package MIA_NodeRequirements {
     requirement r_req_cha_041 : StatusMessagePerDeclaredPhase_Cha041;
     requirement r_req_cha_042 : NoStatusForOtherPhases_Cha042;
     requirement r_req_cha_043 : EndSummaryWithALink_Cha043;
-    requirement r_req_cha_044 : FailedOrStoppedRunInTheChat_Cha044;
+    requirement r_req_cha_044 : FailedRunInTheChat_Cha044;
     requirement r_req_cha_045 : OnlySpokenTextInTheChat_Cha045;
     requirement r_req_cha_046 : HistoryOfARunForTheChatModel_Cha046;
     requirement r_req_cha_047 : SpokenLikeAnswersWithRepair_Cha047;
@@ -4648,6 +4658,8 @@ package MIA_NodeRequirements {
     requirement r_req_cha_053 : FaithfulSummary_Cha053;
     requirement r_req_cha_054 : SummaryInPersona_Cha054;
     requirement r_req_cha_055 : NoStatusMessageForASkillWithoutPhases_Cha055;
+    requirement r_req_cha_056 : LinkAddedByCode_Cha056;
+    requirement r_req_cha_057 : StoppedRunInTheChat_Cha057;
     requirement r_req_wfm_001 : SkillsAsTasks_Wfm001;
     requirement r_req_wfm_002 : VersionedWorkflowLibrary_Wfm002;
     requirement r_req_wfm_003 : NoCycles_Wfm003;
@@ -5121,6 +5133,8 @@ package MIA_NodeRequirements {
     satisfy r_req_cha_053 by mia.conversation;
     satisfy r_req_cha_054 by mia.conversation;
     satisfy r_req_cha_055 by mia.conversation;
+    satisfy r_req_cha_056 by mia.conversation;
+    satisfy r_req_cha_057 by mia.conversation;
     satisfy r_req_wfm_001 by mia.taskRuntime;
     satisfy r_req_wfm_002 by mia.taskRuntime;
     satisfy r_req_wfm_003 by mia.taskRuntime;
@@ -5593,6 +5607,8 @@ package MIA_NodeRequirements {
     allocate r_req_cha_053 to mia.conversation;
     allocate r_req_cha_054 to mia.conversation;
     allocate r_req_cha_055 to mia.conversation;
+    allocate r_req_cha_056 to mia.conversation;
+    allocate r_req_cha_057 to mia.conversation;
     allocate r_req_wfm_001 to mia.taskRuntime;
     allocate r_req_wfm_002 to mia.taskRuntime;
     allocate r_req_wfm_003 to mia.taskRuntime;
@@ -6076,6 +6092,8 @@ package MIA_NodeRequirements {
     dependency from r_req_cha_053 to r_req_be_078;
     dependency from r_req_cha_054 to r_req_be_078;
     dependency from r_req_cha_055 to r_req_be_078;
+    dependency from r_req_cha_056 to r_req_be_078;
+    dependency from r_req_cha_057 to r_req_be_078;
     dependency from r_req_wfm_001 to r_req_be_033;
     dependency from r_req_wfm_002 to r_req_be_035;
     dependency from r_req_wfm_003 to r_req_be_036;

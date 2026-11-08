@@ -31,8 +31,8 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-201
 | TC-CHA-040 | REQ-CHA-040 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: two questions in the chat in order, spoken; answers as users' messages | exact |
 | TC-CHA-041 | REQ-CHA-041 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: three declared phases give three status messages in order | exact |
 | TC-CHA-042 | REQ-CHA-042 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: an undeclared phase gives no status message | exact |
-| TC-CHA-043 | REQ-CHA-043 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: one summary message ending with the link form added by code; no link in the model text | exact |
-| TC-CHA-044 | REQ-CHA-044 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: failed and stopped runs give one message each with reason and link | exact |
+| TC-CHA-043 | REQ-CHA-043 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: a done run gives exactly one summary message, worded by the step | exact |
+| TC-CHA-044 | REQ-CHA-044 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: a failed run gives exactly one message with its reason | exact |
 | TC-CHA-045 | REQ-CHA-045 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: every message of the run has a spoken form; no table, card or full result | exact |
 | TC-CHA-046 | REQ-CHA-046 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: the model history holds questions, answers, summary and the last status message only | exact |
 | TC-CHA-047 | REQ-CHA-047 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: a summary that breaks a behaviour rule is repaired before display and speech; the signal is recorded | exact |
@@ -41,6 +41,8 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-201
 | TC-CHA-051 | REQ-CHA-051 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: every character of a long result goes to exactly one piece, in order; the summary call gets only the digests | exact |
 | TC-CHA-052 | REQ-CHA-052 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: the prompt names 1200 characters; a 3000-character scripted summary reaches the chat unchanged | exact |
 | TC-CHA-055 | REQ-CHA-055 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: lookup and search runs give no status message and one summary | exact |
+| TC-CHA-056 | REQ-CHA-056 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: summary, failure and stop message each end with the link of the run once; a model link is not used | exact |
+| TC-CHA-057 | REQ-CHA-057 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: a stopped run gives exactly one message that says it was stopped | exact |
 | EV-skill_turns | REQ-CHA-049, REQ-CHA-053, REQ-CHA-054 | Evaluation | 4 | the suite `eval/suites/skill_turns` (dev 21) and `skill_turns.holdout` (21) on MP-light, 3 repeats, harness `tools/eval.py` | AC-39: red-team cases pass in every repeat; faithful at least 0.85 (lower bound 0.70); persona at least 0.80 (lower bound 0.70), decided by `eval_decide.py` against the baseline | as in the Eval criterion lines |
 
 ## Assumptions (checked in validation)
@@ -48,7 +50,7 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-201
 - ASM-N2-001: the model server is replaced by the fake model server of `pipeline.py` in all stage 1 to 3 tests; no test needs a GPU before stage 4.
 - ASM-N2-002: the storage is the mock of IF-102 until N-3 is integrated (step 1 of N-0).
 
-## Scenarios (G-V3.CHAT, checks TC-CHA-040 to 052, TC-CHA-055 and EV-skill_turns)
+## Scenarios (G-V3.CHAT, checks TC-CHA-040 to 052, TC-CHA-055 to 057 and EV-skill_turns)
 
 ### TC-CHA-040 – Questions of a skill in the chat
 - Verifies: REQ-CHA-040
@@ -68,17 +70,17 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-201
 - When: it runs to the end
 - Then: the fourth phase gives no message
 
-### TC-CHA-043 – End summary with a link
+### TC-CHA-043 – End summary
 - Verifies: REQ-CHA-043
-- Given: a scripted run that ends done with the run id `r7`; the fake model's summary text is `Found 12 works.` and, in a second case, contains its own link
+- Given: a scripted run that ends done and a fake model whose summary text is `Found 12 works.`
 - When: the run ends
-- Then: one summary message follows, equal to the model text plus ` [Open in the Skill run view](#run=r7)`; a link in the model text is not used as the link of the message and the code's link is present once
+- Then: exactly one summary message follows, and its text is the model text `Found 12 works.`
 
-### TC-CHA-044 – Failed or stopped run in the chat
+### TC-CHA-044 – Failed run in the chat
 - Verifies: REQ-CHA-044
-- Given: a run that fails with `search service unreachable` and a run the user stops
-- When: each run ends
-- Then: each gives exactly one message with its reason in persona wording and the link of its run
+- Given: a scripted run that fails with the reason `search service unreachable`
+- When: the run ends
+- Then: exactly one message follows that contains the reason `search service unreachable` in the wording of the model
 
 ### TC-CHA-045 – Only spoken text in the chat
 - Verifies: REQ-CHA-045
@@ -133,3 +135,15 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-201
 - Given: a lookup run and a search run that declare no phases, each with a scripted full result
 - When: both run to the end
 - Then: neither gives a status message; each gives exactly one summary
+
+### TC-CHA-056 – Link added by code
+- Verifies: REQ-CHA-056
+- Given: three scripted runs with the ids `r7`, `r8`, `r9` that end done, fail and are stopped; a second case whose model text contains its own link `[x](http://example.org)`
+- When: each run ends
+- Then: each message ends with ` [Open in the Skill run view](#run=r7)` (`r8`, `r9`) exactly once; the link in the model text is not taken as the link of the message and the code's link is present once
+
+### TC-CHA-057 – Stopped run in the chat
+- Verifies: REQ-CHA-057
+- Given: a scripted run that the user stops
+- When: the run ends
+- Then: exactly one message follows that says the run was stopped and names no other cause

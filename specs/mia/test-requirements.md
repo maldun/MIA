@@ -226,7 +226,7 @@
 - History: G-V3.CHAT Plan step 3 (2026-11-08), new
 
 ### TR-CHAT-006 – fake model server for the logic checks
-- Applies to: TC-CHA-040, TC-CHA-041, TC-CHA-042, TC-CHA-043, TC-CHA-044, TC-CHA-045, TC-CHA-046, TC-CHA-047, TC-CHA-048, TC-CHA-050, TC-CHA-051, TC-CHA-052, TC-CHA-055
+- Applies to: TC-CHA-040, TC-CHA-041, TC-CHA-042, TC-CHA-043, TC-CHA-044, TC-CHA-045, TC-CHA-046, TC-CHA-047, TC-CHA-048, TC-CHA-050, TC-CHA-051, TC-CHA-052, TC-CHA-055, TC-CHA-056, TC-CHA-057
 - Requirement: REQ-CHA-040
 - Group: Fakes (CHAT)
 - Kind: setup

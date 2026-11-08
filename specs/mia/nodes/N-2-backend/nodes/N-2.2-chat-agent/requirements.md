@@ -273,7 +273,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 ## Groups of G-V3.CHAT
 | Order | Group | What it covers | Requirements |
 |---|---|---|---|
-| 1 | ST | Skill turns: what the chat shows of a run and what the model sees (FR-35, FR-46) | REQ-CHA-040, REQ-CHA-041, REQ-CHA-042, REQ-CHA-043, REQ-CHA-044, REQ-CHA-045, REQ-CHA-046, REQ-CHA-047, REQ-CHA-055 |
+| 1 | ST | Skill turns: what the chat shows of a run and what the model sees (FR-35, FR-46) | REQ-CHA-040, REQ-CHA-041, REQ-CHA-042, REQ-CHA-043, REQ-CHA-044, REQ-CHA-045, REQ-CHA-046, REQ-CHA-047, REQ-CHA-055, REQ-CHA-056, REQ-CHA-057 |
 | 2 | UT | Untrusted result (TB-result) | REQ-CHA-048, REQ-CHA-049 |
 | 3 | BG | Budgets of the digest step | REQ-CHA-050, REQ-CHA-051, REQ-CHA-052 |
 | 4 | SQ | Summary quality (eval criteria) | REQ-CHA-053, REQ-CHA-054 |
@@ -319,29 +319,29 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 
 ### REQ-CHA-043 – End summary with a link
 - Level: low   Subject: ConversationCore
-- Text: When a skill run ends done, the Chat agent shall add one summary of the full result worded by SkillDigestStep, followed by a link to the run that code adds.
+- Text: When a skill run ends done, the Chat agent shall add one summary of the full result worded by SkillDigestStep.
 - Rationale: refines REQ-BE-078; FR-35; the link is added by code, not by the model (owner 2026-10-30)
 - Parent: REQ-BE-078
 - Group: ST
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-39: a done run gives one summary message that ends with the link form `[Open in the Skill run view](#run=<id>)` of the run, and the model text contains no link of its own (exact)
+- Acceptance criterion: AC-39: a done run gives exactly one summary message, worded by the step (exact); the link is REQ-CHA-056
 - Verified by: TC-CHA-043
 - Status: Draft
-- History: A-131 (proposed 2026-11-08, G-V3.CHAT), new; owner 2026-11-08
+- History: A-131 (proposed 2026-11-08, G-V3.CHAT), new; owner 2026-11-08; split at the owner's one-by-one review of 2026-11-08: the link is REQ-CHA-056
 
-### REQ-CHA-044 – Failed or stopped run in the chat
+### REQ-CHA-044 – Failed run in the chat
 - Level: low   Subject: ConversationCore
-- Text: When a skill run fails or is stopped, the Chat agent shall add one message with the reason, worded in MIA's persona, followed by a link to the run that code adds.
+- Text: When a skill run fails, the Chat agent shall add one message with the reason, worded in MIA's persona.
 - Rationale: refines REQ-BE-078; FR-35, OC-5 of G-V3
 - Parent: REQ-BE-078
 - Group: ST
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-39: a failed run and a stopped run each give one message with their reason and the link (exact)
+- Acceptance criterion: AC-39: a failed run gives exactly one message that contains its reason (exact); the link is REQ-CHA-056
 - Verified by: TC-CHA-044
 - Status: Draft
-- History: A-131 (proposed 2026-11-08, G-V3.CHAT), new; owner 2026-11-08
+- History: A-131 (proposed 2026-11-08, G-V3.CHAT), new; owner 2026-11-08; split at the owner's one-by-one review of 2026-11-08: the stopped run is REQ-CHA-057, the link REQ-CHA-056
 
 ### REQ-CHA-045 – Only spoken text in the chat
 - Level: low   Subject: ConversationCore
@@ -488,3 +488,29 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verified by: TC-CHA-055
 - Status: Draft
 - History: A-131 (proposed 2026-11-08, G-V3.CHAT), new; owner 2026-11-08, split from REQ-CHA-042
+
+### REQ-CHA-056 – Link added by code
+- Level: low   Subject: ConversationCore
+- Text: The Chat agent shall end each summary, failure message and stop message of a run with the link `[Open in the Skill run view](#run=<id>)` that code adds, never one taken from the model text.
+- Rationale: refines REQ-BE-078; FR-35: the link is added by code (owner 2026-10-30); the page opens the Full run part (REQ-CLV-037)
+- Parent: REQ-BE-078
+- Group: ST
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: each of the three messages of a scripted run ends with the link of its run exactly once; a link inside the model text is not used and does not duplicate it (exact)
+- Verified by: TC-CHA-056
+- Status: Draft
+- History: A-131 (proposed 2026-11-08, G-V3.CHAT), new; owner 2026-11-08, split from REQ-CHA-043 and 044
+
+### REQ-CHA-057 – Stopped run in the chat
+- Level: low   Subject: ConversationCore
+- Text: When a skill run is stopped, the Chat agent shall add one message that says the run was stopped, worded in MIA's persona.
+- Rationale: refines REQ-BE-078; FR-35, OC-5 of G-V3
+- Parent: REQ-BE-078
+- Group: ST
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: a stopped run gives exactly one message that says it was stopped and names no other cause (exact)
+- Verified by: TC-CHA-057
+- Status: Draft
+- History: A-131 (proposed 2026-11-08, G-V3.CHAT), new; owner 2026-11-08, split from REQ-CHA-043 and 044
