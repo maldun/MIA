@@ -82,7 +82,7 @@ Top-level items it serves: FR-40. Requirements by ID (inside G-V2's scope):
 |---|---|---|
 | Explore | done | HLS of iteration 2 approved 2026-11-05 (D-186) |
 | Plan | done | requirements REQ-GTB-005..020 and checks approved (D-265..D-267); red tests, IF-301 v2 mock and suite installed (tag `plan-baseline-it2-store`); A-90 contract text installed; `plan.md` approved 2026-11-07 |
-| Implement | in progress | T-01 to T-12 done, T-13 open (`implementation-log.md`); A-91 to A-104 installed |
+| Implement | done | T-01 to T-13 done (`implementation-log.md`); A-91 to A-104 installed; hand-over to Verify |
 | Verify | open | |
 | Commit | open | |
 | Deploy | open | |
