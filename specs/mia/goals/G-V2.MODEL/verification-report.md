@@ -4,7 +4,7 @@
 **Branch:** goal/v2.model @ `b36b053` (code unchanged since `5382d28`)   **Parent line of work:** master (`b250450`, STORE merged)   **Plan baseline:** `plan-baseline-it2-model-installed` (`97146b4`)
 **Date:** 2026-11-08   **Reviewers:** (human review pending), Claude Sonnet 5.5 (AI, fresh Verify session, no part in the implementation)
 
-> The verdict of the first run below is superseded by the sections **Second run** (after T-08, `49c18b4`) and **Third run** (after T-09, `e42de62`, merge `735c983`) at the end of this file. Finding IDs are kept; the current verdict and the status of every finding are in the Third run.
+> The verdict of the first run below is superseded by the sections **Second run** (after T-08, `49c18b4`), **Third run** (after T-09, `e42de62`, merge `735c983`) and **Fourth run** (after T-10, `2d38317`) at the end of this file. Finding IDs are kept; the current verdict and the status of every finding are in the Fourth run.
 
 ## Verdict
 **Not verified.** Reasons that remain (all in the table of findings):
@@ -326,6 +326,85 @@ The nine survivors of the first run: six still survive (3 author, 2 refusal bran
 
 ### Not run
 `ruff`, `bandit`, `vulture` (not installed); real start of `web_app.py` with a failing catalog (shown at the loader level only); CI stage log; documentation and clean-machine walkthrough; the human review; the mutants ran on the file backend of the adapter test only (the PostgreSQL class runs the same code and was run unmutated); `save_graph` of 20000 real nodes did not finish within the 10 s probe limit (linear file writes, not a hang).
+
+### Accepted deviations
+| Deviation | Reason | Accepted by |
+|---|---|---|
+| none | | |
+
+## Fourth run (after T-10)
+**Branch:** goal/v2.model @ `50d05b9` (code unchanged since `2d38317`; `git diff 7963797..HEAD` on code: `extension_loader.py`, `graph_model.py` (3 lines), tests `test_graph_run_findings.py` (10), `test_skill_record_storage.py` (32), `test_skill_catalog_loader.py` (20))   **Baseline for diffs and trace_check:** master `66fc76a`   **Date:** 2026-11-08   **Reviewer:** Claude Sonnet 5.5 (AI, fresh Verify session, no part in the implementation); human review pending.
+Owner decisions of 2026-11-08 used as given: fix F-17, F-19 and the nine mutant gaps; F-18: keep `re.A`, accept the side effect, pinned by a test; F-04, F-06, F-07 (c) to (e), F-08, F-09 (refusal branch, node pre-check), F-11 are not fixed (the owner decides whether to accept them as deviations); F-10 is the owner's approval.
+
+### Verdict (fourth run)
+**Not verified, formally.** F-17 and F-19 are closed by my own probes and no new defect or regression of T-10 was found (property tests against a model of the rules: 12 000 random worlds with fakes plus 800 with the real record store, 0 disagreements). What remains:
+1. Open low findings that no person has accepted yet: F-04, F-06 (remainder), F-07 (c) to (e), F-08, F-09 (remainder), F-11.
+2. F-10 (owner's approval): TC-WFM-047, TR-MODEL-003, TR-MODEL-001 are "changed since review".
+**All open findings are low. If the owner accepts F-04, F-06, F-07 c-e, F-08, F-09 and F-11 as deviations (and approves F-10), the verdict becomes 'Verified with accepted deviations'; no fix is needed for that.** F-10 is an approval, not a deviation.
+
+### Automated checks (clean `git archive HEAD`, scratchpad `vm4/head`; master `66fc76a` in `vm4/master`)
+| Check | Result |
+|---|---|
+| `trace_check.py` | 547 errors, sorted list **identical** to master `66fc76a`; none for the MODEL ids; no new error |
+| `goal_check.py`, `req_graph.py` | only GL1 (old); 28 errors as baseline |
+| `req_review.py status` | changed since review: TR-MODEL-001, TC-WFM-047, TR-MODEL-003 only (F-10); nothing marked by me |
+| `test_doc_check.py` on the goal's five test files | 0 errors, 0 warnings |
+| Goal tests, one process each | `test_graph_model` 10, `test_graph_run` 4, `test_graph_run_findings` 10, `test_skill_catalog_loader` 20, `test_extension_loader` 8, `test_task_registry` 8, `test_chat_tasks` 12: all OK |
+| `test_skill_record_storage.py -v` | 32 OK: 16 on the file backend and 16 on PostgreSQL, none skipped |
+| `test_storage_postgres.py`, `contract_postgres.sh` | 43 OK (not skipped); 11 OK |
+| All acceptance files, one process each; `test_contracts.py` (mock, real); `run_integration_steps.py` | all OK; 23 python + 4 javascript steps, 0 failed |
+| JavaScript tests | 163 of 163 OK |
+| Full unit suite alone | 2206 tests OK, skipped 4, expected failures 2; 493 s |
+| TC-WFM-047 statistical check (seeds 1 to 200, 100 + 100 graphs) | run once (acceptance file and unit suite): OK, no re-run, seeds and n unchanged |
+| Protected material vs `66fc76a` (list as in the third run) | empty diff |
+| Three red-test files vs `plan-baseline-it2-model-installed` | empty diff |
+| `check_sysml_model.py`, `check_sysml.sh` | OK; 4 files, 0 errors, 0 warnings |
+| `ruff`, `bandit`, `vulture` | not installed, not run; the diff adds no subprocess, file deletion, environment, network or secret |
+
+### Status of the findings
+| # | Status | Evidence of this run |
+|---|---|---|
+| F-01 | **Closed** | unchanged |
+| F-02 | **Closed** | unchanged; residue F-17 now closed |
+| F-03 | **Closed** | unchanged |
+| F-04 | **Open**, low | unchanged |
+| F-05 | **Closed** | unchanged |
+| F-06 | **Open**, low | unchanged (malformed input still raises: edge without `id`, graph without `nodes`, `n["data"]` None) |
+| F-07 | **(a), (b) decided; (c), (d), (e) open**, low | code unchanged |
+| F-08 | **Open**, low | three "author not passed" mutants survive again |
+| F-09 | **Partly closed**, low | `save_graph` `except StorageError` branch (swallowed, raised) and node pre-check removed still survive |
+| F-10 | **Open, owner's** | `req_review.py status` as above |
+| F-11 | **Open**, low | unchanged (Plan note: command form and stop values only in `plan.md` T-08..T-10 and IF-301 v2; `goal.md` still shows Implement `open`) |
+| F-12 to F-16 | **Closed** | unchanged code; F-16 and F-19 re-probed below |
+| F-17 | **Closed** | `p_real.py` (real record store, file backend) and `p_prop.py` (fake catalog, 12 000 random worlds, seeds 1 to 3, 4000 each: 2360 to 2456 real clashes, about 780 own-alias cases, 0 disagreements with the model). The exact example of the third report (`lookup`, alias `research`, record `/research`) registers `research`, no problem. Also correct: own alias without slash, own folder name, own alias in another case; other skill's name or alias (record skill skipped, problem text names the cause, e.g. "... an alias of the skill lookup"; both causes joined with "and"); a name of a skill that has a record is free (alpha `/lookup`, lookup moved to `/other`); two records for one skill (latest wins, both orders); swap of two aliases (both skipped, each names the other); record without extension (ignored); record skill sorting first/last; folder names / aliases in other case; skill whose lookup raises (folder name taken, manifest registered); broken manifest of another skill (loader goes on, its aliases not taken); every registered name resolves through `TaskRegistry.parse` to its task; one problem line per dropped skill, none otherwise |
+| F-18 | **Closed (accepted by the owner, pinned)** | `test_a_command_followed_by_a_non_ascii_space_is_no_task_command` passes; the mutant "`re.A` removed" is killed by it and by `test_task_registry` |
+| F-19 | **Closed** | `p_f19.py`: 61 681 stops (huge ints both signs `10**400`, `10**30`, floats near overflow `1e308`, `1.797e308`, bool, nan, inf, `-0.0`, `2.0`, str, None, lists, dicts, cross product of both keys): no disagreement with `graph_tables.check_record` except a non-finite number in an EXTRA key (431 cases; Storage document-level rule, the stop rule ignores extra keys by design, as noted in the third run); no exception anywhere. `check_graph` and the real `save_graph` on 6000 stops: no exception, no disagreement; `10**400` as seconds or repetitions is accepted by both, `-10**400` refused by both |
+
+### New findings
+None. Notes (not findings):
+- N-1, pre-existing on master `66fc76a` (identical there, not caused by this goal): manifest `aliases` that are not lower-case strings break chat parsing for every command (`aliases: ["Research"]` makes `parse("/research x")` raise `KeyError`; `[5, null]` makes every `parse` raise `TypeError`; `aliases: "abc"` registers the letters `a`, `b`, `c`; `null` drops the skill with a problem). Manifests are repository code, so low; the loader's `taken` map does not make it worse.
+- N-2, behaviour change of T-10 against `7963797` for skills with a record, found by differential run (3000 random worlds, seed 5): besides F-17 (the record command equal to an own alias is now accepted), a record command equal to the skill's OWN folder name is now skipped when another skill holds that name as an alias (before: the record skill was registered and the aliasing skill failed with "task id already in use"). This follows the owner decision for F-14 (the manifest skill keeps its alias), is consistent, and is pinned by no test; a skipped record skill is dropped as a whole (as T-08 states). With no record at all, registry, names, graph IDs and problems are identical to `7963797` in 3000 of 3000 worlds.
+
+### Regression review of `git diff 7963797..HEAD`
+- `extension_loader.py`: the `taken` map holds folder names of skills without a record (including skills whose lookup failed) and aliases of all readable manifests, each name mapped to its holders; the clash is any holder other than the skill itself. Done-not-specified: none beyond the plan text of T-10. The `try` still wraps the whole alias loop (a broken or odd manifest ends only its own loop; earlier entries stay); mutant "alias loop outside the try" is killed.
+- Skills without a record: the real `extensions/` folder (`lookup`, `review`, `search`) loads to identical tasks, aliases, versions, options and names with `catalog=None`, with an empty catalog and with an unrelated record, at `7963797` and at HEAD (`p_real_ext.py`, identical); in random worlds without records the output is identical (3000 of 3000).
+- `graph_model._limit`: only the int branch changed; booleans, strings, null still refused; floats still checked with `isfinite`.
+- Property test (`p_prop.py`) against a model of T-08..T-10 and the owner's decisions: kept finding a seeded fault (own-skill filter removed: 9 of 500 trials disagree; aliases dropped: 9 of 500), so it is not vacuous. No NEW regression of T-10 found.
+
+### Mutants (fourth run; scratch copy of `git archive HEAD`, the goal's seven test files, file backend of the adapter test)
+149 effective mutants: the third run's 131 minus 11 whose code lines changed in T-10 (rebuilt as the T-10 series below) = 120, plus 29 new T-10 mutants. **129 killed, 20 survived.** All nine gaps of the third run are killed (`find_cycle` last node, whole path, no done mark, self-loop in `find_cycle` and the runner, `_` in a command, the four folder-name / alias comparison mutants). T-10 mutants killed: own-skill filter removed or inverted, holder compared with the command, `taken` only folder names, only aliases, folder names of record skills too or only, aliases of manifest-only skills only, aliases of record skills only, no normal form (aliases, folders, raw command), clash not a problem, alias loop outside `try`, clash check dropped, wrong skill named in the alias cause, `isfinite` for ints again, seconds `>= 0` / `!= 0`, no finiteness check, nan only, bool accepted, huge ints refused.
+Survivors (20):
+| Survivor | Class | Reason / proposed test |
+|---|---|---|
+| author not passed in skills, graph nodes, header (3) | gap, F-08 | store, then `get(...)["author"]` names the account |
+| `save_graph` refusal swallowed / raised (2); node pre-check removed (1) | gap, F-09 | refused edge record gives `saved=False` with rule and detail; after a refused bad node `ids("graph_nodes") == []` |
+| form checks for empty, space, second slash, capitals removed (4); loader `lstrip("/")` instead of `normal_command` (1) | equivalent | the ASCII rule that follows refuses the same strings |
+| lookup failure leaves the entry unset (1); trust-first (1); no values after a cycle refusal (1); control no-op (1) | equivalent / not specified | no observable difference |
+| T-10 problem text: both causes reduced to the first (1); alias cause worded as name (1); name cause worded as alias (1); wrong skill named for the name cause (1) | gap, low | only the wording of the problem line differs; the alias holder's name IS checked (that mutant is killed). TR-MODEL-005 says never compare wording, so a test would check that the problem names the holder skill (`lookup`) for a folder-name clash and both holders when a name and an alias clash |
+| alias loop: a failure empties `taken` (1) | gap, low (text only) | in `p_clear.py` (alpha alias `research`, zeta broken manifest, beta record `/research`) the skill is dropped either way, but the cause becomes "task id already in use" instead of the alias; test: the problem line names the alias holder when a later skill has a broken manifest |
+
+### Not run
+`ruff`, `bandit`, `vulture` (not installed); real start of `web_app.py` with a failing catalog; CI stage log; documentation and clean-machine walkthrough; the human review; mutants on the PostgreSQL class of the adapter test (same code, run unmutated); the contract suites were run through `test_contracts.py` and `run_integration_steps.py`, not as separate "mock 130 / real 130" counts of the third run.
 
 ### Accepted deviations
 | Deviation | Reason | Accepted by |
