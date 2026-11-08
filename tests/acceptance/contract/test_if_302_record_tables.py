@@ -19,15 +19,15 @@ class RecordTablesContract(unittest.TestCase):
     @mark.req("IF-302", "REQ-DB-013")
     @each_provider(IF)
     def test_what_may_be_deleted(self, tables):
-        """TC-IF-302-01 golden 3: deletable are exactly history, memory, tasks and memos (v7, A-67), so votes, runs and source_trust are not; every table is versioned."""
+        """TC-IF-302-01 golden 3: deletable are exactly history, memory, tasks, memos and skill_runs (v7, A-67; v8, A-141), so votes, runs and source_trust are not; every table is versioned."""
         defs = tables.definitions()
         for table in ("memory", "tasks", "memos"):
             self.assertTrue(defs[table]["deletable"], table)
         for table in ("votes", "runs"):
             self.assertFalse(defs[table]["deletable"], table)
         self.assertTrue(all(d["versioned"] for d in defs.values()))
-        self.assertEqual({t for t, d in defs.items() if d["deletable"]}, {"history", "memory", "tasks", "memos"})      # v7 (A-67): the whole set
-        self.assertTrue({"history", "memory", "votes", "tasks", "memos", "accounts", "presets", "gestures", "runs", "source_trust", "cases", "behaviours", "workflow_meta", "reports"} <= set(defs))
+        self.assertEqual({t for t, d in defs.items() if d["deletable"]}, {"history", "memory", "tasks", "memos", "skill_runs"})      # v7 (A-67) and v8 (A-141): the whole set
+        self.assertTrue({"history", "memory", "votes", "tasks", "memos", "accounts", "presets", "gestures", "runs", "source_trust", "cases", "behaviours", "workflow_meta", "reports", "skill_runs"} <= set(defs))
         for table in ("cases", "behaviours", "workflow_meta", "reports"):                                   # v1 (A-08): proposed benchmark cases and the adaptation counters keep every version
             self.assertEqual(defs[table], {"versioned": True, "deletable": False}, table)
 
@@ -95,6 +95,21 @@ class RecordTablesContract(unittest.TestCase):
         vote = {"user": "anna", "subject": "m1", "category": "service", "value": 1}
         for value in (1.0, -1.0, True, False):
             self.assertEqual(tables.validate("votes", dict(vote, value=value)), {"rule": "schema", "detail": "value"}, value)
+
+    @mark.req("IF-302", "REQ-RTB-007")
+    @each_provider(IF)
+    def test_a_skill_run_is_a_versioned_deletable_record(self, tables):
+        """TC-IF-302-08 (v8, A-141): `skill_runs` is versioned and deletable; a record needs run, skill, skill_version, account, started and state (a missing field is rule schema with that field as detail); the optional fields ended, phases, budget, counts, reason, answers, result, material and files are free; `reports` stays as it is.
+        Example: validate("skill_runs", {"run": "r1", "skill": "review", "skill_version": "2", "account": "anna", "started": "2026-11-08T10:00:00Z", "state": "running"}) -> None."""
+        doc = {"run": "r1", "skill": "review", "skill_version": "2", "account": "anna", "started": "2026-11-08T10:00:00Z", "state": "running"}
+        self.assertEqual(tables.definitions()["skill_runs"], {"versioned": True, "deletable": True})
+        self.assertIsNone(tables.validate("skill_runs", doc))
+        for field in doc:
+            self.assertEqual(tables.validate("skill_runs", {k: v for k, v in doc.items() if k != field}), {"rule": "schema", "detail": field})
+        full = dict(doc, ended="2026-11-08T10:05:00Z", phases=[{"name": "screening", "state": "done"}], budget={"seconds": 600}, counts={"searches": 3},
+                    reason="stopped by the user", answers=[{"text": "yes", "time": "2026-11-08T10:01:00Z"}], result="text", material=[], files=["report.md"])
+        self.assertIsNone(tables.validate("skill_runs", full))
+        self.assertEqual(tables.definitions()["reports"], {"versioned": True, "deletable": False})
 
 
 if __name__ == "__main__":

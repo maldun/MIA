@@ -410,7 +410,7 @@ class ChatApiContract(unittest.TestCase):
         api.send(anna, "no")
         api.settle()
         done = [e["payload"] for e in api.events(anna) if e["event"] == "chat_done"]
-        self.assertEqual([(d["text"].split("\n")[0], d["status"]) for d in done][0], ("the report", "done"))                # v10: the links to the files follow the text
+        self.assertEqual([(d["text"].startswith("the report"), d["status"]) for d in done][0], (True, "done"))                # v16 (A-140): the text is the summary, the link to the Skill run view follows it
         self.assertEqual(len(done), 2)                                               # ben's message was answered after the review
         self.assertEqual([m["text"] for m in api.history(anna) if m["role"] == "user"], ["/review do canary releases help?", "yes", "hello from ben", "no"])
 
@@ -515,7 +515,7 @@ class ChatApiContract(unittest.TestCase):
     @mark.req("IF-101", "REQ-WFM-037")
     @each_provider(IF, make(review=("First?",)))
     def test_the_files_of_a_task_are_listed_and_downloaded_and_there_is_no_delete(self, api):
-        """TC-IF-101-30 (v8): a file that a task stored is announced by files_changed and named by chat_done, listed with name, size, time and task, and downloaded byte for byte; a name with a path is 422 invalid_file_name, an unknown name 404 not_found."""
+        """TC-IF-101-30 (v8, v16): a file that a task stored is announced by files_changed and named by chat_done (v16: no `Files:` suffix in the text), listed with name, size, time and task, and downloaded byte for byte; a name with a path is 422 invalid_file_name, an unknown name 404 not_found."""
         s = api.login("anna", "pw-anna")
         api.connect(s)
         self.assertEqual(api.files(s), [])
@@ -529,7 +529,8 @@ class ChatApiContract(unittest.TestCase):
         done = [e["payload"] for e in events if e["event"] == "chat_done"][0]
         self.assertEqual(changed, [{"name": "review-contract.md", "task": "review"}])
         self.assertEqual(done["files"], ["review-contract.md"])
-        self.assertTrue(done["text"].endswith("Files: [review-contract.md](/api/files/review-contract.md)"))        # v10: the result carries the download link
+        self.assertNotIn("Files:", done["text"])                                                                   # v16 (A-140, owner 2026-11-08): the `Files:` suffix of v10 is dropped
+        self.assertTrue(done["text"].endswith(" [Open in the Skill run view](#run=%s)" % done["skill_run"]))        # v16: the summary ends with the link to the view
         listed = api.files(s)
         self.assertEqual([(f["name"], f["size"], f["task"]) for f in listed], [("review-contract.md", len(b"# the report\n"), "review")])
         self.assertEqual(api.file(s, "review-contract.md"), b"# the report\n")
@@ -540,7 +541,7 @@ class ChatApiContract(unittest.TestCase):
     @mark.req("IF-101", "REQ-WFM-036")
     @each_provider(IF, make(review=("First?",), review_fails="the scholarly service is down"))
     def test_a_task_that_fails_leaves_a_result_that_says_why(self, api):
-        """TC-IF-101-31 (v10): a task that fails gives chat_error and a result message `/review could not finish: <reason>` with the status error, which is the newest message of the chat, not an empty text."""
+        """TC-IF-101-31 (v10, v16): a task that fails gives chat_error and a result message with the reason and the link to the Skill run view (v16: no longer `/review could not finish: <reason>`) with the status error, which is the newest message of the chat, not an empty text."""
         s = api.login("anna", "pw-anna")
         api.connect(s)
         api.events(s)
@@ -552,7 +553,8 @@ class ChatApiContract(unittest.TestCase):
         done = [e["payload"] for e in events if e["event"] == "chat_done"][0]
         self.assertEqual(done["status"], "error")
         self.assertIn("the scholarly service is down", done["text"])
-        self.assertTrue(done["text"].startswith("/review could not finish"))
+        self.assertFalse(done["text"].startswith("/review could not finish"))                                       # v16 (A-140): the reason and the link, not `/<id> could not finish: <reason>`
+        self.assertTrue(done["text"].endswith(" [Open in the Skill run view](#run=%s)" % done["skill_run"]))
         self.assertIn("chat_error", names(events))
         self.assertIn("the scholarly service is down", api.history(s)[-1]["text"])
 
@@ -579,6 +581,181 @@ class ChatApiContract(unittest.TestCase):
             err = error_of(lambda: api.vote(anna, "service", "service", value))
             self.assertEqual((err.status, err.code, err.rule), (422, "invalid_vote", "value"), value)
         self.assertEqual(api.score(anna)["votes"], 0)
+
+
+SKILL_STATES = ("running", "paused", "done", "failed", "stopped")
+PHASE_STATES = ("waiting", "running", "done", "failed", "stopped")
+LINK = " [Open in the Skill run view](#run=%s)"
+
+
+def run_review(api, s, *answers):
+    """A scripted /review: start it, give the answers, return the id of its run (from the status events)."""
+    api.send(s, "/review do canary releases help?")
+    api.settle()
+    for answer in answers:
+        api.send(s, answer)
+        api.settle()
+
+
+def cards_of(events):
+    return [e["payload"] for e in events if e["event"] == "task_status"]
+
+
+@contract
+class SkillRunViewContract(unittest.TestCase):
+    """IF-101 v16 (A-140): what the Skill run view reads (G-V3.PANEL)."""
+
+    @mark.req("IF-101", "REQ-WFM-031", "REQ-WFM-130", "REQ-WFM-138")
+    @each_provider(IF, make(review=("First?",)))
+    def test_the_status_event_carries_the_run(self, api):
+        """TC-IF-101-34 (v16): task_status carries skill {id, version}, started, phases (list of {name, state}, state waiting, running, done, failed or stopped), state (running, paused, done, failed or stopped), `elements` (a list, empty when the skill reports none) and `reason` only for failed and stopped; `state` agrees with `paused` and `done`; the first has state running, the last done with every phase done; a stopped run ends with state stopped, a reason and a phase stopped.
+        Example: skill {"id": "review", "version": "1"}, state "running", phases [{"name": "asking", "state": "running"}, ...]."""
+        s = api.login("anna", "pw-anna")
+        api.connect(s)
+        api.events(s)
+        run_review(api, s, "no")
+        cards = cards_of(api.events(s))
+        for card in cards:
+            self.assertEqual(set(card["skill"]), {"id", "version"})
+            self.assertEqual(card["skill"]["id"], "review")
+            self.assertIsInstance(card["started"], str)
+            self.assertTrue(all(set(p) == {"name", "state"} and p["state"] in PHASE_STATES for p in card["phases"]))
+            self.assertIn(card["state"], SKILL_STATES)
+            self.assertEqual(card["elements"], [])
+            self.assertEqual(card["paused"], card["state"] == "paused")
+            self.assertEqual(card["done"], card["state"] in ("done", "failed", "stopped"))
+            self.assertEqual("reason" in card, card["state"] in ("failed", "stopped"))
+        self.assertEqual((cards[0]["state"], cards[-1]["state"]), ("running", "done"))
+        self.assertTrue(all(p["state"] == "done" for p in cards[-1]["phases"]))
+        api.send(s, "/review do canary releases help?")
+        api.settle()
+        api.events(s)
+        api.stop(s)
+        api.settle()
+        last = cards_of(api.events(s))[-1]
+        self.assertEqual(last["state"], "stopped")
+        self.assertIsInstance(last["reason"], str)
+        self.assertIn("stopped", [p["state"] for p in last["phases"]])
+
+    @mark.req("IF-101", "REQ-WFM-134", "REQ-WFM-132", "REQ-WFM-133")
+    @each_provider(IF, make(review=("First?",)))
+    def test_the_run_that_is_shown_and_a_run_by_its_id(self, api):
+        """TC-IF-101-35 (v16): `shown_run` (GET /api/skill-runs/shown) is None (204) before any run; afterwards the run record `id, skill, version, started, ended, state, phases, budget, counts, answers [{text, time}], result, material, files` of the run started most recently; `skill_run(id)` (GET /api/skill-runs/<id>) gives the same record; an unknown id is 404 not_found; both need the session (401 unauthenticated).
+        Example: after a review with the answer "no": state done, answers [{"text": "no", ...}], files ["review-contract.md"]."""
+        s = api.login("anna", "pw-anna")
+        api.connect(s)
+        self.assertIsNone(api.shown_run(s))
+        api.events(s)
+        run_review(api, s, "no")
+        run = cards_of(api.events(s))[0]["id"]
+        record = api.shown_run(s)
+        for key in ("id", "skill", "version", "started", "ended", "state", "phases", "budget", "counts", "answers", "result", "material", "files"):
+            self.assertIn(key, record)
+        self.assertEqual((record["id"], record["state"], record["files"]), (run, "done", ["review-contract.md"]))
+        self.assertIsInstance(record["ended"], str)
+        self.assertTrue(isinstance(record["result"], str) and record["result"])
+        self.assertEqual([a["text"] for a in record["answers"]], ["no"])
+        self.assertTrue(all(set(a) == {"text", "time"} for a in record["answers"]))
+        self.assertEqual(api.skill_run(s, run), record)
+        run_review(api, s, "no")
+        second = cards_of(api.events(s))[0]["id"]
+        self.assertNotEqual(second, run)
+        self.assertEqual(api.shown_run(s)["id"], second)
+        self.assertEqual(api.skill_run(s, run)["id"], run)
+        err = error_of(lambda: api.skill_run(s, "nothing"))
+        self.assertEqual((err.status, err.code), (404, "not_found"))
+        for call in (lambda: api.shown_run("bad-session"), lambda: api.skill_run("bad-session", run)):
+            err = error_of(call)
+            self.assertEqual((err.status, err.code), (401, "unauthenticated"))
+
+    @mark.req("IF-101", "REQ-CLV-038", "REQ-WFM-132")
+    @each_provider(IF, make(review=("First?",)))
+    def test_the_page_is_told_when_the_record_of_a_run_changed(self, api):
+        """TC-IF-101-36 (v16): the event skill_run_changed {id} follows an answer, the result with its file, and the end; the record read after the first one holds the answer and the state running.
+        Example: after the answer "no" the event {"id": "<run>"} comes and the record has answers [{"text": "no", ...}]."""
+        s = api.login("anna", "pw-anna")
+        api.connect(s)
+        api.events(s)
+        api.send(s, "/review do canary releases help?")
+        api.settle()
+        run = cards_of(api.events(s))[0]["id"]
+        api.send(s, "no")
+        events = api.events(s)
+        changed = [e["payload"] for e in events if e["event"] == "skill_run_changed"]
+        self.assertEqual(changed, [{"id": run}])
+        self.assertEqual([a["text"] for a in api.skill_run(s, run)["answers"]], ["no"])
+        self.assertEqual(api.skill_run(s, run)["state"], "running")
+        api.settle()
+        changed = [e["payload"] for e in api.events(s) if e["event"] == "skill_run_changed"]
+        self.assertTrue(changed and all(c == {"id": run} for c in changed))
+        self.assertEqual(api.skill_run(s, run)["state"], "done")
+
+    @mark.req("IF-101", "REQ-CLV-037", "REQ-WFM-036")
+    @each_provider(IF, make(review=("First?",)))
+    def test_the_messages_of_a_skill_carry_the_marker_of_their_run(self, api):
+        """TC-IF-101-37 (v16): the question and the result of a skill carry `skill_run: <id>` in the events (chat_message, chat_start, chat_done) and in the history, so the link survives a reload; the result text is the summary and ends with ` [Open in the Skill run view](#run=<id>)`, without a `Files:` suffix; an ordinary answer carries no marker.
+        Example: history()[-1] == {..., "skill_run": "<run>", "text": "the report ... [Open in the Skill run view](#run=<run>)"}."""
+        s = api.login("anna", "pw-anna")
+        api.connect(s)
+        api.events(s)
+        api.send(s, "/review do canary releases help?")
+        api.settle()
+        events = api.events(s)
+        run = cards_of(events)[0]["id"]
+        question = [e["payload"] for e in events if e["event"] == "chat_message" and e["payload"]["role"] == "assistant"][0]
+        self.assertEqual(question["skill_run"], run)
+        api.send(s, "no")
+        api.settle()
+        events = api.events(s)
+        start = [e["payload"] for e in events if e["event"] == "chat_start"][0]
+        done = [e["payload"] for e in events if e["event"] == "chat_done"][0]
+        self.assertEqual((start["skill_run"], done["skill_run"]), (run, run))
+        self.assertTrue(done["text"].endswith(LINK % run))
+        self.assertNotIn("Files:", done["text"])
+        self.assertEqual(done["files"], ["review-contract.md"])
+        history = api.history(s)
+        self.assertEqual([m.get("skill_run") for m in history if m["role"] == "assistant"], [run, run])
+        self.assertTrue(history[-1]["text"].endswith(LINK % run))
+        api.send(s, "hello")
+        api.settle()
+        self.assertNotIn("skill_run", api.history(s)[-1])
+
+    @mark.req("IF-101", "REQ-WFM-134", "REQ-WFM-036")
+    @each_provider(IF, make(review=("First?",), review_fails="the scholarly service is down"))
+    def test_a_failed_run_has_a_reason_in_the_record_and_the_message(self, api):
+        """TC-IF-101-38 (v16): a failed run has the state failed and the reason in task_status and in the record; its message contains the reason and ends with the link, and the status of chat_done stays error.
+        Example: reason "the scholarly service is down"."""
+        s = api.login("anna", "pw-anna")
+        api.connect(s)
+        api.events(s)
+        run_review(api, s, "yes")
+        events = api.events(s)
+        last = cards_of(events)[-1]
+        self.assertEqual(last["state"], "failed")
+        self.assertIn("the scholarly service is down", last["reason"])
+        record = api.shown_run(s)
+        self.assertEqual(record["state"], "failed")
+        self.assertIn("the scholarly service is down", record["reason"])
+        done = [e["payload"] for e in events if e["event"] == "chat_done"][0]
+        self.assertEqual(done["status"], "error")
+        self.assertIn("the scholarly service is down", done["text"])
+        self.assertTrue(done["text"].endswith(LINK % record["id"]))
+
+    @mark.req("IF-101", "REQ-WFM-135")
+    @each_provider(IF, make(review=("First?",)))
+    def test_deleting_the_history_deletes_the_run_records(self, api):
+        """TC-IF-101-39 (v16): when the history records of an account are deleted in the storage (test adapter `delete_history(account)`), its run records are deleted, the event skill_run_changed {id: null} goes out, `shown_run` is None and `skill_run(id)` is 404 not_found; there is no new operation.
+        Example: after delete_history("anna") the event {"id": None} is sent."""
+        s = api.login("anna", "pw-anna")
+        api.connect(s)
+        api.events(s)
+        run_review(api, s, "no")
+        run = cards_of(api.events(s))[0]["id"]
+        self.assertIsNotNone(api.shown_run(s))
+        api.delete_history("anna")
+        self.assertIn({"id": None}, [e["payload"] for e in api.events(s) if e["event"] == "skill_run_changed"])
+        self.assertIsNone(api.shown_run(s))
+        self.assertEqual(error_of(lambda: api.skill_run(s, run)).code, "not_found")
 
 
 if __name__ == "__main__":
