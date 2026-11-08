@@ -3510,12 +3510,19 @@ plausibility:
       rated_by: maldun
       rating: plausible
     REQ-VPB-006:
+      accepted_risk:
+        decided: '2026-11-08 by maldun'
+        follow_up: VAL-006
+        owner: 'maldun'
+        reason: the 3 s is the constant STOP_DROP_MS of sound.js (D-165), not a measured bound; it
+          only decides how long a late line of a stopped answer is dropped, and the field shows
+          whether it fits
       basis:
       - no number or model quality depends on it; the stop window is one variable in sound.js that speakAgain() clears; observed by TC-VPB-006 (node) and TC-VPB-007 (Chromium)
       hardware: HW-target
       rated: '2026-11-08'
       rated_by: maldun
-      rating: plausible
+      rating: questionable
     REQ-WFM-001:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed

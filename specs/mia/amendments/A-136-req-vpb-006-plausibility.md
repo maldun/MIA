@@ -1,6 +1,6 @@
-# A-136: plausibility record of REQ-VPB-006, the 3 s as an accepted risk (Draft, drafted by the Verify session 2026-11-08)
+# A-136: plausibility record of REQ-VPB-006, the 3 s as an accepted risk (drafted by the Verify session 2026-11-08; approved D-288)
 
-Status: **Draft, not approved, not applied.** The owner decided on 2026-11-08 to accept the plausibility warning of REQ-VPB-006 as an accepted risk (answer "accept the warning" in the Verify session, question 3 of `A-132-verification-report.md`, section 7a). `specs/mia/plausibility.yaml` is a protected file, so the change is made only after the owner approves this amendment. Nothing in `plausibility.yaml` has been changed.
+Status: **approved as proposed by the owner 2026-11-08 (D-288) and applied.** The owner decided on 2026-11-08 to accept the plausibility warning of REQ-VPB-006 as an accepted risk (answer "accept the warning" in the Verify session, question 3 of `A-132-verification-report.md`, section 7a) and approved this amendment unchanged (alternative A and B not chosen; follow-up VAL-006 kept). Applied: the record of REQ-VPB-006 in `specs/mia/plausibility.yaml` (8 lines added, 1 changed). Result: `req_plausibility.py` 45 errors and 93 warnings as before, 41 questionable, 41 accepted risks; `trace_check.py` 540 errors, none of TD-11.
 
 ## Problem
 `req_plausibility.py` warns for REQ-VPB-006: "the requirement has a numeric bound but no claim is recorded: which number is checked against which reference?". The 3 s of REQ-VPB-006 ("also within 3 seconds after a stop") is the constant `STOP_DROP_MS = 3000` in `templates/static/chat/sound.js` (D-165: late lines of a stopped answer arrive within the ~0.2 s poll plus one upload). No measurement is its reference, so no claim can be checked (D-285).
