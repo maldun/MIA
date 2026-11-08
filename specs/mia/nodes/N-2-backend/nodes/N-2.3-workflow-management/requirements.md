@@ -522,7 +522,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-31: a skill record is stored, read back and equal to the stored one (exact); an edit is a new version
 - Verified by: TC-WFM-040
-- Status: Draft
+- Status: Verified
 - History: G-V2 Plan step 1 (2026-11-07), new
 
 ### REQ-WFM-041 – Skill taken from its record
@@ -535,7 +535,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-31: with the old skill file of a converted skill removed, the skill is listed and runs unchanged (exact)
 - Verified by: TC-WFM-041
-- Status: Draft
+- Status: Verified
 - History: G-V2 Plan step 1 (2026-11-07), new
 
 ### REQ-WFM-042 – Command used once
@@ -548,7 +548,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-31: a second record with the command of the first is refused with the first skill's ID (exact); a new version of the same skill keeps its command and is accepted (exact)
 - Verified by: TC-WFM-042
-- Status: Draft
+- Status: Verified
 - History: G-V2 Plan step 1 (2026-11-07), new
 
 ### REQ-WFM-043 – Three node types
@@ -561,7 +561,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-31: a graph with a node of another type is refused naming the node (exact)
 - Verified by: TC-WFM-043
-- Status: Draft
+- Status: Verified
 - History: G-V2 Plan step 1 (2026-11-07), new
 
 ### REQ-WFM-044 – Graph description
@@ -574,7 +574,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-31: the four fields are read back as stored; an empty testbench ID is accepted
 - Verified by: TC-WFM-044
-- Status: Draft
+- Status: Verified
 - History: G-V2 Plan step 1 (2026-11-07), new
 
 ### REQ-WFM-045 – Data and transform alternate
@@ -587,7 +587,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-31: an edge data-data and an edge transform-master are refused naming the edge (exact)
 - Verified by: TC-WFM-045
-- Status: Draft
+- Status: Verified
 - History: G-V2 Plan step 1 (2026-11-07), new
 
 ### REQ-WFM-046 – One writer per data node
@@ -600,7 +600,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-31: two writers of one data node are refused with its ID; two readers are accepted (exact)
 - Verified by: TC-WFM-046
-- Status: Draft
+- Status: Verified
 - History: G-V2 Plan step 1 (2026-11-07), new
 
 ### REQ-WFM-047 – No cycle
@@ -613,7 +613,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-31: a graph with a cycle is refused with the cycle as ids, first id repeated at the end (exact); every accepted graph has a topological order (property test)
 - Verified by: TC-WFM-047
-- Status: Draft
+- Status: Verified
 - History: G-V2 Plan step 1 (2026-11-07), new
 
 ### REQ-WFM-048 – Master node stops
@@ -626,7 +626,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-31: a master node without a stopping criterion is refused; with a maximum of 1 repetition it is accepted (exact)
 - Verified by: TC-WFM-048
-- Status: Draft
+- Status: Verified
 - History: G-V2 Plan step 1 (2026-11-07), new
 
 ### REQ-WFM-049 – Parameters of a data node
@@ -639,7 +639,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-31: a data node with parameters is stored and read back with the parameters apart from the value (exact)
 - Verified by: TC-WFM-049
-- Status: Draft
+- Status: Verified
 - History: G-V2 Plan step 1 (2026-11-07), new
 
 ### REQ-WFM-050 – Transforms by ID
