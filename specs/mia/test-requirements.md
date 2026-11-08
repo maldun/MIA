@@ -262,7 +262,7 @@
 - History: G-V3.CHAT Plan step 4 (2026-11-08), new, with the note `goals/G-V3.CHAT/eval-target-note.md`
 
 ### TR-CHAT-009 – the end-to-end check of a run uses the same fakes
-- Applies to: TC-MIA-030
+- Applies to: TC-CHA-068
 - Requirement: REQ-BE-078
 - Group: Fakes (CHAT)
 - Kind: setup
@@ -271,4 +271,4 @@
 - Credibility aspect: stand-in fidelity
 - Verified by: inspection of the check: it starts no model server and no container
 - Status: Draft
-- History: G-V3 Plan step 4 (2026-11-08), new
+- History: G-V3 Plan step 4 (2026-11-08), new; the check was renamed from TC-MIA-030 to TC-CHA-068 (a Scenarios section in the root test-spec switches on the scenario rule for every old root check)
