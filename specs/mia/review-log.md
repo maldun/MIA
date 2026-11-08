@@ -551,3 +551,9 @@ The first version was silent until the end and could take 20 minutes or more: th
 | REQ-CLV-043 | requirement | 7686f35ef96b | maldun | 2026-11-08 | approved | G-V3.PANEL batch 4 |
 | REQ-CLV-044 | requirement | 2fdbc52df74e | maldun | 2026-11-08 | approved | G-V3.PANEL batch 4 |
 | REQ-FE-032 | requirement | 27e1542388a3 | maldun | 2026-11-08 | approved | G-V3.PANEL batch 4 |
+| REQ-WFM-136 | requirement | 186943eba393 | maldun | 2026-11-08 | approved | G-V3.PANEL batch 5 |
+| REQ-WFM-137 | requirement | f18e5fbeeacb | maldun | 2026-11-08 | approved | G-V3.PANEL batch 5 |
+| REQ-WFM-138 | requirement | 9022a7c70e5b | maldun | 2026-11-08 | approved | G-V3.PANEL batch 5 |
+| REQ-WFM-031 | requirement | 59054a9ecf98 | maldun | 2026-11-08 | approved | G-V3.PANEL batch 5 |
+| REQ-WFM-036 | requirement | 5e984df7d4d2 | maldun | 2026-11-08 | approved | G-V3.PANEL batch 5 |
+| REQ-CLV-024 | requirement | 18129a0dea65 | maldun | 2026-11-08 | approved | G-V3.PANEL batch 5 |
