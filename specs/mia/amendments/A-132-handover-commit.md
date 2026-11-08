@@ -67,6 +67,17 @@ python ~/.claude/skills/dev-workflow/scripts/trace_check.py --spec-dir specs/mia
 ```
 The merge gate and the tag are human steps: `python ~/.claude/skills/dev-workflow/scripts/merge_gate.py --approved-by "<owner name>" --allow-local` only by the owner.
 
+## 8. Processes stopped at the end of this session, and what continues in the next one
+Checked on 2026-11-08 at the end of the session (`pgrep`, `ps`, `podman ps -a`): **no run, test or container of this session is active.**
+- Stopped by me: the monitor of the stage ladder (a shell loop `until ! pgrep -f "stages_gate.sh"`; its pattern matched its own command line, so it could never see the ladder end; it had run 19 minutes). The ladder run itself had already finished (exit 0, 03:25), and the two other background runs (the first ladder in `td11-release`, killed on purpose because I edited spec files while it ran; the child unit run of that kill was not left over) are gone.
+- Not mine, left running: one `python -m unittest discover -s tests` in `/tmp/v7/clean4` (parent session `2617`, started during this session); it belongs to another session. The podman list holds only old containers (16 months, `localhost/dpp`, `open-webui`), no `mia`, `n13-*` or pod of this work.
+- For the next session: **a monitor must not use `pgrep -f "<script name>"` for a script whose name is also in its own command line** (it matches itself and never ends); wait on a process id (`while kill -0 <pid>`) or on a marker file the script writes at its end.
+
+**What continues in the next session** (nothing runs by itself; everything below is to be started by the resuming session after the owner's answer in section 2):
+1. The question to the owner of section 2 (accept the three reds as deviations, fix the tailscale test first, or wait).
+2. Then, in order, section 5: the re-check of master, the ladder if master moved (about 12 minutes, started with a process id to wait on), the merge of the prepared status commit `b48d95b`, `D-289`, the `[Unreleased]` entry of the appendix, the release notes if wanted, and no tag.
+3. The branch `td11-release` (commit `b48d95b` and this file) is the only thing kept on disk; merge it or branch from it, then remove it: `git worktree remove .claude/worktrees/td11-release && git branch -d td11-release` (from the main checkout).
+
 ## Appendix: draft `[Unreleased]` entry for `CHANGELOG.md`
 ```
 ## [Unreleased] – 2026-11-08, TD-11 option B: speak again through the voice route (verified, not released)
