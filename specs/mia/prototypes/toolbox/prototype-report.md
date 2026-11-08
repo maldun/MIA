@@ -32,12 +32,16 @@ See `proposed-spec-changes.md`: D1 id only latest version, D2 same toolbox flagg
 ## Assumptions
 ASM-proto-1: one owner account identified by name; accounts come from IF-101. ASM-proto-2: evidence for `tested` is free text here, in Plan it is a named check or run.
 
-## Carry-over (developer fills in)
-| Item | adopt / adapt / discard / stand-in | Note |
+## Carry-over (filled in by the owner, 2026-11-08)
+| Item | Decision | Note |
 |---|---|---|
-| trust and lifecycle as two fields | | |
-| import stores untrusted whatever the file says | | |
-| `look_up` shows the reason | | |
-| key `id` vs `id@version` (finding 1) | | |
-| seed from `library/nodes` | | |
-| code in the process (finding 4) | | |
+| trust and lifecycle as two fields | adopt | REQ-WFM-051, 067 as they are |
+| import stores untrusted whatever the file says | adopt | test_oc1 is the model for the acceptance test |
+| `look_up` shows the reason | adopt | needs a new requirement, none exists today |
+| seed from `library/nodes`, one entry per ID, shipped flag | adopt | version rule goes into REQ-WFM-056 |
+| code in the MIA process (`exec`) | stand-in | until the sandbox goal (TD-24); SC-09 stays open |
+| owner's allow-as-baseline flag | adopt | new requirement under REQ-WFM-068, own refusal test |
+| newer version keeps trust and lifecycle (D5) | adopt as decided | known risk, see `proposed-spec-changes.md` |
+| prototype checks and jsonschema file check | adapt | checks are the model for Plan's scenarios, code is rewritten; jsonschema check adopted |
+
+Next: the proposed spec changes (`proposed-spec-changes.md`) go to Plan review; the TLS notes this prototype under risks and open questions.
