@@ -2330,6 +2330,11 @@ package MIA_NodeRequirements {
         doc /* The Chat and login views shall show every text of a run (result, material found, answers, reason) as plain text that starts no action and loads nothing. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
+    requirement def <'REQ-CLV-044'> ElementsOfASkill_Clv044 {
+        subject s : WebFrontEnd;
+        doc /* Where a run reports elements of its own, the Chat and login views shall show each as a label with its text in the strip of the Skill run view beside the common ones. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
     requirement def <'REQ-CHV-001'> ChatWithoutTheCharacter_Chv001 {
         subject s : WebFrontEnd;
         doc /* If the Character view cannot load, then it shall report the failure to the Chat and login views through IF-111 and stay hidden. */
@@ -3158,6 +3163,11 @@ package MIA_NodeRequirements {
     requirement def <'REQ-WFM-137'> TextsOfARunAreStoredAsData_Wfm137 {
         subject s : TaskRuntime;
         doc /* The Workflow management shall store the texts of a run (result, material, answers, reason) unchanged as text and never execute or interpret them. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-138'> ElementsOfASkillPassedOn_Wfm138 {
+        subject s : TaskRuntime;
+        doc /* Where a skill reports elements of its own, the Workflow management shall pass them as label and text pairs in the event task_status and store them in the run record, without changing the skill's interface. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-RUN-001'> InternetTasksOnlyOnCommand_Run001 {
@@ -4424,6 +4434,7 @@ package MIA_NodeRequirements {
     requirement r_req_clv_041 : HeightOfTheStrip_Clv041;
     requirement r_req_clv_042 : LayoutOnAPhone_Clv042;
     requirement r_req_clv_043 : TextsOfARunAreText_Clv043;
+    requirement r_req_clv_044 : ElementsOfASkill_Clv044;
     requirement r_req_chv_001 : ChatWithoutTheCharacter_Chv001;
     requirement r_req_chv_002 : OneExpressionAPI_Chv002;
     requirement r_req_chv_003 : LivingCharacter_Chv003;
@@ -4590,6 +4601,7 @@ package MIA_NodeRequirements {
     requirement r_req_wfm_135 : ChatHistoryDeleted_Wfm135;
     requirement r_req_wfm_136 : RunsWithoutKnowledgeOfTheView_Wfm136;
     requirement r_req_wfm_137 : TextsOfARunAreStoredAsData_Wfm137;
+    requirement r_req_wfm_138 : ElementsOfASkillPassedOn_Wfm138;
     requirement r_req_run_001 : InternetTasksOnlyOnCommand_Run001;
     requirement r_req_run_002 : SwitchTheModel_Run002;
     requirement r_req_run_003 : ModelServerUnreachable_Run003;
@@ -4874,6 +4886,7 @@ package MIA_NodeRequirements {
     satisfy r_req_clv_041 by mia.frontEnd;
     satisfy r_req_clv_042 by mia.frontEnd;
     satisfy r_req_clv_043 by mia.frontEnd;
+    satisfy r_req_clv_044 by mia.frontEnd;
     satisfy r_req_chv_001 by mia.frontEnd;
     satisfy r_req_chv_002 by mia.frontEnd;
     satisfy r_req_chv_003 by mia.frontEnd;
@@ -5040,6 +5053,7 @@ package MIA_NodeRequirements {
     satisfy r_req_wfm_135 by mia.taskRuntime;
     satisfy r_req_wfm_136 by mia.taskRuntime;
     satisfy r_req_wfm_137 by mia.taskRuntime;
+    satisfy r_req_wfm_138 by mia.taskRuntime;
     satisfy r_req_run_001 by mia.taskRuntime;
     satisfy r_req_run_002 by mia.taskRuntime;
     satisfy r_req_run_003 by mia.taskRuntime;
@@ -5323,6 +5337,7 @@ package MIA_NodeRequirements {
     allocate r_req_clv_041 to mia.frontEnd;
     allocate r_req_clv_042 to mia.frontEnd;
     allocate r_req_clv_043 to mia.frontEnd;
+    allocate r_req_clv_044 to mia.frontEnd;
     allocate r_req_chv_001 to mia.frontEnd;
     allocate r_req_chv_002 to mia.frontEnd;
     allocate r_req_chv_003 to mia.frontEnd;
@@ -5489,6 +5504,7 @@ package MIA_NodeRequirements {
     allocate r_req_wfm_135 to mia.taskRuntime;
     allocate r_req_wfm_136 to mia.taskRuntime;
     allocate r_req_wfm_137 to mia.taskRuntime;
+    allocate r_req_wfm_138 to mia.taskRuntime;
     allocate r_req_run_001 to mia.taskRuntime;
     allocate r_req_run_002 to mia.taskRuntime;
     allocate r_req_run_003 to mia.taskRuntime;
@@ -5774,6 +5790,7 @@ package MIA_NodeRequirements {
     dependency from r_req_clv_041 to r_req_fe_032;
     dependency from r_req_clv_042 to r_req_fe_032;
     dependency from r_req_clv_043 to r_req_fe_032;
+    dependency from r_req_clv_044 to r_req_fe_032;
     dependency from r_req_chv_001 to r_req_fe_006;
     dependency from r_req_chv_002 to r_req_fe_008;
     dependency from r_req_chv_003 to r_req_fe_009;
@@ -5949,6 +5966,7 @@ package MIA_NodeRequirements {
     dependency from r_req_wfm_135 to r_req_be_033;
     dependency from r_req_wfm_136 to r_req_be_033;
     dependency from r_req_wfm_137 to r_req_be_033;
+    dependency from r_req_wfm_138 to r_req_be_033;
     dependency from r_req_run_001 to r_req_wfx_002;
     dependency from r_req_run_002 to r_req_wfx_003;
     dependency from r_req_run_003 to r_req_wfx_004;

@@ -90,7 +90,7 @@
 - History: G-V3.PANEL Plan step 3 (2026-11-08), new
 
 ### TR-PANEL-002 – the scripted stand-in skill knows nothing of the view
-- Applies to: TC-CLV-030, TC-CLV-031, TC-CLV-032, TC-CLV-033, TC-CLV-034, TC-CLV-035, TC-CLV-038, TC-CLV-039, TC-CLV-043, TC-WFM-136
+- Applies to: TC-CLV-030, TC-CLV-031, TC-CLV-032, TC-CLV-033, TC-CLV-034, TC-CLV-035, TC-CLV-038, TC-CLV-039, TC-CLV-043, TC-CLV-044, TC-WFM-136, TC-WFM-138
 - Requirement: REQ-WFM-136
 - Group: Stand-in (PANEL)
 - Kind: setup
@@ -138,7 +138,7 @@
 - History: G-V3.PANEL Plan step 3 (2026-11-08), new
 
 ### TR-PANEL-006 – exact names, states, orders and figures
-- Applies to: TC-CLV-030, TC-CLV-031, TC-CLV-032, TC-CLV-033, TC-CLV-034, TC-CLV-035, TC-CLV-039, TC-WFM-130, TC-WFM-131, TC-WFM-132, TC-WFM-133, TC-WFM-134, TC-WFM-135
+- Applies to: TC-CLV-030, TC-CLV-031, TC-CLV-032, TC-CLV-033, TC-CLV-034, TC-CLV-035, TC-CLV-039, TC-CLV-044, TC-WFM-130, TC-WFM-131, TC-WFM-132, TC-WFM-133, TC-WFM-134, TC-WFM-135
 - Requirement: REQ-CLV-030
 - Group: Exact values (PANEL)
 - Kind: unit

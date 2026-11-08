@@ -921,7 +921,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 ## Groups of G-V3.PANEL
 | Order | Group | What it covers | Requirements |
 |---|---|---|---|
-| 1 | RV | Run record and the run that is shown for the Skill run view (FR-46) | REQ-WFM-130, REQ-WFM-131, REQ-WFM-132, REQ-WFM-133, REQ-WFM-134, REQ-WFM-135, REQ-WFM-136, REQ-WFM-137 |
+| 1 | RV | Run record and the run that is shown for the Skill run view (FR-46) | REQ-WFM-130, REQ-WFM-131, REQ-WFM-132, REQ-WFM-133, REQ-WFM-134, REQ-WFM-135, REQ-WFM-136, REQ-WFM-137, REQ-WFM-138 |
 
 ### REQ-WFM-130 – Run record of every skill run
 - Level: low   Subject: TaskRuntime
@@ -1026,3 +1026,16 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verified by: TC-WFM-137
 - Status: Draft
 - History: A-131 (proposed 2026-11-08, G-V3.PANEL), new
+
+### REQ-WFM-138 – Elements of a skill passed on
+- Level: low   Subject: TaskRuntime
+- Text: Where a skill reports elements of its own, the Workflow management shall pass them as label and text pairs in the event task_status and store them in the run record, without changing the skill's interface.
+- Rationale: refines REQ-BE-033; owner at the review of 2026-11-08: skill specific elements can be added per skill; OC-7 stays: a skill that reports none works as before
+- Parent: REQ-BE-033
+- Group: RV
+- Priority: Should
+- Verification method: Test
+- Acceptance criterion: AC-39: a scripted skill that reports two elements has them in `task_status` and in the run record; a skill that reports none has an empty list and the other checks of the group pass unchanged (exact)
+- Verified by: TC-WFM-138
+- Status: Draft
+- History: A-131 (proposed 2026-11-08, G-V3.PANEL), new; owner at review of batch 2: skill specific elements can be added per skill

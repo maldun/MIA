@@ -466,3 +466,15 @@ The chat page: messages, queue, history, status line, voting, tasks and memos, e
 - Verified by: TC-CLV-043
 - Status: Draft
 - History: A-131 (proposed 2026-11-08, G-V3.PANEL), new
+
+### REQ-CLV-044 – Elements of a skill
+- Level: low   Subject: WebFrontEnd
+- Text: Where a run reports elements of its own, the Chat and login views shall show each as a label with its text in the strip of the Skill run view beside the common ones.
+- Rationale: refines REQ-FE-032; owner at the review of 2026-11-08: skill specific elements can be added per skill; text only, so OC-8 holds
+- Parent: REQ-FE-032
+- Priority: Should
+- Verification method: Test
+- Acceptance criterion: AC-39: a scripted skill that reports the elements `Works read: 12` and `Grade: B` shows both labels and texts in the strip; a skill that reports none shows only the common elements; an element with markup is shown as characters (exact)
+- Verified by: TC-CLV-044
+- Status: Draft
+- History: A-131 (proposed 2026-11-08, G-V3.PANEL), new; owner at review of batch 2: skill specific elements can be added per skill

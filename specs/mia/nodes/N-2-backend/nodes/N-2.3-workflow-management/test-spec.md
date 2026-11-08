@@ -65,6 +65,7 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-203
 | TC-WFM-135 | REQ-WFM-135 | Component | 1 | unit test with the fake storage of `skill_runs` and a fake clock | AC-39: records gone, files stay | exact |
 | TC-WFM-136 | REQ-WFM-136 | Component | 1 | unit test with the fake storage of `skill_runs` and a fake clock | AC-39: a skill that sends only today's events gets a record and a view | exact |
 | TC-WFM-137 | REQ-WFM-137 | Component | 1 | unit test with the fake storage of `skill_runs` and a fake clock | AC-39: stored and read back byte for byte; no tool call | exact |
+| TC-WFM-138 | REQ-WFM-138 | Component | 1 | unit test with the fake storage of `skill_runs` and a fake clock | AC-39: two reported elements are in task_status and in the run record; none gives an empty list | exact |
 
 ## Assumptions (checked in validation)
 
@@ -184,3 +185,8 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-203
 - When: the run ends and the record is read back
 - Then: each string is equal byte for byte; no tool is called and no file is changed because of them
 
+### TC-WFM-138 – Elements of a skill passed on
+- Verifies: REQ-WFM-138
+- Given: a scripted skill that reports two elements and one that reports none
+- When: both run and end
+- Then: the first has two label and text pairs in `task_status` and in the run record; the second has an empty list in both

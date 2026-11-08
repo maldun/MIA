@@ -46,6 +46,7 @@ Tests of this part alone against the mocks of its neighbours (the mock of IF-101
 | TC-CLV-041 | REQ-CLV-041 | Component (browser) | 2 | a headless browser against the stub server `ui/tools/chat_stub_server.py` with the scripted stand-in skill | AC-39: at most 150 px at 1440 px | 150 px |
 | TC-CLV-042 | REQ-CLV-042 | Component (browser) | 2 | a headless browser against the stub server `ui/tools/chat_stub_server.py` with the scripted stand-in skill | AC-39: stacked order; every control reachable; 44 px targets | exact; 44 px |
 | TC-CLV-043 | REQ-CLV-043 | Component (browser) | 2 | a headless browser against the stub server `ui/tools/chat_stub_server.py` with the scripted stand-in skill | AC-39: no markup effect, no request, no control | exact |
+| TC-CLV-044 | REQ-CLV-044 | Component | 1 | unit test in `tests/js/` with the mocks of the interfaces (`node --test`) | AC-39: two reported elements are shown as label and text; none gives only the common elements; markup shows as characters | exact |
 
 ## Assumptions (checked in validation)
 
@@ -289,3 +290,8 @@ Status: **Draft** (written in Phase 3 after the verification, finding F11 / D-16
 - When: the run ends and the Full run part is opened
 - Then: every string appears as characters; no request leaves the page except the ones of the page itself; no new control appears; no file is deleted
 
+### TC-CLV-044 – Elements of a skill
+- Verifies: REQ-CLV-044
+- Given: a scripted skill that reports the elements `Works read` = `12` and `Grade` = `B<b>x</b>`, and one that reports none
+- When: both run and the Skill run view is drawn
+- Then: the first strip shows both labels with their texts, the second `<b>x</b>` appearing as characters; the second skill's strip shows only the common elements

@@ -5,7 +5,7 @@ Status: **proposed** (Draft). `contracts/IF-101-chat-api.md` (v15), its mock and
 ## Changes (v16)
 | Item | Change |
 |---|---|
-| `task_status` | adds `skill` (id and version), `started` (UTC time), `phases` (list of `{name, state}` with state `waiting`, `running`, `done`, `failed` or `stopped`, empty for a skill without phases), `state` (`running`, `paused`, `done`, `failed` or `stopped`) and `reason` (text, only for `failed` and `stopped`); the other fields stay; one view per run `id`, replaced in place, at most twice per second (REQ-WFM-031) |
+| `task_status` | adds `skill` (id and version), `started` (UTC time), `phases` (list of `{name, state}` with state `waiting`, `running`, `done`, `failed` or `stopped`, empty for a skill without phases), `state` (`running`, `paused`, `done`, `failed` or `stopped`) and `reason` (text, only for `failed` and `stopped`); `elements` (list of `{label, text}` pairs a skill reports for itself, text only, empty when none: owner 2026-11-08, REQ-WFM-138); the other fields stay; one view per run `id`, replaced in place, at most twice per second (REQ-WFM-031) |
 | route `GET /api/skill-runs/shown` | the run that is shown (REQ-WFM-134) as a run record: `id, skill, version, started, ended, state, phases, budget, counts, reason, answers [{text, time}], result, material, files [name]`; `204` when none |
 | route `GET /api/skill-runs/<id>` | the same record for one run named by a link; `404 not_found` for a run that does not exist or is deleted |
 | event `skill_run_changed` | `{id}` after an answer, the result, a file or the end changed the record; the page asks for the record again |
@@ -14,7 +14,7 @@ Status: **proposed** (Draft). `contracts/IF-101-chat-api.md` (v15), its mock and
 | `pause`, `resume`, `stop` | unchanged; the state is reported by `task_status` |
 
 ## Requirements it serves
-REQ-CLV-030 to 039, REQ-WFM-130 to 137. Realised by REQ-API-015 (no new API requirement: the routes are part of "realise IF-101"); the contract suite gets one group `TC-IF-101-28` onward, defined in Step 3.
+REQ-CLV-030 to 039, REQ-CLV-044, REQ-WFM-130 to 138. Realised by REQ-API-015 (no new API requirement: the routes are part of "realise IF-101"); the contract suite gets one group `TC-IF-101-28` onward, defined in Step 3.
 
 ## Open
 Nothing open on the wording; the protected mock `tests/helpers/mocks/if_101_chat_api.py` and the suite change only after approval.
