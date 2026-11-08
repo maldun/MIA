@@ -2,7 +2,7 @@
 
 **Goal:** specs/mia/goals/G-V2.MODEL/goal.md   **Requirements:** REQ-WFM-040..049 in `nodes/N-2-backend/nodes/N-2.3-workflow-management/requirements.md`, REQ-RUN-016..019 in `nodes/N-2-backend/nodes/N-2.4-workflow-execution/nodes/N-2.4.1-pipeline-runner/requirements.md`   **Test specs:** the `test-spec.md` next to each, scenarios at the end; test requirements TR-MODEL-001..005 in `specs/mia/test-requirements.md`   **Status:** Approved by the owner, 2026-11-07 (Plan Step 5)
 
-Line of work `goal/v2.model`; supervised. Eight small tasks, pure logic: no model step, no prompt, no eval suite, no eval budget. The red tests are written first in a session of their own (Step 4) and installed by the owner; the implementing session never edits `tests/acceptance/`, `tests/helpers/`, `tests/smoke/`, `contracts/`, `benchmarks/`, `eval/suites/` or `eval/baselines/`.
+Line of work `goal/v2.model`; supervised. Nine small tasks, pure logic: no model step, no prompt, no eval suite, no eval budget. The red tests are written first in a session of their own (Step 4) and installed by the owner; the implementing session never edits `tests/acceptance/`, `tests/helpers/`, `tests/smoke/`, `contracts/`, `benchmarks/`, `eval/suites/` or `eval/baselines/`.
 
 ## Interface fixed by the red tests
 The stubs `graph_model.py`, `skill_record.py` and `graph_run.py` in the repository root carry the interface the installed tests expect; T-01 to T-04 replace the stubs with the real code and keep these signatures: `GraphModel(tables).save_graph(graph)`, `read_graph(graph_id, version=None)`, `topological_order(graph_id)`; `SkillRecords(tables).store(record)`, `read(skill_id, version=None)`; `SkillCatalog(records, legacy).list()`, `start(skill_id)`; `GraphRunner(trust).run(graph, nodes, inputs)`. The result shapes are in the stub docstrings. A change of a signature is a plan amendment, not a code change.
@@ -18,6 +18,7 @@ The stubs `graph_model.py`, `skill_record.py` and `graph_run.py` in the reposito
 | T-06 Skill listing and start take the record (extension loader) | REQ-WFM-041 | new tests (marked TC-WFM-041) for `extension_loader.py` and the wiring, written first | T-05 |
 | T-07 Graph model on the record tables | REQ-WFM-043..049 (stored form), REQ-WFM-044 | the adapter test of T-05 runs the graph scenarios (TC-WFM-044, 049) on the real Storage through `graph_model.py` itself, without the test-side mapping | T-05 |
 | T-08 Findings of the first Verify run (F-01, F-02, F-03, F-05) | REQ-WFM-042, REQ-WFM-048, REQ-RUN-016, REQ-RUN-017 | the failing tests proposed in `verification-report.md` for F-01, F-02, F-03, F-05 | T-01 to T-07 |
+| T-09 Findings of the second Verify run (F-12, F-13, F-14, F-15, F-16, test gaps) | REQ-WFM-041, REQ-WFM-042, REQ-WFM-048, REQ-RUN-016, REQ-RUN-017 | the failing tests proposed in `verification-report.md` for F-12 to F-16 and the three T-08 test gaps | T-08 |
 
 ## Tasks
 
@@ -93,11 +94,20 @@ The stubs `graph_model.py`, `skill_record.py` and `graph_run.py` in the reposito
 - Done when: the proposed failing tests are green, the protected tests (`test_graph_model.py` 10, `test_graph_run.py` 4) and the earlier tests of the goal stay green, and the report's findings F-01, F-02, F-03, F-05 can be closed by the next Verify run
 - Notes: F-04, F-06 to F-11 are not part of T-08 (owner's decision 2026-11-08: fix the high and the medium findings; the re-save and orphan versions of F-07 are a known property, versions are append-only; F-09 test gaps, F-10 re-approval of TC-WFM-047, TR-MODEL-003 and TR-MODEL-001 and F-11 text/doc items go to the next steps).
 
+### T-09: Findings of the second Verify run (F-12, F-13, F-14, F-15, F-16 and the T-08 test gaps)
+- Implements: REQ-WFM-041 (F-13: a failing catalog must not stop the loader from starting: the `catalog.start` lookups are guarded per skill, a skill whose lookup fails is registered as the manifest says, with a problem report, as before T-08), REQ-WFM-042 (F-14: a record command that equals a manifest alias of another skill is skipped, the record is not used, a problem is reported, the manifest skill keeps its alias, same rule as for folder names; F-15: the command form accepts ASCII lowercase only, so `parse` cannot raise `KeyError`), REQ-WFM-048 (F-16: the T-01 stop rule agrees with the Storage record check for every stop object), REQ-RUN-016 (F-12: the cycle search no longer depends on the depth of the Python stack: a chain of 3000 nodes runs; `graph_run.py` uses a public name of `graph_model.py` instead of the private `_find_cycle`)
+- Tests to turn green: new tests, written first, from the proposals in `verification-report.md` (F-12 to F-16) and the three T-08 test gaps (the repeated first ID of a cycle compared as a list, `named_status` None for a cycle refusal, the trust callback not called before a cycle refusal), in the existing non-protected test files of the goal and `tests/test_graph_run_findings.py`; the protected acceptance files are not edited
+- Touches: `graph_model.py`, `graph_run.py`, `skill_record.py`, `extension_loader.py` and their tests
+- Must not touch: protected material, STORE's files
+- Depends on: T-08
+- Done when: the proposed failing tests are green, the protected tests (`test_graph_model.py` 10, `test_graph_run.py` 4) and the earlier tests of the goal stay green, and F-12 to F-16 can be closed by the next Verify run
+- Notes: owner's decisions 2026-11-08: fix F-12 to F-16 and the three test gaps; F-14: skip the record and keep the manifest skill; F-04, F-06, F-07 (c) to (e), F-08, F-11 are left open for the owner to accept as deviations; F-10 (re-approval of TC-WFM-047, TR-MODEL-003, TR-MODEL-001) is the owner's.
+
 ## Order and checks
 T-01 and T-02 are independent; T-03 needs T-01; T-04 needs T-03; T-05 waits for STORE; T-06 and T-07 need T-05 and are independent of each other. After each task: `python tests/test_<name>.py` for its tests, then the stage 1 and 2 steps of `stages.yaml`.
 
 ## Size check (splitting)
-14 requirements, eight tasks of one session each, no task across two nodes except T-02 (N-2.3 only), T-05, T-06 and T-07 (N-2.3 only) and T-03/T-04 (N-2.4.1 only). No split is suggested; the goal record's "keep together" stands.
+14 requirements, nine tasks of one session each, no task across two nodes except T-02 (N-2.3 only), T-05, T-06 and T-07 (N-2.3 only) and T-03/T-04 (N-2.4.1 only). No split is suggested; the goal record's "keep together" stands.
 
 ## Decided by the owner (2026-11-07)
 1. Module names `graph_model.py`, `skill_record.py`, `graph_run.py` are fine; the only existing code that changes is the skill listing in T-02 (`library.py`, `extension_loader.py`).
