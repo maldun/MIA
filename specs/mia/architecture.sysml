@@ -2863,7 +2863,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-CHA-054'> SummaryInPersona_Cha054 {
         subject s : ConversationCore;
-        doc /* The Chat agent shall word status messages and end summaries with SkillDigestStep in the persona of the persona file. */
+        doc /* The Chat agent shall word status messages, end summaries, failure messages and stop messages with SkillDigestStep in the persona of the persona file. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-CHA-055'> NoStatusMessageForASkillWithoutPhases_Cha055 {

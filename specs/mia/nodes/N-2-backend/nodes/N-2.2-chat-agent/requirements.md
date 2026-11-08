@@ -464,7 +464,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 
 ### REQ-CHA-054 – Summary in persona
 - Level: low   Subject: ConversationCore
-- Text: The Chat agent shall word status messages and end summaries with SkillDigestStep in the persona of the persona file.
+- Text: The Chat agent shall word status messages, end summaries, failure messages and stop messages with SkillDigestStep in the persona of the persona file.
 - Rationale: refines REQ-BE-078; FR-35, REQ-CHA-008
 - Parent: REQ-BE-078
 - Group: SQ
@@ -474,7 +474,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Eval criterion: suite=EV-skill_turns; select=req:REQ-CHA-054; metric=persona; min=0.80; low>=0.70; n=24; repeats=3; pin=MP-light; rule=both; alpha=0.05; false_alarm=0.0134; split=holdout
 - Verified by: EV-skill_turns
 - Status: Draft
-- History: A-131 (proposed 2026-11-08, G-V3.CHAT), new; owner 2026-11-08; n 21 to 24 at the owner's decision of 2026-11-08 on REQ-CHA-049 (6 injection cases per split), error rates recomputed
+- History: A-131 (proposed 2026-11-08, G-V3.CHAT), new; owner 2026-11-08; n 21 to 24 at the owner's decision of 2026-11-08 on REQ-CHA-049 (6 injection cases per split), error rates recomputed; widened at the checks review of 2026-11-08 to the failure and stop messages of REQ-CHA-044 and 057 (the eval categories `failed` and `stopped` already cover them)
 
 ### REQ-CHA-055 – No status message for a skill without phases
 - Level: low   Subject: ConversationCore
