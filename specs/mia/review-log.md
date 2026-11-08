@@ -587,3 +587,14 @@ The first version was silent until the end and could take 20 minutes or more: th
 | TC-WFM-132 | check | 89d1798e06f7 | maldun | 2026-11-08 | approved | G-V3.PANEL batch 8; the stopped text is an example |
 | TC-WFM-133 | check | ded72e486031 | maldun | 2026-11-08 | approved | G-V3.PANEL batch 8; the stopped text is an example |
 | TC-WFM-134 | check | 228d0fc589fa | maldun | 2026-11-08 | approved | G-V3.PANEL batch 8; the stopped text is an example |
+| TC-WFM-135 | check | dffd84b18835 | maldun | 2026-11-08 | approved | G-V3.PANEL batch 9; font and Chromium version of TR-PANEL-001 are named in Step 4 |
+| TC-WFM-136 | check | 381afd19686a | maldun | 2026-11-08 | approved | G-V3.PANEL batch 9; font and Chromium version of TR-PANEL-001 are named in Step 4 |
+| TC-WFM-137 | check | 5f5fa963bf56 | maldun | 2026-11-08 | approved | G-V3.PANEL batch 9; font and Chromium version of TR-PANEL-001 are named in Step 4 |
+| TC-WFM-138 | check | dd34440ed664 | maldun | 2026-11-08 | approved | G-V3.PANEL batch 9; font and Chromium version of TR-PANEL-001 are named in Step 4 |
+| TR-PANEL-001 | test requirement | 646d094393d4 | maldun | 2026-11-08 | approved | G-V3.PANEL batch 9; font and Chromium version of TR-PANEL-001 are named in Step 4 |
+| TR-PANEL-002 | test requirement | 992e83619d15 | maldun | 2026-11-08 | approved | G-V3.PANEL batch 9; font and Chromium version of TR-PANEL-001 are named in Step 4 |
+| TR-PANEL-003 | test requirement | 20a12bfb612b | maldun | 2026-11-08 | approved | G-V3.PANEL batch 9; font and Chromium version of TR-PANEL-001 are named in Step 4 |
+| TR-PANEL-004 | test requirement | 717098d8faba | maldun | 2026-11-08 | approved | G-V3.PANEL batch 9; font and Chromium version of TR-PANEL-001 are named in Step 4 |
+| TR-PANEL-005 | test requirement | 80bce515bfbf | maldun | 2026-11-08 | approved | G-V3.PANEL batch 9; font and Chromium version of TR-PANEL-001 are named in Step 4 |
+| TR-PANEL-006 | test requirement | 0ebe73abcc11 | maldun | 2026-11-08 | approved | G-V3.PANEL batch 9; font and Chromium version of TR-PANEL-001 are named in Step 4 |
+| TR-PANEL-007 | test requirement | e82f2b4f2ae6 | maldun | 2026-11-08 | approved | G-V3.PANEL batch 9; font and Chromium version of TR-PANEL-001 are named in Step 4 |
