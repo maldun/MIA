@@ -579,3 +579,11 @@ The first version was silent until the end and could take 20 minutes or more: th
 | TC-CLV-045 | check | 6a96a2a28781 | maldun | 2026-11-08 | approved | G-V3.PANEL batch 7: sizes as shares of the viewport, set by the user in the browser, wide layout only, strip content scrolls inside |
 | TC-CLV-046 | check | e9df0cfcc30c | maldun | 2026-11-08 | approved | G-V3.PANEL batch 7: sizes as shares of the viewport, set by the user in the browser, wide layout only, strip content scrolls inside |
 | TC-CLV-047 | check | 0a4ec34dab39 | maldun | 2026-11-08 | approved | G-V3.PANEL batch 7: sizes as shares of the viewport, set by the user in the browser, wide layout only, strip content scrolls inside |
+| TC-CLV-042 | check | cc9c95e921ff | maldun | 2026-11-08 | approved | G-V3.PANEL batch 8; the stopped text is an example |
+| TC-CLV-043 | check | e492c545e008 | maldun | 2026-11-08 | approved | G-V3.PANEL batch 8; the stopped text is an example |
+| TC-CLV-044 | check | eccbdf7bc893 | maldun | 2026-11-08 | approved | G-V3.PANEL batch 8; the stopped text is an example |
+| TC-WFM-130 | check | 5fb5969fcc8a | maldun | 2026-11-08 | approved | G-V3.PANEL batch 8; the stopped text is an example |
+| TC-WFM-131 | check | 63a2327e6600 | maldun | 2026-11-08 | approved | G-V3.PANEL batch 8; the stopped text is an example |
+| TC-WFM-132 | check | 89d1798e06f7 | maldun | 2026-11-08 | approved | G-V3.PANEL batch 8; the stopped text is an example |
+| TC-WFM-133 | check | ded72e486031 | maldun | 2026-11-08 | approved | G-V3.PANEL batch 8; the stopped text is an example |
+| TC-WFM-134 | check | 228d0fc589fa | maldun | 2026-11-08 | approved | G-V3.PANEL batch 8; the stopped text is an example |
