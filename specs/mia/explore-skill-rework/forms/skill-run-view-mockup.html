@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Skill run view mockup</title>
+<style>
+/* Mockup of the Skill run view and the spoken-only chat (A-131, G-V3). Stub data, no MIA code, no network. */
+:root{
+  --bg:#f4f5f8; --panel:#ffffff; --panel2:#eef0f5; --line:#d5d9e3; --text:#1c2030; --muted:#5b6377;
+  --accent:#4a5ce8; --accent-text:#ffffff; --ok:#1d7a46; --warn:#a85b00; --bad:#b3261e; --spoken:#e6e9ff;
+  --radius:14px; --font:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans",Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){--bg:#12141c;--panel:#1b1e29;--panel2:#242838;--line:#343a4f;--text:#e8eaf2;--muted:#9aa3ba;
+    --accent:#8c98ff;--accent-text:#12141c;--ok:#5fcf8f;--warn:#f0b35a;--bad:#ff8a80;--spoken:#272c4d;}
+}
+:root[data-theme="dark"]{--bg:#12141c;--panel:#1b1e29;--panel2:#242838;--line:#343a4f;--text:#e8eaf2;--muted:#9aa3ba;
+  --accent:#8c98ff;--accent-text:#12141c;--ok:#5fcf8f;--warn:#f0b35a;--bad:#ff8a80;--spoken:#272c4d;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 var(--font)}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.banner{padding:8px 16px;background:var(--panel2);border-bottom:1px solid var(--line);color:var(--muted);font-size:13px}
+.page{display:grid;gap:16px;padding:16px;max-width:1500px;margin:0 auto;
+  grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);grid-template-areas:"chat character" "chat view"}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);min-width:0}
+h2{margin:0;font-size:15px}
+.character{grid-area:character;height:220px;display:flex;align-items:center;justify-content:center;color:var(--muted);
+  background:repeating-linear-gradient(45deg,var(--panel),var(--panel) 12px,var(--panel2) 12px,var(--panel2) 24px)}
+.chat{grid-area:chat;display:flex;flex-direction:column;min-height:560px;max-height:calc(100vh - 80px);position:sticky;top:12px}
+.chat header,.view header{padding:12px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px}
+.log{flex:1;overflow:auto;padding:12px 16px;display:flex;flex-direction:column;gap:10px}
+.msg{max-width:88%;padding:9px 12px;border-radius:var(--radius);border:1px solid var(--line)}
+.msg.mia{background:var(--spoken);align-self:flex-start}
+.msg.user{background:var(--panel2);align-self:flex-end}
+.msg .spk{display:inline-block;vertical-align:-2px;margin-right:6px;color:var(--accent)}
+.msg a{color:var(--accent);font-weight:600}
+.msg.q{border-color:var(--accent)}
+.composer{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--line);flex-wrap:wrap}
+.composer input{flex:1 1 180px;min-width:0;padding:9px 12px;border-radius:999px;border:1px solid var(--line);background:var(--panel2);color:var(--text)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;width:100%}
+.chip,.btn{padding:7px 14px;border-radius:999px;border:1px solid var(--line);background:var(--panel2)}
+.btn.primary{background:var(--accent);color:var(--accent-text);border-color:var(--accent);font-weight:600}
+.btn.danger{border-color:var(--bad);color:var(--bad)}
+.btn:disabled,.chip:disabled{opacity:.45;cursor:not-allowed}
+.view{grid-area:view;scroll-margin-top:12px}
+.view.flash{outline:3px solid var(--accent)}
+.badge{padding:2px 10px;border-radius:999px;font-size:12px;border:1px solid var(--line);margin-left:auto}
+.badge.running{color:var(--ok);border-color:var(--ok)} .badge.paused,.badge.waiting{color:var(--warn);border-color:var(--warn)}
+.badge.failed,.badge.stopped{color:var(--bad);border-color:var(--bad)} .badge.done{color:var(--muted)}
+.vbody{padding:14px 16px;display:grid;gap:16px}
+.empty{color:var(--muted);padding:18px 16px}
+.title{display:flex;flex-wrap:wrap;gap:8px;align-items:baseline}
+.title b{font-size:17px} .title span{color:var(--muted);font-size:13px}
+.phases{display:flex;gap:6px;flex-wrap:wrap;margin:0;padding:0;list-style:none}
+.phases li{padding:5px 12px;border-radius:999px;border:1px solid var(--line);color:var(--muted);font-size:13px}
+.phases li.now{border-color:var(--accent);color:var(--text);background:var(--spoken);font-weight:600}
+.phases li.past::before{content:"\2713  ";color:var(--ok)}
+.phases li.bad{border-color:var(--bad);color:var(--bad)}
+.phases li.bad::before{content:"\2717  "}
+.meters{display:grid;gap:8px}
+.meter{display:grid;grid-template-columns:110px 1fr 110px;gap:10px;align-items:center;font-size:13px}
+.meter .bar{height:10px;border-radius:99px;background:var(--panel2);border:1px solid var(--line);overflow:hidden}
+.meter .bar i{display:block;height:100%;background:var(--accent)}
+.meter .val{text-align:right;color:var(--muted);font-variant-numeric:tabular-nums}
+.counts{display:flex;gap:8px;flex-wrap:wrap}
+.counts span{padding:3px 10px;border-radius:8px;background:var(--panel2);font-size:13px}
+.ctl{display:flex;gap:8px;flex-wrap:wrap}
+.sec h3{margin:0 0 6px;font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+ol.answers{margin:0;padding-left:20px} ol.answers li{margin-bottom:4px}
+.result{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--panel2)}
+.result table{border-collapse:collapse;width:100%;margin-top:6px;font-size:13px}
+.result th,.result td{border:1px solid var(--line);padding:4px 8px;text-align:left}
+details.sec>summary{cursor:pointer;font-weight:600}
+table.files{border-collapse:collapse;width:100%;font-size:13px}
+table.files th,table.files td{border-bottom:1px solid var(--line);padding:5px 6px;text-align:left}
+.fail{border:1px solid var(--bad);border-radius:10px;padding:10px 12px;color:var(--bad)}
+.demo{margin:0 16px 16px;max-width:1468px;padding:12px 16px;border:2px dashed var(--line);border-radius:var(--radius);color:var(--muted)}
+.demo h2{color:var(--text);margin-bottom:8px}
+.demo .row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+@media (max-width:820px){
+  .page{grid-template-columns:minmax(0,1fr);grid-template-areas:"character" "chat" "view";padding:12px}
+  .chat{position:static;max-height:none;min-height:420px}
+  .character{height:140px}
+  .meter{grid-template-columns:90px 1fr 90px}
+  .demo{margin:0 12px 12px}
+}
+@media (prefers-reduced-motion: no-preference){.view.flash{transition:outline .2s}}
+</style>
+</head>
+<body>
+<div class="banner">Mockup of the <b>Skill run view</b> and the <b>spoken-only chat</b> (A-131, G-V3). Stub data, a scripted skill, not MIA. Use the dashed panel at the bottom to drive it.</div>
+
+<main class="page">
+  <section class="box character" aria-label="Character box (placeholder)">3D character box</section>
+
+  <section class="box chat" aria-label="Chat">
+    <header><h2>Chat</h2><span style="color:var(--muted);font-size:13px">only text that is spoken</span></header>
+    <div class="log" id="log" aria-live="polite"></div>
+    <form class="composer" id="composer" autocomplete="off">
+      <div class="chips" id="chips"></div>
+      <input id="say" aria-label="Your message" placeholder="Write to MIA">
+      <button class="btn primary" type="submit">Send</button>
+    </form>
+  </section>
+
+  <section class="box view" id="view" tabindex="-1" aria-label="Skill run view">
+    <header><h2>Skill run view</h2><span class="badge" id="vbadge" style="display:none"></span></header>
+    <div id="vcontent"></div>
+  </section>
+</main>
+
+<section class="demo" aria-label="Demo controls">
+  <h2>Demo controls (not part of the design)</h2>
+  <div class="row">
+    <button class="btn" id="d-review">Start "review" (asks a question, three phases, long result)</button>
+    <button class="btn" id="d-lookup">Start "lookup" (no phases)</button>
+    <button class="btn" id="d-next">Advance the running skill</button>
+    <button class="btn" id="d-fail">Make the running skill fail</button>
+  </div>
+  <div class="row">
+    <button class="btn" id="d-reload">Reload the page (view comes back from storage)</button>
+    <button class="btn" id="d-clear">Delete chat history (empties the view, keeps files)</button>
+    <button class="btn" id="d-theme">Light / dark</button>
+  </div>
+  <div style="font-size:13px">Try: start review, answer the question in the chat, advance, pause, stop. Start lookup while review runs: the view switches to the most recently started one. When nothing runs the view keeps the last run.</div>
+</section>
+
+<script>
+"use strict";
+/* The scripted skill. Fields follow the real task_status event: id, task, phase, mode, paused, done, budget.seconds, counts. */
+var KEY = "mia-run-view-mockup";
+var state = {runs: [], chat: [], files: [], seq: 0};
+var timer = null;
+
+function load(){ try { var s = localStorage.getItem(KEY); if (s) state = JSON.parse(s); } catch (e) {} }
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+function esc(s){ var d = document.createElement("div"); d.textContent = s; return d.innerHTML; }
+function now(){ return new Date().toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"}); }
+function active(r){ return r.state === "running" || r.state === "paused" || r.state === "waiting"; }
+
+/* A-131: with several running skills the most recently started one; when none runs the last run. */
+function current(){
+  var running = state.runs.filter(active);
+  if (running.length) return running[running.length - 1];
+  return state.runs[state.runs.length - 1] || null;
+}
+function say(kind, text, extra){ state.chat.push(Object.assign({kind: kind, text: text, t: now()}, extra || {})); }
+
+var SPK = '<svg class="spk" width="16" height="16" viewBox="0 0 24 24" aria-label="spoken" role="img"><path fill="currentColor" d="M3 9v6h4l5 4V5L7 9H3zm13.5 3a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4zM14 3.2v2.1a7 7 0 0 1 0 13.4v2.1a9 9 0 0 0 0-17.6z"/></svg>';
+
+function renderChat(){
+  var log = document.getElementById("log"); log.innerHTML = "";
+  if (!state.chat.length){ log.innerHTML = '<p class="empty">Nothing here yet. Start a skill with the demo controls.</p>'; }
+  state.chat.forEach(function(m){
+    var d = document.createElement("div");
+    if (m.kind === "user"){ d.className = "msg user"; d.textContent = m.text; }
+    else {
+      d.className = "msg mia" + (m.kind === "question" ? " q" : "");
+      d.innerHTML = SPK + esc(m.text) + (m.link ? ' <a href="#view" data-run="' + m.link + '">Open in the Skill run view</a>' : "");
+    }
+    log.appendChild(d);
+  });
+  log.scrollTop = log.scrollHeight;
+  var q = state.runs.filter(function(r){ return r.state === "waiting"; })[0];
+  var chips = document.getElementById("chips"); chips.innerHTML = "";
+  if (q) q.question.options.forEach(function(o){
+    var b = document.createElement("button"); b.type = "button"; b.className = "chip"; b.textContent = o;
+    b.onclick = function(){ answer(q, o); }; chips.appendChild(b);
+  });
+}
+
+function meter(label, used, limit, unit){
+  var pct = Math.min(100, Math.round(100 * used / limit));
+  return '<div class="meter"><span>' + label + '</span><div class="bar" role="progressbar" aria-label="' + label + '" aria-valuemin="0" aria-valuemax="' + limit + '" aria-valuenow="' + used + '"><i style="width:' + pct + '%"></i></div><span class="val">' + used + " / " + limit + unit + '</span></div>';
+}
+
+function renderView(){
+  var r = current(), box = document.getElementById("vcontent"), badge = document.getElementById("vbadge");
+  if (!r){ badge.style.display = "none"; box.innerHTML = '<p class="empty">No skill has run yet. When one runs, everything that is not spoken appears here.</p>'; return; }
+  badge.style.display = ""; badge.className = "badge " + r.state;
+  badge.textContent = {waiting:"waiting for you", running:"running", paused:"paused", done:"finished", failed:"failed", stopped:"stopped"}[r.state];
+  var h = '<div class="vbody">';
+  h += '<div class="title"><b>' + esc(r.skill) + '</b><span>started ' + r.started + (active(r) ? "" : " · " + (state.runs.indexOf(r) === state.runs.length - 1 ? "last run" : "earlier run")) + '</span></div>';
+  if (r.phases.length) h += '<ol class="phases" aria-label="Phases">' + r.phases.map(function(p, i){
+    var c = r.state === "done" || i < r.phaseIdx ? "past" : (i === r.phaseIdx && active(r) ? "now" : (i === r.phaseIdx ? "bad" : ""));
+    return '<li class="' + c + '"' + (c === "now" ? ' aria-current="step"' : "") + '>' + esc(p) + '</li>'; }).join("") + '</ol>';
+  h += '<div class="meters">' + meter("Time", r.seconds, r.limitSec, " s") + meter("Searches", r.searches, r.limitSearches, "") + '</div>';
+  h += '<div class="counts"><span>on the list: ' + r.onList + '</span><span>sources read: ' + r.read + '</span></div>';
+  h += '<div class="ctl"><button class="btn" id="b-pause"' + (r.state === "running" ? "" : " disabled") + '>Pause</button>' +
+       '<button class="btn" id="b-resume"' + (r.state === "paused" ? "" : " disabled") + '>Resume</button>' +
+       '<button class="btn danger" id="b-stop"' + (active(r) ? "" : " disabled") + '>Stop</button></div>';
+  if (r.state === "failed") h += '<div class="fail" role="alert"><b>The run failed.</b> ' + esc(r.reason) + '</div>';
+  if (r.state === "stopped") h += '<div class="fail" role="status">You stopped this run. What was found so far is kept below.</div>';
+  h += '<div class="sec"><h3>Answers you gave</h3>' + (r.answers.length ? '<ol class="answers">' + r.answers.map(function(a){
+        return "<li>" + esc(a.q) + " <b>" + esc(a.a) + "</b> <span style='color:var(--muted)'>" + a.t + "</span></li>"; }).join("") + "</ol>" : '<span style="color:var(--muted)">none yet</span>') + "</div>";
+  h += '<div class="sec"><h3>Result</h3>' + (r.result ? '<div class="result">' + r.result + '</div>' : '<span style="color:var(--muted)">not there yet</span>') + "</div>";
+  h += '<details class="sec"><summary>Material found on the way (' + r.material.length + ')</summary><ul>' + r.material.map(function(m){ return "<li>" + esc(m) + "</li>"; }).join("") + "</ul></details>";
+  h += '<div class="sec"><h3>Files</h3>' + filesTable() + "</div>";
+  box.innerHTML = h + "</div>";
+  var p = document.getElementById("b-pause"), re = document.getElementById("b-resume"), s = document.getElementById("b-stop");
+  p.onclick = function(){ r.state = "paused"; r.paused = true; commit(); };
+  re.onclick = function(){ r.state = "running"; r.paused = false; commit(); };
+  s.onclick = function(){ r.state = "stopped"; r.done = true; say("mia", "Stopped, as you asked. What I had is in the Skill run view.", {link: r.id}); commit(); };
+}
+function filesTable(){
+  if (!state.files.length) return '<span style="color:var(--muted)">no files yet</span>';
+  return '<table class="files"><thead><tr><th>Name</th><th>Size</th><th>Time</th><th>Task</th></tr></thead><tbody>' + state.files.map(function(f){
+    return '<tr><td><a href="#" onclick="return false">' + esc(f.name) + '</a></td><td>' + f.size + '</td><td>' + f.t + '</td><td>' + esc(f.task) + '</td></tr>'; }).join("") + "</tbody></table>";
+}
+function commit(){ save(); renderChat(); renderView(); schedule(); }
+
+/* the scripted skills */
+function start(skill){
+  var review = skill === "review";
+  var r = {id: "r" + (++state.seq), skill: skill, started: now(), state: review ? "waiting" : "running", paused: false, done: false,
+    phases: review ? ["Searching", "Reading", "Writing"] : [], phaseIdx: 0, seconds: 0, limitSec: 600, searches: 0, limitSearches: review ? 24 : 6,
+    onList: 0, read: 0, answers: [], result: "", material: [], reason: "",
+    question: review ? {text: "Which topic shall I review?", options: ["Sleep and memory", "Context graphs"]} : null};
+  state.runs.push(r);
+  if (review) say("question", r.question.text);
+  else say("user", "Look up the height of the Eiffel Tower");
+  commit();
+}
+function answer(r, a){
+  say("user", a); r.answers.push({q: r.question.text, a: a, t: now()});
+  r.state = "running"; r.topic = a; say("mia", "Thanks. I start searching for " + a.toLowerCase() + ".");
+  commit();
+}
+function advance(r){
+  if (!r || !active(r) || r.state === "waiting") return;
+  if (r.skill === "lookup"){ finish(r); return; }
+  /* jumping ahead still accounts for the work of the phase that ended */
+  if (r.phaseIdx === 0){ r.seconds = Math.max(r.seconds, 70); r.searches = Math.max(r.searches, 12); r.onList = Math.max(r.onList, 12); }
+  if (r.phaseIdx === 1){ r.seconds = Math.max(r.seconds, 190); r.read = Math.max(r.read, 8); }
+  if (r.phaseIdx === 2){ r.seconds = Math.max(r.seconds, 260); }
+  r.phaseIdx++;
+  if (r.phaseIdx >= r.phases.length){ finish(r); return; }
+  if (r.phaseIdx === 1) say("mia", "I am reading the sources now. " + r.onList + " are on my list.");
+  if (r.phaseIdx === 2) say("mia", "Writing the review. " + r.read + " sources made it in.");
+  commit();
+}
+function finish(r){
+  r.state = "done"; r.done = true; r.phaseIdx = r.phases.length;
+  if (r.skill === "lookup"){
+    r.result = "<b>The Eiffel Tower is 330 m tall</b> (including antennas), 300 m to the tip of the structure before the 1957 mast.<br><small>Two sources agree; one older source says 324 m.</small>";
+    r.material = ["toureiffel.paris, facts page (read)", "Wikipedia, Eiffel Tower (read)", "A 2010 tourism leaflet (older figure 324 m)"];
+    r.searches = 2; r.onList = 3; r.read = 3; r.seconds = Math.max(r.seconds, 14);
+    say("mia", "The Eiffel Tower is about 330 metres tall with its antennas. Two sources agree.", {link: r.id});
+  } else {
+    r.result = "<b>Review: " + esc(r.topic || "topic") + "</b><p>Eight sources, two disagree on the effect size. The main finding is stable across four of the six study designs; the rest is weak.</p><table><tr><th>Source</th><th>Design</th><th>Effect</th></tr><tr><td>A 2019</td><td>RCT</td><td>0.41</td></tr><tr><td>B 2021</td><td>cohort</td><td>0.38</td></tr><tr><td>C 2022</td><td>RCT</td><td>0.12</td></tr><tr><td>D 2023</td><td>survey</td><td>0.45</td></tr></table>";
+    r.material = ["8 sources read, 3 skipped as duplicates", "Disagreement: C 2022 vs A 2019", "Search log: 18 queries"];
+    r.read = 8; state.files.push({name: "review-" + r.id + ".pdf", size: "212 kB", t: now(), task: "review"}, {name: "review-" + r.id + ".md", size: "9 kB", t: now(), task: "review"});
+    say("mia", "The review is done: the main finding holds in four of six designs, and two sources disagree. The table and the files are in the Skill run view.", {link: r.id});
+  }
+  commit();
+}
+function fail(r){
+  if (!r || !active(r) || r.state === "waiting") return;
+  r.state = "failed"; r.done = true; r.reason = "The search engine did not answer three times in a row, so I stopped after " + r.searches + " searches.";
+  say("mia", "I had to stop: the search engine did not answer. Details are in the Skill run view.", {link: r.id}); commit();
+}
+
+/* simulated clock: one real second is five seconds of the run */
+function schedule(){
+  var any = state.runs.some(function(r){ return r.state === "running"; });
+  if (any && !timer) timer = setInterval(tick, 1000);
+  if (!any && timer){ clearInterval(timer); timer = null; }
+}
+function tick(){
+  state.runs.forEach(function(r){
+    if (r.state !== "running") return;
+    r.seconds += 5;
+    if (r.skill === "review" && r.phaseIdx === 0){ r.searches = Math.min(r.limitSearches, r.searches + 1); r.onList = Math.min(12, r.onList + 1); }
+    if (r.skill === "review" && r.phaseIdx === 1){ r.read = Math.min(8, r.read + 1); }
+  });
+  save(); renderView();
+}
+
+document.getElementById("composer").onsubmit = function(e){
+  e.preventDefault(); var i = document.getElementById("say"), v = i.value.trim(); if (!v) return;
+  var q = state.runs.filter(function(r){ return r.state === "waiting"; })[0]; i.value = "";
+  if (q) answer(q, v); else { say("user", v); commit(); }
+};
+document.getElementById("log").onclick = function(e){
+  var a = e.target.closest("a[data-run]"); if (!a) return; e.preventDefault();
+  var v = document.getElementById("view"); v.scrollIntoView({behavior: "smooth", block: "start"}); v.focus({preventScroll: true});
+  v.classList.add("flash"); setTimeout(function(){ v.classList.remove("flash"); }, 900);
+};
+function running(){ var a = state.runs.filter(active); return a[a.length - 1]; }
+document.getElementById("d-review").onclick = function(){ start("review"); };
+document.getElementById("d-lookup").onclick = function(){ start("lookup"); };
+document.getElementById("d-next").onclick = function(){ advance(running()); };
+document.getElementById("d-fail").onclick = function(){ fail(running()); };
+document.getElementById("d-reload").onclick = function(){ location.reload(); };
+document.getElementById("d-clear").onclick = function(){ state.chat = []; state.runs = []; commit(); };
+document.getElementById("d-theme").onclick = function(){
+  var d = document.documentElement, dark = d.getAttribute("data-theme") === "dark" || (!d.getAttribute("data-theme") && matchMedia("(prefers-color-scheme: dark)").matches);
+  d.setAttribute("data-theme", dark ? "light" : "dark");
+};
+load();
+/* #demo=review,answer,next,next,pause,lookup,fail,clear ... plays steps on load (for a still picture of a state) */
+(function(){
+  var m = /^#demo=(.*)$/.exec(location.hash); if (!m) return;
+  try { localStorage.removeItem(KEY); } catch (e) {} state = {runs: [], chat: [], files: [], seq: 0};
+  m[1].split(",").forEach(function(s){
+    var r = running();
+    if (s === "review" || s === "lookup") start(s);
+    else if (s === "answer"){ var q = state.runs.filter(function(x){ return x.state === "waiting"; })[0]; if (q) answer(q, q.question.options[0]); }
+    else if (s === "next") advance(r); else if (s === "fail") fail(r);
+    else if (s === "pause" && r){ r.state = "paused"; } else if (s === "tick" && r){ for (var i = 0; i < 6; i++){ r.seconds += 5; if (r.phaseIdx === 0){ r.searches++; r.onList++; } } }
+  });
+})();
+renderChat(); renderView(); schedule();
+</script>
+</body>
+</html>
