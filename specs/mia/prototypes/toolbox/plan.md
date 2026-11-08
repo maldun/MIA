@@ -20,7 +20,7 @@ Changes to existing requirements: REQ-WFM-050 (one entry per ID, see NEW-C), 055
 
 ## Interface (stand-ins for the red tests)
 - `Toolbox(library)`: `import_transform(text)`, `export_transform(id)`, `look_up(id)`, `offer()`, `set_trust(id, value, account)`, `set_lifecycle(id, value, account, evidence=None, allow_baseline=False)`, `run(id, args, as_baseline=False)`, `seed_shipped(nodes_dir)`. Signatures follow `toolbox.py` of the prototype; the prototype is the model, the code is rewritten.
-- `library`: the IF-203 v1 library, kind `transforms`, used through a mock until the provider is merged (goal.md "Parts"). Who is the owner comes in as a lookup the test supplies (stand-in for IF-101 accounts).
+- `library`: the IF-203 v1 library with the new kind `transforms`. Decided by the owner 2026-11-08 (option A): TOOLBOX itself adds the `transforms` part to `workflow_library.py` (kind, `set_trust`, `set_lifecycle`); MODEL and CONVERT add their own parts. Until T-06 the toolbox works against a mock of that part. Who is the owner comes in as a lookup the test supplies (stand-in for IF-101 accounts).
 - `GraphRunner(trust)` of MODEL asks `Toolbox.look_up(id)["trust"]`; TOOLBOX does not call MODEL.
 
 ## Task list
@@ -31,7 +31,7 @@ Changes to existing requirements: REQ-WFM-050 (one entry per ID, see NEW-C), 055
 | T-03 Only the owner trusts | REQ-WFM-054 | TC-WFM-054 | T-01 |
 | T-04 Lifecycle, retired, baseline | REQ-WFM-067, 068, 070, NEW-B | TC-WFM-067, 068, 070 and the new TC | T-01 |
 | T-05 Seed with the shipped nodes | REQ-WFM-056 | TC-WFM-056 | T-01 |
-| T-06 Replace the mock library by the contract-checked one | all above (TR-TOOLBOX-001) | the tests above against the IF-203 v1 contract suite, no skip | T-01..T-05; IF-203 v1 provider merged |
+| T-06 The `transforms` part of IF-203 v1 in the library | REQ-WFM-050, 051, 054, 067 on the real library (TR-TOOLBOX-001) | the tests of T-01..T-05 against the IF-203 v1 contract suite for `transforms`, no skip; the v0 suite still passes | T-01..T-05; G-V2.STORE merged |
 
 ## Tasks
 
@@ -80,17 +80,17 @@ Changes to existing requirements: REQ-WFM-050 (one entry per ID, see NEW-C), 055
 - Done when: after a first start every shipped node is in the toolbox as trusted, flagged shipped, one entry per ID
 - Notes: 73 IDs today, 89 files (some IDs have several versions, for example `code.gate_abstain`): the highest non-retired version is seeded. The prototype has no code text for them: how a shipped node is run stays with the old runner (finding 2 of the report).
 
-### T-06: Replace the mock library by the contract-checked one
-- Implements: all of T-01..T-05 against the real IF-203 v1 library (TR-TOOLBOX-001, proposed)
-- Tests to turn green: the tests of T-01..T-05 run against the IF-203 v1 contract suite, with no skip
-- Touches: the wiring in `toolbox.py` to the library
-- Must not touch: protected material, the provider's files
-- Depends on: T-01..T-05; the IF-203 v1 provider merged (the goal files do not say which goal provides it: ask the owner)
-- Done when: the mock passes the IF-203 v1 contract suite, or the difference is reported as a finding; the listed tests are green against the real library
-- Notes: if the mock fails the suite, stop and report.
+### T-06: The `transforms` part of IF-203 v1 in the library
+- Implements: REQ-WFM-050, 051, 054, 067 on the real library (TR-TOOLBOX-001, proposed)
+- Tests to turn green: the tests of T-01..T-05 run against the IF-203 v1 contract suite for the kind `transforms`, with no skip; the IF-203 v0 suite keeps passing
+- Touches: `workflow_library.py` (adds `transforms` to `KINDS`, `set_trust`, `set_lifecycle`; `set_status` stays for workflows); the wiring in `toolbox.py` to the library
+- Must not touch: protected material, STORE's files, the snapshot operations and the kinds `skills` and `snapshots` (CONVERT), the four workflow states
+- Depends on: T-01..T-05; G-V2.STORE merged (IF-301 v2)
+- Done when: the mock passes the IF-203 v1 contract suite for `transforms`, or the difference is reported as a finding; the listed tests are green against the real library; the v0 suite is unchanged
+- Notes: a transform is a versioned record (ID, version, schemas, code text); trust and lifecycle live in a separate meta record per ID, as `TableMeta` does for workflows, so saving a new version leaves them as they are (this is NEW-C / D5). MODEL and CONVERT also extend this file: keep the edits to separate methods and tell the owner which lines are shared (`parallel-work.md`). If the mock fails the suite, stop and report.
 
 ## Order and checks
-T-01 first; T-02 to T-05 are independent of each other; T-06 waits for the provider. After each task: `python tests/test_<name>.py` for its tests, then the stage 1 and 2 steps of `stages.yaml`. Merge order of the subgoals: STORE, MODEL, TOOLBOX, CONVERT.
+T-01 first; T-02 to T-05 are independent of each other; T-06 waits for STORE. After each task: `python tests/test_<name>.py` for its tests, then the stage 1 and 2 steps of `stages.yaml`. Merge order of the subgoals: STORE, MODEL, TOOLBOX, CONVERT.
 
 ## Size check (splitting)
 10 requirements of the goal plus three new, six tasks of one session each, all inside N-2.3. No split is suggested; the goal record's "keep together" stands.
@@ -98,8 +98,9 @@ T-01 first; T-02 to T-05 are independent of each other; T-06 waits for the provi
 ## Risks and open points
 1. D5 (trust carries over to a newer version): new code runs without a new decision; consider logging version changes of trusted transforms (prototype report, risks).
 2. SC-09 / TD-24: trusted code runs unsandboxed in the MIA process; stays open.
-3. Who provides IF-203 v1 and when (T-06).
-4. IF-203 v1 contract suite for kind `transforms` is not written; the Step 4 session writes it.
+3. Resolved by the owner 2026-11-08 (option A): TOOLBOX adds the `transforms` part of IF-203 v1 itself. Open: the file `workflow_library.py` is also extended by MODEL and CONVERT, so the order of merges and shared lines need the rules of `parallel-work.md`.
+4. The IF-203 v1 contract suite for kind `transforms` is not written; the Step 4 session writes it.
+4b. Does the meta record of transforms need a new table in IF-302, or can it share `workflow_meta`? Not checked; the Step 4 session or the owner decides.
 5. Shipped nodes carry no code text: running them is not part of this goal.
 6. Anyone may set a transform back to untrusted (T-03 notes): confirm.
 7. REQ-WFM-054 History still says "A-89 not yet approved": check whether A-90 superseded it.
