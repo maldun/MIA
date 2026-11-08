@@ -434,7 +434,7 @@ class ChatApiMock:
         """v16: the run record of a skill run in the table skill_runs (IF-302 v8): one per run, replaced in place"""
         review = self._review
         record = {"id": review["id"], "skill": "review", "version": "1", "started": "t%d" % int(self.now), "ended": None, "state": "running",
-                  "phases": self._phase_list(["running", "waiting"]), "budget": {"seconds": {"used": 0.0}}, "counts": {}, "answers": [], "result": "", "material": [], "files": []}
+                  "phases": self._phase_list(["running", "waiting"]), "budget": {"seconds": {"used": 0.0}}, "counts": {}, "answers": [], "result": "", "material": [], "files": [], "elements": []}      # v17: the elements of the skill (the scripted review reports none)
         self._runs[review["id"]] = record
         self._run_order.append(review["id"])
         self._run_owner[review["id"]] = review["author"]

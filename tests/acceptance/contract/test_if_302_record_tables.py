@@ -99,7 +99,7 @@ class RecordTablesContract(unittest.TestCase):
     @mark.req("IF-302", "REQ-RTB-007")
     @each_provider(IF)
     def test_a_skill_run_is_a_versioned_deletable_record(self, tables):
-        """TC-IF-302-08 (v8, A-141): `skill_runs` is versioned and deletable; a record needs run, skill, skill_version, account, started and state (a missing field is rule schema with that field as detail); the optional fields ended, phases, budget, counts, reason, answers, result, material and files are free; `reports` stays as it is.
+        """TC-IF-302-08 (v8, A-141): `skill_runs` is versioned and deletable; a record needs run, skill, skill_version, account, started and state (a missing field is rule schema with that field as detail); the optional fields ended, phases, budget, counts, reason, answers, result, material, files and (v9) elements are free; `reports` stays as it is.
         Example: validate("skill_runs", {"run": "r1", "skill": "review", "skill_version": "2", "account": "anna", "started": "2026-11-08T10:00:00Z", "state": "running"}) -> None."""
         doc = {"run": "r1", "skill": "review", "skill_version": "2", "account": "anna", "started": "2026-11-08T10:00:00Z", "state": "running"}
         self.assertEqual(tables.definitions()["skill_runs"], {"versioned": True, "deletable": True})
@@ -107,7 +107,8 @@ class RecordTablesContract(unittest.TestCase):
         for field in doc:
             self.assertEqual(tables.validate("skill_runs", {k: v for k, v in doc.items() if k != field}), {"rule": "schema", "detail": field})
         full = dict(doc, ended="2026-11-08T10:05:00Z", phases=[{"name": "screening", "state": "done"}], budget={"seconds": 600}, counts={"searches": 3},
-                    reason="stopped by the user", answers=[{"text": "yes", "time": "2026-11-08T10:01:00Z"}], result="text", material=[], files=["report.md"])
+                    reason="stopped by the user", answers=[{"text": "yes", "time": "2026-11-08T10:01:00Z"}], result="text", material=[], files=["report.md"],
+                    elements=[{"label": "Works read", "text": "12"}])
         self.assertIsNone(tables.validate("skill_runs", full))
         self.assertEqual(tables.definitions()["reports"], {"versioned": True, "deletable": False})
 

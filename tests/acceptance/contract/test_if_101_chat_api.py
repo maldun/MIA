@@ -640,7 +640,7 @@ class SkillRunViewContract(unittest.TestCase):
     @mark.req("IF-101", "REQ-WFM-134", "REQ-WFM-132", "REQ-WFM-133")
     @each_provider(IF, make(review=("First?",)))
     def test_the_run_that_is_shown_and_a_run_by_its_id(self, api):
-        """TC-IF-101-35 (v16): `shown_run` (GET /api/skill-runs/shown) is None (204) before any run; afterwards the run record `id, skill, version, started, ended, state, phases, budget, counts, answers [{text, time}], result, material, files` of the run started most recently; `skill_run(id)` (GET /api/skill-runs/<id>) gives the same record; an unknown id is 404 not_found; both need the session (401 unauthenticated).
+        """TC-IF-101-35 (v16): `shown_run` (GET /api/skill-runs/shown) is None (204) before any run; afterwards the run record `id, skill, version, started, ended, state, phases, budget, counts, answers [{text, time}], result, material, files, elements` (v17: `elements` is the list of label and text pairs of the skill, empty when none) of the run started most recently; `skill_run(id)` (GET /api/skill-runs/<id>) gives the same record; an unknown id is 404 not_found; both need the session (401 unauthenticated).
         Example: after a review with the answer "no": state done, answers [{"text": "no", ...}], files ["review-contract.md"]."""
         s = api.login("anna", "pw-anna")
         api.connect(s)
@@ -649,7 +649,7 @@ class SkillRunViewContract(unittest.TestCase):
         run_review(api, s, "no")
         run = cards_of(api.events(s))[0]["id"]
         record = api.shown_run(s)
-        for key in ("id", "skill", "version", "started", "ended", "state", "phases", "budget", "counts", "answers", "result", "material", "files"):
+        for key in ("id", "skill", "version", "started", "ended", "state", "phases", "budget", "counts", "answers", "result", "material", "files", "elements"):
             self.assertIn(key, record)
         self.assertEqual((record["id"], record["state"], record["files"]), (run, "done", ["review-contract.md"]))
         self.assertIsInstance(record["ended"], str)
