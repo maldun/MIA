@@ -544,3 +544,7 @@ The first version was silent until the end and could take 20 minutes or more: th
 | G-V2.STORE | goal | ae15a6044531 | Stefan Reiterer | 2026-11-08 | approved | A-98: context graph tables and input that cannot be checked; owner's review answer 2026-11-08 |
 | G-V2.STORE | goal | ae15a6044531 | Stefan Reiterer | 2026-11-08 | approved | F-10: Implement row of goal.md in progress, T-01 to T-09 done, A-91 to A-99 installed; owner's review answer 2026-11-08 |
 | G-V2.STORE | goal | ae15a6044531 | Stefan Reiterer | 2026-11-08 | approved | Implement row done after T-10 (F-10); owner's review answer 2026-11-08 |
+| REQ-SLY-013 | requirement | 7a33bb1842b5 | Stefan Reiterer | 2026-11-08 | approved | A-100: Storage depth limit and cyclic documents; owner's review answer 2026-11-08 (text reviewed, T-11 open) |
+| REQ-SLY-014 | requirement | d31d2223989e | Stefan Reiterer | 2026-11-08 | approved | A-100: Storage depth limit and cyclic documents; owner's review answer 2026-11-08 (text reviewed, T-11 open) |
+| TC-SLY-012 | check | c8ab643b2785 | Stefan Reiterer | 2026-11-08 | approved | A-100: Storage depth limit and cyclic documents; owner's review answer 2026-11-08 (text reviewed, T-11 open) |
+| TC-SLY-013 | check | b3b93fd148b1 | Stefan Reiterer | 2026-11-08 | approved | A-100: Storage depth limit and cyclic documents; owner's review answer 2026-11-08 (text reviewed, T-11 open) |
