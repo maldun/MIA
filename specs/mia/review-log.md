@@ -557,3 +557,5 @@ The first version was silent until the end and could take 20 minutes or more: th
 | REQ-WFM-031 | requirement | 59054a9ecf98 | maldun | 2026-11-08 | approved | G-V3.PANEL batch 5 |
 | REQ-WFM-036 | requirement | 5e984df7d4d2 | maldun | 2026-11-08 | approved | G-V3.PANEL batch 5 |
 | REQ-CLV-024 | requirement | 18129a0dea65 | maldun | 2026-11-08 | approved | G-V3.PANEL batch 5 |
+| REQ-WFM-038 | requirement | c5676a017adf | maldun | 2026-11-08 | approved | G-V3.PANEL batch 6; REQ-CHA-008 and REQ-CHA-014 are reviewed with G-V3.CHAT |
+| REQ-WFM-039 | requirement | e80cbdfeca5c | maldun | 2026-11-08 | approved | G-V3.PANEL batch 6; REQ-CHA-008 and REQ-CHA-014 are reviewed with G-V3.CHAT |
