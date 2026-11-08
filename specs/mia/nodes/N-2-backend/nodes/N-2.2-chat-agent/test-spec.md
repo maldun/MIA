@@ -152,7 +152,7 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-201
 - Verifies: REQ-CHA-057
 - Given: a scripted run that the user stops
 - When: the run ends
-- Then: exactly one message follows that says the run was stopped and names no other cause
+- Then: exactly one message follows and it is the scripted wording of the fake model that says the run was stopped; the invented cause is not tested here but in EV-skill_turns (category `stopped`)
 
 ### TC-CHA-058 – No card, table, log line or full result in the chat
 - Verifies: REQ-CHA-058

@@ -510,7 +510,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Group: ST
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-39: a stopped run gives exactly one message that says it was stopped and names no other cause (exact)
+- Acceptance criterion: AC-39: a stopped run gives exactly one message that says it was stopped (exact); that it names no invented cause is judged in EV-skill_turns (category `stopped`)
 - Verified by: TC-CHA-057
 - Status: Draft
 - History: A-131 (proposed 2026-11-08, G-V3.CHAT), new; owner 2026-11-08, split from REQ-CHA-043 and 044
