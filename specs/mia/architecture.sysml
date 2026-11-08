@@ -2803,7 +2803,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-CHA-042'> NoStatusForOtherPhases_Cha042 {
         subject s : ConversationCore;
-        doc /* While a skill runs, the Chat agent shall add no message about a phase that the manifest does not declare worth telling, and none for a skill without declared phases. */
+        doc /* While a skill runs, the Chat agent shall add no message about a phase that the manifest does not declare worth telling. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-CHA-043'> EndSummaryWithALink_Cha043 {
@@ -2864,6 +2864,11 @@ package MIA_NodeRequirements {
     requirement def <'REQ-CHA-054'> SummaryInPersona_Cha054 {
         subject s : ConversationCore;
         doc /* The Chat agent shall word status messages and end summaries with SkillDigestStep in the persona of the persona file. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-055'> NoStatusMessageForASkillWithoutPhases_Cha055 {
+        subject s : ConversationCore;
+        doc /* While a skill without declared phases runs, the Chat agent shall add no status message. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-WFM-001'> SkillsAsTasks_Wfm001 {
@@ -4642,6 +4647,7 @@ package MIA_NodeRequirements {
     requirement r_req_cha_052 : LengthAskedNotEnforced_Cha052;
     requirement r_req_cha_053 : FaithfulSummary_Cha053;
     requirement r_req_cha_054 : SummaryInPersona_Cha054;
+    requirement r_req_cha_055 : NoStatusMessageForASkillWithoutPhases_Cha055;
     requirement r_req_wfm_001 : SkillsAsTasks_Wfm001;
     requirement r_req_wfm_002 : VersionedWorkflowLibrary_Wfm002;
     requirement r_req_wfm_003 : NoCycles_Wfm003;
@@ -5114,6 +5120,7 @@ package MIA_NodeRequirements {
     satisfy r_req_cha_052 by mia.conversation;
     satisfy r_req_cha_053 by mia.conversation;
     satisfy r_req_cha_054 by mia.conversation;
+    satisfy r_req_cha_055 by mia.conversation;
     satisfy r_req_wfm_001 by mia.taskRuntime;
     satisfy r_req_wfm_002 by mia.taskRuntime;
     satisfy r_req_wfm_003 by mia.taskRuntime;
@@ -5585,6 +5592,7 @@ package MIA_NodeRequirements {
     allocate r_req_cha_052 to mia.conversation;
     allocate r_req_cha_053 to mia.conversation;
     allocate r_req_cha_054 to mia.conversation;
+    allocate r_req_cha_055 to mia.conversation;
     allocate r_req_wfm_001 to mia.taskRuntime;
     allocate r_req_wfm_002 to mia.taskRuntime;
     allocate r_req_wfm_003 to mia.taskRuntime;
@@ -6067,6 +6075,7 @@ package MIA_NodeRequirements {
     dependency from r_req_cha_052 to r_req_be_078;
     dependency from r_req_cha_053 to r_req_be_078;
     dependency from r_req_cha_054 to r_req_be_078;
+    dependency from r_req_cha_055 to r_req_be_078;
     dependency from r_req_wfm_001 to r_req_be_033;
     dependency from r_req_wfm_002 to r_req_be_035;
     dependency from r_req_wfm_003 to r_req_be_036;

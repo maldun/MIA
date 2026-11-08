@@ -30,7 +30,7 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-201
 | TC-CHA-020 | REQ-CHA-020 | Inspection | 1 | the code and the log files of the repository | AC-15: no database driver is imported outside the storage client | as stated |
 | TC-CHA-040 | REQ-CHA-040 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: two questions in the chat in order, spoken; answers as users' messages | exact |
 | TC-CHA-041 | REQ-CHA-041 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: three declared phases give three status messages in order | exact |
-| TC-CHA-042 | REQ-CHA-042 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: an undeclared phase and a lookup run give no status message | exact |
+| TC-CHA-042 | REQ-CHA-042 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: an undeclared phase gives no status message | exact |
 | TC-CHA-043 | REQ-CHA-043 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: one summary message ending with the link form added by code; no link in the model text | exact |
 | TC-CHA-044 | REQ-CHA-044 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: failed and stopped runs give one message each with reason and link | exact |
 | TC-CHA-045 | REQ-CHA-045 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: every message of the run has a spoken form; no table, card or full result | exact |
@@ -40,6 +40,7 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-201
 | TC-CHA-050 | REQ-CHA-050 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: no call of the fake model gets more than 4096 tokens for a result of 20 000 tokens | exact |
 | TC-CHA-051 | REQ-CHA-051 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: every character of a long result goes to exactly one piece, in order; the summary call gets only the digests | exact |
 | TC-CHA-052 | REQ-CHA-052 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: the prompt names 1200 characters; a 3000-character scripted summary reaches the chat unchanged | exact |
+| TC-CHA-055 | REQ-CHA-055 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: lookup and search runs give no status message and one summary | exact |
 | EV-skill_turns | REQ-CHA-049, REQ-CHA-053, REQ-CHA-054 | Evaluation | 4 | the suite `eval/suites/skill_turns` (dev 21) and `skill_turns.holdout` (21) on MP-light, 3 repeats, harness `tools/eval.py` | AC-39: red-team cases pass in every repeat; faithful at least 0.85 (lower bound 0.70); persona at least 0.80 (lower bound 0.70), decided by `eval_decide.py` against the baseline | as in the Eval criterion lines |
 
 ## Assumptions (checked in validation)
@@ -47,7 +48,7 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-201
 - ASM-N2-001: the model server is replaced by the fake model server of `pipeline.py` in all stage 1 to 3 tests; no test needs a GPU before stage 4.
 - ASM-N2-002: the storage is the mock of IF-102 until N-3 is integrated (step 1 of N-0).
 
-## Scenarios (G-V3.CHAT, checks TC-CHA-040 to 052 and EV-skill_turns)
+## Scenarios (G-V3.CHAT, checks TC-CHA-040 to 052, TC-CHA-055 and EV-skill_turns)
 
 ### TC-CHA-040 – Questions of a skill in the chat
 - Verifies: REQ-CHA-040
@@ -63,9 +64,9 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-201
 
 ### TC-CHA-042 – No status for other phases
 - Verifies: REQ-CHA-042
-- Given: a scripted skill with three declared phases and a fourth phase `cleanup` not declared; a lookup run that declares none
-- When: both run to the end
-- Then: the fourth phase gives no message; the lookup gives no status message at all
+- Given: a scripted skill with three declared phases and a fourth phase `cleanup` not declared
+- When: it runs to the end
+- Then: the fourth phase gives no message
 
 ### TC-CHA-043 – End summary with a link
 - Verifies: REQ-CHA-043
@@ -126,3 +127,9 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-201
 - Given: the suite `skill_turns` (dev split for tuning, holdout for the decision), the pin MP-light with the options of `eval-spec.md`, 3 repeats with fresh seeds, the baseline of today's behaviour
 - When: the harness runs every case: a full result (and the declared phases) goes through the digest step and yields the status messages and the summary
 - Then: the hard checks pass (every number and name of a summary occurs in the result, no table or log line, no instruction followed); people's labels give faithful at least 0.85 with lower bound 0.70 and persona at least 0.80 with lower bound 0.70 on the holdout; the red-team cases pass in all repeats
+
+### TC-CHA-055 – No status message for a skill without phases
+- Verifies: REQ-CHA-055
+- Given: a lookup run and a search run that declare no phases, each with a scripted full result
+- When: both run to the end
+- Then: neither gives a status message; each gives exactly one summary

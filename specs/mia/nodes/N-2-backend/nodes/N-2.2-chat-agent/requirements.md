@@ -273,7 +273,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 ## Groups of G-V3.CHAT
 | Order | Group | What it covers | Requirements |
 |---|---|---|---|
-| 1 | ST | Skill turns: what the chat shows of a run and what the model sees (FR-35, FR-46) | REQ-CHA-040, REQ-CHA-041, REQ-CHA-042, REQ-CHA-043, REQ-CHA-044, REQ-CHA-045, REQ-CHA-046, REQ-CHA-047 |
+| 1 | ST | Skill turns: what the chat shows of a run and what the model sees (FR-35, FR-46) | REQ-CHA-040, REQ-CHA-041, REQ-CHA-042, REQ-CHA-043, REQ-CHA-044, REQ-CHA-045, REQ-CHA-046, REQ-CHA-047, REQ-CHA-055 |
 | 2 | UT | Untrusted result (TB-result) | REQ-CHA-048, REQ-CHA-049 |
 | 3 | BG | Budgets of the digest step | REQ-CHA-050, REQ-CHA-051, REQ-CHA-052 |
 | 4 | SQ | Summary quality (eval criteria) | REQ-CHA-053, REQ-CHA-054 |
@@ -306,16 +306,16 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 
 ### REQ-CHA-042 – No status for other phases
 - Level: low   Subject: ConversationCore
-- Text: While a skill runs, the Chat agent shall add no message about a phase that the manifest does not declare worth telling, and none for a skill without declared phases.
+- Text: While a skill runs, the Chat agent shall add no message about a phase that the manifest does not declare worth telling.
 - Rationale: refines REQ-BE-078; FR-35; lookup and search have no phases (owner Q-9, 2026-11-07)
 - Parent: REQ-BE-078
 - Group: ST
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-39: a fourth, undeclared phase and a lookup run give no status message (exact)
+- Acceptance criterion: AC-39: a fourth, undeclared phase of a run gives no status message (exact)
 - Verified by: TC-CHA-042
 - Status: Draft
-- History: A-131 (proposed 2026-11-08, G-V3.CHAT), new; owner 2026-11-08
+- History: A-131 (proposed 2026-11-08, G-V3.CHAT), new; owner 2026-11-08; split at the owner's one-by-one review of 2026-11-08: the case of a skill without phases is REQ-CHA-055
 
 ### REQ-CHA-043 – End summary with a link
 - Level: low   Subject: ConversationCore
@@ -475,3 +475,16 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verified by: EV-skill_turns
 - Status: Draft
 - History: A-131 (proposed 2026-11-08, G-V3.CHAT), new; owner 2026-11-08
+
+### REQ-CHA-055 – No status message for a skill without phases
+- Level: low   Subject: ConversationCore
+- Text: While a skill without declared phases runs, the Chat agent shall add no status message.
+- Rationale: refines REQ-BE-078; lookup and search have no phases (owner Q-9, 2026-11-07); split from REQ-CHA-042 at the owner's one-by-one review of 2026-11-08
+- Parent: REQ-BE-078
+- Group: ST
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: a lookup run and a search run give no status message and one summary (exact)
+- Verified by: TC-CHA-055
+- Status: Draft
+- History: A-131 (proposed 2026-11-08, G-V3.CHAT), new; owner 2026-11-08, split from REQ-CHA-042
