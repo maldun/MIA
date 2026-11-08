@@ -74,7 +74,7 @@ Top-level items it serves: FR-34, FR-46 (the view). Requirements by ID (inside G
 |---|---|---|
 | Explore | done | HLS of iteration 2 approved 2026-11-05 (D-186); wording A-131 |
 | Plan | in progress | started 2026-11-08: Step 1b (requirements, A-131, A-140, A-141) and Step 3 (test-spec rows, scenarios, TR-PANEL-001 to 007, VAL-012, plausibility proposal) drafted and reviewed (D-302); plausibility recorded, contract change IF-101 v16, IF-302 v8, IF-102 v4 done (A-140, A-141); Step 4 (red tests) and Step 5 (plan.md) open |
-| Implement | open | |
+| Implement | in progress | started 2026-11-08: T-01 done (`39bf66b`), the log is `implementation-log.md` |
 | Verify | open | |
 | Commit | open | |
 | Deploy | open | |

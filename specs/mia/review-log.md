@@ -702,3 +702,4 @@ The first version was silent until the end and could take 20 minutes or more: th
 | TR-CHAT-009 | test requirement | e5f7baa84e86 | maldun | 2026-11-08 | approved | AC-39 end-to-end check of G-V3, reviewed one by one 2026-11-08 |
 | TC-CHA-068 | check | 95aee435cc88 | maldun | 2026-11-08 | approved | renamed from TC-MIA-030 (content unchanged), confirmed by the owner 2026-11-08 |
 | TR-CHAT-009 | test requirement | c94b179b78df | maldun | 2026-11-08 | approved | renamed from TC-MIA-030 (content unchanged), confirmed by the owner 2026-11-08 |
+| REQ-RTB-001 | requirement | eca9b984ca9a | maldun | 2026-11-08 | approved | REQ-RTB-001 names 15 tables (A-141 applied in Implement G-V3.PANEL T-01), owner's ruling 2026-11-08 |
