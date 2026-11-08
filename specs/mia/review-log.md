@@ -559,3 +559,9 @@ The first version was silent until the end and could take 20 minutes or more: th
 | REQ-CLV-024 | requirement | 18129a0dea65 | maldun | 2026-11-08 | approved | G-V3.PANEL batch 5 |
 | REQ-WFM-038 | requirement | c5676a017adf | maldun | 2026-11-08 | approved | G-V3.PANEL batch 6; REQ-CHA-008 and REQ-CHA-014 are reviewed with G-V3.CHAT |
 | REQ-WFM-039 | requirement | e80cbdfeca5c | maldun | 2026-11-08 | approved | G-V3.PANEL batch 6; REQ-CHA-008 and REQ-CHA-014 are reviewed with G-V3.CHAT |
+| TC-CLV-030 | check | ec31f7e1e37d | maldun | 2026-11-08 | approved | G-V3.PANEL checks set 1; TC-CLV-032 changed to browser stage 2 |
+| TC-CLV-031 | check | ca807c3009ae | maldun | 2026-11-08 | approved | G-V3.PANEL checks set 1; TC-CLV-032 changed to browser stage 2 |
+| TC-CLV-032 | check | c29ddd13fc67 | maldun | 2026-11-08 | approved | G-V3.PANEL checks set 1; TC-CLV-032 changed to browser stage 2 |
+| TC-CLV-033 | check | 1967e422783c | maldun | 2026-11-08 | approved | G-V3.PANEL checks set 1; TC-CLV-032 changed to browser stage 2 |
+| TC-CLV-034 | check | bd9a93ae9e35 | maldun | 2026-11-08 | approved | G-V3.PANEL checks set 1; TC-CLV-032 changed to browser stage 2 |
+| TC-CLV-035 | check | 925f81a8f39d | maldun | 2026-11-08 | approved | G-V3.PANEL checks set 1; TC-CLV-032 changed to browser stage 2 |
