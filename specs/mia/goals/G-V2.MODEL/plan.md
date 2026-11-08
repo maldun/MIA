@@ -2,7 +2,7 @@
 
 **Goal:** specs/mia/goals/G-V2.MODEL/goal.md   **Requirements:** REQ-WFM-040..049 in `nodes/N-2-backend/nodes/N-2.3-workflow-management/requirements.md`, REQ-RUN-016..019 in `nodes/N-2-backend/nodes/N-2.4-workflow-execution/nodes/N-2.4.1-pipeline-runner/requirements.md`   **Test specs:** the `test-spec.md` next to each, scenarios at the end; test requirements TR-MODEL-001..005 in `specs/mia/test-requirements.md`   **Status:** Approved by the owner, 2026-11-07 (Plan Step 5)
 
-Line of work `goal/v2.model`; supervised. Five small tasks, pure logic: no model step, no prompt, no eval suite, no eval budget. The red tests are written first in a session of their own (Step 4) and installed by the owner; the implementing session never edits `tests/acceptance/`, `tests/helpers/`, `tests/smoke/`, `contracts/`, `benchmarks/`, `eval/suites/` or `eval/baselines/`.
+Line of work `goal/v2.model`; supervised. Six small tasks, pure logic: no model step, no prompt, no eval suite, no eval budget. The red tests are written first in a session of their own (Step 4) and installed by the owner; the implementing session never edits `tests/acceptance/`, `tests/helpers/`, `tests/smoke/`, `contracts/`, `benchmarks/`, `eval/suites/` or `eval/baselines/`.
 
 ## Interface fixed by the red tests
 The stubs `graph_model.py`, `skill_record.py` and `graph_run.py` in the repository root carry the interface the installed tests expect; T-01 to T-04 replace the stubs with the real code and keep these signatures: `GraphModel(tables).save_graph(graph)`, `read_graph(graph_id, version=None)`, `topological_order(graph_id)`; `SkillRecords(tables).store(record)`, `read(skill_id, version=None)`; `SkillCatalog(records, legacy).list()`, `start(skill_id)`; `GraphRunner(trust).run(graph, nodes, inputs)`. The result shapes are in the stub docstrings. A change of a signature is a plan amendment, not a code change.
@@ -14,7 +14,8 @@ The stubs `graph_model.py`, `skill_record.py` and `graph_run.py` in the reposito
 | T-02 Skill record | REQ-WFM-040, 041, 042 | TC-WFM-040..042 | red tests installed |
 | T-03 Run in topological order, master node like a transform, failed node stops | REQ-RUN-016, 018, 019 | TC-RUN-016, 018, 019 | T-01 |
 | T-04 Untrusted node refuses the run | REQ-RUN-017 | TC-RUN-017 | T-03 |
-| T-05 Replace the fake storage by the contract-checked one | REQ-WFM-040 (TR-MODEL-001) | TC-WFM-040, 041, 042, 044, 049 against the IF-301 v2 contract suite, no skip | T-02; G-V2.STORE merged |
+| T-05 Skill records on the real Storage layer (adapter test) | REQ-WFM-040 (TR-MODEL-001) | the five scenarios of TC-WFM-040, 041, 042, 044, 049 give the same answers on the fake and on the real Storage layer, in `tests/test_skill_record_storage.py` | T-02; G-V2.STORE merged |
+| T-06 Skill listing and start take the record | REQ-WFM-041 | new tests (marked TC-WFM-041) for `library.py` and `extension_loader.py`, written first | T-05 |
 
 ## Tasks
 
@@ -54,20 +55,29 @@ The stubs `graph_model.py`, `skill_record.py` and `graph_run.py` in the reposito
 - Done when: TC-RUN-017 is green, all other tests unchanged
 - Notes: the status of a node comes in through a small lookup the test supplies (stand-in for IF-203 v1 of TOOLBOX); the refusal happens before any node runs, so the marker file never appears. No new tool, no permission change.
 
-### T-05: Replace the fake storage by the contract-checked one
-- Implements: REQ-WFM-040 (TR-MODEL-001)
-- Tests to turn green: TC-WFM-040, TC-WFM-041, TC-WFM-042, TC-WFM-044, TC-WFM-049 run against the IF-301 v2 contract suite of STORE, with no skip
-- Touches: the wiring in `skill_record.py` to the real graph tables
-- Must not touch: protected material, STORE's files
+### T-05: Skill records on the real Storage layer (adapter test)
+- Implements: REQ-WFM-040 (TR-MODEL-001 as reworded by A-105)
+- Tests to turn green: a new file `tests/test_skill_record_storage.py` (outside the protected folders) that runs the scenarios of TC-WFM-040, TC-WFM-041, TC-WFM-042, TC-WFM-044 and TC-WFM-049 on the real `Storage` of STORE (file backend; PostgreSQL where the test environment offers it) and on the fake, and compares the answers; the five protected tests in `tests/acceptance/test_graph_model.py` stay green on the fake
+- Touches: `skill_record.py` (wiring to `Storage`: the list of skill IDs comes from `Storage.ids("skills")` instead of the `skill_index` record, the `author` of `put` is given by the caller), the new test file
+- Must not touch: protected material (`tests/acceptance/`, `tests/helpers/`, `contracts/`), STORE's files (`storage.py`, `graph_tables.py`, `storage_copy.py`)
 - Depends on: T-02; G-V2.STORE merged
-- Done when: the minimal fake passes the IF-301 v2 contract suite, or the difference is reported as a finding; the listed tests are green against the real tables
-- Notes: if the fake fails the suite, stop and report (TR-MODEL-001: a finding for these checks).
+- Done when: the adapter test is green on the file backend (and on PostgreSQL where available, no skip there), the fake and the real Storage layer give the same answers for the five scenarios, or each difference is reported as a finding for these checks
+- Notes: T-05 stopped on 2026-11-08 because the fake cannot pass the contract suite of IF-301 v2 (key-value store against record checks); A-105 is the answer. A skill record that the real record checks refuse is a finding for the skill record (REQ-WFM-040), not a reason to change STORE.
+
+### T-06: Skill listing and start take the record
+- Implements: REQ-WFM-041
+- Tests to turn green: new tests marked TC-WFM-041 for the real skill listing and start, written first
+- Touches: `library.py`, `extension_loader.py` (a skill with a record takes its command and its graph IDs from the record; the old forms stay for a skill without a record), their tests
+- Must not touch: protected material, STORE's files
+- Depends on: T-05
+- Done when: the listing and the start of a skill with a record use the record, and a skill without a record behaves as before (the existing tests of both modules stay green)
+- Notes: left out of T-02 on purpose (no test needed it); owner decision 2026-11-08: own task after T-05.
 
 ## Order and checks
-T-01 and T-02 are independent; T-03 needs T-01; T-04 needs T-03; T-05 waits for STORE. After each task: `python tests/test_<name>.py` for its tests, then the stage 1 and 2 steps of `stages.yaml`.
+T-01 and T-02 are independent; T-03 needs T-01; T-04 needs T-03; T-05 waits for STORE; T-06 needs T-05. After each task: `python tests/test_<name>.py` for its tests, then the stage 1 and 2 steps of `stages.yaml`.
 
 ## Size check (splitting)
-14 requirements, five tasks of one session each, no task across two nodes except T-02 (N-2.3 only) and T-03/T-04 (N-2.4.1 only). No split is suggested; the goal record's "keep together" stands.
+14 requirements, six tasks of one session each, no task across two nodes except T-02 (N-2.3 only), T-05 and T-06 (N-2.3 only) and T-03/T-04 (N-2.4.1 only). No split is suggested; the goal record's "keep together" stands.
 
 ## Decided by the owner (2026-11-07)
 1. Module names `graph_model.py`, `skill_record.py`, `graph_run.py` are fine; the only existing code that changes is the skill listing in T-02 (`library.py`, `extension_loader.py`).
