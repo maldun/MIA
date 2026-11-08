@@ -70,7 +70,7 @@ Top-level items it serves: FR-34, FR-46 (the view). Requirements by ID (inside G
 | Phase | State | Record or reason |
 |---|---|---|
 | Explore | done | HLS of iteration 2 approved 2026-11-05 (D-186); wording A-131 |
-| Plan | open | |
+| Plan | in progress | started 2026-11-08: Step 1b (requirements, A-131, A-140, A-141) and Step 3 (test-spec rows, scenarios, TR-PANEL-001 to 007, VAL-012, plausibility proposal) drafted; Step 4 (red tests) and Step 5 (plan.md) open |
 | Implement | open | |
 | Verify | open | |
 | Commit | open | |

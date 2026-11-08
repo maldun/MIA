@@ -1,0 +1,146 @@
+# Proposal for the plausibility record of G-V3.PANEL (Plan step 3, 2026-11-08). NOT a rating: a person decides (decision, basis; for questionable also probe or accepted_risk).
+# Kept apart from specs/mia/plausibility-proposal.yaml so that the G-V2 sessions and this one touch different files; merge with tools/apply_plausibility.py after the owner has rated.
+proposal:
+  REQ-FE-032:
+    text: 'The Web Frontend shall show the status, phases, budgets, controls, answers, full result and files of a skill run in the Skill run view, apart from the chat.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on a scripted run, no model (proposal of the agent, 2026-11-08, G-V3.PANEL)"
+
+  REQ-CLV-030:
+    text: 'The Chat and login views shall show in the header line of the Skill run view the skill name, the start time and the state of the run.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on a scripted run, no model (proposal of the agent, 2026-11-08, G-V3.PANEL)"
+
+  REQ-CLV-031:
+    text: 'The Chat and login views shall show the declared phases of a run as pills in the Skill run view and mark the current phase and the phase of a failure or stop.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on a scripted run, no model (proposal of the agent, 2026-11-08, G-V3.PANEL)"
+
+  REQ-CLV-032:
+    text: 'The Chat and login views shall show every budget that the run reports as used and limit and every count that it reports in the Skill run view, updated in place '
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on a scripted run, no model (proposal of the agent, 2026-11-08, G-V3.PANEL)"
+
+  REQ-CLV-033:
+    text: 'When the user presses pause, resume or stop in the Skill run view, the Chat and login views shall send that request once to IF-101 and show the state the backen'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on a scripted run, no model (proposal of the agent, 2026-11-08, G-V3.PANEL)"
+
+  REQ-CLV-034:
+    text: 'The Chat and login views shall show in the Skill run view the run that the backend names as shown (REQ-WFM-134).'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on a scripted run, no model (proposal of the agent, 2026-11-08, G-V3.PANEL)"
+
+  REQ-CLV-035:
+    text: 'When a run fails or is stopped, the Chat and login views shall show its reason in one line in the strip of the Skill run view.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on a scripted run, no model (proposal of the agent, 2026-11-08, G-V3.PANEL)"
+
+  REQ-CLV-037:
+    text: 'When the user follows a chat link to the Skill run view, the Chat and login views shall open the Full run part of the linked run and bring the view into sight.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on a scripted run, no model (proposal of the agent, 2026-11-08, G-V3.PANEL)"
+
+  REQ-CLV-038:
+    text: 'When the page loads, the Chat and login views shall show in the Skill run view the run that the backend names as shown, with its final figures if it has ended.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on a scripted run, no model (proposal of the agent, 2026-11-08, G-V3.PANEL)"
+
+  REQ-CLV-039:
+    text: 'While the backend names no run, the Chat and login views shall show in the Skill run view the text that no skill has run yet and no control.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on a scripted run, no model (proposal of the agent, 2026-11-08, G-V3.PANEL)"
+
+  REQ-CLV-040:
+    text: 'Where the window is wider than 820 px, the Chat and login views shall place the character box left, the chat right and the Skill run view as a strip below both,'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on a scripted run, no model (proposal of the agent, 2026-11-08, G-V3.PANEL); the layout is the one of the owner's mockup, which was checked by screenshots in headless Chromium at 1440 and 600 px (hand-over of 2026-11-08)"
+
+  REQ-CLV-043:
+    text: 'The Chat and login views shall show every text of a run (result, material found, answers, reason) as plain text that starts no action and loads nothing.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on a scripted run, no model (proposal of the agent, 2026-11-08, G-V3.PANEL)"
+
+  REQ-CLV-036:
+    text: 'The Chat and login views shall keep the Full run part of the Skill run view collapsed until opened, at most 34 % of the viewport high, scrolling inside.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on a scripted run, no model (proposal of the agent, 2026-11-08, G-V3.PANEL); the limit of 34 % of the viewport is the max-height of the mockup's Full run part, which scrolls inside itself (mockup CSS `max-height:34vh`)"
+
+  REQ-CLV-041:
+    text: 'The Chat and login views shall keep the strip of the Skill run view, with the Full run part closed, at most 150 px high at a width of 1440 px.'
+    proposed: questionable
+    basis: "150 px is the mockup's strip of about 140 px (hand-over of 2026-11-08, read from the mockup in headless Chromium, no real page yet) plus 10 px of room; the real page, with its fonts and the header buttons, may need more"
+    category: field
+    attention: ['numeric bound in the criterion', 'decided by a measurement']
+    probe: {what: 'the browser check TC-CLV-041 on the first real strip with three phases at 1440 x 900 px, and the owner in VAL-012', who: 'G-V3.PANEL Implement, then the owner', when: 'first task that draws the strip'}
+
+  REQ-CLV-042:
+    text: 'Where the window is at most 820 px wide, the Chat and login views shall stack the character box, the chat and the Skill run view in this order, every control at'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on a scripted run, no model (proposal of the agent, 2026-11-08, G-V3.PANEL); 44 px targets are the bound of NFR-1 already met by the chat page"
+
+  REQ-WFM-130:
+    text: 'The Workflow management shall store one record per skill run, lookup and search included, in the table skill_runs through IF-102 with skill id, version, account'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on a scripted run, no model (proposal of the agent, 2026-11-08, G-V3.PANEL); depends on the table skill_runs of A-141, still a proposal"
+
+  REQ-WFM-131:
+    text: 'The Workflow management shall store the final figures of a run and, for a run that failed or was stopped, its reason in the run record when the run ends.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on a scripted run, no model (proposal of the agent, 2026-11-08, G-V3.PANEL); depends on the table skill_runs of A-141, still a proposal"
+
+  REQ-WFM-132:
+    text: 'The Workflow management shall store the full result, the material found on the way and the names of the files in the run record when the run ends.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on a scripted run, no model (proposal of the agent, 2026-11-08, G-V3.PANEL); depends on the table skill_runs of A-141, still a proposal"
+
+  REQ-WFM-133:
+    text: 'When a user answers a question of a running skill, the Workflow management shall append the answer with its time to the run record in the order given.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on a scripted run, no model (proposal of the agent, 2026-11-08, G-V3.PANEL); depends on the table skill_runs of A-141, still a proposal"
+
+  REQ-WFM-134:
+    text: 'The Workflow management shall name as shown the run started most recently while skills run and the run ended last when none runs, and no earlier run.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on a scripted run, no model (proposal of the agent, 2026-11-08, G-V3.PANEL)"
+
+  REQ-WFM-135:
+    text: 'When the chat history is deleted, the Workflow management shall delete the run records of the account and keep the files of the files volume.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on a scripted run, no model (proposal of the agent, 2026-11-08, G-V3.PANEL); depends on the table skill_runs of A-141, still a proposal"
+
+  REQ-WFM-136:
+    text: 'The Workflow management shall create the run record and send task_status for every skill from the events the skill sends today, without a change of the skill.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on a scripted run, no model (proposal of the agent, 2026-11-08, G-V3.PANEL)"
+
+  REQ-WFM-137:
+    text: 'The Workflow management shall store the texts of a run (result, material, answers, reason) unchanged as text and never execute or interpret them.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on a scripted run, no model (proposal of the agent, 2026-11-08, G-V3.PANEL)"
+
+  REQ-WFM-031:
+    text: 'The Workflow management shall let every task report its state while it runs, the phase, budget figures (used and limit) for time, tokens, model calls, API reque'
+    proposed: plausible
+    basis: "reworded for A-131; the earlier rating stays and applies to the new wording unless the owner objects (proposal of the agent, 2026-11-08)"
+
+  REQ-WFM-036:
+    text: 'The Workflow management shall, when a task has ended, publish one summary of its result of at most 1200 characters as a new message at the end of the chat with '
+    proposed: plausible
+    basis: "reworded for A-131; the earlier rating stays and applies to the new wording unless the owner objects (proposal of the agent, 2026-11-08); the 1200 characters of REQ-WFM-036 are the bound of FR-35"
+
+  REQ-WFM-038:
+    text: 'The Workflow management shall store the finished report of the example workflow review as a record in the database through the storage interface IF-102 with the'
+    proposed: plausible
+    basis: "reworded for A-131; the earlier rating stays and applies to the new wording unless the owner objects (proposal of the agent, 2026-11-08)"
+
+  REQ-WFM-039:
+    text: 'The Workflow management shall load each skill that runs as a task from a folder of its own (a manifest with the id, the text, the options, the phases worth tell'
+    proposed: plausible
+    basis: "reworded for A-131; the earlier rating stays and applies to the new wording unless the owner objects (proposal of the agent, 2026-11-08)"
+
+  REQ-CLV-024:
+    text: 'The Chat and login views shall list the files of the run shown in the Full run part of the Skill run view with name, size, time and task, offer each as a downlo'
+    proposed: plausible
+    basis: "reworded for A-131; the earlier rating stays and applies to the new wording unless the owner objects (proposal of the agent, 2026-11-08)"
+
