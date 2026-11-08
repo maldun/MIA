@@ -391,4 +391,5 @@ Proposed on 2026-10-29 after the usability work of N-2.3 T-09 to T-11 and N-1.1 
 - Trigger: the Plan of the next iteration, or 2026-12-31, whichever first
 - Target check: `tests/test_tailscale.py::ScriptTest::test_without_tailscale_it_says_how_to_install` (exists, red on a host with Tailscale)
 - Decision: D-289, 2026-11-08, Stefan Reiterer
+- Sign-off: maldun, 2026-11-08
 - Status: open
