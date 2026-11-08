@@ -2257,7 +2257,77 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-CLV-024'> FilesList_Clv024 {
         subject s : WebFrontEnd;
-        doc /* The Chat and login views shall list the files of the files volume in the workspace with name, size, time and task, offer each as a download, show a new file without a reload from the event files_changed, and offer no way to delete a file. */
+        doc /* The Chat and login views shall list the files of the run shown in the Full run part of the Skill run view with name, size, time and task, offer each as a download, show a new file without a reload from the event files_changed, and offer no way to delete a file. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CLV-030'> RunHeader_Clv030 {
+        subject s : WebFrontEnd;
+        doc /* The Chat and login views shall show in the header line of the Skill run view the skill name, the start time and the state of the run. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CLV-031'> PhasesOfARun_Clv031 {
+        subject s : WebFrontEnd;
+        doc /* The Chat and login views shall show the declared phases of a run as pills in the Skill run view and mark the current phase and the phase of a failure or stop. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CLV-032'> BudgetsAndCountsOfARun_Clv032 {
+        subject s : WebFrontEnd;
+        doc /* The Chat and login views shall show every budget that the run reports as used and limit and every count that it reports in the Skill run view, updated in place from the event task_status. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CLV-033'> ControlsOfARun_Clv033 {
+        subject s : WebFrontEnd;
+        doc /* When the user presses pause, resume or stop in the Skill run view, the Chat and login views shall send that request once to IF-101 and show the state the backend reports. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CLV-034'> RunThatIsShown_Clv034 {
+        subject s : WebFrontEnd;
+        doc /* The Chat and login views shall show in the Skill run view the run that the backend names as shown (REQ-WFM-134). */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CLV-035'> ReasonOfAFailedOrStoppedRun_Clv035 {
+        subject s : WebFrontEnd;
+        doc /* When a run fails or is stopped, the Chat and login views shall show its reason in one line in the strip of the Skill run view. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CLV-036'> FullRunPart_Clv036 {
+        subject s : WebFrontEnd;
+        doc /* The Chat and login views shall keep the Full run part of the Skill run view collapsed until opened, at most 34 % of the viewport high, scrolling inside. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CLV-037'> LinkFromTheChat_Clv037 {
+        subject s : WebFrontEnd;
+        doc /* When the user follows a chat link to the Skill run view, the Chat and login views shall open the Full run part of the linked run and bring the view into sight. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CLV-038'> RunAfterAReload_Clv038 {
+        subject s : WebFrontEnd;
+        doc /* When the page loads, the Chat and login views shall show in the Skill run view the run that the backend names as shown, with its final figures if it has ended. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CLV-039'> ViewWithoutARun_Clv039 {
+        subject s : WebFrontEnd;
+        doc /* While the backend names no run, the Chat and login views shall show in the Skill run view the text that no skill has run yet and no control. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CLV-040'> LayoutOnAWideScreen_Clv040 {
+        subject s : WebFrontEnd;
+        doc /* Where the window is wider than 820 px, the Chat and login views shall place the character box left, the chat right and the Skill run view as a strip below both, without overlap. */
+        @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
+    }
+    requirement def <'REQ-CLV-041'> HeightOfTheStrip_Clv041 {
+        subject s : WebFrontEnd;
+        doc /* The Chat and login views shall keep the strip of the Skill run view, with the Full run part closed, at most 150 px high at a width of 1440 px. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CLV-042'> LayoutOnAPhone_Clv042 {
+        subject s : WebFrontEnd;
+        doc /* Where the window is at most 820 px wide, the Chat and login views shall stack the character box, the chat and the Skill run view in this order, every control at least 44 px. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CLV-043'> TextsOfARunAreText_Clv043 {
+        subject s : WebFrontEnd;
+        doc /* The Chat and login views shall show every text of a run (result, material found, answers, reason) as plain text that starts no action and loads nothing. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-CHV-001'> ChatWithoutTheCharacter_Chv001 {
@@ -2509,6 +2579,11 @@ package MIA_NodeRequirements {
         subject s : WebFrontEnd;
         doc /* The Web Frontend shall let a signed-in user log out. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-FE-032'> SkillRunView_Fe032 {
+        subject s : WebFrontEnd;
+        doc /* The Web Frontend shall show the status, phases, budgets, controls, answers, full result and files of a skill run in the Skill run view, apart from the chat. */
+        @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
     }
     requirement def <'REQ-API-001'> ChatEventsAndStreaming_Api001 {
         subject s : WebApplication;
@@ -2847,7 +2922,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-WFM-031'> TaskMonitor_Wfm031 {
         subject s : TaskRuntime;
-        doc /* The Workflow management shall let every task report its state while it runs, the phase, budget figures (used and limit) for time, tokens, model calls, API requests and the budgets of its own, and counts of its own, and shall show them on one status card per task that is updated in place at most twice per second and stays with the final figures after the task has ended. */
+        doc /* The Workflow management shall let every task report its state while it runs, the phase, budget figures (used and limit) for time, tokens, model calls, API requests and the budgets of its own, and counts of its own, and shall send them to the Skill run view in the event task_status at most twice per second, and once more with the final figures when the task has ended. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-WFM-032'> FiguresOfTheReview_Wfm032 {
@@ -2870,9 +2945,9 @@ package MIA_NodeRequirements {
         doc /* The Workflow management shall keep for each model whether it is local or paid, ask the user once whether a model is paid when the model has not been used before and is not clearly local, never ask again for a model that is known, change the class only on the user's command `/model paid <name>` or `/model local <name>`, and give a warning at the start of a task with a paid model and use the mode slice by default for it. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
-    requirement def <'REQ-WFM-036'> ResultAtTheEndOfTheChat_Wfm036 {
+    requirement def <'REQ-WFM-036'> SummaryAtTheEndOfTheChat_Wfm036 {
         subject s : TaskRuntime;
-        doc /* The Workflow management shall, for a task that asks questions while it runs, publish the result as a new message at the end of the chat when it is ready, show the progress only on the status card, and, when the task fails, publish a result that says what failed instead of an empty message. */
+        doc /* The Workflow management shall, when a task has ended, publish one summary of its result of at most 1200 characters as a new message at the end of the chat with a link to the run in the Skill run view, and, when the task fails, a message that says what failed with the same link. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-WFM-037'> FilesInAVolume_Wfm037 {
@@ -2882,12 +2957,12 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-WFM-038'> ReportAsARecord_Wfm038 {
         subject s : TaskRuntime;
-        doc /* The Workflow management shall store the finished report of the example workflow review as a record in the database through the storage interface IF-102 with the question, the skill id and version, the account, the model pin and the structured report (flow figures, works with decisions, grades and notes, keywords, limits and the end reason), and shall render the files of the report (markdown and LaTeX, English headings) from this record. */
+        doc /* The Workflow management shall store the finished report of the example workflow review as a record in the database through the storage interface IF-102 with the question, the skill id and version, the account, the model pin and the structured report (flow figures, works with decisions, grades and notes, keywords, limits and the end reason), and shall render the files of the report (markdown and LaTeX, English headings) from this record and name them in the run record of REQ-WFM-130. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-WFM-039'> SkillsAreSelfContainedExtensions_Wfm039 {
         subject s : TaskRuntime;
-        doc /* The Workflow management shall load each skill that runs as a task from a folder of its own (a manifest with the id, the text, the options and what the task needs from the core, the skill files and the code of the skill), so that a new skill needs no change of the chat service, the web application or the page, except a skill that adds an output view of its own, which belongs to the core. */
+        doc /* The Workflow management shall load each skill that runs as a task from a folder of its own (a manifest with the id, the text, the options, the phases worth telling and what the task needs from the core, the skill files and the code of the skill), so that a new skill needs no change of the chat service, the web application or the page, except a skill that adds an output view of its own, which belongs to the core. */
         @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::inspection); }
     }
     requirement def <'REQ-WFM-040'> SkillRecord_Wfm040 {
@@ -3043,6 +3118,46 @@ package MIA_NodeRequirements {
     requirement def <'REQ-WFM-070'> ARetiredItemIsNotOffered_Wfm070 {
         subject s : TaskRuntime;
         doc /* While a transform or a skill is retired, the Workflow management shall not offer it for a new graph or a new run. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-130'> RunRecordOfEverySkillRun_Wfm130 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall store one record per skill run, lookup and search included, in the table skill_runs through IF-102 with skill id, version, account, start, end, state and phases. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-131'> FiguresAndReasonInTheRunRecord_Wfm131 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall store the final figures of a run and, for a run that failed or was stopped, its reason in the run record when the run ends. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-132'> ResultAndMaterialInTheRunRecord_Wfm132 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall store the full result, the material found on the way and the names of the files in the run record when the run ends. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-133'> AnswersInTheRunRecord_Wfm133 {
+        subject s : TaskRuntime;
+        doc /* When a user answers a question of a running skill, the Workflow management shall append the answer with its time to the run record in the order given. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-134'> RunThatIsShown_Wfm134 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall name as shown the run started most recently while skills run and the run ended last when none runs, and no earlier run. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-135'> ChatHistoryDeleted_Wfm135 {
+        subject s : TaskRuntime;
+        doc /* When the chat history is deleted, the Workflow management shall delete the run records of the account and keep the files of the files volume. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-136'> RunsWithoutKnowledgeOfTheView_Wfm136 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall create the run record and send task_status for every skill from the events the skill sends today, without a change of the skill. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-137'> TextsOfARunAreStoredAsData_Wfm137 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall store the texts of a run (result, material, answers, reason) unchanged as text and never execute or interpret them. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-RUN-001'> InternetTasksOnlyOnCommand_Run001 {
@@ -4295,6 +4410,20 @@ package MIA_NodeRequirements {
     requirement r_req_clv_022 : Logout_Clv022;
     requirement r_req_clv_023 : StatusCardOfATask_Clv023;
     requirement r_req_clv_024 : FilesList_Clv024;
+    requirement r_req_clv_030 : RunHeader_Clv030;
+    requirement r_req_clv_031 : PhasesOfARun_Clv031;
+    requirement r_req_clv_032 : BudgetsAndCountsOfARun_Clv032;
+    requirement r_req_clv_033 : ControlsOfARun_Clv033;
+    requirement r_req_clv_034 : RunThatIsShown_Clv034;
+    requirement r_req_clv_035 : ReasonOfAFailedOrStoppedRun_Clv035;
+    requirement r_req_clv_036 : FullRunPart_Clv036;
+    requirement r_req_clv_037 : LinkFromTheChat_Clv037;
+    requirement r_req_clv_038 : RunAfterAReload_Clv038;
+    requirement r_req_clv_039 : ViewWithoutARun_Clv039;
+    requirement r_req_clv_040 : LayoutOnAWideScreen_Clv040;
+    requirement r_req_clv_041 : HeightOfTheStrip_Clv041;
+    requirement r_req_clv_042 : LayoutOnAPhone_Clv042;
+    requirement r_req_clv_043 : TextsOfARunAreText_Clv043;
     requirement r_req_chv_001 : ChatWithoutTheCharacter_Chv001;
     requirement r_req_chv_002 : OneExpressionAPI_Chv002;
     requirement r_req_chv_003 : LivingCharacter_Chv003;
@@ -4345,6 +4474,7 @@ package MIA_NodeRequirements {
     requirement r_req_fe_029 : PlainStack_Fe029;
     requirement r_req_fe_030 : DeliveredByTheBackend_Fe030;
     requirement r_req_fe_031 : Logout_Fe031;
+    requirement r_req_fe_032 : SkillRunView_Fe032;
     requirement r_req_api_001 : ChatEventsAndStreaming_Api001;
     requirement r_req_api_002 : ChangesReachAllDevices_Api002;
     requirement r_req_api_003 : LoginAndSession_Api003;
@@ -4417,7 +4547,7 @@ package MIA_NodeRequirements {
     requirement r_req_wfm_033 : PauseAndResume_Wfm033;
     requirement r_req_wfm_034 : RunModeHardCapsAndSlicing_Wfm034;
     requirement r_req_wfm_035 : ClassOfTheModel_Wfm035;
-    requirement r_req_wfm_036 : ResultAtTheEndOfTheChat_Wfm036;
+    requirement r_req_wfm_036 : SummaryAtTheEndOfTheChat_Wfm036;
     requirement r_req_wfm_037 : FilesInAVolume_Wfm037;
     requirement r_req_wfm_038 : ReportAsARecord_Wfm038;
     requirement r_req_wfm_039 : SkillsAreSelfContainedExtensions_Wfm039;
@@ -4452,6 +4582,14 @@ package MIA_NodeRequirements {
     requirement r_req_wfm_068 : ARetiredItemStaysUsableAsBaseline_Wfm068;
     requirement r_req_wfm_069 : SettingsOfTheEquivalenceCheckAreConfiguration_Wfm069;
     requirement r_req_wfm_070 : ARetiredItemIsNotOffered_Wfm070;
+    requirement r_req_wfm_130 : RunRecordOfEverySkillRun_Wfm130;
+    requirement r_req_wfm_131 : FiguresAndReasonInTheRunRecord_Wfm131;
+    requirement r_req_wfm_132 : ResultAndMaterialInTheRunRecord_Wfm132;
+    requirement r_req_wfm_133 : AnswersInTheRunRecord_Wfm133;
+    requirement r_req_wfm_134 : RunThatIsShown_Wfm134;
+    requirement r_req_wfm_135 : ChatHistoryDeleted_Wfm135;
+    requirement r_req_wfm_136 : RunsWithoutKnowledgeOfTheView_Wfm136;
+    requirement r_req_wfm_137 : TextsOfARunAreStoredAsData_Wfm137;
     requirement r_req_run_001 : InternetTasksOnlyOnCommand_Run001;
     requirement r_req_run_002 : SwitchTheModel_Run002;
     requirement r_req_run_003 : ModelServerUnreachable_Run003;
@@ -4722,6 +4860,20 @@ package MIA_NodeRequirements {
     satisfy r_req_clv_022 by mia.frontEnd;
     satisfy r_req_clv_023 by mia.frontEnd;
     satisfy r_req_clv_024 by mia.frontEnd;
+    satisfy r_req_clv_030 by mia.frontEnd;
+    satisfy r_req_clv_031 by mia.frontEnd;
+    satisfy r_req_clv_032 by mia.frontEnd;
+    satisfy r_req_clv_033 by mia.frontEnd;
+    satisfy r_req_clv_034 by mia.frontEnd;
+    satisfy r_req_clv_035 by mia.frontEnd;
+    satisfy r_req_clv_036 by mia.frontEnd;
+    satisfy r_req_clv_037 by mia.frontEnd;
+    satisfy r_req_clv_038 by mia.frontEnd;
+    satisfy r_req_clv_039 by mia.frontEnd;
+    satisfy r_req_clv_040 by mia.frontEnd;
+    satisfy r_req_clv_041 by mia.frontEnd;
+    satisfy r_req_clv_042 by mia.frontEnd;
+    satisfy r_req_clv_043 by mia.frontEnd;
     satisfy r_req_chv_001 by mia.frontEnd;
     satisfy r_req_chv_002 by mia.frontEnd;
     satisfy r_req_chv_003 by mia.frontEnd;
@@ -4772,6 +4924,7 @@ package MIA_NodeRequirements {
     satisfy r_req_fe_029 by mia.frontEnd;
     satisfy r_req_fe_030 by mia.frontEnd;
     satisfy r_req_fe_031 by mia.frontEnd;
+    satisfy r_req_fe_032 by mia.frontEnd;
     satisfy r_req_api_001 by mia.webApp;
     satisfy r_req_api_002 by mia.webApp;
     satisfy r_req_api_003 by mia.webApp;
@@ -4879,6 +5032,14 @@ package MIA_NodeRequirements {
     satisfy r_req_wfm_068 by mia.taskRuntime;
     satisfy r_req_wfm_069 by mia.taskRuntime;
     satisfy r_req_wfm_070 by mia.taskRuntime;
+    satisfy r_req_wfm_130 by mia.taskRuntime;
+    satisfy r_req_wfm_131 by mia.taskRuntime;
+    satisfy r_req_wfm_132 by mia.taskRuntime;
+    satisfy r_req_wfm_133 by mia.taskRuntime;
+    satisfy r_req_wfm_134 by mia.taskRuntime;
+    satisfy r_req_wfm_135 by mia.taskRuntime;
+    satisfy r_req_wfm_136 by mia.taskRuntime;
+    satisfy r_req_wfm_137 by mia.taskRuntime;
     satisfy r_req_run_001 by mia.taskRuntime;
     satisfy r_req_run_002 by mia.taskRuntime;
     satisfy r_req_run_003 by mia.taskRuntime;
@@ -5148,6 +5309,20 @@ package MIA_NodeRequirements {
     allocate r_req_clv_022 to mia.frontEnd;
     allocate r_req_clv_023 to mia.frontEnd;
     allocate r_req_clv_024 to mia.frontEnd;
+    allocate r_req_clv_030 to mia.frontEnd;
+    allocate r_req_clv_031 to mia.frontEnd;
+    allocate r_req_clv_032 to mia.frontEnd;
+    allocate r_req_clv_033 to mia.frontEnd;
+    allocate r_req_clv_034 to mia.frontEnd;
+    allocate r_req_clv_035 to mia.frontEnd;
+    allocate r_req_clv_036 to mia.frontEnd;
+    allocate r_req_clv_037 to mia.frontEnd;
+    allocate r_req_clv_038 to mia.frontEnd;
+    allocate r_req_clv_039 to mia.frontEnd;
+    allocate r_req_clv_040 to mia.frontEnd;
+    allocate r_req_clv_041 to mia.frontEnd;
+    allocate r_req_clv_042 to mia.frontEnd;
+    allocate r_req_clv_043 to mia.frontEnd;
     allocate r_req_chv_001 to mia.frontEnd;
     allocate r_req_chv_002 to mia.frontEnd;
     allocate r_req_chv_003 to mia.frontEnd;
@@ -5198,6 +5373,7 @@ package MIA_NodeRequirements {
     allocate r_req_fe_029 to mia.frontEnd;
     allocate r_req_fe_030 to mia.frontEnd;
     allocate r_req_fe_031 to mia.frontEnd;
+    allocate r_req_fe_032 to mia.frontEnd;
     allocate r_req_api_001 to mia.webApp;
     allocate r_req_api_002 to mia.webApp;
     allocate r_req_api_003 to mia.webApp;
@@ -5305,6 +5481,14 @@ package MIA_NodeRequirements {
     allocate r_req_wfm_068 to mia.taskRuntime;
     allocate r_req_wfm_069 to mia.taskRuntime;
     allocate r_req_wfm_070 to mia.taskRuntime;
+    allocate r_req_wfm_130 to mia.taskRuntime;
+    allocate r_req_wfm_131 to mia.taskRuntime;
+    allocate r_req_wfm_132 to mia.taskRuntime;
+    allocate r_req_wfm_133 to mia.taskRuntime;
+    allocate r_req_wfm_134 to mia.taskRuntime;
+    allocate r_req_wfm_135 to mia.taskRuntime;
+    allocate r_req_wfm_136 to mia.taskRuntime;
+    allocate r_req_wfm_137 to mia.taskRuntime;
     allocate r_req_run_001 to mia.taskRuntime;
     allocate r_req_run_002 to mia.taskRuntime;
     allocate r_req_run_003 to mia.taskRuntime;
@@ -5576,6 +5760,20 @@ package MIA_NodeRequirements {
     dependency from r_req_clv_022 to r_req_fe_031;
     dependency from r_req_clv_023 to r_req_fe_014;
     dependency from r_req_clv_024 to r_req_fe_018;
+    dependency from r_req_clv_030 to r_req_fe_032;
+    dependency from r_req_clv_031 to r_req_fe_032;
+    dependency from r_req_clv_032 to r_req_fe_032;
+    dependency from r_req_clv_033 to r_req_fe_032;
+    dependency from r_req_clv_034 to r_req_fe_032;
+    dependency from r_req_clv_035 to r_req_fe_032;
+    dependency from r_req_clv_036 to r_req_fe_032;
+    dependency from r_req_clv_037 to r_req_fe_032;
+    dependency from r_req_clv_038 to r_req_fe_032;
+    dependency from r_req_clv_039 to r_req_fe_032;
+    dependency from r_req_clv_040 to r_req_fe_032;
+    dependency from r_req_clv_041 to r_req_fe_032;
+    dependency from r_req_clv_042 to r_req_fe_032;
+    dependency from r_req_clv_043 to r_req_fe_032;
     dependency from r_req_chv_001 to r_req_fe_006;
     dependency from r_req_chv_002 to r_req_fe_008;
     dependency from r_req_chv_003 to r_req_fe_009;
@@ -5635,6 +5833,7 @@ package MIA_NodeRequirements {
     dependency from r_req_fe_029 to nfr1;
     dependency from r_req_fe_030 to nfr9;
     dependency from r_req_fe_031 to fr21;
+    dependency from r_req_fe_032 to fr46;
     dependency from r_req_api_001 to r_req_be_001;
     dependency from r_req_api_002 to r_req_be_007;
     dependency from r_req_api_003 to r_req_be_008;
@@ -5742,6 +5941,14 @@ package MIA_NodeRequirements {
     dependency from r_req_wfm_068 to fr45;
     dependency from r_req_wfm_069 to fr45;
     dependency from r_req_wfm_070 to fr45;
+    dependency from r_req_wfm_130 to r_req_be_033;
+    dependency from r_req_wfm_131 to r_req_be_033;
+    dependency from r_req_wfm_132 to r_req_be_033;
+    dependency from r_req_wfm_133 to r_req_be_033;
+    dependency from r_req_wfm_134 to r_req_be_033;
+    dependency from r_req_wfm_135 to r_req_be_033;
+    dependency from r_req_wfm_136 to r_req_be_033;
+    dependency from r_req_wfm_137 to r_req_be_033;
     dependency from r_req_run_001 to r_req_wfx_002;
     dependency from r_req_run_002 to r_req_wfx_003;
     dependency from r_req_run_003 to r_req_wfx_004;

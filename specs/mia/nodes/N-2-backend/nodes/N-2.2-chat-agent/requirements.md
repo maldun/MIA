@@ -105,6 +105,7 @@ The persona's side: the shared conversation, the answer queue, persona, mood, me
 - Relaxed: TD-10
 - Target: AC-8 is decided: the check dialogues pass at the rate fixed in Plan against the recorded baseline
 - History: A-69 (2026-11-01): Relaxed TD-10 (D-173)
+- Proposed (A-131, G-V3.CHAT, 2026-11-08): the approved text above stays in force until A-131 is approved; the text would then read: The Chat agent shall behave as the shared persona file specifies, with its names, pronouns and form of address, and address every user as master unless the file says otherwise, also in the status summaries and the end summary of a skill run. The criterion of the summaries on the real pinned model is a new requirement of G-V3.CHAT (Plan Step 1b, CHAT), not this one.
 
 ### REQ-CHA-009 – Mood at all times
 - Level: low   Subject: ConversationCore
@@ -177,6 +178,7 @@ The persona's side: the shared conversation, the answer queue, persona, mood, me
 - Verified by: TC-CHA-014
 - Status: Verified
 - History: –
+- Proposed (A-131, G-V3.CHAT, 2026-11-08): the approved text above stays in force until A-131 is approved; the text would then read: If a defined behaviour rule is violated, then the Chat agent shall repair the answer silently, record the violation as a signal and keep the correction out of the conversation memory, also in the status summaries and the end summary of a skill run. The criterion of the summaries on the real pinned model is a new requirement of G-V3.CHAT (Plan Step 1b, CHAT), not this one.
 
 ### REQ-CHA-015 – Votes stored
 - Level: low   Subject: ConversationCore
