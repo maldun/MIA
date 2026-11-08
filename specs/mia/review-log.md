@@ -547,3 +547,7 @@ The first version was silent until the end and could take 20 minutes or more: th
 | REQ-CLV-039 | requirement | 4c0201fe4c0a | maldun | 2026-11-08 | approved | G-V3.PANEL batch 3; 44 px targets on the phone only, the strip buttons keep the mockup size on a wide screen (owner 2026-11-08) |
 | REQ-CLV-040 | requirement | f322f5c0e15a | maldun | 2026-11-08 | approved | G-V3.PANEL batch 3; 44 px targets on the phone only, the strip buttons keep the mockup size on a wide screen (owner 2026-11-08) |
 | REQ-CLV-041 | requirement | 6672979938c2 | maldun | 2026-11-08 | approved | G-V3.PANEL batch 3; 44 px targets on the phone only, the strip buttons keep the mockup size on a wide screen (owner 2026-11-08) |
+| REQ-CLV-042 | requirement | 907fa3bee10a | maldun | 2026-11-08 | approved | G-V3.PANEL batch 4 |
+| REQ-CLV-043 | requirement | 7686f35ef96b | maldun | 2026-11-08 | approved | G-V3.PANEL batch 4 |
+| REQ-CLV-044 | requirement | 2fdbc52df74e | maldun | 2026-11-08 | approved | G-V3.PANEL batch 4 |
+| REQ-FE-032 | requirement | 27e1542388a3 | maldun | 2026-11-08 | approved | G-V3.PANEL batch 4 |
