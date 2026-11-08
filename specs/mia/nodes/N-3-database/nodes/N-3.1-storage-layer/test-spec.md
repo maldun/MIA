@@ -21,6 +21,7 @@ Tests of this part alone against the mocks of its neighbours: the file backend r
 | TC-SLY-011 | REQ-SLY-011 | System | 3 | the container started alone with the configuration file, then by the compose stack with the same file | healthy in both cases; the same tables exist | exact |
 | TC-SLY-012 | REQ-SLY-013 | Component | 1 | a document nested 200, 201, 600 and 990 levels, for `graph_nodes` and for another table | the 200-level one is stored as version 1; the others are refused as invalid and nothing is stored | exact |
 | TC-SLY-013 | REQ-SLY-014 | Component | 1 | a list that contains itself, a dict that contains itself twice, as the value of a graph node and as a document of another table | each is refused as invalid within one second and nothing is stored | exact, 1 s |
+| TC-SLY-014 | REQ-SLY-015 | Component | 1 | a list of 99,999 and one of 100,000 numbers as a document of another table (100,000 and 100,001 values), the same as the value of a graph node; a document that names the same child twice on 30 levels | the 100,000-value document is stored; the others are refused as invalid and nothing is stored, the last within one second | exact, 1 s |
 
 Contract test cases of IF-102: TC-IF-102-01 to the last of the suite (listed in the root `test-spec.md`).
 
@@ -105,6 +106,13 @@ Contract test cases of IF-102: TC-IF-102-01 to the last of the suite (listed in 
 - When: each is put, with a time limit of one second
 - Then: each is refused as invalid within the limit
 - And: nothing is stored; the same on the file backend and on PostgreSQL
+
+### TC-SLY-014 – size of a document
+- Verifies: REQ-SLY-015
+- Given: a list of 99,999 numbers (100,000 values with the list) and one of 100,000 numbers as a document of a table that is not a graph table, a data node whose value is a list of 99,995 and one of 99,996 numbers as records of a graph table, and a document that names the same child twice on 30 levels
+- When: each is put, with a time limit of one second
+- Then: the documents with 100,000 values are stored as version 1; the ones with 100,001 values are refused as invalid
+- And: the 2**30-path document is refused within the limit; the refusals store nothing; graph tables name `schema_break` and `data`, other tables `schema` and `too large`; the same on the file backend and on PostgreSQL
 
 ## Assumptions (checked in validation)
 

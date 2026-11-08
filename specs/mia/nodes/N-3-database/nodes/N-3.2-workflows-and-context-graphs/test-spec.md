@@ -35,6 +35,7 @@ Tests of this part alone against the mocks of its neighbours: unit tests with pl
 | TC-GTB-026 | REQ-GTB-025 | Unit | 1 | a context edge to a stored context node, to one that is not stored, and to the ID of a stored workflow node | the first is accepted; the others are refused naming the end | exact |
 | TC-GTB-027 | REQ-GTB-026 | Unit | 1 | a header of kind context naming a stored and a missing context node; a workflow header naming a context node | the first is accepted; the others are refused as unknown_member naming the member | exact |
 | TC-GTB-028 | REQ-GTB-027 | Unit | 1 | a data node nested 300 and 150 levels deep; a category whose schema is not valid | the deep one is refused naming `data`, the other accepted; the category is refused naming `type`; no exception | exact |
+| TC-GTB-029 | REQ-GTB-028 | Unit | 1 | a data node whose value is a list of 99,995 and one of 99,996 numbers; a record that names the same child twice on 30 levels | the first is stored; the others are refused naming `data`, the last within 5 s | exact |
 | TC-GTB-015 | REQ-GTB-015 | Component | 2 | the contract suites of IF-301 v1 and IF-203 v0, run unchanged, with the graphs stored as records | both suites pass | exact |
 
 Contract test cases of IF-301: TC-IF-301-01 to the last of the suite (listed in the root `test-spec.md`).
@@ -194,6 +195,13 @@ Examples use only what the requirements fix. The registered types are those the 
 - When: each is checked, and the deep node is also rebuilt with `to_object`
 - Then: the 300-level node is refused as `schema_break` naming `data`, in the check and in the rebuild, without an exception; the category is refused as `schema_break` naming `type`
 - And: the 150-level node is accepted
+
+### TC-GTB-029 – A record with too many values is refused
+- Verifies: REQ-GTB-028
+- Given: a data node whose value is a list of 99,995 numbers (100,000 values with the record, its id, its data object, its type and the list), one with 99,996 numbers, and a record that names the same child twice on 30 levels (2**30 paths, 31 levels deep)
+- When: each is written, with a time limit of 5 s
+- Then: the first is stored as version 1; the second is refused as `schema_break` naming `data`
+- And: the third is refused the same way within the limit; the refusals store nothing
 
 ### TC-GTB-015 – The document form still works
 - Verifies: REQ-GTB-015

@@ -79,7 +79,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 | Order | Group | What it covers | Requirements |
 |---|---|---|---|
 | 1 | NR | Node and edge records: graphs as records (FR-40) | REQ-GTB-005, REQ-GTB-006, REQ-GTB-007, REQ-GTB-008 |
-| 2 | TY | Types: rebuilding data classes from type IDs, schemas (FR-40) | REQ-GTB-009, REQ-GTB-010, REQ-GTB-011, REQ-GTB-012, REQ-GTB-022, REQ-GTB-027 |
+| 2 | TY | Types: rebuilding data classes from type IDs, schemas (FR-40) | REQ-GTB-009, REQ-GTB-010, REQ-GTB-011, REQ-GTB-012, REQ-GTB-022, REQ-GTB-027, REQ-GTB-028 |
 | 3 | VR | Versions and round trip: edits as versions, stored equals rebuilt (FR-40) | REQ-GTB-013, REQ-GTB-014, REQ-GTB-016 |
 | 4 | CP | Compatibility: the document form during the transition (FR-40) | REQ-GTB-015 |
 | 5 | HD | Graph header and skill record: which members make a graph version, the skill table (FR-40, FR-36) | REQ-GTB-017, REQ-GTB-018, REQ-GTB-019, REQ-GTB-020, REQ-GTB-021 |
@@ -383,3 +383,16 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verified by: TC-GTB-028
 - Status: Draft
 - History: G-V2.STORE Verify F-02/F-09, 2026-11-08, new (A-98, proposed)
+
+### REQ-GTB-028 – Size of a record
+- Level: low   Subject: Persistence
+- Text: If a record has more than 100,000 values, counting a value once for every path that reaches it, then the Graph tables shall refuse it as `schema_break` naming `data`.
+- Rationale: refines FR-40 and REQ-GTB-027; a record that shares sub-objects can have an exponential number of paths and made the check run for minutes (F-22 of the Verify of G-V2.STORE, A-102); 100,000 is about 190 times the largest stored document in the repository (529 values)
+- Parent: FR-40
+- Group: TY
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-31: a data node whose value is a list of 99,995 numbers (100,000 values with the record, its id, its data object, its type and the list) is accepted, one of 99,996 is refused naming `data`; a record that names the same child twice on 30 levels (2**30 paths) is refused naming `data` within 5 s; nothing raises (exact)
+- Verified by: TC-GTB-029
+- Status: Draft
+- History: G-V2.STORE Verify F-22, 2026-11-08, new (A-102, proposed)

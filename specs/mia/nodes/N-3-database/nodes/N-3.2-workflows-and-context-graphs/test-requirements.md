@@ -12,7 +12,7 @@ Requirements on the checks TC-GTB-006 to TC-GTB-016. The older checks TC-GTB-001
 | 5 | Compatibility | the old suites stay the old suites | TR-GTB-006 |
 
 ### TR-GTB-001 – Exact values written by hand
-- Applies to: TC-GTB-016, TC-GTB-006, TC-GTB-007, TC-GTB-008, TC-GTB-009, TC-GTB-010, TC-GTB-011, TC-GTB-013, TC-GTB-017, TC-GTB-018, TC-GTB-019, TC-GTB-020, TC-GTB-021, TC-GTB-022, TC-GTB-023, TC-GTB-024, TC-GTB-025, TC-GTB-026, TC-GTB-027, TC-GTB-028
+- Applies to: TC-GTB-016, TC-GTB-006, TC-GTB-007, TC-GTB-008, TC-GTB-009, TC-GTB-010, TC-GTB-011, TC-GTB-013, TC-GTB-017, TC-GTB-018, TC-GTB-019, TC-GTB-020, TC-GTB-021, TC-GTB-022, TC-GTB-023, TC-GTB-024, TC-GTB-025, TC-GTB-026, TC-GTB-027, TC-GTB-028, TC-GTB-029
 - Requirement: REQ-GTB-005
 - Group: Round trip
 - Kind: unit

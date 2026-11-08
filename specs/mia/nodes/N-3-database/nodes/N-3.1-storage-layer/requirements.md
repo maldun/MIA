@@ -173,3 +173,15 @@ The PostgreSQL database and the one door to it (IF-102): immutable versions, acc
 - Verified by: TC-SLY-013
 - Status: Draft
 - History: G-V2.STORE Verify F-19, 2026-11-08, new (A-100, proposed)
+
+### REQ-SLY-015 – Size of a document
+- Level: low   Subject: Persistence
+- Text: If a document that is put has more than 100,000 values, counting a value once for every path that reaches it, then the Storage layer shall refuse it as invalid.
+- Rationale: refines REQ-SLY-004 and REQ-GTB-028; a document that shares sub-objects can have an exponential number of paths and the backend would have to serialise all of them (F-22 of the Verify of G-V2.STORE, A-102); 100,000 is about 190 times the largest stored document in the repository (529 values)
+- Parent: REQ-SLY-004
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-16: a document with 100,000 values is stored, one with 100,001 is refused as StorageError `invalid` and nothing is stored, for a graph table (rule `schema_break`, detail `data`) and for another table (rule `schema`, detail `too large`); a document that names the same child twice on 30 levels is refused within one second, on the file backend and on PostgreSQL (exact, time limit 1 s)
+- Verified by: TC-SLY-014
+- Status: Draft
+- History: G-V2.STORE Verify F-22, 2026-11-08, new (A-102, proposed)

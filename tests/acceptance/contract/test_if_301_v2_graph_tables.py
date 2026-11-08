@@ -5,6 +5,7 @@ Protected after the Plan gate. Run with: python tests/acceptance/contract/test_i
 import copy
 import os
 import sys
+import threading
 import time
 import unittest
 
@@ -133,6 +134,32 @@ class GraphTablesV2Contract(unittest.TestCase):
         self.assertEqual(tables.check_record("graphs", header("context", "c9"), stored=stored), {"rule": "unknown_member", "detail": "c9"})
         self.assertEqual(tables.check_record("graphs", header("workflow", "c1"), stored=stored), {"rule": "unknown_member", "detail": "c1"})
         self.assertIsNone(tables.check_record("graphs", header("context", "c1"), stored=stored))
+
+    @mark.req("IF-301", "REQ-GTB-028")
+    @each_provider(IF, make=subject)
+    def test_a_record_with_too_many_values_is_a_schema_break(self, tables):
+        """TC-IF-301-24 golden 21: a record with more than 100 000 values (every path counted) is schema_break naming data, also a record that shares sub-objects (2**30 paths), at once.
+
+        Example: a data node whose value is a list of 99 996 numbers -> {"rule": "schema_break", "detail": "data"}; 99 995 numbers -> None.
+        """
+        # Given: data nodes whose value is a list of 99 995 and of 99 996 numbers (the record, its id, its data object, its type and the list add 5 values: 100 000 and 100 001),
+        # and a record that names the same child twice on 30 levels (31 levels deep, 2**30 paths)
+        shared = 1
+        for _ in range(30):
+            shared = [shared, shared]
+        answers = {}
+
+        def check(name, record):
+            """The answer of check_record, or a text when it did not finish in 5 s (a daemon thread, so a hang fails this test and does not stall the suite)."""
+            thread = threading.Thread(target=lambda: answers.__setitem__(name, tables.check_record("graph_nodes", record)), daemon=True)
+            thread.start()
+            thread.join(5)
+            return answers.get(name, "no answer within 5 s")
+        # When/Then: the record at the limit is accepted, the one over it is refused naming data
+        self.assertIsNone(check("at", node("d1", "data", value=[1] * 99995)))
+        self.assertEqual(check("over", node("d1", "data", value=[1] * 99996)), {"rule": "schema_break", "detail": "data"})
+        # And: the record with 2**30 paths is refused the same way within the time limit
+        self.assertEqual(check("shared", node("d1", "data", value=shared)), {"rule": "schema_break", "detail": "data"})
 
     @mark.req("IF-301", "REQ-GTB-027")
     @each_provider(IF, make=subject)

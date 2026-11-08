@@ -30,6 +30,7 @@ except ImportError:  # plain import (single test run as a script)
 V1_TABLES = {"workflows": {"versioned": True, "deletable": False}, "context_graphs": {"versioned": True, "deletable": False}}
 NEW_TABLES = ("graph_nodes", "graph_edges", "graphs", "skills", "context_nodes", "context_edges")
 MAX_DEPTH = 200      # a record nested deeper than this is schema_break `data` (REQ-GTB-027)
+MAX_VALUES = 100000  # a record with more values (every path counted) is schema_break `data` (REQ-GTB-028)
 
 _STOP = {"type": "object",
          "properties": {"max_repetitions": {"type": "integer", "minimum": 1}, "max_seconds": {"type": "number", "exclusiveMinimum": 0}},
@@ -124,11 +125,13 @@ def _dup(members):
 
 
 def _too_deep(value):
-    """True when the value is nested deeper than MAX_DEPTH levels (the record is level 1); iterative, so the check itself cannot hit the recursion limit."""
-    stack = [(value, 1)]
+    """True when the value is nested deeper than MAX_DEPTH levels (the record is level 1) or has more than MAX_VALUES values (a value reached by two paths counts twice);
+    iterative, so the check itself cannot hit the recursion limit, and it stops at MAX_VALUES + 1 values, so a record that shares sub-objects cannot make it exponential."""
+    stack, seen = [(value, 1)], 0
     while stack:
         item, depth = stack.pop()
-        if depth > MAX_DEPTH:
+        seen += 1
+        if depth > MAX_DEPTH or seen > MAX_VALUES:
             return True
         children = item.values() if isinstance(item, dict) else item if isinstance(item, list) else ()
         stack.extend((child, depth + 1) for child in children)

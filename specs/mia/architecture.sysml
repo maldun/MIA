@@ -3800,6 +3800,11 @@ package MIA_NodeRequirements {
         doc /* If a document that is put contains itself, then the Storage layer shall refuse it as invalid within one second. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
+    requirement def <'REQ-SLY-015'> SizeOfADocument_Sly015 {
+        subject s : Persistence;
+        doc /* If a document that is put has more than 100,000 values, counting a value once for every path that reaches it, then the Storage layer shall refuse it as invalid. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
     requirement def <'REQ-GTB-001'> SharedStateHeld_Gtb001 {
         subject s : Persistence;
         doc /* The Graph tables shall define the tables of workflows (library entries) and context graphs. */
@@ -3933,6 +3938,11 @@ package MIA_NodeRequirements {
     requirement def <'REQ-GTB-027'> InputThatCannotBeChecked_Gtb027 {
         subject s : Persistence;
         doc /* If a record is nested deeper than 200 levels or its category schema is not valid, then the Graph tables shall refuse it as `schema_break` naming the field. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-028'> SizeOfARecord_Gtb028 {
+        subject s : Persistence;
+        doc /* If a record has more than 100,000 values, counting a value once for every path that reaches it, then the Graph tables shall refuse it as `schema_break` naming `data`. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-RTB-001'> SharedStateHeld_Rtb001 {
@@ -4648,6 +4658,7 @@ package MIA_NodeRequirements {
     requirement r_req_sly_012 : RealiseIF102_Sly012;
     requirement r_req_sly_013 : DepthOfADocument_Sly013;
     requirement r_req_sly_014 : ADocumentThatContainsItself_Sly014;
+    requirement r_req_sly_015 : SizeOfADocument_Sly015;
     requirement r_req_gtb_001 : SharedStateHeld_Gtb001;
     requirement r_req_gtb_002 : SchemaValidationOnWrite_Gtb002;
     requirement r_req_gtb_003 : ContextGraphsStored_Gtb003;
@@ -4675,6 +4686,7 @@ package MIA_NodeRequirements {
     requirement r_req_gtb_025 : ContextEdgeEnds_Gtb025;
     requirement r_req_gtb_026 : ContextHeaderMembers_Gtb026;
     requirement r_req_gtb_027 : InputThatCannotBeChecked_Gtb027;
+    requirement r_req_gtb_028 : SizeOfARecord_Gtb028;
     requirement r_req_rtb_001 : SharedStateHeld_Rtb001;
     requirement r_req_rtb_002 : RunResults_Rtb002;
     requirement r_req_rtb_003 : VotesStored_Rtb003;
@@ -5084,6 +5096,7 @@ package MIA_NodeRequirements {
     satisfy r_req_sly_012 by mia.persistence;
     satisfy r_req_sly_013 by mia.persistence;
     satisfy r_req_sly_014 by mia.persistence;
+    satisfy r_req_sly_015 by mia.persistence;
     satisfy r_req_gtb_001 by mia.persistence;
     satisfy r_req_gtb_002 by mia.persistence;
     satisfy r_req_gtb_003 by mia.persistence;
@@ -5111,6 +5124,7 @@ package MIA_NodeRequirements {
     satisfy r_req_gtb_025 by mia.persistence;
     satisfy r_req_gtb_026 by mia.persistence;
     satisfy r_req_gtb_027 by mia.persistence;
+    satisfy r_req_gtb_028 by mia.persistence;
     satisfy r_req_rtb_001 by mia.persistence;
     satisfy r_req_rtb_002 by mia.persistence;
     satisfy r_req_rtb_003 by mia.persistence;
@@ -5519,6 +5533,7 @@ package MIA_NodeRequirements {
     allocate r_req_sly_012 to mia.persistence;
     allocate r_req_sly_013 to mia.persistence;
     allocate r_req_sly_014 to mia.persistence;
+    allocate r_req_sly_015 to mia.persistence;
     allocate r_req_gtb_001 to mia.persistence;
     allocate r_req_gtb_002 to mia.persistence;
     allocate r_req_gtb_003 to mia.persistence;
@@ -5546,6 +5561,7 @@ package MIA_NodeRequirements {
     allocate r_req_gtb_025 to mia.persistence;
     allocate r_req_gtb_026 to mia.persistence;
     allocate r_req_gtb_027 to mia.persistence;
+    allocate r_req_gtb_028 to mia.persistence;
     allocate r_req_rtb_001 to mia.persistence;
     allocate r_req_rtb_002 to mia.persistence;
     allocate r_req_rtb_003 to mia.persistence;
@@ -5986,6 +6002,7 @@ package MIA_NodeRequirements {
     dependency from r_req_sly_012 to if102;
     dependency from r_req_sly_013 to r_req_sly_004;
     dependency from r_req_sly_014 to r_req_sly_004;
+    dependency from r_req_sly_015 to r_req_sly_004;
     dependency from r_req_gtb_001 to r_req_db_002;
     dependency from r_req_gtb_002 to r_req_db_004;
     dependency from r_req_gtb_003 to r_req_db_011;
@@ -6013,6 +6030,7 @@ package MIA_NodeRequirements {
     dependency from r_req_gtb_025 to fr40;
     dependency from r_req_gtb_026 to fr40;
     dependency from r_req_gtb_027 to fr40;
+    dependency from r_req_gtb_028 to fr40;
     dependency from r_req_rtb_001 to r_req_db_002;
     dependency from r_req_rtb_002 to r_req_db_010;
     dependency from r_req_rtb_003 to r_req_db_012;
