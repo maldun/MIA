@@ -128,8 +128,11 @@ class ChatService:
     def __init__(self, emit, log, mood, run_exchange, run_command=None, model_info=None, queue_size=1, user_limit=0,
                  rate_limit=(10, 60), spawn=None, clock=time.monotonic, votes=None, wall_clock=time.time,
                  behaviours=None, reputable=0.6, repair=None, remember=None, review_timeout=1800,
-                 tasks=None, skill_options=None, prepare_task=None, argument_commands=None, files=None, unavailable=(), react=None, speak=None):
+                 tasks=None, skill_options=None, prepare_task=None, argument_commands=None, files=None, unavailable=(), react=None, speak=None,
+                 digest=None, declared_phases=None):
         self._emit = emit
+        self._digest = digest                                              # G-V3.CHAT (A-142): the SkillDigestStep that words the status, summary, failure and stop messages of a skill run
+        self._declared_phases = declared_phases                            # run -> the phases the manifest of its skill declares worth telling (REQ-WFM-039)
         self._speak = speak                                                # (sentence, should_stop) -> None: the voice route of live answers (sound server); None = speak again stays silent (REQ-CHA-030)
         self._speak_lock = threading.Lock()                                # one spoken-again playback at a time (REQ-CHA-034)
         self._speak_pending = 0                                            # spoken-again playbacks that run or wait
@@ -607,6 +610,14 @@ class ChatService:
         record = self.log.append("system", text, markdown=False, **fields)
         self._emit("chat_message", record)
         return record
+
+    def skill_turn(self, account, run, kind, payload):
+        """STUB of Plan Step 4 (IF-201 v3, A-142): one turn of a skill run as a message of MIA; written in Implement"""
+        raise NotImplementedError("REQ-CHA-040 to 047, 055 to 060, 063")
+
+    def model_history(self):
+        """STUB of Plan Step 4 (REQ-CHA-046, 059): the messages the next chat turn sends to the chat model; written in Implement"""
+        raise NotImplementedError("REQ-CHA-046, 059")
 
     def post_assistant(self, text, emotion=None, auto=False):
         """a finished message of MIA that was not an answer to the page (the hourly time check, ...)"""
