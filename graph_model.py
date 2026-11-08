@@ -87,6 +87,22 @@ def check_graph(graph):
     return _find_cycle(list(nodes), edges) or []
 
 
+def order_of(graph):
+    """The node IDs of a graph dict in an order in which every edge points forward (also used by the run, N-2.4.1)."""
+    waiting = {n["id"]: 0 for n in graph["nodes"]}
+    following = {i: [] for i in waiting}
+    for e in graph["edges"]:
+        waiting[e["to"]] += 1
+        following[e["from"]].append(e["to"])
+    order = [i for i, w in waiting.items() if w == 0]
+    for node in order:      # the list grows while it is walked
+        for nxt in following[node]:
+            waiting[nxt] -= 1
+            if waiting[nxt] == 0:
+                order.append(nxt)
+    return order
+
+
 class GraphModel:
     def __init__(self, tables):
         self.tables = tables
@@ -101,16 +117,4 @@ class GraphModel:
         return self.tables.get(TABLE, graph_id, version)
 
     def topological_order(self, graph_id):
-        graph = self.read_graph(graph_id)
-        waiting = {n["id"]: 0 for n in graph["nodes"]}
-        following = {i: [] for i in waiting}
-        for e in graph["edges"]:
-            waiting[e["to"]] += 1
-            following[e["from"]].append(e["to"])
-        order = [i for i, w in waiting.items() if w == 0]
-        for node in order:      # the list grows while it is walked
-            for nxt in following[node]:
-                waiting[nxt] -= 1
-                if waiting[nxt] == 0:
-                    order.append(nxt)
-        return order
+        return order_of(self.read_graph(graph_id))
