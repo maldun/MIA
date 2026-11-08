@@ -700,3 +700,5 @@ The first version was silent until the end and could take 20 minutes or more: th
 | TC-CHA-067 | check | 769ed6845d4e | maldun | 2026-11-08 | approved | G-V3 Plan step 4 items, reviewed one by one 2026-11-08 (TR-PANEL-001 with the harness versions) |
 | TC-MIA-030 | check | 6b833a5f0163 | maldun | 2026-11-08 | approved | AC-39 end-to-end check of G-V3, reviewed one by one 2026-11-08 |
 | TR-CHAT-009 | test requirement | e5f7baa84e86 | maldun | 2026-11-08 | approved | AC-39 end-to-end check of G-V3, reviewed one by one 2026-11-08 |
+| TC-CHA-068 | check | 95aee435cc88 | maldun | 2026-11-08 | approved | renamed from TC-MIA-030 (content unchanged), confirmed by the owner 2026-11-08 |
+| TR-CHAT-009 | test requirement | c94b179b78df | maldun | 2026-11-08 | approved | renamed from TC-MIA-030 (content unchanged), confirmed by the owner 2026-11-08 |

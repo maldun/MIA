@@ -1,5 +1,5 @@
 """
-Integration check of a skill run in the backend (G-V3, AC-39 backend part): TC-MIA-030 (FR-34, FR-35, FR-46; REQ-BE-078, REQ-WFM-130, 136, REQ-CHA-041, 042, 043, 046, 058) with the real
+Integration check of a skill run in the backend (G-V3, AC-39 backend part): TC-CHA-068 (FR-34, FR-35, FR-46; REQ-BE-078, REQ-WFM-130, 136, REQ-CHA-041, 042, 043, 046, 058) with the real
 ChatService, the real SkillRunRecorder and SkillRunObserver, the SkillDigestStep on the fake model of TR-CHAT-006 and the fake storage of TR-PANEL-003 (TR-CHAT-009): no model server, no browser.
 Run with: python tests/integration/G-V3/test_run_end_to_end.py
 """
@@ -40,7 +40,7 @@ def scripted(argument, on_delta, on_emotion, should_stop, monitor):
 class RunEndToEnd(unittest.TestCase):
     @mark.req("REQ-BE-078", "REQ-WFM-130", "REQ-WFM-136", "REQ-CHA-041", "REQ-CHA-042", "REQ-CHA-043", "REQ-CHA-046", "REQ-CHA-058")
     def test_the_chat_holds_the_status_messages_and_one_summary_and_the_record_the_full_result(self):
-        """TC-MIA-030: the chat holds one status message per declared phase and one summary with the link of the run and nothing else of the run; the run record holds the full result; the history for the chat model ends with the last status and the summary.
+        """TC-CHA-068: the chat holds one status message per declared phase and one summary with the link of the run and nothing else of the run; the run record holds the full result; the history for the chat model ends with the last status and the summary.
         Example: phases collect, rank, report give "Collecting.", "Ranking.", "Writing it up.", then "Found 130 findings." and the link; the table is not in the chat."""
         # Given: the chat service with the recorder, the digest step on the fake model and a recording speech route; a scripted task with three declared phases and a long result
         folder = tempfile.mkdtemp()
