@@ -2728,7 +2728,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-CHA-008'> PersonaFromTheFile_Cha008 {
         subject s : ConversationCore;
-        doc /* The Chat agent shall behave as the shared persona file specifies, with its names, pronouns and form of address, and address every user as master unless the file says otherwise. */
+        doc /* The Chat agent shall behave as the shared persona file specifies, with its names, pronouns and form of address, and address every user as master unless the file says otherwise, also in the status summaries and the end summary of a skill run. */
         @Trace { :>> verifiedBy = (HowVerified::measurement); }
     }
     requirement def <'REQ-CHA-009'> MoodAtAllTimes_Cha009 {
@@ -2758,7 +2758,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-CHA-014'> SilentRepairOfBehaviourViolations_Cha014 {
         subject s : ConversationCore;
-        doc /* If a defined behaviour rule is violated, then the Chat agent shall repair the answer silently, record the violation as a signal and keep the correction out of the conversation memory. */
+        doc /* If a defined behaviour rule is violated, then the Chat agent shall repair the answer silently, record the violation as a signal and keep the correction out of the conversation memory, also in the status summaries and the end summary of a skill run. */
         @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::measurement); }
     }
     requirement def <'REQ-CHA-015'> VotesStored_Cha015 {

@@ -1,6 +1,8 @@
 # A-142: IF-201 v3, skill turns in the chat and in the history (proposal, owner G-V3.CHAT)
 
-Status: **proposed** (Draft, Plan step 1b of G-V3.CHAT, 2026-11-08). `contracts/IF-201-chat-turn.md` (v2), its mock and its contract suite are not changed; they change together after approval (suite red first). Part of A-131 (approved, D-302). G-V3.PANEL provides IF-101 v16 (A-140); CHAT uses a mock of it.
+Status: **approved** (2026-11-08, maldun, D-303). `contracts/IF-201-chat-turn.md`, its mock and its contract suite are changed in a separate step (suite red first), together with the contracts of A-140 and A-141.
+
+Earlier status line (kept for the record): Status: **proposed** (Draft, Plan step 1b of G-V3.CHAT, 2026-11-08). `contracts/IF-201-chat-turn.md` (v2), its mock and its contract suite are not changed; they change together after approval (suite red first). Part of A-131 (approved, D-302). G-V3.PANEL provides IF-101 v16 (A-140); CHAT uses a mock of it.
 
 ## Changes (v3)
 | Item | Change |

@@ -94,7 +94,7 @@ The persona's side: the shared conversation, the answer queue, persona, mood, me
 
 ### REQ-CHA-008 – Persona from the file
 - Level: low   Subject: ConversationCore
-- Text: The Chat agent shall behave as the shared persona file specifies, with its names, pronouns and form of address, and address every user as master unless the file says otherwise.
+- Text: The Chat agent shall behave as the shared persona file specifies, with its names, pronouns and form of address, and address every user as master unless the file says otherwise, also in the status summaries and the end summary of a skill run.
 - Rationale: refines REQ-BE-021
 - Parent: REQ-BE-021
 - Priority: Should
@@ -104,8 +104,7 @@ The persona's side: the shared conversation, the answer queue, persona, mood, me
 - Status: Approved
 - Relaxed: TD-10
 - Target: AC-8 is decided: the check dialogues pass at the rate fixed in Plan against the recorded baseline
-- History: A-69 (2026-11-01): Relaxed TD-10 (D-173)
-- Proposed (A-131, G-V3.CHAT, 2026-11-08): the approved text above stays in force until A-131 is approved; the text would then read: The Chat agent shall behave as the shared persona file specifies, with its names, pronouns and form of address, and address every user as master unless the file says otherwise, also in the status summaries and the end summary of a skill run. The criterion of the summaries on the real pinned model is a new requirement of G-V3.CHAT (Plan Step 1b, CHAT), not this one.
+- History: A-69 (2026-11-01): Relaxed TD-10 (D-173); rev B (2026-11-08, G-V3.CHAT, A-131 approved D-302, owner one by one): the rule also holds for the status messages and the end summary of a skill run
 
 ### REQ-CHA-009 – Mood at all times
 - Level: low   Subject: ConversationCore
@@ -169,7 +168,7 @@ The persona's side: the shared conversation, the answer queue, persona, mood, me
 
 ### REQ-CHA-014 – Silent repair of behaviour violations
 - Level: low   Subject: ConversationCore
-- Text: If a defined behaviour rule is violated, then the Chat agent shall repair the answer silently, record the violation as a signal and keep the correction out of the conversation memory.
+- Text: If a defined behaviour rule is violated, then the Chat agent shall repair the answer silently, record the violation as a signal and keep the correction out of the conversation memory, also in the status summaries and the end summary of a skill run.
 - Rationale: refines REQ-BE-027
 - Parent: REQ-BE-027
 - Priority: Should
@@ -177,8 +176,7 @@ The persona's side: the shared conversation, the answer queue, persona, mood, me
 - Acceptance criterion: AC-25: the detectors keep their recorded precision and recall on the behaviour suite
 - Verified by: TC-CHA-014
 - Status: Verified
-- History: –
-- Proposed (A-131, G-V3.CHAT, 2026-11-08): the approved text above stays in force until A-131 is approved; the text would then read: If a defined behaviour rule is violated, then the Chat agent shall repair the answer silently, record the violation as a signal and keep the correction out of the conversation memory, also in the status summaries and the end summary of a skill run. The criterion of the summaries on the real pinned model is a new requirement of G-V3.CHAT (Plan Step 1b, CHAT), not this one.
+- History: –; rev B (2026-11-08, G-V3.CHAT, A-131 approved D-302, owner one by one): the rule also holds for the status messages and the end summary of a skill run
 
 ### REQ-CHA-015 – Votes stored
 - Level: low   Subject: ConversationCore
