@@ -75,7 +75,7 @@ Playing the audio of the answers and the voice lines in this browser: queue, cla
 - Level: low   Subject: WebFrontEnd
 - Text: When a user asks to speak an answer again, the Voice playback shall play the lines that follow, also within 3 seconds after a stop.
 - Rationale: refines REQ-VPB-002; after a stop the page drops every audio_reload for STOP_DROP_MS = 3000 ms (sound.js), so speak again right after a stop would stay silent (A-132); the 3 s is that constant
-- Parent: REQ-VPB-002
+- Parent: REQ-FE-012
 - Priority: Should
 - Verification method: Test
 - Acceptance criterion: AC-1: with a stop 1 s ago a line that arrives after the speak-again request is enqueued, in the node test and in the browser; without the request it is still dropped (exact)

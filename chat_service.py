@@ -188,7 +188,8 @@ class ChatService:
         model, profile = self._model_info()
         mood = self.mood.status()
         with self._lock:
-            return {"busy": self._running or self._speak_pending > 0, "activity": mood["activity"] or "idle", "model": model, "profile": profile,
+            speaking = self._speak_pending > 0            # a repeat that runs or waits owns the stop button, also over a running answer (REQ-CHA-035)
+            return {"busy": self._running or speaking, "activity": "speaking" if speaking else mood["activity"] or "idle", "model": model, "profile": profile,
                     "queue": len(self._queue), "mood": mood}
 
     def publish_status(self):
@@ -282,7 +283,7 @@ class ChatService:
         return {"ok": True, "message": record, "queued": queued, "command": command, "id": record["id"] if record else None, "position": position}
 
     def stop(self):
-        """stops the running answer (the text received so far stays) and any spoken-again playback; True when something was stopped"""
+        """stops the running answer (the text received so far stays) and any spoken-again playback; True only when an answer was stopped (IF-201: nothing running is stopped false)"""
         with self._lock:
             kind = self._current or (self._queue[0][0] if self._queue else None)
             running = self._running and kind not in (None, "command")
@@ -294,7 +295,7 @@ class ChatService:
         if running:
             self._stop.set()
             self._unpaused.set()                      # a paused task wakes up and sees the stop
-        return running or speaking
+        return running
 
     def _file_putter(self, task, message_id):
         def put(name, data):
