@@ -73,6 +73,7 @@ _NO_REMOTE = referencing.Registry(retrieve=_no_remote)
 _validators = {}                                # keyed by the schema's JSON, so a caller's fresh but equal categories share one validator
 _MAX_VALIDATORS = 128                           # bound: a caller with ever new schemas must not grow the cache without end (F-03)
 MAX_DEPTH = 200                                 # levels of a record, the record itself is level 1 (REQ-GTB-027)
+MAX_VALUES = 100000                             # values of a record, a value reached by two paths counted twice (REQ-GTB-028)
 
 
 def record_definitions():
@@ -113,14 +114,19 @@ def _validator(schema):
 
 
 def _too_deep(record):
-    """True when the record has more than MAX_DEPTH levels of objects and lists. Iterative: the check must not hit the recursion limit itself."""
-    level, current = 1, [record]
-    while current:
-        if level > MAX_DEPTH:
+    """True when the record has more than MAX_DEPTH levels of objects and lists (REQ-GTB-027) or more than MAX_VALUES values, a value counted for
+    every path that reaches it (REQ-GTB-028). Iterative, so the check does not hit the recursion limit itself; it stops at the first value over
+    a limit, so a record that shares sub-objects (2**30 paths) is refused after MAX_VALUES + 1 steps (F-22)."""
+    stack, seen = [(record, 1)], 0
+    while stack:
+        value, level = stack.pop()
+        seen += 1
+        if level > MAX_DEPTH or seen > MAX_VALUES:
             return True
-        current = [inner for value in current if isinstance(value, (dict, list))
-                   for inner in (value.values() if isinstance(value, dict) else value) if isinstance(inner, (dict, list))]
-        level += 1
+        if isinstance(value, dict):
+            stack.extend((inner, level + 1) for inner in value.values())
+        elif isinstance(value, list):
+            stack.extend((inner, level + 1) for inner in value)
     return False
 
 

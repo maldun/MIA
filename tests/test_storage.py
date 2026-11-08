@@ -487,12 +487,59 @@ class StorageBehaviour:
         for table, record_id in (("context_nodes", "c1"), ("context_edges", "e1")):
             self.assertEqual(code_of(lambda: self.store.delete(table, record_id, "anna")), ("immutable", None))
 
+    def put_within_a_second(self, table, record_id, doc):
+        """('stored', result), ('refused', (rule, detail)) or ('no answer', None): put runs in a daemon thread, so a hang fails the test."""
+        answer = {}
+
+        def run():
+            try:
+                answer["result"] = ("stored", self.store.put(table, record_id, doc, "anna"))
+            except StorageError as err:
+                answer["result"] = ("refused", (err.rule, err.detail))
+        thread = threading.Thread(target=run, daemon=True)
+        thread.start()
+        thread.join(1.0)
+        return answer.get("result", ("no answer", None))
+
+    @mark.req("REQ-SLY-015")
+    def test_a_document_of_more_than_100000_values_is_refused_for_every_table(self):
+        """TC-SLY-014 (F-22): 100 000 values (every path counted) are stored, 100 001 are refused, for a document table and for a graph table.
+        Example: {"text": "t", "numbers": [..]} of a task has 3 + n values: n = 99 997 is stored, n = 99 998 is refused (schema, "too large"); a data node whose value is a list of 99 995 numbers is stored, 99 996 is refused (schema_break, "data").
+        """
+        # Given: documents of 100 000 and of 100 001 values for a table that is no graph table, and the same for a data node
+        task = lambda count: {"text": "t", "numbers": [1] * count}                      # noqa: E731  the doc, "t" and the list count 3 values
+        node = lambda name, count: {"id": name, "data": {"type": "data", "value": [1] * count}}   # noqa: E731  5 values besides the numbers
+        # When/Then: the document at the limit is stored as version 1, the one over it is refused and nothing is stored
+        self.assertEqual(self.put_within_a_second("tasks", "t1", task(99997)), ("stored", {"version": 1}))
+        self.assertEqual(self.put_within_a_second("tasks", "t2", task(99998)), ("refused", ("schema", "too large")))
+        self.assertEqual(self.store.ids("tasks"), ["t1"])
+        # And: the data node at the limit is stored, the one over it is a schema_break naming data
+        self.assertEqual(self.put_within_a_second("graph_nodes", "n1", node("n1", 99995)), ("stored", {"version": 1}))
+        self.assertEqual(self.put_within_a_second("graph_nodes", "n2", node("n2", 99996)), ("refused", ("schema_break", "data")))
+        self.assertEqual(self.store.ids("graph_nodes"), ["n1"])
+
+    @mark.req("REQ-SLY-015")
+    def test_a_document_that_shares_a_child_on_every_level_is_refused_at_once(self):
+        """TC-SLY-014 (F-22): 2**30 paths are refused within one second, for a document table and for a graph table, and nothing is stored.
+        Example: 30 levels in which every level names the next one twice: a task and a data node with it are refused (schema, "too large") and (schema_break, "data").
+        """
+        # Given: 30 levels in which every level names the level below twice (the same object)
+        shared = 1
+        for _ in range(30):
+            shared = [shared, shared]
+        # When/Then: both kinds of table refuse it within the second
+        self.assertEqual(self.put_within_a_second("tasks", "t1", {"text": "t", "shared": shared}), ("refused", ("schema", "too large")))
+        self.assertEqual(self.put_within_a_second("graph_nodes", "n1", {"id": "n1", "data": {"type": "data", "value": shared}}),
+                         ("refused", ("schema_break", "data")))
+        # And: nothing was stored
+        self.assertEqual((self.store.ids("tasks"), self.store.ids("graph_nodes")), ([], []))
+
 
 class SharedContainers(unittest.TestCase):
     @mark.req("REQ-SLY-014")
     def test_a_document_that_names_the_same_object_many_times_is_scanned_in_linear_time(self):
         """TC-SLY-013 (F-19): the walk goes through each shared container once, so a document of 2^30 paths cannot make the check exponential.
-        Example: 30 levels, each naming the next one twice (the same object): the check answers in under a second and finds nothing wrong.
+        Example: 30 levels, each naming the next one twice (the same object): the check answers in under a second; since T-12 the answer is the refusal "too large" (2**30 paths, F-22).
         """
         # Given: 30 levels in which every level names the level below twice
         document = {}
@@ -500,12 +547,18 @@ class SharedContainers(unittest.TestCase):
             document = {"a": document, "b": document}
         # When: the check of what a backend cannot keep runs in a thread (a hang fails the test)
         outcome = []
-        thread = threading.Thread(target=lambda: outcome.append(refuse_unstorable(document)), daemon=True)
+
+        def check():
+            try:
+                outcome.append(refuse_unstorable(document))
+            except StorageError as err:
+                outcome.append((err.rule, err.detail))
+        thread = threading.Thread(target=check, daemon=True)
         thread.start()
         thread.join(1.0)
-        # Then: it finished within the second and the document is fine (31 levels)
+        # Then: it finished within the second and refused the document as too large (31 levels are fine, 2**30 paths are not)
         self.assertFalse(thread.is_alive(), "the check did not finish within one second")
-        self.assertEqual(outcome, [None])
+        self.assertEqual(outcome, [("schema", "too large")])
 
 
 class FileStorage(StorageBehaviour, unittest.TestCase):

@@ -43,26 +43,30 @@ def table_definitions():
 
 
 MAX_DEPTH = 200                                 # levels of a document for every table, the document itself is level 1 (REQ-SLY-013)
+MAX_VALUES = 100000                             # values of a document or record, every path to a value counted (REQ-SLY-015, REQ-GTB-028)
 
 
 class _Cycle(Exception):
     pass
 
 
-def _unstorable(value, check_depth=True):
+def _unstorable(value, check_depth=True, check_size=True):
     """What one backend would keep and another refuse, or None: a NUL character in a text (PostgreSQL refuses it, F9), a number that is not
-    finite (NaN, inf: JSON has no such number and PostgreSQL refuses it, R2), a container that contains itself ("cyclic", REQ-SLY-014) and more
-    than MAX_DEPTH levels of objects and lists ("nested too deep", REQ-SLY-013). Keys are looked at too.
+    finite (NaN, inf: JSON has no such number and PostgreSQL refuses it, R2), a container that contains itself ("cyclic", REQ-SLY-014),
+    more than MAX_DEPTH levels of objects and lists ("nested too deep", REQ-SLY-013) and more than MAX_VALUES values ("too large", REQ-SLY-015).
+    Keys are looked at too, but only values are counted.
     Iterative, so a deep document is refused by a rule, not by a RecursionError (F-15); each container is walked once, however often the document
-    names it, so a document of many paths through shared objects cannot make the check exponential (F-19). The depth is the height of the
-    root, which an object shared on a short and a long path gets from the long one."""
+    names it, so a document of many paths through shared objects cannot make the check exponential (F-19, F-22). The depth is the height of the
+    root, which an object shared on a short and a long path gets from the long one. The size counts every path, so a shared container
+    contributes its count again each time it is named; the count is capped at MAX_VALUES + 1, so the numbers stay small."""
     problem = None
-    heights = {}                                # finished containers by id: their height
+    finished = {}                               # finished containers by id: (height, count)
     on_path = set()                             # the containers being walked: meeting one again is a cycle
-    stack = []                                  # [container, iterator over its parts, height of the highest part so far]
+    stack = []                                  # [container, iterator over its parts, height of the highest part so far, count so far, is it a value]
+    cap = MAX_VALUES + 1
 
-    def enter(part):
-        """The height of a part that is known at once, or None after the part was put on the stack."""
+    def enter(part, counted=True):
+        """(height, count) of a part that is known at once, or None after the part was put on the stack."""
         nonlocal problem
         if isinstance(part, str):
             if "\x00" in part:
@@ -73,40 +77,47 @@ def _unstorable(value, check_depth=True):
         elif isinstance(part, (dict, list, tuple)):
             if id(part) in on_path:
                 raise _Cycle
-            if id(part) in heights:
-                return heights[id(part)]
+            if id(part) in finished:
+                return finished[id(part)]
             on_path.add(id(part))
-            stack.append([part, iter([*part.keys(), *part.values()] if isinstance(part, dict) else part), 0])
+            # keys are looked at but are no values: only the parts after the keys are counted
+            parts = [(key, False) for key in part] + [(item, True) for item in part.values()] if isinstance(part, dict) else [(item, True) for item in part]
+            stack.append([part, iter(parts), 0, 1, counted])
             return None
-        return 0
+        return 0, 1
+
+    def add_to_top(height, count, counted=True):
+        stack[-1][2] = max(stack[-1][2], height)
+        if counted:
+            stack[-1][3] = min(cap, stack[-1][3] + count)
 
     try:
         top = enter(value)
         while stack:
             frame = stack[-1]
-            for part in frame[1]:
-                height = enter(part)
-                if height is None:
+            for part, counted in frame[1]:
+                result = enter(part, counted)
+                if result is None:
                     break                       # the part is the new top of the stack
-                frame[2] = max(frame[2], height)
+                add_to_top(*result, counted)
             else:
                 stack.pop()
                 on_path.discard(id(frame[0]))
-                heights[id(frame[0])] = height = frame[2] + 1
+                finished[id(frame[0])] = top = (frame[2] + 1, frame[3])
                 if stack:
-                    stack[-1][2] = max(stack[-1][2], height)
-                else:
-                    top = height
+                    add_to_top(*top, frame[4])
     except _Cycle:
         return "cyclic"
     if problem:
         return problem
-    return "nested too deep" if check_depth and top > MAX_DEPTH else None
+    if check_depth and top[0] > MAX_DEPTH:
+        return "nested too deep"
+    return "too large" if check_size and top[1] > MAX_VALUES else None
 
 
-def refuse_unstorable(*values, check_depth=True):
+def refuse_unstorable(*values, check_depth=True, check_size=True):
     """Raises StorageError("invalid", "schema") for a value that not every backend can keep the same way, so all of them refuse it alike."""
-    found = next((found for found in (_unstorable(value, check_depth) for value in values) if found), None)
+    found = next((found for found in (_unstorable(value, check_depth, check_size) for value in values) if found), None)
     if found:
         raise StorageError("invalid", rule="schema", detail=found)
 
@@ -130,8 +141,10 @@ def check_names(record_id, author):
 
 def validate(table, doc):
     """Raises StorageError("invalid", rule, detail) for a document the table definitions refuse (REQ-SLY-004); put and the copies use it."""
-    # a record of the graphs that is too deep is refused by check_record with its rule (schema_break, data), after the identity checks (REQ-GTB-027)
-    refuse_unstorable(doc, check_depth=table not in graph_tables.RECORD_TABLES)
+    # a record of the graphs that is too deep or too large is refused by check_record with its rule (schema_break, data), after the identity checks
+    # (REQ-GTB-027, REQ-GTB-028); its walk stops at the limits, so it never expands a structure that shares sub-objects
+    own_rules = table in graph_tables.RECORD_TABLES
+    refuse_unstorable(doc, check_depth=not own_rules, check_size=not own_rules)
     if table in graph_tables.RECORD_TABLES:         # the records of the graphs: put calls check_record again with what is stored
         broken = graph_tables.check_record(table, doc)
     else:
