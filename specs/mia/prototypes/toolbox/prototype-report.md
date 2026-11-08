@@ -19,7 +19,7 @@ Do OC-1, OC-2, OC-3 of `specs/mia/goals/G-V2.TOOLBOX/goal.md` hold with a plain 
 | REQ-WFM-050, 051, 052, 053, 054, 055, 056, 067, 068, 070 | each shown once; none verified | see tests |
 
 ## Decisions (owner, 2026-11-08)
-See `proposed-spec-changes.md`: D1 id only latest version, D2 same toolbox flagged shipped, D3 retired baseline with owner flag, D4 SC-09 stays as risk, D5 trust carries over. Prototype updated, 9 checks pass.
+See `proposed-spec-changes.md`: D1 id only latest version, D2 same toolbox flagged shipped, D3 retired baseline with owner flag, D4 SC-09 stays as risk, D5 trust carries over. Prototype updated, 11 checks pass (adds the event on replace, REQ-WFM-093, and any-account untrust).
 
 ## Findings
 1. A shipped node ID has several versions (e.g. `code.gate_abstain`: 2 files). REQ-WFM-050 says "ID unique in the toolbox" and REQ-WFM-055 carries a version. Open: is the toolbox key `id` or `id@version`? Prototype seeds the highest non-retired version per ID.

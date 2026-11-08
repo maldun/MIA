@@ -3,7 +3,7 @@
   python explore_toolbox.py          guided tour (OC-1..OC-3), then the prompt
   python explore_toolbox.py --shell  prompt only
 Prompt commands: help, who owner|guest, import [id] [version], look ID, list, trust ID trusted|untrusted, life ID draft|tested|retired [evidence|baseline],
-export ID, run ID x, baseline ID x, seed, quit. 'import' makes a small sample transform that doubles x and writes a marker file when its code text runs.
+export ID, events, run ID x, baseline ID x, seed, quit. 'import' makes a small sample transform that doubles x and writes a marker file when its code text runs.
 """
 import json
 import os
@@ -39,7 +39,7 @@ def step(tb, who, line):
         if cmd == "who":
             who[0] = a[0]
         elif cmd == "import":
-            print("  imported", tb.import_transform(sample(a[0] if a else "ext.double", int(a[1]) if len(a) > 1 else 1)))
+            print("  imported", tb.import_transform(sample(a[0] if a else "ext.double", int(a[1]) if len(a) > 1 else 1), author=who[0]))
         elif cmd == "look":
             show(tb.look_up(a[0]))
         elif cmd == "list":
@@ -54,6 +54,8 @@ def step(tb, who, line):
             print(" ", tb.export_transform(a[0]))
         elif cmd in ("run", "baseline"):
             print("  result:", tb.run(a[0], {"x": float(a[1])}, as_baseline=cmd == "baseline"))
+        elif cmd == "events":
+            print("  ", tb.events or "no events")
         elif cmd == "seed":
             tb.seed_shipped(NODES); print("  seeded shipped nodes")
         else:

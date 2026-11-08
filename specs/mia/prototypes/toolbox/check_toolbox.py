@@ -78,6 +78,26 @@ class ToolboxChecks(unittest.TestCase):
         with self.assertRaises(ToolboxError):
             self.tb.import_transform(outside_file())
 
+    def test_replacing_a_trusted_transform_is_recorded_untrusted_is_not(self):
+        self.tb.import_transform(outside_file(), author="guest")
+        newer = json.loads(outside_file()); newer["version"] = 2
+        self.tb.import_transform(json.dumps(newer), author="guest")      # untrusted: no event
+        self.assertEqual(self.tb.events, [])
+        self.tb.set_trust("ext.double", "trusted", "owner")
+        newer["version"] = 3
+        self.tb.import_transform(json.dumps(newer), author="guest")
+        self.assertEqual(self.tb.events, [{"event": "trusted_transform_replaced", "id": "ext.double", "old_version": 2, "new_version": 3, "author": "guest"}])
+
+    def test_any_account_may_untrust_only_owner_trusts(self):
+        self.tb.import_transform(outside_file())
+        self.tb.set_trust("ext.double", "trusted", "owner")
+        self.tb.set_trust("ext.double", "untrusted", "guest")
+        item = self.tb.look_up("ext.double")
+        self.assertEqual(item["trust"], "untrusted")
+        self.assertIn("guest", item["reason"])
+        with self.assertRaises(ToolboxError):
+            self.tb.set_trust("ext.double", "trusted", "guest")
+
     def test_trust_and_lifecycle_are_independent_and_tested_needs_evidence(self):
         self.tb.import_transform(outside_file())
         with self.assertRaises(ToolboxError):

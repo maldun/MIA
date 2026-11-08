@@ -28,6 +28,7 @@ class ToolboxError(Exception):
 class Toolbox:
     def __init__(self):
         self._items = {}
+        self.events = []      # stand-in for the event record (IF-401); REQ-WFM-093
 
     # --- filling the toolbox -------------------------------------------------
     def seed_shipped(self, nodes_dir):
@@ -40,21 +41,23 @@ class Toolbox:
         for doc in latest.values():
             self._add(doc["id"], doc["version"], doc.get("inputs", {}), doc.get("outputs", {}), None, "trusted", "shipped", "tested")
 
-    def import_transform(self, text):
+    def import_transform(self, text, author=None):
         """REQ-WFM-052/053: stored untrusted whatever the file claims; the code text is never compiled or run here."""
         try:
             doc = json.loads(text)
             jsonschema.validate(doc, EXCHANGE_SCHEMA)
         except (ValueError, jsonschema.ValidationError) as err:
             raise ToolboxError("invalid_file", str(err).splitlines()[0])
-        self._add(doc["id"], doc["version"], doc["inputs"], doc["outputs"], doc["code"], "untrusted", "imported", "draft")
+        self._add(doc["id"], doc["version"], doc["inputs"], doc["outputs"], doc["code"], "untrusted", "imported", "draft", author)
         return doc["id"]
 
-    def _add(self, tid, version, inputs, outputs, code, trust, origin, lifecycle):
+    def _add(self, tid, version, inputs, outputs, code, trust, origin, lifecycle, author=None):
         old = self._items.get(tid)
         if old and version <= old["version"]:
             raise ToolboxError("duplicate_id", "%s version %s is not newer than %s" % (tid, version, old["version"]))   # REQ-WFM-050
         if old:      # decision 1 and 5 (owner 2026-11-08): one entry per ID, a newer version replaces the code, trust and lifecycle carry over
+            if old["trust"] == "trusted":      # REQ-WFM-093: trust carries over, so the change leaves a trace
+                self.events.append({"event": "trusted_transform_replaced", "id": tid, "old_version": old["version"], "new_version": version, "author": author})
             old.update(version=version, inputs=inputs, outputs=outputs, code=code)
             return
         self._items[tid] = {"id": tid, "version": version, "inputs": inputs, "outputs": outputs, "code": code,
