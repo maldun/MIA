@@ -2807,6 +2807,41 @@ plausibility:
       rated: '2026-11-08'
       rated_by: maldun
       rating: plausible
+    REQ-GTB-023:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour (six record tables, versioned, never deleted) is fixed by an acceptance criterion, golden 17, the contract mock and TC-GTB-024; realised in T-08 (owner rating 2026-11-08)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-GTB-024:
+      basis:
+      - no number, measurement or model quality depends on it; the shape rules are fixed by an acceptance criterion, golden 17, the contract mock and TC-GTB-025; realised in T-08 (owner rating 2026-11-08)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-GTB-025:
+      basis:
+      - no number, measurement or model quality depends on it; the lookup of the ends in the context nodes is fixed by an acceptance criterion, golden 18, the contract mock and TC-GTB-026; realised in T-08 (owner rating 2026-11-08)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-GTB-026:
+      basis:
+      - no number, measurement or model quality depends on it; the lookup of the members by the kind of the header is fixed by an acceptance criterion, golden 19, the contract mock and TC-GTB-027; realised in T-08 (owner rating 2026-11-08)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-GTB-027:
+      basis:
+      - one fixed number, 200 levels of nesting with the record as level 1, checked iteratively and exactly on both sides (150 accepted, 300 refused); probe done on 2026-11-08 over 193 real JSON and YAML files in library, skills and eval, the deepest document has 19 levels (a whole pipeline), so the limit is about ten times the deepest real document and far below the recursion limit of about 1000 (owner rating 2026-11-08 after the probe)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
     REQ-LOG-001:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
