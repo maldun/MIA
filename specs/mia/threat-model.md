@@ -13,6 +13,7 @@ How to read it: a model step can only be steered through text, and most MIA step
 | TB-history | ChatHistory | model (earlier answers, quoted web text) | ChatStep, DreamStep | no tools; the summary can become a memory record |
 | TB-code | GeneratedScript | model | ScriptWriterStep, ScriptSandbox | runs code; contained by the sandbox, no network |
 | TB-exchange (G-V2) | ImportedTransform | a transform file from outside MIA | the toolbox, then the pipeline runner | foreign code with MIA's permissions if it runs; stored untrusted, never run until the owner marks it (SC-09, TD-24) |
+| TB-result | SkillResult | model (output of a skill run quoting web and paper text) | SkillDigestStep, then ChatStep through the history | no tools; shapes what is spoken and what MIA later "knows" through the history |
 | TB-edit | WorkflowEdit | user (graph app) | WorkflowValidator, the pipeline runner | changes what runs for everyone; users are trusted (CON-6), the edit is validated and versioned |
 
 ## Threats
@@ -119,4 +120,13 @@ How to read it: a model step can only be steered through text, and most MIA step
 - Mitigation: REQ-WFM-053 (stored untrusted), REQ-WFM-054 (import runs no code), REQ-WFM-055 (only the owner marks it trusted), REQ-RUN-017 (an untrusted transform blocks the run), NFR-3
 - Red-team cases: none yet; the marker side-effect case of AC-32 is a deterministic test, not an eval case; red-team cases are proposed in Step 4 for a person to label
 - Residual risk: a transform the owner marks trusted by mistake runs unsandboxed (SC-09); the review process and a sandbox backend are later goals
+- Status: Draft
+
+### THR-012 – Instructions in the result of a skill run (G-V3.CHAT)
+- Boundary: TB-result
+- Category: LLM01 Prompt injection (indirect)
+- Impact: a page quoted in a result makes the digest step write what the page wants into a spoken summary, which then enters the history and later answers
+- Mitigation: REQ-CHA-048 (no tools, the result is text to report), REQ-CHA-049 (red-team cases, pass in every repeat), REQ-CHA-043 (the link is added by code), REQ-CHA-046 (only the summary and the last status message enter the history), REQ-WFM-137 and REQ-CLV-043 (the result is stored and shown as text)
+- Red-team cases: drafted in `specs/mia/eval-drafts/skill_turns.jsonl` with tag `rt`, numbered RT-nnn when a person labels them
+- Residual risk: a summary that repeats an instruction as a report can still sway MIA through the history; watched by the faithful criterion and by the transcript review
 - Status: Draft

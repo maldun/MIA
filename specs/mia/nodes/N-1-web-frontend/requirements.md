@@ -377,3 +377,15 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Verified by: TC-N1-003, TC-CLV-022
 - Status: Verified
 - History: A-04 (2026-10-26)
+
+### REQ-FE-032 – Skill run view
+- Level: high   Subject: WebFrontEnd
+- Text: The Web Frontend shall show the status, phases, budgets, controls, answers, full result and files of a skill run in the Skill run view, apart from the chat.
+- Rationale: refines FR-46 and FR-34; the chat holds only spoken text (owner 2026-11-07, A-131)
+- Parent: FR-46
+- Priority: Must
+- Verification method: Test, Demonstration
+- Acceptance criterion: AC-39: for a scripted skill the chat shows no card, table, log line or full result, and the view shows them (exact)
+- Verified by: TC-CLV-030, TC-CLV-040
+- Status: Draft
+- History: A-131 (proposed 2026-11-08, G-V3.PANEL), new

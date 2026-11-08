@@ -918,6 +918,18 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Status: Verified
 - History: –
 
+### REQ-BE-078 – Skill turns in the chat
+- Level: high   Subject: WebApplication
+- Text: The Backend shall put into the chat only the spoken text of a skill run: questions, answers, a status message per declared phase and an end summary with a link to the Skill run view.
+- Rationale: refines FR-35 and FR-46; the rest of a run is in the Skill run view (owner 2026-11-07, A-131)
+- Parent: FR-35
+- Priority: Must
+- Verification method: Test, Evaluation
+- Acceptance criterion: AC-39 and AC-30 (the chat part): on a scripted review the chat holds the questions, the answers, the declared status messages and one summary with a link, all spoken, nothing else of the run
+- Verified by: TC-CHA-040, EV-skill_turns
+- Status: Draft
+- History: A-131 (proposed 2026-11-08, G-V3.CHAT), new; owner 2026-11-08
+
 ## Interface requirements
 
 Owned by this node as provider (or, for an external provider, as the consumer that depends on it). The details are in `contracts/`; the mock and the contract suite are in `tests/helpers/mocks/` and `tests/acceptance/contract/`.

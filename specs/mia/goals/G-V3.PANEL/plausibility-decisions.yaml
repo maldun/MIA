@@ -1,0 +1,228 @@
+# Ratings of G-V3.PANEL by maldun, 2026-11-08 (Plan step 3, after review batches 1 to 9): all items as proposed, REQ-CLV-041 questionable with probe and accepted risk.
+# Not yet applied: tools/apply_plausibility.py reads the shared specs/mia/plausibility-proposal.yaml and rewrites plausibility.yaml. At the goal merge (after the rebase on master) merge the items of plausibility-proposal.yaml and this file into the shared ones, run the tool with --by maldun, then req_plausibility.py.
+decisions:
+  REQ-CLV-024:
+    basis:
+    - no number, measurement or model quality depends on it; the behaviour is fixed
+      by an exact acceptance criterion on a scripted run, no model (proposal of the
+      agent, 2026-11-08, G-V3.PANEL); the earlier rating of the old wording is kept
+      unless the owner objects
+    decision: plausible
+  REQ-CLV-030:
+    basis:
+    - no number, measurement or model quality depends on it; the behaviour is fixed
+      by an exact acceptance criterion on a scripted run, no model (proposal of the
+      agent, 2026-11-08, G-V3.PANEL)
+    decision: plausible
+  REQ-CLV-031:
+    basis:
+    - no number, measurement or model quality depends on it; the behaviour is fixed
+      by an exact acceptance criterion on a scripted run, no model (proposal of the
+      agent, 2026-11-08, G-V3.PANEL)
+    decision: plausible
+  REQ-CLV-032:
+    basis:
+    - no number, measurement or model quality depends on it; the behaviour is fixed
+      by an exact acceptance criterion on a scripted run, no model (proposal of the
+      agent, 2026-11-08, G-V3.PANEL)
+    decision: plausible
+  REQ-CLV-033:
+    basis:
+    - no number, measurement or model quality depends on it; the behaviour is fixed
+      by an exact acceptance criterion on a scripted run, no model (proposal of the
+      agent, 2026-11-08, G-V3.PANEL)
+    decision: plausible
+  REQ-CLV-034:
+    basis:
+    - no number, measurement or model quality depends on it; the behaviour is fixed
+      by an exact acceptance criterion on a scripted run, no model (proposal of the
+      agent, 2026-11-08, G-V3.PANEL)
+    decision: plausible
+  REQ-CLV-035:
+    basis:
+    - no number, measurement or model quality depends on it; the behaviour is fixed
+      by an exact acceptance criterion on a scripted run, no model (proposal of the
+      agent, 2026-11-08, G-V3.PANEL)
+    decision: plausible
+  REQ-CLV-036:
+    basis:
+    - no number, measurement or model quality depends on it; the behaviour is fixed
+      by an exact acceptance criterion on a scripted run, no model (proposal of the
+      agent, 2026-11-08, G-V3.PANEL); the default 34 % is the max-height (34vh) of
+      the Full run part of the owner's mockup, which scrolls inside itself; the user
+      can change the share within 20 to 60 % (REQ-CLV-045)
+    decision: plausible
+  REQ-CLV-037:
+    basis:
+    - no number, measurement or model quality depends on it; the behaviour is fixed
+      by an exact acceptance criterion on a scripted run, no model (proposal of the
+      agent, 2026-11-08, G-V3.PANEL)
+    decision: plausible
+  REQ-CLV-038:
+    basis:
+    - no number, measurement or model quality depends on it; the behaviour is fixed
+      by an exact acceptance criterion on a scripted run, no model (proposal of the
+      agent, 2026-11-08, G-V3.PANEL)
+    decision: plausible
+  REQ-CLV-039:
+    basis:
+    - no number, measurement or model quality depends on it; the behaviour is fixed
+      by an exact acceptance criterion on a scripted run, no model (proposal of the
+      agent, 2026-11-08, G-V3.PANEL)
+    decision: plausible
+  REQ-CLV-040:
+    basis:
+    - no number, measurement or model quality depends on it; the behaviour is fixed
+      by an exact acceptance criterion on a scripted run, no model (proposal of the
+      agent, 2026-11-08, G-V3.PANEL); the layout and the 820 px switch are those of
+      the owner's mockup, checked by screenshots in headless Chromium at 1440 and
+      600 px (hand-over of 2026-11-08); not yet on the real page
+    decision: plausible
+  REQ-CLV-041:
+    accepted_risk:
+      decided: 2026-11-08 by maldun
+      follow_up: VAL-012
+      owner: maldun
+      reason: the 16 % default follows the mockup (140 px at 900 px) and is not yet
+        measured on the real page; the user can change the share and the content scrolls
+        inside the strip
+    basis:
+    - the default 16 % of the viewport height is the mockup's strip of about 140 px
+      at 900 px (15.6 %), read from the mockup in headless Chromium, no real page
+      yet; the real page with its fonts and the header buttons may need more; the
+      user can enlarge it and, since the content scrolls inside the strip (REQ-CLV-047),
+      reduce it down to 12 %
+    decision: questionable
+    probe:
+      what: the browser check TC-CLV-041 on the first real strip with three phases
+        at 1440 x 900, 1920 x 1080 and 360 x 800 px, and the owner in VAL-012
+      when: first task that draws the strip
+      who: G-V3.PANEL Implement, then the owner
+  REQ-CLV-042:
+    basis:
+    - no number, measurement or model quality depends on it; the behaviour is fixed
+      by an exact acceptance criterion on a scripted run, no model (proposal of the
+      agent, 2026-11-08, G-V3.PANEL); the 44 px targets on the phone are the bound
+      of NFR-1 (the wide strip is the owner's exception of 2026-11-08)
+    decision: plausible
+  REQ-CLV-043:
+    basis:
+    - no number, measurement or model quality depends on it; the behaviour is fixed
+      by an exact acceptance criterion on a scripted run, no model (proposal of the
+      agent, 2026-11-08, G-V3.PANEL)
+    decision: plausible
+  REQ-CLV-044:
+    basis:
+    - no number, measurement or model quality depends on it; the behaviour is fixed
+      by an exact acceptance criterion on a scripted run, no model (proposal of the
+      agent, 2026-11-08, G-V3.PANEL)
+    decision: plausible
+  REQ-CLV-045:
+    basis:
+    - no number, measurement or model quality depends on it; the behaviour is fixed
+      by an exact acceptance criterion on a scripted run, no model (proposal of the
+      agent, 2026-11-08, G-V3.PANEL); the ranges 12 to 40 % and 20 to 60 % are the
+      agent's limits so that the strip stays larger than a pill row with scrolling
+      (proposal, owner to confirm)
+    decision: plausible
+  REQ-CLV-046:
+    basis:
+    - no number, measurement or model quality depends on it; the behaviour is fixed
+      by an exact acceptance criterion on a scripted run, no model (proposal of the
+      agent, 2026-11-08, G-V3.PANEL); browser storage can be refused (private window,
+      blocked site data), so the default 16 % and 34 % apply then; checked with a
+      blocked profile in TC-CLV-046
+    decision: plausible
+  REQ-CLV-047:
+    basis:
+    - no number, measurement or model quality depends on it; the behaviour is fixed
+      by an exact acceptance criterion on a scripted run, no model (proposal of the
+      agent, 2026-11-08, G-V3.PANEL)
+    decision: plausible
+  REQ-FE-032:
+    basis:
+    - no number, measurement or model quality depends on it; the behaviour is fixed
+      by an exact acceptance criterion on a scripted run, no model (proposal of the
+      agent, 2026-11-08, G-V3.PANEL)
+    decision: plausible
+  REQ-WFM-031:
+    basis:
+    - reworded for A-131; the earlier rating stays and applies to the new wording
+      unless the owner objects (proposal of the agent, 2026-11-08)
+    decision: plausible
+  REQ-WFM-036:
+    basis:
+    - reworded for A-131; the earlier rating stays and applies to the new wording
+      unless the owner objects (proposal of the agent, 2026-11-08); the 1200 characters
+      of REQ-WFM-036 are the bound of FR-35
+    decision: plausible
+  REQ-WFM-038:
+    basis:
+    - reworded for A-131; the earlier rating stays and applies to the new wording
+      unless the owner objects (proposal of the agent, 2026-11-08)
+    decision: plausible
+  REQ-WFM-039:
+    basis:
+    - reworded for A-131; the earlier rating stays and applies to the new wording
+      unless the owner objects (proposal of the agent, 2026-11-08)
+    decision: plausible
+  REQ-WFM-130:
+    basis:
+    - no number, measurement or model quality depends on it; the behaviour is fixed
+      by an exact acceptance criterion on a scripted run, no model (proposal of the
+      agent, 2026-11-08, G-V3.PANEL); depends on the table skill_runs of A-141, still
+      a proposal
+    decision: plausible
+  REQ-WFM-131:
+    basis:
+    - no number, measurement or model quality depends on it; the behaviour is fixed
+      by an exact acceptance criterion on a scripted run, no model (proposal of the
+      agent, 2026-11-08, G-V3.PANEL); depends on the table skill_runs of A-141, still
+      a proposal
+    decision: plausible
+  REQ-WFM-132:
+    basis:
+    - no number, measurement or model quality depends on it; the behaviour is fixed
+      by an exact acceptance criterion on a scripted run, no model (proposal of the
+      agent, 2026-11-08, G-V3.PANEL); depends on the table skill_runs of A-141, still
+      a proposal
+    decision: plausible
+  REQ-WFM-133:
+    basis:
+    - no number, measurement or model quality depends on it; the behaviour is fixed
+      by an exact acceptance criterion on a scripted run, no model (proposal of the
+      agent, 2026-11-08, G-V3.PANEL); depends on the table skill_runs of A-141, still
+      a proposal
+    decision: plausible
+  REQ-WFM-134:
+    basis:
+    - no number, measurement or model quality depends on it; the behaviour is fixed
+      by an exact acceptance criterion on a scripted run, no model (proposal of the
+      agent, 2026-11-08, G-V3.PANEL)
+    decision: plausible
+  REQ-WFM-135:
+    basis:
+    - no number, measurement or model quality depends on it; the behaviour is fixed
+      by an exact acceptance criterion on a scripted run, no model (proposal of the
+      agent, 2026-11-08, G-V3.PANEL); depends on the table skill_runs of A-141, still
+      a proposal
+    decision: plausible
+  REQ-WFM-136:
+    basis:
+    - no number, measurement or model quality depends on it; the behaviour is fixed
+      by an exact acceptance criterion on a scripted run, no model (proposal of the
+      agent, 2026-11-08, G-V3.PANEL)
+    decision: plausible
+  REQ-WFM-137:
+    basis:
+    - no number, measurement or model quality depends on it; the behaviour is fixed
+      by an exact acceptance criterion on a scripted run, no model (proposal of the
+      agent, 2026-11-08, G-V3.PANEL)
+    decision: plausible
+  REQ-WFM-138:
+    basis:
+    - no number, measurement or model quality depends on it; the behaviour is fixed
+      by an exact acceptance criterion on a scripted run, no model (proposal of the
+      agent, 2026-11-08, G-V3.PANEL); depends on the table skill_runs of A-141, still
+      a proposal
+    decision: plausible

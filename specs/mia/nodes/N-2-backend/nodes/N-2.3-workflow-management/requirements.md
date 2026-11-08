@@ -386,16 +386,16 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 
 ### REQ-WFM-031 – Task monitor
 - Level: low   Subject: TaskRuntime
-- Text: The Workflow management shall let every task report its state while it runs, the phase, budget figures (used and limit) for time, tokens, model calls, API requests and the budgets of its own, and counts of its own, and shall show them on one status card per task that is updated in place at most twice per second and stays with the final figures after the task has ended.
-- Rationale: refines REQ-BE-033; a long task shows numbers and not only a sign of life (owner 2026-10-29); the card renders any budget and count the task reports, so every later task has the same monitor
+- Text: The Workflow management shall let every task report its state while it runs, the phase, budget figures (used and limit) for time, tokens, model calls, API requests and the budgets of its own, and counts of its own, and shall send them to the Skill run view in the event task_status at most twice per second, and once more with the final figures when the task has ended.
+- Rationale: refines REQ-BE-033; a long task shows numbers and not only a sign of life (owner 2026-10-29); the Skill run view renders any budget and count the task reports, so every later task has the same monitor; no card in the chat (A-131)
 - Parent: REQ-BE-033
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-23: a task that reports gets a card with exactly the figures it reported; two reports within half a second give one update; the final figures stay on the card; a task that reports nothing gets the card with the time only (exact)
+- Acceptance criterion: AC-23: a task that reports sends exactly the figures it reported; two reports within half a second give one event; the final figures are sent once more with done true; a task that reports nothing sends the time only (exact); the display is checked at REQ-CLV-032
 - Verified by: TC-WFM-031
 - Status: Draft
 - Quality: performance efficiency measure: status updates of one task per second; target: at most 2; context: a task that reports after every step, for example one screening step per work
-- History: A-23 new
+- History: A-23 new; A-131 (proposed 2026-11-08): the place of status is the Skill run view, not a card in the chat
 
 ### REQ-WFM-032 – Figures of the review
 - Level: low   Subject: TaskRuntime
@@ -449,17 +449,17 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Quality: flexibility measure: questions about the class of one model; target: 1 for each model, ever (a known model is never asked again); context: switching between local models and an occasional paid one
 - History: A-23 new
 
-### REQ-WFM-036 – Result at the end of the chat
+### REQ-WFM-036 – Summary at the end of the chat
 - Level: low   Subject: TaskRuntime
-- Text: The Workflow management shall, for a task that asks questions while it runs, publish the result as a new message at the end of the chat when it is ready, show the progress only on the status card, and, when the task fails, publish a result that says what failed instead of an empty message.
-- Rationale: refines REQ-BE-033; the result must not sit in a message far above the questions and answers that came later (owner 2026-10-29)
+- Text: The Workflow management shall, when a task has ended, publish one summary of its result of at most 1200 characters as a new message at the end of the chat with a link to the run in the Skill run view, and, when the task fails, a message that says what failed with the same link.
+- Rationale: refines REQ-BE-033; the end of the chat holds a short spoken summary and a link, the full result lies in the Skill run view (owner 2026-11-07, A-131); the summary is worded by the digest step of G-V3.CHAT
 - Parent: REQ-BE-033
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-23: on a review with two questions the result message has a later position in the history than the last question and its answer, and no message of the task exists before the result except the questions; a task that fails leaves a result that contains the reason (exact)
+- Acceptance criterion: AC-23: on a scripted review with two questions the summary message has a later position in the history than the last question and its answer and contains the link to the run; a task that fails leaves a message that contains the reason and the link (exact); the wording is checked in G-V3.CHAT
 - Verified by: TC-WFM-036
 - Status: Draft
-- History: A-23 new; A-27 reworded (a failure is a visible result)
+- History: A-23 new; A-27 reworded (a failure is a visible result); A-131 (proposed 2026-11-08): the full result leaves the chat, a short summary with a link takes its place
 
 ### REQ-WFM-037 – Files in a volume
 - Level: low   Subject: TaskRuntime
@@ -476,7 +476,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 
 ### REQ-WFM-038 – Report as a record
 - Level: low   Subject: TaskRuntime
-- Text: The Workflow management shall store the finished report of the example workflow review as a record in the database through the storage interface IF-102 with the question, the skill id and version, the account, the model pin and the structured report (flow figures, works with decisions, grades and notes, keywords, limits and the end reason), and shall render the files of the report (markdown and LaTeX, English headings) from this record.
+- Text: The Workflow management shall store the finished report of the example workflow review as a record in the database through the storage interface IF-102 with the question, the skill id and version, the account, the model pin and the structured report (flow figures, works with decisions, grades and notes, keywords, limits and the end reason), and shall render the files of the report (markdown and LaTeX, English headings) from this record and name them in the run record of REQ-WFM-130.
 - Rationale: refines REQ-BE-053; a record can be used for further reference and for benchmarks, the files are a view of it (owner 2026-10-29)
 - Parent: REQ-BE-053
 - Priority: Must
@@ -484,11 +484,11 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Acceptance criterion: AC-3: the record read back has the same figures and works as the report; the markdown and the LaTeX file made from it contain every work with its decision; the LaTeX special characters are escaped (exact)
 - Verified by: TC-WFM-038
 - Status: Draft
-- History: A-23 new
+- History: A-23 new; A-131 (proposed 2026-11-08): the files of the report are the targets of the links in the Skill run view, one run record for every skill is REQ-WFM-130
 
 ### REQ-WFM-039 – Skills are self-contained extensions
 - Level: low   Subject: TaskRuntime
-- Text: The Workflow management shall load each skill that runs as a task from a folder of its own (a manifest with the id, the text, the options and what the task needs from the core, the skill files and the code of the skill), so that a new skill needs no change of the chat service, the web application or the page, except a skill that adds an output view of its own, which belongs to the core.
+- Text: The Workflow management shall load each skill that runs as a task from a folder of its own (a manifest with the id, the text, the options, the phases worth telling and what the task needs from the core, the skill files and the code of the skill), so that a new skill needs no change of the chat service, the web application or the page, except a skill that adds an output view of its own, which belongs to the core.
 - Rationale: refines REQ-BE-033; lookup and review are the models (owner 2026-10-29: skills are extensions, only a substantial addition such as a new output window goes into the core)
 - Parent: REQ-BE-033
 - Priority: Should
@@ -499,7 +499,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Quality: maintainability measure: files of the core that name the id of a skill in code; target: 0; context: adding a skill
 - Relaxed: TD-04
 - Target: the code of a skill lies in its folder; what several skills share is a library of the core with its own name
-- History: A-24 new
+- History: A-24 new; A-131 (proposed 2026-11-08): the manifest also declares the phases worth telling; a skill without phases declares none
 
 ## Iteration 2 (goal G-V2, skill rework: foundation)
 
@@ -915,3 +915,127 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verified by: TC-WFM-070
 - Status: Draft
 - History: G-V2 Plan step 1 (2026-11-07), new, owner answer of 2026-11-07
+
+## Iteration 2 (goal G-V3.PANEL, Skill run view: run records and status)
+
+## Groups of G-V3.PANEL
+| Order | Group | What it covers | Requirements |
+|---|---|---|---|
+| 1 | RV | Run record and the run that is shown for the Skill run view (FR-46) | REQ-WFM-130, REQ-WFM-131, REQ-WFM-132, REQ-WFM-133, REQ-WFM-134, REQ-WFM-135, REQ-WFM-136, REQ-WFM-137, REQ-WFM-138 |
+
+### REQ-WFM-130 – Run record of every skill run
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall store one record per skill run, lookup and search included, in the table skill_runs through IF-102 with skill id, version, account, start, end, state and phases.
+- Rationale: refines REQ-BE-033; the Skill run view is the history of the run (FR-46, owner 2026-11-07)
+- Parent: REQ-BE-033
+- Group: RV
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: a scripted run of each of lookup, search and review leaves one record with the six fields; the record read back equals the one stored (exact)
+- Verified by: TC-WFM-130
+- Status: Draft
+- History: A-131 (proposed 2026-11-08, G-V3.PANEL), new
+
+### REQ-WFM-131 – Figures and reason in the run record
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall store the final figures of a run and, for a run that failed or was stopped, its reason in the run record when the run ends.
+- Rationale: refines REQ-BE-033; the view shows the final figures after a reload (OC-3 of G-V3)
+- Parent: REQ-BE-033
+- Group: RV
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: a run that ends in done, failed and stopped leaves the figures it reported last, and the reason in the two last cases (exact)
+- Verified by: TC-WFM-131
+- Status: Draft
+- History: A-131 (proposed 2026-11-08, G-V3.PANEL), new
+
+### REQ-WFM-132 – Result and material in the run record
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall store the full result, the material found on the way and the names of the files in the run record when the run ends.
+- Rationale: refines REQ-BE-033; the full result leaves the chat (A-131)
+- Parent: REQ-BE-033
+- Group: RV
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: the record of a scripted review holds the full result text, the material and the names of its files (exact)
+- Verified by: TC-WFM-132
+- Status: Draft
+- History: A-131 (proposed 2026-11-08, G-V3.PANEL), new
+
+### REQ-WFM-133 – Answers in the run record
+- Level: low   Subject: TaskRuntime
+- Text: When a user answers a question of a running skill, the Workflow management shall append the answer with its time to the run record in the order given.
+- Rationale: refines REQ-BE-033; the view confirms each answer given (FR-46)
+- Parent: REQ-BE-033
+- Group: RV
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: two answers to a scripted review appear in the record in order with their times (exact)
+- Verified by: TC-WFM-133
+- Status: Draft
+- History: A-131 (proposed 2026-11-08, G-V3.PANEL), new
+
+### REQ-WFM-134 – Run that is shown
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall name as shown the run started most recently while skills run and the run ended last when none runs, and no earlier run.
+- Rationale: refines REQ-BE-033; owner Q-2 and Q-8 of 2026-11-07 (D-271, D-273)
+- Parent: REQ-BE-033
+- Group: RV
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: with two scripted runs started in turn the second is named; after both end the one that ended last is named; a third earlier run is never named (exact)
+- Verified by: TC-WFM-134
+- Status: Draft
+- History: A-131 (proposed 2026-11-08, G-V3.PANEL), new
+
+### REQ-WFM-135 – Chat history deleted
+- Level: low   Subject: TaskRuntime
+- Text: When the history records of an account are deleted in the storage, the Workflow management shall delete that account's run records and keep the files of the files volume.
+- Rationale: refines REQ-BE-033; owner decision of 2026-11-07 (OC-3 of G-V3)
+- Parent: REQ-BE-033
+- Group: RV
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: after the history records of the account are deleted through IF-102 no run is named for it, the page is told by skill_run_changed, and every file of the volume is still listed (exact)
+- Verified by: TC-WFM-135
+- Status: Draft
+- History: A-131 (proposed 2026-11-08, G-V3.PANEL), new; reworded after approval in batch 1 (owner 2026-11-08: no operation deletes the chat history today, the trigger is the delete of history records in the storage, notified by IF-102 `subscribe`)
+
+### REQ-WFM-136 – Runs without knowledge of the view
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall create the run record and send task_status for every skill from the events the skill sends today, without a change of the skill.
+- Rationale: refines REQ-BE-033; OC-7 of G-V3: the view does not depend on the implementation of the skills
+- Parent: REQ-BE-033
+- Group: RV
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: a scripted skill that sends only the events of today gets a record and a view; no skill file or manifest changes for it (exact, inspection of the stand-in)
+- Verified by: TC-WFM-136
+- Status: Draft
+- History: A-131 (proposed 2026-11-08, G-V3.PANEL), new
+
+### REQ-WFM-137 – Texts of a run are stored as data
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall store the texts of a run (result, material, answers, reason) unchanged as text and never execute or interpret them.
+- Rationale: refines REQ-BE-033; NFR-3, boundary TB-result of FB-01 (OC-8 of G-V3)
+- Parent: REQ-BE-033
+- Group: RV
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: a result with an instruction and a script tag is stored and read back byte for byte and starts no tool call (exact)
+- Verified by: TC-WFM-137
+- Status: Draft
+- History: A-131 (proposed 2026-11-08, G-V3.PANEL), new
+
+### REQ-WFM-138 – Elements of a skill passed on
+- Level: low   Subject: TaskRuntime
+- Text: Where a skill reports elements of its own, the Workflow management shall pass them as label and text pairs in the event task_status and store them in the run record, without changing the skill's interface.
+- Rationale: refines REQ-BE-033; owner at the review of 2026-11-08: skill specific elements can be added per skill; OC-7 stays: a skill that reports none works as before
+- Parent: REQ-BE-033
+- Group: RV
+- Priority: Should
+- Verification method: Test
+- Acceptance criterion: AC-39: a scripted skill that reports two elements has them in `task_status` and in the run record; a skill that reports none has an empty list and the other checks of the group pass unchanged (exact)
+- Verified by: TC-WFM-138
+- Status: Draft
+- History: A-131 (proposed 2026-11-08, G-V3.PANEL), new; owner at review of batch 2: skill specific elements can be added per skill
