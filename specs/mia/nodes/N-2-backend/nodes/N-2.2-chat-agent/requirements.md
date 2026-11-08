@@ -259,7 +259,7 @@ The persona's side: the shared conversation, the answer queue, persona, mood, me
 - Level: low   Subject: ConversationCore
 - Text: When a user asks to speak a message of MIA again, the Chat agent shall have the stored text of that message spoken on the voice route that live answers use.
 - Rationale: refines REQ-CHA-006; REQ-BE-006 says 'a new audio stream' but the check counted only audio_chunk events (D-276); the voice route is the sound server of live answers (A-132 option B). A message of MIA is any message with an id that MIA wrote: an answer, a spoken summary, a question of a skill (owner, D-277); a message of a user stays not_found (IF-201, unchanged)
-- Parent: REQ-CHA-006
+- Parent: REQ-BE-006
 - Priority: Should
 - Verification method: Test, Demonstration
 - Acceptance criterion: AC-1: speak again of a stored answer of three sentences, and of a stored question of a skill, hands exactly their spoken sentences to the voice route; on the host the answer is heard
@@ -272,7 +272,7 @@ The persona's side: the shared conversation, the answer queue, persona, mood, me
 - Level: low   Subject: ConversationCore
 - Text: The Chat agent shall hand the sentences of an answer that is spoken again to the voice route in the order of the answer.
 - Rationale: refines REQ-CHA-006; the order of sentences is part of the voice (TD-11)
-- Parent: REQ-CHA-006
+- Parent: REQ-BE-006
 - Priority: Should
 - Verification method: Test
 - Acceptance criterion: AC-1: the sentences of a stored answer reach the voice route in the order of the text (exact)
@@ -285,7 +285,7 @@ The persona's side: the shared conversation, the answer queue, persona, mood, me
 - Level: low   Subject: ConversationCore
 - Text: When a user presses stop, the Chat agent shall end a spoken-again playback that is running or waiting, also when no answer is being generated.
 - Rationale: refines REQ-CHA-004; stop() today does nothing when no answer runs, and speak again has no answer running
-- Parent: REQ-CHA-004
+- Parent: REQ-BE-006
 - Priority: Should
 - Verification method: Test, Demonstration
 - Acceptance criterion: AC-1: after a stop request no further sentence of the answer spoken again is handed to the voice route, and the playback in progress is cancelled
@@ -298,7 +298,7 @@ The persona's side: the shared conversation, the answer queue, persona, mood, me
 - Level: low   Subject: ConversationCore
 - Text: If the voice route is not available, then the Chat agent shall still answer a speak-again request with the number of sentences and log the failure once.
 - Rationale: refines REQ-CHA-006; the chat continues without voice (IF-204, IF-101 audio_chunk); silent, one log line, no new text for the user (owner, D-277)
-- Parent: REQ-CHA-006
+- Parent: REQ-BE-006
 - Priority: Should
 - Verification method: Test
 - Acceptance criterion: AC-1: with a failing voice route the request returns the sentence count, the next message is answered, one error line is logged and no text and no event but audio_chunk and chat_status is added to the page (A-133: the status is busy while the repeat runs)
@@ -311,7 +311,7 @@ The persona's side: the shared conversation, the answer queue, persona, mood, me
 - Level: low   Subject: ConversationCore
 - Text: While a message is being spoken, the Chat agent shall have a spoken-again message wait until that speech has ended.
 - Rationale: refines REQ-CHA-006; two voices at once are an echo (REQ-FE-011 for lines in the page); a speak-again during a live answer is queued behind the live voice (owner, D-277); the sound server takes one connection at a time, which TC-CHA-036 checks on the hand-over
-- Parent: REQ-CHA-006
+- Parent: REQ-BE-006
 - Priority: Should
 - Verification method: Test
 - Acceptance criterion: AC-1: two speak-again requests in a row, and a speak-again while a live answer is spoken, reach the voice route one after the other, never overlapping (exact)
@@ -324,7 +324,7 @@ The persona's side: the shared conversation, the answer queue, persona, mood, me
 - Level: low   Subject: ConversationCore
 - Text: While a message is being spoken again or waits to be spoken again, the Chat agent shall report the status busy with the activity speaking.
 - Rationale: refines REQ-CHA-032; the page offers its stop button only while the status is busy and speaking (REQ-CLV-002, mood.js followStatus), and a speak again has no running answer, so the host hand check TC-CHA-035 found no stop button during a repeat (owner, 2026-11-08; A-133). IF-101 chat_status already has these fields and values: no contract change
-- Parent: REQ-CHA-032
+- Parent: REQ-BE-006
 - Priority: Should
 - Verification method: Test, Demonstration
 - Acceptance criterion: AC-1: with a fake voice route that blocks, after a speak-again request the chat_status event with busy true and activity speaking was published and the status says so, also for a second request that waits (exact); on the host the stop button is shown during the repeat
@@ -337,7 +337,7 @@ The persona's side: the shared conversation, the answer queue, persona, mood, me
 - Level: low   Subject: ConversationCore
 - Text: When the last message that is spoken again has been spoken or stopped, the Chat agent shall report the status as it was before, not busy and without the activity speaking.
 - Rationale: refines REQ-CHA-035; a stop button that stays after the voice has ended would be wrong; an answer that is running keeps its own status (A-133)
-- Parent: REQ-CHA-035
+- Parent: REQ-BE-006
 - Priority: Should
 - Verification method: Test
 - Acceptance criterion: AC-1: after the playback ended by itself, and after a stop, the last chat_status event has busy false and an activity other than speaking, and the status says so (exact)

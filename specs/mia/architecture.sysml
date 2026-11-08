@@ -5660,6 +5660,7 @@ package MIA_NodeRequirements {
     dependency from r_req_vpb_004 to r_req_fe_026;
     dependency from r_req_vpb_005 to r_req_fe_030;
     dependency from r_req_vpb_006 to r_req_vpb_002;
+    dependency from r_req_vpb_006 to r_req_fe_012;
     dependency from r_req_fe_001 to fr1;
     dependency from r_req_fe_002 to fr1;
     dependency from r_req_fe_002 to nfr7;
@@ -5738,12 +5739,19 @@ package MIA_NodeRequirements {
     dependency from r_req_cha_019 to r_req_be_032;
     dependency from r_req_cha_020 to r_req_be_074;
     dependency from r_req_cha_030 to r_req_cha_006;
+    dependency from r_req_cha_030 to r_req_be_006;
     dependency from r_req_cha_031 to r_req_cha_006;
+    dependency from r_req_cha_031 to r_req_be_006;
     dependency from r_req_cha_032 to r_req_cha_004;
+    dependency from r_req_cha_032 to r_req_be_006;
     dependency from r_req_cha_033 to r_req_cha_006;
+    dependency from r_req_cha_033 to r_req_be_006;
     dependency from r_req_cha_034 to r_req_cha_006;
+    dependency from r_req_cha_034 to r_req_be_006;
     dependency from r_req_cha_035 to r_req_cha_032;
+    dependency from r_req_cha_035 to r_req_be_006;
     dependency from r_req_cha_036 to r_req_cha_035;
+    dependency from r_req_cha_036 to r_req_be_006;
     dependency from r_req_wfm_001 to r_req_be_033;
     dependency from r_req_wfm_002 to r_req_be_035;
     dependency from r_req_wfm_003 to r_req_be_036;

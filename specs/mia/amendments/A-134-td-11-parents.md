@@ -1,6 +1,6 @@
-# A-134: parents of the TD-11 requirements (Draft, proposed by the Verify session 2026-11-08, finding F7 of `A-132-verification-report.md`)
+# A-134: parents of the TD-11 requirements (proposed by the Verify session 2026-11-08, finding F7 of `A-132-verification-report.md`; approved D-286)
 
-Status: **Draft, not approved.** The owner decided on 2026-11-08 to change the `Parent` of the eight requirements (answer to question 8 of the report). The choice of the new parents below is a proposal for the owner to confirm or change; no requirement text, `architecture.sysml` or trace link has been changed yet.
+Status: **approved as proposed by the owner 2026-11-08 (D-286) and applied.** The owner decided on 2026-11-08 to change the `Parent` of the eight requirements (answer to question 8 of the report) and approved the parents below unchanged. Applied: the eight `Parent:` lines and eight new `dependency` lines in `architecture.sysml` (the sibling links stay). Result: `decomp_check.py` 65 to 57 errors, none of TD-11; both SysML checks pass; `trace_check.py` and `req_graph.py` unchanged.
 
 ## Problem
 `decomp_check.py` (stage 1 step `decomposition`, required for merge) reports "no parent one level up" for REQ-CHA-030..036 (N-2.2) and REQ-VPB-006 (N-1.3): their `Parent` is a requirement of the same node. 63 errors at the plan gate (`43f2988`), 65 now (A-133 added REQ-CHA-035 and 036). No older REQ-CHA or REQ-VPB id has the error; they point to REQ-BE-nnn or REQ-FE-nnn.

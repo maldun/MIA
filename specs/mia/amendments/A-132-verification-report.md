@@ -117,6 +117,8 @@ Questions 1 to 8 of section 7 are answered; 9 and 10 are tasks. The verdict does
 | 3 s claim (3) | Accept the plausibility warning | add REQ-VPB-006 to `plausibility.yaml` as accepted risk (maldun), like the other 40 | owner approves, then Phase 2 |
 | F4 limits (7) | Accept as is | known limitation, to revisit with TD-61 | none |
 
+**F7 applied (A-134, D-286, 2026-11-08):** the owner approved the proposed parents; the eight `Parent:` lines and the model `dependency` lines are changed. After the change: `decomp_check.py` 57 errors (was 65), none of TD-11; `check_sysml.sh` ok; `check_sysml_model.py` OK; `trace_check.py` 540 errors, none of TD-11; `req_graph.py` 26 errors and 46 warnings as before. F7 is closed; the `decomposition` stage step stays red only for the 57 older errors of the plan backlog, which are not TD-11.
+
 Still open as tasks (not decisions): listen to a long answer spoken again on the host (together with the hand-check repeat; question 9), and diff `goal/v3` against the TD-11 files before the merge (question 10).
 
 ## 8. Next step
