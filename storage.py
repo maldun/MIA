@@ -216,8 +216,12 @@ class Storage:
             current = len(self.backend.versions(table, record_id))
             if expected_version is not None and expected_version != current:
                 raise StorageError("conflict", detail={"current": current})
-            entry = {"id": record_id, "version": current + 1, "author": author, "time": utc_now(), "doc": _copy(doc)}
-            self.backend.append(table, record_id, entry)
+            try:
+                entry = {"id": record_id, "version": current + 1, "author": author, "time": utc_now(), "doc": _copy(doc)}
+                self.backend.append(table, record_id, entry)
+            except RecursionError:              # a caller nearly out of stack: the copy of a dict subclass or the backend's encoder ran out; the backends
+                # write atomically, so nothing is stored; the document cannot be stored from here, so it is refused, never raised (F-27)
+                raise StorageError("invalid", rule="schema", detail="nested too deep") from None
         self._tell({"table": table, "id": record_id, "version": entry["version"], "author": author})
         return {"version": entry["version"]}
 

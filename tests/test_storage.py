@@ -1,4 +1,6 @@
 """The Storage layer on the file backend (N-3.1 T-01, T-02): TC-SLY-002, -003, -004, -006 (files) and the behaviour of IF-102. Run with: python tests/test_storage.py"""
+import collections
+import collections
 import os
 import random
 import shutil
@@ -340,6 +342,71 @@ class StorageBehaviour:
         # Then: the document is stored and read back unchanged
         self.assertFalse(thread.is_alive(), "put and get did not finish within 10 seconds")
         self.assertEqual(outcome, [{"version": 1}, document])
+
+    def _put_from_depth(self, document, frames, record_id="w"):
+        """put(document) called `frames` frames deep in a thread with a time limit; [result] or [("StorageError", rule, detail)] or [("other", type name)]."""
+        outcome = []
+
+        def from_depth(left):
+            if left:
+                return from_depth(left - 1)
+            try:
+                outcome.append(self.store.put("workflows", record_id, document, "anna"))
+            except StorageError as err:
+                outcome.append(("StorageError", err.rule, err.detail))
+            except BaseException as err:        # any other failure is the finding: report it, do not let it end the thread unnoticed
+                outcome.append(("other", type(err).__name__))
+        thread = threading.Thread(target=from_depth, args=(frames,), daemon=True)
+        thread.start()
+        thread.join(10)
+        self.assertFalse(thread.is_alive(), "put did not finish within 10 seconds")
+        return outcome
+
+    @mark.req("REQ-SLY-013")
+    def test_put_raises_only_storage_error_from_a_very_deep_call_stack(self):
+        """F-27 (seventh Verify run): since T-13 put could raise a raw RecursionError when the caller was nearly out of stack.
+        Example: a 200-level document put from 850 frames (the JSON encoder of the file backend runs out) and a 198-deep OrderedDict document put from 700 and 800 frames
+        (the copy of a dict subclass recurses) -> either stored or StorageError(schema, nested too deep), never another exception; a refusal stores nothing.
+        """
+        # Given: a legal document of plain dicts and one of OrderedDicts
+        plain = {"nodes": [], "edges": [], "note": 7}
+        subclassed = {"nodes": [], "edges": [], "note": 7}
+        for _ in range(198):
+            plain["note"] = {"k": plain["note"]}
+        for _ in range(197):
+            subclassed["note"] = collections.OrderedDict(k=subclassed["note"])
+        for name, document, frames in (("plain", plain, 850), ("plain", plain, 900), ("ordered", subclassed, 700), ("ordered", subclassed, 800)):
+            with self.subTest(document=name, frames=frames):
+                # When: put is called that deep
+                record_id = "%s%d" % (name, frames)
+                outcome = self._put_from_depth(document, frames, record_id)
+                # Then: stored, or refused by the rule for a document that cannot be stored; nothing else
+                self.assertIn(outcome, ([{"version": 1}], [("StorageError", "schema", "nested too deep")]))
+                if outcome[0] != {"version": 1}:
+                    self.assertNotIn(record_id, self.store.ids("workflows"))
+
+    @mark.req("REQ-SLY-013")
+    def test_a_tuple_is_a_container_of_the_storage_walk(self):
+        """F-28 (mutant T3): the Storage walk looks into tuples like into lists, so a Python caller cannot get past it with one.
+        Example: a tuple nested 198 deep with a scalar at level 200 is stored and at 199 deep (level 201) refused as nested too deep; a tuple that holds NaN, a NUL or itself is refused.
+        """
+        def nested(wrappers):
+            leaf = 7
+            for _ in range(wrappers):
+                leaf = (leaf,)
+            return {"nodes": [], "edges": [], "note": leaf}
+        loop = []
+        loop.append((loop,))
+        # When / Then: the limit of 200 levels holds through tuples
+        self.assertEqual(self.store.put("workflows", "w", nested(198), "anna"), {"version": 1})
+        self.assertEqual(code_of(lambda: self.store.put("workflows", "x", nested(199), "anna")), ("invalid", "schema"))
+        # And: what a list holding the same is refused for, a tuple is refused for
+        for name, bad, detail in (("NaN", (1, (float("nan"),)), "a number that is not finite"), ("NUL", ("a", ("b\x00",)), "a NUL character"), ("cycle", (loop,), "cyclic")):
+            with self.subTest(tuple_holding=name):
+                with self.assertRaises(StorageError) as refused:
+                    self.store.put("workflows", "y", {"nodes": [], "edges": [], "note": bad}, "anna")
+                self.assertEqual((refused.exception.code, refused.exception.rule, refused.exception.detail), ("invalid", "schema", detail))
+        self.assertEqual(self.store.ids("workflows"), ["w"])
 
     @mark.req("REQ-SLY-014")
     def test_a_document_that_contains_itself_is_refused_within_a_second(self):
