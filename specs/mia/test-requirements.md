@@ -102,7 +102,7 @@
 - History: G-V3.PANEL Plan step 3 (2026-11-08), new
 
 ### TR-PANEL-003 – the fake of skill_runs follows the contract
-- Applies to: TC-WFM-130, TC-WFM-131, TC-WFM-132, TC-WFM-133, TC-WFM-135, TC-WFM-137
+- Applies to: TC-WFM-130, TC-WFM-131, TC-WFM-132, TC-WFM-133, TC-WFM-135, TC-WFM-136, TC-WFM-137, TC-WFM-138
 - Requirement: REQ-WFM-130
 - Group: Stand-in (PANEL)
 - Kind: setup
@@ -114,7 +114,7 @@
 - History: G-V3.PANEL Plan step 3 (2026-11-08), new
 
 ### TR-PANEL-004 – a restart means a new process
-- Applies to: TC-CLV-038, TC-WFM-131
+- Applies to: TC-CLV-038
 - Requirement: REQ-CLV-038
 - Group: Persistence
 - Kind: setup
