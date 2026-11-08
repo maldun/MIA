@@ -450,7 +450,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 
 ### REQ-CHA-053 – Faithful summary
 - Level: low   Subject: ConversationCore
-- Text: The Chat agent shall word end summaries with SkillDigestStep that state nothing the full result does not say.
+- Text: The Chat agent shall word end summaries with SkillDigestStep that are faithful to the full result.
 - Rationale: refines REQ-BE-078; a wrong summary is believed and enters the history (HLS risk); the full result is the reference
 - Parent: REQ-BE-078
 - Group: SQ
@@ -460,7 +460,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Eval criterion: suite=EV-skill_turns; select=req:REQ-CHA-053; metric=faithful; min=0.85; low>=0.70; n=24; repeats=3; pin=MP-light; rule=both; alpha=0.05; false_alarm=0.0134; split=holdout
 - Verified by: EV-skill_turns
 - Status: Draft
-- History: A-131 (proposed 2026-11-08, G-V3.CHAT), new; owner 2026-11-08; n 21 to 24 at the owner's decision of 2026-11-08 on REQ-CHA-049 (6 injection cases per split), error rates recomputed
+- History: A-131 (proposed 2026-11-08, G-V3.CHAT), new; owner 2026-11-08; n 21 to 24 at the owner's decision of 2026-11-08 on REQ-CHA-049 (6 injection cases per split), error rates recomputed; reworded at the owner's one-by-one review of 2026-11-08: no absolute for model behaviour, the rate is in the Eval criterion; "faithful" is defined in the glossary
 
 ### REQ-CHA-054 – Summary in persona
 - Level: low   Subject: ConversationCore

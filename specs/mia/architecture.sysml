@@ -2858,7 +2858,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-CHA-053'> FaithfulSummary_Cha053 {
         subject s : ConversationCore;
-        doc /* The Chat agent shall word end summaries with SkillDigestStep that state nothing the full result does not say. */
+        doc /* The Chat agent shall word end summaries with SkillDigestStep that are faithful to the full result. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-CHA-054'> SummaryInPersona_Cha054 {
