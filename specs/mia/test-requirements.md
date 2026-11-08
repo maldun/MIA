@@ -16,6 +16,8 @@
 | 5 | Stand-in (PANEL) | The scripted skill, the fake of skill_runs, the clock (G-V3.PANEL) | TR-PANEL-002, TR-PANEL-003, TR-PANEL-007 |
 | 6 | Persistence | A restart is a new process (G-V3.PANEL) | TR-PANEL-004 |
 | 7 | Untrusted text | The fixed list of hostile strings (G-V3.PANEL) | TR-PANEL-005 |
+| 9 | Eval setup (CHAT) | Pin, holdout, labels, hard checks and error rates of EV-skill_turns (G-V3.CHAT) | TR-CHAT-001, TR-CHAT-002, TR-CHAT-003, TR-CHAT-004, TR-CHAT-005, TR-CHAT-007 |
+| 10 | Fakes (CHAT) | The fake model server (G-V3.CHAT) | TR-CHAT-006 |
 | 8 | Exact values (PANEL) | Names, states, orders and figures (G-V3.PANEL) | TR-PANEL-006 |
 
 ### TR-MODEL-001 – storage stand-in is a minimal fake with a known gap
@@ -160,4 +162,90 @@
 - Verified by: the checks contain no sleep (inspection)
 - Status: Draft
 - History: G-V3.PANEL Plan step 3 (2026-11-08), new
+
+## G-V3.CHAT (Plan step 3, 2026-11-08; prefix TR-CHAT-)
+
+### TR-CHAT-001 – the suite runs on the pin with fixed options
+- Applies to: EV-skill_turns
+- Requirement: REQ-CHA-053
+- Group: Eval setup (CHAT)
+- Kind: setup
+- Text: The runs of EV-skill_turns shall use MP-light (digest sha256:38044be4f923...) with num_ctx 8192, temperature 0 for the hard checks and the options of `eval-spec.md` for the repeats, 3 repeats per case with fresh seeds.
+- Rationale: a criterion decided on another pin or other options measures another system
+- Credibility aspect: numerical settings
+- Verified by: harness log with the pin, options and seeds of each run
+- Status: Draft
+- History: G-V3.CHAT Plan step 3 (2026-11-08), new
+
+### TR-CHAT-002 – holdout stays apart
+- Applies to: EV-skill_turns
+- Requirement: REQ-CHA-053
+- Group: Eval setup (CHAT)
+- Kind: setup
+- Text: No case of the holdout shall be read, run or tuned on by the coding agent before Verify; the dev split is the only one used in Implement; a case is never moved between splits.
+- Rationale: holdout separation (agent-app rule)
+- Credibility aspect: holdout separation
+- Verified by: file list of eval/suites and the run log
+- Status: Draft
+- History: G-V3.CHAT Plan step 3 (2026-11-08), new
+
+### TR-CHAT-003 – labels are people's
+- Applies to: EV-skill_turns
+- Requirement: REQ-CHA-053
+- Group: Eval setup (CHAT)
+- Kind: setup
+- Text: Truth and the `faithful` and `persona` labels of every case shall be set by a person; a model never sets one; each case has a note that says why its label is what it is.
+- Rationale: M19: truth by people
+- Credibility aspect: reference accuracy
+- Verified by: cases carry `label:people`
+- Status: Draft
+- History: G-V3.CHAT Plan step 3 (2026-11-08), new
+
+### TR-CHAT-004 – hard checks come first
+- Applies to: EV-skill_turns
+- Requirement: REQ-CHA-053
+- Group: Eval setup (CHAT)
+- Kind: setup
+- Text: Before a label counts, the hard checks shall run on every summary: each number and each quoted name occurs in the full result, no table or log line, a link only from code; a failed hard check makes the case not faithful whatever the label says.
+- Rationale: code checks what code can; people judge the rest
+- Credibility aspect: power and false-alarm rate
+- Verified by: hard-check results beside each label in the run file
+- Status: Draft
+- History: G-V3.CHAT Plan step 3 (2026-11-08), new
+
+### TR-CHAT-005 – power and false alarm of the criteria
+- Applies to: EV-skill_turns
+- Requirement: REQ-CHA-053
+- Group: Eval setup (CHAT)
+- Kind: setup
+- Text: The criteria of REQ-CHA-049, 053 and 054 shall be decided with the n, rules and error rates of the Error rates table of `eval-spec.md`; a failing criterion is re-run once with fresh seeds before it counts; n, seeds and bounds are never changed to get a PASS.
+- Rationale: M19: statistics fixed before any data
+- Credibility aspect: power and false-alarm rate
+- Verified by: eval_decide.py output with the criterion line
+- Status: Draft
+- History: G-V3.CHAT Plan step 3 (2026-11-08), new
+
+### TR-CHAT-006 – fake model server for the logic checks
+- Applies to: TC-CHA-040, TC-CHA-041, TC-CHA-042, TC-CHA-043, TC-CHA-044, TC-CHA-045, TC-CHA-046, TC-CHA-047, TC-CHA-048, TC-CHA-050, TC-CHA-051, TC-CHA-052
+- Requirement: REQ-CHA-040
+- Group: Fakes (CHAT)
+- Kind: setup
+- Text: The logic checks shall use the fake model server with scripted replies and a recorder of every call; it is no evidence for any eval criterion, which is decided on the real pin only.
+- Rationale: stand-in fidelity: the fake shows the code paths, not the quality of the text
+- Credibility aspect: stand-in fidelity
+- Verified by: inspection of the checks: none asserts on text quality
+- Status: Draft
+- History: G-V3.CHAT Plan step 3 (2026-11-08), new
+
+### TR-CHAT-007 – hostile strings of the red-team cases
+- Applies to: EV-skill_turns, TC-CHA-048
+- Requirement: REQ-CHA-049
+- Group: Eval setup (CHAT)
+- Kind: setup
+- Text: The red-team cases shall use the five fixed strings of TR-PANEL-005 inside a result, and each case shall name in its note which instruction it carries.
+- Rationale: the same list as in the view, so one list defines hostile for the whole goal
+- Credibility aspect: power and false-alarm rate
+- Verified by: tag rt:RT-nnn on each case
+- Status: Draft
+- History: G-V3.CHAT Plan step 3 (2026-11-08), new
 

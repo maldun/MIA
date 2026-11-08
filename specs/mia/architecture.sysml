@@ -794,10 +794,11 @@ package MIA_AgentView {
         port digestIn : ~SkillDigestPort;    // FB-01: the digests of a long result, joined into the summary
     }
     part def SkillDigestStep {
-        doc /* FB-01: digest of one piece of a long skill result, in order, so that the chat step can write the summary within
-               its context (map step; the chat step is the reduce step). The summary is informative; the full result is the reference. */
-        @ModelStep { schema = "none: free text"; tools = ""; tokenBudget = 8192; secondBudget = 0.0; pin = "MP-light"; criterion = "none: set in Plan"; }
-        @TrustBoundary { boundary = "TB-result"; threats = ""; }
+        doc /* FB-01, G-V3.CHAT: digest of one piece of a long skill result, in order (map), then the end summary, the failure message
+               and the status message per declared phase, all on MP-light and in persona (owner 2026-11-08). The summary is informative;
+               the full result is the reference. */
+        @ModelStep { schema = "none: free text"; tools = ""; tokenBudget = 4096; secondBudget = 0.0; pin = "MP-light"; criterion = "REQ-CHA-049, REQ-CHA-053, REQ-CHA-054"; }
+        @TrustBoundary { boundary = "TB-result"; threats = "THR-012"; }
         @ChangeSource { feedbackId = "FB-01"; iteration = 1; }
         port resultIn : ~SkillResultPort;
         port digestOut : SkillDigestPort;
@@ -2790,6 +2791,81 @@ package MIA_NodeRequirements {
         doc /* The Chat agent shall keep and read the conversation, memory, votes, tasks and memos only through the storage interface IF-102. */
         @Trace { :>> verifiedBy = (HowVerified::inspection, HowVerified::test); }
     }
+    requirement def <'REQ-CHA-040'> QuestionsOfASkillInTheChat_Cha040 {
+        subject s : ConversationCore;
+        doc /* When a running skill asks a question, the Chat agent shall add the question to the chat as a message of MIA and send it to speech. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-041'> StatusMessagePerDeclaredPhase_Cha041 {
+        subject s : ConversationCore;
+        doc /* When a running skill enters a phase that its manifest declares worth telling, the Chat agent shall add one new status message worded by SkillDigestStep in MIA's persona. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-042'> NoStatusForOtherPhases_Cha042 {
+        subject s : ConversationCore;
+        doc /* While a skill runs, the Chat agent shall add no message about a phase that the manifest does not declare worth telling, and none for a skill without declared phases. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-043'> EndSummaryWithALink_Cha043 {
+        subject s : ConversationCore;
+        doc /* When a skill run ends done, the Chat agent shall add one summary of the full result worded by SkillDigestStep, followed by a link to the run that code adds. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-044'> FailedOrStoppedRunInTheChat_Cha044 {
+        subject s : ConversationCore;
+        doc /* When a skill run fails or is stopped, the Chat agent shall add one message with the reason, worded in MIA's persona, followed by a link to the run that code adds. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-045'> OnlySpokenTextInTheChat_Cha045 {
+        subject s : ConversationCore;
+        doc /* The Chat agent shall add to the chat only messages that are sent to speech, and no card, table, log line or full result of a run. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-046'> HistoryOfARunForTheChatModel_Cha046 {
+        subject s : ConversationCore;
+        doc /* The Chat agent shall keep the questions, the answers, the end summary and the last status message of each run in the history the chat model sees, and no other status message. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-047'> SpokenLikeAnswersWithRepair_Cha047 {
+        subject s : ConversationCore;
+        doc /* The Chat agent shall apply the repair of REQ-CHA-014 to each status message, summary and failure message and send the repaired text to speech. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-048'> ResultIsDataForTheDigestStep_Cha048 {
+        subject s : ConversationCore;
+        doc /* The Chat agent shall run SkillDigestStep without tools and give it the full result and each piece as text to report, never as instructions. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-049'> QuotedInstructionIsReportedNotFollowed_Cha049 {
+        subject s : ConversationCore;
+        doc /* The Chat agent shall have SkillDigestStep report an instruction quoted in a result as text and not follow it, in the red-team cases of suite EV-skill_turns. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-050'> InputOfAModelCall_Cha050 {
+        subject s : ConversationCore;
+        doc /* The Chat agent shall limit the input of each model call of SkillDigestStep to half of the context, 4096 tokens at num_ctx 8192. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-051'> LongResultReadInPieces_Cha051 {
+        subject s : ConversationCore;
+        doc /* When the full result is longer than one input allows, the Chat agent shall have SkillDigestStep digest it in consecutive pieces and summarize the digests, leaving no part out. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-052'> LengthAskedNotEnforced_Cha052 {
+        subject s : ConversationCore;
+        doc /* The Chat agent shall pass on the summary of SkillDigestStep uncut, its prompt asking for at most 1200 characters. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-053'> FaithfulSummary_Cha053 {
+        subject s : ConversationCore;
+        doc /* The Chat agent shall word end summaries with SkillDigestStep that state nothing the full result does not say. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-054'> SummaryInPersona_Cha054 {
+        subject s : ConversationCore;
+        doc /* The Chat agent shall word status messages and end summaries with SkillDigestStep in the persona of the persona file. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
     requirement def <'REQ-WFM-001'> SkillsAsTasks_Wfm001 {
         subject s : TaskRuntime;
         doc /* The Workflow management shall perform each kind of work as a task defined by a skill file and a pipeline selectable by every user. */
@@ -3865,6 +3941,11 @@ package MIA_NodeRequirements {
         doc /* The Backend shall offer the Graph app, under the Backend's session, the listing, reading, saving as a new version, history, diff and restore of workflows and context graphs, and refuse an invalid graph with the broken rule named (IF-104). */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
+    requirement def <'REQ-BE-078'> SkillTurnsInTheChat_Be078 {
+        subject s : WebApplication;
+        doc /* The Backend shall put into the chat only the spoken text of a skill run: questions, answers, a status message per declared phase and an end summary with a link to the Skill run view. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
     requirement def <'REQ-BE-077'> Logout_Be077 {
         subject s : WebApplication;
         doc /* The Backend shall end the session of a user on request, so that the session no longer authenticates a request or a socket. */
@@ -4546,6 +4627,21 @@ package MIA_NodeRequirements {
     requirement r_req_cha_018 : CountersVisibleAndResettable_Cha018;
     requirement r_req_cha_019 : TasksAndMemosRecitedFromRecords_Cha019;
     requirement r_req_cha_020 : StateOnlyThroughTheStorageInterface_Cha020;
+    requirement r_req_cha_040 : QuestionsOfASkillInTheChat_Cha040;
+    requirement r_req_cha_041 : StatusMessagePerDeclaredPhase_Cha041;
+    requirement r_req_cha_042 : NoStatusForOtherPhases_Cha042;
+    requirement r_req_cha_043 : EndSummaryWithALink_Cha043;
+    requirement r_req_cha_044 : FailedOrStoppedRunInTheChat_Cha044;
+    requirement r_req_cha_045 : OnlySpokenTextInTheChat_Cha045;
+    requirement r_req_cha_046 : HistoryOfARunForTheChatModel_Cha046;
+    requirement r_req_cha_047 : SpokenLikeAnswersWithRepair_Cha047;
+    requirement r_req_cha_048 : ResultIsDataForTheDigestStep_Cha048;
+    requirement r_req_cha_049 : QuotedInstructionIsReportedNotFollowed_Cha049;
+    requirement r_req_cha_050 : InputOfAModelCall_Cha050;
+    requirement r_req_cha_051 : LongResultReadInPieces_Cha051;
+    requirement r_req_cha_052 : LengthAskedNotEnforced_Cha052;
+    requirement r_req_cha_053 : FaithfulSummary_Cha053;
+    requirement r_req_cha_054 : SummaryInPersona_Cha054;
     requirement r_req_wfm_001 : SkillsAsTasks_Wfm001;
     requirement r_req_wfm_002 : VersionedWorkflowLibrary_Wfm002;
     requirement r_req_wfm_003 : NoCycles_Wfm003;
@@ -4761,6 +4857,7 @@ package MIA_NodeRequirements {
     requirement r_req_be_074 : StateOnlyThroughTheStorageInterface_Be074;
     requirement r_req_be_075 : ServeTheFrontend_Be075;
     requirement r_req_be_076 : WorkflowAndGraphAPI_Be076;
+    requirement r_req_be_078 : SkillTurnsInTheChat_Be078;
     requirement r_req_be_077 : Logout_Be077;
     requirement r_req_sly_001 : PostgreSQLInAContainer_Sly001;
     requirement r_req_sly_002 : SharedStateHeld_Sly002;
@@ -5002,6 +5099,21 @@ package MIA_NodeRequirements {
     satisfy r_req_cha_018 by mia.conversation;
     satisfy r_req_cha_019 by mia.conversation;
     satisfy r_req_cha_020 by mia.conversation;
+    satisfy r_req_cha_040 by mia.conversation;
+    satisfy r_req_cha_041 by mia.conversation;
+    satisfy r_req_cha_042 by mia.conversation;
+    satisfy r_req_cha_043 by mia.conversation;
+    satisfy r_req_cha_044 by mia.conversation;
+    satisfy r_req_cha_045 by mia.conversation;
+    satisfy r_req_cha_046 by mia.conversation;
+    satisfy r_req_cha_047 by mia.conversation;
+    satisfy r_req_cha_048 by mia.conversation;
+    satisfy r_req_cha_049 by mia.conversation;
+    satisfy r_req_cha_050 by mia.conversation;
+    satisfy r_req_cha_051 by mia.conversation;
+    satisfy r_req_cha_052 by mia.conversation;
+    satisfy r_req_cha_053 by mia.conversation;
+    satisfy r_req_cha_054 by mia.conversation;
     satisfy r_req_wfm_001 by mia.taskRuntime;
     satisfy r_req_wfm_002 by mia.taskRuntime;
     satisfy r_req_wfm_003 by mia.taskRuntime;
@@ -5217,6 +5329,7 @@ package MIA_NodeRequirements {
     satisfy r_req_be_074 by mia.webApp;
     satisfy r_req_be_075 by mia.webApp;
     satisfy r_req_be_076 by mia.webApp;
+    satisfy r_req_be_078 by mia.webApp;
     satisfy r_req_be_077 by mia.webApp;
     satisfy r_req_sly_001 by mia.persistence;
     satisfy r_req_sly_002 by mia.persistence;
@@ -5457,6 +5570,21 @@ package MIA_NodeRequirements {
     allocate r_req_cha_018 to mia.conversation;
     allocate r_req_cha_019 to mia.conversation;
     allocate r_req_cha_020 to mia.conversation;
+    allocate r_req_cha_040 to mia.conversation;
+    allocate r_req_cha_041 to mia.conversation;
+    allocate r_req_cha_042 to mia.conversation;
+    allocate r_req_cha_043 to mia.conversation;
+    allocate r_req_cha_044 to mia.conversation;
+    allocate r_req_cha_045 to mia.conversation;
+    allocate r_req_cha_046 to mia.conversation;
+    allocate r_req_cha_047 to mia.conversation;
+    allocate r_req_cha_048 to mia.conversation;
+    allocate r_req_cha_049 to mia.conversation;
+    allocate r_req_cha_050 to mia.conversation;
+    allocate r_req_cha_051 to mia.conversation;
+    allocate r_req_cha_052 to mia.conversation;
+    allocate r_req_cha_053 to mia.conversation;
+    allocate r_req_cha_054 to mia.conversation;
     allocate r_req_wfm_001 to mia.taskRuntime;
     allocate r_req_wfm_002 to mia.taskRuntime;
     allocate r_req_wfm_003 to mia.taskRuntime;
@@ -5672,6 +5800,7 @@ package MIA_NodeRequirements {
     allocate r_req_be_074 to mia.webApp;
     allocate r_req_be_075 to mia.webApp;
     allocate r_req_be_076 to mia.webApp;
+    allocate r_req_be_078 to mia.webApp;
     allocate r_req_be_077 to mia.webApp;
     allocate r_req_sly_001 to mia.persistence;
     allocate r_req_sly_002 to mia.persistence;
@@ -5923,6 +6052,21 @@ package MIA_NodeRequirements {
     dependency from r_req_cha_018 to r_req_be_031;
     dependency from r_req_cha_019 to r_req_be_032;
     dependency from r_req_cha_020 to r_req_be_074;
+    dependency from r_req_cha_040 to r_req_be_078;
+    dependency from r_req_cha_041 to r_req_be_078;
+    dependency from r_req_cha_042 to r_req_be_078;
+    dependency from r_req_cha_043 to r_req_be_078;
+    dependency from r_req_cha_044 to r_req_be_078;
+    dependency from r_req_cha_045 to r_req_be_078;
+    dependency from r_req_cha_046 to r_req_be_078;
+    dependency from r_req_cha_047 to r_req_be_078;
+    dependency from r_req_cha_048 to r_req_be_078;
+    dependency from r_req_cha_049 to r_req_be_078;
+    dependency from r_req_cha_050 to r_req_be_078;
+    dependency from r_req_cha_051 to r_req_be_078;
+    dependency from r_req_cha_052 to r_req_be_078;
+    dependency from r_req_cha_053 to r_req_be_078;
+    dependency from r_req_cha_054 to r_req_be_078;
     dependency from r_req_wfm_001 to r_req_be_033;
     dependency from r_req_wfm_002 to r_req_be_035;
     dependency from r_req_wfm_003 to r_req_be_036;
@@ -6159,6 +6303,7 @@ package MIA_NodeRequirements {
     dependency from r_req_be_076 to fr22;
     dependency from r_req_be_076 to fr30;
     dependency from r_req_be_076 to fr7;
+    dependency from r_req_be_078 to fr35;
     dependency from r_req_be_077 to fr21;
     dependency from r_req_sly_001 to r_req_db_001;
     dependency from r_req_sly_002 to r_req_db_002;

@@ -70,7 +70,7 @@ Top-level items it serves: FR-35, FR-46 (the chat part), FR-3 (the spoken short 
 | Phase | State | Record or reason |
 |---|---|---|
 | Explore | done | HLS of iteration 2 approved 2026-11-05 (D-186); wording A-131 |
-| Plan | open | |
+| Plan | in progress | started 2026-11-08: Step 1b (REQ-BE-078, REQ-CHA-040 to 054, A-142) and Step 3 (test-spec rows and scenarios, EV-skill_turns, eval-spec rows, TR-CHAT-001 to 007, THR-012) drafted; cases, labels, baseline, red tests and plan.md open |
 | Implement | open | |
 | Verify | open | |
 | Commit | open | |
