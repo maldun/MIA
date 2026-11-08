@@ -30,7 +30,7 @@ NEW = {
     "REQ-WFM-035": "a stored class per model and one question for a model that is new and not clearly local; exact behaviour in the chat, no measured number (owner rating 2026-11-08)",
     "REQ-WFM-037": "limits from the configuration, refusal that says so and a byte-for-byte download; no measured number; the allowed names and types are fixed by the acceptance criterion (owner rating 2026-11-08)",
     "REQ-WFM-034":"the time cap of 1800 s of work time is a configurable value checked with a fake clock; counting only work time (no pause, no waiting for the user) is a matter of design, not of measurement (owner rating 2026-11-08)",
-    "REQ-WFM-068": "exact behaviour and no number: a retired transform or skill is hidden from users and stays loadable by a check that names it (owner rating 2026-11-08)",
+    "REQ-WFM-068": "exact behaviour and no number, a retired transform or skill is hidden from users and stays loadable by a check that names it (owner rating 2026-11-08)",
     "REQ-WFM-039":"loading a skill from a folder of its own is standard; the inspection that no core file names a skill id is exact; the part that is deferred is recorded as TD-04 (owner rating 2026-11-08)",
     "REQ-WFM-059": "a fixed rule on the dev split of a suite with the same pin; the numbers of the criterion are open in the plan notes and are fixed in the Plan of the conversion goal, so the rating is of the rule, not of a number (owner rating 2026-11-08)",
 }
