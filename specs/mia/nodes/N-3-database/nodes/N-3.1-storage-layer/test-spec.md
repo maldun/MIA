@@ -19,6 +19,8 @@ Tests of this part alone against the mocks of its neighbours: the file backend r
 | TC-SLY-009 | REQ-SLY-009 | Component | 2 | the seed entries exported to files, then seeded into an empty library | the library holds identical entries (id, versions, documents) | exact |
 | TC-SLY-010 | REQ-SLY-010 | System | 3 | the stack with the database; a connection attempt from the host LAN address and from a container outside the stack network | both are refused; a connection from a container of the stack succeeds | exact |
 | TC-SLY-011 | REQ-SLY-011 | System | 3 | the container started alone with the configuration file, then by the compose stack with the same file | healthy in both cases; the same tables exist | exact |
+| TC-SLY-012 | REQ-SLY-013 | Component | 1 | a document nested 200, 201, 600 and 990 levels, for `graph_nodes` and for another table | the 200-level one is stored as version 1; the others are refused as invalid and nothing is stored | exact |
+| TC-SLY-013 | REQ-SLY-014 | Component | 1 | a list that contains itself, a dict that contains itself twice, as the value of a graph node and as a document of another table | each is refused as invalid within one second and nothing is stored | exact, 1 s |
 
 Contract test cases of IF-102: TC-IF-102-01 to the last of the suite (listed in the root `test-spec.md`).
 
@@ -89,6 +91,20 @@ Contract test cases of IF-102: TC-IF-102-01 to the last of the suite (listed in 
 - Given: the database configuration file
 - When: the container is started alone, then by the compose stack
 - Then: it is healthy both times and has the same tables
+
+### TC-SLY-012 – depth of a document
+- Verifies: REQ-SLY-013
+- Given: a document nested 200 levels (the document is level 1) and others nested 201, 600 and 990 levels, once as the value of a graph node and once as a document of a table that is not a graph table
+- When: each is put
+- Then: the 200-level document is stored as version 1; the others are refused as invalid
+- And: the refusals store nothing; graph tables name `schema_break` and `data`, other tables `schema` and `nested too deep`; the same on the file backend and on PostgreSQL
+
+### TC-SLY-013 – a document that contains itself
+- Verifies: REQ-SLY-014
+- Given: a list that contains itself and a dict that contains itself twice, once as the value of a graph node and once as a document of another table
+- When: each is put, with a time limit of one second
+- Then: each is refused as invalid within the limit
+- And: nothing is stored; the same on the file backend and on PostgreSQL
 
 ## Assumptions (checked in validation)
 

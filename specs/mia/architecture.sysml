@@ -3790,6 +3790,16 @@ package MIA_NodeRequirements {
         doc /* The Storage layer shall realise the storage interface IF-102 as specified in contracts/IF-102-storage-interface.md. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
+    requirement def <'REQ-SLY-013'> DepthOfADocument_Sly013 {
+        subject s : Persistence;
+        doc /* If a document that is put is nested deeper than 200 levels, then the Storage layer shall refuse it as invalid. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-SLY-014'> ADocumentThatContainsItself_Sly014 {
+        subject s : Persistence;
+        doc /* If a document that is put contains itself, then the Storage layer shall refuse it as invalid within one second. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
     requirement def <'REQ-GTB-001'> SharedStateHeld_Gtb001 {
         subject s : Persistence;
         doc /* The Graph tables shall define the tables of workflows (library entries) and context graphs. */
@@ -4636,6 +4646,8 @@ package MIA_NodeRequirements {
     requirement r_req_sly_010 : ReachableOnlyInsideTheHostNetwork_Sly010;
     requirement r_req_sly_011 : OwnContainer_Sly011;
     requirement r_req_sly_012 : RealiseIF102_Sly012;
+    requirement r_req_sly_013 : DepthOfADocument_Sly013;
+    requirement r_req_sly_014 : ADocumentThatContainsItself_Sly014;
     requirement r_req_gtb_001 : SharedStateHeld_Gtb001;
     requirement r_req_gtb_002 : SchemaValidationOnWrite_Gtb002;
     requirement r_req_gtb_003 : ContextGraphsStored_Gtb003;
@@ -5070,6 +5082,8 @@ package MIA_NodeRequirements {
     satisfy r_req_sly_010 by mia.persistence;
     satisfy r_req_sly_011 by mia.persistence;
     satisfy r_req_sly_012 by mia.persistence;
+    satisfy r_req_sly_013 by mia.persistence;
+    satisfy r_req_sly_014 by mia.persistence;
     satisfy r_req_gtb_001 by mia.persistence;
     satisfy r_req_gtb_002 by mia.persistence;
     satisfy r_req_gtb_003 by mia.persistence;
@@ -5503,6 +5517,8 @@ package MIA_NodeRequirements {
     allocate r_req_sly_010 to mia.persistence;
     allocate r_req_sly_011 to mia.persistence;
     allocate r_req_sly_012 to mia.persistence;
+    allocate r_req_sly_013 to mia.persistence;
+    allocate r_req_sly_014 to mia.persistence;
     allocate r_req_gtb_001 to mia.persistence;
     allocate r_req_gtb_002 to mia.persistence;
     allocate r_req_gtb_003 to mia.persistence;
@@ -5968,6 +5984,8 @@ package MIA_NodeRequirements {
     dependency from r_req_sly_010 to r_req_db_016;
     dependency from r_req_sly_011 to r_req_db_017;
     dependency from r_req_sly_012 to if102;
+    dependency from r_req_sly_013 to r_req_sly_004;
+    dependency from r_req_sly_014 to r_req_sly_004;
     dependency from r_req_gtb_001 to r_req_db_002;
     dependency from r_req_gtb_002 to r_req_db_004;
     dependency from r_req_gtb_003 to r_req_db_011;
