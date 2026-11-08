@@ -84,12 +84,12 @@
 - Requirement: REQ-CLV-040
 - Group: Layout
 - Kind: setup
-- Text: The layout checks shall run in headless Chromium of the test harness (podman, D-141) at 1440 x 900 px, 1920 x 1080 px and 360 x 800 px, in the light and the dark theme, with the same fonts, and read sizes from the rendered page.
+- Text: The layout checks shall run in headless Chromium of the test harness (podman, D-141) at 1440 x 900 px, 1920 x 1080 px and 360 x 800 px, in the light and the dark theme, with the same fonts, and read sizes from the rendered page; the harness is the image localhost/mia-browser with Chromium 156.0.8078.73 and chromium-driver of Debian 13, selenium 4.25.0 and the font DejaVu Sans (package fonts-dejavu-core), as read on 2026-11-08.
 - Rationale: heights, overlap and page scroll depend on window size, fonts and theme; the 150 px and 34 % limits mean nothing without them
 - Credibility aspect: reference environment
 - Verified by: harness log of the window sizes and theme of each run
 - Status: Draft
-- History: G-V3.PANEL Plan step 3 (2026-11-08), new
+- History: G-V3.PANEL Plan step 3 (2026-11-08), new; versions of the harness named in Plan step 4 (2026-11-08)
 
 ### TR-PANEL-002 – the scripted stand-in skill knows nothing of the view
 - Applies to: TC-CLV-030, TC-CLV-031, TC-CLV-032, TC-CLV-033, TC-CLV-034, TC-CLV-035, TC-CLV-038, TC-CLV-039, TC-CLV-043, TC-CLV-044, TC-WFM-136, TC-WFM-138
