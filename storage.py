@@ -11,7 +11,6 @@ A backend offers: versions(table, id) -> list of entries (oldest first), append(
 know the rules. Records are never changed in place; only append and remove (of a deletable table) touch the data. A backend shared by several
 instances also offers publish(event) and listen(callback): the notices of the other instances come through that channel, tagged with the origin.
 """
-import copy
 import logging
 import math
 import threading
@@ -122,36 +121,7 @@ def refuse_unstorable(*values, check_depth=True, check_size=True):
         raise StorageError("invalid", rule="schema", detail=found)
 
 
-def _copy(doc):
-    """A copy the backend keeps and get hands out. copy.deepcopy recurses with several frames per level, so a legal 200-level document failed when
-    the caller was already deep in its call stack (F-25). This copy is iterative; like deepcopy it copies a container that is named twice once
-    (the copy shares it too, so a document of 2**30 paths stays small). Containers never contain themselves here: validate refused that before.
-    Whatever is no dict, list or tuple (a text, a number, an object of another type) is left to copy.deepcopy."""
-    containers = (dict, list, tuple)
-    copies = {}                                 # id of a finished container -> its copy
-
-    def done(value):
-        return copies[id(value)] if type(value) in containers else copy.deepcopy(value)
-
-    stack = [doc]
-    while stack:
-        value = stack[-1]
-        if type(value) not in containers or id(value) in copies:
-            stack.pop()
-            continue
-        parts = value.values() if type(value) is dict else value
-        waiting = [part for part in parts if type(part) in containers and id(part) not in copies]
-        if waiting:
-            stack.extend(waiting)               # the parts first, then the container itself
-            continue
-        stack.pop()
-        if type(value) is dict:
-            copies[id(value)] = {done(key): done(part) for key, part in value.items()}
-        elif type(value) is list:
-            copies[id(value)] = [done(part) for part in value]
-        else:
-            copies[id(value)] = tuple(done(part) for part in value)
-    return done(doc)
+_copy = graph_tables.copy_document             # the one iterative copy; the Graph tables need it too (to_object), and they cannot import this module
 
 
 def check_names(record_id, author):

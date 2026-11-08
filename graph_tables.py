@@ -138,12 +138,22 @@ def _broken_path(schema, data):
     return ".".join(paths[0][1]) or "data"
 
 
-def _non_finite_path(value, path=()):
-    """The path of the first NaN or infinity in the data, or None: JSON has no such number and a schema's bounds let it pass (as in v1, A-60)."""
-    if isinstance(value, float) and not math.isfinite(value):
-        return ".".join(path)
-    items = value.items() if isinstance(value, dict) else enumerate(value) if isinstance(value, (list, tuple)) else ()
-    return next((found for found in (_non_finite_path(v, path + (str(k),)) for k, v in items) if found is not None), None)
+def _non_finite_path(value):
+    """The path of the first NaN or infinity in the data (depth first, in the order of the containers), or None: JSON has no such number and a
+    schema's bounds let it pass (as in v1, A-60). Iterative, so a legal record is not refused because the caller's stack is deep (F-26)."""
+    stack = [(value, ())]
+    while stack:
+        item, path = stack.pop()
+        if isinstance(item, float) and not math.isfinite(item):
+            return ".".join(path)
+        if isinstance(item, dict):
+            parts = list(item.items())
+        elif isinstance(item, (list, tuple)):
+            parts = list(enumerate(item))
+        else:
+            continue
+        stack.extend((inner, path + (str(key),)) for key, inner in reversed(parts))     # reversed: the first part is popped first
+    return None
 
 
 def _refusal(rule, detail):
@@ -234,6 +244,39 @@ def check_record(table, record, categories=None, stored=None, record_id=None):
         return _refusal("record_identity", "record")
 
 
+def copy_document(doc):
+    """A copy the backend keeps and get hands out. copy.deepcopy recurses with several frames per level, so a legal 200-level document failed when
+    the caller was already deep in its call stack (F-25). This copy is iterative; like deepcopy it copies a container that is named twice once
+    (the copy shares it too, so a document of 2**30 paths stays small). Containers never contain themselves here: validate refused that before.
+    Whatever is no dict, list or tuple (a text, a number, an object of another type) is left to copy.deepcopy, a dict key too (a tuple as a key is
+    not a part that is walked: it has no entry in `copies`)."""
+    containers = (dict, list, tuple)
+    copies = {}                                 # id of a finished container -> its copy
+
+    def done(value):
+        return copies[id(value)] if type(value) in containers else copy.deepcopy(value)
+
+    stack = [doc]
+    while stack:
+        value = stack[-1]
+        if type(value) not in containers or id(value) in copies:
+            stack.pop()
+            continue
+        parts = value.values() if type(value) is dict else value
+        waiting = [part for part in parts if type(part) in containers and id(part) not in copies]
+        if waiting:
+            stack.extend(waiting)               # the parts first, then the container itself
+            continue
+        stack.pop()
+        if type(value) is dict:
+            copies[id(value)] = {copy.deepcopy(key): done(part) for key, part in value.items()}
+        elif type(value) is list:
+            copies[id(value)] = [done(part) for part in value]
+        else:
+            copies[id(value)] = tuple(done(part) for part in value)
+    return done(doc)
+
+
 @dataclass
 class DataNode:
     id: str
@@ -273,7 +316,7 @@ def to_object(record, categories=None):
     refused = check_record("graph_nodes", record, categories=categories)
     if refused:
         return {"refused": refused}
-    data = copy.deepcopy(record["data"])
+    data = copy_document(record["data"])
     if categories is not None:
         return {"object": ContextNode(record["id"], data.pop("type"), data)}
     type_id = data.pop("type")
