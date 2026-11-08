@@ -89,8 +89,11 @@ class CopyOfADocument(unittest.TestCase):
         """F-28 (mutants C5, C8): a tuple comes back as a tuple, and the containers inside it are copied (and shared with the rest of the document).
         Example: _copy((1, [2], (3,))) -> (1, [2], (3,)) with a new list inside.
         """
+        # Given: a list that is named in a tuple and in the dict next to it
         inner = [2]
+        # When
         copied = _copy({"t": (1, inner, (3,)), "l": inner})
+        # Then: tuples stay tuples, the list inside is a new one and shared once
         self.assertIs(type(copied["t"]), tuple)
         self.assertIs(type(copied["t"][2]), tuple)
         self.assertIsNot(copied["t"][1], inner)
@@ -101,10 +104,13 @@ class CopyOfADocument(unittest.TestCase):
         """F-28: what is no plain dict, list or tuple (a subclass, a text, a number, None, another object) is left to copy.deepcopy: equal, same type, not the same container.
         Example: OrderedDict(a=[1]) comes back as an OrderedDict with a new list; "t", 1, 2.5, None come back equal.
         """
+        # Given: a dict subclass, a set and plain leaves
         ordered = collections.OrderedDict(a=[1])
         counter = collections.Counter("aab")
         unique = {1, 2}
+        # When
         copied = _copy({"o": ordered, "n": counter, "s": unique, "t": "text", "i": 1, "f": 2.5, "z": None, "b": True})
+        # Then: equal, same type, not the same container
         self.assertIs(type(copied["o"]), collections.OrderedDict)
         self.assertEqual(copied["o"], ordered)
         self.assertIsNot(copied["o"], ordered)
@@ -118,12 +124,15 @@ class CopyOfADocument(unittest.TestCase):
         """F-28 (latent defect): _copy({"a": 1, (1, 2): 2}) raised KeyError (the key was looked up in the memo although only values are walked); deepcopy copied it.
         Example: the copy equals the input; through Storage on the file backend the outcome is the one of before T-13 (the backend's TypeError: non-string keys are F-18), never a KeyError.
         """
+        # Given: a document with tuples as keys
         document = {"a": 1, (1, 2): 2, ("x", ("y",)): [3]}
+        # When: copied directly, and put through the file backend
         self.assertEqual(_copy(document), document)
         base = tempfile.mkdtemp()
         self.addCleanup(shutil.rmtree, base, True)
         store = Storage(FileBackend(base))
         outcome = from_depth(0, lambda: store.put("workflows", "w", {"nodes": [], "edges": [], "note": {(1, 2): 2}}, "anna"))
+        # Then: never a KeyError
         self.assertNotEqual(outcome, [("raised", "KeyError")])
         self.assertIn(outcome, ([{"version": 1}], [("raised", "TypeError")]))
 
@@ -135,23 +144,33 @@ class StorageKeepsItsOwnCopy(unittest.TestCase):
 
     @mark.req("REQ-SLY-013")
     def test_changing_the_callers_document_after_put_changes_nothing_stored(self):
-        """F-28 (mutant C1): put keeps a copy. Example: put {"nodes": [], "edges": [], "note": [1]}, then append to the caller's lists -> get gives the document as put."""
+        """F-28 (mutant C1): put keeps a copy.
+        Example: put {"nodes": [], "edges": [], "note": [1]}, then append to the caller's lists -> get gives the document as put.
+        """
+        # Given: a document with a list named twice
         shared = [1]
         document = {"nodes": [], "edges": [], "note": shared, "again": shared}
+        # When: it is put and the caller then changes its own lists
         self.store.put("workflows", "w", document, "anna")
         shared.append(2)
         document["nodes"].append({"id": "x"})
         document["extra"] = 1
+        # Then: the stored document is as put
         self.assertEqual(self.store.get("workflows", "w")["doc"], {"nodes": [], "edges": [], "note": [1], "again": [1]})
         self.assertIsNot(self.backend.versions("workflows", "w")[0]["doc"], document)
 
     @mark.req("REQ-SLY-013")
     def test_changing_what_get_returns_changes_nothing_stored(self):
-        """F-28 (mutant C2): get hands out a copy. Example: append to a list of the result of get -> the next get is as before; the result is not the stored object."""
+        """F-28 (mutant C2): get hands out a copy.
+        Example: append to a list of the result of get -> the next get is as before; the result is not the stored object.
+        """
+        # Given: a stored document
         self.store.put("workflows", "w", {"nodes": [], "edges": [], "note": [1]}, "anna")
+        # When: the caller changes what get returned
         first = self.store.get("workflows", "w")
         first["doc"]["note"].append(2)
         first["doc"]["nodes"].append(1)
+        # Then: the next get is as before and nothing handed out is the stored object
         self.assertEqual(self.store.get("workflows", "w")["doc"], {"nodes": [], "edges": [], "note": [1]})
         self.assertIsNot(first, self.backend.versions("workflows", "w")[0])
         self.assertIsNot(self.store.get("workflows", "w")["doc"], self.backend.versions("workflows", "w")[0]["doc"])
@@ -161,8 +180,11 @@ class StorageKeepsItsOwnCopy(unittest.TestCase):
         """F-28 (mutants C6, C7): a sub-object named twice is kept and handed out once, so a document of 2**30 paths stays small.
         Example: {"note": p, "other": p} -> stored["doc"]["note"] is stored["doc"]["other"], and the same in the result of get.
         """
+        # Given: a sub-object named twice in a document
         shared = {"k": [1]}
+        # When: it is put and read back
         self.store.put("workflows", "w", {"nodes": [], "edges": [], "note": shared, "other": shared}, "anna")
+        # Then: stored and returned versions each hold it once, and it is not the caller's
         stored = self.backend.versions("workflows", "w")[0]["doc"]
         returned = self.store.get("workflows", "w")["doc"]
         for name, doc in (("stored", stored), ("returned", returned)):
@@ -182,16 +204,23 @@ class ALegalRecordAtADeepCallStack(unittest.TestCase):
 
     @mark.req("REQ-GTB-027")
     def test_check_record_gives_the_same_answer_at_every_stack_depth(self):
-        """F-26. Example: check_record("graph_nodes", a node of 200 levels) is None called from 0, 500 and 700 frames."""
+        """F-26.
+        Example: check_record("graph_nodes", a node of 200 levels) is None called from 0, 500 and 700 frames.
+        """
+        # Given: the node of setUp. When/Then: the answer is None at every depth
         for frames in self.FRAMES:
             with self.subTest(frames=frames):
                 self.assertEqual(from_depth(frames, lambda: graph_tables.check_record("graph_nodes", self.record)), [None])
 
     @mark.req("REQ-GTB-027")
     def test_a_non_finite_number_is_named_at_every_stack_depth(self):
-        """F-26. Example: the NaN at the end of a 190-level list in "value" is named by its path from 0 and from 700 frames, not turned into record_identity."""
+        """F-26.
+        Example: the NaN at the end of a 190-level list in "value" is named by its path from 0 and from 700 frames, not turned into record_identity.
+        """
+        # Given: a node with a NaN next to a deep list
         record = {"id": "d1", "data": {"type": "data", "value": [nested(190, lambda leaf: [leaf]), float("nan")]}}
         expected = "value.1"
+        # When/Then: the same schema_break answer at both depths
         for frames in (0, 700):
             with self.subTest(frames=frames):
                 self.assertEqual(from_depth(frames, lambda: graph_tables.check_record("graph_nodes", record)),
@@ -199,7 +228,10 @@ class ALegalRecordAtADeepCallStack(unittest.TestCase):
 
     @mark.req("REQ-GTB-009")
     def test_to_object_gives_an_object_at_every_stack_depth(self):
-        """F-26. Example: to_object of a 200-level data node returns {"object": DataNode} from 0, 500 and 700 frames, and raises nothing."""
+        """F-26.
+        Example: to_object of a 200-level data node returns {"object": DataNode} from 0, 500 and 700 frames, and raises nothing.
+        """
+        # Given: the node of setUp. When/Then: an object with a copied value at every depth
         for frames in self.FRAMES:
             with self.subTest(frames=frames):
                 outcome = from_depth(frames, lambda: graph_tables.to_object(self.record))
@@ -209,7 +241,10 @@ class ALegalRecordAtADeepCallStack(unittest.TestCase):
 
     @mark.req("REQ-SLY-013")
     def test_put_of_a_graph_node_and_get_work_at_every_stack_depth(self):
-        """F-26. Example: Storage.put("graph_nodes", "d1", a 200-level node) is stored from 0, 500 and 700 frames (never record_identity), and get returns it."""
+        """F-26.
+        Example: Storage.put("graph_nodes", "d1", a 200-level node) is stored from 0, 500 and 700 frames (never record_identity), and get returns it.
+        """
+        # Given: the node of setUp. When/Then: put stores it as version 1 and get returns it, at every depth
         for frames in self.FRAMES:
             with self.subTest(frames=frames):
                 record_id = "d%d" % frames

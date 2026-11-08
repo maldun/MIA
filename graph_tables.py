@@ -240,6 +240,8 @@ def check_record(table, record, categories=None, stored=None, record_id=None):
     # only a category's schema comes from the caller: it can be no schema, or hold a reference that cannot be followed without the network (F-17)
     except (jsonschema.SchemaError, referencing.exceptions.Unresolvable):
         return _refusal("schema_break", "type")
+    except RecursionError:                      # the validator (or a walk) ran out of stack: the record cannot be checked, which says nothing about the record (F-30)
+        return _refusal("schema_break", "data")
     except Exception:                           # a malformed record (for example a header whose members are not objects) is refused, not raised
         return _refusal("record_identity", "record")
 

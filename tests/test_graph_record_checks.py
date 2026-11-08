@@ -299,6 +299,54 @@ class RecordCheckRemoteReference(unittest.TestCase):
         self.assertEqual(requests, [])
         self.assertEqual(results, [{"rule": "schema_break", "detail": "type"}] * 2)
 
+    def test_a_recursion_error_is_a_schema_break_naming_data_never_a_record_identity(self):
+        """F-30 (eighth Verify run): the JSON-schema validator recursed on a legal 190-level node against a recursive category schema; from a deep caller stack
+        the RecursionError was caught by the catch-all and reported as record_identity "record", as if the record were malformed.
+
+        Example: x nested 190 levels against {"$ref": "#/$defs/v"} with v = an integer or a list of v -> None at 0 frames and, at 600 frames, None or
+        schema_break "data" ("cannot be checked", as for a record nested too deep), never record_identity; a RecursionError raised inside the checks gives schema_break "data".
+        """
+        # Given: a legal context node and a category whose schema refers to itself
+        nested = 7
+        for _ in range(190):
+            nested = [nested]
+        record = {"id": "n", "data": {"type": "entity", "x": nested}}
+        value = {"type": ["integer", "array"], "items": {"$ref": "#/$defs/v"}}
+        categories = {"entity": {"type": "object", "$defs": {"v": value}, "properties": {"x": {"$ref": "#/$defs/v"}}}}
+        cannot_check = {"rule": "schema_break", "detail": "data"}
+        outcome = []
+
+        def run(left):
+            if left:
+                return run(left - 1)
+            try:
+                outcome.append(graph_tables.check_record("context_nodes", record, categories=categories))
+            except BaseException as err:
+                outcome.append(("raised", type(err).__name__))
+
+        # When: checked from 0 and from 600 frames, each in a thread with a time limit
+        answers = []
+        for frames in (0, 600):
+            del outcome[:]
+            thread = threading.Thread(target=run, args=(frames,), daemon=True)
+            thread.start()
+            thread.join(10)
+            self.assertFalse(thread.is_alive(), "no answer within 10 seconds at %d frames" % frames)
+            answers.append(list(outcome))
+        # Then: the legal record is accepted at 0 frames, and deep down it is accepted or cannot be checked, never a violation of the record
+        self.assertEqual(answers[0], [None])
+        self.assertIn(answers[1], ([None], [cannot_check]))
+        # And: a RecursionError from inside the checks is the same answer
+        original = graph_tables._check
+
+        def exhausted(*args):
+            raise RecursionError("maximum recursion depth exceeded")
+        graph_tables._check = exhausted
+        try:
+            self.assertEqual(graph_tables.check_record("context_nodes", record, categories=categories), cannot_check)
+        finally:
+            graph_tables._check = original
+
     def test_a_local_reference_still_works(self):
         """The registry that refuses remote references keeps `#/$defs/...` working.
 
