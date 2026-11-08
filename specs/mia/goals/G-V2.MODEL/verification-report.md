@@ -410,3 +410,6 @@ Survivors (20):
 | Deviation | Reason | Accepted by |
 |---|---|---|
 | none | | |
+
+## Owner decision (2026-11-08, D-309)
+After the fourth run the owner (maldun) accepted the open low findings as deviations: F-04, F-06, F-07 (c) to (e), F-08, F-09 (remainder), F-11 and the notes N-1 and N-2; F-07 (a) and (b) are a known property (decision of 2026-11-08); F-18 is accepted and pinned by a test. F-10 is settled: TC-WFM-047, TR-MODEL-003 and TR-MODEL-001 were re-approved (review-log rows of 2026-11-08). The reviewer's verdict of the fourth run ('Not verified, formally: nothing accepted yet') therefore becomes **Verified with accepted deviations** (review-log D-309). The reviewer's text above is unchanged.
