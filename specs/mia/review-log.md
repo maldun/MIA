@@ -565,3 +565,17 @@ The first version was silent until the end and could take 20 minutes or more: th
 | TC-CLV-033 | check | 1967e422783c | maldun | 2026-11-08 | approved | G-V3.PANEL checks set 1; TC-CLV-032 changed to browser stage 2 |
 | TC-CLV-034 | check | bd9a93ae9e35 | maldun | 2026-11-08 | approved | G-V3.PANEL checks set 1; TC-CLV-032 changed to browser stage 2 |
 | TC-CLV-035 | check | 925f81a8f39d | maldun | 2026-11-08 | approved | G-V3.PANEL checks set 1; TC-CLV-032 changed to browser stage 2 |
+| REQ-CLV-036 | requirement | b7ced5daf275 | maldun | 2026-11-08 | approved | G-V3.PANEL batch 7: sizes as shares of the viewport, set by the user in the browser, wide layout only, strip content scrolls inside |
+| REQ-CLV-041 | requirement | d4e4befb48bb | maldun | 2026-11-08 | approved | G-V3.PANEL batch 7: sizes as shares of the viewport, set by the user in the browser, wide layout only, strip content scrolls inside |
+| REQ-CLV-045 | requirement | 8852760249c8 | maldun | 2026-11-08 | approved | G-V3.PANEL batch 7: sizes as shares of the viewport, set by the user in the browser, wide layout only, strip content scrolls inside |
+| REQ-CLV-046 | requirement | 6e9cddc8ccfe | maldun | 2026-11-08 | approved | G-V3.PANEL batch 7: sizes as shares of the viewport, set by the user in the browser, wide layout only, strip content scrolls inside |
+| REQ-CLV-047 | requirement | 3b74c0fce765 | maldun | 2026-11-08 | approved | G-V3.PANEL batch 7: sizes as shares of the viewport, set by the user in the browser, wide layout only, strip content scrolls inside |
+| TC-CLV-036 | check | 917a792f4bbb | maldun | 2026-11-08 | approved | G-V3.PANEL batch 7: sizes as shares of the viewport, set by the user in the browser, wide layout only, strip content scrolls inside |
+| TC-CLV-037 | check | 77d13d459472 | maldun | 2026-11-08 | approved | G-V3.PANEL batch 7: sizes as shares of the viewport, set by the user in the browser, wide layout only, strip content scrolls inside |
+| TC-CLV-038 | check | 5f2483f75cf5 | maldun | 2026-11-08 | approved | G-V3.PANEL batch 7: sizes as shares of the viewport, set by the user in the browser, wide layout only, strip content scrolls inside |
+| TC-CLV-039 | check | 952cb270993d | maldun | 2026-11-08 | approved | G-V3.PANEL batch 7: sizes as shares of the viewport, set by the user in the browser, wide layout only, strip content scrolls inside |
+| TC-CLV-040 | check | 25cc41a68bf9 | maldun | 2026-11-08 | approved | G-V3.PANEL batch 7: sizes as shares of the viewport, set by the user in the browser, wide layout only, strip content scrolls inside |
+| TC-CLV-041 | check | c9c16c385d5e | maldun | 2026-11-08 | approved | G-V3.PANEL batch 7: sizes as shares of the viewport, set by the user in the browser, wide layout only, strip content scrolls inside |
+| TC-CLV-045 | check | 6a96a2a28781 | maldun | 2026-11-08 | approved | G-V3.PANEL batch 7: sizes as shares of the viewport, set by the user in the browser, wide layout only, strip content scrolls inside |
+| TC-CLV-046 | check | e9df0cfcc30c | maldun | 2026-11-08 | approved | G-V3.PANEL batch 7: sizes as shares of the viewport, set by the user in the browser, wide layout only, strip content scrolls inside |
+| TC-CLV-047 | check | 0a4ec34dab39 | maldun | 2026-11-08 | approved | G-V3.PANEL batch 7: sizes as shares of the viewport, set by the user in the browser, wide layout only, strip content scrolls inside |
