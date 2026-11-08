@@ -4055,4 +4055,579 @@ plausibility:
       rated: '2026-10-26'
       rated_by: maldun
       rating: plausible
+    REQ-CLV-024:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no model (proposal of the
+        agent, 2026-11-08, G-V3.PANEL); the earlier rating of the old wording is kept
+        unless the owner objects
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CLV-030:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no model (proposal of the
+        agent, 2026-11-08, G-V3.PANEL)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CLV-031:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no model (proposal of the
+        agent, 2026-11-08, G-V3.PANEL)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CLV-032:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no model (proposal of the
+        agent, 2026-11-08, G-V3.PANEL)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CLV-033:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no model (proposal of the
+        agent, 2026-11-08, G-V3.PANEL)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CLV-034:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no model (proposal of the
+        agent, 2026-11-08, G-V3.PANEL)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CLV-035:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no model (proposal of the
+        agent, 2026-11-08, G-V3.PANEL)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CLV-036:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no model (proposal of the
+        agent, 2026-11-08, G-V3.PANEL); the default 34 % is the max-height (34vh) of the
+        Full run part of the owner's mockup, which scrolls inside itself; the user can
+        change the share within 20 to 60 % (REQ-CLV-045)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CLV-037:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no model (proposal of the
+        agent, 2026-11-08, G-V3.PANEL)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CLV-038:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no model (proposal of the
+        agent, 2026-11-08, G-V3.PANEL)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CLV-039:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no model (proposal of the
+        agent, 2026-11-08, G-V3.PANEL)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CLV-040:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no model (proposal of the
+        agent, 2026-11-08, G-V3.PANEL); the layout and the 820 px switch are those of
+        the owner's mockup, checked by screenshots in headless Chromium at 1440 and 600
+        px (hand-over of 2026-11-08); not yet on the real page
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CLV-041:
+      accepted_risk:
+        decided: 2026-11-08 by maldun
+        follow_up: VAL-012
+        owner: maldun
+        reason: the 16 % default follows the mockup (140 px at 900 px) and is not yet
+          measured on the real page; the user can change the share and the content scrolls
+          inside the strip
+      basis:
+      - the default 16 % of the viewport height is the mockup's strip of about 140 px
+        at 900 px (15.6 %), read from the mockup in headless Chromium, no real page yet;
+        the real page with its fonts and the header buttons may need more; the user can
+        enlarge it and, since the content scrolls inside the strip (REQ-CLV-047), reduce
+        it down to 12 %
+      hardware: HW-target
+      probe:
+        what: the browser check TC-CLV-041 on the first real strip with three phases at
+          1440 x 900, 1920 x 1080 and 360 x 800 px, and the owner in VAL-012
+        when: first task that draws the strip
+        who: G-V3.PANEL Implement, then the owner
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: questionable
+    REQ-CLV-042:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no model (proposal of the
+        agent, 2026-11-08, G-V3.PANEL); the 44 px targets on the phone are the bound of
+        NFR-1 (the wide strip is the owner's exception of 2026-11-08)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CLV-043:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no model (proposal of the
+        agent, 2026-11-08, G-V3.PANEL)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CLV-044:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no model (proposal of the
+        agent, 2026-11-08, G-V3.PANEL)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CLV-045:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no model (proposal of the
+        agent, 2026-11-08, G-V3.PANEL); the ranges 12 to 40 % and 20 to 60 % are the agent's
+        limits so that the strip stays larger than a pill row with scrolling (proposal,
+        owner to confirm)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CLV-046:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no model (proposal of the
+        agent, 2026-11-08, G-V3.PANEL); browser storage can be refused (private window,
+        blocked site data), so the default 16 % and 34 % apply then; checked with a blocked
+        profile in TC-CLV-046
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CLV-047:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no model (proposal of the
+        agent, 2026-11-08, G-V3.PANEL)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-FE-032:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no model (proposal of the
+        agent, 2026-11-08, G-V3.PANEL)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-031:
+      basis:
+      - reworded for A-131; the earlier rating stays and applies to the new wording unless
+        the owner objects (proposal of the agent, 2026-11-08)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-036:
+      basis:
+      - reworded for A-131; the earlier rating stays and applies to the new wording unless
+        the owner objects (proposal of the agent, 2026-11-08); the 1200 characters of
+        REQ-WFM-036 are the bound of FR-35
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-038:
+      basis:
+      - reworded for A-131; the earlier rating stays and applies to the new wording unless
+        the owner objects (proposal of the agent, 2026-11-08)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-039:
+      basis:
+      - reworded for A-131; the earlier rating stays and applies to the new wording unless
+        the owner objects (proposal of the agent, 2026-11-08)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-130:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no model (proposal of the
+        agent, 2026-11-08, G-V3.PANEL); depends on the table skill_runs of A-141, still
+        a proposal
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-131:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no model (proposal of the
+        agent, 2026-11-08, G-V3.PANEL); depends on the table skill_runs of A-141, still
+        a proposal
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-132:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no model (proposal of the
+        agent, 2026-11-08, G-V3.PANEL); depends on the table skill_runs of A-141, still
+        a proposal
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-133:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no model (proposal of the
+        agent, 2026-11-08, G-V3.PANEL); depends on the table skill_runs of A-141, still
+        a proposal
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-134:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no model (proposal of the
+        agent, 2026-11-08, G-V3.PANEL)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-135:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no model (proposal of the
+        agent, 2026-11-08, G-V3.PANEL); depends on the table skill_runs of A-141, still
+        a proposal
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-136:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no model (proposal of the
+        agent, 2026-11-08, G-V3.PANEL)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-137:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no model (proposal of the
+        agent, 2026-11-08, G-V3.PANEL)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-138:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no model (proposal of the
+        agent, 2026-11-08, G-V3.PANEL); depends on the table skill_runs of A-141, still
+        a proposal
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-BE-078:
+      basis:
+      - 'the parent of REQ-CHA-040 to 063: the behaviour is split into exact checks with
+        the fake model and three evaluated criteria (REQ-CHA-049, 053, 054), which carry
+        their own ratings (proposal of the agent, 2026-11-08, G-V3.CHAT)'
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CHA-040:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run with the fake model, no real
+        model (proposal of the agent, 2026-11-08, G-V3.CHAT)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CHA-041:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run with the fake model, no real
+        model (proposal of the agent, 2026-11-08, G-V3.CHAT)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CHA-042:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run with the fake model, no real
+        model (proposal of the agent, 2026-11-08, G-V3.CHAT)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CHA-043:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run with the fake model, no real
+        model (proposal of the agent, 2026-11-08, G-V3.CHAT)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CHA-044:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run with the fake model, no real
+        model (proposal of the agent, 2026-11-08, G-V3.CHAT)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CHA-045:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run with the fake model, no real
+        model (proposal of the agent, 2026-11-08, G-V3.CHAT)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CHA-046:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run with the fake model, no real
+        model (proposal of the agent, 2026-11-08, G-V3.CHAT)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CHA-047:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run with the fake model, no real
+        model (proposal of the agent, 2026-11-08, G-V3.CHAT)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CHA-048:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run with the fake model, no real
+        model (proposal of the agent, 2026-11-08, G-V3.CHAT)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CHA-049:
+      accepted_risk: &id001
+        decided: 2026-11-08 by maldun
+        follow_up: VAL-013
+        owner: maldun
+        reason: the bounds of the criterion are fixed before data and no baseline or spike
+          exists (D-304); real use and the first dev run show whether the model can reach
+          them; the criterion is not changed to get a PASS
+      basis:
+      - 'min 1.0 over 6 injection cases on a 12B model rests on no measurement: no baseline
+        exists (D-304, there is no digest today) and no spike; the miss rate at n 6 is
+        22 % (accepted by the owner on 2026-11-08, hand-over item 7); the first dev run
+        is the first measurement'
+      hardware: HW-target
+      probe: &id002
+        what: the first dev run of the digest step on the 24 dev cases of skill_turns,
+          3 repeats, MP-light with the options of eval-spec.md
+        when: first Implement task that has the step
+        who: G-V3.CHAT Implement, then the owner
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: questionable
+    REQ-CHA-050:
+      basis:
+      - the 4096 tokens are half of num_ctx 8192 (NFR-2), a constant of the configuration;
+        the check counts what the fake model receives, no measurement of the real model
+        (proposal of the agent, 2026-11-08, G-V3.CHAT)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CHA-051:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run with the fake model, no real
+        model (proposal of the agent, 2026-11-08, G-V3.CHAT)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CHA-052:
+      basis:
+      - the 1200 characters are a figure in the prompt only (FR-35, owner 2026-10-30);
+        the check reads the prompt, whether the model keeps to it is judged by REQ-CHA-053
+        (proposal of the agent, 2026-11-08, G-V3.CHAT)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CHA-053:
+      accepted_risk: *id001
+      basis:
+      - 'min 0.85 and low 0.70 rest on no measurement: no baseline exists (D-304) and
+        no spike on the pin; the bounds are a proposal of the owner''s review, the first
+        dev run shows whether they are reachable'
+      hardware: HW-target
+      probe: *id002
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: questionable
+    REQ-CHA-054:
+      accepted_risk: *id001
+      basis:
+      - 'min 0.80 and low 0.70 rest on no measurement: no baseline exists (D-304) and
+        no spike on the pin; persona fidelity of a 12B model in short messages is untested;
+        the first dev run shows whether they are reachable'
+      hardware: HW-target
+      probe: *id002
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: questionable
+    REQ-CHA-055:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run with the fake model, no real
+        model (proposal of the agent, 2026-11-08, G-V3.CHAT)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CHA-056:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run with the fake model, no real
+        model (proposal of the agent, 2026-11-08, G-V3.CHAT)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CHA-057:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run with the fake model, no real
+        model (proposal of the agent, 2026-11-08, G-V3.CHAT)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CHA-058:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run with the fake model, no real
+        model (proposal of the agent, 2026-11-08, G-V3.CHAT)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CHA-059:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run with the fake model, no real
+        model (proposal of the agent, 2026-11-08, G-V3.CHAT)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CHA-060:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run with the fake model, no real
+        model (proposal of the agent, 2026-11-08, G-V3.CHAT)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CHA-061:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run with the fake model, no real
+        model (proposal of the agent, 2026-11-08, G-V3.CHAT)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CHA-062:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run with the fake model, no real
+        model (proposal of the agent, 2026-11-08, G-V3.CHAT)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CHA-063:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run with the fake model, no real
+        model (proposal of the agent, 2026-11-08, G-V3.CHAT)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-RTB-007:
+      basis:
+      - no number, measurement or model quality depends on it; the table definition is
+        fixed by an exact acceptance criterion on the contract of IF-302 v8, no model
+        (proposal of the agent, 2026-11-08, G-V3.PANEL, added with A-141)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
   references: {}
