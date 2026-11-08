@@ -1,6 +1,8 @@
 # A-140: IF-101 v16, the run of a skill for the Skill run view (proposal, owner G-V3.PANEL)
 
-Status: **proposed** (Draft). `contracts/IF-101-chat-api.md` (v15), its mock and its contract suite are not changed; they change together after approval (suite red first). Part of A-131. G-V3.CHAT works against a mock of this amendment (D-273).
+Status: **approved** (2026-11-08, maldun, D-302). `contracts/IF-101-chat-api.md`, its mock and its contract suite are changed in a separate step (suite red first). Requirements named here stay Draft until that step is done and merged.
+
+Earlier status line (kept for the record): Status: **proposed** (Draft). `contracts/IF-101-chat-api.md` (v15), its mock and its contract suite are not changed; they change together after approval (suite red first). Part of A-131. G-V3.CHAT works against a mock of this amendment (D-273).
 
 ## Changes (v16)
 | Item | Change |

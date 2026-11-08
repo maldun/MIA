@@ -598,3 +598,10 @@ The first version was silent until the end and could take 20 minutes or more: th
 | TR-PANEL-005 | test requirement | 80bce515bfbf | maldun | 2026-11-08 | approved | G-V3.PANEL batch 9; font and Chromium version of TR-PANEL-001 are named in Step 4 |
 | TR-PANEL-006 | test requirement | 0ebe73abcc11 | maldun | 2026-11-08 | approved | G-V3.PANEL batch 9; font and Chromium version of TR-PANEL-001 are named in Step 4 |
 | TR-PANEL-007 | test requirement | e82f2b4f2ae6 | maldun | 2026-11-08 | approved | G-V3.PANEL batch 9; font and Chromium version of TR-PANEL-001 are named in Step 4 |
+| D-302 | **A-131, A-140 and A-141 approved, owner maldun, 2026-11-08.** A-131 (FR-46 as the Skill run view and the spoken-only chat, layout of 2026-11-08, retired and kept items, revised AC-39, VAL-012, "deleting the chat history" means a delete of history records in the storage), A-140 (IF-101 v16) and A-141 (IF-302 v8 and IF-102, table skill_runs, REQ-RTB-007). Not changed yet: HLS text, glossary, TD-01, contracts, mocks, contract suites; they follow in a separate step. |
+| REQ-WFM-135 | requirement | 775c6e21c823 | maldun | 2026-11-08 | approved | G-V3.PANEL amendments batch (D-302) |
+| REQ-RTB-007 | requirement | df406a2e7cc4 | maldun | 2026-11-08 | approved | G-V3.PANEL amendments batch (D-302) |
+| TC-WFM-135 | check | 7aca35abbf7f | maldun | 2026-11-08 | approved | G-V3.PANEL amendments batch (D-302) |
+| TC-CLV-039 | check | 7b1a75788661 | maldun | 2026-11-08 | approved | G-V3.PANEL amendments batch (D-302) |
+| TC-RTB-007 | check | 6d6e5c15082d | maldun | 2026-11-08 | approved | G-V3.PANEL amendments batch (D-302) |
+| TR-PANEL-006 | test requirement | 1cf80c002a02 | maldun | 2026-11-08 | approved | G-V3.PANEL amendments batch (D-302) |

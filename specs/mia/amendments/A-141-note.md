@@ -1,6 +1,8 @@
 # A-141: IF-302 v8 and IF-102, the table skill_runs (proposal, owner G-V3.PANEL)
 
-Status: **proposed** (Draft). `contracts/IF-302-record-tables.md` (v7), `contracts/IF-102-storage-interface.md`, the mocks and REQ-RTB-001 (14 tables) are not changed. Part of A-131. Decision of the owner, 2026-11-08: a new table, not an extension of `reports`.
+Status: **approved** (2026-11-08, maldun, D-302). `contracts/IF-302-record-tables.md`, `contracts/IF-102-storage-interface.md`, their mocks and suites are changed in a separate step (suite red first). Requirements named here stay Draft until that step is done and merged.
+
+Earlier status line (kept for the record): Status: **proposed** (Draft). `contracts/IF-302-record-tables.md` (v7), `contracts/IF-102-storage-interface.md`, the mocks and REQ-RTB-001 (14 tables) are not changed. Part of A-131. Decision of the owner, 2026-11-08: a new table, not an extension of `reports`.
 
 ## Changes
 | Item | Change |

@@ -1,6 +1,8 @@
 # A-131: FR-46 changed to one Skill run view for the running skill; the status card leaves the chat (proposal)
 
-Status: **proposed** (Draft). Nothing in `high-level-spec.md`, `requirements.md`, the nodes, `deferred.md` or `glossary.md` is changed. Source: the owner, 2026-11-07 (answers Q-1 to Q-7 logged as D-271, Q-8 to Q-11 as D-273; the amendment itself is not approved). Goal: G-V3 with the subgoals G-V3.PANEL and G-V3.CHAT.
+Status: **approved** (2026-11-08, maldun, D-302). The HLS (FR-46, FR-34, FR-35, AC-30, AC-39), `glossary.md` and `deferred.md` (TD-01) are changed in a separate step. Requirements named here stay Draft until that step is done and merged.
+
+Earlier status line (kept for the record): Status: **proposed** (Draft). Nothing in `high-level-spec.md`, `requirements.md`, the nodes, `deferred.md` or `glossary.md` is changed. Source: the owner, 2026-11-07 (answers Q-1 to Q-7 logged as D-271, Q-8 to Q-11 as D-273; the amendment itself is not approved). Goal: G-V3 with the subgoals G-V3.PANEL and G-V3.CHAT.
 
 ## Why
 FR-46 (HLS line 95) says "a subwindow of its own for every skill". The owner wants one view for the running skill. The owner also wants the status card out of the chat: "I want to drop the status card as I want that the chat gives a summary at the end. The current implementation is confusing. However, a small summary should be put inside the text. Another thing which may be ambiguous is that only text in the chat should be spoken. Therefore, status summaries or questions to answer should land in the chat. Status of the skill, buttons etc. should be in the window."
