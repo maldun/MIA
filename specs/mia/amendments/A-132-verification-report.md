@@ -3,7 +3,7 @@
 - Phase 4 (Verify), written 2026-11-08 by an independent Verify session that did not write the code and did not use the implementation log or earlier runs as evidence.
 - Object: master commits `c17ec52` to `36acda3`, checked out as `3c6c388` (clean worktree, branch `verify-a132`). Handover: `specs/mia/amendments/A-132-handover-verify.md`.
 - Python: `/home/maldun/prog/Python/venvs/mia312/bin/python`. No model, no GPU. Every run below is local, not CI: it is evidence for the matrix and nothing more.
-- **Verdict proposal (updated after the fixes, section 7b): Verified except two open points of the owner.** The first run found F1, F2 and F7 as blockers; all three are fixed and re-verified (sections 7a, 7b). What keeps the report from a plain "Verified": (1) TC-CHA-035, the hand check on the host, has to be repeated after the fixes and written down per step (TR-VOICE-002); (2) the wording of REQ-CHA-033 AC-1 against two error lines in the app (section 7b). With both closed, or accepted as deviations by the owner, the verdict is Verified.
+- **Verdict proposal (final, after the fixes and the hand check, sections 7a, 7b, 7c): Verified.** The first run found F1, F2 and F7 as blockers; all three are fixed and re-verified. The two points that were open are closed by the owner on 2026-11-08 (D-287): the hand check TC-CHA-035 passed on the merged code, and the wording of REQ-CHA-033 AC-1 was changed (A-135). One remark stays for the team: the hand check is owner-reported; the audio device, the exact commit and the per-step table were not given, so TR-VOICE-002 is met with incomplete detail (accepted if the owner signs the report as it is).
 - The text below this line up to section 7 is the first run (before the fixes) and is kept as it was found.
 
 ## 1. Matrix (requirement, check, result, evidence)
@@ -13,7 +13,7 @@ All dates 2026-11-08, from the worktree root.
 | Requirement | Check | Result | Evidence (command) |
 |---|---|---|---|
 | REQ-CHA-030 voice route per sentence | TC-CHA-030, TC-CHA-031 | pass | `python tests/test_chat_speak_again.py`: 8 tests OK; also inside `-p "test_chat_*.py"` (166 OK) and two full runs |
-| REQ-CHA-030 on the real engine | TC-CHA-035 (hand check, TR-VOICE-002) | **evidence incomplete** | `A-132-hand-check-result.md`: failed at step 3, then "it works now"; per-step results, browser and audio device not recorded (open question 1) |
+| REQ-CHA-030 on the real engine | TC-CHA-035 (hand check, TR-VOICE-002) | **passed after the fixes (owner-reported); detail incomplete** | `A-132-hand-check-result.md`: first run failed at step 3 (A-133); on 2026-11-08 the owner ran steps 1 to 4 and both extra checks on the merged `verify-a132` (`a2bc052`): all passed, Firefox; audio device, exact commit and per-step table not recorded (D-287). Not repeated by this session |
 | REQ-CHA-031 order | TC-CHA-030, TC-CHA-036 | pass | `python tests/test_sound_server_handover.py`: 2 OK (real `SoundServer`, fake sink) |
 | REQ-CHA-032 stop ends repeat | TC-CHA-032 (2 tests), TC-CHA-036 (cancel on close), TC-CHA-035 | pass, hand check incomplete | same commands; stop of a repeat that waits behind a blocked one is in TC-CHA-037 |
 | REQ-CHA-033 failing route | TC-CHA-033 | pass with a fake, **not met with the real route (F1)** | test file above; probe `probe_route.py` (section 4) |
@@ -85,7 +85,7 @@ Mutations in a scratch copy of the tree (`git archive` to the job's tmp folder; 
 | TR | Met | Note |
 |---|---|---|
 | TR-VOICE-001 fake records, blocks, raises `OSError` | yes, but the fake is unfaithful for failure | F1: the real route never raises |
-| TR-VOICE-002 hand check on the host, result in this report | **no, evidence incomplete** | open question 1 |
+| TR-VOICE-002 hand check on the host, result in this report | **yes, owner-reported, detail incomplete** | passed after the fixes (D-287); browser Firefox; device, commit and per-step table not given |
 | TR-VOICE-003 sentences written by hand | yes | read in the tests |
 | TR-VOICE-004 real server, real TCP, fake sink | yes | mutations above |
 | TR-VOICE-005 real `sound.js` and real page; mock sends `audio_reload` with `url`, `serial`, `message` | yes | one difference: the mock emits to every session of the token, `AudioRouter.announce` only to the owner page |
@@ -146,6 +146,12 @@ Residual points after the fixes:
 - **Still untested guards:** the mutants "a repeat takes the status although an answer runs" (N8) and "the status is restored although an answer runs" (N7) survive: these guards only decide the mood activity that the character shows, which the status of the new tests overrides. Low.
 - **TC-CHA-035** is not repeated yet; the evidence stays incomplete until the owner repeats the hand check after these fixes (decision in 7a). Also the listen test for choppy long answers (question 9).
 
+## 7c. Hand check and wording, closed by the owner (2026-11-08, D-287)
+
+- **TC-CHA-035:** the owner merged `verify-a132` (merge commit `a2bc052`) and ran the hand check on the host: steps 1 to 4 and both extra checks (a repeat requested while an answer is generated, with Stop offered over the overlap; a long answer spoken again without choppy gaps, question 9) all passed. Browser: Firefox. Not given: the audio device, the exact commit the host ran, the table per step. This session did not repeat it. Record: `A-132-hand-check-result.md`.
+- **REQ-CHA-033 AC-1:** decided "accept two, reword": AC-1 and TC-CHA-033 now say "one error line of the Chat agent" (A-135, text only, three lines changed in `requirements.md` and `test-spec.md` of N-2.2; no code and no check changed).
+- Questions 2 (new tests stay in `tests/`), 3 (3 s: accept the warning) and 7 (F4: accept) of section 7a are still to be recorded in `plausibility.yaml` and the known limitations at Commit: the plausibility record for REQ-VPB-006 is a Phase 2 edit by the owner's approval (not made in this session), F4 goes into the known limitations of the release notes.
+
 ## 8. Next step
 
-F1, F2, F3 and F7 are fixed and re-verified (section 7b). Open for the owner: (1) repeat the hand check TC-CHA-035 on the host with the fixed code and write down per step 1 to 4 the result, the browser, the audio device and the commit, and listen to a long answer spoken again (question 9); (2) decide the wording of REQ-CHA-033 AC-1 against two error lines in the app; (3) diff `goal/v3` against the TD-11 files before the merge (question 10). Then the owner approves this report; Phase 5 is the tag, the release-notes line and the status update of the eight requirements to Verified. The owner merges `verify-a132` (it holds the fixes, A-134 and this report) and no one pushes before that.
+F1, F2, F3 and F7 are fixed and re-verified (section 7b); the hand check passed and the wording is changed (section 7c). Open for the owner: (1) approve this report as it is (hand check owner-reported, device and commit not recorded); (2) diff `goal/v3` against the TD-11 files before it is merged on; (3) record the accepted 3 s warning for REQ-VPB-006 in `plausibility.yaml` (a protected file, so by an approved amendment) and the F4 limitation in the release notes. Then Phase 5: the tag, the release-notes line and the status update of the eight requirements to Verified. Everything of this report is on master after the merge `a2bc052`, except the commit that records section 7c, A-135 and D-287 (on `verify-a132`, to be merged again by the owner); no one pushes before that.

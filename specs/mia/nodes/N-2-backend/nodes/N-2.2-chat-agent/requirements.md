@@ -301,7 +301,7 @@ The persona's side: the shared conversation, the answer queue, persona, mood, me
 - Parent: REQ-BE-006
 - Priority: Should
 - Verification method: Test
-- Acceptance criterion: AC-1: with a failing voice route the request returns the sentence count, the next message is answered, one error line is logged and no text and no event but audio_chunk and chat_status is added to the page (A-133: the status is busy while the repeat runs)
+- Acceptance criterion: AC-1: with a failing voice route the request returns the sentence count, the next message is answered, one error line of the Chat agent is logged (a failing route may log its own line too: the sound server streamer does, A-135) and no text and no event but audio_chunk and chat_status is added to the page (A-133: the status is busy while the repeat runs)
 - Verified by: TC-CHA-033
 - Status: Approved
 - Group: SA
