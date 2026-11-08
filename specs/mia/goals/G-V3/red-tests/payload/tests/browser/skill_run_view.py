@@ -123,6 +123,19 @@ def scenario(function):
     return run
 
 
+def themed(function):
+    """runs a scenario once per theme and returns {"light": result, "dark": result}"""
+    def run():
+        global THEME
+        out = {}
+        for THEME in ("light", "dark"):
+            out[THEME] = scenario(function)()
+        THEME = "light"
+        return out
+    run.__name__ = function.__name__
+    return run
+
+
 @scenario
 def header():
     """TC-CLV-030: the header shows review, the start time and the states running, paused, done, failed and stopped in turn"""
@@ -401,19 +414,6 @@ def scroll():
         return out
     finally:
         driver.quit()
-
-
-def themed(function):
-    """runs a scenario once per theme and returns {"light": result, "dark": result}"""
-    def run():
-        global THEME
-        out = {}
-        for THEME in ("light", "dark"):
-            out[THEME] = scenario(function)()
-        THEME = "light"
-        return out
-    run.__name__ = function.__name__
-    return run
 
 
 SCENARIOS = {f.__name__: f for f in (header, meters, reason, full, link, layout, size, phone, hostile, shares, persist, scroll)}
