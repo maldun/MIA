@@ -5,7 +5,9 @@ MIA is a personal assistant with a 3D character, a local voice and a research co
 Host: Fedora, Ryzen 9 5900X, RX 7800 XT with 16 GB, 62 GB RAM, podman. Models through Ollama: `gemma4:12b-it-qat` (light) and `gemma4:26b` (full), `num_ctx` 8192. The package is imported as `MIA` (`python -m MIA` from the parent folder); modules fall back to plain imports so single tests run as scripts.
 
 ## Commands
-- One Python test module: `python tests/test_<name>.py` (works for single modules; `python -m unittest discover -s tests` runs all, needs the venv from `requirements.txt`)
+- Test environment: the Python 3.12 venv `/home/maldun/prog/Python/venvs/mia312`, made from `requirements.txt` and `requirements-db.txt` (that one has psycopg 3 for the PostgreSQL tests). Run every test with `/home/maldun/prog/Python/venvs/mia312/bin/python`; the system Python is 3.14 and has no psycopg, so the PostgreSQL tests skip there. Update it with its own pip: `/home/maldun/prog/Python/venvs/mia312/bin/pip install -r requirements.txt -r requirements-db.txt`. Never create a venv inside the repo or a worktree.
+- One Python test module: `<venv python> tests/test_<name>.py` (works for single modules; `<venv python> -m unittest discover -s tests` runs all)
+- PostgreSQL tests: `<venv python> tests/test_storage_postgres.py` starts its own throwaway postgres:16 under podman (data on tmpfs) and skips where podman, the image or psycopg 3 is missing; `MIA_DB_PYTHON=/home/maldun/prog/Python/venvs/mia312/bin/python bash tools/contract_postgres.sh` runs the IF-102 contract suite on a throwaway postgres:16 (it never pulls: the image must be local)
 - JavaScript tests: `node --test "tests/js/*.test.mjs"`
 - Task tests: the tests named in the task, `-q`-style output only
 - Traceability: `python ~/.claude/skills/dev-workflow/scripts/trace_check.py --spec-dir specs/mia --tests-dir tests`
