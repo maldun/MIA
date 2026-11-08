@@ -163,9 +163,9 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-203
 
 ### TC-WFM-134 – Run that is shown
 - Verifies: REQ-WFM-134
-- Given: three scripted runs, A started first, B second, then C third, all with a fake clock
+- Given: three scripted runs with a fake clock: A started first and has ended before B starts, B second, C third
 - When: B and C run; then C ends; then B ends
-- Then: while B and C run C is named; after C ends B is named; after B ends B is named as the one ended last; A is never named
+- Then: while B and C run C is named; after C ends B is named; after B ends B is named as the one ended last; A is never named, not even while B and C run or after they end
 
 ### TC-WFM-135 – Chat history deleted
 - Verifies: REQ-WFM-135
