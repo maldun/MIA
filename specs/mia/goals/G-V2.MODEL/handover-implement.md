@@ -35,3 +35,14 @@ Read `CLAUDE.md` first. Line of work `goal/v2.model`, worktree `.claude/worktree
 - One file: `python tests/acceptance/test_graph_model.py`; `python tests/acceptance/test_graph_run.py`.
 - All acceptance files as stage 2: `rc=0; for f in tests/acceptance/test_*.py; do python "$f" || rc=1; done; exit $rc`.
 - Checks: `python3 ~/.claude/skills/dev-workflow/scripts/trace_check.py --spec-dir specs/mia --tests-dir tests`, `goal_check.py --spec-dir specs/mia`, `python3 ~/.claude/skills/plan-phase/scripts/req_graph.py --spec-dir specs/mia --tests-dir tests`, `python3 ~/.claude/skills/dev-workflow/scripts/test_doc_check.py --tests-dir tests`.
+
+## Update 2026-11-08 (after T-01 to T-04, STORE merged): owner's answers and the T-05 finding
+- State: T-01 to T-04 done (`0fefbe3`, `23bbfe5`, `e282e65`, `5d5405f`); master with G-V2.STORE merged into `goal/v2.model` (`c95a30a`); `test_graph_model.py` 10 OK, `test_graph_run.py` 4 OK on the merged tree.
+- **T-05 stopped (finding for TR-MODEL-001):** `FakeGraphTables` is a versioned key-value store (`put`, `get`, `versions`); the IF-301 v2 suite tests record checks and conversion (`check_record`, `to_object`, ...), so 0 of its 20 cases pass on the fake. The five TC tests hardcode `FakeGraphTables`, so they cannot run on the real `Storage` without a protected change. Nothing was changed. Probe: `fake_vs_suite.py` (scratchpad of the session).
+- **Owner's answers (2026-11-08, asked in a questionnaire; to be written into `review-log.md` by the amendment):**
+  1. T-05 path: plan amendment plus a new adapter test outside `tests/acceptance`. TR-MODEL-001 and T-05 are amended: the fake is checked against IF-102 plus the record rules (as `GraphStoreStandIn` does), and a new test file runs the five TC tests on the real Storage. No protected file changes. `skill_record.py` stops using the `skill_index` pseudo-table (`Storage.ids("skills")` replaces it) and needs an `author`.
+  2. Node field names are confirmed as proposed (`data`: value, parameters; `transform`: toolbox_id; `master`: stop, toolbox_id, task optional).
+  3. REQ-WFM-041 (skill listing and start from the record in `library.py`, `extension_loader.py`) becomes an own task T-06 after T-05, test first.
+  4. No `Quality:` lines for REQ-WFM-040 and REQ-RUN-017; note the gap as known at Verify.
+- Open points 2 (graph header, membership, skill record table) are answered by IF-301 v2: tables `graphs` and `skills` (D-264). Open point 3 was decided on 2026-11-07 (`plan.md`, "Decided by the owner").
+- Next: draft the plan amendment (TR-MODEL-001, T-05 text, new T-06, adapter test file name) for the owner's review; then T-05, then T-06.
