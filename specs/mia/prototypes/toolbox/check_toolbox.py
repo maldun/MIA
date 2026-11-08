@@ -56,6 +56,28 @@ class ToolboxChecks(unittest.TestCase):
             self.tb.run("ext.double", {"x": 1})
         self.assertEqual(self.tb.run("ext.double", {"x": 1}, as_baseline=True), 2)
 
+    def test_untrusted_retired_baseline_needs_owner_flag(self):
+        self.tb.import_transform(outside_file())
+        self.tb.set_lifecycle("ext.double", "retired", "owner")
+        with self.assertRaises(ToolboxError):
+            self.tb.run("ext.double", {"x": 1}, as_baseline=True)
+        with self.assertRaises(ToolboxError):
+            self.tb.set_lifecycle("ext.double", "retired", "guest", allow_baseline=True)
+        self.tb.set_lifecycle("ext.double", "retired", "owner", allow_baseline=True)
+        self.assertEqual(self.tb.run("ext.double", {"x": 1}, as_baseline=True), 2)
+        with self.assertRaises(ToolboxError):      # still never in a graph
+            self.tb.run("ext.double", {"x": 1})
+
+    def test_newer_version_keeps_trust_older_is_refused(self):
+        self.tb.import_transform(outside_file())
+        self.tb.set_trust("ext.double", "trusted", "owner")
+        newer = json.loads(outside_file()); newer["version"] = 2; newer["code"] = "def run(a):\n    return 99\n"
+        self.tb.import_transform(json.dumps(newer))
+        self.assertEqual(self.tb.look_up("ext.double")["version"], 2)
+        self.assertEqual(self.tb.run("ext.double", {"x": 1}), 99)      # trust carried over: new code runs unreviewed (risk, see report)
+        with self.assertRaises(ToolboxError):
+            self.tb.import_transform(outside_file())
+
     def test_trust_and_lifecycle_are_independent_and_tested_needs_evidence(self):
         self.tb.import_transform(outside_file())
         with self.assertRaises(ToolboxError):
