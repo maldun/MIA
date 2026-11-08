@@ -273,8 +273,8 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 ## Groups of G-V3.CHAT
 | Order | Group | What it covers | Requirements |
 |---|---|---|---|
-| 1 | ST | Skill turns: what the chat shows of a run and what the model sees (FR-35, FR-46) | REQ-CHA-040, REQ-CHA-041, REQ-CHA-042, REQ-CHA-043, REQ-CHA-044, REQ-CHA-045, REQ-CHA-046, REQ-CHA-047, REQ-CHA-055, REQ-CHA-056, REQ-CHA-057 |
-| 2 | UT | Untrusted result (TB-result) | REQ-CHA-048, REQ-CHA-049 |
+| 1 | ST | Skill turns: what the chat shows of a run and what the model sees (FR-35, FR-46) | REQ-CHA-040, REQ-CHA-041, REQ-CHA-042, REQ-CHA-043, REQ-CHA-044, REQ-CHA-045, REQ-CHA-046, REQ-CHA-047, REQ-CHA-055, REQ-CHA-056, REQ-CHA-057, REQ-CHA-058, REQ-CHA-059, REQ-CHA-060 |
+| 2 | UT | Untrusted result (TB-result) | REQ-CHA-048, REQ-CHA-049, REQ-CHA-061 |
 | 3 | BG | Budgets of the digest step | REQ-CHA-050, REQ-CHA-051, REQ-CHA-052 |
 | 4 | SQ | Summary quality (eval criteria) | REQ-CHA-053, REQ-CHA-054 |
 
@@ -343,48 +343,48 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Status: Draft
 - History: A-131 (proposed 2026-11-08, G-V3.CHAT), new; owner 2026-11-08; split at the owner's one-by-one review of 2026-11-08: the stopped run is REQ-CHA-057, the link REQ-CHA-056
 
-### REQ-CHA-045 – Only spoken text in the chat
+### REQ-CHA-045 – Every added message is spoken
 - Level: low   Subject: ConversationCore
-- Text: The Chat agent shall add to the chat only messages that are sent to speech, and no card, table, log line or full result of a run.
+- Text: The Chat agent shall send every message that it adds to the chat to speech.
 - Rationale: refines REQ-BE-078; FR-46: only spoken text in the chat (owner 2026-11-07)
 - Parent: REQ-BE-078
 - Group: ST
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-39: every message of a scripted run has a spoken form; none contains a table, a card or the full result (exact)
+- Acceptance criterion: AC-39: every message of a scripted run has a spoken form, sent to speech once (exact)
 - Verified by: TC-CHA-045
 - Status: Draft
-- History: A-131 (proposed 2026-11-08, G-V3.CHAT), new; owner 2026-11-08
+- History: A-131 (proposed 2026-11-08, G-V3.CHAT), new; owner 2026-11-08; split at the owner's one-by-one review of 2026-11-08: no card, table, log line or full result is REQ-CHA-058
 
 ### REQ-CHA-046 – History of a run for the chat model
 - Level: low   Subject: ConversationCore
-- Text: The Chat agent shall keep the questions, the answers, the end summary and the last status message of each run in the history the chat model sees, and no other status message.
+- Text: The Chat agent shall keep the questions, the answers, the end summary and the last status message of each run in the history the chat model sees.
 - Rationale: refines REQ-BE-078; FR-35 (owner 2026-10-30); IF-201 amendment A-142
 - Parent: REQ-BE-078
 - Group: ST
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-39: after a run with three status messages the model history holds the questions, the answers, the summary and the third status message, and not the first two (exact)
+- Acceptance criterion: AC-39: after a run with three status messages the model history holds the questions, the answers, the summary and the third status message (exact)
 - Verified by: TC-CHA-046
 - Status: Draft
-- History: A-131 (proposed 2026-11-08, G-V3.CHAT), new; owner 2026-11-08
+- History: A-131 (proposed 2026-11-08, G-V3.CHAT), new; owner 2026-11-08; split at the owner's one-by-one review of 2026-11-08: the exclusions are REQ-CHA-059
 
-### REQ-CHA-047 – Spoken like answers, with repair
+### REQ-CHA-047 – Repair of the messages of a run
 - Level: low   Subject: ConversationCore
-- Text: The Chat agent shall apply the repair of REQ-CHA-014 to each status message, summary and failure message and send the repaired text to speech.
+- Text: The Chat agent shall apply the repair of REQ-CHA-014 to each status message, summary, failure message and stop message.
 - Rationale: refines REQ-BE-078; FR-35, FR-3; same rule as answers
 - Parent: REQ-BE-078
 - Group: ST
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-39: a scripted summary that breaks a behaviour rule reaches the chat and the speech repaired, and the violation is recorded as a signal (exact)
+- Acceptance criterion: AC-39: a scripted summary that breaks a behaviour rule is repaired and the violation is recorded as a signal; the correction is not in the conversation memory (exact)
 - Verified by: TC-CHA-047
 - Status: Draft
-- History: A-131 (proposed 2026-11-08, G-V3.CHAT), new; owner 2026-11-08
+- History: A-131 (proposed 2026-11-08, G-V3.CHAT), new; owner 2026-11-08; split at the owner's one-by-one review of 2026-11-08 and the stop message added: the repaired text is shown and spoken in REQ-CHA-060
 
-### REQ-CHA-048 – Result is data for the digest step
+### REQ-CHA-048 – Digest step without tools
 - Level: low   Subject: ConversationCore
-- Text: The Chat agent shall run SkillDigestStep without tools and give it the full result and each piece as text to report, never as instructions.
+- Text: The Chat agent shall run SkillDigestStep without tools.
 - Rationale: refines REQ-BE-078; NFR-3, boundary TB-result, THR-012
 - Parent: REQ-BE-078
 - Group: UT
@@ -393,7 +393,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Acceptance criterion: AC-39: the step configuration lists no tool (inspection, exact); the model behaviour is checked by REQ-CHA-049
 - Verified by: TC-CHA-048
 - Status: Draft
-- History: A-131 (proposed 2026-11-08, G-V3.CHAT), new; owner 2026-11-08
+- History: A-131 (proposed 2026-11-08, G-V3.CHAT), new; owner 2026-11-08; split at the owner's one-by-one review of 2026-11-08: the result as text is REQ-CHA-061
 
 ### REQ-CHA-049 – Quoted instruction is reported, not followed
 - Level: low   Subject: ConversationCore
@@ -514,3 +514,55 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verified by: TC-CHA-057
 - Status: Draft
 - History: A-131 (proposed 2026-11-08, G-V3.CHAT), new; owner 2026-11-08, split from REQ-CHA-043 and 044
+
+### REQ-CHA-058 – No card, table, log line or full result in the chat
+- Level: low   Subject: ConversationCore
+- Text: The Chat agent shall add no card, table, log line or full result of a run to the chat.
+- Rationale: refines REQ-BE-078; FR-46: only spoken text, the rest is in the Skill run view (owner 2026-11-07)
+- Parent: REQ-BE-078
+- Group: ST
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: no message of a scripted review with a long result and a table contains the table or the full result text (exact)
+- Verified by: TC-CHA-058
+- Status: Draft
+- History: A-131 (proposed 2026-11-08, G-V3.CHAT), new; owner 2026-11-08, split from REQ-CHA-045
+
+### REQ-CHA-059 – Exclusions from the history of the chat model
+- Level: low   Subject: ConversationCore
+- Text: The Chat agent shall keep every other status message of a run and its full result out of the history the chat model sees.
+- Rationale: refines REQ-BE-078; FR-35 (owner 2026-10-30): the history stays short; the full result is in the Skill run view
+- Parent: REQ-BE-078
+- Group: ST
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: after a run with three status messages the model history holds neither of the first two and not the full result (exact)
+- Verified by: TC-CHA-059
+- Status: Draft
+- History: A-131 (proposed 2026-11-08, G-V3.CHAT), new; owner 2026-11-08, split from REQ-CHA-046
+
+### REQ-CHA-060 – Repaired text is the text shown and spoken
+- Level: low   Subject: ConversationCore
+- Text: The Chat agent shall show and send to speech the repaired text of each status message, summary, failure message and stop message.
+- Rationale: refines REQ-BE-078; FR-3, FR-35: spoken like answers, with the same repair
+- Parent: REQ-BE-078
+- Group: ST
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: the chat message and the speech input of a repaired summary are the repaired text, not the original (exact)
+- Verified by: TC-CHA-060
+- Status: Draft
+- History: A-131 (proposed 2026-11-08, G-V3.CHAT), new; owner 2026-11-08, split from REQ-CHA-047
+
+### REQ-CHA-061 – Result goes to the digest step as text
+- Level: low   Subject: ConversationCore
+- Text: The Chat agent shall give SkillDigestStep the full result and each piece as user text to report, never as instructions of the system prompt.
+- Rationale: refines REQ-BE-078; NFR-3, boundary TB-result, THR-012
+- Parent: REQ-BE-078
+- Group: UT
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: with a fake model that records the role of every input, the result and each piece arrive in the user role and the system prompt contains none of their text (exact)
+- Verified by: TC-CHA-061
+- Status: Draft
+- History: A-131 (proposed 2026-11-08, G-V3.CHAT), new; owner 2026-11-08, split from REQ-CHA-048
