@@ -84,7 +84,7 @@ def _named_ids(table, doc):
     """The IDs a record of the graphs names, as ([node IDs], [edge IDs]): an edge's two ends, a header's members. A malformed record names none
     (check_record refuses it before it looks at what is stored)."""
     try:
-        if table == "graph_edges":
+        if table in ("graph_edges", "context_edges"):
             return [doc["from"], doc["to"]], []
         if table == "graphs":
             return [m["id"] for m in doc["data"]["nodes"]], [m["id"] for m in doc["data"]["edges"]]
@@ -127,8 +127,12 @@ class Storage:
         if table not in graph_tables.RECORD_TABLES:
             return
         node_ids, edge_ids = _named_ids(table, doc)
-        stored = {"nodes": {i: [v["version"] for v in self.backend.versions("graph_nodes", i)] for i in node_ids if isinstance(i, str)},
-                  "edges": {i: [v["version"] for v in self.backend.versions("graph_edges", i)] for i in edge_ids if isinstance(i, str)}}
+        # a context edge or header looks in the context tables, everything else in the workflow tables (REQ-GTB-025, REQ-GTB-026)
+        context = table == "context_edges" or (table == "graphs" and doc["data"]["kind"] == "context")
+        names = ("context_nodes", "context_edges") if context else ("nodes", "edges")
+        tables = ("context_nodes", "context_edges") if context else ("graph_nodes", "graph_edges")
+        stored = {names[0]: {i: [v["version"] for v in self.backend.versions(tables[0], i)] for i in node_ids if isinstance(i, str)},
+                  names[1]: {i: [v["version"] for v in self.backend.versions(tables[1], i)] for i in edge_ids if isinstance(i, str)}}
         stored = {kind: {i: versions for i, versions in found.items() if versions} for kind, found in stored.items()}
         broken = graph_tables.check_record(table, doc, stored=stored, record_id=record_id)
         if broken:

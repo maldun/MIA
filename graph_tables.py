@@ -31,7 +31,8 @@ def validate(table, doc):
 
 
 # IF-301 v2 (A-90, G-V2.STORE): the graphs as separate records (REQ-GTB-005 to REQ-GTB-020).
-RECORD_TABLES = ("graph_nodes", "graph_edges", "graphs", "skills")
+# A-98: context_nodes and context_edges hold the nodes and edges of context graphs, so the check of a workflow node never sees a category.
+RECORD_TABLES = ("graph_nodes", "graph_edges", "graphs", "skills", "context_nodes", "context_edges")
 
 _STOP = {"type": "object",
          "properties": {"max_repetitions": {"type": "integer", "minimum": 1}, "max_seconds": {"type": "number", "exclusiveMinimum": 0}},
@@ -47,6 +48,7 @@ TYPE_SCHEMAS = {
 }
 _RECORD_SCHEMAS = {
     "graph_edges": {"type": "object"},
+    "context_edges": {"type": "object"},
     "graphs": {"type": "object",
                "properties": {"kind": {"enum": ["workflow", "context"]}, "context_graph_id": {"type": "string"}, "testbench_id": {"type": "string"},
                               "description": {"type": "string"}, "nodes": _MEMBERS, "edges": _MEMBERS},
@@ -59,7 +61,7 @@ _validators = {}
 
 
 def record_definitions():
-    """The four record tables, versioned and never deleted; the Storage layer keeps the versions from this (REQ-GTB-013)."""
+    """The six record tables, versioned and never deleted; the Storage layer keeps the versions from this (REQ-GTB-013)."""
     return {table: {"versioned": True, "deletable": False} for table in RECORD_TABLES}
 
 
@@ -113,9 +115,25 @@ def _node_schema(data, categories):
     return known[data["type"]], None
 
 
+def _context_node_refusal(data, categories):
+    """The refusal for the JSON field of a context node, or None: the shape always (a non-empty text type), the category and its schema only when
+    the caller passes the categories, because the Storage layer does not know them (REQ-GTB-024)."""
+    if not isinstance(data.get("type"), str) or not data["type"]:
+        return _refusal("schema_break", "type")
+    if categories is None:
+        return None
+    schema, refused = _node_schema(data, categories)
+    if refused:
+        return refused
+    broken = _broken_path(schema, data)
+    return _refusal("schema_break", broken) if broken else None
+
+
 def _check_members(data, stored):
-    """unknown_member for a header member (node or edge) whose version is not stored; a member named twice is record_identity."""
-    for key, kind in (("nodes", "nodes"), ("edges", "edges")):
+    """unknown_member for a header member (node or edge) whose version is not stored; a member named twice is record_identity.
+    A header of kind context looks its members up in the context tables, one of kind workflow in the workflow tables (REQ-GTB-026)."""
+    names = ("context_nodes", "context_edges") if data["kind"] == "context" else ("nodes", "edges")
+    for key, kind in zip(("nodes", "edges"), names):
         ids = [member["id"] for member in data[key]]
         if len(ids) != len(set(ids)):
             return _refusal("record_identity", key)
@@ -130,13 +148,15 @@ def _check(table, record, categories, stored, record_id=None):
         return _refusal("record_identity", "id" if isinstance(record, dict) else "record")
     if record_id is not None and record_id != record["id"]:     # a header pins by the ID inside, the storage finds by the record ID (REQ-GTB-021)
         return _refusal("record_identity", "id")
-    if table == "graph_edges":
+    if table in ("graph_edges", "context_edges"):
         for end in ("from", "to"):
             if not isinstance(record.get(end), str) or not record[end]:
                 return _refusal("record_identity", end)
     data = record.get("data")
     if not isinstance(data, dict):
         return _refusal("schema_break", "data")
+    if table == "context_nodes":
+        return _context_node_refusal(data, categories)
     schema = _RECORD_SCHEMAS.get(table)
     if table == "graph_nodes":
         schema, refused = _node_schema(data, categories)
@@ -145,18 +165,19 @@ def _check(table, record, categories, stored, record_id=None):
     broken = _broken_path(schema, data)
     if broken:
         return _refusal("schema_break", broken)
-    if table == "graph_edges" and stored is not None:
+    if table in ("graph_edges", "context_edges") and stored is not None:
+        nodes = stored.get("context_nodes" if table == "context_edges" else "nodes", {})
         for end in (record["from"], record["to"]):
-            if end not in stored.get("nodes", {}):
+            if end not in nodes:
                 return _refusal("unknown_endpoint", end)
     return _check_members(data, stored) if table == "graphs" else None
 
 
 def check_record(table, record, categories=None, stored=None, record_id=None):
-    """None, or {"rule", "detail"} of the first broken rule of a record of graph_nodes, graph_edges, graphs or skills (REQ-GTB-010, 011, 016, 019, 020, 021).
+    """None, or {"rule", "detail"} of the first broken rule of a record of graph_nodes, graph_edges, graphs, skills, context_nodes or context_edges (REQ-GTB-010, 011, 016, 019, 020, 021).
     `record_id` is the ID the caller writes the record under: when given and different from the `id` inside the record, record_identity names `id`.
     Pure: it stores nothing and changes neither the record nor `stored`. Any record gives a rule or None, never an exception (as A-60);
-    a table that is not one of the four is a ValueError."""
+    a table that is not one of the six is a ValueError."""
     if table not in RECORD_TABLES:
         raise ValueError("not a record table of the graphs: %s" % (table,))
     try:

@@ -341,6 +341,32 @@ class StorageBehaviour:
                 # And: under its own ID the same record is accepted (the twin differs only in the broken rule)
                 self.assertEqual(self.store.put(table, record["id"], record, "anna"), {"version": 1})
 
+    @mark.req("REQ-GTB-023", "REQ-GTB-024", "REQ-GTB-025", "REQ-GTB-026")
+    def test_the_context_graph_records_are_versioned_checked_for_shape_and_name_stored_context_records(self):
+        """TC-GTB-024 to TC-GTB-027 on the Storage layer: context nodes and edges are versioned and never deleted, the shape is checked, ends and members must be stored context nodes.
+
+        Example: context edge e1 from c1 to c9 with only c1 stored -> unknown_endpoint "c9"; a workflow node n9 does not count; a context node without type -> schema_break "type".
+        """
+        # Given: one stored context node c1 (written twice) and one stored workflow node n9
+        self.store.put("context_nodes", "c1", {"id": "c1", "data": {"type": "entity"}}, "anna")
+        self.assertEqual(self.store.put("context_nodes", "c1", {"id": "c1", "data": {"type": "entity", "name": "x"}}, "anna"), {"version": 2})
+        self.store.put("graph_nodes", "n9", {"id": "n9", "data": {"type": "data"}}, "anna")
+        def header(kind, member):
+            return {"id": "h1", "data": {"kind": kind, "context_graph_id": "c", "testbench_id": "", "description": "d",
+                                         "nodes": [{"id": member, "version": 1}], "edges": []}}
+        # When/Then: a bad shape, an end or member that is no stored context node, is refused naming the field or ID
+        self.assertEqual(self.refusal_of("context_nodes", "c2", {"id": "c2", "data": {}}), ("schema_break", "type"))
+        self.assertEqual(self.refusal_of("context_nodes", "c2", {"id": "c2"}), ("schema_break", "data"))
+        self.assertEqual(self.refusal_of("context_edges", "e1", {"id": "e1", "from": "c1", "to": "c9", "data": {}}), ("unknown_endpoint", "c9"))
+        self.assertEqual(self.refusal_of("context_edges", "e1", {"id": "e1", "from": "c1", "to": "n9", "data": {}}), ("unknown_endpoint", "n9"))
+        self.assertEqual(self.refusal_of("graphs", "h1", header("context", "c9")), ("unknown_member", "c9"))
+        self.assertEqual(self.refusal_of("graphs", "h1", header("workflow", "c1")), ("unknown_member", "c1"))
+        # And: the twins are accepted and none of the two tables can be deleted
+        self.assertEqual(self.store.put("context_edges", "e1", {"id": "e1", "from": "c1", "to": "c1", "data": {}}, "anna"), {"version": 1})
+        self.assertEqual(self.store.put("graphs", "h1", header("context", "c1"), "anna"), {"version": 1})
+        for table, record_id in (("context_nodes", "c1"), ("context_edges", "e1")):
+            self.assertEqual(code_of(lambda: self.store.delete(table, record_id, "anna")), ("immutable", None))
+
 
 class FileStorage(StorageBehaviour, unittest.TestCase):
     def new_backend(self, label):
