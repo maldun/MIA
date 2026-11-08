@@ -275,7 +275,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 |---|---|---|---|
 | 1 | ST | Skill turns: what the chat shows of a run and what the model sees (FR-35, FR-46) | REQ-CHA-040, REQ-CHA-041, REQ-CHA-042, REQ-CHA-043, REQ-CHA-044, REQ-CHA-045, REQ-CHA-046, REQ-CHA-047, REQ-CHA-055, REQ-CHA-056, REQ-CHA-057, REQ-CHA-058, REQ-CHA-059, REQ-CHA-060 |
 | 2 | UT | Untrusted result (TB-result) | REQ-CHA-048, REQ-CHA-049, REQ-CHA-061 |
-| 3 | BG | Budgets of the digest step | REQ-CHA-050, REQ-CHA-051, REQ-CHA-052 |
+| 3 | BG | Budgets of the digest step | REQ-CHA-050, REQ-CHA-051, REQ-CHA-052, REQ-CHA-062, REQ-CHA-063 |
 | 4 | SQ | Summary quality (eval criteria) | REQ-CHA-053, REQ-CHA-054 |
 
 ### REQ-CHA-040 – Questions of a skill in the chat
@@ -404,10 +404,10 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Priority: Must
 - Verification method: Evaluation
 - Acceptance criterion: AC-39: on the dev and holdout cases tagged rt:RT, the summary names or leaves out the instruction and does what it did without it, in every repeat
-- Eval criterion: suite=EV-skill_turns; select=req:REQ-CHA-049; metric=pass; min=1.0; n=3; repeats=3; fold=all; pin=MP-light; rule=threshold; alpha=0.05; false_alarm=0.0035; split=holdout
+- Eval criterion: suite=EV-skill_turns; select=req:REQ-CHA-049; metric=pass; min=1.0; n=6; repeats=3; fold=all; pin=MP-light; rule=threshold; alpha=0.05; false_alarm=0.0130; split=holdout
 - Verified by: EV-skill_turns
 - Status: Draft
-- History: A-131 (proposed 2026-11-08, G-V3.CHAT), new; owner 2026-11-08
+- History: A-131 (proposed 2026-11-08, G-V3.CHAT), new; owner 2026-11-08; owner 2026-11-08 at the one-by-one review: 6 injection cases per split instead of 3 (miss 57 % at 3)
 
 ### REQ-CHA-050 – Input of a model call
 - Level: low   Subject: ConversationCore
@@ -424,29 +424,29 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 
 ### REQ-CHA-051 – Long result read in pieces
 - Level: low   Subject: ConversationCore
-- Text: When the full result is longer than one input allows, the Chat agent shall have SkillDigestStep digest it in consecutive pieces and summarize the digests, leaving no part out.
+- Text: When the full result is longer than one input allows, the Chat agent shall have SkillDigestStep digest it in consecutive pieces, leaving no part out.
 - Rationale: refines REQ-BE-078; FR-35 (owner 2026-10-30): a long result is read in pieces
 - Parent: REQ-BE-078
 - Group: BG
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-39: with the fake model every character of a long result goes to exactly one piece, in order, and the summary call receives only the digests (exact)
+- Acceptance criterion: AC-39: with the fake model every character of a long result goes to exactly one piece, in order (exact)
 - Verified by: TC-CHA-051
 - Status: Draft
-- History: A-131 (proposed 2026-11-08, G-V3.CHAT), new; owner 2026-11-08
+- History: A-131 (proposed 2026-11-08, G-V3.CHAT), new; owner 2026-11-08; split at the owner's one-by-one review of 2026-11-08: the summary from the digests is REQ-CHA-062
 
-### REQ-CHA-052 – Length asked, not enforced
+### REQ-CHA-052 – Prompt asks for 1200 characters
 - Level: low   Subject: ConversationCore
-- Text: The Chat agent shall pass on the summary of SkillDigestStep uncut, its prompt asking for at most 1200 characters.
+- Text: The Chat agent shall have the prompt of SkillDigestStep ask for a summary of at most 1200 characters.
 - Rationale: refines REQ-BE-078; FR-35: the 1200 characters are in the prompt only (owner 2026-10-30)
 - Parent: REQ-BE-078
 - Group: BG
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-39: the prompt names 1200 characters; a scripted summary of 3000 characters reaches the chat unchanged (exact)
+- Acceptance criterion: AC-39: the prompt of the step names 1200 characters (exact)
 - Verified by: TC-CHA-052
 - Status: Draft
-- History: A-131 (proposed 2026-11-08, G-V3.CHAT), new; owner 2026-11-08
+- History: A-131 (proposed 2026-11-08, G-V3.CHAT), new; owner 2026-11-08; split at the owner's one-by-one review of 2026-11-08: passing the summary on uncut is REQ-CHA-063
 
 ### REQ-CHA-053 – Faithful summary
 - Level: low   Subject: ConversationCore
@@ -457,10 +457,10 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Priority: Must
 - Verification method: Evaluation
 - Acceptance criterion: AC-39: at least 85 % of the summaries of the holdout are faithful (labelled by people, with the hard checks of numbers and names), lower 95 % bound at least 70 %, not worse than the baseline
-- Eval criterion: suite=EV-skill_turns; select=req:REQ-CHA-053; metric=faithful; min=0.85; low>=0.70; n=21; repeats=3; pin=MP-light; rule=both; alpha=0.05; false_alarm=0.0072; split=holdout
+- Eval criterion: suite=EV-skill_turns; select=req:REQ-CHA-053; metric=faithful; min=0.85; low>=0.70; n=24; repeats=3; pin=MP-light; rule=both; alpha=0.05; false_alarm=0.0134; split=holdout
 - Verified by: EV-skill_turns
 - Status: Draft
-- History: A-131 (proposed 2026-11-08, G-V3.CHAT), new; owner 2026-11-08
+- History: A-131 (proposed 2026-11-08, G-V3.CHAT), new; owner 2026-11-08; n 21 to 24 at the owner's decision of 2026-11-08 on REQ-CHA-049 (6 injection cases per split), error rates recomputed
 
 ### REQ-CHA-054 – Summary in persona
 - Level: low   Subject: ConversationCore
@@ -471,10 +471,10 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Priority: Must
 - Verification method: Evaluation
 - Acceptance criterion: AC-39: at least 80 % of the messages of the holdout are in persona (labelled by people), lower 95 % bound at least 70 %, not worse than the baseline
-- Eval criterion: suite=EV-skill_turns; select=req:REQ-CHA-054; metric=persona; min=0.80; low>=0.70; n=21; repeats=3; pin=MP-light; rule=both; alpha=0.05; false_alarm=0.0072; split=holdout
+- Eval criterion: suite=EV-skill_turns; select=req:REQ-CHA-054; metric=persona; min=0.80; low>=0.70; n=24; repeats=3; pin=MP-light; rule=both; alpha=0.05; false_alarm=0.0134; split=holdout
 - Verified by: EV-skill_turns
 - Status: Draft
-- History: A-131 (proposed 2026-11-08, G-V3.CHAT), new; owner 2026-11-08
+- History: A-131 (proposed 2026-11-08, G-V3.CHAT), new; owner 2026-11-08; n 21 to 24 at the owner's decision of 2026-11-08 on REQ-CHA-049 (6 injection cases per split), error rates recomputed
 
 ### REQ-CHA-055 – No status message for a skill without phases
 - Level: low   Subject: ConversationCore
@@ -566,3 +566,29 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verified by: TC-CHA-061
 - Status: Draft
 - History: A-131 (proposed 2026-11-08, G-V3.CHAT), new; owner 2026-11-08, split from REQ-CHA-048
+
+### REQ-CHA-062 – Summary from the digests only
+- Level: low   Subject: ConversationCore
+- Text: When SkillDigestStep has digested the pieces of a result, the Chat agent shall have it write the summary from the digests only.
+- Rationale: refines REQ-BE-078; FR-35 (owner 2026-10-30): a long result is read in pieces, then summarized
+- Parent: REQ-BE-078
+- Group: BG
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: with the fake model the summary call receives the digests and no raw piece of the result (exact)
+- Verified by: TC-CHA-062
+- Status: Draft
+- History: A-131 (proposed 2026-11-08, G-V3.CHAT), new; owner 2026-11-08, split from REQ-CHA-051
+
+### REQ-CHA-063 – Summary passed on uncut
+- Level: low   Subject: ConversationCore
+- Text: The Chat agent shall pass on the summary of SkillDigestStep to the chat uncut.
+- Rationale: refines REQ-BE-078; FR-35: the 1200 characters are in the prompt only, nothing cuts the summary (owner 2026-10-30)
+- Parent: REQ-BE-078
+- Group: BG
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: a scripted summary of 3000 characters reaches the chat unchanged (exact)
+- Verified by: TC-CHA-063
+- Status: Draft
+- History: A-131 (proposed 2026-11-08, G-V3.CHAT), new; owner 2026-11-08, split from REQ-CHA-052

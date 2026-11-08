@@ -12,7 +12,7 @@ Status: **proposed** (Draft, Plan step 1b of G-V3.CHAT, 2026-11-08). `contracts/
 | errors | an unknown `kind` is `ServiceError("invalid_kind")`; nothing is added |
 
 ## Requirements it serves
-REQ-BE-078, REQ-CHA-040 to 047, 055 to 061; the digest step behind `done`, `failed` and `stopped`: REQ-CHA-048 to 054.
+REQ-BE-078, REQ-CHA-040 to 047, 055 to 063; the digest step behind `done`, `failed` and `stopped`: REQ-CHA-048 to 054.
 
 ## Open
 The mock of IF-201 and its contract suite (`tests/helpers/mocks`, `tests/acceptance/contract`) change only after approval. The link form `#run=<id>` is shared with A-140 and REQ-CLV-037 (the page opens the Full run part of that run).

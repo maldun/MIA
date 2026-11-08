@@ -2848,12 +2848,12 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-CHA-051'> LongResultReadInPieces_Cha051 {
         subject s : ConversationCore;
-        doc /* When the full result is longer than one input allows, the Chat agent shall have SkillDigestStep digest it in consecutive pieces and summarize the digests, leaving no part out. */
+        doc /* When the full result is longer than one input allows, the Chat agent shall have SkillDigestStep digest it in consecutive pieces, leaving no part out. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
-    requirement def <'REQ-CHA-052'> LengthAskedNotEnforced_Cha052 {
+    requirement def <'REQ-CHA-052'> PromptAsksFor1200Characters_Cha052 {
         subject s : ConversationCore;
-        doc /* The Chat agent shall pass on the summary of SkillDigestStep uncut, its prompt asking for at most 1200 characters. */
+        doc /* The Chat agent shall have the prompt of SkillDigestStep ask for a summary of at most 1200 characters. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-CHA-053'> FaithfulSummary_Cha053 {
@@ -2899,6 +2899,16 @@ package MIA_NodeRequirements {
     requirement def <'REQ-CHA-061'> ResultGoesToTheDigestStepAsText_Cha061 {
         subject s : ConversationCore;
         doc /* The Chat agent shall give SkillDigestStep the full result and each piece as user text to report, never as instructions of the system prompt. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-062'> SummaryFromTheDigestsOnly_Cha062 {
+        subject s : ConversationCore;
+        doc /* When SkillDigestStep has digested the pieces of a result, the Chat agent shall have it write the summary from the digests only. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-063'> SummaryPassedOnUncut_Cha063 {
+        subject s : ConversationCore;
+        doc /* The Chat agent shall pass on the summary of SkillDigestStep to the chat uncut. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-WFM-001'> SkillsAsTasks_Wfm001 {
@@ -4674,7 +4684,7 @@ package MIA_NodeRequirements {
     requirement r_req_cha_049 : QuotedInstructionIsReportedNotFollowed_Cha049;
     requirement r_req_cha_050 : InputOfAModelCall_Cha050;
     requirement r_req_cha_051 : LongResultReadInPieces_Cha051;
-    requirement r_req_cha_052 : LengthAskedNotEnforced_Cha052;
+    requirement r_req_cha_052 : PromptAsksFor1200Characters_Cha052;
     requirement r_req_cha_053 : FaithfulSummary_Cha053;
     requirement r_req_cha_054 : SummaryInPersona_Cha054;
     requirement r_req_cha_055 : NoStatusMessageForASkillWithoutPhases_Cha055;
@@ -4684,6 +4694,8 @@ package MIA_NodeRequirements {
     requirement r_req_cha_059 : ExclusionsFromTheHistoryOfTheChatModel_Cha059;
     requirement r_req_cha_060 : RepairedTextIsTheTextShownAndSpoken_Cha060;
     requirement r_req_cha_061 : ResultGoesToTheDigestStepAsText_Cha061;
+    requirement r_req_cha_062 : SummaryFromTheDigestsOnly_Cha062;
+    requirement r_req_cha_063 : SummaryPassedOnUncut_Cha063;
     requirement r_req_wfm_001 : SkillsAsTasks_Wfm001;
     requirement r_req_wfm_002 : VersionedWorkflowLibrary_Wfm002;
     requirement r_req_wfm_003 : NoCycles_Wfm003;
@@ -5163,6 +5175,8 @@ package MIA_NodeRequirements {
     satisfy r_req_cha_059 by mia.conversation;
     satisfy r_req_cha_060 by mia.conversation;
     satisfy r_req_cha_061 by mia.conversation;
+    satisfy r_req_cha_062 by mia.conversation;
+    satisfy r_req_cha_063 by mia.conversation;
     satisfy r_req_wfm_001 by mia.taskRuntime;
     satisfy r_req_wfm_002 by mia.taskRuntime;
     satisfy r_req_wfm_003 by mia.taskRuntime;
@@ -5641,6 +5655,8 @@ package MIA_NodeRequirements {
     allocate r_req_cha_059 to mia.conversation;
     allocate r_req_cha_060 to mia.conversation;
     allocate r_req_cha_061 to mia.conversation;
+    allocate r_req_cha_062 to mia.conversation;
+    allocate r_req_cha_063 to mia.conversation;
     allocate r_req_wfm_001 to mia.taskRuntime;
     allocate r_req_wfm_002 to mia.taskRuntime;
     allocate r_req_wfm_003 to mia.taskRuntime;
@@ -6130,6 +6146,8 @@ package MIA_NodeRequirements {
     dependency from r_req_cha_059 to r_req_be_078;
     dependency from r_req_cha_060 to r_req_be_078;
     dependency from r_req_cha_061 to r_req_be_078;
+    dependency from r_req_cha_062 to r_req_be_078;
+    dependency from r_req_cha_063 to r_req_be_078;
     dependency from r_req_wfm_001 to r_req_be_033;
     dependency from r_req_wfm_002 to r_req_be_035;
     dependency from r_req_wfm_003 to r_req_be_036;
