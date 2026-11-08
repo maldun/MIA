@@ -1,0 +1,508 @@
+{
+ "items": [
+  {
+   "id": "N030",
+   "doc": "mia_readme_core_2a",
+   "kind": "relation",
+   "key": [
+    "web_tools.py",
+    "fetch_page"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "N045",
+   "doc": "wikinews",
+   "kind": "relation",
+   "key": [
+    "conservative government",
+    "the program"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "N046",
+   "doc": "wikinews",
+   "kind": "relation",
+   "key": [
+    "John Smol",
+    "Queen's University"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "N006",
+   "doc": "arxiv_2312.10997_intro",
+   "kind": "entity",
+   "key": [
+    "chunks"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "N041",
+   "doc": "wikinews",
+   "kind": "entity",
+   "key": [
+    "Rona Ambrose"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "N029",
+   "doc": "mia_readme_core_2a",
+   "kind": "relation",
+   "key": [
+    "web_tools.py",
+    "web_search"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "N033",
+   "doc": "wikinews",
+   "kind": "entity",
+   "key": [
+    "The Georgia Straight"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "N024",
+   "doc": "mia_readme_core_2a",
+   "kind": "entity",
+   "key": [
+    "chunk_text"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "N019",
+   "doc": "mia_readme_core_2a",
+   "kind": "entity",
+   "key": [
+    "python tools/try_search.py"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "N012",
+   "doc": "arxiv_2312.10997_intro",
+   "kind": "relation",
+   "key": [
+    "Documents",
+    "chunks"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "N011",
+   "doc": "arxiv_2312.10997_intro",
+   "kind": "relation",
+   "key": [
+    "RAG",
+    "advanced RAG"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "N031",
+   "doc": "mia_readme_core_2a",
+   "kind": "relation",
+   "key": [
+    "searxng_port",
+    "run.sh"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "N040",
+   "doc": "wikinews",
+   "kind": "entity",
+   "key": [
+    "Canada's drug laws"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "N010",
+   "doc": "arxiv_2312.10997_intro",
+   "kind": "entity",
+   "key": [
+    "Large language models (LLMs)"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "N015",
+   "doc": "arxiv_2312.10997_intro",
+   "kind": "relation",
+   "key": [
+    "RAG",
+    "modular RAG"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "N013",
+   "doc": "arxiv_2312.10997_intro",
+   "kind": "relation",
+   "key": [
+    "RAG",
+    "Transformer architecture"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "N004",
+   "doc": "arxiv_2312.10997_intro",
+   "kind": "entity",
+   "key": [
+    "user’s query"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "N005",
+   "doc": "arxiv_2312.10997_intro",
+   "kind": "entity",
+   "key": [
+    "Retrieval-Augmented Generation (RAG)"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "N017",
+   "doc": "mia_readme_core_2a",
+   "kind": "entity",
+   "key": [
+    "What MIA asked the internet"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "N007",
+   "doc": "arxiv_2312.10997_intro",
+   "kind": "entity",
+   "key": [
+    "Generation"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "N032",
+   "doc": "mia_readme_core_2a",
+   "kind": "relation",
+   "key": [
+    "tools/searxng/run.sh",
+    "SearXNG"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "N018",
+   "doc": "mia_readme_core_2a",
+   "kind": "entity",
+   "key": [
+    "Web text is data"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "N036",
+   "doc": "wikinews",
+   "kind": "entity",
+   "key": [
+    "Royal Canadian Mounted Police"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "N002",
+   "doc": "arxiv_2312.10997_intro",
+   "kind": "entity",
+   "key": [
+    "Indexing"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "N026",
+   "doc": "mia_readme_core_2a",
+   "kind": "entity",
+   "key": [
+    "web_search"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "N035",
+   "doc": "wikinews",
+   "kind": "entity",
+   "key": [
+    "Supreme Court of British Columbia"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "N023",
+   "doc": "mia_readme_core_2a",
+   "kind": "entity",
+   "key": [
+    "duckduckgo"
+   ],
+   "decision": "trivial",
+   "comment": ""
+  },
+  {
+   "id": "N025",
+   "doc": "mia_readme_core_2a",
+   "kind": "entity",
+   "key": [
+    "web_tools.py"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "N009",
+   "doc": "arxiv_2312.10997_intro",
+   "kind": "entity",
+   "key": [
+    "modular RAG"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "N016",
+   "doc": "arxiv_2312.10997_intro",
+   "kind": "relation",
+   "key": [
+    "RAG",
+    "Retrieval"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "N022",
+   "doc": "mia_readme_core_2a",
+   "kind": "entity",
+   "key": [
+    "WebClient"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "N027",
+   "doc": "mia_readme_core_2a",
+   "kind": "relation",
+   "key": [
+    "search_backends",
+    "searxng"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "N003",
+   "doc": "arxiv_2312.10997_intro",
+   "kind": "entity",
+   "key": [
+    "Retrieval"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "N043",
+   "doc": "wikinews",
+   "kind": "relation",
+   "key": [
+    "conservative government",
+    "Supreme Court of British Columbia ruling"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "N039",
+   "doc": "wikinews",
+   "kind": "entity",
+   "key": [
+    "Stephen Harper's government"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "N048",
+   "doc": "wikinews",
+   "kind": "relation",
+   "key": [
+    "Royal Canadian Mounted Police",
+    "the project"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "N042",
+   "doc": "wikinews",
+   "kind": "entity",
+   "key": [
+    "Andrew Weaver"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "N034",
+   "doc": "wikinews",
+   "kind": "entity",
+   "key": [
+    "Intergovernmental Panel on Climate Change"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "N020",
+   "doc": "mia_readme_core_2a",
+   "kind": "entity",
+   "key": [
+    "web_max_chars"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "N008",
+   "doc": "arxiv_2312.10997_intro",
+   "kind": "entity",
+   "key": [
+    "Pre-Training Models (PTM)"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "N038",
+   "doc": "wikinews",
+   "kind": "entity",
+   "key": [
+    "Queen's University"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "N044",
+   "doc": "wikinews",
+   "kind": "relation",
+   "key": [
+    "Conservatives",
+    "Environment Canada"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "N021",
+   "doc": "mia_readme_core_2a",
+   "kind": "entity",
+   "key": [
+    "MIA"
+   ],
+   "decision": "trivial",
+   "comment": ""
+  },
+  {
+   "id": "N037",
+   "doc": "wikinews",
+   "kind": "entity",
+   "key": [
+    "Conservative government"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "N028",
+   "doc": "mia_readme_core_2a",
+   "kind": "relation",
+   "key": [
+    "search_backends",
+    "duckduckgo"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "N014",
+   "doc": "arxiv_2312.10997_intro",
+   "kind": "relation",
+   "key": [
+    "Retrieval-Augmented Generation (RAG)",
+    "Large language models (LLMs)"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "N001",
+   "doc": "arxiv_2312.10997_intro",
+   "kind": "entity",
+   "key": [
+    "naive RAG"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "N047",
+   "doc": "wikinews",
+   "kind": "relation",
+   "key": [
+    "Tony Clement",
+    "Insite"
+   ],
+   "decision": "right",
+   "comment": ""
+  }
+ ],
+ "missing": [
+  {
+   "doc": "all",
+   "note": ""
+  }
+ ]
+}
