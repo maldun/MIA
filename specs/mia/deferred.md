@@ -8,9 +8,9 @@ Proposed on 2026-10-29 after the usability work of N-2.3 T-09 to T-11 and N-1.1 
 
 ## TD-01 – The status card is gone after a reload
 - Kind: defer
-- Requirement: REQ-CLV-038 (the Skill run view shows the last run after a reload; REQ-CLV-023, the card, is superseded by A-131, D-302)
+- Requirement: REQ-CLV-023
 - Interim criterion: the card is checked in a browser (`tests/test_task_files_browser.py`, TC-CLV-023: draw, update in place, pause, resume, stop, late status after done, 360 px) and its model with `node --test` (`tests/js/taskcard.test.mjs`); the card lives as long as the page is open
-- Target: the Skill run view shows the last run with its final figures after a reload and a restart (browser test)
+- Target: a card that is still there, with its final figures, after a reload (browser test)
 - Reason: a card after a reload needs the status to be kept with the history, which is a change of the interface (IF-101)
 - Effort: about half a day for the kept card (a field in the history record and in the amendment of IF-101)
 - Risk of the gap: after a reload the user sees no final figures of a finished task. Mitigation: the report and the files tab keep the result
@@ -20,6 +20,7 @@ Proposed on 2026-10-29 after the usability work of N-2.3 T-09 to T-11 and N-1.1 
 - Decision: confirmed by Stefan Reiterer, 2026-11-01 (D-172)
 - Note: narrowed to the reload target on 2026-11-07 on the owner's instruction; the browser part is done (branch `td-01-02-browser-tests`). FR-46 (goal B) moves the card into the skill subwindow, so the reload target may be redone there.
 - Status: open
+- Note (A-131, D-302, owner 2026-11-08): REQ-CLV-023 is superseded by the Skill run view; the reload target is met by REQ-CLV-038 (the Skill run view shows the last run with its final figures after a reload and a restart, browser test). TD-01 moves to REQ-CLV-038 when REQ-CLV-023 is retired in Implement of G-V3.PANEL (owner decision of 2026-11-08: no change of approved text now).
 
 ## TD-02 – The Files tab is not tested in a browser
 - Kind: defer

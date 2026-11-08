@@ -10,7 +10,7 @@ Drafted 2026-11-07 when the owner decided to split G-V3 into PANEL and CHAT (Q-3
 - Accepted by: Stefan Reiterer (owner)
 - Line of work: goal/v3.panel
 - Subgoals: –
-- Status: Proposed
+- Status: Agreed
 
 ## Outcome criteria
 | ID | Expected outcome | Derived from |
@@ -47,12 +47,15 @@ Top-level items it serves: FR-34, FR-46 (the view). Requirements by ID (inside G
 | REQ-WFM-038 | in | the report as link target; a run record for every skill |
 | REQ-WFM-039 | partly | the phases a skill declares are read by the view and by CHAT (through a mock); nothing else of the manifest changes |
 | IF-101 | in | amendment (run record, `task_status`, full result, marker for skill messages), provided here; G-V3.CHAT uses it through a mock |
+| IF-302, IF-102 | in | amendment A-141: the table `skill_runs` (v8 and v4), provided here; no new operation |
+| REQ-RTB-007 | in | the table `skill_runs` of the Record tables (N-3.3), the run records of REQ-WFM-130 to 138 are stored in it |
 
 ## Parts
 | Part | Real or stand-in | Notes |
 |---|---|---|
 | N-1.1 Skill run view and layout | real | |
 | N-2.3 run records and status events | real | |
+| N-3.3 Record tables (table `skill_runs`) | real | IF-302 v8, IF-102 v4 (A-141) |
 | chat with spoken text (CHAT) | stand-in | unchanged chat without the card |
 | skills | stand-in | scripted skill on the chat mock server |
 
@@ -70,7 +73,7 @@ Top-level items it serves: FR-34, FR-46 (the view). Requirements by ID (inside G
 | Phase | State | Record or reason |
 |---|---|---|
 | Explore | done | HLS of iteration 2 approved 2026-11-05 (D-186); wording A-131 |
-| Plan | in progress | started 2026-11-08: Step 1b (requirements, A-131, A-140, A-141) and Step 3 (test-spec rows, scenarios, TR-PANEL-001 to 007, VAL-012, plausibility proposal) drafted; Step 4 (red tests) and Step 5 (plan.md) open |
+| Plan | in progress | started 2026-11-08: Step 1b (requirements, A-131, A-140, A-141) and Step 3 (test-spec rows, scenarios, TR-PANEL-001 to 007, VAL-012, plausibility proposal) drafted and reviewed (D-302); plausibility recorded, contract change IF-101 v16, IF-302 v8, IF-102 v4 done (A-140, A-141); Step 4 (red tests) and Step 5 (plan.md) open |
 | Implement | open | |
 | Verify | open | |
 | Commit | open | |

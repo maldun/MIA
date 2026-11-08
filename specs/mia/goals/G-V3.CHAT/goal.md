@@ -10,7 +10,7 @@ Drafted 2026-11-07 when the owner decided to split G-V3 into PANEL and CHAT (Q-3
 - Accepted by: Stefan Reiterer (owner)
 - Line of work: goal/v3.chat
 - Subgoals: –
-- Status: Proposed
+- Status: Agreed
 
 ## Outcome criteria
 | ID | Expected outcome | Derived from |
@@ -25,7 +25,7 @@ Drafted 2026-11-07 when the owner decided to split G-V3 into PANEL and CHAT (Q-3
 | Item (DEP-n / HR-nnn) | Real or stand-in | Note |
 |---|---|---|
 | model server with the pins of `eval-spec.md` | real | MP-light for the dev suite of the digest step |
-| IF-101 amendment (run record, marker for skill messages) and REQ-WFM-039 | provided by G-V3.PANEL; CHAT works against a mock until PANEL is merged | CHAT only uses the link form, the marker and the declared phases; a change CHAT needs goes to the PANEL session as an amendment request; the parent can freeze the amendment once its requirements exist (Plan Step 1) |
+| IF-101 amendment (run record, marker for skill messages) and REQ-WFM-039 | provided by G-V3.PANEL; CHAT works against the mock of IF-101 v16 (installed 2026-11-08, A-140) until PANEL is merged | CHAT only uses the link form, the marker and the declared phases; a change CHAT needs goes to the PANEL session as an amendment request; the parent can freeze the amendment once its requirements exist (Plan Step 1) |
 | the Skill run view (G-V3.PANEL) | stand-in | a link target page until PANEL is merged; the only real dependency of CHAT on PANEL is the link form |
 | speech service | real, unchanged | every chat text is spoken as today (TD-11 independent) |
 | scripted skill on the chat mock server, stub model | stand-in | |
@@ -34,7 +34,7 @@ Drafted 2026-11-07 when the owner decided to split G-V3 into PANEL and CHAT (Q-3
 | Suggestion | Decision (split / keep together) | Reason | Date |
 |---|---|---|---|
 | prompt tuning of the digest step as an unsupervised subgoal | keep together, supervised throughout | owner 2026-11-07 (Q-10): no unsupervised prompt-tuning subgoal now; it can be proposed again once the suite and the baseline exist | 2026-11-07 |
-| further cut | keep together | one model step, five requirements to revise | 2026-11-07 |
+| further cut | keep together | one model step, 2 requirements to revise (REQ-CHA-008, 014) and 25 new ones (REQ-BE-078, REQ-CHA-040 to 063) | 2026-11-07 |
 
 ## Scope
 Top-level items it serves: FR-35, FR-46 (the chat part), FR-3 (the spoken short forms), NFR-3 (TB-result). Requirements by ID (inside G-V3's scope). Not in this table, used through a mock: the IF-101 amendment (marker for skill messages) and REQ-WFM-039 (declared phases), both provided by G-V3.PANEL:
@@ -44,7 +44,32 @@ Top-level items it serves: FR-35, FR-46 (the chat part), FR-3 (the spoken short 
 | REQ-WFM-036 | in | the result at the end becomes a short summary in the text, spoken, with a link |
 | REQ-CHA-008 | in | persona of the status summaries and the end summary |
 | REQ-CHA-014 | in | speech repair of the status summaries and the end summary |
-| IF-201 | in | skill turns in the history the chat model sees (amendment) |
+| IF-201 | in | amendment A-142 (v3): the operation `skill_turn`, the marker and the link, the history the chat model sees |
+| REQ-BE-078 | in | new: the Backend puts only the spoken text of a skill run into the chat; the suite EV-skill_turns (24 dev, 24 holdout, MP-light, labelled by the owner) decides REQ-CHA-049, 053, 054; threat THR-012 (TB-result, red-team cases RT-014) |
+| REQ-CHA-040 | in | new, questions of a skill in the chat (group ST) |
+| REQ-CHA-041 | in | new, status message per declared phase (group ST) |
+| REQ-CHA-042 | in | new, no status for other phases (group ST) |
+| REQ-CHA-043 | in | new, end summary (group ST) |
+| REQ-CHA-044 | in | new, failed run in the chat (group ST) |
+| REQ-CHA-045 | in | new, every added message is spoken (group ST) |
+| REQ-CHA-046 | in | new, history of a run for the chat model (group ST) |
+| REQ-CHA-047 | in | new, repair of the messages of a run (group ST) |
+| REQ-CHA-048 | in | new, digest step without tools (group UT) |
+| REQ-CHA-049 | in | new, quoted instruction is reported, not followed (group UT) |
+| REQ-CHA-050 | in | new, input of a model call (group BG) |
+| REQ-CHA-051 | in | new, long result read in pieces (group BG) |
+| REQ-CHA-052 | in | new, prompt asks for 1200 characters (group BG) |
+| REQ-CHA-053 | in | new, faithful summary (group SQ) |
+| REQ-CHA-054 | in | new, summary in persona (group SQ) |
+| REQ-CHA-055 | in | new, no status message for a skill without phases (group ST) |
+| REQ-CHA-056 | in | new, link added by code (group ST) |
+| REQ-CHA-057 | in | new, stopped run in the chat (group ST) |
+| REQ-CHA-058 | in | new, no card, table, log line or full result in the chat (group ST) |
+| REQ-CHA-059 | in | new, exclusions from the history of the chat model (group ST) |
+| REQ-CHA-060 | in | new, repaired text is the text shown and spoken (group ST) |
+| REQ-CHA-061 | in | new, result goes to the digest step as text (group UT) |
+| REQ-CHA-062 | in | new, summary from the digests only (group BG) |
+| REQ-CHA-063 | in | new, summary passed on uncut (group BG) |
 | REQ-VOI-001 | out | the voice path stays as it is (TD-11, A-130 independent) |
 
 ## Parts
@@ -70,7 +95,7 @@ Top-level items it serves: FR-35, FR-46 (the chat part), FR-3 (the spoken short 
 | Phase | State | Record or reason |
 |---|---|---|
 | Explore | done | HLS of iteration 2 approved 2026-11-05 (D-186); wording A-131 |
-| Plan | in progress | started 2026-11-08: Step 1b (REQ-BE-078, REQ-CHA-040 to 054, A-142) and Step 3 (test-spec rows and scenarios, EV-skill_turns, eval-spec rows, TR-CHAT-001 to 007, THR-012) drafted; cases, labels, baseline, red tests and plan.md open |
+| Plan | in progress | started 2026-11-08: Step 1b (REQ-BE-078, REQ-CHA-040 to 054, A-142) and Step 3 (test-spec rows and scenarios, EV-skill_turns, eval-spec rows, TR-CHAT-001 to 007, THR-012) drafted and reviewed one by one (D-303); EV-skill_turns cases labelled and promoted, baseline "no digest" (D-304), plausibility recorded, contract change IF-201 v3 done (A-142); Step 4 (red tests) and Step 5 (plan.md, with target kind and scorer of the suite) open |
 | Implement | open | |
 | Verify | open | |
 | Commit | open | |
