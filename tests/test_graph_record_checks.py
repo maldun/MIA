@@ -104,5 +104,62 @@ class FixedFieldsOfANode(unittest.TestCase):
         self.assertEqual(list(store.ids("graph_nodes")), [])
 
 
+class RobustnessOfTheChecks(unittest.TestCase):
+    """T-09 (A-98): fixes of F-03, F-09 and F-11 found in Verify."""
+
+    def test_fresh_categories_do_not_grow_the_validator_cache_without_bound(self):
+        """F-03: a caller that builds its categories anew for each call must not leak one validator per call.
+
+        Example: 10 000 calls with equal, freshly built categories -> fewer than 256 cached validators.
+        """
+        # Given/When
+        for _ in range(10000):
+            categories = {"entity": {"type": "object", "properties": {"type": {}}}}
+            graph_tables.check_record("context_nodes", {"id": "c", "data": {"type": "entity"}}, categories=categories)
+        # Then
+        self.assertLess(len(graph_tables._validators), 256)
+
+    def test_an_additional_field_is_not_one_a_pattern_property_matches(self):
+        """F-11: with patternProperties the refusal names the field no pattern matches.
+
+        Example: {"type": "entity", "xa": 1, "zz": 2} with "^x" allowed -> detail zz.
+        """
+        # Given
+        schema = {"type": "object", "properties": {"type": {}}, "patternProperties": {"^x": {}}, "additionalProperties": False}
+        # When/Then
+        self.assertEqual(graph_tables.check_record("graph_nodes", {"id": "n", "data": {"type": "entity", "xa": 1, "zz": 2}}, categories={"entity": schema}),
+                         {"rule": "schema_break", "detail": "zz"})
+
+    def test_a_record_nested_too_deep_is_a_schema_break_naming_data(self):
+        """REQ-GTB-027: 200 levels count the record itself as level 1; deeper is refused, never raised.
+
+        Example: a node whose value is nested 250 levels deep -> schema_break "data" in check_record and to_object; 100 levels is accepted.
+        """
+        # Given: the record is level 1, its data level 2, the value starts at level 3
+        def nested(levels):
+            value = {}
+            for _ in range(levels - 3):
+                value = {"k": value}
+            return {"id": "n", "data": {"type": "data", "value": value}}
+        deep = nested(250)
+        refusal = {"rule": "schema_break", "detail": "data"}
+        # When/Then
+        self.assertEqual(graph_tables.check_record("graph_nodes", deep), refusal)
+        self.assertEqual(graph_tables.to_object(deep), {"refused": refusal})
+        self.assertIsNone(graph_tables.check_record("graph_nodes", nested(100)))
+
+    def test_a_category_schema_that_is_not_a_schema_is_a_schema_break_naming_type(self):
+        """REQ-GTB-027: a category whose schema fails check_schema cannot check a node.
+
+        Example: schema {"type": "nope"} -> schema_break "type" for graph_nodes and context_nodes.
+        """
+        # Given
+        categories = {"entity": {"type": "nope"}}
+        # When/Then
+        for table in ("graph_nodes", "context_nodes"):
+            self.assertEqual(graph_tables.check_record(table, {"id": "n", "data": {"type": "entity"}}, categories=categories),
+                             {"rule": "schema_break", "detail": "type"}, table)
+
+
 if __name__ == "__main__":
     unittest.main()

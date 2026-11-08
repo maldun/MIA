@@ -5,7 +5,9 @@ Both tables are versioned and never deleted (an edit is a new version). A docume
 layer refuses a bad edit on write (TB-edit, second line of defence behind the Backend).
 """
 import copy
+import json
 import math
+import re
 from dataclasses import dataclass, field
 
 import jsonschema
@@ -57,7 +59,9 @@ _RECORD_SCHEMAS = {
                "properties": {"command": {"type": "string"}, "workflow_graph_id": {"type": "string"}, "context_graph_id": {"type": "string"}},
                "required": ["command", "workflow_graph_id", "context_graph_id"]},
 }
-_validators = {}
+_validators = {}                                # keyed by the schema's JSON, so a caller's fresh but equal categories share one validator
+_MAX_VALIDATORS = 128                           # bound: a caller with ever new schemas must not grow the cache without end (F-03)
+MAX_DEPTH = 200                                 # levels of a record, the record itself is level 1 (REQ-GTB-027)
 
 
 def record_definitions():
@@ -77,17 +81,41 @@ def _error_path(error):
     if error.validator == "required":
         return path, path + [next(k for k in error.validator_value if k not in error.instance)]
     if error.validator == "additionalProperties":
-        extra = min(k for k in error.instance if k not in error.schema.get("properties", {}))
+        # as JSON Schema does: a key is allowed when `properties` names it or a pattern of `patternProperties` matches it somewhere (F-11)
+        allowed = error.schema.get("properties", {})
+        patterns = error.schema.get("patternProperties", {})
+        extra = min(k for k in error.instance if k not in allowed and not any(re.search(pattern, k) for pattern in patterns))
         return path + [extra], path + [extra]
     return path, path
 
 
+def _validator(schema):
+    """The validator of a schema, built once: 500 node and 500 edge records must be checked in 500 ms. A schema that is no schema raises
+    jsonschema.SchemaError (a category of a context graph comes from the caller)."""
+    key = json.dumps(schema, sort_keys=True, default=str)
+    if key not in _validators:
+        if len(_validators) >= _MAX_VALIDATORS:
+            _validators.clear()
+        jsonschema.Draft202012Validator.check_schema(schema)
+        _validators[key] = jsonschema.Draft202012Validator(schema)
+    return _validators[key]
+
+
+def _too_deep(record):
+    """True when the record has more than MAX_DEPTH levels of objects and lists. Iterative: the check must not hit the recursion limit itself."""
+    level, current = 1, [record]
+    while current:
+        if level > MAX_DEPTH:
+            return True
+        current = [inner for value in current if isinstance(value, (dict, list))
+                   for inner in (value.values() if isinstance(value, dict) else value) if isinstance(inner, (dict, list))]
+        level += 1
+    return False
+
+
 def _broken_path(schema, data):
     """The path of the first field that breaks the schema, in text order of the paths (TR-GTB-003), or None."""
-    key = id(schema)
-    if key not in _validators:                  # built once: 500 node and 500 edge records must be checked in 500 ms
-        _validators[key] = jsonschema.Draft202012Validator(schema)
-    paths = sorted(_error_path(error) for error in _validators[key].iter_errors(data))
+    paths = sorted(_error_path(error) for error in _validator(schema).iter_errors(data))
     if not paths:
         return _non_finite_path(data)
     return ".".join(paths[0][1]) or "data"
@@ -153,7 +181,7 @@ def _check(table, record, categories, stored, record_id=None):
             if not isinstance(record.get(end), str) or not record[end]:
                 return _refusal("record_identity", end)
     data = record.get("data")
-    if not isinstance(data, dict):
+    if not isinstance(data, dict) or _too_deep(record):
         return _refusal("schema_break", "data")
     if table == "context_nodes":
         return _context_node_refusal(data, categories)
@@ -182,6 +210,8 @@ def check_record(table, record, categories=None, stored=None, record_id=None):
         raise ValueError("not a record table of the graphs: %s" % (table,))
     try:
         return _check(table, record, categories, stored, record_id)
+    except jsonschema.SchemaError:              # only a category's schema comes from the caller and can be no schema (REQ-GTB-027)
+        return _refusal("schema_break", "type")
     except Exception:                           # a malformed record (for example a header whose members are not objects) is refused, not raised
         return _refusal("record_identity", "record")
 

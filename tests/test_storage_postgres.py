@@ -87,6 +87,18 @@ class PostgresStorage(StorageBehaviour, unittest.TestCase):
         self.addCleanup(backend.close)
         return backend
 
+    def test_a_node_with_an_extra_field_is_refused_and_not_stored(self):
+        """F-13(b), REQ-GTB-022 on PostgreSQL: the record check runs before the write, whatever the backend.
+
+        Example: {"type": "data", "foo": 1} -> invalid, schema_break, "foo"; the table stays empty.
+        """
+        # Given/When
+        with self.assertRaises(StorageError) as caught:
+            self.store.put("graph_nodes", "n1", {"id": "n1", "data": {"type": "data", "foo": 1}}, "anna")
+        # Then
+        self.assertEqual((caught.exception.code, caught.exception.rule, caught.exception.detail), ("invalid", "schema_break", "foo"))
+        self.assertEqual(list(self.store.ids("graph_nodes")), [])
+
 
 class SharedDatabase(unittest.TestCase):
     @classmethod

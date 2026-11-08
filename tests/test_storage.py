@@ -12,7 +12,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "helpers"))
 
 from markers import mark                         # noqa: E402
-from storage import Storage, StorageError        # noqa: E402
+from storage import Storage, StorageError, validate  # noqa: E402
 from storage_files import FileBackend            # noqa: E402
 
 LOOKUP = {"nodes": [{"id": "q", "kind": "data"}, {"id": "p", "kind": "process"}, {"id": "a", "kind": "data"}],
@@ -315,6 +315,34 @@ class StorageBehaviour:
         self.store.put("graph_nodes", "n9", {"id": "n9", "data": {"type": "data"}}, "anna")
         self.assertEqual(self.store.put("graph_edges", "e1", edge, "anna"), {"version": 1})
         self.assertEqual(self.store.put("graphs", "wf1", header(2), "anna"), {"version": 1})
+
+    @mark.req("REQ-GTB-020")
+    def test_a_header_names_the_member_that_is_not_stored_not_the_first(self):
+        """F-06(a): the second member of a header names a version that is not stored; the refusal names that member.
+
+        Example: nodes n1 v1 (stored) and n2 v5 (n2 has only v1) -> unknown_member "n2"; n2 v1 is accepted.
+        """
+        # Given: n1 and n2 stored at version 1
+        for node_id in ("n1", "n2"):
+            self.store.put("graph_nodes", node_id, {"id": node_id, "data": {"type": "data"}}, "anna")
+        def header(version):
+            return {"id": "wf1", "data": {"kind": "workflow", "context_graph_id": "c", "testbench_id": "", "description": "d",
+                                          "nodes": [{"id": "n1", "version": 1}, {"id": "n2", "version": version}], "edges": []}}
+        # When/Then
+        self.assertEqual(self.refusal_of("graphs", "wf1", header(5)), ("unknown_member", "n2"))
+        self.assertEqual(self.store.put("graphs", "wf1", header(1), "anna"), {"version": 1})
+
+    @mark.req("REQ-GTB-011")
+    def test_validate_refuses_an_unknown_node_type(self):
+        """F-06(b): storage.validate checks the shape of a record alone.
+
+        Example: validate("graph_nodes", {"id": "n", "data": {"type": "zz"}}) -> invalid, unknown_type, "zz".
+        """
+        # Given/When
+        with self.assertRaises(StorageError) as caught:
+            validate("graph_nodes", {"id": "n", "data": {"type": "zz"}})
+        # Then
+        self.assertEqual((caught.exception.code, caught.exception.rule, caught.exception.detail), ("invalid", "unknown_type", "zz"))
 
     @mark.req("REQ-GTB-021")
     def test_a_graph_record_is_stored_under_its_own_id(self):
