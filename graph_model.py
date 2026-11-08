@@ -11,9 +11,18 @@ Node fields are the proposal of goal.md: data nodes `value`, `parameters`; trans
 
 from collections import namedtuple
 
-SaveResult = namedtuple("SaveResult", "saved version named")
+try:
+    from . import graph_tables
+    from .storage import StorageError
+except ImportError:  # used as plain script / in tests
+    import graph_tables
+    from storage import StorageError
 
-TABLE = "workflow_graphs"
+# `rule` and `detail` are those of a StorageError("invalid") of the record checks (as StoreResult of skill_record.py); None for a refusal of the graph rules.
+SaveResult = namedtuple("SaveResult", "saved version named rule detail", defaults=(None, None))
+
+TABLE = "workflow_graphs"      # the table of the fake; the real Storage keeps the graph as records
+HEADER = ("context_graph_id", "testbench_id", "description")
 NODE_TYPES = ("data", "transform", "master")
 
 
@@ -104,17 +113,45 @@ def order_of(graph):
 
 
 class GraphModel:
-    def __init__(self, tables):
+    """`tables` is the real Storage layer (IF-102, tables graph_nodes, graph_edges and graphs of IF-301 v2) or the minimal fake of the red tests (TR-MODEL-001).
+    On the Storage layer a graph is node records, edge records and a header that pins the version of each member; the caller gives the `author` of a write."""
+
+    def __init__(self, tables, author=None):
         self.tables = tables
+        self.author = author
+        self.real = hasattr(tables, "ids")
 
     def save_graph(self, graph):
         named = check_graph(graph)
         if named:
             return _refuse(named)
-        return SaveResult(True, self.tables.put(TABLE, graph["id"], graph), [])
+        if not self.real:
+            return SaveResult(True, self.tables.put(TABLE, graph["id"], graph), [])
+        # A record the record checks refuse is a refused result like a broken graph rule; other errors raise. Members written before the refusal stay as
+        # unused versions of their records (the header, which makes them a graph, is not written).
+        for node in graph["nodes"]:     # a broken node is found before anything is written
+            broken = graph_tables.check_record("graph_nodes", node, record_id=node["id"])
+            if broken:
+                return SaveResult(False, None, [], broken["rule"], broken["detail"])
+        try:
+            members = {name: [{"id": m["id"], "version": self.tables.put(table, m["id"], m, self.author)["version"]} for m in graph[name]]
+                       for name, table in (("nodes", "graph_nodes"), ("edges", "graph_edges"))}
+            data = {"kind": "workflow", **members, **{key: graph[key] for key in HEADER}}
+            version = self.tables.put("graphs", graph["id"], {"id": graph["id"], "data": data}, self.author)["version"]
+        except StorageError as refusal:
+            if refusal.code != "invalid":
+                raise
+            return SaveResult(False, None, [], refusal.rule, refusal.detail)
+        return SaveResult(True, version, [])
 
     def read_graph(self, graph_id, version=None):
-        return self.tables.get(TABLE, graph_id, version)
+        if not self.real:
+            return self.tables.get(TABLE, graph_id, version)
+        header = self.tables.get("graphs", graph_id, version)["doc"]
+        data = header["data"]
+        pinned = lambda table, members: [self.tables.get(table, m["id"], m["version"])["doc"] for m in members]    # noqa: E731
+        return {"id": header["id"], **{key: data[key] for key in HEADER},
+                "nodes": pinned("graph_nodes", data["nodes"]), "edges": pinned("graph_edges", data["edges"])}
 
     def topological_order(self, graph_id):
         return order_of(self.read_graph(graph_id))

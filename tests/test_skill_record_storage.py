@@ -35,30 +35,6 @@ class FakeSide(FakeGraphTables):
         return super().put(table, record_id, doc)
 
 
-class RealGraphTables:
-    """GraphModel's tables (put/get/versions of one `workflow_graphs` table) on the record tables of IF-301 v2: nodes, edges and a pinning header.
-    The Storage layer has no such table, so this adapter splits a graph into records and joins them again (adapter detail)."""
-
-    def __init__(self, storage):
-        self.storage = storage
-
-    def put(self, table, graph_id, graph):
-        nodes = [{"id": n["id"], "version": self.storage.put("graph_nodes", n["id"], n, AUTHOR)["version"]} for n in graph["nodes"]]
-        edges = [{"id": e["id"], "version": self.storage.put("graph_edges", e["id"], e, AUTHOR)["version"]} for e in graph["edges"]]
-        data = {"kind": "workflow", "nodes": nodes, "edges": edges, **{key: graph[key] for key in HEADER[1:]}}
-        return self.storage.put("graphs", graph_id, {"id": graph_id, "data": data}, AUTHOR)["version"]
-
-    def get(self, table, graph_id, version=None):
-        header = self.storage.get("graphs", graph_id, version)["doc"]
-        data = header["data"]
-        pinned = lambda name, members: [self.storage.get(name, m["id"], m["version"])["doc"] for m in members]    # noqa: E731
-        return {"id": header["id"], **{key: data[key] for key in HEADER[1:]},
-                "nodes": pinned("graph_nodes", data["nodes"]), "edges": pinned("graph_edges", data["edges"])}
-
-    def versions(self, table, graph_id):
-        return [h["version"] for h in self.storage.history("graphs", graph_id)]
-
-
 def chain_graph(graph_id, **kwargs):
     nodes = [data_node("D1"), transform_node("T1"), data_node("D2"), master_node("M1"), data_node("D3")]
     edges = [make_edge("D1", "T1"), make_edge("T1", "D2"), make_edge("D2", "M1"), make_edge("M1", "D3")]
@@ -120,8 +96,8 @@ class SkillRecordOnRealStorage:
         self.storage = self.new_storage()
         self.records = SkillRecords(self.storage, AUTHOR)
         self.fake_records = SkillRecords(FakeSide(), AUTHOR)
-        self.model = GraphModel(RealGraphTables(self.storage))
-        self.fake_model = GraphModel(FakeSide())
+        self.model = GraphModel(self.storage, AUTHOR)
+        self.fake_model = GraphModel(FakeSide(), AUTHOR)
 
     @mark.req("REQ-WFM-040")
     def test_a_skill_record_gives_the_same_versions_on_the_fake_and_the_real_storage(self):
@@ -168,7 +144,7 @@ class SkillRecordOnRealStorage:
 
         Example: testbench ID "" and "tb-1" both read back unchanged, both saved as version 1.
         """
-        # Given: two workflow graphs, one with an empty testbench ID, on each side (the real side splits them into node, edge and header records)
+        # Given: two workflow graphs, one with an empty testbench ID, on each side (GraphModel itself splits them into node, edge and header records on the real side)
         # When: both are saved and read back
         fake, real = scenario_044(self.fake_model), scenario_044(self.model)
         # Then: both sides give the same answers
@@ -215,6 +191,77 @@ class SkillRecordOnRealStorage:
         self.assertEqual(other.exception.code, "unknown_table")
         # And: the fake accepts it (the known gap of the fake, which checks nothing)
         self.assertTrue(self.fake_records.store(broken).stored)
+
+    @mark.req("REQ-WFM-043")
+    def test_a_graph_the_record_checks_refuse_is_a_refused_result_and_the_header_is_not_stored(self):
+        """A node with a field its type does not list is refused by the record checks of the Storage layer: a refused result with rule and detail, no header.
+
+        Example: data node D1 with the extra field `foo` gives (False, None, [], "schema_break", "foo"); the graph stays unknown; the fake takes it.
+        """
+        # Given: a graph whose node D1 has a field that its type does not list, and the refusal the Storage layer itself gives for that node
+        graph = chain_graph("wf-bad")
+        graph["nodes"][0]["data"]["foo"] = 1
+        with self.assertRaises(StorageError) as expected:
+            self.storage.put("graph_nodes", "D1", graph["nodes"][0], AUTHOR)
+        # When: the graph is saved on the real side
+        result = self.model.save_graph(graph)
+        # Then: a refused result (no exception) with the rule and detail of the refusal, and no header
+        self.assertEqual((result.saved, result.version, result.named), (False, None, []))
+        self.assertEqual((result.rule, result.detail), (expected.exception.rule, expected.exception.detail))
+        self.assertEqual(self.storage.ids("graphs"), [])
+        # And: the fake accepts it (known gap of the fake, which checks nothing)
+        self.assertTrue(self.fake_model.save_graph(graph).saved)
+
+    @mark.req("REQ-WFM-043")
+    def test_a_rule_refusal_of_the_graph_is_checked_before_anything_is_written(self):
+        """The rules of T-01 come first: a graph with a cycle names the cycle and writes no record at all.
+
+        Example: D1 -> T1 -> D1 is refused naming ["D1", "T1", "D1"] (rule and detail empty); no node, edge or header is stored.
+        """
+        # Given: a graph with a cycle
+        graph = make_graph("wf-cycle", [data_node("D1"), transform_node("T1")], [make_edge("D1", "T1"), make_edge("T1", "D1")])
+        # When: it is saved on the real side
+        result = self.model.save_graph(graph)
+        # Then: it is refused naming the cycle, and the tables are empty
+        self.assertEqual((result.saved, result.rule, result.detail), (False, None, None))
+        self.assertEqual(result.named[0], result.named[-1])
+        self.assertEqual([self.storage.ids(t) for t in ("graph_nodes", "graph_edges", "graphs")], [[], [], []])
+
+    @mark.req("REQ-WFM-044")
+    def test_a_header_naming_an_unknown_member_version_is_refused_with_the_storage_rule(self):
+        """The header pins member versions; one that is not stored is refused by the Storage layer with `unknown_member`.
+
+        Example: a header naming node D1 at version 5 (only version 1 stored) raises code `invalid`, rule `unknown_member`, detail `D1`.
+        """
+        # Given: a saved graph, so D1 is stored at version 1
+        self.model.save_graph(chain_graph("wf-a", context_graph_id="c", testbench_id="", description=""))
+        data = {"kind": "workflow", "nodes": [{"id": "D1", "version": 5}], "edges": [], "context_graph_id": "c", "testbench_id": "", "description": ""}
+        # When: a header names version 5 of D1
+        with self.assertRaises(StorageError) as refused:
+            self.storage.put("graphs", "wf-x", {"id": "wf-x", "data": data}, AUTHOR)
+        # Then: it is refused with the rule of the Storage layer, and nothing is stored
+        self.assertEqual((refused.exception.code, refused.exception.rule, refused.exception.detail), ("invalid", "unknown_member", "D1"))
+        self.assertEqual(self.storage.ids("graphs"), ["wf-a"])
+
+    @mark.req("REQ-WFM-044")
+    def test_an_old_version_of_a_graph_reads_back_with_the_members_of_that_version(self):
+        """Version 1 of a graph keeps the node versions it pinned after the node is edited in version 2.
+
+        Example: description "one" of D1 in version 1, "two" in version 2; read version 1 gives "one", the latest gives "two".
+        """
+        # Given: a graph saved twice, with the value of D1 changed
+        first = chain_graph("wf-v", context_graph_id="c", testbench_id="", description="first")
+        second = chain_graph("wf-v", context_graph_id="c", testbench_id="", description="second")
+        second["nodes"][0] = data_node("D1", value="two")
+        saved = [self.model.save_graph(first), self.model.save_graph(second)]
+        # When: version 1 and the latest version are read
+        old, latest = self.model.read_graph("wf-v", 1), self.model.read_graph("wf-v")
+        # Then: version 1 has the first members, the latest the edited one, the order is the same
+        self.assertEqual([(r.saved, r.version) for r in saved], [(True, 1), (True, 2)])
+        self.assertEqual((old["description"], latest["description"]), ("first", "second"))
+        self.assertEqual(old["nodes"][0], first["nodes"][0])
+        self.assertEqual(latest["nodes"][0], second["nodes"][0])
+        self.assertEqual(self.model.topological_order("wf-v"), ["D1", "T1", "D2", "M1", "D3"])
 
 
 class FileStorageSkillRecords(SkillRecordOnRealStorage, unittest.TestCase):
