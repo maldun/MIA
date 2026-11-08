@@ -4,6 +4,8 @@
 **Branch:** goal/v2.model @ `b36b053` (code unchanged since `5382d28`)   **Parent line of work:** master (`b250450`, STORE merged)   **Plan baseline:** `plan-baseline-it2-model-installed` (`97146b4`)
 **Date:** 2026-11-08   **Reviewers:** (human review pending), Claude Sonnet 5.5 (AI, fresh Verify session, no part in the implementation)
 
+> The verdict of the first run below is superseded by the section **Second run** at the end of this file (after T-08, `49c18b4`). Finding IDs are kept.
+
 ## Verdict
 **Not verified.** Reasons that remain (all in the table of findings):
 1. F-01: the "maximum time" half of REQ-WFM-048 does not work with the field the owner confirmed (`max_seconds`); the code looks for `max_time`.
@@ -142,3 +144,90 @@ Survivors: (1) `== "untrusted"` instead of `!= "trusted"`: equivalent for the de
 - Not run or not decidable here: the real start of `web_app.py` with the catalog (only an `ast` test shows the wiring; hand-check at Deploy); `ruff`/`bandit`/`vulture` (not installed); documentation and clean-machine walkthrough; the human review of the specification side; CI stage log.
 - For users to judge: command names with capitals or spaces in a skill record; what a record-only skill should do when started (nothing today).
 - The stored graph is not re-checked on read; the Graph app (IF-104/IF-203) writes through IF-102 and bypasses the rules of T-01 by design (D-262). Validate should ask whether the runner must be the second guard (F-05).
+
+---
+
+## Second run (after T-08)
+**Branch:** goal/v2.model @ `5152013` (code unchanged since `49c18b4`; `git diff 775ec90..HEAD` touches `extension_loader.py`, `graph_model.py`, `graph_run.py`, `skill_record.py`, three test files, `plan.md` and the brief only)   **Date:** 2026-11-08   **Reviewer:** Claude Sonnet 5.5 (AI, fresh Verify session, no part in the implementation); human review pending.
+Owner decisions of 2026-11-08 used as given: fix F-01, F-02, F-03, F-05; an unknown trust status stays refused (fail safe); `named_status` stays one value; the re-save and orphan versions of F-07 are a known property; F-04, F-06, F-08 to F-11 are not part of T-08.
+
+### Verdict (second run)
+**Not verified.** Reasons that remain:
+1. F-13 (medium, new, regression of T-08): a failing catalog (storage down) now makes `load_extensions` raise out of `web_app.py` at import; before T-08 every skill was skipped with a problem line and the app started.
+2. F-14 (medium, new, residual of F-02 b): a record command that is an alias of a manifest-only skill is accepted by the store and by the loader; with the record skill sorted first, the real manifest skill (`lookup`, alias `research`) is dropped and its alias belongs to the record skill.
+3. F-10: TC-WFM-047, TR-MODEL-003 and TR-MODEL-001 still wait for the owner's re-approval (`req_review.py status`: changed since review).
+F-01, F-02 (a), F-03 and F-05 are closed by my own probes. The remaining open items are all low except F-13 and F-14 (table below). **If F-13 and F-14 are fixed, the other open findings (F-04, F-06, F-07 c to e, F-08, F-09, F-11, F-12, F-15, F-16) are low and could be accepted by the owner, giving 'Verified with accepted deviations'; F-10 is an owner approval, not a deviation.** No deviation is accepted yet (the owner's decisions above are scope decisions, not acceptances of open findings).
+
+### Automated checks (clean `git archive HEAD` in the scratchpad `vm2/head`)
+| Check | Result |
+|---|---|
+| `trace_check.py` | 547 errors, sorted list **identical** to a `git archive` run of master `b250450`; none for REQ-WFM-040..049, REQ-RUN-016..019, TC-WFM-040..049, TC-RUN-016..019, TR-MODEL-001..005 (the new test file adds no error) |
+| `goal_check.py` and `--parent-ref master` (in the worktree) | only GL1 "G-V2, G-V3 open" (old); nothing for MODEL |
+| `req_graph.py` | 28 errors as baseline, none for MODEL ids |
+| `req_review.py status` | changed since review: TR-MODEL-001, TC-WFM-047, TR-MODEL-003 (F-10); nothing marked by me |
+| `test_doc_check.py` on `test_graph_run_findings.py`, `test_skill_record_storage.py`, `test_skill_catalog_loader.py`, `test_graph_model.py`, `test_graph_run.py` | 0 errors, 0 warnings |
+| Goal tests, one process each | `test_graph_model` 10, `test_graph_run` 4, `test_graph_run_findings` 5, `test_skill_catalog_loader` 7, `test_extension_loader` 8, `test_task_registry` 8, `test_chat_tasks` 12: all OK |
+| `test_skill_record_storage.py` verbose | 26 tests OK: 13 scenarios on the file backend and 13 on PostgreSQL, none skipped |
+| `test_storage_postgres.py`, `contract_postgres.sh` | 43 OK; 11 OK |
+| Contract suites mock / real | 130 / 130 OK (17 skipped for external services, as before); `run_integration_steps.py`: 23 python + 4 javascript steps, 0 failed |
+| All acceptance files, one process each | all OK (`test_benchmarks.py`: one expected failure, as before) |
+| JavaScript tests | 163 of 163 OK |
+| Full unit suite alone | 2182 tests OK, skipped 4, expected failures 2; 494 s (first run 2169: the 13 new tests) |
+| TC-WFM-047 statistical check (seeds 1 to 200, 100 + 100 graphs) | run once (acceptance file and unit suite): OK, no re-run needed; seeds and n unchanged |
+| Protected material vs `b250450` (list as in the first run, also `graph_rules.py`, `pipeline.py`, `library.py`, `requirements.txt`) | empty diff |
+| Three red-test files vs `plan-baseline-it2-model-installed` | empty diff |
+| `plausibility.yaml`, `architecture.sysml` vs `b250450` | no change; `test-requirements.md` only the A-105 change |
+| `check_sysml_model.py`, `check_sysml.sh` | OK; 4 files, 0 errors, 0 warnings |
+| `ruff`, `bandit`, `vulture`, `req_lint.py`, `req_plausibility.py` | not run again (not installed / no spec or plausibility file changed since the first run); by hand: the diff adds no subprocess, file deletion, environment, network or secret |
+
+### Status of the findings
+| # | Status | Evidence of this run |
+|---|---|---|
+| F-01 | **Closed** | Probe `p_f01.py`, forms `max_repetitions`, `max_seconds`, `both`, `max_time`, `{}`, `None`, missing: the rule and the saves agree on the fake, the file backend and PostgreSQL (`p_pg.py`): the first three and "both" are saved, `max_time`, `{}`, `None`, missing and `max_seconds: 0` are refused naming `M1`. A refused graph leaves no node record. Remaining difference: F-16 |
+| F-02 | **(a) closed, (b) partly: F-14** | Store on fake, file backend and PostgreSQL: `/Lookup`, `LOOKUP`, `lookup`, `//lookup` refused naming `lookup`; clash is checked before the form check; a skill with several records is compared by its latest version only (`review` takes the old command `/lookup` of `lookup` after `lookup` moved to `/two`: accepted, by design). Loader: record command equal to a manifest-only folder name is skipped with a problem, the manifest skill stays. Alias of a manifest: F-14 |
+| F-03 | **Closed** (code); F-15 low residue | Store refuses `""`, `/`, `/a b`, `//a`, `/Alpha`, tab, NBSP, NUL with rule `schema` on both sides; every command the store accepted was registered by the loader under `normal_command` and found by `parse` (40 commands, `p_f02.py`); records written around the store (`""`, `/`, `/a b`, `//a`, `/Alpha`) register nothing and give one problem line each, the other skills load. The rule is in `plan.md` T-08 only; REQ-WFM-040/041 do not state the command form (note for Plan) |
+| F-04 | **Open**, low | unchanged: nothing delivers the context graph ID (`SkillCatalog.start` returns the workflow graph ID only) |
+| F-05 | **Closed**; F-12 low regression | `p_f05.py`: cycle of 2 and 4 nodes, self-loop on a transform and on a data node, a cycle in a disconnected part next to a good part, untrusted node inside a cycle, unknown edge end (both directions): status `refused`, named = edge IDs for unknown ends, the cycle with the first ID repeated otherwise, `named_status` None, no node ran, the trust callback was not called (also when it raises). Empty graph, one data node, isolated nodes, a duplicate node ID: unchanged behaviour (`done`). A trust callback that raises on an acyclic graph still propagates before any node ran (unchanged) |
+| F-06 | **Open**, low; T-08 widened it (F-12, F-13) | `_find_cycle` still raises `RecursionError` at about 1000 chained nodes (`check_graph` 1100: raises); malformed input still raises (edge without `id` and an unknown end: `KeyError`; graph without `nodes`: `KeyError`) |
+| F-07 | **(a), (b) decided by the owner (known property); (c), (d), (e) open**, low | code unchanged |
+| F-08 | **Open**, low | mutants "author not passed" (skills, graph nodes and edges, header) survive again |
+| F-09 | **Partly closed**, low | killed now: `named` order, `named_status` of the first node, `!= "trusted"` replaced by `== "untrusted"` (test with status `revoked`). Still surviving: the `except StorageError` branch of `save_graph` (swallowed, raised), node pre-check removed; new gaps in the T-08 tests: `named` of a cycle is only compared as a set (the repeated first ID is not pinned), `named_status` None for a cycle, the trust callback is not asserted to be uncalled before a cycle refusal |
+| F-10 | **Open, owner's** | unchanged (`req_review.py status`) |
+| F-11 | **Open**, low | `architecture.sysml` and `plan.md` text unchanged; `goal.md` still shows Implement `open`, Plan `in progress` |
+| F-12 | **New**, low | below |
+| F-13 | **New**, medium | below |
+| F-14 | **New**, medium | below |
+| F-15 | **New**, low | below |
+| F-16 | **New**, low | below |
+
+### New findings
+| # | Finding | Severity | Destination |
+|---|---|---|---|
+| F-12 | **`graph_run.py:30` (`_find_cycle` import, commit `49c18b4`); REQ-RUN-016; regression.** The recursive `_find_cycle` is now called by every `GraphRunner.run`: a chain of 1100 nodes (and 3000) raises `RecursionError` before any node ran. At `775ec90` the same graphs ran (`done`, 550 and 1500 transforms; probe `p_old_chain.py`). The private import across modules (`_find_cycle`) is a note: acceptable inside the Workflow management, but it ties the runner to the recursive search. *Test:* `run` of a 3000-node chain of alternating data and transform nodes returns `done` (or `refused` with a named reason), never raises; the fix can use `order_of` (iterative): nodes missing from the order are the cycle. | low | Implement fix |
+| F-13 | **`extension_loader.py:61-64` (`manifest_only = {... catalog.start(n) ...}` before the loop, commit `49c18b4`); REQ-WFM-041; regression of F-06.** The new loop over all folders runs outside the per-skill `try`. If the catalog raises (storage down, `records.ids()` raising, probes `p_loader_reg.py`, `p_loader_old.py`), `load_extensions` raises `ConnectionError`; `web_app.py:680` calls it at import, so the app does not start. At `775ec90` the same failure was caught per skill (`alpha: storage down`) and the app started without the extensions. A catalog that returns an odd value (`""`, `0`, `True`) gives `not_found` problems per skill in both versions (no change). *Test:* `load_extensions` with a catalog whose `start` raises returns one problem per skill and raises nothing; skills without a record still load if only `records.read` fails. | medium | Implement fix |
+| F-14 | **`extension_loader.py:62-72`, `skill_record.py:56-61`; REQ-WFM-042; DnS residual of F-02 (b).** The loader refuses a record command only when it equals the folder name of a manifest-only skill. The aliases of a manifest are not compared (`lookup` has `["research"]`). Probe: record of `alpha` with `/research`, extension `lookup` manifest-only: `alpha` sorts first, registers `research`; `lookup` fails with "task id 'research' is already in use" and is gone (ids `['research']`). With a record skill sorted after the manifest skill the record skill is dropped (reported). The store cannot see aliases. *Test:* extensions `alpha` (record `/research`) and `lookup` (alias `research`, no record): `lookup` is registered, `alpha` is skipped with a problem naming `research`, in both folder orders. | medium | Implement fix (compare with the names of the already registered or manifest tasks, aliases included) |
+| F-15 | **`skill_record.py:26-34` (`command_problem`); REQ-WFM-041; low.** The docstring says "a command the task registry can register and parse", but 23 lower-case characters pass the check (`µ`, `ı`, `ſ`, `ς`, `ϐ`, `ϑ`, `ϕ`, `ϖ`, `ϰ`, `ϱ`, `ϵ`, `ι` and the combining `ͅ`, Cyrillic `ᲀ`-`ᲈ`, `ẛ`) for which `TaskRegistry.parse` raises `KeyError` on user text in another case (`/ς x` registered, user types `/Σ x`; `p_uni.py` over all code points to U+2FFFF). The final sigma matters for Greek commands. Also: `/model` and similar names are accepted but shadowed by the argument commands of the chat service (skill unreachable, no error). *Test:* load a record command `/ς`; `parse("/Σ x")` must not raise (refuse such characters, or compare case-folded). | low | Implement fix or backlog |
+| F-16 | **`graph_model.py:89-92` (T-01 rule); REQ-WFM-048; low.** The rule tests only truthiness. Property probe (600 random stops: `max_repetitions`, `max_seconds`, `max_time`, `max_cycles`, `x` with 0, 1, -1, 0.5, 2.5, True, False, "5", "", None, [], {}, 10**12, inf): in 123 cases the rule and the fake accept and the real Storage refuses with `schema_break` (negative, boolean, fractional or string values, a non-integer repetition count); in 0 cases the rule refuses what the Storage accepts. The real save is refused with a rule and writes nothing, so no data is lost; this is the known gap of the fake (TR-MODEL-001). *Test:* adapter test: `{"max_repetitions": -1}` and `{"max_seconds": True}` are refused on the fake as on the Storage, or pinned as a listed difference. | low | Backlog or pin in the adapter test |
+
+### Regression review of `git diff 775ec90..HEAD`
+- Done, not specified: the command form rule (`command_problem`) and the extra `catalog.start` pass exist only in `plan.md` T-08, not in the requirement texts; the loader skips a whole skill (also its manifest form) when its record is bad, as T-08 states (a note: a bad record disables a working skill). No new default or output otherwise. `normal_command` uses `str(command)`, so a non-string is refused by the form check, not raised.
+- The skipped skill's `register` hook is not run; this matches the earlier behaviour of a skill whose `register()` of the task failed (checked by probe).
+- Behaviour for skills without a record: none. The repository's real `extensions/` folder (`lookup`, `review`, `search`) loads to the same tasks, aliases, versions, options and names with `catalog=None`, with an empty catalog and with an unrelated record (`p_real_ext.py`: identical).
+- The private import `_find_cycle`: note inside F-12.
+
+### Mutants (second run; scratch copy of `git archive HEAD`, goal's five test files, file backend of the adapter test)
+89 mutants: the 53 of the first run (49 patterns still applicable, 4 rebuilt for the changed code) and 36 new for the T-08 code. 76 killed, 13 survived.
+| Group | Result |
+|---|---|
+| T-01 (11 rules and order), T-02 (7), T-03 (4), T-04 (5), refuse-everything (3) | all killed |
+| T-05/T-07, T-06 | killed except the survivors below |
+| T-08 new: normal form without `lower()`, without `lstrip`; clash on raw commands; clash after the form check; form check removed; empty / space / second slash / capital / `//` each allowed; loader: problem ignored, manifest-only clash ignored, set empty, set inverted, raw command as ID, skipped skill still registered; `max_seconds` check inverted, `max_time` again, `max_seconds` ignored; runner: cycle check removed, moved after the trust check, cycle or unknown edge not refused, one end only, nodes named instead of edges, status `failed`, refusal that still runs, unknown/cycle order inverted | all 33 killed |
+Survivors (13): (1) to (3) author not passed in skills, nodes/edges, header: gap, F-08. (4), (5) refusal swallowed / raised in `save_graph`: gap, F-09. (6) node pre-check removed: gap, F-09. (7) cycle named without the repeated first ID: gap in the T-08 test (set comparison), F-09. (8) `named_status` set for a cycle refusal: gap, F-09. (9) trust callback called before a cycle refusal: gap, F-09. (10) `values` empty after a cycle refusal: not specified, equivalent for the tests. (11) loader `lstrip("/")` instead of `normal_command`: equivalent (a command that passes `command_problem` is lower case with at most one slash). (12) manifest-only check including the skill itself: equivalent (a skill with a record is never in the set). (13) a no-op control mutant: equivalent by construction. The nine survivors of the first run: `== "untrusted"`, `named` order and `named_status` are now killed by the owner's pins; the other six survive (3 author, 2 refusal branch, 1 pre-check).
+
+### Not run
+`ruff`, `bandit`, `vulture` (not installed); real start of `web_app.py` with a failing catalog (shown at the loader level only); CI stage log; documentation and clean-machine walkthrough; the human review. The mutants ran on the file backend of the adapter test only (the PostgreSQL class runs the same code and was run unmutated).
+
+### Accepted deviations
+| Deviation | Reason | Accepted by |
+|---|---|---|
+| none | | |
