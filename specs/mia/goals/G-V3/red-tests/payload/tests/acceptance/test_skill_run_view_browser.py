@@ -78,6 +78,14 @@ class SkillRunViewInBrowser(unittest.TestCase):
         cls.addClassCleanup(stop_stub, container)
         cls.results = browse(container)
 
+    def themes(self, name):
+        """the result of a scenario of TR-PANEL-001 in the light and in the dark theme"""
+        for theme in ("light", "dark"):
+            result = self.results[name][theme]
+            if "error" in result:
+                self.fail("scenario %s (%s theme): %s" % (name, theme, result["error"]))
+            yield theme, result
+
     def got(self, name):
         result = self.results[name]
         if "error" in result:
@@ -135,8 +143,12 @@ class SkillRunViewInBrowser(unittest.TestCase):
     def test_the_full_run_part_is_collapsed_shows_everything_and_is_limited_in_height(self):
         """TC-CLV-036: after the load the Full run part is collapsed; opened it shows result, answers in order, material, files and counts; it is at most 306 px high (34 % of 900 px), 225 px with 25 %; the page does not scroll.
         Example: five pieces of material, two files, answers canary then 2024."""
+        for theme, out in self.themes("full"):
+            with self.subTest(theme=theme):
+                self.check_full(out)
+
+    def check_full(self, out):
         # Given: a finished review with a long result, two answers, five pieces of material, two files and the counts, window 1440 x 900 px
-        out = self.got("full")
         # When: the page loads, the Full run part is opened and scrolled
         # Then: it is collapsed after the load
         self.assertTrue(out["collapsed"] and out["opened"])
@@ -155,8 +167,12 @@ class SkillRunViewInBrowser(unittest.TestCase):
     def test_the_link_of_the_summary_opens_the_full_run_part_inside_the_viewport(self):
         """TC-CLV-037: following the link of an end summary opens the Full run part of that run and the view lies inside the viewport, at 1440 x 900 px and at 360 x 800 px.
         Example: the link (#run=r7) of "Found 12 works." """
+        for theme, out in self.themes("link"):
+            with self.subTest(theme=theme):
+                self.check_link(out)
+
+    def check_link(self, out):
         # Given: the end summary of a finished run has a link to the run; the window is 1440 x 900 px, then 360 x 800 px
-        out = self.got("link")
         # When: the user follows the link
         # Then: the Full run part of that run is open and the view lies inside the viewport, on both sizes
         for size in ("wide", "phone"):
@@ -168,8 +184,12 @@ class SkillRunViewInBrowser(unittest.TestCase):
     def test_character_box_chat_and_strip_are_laid_out_without_overlap(self):
         """TC-CLV-040: at 1440 x 900 px the character box lies left of the chat and is wider, the strip spans the full width below both, nothing overlaps and the document is not taller than the window.
         Example: character box 0 to 900 px, chat 900 to 1440 px, strip below at full width."""
+        for theme, out in self.themes("layout"):
+            with self.subTest(theme=theme):
+                self.check_layout(out)
+
+    def check_layout(self, out):
         # Given: window 1440 x 900 px and a run in progress, Full run part closed
-        out = self.got("layout")
         character, chat, strip, window = out["character"], out["chat"], out["strip"], out["window"]
         # When: the page is shown
         # Then: the character box lies left of the chat and is wider
@@ -186,8 +206,12 @@ class SkillRunViewInBrowser(unittest.TestCase):
     def test_the_strip_has_its_height_share_and_is_not_cut_on_a_phone(self):
         """TC-CLV-041: the whole Skill run view is at most 144 px high at 1440 x 900 px (16 %), 172.8 px at 1920 x 1080 px, 180 px with the share 20 % at 900 px, and as high as its content at 360 x 800 px.
         Example: 16 % of 900 px is 144 px."""
+        for theme, out in self.themes("size"):
+            with self.subTest(theme=theme):
+                self.check_size(out)
+
+    def check_size(self, out):
         # Given: a running skill with three phases, Full run part closed, at three window sizes
-        out = self.got("size")
         # When: the page is shown
         # Then: with the default the strip measures at most 144 px at 900 px and at most 172.8 px at 1080 px
         self.assertLessEqual(out["wide"], 144.5)
@@ -201,8 +225,12 @@ class SkillRunViewInBrowser(unittest.TestCase):
     def test_the_phone_stacks_character_chat_and_view_with_big_targets(self):
         """TC-CLV-042: at 360 x 800 px character, chat and view follow each other in this order, every control can be scrolled into view and each target is at least 44 px high and wide.
         Example: the Pause button is 44 x 44 px or more."""
+        for theme, out in self.themes("phone"):
+            with self.subTest(theme=theme):
+                self.check_phone(out)
+
+    def check_phone(self, out):
         # Given: window 360 x 800 px and a run in progress
-        out = self.got("phone")
         # When: the page is shown and scrolled to the end
         character, chat, strip = out["character"], out["chat"], out["strip"]
         # Then: character, chat and view follow each other in this order
@@ -235,8 +263,12 @@ class SkillRunViewInBrowser(unittest.TestCase):
     def test_the_shares_are_set_in_the_browser_and_refused_outside_their_range(self):
         """TC-CLV-045: the strip share 20 % takes effect at once (at most 180 px), 11 % and 41 % are refused and 20 % stays; the Full run share 25 % (at most 225 px), 19 % and 61 % are refused and 25 % stays.
         Example: 41 % is refused, the strip stays at 20 %."""
+        for theme, out in self.themes("shares"):
+            with self.subTest(theme=theme):
+                self.check_shares(out)
+
+    def check_shares(self, out):
         # Given: window 1440 x 900 px and a running skill
-        out = self.got("shares")
         # When: the user sets the strip share to 20 %, then to 11 % and 41 %, and the Full run share to 25 %, then to 19 % and 61 %
         # Then: the strip is at most 180 px high at once, 11 % and 41 % are refused and 20 % stays
         self.assertEqual(out["strip"]["set"]["value"], "20")
@@ -253,8 +285,12 @@ class SkillRunViewInBrowser(unittest.TestCase):
     def test_the_shares_are_kept_in_the_browser_and_a_blocked_profile_still_works(self):
         """TC-CLV-046: the shares 20 % and 25 % survive a reload; a fresh profile uses 16 % and 34 %; a profile that refuses to store works with the defaults and shows no error.
         Example: reload keeps 20 and 25, a fresh browser shows 16 and 34."""
+        for theme, out in self.themes("persist"):
+            with self.subTest(theme=theme):
+                self.check_persist(out)
+
+    def check_persist(self, out):
         # Given: shares of 20 % and 25 % set; a fresh browser profile; a profile that refuses to store
-        out = self.got("persist")
         # When: the page is reloaded; the fresh profile loads the page; the blocked profile loads the page and the user sets a share
         # Then: the reloaded page uses 20 % and 25 %, the fresh profile 16 % and 34 %
         self.assertEqual(out["reloaded"], ["20", "25"])
@@ -268,8 +304,12 @@ class SkillRunViewInBrowser(unittest.TestCase):
     def test_the_content_of_a_low_strip_scrolls_inside_it(self):
         """TC-CLV-047: with the strip share 12 % (108 px) the strip is not higher than 108 px, its content moves inside it and the page does not scroll.
         Example: three phases and two elements do not fit 108 px and scroll inside the strip."""
+        for theme, out in self.themes("scroll"):
+            with self.subTest(theme=theme):
+                self.check_scroll(out)
+
+    def check_scroll(self, out):
         # Given: window 1440 x 900 px, the strip share set to 12 %, a running skill with three phases and two reported elements
-        out = self.got("scroll")
         # When: the page is shown and the strip content is scrolled
         # Then: the strip is not higher than 108 px, its content moves inside it, and the page does not scroll
         self.assertLessEqual(out["height"], 108.5)

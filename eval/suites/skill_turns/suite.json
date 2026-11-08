@@ -3,5 +3,6 @@
  "description": "Red-team cases (dev part), labelled by a person; target not decided yet",
  "target": {
   "kind": "pending"
- }
+ },
+ "starter": true
 }
