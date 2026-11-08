@@ -3456,6 +3456,20 @@ plausibility:
       rated: '2026-10-26'
       rated_by: maldun
       rating: plausible
+    REQ-SLY-013:
+      basis:
+      - one fixed number, 200 levels of nesting with the document as level 1, the same limit as REQ-GTB-027 and checked exactly on both sides (200 stored, 201 refused); the deepest real document in library, skills and eval has 19 levels (probe of 193 files on 2026-11-08), so the limit is about ten times that and far below the recursion limit of the interpreter (about 496 levels); the check is iterative and takes a few milliseconds (owner rating 2026-11-08)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-SLY-014:
+      basis:
+      - the only number is the limit of one second; the walk is iterative and visits each container once, so the limit has a very large margin; only Python callers can build such a document, JSON has no cycles; behaviour is exact (refused or not) and is tested with a time limit on both backends (owner rating 2026-11-08)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
     REQ-TLS-001:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
