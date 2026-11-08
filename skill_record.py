@@ -9,15 +9,22 @@ from collections import namedtuple
 StoreResult = namedtuple("StoreResult", "stored version named")
 
 SKILLS = "skills"
-# The tables only know one ID at a time, so the IDs of all skills are kept in one index record.
+# The fake tables only know one ID at a time, so the IDs of all skills are kept in one index record; the Storage layer lists them itself.
 INDEX = ("skill_index", "all")
 
 
 class SkillRecords:
-    def __init__(self, tables):
+    """`tables` is the real Storage layer (IF-102, table `skills` of IF-301 v2) or the minimal fake of the red tests (TR-MODEL-001).
+    The Storage layer keeps the fields of a skill under `data` and lists the IDs itself; the caller gives the `author` of a write."""
+
+    def __init__(self, tables, author=None):
         self.tables = tables
+        self.author = author
+        self.real = hasattr(tables, "ids")
 
     def ids(self):
+        if self.real:
+            return self.tables.ids(SKILLS)
         if not self.tables.versions(*INDEX):
             return []
         return list(self.tables.get(*INDEX)["ids"])
@@ -28,12 +35,20 @@ class SkillRecords:
         named = [other for other in self.ids() if other != skill_id and self.read(other)["command"] == record["command"]]
         if named:
             return StoreResult(False, None, named)
-        version = self.tables.put(SKILLS, skill_id, record)
-        if skill_id not in self.ids():
-            self.tables.put(*INDEX, {"ids": self.ids() + [skill_id]})
+        if self.real:
+            # A record that the record checks of the Storage layer refuse raises StorageError("invalid", rule, detail): nothing is stored.
+            data = {key: value for key, value in record.items() if key != "id"}
+            version = self.tables.put(SKILLS, skill_id, {"id": skill_id, "data": data}, self.author)["version"]
+        else:
+            version = self.tables.put(SKILLS, skill_id, record)
+            if skill_id not in self.ids():
+                self.tables.put(*INDEX, {"ids": self.ids() + [skill_id]})
         return StoreResult(True, version, [])
 
     def read(self, skill_id, version=None):
+        if self.real:
+            doc = self.tables.get(SKILLS, skill_id, version)["doc"]
+            return dict(doc["data"], id=doc["id"])
         return self.tables.get(SKILLS, skill_id, version)
 
 
