@@ -41,7 +41,7 @@ from .constants import CFG_FILE, LOG_FNAME, TIME_FORMAT, MESSAGE_SIZE
 from .constants import ADDRESS_KEY, PROTOCOL_KEY, WEB_PORT_KEY, SOUND_PORT_KEY, URL_KEY, U8
 from .constants import AUDIO_ROUTE, UPLOAD_ROUTE, AUDIO_MIME_TYPE, SPEECH_REQ, SOUND_REQ, TIME_REQ
 from . import constants as CONST
-from .speech_stream import SpeechStreamer
+from .speech_stream import SpeechStreamer, speak_text
 from .shutdown import request_shutdown
 from .presets_api import init_presets_api
 from .chat_log import ChatLog
@@ -650,9 +650,7 @@ def speak_answer(text, should_stop=None):
     spoken = speech_text(text)
     if not spoken:
         return
-    streamer = SpeechStreamer(get_websocket_url(address=ADDRESS, protocol=PROTOCOL), SOUND_PORT)
-    streamer.finish(spoken)
-    streamer.wait(should_stop)
+    speak_text(get_websocket_url(address=ADDRESS, protocol=PROTOCOL), SOUND_PORT, spoken, should_stop)       # raises OSError without a sound server (REQ-CHA-033)
 
 _db_dir = os.path.join(FPATH, cfg.get(CONST.ACCOUNTS_DIR_KEY, "data/db"))
 _votes_store = Storage(FileBackend(_db_dir))                  # the votes table (REQ-CHA-015); the accounts use the same folder
