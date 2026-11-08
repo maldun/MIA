@@ -284,6 +284,63 @@ class StorageBehaviour:
                 self.assertEqual((graph.exception.code, graph.exception.rule, graph.exception.detail), ("invalid", "schema_break", "data"))
         self.assertEqual((self.store.ids("workflows"), self.store.ids("graph_nodes")), (["w"], ["n"]))
 
+    @mark.req("REQ-SLY-013")
+    def test_a_scalar_is_a_level_of_a_document(self):
+        """F-23 (sixth Verify run): the walk of the Storage layer counted containers only, so a scalar in the 200th object was level 200.
+        Example: a workflows document whose deepest value (an empty object, an empty list or the number 7) is at level 200 is version 1; at level 201 put is ("invalid", "schema", "nested too deep"); graph_nodes gives ("invalid", "schema_break", "data") at 201.
+        """
+        # Given: a deepest value of each kind, wrapped in objects; the document is level 1, a graph record is level 1 and its value sits inside data
+        def wrapped(leaf, containers):
+            for _ in range(containers):
+                leaf = {"k": leaf}
+            return leaf
+        for name, leaf in (("empty object", {}), ("empty list", []), ("scalar", 7)):
+            for levels, accepted in ((200, True), (201, False)):
+                document = {"nodes": [], "edges": [], "note": wrapped(leaf, levels - 2)}
+                record = {"id": "n%s" % name, "data": {"type": "data", "value": wrapped(leaf, levels - 3)}}
+                with self.subTest(leaf=name, levels=levels):
+                    # When / Then: 200 levels are stored, 201 refused with the rule of the table
+                    if accepted:
+                        self.assertEqual(self.store.put("workflows", "w%s" % name, document, "anna"), {"version": 1})
+                        self.assertEqual(self.store.put("graph_nodes", "n%s" % name, record, "anna"), {"version": 1})
+                        continue
+                    with self.assertRaises(StorageError) as other:
+                        self.store.put("workflows", "w2", document, "anna")
+                    self.assertEqual((other.exception.code, other.exception.rule, other.exception.detail), ("invalid", "schema", "nested too deep"))
+                    with self.assertRaises(StorageError) as graph:
+                        self.store.put("graph_nodes", "n2", record, "anna")
+                    self.assertEqual((graph.exception.code, graph.exception.rule, graph.exception.detail), ("invalid", "schema_break", "data"))
+
+    @mark.req("REQ-SLY-013")
+    def test_put_and_get_of_a_200_level_document_work_from_a_deep_call_stack(self):
+        """F-25 (sixth Verify run): put and get used the recursive copy.deepcopy, so a legal document failed or was refused as too deep when the caller was already deep.
+        Example: a workflows document with its deepest value at level 200 is put and read back by get from a call stack 700 frames deep; put raises nothing but StorageError.
+        """
+        # Given: a document of 200 levels (the deepest value is a scalar)
+        leaf = 7
+        for _ in range(198):
+            leaf = {"k": leaf}
+        document = {"nodes": [], "edges": [], "note": leaf}
+        outcome = []
+
+        def from_depth(frames):
+            if frames:
+                return from_depth(frames - 1)
+            try:
+                outcome.append(self.store.put("workflows", "w", document, "anna"))
+                outcome.append(self.store.get("workflows", "w")["doc"])
+            except StorageError as err:
+                outcome.append(("StorageError", err.code, err.rule, err.detail))
+            except BaseException as err:        # any other failure is the finding: report it, do not let it end the thread unnoticed
+                outcome.append(("other", type(err).__name__))
+        # When: put and get are called 700 frames deep, in a thread with a time limit
+        thread = threading.Thread(target=from_depth, args=(700,), daemon=True)
+        thread.start()
+        thread.join(10)
+        # Then: the document is stored and read back unchanged
+        self.assertFalse(thread.is_alive(), "put and get did not finish within 10 seconds")
+        self.assertEqual(outcome, [{"version": 1}, document])
+
     @mark.req("REQ-SLY-014")
     def test_a_document_that_contains_itself_is_refused_within_a_second(self):
         """TC-SLY-013 (F-19): a list that contains itself ran without end, a dict that contains itself twice was exponential.

@@ -53,7 +53,7 @@ class _Cycle(Exception):
 def _unstorable(value, check_depth=True, check_size=True):
     """What one backend would keep and another refuse, or None: a NUL character in a text (PostgreSQL refuses it, F9), a number that is not
     finite (NaN, inf: JSON has no such number and PostgreSQL refuses it, R2), a container that contains itself ("cyclic", REQ-SLY-014),
-    more than MAX_DEPTH levels of objects and lists ("nested too deep", REQ-SLY-013) and more than MAX_VALUES values ("too large", REQ-SLY-015).
+    more than MAX_DEPTH levels, a scalar counting as one ("nested too deep", REQ-SLY-013) and more than MAX_VALUES values ("too large", REQ-SLY-015).
     Keys are looked at too, but only values are counted.
     Iterative, so a deep document is refused by a rule, not by a RecursionError (F-15); each container is walked once, however often the document
     names it, so a document of many paths through shared objects cannot make the check exponential (F-19, F-22). The depth is the height of the
@@ -84,7 +84,7 @@ def _unstorable(value, check_depth=True, check_size=True):
             parts = [(key, False) for key in part] + [(item, True) for item in part.values()] if isinstance(part, dict) else [(item, True) for item in part]
             stack.append([part, iter(parts), 0, 1, counted])
             return None
-        return 0, 1
+        return 1, 1                             # a scalar is a level: its parent is one level above it (REQ-SLY-013)
 
     def add_to_top(height, count, counted=True):
         stack[-1][2] = max(stack[-1][2], height)
@@ -123,12 +123,35 @@ def refuse_unstorable(*values, check_depth=True, check_size=True):
 
 
 def _copy(doc):
-    """A copy the backend keeps. deepcopy recurses, so a document of a table without a depth rule that is nested a few hundred levels deep is
-    refused here instead of raising a RecursionError (F-15)."""
-    try:
-        return copy.deepcopy(doc)
-    except RecursionError:
-        raise StorageError("invalid", rule="schema", detail="nested too deep") from None
+    """A copy the backend keeps and get hands out. copy.deepcopy recurses with several frames per level, so a legal 200-level document failed when
+    the caller was already deep in its call stack (F-25). This copy is iterative; like deepcopy it copies a container that is named twice once
+    (the copy shares it too, so a document of 2**30 paths stays small). Containers never contain themselves here: validate refused that before.
+    Whatever is no dict, list or tuple (a text, a number, an object of another type) is left to copy.deepcopy."""
+    containers = (dict, list, tuple)
+    copies = {}                                 # id of a finished container -> its copy
+
+    def done(value):
+        return copies[id(value)] if type(value) in containers else copy.deepcopy(value)
+
+    stack = [doc]
+    while stack:
+        value = stack[-1]
+        if type(value) not in containers or id(value) in copies:
+            stack.pop()
+            continue
+        parts = value.values() if type(value) is dict else value
+        waiting = [part for part in parts if type(part) in containers and id(part) not in copies]
+        if waiting:
+            stack.extend(waiting)               # the parts first, then the container itself
+            continue
+        stack.pop()
+        if type(value) is dict:
+            copies[id(value)] = {done(key): done(part) for key, part in value.items()}
+        elif type(value) is list:
+            copies[id(value)] = [done(part) for part in value]
+        else:
+            copies[id(value)] = tuple(done(part) for part in value)
+    return done(doc)
 
 
 def check_names(record_id, author):
@@ -236,7 +259,7 @@ class Storage:
         versions = self.backend.versions(table, record_id)
         if not versions or (version is not None and not 1 <= version <= len(versions)):
             raise StorageError("not_found")
-        return copy.deepcopy(versions[-1 if version is None else version - 1])
+        return _copy(versions[-1 if version is None else version - 1])
 
     def history(self, table, record_id):
         self._check(table)

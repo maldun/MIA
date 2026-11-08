@@ -202,6 +202,70 @@ class RecordCheckBounds(unittest.TestCase):
         self.assertEqual(len(graph_tables._validators), 1)
 
 
+class ScalarsAndTuplesAreLevels(unittest.TestCase):
+    def test_a_scalar_is_a_level_of_a_record(self):
+        """F-23 (sixth Verify run, mutant G6): a deepest value of any kind counts as a level.
+        Example: a node whose deepest value (an empty object, an empty list or the number 7) is at level 200 -> None; at level 201 -> schema_break "data"; a tuple counts like a list.
+        """
+        # Given: the record is level 1, its data level 2, the value inside data is level 3
+        def record(leaf, levels, container):
+            value = leaf
+            for _ in range(levels - 3):
+                value = container(value)
+            return {"id": "n", "data": {"type": "data", "value": value}}
+        for name, leaf in (("empty object", {}), ("empty list", []), ("scalar", 7), ("empty tuple", ())):
+            for container in (lambda v: {"k": v}, lambda v: [v], lambda v: (v,)):
+                # When / Then
+                with self.subTest(leaf=name):
+                    self.assertIsNone(graph_tables.check_record("graph_nodes", record(leaf, 200, container)))
+                    self.assertEqual(graph_tables.check_record("graph_nodes", record(leaf, 201, container)), {"rule": "schema_break", "detail": "data"})
+
+    def test_tuples_that_are_cyclic_shared_or_deep_are_refused_within_a_second(self):
+        """F-24 (sixth Verify run): a tuple was no container to the checks, so such records were walked without end or raised a RecursionError.
+        Example: a record that contains itself through a tuple, a DAG of tuples 60 levels deep and a tuple nested 5000 deep -> schema_break "data" from check_record and to_object, each within one second.
+        """
+        # Given: the three records
+        loop = []
+        loop.append((loop,))
+        shared = ()
+        for _ in range(60):
+            shared = (shared, shared)
+        deep = ()
+        for _ in range(5000):
+            deep = (deep,)
+        refusal = {"rule": "schema_break", "detail": "data"}
+        for name, value in (("cyclic", loop), ("shared", shared), ("deep", deep)):
+            record = {"id": "n", "data": {"type": "data", "value": value}}
+            for label, call, expected in (("check_record", lambda r=record: graph_tables.check_record("graph_nodes", r), refusal),
+                                          ("to_object", lambda r=record: graph_tables.to_object(r), {"refused": refusal})):
+                outcome = []
+
+                def run(call=call):
+                    try:
+                        outcome.append(call())
+                    except BaseException as err:    # the finding is the exception itself: record it for the assertion
+                        outcome.append(type(err).__name__)
+                # When: the call runs in a thread with a time limit, so a hang fails the test
+                thread = threading.Thread(target=run, daemon=True)
+                thread.start()
+                thread.join(1)
+                # Then
+                with self.subTest(record=name, call=label):
+                    self.assertFalse(thread.is_alive(), "no answer within one second")
+                    self.assertEqual(outcome, [expected])
+
+    def test_a_tuple_holding_a_nan_is_named_like_a_list_holding_one(self):
+        """F-24: the path of a number that is not finite goes through a tuple as it goes through a list.
+        Example: data {"type": "data", "value": (1, float("nan"))} is refused with the same detail as the value [1, nan].
+        """
+        # Given / When
+        as_list = graph_tables.check_record("graph_nodes", {"id": "n", "data": {"type": "data", "value": [1, float("nan")]}})
+        as_tuple = graph_tables.check_record("graph_nodes", {"id": "n", "data": {"type": "data", "value": (1, float("nan"))}})
+        # Then
+        self.assertIsNotNone(as_list)
+        self.assertEqual(as_tuple, as_list)
+
+
 class RecordCheckRemoteReference(unittest.TestCase):
     def test_a_remote_reference_of_a_category_schema_is_never_fetched(self):
         """F-17: untrusted text gets no network access; a $ref to a URL must not make the checker send a request.

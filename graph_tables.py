@@ -125,7 +125,7 @@ def _too_deep(record):
             return True
         if isinstance(value, dict):
             stack.extend((inner, level + 1) for inner in value.values())
-        elif isinstance(value, list):
+        elif isinstance(value, (list, tuple)):          # a tuple counts like a list (F-24)
             stack.extend((inner, level + 1) for inner in value)
     return False
 
@@ -142,7 +142,7 @@ def _non_finite_path(value, path=()):
     """The path of the first NaN or infinity in the data, or None: JSON has no such number and a schema's bounds let it pass (as in v1, A-60)."""
     if isinstance(value, float) and not math.isfinite(value):
         return ".".join(path)
-    items = value.items() if isinstance(value, dict) else enumerate(value) if isinstance(value, list) else ()
+    items = value.items() if isinstance(value, dict) else enumerate(value) if isinstance(value, (list, tuple)) else ()
     return next((found for found in (_non_finite_path(v, path + (str(k),)) for k, v in items) if found is not None), None)
 
 
