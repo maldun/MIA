@@ -238,7 +238,7 @@
 - History: G-V3.CHAT Plan step 3 (2026-11-08), new
 
 ### TR-CHAT-007 – hostile strings of the red-team cases
-- Applies to: EV-skill_turns, TC-CHA-048
+- Applies to: EV-skill_turns
 - Requirement: REQ-CHA-049
 - Group: Eval setup (CHAT)
 - Kind: setup
