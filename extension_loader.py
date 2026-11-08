@@ -47,8 +47,10 @@ def task_from_manifest(doc, run):
     return Task(doc["id"], run, doc["text"], doc["argument"], doc["example"], options=options, aliases=doc.get("aliases", []), needs=doc.get("needs", []), version=str(doc.get("version", "1")))
 
 
-def load_extensions(package, folder, registry, services):
-    """registers every extension of `folder` (the importable package `package`) in `registry`; returns the problems as plain texts"""
+def load_extensions(package, folder, registry, services, catalog=None):
+    """registers every extension of `folder` (the importable package `package`) in `registry`; returns the problems as plain texts.
+    With a `catalog` (skill_record.SkillCatalog) a skill that has a record is registered under the command of the record and its task carries the record's workflow graph ID
+    (REQ-WFM-041); a skill without a record is registered as the manifest says. A record without an extension is not made runnable here."""
     problems = []
     try:
         names = sorted(n for n in os.listdir(folder) if os.path.isfile(os.path.join(folder, n, "manifest.json")))
@@ -59,7 +61,11 @@ def load_extensions(package, folder, registry, services):
             doc = read_manifest(os.path.join(folder, name))
             module, _, function = doc["entry"].partition(":")
             loaded = importlib.import_module("%s.%s.%s" % (package, name, module))
-            registry.register(task_from_manifest(doc, getattr(loaded, function)(services)))
+            task = task_from_manifest(doc, getattr(loaded, function)(services))
+            graph_id = catalog.start(name) if catalog is not None else None
+            if graph_id is not None:
+                task.id, task.workflow_graph_id = catalog.records.read(name)["command"].lstrip("/"), graph_id
+            registry.register(task)
         except Exception as exc:
             problems.append(str(exc) if str(exc).startswith(name + ":") else "%s: %s" % (name, exc))
             continue
