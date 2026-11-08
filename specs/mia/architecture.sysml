@@ -2317,7 +2317,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-CLV-041'> HeightOfTheStrip_Clv041 {
         subject s : WebFrontEnd;
-        doc /* The Chat and login views shall keep the strip of the Skill run view, with the Full run part closed, at most the user's share of the viewport height (default 16 %). */
+        doc /* Where the window is wider than 820 px, the Chat and login views shall keep the Skill run view strip, Full run part closed, at most the user's viewport height share (default 16 %). */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-CLV-042'> LayoutOnAPhone_Clv042 {
@@ -2343,6 +2343,11 @@ package MIA_NodeRequirements {
     requirement def <'REQ-CLV-046'> SizesKeptInTheBrowser_Clv046 {
         subject s : WebFrontEnd;
         doc /* The Chat and login views shall keep the two shares in the browser, apply them at every load and use 16 % and 34 % when none is kept or the browser refuses to store. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CLV-047'> StripContentThatDoesNotFit_Clv047 {
+        subject s : WebFrontEnd;
+        doc /* When the content of the strip does not fit its height, the Chat and login views shall scroll the content inside the strip and not move the page. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-CHV-001'> ChatWithoutTheCharacter_Chv001 {
@@ -4447,6 +4452,7 @@ package MIA_NodeRequirements {
     requirement r_req_clv_044 : ElementsOfASkill_Clv044;
     requirement r_req_clv_045 : SizesSetByTheUser_Clv045;
     requirement r_req_clv_046 : SizesKeptInTheBrowser_Clv046;
+    requirement r_req_clv_047 : StripContentThatDoesNotFit_Clv047;
     requirement r_req_chv_001 : ChatWithoutTheCharacter_Chv001;
     requirement r_req_chv_002 : OneExpressionAPI_Chv002;
     requirement r_req_chv_003 : LivingCharacter_Chv003;
@@ -4901,6 +4907,7 @@ package MIA_NodeRequirements {
     satisfy r_req_clv_044 by mia.frontEnd;
     satisfy r_req_clv_045 by mia.frontEnd;
     satisfy r_req_clv_046 by mia.frontEnd;
+    satisfy r_req_clv_047 by mia.frontEnd;
     satisfy r_req_chv_001 by mia.frontEnd;
     satisfy r_req_chv_002 by mia.frontEnd;
     satisfy r_req_chv_003 by mia.frontEnd;
@@ -5354,6 +5361,7 @@ package MIA_NodeRequirements {
     allocate r_req_clv_044 to mia.frontEnd;
     allocate r_req_clv_045 to mia.frontEnd;
     allocate r_req_clv_046 to mia.frontEnd;
+    allocate r_req_clv_047 to mia.frontEnd;
     allocate r_req_chv_001 to mia.frontEnd;
     allocate r_req_chv_002 to mia.frontEnd;
     allocate r_req_chv_003 to mia.frontEnd;
@@ -5809,6 +5817,7 @@ package MIA_NodeRequirements {
     dependency from r_req_clv_044 to r_req_fe_032;
     dependency from r_req_clv_045 to r_req_fe_032;
     dependency from r_req_clv_046 to r_req_fe_032;
+    dependency from r_req_clv_047 to r_req_fe_032;
     dependency from r_req_chv_001 to r_req_fe_006;
     dependency from r_req_chv_002 to r_req_fe_008;
     dependency from r_req_chv_003 to r_req_fe_009;

@@ -49,6 +49,7 @@ Tests of this part alone against the mocks of its neighbours (the mock of IF-101
 | TC-CLV-044 | REQ-CLV-044 | Component | 1 | unit test in `tests/js/` with the mocks of the interfaces (`node --test`) | AC-39: two reported elements are shown as label and text; none gives only the common elements; markup shows as characters | exact |
 | TC-CLV-045 | REQ-CLV-045 | Component (browser) | 2 | a headless browser against the stub server `ui/tools/chat_stub_server.py` with the scripted stand-in skill | AC-39: a value in range is applied at once; values just outside the ranges are refused | exact |
 | TC-CLV-046 | REQ-CLV-046 | Component (browser) | 2 | a headless browser against the stub server `ui/tools/chat_stub_server.py` with the scripted stand-in skill; a fresh profile, and a profile with storage blocked | AC-39: the shares survive a reload; defaults for a fresh profile and for blocked storage | exact |
+| TC-CLV-047 | REQ-CLV-047 | Component (browser) | 2 | a headless browser against the stub server `ui/tools/chat_stub_server.py` with the scripted stand-in skill | AC-39: at the share 12 % the strip content scrolls inside and the page does not scroll | exact |
 
 ## Assumptions (checked in validation)
 
@@ -276,9 +277,9 @@ Status: **Draft** (written in Phase 3 after the verification, finding F11 / D-16
 
 ### TC-CLV-041 – Height of the strip
 - Verifies: REQ-CLV-041
-- Given: window 1440 x 900 px, then 1920 x 1080 px, a running skill with three phases, Full run part closed; the whole Skill run view element, header included, is measured
+- Given: window 1440 x 900 px, then 1920 x 1080 px, then 360 x 800 px, a running skill with three phases, Full run part closed; the whole Skill run view element, header included, is measured
 - When: the page is shown
-- Then: with the default the strip measures at most 144 px (16 % of 900 px) here and at most 172.8 px at 1920 x 1080 px; with the share set to 20 % at most 180 px at 900 px
+- Then: with the default the strip measures at most 144 px (16 % of 900 px) here and at most 172.8 px at 1920 x 1080 px; with the share set to 20 % at most 180 px at 900 px; at 360 x 800 px the strip is as high as its content and is not cut
 
 ### TC-CLV-042 – Layout on a phone
 - Verifies: REQ-CLV-042
@@ -309,3 +310,9 @@ Status: **Draft** (written in Phase 3 after the verification, finding F11 / D-16
 - Given: shares of 20 % and 25 % set; a fresh browser profile; a profile that refuses to store
 - When: the page is reloaded; the fresh profile loads the page; the blocked profile loads the page and the user sets a share
 - Then: the reloaded page uses 20 % and 25 %; the fresh profile uses 16 % and 34 %; the blocked profile works, uses 16 % and 34 % after the load and shows no error
+
+### TC-CLV-047 – Strip content that does not fit
+- Verifies: REQ-CLV-047
+- Given: window 1440 x 900 px, the strip share set to 12 % (108 px), a running skill with three phases and two reported elements
+- When: the page is shown and the strip content is scrolled
+- Then: the strip is not higher than 108 px, its content moves inside it, and the page does not scroll

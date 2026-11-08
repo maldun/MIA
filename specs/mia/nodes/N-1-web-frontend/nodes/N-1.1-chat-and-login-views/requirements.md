@@ -432,12 +432,12 @@ The chat page: messages, queue, history, status line, voting, tasks and memos, e
 
 ### REQ-CLV-041 – Height of the strip
 - Level: low   Subject: WebFrontEnd
-- Text: The Chat and login views shall keep the strip of the Skill run view, with the Full run part closed, at most the user's share of the viewport height (default 16 %).
+- Text: Where the window is wider than 820 px, the Chat and login views shall keep the Skill run view strip, Full run part closed, at most the user's viewport height share (default 16 %).
 - Rationale: refines REQ-FE-032 (FR-46, A-131); owner layout of 2026-11-08, mockup `explore-skill-rework/forms/skill-run-view-mockup.html`
 - Parent: REQ-FE-032
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-39: with the default the strip of a running scripted skill with three phases measures at most 144 px at 1440 x 900 px and at most 172.8 px at 1920 x 1080 px; with the share set to 20 % at most 180 px at 900 px (exact, browser test)
+- Acceptance criterion: AC-39: with the default the strip of a running scripted skill with three phases measures at most 144 px at 1440 x 900 px and at most 172.8 px at 1920 x 1080 px; with the share set to 20 % at most 180 px at 900 px; at 360 x 800 px the strip is as high as its content (exact, browser test)
 - Verified by: TC-CLV-041
 - Status: Draft
 - Provisional: VAL-012 – the owner judges in use whether the strip is small enough and still readable (16 % follows the 140 px of 900 px of the mockup of 2026-11-08, a limit not a measured need; the user can change the share)
@@ -502,3 +502,15 @@ The chat page: messages, queue, history, status line, voting, tasks and memos, e
 - Verified by: TC-CLV-046
 - Status: Draft
 - History: A-131 (proposed 2026-11-08, G-V3.PANEL), new; owner at the check review of 2026-11-08: sizes relative to the viewport and a setting of each user in the browser
+
+### REQ-CLV-047 – Strip content that does not fit
+- Level: low   Subject: WebFrontEnd
+- Text: When the content of the strip does not fit its height, the Chat and login views shall scroll the content inside the strip and not move the page.
+- Rationale: refines REQ-FE-032; owner at the check review of 2026-11-08: the shares apply on the wide layout, the strip content scrolls inside when it does not fit
+- Parent: REQ-FE-032
+- Priority: Should
+- Verification method: Test
+- Acceptance criterion: AC-39: at the strip share 12 % at 1440 x 900 px (108 px) a run with three phases and two elements has a strip not higher than 108 px whose content scrolls and the page does not scroll (exact)
+- Verified by: TC-CLV-047
+- Status: Draft
+- History: A-131 (proposed 2026-11-08, G-V3.PANEL), new; owner at the check review of 2026-11-08: the shares apply on the wide layout, the strip content scrolls inside when it does not fit

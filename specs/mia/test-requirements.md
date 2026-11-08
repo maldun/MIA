@@ -78,7 +78,7 @@
 ## G-V3.PANEL (Plan step 3, 2026-11-08; prefix TR-PANEL-)
 
 ### TR-PANEL-001 – browser checks of layout and size run at fixed window sizes
-- Applies to: TC-CLV-036, TC-CLV-037, TC-CLV-040, TC-CLV-041, TC-CLV-042, TC-CLV-045, TC-CLV-046
+- Applies to: TC-CLV-036, TC-CLV-037, TC-CLV-040, TC-CLV-041, TC-CLV-042, TC-CLV-045, TC-CLV-046, TC-CLV-047
 - Requirement: REQ-CLV-040
 - Group: Layout
 - Kind: setup
@@ -138,7 +138,7 @@
 - History: G-V3.PANEL Plan step 3 (2026-11-08), new
 
 ### TR-PANEL-006 – exact names, states, orders and figures
-- Applies to: TC-CLV-030, TC-CLV-031, TC-CLV-032, TC-CLV-033, TC-CLV-034, TC-CLV-035, TC-CLV-039, TC-CLV-044, TC-CLV-045, TC-CLV-046, TC-WFM-130, TC-WFM-131, TC-WFM-132, TC-WFM-133, TC-WFM-134, TC-WFM-135
+- Applies to: TC-CLV-030, TC-CLV-031, TC-CLV-032, TC-CLV-033, TC-CLV-034, TC-CLV-035, TC-CLV-039, TC-CLV-044, TC-CLV-045, TC-CLV-046, TC-CLV-047, TC-WFM-130, TC-WFM-131, TC-WFM-132, TC-WFM-133, TC-WFM-134, TC-WFM-135
 - Requirement: REQ-CLV-030
 - Group: Exact values (PANEL)
 - Kind: unit
