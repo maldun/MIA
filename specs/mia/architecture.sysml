@@ -2806,7 +2806,7 @@ package MIA_NodeRequirements {
         doc /* While a skill runs, the Chat agent shall add no message about a phase that the manifest does not declare worth telling. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
-    requirement def <'REQ-CHA-043'> EndSummaryWithALink_Cha043 {
+    requirement def <'REQ-CHA-043'> EndSummary_Cha043 {
         subject s : ConversationCore;
         doc /* When a skill run ends done, the Chat agent shall add one summary of the full result worded by SkillDigestStep. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
@@ -4645,7 +4645,7 @@ package MIA_NodeRequirements {
     requirement r_req_cha_040 : QuestionsOfASkillInTheChat_Cha040;
     requirement r_req_cha_041 : StatusMessagePerDeclaredPhase_Cha041;
     requirement r_req_cha_042 : NoStatusForOtherPhases_Cha042;
-    requirement r_req_cha_043 : EndSummaryWithALink_Cha043;
+    requirement r_req_cha_043 : EndSummary_Cha043;
     requirement r_req_cha_044 : FailedRunInTheChat_Cha044;
     requirement r_req_cha_045 : OnlySpokenTextInTheChat_Cha045;
     requirement r_req_cha_046 : HistoryOfARunForTheChatModel_Cha046;

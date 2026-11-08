@@ -317,7 +317,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Status: Draft
 - History: A-131 (proposed 2026-11-08, G-V3.CHAT), new; owner 2026-11-08; split at the owner's one-by-one review of 2026-11-08: the case of a skill without phases is REQ-CHA-055
 
-### REQ-CHA-043 – End summary with a link
+### REQ-CHA-043 – End summary
 - Level: low   Subject: ConversationCore
 - Text: When a skill run ends done, the Chat agent shall add one summary of the full result worded by SkillDigestStep.
 - Rationale: refines REQ-BE-078; FR-35; the link is added by code, not by the model (owner 2026-10-30)
