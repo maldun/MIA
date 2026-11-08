@@ -37,6 +37,7 @@ One test case per acceptance criterion of the HLS, at the level where the criter
 | TC-MIA-027 | FR-7 | Property | 2 | Generated graphs (seeds 1 to 1000) with and without cycles, adjacent data nodes, shared inputs; session nodes with and without a stopping criterion | a cycle is refused with the cycle named; two adjacent data nodes are refused; a shared data node appears once and both processes see the same value; every accepted graph has a topological order; a session node without a stopping criterion is refused | 0 failures over 1000 seeds |
 | TC-MIA-028 | FR-33 | Measurement | 4 | The recorded lookup runs; the estimate computed from the graph and the measured costs | the estimate of time, calls and tokens is shown before a run; it lies within the factor below of the measured time; a run whose estimate exceeds its budget is refused | the estimate is within a factor of 3 of the measured time, either way (OPEN-3, decided: generous; what matters is that an estimate is shown, the run works and the first text comes within about 10 s) |
 | TC-MIA-029 | NFR-9 | Smoke (target) | 3 | From a fresh checkout the compose stack; each node container alone against the mocks of its neighbours | the containers of N-2 (serving the frontend), N-3, N-4 and N-5 start with one configuration file; each starts alone and passes its contract suites; the chat page loads from the backend container | exact |
+| TC-MIA-030 | FR-34, FR-35, FR-46, REQ-BE-078, REQ-CHA-041, REQ-CHA-042, REQ-CHA-043, REQ-CHA-046, REQ-CHA-058, REQ-WFM-130, REQ-WFM-136 | Integration | 2 | The chat service with the run recorder, the observer of a task run and the digest step on the fake model and the fake storage; a scripted task with three declared phases and a long result (G-V3, TR-CHAT-009) | the chat holds one status message per declared phase and one summary with the link and nothing else of the run; the run record holds the full result; the model history holds the last status and the summary | exact |
 
 ## Contract suites (the interfaces between the nodes)
 
@@ -242,3 +243,11 @@ Error rates from `plan-phase/scripts/false_alarm.py` (`--n 1000 --max-rate 0.01 
 ## Assumptions of the whole system
 
 - ASM-MU-001: MIA is used in a controlled environment by a few trusted users who rarely work at the same time (owner, 2026-10-26). Checked in the field with the first users (VAL-003, VAL-004); the queue (5 messages, 2 per user) and the live update are built for this load.
+
+## Scenarios (G-V3, check TC-MIA-030)
+
+### TC-MIA-030 – A run end to end in the backend (AC-39, backend part)
+- Verifies: FR-34, FR-35, FR-46, REQ-BE-078, REQ-CHA-041, REQ-CHA-042, REQ-CHA-043, REQ-CHA-046, REQ-CHA-058, REQ-WFM-130, REQ-WFM-136
+- Given: the chat service with the recorder on the fake storage, the digest step on the fake model and a recording speech route; a scripted task that declares the phases collect, rank and report, reports them through `monitor.update` (and a fourth phase cleanup that is not declared) and returns a long result with a table
+- When: the user starts the task and it ends
+- Then: the chat holds exactly four messages of MIA: one status message per declared phase in order, then one summary that ends with the link of the run; no message holds the table or the full result; every message was sent to speech once; the run record holds the full result, the state done and the figures; the history for the chat model ends with the third status message and the summary

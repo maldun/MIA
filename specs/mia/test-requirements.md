@@ -17,7 +17,7 @@
 | 6 | Persistence | A restart is a new process (G-V3.PANEL) | TR-PANEL-004 |
 | 7 | Untrusted text | The fixed list of hostile strings (G-V3.PANEL) | TR-PANEL-005 |
 | 9 | Eval setup (CHAT) | Pin, holdout, labels, hard checks and error rates of EV-skill_turns (G-V3.CHAT) | TR-CHAT-001, TR-CHAT-002, TR-CHAT-003, TR-CHAT-004, TR-CHAT-005, TR-CHAT-007, TR-CHAT-008 |
-| 10 | Fakes (CHAT) | The fake model server (G-V3.CHAT) | TR-CHAT-006 |
+| 10 | Fakes (CHAT) | The fake model server (G-V3.CHAT) | TR-CHAT-006, TR-CHAT-009 |
 | 8 | Exact values (PANEL) | Names, states, orders and figures (G-V3.PANEL) | TR-PANEL-006 |
 
 ### TR-MODEL-001 – storage stand-in is a minimal fake with a known gap
@@ -260,3 +260,15 @@
 - Verified by: inspection of the checks: none starts a model server
 - Status: Draft
 - History: G-V3.CHAT Plan step 4 (2026-11-08), new, with the note `goals/G-V3.CHAT/eval-target-note.md`
+
+### TR-CHAT-009 – the end-to-end check of a run uses the same fakes
+- Applies to: TC-MIA-030
+- Requirement: REQ-BE-078
+- Group: Fakes (CHAT)
+- Kind: setup
+- Text: The end-to-end check of a run in the backend shall use the real chat service, the real run recorder and observer, the digest step on the fake model of TR-CHAT-006 and the fake storage of TR-PANEL-003, and no model server and no browser.
+- Rationale: the parts are checked one by one elsewhere; this check shows that they work together, and only the model and the storage are stand-ins
+- Credibility aspect: stand-in fidelity
+- Verified by: inspection of the check: it starts no model server and no container
+- Status: Draft
+- History: G-V3 Plan step 4 (2026-11-08), new
