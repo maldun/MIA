@@ -11,6 +11,8 @@ The real Graph tables (N-3.2) are written against the same suite. Interpretation
 - the type of a context-graph node is in `data["type"]`, as for a workflow node.
 - a field of a node's JSON field that the schema of its type does not list is schema_break naming that field, in check_record and in to_object (A-93); the
   detail is the first path in text order, a missing key counting at the path of its object, an extra field at its own path.
+- context_nodes and context_edges (A-98): the Storage layer checks the shape only; with categories a node is checked as before; edge ends and header members of a context
+  graph are looked up in stored["context_nodes"] and stored["context_edges"]; a record nested deeper than 200 levels and a category with an invalid schema are schema_break.
 - the detail of a schema_break is the path of the field with dots; a missing required key is named as the key.
 - the document form carries the other fields of a node flat beside id and kind and the JSON field of an edge under `data`; an edge of a
   v1 document without an ID gets e1, e2, ... in order.
@@ -26,7 +28,8 @@ except ImportError:  # plain import (single test run as a script)
     import graph_rules
 
 V1_TABLES = {"workflows": {"versioned": True, "deletable": False}, "context_graphs": {"versioned": True, "deletable": False}}
-NEW_TABLES = ("graph_nodes", "graph_edges", "graphs", "skills")
+NEW_TABLES = ("graph_nodes", "graph_edges", "graphs", "skills", "context_nodes", "context_edges")
+MAX_DEPTH = 200      # a record nested deeper than this is schema_break `data` (REQ-GTB-027)
 
 _STOP = {"type": "object",
          "properties": {"max_repetitions": {"type": "integer", "minimum": 1}, "max_seconds": {"type": "number", "exclusiveMinimum": 0}},
@@ -120,6 +123,47 @@ def _dup(members):
     return len(ids) != len(set(ids))
 
 
+def _too_deep(value):
+    """True when the value is nested deeper than MAX_DEPTH levels (the record is level 1); iterative, so the check itself cannot hit the recursion limit."""
+    stack = [(value, 1)]
+    while stack:
+        item, depth = stack.pop()
+        if depth > MAX_DEPTH:
+            return True
+        children = item.values() if isinstance(item, dict) else item if isinstance(item, list) else ()
+        stack.extend((child, depth + 1) for child in children)
+    return False
+
+
+def _bad_schema(schema):
+    try:
+        jsonschema.Draft202012Validator.check_schema(schema)
+    except jsonschema.SchemaError:
+        return True
+    return False
+
+
+def _check_context(table, record, data, categories, stored):
+    """context_nodes and context_edges (A-98): the shape; with categories the type and schema of a node; the ends of an edge in the stored context nodes."""
+    if table == "context_nodes":
+        type_id = data.get("type")
+        if not isinstance(type_id, str) or not type_id:
+            return {"rule": "schema_break", "detail": "type"}
+        if categories is None:
+            return None
+        if type_id not in categories:
+            return {"rule": "unknown_type", "detail": type_id}
+        if _bad_schema(categories[type_id]):
+            return {"rule": "schema_break", "detail": "type"}
+        broken = _broken_path(categories[type_id], data)
+        return {"rule": "schema_break", "detail": broken} if broken else None
+    if stored is not None:
+        for end in (record["from"], record["to"]):
+            if end not in stored.get("context_nodes", {}):
+                return {"rule": "unknown_endpoint", "detail": end}
+    return None
+
+
 def _check(table, record, categories, stored, record_id=None):
     if not isinstance(record, dict):
         return {"rule": "record_identity", "detail": "record"}
@@ -127,13 +171,17 @@ def _check(table, record, categories, stored, record_id=None):
         return {"rule": "record_identity", "detail": "id"}
     if record_id is not None and record_id != record["id"]:      # the record is stored under the ID it carries (REQ-GTB-021)
         return {"rule": "record_identity", "detail": "id"}
-    if table == "graph_edges":
+    if _too_deep(record):                                        # cannot be checked (REQ-GTB-027)
+        return {"rule": "schema_break", "detail": "data"}
+    if table in ("graph_edges", "context_edges"):
         for end in ("from", "to"):
             if not isinstance(record.get(end), str) or not record[end]:
                 return {"rule": "record_identity", "detail": end}
     data = record.get("data")
     if not isinstance(data, dict):
         return {"rule": "schema_break", "detail": "data"}
+    if table in ("context_nodes", "context_edges"):
+        return _check_context(table, record, data, categories, stored)
     if table in ("graph_nodes", "graph_edges"):
         schema = EDGE_SCHEMA
         if table == "graph_nodes":
@@ -141,6 +189,8 @@ def _check(table, record, categories, stored, record_id=None):
             if categories is not None:
                 if type_id not in categories:
                     return {"rule": "unknown_type", "detail": str(type_id)}
+                if _bad_schema(categories[type_id]):
+                    return {"rule": "schema_break", "detail": "type"}
                 schema = categories[type_id]
             elif type_id not in TYPE_SCHEMAS:
                 return {"rule": "unknown_type", "detail": str(type_id)} if "type" in data else {"rule": "schema_break", "detail": "type"}
@@ -163,8 +213,9 @@ def _check(table, record, categories, stored, record_id=None):
                 return {"rule": "record_identity", "detail": key}
         if stored is not None:
             for key in ("nodes", "edges"):
+                where = ("context_" + key) if data["kind"] == "context" else key        # a context header looks in the context tables (REQ-GTB-026)
                 for member in data[key]:
-                    if member["version"] not in stored.get(key, {}).get(member["id"], []):
+                    if member["version"] not in stored.get(where, {}).get(member["id"], []):
                         return {"rule": "unknown_member", "detail": member["id"]}
     return None
 

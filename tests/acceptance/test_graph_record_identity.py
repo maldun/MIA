@@ -22,7 +22,8 @@ from errors import StorageError                                    # noqa: E402
 from graph_store_standin import GraphStoreStandIn                  # noqa: E402
 import graph_tables                                                # noqa: E402
 
-RECORD_TABLES = {t: {"versioned": True, "deletable": False} for t in ("graph_nodes", "graph_edges", "graphs", "skills")}
+RECORD_TABLES = {t: {"versioned": True, "deletable": False}
+                 for t in ("graph_nodes", "graph_edges", "graphs", "skills", "context_nodes", "context_edges")}
 
 
 class RecordIdentityAcceptance(unittest.TestCase):

@@ -3900,6 +3900,31 @@ package MIA_NodeRequirements {
         doc /* If a node is written or read with a field in its JSON field that its type's schema does not list, then the Graph tables shall refuse the node as `schema_break` naming that field. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
+    requirement def <'REQ-GTB-023'> ContextGraphTables_Gtb023 {
+        subject s : Persistence;
+        doc /* The Graph tables shall list `context_nodes` and `context_edges` as versioned tables whose records are never deleted. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-024'> ContextRecordShape_Gtb024 {
+        subject s : Persistence;
+        doc /* If a context node lacks a text ID, a JSON object or a text type, or a context edge lacks a text end, then the Graph tables shall refuse the record naming that field. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-025'> ContextEdgeEnds_Gtb025 {
+        subject s : Persistence;
+        doc /* If a context edge names an end that is not a stored context node, then the Graph tables shall refuse the edge as `unknown_endpoint` naming that end. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-026'> ContextHeaderMembers_Gtb026 {
+        subject s : Persistence;
+        doc /* If a graph header of kind context names a member that is not stored in `context_nodes` or `context_edges` at that version, then the Graph tables shall refuse the header as `unknown_member` naming the member. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-027'> InputThatCannotBeChecked_Gtb027 {
+        subject s : Persistence;
+        doc /* If a record is nested deeper than 200 levels or its category schema is not valid, then the Graph tables shall refuse it as `schema_break` naming the field. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
     requirement def <'REQ-RTB-001'> SharedStateHeld_Rtb001 {
         subject s : Persistence;
         doc /* The Record tables shall define the 14 tables of IF-302 v5: history, memory, votes, tasks, memos, accounts, presets, gestures, runs (run results), source_trust (trust values of sources), cases, behaviours, workflow_meta and reports; summaries and the chat log are records of history. */
@@ -4633,6 +4658,11 @@ package MIA_NodeRequirements {
     requirement r_req_gtb_020 : EdgeNamesStoredNodes_Gtb020;
     requirement r_req_gtb_021 : RecordUnderItsOwnID_Gtb021;
     requirement r_req_gtb_022 : FixedFieldsOfANode_Gtb022;
+    requirement r_req_gtb_023 : ContextGraphTables_Gtb023;
+    requirement r_req_gtb_024 : ContextRecordShape_Gtb024;
+    requirement r_req_gtb_025 : ContextEdgeEnds_Gtb025;
+    requirement r_req_gtb_026 : ContextHeaderMembers_Gtb026;
+    requirement r_req_gtb_027 : InputThatCannotBeChecked_Gtb027;
     requirement r_req_rtb_001 : SharedStateHeld_Rtb001;
     requirement r_req_rtb_002 : RunResults_Rtb002;
     requirement r_req_rtb_003 : VotesStored_Rtb003;
@@ -5062,6 +5092,11 @@ package MIA_NodeRequirements {
     satisfy r_req_gtb_020 by mia.persistence;
     satisfy r_req_gtb_021 by mia.persistence;
     satisfy r_req_gtb_022 by mia.persistence;
+    satisfy r_req_gtb_023 by mia.persistence;
+    satisfy r_req_gtb_024 by mia.persistence;
+    satisfy r_req_gtb_025 by mia.persistence;
+    satisfy r_req_gtb_026 by mia.persistence;
+    satisfy r_req_gtb_027 by mia.persistence;
     satisfy r_req_rtb_001 by mia.persistence;
     satisfy r_req_rtb_002 by mia.persistence;
     satisfy r_req_rtb_003 by mia.persistence;
@@ -5490,6 +5525,11 @@ package MIA_NodeRequirements {
     allocate r_req_gtb_020 to mia.persistence;
     allocate r_req_gtb_021 to mia.persistence;
     allocate r_req_gtb_022 to mia.persistence;
+    allocate r_req_gtb_023 to mia.persistence;
+    allocate r_req_gtb_024 to mia.persistence;
+    allocate r_req_gtb_025 to mia.persistence;
+    allocate r_req_gtb_026 to mia.persistence;
+    allocate r_req_gtb_027 to mia.persistence;
     allocate r_req_rtb_001 to mia.persistence;
     allocate r_req_rtb_002 to mia.persistence;
     allocate r_req_rtb_003 to mia.persistence;
@@ -5950,6 +5990,11 @@ package MIA_NodeRequirements {
     dependency from r_req_gtb_020 to fr40;
     dependency from r_req_gtb_021 to fr40;
     dependency from r_req_gtb_022 to fr40;
+    dependency from r_req_gtb_023 to fr40;
+    dependency from r_req_gtb_024 to fr40;
+    dependency from r_req_gtb_025 to fr40;
+    dependency from r_req_gtb_026 to fr40;
+    dependency from r_req_gtb_027 to fr40;
     dependency from r_req_rtb_001 to r_req_db_002;
     dependency from r_req_rtb_002 to r_req_db_010;
     dependency from r_req_rtb_003 to r_req_db_012;

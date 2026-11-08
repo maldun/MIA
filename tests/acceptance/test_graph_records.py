@@ -33,7 +33,8 @@ from if_102_storage import StorageMock                                   # noqa:
 import graph_tables                                                      # noqa: E402
 
 WHO = "anna"
-RECORD_TABLES = {t: {"versioned": True, "deletable": False} for t in ("graph_nodes", "graph_edges", "graphs", "skills")}
+RECORD_TABLES = {t: {"versioned": True, "deletable": False}
+                 for t in ("graph_nodes", "graph_edges", "graphs", "skills", "context_nodes", "context_edges")}
 NODE_TYPES = ["data", "master", "transform"]
 
 

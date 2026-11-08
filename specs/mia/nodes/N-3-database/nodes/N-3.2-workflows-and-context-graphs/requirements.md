@@ -79,10 +79,11 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 | Order | Group | What it covers | Requirements |
 |---|---|---|---|
 | 1 | NR | Node and edge records: graphs as records (FR-40) | REQ-GTB-005, REQ-GTB-006, REQ-GTB-007, REQ-GTB-008 |
-| 2 | TY | Types: rebuilding data classes from type IDs, schemas (FR-40) | REQ-GTB-009, REQ-GTB-010, REQ-GTB-011, REQ-GTB-012, REQ-GTB-022 |
+| 2 | TY | Types: rebuilding data classes from type IDs, schemas (FR-40) | REQ-GTB-009, REQ-GTB-010, REQ-GTB-011, REQ-GTB-012, REQ-GTB-022, REQ-GTB-027 |
 | 3 | VR | Versions and round trip: edits as versions, stored equals rebuilt (FR-40) | REQ-GTB-013, REQ-GTB-014, REQ-GTB-016 |
 | 4 | CP | Compatibility: the document form during the transition (FR-40) | REQ-GTB-015 |
 | 5 | HD | Graph header and skill record: which members make a graph version, the skill table (FR-40, FR-36) | REQ-GTB-017, REQ-GTB-018, REQ-GTB-019, REQ-GTB-020, REQ-GTB-021 |
+| 6 | CX | Context graph tables: where the nodes and edges of a context graph are kept and what is checked (FR-40, FR-41) | REQ-GTB-023, REQ-GTB-024, REQ-GTB-025, REQ-GTB-026 |
 
 ### REQ-GTB-005 – Node records
 - Level: low   Subject: Persistence
@@ -317,3 +318,68 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verified by: TC-GTB-023
 - Status: Draft
 - History: G-V2.STORE Verify F-01, 2026-11-07, new (A-93, proposed)
+
+### REQ-GTB-023 – Context graph tables
+- Level: low   Subject: Persistence
+- Text: The Graph tables shall list `context_nodes` and `context_edges` as versioned tables whose records are never deleted.
+- Rationale: refines FR-40 and FR-41; a context graph is stored in tables of its own because its node types come from the context graph itself, which the Storage layer cannot know (F-02, decided 2026-11-07/08, A-98)
+- Parent: FR-40
+- Group: CX
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-31: the definitions of the Graph tables list six record tables; a context node written twice has the versions 1 and 2; a delete of a context node or edge is refused as immutable (exact)
+- Verified by: TC-GTB-024
+- Status: Draft
+- History: G-V2.STORE Verify F-02/F-09, 2026-11-08, new (A-98, proposed)
+
+### REQ-GTB-024 – Context record shape
+- Level: low   Subject: Persistence
+- Text: If a context node lacks a text ID, a JSON object or a text type, or a context edge lacks a text end, then the Graph tables shall refuse the record naming that field.
+- Rationale: refines FR-40; the Storage layer checks the shape only, the caller checks the categories before it writes (decision 14 of IF-301) (A-98)
+- Parent: FR-40
+- Group: CX
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-31: a context node with data {} is refused naming `type`, one without data naming `data`, an edge without `to` naming `to`; the same records with the field are accepted (exact)
+- Verified by: TC-GTB-025
+- Status: Draft
+- History: G-V2.STORE Verify F-02/F-09, 2026-11-08, new (A-98, proposed)
+
+### REQ-GTB-025 – Context edge ends
+- Level: low   Subject: Persistence
+- Text: If a context edge names an end that is not a stored context node, then the Graph tables shall refuse the edge as `unknown_endpoint` naming that end.
+- Rationale: refines FR-40 and REQ-GTB-020; the ends of a context edge are looked up in `context_nodes` only (A-98)
+- Parent: FR-40
+- Group: CX
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-31: an edge from c1 to c9 with only c1 stored is refused naming `c9`, also when a workflow node has the ID c9; an edge between stored context nodes is accepted (exact)
+- Verified by: TC-GTB-026
+- Status: Draft
+- History: G-V2.STORE Verify F-02/F-09, 2026-11-08, new (A-98, proposed)
+
+### REQ-GTB-026 – Context header members
+- Level: low   Subject: Persistence
+- Text: If a graph header of kind context names a member that is not stored in `context_nodes` or `context_edges` at that version, then the Graph tables shall refuse the header as `unknown_member` naming the member.
+- Rationale: refines FR-40 and REQ-GTB-019; a header of kind workflow still looks in `graph_nodes` and `graph_edges` (A-98)
+- Parent: FR-40
+- Group: CX
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-31: a context header naming c9 with only c1 stored is refused naming `c9`; a workflow header naming the context node c1 is refused naming `c1`; a context header naming c1 is accepted (exact)
+- Verified by: TC-GTB-027
+- Status: Draft
+- History: G-V2.STORE Verify F-02/F-09, 2026-11-08, new (A-98, proposed)
+
+### REQ-GTB-027 – Input that cannot be checked
+- Level: low   Subject: Persistence
+- Text: If a record is nested deeper than 200 levels or its category schema is not valid, then the Graph tables shall refuse it as `schema_break` naming the field.
+- Rationale: refines FR-40 and REQ-GTB-011; before, such input gave `record_identity` with the detail `record`, which names the wrong rule (F-09, A-98); 200 levels is a fixed limit so that mock and real code agree
+- Parent: FR-40
+- Group: TY
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-31: a data node whose value is nested 300 levels is refused naming `data`, one nested 150 levels is accepted; a category whose schema is {"type": 5} is refused naming `type`; nothing raises (exact)
+- Verified by: TC-GTB-028
+- Status: Draft
+- History: G-V2.STORE Verify F-02/F-09, 2026-11-08, new (A-98, proposed)

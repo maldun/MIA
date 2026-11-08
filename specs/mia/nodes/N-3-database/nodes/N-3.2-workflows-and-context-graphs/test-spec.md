@@ -30,6 +30,11 @@ Tests of this part alone against the mocks of its neighbours: unit tests with pl
 | TC-GTB-021 | REQ-GTB-020 | Unit | 1 | an edge e1 from n1 to n9 with only n1 stored; the same edge with n9 stored | the first is refused naming `n9`; the second is accepted | exact |
 | TC-GTB-022 | REQ-GTB-021 | Unit | 1 | a node with its own ID n1, written under the record ID n1 and under the record ID x | the first is accepted; the second is refused naming `id`; nothing is stored under x | exact |
 | TC-GTB-023 | REQ-GTB-022 | Unit | 1 | a node of each type with an extra field `foo`, and a data node with a key `id` in its JSON field, each written and, put past the check, read; the same nodes without the field | the first group is refused on write and on read naming the field; the twins are accepted | exact |
+| TC-GTB-024 | REQ-GTB-023 | Unit | 1 | the definitions of the Graph tables; a context node written twice; a delete of a context node and of a context edge | six record tables are listed; the versions are 1 and 2; both deletes are refused as immutable | exact |
+| TC-GTB-025 | REQ-GTB-024 | Unit | 1 | a context node without type, without a JSON object, without ID; a context edge without an end; the same records complete | each broken record is refused naming the field; the complete ones are accepted | exact |
+| TC-GTB-026 | REQ-GTB-025 | Unit | 1 | a context edge to a stored context node, to one that is not stored, and to the ID of a stored workflow node | the first is accepted; the others are refused naming the end | exact |
+| TC-GTB-027 | REQ-GTB-026 | Unit | 1 | a header of kind context naming a stored and a missing context node; a workflow header naming a context node | the first is accepted; the others are refused as unknown_member naming the member | exact |
+| TC-GTB-028 | REQ-GTB-027 | Unit | 1 | a data node nested 300 and 150 levels deep; a category whose schema is not valid | the deep one is refused naming `data`, the other accepted; the category is refused naming `type`; no exception | exact |
 | TC-GTB-015 | REQ-GTB-015 | Component | 2 | the contract suites of IF-301 v1 and IF-203 v0, run unchanged, with the graphs stored as records | both suites pass | exact |
 
 Contract test cases of IF-301: TC-IF-301-01 to the last of the suite (listed in the root `test-spec.md`).
@@ -154,6 +159,41 @@ Examples use only what the requirements fix. The registered types are those the 
 - When: each is written, and each is read as a record already in storage
 - Then: each write is refused and each read is refused, both as `schema_break` naming the extra field (`foo`, `id`)
 - And: the refused writes store nothing; the same nodes without the extra field are accepted, and a context-graph node keeps the fields its category allows (the twins differ only in the broken rule)
+
+### TC-GTB-024 – The context tables are versioned and never deleted
+- Verifies: REQ-GTB-023
+- Given: the definitions of the Graph tables and an empty store
+- When: a context node is written twice, a context edge once, and a delete of each is tried
+- Then: six record tables are listed, the context node has the versions 1 and 2, the edge version 1
+- And: both deletes are refused as immutable and the records stay
+
+### TC-GTB-025 – A context record of a bad shape is refused
+- Verifies: REQ-GTB-024
+- Given: a context node with data `{}`, one with a number as type, one without data, one with an empty ID, and a context edge without `to` and one without data
+- When: each is written without categories
+- Then: each write is refused naming the broken field (`type`, `type`, `data`, `id`, `to`, `data`) and stores nothing
+- And: the same records complete are accepted (the twins differ only in the broken rule)
+
+### TC-GTB-026 – A context edge names stored context nodes
+- Verifies: REQ-GTB-025
+- Given: a stored context node `c1` and a stored workflow node `n9`
+- When: a context edge from `c1` to `c9`, one from `c1` to `n9`, and one from `c1` to `c1` are written
+- Then: the first two are refused as `unknown_endpoint` naming `c9` and `n9`
+- And: the third is accepted
+
+### TC-GTB-027 – A context header names stored context members
+- Verifies: REQ-GTB-026
+- Given: a stored context node `c1`
+- When: a header of kind context naming `c9`, a header of kind workflow naming `c1`, and a header of kind context naming `c1` are written
+- Then: the first two are refused as `unknown_member` naming `c9` and `c1`
+- And: the third is accepted
+
+### TC-GTB-028 – Input that cannot be checked is a schema break
+- Verifies: REQ-GTB-027
+- Given: a data node whose value is nested 300 levels, one nested 150 levels, and a category whose schema is `{"type": 5}`
+- When: each is checked, and the deep node is also rebuilt with `to_object`
+- Then: the 300-level node is refused as `schema_break` naming `data`, in the check and in the rebuild, without an exception; the category is refused as `schema_break` naming `type`
+- And: the 150-level node is accepted
 
 ### TC-GTB-015 – The document form still works
 - Verifies: REQ-GTB-015

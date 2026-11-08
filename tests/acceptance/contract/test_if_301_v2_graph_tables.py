@@ -18,7 +18,8 @@ import contract as contract_module            # noqa: E402  (for the real provid
 from markers import mark                      # noqa: E402
 
 IF = "IF-301"
-NODE_RECORD_TABLES = {t: {"versioned": True, "deletable": False} for t in ("graph_nodes", "graph_edges", "graphs", "skills")}
+NODE_RECORD_TABLES = {t: {"versioned": True, "deletable": False}
+                      for t in ("graph_nodes", "graph_edges", "graphs", "skills", "context_nodes", "context_edges")}
 
 
 def subject(kind):
@@ -42,11 +43,11 @@ class GraphTablesV2Contract(unittest.TestCase):
     @mark.req("IF-301", "REQ-GTB-001", "REQ-GTB-013")
     @each_provider(IF, make=subject)
     def test_the_record_tables_are_versioned_and_not_deletable(self, tables):
-        """TC-IF-301-05: definitions() stays the two tables of v1; record_definitions() lists the four record tables, versioned, not deletable.
+        """TC-IF-301-05: definitions() stays the two tables of v1; record_definitions() lists the six record tables, versioned, not deletable.
 
-        Example: record_definitions() -> graph_nodes, graph_edges, graphs, skills, each {"versioned": True, "deletable": False}.
+        Example: record_definitions() -> graph_nodes, graph_edges, graphs, skills, context_nodes, context_edges, each {"versioned": True, "deletable": False}.
         """
-        # Given: the provider; When: both definitions are read; Then: v1 is unchanged and the four tables are added in their own operation
+        # Given: the provider; When: both definitions are read; Then: v1 is unchanged and the six tables are added in their own operation
         self.assertEqual(tables.definitions(), {"workflows": {"versioned": True, "deletable": False}, "context_graphs": {"versioned": True, "deletable": False}})
         self.assertEqual(tables.record_definitions(), NODE_RECORD_TABLES)
 
@@ -97,6 +98,65 @@ class GraphTablesV2Contract(unittest.TestCase):
                 self.assertEqual(tables.to_object(tables.to_record(obj)), built)
         # And: one class per type ID
         self.assertEqual(len(classes), 3)
+
+    @mark.req("IF-301", "REQ-GTB-023", "REQ-GTB-024", "REQ-GTB-025", "REQ-GTB-026")
+    @each_provider(IF, make=subject)
+    def test_the_context_tables_are_checked(self, tables):
+        """TC-IF-301-22 golden 17 to 19: context_nodes and context_edges check the shape, the ends of an edge and the members of a context header in the context tables.
+
+        Example: {"id": "c1", "data": {}} as context_nodes -> schema_break "type"; an edge to c9 with only c1 stored -> unknown_endpoint "c9".
+        """
+        # Given: a stored context node c1, and the shapes of the context records
+        stored = {"context_nodes": {"c1": [1]}}
+        entity = {"entity": {"type": "object", "properties": {"type": {}, "name": {"type": "string"}}}}
+
+        def header(kind, member):
+            return {"id": "h1", "data": {"kind": kind, "context_graph_id": "ctx", "testbench_id": "", "description": "d",
+                                         "nodes": [{"id": member, "version": 1}], "edges": []}}
+        # When/Then: the six tables are listed, versioned and not deletable
+        for table in ("context_nodes", "context_edges"):
+            self.assertEqual(tables.record_definitions()[table], {"versioned": True, "deletable": False})
+        # And: the shape of a node is checked without categories, the type and schema with them
+        self.assertIsNone(tables.check_record("context_nodes", node("c1", "entity")))
+        self.assertEqual(tables.check_record("context_nodes", {"id": "c1", "data": {}}), {"rule": "schema_break", "detail": "type"})
+        self.assertEqual(tables.check_record("context_nodes", {"id": "c1"}), {"rule": "schema_break", "detail": "data"})
+        self.assertEqual(tables.check_record("context_nodes", node("c1", "entity", name=5), categories=entity), {"rule": "schema_break", "detail": "name"})
+        self.assertEqual(tables.check_record("context_nodes", node("c1", "other"), categories=entity), {"rule": "unknown_type", "detail": "other"})
+        self.assertIsNone(tables.check_record("context_nodes", node("c1", "entity", name="x"), categories=entity))
+        # And: an edge needs a text end and stored context nodes as ends; a workflow node does not count
+        self.assertEqual(tables.check_record("context_edges", {"id": "e1", "from": "c1", "data": {}}), {"rule": "record_identity", "detail": "to"})
+        self.assertEqual(tables.check_record("context_edges", edge("e1", "c1", "c9"), stored=stored), {"rule": "unknown_endpoint", "detail": "c9"})
+        self.assertEqual(tables.check_record("context_edges", edge("e1", "c1", "c9"), stored={"nodes": {"c9": [1]}, "context_nodes": {"c1": [1]}}),
+                         {"rule": "unknown_endpoint", "detail": "c9"})
+        self.assertIsNone(tables.check_record("context_edges", edge("e1", "c1", "c1"), stored=stored))
+        # And: a header of kind context looks in the context tables, a header of kind workflow does not
+        self.assertEqual(tables.check_record("graphs", header("context", "c9"), stored=stored), {"rule": "unknown_member", "detail": "c9"})
+        self.assertEqual(tables.check_record("graphs", header("workflow", "c1"), stored=stored), {"rule": "unknown_member", "detail": "c1"})
+        self.assertIsNone(tables.check_record("graphs", header("context", "c1"), stored=stored))
+
+    @mark.req("IF-301", "REQ-GTB-027")
+    @each_provider(IF, make=subject)
+    def test_input_that_cannot_be_checked_is_a_schema_break(self, tables):
+        """TC-IF-301-23 golden 20: a record nested deeper than 200 levels is schema_break naming data, a category with an invalid schema is schema_break naming type.
+
+        Example: a data node whose value is a list nested 300 times -> {"rule": "schema_break", "detail": "data"}; categories {"entity": {"type": 5}} -> detail "type".
+        """
+        # Given: a data node whose value is nested 300 levels, one nested 150 levels, and a category with an invalid schema
+        deep, shallow = 1, 1
+        for _ in range(300):
+            deep = [deep]
+        for _ in range(150):
+            shallow = [shallow]
+        # When/Then: the deep record is refused as schema_break naming data, in the check and in the rebuild, and nothing raises
+        refused = {"rule": "schema_break", "detail": "data"}
+        self.assertEqual(tables.check_record("graph_nodes", node("d1", "data", value=deep)), refused)
+        self.assertEqual(tables.to_object(node("d1", "data", value=deep)), {"refused": refused})
+        # And: the twin nested 150 levels is accepted
+        self.assertIsNone(tables.check_record("graph_nodes", node("d1", "data", value=shallow)))
+        # And: a category whose schema is not valid is refused naming type, for both node tables
+        broken = {"rule": "schema_break", "detail": "type"}
+        self.assertEqual(tables.check_record("graph_nodes", node("c1", "entity"), categories={"entity": {"type": 5}}), broken)
+        self.assertEqual(tables.check_record("context_nodes", node("c1", "entity"), categories={"entity": {"type": 5}}), broken)
 
     @mark.req("IF-301", "REQ-GTB-022")
     @each_provider(IF, make=subject)

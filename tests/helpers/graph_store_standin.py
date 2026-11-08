@@ -18,7 +18,7 @@ sys.path.append(os.path.join(HERE, "mocks"))   # appended: the mocks have their 
 from errors import StorageError          # noqa: E402
 from if_102_storage import StorageMock   # noqa: E402
 
-RECORD_TABLES = ("graph_nodes", "graph_edges", "graphs", "skills")
+RECORD_TABLES = ("graph_nodes", "graph_edges", "graphs", "skills", "context_nodes", "context_edges")
 
 
 class GraphStoreStandIn(StorageMock):
@@ -30,7 +30,9 @@ class GraphStoreStandIn(StorageMock):
     def stored(self):
         """What the caller has stored, in the form check_record takes: {"nodes": {id: [versions]}, "edges": {id: [versions]}}."""
         return {"nodes": {i: [v["version"] for v in vs] for i, vs in self._rows["graph_nodes"].items()},
-                "edges": {i: [v["version"] for v in vs] for i, vs in self._rows["graph_edges"].items()}}
+                "edges": {i: [v["version"] for v in vs] for i, vs in self._rows["graph_edges"].items()},
+                "context_nodes": {i: [v["version"] for v in vs] for i, vs in self._rows["context_nodes"].items()},
+                "context_edges": {i: [v["version"] for v in vs] for i, vs in self._rows["context_edges"].items()}}
 
     def put(self, table, record_id, doc, author, expected_version=None, categories=None):
         if table in RECORD_TABLES:
