@@ -555,3 +555,4 @@ The first version was silent until the end and could take 20 minutes or more: th
 | TR-GTB-001 | test requirement | 120b9959a2b5 | Stefan Reiterer | 2026-11-08 | approved | A-102: size limit of 100,000 values; goal row Implement in progress; owner's review answer 2026-11-08 (text reviewed, T-12 open) |
 | G-V2.STORE | goal | 35f0a4cf0d1f | Stefan Reiterer | 2026-11-08 | approved | A-102: size limit of 100,000 values; goal row Implement in progress; owner's review answer 2026-11-08 (text reviewed, T-12 open) |
 | G-V2.STORE | goal | 35f0a4cf0d1f | Stefan Reiterer | 2026-11-08 | approved | Implement row done after T-12 (F-10, standing answer of 2026-11-08) |
+| TC-SLY-014 | check | e1ea06ffd77e | Stefan Reiterer | 2026-11-08 | approved | scenario names the task document the test uses; owner's review answer 2026-11-08 |
