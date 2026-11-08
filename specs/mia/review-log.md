@@ -691,3 +691,9 @@ The first version was silent until the end and could take 20 minutes or more: th
 | G-V3 | goal | bdeb87498650 | maldun | 2026-11-08 | approved | re-marked after the GL3 scope rows (A-141 rows and REQ-CHA ids in the parent; the owner saw the diffs 2026-11-08) |
 | G-V3.CHAT | goal | b46057484ef7 | maldun | 2026-11-08 | approved | re-marked after the GL3 scope rows (A-141 rows and REQ-CHA ids in the parent; the owner saw the diffs 2026-11-08) |
 | REQ-BE-078 | requirement | c7cbc41213d5 | maldun | 2026-11-08 | approved | method Evaluation dropped (agent_check A1); the model behaviour is judged by REQ-CHA-049, 053, 054; owner 2026-11-08 |
+| TR-PANEL-001 | test requirement | 70f346dbe7f5 | maldun | 2026-11-08 | approved | G-V3 Plan step 4 items, reviewed one by one 2026-11-08 (TR-PANEL-001 with the harness versions) |
+| TR-CHAT-008 | test requirement | 8b0b090386a7 | maldun | 2026-11-08 | approved | G-V3 Plan step 4 items, reviewed one by one 2026-11-08 (TR-PANEL-001 with the harness versions) |
+| TC-CHA-064 | check | 2b32fd853d05 | maldun | 2026-11-08 | approved | G-V3 Plan step 4 items, reviewed one by one 2026-11-08 (TR-PANEL-001 with the harness versions) |
+| TC-CHA-065 | check | a7740f14e152 | maldun | 2026-11-08 | approved | G-V3 Plan step 4 items, reviewed one by one 2026-11-08 (TR-PANEL-001 with the harness versions) |
+| TC-CHA-066 | check | 3b71126cdfbc | maldun | 2026-11-08 | approved | G-V3 Plan step 4 items, reviewed one by one 2026-11-08 (TR-PANEL-001 with the harness versions) |
+| TC-CHA-067 | check | 769ed6845d4e | maldun | 2026-11-08 | approved | G-V3 Plan step 4 items, reviewed one by one 2026-11-08 (TR-PANEL-001 with the harness versions) |
