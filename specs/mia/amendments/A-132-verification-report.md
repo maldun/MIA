@@ -3,7 +3,8 @@
 - Phase 4 (Verify), written 2026-11-08 by an independent Verify session that did not write the code and did not use the implementation log or earlier runs as evidence.
 - Object: master commits `c17ec52` to `36acda3`, checked out as `3c6c388` (clean worktree, branch `verify-a132`). Handover: `specs/mia/amendments/A-132-handover-verify.md`.
 - Python: `/home/maldun/prog/Python/venvs/mia312/bin/python`. No model, no GPU. Every run below is local, not CI: it is evidence for the matrix and nothing more.
-- **Verdict proposal: not yet Verified. Two findings block it (F1, F2), one process finding blocks the merge gate (F7).** All eight requirements have working checks, and the new checks can fail (section 5), but the real voice route and the overlap with a running answer do not meet REQ-CHA-033 and REQ-CHA-035 as written. The owner decides: fix (Phase 3), amend the requirement (Phase 2), or accept as deviation.
+- **Verdict proposal (updated after the fixes, section 7b): Verified except two open points of the owner.** The first run found F1, F2 and F7 as blockers; all three are fixed and re-verified (sections 7a, 7b). What keeps the report from a plain "Verified": (1) TC-CHA-035, the hand check on the host, has to be repeated after the fixes and written down per step (TR-VOICE-002); (2) the wording of REQ-CHA-033 AC-1 against two error lines in the app (section 7b). With both closed, or accepted as deviations by the owner, the verdict is Verified.
+- The text below this line up to section 7 is the first run (before the fixes) and is kept as it was found.
 
 ## 1. Matrix (requirement, check, result, evidence)
 
@@ -121,6 +122,30 @@ Questions 1 to 8 of section 7 are answered; 9 and 10 are tasks. The verdict does
 
 Still open as tasks (not decisions): listen to a long answer spoken again on the host (together with the hand-check repeat; question 9), and diff `goal/v3` against the TD-11 files before the merge (question 10).
 
+## 7b. Fixes and re-verification (2026-11-08)
+
+The fixes were written by a separate implementer agent (it wrote the code; this session did not), test first, one commit per finding; this session then re-verified them from a fresh detached checkout of the agent's branch. Commits on `verify-a132` (cherry-picked unchanged, `git diff` against the agent's branch is empty): `4cb7156` F3, `32b30b9` F2, `1c9405f` F1; the specification part is `8a3a8b0` (A-134, F7).
+
+| Finding | Result | Evidence (this session, 2026-11-08) |
+|---|---|---|
+| F3 `stop()` | fixed | `tests/test_chat_stop_result.py` 1 OK; red on the pre-fix code (`a91ed8c`), red when the fix is mutated back (N3, N6) |
+| F2 overlap status | fixed | `tests/test_chat_speak_overlap.py` 2 OK (both orders, real threads); red on the pre-fix code (2 failures), red under mutation (N1, N2); my own probe `probe_status.py` on the fixed code: `(true, speaking)` at every step of both orders, `(false, idle)` after the stop (was `thinking` and `idle`) |
+| F1 route | fixed, with one wording point (below) | `tests/test_speech_route_failure.py` 2 OK with the real `SpeechStreamer` on a closed port; red on the pre-fix code (1 failure, 1 error), red under mutation (N4, N5); my probe `probe_route_fix.py`: ChatService with the real `speak_text`, 5 sentences, nothing listening: **1 connection attempt** (was 5), the status back to `(false, idle)` |
+| F7 parents | fixed | section 7a, A-134, D-286 |
+
+Re-runs on the fixed code (clean detached worktree at `6e451b4`, `git status` clean):
+- `test_chat_speak_again.py` 8, `test_chat_speak_overlap.py` 2, `test_chat_stop_result.py` 1, `test_speech_route_failure.py` 2, `test_sound_server_handover.py` 2: all OK.
+- `-p "test_chat_*.py"` 169 OK; `-p "test_speech*.py"` 38 OK; IF-201 contract suite 16 OK; contract mocks 110 OK; `node --test "tests/js/*.test.mjs"` 163 of 163; browser `test_speak_again_browser.py` 2 OK (not skipped); `test_chat_views_browser.py` 12 OK.
+- Whole unit suite twice: both 2071 tests (2066 plus the 5 new), 1 error each, the same host-dependent `test_tailscale` (F10), 4 skipped, 1 expected failure.
+- Load: the 5 new tests plus `test_chat_speak_again.py` repeated 40 times next to 48 busy processes: 0 failures.
+- `git diff --stat a91ed8c <fix branch> -- contracts tests/acceptance tests/helpers tests/smoke benchmarks stages.yaml specs`: empty. Only `chat_service.py`, `speech_stream.py`, `web_app.py` and the three new test files changed. `test_doc_check.py`: 0 findings in the new files. The other callers of the route (`research_chat.py`, `extensions/review/review_chat.py`) catch `Exception` around `speak()`, so the new `OSError` does not reach them (read, not run).
+- Not re-run after the fixes: the stage ladder as a whole (I ran its steps singly), `trace_check`, `req_graph`, SysML checks (nothing in them depends on the code; the spec checks were re-run after A-134, section 7a).
+
+Residual points after the fixes:
+- **F1 wording.** One failed repeat now logs **two** ERROR lines in the app: the streamer's own "Sound server not reachable" (unchanged, it is shared with live answers) and the Chat agent's "Speak again: the voice route failed". With the fake route of TC-CHA-033 it is one line. REQ-CHA-033 AC-1 says "one error line". Owner: accept two lines (one per layer) and word AC-1 as "one error line of the Chat agent", or silence the streamer line for this route.
+- **Still untested guards:** the mutants "a repeat takes the status although an answer runs" (N8) and "the status is restored although an answer runs" (N7) survive: these guards only decide the mood activity that the character shows, which the status of the new tests overrides. Low.
+- **TC-CHA-035** is not repeated yet; the evidence stays incomplete until the owner repeats the hand check after these fixes (decision in 7a). Also the listen test for choppy long answers (question 9).
+
 ## 8. Next step
 
-The owner has decided (section 7a). Fixes come as Phase 3 tasks with a failing test first (F1: real `speak_answer` on a closed port; F2: overlap status; F3: `stop()` value), or as amendments. After the fixes the automated checks run again in full; the TD-11 change set is already on master, so Phase 5 is the tag, the release-notes line and the status update to Verified once this report is approved.
+F1, F2, F3 and F7 are fixed and re-verified (section 7b). Open for the owner: (1) repeat the hand check TC-CHA-035 on the host with the fixed code and write down per step 1 to 4 the result, the browser, the audio device and the commit, and listen to a long answer spoken again (question 9); (2) decide the wording of REQ-CHA-033 AC-1 against two error lines in the app; (3) diff `goal/v3` against the TD-11 files before the merge (question 10). Then the owner approves this report; Phase 5 is the tag, the release-notes line and the status update of the eight requirements to Verified. The owner merges `verify-a132` (it holds the fixes, A-134 and this report) and no one pushes before that.
