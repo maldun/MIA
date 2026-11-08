@@ -548,3 +548,9 @@ The first version was silent until the end and could take 20 minutes or more: th
 | REQ-SLY-014 | requirement | d31d2223989e | Stefan Reiterer | 2026-11-08 | approved | A-100: Storage depth limit and cyclic documents; owner's review answer 2026-11-08 (text reviewed, T-11 open) |
 | TC-SLY-012 | check | c8ab643b2785 | Stefan Reiterer | 2026-11-08 | approved | A-100: Storage depth limit and cyclic documents; owner's review answer 2026-11-08 (text reviewed, T-11 open) |
 | TC-SLY-013 | check | b3b93fd148b1 | Stefan Reiterer | 2026-11-08 | approved | A-100: Storage depth limit and cyclic documents; owner's review answer 2026-11-08 (text reviewed, T-11 open) |
+| REQ-GTB-028 | requirement | b5c1d44ed543 | Stefan Reiterer | 2026-11-08 | approved | A-102: size limit of 100,000 values; goal row Implement in progress; owner's review answer 2026-11-08 (text reviewed, T-12 open) |
+| REQ-SLY-015 | requirement | d034eddc1435 | Stefan Reiterer | 2026-11-08 | approved | A-102: size limit of 100,000 values; goal row Implement in progress; owner's review answer 2026-11-08 (text reviewed, T-12 open) |
+| TC-GTB-029 | check | a7ae161fc372 | Stefan Reiterer | 2026-11-08 | approved | A-102: size limit of 100,000 values; goal row Implement in progress; owner's review answer 2026-11-08 (text reviewed, T-12 open) |
+| TC-SLY-014 | check | e929e0863533 | Stefan Reiterer | 2026-11-08 | approved | A-102: size limit of 100,000 values; goal row Implement in progress; owner's review answer 2026-11-08 (text reviewed, T-12 open) |
+| TR-GTB-001 | test requirement | 120b9959a2b5 | Stefan Reiterer | 2026-11-08 | approved | A-102: size limit of 100,000 values; goal row Implement in progress; owner's review answer 2026-11-08 (text reviewed, T-12 open) |
+| G-V2.STORE | goal | 35f0a4cf0d1f | Stefan Reiterer | 2026-11-08 | approved | A-102: size limit of 100,000 values; goal row Implement in progress; owner's review answer 2026-11-08 (text reviewed, T-12 open) |
