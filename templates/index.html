@@ -48,11 +48,15 @@
   <div class="visually-hidden" id="mood-live" role="status" aria-live="polite"></div>
   <div class="visually-hidden" id="announce" role="status" aria-live="polite"></div>
 
+  <!-- the box the character is framed in: the window without the chat and the Skill run view (REQ-CLV-040); an invisible marker, the character itself is the iframe above -->
+  <div class="character-box" id="character-box" aria-hidden="true"></div>
+
   <!-- the chat -->
   <aside class="panel" id="panel" aria-label="Chat" data-collapsed="false">
     <div class="panel-resize" id="panel-resize" role="separator" aria-orientation="vertical" tabindex="0" aria-label="Resize chat" data-i18n-aria-label="panel.resize"></div>
     <button class="sheet-handle" id="sheet-handle" type="button" aria-label="Resize chat" data-i18n-aria-label="panel.resize"></button>
 
+    <div class="chat-body" id="chat">
     <header class="panel-header">
       <div class="avatar" aria-hidden="true">M</div>
       <div class="who">
@@ -163,6 +167,7 @@
         <svg class="icon" aria-hidden="true"><use href="#i-send"/></svg>
       </button>
     </form>
+    </div>
   </aside>
 
   <button class="panel-open" id="panel-open" type="button" hidden aria-label="Show chat" data-i18n-aria-label="panel.show">

@@ -55,6 +55,7 @@ const layout = initLayout({
   collapseButton: $('collapse-button'),
   openButton: $('panel-open'),
   moodChip: $('mood'),
+  strip: $('skill-run-view'),
 });
 
 // --- connection: header, banner, history after (re)connecting --------------------------------------------
@@ -123,6 +124,7 @@ layout.onChange(() => {
 });
 new ResizeObserver(sendInset).observe($('panel'));
 new ResizeObserver(sendInset).observe($('mood'));
+new ResizeObserver(sendInset).observe($('skill-run-view'));
 window.addEventListener('resize', sendInset);
 
 sound = initSound({

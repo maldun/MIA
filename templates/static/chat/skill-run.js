@@ -68,7 +68,7 @@ export function initSkillRunView({ root, socket, api, t, onStop = () => {}, noti
     for (const { label: name, text } of elementsModel(view.elements)) rows.push(el('dt', '', name), el('dd', '', text));
     $('srv-elements').replaceChildren(...rows);
     const allowed = controlsModel(header.state);
-    for (const action of ['pause', 'resume', 'stop']) $(`srv-${action}`).hidden = !allowed[action];
+    for (const action of ['pause', 'resume', 'stop']) $(`srv-${action}`).disabled = !allowed[action];      // all three stay on the strip, the state decides which one acts (REQ-CLV-033)
     drawFull(view);
   }
 

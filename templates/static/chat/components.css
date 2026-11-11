@@ -493,5 +493,18 @@ dialog .actions button {
 .srv-file-meta { margin-left: var(--space-2); color: var(--text-muted); }
 .srv-full h3 { margin: var(--space-2) 0 var(--space-1); font-size: var(--text-sm); color: var(--text-muted); }
 .srv-full li { overflow-wrap: anywhere; }
-@media (min-aspect-ratio: 1/1) and (min-width: 600px) { .panel { bottom: calc(var(--gap) + var(--strip-h, 0px)); } }
-@media not all and ((min-aspect-ratio: 1/1) and (min-width: 600px)) { .panel { bottom: calc(var(--kb) + var(--strip-h, 0px)); } }
+.chat-body { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; }
+.srv-buttons button:disabled { opacity: .4; cursor: default; }
+/* the character box is the free area: left of the chat and above the strip (wide), above the chat (phone) */
+.character-box { position: fixed; z-index: 0; left: 0; top: 0; pointer-events: none; visibility: hidden; }
+@media (min-aspect-ratio: 1/1) and (min-width: 600px) {
+  .panel { bottom: calc(var(--gap) + var(--strip-h, 0px)); }
+  .character-box { right: var(--occupied-w); bottom: var(--strip-h, 0px); }
+}
+@media not all and ((min-aspect-ratio: 1/1) and (min-width: 600px)) {
+  .panel { bottom: calc(var(--kb) + var(--strip-h, 0px)); }
+  .character-box { right: 0; bottom: calc(var(--kb) + var(--strip-h, 0px) + var(--sheet-h)); }
+  /* the phone stacks character, chat and view: the strip is as high as its content and every target is at least 44 px (REQ-CLV-041, REQ-CLV-042) */
+  .skill-run { max-height: none; }
+  .srv-buttons button, .srv-full > summary, .composer button, .composer textarea { min-width: 44px; min-height: 44px; }
+}
