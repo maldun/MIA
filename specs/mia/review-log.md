@@ -776,6 +776,7 @@ The first version was silent until the end and could take 20 minutes or more: th
 | D-226 | **G-V2.TOOLBOX, 2026-11-11 (owner):** a seeded shipped entry has lifecycle `tested` with the evidence "shipped with MIA" (code and unit test; REQ-WFM-056 text unchanged). |
 | D-227 | **G-V2.TOOLBOX, 2026-11-11 (owner):** `seed_shipped` skips IDs that exist; a newer shipped version is not picked up by a restart. |
 | D-228 | **G-V2.TOOLBOX, 2026-11-11 (owner):** `plan.md` approved with the deviations listed at its end. |
+| D-229 | **G-V2.TOOLBOX Verify, 2026-11-12 (owner maldun):** F1: a replace by a higher version clears `baseline_allowed` (amend REQ-WFM-091/092, test first, Phase 3). F2: the allowance is accepted only together with lifecycle retired and any other lifecycle change clears it. F3, F4, F5 go to Phase 3 with a failing test each. F7 (`decomposition` step red on master and +6) is a known red, repaired in a parent session. Report: `goals/G-V2.TOOLBOX/verification-report.md`. |
 | TR-TOOLBOX-005 | test requirement | e535a223d96a | maldun | 2026-11-11 | approved | G-V2.TOOLBOX review 2026-11-11 (A-112) |
 | REQ-RTB-009 | requirement | 7f1838878047 | maldun | 2026-11-11 | approved | G-V2.TOOLBOX review 2026-11-11 (A-112) |
 | TC-RTB-009 | check | 3979226f0319 | maldun | 2026-11-11 | approved | G-V2.TOOLBOX review 2026-11-11 (A-112) |
