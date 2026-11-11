@@ -1,8 +1,8 @@
 """Runs inside localhost/mia-browser (tests/browser/Containerfile) in the network of the IF-101 mock server container (ui/tools/chat_mock_server.py,
-started with MOCK_SEED_FILES=1): the stage-2 browser checks TC-CLV-023 (status card, TD-01) and TC-CLV-024 (files list, TD-02). Prints one JSON object
+started with MOCK_SEED_FILES=1): the stage-2 browser check TC-CLV-024 (files list, TD-02); the status card of TC-CLV-023 is retired, the Skill run view has its own checks (G-V3.PANEL T-10). Prints one JSON object
 {scenario: result}.
     podman run --rm -i --network container:<mock> localhost/mia-browser python - http://127.0.0.1:8686 SCENARIO... < tests/browser/task_files.py
-Scenarios: card (a /review of the mock on a phone of 360 px: the card, an update in place, pause, resume, stop, a late status), files (the Files tab:
+Scenarios: files (the Files tab:
 order, links, redraw after files_changed, no delete).
 """
 import json
@@ -66,51 +66,6 @@ def emit(driver, text):
     driver.execute_script("window.miaChat.socket.emit('chat_send', { text: arguments[0] });", text)
 
 
-CARDS = "[...document.querySelectorAll('#messages .task-card')]"
-CARD_STATE = """
-    return [...document.querySelectorAll('#messages .task-card')].map((c) => ({
-      id: c.dataset.taskId, state: c.className.replace('task-card', '').trim(), text: c.textContent,
-      buttons: [...c.querySelectorAll('button')].map((b) => b.textContent), fits: c.scrollWidth <= c.clientWidth }));"""
-
-
-def card():
-    """TC-CLV-023: one card per task, drawn from task_status, updated in place; Pause sends one /api/pause and shows Resume, Resume one /api/resume;
-    the result ends the task with its figures and no buttons; a late status after done changes nothing; Stop ends a second task"""
-    driver = browser(mobile=True)
-    out = {}
-    try:
-        login(driver)
-        driver.execute_script("""
-            window.posts = [];
-            const original = window.fetch.bind(window);
-            window.fetch = (url, options) => { if (options && options.method === 'POST') window.posts.push(String(url)); return original(url, options); };""")
-        emit(driver, "/review contract")
-        out["appeared"] = until(driver, CARDS + ".length === 1", 20)
-        out["first"] = driver.execute_script(CARD_STATE)
-        driver.execute_script(CARDS + "[0].querySelector('button').click()")           # Pause
-        out["paused"] = until(driver, CARDS + "[0].classList.contains('paused')", 10)
-        out["after_pause"] = driver.execute_script(CARD_STATE)
-        driver.execute_script(CARDS + "[0].querySelector('button').click()")           # Resume
-        out["resumed"] = until(driver, CARDS + "[0].classList.contains('running')", 10)
-        out["after_resume"] = driver.execute_script(CARD_STATE)
-        emit(driver, "yes")                                                             # the answer to the question of the review: it ends
-        out["done"] = until(driver, CARDS + "[0].classList.contains('done')", 20)
-        out["after_done"] = driver.execute_script(CARD_STATE)
-        driver.execute_script("""
-            const late = { id: arguments[0], task: 'review', phase: 'late', done: false, paused: false, budget: {}, counts: {} };
-            window.miaChat.socket.listeners('task_status').forEach((listener) => listener(late));""", out["after_done"][0]["id"])
-        out["after_late"] = driver.execute_script(CARD_STATE)
-        out["posts"] = driver.execute_script("return window.posts.filter((u) => /\\/api\\/(pause|resume)$/.test(u))")
-        emit(driver, "/review again")
-        out["second_appeared"] = until(driver, CARDS + ".length === 2", 20)
-        driver.execute_script(CARDS + "[1].querySelectorAll('button')[1].click()")      # Stop
-        out["stopped"] = until(driver, CARDS + "[1].classList.contains('done')", 20)
-        out["after_stop"] = driver.execute_script(CARD_STATE)
-        return out
-    finally:
-        driver.quit()
-
-
 FILES = """
     return [...document.querySelectorAll('#workspace-body ul.files li')].map((li) => {
       const a = li.querySelector('a'); return { name: a.textContent, href: a.getAttribute('href'), download: a.hasAttribute('download'), text: li.textContent }; });"""
@@ -128,7 +83,7 @@ def files():
         driver.execute_script("[...document.querySelectorAll('#workspace-tabs button')].find((b) => b.textContent === 'Files').click();")
         out["before"] = until(driver, "document.querySelectorAll('#workspace-body ul.files li').length === 1", 10) and driver.execute_script(FILES)
         emit(driver, "/review contract")                     # while the dialog is open: the task stores its report and sends files_changed
-        until(driver, "document.querySelectorAll('#messages .task-card').length === 1", 20)     # the review runs and waits for its answer
+        until(driver, "document.getElementById('srv-header').textContent.trim() !== ''", 20)     # the review runs and waits for its answer: the Skill run view shows it
         emit(driver, "yes")
         out["redrawn"] = until(driver, "document.querySelectorAll('#workspace-body ul.files li').length === 2", 20)
         out["after"] = driver.execute_script(FILES)
@@ -144,5 +99,5 @@ def files():
         driver.quit()
 
 
-SCENARIOS = {"card": card, "files": files}
+SCENARIOS = {"files": files}
 print(json.dumps({name: SCENARIOS[name]() for name in sys.argv[2:]}))

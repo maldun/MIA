@@ -1,5 +1,17 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+- G-V3.PANEL: the Skill run view, one strip across the full width below the character box and the chat. It shows the skill that runs (or the last run): header, phases, Time and Searches meters, counts, pause, resume and stop, the reason of a failed or stopped run and the elements a skill reports; a collapsed Full run part holds the result, your answers, the material, the files and the counts. The chat links to it (`#run=<id>`), it survives a reload and a restart, and its heights are two shares of the window that are set in the settings of the browser (strip 12 to 40 %, default 16; Full run part 20 to 60 %, default 34). On the phone character, chat and view are stacked.
+- IF-101 v16/v17: `task_status` carries skill, start, phases, state, elements and reason; `GET /api/skill-runs/shown` and `GET /api/skill-runs/<id>`; the event `skill_run_changed`; the marker `skill_run` on the messages of a run. The table `skill_runs` (IF-302 v8). The review declares its five stages in its manifest.
+
+### Changed
+- The result of a skill ends with a link to the Skill run view instead of a `Files:` list; a failed run says `The /<skill> run failed: <reason>`.
+
+### Removed
+- The status card in the chat (REQ-CLV-023 is superseded by REQ-CLV-030 to 039).
+
 ## [0.1.0] – 2026-11-01, G-V1 first version of MIA (not yet validated)
 
 ### Added

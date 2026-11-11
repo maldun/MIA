@@ -13,7 +13,6 @@ import { initChat } from './chat.js';
 import { initLogin } from './login.js';
 import { createApi } from './api.js';
 import { initWorkspace } from './workspace.js';
-import { initTaskCards } from './task-card.js';
 import { initSkillRunView } from './skill-run.js';
 import { initShares } from './skill-run-shares.js';
 import { initAccount } from './account.js';
@@ -190,8 +189,6 @@ chat = initChat({
   onSpeakAgain: () => sound.speakAgain(),
   api,
 });
-
-initTaskCards({ list: $('messages'), socket, api, t, onStop: () => socket.emit('chat_stop'), notify: toast });
 
 initShares({ storage, inputs: { strip: $('srv-share-strip'), full: $('srv-share-full') } });
 initSkillRunView({ root: $('skill-run-view'), socket, api, t, onStop: () => socket.emit('chat_stop'), notify: toast });

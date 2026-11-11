@@ -1,6 +1,16 @@
 // The model of the Skill run view (REQ-CLV-030 to 034, 039, 044; IF-101 v16): pure helpers, no DOM, so node tests them (tests/js/skill-run-model.test.mjs).
 // Interface note: specs/mia/goals/G-V3.PANEL/skill-run-view-interface-note.md.
-import { budgetText } from './task-card-model.js';
+function number(value) {
+  return Number(value).toLocaleString('en-US', { maximumFractionDigits: 1 });
+}
+
+/** "12 s / 600 s" for seconds, "1,200 / 400,000" for the others; a budget without a limit shows the used part only */
+export function budgetText(name, figures) {
+  const unit = name === 'seconds' ? ' s' : '';
+  const used = figures?.used === undefined ? '' : `${number(figures.used)}${unit}`;
+  const limit = figures?.limit === undefined ? '' : `${number(figures.limit)}${unit}`;
+  return used && limit ? `${used} / ${limit}` : used || limit;
+}
 
 const ENDED = ['done', 'failed', 'stopped'];
 const FIRST_METERS = ['seconds', 'searches'];                    // Time and Searches come first, the other budgets after them

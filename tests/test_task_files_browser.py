@@ -1,4 +1,4 @@
-"""The stage-2 browser checks of the status card and the Files tab (N-1.1; TD-01, TD-02): TC-CLV-023 (REQ-CLV-023) and TC-CLV-024 (REQ-CLV-024).
+"""The stage-2 browser checks of the Files tab (N-1.1; TD-02): TC-CLV-024 (REQ-CLV-024). The status card (TC-CLV-023) is retired by G-V3.PANEL T-10; the Skill run view is checked in tests/acceptance/test_skill_run_view_browser.py.
 The real page on the IF-101 mock server (ui/tools/chat_mock_server.py, with one older file in the volume) in its own container of the MIA image with
 `--network none`, headless Chromium of localhost/mia-browser in that container's network (tests/browser/Containerfile, D-141), one run of
 tests/browser/task_files.py. Skipped, never passed, where podman or one of the images is missing.  Run on the host with: python3 tests/test_task_files_browser.py"""
@@ -57,7 +57,7 @@ def browse(container, *scenarios):
     return json.loads(run.stdout.strip().splitlines()[-1])
 
 
-class TaskCardAndFilesInBrowser(unittest.TestCase):
+class FilesInBrowser(unittest.TestCase):
     results = None
 
     @classmethod
@@ -65,72 +65,10 @@ class TaskCardAndFilesInBrowser(unittest.TestCase):
         if shutil.which("podman") is None or not image_exists(MIA_IMAGE) or not image_exists(BROWSER_IMAGE):
             raise unittest.SkipTest("podman or an image is missing (%s, %s)" % (MIA_IMAGE, BROWSER_IMAGE))
         cls.results = {}
-        for scenario in ("card", "files"):                 # a fresh mock for each: the report of one review is a file in the volume of the next
+        for scenario in ("files",):                 # a fresh mock for each: the report of one review is a file in the volume of the next
             container = start_mock()
             cls.addClassCleanup(stop_mock, container)
             cls.results.update(browse(container, scenario))
-
-    @mark.req("REQ-CLV-023")
-    def test_a_task_status_draws_one_card_with_its_figures_that_fits_a_phone(self):
-        """TC-CLV-023 (TD-01): a task_status of the mock draws one card with the phase, the state and the figures it carries, without
-        horizontal scrolling at 360 px, with Pause and Stop.
-
-        Example: /review with {phase: working, budget: {seconds: {used: 0}}} -> one card, state running, text has "working" and the seconds, buttons Pause, Stop.
-        """
-        # Given: the phone run that started a /review of the mock
-        card = self.results["card"]
-        self.assertTrue(card["appeared"])
-        # When: the first card is read
-        cards = card["first"]
-        # Then: exactly one, running, with phase and figure, readable without sideways scrolling, with its two buttons
-        self.assertEqual(len(cards), 1)
-        self.assertEqual(cards[0]["state"], "running")
-        self.assertIn("working", cards[0]["text"])
-        self.assertRegex(cards[0]["text"], r"\d+(\.\d)? s")
-        self.assertTrue(cards[0]["fits"])
-        self.assertEqual(cards[0]["buttons"], ["Pause", "Stop"])
-
-    @mark.req("REQ-CLV-023")
-    def test_pause_and_resume_send_one_request_each_and_change_the_same_card(self):
-        """TC-CLV-023 (TD-01): Pause sends one pause request and the same card shows Resume; Resume sends one resume request and the card runs again.
-
-        Example: card m1 running -> Pause -> m1 paused, buttons Resume, Stop -> Resume -> m1 running; requests /api/pause and /api/resume once each.
-        """
-        # Given: the run that paused and resumed the task
-        card = self.results["card"]
-        first, paused, resumed = card["first"], card["after_pause"], card["after_resume"]
-        # When / Then: the same card (one node, the same id) changed state in place, with one request for each button
-        self.assertTrue(card["paused"] and card["resumed"])
-        self.assertEqual([len(first), len(paused), len(resumed)], [1, 1, 1])
-        self.assertEqual({first[0]["id"], paused[0]["id"], resumed[0]["id"]}, {first[0]["id"]})
-        self.assertEqual(paused[0]["state"], "paused")
-        self.assertEqual(paused[0]["buttons"], ["Resume", "Stop"])
-        self.assertEqual(resumed[0]["state"], "running")
-        self.assertEqual([url.rsplit("/", 1)[1] for url in card["posts"]], ["pause", "resume"])
-
-    @mark.req("REQ-CLV-023")
-    def test_a_finished_card_stays_with_its_figures_and_a_late_status_does_not_change_it(self):
-        """TC-CLV-023 (TD-01): when the task ends the card stays with its figures and loses its buttons; a task_status that comes after done
-        (the real handler of the page is called) changes nothing; Stop ends a second task on its own card.
-
-        Example: done -> state done, buttons [], same text after a late status {phase: late}; second /review -> two cards, Stop -> the second is done.
-        """
-        # Given: the run that ended the task, sent a late status and stopped a second task
-        card = self.results["card"]
-        # When / Then: the finished card kept its figures without buttons, the late status left it as it was
-        self.assertTrue(card["done"])
-        done = card["after_done"][0]
-        self.assertEqual(done["state"], "done")
-        self.assertEqual(done["buttons"], [])
-        self.assertRegex(done["text"], r"\d+(\.\d)? s")
-        self.assertEqual(card["after_late"], card["after_done"])
-        self.assertNotIn("late", card["after_late"][0]["text"])
-        # and the second task has its own card that Stop ended, the first one untouched
-        self.assertTrue(card["second_appeared"] and card["stopped"])
-        self.assertEqual(len(card["after_stop"]), 2)
-        self.assertNotEqual(card["after_stop"][1]["id"], done["id"])
-        self.assertEqual(card["after_stop"][1]["state"], "done")
-        self.assertEqual(card["after_stop"][0], done)
 
     @mark.req("REQ-CLV-024")
     def test_the_files_list_is_drawn_with_download_links_and_redrawn_after_files_changed(self):
