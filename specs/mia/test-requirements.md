@@ -305,7 +305,7 @@
 - History: G-V2.TOOLBOX Plan step 3 (2026-11-08), new, from the toolbox prototype and the owner's answers of 2026-11-08
 
 ### TR-TOOLBOX-005 – names, versions and statuses are exact
-- Applies to: TC-WFM-050, TC-WFM-051, TC-WFM-055, TC-WFM-067, TC-WFM-068, TC-WFM-070, TC-WFM-090
+- Applies to: TC-WFM-050, TC-WFM-051, TC-WFM-055, TC-WFM-067, TC-WFM-068, TC-WFM-070, TC-WFM-090, TC-RTB-008
 - Requirement: REQ-WFM-051
 - Group: Exact values (TOOLBOX)
 - Kind: unit

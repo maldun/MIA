@@ -91,6 +91,19 @@ The 14 record tables of IF-302 (history, which also holds the summaries and the 
 - Status: Draft
 - History: A-141 (proposed 2026-11-08, G-V3.PANEL), new; owner 2026-11-08: a new table skill_runs, REQ-RTB-007
 
+### REQ-RTB-008 – Transform meta stored
+- Level: low   Subject: Persistence
+- Text: The Record tables shall define the table transform_meta with the required fields trust and lifecycle, as versioned records that are not deletable.
+- Rationale: refines REQ-DB-002; one meta record per transform ID so that trust and lifecycle survive a new version of the code, A-110 (FR-38, REQ-WFM-092)
+- Parent: REQ-DB-002
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-32: definitions() names transform_meta as versioned and not deletable; a record with trust other than untrusted or trusted, or lifecycle other than draft, tested or retired, is rule schema with that field as detail; a record lacking trust or lifecycle is rule schema with the missing field as detail; a complete one is accepted (exact)
+- Verified by: TC-RTB-008
+- Status: Draft
+- History: A-110 (proposed 2026-11-11, G-V2.TOOLBOX), new; owner 2026-11-11: table transform_meta, REQ-RTB-008
+- Proposed (A-110): REQ-RTB-001 would name one table more (16 when A-141 is installed too).
+
 ## Interface requirements
 
 Owned by this node as provider (or, for an external provider, as the consumer that depends on it). The details are in `contracts/`; the mock and the contract suite are in `tests/helpers/mocks/` and `tests/acceptance/contract/`.

@@ -4316,6 +4316,11 @@ package MIA_NodeRequirements {
         doc /* The Record tables shall define the table skill_runs with the required fields run, skill, skill_version, account, started and state, as versioned records that are deletable. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
+    requirement def <'REQ-RTB-008'> TransformMetaStored_Rtb008 {
+        subject s : Persistence;
+        doc /* The Record tables shall define the table transform_meta with the required fields trust and lifecycle, as versioned records that are not deletable. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
     requirement def <'REQ-DB-001'> PostgreSQLInAContainer_Db001 {
         subject s : Persistence;
         doc /* The Database shall be one PostgreSQL database in a container behind the storage interface IF-102. */
@@ -5102,6 +5107,7 @@ package MIA_NodeRequirements {
     requirement r_req_rtb_005 : TasksAndMemosExact_Rtb005;
     requirement r_req_rtb_006 : SourceTrustStored_Rtb006;
     requirement r_req_rtb_007 : SkillRunsStored_Rtb007;
+    requirement r_req_rtb_008 : TransformMetaStored_Rtb008;
     requirement r_req_db_001 : PostgreSQLInAContainer_Db001;
     requirement r_req_db_002 : SharedStateHeld_Db002;
     requirement r_req_db_003 : ImmutableVersions_Db003;
@@ -5608,6 +5614,7 @@ package MIA_NodeRequirements {
     satisfy r_req_rtb_005 by mia.persistence;
     satisfy r_req_rtb_006 by mia.persistence;
     satisfy r_req_rtb_007 by mia.persistence;
+    satisfy r_req_rtb_008 by mia.persistence;
     satisfy r_req_db_001 by mia.persistence;
     satisfy r_req_db_002 by mia.persistence;
     satisfy r_req_db_003 by mia.persistence;
@@ -6113,6 +6120,7 @@ package MIA_NodeRequirements {
     allocate r_req_rtb_005 to mia.persistence;
     allocate r_req_rtb_006 to mia.persistence;
     allocate r_req_rtb_007 to mia.persistence;
+    allocate r_req_rtb_008 to mia.persistence;
     allocate r_req_db_001 to mia.persistence;
     allocate r_req_db_002 to mia.persistence;
     allocate r_req_db_003 to mia.persistence;
@@ -6650,6 +6658,7 @@ package MIA_NodeRequirements {
     dependency from r_req_rtb_005 to r_req_db_014;
     dependency from r_req_rtb_006 to r_req_db_015;
     dependency from r_req_rtb_007 to r_req_db_002;
+    dependency from r_req_rtb_008 to r_req_db_002;
     dependency from r_req_db_001 to nfr8;
     dependency from r_req_db_001 to con7;
     dependency from r_req_db_001 to nfr9;
