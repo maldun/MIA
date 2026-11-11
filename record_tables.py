@@ -7,13 +7,15 @@ categories and the vote value. It never changes a document (a task or memo comes
 """
 
 TABLES = {name: {"versioned": True, "deletable": name in ("history", "memory", "tasks", "memos")}
-          for name in ("history", "memory", "votes", "tasks", "memos", "accounts", "presets", "gestures", "runs", "source_trust", "cases", "behaviours", "workflow_meta", "reports")}     # reports: the finished report of a task (REQ-WFM-038); cases: proposed benchmark cases (REQ-CHA-016); behaviours: the adaptation counters (REQ-CHA-017, -018)
-REQUIRED = {"reports": ("task", "skill", "skill_version", "question", "account", "model_pin", "report"), "workflow_meta": ("status",), "cases": ("question", "answer", "status"), "behaviours": ("name", "net", "votes"), "memory": ("text", "source"), "votes": ("user", "subject", "category", "value"), "tasks": ("text",), "memos": ("text",),
+          for name in ("history", "memory", "votes", "tasks", "memos", "accounts", "presets", "gestures", "runs", "source_trust", "cases", "behaviours", "workflow_meta", "reports", "transform_meta")}     # reports: the finished report of a task (REQ-WFM-038); cases: proposed benchmark cases (REQ-CHA-016); behaviours: the adaptation counters (REQ-CHA-017, -018)
+REQUIRED = {"reports": ("task", "skill", "skill_version", "question", "account", "model_pin", "report"), "workflow_meta": ("status",), "transform_meta": ("trust", "lifecycle"), "cases": ("question", "answer", "status"), "behaviours": ("name", "net", "votes"), "memory": ("text", "source"), "votes": ("user", "subject", "category", "value"), "tasks": ("text",), "memos": ("text",),
             "runs": ("workflow", "workflow_version", "model_pin", "benchmark_version")}
 CATEGORIES = ("answer_quality", "reactions", "character_behaviour", "service")
 MEMORY_KINDS = ("fact", "preference", "commitment")       # IF-302 v2 (REQ-CHA-011): the optional fields `kind` and `status` of a memory record; `subject` and `updated` are free
 MEMORY_STATUS = ("active", "replaced")
 WORKFLOW_STATUS = ("draft", "tested", "trusted", "retired")      # IF-302 v3 (REQ-WFM-002): the lifecycle of a workflow; its specification and benchmark are free
+TRANSFORM_TRUST = ("untrusted", "trusted")      # IF-302 v8 (A-110, REQ-RTB-008): trust and lifecycle of a transform; reason, evidence, baseline_allowed, shipped, changed_by are free
+TRANSFORM_LIFECYCLE = ("draft", "tested", "retired")
 
 
 def definitions():
@@ -36,6 +38,10 @@ def validate(table, doc):
                 return {"rule": "schema", "detail": field}
     if table == "workflow_meta" and doc["status"] not in WORKFLOW_STATUS:
         return {"rule": "schema", "detail": "status"}
+    if table == "transform_meta":
+        for field, allowed in (("trust", TRANSFORM_TRUST), ("lifecycle", TRANSFORM_LIFECYCLE)):
+            if doc[field] not in allowed:
+                return {"rule": "schema", "detail": field}
     if table == "votes":
         if doc["category"] not in CATEGORIES:
             return {"rule": "category", "detail": doc["category"]}
