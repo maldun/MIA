@@ -169,6 +169,39 @@
     <svg class="icon" aria-hidden="true"><use href="#i-chat"/></svg>
   </button>
 
+  <!-- the Skill run view (REQ-FE-032): a strip with the run that the backend names; skill-run.js draws it from the model skill-run-model.js -->
+  <section class="skill-run" id="skill-run-view" aria-label="Skill run" data-i18n-aria-label="srv.label">
+    <p class="srv-empty" id="srv-empty" data-i18n="srv.empty">No skill has run yet.</p>
+    <div class="srv-run" id="srv-run" hidden>
+      <div class="srv-head">
+        <strong id="srv-header"></strong>
+        <span class="srv-state" id="srv-state"></span>
+        <span class="srv-buttons">
+          <button type="button" id="srv-pause" data-i18n="task.pause">Pause</button>
+          <button type="button" id="srv-resume" data-i18n="task.resume">Resume</button>
+          <button type="button" id="srv-stop" data-i18n="task.stop">Stop</button>
+        </span>
+      </div>
+      <ol class="srv-phases" id="srv-phases"></ol>
+      <div class="srv-figures" id="srv-figures"></div>
+      <p class="srv-reason" id="srv-reason" hidden></p>
+      <dl class="srv-elements" id="srv-elements"></dl>
+      <details class="srv-full" id="srv-full">
+        <summary data-i18n="srv.full">Full run</summary>
+        <h3 data-i18n="srv.result">Result</h3>
+        <div class="srv-result" id="srv-result"></div>
+        <h3 data-i18n="srv.answers">Your answers</h3>
+        <ol id="srv-answers"></ol>
+        <h3 data-i18n="srv.material">Material</h3>
+        <ul id="srv-material"></ul>
+        <h3 data-i18n="srv.files">Files</h3>
+        <ul id="srv-files"></ul>
+        <h3 data-i18n="srv.counts">Counts</h3>
+        <p id="srv-counts"></p>
+      </details>
+    </div>
+  </section>
+
   <dialog id="confirm" aria-labelledby="confirm-text">
     <p id="confirm-text"></p>
     <div class="actions">

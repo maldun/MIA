@@ -14,6 +14,7 @@ import { initLogin } from './login.js';
 import { createApi } from './api.js';
 import { initWorkspace } from './workspace.js';
 import { initTaskCards } from './task-card.js';
+import { initSkillRunView } from './skill-run.js';
 import { initAccount } from './account.js';
 import { followStatus, followVariant, initMood } from './mood.js';
 import { askConfirm, initPalette, loadCommands } from './palette.js';
@@ -188,6 +189,8 @@ chat = initChat({
 });
 
 initTaskCards({ list: $('messages'), socket, api, t, onStop: () => socket.emit('chat_stop'), notify: toast });
+
+initSkillRunView({ root: $('skill-run-view'), socket, api, t, onStop: () => socket.emit('chat_stop'), notify: toast });
 
 let commands = [];
 const commandsReady = loadCommands().then((list) => { commands = list; return list; });

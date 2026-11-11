@@ -43,6 +43,11 @@ def skill_run(run_id):
     return (jsonify(state["runs"][run_id]) if run_id in state["runs"] else (jsonify({"error": "not_found"}), 404))
 
 
+# the real blueprint chat_ops_api answers these paths since G-V3.PANEL T-05 and comes first: re-point its endpoints to the stub views (as chat_mock_server.py does for the others)
+app.view_functions["chat_ops_api.shown_run"] = shown_run
+app.view_functions["chat_ops_api.skill_run"] = skill_run
+
+
 @app.route("/stub/script", methods=["POST"])
 def script():
     for step in (request.get_json(silent=True) or {}).get("steps", []):

@@ -190,5 +190,22 @@
   "task.count.maybe": "Maybe",
   "task.count.excluded": "Excluded",
   "task.count.dropped": "Dropped before screening",
-  "login.origin": "MIA does not know this address. Open the page by one of the addresses MIA lists at its start, or add this name to public_hosts in the configuration."
+  "login.origin": "MIA does not know this address. Open the page by one of the addresses MIA lists at its start, or add this name to public_hosts in the configuration.",
+  "srv.label": "Skill run",
+  "srv.empty": "No skill has run yet.",
+  "srv.state.running": "running",
+  "srv.state.paused": "paused",
+  "srv.state.done": "done",
+  "srv.state.failed": "failed",
+  "srv.state.stopped": "stopped",
+  "srv.stopped": "stopped by the user",
+  "srv.full": "Full run",
+  "srv.result": "Result",
+  "srv.answers": "Your answers",
+  "srv.material": "Material",
+  "srv.files": "Files",
+  "srv.counts": "Counts",
+  "task.budget.searches": "Searches",
+  "task.count.found": "Found",
+  "task.count.read": "Read"
 }

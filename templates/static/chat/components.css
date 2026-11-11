@@ -467,3 +467,28 @@ dialog .actions button {
   white-space: nowrap;
   border: 0;
 }
+
+/* --- the Skill run view (REQ-FE-032): a strip at the bottom; layout, sizes and shares follow in T-09 --------------------------- */
+.skill-run { position: fixed; z-index: 25; left: 0; right: 0; bottom: 0; box-sizing: border-box; max-height: 34dvh; overflow: auto; padding: var(--space-2) var(--space-3); border-top: 1px solid var(--border); background: var(--glass); -webkit-backdrop-filter: blur(var(--blur)); backdrop-filter: blur(var(--blur)); color: var(--text); font-size: var(--text-sm); }
+.skill-run p, .skill-run dl, .skill-run ol, .skill-run ul { margin: 0; }
+.srv-empty { color: var(--text-muted); }
+.srv-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-2); }
+.srv-state { color: var(--accent-text); }
+.srv-state[data-state="failed"] { color: var(--danger); }
+.srv-state[data-state="done"] { color: var(--ok); }
+.srv-buttons { margin-left: auto; display: inline-flex; gap: var(--space-2); }
+.srv-phases { display: flex; flex-wrap: wrap; gap: var(--space-1); padding: 0; list-style: none; }
+.srv-phase { padding: 0 var(--space-2); border: 1px solid var(--border); border-radius: var(--radius-pill); color: var(--text-muted); }
+.srv-phase[data-state="done"] { color: var(--ok); }
+.srv-phase[data-current="true"] { border-color: var(--accent-text); color: var(--text); }
+.srv-phase[data-state="failed"], .srv-phase[data-state="stopped"] { border-color: var(--danger); color: var(--danger); }
+.srv-figures { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-3); font-variant-numeric: tabular-nums; }
+.srv-reason { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--danger); }
+.srv-elements { display: grid; grid-template-columns: max-content 1fr; gap: 0 var(--space-3); overflow-wrap: anywhere; }
+.srv-elements dd { margin: 0; }
+.srv-full { margin-top: var(--space-1); }
+.srv-result { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 12rem; overflow: auto; }
+.srv-full h3 { margin: var(--space-2) 0 var(--space-1); font-size: var(--text-sm); color: var(--text-muted); }
+.srv-full li { overflow-wrap: anywhere; }
+@media (min-aspect-ratio: 1/1) and (min-width: 600px) { .panel { bottom: calc(var(--gap) + var(--strip-h, 0px)); } }
+@media not all and ((min-aspect-ratio: 1/1) and (min-width: 600px)) { .panel { bottom: calc(var(--kb) + var(--strip-h, 0px)); } }
