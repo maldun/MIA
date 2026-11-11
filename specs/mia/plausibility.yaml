@@ -3236,6 +3236,15 @@ plausibility:
       rated: '2026-10-26'
       rated_by: maldun
       rating: plausible
+    REQ-RTB-008:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a unit check of a table definition (proposal,
+        accepted by the person)
+      hardware: HW-target
+      rated: '2026-11-11'
+      rated_by: maldun
+      rating: plausible
     REQ-RUN-001:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
