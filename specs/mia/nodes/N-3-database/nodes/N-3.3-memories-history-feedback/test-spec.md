@@ -16,6 +16,7 @@ Tests of this part alone against the mocks of its neighbours: unit tests with pl
 | TC-RTB-006 | REQ-RTB-006 | Unit | 1 | definitions() entry source_trust | versioned, not deletable | exact |
 | TC-RTB-007 | REQ-RTB-007 | Unit | 1 | definitions() entry skill_runs and validate(skill_runs, doc) for a complete run record and for six documents each lacking one required field | versioned and deletable; the complete one accepted; each incomplete one is rule schema with the missing field as detail | exact |
 | TC-RTB-008 | REQ-RTB-008 | Unit | 1 | definitions() entry transform_meta and validate(transform_meta, doc) for a complete record, for two documents each lacking one required field and for documents with an unknown trust or lifecycle value | versioned and not deletable; the complete one accepted; each bad one is rule schema with the field as detail | exact |
+| TC-RTB-009 | REQ-RTB-009 | Unit | 1 | definitions() entry transforms and validate(transforms, doc) for a complete record, for records with an empty, a null and a missing code, for two documents each lacking one required field and for documents with an id that is empty or not text and a version of 0, -1, true, 1.0, 1.5, "1" or null | versioned and not deletable; the complete one and the three code variants accepted; each bad one is rule schema with the field as detail | exact |
 
 Contract test cases of IF-302: TC-IF-302-01 to the last of the suite (listed in the root `test-spec.md`).
 
@@ -36,3 +37,9 @@ Contract test cases of IF-302: TC-IF-302-01 to the last of the suite (listed in 
 - Given: the Record tables with the table transform_meta of IF-302 (A-110, proposed) and a record with trust `trusted` and lifecycle `tested`
 - When: definitions() is read; the record is validated; then two copies, each lacking one of the two fields, and two copies with trust `maybe` and lifecycle `fine` are validated
 - Then: transform_meta is versioned and not deletable; the complete record is accepted; each bad copy is refused as rule schema naming its field; the accepted values `untrusted` and `draft` are accepted as twins
+
+### TC-RTB-009 – Transforms stored
+- Verifies: REQ-RTB-009
+- Given: the Record tables with the table transforms of IF-302 (A-112, proposed) and a record with id `t.one`, version 1, input and output schemas and a code text
+- When: definitions() is read; the record is validated; then copies with an empty code, a null code and no code, two copies each lacking one of id and version, a copy with an empty id, and copies with version 0, -1, true, 1.0, 1.5, "1" and null are validated
+- Then: transforms is versioned and not deletable; the complete record and the three code variants are accepted (a stub transform is valid); each bad copy is refused as rule schema naming its field; a version of 7 as the first record is accepted as a twin
