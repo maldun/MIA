@@ -776,3 +776,6 @@ The first version was silent until the end and could take 20 minutes or more: th
 | D-226 | **G-V2.TOOLBOX, 2026-11-11 (owner):** a seeded shipped entry has lifecycle `tested` with the evidence "shipped with MIA" (code and unit test; REQ-WFM-056 text unchanged). |
 | D-227 | **G-V2.TOOLBOX, 2026-11-11 (owner):** `seed_shipped` skips IDs that exist; a newer shipped version is not picked up by a restart. |
 | D-228 | **G-V2.TOOLBOX, 2026-11-11 (owner):** `plan.md` approved with the deviations listed at its end. |
+| TR-TOOLBOX-005 | test requirement | e535a223d96a | maldun | 2026-11-11 | approved | G-V2.TOOLBOX review 2026-11-11 (A-112) |
+| REQ-RTB-009 | requirement | 7f1838878047 | maldun | 2026-11-11 | approved | G-V2.TOOLBOX review 2026-11-11 (A-112) |
+| TC-RTB-009 | check | 3979226f0319 | maldun | 2026-11-11 | approved | G-V2.TOOLBOX review 2026-11-11 (A-112) |
