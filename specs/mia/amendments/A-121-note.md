@@ -47,3 +47,6 @@ Open points for the owner are numbered O1 to O5 at the end. O1 changes tests.
 - **O3, name rules.** Duplicate names give `conflict` here (snapshots are never overwritten). The automatic names "before restore of <name>" can themselves be restored and may repeat when the same snapshot is restored twice; the proposal is a numeric suffix " (2)". Neither is in the requirements or the tests.
 - **O4, failure in the middle of a restore.** Proposal: the automatic snapshot is written first and always stays; if a later step fails, the items already changed are changed back, so the state equals the one before the call. Not in the requirements or the tests.
 - **O5, bounds.** No time bound is proposed for `snapshot` and `restore_snapshot`; a bound would be set in Plan like the 1 s of `estimate`.
+
+## Owner answers of 2026-11-11 (D-240)
+O2 write stored trust and lifecycle back; O3 `conflict` plus numeric suffix for automatic names; O4 automatic snapshot first, roll back on failure; O5 no bound now. Assumptions 3 (reason text stays), 4 (owner = creator of accounts), 6 (`evidence` added to the lab) confirmed. Still to do by amendment: tests for O3 and O4, the lab argument `evidence`.
