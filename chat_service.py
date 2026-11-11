@@ -98,6 +98,8 @@ def normalize_text(text):
         return ""
     return CONTROL_CHARACTERS.sub("", text).strip()
 SENTENCE_END = re.compile(r"(?<=[.!?])\s+")
+SKILL_TURN_KINDS = ("question", "phase", "done", "failed", "stopped")      # IF-201 v3
+SKILL_LINK = re.compile(r"\s*\[[^\]]*\]\(#run=[^)]*\)")      # a link to a run in a text of the model
 
 
 NET_NEGATIVE = 5               # REQ-CHA-017: from this many net negative votes a behaviour is shown only rarely
@@ -425,9 +427,13 @@ class ChatService:
     def speak_again(self, message_id):
         """one audio_chunk per sentence of any answer; the page that owns the voice plays them"""
         record = self._answer(message_id)
-        sentences = [s for s in SENTENCE_END.split(speech_text(record["text"])) if s]
+        return {"sentences": self._voice(record["id"], record["text"])}
+
+    def _voice(self, message_id, text):
+        """the sentences of a message go to the page as audio_chunk events and, where a voice route exists, to the voice; returns their number"""
+        sentences = [s for s in SENTENCE_END.split(speech_text(text)) if s]
         for index, sentence in enumerate(sentences):
-            self._emit("audio_chunk", {"id": record["id"], "index": index, "sentence": sentence})
+            self._emit("audio_chunk", {"id": message_id, "index": index, "sentence": sentence})
         if self._speak is not None and sentences:
             with self._lock:
                 self._speak_pending += 1
@@ -439,7 +445,7 @@ class ChatService:
                 self.mood.set_activity("speaking")
             self.publish_status()                                  # busy and speaking: the page offers its stop button (REQ-CHA-035)
             self._spawn(lambda: self._play_again(sentences, generation))      # the request must not wait until the speech has ended
-        return {"sentences": len(sentences)}
+        return len(sentences)
 
     def _play_again(self, sentences, generation):
         """hands the sentences one by one to the voice route, after any playback that is still running (REQ-CHA-030, 031, 034); a stop since the
@@ -645,8 +651,36 @@ class ChatService:
         return record
 
     def skill_turn(self, account, run, kind, payload):
-        """STUB of Plan Step 4 (IF-201 v3, A-142): one turn of a skill run as a message of MIA; written in Implement"""
-        raise NotImplementedError("REQ-CHA-040 to 047, 055 to 060, 063")
+        """IF-201 v3 (A-142): one turn of a skill run as a message of MIA. `question` is the text of the skill as it is; `phase` (only a phase that the skill declares, REQ-CHA-042, 055), `done`,
+        `failed` and `stopped` are worded by the digest step in persona and repaired like every answer (REQ-CHA-041, 043, 044, 047, 057, 060); the end messages end with the link to the run,
+        added by code (REQ-CHA-056). Every message is a record with `skill_run` and `kind`, an event chat_message and goes to speech once (REQ-CHA-045). Returns {"id"}, {"id": None} for a phase without message."""
+        if kind not in SKILL_TURN_KINDS:
+            raise ChatError("invalid_kind")
+        if kind == "phase" and payload not in (self._declared_phases(run) if self._declared_phases else ()):
+            return {"id": None}
+        if kind == "question":
+            text = payload
+        else:
+            text = self._repaired(self._worded(kind, payload))
+        spoken = text
+        if kind in ("done", "failed", "stopped"):
+            text = SKILL_LINK.sub("", text).rstrip() + " [Open in the Skill run view](#run=%s)" % run      # a link in the model text is not the link: cut off, the real one follows
+            spoken = SKILL_LINK.sub("", spoken)
+        record = self.post_assistant(text, skill_run=run, kind=kind)
+        self._voice(record["id"], spoken)
+        return {"id": record["id"]}
+
+    def _worded(self, kind, payload):
+        """the wording of the digest step; a step that is missing or fails leaves a plain sentence that invents nothing, so that the user still hears how the run ended"""
+        try:
+            if self._digest is not None:
+                return {"phase": self._digest.status, "done": self._digest.summary, "failed": self._digest.failure, "stopped": self._digest.stopped}[kind](payload)
+        except Exception as exc:
+            logger.error("The digest step failed for a %s message: %s", kind, exc)
+        return {"phase": "Working on: %s." % payload, "done": "The run is done.", "failed": "The run failed: %s" % payload, "stopped": "The run was stopped (%s)." % payload}[kind]
+
+    def _repaired(self, text):
+        return self._repair(text) if self._repair is not None else text
 
     def model_history(self):
         """STUB of Plan Step 4 (REQ-CHA-046, 059): the messages the next chat turn sends to the chat model; written in Implement"""

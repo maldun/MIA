@@ -1,0 +1,35 @@
+--- a/tests/helpers/contract.py
++++ b/tests/helpers/contract.py
+@@ -432,12 +432,13 @@
+ 
+     START = 1767571200                                              # 2026-01-05 00:00 UTC, a Monday: the clock 0 of the mock
+ 
+-    def __init__(self, answers=None, queue_limit=5):
++    def __init__(self, answers=None, queue_limit=5, phases=()):
+         import tempfile
+         from errors import ServiceError
+         from chat_log import ChatLog
+         from chat_service import ChatError, ChatService
+         from moods import MoodTracker
++        from skill_digest import SkillDigestStep
+         from storage import Storage
+         from storage_files import FileBackend
+         self._answers, self._now, self._pending, self._callbacks = list(answers or []), 0.0, [], []
+@@ -445,7 +446,16 @@
+         self._error, self._chat_error = ServiceError, ChatError
+         self._chat = ChatService(self._deliver, ChatLog(os.path.join(folder, "chat.jsonl")), MoodTracker(os.path.join(REPO, "moods.json")), self._scripted_answer,
+                                  queue_size=queue_limit, spawn=self._pending.append, votes=Storage(FileBackend(os.path.join(folder, "db"))),
+-                                 wall_clock=lambda: self.START + self._now, behaviours=lambda: _ChatApiAdapter.BEHAVIOURS)
++                                 wall_clock=lambda: self.START + self._now, behaviours=lambda: _ChatApiAdapter.BEHAVIOURS,
++                                 digest=SkillDigestStep(self._scripted_digest), declared_phases=lambda run: tuple(phases))      # v3: the step on a scripted model
++
++    @staticmethod
++    def _scripted_digest(messages):
++        """the model of the digest step in the contract suite: it repeats the first 300 characters of the user text (a summary is shorter than the result, a reason stays in the wording)"""
++        return [m["content"] for m in messages if m["role"] == "user"][-1][:300]
++
++    def skill_turn(self, account, run, kind, payload):
++        return self._call(lambda: self._chat.skill_turn(account, run, kind, payload))
+ 
+     def _deliver(self, event, payload):
+         for callback in list(self._callbacks):
