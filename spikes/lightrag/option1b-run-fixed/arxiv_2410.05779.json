@@ -1,0 +1,77 @@
+{
+ "accepted": [
+  {
+   "name": "LightRAG",
+   "description": "To address these challenges, we propose LightRAG, which incorporates graph structures into text indexing and retrieval processes.",
+   "quote": "To address these challenges, we propose LightRAG, which incorporates graph structures into text indexing and retrieval processes.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Retrieval-Augmented Generation (RAG) systems",
+   "description": "Retrieval-Augmented Generation (RAG) systems enhance large language models (LLMs) by integrating external knowledge sources, enabling more accurate and contextually relevant responses tailored to user needs.",
+   "quote": "Retrieval-Augmented Generation (RAG) systems enhance large language models (LLMs) by integrating external knowledge sources, enabling more accurate and contextually relevant responses tailored to user needs.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "large language models (LLMs)",
+   "description": "Retrieval-Augmented Generation (RAG) systems enhance large language models (LLMs) by integrating external knowledge sources, enabling more accurate and contextually relevant responses tailored to user needs.",
+   "quote": "Retrieval-Augmented Generation (RAG) systems enhance large language models (LLMs) by integrating external knowledge sources, enabling more accurate and contextually relevant responses tailored to user needs.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "dual-level retrieval system",
+   "description": "This innovative framework employs a dual-level retrieval system that enhances comprehensive information retrieval from both low-level and high-level knowledge discovery.",
+   "quote": "This innovative framework employs a dual-level retrieval system that enhances comprehensive information retrieval from both low-level and high-level knowledge discovery.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "incremental update algorithm",
+   "description": "This capability is further enhanced by an incremental update algorithm that ensures the timely integration of new data, allowing the system to remain effective and responsive in rapidly changing data environments.",
+   "quote": "This capability is further enhanced by an incremental update algorithm that ensures the timely integration of new data, allowing the system to remain effective and responsive in rapidly changing data environments.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "source": "Retrieval-Augmented Generation (RAG) systems",
+   "relation": "enhance",
+   "target": "large language models (LLMs)",
+   "quote": "Retrieval-Augmented Generation (RAG) systems enhance large language models (LLMs) by integrating external knowledge sources, enabling more accurate and contextually relevant responses tailored to user needs.",
+   "kind": "relation"
+  },
+  {
+   "source": "LightRAG",
+   "relation": "incorporates",
+   "target": "graph structures",
+   "quote": "To address these challenges, we propose LightRAG, which incorporates graph structures into text indexing and retrieval processes.",
+   "kind": "relation"
+  }
+ ],
+ "refused": [
+  {
+   "item": {
+    "source": "LightRAG",
+    "relation": "employs",
+    "target": "dual-level retrieval system",
+    "quote": "This innovative framework employs a dual-level retrieval system that enhances comprehensive information retrieval from both low-level and high-level knowledge discovery.",
+    "kind": "relation"
+   },
+   "reason": "quote does not contain both ends"
+  },
+  {
+   "item": {
+    "source": "LightRAG",
+    "relation": "enhanced by",
+    "target": "incremental update algorithm",
+    "quote": "This capability is further enhanced by an incremental update algorithm that ensures the timely integration of new data, allowing the system to remain effective and responsive in rapidly changing data environments.",
+    "kind": "relation"
+   },
+   "reason": "quote does not contain both ends"
+  }
+ ],
+ "chunks": 1,
+ "seconds": 16.1
+}

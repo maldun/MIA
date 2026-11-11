@@ -43,7 +43,24 @@ def ungrounded(description: str, quote: str):
 
 
 def one_whole_sentence(quote: str, doc_text: str) -> bool:
-    return norm(quote) in {norm(s) for s in split_sentences(doc_text)}
+    """The quote ends like a sentence, holds no sentence border inside, and occurs in the document where a sentence starts:
+    at the start, after a line break (a wiki heading or list line), or after a sentence end. (The first draft compared the quote with the
+    pieces of `split_sentences`; those glue a heading like "== Concept ==" to the next sentence, so correct quotes were refused.)"""
+    q = quote.split()
+    if not q or not re.search(r"[.!?][\"')\]]*$", quote.strip()) or len(list(split_sentences(quote))) != 1:
+        return False
+    toks, newline = [], True
+    for m in re.finditer(r"\n|\S+", doc_text):
+        if m.group() == "\n":
+            newline = True
+        else:
+            toks.append((m.group(), newline))
+            newline = False
+    words_ = [w for w, _ in toks]
+    for i in range(len(words_) - len(q) + 1):
+        if words_[i:i + len(q)] == q and (i == 0 or toks[i][1] or re.search(r"[.!?=][\"')\]]*$", words_[i - 1])):
+            return True
+    return False
 
 
 def validate(proposal: dict, doc_text: str, max_ungrounded: int = 0):

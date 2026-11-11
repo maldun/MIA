@@ -33,6 +33,15 @@ class EntityRules(unittest.TestCase):
         self.assertEqual(option1b.validate(ent("PubMed", "free database", "PubMed is a free database"), DOC),
                          "quote is not one whole sentence of the document")
 
+    def test_a_wiki_heading_or_a_list_line_before_the_sentence_does_not_make_it_a_fragment(self):
+        doc = "== Concept ==\nA citation is a reference to a source.\nCitations help readers. Notes follow here."
+        p = ent("citation", "a reference to a source", "A citation is a reference to a source.")
+        self.assertIsNone(option1b.validate(p, doc))
+
+    def test_a_quote_that_starts_in_the_middle_of_a_sentence_is_refused(self):
+        p = ent("PubMed", "supports them", "and PubMed supports them.")
+        self.assertEqual(option1b.validate(p, DOC), "quote is not one whole sentence of the document")
+
     def test_no_description_is_refused(self):
         p = ent("PubMed", "  ", "PubMed is a free database of biomedical literature.")
         self.assertEqual(option1b.validate(p, DOC), "entity has no description")

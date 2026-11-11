@@ -1,0 +1,401 @@
+{
+ "accepted": [
+  {
+   "name": "Peer review",
+   "description": "Peer review is the evaluation of work by one or more people with similar competencies as the producers of the work (peers).",
+   "quote": "Peer review is the evaluation of work by one or more people with similar competencies as the producers of the work (peers).",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Henry Oldenburg (1619\u20131677)",
+   "description": "Henry Oldenburg (1619\u20131677) was a German-born British philosopher who is seen as the 'father' of modern scientific peer review.",
+   "quote": "Henry Oldenburg (1619\u20131677) was a German-born British philosopher who is seen as the 'father' of modern scientific peer review.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Nature",
+   "description": "It developed over the following centuries with, for example, the journal Nature making it standard practice in 1973.",
+   "quote": "It developed over the following centuries with, for example, the journal Nature making it standard practice in 1973.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Higher School of Economics in Moscow",
+   "description": "A monument to peer review has been at the Higher School of Economics in Moscow since 2017.",
+   "quote": "A monument to peer review has been at the Higher School of Economics in Moscow since 2017.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Ish\u0101q ibn \u02bbAl\u012b al-Ruh\u0101w\u012b (854\u2013931)",
+   "description": "A prototype professional peer review process was recommended in the Ethics of the Physician written by Ish\u0101q ibn \u02bbAl\u012b al-Ruh\u0101w\u012b (854\u2013931).",
+   "quote": "A prototype professional peer review process was recommended in the Ethics of the Physician written by Ish\u0101q ibn \u02bbAl\u012b al-Ruh\u0101w\u012b (854\u2013931).",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Ethics of the Physician",
+   "description": "A prototype professional peer review process was recommended in the Ethics of the Physician written by Ish\u0101q ibn \u02bbAl\u012b al-Ruh\u0101w\u012b (854\u2013931).",
+   "quote": "A prototype professional peer review process was recommended in the Ethics of the Physician written by Ish\u0101q ibn \u02bbAl\u012b al-Ruh\u0101w\u012b (854\u2013931).",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "clinical peer review",
+   "description": "Professional peer review is common in the field of health care, where it is usually called clinical peer review.",
+   "quote": "Professional peer review is common in the field of health care, where it is usually called clinical peer review.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Bloom's taxonomy",
+   "description": "Peer review is used in education to achieve certain learning objectives, particularly as a tool to reach higher order processes in the affective and cognitive domains as defined by Bloom's taxonomy.",
+   "quote": "Peer review is used in education to achieve certain learning objectives, particularly as a tool to reach higher order processes in the affective and cognitive domains as defined by Bloom's taxonomy.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "source": "Henry Oldenburg (1619\u20131677)",
+   "relation": "is seen as the 'father' of",
+   "target": "modern scientific peer review",
+   "quote": "Henry Oldenburg (1619\u20131677) was a German-born British philosopher who is seen as the 'father' of modern scientific peer review.",
+   "kind": "relation"
+  },
+  {
+   "source": "Professional peer review",
+   "relation": "is usually called",
+   "target": "clinical peer review",
+   "quote": "Professional peer review is common in the field of health care, where it is usually called clinical peer review.",
+   "kind": "relation"
+  },
+  {
+   "source": "Ish\u0101q ibn \u02bbAl\u012b al-Ruh\u0101w\u012b (854\u2013931)",
+   "relation": "written",
+   "target": "Ethics of the Physician",
+   "quote": "A prototype professional peer review process was recommended in the Ethics of the Physician written by Ish\u0101q ibn \u02bbAl\u012b al-Ruh\u0101w\u012b (854\u2013931).",
+   "kind": "relation"
+  },
+  {
+   "name": "progressing proficient practice assessment",
+   "description": "It is a piece of progressing proficient practice assessment and centered proficient practice assessment\u2014significant supporters of supplier credentialing and privileging.",
+   "quote": "It is a piece of progressing proficient practice assessment and centered proficient practice assessment\u2014significant supporters of supplier credentialing and privileging.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "centered proficient practice assessment",
+   "description": "It is a piece of progressing proficient practice assessment and centered proficient practice assessment\u2014significant supporters of supplier credentialing and privileging.",
+   "quote": "It is a piece of progressing proficient practice assessment and centered proficient practice assessment\u2014significant supporters of supplier credentialing and privileging.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "medical peer review",
+   "description": "Additionally, \"medical peer review\" has been used by the American Medical Association to refer not only to the process of improving quality and safety in health care organizations, but also to the process of rating clinical behavior or compliance with professional society membership standards.",
+   "quote": "Additionally, \"medical peer review\" has been used by the American Medical Association to refer not only to the process of improving quality and safety in health care organizations, but also to the process of rating clinical behavior or compliance with professional society membership standards.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "American Medical Association",
+   "description": "Additionally, \"medical peer review\" has been used by the American Medical Association to refer not only to the process of improving quality and safety in health care organizations, but also to the process of rating clinical behavior or compliance with professional society membership standards.",
+   "quote": "Additionally, \"medical peer review\" has been used by the American Medical Association to refer not only to the process of improving quality and safety in health care organizations, but also to the process of rating clinical behavior or compliance with professional society membership standards.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "clinical network",
+   "description": "The clinical network believes it to be the most ideal method of guaranteeing that distributed exploration is dependable and that any clinical medicines that it advocates are protected and viable for individuals.",
+   "quote": "The clinical network believes it to be the most ideal method of guaranteeing that distributed exploration is dependable and that any clinical medicines that it advocates are protected and viable for individuals.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "technical peer review",
+   "description": "In engineering, technical peer review is a type of engineering review.",
+   "quote": "In engineering, technical peer review is a type of engineering review.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "engineering review",
+   "description": "In engineering, technical peer review is a type of engineering review.",
+   "quote": "In engineering, technical peer review is a type of engineering review.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "European Union",
+   "description": "The European Union has been using peer review in the \"Open Method of Co-ordination\" of policies in the fields of active labour market policy since 1999.",
+   "quote": "The European Union has been using peer review in the \"Open Method of Co-ordination\" of policies in the fields of active labour market policy since 1999.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Open Method of Co-ordination",
+   "description": "The European Union has been using peer review in the \"Open Method of Co-ordination\" of policies in the fields of active labour market policy since 1999.",
+   "quote": "The European Union has been using peer review in the \"Open Method of Co-ordination\" of policies in the fields of active labour market policy since 1999.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "United Nations Economic Commission for Europe",
+   "description": "The United Nations Economic Commission for Europe, through UNECE Environmental Performance Reviews, uses peer review, referred to as \"peer learning\", to evaluate progress made by its member countries in improving their environmental policies.",
+   "quote": "The United Nations Economic Commission for Europe, through UNECE Environmental Performance Reviews, uses peer review, referred to as \"peer learning\", to evaluate progress made by its member countries in improving their environmental policies.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "UNECE Environmental Performance Reviews",
+   "description": "The United Nations Economic Commission for Europe, through UNECE Environmental Performance Reviews, uses peer review, referred to as \"peer learning\", to evaluate progress made by its member countries in improving their environmental policies.",
+   "quote": "The United Nations Economic Commission for Europe, through UNECE Environmental Performance Reviews, uses peer review, referred to as \"peer learning\", to evaluate progress made by its member countries in improving their environmental policies.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "State of California",
+   "description": "The State of California is the only U.S. state to mandate scientific peer review.",
+   "quote": "The State of California is the only U.S. state to mandate scientific peer review.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Governor of California",
+   "description": "In 1997, the Governor of California signed into law Senate Bill 1320 (Sher), Chapter 295, statutes of 1997, which mandates that, before any CalEPA Board, Department, or Office adopts a final version of a rule-making, the scientific findings, conclusions, and assumptions on which the proposed rule are based must be submitted for independent external scientific peer review.",
+   "quote": "In 1997, the Governor of California signed into law Senate Bill 1320 (Sher), Chapter 295, statutes of 1997, which mandates that, before any CalEPA Board, Department, or Office adopts a final version of a rule-making, the scientific findings, conclusions, and assumptions on which the proposed rule are based must be submitted for independent external scientific peer review.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Senate Bill 1320 (Sher)",
+   "description": "In 1997, the Governor of California signed into law Senate Bill 1320 (Sher), Chapter 295, statutes of 1997, which mandates that, before any CalEPA Board, Department, or Office adopts a final version of a rule-making, the scientific findings, conclusions, and assumptions on which the proposed rule are based must be submitted for independent external scientific peer review.",
+   "quote": "In 1997, the Governor of California signed into law Senate Bill 1320 (Sher), Chapter 295, statutes of 1997, which mandates that, before any CalEPA Board, Department, or Office adopts a final version of a rule-making, the scientific findings, conclusions, and assumptions on which the proposed rule are based must be submitted for independent external scientific peer review.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "CalEPA Board",
+   "description": "In 1997, the Governor of California signed into law Senate Bill 1320 (Sher), Chapter 295, statutes of 1997, which mandates that, before any CalEPA Board, Department, or Office adopts a final version of a rule-making, the scientific findings, conclusions, and assumptions on which the proposed rule are based must be submitted for independent external scientific peer review.",
+   "quote": "In 1997, the Governor of California signed into law Senate Bill 1320 (Sher), Chapter 295, statutes of 1997, which mandates that, before any CalEPA Board, Department, or Office adopts a final version of a rule-making, the scientific findings, conclusions, and assumptions on which the proposed rule are based must be submitted for independent external scientific peer review.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "source": "progressing proficient practice assessment",
+   "relation": "significant supporters of",
+   "target": "supplier credentialing and privileging",
+   "quote": "It is a piece of progressing proficient practice assessment and centered proficient practice assessment\u2014significant supporters of supplier credentialing and privileging.",
+   "kind": "relation"
+  },
+  {
+   "source": "centered proficient practice assessment",
+   "relation": "significant supporters of",
+   "target": "supplier credentialing and privileging",
+   "quote": "It is a piece of progressing proficient practice assessment and centered proficient practice assessment\u2014significant supporters of supplier credentialing and privileging.",
+   "kind": "relation"
+  },
+  {
+   "source": "medical peer review",
+   "relation": "used by",
+   "target": "American Medical Association",
+   "quote": "Additionally, \"medical peer review\" has been used by the American Medical Association to refer not only to the process of improving quality and safety in health care organizations, but also to the process of rating clinical behavior or compliance with professional society membership standards.",
+   "kind": "relation"
+  },
+  {
+   "source": "technical peer review",
+   "relation": "is a type of",
+   "target": "engineering review",
+   "quote": "In engineering, technical peer review is a type of engineering review.",
+   "kind": "relation"
+  },
+  {
+   "source": "European Union",
+   "relation": "has been using peer review in the",
+   "target": "Open Method of Co-ordination",
+   "quote": "The European Union has been using peer review in the \"Open Method of Co-ordination\" of policies in the fields of active labour market policy since 1999.",
+   "kind": "relation"
+  },
+  {
+   "source": "United Nations Economic Commission for Europe",
+   "relation": "through",
+   "target": "UNECE Environmental Performance Reviews",
+   "quote": "The United Nations Economic Commission for Europe, through UNECE Environmental Performance Reviews, uses peer review, referred to as \"peer learning\", to evaluate progress made by its member countries in improving their environmental policies.",
+   "kind": "relation"
+  },
+  {
+   "source": "Governor of California",
+   "relation": "signed into law",
+   "target": "Senate Bill 1320 (Sher)",
+   "quote": "In 1997, the Governor of California signed into law Senate Bill 1320 (Sher), Chapter 295, statutes of 1997, which mandates that, before any CalEPA Board, Department, or Office adopts a final version of a rule-making, the scientific findings, conclusions, and assumptions on which the proposed rule are based must be submitted for independent external scientific peer review.",
+   "kind": "relation"
+  },
+  {
+   "name": "California Health and Safety Code Section 57004",
+   "description": "This requirement is incorporated into the California Health and Safety Code Section 57004.",
+   "quote": "This requirement is incorporated into the California Health and Safety Code Section 57004.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Richard Smith",
+   "description": "\"Who wants to read something that doesn't work?\" asks Richard Smith in the Journal of the Royal Society of Medicine.",
+   "quote": "\"Who wants to read something that doesn't work?\" asks Richard Smith in the Journal of the Royal Society of Medicine.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Journal of the Royal Society of Medicine",
+   "description": "\"Who wants to read something that doesn't work?\" asks Richard Smith in the Journal of the Royal Society of Medicine.",
+   "quote": "\"Who wants to read something that doesn't work?\" asks Richard Smith in the Journal of the Royal Society of Medicine.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Registered reports",
+   "description": "Registered reports and peer-replication can mitigate the replication crisis.",
+   "quote": "Registered reports and peer-replication can mitigate the replication crisis.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "peer-replication",
+   "description": "Registered reports and peer-replication can mitigate the replication crisis.",
+   "quote": "Registered reports and peer-replication can mitigate the replication crisis.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Adversarial systems",
+   "description": "Adversarial systems can reduce ideological biases.",
+   "quote": "Adversarial systems can reduce ideological biases.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "visual peer review",
+   "description": "The concept of peer review has been extended to other practices, including the use of visual peer review for evaluating peer-produced data visualizations.",
+   "quote": "The concept of peer review has been extended to other practices, including the use of visual peer review for evaluating peer-produced data visualizations.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "source": "Richard Smith",
+   "relation": "asks a question in",
+   "target": "Journal of the Royal Society of Medicine",
+   "quote": "\"Who wants to read something that doesn't work?\" asks Richard Smith in the Journal of the Royal Society of Medicine.",
+   "kind": "relation"
+  },
+  {
+   "source": "Nature",
+   "relation": "conducted a survey confirming the use of artificial intelligence",
+   "target": "artificial intelligence",
+   "quote": "The (possibly not declared) use of artificial intelligence to assist or perform the process of peer review has been confirmed by interviews in a survey by Nature.",
+   "kind": "relation"
+  },
+  {
+   "name": "Peer review in writing",
+   "description": "Peer review in writing is a pivotal component among various peer review mechanisms, often spearheaded by educators and involving student participation, particularly in academic settings.",
+   "quote": "Peer review in writing is a pivotal component among various peer review mechanisms, often spearheaded by educators and involving student participation, particularly in academic settings.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "self-assessment",
+   "description": "The author's analysis suggests that self-assessment allows individuals to clearly understand the revision goals at each stage, as the author is the most familiar with their writing.",
+   "quote": "The author's analysis suggests that self-assessment allows individuals to clearly understand the revision goals at each stage, as the author is the most familiar with their writing.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "source": "Peer review in writing",
+   "relation": "is a pivotal component among",
+   "target": "various peer review mechanisms",
+   "quote": "Peer review in writing is a pivotal component among various peer review mechanisms, often spearheaded by educators and involving student participation, particularly in academic settings.",
+   "kind": "relation"
+  },
+  {
+   "source": "Magda Tigchelaar",
+   "relation": "compares",
+   "target": "peer review with self-assessment",
+   "quote": "Magda Tigchelaar compares peer review with self-assessment through an experiment that divided students into three groups: self-assessment, peer review, and no review.",
+   "kind": "relation"
+  },
+  {
+   "name": "educators",
+   "description": "Some educators recommend that for any school related assignments, instead of h",
+   "quote": "Some educators recommend that for any school related assignments, instead of h",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "school related assignments",
+   "description": "Some educators recommend that for any school related assignments, instead of h",
+   "quote": "Some educators recommend that for any school related assignments, instead of h",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "source": "educators",
+   "relation": "recommend",
+   "target": "school related assignments",
+   "quote": "Some educators recommend that for any school related assignments, instead of h",
+   "kind": "relation"
+  }
+ ],
+ "refused": [
+  {
+   "item": {
+    "name": "Professional peer review",
+    "description": "Professional peer review focuses on the performance of professionals, with a view to improving quality, upholding standards, or providing certification.",
+    "quote": "Professional peer review focuses on the performance of professionals, with a view to improving quality, upholding standards, or providing certification.",
+    "ungrounded": 0,
+    "kind": "entity"
+   },
+   "reason": "quote is not one whole sentence of the document"
+  },
+  {
+   "item": {
+    "source": "Nature",
+    "relation": "making it standard practice in 1973",
+    "target": "peer review",
+    "quote": "It developed over the following centuries with, for example, the journal Nature making it standard practice in 1973.",
+    "kind": "relation"
+   },
+   "reason": "quote does not contain both ends"
+  },
+  {
+   "item": {
+    "name": "funding-by-lottery",
+    "description": "Various alternatives to peer review have been suggested such as, in the context of science funding, funding-by-lottery.",
+    "quote": "Various alternatives to peer review have been suggested such as, in the context of science funding, funding-by-lottery.",
+    "ungrounded": 0,
+    "kind": "entity"
+   },
+   "reason": "quote is not one whole sentence of the document"
+  },
+  {
+   "item": {
+    "name": "Peer seminar",
+    "description": "Peer seminar is a method that involves a speaker that presents ideas to an audience that also acts as a \"contest\".",
+    "quote": "Peer seminar is a method that involves a speaker that presents ideas to an audience that also acts as a \"contest\".",
+    "ungrounded": 0,
+    "kind": "entity"
+   },
+   "reason": "quote is not one whole sentence of the document"
+  },
+  {
+   "item": {
+    "name": "Magda Tigchelaar",
+    "description": "Magda Tigchelaar compares peer review with self-assessment through an experiment that divided students into three groups: self-assessment, peer review, and no review.",
+    "quote": "Magda Tigchelaar compares peer review with self-assessment through an experiment that divided students into three groups: self-assessment, peer review, and no review.",
+    "ungrounded": 0,
+    "kind": "entity"
+   },
+   "reason": "quote is not one whole sentence of the document"
+  }
+ ],
+ "chunks": 5,
+ "seconds": 109.5
+}

@@ -1,0 +1,450 @@
+{
+ "accepted": [
+  {
+   "name": "Retrieval-augmented generation (RAG)",
+   "description": "Retrieval-augmented generation (RAG) is a technique that enables large language models (LLMs) to retrieve and incorporate new information from external data sources.",
+   "quote": "Retrieval-augmented generation (RAG) is a technique that enables large language models (LLMs) to retrieve and incorporate new information from external data sources.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "large language models (LLMs)",
+   "description": "Retrieval-augmented generation (RAG) is a technique that enables large language models (LLMs) to retrieve and incorporate new information from external data sources.",
+   "quote": "Retrieval-augmented generation (RAG) is a technique that enables large language models (LLMs) to retrieve and incorporate new information from external data sources.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Google",
+   "description": "This error contributed to a $100 billion decline in Google's stock value.",
+   "quote": "This error contributed to a $100 billion decline in Google's stock value.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Bard",
+   "description": "For example, when Google first demonstrated its LLM tool \"Bard\" (later re-branded to Google Gemini), the LLM provided incorrect information about the James Webb Space Telescope.",
+   "quote": "For example, when Google first demonstrated its LLM tool \"Bard\" (later re-branded to Google Gemini), the LLM provided incorrect information about the James Webb Space Telescope.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Google Gemini",
+   "description": "For example, when Google first demonstrated its LLM tool \"Bard\" (later re-branded to Google Gemini), the LLM provided incorrect information about the James Webb Space Telescope.",
+   "quote": "For example, when Google first demonstrated its LLM tool \"Bard\" (later re-branded to Google Gemini), the LLM provided incorrect information about the James Webb Space Telescope.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "James Webb Space Telescope",
+   "description": "For example, when Google first demonstrated its LLM tool \"Bard\" (later re-branded to Google Gemini), the LLM provided incorrect information about the James Webb Space Telescope.",
+   "quote": "For example, when Google first demonstrated its LLM tool \"Bard\" (later re-branded to Google Gemini), the LLM provided incorrect information about the James Webb Space Telescope.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "source": "Retrieval-augmented generation (RAG)",
+   "relation": "enables",
+   "target": "large language models (LLMs)",
+   "quote": "Retrieval-augmented generation (RAG) is a technique that enables large language models (LLMs) to retrieve and incorporate new information from external data sources.",
+   "kind": "relation"
+  },
+  {
+   "source": "Google",
+   "relation": "demonstrated",
+   "target": "Bard",
+   "quote": "For example, when Google first demonstrated its LLM tool \"Bard\" (later re-branded to Google Gemini), the LLM provided incorrect information about the James Webb Space Telescope.",
+   "kind": "relation"
+  },
+  {
+   "source": "Bard",
+   "relation": "re-branded to",
+   "target": "Google Gemini",
+   "quote": "For example, when Google first demonstrated its LLM tool \"Bard\" (later re-branded to Google Gemini), the LLM provided incorrect information about the James Webb Space Telescope.",
+   "kind": "relation"
+  },
+  {
+   "source": "Barack Hussein Obama",
+   "relation": "in the book",
+   "target": "Faith in the New Millennium: The Future of Religion and American Politics",
+   "quote": "The model retrieved this from the rhetorical chapter title \"Barack Hussein Obama: America's First Muslim President?\" in the book Faith in the New Millennium: The Future of Religion and American Politics.",
+   "kind": "relation"
+  },
+  {
+   "name": "IBM",
+   "description": "IBM states that \"in the generative phase, the LLM draws from the augmented prompt and its internal representation of its training data to synthesize\" an answer.",
+   "quote": "IBM states that \"in the generative phase, the LLM draws from the augmented prompt and its internal representation of its training data to synthesize\" an answer.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "LLM embeddings",
+   "description": "Typically, the data to be referenced is converted into LLM embeddings, numerical representations in the form of a large vector space.",
+   "quote": "Typically, the data to be referenced is converted into LLM embeddings, numerical representations in the form of a large vector space.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "vector database",
+   "description": "These embeddings are then stored in a vector database to allow for document retrieval.",
+   "quote": "These embeddings are then stored in a vector database to allow for document retrieval.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "document retriever",
+   "description": "Given a user query, a document retriever is first called to select the most relevant documents that will be used to augment the query.",
+   "quote": "Given a user query, a document retriever is first called to select the most relevant documents that will be used to augment the query.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "augmentation modules",
+   "description": "Newer implementations (as of 2023) can also incorporate specific augmentation modules with abilities such as expanding queries into multiple domains and using memory and self-improvement to learn from previous retrievals.",
+   "quote": "Newer implementations (as of 2023) can also incorporate specific augmentation modules with abilities such as expanding queries into multiple domains and using memory and self-improvement to learn from previous retrievals.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "healthcare",
+   "description": "In healthcare, RAG has been studied as a way to ground large language model outputs in external medical knowledge sources, although reviews have noted continuing challenges around evaluation, ethics, and clinical reliability.",
+   "quote": "In healthcare, RAG has been studied as a way to ground large language model outputs in external medical knowledge sources, although reviews have noted continuing challenges around evaluation, ethics, and clinical reliability.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Sparse vectors",
+   "description": "Sparse vectors, which encode the identity of a word, are typically dictionary-length and contain mostly zeros.",
+   "quote": "Sparse vectors, which encode the identity of a word, are typically dictionary-length and contain mostly zeros.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Dense vectors",
+   "description": "Dense vectors, which encode meaning, are more compact and contain fewer zeros.",
+   "quote": "Dense vectors, which encode meaning, are more compact and contain fewer zeros.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "source": "Retrieval-augmented generation (RAG)",
+   "relation": "enhances",
+   "target": "large language models (LLMs)",
+   "quote": "Retrieval-augmented generation (RAG) enhances large language models (LLMs) by incorporating an information-retrieval mechanism that allows models to access and utilize additional data beyond their original training set.",
+   "kind": "relation"
+  },
+  {
+   "source": "document retriever",
+   "relation": "select the most relevant documents that will be used to augment the query",
+   "target": "user query",
+   "quote": "Given a user query, a document retriever is first called to select the most relevant documents that will be used to augment the query.",
+   "kind": "relation"
+  },
+  {
+   "source": "The model",
+   "relation": "feeds this relevant retrieved information into",
+   "target": "the LLM",
+   "quote": "The model feeds this relevant retrieved information into the LLM via prompt engineering of the user's original query.",
+   "kind": "relation"
+  },
+  {
+   "source": "RAG",
+   "relation": "ground large language model outputs in",
+   "target": "external medical knowledge sources",
+   "quote": "In healthcare, RAG has been studied as a way to ground large language model outputs in external medical knowledge sources, although reviews have noted continuing challenges around evaluation, ethics, and clinical reliability.",
+   "kind": "relation"
+  },
+  {
+   "name": "vector stores (databases)",
+   "description": "Various enhancements can improve the way similarities are calculated in the vector stores (databases).",
+   "quote": "Various enhancements can improve the way similarities are calculated in the vector stores (databases).",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Dot products",
+   "description": "Dot products enhance similarity scoring, while approximate nearest neighbor (ANN) searches improve retrieval efficiency over K-nearest neighbors (KNN) searches.",
+   "quote": "Dot products enhance similarity scoring, while approximate nearest neighbor (ANN) searches improve retrieval efficiency over K-nearest neighbors (KNN) searches.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "approximate nearest neighbor (ANN) searches",
+   "description": "Dot products enhance similarity scoring, while approximate nearest neighbor (ANN) searches improve retrieval efficiency over K-nearest neighbors (KNN) searches.",
+   "quote": "Dot products enhance similarity scoring, while approximate nearest neighbor (ANN) searches improve retrieval efficiency over K-nearest neighbors (KNN) searches.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "K-nearest neighbors (KNN) searches",
+   "description": "Dot products enhance similarity scoring, while approximate nearest neighbor (ANN) searches improve retrieval efficiency over K-nearest neighbors (KNN) searches.",
+   "quote": "Dot products enhance similarity scoring, while approximate nearest neighbor (ANN) searches improve retrieval efficiency over K-nearest neighbors (KNN) searches.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Late Interactions",
+   "description": "Accuracy may be improved with Late Interactions, which allow the system to compare words more precisely after retrieval.",
+   "quote": "Accuracy may be improved with Late Interactions, which allow the system to compare words more precisely after retrieval.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Hybrid vector approaches",
+   "description": "Hybrid vector approaches may be used to combine dense vector representations with sparse one-hot vectors, taking advantage of the computational efficiency of sparse dot products over dense vector operations.",
+   "quote": "Hybrid vector approaches may be used to combine dense vector representations with sparse one-hot vectors, taking advantage of the computational efficiency of sparse dot products over dense vector operations.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "dense vector representations",
+   "description": "Hybrid vector approaches may be used to combine dense vector representations with sparse one-hot vectors, taking advantage of the computational efficiency of sparse dot products over dense vector operations.",
+   "quote": "Hybrid vector approaches may be used to combine dense vector representations with sparse one-hot vectors, taking advantage of the computational efficiency of sparse dot products over dense vector operations.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "sparse one-hot vectors",
+   "description": "Hybrid vector approaches may be used to combine dense vector representations with sparse one-hot vectors, taking advantage of the computational efficiency of sparse dot products over dense vector operations.",
+   "quote": "Hybrid vector approaches may be used to combine dense vector representations with sparse one-hot vectors, taking advantage of the computational efficiency of sparse dot products over dense vector operations.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "sparse dot products",
+   "description": "Hybrid vector approaches may be used to combine dense vector representations with sparse one-hot vectors, taking advantage of the computational efficiency of sparse dot products over dense vector operations.",
+   "quote": "Hybrid vector approaches may be used to combine dense vector representations with sparse one-hot vectors, taking advantage of the computational efficiency of sparse dot products over dense vector operations.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "dense vector operations",
+   "description": "Hybrid vector approaches may be used to combine dense vector representations with sparse one-hot vectors, taking advantage of the computational efficiency of sparse dot products over dense vector operations.",
+   "quote": "Hybrid vector approaches may be used to combine dense vector representations with sparse one-hot vectors, taking advantage of the computational efficiency of sparse dot products over dense vector operations.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "SPLADE",
+   "description": "Some retrieval methods combine sparse representations, such as SPLADE, with query expansion strategies to improve search accuracy and recall.",
+   "quote": "Some retrieval methods combine sparse representations, such as SPLADE, with query expansion strategies to improve search accuracy and recall.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Inverse Cloze Task (ICT)",
+   "description": "Pre-training the retriever using the Inverse Cloze Task (ICT), a technique that helps the model learn retrieval patterns by predicting masked text within documents.",
+   "quote": "Pre-training the retriever using the Inverse Cloze Task (ICT), a technique that helps the model learn retrieval patterns by predicting masked text within documents.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Retro",
+   "description": "Because it is trained from scratch, this method (Retro) incurs the high cost of training runs that the original RAG scheme avoided.",
+   "quote": "Because it is trained from scratch, this method (Retro) incurs the high cost of training runs that the original RAG scheme avoided.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Chunking",
+   "description": "Chunking involves various strategies for breaking up the data into vectors so the retriever can find details in it.",
+   "quote": "Chunking involves various strategies for breaking up the data into vectors so the retriever can find details in it.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "source": "approximate nearest neighbor (ANN) searches",
+   "relation": "improve retrieval efficiency over",
+   "target": "K-nearest neighbors (KNN) searches",
+   "quote": "Dot products enhance similarity scoring, while approximate nearest neighbor (ANN) searches improve retrieval efficiency over K-nearest neighbors (KNN) searches.",
+   "kind": "relation"
+  },
+  {
+   "source": "Hybrid vector approaches",
+   "relation": "combine",
+   "target": "dense vector representations",
+   "quote": "Hybrid vector approaches may be used to combine dense vector representations with sparse one-hot vectors, taking advantage of the computational efficiency of sparse dot products over dense vector operations.",
+   "kind": "relation"
+  },
+  {
+   "source": "Hybrid vector approaches",
+   "relation": "combine",
+   "target": "sparse one-hot vectors",
+   "quote": "Hybrid vector approaches may be used to combine dense vector representations with sparse one-hot vectors, taking advantage of the computational efficiency of sparse dot products over dense vector operations.",
+   "kind": "relation"
+  },
+  {
+   "source": "Inverse Cloze Task (ICT)",
+   "relation": "Pre-training the retriever using",
+   "target": "retriever",
+   "quote": "Pre-training the retriever using the Inverse Cloze Task (ICT), a technique that helps the model learn retrieval patterns by predicting masked text within documents.",
+   "kind": "relation"
+  },
+  {
+   "source": "Retro++",
+   "relation": "includes",
+   "target": "in-context RAG",
+   "quote": "The more reproducible version is called Retro++ and includes in-context RAG.",
+   "kind": "relation"
+  },
+  {
+   "name": "Israel",
+   "description": "On September 2025, Israel paid Clock Tower X $6 million in order to sway public opinion to a more favourable view of the country (hasbara) after support plummeted due to its genocidal conduct during the Gaza war.",
+   "quote": "On September 2025, Israel paid Clock Tower X $6 million in order to sway public opinion to a more favourable view of the country (hasbara) after support plummeted due to its genocidal conduct during the Gaza war.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Clock Tower X",
+   "description": "On September 2025, Israel paid Clock Tower X $6 million in order to sway public opinion to a more favourable view of the country (hasbara) after support plummeted due to its genocidal conduct during the Gaza war.",
+   "quote": "On September 2025, Israel paid Clock Tower X $6 million in order to sway public opinion to a more favourable view of the country (hasbara) after support plummeted due to its genocidal conduct during the Gaza war.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "source": "RAG",
+   "relation": "does not prevent hallucinations in",
+   "target": "LLMs",
+   "quote": "RAG does not prevent hallucinations in LLMs.",
+   "kind": "relation"
+  },
+  {
+   "source": "Israel",
+   "relation": "paid",
+   "target": "Clock Tower X",
+   "quote": "On September 2025, Israel paid Clock Tower X $6 million in order to sway public opinion to a more favourable view of the country (hasbara) after support plummeted due to its genocidal conduct during the Gaza war.",
+   "kind": "relation"
+  },
+  {
+   "source": "Clock Tower X",
+   "relation": "used RAG poisoning to flood the information space",
+   "target": "Israel",
+   "quote": "Clock Tower X used RAG poisoning to flood the information space with sites and content sympathetic to Israel.",
+   "kind": "relation"
+  }
+ ],
+ "refused": [
+  {
+   "item": {
+    "name": "Ars Technica",
+    "description": "According to Ars Technica, \"RAG is a way of improving LLM performance, in essence by blending the LLM process with a web search or other document look-up process to help LLMs stick to the facts.\"",
+    "quote": "According to Ars Technica, \"RAG is a way of improving LLM performance, in essence by blending the LLM process with a web search or other document look-up process to help LLMs stick to the facts.\"",
+    "ungrounded": 0,
+    "kind": "entity"
+   },
+   "reason": "quote is not one whole sentence of the document"
+  },
+  {
+   "item": {
+    "name": "MIT Technology Review",
+    "description": "MIT Technology Review gives the example of an AI-generated response stating, \"The United States has had one Muslim president, Barack Hussein Obama.\"",
+    "quote": "MIT Technology Review gives the example of an AI-generated response stating, \"The United States has had one Muslim president, Barack Hussein Obama.\"",
+    "ungrounded": 0,
+    "kind": "entity"
+   },
+   "reason": "quote is not one whole sentence of the document"
+  },
+  {
+   "item": {
+    "name": "Barack Hussein Obama",
+    "description": "MIT Technology Review gives the example of an AI-generated response stating, \"The United States has had one Muslim president, Barack Hussein Obama.\"",
+    "quote": "MIT Technology Review gives the example of an AI-generated response stating, \"The United States has had one Muslim president, Barack Hussein Obama.\"",
+    "ungrounded": 0,
+    "kind": "entity"
+   },
+   "reason": "quote is not one whole sentence of the document"
+  },
+  {
+   "item": {
+    "name": "Faith in the New Millennium: The Future of Religion and American Politics",
+    "description": "The model retrieved this from the rhetorical chapter title \"Barack Hussein Obama: America's First Muslim President?\" in the book Faith in the New Millennium: The Future of Religion and American Politics.",
+    "quote": "The model retrieved this from the rhetorical chapter title \"Barack Hussein Obama: America's First Muslim President?\" in the book Faith in the New Millennium: The Future of Religion and American Politics.",
+    "ungrounded": 0,
+    "kind": "entity"
+   },
+   "reason": "quote is not one whole sentence of the document"
+  },
+  {
+   "item": {
+    "name": "prompt stuffing",
+    "description": "This technique has been called \"prompt stuffing.\"",
+    "quote": "This technique has been called \"prompt stuffing.\"",
+    "ungrounded": 0,
+    "kind": "entity"
+   },
+   "reason": "quote is not one whole sentence of the document"
+  },
+  {
+   "item": {
+    "name": "LLM",
+    "description": "Without prompt stuffing, the LLM's input is generated by a user; with prompt stuffing, additional relevant context is added to this input to guide the model's response.",
+    "quote": "Without prompt stuffing, the LLM's input is generated by a user; with prompt stuffing, additional relevant context is added to this input to guide the model's response.",
+    "ungrounded": 0,
+    "kind": "entity"
+   },
+   "reason": "quote is not one whole sentence of the document"
+  },
+  {
+   "item": {
+    "name": "Encoder",
+    "description": "These methods focus on the encoding of text as either dense or sparse vectors.",
+    "quote": "These methods focus on the encoding of text as either dense or sparse vectors.",
+    "ungrounded": 0,
+    "kind": "entity"
+   },
+   "reason": "quote does not contain the name"
+  },
+  {
+   "item": {
+    "source": "LLM embeddings",
+    "relation": "stored in",
+    "target": "vector database",
+    "quote": "These embeddings are then stored in a vector database to allow for document retrieval.",
+    "kind": "relation"
+   },
+   "reason": "quote does not contain both ends"
+  },
+  {
+   "item": {
+    "name": "Hybrid search",
+    "description": "One way to mitigate this is to do a traditional text search (aka full text search), combine those results to the text chunks linked to the retrieved vectors from the vector search, and feed the combined hybrid text (using effective scoring or reranking scoring) into the language model for generation.",
+    "quote": "One way to mitigate this is to do a traditional text search (aka full text search), combine those results to the text chunks linked to the retrieved vectors from the vector search, and feed the combined hybrid text (using effective scoring or reranking scoring) into the language model for generation.",
+    "ungrounded": 0,
+    "kind": "entity"
+   },
+   "reason": "quote does not contain the name"
+  },
+  {
+   "item": {
+    "source": "Dot products",
+    "relation": "enhance similarity scoring",
+    "target": "vector stores (databases)",
+    "quote": "Dot products enhance similarity scoring, while approximate nearest neighbor (ANN) searches improve retrieval efficiency over K-nearest neighbors (KNN) searches.",
+    "kind": "relation"
+   },
+   "reason": "quote does not contain both ends"
+  },
+  {
+   "item": {
+    "name": "RAG",
+    "description": "RAG does not prevent hallucinations in LLMs.",
+    "quote": "RAG does not prevent hallucinations in LLMs.",
+    "ungrounded": 0,
+    "kind": "entity"
+   },
+   "reason": "quote is not one whole sentence of the document"
+  },
+  {
+   "item": {
+    "name": "LLMs",
+    "description": "RAG does not prevent hallucinations in LLMs.",
+    "quote": "RAG does not prevent hallucinations in LLMs.",
+    "ungrounded": 0,
+    "kind": "entity"
+   },
+   "reason": "quote is not one whole sentence of the document"
+  }
+ ],
+ "chunks": 4,
+ "seconds": 112.7
+}

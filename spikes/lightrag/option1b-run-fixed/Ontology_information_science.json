@@ -1,0 +1,603 @@
+{
+ "accepted": [
+  {
+   "name": "ontology",
+   "description": "In information science, an ontology encompasses a representation, formal naming, and definitions of the categories, properties, and relations between the concepts, data, or entities that pertain to one, many, or all domains of discourse.",
+   "quote": "In information science, an ontology encompasses a representation, formal naming, and definitions of the categories, properties, and relations between the concepts, data, or entities that pertain to one, many, or all domains of discourse.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "applied ontology",
+   "description": "The field which studies ontologies so conceived is sometimes referred to as applied ontology.",
+   "quote": "The field which studies ontologies so conceived is sometimes referred to as applied ontology.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "economics",
+   "description": "For instance, the definition and ontology of economics is a primary concern in Marxist economics, but also in other subfields of economics.",
+   "quote": "For instance, the definition and ontology of economics is a primary concern in Marxist economics, but also in other subfields of economics.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Marxist economics",
+   "description": "For instance, the definition and ontology of economics is a primary concern in Marxist economics, but also in other subfields of economics.",
+   "quote": "For instance, the definition and ontology of economics is a primary concern in Marxist economics, but also in other subfields of economics.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "information science",
+   "description": "What ontologies in both information science and philosophy have in common is the attempt to represent entities, including both objects and events, with all their interdependent properties and relations, according to a system of categories.",
+   "quote": "What ontologies in both information science and philosophy have in common is the attempt to represent entities, including both objects and events, with all their interdependent properties and relations, according to a system of categories.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "philosophy",
+   "description": "What ontologies in both information science and philosophy have in common is the attempt to represent entities, including both objects and events, with all their interdependent properties and relations, according to a system of categories.",
+   "quote": "What ontologies in both information science and philosophy have in common is the attempt to represent entities, including both objects and events, with all their interdependent properties and relations, according to a system of categories.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Quine",
+   "description": "In both fields, there is considerable work on problems of ontology engineering (e.g., Quine and Kripke in philosophy, Sowa and Guarino in information science), and debates concerning to what extent normative ontology is possible (e.g., foundationalism and coherentism in philosophy, BFO and Cyc in artificial intelligence).",
+   "quote": "In both fields, there is considerable work on problems of ontology engineering (e.g., Quine and Kripke in philosophy, Sowa and Guarino in information science), and debates concerning to what extent normative ontology is possible (e.g., foundationalism and coherentism in philosophy, BFO and Cyc in artificial intelligence).",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Kripke",
+   "description": "In both fields, there is considerable work on problems of ontology engineering (e.g., Quine and Kripke in philosophy, Sowa and Guarino in information science), and debates concerning to what extent normative ontology is possible (e.g., foundationalism and coherentism in philosophy, BFO and Cyc in artificial intelligence).",
+   "quote": "In both fields, there is considerable work on problems of ontology engineering (e.g., Quine and Kripke in philosophy, Sowa and Guarino in information science), and debates concerning to what extent normative ontology is possible (e.g., foundationalism and coherentism in philosophy, BFO and Cyc in artificial intelligence).",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Sowa",
+   "description": "In both fields, there is considerable work on problems of ontology engineering (e.g., Quine and Kripke in philosophy, Sowa and Guarino in information science), and debates concerning to what extent normative ontology is possible (e.g., foundationalism and coherentism in philosophy, BFO and Cyc in artificial intelligence).",
+   "quote": "In both fields, there is considerable work on problems of ontology engineering (e.g., Quine and Kripke in philosophy, Sowa and Guarino in information science), and debates concerning to what extent normative ontology is possible (e.g., foundationalism and coherentism in philosophy, BFO and Cyc in artificial intelligence).",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Guarino",
+   "description": "In both fields, there is considerable work on problems of ontology engineering (e.g., Quine and Kripke in philosophy, Sowa and Guarino in information science), and debates concerning to what extent normative ontology is possible (e.g., foundationalism and coherentism in philosophy, BFO and Cyc in artificial intelligence).",
+   "quote": "In both fields, there is considerable work on problems of ontology engineering (e.g., Quine and Kripke in philosophy, Sowa and Guarino in information science), and debates concerning to what extent normative ontology is possible (e.g., foundationalism and coherentism in philosophy, BFO and Cyc in artificial intelligence).",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "foundationalism",
+   "description": "In both fields, there is considerable work on problems of ontology engineering (e.g., Quine and Kripke in philosophy, Sowa and Guarino in information science), and debates concerning to what extent normative ontology is possible (e.g., foundationalism and coherentism in philosophy, BFO and Cyc in artificial intelligence).",
+   "quote": "In both fields, there is considerable work on problems of ontology engineering (e.g., Quine and Kripke in philosophy, Sowa and Guarino in information science), and debates concerning to what extent normative ontology is possible (e.g., foundationalism and coherentism in philosophy, BFO and Cyc in artificial intelligence).",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "coherentism",
+   "description": "In both fields, there is considerable work on problems of ontology engineering (e.g., Quine and Kripke in philosophy, Sowa and Guarino in information science), and debates concerning to what extent normative ontology is possible (e.g., foundationalism and coherentism in philosophy, BFO and Cyc in artificial intelligence).",
+   "quote": "In both fields, there is considerable work on problems of ontology engineering (e.g., Quine and Kripke in philosophy, Sowa and Guarino in information science), and debates concerning to what extent normative ontology is possible (e.g., foundationalism and coherentism in philosophy, BFO and Cyc in artificial intelligence).",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "BFO",
+   "description": "In both fields, there is considerable work on problems of ontology engineering (e.g., Quine and Kripke in philosophy, Sowa and Guarino in information science), and debates concerning to what extent normative ontology is possible (e.g., foundationalism and coherentism in philosophy, BFO and Cyc in artificial intelligence).",
+   "quote": "In both fields, there is considerable work on problems of ontology engineering (e.g., Quine and Kripke in philosophy, Sowa and Guarino in information science), and debates concerning to what extent normative ontology is possible (e.g., foundationalism and coherentism in philosophy, BFO and Cyc in artificial intelligence).",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Cyc",
+   "description": "In both fields, there is considerable work on problems of ontology engineering (e.g., Quine and Kripke in philosophy, Sowa and Guarino in information science), and debates concerning to what extent normative ontology is possible (e.g., foundationalism and coherentism in philosophy, BFO and Cyc in artificial intelligence).",
+   "quote": "In both fields, there is considerable work on problems of ontology engineering (e.g., Quine and Kripke in philosophy, Sowa and Guarino in information science), and debates concerning to what extent normative ontology is possible (e.g., foundationalism and coherentism in philosophy, BFO and Cyc in artificial intelligence).",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "artificial intelligence",
+   "description": "In both fields, there is considerable work on problems of ontology engineering (e.g., Quine and Kripke in philosophy, Sowa and Guarino in information science), and debates concerning to what extent normative ontology is possible (e.g., foundationalism and coherentism in philosophy, BFO and Cyc in artificial intelligence).",
+   "quote": "In both fields, there is considerable work on problems of ontology engineering (e.g., Quine and Kripke in philosophy, Sowa and Guarino in information science), and debates concerning to what extent normative ontology is possible (e.g., foundationalism and coherentism in philosophy, BFO and Cyc in artificial intelligence).",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "natural language processing",
+   "description": "Artificial intelligence has retained considerable attention regarding applied ontology in subfields like natural language processing within machine translation and knowledge representation, but ontology editors are being used often in a range of fields, including biomedical informatics and industry.",
+   "quote": "Artificial intelligence has retained considerable attention regarding applied ontology in subfields like natural language processing within machine translation and knowledge representation, but ontology editors are being used often in a range of fields, including biomedical informatics and industry.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "machine translation",
+   "description": "Artificial intelligence has retained considerable attention regarding applied ontology in subfields like natural language processing within machine translation and knowledge representation, but ontology editors are being used often in a range of fields, including biomedical informatics and industry.",
+   "quote": "Artificial intelligence has retained considerable attention regarding applied ontology in subfields like natural language processing within machine translation and knowledge representation, but ontology editors are being used often in a range of fields, including biomedical informatics and industry.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "knowledge representation",
+   "description": "Artificial intelligence has retained considerable attention regarding applied ontology in subfields like natural language processing within machine translation and knowledge representation, but ontology editors are being used often in a range of fields, including biomedical informatics and industry.",
+   "quote": "Artificial intelligence has retained considerable attention regarding applied ontology in subfields like natural language processing within machine translation and knowledge representation, but ontology editors are being used often in a range of fields, including biomedical informatics and industry.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "biomedical informatics",
+   "description": "Artificial intelligence has retained considerable attention regarding applied ontology in subfields like natural language processing within machine translation and knowledge representation, but ontology editors are being used often in a range of fields, including biomedical informatics and industry.",
+   "quote": "Artificial intelligence has retained considerable attention regarding applied ontology in subfields like natural language processing within machine translation and knowledge representation, but ontology editors are being used often in a range of fields, including biomedical informatics and industry.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "industry",
+   "description": "Artificial intelligence has retained considerable attention regarding applied ontology in subfields like natural language processing within machine translation and knowledge representation, but ontology editors are being used often in a range of fields, including biomedical informatics and industry.",
+   "quote": "Artificial intelligence has retained considerable attention regarding applied ontology in subfields like natural language processing within machine translation and knowledge representation, but ontology editors are being used often in a range of fields, including biomedical informatics and industry.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Prot\u00e9g\u00e9",
+   "description": "Such efforts often use ontology editing tools such as Prot\u00e9g\u00e9.",
+   "quote": "Such efforts often use ontology editing tools such as Prot\u00e9g\u00e9.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "source": "applied ontology",
+   "relation": "is a successor to",
+   "target": "philosophy",
+   "quote": "Applied ontology is considered by some as a successor to prior work in philosophy.",
+   "kind": "relation"
+  },
+  {
+   "source": "economics",
+   "relation": "is a primary concern in",
+   "target": "Marxist economics",
+   "quote": "For instance, the definition and ontology of economics is a primary concern in Marxist economics, but also in other subfields of economics.",
+   "kind": "relation"
+  },
+  {
+   "source": "economics",
+   "relation": "relying on",
+   "target": "information science",
+   "quote": "An example of economics relying on information science occurs in cases where a simulation or model is intended to enable economic decisions, such as determining what capital assets are at risk and by how much (see risk management).",
+   "kind": "relation"
+  },
+  {
+   "name": "epistemology",
+   "description": "Ontology is a branch of philosophy and intersects areas such as metaphysics, epistemology, and philosophy of language, as it considers how knowledge, language, and perception relate to the nature of reality.",
+   "quote": "Ontology is a branch of philosophy and intersects areas such as metaphysics, epistemology, and philosophy of language, as it considers how knowledge, language, and perception relate to the nature of reality.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "philosophy of language",
+   "description": "Ontology is a branch of philosophy and intersects areas such as metaphysics, epistemology, and philosophy of language, as it considers how knowledge, language, and perception relate to the nature of reality.",
+   "quote": "Ontology is a branch of philosophy and intersects areas such as metaphysics, epistemology, and philosophy of language, as it considers how knowledge, language, and perception relate to the nature of reality.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "ontologia",
+   "description": "While the etymology is Greek, the oldest extant record of the word itself, the Neo-Latin form ontologia, appeared in 1606 in the work Ogdoas Scholastica by Jacob Lorhard (Lorhardus) and in 1613 in the Lexicon philosophicum by Rudolf G\u00f6ckel (Goclenius).",
+   "quote": "While the etymology is Greek, the oldest extant record of the word itself, the Neo-Latin form ontologia, appeared in 1606 in the work Ogdoas Scholastica by Jacob Lorhard (Lorhardus) and in 1613 in the Lexicon philosophicum by Rudolf G\u00f6ckel (Goclenius).",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Ogdoas Scholastica",
+   "description": "While the etymology is Greek, the oldest extant record of the word itself, the Neo-Latin form ontologia, appeared in 1606 in the work Ogdoas Scholastica by Jacob Lorhard (Lorhardus) and in 1613 in the Lexicon philosophicum by Rudolf G\u00f6ckel (Goclenius).",
+   "quote": "While the etymology is Greek, the oldest extant record of the word itself, the Neo-Latin form ontologia, appeared in 1606 in the work Ogdoas Scholastica by Jacob Lorhard (Lorhardus) and in 1613 in the Lexicon philosophicum by Rudolf G\u00f6ckel (Goclenius).",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Jacob Lorhard (Lorhardus)",
+   "description": "While the etymology is Greek, the oldest extant record of the word itself, the Neo-Latin form ontologia, appeared in 1606 in the work Ogdoas Scholastica by Jacob Lorhard (Lorhardus) and in 1613 in the Lexicon philosophicum by Rudolf G\u00f6ckel (Goclenius).",
+   "quote": "While the etymology is Greek, the oldest extant record of the word itself, the Neo-Latin form ontologia, appeared in 1606 in the work Ogdoas Scholastica by Jacob Lorhard (Lorhardus) and in 1613 in the Lexicon philosophicum by Rudolf G\u00f6ckel (Goclenius).",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Lexicon philosophicum",
+   "description": "While the etymology is Greek, the oldest extant record of the word itself, the Neo-Latin form ontologia, appeared in 1606 in the work Ogdoas Scholastica by Jacob Lorhard (Lorhardus) and in 1613 in the Lexicon philosophicum by Rudolf G\u00f6ckel (Goclenius).",
+   "quote": "While the etymology is Greek, the oldest extant record of the word itself, the Neo-Latin form ontologia, appeared in 1606 in the work Ogdoas Scholastica by Jacob Lorhard (Lorhardus) and in 1613 in the Lexicon philosophicum by Rudolf G\u00f6ckel (Goclenius).",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Rudolf G\u00f6ckel (Goclenius)",
+   "description": "While the etymology is Greek, the oldest extant record of the word itself, the Neo-Latin form ontologia, appeared in 1606 in the work Ogdoas Scholastica by Jacob Lorhard (Lorhardus) and in 1613 in the Lexicon philosophicum by Rudolf G\u00f6ckel (Goclenius).",
+   "quote": "While the etymology is Greek, the oldest extant record of the word itself, the Neo-Latin form ontologia, appeared in 1606 in the work Ogdoas Scholastica by Jacob Lorhard (Lorhardus) and in 1613 in the Lexicon philosophicum by Rudolf G\u00f6ckel (Goclenius).",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Archeologia Philosophica Nova or New Principles of Philosophy (1663)",
+   "description": "The first occurrence in English of ontology as recorded by the OED (Oxford English Dictionary, online edition, 2008) came in Archeologia Philosophica Nova or New Principles of Philosophy (1663) by Gideon Harvey.",
+   "quote": "The first occurrence in English of ontology as recorded by the OED (Oxford English Dictionary, online edition, 2008) came in Archeologia Philosophica Nova or New Principles of Philosophy (1663) by Gideon Harvey.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Gideon Harvey",
+   "description": "The first occurrence in English of ontology as recorded by the OED (Oxford English Dictionary, online edition, 2008) came in Archeologia Philosophica Nova or New Principles of Philosophy (1663) by Gideon Harvey.",
+   "quote": "The first occurrence in English of ontology as recorded by the OED (Oxford English Dictionary, online edition, 2008) came in Archeologia Philosophica Nova or New Principles of Philosophy (1663) by Gideon Harvey.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "artificial intelligence (AI)",
+   "description": "Since the mid-1970s, researchers in the field of artificial intelligence (AI) have recognized that knowledge engineering is the key to building large and powerful AI systems.",
+   "quote": "Since the mid-1970s, researchers in the field of artificial intelligence (AI) have recognized that knowledge engineering is the key to building large and powerful AI systems.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "David Powers",
+   "description": "In particular, David Powers introduced the word ontology to AI to refer to real world or robotic grounding, publishing in 1990 literature reviews emphasizing grounded ontology in association with the call for papers for a AAAI Summer Symposium Machine Learning of Natural Language and Ontology, with an expanded version published in SIGART Bulletin and included as a preface to the proceedings.",
+   "quote": "In particular, David Powers introduced the word ontology to AI to refer to real world or robotic grounding, publishing in 1990 literature reviews emphasizing grounded ontology in association with the call for papers for a AAAI Summer Symposium Machine Learning of Natural Language and Ontology, with an expanded version published in SIGART Bulletin and included as a preface to the proceedings.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Tom Gruber",
+   "description": "In 1993, the widely cited web page and paper \"Toward Principles for the Design of Ontologies Used for Knowledge Sharing\" by Tom Gruber used ontology as a technical term in computer science closely related to earlier idea of semantic networks and taxonomies.",
+   "quote": "In 1993, the widely cited web page and paper \"Toward Principles for the Design of Ontologies Used for Knowledge Sharing\" by Tom Gruber used ontology as a technical term in computer science closely related to earlier idea of semantic networks and taxonomies.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "source": "Ontology",
+   "relation": "intersects areas such as",
+   "target": "metaphysics",
+   "quote": "Ontology is a branch of philosophy and intersects areas such as metaphysics, epistemology, and philosophy of language, as it considers how knowledge, language, and perception relate to the nature of reality.",
+   "kind": "relation"
+  },
+  {
+   "source": "Ontology",
+   "relation": "intersects areas such as",
+   "target": "epistemology",
+   "quote": "Ontology is a branch of philosophy and intersects areas such as metaphysics, epistemology, and philosophy of language, as it considers how knowledge, language, and perception relate to the nature of reality.",
+   "kind": "relation"
+  },
+  {
+   "source": "Ontology",
+   "relation": "intersects areas such as",
+   "target": "philosophy of language",
+   "quote": "Ontology is a branch of philosophy and intersects areas such as metaphysics, epistemology, and philosophy of language, as it considers how knowledge, language, and perception relate to the nature of reality.",
+   "kind": "relation"
+  },
+  {
+   "source": "ontologia",
+   "relation": "appeared in the work",
+   "target": "Ogdoas Scholastica",
+   "quote": "While the etymology is Greek, the oldest extant record of the word itself, the Neo-Latin form ontologia, appeared in 1606 in the work Ogdoas Scholastica by Jacob Lorhard (Lorhardus) and in 1613 in the Lexicon philosophicum by Rudolf G\u00f6ckel (Goclenius).",
+   "kind": "relation"
+  },
+  {
+   "source": "ontologia",
+   "relation": "appeared in",
+   "target": "Lexicon philosophicum",
+   "quote": "While the etymology is Greek, the oldest extant record of the word itself, the Neo-Latin form ontologia, appeared in 1606 in the work Ogdoas Scholastica by Jacob Lorhard (Lorhardus) and in 1613 in the Lexicon philosophicum by Rudolf G\u00f6ckel (Goclenius).",
+   "kind": "relation"
+  },
+  {
+   "source": "Ogdoas Scholastica",
+   "relation": "by",
+   "target": "Jacob Lorhard (Lorhardus)",
+   "quote": "While the etymology is Greek, the oldest extant record of the word itself, the Neo-Latin form ontologia, appeared in 1606 in the work Ogdoas Scholastica by Jacob Lorhard (Lorhardus) and in 1613 in the Lexicon philosophicum by Rudolf G\u00f6ckel (Goclenius).",
+   "kind": "relation"
+  },
+  {
+   "source": "Lexicon philosophicum",
+   "relation": "by",
+   "target": "Rudolf G\u00f6ckel (Goclenius)",
+   "quote": "While the etymology is Greek, the oldest extant record of the word itself, the Neo-Latin form ontologia, appeared in 1606 in the work Ogdoas Scholastica by Jacob Lorhard (Lorhardus) and in 1613 in the Lexicon philosophicum by Rudolf G\u00f6ckel (Goclenius).",
+   "kind": "relation"
+  },
+  {
+   "source": "Archeologia Philosophica Nova or New Principles of Philosophy (1663)",
+   "relation": "by",
+   "target": "Gideon Harvey",
+   "quote": "The first occurrence in English of ontology as recorded by the OED (Oxford English Dictionary, online edition, 2008) came in Archeologia Philosophica Nova or New Principles of Philosophy (1663) by Gideon Harvey.",
+   "kind": "relation"
+  },
+  {
+   "source": "David Powers",
+   "relation": "introduced the word ontology to",
+   "target": "artificial intelligence (AI)",
+   "quote": "In particular, David Powers introduced the word ontology to AI to refer to real world or robotic grounding, publishing in 1990 literature reviews emphasizing grounded ontology in association with the call for papers for a AAAI Summer Symposium Machine Learning of Natural Language and Ontology, with an expanded version published in SIGART Bulletin and included as a preface to the proceedings.",
+   "kind": "relation"
+  },
+  {
+   "name": "Enderton",
+   "description": "Ontologies are also not limited to conservative definitions, that is, definitions in the traditional logic sense that only introduce terminology and do not add any knowledge about the world (Enderton, 1972).",
+   "quote": "Ontologies are also not limited to conservative definitions, that is, definitions in the traditional logic sense that only introduce terminology and do not add any knowledge about the world (Enderton, 1972).",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "IAMF (Illumination AI Matrix Framework)",
+   "description": "Recent experimental ontology frameworks have also explored resonance-based AI-human co-evolution structures, such as IAMF (Illumination AI Matrix Framework), OntoMotoOS (a meta-operating system concept for ethical and ontological AI\u2013human co-evolution), and PSRT (Phase-Structural Reality Theory across multi-scale ontological layers).",
+   "quote": "Recent experimental ontology frameworks have also explored resonance-based AI-human co-evolution structures, such as IAMF (Illumination AI Matrix Framework), OntoMotoOS (a meta-operating system concept for ethical and ontological AI\u2013human co-evolution), and PSRT (Phase-Structural Reality Theory across multi-scale ontological layers).",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "OntoMotoOS",
+   "description": "Recent experimental ontology frameworks have also explored resonance-based AI-human co-evolution structures, such as IAMF (Illumination AI Matrix Framework), OntoMotoOS (a meta-operating system concept for ethical and ontological AI\u2013human co-evolution), and PSRT (Phase-Structural Reality Theory across multi-scale ontological layers).",
+   "quote": "Recent experimental ontology frameworks have also explored resonance-based AI-human co-evolution structures, such as IAMF (Illumination AI Matrix Framework), OntoMotoOS (a meta-operating system concept for ethical and ontological AI\u2013human co-evolution), and PSRT (Phase-Structural Reality Theory across multi-scale ontological layers).",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "PSRT",
+   "description": "Recent experimental ontology frameworks have also explored resonance-based AI-human co-evolution structures, such as IAMF (Illumination AI Matrix Framework), OntoMotoOS (a meta-operating system concept for ethical and ontological AI\u2013human co-evolution), and PSRT (Phase-Structural Reality Theory across multi-scale ontological layers).",
+   "quote": "Recent experimental ontology frameworks have also explored resonance-based AI-human co-evolution structures, such as IAMF (Illumination AI Matrix Framework), OntoMotoOS (a meta-operating system concept for ethical and ontological AI\u2013human co-evolution), and PSRT (Phase-Structural Reality Theory across multi-scale ontological layers).",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Feilmayr and W\u00f6\u00df",
+   "description": "As refinement of Gruber's definition Feilmayr and W\u00f6\u00df (2016) stated: \"An ontology is a formal, explicit specification of a shared conceptualization that is characterized by high semantic expressiveness required for increased complexity.\"",
+   "quote": "As refinement of Gruber's definition Feilmayr and W\u00f6\u00df (2016) stated: \"An ontology is a formal, explicit specification of a shared conceptualization that is characterized by high semantic expressiveness required for increased complexity.\"",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "source": "Feilmayr and W\u00f6\u00df",
+   "relation": "refinement of",
+   "target": "Gruber",
+   "quote": "As refinement of Gruber's definition Feilmayr and W\u00f6\u00df (2016) stated: \"An ontology is a formal, explicit specification of a shared conceptualization that is characterized by high semantic expressiveness required for increased complexity.\"",
+   "kind": "relation"
+  },
+  {
+   "name": "upper ontology",
+   "description": "An upper ontology (or foundation ontology) is a model of the commonly shared relations and objects that are generally applicable across a wide range of domain ontologies.",
+   "quote": "An upper ontology (or foundation ontology) is a model of the commonly shared relations and objects that are generally applicable across a wide range of domain ontologies.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Dublin Core",
+   "description": "Standardized upper ontologies available for use include BFO, Dublin Core, GFO, Cyc, SUMO, UMBEL, and DOLCE.",
+   "quote": "Standardized upper ontologies available for use include BFO, Dublin Core, GFO, Cyc, SUMO, UMBEL, and DOLCE.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "GFO",
+   "description": "Standardized upper ontologies available for use include BFO, Dublin Core, GFO, Cyc, SUMO, UMBEL, and DOLCE.",
+   "quote": "Standardized upper ontologies available for use include BFO, Dublin Core, GFO, Cyc, SUMO, UMBEL, and DOLCE.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "SUMO",
+   "description": "Standardized upper ontologies available for use include BFO, Dublin Core, GFO, Cyc, SUMO, UMBEL, and DOLCE.",
+   "quote": "Standardized upper ontologies available for use include BFO, Dublin Core, GFO, Cyc, SUMO, UMBEL, and DOLCE.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "UMBEL",
+   "description": "Standardized upper ontologies available for use include BFO, Dublin Core, GFO, Cyc, SUMO, UMBEL, and DOLCE.",
+   "quote": "Standardized upper ontologies available for use include BFO, Dublin Core, GFO, Cyc, SUMO, UMBEL, and DOLCE.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "DOLCE",
+   "description": "Standardized upper ontologies available for use include BFO, Dublin Core, GFO, Cyc, SUMO, UMBEL, and DOLCE.",
+   "quote": "Standardized upper ontologies available for use include BFO, Dublin Core, GFO, Cyc, SUMO, UMBEL, and DOLCE.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "WordNet",
+   "description": "WordNet has been considered an upper ontology by some and has been used as a linguistic tool for learning domain ontologies.",
+   "quote": "WordNet has been considered an upper ontology by some and has been used as a linguistic tool for learning domain ontologies.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Katifori et al.",
+   "description": "A survey of ontology visualization methods is presented by Katifori et al.",
+   "quote": "A survey of ontology visualization methods is presented by Katifori et al.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Dud\u00e1s et al.",
+   "description": "An updated survey of ontology visualization methods and tools was published by Dud\u00e1s et al.",
+   "quote": "An updated survey of ontology visualization methods and tools was published by Dud\u00e1s et al.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Fu et al.",
+   "description": "The most established ontology visualization methods, namely indented tree and graph visualization are evaluated by Fu et al.",
+   "quote": "The most established ontology visualization methods, namely indented tree and graph visualization are evaluated by Fu et al.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Visual Notation for OWL Ontologies (VOWL)",
+   "description": "A visual language for ontologies represented in OWL is specified by the Visual Notation for OWL Ontologies (VOWL).",
+   "quote": "A visual language for ontologies represented in OWL is specified by the Visual Notation for OWL Ontologies (VOWL).",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Ontology engineering",
+   "description": "Ontology engineering (also called ontology building) is a set of tasks related to the development of ontologies for a particular domain.",
+   "quote": "Ontology engineering (also called ontology building) is a set of tasks related to the development of ontologies for a particular domain.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "knowledge engineering",
+   "description": "It is a subfield of knowledge engineering that studies the ontology development process, the ontology life cycle, the methods and methodologies for building ontologies, and the tools and languages that support them.",
+   "quote": "It is a subfield of knowledge engineering that studies the ontology development process, the ontology life cycle, the methods and methodologies for building ontologies, and the tools and languages that support them.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "source": "BFO",
+   "relation": "is a standardized upper ontology",
+   "target": "upper ontology",
+   "quote": "Standardized upper ontologies available for use include BFO, Dublin Core, GFO, Cyc, SUMO, UMBEL, and DOLCE.",
+   "kind": "relation"
+  },
+  {
+   "source": "Dublin Core",
+   "relation": "is a standardized upper ontology",
+   "target": "upper ontology",
+   "quote": "Standardized upper ontologies available for use include BFO, Dublin Core, GFO, Cyc, SUMO, UMBEL, and DOLCE.",
+   "kind": "relation"
+  },
+  {
+   "source": "GFO",
+   "relation": "is a standardized upper ontology",
+   "target": "upper ontology",
+   "quote": "Standardized upper ontologies available for use include BFO, Dublin Core, GFO, Cyc, SUMO, UMBEL, and DOLCE.",
+   "kind": "relation"
+  },
+  {
+   "source": "Cyc",
+   "relation": "is a standardized upper ontology",
+   "target": "upper ontology",
+   "quote": "Standardized upper ontologies available for use include BFO, Dublin Core, GFO, Cyc, SUMO, UMBEL, and DOLCE.",
+   "kind": "relation"
+  },
+  {
+   "source": "SUMO",
+   "relation": "is a standardized upper ontology",
+   "target": "upper ontology",
+   "quote": "Standardized upper ontologies available for use include BFO, Dublin Core, GFO, Cyc, SUMO, UMBEL, and DOLCE.",
+   "kind": "relation"
+  },
+  {
+   "source": "UMBEL",
+   "relation": "is a standardized upper ontology",
+   "target": "upper ontology",
+   "quote": "Standardized upper ontologies available for use include BFO, Dublin Core, GFO, Cyc, SUMO, UMBEL, and DOLCE.",
+   "kind": "relation"
+  },
+  {
+   "source": "DOLCE",
+   "relation": "is a standardized upper ontology",
+   "target": "upper ontology",
+   "quote": "Standardized upper ontologies available for use include BFO, Dublin Core, GFO, Cyc, SUMO, UMBEL, and DOLCE.",
+   "kind": "relation"
+  },
+  {
+   "source": "WordNet",
+   "relation": "has been considered an upper ontology",
+   "target": "upper ontology",
+   "quote": "WordNet has been considered an upper ontology by some and has been used as a linguistic tool for learning domain ontologies.",
+   "kind": "relation"
+  },
+  {
+   "name": "domain ontology",
+   "description": "A domain ontology (or domain-specific ontology) represents concepts which belong to a realm of the world, such as biology or politics.",
+   "quote": "A domain ontology (or domain-specific ontology) represents concepts which belong to a realm of the world, such as biology or politics.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Gellish ontology",
+   "description": "The Gellish ontology is an example of a combination of an upper and a domain ontology.",
+   "quote": "The Gellish ontology is an example of a combination of an upper and a domain ontology.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Ontology editors",
+   "description": "Ontology editors are applications designed to assist in the creation or manipulation of ontologies.",
+   "quote": "Ontology editors are applications designed to assist in the creation or manipulation of ontologies.",
+   "ungrounded": 0,
+   "kind": "entity"
+  }
+ ],
+ "refused": [
+  {
+   "item": {
+    "name": "metaphysics",
+    "description": "Metaphysics deals with questions like \"what exists?\" and \"what is the nature of reality?\"",
+    "quote": "Metaphysics deals with questions like \"what exists?\" and \"what is the nature of reality?\"",
+    "ungrounded": 0,
+    "kind": "entity"
+   },
+   "reason": "quote is not one whole sentence of the document"
+  },
+  {
+   "item": {
+    "name": "Ontology learning",
+    "description": "Ontology learning is the automatic or semi-automatic creation of ontologies, including",
+    "quote": "Ontology learning is the automatic or semi-automatic creation of ontologies, including",
+    "ungrounded": 0,
+    "kind": "entity"
+   },
+   "reason": "quote is not one whole sentence of the document"
+  },
+  {
+   "item": {
+    "name": "Gruber",
+    "description": "Gruber stated (1993): Ontologies are often equated with taxonomic hierarchies of classes, class definitions, and the subsumption relation, but ontologies need not be limited to these forms.",
+    "quote": "Gruber stated (1993): Ontologies are often equated with taxonomic hierarchies of classes, class definitions, and the subsumption relation, but ontologies need not be limited to these forms.",
+    "ungrounded": 0,
+    "kind": "entity"
+   },
+   "reason": "quote is not one whole sentence of the document"
+  },
+  {
+   "item": {
+    "source": "Ontology engineering",
+    "relation": "is a subfield of",
+    "target": "knowledge engineering",
+    "quote": "It is a subfield of knowledge engineering that studies the ontology development process, the ontology life cycle, the methods and methodologies for building ontologies, and the tools and languages that support them.",
+    "kind": "relation"
+   },
+   "reason": "quote does not contain both ends"
+  },
+  {
+   "item": {
+    "name": "OWL-S",
+    "description": "the support of meta-ontologies such as OWL-S, Dublin Core, etc.",
+    "quote": "the support of meta-ontologies such as OWL-S, Dublin Core, etc.",
+    "ungrounded": 0,
+    "kind": "entity"
+   },
+   "reason": "quote is not one whole sentence of the document"
+  },
+  {
+   "item": {
+    "source": "ontology editors",
+    "relation": "support",
+    "target": "OWL-S",
+    "quote": "Aspects of ontology editors include: ... and the support of meta-ontologies such as OWL-S, Dublin Core, etc.",
+    "kind": "relation"
+   },
+   "reason": "quote is not a passage of the document"
+  },
+  {
+   "item": {
+    "source": "ontology editors",
+    "relation": "support",
+    "target": "Dublin Core",
+    "quote": "Aspects of ontology editors include: ... and the support of meta-ontologies such as OWL-S, Dublin Core, etc.",
+    "kind": "relation"
+   },
+   "reason": "quote is not a passage of the document"
+  }
+ ],
+ "chunks": 5,
+ "seconds": 196.1
+}
