@@ -8,3 +8,10 @@ Line of work `goal/v2.toolbox`, supervised. Test runs here are feedback, not ver
 - Deviation (owner's answer, "minimal versions in T-01"): the T-01 tests call `export_transform`, `set_trust`, `set_lifecycle` and `run`, which the plan assigns to T-02 to T-04. T-01 has the plain happy path of these; the rules are left to their tasks: file check `invalid_file` (T-02), owner-only (T-03), evidence, retired, baseline, `offer` (T-04), shipped and `seed_shipped` (T-05). `run` runs the code text with `exec` only in `run`, and refuses untrusted transforms.
 - Decision: the reason text for an imported transform is "It came from outside MIA and was not reviewed." (TC-WFM-090 fixes the two phrases, not the full sentence). `reason` is stored in the meta record on import and shown only while the transform is untrusted.
 - Open for Phase 4: `import_transform` does `json.loads` and key access without a check until T-02; a bad file raises a plain exception today.
+
+## T-02: Import and export of the exchange file
+- Requirements: REQ-WFM-052, 053, 055. Files: `toolbox.py`, new unit test `tests/test_toolbox.py`.
+- Tests reported green (own run, 2026-11-11): TC-WFM-052, 053, 055. T-01 tests still green; contract mock suite green. Full unit suite not re-run (last full run at T-01: 2202 OK).
+- Finding (closes the open point of T-01): a malformed file raised a plain exception. Test first: `tests/test_toolbox.py` (not JSON, list, version 0, version `true`, `inputs` a text, empty id), then the schema check `EXCHANGE_SCHEMA` with `jsonschema` (already pinned); the first problem is the reason, nothing is stored.
+- Deviation: TC-WFM-055 asserts `offer() == ["t.one"]`, so `offer` lists all IDs now; T-04 leaves retired ones out.
+- Code text is still never compiled on import (TC-WFM-053 green).

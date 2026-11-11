@@ -4,7 +4,7 @@ The toolbox keeps no state of its own: entries, versions, trust and lifecycle li
 so the real library of T-06 replaces the mock without a change here. T-01 is done; T-02 to T-05 add their rules (marked below) to this module.
 - Toolbox(library, is_owner, events): `is_owner(account)` says whether an account is the owner (REQ-WFM-066), `events.record(event)` takes the event of REQ-WFM-093 (IF-401).
 - import_transform(text, author) -> the transform ID; the exchange form is one JSON text with id, version, inputs, outputs and code (a field `status` in it is ignored);
-  an ID that exists with an equal or lower version raises ToolboxError("duplicate_id") naming the ID; a higher version replaces the code and keeps trust and lifecycle
+  a text that fails the exchange schema raises ToolboxError("invalid_file") naming the first problem and stores nothing; an ID that exists with an equal or lower version raises ToolboxError("duplicate_id") naming the ID; a higher version replaces the code and keeps trust and lifecycle
   (REQ-WFM-092); the code text is never compiled or run here (REQ-WFM-053).
 - export_transform(id) -> the exchange text.
 - look_up(id) -> {"id", "version", "trust", "lifecycle", "reason", "evidence", "baseline_allowed", "shipped"}; `reason` says why a transform is untrusted.
@@ -12,14 +12,23 @@ so the real library of T-06 replaces the mock without a change here. T-01 is don
   "invalid_lifecycle") and the status stays as it was.
 - run(id, args) -> the result of the code text's run(args); an untrusted transform raises ToolboxError("untrusted").
 ToolboxError has `code` and `why` (a text for the person).
-Still stubs or minimal until their task: file check (T-02), owner-only rules (T-03), evidence, retired and baseline (T-04), seed_shipped and shipped export (T-05).
+Still stubs or minimal until their task: owner-only rules (T-03), evidence, retired and baseline (T-04), seed_shipped and shipped export (T-05).
 """
 import json
+
+import jsonschema
 
 TRUST = ("untrusted", "trusted")
 LIFECYCLE = ("draft", "tested", "retired")
 # Why a transform is untrusted (REQ-WFM-090): every import is untrusted, so this is the one reason that exists.
 REASON_IMPORTED = "It came from outside MIA and was not reviewed."
+# The exchange form (REQ-WFM-055). Extra fields such as `status` are allowed and dropped on import.
+EXCHANGE_SCHEMA = {
+    "type": "object",
+    "required": ["id", "version", "inputs", "outputs", "code"],
+    "properties": {"id": {"type": "string", "minLength": 1}, "version": {"type": "integer", "minimum": 1},
+                   "inputs": {"type": "object"}, "outputs": {"type": "object"}, "code": {"type": "string"}},
+}
 
 
 class ToolboxError(Exception):
@@ -35,8 +44,20 @@ class Toolbox:
     def _latest(self, tid):
         return self.library.read("transforms", tid)
 
+    @staticmethod
+    def _checked(text):
+        """The parsed exchange file, or ToolboxError("invalid_file") naming the first problem; nothing is compiled or run (REQ-WFM-053)."""
+        try:
+            file = json.loads(text)
+        except ValueError as error:
+            raise ToolboxError("invalid_file", "The file is not JSON: %s" % error)
+        problems = sorted(jsonschema.Draft202012Validator(EXCHANGE_SCHEMA).iter_errors(file), key=lambda e: list(map(str, e.path)))
+        if problems:
+            raise ToolboxError("invalid_file", problems[0].message)
+        return file
+
     def import_transform(self, text, author):
-        file = json.loads(text)
+        file = self._checked(text)
         tid, version = file["id"], file["version"]
         # `status` of the file is dropped: what a file says about its own trust never counts (REQ-WFM-052).
         doc = {key: file[key] for key in ("id", "version", "inputs", "outputs", "code")}
@@ -64,7 +85,7 @@ class Toolbox:
                 "baseline_allowed": meta.get("baseline_allowed", False), "shipped": meta.get("shipped", False)}
 
     def offer(self):
-        return []
+        return sorted(self.library.list_ids("transforms"))       # retired ones are left out in T-04
 
     def set_trust(self, tid, value, account):
         if value not in TRUST:
