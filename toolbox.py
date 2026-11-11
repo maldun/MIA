@@ -10,9 +10,12 @@ so the real library of T-06 replaces the mock without a change here. T-01 is don
 - look_up(id) -> {"id", "version", "trust", "lifecycle", "reason", "evidence", "baseline_allowed", "shipped"}; `reason` says why a transform is untrusted.
 - set_trust(id, value, account), set_lifecycle(id, value, account, evidence=None, allow_baseline=False): a value outside the lists raises ToolboxError("invalid_trust" or
   "invalid_lifecycle") and the status stays as it was; trusted by an account that is not the owner raises ToolboxError("owner_only").
-- run(id, args) -> the result of the code text's run(args); an untrusted transform raises ToolboxError("untrusted").
+- `tested` without evidence raises ToolboxError("evidence_missing"); allow_baseline by an account that is not the owner raises ToolboxError("owner_only") (REQ-WFM-095).
+- offer() -> the sorted IDs a new graph may pick (retired ones left out, REQ-WFM-070).
+- run(id, args, as_baseline=False) -> the result of the code text's run(args); an untrusted transform raises ToolboxError("untrusted") unless it is retired, runs as the baseline
+  of a check and has the owner's allowance (REQ-WFM-091); a retired one raises ToolboxError("retired") unless as_baseline (REQ-WFM-068).
 ToolboxError has `code` and `why` (a text for the person).
-Still stubs or minimal until their task: evidence, retired, baseline and its owner-only allowance (T-04), seed_shipped and shipped export (T-05).
+Still stub until its task: seed_shipped and shipped export (T-05).
 """
 import json
 
@@ -85,7 +88,7 @@ class Toolbox:
                 "baseline_allowed": meta.get("baseline_allowed", False), "shipped": meta.get("shipped", False)}
 
     def offer(self):
-        return sorted(self.library.list_ids("transforms"))       # retired ones are left out in T-04
+        return sorted(tid for tid in self.library.list_ids("transforms") if self.library.get_lifecycle(tid) != "retired")
 
     def set_trust(self, tid, value, account):
         if value not in TRUST:
@@ -98,13 +101,27 @@ class Toolbox:
     def set_lifecycle(self, tid, value, account, evidence=None, allow_baseline=False):
         if value not in LIFECYCLE:
             raise ToolboxError("invalid_lifecycle", "Lifecycle is draft, tested or retired, not %r." % (value,))
-        self.library.set_lifecycle(tid, value, account, evidence)
+        if value == "tested" and not evidence:
+            raise ToolboxError("evidence_missing", "Tested needs the check or run that shows it.")
+        if allow_baseline and not self.is_owner(account):
+            raise ToolboxError("owner_only", "Only the owner may allow a retired untrusted transform as the baseline of a check.")
+        fields = {"lifecycle": value}
+        if evidence is not None:
+            fields["evidence"] = evidence
+        if allow_baseline:
+            fields["baseline_allowed"] = True       # one new version of the meta record, so lifecycle and allowance never show apart
+        self.library.set_meta(tid, account, **fields)
 
     def run(self, tid, args, as_baseline=False):
-        if self._latest(tid)["trust"] != "trusted":
+        entry, meta = self._latest(tid), self.library.get_meta(tid)
+        retired = entry["lifecycle"] == "retired"
+        if retired and not as_baseline:
+            raise ToolboxError("retired", "%s is retired and is not a step of a graph." % tid)
+        # An untrusted transform runs only as the baseline of a check, retired, and with the owner's allowance (REQ-WFM-091).
+        if entry["trust"] != "trusted" and not (as_baseline and retired and meta.get("baseline_allowed")):
             raise ToolboxError("untrusted", "%s is not trusted and does not run." % tid)
         namespace = {}
-        exec(self._latest(tid)["doc"]["code"], namespace)       # trusted code runs in the MIA process (SC-09 accepted); only here, never on import
+        exec(entry["doc"]["code"], namespace)       # trusted code runs in the MIA process (SC-09 accepted); only here, never on import
         return namespace["run"](args)
 
     def seed_shipped(self, nodes_dir):

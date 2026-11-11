@@ -21,3 +21,9 @@ Line of work `goal/v2.toolbox`, supervised. Test runs here are feedback, not ver
 - Test reported green (own run, 2026-11-11): TC-WFM-054; TC-WFM-050..053, 055, 090, 092, 093 still green. No new unit test: the acceptance test checks the refusal with its accepted twins (owner trusts, any account untrusts); no edge case beyond it.
 - The refusal leaves the status as it was (checked in TC-WFM-054). The same rule for `allow_baseline` is REQ-WFM-095, T-04.
 - Process note: in T-02 the unit test `tests/test_toolbox.py` was written together with the code, not seen red first; it covers the malformed-file cases, which the schema check handles.
+
+## T-04: Lifecycle, retired, baseline
+- Requirements: REQ-WFM-067, 068, 070, 091, 095. Files: `toolbox.py` (`set_lifecycle`, `offer`, `run`), `tests/test_toolbox.py`.
+- Tests reported green (own run, 2026-11-11): TC-WFM-067, 068, 070, 091, 095; all earlier toolbox tests still green; contract mock suite green. Only TC-WFM-056 (two variants) and 094 stay red (T-05).
+- Decisions: `set_lifecycle` writes lifecycle, evidence and the allowance in one `set_meta` call (one new version of the meta record); `allow_baseline=False` means "not given", it never clears an allowance. The allowance counts only while the transform is retired and only as baseline (REQ-WFM-091); a refused change leaves everything as it was (unit test `BaselineChecks`, the edge case beyond the acceptance tests).
+- Library calls: the toolbox now uses `set_meta`, `get_meta`, `get_lifecycle` of IF-203 v1 (A-111) next to `set_trust`; `set_lifecycle` of the library is not used.

@@ -34,5 +34,22 @@ class ImportChecks(unittest.TestCase):
         self.assertEqual(self.box.import_transform(json.dumps(good), "anna"), "t.one")      # the twin is accepted
 
 
+class BaselineChecks(unittest.TestCase):
+    def test_the_allowance_counts_only_for_a_retired_transform_and_a_failed_set_changes_nothing(self):
+        """Example: an allowance given while the transform is live does not let it run as baseline; a refused allowance leaves the lifecycle as it was."""
+        library = TransformLibraryMock()
+        box = Toolbox(library, lambda account: account == "anna", EventRecord())
+        box.import_transform(exchange_file("t.one", code="def run(args):\n    return 1\n"), "anna")
+        box.set_lifecycle("t.one", "draft", "anna", allow_baseline=True)
+        with self.assertRaises(ToolboxError) as caught:
+            box.run("t.one", {}, as_baseline=True)
+        self.assertEqual(caught.exception.code, "untrusted")
+        with self.assertRaises(ToolboxError):
+            box.set_lifecycle("t.one", "retired", "guest", allow_baseline=True)
+        self.assertEqual(box.look_up("t.one")["lifecycle"], "draft")
+        box.set_lifecycle("t.one", "retired", "anna")      # the twin: retired and allowed runs as baseline
+        self.assertEqual(box.run("t.one", {}, as_baseline=True), 1)
+
+
 if __name__ == "__main__":
     unittest.main()
