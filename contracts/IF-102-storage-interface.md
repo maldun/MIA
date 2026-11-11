@@ -1,4 +1,4 @@
-# IF-102 – Storage interface, v3
+# IF-102 – Storage interface, v4
 
 Owner (provider): N-3 Database   Consumers: N-2 Backend   Decided by: N-0   Mock complexity: 2 (in-memory fake)   Suite: `tests/acceptance/contract/test_if_102_storage.py`
 
@@ -15,7 +15,7 @@ The only door to the shared state. Python calls on a storage client (the real on
 | `categories()` | | list of the vote categories, in their order: `answer_quality`, `reactions`, `character_behaviour`, `service` | read from the record tables (IF-302) inside N-3, so a consumer imports nothing of IF-302 (D-162) |
 | `subscribe(table, callback)` | | a function that unsubscribes | `callback({"table","id","version","author"})` after every write; a delete is a write and is told with `"version": None` and the deleting account as `author`; a refused put or delete tells nothing |
 
-Tables: the tables of IF-301 (`workflows`, `context_graphs`) and IF-302 (`history`, `memory`, `votes`, `tasks`, `memos`, `accounts`, `presets`, `gestures`, `runs`, `source_trust`, `cases`, `behaviours`, `workflow_meta`, `reports`); their definitions decide the document rules and whether a record may be deleted.
+Tables: the tables of IF-301 (`workflows`, `context_graphs`) and IF-302 (`history`, `memory`, `votes`, `tasks`, `memos`, `accounts`, `presets`, `gestures`, `runs`, `source_trust`, `cases`, `behaviours`, `workflow_meta`, `reports`, `transform_meta`); their definitions decide the document rules and whether a record may be deleted.
 
 ## Errors
 | Condition | Signal | What the consumer may rely on afterwards |
@@ -47,3 +47,4 @@ Tables: the tables of IF-301 (`workflows`, `context_graphs`) and IF-302 (`histor
 | v1 | 2026-10-26 | tables `runs` (run results with workflow version, model pin and benchmark version) and `source_trust` added, as IF-302 defines them (finding F-5) | 9 |
 | v2 | 2026-10-31 | a delete is told to the subscribers with version None (golden 4, TC-IF-102-09; D-158, N-3.1 Verify F7); the tables and the delete rule follow the definitions of IF-301 and IF-302 (D-67 decision 2, D-69; N-3.1 Verify F12). The mock refuses delete for the graph tables only (complexity 2). `categories()`, the vote categories (golden 5, TC-IF-102-10; D-162) | A-59 |
 | v3 | 2026-10-31 | values that not every backend keeps alike are refused with `invalid`/`schema`: NUL, numbers that are not finite, ids that are not text (TC-IF-102-11; D-168, N-3.1 re-verification R3a) | A-65 |
+| v4 | 2026-11-11 | the table list names `transform_meta` (IF-302 v8); no new operation | A-110 |
