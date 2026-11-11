@@ -5,8 +5,8 @@ Requirements on the checks TC-CHA-030 to TC-CHA-036, TC-VPB-006 and TC-VPB-007 (
 ## Groups
 | Order | Group | What it covers | Test requirements |
 |---|---|---|---|
-| 1 | Stand-ins | The fakes for the voice route, the sound-server sink and the audio events, and how far they can be trusted | TR-VOICE-001, TR-VOICE-002, TR-VOICE-004, TR-VOICE-005 |
-| 2 | Exact values | Sentences and order written by hand | TR-VOICE-003 |
+| 1 | Stand-ins | The fakes for the voice route, the sound-server sink and the audio events, the memory writer and storage, and how far they can be trusted | TR-VOICE-001, TR-VOICE-002, TR-VOICE-004, TR-VOICE-005, TR-MEM-001, TR-MEM-003, TR-MEM-004 |
+| 2 | Exact values | Sentences and order written by hand; the cost check names its record count | TR-VOICE-003, TR-MEM-002 |
 
 ### TR-VOICE-001 – the fake voice route records and obeys stop
 - Applies to: TC-CHA-030, TC-CHA-031, TC-CHA-032, TC-CHA-033, TC-CHA-034, TC-CHA-037
@@ -62,3 +62,49 @@ Requirements on the checks TC-CHA-030 to TC-CHA-036, TC-VPB-006 and TC-VPB-007 (
 - Credibility aspect: stand-in fidelity
 - Verified by: TC-CHA-035
 - Status: Approved
+
+## Structured memory (T-04, TC-CHA-011 to 013; Draft, written 2026-11-11 after the first Verify, for the owner's review)
+
+### TR-MEM-001 – the holdout is run by a verifier, once, with the fixed repeats
+- Applies to: TC-CHA-011
+- Requirement: REQ-CHA-011
+- Group: Stand-ins
+- Kind: setup
+- Text: The holdout part of TC-CHA-011 shall be run by a verifier who did not tune the skill, with pin MP-light, 3 repeats and the temperature of the skill; a FAIL shall be re-run once with fresh repeats and only the second result counts; the texts of the holdout cases shall not be copied into prompts, cases or notes.
+- Rationale: the implementer saw all dev cases and tuned the prompt against them; the rule of A-12 (9 of 11, lower bound 0.5) has the error rates given in the check only with one re-run.
+- Credibility aspect: reviewer independence
+- Verified by: verification report
+- Status: Draft
+
+### TR-MEM-002 – the cost check says how many records it saw
+- Applies to: TC-CHA-011
+- Requirement: REQ-CHA-011
+- Group: Exact values
+- Kind: setup
+- Text: The result of `tools/memory_cost.py` shall be reported together with the number of records in the store it ran on, and a result with fewer than 10 records shall be called a formal pass only.
+- Rationale: on 2026-11-11 the store held 0 records, so the block was empty for all 20 questions and "not higher than dreaming" held trivially.
+- Credibility aspect: measurement conditions
+- Verified by: verification report
+- Status: Draft
+
+### TR-MEM-003 – the writer is a fake that fails when asked
+- Applies to: TC-CHA-012
+- Requirement: REQ-CHA-012
+- Group: Stand-ins
+- Kind: setup
+- Text: The check shall use a fake writer that fails the check when it is called, so that a text that is not the user's is shown to be refused before the model is asked, and the only caller of `remember` shall be read in the verification report.
+- Rationale: a fake that returns an empty list would hide a call that happens and finds nothing; the rule is a code rule, not a property of the model.
+- Credibility aspect: stand-in fidelity
+- Verified by: verification report
+- Status: Draft
+
+### TR-MEM-004 – the routes run on a real storage, the tab is not covered
+- Applies to: TC-CHA-013
+- Requirement: REQ-CHA-013
+- Group: Stand-ins
+- Kind: setup
+- Text: The check shall run the real items routes on a real file storage in a temporary folder; the Memory tab of the page is shown to the owner by hand after a change of the tab, and the result is written into the verification report.
+- Rationale: no automatic check in this file loads the tab; the routes carry the rules, the tab only shows them.
+- Credibility aspect: stand-in fidelity
+- Verified by: verification report
+- Status: Draft

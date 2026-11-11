@@ -109,6 +109,26 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-201
 - When: a user asks to speak it again; later the user presses stop; in a second run the fake does not block and the playback ends by itself
 - Then: after the request a chat_status event with busy true and activity speaking was published and the status says the same; after the stop, and after the playback that ended by itself, the last chat_status event has busy false and an activity other than speaking, and the status says the same
 
+## Scenarios (structured memory, T-04, checks TC-CHA-011 to 013; written after the fact from the tests and the first Verify)
+
+### TC-CHA-011 – the structured memory is good enough and not dearer than dreaming
+- Verifies: REQ-CHA-011
+- Given: (a) the 11 holdout cases of `eval-drafts/memory_sample.jsonl`, the light model of pin MP-light and skill `memory_write` with its own temperature; (b) a memory store with the records of a stand-in conversation, and the last 20 user messages of the owner
+- When: (a) a verifier who did not tune the skill runs `tools/memory_dev_run.py --split holdout --verifier --repeats 3` once, and once more with fresh repeats only after a FAIL; (b) `tests/test_memory_records.py` runs and `tools/memory_cost.py` is run on a copy of the owner's store
+- Then: (a) at least 9 of the 11 cases are right by majority of the 3 repeats and the Wilson 95 % lower bound is at least 0.5; (b) the block of a question never holds more than the budget (400 tokens, exact) and the mean block is not higher than the tokens of dreaming; the result of (b) names the number of records in the store
+
+### TC-CHA-012 – text that is not the user's never becomes a record
+- Verifies: REQ-CHA-012
+- Given: the memory with a fake writer that fails the check when it is asked, and a Chat agent with the memory wired in
+- When: `remember` gets a text with the source kind web page, file, tool result and an unknown kind in turn; a command, a `/lookup` and a regenerated answer are sent; a plain chat turn ends failed
+- Then: the fake writer was not asked once for those texts, the store is unchanged (no record, exactly), and the memory was handed only the message of a plain chat turn that ended `done`
+
+### TC-CHA-013 – a user inspects, corrects and deletes a memory record
+- Verifies: REQ-CHA-013
+- Given: the items routes on a storage in a temporary folder, a memory record "Anna likes tea" with the source of a message id, and a second client
+- When: a user lists the memory, saves a changed text for the record, and deletes it; and a memory record without a source is saved
+- Then: the list shows the text and the source; after the change the record has the new text and keeps its creation time; after the delete the record is gone and the other client got the `item_changed` event; the record without a source is refused and nothing is stored
+
 ## Assumptions (checked in validation)
 
 - ASM-N2-001: the model server is replaced by the fake model server of `pipeline.py` in all stage 1 to 3 tests; no test needs a GPU before stage 4.
