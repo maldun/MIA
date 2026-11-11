@@ -9,12 +9,12 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[4]
 do = "--do" in sys.argv
-check = subprocess.run(["patch", "-p1", "--dry-run", "-d", str(ROOT), "-i", str(HERE / "contract.patch")], capture_output=True, text=True)
-print(check.stdout.strip() or check.stderr.strip())
+check = subprocess.run(["git", "-C", str(ROOT), "apply", "--check", "-p1", str(HERE / "contract.patch")], capture_output=True, text=True)
+print(check.stdout.strip() or check.stderr.strip() or "the patch applies")
 if check.returncode:
     sys.exit("the patch does not apply (already installed or the file changed)")
 if do:
-    subprocess.run(["patch", "-p1", "-d", str(ROOT), "-i", str(HERE / "contract.patch")], check=True)
+    subprocess.run(["git", "-C", str(ROOT), "apply", "-p1", str(HERE / "contract.patch")], check=True)
     print("installed")
 else:
     print("dry run; add --do to install")
