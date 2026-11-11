@@ -729,3 +729,32 @@ The first version was silent until the end and could take 20 minutes or more: th
 | D-309 | **G-V2.MODEL, verdict of the Verify phase, owner maldun, 2026-11-08.** After the fourth run (`74525e4`, reviewer's formal verdict 'Not verified' because nothing was accepted yet) the owner accepts as deviations, all low: F-04 (the record's context graph ID is taken by nothing), F-06 (malformed graph input raises instead of a refusal), F-07 (c) to (e) (duplicate node IDs collapsed in the rule check, node IDs global across graphs, empty graphs accepted), F-08 (`author` not checked by a test), F-09 (remainder: the `save_graph` refusal branch and the node pre-check are not covered by a test), F-11 (plan and doc text: networkx, the three modules not in `architecture.sysml`, no `implementation-log.md`, command form and stop values only in plan T-08 to T-10 and IF-301 v2), and the notes N-1 (manifest `aliases` that are not lower-case strings break `parse`, pre-existing on master) and N-2 (a record command equal to the skill's own folder name is skipped when another skill holds it as an alias; follows the F-14 decision, not pinned by a test). F-07 (a) and (b) are covered by the decision of 2026-11-08 (re-save and orphan versions are a known property, versions are append-only); F-18 (`re.A` in `TaskRegistry.parse`, non-ASCII whitespace after a command no longer parses as a command) is accepted and pinned by a test. F-10 is settled by the approval of TC-WFM-047, TR-MODEL-003 and TR-MODEL-001 (rows above). Verdict of G-V2.MODEL: **Verified with accepted deviations**. |
 | D-310 | **G-V2.MODEL, wording of T-06, owner maldun, 2026-11-08 (A-108).** Decision (c) of 2026-11-08: a record-only skill (a record, but no manifest folder or entry module) is listed through `SkillCatalog.list()` only: not a `Task`, not in `TaskRegistry.commands()`, not runnable, until G-V2.CONVERT. A-108 corrects the two sentences of the T-06 text in `plan.md` and supersedes point 1 of `A-107-note.md` ("listed by its command"); no code or test changes. |
 | D-220 | **G-V2.TOOLBOX, Plan decisions, owner maldun, 2026-11-11.** REQ-WFM-092 and 093 stay whole (no split). The goal stays together (Split check row: keep together). A-110 (IF-302 table for transform meta) is to be drafted for review (draft only, `contracts/` untouched). Step 5 `plan.md` written; REQ-WFM-054 has no stale "not yet approved" line. Master merged into `goal/v2.toolbox` without conflicts. Open: plausibility ratings of REQ-WFM-090..095, the batched review, Step 4 (red tests, own session), the parent session's files (GL3). |
+| REQ-WFM-050 | requirement | 0d63b904c42f | maldun | 2026-11-11 | approved |  |
+| REQ-WFM-051 | requirement | c96f8973c16f | maldun | 2026-11-11 | approved |  |
+| REQ-WFM-052 | requirement | 9145ec5c33f1 | maldun | 2026-11-11 | approved |  |
+| REQ-WFM-053 | requirement | a4a27c06a964 | maldun | 2026-11-11 | approved |  |
+| REQ-WFM-054 | requirement | be884b0fe3ea | maldun | 2026-11-11 | approved |  |
+| REQ-WFM-055 | requirement | 86a75c7a7402 | maldun | 2026-11-11 | approved |  |
+| REQ-WFM-056 | requirement | 20fbb6cb7c8f | maldun | 2026-11-11 | approved |  |
+| REQ-WFM-090 | requirement | 1d7f23d1661f | maldun | 2026-11-11 | approved |  |
+| REQ-WFM-091 | requirement | 9cff6ce950a9 | maldun | 2026-11-11 | approved |  |
+| REQ-WFM-092 | requirement | 5550483fc8c1 | maldun | 2026-11-11 | approved |  |
+| REQ-WFM-093 | requirement | 501bd44d0cd9 | maldun | 2026-11-11 | approved |  |
+| REQ-WFM-094 | requirement | 65f617fb27b6 | maldun | 2026-11-11 | approved |  |
+| REQ-WFM-095 | requirement | 470e20f241a8 | maldun | 2026-11-11 | approved |  |
+| REQ-WFM-067 | requirement | 5d72146ad73c | maldun | 2026-11-11 | approved |  |
+| TC-WFM-050 | check | 6718925a1095 | maldun | 2026-11-11 | approved |  |
+| TC-WFM-051 | check | bbe40ec1e7e3 | maldun | 2026-11-11 | approved |  |
+| TC-WFM-052 | check | 586380f4d605 | maldun | 2026-11-11 | approved |  |
+| TC-WFM-053 | check | 5ca7fa4119a8 | maldun | 2026-11-11 | approved |  |
+| TC-WFM-054 | check | e457c7b6e704 | maldun | 2026-11-11 | approved |  |
+| TC-WFM-055 | check | e103d62af76b | maldun | 2026-11-11 | approved |  |
+| TC-WFM-067 | check | 7caead70b116 | maldun | 2026-11-11 | approved |  |
+| TC-WFM-056 | check | e6af2f5c8cf6 | maldun | 2026-11-11 | changes requested | add a case where the highest version is retired |
+| TC-WFM-056 | check | d87109afc87d | maldun | 2026-11-11 | approved |  |
+| TC-WFM-090 | check | 4bcb3bd7216f | maldun | 2026-11-11 | approved |  |
+| TC-WFM-091 | check | a071597b19fb | maldun | 2026-11-11 | approved |  |
+| TC-WFM-092 | check | b4caec9095eb | maldun | 2026-11-11 | approved |  |
+| TC-WFM-093 | check | 178a6168d385 | maldun | 2026-11-11 | approved |  |
+| TC-WFM-094 | check | 450bf34da46f | maldun | 2026-11-11 | approved |  |
+| TC-WFM-095 | check | bbbd5aad9a9b | maldun | 2026-11-11 | approved |  |

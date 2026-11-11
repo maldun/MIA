@@ -72,13 +72,13 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-203
 | TC-WFM-053 | REQ-WFM-053 | Component | 1 | unit test with the mock of the library part for transforms; an exchange file whose code text writes a marker file | AC-32: the marker file does not exist after the import | exact |
 | TC-WFM-054 | REQ-WFM-054 | Component | 1 | unit test with the mock of the library part for transforms; an imported transform; the owner, a second account | AC-32: the second account is refused with the reason and the status stays; the owner's change shows trusted; any account may set it back to untrusted | exact |
 | TC-WFM-055 | REQ-WFM-055 | Component | 1 | unit test with the mock of the library part for transforms; a transform exported to one JSON file and imported into an empty toolbox, and a file that lacks a required field | AC-32: ID, version, schemas and code read back equal; the incomplete file is refused | exact |
-| TC-WFM-056 | REQ-WFM-056 | Component | 1 | unit test with the mock of the library part for transforms; a fixed copy of three shipped nodes, one ID with two versions | AC-32: each ID once, trusted, marked shipped, highest version | exact |
+| TC-WFM-056 | REQ-WFM-056 | Component | 1 | unit test with the mock of the library part for transforms; a fixed copy of three shipped nodes, one ID with two versions, one ID whose version 2 is retired | AC-32: each ID once, trusted, marked shipped, highest version | exact |
 | TC-WFM-067 | REQ-WFM-067 | Component | 1 | unit test with the mock of the library part for transforms; a transform moved to tested without and with a named evidence | AC-32: the first is refused, the second accepted; trust is unchanged | exact |
 | TC-WFM-068 | REQ-WFM-068 | Component | 1 | unit test with the mock of the library part for transforms; a retired trusted transform and a check that names it | AC-32: the check runs it | exact |
 | TC-WFM-070 | REQ-WFM-070 | Component | 1 | unit test with the mock of the library part for transforms; a toolbox with one live and one retired transform | AC-32: only the live one is in the list for a new graph | exact |
 | TC-WFM-090 | REQ-WFM-090 | Component | 1 | unit test with the mock of the library part for transforms; an imported untrusted transform | AC-32: the look-up names that it came from outside MIA and was not reviewed | exact |
 | TC-WFM-091 | REQ-WFM-091 | Component | 1 | unit test with the mock of the library part for transforms; a retired untrusted transform with and without the owner's allowance | AC-32: with the allowance a check runs it; without it the run is refused; as a graph step it is refused in both cases | exact |
-| TC-WFM-092 | REQ-WFM-092 | Component | 1 | unit test with the mock of the library part for transforms; a trusted version 1 and a version 2 with different code | AC-32: the entry is version 2, still trusted, runs the new code | exact |
+| TC-WFM-092 | REQ-WFM-092 | Component | 1 | unit test with the mock of the library part for transforms; a trusted, tested version 1 and a version 2 with different code | AC-32: the entry is version 2, still trusted and tested, runs the new code | exact |
 | TC-WFM-093 | REQ-WFM-093 | Component | 1 | unit test with the mock of the library part for transforms; a trusted and an untrusted transform, each replaced by a newer version | AC-32: one event for the trusted one with ID, old and new version and author, none for the untrusted one | exact |
 | TC-WFM-094 | REQ-WFM-094 | Component | 1 | unit test with the mock of the library part for transforms; one shipped and one imported transform | AC-32: the export of the shipped one is refused; the imported one exports | exact |
 | TC-WFM-095 | REQ-WFM-095 | Component | 1 | unit test with the mock of the library part for transforms; a retired untrusted transform; the owner, a second account | AC-32: the second account is refused and the allowance stays unset | exact |
@@ -247,9 +247,9 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-203
 
 ### TC-WFM-056 – shipped transforms
 - Verifies: REQ-WFM-056
-- Given: a copy of three shipped nodes of which one ID has the versions 1 and 2, and an empty toolbox
+- Given: a copy of three shipped nodes of which one ID has the versions 1 and 2, another has the versions 1 and 2 with version 2 retired, and an empty toolbox
 - When: the toolbox is seeded
-- Then: it holds three entries, each trusted and marked shipped, and the double ID is in version 2
+- Then: it holds three entries, each trusted and marked shipped, and the first double ID is in version 2 and the second in version 1 (the highest version that is not retired)
 
 ### TC-WFM-067 – lifecycle
 - Verifies: REQ-WFM-067
@@ -283,9 +283,9 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-203
 
 ### TC-WFM-092 – a newer version replaces the code
 - Verifies: REQ-WFM-092
-- Given: a trusted transform in version 1 and a version 2 with different code
+- Given: a trusted transform in version 1 with the lifecycle `tested`, and a version 2 with different code
 - When: version 2 is imported
-- Then: the entry is in version 2, still trusted, and a run gives the result of the new code
+- Then: the entry is in version 2, still trusted, still `tested`, and a run gives the result of the new code
 
 ### TC-WFM-093 – a replaced trusted transform leaves a trace
 - Verifies: REQ-WFM-093

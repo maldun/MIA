@@ -297,7 +297,7 @@
 - Requirement: REQ-WFM-056
 - Group: Shipped nodes (TOOLBOX)
 - Kind: setup
-- Text: The checks shall seed the toolbox from a fixed copy of three shipped nodes in which one ID has two versions, and one further check shall run against the folder library/nodes of the checkout and expect every ID once.
+- Text: The checks shall seed the toolbox from a fixed copy of three shipped nodes in which one ID has two versions and one ID has a retired highest version, and one further check shall run against the folder library/nodes of the checkout and expect every ID once.
 - Rationale: library/nodes changes over time and has IDs with several versions (finding of the prototype); a fixed copy keeps the expected values exact, the second check keeps the copy honest
 - Credibility aspect: reference data
 - Verified by: the copy in the test fixtures and the run against the folder of the checkout
