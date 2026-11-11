@@ -1,6 +1,6 @@
 # A-112: IF-302, the table transforms (proposal, owner G-V2.TOOLBOX)
 
-Status: **proposed** (Draft, 2026-11-11). `contracts/IF-302-record-tables.md`, `contracts/IF-102-storage-interface.md`, their mocks and suites are not changed by this note; that is a separate step (suite red first, the owner's go for protected files), like A-110. Found in Implement (T-06, `implementation-log.md`): the real library of IF-203 v1 saves versioned transform records, and no storage table exists for them; A-110 gave only the meta record a table (`transform_meta`). Owner answers of 2026-11-11: a thin table, not a strict one; an empty code text is fine (a stub transform may stand beside a data node for formal reasons).
+Status: **approved by the owner as drafted (2026-11-11)**, not yet installed. The four open points are settled as proposed (see the end). `contracts/IF-302-record-tables.md`, `contracts/IF-102-storage-interface.md`, their mocks and suites are not changed by this note; that is a separate step (suite red first, the owner's go for protected files), like A-110. Found in Implement (T-06, `implementation-log.md`): the real library of IF-203 v1 saves versioned transform records, and no storage table exists for them; A-110 gave only the meta record a table (`transform_meta`). Owner answers of 2026-11-11: a thin table, not a strict one; an empty code text is fine (a stub transform may stand beside a data node for formal reasons).
 
 ## Why a table
 A transform is a versioned record of IF-203 v1: ID, version, input and output schemas, code text (A-111). The Storage keeps its immutable versions and the history with authors from the table's `versioned` flag (REQ-SLY-004), and cannot do that for a table it does not know (`unknown_table`). IF-301 holds the graph records (`skills` there is a graph record `{id, data}` and does not fit); trust and lifecycle are in `transform_meta` (A-110). So the code of a transform needs a table of its own.
@@ -40,3 +40,6 @@ One requirement in N-3.3, REQ-RTB-009: "The Record tables shall define the table
 2. `version` required and an integer of at least 1: yes (proposal), or free like the rest?
 3. Whether the shipped nodes are written as stubs with `code: ""` (as `seed_shipped` does today) or with the field left out; both are valid under this proposal.
 4. The numbers REQ-RTB-009, TC-RTB-009, TC-IF-302-10 and D-id (next free D-223 at the time of writing: check `tail specs/mia/review-log.md`).
+
+## Owner decision, 2026-11-11 ("approve draft")
+Approved as drafted, so the proposals of the four open points stand: 1. the name `transforms`; 2. `version` required, an integer of at least 1; 3. both forms of an empty code are valid, `seed_shipped` keeps writing `code: ""`; 4. the numbers REQ-RTB-009, TC-RTB-009, TC-IF-302-10, the D-id is taken at install time. Still to do by the owner or the Plan session: the requirement and check text, the contract and mock changes, the suite case (all protected), then the install.
