@@ -98,6 +98,7 @@ def normalize_text(text):
         return ""
     return CONTROL_CHARACTERS.sub("", text).strip()
 SENTENCE_END = re.compile(r"(?<=[.!?])\s+")
+SKILL_RUNS_IN_HISTORY = 3      # runs whose messages the chat model sees
 SKILL_TURN_KINDS = ("question", "phase", "done", "failed", "stopped")      # IF-201 v3
 SKILL_LINK = re.compile(r"\s*\[[^\]]*\]\(#run=[^)]*\)")      # a link to a run in a text of the model
 
@@ -683,8 +684,25 @@ class ChatService:
         return self._repair(text) if self._repair is not None else text
 
     def model_history(self):
-        """STUB of Plan Step 4 (REQ-CHA-046, 059): the messages the next chat turn sends to the chat model; written in Implement"""
-        raise NotImplementedError("REQ-CHA-046, 059")
+        """the messages of skill runs that the next chat turn sends to the chat model, [{"role", "text"}] in the order of the chat (REQ-CHA-046, 059): per run its questions, the answers that
+        follow them, the last status message and the end message; never another status message and never the full result (it is not in the chat). The ordinary exchange is the memory of
+        the Communicator and not part of this list. Unspecified: only the last three runs, so that the history stays small."""
+        records = self.log.history(limit=MAX_PAGE)[0]
+        runs = list(dict.fromkeys(r["skill_run"] for r in records if r.get("skill_run")))[-SKILL_RUNS_IN_HISTORY:]
+        last_status = {run: max((r["id"] for r in records if r.get("skill_run") == run and r.get("kind") == "phase"), default=None) for run in runs}
+        history, after_question = [], False
+        for record in records:
+            run = record.get("skill_run")
+            if run is None:
+                if record["role"] == "user" and after_question:      # the first user message after a question is its answer (the waiter takes it)
+                    history.append({"role": "user", "text": record["text"]})
+                after_question = False
+                continue
+            kind = record.get("kind")
+            after_question = kind == "question" and run in runs
+            if run in runs and (kind != "phase" or record["id"] == last_status[run]):
+                history.append({"role": "assistant", "text": record["text"]})
+        return history
 
     def post_assistant(self, text, emotion=None, auto=False, **fields):
         """a finished message of MIA that was not an answer to the page (the hourly time check, ...)"""

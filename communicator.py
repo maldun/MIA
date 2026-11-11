@@ -109,6 +109,7 @@ class Communicator:
 
     TIME_UPDATE="Hi MIA it is {time}." 
     persona_provider = None          # () -> the text of the shared persona file (web_app.py sets it); None = no persona
+    skill_history = None             # () -> the messages of skill runs [{"role", "text"}] for the next turn (REQ-CHA-046; ChatService.model_history); None = off
     memory_provider = None           # (message) -> the block of memory records that match the message, "" for none (web_app.py sets it with "structured_memory"); None = off
     FULL_PROFILE = "full"
     LIGHT_PROFILE = "light"
@@ -212,7 +213,7 @@ class Communicator:
     def chat(self,msg,stream=True):
         msg_dic = self.update_history(msg,role=self.USER_ROLE)
         answer = self.client.chat(model=self.version,
-                                  messages=[self.persona_message(msg)]+self._history,
+                                  messages=[self.persona_message(msg)]+self._with_skill_messages(),
                                   stream=stream,
                                   options=self.llm_options,
                                   think=self.think,
@@ -220,6 +221,15 @@ class Communicator:
                                   )
         return answer
     
+    def _with_skill_messages(self):
+        """the memory of this conversation with the messages of skill runs (questions, answers, last status, end message) before the new user message; they are not kept in the memory"""
+        try:
+            skill = [{self.ROLE_KEY:m["role"],self.CONTENT_KEY:m["text"]} for m in (self.skill_history() if self.skill_history else [])]
+        except Exception as e:           # a log that cannot be read must not stop the answer
+            logger.warning(f"Could not read the skill messages: {e}")
+            skill = []
+        return self._history[:-1] + skill + self._history[-1:]
+
     def handle_chunk(self,chunk):
         """
         Handling of chunks to avoid direct calling
