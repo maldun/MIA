@@ -51,3 +51,8 @@ Line of work `goal/v2.toolbox`, supervised. Test runs here are feedback, not ver
 - Full unit suite: 2222 tests, one failure, the table list of `tests/test_record_tables.py`, which I fixed (and re-ran alone, OK) after the run had started; the full suite was not re-run after that edit.
 - Decisions: the library creates the meta record (untrusted, draft) on the first save of an ID; `set_meta` checks field names and types itself (the table leaves optional fields free) and a refused call stores nothing.
 - Open for Phase 4: the real contract steps and the unit suite should be re-run in a clean environment; `contracts/IF-203` text for A-111 is still not installed (the suite, mock and library are consistent with the note).
+
+## Hand-over checks (2026-11-11)
+- `goal_check`: two errors, both known and outside this goal (GL1 two open iteration goals, GL3 IF-302 in scope here but not in G-V2: the parent session). `trace_check`: no error on a TOOLBOX id; the errors listed are the ids of MODEL and CONVERT (REQ-WFM-057 to 066, 069). Warning on REQ-RTB-009 and REQ-RTB-008 (`@mark.req` marker not found for the contract suite, same pattern as the older ones).
+- `req_review status`: **TR-TOOLBOX-005 is "changed since review"**: the install script of A-112 added TC-RTB-009 to its "Applies to" line (not TR-TOOLBOX-001 as the A-112 text of this log said). REQ-RTB-009 and TC-RTB-009 are Draft and unreviewed. Both need the owner's review.
+- Open for the hand-over: approval of A-111 and installation of the IF-203 text; the review of TR-TOOLBOX-005, REQ-RTB-009, TC-RTB-009; the questions of T-05; `plan.md` is still Draft (approve at the Plan gate); the deny rules for the protected folders (`.claude/settings.json`) to re-add if lifted.
