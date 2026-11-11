@@ -33,7 +33,7 @@ Amended 2026-11-08 after the toolbox prototype (`prototype/toolbox`, owner decis
 | Suggestion | Decision (split / keep together) | Reason | Date |
 |---|---|---|---|
 | further cut | keep together | 10 items in scope, one chain | 2026-11-07 |
-| further cut, after the amendment of 2026-11-08 | open | 17 requirement and interface items in scope (16 requirements, IF-203) plus the IF-302 table, still one chain, six tasks in the draft plan; the owner decides at the Plan gate | 2026-11-08 |
+| further cut, after the amendment of 2026-11-08 | keep together | 17 requirement and interface items in scope (16 requirements, IF-203) plus the IF-302 table, still one chain, six tasks in the draft plan; owner decision D-220 | 2026-11-11 (first date 2026-11-08) |
 
 ## Scope
 Top-level items it serves: FR-38. Requirements by ID (inside G-V2's scope):
