@@ -7,8 +7,8 @@ categories and the vote value. It never changes a document (a task or memo comes
 """
 
 TABLES = {name: {"versioned": True, "deletable": name in ("history", "memory", "tasks", "memos")}
-          for name in ("history", "memory", "votes", "tasks", "memos", "accounts", "presets", "gestures", "runs", "source_trust", "cases", "behaviours", "workflow_meta", "reports", "transform_meta")}     # reports: the finished report of a task (REQ-WFM-038); cases: proposed benchmark cases (REQ-CHA-016); behaviours: the adaptation counters (REQ-CHA-017, -018)
-REQUIRED = {"reports": ("task", "skill", "skill_version", "question", "account", "model_pin", "report"), "workflow_meta": ("status",), "transform_meta": ("trust", "lifecycle"), "cases": ("question", "answer", "status"), "behaviours": ("name", "net", "votes"), "memory": ("text", "source"), "votes": ("user", "subject", "category", "value"), "tasks": ("text",), "memos": ("text",),
+          for name in ("history", "memory", "votes", "tasks", "memos", "accounts", "presets", "gestures", "runs", "source_trust", "cases", "behaviours", "workflow_meta", "reports", "transform_meta", "transforms")}     # reports: the finished report of a task (REQ-WFM-038); cases: proposed benchmark cases (REQ-CHA-016); behaviours: the adaptation counters (REQ-CHA-017, -018)
+REQUIRED = {"reports": ("task", "skill", "skill_version", "question", "account", "model_pin", "report"), "workflow_meta": ("status",), "transform_meta": ("trust", "lifecycle"), "transforms": ("id", "version"), "cases": ("question", "answer", "status"), "behaviours": ("name", "net", "votes"), "memory": ("text", "source"), "votes": ("user", "subject", "category", "value"), "tasks": ("text",), "memos": ("text",),
             "runs": ("workflow", "workflow_version", "model_pin", "benchmark_version")}
 CATEGORIES = ("answer_quality", "reactions", "character_behaviour", "service")
 MEMORY_KINDS = ("fact", "preference", "commitment")       # IF-302 v2 (REQ-CHA-011): the optional fields `kind` and `status` of a memory record; `subject` and `updated` are free
@@ -42,6 +42,11 @@ def validate(table, doc):
         for field, allowed in (("trust", TRANSFORM_TRUST), ("lifecycle", TRANSFORM_LIFECYCLE)):
             if doc[field] not in allowed:
                 return {"rule": "schema", "detail": field}
+    if table == "transforms":      # IF-302 v9 (A-112, REQ-RTB-009): inputs, outputs and code are free (a missing, empty or null code is a stub); the toolbox checks the exchange form
+        if not isinstance(doc["id"], str) or not doc["id"]:
+            return {"rule": "schema", "detail": "id"}
+        if type(doc["version"]) is not int or doc["version"] < 1:      # a bool or a float is no version number, as for the vote value
+            return {"rule": "schema", "detail": "version"}
     if table == "votes":
         if doc["category"] not in CATEGORIES:
             return {"rule": "category", "detail": doc["category"]}

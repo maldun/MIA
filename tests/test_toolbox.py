@@ -2,9 +2,12 @@
 Toolbox import checks beyond the acceptance tests (REQ-WFM-052, 053, 055): every malformed exchange file is refused as invalid_file and stores nothing.
 Run: python tests/test_toolbox.py
 """
+import importlib.util
 import json
 import os
+import shutil
 import sys
+import tempfile
 import unittest
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -14,6 +17,24 @@ for path in (REPO, os.path.join(REPO, "tests", "helpers"), os.path.join(REPO, "t
 from if_203_transforms import TransformLibraryMock     # noqa: E402
 from toolbox_fakes import EventRecord, exchange_file    # noqa: E402
 from toolbox import Toolbox, ToolboxError               # noqa: E402
+from storage import Storage                             # noqa: E402
+from storage_files import FileBackend                   # noqa: E402
+from workflow_library import WorkflowLibrary            # noqa: E402
+
+# The acceptance tests of the toolbox run once more on the real library (T-06, TR-TOOLBOX-001): the same file under another module name, since this module is called test_toolbox too.
+_spec = importlib.util.spec_from_file_location("acceptance_toolbox", os.path.join(REPO, "tests", "acceptance", "test_toolbox.py"))
+acceptance = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(acceptance)
+
+
+class ToolboxOnTheRealLibrary(acceptance.ToolboxAcceptance):
+    """Every acceptance test of the toolbox on the real WorkflowLibrary over the real Storage (file backend) instead of the mock; the stand-ins for accounts and events stay."""
+    def setUp(self):
+        super().setUp()
+        folder = tempfile.mkdtemp(prefix="toolbox-store-")
+        self.addCleanup(shutil.rmtree, folder, True)
+        self.library = WorkflowLibrary(Storage(FileBackend(folder)))
+        self.box = Toolbox(self.library, self.accounts.is_owner, self.events)
 
 
 class ImportChecks(unittest.TestCase):
