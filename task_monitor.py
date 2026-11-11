@@ -10,7 +10,7 @@ class TaskMonitor:
     def __init__(self, emit, task_id, task, mode="run", clock=time.monotonic, min_interval=0.5):
         self._emit, self._clock, self._interval = emit, clock, min_interval
         self.id, self.task, self.mode = task_id, task, mode
-        self.phase, self.budget, self.counts = None, {}, {}
+        self.phase, self.budget, self.counts, self.elements = None, {}, {}, []
         self.done, self._paused_at, self._paused_total = False, None, 0.0
         self._wait_at = None                                     # the task waits for the answer of a user: that time is not work time, but the card does not say paused
         self._started, self._last = clock(), None
@@ -35,12 +35,14 @@ class TaskMonitor:
             self._paused_total += self._clock() - self._wait_at
             self._wait_at = None
 
-    def update(self, phase=None, budget=None, counts=None):
+    def update(self, phase=None, budget=None, counts=None, elements=None):
         if phase is not None:
             self.phase = phase
         for name, figures in (budget or {}).items():
             self.budget.setdefault(name, {}).update(figures)
         self.counts.update(counts or {})
+        if elements is not None:
+            self.elements = list(elements)                      # label and text pairs a skill chooses to show (REQ-WFM-138)
         if self._last is None or self._clock() - self._last >= self._interval:
             self._send()
 
@@ -62,7 +64,7 @@ class TaskMonitor:
     def state(self):
         budget = {name: dict(figures) for name, figures in self.budget.items()}
         budget.setdefault("seconds", {})["used"] = round(self.active_seconds(), 1)       # the monitor counts the time, a task only reports the limit
-        return {"id": self.id, "task": self.task, "phase": self.phase, "mode": self.mode, "paused": self.paused, "done": self.done, "budget": budget, "counts": dict(self.counts)}
+        return {"id": self.id, "task": self.task, "phase": self.phase, "mode": self.mode, "paused": self.paused, "done": self.done, "budget": budget, "counts": dict(self.counts), "elements": list(self.elements)}
 
     def _send(self):
         self._last = self._clock()
