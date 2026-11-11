@@ -770,3 +770,4 @@ The first version was silent until the end and could take 20 minutes or more: th
 | TR-TOOLBOX-005 | test requirement | 9e375b65e591 | maldun | 2026-11-11 | approved |  |
 | D-222 | **A-110 installed, G-V2.TOOLBOX, 2026-11-11.** `contracts/IF-302-record-tables.md` v8 and `contracts/IF-102-storage-interface.md` v4 name the table `transform_meta` (REQ-RTB-008). The mock, the contract suites, REQ-RTB-001's count and the goal record are separate steps. |
 | G-V2.TOOLBOX | goal | 60b70f89f548 | maldun | 2026-11-11 | approved | Plan reviewed 2026-11-11: split check keep together (D-220) |
+| D-223 | **A-112 installed, G-V2.TOOLBOX, 2026-11-11.** `contracts/IF-302-record-tables.md` v9 and `contracts/IF-102-storage-interface.md` v5 name the table `transforms` (REQ-RTB-009; id and version required, a missing, empty or null code valid). The mock and the suite case are installed with `tools/apply_red_tests_a112.sh`. |
