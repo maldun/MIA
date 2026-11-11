@@ -275,7 +275,7 @@
 - Kind: setup
 - Text: The sample transform shall carry a code text that writes a marker file at the moment it is compiled or run, the marker folder shall be new and empty for every check, and a check that expects no run shall read the folder after the action.
 - Rationale: an untrusted transform that does not run leaves no trace of its own; only a side effect shows that code ran, and a shared folder would show the marker of an earlier check
-- Credibility aspect: reference data
+- Credibility aspect: reference accuracy
 - Verified by: inspection of the sample transform and of the folder set-up in the plan review
 - Status: Draft
 - History: G-V2.TOOLBOX Plan step 3 (2026-11-08), new, from the toolbox prototype and the owner's answers of 2026-11-08
@@ -299,7 +299,7 @@
 - Kind: setup
 - Text: The checks shall seed the toolbox from a fixed copy of three shipped nodes in which one ID has two versions and one ID has a retired highest version, and one further check shall run against the folder library/nodes of the checkout and expect every ID once.
 - Rationale: library/nodes changes over time and has IDs with several versions (finding of the prototype); a fixed copy keeps the expected values exact, the second check keeps the copy honest
-- Credibility aspect: reference data
+- Credibility aspect: reference accuracy
 - Verified by: the copy in the test fixtures and the run against the folder of the checkout
 - Status: Draft
 - History: G-V2.TOOLBOX Plan step 3 (2026-11-08), new, from the toolbox prototype and the owner's answers of 2026-11-08
@@ -311,7 +311,7 @@
 - Kind: unit
 - Text: The checks shall compare IDs, version numbers, status values, the list of offered transforms and the words of a refusal by exact equality, with every refusal checked together with an accepted twin.
 - Rationale: a refusal check alone passes when everything is refused; the accepted twin shows that the rule, not a general failure, did the refusing
-- Credibility aspect: exact values
+- Credibility aspect: numerical settings
 - Verified by: signed off as a group in the plan review
 - Status: Draft
 - History: G-V2.TOOLBOX Plan step 3 (2026-11-08), new, from the toolbox prototype and the owner's answers of 2026-11-08

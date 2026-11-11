@@ -758,3 +758,9 @@ The first version was silent until the end and could take 20 minutes or more: th
 | TC-WFM-093 | check | 178a6168d385 | maldun | 2026-11-11 | approved |  |
 | TC-WFM-094 | check | 450bf34da46f | maldun | 2026-11-11 | approved |  |
 | TC-WFM-095 | check | bbbd5aad9a9b | maldun | 2026-11-11 | approved |  |
+| TR-TOOLBOX-001 | test requirement | 4561965f4502 | maldun | 2026-11-11 | approved |  |
+| TR-TOOLBOX-002 | test requirement | b8bbc6ead31d | maldun | 2026-11-11 | approved |  |
+| TR-TOOLBOX-003 | test requirement | ca21e3bc3bea | maldun | 2026-11-11 | approved |  |
+| TR-TOOLBOX-004 | test requirement | e8877bf5efce | maldun | 2026-11-11 | approved |  |
+| TR-TOOLBOX-005 | test requirement | 8a630632aa70 | maldun | 2026-11-11 | approved |  |
+| TR-TOOLBOX-006 | test requirement | 23842d9b8608 | maldun | 2026-11-11 | approved |  |
