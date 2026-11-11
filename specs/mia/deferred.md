@@ -393,3 +393,18 @@ Proposed on 2026-10-29 after the usability work of N-2.3 T-09 to T-11 and N-1.1 
 - Decision: D-289, 2026-11-08, Stefan Reiterer
 - Sign-off: maldun, 2026-11-08
 - Status: open
+
+## TD-80 – The 25 open Dependabot alerts of the repository are not handled yet
+- Kind: defer
+- Requirement: none (maintenance of the dependencies; no requirement covers it)
+- Interim criterion: none beyond the pinned versions of `requirements.txt` and `requirements-db.txt` and the rule that no dependency is added or changed without the owner's approval; the app runs only on the owner's workstation and inside the private network (CON-5)
+- Target: the open alerts (25 on 2026-11-12: 1 critical, 5 high, 15 moderate, 4 low, https://github.com/maldun/MIA/security/dependabot) are listed, matched to our pins, and each is fixed by a version change, accepted with a reason, or dismissed as not reachable; the tests of the new versions are green
+- Reason: the owner decided on 2026-11-12 to go through them once everything is implemented, as a goal of its own (a cleanup goal), so that version changes do not mix with the feature goals
+- Effort: not estimated; it is a goal of its own, with its own Explore and Plan
+- Risk of the gap: a known flaw in a dependency stays in the code until the cleanup; mitigation: personal use on a trusted network, no public port, no untrusted users (the owner's privacy and trust statement); the web tools read untrusted text, so alerts about `requests`, `lxml` and `Flask` should be looked at first when the goal starts
+- Owner: Stefan Reiterer
+- Trigger: all nodes of the decomposition are implemented and integrated (the owner's wording, 2026-11-12; no date)
+- Target check: specified only
+- Decision: the owner's instruction in the session of 2026-11-12 (no D-number yet)
+- Sign-off: maldun, 2026-11-12
+- Status: open
