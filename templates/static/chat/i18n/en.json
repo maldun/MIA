@@ -207,5 +207,7 @@
   "srv.counts": "Counts",
   "task.budget.searches": "Searches",
   "task.count.found": "Found",
-  "task.count.read": "Read"
+  "task.count.read": "Read",
+  "srv.share.strip": "Skill run strip: height in % of the window (12 to 40)",
+  "srv.share.full": "Skill run, full run part: height in % of the window (20 to 60)"
 }

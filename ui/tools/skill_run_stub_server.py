@@ -36,11 +36,11 @@ def shown_run():
     return ("", 204) if state["shown"] is None else jsonify(state["shown"])
 
 
-@app.route("/api/skill-runs/<run_id>")
-def skill_run(run_id):
+@app.route("/api/skill-runs/<run>")
+def skill_run(run):      # the name of the URL part is the one of the real blueprint, whose endpoint is re-pointed to this view below
     if not signed_in():
         return jsonify({"error": "unauthenticated"}), 401
-    return (jsonify(state["runs"][run_id]) if run_id in state["runs"] else (jsonify({"error": "not_found"}), 404))
+    return (jsonify(state["runs"][run]) if run in state["runs"] else (jsonify({"error": "not_found"}), 404))
 
 
 # the real blueprint chat_ops_api answers these paths since G-V3.PANEL T-05 and comes first: re-point its endpoints to the stub views (as chat_mock_server.py does for the others)

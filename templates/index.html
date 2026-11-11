@@ -188,6 +188,7 @@
       <dl class="srv-elements" id="srv-elements"></dl>
       <details class="srv-full" id="srv-full">
         <summary data-i18n="srv.full">Full run</summary>
+        <div class="srv-full-body" id="srv-full-body">
         <h3 data-i18n="srv.result">Result</h3>
         <div class="srv-result" id="srv-result"></div>
         <h3 data-i18n="srv.answers">Your answers</h3>
@@ -198,6 +199,7 @@
         <ul id="srv-files"></ul>
         <h3 data-i18n="srv.counts">Counts</h3>
         <p id="srv-counts"></p>
+        </div>
       </details>
     </div>
   </section>
@@ -270,6 +272,14 @@
       <label class="setting check"><input type="checkbox" id="set-emotions"><span data-i18n="settings.emotions">Show emotions at messages</span></label>
       <label class="setting check"><input type="checkbox" id="set-times"><span data-i18n="settings.times">Show times</span></label>
       <label class="setting check"><input type="checkbox" id="set-compact"><span data-i18n="settings.compact">Compact messages</span></label>
+      <label class="setting">
+        <span data-i18n="srv.share.strip">Skill run strip: height in % of the window (12 to 40)</span>
+        <input type="number" id="srv-share-strip" min="12" max="40" step="1" value="16" inputmode="numeric">
+      </label>
+      <label class="setting">
+        <span data-i18n="srv.share.full">Skill run, full run part: height in % of the window (20 to 60)</span>
+        <input type="number" id="srv-share-full" min="20" max="60" step="1" value="34" inputmode="numeric">
+      </label>
       <label class="setting">
         <span data-i18n="settings.token">Editor token</span>
         <input type="password" id="set-token" autocomplete="off" spellcheck="false" data-i18n-placeholder="settings.token.placeholder" placeholder="from data/editor_token.txt">

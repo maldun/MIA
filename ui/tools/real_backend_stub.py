@@ -31,6 +31,9 @@ _config.ensure = lambda folder: (os.path.join(_cfg_dir, _config.NAME), False)
 from MIA import web_app as w  # noqa: E402
 
 w.play_intro_sound = lambda: None
+for _origin in ("http://127.0.0.1:8686", "http://localhost:8686"):      # the browser container reaches the stub by this address; the guard refuses every other Origin (REQ-API-009)
+    if _origin not in w.allowed_origins:
+        w.allowed_origins.append(_origin)
 w.socketio.server.eio.cors_allowed_origins = "*"
 
 

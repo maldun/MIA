@@ -12,6 +12,7 @@ function el(tag, className, text) {
 export function initSkillRunView({ root, socket, api, t, onStop = () => {}, notify = () => {} }) {
   const $ = (id) => root.querySelector(`#${id}`);
   let view = null;      // a task_status or a run record of the run that is shown
+  const fileInfo = new Map();      // file name -> the entry of the files volume
 
   const label = (prefix, key) => {
     const text = t(`${prefix}.${key}`);
@@ -31,6 +32,8 @@ export function initSkillRunView({ root, socket, api, t, onStop = () => {}, noti
       const link = el('a', '', name);
       link.href = `/api/files/${encodeURIComponent(name)}`;
       item.append(link);
+      const info = fileInfo.get(name);      // size, time and task, when the files volume lists the file (REQ-CLV-024); the name and the download do not wait for it
+      if (info) item.append(el('span', 'srv-file-meta', [info.size !== undefined ? `${info.size} B` : '', info.time ?? '', info.task ?? ''].filter(Boolean).join(' · ')));
       return item;
     }));
     $('srv-counts').textContent = Object.entries(run.counts ?? {}).map(([key, value]) => `${label('task.count', key)}: ${value}`).join(', ');
@@ -78,6 +81,36 @@ export function initSkillRunView({ root, socket, api, t, onStop = () => {}, noti
     draw();
   }
 
+  async function loadFileInfo() {
+    try {
+      fileInfo.clear();
+      for (const file of await api.files()) fileInfo.set(file.name, file);
+    } catch (error) {
+      return;      // without the list the files are shown by name
+    }
+    if (view) drawFull(view);
+  }
+
+  /** a link of a chat message (#run=<id>) opens the Full run part of that run and brings the view into sight (REQ-CLV-037) */
+  async function open(id) {
+    try {
+      view = await api.skillRun(id);
+    } catch (error) {
+      notify(t('workspace.failed'));
+      return;
+    }
+    draw();
+    $('srv-full').open = true;
+    root.scrollIntoView({ block: 'nearest' });
+  }
+  const runOfHash = (hash) => (/^#run=(.+)$/.exec(hash ?? '') ? decodeURIComponent(/^#run=(.+)$/.exec(hash)[1]) : null);
+  document.addEventListener('click', (event) => {
+    const link = event.target.closest?.('a[href^="#run="]');
+    if (!link) return;
+    event.preventDefault();
+    open(runOfHash(link.getAttribute('href')));
+  });
+
   const calls = { pause: () => api.pause().catch(() => notify(t('workspace.failed'))), resume: () => api.resume().catch(() => notify(t('workspace.failed'))), stop: () => onStop() };
   for (const action of ['pause', 'resume', 'stop']) {
     $(`srv-${action}`).addEventListener('click', () => view && controlAction(action, headerModel(view, t).state, calls));
@@ -91,7 +124,15 @@ export function initSkillRunView({ root, socket, api, t, onStop = () => {}, noti
     draw();
   });
   socket.on('skill_run_changed', refresh);
-  socket.on('connect', refresh);
+  socket.on('files_changed', loadFileInfo);
+  async function start() {
+    const linked = runOfHash(location.hash);      // a reload keeps the link: the page opens the linked run, else the one the backend names
+    if (linked) await open(linked);
+    else await refresh();
+    loadFileInfo();
+  }
+  socket.on('connect', start);
+  if (socket.connected) start();      // the socket may have connected before this module ran
   draw();
-  return { refresh, shown: () => view };
+  return { refresh, open, shown: () => view };
 }
