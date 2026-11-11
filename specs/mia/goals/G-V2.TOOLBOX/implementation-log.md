@@ -15,3 +15,9 @@ Line of work `goal/v2.toolbox`, supervised. Test runs here are feedback, not ver
 - Finding (closes the open point of T-01): a malformed file raised a plain exception. Test first: `tests/test_toolbox.py` (not JSON, list, version 0, version `true`, `inputs` a text, empty id), then the schema check `EXCHANGE_SCHEMA` with `jsonschema` (already pinned); the first problem is the reason, nothing is stored.
 - Deviation: TC-WFM-055 asserts `offer() == ["t.one"]`, so `offer` lists all IDs now; T-04 leaves retired ones out.
 - Code text is still never compiled on import (TC-WFM-053 green).
+
+## T-03: Only the owner trusts
+- Requirement: REQ-WFM-054. File: `toolbox.py` (`set_trust`: `owner_only` for trusted by a non-owner; setting untrusted is open to every account).
+- Test reported green (own run, 2026-11-11): TC-WFM-054; TC-WFM-050..053, 055, 090, 092, 093 still green. No new unit test: the acceptance test checks the refusal with its accepted twins (owner trusts, any account untrusts); no edge case beyond it.
+- The refusal leaves the status as it was (checked in TC-WFM-054). The same rule for `allow_baseline` is REQ-WFM-095, T-04.
+- Process note: in T-02 the unit test `tests/test_toolbox.py` was written together with the code, not seen red first; it covers the malformed-file cases, which the schema check handles.

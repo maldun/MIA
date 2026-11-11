@@ -9,10 +9,10 @@ so the real library of T-06 replaces the mock without a change here. T-01 is don
 - export_transform(id) -> the exchange text.
 - look_up(id) -> {"id", "version", "trust", "lifecycle", "reason", "evidence", "baseline_allowed", "shipped"}; `reason` says why a transform is untrusted.
 - set_trust(id, value, account), set_lifecycle(id, value, account, evidence=None, allow_baseline=False): a value outside the lists raises ToolboxError("invalid_trust" or
-  "invalid_lifecycle") and the status stays as it was.
+  "invalid_lifecycle") and the status stays as it was; trusted by an account that is not the owner raises ToolboxError("owner_only").
 - run(id, args) -> the result of the code text's run(args); an untrusted transform raises ToolboxError("untrusted").
 ToolboxError has `code` and `why` (a text for the person).
-Still stubs or minimal until their task: owner-only rules (T-03), evidence, retired and baseline (T-04), seed_shipped and shipped export (T-05).
+Still stubs or minimal until their task: evidence, retired, baseline and its owner-only allowance (T-04), seed_shipped and shipped export (T-05).
 """
 import json
 
@@ -90,6 +90,9 @@ class Toolbox:
     def set_trust(self, tid, value, account):
         if value not in TRUST:
             raise ToolboxError("invalid_trust", "Trust is untrusted or trusted, not %r." % (value,))
+        if value == "trusted" and not self.is_owner(account):
+            # Exception to CON-6 (A-89): only the owner trusts code; any account may take trust back (REQ-WFM-054).
+            raise ToolboxError("owner_only", "Only the owner may mark a transform as trusted.")
         self.library.set_trust(tid, value, account)
 
     def set_lifecycle(self, tid, value, account, evidence=None, allow_baseline=False):
