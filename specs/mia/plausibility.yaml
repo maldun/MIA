@@ -4254,6 +4254,60 @@ plausibility:
       rated: '2026-11-07'
       rated_by: maldun
       rating: plausible
+    REQ-WFM-090:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a mock of the library part; the prototype of
+        G-V2.TOOLBOX shows it works (proposal, accepted by the person)
+      hardware: HW-target
+      rated: '2026-11-11'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-091:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a mock of the library part; the prototype of
+        G-V2.TOOLBOX shows it works (proposal, accepted by the person)
+      hardware: HW-target
+      rated: '2026-11-11'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-092:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a mock of the library part; the prototype of
+        G-V2.TOOLBOX shows it works (proposal, accepted by the person)
+      hardware: HW-target
+      rated: '2026-11-11'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-093:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a mock of the library part; the prototype of
+        G-V2.TOOLBOX shows it works (proposal, accepted by the person)
+      hardware: HW-target
+      rated: '2026-11-11'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-094:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a mock of the library part; the prototype of
+        G-V2.TOOLBOX shows it works (proposal, accepted by the person)
+      hardware: HW-target
+      rated: '2026-11-11'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-095:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a mock of the library part; the prototype of
+        G-V2.TOOLBOX shows it works (proposal, accepted by the person)
+      hardware: HW-target
+      rated: '2026-11-11'
+      rated_by: maldun
+      rating: plausible
     REQ-WFX-001:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
