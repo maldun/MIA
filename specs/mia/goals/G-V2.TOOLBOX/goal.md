@@ -80,7 +80,7 @@ Top-level items it serves: FR-38. Requirements by ID (inside G-V2's scope):
 | Phase | State | Record or reason |
 |---|---|---|
 | Explore | done | HLS of iteration 2 approved 2026-11-05 (D-186) |
-| Plan | in progress | requirements drafted in G-V2 Plan step 1; amended 2026-11-08 (REQ-WFM-090..095, A-110); checks in Step 3 |
+| Plan | in progress | requirements, checks and test requirements reviewed and approved 2026-11-11 (maldun, D-220, D-221), goal reviewed; `plan.md` is a draft; A-110 drafted (script `tools/apply_amendment_a110.sh`, not installed); open: Step 4 (red tests, `handover-step4.md`), the parent session's files |
 | Implement | open | |
 | Verify | open | |
 | Commit | open | |

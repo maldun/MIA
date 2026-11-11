@@ -768,3 +768,5 @@ The first version was silent until the end and could take 20 minutes or more: th
 | REQ-RTB-008 | requirement | 7f7cd5ee1ba5 | maldun | 2026-11-11 | approved |  |
 | TC-RTB-008 | check | a175ad97f8d4 | maldun | 2026-11-11 | approved |  |
 | TR-TOOLBOX-005 | test requirement | 9e375b65e591 | maldun | 2026-11-11 | approved |  |
+| D-222 | **A-110 installed, G-V2.TOOLBOX, 2026-11-11.** `contracts/IF-302-record-tables.md` v8 and `contracts/IF-102-storage-interface.md` v4 name the table `transform_meta` (REQ-RTB-008). The mock, the contract suites, REQ-RTB-001's count and the goal record are separate steps. |
+| G-V2.TOOLBOX | goal | 60b70f89f548 | maldun | 2026-11-11 | approved | Plan reviewed 2026-11-11: split check keep together (D-220) |
