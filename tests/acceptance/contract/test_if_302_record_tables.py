@@ -96,6 +96,21 @@ class RecordTablesContract(unittest.TestCase):
         for value in (1.0, -1.0, True, False):
             self.assertEqual(tables.validate("votes", dict(vote, value=value)), {"rule": "schema", "detail": "value"}, value)
 
+    @mark.req("IF-302", "REQ-RTB-008")
+    @each_provider(IF)
+    def test_transform_meta_keeps_trust_and_lifecycle(self, tables):
+        """TC-IF-302-09 (v8, A-110; TC-RTB-008): transform_meta is versioned and not deletable; trust (untrusted or trusted) and lifecycle (draft, tested or retired) are required and exact; the optional fields are free.
+        (08 is taken by skill_runs of G-V3, A-141: check the number when both are installed.)"""
+        self.assertEqual(tables.definitions()["transform_meta"], {"versioned": True, "deletable": False})
+        self.assertIsNone(tables.validate("transform_meta", {"trust": "trusted", "lifecycle": "tested"}))
+        self.assertIsNone(tables.validate("transform_meta", {"trust": "untrusted", "lifecycle": "draft", "reason": "not reviewed", "evidence": "run-17", "baseline_allowed": False, "shipped": True}))
+        for field in ("trust", "lifecycle"):
+            incomplete = {"trust": "trusted", "lifecycle": "tested"}
+            del incomplete[field]
+            self.assertEqual(tables.validate("transform_meta", incomplete), {"rule": "schema", "detail": field})
+        self.assertEqual(tables.validate("transform_meta", {"trust": "maybe", "lifecycle": "tested"}), {"rule": "schema", "detail": "trust"})
+        self.assertEqual(tables.validate("transform_meta", {"trust": "trusted", "lifecycle": "fine"}), {"rule": "schema", "detail": "lifecycle"})
+
 
 if __name__ == "__main__":
     unittest.main()
