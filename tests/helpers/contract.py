@@ -210,12 +210,13 @@ class _ChatApiAdapter:
         self._files = FileStore(os.path.join(folder, "files"))
         self._tasks = TaskRegistry()              # A-25: the tasks are registered, the chat service names none; the contract suite has one scripted task, `review`
         self._tasks.register(Task("review", self._scripted_review, "Scripted review of the contract suite", "your question", "/review a question",
-                                  options=(Option("slice", "flag", False, "time slices"),), needs=("ask", "options", "files")))
+                                  options=(Option("slice", "flag", False, "time slices"),), needs=("ask", "options", "files", "monitor"), phases=("asking", "reporting")))
         self._chat = ChatService(self._broadcast, ChatLog(os.path.join(folder, "chat.jsonl")), MoodTracker(os.path.join(REPO, "moods.json")),
                                  self._scripted_answer, queue_size=queue_limit, user_limit=user_limit, spawn=self._spawn,
                                  votes=store, wall_clock=lambda: self.START + self._now, behaviours=lambda: self.BEHAVIOURS,
                                  tasks=self._tasks, files=self._files, review_timeout=30)
         self._review_questions = tuple(review)
+        self._store = store                                         # v16: delete_history deletes in it
         self._review_fails = review_fails
         app = Flask(__name__)
 
@@ -249,14 +250,16 @@ class _ChatApiAdapter:
         else:
             self._pending.append(target)
 
-    def _scripted_review(self, text, on_delta, on_emotion, should_stop, ask=None, options=None, files=None):
+    def _scripted_review(self, text, on_delta, on_emotion, should_stop, ask=None, options=None, files=None, monitor=None):
         """the review of the contract suite: asks its questions one after the other (should_stop() waits while the task is paused), stores a file and gives the report (stopped or not)"""
+        monitor.update(phase="asking")              # v16: the two phases the scripted review declares
         for question in self._review_questions:
             ask(question)
             if should_stop():
                 break
         if self._review_fails:
             raise RuntimeError(self._review_fails)
+        monitor.update(phase="reporting")
         files("review-contract.md", "# the report\n")
         return "the report"
 
@@ -397,6 +400,17 @@ class _ChatApiAdapter:
 
     def account(self, session, message_id):
         return self._route("get", "/api/account?message_id=%s" % message_id, session)
+
+    def shown_run(self, session):
+        return self._route("get", "/api/skill-runs/shown", session)
+
+    def skill_run(self, session, run_id):
+        return self._route("get", "/api/skill-runs/%s" % run_id, session)
+
+    def delete_history(self, account):
+        """Test adapter (v16): a history record of the account is deleted in the storage (IF-102); the run records go with it"""
+        self._store.put("history", "h-" + account, {"text": "hello"}, account)
+        self._store.delete("history", "h-" + account, account)
 
     def run_with_variant(self, variant):
         raise unittest.SkipTest("IF-101 no workflow picks a character variant yet (REQ-CHV-008)")
