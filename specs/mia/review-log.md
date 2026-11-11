@@ -764,3 +764,4 @@ The first version was silent until the end and could take 20 minutes or more: th
 | TR-TOOLBOX-004 | test requirement | e8877bf5efce | maldun | 2026-11-11 | approved |  |
 | TR-TOOLBOX-005 | test requirement | 8a630632aa70 | maldun | 2026-11-11 | approved |  |
 | TR-TOOLBOX-006 | test requirement | 23842d9b8608 | maldun | 2026-11-11 | approved |  |
+| D-221 | **A-110 open points, G-V2.TOOLBOX, owner maldun, 2026-11-11.** Table name `transform_meta`; its requirement is REQ-RTB-008 (N-3.3, to be written as Draft, with a check, then reviewed); the IF-302 version is the next free one at install time; `shipped` is a field of the table. A-110 itself is not yet approved as a whole; `contracts/` is untouched. |

@@ -16,14 +16,17 @@ A transform is a versioned record of IF-203 v1 (ID, version, schemas, code text)
 | version number | the next free version of IF-302 at install time (A-141 takes v8 on `goal/v3`; v9 if it is installed first) |
 
 ## Requirement it needs
-One requirement in N-3.3 (number to be given by the owner, as for REQ-RTB-007): "The Record tables shall define the table transform_meta with the required fields trust and lifecycle, as versioned records that are not deletable." Check with a scenario like TC-RTB-007. REQ-RTB-001 (table count) changes with it; if A-141 is installed first it reads 16.
+One requirement in N-3.3, REQ-RTB-008 (owner 2026-11-11): "The Record tables shall define the table transform_meta with the required fields trust and lifecycle, as versioned records that are not deletable." Check with a scenario like TC-RTB-007. REQ-RTB-001 (table count) changes with it; if A-141 is installed first it reads 16.
 
 ## What stays outside
 - Whether an account may set a value (only the owner trusts; any account may untrust, REQ-WFM-054) is a rule of the Workflow management, not of the table.
 - The event of REQ-WFM-093 is the toolbox's, through IF-401.
 - The contract suite for the table and the IF-203 v1 `transforms` suite are Step 4 work (protected, the owner installs).
 
-## Open points for the owner
+## Owner answers of 2026-11-11 (D-221)
+1. Table name `transform_meta`. 2. The N-3.3 requirement is REQ-RTB-008 (not yet written); the IF-302 version is the next free one at install time (v8 or v9, A-141 or A-110 first), REQ-RTB-001's table count follows. 3. `shipped` is a field of the table.
+
+## Open points (answered, kept for the record)
 1. Table name `transform_meta` (proposal; parallel to `workflow_meta`).
 2. Number of the N-3.3 requirement and the order of A-141 and A-110 (version numbers).
 3. Is `shipped` a meta field (proposal) or derived from a folder? The proposal keeps it in the table so `look_up` needs one read.
