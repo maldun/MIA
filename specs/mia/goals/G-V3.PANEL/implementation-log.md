@@ -8,13 +8,15 @@ Goal: G-V3.PANEL   Line of work: goal/v3 (the worktree's branch; the plan names 
 | T-02 | done | (this commit) | TC-WFM-130..135, 137, 138 (8 tests) green; `test_task_monitor`, `test_chat_tasks`, `test_core_names_no_skill` green | `skill_runs.py` replaced the stub; `TaskMonitor.update` has the optional `elements` argument and `state()` the key `elements` (D-309) |
 | T-03 | done | | | note approved |
 | T-04 | done | (this commit) | TC-WFM-136 green; `test_review_chat` (25), `test_review_run_mode`, `test_review_entry`, `test_extension_loader`, `test_chat_tasks` green; full unit suite 2067 tests (+ the new one), one error: the known `test_tailscale` timeout | `skill_run_observer.py`; `Task.phases` and the manifest field `phases` (loader); `TaskMonitor.observer`; six calls in `chat_service.py`; the review declares 5 stages and sends exactly those names as the phase, the detail moves to the element `Now` |
-| T-05 | open | | | |
+| T-05 | done on the code side; the real variants of TC-IF-101-34, -35, -36, -38, -39 wait for the helper amendment (see Stop conditions) | (this commit) | TC-IF-101-30, -31, -37 green on the real provider; with the patched helper in a sandbox copy all 76 tests of `test_if_101_chat_api` pass (2 skips as before); full unit suite 2068 tests, one error: the known `test_tailscale` timeout | `chat_service.py` (own recorder from the `votes` storage, enriched `task_status`, marker `skill_run`, link instead of `Files:`, `shown_run`, `skill_run`), `chat_ops_api.py` (two routes), `skill_runs.py` (end phase state, tie-break, account check) |
 | T-06 | done | (this commit) | `node --test "tests/js/*.test.mjs"`: 170 pass, 0 fail (the 7 tests of the model) | `skill-run-model.js` replaced the stub; imports `budgetText` from `task-card-model.js`, which is unchanged |
 | T-07 to T-10 | open | | | |
 
 ## Findings
 | Finding | Task | Covered by test |
 |---|---|---|
+| `tests/test_review_chain.py` expected the download links in the result text; A-140 (approved, D-302) drops the `Files:` suffix | T-05 | the same test, now expecting the run link and the files in the run record |
+| The real adapter of the contract suite (`tests/helpers/contract.py`, protected) has no `shown_run`, `skill_run`, `delete_history` and a review without phases | T-05 | patch in `specs/mia/goals/G-V3/contract-change-3/` |
 | The unit test of the table list (`tests/test_record_tables.py`, TC-RTB-001, TC-RTB-006) asserts exactly the 14 tables and the deletable set of four of the approved REQ-RTB-001 and fails with the 15th table | T-01 | the same test, now naming 15 tables and the deletable set of five |
 
 ## Plan amendments
@@ -23,9 +25,11 @@ None. The conflict of the finding was ruled by the owner (below); A-141 (approve
 ## Stop conditions hit
 | Date | Task | Condition | Escalated to | Outcome |
 |---|---|---|---|---|
+| 2026-11-11 | T-05 | a protected helper must change: TC-IF-101-34..36, -38, -39 cannot run on the real provider without `shown_run`, `skill_run`, `delete_history` and phases in the scripted review of `tests/helpers/contract.py` | the owner | patch built and run in a sandbox; the owner installs it with `python3 -I specs/mia/goals/G-V3/contract-change-3/install.py --do` |
 | 2026-11-08 | T-01 | a requirement and a test contradict the change the plan prescribes: REQ-RTB-001 (Verified) says 14 tables, A-141 says 15, the plan says "all other tests unchanged" | the owner (maldun) | change the requirement text (15 tables of IF-302 v8, status Approved again) and the unit test; done and marked approved in the review log |
 
 ## Unspecified behavior (decisions no requirement covers)
+- T-05: a failed run's result text is `The /<task> run failed: <reason>` plus the link (until G-V3.CHAT words it); without a recorder (no `votes` storage) the old texts and the `Files:` suffix stay. The record state is never `paused` (only `task_status` says paused). On `failed`/`stopped` the running phase (else the first open one) takes that state. `ChatService` builds its recorder itself from the `votes` storage when none is given. Run ids tie-break by id when two runs share a second.
 - T-04: the recorder is only created when `ChatService(recorder=...)` is given; the account of a run without accounts is `page`. The observer swallows and logs an error of the recorder (a failing record must not take the answer away). The result of the record is the text before the `Files:` suffix. Reason of a failed run is the exception text, of a stopped run `stopped by the user`. The recorder makes its own `TaskMonitor`: in T-05 the web application must give the recorder an `emit` that passes only `skill_run_changed`, or `task_status` is sent twice.
 - T-06: a status without `state` (today's `task_status`) gets the state done, paused or running from its `done` and `paused` flags; `applyStatus` keeps an ended run only against a later status of the same id that is not ended (a new run with another id replaces it); counts are shown as `String(value)`.
 - T-02: on `end` with state `done` all phases of the record become `done`; with `failed` or `stopped` the phase states stay as they were. A phase name that is not declared at `start` changes the monitor's phase text only, not the phase list. A history delete is answered with one `skill_run_changed {id: null}` even if the account had no run record.

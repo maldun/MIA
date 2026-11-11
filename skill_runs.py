@@ -73,14 +73,21 @@ class SkillRunRecorder:
         if state == "done":
             for entry in doc["phases"]:
                 entry["state"] = "done"
+        else:
+            open_phases = [entry for entry in doc["phases"] if entry["state"] != "done"]
+            for entry in [e for e in open_phases if e["state"] == "running"] or open_phases[:1]:
+                entry["state"] = state                           # the phase that was current when the run failed or was stopped (IF-101 v16)
         self._save(doc)
         self._monitors.pop(run, None)
         self._changed(run)
 
-    def record(self, run):
+    def record(self, run, account=None):
+        """the run record of IF-101 v16; with `account` only the record of that account (the view of another account's run is not found)"""
         try:
             doc = self._load(run)
         except KeyError:
+            return None
+        if account is not None and doc["account"] != account:
             return None
         record = {"id": doc["run"], "skill": doc["skill"], "version": doc["skill_version"], "started": doc["started"], "ended": doc.get("ended"), "state": doc["state"]}
         record.update({field: doc.get(field) for field in ("phases", "budget", "counts", "elements", "answers", "result", "material", "files")})
@@ -93,8 +100,8 @@ class SkillRunRecorder:
         docs = [doc for doc in (self._load_or_none(run) for run in self._storage.ids("skill_runs")) if doc and doc["account"] == account]
         running = [doc for doc in docs if doc["state"] == "running"]
         if running:
-            return max(running, key=lambda doc: doc["started"])["run"]
-        return max(docs, key=lambda doc: doc["ended"] or "")["run"] if docs else None
+            return max(running, key=lambda doc: (doc["started"], doc["run"]))["run"]
+        return max(docs, key=lambda doc: (doc["ended"] or "", doc["run"]))["run"] if docs else None
 
     def _history_changed(self, notice):
         """A delete in the history (version None) removes the run records of the account named as author (REQ-WFM-135)."""
