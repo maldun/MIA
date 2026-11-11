@@ -63,7 +63,7 @@ Requirements on the checks TC-CHA-030 to TC-CHA-036, TC-VPB-006 and TC-VPB-007 (
 - Verified by: TC-CHA-035
 - Status: Approved
 
-## Structured memory (T-04, TC-CHA-011 to 013; Draft, written 2026-11-11 after the first Verify, for the owner's review)
+## Structured memory (T-04, TC-CHA-011 to 013; approved by maldun 2026-11-11, written after the first Verify)
 
 ### TR-MEM-001 – the holdout is run by a verifier, once, with the fixed repeats
 - Applies to: TC-CHA-011
@@ -74,7 +74,7 @@ Requirements on the checks TC-CHA-030 to TC-CHA-036, TC-VPB-006 and TC-VPB-007 (
 - Rationale: the implementer saw all dev cases and tuned the prompt against them; the rule of A-12 (9 of 11, lower bound 0.5) has the error rates given in the check only with one re-run.
 - Credibility aspect: reviewer independence
 - Verified by: verification report
-- Status: Draft
+- Status: Approved
 
 ### TR-MEM-002 – the cost check says how many records it saw
 - Applies to: TC-CHA-011
@@ -85,7 +85,7 @@ Requirements on the checks TC-CHA-030 to TC-CHA-036, TC-VPB-006 and TC-VPB-007 (
 - Rationale: on 2026-11-11 the store held 0 records, so the block was empty for all 20 questions and "not higher than dreaming" held trivially.
 - Credibility aspect: measurement conditions
 - Verified by: verification report
-- Status: Draft
+- Status: Approved
 
 ### TR-MEM-003 – the writer is a fake that fails when asked
 - Applies to: TC-CHA-012
@@ -96,7 +96,7 @@ Requirements on the checks TC-CHA-030 to TC-CHA-036, TC-VPB-006 and TC-VPB-007 (
 - Rationale: a fake that returns an empty list would hide a call that happens and finds nothing; the rule is a code rule, not a property of the model.
 - Credibility aspect: stand-in fidelity
 - Verified by: verification report
-- Status: Draft
+- Status: Approved
 
 ### TR-MEM-004 – the routes run on a real storage, the tab is not covered
 - Applies to: TC-CHA-013
@@ -107,4 +107,4 @@ Requirements on the checks TC-CHA-030 to TC-CHA-036, TC-VPB-006 and TC-VPB-007 (
 - Rationale: no automatic check in this file loads the tab; the routes carry the rules, the tab only shows them.
 - Credibility aspect: stand-in fidelity
 - Verified by: verification report
-- Status: Draft
+- Status: Approved
