@@ -51,5 +51,24 @@ class BaselineChecks(unittest.TestCase):
         self.assertEqual(box.run("t.one", {}, as_baseline=True), 1)
 
 
+class SeedChecks(unittest.TestCase):
+    def test_seeding_twice_adds_nothing_and_keeps_a_changed_trust(self):
+        """Example: after the second start a shipped node untrusted by hand is still untrusted and the toolbox holds the same entries."""
+        import shutil
+        import tempfile
+        from toolbox_fakes import shipped_copy
+        folder = tempfile.mkdtemp(prefix="toolbox-nodes-")
+        self.addCleanup(shutil.rmtree, folder, True)
+        shipped_copy(folder)
+        library = TransformLibraryMock()
+        box = Toolbox(library, lambda account: True, EventRecord())
+        box.seed_shipped(folder)
+        box.set_trust("check.plain", "untrusted", "anna")
+        box.seed_shipped(folder)
+        self.assertEqual(library.list_ids("transforms"), ["check.double", "check.gone", "check.plain"])
+        self.assertEqual(library.history("transforms", "check.plain")[-1]["version"], 1)
+        self.assertEqual(box.look_up("check.plain")["trust"], "untrusted")
+
+
 if __name__ == "__main__":
     unittest.main()

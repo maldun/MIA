@@ -6,7 +6,7 @@ so the real library of T-06 replaces the mock without a change here. T-01 is don
 - import_transform(text, author) -> the transform ID; the exchange form is one JSON text with id, version, inputs, outputs and code (a field `status` in it is ignored);
   a text that fails the exchange schema raises ToolboxError("invalid_file") naming the first problem and stores nothing; an ID that exists with an equal or lower version raises ToolboxError("duplicate_id") naming the ID; a higher version replaces the code and keeps trust and lifecycle
   (REQ-WFM-092); the code text is never compiled or run here (REQ-WFM-053).
-- export_transform(id) -> the exchange text.
+- export_transform(id) -> the exchange text; a shipped transform raises ToolboxError("not_exportable"), why names "no code text" (REQ-WFM-094).
 - look_up(id) -> {"id", "version", "trust", "lifecycle", "reason", "evidence", "baseline_allowed", "shipped"}; `reason` says why a transform is untrusted.
 - set_trust(id, value, account), set_lifecycle(id, value, account, evidence=None, allow_baseline=False): a value outside the lists raises ToolboxError("invalid_trust" or
   "invalid_lifecycle") and the status stays as it was; trusted by an account that is not the owner raises ToolboxError("owner_only").
@@ -15,15 +15,18 @@ so the real library of T-06 replaces the mock without a change here. T-01 is don
 - run(id, args, as_baseline=False) -> the result of the code text's run(args); an untrusted transform raises ToolboxError("untrusted") unless it is retired, runs as the baseline
   of a check and has the owner's allowance (REQ-WFM-091); a retired one raises ToolboxError("retired") unless as_baseline (REQ-WFM-068).
 ToolboxError has `code` and `why` (a text for the person).
-Still stub until its task: seed_shipped and shipped export (T-05).
+- seed_shipped(nodes_dir): see the method (REQ-WFM-056).
 """
+import glob
 import json
+import os
 
 import jsonschema
 
 TRUST = ("untrusted", "trusted")
 LIFECYCLE = ("draft", "tested", "retired")
 # Why a transform is untrusted (REQ-WFM-090): every import is untrusted, so this is the one reason that exists.
+SHIPPED_AUTHOR = "MIA"
 REASON_IMPORTED = "It came from outside MIA and was not reviewed."
 # The exchange form (REQ-WFM-055). Extra fields such as `status` are allowed and dropped on import.
 EXCHANGE_SCHEMA = {
@@ -78,6 +81,8 @@ class Toolbox:
         return tid
 
     def export_transform(self, tid):
+        if self.library.get_meta(tid).get("shipped"):
+            raise ToolboxError("not_exportable", "%s ships with MIA and has no code text to export." % tid)
         return json.dumps(self._latest(tid)["doc"], sort_keys=True)
 
     def look_up(self, tid):
@@ -125,4 +130,17 @@ class Toolbox:
         return namespace["run"](args)
 
     def seed_shipped(self, nodes_dir):
-        return None
+        """One entry per ID of nodes_dir/<id>/<version>.json in its highest version that is not retired, trusted and shipped (REQ-WFM-056). A second call adds nothing."""
+        latest = {}
+        for path in sorted(glob.glob(os.path.join(nodes_dir, "*", "*.json"))):
+            with open(path, encoding="utf-8") as handle:
+                node = json.load(handle)
+            if node.get("status") != "retired" and node["version"] > latest.get(node["id"], {"version": 0})["version"]:
+                latest[node["id"]] = node
+        for tid, node in sorted(latest.items()):
+            if tid in self.library.list_ids("transforms"):
+                continue
+            # No code text: how a shipped node runs stays with the old runner (report of the prototype, finding 2).
+            doc = {"id": tid, "version": node["version"], "inputs": node.get("inputs", {}), "outputs": node.get("outputs", {}), "code": ""}
+            self.library.save("transforms", tid, doc, SHIPPED_AUTHOR)
+            self.library.set_meta(tid, SHIPPED_AUTHOR, trust="trusted", shipped=True)
