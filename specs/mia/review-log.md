@@ -772,3 +772,7 @@ The first version was silent until the end and could take 20 minutes or more: th
 | G-V2.TOOLBOX | goal | 60b70f89f548 | maldun | 2026-11-11 | approved | Plan reviewed 2026-11-11: split check keep together (D-220) |
 | D-223 | **A-112 installed, G-V2.TOOLBOX, 2026-11-11.** `contracts/IF-302-record-tables.md` v9 and `contracts/IF-102-storage-interface.md` v5 name the table `transforms` (REQ-RTB-009; id and version required, a missing, empty or null code valid). The mock and the suite case are installed with `tools/apply_red_tests_a112.sh`. |
 | D-224 | **A-111 installed, G-V2.TOOLBOX, 2026-11-11.** `contracts/IF-203-workflow-library.md` v1 has the kind `transforms` with trust and lifecycle (the table `transforms` of IF-302 v9, the meta record in `transform_meta` of IF-302 v8). Mock, suite and library were installed before. |
+| D-225 | **G-V2.TOOLBOX, 2026-11-11 (owner):** running a shipped transform (no code text) is left as it is, logged only; no requirement. |
+| D-226 | **G-V2.TOOLBOX, 2026-11-11 (owner):** a seeded shipped entry has lifecycle `tested` with the evidence "shipped with MIA" (code and unit test; REQ-WFM-056 text unchanged). |
+| D-227 | **G-V2.TOOLBOX, 2026-11-11 (owner):** `seed_shipped` skips IDs that exist; a newer shipped version is not picked up by a restart. |
+| D-228 | **G-V2.TOOLBOX, 2026-11-11 (owner):** `plan.md` approved with the deviations listed at its end. |

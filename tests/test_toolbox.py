@@ -90,6 +90,19 @@ class SeedChecks(unittest.TestCase):
         self.assertEqual(library.history("transforms", "check.plain")[-1]["version"], 1)
         self.assertEqual(box.look_up("check.plain")["trust"], "untrusted")
 
+    def test_a_seeded_entry_is_tested_with_the_evidence_shipped_with_mia(self):
+        """Example: D-226 (owner 2026-11-11): a shipped entry shows lifecycle tested and the evidence, not draft."""
+        import shutil
+        import tempfile
+        from toolbox_fakes import shipped_copy
+        folder = tempfile.mkdtemp(prefix="toolbox-nodes-")
+        self.addCleanup(shutil.rmtree, folder, True)
+        shipped_copy(folder)
+        box = Toolbox(TransformLibraryMock(), lambda account: True, EventRecord())
+        box.seed_shipped(folder)
+        entry = box.look_up("check.plain")
+        self.assertEqual((entry["lifecycle"], entry["evidence"]), ("tested", "shipped with MIA"))
+
 
 if __name__ == "__main__":
     unittest.main()

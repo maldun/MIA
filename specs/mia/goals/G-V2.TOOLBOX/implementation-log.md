@@ -59,3 +59,9 @@ Line of work `goal/v2.toolbox`, supervised. Test runs here are feedback, not ver
 
 ## Hand-over (2026-11-11)
 A-111 installed by the owner (`18218e0`, IF-203 v1, D-224); with A-110 and A-112 every amendment of the goal is approved and installed. Implement recorded as done in the Phases table. Still open for the owner: review of TR-TOOLBOX-005, REQ-RTB-009 and TC-RTB-009; approval of `plan.md`; the questions of T-05; GL1 and GL3 (parent session).
+
+## Owner answers to the open questions (2026-11-11, D-225 to D-228)
+- D-225 running a shipped transform: left as it is, logged only (the KeyError stays; not a requirement now).
+- D-226 lifecycle of a seeded shipped entry: `tested`, evidence "shipped with MIA". Unit test first (`SeedChecks`, red), then `toolbox.py` (`SHIPPED_EVIDENCE`). REQ-WFM-056 does not name it: the owner may add it by amendment (the approved text is not edited here).
+- D-227 newer shipped versions: `seed_shipped` skips existing IDs (no change).
+- D-228 `plan.md` approved; its deviations section updated.

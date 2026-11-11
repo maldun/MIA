@@ -27,6 +27,7 @@ TRUST = ("untrusted", "trusted")
 LIFECYCLE = ("draft", "tested", "retired")
 # Why a transform is untrusted (REQ-WFM-090): every import is untrusted, so this is the one reason that exists.
 SHIPPED_AUTHOR = "MIA"
+SHIPPED_EVIDENCE = "shipped with MIA"
 REASON_IMPORTED = "It came from outside MIA and was not reviewed."
 # The exchange form (REQ-WFM-055). Extra fields such as `status` are allowed and dropped on import.
 EXCHANGE_SCHEMA = {
@@ -143,4 +144,5 @@ class Toolbox:
             # No code text: how a shipped node runs stays with the old runner (report of the prototype, finding 2).
             doc = {"id": tid, "version": node["version"], "inputs": node.get("inputs", {}), "outputs": node.get("outputs", {}), "code": ""}
             self.library.save("transforms", tid, doc, SHIPPED_AUTHOR)
-            self.library.set_meta(tid, SHIPPED_AUTHOR, trust="trusted", shipped=True)
+            # tested, since the nodes ship with MIA and are in use (D-226); the evidence says why
+            self.library.set_meta(tid, SHIPPED_AUTHOR, trust="trusted", shipped=True, lifecycle="tested", evidence=SHIPPED_EVIDENCE)

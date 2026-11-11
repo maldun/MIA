@@ -1,6 +1,6 @@
-# Plan: G-V2.TOOLBOX (toolbox and trust) -- DRAFT from the prototype
+# Plan: G-V2.TOOLBOX (toolbox and trust)
 
-Status: Draft for review (Step 5, 2026-11-11, supervised). Taken over from the prototype draft of 2026-11-08, written from the template of `specs/mia/goals/G-V2.MODEL/plan.md`, the owner's decisions D1-D5 and the carry-over table in `prototype-report.md`. Updated 2026-11-08 after Plan step 3: the requirements, checks and test requirements named here are in commit `308c67f` of the line of work `goal/v2.toolbox` (all Draft); this file is that plan. Master (with STORE and MODEL) was merged into the branch on 2026-11-11; the owner kept REQ-WFM-092 and 093 whole and the goal together (D-220).
+Status: **Approved by the owner 2026-11-11 (D-228)**, with the deviations at the end of this file (was: Draft for review, Step 5, supervised). Taken over from the prototype draft of 2026-11-08, written from the template of `specs/mia/goals/G-V2.MODEL/plan.md`, the owner's decisions D1-D5 and the carry-over table in `prototype-report.md`. Updated 2026-11-08 after Plan step 3: the requirements, checks and test requirements named here are in commit `308c67f` of the line of work `goal/v2.toolbox` (all Draft); this file is that plan. Master (with STORE and MODEL) was merged into the branch on 2026-11-11; the owner kept REQ-WFM-092 and 093 whole and the goal together (D-220).
 
 **Goal:** specs/mia/goals/G-V2.TOOLBOX/goal.md   **Requirements:** REQ-WFM-050..056, 067, 068, 070 in `nodes/N-2-backend/nodes/N-2.3-workflow-management/requirements.md`, plus REQ-WFM-090..095 (new, IDs from the TOOLBOX block of `goals/G-V2/parallel-work.md`)   **Test spec:** `test-spec.md` of N-2.3, TC-WFM-050..056, 067, 068, 070, 090..095 with scenarios at the end   **Test requirements:** TR-TOOLBOX-001..006 in `specs/mia/test-requirements.md`   **Acceptance:** AC-32 (AC-32a..c proposed in `proposed-spec-changes.md`, not yet in the HLS)
 
@@ -127,3 +127,9 @@ Open:
 6. Resolved: any logged-in account may untrust.
 7. REQ-WFM-054 History: the file has no "not yet approved" line any more (checked 2026-11-11); the rationale names A-89 only. Nothing to change.
 8. Resolved: IDs from the TOOLBOX block.
+
+## Deviations and decisions found in Implement (2026-11-11, recorded in `implementation-log.md`)
+- T-01 carries the plain versions of `export_transform`, `set_trust`, `set_lifecycle` and `run`, because its tests call them; T-02 to T-04 add their rules (owner's answer, "minimal versions in T-01").
+- T-02 adds a unit test file `tests/test_toolbox.py` (edge cases and the acceptance tests once more on the real library).
+- T-06 ran in two parts: the table `transform_meta` first (A-110), then, after a finding (no storage table for the transform records), A-112 (thin table `transforms`, REQ-RTB-009, a missing, empty or null code is valid) and A-111 (IF-203 v1 text) before the library part. A-110, A-111 and A-112 are installed (D-222, D-223, D-224).
+- D-225: running a shipped transform (empty code text) is left as it is, logged only; D-226: a seeded shipped entry is lifecycle `tested` with the evidence "shipped with MIA" (the text of REQ-WFM-056 does not name it; the owner may add it by amendment); D-227: `seed_shipped` skips IDs that exist, a newer shipped version is not picked up by a restart.
