@@ -11,6 +11,7 @@ class TaskMonitor:
         self._emit, self._clock, self._interval = emit, clock, min_interval
         self.id, self.task, self.mode = task_id, task, mode
         self.phase, self.budget, self.counts, self.elements = None, {}, {}, []
+        self.observer = None                                     # the SkillRunObserver of the run: it hears every report of the task (REQ-WFM-136), the task does not know it
         self.done, self._paused_at, self._paused_total = False, None, 0.0
         self._wait_at = None                                     # the task waits for the answer of a user: that time is not work time, but the card does not say paused
         self._started, self._last = clock(), None
@@ -43,6 +44,8 @@ class TaskMonitor:
         self.counts.update(counts or {})
         if elements is not None:
             self.elements = list(elements)                      # label and text pairs a skill chooses to show (REQ-WFM-138)
+        if self.observer is not None:
+            self.observer.tell(phase, budget, counts, elements)
         if self._last is None or self._clock() - self._last >= self._interval:
             self._send()
 

@@ -44,6 +44,7 @@ try:
     from .storage import StorageError
     from .speech_text import speech_text
     from .mia_logger import logger
+    from .skill_run_observer import SkillRunObserver
     from .task_monitor import TaskMonitor
     from .task_registry import TaskCommandError, TaskRegistry
 except ImportError:  # used as plain script / in tests
@@ -52,6 +53,7 @@ except ImportError:  # used as plain script / in tests
     from storage import StorageError
     from speech_text import speech_text
     from mia_logger import logger
+    from skill_run_observer import SkillRunObserver
     from task_monitor import TaskMonitor
     from task_registry import TaskCommandError, TaskRegistry
 
@@ -145,6 +147,7 @@ class ChatService:
         self._prepare_task = prepare_task                                  # (task, options, ask) -> options: before a task runs, e.g. the class of the model; may ask the user
         self._argument_commands = {k.lower(): v for k, v in (argument_commands or {}).items()}      # {name: fn(argument) -> text}: commands with an argument, e.g. /model paid <name>
         self._files = files                                                # the files volume (file_store.FileStore), None = tasks cannot store files
+        self._observer = None                                              # the SkillRunObserver of the running task (REQ-WFM-136)
         self._monitor = None                                               # the status card of the running task
         self._late = False                                                 # the running task gives its result at the end (it asks questions)
         self._task_files = []                                              # the names of the files that the running task stored: chat_done names them
@@ -271,6 +274,8 @@ class ChatService:
                 record = self.log.append("user", text, **fields)             # the reply to a question of the review is a message like any other, but it is not queued behind the review
                 self._emit("chat_message", record)
                 waiter["replies"].put(text)
+                if self._observer is not None:
+                    self._observer.answer(text)
                 return {"ok": True, "message": record, "queued": False, "command": False, "id": record["id"], "position": 0}
             record = None
             if not command:
@@ -307,6 +312,8 @@ class ChatService:
                 raise RuntimeError("no files volume is configured")
             info = self._files.put(name, data, task=task, message_id=message_id, account=self._author)
             self._task_files.append(info["name"])
+            if self._observer is not None:
+                self._observer.file(info["name"])
             self._emit("files_changed", {"name": info["name"], "task": task})
             return info["name"]
         return put
@@ -713,6 +720,10 @@ class ChatService:
                     self.note("Could not prepare /%s: %s" % (task, exc))
             self._monitor = TaskMonitor(self._emit, message_id, task, mode="slice" if (options or {}).get("slice") else "run")
             self._monitor.update(phase="starting")
+            if self._recorder is not None:
+                self._observer = SkillRunObserver(self._recorder, message_id, task, entry.version, self._author or "page", phases=entry.phases)
+                self._observer.start()
+                self._monitor.observer = self._observer
         starter = {"id": message_id, "role": "assistant", "created": created, **({"task": task} if task != "chat" else {})}
 
         def start():
@@ -750,7 +761,7 @@ class ChatService:
             if self.mood.set_emotion(emotion):
                 self.publish_status()
 
-        status = "done"
+        status, failure = "done", None
         try:
             # the model knows who writes (accounts only); the log keeps the plain text. The argument of a task is data for a tool and stays as it is
             if self._stop.is_set():
@@ -765,7 +776,7 @@ class ChatService:
             if self._stop.is_set():
                 status = "stopped"
         except Exception as exc:
-            status = "error"
+            status, failure = "error", str(exc)
             self.set_activity("offline")
             # a model server that is down is said in its own plain sentence, nothing before it (AC-23, D-129)
             self._emit("chat_error", {"id": message_id, "message": UNREACHABLE if str(exc) == UNREACHABLE else "MIA could not answer: %s" % exc})
@@ -773,6 +784,7 @@ class ChatService:
                 state["text"] = "/%s could not finish: %s" % (task, exc)       # a task that fails leaves a result that says why, not an empty message and a toast that can be missed
         else:
             self.set_activity(None)
+        result = state["text"]                                                   # the result of the run record is the text without the links of its files
         if self._task_files:                                                   # the files of the task are links in its result (the route is the core's own, IF-101 v8)
             state["text"] = (state["text"] + "\n\n" if state["text"] else "") + "Files: " + ", ".join("[%s](/api/files/%s)" % (n, n) for n in self._task_files)
         if not late and not repairing and state["text"] != state["sent"] and (status != "stopped" or self._task_files):
@@ -802,6 +814,9 @@ class ChatService:
         record = self.log.append("assistant", state["text"], id=message_id, created=created, emotion=state["emotion"],
                                  status=status, model=model, **extra)
         self._emit("chat_done", {"id": message_id, "text": record["text"], "emotion": record["emotion"], "status": status, **({"files": list(self._task_files)} if self._task_files else {})})
+        if self._observer is not None:
+            self._observer.end({"done": "done", "stopped": "stopped"}.get(status, "failed"), reason=failure if status == "error" else "stopped by the user" if status == "stopped" else None, result=result)
+            self._observer = None
         if self._monitor is not None:
             self._monitor.finish()                      # the card keeps the final figures
             self._monitor = None

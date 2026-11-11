@@ -175,12 +175,24 @@ class CardMonitor:
     def __init__(self):
         self.phases, self.budget, self.counts = [], {}, {}
 
-    def update(self, phase=None, budget=None, counts=None):
+    def update(self, phase=None, budget=None, counts=None, elements=None):
         if phase:
             self.phases.append(phase)
         for name, figures in (budget or {}).items():
             self.budget.setdefault(name, {}).update(figures)
         self.counts.update(counts or {})
+
+
+@mark.req("REQ-WFM-039", "REQ-WFM-136")
+class TestReviewPhases(unittest.TestCase):
+    def test_every_phase_the_review_sends_is_declared_in_its_manifest(self):
+        """the run record takes a phase only when its text equals a declared name (T-04): the review sends exactly the names of its manifest and shows the detail as an element"""
+        import json
+        declared = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "extensions", "review", "manifest.json"), encoding="utf-8"))["phases"]
+        card = CardMonitor()
+        review(Conversation("yes", "no"), monitor=card)
+        self.assertEqual([p for p in card.phases if p not in declared], [])
+        self.assertEqual(sorted(set(card.phases), key=declared.index), [n for n in declared if n != "reading full texts"])      # the scripted user said no to the full texts
 
 
 @mark.req("REQ-WFM-031")
@@ -195,7 +207,7 @@ class TestReviewCard(unittest.TestCase):                                        
         card = CardMonitor()
         review(Conversation("yes", "no"), monitor=card)
         self.assertEqual(card.phases[0], "choosing keywords")
-        self.assertIn("searching for graph colouring", card.phases)
+        self.assertIn("searching", card.phases)
         self.assertEqual((card.counts["on_list"], card.counts["processed"], card.counts["to_process"], card.counts["included"]), (1, 1, 0, 1))
         self.assertEqual(card.budget["calls"]["used"], 2)                        # the keywords and one abstract
         self.assertGreater(card.budget["tokens"]["used"], 0)
