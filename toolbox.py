@@ -1,22 +1,25 @@
-"""The toolbox of the Workflow management (N-2.3, G-V2.TOOLBOX T-01 to T-05): STUB, written in Plan step 4 so the red tests import.
+"""The toolbox of the Workflow management (N-2.3, G-V2.TOOLBOX T-01 to T-05): one entry per transform ID, with a trust status and a lifecycle.
 
-Real behaviour comes with plan tasks T-01 to T-05 (REQ-WFM-050..056, 067, 068, 070, 090..095). The tests in tests/acceptance/test_toolbox.py fix this interface:
-- Toolbox(library, is_owner, events): `library` is the part `transforms` of IF-203 v1 (mock: tests/helpers/mocks/if_203_transforms.py), `is_owner(account)` says whether an
-  account is the owner (REQ-WFM-066), `events.record(event)` takes the event of REQ-WFM-093 (stand-in for IF-401).
+The toolbox keeps no state of its own: entries, versions, trust and lifecycle live in the library part `transforms` of IF-203 v1 (tests: tests/helpers/mocks/if_203_transforms.py),
+so the real library of T-06 replaces the mock without a change here. T-01 is done; T-02 to T-05 add their rules (marked below) to this module.
+- Toolbox(library, is_owner, events): `is_owner(account)` says whether an account is the owner (REQ-WFM-066), `events.record(event)` takes the event of REQ-WFM-093 (IF-401).
 - import_transform(text, author) -> the transform ID; the exchange form is one JSON text with id, version, inputs, outputs and code (a field `status` in it is ignored);
-  a text that fails the check raises ToolboxError("invalid_file") naming the first problem; an ID that exists with an equal or lower version raises ToolboxError("duplicate_id")
-  naming the ID; a higher version replaces the code and keeps trust and lifecycle (REQ-WFM-092); the code text is never compiled or run here.
-- export_transform(id) -> the exchange text; a shipped transform raises ToolboxError("not_exportable"), why names "no code text".
+  an ID that exists with an equal or lower version raises ToolboxError("duplicate_id") naming the ID; a higher version replaces the code and keeps trust and lifecycle
+  (REQ-WFM-092); the code text is never compiled or run here (REQ-WFM-053).
+- export_transform(id) -> the exchange text.
 - look_up(id) -> {"id", "version", "trust", "lifecycle", "reason", "evidence", "baseline_allowed", "shipped"}; `reason` says why a transform is untrusted.
-- offer() -> the sorted IDs a new graph may pick (retired ones left out).
 - set_trust(id, value, account), set_lifecycle(id, value, account, evidence=None, allow_baseline=False): a value outside the lists raises ToolboxError("invalid_trust" or
-  "invalid_lifecycle"); trusted by an account that is not the owner, and allow_baseline by one, raise ToolboxError("owner_only"); `tested` without evidence raises
-  ToolboxError("evidence_missing"). The status stays as it was when an error is raised.
-- run(id, args, as_baseline=False) -> the result of the code text's run(args); an untrusted transform raises ToolboxError("untrusted") unless it runs as the baseline of a check
-  with the owner's allowance; a retired one raises ToolboxError("retired") unless as_baseline.
-- seed_shipped(nodes_dir): every ID of nodes_dir/<id>/<version>.json once, in its highest version that is not retired, trusted and shipped, without a code text.
+  "invalid_lifecycle") and the status stays as it was.
+- run(id, args) -> the result of the code text's run(args); an untrusted transform raises ToolboxError("untrusted").
 ToolboxError has `code` and `why` (a text for the person).
+Still stubs or minimal until their task: file check (T-02), owner-only rules (T-03), evidence, retired and baseline (T-04), seed_shipped and shipped export (T-05).
 """
+import json
+
+TRUST = ("untrusted", "trusted")
+LIFECYCLE = ("draft", "tested", "retired")
+# Why a transform is untrusted (REQ-WFM-090): every import is untrusted, so this is the one reason that exists.
+REASON_IMPORTED = "It came from outside MIA and was not reviewed."
 
 
 class ToolboxError(Exception):
@@ -29,26 +32,56 @@ class Toolbox:
     def __init__(self, library, is_owner, events):
         self.library, self.is_owner, self.events = library, is_owner, events
 
+    def _latest(self, tid):
+        return self.library.read("transforms", tid)
+
     def import_transform(self, text, author):
-        return None
+        file = json.loads(text)
+        tid, version = file["id"], file["version"]
+        # `status` of the file is dropped: what a file says about its own trust never counts (REQ-WFM-052).
+        doc = {key: file[key] for key in ("id", "version", "inputs", "outputs", "code")}
+        if tid not in self.library.list_ids("transforms"):
+            self.library.save("transforms", tid, doc, author)
+            self.library.set_meta(tid, author, reason=REASON_IMPORTED)
+            return tid
+        old = self._latest(tid)
+        old_version = old["doc"]["version"]
+        if version <= old_version:
+            raise ToolboxError("duplicate_id", "%s exists in version %s; version %s is not newer." % (tid, old_version, version))
+        self.library.save("transforms", tid, doc, author)       # trust and lifecycle stay with the meta record (REQ-WFM-092)
+        if old["trust"] == "trusted":
+            self.events.record({"id": tid, "old_version": old_version, "new_version": version, "author": author})
+        return tid
 
     def export_transform(self, tid):
-        return "{}"
+        return json.dumps(self._latest(tid)["doc"], sort_keys=True)
 
     def look_up(self, tid):
-        return {"id": tid, "version": 0, "trust": None, "lifecycle": None, "reason": None, "evidence": None, "baseline_allowed": False, "shipped": False}
+        entry, meta = self._latest(tid), self.library.get_meta(tid)
+        untrusted = entry["trust"] == "untrusted"
+        return {"id": tid, "version": entry["doc"]["version"], "trust": entry["trust"], "lifecycle": entry["lifecycle"],
+                "reason": meta.get("reason", "") if untrusted else "", "evidence": meta.get("evidence"),
+                "baseline_allowed": meta.get("baseline_allowed", False), "shipped": meta.get("shipped", False)}
 
     def offer(self):
         return []
 
     def set_trust(self, tid, value, account):
-        return None
+        if value not in TRUST:
+            raise ToolboxError("invalid_trust", "Trust is untrusted or trusted, not %r." % (value,))
+        self.library.set_trust(tid, value, account)
 
     def set_lifecycle(self, tid, value, account, evidence=None, allow_baseline=False):
-        return None
+        if value not in LIFECYCLE:
+            raise ToolboxError("invalid_lifecycle", "Lifecycle is draft, tested or retired, not %r." % (value,))
+        self.library.set_lifecycle(tid, value, account, evidence)
 
     def run(self, tid, args, as_baseline=False):
-        return None
+        if self._latest(tid)["trust"] != "trusted":
+            raise ToolboxError("untrusted", "%s is not trusted and does not run." % tid)
+        namespace = {}
+        exec(self._latest(tid)["doc"]["code"], namespace)       # trusted code runs in the MIA process (SC-09 accepted); only here, never on import
+        return namespace["run"](args)
 
     def seed_shipped(self, nodes_dir):
         return None
