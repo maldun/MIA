@@ -81,7 +81,7 @@ Top-level items it serves: FR-38. Requirements by ID (inside G-V2's scope):
 |---|---|---|
 | Explore | done | HLS of iteration 2 approved 2026-11-05 (D-186) |
 | Plan | in progress | requirements, checks and test requirements reviewed and approved 2026-11-11 (maldun, D-220, D-221), goal reviewed; `plan.md` is a draft; A-110 drafted (script `tools/apply_amendment_a110.sh`, not installed); open: Step 4 (red tests, `handover-step4.md`), the parent session's files |
-| Implement | in progress | T-01 to T-06 done on `goal/v2.toolbox` (commits `3e68ba6` to `6477dbf`, `implementation-log.md`); hand-over waits for the owner's approval of A-111 (the `transforms` part of IF-203 v1, not installed); A-110 and A-112 are installed |
+| Implement | done | T-01 to T-06 done on `goal/v2.toolbox` (commits `3e68ba6` to `6477dbf`, `implementation-log.md`); A-110, A-111, A-112 installed (D-222, D-223, D-224); open for the owner: review of TR-TOOLBOX-005, REQ-RTB-009, TC-RTB-009, approval of `plan.md` |
 | Verify | open | |
 | Commit | open | |
 | Deploy | open | |
