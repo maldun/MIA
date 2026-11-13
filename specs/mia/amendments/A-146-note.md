@@ -10,3 +10,6 @@ Test-spec text of TC-CLV-036 (N-1.1): "its height" becomes "the height of the op
 
 ## Delivery
 Payload with `install.py` for the protected browser test (`tests/acceptance/`), together with A-145 if the owner wants one install step.
+
+## Done (2026-11-13)
+No payload: the measurement lives in `tests/browser/skill_run_view.py`, which is not a protected folder. The three measurements (`height`, `height_25`, the share check of TC-CLV-045) now read `#srv-full-body`. Checked: the 12 browser tests pass; with the CSS limit raised from 34 to 1.6 times 34 dvh the tests of TC-CLV-036 and TC-CLV-045 fail (they could not before).
