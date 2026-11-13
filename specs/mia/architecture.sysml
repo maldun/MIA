@@ -229,7 +229,7 @@ package MIA_Architecture {
                                "templates/static/chat/chat.js", "templates/static/chat/chat-model.js", "templates/static/chat/mood.js",
                                "templates/static/chat/login.js", "templates/static/chat/account.js", "templates/static/chat/api.js",
                                "templates/static/chat/socket.js", "templates/static/chat/workspace.js", "templates/static/chat/panels-model.js",
-                               "templates/static/chat/task-card.js", "templates/static/chat/task-card-model.js",
+                               "templates/static/chat/skill-run.js", "templates/static/chat/skill-run-model.js", "templates/static/chat/skill-run-shares.js",
                                "templates/static/chat/composer.js", "templates/static/chat/palette.js", "templates/static/chat/markdown.js",
                                "templates/static/chat/menu.js", "templates/static/chat/layout.js", "templates/static/chat/caption.js",
                                "templates/static/chat/view-menu.js", "templates/static/chat/settings.js", "templates/static/chat/theme.js",
@@ -400,10 +400,10 @@ package MIA_Architecture {
             @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("skill_store.py", "skills/chat.md", "skills/research.md"); }
         }
         part skillRunStore {
-            doc /* Target (FB-01): one stored record per skill run (skill, who started it, state, final figures, full result, files,
-                   link to its report), so that the skills panel lists running and finished runs after a reload and a restart.
-                   Today only the review's report is a record (reports) and the card is lost on reload (TD-01). */
-            @Implementation { :>> status = ImplementationStatus::proposed; }
+            doc /* One stored record per skill run in the table skill_runs (skill, version, account, state, phases, figures, answers, result,
+                   material, files, elements), kept by the run recorder and fed by the run observer from the events a skill sends today; the
+                   Skill run view and the chat read it through IF-101 v16 and it goes with the chat history (REQ-WFM-130 to 138). */
+            @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("skill_runs.py", "skill_run_observer.py"); }
             @ChangeSource { feedbackId = "FB-01"; iteration = 1; }
         }
         part pipelineRunner {
