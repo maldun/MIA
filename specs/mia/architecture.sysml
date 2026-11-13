@@ -3333,7 +3333,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-WFM-135'> ChatHistoryDeleted_Wfm135 {
         subject s : TaskRuntime;
-        doc /* When the history records of an account are deleted in the storage, the Workflow management shall delete that account's run records and keep the files of the files volume. */
+        doc /* When a history record is deleted in the storage, the Workflow management shall delete the run record whose run id equals the id of that history record, and no other run record, and keep the files of the files volume. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-WFM-136'> RunsWithoutKnowledgeOfTheView_Wfm136 {
