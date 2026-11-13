@@ -1,5 +1,5 @@
 """
-The real backend of MIA with a fake model, for the browser check of a restart (G-V3.PANEL, TC-CLV-038; note specs/mia/goals/G-V3.PANEL/skill-events-today.md, D-309): web_app with accounts ON,
+The real backend of MIA with a fake model, for the browser check of a restart (G-V3.PANEL, TC-CLV-038; note specs/mia/goals/G-V3.PANEL/skill-events-today.md, D-337): web_app with accounts ON,
 its file storage in the folder MIA_STUB_DATA (a folder that a test mounts read-write into the container, so that the data survives a stop and a new start), a model that answers at once and no
 sound. Seed the account and the data in that folder BEFORE the start with the code of the repository (accounts.create, Storage(FileBackend(folder)).put).
 Run in a container of the MIA image like chat_mock_server.py:  python MIA/ui/tools/real_backend_stub.py   (port MIA_MOCK_PORT, default 8686; MIA_STUB_HOST for the address)

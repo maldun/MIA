@@ -2269,7 +2269,7 @@ proposal:
     - decided by a measurement
     - numeric bound in the criterion
     - depends on the model, a GPU or a phone
-    basis: 'min 1.0 over 6 injection cases on a 12B model rests on no measurement: no baseline exists (D-304,
+    basis: 'min 1.0 over 6 injection cases on a 12B model rests on no measurement: no baseline exists (D-332,
       there is no digest today) and no spike; the miss rate at n 6 is 22 % (accepted by the owner on 2026-11-08,
       hand-over item 7); the first dev run is the first measurement'
     category: model
@@ -2303,7 +2303,7 @@ proposal:
     text: The Chat agent shall have the prompt of SkillDigestStep ask for a summary of at most 1200 characters.
   REQ-CHA-053:
     attention: *id001
-    basis: 'min 0.85 and low 0.70 rest on no measurement: no baseline exists (D-304) and no spike on the
+    basis: 'min 0.85 and low 0.70 rest on no measurement: no baseline exists (D-332) and no spike on the
       pin; the bounds are a proposal of the owner''s review, the first dev run shows whether they are reachable'
     category: model
     probe: *id002
@@ -2311,7 +2311,7 @@ proposal:
     text: The Chat agent shall word end summaries with SkillDigestStep that are faithful to the full result.
   REQ-CHA-054:
     attention: *id001
-    basis: 'min 0.80 and low 0.70 rest on no measurement: no baseline exists (D-304) and no spike on the
+    basis: 'min 0.80 and low 0.70 rest on no measurement: no baseline exists (D-332) and no spike on the
       pin; persona fidelity of a 12B model in short messages is untested; the first dev run shows whether
       they are reachable'
     category: model

@@ -95,7 +95,7 @@ Top-level items it serves: FR-35, FR-46 (the chat part), FR-3 (the spoken short 
 | Phase | State | Record or reason |
 |---|---|---|
 | Explore | done | HLS of iteration 2 approved 2026-11-05 (D-186); wording A-131 |
-| Plan | in progress | started 2026-11-08: Step 1b (REQ-BE-078, REQ-CHA-040 to 054, A-142) and Step 3 (test-spec rows and scenarios, EV-skill_turns, eval-spec rows, TR-CHAT-001 to 007, THR-012) drafted and reviewed one by one (D-303); EV-skill_turns cases labelled and promoted, baseline "no digest" (D-304), plausibility recorded, contract change IF-201 v3 done (A-142); Step 4 (red tests) and Step 5 (plan.md, with target kind and scorer of the suite) open |
+| Plan | in progress | started 2026-11-08: Step 1b (REQ-BE-078, REQ-CHA-040 to 054, A-142) and Step 3 (test-spec rows and scenarios, EV-skill_turns, eval-spec rows, TR-CHAT-001 to 007, THR-012) drafted and reviewed one by one (D-303); EV-skill_turns cases labelled and promoted, baseline "no digest" (D-332), plausibility recorded, contract change IF-201 v3 done (A-142); Step 4 (red tests) and Step 5 (plan.md, with target kind and scorer of the suite) open |
 | Implement | open | |
 | Verify | open | |
 | Commit | open | |

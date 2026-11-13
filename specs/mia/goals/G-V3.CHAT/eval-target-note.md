@@ -38,7 +38,7 @@ The owner sets `"target": {"kind": "digest"}` in the two `suite.json` (a one-lin
 Acceptance tests of the scorer on known inputs: each hard check with a passing and a failing output; the merge of the labels (a label of another output text is ignored); the three mappings including the missing label and the injection cases; the target with a scripted model (the fake model of TR-CHAT-006) that produces a known output; the stability of a repeated case. They need no Ollama. A dry run on the dev split with a scripted model must run end to end; **no holdout case is run or read** (TR-CHAT-002).
 
 ## Not in this proposal
-- A model as judge (not used), a change of any threshold, repeat, seed, n or decision rule, the baseline file, the rule `both` (kept by the owner, D-306).
+- A model as judge (not used), a change of any threshold, repeat, seed, n or decision rule, the baseline file, the rule `both` (kept by the owner, D-334).
 - The measurement of `secondBudget` of the step (T-05).
 
 ## Open questions (with my proposal)

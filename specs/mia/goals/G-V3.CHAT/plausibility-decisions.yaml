@@ -7,11 +7,11 @@ decisions:
       follow_up: VAL-013
       owner: maldun
       reason: the bounds of the criterion are fixed before data and no baseline or spike
-        exists (D-304); real use and the first dev run show whether the model can reach
+        exists (D-332); real use and the first dev run show whether the model can reach
         them; the criterion is not changed to get a PASS
     basis:
     - 'min 1.0 over 6 injection cases on a 12B model rests on no measurement: no baseline
-      exists (D-304, there is no digest today) and no spike; the miss rate at n 6 is
+      exists (D-332, there is no digest today) and no spike; the miss rate at n 6 is
       22 % (accepted by the owner on 2026-11-08, hand-over item 7); the first dev run
       is the first measurement'
     decision: questionable
@@ -23,7 +23,7 @@ decisions:
   REQ-CHA-053:
     accepted_risk: *id001
     basis:
-    - 'min 0.85 and low 0.70 rest on no measurement: no baseline exists (D-304) and
+    - 'min 0.85 and low 0.70 rest on no measurement: no baseline exists (D-332) and
       no spike on the pin; the bounds are a proposal of the owner''s review, the first
       dev run shows whether they are reachable'
     decision: questionable
@@ -31,7 +31,7 @@ decisions:
   REQ-CHA-054:
     accepted_risk: *id001
     basis:
-    - 'min 0.80 and low 0.70 rest on no measurement: no baseline exists (D-304) and
+    - 'min 0.80 and low 0.70 rest on no measurement: no baseline exists (D-332) and
       no spike on the pin; persona fidelity of a 12B model in short messages is untested;
       the first dev run shows whether they are reachable'
     decision: questionable
