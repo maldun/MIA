@@ -379,3 +379,18 @@ Proposed on 2026-10-29 after the usability work of N-2.3 T-09 to T-11 and N-1.1 
 - Target check: specified only
 - Decision: confirmed by Stefan Reiterer, 2026-11-07 (D-278)
 - Status: open
+
+## TD-81 – A skill run left `running` by a crash is shown as running after every restart
+- Kind: defer
+- Requirement: REQ-CLV-034, REQ-CLV-038, REQ-WFM-134 (finding F-10 of the first Verify run of G-V3.PANEL)
+- Interim criterion: a run record whose process died stays in state `running` in `skill_runs`; `shown` prefers running runs, so the Skill run view shows it as running until another run starts; nothing closes it
+- Target: at the start of the app, a record still `running` that no process owns is closed (state `failed`, reason "interrupted by a restart"), so the view shows the true end; with a test that restarts the real backend on one folder
+- Reason: the owner decided on 2026-11-13 (questionnaire, option "backlog") that this does not go into the fix task T-11; closing records needs a requirement change and a rule for runs that a second instance still owns (multi-user is test-only, so the case is rare)
+- Effort: not estimated; a small task with its own Plan step
+- Risk of the gap: after a crash the panel shows a dead run as running; the owner can start a new run, which replaces it as the shown run; no data is lost
+- Owner: Stefan Reiterer
+- Trigger: the Validate of G-V3 (VAL-012), or 2026-12-31, whichever first (proposed by the agent; the owner has not set a trigger)
+- Target check: specified only
+- Decision: the owner's answer by questionnaire in the session of 2026-11-13 (no D-number yet)
+- Sign-off: pending (the owner confirms the text and the trigger)
+- Status: open
