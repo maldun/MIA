@@ -1,0 +1,32 @@
+# Brief for the second Verify run of G-V3.PANEL (to be pasted as the prompt of a fresh reviewer agent)
+
+Prepared 2026-11-13 after the fix round T-11 and the amendments A-144 to A-148 (HEAD at writing: the commit of this file; `git log --oneline ad454f6..HEAD` lists the round). Use this text unchanged. It builds on `verify-brief.md` (first run): the scope, the rules and the checklist there still apply; read it first, then `verification-report.md` (first run, verdict Not verified, findings F-01 to F-12).
+
+---
+
+You are a fresh Verify-phase reviewer for goal G-V3.PANEL, second run (no memory of earlier sessions). Work ONLY in /home/maldun/prog/Python/MIA/.claude/worktrees/goal-v3 (branch goal/v3); never cd to /home/maldun/prog/Python/MIA. Follow CLAUDE.md there; Python for every test: /home/maldun/prog/Python/venvs/mia312/bin/python; long suites in the foreground, never `nohup`. Load `dev-workflow` and `verify-phase`; probes and scratch copies under your scratchpad directory, mutants only in a scratch COPY made by `git archive`. Rules of `verify-brief.md` apply unchanged: you are a reviewer, edit nothing but the report, do not push, do not run `install.py` files.
+
+**What changed since the first report (`ad454f6`).**
+| Finding | Decision (owner, 2026-11-13) | Commit |
+|---|---|---|
+| F-01 lock in `skill_runs.py` | fixed | `92075cb`, test `tests/test_skill_runs_race.py` |
+| F-02 storage error in `_emit_status` | fixed | `92075cb`, `tests/test_emit_status_storage_error.py` |
+| F-03 broken `%` in `#run=` | fixed (`runOfHash` moved to `skill-run-model.js`) | `92075cb`, `tests/js/skill-run-model.test.mjs` |
+| F-09 `phases` type check | fixed in `read_manifest` | `92075cb`, `tests/test_extension_loader.py` |
+| F-12 missing `Example:` line | fixed | `92075cb` |
+| F-06 mutant gaps M02, M04, M11, M12, M20, M21, M22 | tests added | `a02fd5f`, `tests/test_skill_run_gaps.py` |
+| F-08 | A-144 (approved): one history record deletes the run with the same id | `90823b9` (code), `876475e` (owner's install of `contract-change-5`), requirement text in `e7014a6` |
+| F-04 | A-145: TC-IF-101-40, the IF-101 mock checks the account | `876475e` |
+| F-05 | A-146: browser checks measure `.srv-full-body` | `48b386a` |
+| F-07 | A-147: `architecture.sysml` names the skill-run files, `skillRunStore` is `built` | `9b644ec` |
+| F-11 | A-148: REQ-FE-032 in Verifies of TC-CLV-030 | `9fdbf69` |
+| F-10 | backlog, TD-81 (sign-off pending) | `aab21c4` |
+
+**Tasks.**
+1. Re-run all checks of task 1 of `verify-brief.md` from a clean checkout of HEAD. Expected differences from the first run: `check_sysml_model.py` has no problems; `req_graph` 26 errors (REQ-FE-032 gone); `test_doc_check` has no new error from `TestReviewPhases`; JS tests 164; contract suites with the installed `contract-change-5` (78 tests in `test_if_101_chat_api`, 2 skips); the protected diff against `plan-baseline-it2-panel` is now the owner's two installs (`tests/helpers/contract.py` and the IF-101 mock, `tests/acceptance/test_skill_runs.py`, `tests/acceptance/contract/test_if_101_chat_api.py`): compare with `specs/mia/goals/G-V3/contract-change-3/contract.patch` and `contract-change-5/contract.patch` byte for byte and report any other change.
+2. Close each finding F-01 to F-12: re-run the reviewer's own probe from the first run (or write it again from the report: P9 for F-08, the 60-answer thread probe for F-01, the storage-raising status probe for F-02, `#run=%E0%A4%A` in the browser for F-03, manifest `phases` of type str, int and None for F-09) and say fixed, not fixed, or regressed. **Earlier fix rounds each introduced one regression found by the next Verify run: look hard at the new code, not only at the findings.** Specific places: the lock in `skill_runs.py` (deadlock: `_emit` and `TaskMonitor` called inside the lock, `RLock` re-entry from a `subscribe` callback of the storage during `_save` or `_history_changed`; the lock is per recorder, so two recorders on one storage still race: is that possible in `ChatService`?), the broad `except Exception` in `_emit_status` (does it hide a programming error; is the plain status complete), `runOfHash` (null for a broken link: the view then shows the run the backend names, is that what REQ-CLV-037/038 want), `read_manifest` (an extension that loaded before and is now refused: the shipped manifests), `_history_changed` (a history record id that equals a run id of another account; `notice["author"]` is no longer used: can any account's delete remove another account's run, and is that acceptable under A-144).
+3. Mutants: rerun the first run's list (M01 to M28b) and the new ones for the changes above (lock removed, `_emit_status` except removed, `runOfHash` without try, manifest check removed, `_history_changed` deleting by author again, mock `skill_run` without the account check, `.srv-full-body` limit changed). Report survivors with a reason and a proposed test.
+4. The amendments: A-144 to A-148 notes in `specs/mia/amendments/` against what was done (A-146 and A-148 differ from their first text; the notes say how). Check that no requirement text changed beyond REQ-WFM-135 and that its new text, the SysML doc, `requirements.md`, `test-spec.md` (TC-WFM-135) and `run-recorder-interface.md` agree. List what still needs the owner: review-log rows for the changed fingerprints (REQ-WFM-135, TC-WFM-135, TC-CLV-030), D-numbers of A-144 to A-148, the TD-81 sign-off and trigger.
+5. Regression run of the browser checks (12 tests, three runs, no flip) and the restart test, and the PostgreSQL contract run (`MIA_DB_PYTHON=... bash tools/contract_postgres.sh`) if podman and the image are present.
+
+**Verdict.** 'Verified', 'Verified with accepted deviations' (deviations a person accepted: F-10 is backlogged by the owner as TD-81; nothing else is accepted yet) or 'Not verified', with the exact remaining reasons. Write ONLY `specs/mia/goals/G-V3.PANEL/verification-report-run2.md` (finding ids continue at F-13), commit only that file with `git add` of its path and `git commit -m "docs: G-V3.PANEL verification report, second run" -- <path>`, message ending with `Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>`. Facts, not findings: the branch has not merged master; `goal/v3.chat` is a separate line; the look of the character in the changed box is VAL-012.
