@@ -407,10 +407,10 @@ class _ChatApiAdapter:
     def skill_run(self, session, run_id):
         return self._route("get", "/api/skill-runs/%s" % run_id, session)
 
-    def delete_history(self, account):
-        """Test adapter (v16): a history record of the account is deleted in the storage (IF-102); the run records go with it"""
-        self._store.put("history", "h-" + account, {"text": "hello"}, account)
-        self._store.delete("history", "h-" + account, account)
+    def delete_history(self, account, run_id):
+        """Test adapter (A-144): the history record with the id of the run is deleted in the storage (IF-102); the run record of that run goes with it, no other"""
+        self._store.put("history", run_id, {"text": "hello"}, account)
+        self._store.delete("history", run_id, account)
 
     def run_with_variant(self, variant):
         raise unittest.SkipTest("IF-101 no workflow picks a character variant yet (REQ-CHV-008)")

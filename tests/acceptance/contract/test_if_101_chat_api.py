@@ -743,19 +743,36 @@ class SkillRunViewContract(unittest.TestCase):
 
     @mark.req("IF-101", "REQ-WFM-135")
     @each_provider(IF, make(review=("First?",)))
-    def test_deleting_the_history_deletes_the_run_records(self, api):
-        """TC-IF-101-39 (v16): when the history records of an account are deleted in the storage (test adapter `delete_history(account)`), its run records are deleted, the event skill_run_changed {id: null} goes out, `shown_run` is None and `skill_run(id)` is 404 not_found; there is no new operation.
-        Example: after delete_history("anna") the event {"id": None} is sent."""
+    def test_deleting_a_history_record_deletes_the_run_of_that_record(self, api):
+        """TC-IF-101-39 (v16, A-144): when a history record is deleted in the storage (test adapter `delete_history(account, run_id)`, the id of the history record is the run id), the run record of that run is deleted and no other: the event skill_run_changed {id: <run>} goes out, `skill_run(run)` is 404 not_found, the other run of the account is still read and `shown_run` names it; there is no new operation.
+        Example: after delete_history("anna", first) the event {"id": first} is sent and the second run is shown."""
         s = api.login("anna", "pw-anna")
         api.connect(s)
         api.events(s)
         run_review(api, s, "no")
-        run = cards_of(api.events(s))[0]["id"]
-        self.assertIsNotNone(api.shown_run(s))
-        api.delete_history("anna")
-        self.assertIn({"id": None}, [e["payload"] for e in api.events(s) if e["event"] == "skill_run_changed"])
-        self.assertIsNone(api.shown_run(s))
-        self.assertEqual(error_of(lambda: api.skill_run(s, run)).code, "not_found")
+        first = cards_of(api.events(s))[0]["id"]
+        run_review(api, s, "no")
+        second = cards_of(api.events(s))[0]["id"]
+        api.delete_history("anna", first)
+        self.assertIn({"id": first}, [e["payload"] for e in api.events(s) if e["event"] == "skill_run_changed"])
+        self.assertEqual(error_of(lambda: api.skill_run(s, first)).code, "not_found")
+        self.assertEqual(api.skill_run(s, second)["id"], second)
+        self.assertEqual(api.shown_run(s)["id"], second)
+
+    @mark.req("IF-101", "REQ-API-015")
+    @each_provider(IF, make(review=("First?",)))
+    def test_the_run_of_another_account_is_not_found(self, api):
+        """TC-IF-101-40 (v16, A-145): another account asking for the run id of anna's run gets 404 not_found, anna gets the record, and `shown_run` of the other account never names anna's run.
+        Example: ben asks skill_run(anna's run): 404 not_found; shown_run(ben) is None."""
+        anna, ben = api.login("anna", "pw-anna"), api.login("ben", "pw-ben")
+        api.connect(anna)
+        api.events(anna)
+        run_review(api, anna, "no")
+        run = cards_of(api.events(anna))[0]["id"]
+        err = error_of(lambda: api.skill_run(ben, run))
+        self.assertEqual((err.status, err.code), (404, "not_found"))
+        self.assertEqual(api.skill_run(anna, run)["id"], run)
+        self.assertIsNone(api.shown_run(ben))
 
 
 if __name__ == "__main__":
