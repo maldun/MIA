@@ -1,6 +1,6 @@
 # A-145: another account's run is a 404 (finding F-04, owner G-V3.PANEL)
 
-Status: **approved** (2026-11-13, maldun, by the answer "approve" to the five drafts as written; D-number and review-log row follow). Security property of IF-101 v16, `GET /api/skill-runs/<id>`.
+Status: **approved** (2026-11-13, maldun, D-331). Security property of IF-101 v16, `GET /api/skill-runs/<id>`.
 
 ## Why
 No protected check makes the run of another account a 404. Mutant M10 (`record` ignores the account) survives all tests of the goal. The code is correct today (`chat_ops_api.py` passes `g.account`, `ChatService.skill_run` passes it to `record`).

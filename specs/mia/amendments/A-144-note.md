@@ -1,6 +1,6 @@
 # A-144: REQ-WFM-135, what "history deleted" deletes (finding F-08, owner G-V3.PANEL)
 
-Status: **approved** (2026-11-13, maldun, by the answer "approve" to the five drafts as written; D-number and review-log row follow). The owner decided the direction by questionnaire on 2026-11-13: deleting one history record deletes only the run of that record. The wording below waits for the owner's approval; protected tests change only as a payload with `install.py` after that.
+Status: **approved** (2026-11-13, maldun, D-331). The owner decided the direction by questionnaire on 2026-11-13: deleting one history record deletes only the run of that record. The wording below waits for the owner's approval; protected tests change only as a payload with `install.py` after that.
 
 ## Why
 REQ-WFM-135 says "when the history records of an account are deleted". The recorder reads the notice `{table, id, version: None, author}` of IF-102 and deletes all run records of `author`, which is the account that deleted, not the owner of the record, and it does so for a single record (probe P9: two runs gone after one delete). Today nothing in production deletes history records, so only the acceptance test shows it.

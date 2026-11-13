@@ -389,8 +389,8 @@ Proposed on 2026-10-29 after the usability work of N-2.3 T-09 to T-11 and N-1.1 
 - Effort: not estimated; a small task with its own Plan step
 - Risk of the gap: after a crash the panel shows a dead run as running; the owner can start a new run, which replaces it as the shown run; no data is lost
 - Owner: Stefan Reiterer
-- Trigger: the Validate of G-V3 (VAL-012), or 2026-12-31, whichever first (proposed by the agent; the owner has not set a trigger)
+- Trigger: the Validate of G-V3 (VAL-012), or 2026-12-31, whichever first (confirmed by the owner, 2026-11-13)
 - Target check: specified only
-- Decision: the owner's answer by questionnaire in the session of 2026-11-13 (no D-number yet)
-- Sign-off: pending (the owner confirms the text and the trigger)
+- Decision: D-331, 2026-11-13, Stefan Reiterer
+- Sign-off: maldun, 2026-11-13
 - Status: open
