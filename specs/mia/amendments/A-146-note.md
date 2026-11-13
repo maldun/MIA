@@ -1,6 +1,6 @@
 # A-146: TC-CLV-036 measures the floating part, not the summary (finding F-05, owner G-V3.PANEL)
 
-Status: **proposed** (Draft, 2026-11-13).
+Status: **approved** (2026-11-13, maldun, by the answer "approve" to the five drafts as written; D-number and review-log row follow).
 
 ## Why
 TC-CLV-036 measures the height of `details#srv-full`. Since the layout round the opened part floats above the strip as `.srv-full-body`; the details element is only its summary (18.8 px), so the check cannot fail on the part. The reviewer's probe measured the body: 257 px at the default share (34 % of 757 px) and 189 px at 25 %, so the limit holds today.

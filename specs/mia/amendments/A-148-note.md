@@ -1,6 +1,6 @@
 # A-148: REQ-FE-032 gets a check of its own (finding F-11, owner G-V3.PANEL)
 
-Status: **proposed** (Draft, 2026-11-13).
+Status: **approved** (2026-11-13, maldun, by the answer "approve" to the five drafts as written; D-number and review-log row follow).
 
 ## Why
 `req_graph` G7 reports REQ-FE-032 (Skill run view) without a verifying check; it is among the 27 errors of the tag. The children REQ-CLV-030 to 047 verify it piece by piece.

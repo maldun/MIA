@@ -1,6 +1,6 @@
 # A-147: the architecture model after G-V3.PANEL (finding F-07, owner G-V3.PANEL)
 
-Status: **proposed** (Draft, 2026-11-13). `tools/check_sysml_model.py` fails today ("files not found: task-card-model.js, task-card.js"); it passed at the tag.
+Status: **approved** (2026-11-13, maldun, by the answer "approve" to the five drafts as written; D-number and review-log row follow). `tools/check_sysml_model.py` fails today ("files not found: task-card-model.js, task-card.js"); it passed at the tag.
 
 ## Changes in `architecture.sysml` (model change, payload with `install.py`, then `bash tools/check_sysml.sh`)
 | Item | Change |
