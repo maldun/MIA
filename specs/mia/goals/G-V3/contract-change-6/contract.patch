@@ -1,0 +1,69 @@
+diff --git a/contracts/IF-101-chat-api.md b/contracts/IF-101-chat-api.md
+index 01d8119..264d766 100644
+--- a/contracts/IF-101-chat-api.md
++++ b/contracts/IF-101-chat-api.md
+@@ -156,4 +156,4 @@ Events (page to server) **[v15]**:
+ | v14 | 2026-10-31 | `vote`: the value is the integer 1 or -1; `1.0` or `true` is `422 invalid_vote`, rule `value`, as the chat service and the Record tables (IF-302 v6) refuse it; the mock follows (D-162) | A-61 |
+ | v15 | 2026-10-31 | the whole wire of the chat page (D-163, F4 of the N-1.1 verification): the REST addresses with their methods; `history` on the wire is `{messages, older}` with `before`; the operations `commands` (`/api/chat/commands`) and `backgrounds` (`/character-backgrounds.json`); the events `chat_status`, `chat_pipeline`, `audio_owner`, `audio_reload`; the page's events `audio_claim`, `audio_ended`, `character_ready` | A-62 |
+ | v16 | 2026-11-08 | the run of a skill for the Skill run view (G-V3.PANEL): `task_status` with `skill`, `started`, `phases`, `state`, `reason`, `elements`; the operations `shown_run` and `skill_run` (`GET /api/skill-runs/shown`, `/api/skill-runs/<id>`); the event `skill_run_changed`; `skill_run` on the messages of a skill in the events and the history; `chat_done` without the `Files:` suffix and a failed task as reason plus link; the run records are deleted with the history records of the account; the contract suite gets TC-IF-101-34 to -39 (A-140 said -28 onward, which were taken) and three tests change (TC-IF-101-24, -30, -31) (owner 2026-11-08, D-302) | A-140 |
+-| v17 | 2026-11-08 | the run record also carries `elements` (the label and text pairs of the skill, empty when none), as REQ-WFM-138 and the table `skill_runs` (IF-302 v9) keep them; the mock follows and TC-IF-101-35 names the field (owner 2026-11-08, D-306) | A-143 |
++| v17 | 2026-11-08 | the run record also carries `elements` (the label and text pairs of the skill, empty when none), as REQ-WFM-138 and the table `skill_runs` (IF-302 v9) keep them; the mock follows and TC-IF-101-35 names the field (owner 2026-11-08, D-334) | A-149 |
+diff --git a/contracts/IF-302-record-tables.md b/contracts/IF-302-record-tables.md
+index cbb39b1..f9b7a70 100644
+--- a/contracts/IF-302-record-tables.md
++++ b/contracts/IF-302-record-tables.md
+@@ -40,4 +40,4 @@ Required fields: **[v8]** `skill_runs` {run, skill, skill_version, account, star
+ | v6 | 2026-10-31 | a document that is not a mapping is rule `schema` in every table, and a vote value is an integer (a boolean or a float is rule `schema`); the mock now does both, as the Record tables do (owner 2026-10-31: N-3.3 Verify F3, F5, D-161) | A-61 |
+ | v7 | 2026-10-31 | the deletable tables named in full: exactly `history`, `memory`, `tasks`, `memos` (as built and mocked; v0 to v6 named only `memory`, `tasks`, `memos`, `votes`, `runs`); TC-IF-302-01 checks the whole set (owner 2026-10-31: re-verification R2 of N-3.3, D-170) | A-67 |
+ | v8 | 2026-11-08 | the table `skill_runs` (versioned, deletable; required fields run, skill, skill_version, account, started, state); the deletable tables are `history`, `memory`, `tasks`, `memos` and `skill_runs`; TC-IF-302-01 changes, TC-IF-302-08 is new (owner 2026-11-08: a new table, not an extension of `reports`, D-302) | A-141 |
+-| v9 | 2026-11-08 | `skill_runs` also keeps `elements` (optional): REQ-WFM-138 stores the label and text pairs of a skill in the run record, which v8 did not list; TC-IF-302-08 names the field (owner 2026-11-08, D-306) | A-143 |
++| v9 | 2026-11-08 | `skill_runs` also keeps `elements` (optional): REQ-WFM-138 stores the label and text pairs of a skill in the run record, which v8 did not list; TC-IF-302-08 names the field (owner 2026-11-08, D-334) | A-149 |
+diff --git a/specs/mia/plausibility.yaml b/specs/mia/plausibility.yaml
+index e27cb0a..e6438ad 100644
+--- a/specs/mia/plausibility.yaml
++++ b/specs/mia/plausibility.yaml
+@@ -4475,11 +4475,11 @@ plausibility:
+         follow_up: VAL-013
+         owner: maldun
+         reason: the bounds of the criterion are fixed before data and no baseline or spike
+-          exists (D-304); real use and the first dev run show whether the model can reach
++          exists (D-332); real use and the first dev run show whether the model can reach
+           them; the criterion is not changed to get a PASS
+       basis:
+       - 'min 1.0 over 6 injection cases on a 12B model rests on no measurement: no baseline
+-        exists (D-304, there is no digest today) and no spike; the miss rate at n 6 is
++        exists (D-332, there is no digest today) and no spike; the miss rate at n 6 is
+         22 % (accepted by the owner on 2026-11-08, hand-over item 7); the first dev run
+         is the first measurement'
+       hardware: HW-target
+@@ -4521,7 +4521,7 @@ plausibility:
+     REQ-CHA-053:
+       accepted_risk: *id001
+       basis:
+-      - 'min 0.85 and low 0.70 rest on no measurement: no baseline exists (D-304) and
++      - 'min 0.85 and low 0.70 rest on no measurement: no baseline exists (D-332) and
+         no spike on the pin; the bounds are a proposal of the owner''s review, the first
+         dev run shows whether they are reachable'
+       hardware: HW-target
+@@ -4532,7 +4532,7 @@ plausibility:
+     REQ-CHA-054:
+       accepted_risk: *id001
+       basis:
+-      - 'min 0.80 and low 0.70 rest on no measurement: no baseline exists (D-304) and
++      - 'min 0.80 and low 0.70 rest on no measurement: no baseline exists (D-332) and
+         no spike on the pin; persona fidelity of a 12B model in short messages is untested;
+         the first dev run shows whether they are reachable'
+       hardware: HW-target
+diff --git a/tests/acceptance/test_skill_run_observer.py b/tests/acceptance/test_skill_run_observer.py
+index 598d5b9..0552e7e 100644
+--- a/tests/acceptance/test_skill_run_observer.py
++++ b/tests/acceptance/test_skill_run_observer.py
+@@ -1,7 +1,7 @@
+ """
+ Acceptance test of the runs of skills without knowledge of the view (N-2.3, G-V3.PANEL): TC-WFM-136 (REQ-WFM-136, with REQ-WFM-130 and 131) against the real ChatService with a
+ scripted task, the SkillRunRecorder on the fake storage of skill_runs and a fake clock (TR-PANEL-002, TR-PANEL-003). The scripted skill does only what skills do today: it reports
+-through `monitor.update` and returns its result; it has no entry for the view. Note: specs/mia/goals/G-V3.PANEL/skill-events-today.md (D-309).
++through `monitor.update` and returns its result; it has no entry for the view. Note: specs/mia/goals/G-V3.PANEL/skill-events-today.md (D-337).
+ Run with: python tests/acceptance/test_skill_run_observer.py
+ """
+ 
