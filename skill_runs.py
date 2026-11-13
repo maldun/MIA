@@ -111,16 +111,16 @@ class SkillRunRecorder:
         return max(docs, key=lambda doc: (doc["ended"] or "", doc["run"]))["run"] if docs else None
 
     def _history_changed(self, notice):
-        """A delete in the history (version None) removes the run records of the account named as author (REQ-WFM-135)."""
+        """A delete in the history (version None) removes the run record whose run id is the id of the history record, and no other (REQ-WFM-135, A-144)."""
+        if notice.get("version") is not None:
+            return
         with self._lock:
-            if notice.get("version") is not None:
-                return
-            for run in list(self._storage.ids("skill_runs")):
-                doc = self._load_or_none(run)
-                if doc and doc["account"] == notice.get("author"):
-                    self._storage.delete("skill_runs", run, AUTHOR)
-                    self._monitors.pop(run, None)
-            self._emit("skill_run_changed", {"id": None})
+            run = notice.get("id")
+            if self._load_or_none(run) is None:
+                return                                           # the history record belongs to no run
+            self._storage.delete("skill_runs", run, AUTHOR)
+            self._monitors.pop(run, None)
+        self._emit("skill_run_changed", {"id": run})
 
     def _keep_figures(self, run, monitor):
         with self._lock:
