@@ -18,3 +18,6 @@ The id of the history record that belongs to a run is the run id (the message id
 
 ## Affected
 `architecture.sysml` REQ-WFM-135 (doc text), N-2.3 `requirements.md` and `test-spec.md`, `run-recorder-interface.md` (deletion paragraph), `review-log.md` (fingerprints).
+
+## Added when the payload was built (2026-11-13)
+The contract level breaks too: TC-IF-101-39 and the test adapter `delete_history(account)` (real adapter in `tests/helpers/contract.py`, mock `tests/helpers/mocks/if_101_chat_api.py`) delete the history of a whole account. They become `delete_history(account, run_id)` and TC-IF-101-39 checks one run deleted, the other kept (payload `goals/G-V3/contract-change-5/`, together with A-145).

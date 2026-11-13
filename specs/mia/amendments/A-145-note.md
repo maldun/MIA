@@ -11,4 +11,4 @@ No requirement or contract text changes; REQ-API-015 and IF-101 v16 already say 
 The mock of IF-101 gets the same rule (404 for another account) so the mock and the real variant agree.
 
 ## Delivery
-Payload with `install.py` under `goals/G-V3/contract-change-5/` (suite red first on a mock that ignores the account, as the earlier payloads). Number TC-IF-101-40: to be checked against the highest existing number before the payload is built.
+Payload with `install.py` under `goals/G-V3/contract-change-5/` (suite red first on a mock that ignores the account, as the earlier payloads). TC-IF-101-40 is the next free number (checked 2026-11-13). Delivered in the same payload as A-144 (`contract-change-5`); the mock now checks the account in `skill_run` and shows only the runs of the asking account in `shown_run`.
