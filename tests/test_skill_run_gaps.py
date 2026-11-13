@@ -31,12 +31,17 @@ def states(recorder, run):
 class TestObserverPhases(unittest.TestCase):
     def test_only_declared_phases_are_recorded_and_the_earlier_ones_are_done(self):
         """Example: declared (a, b, c); the skill says "hello" (ignored), "b": a done, b running, c waiting"""
+        # Given: a run with three declared phases
         recorder, _ = make()
         observer = SkillRunObserver(recorder, "r1", "review", "1", "carl", phases=("a", "b", "c"))
         observer.start()
+        # When: the skill says a text that is no phase name
         observer.phase("hello")
+        # Then: no phase changes
         self.assertEqual(states(recorder, "r1"), [("a", "waiting"), ("b", "waiting"), ("c", "waiting")])
+        # When: it says a declared name
         observer.phase("b")
+        # Then: the earlier phases are done and that one runs
         self.assertEqual(states(recorder, "r1"), [("a", "done"), ("b", "running"), ("c", "waiting")])
 
 
@@ -48,20 +53,26 @@ class TestObserverPhases(unittest.TestCase):
 
             def phase(self, run, name):
                 self.phases.append(name)
+        # Given: an observer with one declared phase over a recorder that only notes what it is told
         spy = Spy()
         observer = SkillRunObserver(spy, "r1", "review", "1", "carl", phases=("a",))
+        # When: the skill says "hello" and then "a"
         observer.phase("hello")
         observer.phase("a")
+        # Then: the recorder heard "a" only
         self.assertEqual(spy.phases, ["a"])
 
 
 class TestReasonOfDoneRun(unittest.TestCase):
     def test_a_done_run_keeps_no_reason_a_failed_one_does(self):
         """Example: end(done, reason="x") has no reason in the record; end(failed, reason="x") has"""
+        # Given: two runs
         recorder, _ = make()
+        # When: one ends done and one ends failed, both with a reason
         for run, state in (("ok", "done"), ("bad", "failed")):
             recorder.start(run, "review", "1", "carl", phases=("a",))
             recorder.end(run, state, reason="x")
+        # Then: only the failed one keeps the reason
         self.assertNotIn("reason", recorder.record("ok"))
         self.assertEqual(recorder.record("bad")["reason"], "x")
 
@@ -102,6 +113,7 @@ class TestStatusWire(unittest.TestCase):
 class TestShownRoute(unittest.TestCase):
     def test_no_run_yet_is_204_without_a_body(self):
         """Example: GET /api/skill-runs/shown before any run answers 204 and an empty body"""
+        # Given: a backend that has no run yet
         class Chat:
             def shown_run(self, account):
                 return None
@@ -111,16 +123,21 @@ class TestShownRoute(unittest.TestCase):
         def who():
             g.account = "anna"
         app.register_blueprint(create_chat_ops_blueprint(Chat()))
+        # When: the view asks for the run that is shown
         got = app.test_client().get("/api/skill-runs/shown")
+        # Then: 204 and no body
         self.assertEqual((got.status_code, got.data), (204, b""))
 
 
 class TestShownTie(unittest.TestCase):
     def test_runs_started_in_the_same_second_the_larger_id_is_shown(self):
         """Example: r1 and r2 started at the same time and running: r2; both ended at the same time: r2"""
+        # Given: two runs of one account that started at the same time
         recorder, _ = make()
         for run in ("r2", "r1"):
             recorder.start(run, "review", "1", "carl")
+        # When: both run, and then both end at the same time
+        # Then: the larger id is shown in both cases
         self.assertEqual(recorder.shown("carl"), "r2")
         for run in ("r1", "r2"):
             recorder.end(run, "done")

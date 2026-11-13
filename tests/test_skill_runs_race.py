@@ -29,13 +29,16 @@ class TestRecorderRace(unittest.TestCase):
     def test_answers_survive_reports_of_the_skill_thread(self):
         """Example: 30 answers while the skill thread reports 30 times: 30 answers are kept"""
         clock = FakeClock()
+        # Given: a recorder on a storage whose reads take a moment, and a skill thread that reports 30 times
         recorder = SkillRunRecorder(SlowStorage(), lambda event, payload: None, clock=clock.monotonic, now=clock.now)
         recorder.start("r1", "review", "1", "carl", phases=("a", "b"))
         reporter = threading.Thread(name="skill", target=lambda: [recorder.report("r1", counts={"n": i}) for i in range(30)])
+        # When: the HTTP thread answers 30 times while the skill thread reports
         reporter.start()
         for i in range(30):
             recorder.answer("r1", "answer %d" % i)
         reporter.join()
+        # Then: all 30 answers and the last figures are in the record
         record = recorder.record("r1")
         self.assertEqual(len(record["answers"]), 30)
         self.assertEqual(record["counts"], {"n": 29})
