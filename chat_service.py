@@ -313,7 +313,10 @@ class ChatService:
 
     def _emit_status(self, event, payload):
         """task_status with what the Skill run view reads: skill, start, phases and the state of the run, `reason` after a failure or a stop (IF-101 v16)"""
-        record = self._recorder.record(payload["id"]) if event == "task_status" and self._recorder is not None else None
+        try:
+            record = self._recorder.record(payload["id"]) if event == "task_status" and self._recorder is not None else None
+        except Exception:                                        # a storage error must not reach the skill through its monitor (REQ-WFM-136)
+            record = None
         if record is not None:
             state = record["state"] if payload["done"] else "paused" if payload["paused"] else "running"
             payload = dict(payload, skill={"id": record["skill"], "version": record["version"]}, started=record["started"], phases=record["phases"], state=state,

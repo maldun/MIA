@@ -1,5 +1,16 @@
 // The model of the Skill run view (REQ-CLV-030 to 034, 039, 044; IF-101 v16): pure helpers, no DOM, so node tests them (tests/js/skill-run-model.test.mjs).
 // Interface note: specs/mia/goals/G-V3.PANEL/skill-run-view-interface-note.md.
+/** the run id of a chat link "#run=<id>"; null for another hash or a broken % escape (F-03: a bad link must not stop the view from starting) */
+export function runOfHash(hash) {
+  const found = /^#run=(.+)$/.exec(hash ?? '');
+  if (!found) return null;
+  try {
+    return decodeURIComponent(found[1]);
+  } catch {
+    return null;
+  }
+}
+
 function number(value) {
   return Number(value).toLocaleString('en-US', { maximumFractionDigits: 1 });
 }

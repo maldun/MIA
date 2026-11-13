@@ -186,7 +186,8 @@ class CardMonitor:
 @mark.req("REQ-WFM-039", "REQ-WFM-136")
 class TestReviewPhases(unittest.TestCase):
     def test_every_phase_the_review_sends_is_declared_in_its_manifest(self):
-        """the run record takes a phase only when its text equals a declared name (T-04): the review sends exactly the names of its manifest and shows the detail as an element"""
+        """the run record takes a phase only when its text equals a declared name (T-04): the review sends exactly the names of its manifest and shows the detail as an element
+        Example: the scripted user says no to the full texts: every phase sent is a manifest name and "reading full texts" is missing"""
         import json
         declared = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "extensions", "review", "manifest.json"), encoding="utf-8"))["phases"]
         card = CardMonitor()

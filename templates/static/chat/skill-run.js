@@ -1,6 +1,6 @@
 // The Skill run view (REQ-FE-032, REQ-CLV-030 to 039, 043, 044; IF-101 v16): a strip with the run that the backend names. The model (skill-run-model.js) decides what is shown,
 // this module draws it. Every text of a run (reason, result, answers, material, elements) goes in as a text node: nothing of it is ever markup (REQ-CLV-043).
-import { applyStatus, controlAction, controlsModel, elementsModel, headerModel, meterModel, phaseModel, shownModel } from './skill-run-model.js';
+import { applyStatus, runOfHash, controlAction, controlsModel, elementsModel, headerModel, meterModel, phaseModel, shownModel } from './skill-run-model.js';
 
 function el(tag, className, text) {
   const node = document.createElement(tag);
@@ -103,7 +103,6 @@ export function initSkillRunView({ root, socket, api, t, onStop = () => {}, noti
     $('srv-full').open = true;
     root.scrollIntoView({ block: 'nearest' });
   }
-  const runOfHash = (hash) => (/^#run=(.+)$/.exec(hash ?? '') ? decodeURIComponent(/^#run=(.+)$/.exec(hash)[1]) : null);
   document.addEventListener('click', (event) => {
     const link = event.target.closest?.('a[href^="#run="]');
     if (!link) return;

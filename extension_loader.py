@@ -37,6 +37,9 @@ def read_manifest(folder):
     unknown = [n for n in doc.get("needs", []) if n not in NEEDS]
     if unknown:
         raise ValueError("%s: unknown need %s (known: %s)" % (name, ", ".join(unknown), ", ".join(NEEDS)))
+    phases = doc.get("phases", [])
+    if not isinstance(phases, list) or not all(isinstance(n, str) and n for n in phases):
+        raise ValueError("%s: phases must be a list of names" % name)
     if ":" not in doc["entry"]:
         raise ValueError("%s: entry must be module:function" % name)
     return doc
