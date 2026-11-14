@@ -1,7 +1,7 @@
 """
 Acceptance test of the runs of skills without knowledge of the view (N-2.3, G-V3.PANEL): TC-WFM-136 (REQ-WFM-136, with REQ-WFM-130 and 131) against the real ChatService with a
 scripted task, the SkillRunRecorder on the fake storage of skill_runs and a fake clock (TR-PANEL-002, TR-PANEL-003). The scripted skill does only what skills do today: it reports
-through `monitor.update` and returns its result; it has no entry for the view. Note: specs/mia/goals/G-V3.PANEL/skill-events-today.md (D-309).
+through `monitor.update` and returns its result; it has no entry for the view. Note: specs/mia/goals/G-V3.PANEL/skill-events-today.md (D-337).
 Run with: python tests/acceptance/test_skill_run_observer.py
 """
 
