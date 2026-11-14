@@ -203,7 +203,7 @@ Runs a workflow step by step under budgets: model calls and model management, pr
 - Verification method: Test
 - Acceptance criterion: AC-31: a graph with three transforms runs in an order that respects its edges and the output nodes hold the results (exact)
 - Verified by: TC-RUN-016
-- Status: Draft
+- Status: Verified
 - History: G-V2 Plan step 1 (2026-11-07), new
 
 ### REQ-RUN-017 – Untrusted does not run
@@ -216,7 +216,7 @@ Runs a workflow step by step under budgets: model calls and model management, pr
 - Verification method: Test
 - Acceptance criterion: AC-32: the marker side effect of an untrusted transform does not happen and the refusal names its ID (exact); after the owner sets it trusted the same graph runs
 - Verified by: TC-RUN-017
-- Status: Draft
+- Status: Verified
 - History: G-V2 Plan step 1 (2026-11-07), new
 
 ### REQ-RUN-018 – Master node runs like a transform
@@ -229,7 +229,7 @@ Runs a workflow step by step under budgets: model calls and model management, pr
 - Verification method: Test
 - Acceptance criterion: AC-31: a master node between two data nodes runs once after its input data nodes are written and its output data node holds the result (exact); a master node with status untrusted is refused as in REQ-RUN-017
 - Verified by: TC-RUN-018
-- Status: Draft
+- Status: Verified
 - History: G-V2 Plan step 1 (2026-11-07), new; rewritten at review (2026-11-07): was "refuse a run with a master node"
 
 ### REQ-RUN-019 – Failed node stops the run
@@ -242,5 +242,5 @@ Runs a workflow step by step under budgets: model calls and model management, pr
 - Verification method: Test
 - Acceptance criterion: AC-31: with the second of three transforms failing, the third does not run and the result names the second (exact)
 - Verified by: TC-RUN-019
-- Status: Draft
+- Status: Verified
 - History: G-V2 Plan step 1 (2026-11-07), new at review

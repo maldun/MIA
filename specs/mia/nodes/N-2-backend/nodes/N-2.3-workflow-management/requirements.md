@@ -393,7 +393,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-23: a task that reports sends exactly the figures it reported; two reports within half a second give one event; the final figures are sent once more with done true; a task that reports nothing sends the time only (exact); the display is checked at REQ-CLV-032
 - Verified by: TC-WFM-031
-- Status: Draft
+- Status: Verified
 - Quality: performance efficiency measure: status updates of one task per second; target: at most 2; context: a task that reports after every step, for example one screening step per work
 - History: A-23 new; A-131 (proposed 2026-11-08): the place of status is the Skill run view, not a card in the chat
 
@@ -483,7 +483,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-3: the record read back has the same figures and works as the report; the markdown and the LaTeX file made from it contain every work with its decision; the LaTeX special characters are escaped (exact)
 - Verified by: TC-WFM-038
-- Status: Draft
+- Status: Verified
 - History: A-23 new; A-131 (proposed 2026-11-08): the files of the report are the targets of the links in the Skill run view, one run record for every skill is REQ-WFM-130
 
 ### REQ-WFM-039 – Skills are self-contained extensions
@@ -495,7 +495,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test, Inspection
 - Acceptance criterion: AC-23: a folder added to the extensions folder appears in the list of commands, its options are parsed and its task runs; no file of the core names the id of a skill (inspection, exact)
 - Verified by: TC-WFM-039
-- Status: Draft
+- Status: Verified
 - Quality: maintainability measure: files of the core that name the id of a skill in code; target: 0; context: adding a skill
 - Relaxed: TD-04
 - Target: the code of a skill lies in its folder; what several skills share is a library of the core with its own name
@@ -522,7 +522,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-31: a skill record is stored, read back and equal to the stored one (exact); an edit is a new version
 - Verified by: TC-WFM-040
-- Status: Draft
+- Status: Verified
 - History: G-V2 Plan step 1 (2026-11-07), new
 
 ### REQ-WFM-041 – Skill taken from its record
@@ -535,7 +535,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-31: with the old skill file of a converted skill removed, the skill is listed and runs unchanged (exact)
 - Verified by: TC-WFM-041
-- Status: Draft
+- Status: Verified
 - History: G-V2 Plan step 1 (2026-11-07), new
 
 ### REQ-WFM-042 – Command used once
@@ -548,7 +548,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-31: a second record with the command of the first is refused with the first skill's ID (exact); a new version of the same skill keeps its command and is accepted (exact)
 - Verified by: TC-WFM-042
-- Status: Draft
+- Status: Verified
 - History: G-V2 Plan step 1 (2026-11-07), new
 
 ### REQ-WFM-043 – Three node types
@@ -561,7 +561,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-31: a graph with a node of another type is refused naming the node (exact)
 - Verified by: TC-WFM-043
-- Status: Draft
+- Status: Verified
 - History: G-V2 Plan step 1 (2026-11-07), new
 
 ### REQ-WFM-044 – Graph description
@@ -574,7 +574,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-31: the four fields are read back as stored; an empty testbench ID is accepted
 - Verified by: TC-WFM-044
-- Status: Draft
+- Status: Verified
 - History: G-V2 Plan step 1 (2026-11-07), new
 
 ### REQ-WFM-045 – Data and transform alternate
@@ -587,7 +587,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-31: an edge data-data and an edge transform-master are refused naming the edge (exact)
 - Verified by: TC-WFM-045
-- Status: Draft
+- Status: Verified
 - History: G-V2 Plan step 1 (2026-11-07), new
 
 ### REQ-WFM-046 – One writer per data node
@@ -600,7 +600,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-31: two writers of one data node are refused with its ID; two readers are accepted (exact)
 - Verified by: TC-WFM-046
-- Status: Draft
+- Status: Verified
 - History: G-V2 Plan step 1 (2026-11-07), new
 
 ### REQ-WFM-047 – No cycle
@@ -613,7 +613,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-31: a graph with a cycle is refused with the cycle as ids, first id repeated at the end (exact); every accepted graph has a topological order (property test)
 - Verified by: TC-WFM-047
-- Status: Draft
+- Status: Verified
 - History: G-V2 Plan step 1 (2026-11-07), new
 
 ### REQ-WFM-048 – Master node stops
@@ -626,7 +626,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-31: a master node without a stopping criterion is refused; with a maximum of 1 repetition it is accepted (exact)
 - Verified by: TC-WFM-048
-- Status: Draft
+- Status: Verified
 - History: G-V2 Plan step 1 (2026-11-07), new
 
 ### REQ-WFM-049 – Parameters of a data node
@@ -639,7 +639,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-31: a data node with parameters is stored and read back with the parameters apart from the value (exact)
 - Verified by: TC-WFM-049
-- Status: Draft
+- Status: Verified
 - History: G-V2 Plan step 1 (2026-11-07), new
 
 ### REQ-WFM-050 – Transforms by ID
@@ -933,7 +933,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-39: a scripted run of each of lookup, search and review leaves one record with the six fields; the record read back equals the one stored (exact)
 - Verified by: TC-WFM-130
-- Status: Draft
+- Status: Verified
 - History: A-131 (proposed 2026-11-08, G-V3.PANEL), new
 
 ### REQ-WFM-131 – Figures and reason in the run record
@@ -946,7 +946,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-39: a run that ends in done, failed and stopped leaves the figures it reported last, and the reason in the two last cases (exact)
 - Verified by: TC-WFM-131
-- Status: Draft
+- Status: Verified
 - History: A-131 (proposed 2026-11-08, G-V3.PANEL), new
 
 ### REQ-WFM-132 – Result and material in the run record
@@ -959,7 +959,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-39: the record of a scripted review holds the full result text, the material and the names of its files (exact)
 - Verified by: TC-WFM-132
-- Status: Draft
+- Status: Verified
 - History: A-131 (proposed 2026-11-08, G-V3.PANEL), new
 
 ### REQ-WFM-133 – Answers in the run record
@@ -972,7 +972,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-39: two answers to a scripted review appear in the record in order with their times (exact)
 - Verified by: TC-WFM-133
-- Status: Draft
+- Status: Verified
 - History: A-131 (proposed 2026-11-08, G-V3.PANEL), new
 
 ### REQ-WFM-134 – Run that is shown
@@ -985,21 +985,21 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-39: with two scripted runs started in turn the second is named; after both end the one that ended last is named; a third earlier run is never named (exact)
 - Verified by: TC-WFM-134
-- Status: Draft
+- Status: Verified
 - History: A-131 (proposed 2026-11-08, G-V3.PANEL), new
 
 ### REQ-WFM-135 – Chat history deleted
 - Level: low   Subject: TaskRuntime
-- Text: When the history records of an account are deleted in the storage, the Workflow management shall delete that account's run records and keep the files of the files volume.
+- Text: When a history record is deleted in the storage, the Workflow management shall delete the run record whose run id equals the id of that history record, and no other run record, and keep the files of the files volume.
 - Rationale: refines REQ-BE-033; owner decision of 2026-11-07 (OC-3 of G-V3)
 - Parent: REQ-BE-033
 - Group: RV
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-39: after the history records of the account are deleted through IF-102 no run is named for it, the page is told by skill_run_changed, and every file of the volume is still listed (exact)
+- Acceptance criterion: AC-39: after one history record is deleted through IF-102 the run with its id is gone and is named by skill_run_changed, every other run of the same and of another account is still read, and every file of the volume is still listed (exact)
 - Verified by: TC-WFM-135
-- Status: Draft
-- History: A-131 (proposed 2026-11-08, G-V3.PANEL), new; reworded after approval in batch 1 (owner 2026-11-08: no operation deletes the chat history today, the trigger is the delete of history records in the storage, notified by IF-102 `subscribe`)
+- Status: Verified
+- History: A-131 (proposed 2026-11-08, G-V3.PANEL), new; reworded after approval in batch 1 (owner 2026-11-08: no operation deletes the chat history today, the trigger is the delete of history records in the storage, notified by IF-102 `subscribe`); A-144 (approved 2026-11-13, F-08 of the first Verify run: one history record deletes the run of that record only; the id of the history record is the run id)
 
 ### REQ-WFM-136 – Runs without knowledge of the view
 - Level: low   Subject: TaskRuntime
@@ -1011,7 +1011,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-39: a scripted skill that sends only the events of today gets a record and a view; no skill file or manifest changes for it (exact, inspection of the stand-in)
 - Verified by: TC-WFM-136
-- Status: Draft
+- Status: Verified
 - History: A-131 (proposed 2026-11-08, G-V3.PANEL), new
 
 ### REQ-WFM-137 – Texts of a run are stored as data
@@ -1024,7 +1024,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-39: a result with an instruction and a script tag is stored and read back byte for byte and starts no tool call (exact)
 - Verified by: TC-WFM-137
-- Status: Draft
+- Status: Verified
 - History: A-131 (proposed 2026-11-08, G-V3.PANEL), new
 
 ### REQ-WFM-138 – Elements of a skill passed on
@@ -1037,5 +1037,5 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-39: a scripted skill that reports two elements has them in `task_status` and in the run record; a skill that reports none has an empty list and the other checks of the group pass unchanged (exact)
 - Verified by: TC-WFM-138
-- Status: Draft
+- Status: Verified
 - History: A-131 (proposed 2026-11-08, G-V3.PANEL), new; owner at review of batch 2: skill specific elements can be added per skill

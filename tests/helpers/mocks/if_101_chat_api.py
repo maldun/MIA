@@ -445,14 +445,15 @@ class ChatApiMock:
         self._broadcast("skill_run_changed", {"id": run_id})
 
     def shown_run(self, session):
-        """v16 (GET /api/skill-runs/shown): the run started most recently as a run record, None (204) when there is none"""
-        self._user(session)
-        return None if not self._run_order else self._copy(self._runs[self._run_order[-1]])
+        """v16 (GET /api/skill-runs/shown): the run of the account started most recently as a run record, None (204) when there is none (A-145: runs of another account are never shown)"""
+        account = self._user(session)
+        own = [r for r in self._run_order if self._run_owner.get(r) == account]
+        return None if not own else self._copy(self._runs[own[-1]])
 
     def skill_run(self, session, run_id):
-        """v16 (GET /api/skill-runs/<id>): the run record of one run; 404 not_found for a run that does not exist or is deleted"""
-        self._user(session)
-        if run_id not in self._runs:
+        """v16 (GET /api/skill-runs/<id>): the run record of one run; 404 not_found for a run that does not exist, is deleted or belongs to another account (A-145)"""
+        account = self._user(session)
+        if run_id not in self._runs or self._run_owner.get(run_id) != account:
             raise ApiError(404, "not_found")
         return self._copy(self._runs[run_id])
 
@@ -460,13 +461,13 @@ class ChatApiMock:
     def _copy(record):
         return {k: (list(v) if isinstance(v, list) else dict(v) if isinstance(v, dict) else v) for k, v in record.items()}
 
-    def delete_history(self, account):
-        """Test adapter (v16): the history records of the account are deleted in the storage (IF-102); its run records go with them and the page is told with id null"""
-        self._history = []
-        for run_id in [r for r in self._run_order if self._run_owner.get(r) == account]:
-            del self._runs[run_id]
-            self._run_order.remove(run_id)
-        self._broadcast("skill_run_changed", {"id": None})
+    def delete_history(self, account, run_id):
+        """Test adapter (A-144): the history record with the id of the run is deleted in the storage (IF-102); the run record of that run goes with it, no other, and the page is told its id"""
+        if self._run_owner.get(run_id) != account:
+            return                                                   # the history record belongs to no run of the account
+        del self._runs[run_id]
+        self._run_order.remove(run_id)
+        self._broadcast("skill_run_changed", {"id": run_id})
 
     def pause(self, session):
         """v8: pauses the running task; False when nothing runs"""

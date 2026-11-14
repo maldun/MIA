@@ -229,7 +229,7 @@ package MIA_Architecture {
                                "templates/static/chat/chat.js", "templates/static/chat/chat-model.js", "templates/static/chat/mood.js",
                                "templates/static/chat/login.js", "templates/static/chat/account.js", "templates/static/chat/api.js",
                                "templates/static/chat/socket.js", "templates/static/chat/workspace.js", "templates/static/chat/panels-model.js",
-                               "templates/static/chat/task-card.js", "templates/static/chat/task-card-model.js",
+                               "templates/static/chat/skill-run.js", "templates/static/chat/skill-run-model.js", "templates/static/chat/skill-run-shares.js",
                                "templates/static/chat/composer.js", "templates/static/chat/palette.js", "templates/static/chat/markdown.js",
                                "templates/static/chat/menu.js", "templates/static/chat/layout.js", "templates/static/chat/caption.js",
                                "templates/static/chat/view-menu.js", "templates/static/chat/settings.js", "templates/static/chat/theme.js",
@@ -400,10 +400,10 @@ package MIA_Architecture {
             @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("skill_store.py", "skills/chat.md", "skills/research.md"); }
         }
         part skillRunStore {
-            doc /* Target (FB-01): one stored record per skill run (skill, who started it, state, final figures, full result, files,
-                   link to its report), so that the skills panel lists running and finished runs after a reload and a restart.
-                   Today only the review's report is a record (reports) and the card is lost on reload (TD-01). */
-            @Implementation { :>> status = ImplementationStatus::proposed; }
+            doc /* One stored record per skill run in the table skill_runs (skill, version, account, state, phases, figures, answers, result,
+                   material, files, elements), kept by the run recorder and fed by the run observer from the events a skill sends today; the
+                   Skill run view and the chat read it through IF-101 v16 and it goes with the chat history (REQ-WFM-130 to 138). */
+            @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("skill_runs.py", "skill_run_observer.py"); }
             @ChangeSource { feedbackId = "FB-01"; iteration = 1; }
         }
         part pipelineRunner {
@@ -3333,7 +3333,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-WFM-135'> ChatHistoryDeleted_Wfm135 {
         subject s : TaskRuntime;
-        doc /* When the history records of an account are deleted in the storage, the Workflow management shall delete that account's run records and keep the files of the files volume. */
+        doc /* When a history record is deleted in the storage, the Workflow management shall delete the run record whose run id equals the id of that history record, and no other run record, and keep the files of the files volume. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-WFM-136'> RunsWithoutKnowledgeOfTheView_Wfm136 {
@@ -4101,6 +4101,21 @@ package MIA_NodeRequirements {
         doc /* The Storage layer shall realise the storage interface IF-102 as specified in contracts/IF-102-storage-interface.md. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
+    requirement def <'REQ-SLY-013'> DepthOfADocument_Sly013 {
+        subject s : Persistence;
+        doc /* If a document that is put is nested deeper than 200 levels, then the Storage layer shall refuse it as invalid. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-SLY-014'> ADocumentThatContainsItself_Sly014 {
+        subject s : Persistence;
+        doc /* If a document that is put contains itself, then the Storage layer shall refuse it as invalid within one second. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-SLY-015'> SizeOfADocument_Sly015 {
+        subject s : Persistence;
+        doc /* If a document that is put has more than 100,000 values, counting a value once for every path that reaches it, then the Storage layer shall refuse it as invalid. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
     requirement def <'REQ-GTB-001'> SharedStateHeld_Gtb001 {
         subject s : Persistence;
         doc /* The Graph tables shall define the tables of workflows (library entries) and context graphs. */
@@ -4199,6 +4214,46 @@ package MIA_NodeRequirements {
     requirement def <'REQ-GTB-020'> EdgeNamesStoredNodes_Gtb020 {
         subject s : Persistence;
         doc /* If an edge names a start or end node that is not stored, then the Graph tables shall refuse the edge and name that node ID. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-021'> RecordUnderItsOwnID_Gtb021 {
+        subject s : Persistence;
+        doc /* If a record of a graph table is written under a record ID that differs from the ID inside the record, then the Graph tables shall refuse the record and name the field `id`. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-022'> FixedFieldsOfANode_Gtb022 {
+        subject s : Persistence;
+        doc /* If a node is written or read with a field in its JSON field that its type's schema does not list, then the Graph tables shall refuse the node as `schema_break` naming that field. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-023'> ContextGraphTables_Gtb023 {
+        subject s : Persistence;
+        doc /* The Graph tables shall list `context_nodes` and `context_edges` as versioned tables whose records are never deleted. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-024'> ContextRecordShape_Gtb024 {
+        subject s : Persistence;
+        doc /* If a context node lacks a text ID, a JSON object or a text type, or a context edge lacks a text end, then the Graph tables shall refuse the record naming that field. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-025'> ContextEdgeEnds_Gtb025 {
+        subject s : Persistence;
+        doc /* If a context edge names an end that is not a stored context node, then the Graph tables shall refuse the edge as `unknown_endpoint` naming that end. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-026'> ContextHeaderMembers_Gtb026 {
+        subject s : Persistence;
+        doc /* If a graph header of kind context names a member that is not stored in `context_nodes` or `context_edges` at that version, then the Graph tables shall refuse the header as `unknown_member` naming the member. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-027'> InputThatCannotBeChecked_Gtb027 {
+        subject s : Persistence;
+        doc /* If a record is nested deeper than 200 levels or its category schema is not valid, then the Graph tables shall refuse it as `schema_break` naming the field. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-028'> SizeOfARecord_Gtb028 {
+        subject s : Persistence;
+        doc /* If a record has more than 100,000 values, counting a value once for every path that reaches it, then the Graph tables shall refuse it as `schema_break` naming `data`. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-RTB-001'> SharedStateHeld_Rtb001 {
@@ -4978,6 +5033,9 @@ package MIA_NodeRequirements {
     requirement r_req_sly_010 : ReachableOnlyInsideTheHostNetwork_Sly010;
     requirement r_req_sly_011 : OwnContainer_Sly011;
     requirement r_req_sly_012 : RealiseIF102_Sly012;
+    requirement r_req_sly_013 : DepthOfADocument_Sly013;
+    requirement r_req_sly_014 : ADocumentThatContainsItself_Sly014;
+    requirement r_req_sly_015 : SizeOfADocument_Sly015;
     requirement r_req_gtb_001 : SharedStateHeld_Gtb001;
     requirement r_req_gtb_002 : SchemaValidationOnWrite_Gtb002;
     requirement r_req_gtb_003 : ContextGraphsStored_Gtb003;
@@ -4998,6 +5056,14 @@ package MIA_NodeRequirements {
     requirement r_req_gtb_018 : SkillTable_Gtb018;
     requirement r_req_gtb_019 : HeaderNamesStoredMembers_Gtb019;
     requirement r_req_gtb_020 : EdgeNamesStoredNodes_Gtb020;
+    requirement r_req_gtb_021 : RecordUnderItsOwnID_Gtb021;
+    requirement r_req_gtb_022 : FixedFieldsOfANode_Gtb022;
+    requirement r_req_gtb_023 : ContextGraphTables_Gtb023;
+    requirement r_req_gtb_024 : ContextRecordShape_Gtb024;
+    requirement r_req_gtb_025 : ContextEdgeEnds_Gtb025;
+    requirement r_req_gtb_026 : ContextHeaderMembers_Gtb026;
+    requirement r_req_gtb_027 : InputThatCannotBeChecked_Gtb027;
+    requirement r_req_gtb_028 : SizeOfARecord_Gtb028;
     requirement r_req_rtb_001 : SharedStateHeld_Rtb001;
     requirement r_req_rtb_002 : RunResults_Rtb002;
     requirement r_req_rtb_003 : VotesStored_Rtb003;
@@ -5467,6 +5533,9 @@ package MIA_NodeRequirements {
     satisfy r_req_sly_010 by mia.persistence;
     satisfy r_req_sly_011 by mia.persistence;
     satisfy r_req_sly_012 by mia.persistence;
+    satisfy r_req_sly_013 by mia.persistence;
+    satisfy r_req_sly_014 by mia.persistence;
+    satisfy r_req_sly_015 by mia.persistence;
     satisfy r_req_gtb_001 by mia.persistence;
     satisfy r_req_gtb_002 by mia.persistence;
     satisfy r_req_gtb_003 by mia.persistence;
@@ -5487,6 +5556,14 @@ package MIA_NodeRequirements {
     satisfy r_req_gtb_018 by mia.persistence;
     satisfy r_req_gtb_019 by mia.persistence;
     satisfy r_req_gtb_020 by mia.persistence;
+    satisfy r_req_gtb_021 by mia.persistence;
+    satisfy r_req_gtb_022 by mia.persistence;
+    satisfy r_req_gtb_023 by mia.persistence;
+    satisfy r_req_gtb_024 by mia.persistence;
+    satisfy r_req_gtb_025 by mia.persistence;
+    satisfy r_req_gtb_026 by mia.persistence;
+    satisfy r_req_gtb_027 by mia.persistence;
+    satisfy r_req_gtb_028 by mia.persistence;
     satisfy r_req_rtb_001 by mia.persistence;
     satisfy r_req_rtb_002 by mia.persistence;
     satisfy r_req_rtb_003 by mia.persistence;
@@ -5955,6 +6032,9 @@ package MIA_NodeRequirements {
     allocate r_req_sly_010 to mia.persistence;
     allocate r_req_sly_011 to mia.persistence;
     allocate r_req_sly_012 to mia.persistence;
+    allocate r_req_sly_013 to mia.persistence;
+    allocate r_req_sly_014 to mia.persistence;
+    allocate r_req_sly_015 to mia.persistence;
     allocate r_req_gtb_001 to mia.persistence;
     allocate r_req_gtb_002 to mia.persistence;
     allocate r_req_gtb_003 to mia.persistence;
@@ -5975,6 +6055,14 @@ package MIA_NodeRequirements {
     allocate r_req_gtb_018 to mia.persistence;
     allocate r_req_gtb_019 to mia.persistence;
     allocate r_req_gtb_020 to mia.persistence;
+    allocate r_req_gtb_021 to mia.persistence;
+    allocate r_req_gtb_022 to mia.persistence;
+    allocate r_req_gtb_023 to mia.persistence;
+    allocate r_req_gtb_024 to mia.persistence;
+    allocate r_req_gtb_025 to mia.persistence;
+    allocate r_req_gtb_026 to mia.persistence;
+    allocate r_req_gtb_027 to mia.persistence;
+    allocate r_req_gtb_028 to mia.persistence;
     allocate r_req_rtb_001 to mia.persistence;
     allocate r_req_rtb_002 to mia.persistence;
     allocate r_req_rtb_003 to mia.persistence;
@@ -6475,6 +6563,9 @@ package MIA_NodeRequirements {
     dependency from r_req_sly_010 to r_req_db_016;
     dependency from r_req_sly_011 to r_req_db_017;
     dependency from r_req_sly_012 to if102;
+    dependency from r_req_sly_013 to r_req_sly_004;
+    dependency from r_req_sly_014 to r_req_sly_004;
+    dependency from r_req_sly_015 to r_req_sly_004;
     dependency from r_req_gtb_001 to r_req_db_002;
     dependency from r_req_gtb_002 to r_req_db_004;
     dependency from r_req_gtb_003 to r_req_db_011;
@@ -6495,6 +6586,14 @@ package MIA_NodeRequirements {
     dependency from r_req_gtb_018 to fr40;
     dependency from r_req_gtb_019 to fr40;
     dependency from r_req_gtb_020 to fr40;
+    dependency from r_req_gtb_021 to fr40;
+    dependency from r_req_gtb_022 to fr40;
+    dependency from r_req_gtb_023 to fr40;
+    dependency from r_req_gtb_024 to fr40;
+    dependency from r_req_gtb_025 to fr40;
+    dependency from r_req_gtb_026 to fr40;
+    dependency from r_req_gtb_027 to fr40;
+    dependency from r_req_gtb_028 to fr40;
     dependency from r_req_rtb_001 to r_req_db_002;
     dependency from r_req_rtb_002 to r_req_db_010;
     dependency from r_req_rtb_003 to r_req_db_012;

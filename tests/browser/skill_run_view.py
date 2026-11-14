@@ -224,10 +224,10 @@ def full():
                    answers=driver.execute_script("return [...document.querySelectorAll('#srv-answers li')].map((e) => e.textContent.trim())"),
                    material=driver.execute_script("return document.querySelectorAll('#srv-material li').length"),
                    files=driver.execute_script("return [...document.querySelectorAll('#srv-files a')].map((a) => a.getAttribute('href'))"),
-                   counts=text(driver, "#srv-counts"), height=rect(driver, "#srv-full")["height"], page_scrolls=page_scrolls(driver))
+                   counts=text(driver, "#srv-counts"), height=rect(driver, "#srv-full-body")["height"], page_scrolls=page_scrolls(driver))
         driver.execute_script("document.getElementById('srv-result').scrollTop = 200")
         set_share(driver, "#srv-share-full", 25)
-        out["height_25"] = rect(driver, "#srv-full")["height"]
+        out["height_25"] = rect(driver, "#srv-full-body")["height"]
         return out
     finally:
         driver.quit()
@@ -354,11 +354,11 @@ def shares():
         for name, selector, good, bad_values in (("strip", "#srv-share-strip", 20, (11, 41)), ("full", "#srv-share-full", 25, (19, 61))):
             set_share(driver, selector, good)
             out[name]["set"] = {"value": driver.execute_script("return document.querySelector(arguments[0]).value", selector),
-                                "strip": rect(driver, "#skill-run-view")["height"], "full": rect(driver, "#srv-full")["height"]}
+                                "strip": rect(driver, "#skill-run-view")["height"], "full": rect(driver, "#srv-full-body")["height"]}
             for value in bad_values:
                 set_share(driver, selector, value)
                 out[name][str(value)] = {"value": driver.execute_script("return document.querySelector(arguments[0]).value", selector),
-                                         "strip": rect(driver, "#skill-run-view")["height"], "full": rect(driver, "#srv-full")["height"]}
+                                         "strip": rect(driver, "#skill-run-view")["height"], "full": rect(driver, "#srv-full-body")["height"]}
         return out
     finally:
         driver.quit()

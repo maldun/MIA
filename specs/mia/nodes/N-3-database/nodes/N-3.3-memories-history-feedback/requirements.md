@@ -88,7 +88,7 @@ The 14 record tables of IF-302 (history, which also holds the summaries and the 
 - Verification method: Test
 - Acceptance criterion: AC-39: definitions() names skill_runs as versioned and deletable; a run record lacking one of the six fields is rule schema with that field as detail; a complete one is accepted (exact)
 - Verified by: TC-RTB-007
-- Status: Draft
+- Status: Verified
 - History: A-141 (proposed 2026-11-08, G-V3.PANEL), new; owner 2026-11-08: a new table skill_runs, REQ-RTB-007
 
 ## Interface requirements

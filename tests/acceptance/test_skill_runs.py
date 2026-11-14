@@ -143,25 +143,26 @@ class SkillRunRecorderChecks(unittest.TestCase):
         self.assertNotIn("A", shown)
 
     @mark.req("REQ-WFM-135")
-    def test_deleting_the_history_deletes_the_run_records_of_the_account(self):
-        """TC-WFM-135: when the history records of an account are deleted in the storage, no run is named for it, its run records are gone and skill_run_changed with no id is sent; the run of the other account stays.
+    def test_deleting_a_history_record_deletes_the_run_of_that_record_only(self):
+        """TC-WFM-135 (A-144): when a history record is deleted in the storage, the run record whose id equals the id of that history record is gone and skill_run_changed names that id; every other run record stays, also those of the same account.
         The files volume is not a handle of the recorder: that its files stay listed is checked at the interface (TC-IF-101-39) and in the browser check TC-CLV-038.
-        Example: after the delete of anna's history record h1 the table holds only ben's run r2."""
-        # Given: two accounts with one finished run each and a history record each
-        recorder, storage, events, _ = make()
-        for run, account in (("r1", "anna"), ("r2", "ben")):
+        Example: after the delete of the history record r1 the table holds r2 (anna) and r3 (ben)."""
+        # Given: three finished runs, two of anna and one of ben, and a history record with the id of each run
+        recorder, storage, events, clock = make()
+        for run, account in (("r1", "anna"), ("r2", "anna"), ("r3", "ben")):
+            clock.advance(1)
             recorder.start(run, "review", "1", account, phases=REVIEW_PHASES)
             recorder.end(run, "done")
-            storage.put("history", "h-" + account, {"text": "hello"}, account)
-        # When: the history records of the first account are deleted through the fake storage and its notification arrives
-        storage.delete("history", "h-anna", "anna")
-        # Then: no run is named for the first account and its records are gone
-        self.assertIsNone(recorder.shown("anna"))
-        self.assertEqual(storage.ids("skill_runs"), ["r2"])
-        # And: skill_run_changed with no id is sent
-        self.assertIn(("skill_run_changed", {"id": None}), events)
-        # And: the second account's run is still named
-        self.assertEqual(recorder.shown("ben"), "r2")
+            storage.put("history", run, {"text": "hello"}, account)
+        # When: one history record of anna is deleted through the fake storage and its notification arrives
+        storage.delete("history", "r1", "anna")
+        # Then: only the run of that record is gone
+        self.assertEqual(storage.ids("skill_runs"), ["r2", "r3"])
+        # And: skill_run_changed names the deleted run
+        self.assertIn(("skill_run_changed", {"id": "r1"}), events)
+        # And: the other runs are still named, also the other run of the same account
+        self.assertEqual(recorder.shown("anna"), "r2")
+        self.assertEqual(recorder.shown("ben"), "r3")
 
     @mark.req("REQ-WFM-137")
     def test_the_texts_of_a_run_are_stored_as_data(self):

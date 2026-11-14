@@ -24,7 +24,7 @@ New module `skill_runs.py` with the class `SkillRunRecorder(storage, emit, clock
 
 Texts (result, material, answers, reason, elements) are stored and returned as they came, as text; the recorder never evaluates them (REQ-WFM-137).
 
-**Deletion with the history (REQ-WFM-135):** the constructor subscribes to the table `history`; a notice with `version: None` deletes the run records of the account and sends `skill_run_changed {id: null}`; the files are not touched. The recorder is told nothing else.
+**Deletion with the history (REQ-WFM-135):** the constructor subscribes to the table `history`; a notice with `version: None` deletes the run record whose run id is the `id` of the notice (the history record has the id of its run; A-144), no other, and sends `skill_run_changed {id: <run>}`; a notice whose id is no run changes nothing; the files are not touched. The recorder is told nothing else.
 
 **Skills stay unchanged (REQ-WFM-136):** a skill-runner adapter (not part of the recorder) translates the events a skill sends today into these calls; TC-WFM-136 drives the adapter with a scripted skill and inspects that no skill file names the view.
 

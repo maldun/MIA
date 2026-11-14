@@ -25,12 +25,12 @@
 - Requirement: REQ-WFM-040
 - Group: Stand-ins
 - Kind: setup
-- Text: The checks shall use a minimal fake of the graph tables that keeps versions and fields, and the fake shall be run against the contract suite of IF-301 v2 as soon as that suite exists.
-- Rationale: owner decision 2026-11-07: the checks do not wait for the IF-301 v2 mock of STORE. The fake is only as faithful as the contract suite shows; until the suite exists the gap is known, and a fake that fails the suite later is a finding for these checks.
+- Text: The checks shall use a minimal fake of the graph tables that keeps versions and fields, and the same scenarios shall also run, in a test file outside the protected folders, on the real Storage layer with the record checks of IF-301 v2; a difference between the fake and the real Storage layer shall be reported as a finding for these checks.
+- Rationale: owner decision 2026-11-07: the checks do not wait for the IF-301 v2 mock of STORE. Owner decision 2026-11-08 (T-05): the contract suite of IF-301 v2 tests record checks and conversion, the fake is a versioned key-value store, so the suite cannot judge it; its fidelity is shown by running the same scenarios on the real Storage layer. A difference is a finding for these checks.
 - Credibility aspect: stand-in fidelity
-- Verified by: contract suite
+- Verified by: adapter test on the real Storage layer
 - Status: Draft
-- History: changed at review (2026-11-07) from "use only the IF-301 v2 mock" at the owner's answer
+- History: changed at review (2026-11-07) from "use only the IF-301 v2 mock" at the owner's answer; A-105 (2026-11-08): from "run the fake against the contract suite" to the adapter test on the real Storage layer (T-05 finding)
 
 ### TR-MODEL-002 – every refusal has an accepted twin
 - Applies to: TC-WFM-042, TC-WFM-043, TC-WFM-045, TC-WFM-046, TC-WFM-048

@@ -80,9 +80,9 @@ Playing the audio of the answers and the voice lines in this browser: queue, cla
 - Verification method: Test
 - Acceptance criterion: AC-1: with a stop 1 s ago a line that arrives after the speak-again request is enqueued, in the node test and in the browser; without the request it is still dropped (exact)
 - Verified by: TC-VPB-006, TC-VPB-007
-- Status: Approved
+- Status: Validated
 - Group: SA
-- History: proposed in A-132 (Draft); approved by the owner 2026-11-08 (D-285)
+- History: proposed in A-132 (Draft); approved by the owner 2026-11-08 (D-285); verified 2026-11-08 (A-132-verification-report.md, approved by the owner); validated 2026-11-08 (A-132-validation-report.md, accepted as is by the owner)
 
 ## Interface requirements
 

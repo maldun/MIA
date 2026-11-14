@@ -1,0 +1,573 @@
+{
+ "accepted": [
+  {
+   "name": "citation",
+   "description": "A citation is a reference to a source.",
+   "quote": "A citation is a reference to a source.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "bibliographic references section",
+   "description": "a citation is an abbreviated alphanumeric expression embedded in the body of an intellectual work that denotes an entry in the bibliographic references section of the work",
+   "quote": "More precisely, a citation is an abbreviated alphanumeric expression embedded in the body of an intellectual work that denotes an entry in the bibliographic references section of the work, for the purpose of acknowledging the relevance of the works of others to the topic of discussion at the spot where the citation appears.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "in-body citation",
+   "description": "Generally, the combination of both the in-body citation and the bibliographic entry constitutes what is commonly thought of as a citation",
+   "quote": "Generally, the combination of both the in-body citation and the bibliographic entry constitutes what is commonly thought of as a citation (whereas bibliographic entries by themselves are not).",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "bibliographic entry",
+   "description": "Generally, the combination of both the in-body citation and the bibliographic entry constitutes what is commonly thought of as a citation",
+   "quote": "Generally, the combination of both the in-body citation and the bibliographic entry constitutes what is commonly thought of as a citation (whereas bibliographic entries by themselves are not).",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "citation system",
+   "description": "Conventions of citation (e.g., placement of dates within parentheses, superscripted endnotes vs. footnotes, colons or commas for page numbers, etc.) vary by the citation system used",
+   "quote": "Conventions of citation (e.g., placement of dates within parentheses, superscripted endnotes vs. footnotes, colons or commas for page numbers, etc.) vary by the citation system used (e.g., Oxford, Harvard, MLA, NLM, American Sociological Association (ASA), American Psychological Association (APA), etc.).",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Oxford",
+   "description": "Conventions of citation (e.g., placement of dates within parentheses, superscripted endnotes vs. footnotes, colons or commas for page numbers, etc.) vary by the citation system used (e.g., Oxford, Harvard, MLA, NLM, American Sociological Association (ASA), American Psychological Association (APA), etc.).",
+   "quote": "Conventions of citation (e.g., placement of dates within parentheses, superscripted endnotes vs. footnotes, colons or commas for page numbers, etc.) vary by the citation system used (e.g., Oxford, Harvard, MLA, NLM, American Sociological Association (ASA), American Psychological Association (APA), etc.).",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Harvard",
+   "description": "Conventions of citation (e.g., placement of dates within parentheses, superscripted endnotes vs. footnotes, colons or commas for page numbers, etc.) vary by the citation system used (e.g., Oxford, Harvard, MLA, NLM, American Sociological Association (ASA), American Psychological Association (APA), etc.).",
+   "quote": "Conventions of citation (e.g., placement of dates within parentheses, superscripted endnotes vs. footnotes, colons or commas for page numbers, etc.) vary by the citation system used (e.g., Oxford, Harvard, MLA, NLM, American Sociological Association (ASA), American Psychological Association (APA), etc.).",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "MLA",
+   "description": "Conventions of citation (e.g., placement of dates within parentheses, superscripted endnotes vs. footnotes, colons or commas for page numbers, etc.) vary by the citation system used (e.g., Oxford, Harvard, MLA, NLM, American Sociological Association (ASA), American Psychological Association (APA), etc.).",
+   "quote": "Conventions of citation (e.g., placement of dates within parentheses, superscripted endnotes vs. footnotes, colons or commas for page numbers, etc.) vary by the citation system used (e.g., Oxford, Harvard, MLA, NLM, American Sociological Association (ASA), American Psychological Association (APA), etc.).",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "NLM",
+   "description": "Conventions of citation (e.g., placement of dates within parentheses, superscripted endnotes vs. footnotes, colons or commas for page numbers, etc.) vary by the citation system used (e.g., Oxford, Harvard, MLA, NLM, American Sociological Association (ASA), American Psychological Association (APA), etc.).",
+   "quote": "Conventions of citation (e.g., placement of dates within parentheses, superscripted endnotes vs. footnotes, colons or commas for page numbers, etc.) vary by the citation system used (e.g., Oxford, Harvard, MLA, NLM, American Sociological Association (ASA), American Psychological Association (APA), etc.).",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "American Sociological Association (ASA)",
+   "description": "Conventions of citation (e.g., placement of dates within parentheses, superscripted endnotes vs. footnotes, colons or commas for page numbers, etc.) vary by the citation system used (e.g., Oxford, Harvard, MLA, NLM, American Sociological Association (ASA), American Psychological Association (APA), etc.).",
+   "quote": "Conventions of citation (e.g., placement of dates within parentheses, superscripted endnotes vs. footnotes, colons or commas for page numbers, etc.) vary by the citation system used (e.g., Oxford, Harvard, MLA, NLM, American Sociological Association (ASA), American Psychological Association (APA), etc.).",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "American Psychological Association (APA)",
+   "description": "Conventions of citation (e.g., placement of dates within parentheses, superscripted endnotes vs. footnotes, colons or commas for page numbers, etc.) vary by the citation system used (e.g., Oxford, Harvard, MLA, NLM, American Sociological Association (ASA), American Psychological Association (APA), etc.).",
+   "quote": "Conventions of citation (e.g., placement of dates within parentheses, superscripted endnotes vs. footnotes, colons or commas for page numbers, etc.) vary by the citation system used (e.g., Oxford, Harvard, MLA, NLM, American Sociological Association (ASA), American Psychological Association (APA), etc.).",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "academic disciplines",
+   "description": "Each system is associated with different academic disciplines, and academic journals associated with these disciplines maintain the relevant citational style by recommending and adhering to the relevant style guides.",
+   "quote": "Each system is associated with different academic disciplines, and academic journals associated with these disciplines maintain the relevant citational style by recommending and adhering to the relevant style guides.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "academic journals",
+   "description": "Each system is associated with different academic disciplines, and academic journals associated with these disciplines maintain the relevant citational style by recommending and adhering to the relevant style guides.",
+   "quote": "Each system is associated with different academic disciplines, and academic journals associated with these disciplines maintain the relevant citational style by recommending and adhering to the relevant style guides.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "style guides",
+   "description": "Each system is associated with different academic disciplines, and academic journals associated with these disciplines maintain the relevant citational style by recommending and adhering to the relevant style guides.",
+   "quote": "Each system is associated with different academic disciplines, and academic journals associated with these disciplines maintain the relevant citational style by recommending and adhering to the relevant style guides.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "source": "citation",
+   "relation": "is a reference to",
+   "target": "source",
+   "quote": "A citation is a reference to a source.",
+   "kind": "relation"
+  },
+  {
+   "source": "citation",
+   "relation": "denotes an entry in",
+   "target": "bibliographic references section",
+   "quote": "More precisely, a citation is an abbreviated alphanumeric expression embedded in the body of an intellectual work that denotes an entry in the bibliographic references section of the work, for the purpose of acknowledging the relevance of the works of others to the topic of discussion at the spot where the citation appears.",
+   "kind": "relation"
+  },
+  {
+   "source": "in-body citation",
+   "relation": "constitutes what is commonly thought of as",
+   "target": "citation",
+   "quote": "Generally, the combination of both the in-body citation and the bibliographic entry constitutes what is commonly thought of as a citation (whereas bibliographic entries by themselves are not).",
+   "kind": "relation"
+  },
+  {
+   "source": "bibliographic entry",
+   "relation": "constitutes what is commonly thought of as",
+   "target": "citation",
+   "quote": "Generally, the combination of both the in-body citation and the bibliographic entry constitutes what is commonly thought of as a citation (whereas bibliographic entries by themselves are not).",
+   "kind": "relation"
+  },
+  {
+   "source": "academic journals",
+   "relation": "associated with",
+   "target": "academic disciplines",
+   "quote": "Each system is associated with different academic disciplines, and academic journals associated with these disciplines maintain the relevant citational style by recommending and adhering to the relevant style guides.",
+   "kind": "relation"
+  },
+  {
+   "source": "academic journals",
+   "relation": "maintain the relevant citational style by recommending and adhering to",
+   "target": "style guides",
+   "quote": "Each system is associated with different academic disciplines, and academic journals associated with these disciplines maintain the relevant citational style by recommending and adhering to the relevant style guides.",
+   "kind": "relation"
+  },
+  {
+   "name": "Vancouver system",
+   "description": "The Vancouver system uses sequential numbers in the text, either bracketed or superscript or both.",
+   "quote": "The Vancouver system uses sequential numbers in the text, either bracketed or superscript or both.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Council of Science Editors (CSE)",
+   "description": "However, the Council of Science Editors (CSE) adds a third, the citation-name system.",
+   "quote": "However, the Council of Science Editors (CSE) adds a third, the citation-name system.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "citation-name system",
+   "description": "However, the Council of Science Editors (CSE) adds a third, the citation-name system.",
+   "quote": "However, the Council of Science Editors (CSE) adds a third, the citation-name system.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "International Standard Book Number (ISBN)",
+   "description": "Citations of books may include an International Standard Book Number (ISBN).",
+   "quote": "Citations of books may include an International Standard Book Number (ISBN).",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Serial Item and Contribution Identifier (SICI)",
+   "description": "Specific volumes, articles, or other identifiable parts of a periodical, may have an associated Serial Item and Contribution Identifier (SICI) or an International Standard Serial Number (ISSN).",
+   "quote": "Specific volumes, articles, or other identifiable parts of a periodical, may have an associated Serial Item and Contribution Identifier (SICI) or an International Standard Serial Number (ISSN).",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "International Standard Serial Number (ISSN)",
+   "description": "Specific volumes, articles, or other identifiable parts of a periodical, may have an associated Serial Item and Contribution Identifier (SICI) or an International Standard Serial Number (ISSN).",
+   "quote": "Specific volumes, articles, or other identifiable parts of a periodical, may have an associated Serial Item and Contribution Identifier (SICI) or an International Standard Serial Number (ISSN).",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "digital object identifier (DOI)",
+   "description": "Electronic documents may have a digital object identifier (DOI).",
+   "quote": "Electronic documents may have a digital object identifier (DOI).",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "PubMed Identifier (PMID)",
+   "description": "Biomedical research articles may have a PubMed Identifier (PMID).",
+   "quote": "Biomedical research articles may have a PubMed Identifier (PMID).",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "footnotes",
+   "description": "The numbers refer to either footnotes (notes at the end of the page) or endnotes (notes on a page at the end of the paper) that provide source detail.",
+   "quote": "The numbers refer to either footnotes (notes at the end of the page) or endnotes (notes on a page at the end of the paper) that provide source detail.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "endnotes",
+   "description": "The numbers refer to either footnotes (notes at the end of the page) or endnotes (notes on a page at the end of the paper) that provide source detail.",
+   "quote": "The numbers refer to either footnotes (notes at the end of the page) or endnotes (notes on a page at the end of the paper) that provide source detail.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "source": "Council of Science Editors (CSE)",
+   "relation": "adds a third",
+   "target": "citation-name system",
+   "quote": "However, the Council of Science Editors (CSE) adds a third, the citation-name system.",
+   "kind": "relation"
+  },
+  {
+   "name": "Harvard referencing",
+   "description": "Parenthetical referencing, also known as Harvard referencing, has full or partial, in-text, citations enclosed in circular brackets and embedded in the paragraph.",
+   "quote": "Parenthetical referencing, also known as Harvard referencing, has full or partial, in-text, citations enclosed in circular brackets and embedded in the paragraph.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "References",
+   "description": "This section is often called \"References\", \"Bibliography\", \"Works cited\" or \"Works consulted\".",
+   "quote": "This section is often called \"References\", \"Bibliography\", \"Works cited\" or \"Works consulted\".",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Bibliography",
+   "description": "This section is often called \"References\", \"Bibliography\", \"Works cited\" or \"Works consulted\".",
+   "quote": "This section is often called \"References\", \"Bibliography\", \"Works cited\" or \"Works consulted\".",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Works cited",
+   "description": "This section is often called \"References\", \"Bibliography\", \"Works cited\" or \"Works consulted\".",
+   "quote": "This section is often called \"References\", \"Bibliography\", \"Works cited\" or \"Works consulted\".",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Works consulted",
+   "description": "This section is often called \"References\", \"Bibliography\", \"Works cited\" or \"Works consulted\".",
+   "quote": "This section is often called \"References\", \"Bibliography\", \"Works cited\" or \"Works consulted\".",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "tooltip",
+   "description": "A full reference can be hidden, only displayed when wanted by the reader, in the form of a tooltip.",
+   "quote": "A full reference can be hidden, only displayed when wanted by the reader, in the form of a tooltip.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Chicago Manual of Style",
+   "description": "Some style guides, such as the Chicago Manual of Style, are quite flexible and cover both parenthetical and note citation systems.",
+   "quote": "Some style guides, such as the Chicago Manual of Style, are quite flexible and cover both parenthetical and note citation systems.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "APA",
+   "description": "Others, such as MLA and APA styles, specify formats within the context of a single citation system.",
+   "quote": "Others, such as MLA and APA styles, specify formats within the context of a single citation system.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Citation Style Language (CSL)",
+   "description": "The Citation Style Language (CSL) is an open XML-based language to describe the formatting of citations and bibliographies.",
+   "quote": "The Citation Style Language (CSL) is an open XML-based language to describe the formatting of citations and bibliographies.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Turabian style",
+   "description": "The closely related Turabian style\u2014which derives from it\u2014is for student references, and is distinguished from the CMOS by omission of quotation marks in reference lists, and mandatory access date citation.",
+   "quote": "The closely related Turabian style\u2014which derives from it\u2014is for student references, and is distinguished from the CMOS by omission of quotation marks in reference lists, and mandatory access date citation.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "source": "Parenthetical referencing",
+   "relation": "also known as",
+   "target": "Harvard referencing",
+   "quote": "Parenthetical referencing, also known as Harvard referencing, has full or partial, in-text, citations enclosed in circular brackets and embedded in the paragraph.",
+   "kind": "relation"
+  },
+  {
+   "source": "Chicago style (CMOS)",
+   "relation": "guide is",
+   "target": "The Chicago Manual of Style",
+   "quote": "The Chicago style (CMOS) was developed and its guide is The Chicago Manual of Style.",
+   "kind": "relation"
+  },
+  {
+   "source": "Turabian style",
+   "relation": "derives from",
+   "target": "it",
+   "quote": "The closely related Turabian style\u2014which derives from it\u2014is for student references, and is distinguished from the CMOS by omission of quotation marks in reference lists, and mandatory access date citation.",
+   "kind": "relation"
+  },
+  {
+   "source": "Columbia style",
+   "relation": "created by",
+   "target": "Janice R. Walker",
+   "quote": "The Columbia style was created by Janice R. Walker and Todd Taylor to give detailed guidelines for citing internet sources.",
+   "kind": "relation"
+  },
+  {
+   "source": "Columbia style",
+   "relation": "created by",
+   "target": "Todd Taylor",
+   "quote": "The Columbia style was created by Janice R. Walker and Todd Taylor to give detailed guidelines for citing internet sources.",
+   "kind": "relation"
+  },
+  {
+   "name": "Evidence Explained: Citing History Sources from Artifacts to Cyberspace",
+   "description": "Evidence Explained: Citing History Sources from Artifacts to Cyberspace by Elizabeth Shown Mills covers primary sources not included in CMOS, such as censuses, court, land, government, business, and church records.",
+   "quote": "Evidence Explained: Citing History Sources from Artifacts to Cyberspace by Elizabeth Shown Mills covers primary sources not included in CMOS, such as censuses, court, land, government, business, and church records.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Elizabeth Shown Mills",
+   "description": "Evidence Explained: Citing History Sources from Artifacts to Cyberspace by Elizabeth Shown Mills covers primary sources not included in CMOS, such as censuses, court, land, government, business, and church records.",
+   "quote": "Evidence Explained: Citing History Sources from Artifacts to Cyberspace by Elizabeth Shown Mills covers primary sources not included in CMOS, such as censuses, court, land, government, business, and church records.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "British Standards Institution",
+   "description": "Parenthetical referencing is recommended by both the British Standards Institution and the Modern Language Association.",
+   "quote": "Parenthetical referencing is recommended by both the British Standards Institution and the Modern Language Association.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Modern Language Association",
+   "description": "Parenthetical referencing is recommended by both the British Standards Institution and the Modern Language Association.",
+   "quote": "Parenthetical referencing is recommended by both the British Standards Institution and the Modern Language Association.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "MLA style",
+   "description": "MLA style was developed by the Modern Language Association and is most often used in the arts and the humanities, particularly in English studies, other literary studies, including comparative literature and literary criticism in languages other than English (\"foreign languages\"), and some interdisciplinary studies, such as cultural studies, drama and theatre, film, and other media, including television.",
+   "quote": "MLA style was developed by the Modern Language Association and is most often used in the arts and the humanities, particularly in English studies, other literary studies, including comparative literature and literary criticism in languages other than English (\"foreign languages\"), and some interdisciplinary studies, such as cultural studies, drama and theatre, film, and other media, including television.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "MHRA Style Guide",
+   "description": "The MHRA Style Guide is published by the Modern Humanities Research Association (MHRA) and most widely used in the arts and humanities in the United Kingdom, where the MHRA is based.",
+   "quote": "The MHRA Style Guide is published by the Modern Humanities Research Association (MHRA) and most widely used in the arts and humanities in the United Kingdom, where the MHRA is based.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Modern Humanities Research Association (MHRA)",
+   "description": "The MHRA Style Guide is published by the Modern Humanities Research Association (MHRA) and most widely used in the arts and humanities in the United Kingdom, where the MHRA is based.",
+   "quote": "The MHRA Style Guide is published by the Modern Humanities Research Association (MHRA) and most widely used in the arts and humanities in the United Kingdom, where the MHRA is based.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "The Bluebook",
+   "description": "The Bluebook is a citation system traditionally used in American academic legal writing, and the Bluebook (or similar systems derived from it) are used by many courts.",
+   "quote": "The Bluebook is a citation system traditionally used in American academic legal writing, and the Bluebook (or similar systems derived from it) are used by many courts.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "source": "Harvard referencing",
+   "relation": "is a specific kind of",
+   "target": "Parenthetical referencing",
+   "quote": "Harvard referencing (or author-date system) is a specific kind of parenthetical referencing.",
+   "kind": "relation"
+  },
+  {
+   "source": "Parenthetical referencing",
+   "relation": "is recommended by",
+   "target": "British Standards Institution",
+   "quote": "Parenthetical referencing is recommended by both the British Standards Institution and the Modern Language Association.",
+   "kind": "relation"
+  },
+  {
+   "source": "Parenthetical referencing",
+   "relation": "is recommended by",
+   "target": "Modern Language Association",
+   "quote": "Parenthetical referencing is recommended by both the British Standards Institution and the Modern Language Association.",
+   "kind": "relation"
+  },
+  {
+   "source": "MLA style",
+   "relation": "was developed by",
+   "target": "Modern Language Association",
+   "quote": "MLA style was developed by the Modern Language Association and is most often used in the arts and the humanities, particularly in English studies, other literary studies, including comparative literature and literary criticism in languages other than English (\"foreign languages\"), and some interdisciplinary studies, such as cultural studies, drama and theatre, film, and other media, including television.",
+   "kind": "relation"
+  },
+  {
+   "source": "MHRA Style Guide",
+   "relation": "is published by",
+   "target": "Modern Humanities Research Association (MHRA)",
+   "quote": "The MHRA Style Guide is published by the Modern Humanities Research Association (MHRA) and most widely used in the arts and humanities in the United Kingdom, where the MHRA is based.",
+   "kind": "relation"
+  },
+  {
+   "name": "Canadian Guide to Uniform Legal Citation (AKA McGill Guide)",
+   "description": "The legal citation style used almost universally in Canada is based on the Canadian Guide to Uniform Legal Citation (AKA McGill Guide), published by McGill Law Journal.",
+   "quote": "The legal citation style used almost universally in Canada is based on the Canadian Guide to Uniform Legal Citation (AKA McGill Guide), published by McGill Law Journal.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "McGill Law Journal",
+   "description": "The legal citation style used almost universally in Canada is based on the Canadian Guide to Uniform Legal Citation (AKA McGill Guide), published by McGill Law Journal.",
+   "quote": "The legal citation style used almost universally in Canada is based on the Canadian Guide to Uniform Legal Citation (AKA McGill Guide), published by McGill Law Journal.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "source": "Canadian Guide to Uniform Legal Citation (AKA McGill Guide)",
+   "relation": "published by",
+   "target": "McGill Law Journal",
+   "quote": "The legal citation style used almost universally in Canada is based on the Canadian Guide to Uniform Legal Citation (AKA McGill Guide), published by McGill Law Journal.",
+   "kind": "relation"
+  },
+  {
+   "name": "bibliographic citation",
+   "description": "A bibliographic citation is a reference to a book, article, web page, or other published item.",
+   "quote": "A bibliographic citation is a reference to a book, article, web page, or other published item.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "parenthetical referencing",
+   "description": "Broadly speaking, there are two types of citation systems, the Vancouver system and parenthetical referencing.",
+   "quote": "Broadly speaking, there are two types of citation systems, the Vancouver system and parenthetical referencing.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Chicago style (CMOS)",
+   "description": "The Chicago style (CMOS) was developed and its guide is The Chicago Manual of Style.",
+   "quote": "The Chicago style (CMOS) was developed and its guide is The Chicago Manual of Style.",
+   "ungrounded": 0,
+   "kind": "entity"
+  }
+ ],
+ "refused": [
+  {
+   "item": {
+    "source": "citation system",
+    "relation": "is associated with",
+    "target": "academic disciplines",
+    "quote": "Each system is associated with different academic disciplines, and academic journals associated with these disciplines maintain the relevant citational style by recommending and adhering to the relevant style guides.",
+    "kind": "relation"
+   },
+   "reason": "quote does not contain both ends"
+  },
+  {
+   "item": {
+    "name": "Stephanus pagination",
+    "description": "Stephanus pagination for Plato; Bekker numbers for Aristotle; citing the Bible by book, chapter and verse; or Shakespeare notation by play.",
+    "quote": "Stephanus pagination for Plato; Bekker numbers for Aristotle; citing the Bible by book, chapter and verse; or Shakespeare notation by play.",
+    "ungrounded": 0,
+    "kind": "entity"
+   },
+   "reason": "quote is not one whole sentence of the document"
+  },
+  {
+   "item": {
+    "name": "Plato",
+    "description": "Stephanus pagination for Plato; Bekker numbers for Aristotle; citing the Bible by book, chapter and verse; or Shakespeare notation by play.",
+    "quote": "Stephanus pagination for Plato; Bekker numbers for Aristotle; citing the Bible by book, chapter and verse; or Shakespeare notation by play.",
+    "ungrounded": 0,
+    "kind": "entity"
+   },
+   "reason": "quote is not one whole sentence of the document"
+  },
+  {
+   "item": {
+    "name": "Bekker numbers",
+    "description": "Stephanus pagination for Plato; Bekker numbers for Aristotle; citing the Bible by book, chapter and verse; or Shakespeare notation by play.",
+    "quote": "Stephanus pagination for Plato; Bekker numbers for Aristotle; citing the Bible by book, chapter and verse; or Shakespeare notation by play.",
+    "ungrounded": 0,
+    "kind": "entity"
+   },
+   "reason": "quote is not one whole sentence of the document"
+  },
+  {
+   "item": {
+    "name": "Aristotle",
+    "description": "Stephanus pagination for Plato; Bekker numbers for Aristotle; citing the Bible by book, chapter and verse; or Shakespeare notation by play.",
+    "quote": "Stephanus pagination for Plato; Bekker numbers for Aristotle; citing the Bible by book, chapter and verse; or Shakespeare notation by play.",
+    "ungrounded": 0,
+    "kind": "entity"
+   },
+   "reason": "quote is not one whole sentence of the document"
+  },
+  {
+   "item": {
+    "name": "Bible",
+    "description": "Stephanus pagination for Plato; Bekker numbers for Aristotle; citing the Bible by book, chapter and verse; or Shakespeare notation by play.",
+    "quote": "Stephanus pagination for Plato; Bekker numbers for Aristotle; citing the Bible by book, chapter and verse; or Shakespeare notation by play.",
+    "ungrounded": 0,
+    "kind": "entity"
+   },
+   "reason": "quote is not one whole sentence of the document"
+  },
+  {
+   "item": {
+    "name": "Shakespeare notation",
+    "description": "Stephanus pagination for Plato; Bekker numbers for Aristotle; citing the Bible by book, chapter and verse; or Shakespeare notation by play.",
+    "quote": "Stephanus pagination for Plato; Bekker numbers for Aristotle; citing the Bible by book, chapter and verse; or Shakespeare notation by play.",
+    "ungrounded": 0,
+    "kind": "entity"
+   },
+   "reason": "quote is not one whole sentence of the document"
+  },
+  {
+   "item": {
+    "name": "Columbia style",
+    "description": "The Columbia style was created by Janice R. Walker and Todd Taylor to give detailed guidelines for citing internet sources.",
+    "quote": "The Columbia style was created by Janice R. Walker and Todd Taylor to give detailed guidelines for citing internet sources.",
+    "ungrounded": 0,
+    "kind": "entity"
+   },
+   "reason": "quote is not one whole sentence of the document"
+  },
+  {
+   "item": {
+    "name": "Janice R. Walker",
+    "description": "The Columbia style was created by Janice R. Walker and Todd Taylor to give detailed guidelines for citing internet sources.",
+    "quote": "The Columbia style was created by Janice R. Walker and Todd Taylor to give detailed guidelines for citing internet sources.",
+    "ungrounded": 0,
+    "kind": "entity"
+   },
+   "reason": "quote is not one whole sentence of the document"
+  },
+  {
+   "item": {
+    "name": "Todd Taylor",
+    "description": "The Columbia style was created by Janice R. Walker and Todd Taylor to give detailed guidelines for citing internet sources.",
+    "quote": "The Columbia style was created by Janice R. Walker and Todd Taylor to give detailed guidelines for citing internet sources.",
+    "ungrounded": 0,
+    "kind": "entity"
+   },
+   "reason": "quote is not one whole sentence of the document"
+  },
+  {
+   "item": {
+    "source": "MHRA Style Guide",
+    "relation": "is similar to",
+    "target": "MLA style",
+    "quote": "It is similar to MLA style, but has some differences.",
+    "kind": "relation"
+   },
+   "reason": "quote does not contain both ends"
+  }
+ ],
+ "chunks": 5,
+ "seconds": 147.3
+}

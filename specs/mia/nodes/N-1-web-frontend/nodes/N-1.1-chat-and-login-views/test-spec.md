@@ -32,7 +32,7 @@ Tests of this part alone against the mocks of its neighbours (the mock of IF-101
 | TC-CLV-022 | REQ-CLV-022 | Component | 1 | unit test in `tests/js/` with the mocks of the interfaces (`node --test`) | AC-14: one logout request, socket closed, login shown | exact |
 | TC-CLV-023 | REQ-CLV-023 (proposed: superseded by REQ-CLV-030 to 039, A-131) | Component | 1 | unit test in `tests/js/` with the mocks of the interfaces (`node --test`); the card in the browser by checklist | AC-17: the card draws the figures, is updated in place, pause and resume, stays after done | exact |
 | TC-CLV-024 | REQ-CLV-024 | Component | 1 | unit test in `tests/js/` with the mocks of the interfaces (`node --test`) | AC-17: the files are listed newest first with a download link; files_changed draws again; no delete | exact |
-| TC-CLV-030 | REQ-CLV-030 | Component (browser) | 2 | a headless browser against the stub server `ui/tools/chat_stub_server.py` with the scripted stand-in skill | AC-39: name, start time and state as the mock reports them | exact |
+| TC-CLV-030 | REQ-CLV-030, REQ-FE-032 | Component (browser) | 2 | a headless browser against the stub server `ui/tools/chat_stub_server.py` with the scripted stand-in skill | AC-39: name, start time and state as the mock reports them | exact |
 | TC-CLV-031 | REQ-CLV-031 | Component | 1 | unit test in `tests/js/` with the mocks of the interfaces (`node --test`) | AC-39: three pills, current one marked, failing one marked | exact |
 | TC-CLV-032 | REQ-CLV-032 | Component (browser) | 2 | a headless browser against the stub server `ui/tools/chat_stub_server.py` with the scripted stand-in skill | AC-39: meters draw the figures sent; same id updates in place; nothing changes after done | exact |
 | TC-CLV-033 | REQ-CLV-033 | Component | 1 | unit test in `tests/js/` with the mocks of the interfaces (`node --test`) | AC-39: one request per press; button swaps; no action after the end | exact |
@@ -210,7 +210,7 @@ Status: **Draft** (written in Phase 3 after the verification, finding F11 / D-16
 ## Scenarios (G-V3.PANEL, checks TC-CLV-030 to 043; the older checks of this file are not changed)
 
 ### TC-CLV-030 – Run header
-- Verifies: REQ-CLV-030
+- Verifies: REQ-CLV-030, REQ-FE-032
 - Given: the stand-in skill `review` is started at a known time (fake clock)
 - When: the page shows the Skill run view while it runs, is paused, ends done, a second run fails and a third is stopped
 - Then: the header shows `review`, the start time and the states running, paused, done, failed and stopped in turn

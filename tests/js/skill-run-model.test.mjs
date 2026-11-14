@@ -2,7 +2,7 @@
 // TC-CLV-030, 031, 032, 033, 034, 039 and 044 (the model part of the checks that also run in the browser).  node --test "tests/js/*.test.mjs"
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { applyStatus, controlAction, controlsModel, elementsModel, headerModel, meterModel, phaseModel, shownModel }
+import { applyStatus, runOfHash, controlAction, controlsModel, elementsModel, headerModel, meterModel, phaseModel, shownModel }
   from '../../templates/static/chat/skill-run-model.js';
 
 const t = (key) => key;
@@ -105,4 +105,15 @@ test('TC-CLV-044: the elements of a skill are label and text pairs as text, a sk
   // And: the second skill shows only the common elements
   assert.deepEqual(elementsModel([]), []);
   assert.deepEqual(elementsModel(undefined), []);
+});
+
+test('REQ-CLV-037/038 (F-03): a chat link with a broken % escape gives no run instead of throwing', () => {
+  // Given: a good link, a link with an escape, a broken escape and a link of another kind
+  // When: the run id is read from each
+  // Then: the first two give the id, the others give null and nothing throws
+  assert.equal(runOfHash('#run=m-1'), 'm-1');
+  assert.equal(runOfHash('#run=a%20b'), 'a b');
+  assert.equal(runOfHash('#run=%E0%A4%A'), null);
+  assert.equal(runOfHash('#other'), null);
+  assert.equal(runOfHash(undefined), null);
 });

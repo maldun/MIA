@@ -39,13 +39,15 @@ class Option:
 
 
 class Task:
-    def __init__(self, id, run, text, argument, example, options=(), aliases=(), needs=(), version="1", phases=()):
+    def __init__(self, id, run, text, argument, example, options=(), aliases=(), needs=(), version="1", phases=(), workflow_graph_id=None):
         """run(argument, on_delta, on_emotion, should_stop, **what it needs) -> the result text; `needs` names what the core hands over besides: "ask" (ask the user a question; a task that
         asks gives its result as the newest message), "options" (the options of this call), "monitor" (the status card: update(phase, budget, counts)),
-        "files" (files(name, data) -> the stored name: puts a file into the files volume), "reports" (reports(question, report): keeps the finished report as a record)"""
+        "files" (files(name, data) -> the stored name: puts a file into the files volume), "reports" (reports(question, report): keeps the finished report as a record)
+        `workflow_graph_id`: the workflow graph of the skill record (REQ-WFM-041); None for a skill without a record"""
         self.id, self.run, self.text, self.argument, self.example = id, run, text, argument, example
         self.options, self.aliases, self.needs, self.version = tuple(options), tuple(aliases), tuple(needs), version
         self.phases = tuple(phases)                          # the phase names worth telling (REQ-WFM-039); none for a skill that has no stages
+        self.workflow_graph_id = workflow_graph_id
 
 
 class TaskRegistry:
@@ -73,7 +75,7 @@ class TaskRegistry:
     def parse(self, text, defaults=None):
         """None if `text` is no task command; else {"task", "argument", "options", "help", "text"}; raises TaskCommandError for a command that cannot run"""
         names = "|".join(re.escape(n) for n in sorted(self._names, key=len, reverse=True))
-        match = re.fullmatch(r"/(%s)(?:\s+(.*))?" % names, text.strip(), re.I | re.S) if names else None
+        match = re.fullmatch(r"/(%s)(?:\s+(.*))?" % names, text.strip(), re.I | re.S | re.A) if names else None
         if not match:
             return None
         task = self._tasks[self._names[match.group(1).lower()]]

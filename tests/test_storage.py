@@ -1,4 +1,6 @@
 """The Storage layer on the file backend (N-3.1 T-01, T-02): TC-SLY-002, -003, -004, -006 (files) and the behaviour of IF-102. Run with: python tests/test_storage.py"""
+import collections
+import collections
 import os
 import random
 import shutil
@@ -12,7 +14,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "helpers"))
 
 from markers import mark                         # noqa: E402
-from storage import Storage, StorageError        # noqa: E402
+from storage import Storage, StorageError, refuse_unstorable, validate  # noqa: E402
 from storage_files import FileBackend            # noqa: E402
 
 LOOKUP = {"nodes": [{"id": "q", "kind": "data"}, {"id": "p", "kind": "process"}, {"id": "a", "kind": "data"}],
@@ -229,11 +231,458 @@ class StorageBehaviour:
             self.assertEqual(code_of(call), ("invalid", "schema"))
         self.assertEqual(self.store.ids("memos"), [])
 
+    @mark.req("REQ-GTB-027")
+    def test_a_document_nested_very_deep_is_refused_never_a_recursion_error(self):
+        """F-15 (fourth Verify run): the recursive scan for what a backend cannot keep ran before the depth check and gave a RecursionError
+        for 600 levels and more.
+        Example: put("graph_nodes", "n", record with a value nested 900 levels) is ("invalid", "schema_break", "data"), as with 300 levels."""
+        # Given: records of a graph table and documents of a table that is not a graph table, nested 300, 600 and 900 levels
+        def nested(levels):
+            value = {}
+            for _ in range(levels - 3):
+                value = {"k": value}
+            return value
+        for levels in (300, 600, 900):
+            record = {"id": "n", "data": {"type": "data", "value": [nested(levels)]}}
+            document = {"nodes": [], "edges": [], "note": nested(levels)}
+            # When / Then: a graph table refuses with the rule and the detail of REQ-GTB-027, the other table with a StorageError
+            with self.subTest(levels=levels, table="graph_nodes"):
+                with self.assertRaises(StorageError) as caught:
+                    self.store.put("graph_nodes", "n", record, "anna")
+                self.assertEqual((caught.exception.code, caught.exception.rule, caught.exception.detail), ("invalid", "schema_break", "data"))
+            if levels == 300:                   # a table that is not a graph table may keep such a document: the point is only the error
+                continue
+            with self.subTest(levels=levels, table="workflows"):
+                with self.assertRaises(StorageError):
+                    self.store.put("workflows", "w", document, "anna")
+        self.assertEqual((self.store.ids("graph_nodes"), self.store.ids("workflows")), ([], []))
+
+    @mark.req("REQ-SLY-013")
+    def test_one_depth_limit_of_200_levels_holds_for_every_table(self):
+        """TC-SLY-012 (F-20, fifth Verify run): only the graph tables had a depth limit; another table kept 600 levels or refused 990 with an accident.
+        Example: a workflows document nested 200 levels is version 1; at 201, 600 and 990 levels put is ("invalid", "schema", "nested too deep"); graph_nodes gives ("invalid", "schema_break", "data").
+        """
+        # Given: documents nested n levels (the document is level 1; of a graph node the record is level 1 and the value sits inside data)
+        def chain(levels):
+            value = {}
+            for _ in range(levels - 1):
+                value = {"k": value}
+            return value
+        def workflow(levels):
+            return {"nodes": [], "edges": [], "note": chain(levels - 1)}
+        def node(levels):
+            return {"id": "n", "data": {"type": "data", "value": chain(levels - 2)}}
+        # When / Then: 200 levels are stored as version 1 in both kinds of table
+        self.assertEqual(self.store.put("workflows", "w", workflow(200), "anna"), {"version": 1})
+        self.assertEqual(self.store.put("graph_nodes", "n", node(200), "anna"), {"version": 1})
+        # And: 201, 600 and 990 levels are refused with the rule of the table and nothing is stored
+        for levels in (201, 600, 990):
+            with self.subTest(levels=levels):
+                with self.assertRaises(StorageError) as other:
+                    self.store.put("workflows", "w2", workflow(levels), "anna")
+                self.assertEqual((other.exception.code, other.exception.rule, other.exception.detail), ("invalid", "schema", "nested too deep"))
+                with self.assertRaises(StorageError) as graph:
+                    self.store.put("graph_nodes", "n2", node(levels), "anna")
+                self.assertEqual((graph.exception.code, graph.exception.rule, graph.exception.detail), ("invalid", "schema_break", "data"))
+        self.assertEqual((self.store.ids("workflows"), self.store.ids("graph_nodes")), (["w"], ["n"]))
+
+    @mark.req("REQ-SLY-013")
+    def test_a_scalar_is_a_level_of_a_document(self):
+        """F-23 (sixth Verify run): the walk of the Storage layer counted containers only, so a scalar in the 200th object was level 200.
+        Example: a workflows document whose deepest value (an empty object, an empty list or the number 7) is at level 200 is version 1; at level 201 put is ("invalid", "schema", "nested too deep"); graph_nodes gives ("invalid", "schema_break", "data") at 201.
+        """
+        # Given: a deepest value of each kind, wrapped in objects; the document is level 1, a graph record is level 1 and its value sits inside data
+        def wrapped(leaf, containers):
+            for _ in range(containers):
+                leaf = {"k": leaf}
+            return leaf
+        for name, leaf in (("empty object", {}), ("empty list", []), ("scalar", 7)):
+            for levels, accepted in ((200, True), (201, False)):
+                document = {"nodes": [], "edges": [], "note": wrapped(leaf, levels - 2)}
+                record = {"id": "n%s" % name, "data": {"type": "data", "value": wrapped(leaf, levels - 3)}}
+                with self.subTest(leaf=name, levels=levels):
+                    # When / Then: 200 levels are stored, 201 refused with the rule of the table
+                    if accepted:
+                        self.assertEqual(self.store.put("workflows", "w%s" % name, document, "anna"), {"version": 1})
+                        self.assertEqual(self.store.put("graph_nodes", "n%s" % name, record, "anna"), {"version": 1})
+                        continue
+                    with self.assertRaises(StorageError) as other:
+                        self.store.put("workflows", "w2", document, "anna")
+                    self.assertEqual((other.exception.code, other.exception.rule, other.exception.detail), ("invalid", "schema", "nested too deep"))
+                    with self.assertRaises(StorageError) as graph:
+                        self.store.put("graph_nodes", "n2", record, "anna")
+                    self.assertEqual((graph.exception.code, graph.exception.rule, graph.exception.detail), ("invalid", "schema_break", "data"))
+
+    @mark.req("REQ-SLY-013")
+    def test_put_and_get_of_a_200_level_document_work_from_a_deep_call_stack(self):
+        """F-25 (sixth Verify run): put and get used the recursive copy.deepcopy, so a legal document failed or was refused as too deep when the caller was already deep.
+        Example: a workflows document with its deepest value at level 200 is put and read back by get from a call stack 700 frames deep; put raises nothing but StorageError.
+        """
+        # Given: a document of 200 levels (the deepest value is a scalar)
+        leaf = 7
+        for _ in range(198):
+            leaf = {"k": leaf}
+        document = {"nodes": [], "edges": [], "note": leaf}
+        outcome = []
+
+        def from_depth(frames):
+            if frames:
+                return from_depth(frames - 1)
+            try:
+                outcome.append(self.store.put("workflows", "w", document, "anna"))
+                outcome.append(self.store.get("workflows", "w")["doc"])
+            except StorageError as err:
+                outcome.append(("StorageError", err.code, err.rule, err.detail))
+            except BaseException as err:        # any other failure is the finding: report it, do not let it end the thread unnoticed
+                outcome.append(("other", type(err).__name__))
+        # When: put and get are called 700 frames deep, in a thread with a time limit
+        thread = threading.Thread(target=from_depth, args=(700,), daemon=True)
+        thread.start()
+        thread.join(10)
+        # Then: the document is stored and read back unchanged
+        self.assertFalse(thread.is_alive(), "put and get did not finish within 10 seconds")
+        self.assertEqual(outcome, [{"version": 1}, document])
+
+    def _put_from_depth(self, document, frames, record_id="w"):
+        """put(document) called `frames` frames deep in a thread with a time limit; [result] or [("StorageError", rule, detail)] or [("other", type name)]."""
+        outcome = []
+
+        def from_depth(left):
+            if left:
+                return from_depth(left - 1)
+            try:
+                outcome.append(self.store.put("workflows", record_id, document, "anna"))
+            except StorageError as err:
+                outcome.append(("StorageError", err.rule, err.detail))
+            except BaseException as err:        # any other failure is the finding: report it, do not let it end the thread unnoticed
+                outcome.append(("other", type(err).__name__))
+        thread = threading.Thread(target=from_depth, args=(frames,), daemon=True)
+        thread.start()
+        thread.join(10)
+        self.assertFalse(thread.is_alive(), "put did not finish within 10 seconds")
+        return outcome
+
+    @mark.req("REQ-SLY-013")
+    def test_put_raises_only_storage_error_from_a_very_deep_call_stack(self):
+        """F-27 (seventh Verify run): since T-13 put could raise a raw RecursionError when the caller was nearly out of stack.
+        Example: a 200-level document put from 850 frames (the JSON encoder of the file backend runs out) and a 198-deep OrderedDict document put from 700 and 800 frames
+        (the copy of a dict subclass recurses) -> either stored or StorageError(schema, nested too deep), never another exception; a refusal stores nothing.
+        """
+        # Given: a legal document of plain dicts and one of OrderedDicts
+        plain = {"nodes": [], "edges": [], "note": 7}
+        subclassed = {"nodes": [], "edges": [], "note": 7}
+        for _ in range(198):
+            plain["note"] = {"k": plain["note"]}
+        for _ in range(197):
+            subclassed["note"] = collections.OrderedDict(k=subclassed["note"])
+        for name, document, frames in (("plain", plain, 850), ("plain", plain, 900), ("ordered", subclassed, 700), ("ordered", subclassed, 800)):
+            with self.subTest(document=name, frames=frames):
+                # When: put is called that deep
+                record_id = "%s%d" % (name, frames)
+                outcome = self._put_from_depth(document, frames, record_id)
+                # Then: stored, or refused by the rule for a document that cannot be stored; nothing else
+                self.assertIn(outcome, ([{"version": 1}], [("StorageError", "schema", "nested too deep")]))
+                if outcome[0] != {"version": 1}:
+                    self.assertNotIn(record_id, self.store.ids("workflows"))
+
+    @mark.req("REQ-SLY-013")
+    def test_a_tuple_is_a_container_of_the_storage_walk(self):
+        """F-28 (mutant T3): the Storage walk looks into tuples like into lists, so a Python caller cannot get past it with one.
+        Example: a tuple nested 198 deep with a scalar at level 200 is stored and at 199 deep (level 201) refused as nested too deep; a tuple that holds NaN, a NUL or itself is refused.
+        """
+        def nested(wrappers):
+            leaf = 7
+            for _ in range(wrappers):
+                leaf = (leaf,)
+            return {"nodes": [], "edges": [], "note": leaf}
+        loop = []
+        loop.append((loop,))
+        # When / Then: the limit of 200 levels holds through tuples
+        self.assertEqual(self.store.put("workflows", "w", nested(198), "anna"), {"version": 1})
+        self.assertEqual(code_of(lambda: self.store.put("workflows", "x", nested(199), "anna")), ("invalid", "schema"))
+        # And: what a list holding the same is refused for, a tuple is refused for
+        for name, bad, detail in (("NaN", (1, (float("nan"),)), "a number that is not finite"), ("NUL", ("a", ("b\x00",)), "a NUL character"), ("cycle", (loop,), "cyclic")):
+            with self.subTest(tuple_holding=name):
+                with self.assertRaises(StorageError) as refused:
+                    self.store.put("workflows", "y", {"nodes": [], "edges": [], "note": bad}, "anna")
+                self.assertEqual((refused.exception.code, refused.exception.rule, refused.exception.detail), ("invalid", "schema", detail))
+        self.assertEqual(self.store.ids("workflows"), ["w"])
+
+    @mark.req("REQ-SLY-014")
+    def test_a_document_that_contains_itself_is_refused_within_a_second(self):
+        """TC-SLY-013 (F-19): a list that contains itself ran without end, a dict that contains itself twice was exponential.
+        Example: l = []; l.append(l) and d["a"] = d; d["b"] = d, as a workflows document or as the value of a graph node: put raises StorageError at once.
+        """
+        # Given: three documents that contain themselves
+        looping_list = []
+        looping_list.append(looping_list)
+        looping_dict = {}
+        looping_dict["a"] = looping_dict
+        looping_dict["b"] = looping_dict
+        node_dict = {}
+        node_dict["a"] = node_dict
+        node_dict["b"] = node_dict
+        calls = {"list": lambda: self.store.put("workflows", "w", looping_list, "anna"),
+                 "dict": lambda: self.store.put("workflows", "w", looping_dict, "anna"),
+                 "node value": lambda: self.store.put("graph_nodes", "n", {"id": "n", "data": {"type": "data", "value": node_dict}}, "anna")}
+        for label, call in calls.items():
+            # When: put runs in a thread, so a hang fails the test and does not stall the suite
+            outcome = []
+            def run(call=call):
+                try:
+                    call()
+                    outcome.append("stored")
+                except StorageError as err:
+                    outcome.append((err.code, err.rule))
+                except BaseException as err:         # a RecursionError is an accident, not a refusal
+                    outcome.append(type(err).__name__)
+            thread = threading.Thread(target=run, daemon=True)
+            thread.start()
+            thread.join(1.0)
+            # Then: it finished within the second with a refusal and nothing is stored
+            with self.subTest(document=label):
+                self.assertFalse(thread.is_alive(), "put did not finish within one second")
+                self.assertEqual(outcome, [("invalid", "schema")])
+        self.assertEqual((self.store.ids("workflows"), self.store.ids("graph_nodes")), ([], []))
+
     @mark.req("REQ-SLY-004")
     def test_a_refused_edit_consumes_no_version(self):
         self.store.put("workflows", "w", LOOKUP, "anna")
         code_of(lambda: self.store.put("workflows", "w", CYCLE, "anna"))
         self.assertEqual(self.store.put("workflows", "w", LOOKUP, "ben"), {"version": 2})
+
+    def refusal_of(self, table, record_id, record):
+        """Writes a record that must be refused: returns (rule, detail) and checks that the stored versions stayed as they were."""
+        before = {t: {i: len(self.store.history(t, i)) for i in self.store.ids(t)} for t in ("graph_nodes", "graph_edges", "graphs", "skills")}
+        with self.assertRaises(StorageError) as caught:
+            self.store.put(table, record_id, record, "anna")
+        self.assertEqual(caught.exception.code, "invalid")
+        after = {t: {i: len(self.store.history(t, i)) for i in self.store.ids(t)} for t in before}
+        self.assertEqual(after, before)
+        return caught.exception.rule, caught.exception.detail
+
+    @mark.req("REQ-GTB-005", "REQ-GTB-006", "REQ-GTB-013")
+    def test_the_graph_records_are_stored_as_versions_and_never_deleted(self):
+        """TC-GTB-013 and TC-GTB-016 on the Storage layer: a node, an edge, a header and a skill read back equal; an edit is version 2 and version 1 is unchanged; none can be deleted.
+
+        Example: node n1 with toolbox "t-old" edited to "t-new" -> history [1, 2], version 1 still names "t-old"; delete of n1 -> immutable.
+        """
+        # Given: one record of each of the four tables
+        n1, n2 = {"id": "n1", "data": {"type": "transform", "toolbox_id": "t-old"}}, {"id": "n2", "data": {"type": "data"}}
+        e1 = {"id": "e1", "from": "n1", "to": "n2", "data": {"label": "x"}}
+        wf = {"id": "wf1", "data": {"kind": "workflow", "context_graph_id": "ctx", "testbench_id": "", "description": "d",
+                                    "nodes": [{"id": "n1", "version": 1}, {"id": "n2", "version": 1}], "edges": [{"id": "e1", "version": 1}]}}
+        skill = {"id": "lookup", "data": {"command": "/lookup", "workflow_graph_id": "wf1", "context_graph_id": "ctx"}}
+        # When: each is written and read back
+        for table, record in (("graph_nodes", n1), ("graph_nodes", n2), ("graph_edges", e1), ("graphs", wf), ("skills", skill)):
+            self.assertEqual(self.store.put(table, record["id"], record, "anna"), {"version": 1})
+            # Then: it reads back equal
+            self.assertEqual(self.store.get(table, record["id"])["doc"], record)
+        # When: n1 is edited
+        n1b = {"id": "n1", "data": {"type": "transform", "toolbox_id": "t-new"}}
+        self.assertEqual(self.store.put("graph_nodes", "n1", n1b, "ben"), {"version": 2})
+        # Then: both versions exist and version 1 is unchanged
+        self.assertEqual([h["version"] for h in self.store.history("graph_nodes", "n1")], [1, 2])
+        self.assertEqual(self.store.get("graph_nodes", "n1", version=1)["doc"], n1)
+        # And: none of the four tables allows a delete
+        for table, record_id in (("graph_nodes", "n1"), ("graph_edges", "e1"), ("graphs", "wf1"), ("skills", "lookup")):
+            self.assertEqual(code_of(lambda: self.store.delete(table, record_id, "anna")), ("immutable", None))
+
+    @mark.req("REQ-GTB-016", "REQ-GTB-011", "REQ-GTB-010")
+    def test_a_refused_graph_edit_changes_nothing(self):
+        """TC-GTB-017 on the Storage layer: an unknown type, a schema break and a member named twice are refused with rule and detail, and the latest version stays 1.
+
+        Example: node n1 edited to type x.unknown -> invalid, unknown_type, "x.unknown"; history of n1 is still [1].
+        """
+        # Given: a stored graph at version 1
+        n1, n2 = {"id": "n1", "data": {"type": "transform", "toolbox_id": "t"}}, {"id": "n2", "data": {"type": "data"}}
+        e1 = {"id": "e1", "from": "n1", "to": "n2", "data": {}}
+        wf = {"id": "wf1", "data": {"kind": "workflow", "context_graph_id": "ctx", "testbench_id": "", "description": "d",
+                                    "nodes": [{"id": "n1", "version": 1}, {"id": "n2", "version": 1}], "edges": [{"id": "e1", "version": 1}]}}
+        for table, record in (("graph_nodes", n1), ("graph_nodes", n2), ("graph_edges", e1), ("graphs", wf)):
+            self.store.put(table, record["id"], record, "anna")
+        # When/Then: each breaking edit is refused with its rule and detail
+        self.assertEqual(self.refusal_of("graph_nodes", "n1", {"id": "n1", "data": {"type": "x.unknown"}}), ("unknown_type", "x.unknown"))
+        self.assertEqual(self.refusal_of("graph_edges", "e1", {"id": "e1", "from": "n1", "to": "n2", "data": "x"}), ("schema_break", "data"))
+        twice = {"id": "wf1", "data": dict(wf["data"], nodes=[{"id": "n1", "version": 1}, {"id": "n1", "version": 1}])}
+        self.assertEqual(self.refusal_of("graphs", "wf1", twice)[0], "record_identity")
+        # And: the latest versions are still 1 with their content, and a refused write took no number (the next edit is version 2)
+        for table, record in (("graph_nodes", n1), ("graph_edges", e1), ("graphs", wf)):
+            self.assertEqual(self.store.get(table, record["id"]), dict(self.store.get(table, record["id"]), version=1, doc=record))
+        self.assertEqual(self.store.put("graph_nodes", "n1", {"id": "n1", "data": {"type": "transform", "toolbox_id": "t2"}}, "ben"), {"version": 2})
+
+    @mark.req("REQ-GTB-019", "REQ-GTB-020")
+    def test_an_edge_and_a_header_must_name_stored_things(self):
+        """TC-GTB-020 and TC-GTB-021 on the Storage layer: an edge to a node that is not stored and a header naming a version that is not stored are refused naming the ID; the twins are accepted.
+
+        Example: edge e1 from n1 to n9 with only n1 stored -> unknown_endpoint "n9"; header naming n1 at version 5 of [1, 2] -> unknown_member "n1".
+        """
+        # Given: n1 stored with versions 1 and 2
+        self.store.put("graph_nodes", "n1", {"id": "n1", "data": {"type": "data"}}, "anna")
+        self.store.put("graph_nodes", "n1", {"id": "n1", "data": {"type": "data", "value": 1}}, "anna")
+        edge = {"id": "e1", "from": "n1", "to": "n9", "data": {}}
+        def header(version):
+            return {"id": "wf1", "data": {"kind": "workflow", "context_graph_id": "c", "testbench_id": "", "description": "d",
+                                          "nodes": [{"id": "n1", "version": version}], "edges": []}}
+        # When/Then: the edge to the missing node and the header with version 5 are refused, naming the ID
+        self.assertEqual(self.refusal_of("graph_edges", "e1", edge), ("unknown_endpoint", "n9"))
+        self.assertEqual(self.refusal_of("graphs", "wf1", header(5)), ("unknown_member", "n1"))
+        # And: the same edge after n9 is stored, and the header naming version 2, are accepted
+        self.store.put("graph_nodes", "n9", {"id": "n9", "data": {"type": "data"}}, "anna")
+        self.assertEqual(self.store.put("graph_edges", "e1", edge, "anna"), {"version": 1})
+        self.assertEqual(self.store.put("graphs", "wf1", header(2), "anna"), {"version": 1})
+
+    @mark.req("REQ-GTB-020")
+    def test_a_header_names_the_member_that_is_not_stored_not_the_first(self):
+        """F-06(a): the second member of a header names a version that is not stored; the refusal names that member.
+
+        Example: nodes n1 v1 (stored) and n2 v5 (n2 has only v1) -> unknown_member "n2"; n2 v1 is accepted.
+        """
+        # Given: n1 and n2 stored at version 1
+        for node_id in ("n1", "n2"):
+            self.store.put("graph_nodes", node_id, {"id": node_id, "data": {"type": "data"}}, "anna")
+        def header(version):
+            return {"id": "wf1", "data": {"kind": "workflow", "context_graph_id": "c", "testbench_id": "", "description": "d",
+                                          "nodes": [{"id": "n1", "version": 1}, {"id": "n2", "version": version}], "edges": []}}
+        # When/Then
+        self.assertEqual(self.refusal_of("graphs", "wf1", header(5)), ("unknown_member", "n2"))
+        self.assertEqual(self.store.put("graphs", "wf1", header(1), "anna"), {"version": 1})
+
+    @mark.req("REQ-GTB-011")
+    def test_validate_refuses_an_unknown_node_type(self):
+        """F-06(b): storage.validate checks the shape of a record alone.
+
+        Example: validate("graph_nodes", {"id": "n", "data": {"type": "zz"}}) -> invalid, unknown_type, "zz".
+        """
+        # Given/When
+        with self.assertRaises(StorageError) as caught:
+            validate("graph_nodes", {"id": "n", "data": {"type": "zz"}})
+        # Then
+        self.assertEqual((caught.exception.code, caught.exception.rule, caught.exception.detail), ("invalid", "unknown_type", "zz"))
+
+    @mark.req("REQ-GTB-021")
+    def test_a_graph_record_is_stored_under_its_own_id(self):
+        """TC-GTB-022 on the Storage layer, for each of the four tables: a record written under a record ID that differs from the ID inside it is refused naming id, and nothing is stored under that ID.
+
+        Example: {"id": "n1", "data": {"type": "data"}} written under "x" -> invalid, record_identity, "id"; under "n1" -> version 1.
+        """
+        # Given: two stored nodes and one record of each table, each with its own ID
+        for node_id in ("n1", "n2"):
+            self.store.put("graph_nodes", node_id, {"id": node_id, "data": {"type": "data"}}, "anna")
+        records = {"graph_nodes": {"id": "n3", "data": {"type": "data"}},
+                   "graph_edges": {"id": "e1", "from": "n1", "to": "n2", "data": {}},
+                   "graphs": {"id": "wf1", "data": {"kind": "workflow", "context_graph_id": "c", "testbench_id": "", "description": "d",
+                                                   "nodes": [{"id": "n1", "version": 1}], "edges": []}},
+                   "skills": {"id": "lookup", "data": {"command": "/lookup", "workflow_graph_id": "wf1", "context_graph_id": "c"}}}
+        for table, record in records.items():
+            with self.subTest(table=table):
+                # When: the record is written under the record ID x
+                with self.assertRaises(StorageError) as caught:
+                    self.store.put(table, "x", record, "anna")
+                # Then: it is refused as record_identity naming id, and nothing is stored under x
+                self.assertEqual((caught.exception.code, caught.exception.rule, caught.exception.detail), ("invalid", "record_identity", "id"))
+                self.assertNotIn("x", self.store.ids(table))
+                # And: under its own ID the same record is accepted (the twin differs only in the broken rule)
+                self.assertEqual(self.store.put(table, record["id"], record, "anna"), {"version": 1})
+
+    @mark.req("REQ-GTB-023", "REQ-GTB-024", "REQ-GTB-025", "REQ-GTB-026")
+    def test_the_context_graph_records_are_versioned_checked_for_shape_and_name_stored_context_records(self):
+        """TC-GTB-024 to TC-GTB-027 on the Storage layer: context nodes and edges are versioned and never deleted, the shape is checked, ends and members must be stored context nodes.
+
+        Example: context edge e1 from c1 to c9 with only c1 stored -> unknown_endpoint "c9"; a workflow node n9 does not count; a context node without type -> schema_break "type".
+        """
+        # Given: one stored context node c1 (written twice) and one stored workflow node n9
+        self.store.put("context_nodes", "c1", {"id": "c1", "data": {"type": "entity"}}, "anna")
+        self.assertEqual(self.store.put("context_nodes", "c1", {"id": "c1", "data": {"type": "entity", "name": "x"}}, "anna"), {"version": 2})
+        self.store.put("graph_nodes", "n9", {"id": "n9", "data": {"type": "data"}}, "anna")
+        def header(kind, member):
+            return {"id": "h1", "data": {"kind": kind, "context_graph_id": "c", "testbench_id": "", "description": "d",
+                                         "nodes": [{"id": member, "version": 1}], "edges": []}}
+        # When/Then: a bad shape, an end or member that is no stored context node, is refused naming the field or ID
+        self.assertEqual(self.refusal_of("context_nodes", "c2", {"id": "c2", "data": {}}), ("schema_break", "type"))
+        self.assertEqual(self.refusal_of("context_nodes", "c2", {"id": "c2"}), ("schema_break", "data"))
+        self.assertEqual(self.refusal_of("context_edges", "e1", {"id": "e1", "from": "c1", "to": "c9", "data": {}}), ("unknown_endpoint", "c9"))
+        self.assertEqual(self.refusal_of("context_edges", "e1", {"id": "e1", "from": "c1", "to": "n9", "data": {}}), ("unknown_endpoint", "n9"))
+        self.assertEqual(self.refusal_of("graphs", "h1", header("context", "c9")), ("unknown_member", "c9"))
+        self.assertEqual(self.refusal_of("graphs", "h1", header("workflow", "c1")), ("unknown_member", "c1"))
+        # And: the twins are accepted and none of the two tables can be deleted
+        self.assertEqual(self.store.put("context_edges", "e1", {"id": "e1", "from": "c1", "to": "c1", "data": {}}, "anna"), {"version": 1})
+        self.assertEqual(self.store.put("graphs", "h1", header("context", "c1"), "anna"), {"version": 1})
+        for table, record_id in (("context_nodes", "c1"), ("context_edges", "e1")):
+            self.assertEqual(code_of(lambda: self.store.delete(table, record_id, "anna")), ("immutable", None))
+
+    def put_within_a_second(self, table, record_id, doc):
+        """('stored', result), ('refused', (rule, detail)) or ('no answer', None): put runs in a daemon thread, so a hang fails the test."""
+        answer = {}
+
+        def run():
+            try:
+                answer["result"] = ("stored", self.store.put(table, record_id, doc, "anna"))
+            except StorageError as err:
+                answer["result"] = ("refused", (err.rule, err.detail))
+        thread = threading.Thread(target=run, daemon=True)
+        thread.start()
+        thread.join(1.0)
+        return answer.get("result", ("no answer", None))
+
+    @mark.req("REQ-SLY-015")
+    def test_a_document_of_more_than_100000_values_is_refused_for_every_table(self):
+        """TC-SLY-014 (F-22): 100 000 values (every path counted) are stored, 100 001 are refused, for a document table and for a graph table.
+        Example: {"text": "t", "numbers": [..]} of a task has 3 + n values: n = 99 997 is stored, n = 99 998 is refused (schema, "too large"); a data node whose value is a list of 99 995 numbers is stored, 99 996 is refused (schema_break, "data").
+        """
+        # Given: documents of 100 000 and of 100 001 values for a table that is no graph table, and the same for a data node
+        task = lambda count: {"text": "t", "numbers": [1] * count}                      # noqa: E731  the doc, "t" and the list count 3 values
+        node = lambda name, count: {"id": name, "data": {"type": "data", "value": [1] * count}}   # noqa: E731  5 values besides the numbers
+        # When/Then: the document at the limit is stored as version 1, the one over it is refused and nothing is stored
+        self.assertEqual(self.put_within_a_second("tasks", "t1", task(99997)), ("stored", {"version": 1}))
+        self.assertEqual(self.put_within_a_second("tasks", "t2", task(99998)), ("refused", ("schema", "too large")))
+        self.assertEqual(self.store.ids("tasks"), ["t1"])
+        # And: the data node at the limit is stored, the one over it is a schema_break naming data
+        self.assertEqual(self.put_within_a_second("graph_nodes", "n1", node("n1", 99995)), ("stored", {"version": 1}))
+        self.assertEqual(self.put_within_a_second("graph_nodes", "n2", node("n2", 99996)), ("refused", ("schema_break", "data")))
+        self.assertEqual(self.store.ids("graph_nodes"), ["n1"])
+
+    @mark.req("REQ-SLY-015")
+    def test_a_document_that_shares_a_child_on_every_level_is_refused_at_once(self):
+        """TC-SLY-014 (F-22): 2**30 paths are refused within one second, for a document table and for a graph table, and nothing is stored.
+        Example: 30 levels in which every level names the next one twice: a task and a data node with it are refused (schema, "too large") and (schema_break, "data").
+        """
+        # Given: 30 levels in which every level names the level below twice (the same object)
+        shared = 1
+        for _ in range(30):
+            shared = [shared, shared]
+        # When/Then: both kinds of table refuse it within the second
+        self.assertEqual(self.put_within_a_second("tasks", "t1", {"text": "t", "shared": shared}), ("refused", ("schema", "too large")))
+        self.assertEqual(self.put_within_a_second("graph_nodes", "n1", {"id": "n1", "data": {"type": "data", "value": shared}}),
+                         ("refused", ("schema_break", "data")))
+        # And: nothing was stored
+        self.assertEqual((self.store.ids("tasks"), self.store.ids("graph_nodes")), ([], []))
+
+
+class SharedContainers(unittest.TestCase):
+    @mark.req("REQ-SLY-014")
+    def test_a_document_that_names_the_same_object_many_times_is_scanned_in_linear_time(self):
+        """TC-SLY-013 (F-19): the walk goes through each shared container once, so a document of 2^30 paths cannot make the check exponential.
+        Example: 30 levels, each naming the next one twice (the same object): the check answers in under a second; since T-12 the answer is the refusal "too large" (2**30 paths, F-22).
+        """
+        # Given: 30 levels in which every level names the level below twice
+        document = {}
+        for _ in range(30):
+            document = {"a": document, "b": document}
+        # When: the check of what a backend cannot keep runs in a thread (a hang fails the test)
+        outcome = []
+
+        def check():
+            try:
+                outcome.append(refuse_unstorable(document))
+            except StorageError as err:
+                outcome.append((err.rule, err.detail))
+        thread = threading.Thread(target=check, daemon=True)
+        thread.start()
+        thread.join(1.0)
+        # Then: it finished within the second and refused the document as too large (31 levels are fine, 2**30 paths are not)
+        self.assertFalse(thread.is_alive(), "the check did not finish within one second")
+        self.assertEqual(outcome, [("schema", "too large")])
 
 
 class FileStorage(StorageBehaviour, unittest.TestCase):

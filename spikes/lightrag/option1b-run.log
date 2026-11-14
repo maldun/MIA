@@ -1,0 +1,10 @@
+arxiv_2005.11401 1 chunks 12 accepted 0 refused 88.2 s
+arxiv_2410.05779 1 chunks 7 accepted 2 refused 16.1 s
+Citation 5 chunks 62 accepted 14 refused 147.3 s
+Knowledge_graph 4 chunks 59 accepted 36 refused 177.6 s
+Meta_analysis 4 chunks 31 accepted 19 refused 90.7 s
+Ontology_information_science 5 chunks 74 accepted 8 refused 196.1 s
+Peer_review 5 chunks 49 accepted 5 refused 109.5 s
+Prompt_injection 4 chunks 59 accepted 17 refused 147.7 s
+Retrieval_augmented_generation 4 chunks 46 accepted 12 refused 112.7 s
+Systematic_review 5 chunks 45 accepted 1 refused 110.5 s

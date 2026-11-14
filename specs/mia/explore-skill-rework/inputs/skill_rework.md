@@ -51,6 +51,8 @@ new dependencies: networkx (on backend) and PostgreSQL for daabase
 - Each graph is defined by these categories of nodes and edges and flows what should happen to the data.
 - The types are provided as JSON schema (of the jsons we store in the DB)
 
+- Use LightRAG for context graphs. It was recommended to fit for our purposes and create an app to edit graphs with it.. Adapt the suggestions above to fit the usage.
+
 ## DB
 
 To store the data all graph objects are converted to dictionaries and stored as JSON. The Dataobjects must be a able to turned into JSONS. To reconstruct 
@@ -96,4 +98,4 @@ In DB:
 - command
 - workflow graph
 - associated context graph
--benchmarks
+- benchmarks
