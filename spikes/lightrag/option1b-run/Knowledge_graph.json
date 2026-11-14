@@ -1,0 +1,781 @@
+{
+ "accepted": [
+  {
+   "name": "knowledge graph",
+   "description": "In knowledge representation and reasoning, a knowledge graph is a knowledge base that uses a graph-structured data model or topology to represent and operate on data.",
+   "quote": "In knowledge representation and reasoning, a knowledge graph is a knowledge base that uses a graph-structured data model or topology to represent and operate on data.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Semantic Web",
+   "description": "Since the development of the Semantic Web, knowledge graphs have often been associated with linked open data projects, focusing on the connections between concepts and entities.",
+   "quote": "Since the development of the Semantic Web, knowledge graphs have often been associated with linked open data projects, focusing on the connections between concepts and entities.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Google",
+   "description": "They are also historically associated with and used by search engines such as Google, Bing, and Yahoo; knowledge engines and question-answering services such as WolframAlpha, Apple's Siri, and Amazon Alexa; and social networks such as LinkedIn and Facebook.",
+   "quote": "They are also historically associated with and used by search engines such as Google, Bing, and Yahoo; knowledge engines and question-answering services such as WolframAlpha, Apple's Siri, and Amazon Alexa; and social networks such as LinkedIn and Facebook.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Bing",
+   "description": "They are also historically associated with and used by search engines such as Google, Bing, and Yahoo; knowledge engines and question-answering services such as WolframAlpha, Apple's Siri, and Amazon Alexa; and social networks such as LinkedIn and Facebook.",
+   "quote": "They are also historically associated with and used by search engines such as Google, Bing, and Yahoo; knowledge engines and question-answering services such as WolframAlpha, Apple's Siri, and Amazon Alexa; and social networks such as LinkedIn and Facebook.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Yahoo",
+   "description": "They are also historically associated with and used by search engines such as Google, Bing, and Yahoo; knowledge engines and question-answering services such as WolframAlpha, Apple's Siri, and Amazon Alexa; and social networks such as LinkedIn and Facebook.",
+   "quote": "They are also historically associated with and used by search engines such as Google, Bing, and Yahoo; knowledge engines and question-answering services such as WolframAlpha, Apple's Siri, and Amazon Alexa; and social networks such as LinkedIn and Facebook.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "WolframAlpha",
+   "description": "They are also historically associated with and used by search engines such as Google, Bing, and Yahoo; knowledge engines and question-answering services such as WolframAlpha, Apple's Siri, and Amazon Alexa; and social networks such as LinkedIn and Facebook.",
+   "quote": "They are also historically associated with and used by search engines such as Google, Bing, and Yahoo; knowledge engines and question-answering services such as WolframAlpha, Apple's Siri, and Amazon Alexa; and social networks such as LinkedIn and Facebook.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Apple's Siri",
+   "description": "They are also historically associated with and used by search engines such as Google, Bing, and Yahoo; knowledge engines and question-answering services such as WolframAlpha, Apple's Siri, and Amazon Alexa; and social networks such as LinkedIn and Facebook.",
+   "quote": "They are also historically associated with and used by search engines such as Google, Bing, and Yahoo; knowledge engines and question-answering services such as WolframAlpha, Apple's Siri, and Amazon Alexa; and social networks such as LinkedIn and Facebook.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Amazon Alexa",
+   "description": "They are also historically associated with and used by search engines such as Google, Bing, and Yahoo; knowledge engines and question-answering services such as WolframAlpha, Apple's Siri, and Amazon Alexa; and social networks such as LinkedIn and Facebook.",
+   "quote": "They are also historically associated with and used by search engines such as Google, Bing, and Yahoo; knowledge engines and question-answering services such as WolframAlpha, Apple's Siri, and Amazon Alexa; and social networks such as LinkedIn and Facebook.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "LinkedIn",
+   "description": "They are also historically associated with and used by search engines such as Google, Bing, and Yahoo; knowledge engines and question-answering services such as WolframAlpha, Apple's Siri, and Amazon Alexa; and social networks such as LinkedIn and Facebook.",
+   "quote": "They are also historically associated with and used by search engines such as Google, Bing, and Yahoo; knowledge engines and question-answering services such as WolframAlpha, Apple's Siri, and Amazon Alexa; and social networks such as LinkedIn and Facebook.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Facebook",
+   "description": "They are also historically associated with and used by search engines such as Google, Bing, and Yahoo; knowledge engines and question-answering services such as WolframAlpha, Apple's Siri, and Amazon Alexa; and social networks such as LinkedIn and Facebook.",
+   "quote": "They are also historically associated with and used by search engines such as Google, Bing, and Yahoo; knowledge engines and question-answering services such as WolframAlpha, Apple's Siri, and Amazon Alexa; and social networks such as LinkedIn and Facebook.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Wordnet",
+   "description": "In 1985, Wordnet was founded, capturing semantic relationships between words and meanings \u2013 an application of this idea to language itself.",
+   "quote": "In 1985, Wordnet was founded, capturing semantic relationships between words and meanings \u2013 an application of this idea to language itself.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Marc Wirk",
+   "description": "In 2005, Marc Wirk founded Geonames to capture relationships between different geographic names and locales and associated entities.",
+   "quote": "In 2005, Marc Wirk founded Geonames to capture relationships between different geographic names and locales and associated entities.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Geonames",
+   "description": "In 2005, Marc Wirk founded Geonames to capture relationships between different geographic names and locales and associated entities.",
+   "quote": "In 2005, Marc Wirk founded Geonames to capture relationships between different geographic names and locales and associated entities.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Andrew Edmonds",
+   "description": "In 1998, Andrew Edmonds of Science in Finance Ltd in the UK created a system called ThinkBase that offered fuzzy-logic based reasoning in a graphical context.",
+   "quote": "In 1998, Andrew Edmonds of Science in Finance Ltd in the UK created a system called ThinkBase that offered fuzzy-logic based reasoning in a graphical context.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Science in Finance Ltd",
+   "description": "In 1998, Andrew Edmonds of Science in Finance Ltd in the UK created a system called ThinkBase that offered fuzzy-logic based reasoning in a graphical context.",
+   "quote": "In 1998, Andrew Edmonds of Science in Finance Ltd in the UK created a system called ThinkBase that offered fuzzy-logic based reasoning in a graphical context.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "ThinkBase",
+   "description": "In 1998, Andrew Edmonds of Science in Finance Ltd in the UK created a system called ThinkBase that offered fuzzy-logic based reasoning in a graphical context.",
+   "quote": "In 1998, Andrew Edmonds of Science in Finance Ltd in the UK created a system called ThinkBase that offered fuzzy-logic based reasoning in a graphical context.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "DBpedia",
+   "description": "In 2007, both DBpedia and Freebase were founded as graph-based knowledge repositories for general-purpose knowledge.",
+   "quote": "In 2007, both DBpedia and Freebase were founded as graph-based knowledge repositories for general-purpose knowledge.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Freebase",
+   "description": "In 2007, both DBpedia and Freebase were founded as graph-based knowledge repositories for general-purpose knowledge.",
+   "quote": "In 2007, both DBpedia and Freebase were founded as graph-based knowledge repositories for general-purpose knowledge.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Wikipedia",
+   "description": "DBpedia focused exclusively on data extracted from Wikipedia, while Freebase also included a range of public datasets.",
+   "quote": "DBpedia focused exclusively on data extracted from Wikipedia, while Freebase also included a range of public datasets.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "source": "knowledge graph",
+   "relation": "associated with",
+   "target": "linked open data projects",
+   "quote": "Since the development of the Semantic Web, knowledge graphs have often been associated with linked open data projects, focusing on the connections between concepts and entities.",
+   "kind": "relation"
+  },
+  {
+   "source": "Human Resources Research Organization (HumRRO)",
+   "relation": "delivered a presentation for",
+   "target": "Society for General Systems Research",
+   "quote": "In December 1968, the Human Resources Research Organization (HumRRO) delivered a presentation for the Society for General Systems Research's Annual Meeting in which they described the \"Subject-Matter Map,\" and formalized the idea of representing knowledge as a graph.",
+   "kind": "relation"
+  },
+  {
+   "source": "Edgar W. Schneider",
+   "relation": "cited",
+   "target": "HumRRO",
+   "quote": "In 1972, the Austrian linguist Edgar W. Schneider cited HumRRO's presentation in his discussion of how to build modular instructional systems for courses, and coined the term \"Knowledge Graph.\"",
+   "kind": "relation"
+  },
+  {
+   "source": "University of Groningen",
+   "relation": "jointly began a project called",
+   "target": "Knowledge Graphs",
+   "quote": "In the late 1980s, the University of Groningen and University of Twente jointly began a project called Knowledge Graphs, focusing on the design of semantic networks with edges restricted to a limited set of relations, to facilitate algebras on the graph.",
+   "kind": "relation"
+  },
+  {
+   "source": "University of Twente",
+   "relation": "jointly began a project called",
+   "target": "Knowledge Graphs",
+   "quote": "In the late 1980s, the University of Groningen and University of Twente jointly began a project called Knowledge Graphs, focusing on the design of semantic networks with edges restricted to a limited set of relations, to facilitate algebras on the graph.",
+   "kind": "relation"
+  },
+  {
+   "source": "Marc Wirk",
+   "relation": "founded",
+   "target": "Geonames",
+   "quote": "In 2005, Marc Wirk founded Geonames to capture relationships between different geographic names and locales and associated entities.",
+   "kind": "relation"
+  },
+  {
+   "source": "Andrew Edmonds",
+   "relation": "of",
+   "target": "Science in Finance Ltd",
+   "quote": "In 1998, Andrew Edmonds of Science in Finance Ltd in the UK created a system called ThinkBase that offered fuzzy-logic based reasoning in a graphical context.",
+   "kind": "relation"
+  },
+  {
+   "source": "Andrew Edmonds",
+   "relation": "created a system called",
+   "target": "ThinkBase",
+   "quote": "In 1998, Andrew Edmonds of Science in Finance Ltd in the UK created a system called ThinkBase that offered fuzzy-logic based reasoning in a graphical context.",
+   "kind": "relation"
+  },
+  {
+   "source": "DBpedia",
+   "relation": "focused exclusively on data extracted from",
+   "target": "Wikipedia",
+   "quote": "DBpedia focused exclusively on data extracted from Wikipedia, while Freebase also included a range of public datasets.",
+   "kind": "relation"
+  },
+  {
+   "source": "Google",
+   "relation": "introduced",
+   "target": "Knowledge Graph",
+   "quote": "In 2012, Google introduced their Knowledge Graph, building on DBpedia and Freebase among other sources.",
+   "kind": "relation"
+  },
+  {
+   "name": "RDFa",
+   "description": "They later incorporated RDFa, Microdata, JSON-LD content extracted from indexed web pages, including the CIA World Factbook, Wikidata, and Wikipedia.",
+   "quote": "They later incorporated RDFa, Microdata, JSON-LD content extracted from indexed web pages, including the CIA World Factbook, Wikidata, and Wikipedia.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Microdata",
+   "description": "They later incorporated RDFa, Microdata, JSON-LD content extracted from indexed web pages, including the CIA World Factbook, Wikidata, and Wikipedia.",
+   "quote": "They later incorporated RDFa, Microdata, JSON-LD content extracted from indexed web pages, including the CIA World Factbook, Wikidata, and Wikipedia.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "JSON-LD",
+   "description": "They later incorporated RDFa, Microdata, JSON-LD content extracted from indexed web pages, including the CIA World Factbook, Wikidata, and Wikipedia.",
+   "quote": "They later incorporated RDFa, Microdata, JSON-LD content extracted from indexed web pages, including the CIA World Factbook, Wikidata, and Wikipedia.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "CIA World Factbook",
+   "description": "They later incorporated RDFa, Microdata, JSON-LD content extracted from indexed web pages, including the CIA World Factbook, Wikidata, and Wikipedia.",
+   "quote": "They later incorporated RDFa, Microdata, JSON-LD content extracted from indexed web pages, including the CIA World Factbook, Wikidata, and Wikipedia.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Wikidata",
+   "description": "They later incorporated RDFa, Microdata, JSON-LD content extracted from indexed web pages, including the CIA World Factbook, Wikidata, and Wikipedia.",
+   "quote": "They later incorporated RDFa, Microdata, JSON-LD content extracted from indexed web pages, including the CIA World Factbook, Wikidata, and Wikipedia.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "schema.org",
+   "description": "Entity and relationship types associated with this knowledge graph have been further organized using terms from the schema.org vocabulary.",
+   "quote": "Entity and relationship types associated with this knowledge graph have been further organized using terms from the schema.org vocabulary.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Google Knowledge Graph",
+   "description": "The Google Knowledge Graph became a complement to string-based search within Google, and its popularity online brought the term into more common use.",
+   "quote": "The Google Knowledge Graph became a complement to string-based search within Google, and its popularity online brought the term into more common use.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Airbnb",
+   "description": "These include Facebook, LinkedIn, Airbnb, Microsoft, Amazon, Uber and eBay.",
+   "quote": "These include Facebook, LinkedIn, Airbnb, Microsoft, Amazon, Uber and eBay.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Microsoft",
+   "description": "These include Facebook, LinkedIn, Airbnb, Microsoft, Amazon, Uber and eBay.",
+   "quote": "These include Facebook, LinkedIn, Airbnb, Microsoft, Amazon, Uber and eBay.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Amazon",
+   "description": "These include Facebook, LinkedIn, Airbnb, Microsoft, Amazon, Uber and eBay.",
+   "quote": "These include Facebook, LinkedIn, Airbnb, Microsoft, Amazon, Uber and eBay.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Uber",
+   "description": "These include Facebook, LinkedIn, Airbnb, Microsoft, Amazon, Uber and eBay.",
+   "quote": "These include Facebook, LinkedIn, Airbnb, Microsoft, Amazon, Uber and eBay.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "eBay",
+   "description": "These include Facebook, LinkedIn, Airbnb, Microsoft, Amazon, Uber and eBay.",
+   "quote": "These include Facebook, LinkedIn, Airbnb, Microsoft, Amazon, Uber and eBay.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "IEEE",
+   "description": "In 2019, IEEE combined its annual international conferences on \"Big Knowledge\" and \"Data Mining and Intelligent Computing\" into the International Conference on Knowledge Graph.",
+   "quote": "In 2019, IEEE combined its annual international conferences on \"Big Knowledge\" and \"Data Mining and Intelligent Computing\" into the International Conference on Knowledge Graph.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "International Conference on Knowledge Graph",
+   "description": "In 2019, IEEE combined its annual international conferences on \"Big Knowledge\" and \"Data Mining and Intelligent Computing\" into the International Conference on Knowledge Graph.",
+   "quote": "In 2019, IEEE combined its annual international conferences on \"Big Knowledge\" and \"Data Mining and Intelligent Computing\" into the International Conference on Knowledge Graph.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Microsoft Research's GraphRAG (2024)",
+   "description": "Microsoft Research's GraphRAG (2024) exemplified this development by integrating LLM-generated graphs into retrieval-augmented generation.",
+   "quote": "Microsoft Research's GraphRAG (2024) exemplified this development by integrating LLM-generated graphs into retrieval-augmented generation.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "source": "Google Knowledge Graph",
+   "relation": "complement to string-based search within",
+   "target": "Google",
+   "quote": "The Google Knowledge Graph became a complement to string-based search within Google, and its popularity online brought the term into more common use.",
+   "kind": "relation"
+  },
+  {
+   "source": "IEEE",
+   "relation": "combined its annual international conferences on \"Big Knowledge\" and \"Data Mining and Intelligent Computing\" into",
+   "target": "International Conference on Knowledge Graph",
+   "quote": "In 2019, IEEE combined its annual international conferences on \"Big Knowledge\" and \"Data Mining and Intelligent Computing\" into the International Conference on Knowledge Graph.",
+   "kind": "relation"
+  },
+  {
+   "name": "graph databases",
+   "description": "These graph databases allow users to easily store data as entities and their interrelationships, and facilitate operations such as data reasoning, node embedding, and ontology development on knowledge bases.",
+   "quote": "These graph databases allow users to easily store data as entities and their interrelationships, and facilitate operations such as data reasoning, node embedding, and ontology development on knowledge bases.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "virtual knowledge graphs",
+   "description": "In contrast, virtual knowledge graphs do not store information in specialized databases.",
+   "quote": "In contrast, virtual knowledge graphs do not store information in specialized databases.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "relational database",
+   "description": "They rely on an underlying relational database or data lake to answer queries on the graph.",
+   "quote": "They rely on an underlying relational database or data lake to answer queries on the graph.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "data lake",
+   "description": "They rely on an underlying relational database or data lake to answer queries on the graph.",
+   "quote": "They rely on an underlying relational database or data lake to answer queries on the graph.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "ontologies",
+   "description": "Knowledge graphs may make use of ontologies as a schema layer.",
+   "quote": "Knowledge graphs may make use of ontologies as a schema layer.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "knowledge graph embeddings",
+   "description": "These knowledge graph embeddings allow them to be connected to machine learning methods that require feature vectors like word embeddings.",
+   "quote": "These knowledge graph embeddings allow them to be connected to machine learning methods that require feature vectors like word embeddings.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "graph neural networks (GNNs)",
+   "description": "Models for generating useful knowledge graph embeddings are commonly the domain of graph neural networks (GNNs).",
+   "quote": "Models for generating useful knowledge graph embeddings are commonly the domain of graph neural networks (GNNs).",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "source": "graph databases",
+   "relation": "allow users to easily store data as entities and their interrelationships",
+   "target": "entities",
+   "quote": "These graph databases allow users to easily store data as entities and their interrelationships, and facilitate operations such as data reasoning, node embedding, and ontology development on knowledge bases.",
+   "kind": "relation"
+  },
+  {
+   "source": "Knowledge graphs",
+   "relation": "may make use of",
+   "target": "ontologies",
+   "quote": "Knowledge graphs may make use of ontologies as a schema layer.",
+   "kind": "relation"
+  },
+  {
+   "source": "graph neural networks (GNNs)",
+   "relation": "comprise edges and nodes, which correspond well to the entities and relationships of",
+   "target": "knowledge graphs",
+   "quote": "GNNs are deep learning architectures that comprise edges and nodes, which correspond well to the entities and relationships of knowledge graphs.",
+   "kind": "relation"
+  },
+  {
+   "name": "knowledge graph entity alignment",
+   "description": "This task is known as knowledge graph entity alignment, and is an active area of research.",
+   "quote": "This task is known as knowledge graph entity alignment, and is an active area of research.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "large language models (LLMs)",
+   "description": "In 2023, researchers found success in using large language models (LLMs) in the task of entity alignment.",
+   "quote": "In 2023, researchers found success in using large language models (LLMs) in the task of entity alignment.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Diffbot",
+   "description": "Diffbot is building the biggest-ever knowledge graph by applying image recognition and natural-language processing to billions of web pages.",
+   "quote": "Diffbot is building the biggest-ever knowledge graph by applying image recognition and natural-language processing to billions of web pages.",
+   "ungrounded": 0,
+   "kind": "entity"
+  }
+ ],
+ "refused": [
+  {
+   "item": {
+    "name": "Human Resources Research Organization (HumRRO)",
+    "description": "In December 1968, the Human Resources Research Organization (HumRRO) delivered a presentation for the Society for General Systems Research's Annual Meeting in which they described the \"Subject-Matter Map,\" and formalized the idea of representing knowledge as a graph.",
+    "quote": "In December 1968, the Human Resources Research Organization (HumRRO) delivered a presentation for the Society for General Systems Research's Annual Meeting in which they described the \"Subject-Matter Map,\" and formalized the idea of representing knowledge as a graph.",
+    "ungrounded": 0,
+    "kind": "entity"
+   },
+   "reason": "quote is not one whole sentence of the document"
+  },
+  {
+   "item": {
+    "name": "Society for General Systems Research",
+    "description": "In December 1968, the Human Resources Research Organization (HumRRO) delivered a presentation for the Society for General Systems Research's Annual Meeting in which they described the \"Subject-Matter Map,\" and formalized the idea of representing knowledge as a graph.",
+    "quote": "In December 1968, the Human Resources Research Organization (HumRRO) delivered a presentation for the Society for General Systems Research's Annual Meeting in which they described the \"Subject-Matter Map,\" and formalized the idea of representing knowledge as a graph.",
+    "ungrounded": 0,
+    "kind": "entity"
+   },
+   "reason": "quote is not one whole sentence of the document"
+  },
+  {
+   "item": {
+    "name": "Edgar W. Schneider",
+    "description": "In 1972, the Austrian linguist Edgar W. Schneider cited HumRRO's presentation in his discussion of how to build modular instructional systems for courses, and coined the term \"Knowledge Graph.\"",
+    "quote": "In 1972, the Austrian linguist Edgar W. Schneider cited HumRRO's presentation in his discussion of how to build modular instructional systems for courses, and coined the term \"Knowledge Graph.\"",
+    "ungrounded": 0,
+    "kind": "entity"
+   },
+   "reason": "quote is not one whole sentence of the document"
+  },
+  {
+   "item": {
+    "name": "University of Groningen",
+    "description": "In the late 1980s, the University of Groningen and University of Twente jointly began a project called Knowledge Graphs, focusing on the design of semantic networks with edges restricted to a limited set of relations, to facilitate algebras on the graph.",
+    "quote": "In the late 1980s, the University of Groningen and University of Twente jointly began a project called Knowledge Graphs, focusing on the design of semantic networks with edges restricted to a limited set of relations, to facilitate algebras on the graph.",
+    "ungrounded": 0,
+    "kind": "entity"
+   },
+   "reason": "quote is not one whole sentence of the document"
+  },
+  {
+   "item": {
+    "name": "University of Twente",
+    "description": "In the late 1980s, the University of Groningen and University of Twente jointly began a project called Knowledge Graphs, focusing on the design of semantic networks with edges restricted to a limited set of relations, to facilitate algebras on the graph.",
+    "quote": "In the late 1980s, the University of Groningen and University of Twente jointly began a project called Knowledge Graphs, focusing on the design of semantic networks with edges restricted to a limited set of relations, to facilitate algebras on the graph.",
+    "ungrounded": 0,
+    "kind": "entity"
+   },
+   "reason": "quote is not one whole sentence of the document"
+  },
+  {
+   "item": {
+    "name": "Google's Knowledge Graph",
+    "description": "In 2012, Google introduced their Knowledge Graph, building on DBpedia and Freebase among other sources.",
+    "quote": "In 2012, Google introduced their Knowledge Graph, building on DBpedia and Freebase among other sources.",
+    "ungrounded": 0,
+    "kind": "entity"
+   },
+   "reason": "quote does not contain the name"
+  },
+  {
+   "item": {
+    "source": "knowledge graph",
+    "relation": "historically associated with and used by",
+    "target": "Google",
+    "quote": "They are also historically associated with and used by search engines such as Google, Bing, and Yahoo; knowledge engines and question-answering services such as WolframAlpha, Apple's Siri, and Amazon Alexa; and social networks such as LinkedIn and Facebook.",
+    "kind": "relation"
+   },
+   "reason": "quote does not contain both ends"
+  },
+  {
+   "item": {
+    "source": "knowledge graph",
+    "relation": "historically associated with and used by",
+    "target": "Bing",
+    "quote": "They are also historically associated with and used by search engines such as Google, Bing, and Yahoo; knowledge engines and question-answering services such as WolframAlpha, Apple's Siri, and Amazon Alexa; and social networks such as LinkedIn and Facebook.",
+    "kind": "relation"
+   },
+   "reason": "quote does not contain both ends"
+  },
+  {
+   "item": {
+    "source": "knowledge graph",
+    "relation": "historically associated with and used by",
+    "target": "Yahoo",
+    "quote": "They are also historically associated with and used by search engines such as Google, Bing, and Yahoo; knowledge engines and question-answering services such as WolframAlpha, Apple's Siri, and Amazon Alexa; and social networks such as LinkedIn and Facebook.",
+    "kind": "relation"
+   },
+   "reason": "quote does not contain both ends"
+  },
+  {
+   "item": {
+    "source": "knowledge graph",
+    "relation": "historically associated with and used by",
+    "target": "WolframAlpha",
+    "quote": "They are also historically associated with and used by search engines such as Google, Bing, and Yahoo; knowledge engines and question-answering services such as WolframAlpha, Apple's Siri, and Amazon Alexa; and social networks such as LinkedIn and Facebook.",
+    "kind": "relation"
+   },
+   "reason": "quote does not contain both ends"
+  },
+  {
+   "item": {
+    "source": "knowledge graph",
+    "relation": "historically associated with and used by",
+    "target": "Apple's Siri",
+    "quote": "They are also historically associated with and used by search engines such as Google, Bing, and Yahoo; knowledge engines and question-answering services such as WolframAlpha, Apple's Siri, and Amazon Alexa; and social networks such as LinkedIn and Facebook.",
+    "kind": "relation"
+   },
+   "reason": "quote does not contain both ends"
+  },
+  {
+   "item": {
+    "source": "knowledge graph",
+    "relation": "historically associated with and used by",
+    "target": "Amazon Alexa",
+    "quote": "They are also historically associated with and used by search engines such as Google, Bing, and Yahoo; knowledge engines and question-answering services such as WolframAlpha, Apple's Siri, and Amazon Alexa; and social networks such as LinkedIn and Facebook.",
+    "kind": "relation"
+   },
+   "reason": "quote does not contain both ends"
+  },
+  {
+   "item": {
+    "source": "knowledge graph",
+    "relation": "historically associated with and used by",
+    "target": "LinkedIn",
+    "quote": "They are also historically associated with and used by search engines such as Google, Bing, and Yahoo; knowledge engines and question-answering services such as WolframAlpha, Apple's Siri, and Amazon Alexa; and social networks such as LinkedIn and Facebook.",
+    "kind": "relation"
+   },
+   "reason": "quote does not contain both ends"
+  },
+  {
+   "item": {
+    "source": "knowledge graph",
+    "relation": "historically associated with and used by",
+    "target": "Facebook",
+    "quote": "They are also historically associated with and used by search engines such as Google, Bing, and Yahoo; knowledge engines and question-answering services such as WolframAlpha, Apple's Siri, and Amazon Alexa; and social networks such as LinkedIn and Facebook.",
+    "kind": "relation"
+   },
+   "reason": "quote does not contain both ends"
+  },
+  {
+   "item": {
+    "source": "Google's Knowledge Graph",
+    "relation": "building on",
+    "target": "DBpedia",
+    "quote": "In 2012, Google introduced their Knowledge Graph, building on DBpedia and Freebase among other sources.",
+    "kind": "relation"
+   },
+   "reason": "quote does not contain both ends"
+  },
+  {
+   "item": {
+    "source": "Google's Knowledge Graph",
+    "relation": "building on",
+    "target": "Freebase",
+    "quote": "In 2012, Google introduced their Knowledge Graph, building on DBpedia and Freebase among other sources.",
+    "kind": "relation"
+   },
+   "reason": "quote does not contain both ends"
+  },
+  {
+   "item": {
+    "name": "YAGO",
+    "description": "the term has been used to describe open knowledge projects such as YAGO and Wikidata",
+    "quote": "In addition to the above examples, the term has been used to describe open knowledge projects such as YAGO and Wikidata;",
+    "ungrounded": 0,
+    "kind": "entity"
+   },
+   "reason": "quote is not one whole sentence of the document"
+  },
+  {
+   "item": {
+    "name": "Linked Open Data cloud",
+    "description": "federations like the Linked Open Data cloud",
+    "quote": "In addition to the above examples, the term has been used to describe open knowledge projects such as YAGO and Wikidata; federations like the Linked Open Data cloud; a range of commercial search tools, including Yahoo's semantic search assistant Spark, Google's Knowledge Graph, and Microsoft's Satori; and the LinkedIn and Facebook entity graphs.",
+    "ungrounded": 0,
+    "kind": "entity"
+   },
+   "reason": "quote is not one whole sentence of the document"
+  },
+  {
+   "item": {
+    "name": "Yahoo's semantic search assistant Spark",
+    "description": "a range of commercial search tools, including Yahoo's semantic search assistant Spark, Google's Knowledge Graph, and Microsoft's Satori",
+    "quote": "In addition to the above examples, the term has been used to describe open knowledge projects such as YAGO and Wikidata; federations like the Linked Open Data cloud; a range of commercial search tools, including Yahoo's semantic search assistant Spark, Google's Knowledge Graph, and Microsoft's Satori; and the LinkedIn and Facebook entity graphs.",
+    "ungrounded": 0,
+    "kind": "entity"
+   },
+   "reason": "quote is not one whole sentence of the document"
+  },
+  {
+   "item": {
+    "name": "Microsoft's Satori",
+    "description": "a range of commercial search tools, including Yahoo's semantic search assistant Spark, Google's Knowledge Graph, and Microsoft's Satori",
+    "quote": "In addition to the above examples, the term has been used to describe open knowledge projects such as YAGO and Wikidata; federations like the Linked Open Data cloud; a range of commercial search tools, including Yahoo's semantic search assistant Spark, Google's Knowledge Graph, and Microsoft's Satori; and the LinkedIn and Facebook entity graphs.",
+    "ungrounded": 0,
+    "kind": "entity"
+   },
+   "reason": "quote is not one whole sentence of the document"
+  },
+  {
+   "item": {
+    "name": "LinkedIn and Facebook entity graphs",
+    "description": "the LinkedIn and Facebook entity graphs",
+    "quote": "In addition to the above examples, the term has been used to describe open knowledge projects such as YAGO and Wikidata; federations like the Linked Open Data cloud; a range of commercial search tools, including Yahoo's semantic search assistant Spark, Google's Knowledge Graph, and Microsoft's Satori; and the LinkedIn and Facebook entity graphs.",
+    "ungrounded": 0,
+    "kind": "entity"
+   },
+   "reason": "quote is not one whole sentence of the document"
+  },
+  {
+   "item": {
+    "source": "virtual knowledge graphs",
+    "relation": "rely on",
+    "target": "relational database",
+    "quote": "They rely on an underlying relational database or data lake to answer queries on the graph.",
+    "kind": "relation"
+   },
+   "reason": "quote does not contain both ends"
+  },
+  {
+   "item": {
+    "source": "virtual knowledge graphs",
+    "relation": "rely on",
+    "target": "data lake",
+    "quote": "They rely on an underlying relational database or data lake to answer queries on the graph.",
+    "kind": "relation"
+   },
+   "reason": "quote does not contain both ends"
+  },
+  {
+   "item": {
+    "name": "Concept map",
+    "description": "Concept map \u2013 Diagram showing relationships among concepts",
+    "quote": "Concept map \u2013 Diagram showing relationships among concepts",
+    "ungrounded": 0,
+    "kind": "entity"
+   },
+   "reason": "quote is not one whole sentence of the document"
+  },
+  {
+   "item": {
+    "name": "Formal semantics (natural language)",
+    "description": "Formal semantics (natural language) \u2013 Formal study of linguistic meaning",
+    "quote": "Formal semantics (natural language) \u2013 Formal study of linguistic meaning",
+    "ungrounded": 0,
+    "kind": "entity"
+   },
+   "reason": "quote is not one whole sentence of the document"
+  },
+  {
+   "item": {
+    "name": "Graph database",
+    "description": "Graph database \u2013 Database using graph structures for queries",
+    "quote": "Graph database \u2013 Database using graph structures for queries",
+    "ungrounded": 0,
+    "kind": "entity"
+   },
+   "reason": "quote is not one whole sentence of the document"
+  },
+  {
+   "item": {
+    "name": "Knowledge base",
+    "description": "Knowledge base \u2013 Information repository with multiple applications",
+    "quote": "Knowledge base \u2013 Information repository with multiple applications",
+    "ungrounded": 0,
+    "kind": "entity"
+   },
+   "reason": "quote is not one whole sentence of the document"
+  },
+  {
+   "item": {
+    "name": "Knowledge graph embedding",
+    "description": "Knowledge graph embedding \u2013 Dimensionality reduction of graph-based semantic data objects [machine learning task]",
+    "quote": "Knowledge graph embedding \u2013 Dimensionality reduction of graph-based semantic data objects [machine learning task]",
+    "ungrounded": 0,
+    "kind": "entity"
+   },
+   "reason": "quote is not one whole sentence of the document"
+  },
+  {
+   "item": {
+    "name": "Logical graph",
+    "description": "Logical graph \u2013 Type of diagrammatic notation for propositional logic",
+    "quote": "Logical graph \u2013 Type of diagrammatic notation for propositional logic",
+    "ungrounded": 0,
+    "kind": "entity"
+   },
+   "reason": "quote is not one whole sentence of the document"
+  },
+  {
+   "item": {
+    "name": "Semantic integration",
+    "description": "Semantic integration \u2013 Interrelating info from diverse sources",
+    "quote": "Semantic integration \u2013 Interrelating info from diverse sources",
+    "ungrounded": 0,
+    "kind": "entity"
+   },
+   "reason": "quote is not one whole sentence of the document"
+  },
+  {
+   "item": {
+    "name": "Semantic technology",
+    "description": "Semantic technology \u2013 Technology to help machines understand data",
+    "quote": "Semantic technology \u2013 Technology to help machines understand data",
+    "ungrounded": 0,
+    "kind": "entity"
+   },
+   "reason": "quote is not one whole sentence of the document"
+  },
+  {
+   "item": {
+    "name": "Topic map",
+    "description": "Topic map \u2013 Knowledge organization system",
+    "quote": "Topic map \u2013 Knowledge organization system",
+    "ungrounded": 0,
+    "kind": "entity"
+   },
+   "reason": "quote is not one whole sentence of the document"
+  },
+  {
+   "item": {
+    "name": "Vadalog",
+    "description": "Vadalog \u2013 Type of Knowledge Graph Management System",
+    "quote": "Vadalog \u2013 Type of Knowledge Graph Management System",
+    "ungrounded": 0,
+    "kind": "entity"
+   },
+   "reason": "quote is not one whole sentence of the document"
+  },
+  {
+   "item": {
+    "name": "Wikibase- Mediawiki",
+    "description": "Wikibase- Mediawiki Software extensions for creating knowledge bases",
+    "quote": "Wikibase- Mediawiki Software extensions for creating knowledge bases",
+    "ungrounded": 0,
+    "kind": "entity"
+   },
+   "reason": "quote is not one whole sentence of the document"
+  },
+  {
+   "item": {
+    "name": "YAGO (database)",
+    "description": "YAGO (database) \u2013 Open-source information repository",
+    "quote": "YAGO (database) \u2013 Open-source information repository",
+    "ungrounded": 0,
+    "kind": "entity"
+   },
+   "reason": "quote is not one whole sentence of the document"
+  },
+  {
+   "item": {
+    "source": "large language models (LLMs)",
+    "relation": "used in",
+    "target": "knowledge graph entity alignment",
+    "quote": "In 2023, researchers found success in using large language models (LLMs) in the task of entity alignment.",
+    "kind": "relation"
+   },
+   "reason": "quote does not contain both ends"
+  }
+ ],
+ "chunks": 4,
+ "seconds": 177.6
+}

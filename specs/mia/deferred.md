@@ -380,6 +380,35 @@ Proposed on 2026-10-29 after the usability work of N-2.3 T-09 to T-11 and N-1.1 
 - Decision: confirmed by Stefan Reiterer, 2026-11-07 (D-278)
 - Status: open
 
+## TD-62 – The unit test without Tailscale runs the real `tailscale up` on a host that has it
+- Kind: defer
+- Requirement: NFR-6, CON-5 (test of `ui/tools/remote.sh`, `tests/test_tailscale.py`)
+- Interim criterion: the other tests of `tests/test_tailscale.py` pass with a fake `tailscale`; on a host without Tailscale the test `ScriptTest.test_without_tailscale_it_says_how_to_install` passes; the stage `unit` is red on this host for that one test (the merge gate of TD-11 ran locally with this deviation)
+- Target: the lookup of `tailscale` in that test ignores the host's `PATH`, so the test gives the same result on every host; the stage `unit` is green here
+- Reason: `/usr/bin/tailscale` is installed on the workstation, so the test runs the real `tailscale up` and times out after 30 s; neither `remote.sh` nor the test changed in TD-11; the owner defers the fix to a later goal (2026-11-08)
+- Effort: about an hour (proposed), test first
+- Risk of the gap: the stage `unit` stays red on this host and hides a real failure; mitigation: the single red test is known by name
+- Owner: Stefan Reiterer
+- Trigger: the Plan of the next iteration, or 2026-12-31, whichever first
+- Target check: `tests/test_tailscale.py::ScriptTest::test_without_tailscale_it_says_how_to_install` (exists, red on a host with Tailscale)
+- Decision: D-289, 2026-11-08, Stefan Reiterer
+- Sign-off: maldun, 2026-11-08
+- Status: open
+
+## TD-80 – The 25 open Dependabot alerts of the repository are not handled yet
+- Kind: defer
+- Requirement: none (maintenance of the dependencies; no requirement covers it)
+- Interim criterion: none beyond the pinned versions of `requirements.txt` and `requirements-db.txt` and the rule that no dependency is added or changed without the owner's approval; the app runs only on the owner's workstation and inside the private network (CON-5)
+- Target: the open alerts (25 on 2026-11-12: 1 critical, 5 high, 15 moderate, 4 low, https://github.com/maldun/MIA/security/dependabot) are listed, matched to our pins, and each is fixed by a version change, accepted with a reason, or dismissed as not reachable; the tests of the new versions are green
+- Reason: the owner decided on 2026-11-12 to go through them once everything is implemented, as a goal of its own (a cleanup goal), so that version changes do not mix with the feature goals
+- Effort: not estimated; it is a goal of its own, with its own Explore and Plan
+- Risk of the gap: a known flaw in a dependency stays in the code until the cleanup; mitigation: personal use on a trusted network, no public port, no untrusted users (the owner's privacy and trust statement); the web tools read untrusted text, so alerts about `requests`, `lxml` and `Flask` should be looked at first when the goal starts
+- Owner: Stefan Reiterer
+- Trigger: all nodes of the decomposition are implemented and integrated (the owner's wording, 2026-11-12; no date)
+- Target check: specified only
+- Decision: the owner's instruction in the session of 2026-11-12 (no D-number yet)
+- Sign-off: maldun, 2026-11-12
+
 ## TD-81 – A skill run left `running` by a crash is shown as running after every restart
 - Kind: defer
 - Requirement: REQ-CLV-034, REQ-CLV-038, REQ-WFM-134 (finding F-10 of the first Verify run of G-V3.PANEL)

@@ -1,0 +1,415 @@
+{
+ "accepted": [
+  {
+   "name": "Meta-analysis",
+   "description": "Meta-analysis is a method of synthesis of quantitative data from multiple independent studies addressing a common research question.",
+   "quote": "Meta-analysis is a method of synthesis of quantitative data from multiple independent studies addressing a common research question.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Karl Pearson",
+   "description": "While Glass is credited with authoring the first modern meta-analysis, a 1904 paper by the statistician Karl Pearson published in the British Medical Journal collated data from several studies of typhoid inoculation; it is seen as the first time a meta-analytic approach was used to aggregate the outcomes of multiple clinical studies.",
+   "quote": "While Glass is credited with authoring the first modern meta-analysis, a 1904 paper by the statistician Karl Pearson published in the British Medical Journal collated data from several studies of typhoid inoculation; it is seen as the first time a meta-analytic approach was used to aggregate the outcomes of multiple clinical studies.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "British Medical Journal",
+   "description": "While Glass is credited with authoring the first modern meta-analysis, a 1904 paper by the statistician Karl Pearson published in the British Medical Journal collated data from several studies of typhoid inoculation; it is seen as the first time a meta-analytic approach was used to aggregate the outcomes of multiple clinical studies.",
+   "quote": "While Glass is credited with authoring the first modern meta-analysis, a 1904 paper by the statistician Karl Pearson published in the British Medical Journal collated data from several studies of typhoid inoculation; it is seen as the first time a meta-analytic approach was used to aggregate the outcomes of multiple clinical studies.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Mary Lee Smith",
+   "description": "The first model meta-analysis was published in 1978 on the effectiveness of psychotherapy by Mary Lee Smith and Glass.",
+   "quote": "The first model meta-analysis was published in 1978 on the effectiveness of psychotherapy by Mary Lee Smith and Glass.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Hans Eysenck",
+   "description": "The first example of this was by Hans Eysenck, who, in a 1978 article in response to the work done by Smith and Glass, called meta-analysis an \"exercise in mega-silliness\".",
+   "quote": "The first example of this was by Hans Eysenck, who, in a 1978 article in response to the work done by Smith and Glass, called meta-analysis an \"exercise in mega-silliness\".",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "source": "Gene V. Glass",
+   "relation": "coined the term",
+   "target": "Meta-analysis",
+   "quote": "The term \"meta-analysis\" was coined in 1976 by the statistician Gene V. Glass",
+   "kind": "relation"
+  },
+  {
+   "source": "Gene V. Glass",
+   "relation": "published an article in",
+   "target": "Educational Researcher",
+   "quote": "The term \"meta-analysis\" was coined in 1976 by the statistician Gene V. Glass, who, in an article in Educational Researcher that year, stated: \"meta-analysis refers to the analysis of analyses\".",
+   "kind": "relation"
+  },
+  {
+   "source": "Karl Pearson",
+   "relation": "published a paper in",
+   "target": "British Medical Journal",
+   "quote": "While Glass is credited with authoring the first modern meta-analysis, a 1904 paper by the statistician Karl Pearson published in the British Medical Journal collated data from several studies of typhoid inoculation",
+   "kind": "relation"
+  },
+  {
+   "name": "PubMed",
+   "description": "A number of databases are available (e.g., PubMed, Embase, PsycINFO), but it is up to the researcher to choose the most appropriate sources for their research area.",
+   "quote": "A number of databases are available (e.g., PubMed, Embase, PsycINFO), but it is up to the researcher to choose the most appropriate sources for their research area.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Embase",
+   "description": "A number of databases are available (e.g., PubMed, Embase, PsycINFO), but it is up to the researcher to choose the most appropriate sources for their research area.",
+   "quote": "A number of databases are available (e.g., PubMed, Embase, PsycINFO), but it is up to the researcher to choose the most appropriate sources for their research area.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "PsycINFO",
+   "description": "A number of databases are available (e.g., PubMed, Embase, PsycINFO), but it is up to the researcher to choose the most appropriate sources for their research area.",
+   "quote": "A number of databases are available (e.g., PubMed, Embase, PsycINFO), but it is up to the researcher to choose the most appropriate sources for their research area.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "PRIMSA flow diagram",
+   "description": "These search results need to be detailed in a PRIMSA flow diagram, which details the flow of information through all stages of the review.",
+   "quote": "These search results need to be detailed in a PRIMSA flow diagram, which details the flow of information through all stages of the review.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "data-collection form",
+   "description": "A data-collection form provides a standardized means of collecting data from eligible studies.",
+   "quote": "A data-collection form provides a standardized means of collecting data from eligible studies.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Pearson correlation coefficient (r)",
+   "description": "For a meta-analysis of correlational data, effect size information is usually collected as Pearson correlation coefficient (r).",
+   "quote": "For a meta-analysis of correlational data, effect size information is usually collected as Pearson correlation coefficient (r).",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "2024 simulation study",
+   "description": "A 2024 simulation study found that standard meta-analysis methods are biased away from zero when applied to partial correlations, and proposed a correction that adjust the degrees of freedom used to compute the correlations.",
+   "quote": "A 2024 simulation study found that standard meta-analysis methods are biased away from zero when applied to partial correlations, and proposed a correction that adjust the degrees of freedom used to compute the correlations.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "plot digitizers",
+   "description": "As a final resort, plot digitizers can be used to scrape data points from scatterplots (if available) for the calculation of Pearson's r.",
+   "quote": "As a final resort, plot digitizers can be used to scrape data points from scatterplots (if available) for the calculation of Pearson's r.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "source": "PRIMSA flow diagram",
+   "relation": "details the flow of information through all stages of the review",
+   "target": "search results",
+   "quote": "These search results need to be detailed in a PRIMSA flow diagram, which details the flow of information through all stages of the review.",
+   "kind": "relation"
+  },
+  {
+   "source": "data-collection form",
+   "relation": "provides a standardized means of collecting data from",
+   "target": "eligible studies",
+   "quote": "A data-collection form provides a standardized means of collecting data from eligible studies.",
+   "kind": "relation"
+  },
+  {
+   "source": "2024 simulation study",
+   "relation": "found that standard meta-analysis methods are biased away from zero when applied to",
+   "target": "partial correlations",
+   "quote": "A 2024 simulation study found that standard meta-analysis methods are biased away from zero when applied to partial correlations, and proposed a correction that adjust the degrees of freedom used to compute the correlations.",
+   "kind": "relation"
+  },
+  {
+   "source": "plot digitizers",
+   "relation": "can be used to scrape data points from scatterplots (if available) for the calculation of",
+   "target": "Pearson's r",
+   "quote": "As a final resort, plot digitizers can be used to scrape data points from scatterplots (if available) for the calculation of Pearson's r.",
+   "kind": "relation"
+  },
+  {
+   "name": "grey literature",
+   "description": "grey literature, which is defined as research that has not been formally published.",
+   "quote": "A final consideration is whether to include studies from the grey literature, which is defined as research that has not been formally published.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "conference abstracts",
+   "description": "This type of literature includes conference abstracts, dissertations, and pre-prints.",
+   "quote": "This type of literature includes conference abstracts, dissertations, and pre-prints.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "dissertations",
+   "description": "This type of literature includes conference abstracts, dissertations, and pre-prints.",
+   "quote": "This type of literature includes conference abstracts, dissertations, and pre-prints.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "pre-prints",
+   "description": "This type of literature includes conference abstracts, dissertations, and pre-prints.",
+   "quote": "This type of literature includes conference abstracts, dissertations, and pre-prints.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "conference proceedings",
+   "description": "Reports from conference proceedings, which are the most common source of grey literature, are poorly reported, and data in the subsequent publication are often inconsistent, with differences observed in almost 20% of published studies.",
+   "quote": "Reports from conference proceedings, which are the most common source of grey literature, are poorly reported, and data in the subsequent publication are often inconsistent, with differences observed in almost 20% of published studies.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "two-stage methods",
+   "description": "This distinction has raised the need for different meta-analytic methods when evidence synthesis is desired, and has led to the development of one-stage and two-stage methods.",
+   "quote": "This distinction has raised the need for different meta-analytic methods when evidence synthesis is desired, and has led to the development of one-stage and two-stage methods.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "Fixed effect model",
+   "description": "The fixed effect model provides a weighted average of a series of study estimates.",
+   "quote": "The fixed effect model provides a weighted average of a series of study estimates.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "source": "conference proceedings",
+   "relation": "most common source of",
+   "target": "grey literature",
+   "quote": "Reports from conference proceedings, which are the most common source of grey literature, are poorly reported, and data in the subsequent publication are often inconsistent, with differences observed in almost 20% of published studies.",
+   "kind": "relation"
+  },
+  {
+   "source": "two-stage methods",
+   "relation": "can also be applied when",
+   "target": "individual participant data (IPD)",
+   "quote": "By reducing IPD to AD, two-stage methods can also be applied when IPD is available; this makes them an appealing choice when performing a meta-analysis.",
+   "kind": "relation"
+  },
+  {
+   "name": "fixed effects model",
+   "description": "the fixed effects model assumes that all included studies investigate the same population, use the same variable and outcome definitions, etc.",
+   "quote": "Most importantly, the fixed effects model assumes that all included studies investigate the same population, use the same variable and outcome definitions, etc.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "source": "random effects variance component (REVC)",
+   "relation": "is simply derived from the extent of variability of",
+   "target": "effect sizes",
+   "quote": "applying a random effects variance component (REVC) that is simply derived from the extent of variability of the effect sizes of the underlying studies.",
+   "kind": "relation"
+  }
+ ],
+ "refused": [
+  {
+   "item": {
+    "name": "Gene V. Glass",
+    "description": "The term \"meta-analysis\" was coined in 1976 by the statistician Gene V. Glass, who, in an article in Educational Researcher that year, stated: \"meta-analysis refers to the analysis of analyses\".",
+    "quote": "The term \"meta-analysis\" was coined in 1976 by the statistician Gene V. Glass, who, in an article in Educational Researcher that year, stated: \"meta-analysis refers to the analysis of analyses\".",
+    "ungrounded": 0,
+    "kind": "entity"
+   },
+   "reason": "quote is not one whole sentence of the document"
+  },
+  {
+   "item": {
+    "name": "Educational Researcher",
+    "description": "The term \"meta-analysis\" was coined in 1976 by the statistician Gene V. Glass, who, in an article in Educational Researcher that year, stated: \"meta-analysis refers to the analysis of analyses\".",
+    "quote": "The term \"meta-analysis\" was coined in 1976 by the statistician Gene V. Glass, who, in an article in Educational Researcher that year, stated: \"meta-analysis refers to the analysis of analyses\".",
+    "ungrounded": 0,
+    "kind": "entity"
+   },
+   "reason": "quote is not one whole sentence of the document"
+  },
+  {
+   "item": {
+    "source": "Mary Lee Smith",
+    "relation": "published the first model meta-analysis with",
+    "target": "Gene V. Glass",
+    "quote": "The first model meta-analysis was published in 1978 on the effectiveness of psychotherapy by Mary Lee Smith and Glass.",
+    "kind": "relation"
+   },
+   "reason": "quote does not contain both ends"
+  },
+  {
+   "item": {
+    "source": "Hans Eysenck",
+    "relation": "wrote an article in response to the work done by",
+    "target": "Mary Lee Smith",
+    "quote": "The first example of this was by Hans Eysenck, who, in a 1978 article in response to the work done by Smith and Glass, called meta-analysis an \"exercise in mega-silliness\".",
+    "kind": "relation"
+   },
+   "reason": "quote does not contain both ends"
+  },
+  {
+   "item": {
+    "source": "Hans Eysenck",
+    "relation": "wrote an article in response to the work done by",
+    "target": "Gene V. Glass",
+    "quote": "The first example of this was by Hans Eysenck, who, in a 1978 article in response to the work done by Smith and Glass, called meta-analysis an \"exercise in mega-silliness\".",
+    "kind": "relation"
+   },
+   "reason": "quote does not contain both ends"
+  },
+  {
+   "item": {
+    "name": "individual participant data (IPD)",
+    "description": "In general, two types of evidence can be distinguished when performing a meta-analysis: individual participant data (IPD), and aggregate data (AD).",
+    "quote": "In general, two types of evidence can be distinguished when performing a meta-analysis: individual participant data (IPD), and aggregate data (AD).",
+    "ungrounded": 0,
+    "kind": "entity"
+   },
+   "reason": "quote is not one whole sentence of the document"
+  },
+  {
+   "item": {
+    "name": "aggregate data (AD)",
+    "description": "In general, two types of evidence can be distinguished when performing a meta-analysis: individual participant data (IPD), and aggregate data (AD).",
+    "quote": "In general, two types of evidence can be distinguished when performing a meta-analysis: individual participant data (IPD), and aggregate data (AD).",
+    "ungrounded": 0,
+    "kind": "entity"
+   },
+   "reason": "quote is not one whole sentence of the document"
+  },
+  {
+   "item": {
+    "name": "one-stage methods",
+    "description": "This distinction has raised the need for different meta-analytic methods when evidence synthesis is desired, and has led to the development of one-stage and two-stage methods.",
+    "quote": "This distinction has raised the need for different meta-analytic methods when evidence synthesis is desired, and has led to the development of one-stage and two-stage methods.",
+    "ungrounded": 0,
+    "kind": "entity"
+   },
+   "reason": "quote does not contain the name"
+  },
+  {
+   "item": {
+    "source": "conference abstracts",
+    "relation": "included in",
+    "target": "grey literature",
+    "quote": "This type of literature includes conference abstracts, dissertations, and pre-prints.",
+    "kind": "relation"
+   },
+   "reason": "quote does not contain both ends"
+  },
+  {
+   "item": {
+    "source": "dissertations",
+    "relation": "included in",
+    "target": "grey literature",
+    "quote": "This type of literature includes conference abstracts, dissertations, and pre-prints.",
+    "kind": "relation"
+   },
+   "reason": "quote does not contain both ends"
+  },
+  {
+   "item": {
+    "source": "pre-prints",
+    "relation": "included in",
+    "target": "grey literature",
+    "quote": "This type of literature includes conference abstracts, dissertations, and pre-prints.",
+    "kind": "relation"
+   },
+   "reason": "quote does not contain both ends"
+  },
+  {
+   "item": {
+    "source": "one-stage methods",
+    "relation": "yield similar results to",
+    "target": "two-stage methods",
+    "quote": "Although it is conventionally believed that one-stage and two-stage methods yield similar results, recent studies have shown that they may occasionally lead to different conclusions.",
+    "kind": "relation"
+   },
+   "reason": "quote does not contain both ends"
+  },
+  {
+   "item": {
+    "name": "y i",
+    "description": "y i denotes the observed effect in the i-th study",
+    "quote": "where y i denotes the observed effect in the i-th study",
+    "ungrounded": 0,
+    "kind": "entity"
+   },
+   "reason": "quote is not a passage of the document"
+  },
+  {
+   "item": {
+    "name": "\u03b8 i",
+    "description": "\u03b8 i the corresponding (unknown) true effect",
+    "quote": "\u03b8 i the corresponding (unknown) true effect",
+    "ungrounded": 0,
+    "kind": "entity"
+   },
+   "reason": "quote is not a passage of the document"
+  },
+  {
+   "item": {
+    "name": "e i",
+    "description": "e i is the sampling error",
+    "quote": "e i is the sampling error",
+    "ungrounded": 0,
+    "kind": "entity"
+   },
+   "reason": "quote is not one whole sentence of the document"
+  },
+  {
+   "item": {
+    "name": "v i",
+    "description": "The sampling variances (i.e., v i values) are assumed to be known.",
+    "quote": "The sampling variances (i.e., v i values) are assumed to be known.",
+    "ungrounded": 0,
+    "kind": "entity"
+   },
+   "reason": "quote is not a passage of the document"
+  },
+  {
+   "item": {
+    "name": "Random effects model",
+    "description": "Most meta-analyses are based on sets of studies that are not exactly identical in their methods and/or the characteristics of the included samples.",
+    "quote": "Most meta-analyses are based on sets of studies that are not exactly identical in their methods and/or the characteristics of the included samples.",
+    "ungrounded": 0,
+    "kind": "entity"
+   },
+   "reason": "quote does not contain the name"
+  },
+  {
+   "item": {
+    "name": "random effects variance component (REVC)",
+    "description": "applying a random effects variance component (REVC) that is simply derived from the extent of variability of the effect sizes of the underlying studies.",
+    "quote": "Step 2: Un-weighting of this inverse variance weighting by applying a random effects variance component (REVC) that is simply derived from the extent of variability of the effect sizes of the underlying studies.",
+    "ungrounded": 0,
+    "kind": "entity"
+   },
+   "reason": "quote is not one whole sentence of the document"
+  },
+  {
+   "item": {
+    "source": "y i",
+    "relation": "are assumed to be unbiased and normally distributed estimates of",
+    "target": "\u03b8 i",
+    "quote": "Therefore, the y i's are assumed to be unbiased and normally distributed estimates of their corresponding true effects.",
+    "kind": "relation"
+   },
+   "reason": "quote is not a passage of the document"
+  }
+ ],
+ "chunks": 4,
+ "seconds": 90.7
+}

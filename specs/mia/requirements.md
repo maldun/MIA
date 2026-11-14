@@ -555,6 +555,8 @@ Status of this file: first draft by the coding agent. Not yet done: lint run, pl
 - Quality: security measure: unauthenticated requests served; plain-HTTP passwords accepted from LAN addresses; target: 0; 0; context: home network and tailnet
 - Refined in: N-2.1, N-4
 - Verified by: TC-MIA-014
+- Relaxed: TD-62
+- Target: the unit test of `remote.sh` without Tailscale gives the same result on every host, also on one that has Tailscale installed (TD-62)
 - Status: Approved
 - History: –
 
