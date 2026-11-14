@@ -394,3 +394,48 @@ Proposed on 2026-10-29 after the usability work of N-2.3 T-09 to T-11 and N-1.1 
 - Decision: D-331, 2026-11-13, Stefan Reiterer
 - Sign-off: maldun, 2026-11-13
 - Status: open
+
+## TD-82 – Nothing in the product writes the history table, so "history deleted" cannot reach a skill run (DRAFT)
+- Kind: defer
+- Requirement: REQ-WFM-135 (finding F-15 of the second Verify run of G-V3.PANEL, A-144)
+- Interim criterion: `SkillRunRecorder` subscribes to deletes in the table `history` of the storage (`skill_runs.py`), and the acceptance tests of TC-WFM-135 show that a delete removes the run with the id of the history record; in the product the chat log is not kept in that table, so no delete notice can arrive and the mapping history id = run id is checked only by the tests
+- Target: the chat log is written to and deleted from the table `history` (IF-102), the id of a history record of a skill run is the run id, and a test through the real chat log shows that deleting the message removes the run
+- Reason: the chat log moves into the shared storage with the shared-state plan (deploy/REQUIREMENTS_DB.md, postponed); a link before that has nothing to link to. A delete of a history record also removes a run of any account with that id (accepted by A-144)
+- Effort: not estimated; part of moving the chat log to IF-102
+- Risk of the gap: none today (the case cannot occur); once the chat log writes `history`, a missing or wrong id mapping would delete the wrong run or none
+- Owner: Stefan Reiterer
+- Trigger: the chat log is moved to the storage (IF-102), or the Plan of the shared-state database, whichever first
+- Target check: specified only
+- Decision: proposed 2026-11-14 on the owner's instruction (F-15 later); decision row pending
+- Sign-off: pending (owner)
+- Status: open
+
+## TD-83 – The lock of the skill run recorder is per recorder, two recorders on one storage lose answers (DRAFT)
+- Kind: defer
+- Requirement: REQ-WFM-133 (finding F-16 of the second Verify run of G-V3.PANEL)
+- Interim criterion: an `RLock` in `skill_runs.py` makes the writes of one recorder atomic (`tests/test_skill_runs_race.py`: 30 of 30 answers kept); the product builds one `ChatService` and so one recorder (`web_app.py`)
+- Target: the write of a run record is atomic on the storage itself (for example `expected_version` with a retry), so that two recorders on one storage keep every answer (a test with two recorders and concurrent answers; the reviewer's probe lost 60 of 120)
+- Reason: two recorders exist only with a second instance on one shared database, which is the postponed shared-state plan; the owner keeps several accounts on one instance for tests only
+- Effort: not estimated; a small task with a storage test
+- Risk of the gap: none today; with two instances on one database, answers of a run would be lost
+- Owner: Stefan Reiterer
+- Trigger: the Plan of the shared-state database (deploy/REQUIREMENTS_DB.md), before a second instance uses one database
+- Target check: specified only
+- Decision: proposed 2026-11-14 on the owner's instruction (F-16 later); decision row pending
+- Sign-off: pending (owner)
+- Status: open
+
+## TD-84 – The mock of IF-101 does not pin the account check of delete_history, TC-CLV-036 is not reworded (DRAFT)
+- Kind: defer
+- Requirement: REQ-CLV-036, REQ-WFM-135 (finding F-17 of the second Verify run of G-V3.PANEL, A-146)
+- Interim criterion: the account check in `delete_history` of the IF-101 mock (`tests/helpers/mocks/if_101_chat_api.py`) is not covered by a test (a mutant that removes it survives); the browser driver measures `.srv-full-body`, but the text of TC-CLV-036 in `test-spec.md` still names the old measure, and A-146 announced the rewording ("the height of the opened part")
+- Target: a contract test that a delete of another account's run changes nothing, and TC-CLV-036 worded as A-146 says (the height of the opened part), both through the protected-file route (payload, owner installs) and a plan amendment
+- Reason: both changes touch protected material (`tests/helpers/`, `tests/acceptance/contract/`) or an approved test spec, so they need a payload, a plan amendment and a review row; the owner chose on 2026-11-14 to leave F-15 to F-17 for a later stage
+- Effort: about an hour for the payload and the amendment
+- Risk of the gap: a later change could remove the account check of the mock unnoticed; the real adapter has its own check
+- Owner: Stefan Reiterer
+- Trigger: the next plan amendment or contract change that touches `tests/helpers/` or `tests/acceptance/contract/test_if_101_chat_api.py`, or the Validate of G-V3, whichever first
+- Target check: specified only
+- Decision: proposed 2026-11-14 on the owner's instruction (F-17 later); decision row pending
+- Sign-off: pending (owner)
+- Status: open
