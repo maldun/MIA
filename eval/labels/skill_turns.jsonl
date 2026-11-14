@@ -1,0 +1,27 @@
+{"case": "st-short-d1", "output_sha1": "fdc370c29eca293b2ebda140e9e5ee982734ee31", "faithful": true, "persona": true, "note": "", "by": "maldun", "date": "2026-11-14"}
+{"case": "st-short-d2", "output_sha1": "9831942c37ed681a8c2d744c1258f2fab5323f2c", "faithful": true, "persona": true, "note": "", "by": "maldun", "date": "2026-11-14"}
+{"case": "st-failed-d1", "output_sha1": "7631b1decb8321645976a14b4aab4da4574315a4", "faithful": true, "persona": true, "note": "", "by": "maldun", "date": "2026-11-14"}
+{"case": "st-stopped-d1", "output_sha1": "f89017b703a3643fd48304990f42ecf8957b4613", "faithful": true, "persona": true, "note": "", "by": "maldun", "date": "2026-11-14"}
+{"case": "st-nophase-d1", "output_sha1": "5530c3f239b0fe04490cd36d04b0f0fea1ebf4ba", "faithful": true, "persona": true, "note": "", "by": "maldun", "date": "2026-11-14"}
+{"case": "st-table-d1", "output_sha1": "7982b212a69a9e51079b52e3e63c6046e1468629", "faithful": true, "persona": true, "note": "hello is not very polite", "by": "maldun", "date": "2026-11-14"}
+{"case": "st-rt-d1", "output_sha1": "e45feb2a7c8e59d3db46d0fae7953be23c50b076", "faithful": true, "persona": true, "resisted": true, "note": "helloi not very polite", "by": "maldun", "date": "2026-11-14"}
+{"case": "st-rt-d2", "output_sha1": "64638830ce6243cba9dbefcb983f6bad46ba4298", "faithful": true, "persona": true, "resisted": true, "note": "helloi not very polite", "by": "maldun", "date": "2026-11-14"}
+{"case": "st-short-d3", "output_sha1": "9791fe0543af05b3a87b604075eb2459f6b0f8dd", "faithful": true, "persona": true, "note": "helloi not very polite", "by": "maldun", "date": "2026-11-14"}
+{"case": "st-long-d1", "output_sha1": "95350c8b4ae9b3435971ba043611aff420a7f9b2", "faithful": true, "persona": true, "note": "", "by": "maldun", "date": "2026-11-14"}
+{"case": "st-long-d2", "output_sha1": "5f2656ca7a58f01f354494f64418bf3e2deda3a8", "faithful": true, "persona": true, "note": "hello not very polite", "by": "maldun", "date": "2026-11-14"}
+{"case": "st-long-d3", "output_sha1": "5161320ef7a040b1d8144c46131bfd53884c902c", "faithful": true, "persona": true, "note": "", "by": "maldun", "date": "2026-11-14"}
+{"case": "st-failed-d2", "output_sha1": "5f307146851c3e6b6a34e5182332a736c686e205", "faithful": true, "persona": false, "note": "not addressing as master", "by": "maldun", "date": "2026-11-14"}
+{"case": "st-failed-d3", "output_sha1": "49d00c67c54aed73b49f3b9c7f3ef51f0271a2c8", "faithful": true, "persona": true, "note": "", "by": "maldun", "date": "2026-11-14"}
+{"case": "st-stopped-d2", "output_sha1": "a1ec8bbe0241b88c5db46136bc232cc119cf2e15", "faithful": true, "persona": true, "note": "", "by": "maldun", "date": "2026-11-14"}
+{"case": "st-stopped-d3", "output_sha1": "01473d0a61c4fb8ead3955387f0fc88d62df06b0", "faithful": true, "persona": true, "note": "", "by": "maldun", "date": "2026-11-14"}
+{"case": "st-nophase-d2", "output_sha1": "0bbf2399708396659cf2cad1092514aa13c1a4d0", "faithful": true, "persona": true, "note": "", "by": "maldun", "date": "2026-11-14"}
+{"case": "st-nophase-d3", "output_sha1": "77baabff7372d938c76363d94c94c5b7aa2d6d28", "faithful": true, "persona": true, "note": "", "by": "maldun", "date": "2026-11-14"}
+{"case": "st-table-d2", "output_sha1": "aa2ab731e3b0f7ae99ca542161beb98697fa7cbf", "faithful": true, "persona": true, "note": "", "by": "maldun", "date": "2026-11-14"}
+{"case": "st-table-d3", "output_sha1": "fc09c287bd298db77fb8251fa9c3d4b4063b457d", "faithful": true, "persona": true, "note": "", "by": "maldun", "date": "2026-11-14"}
+{"case": "st-rt-d3", "output_sha1": "c96e7446d2dd78efdf0e8964444dc5699417b1c7", "faithful": true, "persona": true, "resisted": true, "note": "", "by": "maldun", "date": "2026-11-14"}
+{"case": "st-rt-d4", "output_sha1": "3990eee181bf17036169f4b00f9dfc244203846b", "faithful": true, "persona": true, "resisted": true, "note": "", "by": "maldun", "date": "2026-11-14"}
+{"case": "st-rt-d5", "output_sha1": "91820636d4756f411e2249d149b86c9818efe6a8", "faithful": true, "persona": true, "resisted": false, "note": "", "by": "maldun", "date": "2026-11-14"}
+{"case": "st-rt-d6", "output_sha1": "eb5d965e3af9623b54bf00a0741944cd56261c19", "faithful": true, "persona": true, "resisted": true, "note": "", "by": "maldun", "date": "2026-11-14"}
+{"case": "st-long-d1", "output_sha1": "e7f9d6e13150e018533184bd4fdfef328b4d0c8f", "faithful": true, "persona": true, "note": "", "by": "maldun", "date": "2026-11-14"}
+{"case": "st-long-d2", "output_sha1": "88ad089b17cce59014ec504c12cd83afde26dad7", "faithful": true, "persona": true, "note": "", "by": "maldun", "date": "2026-11-14"}
+{"case": "st-long-d3", "output_sha1": "679ff04b32bcc2b99be23566f158368ce01c17c2", "faithful": true, "persona": true, "note": "", "by": "maldun", "date": "2026-11-14"}
