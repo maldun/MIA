@@ -4,7 +4,10 @@
 **Branch:** goal/v2.toolbox @ 02f8785 (plus this report)   **Parent line of work:** goal/v2 (merge order STORE, MODEL, TOOLBOX, CONVERT)   **Plan baseline:** plan-baseline-it2-toolbox (installed state: plan-baseline-it2-toolbox-installed = d77858f)
 **Date:** 2026-11-12   **Reviewers:** maldun (human, pending), Claude Sonnet 5.5 (AI, fresh session, did not see the Implement chat)
 
-## Verdict (proposal)
+## Verdict (proposal, after the second round)
+**Verified with open findings** (round 2, 2026-11-14): F1 to F5 and F8 are fixed and each test fails on `84eddb6:toolbox.py` and passes on `HEAD`; the protected material is unchanged. Three new small findings (N1, N2, N3) go back to Phase 3; see "Second round" at the end. The text below is the first round's verdict.
+
+## Verdict of the first round
 **Verified with open findings** (decisions of the batched review below; the findings F1, F2, F3, F4, F5 go back to Phase 3 before the merge). All checks of the scope are green, the protected material is unchanged apart from the approved installs, and no unapproved code path was found that runs untrusted text on import or lets a non-owner mark a transform trusted through the toolbox. One security finding (F1) is a gap in the owner rule and should be fixed before the merge; the others are small.
 
 ## Automated checks
@@ -26,25 +29,21 @@
 | Usability (bad inputs) | `import_transform` refuses non-JSON, list, version 0/true, text `inputs`, empty id with `invalid_file` (unit test); the float version `1.0` is the exception (F3) |
 
 ### Stage log
-Local run after the fixes (2026-11-14), `run_stages.py --upto 2 --keep-going` with the venv `bin` first in PATH, started on `33ab9a2` (F1 to F5). A local run is feedback, not the gate (only CI counts for `merge_gate.py`). Done by the fixing session, not by a fresh reviewer.
+Clean run on `HEAD` (`ed8ba48`) by the second-round reviewer, 2026-11-14, `run_stages.py --stages stages.yaml --upto 2 --keep-going`, venv `bin` first in PATH, started with `nohup ... &`. Not a CI run; only CI counts for `merge_gate.py`. The entry of the fixing session (run on `33ab9a2`, overlapping file changes) is replaced.
 
 | Stage | Step | Result |
 |---|---|---|
-| 0 | model-ids | pass (0.6 s) |
-| 1 | contract-js, js, quality | pass (js: 163 tests) |
-| 1 | sysml-parse | pass (66 s) |
-| 1 | decomposition | **fail**, F7 (known red, same class as master; D-229: repaired in a parent session) |
-| 1 | unit | 2233 tests, 1 failure, 5 skipped, 2 expected failures (494 s): `test_checkout_untouched` found `specs/mia/goals/G-V2.TOOLBOX/plan.md` changed, because the fixing session appended the F6 note to it while the run was going. Re-run alone on the clean tree: OK (87 s). Not a finding, but the unit step itself was not repeated whole |
+| 0 | model-ids | pass |
+| 1 | contract-js, js, quality | pass |
+| 1 | sysml-parse | pass (63 s) |
+| 1 | decomposition | **fail**, F7 (known red, same class as master; decided D-229) |
+| 1 | unit | 2235 tests, 1 failure, 4 errors, 5 skipped, 2 expected failures (826 s). All five are in `test_shutdown.py` and `test_shutdown_database.py` (SIGINT tests: `KeyboardInterrupt not raised`, harness timeout 20 s). Both files pass alone (OK). Likely cause, not proven: a `nohup`/`&` background job ignores SIGINT. No test of this goal is among them. The unit step was not re-run whole |
 | 1 | contract-mocks | skipped by the ladder (needs unit); run by hand with the command of `stages.yaml`: 137 tests OK |
-| 2 | acceptance | skipped by the ladder (needs unit); run by hand, every `tests/acceptance/test_*.py` one process each: all OK |
-| 2 | contract-real | pass (9.8 s), 17 skipped (the same 17 as above, none of this goal) |
-| 2 | integration | pass (4.0 s) |
+| 2 | acceptance | skipped by the ladder (needs unit); run by hand, one process per file: all OK |
+| 2 | contract-real | pass (9.6 s), 17 skipped (none of this goal: IF-103 real model server 6, IF-404 web 5, IF-405 scholarly 4, IF-101 2) |
+| 2 | integration | pass (3.9 s) |
 
-Limits of this entry:
-- The run started before the commit `931c53f` (F8, `ToolboxError("not_found")`). `tests/test_toolbox.py` (33 tests, F8 included) was run by hand on that commit and passes; the whole ladder was not repeated on it.
-- The unit step ran partly while files changed; a clean full run on `HEAD` is the job of the second Verify round (`start-prompt-verify-fixes.md`).
-- Stages 3 and 4 (and the checks 1, 2, 4 and 5 that D-229 asks to run again in full after the fixes) were not run: this run stopped at `--upto 2`.
-- The 17 skips are unchanged from the first round (137 `_real` tests).
+Stages 3 and 4: `stages.yaml` defines stage 3 as `contract-postgres` (needs podman, local postgres:16 image and psycopg 3) and `container-alone` (needs podman and `localhost/mia:latest`); both are outside this goal's code and were not run. Stage 4 (eval runs on the pinned model) has no step by design (comment in `stages.yaml`; no suites yet), so there is nothing to run. Slow stage 1: 894 s against a budget of 120 s (the unit step), a known tuning item.
 
 ## Protected material
 `git diff --stat plan-baseline-it2-toolbox..HEAD -- tests/acceptance tests/helpers tests/smoke contracts eval benchmarks stages.yaml specs/mia/test-requirements.md`: 10 files. Every change maps to an approved install; against the installed state (`plan-baseline-it2-toolbox-installed`) only the A-111/A-112 installs remain:
@@ -185,3 +184,28 @@ After the fixes the automated checks 1, 2, 4 and 5 run again in full and a revie
 - The toolbox has no caller yet; real behaviour of trust and the owner rule at the API is first seen after MODEL's `GraphRunner` and the wiring.
 - Shipped nodes carry no code; "running a shipped transform" is a `KeyError` until the old runner is connected (D-225).
 - The reason text and the lifecycle `tested` of shipped nodes (D-226) are what a user sees first.
+
+## Second round (2026-11-14, fresh reviewer, scope `02a4906 33ab9a2 931c53f`)
+Verdict: **Verified with open findings** (N1, N2, N3 back to Phase 3; the rest is verified).
+
+| Check | Result |
+|---|---|
+| 1 protected material | `git diff 84eddb6..HEAD -- tests/acceptance tests/helpers tests/smoke contracts eval benchmarks` is empty: no finding |
+| 2 failing tests | `84eddb6:toolbox.py` with `HEAD`'s `tests/test_toolbox.py` (copy in the scratchpad, worktree untouched): 33 tests, 10 failures and 11 errors, covering F1, F2, F3 (mock errors, real fails with `WorkflowLibraryError`), F4, F5, F8 and the changed twin `BaselineChecks`. On `HEAD`: 33 OK. No test passes without its fix |
+| 3 F1/F2 paths | A replace clears the allowance (also on a trusted retired entry); a lifecycle change away from retired clears it in the same `set_meta` call as the lifecycle; `allow_baseline` with another lifecycle is `allowance_needs_retired`. Order event, clear, save: a failing save after the clear leaves version 1 and no allowance (checked, mock and real): a permission may be lost, none is kept. `get_meta` always has a record (`_save_transform` writes it with the first save). Retire again, or retire by the owner without `allow_baseline`, keeps the allowance: same retirement, in line with the text of REQ-WFM-091. There is no withdrawal while staying retired (un-retire and retire again); not required, noted |
+| 4 F3 | `1e0`, `1E0`, `2.0`, `1.5`, `1e400`, `-0.0` are `invalid_file` on mock and real; a huge integer is accepted (fine) |
+| 4 F4 | owner untrust: "The owner took its trust back."; account: "An account took its trust back."; shipped entry untrusted by an account shows the account text (not empty); `look_up` of a trusted entry shows no reason. See N1 |
+| 4 F5 | event recorded, then save fails: the event stays, the entry stays at version 1 (mock and real). See N2 |
+| 5 requirement text | REQ-WFM-091/092 match code (`run`, `set_lifecycle`, `import_transform`) both ways. Two clauses (allowance refused with another lifecycle, cleared on un-retire and on replace) are checked by the unit tests only; TC-WFM-091 in `test-spec.md` says so. TC-WFM-091, 092, 095 (protected) are unchanged and read the same behaviour; the allowance set by the owner on a retired entry stays valid in them |
+| 6 re-run | scope test files: `tests/acceptance/test_toolbox.py` 17, `contract/test_if_203_v1_transforms.py` 10, `test_if_203_workflow_library.py` 8, `test_if_302_record_tables.py` 18, `tests/test_toolbox.py` 33, `test_record_tables.py` 17, `test_workflow_library.py` 13: all OK. Ladder: see Stage log. `check_sysml.sh` pass |
+
+### New findings (owner decisions of 2026-11-14, maldun)
+**N1 (low, Phase 3): an untrust of an already untrusted entry overwrites the reason.** `set_trust(id, "untrusted", account)` always writes `REASON_UNTRUSTED_BY_*`. A fresh import untrusted again by `guest` changes "It came from outside MIA and was not reviewed." to "An account took its trust back.", which is false (never trusted); REQ-WFM-090. Decision: fix, write a new reason only on the change trusted to untrusted. Proposed test: import, `set_trust(untrusted, "guest")`, `look_up()["reason"] == REASON_IMPORTED`, mock and real.
+
+**N2 (low, Phase 3): failures of the event store or the save are not `ToolboxError`, and the event can stand without a replace.** Decision: wrap in a `ToolboxError` (for example `store_failed`); the orphan event is accepted as it is (the fix chose it on purpose). Proposed tests: (a) event stand-in raises `RuntimeError`: `import_transform` raises `ToolboxError`, version stays 1; (b) `library.save` raises after the event: `ToolboxError`, version stays 1, no allowance kept. Update the F5 test, which expects `RuntimeError`.
+
+**N3 (info, Phase 3): test gaps in the new tests.** Decision: add. (a) F4: untrust by an account (text differs from the owner's and from `REASON_IMPORTED`) and of a shipped entry (not empty); (b) F3: `1e0`, `2.0` and `1e400` are `invalid_file`; (c) F1: a failing `library.save` after the clear leaves version 1 and the allowance cleared. The code already passes them.
+
+Not findings: the event-before-replace order (accepted by the owner's choice of N2), no withdrawal of an allowance while retired, the red `unit` step in the shutdown tests (environment, see Stage log), F7 (decided).
+
+After the fixes of N1 to N3 a reviewer reads those commits only and re-runs `tests/test_toolbox.py` and the acceptance tests; the full ladder is then run in a normal terminal (not `nohup`), so that the shutdown tests can pass.
