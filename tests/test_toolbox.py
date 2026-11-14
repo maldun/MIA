@@ -127,16 +127,70 @@ class VerifyFindings:
         self.assertNotEqual(reason, REASON_IMPORTED)
 
     def test_f5_a_failed_event_refuses_the_replace(self):
-        """Example: the event stand-in raises; the entry stays in version 1."""
+        """Example: the event stand-in raises; the call raises ToolboxError(store_failed) and the entry stays in version 1 (N2)."""
         self.box.import_transform(exchange_file("t.one", 1), "guest")
         self.box.set_trust("t.one", "trusted", "anna")
 
         def broken(event):
             raise RuntimeError("event store down")
         self.events.record = broken
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ToolboxError) as caught:
             self.box.import_transform(exchange_file("t.one", 2), "guest")
+        self.assertEqual(caught.exception.code, "store_failed")
         self.assertEqual(self.box.look_up("t.one")["version"], 1)
+
+    def test_n2_a_failed_save_is_a_toolbox_error_and_the_old_version_stays(self):
+        """Example: the save raises after the allowance was cleared; ToolboxError(store_failed), version 1, no allowance kept (N2, N3c)."""
+        self.untrusted_retired_allowed()
+
+        def broken(*args, **kwargs):
+            raise RuntimeError("disk")
+        self.library.save = broken
+        with self.assertRaises(ToolboxError) as caught:
+            self.box.import_transform(exchange_file("t.one", 2), "mallory")
+        self.assertEqual(caught.exception.code, "store_failed")
+        entry = self.box.look_up("t.one")
+        self.assertEqual(entry["version"], 1)
+        self.assertFalse(entry["baseline_allowed"])
+
+    def test_n1_an_untrust_of_an_untrusted_entry_keeps_its_reason(self):
+        """Example: a fresh import untrusted again by an account still says it came from outside."""
+        self.box.import_transform(exchange_file("t.one", 1), "guest")
+        self.box.set_trust("t.one", "untrusted", "guest")
+        self.box.set_trust("t.one", "untrusted", "anna")
+        self.assertEqual(self.box.look_up("t.one")["reason"], REASON_IMPORTED)
+
+    def test_n3a_the_reason_texts_by_account_and_for_a_shipped_entry(self):
+        """Example: an account's untrust, the owner's untrust and an untrusted shipped entry each have their own non-empty text."""
+        self.box.import_transform(exchange_file("t.one", 1), "guest")
+        self.box.set_trust("t.one", "trusted", "anna")
+        self.box.set_trust("t.one", "untrusted", "guest")
+        by_account = self.box.look_up("t.one")["reason"]
+        self.box.set_trust("t.one", "trusted", "anna")
+        self.box.set_trust("t.one", "untrusted", "anna")
+        by_owner = self.box.look_up("t.one")["reason"]
+        folder = tempfile.mkdtemp(prefix="toolbox-nodes-")
+        self.addCleanup(shutil.rmtree, folder, True)
+        os.makedirs(os.path.join(folder, "s.one"))
+        with open(os.path.join(folder, "s.one", "1.json"), "w") as handle:
+            json.dump({"id": "s.one", "version": 1, "inputs": {}, "outputs": {}}, handle)
+        self.box.seed_shipped(folder)
+        self.box.set_trust("s.one", "untrusted", "guest")
+        shipped = self.box.look_up("s.one")["reason"]
+        for reason in (by_account, by_owner, shipped):
+            self.assertTrue(reason)
+            self.assertNotEqual(reason, REASON_IMPORTED)
+        self.assertNotEqual(by_account, by_owner)
+
+    def test_n3b_other_whole_looking_numbers_are_invalid_file(self):
+        good = json.loads(exchange_file("t.one"))
+        text = json.dumps(dict(good, version=0))
+        for number in ("1e0", "2.0", "1e400"):
+            with self.subTest(number=number):
+                with self.assertRaises(ToolboxError) as caught:
+                    self.box.import_transform(text.replace('"version": 0', '"version": ' + number), "anna")
+                self.assertEqual(caught.exception.code, "invalid_file")
+        self.assertEqual(self.library.list_ids("transforms"), [])
 
     def test_f8_an_unknown_id_is_a_toolbox_error(self):
         """Example: every call that names an ID the toolbox does not hold raises ToolboxError("not_found") naming the ID."""

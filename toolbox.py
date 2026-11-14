@@ -11,7 +11,7 @@ so the real library of T-06 replaces the mock without a change here. T-01 is don
 - set_trust(id, value, account), set_lifecycle(id, value, account, evidence=None, allow_baseline=False): a value outside the lists raises ToolboxError("invalid_trust" or
   "invalid_lifecycle") and the status stays as it was; trusted by an account that is not the owner raises ToolboxError("owner_only").
 - `tested` without evidence raises ToolboxError("evidence_missing"); allow_baseline by an account that is not the owner raises ToolboxError("owner_only") (REQ-WFM-095); allow_baseline with another lifecycle than retired raises ToolboxError("allowance_needs_retired"), and any other lifecycle change clears the allowance (D-229).
-- every call that names an ID not in the toolbox raises ToolboxError("not_found") (F8).
+- every call that names an ID not in the toolbox raises ToolboxError("not_found") (F8); a failure of the event store or the library while importing raises ToolboxError("store_failed") (N2).
 - offer() -> the sorted IDs a new graph may pick (retired ones left out, REQ-WFM-070).
 - run(id, args, as_baseline=False) -> the result of the code text's run(args); an untrusted transform raises ToolboxError("untrusted") unless it is retired, runs as the baseline
   of a check and has the owner's allowance (REQ-WFM-091); a retired one raises ToolboxError("retired") unless as_baseline (REQ-WFM-068).
@@ -80,8 +80,11 @@ class Toolbox:
         # `status` of the file is dropped: what a file says about its own trust never counts (REQ-WFM-052).
         doc = {key: file[key] for key in ("id", "version", "inputs", "outputs", "code")}
         if tid not in self.library.list_ids("transforms"):
-            self.library.save("transforms", tid, doc, author)
-            self.library.set_meta(tid, author, reason=REASON_IMPORTED)
+            try:
+                self.library.save("transforms", tid, doc, author)
+                self.library.set_meta(tid, author, reason=REASON_IMPORTED)
+            except Exception as error:
+                raise ToolboxError("store_failed", "%s was not stored: %s" % (tid, error))
             return tid
         old = self._latest(tid)
         old_version = old["doc"]["version"]
@@ -89,11 +92,15 @@ class Toolbox:
             raise ToolboxError("duplicate_id", "%s exists in version %s; version %s is not newer." % (tid, old_version, version))
         # The order is on purpose: the event first, so a failing event store refuses the replace instead of leaving new trusted code without a trace (F5);
         # the allowance next, so a failure after it can only take a permission away, never keep one for code the owner has not seen (F1).
-        if old["trust"] == "trusted":
-            self.events.record({"id": tid, "old_version": old_version, "new_version": version, "author": author})
-        if self.library.get_meta(tid).get("baseline_allowed"):
-            self.library.set_meta(tid, author, baseline_allowed=False)      # an allowance belongs to the version the owner saw
-        self.library.save("transforms", tid, doc, author)       # trust and lifecycle stay with the meta record (REQ-WFM-092)
+        # A failure of the event store or the library is one error type for the caller (N2); an event may then stand without a replace, on purpose.
+        try:
+            if old["trust"] == "trusted":
+                self.events.record({"id": tid, "old_version": old_version, "new_version": version, "author": author})
+            if self.library.get_meta(tid).get("baseline_allowed"):
+                self.library.set_meta(tid, author, baseline_allowed=False)      # an allowance belongs to the version the owner saw
+            self.library.save("transforms", tid, doc, author)       # trust and lifecycle stay with the meta record (REQ-WFM-092)
+        except Exception as error:
+            raise ToolboxError("store_failed", "%s was not replaced: %s" % (tid, error))
         return tid
 
     def export_transform(self, tid):
@@ -119,8 +126,9 @@ class Toolbox:
         if value == "trusted" and not self.is_owner(account):
             # Exception to CON-6 (A-89): only the owner trusts code; any account may take trust back (REQ-WFM-054).
             raise ToolboxError("owner_only", "Only the owner may mark a transform as trusted.")
-        if value == "untrusted":
-            # the reason says who took the trust back (REQ-WFM-090); the import text would be wrong here, and a shipped entry has none
+        if value == "untrusted" and self._latest(tid)["trust"] == "trusted":
+            # the reason says who took the trust back (REQ-WFM-090); the import text would be wrong here, and a shipped entry has none.
+            # An entry that is untrusted already keeps its reason (N1): it was never trusted, so "took back" would be false.
             reason = REASON_UNTRUSTED_BY_OWNER if self.is_owner(account) else REASON_UNTRUSTED_BY_ACCOUNT
             self.library.set_meta(tid, account, trust=value, reason=reason)
         else:
