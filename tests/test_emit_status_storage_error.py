@@ -4,6 +4,7 @@ skill through the monitor; the plain status goes out. Run with: python tests/tes
 """
 import os
 import sys
+import types
 import unittest
 import unittest.mock
 
@@ -46,6 +47,30 @@ class TestEmitStatus(unittest.TestCase):
         self.assertEqual(probe.sent, [("task_status", payload)])
         self.assertEqual(log.error.call_count, 1)
         self.assertIn("disk read failed", " ".join(str(a) for a in log.error.call_args.args))
+
+    def test_a_status_that_is_not_a_dict_goes_out_unchanged(self):
+        """F-18 of the third Verify run: a payload without get() is no reason to raise out of the status.
+        Example: the payload "plain" is emitted as it is."""
+        # Given: a payload that is not a dict and a recorder that raises
+        probe = Probe()
+        # When: the status is emitted
+        ChatService._emit_status(probe, "task_status", "plain")
+        # Then: it goes out unchanged and nothing is raised
+        self.assertEqual(probe.sent, [("task_status", "plain")])
+
+    def test_a_healthy_recorder_logs_nothing(self):
+        """F-19 of the third Verify run: the log line belongs to the error only.
+        Example: a recorder that answers with the run record leaves the log empty and the status enriched."""
+        # Given: a recorder that answers with the record of the run
+        record = {"skill": "review", "version": "1", "started": "t", "phases": [], "state": "running"}
+        probe = Probe()
+        probe._recorder = types.SimpleNamespace(record=lambda run, account=None: record)
+        # When: a running status is emitted
+        with unittest.mock.patch("chat_service.logger") as log:
+            ChatService._emit_status(probe, "task_status", {"id": "r1", "done": False, "paused": False})
+        # Then: nothing is logged and the status carries the state of the record
+        self.assertEqual(log.error.call_count, 0)
+        self.assertEqual(probe.sent[0][1]["state"], "running")
 
 
 if __name__ == "__main__":

@@ -10,7 +10,7 @@ const SHOWN = { id: 'r7', skill: 'review', version: '1', started: '2026-11-08T10
 async function startView(hash, api) {
   const doc = installDocument();
   doc.documentElement = { style: { setProperty() {} } };
-  doc.addEventListener = () => {};
+  doc.addEventListener = (name, fn) => { if (name === 'click') doc.click = fn; };
   globalThis.location = { hash };
   globalThis.ResizeObserver = class { observe() {} };
   const nodes = new Map();
@@ -28,15 +28,29 @@ async function startView(hash, api) {
   const view = initSkillRunView({ root, socket, api: { files: async () => [], ...api }, t: (key) => key, notify: (text) => notes.push(text) });
   socket.fire('connect');
   await flush();
-  return { view, notes };
+  return { view, notes, doc };
 }
 
 test('TC-CLV-038: a reload with a link to a run that cannot be opened shows the run the backend names', async () => {
   // Given: a page address that names the run "gone" (deleted, or of another account: the backend answers not found) and a backend whose shown run is r7
   const api = { skillRun: async () => { throw new Error('404'); }, shownRun: async () => SHOWN };
   // When: the page starts
-  const { view } = await startView('#run=gone', api);
+  const { view, notes } = await startView('#run=gone', api);
   // Then: the view shows r7, the run the backend names
+  assert.equal(view.shown()?.id, 'r7');
+  // And: the user gets no note about the link at load (F-19 of the third Verify run)
+  assert.deepEqual(notes, []);
+});
+
+test('TC-CLV-037: a click on a link to a run that cannot be opened tells the user and keeps the view', async () => {
+  // Given: the view started on r7 and a backend that has no run "gone"
+  const api = { skillRun: async (id) => { if (id === 'gone') throw new Error('404'); return { ...SHOWN, id }; }, shownRun: async () => SHOWN };
+  const { view, notes, doc } = await startView('', api);
+  // When: the user clicks a link of a chat message to the run "gone"
+  doc.click({ target: { closest: () => ({ getAttribute: () => '#run=gone' }) }, preventDefault() {} });
+  await flush();
+  // Then: one note says it failed, and the view still shows r7
+  assert.deepEqual(notes, ['workspace.failed']);
   assert.equal(view.shown()?.id, 'r7');
 });
 

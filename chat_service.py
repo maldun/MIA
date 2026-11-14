@@ -313,10 +313,11 @@ class ChatService:
 
     def _emit_status(self, event, payload):
         """task_status with what the Skill run view reads: skill, start, phases and the state of the run, `reason` after a failure or a stop (IF-101 v16)"""
+        run = payload.get("id") if isinstance(payload, dict) else None       # read before the try: the log line must not be able to raise
         try:
             record = self._recorder.record(payload["id"]) if event == "task_status" and self._recorder is not None else None
         except Exception as exc:                                 # a storage error must not reach the skill through its monitor (REQ-WFM-136), but it is not hidden either
-            logger.error("The run record for the status of %s could not be read: %s", payload.get("id"), exc)
+            logger.error("The run record for the status of %s could not be read: %s", run, exc)
             record = None
         if record is not None:
             state = record["state"] if payload["done"] else "paused" if payload["paused"] else "running"
