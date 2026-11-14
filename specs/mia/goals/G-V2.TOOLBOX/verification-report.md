@@ -4,8 +4,8 @@
 **Branch:** goal/v2.toolbox @ 02f8785 (plus this report)   **Parent line of work:** goal/v2 (merge order STORE, MODEL, TOOLBOX, CONVERT)   **Plan baseline:** plan-baseline-it2-toolbox (installed state: plan-baseline-it2-toolbox-installed = d77858f)
 **Date:** 2026-11-12   **Reviewers:** maldun (human, pending), Claude Sonnet 5.5 (AI, fresh session, did not see the Implement chat)
 
-## Verdict (proposal, after the second round)
-**Verified with open findings** (round 2, 2026-11-14): F1 to F5 and F8 are fixed and each test fails on `84eddb6:toolbox.py` and passes on `HEAD`; the protected material is unchanged. Three new small findings (N1, N2, N3) go back to Phase 3; see "Second round" at the end. The text below is the first round's verdict.
+## Verdict (proposal, after the third round)
+**Verified with open findings** (round 3, 2026-11-14, commit `ca3d8fa`): N1, N2 and N3 are fixed and verified; the protected material is unchanged; the ladder on `HEAD` is clean except F7 (known). One new small finding, N4 (low, Phase 3), goes back: the message of a failed new import says "was not stored" although the entry stays; no test covers that branch. Owner decision (maldun): fix the text and add a test. After that commit a reader checks that commit only; deviations to accept at the gate: F6, F7, F8 rest. See "Third round" at the end. The text below is the earlier rounds' verdict.
 
 ## Verdict of the first round
 **Verified with open findings** (decisions of the batched review below; the findings F1, F2, F3, F4, F5 go back to Phase 3 before the merge). All checks of the scope are green, the protected material is unchanged apart from the approved installs, and no unapproved code path was found that runs untrusted text on import or lets a non-owner mark a transform trusted through the toolbox. One security finding (F1) is a gap in the owner rule and should be fixed before the merge; the others are small.
@@ -29,21 +29,22 @@
 | Usability (bad inputs) | `import_transform` refuses non-JSON, list, version 0/true, text `inputs`, empty id with `invalid_file` (unit test); the float version `1.0` is the exception (F3) |
 
 ### Stage log
-Clean run on `HEAD` (`ed8ba48`) by the second-round reviewer, 2026-11-14, `run_stages.py --stages stages.yaml --upto 2 --keep-going`, venv `bin` first in PATH, started with `nohup ... &`. Not a CI run; only CI counts for `merge_gate.py`. The entry of the fixing session (run on `33ab9a2`, overlapping file changes) is replaced.
+Clean run on `HEAD` (`3b77fe8`, code as of `ca3d8fa`) by the third-round reviewer, 2026-11-14, `run_stages.py --stages stages.yaml --upto 2 --keep-going`, venv `bin` first in PATH, started from the session shell as a background command (the SIGINT tests passed this time). Not a CI run; only CI counts for `merge_gate.py`. It replaces the entry of the second round.
 
 | Stage | Step | Result |
 |---|---|---|
 | 0 | model-ids | pass |
-| 1 | contract-js, js, quality | pass |
-| 1 | sysml-parse | pass (63 s) |
+| 1 | contract-js, js, quality, contract-mocks | pass (contract-mocks 137 tests) |
+| 1 | sysml-parse | pass (64 s) |
 | 1 | decomposition | **fail**, F7 (known red, same class as master; decided D-229) |
-| 1 | unit | 2235 tests, 1 failure, 4 errors, 5 skipped, 2 expected failures (826 s). All five are in `test_shutdown.py` and `test_shutdown_database.py` (SIGINT tests: `KeyboardInterrupt not raised`, harness timeout 20 s). Both files pass alone (OK). Likely cause, not proven: a `nohup`/`&` background job ignores SIGINT. No test of this goal is among them. The unit step was not re-run whole |
-| 1 | contract-mocks | skipped by the ladder (needs unit); run by hand with the command of `stages.yaml`: 137 tests OK |
-| 2 | acceptance | skipped by the ladder (needs unit); run by hand, one process per file: all OK |
-| 2 | contract-real | pass (9.6 s), 17 skipped (none of this goal: IF-103 real model server 6, IF-404 web 5, IF-405 scholarly 4, IF-101 2) |
-| 2 | integration | pass (3.9 s) |
+| 1 | unit | pass: 2243 tests, 5 skipped, 2 expected failures (463 s), the shutdown tests included |
+| 2 | acceptance | pass (11.6 s) |
+| 2 | contract-real | pass (9.7 s), 17 skipped (none of this goal) |
+| 2 | integration | pass (4.0 s) |
+| 3 | contract-postgres | pass by hand, 11 tests (podman and the local `postgres:16` are there) |
+| 3 | container-alone | pass by hand, 2 tests (image `localhost/mia:latest`, built 7 days ago, not rebuilt: it says nothing about `ca3d8fa`) |
 
-Stages 3 and 4: `stages.yaml` defines stage 3 as `contract-postgres` (needs podman, local postgres:16 image and psycopg 3) and `container-alone` (needs podman and `localhost/mia:latest`); both are outside this goal's code and were not run. Stage 4 (eval runs on the pinned model) has no step by design (comment in `stages.yaml`; no suites yet), so there is nothing to run. Slow stage 1: 894 s against a budget of 120 s (the unit step), a known tuning item.
+Stage 4 (eval runs on the pinned model) has no step by design (comment in `stages.yaml`). Slow stage 1: 529 s against a budget of 120 s (the unit step), a known tuning item.
 
 ## Protected material
 `git diff --stat plan-baseline-it2-toolbox..HEAD -- tests/acceptance tests/helpers tests/smoke contracts eval benchmarks stages.yaml specs/mia/test-requirements.md`: 10 files. Every change maps to an approved install; against the installed state (`plan-baseline-it2-toolbox-installed`) only the A-111/A-112 installs remain:
@@ -209,3 +210,23 @@ Verdict: **Verified with open findings** (N1, N2, N3 back to Phase 3; the rest i
 Not findings: the event-before-replace order (accepted by the owner's choice of N2), no withdrawal of an allowance while retired, the red `unit` step in the shutdown tests (environment, see Stage log), F7 (decided).
 
 After the fixes of N1 to N3 a reviewer reads those commits only and re-runs `tests/test_toolbox.py` and the acceptance tests; the full ladder is then run in a normal terminal (not `nohup`), so that the shutdown tests can pass.
+
+## Third round (ca3d8fa)
+Scope: `ca3d8fa` only (`toolbox.py`, `tests/test_toolbox.py`). Verdict: **Verified with open findings** (N4 back to Phase 3; N1 to N3 verified). Not in scope and decided: F6, F7, F8 rest, the order event, allowance clear, save.
+
+| Check | Result |
+|---|---|
+| 1 protected material | `git diff 84eddb6..HEAD -- tests/acceptance tests/helpers tests/smoke contracts eval benchmarks` is empty: no finding |
+| 2 red before green | `HEAD`'s `tests/test_toolbox.py` (41 tests) against `5c0f2b0:toolbox.py` (copy in the scratchpad): 2 failures and 4 errors. Red: `test_n1_an_untrust_of_an_untrusted_entry_keeps_its_reason` and `test_f5_a_failed_event_refuses_the_replace` (now expects `store_failed`), `test_n2_a_failed_save_is_a_toolbox_error_and_the_old_version_stays`, each on mock and real. On `HEAD`: 41 OK |
+| 2 N3 tests (pass on old code, as expected) | `test_n3a` (reason texts), `test_n3b` (`1e0`, `2.0`, `1e400`); N3c is covered by the N2 save test above. Mutations on a copy of `HEAD`: drop the float check: `test_n3b` and F3 fail; accept only `2.0`: `test_n3b` fails; account text equal to owner text: `test_n3a` fails; no allowance clear before the save: F1 and the N2 save test fail; untrust always overwrites: N1 test fails. All killed |
+| 2 survivor | replace the wrap of the new-import branch by a bare `raise`: all 41 tests pass. That branch has no test: N4 |
+| 3 N1 `set_trust` | mock and real, same result: trusted, owner untrusts: owner text; again by an account: owner text kept; trust given back, account untrusts: account text; owner untrusts the untrusted entry: account text kept; fresh import untrusted by `guest`: import text kept; shipped entry (trusted) untrusted by an account: non-empty account text. `_latest(tid)` is a second read before the write: with one user it only matters if trust changes between the read and the write, and then only the reason text could differ from the state; no finding |
+| 4 N2 `import_transform` | `KeyboardInterrupt` and `SystemExit` are not `Exception`: confirmed, a `KeyboardInterrupt` from the event store passes through and the version stays 1. A `ToolboxError` raised inside the `try` (stand-in `save`) becomes `store_failed`; no real library or event call raises one, so nothing is lost today (info). New import with `save` ok and `set_meta` failing: `store_failed`, but the entry stays (version 1, untrusted, empty reason), a retry gives `duplicate_id`: the text "was not stored" is not honest: **N4**. `why` carries the text of the library's error as it is (a path in a stand-in's text appeared in it): the owner ranks privacy-only findings low, info only. The module docstring lists `store_failed` |
+| 5 re-run | `tests/test_toolbox.py` 41, `tests/acceptance/test_toolbox.py` 17, `tests/test_workflow_library.py` 13, `contract/test_if_203_v1_transforms.py` 10: all OK. Ladder: see Stage log (only `decomposition` fails, F7; 17 skips in contract-real). Stage 3 steps run by hand: pass |
+
+### New finding
+**N4 (low, Phase 3): a failed `set_meta` after the first save of a new import is reported as "was not stored".** In `import_transform` the new-id branch wraps `save` and `set_meta` in one `try`; when `set_meta` fails the entry is already in the library (version 1, untrusted, no reason), but the message says it was not stored and a retry is `duplicate_id`. REQ-WFM-090 shows a reason for an untrusted entry; here it is empty. Decision (maldun, 2026-11-14): fix the text and add a test; the orphan stays, as decided for N2 and F8. Proposed test (mock and real): `library.set_meta` raises after a new import's `save`: `ToolboxError` with code `store_failed`, `look_up(id)["version"] == 1`, and the message does not say "was not stored" (it says the entry was stored without its meta record).
+
+Info, no action: a `ToolboxError` inside the `try` would be re-wrapped (cannot happen today); the error text of the library goes into `why` unchanged.
+
+After the N4 commit a reader checks that commit only and re-runs `tests/test_toolbox.py` and the acceptance tests; the full ladder ran clean on `ca3d8fa`, so it is repeated only if other files change.
