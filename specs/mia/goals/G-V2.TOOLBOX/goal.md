@@ -83,7 +83,7 @@ Top-level items it serves: FR-38. Requirements by ID (inside G-V2's scope):
 | Plan | in progress | requirements, checks and test requirements reviewed and approved 2026-11-11 (maldun, D-220, D-221), goal reviewed; `plan.md` is a draft; A-110 drafted (script `tools/apply_amendment_a110.sh`, not installed); open: Step 4 (red tests, `handover-step4.md`), the parent session's files |
 | Implement | done | T-01 to T-06 done on `goal/v2.toolbox` (commits `3e68ba6` to `6477dbf`, `implementation-log.md`); A-110, A-111, A-112 installed (D-222, D-223, D-224); `plan.md` approved (D-228) ; TR-TOOLBOX-005, REQ-RTB-009 and TC-RTB-009 reviewed and approved by maldun 2026-11-11 |
 | Verify | done | six rounds, last on `ff44e2d`; Verified with accepted deviations F6, F7, F8 rest, accepted by maldun 2026-11-14 (`verification-report.md`) |
-| Commit | in progress | master merged into `goal/v2.toolbox` (`6050b84`): conflicts only in the IF-302 and IF-102 version numbers, ours renumbered to IF-302 v10 and v11, IF-102 v5 and v6 (owner decision); stage ladder 0 to 2 red only on `decomposition` (F7) and `acceptance` (master's red G-V3.CHAT tests, same on master); merge request drafted in `merge-request.md`; the merge into master by a person is open |
+| Commit | done | merged into master by maldun as `77d1cf3` (2026-11-15), no version (subgoal). Before: master merged into `goal/v2.toolbox` (`6050b84`): conflicts only in the IF-302 and IF-102 version numbers, ours renumbered to IF-302 v10 and v11, IF-102 v5 and v6 (owner decision); stage ladder 0 to 2 red only on `decomposition` (F7) and `acceptance` (master's red G-V3.CHAT tests, same on master); merge request drafted in `merge-request.md` |
 | Deploy | open | |
 | Validate | open | |
 
