@@ -2,6 +2,8 @@
 
 Drafted 2026-11-07 when the owner asked to split G-V2 into subgoals; renamed from TRUST and REQ-RUN-017 moved to MODEL when the owner asked for a cut with fewer dependencies (same day).
 
+Amended 2026-11-08 after the toolbox prototype (`prototype/toolbox`, owner decisions D1 to D5 and the answers on the open points): TOOLBOX adds the `transforms` part of IF-203 v1 itself; six new requirements (REQ-WFM-090..095) and a changed REQ-WFM-054; a new table in IF-302 (A-110, proposed). The draft plan is `specs/mia/prototypes/toolbox/plan.md` on that branch.
+
 - Kind: subgoal
 - Parent: G-V2
 - Statement: Transforms are kept in a toolbox by ID with a trust status and a lifecycle; a step from outside is stored but never runs until the owner allows it.
@@ -23,11 +25,15 @@ Drafted 2026-11-07 when the owner asked to split G-V2 into subgoals; renamed fro
 | Item (DEP-n / HR-nnn) | Real or stand-in | Note |
 |---|---|---|
 | jsonschema | real | exchange file check |
+| IF-203 v1, kind `transforms` | real | TOOLBOX adds it (kind, `set_trust`, `set_lifecycle`) in its own block of `workflow_library.py`; MODEL and CONVERT add their own parts; merge order STORE, MODEL, TOOLBOX, CONVERT |
+| IF-302, table of transform meta | real | new table for trust, lifecycle, evidence and baseline allowance (A-110, proposed, owner 2026-11-08); needs its contract suite in Plan Step 4 |
+| IF-401 run events | stand-in | the event of REQ-WFM-093 goes through a stand-in in the tests |
 
 ## Split check
 | Suggestion | Decision (split / keep together) | Reason | Date |
 |---|---|---|---|
 | further cut | keep together | 10 items in scope, one chain | 2026-11-07 |
+| further cut, after the amendment of 2026-11-08 | keep together | 17 requirement and interface items in scope (16 requirements, IF-203) plus the IF-302 table, still one chain, six tasks in the draft plan; owner decision D-220 | 2026-11-11 (first date 2026-11-08) |
 
 ## Scope
 Top-level items it serves: FR-38. Requirements by ID (inside G-V2's scope):
@@ -44,13 +50,21 @@ Top-level items it serves: FR-38. Requirements by ID (inside G-V2's scope):
 | REQ-WFM-067 | in | |
 | REQ-WFM-068 | in | |
 | REQ-WFM-070 | in | |
-| IF-203 | in | frozen at G-V2 (A-90, approved 2026-11-07); used through its mock until the provider is merged |
+| REQ-WFM-090 | in | new, proposed 2026-11-08: the reason an untrusted transform is untrusted is shown on look-up |
+| REQ-WFM-091 | in | new, proposed 2026-11-08: the owner's allowance for an untrusted retired transform to run as baseline |
+| REQ-WFM-092 | in | new, proposed 2026-11-08: a newer version replaces the code and keeps trust and lifecycle; an equal or lower version is refused |
+| REQ-WFM-093 | in | new, proposed 2026-11-08: replacing a trusted transform's code records an event |
+| REQ-WFM-094 | in | new, proposed 2026-11-08: a shipped transform is not exported |
+| REQ-WFM-095 | in | new, proposed 2026-11-08: only the owner allows the baseline of an untrusted retired transform |
+| IF-203 | in | frozen at G-V2 (A-90, approved 2026-11-07); TOOLBOX provides the `transforms` part itself (owner 2026-11-08) |
+| IF-302 | in | one new table for transform meta (A-110, proposed); no other change |
 
 ## Parts
 | Part | Real or stand-in | Notes |
 |---|---|---|
 | N-2.3 toolbox | real |  |
-| IF-203 v1 library (kind `transforms`) | stand-in | mock until the provider is merged; transforms are records of the library, the toolbox needs no graph |
+| IF-203 v1 library (kind `transforms`) | real | built by this goal (owner 2026-11-08); until it is merged the toolbox runs against a mock of it in the tests; transforms are records of the library, the toolbox needs no graph |
+| IF-302 table of transform meta | real | new, A-110 (proposed) |
 
 ## Frozen requirements
 | Requirement | Shared by | Reason |
@@ -66,10 +80,10 @@ Top-level items it serves: FR-38. Requirements by ID (inside G-V2's scope):
 | Phase | State | Record or reason |
 |---|---|---|
 | Explore | done | HLS of iteration 2 approved 2026-11-05 (D-186) |
-| Plan | in progress | requirements drafted in G-V2 Plan step 1; checks in Step 3 |
-| Implement | open | |
-| Verify | open | |
-| Commit | open | |
+| Plan | in progress | requirements, checks and test requirements reviewed and approved 2026-11-11 (maldun, D-220, D-221), goal reviewed; `plan.md` is a draft; A-110 drafted (script `tools/apply_amendment_a110.sh`, not installed); open: Step 4 (red tests, `handover-step4.md`), the parent session's files |
+| Implement | done | T-01 to T-06 done on `goal/v2.toolbox` (commits `3e68ba6` to `6477dbf`, `implementation-log.md`); A-110, A-111, A-112 installed (D-222, D-223, D-224); `plan.md` approved (D-228) ; TR-TOOLBOX-005, REQ-RTB-009 and TC-RTB-009 reviewed and approved by maldun 2026-11-11 |
+| Verify | done | six rounds, last on `ff44e2d`; Verified with accepted deviations F6, F7, F8 rest, accepted by maldun 2026-11-14 (`verification-report.md`) |
+| Commit | in progress | master merged into `goal/v2.toolbox` (`6050b84`): conflicts only in the IF-302 and IF-102 version numbers, ours renumbered to IF-302 v10 and v11, IF-102 v5 and v6 (owner decision); stage ladder 0 to 2 red only on `decomposition` (F7) and `acceptance` (master's red G-V3.CHAT tests, same on master); merge request drafted in `merge-request.md`; the merge into master by a person is open |
 | Deploy | open | |
 | Validate | open | |
 

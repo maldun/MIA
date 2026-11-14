@@ -756,4 +756,56 @@ The first version was silent until the end and could take 20 minutes or more: th
 | TR-MODEL-001 | test requirement | 6a11d368ffc4 | maldun | 2026-11-08 | approved | G-V2.MODEL, F-10 of the Verify runs: TC-WFM-047 and TR-MODEL-003 (cycles of 2 or 4 nodes plus one fixed 5-node negative example, commit 2b5acd8) and TR-MODEL-001 (A-105, adapter test on the real Storage layer) re-approved after the fourth run |
 | D-309 | **G-V2.MODEL, verdict of the Verify phase, owner maldun, 2026-11-08.** After the fourth run (`74525e4`, reviewer's formal verdict 'Not verified' because nothing was accepted yet) the owner accepts as deviations, all low: F-04 (the record's context graph ID is taken by nothing), F-06 (malformed graph input raises instead of a refusal), F-07 (c) to (e) (duplicate node IDs collapsed in the rule check, node IDs global across graphs, empty graphs accepted), F-08 (`author` not checked by a test), F-09 (remainder: the `save_graph` refusal branch and the node pre-check are not covered by a test), F-11 (plan and doc text: networkx, the three modules not in `architecture.sysml`, no `implementation-log.md`, command form and stop values only in plan T-08 to T-10 and IF-301 v2), and the notes N-1 (manifest `aliases` that are not lower-case strings break `parse`, pre-existing on master) and N-2 (a record command equal to the skill's own folder name is skipped when another skill holds it as an alias; follows the F-14 decision, not pinned by a test). F-07 (a) and (b) are covered by the decision of 2026-11-08 (re-save and orphan versions are a known property, versions are append-only); F-18 (`re.A` in `TaskRegistry.parse`, non-ASCII whitespace after a command no longer parses as a command) is accepted and pinned by a test. F-10 is settled by the approval of TC-WFM-047, TR-MODEL-003 and TR-MODEL-001 (rows above). Verdict of G-V2.MODEL: **Verified with accepted deviations**. |
 | D-310 | **G-V2.MODEL, wording of T-06, owner maldun, 2026-11-08 (A-108).** Decision (c) of 2026-11-08: a record-only skill (a record, but no manifest folder or entry module) is listed through `SkillCatalog.list()` only: not a `Task`, not in `TaskRegistry.commands()`, not runnable, until G-V2.CONVERT. A-108 corrects the two sentences of the T-06 text in `plan.md` and supersedes point 1 of `A-107-note.md` ("listed by its command"); no code or test changes. |
+| D-220 | **G-V2.TOOLBOX, Plan decisions, owner maldun, 2026-11-11.** REQ-WFM-092 and 093 stay whole (no split). The goal stays together (Split check row: keep together). A-110 (IF-302 table for transform meta) is to be drafted for review (draft only, `contracts/` untouched). Step 5 `plan.md` written; REQ-WFM-054 has no stale "not yet approved" line. Master merged into `goal/v2.toolbox` without conflicts. Open: plausibility ratings of REQ-WFM-090..095, the batched review, Step 4 (red tests, own session), the parent session's files (GL3). |
+| REQ-WFM-050 | requirement | 0d63b904c42f | maldun | 2026-11-11 | approved |  |
+| REQ-WFM-051 | requirement | c96f8973c16f | maldun | 2026-11-11 | approved |  |
+| REQ-WFM-052 | requirement | 9145ec5c33f1 | maldun | 2026-11-11 | approved |  |
+| REQ-WFM-053 | requirement | a4a27c06a964 | maldun | 2026-11-11 | approved |  |
+| REQ-WFM-054 | requirement | be884b0fe3ea | maldun | 2026-11-11 | approved |  |
+| REQ-WFM-055 | requirement | 86a75c7a7402 | maldun | 2026-11-11 | approved |  |
+| REQ-WFM-056 | requirement | 20fbb6cb7c8f | maldun | 2026-11-11 | approved |  |
+| REQ-WFM-090 | requirement | 1d7f23d1661f | maldun | 2026-11-11 | approved |  |
+| REQ-WFM-091 | requirement | 9cff6ce950a9 | maldun | 2026-11-11 | approved |  |
+| REQ-WFM-092 | requirement | 5550483fc8c1 | maldun | 2026-11-11 | approved |  |
+| REQ-WFM-093 | requirement | 501bd44d0cd9 | maldun | 2026-11-11 | approved |  |
+| REQ-WFM-094 | requirement | 65f617fb27b6 | maldun | 2026-11-11 | approved |  |
+| REQ-WFM-095 | requirement | 470e20f241a8 | maldun | 2026-11-11 | approved |  |
+| REQ-WFM-067 | requirement | 5d72146ad73c | maldun | 2026-11-11 | approved |  |
+| TC-WFM-050 | check | 6718925a1095 | maldun | 2026-11-11 | approved |  |
+| TC-WFM-051 | check | bbe40ec1e7e3 | maldun | 2026-11-11 | approved |  |
+| TC-WFM-052 | check | 586380f4d605 | maldun | 2026-11-11 | approved |  |
+| TC-WFM-053 | check | 5ca7fa4119a8 | maldun | 2026-11-11 | approved |  |
+| TC-WFM-054 | check | e457c7b6e704 | maldun | 2026-11-11 | approved |  |
+| TC-WFM-055 | check | e103d62af76b | maldun | 2026-11-11 | approved |  |
+| TC-WFM-067 | check | 7caead70b116 | maldun | 2026-11-11 | approved |  |
+| TC-WFM-056 | check | e6af2f5c8cf6 | maldun | 2026-11-11 | changes requested | add a case where the highest version is retired |
+| TC-WFM-056 | check | d87109afc87d | maldun | 2026-11-11 | approved |  |
+| TC-WFM-090 | check | 4bcb3bd7216f | maldun | 2026-11-11 | approved |  |
+| TC-WFM-091 | check | a071597b19fb | maldun | 2026-11-11 | approved |  |
+| TC-WFM-092 | check | b4caec9095eb | maldun | 2026-11-11 | approved |  |
+| TC-WFM-093 | check | 178a6168d385 | maldun | 2026-11-11 | approved |  |
+| TC-WFM-094 | check | 450bf34da46f | maldun | 2026-11-11 | approved |  |
+| TC-WFM-095 | check | bbbd5aad9a9b | maldun | 2026-11-11 | approved |  |
+| TR-TOOLBOX-001 | test requirement | 4561965f4502 | maldun | 2026-11-11 | approved |  |
+| TR-TOOLBOX-002 | test requirement | b8bbc6ead31d | maldun | 2026-11-11 | approved |  |
+| TR-TOOLBOX-003 | test requirement | ca21e3bc3bea | maldun | 2026-11-11 | approved |  |
+| TR-TOOLBOX-004 | test requirement | e8877bf5efce | maldun | 2026-11-11 | approved |  |
+| TR-TOOLBOX-005 | test requirement | 8a630632aa70 | maldun | 2026-11-11 | approved |  |
+| TR-TOOLBOX-006 | test requirement | 23842d9b8608 | maldun | 2026-11-11 | approved |  |
+| D-221 | **A-110 open points, G-V2.TOOLBOX, owner maldun, 2026-11-11.** Table name `transform_meta`; its requirement is REQ-RTB-008 (N-3.3, to be written as Draft, with a check, then reviewed); the IF-302 version is the next free one at install time; `shipped` is a field of the table. A-110 itself is not yet approved as a whole; `contracts/` is untouched. |
+| REQ-RTB-008 | requirement | 7f7cd5ee1ba5 | maldun | 2026-11-11 | approved |  |
+| TC-RTB-008 | check | a175ad97f8d4 | maldun | 2026-11-11 | approved |  |
+| TR-TOOLBOX-005 | test requirement | 9e375b65e591 | maldun | 2026-11-11 | approved |  |
+| D-222 | **A-110 installed, G-V2.TOOLBOX, 2026-11-11.** `contracts/IF-302-record-tables.md` v8 and `contracts/IF-102-storage-interface.md` v4 name the table `transform_meta` (REQ-RTB-008). The mock, the contract suites, REQ-RTB-001's count and the goal record are separate steps. |
+| G-V2.TOOLBOX | goal | 60b70f89f548 | maldun | 2026-11-11 | approved | Plan reviewed 2026-11-11: split check keep together (D-220) |
+| D-223 | **A-112 installed, G-V2.TOOLBOX, 2026-11-11.** `contracts/IF-302-record-tables.md` v9 and `contracts/IF-102-storage-interface.md` v5 name the table `transforms` (REQ-RTB-009; id and version required, a missing, empty or null code valid). The mock and the suite case are installed with `tools/apply_red_tests_a112.sh`. |
+| D-224 | **A-111 installed, G-V2.TOOLBOX, 2026-11-11.** `contracts/IF-203-workflow-library.md` v1 has the kind `transforms` with trust and lifecycle (the table `transforms` of IF-302 v9, the meta record in `transform_meta` of IF-302 v8). Mock, suite and library were installed before. |
+| D-225 | **G-V2.TOOLBOX, 2026-11-11 (owner):** running a shipped transform (no code text) is left as it is, logged only; no requirement. |
+| D-226 | **G-V2.TOOLBOX, 2026-11-11 (owner):** a seeded shipped entry has lifecycle `tested` with the evidence "shipped with MIA" (code and unit test; REQ-WFM-056 text unchanged). |
+| D-227 | **G-V2.TOOLBOX, 2026-11-11 (owner):** `seed_shipped` skips IDs that exist; a newer shipped version is not picked up by a restart. |
+| D-228 | **G-V2.TOOLBOX, 2026-11-11 (owner):** `plan.md` approved with the deviations listed at its end. |
+| D-229 | **G-V2.TOOLBOX Verify, 2026-11-12 (owner maldun):** F1: a replace by a higher version clears `baseline_allowed` (amend REQ-WFM-091/092, test first, Phase 3). F2: the allowance is accepted only together with lifecycle retired and any other lifecycle change clears it. F3, F4, F5 go to Phase 3 with a failing test each. F7 (`decomposition` step red on master and +6) is a known red, repaired in a parent session. Report: `goals/G-V2.TOOLBOX/verification-report.md`. |
+| TR-TOOLBOX-005 | test requirement | e535a223d96a | maldun | 2026-11-11 | approved | G-V2.TOOLBOX review 2026-11-11 (A-112) |
+| REQ-RTB-009 | requirement | 7f1838878047 | maldun | 2026-11-11 | approved | G-V2.TOOLBOX review 2026-11-11 (A-112) |
+| TC-RTB-009 | check | 3979226f0319 | maldun | 2026-11-11 | approved | G-V2.TOOLBOX review 2026-11-11 (A-112) |
 | D-330 | **N-2.2 Chat agent, T-04 structured memory, plan gaps closed, owner maldun, 2026-11-11.** A verifier session (no holdout run: the owner kept the CLAUDE.md rule; the earlier verifier's holdout result of 10 of 11 stands, skill v6 = v7 in prompt text) found that TC-CHA-011 to -013 had no scenario and no test requirement (trace check M39, M41). Added in `nodes/N-2-backend/nodes/N-2.2-chat-agent/`: scenarios for TC-CHA-011, -012, -013 in `test-spec.md` (`90e3f06`) and TR-MEM-001 to TR-MEM-004 in `test-requirements.md`, approved by maldun (`19c22ef`): holdout run by a verifier once, the cost check names its record count (fewer than 10 records is a formal pass only), the writer fake fails when asked, the routes run on a real storage and the Memory tab is shown by hand. Open: AC-24 (b) with a filled store, red-team cases for THR-006, transcript review. No code, test or protected file changed. |
