@@ -1,0 +1,2270 @@
+{
+ "items": [
+  {
+   "id": "I001",
+   "doc": "Citation",
+   "kind": "entity",
+   "key": [
+    "British Legal Citation"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I002",
+   "doc": "Citation",
+   "kind": "entity",
+   "key": [
+    "Book"
+   ],
+   "stable": 2,
+   "decision": "trivial",
+   "comment": ""
+  },
+  {
+   "id": "I003",
+   "doc": "Citation",
+   "kind": "entity",
+   "key": [
+    "Right to Refuse Unwanted Citations"
+   ],
+   "stable": 0,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I004",
+   "doc": "Citation",
+   "kind": "entity",
+   "key": [
+    "Citation System"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I005",
+   "doc": "Citation",
+   "kind": "entity",
+   "key": [
+    "Motions Submitted To Courts"
+   ],
+   "stable": 0,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I006",
+   "doc": "Citation",
+   "kind": "entity",
+   "key": [
+    "Chicago Manual of Style"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I007",
+   "doc": "Citation",
+   "kind": "entity",
+   "key": [
+    "Elizabeth Shown Mills"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I008",
+   "doc": "Citation",
+   "kind": "entity",
+   "key": [
+    "Macmillan"
+   ],
+   "stable": 0,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I009",
+   "doc": "Citation",
+   "kind": "entity",
+   "key": [
+    "Shakespeare Notation"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I010",
+   "doc": "Citation",
+   "kind": "entity",
+   "key": [
+    "International Standard Serial Number (ISSN)"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I011",
+   "doc": "Citation",
+   "kind": "entity",
+   "key": [
+    "Academic Journal"
+   ],
+   "stable": 2,
+   "decision": "trivial",
+   "comment": ""
+  },
+  {
+   "id": "I012",
+   "doc": "Citation",
+   "kind": "entity",
+   "key": [
+    "Interview"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I013",
+   "doc": "Citation",
+   "kind": "relation",
+   "key": [
+    "Parenthetical Referencing",
+    "British Standards Institution"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I014",
+   "doc": "Citation",
+   "kind": "relation",
+   "key": [
+    "Vancouver system",
+    "Footnote"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I015",
+   "doc": "Citation",
+   "kind": "relation",
+   "key": [
+    "The Bluebook",
+    "Inline Citations"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I016",
+   "doc": "Citation",
+   "kind": "relation",
+   "key": [
+    "Style Guide",
+    "Citation System"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I017",
+   "doc": "Citation",
+   "kind": "relation",
+   "key": [
+    "Elisabeth Kübler-Ross",
+    "On Death and Dying"
+   ],
+   "stable": 0,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I018",
+   "doc": "Citation",
+   "kind": "relation",
+   "key": [
+    "Parenthetical referencing",
+    "Chicago Manual of Style"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I019",
+   "doc": "Citation",
+   "kind": "relation",
+   "key": [
+    "Parenthetical referencing",
+    "MLA"
+   ],
+   "stable": 0,
+   "decision": "invented",
+   "comment": ""
+  },
+  {
+   "id": "I020",
+   "doc": "Citation",
+   "kind": "relation",
+   "key": [
+    "Parenthetical referencing",
+    "Harvard referencing"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I021",
+   "doc": "Knowledge_graph",
+   "kind": "entity",
+   "key": [
+    "Knowledge Graph Entity Alignment"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I022",
+   "doc": "Knowledge_graph",
+   "kind": "entity",
+   "key": [
+    "Knowledge Graph Embedding"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I023",
+   "doc": "Knowledge_graph",
+   "kind": "entity",
+   "key": [
+    "GraphRAG"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I024",
+   "doc": "Knowledge_graph",
+   "kind": "entity",
+   "key": [
+    "Spark"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I025",
+   "doc": "Knowledge_graph",
+   "kind": "entity",
+   "key": [
+    "Retrieval-Augmented Generation"
+   ],
+   "stable": 2,
+   "decision": "invented",
+   "comment": ""
+  },
+  {
+   "id": "I026",
+   "doc": "Knowledge_graph",
+   "kind": "entity",
+   "key": [
+    "Freebase"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I027",
+   "doc": "Knowledge_graph",
+   "kind": "entity",
+   "key": [
+    "Wikipedia"
+   ],
+   "stable": 2,
+   "decision": "trivial",
+   "comment": ""
+  },
+  {
+   "id": "I028",
+   "doc": "Knowledge_graph",
+   "kind": "entity",
+   "key": [
+    "Human Resources Research Organization (HumRRO)"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I029",
+   "doc": "Knowledge_graph",
+   "kind": "entity",
+   "key": [
+    "WolframAlpha"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I030",
+   "doc": "Knowledge_graph",
+   "kind": "entity",
+   "key": [
+    "eBay"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I031",
+   "doc": "Knowledge_graph",
+   "kind": "entity",
+   "key": [
+    "Knowledge Graph Embeddings"
+   ],
+   "stable": 2,
+   "decision": "invented",
+   "comment": ""
+  },
+  {
+   "id": "I032",
+   "doc": "Knowledge_graph",
+   "kind": "entity",
+   "key": [
+    "Data Lake"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I033",
+   "doc": "Knowledge_graph",
+   "kind": "relation",
+   "key": [
+    "Knowledge Graph",
+    "Ontology"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I034",
+   "doc": "Knowledge_graph",
+   "kind": "relation",
+   "key": [
+    "University of Groningen",
+    "University of Twente"
+   ],
+   "stable": 0,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I035",
+   "doc": "Knowledge_graph",
+   "kind": "relation",
+   "key": [
+    "Knowledge Graph",
+    "Satori"
+   ],
+   "stable": 0,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I036",
+   "doc": "Knowledge_graph",
+   "kind": "relation",
+   "key": [
+    "Knowledge Graph",
+    "Spark"
+   ],
+   "stable": 0,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I037",
+   "doc": "Knowledge_graph",
+   "kind": "relation",
+   "key": [
+    "Virtual Knowledge Graph",
+    "Relational Database"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I038",
+   "doc": "Knowledge_graph",
+   "kind": "relation",
+   "key": [
+    "Knowledge Graph",
+    "Entity Alignment"
+   ],
+   "stable": 2,
+   "decision": "invented",
+   "comment": ""
+  },
+  {
+   "id": "I039",
+   "doc": "Knowledge_graph",
+   "kind": "relation",
+   "key": [
+    "Google",
+    "DBpedia"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I040",
+   "doc": "Knowledge_graph",
+   "kind": "relation",
+   "key": [
+    "Google",
+    "CIA World Factbook"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I041",
+   "doc": "Meta_analysis",
+   "kind": "entity",
+   "key": [
+    "SA Flow Diagram"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I042",
+   "doc": "Meta_analysis",
+   "kind": "entity",
+   "key": [
+    "Random Effects Meta-Analysis"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I043",
+   "doc": "Meta_analysis",
+   "kind": "entity",
+   "key": [
+    "Conference Proceedings"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I044",
+   "doc": "Meta_analysis",
+   "kind": "entity",
+   "key": [
+    "One-Stage Methods"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I045",
+   "doc": "Meta_analysis",
+   "kind": "entity",
+   "key": [
+    "Boolean Operators"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I046",
+   "doc": "Meta_analysis",
+   "kind": "entity",
+   "key": [
+    "One-stage methods"
+   ],
+   "stable": 2,
+   "decision": "wrong",
+   "comment": ""
+  },
+  {
+   "id": "I047",
+   "doc": "Meta_analysis",
+   "kind": "entity",
+   "key": [
+    "Metascience"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I048",
+   "doc": "Meta_analysis",
+   "kind": "entity",
+   "key": [
+    "PubMed"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I049",
+   "doc": "Meta_analysis",
+   "kind": "entity",
+   "key": [
+    "Plot Digitizers"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I050",
+   "doc": "Meta_analysis",
+   "kind": "entity",
+   "key": [
+    "Snowballing"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I051",
+   "doc": "Meta_analysis",
+   "kind": "entity",
+   "key": [
+    "Effect Size"
+   ],
+   "stable": 2,
+   "decision": "invented",
+   "comment": ""
+  },
+  {
+   "id": "I052",
+   "doc": "Meta_analysis",
+   "kind": "entity",
+   "key": [
+    "Partial Correlations"
+   ],
+   "stable": 2,
+   "decision": "invented",
+   "comment": ""
+  },
+  {
+   "id": "I053",
+   "doc": "Meta_analysis",
+   "kind": "relation",
+   "key": [
+    "Gene V. Glass",
+    "Mary Lee Smith"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I054",
+   "doc": "Meta_analysis",
+   "kind": "relation",
+   "key": [
+    "Individual Participant Data (IPD)",
+    "Two-Stage Methods"
+   ],
+   "stable": 0,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I055",
+   "doc": "Meta_analysis",
+   "kind": "relation",
+   "key": [
+    "Systematic Review",
+    "PRIMSA Flow Diagram"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I056",
+   "doc": "Meta_analysis",
+   "kind": "relation",
+   "key": [
+    "Meta-analysis",
+    "Snowballing"
+   ],
+   "stable": 0,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I057",
+   "doc": "Meta_analysis",
+   "kind": "relation",
+   "key": [
+    "PubMed",
+    "Boolean Operators"
+   ],
+   "stable": 0,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I058",
+   "doc": "Meta_analysis",
+   "kind": "relation",
+   "key": [
+    "SA Flow Diagram",
+    "Review"
+   ],
+   "stable": 0,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I059",
+   "doc": "Meta_analysis",
+   "kind": "relation",
+   "key": [
+    "Embase",
+    "Boolean Operators"
+   ],
+   "stable": 0,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I060",
+   "doc": "Meta_analysis",
+   "kind": "relation",
+   "key": [
+    "Meta-analysis",
+    "Variance Measures"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I061",
+   "doc": "Ontology_information_science",
+   "kind": "entity",
+   "key": [
+    "Lexicon Philosophicum"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I062",
+   "doc": "Ontology_information_science",
+   "kind": "entity",
+   "key": [
+    "Perdurantism"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I063",
+   "doc": "Ontology_information_science",
+   "kind": "entity",
+   "key": [
+    "Kripke"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I064",
+   "doc": "Ontology_information_science",
+   "kind": "entity",
+   "key": [
+    "Universals"
+   ],
+   "stable": 2,
+   "decision": "wrong",
+   "comment": ""
+  },
+  {
+   "id": "I065",
+   "doc": "Ontology_information_science",
+   "kind": "entity",
+   "key": [
+    "Ogdoas Scholastica"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I066",
+   "doc": "Ontology_information_science",
+   "kind": "entity",
+   "key": [
+    "OntoMotoOS"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I067",
+   "doc": "Ontology_information_science",
+   "kind": "entity",
+   "key": [
+    "Knowledge Representation"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I068",
+   "doc": "Ontology_information_science",
+   "kind": "entity",
+   "key": [
+    "Foundationalism"
+   ],
+   "stable": 2,
+   "decision": "wrong",
+   "comment": ""
+  },
+  {
+   "id": "I069",
+   "doc": "Ontology_information_science",
+   "kind": "entity",
+   "key": [
+    "Oxford English Dictionary"
+   ],
+   "stable": 2,
+   "decision": "wrong",
+   "comment": ""
+  },
+  {
+   "id": "I070",
+   "doc": "Ontology_information_science",
+   "kind": "entity",
+   "key": [
+    "Sowa"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I071",
+   "doc": "Ontology_information_science",
+   "kind": "entity",
+   "key": [
+    "Essence"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I072",
+   "doc": "Ontology_information_science",
+   "kind": "entity",
+   "key": [
+    "Philosophy"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I073",
+   "doc": "Ontology_information_science",
+   "kind": "relation",
+   "key": [
+    "Tom Gruber",
+    "Feilmayr"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I074",
+   "doc": "Ontology_information_science",
+   "kind": "relation",
+   "key": [
+    "Domain Ontology",
+    "Ontology Engineering"
+   ],
+   "stable": 0,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I075",
+   "doc": "Ontology_information_science",
+   "kind": "relation",
+   "key": [
+    "Ontology",
+    "Philosophy"
+   ],
+   "stable": 2,
+   "decision": "wrong",
+   "comment": ""
+  },
+  {
+   "id": "I076",
+   "doc": "Ontology_information_science",
+   "kind": "relation",
+   "key": [
+    "Ontology",
+    "Guarino"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I077",
+   "doc": "Ontology_information_science",
+   "kind": "relation",
+   "key": [
+    "Ontology",
+    "Ontology Learning"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I078",
+   "doc": "Ontology_information_science",
+   "kind": "relation",
+   "key": [
+    "Meta-Ontology",
+    "OWL-S"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I079",
+   "doc": "Ontology_information_science",
+   "kind": "relation",
+   "key": [
+    "Tom Gruber",
+    "Semantic Networks"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I080",
+   "doc": "Ontology_information_science",
+   "kind": "relation",
+   "key": [
+    "Tom Gruber",
+    "Wöß"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I081",
+   "doc": "Peer_review",
+   "kind": "entity",
+   "key": [
+    "Adversarial Systems"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I082",
+   "doc": "Peer_review",
+   "kind": "entity",
+   "key": [
+    "Higher School of Economics"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I083",
+   "doc": "Peer_review",
+   "kind": "entity",
+   "key": [
+    "Peer Review in Writing"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I084",
+   "doc": "Peer_review",
+   "kind": "entity",
+   "key": [
+    "Software Peer Review"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I085",
+   "doc": "Peer_review",
+   "kind": "entity",
+   "key": [
+    "Assignments"
+   ],
+   "stable": 2,
+   "decision": "invented",
+   "comment": ""
+  },
+  {
+   "id": "I086",
+   "doc": "Peer_review",
+   "kind": "entity",
+   "key": [
+    "American Medical Association"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I087",
+   "doc": "Peer_review",
+   "kind": "entity",
+   "key": [
+    "Magda Tigchelaar"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I088",
+   "doc": "Peer_review",
+   "kind": "entity",
+   "key": [
+    "Open Method of Co-ordination"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I089",
+   "doc": "Peer_review",
+   "kind": "entity",
+   "key": [
+    "Funding-by-lottery"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I090",
+   "doc": "Peer_review",
+   "kind": "entity",
+   "key": [
+    "Richard Smith"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I091",
+   "doc": "Peer_review",
+   "kind": "entity",
+   "key": [
+    "Student Peer Assessment"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I092",
+   "doc": "Peer_review",
+   "kind": "entity",
+   "key": [
+    "Engineering Review"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I093",
+   "doc": "Peer_review",
+   "kind": "relation",
+   "key": [
+    "Richard Smith",
+    "Journal of the Royal Society of Medicine"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I094",
+   "doc": "Peer_review",
+   "kind": "relation",
+   "key": [
+    "Peer Review",
+    "Natural Sciences"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I095",
+   "doc": "Peer_review",
+   "kind": "relation",
+   "key": [
+    "Self-Assessment",
+    "Magda Tigchelaar"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I096",
+   "doc": "Peer_review",
+   "kind": "relation",
+   "key": [
+    "Ethics of the Physician",
+    "Medical Council"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I097",
+   "doc": "Peer_review",
+   "kind": "relation",
+   "key": [
+    "Technical Peer Review",
+    "Technical Review"
+   ],
+   "stable": 0,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I098",
+   "doc": "Peer_review",
+   "kind": "relation",
+   "key": [
+    "Technical Peer Review",
+    "Software Peer Review"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I099",
+   "doc": "Peer_review",
+   "kind": "relation",
+   "key": [
+    "American Medical Association",
+    "Medical Peer Review"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I100",
+   "doc": "Peer_review",
+   "kind": "relation",
+   "key": [
+    "Peer Review",
+    "Peer Review in Writing"
+   ],
+   "stable": 0,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I101",
+   "doc": "Prompt_injection",
+   "kind": "entity",
+   "key": [
+    "Amazon"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I102",
+   "doc": "Prompt_injection",
+   "kind": "entity",
+   "key": [
+    "Sydney"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I103",
+   "doc": "Prompt_injection",
+   "kind": "entity",
+   "key": [
+    "Grok4"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I104",
+   "doc": "Prompt_injection",
+   "kind": "entity",
+   "key": [
+    "Large Language Models (LLMs)"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I105",
+   "doc": "Prompt_injection",
+   "kind": "entity",
+   "key": [
+    "User Training"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I106",
+   "doc": "Prompt_injection",
+   "kind": "entity",
+   "key": [
+    "Jonathan Cefalu"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I107",
+   "doc": "Prompt_injection",
+   "kind": "entity",
+   "key": [
+    "Preamble"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I108",
+   "doc": "Prompt_injection",
+   "kind": "entity",
+   "key": [
+    "@himbodhisattva"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I109",
+   "doc": "Prompt_injection",
+   "kind": "entity",
+   "key": [
+    "Bing Chat (Microsoft Copilot)"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I110",
+   "doc": "Prompt_injection",
+   "kind": "entity",
+   "key": [
+    "OpenAI"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I111",
+   "doc": "Prompt_injection",
+   "kind": "entity",
+   "key": [
+    "Sequire Technology"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I112",
+   "doc": "Prompt_injection",
+   "kind": "entity",
+   "key": [
+    "Prompt Leaking"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I113",
+   "doc": "Prompt_injection",
+   "kind": "relation",
+   "key": [
+    "Prompt Injection",
+    "Indirect Injection"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I114",
+   "doc": "Prompt_injection",
+   "kind": "relation",
+   "key": [
+    "DeepSeek-R1",
+    "Chatbot Arena"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I115",
+   "doc": "Prompt_injection",
+   "kind": "relation",
+   "key": [
+    "Jailbreaking",
+    "Simon Willison"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I116",
+   "doc": "Prompt_injection",
+   "kind": "relation",
+   "key": [
+    "Kai Greshake",
+    "GPT-4"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I117",
+   "doc": "Prompt_injection",
+   "kind": "relation",
+   "key": [
+    "Multimodal AI",
+    "Adversarial Prompts"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I118",
+   "doc": "Prompt_injection",
+   "kind": "relation",
+   "key": [
+    "Bing Chat (Microsoft Copilot)",
+    "Sydney"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I119",
+   "doc": "Prompt_injection",
+   "kind": "relation",
+   "key": [
+    "Prompt Injection",
+    "Direct Injection"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I120",
+   "doc": "Prompt_injection",
+   "kind": "relation",
+   "key": [
+    "OpenAI",
+    "ChatGPT"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I121",
+   "doc": "Retrieval_augmented_generation",
+   "kind": "entity",
+   "key": [
+    "KL Divergence"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I122",
+   "doc": "Retrieval_augmented_generation",
+   "kind": "entity",
+   "key": [
+    "Vector Database Search"
+   ],
+   "stable": 2,
+   "decision": "invented",
+   "comment": ""
+  },
+  {
+   "id": "I123",
+   "doc": "Retrieval_augmented_generation",
+   "kind": "entity",
+   "key": [
+    "Full Text Search"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I124",
+   "doc": "Retrieval_augmented_generation",
+   "kind": "entity",
+   "key": [
+    "RAG Poisoning"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I125",
+   "doc": "Retrieval_augmented_generation",
+   "kind": "entity",
+   "key": [
+    "Retro"
+   ],
+   "stable": 2,
+   "decision": "invented",
+   "comment": ""
+  },
+  {
+   "id": "I126",
+   "doc": "Retrieval_augmented_generation",
+   "kind": "entity",
+   "key": [
+    "Hybrid Search"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I127",
+   "doc": "Retrieval_augmented_generation",
+   "kind": "entity",
+   "key": [
+    "AI Hallucinations"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I128",
+   "doc": "Retrieval_augmented_generation",
+   "kind": "entity",
+   "key": [
+    "Prompt Stuffing"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I129",
+   "doc": "Retrieval_augmented_generation",
+   "kind": "entity",
+   "key": [
+    "Prompt Engineering"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I130",
+   "doc": "Retrieval_augmented_generation",
+   "kind": "entity",
+   "key": [
+    "Barack Hussein Obama"
+   ],
+   "stable": 0,
+   "decision": "invented",
+   "comment": ""
+  },
+  {
+   "id": "I131",
+   "doc": "Retrieval_augmented_generation",
+   "kind": "entity",
+   "key": [
+    "Hybrid Vector Approaches"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I132",
+   "doc": "Retrieval_augmented_generation",
+   "kind": "entity",
+   "key": [
+    "LLMs"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I133",
+   "doc": "Retrieval_augmented_generation",
+   "kind": "relation",
+   "key": [
+    "Hybrid Search",
+    "Full Text Search"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I134",
+   "doc": "Retrieval_augmented_generation",
+   "kind": "relation",
+   "key": [
+    "Hybrid Vector Approaches",
+    "One-hot Vectors"
+   ],
+   "stable": 0,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I135",
+   "doc": "Retrieval_augmented_generation",
+   "kind": "relation",
+   "key": [
+    "Large Language Model (LLM)",
+    "Document Retriever"
+   ],
+   "stable": 0,
+   "decision": "wrong",
+   "comment": ""
+  },
+  {
+   "id": "I136",
+   "doc": "Retrieval_augmented_generation",
+   "kind": "relation",
+   "key": [
+    "Retrieval-augmented generation (RAG)",
+    "Large Language Models (LLMs)"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I137",
+   "doc": "Retrieval_augmented_generation",
+   "kind": "relation",
+   "key": [
+    "Israel",
+    "Hasbara"
+   ],
+   "stable": 0,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I138",
+   "doc": "Retrieval_augmented_generation",
+   "kind": "relation",
+   "key": [
+    "Retrieval-Augmented Generation (RAG)",
+    "Augmentation Modules"
+   ],
+   "stable": 0,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I139",
+   "doc": "Retrieval_augmented_generation",
+   "kind": "relation",
+   "key": [
+    "Retrieval-Augmented Generation (RAG)",
+    "Context Selection"
+   ],
+   "stable": 0,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I140",
+   "doc": "Retrieval_augmented_generation",
+   "kind": "relation",
+   "key": [
+    "Google",
+    "James Webb Space Telescope"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I141",
+   "doc": "Systematic_review",
+   "kind": "entity",
+   "key": [
+    "MEDLINE"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I142",
+   "doc": "Systematic_review",
+   "kind": "entity",
+   "key": [
+    "Web of Science"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I143",
+   "doc": "Systematic_review",
+   "kind": "entity",
+   "key": [
+    "PRISMA-ScR"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I144",
+   "doc": "Systematic_review",
+   "kind": "entity",
+   "key": [
+    "Grey Literature Collections"
+   ],
+   "stable": 0,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I145",
+   "doc": "Systematic_review",
+   "kind": "entity",
+   "key": [
+    "PRISMA 2020"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I146",
+   "doc": "Systematic_review",
+   "kind": "entity",
+   "key": [
+    "Cochrane"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I147",
+   "doc": "Systematic_review",
+   "kind": "entity",
+   "key": [
+    "EPPI-Centre"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I148",
+   "doc": "Systematic_review",
+   "kind": "entity",
+   "key": [
+    "Scoping Review"
+   ],
+   "stable": 2,
+   "decision": "invented",
+   "comment": ""
+  },
+  {
+   "id": "I149",
+   "doc": "Systematic_review",
+   "kind": "entity",
+   "key": [
+    "Pearl Growing"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I150",
+   "doc": "Systematic_review",
+   "kind": "entity",
+   "key": [
+    "PROSPERO"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I151",
+   "doc": "Systematic_review",
+   "kind": "entity",
+   "key": [
+    "Proximity Searching"
+   ],
+   "stable": 2,
+   "decision": "invented",
+   "comment": ""
+  },
+  {
+   "id": "I152",
+   "doc": "Systematic_review",
+   "kind": "entity",
+   "key": [
+    "PubMed"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I153",
+   "doc": "Systematic_review",
+   "kind": "relation",
+   "key": [
+    "PRISMA",
+    "PRISMA 2020"
+   ],
+   "stable": 2,
+   "decision": "wrong",
+   "comment": ""
+  },
+  {
+   "id": "I154",
+   "doc": "Systematic_review",
+   "kind": "relation",
+   "key": [
+    "Systematic Review",
+    "PubMed"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I155",
+   "doc": "Systematic_review",
+   "kind": "relation",
+   "key": [
+    "Systematic Review",
+    "EPPI-Centre"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I156",
+   "doc": "Systematic_review",
+   "kind": "relation",
+   "key": [
+    "Systematic Review",
+    "Embase"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I157",
+   "doc": "Systematic_review",
+   "kind": "relation",
+   "key": [
+    "Systematic Review",
+    "Grey Literature Collections"
+   ],
+   "stable": 0,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I158",
+   "doc": "Systematic_review",
+   "kind": "relation",
+   "key": [
+    "PRISMA",
+    "Non-Interventional, Reproducible, and Open (NIRO) Systematic Reviews"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I159",
+   "doc": "Systematic_review",
+   "kind": "relation",
+   "key": [
+    "Scoping Reviews",
+    "Systematic Reviews"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I160",
+   "doc": "Systematic_review",
+   "kind": "relation",
+   "key": [
+    "Systematic Review",
+    "PRISMA"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I161",
+   "doc": "arxiv_2005.11401",
+   "kind": "entity",
+   "key": [
+    "Retrieval-Augmented Generation"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I162",
+   "doc": "arxiv_2005.11401",
+   "kind": "entity",
+   "key": [
+    "Neural Retriever"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I163",
+   "doc": "arxiv_2005.11401",
+   "kind": "entity",
+   "key": [
+    "Open Domain QA Tasks"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I164",
+   "doc": "arxiv_2005.11401",
+   "kind": "entity",
+   "key": [
+    "Seq2seq Model"
+   ],
+   "stable": 0,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I165",
+   "doc": "arxiv_2005.11401",
+   "kind": "entity",
+   "key": [
+    "Non-parametric Memory"
+   ],
+   "stable": 0,
+   "decision": "wrong",
+   "comment": ""
+  },
+  {
+   "id": "I166",
+   "doc": "arxiv_2005.11401",
+   "kind": "entity",
+   "key": [
+    "Dense Vector Index"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I167",
+   "doc": "arxiv_2005.11401",
+   "kind": "entity",
+   "key": [
+    "Retrieve-and-Extract Architectures"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I168",
+   "doc": "arxiv_2005.11401",
+   "kind": "entity",
+   "key": [
+    "Wikipedia"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I169",
+   "doc": "arxiv_2005.11401",
+   "kind": "entity",
+   "key": [
+    "Large Pre-trained Language Models"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I170",
+   "doc": "arxiv_2005.11401",
+   "kind": "entity",
+   "key": [
+    "Fine-tuning"
+   ],
+   "stable": 0,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I171",
+   "doc": "arxiv_2005.11401",
+   "kind": "entity",
+   "key": [
+    "Parametric Memory"
+   ],
+   "stable": 2,
+   "decision": "invented",
+   "comment": ""
+  },
+  {
+   "id": "I172",
+   "doc": "arxiv_2005.11401",
+   "kind": "entity",
+   "key": [
+    "Knowledge-Intensive NLP Tasks"
+   ],
+   "stable": 2,
+   "decision": "wrong",
+   "comment": ""
+  },
+  {
+   "id": "I173",
+   "doc": "arxiv_2005.11401",
+   "kind": "relation",
+   "key": [
+    "Retrieval-Augmented Generation",
+    "Open Domain QA Tasks"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I174",
+   "doc": "arxiv_2005.11401",
+   "kind": "relation",
+   "key": [
+    "Retrieval-Augmented Generation",
+    "Parametric Memory"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I175",
+   "doc": "arxiv_2005.11401",
+   "kind": "relation",
+   "key": [
+    "Retrieval-Augmented Generation",
+    "Dense Vector Index"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I176",
+   "doc": "arxiv_2005.11401",
+   "kind": "relation",
+   "key": [
+    "Retrieval-Augmented Generation",
+    "Non-parametric Memory"
+   ],
+   "stable": 0,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I177",
+   "doc": "arxiv_2005.11401",
+   "kind": "relation",
+   "key": [
+    "Dense Vector Index",
+    "Neural Retriever"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I178",
+   "doc": "arxiv_2005.11401",
+   "kind": "relation",
+   "key": [
+    "Retrieval-Augmented Generation",
+    "Retrieve-and-Extract Architectures"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I179",
+   "doc": "arxiv_2005.11401",
+   "kind": "relation",
+   "key": [
+    "Large Pre-trained Language Models",
+    "Knowledge-Intensive NLP Tasks"
+   ],
+   "stable": 0,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I180",
+   "doc": "arxiv_2005.11401",
+   "kind": "relation",
+   "key": [
+    "Large Pre-trained Language Models",
+    "Parametric Memory"
+   ],
+   "stable": 2,
+   "decision": "invented",
+   "comment": ""
+  },
+  {
+   "id": "I181",
+   "doc": "arxiv_2410.05779",
+   "kind": "entity",
+   "key": [
+    "GitHub"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I182",
+   "doc": "arxiv_2410.05779",
+   "kind": "entity",
+   "key": [
+    "Retrieval-Augmented Generation (RAG)"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I183",
+   "doc": "arxiv_2410.05779",
+   "kind": "entity",
+   "key": [
+    "Large Language Models (LLMs)"
+   ],
+   "stable": 2,
+   "decision": "trivial",
+   "comment": ""
+  },
+  {
+   "id": "I184",
+   "doc": "arxiv_2410.05779",
+   "kind": "entity",
+   "key": [
+    "Incremental Update Algorithm"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I185",
+   "doc": "arxiv_2410.05779",
+   "kind": "entity",
+   "key": [
+    "LightRAG"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I186",
+   "doc": "arxiv_2410.05779",
+   "kind": "entity",
+   "key": [
+    "Vector Representations"
+   ],
+   "stable": 2,
+   "decision": "invented",
+   "comment": ""
+  },
+  {
+   "id": "I187",
+   "doc": "arxiv_2410.05779",
+   "kind": "entity",
+   "key": [
+    "Graph Structures"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I188",
+   "doc": "arxiv_2410.05779",
+   "kind": "entity",
+   "key": [
+    "Dual-Level Retrieval System"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I189",
+   "doc": "arxiv_2410.05779",
+   "kind": "relation",
+   "key": [
+    "LightRAG",
+    "Incremental Update Algorithm"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I190",
+   "doc": "arxiv_2410.05779",
+   "kind": "relation",
+   "key": [
+    "LightRAG",
+    "Retrieval-Augmented Generation (RAG)"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I191",
+   "doc": "arxiv_2410.05779",
+   "kind": "relation",
+   "key": [
+    "Retrieval-Augmented Generation (RAG)",
+    "Large Language Models (LLMs)"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I192",
+   "doc": "arxiv_2410.05779",
+   "kind": "relation",
+   "key": [
+    "LightRAG",
+    "Vector Representations"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I193",
+   "doc": "arxiv_2410.05779",
+   "kind": "relation",
+   "key": [
+    "LightRAG",
+    "Dual-Level Retrieval System"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I194",
+   "doc": "arxiv_2410.05779",
+   "kind": "relation",
+   "key": [
+    "LightRAG",
+    "Graph Structures"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "I195",
+   "doc": "arxiv_2410.05779",
+   "kind": "relation",
+   "key": [
+    "LightRAG",
+    "GitHub"
+   ],
+   "stable": 2,
+   "decision": "right",
+   "comment": ""
+  }
+ ],
+ "missing": [
+  {
+   "doc": "Citation",
+   "note": ""
+  },
+  {
+   "doc": "Knowledge_graph",
+   "note": ""
+  },
+  {
+   "doc": "Meta_analysis",
+   "note": ""
+  },
+  {
+   "doc": "Ontology_information_science",
+   "note": ""
+  },
+  {
+   "doc": "Peer_review",
+   "note": ""
+  },
+  {
+   "doc": "Prompt_injection",
+   "note": ""
+  },
+  {
+   "doc": "Retrieval_augmented_generation",
+   "note": ""
+  },
+  {
+   "doc": "Systematic_review",
+   "note": ""
+  },
+  {
+   "doc": "arxiv_2005.11401",
+   "note": ""
+  },
+  {
+   "doc": "arxiv_2410.05779",
+   "note": ""
+  }
+ ]
+}

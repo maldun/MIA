@@ -1,4 +1,4 @@
-# IF-201 – Chat turn service, v2
+# IF-201 – Chat turn service, v3
 
 Owner (provider): N-2.2 Chat agent   Consumers: N-2.1 API and accounts   Decided by: N-2   Mock complexity: 3 (queue, event stream)   Suite: `tests/acceptance/contract/test_if_201_chat_turn.py`
 
@@ -18,6 +18,7 @@ The call from the gateway to the chat agent. Authentication, sessions and the wi
 | `score()` **[v1]** | | `{"overall", "categories", "votes", "series"}` | as in IF-101 v4: `series` = sums per ISO week (`YYYY-Www`), oldest first |
 | `counters()` **[v2]** | | `{name: {"net", "votes", "chance", "reset_at"}}` | as `counters` of IF-101 v5, for every behaviour of the list |
 | `reset_counter(account, name)` **[v2]** | name of a behaviour | the counter after the reset | back to the default rate; the event `counters_changed {name, author}` follows |
+| `skill_turn(account, run, kind, payload)` **[v3]** | `run` the run id; `kind` `question` (payload: the question text), `phase` (the phase name; only phases the manifest declares worth telling), `done` (the full result), `failed` or `stopped` (the reason) | `{"id"}` of the message, or `{"id": null}` when the turn adds no message (an undeclared phase) | the Workflow management hands one turn of a skill run to the chat agent; the message is one `chat_message` of MIA that carries `skill_run: <run>` and `kind` in the event and in `history`; the text of `done`, `failed` and `stopped` ends with ` [Open in the Skill run view](#run=<run>)`, added by code (REQ-CHA-056); the summary of a `done` is worded by the digest step, the full result is never in the chat (REQ-CHA-058); each message is sent to speech with the repair of REQ-CHA-014, like an answer (REQ-CHA-047); the chat model sees per run the questions, the users' answers, the end summary and the last status message, no other status message and never the full result (REQ-CHA-046) |
 | `subscribe(callback)` | | a function that unsubscribes | `callback({"event", "payload"})` for `chat_message`, `chat_start`, `chat_delta`, `audio_chunk`, `expression`, `chat_done`, `chat_status`, `variant`, `score`, `counters_changed` **[v2]**; same payloads as IF-101 |
 
 ## Errors
@@ -26,6 +27,7 @@ The call from the gateway to the chat agent. Authentication, sessions and the wi
 | empty or blank text, or more than 4000 characters | `ServiceError("empty_text")` | nothing queued |
 | queue full (5 waiting messages in all) or 2 waiting messages of this account | `ServiceError("queue_full")` | nothing queued |
 | unknown message id, or an id that is no answer **[v1]** | `ServiceError("not_found")` | nothing changed |
+| an unknown `kind` of `skill_turn` **[v3]** | `ServiceError("invalid_kind")` | nothing is added |
 | `regenerate` of a known message that is not the last answer, a user message included **[v1, v2: user message]** | `ServiceError("not_the_last_answer")` | nothing queued |
 | a vote with a wrong category or value **[v1]**, or **[v2]** a `character_behaviour` vote on a name that is not on the list | `ServiceError("invalid_vote", rule="category", "value" or "subject")` | the vote is not stored, the score is unchanged |
 | `reset_counter` of a name that is not on the list of behaviours **[v2]** | `ServiceError("not_found")` | nothing changed |
@@ -48,3 +50,4 @@ A minus (`value` -1, category `answer_quality`) on a **fact** proposes one bench
 | v0 | 2026-10-25 | first draft | 8 |
 | v1 | 2026-10-27 | regenerate, speak_again, account, vote, score; events variant and score; errors not_found, not_the_last_answer, invalid_vote; the ack stays `{id, position}` | A-06 |
 | v2 | 2026-10-27 | `counters`, `reset_counter`, the event `counters_changed`; `invalid_vote` rule `subject`; `regenerate` of a user message is `not_the_last_answer`; the case on a minus on a fact (table `cases`) | A-08 |
+| v3 | 2026-11-08 | the operation `skill_turn` (questions, status per declared phase, end summary, failure and stop message of a skill run, in persona, with the marker and the link), the error `invalid_kind`; the contract suite gets TC-IF-201-09 to -12 (owner 2026-11-08, D-303) | A-142 |

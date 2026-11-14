@@ -13,7 +13,8 @@ import { initChat } from './chat.js';
 import { initLogin } from './login.js';
 import { createApi } from './api.js';
 import { initWorkspace } from './workspace.js';
-import { initTaskCards } from './task-card.js';
+import { initSkillRunView } from './skill-run.js';
+import { initShares } from './skill-run-shares.js';
 import { initAccount } from './account.js';
 import { followStatus, followVariant, initMood } from './mood.js';
 import { askConfirm, initPalette, loadCommands } from './palette.js';
@@ -53,6 +54,7 @@ const layout = initLayout({
   collapseButton: $('collapse-button'),
   openButton: $('panel-open'),
   moodChip: $('mood'),
+  strip: $('skill-run-view'),
 });
 
 // --- connection: header, banner, history after (re)connecting --------------------------------------------
@@ -121,6 +123,7 @@ layout.onChange(() => {
 });
 new ResizeObserver(sendInset).observe($('panel'));
 new ResizeObserver(sendInset).observe($('mood'));
+new ResizeObserver(sendInset).observe($('skill-run-view'));
 window.addEventListener('resize', sendInset);
 
 sound = initSound({
@@ -187,7 +190,8 @@ chat = initChat({
   api,
 });
 
-initTaskCards({ list: $('messages'), socket, api, t, onStop: () => socket.emit('chat_stop'), notify: toast });
+initShares({ storage, inputs: { strip: $('srv-share-strip'), full: $('srv-share-full') } });
+initSkillRunView({ root: $('skill-run-view'), socket, api, t, onStop: () => socket.emit('chat_stop'), notify: toast });
 
 let commands = [];
 const commandsReady = loadCommands().then((list) => { commands = list; return list; });

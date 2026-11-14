@@ -50,6 +50,15 @@ def create_chat_ops_blueprint(chat):
     def account_of():
         return answer(lambda: chat.account(request.args.get("message_id")))
 
+    @bp.get("/api/skill-runs/shown")
+    def shown_run():
+        record = chat.shown_run(account())
+        return jsonify(record) if record else ("", 204)       # no run yet (IF-101 v16)
+
+    @bp.get("/api/skill-runs/<run>")
+    def skill_run(run):
+        return answer(lambda: chat.skill_run(account(), run))
+
     @bp.post("/api/pause")
     def pause():
         return jsonify({"paused": chat.pause()})          # False when nothing runs (IF-101 v8)

@@ -387,5 +387,5 @@ GUI, chat and prompt, character view, login and user views, voice playback. Stat
 - Verification method: Test, Demonstration
 - Acceptance criterion: AC-39: for a scripted skill the chat shows no card, table, log line or full result, and the view shows them (exact)
 - Verified by: TC-CLV-030, TC-CLV-040
-- Status: Draft
+- Status: Verified
 - History: A-131 (proposed 2026-11-08, G-V3.PANEL), new

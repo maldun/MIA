@@ -1,0 +1,163 @@
+diff --git a/tests/acceptance/contract/test_if_101_chat_api.py b/tests/acceptance/contract/test_if_101_chat_api.py
+index ce28dd3..357b46d 100644
+--- a/tests/acceptance/contract/test_if_101_chat_api.py
++++ b/tests/acceptance/contract/test_if_101_chat_api.py
+@@ -743,19 +743,36 @@ class SkillRunViewContract(unittest.TestCase):
+ 
+     @mark.req("IF-101", "REQ-WFM-135")
+     @each_provider(IF, make(review=("First?",)))
+-    def test_deleting_the_history_deletes_the_run_records(self, api):
+-        """TC-IF-101-39 (v16): when the history records of an account are deleted in the storage (test adapter `delete_history(account)`), its run records are deleted, the event skill_run_changed {id: null} goes out, `shown_run` is None and `skill_run(id)` is 404 not_found; there is no new operation.
+-        Example: after delete_history("anna") the event {"id": None} is sent."""
++    def test_deleting_a_history_record_deletes_the_run_of_that_record(self, api):
++        """TC-IF-101-39 (v16, A-144): when a history record is deleted in the storage (test adapter `delete_history(account, run_id)`, the id of the history record is the run id), the run record of that run is deleted and no other: the event skill_run_changed {id: <run>} goes out, `skill_run(run)` is 404 not_found, the other run of the account is still read and `shown_run` names it; there is no new operation.
++        Example: after delete_history("anna", first) the event {"id": first} is sent and the second run is shown."""
+         s = api.login("anna", "pw-anna")
+         api.connect(s)
+         api.events(s)
+         run_review(api, s, "no")
+-        run = cards_of(api.events(s))[0]["id"]
+-        self.assertIsNotNone(api.shown_run(s))
+-        api.delete_history("anna")
+-        self.assertIn({"id": None}, [e["payload"] for e in api.events(s) if e["event"] == "skill_run_changed"])
+-        self.assertIsNone(api.shown_run(s))
+-        self.assertEqual(error_of(lambda: api.skill_run(s, run)).code, "not_found")
++        first = cards_of(api.events(s))[0]["id"]
++        run_review(api, s, "no")
++        second = cards_of(api.events(s))[0]["id"]
++        api.delete_history("anna", first)
++        self.assertIn({"id": first}, [e["payload"] for e in api.events(s) if e["event"] == "skill_run_changed"])
++        self.assertEqual(error_of(lambda: api.skill_run(s, first)).code, "not_found")
++        self.assertEqual(api.skill_run(s, second)["id"], second)
++        self.assertEqual(api.shown_run(s)["id"], second)
++
++    @mark.req("IF-101", "REQ-API-015")
++    @each_provider(IF, make(review=("First?",)))
++    def test_the_run_of_another_account_is_not_found(self, api):
++        """TC-IF-101-40 (v16, A-145): another account asking for the run id of anna's run gets 404 not_found, anna gets the record, and `shown_run` of the other account never names anna's run.
++        Example: ben asks skill_run(anna's run): 404 not_found; shown_run(ben) is None."""
++        anna, ben = api.login("anna", "pw-anna"), api.login("ben", "pw-ben")
++        api.connect(anna)
++        api.events(anna)
++        run_review(api, anna, "no")
++        run = cards_of(api.events(anna))[0]["id"]
++        err = error_of(lambda: api.skill_run(ben, run))
++        self.assertEqual((err.status, err.code), (404, "not_found"))
++        self.assertEqual(api.skill_run(anna, run)["id"], run)
++        self.assertIsNone(api.shown_run(ben))
+ 
+ 
+ if __name__ == "__main__":
+diff --git a/tests/acceptance/test_skill_runs.py b/tests/acceptance/test_skill_runs.py
+index 55bf922..ddbac39 100644
+--- a/tests/acceptance/test_skill_runs.py
++++ b/tests/acceptance/test_skill_runs.py
+@@ -143,25 +143,26 @@ class SkillRunRecorderChecks(unittest.TestCase):
+         self.assertNotIn("A", shown)
+ 
+     @mark.req("REQ-WFM-135")
+-    def test_deleting_the_history_deletes_the_run_records_of_the_account(self):
+-        """TC-WFM-135: when the history records of an account are deleted in the storage, no run is named for it, its run records are gone and skill_run_changed with no id is sent; the run of the other account stays.
++    def test_deleting_a_history_record_deletes_the_run_of_that_record_only(self):
++        """TC-WFM-135 (A-144): when a history record is deleted in the storage, the run record whose id equals the id of that history record is gone and skill_run_changed names that id; every other run record stays, also those of the same account.
+         The files volume is not a handle of the recorder: that its files stay listed is checked at the interface (TC-IF-101-39) and in the browser check TC-CLV-038.
+-        Example: after the delete of anna's history record h1 the table holds only ben's run r2."""
+-        # Given: two accounts with one finished run each and a history record each
+-        recorder, storage, events, _ = make()
+-        for run, account in (("r1", "anna"), ("r2", "ben")):
++        Example: after the delete of the history record r1 the table holds r2 (anna) and r3 (ben)."""
++        # Given: three finished runs, two of anna and one of ben, and a history record with the id of each run
++        recorder, storage, events, clock = make()
++        for run, account in (("r1", "anna"), ("r2", "anna"), ("r3", "ben")):
++            clock.advance(1)
+             recorder.start(run, "review", "1", account, phases=REVIEW_PHASES)
+             recorder.end(run, "done")
+-            storage.put("history", "h-" + account, {"text": "hello"}, account)
+-        # When: the history records of the first account are deleted through the fake storage and its notification arrives
+-        storage.delete("history", "h-anna", "anna")
+-        # Then: no run is named for the first account and its records are gone
+-        self.assertIsNone(recorder.shown("anna"))
+-        self.assertEqual(storage.ids("skill_runs"), ["r2"])
+-        # And: skill_run_changed with no id is sent
+-        self.assertIn(("skill_run_changed", {"id": None}), events)
+-        # And: the second account's run is still named
+-        self.assertEqual(recorder.shown("ben"), "r2")
++            storage.put("history", run, {"text": "hello"}, account)
++        # When: one history record of anna is deleted through the fake storage and its notification arrives
++        storage.delete("history", "r1", "anna")
++        # Then: only the run of that record is gone
++        self.assertEqual(storage.ids("skill_runs"), ["r2", "r3"])
++        # And: skill_run_changed names the deleted run
++        self.assertIn(("skill_run_changed", {"id": "r1"}), events)
++        # And: the other runs are still named, also the other run of the same account
++        self.assertEqual(recorder.shown("anna"), "r2")
++        self.assertEqual(recorder.shown("ben"), "r3")
+ 
+     @mark.req("REQ-WFM-137")
+     def test_the_texts_of_a_run_are_stored_as_data(self):
+diff --git a/tests/helpers/contract.py b/tests/helpers/contract.py
+index 2d6dab2..7e55fe8 100644
+--- a/tests/helpers/contract.py
++++ b/tests/helpers/contract.py
+@@ -407,10 +407,10 @@ class _ChatApiAdapter:
+     def skill_run(self, session, run_id):
+         return self._route("get", "/api/skill-runs/%s" % run_id, session)
+ 
+-    def delete_history(self, account):
+-        """Test adapter (v16): a history record of the account is deleted in the storage (IF-102); the run records go with it"""
+-        self._store.put("history", "h-" + account, {"text": "hello"}, account)
+-        self._store.delete("history", "h-" + account, account)
++    def delete_history(self, account, run_id):
++        """Test adapter (A-144): the history record with the id of the run is deleted in the storage (IF-102); the run record of that run goes with it, no other"""
++        self._store.put("history", run_id, {"text": "hello"}, account)
++        self._store.delete("history", run_id, account)
+ 
+     def run_with_variant(self, variant):
+         raise unittest.SkipTest("IF-101 no workflow picks a character variant yet (REQ-CHV-008)")
+diff --git a/tests/helpers/mocks/if_101_chat_api.py b/tests/helpers/mocks/if_101_chat_api.py
+index aca85e5..dbb265b 100644
+--- a/tests/helpers/mocks/if_101_chat_api.py
++++ b/tests/helpers/mocks/if_101_chat_api.py
+@@ -445,14 +445,15 @@ class ChatApiMock:
+         self._broadcast("skill_run_changed", {"id": run_id})
+ 
+     def shown_run(self, session):
+-        """v16 (GET /api/skill-runs/shown): the run started most recently as a run record, None (204) when there is none"""
+-        self._user(session)
+-        return None if not self._run_order else self._copy(self._runs[self._run_order[-1]])
++        """v16 (GET /api/skill-runs/shown): the run of the account started most recently as a run record, None (204) when there is none (A-145: runs of another account are never shown)"""
++        account = self._user(session)
++        own = [r for r in self._run_order if self._run_owner.get(r) == account]
++        return None if not own else self._copy(self._runs[own[-1]])
+ 
+     def skill_run(self, session, run_id):
+-        """v16 (GET /api/skill-runs/<id>): the run record of one run; 404 not_found for a run that does not exist or is deleted"""
+-        self._user(session)
+-        if run_id not in self._runs:
++        """v16 (GET /api/skill-runs/<id>): the run record of one run; 404 not_found for a run that does not exist, is deleted or belongs to another account (A-145)"""
++        account = self._user(session)
++        if run_id not in self._runs or self._run_owner.get(run_id) != account:
+             raise ApiError(404, "not_found")
+         return self._copy(self._runs[run_id])
+ 
+@@ -460,13 +461,13 @@ class ChatApiMock:
+     def _copy(record):
+         return {k: (list(v) if isinstance(v, list) else dict(v) if isinstance(v, dict) else v) for k, v in record.items()}
+ 
+-    def delete_history(self, account):
+-        """Test adapter (v16): the history records of the account are deleted in the storage (IF-102); its run records go with them and the page is told with id null"""
+-        self._history = []
+-        for run_id in [r for r in self._run_order if self._run_owner.get(r) == account]:
+-            del self._runs[run_id]
+-            self._run_order.remove(run_id)
+-        self._broadcast("skill_run_changed", {"id": None})
++    def delete_history(self, account, run_id):
++        """Test adapter (A-144): the history record with the id of the run is deleted in the storage (IF-102); the run record of that run goes with it, no other, and the page is told its id"""
++        if self._run_owner.get(run_id) != account:
++            return                                                   # the history record belongs to no run of the account
++        del self._runs[run_id]
++        self._run_order.remove(run_id)
++        self._broadcast("skill_run_changed", {"id": run_id})
+ 
+     def pause(self, session):
+         """v8: pauses the running task; False when nothing runs"""

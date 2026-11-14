@@ -91,6 +91,7 @@ Reading, worked out on 2026-10-31 for scale: with a zero-tolerance rule at n = 3
 | EV-research | research.escalate@1 (current default) | eval/baselines/research__escalate__baseline.jsonl (+ `.holdout`) | current `goal/v1` | to record at the gate (dev); holdout before Verify, results only | eval/baselines/research-escalate.md (2026-10-19, 20 questions, 3 repeats: calls per question 1 to 11) |
 | EV-research_compound | research.decompose (current) | eval/baselines/research_compound__decompose__baseline.jsonl | the same | to record | eval/baselines/research-decompose.md |
 | EV-review_toy | the current review (`review_chat.run_review`) | eval/baselines/review_toy__review__baseline.jsonl | the same | to record **before T-08 starts** (the baseline T-08 must not be worse than) | – |
+| EV-skill_turns | none: today the chat gives no summary, status or failure message of a skill run (the step SkillDigestStep does not exist) | no file | `goal/v3` | decided 2026-11-08 (D-332); nothing to run | the baseline is "no digest"; "not worse than the baseline" in REQ-CHA-053 and 054 holds trivially, the fixed bounds (min, low) decide; first measurement of the step is the first dev run in Implement |
 
 ## Stability
 Accepted stability (share of repeated cases with identical outcome) >= 0.90 for the lookup and review suites, as for the number gate. Below that, a run is a finding (stop condition in Implement).

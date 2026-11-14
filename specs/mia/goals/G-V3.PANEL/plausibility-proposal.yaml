@@ -169,3 +169,11 @@ proposal:
     proposed: plausible
     basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on a scripted run, no model (proposal of the agent, 2026-11-08, G-V3.PANEL); depends on the table skill_runs of A-141, still a proposal"
 
+  # REQ-RTB-007 (A-141, added 2026-11-08)
+  REQ-RTB-007:
+    basis: no number, measurement or model quality depends on it; the table definition is fixed by an exact
+      acceptance criterion on the contract of IF-302 v8, no model (proposal of the agent, 2026-11-08, G-V3.PANEL,
+      added with A-141)
+    proposed: plausible
+    text: The Record tables shall define the table skill_runs with the required fields run, skill, skill_version,
+      account, started and state, as versioned records that are deletable.

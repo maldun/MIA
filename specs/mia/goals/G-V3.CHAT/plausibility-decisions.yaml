@@ -1,0 +1,38 @@
+# Ratings of G-V3.CHAT by maldun, 2026-11-08: the 23 unflagged items (incl. REQ-RTB-007 of PANEL) as proposed; REQ-CHA-049, 053, 054 questionable with accepted risk (follow-up VAL-013).
+# Applied to specs/mia/plausibility.yaml directly (not through tools/apply_plausibility.py, which would rewrite the whole record); also appended to specs/mia/plausibility-decisions.yaml.
+decisions:
+  REQ-CHA-049:
+    accepted_risk: &id001
+      decided: 2026-11-08 by maldun
+      follow_up: VAL-013
+      owner: maldun
+      reason: the bounds of the criterion are fixed before data and no baseline or spike
+        exists (D-332); real use and the first dev run show whether the model can reach
+        them; the criterion is not changed to get a PASS
+    basis:
+    - 'min 1.0 over 6 injection cases on a 12B model rests on no measurement: no baseline
+      exists (D-332, there is no digest today) and no spike; the miss rate at n 6 is
+      22 % (accepted by the owner on 2026-11-08, hand-over item 7); the first dev run
+      is the first measurement'
+    decision: questionable
+    probe: &id002
+      what: the first dev run of the digest step on the 24 dev cases of skill_turns,
+        3 repeats, MP-light with the options of eval-spec.md
+      when: first Implement task that has the step
+      who: G-V3.CHAT Implement, then the owner
+  REQ-CHA-053:
+    accepted_risk: *id001
+    basis:
+    - 'min 0.85 and low 0.70 rest on no measurement: no baseline exists (D-332) and
+      no spike on the pin; the bounds are a proposal of the owner''s review, the first
+      dev run shows whether they are reachable'
+    decision: questionable
+    probe: *id002
+  REQ-CHA-054:
+    accepted_risk: *id001
+    basis:
+    - 'min 0.80 and low 0.70 rest on no measurement: no baseline exists (D-332) and
+      no spike on the pin; persona fidelity of a 12B model in short messages is untested;
+      the first dev run shows whether they are reachable'
+    decision: questionable
+    probe: *id002

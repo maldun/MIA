@@ -47,6 +47,8 @@ export function createApi({ origin = location.origin, fetchFn = (url, init) => f
     deleteItem: (kind, id) => request('DELETE', '/api/items', { query: { kind, id } }),
     trust: () => request('GET', '/api/trust'),
     setTrust: (source, value) => request('POST', '/api/trust', { body: { source, value } }),
+    shownRun: async () => { const run = await request('GET', '/api/skill-runs/shown'); return run?.id ? run : null; },      // IF-101 v16: 204 (no body) = no run yet
+    skillRun: (id) => request('GET', `/api/skill-runs/${encodeURIComponent(id)}`),
     pause: () => request('POST', '/api/pause'),
     resume: () => request('POST', '/api/resume'),
     files: () => request('GET', '/api/files'),

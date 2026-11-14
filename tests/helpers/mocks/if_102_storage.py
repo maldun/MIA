@@ -10,7 +10,7 @@ except ImportError:  # plain import (single test run as a script)
     from errors import StorageError
     import graph_rules
 
-TABLES = ("workflows", "context_graphs", "history", "memory", "votes", "tasks", "memos", "accounts", "presets", "gestures", "runs", "source_trust", "cases", "behaviours", "workflow_meta")
+TABLES = ("workflows", "context_graphs", "history", "memory", "votes", "tasks", "memos", "accounts", "presets", "gestures", "runs", "source_trust", "cases", "behaviours", "workflow_meta", "skill_runs")
 IMMUTABLE = ("workflows", "context_graphs")      # versioned records are never deleted
 CATEGORIES = ("answer_quality", "reactions", "character_behaviour", "service")   # the vote categories of IF-302 (A-59, D-162)
 VALIDATED = ("workflows",)                       # graph rules are checked on write (TB-edit, second line of defence)

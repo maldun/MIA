@@ -271,15 +271,15 @@ class ReviewRun:
                 return False
             self.budget.continue_run()
 
-    def _note(self, phase=None):
-        """the figures for the status card: the sources by state and the limits with what is used (REQ-WFM-032)"""
+    def _note(self, phase=None, detail=None):
+        """the figures for the status card: the sources by state and the limits with what is used (REQ-WFM-032); `phase` is a declared stage name (manifest `phases`), `detail` what the stage does now"""
         if self.monitor is None:
             return
         flow = self.report()["flow"]
         state = self.budget.state()
         budget = {name: {"used": state["used"][name], "limit": state["limits"][name]} for name in LIMITS if name != "seconds"}
         budget["seconds"] = {"limit": state["limits"]["seconds"]}              # the monitor counts the active seconds itself
-        self.monitor.update(phase=phase, budget=budget, counts={
+        self.monitor.update(phase=phase, elements=None if detail is None else [{"label": "Now", "text": detail}], budget=budget, counts={
             "on_list": len(self.collected["kept"]), "processed": flow["screened"], "to_process": flow["undecided"], "included": flow["included"], "maybe": flow["maybe"],
             "excluded": flow["excluded_abstract"] + flow["excluded_full"], "dropped": flow["dropped"]})
 
@@ -287,14 +287,14 @@ class ReviewRun:
         for keyword in self.pool.to_search():
             if not self._go("api_requests"):
                 return False
-            self._note("searching for %s" % keyword)
+            self._note("searching", "keyword: %s" % keyword)
             query = build_queries({"k": [keyword]})["per_keyword"][keyword]
             self.queries[keyword] = query
             self.found[keyword] = list(self.search(keyword, query))
             self.hits[keyword] = len(self.found[keyword])
             self.pool.mark_searched(keyword)
         self.collected = collect(self.found, self.request.until, self.request.since)
-        self._note("collected %d works" % len(self.collected["kept"]))
+        self._note("searching", "collected %d works" % len(self.collected["kept"]))
         return True
 
     def _screen_abstracts(self):
@@ -306,7 +306,7 @@ class ReviewRun:
                 return False
             judgement = check_judgement(self.screen_abstract(work), work.get("abstract", ""), self.criteria)
             self.judged[wid] = {"abstract": judgement, "full": None}
-            self._note("screened the abstracts")
+            self._note("screening", "screened the abstracts")
         return True
 
     def _screen_full_texts(self):
@@ -320,7 +320,7 @@ class ReviewRun:
             if not self._go("read"):
                 return False
             entry["full"] = check_full(self.screen_full(work, text), text, self.criteria)
-            self._note("read the full texts")
+            self._note("reading full texts", "read the full texts")
         return True
 
     def run(self):

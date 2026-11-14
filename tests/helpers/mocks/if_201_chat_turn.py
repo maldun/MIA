@@ -11,7 +11,8 @@ CODES = {"empty_text": "empty_text", "queue_full": "queue_full"}      # every ot
 
 
 class ChatTurnMock:
-    def __init__(self, answers=None, queue_limit=5):
+    def __init__(self, answers=None, queue_limit=5, phases=("screening", "reading", "summarizing")):
+        self._phases = tuple(phases)                                      # v3 (A-142): the phases the manifest of the skill declares worth telling
         names = ("anna", "ben", "carl", "dora", "emil")                   # v2: five voters for the counters
         self._api = ChatApiMock(accounts={name: "pw" for name in names}, answers=answers, queue_limit=queue_limit)
         self._sessions = {name: self._api.login(name, "pw") for name in names}
@@ -65,6 +66,33 @@ class ChatTurnMock:
         result = self._call(lambda: self._api.reset_counter(self._sessions[account], name))
         self._forward()
         return result
+
+    # v3 (amendment A-142): the turns of a skill run; the mock words them by rule, the real step words them in persona (REQ-CHA-054)
+    KINDS = ("question", "phase", "done", "failed", "stopped")
+
+    def skill_turn(self, account, run, kind, payload):
+        if kind not in self.KINDS:
+            raise ServiceError("invalid_kind")
+        link = " [Open in the Skill run view](#run=%s)" % run                # added by code (REQ-CHA-056)
+        if kind == "phase":
+            if payload not in self._phases:
+                return {"id": None}                                          # an undeclared phase adds no message
+            text = "Working on: %s." % payload
+        elif kind == "question":
+            text = payload
+        elif kind == "done":
+            text = payload[:1200] + link                                     # the real summary is worded by the digest step; the full result never goes into the chat
+        elif kind == "failed":
+            text = "%s%s" % (payload, link)
+        else:
+            text = "The run was stopped (%s).%s" % (payload, link)
+        record = self._api._record("assistant", "MIA", text)
+        record["skill_run"], record["kind"] = run, kind
+        self._api._broadcast("chat_message", record)
+        for index, sentence in enumerate(s for s in text.replace("?", "?|").replace(".", ".|").replace("!", "!|").split("|") if s.strip()):
+            self._api._broadcast("audio_chunk", {"id": record["id"], "index": index, "sentence": sentence.strip()})      # spoken with the repair of REQ-CHA-014 (REQ-CHA-047)
+        self._forward()
+        return {"id": record["id"]}
 
     def advance_time(self, seconds):
         """Test adapter: move the clock of the chat agent (the weeks of the score)."""

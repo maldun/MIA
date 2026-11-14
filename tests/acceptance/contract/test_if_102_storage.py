@@ -177,6 +177,22 @@ class StorageContract(unittest.TestCase):
             self.assertEqual((caught.exception.code, caught.exception.rule), ("invalid", "schema"))
         self.assertEqual(store.ids("memos"), [])
 
+    @mark.req("IF-102", "REQ-WFM-135", "REQ-RTB-007")
+    @each_provider(IF)
+    def test_the_run_records_of_a_skill_are_a_table_that_can_be_deleted(self, store):
+        """TC-IF-102-12 (A-141): `skill_runs` is a table of the storage: every write is a version, `ids` and `get` find the records, and a delete is told with version None; no new operation.
+        Example: put("skill_runs", "r1", run, "anna") twice -> version 2; delete("skill_runs", "r1", "anna") -> the subscriber gets {"table": "skill_runs", "id": "r1", "version": None, "author": "anna"}."""
+        run = {"run": "r1", "skill": "review", "skill_version": "2", "account": "anna", "started": "2026-11-08T10:00:00Z", "state": "running"}
+        seen = []
+        store.subscribe("skill_runs", seen.append)
+        self.assertEqual(store.put("skill_runs", "r1", run, "anna"), {"version": 1})
+        self.assertEqual(store.put("skill_runs", "r1", dict(run, state="done"), "anna"), {"version": 2})
+        self.assertEqual(store.ids("skill_runs"), ["r1"])
+        self.assertEqual(store.get("skill_runs", "r1", version=1)["doc"]["state"], "running")
+        store.delete("skill_runs", "r1", "anna")
+        self.assertEqual(store.ids("skill_runs"), [])
+        self.assertEqual(seen[-1], {"table": "skill_runs", "id": "r1", "version": None, "author": "anna"})
+
 
 if __name__ == "__main__":
     unittest.main()
