@@ -748,29 +748,29 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 
 ### REQ-WFM-091 – Baseline of a retired untrusted transform
 - Level: low   Subject: TaskRuntime
-- Text: Where the owner allowed it when retiring an untrusted transform, the Workflow management shall run it as the baseline of a check.
+- Text: Where the owner allowed it when retiring an untrusted transform, the Workflow management shall run it as the baseline of a check, until the transform leaves retirement or a newer version replaces its code.
 - Rationale: refines FR-38 and REQ-WFM-068 (owner 2026-11-08: a retired transform may be a baseline, an untrusted one only by the owner's allowance, so that OC-1 stays true)
 - Parent: FR-38
 - Group: TB
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-32c: a retired untrusted transform with the allowance runs when a check names it; without the allowance it is refused as baseline; in no case does it run in a graph (exact)
+- Acceptance criterion: AC-32c: a retired untrusted transform with the allowance runs when a check names it; without the allowance it is refused as baseline; in no case does it run in a graph; an allowance given with another lifecycle than retired is refused, and leaving retirement or a replace by a higher version takes the allowance back (exact)
 - Verified by: TC-WFM-091
 - Status: Draft
-- History: G-V2.TOOLBOX Plan step 3 (2026-11-08), new, from the toolbox prototype and the owner's answers of 2026-11-08
+- History: G-V2.TOOLBOX Plan step 3 (2026-11-08), new, from the toolbox prototype and the owner's answers of 2026-11-08; changed by D-229 (Verify finding F1/F2, owner 2026-11-12)
 
 ### REQ-WFM-092 – A newer version replaces the code
 - Level: low   Subject: TaskRuntime
-- Text: When a transform arrives with the ID of an entry and a higher version, the Workflow management shall replace the code of the entry and keep its trust status and lifecycle.
+- Text: When a transform arrives with the ID of an entry and a higher version, the Workflow management shall replace the code of the entry, keep its trust status and lifecycle, and clear the owner's baseline allowance of REQ-WFM-091.
 - Rationale: refines FR-38 (owner 2026-11-08: one entry per ID, the latest version; trust carries over); risk: new code runs without a new decision, therefore REQ-WFM-093
 - Parent: FR-38
 - Group: TB
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-32b: after version 2 replaces a trusted version 1, the entry is version 2, still trusted, and runs the new code (exact)
+- Acceptance criterion: AC-32b: after version 2 replaces a trusted version 1, the entry is version 2, still trusted, and runs the new code, and an allowance of the old version is cleared (exact)
 - Verified by: TC-WFM-092
 - Status: Draft
-- History: G-V2.TOOLBOX Plan step 3 (2026-11-08), new, from the toolbox prototype and the owner's answers of 2026-11-08
+- History: G-V2.TOOLBOX Plan step 3 (2026-11-08), new, from the toolbox prototype and the owner's answers of 2026-11-08; changed by D-229 (Verify finding F1/F2, owner 2026-11-12)
 
 ### REQ-WFM-093 – A replaced trusted transform leaves a trace
 - Level: low   Subject: TaskRuntime

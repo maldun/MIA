@@ -279,7 +279,7 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-203
 - Verifies: REQ-WFM-091
 - Given: a retired untrusted transform, once with and once without the owner's allowance
 - When: a check names it as its baseline, and a graph names it as a step
-- Then: with the allowance the check runs it; without it the check is refused; the graph step is refused in both cases
+- Then: with the allowance the check runs it; without it the check is refused; the graph step is refused in both cases; an allowance with another lifecycle is refused, and un-retiring clears it (unit test `tests/test_toolbox.py`, F2)
 
 ### TC-WFM-092 – a newer version replaces the code
 - Verifies: REQ-WFM-092
