@@ -4,6 +4,9 @@
 **Branch:** goal/v2.toolbox @ 02f8785 (plus this report)   **Parent line of work:** goal/v2 (merge order STORE, MODEL, TOOLBOX, CONVERT)   **Plan baseline:** plan-baseline-it2-toolbox (installed state: plan-baseline-it2-toolbox-installed = d77858f)
 **Date:** 2026-11-12   **Reviewers:** maldun (human, pending), Claude Sonnet 5.5 (AI, fresh session, did not see the Implement chat)
 
+## Verdict (proposal, after the fourth round)
+**Verified with open findings** (round 4, 2026-11-14, commit `bf253ce`): N4 is fixed and verified (the message of a failed `set_meta` after a first save is honest, the code is `store_failed`, nothing deleted, replace branch untouched). One new finding, N5 (info, Phase 3): the new text is not pinned by any test. Owner decision (maldun): pin the text and the reason clause. After that commit a reader checks that commit only. Deviations to accept at the gate: F6, F7, F8 rest. See "Fourth round" at the end. The verdict of the third round follows.
+
 ## Verdict (proposal, after the third round)
 **Verified with open findings** (round 3, 2026-11-14, commit `ca3d8fa`): N1, N2 and N3 are fixed and verified; the protected material is unchanged; the ladder on `HEAD` is clean except F7 (known). One new small finding, N4 (low, Phase 3), goes back: the message of a failed new import says "was not stored" although the entry stays; no test covers that branch. Owner decision (maldun): fix the text and add a test. After that commit a reader checks that commit only; deviations to accept at the gate: F6, F7, F8 rest. See "Third round" at the end. The text below is the earlier rounds' verdict.
 
@@ -43,6 +46,8 @@ Clean run on `HEAD` (`3b77fe8`, code as of `ca3d8fa`) by the third-round reviewe
 | 2 | integration | pass (4.0 s) |
 | 3 | contract-postgres | pass by hand, 11 tests (podman and the local `postgres:16` are there) |
 | 3 | container-alone | pass by hand, 2 tests (image `localhost/mia:latest`, built 7 days ago, not rebuilt: it says nothing about `ca3d8fa`) |
+
+`bf253ce` touches no file outside `toolbox.py`, `tests/test_toolbox.py` and `implementation-log.md`, so the ladder of `ca3d8fa` stands (checked by `git show --stat bf253ce`).
 
 Stage 4 (eval runs on the pinned model) has no step by design (comment in `stages.yaml`). Slow stage 1: 529 s against a budget of 120 s (the unit step), a known tuning item.
 
@@ -230,3 +235,20 @@ Scope: `ca3d8fa` only (`toolbox.py`, `tests/test_toolbox.py`). Verdict: **Verifi
 Info, no action: a `ToolboxError` inside the `try` would be re-wrapped (cannot happen today); the error text of the library goes into `why` unchanged.
 
 After the N4 commit a reader checks that commit only and re-runs `tests/test_toolbox.py` and the acceptance tests; the full ladder ran clean on `ca3d8fa`, so it is repeated only if other files change.
+
+## Fourth round (bf253ce)
+Scope: `bf253ce` only (`toolbox.py`, `tests/test_toolbox.py`, `implementation-log.md`). Verdict: **Verified with open findings** (N4 verified; N5 back to Phase 3). Not in scope and decided: F6, F7, F8 rest, the order event, allowance clear, save, N1 to N3.
+
+| Check | Result |
+|---|---|
+| 1 protected material | `git diff 84eddb6..HEAD -- tests/acceptance tests/helpers tests/smoke contracts eval benchmarks` is empty. `git show --stat bf253ce`: exactly the three files. `git diff ca3d8fa..HEAD --stat` adds only docs (two start prompts, this report) and the same three files: no finding |
+| 2 red before green | `HEAD`'s `tests/test_toolbox.py` (45 tests) against `ca3d8fa`'s code (`git archive` copy in the scratchpad): 2 failures, `test_n4_a_failed_set_meta_after_a_first_save_says_the_entry_was_stored` on mock and on real. `test_n4_a_failed_first_save_still_says_not_stored` passes on the old code, as expected: it guards the unchanged save text. It fails if that text, the code `store_failed` or the empty library breaks (mutations c, d1); it does not fail if the old single `try` came back, the set_meta test covers that |
+| 3 mutations on a copy of `HEAD` | (a) bare `raise` in the `set_meta` branch: set_meta test errors (mock, real). (b) old text "was not stored" there: set_meta test fails. (c) the "stored without its meta record" text in the `save` branch: save test fails. (d) code changed in the save branch: save test fails; in the `set_meta` branch: set_meta test fails. (e) replace branch: the diff of `bf253ce` has one hunk, inside the new-id branch, the replace branch is untouched. All killed. Extra mutations (not asked): drop "(its reason is empty)", or shorten the text to "was stored": **survive**, see N5 |
+| 4 new-id branch | Two `try` blocks, `save` then `set_meta`. A `KeyboardInterrupt` and a `SystemExit` pass through in both (ids: none after a save, `t.one` after a `set_meta`, as decided); a `ToolboxError` inside is re-wrapped as before (info, cannot happen today); nothing is deleted, no library method added. Real and mock, `set_meta` raising before it writes: `look_up` = version 1, untrusted, reason `""`, retry `duplicate_id`; the text "(its reason is empty)" is true. Contrived: a `set_meta` that writes and then raises leaves the reason set, and the text would be false; no real library or event call does that (info). Module docstring: still true (`store_failed` while importing); it does not name the two texts or that the entry stays (info) |
+| 5 behaviour only in the code | No new default, output, retry or cleanup. The text "(its reason is empty)" is an addition to the wording proposed in N4; it states what `look_up` shows, but no test and no requirement pins it: N5 |
+| 6 re-run (mia312 venv) | `tests/test_toolbox.py` 45 OK, `tests/acceptance/test_toolbox.py` 17 OK, `tests/test_workflow_library.py` 13 OK, `contract/test_if_203_v1_transforms.py` 10 OK. Ladder not repeated: no code file outside the three changed |
+
+### New finding
+**N5 (info, Phase 3): the text of a failed `set_meta` after a first save is not pinned.** `test_n4_a_failed_set_meta_after_a_first_save_says_the_entry_was_stored` asserts only `assertNotIn("was not stored", why)`, so the wording "was stored without its meta record (its reason is empty)" can be dropped or shortened to "was stored" and all 45 tests pass. Decision (maldun, 2026-11-14): pin the text and the reason clause. Proposed test: in that test add, after the `assertNotIn`, `self.assertIn("stored without its meta record", caught.exception.why)`, `self.assertIn("its reason is empty", caught.exception.why)` and `self.assertEqual(self.box.look_up("t.one")["reason"], "")` (mock and real), so the claim is checked against `look_up`. No code change is needed.
+
+After the N5 commit a reader checks that commit only and re-runs `tests/test_toolbox.py`; no other file changes, so the ladder is not repeated. Then the report is ready for the gate with the deviations F6, F7, F8 rest.
