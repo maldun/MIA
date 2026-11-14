@@ -4,13 +4,13 @@ The toolbox keeps no state of its own: entries, versions, trust and lifecycle li
 so the real library of T-06 replaces the mock without a change here. T-01 is done; T-02 to T-05 add their rules (marked below) to this module.
 - Toolbox(library, is_owner, events): `is_owner(account)` says whether an account is the owner (REQ-WFM-066), `events.record(event)` takes the event of REQ-WFM-093 (IF-401).
 - import_transform(text, author) -> the transform ID; the exchange form is one JSON text with id, version, inputs, outputs and code (a field `status` in it is ignored);
-  a text that fails the exchange schema raises ToolboxError("invalid_file") naming the first problem and stores nothing; an ID that exists with an equal or lower version raises ToolboxError("duplicate_id") naming the ID; a higher version replaces the code and keeps trust and lifecycle
-  (REQ-WFM-092); the code text is never compiled or run here (REQ-WFM-053).
+  a text that fails the exchange schema raises ToolboxError("invalid_file") naming the first problem and stores nothing; an ID that exists with an equal or lower version raises ToolboxError("duplicate_id") naming the ID; a higher version replaces the code, keeps trust and lifecycle and clears the baseline allowance
+  (REQ-WFM-092, D-229); the code text is never compiled or run here (REQ-WFM-053).
 - export_transform(id) -> the exchange text; a shipped transform raises ToolboxError("not_exportable"), why names "no code text" (REQ-WFM-094).
 - look_up(id) -> {"id", "version", "trust", "lifecycle", "reason", "evidence", "baseline_allowed", "shipped"}; `reason` says why a transform is untrusted.
 - set_trust(id, value, account), set_lifecycle(id, value, account, evidence=None, allow_baseline=False): a value outside the lists raises ToolboxError("invalid_trust" or
   "invalid_lifecycle") and the status stays as it was; trusted by an account that is not the owner raises ToolboxError("owner_only").
-- `tested` without evidence raises ToolboxError("evidence_missing"); allow_baseline by an account that is not the owner raises ToolboxError("owner_only") (REQ-WFM-095).
+- `tested` without evidence raises ToolboxError("evidence_missing"); allow_baseline by an account that is not the owner raises ToolboxError("owner_only") (REQ-WFM-095); allow_baseline with another lifecycle than retired raises ToolboxError("allowance_needs_retired"), and any other lifecycle change clears the allowance (D-229).
 - offer() -> the sorted IDs a new graph may pick (retired ones left out, REQ-WFM-070).
 - run(id, args, as_baseline=False) -> the result of the code text's run(args); an untrusted transform raises ToolboxError("untrusted") unless it is retired, runs as the baseline
   of a check and has the owner's allowance (REQ-WFM-091); a retired one raises ToolboxError("retired") unless as_baseline (REQ-WFM-068).
@@ -29,6 +29,8 @@ LIFECYCLE = ("draft", "tested", "retired")
 SHIPPED_AUTHOR = "MIA"
 SHIPPED_EVIDENCE = "shipped with MIA"
 REASON_IMPORTED = "It came from outside MIA and was not reviewed."
+REASON_UNTRUSTED_BY_OWNER = "The owner took its trust back."
+REASON_UNTRUSTED_BY_ACCOUNT = "An account took its trust back."
 # The exchange form (REQ-WFM-055). Extra fields such as `status` are allowed and dropped on import.
 EXCHANGE_SCHEMA = {
     "type": "object",
@@ -61,6 +63,8 @@ class Toolbox:
         problems = sorted(jsonschema.Draft202012Validator(EXCHANGE_SCHEMA).iter_errors(file), key=lambda e: list(map(str, e.path)))
         if problems:
             raise ToolboxError("invalid_file", problems[0].message)
+        if isinstance(file["version"], float):      # jsonschema counts 1.0 as an integer; the table does not (F3)
+            raise ToolboxError("invalid_file", "%r is not a whole number" % file["version"])
         return file
 
     def import_transform(self, text, author):
@@ -76,9 +80,13 @@ class Toolbox:
         old_version = old["doc"]["version"]
         if version <= old_version:
             raise ToolboxError("duplicate_id", "%s exists in version %s; version %s is not newer." % (tid, old_version, version))
-        self.library.save("transforms", tid, doc, author)       # trust and lifecycle stay with the meta record (REQ-WFM-092)
+        # The order is on purpose: the event first, so a failing event store refuses the replace instead of leaving new trusted code without a trace (F5);
+        # the allowance next, so a failure after it can only take a permission away, never keep one for code the owner has not seen (F1).
         if old["trust"] == "trusted":
             self.events.record({"id": tid, "old_version": old_version, "new_version": version, "author": author})
+        if self.library.get_meta(tid).get("baseline_allowed"):
+            self.library.set_meta(tid, author, baseline_allowed=False)      # an allowance belongs to the version the owner saw
+        self.library.save("transforms", tid, doc, author)       # trust and lifecycle stay with the meta record (REQ-WFM-092)
         return tid
 
     def export_transform(self, tid):
@@ -102,7 +110,12 @@ class Toolbox:
         if value == "trusted" and not self.is_owner(account):
             # Exception to CON-6 (A-89): only the owner trusts code; any account may take trust back (REQ-WFM-054).
             raise ToolboxError("owner_only", "Only the owner may mark a transform as trusted.")
-        self.library.set_trust(tid, value, account)
+        if value == "untrusted":
+            # the reason says who took the trust back (REQ-WFM-090); the import text would be wrong here, and a shipped entry has none
+            reason = REASON_UNTRUSTED_BY_OWNER if self.is_owner(account) else REASON_UNTRUSTED_BY_ACCOUNT
+            self.library.set_meta(tid, account, trust=value, reason=reason)
+        else:
+            self.library.set_trust(tid, value, account)
 
     def set_lifecycle(self, tid, value, account, evidence=None, allow_baseline=False):
         if value not in LIFECYCLE:
@@ -111,7 +124,11 @@ class Toolbox:
             raise ToolboxError("evidence_missing", "Tested needs the check or run that shows it.")
         if allow_baseline and not self.is_owner(account):
             raise ToolboxError("owner_only", "Only the owner may allow a retired untrusted transform as the baseline of a check.")
+        if allow_baseline and value != "retired":
+            raise ToolboxError("allowance_needs_retired", "The baseline allowance is given only when the transform is retired (REQ-WFM-091).")
         fields = {"lifecycle": value}
+        if value != "retired":
+            fields["baseline_allowed"] = False      # leaving retirement takes the allowance back
         if evidence is not None:
             fields["evidence"] = evidence
         if allow_baseline:

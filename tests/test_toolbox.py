@@ -16,7 +16,7 @@ for path in (REPO, os.path.join(REPO, "tests", "helpers"), os.path.join(REPO, "t
 
 from if_203_transforms import TransformLibraryMock     # noqa: E402
 from toolbox_fakes import EventRecord, exchange_file    # noqa: E402
-from toolbox import Toolbox, ToolboxError               # noqa: E402
+from toolbox import REASON_IMPORTED, Toolbox, ToolboxError               # noqa: E402
 from storage import Storage                             # noqa: E402
 from storage_files import FileBackend                   # noqa: E402
 from workflow_library import WorkflowLibrary            # noqa: E402
@@ -57,19 +57,98 @@ class ImportChecks(unittest.TestCase):
 
 class BaselineChecks(unittest.TestCase):
     def test_the_allowance_counts_only_for_a_retired_transform_and_a_failed_set_changes_nothing(self):
-        """Example: an allowance given while the transform is live does not let it run as baseline; a refused allowance leaves the lifecycle as it was."""
+        """Example: an allowance given while the transform is live is refused (F2, D-229); a refused allowance leaves the lifecycle as it was."""
         library = TransformLibraryMock()
         box = Toolbox(library, lambda account: account == "anna", EventRecord())
         box.import_transform(exchange_file("t.one", code="def run(args):\n    return 1\n"), "anna")
-        box.set_lifecycle("t.one", "draft", "anna", allow_baseline=True)
         with self.assertRaises(ToolboxError) as caught:
+            box.set_lifecycle("t.one", "draft", "anna", allow_baseline=True)
+        self.assertEqual(caught.exception.code, "allowance_needs_retired")
+        with self.assertRaises(ToolboxError):
             box.run("t.one", {}, as_baseline=True)
-        self.assertEqual(caught.exception.code, "untrusted")
         with self.assertRaises(ToolboxError):
             box.set_lifecycle("t.one", "retired", "guest", allow_baseline=True)
         self.assertEqual(box.look_up("t.one")["lifecycle"], "draft")
-        box.set_lifecycle("t.one", "retired", "anna")      # the twin: retired and allowed runs as baseline
+        box.set_lifecycle("t.one", "retired", "anna", allow_baseline=True)      # the twin: retired and allowed runs as baseline
         self.assertEqual(box.run("t.one", {}, as_baseline=True), 1)
+
+
+class VerifyFindings:
+    """Findings F1 to F5 of the Verify run of 2026-11-12 (D-229), on the mock and on the real library. A failing test came first for each."""
+    def make_library(self):
+        raise NotImplementedError
+
+    def setUp(self):
+        self.library = self.make_library()
+        self.events = EventRecord()
+        self.box = Toolbox(self.library, lambda account: account == "anna", self.events)
+
+    def untrusted_retired_allowed(self, tid="t.one"):
+        self.box.import_transform(exchange_file(tid, 1), "guest")
+        self.box.set_lifecycle(tid, "retired", "anna", allow_baseline=True)
+
+    def test_f1_an_allowance_does_not_survive_a_newer_version(self):
+        """Example: the owner allows version 1 as baseline; another account imports version 2; the check is refused as untrusted."""
+        self.untrusted_retired_allowed()
+        self.box.import_transform(exchange_file("t.one", 2), "mallory")
+        self.assertFalse(self.box.look_up("t.one")["baseline_allowed"])
+        with self.assertRaises(ToolboxError) as caught:
+            self.box.run("t.one", {}, as_baseline=True)
+        self.assertEqual(caught.exception.code, "untrusted")
+
+    def test_f2_an_allowance_belongs_to_a_retirement(self):
+        """Example: an allowance with another lifecycle is refused and stores nothing; un-retiring clears an allowance."""
+        self.box.import_transform(exchange_file("t.one", 1), "guest")
+        with self.assertRaises(ToolboxError) as caught:
+            self.box.set_lifecycle("t.one", "draft", "anna", allow_baseline=True)
+        self.assertEqual(caught.exception.code, "allowance_needs_retired")
+        self.assertFalse(self.box.look_up("t.one")["baseline_allowed"])
+        self.untrusted_retired_allowed("t.two")
+        self.box.set_lifecycle("t.two", "draft", "guest")
+        self.assertFalse(self.box.look_up("t.two")["baseline_allowed"])
+        self.box.set_lifecycle("t.two", "retired", "guest")         # a later retire by any account must not bring it back
+        with self.assertRaises(ToolboxError):
+            self.box.run("t.two", {}, as_baseline=True)
+
+    def test_f3_a_float_version_is_invalid_file(self):
+        good = json.loads(exchange_file("t.one"))
+        with self.assertRaises(ToolboxError) as caught:
+            self.box.import_transform(json.dumps(dict(good, version=1.0)), "anna")
+        self.assertEqual(caught.exception.code, "invalid_file")
+        self.assertEqual(self.library.list_ids("transforms"), [])
+
+    def test_f4_the_reason_after_an_untrust_is_not_the_import_text_and_not_empty(self):
+        """Example: a trusted entry, untrusted by the owner, and a shipped one untrusted by an account."""
+        self.box.import_transform(exchange_file("t.one", 1), "guest")
+        self.box.set_trust("t.one", "trusted", "anna")
+        self.box.set_trust("t.one", "untrusted", "anna")
+        reason = self.box.look_up("t.one")["reason"]
+        self.assertTrue(reason)
+        self.assertNotEqual(reason, REASON_IMPORTED)
+
+    def test_f5_a_failed_event_refuses_the_replace(self):
+        """Example: the event stand-in raises; the entry stays in version 1."""
+        self.box.import_transform(exchange_file("t.one", 1), "guest")
+        self.box.set_trust("t.one", "trusted", "anna")
+
+        def broken(event):
+            raise RuntimeError("event store down")
+        self.events.record = broken
+        with self.assertRaises(RuntimeError):
+            self.box.import_transform(exchange_file("t.one", 2), "guest")
+        self.assertEqual(self.box.look_up("t.one")["version"], 1)
+
+
+class VerifyFindingsMock(VerifyFindings, unittest.TestCase):
+    def make_library(self):
+        return TransformLibraryMock()
+
+
+class VerifyFindingsReal(VerifyFindings, unittest.TestCase):
+    def make_library(self):
+        folder = tempfile.mkdtemp(prefix="toolbox-store-")
+        self.addCleanup(shutil.rmtree, folder, True)
+        return WorkflowLibrary(Storage(FileBackend(folder)))
 
 
 class SeedChecks(unittest.TestCase):
