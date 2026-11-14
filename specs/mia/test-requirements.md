@@ -16,8 +16,8 @@
 | 5 | Stand-in (PANEL) | The scripted skill, the fake of skill_runs, the clock (G-V3.PANEL) | TR-PANEL-002, TR-PANEL-003, TR-PANEL-007 |
 | 6 | Persistence | A restart is a new process (G-V3.PANEL) | TR-PANEL-004 |
 | 7 | Untrusted text | The fixed list of hostile strings (G-V3.PANEL) | TR-PANEL-005 |
-| 9 | Eval setup (CHAT) | Pin, holdout, labels, hard checks and error rates of EV-skill_turns (G-V3.CHAT) | TR-CHAT-001, TR-CHAT-002, TR-CHAT-003, TR-CHAT-004, TR-CHAT-005, TR-CHAT-007 |
-| 10 | Fakes (CHAT) | The fake model server (G-V3.CHAT) | TR-CHAT-006 |
+| 9 | Eval setup (CHAT) | Pin, holdout, labels, hard checks and error rates of EV-skill_turns (G-V3.CHAT) | TR-CHAT-001, TR-CHAT-002, TR-CHAT-003, TR-CHAT-004, TR-CHAT-005, TR-CHAT-007, TR-CHAT-008 |
+| 10 | Fakes (CHAT) | The fake model server (G-V3.CHAT) | TR-CHAT-006, TR-CHAT-009 |
 | 8 | Exact values (PANEL) | Names, states, orders and figures (G-V3.PANEL) | TR-PANEL-006 |
 
 ### TR-MODEL-001 – storage stand-in is a minimal fake with a known gap
@@ -84,12 +84,12 @@
 - Requirement: REQ-CLV-040
 - Group: Layout
 - Kind: setup
-- Text: The layout checks shall run in headless Chromium of the test harness (podman, D-141) at 1440 x 900 px, 1920 x 1080 px and 360 x 800 px, in the light and the dark theme, with the same fonts, and read sizes from the rendered page.
+- Text: The layout checks shall run in headless Chromium of the test harness (podman, D-141) at 1440 x 900 px, 1920 x 1080 px and 360 x 800 px, in the light and the dark theme, with the same fonts, and read sizes from the rendered page; the harness is the image localhost/mia-browser with Chromium 156.0.8078.73 and chromium-driver of Debian 13, selenium 4.25.0 and the font DejaVu Sans (package fonts-dejavu-core), as read on 2026-11-08.
 - Rationale: heights, overlap and page scroll depend on window size, fonts and theme; the 150 px and 34 % limits mean nothing without them
 - Credibility aspect: reference environment
 - Verified by: harness log of the window sizes and theme of each run
 - Status: Draft
-- History: G-V3.PANEL Plan step 3 (2026-11-08), new
+- History: G-V3.PANEL Plan step 3 (2026-11-08), new; versions of the harness named in Plan step 4 (2026-11-08)
 
 ### TR-PANEL-002 – the scripted stand-in skill knows nothing of the view
 - Applies to: TC-CLV-030, TC-CLV-031, TC-CLV-032, TC-CLV-033, TC-CLV-034, TC-CLV-035, TC-CLV-038, TC-CLV-039, TC-CLV-043, TC-CLV-044, TC-WFM-136, TC-WFM-138
@@ -249,3 +249,26 @@
 - Status: Draft
 - History: G-V3.CHAT Plan step 3 (2026-11-08), new
 
+### TR-CHAT-008 – the scorer is checked on fixed outputs
+- Applies to: TC-CHA-064, TC-CHA-065, TC-CHA-066, TC-CHA-067
+- Requirement: REQ-CHA-053
+- Group: Eval setup (CHAT)
+- Kind: unit
+- Text: The checks of the scorer and of the target digest shall use outputs, sources and labels written in the test with known results, and shall call no model except the scripted fake model of TR-CHAT-006.
+- Rationale: the scorer decides REQ-CHA-049, 053 and 054; a scorer that is only checked on model output could hide its own mistakes
+- Credibility aspect: reference accuracy
+- Verified by: inspection of the checks: none starts a model server
+- Status: Draft
+- History: G-V3.CHAT Plan step 4 (2026-11-08), new, with the note `goals/G-V3.CHAT/eval-target-note.md`
+
+### TR-CHAT-009 – the end-to-end check of a run uses the same fakes
+- Applies to: TC-CHA-068
+- Requirement: REQ-BE-078
+- Group: Fakes (CHAT)
+- Kind: setup
+- Text: The end-to-end check of a run in the backend shall use the real chat service, the real run recorder and observer, the digest step on the fake model of TR-CHAT-006 and the fake storage of TR-PANEL-003, and no model server and no browser.
+- Rationale: the parts are checked one by one elsewhere; this check shows that they work together, and only the model and the storage are stand-ins
+- Credibility aspect: stand-in fidelity
+- Verified by: inspection of the check: it starts no model server and no container
+- Status: Draft
+- History: G-V3 Plan step 4 (2026-11-08), new; the check was renamed from TC-MIA-030 to TC-CHA-068 (a Scenarios section in the root test-spec switches on the scenario rule for every old root check)

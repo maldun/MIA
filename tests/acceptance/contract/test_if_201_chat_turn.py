@@ -159,5 +159,80 @@ class ChatTurnContract(unittest.TestCase):
             self.fail("no ServiceError raised")
 
 
+LINK = " [Open in the Skill run view](#run=%s)"
+
+
+@contract
+class SkillTurnContract(unittest.TestCase):
+    """IF-201 v3 (A-142): the turns of a skill run in the chat (G-V3.CHAT)."""
+
+    @mark.req("IF-201", "REQ-CHA-040", "REQ-CHA-041", "REQ-CHA-043", "REQ-CHA-044", "REQ-CHA-056", "REQ-CHA-057")
+    @each_provider(IF, make(phases=("screening", "reading")))
+    def test_a_turn_of_a_skill_is_a_message_with_its_marker(self, chat):
+        """TC-IF-201-09 (v3): `skill_turn(account, run, kind, payload)` with kind question, phase, done, failed or stopped adds one message of MIA that carries `skill_run: <run>` and `kind` in the event chat_message and in the history and returns its `{id}`; the texts of done, failed and stopped end with ` [Open in the Skill run view](#run=<run>)`; a question is its text; the text of failed contains the reason; the summary of a long full result is shorter than the result.
+        Example: skill_turn("anna", "r1", "failed", "the scholarly service is down") -> a message ending with the link, containing the reason."""
+        seen = []
+        chat.subscribe(seen.append)
+        full = "The works agree on lower costs. " * 200
+        turns = [("question", "Which period?"), ("phase", "screening"), ("done", full), ("failed", "the scholarly service is down"), ("stopped", "stopped by the user")]
+        ids = []
+        for kind, payload in turns:
+            ack = chat.skill_turn("anna", "r1", kind, payload)
+            self.assertEqual(set(ack), {"id"})
+            ids.append(ack["id"])
+        chat.settle()
+        by_id = {m["id"]: m for m in chat.history()}
+        self.assertEqual([by_id[i]["kind"] for i in ids], [k for k, _ in turns])
+        for i in ids:
+            self.assertEqual((by_id[i]["skill_run"], by_id[i]["role"], by_id[i]["sender"]), ("r1", "assistant", "MIA"))
+        messages = [e["payload"] for e in seen if e["event"] == "chat_message" and e["payload"].get("skill_run")]
+        self.assertEqual([(m["id"], m["kind"], m["skill_run"]) for m in messages], [(i, k, "r1") for i, (k, _) in zip(ids, turns)])
+        self.assertIn("Which period?", by_id[ids[0]]["text"])
+        for i in ids[2:]:
+            self.assertTrue(by_id[i]["text"].endswith(LINK % "r1"), by_id[i]["text"])
+        self.assertIn("the scholarly service is down", by_id[ids[3]]["text"])
+        self.assertLess(len(by_id[ids[2]]["text"]), len(full))
+        for i in ids[:2]:
+            self.assertNotIn("#run=", by_id[i]["text"])
+
+    @mark.req("IF-201", "REQ-CHA-041", "REQ-CHA-042", "REQ-CHA-055")
+    @each_provider(IF, make(phases=("screening",)))
+    def test_a_phase_that_the_skill_does_not_declare_adds_no_message(self, chat):
+        """TC-IF-201-10 (v3): a phase that the manifest of the skill does not declare gives `{"id": None}` and adds no message and no event; a declared phase gives a message.
+        Example: with declared phase screening, skill_turn("anna", "r1", "phase", "indexing") -> {"id": None}."""
+        seen = []
+        chat.subscribe(seen.append)
+        before = len(chat.history())
+        self.assertEqual(chat.skill_turn("anna", "r1", "phase", "indexing"), {"id": None})
+        chat.settle()
+        self.assertEqual((len(chat.history()), seen), (before, []))
+        ack = chat.skill_turn("anna", "r1", "phase", "screening")
+        self.assertTrue(ack["id"])
+        self.assertEqual(len(chat.history()), before + 1)
+
+    @mark.req("IF-201", "REQ-CHA-040")
+    @each_provider(IF)
+    def test_an_unknown_kind_is_refused_and_adds_nothing(self, chat):
+        """TC-IF-201-11 (v3): an unknown kind is ServiceError invalid_kind and nothing is added.
+        Example: skill_turn("anna", "r1", "chat", "x") -> ServiceError("invalid_kind")."""
+        before = chat.history()
+        self.assertEqual(code_of(lambda: chat.skill_turn("anna", "r1", "chat", "x")), "invalid_kind")
+        chat.settle()
+        self.assertEqual(chat.history(), before)
+
+    @mark.req("IF-201", "REQ-CHA-045", "REQ-CHA-047")
+    @each_provider(IF, make(phases=("screening",)))
+    def test_every_message_of_a_skill_turn_is_sent_to_speech(self, chat):
+        """TC-IF-201-12 (v3): each message that skill_turn adds is followed by at least one audio_chunk with its id, like an answer; a phase without a message gives none.
+        Example: skill_turn("anna", "r1", "question", "Which period?") -> an audio_chunk {id, index 0, sentence}."""
+        seen = []
+        chat.subscribe(seen.append)
+        ids = [chat.skill_turn("anna", "r1", kind, payload)["id"] for kind, payload in (("question", "Which period?"), ("phase", "screening"), ("done", "All done."))]
+        self.assertIsNone(chat.skill_turn("anna", "r1", "phase", "indexing")["id"])
+        chat.settle()
+        spoken = {e["payload"]["id"] for e in seen if e["event"] == "audio_chunk"}
+        self.assertEqual(spoken, set(ids))
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -8,16 +8,16 @@ The 14 record tables of IF-302 (history, which also holds the summaries and the 
 
 ### REQ-RTB-001 – Shared state held
 - Level: low   Subject: Persistence
-- Text: The Record tables shall define the 14 tables of IF-302 v5: history, memory, votes, tasks, memos, accounts, presets, gestures, runs (run results), source_trust (trust values of sources), cases, behaviours, workflow_meta and reports; summaries and the chat log are records of history.
+- Text: The Record tables shall define the 15 tables of IF-302 v8: history, memory, votes, tasks, memos, accounts, presets, gestures, runs (run results), source_trust (trust values of sources), cases, behaviours, workflow_meta, reports and skill_runs (the run records of the Skill run view, REQ-RTB-007); summaries and the chat log are records of history.
 - Rationale: refines REQ-DB-002
 - Parent: REQ-DB-002
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-15: a record of each kind is written and read back identically
 - Verified by: TC-RTB-001
-- Status: Verified
+- Status: Approved
 - History: 2026-10-31 D-161: the 14 tables of IF-302 v5 listed (it named summaries and a chat log, which are records of history, and missed six tables)
-- Proposed (A-141, G-V3.PANEL, 2026-11-08): the approved text above stays in force until A-141 is approved; the text would then name 15 tables, skill_runs added after reports (REQ-RTB-007).
+- History (cont.): A-141 (G-V3.PANEL, approved 2026-11-08, D-302): 15 tables, skill_runs added after reports (REQ-RTB-007); applied in Implement of G-V3.PANEL T-01 (2026-11-08, owner's ruling on the conflict with the unit test); Verified again after the next verification
 
 ### REQ-RTB-002 – Run results
 - Level: low   Subject: Persistence

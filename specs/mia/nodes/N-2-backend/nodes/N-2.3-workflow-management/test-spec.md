@@ -62,7 +62,7 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-203
 | TC-WFM-132 | REQ-WFM-132 | Component | 1 | unit test with the fake storage of `skill_runs` and a fake clock | AC-39: result, material and file names stored | exact |
 | TC-WFM-133 | REQ-WFM-133 | Component | 1 | unit test with the fake storage of `skill_runs` and a fake clock | AC-39: answers in order with their times | exact |
 | TC-WFM-134 | REQ-WFM-134 | Component | 1 | unit test with the fake storage of `skill_runs` and a fake clock | AC-39: newest started while running; last ended otherwise; no earlier run | exact |
-| TC-WFM-135 | REQ-WFM-135 | Component | 1 | unit test with the fake storage of `skill_runs` and a fake clock | AC-39: records gone, files stay | exact |
+| TC-WFM-135 | REQ-WFM-135 | Component | 1 | unit test with the fake storage of `skill_runs` and a fake clock | AC-39: the run of the deleted history record is gone, the others and the files stay | exact |
 | TC-WFM-136 | REQ-WFM-136 | Component | 1 | unit test with the fake storage of `skill_runs` and a fake clock | AC-39: a skill that sends only today's events gets a record and a view | exact |
 | TC-WFM-137 | REQ-WFM-137 | Component | 1 | unit test with the fake storage of `skill_runs` and a fake clock | AC-39: stored and read back byte for byte; no tool call | exact |
 | TC-WFM-138 | REQ-WFM-138 | Component | 1 | unit test with the fake storage of `skill_runs` and a fake clock | AC-39: two reported elements are in task_status and in the run record; none gives an empty list | exact |
@@ -169,9 +169,9 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-203
 
 ### TC-WFM-135 – Chat history deleted
 - Verifies: REQ-WFM-135
-- Given: two accounts with one finished run and one stored file each
-- When: the history records of the first account are deleted through the fake storage and its `subscribe` notification arrives
-- Then: no run is named for the first account, its records are gone, `skill_run_changed` with no id is sent; its file and the files of the second account are still listed; the second account's run is still named
+- Given: three finished runs, two of the first account and one of the second, a history record with the id of each run, and one stored file each
+- When: one history record of the first account is deleted through the fake storage and its `subscribe` notification arrives
+- Then: only the run with that id is gone and `skill_run_changed` names its id; the other run of the first account and the run of the second account are still named and read; the files of both accounts are still listed (A-144)
 
 ### TC-WFM-136 – Runs without knowledge of the view
 - Verifies: REQ-WFM-136

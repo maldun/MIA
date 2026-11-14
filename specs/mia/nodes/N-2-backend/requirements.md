@@ -924,11 +924,11 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Rationale: refines FR-35 and FR-46; the rest of a run is in the Skill run view (owner 2026-11-07, A-131)
 - Parent: FR-35
 - Priority: Must
-- Verification method: Test, Evaluation
+- Verification method: Test
 - Acceptance criterion: AC-39 and AC-30 (the chat part): on a scripted review the chat holds the questions, the answers, the declared status messages and one summary with a link, all spoken, nothing else of the run
-- Verified by: TC-CHA-040, EV-skill_turns
+- Verified by: TC-CHA-040
 - Status: Draft
-- History: A-131 (proposed 2026-11-08, G-V3.CHAT), new; owner 2026-11-08
+- History: A-131 (proposed 2026-11-08, G-V3.CHAT), new; owner 2026-11-08; method Evaluation dropped 2026-11-08 (agent_check A1): the model behaviour is judged by the Eval criteria of REQ-CHA-049, 053 and 054, this requirement checks only the structure of the chat
 
 ## Interface requirements
 

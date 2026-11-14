@@ -48,11 +48,15 @@
   <div class="visually-hidden" id="mood-live" role="status" aria-live="polite"></div>
   <div class="visually-hidden" id="announce" role="status" aria-live="polite"></div>
 
+  <!-- the box the character is framed in: the window without the chat and the Skill run view (REQ-CLV-040); an invisible marker, the character itself is the iframe above -->
+  <div class="character-box" id="character-box" aria-hidden="true"></div>
+
   <!-- the chat -->
   <aside class="panel" id="panel" aria-label="Chat" data-collapsed="false">
     <div class="panel-resize" id="panel-resize" role="separator" aria-orientation="vertical" tabindex="0" aria-label="Resize chat" data-i18n-aria-label="panel.resize"></div>
     <button class="sheet-handle" id="sheet-handle" type="button" aria-label="Resize chat" data-i18n-aria-label="panel.resize"></button>
 
+    <div class="chat-body" id="chat">
     <header class="panel-header">
       <div class="avatar" aria-hidden="true">M</div>
       <div class="who">
@@ -163,11 +167,47 @@
         <svg class="icon" aria-hidden="true"><use href="#i-send"/></svg>
       </button>
     </form>
+    </div>
   </aside>
 
   <button class="panel-open" id="panel-open" type="button" hidden aria-label="Show chat" data-i18n-aria-label="panel.show">
     <svg class="icon" aria-hidden="true"><use href="#i-chat"/></svg>
   </button>
+
+  <!-- the Skill run view (REQ-FE-032): a strip with the run that the backend names; skill-run.js draws it from the model skill-run-model.js -->
+  <section class="skill-run" id="skill-run-view" aria-label="Skill run" data-i18n-aria-label="srv.label">
+    <p class="srv-empty" id="srv-empty" data-i18n="srv.empty">No skill has run yet.</p>
+    <div class="srv-run" id="srv-run" hidden>
+      <div class="srv-head">
+        <strong id="srv-header"></strong>
+        <span class="srv-state" id="srv-state"></span>
+        <span class="srv-buttons">
+          <button type="button" id="srv-pause" data-i18n="task.pause">Pause</button>
+          <button type="button" id="srv-resume" data-i18n="task.resume">Resume</button>
+          <button type="button" id="srv-stop" data-i18n="task.stop">Stop</button>
+        </span>
+      </div>
+      <ol class="srv-phases" id="srv-phases"></ol>
+      <div class="srv-figures" id="srv-figures"></div>
+      <p class="srv-reason" id="srv-reason" hidden></p>
+      <dl class="srv-elements" id="srv-elements"></dl>
+      <details class="srv-full" id="srv-full">
+        <summary data-i18n="srv.full">Full run</summary>
+        <div class="srv-full-body" id="srv-full-body">
+        <h3 data-i18n="srv.result">Result</h3>
+        <div class="srv-result" id="srv-result"></div>
+        <h3 data-i18n="srv.answers">Your answers</h3>
+        <ol id="srv-answers"></ol>
+        <h3 data-i18n="srv.material">Material</h3>
+        <ul id="srv-material"></ul>
+        <h3 data-i18n="srv.files">Files</h3>
+        <ul id="srv-files"></ul>
+        <h3 data-i18n="srv.counts">Counts</h3>
+        <p id="srv-counts"></p>
+        </div>
+      </details>
+    </div>
+  </section>
 
   <dialog id="confirm" aria-labelledby="confirm-text">
     <p id="confirm-text"></p>
@@ -237,6 +277,14 @@
       <label class="setting check"><input type="checkbox" id="set-emotions"><span data-i18n="settings.emotions">Show emotions at messages</span></label>
       <label class="setting check"><input type="checkbox" id="set-times"><span data-i18n="settings.times">Show times</span></label>
       <label class="setting check"><input type="checkbox" id="set-compact"><span data-i18n="settings.compact">Compact messages</span></label>
+      <label class="setting">
+        <span data-i18n="srv.share.strip">Skill run strip: height in % of the window (12 to 40)</span>
+        <input type="number" id="srv-share-strip" min="12" max="40" step="1" value="16" inputmode="numeric">
+      </label>
+      <label class="setting">
+        <span data-i18n="srv.share.full">Skill run, full run part: height in % of the window (20 to 60)</span>
+        <input type="number" id="srv-share-full" min="20" max="60" step="1" value="34" inputmode="numeric">
+      </label>
       <label class="setting">
         <span data-i18n="settings.token">Editor token</span>
         <input type="password" id="set-token" autocomplete="off" spellcheck="false" data-i18n-placeholder="settings.token.placeholder" placeholder="from data/editor_token.txt">

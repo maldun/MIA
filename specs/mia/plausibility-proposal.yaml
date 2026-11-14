@@ -2386,3 +2386,364 @@ proposal:
     decision: questionable
     basis: ["decided by the owner on 2026-10-26; checked in the field with the first users"]
     accepted_risk: {reason: "the number of simultaneous users is a fact about use; the field shows it", owner: "{by}", decided: "2026-10-26 by {by}", follow_up: "VAL-003"}
+  # G-V3.PANEL (merged 2026-11-08)
+  REQ-FE-032:
+    text: 'The Web Frontend shall show the status, phases, budgets, controls, answers, full result and files of a skill run in the Skill run view, apart from the chat.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on a scripted run, no model (proposal of the agent, 2026-11-08, G-V3.PANEL)"
+
+  REQ-CLV-024:
+    text: 'The Chat and login views shall list the files of the run shown in the Full run part of the Skill run view with name, size, time and task, offer each as a downlo'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on a scripted run, no model (proposal of the agent, 2026-11-08, G-V3.PANEL); the earlier rating of the old wording is kept unless the owner objects"
+
+  REQ-CLV-030:
+    text: 'The Chat and login views shall show in the header line of the Skill run view the skill name, the start time and the state of the run.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on a scripted run, no model (proposal of the agent, 2026-11-08, G-V3.PANEL)"
+
+  REQ-CLV-031:
+    text: 'The Chat and login views shall show the declared phases of a run as pills in the Skill run view and mark the current phase and the phase of a failure or stop.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on a scripted run, no model (proposal of the agent, 2026-11-08, G-V3.PANEL)"
+
+  REQ-CLV-032:
+    text: 'The Chat and login views shall show every budget that the run reports as used and limit and every count that it reports in the Skill run view, updated in place '
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on a scripted run, no model (proposal of the agent, 2026-11-08, G-V3.PANEL)"
+
+  REQ-CLV-033:
+    text: 'When the user presses pause, resume or stop in the Skill run view, the Chat and login views shall send that request once to IF-101 and show the state the backen'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on a scripted run, no model (proposal of the agent, 2026-11-08, G-V3.PANEL)"
+
+  REQ-CLV-034:
+    text: 'The Chat and login views shall show in the Skill run view the run that the backend names as shown (REQ-WFM-134).'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on a scripted run, no model (proposal of the agent, 2026-11-08, G-V3.PANEL)"
+
+  REQ-CLV-035:
+    text: 'When a run fails or is stopped, the Chat and login views shall show its reason in one line in the strip of the Skill run view.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on a scripted run, no model (proposal of the agent, 2026-11-08, G-V3.PANEL)"
+
+  REQ-CLV-037:
+    text: 'When the user follows a chat link to the Skill run view, the Chat and login views shall open the Full run part of the linked run and bring the view into sight.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on a scripted run, no model (proposal of the agent, 2026-11-08, G-V3.PANEL)"
+
+  REQ-CLV-038:
+    text: 'When the page loads, the Chat and login views shall show in the Skill run view the run that the backend names as shown, with its final figures if it has ended.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on a scripted run, no model (proposal of the agent, 2026-11-08, G-V3.PANEL)"
+
+  REQ-CLV-039:
+    text: 'While the backend names no run, the Chat and login views shall show in the Skill run view the text that no skill has run yet and no control.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on a scripted run, no model (proposal of the agent, 2026-11-08, G-V3.PANEL)"
+
+  REQ-CLV-043:
+    text: 'The Chat and login views shall show every text of a run (result, material found, answers, reason) as plain text that starts no action and loads nothing.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on a scripted run, no model (proposal of the agent, 2026-11-08, G-V3.PANEL)"
+
+  REQ-CLV-044:
+    text: 'Where a run reports elements of its own, the Chat and login views shall show each as a label with its text in the strip of the Skill run view beside the common '
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on a scripted run, no model (proposal of the agent, 2026-11-08, G-V3.PANEL)"
+
+  REQ-CLV-036:
+    text: 'The Chat and login views shall keep the Full run part of the Skill run view collapsed until opened, at most the user''s share of the viewport height (default 34'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on a scripted run, no model (proposal of the agent, 2026-11-08, G-V3.PANEL); the default 34 % is the max-height (34vh) of the Full run part of the owner's mockup, which scrolls inside itself; the user can change the share within 20 to 60 % (REQ-CLV-045)"
+
+  REQ-CLV-040:
+    text: 'Where the window is wider than 820 px, the Chat and login views shall place the character box left, the chat right and the Skill run view as a strip below both,'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on a scripted run, no model (proposal of the agent, 2026-11-08, G-V3.PANEL); the layout and the 820 px switch are those of the owner's mockup, checked by screenshots in headless Chromium at 1440 and 600 px (hand-over of 2026-11-08); not yet on the real page"
+
+  REQ-CLV-041:
+    text: 'Where the window is wider than 820 px, the Chat and login views shall keep the Skill run view strip, Full run part closed, at most the user''s viewport height s'
+    proposed: questionable
+    basis: "the default 16 % of the viewport height is the mockup's strip of about 140 px at 900 px (15.6 %), read from the mockup in headless Chromium, no real page yet; the real page with its fonts and the header buttons may need more; the user can enlarge it and, since the content scrolls inside the strip (REQ-CLV-047), reduce it down to 12 %"
+    category: field
+    attention: ['numeric bound in the criterion', 'decided by a measurement']
+    probe: {what: 'the browser check TC-CLV-041 on the first real strip with three phases at 1440 x 900, 1920 x 1080 and 360 x 800 px, and the owner in VAL-012', who: 'G-V3.PANEL Implement, then the owner', when: 'first task that draws the strip'}
+
+  REQ-CLV-042:
+    text: 'Where the window is at most 820 px wide, the Chat and login views shall stack the character box, the chat and the Skill run view in this order, every control at'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on a scripted run, no model (proposal of the agent, 2026-11-08, G-V3.PANEL); the 44 px targets on the phone are the bound of NFR-1 (the wide strip is the owner's exception of 2026-11-08)"
+
+  REQ-CLV-045:
+    text: 'The Chat and login views shall let the user set the viewport height share of the strip (12 to 40 %) and of the Full run part (20 to 60 %).'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on a scripted run, no model (proposal of the agent, 2026-11-08, G-V3.PANEL); the ranges 12 to 40 % and 20 to 60 % are the agent's limits so that the strip stays larger than a pill row with scrolling (proposal, owner to confirm)"
+
+  REQ-CLV-046:
+    text: 'The Chat and login views shall keep the two shares in the browser, apply them at every load and use 16 % and 34 % when none is kept or the browser refuses to st'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on a scripted run, no model (proposal of the agent, 2026-11-08, G-V3.PANEL); browser storage can be refused (private window, blocked site data), so the default 16 % and 34 % apply then; checked with a blocked profile in TC-CLV-046"
+
+  REQ-CLV-047:
+    text: 'When the content of the strip does not fit its height, the Chat and login views shall scroll the content inside the strip and not move the page.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on a scripted run, no model (proposal of the agent, 2026-11-08, G-V3.PANEL)"
+
+  REQ-WFM-031:
+    text: 'The Workflow management shall let every task report its state while it runs, the phase, budget figures (used and limit) for time, tokens, model calls, API reque'
+    proposed: plausible
+    basis: "reworded for A-131; the earlier rating stays and applies to the new wording unless the owner objects (proposal of the agent, 2026-11-08)"
+
+  REQ-WFM-036:
+    text: 'The Workflow management shall, when a task has ended, publish one summary of its result of at most 1200 characters as a new message at the end of the chat with '
+    proposed: plausible
+    basis: "reworded for A-131; the earlier rating stays and applies to the new wording unless the owner objects (proposal of the agent, 2026-11-08); the 1200 characters of REQ-WFM-036 are the bound of FR-35"
+
+  REQ-WFM-038:
+    text: 'The Workflow management shall store the finished report of the example workflow review as a record in the database through the storage interface IF-102 with the'
+    proposed: plausible
+    basis: "reworded for A-131; the earlier rating stays and applies to the new wording unless the owner objects (proposal of the agent, 2026-11-08)"
+
+  REQ-WFM-039:
+    text: 'The Workflow management shall load each skill that runs as a task from a folder of its own (a manifest with the id, the text, the options, the phases worth tell'
+    proposed: plausible
+    basis: "reworded for A-131; the earlier rating stays and applies to the new wording unless the owner objects (proposal of the agent, 2026-11-08)"
+
+  REQ-WFM-130:
+    text: 'The Workflow management shall store one record per skill run, lookup and search included, in the table skill_runs through IF-102 with skill id, version, account'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on a scripted run, no model (proposal of the agent, 2026-11-08, G-V3.PANEL); depends on the table skill_runs of A-141, still a proposal"
+
+  REQ-WFM-131:
+    text: 'The Workflow management shall store the final figures of a run and, for a run that failed or was stopped, its reason in the run record when the run ends.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on a scripted run, no model (proposal of the agent, 2026-11-08, G-V3.PANEL); depends on the table skill_runs of A-141, still a proposal"
+
+  REQ-WFM-132:
+    text: 'The Workflow management shall store the full result, the material found on the way and the names of the files in the run record when the run ends.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on a scripted run, no model (proposal of the agent, 2026-11-08, G-V3.PANEL); depends on the table skill_runs of A-141, still a proposal"
+
+  REQ-WFM-133:
+    text: 'When a user answers a question of a running skill, the Workflow management shall append the answer with its time to the run record in the order given.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on a scripted run, no model (proposal of the agent, 2026-11-08, G-V3.PANEL); depends on the table skill_runs of A-141, still a proposal"
+
+  REQ-WFM-134:
+    text: 'The Workflow management shall name as shown the run started most recently while skills run and the run ended last when none runs, and no earlier run.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on a scripted run, no model (proposal of the agent, 2026-11-08, G-V3.PANEL)"
+
+  REQ-WFM-135:
+    text: 'When the chat history is deleted, the Workflow management shall delete the run records of the account and keep the files of the files volume.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on a scripted run, no model (proposal of the agent, 2026-11-08, G-V3.PANEL); depends on the table skill_runs of A-141, still a proposal"
+
+  REQ-WFM-136:
+    text: 'The Workflow management shall create the run record and send task_status for every skill from the events the skill sends today, without a change of the skill.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on a scripted run, no model (proposal of the agent, 2026-11-08, G-V3.PANEL)"
+
+  REQ-WFM-137:
+    text: 'The Workflow management shall store the texts of a run (result, material, answers, reason) unchanged as text and never execute or interpret them.'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on a scripted run, no model (proposal of the agent, 2026-11-08, G-V3.PANEL)"
+
+  REQ-WFM-138:
+    text: 'Where a skill reports elements of its own, the Workflow management shall pass them as label and text pairs in the event task_status and store them in the run re'
+    proposed: plausible
+    basis: "no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on a scripted run, no model (proposal of the agent, 2026-11-08, G-V3.PANEL); depends on the table skill_runs of A-141, still a proposal"
+
+  # G-V3.CHAT (appended 2026-11-08)
+  REQ-BE-078:
+    basis: 'the parent of REQ-CHA-040 to 063: the behaviour is split into exact checks with the fake model
+      and three evaluated criteria (REQ-CHA-049, 053, 054), which carry their own ratings (proposal of the
+      agent, 2026-11-08, G-V3.CHAT)'
+    proposed: plausible
+    text: 'The Backend shall put into the chat only the spoken text of a skill run: questions, answers,
+      a status message per declared phase and an end summary with a link to the Skill run view.'
+  REQ-CHA-040:
+    basis: no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance
+      criterion on a scripted run with the fake model, no real model (proposal of the agent, 2026-11-08,
+      G-V3.CHAT)
+    proposed: plausible
+    text: When a running skill asks a question, the Chat agent shall add the question to the chat as a message
+      of MIA and send it to speech.
+  REQ-CHA-041:
+    basis: no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance
+      criterion on a scripted run with the fake model, no real model (proposal of the agent, 2026-11-08,
+      G-V3.CHAT)
+    proposed: plausible
+    text: When a running skill enters a phase that its manifest declares worth telling, the Chat agent shall
+      add one new status message worded by SkillDigestStep in MIA's persona.
+  REQ-CHA-042:
+    basis: no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance
+      criterion on a scripted run with the fake model, no real model (proposal of the agent, 2026-11-08,
+      G-V3.CHAT)
+    proposed: plausible
+    text: While a skill runs, the Chat agent shall add no message about a phase that the manifest does not
+      declare worth telling.
+  REQ-CHA-043:
+    basis: no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance
+      criterion on a scripted run with the fake model, no real model (proposal of the agent, 2026-11-08,
+      G-V3.CHAT)
+    proposed: plausible
+    text: When a skill run ends done, the Chat agent shall add one summary of the full result worded by
+      SkillDigestStep.
+  REQ-CHA-044:
+    basis: no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance
+      criterion on a scripted run with the fake model, no real model (proposal of the agent, 2026-11-08,
+      G-V3.CHAT)
+    proposed: plausible
+    text: When a skill run fails, the Chat agent shall add one message with the reason, worded in MIA's
+      persona.
+  REQ-CHA-045:
+    basis: no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance
+      criterion on a scripted run with the fake model, no real model (proposal of the agent, 2026-11-08,
+      G-V3.CHAT)
+    proposed: plausible
+    text: The Chat agent shall send every message that it adds to the chat to speech.
+  REQ-CHA-046:
+    basis: no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance
+      criterion on a scripted run with the fake model, no real model (proposal of the agent, 2026-11-08,
+      G-V3.CHAT)
+    proposed: plausible
+    text: The Chat agent shall keep the questions, the answers, the end summary and the last status message
+      of each run in the history the chat model sees.
+  REQ-CHA-047:
+    basis: no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance
+      criterion on a scripted run with the fake model, no real model (proposal of the agent, 2026-11-08,
+      G-V3.CHAT)
+    proposed: plausible
+    text: The Chat agent shall apply the repair of REQ-CHA-014 to each status message, summary, failure
+      message and stop message.
+  REQ-CHA-048:
+    basis: no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance
+      criterion on a scripted run with the fake model, no real model (proposal of the agent, 2026-11-08,
+      G-V3.CHAT)
+    proposed: plausible
+    text: The Chat agent shall run SkillDigestStep without tools.
+  REQ-CHA-049:
+    attention: &id001
+    - decided by a measurement
+    - numeric bound in the criterion
+    - depends on the model, a GPU or a phone
+    basis: 'min 1.0 over 6 injection cases on a 12B model rests on no measurement: no baseline exists (D-332,
+      there is no digest today) and no spike; the miss rate at n 6 is 22 % (accepted by the owner on 2026-11-08,
+      hand-over item 7); the first dev run is the first measurement'
+    category: model
+    probe: &id002
+      what: the first dev run of the digest step on the 24 dev cases of skill_turns, 3 repeats, MP-light
+        with the options of eval-spec.md
+      when: first Implement task that has the step
+      who: G-V3.CHAT Implement, then the owner
+    proposed: questionable
+    text: The Chat agent shall have SkillDigestStep report an instruction quoted in a result as text and
+      not follow it, in the red-team cases of suite EV-skill_turns.
+  REQ-CHA-050:
+    basis: the 4096 tokens are half of num_ctx 8192 (NFR-2), a constant of the configuration; the check
+      counts what the fake model receives, no measurement of the real model (proposal of the agent, 2026-11-08,
+      G-V3.CHAT)
+    proposed: plausible
+    text: The Chat agent shall limit the input of each model call of SkillDigestStep to half of the context,
+      4096 tokens at num_ctx 8192.
+  REQ-CHA-051:
+    basis: no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance
+      criterion on a scripted run with the fake model, no real model (proposal of the agent, 2026-11-08,
+      G-V3.CHAT)
+    proposed: plausible
+    text: When the full result is longer than one input allows, the Chat agent shall have SkillDigestStep
+      digest it in consecutive pieces, leaving no part out.
+  REQ-CHA-052:
+    basis: the 1200 characters are a figure in the prompt only (FR-35, owner 2026-10-30); the check reads
+      the prompt, whether the model keeps to it is judged by REQ-CHA-053 (proposal of the agent, 2026-11-08,
+      G-V3.CHAT)
+    proposed: plausible
+    text: The Chat agent shall have the prompt of SkillDigestStep ask for a summary of at most 1200 characters.
+  REQ-CHA-053:
+    attention: *id001
+    basis: 'min 0.85 and low 0.70 rest on no measurement: no baseline exists (D-332) and no spike on the
+      pin; the bounds are a proposal of the owner''s review, the first dev run shows whether they are reachable'
+    category: model
+    probe: *id002
+    proposed: questionable
+    text: The Chat agent shall word end summaries with SkillDigestStep that are faithful to the full result.
+  REQ-CHA-054:
+    attention: *id001
+    basis: 'min 0.80 and low 0.70 rest on no measurement: no baseline exists (D-332) and no spike on the
+      pin; persona fidelity of a 12B model in short messages is untested; the first dev run shows whether
+      they are reachable'
+    category: model
+    probe: *id002
+    proposed: questionable
+    text: The Chat agent shall word status messages, end summaries, failure messages and stop messages with
+      SkillDigestStep in the persona of the persona file.
+  REQ-CHA-055:
+    basis: no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance
+      criterion on a scripted run with the fake model, no real model (proposal of the agent, 2026-11-08,
+      G-V3.CHAT)
+    proposed: plausible
+    text: While a skill without declared phases runs, the Chat agent shall add no status message.
+  REQ-CHA-056:
+    basis: no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance
+      criterion on a scripted run with the fake model, no real model (proposal of the agent, 2026-11-08,
+      G-V3.CHAT)
+    proposed: plausible
+    text: The Chat agent shall end each summary, failure message and stop message of a run with the link
+      `[Open in the Skill run view](#run=<id>)` that code adds, never one taken from the model text.
+  REQ-CHA-057:
+    basis: no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance
+      criterion on a scripted run with the fake model, no real model (proposal of the agent, 2026-11-08,
+      G-V3.CHAT)
+    proposed: plausible
+    text: When a skill run is stopped, the Chat agent shall add one message that says the run was stopped,
+      worded in MIA's persona.
+  REQ-CHA-058:
+    basis: no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance
+      criterion on a scripted run with the fake model, no real model (proposal of the agent, 2026-11-08,
+      G-V3.CHAT)
+    proposed: plausible
+    text: The Chat agent shall add no card, table, log line or full result of a run to the chat.
+  REQ-CHA-059:
+    basis: no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance
+      criterion on a scripted run with the fake model, no real model (proposal of the agent, 2026-11-08,
+      G-V3.CHAT)
+    proposed: plausible
+    text: The Chat agent shall keep every other status message of a run and its full result out of the history
+      the chat model sees.
+  REQ-CHA-060:
+    basis: no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance
+      criterion on a scripted run with the fake model, no real model (proposal of the agent, 2026-11-08,
+      G-V3.CHAT)
+    proposed: plausible
+    text: The Chat agent shall show and send to speech the repaired text of each status message, summary,
+      failure message and stop message.
+  REQ-CHA-061:
+    basis: no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance
+      criterion on a scripted run with the fake model, no real model (proposal of the agent, 2026-11-08,
+      G-V3.CHAT)
+    proposed: plausible
+    text: The Chat agent shall give SkillDigestStep the full result and each piece as user text to report,
+      never as instructions of the system prompt.
+  REQ-CHA-062:
+    basis: no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance
+      criterion on a scripted run with the fake model, no real model (proposal of the agent, 2026-11-08,
+      G-V3.CHAT)
+    proposed: plausible
+    text: When SkillDigestStep has digested the pieces of a result, the Chat agent shall have it write the
+      summary from the digests only.
+  REQ-CHA-063:
+    basis: no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance
+      criterion on a scripted run with the fake model, no real model (proposal of the agent, 2026-11-08,
+      G-V3.CHAT)
+    proposed: plausible
+    text: The Chat agent shall pass on the summary of SkillDigestStep to the chat uncut.
+  # G-V3.PANEL REQ-RTB-007 (A-141)
+  REQ-RTB-007:
+    basis: no number, measurement or model quality depends on it; the table definition is fixed by an exact
+      acceptance criterion on the contract of IF-302 v8, no model (proposal of the agent, 2026-11-08, G-V3.PANEL,
+      added with A-141)
+    proposed: plausible
+    text: The Record tables shall define the table skill_runs with the required fields run, skill, skill_version,
+      account, started and state, as versioned records that are deletable.

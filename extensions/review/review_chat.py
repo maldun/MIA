@@ -232,9 +232,10 @@ def run_review(text, run_skill, scholar, full_text_source, ask, on_event=None, s
         except Exception:                      # a voice that fails must not take the report away
             pass
 
-    def progress(plain):
+    def progress(plain, stage):
+        """`plain` is the step the chat shows, `stage` the declared phase name (manifest `phases`) that the card and the run record get"""
         if monitor is not None:
-            monitor.update(phase=plain)
+            monitor.update(phase=stage, elements=[{"label": "Now", "text": plain}])
         if on_event is None:
             return
         if not started["shown"]:
@@ -242,7 +243,7 @@ def run_review(text, run_skill, scholar, full_text_source, ask, on_event=None, s
             on_event({"kind": "run_start", "payload": {"show": True}})
         on_event({"kind": "step", "plain": plain})
 
-    progress("choosing keywords")
+    progress("choosing keywords", "choosing keywords")
     concepts, criteria = review_models.plan_keywords(run_skill, question)
     keywords = [k for words in concepts.values() for k in words]
     say(spoken_keywords(keywords))
@@ -253,16 +254,16 @@ def run_review(text, run_skill, scholar, full_text_source, ask, on_event=None, s
         keywords = reply["items"]
 
     def search(keyword, query):
-        progress("searching for %s" % keyword)
+        progress("searching for %s" % keyword, "searching")
         found = scholar.search(query, limit=cfg.get("review_results_per_keyword", 10), until=request.until, since=request.since, check_retraction=True)
         return found["works"]
 
     def screen_abstract_noted(work):
-        progress("reading the abstract: %s" % (work.get("title") or work.get("doi")))
+        progress("reading the abstract: %s" % (work.get("title") or work.get("doi")), "screening")
         return abstract(work)
 
     def screen_full_noted(work, text_):
-        progress("reading the full text: %s" % (work.get("title") or work.get("doi")))
+        progress("reading the full text: %s" % (work.get("title") or work.get("doi")), "reading full texts")
         return full(work, text_)
 
     def agree(report):
@@ -286,6 +287,6 @@ def run_review(text, run_skill, scholar, full_text_source, ask, on_event=None, s
                                   screen_full=screen_full_noted, full_text=full_text_source, agree=agree, approve_terms=approve_terms, min_works=min_works,
                                   summarize=review_models.make_summarizer(run_skill, question), should_stop=should_stop, monitor=monitor, at_cap=at_cap)
     report = run.run()
-    progress("writing the report")
+    progress("writing the report", "writing the report")
     say(spoken_result(report))
     return format_report(report, question, request.until.isoformat()) + _keep(report, question, request.until.isoformat(), files, reports)

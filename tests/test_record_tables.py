@@ -19,9 +19,9 @@ class Definitions(unittest.TestCase):
     def test_all_tables_versioned_and_deletable_exactly_where_planned(self):
         """TC-RTB-001, TC-RTB-006."""
         tables = definitions()
-        self.assertEqual(set(tables), {"history", "memory", "votes", "tasks", "memos", "accounts", "presets", "gestures", "runs", "source_trust", "cases", "behaviours", "workflow_meta", "reports"})
+        self.assertEqual(set(tables), {"history", "memory", "votes", "tasks", "memos", "accounts", "presets", "gestures", "runs", "source_trust", "cases", "behaviours", "workflow_meta", "reports", "skill_runs"})
         self.assertTrue(all(t["versioned"] for t in tables.values()))
-        self.assertEqual({k for k, t in tables.items() if t["deletable"]}, {"history", "memory", "tasks", "memos"})
+        self.assertEqual({k for k, t in tables.items() if t["deletable"]}, {"history", "memory", "tasks", "memos", "skill_runs"})
         self.assertEqual(tables["source_trust"], {"versioned": True, "deletable": False})
 
     @mark.req("REQ-RTB-001")

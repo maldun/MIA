@@ -44,6 +44,8 @@ try:
     from .storage import StorageError
     from .speech_text import speech_text
     from .mia_logger import logger
+    from .skill_run_observer import SkillRunObserver
+    from .skill_runs import SkillRunRecorder
     from .task_monitor import TaskMonitor
     from .task_registry import TaskCommandError, TaskRegistry
 except ImportError:  # used as plain script / in tests
@@ -52,6 +54,8 @@ except ImportError:  # used as plain script / in tests
     from storage import StorageError
     from speech_text import speech_text
     from mia_logger import logger
+    from skill_run_observer import SkillRunObserver
+    from skill_runs import SkillRunRecorder
     from task_monitor import TaskMonitor
     from task_registry import TaskCommandError, TaskRegistry
 
@@ -128,8 +132,15 @@ class ChatService:
     def __init__(self, emit, log, mood, run_exchange, run_command=None, model_info=None, queue_size=1, user_limit=0,
                  rate_limit=(10, 60), spawn=None, clock=time.monotonic, votes=None, wall_clock=time.time,
                  behaviours=None, reputable=0.6, repair=None, remember=None, review_timeout=1800,
-                 tasks=None, skill_options=None, prepare_task=None, argument_commands=None, files=None, unavailable=(), react=None, speak=None):
+                 tasks=None, skill_options=None, prepare_task=None, argument_commands=None, files=None, unavailable=(), react=None, speak=None,
+                 digest=None, declared_phases=None, recorder=None):
         self._emit = emit
+        if recorder is None and votes is not None and hasattr(votes, "subscribe"):      # the run records live in the same Storage as the votes (IF-102, table skill_runs)
+            recorder = SkillRunRecorder(votes, lambda event, payload: emit(event, payload) if event == "skill_run_changed" else None, clock=clock,
+                                        now=lambda: datetime.datetime.fromtimestamp(self._wall_clock(), datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"))      # task_status comes from the monitor of the run, once
+        self._recorder = recorder                                          # G-V3.PANEL (REQ-WFM-130..138): the SkillRunRecorder; a SkillRunObserver made in _do_chat reports every task run to it (stub of Plan step 4: not used yet)
+        self._digest = digest                                              # G-V3.CHAT (A-142): the SkillDigestStep that words the status, summary, failure and stop messages of a skill run
+        self._declared_phases = declared_phases                            # run -> the phases the manifest of its skill declares worth telling (REQ-WFM-039)
         self._speak = speak                                                # (sentence, should_stop) -> None: the voice route of live answers (sound server); None = speak again stays silent (REQ-CHA-030)
         self._speak_lock = threading.Lock()                                # one spoken-again playback at a time (REQ-CHA-034)
         self._speak_pending = 0                                            # spoken-again playbacks that run or wait
@@ -141,6 +152,7 @@ class ChatService:
         self._prepare_task = prepare_task                                  # (task, options, ask) -> options: before a task runs, e.g. the class of the model; may ask the user
         self._argument_commands = {k.lower(): v for k, v in (argument_commands or {}).items()}      # {name: fn(argument) -> text}: commands with an argument, e.g. /model paid <name>
         self._files = files                                                # the files volume (file_store.FileStore), None = tasks cannot store files
+        self._observer = None                                              # the SkillRunObserver of the running task (REQ-WFM-136)
         self._monitor = None                                               # the status card of the running task
         self._late = False                                                 # the running task gives its result at the end (it asks questions)
         self._task_files = []                                              # the names of the files that the running task stored: chat_done names them
@@ -267,6 +279,8 @@ class ChatService:
                 record = self.log.append("user", text, **fields)             # the reply to a question of the review is a message like any other, but it is not queued behind the review
                 self._emit("chat_message", record)
                 waiter["replies"].put(text)
+                if self._observer is not None:
+                    self._observer.answer(text)
                 return {"ok": True, "message": record, "queued": False, "command": False, "id": record["id"], "position": 0}
             record = None
             if not command:
@@ -297,12 +311,39 @@ class ChatService:
             self._unpaused.set()                      # a paused task wakes up and sees the stop
         return running
 
+    def _emit_status(self, event, payload):
+        """task_status with what the Skill run view reads: skill, start, phases and the state of the run, `reason` after a failure or a stop (IF-101 v16)"""
+        run = payload.get("id") if isinstance(payload, dict) else None       # read before the try: the log line must not be able to raise
+        try:
+            record = self._recorder.record(payload["id"]) if event == "task_status" and self._recorder is not None else None
+        except Exception as exc:                                 # a storage error must not reach the skill through its monitor (REQ-WFM-136), but it is not hidden either
+            logger.error("The run record for the status of %s could not be read: %s", run, exc)
+            record = None
+        if record is not None:
+            state = record["state"] if payload["done"] else "paused" if payload["paused"] else "running"
+            payload = dict(payload, skill={"id": record["skill"], "version": record["version"]}, started=record["started"], phases=record["phases"], state=state,
+                           **({"reason": record["reason"]} if state in ("failed", "stopped") and "reason" in record else {}))
+        self._emit(event, payload)
+
+    def shown_run(self, account):
+        """the run record the Skill run view draws for the account, None before any run (IF-101 v16)"""
+        run = self._recorder.shown(account) if self._recorder is not None else None
+        return self._recorder.record(run) if run else None
+
+    def skill_run(self, account, run):
+        record = self._recorder.record(run, account) if self._recorder is not None else None
+        if record is None:
+            raise ChatError("not_found")
+        return record
+
     def _file_putter(self, task, message_id):
         def put(name, data):
             if self._files is None:
                 raise RuntimeError("no files volume is configured")
             info = self._files.put(name, data, task=task, message_id=message_id, account=self._author)
             self._task_files.append(info["name"])
+            if self._observer is not None:
+                self._observer.file(info["name"])
             self._emit("files_changed", {"name": info["name"], "task": task})
             return info["name"]
         return put
@@ -608,9 +649,17 @@ class ChatService:
         self._emit("chat_message", record)
         return record
 
-    def post_assistant(self, text, emotion=None, auto=False):
+    def skill_turn(self, account, run, kind, payload):
+        """STUB of Plan Step 4 (IF-201 v3, A-142): one turn of a skill run as a message of MIA; written in Implement"""
+        raise NotImplementedError("REQ-CHA-040 to 047, 055 to 060, 063")
+
+    def model_history(self):
+        """STUB of Plan Step 4 (REQ-CHA-046, 059): the messages the next chat turn sends to the chat model; written in Implement"""
+        raise NotImplementedError("REQ-CHA-046, 059")
+
+    def post_assistant(self, text, emotion=None, auto=False, **fields):
         """a finished message of MIA that was not an answer to the page (the hourly time check, ...)"""
-        record = self.log.append("assistant", text, emotion=emotion, auto=auto, model=self._model_info()[0])
+        record = self.log.append("assistant", text, emotion=emotion, auto=auto, model=self._model_info()[0], **fields)
         self._emit("chat_message", record)
         if emotion and self.mood.set_emotion(emotion):
             self.publish_status()
@@ -622,7 +671,7 @@ class ChatService:
         waiter = {"author": self._author, "replies": queue.Queue()}
         with self._lock:
             self._waiter = waiter
-        self.post_assistant(text)
+        self.post_assistant(text, **({"skill_run": self._observer.run} if self._observer is not None else {}))
         self.set_activity("waiting")
         monitor = self._monitor
         if monitor is not None:
@@ -699,9 +748,13 @@ class ChatService:
                     options = self._prepare_task(entry, dict(options or {}), self.ask)
                 except Exception as exc:
                     self.note("Could not prepare /%s: %s" % (task, exc))
-            self._monitor = TaskMonitor(self._emit, message_id, task, mode="slice" if (options or {}).get("slice") else "run")
+            self._monitor = TaskMonitor(self._emit_status, message_id, task, mode="slice" if (options or {}).get("slice") else "run")
+            if self._recorder is not None:
+                self._observer = SkillRunObserver(self._recorder, message_id, task, entry.version, self._author or "page", phases=entry.phases)
+                self._observer.start()
+                self._monitor.observer = self._observer
             self._monitor.update(phase="starting")
-        starter = {"id": message_id, "role": "assistant", "created": created, **({"task": task} if task != "chat" else {})}
+        starter = {"id": message_id, "role": "assistant", "created": created, **({"task": task} if task != "chat" else {}), **({"skill_run": message_id} if self._observer is not None else {})}
 
         def start():
             self._emit("chat_start", starter)
@@ -738,7 +791,7 @@ class ChatService:
             if self.mood.set_emotion(emotion):
                 self.publish_status()
 
-        status = "done"
+        status, failure = "done", None
         try:
             # the model knows who writes (accounts only); the log keeps the plain text. The argument of a task is data for a tool and stays as it is
             if self._stop.is_set():
@@ -753,15 +806,18 @@ class ChatService:
             if self._stop.is_set():
                 status = "stopped"
         except Exception as exc:
-            status = "error"
+            status, failure = "error", str(exc)
             self.set_activity("offline")
             # a model server that is down is said in its own plain sentence, nothing before it (AC-23, D-129)
             self._emit("chat_error", {"id": message_id, "message": UNREACHABLE if str(exc) == UNREACHABLE else "MIA could not answer: %s" % exc})
             if entry is not None and not state["text"]:
-                state["text"] = "/%s could not finish: %s" % (task, exc)       # a task that fails leaves a result that says why, not an empty message and a toast that can be missed
+                state["text"] = ("The /%s run failed: %s" if self._observer is not None else "/%s could not finish: %s") % (task, exc)       # a task that fails leaves a result that says why, not an empty message and a toast that can be missed
         else:
             self.set_activity(None)
-        if self._task_files:                                                   # the files of the task are links in its result (the route is the core's own, IF-101 v8)
+        result = state["text"]                                                   # the result of the run record is the text without the links of its files
+        if self._observer is not None and state["text"]:                       # the result links to the run: the files are listed there, not in the text (IF-101 v16)
+            state["text"] += " [Open in the Skill run view](#run=%s)" % message_id
+        elif self._task_files:                                                 # without run records the files are links in the result (IF-101 v8)
             state["text"] = (state["text"] + "\n\n" if state["text"] else "") + "Files: " + ", ".join("[%s](/api/files/%s)" % (n, n) for n in self._task_files)
         if not late and not repairing and state["text"] != state["sent"] and (status != "stopped" or self._task_files):
             self._emit("chat_delta", {"id": message_id, "text": state["text"]})        # the last delta equals the text of chat_done, also when the throttle held it back (IF-101 chat_done)
@@ -779,6 +835,8 @@ class ChatService:
         extra = {"emotions": state["emotions"]} if len(state["emotions"]) > 1 else {}
         if task != "chat":
             extra["task"] = task
+        if self._observer is not None:
+            extra["skill_run"] = message_id                  # the link from the message to its run survives a reload (IF-101 v16)
         with self._lock:
             shown, kept, sources, self._message_id, self._late = self._pipeline, self._steps, self._sources, None, False
         if shown:
@@ -789,7 +847,10 @@ class ChatService:
             extra["sources"] = sources
         record = self.log.append("assistant", state["text"], id=message_id, created=created, emotion=state["emotion"],
                                  status=status, model=model, **extra)
-        self._emit("chat_done", {"id": message_id, "text": record["text"], "emotion": record["emotion"], "status": status, **({"files": list(self._task_files)} if self._task_files else {})})
+        self._emit("chat_done", {"id": message_id, "text": record["text"], "emotion": record["emotion"], "status": status, **({"files": list(self._task_files)} if self._task_files else {}), **({"skill_run": message_id} if self._observer is not None else {})})
+        if self._observer is not None:
+            self._observer.end({"done": "done", "stopped": "stopped"}.get(status, "failed"), reason=failure if status == "error" else "stopped by the user" if status == "stopped" else None, result=result)
+            self._observer = None
         if self._monitor is not None:
             self._monitor.finish()                      # the card keeps the final figures
             self._monitor = None

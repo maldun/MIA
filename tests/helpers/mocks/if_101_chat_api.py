@@ -46,6 +46,7 @@ class ChatApiMock:
         self._texts = {}                              # id of a queued user message -> its text
         self._options = {}                            # v8: id of a queued /review -> its options
         self._files = {}                              # v8: name -> {"data", "created", "task"}: the files volume
+        self._runs, self._run_order, self._run_owner = {}, [], {}      # v16 (A-140): run id -> run record, the ids in order of their start, run id -> account
 
     # ------------------------------------------------------------ test adapter
     def advance_time(self, seconds):
@@ -64,6 +65,7 @@ class ChatApiMock:
                     self._ids += 1
                     self._review = {"author": self._owner.get(asked), "asked": 0, "waiting": False, "replies": [], "stop": False, "id": "m%d" % self._ids, "paused": False,
                                     "mode": "slice" if self._options.get(asked, {}).get("slice") else "run", "files": []}
+                    self._start_run()                             # v16: the run record of the Skill run view
                     self._card()                                  # v8: the status card; the result (chat_start) comes at the end
                 else:
                     self._answer(asked)
@@ -115,6 +117,7 @@ class ChatApiMock:
                 message["client_id"] = client_id
             self._broadcast("chat_message", message)
             review["replies"].append(text)
+            self._update_run(answers=self._runs[review["id"]]["answers"] + [{"text": text, "time": "t%d" % int(self.now)}])      # v16: the answer is in the record
             return {"id": message["id"], "position": 0, "queued": False, "message": dict(message)}
         message = self._record("user", user, text)
         if client_id:
@@ -369,6 +372,7 @@ class ChatApiMock:
             review["waiting"] = False
         if review["asked"] < len(self._review_questions):
             question = self._record("assistant", "MIA", self._review_questions[review["asked"]])
+            question["skill_run"] = review["id"]              # v16: the marker of the run
             review["asked"] += 1
             review["waiting"] = True
             self._broadcast("chat_message", question)
@@ -377,30 +381,93 @@ class ChatApiMock:
 
     def _end_review(self, status):
         name = "review-contract.md"
-        text, extra = "the report", {}
+        run_id = self._review["id"]
+        link = " [Open in the Skill run view](#run=%s)" % run_id           # v16 (A-140, A-142): the link is added by code at the end of the text
+        text, extra, result, reason = "the report" + link, {}, "the report", None
         if self._review_fails:                                # v10: a task that fails leaves a result that says why (and chat_error), no file
-            text, status = "/review could not finish: %s" % self._review_fails, "error"
-            self._broadcast("chat_error", {"id": self._review["id"], "message": "MIA could not answer: %s" % self._review_fails})
+            reason = self._review_fails
+            text, status = "%s%s" % (reason, link), "error"       # v16: the reason and the link, not "/review could not finish: <reason>"
+            self._broadcast("chat_error", {"id": run_id, "message": "MIA could not answer: %s" % self._review_fails})
         else:
-            self._files[name] = {"data": b"# the report\n", "created": "t%d" % int(self.now), "task": "review", "message_id": self._review["id"]}
+            self._files[name] = {"data": b"# the report\n", "created": "t%d" % int(self.now), "task": "review", "message_id": run_id}
             self._broadcast("files_changed", {"name": name, "task": "review"})
             self._review["files"].append(name)
-            text += "\n\nFiles: [%s](/api/files/%s)" % (name, name)           # v10: the files are links at the end of the result
-            extra = {"files": list(self._review["files"])}
-        record = {"id": self._review["id"], "role": "assistant", "sender": "MIA", "text": text, "created": "t%d" % int(self.now)}
+            self._update_run(files=list(self._review["files"]))
+            extra = {"files": list(self._review["files"])}          # v16: the `Files:` suffix of v10 is dropped, the names stay in `files`
+            if status == "stopped":
+                reason = "stopped by the user"
+        state = "failed" if status == "error" else ("stopped" if status == "stopped" else "done")
+        if state == "failed":
+            phases = ["done", "failed"]
+        elif state == "stopped":
+            phases = ["stopped", "waiting"]
+        else:
+            phases = ["done", "done"]
+        record = {"id": run_id, "role": "assistant", "sender": "MIA", "text": text, "created": "t%d" % int(self.now), "skill_run": run_id}
         self._history.append(record)
-        self._broadcast("chat_start", {"id": record["id"], "role": "assistant", "task": "review"})      # v8: the result is the newest message
+        self._broadcast("chat_start", {"id": record["id"], "role": "assistant", "task": "review", "skill_run": run_id})      # v8: the result is the newest message
         self._broadcast("chat_delta", {"id": record["id"], "text": text})
-        self._broadcast("chat_done", dict({"id": record["id"], "text": text, "emotion": "neutral", "status": status}, **extra))
-        self._card(done=True)
+        self._broadcast("chat_done", dict({"id": record["id"], "text": text, "emotion": "neutral", "status": status, "skill_run": run_id}, **extra))
+        self._update_run(state=state, ended="t%d" % int(self.now), result=result, phases=self._phase_list(phases), **({"reason": reason} if reason else {}))
+        self._card(done=True, state=state, reason=reason, phases=phases)
         self._review = None
         return True
 
-    def _card(self, done=False):
-        """v8: the status card of the running task"""
+    PHASES = ("asking", "reporting")                          # v16: the phases the scripted review declares
+
+    def _phase_list(self, states):
+        return [{"name": name, "state": state} for name, state in zip(self.PHASES, states)]
+
+    def _card(self, done=False, state=None, reason=None, phases=None):
+        """v8: the status card of the running task; v16: the run (skill, start, phases, state, reason, elements)"""
         review = self._review
-        self._broadcast("task_status", {"id": review["id"], "task": "review", "phase": "working", "mode": review["mode"], "paused": review["paused"], "done": done,
-                                        "budget": {"seconds": {"used": round(self.now, 1)}}, "counts": {}})
+        state = state or ("paused" if review["paused"] else "running")
+        card = {"id": review["id"], "task": "review", "phase": "working", "mode": review["mode"], "paused": review["paused"], "done": done,
+                "budget": {"seconds": {"used": round(self.now, 1)}}, "counts": {},
+                "skill": {"id": "review", "version": "1"}, "started": self._runs[review["id"]]["started"],
+                "phases": self._phase_list(phases or ["running", "waiting"]), "state": state, "elements": []}
+        if state in ("failed", "stopped"):
+            card["reason"] = reason or "stopped by the user"
+        self._broadcast("task_status", card)
+
+    def _start_run(self):
+        """v16: the run record of a skill run in the table skill_runs (IF-302 v8): one per run, replaced in place"""
+        review = self._review
+        record = {"id": review["id"], "skill": "review", "version": "1", "started": "t%d" % int(self.now), "ended": None, "state": "running",
+                  "phases": self._phase_list(["running", "waiting"]), "budget": {"seconds": {"used": 0.0}}, "counts": {}, "answers": [], "result": "", "material": [], "files": [], "elements": []}      # v17: the elements of the skill (the scripted review reports none)
+        self._runs[review["id"]] = record
+        self._run_order.append(review["id"])
+        self._run_owner[review["id"]] = review["author"]
+
+    def _update_run(self, **fields):
+        run_id = self._review["id"]
+        self._runs[run_id].update(fields)
+        self._broadcast("skill_run_changed", {"id": run_id})
+
+    def shown_run(self, session):
+        """v16 (GET /api/skill-runs/shown): the run of the account started most recently as a run record, None (204) when there is none (A-145: runs of another account are never shown)"""
+        account = self._user(session)
+        own = [r for r in self._run_order if self._run_owner.get(r) == account]
+        return None if not own else self._copy(self._runs[own[-1]])
+
+    def skill_run(self, session, run_id):
+        """v16 (GET /api/skill-runs/<id>): the run record of one run; 404 not_found for a run that does not exist, is deleted or belongs to another account (A-145)"""
+        account = self._user(session)
+        if run_id not in self._runs or self._run_owner.get(run_id) != account:
+            raise ApiError(404, "not_found")
+        return self._copy(self._runs[run_id])
+
+    @staticmethod
+    def _copy(record):
+        return {k: (list(v) if isinstance(v, list) else dict(v) if isinstance(v, dict) else v) for k, v in record.items()}
+
+    def delete_history(self, account, run_id):
+        """Test adapter (A-144): the history record with the id of the run is deleted in the storage (IF-102); the run record of that run goes with it, no other, and the page is told its id"""
+        if self._run_owner.get(run_id) != account:
+            return                                                   # the history record belongs to no run of the account
+        del self._runs[run_id]
+        self._run_order.remove(run_id)
+        self._broadcast("skill_run_changed", {"id": run_id})
 
     def pause(self, session):
         """v8: pauses the running task; False when nothing runs"""

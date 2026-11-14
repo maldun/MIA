@@ -31,7 +31,7 @@ What the HLS says: FR-34 and FR-35 (FB-01, the skills panel and the skill turns 
 - Accepted by: Stefan Reiterer (owner)
 - Line of work: goal/v3
 - Subgoals: G-V3.PANEL, G-V3.CHAT
-- Status: Proposed
+- Status: Agreed
 
 ## Outcome criteria
 | ID | Expected outcome | Derived from |
@@ -50,7 +50,7 @@ What the HLS says: FR-34 and FR-35 (FB-01, the skills panel and the skill turns 
 |---|---|---|
 | events and interface IF-101 of the chat page (`task_status`, `files_changed`), with the amendment | real, amended | the Skill run view is driven by them; provided by PANEL, used by CHAT through a mock |
 | a scripted skill (questions, three phases, long result, failure, stop) | stand-in | the chat mock server `ui/tools/chat_mock_server.py` and the stub model; real skills need not be converted |
-| records of runs (one per run, survives reload and restart) | real | storage as today (TD-21: PostgreSQL later); no change of the storage interface planned, to be confirmed in Plan |
+| records of runs (one per run, survives reload and restart) | real | storage as today (TD-21: PostgreSQL later); a new table `skill_runs` (IF-302 v8, IF-102 v4, A-141, REQ-RTB-007), no new operation |
 | model server with the pins of `eval-spec.md` | real | the digest step (G-V3.CHAT): MP-light for the dev suite |
 | speech service | real, unchanged | every chat text is spoken as today (TD-11 independent) |
 | browser test harness (`tests/browser`, podman) | real | exists since D-141 |
@@ -137,6 +137,33 @@ Top-level items: FR-34, FR-35, FR-46 (all in, as one revised unit); FR-3 only as
 | REQ-VOI-001 | out | voice path stays as it is (owner 2026-11-07); TD-11 and A-130 stay independent |
 | IF-101 | in | amendment: `task_status`, the run record and the full result for the Skill run view, a marker for skill messages; provided by PANEL, used by CHAT through a mock |
 | IF-201 | in | amendment: skill turns in the history the chat model sees (CHAT) |
+| IF-302, IF-102 | in | amendment A-141: the table `skill_runs` for the run records (PANEL) |
+| REQ-RTB-007 | in | the table `skill_runs` of the Record tables (PANEL, A-141) |
+| REQ-BE-078 | in | new: only the spoken text of a skill run is put into the chat (CHAT) |
+| REQ-CHA-040 | in | new, questions of a skill in the chat (group ST) |
+| REQ-CHA-041 | in | new, status message per declared phase (group ST) |
+| REQ-CHA-042 | in | new, no status for other phases (group ST) |
+| REQ-CHA-043 | in | new, end summary (group ST) |
+| REQ-CHA-044 | in | new, failed run in the chat (group ST) |
+| REQ-CHA-045 | in | new, every added message is spoken (group ST) |
+| REQ-CHA-046 | in | new, history of a run for the chat model (group ST) |
+| REQ-CHA-047 | in | new, repair of the messages of a run (group ST) |
+| REQ-CHA-048 | in | new, digest step without tools (group UT) |
+| REQ-CHA-049 | in | new, quoted instruction is reported, not followed (group UT) |
+| REQ-CHA-050 | in | new, input of a model call (group BG) |
+| REQ-CHA-051 | in | new, long result read in pieces (group BG) |
+| REQ-CHA-052 | in | new, prompt asks for 1200 characters (group BG) |
+| REQ-CHA-053 | in | new, faithful summary (group SQ) |
+| REQ-CHA-054 | in | new, summary in persona (group SQ) |
+| REQ-CHA-055 | in | new, no status message for a skill without phases (group ST) |
+| REQ-CHA-056 | in | new, link added by code (group ST) |
+| REQ-CHA-057 | in | new, stopped run in the chat (group ST) |
+| REQ-CHA-058 | in | new, no card, table, log line or full result in the chat (group ST) |
+| REQ-CHA-059 | in | new, exclusions from the history of the chat model (group ST) |
+| REQ-CHA-060 | in | new, repaired text is the text shown and spoken (group ST) |
+| REQ-CHA-061 | in | new, result goes to the digest step as text (group UT) |
+| REQ-CHA-062 | in | new, summary from the digests only (group BG) |
+| REQ-CHA-063 | in | new, summary passed on uncut (group BG) |
 
 ## Parts
 | Part | Real or stand-in | Notes |
@@ -160,13 +187,13 @@ None yet: the IF-101 amendment is provided by PANEL only and CHAT works against 
 | G-V3.CHAT | Stefan Reiterer (owner), CHAT uses a mock of the IF-101 amendment | 2026-11-07 |
 
 ## Open questions for the owner
-None open for Step 0 (Q-1 to Q-11 answered, D-271 and D-273). Left for Plan Step 1: the exact content of the run view's last-run rule when a run is stopped, and the later run list (not in this goal).
+None open for Step 0 (Q-1 to Q-11 answered, D-271 and D-273). Settled in Plan Step 1b: a stopped run is shown as the last run with its reason (REQ-WFM-134, OC-5). The later run list is not in this goal.
 
 ## Phases
 | Phase | State | Record or reason |
 |---|---|---|
 | Explore | done | FR-34, FR-35 and FR-46 are in the HLS of iteration 2 (approved 2026-11-05, D-186); the new wording (one Skill run view, no card in the chat) is proposal A-131 |
-| Plan | in progress | started 2026-11-07, Step 0 |
+| Plan | in progress | started 2026-11-07; Steps 0 to 3 done for both subgoals (D-300 to D-303 and D-332), contract change applied; Step 4 (red tests) and Step 5 (plan.md) open |
 | Implement | open | |
 | Verify | open | |
 | Commit | open | |

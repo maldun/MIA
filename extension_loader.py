@@ -3,7 +3,7 @@ Skills as extensions (REQ-WFM-039): a skill that runs as a task is a folder `ext
 entry's function with the services of the application and registers the task; the chat service, the web application and the page need no change for a new skill. id = folder name =
 command. An extension that is broken, or whose id is already taken, is skipped and named in the list of problems; the others still load.
 
-manifest.json: {"id", "text", "argument", "example", "entry": "module:function", "aliases": [], "needs": [], "options": [{"name", "kind", "default", "text"}], "version"}
+manifest.json: {"id", "text", "argument", "example", "entry": "module:function", "aliases": [], "needs": [], "phases": [], "options": [{"name", "kind", "default", "text"}], "version"}
   needs: what the core hands to the run function besides the question (see task_registry.Task): ask, options, monitor, files, reports
   entry: the function is called as function(services) and returns run(argument, on_delta, on_emotion, should_stop, **what it needs); an optional register(services) of the same
          module is called afterwards (a failure there is a problem, the task stays)
@@ -39,6 +39,9 @@ def read_manifest(folder):
     unknown = [n for n in doc.get("needs", []) if n not in NEEDS]
     if unknown:
         raise ValueError("%s: unknown need %s (known: %s)" % (name, ", ".join(unknown), ", ".join(NEEDS)))
+    phases = doc.get("phases", [])
+    if not isinstance(phases, list) or not all(isinstance(n, str) and n for n in phases):
+        raise ValueError("%s: phases must be a list of names" % name)
     if ":" not in doc["entry"]:
         raise ValueError("%s: entry must be module:function" % name)
     return doc
@@ -46,7 +49,7 @@ def read_manifest(folder):
 
 def task_from_manifest(doc, run):
     options = [Option(o["name"], o["kind"], o.get("default"), o.get("text", "")) for o in doc.get("options", [])]
-    return Task(doc["id"], run, doc["text"], doc["argument"], doc["example"], options=options, aliases=doc.get("aliases", []), needs=doc.get("needs", []), version=str(doc.get("version", "1")))
+    return Task(doc["id"], run, doc["text"], doc["argument"], doc["example"], options=options, aliases=doc.get("aliases", []), needs=doc.get("needs", []), version=str(doc.get("version", "1")), phases=doc.get("phases", []))
 
 
 def load_extensions(package, folder, registry, services, catalog=None):

@@ -5,6 +5,7 @@ Run: python tests/test_extension_loader.py
 """
 import json
 import os
+import shutil
 import sys
 import tempfile
 import types
@@ -98,6 +99,24 @@ class ExtensionLoader(unittest.TestCase):
         with self.assertRaises(ValueError) as caught:
             read_manifest(folder)
         self.assertIn("teleport", str(caught.exception))
+
+    def test_read_manifest_checks_the_phases_are_a_list_of_names(self):
+        """F-09 of the first Verify run of G-V3.PANEL: a string or a number as `phases` is refused with a ValueError that names the folder.
+        Example: phases "screening" (a string) or [ok, 3] is refused, ["screening", "reading"] is read"""
+        # Given: manifests whose phases are not a list of names
+        # When: each is read
+        # Then: each is refused and the message names `phases`
+        for bad in ("screening", 5, None, ["ok", ""], ["ok", 3]):
+            folder = os.path.join(self.folder, "alpha")
+            shutil.rmtree(folder, ignore_errors=True)
+            self.add("alpha", manifest(phases=bad))
+            with self.assertRaises(ValueError, msg=repr(bad)) as caught:
+                read_manifest(folder)
+            self.assertIn("phases", str(caught.exception))
+        # And: a list of names is read as it is
+        shutil.rmtree(folder)
+        self.add("alpha", manifest(phases=["screening", "reading"]))
+        self.assertEqual(read_manifest(folder)["phases"], ["screening", "reading"])
 
     def test_a_task_can_be_made_from_a_manifest_with_a_run_function_given_from_outside(self):          # for the tests of the core
         task = task_from_manifest(manifest(needs=["monitor"]), lambda *a: "x")
