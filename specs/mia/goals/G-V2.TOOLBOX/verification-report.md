@@ -26,7 +26,25 @@
 | Usability (bad inputs) | `import_transform` refuses non-JSON, list, version 0/true, text `inputs`, empty id with `invalid_file` (unit test); the float version `1.0` is the exception (F3) |
 
 ### Stage log
-Open: the local run `run_stages.py --upto 2 --keep-going` (venv `bin` first in PATH) was restarted on 2026-11-12 and had not finished when this report was committed. The first run is invalid (my `python` symlink fell back to the system Python without `jsonschema`: unit failed, acceptance/contract-real/integration skipped or failed for that reason). Known from that run: model-ids, contract-js, js, quality, sysml-parse pass; `decomposition` fails (F7, same on master). Run by hand in the venv: all test files of the scope pass, `-k _real` contract suites 137 tests OK with 17 skipped. The result of unit, contract-mocks, acceptance, contract-real and integration is still to be entered here.
+Local run after the fixes (2026-11-14), `run_stages.py --upto 2 --keep-going` with the venv `bin` first in PATH, started on `33ab9a2` (F1 to F5). A local run is feedback, not the gate (only CI counts for `merge_gate.py`). Done by the fixing session, not by a fresh reviewer.
+
+| Stage | Step | Result |
+|---|---|---|
+| 0 | model-ids | pass (0.6 s) |
+| 1 | contract-js, js, quality | pass (js: 163 tests) |
+| 1 | sysml-parse | pass (66 s) |
+| 1 | decomposition | **fail**, F7 (known red, same class as master; D-229: repaired in a parent session) |
+| 1 | unit | 2233 tests, 1 failure, 5 skipped, 2 expected failures (494 s): `test_checkout_untouched` found `specs/mia/goals/G-V2.TOOLBOX/plan.md` changed, because the fixing session appended the F6 note to it while the run was going. Re-run alone on the clean tree: OK (87 s). Not a finding, but the unit step itself was not repeated whole |
+| 1 | contract-mocks | skipped by the ladder (needs unit); run by hand with the command of `stages.yaml`: 137 tests OK |
+| 2 | acceptance | skipped by the ladder (needs unit); run by hand, every `tests/acceptance/test_*.py` one process each: all OK |
+| 2 | contract-real | pass (9.8 s), 17 skipped (the same 17 as above, none of this goal) |
+| 2 | integration | pass (4.0 s) |
+
+Limits of this entry:
+- The run started before the commit `931c53f` (F8, `ToolboxError("not_found")`). `tests/test_toolbox.py` (33 tests, F8 included) was run by hand on that commit and passes; the whole ladder was not repeated on it.
+- The unit step ran partly while files changed; a clean full run on `HEAD` is the job of the second Verify round (`start-prompt-verify-fixes.md`).
+- Stages 3 and 4 (and the checks 1, 2, 4 and 5 that D-229 asks to run again in full after the fixes) were not run: this run stopped at `--upto 2`.
+- The 17 skips are unchanged from the first round (137 `_real` tests).
 
 ## Protected material
 `git diff --stat plan-baseline-it2-toolbox..HEAD -- tests/acceptance tests/helpers tests/smoke contracts eval benchmarks stages.yaml specs/mia/test-requirements.md`: 10 files. Every change maps to an approved install; against the installed state (`plan-baseline-it2-toolbox-installed`) only the A-111/A-112 installs remain:
