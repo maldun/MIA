@@ -212,7 +212,11 @@ class VerifyFindings:
             self.box.import_transform(exchange_file("t.one", 1), "guest")
         self.assertEqual(caught.exception.code, "store_failed")
         self.assertNotIn("was not stored", caught.exception.why)
+        self.assertIn("stored without its meta record", caught.exception.why)      # N5: the text is the contract, not only the absence of the false one
+        self.assertIn("its reason is empty", caught.exception.why)
         self.assertEqual(self.library.read("transforms", "t.one")["doc"]["version"], 1)
+        del self.library.set_meta       # back to the real method: look_up must show what the text claims
+        self.assertEqual(self.box.look_up("t.one")["reason"], "")
 
     def test_n4_a_failed_first_save_still_says_not_stored(self):
         """Example: the save of a new ID raises; store_failed, "was not stored", nothing in the library."""

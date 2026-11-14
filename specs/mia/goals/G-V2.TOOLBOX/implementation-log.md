@@ -70,3 +70,6 @@ A-111 installed by the owner (`18218e0`, IF-203 v1, D-224); with A-110 and A-112
 ## Verify round 3, N4 (2026-11-14)
 - N4 (owner decision: fix the text, add a test, the orphan entry stays): in the new-id branch of `import_transform`, a failing `set_meta` after a successful `save` raised "<id> was not stored", which is false. The `try` is split: a failing save keeps "was not stored"; a failing `set_meta` says the entry was stored without its meta record and its reason is empty. Code stays `store_failed`; nothing is deleted, no library method added. REQ-WFM-090.
 - Tests (`VerifyFindings`, mock and real): `test_n4_a_failed_set_meta_after_a_first_save_says_the_entry_was_stored` (red on the old code: message "t.one was not stored: disk"), `test_n4_a_failed_first_save_still_says_not_stored`. Files: `toolbox.py`, `tests/test_toolbox.py`.
+
+## Verify round 4, N5 (2026-11-14)
+- N5 (owner decision: pin the text and the reason clause): `test_n4_a_failed_set_meta_after_a_first_save_says_the_entry_was_stored` now asserts "stored without its meta record" and "its reason is empty" in the message and, with the real `set_meta` restored, that `look_up(id)["reason"]` is empty. No code change. Mutations "drop the reason clause" and "shorten to was stored" now fail the test (mock and real). File: `tests/test_toolbox.py`.
