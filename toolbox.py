@@ -11,6 +11,7 @@ so the real library of T-06 replaces the mock without a change here. T-01 is don
 - set_trust(id, value, account), set_lifecycle(id, value, account, evidence=None, allow_baseline=False): a value outside the lists raises ToolboxError("invalid_trust" or
   "invalid_lifecycle") and the status stays as it was; trusted by an account that is not the owner raises ToolboxError("owner_only").
 - `tested` without evidence raises ToolboxError("evidence_missing"); allow_baseline by an account that is not the owner raises ToolboxError("owner_only") (REQ-WFM-095); allow_baseline with another lifecycle than retired raises ToolboxError("allowance_needs_retired"), and any other lifecycle change clears the allowance (D-229).
+- every call that names an ID not in the toolbox raises ToolboxError("not_found") (F8).
 - offer() -> the sorted IDs a new graph may pick (retired ones left out, REQ-WFM-070).
 - run(id, args, as_baseline=False) -> the result of the code text's run(args); an untrusted transform raises ToolboxError("untrusted") unless it is retired, runs as the baseline
   of a check and has the owner's allowance (REQ-WFM-091); a retired one raises ToolboxError("retired") unless as_baseline (REQ-WFM-068).
@@ -51,7 +52,13 @@ class Toolbox:
         self.library, self.is_owner, self.events = library, is_owner, events
 
     def _latest(self, tid):
+        self._known(tid)
         return self.library.read("transforms", tid)
+
+    def _known(self, tid):
+        # One error type for every caller (F8): the library raises its own type, the mock another, and a caller should handle ToolboxError only.
+        if tid not in self.library.list_ids("transforms"):
+            raise ToolboxError("not_found", "%s is not in the toolbox." % tid)
 
     @staticmethod
     def _checked(text):
@@ -90,6 +97,7 @@ class Toolbox:
         return tid
 
     def export_transform(self, tid):
+        self._known(tid)
         if self.library.get_meta(tid).get("shipped"):
             raise ToolboxError("not_exportable", "%s ships with MIA and has no code text to export." % tid)
         return json.dumps(self._latest(tid)["doc"], sort_keys=True)
@@ -105,6 +113,7 @@ class Toolbox:
         return sorted(tid for tid in self.library.list_ids("transforms") if self.library.get_lifecycle(tid) != "retired")
 
     def set_trust(self, tid, value, account):
+        self._known(tid)
         if value not in TRUST:
             raise ToolboxError("invalid_trust", "Trust is untrusted or trusted, not %r." % (value,))
         if value == "trusted" and not self.is_owner(account):
@@ -118,6 +127,7 @@ class Toolbox:
             self.library.set_trust(tid, value, account)
 
     def set_lifecycle(self, tid, value, account, evidence=None, allow_baseline=False):
+        self._known(tid)
         if value not in LIFECYCLE:
             raise ToolboxError("invalid_lifecycle", "Lifecycle is draft, tested or retired, not %r." % (value,))
         if value == "tested" and not evidence:

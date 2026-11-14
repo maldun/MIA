@@ -133,3 +133,9 @@ Open:
 - T-02 adds a unit test file `tests/test_toolbox.py` (edge cases and the acceptance tests once more on the real library).
 - T-06 ran in two parts: the table `transform_meta` first (A-110), then, after a finding (no storage table for the transform records), A-112 (thin table `transforms`, REQ-RTB-009, a missing, empty or null code is valid) and A-111 (IF-203 v1 text) before the library part. A-110, A-111 and A-112 are installed (D-222, D-223, D-224).
 - D-225: running a shipped transform (empty code text) is left as it is, logged only; D-226: a seeded shipped entry is lifecycle `tested` with the evidence "shipped with MIA" (the text of REQ-WFM-056 does not name it; the owner may add it by amendment); D-227: `seed_shipped` skips IDs that exist, a newer shipped version is not picked up by a restart.
+
+## Notes for the wiring task (Verify findings F6 and F8, D-229)
+There is no wiring task in this goal; the API that exposes the toolbox comes later. What it must keep:
+- The only door to transforms is `Toolbox`. `WorkflowLibrary.set_trust`, `set_meta` and the table `transform_meta` take `trust="trusted"` from any caller (A-112, thin on purpose), so the API must never expose the library itself (F6).
+- `Toolbox.set_trust(.., "untrusted", account)` does not check that the account is logged in; the caller does (F6).
+- Left as notes (F8): `_save_transform` writes the record and then the meta record in two calls (a failure in between leaves a transform without meta), and the import check-then-save is not atomic (`save` without `expected_version`). A single user makes both unlikely; revisit if the API takes concurrent imports.

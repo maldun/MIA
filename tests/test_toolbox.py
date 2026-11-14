@@ -138,6 +138,17 @@ class VerifyFindings:
             self.box.import_transform(exchange_file("t.one", 2), "guest")
         self.assertEqual(self.box.look_up("t.one")["version"], 1)
 
+    def test_f8_an_unknown_id_is_a_toolbox_error(self):
+        """Example: every call that names an ID the toolbox does not hold raises ToolboxError("not_found") naming the ID."""
+        calls = (lambda: self.box.look_up("t.none"), lambda: self.box.run("t.none", {}), lambda: self.box.set_trust("t.none", "untrusted", "anna"),
+                 lambda: self.box.set_lifecycle("t.none", "draft", "anna"), lambda: self.box.export_transform("t.none"))
+        for call in calls:
+            with self.subTest(call=call):
+                with self.assertRaises(ToolboxError) as caught:
+                    call()
+                self.assertEqual(caught.exception.code, "not_found")
+                self.assertIn("t.none", caught.exception.why)
+
 
 class VerifyFindingsMock(VerifyFindings, unittest.TestCase):
     def make_library(self):
