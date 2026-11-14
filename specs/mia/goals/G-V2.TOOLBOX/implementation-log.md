@@ -66,3 +66,7 @@ A-111 installed by the owner (`18218e0`, IF-203 v1, D-224); with A-110 and A-112
 - D-227 newer shipped versions: `seed_shipped` skips existing IDs (no change).
 - D-228 `plan.md` approved; its deviations section updated.
 - Review 2026-11-11 (maldun, one by one): TR-TOOLBOX-005, REQ-RTB-009 and TC-RTB-009 approved (`req_review.py mark`, three rows in the review log); nothing changed since review is left on the TOOLBOX ids.
+
+## Verify round 3, N4 (2026-11-14)
+- N4 (owner decision: fix the text, add a test, the orphan entry stays): in the new-id branch of `import_transform`, a failing `set_meta` after a successful `save` raised "<id> was not stored", which is false. The `try` is split: a failing save keeps "was not stored"; a failing `set_meta` says the entry was stored without its meta record and its reason is empty. Code stays `store_failed`; nothing is deleted, no library method added. REQ-WFM-090.
+- Tests (`VerifyFindings`, mock and real): `test_n4_a_failed_set_meta_after_a_first_save_says_the_entry_was_stored` (red on the old code: message "t.one was not stored: disk"), `test_n4_a_failed_first_save_still_says_not_stored`. Files: `toolbox.py`, `tests/test_toolbox.py`.

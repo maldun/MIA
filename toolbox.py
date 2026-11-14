@@ -82,9 +82,13 @@ class Toolbox:
         if tid not in self.library.list_ids("transforms"):
             try:
                 self.library.save("transforms", tid, doc, author)
-                self.library.set_meta(tid, author, reason=REASON_IMPORTED)
             except Exception as error:
                 raise ToolboxError("store_failed", "%s was not stored: %s" % (tid, error))
+            # The entry stands after this save (version 1, untrusted); "was not stored" would be false when only the meta record fails (N4).
+            try:
+                self.library.set_meta(tid, author, reason=REASON_IMPORTED)
+            except Exception as error:
+                raise ToolboxError("store_failed", "%s was stored without its meta record (its reason is empty): %s" % (tid, error))
             return tid
         old = self._latest(tid)
         old_version = old["doc"]["version"]

@@ -203,6 +203,28 @@ class VerifyFindings:
                 self.assertEqual(caught.exception.code, "not_found")
                 self.assertIn("t.none", caught.exception.why)
 
+    def test_n4_a_failed_set_meta_after_a_first_save_says_the_entry_was_stored(self):
+        """Example: set_meta raises after the save of a new ID; store_failed, the entry stays at version 1, the message does not say "was not stored" (N4)."""
+        def broken(*args, **kwargs):
+            raise RuntimeError("disk")
+        self.library.set_meta = broken
+        with self.assertRaises(ToolboxError) as caught:
+            self.box.import_transform(exchange_file("t.one", 1), "guest")
+        self.assertEqual(caught.exception.code, "store_failed")
+        self.assertNotIn("was not stored", caught.exception.why)
+        self.assertEqual(self.library.read("transforms", "t.one")["doc"]["version"], 1)
+
+    def test_n4_a_failed_first_save_still_says_not_stored(self):
+        """Example: the save of a new ID raises; store_failed, "was not stored", nothing in the library."""
+        def broken(*args, **kwargs):
+            raise RuntimeError("disk")
+        self.library.save = broken
+        with self.assertRaises(ToolboxError) as caught:
+            self.box.import_transform(exchange_file("t.one", 1), "guest")
+        self.assertEqual(caught.exception.code, "store_failed")
+        self.assertIn("was not stored", caught.exception.why)
+        self.assertEqual(self.library.list_ids("transforms"), [])
+
 
 class VerifyFindingsMock(VerifyFindings, unittest.TestCase):
     def make_library(self):
