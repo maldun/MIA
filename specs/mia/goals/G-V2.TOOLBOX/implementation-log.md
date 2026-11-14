@@ -73,3 +73,6 @@ A-111 installed by the owner (`18218e0`, IF-203 v1, D-224); with A-110 and A-112
 
 ## Verify round 4, N5 (2026-11-14)
 - N5 (owner decision: pin the text and the reason clause): `test_n4_a_failed_set_meta_after_a_first_save_says_the_entry_was_stored` now asserts "stored without its meta record" and "its reason is empty" in the message and, with the real `set_meta` restored, that `look_up(id)["reason"]` is empty. No code change. Mutations "drop the reason clause" and "shorten to was stored" now fail the test (mock and real). File: `tests/test_toolbox.py`.
+
+## Verify round 5, N6 (2026-11-14)
+- N6 (owner decision: fix the docstring): the docstring of `test_n4_a_failed_set_meta_after_a_first_save_says_the_entry_was_stored` now names what the test checks: code `store_failed`, the texts "stored without its meta record" and "its reason is empty", not "was not stored", version 1, and an empty reason from `look_up` with the real `set_meta` back. No assertion, name or helper changed, no code change. File: `tests/test_toolbox.py`.

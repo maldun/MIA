@@ -204,7 +204,7 @@ class VerifyFindings:
                 self.assertIn("t.none", caught.exception.why)
 
     def test_n4_a_failed_set_meta_after_a_first_save_says_the_entry_was_stored(self):
-        """Example: set_meta raises after the save of a new ID; store_failed, the entry stays at version 1, the message does not say "was not stored" (N4)."""
+        """Example: set_meta raises after the save of a new ID; store_failed, the message says "stored without its meta record" and "its reason is empty" and not "was not stored", the entry stays at version 1, and with the real set_meta back look_up shows an empty reason (N4, N5)."""
         def broken(*args, **kwargs):
             raise RuntimeError("disk")
         self.library.set_meta = broken
