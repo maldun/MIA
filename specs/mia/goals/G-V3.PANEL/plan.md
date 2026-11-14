@@ -1,6 +1,6 @@
 # Plan: G-V3.PANEL (the Skill run view)
 
-**Goal:** specs/mia/goals/G-V3.PANEL/goal.md   **Requirements:** REQ-FE-032 (N-1), REQ-CLV-024 and 030..047 (N-1.1), REQ-WFM-031, 036 (the link and the failure message belong to G-V3.CHAT), 038, 039 and 130..138 (N-2.3), REQ-RTB-007 (N-3.3), the contracts IF-101 v16, IF-302 v8, IF-102 v4 (A-140, A-141)   **Status:** Approved (owner maldun, 2026-11-08, task by task in three batches, D-307)
+**Goal:** specs/mia/goals/G-V3.PANEL/goal.md   **Requirements:** REQ-FE-032 (N-1), REQ-CLV-024 and 030..047 (N-1.1), REQ-WFM-031, 036 (the link and the failure message belong to G-V3.CHAT), 038, 039 and 130..138 (N-2.3), REQ-RTB-007 (N-3.3), the contracts IF-101 v16, IF-302 v8, IF-102 v4 (A-140, A-141)   **Status:** Approved (owner maldun, 2026-11-08, task by task in three batches, D-335)
 
 Line of work `goal/v3.panel`; supervised; no model step, no prompt, no eval suite. The red tests were written first in a session of their own (Step 4, commits `2f8867f`, `72bce48`, `e705709`) and installed by the owner; the implementing sessions never edit `tests/acceptance/`, `tests/helpers/`, `contracts/`, `eval/` or `test-requirements.md` (a change there is a plan amendment).
 
@@ -16,7 +16,7 @@ The stubs carry the interface the installed tests expect; the tasks replace the 
 |---|---|---|---|
 | T-01 Table skill_runs in the Record tables and the storage | REQ-RTB-007, IF-302 v8, IF-102 v4 | TC-RTB-007; TC-IF-302-01 and -08, TC-IF-102-12 on the real providers | red tests installed |
 | T-02 Run recorder | REQ-WFM-130, 131, 132, 133, 134, 135, 137, 138, 031 | TC-WFM-130..135, 137, 138 | T-01 |
-| T-03 Spike: the events of a skill today, and the real-backend start of TC-CLV-038 | – (fixes REQ-WFM-136 and TC-CLV-038) | **done 2026-11-08**: the note `skill-events-today.md` is approved (D-309); no test | T-02 |
+| T-03 Spike: the events of a skill today, and the real-backend start of TC-CLV-038 | – (fixes REQ-WFM-136 and TC-CLV-038) | **done 2026-11-08**: the note `skill-events-today.md` is approved (D-337); no test | T-02 |
 | T-04 Skill-runner adapter and the tests TC-WFM-136 and TC-CLV-038 | REQ-WFM-136, 130, 036 (failure and end hand-over only) | TC-WFM-136, TC-CLV-038 (both written first, Step 4b) | T-03 |
 | T-05 IF-101 v16 on the real backend | REQ-API-015 (realise IF-101), REQ-WFM-134, 135 | TC-IF-101-31, -30, -34..39 on the real provider | T-02, T-04 |
 | T-06 JS model of the view | REQ-CLV-030, 031, 032, 033, 034, 039, 044 | `tests/js/skill-run-model.test.mjs` (7 tests) | red tests installed |
@@ -57,7 +57,7 @@ The stubs carry the interface the installed tests expect; the tasks replace the 
 ### T-04: Skill-runner adapter
 - Implements: REQ-WFM-136 (runs without knowledge of the view), REQ-WFM-130 for lookup, search and review
 - Tests to turn green: TC-WFM-136 (Step 4b)
-- Touches: a new module `skill_run_observer.py` next to `chat_service.py` with the class `SkillRunObserver` (note `skill-events-today.md`, D-309), the six places in `chat_service.py` (start, phase, report, answer, file, end) only to call it, `task_monitor.py` (an optional `elements` argument of `update`, with T-02), the manifest field `phases` (REQ-WFM-039) and the phase strings of the review (`extensions/review/manifest.json`, `review_chat.py`: the review declares the names of its stages and sends exactly these names; a phase text that is not a declared name is not a phase change)
+- Touches: a new module `skill_run_observer.py` next to `chat_service.py` with the class `SkillRunObserver` (note `skill-events-today.md`, D-337), the six places in `chat_service.py` (start, phase, report, answer, file, end) only to call it, `task_monitor.py` (an optional `elements` argument of `update`, with T-02), the manifest field `phases` (REQ-WFM-039) and the phase strings of the review (`extensions/review/manifest.json`, `review_chat.py`: the review declares the names of its stages and sends exactly these names; a phase text that is not a declared name is not a phase change)
 - Must not touch: protected material, the other skills and manifests (lookup and search declare no phases and are not changed), `pipeline.py`
 - Depends on: T-03
 - Done when: the listed test is green, all other tests unchanged, no skill file names the view (inspection part of TC-WFM-136)
@@ -117,9 +117,9 @@ The stubs carry the interface the installed tests expect; the tasks replace the 
 - Done when: no card in the chat, all remaining tests green except the ones that wait for G-V3.CHAT, documentation updated
 
 ## Split check
-10 tasks, above the usual 8. The cut would run between T-01 to T-05 (the run records and the wire, no browser) and T-06 to T-10 (the page), which can run in parallel after the red tests. **Decided by the owner (2026-11-08, D-307): keep one plan and one line of work**; the page needs the wire from T-05 for its browser checks, and each half already ends with checks of its own.
+10 tasks, above the usual 8. The cut would run between T-01 to T-05 (the run records and the wire, no browser) and T-06 to T-10 (the page), which can run in parallel after the red tests. **Decided by the owner (2026-11-08, D-335): keep one plan and one line of work**; the page needs the wire from T-05 for its browser checks, and each half already ends with checks of its own.
 
 ## Open before Implement starts
 1. TC-WFM-136 and TC-CLV-038 are written in a session of their own (Step 4b); the T-03 spike note is approved: TC-WFM-136 against the observer, TC-CLV-038 with a new stub `ui/tools/real_backend_stub.py` (the chat stub server with a data folder and a seeded account, started twice with the folder mounted read-write; tried first, reported if it does not start).
 2. TR-PANEL-001 (the harness versions were added in Step 4) is to be marked again in `req_review`.
-(Closed on 2026-11-08: `elements` in the run record by A-143, D-306; the dark theme in the browser driver; the `starter` flag of the `skill_turns` suites.)
+(Closed on 2026-11-08: `elements` in the run record by A-149, D-334; the dark theme in the browser driver; the `starter` flag of the `skill_turns` suites.)

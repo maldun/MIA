@@ -1,7 +1,7 @@
-"""One-off, owner runs it (eval/suites and eval/baselines are protected), D-304 and the retag decision of 2026-11-08.
+"""One-off, owner runs it (eval/suites and eval/baselines are protected), D-332 and the retag decision of 2026-11-08.
 1. every case of eval/suites/skill_turns and skill_turns.holdout gets the tags req:REQ-CHA-053 and req:REQ-CHA-054 if missing,
    so the criteria select all 24 cases per split (n=24 of REQ-CHA-053 and 054); ids, inputs, notes, truth and splits stay as they are.
-2. an empty baseline file eval/baselines/skill_turns__nodigest__baseline.jsonl records "no digest today" (D-304).
+2. an empty baseline file eval/baselines/skill_turns__nodigest__baseline.jsonl records "no digest today" (D-332).
 usage: python3 -I specs/mia/eval-drafts/retag_skill_turns.py [--do]   (run from the repository root; without --do it only reports)"""
 import json, sys
 from pathlib import Path

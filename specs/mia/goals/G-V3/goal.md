@@ -193,7 +193,7 @@ None open for Step 0 (Q-1 to Q-11 answered, D-271 and D-273). Settled in Plan St
 | Phase | State | Record or reason |
 |---|---|---|
 | Explore | done | FR-34, FR-35 and FR-46 are in the HLS of iteration 2 (approved 2026-11-05, D-186); the new wording (one Skill run view, no card in the chat) is proposal A-131 |
-| Plan | in progress | started 2026-11-07; Steps 0 to 3 done for both subgoals (D-300 to D-304), contract change applied; Step 4 (red tests) and Step 5 (plan.md) open |
+| Plan | in progress | started 2026-11-07; Steps 0 to 3 done for both subgoals (D-300 to D-303 and D-332), contract change applied; Step 4 (red tests) and Step 5 (plan.md) open |
 | Implement | open | |
 | Verify | open | |
 | Commit | open | |
