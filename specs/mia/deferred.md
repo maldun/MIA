@@ -407,7 +407,7 @@ Proposed on 2026-10-29 after the usability work of N-2.3 T-09 to T-11 and N-1.1 
 - Trigger: the chat log is moved to the storage (IF-102), or the Plan of the shared-state database, whichever first
 - Target check: specified only
 - Decision: proposed 2026-11-14 on the owner's instruction (F-15 later); decision row pending
-- Sign-off: pending (owner)
+- Sign-off: maldun, 2026-11-14
 - Status: open
 
 ## TD-83 – The lock of the skill run recorder is per recorder, two recorders on one storage lose answers (DRAFT)
@@ -422,7 +422,7 @@ Proposed on 2026-10-29 after the usability work of N-2.3 T-09 to T-11 and N-1.1 
 - Trigger: the Plan of the shared-state database (deploy/REQUIREMENTS_DB.md), before a second instance uses one database
 - Target check: specified only
 - Decision: proposed 2026-11-14 on the owner's instruction (F-16 later); decision row pending
-- Sign-off: pending (owner)
+- Sign-off: maldun, 2026-11-14
 - Status: open
 
 ## TD-84 – The mock of IF-101 does not pin the account check of delete_history, TC-CLV-036 is not reworded (DRAFT)
@@ -437,5 +437,5 @@ Proposed on 2026-10-29 after the usability work of N-2.3 T-09 to T-11 and N-1.1 
 - Trigger: the next plan amendment or contract change that touches `tests/helpers/` or `tests/acceptance/contract/test_if_101_chat_api.py`, or the Validate of G-V3, whichever first
 - Target check: specified only
 - Decision: proposed 2026-11-14 on the owner's instruction (F-17 later); decision row pending
-- Sign-off: pending (owner)
+- Sign-off: maldun, 2026-11-14
 - Status: open
