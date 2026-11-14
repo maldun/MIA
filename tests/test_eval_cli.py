@@ -213,5 +213,17 @@ class PinInTheWrittenCommands(unittest.TestCase):
         self.assertEqual(found, [])
 
 
+class CoreNeeds(unittest.TestCase):
+    @mark.req("REQ-CHA-049")
+    def test_the_digest_target_gets_a_model_and_no_sandbox(self):
+        """F-T05: the target digest calls the pinned model through the core, so the core is built with a model; the step has no tool, so it gets no sandbox.
+        Example: core_needs("digest", False) is (True, False); a hard-check suite needs neither."""
+        # Given: the target kinds of the suites
+        # When: the CLI decides what the core is built with
+        needs = {kind: EVAL_CLI.core_needs(kind, False) for kind in ("digest", "pipeline", "checks")}
+        # Then: digest has a model and no sandbox, pipeline both, checks neither
+        self.assertEqual(needs, {"digest": (True, False), "pipeline": (True, True), "checks": (False, False)})
+
+
 if __name__ == "__main__":
     unittest.main()

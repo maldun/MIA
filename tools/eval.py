@@ -67,6 +67,12 @@ def build_core(cfg, need_model, need_sandbox):
     return Core(own(cfg, "skills_dir", "skills"), library, work, model=model, sandbox=create_router(cfg) if need_sandbox else None)
 
 
+def core_needs(kind, with_pipeline):
+    """(a model, a sandbox) for the core of a run: the digest step calls the pinned model and has no tool, so no sandbox (G-V3.CHAT T-05)"""
+    need_model = kind in ("pipeline", "research", "plan", "workflow", "digest") or (kind == "extraction" and with_pipeline)
+    return need_model, need_model and kind != "digest"
+
+
 def model_client(cfg):
     from ollama import Client
     return Client(host="http://%s:%s" % (cfg.get("address", "localhost"), cfg.get("port", 11434)))
@@ -194,8 +200,8 @@ def main():
         sys.exit("--model together with --pin: the pin decides the model of a run (%s); drop --model" %
                  ", ".join("%s = %s" % (i, p["name"]) for i, p in sorted(PINS.items())))
     suite = open_suite(args.args[0], args.holdout)
-    need_model = suite.target["kind"] in ("pipeline", "research", "plan", "workflow") or (suite.target["kind"] == "extraction" and bool(args.skill or args.pipeline))
-    core = build_core(cfg, need_model, need_sandbox=need_model)
+    need_model, need_sandbox = core_needs(suite.target["kind"], bool(args.skill or args.pipeline))
+    core = build_core(cfg, need_model, need_sandbox)
     variant = {"name": args.variant}
     for key in ("skill", "pipeline", "model"):
         if getattr(args, key):
