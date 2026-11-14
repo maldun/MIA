@@ -408,6 +408,7 @@ Proposed on 2026-10-29 after the usability work of N-2.3 T-09 to T-11 and N-1.1 
 - Target check: specified only
 - Decision: the owner's instruction in the session of 2026-11-12 (no D-number yet)
 - Sign-off: maldun, 2026-11-12
+- Status: open
 
 ## TD-81 – A skill run left `running` by a crash is shown as running after every restart
 - Kind: defer
