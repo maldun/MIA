@@ -92,16 +92,17 @@ export function initSkillRunView({ root, socket, api, t, onStop = () => {}, noti
   }
 
   /** a link of a chat message (#run=<id>) opens the Full run part of that run and brings the view into sight (REQ-CLV-037) */
-  async function open(id) {
+  async function open(id, { quiet = false } = {}) {
     try {
       view = await api.skillRun(id);
     } catch (error) {
-      notify(t('workspace.failed'));
-      return;
+      if (!quiet) notify(t('workspace.failed'));
+      return false;
     }
     draw();
     $('srv-full').open = true;
     root.scrollIntoView({ block: 'nearest' });
+    return true;
   }
   document.addEventListener('click', (event) => {
     const link = event.target.closest?.('a[href^="#run="]');
@@ -126,8 +127,8 @@ export function initSkillRunView({ root, socket, api, t, onStop = () => {}, noti
   socket.on('files_changed', loadFileInfo);
   async function start() {
     const linked = runOfHash(location.hash);      // a reload keeps the link: the page opens the linked run, else the one the backend names
-    if (linked) await open(linked);
-    else await refresh();
+    // a link that cannot be opened (a deleted run, one of another account) is no reason to show nothing: the run the backend names is shown (REQ-CLV-038)
+    if (!linked || !(await open(linked, { quiet: true }))) await refresh();
     loadFileInfo();
   }
   socket.on('connect', start);

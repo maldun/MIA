@@ -5,6 +5,7 @@ skill through the monitor; the plain status goes out. Run with: python tests/tes
 import os
 import sys
 import unittest
+import unittest.mock
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -32,6 +33,19 @@ class TestEmitStatus(unittest.TestCase):
         probe, payload = Probe(), {"id": "r1", "done": False, "paused": False}
         ChatService._emit_status(probe, "task_status", payload)
         self.assertEqual(probe.sent, [("task_status", payload)])
+
+    def test_the_error_is_logged(self):
+        """F-14 of the second Verify run: the plain status goes out, and the error is not hidden: one log record names it.
+        Example: record() raises OSError("disk read failed"), the log line holds "disk read failed"."""
+        # Given: a recorder whose storage raises
+        probe, payload = Probe(), {"id": "r1", "done": True, "paused": False}
+        # When: the end status is emitted
+        with unittest.mock.patch("chat_service.logger") as log:
+            ChatService._emit_status(probe, "task_status", payload)
+        # Then: the plain status went out and one error line names the cause
+        self.assertEqual(probe.sent, [("task_status", payload)])
+        self.assertEqual(log.error.call_count, 1)
+        self.assertIn("disk read failed", " ".join(str(a) for a in log.error.call_args.args))
 
 
 if __name__ == "__main__":
