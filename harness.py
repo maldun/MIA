@@ -19,16 +19,19 @@ import time
 import requests
 
 try:
-    from . import behaviour, checks, eval_platform, extraction, metrics, plans, research_score, web_tools
+    from . import behaviour, checks, digest_score, eval_platform, extraction, metrics, persona, plans, research_score, skill_digest, web_tools
     from .pipeline import Tool
 except ImportError:  # used as plain script / in tests
     import behaviour
+    import digest_score
     import eval_platform
     import checks
     import extraction
     import metrics
+    import persona
     import plans
     import research_score
+    import skill_digest
     from pipeline import Tool
     import web_tools
 
@@ -382,8 +385,38 @@ class Harness:
         return ("pass" if score["ok"] else "fail"), {"plan": result.answer, "score": score}
 
     def _digest(self, case, variant, suite):
-        """STUB of Plan Step 4 (G-V3.CHAT, note eval-target-note.md): the production SkillDigestStep on the pin, scored by digest_score.py; written in CHAT T-04"""
-        raise NotImplementedError("the target digest")
+        """the production SkillDigestStep (never a copy of its prompt) on the pin, scored by digest_score.py with the labels of the owner (G-V3.CHAT T-04, note eval-target-note.md);
+        every call carries the model, seed and temperature of the pin and no tool (REQ-EVAL-003, REQ-CHA-048)"""
+        model, pin = self.core.runner.model, self.pin or {}
+        args = {"model": pin["name"], "options": {"seed": pin["seed"], "temperature": pin["temperature"]}} if pin else {}
+
+        def call(messages):
+            reply = model.chat(messages, **args)
+            return reply if isinstance(reply, str) else json.dumps(reply, ensure_ascii=False)
+        text = suite.target.get("persona")
+        if text is None:
+            text = persona.read_persona(suite.target["persona_file"]) if suite.target.get("persona_file") else ""
+        step = skill_digest.SkillDigestStep(call, persona=text)
+        data = case["input"]
+        asks = {"summary": lambda: step.summary(data["result"]), "failed": lambda: step.failure(data["reason"]), "stopped": lambda: step.stopped(data["reason"])}
+        if data.get("kind") not in asks:
+            raise SuiteError("%s: the case %s has the kind '%s' (summary, failed or stopped)" % (suite.name, case["id"], data.get("kind")))
+        try:
+            output = asks[data["kind"]]()
+        except Exception as exc:                                             # a model that raises is a case that failed to answer, not a harness error
+            return "error:no_output", {"error": "%s: %s" % (type(exc).__name__, exc)}
+        if not isinstance(output, str) or not output.strip():
+            return "error:no_output", {"output": output}
+        score = digest_score.score_digest(case, output, self._labels(suite))
+        return score["status"], {"output": output, "score": score}
+
+    def _labels(self, suite):
+        """the labels of the owner for this suite (eval/labels/<suite>.jsonl next to eval/suites, or the path of the target); none is no label, the harness never writes them"""
+        path = suite.target.get("labels") or (os.path.join(suite.path, os.pardir, os.pardir, "labels", suite.name + ".jsonl") if suite.path else None)
+        if not path or not os.path.isfile(path):
+            return []
+        with open(path, encoding="utf-8") as fp:
+            return [json.loads(line) for line in fp if line.strip()]
 
     def _research(self, case, variant, suite):
         """a research pipeline over the recorded web of the suite (web.json, searched by keywords): its answer {answer, status, sources} is scored against the gold of the case (research_score.py)"""
