@@ -14,7 +14,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(HERE), "helpers"))
 
 from markers import mark                                                        # noqa: E402
 from snapshot_lab import AccountsLab, LibraryLab, standard_state                # noqa: E402
-from snapshot_store import Refused, SnapshotStore                               # noqa: E402
+from snapshot_store import Conflict, Refused, SnapshotStore                               # noqa: E402
 
 PINS = {"MP-light": "gemma4:12b-it-qat"}
 
@@ -89,6 +89,45 @@ class SnapshotAcceptance(unittest.TestCase):
         self.assertEqual(self.lab.state(), s1)
         self.store.restore_snapshot("before restore of a", "anna")
         self.assertEqual(self.lab.state(), s2)
+
+    @mark.req("REQ-WFM-063")
+    def test_names_never_overwrite_a_snapshot(self):
+        """TC-WFM-063 (D-240 O3): a name that exists is refused with Conflict and nothing is written; restoring "a" twice stores "before restore of a" and
+        "before restore of a (2)", both kept, the first unchanged."""
+        self.store.snapshot("a", "anna")
+        with self.assertRaises(Conflict):
+            self.store.snapshot("a", "anna")
+        self.assertEqual([s["name"] for s in self.store.list_snapshots("anna")], ["a"])
+        change_four_items(self.lab)
+        first = items_of(self.lab)
+        self.store.restore_snapshot("a", "anna")
+        self.lab.save("skills", "research", {"name": "research", "v": 3}, "anna")
+        self.store.restore_snapshot("a", "anna")
+        names = [s["name"] for s in self.store.list_snapshots("anna")]
+        self.assertEqual(names, ["a", "before restore of a", "before restore of a (2)"])
+        self.assertEqual(sorted_items(self.store.read_snapshot("before restore of a")), first)
+
+    @mark.req("REQ-WFM-063")
+    def test_a_failure_in_the_middle_of_a_restore_changes_everything_back(self):
+        """TC-WFM-063 (D-240 O4): the third write of the restore fails; the error is raised, the state equals the one before the call, the automatic
+        snapshot stays."""
+        self.store.snapshot("a", "anna")
+        change_four_items(self.lab)
+        before = self.lab.state()
+        real, calls = self.lab.set_current_version, []
+
+        def failing(kind, record_id, version, author):
+            calls.append(record_id)
+            if len(calls) == 3:
+                raise OSError("disk full")
+            return real(kind, record_id, version, author)
+
+        self.lab.set_current_version = failing
+        with self.assertRaises(OSError):
+            self.store.restore_snapshot("a", "anna")
+        self.lab.set_current_version = real
+        self.assertEqual(self.lab.state(), before)
+        self.assertIsNotNone(self.store.read_snapshot("before restore of a"), "the automatic snapshot was not kept")
 
     @mark.req("REQ-WFM-064")
     def test_a_restore_gives_back_version_trust_and_lifecycle_of_each_item(self):

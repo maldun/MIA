@@ -1,5 +1,5 @@
 """Test doubles for the snapshot checks (TC-WFM-061 to 066, G-V2.CONVERT): an in-memory library with the IF-203 v1 operations a snapshot needs and a stand-in
-for the accounts. Complexity 2; they hold no rules of the product. The IF-203 v1 contract text is not reviewed yet (D-188): the operations named in
+for the accounts. Complexity 2; they hold no rules of the product. The IF-203 v2 contract text (A-121 draft) is not approved yet (D-188): the operations named in
 `snapshot_store.py` are an assumption of the tests."""
 
 
@@ -33,10 +33,14 @@ class LibraryLab:
         key = (kind, record_id)
         return [{"version": i + 1, "author": a} for i, a in enumerate(self._authors[key])]
 
-    def restore(self, kind, record_id, version, author):
-        """the item gets `version` as its current one; no version is created or deleted (assumption A1 of the tests, see the report)"""
+    def set_current_version(self, kind, record_id, version, author):
+        """the item gets `version` as its current one; no version is created or deleted (A-121 draft, D-241 D-b)"""
         self._current[(kind, record_id)] = version
         return {"version": version}
+
+    def restore(self, kind, record_id, version, author):
+        """IF-203 v0 meaning, unchanged: a new version with the content of `version` (not used by the snapshot code)"""
+        return self.save(kind, record_id, self._docs[(kind, record_id)][version - 1], author)
 
     def get_trust(self, record_id):
         return self._trust[record_id]
@@ -47,7 +51,7 @@ class LibraryLab:
     def get_lifecycle(self, record_id):
         return self._lifecycle[record_id]
 
-    def set_lifecycle(self, record_id, lifecycle, author):
+    def set_lifecycle(self, record_id, lifecycle, author, evidence=None):
         self._lifecycle[record_id] = lifecycle
 
     def pins(self):
