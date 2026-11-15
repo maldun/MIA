@@ -18,7 +18,7 @@ class Monitor:
     def __init__(self):
         self.phase, self.budget, self.counts, self.updates = None, {}, {}, []
 
-    def update(self, phase=None, budget=None, counts=None):
+    def update(self, phase=None, budget=None, counts=None, elements=None):
         self.phase = phase or self.phase
         for name, figures in (budget or {}).items():
             self.budget.setdefault(name, {}).update(figures)

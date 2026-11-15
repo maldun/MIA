@@ -1,0 +1,222 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>N-6 neighbour rule: mark the relations the strict rule refused</title>
+<style>
+:root{--bg:#fff;--fg:#1d2330;--card:#f4f6fa;--line:#c9d0dc;--acc:#2a5bd7;--mark:#ffe58a}
+@media(prefers-color-scheme:dark){:root{--bg:#141821;--fg:#e6e9f0;--card:#1e2430;--line:#38405a;--acc:#7ea2ff;--mark:#6b5a00}}
+body{background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,sans-serif;margin:0 auto;max-width:800px;padding:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:8px 16px;margin:10px 0}
+h1{font-size:1.3rem}h2.doc{font-size:1.1rem;margin-top:28px;border-bottom:1px solid var(--line)}h3{font-size:.95rem;margin:6px 0}
+.desc{margin:4px 0}.src{max-height:11em;overflow:auto;white-space:pre-wrap;font-size:.85rem;padding:6px;border-left:3px solid var(--line);margin:6px 0}
+mark{background:var(--mark);color:inherit}.opts label{margin-right:12px;white-space:nowrap}
+.note,.missing{width:100%;box-sizing:border-box;background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:6px;font:inherit}
+button{background:var(--acc);color:#fff;border:0;border-radius:6px;padding:10px 16px;font:inherit;cursor:pointer}
+#bar{position:sticky;bottom:0;background:var(--bg);padding:10px 0;border-top:1px solid var(--line)}
+</style></head><body>
+<h1>N-6 neighbour rule: mark the relations the strict rule refused</h1>
+<p>20 items sampled from 9 documents (own builder, gemma4:12b-it-qat, num_ctx 8192; the model's quote is shown on each card). Open <b>Source passage</b>; the item's names are highlighted.
+<b>right</b> = the text supports it. <b>right but useless</b> = true but not worth keeping in a context graph. <b>wrong</b> = the text says something else.
+<b>invented</b> = the text does not say it. Per document, note anything important that is missing. Answers stay in this browser until you press <b>Save as file</b>.</p>
+<p class="miss"><label>Notes (optional): <input data-doc="all" class="missing" placeholder="short note or empty"></label></p>
+<section class="card" data-id="R001">
+<h3>R001 · Prompt_injection · relation: Forms of indirect injection  —  evade the filter  [are one example]</h3>
+<p class="desc">Model's quote: “Forms of indirect injection (as mentioned above) are one example.” (the strict rule refused it: the quote lacks one end)</p>
+<details open><summary>Quote with its neighbouring sentences</summary><div class='src'>In response, attackers have sought ways to <mark>evade the filter</mark>. <mark>Forms of indirect injection</mark> (as mentioned above) are one example. A November 2024 OWASP report identified security challenges in multimodal AI, which processes multiple data types, such as text and images.</div></details>
+<p class="opts"><label><input type="radio" name="d-R001" value="right"> right</label>
+<label><input type="radio" name="d-R001" value="trivial"> right but useless</label>
+<label><input type="radio" name="d-R001" value="wrong"> wrong (text says otherwise)</label>
+<label><input type="radio" name="d-R001" value="invented"> invented (not in the text)</label></p>
+<input class="note" placeholder="comment (optional)"></section>
+<section class="card" data-id="R002">
+<h3>R002 · Systematic_review · relation: Non-Interventional, Reproducible, and Open (NIRO) Systematic Reviews  —  PRISMA guidelines  [was created to counter the limitation of]</h3>
+<p class="desc">Model's quote: “As a result, Non-Interventional, Reproducible, and Open (NIRO) Systematic Reviews was created to counter this limitation.” (the strict rule refused it: the quote lacks one end)</p>
+<details open><summary>Quote with its neighbouring sentences</summary><div class='src'>However, the <mark>PRISMA guidelines</mark> have been found to be limited to intervention research and the guidelines have to be changed in order to fit non-intervention research. As a result, <mark>Non-Interventional, Reproducible, and Open (NIRO) Systematic Reviews</mark> was created to counter this limitation. PRISMA does not provide guidance for conducting systematic reviews, but rather is a guideline for reporting the systematic review process, results, analysis, and synthesis.</div></details>
+<p class="opts"><label><input type="radio" name="d-R002" value="right"> right</label>
+<label><input type="radio" name="d-R002" value="trivial"> right but useless</label>
+<label><input type="radio" name="d-R002" value="wrong"> wrong (text says otherwise)</label>
+<label><input type="radio" name="d-R002" value="invented"> invented (not in the text)</label></p>
+<input class="note" placeholder="comment (optional)"></section>
+<section class="card" data-id="R003">
+<h3>R003 · Meta_analysis · relation: pre-prints  —  grey literature  [is a type of]</h3>
+<p class="desc">Model's quote: “This type of literature includes conference abstracts, dissertations, and pre-prints.” (the strict rule refused it: the quote lacks one end)</p>
+<details open><summary>Quote with its neighbouring sentences</summary><div class='src'>A final consideration is whether to include studies from the <mark>grey literature</mark>, which is defined as research that has not been formally published. This type of literature includes conference abstracts, dissertations, and <mark>pre-prints</mark>. While the inclusion of <mark>grey literature</mark> reduces the risk of publication bias, the methodological quality of the work is often (but not always) lower than formally published work.</div></details>
+<p class="opts"><label><input type="radio" name="d-R003" value="right"> right</label>
+<label><input type="radio" name="d-R003" value="trivial"> right but useless</label>
+<label><input type="radio" name="d-R003" value="wrong"> wrong (text says otherwise)</label>
+<label><input type="radio" name="d-R003" value="invented"> invented (not in the text)</label></p>
+<input class="note" placeholder="comment (optional)"></section>
+<section class="card" data-id="R004">
+<h3>R004 · Prompt_injection · relation: Direct injection  —  prompt injection  [is the original form of]</h3>
+<p class="desc">Model's quote: “This is the original form of prompt injection.” (the strict rule refused it: the quote lacks one end)</p>
+<details open><summary>Quote with its neighbouring sentences</summary><div class='src'>== Types == <mark>Direct injection</mark> happens when user input is mistaken as developer instruction, leading to unexpected manipulation of responses. This is the original form of <mark>prompt injection</mark>. In<mark>direct injection</mark> happens when the prompt is located in external data sources such as emails and documents.</div></details>
+<p class="opts"><label><input type="radio" name="d-R004" value="right"> right</label>
+<label><input type="radio" name="d-R004" value="trivial"> right but useless</label>
+<label><input type="radio" name="d-R004" value="wrong"> wrong (text says otherwise)</label>
+<label><input type="radio" name="d-R004" value="invented"> invented (not in the text)</label></p>
+<input class="note" placeholder="comment (optional)"></section>
+<section class="card" data-id="R005">
+<h3>R005 · Meta_analysis · relation: conference abstracts  —  grey literature  [is a type of]</h3>
+<p class="desc">Model's quote: “This type of literature includes conference abstracts, dissertations, and pre-prints.” (the strict rule refused it: the quote lacks one end)</p>
+<details open><summary>Quote with its neighbouring sentences</summary><div class='src'>A final consideration is whether to include studies from the <mark>grey literature</mark>, which is defined as research that has not been formally published. This type of literature includes <mark>conference abstracts</mark>, dissertations, and pre-prints. While the inclusion of <mark>grey literature</mark> reduces the risk of publication bias, the methodological quality of the work is often (but not always) lower than formally published work.</div></details>
+<p class="opts"><label><input type="radio" name="d-R005" value="right"> right</label>
+<label><input type="radio" name="d-R005" value="trivial"> right but useless</label>
+<label><input type="radio" name="d-R005" value="wrong"> wrong (text says otherwise)</label>
+<label><input type="radio" name="d-R005" value="invented"> invented (not in the text)</label></p>
+<input class="note" placeholder="comment (optional)"></section>
+<section class="card" data-id="R006">
+<h3>R006 · Peer_review · relation: Nature  —  Peer review  [making it standard practice in 1973]</h3>
+<p class="desc">Model's quote: “It developed over the following centuries with, for example, the journal Nature making it standard practice in 1973.” (the strict rule refused it: the quote lacks one end)</p>
+<details open><summary>Quote with its neighbouring sentences</summary><div class='src'>Henry Oldenburg (1619–1677) was a German-born British philosopher who is seen as the &#x27;father&#x27; of modern scientific <mark>peer review</mark>. It developed over the following centuries with, for example, the journal <mark>Nature</mark> making it standard practice in 1973. The term &quot;<mark>peer review</mark>&quot; was first used in the early 1970s.</div></details>
+<p class="opts"><label><input type="radio" name="d-R006" value="right"> right</label>
+<label><input type="radio" name="d-R006" value="trivial"> right but useless</label>
+<label><input type="radio" name="d-R006" value="wrong"> wrong (text says otherwise)</label>
+<label><input type="radio" name="d-R006" value="invented"> invented (not in the text)</label></p>
+<input class="note" placeholder="comment (optional)"></section>
+<section class="card" data-id="R007">
+<h3>R007 · Citation · relation: sequential numbers  —  endnotes  [refer to]</h3>
+<p class="desc">Model's quote: “The numbers refer to either footnotes (notes at the end of the page) or endnotes (notes on a page at the end of the paper) that provide source detail.” (the strict rule refused it: the quote lacks one end)</p>
+<details open><summary>Quote with its neighbouring sentences</summary><div class='src'>The Vancouver system uses <mark>sequential numbers</mark> in the text, either bracketed or superscript or both. The numbers refer to either footnotes (notes at the end of the page) or <mark>endnotes</mark> (notes on a page at the end of the paper) that provide source detail. The notes system may or may not require a full bibliography, depending on whether the writer has used a full-note form or a shortened-note form.</div></details>
+<p class="opts"><label><input type="radio" name="d-R007" value="right"> right</label>
+<label><input type="radio" name="d-R007" value="trivial"> right but useless</label>
+<label><input type="radio" name="d-R007" value="wrong"> wrong (text says otherwise)</label>
+<label><input type="radio" name="d-R007" value="invented"> invented (not in the text)</label></p>
+<input class="note" placeholder="comment (optional)"></section>
+<section class="card" data-id="R008">
+<h3>R008 · arxiv_2410.05779 · relation: LightRAG  —  dual-level retrieval system  [employs]</h3>
+<p class="desc">Model's quote: “This innovative framework employs a dual-level retrieval system that enhances comprehensive information retrieval from both low-level and high-level knowledge discovery.” (the strict rule refused it: the quote lacks one end)</p>
+<details open><summary>Quote with its neighbouring sentences</summary><div class='src'>To address these challenges, we propose <mark>LightRAG</mark>, which incorporates graph structures into text indexing and retrieval processes. This innovative framework employs a <mark>dual-level retrieval system</mark> that enhances comprehensive information retrieval from both low-level and high-level knowledge discovery. Additionally, the integration of graph structures with vector representations facilitates efficient retrieval of related entities and their relationships, significantly improving response times while maintaining contextual relevance.</div></details>
+<p class="opts"><label><input type="radio" name="d-R008" value="right"> right</label>
+<label><input type="radio" name="d-R008" value="trivial"> right but useless</label>
+<label><input type="radio" name="d-R008" value="wrong"> wrong (text says otherwise)</label>
+<label><input type="radio" name="d-R008" value="invented"> invented (not in the text)</label></p>
+<input class="note" placeholder="comment (optional)"></section>
+<section class="card" data-id="R009">
+<h3>R009 · Prompt_injection · relation: prompt engineering  —  Prompt injection  [is a mitigation strategy for]</h3>
+<p class="desc">Model's quote: “These include input and output filtering, prompt evaluation, reinforcement learning from human feedback, and prompt engineering to distinguish user input from system instructions.” (the strict rule refused it: the quote lacks one end)</p>
+<details open><summary>Quote with its neighbouring sentences</summary><div class='src'>== Mitigation == <mark>Prompt injection</mark> has been identified as a significant security risk in LLM applications, prompting the development of various mitigation strategies. These include input and output filtering, prompt evaluation, reinforcement learning from human feedback, and <mark>prompt engineering</mark> to distinguish user input from system instructions. Additional techniques outlined by OWASP include enforcing least privilege access, requiring human oversight for sensitive operations, isolating external content, and conducting adversarial testing to identify vulnerabilities with tools like garak.</div></details>
+<p class="opts"><label><input type="radio" name="d-R009" value="right"> right</label>
+<label><input type="radio" name="d-R009" value="trivial"> right but useless</label>
+<label><input type="radio" name="d-R009" value="wrong"> wrong (text says otherwise)</label>
+<label><input type="radio" name="d-R009" value="invented"> invented (not in the text)</label></p>
+<input class="note" placeholder="comment (optional)"></section>
+<section class="card" data-id="R010">
+<h3>R010 · Prompt_injection · relation: OWASP  —  Prompt injection  [outlined techniques for]</h3>
+<p class="desc">Model's quote: “Additional techniques outlined by OWASP include enforcing least privilege access, requiring human oversight for sensitive operations, isolating external content, and conducting adversarial testing to identify vulnerabilities with tools like garak.” (the strict rule refused it: the quote lacks one end)</p>
+<details open><summary>Quote with its neighbouring sentences</summary><div class='src'>These include input and output filtering, prompt evaluation, reinforcement learning from human feedback, and prompt engineering to distinguish user input from system instructions. Additional techniques outlined by <mark>OWASP</mark> include enforcing least privilege access, requiring human oversight for sensitive operations, isolating external content, and conducting adversarial testing to identify vulnerabilities with tools like garak. While these measures help reduce risks, <mark>OWASP</mark> notes that <mark>prompt injection</mark> remains a persistent challenge, as methods like Retrieval-Augmented Generation (RAG) and fine-tuning do not eliminate the threat.</div></details>
+<p class="opts"><label><input type="radio" name="d-R010" value="right"> right</label>
+<label><input type="radio" name="d-R010" value="trivial"> right but useless</label>
+<label><input type="radio" name="d-R010" value="wrong"> wrong (text says otherwise)</label>
+<label><input type="radio" name="d-R010" value="invented"> invented (not in the text)</label></p>
+<input class="note" placeholder="comment (optional)"></section>
+<section class="card" data-id="R011">
+<h3>R011 · Meta_analysis · relation: dissertations  —  grey literature  [is a type of]</h3>
+<p class="desc">Model's quote: “This type of literature includes conference abstracts, dissertations, and pre-prints.” (the strict rule refused it: the quote lacks one end)</p>
+<details open><summary>Quote with its neighbouring sentences</summary><div class='src'>A final consideration is whether to include studies from the <mark>grey literature</mark>, which is defined as research that has not been formally published. This type of literature includes conference abstracts, <mark>dissertations</mark>, and pre-prints. While the inclusion of <mark>grey literature</mark> reduces the risk of publication bias, the methodological quality of the work is often (but not always) lower than formally published work.</div></details>
+<p class="opts"><label><input type="radio" name="d-R011" value="right"> right</label>
+<label><input type="radio" name="d-R011" value="trivial"> right but useless</label>
+<label><input type="radio" name="d-R011" value="wrong"> wrong (text says otherwise)</label>
+<label><input type="radio" name="d-R011" value="invented"> invented (not in the text)</label></p>
+<input class="note" placeholder="comment (optional)"></section>
+<section class="card" data-id="R012">
+<h3>R012 · Knowledge_graph · relation: knowledge graph  —  Amazon Alexa  [used by]</h3>
+<p class="desc">Model's quote: “They are also historically associated with and used by search engines such as Google, Bing, and Yahoo; knowledge engines and question-answering services such as WolframAlpha, Apple&#x27;s Siri, and Amazon Alexa; and social networks such as LinkedIn and Facebook.” (the strict rule refused it: the quote lacks one end)</p>
+<details open><summary>Quote with its neighbouring sentences</summary><div class='src'>Since the development of the Semantic Web, <mark>knowledge graph</mark>s have often been associated with linked open data projects, focusing on the connections between concepts and entities. They are also historically associated with and used by search engines such as Google, Bing, and Yahoo; knowledge engines and question-answering services such as WolframAlpha, Apple&#x27;s Siri, and <mark>Amazon Alexa</mark>; and social networks such as LinkedIn and Facebook. Recent developments in data science and machine learning, particularly in graph neural networks, representation learning, and machine learning, have broadened the scope of <mark>knowledge graph</mark>s beyond their traditional use in search engines and recommender systems.</div></details>
+<p class="opts"><label><input type="radio" name="d-R012" value="right"> right</label>
+<label><input type="radio" name="d-R012" value="trivial"> right but useless</label>
+<label><input type="radio" name="d-R012" value="wrong"> wrong (text says otherwise)</label>
+<label><input type="radio" name="d-R012" value="invented"> invented (not in the text)</label></p>
+<input class="note" placeholder="comment (optional)"></section>
+<section class="card" data-id="R013">
+<h3>R013 · Prompt_injection · relation: reinforcement learning from human feedback  —  Prompt injection  [is a mitigation strategy for]</h3>
+<p class="desc">Model's quote: “These include input and output filtering, prompt evaluation, reinforcement learning from human feedback, and prompt engineering to distinguish user input from system instructions.” (the strict rule refused it: the quote lacks one end)</p>
+<details open><summary>Quote with its neighbouring sentences</summary><div class='src'>== Mitigation == <mark>Prompt injection</mark> has been identified as a significant security risk in LLM applications, prompting the development of various mitigation strategies. These include input and output filtering, prompt evaluation, <mark>reinforcement learning from human feedback</mark>, and prompt engineering to distinguish user input from system instructions. Additional techniques outlined by OWASP include enforcing least privilege access, requiring human oversight for sensitive operations, isolating external content, and conducting adversarial testing to identify vulnerabilities with tools like garak.</div></details>
+<p class="opts"><label><input type="radio" name="d-R013" value="right"> right</label>
+<label><input type="radio" name="d-R013" value="trivial"> right but useless</label>
+<label><input type="radio" name="d-R013" value="wrong"> wrong (text says otherwise)</label>
+<label><input type="radio" name="d-R013" value="invented"> invented (not in the text)</label></p>
+<input class="note" placeholder="comment (optional)"></section>
+<section class="card" data-id="R014">
+<h3>R014 · Knowledge_graph · relation: knowledge graph  —  Apple&#x27;s Siri  [used by]</h3>
+<p class="desc">Model's quote: “They are also historically associated with and used by search engines such as Google, Bing, and Yahoo; knowledge engines and question-answering services such as WolframAlpha, Apple&#x27;s Siri, and Amazon Alexa; and social networks such as LinkedIn and Facebook.” (the strict rule refused it: the quote lacks one end)</p>
+<details open><summary>Quote with its neighbouring sentences</summary><div class='src'>Since the development of the Semantic Web, <mark>knowledge graph</mark>s have often been associated with linked open data projects, focusing on the connections between concepts and entities. They are also historically associated with and used by search engines such as Google, Bing, and Yahoo; knowledge engines and question-answering services such as WolframAlpha, <mark>Apple&#x27;s Siri</mark>, and Amazon Alexa; and social networks such as LinkedIn and Facebook. Recent developments in data science and machine learning, particularly in graph neural networks, representation learning, and machine learning, have broadened the scope of <mark>knowledge graph</mark>s beyond their traditional use in search engines and recommender systems.</div></details>
+<p class="opts"><label><input type="radio" name="d-R014" value="right"> right</label>
+<label><input type="radio" name="d-R014" value="trivial"> right but useless</label>
+<label><input type="radio" name="d-R014" value="wrong"> wrong (text says otherwise)</label>
+<label><input type="radio" name="d-R014" value="invented"> invented (not in the text)</label></p>
+<input class="note" placeholder="comment (optional)"></section>
+<section class="card" data-id="R015">
+<h3>R015 · wikinews · relation: Andrew Weaver  —  Intergovernmental Panel on Climate Change  [lead author on]</h3>
+<p class="desc">Model's quote: “Weaver, lead author on three Intergovernmental Panel on Climate Change reports and the recently published &quot;Keeping Our Cool: Canada in a Warming World&quot;, was not surprised when references to the UN&#x27;s IPCC reports were removed from Canadian government websites.” (the strict rule refused it: the quote lacks one end)</p>
+<details open><summary>Quote with its neighbouring sentences</summary><div class='src'>Then-Environmental Minister Rona Ambrose ordered the scientist not to attend talks to promote his novel where his job title was given. “It’s absolutely Orwellian what’s going on here in science in Canada,” said environmental scientist <mark>Andrew Weaver</mark> in an interview with The Georgia Straight. Weaver, lead author on three <mark>Intergovernmental Panel on Climate Change</mark> reports and the recently published &quot;Keeping Our Cool: Canada in a Warming World&quot;, was not surprised when references to the UN&#x27;s IPCC reports were removed from Canadian government websites. He wrote in his book about new rules the Harper government put in place, requiring journalist questions for Environment Canada scientists be submitted in writing, and responses must first be presented to media-relations staff for editing and approval.</div></details>
+<p class="opts"><label><input type="radio" name="d-R015" value="right"> right</label>
+<label><input type="radio" name="d-R015" value="trivial"> right but useless</label>
+<label><input type="radio" name="d-R015" value="wrong"> wrong (text says otherwise)</label>
+<label><input type="radio" name="d-R015" value="invented"> invented (not in the text)</label></p>
+<input class="note" placeholder="comment (optional)"></section>
+<section class="card" data-id="R016">
+<h3>R016 · Knowledge_graph · relation: virtual knowledge graphs  —  relational database  [rely on]</h3>
+<p class="desc">Model's quote: “They rely on an underlying relational database or data lake to answer queries on the graph.” (the strict rule refused it: the quote lacks one end)</p>
+<details open><summary>Quote with its neighbouring sentences</summary><div class='src'>In contrast, <mark>virtual knowledge graphs</mark> do not store information in specialized databases. They rely on an underlying <mark>relational database</mark> or data lake to answer queries on the graph. Such a virtual knowledge graph system must be properly configured in order to answer the queries correctly.</div></details>
+<p class="opts"><label><input type="radio" name="d-R016" value="right"> right</label>
+<label><input type="radio" name="d-R016" value="trivial"> right but useless</label>
+<label><input type="radio" name="d-R016" value="wrong"> wrong (text says otherwise)</label>
+<label><input type="radio" name="d-R016" value="invented"> invented (not in the text)</label></p>
+<input class="note" placeholder="comment (optional)"></section>
+<section class="card" data-id="R017">
+<h3>R017 · Knowledge_graph · relation: knowledge graph  —  Yahoo  [used by]</h3>
+<p class="desc">Model's quote: “They are also historically associated with and used by search engines such as Google, Bing, and Yahoo; knowledge engines and question-answering services such as WolframAlpha, Apple&#x27;s Siri, and Amazon Alexa; and social networks such as LinkedIn and Facebook.” (the strict rule refused it: the quote lacks one end)</p>
+<details open><summary>Quote with its neighbouring sentences</summary><div class='src'>Since the development of the Semantic Web, <mark>knowledge graph</mark>s have often been associated with linked open data projects, focusing on the connections between concepts and entities. They are also historically associated with and used by search engines such as Google, Bing, and <mark>Yahoo</mark>; knowledge engines and question-answering services such as WolframAlpha, Apple&#x27;s Siri, and Amazon Alexa; and social networks such as LinkedIn and Facebook. Recent developments in data science and machine learning, particularly in graph neural networks, representation learning, and machine learning, have broadened the scope of <mark>knowledge graph</mark>s beyond their traditional use in search engines and recommender systems.</div></details>
+<p class="opts"><label><input type="radio" name="d-R017" value="right"> right</label>
+<label><input type="radio" name="d-R017" value="trivial"> right but useless</label>
+<label><input type="radio" name="d-R017" value="wrong"> wrong (text says otherwise)</label>
+<label><input type="radio" name="d-R017" value="invented"> invented (not in the text)</label></p>
+<input class="note" placeholder="comment (optional)"></section>
+<section class="card" data-id="R018">
+<h3>R018 · mia_readme_core_2a · relation: What MIA asked the internet  —  data/runs/web-YYYY-MM.jsonl  [is a line in]</h3>
+<p class="desc">Model's quote: “every search and fetch is a line in data/runs/web-YYYY-MM.jsonl (query, backend, results, errors, URL, status, bytes, timing).” (the strict rule refused it: the quote lacks one end)</p>
+<details open><summary>Quote with its neighbouring sentences</summary><div class='src'>Blocked: localhost, the LAN, the tailnet (100.64.0.0/10, `.ts.net`), link-local and cloud metadata addresses (169.254.169.254), IPv6 private ranges, names without a dot or ending in `.local`/`.internal`, addresses with a user name. Limits: 5 s connect, 15 s read, 2 MB, content types html/plain/json/xml, no cookies, no scripts. - **Text from pages**: scripts, styles, menus and **hidden elements** (`display:none`, `hidden`, `aria-hidden`, font size 0) are dropped, because hidden text is a favourite place for instructions aimed at models. `chunk_text` cuts long pages at paragraph breaks. - **Web text is data** (X1): `untrusted()` wraps it in delimiters that the page cannot close, `injection_signals()` flags phrases like &quot;ignore previous instructions&quot; (shown in the status block and logged; a hint, not the protection: the protection is narrow tools and schemas in the stages that read the web). - **<mark>What MIA asked the internet</mark>** (X4): every search and fetch is a line in `<mark>data/runs/web-YYYY-MM.jsonl</mark>` (query, backend, results, errors, URL, status, bytes, timing). - Other keys (optional): `web_timeout` (`[5, 15]`), `web_max_bytes`, `web_max_chars`, `search_results`. - Try it without MIA: `python tools/try_search.py &quot;query&quot;`, `--fetch 2` to read the first results, `--url ...`, `--backends duckduckgo`, `--safety` (shows what is blocked). - Tests: `tests/test_web_tools.py` (no network; fakes for sessions and name resolution). - A limit worth knowing: the check of the connected address uses the socket of the connection when the library gives it, and the name is resolved by the system a second time when the connection is made. A name that changes its address between the two lookups is therefore caught by the connected-address check, not by the first one.</div></details>
+<p class="opts"><label><input type="radio" name="d-R018" value="right"> right</label>
+<label><input type="radio" name="d-R018" value="trivial"> right but useless</label>
+<label><input type="radio" name="d-R018" value="wrong"> wrong (text says otherwise)</label>
+<label><input type="radio" name="d-R018" value="invented"> invented (not in the text)</label></p>
+<input class="note" placeholder="comment (optional)"></section>
+<section class="card" data-id="R019">
+<h3>R019 · mia_readme_core_2a · relation: untrusted()  —  Web text is data  [wraps]</h3>
+<p class="desc">Model's quote: “untrusted() wraps it in delimiters that the page cannot close” (the strict rule refused it: the quote lacks one end)</p>
+<details open><summary>Quote with its neighbouring sentences</summary><div class='src'>Blocked: localhost, the LAN, the tailnet (100.64.0.0/10, `.ts.net`), link-local and cloud metadata addresses (169.254.169.254), IPv6 private ranges, names without a dot or ending in `.local`/`.internal`, addresses with a user name. Limits: 5 s connect, 15 s read, 2 MB, content types html/plain/json/xml, no cookies, no scripts. - **Text from pages**: scripts, styles, menus and **hidden elements** (`display:none`, `hidden`, `aria-hidden`, font size 0) are dropped, because hidden text is a favourite place for instructions aimed at models. `chunk_text` cuts long pages at paragraph breaks. - **<mark>Web text is data</mark>** (X1): `<mark>untrusted()</mark>` wraps it in delimiters that the page cannot close, `injection_signals()` flags phrases like &quot;ignore previous instructions&quot; (shown in the status block and logged; a hint, not the protection: the protection is narrow tools and schemas in the stages that read the web). - **What MIA asked the internet** (X4): every search and fetch is a line in `data/runs/web-YYYY-MM.jsonl` (query, backend, results, errors, URL, status, bytes, timing). - Other keys (optional): `web_timeout` (`[5, 15]`), `web_max_bytes`, `web_max_chars`, `search_results`. - Try it without MIA: `python tools/try_search.py &quot;query&quot;`, `--fetch 2` to read the first results, `--url ...`, `--backends duckduckgo`, `--safety` (shows what is blocked). - Tests: `tests/test_web_tools.py` (no network; fakes for sessions and name resolution). - A limit worth knowing: the check of the connected address uses the socket of the connection when the library gives it, and the name is resolved by the system a second time when the connection is made. A name that changes its address between the two lookups is therefore caught by the connected-address check, not by the first one.</div></details>
+<p class="opts"><label><input type="radio" name="d-R019" value="right"> right</label>
+<label><input type="radio" name="d-R019" value="trivial"> right but useless</label>
+<label><input type="radio" name="d-R019" value="wrong"> wrong (text says otherwise)</label>
+<label><input type="radio" name="d-R019" value="invented"> invented (not in the text)</label></p>
+<input class="note" placeholder="comment (optional)"></section>
+<section class="card" data-id="R020">
+<h3>R020 · Prompt_injection · relation: input and output filtering  —  Prompt injection  [is a mitigation strategy for]</h3>
+<p class="desc">Model's quote: “These include input and output filtering, prompt evaluation, reinforcement learning from human feedback, and prompt engineering to distinguish user input from system instructions.” (the strict rule refused it: the quote lacks one end)</p>
+<details open><summary>Quote with its neighbouring sentences</summary><div class='src'>== Mitigation == <mark>Prompt injection</mark> has been identified as a significant security risk in LLM applications, prompting the development of various mitigation strategies. These include <mark>input and output filtering</mark>, prompt evaluation, reinforcement learning from human feedback, and prompt engineering to distinguish user input from system instructions. Additional techniques outlined by OWASP include enforcing least privilege access, requiring human oversight for sensitive operations, isolating external content, and conducting adversarial testing to identify vulnerabilities with tools like garak.</div></details>
+<p class="opts"><label><input type="radio" name="d-R020" value="right"> right</label>
+<label><input type="radio" name="d-R020" value="trivial"> right but useless</label>
+<label><input type="radio" name="d-R020" value="wrong"> wrong (text says otherwise)</label>
+<label><input type="radio" name="d-R020" value="invented"> invented (not in the text)</label></p>
+<input class="note" placeholder="comment (optional)"></section>
+<div id="bar"><button id="save">Save as file</button> <span id="count"></span></div>
+<script>
+const META=[{"id": "R001", "doc": "Prompt_injection", "kind": "relation", "key": ["Forms of indirect injection", "evade the filter"]}, {"id": "R002", "doc": "Systematic_review", "kind": "relation", "key": ["Non-Interventional, Reproducible, and Open (NIRO) Systematic Reviews", "PRISMA guidelines"]}, {"id": "R003", "doc": "Meta_analysis", "kind": "relation", "key": ["pre-prints", "grey literature"]}, {"id": "R004", "doc": "Prompt_injection", "kind": "relation", "key": ["Direct injection", "prompt injection"]}, {"id": "R005", "doc": "Meta_analysis", "kind": "relation", "key": ["conference abstracts", "grey literature"]}, {"id": "R006", "doc": "Peer_review", "kind": "relation", "key": ["Nature", "Peer review"]}, {"id": "R007", "doc": "Citation", "kind": "relation", "key": ["sequential numbers", "endnotes"]}, {"id": "R008", "doc": "arxiv_2410.05779", "kind": "relation", "key": ["LightRAG", "dual-level retrieval system"]}, {"id": "R009", "doc": "Prompt_injection", "kind": "relation", "key": ["prompt engineering", "Prompt injection"]}, {"id": "R010", "doc": "Prompt_injection", "kind": "relation", "key": ["OWASP", "Prompt injection"]}, {"id": "R011", "doc": "Meta_analysis", "kind": "relation", "key": ["dissertations", "grey literature"]}, {"id": "R012", "doc": "Knowledge_graph", "kind": "relation", "key": ["knowledge graph", "Amazon Alexa"]}, {"id": "R013", "doc": "Prompt_injection", "kind": "relation", "key": ["reinforcement learning from human feedback", "Prompt injection"]}, {"id": "R014", "doc": "Knowledge_graph", "kind": "relation", "key": ["knowledge graph", "Apple's Siri"]}, {"id": "R015", "doc": "wikinews", "kind": "relation", "key": ["Andrew Weaver", "Intergovernmental Panel on Climate Change"]}, {"id": "R016", "doc": "Knowledge_graph", "kind": "relation", "key": ["virtual knowledge graphs", "relational database"]}, {"id": "R017", "doc": "Knowledge_graph", "kind": "relation", "key": ["knowledge graph", "Yahoo"]}, {"id": "R018", "doc": "mia_readme_core_2a", "kind": "relation", "key": ["What MIA asked the internet", "data/runs/web-YYYY-MM.jsonl"]}, {"id": "R019", "doc": "mia_readme_core_2a", "kind": "relation", "key": ["untrusted()", "Web text is data"]}, {"id": "R020", "doc": "Prompt_injection", "kind": "relation", "key": ["input and output filtering", "Prompt injection"]}], KEY="mia-n6-neighbour-marking";
+const cards=[...document.querySelectorAll('.card')], miss=[...document.querySelectorAll('.missing')];
+function collect(){return {items:cards.map(c=>({...META.find(m=>m.id===c.dataset.id),
+  decision:(c.querySelector('input[type=radio]:checked')||{}).value||null,comment:c.querySelector('.note').value})),
+  missing:miss.map(m=>({doc:m.dataset.doc,note:m.value}))};}
+function store(){const s=collect();try{localStorage.setItem(KEY,JSON.stringify(s))}catch(e){}
+ document.getElementById('count').textContent=s.items.filter(x=>x.decision).length+' of '+cards.length+' marked';}
+try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s){s.items.forEach(x=>{const c=cards.find(k=>k.dataset.id===x.id);if(!c)return;
+ c.querySelector('.note').value=x.comment||'';if(x.decision){const r=c.querySelector('input[value='+x.decision+']');if(r)r.checked=true;}});
+ s.missing.forEach(x=>{const m=miss.find(k=>k.dataset.doc===x.doc);if(m)m.value=x.note;});}}catch(e){}
+function tally(){const d=cards.map(c=>(c.querySelector('input[type=radio]:checked')||{}).value).filter(Boolean),n=d.length;
+ const r=d.filter(x=>x==='right').length,k=d.filter(x=>x==='invented').length;let t='';
+ if(n>=10){const p=r/n,s=Math.sqrt(p*(1-p)/n),z=1.645,q=k/n,up=(q+z*z/(2*n)+z*Math.sqrt(q*(1-q)/n+z*z/(4*n*n)))/(1+z*z/n);
+  const okR=p-s>=0.68,okI=up<=0.05,bad=p+s<0.68||(k/n-Math.sqrt(q*(1-q)/n))>0.05;
+  t=' | right '+(100*p).toFixed(0)+' % (1 sigma: '+(100*(p-s)).toFixed(0)+' to '+(100*(p+s)).toFixed(0)+' %), invented '+k+' (95 % upper bound '+(100*up).toFixed(1)+' %)'+
+   ' | rule: at most 5 % invented; right at least 68 %';}
+ document.getElementById('count').textContent+=t;}
+document.addEventListener('input',()=>{store();tally();});store();tally();
+document.getElementById('save').onclick=()=>{const a=document.createElement('a');
+ a.href=URL.createObjectURL(new Blob([JSON.stringify(collect(),null,1)],{type:'application/json'}));a.download='n6-neighbour-marks.json';a.click();};
+</script></body></html>

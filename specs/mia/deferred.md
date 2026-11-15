@@ -6,19 +6,21 @@ Check with `trace_check.py` (records, `Relaxed`/`Target` links, `deferred` marke
 Proposed on 2026-10-29 after the usability work of N-2.3 T-09 to T-11 and N-1.1 T-09 (A-23, A-24, D-101, D-103). Every record below is a proposal: the owner confirms, changes or drops it
 (the line `Decision` names the person who has to decide).
 
-## TD-01 – The status card is not tested in a browser and is gone after a reload
+## TD-01 – The status card is gone after a reload
 - Kind: defer
 - Requirement: REQ-CLV-023
-- Interim criterion: the model of the card (figures, state, a late status after done) is tested with `node --test` (`tests/js/taskcard.test.mjs`); the drawing, the buttons and the placement in the chat are looked at by the owner (hand test); the card lives as long as the page is open
-- Target: a browser test that draws the card from a `task_status` of the mock, updates it in place, presses pause, resume and stop, and a card that is still there, with its final figures, after a reload
-- Reason: the repository has no browser test harness for the page yet (no DOM library in `tests/js`); a card after a reload needs the status to be kept with the history, which is a change of the interface (IF-101)
-- Effort: about 1 day for the harness, half a day for the kept card (a field in the history record and in the amendment of IF-101)
-- Risk of the gap: a broken layout or a dead button is found only by a person; on a phone the card may be too wide. Mitigation: the hand test list in `handover-review-workflow.md` and the owner's look before the release
+- Interim criterion: the card is checked in a browser (`tests/test_task_files_browser.py`, TC-CLV-023: draw, update in place, pause, resume, stop, late status after done, 360 px) and its model with `node --test` (`tests/js/taskcard.test.mjs`); the card lives as long as the page is open
+- Target: a card that is still there, with its final figures, after a reload (browser test)
+- Reason: a card after a reload needs the status to be kept with the history, which is a change of the interface (IF-101)
+- Effort: about half a day for the kept card (a field in the history record and in the amendment of IF-101)
+- Risk of the gap: after a reload the user sees no final figures of a finished task. Mitigation: the report and the files tab keep the result
 - Owner: Stefan Reiterer
-- Trigger: the chat mock server sends `task_status` and files events, or the Plan of FB-01, or 2026-12-31, whichever first (the browser harness exists since D-141; D-172)
+- Trigger: the Plan of G-V3.PANEL (was: the chat mock server sends `task_status` and files events, or the Plan of FB-01, or 2026-12-31, whichever first; D-172, wording of A-131, D-302); status stays open
 - Target check: specified only
 - Decision: confirmed by Stefan Reiterer, 2026-11-01 (D-172)
+- Note: narrowed to the reload target on 2026-11-07 on the owner's instruction; the browser part is done (branch `td-01-02-browser-tests`). FR-46 (goal B) moves the card into the skill subwindow, so the reload target may be redone there.
 - Status: open
+- Note (A-131, D-302, owner 2026-11-08): REQ-CLV-023 is superseded by the Skill run view; the reload target is met by REQ-CLV-038 (the Skill run view shows the last run with its final figures after a reload and a restart, browser test). TD-01 moves to REQ-CLV-038 when REQ-CLV-023 is retired in Implement of G-V3.PANEL (owner decision of 2026-11-08: no change of approved text now).
 
 ## TD-02 – The Files tab is not tested in a browser
 - Kind: defer
@@ -32,7 +34,8 @@ Proposed on 2026-10-29 after the usability work of N-2.3 T-09 to T-11 and N-1.1 
 - Trigger: the chat mock server sends `task_status` and files events, or the Plan of FB-01, or 2026-12-31, whichever first (the browser harness exists since D-141; D-172)
 - Target check: specified only
 - Decision: confirmed by Stefan Reiterer, 2026-11-01 (D-172)
-- Status: open
+- Status: done
+- Closed: 2026-11-07, marked done on the owner's instruction; browser test `tests/test_task_files_browser.py` (TC-CLV-024: newest first, download links, redraw after `files_changed`, no delete control)
 
 ## TD-03 – Tokens on the card are an estimate
 - Kind: relax
@@ -136,16 +139,19 @@ Proposed on 2026-10-29 after the usability work of N-2.3 T-09 to T-11 and N-1.1 
 ## TD-11 – The voice goes through IF-204
 - Kind: defer
 - Requirement: REQ-VOI-001
-- Interim criterion: the app speaks through `SpeechStreamer` and `Speaker.render_voice` with the `speech_text` filter; `SpeechService` passes the IF-204 contract suite and TC-VOI-001 to -003
-- Target: the chat agent's audio goes through `SpeechService`, the `audio_chunk` event of an answer is built, and the skipped cases of IF-201 and IF-101 and the integration step 1 of N-2 run green
-- Reason: the older route works on the host; changing it risks the working voice for no gain to the user now
-- Effort: about one day
+- Interim criterion: the app speaks through `SpeechStreamer`, the sound server (`speak.py`) and `Speaker.render_voice` with the `speech_text` filter; `SpeechService` passes the IF-204 contract suite and TC-VOI-001 to -003; the chat agent emits one `audio_chunk` per sentence of an answer (TC-IF-201-01 green, `tests/test_chat_answer_events.py`)
+- Target: the playback of the chat agent's voice on the backend goes through `SpeechService` (IF-204) instead of `SpeechStreamer` and the sound server, with the order of sentences, stop, speak again and repair (REQ-CHA-014) kept; needs a Plan step first (see the Note)
+- Reason: the older route works on the host; `SpeechService.synthesize` renders one sentence to bytes and has no playing, ordering, pipelining or cancel, so routing the playback through it means a new backend playback pipeline (probably a changed audio-route contract), not wiring; it risks the working voice for no gain to the user now
+- Effort: open until the Plan step (the agent's first estimate of one day was for wiring only)
 - Risk of the gap: two routes may diverge. Mitigation: both use `speech_text` and `render_voice`
 - Owner: Stefan Reiterer
 - Trigger: the Plan of the next iteration, or 2026-12-31, whichever first
-- Target check: skip: the IF-204 side of the chat is not wired (TD-11); the skipped cases carry deferred('TD-11') until green
+- Target check: specified only (the IF-201 case TC-IF-201-01 is green; the IF-101 case TC-IF-101-04 stays skipped until the expression event exists, see A-130 section 8)
 - Decision: D-173, 2026-11-01, Stefan Reiterer
-- Status: open
+- Note: 2026-11-07, owner Stefan Reiterer (D-275): narrowed. The IF-201 part is done (answer events, helper fixes D-272 and D-274, `chat_service.py`); the `expression` event is split out of TD-11 (A-130 section 8, draft TD-60, not yet adopted). What stays open is the playback route. A Plan step has to come first: an amendment for the audio route, a requirement for stop and ordering, and host hand-test criteria. See `amendments/A-130-note.md`.
+- Note: 2026-11-07, found in the hand test on the host (owner Stefan Reiterer, D-276): the button "Speak again" does nothing. `/api/speak_again` only emits `audio_chunk` events and no page code handles them (`templates/static/chat/` has no `audio_chunk` handler); live answers are spoken by the backend sound server. Not caused by the TD-11 work (`speak_again` is unchanged). Folded into the Plan step of this deferral: speak again plays through the backend voice route; the Plan step needs a requirement and a failing test first.
+- Status: dropped
+- Closed: 2026-11-07, replaced by TD-61 (owner decision, D-278); the IF-201 work (answer events, `chat_delta` flush, helper fixes) is recorded in D-275 and D-277; "Speak again" is planned as the requirements REQ-CHA-030 to 034 (A-132, option B), not as a deferral
 
 ## TD-12 – Verify before asserting; lookup (TC-MIA-002)
 - Kind: defer
@@ -358,4 +364,108 @@ Proposed on 2026-10-29 after the usability work of N-2.3 T-09 to T-11 and N-1.1 
 - Trigger: before VAL-004 starts, or 2026-12-31, whichever first
 - Target check: specified only
 - Decision: D-184, 2026-11-02, Stefan Reiterer
+- Status: open
+
+## TD-61 – The app has two voice paths: the sound server and SpeechService
+- Kind: defer
+- Requirement: REQ-VOI-001
+- Interim criterion: live answers and "Speak again" are spoken through `SpeechStreamer` and the sound server (`speak.py`), with `Speaker.render_voice` and the `speech_text` filter; `SpeechService` (IF-204) passes its contract suite and TC-VOI-001 to -003 but nothing in the app calls it; both paths share `speech_text` and `render_voice`
+- Target: one voice path: the sentences of every answer and of every spoken-again message are rendered and played through one component built on `SpeechService` (IF-204), with the order of sentences, rendering ahead, stop and the repair of REQ-CHA-014 kept, and the sound server and `SpeechStreamer` removed or reduced to that one path
+- Reason: merging the paths means a backend playback pipeline (render ahead, serials, cancel, upload or direct publish) and probably an IF-204 v1 and a changed audio-route contract (A-132 option A); it risks the working voice for no gain the user can see now
+- Effort: about 3 to 5 days (estimate of A-132, not measured), after its own Plan step
+- Risk of the gap: two routes may diverge. Mitigation: both use `speech_text` and `render_voice`; the sound-server hand-over has its own check (TC-CHA-036)
+- Owner: Stefan Reiterer
+- Trigger: the Plan of an iteration that changes the voice, or 2026-12-31, whichever first
+- Target check: specified only
+- Decision: confirmed by Stefan Reiterer, 2026-11-07 (D-278)
+- Status: open
+
+## TD-62 – The unit test without Tailscale runs the real `tailscale up` on a host that has it
+- Kind: defer
+- Requirement: NFR-6, CON-5 (test of `ui/tools/remote.sh`, `tests/test_tailscale.py`)
+- Interim criterion: the other tests of `tests/test_tailscale.py` pass with a fake `tailscale`; on a host without Tailscale the test `ScriptTest.test_without_tailscale_it_says_how_to_install` passes; the stage `unit` is red on this host for that one test (the merge gate of TD-11 ran locally with this deviation)
+- Target: the lookup of `tailscale` in that test ignores the host's `PATH`, so the test gives the same result on every host; the stage `unit` is green here
+- Reason: `/usr/bin/tailscale` is installed on the workstation, so the test runs the real `tailscale up` and times out after 30 s; neither `remote.sh` nor the test changed in TD-11; the owner defers the fix to a later goal (2026-11-08)
+- Effort: about an hour (proposed), test first
+- Risk of the gap: the stage `unit` stays red on this host and hides a real failure; mitigation: the single red test is known by name
+- Owner: Stefan Reiterer
+- Trigger: the Plan of the next iteration, or 2026-12-31, whichever first
+- Target check: `tests/test_tailscale.py::ScriptTest::test_without_tailscale_it_says_how_to_install` (exists, red on a host with Tailscale)
+- Decision: D-289, 2026-11-08, Stefan Reiterer
+- Sign-off: maldun, 2026-11-08
+- Status: open
+
+## TD-80 – The 25 open Dependabot alerts of the repository are not handled yet
+- Kind: defer
+- Requirement: none (maintenance of the dependencies; no requirement covers it)
+- Interim criterion: none beyond the pinned versions of `requirements.txt` and `requirements-db.txt` and the rule that no dependency is added or changed without the owner's approval; the app runs only on the owner's workstation and inside the private network (CON-5)
+- Target: the open alerts (25 on 2026-11-12: 1 critical, 5 high, 15 moderate, 4 low, https://github.com/maldun/MIA/security/dependabot) are listed, matched to our pins, and each is fixed by a version change, accepted with a reason, or dismissed as not reachable; the tests of the new versions are green
+- Reason: the owner decided on 2026-11-12 to go through them once everything is implemented, as a goal of its own (a cleanup goal), so that version changes do not mix with the feature goals
+- Effort: not estimated; it is a goal of its own, with its own Explore and Plan
+- Risk of the gap: a known flaw in a dependency stays in the code until the cleanup; mitigation: personal use on a trusted network, no public port, no untrusted users (the owner's privacy and trust statement); the web tools read untrusted text, so alerts about `requests`, `lxml` and `Flask` should be looked at first when the goal starts
+- Owner: Stefan Reiterer
+- Trigger: all nodes of the decomposition are implemented and integrated (the owner's wording, 2026-11-12; no date)
+- Target check: specified only
+- Decision: the owner's instruction in the session of 2026-11-12 (no D-number yet)
+- Sign-off: maldun, 2026-11-12
+- Status: open
+
+## TD-81 – A skill run left `running` by a crash is shown as running after every restart
+- Kind: defer
+- Requirement: REQ-CLV-034, REQ-CLV-038, REQ-WFM-134 (finding F-10 of the first Verify run of G-V3.PANEL)
+- Interim criterion: a run record whose process died stays in state `running` in `skill_runs`; `shown` prefers running runs, so the Skill run view shows it as running until another run starts; nothing closes it
+- Target: at the start of the app, a record still `running` that no process owns is closed (state `failed`, reason "interrupted by a restart"), so the view shows the true end; with a test that restarts the real backend on one folder
+- Reason: the owner decided on 2026-11-13 (questionnaire, option "backlog") that this does not go into the fix task T-11; closing records needs a requirement change and a rule for runs that a second instance still owns (multi-user is test-only, so the case is rare)
+- Effort: not estimated; a small task with its own Plan step
+- Risk of the gap: after a crash the panel shows a dead run as running; the owner can start a new run, which replaces it as the shown run; no data is lost
+- Owner: Stefan Reiterer
+- Trigger: the Validate of G-V3 (VAL-012), or 2026-12-31, whichever first (confirmed by the owner, 2026-11-13)
+- Target check: specified only
+- Decision: D-331, 2026-11-13, Stefan Reiterer
+- Sign-off: maldun, 2026-11-13
+- Status: open
+
+## TD-82 – Nothing in the product writes the history table, so "history deleted" cannot reach a skill run (DRAFT)
+- Kind: defer
+- Requirement: REQ-WFM-135 (finding F-15 of the second Verify run of G-V3.PANEL, A-144)
+- Interim criterion: `SkillRunRecorder` subscribes to deletes in the table `history` of the storage (`skill_runs.py`), and the acceptance tests of TC-WFM-135 show that a delete removes the run with the id of the history record; in the product the chat log is not kept in that table, so no delete notice can arrive and the mapping history id = run id is checked only by the tests
+- Target: the chat log is written to and deleted from the table `history` (IF-102), the id of a history record of a skill run is the run id, and a test through the real chat log shows that deleting the message removes the run
+- Reason: the chat log moves into the shared storage with the shared-state plan (deploy/REQUIREMENTS_DB.md, postponed); a link before that has nothing to link to. A delete of a history record also removes a run of any account with that id (accepted by A-144)
+- Effort: not estimated; part of moving the chat log to IF-102
+- Risk of the gap: none today (the case cannot occur); once the chat log writes `history`, a missing or wrong id mapping would delete the wrong run or none
+- Owner: Stefan Reiterer
+- Trigger: the chat log is moved to the storage (IF-102), or the Plan of the shared-state database, whichever first
+- Target check: specified only
+- Decision: proposed 2026-11-14 on the owner's instruction (F-15 later); decision row pending
+- Sign-off: maldun, 2026-11-14
+- Status: open
+
+## TD-83 – The lock of the skill run recorder is per recorder, two recorders on one storage lose answers (DRAFT)
+- Kind: defer
+- Requirement: REQ-WFM-133 (finding F-16 of the second Verify run of G-V3.PANEL)
+- Interim criterion: an `RLock` in `skill_runs.py` makes the writes of one recorder atomic (`tests/test_skill_runs_race.py`: 30 of 30 answers kept); the product builds one `ChatService` and so one recorder (`web_app.py`)
+- Target: the write of a run record is atomic on the storage itself (for example `expected_version` with a retry), so that two recorders on one storage keep every answer (a test with two recorders and concurrent answers; the reviewer's probe lost 60 of 120)
+- Reason: two recorders exist only with a second instance on one shared database, which is the postponed shared-state plan; the owner keeps several accounts on one instance for tests only
+- Effort: not estimated; a small task with a storage test
+- Risk of the gap: none today; with two instances on one database, answers of a run would be lost
+- Owner: Stefan Reiterer
+- Trigger: the Plan of the shared-state database (deploy/REQUIREMENTS_DB.md), before a second instance uses one database
+- Target check: specified only
+- Decision: proposed 2026-11-14 on the owner's instruction (F-16 later); decision row pending
+- Sign-off: maldun, 2026-11-14
+- Status: open
+
+## TD-84 – The mock of IF-101 does not pin the account check of delete_history, TC-CLV-036 is not reworded (DRAFT)
+- Kind: defer
+- Requirement: REQ-CLV-036, REQ-WFM-135 (finding F-17 of the second Verify run of G-V3.PANEL, A-146)
+- Interim criterion: the account check in `delete_history` of the IF-101 mock (`tests/helpers/mocks/if_101_chat_api.py`) is not covered by a test (a mutant that removes it survives); the browser driver measures `.srv-full-body`, but the text of TC-CLV-036 in `test-spec.md` still names the old measure, and A-146 announced the rewording ("the height of the opened part")
+- Target: a contract test that a delete of another account's run changes nothing, and TC-CLV-036 worded as A-146 says (the height of the opened part), both through the protected-file route (payload, owner installs) and a plan amendment
+- Reason: both changes touch protected material (`tests/helpers/`, `tests/acceptance/contract/`) or an approved test spec, so they need a payload, a plan amendment and a review row; the owner chose on 2026-11-14 to leave F-15 to F-17 for a later stage
+- Effort: about an hour for the payload and the amendment
+- Risk of the gap: a later change could remove the account check of the mock unnoticed; the real adapter has its own check
+- Owner: Stefan Reiterer
+- Trigger: the next plan amendment or contract change that touches `tests/helpers/` or `tests/acceptance/contract/test_if_101_chat_api.py`, or the Validate of G-V3, whichever first
+- Target check: specified only
+- Decision: proposed 2026-11-14 on the owner's instruction (F-17 later); decision row pending
+- Sign-off: maldun, 2026-11-14
 - Status: open

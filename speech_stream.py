@@ -56,6 +56,11 @@ class SpeechStreamer:
         self._timestamp = None
         self._sent = 0 # number of sentences sent so far
 
+    @property
+    def failed(self):
+        """True when the sound server could not be reached (or went away) while sending"""
+        return self._failed
+
     @staticmethod
     def split(text, final=True):
         """sentences of the text for the voice: without markdown marks and without *actions* (see speech_text.py)"""
@@ -142,3 +147,13 @@ class SpeechStreamer:
             except OSError:
                 pass
             self._sock = None
+
+
+def speak_text(host, port, text, should_stop=None):
+    """the voice route of web_app.speak_answer: one streamer for one text. The streamer logs a failure and goes on; a caller that repeats an answer sentence by
+    sentence needs the exception, to drop the rest after the first failure (REQ-CHA-033)"""
+    streamer = SpeechStreamer(host, port)
+    streamer.finish(text)
+    streamer.wait(should_stop)
+    if streamer.failed:
+        raise OSError("sound server not reachable")

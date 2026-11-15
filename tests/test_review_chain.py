@@ -80,8 +80,10 @@ class Chain(unittest.TestCase):
         self.assertTrue(last["text"].startswith("## Literature review"), last["text"][:200])
         names = [f["name"] for f in self.files.list()]
         self.assertEqual(sorted(n.rsplit(".", 1)[1] for n in names), ["md", "tex"])
-        for name in names:
-            self.assertIn("(/api/files/%s)" % name, last["text"])                 # a link that downloads the file, in the result itself
+        self.assertNotIn("Files:", last["text"])                                    # IF-101 v16 (A-140): the files are listed in the Skill run view, the result links to it
+        run = self.chat.shown_run("anna")
+        self.assertTrue(last["text"].endswith("[Open in the Skill run view](#run=%s)" % run["id"]))
+        self.assertEqual(sorted(run["files"]), sorted(names))
         done = [p for e, p in self.events if e == "chat_done"][-1]
         self.assertEqual(sorted(done["files"]), sorted(names))
         self.assertEqual(done["id"], last["id"])

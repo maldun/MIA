@@ -149,3 +149,39 @@ The PostgreSQL database and the one door to it (IF-102): immutable versions, acc
 - Verified by: TC-SLY-001
 - Status: Verified
 - History: –
+
+### REQ-SLY-013 – Depth of a document
+- Level: low   Subject: Persistence
+- Text: If a document that is put is nested deeper than 200 levels, then the Storage layer shall refuse it as invalid.
+- Rationale: refines REQ-SLY-004 and REQ-GTB-027; one limit for every table, so that the refusal does not depend on the recursion limit of the interpreter or on how deep the caller is in the call stack (F-20 of the fifth Verify run of G-V2.STORE, A-100); the deepest real document in library, skills and eval has 19 levels
+- Parent: REQ-SLY-004
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-16: a document whose deepest value (an object, a list or a scalar; the document is level 1 and every value below it is one level deeper than its parent) is at level 200 is stored, one whose deepest value is at level 201, 600 or 990 is refused as StorageError `invalid` and nothing is stored, for a graph table (rule `schema_break`, detail `data`) and for another table (rule `schema`, detail `nested too deep`), on the file backend and on PostgreSQL (exact)
+- Verified by: TC-SLY-012
+- Status: Verified
+- History: G-V2.STORE Verify F-20, 2026-11-08, new (A-100, proposed)
+
+### REQ-SLY-014 – A document that contains itself
+- Level: low   Subject: Persistence
+- Text: If a document that is put contains itself, then the Storage layer shall refuse it as invalid within one second.
+- Rationale: refines REQ-SLY-004; a hang is worse than the RecursionError it replaced (F-19 of the fifth Verify run of G-V2.STORE, A-100); only Python callers can build such a document, JSON has no cycles
+- Parent: REQ-SLY-004
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-16: a list or dict that contains itself, also twice in one dict, is refused as StorageError `invalid` within one second for a graph table and for another table, on the file backend and on PostgreSQL, and nothing is stored (exact, time limit 1 s)
+- Verified by: TC-SLY-013
+- Status: Verified
+- History: G-V2.STORE Verify F-19, 2026-11-08, new (A-100, proposed)
+
+### REQ-SLY-015 – Size of a document
+- Level: low   Subject: Persistence
+- Text: If a document that is put has more than 100,000 values, counting a value once for every path that reaches it, then the Storage layer shall refuse it as invalid.
+- Rationale: refines REQ-SLY-004 and REQ-GTB-028; a document that shares sub-objects can have an exponential number of paths and the backend would have to serialise all of them (F-22 of the Verify of G-V2.STORE, A-102); 100,000 is about 190 times the largest stored document in the repository (529 values)
+- Parent: REQ-SLY-004
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-16: a document with 100,000 values is stored, one with 100,001 is refused as StorageError `invalid` and nothing is stored, for a graph table (rule `schema_break`, detail `data`) and for another table (rule `schema`, detail `too large`); a document that names the same child twice on 30 levels is refused within one second, on the file backend and on PostgreSQL (exact, time limit 1 s)
+- Verified by: TC-SLY-014
+- Status: Verified
+- History: G-V2.STORE Verify F-22, 2026-11-08, new (A-102, proposed)

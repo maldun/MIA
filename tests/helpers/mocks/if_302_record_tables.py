@@ -10,11 +10,16 @@ DEFINITIONS = {
     "cases": {"versioned": True, "deletable": False}, "behaviours": {"versioned": True, "deletable": False},      # v1 (amendment A-08)
     "workflow_meta": {"versioned": True, "deletable": False},      # v3 (amendment A-15): status, specification and benchmark of a workflow
     "reports": {"versioned": True, "deletable": False},      # v4/v5 (amendments A-23, A-24): the finished report of a task
+    "skill_runs": {"versioned": True, "deletable": True},      # v8 (amendment A-141): the record of a skill run, deleted with the chat history of its account
+    "transform_meta": {"versioned": True, "deletable": False},      # v10 (amendment A-110): trust and lifecycle of a transform, one record per transform id
+    "transforms": {"versioned": True, "deletable": False},      # v11 (amendment A-112): the versioned code of a transform, one record per transform id
 }
-REQUIRED = {"reports": ("task", "skill", "skill_version", "question", "account", "model_pin", "report"), "workflow_meta": ("status",), "cases": ("question", "answer", "status"), "behaviours": ("name", "net", "votes"),"memory": ("text", "source"), "votes": ("user", "subject", "category", "value"), "tasks": ("text",), "memos": ("text",),
-            "runs": ("workflow", "workflow_version", "model_pin", "benchmark_version")}
+REQUIRED = {"skill_runs": ("run", "skill", "skill_version", "account", "started", "state"), "reports": ("task", "skill", "skill_version", "question", "account", "model_pin", "report"), "workflow_meta": ("status",), "cases": ("question", "answer", "status"), "behaviours": ("name", "net", "votes"),"memory": ("text", "source"), "votes": ("user", "subject", "category", "value"), "tasks": ("text",), "memos": ("text",),
+            "runs": ("workflow", "workflow_version", "model_pin", "benchmark_version"),
+            "transform_meta": ("trust", "lifecycle"), "transforms": ("id", "version")}
 CATEGORIES = ("answer_quality", "reactions", "character_behaviour", "service")
 MEMORY_FIELDS = {"kind": ("fact", "preference", "commitment"), "status": ("active", "replaced")}      # v2 (amendment A-10): optional, checked when present
+TRANSFORM_META_FIELDS = {"trust": ("untrusted", "trusted"), "lifecycle": ("draft", "tested", "retired")}      # v10 (amendment A-110): exact values, the optional fields are free
 
 
 class RecordTablesMock:
@@ -33,6 +38,15 @@ class RecordTablesMock:
             for field, allowed in MEMORY_FIELDS.items():
                 if field in doc and doc[field] not in allowed:
                     return {"rule": "schema", "detail": field}
+        if table == "transform_meta":
+            for field, allowed in TRANSFORM_META_FIELDS.items():
+                if doc[field] not in allowed:
+                    return {"rule": "schema", "detail": field}
+        if table == "transforms":      # v11 (amendment A-112): inputs, outputs and code are free, an empty, missing or null code is valid
+            if not isinstance(doc["id"], str) or not doc["id"]:
+                return {"rule": "schema", "detail": "id"}
+            if type(doc["version"]) is not int or doc["version"] < 1:      # a bool or a float is no version number (as for the vote value)
+                return {"rule": "schema", "detail": "version"}
         if table == "workflow_meta" and doc["status"] not in ("draft", "tested", "trusted", "retired"):
             return {"rule": "schema", "detail": "status"}
         if table == "votes" and doc["category"] not in CATEGORIES:

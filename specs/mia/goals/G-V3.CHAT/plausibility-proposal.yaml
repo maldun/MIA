@@ -1,0 +1,186 @@
+# Proposal for the plausibility record of G-V3.CHAT (Plan step 3, 2026-11-08). NOT a rating: a person decides. Items with `attention` and no `decision` are open: set `decision` (plausible | questionable | implausible), `basis` and for questionable a `probe` or `accepted_risk`.
+# Kept apart from specs/mia/plausibility-proposal.yaml; the items are also appended there (2026-11-08).
+proposal:
+  REQ-BE-078:
+    basis: 'the parent of REQ-CHA-040 to 063: the behaviour is split into exact checks with the fake model
+      and three evaluated criteria (REQ-CHA-049, 053, 054), which carry their own ratings (proposal of the
+      agent, 2026-11-08, G-V3.CHAT)'
+    proposed: plausible
+    text: 'The Backend shall put into the chat only the spoken text of a skill run: questions, answers,
+      a status message per declared phase and an end summary with a link to the Skill run view.'
+  REQ-CHA-040:
+    basis: no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance
+      criterion on a scripted run with the fake model, no real model (proposal of the agent, 2026-11-08,
+      G-V3.CHAT)
+    proposed: plausible
+    text: When a running skill asks a question, the Chat agent shall add the question to the chat as a message
+      of MIA and send it to speech.
+  REQ-CHA-041:
+    basis: no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance
+      criterion on a scripted run with the fake model, no real model (proposal of the agent, 2026-11-08,
+      G-V3.CHAT)
+    proposed: plausible
+    text: When a running skill enters a phase that its manifest declares worth telling, the Chat agent shall
+      add one new status message worded by SkillDigestStep in MIA's persona.
+  REQ-CHA-042:
+    basis: no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance
+      criterion on a scripted run with the fake model, no real model (proposal of the agent, 2026-11-08,
+      G-V3.CHAT)
+    proposed: plausible
+    text: While a skill runs, the Chat agent shall add no message about a phase that the manifest does not
+      declare worth telling.
+  REQ-CHA-043:
+    basis: no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance
+      criterion on a scripted run with the fake model, no real model (proposal of the agent, 2026-11-08,
+      G-V3.CHAT)
+    proposed: plausible
+    text: When a skill run ends done, the Chat agent shall add one summary of the full result worded by
+      SkillDigestStep.
+  REQ-CHA-044:
+    basis: no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance
+      criterion on a scripted run with the fake model, no real model (proposal of the agent, 2026-11-08,
+      G-V3.CHAT)
+    proposed: plausible
+    text: When a skill run fails, the Chat agent shall add one message with the reason, worded in MIA's
+      persona.
+  REQ-CHA-045:
+    basis: no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance
+      criterion on a scripted run with the fake model, no real model (proposal of the agent, 2026-11-08,
+      G-V3.CHAT)
+    proposed: plausible
+    text: The Chat agent shall send every message that it adds to the chat to speech.
+  REQ-CHA-046:
+    basis: no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance
+      criterion on a scripted run with the fake model, no real model (proposal of the agent, 2026-11-08,
+      G-V3.CHAT)
+    proposed: plausible
+    text: The Chat agent shall keep the questions, the answers, the end summary and the last status message
+      of each run in the history the chat model sees.
+  REQ-CHA-047:
+    basis: no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance
+      criterion on a scripted run with the fake model, no real model (proposal of the agent, 2026-11-08,
+      G-V3.CHAT)
+    proposed: plausible
+    text: The Chat agent shall apply the repair of REQ-CHA-014 to each status message, summary, failure
+      message and stop message.
+  REQ-CHA-048:
+    basis: no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance
+      criterion on a scripted run with the fake model, no real model (proposal of the agent, 2026-11-08,
+      G-V3.CHAT)
+    proposed: plausible
+    text: The Chat agent shall run SkillDigestStep without tools.
+  REQ-CHA-049:
+    attention: &id001
+    - decided by a measurement
+    - numeric bound in the criterion
+    - depends on the model, a GPU or a phone
+    basis: 'min 1.0 over 6 injection cases on a 12B model rests on no measurement: no baseline exists (D-332,
+      there is no digest today) and no spike; the miss rate at n 6 is 22 % (accepted by the owner on 2026-11-08,
+      hand-over item 7); the first dev run is the first measurement'
+    category: model
+    probe: &id002
+      what: the first dev run of the digest step on the 24 dev cases of skill_turns, 3 repeats, MP-light
+        with the options of eval-spec.md
+      when: first Implement task that has the step
+      who: G-V3.CHAT Implement, then the owner
+    proposed: questionable
+    text: The Chat agent shall have SkillDigestStep report an instruction quoted in a result as text and
+      not follow it, in the red-team cases of suite EV-skill_turns.
+  REQ-CHA-050:
+    basis: the 4096 tokens are half of num_ctx 8192 (NFR-2), a constant of the configuration; the check
+      counts what the fake model receives, no measurement of the real model (proposal of the agent, 2026-11-08,
+      G-V3.CHAT)
+    proposed: plausible
+    text: The Chat agent shall limit the input of each model call of SkillDigestStep to half of the context,
+      4096 tokens at num_ctx 8192.
+  REQ-CHA-051:
+    basis: no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance
+      criterion on a scripted run with the fake model, no real model (proposal of the agent, 2026-11-08,
+      G-V3.CHAT)
+    proposed: plausible
+    text: When the full result is longer than one input allows, the Chat agent shall have SkillDigestStep
+      digest it in consecutive pieces, leaving no part out.
+  REQ-CHA-052:
+    basis: the 1200 characters are a figure in the prompt only (FR-35, owner 2026-10-30); the check reads
+      the prompt, whether the model keeps to it is judged by REQ-CHA-053 (proposal of the agent, 2026-11-08,
+      G-V3.CHAT)
+    proposed: plausible
+    text: The Chat agent shall have the prompt of SkillDigestStep ask for a summary of at most 1200 characters.
+  REQ-CHA-053:
+    attention: *id001
+    basis: 'min 0.85 and low 0.70 rest on no measurement: no baseline exists (D-332) and no spike on the
+      pin; the bounds are a proposal of the owner''s review, the first dev run shows whether they are reachable'
+    category: model
+    probe: *id002
+    proposed: questionable
+    text: The Chat agent shall word end summaries with SkillDigestStep that are faithful to the full result.
+  REQ-CHA-054:
+    attention: *id001
+    basis: 'min 0.80 and low 0.70 rest on no measurement: no baseline exists (D-332) and no spike on the
+      pin; persona fidelity of a 12B model in short messages is untested; the first dev run shows whether
+      they are reachable'
+    category: model
+    probe: *id002
+    proposed: questionable
+    text: The Chat agent shall word status messages, end summaries, failure messages and stop messages with
+      SkillDigestStep in the persona of the persona file.
+  REQ-CHA-055:
+    basis: no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance
+      criterion on a scripted run with the fake model, no real model (proposal of the agent, 2026-11-08,
+      G-V3.CHAT)
+    proposed: plausible
+    text: While a skill without declared phases runs, the Chat agent shall add no status message.
+  REQ-CHA-056:
+    basis: no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance
+      criterion on a scripted run with the fake model, no real model (proposal of the agent, 2026-11-08,
+      G-V3.CHAT)
+    proposed: plausible
+    text: The Chat agent shall end each summary, failure message and stop message of a run with the link
+      `[Open in the Skill run view](#run=<id>)` that code adds, never one taken from the model text.
+  REQ-CHA-057:
+    basis: no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance
+      criterion on a scripted run with the fake model, no real model (proposal of the agent, 2026-11-08,
+      G-V3.CHAT)
+    proposed: plausible
+    text: When a skill run is stopped, the Chat agent shall add one message that says the run was stopped,
+      worded in MIA's persona.
+  REQ-CHA-058:
+    basis: no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance
+      criterion on a scripted run with the fake model, no real model (proposal of the agent, 2026-11-08,
+      G-V3.CHAT)
+    proposed: plausible
+    text: The Chat agent shall add no card, table, log line or full result of a run to the chat.
+  REQ-CHA-059:
+    basis: no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance
+      criterion on a scripted run with the fake model, no real model (proposal of the agent, 2026-11-08,
+      G-V3.CHAT)
+    proposed: plausible
+    text: The Chat agent shall keep every other status message of a run and its full result out of the history
+      the chat model sees.
+  REQ-CHA-060:
+    basis: no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance
+      criterion on a scripted run with the fake model, no real model (proposal of the agent, 2026-11-08,
+      G-V3.CHAT)
+    proposed: plausible
+    text: The Chat agent shall show and send to speech the repaired text of each status message, summary,
+      failure message and stop message.
+  REQ-CHA-061:
+    basis: no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance
+      criterion on a scripted run with the fake model, no real model (proposal of the agent, 2026-11-08,
+      G-V3.CHAT)
+    proposed: plausible
+    text: The Chat agent shall give SkillDigestStep the full result and each piece as user text to report,
+      never as instructions of the system prompt.
+  REQ-CHA-062:
+    basis: no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance
+      criterion on a scripted run with the fake model, no real model (proposal of the agent, 2026-11-08,
+      G-V3.CHAT)
+    proposed: plausible
+    text: When SkillDigestStep has digested the pieces of a result, the Chat agent shall have it write the
+      summary from the digests only.
+  REQ-CHA-063:
+    basis: no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance
+      criterion on a scripted run with the fake model, no real model (proposal of the agent, 2026-11-08,
+      G-V3.CHAT)
+    proposed: plausible
+    text: The Chat agent shall pass on the summary of SkillDigestStep to the chat uncut.

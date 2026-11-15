@@ -1,13 +1,13 @@
 # A-90, draft of the contract text IF-301 v2 (Graph table definitions and validation)
 
-Status: **draft; all open points answered by the owner (D-262, D-263, D-264); the text still to be approved as a whole** (G-V2.STORE Plan step 4, 2026-11-07). It is not `contracts/IF-301-graph-tables.md`: that file, the mock and the contract suite change only after this text is approved, and then in a session of their own (tests are written outside the implementing session). Basis: A-90 (approved, D-188), REQ-GTB-005 to 016, v1 text of 2026-10-31.
+Status: **text approved by the owner as the contract text of A-90, 2026-11-07 (D-266), with five fixes; REQ-GTB-020 (edge endpoints) still to be reviewed; not yet applied: `contracts/`, the mock and the suite change in the amendment step** (G-V2.STORE Plan step 4, 2026-11-07). It is not `contracts/IF-301-graph-tables.md`: that file, the mock and the contract suite change only after this text is approved, and then in a session of their own (tests are written outside the implementing session). Basis: A-90 (approved, D-188), REQ-GTB-005 to 020, v1 text of 2026-10-31.
 
 Owner (provider): N-3.2 Graph tables   Consumers: N-3.1 Storage layer, N-2.3 Workflow management (converts), N-2.4.1 Pipeline runner (reads)   Decided by: N-3   Mock complexity: **1** (a fixed list of types and pure functions, nothing stored)   Suite: `tests/acceptance/contract/test_if_301_graph_tables.py` (v1 cases stay; v2 cases are added)
 
 ## What changes against v1
 1. Four new tables, all versioned and not deletable: `graph_nodes`, `graph_edges` (REQ-GTB-005, 006, 013), `graphs` (the graph header and its members, D-264) and `skills` (the skill record of REQ-WFM-040, D-264). `workflows` and `context_graphs` stay as they are (document form, REQ-GTB-015).
 2. A fixed list of node types built into the Graph tables: a node's JSON field names a type ID; each type has a data class and a JSON schema (REQ-GTB-009, 011). A new type is an amendment of this interface (owner, 2026-11-07).
-3. New refusals `unknown_type` and `schema_break` (REQ-GTB-010, 011) and the rule that a refused edit leaves the stored version alone (REQ-GTB-016).
+3. New refusals `unknown_type`, `schema_break`, `unknown_member` and `unknown_endpoint` (REQ-GTB-010, 011, 019, 020) and the rule that a refused edit leaves the stored version alone (REQ-GTB-016).
 4. Conversion between the record form and the document form of v1 (REQ-GTB-015).
 
 ## Operations (new and changed)
@@ -15,11 +15,11 @@ Owner (provider): N-3.2 Graph tables   Consumers: N-3.1 Storage layer, N-2.3 Wor
 |---|---|---|---|
 | `definitions()` | | v1 result plus `graph_nodes`, `graph_edges`, `graphs` and `skills`: `{"versioned": true, "deletable": false}` | the versions are kept by the Storage layer from this flag (REQ-GTB-013) |
 | `validate(table, doc)` | table name, document | `None` or `{"rule", "detail"}` | for `workflows` and `context_graphs` exactly as v1 |
-| `types()` | | the type IDs of the fixed list for workflow graphs, sorted, each with its JSON schema | the list is part of this contract (below); context graphs have no fixed list (open point 5, decided) |
-| `check_record(table, record, categories=None)` | `graph_nodes`, `graph_edges`, `graphs` or `skills`; `{"id", "data"}` for a node, a skill and a graph header, `{"id", "from", "to", "data"}` for an edge; for a record of a context graph `categories` = `{type ID: JSON schema}` of that context graph | `None` or `{"rule", "detail"}` | rules: `record_identity` (detail: the field), `unknown_member` (a graph header names a node or edge version that is not stored; detail: its ID), `unknown_type` (detail: the type ID, REQ-GTB-010; for a workflow graph the type is not in the fixed list, for a context graph not in `categories`), `schema_break` (detail: the path of the broken field, REQ-GTB-011). A record of a context graph without `categories` is `unknown_type`. Any input gives a rule or `None`, never an exception (as A-60) |
+| `types()` | | the type IDs of the fixed list for workflow graphs, sorted, each with its JSON schema | the list is part of this contract (below); context graphs have no fixed list (decision 5) |
+| `check_record(table, record, categories=None, stored=None)` | `graph_nodes`, `graph_edges`, `graphs` or `skills`; `{"id", "data"}` for a node, a skill and a graph header, `{"id", "from", "to", "data"}` for an edge; for a record of a context graph `categories` = `{type ID: JSON schema}` of that context graph; `stored` = `{"nodes": {id: [versions]}, "edges": {id: [versions]}}`, what the caller has stored | `None` or `{"rule", "detail"}` | rules: `record_identity` (detail: the field), `unknown_member` (a graph header names a node or edge version that is not in `stored`; detail: its ID, REQ-GTB-019), `unknown_endpoint` (an edge names a start or end node that is not in `stored["nodes"]`; detail: that node ID, REQ-GTB-020), `unknown_type` (detail: the type ID, REQ-GTB-010; for a workflow graph the type is not in the fixed list, for a context graph not in `categories`), `schema_break` (detail: the path of the broken field, REQ-GTB-011). Without `stored` the two rules that need it are not checked (a pure function stores nothing); the Storage layer and the Workflow management always pass it. A record of a context graph without `categories` is `unknown_type`. Any input gives a rule or `None`, never an exception (as A-60) |
 | `to_object(record, categories=None)` | a node record, `categories` as above for a context graph | `{"object": obj}` or `{"refused": {"rule", "detail"}}` | for a workflow node `obj` is an instance of the class listed for the type ID in `record["data"]["type"]` (REQ-GTB-009); for a context-graph node it is a plain `ContextNode` (ID, type, JSON field) |
 | `to_record(obj)` | an object of a listed class | a node record | `to_object(to_record(x))` equals `x` (REQ-GTB-014) |
-| `to_document(nodes, edges)` | node records, edge records of one workflow | `{"document": doc}` or `{"refused": {"rule", "detail"}}` | the v1 document form (`{"nodes", "edges"}`); a graph with a master node is `not_representable` (see open point 3) |
+| `to_document(nodes, edges)` | node records, edge records of one workflow | `{"document": doc}` or `{"refused": {"rule", "detail"}}` | the v1 document form (`{"nodes", "edges"}`): type `transform` becomes kind `process`, `data` stays `data`; a graph with a master node is `not_representable` (decision 3) |
 | `from_document(doc)` | a v1 document | `{"nodes": [...], "edges": [...]}` (records) or `{"refused": {"rule", "detail"}}` | kinds `process` become `transform`, `data` stays `data` |
 
 Record shapes of the two new tables (D-264): a graph header is `{"id", "data": {"kind": "workflow" or "context", "context_graph_id", "testbench_id" (may be empty), "description", "nodes": [{"id", "version"}], "edges": [{"id", "version"}]}}`; a graph version pins the version of each member, so "graph X, version n" is found from its header and an edit of one node makes a new graph version. A skill is `{"id", "data": {"command", "workflow_graph_id", "context_graph_id"}}`; that no command is used twice is a rule of the Workflow management (REQ-WFM-042), not of this interface.
@@ -46,6 +46,11 @@ The Storage layer calls `check_record` before every write and writes nothing whe
 3. Failure: a node whose required key is missing gives `{"rule": "schema_break", "detail": "<path of the key>"}` (the path as the pinned validator names it, TR-GTB-003).
 4. Edge: a refused edit leaves version 1 as the latest version (REQ-GTB-016).
 5. Compatibility: `from_document(to_document(g))` equals `g` for a graph without a master node; the v1 suite passes unchanged.
+6. Header: a `graphs` record naming n1 at version 5 with `stored = {"nodes": {"n1": [1, 2]}, "edges": {}}` gives `{"rule": "unknown_member", "detail": "n1"}`; naming version 2 gives `None`.
+7. Edge: an edge `e1` from `n1` to `n9` with `stored["nodes"] == {"n1": [1]}` gives `{"rule": "unknown_endpoint", "detail": "n9"}`.
+8. Skill: `{"id": "lookup", "data": {"command": "/lookup", "workflow_graph_id": "wf-lookup"}}` (no context graph ID) gives `{"rule": "schema_break", "detail": "context_graph_id"}`.
+9. Context graph: a node of category `entity` with `categories = {"entity": <schema>}` and a field that fits gives `None`; the same node without `categories` gives `{"rule": "unknown_type", "detail": "entity"}`.
+10. Document form: `to_document` of a graph with a master node gives `{"refused": {"rule": "not_representable", "detail": "<master node ID>"}}`.
 
 ## The fixed list of types (field names confirmed by the owner in D-264)
 Workflow nodes only (D-263); the rules of the whole graph are checked by the Workflow management (D-262). Besides `type`, the JSON field of a node holds:
@@ -71,7 +76,9 @@ The graph description (ID, context graph ID, testbench ID, description) is not a
 8. **Skill record (D-264):** a versioned table `skills` in IF-301; STORE defines it, the Workflow management checks the content.
 9. **Refusals (D-264):** the Workflow management calls `check_record` itself; IF-102 is unchanged.
 
-## Version history (to be added when approved)
+10. **Review of 2026-11-07 (D-266):** `check_record` gets the argument `stored` for the rules that need to know what is stored; `to_document` maps `transform` to `process`; an edge must name stored nodes (`unknown_endpoint`, REQ-GTB-020); golden examples 6 to 10 added; stale wording corrected.
+
+## Version history (to be entered into contracts/IF-301-graph-tables.md in the amendment step)
 | Version | Date | Change | Amendment |
 |---|---|---|---|
-| v2 | – | tables `graph_nodes`, `graph_edges`, `graphs`, `skills`; fixed list of types; `check_record`, `to_object`, `to_record`, `to_document`, `from_document`; rules `unknown_type`, `schema_break`, `record_identity` | A-90 (D-188) |
+| v2 | – | tables `graph_nodes`, `graph_edges`, `graphs`, `skills`; fixed list of types; `check_record`, `to_object`, `to_record`, `to_document`, `from_document`; rules `record_identity`, `unknown_type`, `schema_break`, `unknown_member`, `unknown_endpoint` | A-90 (D-188) |

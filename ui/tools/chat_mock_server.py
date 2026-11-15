@@ -9,11 +9,14 @@ positions in the queue, scripted answers. For trying the page by hand and for th
 It is the real page (templates/, served by web_app.py) with the chat handlers replaced by the mock of the protected helper
 tests/helpers/mocks/if_101_chat_api.py. The session is a cookie (HttpOnly, same site); the page keeps no token.
 """
+import io
 import os
+import re
 import sys
 import tempfile
 import threading
 import time
+import wave
 
 repo = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import importlib.util  # noqa: E402
@@ -28,7 +31,7 @@ for candidate in (os.path.join(repo, "tests", "helpers", "mocks"), os.path.join(
             break
 sys.path.insert(0, candidate)
 
-from flask import jsonify, request  # noqa: E402
+from flask import Response, jsonify, request  # noqa: E402
 from flask_socketio import emit  # noqa: E402
 
 from socketio.exceptions import ConnectionRefusedError  # noqa: E402,A004  (the one the Socket.IO server turns into connect_error)
@@ -66,6 +69,8 @@ w.play_intro_sound = lambda: None
 w.socketio.server.eio.cors_allowed_origins = "*"
 
 api = ChatApiMock(accounts=dict(ACCOUNTS), answers=[])
+if os.environ.get("MOCK_SEED_FILES"):        # an older file in the volume, so that the list can show an order (TC-CLV-024)
+    api._files["notes-older.txt"] = {"data": b"older\n", "created": "t0", "task": "review", "message_id": None}
 lock = threading.RLock()
 sids = {}              # session token -> set of socket ids
 tokens = {}            # socket id -> session token
@@ -131,6 +136,9 @@ def answer_later():
     time.sleep(ANSWER_DELAY)
     with lock:
         while api._queue:                                  # the mock answers the whole queue; one scripted answer per message
+            if re.match(r"/review\s+\S", api._texts.get(api._queue[0], ""), re.I):
+                api.settle()                               # a review is a task: its status card, question and result come from the mock (TC-CLV-023)
+                break
             owner = api._owner.get(api._queue[0], "you")
             script = dict(ANSWERS[turn["n"] % len(ANSWERS)])
             script["sentences"] = [s.format(user=owner) for s in script["sentences"]]
@@ -143,6 +151,14 @@ def answer_later():
     answering.clear()
 
 
+def drive():
+    """A running task moves on after every call that can change it (a reply, pause, resume, stop); the events then go out."""
+    with lock:
+        if api._review is not None:
+            api.settle()
+    deliver()
+
+
 def run_api(operation):
     """One call of the mock for the session of the request: its answer as JSON, an ApiError as {error, rule} with the status; the events it caused go out."""
     try:
@@ -151,7 +167,7 @@ def run_api(operation):
         status = 200
     except ApiError as err:
         result, status = {"error": err.code, "rule": err.rule}, err.status
-    deliver()
+    drive()
     if status == 200 and answering.is_set() is False and api._queue:
         answering.set()
         w.socketio.start_background_task(answer_later)           # a regenerated answer waits like a message
@@ -190,9 +206,41 @@ def r_regenerate():
     return run_api(lambda s: api.regenerate(s, body().get("message_id")))
 
 
+def announce_line(token):
+    """what publish_audio and AudioRouter.announce do for a rendered line: audio_reload {url, serial, message} to the page of the session
+    (TC-VPB-007, TR-VOICE-005). The line is a short silent wav served by this mock at /mock/audio/<name>."""
+    with lock:
+        turn["line"] = turn.get("line", 0) + 1
+        serial = turn["line"]
+    for sid in list(sids.get(token, ())):
+        w.socketio.emit("audio_reload", {"url": "/mock/audio/line-%06d.wav" % serial, "serial": serial, "message": "mock"}, to=sid)
+
+
 @w.app.post("/api/speak_again")
 def r_speak_again():
-    return run_api(lambda s: api.speak_again(s, body().get("message_id")))
+    response = run_api(lambda s: api.speak_again(s, body().get("message_id")))
+    if response[1] == 200 and os.environ.get("MOCK_VOICE"):
+        announce_line(session())                           # the backend plays the answer again: the page gets its line (only where asked: the wire check TC-CLV-021 allows no audio fetch)
+    return response
+
+
+@w.app.post("/mock/audio_reload")
+def r_mock_audio_reload():
+    """a line of the voice without any request of the page (a late line of a stopped answer): the check TC-VPB-007 sends it"""
+    announce_line(session())
+    return jsonify({"ok": True})
+
+
+@w.app.get("/mock/audio/<name>")
+def r_mock_audio(name):
+    """0.2 s of silence as a wav (8 kHz, 16 bit, mono) for every line name"""
+    buffer = io.BytesIO()
+    with wave.open(buffer, "wb") as wav:
+        wav.setnchannels(1)
+        wav.setsampwidth(2)
+        wav.setframerate(8000)
+        wav.writeframes(b"\x00\x00" * 1600)
+    return Response(buffer.getvalue(), mimetype="audio/wav")
 
 
 @w.app.get("/api/account")
@@ -223,6 +271,37 @@ def r_reset_counter():
 # web_app registers the real routes of the same paths first and they would win: the mock answers on their endpoints
 for _name, _view in (("vote", r_vote), ("score", r_score), ("regenerate", r_regenerate), ("speak_again", r_speak_again), ("account_of", r_account),
                      ("counters", r_counters), ("reset_counter", r_reset_counter)):
+    w.app.view_functions["chat_ops_api." + _name] = _view
+
+
+@w.app.get("/api/files")
+def r_files():
+    return run_api(lambda s: api.files(s))
+
+
+@w.app.get("/api/files/<name>")
+def r_file(name):
+    try:
+        with lock:
+            data = api.file(session(), name)
+    except ApiError as err:
+        return jsonify({"error": err.code}), err.status
+    return Response(data, headers={"Content-Disposition": 'attachment; filename="%s"' % name})
+
+
+@w.app.post("/api/pause")
+def r_pause():
+    return run_api(lambda s: api.pause(s))
+
+
+@w.app.post("/api/resume")
+def r_resume():
+    return run_api(lambda s: api.resume(s))
+
+
+for _name, _view in (("files", r_files), ("file", r_file)):
+    w.app.view_functions["files_api." + _name] = _view
+for _name, _view in (("pause", r_pause), ("resume", r_resume)):
     w.app.view_functions["chat_ops_api." + _name] = _view
 
 
@@ -301,7 +380,7 @@ def chat_send(data=None):
             message = ack["message"]
     except ApiError as err:
         return {"ok": False, "error": {"queue_full": "The queue is full: wait for an answer.", "empty_text": "There is no text to send."}.get(err.code, err.code)}
-    deliver()                                              # the broadcast of the message itself and the new queue status
+    drive()                                                # the broadcast of the message itself and the new queue status; a reply moves a review on
     if not answering.is_set():
         answering.set()
         w.socketio.start_background_task(answer_later)
@@ -312,7 +391,9 @@ def chat_send(data=None):
 def chat_stop(_=None):
     token = tokens.get(request.sid)
     with lock:
-        return {"stopped": api.stop(token)["stopped"] if token else False}
+        stopped = api.stop(token)["stopped"] if token else False
+    drive()
+    return {"stopped": stopped}
 
 
 if __name__ == "__main__":

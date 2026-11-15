@@ -1,0 +1,91 @@
+{
+ "accepted": [
+  {
+   "name": "Large pre-trained language models",
+   "description": "Large pre-trained language models have been shown to store factual knowledge in their parameters, and achieve state-of-the-art results when fine-tuned on downstream NLP tasks.",
+   "quote": "Large pre-trained language models have been shown to store factual knowledge in their parameters, and achieve state-of-the-art results when fine-tuned on downstream NLP tasks.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "retrieval-augmented generation (RAG)",
+   "description": "We explore a general-purpose fine-tuning recipe for retrieval-augmented generation (RAG) -- models which combine pre-trained parametric and non-parametric memory for language generation.",
+   "quote": "We explore a general-purpose fine-tuning recipe for retrieval-augmented generation (RAG) -- models which combine pre-trained parametric and non-parametric memory for language generation.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "parametric memory",
+   "description": "We introduce RAG models where the parametric memory is a pre-trained seq2seq model and the non-parametric memory is a dense vector index of Wikipedia, accessed with a pre-trained neural retriever.",
+   "quote": "We introduce RAG models where the parametric memory is a pre-trained seq2seq model and the non-parametric memory is a dense vector index of Wikipedia, accessed with a pre-trained neural retriever.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "pre-trained seq2seq model",
+   "description": "We introduce RAG models where the parametric memory is a pre-trained seq2seq model and the non-parametric memory is a dense vector index of Wikipedia, accessed with a pre-trained neural retriever.",
+   "quote": "We introduce RAG models where the parametric memory is a pre-trained seq2seq model and the non-parametric memory is a dense vector index of Wikipedia, accessed with a pre-trained neural retriever.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "non-parametric memory",
+   "description": "We introduce RAG models where the parametric memory is a pre-trained seq2seq model and the non-parametric memory is a dense vector index of Wikipedia, accessed with a pre-trained neural retriever.",
+   "quote": "We introduce RAG models where the parametric memory is a pre-trained seq2seq model and the non-parametric memory is a dense vector index of Wikipedia, accessed with a pre-trained neural retriever.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "dense vector index of Wikipedia",
+   "description": "We introduce RAG models where the parametric memory is a pre-trained seq2seq model and the non-parametric memory is a dense vector index of Wikipedia, accessed with a pre-trained neural retriever.",
+   "quote": "We introduce RAG models where the parametric memory is a pre-trained seq2seq model and the non-parametric memory is a dense vector index of Wikipedia, accessed with a pre-trained neural retriever.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "name": "pre-trained neural retriever",
+   "description": "We introduce RAG models where the parametric memory is a pre-trained seq2seq model and the non-parametric memory is a dense vector index of Wikipedia, accessed with a pre-trained neural retriever.",
+   "quote": "We introduce RAG models where the parametric memory is a pre-trained seq2seq model and the non-parametric memory is a dense vector index of Wikipedia, accessed with a pre-trained neural retriever.",
+   "ungrounded": 0,
+   "kind": "entity"
+  },
+  {
+   "source": "retrieval-augmented generation (RAG)",
+   "relation": "combine",
+   "target": "parametric memory",
+   "quote": "We explore a general-purpose fine-tuning recipe for retrieval-augmented generation (RAG) -- models which combine pre-trained parametric and non-parametric memory for language generation.",
+   "kind": "relation"
+  },
+  {
+   "source": "retrieval-augmented generation (RAG)",
+   "relation": "combine",
+   "target": "non-parametric memory",
+   "quote": "We explore a general-purpose fine-tuning recipe for retrieval-augmented generation (RAG) -- models which combine pre-trained parametric and non-parametric memory for language generation.",
+   "kind": "relation"
+  },
+  {
+   "source": "parametric memory",
+   "relation": "is a",
+   "target": "pre-trained seq2seq model",
+   "quote": "We introduce RAG models where the parametric memory is a pre-trained seq2seq model and the non-parametric memory is a dense vector index of Wikipedia, accessed with a pre-trained neural retriever.",
+   "kind": "relation"
+  },
+  {
+   "source": "non-parametric memory",
+   "relation": "is a",
+   "target": "dense vector index of Wikipedia",
+   "quote": "We introduce RAG models where the parametric memory is a pre-trained seq2seq model and the non-parametric memory is a dense vector index of Wikipedia, accessed with a pre-trained neural retriever.",
+   "kind": "relation"
+  },
+  {
+   "source": "dense vector index of Wikipedia",
+   "relation": "accessed with",
+   "target": "pre-trained neural retriever",
+   "quote": "We introduce RAG models where the parametric memory is a pre-trained seq2seq model and the non-parametric memory is a dense vector index of Wikipedia, accessed with a pre-trained neural retriever.",
+   "kind": "relation"
+  }
+ ],
+ "refused": [],
+ "chunks": 1,
+ "seconds": 88.2
+}

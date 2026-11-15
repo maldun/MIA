@@ -54,11 +54,11 @@ export function occupiedWidth({ mode, collapsed, panelWidth }) {
 }
 
 /** the part of the window the chat covers, in pixels: the character is centered in the rest ({"type": "viewport_inset"}) */
-export function insetFor({ mode, collapsed, rect, width, height, top = 0 }) {
-  const inset = { left: 0, right: 0, top: Math.max(0, Math.round(top)), bottom: 0, width, height };      // top: the mood line
+export function insetFor({ mode, collapsed, rect, width, height, top = 0, strip = 0 }) {
+  const inset = { left: 0, right: 0, top: Math.max(0, Math.round(top)), bottom: Math.max(0, Math.round(strip)), width, height };      // top: the mood line, bottom: the Skill run view strip
   if (collapsed || !rect) return inset;
   if (mode === 'panel') inset.right = Math.max(0, Math.round(width - rect.left));
-  else inset.bottom = Math.max(0, Math.round(height - rect.top));
+  else inset.bottom = Math.max(inset.bottom, Math.round(height - rect.top));      // the sheet stands on the strip: its top already counts it
   return inset;
 }
 
@@ -67,7 +67,7 @@ function numberOr(value, fallback) {
   return Number.isFinite(number) ? number : fallback;
 }
 
-export function initLayout({ storage, panel, resizeHandle, sheetHandle, collapseButton, openButton, moodChip = null, root = document.documentElement, win = window }) {
+export function initLayout({ storage, panel, resizeHandle, sheetHandle, collapseButton, openButton, moodChip = null, strip = null, root = document.documentElement, win = window }) {
   const body = document.body;
   let panelWidth = clampPanelWidth(numberOr(storage.get('mia.panelWidth'), 420), win.innerWidth);
   let snap = SNAPS.includes(storage.get('mia.snap')) ? storage.get('mia.snap') : 'half';
@@ -179,7 +179,7 @@ export function initLayout({ storage, panel, resizeHandle, sheetHandle, collapse
   apply();
   return {
     mode,
-    inset: () => insetFor({ mode: mode(), collapsed, rect: panel.getBoundingClientRect(), width: win.innerWidth, height: win.innerHeight, top: moodChip && !moodChip.hidden ? moodChip.getBoundingClientRect().bottom + 6 : 0 }),
+    inset: () => insetFor({ mode: mode(), collapsed, rect: panel.getBoundingClientRect(), width: win.innerWidth, height: win.innerHeight, strip: strip ? strip.getBoundingClientRect().height : 0, top: moodChip && !moodChip.hidden ? moodChip.getBoundingClientRect().bottom + 6 : 0 }),
     get collapsed() { return collapsed; },
     get snap() { return snap; },
     get panelWidth() { return panelWidth; },

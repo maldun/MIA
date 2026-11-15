@@ -8,7 +8,7 @@ plausibility:
       accepted_risk:
         decided: 2026-10-26 by maldun
         follow_up: VAL-003
-        owner: 'maldun'
+        owner: maldun
         reason: the number of simultaneous users is a fact about use; the field shows
           it
       basis:
@@ -133,7 +133,7 @@ plausibility:
       accepted_risk:
         decided: 2026-10-26 by maldun
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: maldun
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
@@ -201,9 +201,9 @@ plausibility:
       rating: plausible
     FR-11:
       accepted_risk:
-        decided: '2026-10-26 by maldun'
+        decided: 2026-10-26 by maldun
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: maldun
         reason: criteria may be adjusted later if it is not working
       basis:
       - hard to check outside field tests also should used at small scale
@@ -221,9 +221,9 @@ plausibility:
       rating: plausible
     FR-13:
       accepted_risk:
-        decided: '2026-10-26 by maldun'
+        decided: 2026-10-26 by maldun
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: maldun
         reason: criteria may be adjusted later if it is not working
       basis:
       - hard to check outside field tests also should used at small scale also small
@@ -364,9 +364,9 @@ plausibility:
       rating: plausible
     FR-29:
       accepted_risk:
-        decided: '2026-10-26 by maldun'
+        decided: 2026-10-26 by maldun
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: maldun
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
@@ -412,7 +412,7 @@ plausibility:
       accepted_risk:
         decided: 2026-10-26 by maldun
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: maldun
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
@@ -422,6 +422,30 @@ plausibility:
       rated: '2026-10-26'
       rated_by: maldun
       rating: questionable
+    FR-36:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: maldun
+      rating: plausible
+    FR-37:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: maldun
+      rating: plausible
+    FR-38:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: maldun
+      rating: plausible
     FR-4:
       basis:
       - flagged by a number or a quality line only; the check is deterministic code,
@@ -429,6 +453,29 @@ plausibility:
         is a plain table (agent proposal)
       hardware: HW-target
       rated: '2026-10-26'
+      rated_by: maldun
+      rating: plausible
+    FR-40:
+      basis:
+      - all 12 refining requirements (REQ-GTB-005 to 016) are rated plausible and verified by TC-GTB-016, 006 to 015 and 017; PostgreSQL is part of the stack already (rated by the owner, D-260 rule for top-level items)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: maldun
+      rating: plausible
+    FR-45:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: maldun
+      rating: plausible
+    FR-47:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
       rated_by: maldun
       rating: plausible
     FR-5:
@@ -459,7 +506,7 @@ plausibility:
       accepted_risk:
         decided: 2026-10-26 by maldun
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: maldun
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
@@ -471,9 +518,9 @@ plausibility:
       rating: questionable
     FR-9:
       accepted_risk:
-        decided: '2026-10-26 by maldun'
+        decided: 2026-10-26 by maldun
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: maldun
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
@@ -482,13 +529,6 @@ plausibility:
       rated: '2026-10-26'
       rated_by: maldun
       rating: questionable
-    FR-40:
-      basis:
-      - all 12 refining requirements (REQ-GTB-005 to 016) are rated plausible and verified by TC-GTB-016, 006 to 015 and 017; PostgreSQL is part of the stack already (rated by the owner, D-260 rule for top-level items)
-      hardware: HW-target
-      rated: '2026-11-07'
-      rated_by: maldun
-      rating: plausible
     IF-101:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
@@ -639,7 +679,7 @@ plausibility:
       accepted_risk:
         decided: 2026-10-26 by maldun
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: maldun
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
@@ -684,7 +724,7 @@ plausibility:
       accepted_risk:
         decided: 2026-10-26 by maldun
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: maldun
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
@@ -738,10 +778,9 @@ plausibility:
       rating: plausible
     REQ-API-004:
       basis:
-      - no number, measurement or model quality depends on it; the behaviour is fixed
-        by an acceptance criterion and a contract mock (proposal)
+      - limits are exact counts (5 failed logins, a 60 s window) judged on the host clock, no measurement uncertainty; the text of D-153 matches the code, IF-101 and TC-IF-101-02; realised and Verified in v0.1.0 (owner rating 2026-11-08)
       hardware: HW-target
-      rated: '2026-10-26'
+      rated: '2026-11-08'
       rated_by: maldun
       rating: plausible
     REQ-API-005:
@@ -762,10 +801,9 @@ plausibility:
       rating: plausible
     REQ-API-007:
       basis:
-      - no number, measurement or model quality depends on it; the behaviour is fixed
-        by an acceptance criterion and a contract mock (proposal)
+      - the limit is an exact count (10 messages per 60 s, the setting chat_rate_per_minute, default 10) and the refusal is rate_limited; fixed by D-149 and A-54 (IF-101 v12); realised and Verified in v0.1.0; whether 10 suits real use is for Validate (owner rating 2026-11-08)
       hardware: HW-target
-      rated: '2026-10-26'
+      rated: '2026-11-08'
       rated_by: maldun
       rating: plausible
     REQ-API-008:
@@ -839,6 +877,14 @@ plausibility:
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
       rated: '2026-10-26'
+      rated_by: maldun
+      rating: plausible
+    REQ-API-017:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
       rated_by: maldun
       rating: plausible
     REQ-BE-001:
@@ -1077,9 +1123,9 @@ plausibility:
       rating: plausible
     REQ-BE-030:
       accepted_risk:
-        decided: '2026-10-26 by maldun'
+        decided: 2026-10-26 by maldun
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: maldun
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
@@ -1182,7 +1228,7 @@ plausibility:
       accepted_risk:
         decided: 2026-10-26 by maldun
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: maldun
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
@@ -1204,7 +1250,7 @@ plausibility:
       accepted_risk:
         decided: 2026-10-26 by maldun
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: maldun
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
@@ -1249,9 +1295,9 @@ plausibility:
       rating: plausible
     REQ-BE-049:
       accepted_risk:
-        decided: '2026-10-26 by maldun'
+        decided: 2026-10-26 by maldun
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: maldun
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
@@ -1262,9 +1308,9 @@ plausibility:
       rating: questionable
     REQ-BE-050:
       accepted_risk:
-        decided: '2026-10-26 by maldun'
+        decided: 2026-10-26 by maldun
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: maldun
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
@@ -1290,9 +1336,9 @@ plausibility:
       rating: plausible
     REQ-BE-053:
       accepted_risk:
-        decided: '2026-10-26 by maldun'
+        decided: 2026-10-26 by maldun
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: maldun
         reason: criteria may be adjusted later if it is not working
       basis:
       - hard to check outside field tests also should used at small scale also small
@@ -1305,7 +1351,7 @@ plausibility:
       accepted_risk:
         decided: 2026-10-26 by maldun
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: maldun
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
@@ -1333,9 +1379,9 @@ plausibility:
       rating: plausible
     REQ-BE-057:
       accepted_risk:
-        decided: '2026-10-26 by maldun'
+        decided: 2026-10-26 by maldun
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: maldun
         reason: criteria may be adjusted later if it is not working
       basis:
       - hard to check outside field tests also should used at small scale also small
@@ -1381,7 +1427,7 @@ plausibility:
       accepted_risk:
         decided: 2026-10-26 by maldun
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: maldun
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
@@ -1395,7 +1441,7 @@ plausibility:
       accepted_risk:
         decided: 2026-10-26 by maldun
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: maldun
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
@@ -1450,7 +1496,7 @@ plausibility:
       accepted_risk:
         decided: 2026-10-26 by maldun
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: maldun
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
@@ -1472,7 +1518,7 @@ plausibility:
       accepted_risk:
         decided: 2026-10-26 by maldun
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: maldun
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
@@ -1521,6 +1567,14 @@ plausibility:
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
       rated: '2026-10-26'
+      rated_by: maldun
+      rating: plausible
+    REQ-BE-077:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
       rated_by: maldun
       rating: plausible
     REQ-CHA-001:
@@ -1653,9 +1707,9 @@ plausibility:
       rating: plausible
     REQ-CHA-017:
       accepted_risk:
-        decided: '2026-10-26 by maldun'
+        decided: 2026-10-26 by maldun
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: maldun
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
@@ -1687,6 +1741,55 @@ plausibility:
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
       rated: '2026-10-26'
+      rated_by: maldun
+      rating: plausible
+    REQ-CHA-030:
+      basis:
+      - no number or model quality depends on it; speak_answer in web_app.py already runs SpeechStreamer.finish and wait, the route live answers use; the hand check TC-CHA-035 passed on the host (2026-11-08)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CHA-031:
+      basis:
+      - no number or model quality depends on it; the sentences are handed over in order by one loop; TC-CHA-030 and TC-CHA-036 (the real sound server with a fake sink) observed the order
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CHA-032:
+      basis:
+      - no number or model quality depends on it; SpeechStreamer.wait(should_stop) closes the connection and the sound server cancels on it; observed by TC-CHA-036 and by the hand check (2026-11-08)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CHA-033:
+      basis:
+      - no number or model quality depends on it; the playback catches a failing route and logs once; observed by TC-CHA-033
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CHA-034:
+      basis:
+      - no number or model quality depends on it; a lock covers two repeats (TC-CHA-034); the queue behind a live answer rests on the single-threaded SoundServer, observed green by TC-CHA-036 with real TCP clients, which settles the open point of A-132 section 10
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CHA-035:
+      basis:
+      - no number or model quality depends on it; publish_status and set_activity exist and are used at the same places for answers (read in chat_service.py); the page already shows Stop for busy and speaking (mood.js, composer.js); checked by TC-CHA-037 (A-133)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CHA-036:
+      basis:
+      - no number or model quality depends on it; the end of a playback is one place (_play_again, finally) and set_activity(None) is what an answer does at its end (read in chat_service.py); checked by TC-CHA-037 (A-133)
+      hardware: HW-target
+      rated: '2026-11-08'
       rated_by: maldun
       rating: plausible
     REQ-CHV-001:
@@ -1767,7 +1870,7 @@ plausibility:
       accepted_risk:
         decided: 2026-10-26 by maldun
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: maldun
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
@@ -1895,10 +1998,9 @@ plausibility:
       rating: plausible
     REQ-CLV-011:
       basis:
-      - no number, measurement or model quality depends on it; the behaviour is fixed
-        by an acceptance criterion and a contract mock (proposal)
+      - no number, measurement or model quality depends on it; the behaviour (list, change, delete, due time of a task) is fixed by an acceptance criterion and a mock; realised and Verified in v0.1.0 (D-163, D-165; owner rating 2026-11-08)
       hardware: HW-target
-      rated: '2026-10-26'
+      rated: '2026-11-08'
       rated_by: maldun
       rating: plausible
     REQ-CLV-012:
@@ -1980,6 +2082,29 @@ plausibility:
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
       rated: '2026-10-26'
+      rated_by: maldun
+      rating: plausible
+    REQ-CLV-022:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: maldun
+      rating: plausible
+    REQ-CLV-023:
+      basis:
+      - a mock-driven browser check with exact figures; no measured number depends on it; the part that is deferred is recorded as TD-01 (owner rating 2026-11-08)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CLV-024:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
       rated_by: maldun
       rating: plausible
     REQ-DB-001:
@@ -2182,7 +2307,7 @@ plausibility:
       accepted_risk:
         decided: 2026-10-26 by maldun
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: maldun
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
@@ -2426,7 +2551,7 @@ plausibility:
       accepted_risk:
         decided: 2026-10-26 by maldun
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: maldun
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
@@ -2474,6 +2599,14 @@ plausibility:
         by an acceptance criterion and a contract mock (proposal)
       hardware: HW-target
       rated: '2026-10-26'
+      rated_by: maldun
+      rating: plausible
+    REQ-FE-031:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
       rated_by: maldun
       rating: plausible
     REQ-GA-001:
@@ -2678,6 +2811,91 @@ plausibility:
       - 'a refused write leaves the stored record alone; versions are written only after the checks pass; no number depends on it (proposal of the agent, 2026-11-07; rated by the owner)'
       hardware: HW-target
       rated: '2026-11-07'
+      rated_by: maldun
+      rating: plausible
+    REQ-GTB-017:
+      basis:
+      - 'a header is one row with a list of member IDs and versions; no number depends on it (proposal of the agent, 2026-11-07; rated by the owner)'
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: maldun
+      rating: plausible
+    REQ-GTB-018:
+      basis:
+      - 'a versioned row with four fields; the same kind of record as the older tables (proposal of the agent, 2026-11-07; rated by the owner)'
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: maldun
+      rating: plausible
+    REQ-GTB-019:
+      basis:
+      - 'a lookup of each named member version before the write; no number depends on it (proposal of the agent, 2026-11-07; rated by the owner)'
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: maldun
+      rating: plausible
+    REQ-GTB-020:
+      basis:
+      - 'a lookup of the two end nodes before the write; no number depends on it (proposal of the agent, 2026-11-07; rated by the owner)'
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: maldun
+      rating: plausible
+    REQ-GTB-021:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: maldun
+      rating: plausible
+    REQ-GTB-022:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed by an acceptance criterion, a contract mock and golden 16; realised in T-07 (27cba26) with the contract suite, TC-GTB-023 and the old suites green (owner rating 2026-11-08)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-GTB-023:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour (six record tables, versioned, never deleted) is fixed by an acceptance criterion, golden 17, the contract mock and TC-GTB-024; realised in T-08 (owner rating 2026-11-08)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-GTB-024:
+      basis:
+      - no number, measurement or model quality depends on it; the shape rules are fixed by an acceptance criterion, golden 17, the contract mock and TC-GTB-025; realised in T-08 (owner rating 2026-11-08)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-GTB-025:
+      basis:
+      - no number, measurement or model quality depends on it; the lookup of the ends in the context nodes is fixed by an acceptance criterion, golden 18, the contract mock and TC-GTB-026; realised in T-08 (owner rating 2026-11-08)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-GTB-026:
+      basis:
+      - no number, measurement or model quality depends on it; the lookup of the members by the kind of the header is fixed by an acceptance criterion, golden 19, the contract mock and TC-GTB-027; realised in T-08 (owner rating 2026-11-08)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-GTB-027:
+      basis:
+      - one fixed number, 200 levels of nesting with the record as level 1, checked iteratively and exactly on both sides (150 accepted, 300 refused); probe done on 2026-11-08 over 193 real JSON and YAML files in library, skills and eval, the deepest document has 19 levels (a whole pipeline), so the limit is about ten times the deepest real document and far below the recursion limit of about 1000 (owner rating 2026-11-08 after the probe)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-GTB-028:
+      basis:
+      - one fixed number, 100,000 values with every path counted, checked exactly on both sides (99,995 numbers in a data node value are 100,000 values and accepted, 99,996 refused); about 190 times the largest stored document in the repository (529 values, probe of 202 files on 2026-11-08); the walk is iterative and stops at the limit, so it takes a few milliseconds and a record that shares sub-objects is refused at once (owner rating 2026-11-08)
+      hardware: HW-target
+      rated: '2026-11-08'
       rated_by: maldun
       rating: plausible
     REQ-LOG-001:
@@ -2934,7 +3152,7 @@ plausibility:
       accepted_risk:
         decided: 2026-10-26 by maldun
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: maldun
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
@@ -3018,6 +3236,15 @@ plausibility:
       rated: '2026-10-26'
       rated_by: maldun
       rating: plausible
+    REQ-RTB-008:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a unit check of a table definition (proposal,
+        accepted by the person)
+      hardware: HW-target
+      rated: '2026-11-11'
+      rated_by: maldun
+      rating: plausible
     REQ-RUN-001:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
@@ -3030,7 +3257,7 @@ plausibility:
       accepted_risk:
         decided: 2026-10-26 by maldun
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: maldun
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
@@ -3060,7 +3287,7 @@ plausibility:
       accepted_risk:
         decided: 2026-10-26 by maldun
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: maldun
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
@@ -3074,7 +3301,7 @@ plausibility:
       accepted_risk:
         decided: 2026-10-26 by maldun
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: maldun
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
@@ -3088,7 +3315,7 @@ plausibility:
       accepted_risk:
         decided: 2026-10-26 by maldun
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: maldun
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
@@ -3110,7 +3337,7 @@ plausibility:
       accepted_risk:
         decided: 2026-10-26 by maldun
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: maldun
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
@@ -3294,6 +3521,27 @@ plausibility:
       rated: '2026-10-26'
       rated_by: maldun
       rating: plausible
+    REQ-SLY-013:
+      basis:
+      - one fixed number, 200 levels of nesting with the document as level 1, the same limit as REQ-GTB-027 and checked exactly on both sides (200 stored, 201 refused); the deepest real document in library, skills and eval has 19 levels (probe of 193 files on 2026-11-08), so the limit is about ten times that and far below the recursion limit of the interpreter (about 496 levels); the check is iterative and takes a few milliseconds (owner rating 2026-11-08)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-SLY-014:
+      basis:
+      - the only number is the limit of one second; the walk is iterative and visits each container once, so the limit has a very large margin; only Python callers can build such a document, JSON has no cycles; behaviour is exact (refused or not) and is tested with a time limit on both backends (owner rating 2026-11-08)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-SLY-015:
+      basis:
+      - the same number and basis as REQ-GTB-028 for the Storage layer; the walk memoises shared containers and stops at the limit, so the refusal of a document with 2**30 paths takes far less than the limit of one second; behaviour is exact and tested with a time limit on both backends (owner rating 2026-11-08)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
     REQ-TLS-001:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
@@ -3402,10 +3650,9 @@ plausibility:
       rating: plausible
     REQ-VPB-002:
       basis:
-      - no number, measurement or model quality depends on it; the behaviour is fixed
-        by an acceptance criterion and a contract mock (proposal)
+      - the window is 3 s after the Stop or until the next answer begins, checked by the browser check TC-VPB-007 on the reference browser; the 3 s are a product guess because lines carry no answer id (D-157, D-165); realised and Verified in v0.1.0; whether 3 s suits real use is for Validate (owner rating 2026-11-08)
       hardware: HW-target
-      rated: '2026-10-26'
+      rated: '2026-11-08'
       rated_by: maldun
       rating: plausible
     REQ-VPB-003:
@@ -3432,6 +3679,20 @@ plausibility:
       rated: '2026-10-26'
       rated_by: maldun
       rating: plausible
+    REQ-VPB-006:
+      accepted_risk:
+        decided: '2026-11-08 by maldun'
+        follow_up: VAL-006
+        owner: 'maldun'
+        reason: the 3 s is the constant STOP_DROP_MS of sound.js (D-165), not a measured bound; it
+          only decides how long a late line of a stopped answer is dropped, and the field shows
+          whether it fits
+      basis:
+      - no number or model quality depends on it; the stop window is one variable in sound.js that speakAgain() clears; observed by TC-VPB-006 (node) and TC-VPB-007 (Chromium)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: questionable
     REQ-WFM-001:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
@@ -3501,7 +3762,7 @@ plausibility:
       accepted_risk:
         decided: 2026-10-26 by maldun
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: maldun
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
@@ -3546,9 +3807,9 @@ plausibility:
       rating: plausible
     REQ-WFM-014:
       accepted_risk:
-        decided: '2026-10-26 by maldun'
+        decided: 2026-10-26 by maldun
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: maldun
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
@@ -3581,9 +3842,9 @@ plausibility:
       rating: plausible
     REQ-WFM-018:
       accepted_risk:
-        decided: '2026-10-26 by maldun'
+        decided: 2026-10-26 by maldun
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: maldun
         reason: criteria may be adjusted later if it is not working
       basis:
       - hard to check outside field tests also should used at small scale also small
@@ -3596,7 +3857,7 @@ plausibility:
       accepted_risk:
         decided: 2026-10-26 by maldun
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: maldun
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
@@ -3624,9 +3885,9 @@ plausibility:
       rating: plausible
     REQ-WFM-022:
       accepted_risk:
-        decided: '2026-10-26 by maldun'
+        decided: 2026-10-26 by maldun
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: maldun
         reason: criteria may be adjusted later if it is not working
       basis:
       - hard to check outside field tests also should used at small scale also small
@@ -3734,6 +3995,105 @@ plausibility:
     REQ-WFM-066:
       basis:
       - 'only the owner = the account that creates accounts (TC-MIA-014); several accounts on one instance are for testing only, a later goal is one user per instance (owner, D-260 B)'
+
+    REQ-WFM-027:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-028:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-029:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-030:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-031:
+      basis:
+      - exact figures on a card that the task reported, at most 2 updates per second is a rate limit on a timer; a task that reports nothing gets the time only (owner rating 2026-11-08)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-032:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-033:
+      basis:
+      - pause is a flag checked before each step and 5 s of constant used time is a check on a clock; a step that is running when the pause comes ends first (owner rating 2026-11-08)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-034:
+      basis:
+      - the time cap of 1800 s of work time is a configurable value checked with a fake clock; counting only work time (no pause, no waiting for the user) is a matter of design, not of measurement (owner rating 2026-11-08)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-035:
+      basis:
+      - a stored class per model and one question for a model that is new and not clearly local; exact behaviour in the chat, no measured number (owner rating 2026-11-08)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-036:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-037:
+      basis:
+      - limits from the configuration, refusal that says so and a byte-for-byte download; no measured number; the allowed names and types are fixed by the acceptance criterion (owner rating 2026-11-08)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-038:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-039:
+      basis:
+      - loading a skill from a folder of its own is standard; the inspection that no core file names a skill id is exact; the part that is deferred is recorded as TD-04 (owner rating 2026-11-08)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
     REQ-WFM-040:
       basis:
       - 'no number, measurement or model quality depends on it; the behaviour is fixed by an exact acceptance criterion on plain data and a scripted run, no model (proposal of the agent, 2026-11-07, G-V2.MODEL; rated by the owner 2026-11-07)'
@@ -3804,6 +4164,226 @@ plausibility:
       rated: '2026-11-07'
       rated_by: maldun
       rating: plausible
+    REQ-WFM-050:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-051:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-052:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-053:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-054:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-055:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-056:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-057:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-058:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-059:
+      basis:
+      - a fixed rule on the dev split of a suite with the same pin; the numbers of the criterion are open in the plan notes and are fixed in the Plan of the conversion goal, so the rating is of the rule, not of a number (owner rating 2026-11-08)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-060:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-061:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-062:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-063:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-064:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-065:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-066:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-067:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-068:
+      basis:
+      - exact behaviour and no number, a retired transform or skill is hidden from users and stays loadable by a check that names it (owner rating 2026-11-08)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-069:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-070:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a contract mock (proposal)
+      hardware: HW-target
+      rated: '2026-11-07'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-090:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a mock of the library part; the prototype of
+        G-V2.TOOLBOX shows it works (proposal, accepted by the person)
+      hardware: HW-target
+      rated: '2026-11-11'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-091:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a mock of the library part; the prototype of
+        G-V2.TOOLBOX shows it works (proposal, accepted by the person)
+      hardware: HW-target
+      rated: '2026-11-11'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-092:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a mock of the library part; the prototype of
+        G-V2.TOOLBOX shows it works (proposal, accepted by the person)
+      hardware: HW-target
+      rated: '2026-11-11'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-093:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a mock of the library part; the prototype of
+        G-V2.TOOLBOX shows it works (proposal, accepted by the person)
+      hardware: HW-target
+      rated: '2026-11-11'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-094:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a mock of the library part; the prototype of
+        G-V2.TOOLBOX shows it works (proposal, accepted by the person)
+      hardware: HW-target
+      rated: '2026-11-11'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-095:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an acceptance criterion and a mock of the library part; the prototype of
+        G-V2.TOOLBOX shows it works (proposal, accepted by the person)
+      hardware: HW-target
+      rated: '2026-11-11'
+      rated_by: maldun
+      rating: plausible
     REQ-WFX-001:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
@@ -3824,7 +4404,7 @@ plausibility:
       accepted_risk:
         decided: 2026-10-26 by maldun
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: maldun
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
@@ -3904,7 +4484,7 @@ plausibility:
       accepted_risk:
         decided: 2026-10-26 by maldun
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: maldun
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
@@ -3918,7 +4498,7 @@ plausibility:
       accepted_risk:
         decided: 2026-10-26 by maldun
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: maldun
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
@@ -3965,7 +4545,7 @@ plausibility:
       accepted_risk:
         decided: 2026-10-26 by maldun
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: maldun
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
@@ -3987,7 +4567,7 @@ plausibility:
       accepted_risk:
         decided: 2026-10-26 by maldun
         follow_up: VAL-006
-        owner: 'maldun'
+        owner: maldun
         reason: performance and resource figures are validated in the field (phase
           7, VAL-006) and tuned in later iterations
       basis:
@@ -4036,3 +4616,580 @@ plausibility:
     REF-CONVERT-3: {quantity: "verify.single@1 on EV-verdicts, share of right decisions", value: 0.93, unit: "1", uncertainty: 0.07, kind: measured, basis: "eval/baselines/verdicts-single.md: 43 of 46 claims with a known truth, 1 run, Wilson half-width over 50 cases", hardware: HW-target, date: "2026-10-19"}
     REF-CONVERT-4: {quantity: "verify.computable@2 on EV-computable, share of right decisions", value: 0.92, unit: "1", uncertainty: 0.09, kind: measured, basis: "eval/baselines/computable-gemma4-12b.md: right overall 92 % of 39 cases, 1 run, Wilson half-width over 39 cases", hardware: HW-target, date: "2026-10-18"}
     REF-CONVERT-5: {quantity: "extract.llm@1 on EV-extraction, share of texts extracted perfectly", value: 0.69, unit: "1", uncertainty: 0.12, kind: measured, basis: "eval/baselines/extraction-llm-light.md: 35 of 51 texts, 1 run, Wilson half-width over 51 cases", hardware: HW-target, date: "2026-10-18"}
+
+    REQ-CLV-024:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no model (proposal of the
+        agent, 2026-11-08, G-V3.PANEL); the earlier rating of the old wording is kept
+        unless the owner objects
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CLV-030:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no model (proposal of the
+        agent, 2026-11-08, G-V3.PANEL)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CLV-031:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no model (proposal of the
+        agent, 2026-11-08, G-V3.PANEL)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CLV-032:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no model (proposal of the
+        agent, 2026-11-08, G-V3.PANEL)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CLV-033:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no model (proposal of the
+        agent, 2026-11-08, G-V3.PANEL)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CLV-034:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no model (proposal of the
+        agent, 2026-11-08, G-V3.PANEL)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CLV-035:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no model (proposal of the
+        agent, 2026-11-08, G-V3.PANEL)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CLV-036:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no model (proposal of the
+        agent, 2026-11-08, G-V3.PANEL); the default 34 % is the max-height (34vh) of the
+        Full run part of the owner's mockup, which scrolls inside itself; the user can
+        change the share within 20 to 60 % (REQ-CLV-045)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CLV-037:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no model (proposal of the
+        agent, 2026-11-08, G-V3.PANEL)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CLV-038:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no model (proposal of the
+        agent, 2026-11-08, G-V3.PANEL)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CLV-039:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no model (proposal of the
+        agent, 2026-11-08, G-V3.PANEL)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CLV-040:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no model (proposal of the
+        agent, 2026-11-08, G-V3.PANEL); the layout and the 820 px switch are those of
+        the owner's mockup, checked by screenshots in headless Chromium at 1440 and 600
+        px (hand-over of 2026-11-08); not yet on the real page
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CLV-041:
+      accepted_risk:
+        decided: 2026-11-08 by maldun
+        follow_up: VAL-012
+        owner: maldun
+        reason: the 16 % default follows the mockup (140 px at 900 px) and is not yet
+          measured on the real page; the user can change the share and the content scrolls
+          inside the strip
+      basis:
+      - the default 16 % of the viewport height is the mockup's strip of about 140 px
+        at 900 px (15.6 %), read from the mockup in headless Chromium, no real page yet;
+        the real page with its fonts and the header buttons may need more; the user can
+        enlarge it and, since the content scrolls inside the strip (REQ-CLV-047), reduce
+        it down to 12 %
+      hardware: HW-target
+      probe:
+        what: the browser check TC-CLV-041 on the first real strip with three phases at
+          1440 x 900, 1920 x 1080 and 360 x 800 px, and the owner in VAL-012
+        when: first task that draws the strip
+        who: G-V3.PANEL Implement, then the owner
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: questionable
+    REQ-CLV-042:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no model (proposal of the
+        agent, 2026-11-08, G-V3.PANEL); the 44 px targets on the phone are the bound of
+        NFR-1 (the wide strip is the owner's exception of 2026-11-08)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CLV-043:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no model (proposal of the
+        agent, 2026-11-08, G-V3.PANEL)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CLV-044:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no model (proposal of the
+        agent, 2026-11-08, G-V3.PANEL)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CLV-045:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no model (proposal of the
+        agent, 2026-11-08, G-V3.PANEL); the ranges 12 to 40 % and 20 to 60 % are the agent's
+        limits so that the strip stays larger than a pill row with scrolling (proposal,
+        owner to confirm)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CLV-046:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no model (proposal of the
+        agent, 2026-11-08, G-V3.PANEL); browser storage can be refused (private window,
+        blocked site data), so the default 16 % and 34 % apply then; checked with a blocked
+        profile in TC-CLV-046
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CLV-047:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no model (proposal of the
+        agent, 2026-11-08, G-V3.PANEL)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-FE-032:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no model (proposal of the
+        agent, 2026-11-08, G-V3.PANEL)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-031:
+      basis:
+      - reworded for A-131; the earlier rating stays and applies to the new wording unless
+        the owner objects (proposal of the agent, 2026-11-08)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-036:
+      basis:
+      - reworded for A-131; the earlier rating stays and applies to the new wording unless
+        the owner objects (proposal of the agent, 2026-11-08); the 1200 characters of
+        REQ-WFM-036 are the bound of FR-35
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-038:
+      basis:
+      - reworded for A-131; the earlier rating stays and applies to the new wording unless
+        the owner objects (proposal of the agent, 2026-11-08)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-039:
+      basis:
+      - reworded for A-131; the earlier rating stays and applies to the new wording unless
+        the owner objects (proposal of the agent, 2026-11-08)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-130:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no model (proposal of the
+        agent, 2026-11-08, G-V3.PANEL); depends on the table skill_runs of A-141, still
+        a proposal
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-131:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no model (proposal of the
+        agent, 2026-11-08, G-V3.PANEL); depends on the table skill_runs of A-141, still
+        a proposal
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-132:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no model (proposal of the
+        agent, 2026-11-08, G-V3.PANEL); depends on the table skill_runs of A-141, still
+        a proposal
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-133:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no model (proposal of the
+        agent, 2026-11-08, G-V3.PANEL); depends on the table skill_runs of A-141, still
+        a proposal
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-134:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no model (proposal of the
+        agent, 2026-11-08, G-V3.PANEL)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-135:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no model (proposal of the
+        agent, 2026-11-08, G-V3.PANEL); depends on the table skill_runs of A-141, still
+        a proposal
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-136:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no model (proposal of the
+        agent, 2026-11-08, G-V3.PANEL)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-137:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no model (proposal of the
+        agent, 2026-11-08, G-V3.PANEL)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-WFM-138:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no model (proposal of the
+        agent, 2026-11-08, G-V3.PANEL); depends on the table skill_runs of A-141, still
+        a proposal
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-BE-078:
+      basis:
+      - 'the parent of REQ-CHA-040 to 063: the behaviour is split into exact checks with
+        the fake model and three evaluated criteria (REQ-CHA-049, 053, 054), which carry
+        their own ratings (proposal of the agent, 2026-11-08, G-V3.CHAT)'
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CHA-040:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run with the fake model, no real
+        model (proposal of the agent, 2026-11-08, G-V3.CHAT)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CHA-041:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run with the fake model, no real
+        model (proposal of the agent, 2026-11-08, G-V3.CHAT)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CHA-042:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run with the fake model, no real
+        model (proposal of the agent, 2026-11-08, G-V3.CHAT)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CHA-043:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run with the fake model, no real
+        model (proposal of the agent, 2026-11-08, G-V3.CHAT)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CHA-044:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run with the fake model, no real
+        model (proposal of the agent, 2026-11-08, G-V3.CHAT)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CHA-045:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run with the fake model, no real
+        model (proposal of the agent, 2026-11-08, G-V3.CHAT)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CHA-046:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run with the fake model, no real
+        model (proposal of the agent, 2026-11-08, G-V3.CHAT)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CHA-047:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run with the fake model, no real
+        model (proposal of the agent, 2026-11-08, G-V3.CHAT)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CHA-048:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run with the fake model, no real
+        model (proposal of the agent, 2026-11-08, G-V3.CHAT)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CHA-049:
+      accepted_risk: &id001
+        decided: 2026-11-08 by maldun
+        follow_up: VAL-013
+        owner: maldun
+        reason: the bounds of the criterion are fixed before data and no baseline or spike
+          exists (D-332); real use and the first dev run show whether the model can reach
+          them; the criterion is not changed to get a PASS
+      basis:
+      - 'min 1.0 over 6 injection cases on a 12B model rests on no measurement: no baseline
+        exists (D-332, there is no digest today) and no spike; the miss rate at n 6 is
+        22 % (accepted by the owner on 2026-11-08, hand-over item 7); the first dev run
+        is the first measurement'
+      hardware: HW-target
+      probe: &id002
+        what: the first dev run of the digest step on the 24 dev cases of skill_turns,
+          3 repeats, MP-light with the options of eval-spec.md
+        when: first Implement task that has the step
+        who: G-V3.CHAT Implement, then the owner
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: questionable
+    REQ-CHA-050:
+      basis:
+      - the 4096 tokens are half of num_ctx 8192 (NFR-2), a constant of the configuration;
+        the check counts what the fake model receives, no measurement of the real model
+        (proposal of the agent, 2026-11-08, G-V3.CHAT)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CHA-051:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run with the fake model, no real
+        model (proposal of the agent, 2026-11-08, G-V3.CHAT)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CHA-052:
+      basis:
+      - the 1200 characters are a figure in the prompt only (FR-35, owner 2026-10-30);
+        the check reads the prompt, whether the model keeps to it is judged by REQ-CHA-053
+        (proposal of the agent, 2026-11-08, G-V3.CHAT)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CHA-053:
+      accepted_risk: *id001
+      basis:
+      - 'min 0.85 and low 0.70 rest on no measurement: no baseline exists (D-332) and
+        no spike on the pin; the bounds are a proposal of the owner''s review, the first
+        dev run shows whether they are reachable'
+      hardware: HW-target
+      probe: *id002
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: questionable
+    REQ-CHA-054:
+      accepted_risk: *id001
+      basis:
+      - 'min 0.80 and low 0.70 rest on no measurement: no baseline exists (D-332) and
+        no spike on the pin; persona fidelity of a 12B model in short messages is untested;
+        the first dev run shows whether they are reachable'
+      hardware: HW-target
+      probe: *id002
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: questionable
+    REQ-CHA-055:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run with the fake model, no real
+        model (proposal of the agent, 2026-11-08, G-V3.CHAT)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CHA-056:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run with the fake model, no real
+        model (proposal of the agent, 2026-11-08, G-V3.CHAT)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CHA-057:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run with the fake model, no real
+        model (proposal of the agent, 2026-11-08, G-V3.CHAT)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CHA-058:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run with the fake model, no real
+        model (proposal of the agent, 2026-11-08, G-V3.CHAT)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CHA-059:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run with the fake model, no real
+        model (proposal of the agent, 2026-11-08, G-V3.CHAT)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CHA-060:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run with the fake model, no real
+        model (proposal of the agent, 2026-11-08, G-V3.CHAT)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CHA-061:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run with the fake model, no real
+        model (proposal of the agent, 2026-11-08, G-V3.CHAT)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CHA-062:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run with the fake model, no real
+        model (proposal of the agent, 2026-11-08, G-V3.CHAT)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-CHA-063:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run with the fake model, no real
+        model (proposal of the agent, 2026-11-08, G-V3.CHAT)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+    REQ-RTB-007:
+      basis:
+      - no number, measurement or model quality depends on it; the table definition is
+        fixed by an exact acceptance criterion on the contract of IF-302 v8, no model
+        (proposal of the agent, 2026-11-08, G-V3.PANEL, added with A-141)
+      hardware: HW-target
+      rated: '2026-11-08'
+      rated_by: maldun
+      rating: plausible
+  references: {}

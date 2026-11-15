@@ -1,0 +1,230 @@
+{
+ "items": [
+  {
+   "id": "R001",
+   "doc": "Prompt_injection",
+   "kind": "relation",
+   "key": [
+    "Forms of indirect injection",
+    "evade the filter"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "R002",
+   "doc": "Systematic_review",
+   "kind": "relation",
+   "key": [
+    "Non-Interventional, Reproducible, and Open (NIRO) Systematic Reviews",
+    "PRISMA guidelines"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "R003",
+   "doc": "Meta_analysis",
+   "kind": "relation",
+   "key": [
+    "pre-prints",
+    "grey literature"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "R004",
+   "doc": "Prompt_injection",
+   "kind": "relation",
+   "key": [
+    "Direct injection",
+    "prompt injection"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "R005",
+   "doc": "Meta_analysis",
+   "kind": "relation",
+   "key": [
+    "conference abstracts",
+    "grey literature"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "R006",
+   "doc": "Peer_review",
+   "kind": "relation",
+   "key": [
+    "Nature",
+    "Peer review"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "R007",
+   "doc": "Citation",
+   "kind": "relation",
+   "key": [
+    "sequential numbers",
+    "endnotes"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "R008",
+   "doc": "arxiv_2410.05779",
+   "kind": "relation",
+   "key": [
+    "LightRAG",
+    "dual-level retrieval system"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "R009",
+   "doc": "Prompt_injection",
+   "kind": "relation",
+   "key": [
+    "prompt engineering",
+    "Prompt injection"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "R010",
+   "doc": "Prompt_injection",
+   "kind": "relation",
+   "key": [
+    "OWASP",
+    "Prompt injection"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "R011",
+   "doc": "Meta_analysis",
+   "kind": "relation",
+   "key": [
+    "dissertations",
+    "grey literature"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "R012",
+   "doc": "Knowledge_graph",
+   "kind": "relation",
+   "key": [
+    "knowledge graph",
+    "Amazon Alexa"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "R013",
+   "doc": "Prompt_injection",
+   "kind": "relation",
+   "key": [
+    "reinforcement learning from human feedback",
+    "Prompt injection"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "R014",
+   "doc": "Knowledge_graph",
+   "kind": "relation",
+   "key": [
+    "knowledge graph",
+    "Apple's Siri"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "R015",
+   "doc": "wikinews",
+   "kind": "relation",
+   "key": [
+    "Andrew Weaver",
+    "Intergovernmental Panel on Climate Change"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "R016",
+   "doc": "Knowledge_graph",
+   "kind": "relation",
+   "key": [
+    "virtual knowledge graphs",
+    "relational database"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "R017",
+   "doc": "Knowledge_graph",
+   "kind": "relation",
+   "key": [
+    "knowledge graph",
+    "Yahoo"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "R018",
+   "doc": "mia_readme_core_2a",
+   "kind": "relation",
+   "key": [
+    "What MIA asked the internet",
+    "data/runs/web-YYYY-MM.jsonl"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "R019",
+   "doc": "mia_readme_core_2a",
+   "kind": "relation",
+   "key": [
+    "untrusted()",
+    "Web text is data"
+   ],
+   "decision": "right",
+   "comment": ""
+  },
+  {
+   "id": "R020",
+   "doc": "Prompt_injection",
+   "kind": "relation",
+   "key": [
+    "input and output filtering",
+    "Prompt injection"
+   ],
+   "decision": "right",
+   "comment": ""
+  }
+ ],
+ "missing": [
+  {
+   "doc": "all",
+   "note": ""
+  }
+ ]
+}

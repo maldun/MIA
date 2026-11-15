@@ -386,16 +386,16 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 
 ### REQ-WFM-031 – Task monitor
 - Level: low   Subject: TaskRuntime
-- Text: The Workflow management shall let every task report its state while it runs, the phase, budget figures (used and limit) for time, tokens, model calls, API requests and the budgets of its own, and counts of its own, and shall show them on one status card per task that is updated in place at most twice per second and stays with the final figures after the task has ended.
-- Rationale: refines REQ-BE-033; a long task shows numbers and not only a sign of life (owner 2026-10-29); the card renders any budget and count the task reports, so every later task has the same monitor
+- Text: The Workflow management shall let every task report its state while it runs, the phase, budget figures (used and limit) for time, tokens, model calls, API requests and the budgets of its own, and counts of its own, and shall send them to the Skill run view in the event task_status at most twice per second, and once more with the final figures when the task has ended.
+- Rationale: refines REQ-BE-033; a long task shows numbers and not only a sign of life (owner 2026-10-29); the Skill run view renders any budget and count the task reports, so every later task has the same monitor; no card in the chat (A-131)
 - Parent: REQ-BE-033
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-23: a task that reports gets a card with exactly the figures it reported; two reports within half a second give one update; the final figures stay on the card; a task that reports nothing gets the card with the time only (exact)
+- Acceptance criterion: AC-23: a task that reports sends exactly the figures it reported; two reports within half a second give one event; the final figures are sent once more with done true; a task that reports nothing sends the time only (exact); the display is checked at REQ-CLV-032
 - Verified by: TC-WFM-031
-- Status: Draft
+- Status: Verified
 - Quality: performance efficiency measure: status updates of one task per second; target: at most 2; context: a task that reports after every step, for example one screening step per work
-- History: A-23 new
+- History: A-23 new; A-131 (proposed 2026-11-08): the place of status is the Skill run view, not a card in the chat
 
 ### REQ-WFM-032 – Figures of the review
 - Level: low   Subject: TaskRuntime
@@ -449,17 +449,17 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Quality: flexibility measure: questions about the class of one model; target: 1 for each model, ever (a known model is never asked again); context: switching between local models and an occasional paid one
 - History: A-23 new
 
-### REQ-WFM-036 – Result at the end of the chat
+### REQ-WFM-036 – Summary at the end of the chat
 - Level: low   Subject: TaskRuntime
-- Text: The Workflow management shall, for a task that asks questions while it runs, publish the result as a new message at the end of the chat when it is ready, show the progress only on the status card, and, when the task fails, publish a result that says what failed instead of an empty message.
-- Rationale: refines REQ-BE-033; the result must not sit in a message far above the questions and answers that came later (owner 2026-10-29)
+- Text: The Workflow management shall, when a task has ended, publish one summary of its result of at most 1200 characters as a new message at the end of the chat with a link to the run in the Skill run view, and, when the task fails, a message that says what failed with the same link.
+- Rationale: refines REQ-BE-033; the end of the chat holds a short spoken summary and a link, the full result lies in the Skill run view (owner 2026-11-07, A-131); the summary is worded by the digest step of G-V3.CHAT
 - Parent: REQ-BE-033
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-23: on a review with two questions the result message has a later position in the history than the last question and its answer, and no message of the task exists before the result except the questions; a task that fails leaves a result that contains the reason (exact)
+- Acceptance criterion: AC-23: on a scripted review with two questions the summary message has a later position in the history than the last question and its answer and contains the link to the run; a task that fails leaves a message that contains the reason and the link (exact); the wording is checked in G-V3.CHAT
 - Verified by: TC-WFM-036
 - Status: Draft
-- History: A-23 new; A-27 reworded (a failure is a visible result)
+- History: A-23 new; A-27 reworded (a failure is a visible result); A-131 (proposed 2026-11-08): the full result leaves the chat, a short summary with a link takes its place
 
 ### REQ-WFM-037 – Files in a volume
 - Level: low   Subject: TaskRuntime
@@ -476,30 +476,30 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 
 ### REQ-WFM-038 – Report as a record
 - Level: low   Subject: TaskRuntime
-- Text: The Workflow management shall store the finished report of the example workflow review as a record in the database through the storage interface IF-102 with the question, the skill id and version, the account, the model pin and the structured report (flow figures, works with decisions, grades and notes, keywords, limits and the end reason), and shall render the files of the report (markdown and LaTeX, English headings) from this record.
+- Text: The Workflow management shall store the finished report of the example workflow review as a record in the database through the storage interface IF-102 with the question, the skill id and version, the account, the model pin and the structured report (flow figures, works with decisions, grades and notes, keywords, limits and the end reason), and shall render the files of the report (markdown and LaTeX, English headings) from this record and name them in the run record of REQ-WFM-130.
 - Rationale: refines REQ-BE-053; a record can be used for further reference and for benchmarks, the files are a view of it (owner 2026-10-29)
 - Parent: REQ-BE-053
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-3: the record read back has the same figures and works as the report; the markdown and the LaTeX file made from it contain every work with its decision; the LaTeX special characters are escaped (exact)
 - Verified by: TC-WFM-038
-- Status: Draft
-- History: A-23 new
+- Status: Verified
+- History: A-23 new; A-131 (proposed 2026-11-08): the files of the report are the targets of the links in the Skill run view, one run record for every skill is REQ-WFM-130
 
 ### REQ-WFM-039 – Skills are self-contained extensions
 - Level: low   Subject: TaskRuntime
-- Text: The Workflow management shall load each skill that runs as a task from a folder of its own (a manifest with the id, the text, the options and what the task needs from the core, the skill files and the code of the skill), so that a new skill needs no change of the chat service, the web application or the page, except a skill that adds an output view of its own, which belongs to the core.
+- Text: The Workflow management shall load each skill that runs as a task from a folder of its own (a manifest with the id, the text, the options, the phases worth telling and what the task needs from the core, the skill files and the code of the skill), so that a new skill needs no change of the chat service, the web application or the page, except a skill that adds an output view of its own, which belongs to the core.
 - Rationale: refines REQ-BE-033; lookup and review are the models (owner 2026-10-29: skills are extensions, only a substantial addition such as a new output window goes into the core)
 - Parent: REQ-BE-033
 - Priority: Should
 - Verification method: Test, Inspection
 - Acceptance criterion: AC-23: a folder added to the extensions folder appears in the list of commands, its options are parsed and its task runs; no file of the core names the id of a skill (inspection, exact)
 - Verified by: TC-WFM-039
-- Status: Draft
+- Status: Verified
 - Quality: maintainability measure: files of the core that name the id of a skill in code; target: 0; context: adding a skill
 - Relaxed: TD-04
 - Target: the code of a skill lies in its folder; what several skills share is a library of the core with its own name
-- History: A-24 new
+- History: A-24 new; A-131 (proposed 2026-11-08): the manifest also declares the phases worth telling; a skill without phases declares none
 
 ## Iteration 2 (goal G-V2, skill rework: foundation)
 
@@ -508,7 +508,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 |---|---|---|---|
 | 1 | SK | Skill record: the skill as one versioned record (FR-36) | REQ-WFM-040, REQ-WFM-041, REQ-WFM-042 |
 | 2 | GM | Graph model: data, transform and master nodes and their rules (FR-37) | REQ-WFM-043, REQ-WFM-044, REQ-WFM-045, REQ-WFM-046, REQ-WFM-047, REQ-WFM-048, REQ-WFM-049 |
-| 3 | TB | Toolbox and trust: transforms by ID, status, import and export (FR-38) | REQ-WFM-050, REQ-WFM-051, REQ-WFM-052, REQ-WFM-053, REQ-WFM-054, REQ-WFM-055, REQ-WFM-056, REQ-WFM-067 |
+| 3 | TB | Toolbox and trust: transforms by ID, status, import and export (FR-38) | REQ-WFM-050, REQ-WFM-051, REQ-WFM-052, REQ-WFM-053, REQ-WFM-054, REQ-WFM-055, REQ-WFM-056, REQ-WFM-067, REQ-WFM-090, REQ-WFM-091, REQ-WFM-092, REQ-WFM-093, REQ-WFM-094, REQ-WFM-095 |
 | 4 | CV | Conversion: moving today's skills onto the records, one by one (FR-45) | REQ-WFM-057, REQ-WFM-058, REQ-WFM-059, REQ-WFM-060, REQ-WFM-068, REQ-WFM-069, REQ-WFM-070, REQ-WFM-110, REQ-WFM-111, REQ-WFM-112, REQ-WFM-113, REQ-WFM-114, REQ-WFM-115 |
 | 5 | SN | Snapshots: the skill set kept and restored (FR-47) | REQ-WFM-061, REQ-WFM-062, REQ-WFM-063, REQ-WFM-064, REQ-WFM-065, REQ-WFM-066 |
 
@@ -522,7 +522,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-31: a skill record is stored, read back and equal to the stored one (exact); an edit is a new version
 - Verified by: TC-WFM-040
-- Status: Draft
+- Status: Verified
 - History: G-V2 Plan step 1 (2026-11-07), new
 
 ### REQ-WFM-041 – Skill taken from its record
@@ -535,7 +535,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-31: with the old skill file of a converted skill removed, the skill is listed and runs unchanged (exact)
 - Verified by: TC-WFM-041
-- Status: Draft
+- Status: Verified
 - History: G-V2 Plan step 1 (2026-11-07), new
 
 ### REQ-WFM-042 – Command used once
@@ -548,7 +548,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-31: a second record with the command of the first is refused with the first skill's ID (exact); a new version of the same skill keeps its command and is accepted (exact)
 - Verified by: TC-WFM-042
-- Status: Draft
+- Status: Verified
 - History: G-V2 Plan step 1 (2026-11-07), new
 
 ### REQ-WFM-043 – Three node types
@@ -561,7 +561,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-31: a graph with a node of another type is refused naming the node (exact)
 - Verified by: TC-WFM-043
-- Status: Draft
+- Status: Verified
 - History: G-V2 Plan step 1 (2026-11-07), new
 
 ### REQ-WFM-044 – Graph description
@@ -574,7 +574,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-31: the four fields are read back as stored; an empty testbench ID is accepted
 - Verified by: TC-WFM-044
-- Status: Draft
+- Status: Verified
 - History: G-V2 Plan step 1 (2026-11-07), new
 
 ### REQ-WFM-045 – Data and transform alternate
@@ -587,7 +587,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-31: an edge data-data and an edge transform-master are refused naming the edge (exact)
 - Verified by: TC-WFM-045
-- Status: Draft
+- Status: Verified
 - History: G-V2 Plan step 1 (2026-11-07), new
 
 ### REQ-WFM-046 – One writer per data node
@@ -600,7 +600,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-31: two writers of one data node are refused with its ID; two readers are accepted (exact)
 - Verified by: TC-WFM-046
-- Status: Draft
+- Status: Verified
 - History: G-V2 Plan step 1 (2026-11-07), new
 
 ### REQ-WFM-047 – No cycle
@@ -613,7 +613,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-31: a graph with a cycle is refused with the cycle as ids, first id repeated at the end (exact); every accepted graph has a topological order (property test)
 - Verified by: TC-WFM-047
-- Status: Draft
+- Status: Verified
 - History: G-V2 Plan step 1 (2026-11-07), new
 
 ### REQ-WFM-048 – Master node stops
@@ -626,7 +626,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-31: a master node without a stopping criterion is refused; with a maximum of 1 repetition it is accepted (exact)
 - Verified by: TC-WFM-048
-- Status: Draft
+- Status: Verified
 - History: G-V2 Plan step 1 (2026-11-07), new
 
 ### REQ-WFM-049 – Parameters of a data node
@@ -639,7 +639,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-31: a data node with parameters is stored and read back with the parameters apart from the value (exact)
 - Verified by: TC-WFM-049
-- Status: Draft
+- Status: Verified
 - History: G-V2 Plan step 1 (2026-11-07), new
 
 ### REQ-WFM-050 – Transforms by ID
@@ -650,7 +650,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Group: TB
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-32: a second transform with an existing ID is refused (exact)
+- Acceptance criterion: AC-32: a second transform with an existing ID and a version that is not higher is refused (exact); a higher version is REQ-WFM-092
 - Verified by: TC-WFM-050
 - Status: Draft
 - History: G-V2 Plan step 1 (2026-11-07), new
@@ -702,7 +702,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Group: TB
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-32: the owner's account changes the status, any other account is refused and the status stays (exact)
+- Acceptance criterion: AC-32: the owner's account sets trusted, any other account is refused and the status stays; any account sets trusted back to untrusted (exact)
 - Verified by: TC-WFM-054
 - Status: Draft
 - History: G-V2 Plan step 1 (2026-11-07), new
@@ -722,16 +722,94 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 
 ### REQ-WFM-056 – Shipped transforms
 - Level: low   Subject: TaskRuntime
-- Text: The Workflow management shall seed the toolbox with the transforms that MIA ships, each with the status trusted.
+- Text: The Workflow management shall seed the toolbox with the transforms that MIA ships, each with the status trusted and marked as shipped.
 - Rationale: refines FR-38 and FR-45; the nodes of `library/nodes` are MIA's own code and the converted skills need them to run Suggestion of the agent, not in the HLS text; the owner decides at review.
 - Parent: FR-38
 - Group: TB
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-32: after a first start every shipped node is in the toolbox as trusted (exact)
+- Acceptance criterion: AC-32: after a first start every shipped node is in the toolbox once, as trusted and marked shipped, with its highest version that is not retired (exact)
 - Verified by: TC-WFM-056
 - Status: Draft
 - History: G-V2 Plan step 1 (2026-11-07), new
+
+### REQ-WFM-090 – The reason is shown
+- Level: low   Subject: TaskRuntime
+- Text: When someone looks up an untrusted transform, the Workflow management shall show the reason it is untrusted.
+- Rationale: refines FR-38; OC-1 of G-V2.TOOLBOX ('shown as untrusted, with the reason')
+- Parent: FR-38
+- Group: TB
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-32a: the look-up of an imported transform names that it came from outside MIA and has not been reviewed (exact)
+- Verified by: TC-WFM-090
+- Status: Draft
+- History: G-V2.TOOLBOX Plan step 3 (2026-11-08), new, from the toolbox prototype and the owner's answers of 2026-11-08
+
+### REQ-WFM-091 – Baseline of a retired untrusted transform
+- Level: low   Subject: TaskRuntime
+- Text: Where the owner allowed it when retiring an untrusted transform, the Workflow management shall run it as the baseline of a check, until the transform leaves retirement or a newer version replaces its code.
+- Rationale: refines FR-38 and REQ-WFM-068 (owner 2026-11-08: a retired transform may be a baseline, an untrusted one only by the owner's allowance, so that OC-1 stays true)
+- Parent: FR-38
+- Group: TB
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-32c: a retired untrusted transform with the allowance runs when a check names it; without the allowance it is refused as baseline; in no case does it run in a graph; an allowance given with another lifecycle than retired is refused, and leaving retirement or a replace by a higher version takes the allowance back (exact)
+- Verified by: TC-WFM-091
+- Status: Draft
+- History: G-V2.TOOLBOX Plan step 3 (2026-11-08), new, from the toolbox prototype and the owner's answers of 2026-11-08; changed by D-229 (Verify finding F1/F2, owner 2026-11-12)
+
+### REQ-WFM-092 – A newer version replaces the code
+- Level: low   Subject: TaskRuntime
+- Text: When a transform arrives with the ID of an entry and a higher version, the Workflow management shall replace the code of the entry, keep its trust status and lifecycle, and clear the owner's baseline allowance of REQ-WFM-091.
+- Rationale: refines FR-38 (owner 2026-11-08: one entry per ID, the latest version; trust carries over); risk: new code runs without a new decision, therefore REQ-WFM-093
+- Parent: FR-38
+- Group: TB
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-32b: after version 2 replaces a trusted version 1, the entry is version 2, still trusted, and runs the new code, and an allowance of the old version is cleared (exact)
+- Verified by: TC-WFM-092
+- Status: Draft
+- History: G-V2.TOOLBOX Plan step 3 (2026-11-08), new, from the toolbox prototype and the owner's answers of 2026-11-08; changed by D-229 (Verify finding F1/F2, owner 2026-11-12)
+
+### REQ-WFM-093 – A replaced trusted transform leaves a trace
+- Level: low   Subject: TaskRuntime
+- Text: When the code of a trusted transform is replaced by a newer version, the Workflow management shall record an event with the ID, the old and the new version and the author.
+- Rationale: refines FR-38; the owner can see afterwards that trusted transforms changed (owner 2026-11-08)
+- Parent: FR-38
+- Group: TB
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-32b: one event per replace of a trusted transform with the four fields; none when the replaced transform is untrusted (exact)
+- Verified by: TC-WFM-093
+- Status: Draft
+- History: G-V2.TOOLBOX Plan step 3 (2026-11-08), new, from the toolbox prototype and the owner's answers of 2026-11-08
+
+### REQ-WFM-094 – A shipped transform is not exported
+- Level: low   Subject: TaskRuntime
+- Text: If an export is asked for a shipped transform, then the Workflow management shall refuse it.
+- Rationale: refines FR-38 and REQ-WFM-055 (owner 2026-11-08: shipped nodes are in the toolbox, flagged shipped; they are modules of MIA and have no code text)
+- Parent: FR-38
+- Group: TB
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-32: the export of a shipped transform is refused and says why; an imported transform exports (exact)
+- Verified by: TC-WFM-094
+- Status: Draft
+- History: G-V2.TOOLBOX Plan step 3 (2026-11-08), new, from the toolbox prototype and the owner's answers of 2026-11-08
+
+### REQ-WFM-095 – Only the owner allows a baseline
+- Level: low   Subject: TaskRuntime
+- Text: If an account other than the owner asks to allow an untrusted retired transform as a baseline, then the Workflow management shall refuse the allowance.
+- Rationale: refines FR-38 and REQ-WFM-054; the allowance is a second owner-only act (owner 2026-11-08)
+- Parent: FR-38
+- Group: TB
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-32c: the owner's account sets the allowance, any other account is refused and the allowance stays unset (exact)
+- Verified by: TC-WFM-095
+- Status: Draft
+- History: G-V2.TOOLBOX Plan step 3 (2026-11-08), new, from the toolbox prototype and the owner's answers of 2026-11-08
 
 ### REQ-WFM-057 – Old runner until proven
 - Level: low   Subject: TaskRuntime
@@ -884,7 +962,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Group: CV
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-34: a retired transform runs when a check names it (exact)
+- Acceptance criterion: AC-34: a retired trusted transform runs when a check names it (exact); an untrusted one only under REQ-WFM-091
 - Verified by: TC-WFM-068
 - Status: Draft
 - History: G-V2 Plan step 1 (2026-11-07), new, owner answer of 2026-11-07
@@ -997,3 +1075,127 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verified by: TC-WFM-115
 - Status: Draft
 - History: G-V2 Plan step 3 (2026-11-07), new, split from REQ-WFM-059 (owner)
+
+## Iteration 2 (goal G-V3.PANEL, Skill run view: run records and status)
+
+## Groups of G-V3.PANEL
+| Order | Group | What it covers | Requirements |
+|---|---|---|---|
+| 1 | RV | Run record and the run that is shown for the Skill run view (FR-46) | REQ-WFM-130, REQ-WFM-131, REQ-WFM-132, REQ-WFM-133, REQ-WFM-134, REQ-WFM-135, REQ-WFM-136, REQ-WFM-137, REQ-WFM-138 |
+
+### REQ-WFM-130 – Run record of every skill run
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall store one record per skill run, lookup and search included, in the table skill_runs through IF-102 with skill id, version, account, start, end, state and phases.
+- Rationale: refines REQ-BE-033; the Skill run view is the history of the run (FR-46, owner 2026-11-07)
+- Parent: REQ-BE-033
+- Group: RV
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: a scripted run of each of lookup, search and review leaves one record with the six fields; the record read back equals the one stored (exact)
+- Verified by: TC-WFM-130
+- Status: Verified
+- History: A-131 (proposed 2026-11-08, G-V3.PANEL), new
+
+### REQ-WFM-131 – Figures and reason in the run record
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall store the final figures of a run and, for a run that failed or was stopped, its reason in the run record when the run ends.
+- Rationale: refines REQ-BE-033; the view shows the final figures after a reload (OC-3 of G-V3)
+- Parent: REQ-BE-033
+- Group: RV
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: a run that ends in done, failed and stopped leaves the figures it reported last, and the reason in the two last cases (exact)
+- Verified by: TC-WFM-131
+- Status: Verified
+- History: A-131 (proposed 2026-11-08, G-V3.PANEL), new
+
+### REQ-WFM-132 – Result and material in the run record
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall store the full result, the material found on the way and the names of the files in the run record when the run ends.
+- Rationale: refines REQ-BE-033; the full result leaves the chat (A-131)
+- Parent: REQ-BE-033
+- Group: RV
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: the record of a scripted review holds the full result text, the material and the names of its files (exact)
+- Verified by: TC-WFM-132
+- Status: Verified
+- History: A-131 (proposed 2026-11-08, G-V3.PANEL), new
+
+### REQ-WFM-133 – Answers in the run record
+- Level: low   Subject: TaskRuntime
+- Text: When a user answers a question of a running skill, the Workflow management shall append the answer with its time to the run record in the order given.
+- Rationale: refines REQ-BE-033; the view confirms each answer given (FR-46)
+- Parent: REQ-BE-033
+- Group: RV
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: two answers to a scripted review appear in the record in order with their times (exact)
+- Verified by: TC-WFM-133
+- Status: Verified
+- History: A-131 (proposed 2026-11-08, G-V3.PANEL), new
+
+### REQ-WFM-134 – Run that is shown
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall name as shown the run started most recently while skills run and the run ended last when none runs, and no earlier run.
+- Rationale: refines REQ-BE-033; owner Q-2 and Q-8 of 2026-11-07 (D-271, D-273)
+- Parent: REQ-BE-033
+- Group: RV
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: with two scripted runs started in turn the second is named; after both end the one that ended last is named; a third earlier run is never named (exact)
+- Verified by: TC-WFM-134
+- Status: Verified
+- History: A-131 (proposed 2026-11-08, G-V3.PANEL), new
+
+### REQ-WFM-135 – Chat history deleted
+- Level: low   Subject: TaskRuntime
+- Text: When a history record is deleted in the storage, the Workflow management shall delete the run record whose run id equals the id of that history record, and no other run record, and keep the files of the files volume.
+- Rationale: refines REQ-BE-033; owner decision of 2026-11-07 (OC-3 of G-V3)
+- Parent: REQ-BE-033
+- Group: RV
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: after one history record is deleted through IF-102 the run with its id is gone and is named by skill_run_changed, every other run of the same and of another account is still read, and every file of the volume is still listed (exact)
+- Verified by: TC-WFM-135
+- Status: Verified
+- History: A-131 (proposed 2026-11-08, G-V3.PANEL), new; reworded after approval in batch 1 (owner 2026-11-08: no operation deletes the chat history today, the trigger is the delete of history records in the storage, notified by IF-102 `subscribe`); A-144 (approved 2026-11-13, F-08 of the first Verify run: one history record deletes the run of that record only; the id of the history record is the run id)
+
+### REQ-WFM-136 – Runs without knowledge of the view
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall create the run record and send task_status for every skill from the events the skill sends today, without a change of the skill.
+- Rationale: refines REQ-BE-033; OC-7 of G-V3: the view does not depend on the implementation of the skills
+- Parent: REQ-BE-033
+- Group: RV
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: a scripted skill that sends only the events of today gets a record and a view; no skill file or manifest changes for it (exact, inspection of the stand-in)
+- Verified by: TC-WFM-136
+- Status: Verified
+- History: A-131 (proposed 2026-11-08, G-V3.PANEL), new
+
+### REQ-WFM-137 – Texts of a run are stored as data
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall store the texts of a run (result, material, answers, reason) unchanged as text and never execute or interpret them.
+- Rationale: refines REQ-BE-033; NFR-3, boundary TB-result of FB-01 (OC-8 of G-V3)
+- Parent: REQ-BE-033
+- Group: RV
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: a result with an instruction and a script tag is stored and read back byte for byte and starts no tool call (exact)
+- Verified by: TC-WFM-137
+- Status: Verified
+- History: A-131 (proposed 2026-11-08, G-V3.PANEL), new
+
+### REQ-WFM-138 – Elements of a skill passed on
+- Level: low   Subject: TaskRuntime
+- Text: Where a skill reports elements of its own, the Workflow management shall pass them as label and text pairs in the event task_status and store them in the run record, without changing the skill's interface.
+- Rationale: refines REQ-BE-033; owner at the review of 2026-11-08: skill specific elements can be added per skill; OC-7 stays: a skill that reports none works as before
+- Parent: REQ-BE-033
+- Group: RV
+- Priority: Should
+- Verification method: Test
+- Acceptance criterion: AC-39: a scripted skill that reports two elements has them in `task_status` and in the run record; a skill that reports none has an empty list and the other checks of the group pass unchanged (exact)
+- Verified by: TC-WFM-138
+- Status: Verified
+- History: A-131 (proposed 2026-11-08, G-V3.PANEL), new; owner at review of batch 2: skill specific elements can be added per skill

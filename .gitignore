@@ -45,3 +45,31 @@ local-tasks.jsonl
 # editor autosave and lock files (Emacs, Kate)
 \#*#
 .#*
+
+# personal runtime data of MIA (memories and conversation history, with their .old copies) and local backups
+memories.json
+long_time_history.json
+*.old
+mia-backup-*.tar.gz
+testmsg.txt
+in.wav
+
+# local media of the page and the character: the videos made in vids/ and the site files that stay on this machine (templates/static/.site_stuff_goes_here)
+vids/
+templates/static/*.mp4
+templates/static/background.jpg
+templates/static/favicon.ico
+# leftovers of the old page (removed code, see ui/README.md; the vendored libraries are in templates/static/vendor/)
+templates/static/answer.html
+templates/static/md-block.js.js
+templates/static/socket.io.min.js
+templates/node_modules/
+
+# voice models and samples downloaded or made on this machine
+voice/models/MikuAI/
+voice/models/mitchieMmiku/
+voice/samples/miku*.wav
+voice/expressions.zip
+
+# draw.io backup and lock files
+.$*

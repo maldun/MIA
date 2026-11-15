@@ -73,11 +73,11 @@ Top-level items it serves: FR-36, FR-37. Requirements by ID (inside G-V2's scope
 | Phase | State | Record or reason |
 |---|---|---|
 | Explore | done | HLS of iteration 2 approved 2026-11-05 (D-186) |
-| Plan | in progress | requirements drafted in G-V2 Plan step 1; checks in Step 3 |
-| Implement | open | |
-| Verify | open | |
-| Commit | open | |
-| Deploy | open | |
+| Plan | done | requirements REQ-WFM-040..049 and REQ-RUN-016..019 and checks approved (D-262..D-264, review of 2026-11-07); red tests installed (tags `plan-baseline-it2-model`, `plan-baseline-it2-model-installed`); `plan.md` approved 2026-11-07 (Step 5); amendments A-105 to A-107 (D-306 to D-308); T-08 to T-10 added after the Verify runs |
+| Implement | done | T-01 to T-10 done (task commits in `plan.md` order, `handover-implement.md`); there is no `implementation-log.md` (accepted deviation F-11) |
+| Verify | done | `goals/G-V2.MODEL/verification-report.md`: four runs by fresh reviewers; the fourth (commit `74525e4`) found no open finding above low; the owner accepted the open lows as deviations and re-approved TC-WFM-047, TR-MODEL-003 and TR-MODEL-001 on 2026-11-08 (D-309): **Verified with accepted deviations** |
+| Commit | done | master (with G-V2.STORE) merged into `goal/v2.model` without conflicts (`735c983`); trace_check 547 = master's, goal, contract and PostgreSQL suites and JS tests green; merged into master by the owner as `971d388` on 2026-11-08; no version and no tag (subgoal of G-V2); requirement statuses Draft to Verified in this update |
+| Deploy | empty | skill record, graph model, run order and the loader wiring inside the backend: nothing that users can reach on its own; delivered with the iteration goal G-V2 |
 | Validate | open | |
 
 ## Joint amendments

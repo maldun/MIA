@@ -1,0 +1,197 @@
+{
+ "accepted": [
+  {
+   "name": "web_tools.py",
+   "quote": "`web_tools.py` gives the pipelines two tools, `web_search` (budget key `search_calls`) and `fetch_page` (`fetch_calls`); a skill lists them under `tools:`.",
+   "kind": "entity"
+  },
+  {
+   "name": "web_search",
+   "quote": "`web_tools.py` gives the pipelines two tools, `web_search` (budget key `search_calls`) and `fetch_page` (`fetch_calls`); a skill lists them under `tools:`.",
+   "kind": "entity"
+  },
+  {
+   "name": "fetch_page",
+   "quote": "`web_tools.py` gives the pipelines two tools, `web_search` (budget key `search_calls`) and `fetch_page` (`fetch_calls`); a skill lists them under `tools:`.",
+   "kind": "entity"
+  },
+  {
+   "name": "search_backends",
+   "quote": "- **Search**: backends in order, `search_backends` (default `[\"searxng\", \"duckduckgo\"]`).",
+   "kind": "entity"
+  },
+  {
+   "name": "searxng",
+   "quote": "- **Search**: backends in order, `search_backends` (default `[\"searxng\", \"duckduckgo\"]`).",
+   "kind": "entity"
+  },
+  {
+   "name": "duckduckgo",
+   "quote": "- **Search**: backends in order, `search_backends` (default `[\"searxng\", \"duckduckgo\"]`).",
+   "kind": "entity"
+  },
+  {
+   "name": "tools/searxng/run.sh",
+   "quote": "- **SearXNG** (self-hosted, the first choice): `tools/searxng/run.sh` starts it with podman or docker on `127.0.0.1:8590` (`stop`, `check` also exist).",
+   "kind": "entity"
+  },
+  {
+   "name": "WebClient",
+   "quote": "- **Fetching** (`WebClient`): only http(s) to public addresses on ports 80, 443, 8080, 8443; the address is checked before the connection, at every redirect (at most 4) and for the address that was really connected.",
+   "kind": "entity"
+  },
+  {
+   "name": "MIA",
+   "quote": "Settings: `searxng_port` (default 8590, used by MIA and by `run.sh`; 8888 is taken by too many other programs) or `searxng_url` for another address.",
+   "kind": "entity"
+  },
+  {
+   "source": "web_tools.py",
+   "relation": "gives",
+   "target": "web_search",
+   "quote": "`web_tools.py` gives the pipelines two tools, `web_search` (budget key `search_calls`) and `fetch_page` (`fetch_calls`); a skill lists them under `tools:`.",
+   "kind": "relation"
+  },
+  {
+   "source": "web_tools.py",
+   "relation": "gives",
+   "target": "fetch_page",
+   "quote": "`web_tools.py` gives the pipelines two tools, `web_search` (budget key `search_calls`) and `fetch_page` (`fetch_calls`); a skill lists them under `tools:`.",
+   "kind": "relation"
+  },
+  {
+   "source": "search_backends",
+   "relation": "default",
+   "target": "searxng",
+   "quote": "- **Search**: backends in order, `search_backends` (default `[\"searxng\", \"duckduckgo\"]`).",
+   "kind": "relation"
+  },
+  {
+   "source": "search_backends",
+   "relation": "default",
+   "target": "duckduckgo",
+   "quote": "- **Search**: backends in order, `search_backends` (default `[\"searxng\", \"duckduckgo\"]`).",
+   "kind": "relation"
+  },
+  {
+   "source": "tools/searxng/run.sh",
+   "relation": "starts",
+   "target": "SearXNG",
+   "quote": "- **SearXNG** (self-hosted, the first choice): `tools/searxng/run.sh` starts it with podman or docker on `127.0.0.1:8590` (`stop`, `check` also exist).",
+   "kind": "relation"
+  },
+  {
+   "source": "searxng_port",
+   "relation": "used by",
+   "target": "MIA",
+   "quote": "Settings: `searxng_port` (default 8590, used by MIA and by `run.sh`; 8888 is taken by too many other programs) or `searxng_url` for another address.",
+   "kind": "relation"
+  },
+  {
+   "source": "searxng_port",
+   "relation": "used by",
+   "target": "run.sh",
+   "quote": "Settings: `searxng_port` (default 8590, used by MIA and by `run.sh`; 8888 is taken by too many other programs) or `searxng_url` for another address.",
+   "kind": "relation"
+  },
+  {
+   "name": "scripts, styles, menus and hidden elements",
+   "quote": "scripts, styles, menus and hidden elements (display:none, hidden, aria-hidden, font size 0) are dropped, because hidden text is a favourite place for instructions aimed at models.",
+   "kind": "entity"
+  },
+  {
+   "name": "chunk_text",
+   "quote": "chunk_text cuts long pages at paragraph breaks.",
+   "kind": "entity"
+  },
+  {
+   "name": "Web text is data",
+   "quote": "Web text is data (X1): untrusted() wraps it in delimiters that the page cannot close, injection_signals() flags phrases like \"ignore previous instructions\" (shown in the status block and logged; a hint, not the protection: the protection is narrow tools and schemas in the stages that read the web).",
+   "kind": "entity"
+  },
+  {
+   "name": "untrusted()",
+   "quote": "untrusted() wraps it in delimiters that the page cannot close",
+   "kind": "entity"
+  },
+  {
+   "name": "injection_signals()",
+   "quote": "injection_signals() flags phrases like \"ignore previous instructions\" (shown in the status block and logged; a hint, not the protection: the protection is narrow tools and schemas in the stages that read the web).",
+   "kind": "entity"
+  },
+  {
+   "name": "What MIA asked the internet",
+   "quote": "What MIA asked the internet (X4): every search and fetch is a line in data/runs/web-YYYY-MM.jsonl (query, backend, results, errors, URL, status, bytes, timing).",
+   "kind": "entity"
+  },
+  {
+   "name": "data/runs/web-YYYY-MM.jsonl",
+   "quote": "every search and fetch is a line in data/runs/web-YYYY-MM.jsonl (query, backend, results, errors, URL, status, bytes, timing).",
+   "kind": "entity"
+  },
+  {
+   "name": "web_timeout",
+   "quote": "Other keys (optional): web_timeout ([5, 15]), web_max_bytes, web_max_chars, search_results.",
+   "kind": "entity"
+  },
+  {
+   "name": "web_max_bytes",
+   "quote": "Other keys (optional): web_timeout ([5, 15]), web_max_bytes, web_max_chars, search_results.",
+   "kind": "entity"
+  },
+  {
+   "name": "web_max_chars",
+   "quote": "Other keys (optional): web_timeout ([5, 15]), web_max_bytes, web_max_chars, search_results.",
+   "kind": "entity"
+  },
+  {
+   "name": "search_results",
+   "quote": "Other keys (optional): web_timeout ([5, 15]), web_max_bytes, web_max_chars, search_results.",
+   "kind": "entity"
+  },
+  {
+   "name": "python tools/try_search.py",
+   "quote": "Try it without MIA: python tools/try_search.py \"query\"",
+   "kind": "entity"
+  },
+  {
+   "name": "tests/test_web_tools.py",
+   "quote": "Tests: tests/test_web_tools.py (no network; fakes for sessions and name resolution).",
+   "kind": "entity"
+  }
+ ],
+ "refused": [
+  {
+   "item": {
+    "source": "untrusted()",
+    "relation": "wraps",
+    "target": "Web text is data",
+    "quote": "untrusted() wraps it in delimiters that the page cannot close",
+    "kind": "relation"
+   },
+   "reason": "quote does not contain both ends"
+  },
+  {
+   "item": {
+    "source": "injection_signals()",
+    "relation": "flags",
+    "target": "Web text is data",
+    "quote": "injection_signals() flags phrases like \"ignore previous instructions\" (shown in the status block and logged; a hint, not the protection: the protection is narrow tools and schemas in the stages that read the web).",
+    "kind": "relation"
+   },
+   "reason": "quote does not contain both ends"
+  },
+  {
+   "item": {
+    "source": "What MIA asked the internet",
+    "relation": "is a line in",
+    "target": "data/runs/web-YYYY-MM.jsonl",
+    "quote": "every search and fetch is a line in data/runs/web-YYYY-MM.jsonl (query, backend, results, errors, URL, status, bytes, timing).",
+    "kind": "relation"
+   },
+   "reason": "quote does not contain both ends"
+  }
+ ],
+ "chunks": 2,
+ "seconds": 48.9
+}

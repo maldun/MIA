@@ -9,6 +9,7 @@
     {"name": "slice", "kind": "flag", "default": false, "text": "work in time slices and ask at each limit (default: run to the end, bounded by hard caps)"},
     {"name": "cap_factor", "kind": "int", "default": 10, "text": "hard caps of the mode run = the limits times this number"}
   ],
+  "phases": ["choosing keywords", "searching", "screening", "reading full texts", "writing the report"],
   "version": "1",
   "entry": "entry:make"
 }

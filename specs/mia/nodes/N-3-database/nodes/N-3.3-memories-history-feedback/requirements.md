@@ -8,15 +8,16 @@ The 14 record tables of IF-302 (history, which also holds the summaries and the 
 
 ### REQ-RTB-001 – Shared state held
 - Level: low   Subject: Persistence
-- Text: The Record tables shall define the 14 tables of IF-302 v5: history, memory, votes, tasks, memos, accounts, presets, gestures, runs (run results), source_trust (trust values of sources), cases, behaviours, workflow_meta and reports; summaries and the chat log are records of history.
+- Text: The Record tables shall define the 15 tables of IF-302 v8: history, memory, votes, tasks, memos, accounts, presets, gestures, runs (run results), source_trust (trust values of sources), cases, behaviours, workflow_meta, reports and skill_runs (the run records of the Skill run view, REQ-RTB-007); summaries and the chat log are records of history.
 - Rationale: refines REQ-DB-002
 - Parent: REQ-DB-002
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-15: a record of each kind is written and read back identically
 - Verified by: TC-RTB-001
-- Status: Verified
+- Status: Approved
 - History: 2026-10-31 D-161: the 14 tables of IF-302 v5 listed (it named summaries and a chat log, which are records of history, and missed six tables)
+- History (cont.): A-141 (G-V3.PANEL, approved 2026-11-08, D-302): 15 tables, skill_runs added after reports (REQ-RTB-007); applied in Implement of G-V3.PANEL T-01 (2026-11-08, owner's ruling on the conflict with the unit test); Verified again after the next verification
 
 ### REQ-RTB-002 – Run results
 - Level: low   Subject: Persistence
@@ -77,6 +78,44 @@ The 14 record tables of IF-302 (history, which also holds the summaries and the 
 - Verified by: TC-RTB-006
 - Status: Approved
 - History: –
+
+### REQ-RTB-007 – Skill runs stored
+- Level: low   Subject: Persistence
+- Text: The Record tables shall define the table skill_runs with the required fields run, skill, skill_version, account, started and state, as versioned records that are deletable.
+- Rationale: refines REQ-DB-002; one record per skill run for the Skill run view, A-141 (FR-46)
+- Parent: REQ-DB-002
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: definitions() names skill_runs as versioned and deletable; a run record lacking one of the six fields is rule schema with that field as detail; a complete one is accepted (exact)
+- Verified by: TC-RTB-007
+- Status: Verified
+- History: A-141 (proposed 2026-11-08, G-V3.PANEL), new; owner 2026-11-08: a new table skill_runs, REQ-RTB-007
+
+### REQ-RTB-008 – Transform meta stored
+- Level: low   Subject: Persistence
+- Text: The Record tables shall define the table transform_meta with the required fields trust and lifecycle, as versioned records that are not deletable.
+- Rationale: refines REQ-DB-002; one meta record per transform ID so that trust and lifecycle survive a new version of the code, A-110 (FR-38, REQ-WFM-092)
+- Parent: REQ-DB-002
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-32: definitions() names transform_meta as versioned and not deletable; a record with trust other than untrusted or trusted, or lifecycle other than draft, tested or retired, is rule schema with that field as detail; a record lacking trust or lifecycle is rule schema with the missing field as detail; a complete one is accepted (exact)
+- Verified by: TC-RTB-008
+- Status: Draft
+- History: A-110 (proposed 2026-11-11, G-V2.TOOLBOX), new; owner 2026-11-11: table transform_meta, REQ-RTB-008
+- Proposed (A-110): REQ-RTB-001 would name one table more (16 when A-141 is installed too).
+
+### REQ-RTB-009 – Transforms stored
+- Level: low   Subject: Persistence
+- Text: The Record tables shall define the table transforms with the required fields id and version, as versioned records that are not deletable.
+- Rationale: refines REQ-DB-002; the versioned code of a transform needs a table of its own, thin because the toolbox checks the exchange form (REQ-WFM-055), A-112 (FR-38, REQ-WFM-050)
+- Parent: REQ-DB-002
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-32: definitions() names transforms as versioned and not deletable; a record whose id is not a non-empty text, or whose version is not an integer of at least 1 (0, -1, true, 1.0, 1.5, "1" and null among them), is rule schema with that field as detail; a record lacking id or version is rule schema with the missing field as detail; a record with a missing, empty or null code, or with free inputs and outputs, is accepted (exact)
+- Verified by: TC-RTB-009
+- Status: Draft
+- History: A-112 (proposed 2026-11-11, G-V2.TOOLBOX), new; owner 2026-11-11: thin table transforms, REQ-RTB-009; a missing, empty or null code is valid (stub transforms)
+- Proposed (A-112): REQ-RTB-001 would name one table more (17 when A-141 is installed too).
 
 ## Interface requirements
 

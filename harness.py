@@ -32,7 +32,7 @@ except ImportError:  # used as plain script / in tests
     from pipeline import Tool
     import web_tools
 
-INPUT_KEY = {"workflow": "input", "checks": "claim", "pipeline": "input", "extraction": "input", "text_rules": "input", "research": "input", "plan": "input"}
+INPUT_KEY = {"workflow": "input", "checks": "claim", "pipeline": "input", "extraction": "input", "text_rules": "input", "research": "input", "plan": "input", "digest": "input"}
 CASE_KEYS = {"id", "tags", "claim", "input", "truth", "expect", "note", "gold"}
 STATUSES = ("pass", "fail", "open", "not_applicable")
 MAX_OUTPUT_CHARS = 3000
@@ -301,7 +301,7 @@ class Harness:
     def __init__(self, core=None, clock=time.time, targets=None, platform=None):
         """core: a Core (for the targets 'checks' and 'pipeline'); platform: a provider of IF-105 (for the target 'workflow'); targets: more kinds, {kind: function(case, variant, context) -> (status, output)}, for tests and new tasks"""
         self.core, self._clock = core, clock
-        self.targets = {"checks": self._checks, "pipeline": self._pipeline, "extraction": self._extraction, "text_rules": self._text_rules, "research": self._research, "plan": self._plan}
+        self.targets = {"checks": self._checks, "pipeline": self._pipeline, "extraction": self._extraction, "text_rules": self._text_rules, "research": self._research, "plan": self._plan, "digest": self._digest}
         if platform is not None:
             self.targets["workflow"] = eval_platform.WorkflowTarget(platform, lambda: self.pin)
         self.targets.update(targets or {})
@@ -380,6 +380,10 @@ class Harness:
             return "error:" + (result.status if result.status != "done" else "no_answer"), {"error": result.error, "answer": result.answer}
         score = plans.score_plan(result.answer, case["gold"], case["input"]["question"])
         return ("pass" if score["ok"] else "fail"), {"plan": result.answer, "score": score}
+
+    def _digest(self, case, variant, suite):
+        """STUB of Plan Step 4 (G-V3.CHAT, note eval-target-note.md): the production SkillDigestStep on the pin, scored by digest_score.py; written in CHAT T-04"""
+        raise NotImplementedError("the target digest")
 
     def _research(self, case, variant, suite):
         """a research pipeline over the recorded web of the suite (web.json, searched by keywords): its answer {answer, status, sources} is scored against the gold of the case (research_score.py)"""

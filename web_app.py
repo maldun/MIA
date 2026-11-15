@@ -41,7 +41,7 @@ from .constants import CFG_FILE, LOG_FNAME, TIME_FORMAT, MESSAGE_SIZE
 from .constants import ADDRESS_KEY, PROTOCOL_KEY, WEB_PORT_KEY, SOUND_PORT_KEY, URL_KEY, U8
 from .constants import AUDIO_ROUTE, UPLOAD_ROUTE, AUDIO_MIME_TYPE, SPEECH_REQ, SOUND_REQ, TIME_REQ
 from . import constants as CONST
-from .speech_stream import SpeechStreamer
+from .speech_stream import SpeechStreamer, speak_text
 from .shutdown import request_shutdown
 from .presets_api import init_presets_api
 from .chat_log import ChatLog
@@ -55,6 +55,7 @@ from .trust_persona_api import create_trust_persona_blueprint
 from .persona import read_persona
 from .internal_auth import ensure_token, internal_headers
 from .storage import Storage
+from .skill_record import SkillCatalog, SkillRecords
 from .storage_files import FileBackend
 from .moods import MoodTracker
 from .memory_records import MemoryRecords, memory_hooks
@@ -645,14 +646,12 @@ def run_chat_exchange(text, on_delta, on_emotion, should_stop):
     behaviour.record_signals(core.run_log, result.run_id, result.answer or "", node="converse")     # the violations of the text the model wrote are signals (BF2); the chat service repairs the text silently before the page sees it, and nobody is scolded
     return result.answer
 
-def speak_answer(text):
-    """MIA says the answer of a research (not its list of sources)"""
+def speak_answer(text, should_stop=None):
+    """MIA says the answer of a research (not its list of sources); should_stop() ends the wait and closes the connection, so the sound server speaks no more"""
     spoken = speech_text(text)
     if not spoken:
         return
-    streamer = SpeechStreamer(get_websocket_url(address=ADDRESS, protocol=PROTOCOL), SOUND_PORT)
-    streamer.finish(spoken)
-    streamer.wait()
+    speak_text(get_websocket_url(address=ADDRESS, protocol=PROTOCOL), SOUND_PORT, spoken, should_stop)       # raises OSError without a sound server (REQ-CHA-033)
 
 _db_dir = os.path.join(FPATH, cfg.get(CONST.ACCOUNTS_DIR_KEY, "data/db"))
 _votes_store = Storage(FileBackend(_db_dir))                  # the votes table (REQ-CHA-015); the accounts use the same folder
@@ -677,7 +676,8 @@ _services = types.SimpleNamespace(
     speaker=lambda task: speaker_for(cfg, task, speak_answer),                      # one voice rule for all tasks (workflow_voice.py)
     trust_for_url=lambda: source_trust.build_trust(cfg).for_url)
 _tasks = TaskRegistry()
-_extension_problems = load_extensions(__package__ + ".extensions", os.path.join(FPATH, "extensions"), _tasks, _services)
+_skill_catalog = SkillCatalog(SkillRecords(_votes_store))          # REQ-WFM-041: a skill with a record takes its command and workflow graph from it
+_extension_problems = load_extensions(__package__ + ".extensions", os.path.join(FPATH, "extensions"), _tasks, _services, catalog=_skill_catalog)
 for _problem in _extension_problems:
     print("an extension was not loaded: %s" % _problem)
 # the files volume (REQ-WFM-037): a folder of its own, movable by `files_dir`; limits in bytes; nothing is deleted by MIA
@@ -694,6 +694,7 @@ chat_service = ChatService(socketio.emit, chat_log, mood, run_chat_exchange, run
                            user_limit=2 if cfg.get(CONST.ACCOUNTS_KEY, False) else 0,           # IF-101: 5 waiting in all, 2 per account
                            rate_limit=(cfg.get(CONST.CHAT_RATE_KEY, 10), 60),
                            spawn=socketio.start_background_task, votes=_votes_store,
+                           speak=speak_answer,                                                  # speak again uses the voice route of live answers (REQ-CHA-030)
                            behaviours=behaviours_from_file(os.path.join(FPATH, cfg.get(CONST.BEHAVIOURS_FILE_KEY, "library/behaviours.json"))),
                            reputable=cfg.get(CONST.REPUTABLE_TRUST_KEY, 0.6),
                            repair=lambda text: behaviour.apply_rules(text)["text"], remember=_remember,         # the stream is held back and repaired silently (REQ-CHA-014)

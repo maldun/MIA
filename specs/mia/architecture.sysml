@@ -229,7 +229,7 @@ package MIA_Architecture {
                                "templates/static/chat/chat.js", "templates/static/chat/chat-model.js", "templates/static/chat/mood.js",
                                "templates/static/chat/login.js", "templates/static/chat/account.js", "templates/static/chat/api.js",
                                "templates/static/chat/socket.js", "templates/static/chat/workspace.js", "templates/static/chat/panels-model.js",
-                               "templates/static/chat/task-card.js", "templates/static/chat/task-card-model.js",
+                               "templates/static/chat/skill-run.js", "templates/static/chat/skill-run-model.js", "templates/static/chat/skill-run-shares.js",
                                "templates/static/chat/composer.js", "templates/static/chat/palette.js", "templates/static/chat/markdown.js",
                                "templates/static/chat/menu.js", "templates/static/chat/layout.js", "templates/static/chat/caption.js",
                                "templates/static/chat/view-menu.js", "templates/static/chat/settings.js", "templates/static/chat/theme.js",
@@ -400,10 +400,10 @@ package MIA_Architecture {
             @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("skill_store.py", "skills/chat.md", "skills/research.md"); }
         }
         part skillRunStore {
-            doc /* Target (FB-01): one stored record per skill run (skill, who started it, state, final figures, full result, files,
-                   link to its report), so that the skills panel lists running and finished runs after a reload and a restart.
-                   Today only the review's report is a record (reports) and the card is lost on reload (TD-01). */
-            @Implementation { :>> status = ImplementationStatus::proposed; }
+            doc /* One stored record per skill run in the table skill_runs (skill, version, account, state, phases, figures, answers, result,
+                   material, files, elements), kept by the run recorder and fed by the run observer from the events a skill sends today; the
+                   Skill run view and the chat read it through IF-101 v16 and it goes with the chat history (REQ-WFM-130 to 138). */
+            @Implementation { :>> status = ImplementationStatus::built; :>> modules = ("skill_runs.py", "skill_run_observer.py"); }
             @ChangeSource { feedbackId = "FB-01"; iteration = 1; }
         }
         part pipelineRunner {
@@ -794,10 +794,11 @@ package MIA_AgentView {
         port digestIn : ~SkillDigestPort;    // FB-01: the digests of a long result, joined into the summary
     }
     part def SkillDigestStep {
-        doc /* FB-01: digest of one piece of a long skill result, in order, so that the chat step can write the summary within
-               its context (map step; the chat step is the reduce step). The summary is informative; the full result is the reference. */
-        @ModelStep { schema = "none: free text"; tools = ""; tokenBudget = 8192; secondBudget = 0.0; pin = "MP-light"; criterion = "none: set in Plan"; }
-        @TrustBoundary { boundary = "TB-result"; threats = ""; }
+        doc /* FB-01, G-V3.CHAT: digest of one piece of a long skill result, in order (map), then the end summary, the failure message
+               and the status message per declared phase, all on MP-light and in persona (owner 2026-11-08). The summary is informative;
+               the full result is the reference. */
+        @ModelStep { schema = "none: free text"; tools = ""; tokenBudget = 4096; secondBudget = 20.0; pin = "MP-light"; criterion = "REQ-CHA-049, REQ-CHA-053, REQ-CHA-054"; }
+        @TrustBoundary { boundary = "TB-result"; threats = "THR-012"; }
         @ChangeSource { feedbackId = "FB-01"; iteration = 1; }
         port resultIn : ~SkillResultPort;
         port digestOut : SkillDigestPort;
@@ -1530,11 +1531,12 @@ package MIA_Requirements {
 
     requirement def <'FR-34'> SkillsPanel {
         subject mia : MiaSystem;
-        doc /* MIA shall show every skill run in a skills panel beside the chat on the same page, a tab on the phone: a status
-               card per run with its phase, budgets and counts, pause, resume and stop, the full result and the links to its files
-               and report. The panel lists the running and finished runs whose messages are in the shared chat history, for all
-               users, also after a reload and a restart, and is emptied when the chat history is deleted; the files and report
-               records stay. The chat holds no status card and no full result of a skill. */
+        doc /* MIA shall show the status of a skill run in the Skill run view, a compact strip across the full width below the
+               character box and the chat (stacked on the phone: character, chat, view): the phase, budgets and counts, pause,
+               resume and stop, the full result and the links to its files and report, for the skill that runs and, when none
+               runs, for the last run, also after a reload and a restart; the view is emptied when the chat history is deleted
+               (a delete of the history records in the storage); the files and report records stay. The chat holds no status
+               card and no full result of a skill. */
         @Trace { :>> baseline = ("CT-11", "TK-1");
                  :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
         @ChangeSource { feedbackId = "FB-01"; iteration = 1; }
@@ -1542,13 +1544,13 @@ package MIA_Requirements {
     requirement def <'FR-35'> SkillTurnsInTheChat {
         subject mia : MiaSystem;
         doc /* While a skill runs, the chat shall show only its questions, the users' answers and, for each phase the skill
-               declares worth telling, a new short status message that the chat model words in MIA's persona like any chat turn.
-               When the skill ends, the chat model shall summarize its full result in persona, reading it in pieces when it is
-               longer than its share of the context, in a summary that the prompt asks to keep within 1200 characters, followed
-               by a link to the full result that code adds; a failure is a short message with the reason and the link. These
-               messages are spoken like answers, with the same repair; the questions, the answers, the summary and the last
-               status message of each run are part of the history the chat model sees. The summary is informative only: the full
-               result in the panel is the reference. */
+               declares worth telling, a new short status message that the chat model words in MIA's persona like any chat
+               turn. When the skill ends, the chat model shall summarize its full result in persona, reading it in pieces when
+               it is longer than its share of the context, in a summary that the prompt asks to keep within 1200 characters,
+               followed by a link to the Skill run view that code adds; a failure is a short message with the reason and the
+               link. These messages, the status messages included, are spoken like answers, with the same repair; the
+               questions, the answers, the summary and the last status message of each run are part of the history the chat
+               model sees. The summary is informative only: the full result in the Skill run view is the reference. */
         @Trace { :>> baseline = ("CT-2", "CT-7", "TK-1");
                  :>> verifiedBy = (HowVerified::test, HowVerified::measurement); }
         @ChangeSource { feedbackId = "FB-01"; iteration = 1; }
@@ -1663,14 +1665,18 @@ package MIA_Requirements {
     }
     requirement def <'FR-46'> SkillSubwindow {
         subject mia : MiaSystem;
-        doc /* MIA shall give every skill a subwindow of its own in the web interface that holds everything of a run that is
-               not spoken: status card, phases, budgets, pause, resume and stop, the full result, intermediate material, the
-               links to files and report, and a confirmation of each answer the user gave, so that the subwindow is the
-               history of the run. The chat shall contain only text that is spoken, each a shortened or summed-up form worded
-               in MIA's persona: the skill's questions are spoken in the chat and the users' answers are given in the chat;
-               the full result is referenced by a link to the subwindow; no card, log line, table or full result is put into
-               the chat. On the page the character stands in a rectangular box, the chat is left of it and the skill
-               subwindow is below it. This revises FR-34 (position) and FR-35. */
+        doc /* MIA shall show, in one view of the web interface, the Skill run view, the skill that is currently running and
+               everything of its run that is not spoken: status, phases, budgets, pause, resume and stop, the full result,
+               intermediate material, the links to files and report, and a confirmation of each answer the user gave, so that
+               the view is the history of the run. When no skill runs, the view shows the last run, and no earlier one; when
+               several skills run, it shows the one started most recently. Every skill, lookup and search included, has a run
+               in the view and ends with a short spoken summary in the chat. The chat shall contain only text that is spoken,
+               each a shortened or summed-up form worded in MIA's persona: the skill's questions to answer and the users'
+               answers, a status summary for each phase the skill names, and at the end a short summary in the text with a link
+               to the Skill run view; no status card, log line, table or full result is put into the chat, and no text is put
+               into the chat that is not spoken. On the page the character stands in a large rectangular box on the left, the
+               chat is right of it and the Skill run view is a compact strip across the full width below both. This revises
+               FR-34 (position, and the card) and FR-35. */
         @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
         @ChangeSource { feedbackId = "NOTE-2026-11-02"; iteration = 2; }
     }
@@ -2257,7 +2263,97 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-CLV-024'> FilesList_Clv024 {
         subject s : WebFrontEnd;
-        doc /* The Chat and login views shall list the files of the files volume in the workspace with name, size, time and task, offer each as a download, show a new file without a reload from the event files_changed, and offer no way to delete a file. */
+        doc /* The Chat and login views shall list the files of the run shown in the Full run part of the Skill run view with name, size, time and task, offer each as a download, show a new file without a reload from the event files_changed, and offer no way to delete a file. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CLV-030'> RunHeader_Clv030 {
+        subject s : WebFrontEnd;
+        doc /* The Chat and login views shall show in the header line of the Skill run view the skill name, the start time and the state of the run. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CLV-031'> PhasesOfARun_Clv031 {
+        subject s : WebFrontEnd;
+        doc /* The Chat and login views shall show the declared phases of a run as pills in the Skill run view and mark the current phase and the phase of a failure or stop. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CLV-032'> BudgetsAndCountsOfARun_Clv032 {
+        subject s : WebFrontEnd;
+        doc /* The Chat and login views shall show every budget that the run reports as used and limit and every count that it reports in the Skill run view, updated in place from the event task_status. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CLV-033'> ControlsOfARun_Clv033 {
+        subject s : WebFrontEnd;
+        doc /* When the user presses pause, resume or stop in the Skill run view, the Chat and login views shall send that request once to IF-101 and show the state the backend reports. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CLV-034'> RunThatIsShown_Clv034 {
+        subject s : WebFrontEnd;
+        doc /* The Chat and login views shall show in the Skill run view the run that the backend names as shown (REQ-WFM-134). */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CLV-035'> ReasonOfAFailedOrStoppedRun_Clv035 {
+        subject s : WebFrontEnd;
+        doc /* When a run fails or is stopped, the Chat and login views shall show its reason in one line in the strip of the Skill run view. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CLV-036'> FullRunPart_Clv036 {
+        subject s : WebFrontEnd;
+        doc /* The Chat and login views shall keep the Full run part of the Skill run view collapsed until opened, at most the user's share of the viewport height (default 34 %), scrolling inside. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CLV-037'> LinkFromTheChat_Clv037 {
+        subject s : WebFrontEnd;
+        doc /* When the user follows a chat link to the Skill run view, the Chat and login views shall open the Full run part of the linked run and bring the view into sight. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CLV-038'> RunAfterAReload_Clv038 {
+        subject s : WebFrontEnd;
+        doc /* When the page loads, the Chat and login views shall show in the Skill run view the run that the backend names as shown, with its final figures if it has ended. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CLV-039'> ViewWithoutARun_Clv039 {
+        subject s : WebFrontEnd;
+        doc /* While the backend names no run, the Chat and login views shall show in the Skill run view the text that no skill has run yet and no control. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CLV-040'> LayoutOnAWideScreen_Clv040 {
+        subject s : WebFrontEnd;
+        doc /* Where the window is wider than 820 px, the Chat and login views shall place the character box left, the chat right and the Skill run view as a strip below both, without overlap. */
+        @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
+    }
+    requirement def <'REQ-CLV-041'> HeightOfTheStrip_Clv041 {
+        subject s : WebFrontEnd;
+        doc /* Where the window is wider than 820 px, the Chat and login views shall keep the Skill run view strip, Full run part closed, at most the user's viewport height share (default 16 %). */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CLV-042'> LayoutOnAPhone_Clv042 {
+        subject s : WebFrontEnd;
+        doc /* Where the window is at most 820 px wide, the Chat and login views shall stack the character box, the chat and the Skill run view in this order, every control at least 44 px. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CLV-043'> TextsOfARunAreText_Clv043 {
+        subject s : WebFrontEnd;
+        doc /* The Chat and login views shall show every text of a run (result, material found, answers, reason) as plain text that starts no action and loads nothing. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CLV-044'> ElementsOfASkill_Clv044 {
+        subject s : WebFrontEnd;
+        doc /* Where a run reports elements of its own, the Chat and login views shall show each as a label with its text in the strip of the Skill run view beside the common ones. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CLV-045'> SizesSetByTheUser_Clv045 {
+        subject s : WebFrontEnd;
+        doc /* The Chat and login views shall let the user set the viewport height share of the strip (12 to 40 %) and of the Full run part (20 to 60 %). */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CLV-046'> SizesKeptInTheBrowser_Clv046 {
+        subject s : WebFrontEnd;
+        doc /* The Chat and login views shall keep the two shares in the browser, apply them at every load and use 16 % and 34 % when none is kept or the browser refuses to store. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CLV-047'> StripContentThatDoesNotFit_Clv047 {
+        subject s : WebFrontEnd;
+        doc /* When the content of the strip does not fit its height, the Chat and login views shall scroll the content inside the strip and not move the page. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-CHV-001'> ChatWithoutTheCharacter_Chv001 {
@@ -2353,6 +2449,11 @@ package MIA_NodeRequirements {
     requirement def <'REQ-VPB-005'> DeliveredByTheBackend_Vpb005 {
         subject s : WebFrontEnd;
         doc /* The Voice playback shall consist of static files that the backend container serves. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-VPB-006'> SpeakAgainAfterAStopIsHeard_Vpb006 {
+        subject s : WebFrontEnd;
+        doc /* When a user asks to speak an answer again, the Voice playback shall play the lines that follow, also within 3 seconds after a stop. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-FE-001'> ChatViewWithSenderAndStreaming_Fe001 {
@@ -2510,6 +2611,11 @@ package MIA_NodeRequirements {
         doc /* The Web Frontend shall let a signed-in user log out. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
+    requirement def <'REQ-FE-032'> SkillRunView_Fe032 {
+        subject s : WebFrontEnd;
+        doc /* The Web Frontend shall show the status, phases, budgets, controls, answers, full result and files of a skill run in the Skill run view, apart from the chat. */
+        @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
+    }
     requirement def <'REQ-API-001'> ChatEventsAndStreaming_Api001 {
         subject s : WebApplication;
         doc /* When a logged-in user sends a message, the API and accounts shall hand it to the chat agent through IF-201 and relay the events of the answer to every connected browser (IF-101). */
@@ -2632,7 +2738,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-CHA-008'> PersonaFromTheFile_Cha008 {
         subject s : ConversationCore;
-        doc /* The Chat agent shall behave as the shared persona file specifies, with its names, pronouns and form of address, and address every user as master unless the file says otherwise. */
+        doc /* The Chat agent shall behave as the shared persona file specifies, with its names, pronouns and form of address, and address every user as master unless the file says otherwise, also in the status summaries and the end summary of a skill run. */
         @Trace { :>> verifiedBy = (HowVerified::measurement); }
     }
     requirement def <'REQ-CHA-009'> MoodAtAllTimes_Cha009 {
@@ -2662,7 +2768,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-CHA-014'> SilentRepairOfBehaviourViolations_Cha014 {
         subject s : ConversationCore;
-        doc /* If a defined behaviour rule is violated, then the Chat agent shall repair the answer silently, record the violation as a signal and keep the correction out of the conversation memory. */
+        doc /* If a defined behaviour rule is violated, then the Chat agent shall repair the answer silently, record the violation as a signal and keep the correction out of the conversation memory, also in the status summaries and the end summary of a skill run. */
         @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::measurement); }
     }
     requirement def <'REQ-CHA-015'> VotesStored_Cha015 {
@@ -2694,6 +2800,161 @@ package MIA_NodeRequirements {
         subject s : ConversationCore;
         doc /* The Chat agent shall keep and read the conversation, memory, votes, tasks and memos only through the storage interface IF-102. */
         @Trace { :>> verifiedBy = (HowVerified::inspection, HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-030'> SpeakAgainIsSpoken_Cha030 {
+        subject s : ConversationCore;
+        doc /* When a user asks to speak a message of MIA again, the Chat agent shall have the stored text of that message spoken on the voice route that live answers use. */
+        @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
+    }
+    requirement def <'REQ-CHA-031'> SpeakAgainKeepsTheOrder_Cha031 {
+        subject s : ConversationCore;
+        doc /* The Chat agent shall hand the sentences of an answer that is spoken again to the voice route in the order of the answer. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-032'> StopEndsSpeakAgain_Cha032 {
+        subject s : ConversationCore;
+        doc /* When a user presses stop, the Chat agent shall end a spoken-again playback that is running or waiting, also when no answer is being generated. */
+        @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
+    }
+    requirement def <'REQ-CHA-033'> SpeakAgainWithoutAVoiceRoute_Cha033 {
+        subject s : ConversationCore;
+        doc /* If the voice route is not available, then the Chat agent shall still answer a speak-again request with the number of sentences and log the failure once. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-034'> OneSpeakAgainAtATime_Cha034 {
+        subject s : ConversationCore;
+        doc /* While a message is being spoken, the Chat agent shall have a spoken-again message wait until that speech has ended. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-035'> StopIsOfferedWhileAMessageIsSpokenAgain_Cha035 {
+        subject s : ConversationCore;
+        doc /* While a message is being spoken again or waits to be spoken again, the Chat agent shall report the status busy with the activity speaking. */
+        @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::demonstration); }
+    }
+    requirement def <'REQ-CHA-036'> TheStatusReturnsWhenTheSpeakAgainHasEnded_Cha036 {
+        subject s : ConversationCore;
+        doc /* When the last message that is spoken again has been spoken or stopped, the Chat agent shall report the status as it was before, not busy and without the activity speaking. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-040'> QuestionsOfASkillInTheChat_Cha040 {
+        subject s : ConversationCore;
+        doc /* When a running skill asks a question, the Chat agent shall add the question to the chat as a message of MIA and send it to speech. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-041'> StatusMessagePerDeclaredPhase_Cha041 {
+        subject s : ConversationCore;
+        doc /* When a running skill enters a phase that its manifest declares worth telling, the Chat agent shall add one new status message worded by SkillDigestStep in MIA's persona. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-042'> NoStatusForOtherPhases_Cha042 {
+        subject s : ConversationCore;
+        doc /* While a skill runs, the Chat agent shall add no message about a phase that the manifest does not declare worth telling. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-043'> EndSummary_Cha043 {
+        subject s : ConversationCore;
+        doc /* When a skill run ends done, the Chat agent shall add one summary of the full result worded by SkillDigestStep. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-044'> FailedRunInTheChat_Cha044 {
+        subject s : ConversationCore;
+        doc /* When a skill run fails, the Chat agent shall add one message with the reason, worded in MIA's persona. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-045'> EveryAddedMessageIsSpoken_Cha045 {
+        subject s : ConversationCore;
+        doc /* The Chat agent shall send every message that it adds to the chat to speech. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-046'> HistoryOfARunForTheChatModel_Cha046 {
+        subject s : ConversationCore;
+        doc /* The Chat agent shall keep the questions, the answers, the end summary and the last status message of each run in the history the chat model sees. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-047'> RepairOfTheMessagesOfARun_Cha047 {
+        subject s : ConversationCore;
+        doc /* The Chat agent shall apply the repair of REQ-CHA-014 to each status message, summary, failure message and stop message. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-048'> DigestStepWithoutTools_Cha048 {
+        subject s : ConversationCore;
+        doc /* The Chat agent shall run SkillDigestStep without tools. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-049'> QuotedInstructionIsReportedNotFollowed_Cha049 {
+        subject s : ConversationCore;
+        doc /* The Chat agent shall have SkillDigestStep report an instruction quoted in a result as text and not follow it, in the red-team cases of suite EV-skill_turns. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-050'> InputOfAModelCall_Cha050 {
+        subject s : ConversationCore;
+        doc /* The Chat agent shall limit the input of each model call of SkillDigestStep to half of the context, 4096 tokens at num_ctx 8192. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-051'> LongResultReadInPieces_Cha051 {
+        subject s : ConversationCore;
+        doc /* When the full result is longer than one input allows, the Chat agent shall have SkillDigestStep digest it in consecutive pieces, leaving no part out. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-052'> PromptAsksFor1200Characters_Cha052 {
+        subject s : ConversationCore;
+        doc /* The Chat agent shall have the prompt of SkillDigestStep ask for a summary of at most 1200 characters. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-053'> FaithfulSummary_Cha053 {
+        subject s : ConversationCore;
+        doc /* The Chat agent shall word end summaries with SkillDigestStep that are faithful to the full result. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-054'> SummaryInPersona_Cha054 {
+        subject s : ConversationCore;
+        doc /* The Chat agent shall word status messages, end summaries, failure messages and stop messages with SkillDigestStep in the persona of the persona file. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-055'> NoStatusMessageForASkillWithoutPhases_Cha055 {
+        subject s : ConversationCore;
+        doc /* While a skill without declared phases runs, the Chat agent shall add no status message. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-056'> LinkAddedByCode_Cha056 {
+        subject s : ConversationCore;
+        doc /* The Chat agent shall end each summary, failure message and stop message of a run with the link `[Open in the Skill run view](#run=<id>)` that code adds, never one taken from the model text. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-057'> StoppedRunInTheChat_Cha057 {
+        subject s : ConversationCore;
+        doc /* When a skill run is stopped, the Chat agent shall add one message that says the run was stopped, worded in MIA's persona. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-058'> NoCardTableLogLineOrFullResultInTheChat_Cha058 {
+        subject s : ConversationCore;
+        doc /* The Chat agent shall add no card, table, log line or full result of a run to the chat. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-059'> ExclusionsFromTheHistoryOfTheChatModel_Cha059 {
+        subject s : ConversationCore;
+        doc /* The Chat agent shall keep every other status message of a run and its full result out of the history the chat model sees. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-060'> RepairedTextIsTheTextShownAndSpoken_Cha060 {
+        subject s : ConversationCore;
+        doc /* The Chat agent shall show and send to speech the repaired text of each status message, summary, failure message and stop message. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-061'> ResultGoesToTheDigestStepAsText_Cha061 {
+        subject s : ConversationCore;
+        doc /* The Chat agent shall give SkillDigestStep the full result and each piece as user text to report, never as instructions of the system prompt. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-062'> SummaryFromTheDigestsOnly_Cha062 {
+        subject s : ConversationCore;
+        doc /* When SkillDigestStep has digested the pieces of a result, the Chat agent shall have it write the summary from the digests only. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-063'> SummaryPassedOnUncut_Cha063 {
+        subject s : ConversationCore;
+        doc /* The Chat agent shall pass on the summary of SkillDigestStep to the chat uncut. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-WFM-001'> SkillsAsTasks_Wfm001 {
         subject s : TaskRuntime;
@@ -2847,7 +3108,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-WFM-031'> TaskMonitor_Wfm031 {
         subject s : TaskRuntime;
-        doc /* The Workflow management shall let every task report its state while it runs, the phase, budget figures (used and limit) for time, tokens, model calls, API requests and the budgets of its own, and counts of its own, and shall show them on one status card per task that is updated in place at most twice per second and stays with the final figures after the task has ended. */
+        doc /* The Workflow management shall let every task report its state while it runs, the phase, budget figures (used and limit) for time, tokens, model calls, API requests and the budgets of its own, and counts of its own, and shall send them to the Skill run view in the event task_status at most twice per second, and once more with the final figures when the task has ended. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-WFM-032'> FiguresOfTheReview_Wfm032 {
@@ -2870,9 +3131,9 @@ package MIA_NodeRequirements {
         doc /* The Workflow management shall keep for each model whether it is local or paid, ask the user once whether a model is paid when the model has not been used before and is not clearly local, never ask again for a model that is known, change the class only on the user's command `/model paid <name>` or `/model local <name>`, and give a warning at the start of a task with a paid model and use the mode slice by default for it. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
-    requirement def <'REQ-WFM-036'> ResultAtTheEndOfTheChat_Wfm036 {
+    requirement def <'REQ-WFM-036'> SummaryAtTheEndOfTheChat_Wfm036 {
         subject s : TaskRuntime;
-        doc /* The Workflow management shall, for a task that asks questions while it runs, publish the result as a new message at the end of the chat when it is ready, show the progress only on the status card, and, when the task fails, publish a result that says what failed instead of an empty message. */
+        doc /* The Workflow management shall, when a task has ended, publish one summary of its result of at most 1200 characters as a new message at the end of the chat with a link to the run in the Skill run view, and, when the task fails, a message that says what failed with the same link. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-WFM-037'> FilesInAVolume_Wfm037 {
@@ -2882,12 +3143,12 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-WFM-038'> ReportAsARecord_Wfm038 {
         subject s : TaskRuntime;
-        doc /* The Workflow management shall store the finished report of the example workflow review as a record in the database through the storage interface IF-102 with the question, the skill id and version, the account, the model pin and the structured report (flow figures, works with decisions, grades and notes, keywords, limits and the end reason), and shall render the files of the report (markdown and LaTeX, English headings) from this record. */
+        doc /* The Workflow management shall store the finished report of the example workflow review as a record in the database through the storage interface IF-102 with the question, the skill id and version, the account, the model pin and the structured report (flow figures, works with decisions, grades and notes, keywords, limits and the end reason), and shall render the files of the report (markdown and LaTeX, English headings) from this record and name them in the run record of REQ-WFM-130. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-WFM-039'> SkillsAreSelfContainedExtensions_Wfm039 {
         subject s : TaskRuntime;
-        doc /* The Workflow management shall load each skill that runs as a task from a folder of its own (a manifest with the id, the text, the options and what the task needs from the core, the skill files and the code of the skill), so that a new skill needs no change of the chat service, the web application or the page, except a skill that adds an output view of its own, which belongs to the core. */
+        doc /* The Workflow management shall load each skill that runs as a task from a folder of its own (a manifest with the id, the text, the options, the phases worth telling and what the task needs from the core, the skill files and the code of the skill), so that a new skill needs no change of the chat service, the web application or the page, except a skill that adds an output view of its own, which belongs to the core. */
         @Trace { :>> verifiedBy = (HowVerified::test, HowVerified::inspection); }
     }
     requirement def <'REQ-WFM-040'> SkillRecord_Wfm040 {
@@ -2972,7 +3233,37 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-WFM-056'> ShippedTransforms_Wfm056 {
         subject s : TaskRuntime;
-        doc /* The Workflow management shall seed the toolbox with the transforms that MIA ships, each with the status trusted. */
+        doc /* The Workflow management shall seed the toolbox with the transforms that MIA ships, each with the status trusted and marked as shipped. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-090'> TheReasonIsShown_Wfm090 {
+        subject s : TaskRuntime;
+        doc /* When someone looks up an untrusted transform, the Workflow management shall show the reason it is untrusted. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-091'> BaselineOfARetiredUntrustedTransform_Wfm091 {
+        subject s : TaskRuntime;
+        doc /* Where the owner allowed it when retiring an untrusted transform, the Workflow management shall run it as the baseline of a check, until the transform leaves retirement or a newer version replaces its code. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-092'> ANewerVersionReplacesTheCode_Wfm092 {
+        subject s : TaskRuntime;
+        doc /* When a transform arrives with the ID of an entry and a higher version, the Workflow management shall replace the code of the entry, keep its trust status and lifecycle, and clear the owner's baseline allowance of REQ-WFM-091. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-093'> AReplacedTrustedTransformLeavesATrace_Wfm093 {
+        subject s : TaskRuntime;
+        doc /* When the code of a trusted transform is replaced by a newer version, the Workflow management shall record an event with the ID, the old and the new version and the author. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-094'> AShippedTransformIsNotExported_Wfm094 {
+        subject s : TaskRuntime;
+        doc /* If an export is asked for a shipped transform, then the Workflow management shall refuse it. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-095'> OnlyTheOwnerAllowsABaseline_Wfm095 {
+        subject s : TaskRuntime;
+        doc /* If an account other than the owner asks to allow an untrusted retired transform as a baseline, then the Workflow management shall refuse the allowance. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-WFM-057'> OldRunnerUntilProven_Wfm057 {
@@ -3073,6 +3364,51 @@ package MIA_NodeRequirements {
     requirement def <'REQ-WFM-115'> SameOutputsExtractClaimsRules_Wfm115 {
         subject s : TaskRuntime;
         doc /* The Workflow management shall run the converted skill extract_claims_rules so that it gives the same output as the old runner on every dev case of EV-extraction. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-130'> RunRecordOfEverySkillRun_Wfm130 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall store one record per skill run, lookup and search included, in the table skill_runs through IF-102 with skill id, version, account, start, end, state and phases. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-131'> FiguresAndReasonInTheRunRecord_Wfm131 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall store the final figures of a run and, for a run that failed or was stopped, its reason in the run record when the run ends. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-132'> ResultAndMaterialInTheRunRecord_Wfm132 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall store the full result, the material found on the way and the names of the files in the run record when the run ends. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-133'> AnswersInTheRunRecord_Wfm133 {
+        subject s : TaskRuntime;
+        doc /* When a user answers a question of a running skill, the Workflow management shall append the answer with its time to the run record in the order given. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-134'> RunThatIsShown_Wfm134 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall name as shown the run started most recently while skills run and the run ended last when none runs, and no earlier run. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-135'> ChatHistoryDeleted_Wfm135 {
+        subject s : TaskRuntime;
+        doc /* When a history record is deleted in the storage, the Workflow management shall delete the run record whose run id equals the id of that history record, and no other run record, and keep the files of the files volume. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-136'> RunsWithoutKnowledgeOfTheView_Wfm136 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall create the run record and send task_status for every skill from the events the skill sends today, without a change of the skill. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-137'> TextsOfARunAreStoredAsData_Wfm137 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall store the texts of a run (result, material, answers, reason) unchanged as text and never execute or interpret them. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-138'> ElementsOfASkillPassedOn_Wfm138 {
+        subject s : TaskRuntime;
+        doc /* Where a skill reports elements of its own, the Workflow management shall pass them as label and text pairs in the event task_status and store them in the run record, without changing the skill's interface. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-RUN-001'> InternetTasksOnlyOnCommand_Run001 {
@@ -3755,6 +4091,11 @@ package MIA_NodeRequirements {
         doc /* The Backend shall offer the Graph app, under the Backend's session, the listing, reading, saving as a new version, history, diff and restore of workflows and context graphs, and refuse an invalid graph with the broken rule named (IF-104). */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
+    requirement def <'REQ-BE-078'> SkillTurnsInTheChat_Be078 {
+        subject s : WebApplication;
+        doc /* The Backend shall put into the chat only the spoken text of a skill run: questions, answers, a status message per declared phase and an end summary with a link to the Skill run view. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
     requirement def <'REQ-BE-077'> Logout_Be077 {
         subject s : WebApplication;
         doc /* The Backend shall end the session of a user on request, so that the session no longer authenticates a request or a socket. */
@@ -3818,6 +4159,21 @@ package MIA_NodeRequirements {
     requirement def <'REQ-SLY-012'> RealiseIF102_Sly012 {
         subject s : Persistence;
         doc /* The Storage layer shall realise the storage interface IF-102 as specified in contracts/IF-102-storage-interface.md. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-SLY-013'> DepthOfADocument_Sly013 {
+        subject s : Persistence;
+        doc /* If a document that is put is nested deeper than 200 levels, then the Storage layer shall refuse it as invalid. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-SLY-014'> ADocumentThatContainsItself_Sly014 {
+        subject s : Persistence;
+        doc /* If a document that is put contains itself, then the Storage layer shall refuse it as invalid within one second. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-SLY-015'> SizeOfADocument_Sly015 {
+        subject s : Persistence;
+        doc /* If a document that is put has more than 100,000 values, counting a value once for every path that reaches it, then the Storage layer shall refuse it as invalid. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-GTB-001'> SharedStateHeld_Gtb001 {
@@ -3900,9 +4256,69 @@ package MIA_NodeRequirements {
         doc /* If an edit of a node, an edge or a graph is refused by a check, then the Graph tables shall keep the stored version unchanged and create no new version. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
+    requirement def <'REQ-GTB-017'> GraphHeaderWithPinnedMembers_Gtb017 {
+        subject s : Persistence;
+        doc /* The Graph tables shall store the header of each graph as a record of its ID, kind, context graph ID, testbench ID, description and the ID and version of each of its nodes and edges. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-018'> SkillTable_Gtb018 {
+        subject s : Persistence;
+        doc /* The Graph tables shall store each skill as a versioned record of its ID, command, workflow graph ID and context graph ID. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-019'> HeaderNamesStoredMembers_Gtb019 {
+        subject s : Persistence;
+        doc /* If a graph header names a node or edge version that is not stored, then the Graph tables shall refuse the header and name that node or edge ID. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-020'> EdgeNamesStoredNodes_Gtb020 {
+        subject s : Persistence;
+        doc /* If an edge names a start or end node that is not stored, then the Graph tables shall refuse the edge and name that node ID. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-021'> RecordUnderItsOwnID_Gtb021 {
+        subject s : Persistence;
+        doc /* If a record of a graph table is written under a record ID that differs from the ID inside the record, then the Graph tables shall refuse the record and name the field `id`. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-022'> FixedFieldsOfANode_Gtb022 {
+        subject s : Persistence;
+        doc /* If a node is written or read with a field in its JSON field that its type's schema does not list, then the Graph tables shall refuse the node as `schema_break` naming that field. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-023'> ContextGraphTables_Gtb023 {
+        subject s : Persistence;
+        doc /* The Graph tables shall list `context_nodes` and `context_edges` as versioned tables whose records are never deleted. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-024'> ContextRecordShape_Gtb024 {
+        subject s : Persistence;
+        doc /* If a context node lacks a text ID, a JSON object or a text type, or a context edge lacks a text end, then the Graph tables shall refuse the record naming that field. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-025'> ContextEdgeEnds_Gtb025 {
+        subject s : Persistence;
+        doc /* If a context edge names an end that is not a stored context node, then the Graph tables shall refuse the edge as `unknown_endpoint` naming that end. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-026'> ContextHeaderMembers_Gtb026 {
+        subject s : Persistence;
+        doc /* If a graph header of kind context names a member that is not stored in `context_nodes` or `context_edges` at that version, then the Graph tables shall refuse the header as `unknown_member` naming the member. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-027'> InputThatCannotBeChecked_Gtb027 {
+        subject s : Persistence;
+        doc /* If a record is nested deeper than 200 levels or its category schema is not valid, then the Graph tables shall refuse it as `schema_break` naming the field. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-GTB-028'> SizeOfARecord_Gtb028 {
+        subject s : Persistence;
+        doc /* If a record has more than 100,000 values, counting a value once for every path that reaches it, then the Graph tables shall refuse it as `schema_break` naming `data`. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
     requirement def <'REQ-RTB-001'> SharedStateHeld_Rtb001 {
         subject s : Persistence;
-        doc /* The Record tables shall define the 14 tables of IF-302 v5: history, memory, votes, tasks, memos, accounts, presets, gestures, runs (run results), source_trust (trust values of sources), cases, behaviours, workflow_meta and reports; summaries and the chat log are records of history. */
+        doc /* The Record tables shall define the 15 tables of IF-302 v8: history, memory, votes, tasks, memos, accounts, presets, gestures, runs (run results), source_trust (trust values of sources), cases, behaviours, workflow_meta, reports and skill_runs (the run records of the Skill run view, REQ-RTB-007); summaries and the chat log are records of history. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-RTB-002'> RunResults_Rtb002 {
@@ -3928,6 +4344,21 @@ package MIA_NodeRequirements {
     requirement def <'REQ-RTB-006'> SourceTrustStored_Rtb006 {
         subject s : Persistence;
         doc /* The Record tables shall define the table of the trust values of sources as versioned records that are not deletable. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-RTB-007'> SkillRunsStored_Rtb007 {
+        subject s : Persistence;
+        doc /* The Record tables shall define the table skill_runs with the required fields run, skill, skill_version, account, started and state, as versioned records that are deletable. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-RTB-008'> TransformMetaStored_Rtb008 {
+        subject s : Persistence;
+        doc /* The Record tables shall define the table transform_meta with the required fields trust and lifecycle, as versioned records that are not deletable. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-RTB-009'> TransformsStored_Rtb009 {
+        subject s : Persistence;
+        doc /* The Record tables shall define the table transforms with the required fields id and version, as versioned records that are not deletable. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-DB-001'> PostgreSQLInAContainer_Db001 {
@@ -4305,6 +4736,24 @@ package MIA_NodeRequirements {
     requirement r_req_clv_022 : Logout_Clv022;
     requirement r_req_clv_023 : StatusCardOfATask_Clv023;
     requirement r_req_clv_024 : FilesList_Clv024;
+    requirement r_req_clv_030 : RunHeader_Clv030;
+    requirement r_req_clv_031 : PhasesOfARun_Clv031;
+    requirement r_req_clv_032 : BudgetsAndCountsOfARun_Clv032;
+    requirement r_req_clv_033 : ControlsOfARun_Clv033;
+    requirement r_req_clv_034 : RunThatIsShown_Clv034;
+    requirement r_req_clv_035 : ReasonOfAFailedOrStoppedRun_Clv035;
+    requirement r_req_clv_036 : FullRunPart_Clv036;
+    requirement r_req_clv_037 : LinkFromTheChat_Clv037;
+    requirement r_req_clv_038 : RunAfterAReload_Clv038;
+    requirement r_req_clv_039 : ViewWithoutARun_Clv039;
+    requirement r_req_clv_040 : LayoutOnAWideScreen_Clv040;
+    requirement r_req_clv_041 : HeightOfTheStrip_Clv041;
+    requirement r_req_clv_042 : LayoutOnAPhone_Clv042;
+    requirement r_req_clv_043 : TextsOfARunAreText_Clv043;
+    requirement r_req_clv_044 : ElementsOfASkill_Clv044;
+    requirement r_req_clv_045 : SizesSetByTheUser_Clv045;
+    requirement r_req_clv_046 : SizesKeptInTheBrowser_Clv046;
+    requirement r_req_clv_047 : StripContentThatDoesNotFit_Clv047;
     requirement r_req_chv_001 : ChatWithoutTheCharacter_Chv001;
     requirement r_req_chv_002 : OneExpressionAPI_Chv002;
     requirement r_req_chv_003 : LivingCharacter_Chv003;
@@ -4324,6 +4773,7 @@ package MIA_NodeRequirements {
     requirement r_req_vpb_003 : VoiceLines_Vpb003;
     requirement r_req_vpb_004 : NoRequestLeavesTheHost_Vpb004;
     requirement r_req_vpb_005 : DeliveredByTheBackend_Vpb005;
+    requirement r_req_vpb_006 : SpeakAgainAfterAStopIsHeard_Vpb006;
     requirement r_req_fe_001 : ChatViewWithSenderAndStreaming_Fe001;
     requirement r_req_fe_002 : StopAndQueuePosition_Fe002;
     requirement r_req_fe_003 : SharedHistoryAfterReload_Fe003;
@@ -4355,6 +4805,7 @@ package MIA_NodeRequirements {
     requirement r_req_fe_029 : PlainStack_Fe029;
     requirement r_req_fe_030 : DeliveredByTheBackend_Fe030;
     requirement r_req_fe_031 : Logout_Fe031;
+    requirement r_req_fe_032 : SkillRunView_Fe032;
     requirement r_req_api_001 : ChatEventsAndStreaming_Api001;
     requirement r_req_api_002 : ChangesReachAllDevices_Api002;
     requirement r_req_api_003 : LoginAndSession_Api003;
@@ -4392,6 +4843,37 @@ package MIA_NodeRequirements {
     requirement r_req_cha_018 : CountersVisibleAndResettable_Cha018;
     requirement r_req_cha_019 : TasksAndMemosRecitedFromRecords_Cha019;
     requirement r_req_cha_020 : StateOnlyThroughTheStorageInterface_Cha020;
+    requirement r_req_cha_030 : SpeakAgainIsSpoken_Cha030;
+    requirement r_req_cha_031 : SpeakAgainKeepsTheOrder_Cha031;
+    requirement r_req_cha_032 : StopEndsSpeakAgain_Cha032;
+    requirement r_req_cha_033 : SpeakAgainWithoutAVoiceRoute_Cha033;
+    requirement r_req_cha_034 : OneSpeakAgainAtATime_Cha034;
+    requirement r_req_cha_035 : StopIsOfferedWhileAMessageIsSpokenAgain_Cha035;
+    requirement r_req_cha_036 : TheStatusReturnsWhenTheSpeakAgainHasEnded_Cha036;
+    requirement r_req_cha_040 : QuestionsOfASkillInTheChat_Cha040;
+    requirement r_req_cha_041 : StatusMessagePerDeclaredPhase_Cha041;
+    requirement r_req_cha_042 : NoStatusForOtherPhases_Cha042;
+    requirement r_req_cha_043 : EndSummary_Cha043;
+    requirement r_req_cha_044 : FailedRunInTheChat_Cha044;
+    requirement r_req_cha_045 : EveryAddedMessageIsSpoken_Cha045;
+    requirement r_req_cha_046 : HistoryOfARunForTheChatModel_Cha046;
+    requirement r_req_cha_047 : RepairOfTheMessagesOfARun_Cha047;
+    requirement r_req_cha_048 : DigestStepWithoutTools_Cha048;
+    requirement r_req_cha_049 : QuotedInstructionIsReportedNotFollowed_Cha049;
+    requirement r_req_cha_050 : InputOfAModelCall_Cha050;
+    requirement r_req_cha_051 : LongResultReadInPieces_Cha051;
+    requirement r_req_cha_052 : PromptAsksFor1200Characters_Cha052;
+    requirement r_req_cha_053 : FaithfulSummary_Cha053;
+    requirement r_req_cha_054 : SummaryInPersona_Cha054;
+    requirement r_req_cha_055 : NoStatusMessageForASkillWithoutPhases_Cha055;
+    requirement r_req_cha_056 : LinkAddedByCode_Cha056;
+    requirement r_req_cha_057 : StoppedRunInTheChat_Cha057;
+    requirement r_req_cha_058 : NoCardTableLogLineOrFullResultInTheChat_Cha058;
+    requirement r_req_cha_059 : ExclusionsFromTheHistoryOfTheChatModel_Cha059;
+    requirement r_req_cha_060 : RepairedTextIsTheTextShownAndSpoken_Cha060;
+    requirement r_req_cha_061 : ResultGoesToTheDigestStepAsText_Cha061;
+    requirement r_req_cha_062 : SummaryFromTheDigestsOnly_Cha062;
+    requirement r_req_cha_063 : SummaryPassedOnUncut_Cha063;
     requirement r_req_wfm_001 : SkillsAsTasks_Wfm001;
     requirement r_req_wfm_002 : VersionedWorkflowLibrary_Wfm002;
     requirement r_req_wfm_003 : NoCycles_Wfm003;
@@ -4427,7 +4909,7 @@ package MIA_NodeRequirements {
     requirement r_req_wfm_033 : PauseAndResume_Wfm033;
     requirement r_req_wfm_034 : RunModeHardCapsAndSlicing_Wfm034;
     requirement r_req_wfm_035 : ClassOfTheModel_Wfm035;
-    requirement r_req_wfm_036 : ResultAtTheEndOfTheChat_Wfm036;
+    requirement r_req_wfm_036 : SummaryAtTheEndOfTheChat_Wfm036;
     requirement r_req_wfm_037 : FilesInAVolume_Wfm037;
     requirement r_req_wfm_038 : ReportAsARecord_Wfm038;
     requirement r_req_wfm_039 : SkillsAreSelfContainedExtensions_Wfm039;
@@ -4448,6 +4930,12 @@ package MIA_NodeRequirements {
     requirement r_req_wfm_054 : OnlyTheOwnerTrusts_Wfm054;
     requirement r_req_wfm_055 : ExchangeForm_Wfm055;
     requirement r_req_wfm_056 : ShippedTransforms_Wfm056;
+    requirement r_req_wfm_090 : TheReasonIsShown_Wfm090;
+    requirement r_req_wfm_091 : BaselineOfARetiredUntrustedTransform_Wfm091;
+    requirement r_req_wfm_092 : ANewerVersionReplacesTheCode_Wfm092;
+    requirement r_req_wfm_093 : AReplacedTrustedTransformLeavesATrace_Wfm093;
+    requirement r_req_wfm_094 : AShippedTransformIsNotExported_Wfm094;
+    requirement r_req_wfm_095 : OnlyTheOwnerAllowsABaseline_Wfm095;
     requirement r_req_wfm_057 : OldRunnerUntilProven_Wfm057;
     requirement r_req_wfm_058 : SameModelCalls_Wfm058;
     requirement r_req_wfm_059 : SameOutcomesOnTheSuite_Wfm059;
@@ -4468,6 +4956,15 @@ package MIA_NodeRequirements {
     requirement r_req_wfm_113 : SameOutcomesVerifyComputable_Wfm113;
     requirement r_req_wfm_114 : SameOutcomesExtractClaims_Wfm114;
     requirement r_req_wfm_115 : SameOutputsExtractClaimsRules_Wfm115;
+    requirement r_req_wfm_130 : RunRecordOfEverySkillRun_Wfm130;
+    requirement r_req_wfm_131 : FiguresAndReasonInTheRunRecord_Wfm131;
+    requirement r_req_wfm_132 : ResultAndMaterialInTheRunRecord_Wfm132;
+    requirement r_req_wfm_133 : AnswersInTheRunRecord_Wfm133;
+    requirement r_req_wfm_134 : RunThatIsShown_Wfm134;
+    requirement r_req_wfm_135 : ChatHistoryDeleted_Wfm135;
+    requirement r_req_wfm_136 : RunsWithoutKnowledgeOfTheView_Wfm136;
+    requirement r_req_wfm_137 : TextsOfARunAreStoredAsData_Wfm137;
+    requirement r_req_wfm_138 : ElementsOfASkillPassedOn_Wfm138;
     requirement r_req_run_001 : InternetTasksOnlyOnCommand_Run001;
     requirement r_req_run_002 : SwitchTheModel_Run002;
     requirement r_req_run_003 : ModelServerUnreachable_Run003;
@@ -4604,6 +5101,7 @@ package MIA_NodeRequirements {
     requirement r_req_be_074 : StateOnlyThroughTheStorageInterface_Be074;
     requirement r_req_be_075 : ServeTheFrontend_Be075;
     requirement r_req_be_076 : WorkflowAndGraphAPI_Be076;
+    requirement r_req_be_078 : SkillTurnsInTheChat_Be078;
     requirement r_req_be_077 : Logout_Be077;
     requirement r_req_sly_001 : PostgreSQLInAContainer_Sly001;
     requirement r_req_sly_002 : SharedStateHeld_Sly002;
@@ -4617,6 +5115,9 @@ package MIA_NodeRequirements {
     requirement r_req_sly_010 : ReachableOnlyInsideTheHostNetwork_Sly010;
     requirement r_req_sly_011 : OwnContainer_Sly011;
     requirement r_req_sly_012 : RealiseIF102_Sly012;
+    requirement r_req_sly_013 : DepthOfADocument_Sly013;
+    requirement r_req_sly_014 : ADocumentThatContainsItself_Sly014;
+    requirement r_req_sly_015 : SizeOfADocument_Sly015;
     requirement r_req_gtb_001 : SharedStateHeld_Gtb001;
     requirement r_req_gtb_002 : SchemaValidationOnWrite_Gtb002;
     requirement r_req_gtb_003 : ContextGraphsStored_Gtb003;
@@ -4633,12 +5134,27 @@ package MIA_NodeRequirements {
     requirement r_req_gtb_014 : RebuiltEqualsStored_Gtb014;
     requirement r_req_gtb_015 : DocumentFormDuringTheTransition_Gtb015;
     requirement r_req_gtb_016 : ARefusedEditChangesNothing_Gtb016;
+    requirement r_req_gtb_017 : GraphHeaderWithPinnedMembers_Gtb017;
+    requirement r_req_gtb_018 : SkillTable_Gtb018;
+    requirement r_req_gtb_019 : HeaderNamesStoredMembers_Gtb019;
+    requirement r_req_gtb_020 : EdgeNamesStoredNodes_Gtb020;
+    requirement r_req_gtb_021 : RecordUnderItsOwnID_Gtb021;
+    requirement r_req_gtb_022 : FixedFieldsOfANode_Gtb022;
+    requirement r_req_gtb_023 : ContextGraphTables_Gtb023;
+    requirement r_req_gtb_024 : ContextRecordShape_Gtb024;
+    requirement r_req_gtb_025 : ContextEdgeEnds_Gtb025;
+    requirement r_req_gtb_026 : ContextHeaderMembers_Gtb026;
+    requirement r_req_gtb_027 : InputThatCannotBeChecked_Gtb027;
+    requirement r_req_gtb_028 : SizeOfARecord_Gtb028;
     requirement r_req_rtb_001 : SharedStateHeld_Rtb001;
     requirement r_req_rtb_002 : RunResults_Rtb002;
     requirement r_req_rtb_003 : VotesStored_Rtb003;
     requirement r_req_rtb_004 : MemoryRecords_Rtb004;
     requirement r_req_rtb_005 : TasksAndMemosExact_Rtb005;
     requirement r_req_rtb_006 : SourceTrustStored_Rtb006;
+    requirement r_req_rtb_007 : SkillRunsStored_Rtb007;
+    requirement r_req_rtb_008 : TransformMetaStored_Rtb008;
+    requirement r_req_rtb_009 : TransformsStored_Rtb009;
     requirement r_req_db_001 : PostgreSQLInAContainer_Db001;
     requirement r_req_db_002 : SharedStateHeld_Db002;
     requirement r_req_db_003 : ImmutableVersions_Db003;
@@ -4734,6 +5250,24 @@ package MIA_NodeRequirements {
     satisfy r_req_clv_022 by mia.frontEnd;
     satisfy r_req_clv_023 by mia.frontEnd;
     satisfy r_req_clv_024 by mia.frontEnd;
+    satisfy r_req_clv_030 by mia.frontEnd;
+    satisfy r_req_clv_031 by mia.frontEnd;
+    satisfy r_req_clv_032 by mia.frontEnd;
+    satisfy r_req_clv_033 by mia.frontEnd;
+    satisfy r_req_clv_034 by mia.frontEnd;
+    satisfy r_req_clv_035 by mia.frontEnd;
+    satisfy r_req_clv_036 by mia.frontEnd;
+    satisfy r_req_clv_037 by mia.frontEnd;
+    satisfy r_req_clv_038 by mia.frontEnd;
+    satisfy r_req_clv_039 by mia.frontEnd;
+    satisfy r_req_clv_040 by mia.frontEnd;
+    satisfy r_req_clv_041 by mia.frontEnd;
+    satisfy r_req_clv_042 by mia.frontEnd;
+    satisfy r_req_clv_043 by mia.frontEnd;
+    satisfy r_req_clv_044 by mia.frontEnd;
+    satisfy r_req_clv_045 by mia.frontEnd;
+    satisfy r_req_clv_046 by mia.frontEnd;
+    satisfy r_req_clv_047 by mia.frontEnd;
     satisfy r_req_chv_001 by mia.frontEnd;
     satisfy r_req_chv_002 by mia.frontEnd;
     satisfy r_req_chv_003 by mia.frontEnd;
@@ -4753,6 +5287,7 @@ package MIA_NodeRequirements {
     satisfy r_req_vpb_003 by mia.frontEnd;
     satisfy r_req_vpb_004 by mia.frontEnd;
     satisfy r_req_vpb_005 by mia.frontEnd;
+    satisfy r_req_vpb_006 by mia.frontEnd;
     satisfy r_req_fe_001 by mia.frontEnd;
     satisfy r_req_fe_002 by mia.frontEnd;
     satisfy r_req_fe_003 by mia.frontEnd;
@@ -4784,6 +5319,7 @@ package MIA_NodeRequirements {
     satisfy r_req_fe_029 by mia.frontEnd;
     satisfy r_req_fe_030 by mia.frontEnd;
     satisfy r_req_fe_031 by mia.frontEnd;
+    satisfy r_req_fe_032 by mia.frontEnd;
     satisfy r_req_api_001 by mia.webApp;
     satisfy r_req_api_002 by mia.webApp;
     satisfy r_req_api_003 by mia.webApp;
@@ -4821,6 +5357,37 @@ package MIA_NodeRequirements {
     satisfy r_req_cha_018 by mia.conversation;
     satisfy r_req_cha_019 by mia.conversation;
     satisfy r_req_cha_020 by mia.conversation;
+    satisfy r_req_cha_030 by mia.conversation;
+    satisfy r_req_cha_031 by mia.conversation;
+    satisfy r_req_cha_032 by mia.conversation;
+    satisfy r_req_cha_033 by mia.conversation;
+    satisfy r_req_cha_034 by mia.conversation;
+    satisfy r_req_cha_035 by mia.conversation;
+    satisfy r_req_cha_036 by mia.conversation;
+    satisfy r_req_cha_040 by mia.conversation;
+    satisfy r_req_cha_041 by mia.conversation;
+    satisfy r_req_cha_042 by mia.conversation;
+    satisfy r_req_cha_043 by mia.conversation;
+    satisfy r_req_cha_044 by mia.conversation;
+    satisfy r_req_cha_045 by mia.conversation;
+    satisfy r_req_cha_046 by mia.conversation;
+    satisfy r_req_cha_047 by mia.conversation;
+    satisfy r_req_cha_048 by mia.conversation;
+    satisfy r_req_cha_049 by mia.conversation;
+    satisfy r_req_cha_050 by mia.conversation;
+    satisfy r_req_cha_051 by mia.conversation;
+    satisfy r_req_cha_052 by mia.conversation;
+    satisfy r_req_cha_053 by mia.conversation;
+    satisfy r_req_cha_054 by mia.conversation;
+    satisfy r_req_cha_055 by mia.conversation;
+    satisfy r_req_cha_056 by mia.conversation;
+    satisfy r_req_cha_057 by mia.conversation;
+    satisfy r_req_cha_058 by mia.conversation;
+    satisfy r_req_cha_059 by mia.conversation;
+    satisfy r_req_cha_060 by mia.conversation;
+    satisfy r_req_cha_061 by mia.conversation;
+    satisfy r_req_cha_062 by mia.conversation;
+    satisfy r_req_cha_063 by mia.conversation;
     satisfy r_req_wfm_001 by mia.taskRuntime;
     satisfy r_req_wfm_002 by mia.taskRuntime;
     satisfy r_req_wfm_003 by mia.taskRuntime;
@@ -4877,6 +5444,12 @@ package MIA_NodeRequirements {
     satisfy r_req_wfm_054 by mia.taskRuntime;
     satisfy r_req_wfm_055 by mia.taskRuntime;
     satisfy r_req_wfm_056 by mia.taskRuntime;
+    satisfy r_req_wfm_090 by mia.taskRuntime;
+    satisfy r_req_wfm_091 by mia.taskRuntime;
+    satisfy r_req_wfm_092 by mia.taskRuntime;
+    satisfy r_req_wfm_093 by mia.taskRuntime;
+    satisfy r_req_wfm_094 by mia.taskRuntime;
+    satisfy r_req_wfm_095 by mia.taskRuntime;
     satisfy r_req_wfm_057 by mia.taskRuntime;
     satisfy r_req_wfm_058 by mia.taskRuntime;
     satisfy r_req_wfm_059 by mia.taskRuntime;
@@ -4897,6 +5470,15 @@ package MIA_NodeRequirements {
     satisfy r_req_wfm_113 by mia.taskRuntime;
     satisfy r_req_wfm_114 by mia.taskRuntime;
     satisfy r_req_wfm_115 by mia.taskRuntime;
+    satisfy r_req_wfm_130 by mia.taskRuntime;
+    satisfy r_req_wfm_131 by mia.taskRuntime;
+    satisfy r_req_wfm_132 by mia.taskRuntime;
+    satisfy r_req_wfm_133 by mia.taskRuntime;
+    satisfy r_req_wfm_134 by mia.taskRuntime;
+    satisfy r_req_wfm_135 by mia.taskRuntime;
+    satisfy r_req_wfm_136 by mia.taskRuntime;
+    satisfy r_req_wfm_137 by mia.taskRuntime;
+    satisfy r_req_wfm_138 by mia.taskRuntime;
     satisfy r_req_run_001 by mia.taskRuntime;
     satisfy r_req_run_002 by mia.taskRuntime;
     satisfy r_req_run_003 by mia.taskRuntime;
@@ -5033,6 +5615,7 @@ package MIA_NodeRequirements {
     satisfy r_req_be_074 by mia.webApp;
     satisfy r_req_be_075 by mia.webApp;
     satisfy r_req_be_076 by mia.webApp;
+    satisfy r_req_be_078 by mia.webApp;
     satisfy r_req_be_077 by mia.webApp;
     satisfy r_req_sly_001 by mia.persistence;
     satisfy r_req_sly_002 by mia.persistence;
@@ -5046,6 +5629,9 @@ package MIA_NodeRequirements {
     satisfy r_req_sly_010 by mia.persistence;
     satisfy r_req_sly_011 by mia.persistence;
     satisfy r_req_sly_012 by mia.persistence;
+    satisfy r_req_sly_013 by mia.persistence;
+    satisfy r_req_sly_014 by mia.persistence;
+    satisfy r_req_sly_015 by mia.persistence;
     satisfy r_req_gtb_001 by mia.persistence;
     satisfy r_req_gtb_002 by mia.persistence;
     satisfy r_req_gtb_003 by mia.persistence;
@@ -5062,12 +5648,27 @@ package MIA_NodeRequirements {
     satisfy r_req_gtb_014 by mia.persistence;
     satisfy r_req_gtb_015 by mia.persistence;
     satisfy r_req_gtb_016 by mia.persistence;
+    satisfy r_req_gtb_017 by mia.persistence;
+    satisfy r_req_gtb_018 by mia.persistence;
+    satisfy r_req_gtb_019 by mia.persistence;
+    satisfy r_req_gtb_020 by mia.persistence;
+    satisfy r_req_gtb_021 by mia.persistence;
+    satisfy r_req_gtb_022 by mia.persistence;
+    satisfy r_req_gtb_023 by mia.persistence;
+    satisfy r_req_gtb_024 by mia.persistence;
+    satisfy r_req_gtb_025 by mia.persistence;
+    satisfy r_req_gtb_026 by mia.persistence;
+    satisfy r_req_gtb_027 by mia.persistence;
+    satisfy r_req_gtb_028 by mia.persistence;
     satisfy r_req_rtb_001 by mia.persistence;
     satisfy r_req_rtb_002 by mia.persistence;
     satisfy r_req_rtb_003 by mia.persistence;
     satisfy r_req_rtb_004 by mia.persistence;
     satisfy r_req_rtb_005 by mia.persistence;
     satisfy r_req_rtb_006 by mia.persistence;
+    satisfy r_req_rtb_007 by mia.persistence;
+    satisfy r_req_rtb_008 by mia.persistence;
+    satisfy r_req_rtb_009 by mia.persistence;
     satisfy r_req_db_001 by mia.persistence;
     satisfy r_req_db_002 by mia.persistence;
     satisfy r_req_db_003 by mia.persistence;
@@ -5162,6 +5763,24 @@ package MIA_NodeRequirements {
     allocate r_req_clv_022 to mia.frontEnd;
     allocate r_req_clv_023 to mia.frontEnd;
     allocate r_req_clv_024 to mia.frontEnd;
+    allocate r_req_clv_030 to mia.frontEnd;
+    allocate r_req_clv_031 to mia.frontEnd;
+    allocate r_req_clv_032 to mia.frontEnd;
+    allocate r_req_clv_033 to mia.frontEnd;
+    allocate r_req_clv_034 to mia.frontEnd;
+    allocate r_req_clv_035 to mia.frontEnd;
+    allocate r_req_clv_036 to mia.frontEnd;
+    allocate r_req_clv_037 to mia.frontEnd;
+    allocate r_req_clv_038 to mia.frontEnd;
+    allocate r_req_clv_039 to mia.frontEnd;
+    allocate r_req_clv_040 to mia.frontEnd;
+    allocate r_req_clv_041 to mia.frontEnd;
+    allocate r_req_clv_042 to mia.frontEnd;
+    allocate r_req_clv_043 to mia.frontEnd;
+    allocate r_req_clv_044 to mia.frontEnd;
+    allocate r_req_clv_045 to mia.frontEnd;
+    allocate r_req_clv_046 to mia.frontEnd;
+    allocate r_req_clv_047 to mia.frontEnd;
     allocate r_req_chv_001 to mia.frontEnd;
     allocate r_req_chv_002 to mia.frontEnd;
     allocate r_req_chv_003 to mia.frontEnd;
@@ -5181,6 +5800,7 @@ package MIA_NodeRequirements {
     allocate r_req_vpb_003 to mia.frontEnd;
     allocate r_req_vpb_004 to mia.frontEnd;
     allocate r_req_vpb_005 to mia.frontEnd;
+    allocate r_req_vpb_006 to mia.frontEnd;
     allocate r_req_fe_001 to mia.frontEnd;
     allocate r_req_fe_002 to mia.frontEnd;
     allocate r_req_fe_003 to mia.frontEnd;
@@ -5212,6 +5832,7 @@ package MIA_NodeRequirements {
     allocate r_req_fe_029 to mia.frontEnd;
     allocate r_req_fe_030 to mia.frontEnd;
     allocate r_req_fe_031 to mia.frontEnd;
+    allocate r_req_fe_032 to mia.frontEnd;
     allocate r_req_api_001 to mia.webApp;
     allocate r_req_api_002 to mia.webApp;
     allocate r_req_api_003 to mia.webApp;
@@ -5249,6 +5870,37 @@ package MIA_NodeRequirements {
     allocate r_req_cha_018 to mia.conversation;
     allocate r_req_cha_019 to mia.conversation;
     allocate r_req_cha_020 to mia.conversation;
+    allocate r_req_cha_030 to mia.conversation;
+    allocate r_req_cha_031 to mia.conversation;
+    allocate r_req_cha_032 to mia.conversation;
+    allocate r_req_cha_033 to mia.conversation;
+    allocate r_req_cha_034 to mia.conversation;
+    allocate r_req_cha_035 to mia.conversation;
+    allocate r_req_cha_036 to mia.conversation;
+    allocate r_req_cha_040 to mia.conversation;
+    allocate r_req_cha_041 to mia.conversation;
+    allocate r_req_cha_042 to mia.conversation;
+    allocate r_req_cha_043 to mia.conversation;
+    allocate r_req_cha_044 to mia.conversation;
+    allocate r_req_cha_045 to mia.conversation;
+    allocate r_req_cha_046 to mia.conversation;
+    allocate r_req_cha_047 to mia.conversation;
+    allocate r_req_cha_048 to mia.conversation;
+    allocate r_req_cha_049 to mia.conversation;
+    allocate r_req_cha_050 to mia.conversation;
+    allocate r_req_cha_051 to mia.conversation;
+    allocate r_req_cha_052 to mia.conversation;
+    allocate r_req_cha_053 to mia.conversation;
+    allocate r_req_cha_054 to mia.conversation;
+    allocate r_req_cha_055 to mia.conversation;
+    allocate r_req_cha_056 to mia.conversation;
+    allocate r_req_cha_057 to mia.conversation;
+    allocate r_req_cha_058 to mia.conversation;
+    allocate r_req_cha_059 to mia.conversation;
+    allocate r_req_cha_060 to mia.conversation;
+    allocate r_req_cha_061 to mia.conversation;
+    allocate r_req_cha_062 to mia.conversation;
+    allocate r_req_cha_063 to mia.conversation;
     allocate r_req_wfm_001 to mia.taskRuntime;
     allocate r_req_wfm_002 to mia.taskRuntime;
     allocate r_req_wfm_003 to mia.taskRuntime;
@@ -5305,6 +5957,12 @@ package MIA_NodeRequirements {
     allocate r_req_wfm_054 to mia.taskRuntime;
     allocate r_req_wfm_055 to mia.taskRuntime;
     allocate r_req_wfm_056 to mia.taskRuntime;
+    allocate r_req_wfm_090 to mia.taskRuntime;
+    allocate r_req_wfm_091 to mia.taskRuntime;
+    allocate r_req_wfm_092 to mia.taskRuntime;
+    allocate r_req_wfm_093 to mia.taskRuntime;
+    allocate r_req_wfm_094 to mia.taskRuntime;
+    allocate r_req_wfm_095 to mia.taskRuntime;
     allocate r_req_wfm_057 to mia.taskRuntime;
     allocate r_req_wfm_058 to mia.taskRuntime;
     allocate r_req_wfm_059 to mia.taskRuntime;
@@ -5325,6 +5983,15 @@ package MIA_NodeRequirements {
     allocate r_req_wfm_113 to mia.taskRuntime;
     allocate r_req_wfm_114 to mia.taskRuntime;
     allocate r_req_wfm_115 to mia.taskRuntime;
+    allocate r_req_wfm_130 to mia.taskRuntime;
+    allocate r_req_wfm_131 to mia.taskRuntime;
+    allocate r_req_wfm_132 to mia.taskRuntime;
+    allocate r_req_wfm_133 to mia.taskRuntime;
+    allocate r_req_wfm_134 to mia.taskRuntime;
+    allocate r_req_wfm_135 to mia.taskRuntime;
+    allocate r_req_wfm_136 to mia.taskRuntime;
+    allocate r_req_wfm_137 to mia.taskRuntime;
+    allocate r_req_wfm_138 to mia.taskRuntime;
     allocate r_req_run_001 to mia.taskRuntime;
     allocate r_req_run_002 to mia.taskRuntime;
     allocate r_req_run_003 to mia.taskRuntime;
@@ -5461,6 +6128,7 @@ package MIA_NodeRequirements {
     allocate r_req_be_074 to mia.webApp;
     allocate r_req_be_075 to mia.webApp;
     allocate r_req_be_076 to mia.webApp;
+    allocate r_req_be_078 to mia.webApp;
     allocate r_req_be_077 to mia.webApp;
     allocate r_req_sly_001 to mia.persistence;
     allocate r_req_sly_002 to mia.persistence;
@@ -5474,6 +6142,9 @@ package MIA_NodeRequirements {
     allocate r_req_sly_010 to mia.persistence;
     allocate r_req_sly_011 to mia.persistence;
     allocate r_req_sly_012 to mia.persistence;
+    allocate r_req_sly_013 to mia.persistence;
+    allocate r_req_sly_014 to mia.persistence;
+    allocate r_req_sly_015 to mia.persistence;
     allocate r_req_gtb_001 to mia.persistence;
     allocate r_req_gtb_002 to mia.persistence;
     allocate r_req_gtb_003 to mia.persistence;
@@ -5490,12 +6161,27 @@ package MIA_NodeRequirements {
     allocate r_req_gtb_014 to mia.persistence;
     allocate r_req_gtb_015 to mia.persistence;
     allocate r_req_gtb_016 to mia.persistence;
+    allocate r_req_gtb_017 to mia.persistence;
+    allocate r_req_gtb_018 to mia.persistence;
+    allocate r_req_gtb_019 to mia.persistence;
+    allocate r_req_gtb_020 to mia.persistence;
+    allocate r_req_gtb_021 to mia.persistence;
+    allocate r_req_gtb_022 to mia.persistence;
+    allocate r_req_gtb_023 to mia.persistence;
+    allocate r_req_gtb_024 to mia.persistence;
+    allocate r_req_gtb_025 to mia.persistence;
+    allocate r_req_gtb_026 to mia.persistence;
+    allocate r_req_gtb_027 to mia.persistence;
+    allocate r_req_gtb_028 to mia.persistence;
     allocate r_req_rtb_001 to mia.persistence;
     allocate r_req_rtb_002 to mia.persistence;
     allocate r_req_rtb_003 to mia.persistence;
     allocate r_req_rtb_004 to mia.persistence;
     allocate r_req_rtb_005 to mia.persistence;
     allocate r_req_rtb_006 to mia.persistence;
+    allocate r_req_rtb_007 to mia.persistence;
+    allocate r_req_rtb_008 to mia.persistence;
+    allocate r_req_rtb_009 to mia.persistence;
     allocate r_req_db_001 to mia.persistence;
     allocate r_req_db_002 to mia.persistence;
     allocate r_req_db_003 to mia.persistence;
@@ -5592,6 +6278,24 @@ package MIA_NodeRequirements {
     dependency from r_req_clv_022 to r_req_fe_031;
     dependency from r_req_clv_023 to r_req_fe_014;
     dependency from r_req_clv_024 to r_req_fe_018;
+    dependency from r_req_clv_030 to r_req_fe_032;
+    dependency from r_req_clv_031 to r_req_fe_032;
+    dependency from r_req_clv_032 to r_req_fe_032;
+    dependency from r_req_clv_033 to r_req_fe_032;
+    dependency from r_req_clv_034 to r_req_fe_032;
+    dependency from r_req_clv_035 to r_req_fe_032;
+    dependency from r_req_clv_036 to r_req_fe_032;
+    dependency from r_req_clv_037 to r_req_fe_032;
+    dependency from r_req_clv_038 to r_req_fe_032;
+    dependency from r_req_clv_039 to r_req_fe_032;
+    dependency from r_req_clv_040 to r_req_fe_032;
+    dependency from r_req_clv_041 to r_req_fe_032;
+    dependency from r_req_clv_042 to r_req_fe_032;
+    dependency from r_req_clv_043 to r_req_fe_032;
+    dependency from r_req_clv_044 to r_req_fe_032;
+    dependency from r_req_clv_045 to r_req_fe_032;
+    dependency from r_req_clv_046 to r_req_fe_032;
+    dependency from r_req_clv_047 to r_req_fe_032;
     dependency from r_req_chv_001 to r_req_fe_006;
     dependency from r_req_chv_002 to r_req_fe_008;
     dependency from r_req_chv_003 to r_req_fe_009;
@@ -5611,6 +6315,7 @@ package MIA_NodeRequirements {
     dependency from r_req_vpb_003 to r_req_fe_013;
     dependency from r_req_vpb_004 to r_req_fe_026;
     dependency from r_req_vpb_005 to r_req_fe_030;
+    dependency from r_req_vpb_006 to r_req_fe_012;
     dependency from r_req_fe_001 to fr1;
     dependency from r_req_fe_002 to fr1;
     dependency from r_req_fe_002 to nfr7;
@@ -5651,6 +6356,7 @@ package MIA_NodeRequirements {
     dependency from r_req_fe_029 to nfr1;
     dependency from r_req_fe_030 to nfr9;
     dependency from r_req_fe_031 to fr21;
+    dependency from r_req_fe_032 to fr46;
     dependency from r_req_api_001 to r_req_be_001;
     dependency from r_req_api_002 to r_req_be_007;
     dependency from r_req_api_003 to r_req_be_008;
@@ -5688,6 +6394,37 @@ package MIA_NodeRequirements {
     dependency from r_req_cha_018 to r_req_be_031;
     dependency from r_req_cha_019 to r_req_be_032;
     dependency from r_req_cha_020 to r_req_be_074;
+    dependency from r_req_cha_030 to r_req_be_006;
+    dependency from r_req_cha_031 to r_req_be_006;
+    dependency from r_req_cha_032 to r_req_be_006;
+    dependency from r_req_cha_033 to r_req_be_006;
+    dependency from r_req_cha_034 to r_req_be_006;
+    dependency from r_req_cha_035 to r_req_be_006;
+    dependency from r_req_cha_036 to r_req_be_006;
+    dependency from r_req_cha_040 to r_req_be_078;
+    dependency from r_req_cha_041 to r_req_be_078;
+    dependency from r_req_cha_042 to r_req_be_078;
+    dependency from r_req_cha_043 to r_req_be_078;
+    dependency from r_req_cha_044 to r_req_be_078;
+    dependency from r_req_cha_045 to r_req_be_078;
+    dependency from r_req_cha_046 to r_req_be_078;
+    dependency from r_req_cha_047 to r_req_be_078;
+    dependency from r_req_cha_048 to r_req_be_078;
+    dependency from r_req_cha_049 to r_req_be_078;
+    dependency from r_req_cha_050 to r_req_be_078;
+    dependency from r_req_cha_051 to r_req_be_078;
+    dependency from r_req_cha_052 to r_req_be_078;
+    dependency from r_req_cha_053 to r_req_be_078;
+    dependency from r_req_cha_054 to r_req_be_078;
+    dependency from r_req_cha_055 to r_req_be_078;
+    dependency from r_req_cha_056 to r_req_be_078;
+    dependency from r_req_cha_057 to r_req_be_078;
+    dependency from r_req_cha_058 to r_req_be_078;
+    dependency from r_req_cha_059 to r_req_be_078;
+    dependency from r_req_cha_060 to r_req_be_078;
+    dependency from r_req_cha_061 to r_req_be_078;
+    dependency from r_req_cha_062 to r_req_be_078;
+    dependency from r_req_cha_063 to r_req_be_078;
     dependency from r_req_wfm_001 to r_req_be_033;
     dependency from r_req_wfm_002 to r_req_be_035;
     dependency from r_req_wfm_003 to r_req_be_036;
@@ -5744,6 +6481,12 @@ package MIA_NodeRequirements {
     dependency from r_req_wfm_054 to fr38;
     dependency from r_req_wfm_055 to fr38;
     dependency from r_req_wfm_056 to fr38;
+    dependency from r_req_wfm_090 to fr38;
+    dependency from r_req_wfm_091 to fr38;
+    dependency from r_req_wfm_092 to fr38;
+    dependency from r_req_wfm_093 to fr38;
+    dependency from r_req_wfm_094 to fr38;
+    dependency from r_req_wfm_095 to fr38;
     dependency from r_req_wfm_057 to fr45;
     dependency from r_req_wfm_058 to fr45;
     dependency from r_req_wfm_059 to fr45;
@@ -5764,6 +6507,15 @@ package MIA_NodeRequirements {
     dependency from r_req_wfm_113 to fr45;
     dependency from r_req_wfm_114 to fr45;
     dependency from r_req_wfm_115 to fr45;
+    dependency from r_req_wfm_130 to r_req_be_033;
+    dependency from r_req_wfm_131 to r_req_be_033;
+    dependency from r_req_wfm_132 to r_req_be_033;
+    dependency from r_req_wfm_133 to r_req_be_033;
+    dependency from r_req_wfm_134 to r_req_be_033;
+    dependency from r_req_wfm_135 to r_req_be_033;
+    dependency from r_req_wfm_136 to r_req_be_033;
+    dependency from r_req_wfm_137 to r_req_be_033;
+    dependency from r_req_wfm_138 to r_req_be_033;
     dependency from r_req_run_001 to r_req_wfx_002;
     dependency from r_req_run_002 to r_req_wfx_003;
     dependency from r_req_run_003 to r_req_wfx_004;
@@ -5921,6 +6673,7 @@ package MIA_NodeRequirements {
     dependency from r_req_be_076 to fr22;
     dependency from r_req_be_076 to fr30;
     dependency from r_req_be_076 to fr7;
+    dependency from r_req_be_078 to fr35;
     dependency from r_req_be_077 to fr21;
     dependency from r_req_sly_001 to r_req_db_001;
     dependency from r_req_sly_002 to r_req_db_002;
@@ -5934,6 +6687,9 @@ package MIA_NodeRequirements {
     dependency from r_req_sly_010 to r_req_db_016;
     dependency from r_req_sly_011 to r_req_db_017;
     dependency from r_req_sly_012 to if102;
+    dependency from r_req_sly_013 to r_req_sly_004;
+    dependency from r_req_sly_014 to r_req_sly_004;
+    dependency from r_req_sly_015 to r_req_sly_004;
     dependency from r_req_gtb_001 to r_req_db_002;
     dependency from r_req_gtb_002 to r_req_db_004;
     dependency from r_req_gtb_003 to r_req_db_011;
@@ -5950,12 +6706,27 @@ package MIA_NodeRequirements {
     dependency from r_req_gtb_014 to fr40;
     dependency from r_req_gtb_015 to fr40;
     dependency from r_req_gtb_016 to fr40;
+    dependency from r_req_gtb_017 to fr40;
+    dependency from r_req_gtb_018 to fr40;
+    dependency from r_req_gtb_019 to fr40;
+    dependency from r_req_gtb_020 to fr40;
+    dependency from r_req_gtb_021 to fr40;
+    dependency from r_req_gtb_022 to fr40;
+    dependency from r_req_gtb_023 to fr40;
+    dependency from r_req_gtb_024 to fr40;
+    dependency from r_req_gtb_025 to fr40;
+    dependency from r_req_gtb_026 to fr40;
+    dependency from r_req_gtb_027 to fr40;
+    dependency from r_req_gtb_028 to fr40;
     dependency from r_req_rtb_001 to r_req_db_002;
     dependency from r_req_rtb_002 to r_req_db_010;
     dependency from r_req_rtb_003 to r_req_db_012;
     dependency from r_req_rtb_004 to r_req_db_013;
     dependency from r_req_rtb_005 to r_req_db_014;
     dependency from r_req_rtb_006 to r_req_db_015;
+    dependency from r_req_rtb_007 to r_req_db_002;
+    dependency from r_req_rtb_008 to r_req_db_002;
+    dependency from r_req_rtb_009 to r_req_db_002;
     dependency from r_req_db_001 to nfr8;
     dependency from r_req_db_001 to con7;
     dependency from r_req_db_001 to nfr9;
