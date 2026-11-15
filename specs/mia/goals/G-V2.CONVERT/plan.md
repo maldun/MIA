@@ -22,7 +22,10 @@ Task ids carry the prefix CV so that they do not collide with T-01 to T-11 of th
 | T-CV-01 Recording of the old run (spike) | REQ-WFM-058 | TC-WFM-058 can be written against recordings: model replies and tool results of one old run replay deterministically | P1, P2 |
 | T-CV-02 Settings record of the equivalence check | REQ-WFM-069 | TC-WFM-069 | P1, P2 |
 | T-CV-03 Per-skill state, old runner until accepted, record of the check | REQ-WFM-057, REQ-WFM-059, REQ-WFM-060 | TC-WFM-057, TC-WFM-059, TC-WFM-060 | T-CV-02 |
-| T-CV-04 Same calls on scripted replies | REQ-WFM-058 | TC-WFM-058 for each skill converted in T-CV-06 to T-CV-08 | T-CV-01, T-CV-03 |
+| T-CV-03b Common operations module and thin toolbox entries | REQ-WFM-058 (precondition), A-123 P1b | every shipped toolbox transform runs: `toolbox.run(id, args)` gives the result of its library node on recorded inputs; a view runs as a model step with its prompt and schema as data | T-CV-03 |
+| T-CV-03c Order of independent steps | REQ-WFM-058 (precondition), A-123 P4 | the graph built from an ordered list of steps has `order_of` equal to that list; no edge joins two process nodes (R3) | T-CV-03b |
+| T-CV-03d Pipeline to graph converter | REQ-WFM-058 (precondition), A-123 P2, P3 | a pipeline JSON becomes a graph that passes the graph rules: stages are transforms, a loop or a map over an unknown number of items is a master node with `stop` | T-CV-03c |
+| T-CV-04 Same calls on scripted replies | REQ-WFM-058 | TC-WFM-058 for each skill converted in T-CV-06 to T-CV-08 | T-CV-03d |
 | T-CV-05 Snapshots: take, list, restore, nothing deleted, owner only | REQ-WFM-061, REQ-WFM-062, REQ-WFM-063, REQ-WFM-064, REQ-WFM-065, REQ-WFM-066 | TC-WFM-061 to TC-WFM-066 | P1 (snapshotStore, IF-203 v1, IF-301 v2 through their mocks) |
 | T-CV-06 Convert research and plan_question | REQ-WFM-110, REQ-WFM-111 | TC-WFM-110, TC-WFM-111 on the dev split | T-CV-04, P3, P4 |
 | T-CV-07 Convert verify_claim and verify_computable | REQ-WFM-112, REQ-WFM-113 | TC-WFM-112, TC-WFM-113 on the dev split | T-CV-04, P3, P4 |
@@ -58,12 +61,38 @@ Task ids carry the prefix CV so that they do not collide with T-01 to T-11 of th
 - Done when: a skill whose criterion passes is accepted; one that fails or is not decided stays on the old runner; every skill record names its form and a verdict or a reason
 - Notes: no model run; versions: records start at version 1, no skill file or pipeline changes, so no version bump
 
+### T-CV-03b: Common operations module and thin toolbox entries
+- Implements: precondition of REQ-WFM-058; A-123 (owner decisions 2026-11-15, P1 and P1b)
+- Tests to turn green: new, written first (red) for the owner's go: `toolbox.run` of each shipped id on recorded inputs equals the library node's result (code, check, tool and rule nodes); a view runs as a model step whose prompt and schema come from data (scripted model)
+- Touches: a Python module of common operations (the functions the library nodes name, `FUNCTIONS` registries of research.py and the others, moved there without change of behaviour), the code text of the shipped toolbox entries (thin: they call the module by name), `toolbox.py` only to run them
+- Must not touch: protected material, prompts, the old pipelines and their results, any behaviour of a function; one-off functions (no second user) stay in their toolbox entry as code text, common ones live in the module (owner: no duplicates)
+- Depends on: T-CV-03
+- Done when: every shipped transform runs from the toolbox and the old runner still gives its old results (TC-WFM-058 old side unchanged)
+- Notes: about 50 code, check, tool and rule nodes and 21 views; the module is a move, not a rewrite; model-step views use the prompt and schema of the skill as data
+
+### T-CV-03c: Order of independent steps
+- Implements: precondition of REQ-WFM-058; A-123 P4 (owner: enforce the order with an artificial dependency)
+- Tests to turn green: new, written first: a builder gives, for an ordered list of steps, a graph whose `order_of` is that list, by letting a later transform read the data node of an earlier step's output without using it; no edge joins two process nodes
+- Touches: a graph builder next to `graph_model.py`/`graph_rules.py` (no change of the rules)
+- Must not touch: protected material, `contracts/`, the graph rules
+- Depends on: T-CV-03b
+- Done when: the order of the recorded runs of the five skills is reproduced by the built graphs
+
+### T-CV-03d: Pipeline to graph converter
+- Implements: precondition of REQ-WFM-058; A-123 P2 and P3
+- Tests to turn green: new, written first: `plan.free@1`, `verify.single@1`, `extract.llm@1` convert to graphs that pass the graph rules; `verify.computable@2` and `research.escalate@3` convert with master nodes for the loop and for a map over an unknown number of items (`stop` from the loop's maximum cycles or the map bound and the skill budget's seconds, `task` empty); a branch between fixed alternatives stays inside a transform
+- Touches: the converter in N-2.3 (reads `library/pipelines`, writes graphs and a minimal context graph and the skill record through the existing stores)
+- Must not touch: protected material, `contracts/`, `library/pipelines` (read only), prompts
+- Depends on: T-CV-03c
+- Done when: the five pipelines convert; nothing is run on a model
+- Notes: a node of the pipeline that cannot be placed by the rule of A-123 P2 keeps its skill on the old runner with that reason (REQ-WFM-057)
+
 ### T-CV-04: Same calls on scripted replies
 - Implements: REQ-WFM-058
 - Tests to turn green: TC-WFM-058 for each converted skill
-- Touches: the converted runner path of N-2.3 (calls only, no prompt text)
+- Touches: the converted runner path of N-2.3: `run_converted` reads the skill record and its graph, merges `skill_changes` into the data node that holds the model options, runs the graph with the adapter of T-CV-03b (A-123); the comment of TC-WFM-058 changes accordingly (protected, amendment)
 - Must not touch: protected material, prompts, schemas, tools, budgets of any skill
-- Depends on: T-CV-01, T-CV-03
+- Depends on: T-CV-01, T-CV-03d
 - Done when: per skill the list of model calls of the old and the converted run on the recording is equal, a diff is shown otherwise
 - Notes: the main guard of the conversion; the suite run is the second guard (miss 0.10 to 0.27 at a loss of 0.20 in `eval-spec.md`)
 
@@ -75,6 +104,9 @@ Task ids carry the prefix CV so that they do not collide with T-01 to T-11 of th
 - Depends on: P1
 - Done when: the six checks pass with the mocks; the automatic snapshot is named "before restore of <name>" with the owner as author
 - Notes: independent of the conversion tasks; can run in parallel with T-CV-01 to T-CV-04
+
+### Order of the conversions (owner, A-123 P5, 2026-11-15)
+The tasks T-CV-06 to T-CV-08 keep their groups, but the skills are converted in this order: plan_question, verify_claim, extract_claims_rules and extract_claims, then verify_computable, then research (the largest: 50 calls, 6 maps, 8 branches, 1 loop). Each skill has its own equivalence check; a failing skill stays on the old runner with the reason recorded.
 
 ### T-CV-06: Convert research and plan_question
 - Implements: REQ-WFM-110, REQ-WFM-111
