@@ -21,6 +21,8 @@ Snapshots (v2): a named, never changed record of the state of the skill set; the
 
 The kinds of `list_ids`, `read`, `save`, `history`, `restore` and `set_current_version` also include `skills`, `transforms`, `snapshots` (A-90 and v1). A `snapshots` record is written once; no kind is deletable. `read(kind, id)` without a version returns the **current** version.
 
+**Snapshot record (open, owner 2026-11-15):** the stored `snapshots` document is a JSON object. Required: `name`, `time`, `author`, `items` (a list of `{kind, id, version}`; plus `trust` and `lifecycle` on transforms) and `pins`. Further fields are optional, **kept as given and never refused**; known today: `format` (integer, 1 for this text, raised when the meaning of the record changes) and `note` (free text of the owner). `read_snapshot` returns the document as stored, so a reader gets the fields it knows and ignores the rest, and a restore uses only the required ones. Each item may carry extra fields too (kept, ignored by a restore). Exception: `list_snapshots` stays exactly `name`, `time`, `author` (REQ-WFM-062, TC-WFM-062). A snapshot is written once, so a record keeps the shape of the time it was taken.
+
 ### Errors (new rows)
 | Condition | Signal | What the consumer may rely on afterwards |
 |---|---|---|
