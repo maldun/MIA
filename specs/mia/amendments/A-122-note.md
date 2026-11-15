@@ -1,6 +1,6 @@
 # A-122: baselines recorded, two criterion lines raised (G-V2.CONVERT, proposal for the owner's review)
 
-Status: **proposed, not applied**. Basis: A-120 change 2 ("if a recorded rate differs from the reference in the criterion line by more than 0.02, the line is changed in Plan, never after a converted run"), the five baseline runs the owner started on 2026-11-15, owner decision 2026-11-15 "raise both floors" (margin 0.10 kept).
+Status: **approved by the owner 2026-11-15 (D-244, items 110, 113 and the other three one by one)**; applied: `requirements.md` (110, 113), node `test-spec.md`, `eval-spec.md`. Not applied (protected, owner's go): the copied line in TC-WFM-059 (numbers hold: 17 of 20 PASS, 16 of 20 FAIL at 0.85, checked with eval_decide.py on synthetic runs), `plausibility.yaml` claims `floor` of REF-CONVERT-1 and -4 (0.82 to 0.85 and 0.87), `eval/baselines/` files, `plausibility-proposal.yaml` texts. Basis: A-120 change 2 ("if a recorded rate differs from the reference in the criterion line by more than 0.02, the line is changed in Plan, never after a converted run"), the five baseline runs the owner started on 2026-11-15, owner decision 2026-11-15 "raise both floors" (margin 0.10 kept).
 
 ## The runs (MP-light gemma4:12b-it-qat, seed 7, temperature 0, 3 repeats, all cases, commit 1fb0c35; files in `data/eval/`, not yet in `eval/baselines/`)
 | Skill / suite | Run file | Right case-repeats | Case majority | Reference in the line | Diff |

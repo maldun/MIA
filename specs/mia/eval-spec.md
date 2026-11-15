@@ -148,15 +148,17 @@ The skill-to-suite link is the `target.skill` field of each `suite.json`; EV-beh
 | extract_claims | extract.llm@1 | 0.69 (35 of 51 perfect) | eval/baselines/extraction-llm-light.md, 2026-10-18 | 1 | re-record at 3 repeats |
 | extract_claims_rules | extract.rules | 0.63 (32 of 51), deterministic | eval/baselines/extraction-rules.md, 2026-10-18 | 1 (deterministic) | record the run file for the equality check |
 
+Recorded 2026-11-15 (A-122, D-244): the five runs of `data/eval/` (MP-light, seed 7, temperature 0, 3 repeats, all cases, commit 1fb0c35) give right shares research 0.950 (57/60), plan_question 0.639 (69/108), verify_claim 0.940 (141/150), verify_computable 0.974 (114/117), extract_claims 0.680 (104/153). Within 0.02 of the reference: plans, verdicts, extraction (lines unchanged). Research and computable moved by more than 0.02: REQ-WFM-110 and 113 are raised (table below). The files are placed in `eval/baselines/` by the owner (`<suite>__<variant>__baseline.jsonl`); `extract_claims_rules` is not re-recorded here.
+
 ### Error rates (M19, fixed before any run)
-`false_alarm.py --n <n> --min-rate <min> --good <reference> --bad <reference - loss> --rerun`, computed 2026-11-07.
+`false_alarm.py --n <n> --min-rate <min> --good <reference> --bad <reference - loss> --rerun`, computed 2026-11-07; rows of REQ-WFM-110 and 113 recomputed 2026-11-15 (A-122).
 
 | Requirement | n | Minimum (k of n) | Good rate | False alarm | Miss at a loss of 0.25 | Miss at a loss of 0.15 |
 |---|---|---|---|---|---|---|
-| REQ-WFM-110 | 20 | 0.82 (17) | 0.92 | 0.0050 | 0.1242 | 0.4981 |
+| REQ-WFM-110 | 20 | 0.85 (17) | 0.95 | 0.0003 | 0.2027 | 0.6536 |
 | REQ-WFM-111 | 36 | 0.54 (20) | 0.64 | 0.0122 | 0.0638 | 0.4637 |
 | REQ-WFM-112 | 50 | 0.83 (42) | 0.93 | 0.0001 | 0.0171 | 0.3586 |
-| REQ-WFM-113 | 39 | 0.82 (32) | 0.92 | 0.0001 | 0.0577 | 0.5053 |
+| REQ-WFM-113 | 39 | 0.87 (34) | 0.974 | 0.0000 | 0.0469 | 0.5020 |
 | REQ-WFM-114 | 51 | 0.59 (31) | 0.69 | 0.0064 | 0.0233 | 0.3652 |
 
 Reading: a conversion that loses a quarter of the right cases is caught with a miss of at most 0.12; one that loses 0.15 passes in 36 to 51 % of the checks. The suites are too small to see a small loss, so the guard against a silently changed prompt or step order is REQ-WFM-058 (same model calls, exact, no model). The reference rates of four suites come from one repeat and carry their own uncertainty (Wilson 95 % half-width 0.07 to 0.15 over the cases), larger than the margin of 0.10 for three of them; a bigger suite or more repeats would narrow it, which is the owner's call (settings version 2 of REQ-WFM-069).

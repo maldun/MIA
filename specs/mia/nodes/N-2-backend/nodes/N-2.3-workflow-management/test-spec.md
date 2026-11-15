@@ -121,7 +121,7 @@ TC-WFM-110 to 114 (the five eval criteria of the converted skills) are statistic
 - Verifies: REQ-WFM-059
 - Given: three scripted run files for criterion lines of REQ-WFM-110: 17 of 20 cases right, 15 of 20 right in the first run and again in the re-run, and a run whose header names the suite plans
 - When: `eval_decide.py` decides each and the acceptance rule applies the result
-- Then: 17 of 20 (0.85, limit 0.82) is PASS and the skill is accepted; 15 of 20 (0.75) is FAIL after the re-run and the skill stays unconverted; the wrong-suite run is NOT DECIDED and the skill stays unconverted
+- Then: 17 of 20 (0.85, limit 0.85) is PASS and the skill is accepted; 15 of 20 (0.75) is FAIL after the re-run and the skill stays unconverted; the wrong-suite run is NOT DECIDED and the skill stays unconverted
 
 ### TC-WFM-060 – Record of the check
 - Verifies: REQ-WFM-060
@@ -181,7 +181,7 @@ TC-WFM-110 to 114 (the five eval criteria of the converted skills) are statistic
 - Verifies: REQ-WFM-110
 - Given: suite EV-research dev (20 cases, tagged split:dev), pin MP-light (digest in eval-spec.md), 3 repeats folded by majority, the converted skill research, the v0.1.0 baseline recorded at 3 repeats (reference 0.92)
 - When: one run of the suite with `python tools/eval.py run research --pin MP-light --repeats 3`
-- Then: `eval_decide.py` on the criterion of REQ-WFM-110: PASS with at least 17 of 20 cases right (0.82); a FAIL is re-run once with fresh seeds and only the re-run counts
+- Then: `eval_decide.py` on the criterion of REQ-WFM-110: PASS with at least 17 of 20 cases right (0.85); a FAIL is re-run once with fresh seeds and only the re-run counts
 - And: the secondary suite EV-research_compound is run and reported, not decided
 
 ### TC-WFM-111 – Equivalence of plan_question
@@ -201,7 +201,7 @@ TC-WFM-110 to 114 (the five eval criteria of the converted skills) are statistic
 - Verifies: REQ-WFM-113
 - Given: suite EV-computable dev (39 cases, split:dev), MP-light, 3 repeats, the converted skill verify_computable, baseline of verify.computable@2 re-recorded at 3 repeats (reference 0.92 from 1 run)
 - When: one run of the suite
-- Then: PASS with at least 32 of 39 cases right (0.82); a FAIL is re-run once
+- Then: PASS with at least 34 of 39 cases right (0.87); a FAIL is re-run once
 
 ### TC-WFM-114 – Equivalence of extract_claims
 - Verifies: REQ-WFM-114

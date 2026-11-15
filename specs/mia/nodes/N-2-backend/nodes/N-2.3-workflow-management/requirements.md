@@ -995,17 +995,17 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 
 ### REQ-WFM-110 – Same outcomes: research
 - Level: low   Subject: TaskRuntime
-- Text: The Workflow management shall run the converted skill research so that it behaves as expected in at least 82 % of the dev cases of EV-research.
-- Rationale: refines FR-45 and AC-34; v0.1.0 baseline 0.92 (research-escalate.md, 20 questions, 3 repeats) minus the margin 0.10, a starting guess under D-187 (REQ-WFM-069); the secondary suite EV-research_compound is run and reported, not decided
+- Text: The Workflow management shall run the converted skill research so that it behaves as expected in at least 85 % of the dev cases of EV-research.
+- Rationale: refines FR-45 and AC-34; v0.1.0 baseline 0.95 (run research__escalate__20261115-173301, 20 cases, 3 repeats, 57 of 60) minus the margin 0.10, a starting guess under D-187 (REQ-WFM-069); the secondary suite EV-research_compound is run and reported, not decided
 - Parent: FR-45
 - Group: CV
 - Priority: Must
 - Verification method: Evaluation
-- Acceptance criterion: AC-34: the share of right cases of the converted skill on the dev split of EV-research is at least 0.82 (3 repeats folded by majority, MP-light), decided by the rule, not by eye
-- Eval criterion: suite=EV-research; select=; metric=right; min=0.82; n=20; repeats=3; pin=MP-light; rule=threshold; alpha=0.05; false_alarm=0.0050; split=dev
+- Acceptance criterion: AC-34: the share of right cases of the converted skill on the dev split of EV-research is at least 0.85 (3 repeats folded by majority, MP-light), decided by the rule, not by eye
+- Eval criterion: suite=EV-research; select=; metric=right; min=0.85; n=20; repeats=3; pin=MP-light; rule=threshold; alpha=0.05; false_alarm=0.0003; split=dev
 - Verified by: TC-WFM-110, EV-research
 - Status: Draft
-- History: G-V2 Plan step 3 (2026-11-07), new, split from REQ-WFM-059 (owner)
+- History: G-V2 Plan step 3 (2026-11-07), new, split from REQ-WFM-059 (owner); A-122 (2026-11-15): floor 0.82 to 0.85 on the recorded baseline (0.95), owner approved, back in review
 
 ### REQ-WFM-111 – Same outcomes: plan_question
 - Level: low   Subject: TaskRuntime
@@ -1037,17 +1037,17 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 
 ### REQ-WFM-113 – Same outcomes: verify_computable
 - Level: low   Subject: TaskRuntime
-- Text: The Workflow management shall run the converted skill verify_computable so that it behaves as expected in at least 82 % of the dev cases of EV-computable.
-- Rationale: refines FR-45 and AC-34; v0.1.0 baseline 0.92 (computable-gemma4-12b.md, 39 cases, 1 run, verify.computable@2) minus the margin 0.10, a starting guess under D-187 (REQ-WFM-069); the baseline has one repeat; it is re-recorded at 3 repeats before any converted run
+- Text: The Workflow management shall run the converted skill verify_computable so that it behaves as expected in at least 87 % of the dev cases of EV-computable.
+- Rationale: refines FR-45 and AC-34; v0.1.0 baseline 0.974 (run computable__computable2__20261115-173501, 39 cases, 3 repeats, 114 of 117) minus the margin 0.10, a starting guess under D-187 (REQ-WFM-069)
 - Parent: FR-45
 - Group: CV
 - Priority: Must
 - Verification method: Evaluation
-- Acceptance criterion: AC-34: the share of right cases of the converted skill on the dev split of EV-computable is at least 0.82 (3 repeats folded by majority, MP-light), decided by the rule, not by eye
-- Eval criterion: suite=EV-computable; select=; metric=right; min=0.82; n=39; repeats=3; pin=MP-light; rule=threshold; alpha=0.05; false_alarm=0.0001; split=dev
+- Acceptance criterion: AC-34: the share of right cases of the converted skill on the dev split of EV-computable is at least 0.87 (3 repeats folded by majority, MP-light), decided by the rule, not by eye
+- Eval criterion: suite=EV-computable; select=; metric=right; min=0.87; n=39; repeats=3; pin=MP-light; rule=threshold; alpha=0.05; false_alarm=0.0000; split=dev
 - Verified by: TC-WFM-113, EV-computable
 - Status: Draft
-- History: G-V2 Plan step 3 (2026-11-07), new, split from REQ-WFM-059 (owner)
+- History: G-V2 Plan step 3 (2026-11-07), new, split from REQ-WFM-059 (owner); A-122 (2026-11-15): floor 0.82 to 0.87 on the recorded baseline (0.974), owner approved, back in review
 
 ### REQ-WFM-114 – Same outcomes: extract_claims
 - Level: low   Subject: TaskRuntime
