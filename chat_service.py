@@ -45,6 +45,7 @@ try:
     from .storage import StorageError
     from .speech_text import speech_text
     from .mia_logger import logger
+    from .skill_digest import strip_markup
     from .skill_run_observer import SkillRunObserver
     from .skill_runs import SkillRunRecorder
     from .task_monitor import TaskMonitor
@@ -55,6 +56,7 @@ except ImportError:  # used as plain script / in tests
     from storage import StorageError
     from speech_text import speech_text
     from mia_logger import logger
+    from skill_digest import strip_markup
     from skill_run_observer import SkillRunObserver
     from skill_runs import SkillRunRecorder
     from task_monitor import TaskMonitor
@@ -105,19 +107,42 @@ SKILL_LINK = re.compile(r"\[(?:[^\[\]]|\[[^\]]{0,100}\]){0,200}\]\(\s*<?#run=[^)
 CUT_ROUNDS = 6        # the nicer cut: a link that is built from the parts of another needs another round; the rest below does not depend on it
 
 
+def browser_view(text):
+    """what the page and the browser make of a text before they look at a link: character references decoded, backslash escapes of punctuation resolved, tab and newline dropped by the URL
+    parser, lower case. A link is judged by this view, never by the raw text."""
+    text = html.unescape(text)
+    text = re.sub(r"\\(?=[!-/:-@\[-`{-~])", "", text)
+    return re.sub(r"[\t\n\r]", "", text).lower()
+
+
+def neutralize_run_links(text):
+    """REQ-CHA-066, by construction: if the browser view of the text holds `#run=` in any form, the text is made plain: every `&` is written as a reference of its own and every `#` as the
+    full-width sign, so that no reference, escape or join can build a link to a run. A text without such a view is not touched."""
+    if "#run=" in browser_view(text):
+        text = text.replace("&", "&amp;").replace("#", "\uff03")
+    return text
+
+
 def cut_run_links(text):
-    """REQ-CHA-066: no link to a run is left in a text of the model. The links of the usual forms are cut (a few rounds, because cutting one can join the parts of another); what is left
-    fails closed whatever its form: `#run=` that is no link any more is made plain, and where an HTML character reference would decode to it (`&#35;run=`) every `&` is written as a
-    reference of its own, so that the page shows the text and never builds the link. The patterns are bounded, so no input costs more than a few linear passes."""
+    """REQ-CHA-066: the links to a run of the usual forms are cut (a few rounds, because cutting one can join the parts of another); what is left is made plain by neutralize_run_links.
+    The patterns are bounded, so no input costs more than a few linear passes."""
     for _ in range(CUT_ROUNDS):
         cut = SKILL_LINK.sub("", text)
         if cut == text:
             break
         text = cut
-    text = re.sub(r"#run=", "#run ", text, flags=re.I)
-    if "#run=" in html.unescape(text).lower():
-        text = text.replace("&", "&amp;")
-    return text
+    return neutralize_run_links(re.sub(r"#run=", "#run ", text, flags=re.I))
+
+
+def clean_model_text(text):
+    """the text of the digest step before it is shown or spoken (REQ-CHA-064, 066): both cuts together a few times, because each can join the parts of what the other removed, then the
+    guarantees by construction: no `<` that starts markup (escape_markup) and no way to a link to a run (neutralize_run_links, last, so that nothing after it can build one)"""
+    for _ in range(3):
+        cleaned = cut_run_links(strip_markup(text))
+        if cleaned == text:
+            break
+        text = cleaned
+    return neutralize_run_links(strip_markup(text))
 
 
 NET_NEGATIVE = 5               # REQ-CHA-017: from this many net negative votes a behaviour is shown only rarely
@@ -699,9 +724,11 @@ class ChatService:
         """(text, spoken text) of one turn: the wording of the digest step, repaired, with the link of the run added by code at the end messages"""
         if kind == "question":
             return payload, payload
-        text = cut_run_links(self._repaired(self._worded(kind, payload)))      # a link in the model text is not the link, in no message of a run (REQ-CHA-066): cut off
+        text = clean_model_text(self._repaired(self._worded(kind, payload)))      # a link in the model text is not the link, in no message of a run (REQ-CHA-066): cut off
         spoken = text
         if kind in ("done", "failed", "stopped"):
+            if text.count("```") % 2:
+                text = text.rstrip() + "\n```"                                                     # an open code block would swallow the link (REQ-CHA-056)
             text = text.rstrip() + " [Open in the Skill run view](#run=%s)" % run                  # the real one follows, added by code (REQ-CHA-056)
         return text, spoken
 

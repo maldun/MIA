@@ -22,19 +22,17 @@ TASKS = {
     "piece": "The user text is one consecutive part of a long result. Write a digest of this part that keeps every fact the summary of the whole result may need.",
     "digests": "The user text holds the digests of the consecutive parts of one long result, in order. Write the summary of the whole result from them.",
 }
-CODE_OPEN = re.compile(r"[ \t]*<(script|style)\b[^<>]*>", re.I)       # REQ-CHA-064 (A-151): the content of a script or style element is code and goes with its tags
+CODE_OPEN = re.compile(r"<(script|style)\b[^<>]*>", re.I | re.A)      # REQ-CHA-064 (A-151): the content of a script or style element is code and goes with its tags; ASCII letters only (the long s is no `s` of a tag)
 TAG = re.compile(r"</?[A-Za-z!][^<>]*>")     # REQ-CHA-064: a tag, not a lone "<" as in "5 < 6" (a space or digit follows it)
+CODE_CLOSE = {"script": re.compile(r"</script\b[^<>]*>", re.I | re.A), "style": re.compile(r"</style\b[^<>]*>", re.I | re.A)}      # an end tag may carry attributes or a slash
+STRIP_ROUNDS = 8       # removing a tag can join the parts of another (`<<b>script>`): the nicer path; the guarantee is escape_markup at the end
 MAX_ROUNDS = 5         # a model that does not shorten its digests cannot make the rounds go on for ever
 MARGIN = 0.95          # the count of a tokenizer differs a little from the count of the caller: the calls stay below this share of the limit
 
 
-CODE_CLOSE = {"script": re.compile(r"</script\b[^<>]*>", re.I), "style": re.compile(r"</style\b[^<>]*>", re.I)}      # an end tag may carry attributes or a slash
-STRIP_ROUNDS = 8       # removing a tag can join the parts of another (`<<b>script>`); what is still markup after these rounds is shown as text (fails closed)
-
-
 def _without_code_elements(text):
-    """script and style elements with their content; one pass over the text (the original, not a lower-cased copy: its indexes differ for some letters): where no closing tag follows, an
-    opening one is left to TAG (no rescan, so many unclosed tags cost little)"""
+    """script and style elements with their content, and the blanks in front of them; one pass over the original text (a lower-cased copy has other indexes for some letters): where no
+    closing tag follows, an opening one is left to TAG (no rescan, so many unclosed tags cost little)"""
     out, cursor, no_close = [], 0, set()
     for match in CODE_OPEN.finditer(text):
         name = match.group(1).lower()
@@ -44,20 +42,26 @@ def _without_code_elements(text):
         if end is None:
             no_close.add(name)
             continue
-        out.append(text[cursor:match.start()])
+        out.append(text[cursor:match.start()].rstrip(" \t") if cursor < match.start() else "")
         cursor = end.end()
     return "".join(out) + text[cursor:]
 
 
+def escape_markup(text):
+    """REQ-CHA-064, by construction: a `<` that a browser could read as the start of a tag, comment or end tag (a letter, `!` or `/` follows) is written `&lt;`, so no text can reach the page
+    or the voice as markup whatever the rounds before it left; `5 < 6` stays"""
+    return re.sub(r"<(?=[A-Za-z!/])", "&lt;", text)
+
+
 def strip_markup(text):
-    """REQ-CHA-064: no HTML tag and no content of a script or style element is left. A few rounds, because removing a tag can join the parts of another (`<<b>script>`); a text that is still
-    changing after them is nested on purpose, and its remaining `<` are written as `&lt;`: shown as text, never a tag, and every input costs a few linear passes"""
+    """REQ-CHA-064: no HTML tag and no content of a script or style element is left. A few rounds remove them (removing a tag can join the parts of another, `<<b>script>`); whatever is
+    still markup after them is written as text by escape_markup. Every pass is linear."""
     for _ in range(STRIP_ROUNDS):
         cleaned = TAG.sub("", _without_code_elements(text))
         if cleaned == text:
-            return text
+            break
         text = cleaned
-    return text.replace("<", "&lt;")
+    return escape_markup(text)
 
 
 class SkillDigestStep:

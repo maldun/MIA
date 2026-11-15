@@ -20,7 +20,7 @@ sys.path.insert(0, REPO)
 sys.path.insert(0, os.path.join(HERE, "helpers"))
 
 from chat_log import ChatLog                                 # noqa: E402
-from chat_service import ChatService, cut_run_links          # noqa: E402
+from chat_service import ChatService, clean_model_text, cut_run_links    # noqa: E402
 from fake_model import FakeModel                             # noqa: E402
 from markers import mark                                     # noqa: E402
 from moods import MoodTracker                                # noqa: E402
@@ -434,6 +434,117 @@ class ThirdVerifyRun(unittest.TestCase):
         Example: `<script>a</script foo>b` and `<script>a</script/>b` give `b`."""
         self.assertEqual(step_saying("<script>a</script foo>b").failure("r"), "b")
         self.assertEqual(step_saying("<script>a</script/>b").failure("r"), "b")
+
+
+def seen_by_a_browser(text):
+    """what the page makes of a text before it looks at a link: entities decoded, backslash escapes of punctuation resolved, tab and newline dropped by the URL parser, lower case"""
+    text = html.unescape(text)
+    text = re.sub(r"\\(?=[!-/:-@\[-`{-~])", "", text)
+    return re.sub(r"[\t\n\r]", "", text).lower()
+
+
+class FourthVerifyRun(unittest.TestCase):
+    """findings F-25 to F-32 of the fourth Verify run (verification-report-run4.md): the guarantee is by construction, at the end of the cleaning of a model text"""
+
+    HOSTILE_LINKS = (r"A [x](#run\=evil) B", r"A [x](<#run\=evil>) B", "A\n\n[r]: #run\\=evil\n\n[x][r]", r"A [x](#r&#117;n\=e) B", "A [x](#ru&#10;n=e) B", "A [x](#ru&#9;n=e) B", "A [x](&#35;RUN=e) B",
+                     "A [x](#run=e) B", "A [x](&#35;run=e) B", "see #RUN=e", "A [a](#ru[b](#run=1)n=e) B")
+
+    @mark.req("REQ-CHA-066")
+    def test_no_form_of_a_run_link_survives_the_cleaning(self):
+        """F-25, F-31: a backslash escape, a tab or a newline in the destination, an entity, capitals: nothing that a browser reads as `#run=` is left.
+        Example: `[x](#run\\=evil)` and `[x](#ru&#10;n=e)`."""
+        for hostile in self.HOSTILE_LINKS:
+            self.assertNotIn("#run=", seen_by_a_browser(clean_model_text(hostile)), hostile)
+
+    @mark.req("REQ-CHA-066")
+    def test_ordinary_text_with_an_ampersand_is_not_touched(self):
+        """F-25 (mutant gap): the fail-closed rewrite fires only for a text that holds a run link.
+        Example: `Tom & Jerry <3 5 < 6` stays as it is."""
+        self.assertEqual(clean_model_text("Tom & Jerry 5 < 6 and 7 > 3"), "Tom & Jerry 5 < 6 and 7 > 3")
+
+    @mark.req("REQ-CHA-066")
+    def test_a_link_that_is_built_from_parts_is_cut_whole(self):
+        """F-26 (mutant gap): the nicer path removes a joined link completely.
+        Example: `[a](#ru[b](#run=1)n=e)` gives an empty text."""
+        self.assertEqual(clean_model_text("[a](#ru[b](#run=1)n=e)"), "")
+
+    @mark.req("REQ-CHA-064", "REQ-CHA-066")
+    def test_cutting_a_link_cannot_rebuild_a_tag_and_cutting_a_tag_cannot_rebuild_a_link(self):
+        """F-26: the cleaning joins nothing that either cut would remove.
+        Example: `<[x](#run=1)script>EVIL</[x](#run=1)script>` leaves no tag and no `EVIL` as markup; `[x](#ru<b>n=e)` leaves no run link."""
+        out = clean_model_text("<[x](#run=1)script>EVIL</[x](#run=1)script>")
+        self.assertNotRegex(out, r"<[A-Za-z!/]")
+        self.assertNotIn("#run=", seen_by_a_browser(clean_model_text("[x](#ru<b>n=e)")))
+
+    @mark.req("REQ-CHA-064")
+    def test_a_tag_with_a_less_than_sign_in_an_attribute_is_not_left_as_a_tag(self):
+        """F-27: after the cleaning no `<` is followed by a letter, `!` or `/`.
+        Example: `<script a="<">alert(1)`, `<b title="<">x</b>`, `<svg onload="<">`, `<!-- unclosed`."""
+        for hostile in ('<script a="<">alert(1)', '<b title="<">x</b>', '<img src="/x" alt="<">', '<svg onload="<">', "x <!-- unclosed", "<script a=<>alert(1)</script>"):
+            self.assertNotRegex(step_saying(hostile).failure("r"), r"<[A-Za-z!/]", hostile)
+
+    @mark.req("REQ-CHA-064")
+    def test_letters_that_match_a_script_name_only_in_unicode_do_not_break_the_step(self):
+        """F-28: `<\u017fcript>` (long s), `<scr\u0130pt>` and `<scr\u0131pt>` are no script tags and raise nothing.
+        Example: step_saying("<\u017fcript>x</script>y") returns text."""
+        for hostile in ("<\u017fcript>x</script>y", "<scr\u0130pt>x", "<scr\u0131pt>x", "<\u017ftyle>x"):
+            self.assertIsInstance(step_saying(hostile).failure("r"), str)
+
+    @mark.req("REQ-CHA-064")
+    def test_a_run_of_blanks_costs_little_in_the_markup_removal(self):
+        """F-29: 100 000 blanks and 100 000 tabs take under one second.
+        Example: ' ' * 100000, '\t' * 100000."""
+        # Given: 100 000 blanks and 100 000 tabs
+        for hostile in (" " * 100000, "\t" * 100000):
+            started = time.monotonic()
+            # When: the step returns them
+            step_saying(hostile).failure("r")
+            # Then: it took under one second
+            self.assertLess(time.monotonic() - started, 1.0)
+
+    @mark.req("REQ-CHA-056")
+    def test_the_real_link_stays_clickable_after_text_that_ends_in_an_open_block(self):
+        """F-30: a comment or a code fence that the model leaves open must not swallow the link that code adds.
+        Example: `x` then `<!--`, and `x` then an open fence."""
+        # Given: a summary that ends in an open comment and one that ends in an open code fence
+        for ending in ("x\n\n<!--", "Done\n\n```\ncode"):
+            def runs(argument, on_delta, on_emotion, should_stop, monitor, ending=ending):
+                return "Done"
+            chat, _, _ = chat_with(self, runs, replies={"Done": ending})
+            # When: the run ends
+            chat.send("/go x", sender="anna", author="anna")
+            text = mia(chat)[0]["text"]
+            # Then: the block is closed and the message ends with the real link
+            self.assertNotIn("<!--", text)
+            self.assertEqual(text.count("```") % 2, 0, text)
+            self.assertTrue(text.endswith("(#run=%s)" % mia(chat)[0]["id"]))
+
+    @mark.req("REQ-CHA-064", "REQ-CHA-066")
+    def test_degenerate_texts_cost_little_in_both_cuts(self):
+        """F-20, F-29 (mutant gaps): `[a][` repeated 30 000 times, `[x](#run=` repeated 11 000 times, 100 000 `<script ` take under one second each.
+        Example: those texts."""
+        # Given: three degenerate texts
+        for hostile in ("[a][" * 30000, "[x](#run=" * 11000, "<script " * 12500):
+            started = time.monotonic()
+            # When: the model text is cleaned
+            clean_model_text(hostile)
+            # Then: it took under one second
+            self.assertLess(time.monotonic() - started, 1.0)
+
+    @mark.req("REQ-CHA-064")
+    def test_the_nesting_boundary_and_the_ends_of_the_removal(self):
+        """F-32 and mutant gaps: nesting 8 and 9 deep leaves no tag and no lost `5 < 6`; style end tags with attributes; comments and doctype go; a capital left-over of a run link is plain.
+        Example: `5 < 6 ` then 9 nested openings; `<style>a</style foo>b`; `<!-- x -->y`."""
+        # Given: nested openings 7 to 10 deep behind a comparison
+        # When: the step returns them
+        # Then: no tag is left and the comparison stays; the end tags, the comment and the capital left-over behave
+        for depth in (7, 8, 9, 10):
+            out = step_saying("5 < 6 " + "<a" * depth + "b" + ">" * depth).failure("r")
+            self.assertNotRegex(out, r"<[A-Za-z!/]")
+            self.assertIn("5 < 6", out)
+        self.assertEqual(step_saying("<style>a</style foo>b").failure("r"), "b")
+        self.assertEqual(step_saying("<!-- x -->y").failure("r"), "y")
+        self.assertNotIn("#run=", seen_by_a_browser(clean_model_text("see #RUN=e")))
 
 
 class Margin(unittest.TestCase):
