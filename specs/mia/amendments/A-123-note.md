@@ -1,0 +1,40 @@
+# A-123: what a converted skill is made of (design note, G-V2.CONVERT, for the owner's review)
+
+Status: **proposed, not applied, not reviewed**. Written 2026-11-15 after the T-CV-04 implementer stopped (no converted record exists; the test plants `model = {profile, options}` into one). It decides nothing; it lays out the shapes so the owner can pick. Blocks T-CV-04 and T-CV-06 to T-CV-08 (T-CV-05, snapshots, is independent but waits for the contract text).
+
+## What is fixed today (checked in the repo, 2026-11-15)
+- **Skill record** (IF-301 v2, REQ-WFM-040): `{id, data: {command, workflow_graph_id, context_graph_id}}`. A record wins over skill file, manifest and pipeline reference for those three things (REQ-WFM-041).
+- **Workflow graph** (IF-301 types, FR-37): nodes of three types only, `additionalProperties: false`: `data` (`value` any JSON, `parameters` object), `transform` (`toolbox_id`), `master` (`toolbox_id`, `stop`, `task`). The graph header has ID, context graph ID, testbench ID, description, members. Adding a type or a field is an IF-301 amendment (parent session).
+- **Runner** (N-2.4.1): runs the transforms and master nodes of a graph in topological order, each reading its input data nodes; refuses a graph with an untrusted transform or master node (REQ-RUN). A transform is a versioned function of the toolbox with trust and lifecycle (TOOLBOX goal, merged).
+- **Old skill** (`skills/<name>.md`, parsed by `skill_store.parse_skill`): name, pipeline, tools, budget, model (profile, options), prompts, schemas, examples, lines, triggers, status_block, personal. The old runner is `Core.run` -> `Core.graph(skill)` -> `Runner.run(skill, graph, inputs)` over `library/pipelines/<pipeline>`.
+- **Not defined anywhere:** where prompts, schemas, model options, tools and budget of a converted skill live. FR-45 and REQ-WFM-057 to 060 only say "the converted version" runs the same.
+
+## Three shapes
+| | A: one legacy step | B: steps as nodes | C: wide skill record |
+|---|---|---|---|
+| Idea | the skill's full content sits in one data node (`value` = the parsed skill dict: pipeline, tools, budget, model, prompts, schemas, examples, lines); one transform node `run_skill_pipeline` of the toolbox (trusted by the owner) reads it and runs the old pipeline machinery | every pipeline step becomes a node: prompts, schemas, model options as data nodes (`value`, `parameters`), model steps and tools as transforms of the toolbox (`model_step`, one per tool) | the skill record `data` gets the fields of the skill dict |
+| Skill record | unchanged (3 fields) | unchanged | IF-301 v3: new fields on `skills` (parent session) |
+| Graph | 1 data node + 1 transform node (+ data node for the input), context graph minimal | many nodes per skill; faithful, editable in the graph app | graph of the old pipeline steps still undefined |
+| New code | the transform `run_skill_pipeline` (small) | a `model_step` transform and a transform per tool, a converter pipeline-to-graph, probably a master-node style for loops (escalate, jury) | converter and a way to run content from the record |
+| IF-301 change | none | none (data nodes are open JSON), unless loops need a node type | yes (v3, protected) |
+| TC-WFM-058 | same calls by construction; the test plants `temperature 0.2` into the data node (`skill_changes` merges into the node value) | real test of a real conversion; hard for loops and escalation | as the red test assumes |
+| Risk | the conversion is shallow: structure is not visible in the graph; the equivalence check mostly proves the wrapper | large: five skills with escalation, jury, cops style flows; equivalence may fail on small differences; the dev suites (20 to 51 cases) cannot see small losses (A-122 point 2) | contract change for little gain: the graphs of REQ-WFM-040 carry no content |
+| Fits the goal exit (OC-1: "every skill runs from its record with the same outcomes or stays old for a written reason") | yes, cheapest; deeper decomposition becomes later goals, skill by skill | yes, but the largest and riskiest conversion | partly |
+
+## Recommendation (agent, the owner decides)
+**A for this goal, B as the direction of later goals.** A satisfies FR-45 and OC-1 without a contract change and keeps the equivalence check meaningful for what changes (the record, the runner path, the toolbox transform). Skills that later get a real graph (B) are converted one at a time with their own equivalence check, which FR-45 already describes. It also keeps `library/pipelines` as the single behaviour source until then, so no prompt can drift. The cost is honesty: "converted" in this goal means "runs from a record and a toolbox transform", and the report must say so.
+
+## What each choice needs
+- **A:** (1) the transform `run_skill_pipeline` as a toolbox record, trusted and shipped by the owner (REQ-WFM-054, TOOLBOX); (2) a converted skill = skill record + workflow graph (data node `skill`, data node `inputs`, transform node) + a minimal context graph, created by the converter (T-CV-06 to T-CV-08); (3) `run_converted` runs that graph with the existing graph runner on the given model and tools; (4) TC-WFM-058 unchanged except that `skill_changes` is merged into the value of the `skill` data node (the test text says "merged into the skill record": one amendment of the protected test comment, or it works as is if the helper accepts it); (5) TC-WFM-115 (extract_claims_rules, no model) the same way.
+- **B:** all of A's records, plus node types or loop handling decided in IF-301, a converter per pipeline, and the recording of the old run per step; a separate planning round per skill.
+- **C:** IF-301 v3, then A or B anyway for the graphs.
+
+## Open points for the owner
+- **O1** which shape (A recommended).
+- **O2** (for A) is the data node `skill` allowed to hold the whole skill dict including prompts, as `value` of a data node (size, versioning: one node version per change of the skill)? This repeats the skill file inside the graph store; the old file stays the source until the conversion is accepted (REQ-WFM-057) and is retired afterwards (FR-45).
+- **O3** (for A) the transform `run_skill_pipeline` runs old pipeline code with the permissions of MIA: only the owner marks it trusted, and it must refuse any pipeline that is not in `library/pipelines` (no foreign code path). Agree?
+- **O4** whether "converted" in the per-skill record (REQ-WFM-060) should name the shape ("wrapped") so a later deeper conversion is visible as a second step.
+- **O5** the nine skills that stay on the old runner (chat, check_speech, memory_write, summarize, five review skills) are not affected by any of this.
+
+## Effects on the plan if A is chosen (nothing changed yet)
+T-CV-04 and T-CV-06 to T-CV-08 get a precondition "the toolbox transform `run_skill_pipeline` exists and is trusted" (a new small task T-CV-03b before T-CV-04); T-CV-04's "Touches" line says the graph of a converted skill, not a record with prompts; REQ-WFM-058's text stays ("same model calls ... same prompts and options"). No requirement changes; one test comment of TC-WFM-058 and the plan text would be amended.
