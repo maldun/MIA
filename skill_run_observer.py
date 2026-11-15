@@ -10,8 +10,9 @@ except ImportError:  # used as plain script / in tests
 
 
 class SkillRunObserver:
-    def __init__(self, recorder, run, skill, version, account, phases=()):
+    def __init__(self, recorder, run, skill, version, account, phases=(), on_phase=None):
         self._recorder, self.run, self.skill, self.version, self.account, self.phases = recorder, run, skill, version, account, tuple(phases)
+        self._on_phase = on_phase          # G-V3.CHAT T-06: the chat tells a declared phase as a status message
 
     def start(self):
         self._call(self._recorder.start, self.run, self.skill, self.version, self.account, phases=self.phases)
@@ -19,6 +20,8 @@ class SkillRunObserver:
     def phase(self, text):
         if text in self.phases:
             self._call(self._recorder.phase, self.run, text)
+            if self._on_phase is not None:
+                self._call(self._on_phase, text)
 
     def report(self, budget=None, counts=None, elements=None):
         self._call(self._recorder.report, self.run, budget=budget, counts=counts, elements=elements)

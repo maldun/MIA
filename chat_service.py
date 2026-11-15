@@ -143,6 +143,7 @@ class ChatService:
                                         now=lambda: datetime.datetime.fromtimestamp(self._wall_clock(), datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"))      # task_status comes from the monitor of the run, once
         self._recorder = recorder                                          # G-V3.PANEL (REQ-WFM-130..138): the SkillRunRecorder; a SkillRunObserver made in _do_chat reports every task run to it (stub of Plan step 4: not used yet)
         self._digest = digest                                              # G-V3.CHAT (A-142): the SkillDigestStep that words the status, summary, failure and stop messages of a skill run
+        self._run_phases = {}                                              # run -> the phases its skill declares, for a service that has no `declared_phases` of its own (run_phases)
         self._declared_phases = declared_phases                            # run -> the phases the manifest of its skill declares worth telling (REQ-WFM-039)
         self._speak = speak                                                # (sentence, should_stop) -> None: the voice route of live answers (sound server); None = speak again stays silent (REQ-CHA-030)
         self._speak_lock = threading.Lock()                                # one spoken-again playback at a time (REQ-CHA-034)
@@ -664,17 +665,25 @@ class ChatService:
             raise ChatError("invalid_kind")
         if kind == "phase" and payload not in (self._declared_phases(run) if self._declared_phases else ()):
             return {"id": None}
+        text, spoken = self._turn_text(run, kind, payload)
+        record = self.post_assistant(text, skill_run=run, kind=kind)
+        self._voice(record["id"], spoken)
+        return {"id": record["id"]}
+
+    def run_phases(self, run):
+        """the phases that the skill of a run declares (REQ-WFM-039); () for a run that is not known"""
+        return self._run_phases.get(run, ())
+
+    def _turn_text(self, run, kind, payload):
+        """(text, spoken text) of one turn: the wording of the digest step, repaired, with the link of the run added by code at the end messages"""
         if kind == "question":
-            text = payload
-        else:
-            text = self._repaired(self._worded(kind, payload))
+            return payload, payload
+        text = self._repaired(self._worded(kind, payload))
         spoken = text
         if kind in ("done", "failed", "stopped"):
             text = SKILL_LINK.sub("", text).rstrip() + " [Open in the Skill run view](#run=%s)" % run      # a link in the model text is not the link: cut off, the real one follows
             spoken = SKILL_LINK.sub("", spoken)
-        record = self.post_assistant(text, skill_run=run, kind=kind)
-        self._voice(record["id"], spoken)
-        return {"id": record["id"]}
+        return text, spoken
 
     def _worded(self, kind, payload):
         """the wording of the digest step; a step that is missing or fails leaves a plain sentence that invents nothing, so that the user still hears how the run ended"""
@@ -788,7 +797,8 @@ class ChatService:
         message_id = self.log.new_id()
         created = utc_now()
         entry = self._tasks.get(task) if task != "chat" else None
-        late = entry is not None and "ask" in entry.needs            # REQ-WFM-036: the result of a task that asks questions is the newest message, its progress is the status card
+        turns = entry is not None and self._recorder is not None and self._digest is not None        # G-V3.CHAT T-06: the chat holds the questions, status messages and one summary of a run, never its result
+        late = entry is not None and ("ask" in entry.needs or turns)            # REQ-WFM-036: the result of a task that asks questions is the newest message, its progress is the status card
         with self._lock:
             self._message_id, self._pipeline, self._sources, self._show_pipeline, self._late, self._task_files = message_id, [], [], False, late, []
             self._steps = []
@@ -800,9 +810,12 @@ class ChatService:
                     options = self._prepare_task(entry, dict(options or {}), self.ask)
                 except Exception as exc:
                     self.note("Could not prepare /%s: %s" % (task, exc))
+            self._run_phases[message_id] = entry.phases
             self._monitor = TaskMonitor(self._emit_status, message_id, task, mode="slice" if (options or {}).get("slice") else "run")
             if self._recorder is not None:
-                self._observer = SkillRunObserver(self._recorder, message_id, task, entry.version, self._author or "page", phases=entry.phases)
+                self._observer = SkillRunObserver(self._recorder, message_id, task, entry.version, self._author or "page",
+                                                 phases=self._declared_phases(message_id) if self._declared_phases else entry.phases,
+                                                 on_phase=(lambda text, run=message_id: self.skill_turn(self._author or "page", run, "phase", text)) if turns else None)
                 self._observer.start()
                 self._monitor.observer = self._observer
             self._monitor.update(phase="starting")
@@ -867,7 +880,11 @@ class ChatService:
         else:
             self.set_activity(None)
         result = state["text"]                                                   # the result of the run record is the text without the links of its files
-        if self._observer is not None and state["text"]:                       # the result links to the run: the files are listed there, not in the text (IF-101 v16)
+        summary = None
+        if turns and self._observer is not None:
+            kind = {"done": "done", "stopped": "stopped"}.get(status, "failed")
+            state["text"], summary = self._turn_text(message_id, kind, result if kind == "done" else failure or "stopped by the user")      # the link is in the text already
+        elif self._observer is not None and state["text"]:                       # the result links to the run: the files are listed there, not in the text (IF-101 v16)
             state["text"] += " [Open in the Skill run view](#run=%s)" % message_id
         elif self._task_files:                                                 # without run records the files are links in the result (IF-101 v8)
             state["text"] = (state["text"] + "\n\n" if state["text"] else "") + "Files: " + ", ".join("[%s](/api/files/%s)" % (n, n) for n in self._task_files)
@@ -889,6 +906,8 @@ class ChatService:
             extra["task"] = task
         if self._observer is not None:
             extra["skill_run"] = message_id                  # the link from the message to its run survives a reload (IF-101 v16)
+            if turns:
+                extra["kind"] = kind
         with self._lock:
             shown, kept, sources, self._message_id, self._late = self._pipeline, self._steps, self._sources, None, False
         if shown:
@@ -900,6 +919,8 @@ class ChatService:
         record = self.log.append("assistant", state["text"], id=message_id, created=created, emotion=state["emotion"],
                                  status=status, model=model, **extra)
         self._emit("chat_done", {"id": message_id, "text": record["text"], "emotion": record["emotion"], "status": status, **({"files": list(self._task_files)} if self._task_files else {}), **({"skill_run": message_id} if self._observer is not None else {})})
+        if summary is not None:
+            self._voice(message_id, summary)
         if self._observer is not None:
             self._observer.end({"done": "done", "stopped": "stopped"}.get(status, "failed"), reason=failure if status == "error" else "stopped by the user" if status == "stopped" else None, result=result)
             self._observer = None
