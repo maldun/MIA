@@ -3929,73 +3929,63 @@ plausibility:
       rated: '2026-10-26'
       rated_by: maldun
       rating: plausible
-    REQ-WFM-059:
-      basis:
-      - 'umbrella over the per-skill criteria REQ-WFM-110 to 115; its own behaviour is exact, the numbers sit in 110 to 114 (D-260 D: questionable with a probe)'
-      hardware: HW-target
-      rated: '2026-11-07'
-      rated_by: maldun
-      rating: questionable
-      probe: {what: "record the baselines of the converted skills on MP-light (dev split, 3 repeats, results only) in Plan Step 4 of G-V2.CONVERT, then judge the margin 0.10 against them", who: maldun, when: "Plan Step 4 of G-V2.CONVERT"}
     REQ-WFM-110:
       basis:
       - REF-CONVERT-1
-      - 'the margin 0.10 is an educated guess (D-187); rated questionable with a probe: baselines are recorded in Plan Step 4, then the margin is judged against them (owner, D-260 D)'
+      - 'baseline measured 2026-11-15: 0.95 (57 of 60), floor 0.85 (17 of 20 cases), false alarm 0.0003; the margin 0.10 is kept, a loss of 0.15 is still missed in 65 % of the checks and REQ-WFM-058 is the guard (owner, D-245)'
       claims:
-      - {kind: floor, value: 0.82, unit: '1', against: REF-CONVERT-1}
+      - {kind: floor, value: 0.85, unit: '1', against: REF-CONVERT-1}
       hardware: HW-target
-      rated: '2026-11-07'
+      rated: '2026-11-15'
       rated_by: maldun
-      rating: questionable
-      probe: {what: "record the baselines of the converted skills on MP-light (dev split, 3 repeats, results only) in Plan Step 4 of G-V2.CONVERT, then judge the margin 0.10 against them", who: maldun, when: "Plan Step 4 of G-V2.CONVERT"}
+      rating: plausible
     REQ-WFM-111:
       basis:
       - REF-CONVERT-2
-      - 'the margin 0.10 is an educated guess (D-187); rated questionable with a probe: baselines are recorded in Plan Step 4, then the margin is judged against them (owner, D-260 D)'
+      - 'baseline measured 2026-11-15: 0.639 (69 of 108), floor 0.54 (20 of 36 cases), false alarm 0.0122; REQ-WFM-058 is the guard against small losses (owner, D-245)'
       claims:
       - {kind: floor, value: 0.54, unit: '1', against: REF-CONVERT-2}
       hardware: HW-target
-      rated: '2026-11-07'
+      rated: '2026-11-15'
       rated_by: maldun
-      rating: questionable
-      probe: {what: "record the baselines of the converted skills on MP-light (dev split, 3 repeats, results only) in Plan Step 4 of G-V2.CONVERT, then judge the margin 0.10 against them", who: maldun, when: "Plan Step 4 of G-V2.CONVERT"}
+      rating: plausible
     REQ-WFM-112:
       basis:
       - REF-CONVERT-3
-      - 'the margin 0.10 is an educated guess (D-187); rated questionable with a probe: baselines are recorded in Plan Step 4, then the margin is judged against them (owner, D-260 D)'
+      - 'baseline measured 2026-11-15: 0.940 (141 of 150), floor 0.83 (42 of 50 cases), false alarm 0.0001; REQ-WFM-058 is the guard against small losses (owner, D-245)'
       claims:
       - {kind: floor, value: 0.83, unit: '1', against: REF-CONVERT-3}
       hardware: HW-target
-      rated: '2026-11-07'
+      rated: '2026-11-15'
       rated_by: maldun
-      rating: questionable
-      probe: {what: "record the baselines of the converted skills on MP-light (dev split, 3 repeats, results only) in Plan Step 4 of G-V2.CONVERT, then judge the margin 0.10 against them", who: maldun, when: "Plan Step 4 of G-V2.CONVERT"}
+      rating: plausible
     REQ-WFM-113:
       basis:
       - REF-CONVERT-4
-      - 'the margin 0.10 is an educated guess (D-187); rated questionable with a probe: baselines are recorded in Plan Step 4, then the margin is judged against them (owner, D-260 D)'
+      - 'baseline measured 2026-11-15: 0.974 (114 of 117), floor 0.87 (34 of 39 cases, A-122), false alarm 0.0000; REQ-WFM-058 is the guard against small losses (owner, D-245)'
       claims:
-      - {kind: floor, value: 0.82, unit: '1', against: REF-CONVERT-4}
+      - {kind: floor, value: 0.87, unit: '1', against: REF-CONVERT-4}
       hardware: HW-target
-      rated: '2026-11-07'
+      rated: '2026-11-15'
       rated_by: maldun
-      rating: questionable
-      probe: {what: "record the baselines of the converted skills on MP-light (dev split, 3 repeats, results only) in Plan Step 4 of G-V2.CONVERT, then judge the margin 0.10 against them", who: maldun, when: "Plan Step 4 of G-V2.CONVERT"}
+      rating: plausible
     REQ-WFM-114:
       basis:
       - REF-CONVERT-5
-      - 'the margin 0.10 is an educated guess (D-187); rated questionable with a probe: baselines are recorded in Plan Step 4, then the margin is judged against them (owner, D-260 D)'
+      - 'baseline measured 2026-11-15: 0.680 (104 of 153), floor 0.59 (31 of 51 cases), false alarm 0.0064; REQ-WFM-058 is the guard against small losses (owner, D-245)'
       claims:
       - {kind: floor, value: 0.59, unit: '1', against: REF-CONVERT-5}
       hardware: HW-target
-      rated: '2026-11-07'
+      rated: '2026-11-15'
       rated_by: maldun
-      rating: questionable
-      probe: {what: "record the baselines of the converted skills on MP-light (dev split, 3 repeats, results only) in Plan Step 4 of G-V2.CONVERT, then judge the margin 0.10 against them", who: maldun, when: "Plan Step 4 of G-V2.CONVERT"}
-    REQ-WFM-066:
+      rating: plausible
+    REQ-WFM-115:
       basis:
-      - 'only the owner = the account that creates accounts (TC-MIA-014); several accounts on one instance are for testing only, a later goal is one user per instance (owner, D-260 B)'
-
+      - 'exact equality of the outputs of a deterministic function (no model) on all 51 cases; no model quality or measured number depends on it (owner, D-245)'
+      hardware: HW-target
+      rated: '2026-11-15'
+      rated_by: maldun
+      rating: plausible
     REQ-WFM-027:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
@@ -4293,8 +4283,7 @@ plausibility:
       rating: plausible
     REQ-WFM-066:
       basis:
-      - no number, measurement or model quality depends on it; the behaviour is fixed
-        by an acceptance criterion and a contract mock (proposal)
+      - 'only the owner = the account that creates accounts (TC-MIA-014); several accounts on one instance are for testing only, a later goal is one user per instance (owner, D-260 B)'
       hardware: HW-target
       rated: '2026-11-07'
       rated_by: maldun
@@ -4610,13 +4599,6 @@ plausibility:
       rated: '2026-10-26'
       rated_by: maldun
       rating: plausible
-  references:
-    REF-CONVERT-1: {quantity: "research.escalate@1 on EV-research, share of cases behaving as expected", value: 0.92, unit: "1", uncertainty: 0.13, kind: measured, basis: "eval/baselines/research-escalate.md: 55 of 60 case-repeats (20 cases x 3 repeats), Wilson 95 % half-width over 20 cases", hardware: HW-target, date: "2026-10-19"}
-    REF-CONVERT-2: {quantity: "plan.free@1 on EV-plans, share of plans as they should be", value: 0.64, unit: "1", uncertainty: 0.15, kind: measured, basis: "eval/baselines/research-planners.md: 69 of 108 (36 plans x 3 repeats), Wilson half-width over 36 cases", hardware: HW-target, date: "2026-10-20"}
-    REF-CONVERT-3: {quantity: "verify.single@1 on EV-verdicts, share of right decisions", value: 0.93, unit: "1", uncertainty: 0.07, kind: measured, basis: "eval/baselines/verdicts-single.md: 43 of 46 claims with a known truth, 1 run, Wilson half-width over 50 cases", hardware: HW-target, date: "2026-10-19"}
-    REF-CONVERT-4: {quantity: "verify.computable@2 on EV-computable, share of right decisions", value: 0.92, unit: "1", uncertainty: 0.09, kind: measured, basis: "eval/baselines/computable-gemma4-12b.md: right overall 92 % of 39 cases, 1 run, Wilson half-width over 39 cases", hardware: HW-target, date: "2026-10-18"}
-    REF-CONVERT-5: {quantity: "extract.llm@1 on EV-extraction, share of texts extracted perfectly", value: 0.69, unit: "1", uncertainty: 0.12, kind: measured, basis: "eval/baselines/extraction-llm-light.md: 35 of 51 texts, 1 run, Wilson half-width over 51 cases", hardware: HW-target, date: "2026-10-18"}
-
     REQ-CLV-024:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
@@ -5192,4 +5174,9 @@ plausibility:
       rated: '2026-11-08'
       rated_by: maldun
       rating: plausible
-  references: {}
+  references:
+    REF-CONVERT-1: {quantity: "research.escalate@1 on EV-research, share of cases behaving as expected", value: 0.95, unit: "1", uncertainty: 0.11, kind: measured, basis: "run research__escalate__20261115-173301: 57 of 60 case-repeats (20 cases x 3 repeats), Wilson 95 % half-width over 20 cases; baseline run files placed by the owner in eval/baselines/", hardware: HW-target, date: "2026-11-15"}
+    REF-CONVERT-2: {quantity: "plan.free@1 on EV-plans, share of plans as they should be", value: 0.639, unit: "1", uncertainty: 0.15, kind: measured, basis: "run plans__free__20261115-173323: 69 of 108 (36 plans x 3 repeats), Wilson 95 % half-width over 36 cases; baseline run files placed by the owner in eval/baselines/", hardware: HW-target, date: "2026-11-15"}
+    REF-CONVERT-3: {quantity: "verify.single@1 on EV-verdicts, share of right decisions", value: 0.94, unit: "1", uncertainty: 0.07, kind: measured, basis: "run verdicts__single__20261115-173350: 141 of 150 right decisions (50 cases x 3 repeats), Wilson 95 % half-width over 50 cases; baseline run files placed by the owner in eval/baselines/", hardware: HW-target, date: "2026-11-15"}
+    REF-CONVERT-4: {quantity: "verify.computable@2 on EV-computable, share of right decisions", value: 0.974, unit: "1", uncertainty: 0.06, kind: measured, basis: "run computable__computable2__20261115-173501: 114 of 117 (39 cases x 3 repeats), Wilson 95 % half-width over 39 cases; baseline run files placed by the owner in eval/baselines/", hardware: HW-target, date: "2026-11-15"}
+    REF-CONVERT-5: {quantity: "extract.llm@1 on EV-extraction, share of texts extracted perfectly", value: 0.68, unit: "1", uncertainty: 0.12, kind: measured, basis: "run extraction__llm__20261115-173516: 104 of 153 (51 cases x 3 repeats), Wilson 95 % half-width over 51 cases; baseline run files placed by the owner in eval/baselines/", hardware: HW-target, date: "2026-11-15"}
