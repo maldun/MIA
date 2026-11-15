@@ -70,6 +70,7 @@ Top-level items it serves: FR-35, FR-46 (the chat part), FR-3 (the spoken short 
 | REQ-CHA-061 | in | new, result goes to the digest step as text (group UT) |
 | REQ-CHA-062 | in | new, summary from the digests only (group BG) |
 | REQ-CHA-063 | in | new, summary passed on uncut (group BG) |
+| REQ-CHA-064 | in | new (A-150), no HTML tag in the output of the digest step (group UT) |
 | REQ-VOI-001 | out | the voice path stays as it is (TD-11, A-130 independent) |
 
 ## Parts

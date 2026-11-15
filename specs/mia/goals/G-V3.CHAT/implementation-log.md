@@ -20,7 +20,7 @@ Goal: G-V3.CHAT   Line of work: goal/v3.chat (a worktree of its own, `goal-v3-ch
 | TC-CHA-063 is listed under T-01, but its acceptance test (`test_a_long_summary_is_passed_on_uncut`) runs through `ChatService.skill_turn`, which is the stub of T-02. The step side of REQ-CHA-063 (the model text is returned as it is) is met and tested by the unit test of the one-call wordings; the acceptance test turns green with T-02 | T-01 | `tests/acceptance/test_chat_skill_turns.py` (waits for T-02), `tests/test_skill_digest.py` |
 
 ## Plan amendments
-None.
+| A-150 | 2026-11-15 | REQ-CHA-064 (no HTML tag in the output of SkillDigestStep, code side) after T-05 found REQ-CHA-049 unreachable by prompt for `st-rt-d5`; approved by the owner by questionnaire. Applied: requirements.md, test-spec.md (TC-CHA-069), architecture.sysml, goal.md; protected part (acceptance test, TR-CHAT-006 `Applies to`) in `amendment-a150/protected.patch` for the owner (`git apply`); plausibility row REQ-CHA-064 to be rated by the owner | `specs/mia/amendments/A-150-note.md` |
 
 ## Stop conditions hit
 | Date | Task | Condition | Escalated to | Outcome |

@@ -62,6 +62,7 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-201
 | TC-CHA-066 | REQ-CHA-049, REQ-CHA-053, REQ-CHA-054 | Unit | 0 | unit test of the scorer | AC-39: faithful, persona and the status of a case follow the labels and the hard checks as written | exact |
 | TC-CHA-067 | REQ-CHA-053 | Component | 1 | the harness target `digest` with the fake model of TR-CHAT-006 and a pin | AC-39: the target runs the production step on the pin, with no tool, and records its text unchanged | exact |
 | TC-CHA-068 | REQ-BE-078, REQ-CHA-041, REQ-CHA-042, REQ-CHA-043, REQ-CHA-046, REQ-CHA-058, REQ-WFM-130, REQ-WFM-136 | Integration | 2 | The chat service with the run recorder, the observer of a task run and the digest step on the fake model and the fake storage; a scripted task with three declared phases and a long result (G-V3, TR-CHAT-009) | AC-39 (backend part): the chat holds one status message per declared phase and one summary with the link and nothing else of the run; the run record holds the full result; the model history holds the last status and the summary | exact |
+| TC-CHA-069 | REQ-CHA-064 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: HTML tags are removed from every output of the step, text without a tag and a lone `<` are unchanged | exact |
 | EV-skill_turns | REQ-CHA-049, REQ-CHA-053, REQ-CHA-054 | Evaluation | 4 | the suite `eval/suites/skill_turns` (dev 24) and `skill_turns.holdout` (24) on MP-light, 3 repeats, harness `tools/eval.py` | AC-39: red-team cases pass in every repeat; faithful at least 0.85 (lower bound 0.70); persona at least 0.80 (lower bound 0.70), decided by `eval_decide.py` against the baseline | as in the Eval criterion lines |
 
 ## Scenarios (speak again, A-132; the older checks of this file have none yet)
@@ -302,3 +303,9 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-201
 - Given: the chat service with the recorder on the fake storage, the digest step on the fake model and a recording speech route; a scripted task that declares the phases collect, rank and report, reports them through `monitor.update` (and a fourth phase cleanup that is not declared) and returns a long result with a table
 - When: the user starts the task and it ends
 - Then: the chat holds exactly four messages of MIA: one status message per declared phase in order, then one summary that ends with the link of the run; no message holds the table or the full result; every message was sent to speech once; the run record holds the full result, the state done and the figures; the history for the chat model ends with the third status message and the summary
+
+### TC-CHA-069 – No markup in the output of the digest step
+- Verifies: REQ-CHA-064
+- Given: scripted replies of the fake model for a status message, a summary, a failure message and a stop message, one of them `Done: <script>alert(1)</script> and <b>x</b>`, one `5 < 6 is true`, one without any `<`
+- When: the four wordings are asked from SkillDigestStep
+- Then: the first reads `Done: alert(1) and x`; the second and the third are returned unchanged; no output of the step contains a tag

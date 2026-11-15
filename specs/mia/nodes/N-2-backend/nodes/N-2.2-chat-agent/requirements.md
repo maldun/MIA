@@ -368,7 +368,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 | Order | Group | What it covers | Requirements |
 |---|---|---|---|
 | 1 | ST | Skill turns: what the chat shows of a run and what the model sees (FR-35, FR-46) | REQ-CHA-040, REQ-CHA-041, REQ-CHA-042, REQ-CHA-043, REQ-CHA-044, REQ-CHA-045, REQ-CHA-046, REQ-CHA-047, REQ-CHA-055, REQ-CHA-056, REQ-CHA-057, REQ-CHA-058, REQ-CHA-059, REQ-CHA-060 |
-| 2 | UT | Untrusted result (TB-result) | REQ-CHA-048, REQ-CHA-049, REQ-CHA-061 |
+| 2 | UT | Untrusted result (TB-result) | REQ-CHA-048, REQ-CHA-049, REQ-CHA-061, REQ-CHA-064 |
 | 3 | BG | Budgets of the digest step | REQ-CHA-050, REQ-CHA-051, REQ-CHA-052, REQ-CHA-062, REQ-CHA-063 |
 | 4 | SQ | Summary quality (eval criteria) | REQ-CHA-053, REQ-CHA-054 |
 
@@ -686,3 +686,16 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verified by: TC-CHA-063
 - Status: Draft
 - History: A-131 (proposed 2026-11-08, G-V3.CHAT), new; owner 2026-11-08, split from REQ-CHA-052
+
+### REQ-CHA-064 – No markup in the output of the digest step
+- Level: low   Subject: ConversationCore
+- Text: When SkillDigestStep returns a text, the Chat agent shall remove every HTML tag from it before the text is repaired or shown.
+- Rationale: refines REQ-BE-078; NFR-3, THR-012: a prompt cannot make the 12B model leave a quoted tag out (G-V3.CHAT T-05, prompt versions 1 to 4, st-rt-d5), so code does; the text inside a tag stays as plain text
+- Parent: REQ-BE-078
+- Group: UT
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: a scripted reply `Done: <script>alert(1)</script> and <b>x</b>` gives `Done: alert(1) and x`; a text without a tag, and a lone `<` or `>` as in `5 < 6`, is unchanged (exact)
+- Verified by: TC-CHA-069
+- Status: Draft
+- History: A-150 (proposed 2026-11-15, G-V3.CHAT), new; owner approval 2026-11-15 by questionnaire
