@@ -712,6 +712,7 @@ chat_service = ChatService(socketio.emit, chat_log, mood, run_chat_exchange, run
                            repair=lambda text: behaviour.apply_rules(text)["text"], remember=_remember,         # the stream is held back and repaired silently (REQ-CHA-014)
                            digest=_SkillDigest(), declared_phases=lambda run: chat_service.run_phases(run),     # the chat holds status messages and one summary of a run, not its result (G-V3.CHAT T-06)
                            react=lambda expression: character_reaction(expression))         # shocked after a minus (REQ-CHV-006)
+comm.skill_history = chat_service.model_history          # the messages of skill runs go to the chat model with the next turn (REQ-CHA-046, 059)
 app.register_blueprint(create_chat_ops_blueprint(chat_service))
 app.register_blueprint(create_files_blueprint(_file_store))
 app.register_blueprint(create_items_blueprint(_votes_store, socketio.emit))

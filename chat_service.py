@@ -663,12 +663,16 @@ class ChatService:
         added by code (REQ-CHA-056). Every message is a record with `skill_run` and `kind`, an event chat_message and goes to speech once (REQ-CHA-045). Returns {"id"}, {"id": None} for a phase without message."""
         if kind not in SKILL_TURN_KINDS:
             raise ChatError("invalid_kind")
-        if kind == "phase" and payload not in (self._declared_phases(run) if self._declared_phases else ()):
+        if kind == "phase" and payload not in self._phases_of(run):
             return {"id": None}
         text, spoken = self._turn_text(run, kind, payload)
         record = self.post_assistant(text, skill_run=run, kind=kind)
         self._voice(record["id"], spoken)
         return {"id": record["id"]}
+
+    def _phases_of(self, run):
+        """the phases a run may tell: those of `declared_phases` where the service has it, else those of the entry of the running skill (REQ-WFM-039)"""
+        return self._declared_phases(run) if self._declared_phases else self.run_phases(run)
 
     def run_phases(self, run):
         """the phases that the skill of a run declares (REQ-WFM-039); () for a run that is not known"""
@@ -695,7 +699,11 @@ class ChatService:
         return {"phase": "Working on: %s." % payload, "done": "The run is done.", "failed": "The run failed: %s" % payload, "stopped": "The run was stopped (%s)." % payload}[kind]
 
     def _repaired(self, text):
-        return self._repair(text) if self._repair is not None else text
+        try:
+            return self._repair(text) if self._repair is not None else text
+        except Exception as exc:                                  # a repair that fails leaves the text as the step worded it: the run still ends in the chat
+            logger.error("The repair of a skill message failed: %s", exc)
+            return text
 
     def model_history(self):
         """the messages of skill runs that the next chat turn sends to the chat model, [{"role", "text"}] in the order of the chat (REQ-CHA-046, 059): per run its questions, the answers that
@@ -732,7 +740,10 @@ class ChatService:
         waiter = {"author": self._author, "replies": queue.Queue()}
         with self._lock:
             self._waiter = waiter
-        self.post_assistant(text, **({"skill_run": self._observer.run} if self._observer is not None else {}))
+        if self._observer is not None:
+            self.skill_turn(self._author or "page", self._observer.run, "question", text)       # a question of a run is a message of MIA with kind and speech (REQ-CHA-040, 045)
+        else:
+            self.post_assistant(text)
         self.set_activity("waiting")
         monitor = self._monitor
         if monitor is not None:
@@ -814,7 +825,7 @@ class ChatService:
             self._monitor = TaskMonitor(self._emit_status, message_id, task, mode="slice" if (options or {}).get("slice") else "run")
             if self._recorder is not None:
                 self._observer = SkillRunObserver(self._recorder, message_id, task, entry.version, self._author or "page",
-                                                 phases=self._declared_phases(message_id) if self._declared_phases else entry.phases,
+                                                 phases=self._phases_of(message_id),
                                                  on_phase=(lambda text, run=message_id: self.skill_turn(self._author or "page", run, "phase", text)) if turns else None)
                 self._observer.start()
                 self._monitor.observer = self._observer
@@ -924,6 +935,7 @@ class ChatService:
         if self._observer is not None:
             self._observer.end({"done": "done", "stopped": "stopped"}.get(status, "failed"), reason=failure if status == "error" else "stopped by the user" if status == "stopped" else None, result=result)
             self._observer = None
+            self._run_phases.pop(message_id, None)               # the run is over: its phases need no memory (F-13)
         if self._monitor is not None:
             self._monitor.finish()                      # the card keeps the final figures
             self._monitor = None
