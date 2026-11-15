@@ -4964,7 +4964,7 @@ plausibility:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
         by an exact acceptance criterion on a scripted run or a recording chat function,
-        no real model (proposal of the agent, 2026-11-15, A-152; the time budget per call was measured in a spike on MP-light the same day: slowest call 12.9 s of 20 s)
+        no real model (proposal of the agent, 2026-11-15, A-152; the time budget per call was measured in a spike on MP-light the same day, slowest call 12.9 s of 20 s)
       hardware: HW-target
       rated: '2026-11-15'
       rated_by: maldun
