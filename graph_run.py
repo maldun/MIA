@@ -20,11 +20,11 @@ RunResult = namedtuple("RunResult", "status named named_status values")
 
 
 class Stage:
-    """STUB (T-CV-03a, A-124): marks a function that wants the call function(inputs, outputs, node) instead of function({input data node id: value}). The runner does not
+    """STUB (T-CV-03a, A-124): marks a function that wants the call function(inputs, outputs, node), with an optional `prepare(inputs, outputs, node)` that gives start values (D-250), instead of function({input data node id: value}). The runner does not
     know it yet, so a Stage is not callable and its node fails; the acceptance tests of REQ-RUN-030 to 033 are red."""
 
-    def __init__(self, function):
-        self.function = function
+    def __init__(self, function, prepare=None):
+        self.function, self.prepare = function, prepare
 
 
 class GraphRunner:

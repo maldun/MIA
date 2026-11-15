@@ -30,3 +30,6 @@ TC-RUN-030 (inputs, renamed input, outputs, settings), TC-RUN-031 (per-output wr
 - **R3** the result form `{"outputs": {...}}` and the rule that anything else goes to every output node.
 - **R4** the four new requirements and the refusals of REQ-RUN-033; the tool and model whitelist stays in the common module.
 - **R5** the new checks TC-RUN-030 to 033 in a new test file.
+
+## Addition 2026-11-15 (owner, D-250): start values
+The owner: "start values should depend on the transform; most times the run gives them, but there may be exceptions." Decided: a Stage may have a second function `prepare(inputs, outputs, node)`, called once right before the Stage with the arguments as they stand without its help; it returns `{"inputs": {...}, "outputs": {...}}` (either may be missing, or None): defaults for inputs not given and start values for output nodes (an empty store, a counter). Precedence for the value of a data node: the run's `inputs`, then `prepare`, then the `value` of the graph node (IF-301 allows it on data nodes, optional), then nothing. The caller always wins (tests, replays, the equivalence check). New REQ-RUN-034 and check TC-RUN-034; `Stage(function, prepare=None)`; TC-RUN-030 to 033 stay as drafted (their graph nodes carry no `value`).

@@ -22,7 +22,7 @@ Task ids carry the prefix CV so that they do not collide with T-01 to T-11 of th
 | T-CV-01 Recording of the old run (spike) | REQ-WFM-058 | TC-WFM-058 can be written against recordings: model replies and tool results of one old run replay deterministically | P1, P2 |
 | T-CV-02 Settings record of the equivalence check | REQ-WFM-069 | TC-WFM-069 | P1, P2 |
 | T-CV-03 Per-skill state, old runner until accepted, record of the check | REQ-WFM-057, REQ-WFM-059, REQ-WFM-060 | TC-WFM-057, TC-WFM-059, TC-WFM-060 | T-CV-02 |
-| T-CV-03a The three-argument call of the graph runner (Stage) | REQ-RUN-030, REQ-RUN-031, REQ-RUN-032, REQ-RUN-033 (A-124) | TC-RUN-030 to TC-RUN-033; TC-RUN-016 to 019 unchanged | T-CV-03 |
+| T-CV-03a The three-argument call of the graph runner (Stage) | REQ-RUN-030 to REQ-RUN-034 (A-124) | TC-RUN-030 to TC-RUN-034; TC-RUN-016 to 019 unchanged | T-CV-03 |
 | T-CV-03b Common operations module and thin toolbox entries | REQ-WFM-058 (precondition), A-123 P1b | every shipped toolbox transform runs: `toolbox.run(id, args)` gives the result of its library node on recorded inputs; a view runs as a model step with its prompt and schema as data | T-CV-03 |
 | T-CV-03c Order of independent steps | REQ-WFM-058 (precondition), A-123 P4 | the graph built from an ordered list of steps has `order_of` equal to that list; no edge joins two process nodes (R3) | T-CV-03b |
 | T-CV-03d Pipeline to graph converter | REQ-WFM-058 (precondition), A-123 P2, P3 | a pipeline JSON becomes a graph that passes the graph rules: stages are transforms, a loop or a map over an unknown number of items is a master node with `stop` | T-CV-03c |
@@ -63,9 +63,9 @@ Task ids carry the prefix CV so that they do not collide with T-01 to T-11 of th
 - Notes: no model run; versions: records start at version 1, no skill file or pipeline changes, so no version bump
 
 ### T-CV-03a: The three-argument call of the graph runner (Stage)
-- Implements: REQ-RUN-030 to REQ-RUN-033 (A-124, D-248 C, D-249)
-- Tests to turn green: new `tests/acceptance/test_graph_run_stages.py` written first (red, protected folder, the owner's go and placement): TC-RUN-030 to TC-RUN-033; the four old checks of `test_graph_run.py` stay green
-- Touches: `graph_run.py` (class `Stage`; the run reads edge fields `as` and `role`, builds inputs, outputs and the settings object, writes per output; plain callables unchanged)
+- Implements: REQ-RUN-030 to REQ-RUN-034 (A-124, D-248 C, D-249, D-250)
+- Tests to turn green: new `tests/acceptance/test_graph_run_stages.py` written first (red, protected folder, the owner's go and placement): TC-RUN-030 to TC-RUN-034; the four old checks of `test_graph_run.py` stay green
+- Touches: `graph_run.py` (class `Stage(function, prepare=None)`; the run reads edge fields `as` and `role` and the graph node `value`, builds inputs, outputs and the settings object, calls prepare once before the Stage, writes per output; plain callables unchanged)
 - Must not touch: protected material, `contracts/`, the verified behaviour of REQ-RUN-016 to 019
 - Depends on: T-CV-03
 - Done when: the four new checks and the four old checks are green

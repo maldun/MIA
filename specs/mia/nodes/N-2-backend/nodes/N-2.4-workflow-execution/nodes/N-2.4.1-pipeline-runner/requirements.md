@@ -192,7 +192,7 @@ Runs a workflow step by step under budgets: model calls and model management, pr
 | Order | Group | What it covers | Requirements |
 |---|---|---|---|
 | 1 | EX | Execution of the new graph: order, trust, master nodes, failure (FR-37, FR-38) | REQ-RUN-016, REQ-RUN-017, REQ-RUN-018, REQ-RUN-019 |
-| 2 | ST | Stages: inputs, outputs and settings of a transform (FR-37; G-V2.CONVERT, A-124) | REQ-RUN-030, REQ-RUN-031, REQ-RUN-032, REQ-RUN-033 |
+| 2 | ST | Stages: inputs, outputs and settings of a transform (FR-37; G-V2.CONVERT, A-124) | REQ-RUN-030, REQ-RUN-031, REQ-RUN-032, REQ-RUN-033, REQ-RUN-034 |
 
 ### REQ-RUN-016 – Run in topological order
 - Level: low-2   Subject: TaskRuntime
@@ -297,3 +297,16 @@ Runs a workflow step by step under budgets: model calls and model management, pr
 - Verified by: TC-RUN-033
 - Status: Draft
 - History: G-V2.CONVERT A-124 (owner approval 2026-11-15, D-249), new
+
+### REQ-RUN-034 – Start values of data nodes
+- Level: low-2   Subject: TaskRuntime
+- Text: When a Stage is about to run, the Pipeline runner shall give each data node it reads or writes the value of the run, else the value the Stage's prepare function gave for it, else the value of the graph node, else nothing.
+- Rationale: refines FR-37; D-250: the usual start values come from the run, some transforms need their own (an empty store, a counter, a default input); the caller always wins so replays and checks can override; prepare runs once, right before its Stage, and sees the arguments as they stand without its help
+- Parent: FR-37
+- Group: ST
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-31: with a graph value, a prepare value and a run value for one node, the Stage gets the run value; without the run value the prepare value; without both the graph value; without any, nothing (exact)
+- Verified by: TC-RUN-034
+- Status: Draft
+- History: G-V2.CONVERT A-124 (owner decision 2026-11-15, D-250), new
