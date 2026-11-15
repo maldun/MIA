@@ -96,6 +96,44 @@ class RecordTablesContract(unittest.TestCase):
         for value in (1.0, -1.0, True, False):
             self.assertEqual(tables.validate("votes", dict(vote, value=value)), {"rule": "schema", "detail": "value"}, value)
 
+    @mark.req("IF-302", "REQ-RTB-008")
+    @each_provider(IF)
+    def test_transform_meta_keeps_trust_and_lifecycle(self, tables):
+        """TC-IF-302-09 (v10, A-110; TC-RTB-008): transform_meta is versioned and not deletable; trust (untrusted or trusted) and lifecycle (draft, tested or retired) are required and exact; the optional fields are free.
+        (08 is taken by skill_runs of G-V3, A-141: check the number when both are installed.)"""
+        self.assertEqual(tables.definitions()["transform_meta"], {"versioned": True, "deletable": False})
+        self.assertIsNone(tables.validate("transform_meta", {"trust": "trusted", "lifecycle": "tested"}))
+        self.assertIsNone(tables.validate("transform_meta", {"trust": "untrusted", "lifecycle": "draft", "reason": "not reviewed", "evidence": "run-17", "baseline_allowed": False, "shipped": True}))
+        for field in ("trust", "lifecycle"):
+            incomplete = {"trust": "trusted", "lifecycle": "tested"}
+            del incomplete[field]
+            self.assertEqual(tables.validate("transform_meta", incomplete), {"rule": "schema", "detail": field})
+        self.assertEqual(tables.validate("transform_meta", {"trust": "maybe", "lifecycle": "tested"}), {"rule": "schema", "detail": "trust"})
+        self.assertEqual(tables.validate("transform_meta", {"trust": "trusted", "lifecycle": "fine"}), {"rule": "schema", "detail": "lifecycle"})
+
+    @mark.req("IF-302", "REQ-RTB-009")
+    @each_provider(IF)
+    def test_transforms_keeps_the_versions_of_the_code(self, tables):
+        """TC-IF-302-10 (v11, A-112; TC-RTB-009): transforms is versioned and not deletable; id (text, not empty) and version (an integer of at least 1) are required and exact;
+        inputs, outputs and code are free, a missing, empty or null code is valid."""
+        self.assertEqual(tables.definitions()["transforms"], {"versioned": True, "deletable": False})
+        full = {"id": "t.one", "version": 1, "inputs": {"type": "object"}, "outputs": {"type": "number"}, "code": "def run(args):\n    return 1\n"}
+        self.assertIsNone(tables.validate("transforms", full))
+        for free in ({"code": ""}, {"code": None}, {"inputs": 5}):
+            self.assertIsNone(tables.validate("transforms", dict(full, **free)), free)
+        self.assertIsNone(tables.validate("transforms", {"id": "t.two", "version": 7}))
+        stub = dict(full)
+        del stub["code"]
+        self.assertIsNone(tables.validate("transforms", stub))
+        for field in ("id", "version"):
+            incomplete = dict(full)
+            del incomplete[field]
+            self.assertEqual(tables.validate("transforms", incomplete), {"rule": "schema", "detail": field})
+        self.assertEqual(tables.validate("transforms", dict(full, id="")), {"rule": "schema", "detail": "id"})
+        self.assertEqual(tables.validate("transforms", dict(full, id=5)), {"rule": "schema", "detail": "id"})
+        for version in (0, -1, True, 1.0, 1.5, "1", None):
+            self.assertEqual(tables.validate("transforms", dict(full, version=version)), {"rule": "schema", "detail": "version"}, version)
+
     @mark.req("IF-302", "REQ-RTB-007")
     @each_provider(IF)
     def test_a_skill_run_is_a_versioned_deletable_record(self, tables):

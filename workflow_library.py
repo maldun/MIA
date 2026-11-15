@@ -13,9 +13,12 @@ except ImportError:
     from storage import StorageError
     import context_graph
 
-KINDS = ("workflows", "context_graphs")
+KINDS = ("workflows", "context_graphs", "transforms")
 STATUSES = ("draft", "tested", "trusted", "retired")
 NEEDS = ("specification", "benchmark")
+TRANSFORM_META = "transform_meta"
+# the fields of a transform's meta record and their types (None: checked by the table, which knows the two lists of values)
+TRANSFORM_FIELDS = {"trust": None, "lifecycle": None, "reason": str, "evidence": str, "baseline_allowed": bool, "shipped": bool, "changed_by": str}
 DEFAULT_STEP_BUDGET = 800          # tokens of the view of a step whose node names no budget (the default of context_graph.render)
 NO_COST = {"seconds": 0.0, "calls": 0, "tokens": 0}
 
@@ -68,12 +71,16 @@ class WorkflowLibrary:
 
     def read(self, kind, record_id, version=None):
         self._kind(kind)
+        if kind == "transforms":
+            return self._read_transform(record_id, version)
         entry = _storage_call(self._storage.get, kind, record_id, version)
         entry["status"] = self._meta.get(record_id).get("status", "draft") if kind == "workflows" else "draft"
         return entry
 
     def save(self, kind, record_id, doc, author, expected_version=None):
         self._kind(kind)
+        if kind == "transforms":
+            return self._save_transform(record_id, doc, author, expected_version)
         for node in (doc.get("nodes") if isinstance(doc, dict) and isinstance(doc.get("nodes"), list) else []):
             budget = node.get("budget_tokens") if isinstance(node, dict) else None
             if budget is not None and (isinstance(budget, bool) or not isinstance(budget, int) or budget < 1):
@@ -199,3 +206,54 @@ class WorkflowLibrary:
             cycles = (node.get("stop") or {}).get("max_cycles") or 1
             cost = {key: value * cycles for key, value in cost.items()}
         return cost
+
+    # --- the kind `transforms` (IF-203 v1, A-111, G-V2.TOOLBOX): the code in the table `transforms`, trust and lifecycle in `transform_meta` (A-110, A-112) ---
+    # A new version of the code leaves the meta record as it is (REQ-WFM-092); who may set a value is the rule of the toolbox, not of the library.
+
+    def _read_transform(self, record_id, version):
+        entry = _storage_call(self._storage.get, "transforms", record_id, version)
+        meta = self.get_meta(record_id)
+        entry.update(trust=meta["trust"], lifecycle=meta["lifecycle"])
+        return entry
+
+    def _save_transform(self, record_id, doc, author, expected_version):
+        saved = _storage_call(self._storage.put, "transforms", record_id, doc, author, expected_version)
+        if record_id not in self._storage.ids(TRANSFORM_META):      # the first save of an id: untrusted and draft
+            _storage_call(self._storage.put, TRANSFORM_META, record_id, {"trust": "untrusted", "lifecycle": "draft", "changed_by": author}, author)
+        return saved
+
+    def get_meta(self, record_id):
+        self._known_transform(record_id)
+        return _storage_call(self._storage.get, TRANSFORM_META, record_id)["doc"]
+
+    def get_trust(self, record_id):
+        return self.get_meta(record_id)["trust"]
+
+    def get_lifecycle(self, record_id):
+        return self.get_meta(record_id)["lifecycle"]
+
+    def set_meta(self, record_id, author, **fields):
+        """One new version of the meta record with these fields; `changed_by` is the author. A value outside the lists, a field of the wrong type or an unknown
+        field is invalid/schema with the field as detail, and nothing changes."""
+        meta = dict(self.get_meta(record_id))
+        for name, value in fields.items():
+            if name not in TRANSFORM_FIELDS:
+                raise WorkflowLibraryError("invalid", rule="schema", detail=name)
+            if TRANSFORM_FIELDS[name] is not None and type(value) is not TRANSFORM_FIELDS[name]:
+                raise WorkflowLibraryError("invalid", rule="schema", detail=name)
+        meta.update(fields, changed_by=author)
+        _storage_call(self._storage.put, TRANSFORM_META, record_id, meta, author)      # trust and lifecycle values are checked by the table
+        return meta
+
+    def set_trust(self, record_id, trust, author):
+        return {"trust": self.set_meta(record_id, author, trust=trust)["trust"]}
+
+    def set_lifecycle(self, record_id, lifecycle, author, evidence=None):
+        fields = {"lifecycle": lifecycle}
+        if evidence is not None:
+            fields["evidence"] = evidence
+        return {"lifecycle": self.set_meta(record_id, author, **fields)["lifecycle"]}
+
+    def _known_transform(self, record_id):
+        if record_id not in self._storage.ids("transforms"):
+            raise WorkflowLibraryError("not_found", detail=record_id)

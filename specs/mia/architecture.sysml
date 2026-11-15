@@ -3238,7 +3238,37 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-WFM-056'> ShippedTransforms_Wfm056 {
         subject s : TaskRuntime;
-        doc /* The Workflow management shall seed the toolbox with the transforms that MIA ships, each with the status trusted. */
+        doc /* The Workflow management shall seed the toolbox with the transforms that MIA ships, each with the status trusted and marked as shipped. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-090'> TheReasonIsShown_Wfm090 {
+        subject s : TaskRuntime;
+        doc /* When someone looks up an untrusted transform, the Workflow management shall show the reason it is untrusted. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-091'> BaselineOfARetiredUntrustedTransform_Wfm091 {
+        subject s : TaskRuntime;
+        doc /* Where the owner allowed it when retiring an untrusted transform, the Workflow management shall run it as the baseline of a check. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-092'> ANewerVersionReplacesTheCode_Wfm092 {
+        subject s : TaskRuntime;
+        doc /* When a transform arrives with the ID of an entry and a higher version, the Workflow management shall replace the code of the entry and keep its trust status and lifecycle. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-093'> AReplacedTrustedTransformLeavesATrace_Wfm093 {
+        subject s : TaskRuntime;
+        doc /* When the code of a trusted transform is replaced by a newer version, the Workflow management shall record an event with the ID, the old and the new version and the author. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-094'> AShippedTransformIsNotExported_Wfm094 {
+        subject s : TaskRuntime;
+        doc /* If an export is asked for a shipped transform, then the Workflow management shall refuse it. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-095'> OnlyTheOwnerAllowsABaseline_Wfm095 {
+        subject s : TaskRuntime;
+        doc /* If an account other than the owner asks to allow an untrusted retired transform as a baseline, then the Workflow management shall refuse the allowance. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-WFM-057'> OldRunnerUntilProven_Wfm057 {
@@ -4296,6 +4326,16 @@ package MIA_NodeRequirements {
         doc /* The Record tables shall define the table skill_runs with the required fields run, skill, skill_version, account, started and state, as versioned records that are deletable. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
+    requirement def <'REQ-RTB-008'> TransformMetaStored_Rtb008 {
+        subject s : Persistence;
+        doc /* The Record tables shall define the table transform_meta with the required fields trust and lifecycle, as versioned records that are not deletable. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-RTB-009'> TransformsStored_Rtb009 {
+        subject s : Persistence;
+        doc /* The Record tables shall define the table transforms with the required fields id and version, as versioned records that are not deletable. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
     requirement def <'REQ-DB-001'> PostgreSQLInAContainer_Db001 {
         subject s : Persistence;
         doc /* The Database shall be one PostgreSQL database in a container behind the storage interface IF-102. */
@@ -4866,6 +4906,12 @@ package MIA_NodeRequirements {
     requirement r_req_wfm_054 : OnlyTheOwnerTrusts_Wfm054;
     requirement r_req_wfm_055 : ExchangeForm_Wfm055;
     requirement r_req_wfm_056 : ShippedTransforms_Wfm056;
+    requirement r_req_wfm_090 : TheReasonIsShown_Wfm090;
+    requirement r_req_wfm_091 : BaselineOfARetiredUntrustedTransform_Wfm091;
+    requirement r_req_wfm_092 : ANewerVersionReplacesTheCode_Wfm092;
+    requirement r_req_wfm_093 : AReplacedTrustedTransformLeavesATrace_Wfm093;
+    requirement r_req_wfm_094 : AShippedTransformIsNotExported_Wfm094;
+    requirement r_req_wfm_095 : OnlyTheOwnerAllowsABaseline_Wfm095;
     requirement r_req_wfm_057 : OldRunnerUntilProven_Wfm057;
     requirement r_req_wfm_058 : SameModelCalls_Wfm058;
     requirement r_req_wfm_059 : SameOutcomesOnTheSuite_Wfm059;
@@ -5077,6 +5123,8 @@ package MIA_NodeRequirements {
     requirement r_req_rtb_005 : TasksAndMemosExact_Rtb005;
     requirement r_req_rtb_006 : SourceTrustStored_Rtb006;
     requirement r_req_rtb_007 : SkillRunsStored_Rtb007;
+    requirement r_req_rtb_008 : TransformMetaStored_Rtb008;
+    requirement r_req_rtb_009 : TransformsStored_Rtb009;
     requirement r_req_db_001 : PostgreSQLInAContainer_Db001;
     requirement r_req_db_002 : SharedStateHeld_Db002;
     requirement r_req_db_003 : ImmutableVersions_Db003;
@@ -5367,6 +5415,12 @@ package MIA_NodeRequirements {
     satisfy r_req_wfm_054 by mia.taskRuntime;
     satisfy r_req_wfm_055 by mia.taskRuntime;
     satisfy r_req_wfm_056 by mia.taskRuntime;
+    satisfy r_req_wfm_090 by mia.taskRuntime;
+    satisfy r_req_wfm_091 by mia.taskRuntime;
+    satisfy r_req_wfm_092 by mia.taskRuntime;
+    satisfy r_req_wfm_093 by mia.taskRuntime;
+    satisfy r_req_wfm_094 by mia.taskRuntime;
+    satisfy r_req_wfm_095 by mia.taskRuntime;
     satisfy r_req_wfm_057 by mia.taskRuntime;
     satisfy r_req_wfm_058 by mia.taskRuntime;
     satisfy r_req_wfm_059 by mia.taskRuntime;
@@ -5578,6 +5632,8 @@ package MIA_NodeRequirements {
     satisfy r_req_rtb_005 by mia.persistence;
     satisfy r_req_rtb_006 by mia.persistence;
     satisfy r_req_rtb_007 by mia.persistence;
+    satisfy r_req_rtb_008 by mia.persistence;
+    satisfy r_req_rtb_009 by mia.persistence;
     satisfy r_req_db_001 by mia.persistence;
     satisfy r_req_db_002 by mia.persistence;
     satisfy r_req_db_003 by mia.persistence;
@@ -5867,6 +5923,12 @@ package MIA_NodeRequirements {
     allocate r_req_wfm_054 to mia.taskRuntime;
     allocate r_req_wfm_055 to mia.taskRuntime;
     allocate r_req_wfm_056 to mia.taskRuntime;
+    allocate r_req_wfm_090 to mia.taskRuntime;
+    allocate r_req_wfm_091 to mia.taskRuntime;
+    allocate r_req_wfm_092 to mia.taskRuntime;
+    allocate r_req_wfm_093 to mia.taskRuntime;
+    allocate r_req_wfm_094 to mia.taskRuntime;
+    allocate r_req_wfm_095 to mia.taskRuntime;
     allocate r_req_wfm_057 to mia.taskRuntime;
     allocate r_req_wfm_058 to mia.taskRuntime;
     allocate r_req_wfm_059 to mia.taskRuntime;
@@ -6078,6 +6140,8 @@ package MIA_NodeRequirements {
     allocate r_req_rtb_005 to mia.persistence;
     allocate r_req_rtb_006 to mia.persistence;
     allocate r_req_rtb_007 to mia.persistence;
+    allocate r_req_rtb_008 to mia.persistence;
+    allocate r_req_rtb_009 to mia.persistence;
     allocate r_req_db_001 to mia.persistence;
     allocate r_req_db_002 to mia.persistence;
     allocate r_req_db_003 to mia.persistence;
@@ -6378,6 +6442,12 @@ package MIA_NodeRequirements {
     dependency from r_req_wfm_054 to fr38;
     dependency from r_req_wfm_055 to fr38;
     dependency from r_req_wfm_056 to fr38;
+    dependency from r_req_wfm_090 to fr38;
+    dependency from r_req_wfm_091 to fr38;
+    dependency from r_req_wfm_092 to fr38;
+    dependency from r_req_wfm_093 to fr38;
+    dependency from r_req_wfm_094 to fr38;
+    dependency from r_req_wfm_095 to fr38;
     dependency from r_req_wfm_057 to fr45;
     dependency from r_req_wfm_058 to fr45;
     dependency from r_req_wfm_059 to fr45;
@@ -6610,6 +6680,8 @@ package MIA_NodeRequirements {
     dependency from r_req_rtb_005 to r_req_db_014;
     dependency from r_req_rtb_006 to r_req_db_015;
     dependency from r_req_rtb_007 to r_req_db_002;
+    dependency from r_req_rtb_008 to r_req_db_002;
+    dependency from r_req_rtb_009 to r_req_db_002;
     dependency from r_req_db_001 to nfr8;
     dependency from r_req_db_001 to con7;
     dependency from r_req_db_001 to nfr9;
