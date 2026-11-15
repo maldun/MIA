@@ -192,6 +192,7 @@ Runs a workflow step by step under budgets: model calls and model management, pr
 | Order | Group | What it covers | Requirements |
 |---|---|---|---|
 | 1 | EX | Execution of the new graph: order, trust, master nodes, failure (FR-37, FR-38) | REQ-RUN-016, REQ-RUN-017, REQ-RUN-018, REQ-RUN-019 |
+| 2 | ST | Stages: inputs, outputs and settings of a transform (FR-37; G-V2.CONVERT, A-124) | REQ-RUN-030, REQ-RUN-031, REQ-RUN-032, REQ-RUN-033 |
 
 ### REQ-RUN-016 – Run in topological order
 - Level: low-2   Subject: TaskRuntime
@@ -244,3 +245,55 @@ Runs a workflow step by step under budgets: model calls and model management, pr
 - Verified by: TC-RUN-019
 - Status: Verified
 - History: G-V2 Plan step 1 (2026-11-07), new at review
+
+### REQ-RUN-030 – Stage gets inputs, outputs and settings
+- Level: low-2   Subject: TaskRuntime
+- Text: When a transform or master node is run as a Stage, the Pipeline runner shall hand it the values of its input data nodes by name, the values of its output data nodes by name and the settings object of its settings node.
+- Rationale: refines FR-37; D-248: a transform sees its input, output and settings nodes; the name of an input or output is the `as` field of its edge, else the data node ID; the settings node is the input data node whose edge carries `role: settings`, `{}` when there is none
+- Parent: FR-37
+- Group: ST
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-31: a Stage with two inputs (one renamed by the edge field `as`), one output and a settings node receives exactly those three objects (exact)
+- Verified by: TC-RUN-030
+- Status: Draft
+- History: G-V2.CONVERT A-124 (owner approval 2026-11-15, D-249), new
+
+### REQ-RUN-031 – Per-output writes
+- Level: low-2   Subject: TaskRuntime
+- Text: When a Stage returns an object with an `outputs` entry, the Pipeline runner shall write each value to the output data node of that name, and otherwise shall write the one result to every output data node.
+- Rationale: refines FR-37; D-248 C and A-124 R3; an object with other keys besides `outputs` is an ordinary value; an unknown output name fails the node (REQ-RUN-019)
+- Parent: FR-37
+- Group: ST
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-31: a Stage with two outputs gets two different values written; a Stage returning a plain value writes it to both; an unknown output name fails the node and the run result names it (exact)
+- Verified by: TC-RUN-031
+- Status: Draft
+- History: G-V2.CONVERT A-124 (owner approval 2026-11-15, D-249), new
+
+### REQ-RUN-032 – Plain callables unchanged
+- Level: low-2   Subject: TaskRuntime
+- Text: While a callable is not a Stage, the Pipeline runner shall call it with the values of its input data nodes by data node ID and write its result to every output data node.
+- Rationale: refines FR-37; A-124 R1: the new call is additive, REQ-RUN-016 to 019 keep their verified behaviour
+- Parent: FR-37
+- Group: ST
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-31: TC-RUN-016 to TC-RUN-019 give the same results with the new code, and a plain function runs next to a Stage in one graph (exact)
+- Verified by: TC-RUN-032
+- Status: Draft
+- History: G-V2.CONVERT A-124 (owner approval 2026-11-15, D-249), new
+
+### REQ-RUN-033 – Broken wiring refused before any node ran
+- Level: low-2   Subject: TaskRuntime
+- Text: If a transform has more than one settings edge, or two of its output data nodes have the same name, then the Pipeline runner shall refuse the run before any node ran and name the transform.
+- Rationale: refines FR-37; A-124 R4: a name that is not unique cannot be handed over; the check is made with the graph, like REQ-RUN-017
+- Parent: FR-37
+- Group: ST
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-32: nothing ran and the refusal names the transform (exact), with an accepted twin that runs
+- Verified by: TC-RUN-033
+- Status: Draft
+- History: G-V2.CONVERT A-124 (owner approval 2026-11-15, D-249), new

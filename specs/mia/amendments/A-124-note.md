@@ -1,6 +1,6 @@
 # A-124: the three-argument call of the graph runner (T-CV-03a, G-V2.CONVERT, proposal for the owner's review)
 
-Status: **proposed, not applied, not reviewed**. Written 2026-11-15 after D-248 (the owner's revision of the transform interface). Reserved range of CONVERT: A-120 to A-129, REQ-RUN-030 to 039, TC-RUN-030 to 039, TR-CONVERT-. Nothing of the verified REQ-RUN-016 to 019, `graph_run.py` behaviour or `tests/acceptance/test_graph_run.py` changes: the new call is additive.
+Status: **approved by the owner 2026-11-15 (D-249, R1 to R5 one by one, no changes); requirements written into the runner node as Draft; the red tests and `graph_run.py` are T-CV-03a**. Written 2026-11-15 after D-248 (the owner's revision of the transform interface). Reserved range of CONVERT: A-120 to A-129, REQ-RUN-030 to 039, TC-RUN-030 to 039, TR-CONVERT-. Nothing of the verified REQ-RUN-016 to 019, `graph_run.py` behaviour or `tests/acceptance/test_graph_run.py` changes: the new call is additive.
 
 ## Why additive
 D-248 C agreed that the runner calls `nodes[id](inputs, outputs, node)`, old one-argument functions wrapped. The simplest wrapper is explicit: a function that wants the new call is handed to the runner as `Stage(function)`; every other callable is called as today (`function({input data node id: value})`, one value written to every output node). So the tested behaviour of REQ-RUN-016 to 019 stays exactly as verified, no protected test is amended, and old callers need no change.
