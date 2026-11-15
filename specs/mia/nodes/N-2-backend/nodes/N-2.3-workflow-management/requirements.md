@@ -451,7 +451,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 
 ### REQ-WFM-036 – Summary at the end of the chat
 - Level: low   Subject: TaskRuntime
-- Text: The Workflow management shall, when a task has ended, publish one summary of its result of at most 1200 characters as a new message at the end of the chat with a link to the run in the Skill run view, and, when the task fails, a message that says what failed with the same link.
+- Text: The Workflow management shall, when a task has ended, publish one summary of its result, worded by the digest step that is asked to keep it to at most 1200 characters, as a new message at the end of the chat with a link to the run in the Skill run view, and, when the task fails, a message that says what failed with the same link.
 - Rationale: refines REQ-BE-033; the end of the chat holds a short spoken summary and a link, the full result lies in the Skill run view (owner 2026-11-07, A-131); the summary is worded by the digest step of G-V3.CHAT
 - Parent: REQ-BE-033
 - Priority: Must
@@ -459,7 +459,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Acceptance criterion: AC-23: on a scripted review with two questions the summary message has a later position in the history than the last question and its answer and contains the link to the run; a task that fails leaves a message that contains the reason and the link (exact); the wording is checked in G-V3.CHAT
 - Verified by: TC-WFM-036
 - Status: Draft
-- History: A-23 new; A-27 reworded (a failure is a visible result); A-131 (proposed 2026-11-08): the full result leaves the chat, a short summary with a link takes its place
+- History: A-23 new; A-27 reworded (a failure is a visible result); A-131 (proposed 2026-11-08): the full result leaves the chat, a short summary with a link takes its place; A-152 (proposed 2026-11-15, owner by questionnaire): the 1200 characters are a request in the prompt of the step, not a cut (REQ-CHA-052, 063)
 
 ### REQ-WFM-037 – Files in a volume
 - Level: low   Subject: TaskRuntime

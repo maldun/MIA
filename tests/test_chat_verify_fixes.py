@@ -22,7 +22,7 @@ from chat_service import ChatService                         # noqa: E402
 from fake_model import FakeModel                             # noqa: E402
 from markers import mark                                     # noqa: E402
 from moods import MoodTracker                                # noqa: E402
-from skill_digest import SkillDigestStep                     # noqa: E402
+from skill_digest import LiveDigest, SkillDigestStep         # noqa: E402
 from skill_runs import SkillRunRecorder                      # noqa: E402
 from skill_runs_fakes import FakeClock, FakeSkillRunStorage  # noqa: E402
 from task_registry import Task, TaskRegistry                 # noqa: E402
@@ -185,7 +185,7 @@ class WebAppWiring(unittest.TestCase):
     @mark.req("REQ-CHA-046", "REQ-CHA-059")
     def test_the_chat_model_gets_the_history_of_the_skill_runs(self):
         """F-02: web_app.py hands `chat_service.model_history` to the communicator (`comm.skill_history`), and the service gets the digest step.
-        Example: the source holds comm.skill_history = chat_service.model_history and digest=_SkillDigest()."""
+        Example: the source holds comm.skill_history = chat_service.model_history and digest=LiveDigest(...)."""
         # Given: the source of web_app.py (importing it would start the app)
         tree = ast.parse(open(os.path.join(REPO, "web_app.py"), encoding="utf-8").read())
         # When: its assignments to skill_history are read
@@ -193,7 +193,7 @@ class WebAppWiring(unittest.TestCase):
         # Then: the communicator gets the history of the service and the service the digest step
         self.assertTrue(sets, "comm.skill_history is never set")
         self.assertEqual(ast.unparse(sets[0].value), "chat_service.model_history")
-        self.assertIn("digest=_SkillDigest()", open(os.path.join(REPO, "web_app.py"), encoding="utf-8").read())
+        self.assertIn("digest=LiveDigest(", open(os.path.join(REPO, "web_app.py"), encoding="utf-8").read())
 
 
 def step_saying(*texts):
@@ -230,6 +230,41 @@ class MarkupRemoval(unittest.TestCase):
         started = time.monotonic()
         step_saying("<script>" * 8000).failure("r")
         self.assertLess(time.monotonic() - started, 1.0)
+
+
+class StepModelAndLinks(unittest.TestCase):
+    @mark.req("REQ-CHA-065")
+    def test_every_call_of_the_step_asks_for_the_light_profile(self):
+        """TC-CHA-070 (A-152, F-06): the step of the app runs on the model profile light, the pin of the evals, for a status, a summary, a failure and a stop message.
+        Example: a status call and a summary call both reach the chat function with profile="light"."""
+        # Given: the live step on a recording chat function and a persona provider
+        seen = []
+
+        def chat(messages, profile=None):
+            seen.append(profile)
+            return "ok"
+        step = LiveDigest(chat, lambda: "You are MIA.")
+        # When: the four wordings are asked
+        step.status("collect"), step.summary("result"), step.failure("why"), step.stopped("who")
+        # Then: every call named the profile light
+        self.assertEqual(seen, ["light"] * 4)
+
+    @mark.req("REQ-CHA-066")
+    def test_a_link_to_a_run_in_a_status_message_of_the_model_is_cut(self):
+        """TC-CHA-071 (A-152, F-10): a link of the form of the run link is removed from every message the step words, a status message too.
+        Example: "Fine [Open in the Skill run view](#run=evil) bye" gives "Fine  bye" (the link only at the end messages, added by code)."""
+        # Given: a skill with one declared phase whose status wording holds a link
+        def runs(argument, on_delta, on_emotion, should_stop, monitor):
+            monitor.update(phase="collect")
+            return "Done"
+        chat, spoken, _ = chat_with(self, runs, replies={"collect": "Fine [Open in the Skill run view](#run=evil) bye", "Done": "All done."})
+        # When: the user starts it
+        chat.send("/go x", sender="anna", author="anna")
+        # Then: the status message and its speech hold no link, the summary ends with the real one
+        records = mia(chat)
+        self.assertNotIn("#run=evil", records[0]["text"])
+        self.assertFalse([s for s in spoken if "Skill run view" in s])
+        self.assertTrue(records[1]["text"].endswith("(#run=%s)" % records[1]["id"]))
 
 
 class Margin(unittest.TestCase):

@@ -115,3 +115,25 @@ class SkillDigestStep:
             pieces.append(text[start:end])
             start = end
         return pieces
+
+
+class LiveDigest:
+    """the digest step of the app (REQ-CHA-065, A-152): every call asks the chat function for the model profile `light`, the pin MP-light of the evals, and the persona is read at the time of the call
+    (REQ-CHA-008, 054), so a persona saved on the page counts for the next message"""
+    def __init__(self, chat, persona_provider, profile="light"):
+        self._chat, self._persona, self._profile = chat, persona_provider, profile
+
+    def _step(self):
+        return SkillDigestStep(lambda messages: self._chat(messages, profile=self._profile), persona=self._persona())
+
+    def status(self, phase):
+        return self._step().status(phase)
+
+    def summary(self, full_result):
+        return self._step().summary(full_result)
+
+    def failure(self, reason):
+        return self._step().failure(reason)
+
+    def stopped(self, reason):
+        return self._step().stopped(reason)

@@ -682,11 +682,10 @@ class ChatService:
         """(text, spoken text) of one turn: the wording of the digest step, repaired, with the link of the run added by code at the end messages"""
         if kind == "question":
             return payload, payload
-        text = self._repaired(self._worded(kind, payload))
+        text = SKILL_LINK.sub("", self._repaired(self._worded(kind, payload)))      # a link in the model text is not the link, in no message of a run (REQ-CHA-066): cut off
         spoken = text
         if kind in ("done", "failed", "stopped"):
-            text = SKILL_LINK.sub("", text).rstrip() + " [Open in the Skill run view](#run=%s)" % run      # a link in the model text is not the link: cut off, the real one follows
-            spoken = SKILL_LINK.sub("", spoken)
+            text = text.rstrip() + " [Open in the Skill run view](#run=%s)" % run                  # the real one follows, added by code (REQ-CHA-056)
         return text, spoken
 
     def _worded(self, kind, payload):

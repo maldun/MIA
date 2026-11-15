@@ -53,7 +53,7 @@ from .items_api import create_items_blueprint
 from .graph_api import create_graph_blueprint
 from .trust_persona_api import create_trust_persona_blueprint
 from .persona import read_persona
-from .skill_digest import SkillDigestStep
+from .skill_digest import LiveDigest
 from .internal_auth import ensure_token, internal_headers
 from .storage import Storage
 from .skill_record import SkillCatalog, SkillRecords
@@ -685,17 +685,6 @@ for _problem in _extension_problems:
 _file_store = FileStore(os.path.join(FPATH, cfg.get("files_dir", "data/files")), max_file_bytes=cfg.get("files_max_bytes", 1 << 30), max_total_bytes=cfg.get("files_max_total_bytes", 50 << 30))
 _model_classes = ModelClasses(os.path.join(FPATH, cfg.get("model_classes_file", "data/model_classes.json")))
 _model_host = lambda: (str(cfg.get("ollama_host") or "localhost").replace("http://", "").replace("https://", "").split("/")[0].split(":")[0]) or "localhost"
-class _SkillDigest:
-    """the digest step on the model of the tasks, with the persona as it is saved on the page at the time of the call (REQ-CHA-008, 054)"""
-    def _step(self):
-        return SkillDigestStep(pipeline_model.chat, persona=read_persona(_persona_file))
-
-    def status(self, phase): return self._step().status(phase)
-    def summary(self, full_result): return self._step().summary(full_result)
-    def failure(self, reason): return self._step().failure(reason)
-    def stopped(self, reason): return self._step().stopped(reason)
-
-
 chat_service = ChatService(socketio.emit, chat_log, mood, run_chat_exchange, run_command=run_chat_command,
                            tasks=_tasks, skill_options=cfg.get("skill_options"), files=_file_store, unavailable={p.split(":")[0] for p in _extension_problems},
                            prepare_task=make_prepare(_model_classes, lambda: comm.version, _model_host, lambda text: chat_service.note(text)),
@@ -710,7 +699,7 @@ chat_service = ChatService(socketio.emit, chat_log, mood, run_chat_exchange, run
                            behaviours=behaviours_from_file(os.path.join(FPATH, cfg.get(CONST.BEHAVIOURS_FILE_KEY, "library/behaviours.json"))),
                            reputable=cfg.get(CONST.REPUTABLE_TRUST_KEY, 0.6),
                            repair=lambda text: behaviour.apply_rules(text)["text"], remember=_remember,         # the stream is held back and repaired silently (REQ-CHA-014)
-                           digest=_SkillDigest(), declared_phases=lambda run: chat_service.run_phases(run),     # the chat holds status messages and one summary of a run, not its result (G-V3.CHAT T-06)
+                           digest=LiveDigest(pipeline_model.chat, lambda: read_persona(_persona_file)), declared_phases=lambda run: chat_service.run_phases(run),     # the chat holds status messages and one summary of a run, not its result (G-V3.CHAT T-06)
                            react=lambda expression: character_reaction(expression))         # shocked after a minus (REQ-CHV-006)
 comm.skill_history = chat_service.model_history          # the messages of skill runs go to the chat model with the next turn (REQ-CHA-046, 059)
 app.register_blueprint(create_chat_ops_blueprint(chat_service))
