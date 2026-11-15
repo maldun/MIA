@@ -1,6 +1,6 @@
 """Run of a workflow graph in topological order (N-2.4.1, G-V2.MODEL T-03 and T-04, G-V2.CONVERT T-CV-03a).
 
-REQ-RUN-016 to 019 (order, refusals, failure) and REQ-RUN-030 to 034 (Stage: three-argument call, per-output writes, wiring checks, start values). The tests in tests/acceptance/test_graph_run.py fix this interface:
+REQ-RUN-016 to 019 (order, refusals, failure) and REQ-RUN-030 to 035 (Stage: three-argument call, per-output writes, wiring checks, start values, order edge). The tests in tests/acceptance/test_graph_run.py fix this interface:
 - GraphRunner(trust): `trust(node_id)` -> "trusted" or "untrusted" (stand-in for the toolbox of G-V2.TOOLBOX).
 - run(graph, nodes, inputs) -> RunResult(status, named, named_status, values): `nodes` maps a transform or master node ID to a function
   of {input data node ID: value} that returns the value it writes; `inputs` maps data node IDs to their starting values.
@@ -10,7 +10,8 @@ REQ-RUN-016 to 019 (order, refusals, failure) and REQ-RUN-030 to 034 (Stage: thr
 - A function wrapped as Stage(function, prepare=None) is called as function(inputs, outputs, node) (A-124): inputs and outputs map the name
   (edge field `as`, else the data node ID) to the value of the data node, node is the settings object (the value of the input data node whose edge has
   `role: "settings"`, else {}). Start value of a data node: the run's `inputs`, else what `prepare(inputs, outputs, node)` returned under "inputs" or "outputs", else the
-  `value` of the graph node, else None. A result {"outputs": {name: value}} (no other key) writes each output by name, any other result goes to every output node.
+  `value` of the graph node, else None. An input edge with `role: "order"` orders the nodes (the writer of its data node runs first) but is not an input: no name, no value, for a Stage and a plain callable alike (REQ-RUN-035).
+  A result {"outputs": {name: value}} (no other key) writes each output by name, any other result goes to every output node.
 """
 
 from collections import namedtuple
@@ -44,7 +45,8 @@ class GraphRunner:
             return RunResult("refused", unknown or cycle, None, _data_values(kinds, dict(inputs)))
         reads = {i: [] for i in kinds}
         for edge in graph["edges"]:
-            reads[edge["to"]].append(edge["from"])
+            if not _is_order(edge):     # an order edge only orders (REQ-RUN-035): it is no input of a plain callable either
+                reads[edge["to"]].append(edge["from"])
         # REQ-RUN-017: check every transform and master node before the first one runs. Any status except "trusted"
         # counts as untrusted, so an unknown status never lets a node run.
         refused = {i: self.trust(i) for i, k in kinds.items() if k != "data"}
@@ -81,6 +83,10 @@ def _is_settings(edge):
     return edge.get("data", {}).get("role") == "settings"
 
 
+def _is_order(edge):
+    return edge.get("data", {}).get("role") == "order"
+
+
 def _bad_wiring(edges, node_id):
     """REQ-RUN-033: more than one settings edge into the transform, or two output edges with the same name."""
     settings = [e for e in edges if e["to"] == node_id and _is_settings(e)]
@@ -94,7 +100,7 @@ def _name(edge, data_id):
 
 def _run_stage(stage, edges, node_id, values, defaults):
     """Build inputs, outputs and settings, call prepare once, call the function; returns {output data node id: value} to write."""
-    reads = [(_name(e, e["from"]), e["from"]) for e in edges if e["to"] == node_id and not _is_settings(e)]
+    reads = [(_name(e, e["from"]), e["from"]) for e in edges if e["to"] == node_id and not _is_settings(e) and not _is_order(e)]
     writes = [(_name(e, e["to"]), e["to"]) for e in edges if e["from"] == node_id]
     settings = next((e["from"] for e in edges if e["to"] == node_id and _is_settings(e)), None)
 
