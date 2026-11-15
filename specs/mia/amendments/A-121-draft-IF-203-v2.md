@@ -1,6 +1,6 @@
 # A-121 draft: IF-203 v2, snapshot section (text for `contracts/IF-203-workflow-library.md`)
 
-Status: **draft for the owner's review**, not applied. Parent session applies it to `contracts/` after approval (`parallel-work.md`); no contract suite is written before that (D-188). Basis: `A-121-note.md` with the owner's answers O1 (A), O2 to O5, assumptions 3, 4, 6 (D-240), A-90, and IF-203 v1 as merged from TOOLBOX (2026-11-11).
+Status: **approved by the owner as a whole, 2026-11-15 (D-243, items 1 to 11 one by one, no changes); not yet applied to `contracts/`**. Parent session applies it to `contracts/` after approval (`parallel-work.md`); no contract suite is written before that (D-188). Basis: `A-121-note.md` with the owner's answers O1 (A), O2 to O5, assumptions 3, 4, 6 (D-240), A-90, and IF-203 v1 as merged from TOOLBOX (2026-11-11).
 
 Changes against the note: IF-203 v1 already has `get_trust`, `get_lifecycle`, `set_trust` and `set_lifecycle(..., evidence=None)` (A-111), so the note's rows for them and its assumption 6 fall away; the library needs no new transform operation. The result is **v2**.
 
