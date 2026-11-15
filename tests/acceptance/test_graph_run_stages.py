@@ -1,8 +1,9 @@
 """
-Acceptance tests of the Stage call of the graph runner (N-2.4.1, G-V2.CONVERT, task T-CV-03a, A-124, D-248, D-249): TC-RUN-030 to TC-RUN-033 (REQ-RUN-030 to -033) against
+Acceptance tests of the Stage call of the graph runner (N-2.4.1, G-V2.CONVERT, task T-CV-03a, A-124, D-248, D-249, D-250): TC-RUN-030 to TC-RUN-034 (REQ-RUN-030 to -034) against
 GraphRunner with scripted functions, no model server. RED until T-CV-03a: `Stage` in graph_run.py is a stub the runner does not know.
 Conventions under test (A-124 R2): the name of an input or output is the `as` field of its edge, else the data node ID; the settings node is the input data node whose edge
-carries `role: "settings"`; all configuration is the value of a data node, given to the run in `inputs` like any starting value (a data node without one holds None).
+carries `role: "settings"`; all configuration is the value of a data node. Start values (D-250): the run's `inputs`, else the `prepare` function of the Stage, else the `value` of the
+graph node, else None.
 Run with: python tests/acceptance/test_graph_run_stages.py
 """
 
@@ -114,6 +115,38 @@ class StageAcceptance(unittest.TestCase):
                 stage = Recorder("v")
                 self.assertEqual(self.runner.run(fixed, {"T": Stage(stage)}, {k: v for k, v in start.items() if k != "DS2"}).status, "done")
                 self.assertEqual(len(stage.calls), 1)
+
+
+    @mark.req("REQ-RUN-034")
+    def test_start_values_come_from_the_run_then_the_transform_then_the_graph(self):
+        """TC-RUN-034: a data node starts with the run's value, else the value `prepare` gave for it, else the graph node's own value, else None; `prepare` runs once, right
+        before its Stage, and sees the three arguments as they stand without its help; it may give start values for output nodes and defaults for inputs not given."""
+        graph = make_graph("wf-start", [data_node("DB"), data_node("DO", value={"store": "graph-default"}), transform_node("T")],
+                           [edge("DB", "T", **{"as": "b"}), edge("T", "DO", **{"as": "store"})])
+        prepared = {"inputs": {"b": "from-prepare"}, "outputs": {"store": {"store": "prepared"}}}
+        graph_default = {"store": {"store": "graph-default"}}
+        cases = [  # label, what prepare gives, the run's start values, what prepare sees, what the Stage gets
+            ("graph value only", None, {}, ({"b": None}, graph_default), ({"b": None}, graph_default)),
+            ("prepare beats the graph value and fills a missing input", prepared, {}, ({"b": None}, graph_default), ({"b": "from-prepare"}, {"store": {"store": "prepared"}})),
+            ("the run beats prepare", prepared, {"DB": "given", "DO": {"store": "given"}}, ({"b": "given"}, {"store": {"store": "given"}}),
+             ({"b": "given"}, {"store": {"store": "given"}}))]
+        for label, gives, start, seen_by_prepare, got_by_stage in cases:
+            with self.subTest(case=label):
+                order, stage, prepare = [], Recorder("w"), Recorder(gives)
+
+                def run_stage(inputs, outputs, node):
+                    order.append("stage")
+                    return stage(inputs, outputs, node)
+
+                def run_prepare(inputs, outputs, node):
+                    order.append("prepare")
+                    return prepare(inputs, outputs, node)
+
+                result = self.runner.run(graph, {"T": Stage(run_stage, prepare=run_prepare)}, dict(start))
+                self.assertEqual(result.status, "done")
+                self.assertEqual(order, ["prepare", "stage"])
+                self.assertEqual(prepare.calls, [(seen_by_prepare[0], seen_by_prepare[1], {})])
+                self.assertEqual(stage.calls, [(got_by_stage[0], got_by_stage[1], {})])
 
 
 if __name__ == "__main__":
