@@ -7,8 +7,10 @@ Interface under test (a proposal, reviewed with the tests): `pipeline_graph.conv
   not empty (the skill then stays on the old runner, REQ-WFM-057).
 - Node IDs: a transform is `step.<id>`, a variable is the data node `var.<name>` (written again later: `var.<name>#2`, `#3`), a pipeline input is `input.<field>`, a literal in a wire is
   `literal.<step id>.<parameter>` with the literal as the node's `value`, the settings of a construct are `settings.<step id>`.
-- A call (`use: <node id>@<version>`) is a transform with toolbox_id `<node id>`; its wire becomes edges into it named by the parameter (`as`), with `path` for a reference with a field
-  (`$raw.claims`: variable raw, path claims); its `output` is a data node it writes. Steps are chained in the order of the pipeline (graph_order.order_steps).
+- A call (`use: <node id>@<version>`) is a transform with toolbox_id `<node id>`; its wire becomes edges into it named by the parameter (`as`); its `output` is a data node it writes.
+  A reference with a field (`$raw.claims`: variable raw, path claims) goes through a pick transform `pick.<step id>.<parameter>` (toolbox_id code.pick_field) that reads the variable as
+  `value` and has a settings data node `settings.pick.<step id>.<parameter>` with {"path": "claims"}; it writes the data node `var.pick.<step id>.<parameter>`, which the step reads
+  under the parameter name (owner, D-252). Steps (picks included, each just before its step) are chained in the order of the pipeline (graph_order.order_steps).
 - A construct (`branch`, `map`, `loop`) is ONE node with toolbox_id `control.<kind>` and a settings data node (edge role settings) whose value is {"construct": kind, "node": <the JSON of
   the construct as in the pipeline>}. It is a master node when it contains a map or a loop (stop: `max_repetitions` = the largest `max` of a loop inside, if any; `max_seconds` =
   budget_seconds), otherwise a transform (A-123 P2). It reads every variable its JSON refers to and writes every variable assigned inside it.
@@ -63,6 +65,11 @@ def step_order(graph):
     return [i for i in order_of(graph) if kinds[i]["type"] in ("transform", "master")]
 
 
+def real_steps(graph):
+    """the steps of the pipeline in order, without the pick transforms of field references"""
+    return [i for i in step_order(graph) if not i.startswith("pick.")]
+
+
 def contains(node, kinds):
     if node.get("kind") in kinds:
         return True
@@ -101,17 +108,18 @@ class PipelineGraph(unittest.TestCase):
                 graph = found["graph"]
                 self.assertEqual(check_graph(graph), [])
                 kinds = nodes_of(graph)
-                self.assertEqual(step_order(graph), ["step." + s for s in steps])
+                self.assertEqual(real_steps(graph), ["step." + s for s in steps])
                 self.assertEqual([kinds["step." + s]["toolbox_id"] for s in steps], toolbox)
                 self.assertEqual((found["inputs"], found["result"]), (inputs, result_node))
                 for node in list(inputs.values()) + [result_node]:
                     self.assertEqual(kinds[node]["type"], "data")
 
     @mark.req("REQ-WFM-058")
-    def test_wires_become_named_edges_with_literals_and_field_paths(self):
+    def test_wires_become_named_edges_with_literals_and_field_references_through_a_pick_transform(self):
         """TC-WFM-126: in verify.single@1 the literal "an impartial checker" is a data node `literal.judge.context` with that value, read as `context`; the input `claim` is read
-        as `claim`; the output variable `one` is written by the step and read by `count` as `verdicts`. In extract.llm@1 `$raw.claims` is an edge from var.raw named `claims`
-        with the path `claims`."""
+        as `claim`; the output variable `one` is written by the step and read by `count` as `verdicts`. In extract.llm@1 `$raw.claims` is a pick transform `pick.anchor.claims`
+        (code.pick_field) that reads var.raw as `value`, has the settings node {"path": "claims"}, writes var.pick.anchor.claims, which step.anchor reads as `claims`; the pick comes
+        after `ask` and before `anchor`."""
         graph = self.convert(load_pipeline("verify.single", 1))["graph"]
         edges, kinds = edges_of(graph), nodes_of(graph)
         self.assertEqual(kinds["literal.judge.context"]["value"], "an impartial checker")
@@ -120,8 +128,16 @@ class PipelineGraph(unittest.TestCase):
         self.assertIn(("step.judge", "var.one"), edges)
         self.assertEqual(edges[("var.one", "step.count")], {"as": "verdicts"})
         graph = self.convert(load_pipeline("extract.llm", 1))["graph"]
-        self.assertEqual(edges_of(graph)[("var.raw", "step.anchor")], {"as": "claims", "path": "claims"})
-        self.assertEqual(edges_of(graph)[("input.text", "step.anchor")], {"as": "text"})
+        edges, kinds = edges_of(graph), nodes_of(graph)
+        self.assertEqual(kinds["pick.anchor.claims"]["toolbox_id"], "code.pick_field")
+        self.assertEqual(edges[("var.raw", "pick.anchor.claims")], {"as": "value"})
+        self.assertEqual(kinds["settings.pick.anchor.claims"]["value"], {"path": "claims"})
+        self.assertEqual(edges[("settings.pick.anchor.claims", "pick.anchor.claims")], {"role": "settings"})
+        self.assertIn(("pick.anchor.claims", "var.pick.anchor.claims"), edges)
+        self.assertEqual(edges[("var.pick.anchor.claims", "step.anchor")], {"as": "claims"})
+        self.assertEqual(edges[("input.text", "step.anchor")], {"as": "text"})
+        self.assertEqual(step_order(graph), ["step.ask", "pick.anchor.claims", "step.anchor"])
+        self.assertEqual(check_graph(graph), [])
 
     @mark.req("REQ-WFM-058")
     def test_a_branch_with_a_loop_is_one_master_node_with_the_construct_as_its_settings(self):
@@ -134,7 +150,8 @@ class PipelineGraph(unittest.TestCase):
         graph = found["graph"]
         self.assertEqual(check_graph(graph), [])
         kinds, edges = nodes_of(graph), edges_of(graph)
-        self.assertEqual(step_order(graph), ["step.shape", "step.write", "step.run", "step.repair"])
+        self.assertEqual(real_steps(graph), ["step.shape", "step.write", "step.run", "step.repair"])
+        self.assertIn("pick.run.script", step_order(graph))      # run reads `$written.script`
         master = kinds["step.repair"]
         self.assertEqual((master["type"], master["toolbox_id"]), ("master", "control.branch"))
         self.assertEqual(master["stop"], {"max_repetitions": 2, "max_seconds": BUDGET_SECONDS})
@@ -158,7 +175,7 @@ class PipelineGraph(unittest.TestCase):
         graph = found["graph"]
         self.assertEqual(check_graph(graph), [])
         kinds = nodes_of(graph)
-        self.assertEqual(step_order(graph), ["step." + n["id"] for n in pipeline["nodes"]])
+        self.assertEqual(real_steps(graph), ["step." + n["id"] for n in pipeline["nodes"]])
         for node in pipeline["nodes"]:
             data = kinds["step." + node["id"]]
             if "use" in node:
@@ -207,7 +224,7 @@ class PipelineGraph(unittest.TestCase):
         ids = [n["id"] for n in found["graph"]["nodes"]]
         self.assertEqual(len(ids), len(set(ids)), "a node ID is used twice")
         self.assertEqual(check_graph(found["graph"]), [])
-        self.assertEqual(step_order(found["graph"]), ["step.plan", "step.a"])
+        self.assertEqual(real_steps(found["graph"]), ["step.plan", "step.a"])
 
 
 if __name__ == "__main__":
