@@ -4,6 +4,7 @@ a failed or stopped run, a recorder or a repair that raises, the phases of the e
 Run with: python tests/test_chat_verify_fixes.py
 """
 import ast
+import html
 import os
 import re
 import shutil
@@ -19,7 +20,7 @@ sys.path.insert(0, REPO)
 sys.path.insert(0, os.path.join(HERE, "helpers"))
 
 from chat_log import ChatLog                                 # noqa: E402
-from chat_service import ChatService                         # noqa: E402
+from chat_service import ChatService, cut_run_links          # noqa: E402
 from fake_model import FakeModel                             # noqa: E402
 from markers import mark                                     # noqa: E402
 from moods import MoodTracker                                # noqa: E402
@@ -368,6 +369,71 @@ class SecondVerifyRun(unittest.TestCase):
         chat.send("/go x", sender="anna", author="anna")
         # Then: no waiter is left behind
         self.assertIsNone(chat._waiter)
+
+
+class ThirdVerifyRun(unittest.TestCase):
+    """findings F-19 to F-24 of the third Verify run (verification-report-run3.md): the end of both cuts fails closed"""
+
+    @mark.req("REQ-CHA-066")
+    def test_a_link_with_an_encoded_destination_is_not_left_to_the_page(self):
+        """F-19: an HTML character reference in a link destination decodes to `#run=` in the browser, so what the cut leaves must not decode to it.
+        Example: `[x](&#35;run=e)`, `[x](&#x23;run=e)`, `[x](&num;run=e)`, `[x](#&#114;un=e)`, `[x](#run&#61;e)`, `[r]: &#35;run=e`."""
+        for hostile in ("A [x](&#35;run=e) B", "A [x](&#x23;run=e) B", "A [x](&num;run=e) B", "A [x](#&#114;un=e) B", "A [x](#run&#61;e) B", "A [x](<&#35;run=e>) B", "A\n\n[r]: &#35;run=e\n\n[x][r]"):
+            # Given: a wording with the encoded link
+            # When: the links of the model are cut
+            out = cut_run_links(hostile)
+            # Then: nothing in it decodes to a run link
+            self.assertNotIn("#run=", html.unescape(out).lower(), hostile)
+
+    @mark.req("REQ-CHA-066")
+    def test_the_rest_of_a_cut_is_made_plain_even_when_no_link_form_matches(self):
+        """F-24: three levels of brackets and a destination with its own parenthesis leave no `#run=`.
+        Example: `[x [y [z]]](#run=e)` and `[a](#run=e(1))`."""
+        for hostile in ("[x [y [z]]](#run=e)", "[a](#run=e(1))", "plain #run=e text"):
+            self.assertNotIn("#run=", html.unescape(cut_run_links(hostile)).lower(), hostile)
+
+    @mark.req("REQ-CHA-066")
+    def test_the_cut_of_degenerate_text_costs_little(self):
+        """F-20: 40 000 blanks and a chain of 4000 joined links are handled within one second each.
+        Example: ' ' * 40000 + 'x'; '[a](#ru' * 4000 + '[b](#run=1)' + 'n=e)' * 4000."""
+        # Given: three degenerate texts of tens of thousands of characters
+        for hostile in (" " * 40000 + "x", "[a](#ru" * 4000 + "[b](#run=1)" + "n=e)" * 4000, "[a" * 40000):
+            started = time.monotonic()
+            # When: the links are cut
+            # Then: no run link is left and it took under one second
+            self.assertNotIn("#run=", html.unescape(cut_run_links(hostile)).lower())
+            self.assertLess(time.monotonic() - started, 1.0)
+
+    @mark.req("REQ-CHA-064")
+    def test_deeply_nested_tags_cost_little_and_leave_no_tag(self):
+        """F-21: `<a` repeated 8000 times, a letter and 8000 `>`: no tag is left and it takes under one second.
+        Example: that text."""
+        # Given: a text of 8000 nested tag openings and as many closings
+        started = time.monotonic()
+        # When: the step returns it
+        out = step_saying("<a" * 8000 + "b" + ">" * 8000).failure("r")
+        # Then: no tag is left and it took under one second
+        self.assertNotRegex(out.lower(), r"</?[a-z!]")
+        self.assertLess(time.monotonic() - started, 1.0)
+
+    @mark.req("REQ-CHA-064")
+    def test_the_text_after_a_script_element_stays_for_every_kind_of_letter(self):
+        """F-22: a letter whose lower case is longer (the dotted capital I) in front of a script element does not move the cut.
+        Example: `\u0130\u0130\u0130\u0130<script>a</script>KEEP` gives the four letters and KEEP; a second script after eight of them loses its content."""
+        # Given: the dotted capital I before one script element, and eight of them before two
+        # When: the step returns the texts
+        # Then: the text after the script stays and the content of the second script goes
+        self.assertEqual(step_saying("\u0130" * 4 + "<script>a</script>KEEP").failure("r"), "\u0130" * 4 + "KEEP")
+        out = step_saying("\u0130" * 8 + "<script>a</script><script>EVIL</script>KEEP").failure("r")
+        self.assertNotIn("EVIL", out)
+        self.assertTrue(out.endswith("KEEP"))
+
+    @mark.req("REQ-CHA-064")
+    def test_an_end_tag_with_attributes_or_a_slash_closes_the_element(self):
+        """F-23: `</script foo>` and `</script/>` end a script element like `</script>`.
+        Example: `<script>a</script foo>b` and `<script>a</script/>b` give `b`."""
+        self.assertEqual(step_saying("<script>a</script foo>b").failure("r"), "b")
+        self.assertEqual(step_saying("<script>a</script/>b").failure("r"), "b")
 
 
 class Margin(unittest.TestCase):

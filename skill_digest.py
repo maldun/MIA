@@ -28,14 +28,19 @@ MAX_ROUNDS = 5         # a model that does not shorten its digests cannot make t
 MARGIN = 0.95          # the count of a tokenizer differs a little from the count of the caller: the calls stay below this share of the limit
 
 
+CODE_CLOSE = {"script": re.compile(r"</script\b[^<>]*>", re.I), "style": re.compile(r"</style\b[^<>]*>", re.I)}      # an end tag may carry attributes or a slash
+STRIP_ROUNDS = 8       # removing a tag can join the parts of another (`<<b>script>`); what is still markup after these rounds is shown as text (fails closed)
+
+
 def _without_code_elements(text):
-    """script and style elements with their content; one pass over the text: where no closing tag follows, an opening one is left to TAG (no rescan, so many unclosed tags cost little)"""
-    low, out, cursor, no_close = text.lower(), [], 0, set()
+    """script and style elements with their content; one pass over the text (the original, not a lower-cased copy: its indexes differ for some letters): where no closing tag follows, an
+    opening one is left to TAG (no rescan, so many unclosed tags cost little)"""
+    out, cursor, no_close = [], 0, set()
     for match in CODE_OPEN.finditer(text):
         name = match.group(1).lower()
         if match.start() < cursor or name in no_close:
             continue
-        end = re.compile(r"</%s\s*>" % name).search(low, match.end())
+        end = CODE_CLOSE[name].search(text, match.end())
         if end is None:
             no_close.add(name)
             continue
@@ -45,13 +50,14 @@ def _without_code_elements(text):
 
 
 def strip_markup(text):
-    """REQ-CHA-064: no HTML tag and no content of a script or style element is left; repeated until nothing changes, because removing a tag can join the parts of another (`<<b>script>`);
-    every round that changes the text shortens it, so the loop ends and no depth of nesting is left over"""
-    while True:
+    """REQ-CHA-064: no HTML tag and no content of a script or style element is left. A few rounds, because removing a tag can join the parts of another (`<<b>script>`); a text that is still
+    changing after them is nested on purpose, and its remaining `<` are written as `&lt;`: shown as text, never a tag, and every input costs a few linear passes"""
+    for _ in range(STRIP_ROUNDS):
         cleaned = TAG.sub("", _without_code_elements(text))
         if cleaned == text:
             return text
         text = cleaned
+    return text.replace("<", "&lt;")
 
 
 class SkillDigestStep:

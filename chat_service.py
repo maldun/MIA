@@ -34,6 +34,7 @@ import datetime
 import json
 import queue
 import random
+import html
 import re
 import threading
 import time
@@ -100,17 +101,23 @@ def normalize_text(text):
 SENTENCE_END = re.compile(r"(?<=[.!?])\s+")
 SKILL_RUNS_IN_HISTORY = 3      # runs whose messages the chat model sees
 SKILL_TURN_KINDS = ("question", "phase", "done", "failed", "stopped")      # IF-201 v3
-SKILL_LINK = re.compile(r"\s*\[(?:[^\[\]]|\[[^\]]*\])*\]\(\s*<?#run=[^)]*\)", re.I)      # a link to a run in a text of the model (one level of brackets inside the label, any case)
+SKILL_LINK = re.compile(r"\[(?:[^\[\]]|\[[^\]]{0,100}\]){0,200}\]\(\s*<?#run=[^)]{0,300}\)", re.I)      # a link to a run in a text of the model: one level of brackets in a label of usual size, any case
+CUT_ROUNDS = 6        # the nicer cut: a link that is built from the parts of another needs another round; the rest below does not depend on it
 
 
 def cut_run_links(text):
-    """REQ-CHA-066: no link to a run is left in a text of the model: the cut repeats until nothing changes (cutting one link can join the parts of another), and a rest of `#run=` that is
-    no link any more is made plain, so that no form can reach the page or the voice. Every round shortens the text, so the loop ends."""
-    while True:
+    """REQ-CHA-066: no link to a run is left in a text of the model. The links of the usual forms are cut (a few rounds, because cutting one can join the parts of another); what is left
+    fails closed whatever its form: `#run=` that is no link any more is made plain, and where an HTML character reference would decode to it (`&#35;run=`) every `&` is written as a
+    reference of its own, so that the page shows the text and never builds the link. The patterns are bounded, so no input costs more than a few linear passes."""
+    for _ in range(CUT_ROUNDS):
         cut = SKILL_LINK.sub("", text)
         if cut == text:
-            return re.sub(r"#run=", "#run ", text, flags=re.I)
+            break
         text = cut
+    text = re.sub(r"#run=", "#run ", text, flags=re.I)
+    if "#run=" in html.unescape(text).lower():
+        text = text.replace("&", "&amp;")
+    return text
 
 
 NET_NEGATIVE = 5               # REQ-CHA-017: from this many net negative votes a behaviour is shown only rarely
