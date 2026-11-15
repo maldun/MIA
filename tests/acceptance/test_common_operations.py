@@ -1,9 +1,11 @@
 """
-Acceptance tests of the common operations and the thin toolbox entries (G-V2.CONVERT, task T-CV-03b, A-123 P1b, D-246): TC-WFM-116 to TC-WFM-120, preconditions of
-REQ-WFM-058 (the converted skill runs its stages as transforms of the toolbox). RED until T-CV-03b: `common_operations.py` is a stub and `seed_shipped` stores shipped
-nodes without code text.
-What they fix: the functions the shipped library nodes name live once in `common_operations`; every shipped transform runs from the toolbox (`Toolbox.run`) and gives
-what the old runner's function gives; model views and tools get the model and the tools through `common_operations.use(...)`, not through arguments. No model, no network.
+Acceptance tests of the common operations and the thin toolbox entries (G-V2.CONVERT, task T-CV-03b, A-123 P1b, D-246, revised by D-248): TC-WFM-116 to TC-WFM-121,
+preconditions of REQ-WFM-058 (the converted skill runs its stages as transforms of the toolbox). RED until T-CV-03b: `common_operations.py` is a stub and `seed_shipped`
+stores shipped nodes without code text.
+What they fix: the functions the shipped library nodes name live once in `common_operations`; every shipped transform runs from the toolbox and gives what the old runner's
+function gives; a tool or the model reaches a transform as a JSON descriptor in an input node ({"tool": ...}, {"model": ...}, D-248) and is resolved only against what MIA
+registered. A plain entry defines run(args); an entry that needs outputs or settings defines stage(inputs, outputs, node), which `Toolbox.run_stage` calls (the Stage call
+of the graph runner, A-124). No model, no network.
 Run with: python tests/acceptance/test_common_operations.py
 """
 import glob
@@ -29,7 +31,7 @@ from pipeline import render                                        # noqa: E402
 from toolbox import Toolbox, ToolboxError                          # noqa: E402
 
 NODES = os.path.join(REPO, "library", "nodes")
-SETTINGS = {"profile": "light", "options": {"temperature": 0}}
+LIGHT = {"model": "light", "options": {"temperature": 0}}
 
 
 def latest_nodes():
@@ -45,17 +47,25 @@ def latest_nodes():
 
 class CommonOperations(unittest.TestCase):
     def setUp(self):
+        ops.reset()
+        self.addCleanup(ops.reset)
         self.library = TransformLibraryMock()
         self.box = Toolbox(self.library, lambda account: True, EventRecord())
         self.box.seed_shipped(NODES)
         self.nodes = latest_nodes()
 
-    def run_ok(self, tid, args):
-        """the result of the transform, or a failure that names the error (a stub or a missing entry must not look like an error of the test)"""
+    def ok(self, call, what):
+        """the result of the call, or a failure that names the error (a stub or a missing entry must not look like an error of the test)"""
         try:
-            return self.box.run(tid, args)
-        except (ToolboxError, KeyError, NameError, ImportError, TypeError) as error:
-            self.fail("%s does not run from the toolbox: %s %s" % (tid, type(error).__name__, error))
+            return call()
+        except (ToolboxError, KeyError, NameError, ImportError, TypeError, AttributeError) as error:
+            self.fail("%s does not run from the toolbox: %s %s" % (what, type(error).__name__, error))
+
+    def run_ok(self, tid, args):
+        return self.ok(lambda: self.box.run(tid, args), tid)
+
+    def stage_ok(self, tid, inputs, outputs=None, node=None):
+        return self.ok(lambda: self.box.run_stage(tid, inputs, outputs or {}, node or {}), tid)
 
     @mark.req("REQ-WFM-058")
     def test_every_function_a_shipped_code_node_names_is_in_the_common_module_once(self):
@@ -85,31 +95,31 @@ class CommonOperations(unittest.TestCase):
 
     @mark.req("REQ-WFM-058")
     def test_the_entries_of_common_functions_are_thin_and_every_shipped_entry_has_code(self):
-        """TC-WFM-118: after seeding, every shipped entry of kind code, model, tool or script holds code text that defines run(args); an entry whose function is in the
-        common module is at most 12 lines (it calls the module, it does not hold the function)."""
+        """TC-WFM-118: after seeding, every shipped entry of kind code, model, tool or script holds code text that defines run(args) or stage(inputs, outputs, node); an
+        entry whose function is in the common module is at most 12 lines (it calls the module, it does not hold the function)."""
         empty, long_entries = [], []
         for tid, node in sorted(self.nodes.items()):
             if node.get("kind") not in ("code", "model", "tool", "script"):
                 continue
             code = self.library.read("transforms", tid)["doc"].get("code") or ""
-            if "def run" not in code:
+            if "def run(" not in code and "def stage(" not in code:
                 empty.append(tid)
             elif node.get("kind") == "code" and node["body"]["function"] in ops.FUNCTIONS and len(code.strip().splitlines()) > 12:
                 long_entries.append(tid)
-        self.assertEqual(empty, [], "shipped entries without a run function (no code text)")
+        self.assertEqual(empty, [], "shipped entries without a run or stage function (no code text)")
         self.assertEqual(long_entries, [], "entries of common functions that are not thin")
 
     @mark.req("REQ-WFM-058")
-    def test_a_model_view_makes_the_one_call_the_old_runner_makes(self):
-        """TC-WFM-119: view.verdict run through the toolbox inside common_operations.use(model, settings) asks the model once, with the messages of the old runner (system
-        text rendered not strict, user text = the template rendered strict), the schema of the node and the settings of the skill, and returns the parsed reply."""
+    def test_a_model_view_gets_its_model_as_a_descriptor_and_makes_the_one_call_the_old_runner_makes(self):
+        """TC-WFM-119: view.verdict run as a stage with the model as an input descriptor {"model": "light", "options": {...}} asks the registered model once, with the
+        messages of the old runner (system text rendered not strict, user text = the template rendered strict), the schema of the node, the profile and options of the
+        descriptor, and returns the parsed reply. The descriptor is not an argument of the template."""
         node = self.nodes["view.verdict"]
         args = {"claim": "The Rivertown Bridge opened in 2021.", "evidence": "It opened on 3 May 2021.", "context": "a careful reader"}
         reply = {"verdict": "supported", "reason": "the evidence says so", "confidence": 0.9}
         recording = Recording()
-        model = RecordingModel(ScriptedModel([json.dumps(reply)]), recording)
-        with ops.use(model=model, settings=SETTINGS):
-            result = self.run_ok("view.verdict", args)
+        ops.register_model("light", RecordingModel(ScriptedModel([json.dumps(reply)]), recording))
+        result = self.stage_ok("view.verdict", {**args, "model": LIGHT})
         calls = recording.model_calls()
         self.assertEqual(len(calls), 1, "a model view makes exactly one call when the reply fits")
         expected = [{"role": "system", "content": render(node["body"]["system"], args, strict=False)}, {"role": "user", "content": render(node["body"]["template"], args)}]
@@ -119,20 +129,40 @@ class CommonOperations(unittest.TestCase):
         self.assertEqual(result, reply)
 
     @mark.req("REQ-WFM-058")
-    def test_a_tool_transform_calls_the_handed_tool_and_refuses_without_one(self):
-        """TC-WFM-120: tool.web_search inside common_operations.use(tools={...}) calls that function with the args as keywords and returns its result; without a handed tool
-        the run is refused with ToolMissing (the toolbox does not search the web by itself)."""
+    def test_a_tool_transform_calls_the_registered_tool_named_by_its_descriptor(self):
+        """TC-WFM-120: tool.web_search run as a stage with the input descriptor {"tool": "web_search", "settings": {...}} calls the registered function with the other
+        inputs as keywords and the declared settings applied, and returns its result; without a descriptor input the stage is refused with ToolMissing."""
         seen = []
 
-        def web_search(query):
-            seen.append(query)
+        def web_search(query, max_results=10):
+            seen.append((query, max_results))
             return [{"url": "https://a.example/1", "title": "A"}]
 
-        with ops.use(tools={"web_search": web_search}):
-            result = self.run_ok("tool.web_search", {"query": "rivertown bridge"})
-        self.assertEqual((seen, result), (["rivertown bridge"], [{"url": "https://a.example/1", "title": "A"}]))
+        ops.register_tool("web_search", web_search, settings=("max_results",))
+        result = self.stage_ok("tool.web_search", {"query": "rivertown bridge", "tool": {"tool": "web_search", "settings": {"max_results": 3}}})
+        self.assertEqual((seen, result), ([("rivertown bridge", 3)], [{"url": "https://a.example/1", "title": "A"}]))
         with self.assertRaises(ops.ToolMissing):
-            self.box.run("tool.web_search", {"query": "rivertown bridge"})
+            self.box.run_stage("tool.web_search", {"query": "rivertown bridge"}, {}, {})
+
+    @mark.req("REQ-WFM-058")
+    def test_a_descriptor_resolves_only_against_what_mia_registered(self):
+        """TC-WFM-121 (D-248 D): an unknown tool name is refused with ToolMissing, a setting the tool did not declare with DescriptorRefused, an unknown model profile with
+        ModelMissing, each before anything is called; the same descriptors with a registered name and a declared setting resolve."""
+        calls = []
+        ops.register_tool("web_search", lambda query, max_results=10: calls.append(query), settings=("max_results",))
+        ops.register_model("light", ScriptedModel([]))
+        with self.assertRaises(ops.ToolMissing):
+            ops.resolve_tool({"tool": "shell", "settings": {}})
+        with self.assertRaises(ops.DescriptorRefused) as undeclared:
+            ops.resolve_tool({"tool": "web_search", "settings": {"timeout": 1}})
+        self.assertNotIsInstance(undeclared.exception, ops.ToolMissing)
+        with self.assertRaises(ops.ModelMissing):
+            ops.resolve_model({"model": "full", "options": {}})
+        self.assertEqual(calls, [])
+        self.assertTrue(callable(ops.resolve_tool({"tool": "web_search", "settings": {"max_results": 3}})))
+        chat, profile, options = ops.resolve_model(LIGHT)
+        self.assertEqual((profile, options), ("light", {"temperature": 0}))
+        self.assertTrue(hasattr(chat, "chat"))
 
 
 if __name__ == "__main__":
