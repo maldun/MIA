@@ -25,7 +25,7 @@ Task ids carry the prefix CV so that they do not collide with T-01 to T-11 of th
 | T-CV-03a The three-argument call of the graph runner (Stage) | REQ-RUN-030 to REQ-RUN-034 (A-124) | TC-RUN-030 to TC-RUN-034; TC-RUN-016 to 019 unchanged | T-CV-03 |
 | T-CV-03b Common operations module and thin toolbox entries | REQ-WFM-058 (precondition), A-123 P1b | every shipped toolbox transform runs: `toolbox.run(id, args)` gives the result of its library node on recorded inputs; a view runs as a model step with its prompt and schema as data | T-CV-03 |
 | T-CV-03c Order of independent steps | REQ-WFM-058 (precondition), A-123 P4, REQ-RUN-035 | TC-RUN-035 and TC-WFM-122 to 124: the graph built from an ordered list of steps has `order_of` equal to that list over order edges that the runner does not hand to a stage; no edge joins two process nodes (R3) | T-CV-03b |
-| T-CV-03d Pipeline to graph converter | REQ-WFM-058 (precondition), A-123 P2, P3 | a pipeline JSON becomes a graph that passes the graph rules: stages are transforms, a loop or a map over an unknown number of items is a master node with `stop` | T-CV-03c |
+| T-CV-03d Pipeline to graph converter | REQ-WFM-058 (precondition), A-123 P2, P3 | TC-WFM-125 to 130: a pipeline JSON becomes a graph that passes the graph rules: stages are transforms, a loop or a map over an unknown number of items is a master node with `stop` | T-CV-03c |
 | T-CV-04 Same calls on scripted replies | REQ-WFM-058 | TC-WFM-058 for each skill converted in T-CV-06 to T-CV-08 | T-CV-03d |
 | T-CV-05 Snapshots: take, list, restore, nothing deleted, owner only | REQ-WFM-061, REQ-WFM-062, REQ-WFM-063, REQ-WFM-064, REQ-WFM-065, REQ-WFM-066 | TC-WFM-061 to TC-WFM-066 | P1 (snapshotStore, IF-203 v1, IF-301 v2 through their mocks) |
 | T-CV-06 Convert research and plan_question | REQ-WFM-110, REQ-WFM-111 | TC-WFM-110, TC-WFM-111 on the dev split | T-CV-04, P3, P4 |
@@ -91,7 +91,7 @@ Task ids carry the prefix CV so that they do not collide with T-01 to T-11 of th
 ### T-CV-03d: Pipeline to graph converter
 - Implements: precondition of REQ-WFM-058; A-123 P2 and P3
 - Tests to turn green: new, written first: `plan.free@1`, `verify.single@1`, `extract.llm@1` convert to graphs that pass the graph rules; `verify.computable@2` and `research.escalate@3` convert with master nodes for the loop and for a map over an unknown number of items (`stop` from the loop's maximum cycles or the map bound and the skill budget's seconds, `task` empty); a branch between fixed alternatives stays inside a transform
-- Touches: the converter in N-2.3 (reads `library/pipelines`, writes graphs and a minimal context graph and the skill record through the existing stores)
+- Touches: `pipeline_graph.py` (`convert(pipeline, library_nodes, budget_seconds)`, a pure function: reads the pipeline and node JSON, returns the graph, the input and result names, notes and refusals; it writes no store: records and context graphs belong to T-CV-06 to T-CV-08). The edge field `path` (a field of a variable, `$raw.claims`) needs the runner to apply it: REQ-RUN-036 (to be approved) and a small follow-up in `graph_run.py` before the converted run; the `control.*` transforms (branch, map, loop: they run the construct of the settings node) are a later task of the conversions
 - Must not touch: protected material, `contracts/`, `library/pipelines` (read only), prompts
 - Depends on: T-CV-03c
 - Done when: the five pipelines convert; nothing is run on a model
