@@ -323,3 +323,15 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-201
 - Given: a scripted skill with one declared phase whose status wording holds `[Open in the Skill run view](#run=evil)`
 - When: the run is started and ends
 - Then: the status message and its speech hold no such link; the summary ends with the link of its own run
+
+### TC-CHA-014 – Behaviour violations are repaired silently, and the detectors keep their precision
+- Verifies: REQ-CHA-014
+- Given: the suite `behaviour` (67 texts with people's truth: texts that break a behaviour rule and 32 clean ones) and a chat whose model answer breaks a rule while it is streamed
+- When: the detectors run on the suite, and the answer is streamed to the page
+- Then: every rule has precision and recall 100 % on the suite, the 32 clean texts are left alone and a repair of a repaired text changes nothing; the page sees only repaired text, the violation is recorded as a signal and the correction is not in the conversation memory
+
+### TC-CHA-008 – The persona file reaches the model (interim check of TD-10)
+- Verifies: REQ-CHA-008
+- Given: a persona file that names MIA with its pronouns and form of address, a missing, a broken and a blank file, and a recording stand-in for the model client
+- When: the Chat agent builds the messages of a call, and the file is changed between two calls
+- Then: the persona text is the system message of every call, unchanged; a missing, broken or blank file gives the default form of address "master" alone; a change of the file counts from the next call; the system message is not kept in the history. The statistical check of AC-8 (check dialogues against a baseline) is deferred by TD-10 and is not decided here; the persona of the status and end messages of a skill run is decided by REQ-CHA-054
