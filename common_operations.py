@@ -60,9 +60,20 @@ def _late(name):
     return unbound
 
 
+def pick_field(value, path=""):
+    """the part of `value` at a dot-separated path (dict keys, list indexes as numbers); the pick transform of a field reference like `$raw.claims`"""
+    here = value
+    for part in [p for p in str(path).split(".") if p]:
+        try:
+            here = here[int(part)] if isinstance(here, list) else here[part]
+        except (KeyError, IndexError, ValueError, TypeError):
+            raise KeyError("pick_field: no %r at path %r" % (part, path)) from None
+    return here
+
+
 # The old registries are merged without copying a function; the rest are plain functions of web_tools or built by the app (core.py, web_app.py).
 FUNCTIONS = {**checks.OFFLINE_FUNCTIONS, **extraction.FUNCTIONS, **behaviour.FUNCTIONS, **verification.FUNCTIONS, **number_gate.FUNCTIONS, **research.FUNCTIONS,
-             "chunk_text": web_tools.chunk_text, "untrusted": web_tools.untrusted, "injection_signals": web_tools.injection_signals}
+             "pick_field": pick_field, "chunk_text": web_tools.chunk_text, "untrusted": web_tools.untrusted, "injection_signals": web_tools.injection_signals}
 APP_BUILT = ("citation_check", "web_confirm", "script_check", "script_check_web", "hard_checks_offline", "hard_checks_web", "converse")
 for _name in APP_BUILT:
     FUNCTIONS[_name] = _late(_name)

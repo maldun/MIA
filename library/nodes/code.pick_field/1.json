@@ -1,0 +1,55 @@
+{
+ "id": "code.pick_field",
+ "version": 1,
+ "kind": "code",
+ "title": "A field of a value",
+ "description": "The value at a dot-separated path into dicts and lists (a list index is a number); a missing key is an error that names the path.",
+ "tags": [
+  "exact",
+  "convert"
+ ],
+ "applies_to": {
+  "tasks": [
+   "research"
+  ]
+ },
+ "inputs": {
+  "schema": {
+   "type": "object",
+   "required": [
+    "value"
+   ],
+   "properties": {
+    "value": {},
+    "path": {
+     "type": "string"
+    }
+   }
+  }
+ },
+ "outputs": {
+  "schema": {}
+ },
+ "params": {
+  "path": {
+   "default": "",
+   "description": "dot-separated path, from the settings node"
+  }
+ },
+ "body": {
+  "function": "pick_field",
+  "plain": "taking a field out of a result"
+ },
+ "cost": {
+  "seconds": 0.001
+ },
+ "safety": {
+  "reads_web": false,
+  "runs_code": false
+ },
+ "status": "trusted",
+ "origin": {
+  "by": "manual",
+  "note": "field references of converted pipelines (T-CV-03d, D-252)"
+ }
+}
