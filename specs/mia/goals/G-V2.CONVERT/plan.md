@@ -118,6 +118,12 @@ Task ids carry the prefix CV so that they do not collide with T-01 to T-11 of th
 ### Order of the conversions (owner, A-123 P5, 2026-11-15)
 The tasks T-CV-06 to T-CV-08 keep their groups, but the skills are converted in this order: plan_question, verify_claim, extract_claims_rules and extract_claims, then verify_computable, then research (the largest: 50 calls, 6 maps, 8 branches, 1 loop). Each skill has its own equivalence check; a failing skill stays on the old runner with the reason recorded.
 
+### Wiring found before the conversions (checked 2026-11-15 against `library/pipelines`, after T-CV-03b)
+- plan_question (plan.free@1), verify_claim (verify.single@1), extract_claims (extract.llm@1): use no placeholder function of `common_operations` and no tool; they can be converted as soon as T-CV-03c, T-CV-03d and T-CV-04 are done.
+- verify_computable (verify.computable@2): uses `check.script` (function `script_check`, a placeholder until `common_operations.bind` is called by the app with the sandbox): a small task T-CV-07a binds it (sandbox wiring, trust of scripts the model wrote, no new permission) before this skill is converted; it needs the owner's look because it runs generated code in the sandbox.
+- research (research.escalate@3): uses two tools (`tool.web_search`, `tool.fetch_page`) with the budget counting and the IF-402 door of the old runner (D-247 item 5: plain callables only so far) and 22 distinct nodes; a task T-CV-06a decides how a converted run counts budgets and labels trust of tool results before research is converted.
+- all five: `model_step` has no budget, token estimate or run events (D-247 item 4); the converted runner path (T-CV-04) adds them or the check shows the difference.
+
 ### T-CV-06: Convert research and plan_question
 - Implements: REQ-WFM-110, REQ-WFM-111
 - Tests to turn green: TC-WFM-110 (EV-research dev), TC-WFM-111 (EV-plans dev), after TC-WFM-058 for both skills
