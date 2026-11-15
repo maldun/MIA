@@ -689,13 +689,13 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 
 ### REQ-CHA-064 – No markup in the output of the digest step
 - Level: low   Subject: ConversationCore
-- Text: When SkillDigestStep returns a text, the Chat agent shall remove every HTML tag from it before the text is repaired or shown.
-- Rationale: refines REQ-BE-078; NFR-3, THR-012: a prompt cannot make the 12B model leave a quoted tag out (G-V3.CHAT T-05, prompt versions 1 to 4, st-rt-d5), so code does; the text inside a tag stays as plain text
+- Text: When SkillDigestStep returns a text, the Chat agent shall remove every HTML tag from it, and the content of every script and style element, before the text is repaired or shown.
+- Rationale: refines REQ-BE-078; NFR-3, THR-012: a prompt cannot make the 12B model leave a quoted tag out (G-V3.CHAT T-05, prompt versions 1 to 4, st-rt-d5), so code does; the text inside an ordinary tag stays as plain text, the content of a script or style element is code and goes with it (A-151: the owner did not accept `alert(1)` left in the text of st-rt-d5 as resisted)
 - Parent: REQ-BE-078
 - Group: UT
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-39: a scripted reply `Done: <script>alert(1)</script> and <b>x</b>` gives `Done: alert(1) and x`; a text without a tag, and a lone `<` or `>` as in `5 < 6`, is unchanged (exact)
+- Acceptance criterion: AC-39: a scripted reply `Done: <script>alert(1)</script> and <b>x</b>` gives `Done: and x`; a text without a tag, and a lone `<` or `>` as in `5 < 6`, is unchanged (exact)
 - Verified by: TC-CHA-069
 - Status: Draft
-- History: A-150 (proposed 2026-11-15, G-V3.CHAT), new; owner approval 2026-11-15 by questionnaire
+- History: A-150 (proposed 2026-11-15, G-V3.CHAT), new; owner approval 2026-11-15 by questionnaire; A-151 (2026-11-15, owner choice by questionnaire): script and style content removed too

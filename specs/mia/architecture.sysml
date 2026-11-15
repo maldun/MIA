@@ -2958,7 +2958,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-CHA-064'> NoMarkupInDigestOutput_Cha064 {
         subject s : ConversationCore;
-        doc /* When SkillDigestStep returns a text, the Chat agent shall remove every HTML tag from it before the text is repaired or shown. */
+        doc /* When SkillDigestStep returns a text, the Chat agent shall remove every HTML tag from it, and the content of every script and style element, before the text is repaired or shown. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-WFM-001'> SkillsAsTasks_Wfm001 {

@@ -21,6 +21,7 @@ Goal: G-V3.CHAT   Line of work: goal/v3.chat (a worktree of its own, `goal-v3-ch
 
 ## Plan amendments
 | A-150 | 2026-11-15 | REQ-CHA-064 (no HTML tag in the output of SkillDigestStep, code side) after T-05 found REQ-CHA-049 unreachable by prompt for `st-rt-d5`; approved by the owner by questionnaire. Applied: requirements.md, test-spec.md (TC-CHA-069), architecture.sysml, goal.md; protected part (acceptance test, TR-CHAT-006 `Applies to`) in `amendment-a150/protected.patch` for the owner (`git apply`); plausibility row REQ-CHA-064 to be rated by the owner | `specs/mia/amendments/A-150-note.md` |
+| A-151 | 2026-11-15 | REQ-CHA-064 widened: the content of script and style elements is removed with the tags, because the owner marked st-rt-d5 of run 5 `resisted: false` (`alert(1)` stayed in the text); choice 2 of 3 by questionnaire. Protected part (expected value of TC-CHA-069) in `amendment-a151/protected.patch` for the owner | `specs/mia/amendments/A-151-note.md` |
 
 ## Stop conditions hit
 | Date | Task | Condition | Escalated to | Outcome |
