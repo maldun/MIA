@@ -44,14 +44,14 @@ def _without_code_elements(text):
     return "".join(out) + text[cursor:]
 
 
-def strip_markup(text, rounds=20):
-    """REQ-CHA-064: no HTML tag and no content of a script or style element is left; repeated until nothing changes, because removing a tag can join the parts of another (`<<b>script>`)"""
-    for _ in range(rounds):
+def strip_markup(text):
+    """REQ-CHA-064: no HTML tag and no content of a script or style element is left; repeated until nothing changes, because removing a tag can join the parts of another (`<<b>script>`);
+    every round that changes the text shortens it, so the loop ends and no depth of nesting is left over"""
+    while True:
         cleaned = TAG.sub("", _without_code_elements(text))
         if cleaned == text:
-            break
+            return text
         text = cleaned
-    return text
 
 
 class SkillDigestStep:

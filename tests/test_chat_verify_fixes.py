@@ -5,6 +5,7 @@ Run with: python tests/test_chat_verify_fixes.py
 """
 import ast
 import os
+import re
 import shutil
 import sys
 import tempfile
@@ -265,6 +266,108 @@ class StepModelAndLinks(unittest.TestCase):
         self.assertNotIn("#run=evil", records[0]["text"])
         self.assertFalse([s for s in spoken if "Skill run view" in s])
         self.assertTrue(records[1]["text"].endswith("(#run=%s)" % records[1]["id"]))
+
+
+class SecondVerifyRun(unittest.TestCase):
+    """findings F-15, F-16, F-18 and the observations of the second Verify run (verification-report-run2.md)"""
+
+    def run_ids(self, text):
+        return [m.group(0) for m in re.finditer(r"#run=[^)\s]*", text, re.I)]
+
+    @mark.req("REQ-CHA-066")
+    def test_a_run_link_that_is_built_from_what_is_left_is_cut_too(self):
+        """F-15: the cut repeats until nothing changes and covers nested brackets, capitals and a space; no `#run=` is left in a message or its speech except the real link.
+        Example: `Fine [a](#ru[b](#run=1)n=evil) bye`, `[a [b]](#run=evil)`, `[a](#RUN=evil)`, `[a]( #run=evil)`."""
+        for hostile in ("Fine [a](#ru[b](#run=1)n=evil) bye", "Fine [a [b]](#run=evil) bye", "Fine [a](#RUN=evil) bye", "Fine [a]( #run=evil) bye", "Fine [a](<#run=evil>) bye"):
+            # Given: a skill with one phase whose status wording holds the hostile link and whose summary holds it too
+            def runs(argument, on_delta, on_emotion, should_stop, monitor):
+                monitor.update(phase="collect")
+                return "Done"
+            chat, spoken, _ = chat_with(self, runs, replies={"collect": hostile, "Done": hostile})
+            # When: the run is started
+            chat.send("/go x", sender="anna", author="anna")
+            # Then: the status message and all speech hold no run link; the summary holds only the real one, once
+            records = mia(chat)
+            self.assertEqual(self.run_ids(records[0]["text"]), [], hostile)
+            self.assertEqual(self.run_ids(" ".join(spoken)), [], hostile)
+            self.assertEqual(self.run_ids(records[1]["text"]), ["#run=%s" % records[1]["id"]], hostile)
+
+    @mark.req("REQ-CHA-066")
+    def test_a_link_in_a_failure_or_stop_message_is_cut_and_the_real_one_follows(self):
+        """F-18: failed and stopped wordings are cut like the others, also when the repair itself adds a link.
+        Example: the failure wording holds [x](#run=evil): the message ends with the real link once."""
+        def raises(argument, on_delta, on_emotion, should_stop, monitor):
+            raise RuntimeError("boom")
+        # Given: a failing skill whose wording has a link, and a repair that adds another
+        chat, spoken, _ = chat_with(self, raises, replies={"boom": "It failed [x](#run=evil)."}, repair=lambda text: text + " [y](#run=evil2)")
+        # When: the user starts it
+        chat.send("/go x", sender="anna", author="anna")
+        # Then: one run link in the message, the real one, and none in the speech
+        record = mia(chat)[0]
+        self.assertEqual(self.run_ids(record["text"]), ["#run=%s" % record["id"]])
+        self.assertEqual(self.run_ids(" ".join(spoken)), [])
+
+    @mark.req("REQ-CHA-064")
+    def test_markup_nested_deeper_than_any_fixed_number_of_rounds_is_removed(self):
+        """F-16: the removal stops when nothing changes, not after a fixed number of rounds.
+        Example: a tag hidden 25 levels deep leaves no tag; `<script><script>a</script>b</script>c` gives `bc`."""
+        # Given: a tag hidden 25 levels deep, nested script elements and 1 MB of unclosed script tags
+        deep = "<scr" + "<b" * 25 + ">" * 25 + "ipt>alert(1)"
+        # When: the step returns them
+        out = step_saying(deep).failure("r")
+        # Then: no tag is left, the nested elements go whole and the cost stays small
+        self.assertNotRegex(out.lower(), r"</?[a-z!]")
+        self.assertEqual(step_saying("<script><script>a</script>b</script>c").failure("r"), "bc")
+        started = time.monotonic()
+        step_saying("<script>" * 125000).failure("r")
+        self.assertLess(time.monotonic() - started, 2.0)
+
+    @mark.req("REQ-CHA-008")
+    def test_the_persona_is_read_at_every_call(self):
+        """F-18: a persona saved on the page counts for the next message.
+        Example: the provider says A, then B: the second call carries B."""
+        # Given: a live step whose persona provider answers A, then B
+        personas, seen = ["A", "B"], []
+        step = LiveDigest(lambda messages, profile=None: seen.append(messages[0]["content"]) or "ok", lambda: personas.pop(0))
+        # When: two messages are worded
+        step.status("x"), step.status("y")
+        # Then: each call carries the persona of its time
+        self.assertTrue(seen[0].startswith("A") and seen[1].startswith("B"))
+
+    @mark.req("REQ-CHA-041", "REQ-WFM-136")
+    def test_a_phase_turn_that_raises_does_not_stop_the_run(self):
+        """F-03, F-18: if the chat cannot add a status message, the run still ends with its summary.
+        Example: post_assistant raises for kind phase; the summary is in the chat."""
+        def runs(argument, on_delta, on_emotion, should_stop, monitor):
+            monitor.update(phase="collect")
+            return "Done"
+        # Given: a chat that fails to add a status message
+        chat, _, _ = chat_with(self, runs)
+        original = chat.post_assistant
+
+        def failing(text, **fields):
+            if fields.get("kind") == "phase":
+                raise OSError("log down")
+            return original(text, **fields)
+        chat.post_assistant = failing
+        # When: the user starts the run
+        chat.send("/go x", sender="anna", author="anna")
+        # Then: the summary is there
+        self.assertEqual([r.get("kind") for r in mia(chat)], ["done"])
+
+    @mark.req("REQ-CHA-040")
+    def test_a_question_that_cannot_be_posted_leaves_no_waiter_behind(self):
+        """F-18 (observation): if the question cannot be added, the next message of the author is not swallowed as an answer.
+        Example: post_assistant raises in ask; _waiter is None afterwards."""
+        # Given: a skill that asks and a chat whose log is down
+        def asks(argument, on_delta, on_emotion, should_stop, ask, monitor):
+            return ask("Which topic?")
+        chat, _, _ = chat_with(self, asks, needs=("ask", "monitor"))
+        chat.post_assistant = lambda text, **fields: (_ for _ in ()).throw(OSError("log down"))
+        # When: the run asks its question
+        chat.send("/go x", sender="anna", author="anna")
+        # Then: no waiter is left behind
+        self.assertIsNone(chat._waiter)
 
 
 class Margin(unittest.TestCase):

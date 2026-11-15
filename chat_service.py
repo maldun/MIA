@@ -100,7 +100,17 @@ def normalize_text(text):
 SENTENCE_END = re.compile(r"(?<=[.!?])\s+")
 SKILL_RUNS_IN_HISTORY = 3      # runs whose messages the chat model sees
 SKILL_TURN_KINDS = ("question", "phase", "done", "failed", "stopped")      # IF-201 v3
-SKILL_LINK = re.compile(r"\s*\[[^\]]*\]\(#run=[^)]*\)")      # a link to a run in a text of the model
+SKILL_LINK = re.compile(r"\s*\[(?:[^\[\]]|\[[^\]]*\])*\]\(\s*<?#run=[^)]*\)", re.I)      # a link to a run in a text of the model (one level of brackets inside the label, any case)
+
+
+def cut_run_links(text):
+    """REQ-CHA-066: no link to a run is left in a text of the model: the cut repeats until nothing changes (cutting one link can join the parts of another), and a rest of `#run=` that is
+    no link any more is made plain, so that no form can reach the page or the voice. Every round shortens the text, so the loop ends."""
+    while True:
+        cut = SKILL_LINK.sub("", text)
+        if cut == text:
+            return re.sub(r"#run=", "#run ", text, flags=re.I)
+        text = cut
 
 
 NET_NEGATIVE = 5               # REQ-CHA-017: from this many net negative votes a behaviour is shown only rarely
@@ -682,7 +692,7 @@ class ChatService:
         """(text, spoken text) of one turn: the wording of the digest step, repaired, with the link of the run added by code at the end messages"""
         if kind == "question":
             return payload, payload
-        text = SKILL_LINK.sub("", self._repaired(self._worded(kind, payload)))      # a link in the model text is not the link, in no message of a run (REQ-CHA-066): cut off
+        text = cut_run_links(self._repaired(self._worded(kind, payload)))      # a link in the model text is not the link, in no message of a run (REQ-CHA-066): cut off
         spoken = text
         if kind in ("done", "failed", "stopped"):
             text = text.rstrip() + " [Open in the Skill run view](#run=%s)" % run                  # the real one follows, added by code (REQ-CHA-056)
@@ -739,10 +749,15 @@ class ChatService:
         waiter = {"author": self._author, "replies": queue.Queue()}
         with self._lock:
             self._waiter = waiter
-        if self._observer is not None:
-            self.skill_turn(self._author or "page", self._observer.run, "question", text)       # a question of a run is a message of MIA with kind and speech (REQ-CHA-040, 045)
-        else:
-            self.post_assistant(text)
+        try:
+            if self._observer is not None:
+                self.skill_turn(self._author or "page", self._observer.run, "question", text)       # a question of a run is a message of MIA with kind and speech (REQ-CHA-040, 045)
+            else:
+                self.post_assistant(text)
+        except Exception:
+            with self._lock:
+                self._waiter = None                      # a question that was not shown has no answer to wait for: the next message is not swallowed
+            raise
         self.set_activity("waiting")
         monitor = self._monitor
         if monitor is not None:
