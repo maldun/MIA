@@ -7,12 +7,12 @@ Written because two gaps of Plan step 3 cannot be closed in Plan: `stages.yaml` 
 ## Preconditions (nothing of Implement starts before all of them)
 | # | Precondition | Owner | State |
 |---|---|---|---|
-| P1 | G-V2.STORE, MODEL and TOOLBOX are merged (parallel-work.md) | owner | open |
-| P2 | Step 4 done: red tests for the checks below in `tests/acceptance/`, helpers, fake model server with recorded replies; tag `plan-baseline-it2` | a dedicated test-writing session, reviewed by the owner | open |
-| P3 | A-120 applied: tag `split:dev` on the cases of EV-research, EV-plans, EV-verdicts, EV-computable, EV-extraction (protected eval material) | owner | proposed |
-| P4 | Baselines recorded as run files: dev split, 3 repeats, MP-light, per skill and variant of `eval-spec.md` (results only; `eval/baselines/` is protected) | owner or a harness run the owner starts | open; today only `.md` summaries exist |
-| P5 | The ten proposed plausibility items rated; the margin 0.10 of REQ-WFM-110 to 114 judged against the recorded baselines (D-260 D probe) | owner | open |
-| P6 | REQ-WFM-057 to 066, 069, 110 to 115 Approved in the review log with their final text | owner | 062, 063, 066 and 059 back in review |
+| P1 | G-V2.STORE, MODEL and TOOLBOX are merged (parallel-work.md) | owner | met 2026-11-15: STORE, MODEL and TOOLBOX are in master |
+| P2 | Step 4 done: red tests for the checks below in `tests/acceptance/`, helpers, fake model server with recorded replies; tag `plan-baseline-it2` | a dedicated test-writing session, reviewed by the owner | met: red tests committed (plan-baseline-it2-convert), amended 2026-11-15 after A-121 (D-242) |
+| P3 | A-120 applied: tag `split:dev` on the cases of EV-research, EV-plans, EV-verdicts, EV-computable, EV-extraction (protected eval material) | owner | owner applies A-120 change 1 (approved, D-244 context); not yet confirmed |
+| P4 | Baselines recorded as run files: dev split, 3 repeats, MP-light, per skill and variant of `eval-spec.md` (results only; `eval/baselines/` is protected) | owner or a harness run the owner starts | runs done 2026-11-15 (data/eval, 3 repeats, MP-light, A-122); the owner places the five files in eval/baselines/ |
+| P5 | The ten proposed plausibility items rated; the margin 0.10 of REQ-WFM-110 to 114 judged against the recorded baselines (D-260 D probe) | owner | done 2026-11-15: ten items rated (D-245), margin kept, REQ-WFM-110 and 113 raised (A-122, D-244); written to plausibility.yaml |
+| P6 | REQ-WFM-057 to 066, 069, 110 to 115 Approved in the review log with their final text | owner | done 2026-11-15: REQ-WFM-057 to 066, 069, 115 approved earlier; 110 to 114 approved with their final text |
 
 ## Task list
 Task ids carry the prefix CV so that they do not collide with T-01 to T-11 of the N-2.3 plan. Riskiest first.
