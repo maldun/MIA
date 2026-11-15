@@ -1,6 +1,6 @@
 # A-153: the paperwork findings F-12 and F-14 of the Verify of G-V3.CHAT (no requirement text changes)
 
-Status: **F-12 and F-14 are to be fixed with these patches (owner's decision D-339, 2026-11-15)**; the owner installs them (protected files). The deviations that the owner accepts in D-339 are F-33 and F-35 (TD-85), not F-12 and F-14 (TC-CHA-008 decision by questionnaire: use the existing deferral TD-10).
+Status: **F-12 and F-14 are to be fixed with these patches (owner's decision D-339, 2026-11-15)**; the owner installs them (protected files). The deviations that the owner accepts in D-339 are F-33, F-34 and F-35 (TD-85), not F-12 and F-14 (TC-CHA-008 decision by questionnaire: use the existing deferral TD-10).
 
 ## F-12: the protected contract tests lack `Example:` lines and Given/When/Then comments
 `amendment-a153/f12-contract-comments.patch` changes only comments and docstrings of `tests/acceptance/contract/test_if_201_chat_turn.py` (TC-IF-201-01 to 12): the code of the tests is identical (compared as syntax trees with the docstrings removed); `test_doc_check.py` reports 0 errors and 0 warnings for the file with the patch.
@@ -17,7 +17,7 @@ Status: **F-12 and F-14 are to be fixed with these patches (owner's decision D-3
 Effect on `trace_check` (checked on a copy of `specs/`): 538 errors become 528, none left for these checks. The two files `test-spec.md` of N-2.2 and N-2.3 are not protected; `test-requirements.md` is.
 
 ## Deferral (F-33 and F-35, not part of this amendment)
-`amendment-a153/td85-deferred.patch` adds TD-85 to `deferred.md` (protected; with `Sign-off: maldun, 2026-11-15`): the fixes of F-33 and F-35 are not re-checked by a reviewer; the decision row D-339 is in `review-log.md`.
+`amendment-a153/td85-deferred.patch` adds TD-85 to `deferred.md` (protected; with `Sign-off: maldun, 2026-11-15`): the fixes of F-33, F-34 and F-35 are not re-checked by a reviewer; the decision row D-339 is in `review-log.md`.
 
 ## Install
 `git apply` of both patches, then `git add` of the four paths and one commit (the command is in the reply of the session).
