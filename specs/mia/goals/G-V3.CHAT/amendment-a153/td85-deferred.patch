@@ -1,0 +1,23 @@
+diff --git a/specs/mia/deferred.md b/specs/mia/deferred.md
+index 3d6f4d2..da141c8 100644
+--- a/specs/mia/deferred.md
++++ b/specs/mia/deferred.md
+@@ -469,3 +469,18 @@ Proposed on 2026-10-29 after the usability work of N-2.3 T-09 to T-11 and N-1.1
+ - Decision: proposed 2026-11-14 on the owner's instruction (F-17 later); decision row pending
+ - Sign-off: maldun, 2026-11-14
+ - Status: open
++
++## TD-85 – The fixes of F-33 and F-35 of the fifth Verify run of G-V3.CHAT are not re-checked by a reviewer (accepted by the owner)
++- Kind: defer
++- Requirement: REQ-CHA-064, REQ-CHA-066 (finding F-33: the cleaning of the text of the digest step raised on a character reference with more than 4300 digits; finding F-35: `<?` was left as markup and swallowed the link)
++- Interim criterion: both are fixed in the code with tests that failed first and pass now (`tests/test_chat_verify_fixes.py`, class `FifthVerifyRun`: the cleaning returns text for every text, a run whose summary holds such a reference ends with its message and is closed, `<?` is escaped); the unit suite is green; no fresh reviewer has re-checked the fixes (the fifth run reported them as the reasons of 'Not verified')
++- Target: a sixth narrow Verify run (fresh reviewer, brief like `verify-brief-run5.md`) that checks F-33, F-35 and their neighbours, or the real page with DOMPurify (not run so far)
++- Reason: the owner accepted the deviation on 2026-11-15: the verification did not go through to the end, and the gap does not harm the end product (the page also sanitizes the text; the fixes are tested)
++- Effort: about 25 minutes of a background reviewer run
++- Risk of the gap: another edge case of the same family may remain in the cleaning of the model text; the page's DOMPurify is a second layer
++- Owner: Stefan Reiterer
++- Trigger: the Validate of G-V3 (VAL-013, real summaries in use), or earlier when the owner wants a sixth run
++- Target check: specified only
++- Decision: D-339, 2026-11-15, Stefan Reiterer
++- Sign-off: maldun, 2026-11-15
++- Status: open

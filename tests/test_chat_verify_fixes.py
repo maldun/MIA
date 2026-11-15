@@ -547,6 +547,97 @@ class FourthVerifyRun(unittest.TestCase):
         self.assertNotIn("#run=", seen_by_a_browser(clean_model_text("see #RUN=e")))
 
 
+class FifthVerifyRun(unittest.TestCase):
+    """findings F-33 to F-37 of the fifth Verify run (verification-report-run5.md): the cleaning never raises, and the real link is always a paragraph of its own"""
+
+    FENCE_OPENER = re.compile(r"^[ >*+\-]*(`{3,}|~{3,})", re.M)
+
+    @mark.req("REQ-CHA-064", "REQ-CHA-066")
+    def test_the_cleaning_returns_text_for_every_text(self):
+        """F-33: a character reference with more than 4300 digits made `int()` raise inside the cleaning.
+        Example: `a &#` + 5000 digits + `;` gives a text, and the run ends with its message."""
+        # Given: texts that make the standard library raise
+        for hostile in ("a &#" + "1" * 5000 + ";", "a &#" + "1" * 5000, "&#x" + "f" * 5000 + ";", "&#" * 3000):
+            # When: they are cleaned
+            out = clean_model_text(hostile)
+            # Then: the result is a text without a way to a run link
+            self.assertIsInstance(out, str)
+            self.assertNotIn("#run=", seen_by_a_browser(out))
+
+    @mark.req("REQ-CHA-043", "REQ-CHA-044")
+    def test_a_run_whose_summary_holds_such_a_reference_still_ends_with_its_message(self):
+        """F-33: the end of the run is outside any guard, so a failing cleaning must not leave the run open.
+        Example: the summary `All done &#` + 5000 digits + `;`: one done message with the link, the observer closed."""
+        def runs(argument, on_delta, on_emotion, should_stop, monitor):
+            return "Done"
+        # Given: a run whose summary holds the long reference
+        chat, _, _ = chat_with(self, runs, replies={"Done": "All done &#" + "1" * 5000 + ";"})
+        # When: the user starts it
+        chat.send("/go x", sender="anna", author="anna")
+        # Then: one done message that ends with the real link, the run is closed
+        records = mia(chat)
+        self.assertEqual([r.get("kind") for r in records], ["done"])
+        self.assertTrue(records[0]["text"].endswith("(#run=%s)" % records[0]["id"]))
+        self.assertIsNone(chat._observer)
+        self.assertIsNone(chat._message_id)
+
+    @mark.req("REQ-CHA-056")
+    def test_the_real_link_is_a_paragraph_of_its_own_after_any_block(self):
+        """F-34: an open fence, an indented code block, a quote, a list or a table must not swallow the link: it ends the text, no fence can open before it, and an indented line or a table row is separated from it by a blank line.
+        Example: `x` + a fence + `code`, `~~~`, four backticks, `> ` + a fence, a list item with a fence, an indented line, a table row."""
+        for ending in ("x\n```\ncode", "x\n~~~\ncode", "x\n````\ncode", "x\n```js\ncode", "> ```\n> code", "- ```\n  code", "x\n\n    code", "| a |\n|---|\n| 1 |"):
+            def runs(argument, on_delta, on_emotion, should_stop, monitor, ending=ending):
+                return "Done"
+            # Given: a summary that ends in the block
+            chat, spoken, _ = chat_with(self, runs, replies={"Done": ending})
+            # When: the run ends
+            chat.send("/go x", sender="anna", author="anna")
+            text = mia(chat)[0]["text"]
+            # Then: no fence can open before the link, the link ends the text, and an indented line or a table row is separated from it by a blank line
+            link = "[Open in the Skill run view](#run=%s)" % mia(chat)[0]["id"]
+            self.assertTrue(text.endswith(link), repr(ending))
+            self.assertIsNone(self.FENCE_OPENER.search(text), repr(ending))
+            if ending.startswith(("x\n\n    ", "| a")):
+                self.assertTrue(text.endswith("\n\n" + link), repr(ending))
+
+    @mark.req("REQ-CHA-064")
+    def test_a_question_mark_after_the_angle_bracket_is_markup_too(self):
+        """F-35: a browser reads `<?` as a comment and marked passes it on as a raw block.
+        Example: `x` then `<?` and `<?x>y` leave no `<?`."""
+        for hostile in ("x\n\n<?", "<?x>y", "<? a ?> text"):
+            self.assertNotIn("<?", clean_model_text(hostile), hostile)
+
+    @mark.req("REQ-CHA-056")
+    def test_the_id_of_the_run_is_encoded_in_the_link(self):
+        """F-36: a run id with a space or a parenthesis must not break the link.
+        Example: id `a b)` gives `#run=a%20b%29`; the usual id is unchanged."""
+        def runs(argument, on_delta, on_emotion, should_stop, monitor):
+            return "Done"
+        # Given: a chat and two run ids, one with a space and a parenthesis
+        chat, _, _ = chat_with(self, runs)
+        # When: the end message of each run is made
+        text, _ = chat._turn_text("a b)", "done", "x")
+        # Then: the odd id is percent-encoded and the usual id is unchanged
+
+        self.assertTrue(text.endswith("(#run=a%20b%29)"), text)
+        self.assertTrue(chat._turn_text("01794783217634342-fc25", "done", "x")[0].endswith("(#run=01794783217634342-fc25)"))
+
+    @mark.req("REQ-CHA-064", "REQ-CHA-066")
+    def test_the_last_strip_and_the_order_of_the_two_nets_matter(self):
+        """F-37 (mutants that survived): tags and links built from several joined parts are gone at the end, in either order of discovery.
+        Example: `<[x](#ru<[x](#ru<[x](#run=1)b>n=1)b>n=1)b>` leaves no `<b`; the same shape with links leaves no run link."""
+        # Given: tags and links that are built from several joined parts, a `</b` without `>` and a carriage return in a destination
+        tags = "<[x](#ru<[x](#ru<[x](#run=1)b>n=1)b>n=1)b>"
+        links = "[x](#ru<[x](#ru<[x](#ru<[x](#run=1)b>n=1)b>n=1)b>n=1)"
+        # When: they are cleaned
+        # Then: no tag and no way to a run link is left
+        self.assertNotRegex(clean_model_text(tags), r"<[A-Za-z!/?]")
+        self.assertNotIn("#run=", seen_by_a_browser(clean_model_text(links)))
+        self.assertNotRegex(clean_model_text("a </b"), r"<[A-Za-z!/?]")
+        for hostile in ("[x](#ru&#13;n=e)", "[x](#ru\rn=e)"):
+            self.assertNotIn("#run=", seen_by_a_browser(clean_model_text(hostile)), hostile)
+
+
 class Margin(unittest.TestCase):
     @mark.req("REQ-CHA-050")
     def test_a_tokenizer_that_counts_five_percent_more_still_stays_below_the_limit(self):

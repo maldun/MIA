@@ -35,6 +35,7 @@ import json
 import queue
 import random
 import html
+from urllib.parse import quote
 import re
 import threading
 import time
@@ -107,10 +108,17 @@ SKILL_LINK = re.compile(r"\[(?:[^\[\]]|\[[^\]]{0,100}\]){0,200}\]\(\s*<?#run=[^)
 CUT_ROUNDS = 6        # the nicer cut: a link that is built from the parts of another needs another round; the rest below does not depend on it
 
 
+FENCE_RUN = re.compile(r"`{3,}|~{3,}")             # a run of three or more backticks or tildes is a code fence when it starts a line
+RISKY_END = re.compile(r"(?:^|\n)(?: {4}|\t)[^\n]*$|\|[^\n]*$")      # the last line is indented code or part of a table
+
+
 def browser_view(text):
     """what the page and the browser make of a text before they look at a link: character references decoded, backslash escapes of punctuation resolved, tab and newline dropped by the URL
     parser, lower case. A link is judged by this view, never by the raw text."""
-    text = html.unescape(text)
+    try:
+        text = html.unescape(text)
+    except Exception:                                   # a reference with thousands of digits makes int() raise: fail closed, the text is made plain
+        return "#run="
     text = re.sub(r"\\(?=[!-/:-@\[-`{-~])", "", text)
     return re.sub(r"[\t\n\r]", "", text).lower()
 
@@ -721,15 +729,20 @@ class ChatService:
         return self._run_phases.get(run, ())
 
     def _turn_text(self, run, kind, payload):
-        """(text, spoken text) of one turn: the wording of the digest step, repaired, with the link of the run added by code at the end messages"""
+        """(text, spoken text) of one turn: the wording of the digest step, repaired and cleaned, with the link of the run added by code at the end messages. It never raises: a failing
+        cleaning leaves a plain sentence, so that a run always ends in the chat (REQ-CHA-064, 066)"""
         if kind == "question":
             return payload, payload
-        text = clean_model_text(self._repaired(self._worded(kind, payload)))      # a link in the model text is not the link, in no message of a run (REQ-CHA-066): cut off
+        try:
+            text = clean_model_text(self._repaired(self._worded(kind, payload)))      # a link in the model text is not the link, in no message of a run (REQ-CHA-066): cut off
+        except Exception as exc:
+            logger.error("The cleaning of a skill message failed: %s", exc)
+            text = {"phase": "Working.", "done": "The run is done.", "failed": "The run failed.", "stopped": "The run was stopped."}[kind]
         spoken = text
         if kind in ("done", "failed", "stopped"):
-            if text.count("```") % 2:
-                text = text.rstrip() + "\n```"                                                     # an open code block would swallow the link (REQ-CHA-056)
-            text = text.rstrip() + " [Open in the Skill run view](#run=%s)" % run                  # the real one follows, added by code (REQ-CHA-056)
+            text = FENCE_RUN.sub(lambda m: "".join("\\" + c for c in m.group(0)), text).rstrip()      # no code fence can open and swallow the link (REQ-CHA-056)
+            separator = "\n\n" if RISKY_END.search(text) else " "                  # an indented code line or a table row would take the link into itself
+            text += separator + "[Open in the Skill run view](#run=%s)" % quote(str(run), safe="")      # the real one, added by code (REQ-CHA-056)
         return text, spoken
 
     def _worded(self, kind, payload):

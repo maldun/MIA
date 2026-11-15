@@ -48,9 +48,9 @@ def _without_code_elements(text):
 
 
 def escape_markup(text):
-    """REQ-CHA-064, by construction: a `<` that a browser could read as the start of a tag, comment or end tag (a letter, `!` or `/` follows) is written `&lt;`, so no text can reach the page
+    """REQ-CHA-064, by construction: a `<` that a browser could read as the start of a tag, comment or end tag (a letter, `!`, `/` or `?` follows) is written `&lt;`, so no text can reach the page
     or the voice as markup whatever the rounds before it left; `5 < 6` stays"""
-    return re.sub(r"<(?=[A-Za-z!/])", "&lt;", text)
+    return re.sub(r"<(?=[A-Za-z!/?])", "&lt;", text)
 
 
 def strip_markup(text):
