@@ -32,6 +32,7 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-202
 | TC-RUN-032 | REQ-RUN-032 | Component | 2 | unit test: a plain function and a Stage in one graph | AC-31: the plain function is called as before; TC-RUN-016 to 019 unchanged | exact |
 | TC-RUN-033 | REQ-RUN-033 | Component | 2 | unit test: two settings edges into one transform; two outputs with one name; the same graph corrected | AC-32: nothing ran and the refusal names the transform; the corrected graph runs | exact |
 | TC-RUN-034 | REQ-RUN-034 | Component | 2 | unit test: a Stage with prepare, a graph node with a value, three runs (graph only, prepare, run values) | AC-31: the Stage gets the run value, else the prepare value, else the graph value, else nothing; prepare ran once before the Stage | exact |
+| TC-RUN-035 | REQ-RUN-035 | Component | 2 | unit test: a transform with an order edge from a data node written by another transform | AC-31: the writer runs first and the Stage's inputs hold no entry for the order node | exact |
 
 ## Assumptions (checked in validation)
 

@@ -24,7 +24,7 @@ Task ids carry the prefix CV so that they do not collide with T-01 to T-11 of th
 | T-CV-03 Per-skill state, old runner until accepted, record of the check | REQ-WFM-057, REQ-WFM-059, REQ-WFM-060 | TC-WFM-057, TC-WFM-059, TC-WFM-060 | T-CV-02 |
 | T-CV-03a The three-argument call of the graph runner (Stage) | REQ-RUN-030 to REQ-RUN-034 (A-124) | TC-RUN-030 to TC-RUN-034; TC-RUN-016 to 019 unchanged | T-CV-03 |
 | T-CV-03b Common operations module and thin toolbox entries | REQ-WFM-058 (precondition), A-123 P1b | every shipped toolbox transform runs: `toolbox.run(id, args)` gives the result of its library node on recorded inputs; a view runs as a model step with its prompt and schema as data | T-CV-03 |
-| T-CV-03c Order of independent steps | REQ-WFM-058 (precondition), A-123 P4 | the graph built from an ordered list of steps has `order_of` equal to that list; no edge joins two process nodes (R3) | T-CV-03b |
+| T-CV-03c Order of independent steps | REQ-WFM-058 (precondition), A-123 P4, REQ-RUN-035 | TC-RUN-035 and TC-WFM-122 to 124: the graph built from an ordered list of steps has `order_of` equal to that list over order edges that the runner does not hand to a stage; no edge joins two process nodes (R3) | T-CV-03b |
 | T-CV-03d Pipeline to graph converter | REQ-WFM-058 (precondition), A-123 P2, P3 | a pipeline JSON becomes a graph that passes the graph rules: stages are transforms, a loop or a map over an unknown number of items is a master node with `stop` | T-CV-03c |
 | T-CV-04 Same calls on scripted replies | REQ-WFM-058 | TC-WFM-058 for each skill converted in T-CV-06 to T-CV-08 | T-CV-03d |
 | T-CV-05 Snapshots: take, list, restore, nothing deleted, owner only | REQ-WFM-061, REQ-WFM-062, REQ-WFM-063, REQ-WFM-064, REQ-WFM-065, REQ-WFM-066 | TC-WFM-061 to TC-WFM-066 | P1 (snapshotStore, IF-203 v1, IF-301 v2 through their mocks) |
@@ -83,7 +83,7 @@ Task ids carry the prefix CV so that they do not collide with T-01 to T-11 of th
 ### T-CV-03c: Order of independent steps
 - Implements: precondition of REQ-WFM-058; A-123 P4 (owner: enforce the order with an artificial dependency)
 - Tests to turn green: new, written first: a builder gives, for an ordered list of steps, a graph whose `order_of` is that list, by letting a later transform read the data node of an earlier step's output without using it; no edge joins two process nodes
-- Touches: a graph builder next to `graph_model.py`/`graph_rules.py` (no change of the rules)
+- Touches: a graph builder `graph_order.py` (`order_steps`), and `graph_run.py` for REQ-RUN-035 (an input edge with `role: order` orders but is not handed to the Stage; one condition) (no change of the graph rules)
 - Must not touch: protected material, `contracts/`, the graph rules
 - Depends on: T-CV-03b
 - Done when: the order of the recorded runs of the five skills is reproduced by the built graphs

@@ -192,7 +192,7 @@ Runs a workflow step by step under budgets: model calls and model management, pr
 | Order | Group | What it covers | Requirements |
 |---|---|---|---|
 | 1 | EX | Execution of the new graph: order, trust, master nodes, failure (FR-37, FR-38) | REQ-RUN-016, REQ-RUN-017, REQ-RUN-018, REQ-RUN-019 |
-| 2 | ST | Stages: inputs, outputs and settings of a transform (FR-37; G-V2.CONVERT, A-124) | REQ-RUN-030, REQ-RUN-031, REQ-RUN-032, REQ-RUN-033, REQ-RUN-034 |
+| 2 | ST | Stages: inputs, outputs and settings of a transform (FR-37; G-V2.CONVERT, A-124) | REQ-RUN-030, REQ-RUN-031, REQ-RUN-032, REQ-RUN-033, REQ-RUN-034, REQ-RUN-035 |
 
 ### REQ-RUN-016 – Run in topological order
 - Level: low-2   Subject: TaskRuntime
@@ -310,3 +310,16 @@ Runs a workflow step by step under budgets: model calls and model management, pr
 - Verified by: TC-RUN-034
 - Status: Draft
 - History: G-V2.CONVERT A-124 (owner decision 2026-11-15, D-250), new
+
+### REQ-RUN-035 – Order edge
+- Level: low-2   Subject: TaskRuntime
+- Text: Where an input edge of a transform carries the role order, the Pipeline runner shall run the transform after the node that writes that data node and shall not hand that data node to the transform.
+- Rationale: refines FR-37; D-251 (owner chose option A): the old runner runs pipeline steps in the order of the pipeline, a graph orders independent nodes by what they read; an artificial dependency through a data node keeps the old order (A-123 P4) without the function seeing it
+- Parent: FR-37
+- Group: ST
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-31: a transform with an order edge runs after the writer of that data node, which it would not without the edge, and its inputs hold no entry for it (exact)
+- Verified by: TC-RUN-035
+- Status: Draft
+- History: G-V2.CONVERT A-124 addition (owner decision 2026-11-16, D-251), new
