@@ -55,3 +55,8 @@ Line of work `goal/v2.convert`, supervised. Test runs here are feedback, not ver
 - Design: the pipeline is converted in memory at each call, bound, run on a throwaway `WorkflowLibrary` seeded from `library/nodes`; the registries of `common_operations` are reset first, then the handed model (under the profile of the skill, after `skill_changes`) and tools are registered. `runs_dir` unused. A pipeline the converter refuses raises `ConversionError`.
 - Finding: old runner passed `options=None` for a skill without options, the binder gave `{}`: fixed in `resolve_model` (covered by TC-WFM-058).
 - Open for later tasks: `seed_shipped` skips existing entries, so a persisted toolbox keeps the old `run(args)` code of `code.pick_field` until re-seeded (it fails clearly: no path).
+
+## T-CV-08 (part): `compare_outputs`, REQ-WFM-115
+- Files: `skill_converter.py` (`compare_outputs`), unit test `tests/test_run_converted.py` (`CompareOutputs`, red first: a case on one side only is a difference, sorted by case).
+- Tests reported green (own run, 2026-11-16): TC-WFM-115 both tests (51 outputs of extract_claims_rules equal, old against converted, no model; a planted difference reported with its case). `test_skill_conversion`: 6 failures before, 4 after (research and verify_computable, `control.*` controllers).
+- Not done: TC-WFM-114 (extract_claims on the dev split of EV-extraction, 3 repeats, MP-light, against the baseline) needs a dev eval run of the converted skill and the baseline file `eval/baselines/extraction__llm__baseline.jsonl`, which the owner has not placed yet; the run path of the harness for a converted variant belongs to T-CV-09. No eval run made. The skill stays on the old runner until the criterion passes (REQ-WFM-057).

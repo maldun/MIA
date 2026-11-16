@@ -58,5 +58,16 @@ class SettingsReachTheEntry(unittest.TestCase):
         self.assertEqual(got, "a")
 
 
+class CompareOutputs(unittest.TestCase):
+    def test_a_case_on_one_side_only_is_a_difference(self):
+        """Example: old has c1 and c2, new only c1: one diff for c2 with new None."""
+        # Given outputs where the converted run has no output for c2
+        old, new = {"c1": 1, "c2": 2}, {"c1": 1}
+        # When they are compared
+        # Then c2 is reported once, with the missing side as None, and the diffs are sorted by case
+        self.assertEqual(skill_converter.compare_outputs(old, new), [{"case": "c2", "old": 2, "new": None}])
+        self.assertEqual([d["case"] for d in skill_converter.compare_outputs({"b": 1, "a": 1}, {"b": 2, "a": 2})], ["a", "b"])
+
+
 if __name__ == "__main__":
     unittest.main()

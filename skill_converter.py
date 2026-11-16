@@ -165,8 +165,9 @@ def conversion_records(skills_dir, checks=None):
 
 
 def compare_outputs(old, new):
-    """STUB (REQ-WFM-115): `old` and `new` are {case id: output}; returns the list of {"case", "old", "new"} for every case whose outputs differ (empty = equal)"""
-    return None
+    """REQ-WFM-115: `old` and `new` are {case id: output}; returns the list of {"case", "old", "new"} for every case whose outputs differ (empty = equal), sorted by case; a case
+    that one side lacks differs, its missing output is None"""
+    return [{"case": case, "old": old.get(case), "new": new.get(case)} for case in sorted(set(old) | set(new)) if case not in old or case not in new or old[case] != new[case]]
 
 
 class EquivalenceSettings:
