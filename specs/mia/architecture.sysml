@@ -3258,12 +3258,12 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-WFM-091'> BaselineOfARetiredUntrustedTransform_Wfm091 {
         subject s : TaskRuntime;
-        doc /* Where the owner allowed it when retiring an untrusted transform, the Workflow management shall run it as the baseline of a check. */
+        doc /* Where the owner allowed it when retiring an untrusted transform, the Workflow management shall run it as the baseline of a check, until the transform leaves retirement or a newer version replaces its code. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-WFM-092'> ANewerVersionReplacesTheCode_Wfm092 {
         subject s : TaskRuntime;
-        doc /* When a transform arrives with the ID of an entry and a higher version, the Workflow management shall replace the code of the entry and keep its trust status and lifecycle. */
+        doc /* When a transform arrives with the ID of an entry and a higher version, the Workflow management shall replace the code of the entry, keep its trust status and lifecycle, and clear the owner's baseline allowance of REQ-WFM-091. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-WFM-093'> AReplacedTrustedTransformLeavesATrace_Wfm093 {
@@ -3293,8 +3293,8 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-WFM-059'> SameOutcomesOnTheSuite_Wfm059 {
         subject s : TaskRuntime;
-        doc /* The Workflow management shall accept the converted version of a skill only if it reproduces the outcomes of the old version on the dev split of its suite with the same pin. */
-        @Trace { :>> verifiedBy = (HowVerified::measurement); }
+        doc /* The Workflow management shall mark the converted version of a skill as accepted only if the criterion of that skill's equivalence requirement passed on the dev split with the pin MP-light. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-WFM-060'> RecordOfTheCheck_Wfm060 {
         subject s : TaskRuntime;
@@ -3328,7 +3328,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-WFM-066'> SnapshotsOnlyByTheOwner_Wfm066 {
         subject s : TaskRuntime;
-        doc /* If an account other than the owner asks to take or restore a snapshot, then the Workflow management shall refuse the request. */
+        doc /* If an account other than the owner account, the account that creates accounts, asks to take or restore a snapshot, then the Workflow management shall refuse the request. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-WFM-067'> LifecycleOfATransform_Wfm067 {
@@ -3349,6 +3349,36 @@ package MIA_NodeRequirements {
     requirement def <'REQ-WFM-070'> ARetiredItemIsNotOffered_Wfm070 {
         subject s : TaskRuntime;
         doc /* While a transform or a skill is retired, the Workflow management shall not offer it for a new graph or a new run. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-110'> SameOutcomesResearch_Wfm110 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall run the converted skill research so that it behaves as expected in at least 82 % of the dev cases of EV-research. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-111'> SameOutcomesPlanQuestion_Wfm111 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall run the converted skill plan_question so that it behaves as expected in at least 54 % of the dev cases of EV-plans. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-112'> SameOutcomesVerifyClaim_Wfm112 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall run the converted skill verify_claim so that it behaves as expected in at least 83 % of the dev cases of EV-verdicts. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-113'> SameOutcomesVerifyComputable_Wfm113 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall run the converted skill verify_computable so that it behaves as expected in at least 82 % of the dev cases of EV-computable. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-114'> SameOutcomesExtractClaims_Wfm114 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall run the converted skill extract_claims so that it behaves as expected in at least 59 % of the dev cases of EV-extraction. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-115'> SameOutputsExtractClaimsRules_Wfm115 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall run the converted skill extract_claims_rules so that it gives the same output as the old runner on every dev case of EV-extraction. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-WFM-130'> RunRecordOfEverySkillRun_Wfm130 {
@@ -4938,6 +4968,12 @@ package MIA_NodeRequirements {
     requirement r_req_wfm_068 : ARetiredItemStaysUsableAsBaseline_Wfm068;
     requirement r_req_wfm_069 : SettingsOfTheEquivalenceCheckAreConfiguration_Wfm069;
     requirement r_req_wfm_070 : ARetiredItemIsNotOffered_Wfm070;
+    requirement r_req_wfm_110 : SameOutcomesResearch_Wfm110;
+    requirement r_req_wfm_111 : SameOutcomesPlanQuestion_Wfm111;
+    requirement r_req_wfm_112 : SameOutcomesVerifyClaim_Wfm112;
+    requirement r_req_wfm_113 : SameOutcomesVerifyComputable_Wfm113;
+    requirement r_req_wfm_114 : SameOutcomesExtractClaims_Wfm114;
+    requirement r_req_wfm_115 : SameOutputsExtractClaimsRules_Wfm115;
     requirement r_req_wfm_130 : RunRecordOfEverySkillRun_Wfm130;
     requirement r_req_wfm_131 : FiguresAndReasonInTheRunRecord_Wfm131;
     requirement r_req_wfm_132 : ResultAndMaterialInTheRunRecord_Wfm132;
@@ -5449,6 +5485,12 @@ package MIA_NodeRequirements {
     satisfy r_req_wfm_068 by mia.taskRuntime;
     satisfy r_req_wfm_069 by mia.taskRuntime;
     satisfy r_req_wfm_070 by mia.taskRuntime;
+    satisfy r_req_wfm_110 by mia.taskRuntime;
+    satisfy r_req_wfm_111 by mia.taskRuntime;
+    satisfy r_req_wfm_112 by mia.taskRuntime;
+    satisfy r_req_wfm_113 by mia.taskRuntime;
+    satisfy r_req_wfm_114 by mia.taskRuntime;
+    satisfy r_req_wfm_115 by mia.taskRuntime;
     satisfy r_req_wfm_130 by mia.taskRuntime;
     satisfy r_req_wfm_131 by mia.taskRuntime;
     satisfy r_req_wfm_132 by mia.taskRuntime;
@@ -5959,6 +6001,12 @@ package MIA_NodeRequirements {
     allocate r_req_wfm_068 to mia.taskRuntime;
     allocate r_req_wfm_069 to mia.taskRuntime;
     allocate r_req_wfm_070 to mia.taskRuntime;
+    allocate r_req_wfm_110 to mia.taskRuntime;
+    allocate r_req_wfm_111 to mia.taskRuntime;
+    allocate r_req_wfm_112 to mia.taskRuntime;
+    allocate r_req_wfm_113 to mia.taskRuntime;
+    allocate r_req_wfm_114 to mia.taskRuntime;
+    allocate r_req_wfm_115 to mia.taskRuntime;
     allocate r_req_wfm_130 to mia.taskRuntime;
     allocate r_req_wfm_131 to mia.taskRuntime;
     allocate r_req_wfm_132 to mia.taskRuntime;
@@ -6480,6 +6528,12 @@ package MIA_NodeRequirements {
     dependency from r_req_wfm_068 to fr45;
     dependency from r_req_wfm_069 to fr45;
     dependency from r_req_wfm_070 to fr45;
+    dependency from r_req_wfm_110 to fr45;
+    dependency from r_req_wfm_111 to fr45;
+    dependency from r_req_wfm_112 to fr45;
+    dependency from r_req_wfm_113 to fr45;
+    dependency from r_req_wfm_114 to fr45;
+    dependency from r_req_wfm_115 to fr45;
     dependency from r_req_wfm_130 to r_req_be_033;
     dependency from r_req_wfm_131 to r_req_be_033;
     dependency from r_req_wfm_132 to r_req_be_033;

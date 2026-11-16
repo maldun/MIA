@@ -58,6 +58,10 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-203
 | TC-WFM-048 | REQ-WFM-048 | Component | 2 | unit test, graphs written as data | AC-31: a master node with neither a maximum of repetitions nor a maximum time is refused naming it; with a maximum of 1 repetition it is accepted | exact |
 | TC-WFM-049 | REQ-WFM-049 | Component | 2 | unit test with the fake storage | AC-31: a data node with parameters is stored and read back with the parameters apart from its value | exact |
 | TC-WFM-130 | REQ-WFM-130 | Component | 1 | unit test with the fake storage of `skill_runs` and a fake clock | AC-39: lookup, search and review each leave one record with the six fields | exact |
+| TC-WFM-131 | REQ-WFM-058 (A-125 Q3) | Component | 2 | view.extract_claims (default `guide`) and rule.speech.no_bold (default `rules`) run through the toolbox, with and without the parameter | the default of the node applies when nothing is given and a given value wins; the rule default removes only bold markup | exact |
+| TC-WFM-132 | REQ-WFM-058 (A-125 Q2) | Component | 2 | verify.single@1 and a pipeline with a tool step bound to a skill, with and without changes | descriptor nodes `descriptor.model` and `descriptor.tool.<name>` with edges `as` model and tool into the steps that need them; changes replace the options; the input graph is unchanged; rules and order kept | exact |
+| TC-WFM-133 | REQ-WFM-058 (A-125 Q4) | Component | 2 | plan.free@1 of plan_question converted, bound, run with `stages_from_toolbox` and a scripted registered model | status done, one model call with the rendered template, the result node holds what normalize_plan gives | exact |
+| TC-WFM-134 | REQ-WFM-058 (A-125 Q4) | Component | 1 | the same graph with the entry code.normalize_plan untrusted, then trusted | refused naming step.norm before the model was asked; trusted again it runs to done | exact |
 | TC-WFM-131 | REQ-WFM-131 | Component | 1 | unit test with the fake storage of `skill_runs` and a fake clock | AC-39: figures last reported; reason for failed and stopped | exact |
 | TC-WFM-132 | REQ-WFM-132 | Component | 1 | unit test with the fake storage of `skill_runs` and a fake clock | AC-39: result, material and file names stored | exact |
 | TC-WFM-133 | REQ-WFM-133 | Component | 1 | unit test with the fake storage of `skill_runs` and a fake clock | AC-39: answers in order with their times | exact |
@@ -82,6 +86,147 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-203
 | TC-WFM-093 | REQ-WFM-093 | Component | 1 | unit test with the mock of the library part for transforms; a trusted and an untrusted transform, each replaced by a newer version | AC-32: one event for the trusted one with ID, old and new version and author, none for the untrusted one | exact |
 | TC-WFM-094 | REQ-WFM-094 | Component | 1 | unit test with the mock of the library part for transforms; one shipped and one imported transform | AC-32: the export of the shipped one is refused; the imported one exports | exact |
 | TC-WFM-095 | REQ-WFM-095 | Component | 1 | unit test with the mock of the library part for transforms; a retired untrusted transform; the owner, a second account | AC-32: the second account is refused and the allowance stays unset | exact |
+
+## Test cases of G-V2.CONVERT (REQ-WFM-057 to 066, 069, 115)
+
+| Test ID | Verifies | Level | Stage | Setup / inputs | Expected result | Limit / tolerance |
+| --- | --- | --- | --- | --- | --- | --- |
+| TC-WFM-057 | REQ-WFM-057 | Component | 2 | component test with the mocks of the neighbouring interfaces; one skill marked unconverted, one marked converted, each with an old and a converted version | AC-34: the unconverted skill runs its old skill file and pipeline and its converted version is never used; the converted skill runs the converted version | exact |
+| TC-WFM-058 | REQ-WFM-058 | Component | 2 | the fake model server of `pipeline.py` with scripted replies; old runner and converted skill run the same input for each of the 5 converted skills that call a model | AC-34: the recorded lists of model calls (order, prompt, options) are equal; one changed option or prompt makes the check fail and names the first differing call | exact |
+| TC-WFM-059 | REQ-WFM-059 | Component | 2 | scripted run files of `eval_decide.py` for three skills: 17 of 20 right, 15 of 20 right twice, and a run of another suite | AC-34: the first skill is accepted; the second stays unconverted after the re-run; the third is not decided and stays unconverted | exact |
+| TC-WFM-060 | REQ-WFM-060 | Inspection | 1 | the record of the 15 skills of v0.1.0 read by a script and by a person | AC-34: each skill names its form and either a verdict with suite, run and pins or a reason; the nine interface skills carry the reason of the owner of 2026-11-07 | exact |
+| TC-WFM-061 | REQ-WFM-061 | Component | 2 | component test with the mocks of the neighbouring interfaces; a state of 2 skills, 2 workflow graphs, 1 context graph, 3 transforms (trusted tested, trusted draft, untrusted retired) and the pin MP-light | AC-40: the snapshot "before-rework" holds all 8 items with version, trust and lifecycle and the pin | exact |
+| TC-WFM-062 | REQ-WFM-062 | Component | 2 | component test with the mocks of the neighbouring interfaces; two snapshots taken at two different times by the owner | AC-40: both are listed with name, time and author | exact |
+| TC-WFM-063 | REQ-WFM-063 | Component | 2 | component test with the mocks of the neighbouring interfaces; state S2 differs from snapshot "a" | AC-40: restoring "a" first creates a snapshot named "before restore of a" with S2 and the owner as author; restoring that snapshot gives S2 back | exact |
+| TC-WFM-064 | REQ-WFM-064 | Component | 2 | component test with the mocks of the neighbouring interfaces; after "a" a skill, a workflow graph, a context graph and a transform status are changed | AC-40: after the restore each item has the version, trust and lifecycle of "a"; the transform untrusted in "a" is untrusted | exact |
+| TC-WFM-065 | REQ-WFM-065 | Component | 2 | component test with the mocks of the neighbouring interfaces; the lists of versions of every item before and after a restore | AC-40: each list before is a prefix of the list after (no version deleted) | exact |
+| TC-WFM-066 | REQ-WFM-066 | Component | 2 | component test with the mocks of the neighbouring interfaces; the owner account (the account that creates accounts) and a second account created by it | AC-40: the non-owner is refused for take and restore and the state is unchanged; the owner succeeds | exact |
+| TC-WFM-069 | REQ-WFM-069 | Component | 2 | component test with the mocks of the neighbouring interfaces; the equivalence settings at version 1 (margin 0.10, repeats 3, rule threshold) and a change of the margin to 0.05 | AC-34: version 2 is created; a new result names 2; the earlier result still names 1 and is not decided again | exact |
+| TC-WFM-115 | REQ-WFM-115 | Component | 2 | the old runner and the converted skill extract_claims_rules on the 51 dev cases of EV-extraction, no model | AC-34: the 51 outputs are equal; a planted difference in one output is reported as a diff | exact |
+| TC-WFM-116 | REQ-WFM-058 (A-123) | Component | 1 | the shipped library nodes (`library/nodes`) and the registries of research, extraction and verification | every function a shipped code node names is in `common_operations.FUNCTIONS` and callable; a function of the old registries is the same object there | exact |
+| TC-WFM-117 | REQ-WFM-058 (A-123) | Component | 2 | the toolbox seeded from `library/nodes`, input of top_urls, tally and tidy_claims | `Toolbox.run(<node id>, args)` gives exactly the value of the old function | exact |
+| TC-WFM-118 | REQ-WFM-058 (A-123) | Component | 1 | the seeded toolbox | every shipped entry of kind code, model, tool or script has code text with `run(args)` or `stage(inputs, outputs, node)`; entries of common functions are at most 12 lines | exact |
+| TC-WFM-119 | REQ-WFM-058 (A-123, D-248) | Component | 2 | view.verdict run as a stage, the model as an input descriptor, a scripted registered model | one model call with the messages, schema, profile and options of the old runner, the parsed reply returned | exact |
+| TC-WFM-120 | REQ-WFM-058 (A-123, D-248) | Component | 1 | tool.web_search run as a stage with a tool descriptor and a registered function | the registered function is called with the other inputs as keywords and the declared settings; without a descriptor `ToolMissing` | exact |
+| TC-WFM-121 | REQ-WFM-058 (D-248 D) | Component | 1 | descriptors of an unknown tool, an undeclared setting, an unknown model profile, and their registered twins | refusals `ToolMissing`, `DescriptorRefused`, `ModelMissing` before anything is called; the twins resolve | exact |
+| TC-WFM-122 | REQ-WFM-058 (A-123 P4) | Component | 2 | `order_steps` on all 12 listings of four steps in which S1 precedes S3, S2 reading nothing | the transforms of the built graph come in `order_of` exactly as listed; the graph keeps the rules | exact |
+| TC-WFM-123 | REQ-WFM-058 (A-123 P4) | Component | 1 | the built graph of one listing | the given reads and writes are edges with their `as` names; the added edges are order edges through extra data nodes with one writer each, at most steps minus one | exact |
+| TC-WFM-124 | REQ-WFM-058 (A-123 P4) | Component | 2 | the graph of the listing S2, S1, S4, S3 run with recording stages | the calls come in that order, S3 reads S1's result under its name, no stage sees an order input | exact |
+| TC-WFM-125 | REQ-WFM-058 (A-123 P2, P3) | Component | 2 | plan.free@1, verify.single@1, extract.llm@1 from `library/pipelines` and the library nodes | no refusal, a valid graph, one transform per call with its node ID as toolbox ID in pipeline order, data nodes for inputs, variables and the result named | exact |
+| TC-WFM-126 | REQ-WFM-058 (A-123, D-252) | Component | 1 | verify.single@1 and extract.llm@1 | a literal in a wire is a data node with that value, read under the parameter name; a field reference goes through a pick transform `code.pick_field` with a settings node holding the path | exact |
+| TC-WFM-127 | REQ-WFM-058 (A-123 P2, P3) | Component | 2 | verify.computable@2 | the repair branch with its loop is one master node control.branch with stop max_repetitions 2 and the budget seconds, settings node holding the branch JSON, reads and writes of its variables, result the last version of `verdict` | exact |
+| TC-WFM-128 | REQ-WFM-058 (A-123 P2, P3) | Component | 2 | research.escalate@3 | calls are transforms in pipeline order; the map `read` is a master node control.map with max_seconds only (noted); the branch with maps and a loop is a master node control.branch; two master nodes in all | exact |
+| TC-WFM-129 | REQ-WFM-058 (A-123 P2) | Component | 2 | a pipeline with an unknown library node, with an unknown node kind, without them, and with a plain branch | refusals name the node and a reason and give no graph; the plain branch is a transform control.branch with a settings node | exact |
+| TC-WFM-130 | REQ-WFM-058 (A-123) | Component | 1 | a step and a variable of the same name, a variable named like an order node | unique node IDs, valid graph, one writer per data node, or a refusal | exact |
+
+TC-WFM-110 to 114 (the five eval criteria of the converted skills) are statistical checks at stage 4 and are in the table "Statistical checks" of the root `test-spec.md`. The eval runs need the cases tagged `split:dev` (amendment A-120, proposed) and the v0.1.0 baselines recorded with 3 repeats (see `eval-spec.md`, section G-V2.CONVERT).
+
+## Scenarios (G-V2.CONVERT, for the owner's review, M39)
+
+### TC-WFM-057 – Old runner until proven
+- Verifies: REQ-WFM-057
+- Given: skills A (unconverted) and B (converted), each with its old file and pipeline and a converted record, the fake model server
+- When: a command of A and a command of B are run
+- Then: A runs its old skill file and pipeline (the converted record of A is not read); B runs the converted record
+- And: marking A converted without a passed check is refused
+
+### TC-WFM-058 – Same model calls
+- Verifies: REQ-WFM-058
+- Given: the fake model server with scripted replies and, for each of the 5 converted skills that call a model (research, plan_question, verify_claim, verify_computable, extract_claims), one input
+- When: the old runner and the converted skill run that input
+- Then: the lists of model calls (order, prompt text, options) are equal; with one option changed in the converted version (temperature 0 to 0.2) the check fails and names call 1 of that skill
+
+### TC-WFM-059 – Accept only on the criterion
+- Verifies: REQ-WFM-059
+- Given: three scripted run files for criterion lines of REQ-WFM-110: 17 of 20 cases right, 15 of 20 right in the first run and again in the re-run, and a run whose header names the suite plans
+- When: `eval_decide.py` decides each and the acceptance rule applies the result
+- Then: 17 of 20 (0.85, limit 0.85) is PASS and the skill is accepted; 15 of 20 (0.75) is FAIL after the re-run and the skill stays unconverted; the wrong-suite run is NOT DECIDED and the skill stays unconverted
+
+### TC-WFM-060 – Record of the check
+- Verifies: REQ-WFM-060
+- Given: the record of the 15 skills of v0.1.0: chat, check_speech, memory_write, summarize, research, plan_question, verify_claim, verify_computable, extract_claims, extract_claims_rules, review_abstract, review_full, review_keywords, review_section, review_summary
+- When: a script lists the record and a person reads it
+- Then: every skill names the form it runs on; the six skills with an equivalence requirement carry suite, run, pins and verdict (or the reason that it stays old); the nine others (chat, check_speech, memory_write, summarize and the five review skills) carry the reason "part of the user interface, stays on the old runner, revisited in a later goal" (owner, 2026-11-07)
+
+### TC-WFM-061 – Take a snapshot
+- Verifies: REQ-WFM-061
+- Given: a state of 2 skills, 2 workflow graphs, 1 context graph and 3 transforms (trusted and tested, trusted and draft, untrusted and retired), the pin MP-light, and the owner account
+- When: the owner takes the snapshot "before-rework"
+- Then: the snapshot holds 8 items, each with version; the 3 transforms also with trust and lifecycle; and the pin MP-light
+
+### TC-WFM-062 – List snapshots
+- Verifies: REQ-WFM-062
+- Given: two snapshots "a" and "b" taken at two times by the owner
+- When: the owner lists the snapshots
+- Then: two entries, each with name, time and author (3 fields)
+
+### TC-WFM-063 – Restore keeps the former state
+- Verifies: REQ-WFM-063
+- Given: state S1 stored as snapshot "a"; later state S2 differs from S1 in 4 items
+- When: the owner restores "a"
+- Then: before anything is replaced a snapshot named "before restore of a" exists with S2 and the owner as author; the state equals S1; restoring that new snapshot gives S2 again
+
+### TC-WFM-064 – Restore gives version and statuses
+- Verifies: REQ-WFM-064
+- Given: snapshot "a"; afterwards a skill gets a new version, a workflow graph and a context graph are edited, one transform is set trusted that was untrusted in "a", another is retired
+- When: the owner restores "a"
+- Then: each of the 4 changed items equals the stored one in version, trust and lifecycle; the transform untrusted in "a" is untrusted
+
+### TC-WFM-065 – Restore deletes nothing
+- Verifies: REQ-WFM-065
+- Given: the lists of versions of 8 items before a restore
+- When: the owner restores a snapshot that is older than the last 3 versions
+- Then: for every item the list before the restore is a prefix of the list after it
+
+### TC-WFM-066 – Snapshots only by the owner
+- Verifies: REQ-WFM-066
+- Given: the owner account (the account that creates accounts) and a second account created by it; snapshot "a" and a changed state
+- When: the other account asks to take a snapshot and to restore "a"; then the owner does both
+- Then: both requests of the other account are refused and the list of snapshots and the state are unchanged; the owner succeeds
+
+### TC-WFM-069 – Settings are versioned configuration
+- Verifies: REQ-WFM-069
+- Given: settings version 1 (margin 0.10, repeats 3, rule threshold) and one result recorded with it
+- When: the margin is changed to 0.05 and a second result is recorded
+- Then: settings version 2 exists; the new result names 2; the earlier result still names 1 and is not decided again
+
+### TC-WFM-115 – Same outputs of the rule-based skill
+- Verifies: REQ-WFM-115
+- Given: the old runner and the converted extract_claims_rules, the 51 dev cases of EV-extraction (no model); a copy of the converted skill with one output changed
+- When: both run all 51 cases
+- Then: the 51 outputs are equal; the changed copy is reported with a diff naming the case
+
+### TC-WFM-110 – Equivalence of research
+- Verifies: REQ-WFM-110
+- Given: suite EV-research dev (20 cases, tagged split:dev), pin MP-light (digest in eval-spec.md), 3 repeats folded by majority, the converted skill research, the v0.1.0 baseline recorded at 3 repeats (reference 0.92)
+- When: one run of the suite with `python tools/eval.py run research --pin MP-light --repeats 3`
+- Then: `eval_decide.py` on the criterion of REQ-WFM-110: PASS with at least 17 of 20 cases right (0.85); a FAIL is re-run once with fresh seeds and only the re-run counts
+- And: the secondary suite EV-research_compound is run and reported, not decided
+
+### TC-WFM-111 – Equivalence of plan_question
+- Verifies: REQ-WFM-111
+- Given: suite EV-plans dev (36 cases, split:dev), MP-light, 3 repeats, the converted skill plan_question, baseline of plan.free@1 (reference 0.64)
+- When: one run of the suite
+- Then: PASS with at least 20 of 36 cases right (0.54); a FAIL is re-run once
+
+### TC-WFM-112 – Equivalence of verify_claim
+- Verifies: REQ-WFM-112
+- Given: suite EV-verdicts dev (50 cases, split:dev), MP-light, 3 repeats, the converted skill verify_claim, baseline of verify.single@1 re-recorded at 3 repeats (reference 0.93 from 1 run)
+- When: one run of the suite
+- Then: PASS with at least 42 of 50 cases right (0.83); a FAIL is re-run once
+- And: EV-verdicts_injection and EV-verdicts_wikidata are run and reported, not decided
+
+### TC-WFM-113 – Equivalence of verify_computable
+- Verifies: REQ-WFM-113
+- Given: suite EV-computable dev (39 cases, split:dev), MP-light, 3 repeats, the converted skill verify_computable, baseline of verify.computable@2 re-recorded at 3 repeats (reference 0.92 from 1 run)
+- When: one run of the suite
+- Then: PASS with at least 34 of 39 cases right (0.87); a FAIL is re-run once
+
+### TC-WFM-114 – Equivalence of extract_claims
+- Verifies: REQ-WFM-114
+- Given: suite EV-extraction dev (51 cases, split:dev), MP-light, 3 repeats, the converted skill extract_claims, baseline of extract.llm@1 re-recorded at 3 repeats (reference 0.69 from 1 run)
+- When: one run of the suite
+- Then: PASS with at least 31 of 51 cases right (0.59); a FAIL is re-run once
 
 ## Assumptions (checked in validation)
 

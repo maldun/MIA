@@ -5,7 +5,7 @@ Drafted 2026-11-07 when the owner asked to split G-V2 into four subgoals for rev
 - Kind: subgoal
 - Parent: G-V2
 - Statement: Every existing skill runs from its record with the same outcomes on its suite, or stays on the old runner for a written reason, and the owner can take and restore a snapshot of the skill set.
-- Exit criterion: OC-1, OC-2, OC-3, with the checks of its requirements below
+- Exit criterion: OC-1, OC-2, OC-3, with the checks of its requirements below; validation: VAL-007 (`specs/mia/test-spec.md`)
 - Supervision: supervised
 - Accepted by: Stefan Reiterer (owner)
 - Line of work: goal/v2.convert
@@ -28,8 +28,11 @@ Drafted 2026-11-07 when the owner asked to split G-V2 into four subgoals for rev
 | Suggestion | Decision (split / keep together) | Reason | Date |
 |---|---|---|---|
 | further cut | keep together | 11 items in scope, one chain | 2026-11-07 |
+| REQ-WFM-059 split per skill into REQ-WFM-110 to 115 | keep together | 17 items in scope, one chain, the six new ones share one suite family and one rule | 2026-11-07 |
 
 ## Scope
+Ids REQ-WFM-110 to 115 are reserved for this subgoal. Nine skills stay on the old runner in this goal: chat, check_speech, memory_write, summarize and the five review skills; reason (owner, 2026-11-07): they are part of the user interface; they are revisited in another goal (recorded per skill by REQ-WFM-060).
+
 Top-level items it serves: FR-45, FR-47. Requirements by ID (inside G-V2's scope):
 
 | Item | In/Out | Reason |
@@ -45,6 +48,12 @@ Top-level items it serves: FR-45, FR-47. Requirements by ID (inside G-V2's scope
 | REQ-WFM-065 | in | |
 | REQ-WFM-066 | in | |
 | REQ-WFM-069 | in | |
+| REQ-WFM-110 | in | split from REQ-WFM-059 (owner 2026-11-07) |
+| REQ-WFM-111 | in | split from REQ-WFM-059 (owner 2026-11-07) |
+| REQ-WFM-112 | in | split from REQ-WFM-059 (owner 2026-11-07) |
+| REQ-WFM-113 | in | split from REQ-WFM-059 (owner 2026-11-07) |
+| REQ-WFM-114 | in | split from REQ-WFM-059 (owner 2026-11-07) |
+| REQ-WFM-115 | in | split from REQ-WFM-059 (owner 2026-11-07) |
 | IF-301 | in | frozen at G-V2 (A-90, approved 2026-11-07); used through its mock until the provider is merged |
 | IF-203 | in | frozen at G-V2 (A-90, approved 2026-11-07); used through its mock until the provider is merged |
 

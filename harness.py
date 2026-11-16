@@ -19,7 +19,7 @@ import time
 import requests
 
 try:
-    from . import behaviour, checks, digest_score, eval_platform, extraction, metrics, persona, plans, research_score, skill_digest, web_tools
+    from . import behaviour, checks, digest_score, eval_platform, extraction, metrics, persona, plans, research_score, skill_converter, skill_digest, web_tools
     from .pipeline import Tool
 except ImportError:  # used as plain script / in tests
     import behaviour
@@ -31,6 +31,7 @@ except ImportError:  # used as plain script / in tests
     import persona
     import plans
     import research_score
+    import skill_converter
     import skill_digest
     from pipeline import Tool
     import web_tools
@@ -300,6 +301,17 @@ def _clip(value, limit=MAX_OUTPUT_CHARS):
     return value if len(text) <= limit else text[:limit] + "...[clipped]"
 
 
+class _PinnedChat:
+    """the model of a run on the converted path: the pin decides the model, its seed and temperature reach every call (REQ-EVAL-003), the profile of the skill is not used,
+    the same call the old runner makes with `_pinned`"""
+    def __init__(self, model, pin):
+        self.model, self.pin = model, pin
+
+    def chat(self, messages, schema=None, model=None, profile=None, options=None, **more):
+        options = dict(options or {}, seed=self.pin["seed"], temperature=self.pin["temperature"])
+        return self.model.chat(messages, schema=schema, model=self.pin["name"], profile=None, options=options, **more)
+
+
 class Harness:
     def __init__(self, core=None, clock=time.time, targets=None, platform=None):
         """core: a Core (for the targets 'checks' and 'pipeline'); platform: a provider of IF-105 (for the target 'workflow'); targets: more kinds, {kind: function(case, variant, context) -> (status, output)}, for tests and new tasks"""
@@ -338,9 +350,16 @@ class Harness:
             skill["model"] = {"profile": variant["model"]} if variant["model"] in ("light", "full", "current") else {"name": variant["model"]}
         if variant.get("budget"):
             skill["budget"] = dict(skill["budget"], **variant["budget"])
-        graph = self.core.graph(skill)[0]
-        result = self.core.runner.run(self._pinned(skill), graph, case["input"], task="eval:" + suite.name, started_by="command")
+        result = self._run_skill(skill, case["input"], suite, variant)
         return self._status_of(result, suite)
+
+    def _run_skill(self, skill, inputs, suite, variant, tools=None):
+        """one run of the skill on the old runner, or with variant["converted"] on the graph path (G-V2.CONVERT, REQ-WFM-112, 114): the same skill and inputs, the pin decides the model"""
+        if variant.get("converted"):
+            return skill_converter.run_converted(skill["name"], inputs, model=_PinnedChat(self.core.runner.model, self.pin), skills_dir=self.core.skills.folder,
+                                                 library_dir=self.core.library.shipped_dir, sandbox=self.core.sandbox, broker_factory=self.core.runner.broker_factory,
+                                                 **({"tools": tools} if tools else {}))
+        return self.core.runner.run(self._pinned(skill), self.core.graph(skill)[0], inputs, task="eval:" + suite.name, started_by="command", **({"tools": tools} if tools else {}))
 
     def _pinned(self, skill):
         """the skill with the model of the pin and its seed and temperature, so that they reach every model call (REQ-EVAL-003); the pin decides
@@ -378,7 +397,7 @@ class Harness:
         for key in ("pipeline", "model"):
             if variant.get(key):
                 skill[key] = variant[key] if key == "pipeline" else ({"profile": variant[key]} if variant[key] in ("light", "full", "current") else {"name": variant[key]})
-        result = self.core.runner.run(self._pinned(skill), self.core.graph(skill)[0], case["input"], task="eval:" + suite.name, started_by="command")
+        result = self._run_skill(skill, case["input"], suite, variant)
         if result.status != "done" or not isinstance(result.answer, dict):
             return "error:" + (result.status if result.status != "done" else "no_answer"), {"error": result.error, "answer": result.answer}
         score = plans.score_plan(result.answer, case["gold"], case["input"]["question"])
@@ -433,7 +452,7 @@ class Harness:
             with open(os.path.join(suite.path, suite.target["fixtures"]), encoding="utf-8") as fp:
                 fixtures = self._fixtures[suite.name] = json.load(fp)
         tools, session = fixture_tools(fixtures)
-        result = self.core.runner.run(self._pinned(skill), self.core.graph(skill)[0], case["input"], task="eval:" + suite.name, tools=tools, started_by="command")
+        result = self._run_skill(skill, case["input"], suite, variant, tools=tools)
         if result.status != "done" or not isinstance(result.answer, dict):
             return "error:" + (result.status if result.status != "done" else "no_answer"), {"error": result.error, "answer": result.answer}
         score = research_score.score_research(result.answer, case["gold"], fixtures)
@@ -449,9 +468,9 @@ class Harness:
         for key in ("pipeline", "model"):
             if variant.get(key):
                 skill[key] = variant[key] if key == "pipeline" else ({"profile": variant[key]} if variant[key] in ("light", "full", "current") else {"name": variant[key]})
-        result = self.core.runner.run(self._pinned(skill), self.core.graph(skill)[0], case["input"], task="eval:" + suite.name, started_by="command")
+        result = self._run_skill(skill, case["input"], suite, variant)
         if result.status != "done" or not isinstance(result.answer, dict):
-            return "error:" + (result.status if result.status != "done" else "no_answer"), {"error": result.error, "answer": result.answer}
+            return "error:" + (result.status if result.status != "done" else "no_answer"), {"error": getattr(result, "error", None), "answer": result.answer}
         claims = result.answer.get("claims")
         if not isinstance(claims, list):
             return "error:no_claims", {"answer": result.answer}

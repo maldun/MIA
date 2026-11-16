@@ -15,14 +15,22 @@ so the real library of T-06 replaces the mock without a change here. T-01 is don
 - offer() -> the sorted IDs a new graph may pick (retired ones left out, REQ-WFM-070).
 - run(id, args, as_baseline=False) -> the result of the code text's run(args); an untrusted transform raises ToolboxError("untrusted") unless it is retired, runs as the baseline
   of a check and has the owner's allowance (REQ-WFM-091); a retired one raises ToolboxError("retired") unless as_baseline (REQ-WFM-068).
+- run_stage(id, inputs, outputs, node) -> the result of the code text's stage(inputs, outputs, node), under the same trust and lifecycle rules as run (A-124); an entry
+  without stage raises ToolboxError("no_stage").
 ToolboxError has `code` and `why` (a text for the person).
-- seed_shipped(nodes_dir): see the method (REQ-WFM-056).
+- seed_shipped(nodes_dir): see the method (REQ-WFM-056); shipped entries hold thin code text that calls common_operations (T-CV-03b).
 """
 import glob
+import inspect
 import json
 import os
 
 import jsonschema
+
+try:
+    from . import common_operations
+except ImportError:
+    import common_operations
 
 TRUST = ("untrusted", "trusted")
 LIFECYCLE = ("draft", "tested", "retired")
@@ -39,6 +47,55 @@ EXCHANGE_SCHEMA = {
     "properties": {"id": {"type": "string", "minLength": 1}, "version": {"type": "integer", "minimum": 1},
                    "inputs": {"type": "object"}, "outputs": {"type": "object"}, "code": {"type": "string"}},
 }
+
+
+IMPORT_OPS = """try:
+    from MIA import common_operations as ops
+except ImportError:
+    import common_operations as ops
+"""
+# Kinds without a common function (script: its sandbox runs only in the old runner) still define the function, so a call is a clear refusal and not a KeyError.
+REFUSED = """
+
+def run(args):
+    raise RuntimeError(%r)
+
+
+def stage(inputs, outputs, node):
+    raise RuntimeError(%r)
+"""
+
+
+def _defaults(node, accepted=None):
+    """the `params` defaults of a library node as {name: default}; with `accepted` (the parameter names of the function) only those it takes: a node may declare a param its function lacks"""
+    found = {name: spec["default"] for name, spec in (node.get("params") or {}).items() if isinstance(spec, dict) and "default" in spec}
+    return found if accepted is None else {name: value for name, value in found.items() if name in accepted}
+
+
+def _accepted(function):
+    """the parameter names of a function, None when it takes any keyword (a placeholder that the app binds later)"""
+    parameters = inspect.signature(function).parameters.values()
+    return None if any(p.kind is p.VAR_KEYWORD for p in parameters) else {p.name for p in parameters}
+
+
+def shipped_code(node):
+    """the thin code text of a shipped node (T-CV-03b): code nodes call the common module by name, models and tools run as steps with the node's data.
+    The `params` defaults of the node are embedded as data and a value in the call wins (T-CV-04a, D-253)."""
+    kind, body = node.get("kind"), node.get("body", {})
+    if kind == "code" and body.get("function") in common_operations.FUNCTIONS:
+        defaults = _defaults(node, _accepted(common_operations.FUNCTIONS[body["function"]]))
+        return IMPORT_OPS + "\nDEFAULTS = %r\n\n\ndef run(args, settings=None):\n    return ops.call(%r, {**DEFAULTS, **(settings or {}), **args})\n" % (defaults, body["function"])
+    if kind == "model":
+        return IMPORT_OPS + "\nDEFAULTS = %r\n\n\ndef stage(inputs, outputs, node):\n    return ops.model_step(%r, %r, %r, {**DEFAULTS, **inputs}, retries=%r)\n" % (
+            _defaults(node), body["system"], body["template"], body["schema"], body.get("retries", 1))
+    if kind == "tool":
+        return IMPORT_OPS + "\n\ndef stage(inputs, outputs, node):\n    return ops.tool_step(inputs)\n"
+    why = "%s runs only in the old runner: it has no common function." % node["id"]
+    return REFUSED % (why, why)
+
+
+CONTROLS = ("control.branch", "control.map", "control.loop")
+CONTROL_CODE = IMPORT_OPS + "\n\ndef stage(inputs, outputs, node):\n    return ops.control_step(inputs, outputs, node)\n"
 
 
 class ToolboxError(Exception):
@@ -157,7 +214,7 @@ class Toolbox:
             fields["baseline_allowed"] = True       # one new version of the meta record, so lifecycle and allowance never show apart
         self.library.set_meta(tid, account, **fields)
 
-    def run(self, tid, args, as_baseline=False):
+    def _code_namespace(self, tid, as_baseline):
         entry, meta = self._latest(tid), self.library.get_meta(tid)
         retired = entry["lifecycle"] == "retired"
         if retired and not as_baseline:
@@ -167,7 +224,28 @@ class Toolbox:
             raise ToolboxError("untrusted", "%s is not trusted and does not run." % tid)
         namespace = {}
         exec(entry["doc"]["code"], namespace)       # trusted code runs in the MIA process (SC-09 accepted); only here, never on import
-        return namespace["run"](args)
+        return namespace
+
+    def run(self, tid, args, as_baseline=False, settings=None):
+        """`settings` (the settings node of a transform, D-254) goes only to an entry whose run takes a second parameter; entries of the form run(args) are called as before"""
+        function = self._code_namespace(tid, as_baseline)["run"]
+        if settings is not None and len(inspect.signature(function).parameters) > 1:
+            return function(args, settings)
+        return function(args)
+
+    def run_stage(self, tid, inputs, outputs, node, as_baseline=False):
+        stage = self._code_namespace(tid, as_baseline).get("stage")
+        if stage is None:
+            raise ToolboxError("no_stage", "%s defines no stage(inputs, outputs, node)." % tid)
+        return stage(inputs, outputs, node)
+
+    def seed_controls(self):
+        """the three controllers as shipped, trusted entries (D-258); an entry that exists stays. Apart from seed_shipped: they are no library nodes."""
+        for tid in CONTROLS:
+            if tid in self.library.list_ids("transforms"):
+                continue
+            self.library.save("transforms", tid, {"id": tid, "version": 1, "inputs": {}, "outputs": {}, "code": CONTROL_CODE}, SHIPPED_AUTHOR)
+            self.library.set_meta(tid, SHIPPED_AUTHOR, trust="trusted", shipped=True, lifecycle="tested", evidence=SHIPPED_EVIDENCE)
 
     def seed_shipped(self, nodes_dir):
         """One entry per ID of nodes_dir/<id>/<version>.json in its highest version that is not retired, trusted and shipped (REQ-WFM-056). A second call adds nothing."""
@@ -180,8 +258,7 @@ class Toolbox:
         for tid, node in sorted(latest.items()):
             if tid in self.library.list_ids("transforms"):
                 continue
-            # No code text: how a shipped node runs stays with the old runner (report of the prototype, finding 2).
-            doc = {"id": tid, "version": node["version"], "inputs": node.get("inputs", {}), "outputs": node.get("outputs", {}), "code": ""}
+            doc = {"id": tid, "version": node["version"], "inputs": node.get("inputs", {}), "outputs": node.get("outputs", {}), "code": shipped_code(node)}
             self.library.save("transforms", tid, doc, SHIPPED_AUTHOR)
             # tested, since the nodes ship with MIA and are in use (D-226); the evidence says why
             self.library.set_meta(tid, SHIPPED_AUTHOR, trust="trusted", shipped=True, lifecycle="tested", evidence=SHIPPED_EVIDENCE)

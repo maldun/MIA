@@ -1,0 +1,33 @@
+# A-125: what `run_converted` needs (T-CV-04, G-V2.CONVERT, design note for the owner's review)
+
+Status: **reviewed by the owner point by point 2026-11-16 (D-253, Q1 to Q6 all as recommended)**. Written 2026-11-16 after T-CV-03a to T-CV-03d (Stage call, order edge, common operations, pipeline converter). Decides nothing; it lists what TC-WFM-058 demands of `run_converted`, the gaps found in the repo, and the questions for the owner.
+
+## What the protected test demands (tests/acceptance/test_skill_conversion.py)
+- `run_converted(skill, inputs, model=replay.model, tools=replay.tools, skills_dir=skills/, library_dir=library/, skill_changes=...)` on a replay of one recorded run of the **old** runner. The converted run must make the same model calls: same order, messages, schema, model, profile, options (`first_difference`). Both tests loop over **all five** skills (subtests): research, plan_question, verify_claim, verify_computable, extract_claims.
+- The second test plants `skill_changes={"model": {"profile": "light", "options": {"temperature": 0.2}}}` and expects the first difference at call 1, field `options`, value `{"temperature": 0.2}`.
+- TC-WFM-115 reads `getattr(result, "answer")` of the converted run of extract_claims_rules (no model).
+- `runs_dir` is not passed by the test (default None); the old runner needs one for its run log, the converted path does not.
+
+## What exists after T-CV-03a to 03d
+Stage call with `as`, `role: settings`, `prepare`, start values, order edges (graph_run.py); `order_steps`; `common_operations` (FUNCTIONS, registry of tools and models, `model_step`, `tool_step`, `pick_field`) and thin shipped entries with `Toolbox.run_stage`; `pipeline_graph.convert(pipeline, library_nodes, budget_seconds)` giving the graph of a pipeline.
+
+## Gaps between that and a converted run
+- **G1 model descriptor.** `model_step` takes the model from an input named `model` (`{"model": profile, "options": {...}}`). The converter adds no such node: it does not know the skill. Someone must add a data node with the skill's model settings (profile and options, merged with `skill_changes`) and an edge `as: "model"` into every transform whose library node is kind model.
+- **G2 tool descriptors.** Same for tool nodes (`{"tool": name, "settings": {}}`); only research has tool nodes (web_search, fetch_page). The old runner counts calls against budget keys and labels trust (the IF-402 door); `tool_step` does neither.
+- **G3 parameter defaults.** 25 library nodes carry `params` with defaults; the old runner merges them into the call or the prompt variables. Thin entries do not. Affected: extract_claims (`view.extract_claims`), verify_computable (`view.fix_check_script`, `view.write_check_script`), research (`code.collect_passages`, `code.top_urls`, `view.answer_from_passages` with a long `guide` text, `view.answer_with_value`). Without it, extract_claims, verify_computable and research cannot match the old calls. A `params` entry on a pipeline node (none in the five pipelines) is not converted either.
+- **G4 the adapter between toolbox and runner.** `GraphRunner.run` wants `{node id: Stage(function)}`. Nothing builds it from the toolbox and the graph: an entry with `stage` is called through `run_stage`, one with `run` through `run(inputs)`; trust comes from the toolbox.
+- **G5 the graph and the records.** The plan says "read the skill record and its graph"; no converted skill record or stored graph exists until T-CV-06 to T-CV-08 create them. `run_converted` can convert the pipeline in memory with the same converter those tasks will use.
+- **G6 constructs and special functions.** verify_computable (branch with loop) and research (map, branch, loop) need the `control.*` controllers (they run the construct held by a settings node); verify_computable needs `script_check` bound to the sandbox (`bind`); research needs tool budgets and trust (G2) and the settings of nodes inside constructs. These are the tasks T-CV-07a, T-CV-06a and the controllers noted in the plan.
+- **G7 the result.** `run_converted` returns an object with `status`, `answer` and the values of the data nodes; the graph's result node is `result` of the conversion.
+
+## Points for the owner (one at a time)
+- **Q1 (G5)** Convert the pipeline in memory at every `run_converted` call (the same function that later creates the records) or wait for stored records? Recommended: in memory now; once records exist `run_converted` prefers a stored record.
+- **Q2 (G1, G2)** The model and tool descriptor nodes are added by a small binder function `bind_skill(graph, library_nodes, skill, changes)` that `run_converted` and the later record creation both call, not by the converter (it stays a pure function of the pipeline). Agree?
+- **Q3 (G3)** Parameter defaults are applied inside the thin entries (the entry code carries the defaults of its library node as data), so a transform called from the toolbox behaves like the library node; the converter does not copy defaults into the graph. Agree?
+- **Q4 (G4)** The adapter is a function `stages_from_toolbox(graph, toolbox)` returning the `nodes` map for the runner. Agree?
+- **Q5 (G6, scope of T-CV-04)** TC-WFM-058 loops over five skills. T-CV-04 can make plan_question, verify_claim and extract_claims green; verify_computable and research stay red until their tasks (controllers, bind, tool budgets) are done. Accept that the protected test is green per skill, as skills are converted (no amendment), or amend it to run per skill in a table that grows?
+- **Q6 (G2)** Tool budgets and trust labels: until a task decides how a converted run counts tool calls and labels trust (before research), converted runs of skills with tools are not accepted. Agree that research's conversion is blocked on that decision?
+
+## Owner answers of 2026-11-16 (D-253)
+Q1 in memory now (a stored record is preferred once records exist). Q2 a separate binder `bind_skill(graph, library_nodes, skill, changes)`; the converter stays pure. Q3 parameter defaults inside the thin entries (seed_shipped embeds the defaults of the library node; a value in the call overrides). Q4 the adapter `stages_from_toolbox(graph, toolbox)`. Q5 TC-WFM-058 stays partly red, green skill by skill (no amendment); expected red until their tasks: verify_computable and research. Q6 research's conversion is blocked until a task (T-CV-06a) decides tool budgets and trust labels; no skill with tools is accepted before that.
+Consequence for the plan: a new task **T-CV-04a** before T-CV-04: parameter defaults in the thin entries, `bind_skill`, `stages_from_toolbox` (red tests first, for the owner's placement); T-CV-04 then implements `run_converted` over them.

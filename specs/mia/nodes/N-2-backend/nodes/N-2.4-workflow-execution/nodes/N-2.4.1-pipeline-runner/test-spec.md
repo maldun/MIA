@@ -27,6 +27,12 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-202
 | TC-RUN-017 | REQ-RUN-017 | Component | 2 | unit test with a transform whose only effect is writing a marker file | AC-32: the marker is not written and the refusal names the node and its status untrusted; after the owner sets it trusted the same graph runs and writes the marker | exact |
 | TC-RUN-018 | REQ-RUN-018 | Component | 2 | unit test with a master node between two data nodes | AC-31: the master node runs once after its input data node is written and its output data node holds the result | exact |
 | TC-RUN-019 | REQ-RUN-019 | Component | 2 | unit test with three scripted transforms, the second failing | AC-31: the third transform does not run and the run result names the second | exact |
+| TC-RUN-030 | REQ-RUN-030 | Component | 2 | unit test: a Stage with two inputs (one renamed by `as`), one output and a settings node | AC-31: the Stage receives exactly the three objects | exact |
+| TC-RUN-031 | REQ-RUN-031 | Component | 2 | unit test: a Stage with two outputs; one that returns a plain value; one that names an unknown output | AC-31: two different values written; the plain value in both nodes; the unknown name fails the node and the result names it | exact |
+| TC-RUN-032 | REQ-RUN-032 | Component | 2 | unit test: a plain function and a Stage in one graph | AC-31: the plain function is called as before; TC-RUN-016 to 019 unchanged | exact |
+| TC-RUN-033 | REQ-RUN-033 | Component | 2 | unit test: two settings edges into one transform; two outputs with one name; the same graph corrected | AC-32: nothing ran and the refusal names the transform; the corrected graph runs | exact |
+| TC-RUN-034 | REQ-RUN-034 | Component | 2 | unit test: a Stage with prepare, a graph node with a value, three runs (graph only, prepare, run values) | AC-31: the Stage gets the run value, else the prepare value, else the graph value, else nothing; prepare ran once before the Stage | exact |
+| TC-RUN-035 | REQ-RUN-035 | Component | 2 | unit test: a transform with an order edge from a data node written by another transform | AC-31: the writer runs first and the Stage's inputs hold no entry for the order node | exact |
 
 ## Assumptions (checked in validation)
 
