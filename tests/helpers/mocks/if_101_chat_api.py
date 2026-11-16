@@ -403,19 +403,16 @@ class ChatApiMock:
             phases = ["stopped", "waiting"]
         else:
             phases = ["done", "done"]
-        report = name                                         # v18 (A-154): the report of a done scripted review is its file; a run that fails or is stopped gets a report with the state line
-        if state != "done":
-            report = "review-contract-report.md"
-            self._files[report] = {"data": ("%s: %s\n" % (state.capitalize(), reason)).encode(), "created": "t%d" % int(self.now), "task": "review", "message_id": run_id}
-            self._broadcast("files_changed", {"name": report, "task": "review"})
-            self._review["files"].append(report)
-            self._update_run(files=list(self._review["files"]))
-            extra = {"files": list(self._review["files"])}
         record = {"id": run_id, "role": "assistant", "sender": "MIA", "text": text, "created": "t%d" % int(self.now), "skill_run": run_id}
         self._history.append(record)
         self._broadcast("chat_start", {"id": record["id"], "role": "assistant", "task": "review", "skill_run": run_id})      # v8: the result is the newest message
         self._broadcast("chat_delta", {"id": record["id"], "text": text})
         self._broadcast("chat_done", dict({"id": record["id"], "text": text, "emotion": "neutral", "status": status, "skill_run": run_id}, **extra))
+        report = "review-contract-report.md"                  # v18 (A-154, A-155): the report of every ended run is a file of its own after the files of the skill, put after chat_done as the real service does
+        self._files[report] = {"data": ("# %s\n" % state.capitalize()).encode(), "created": "t%d" % int(self.now), "task": "review", "message_id": run_id}
+        self._broadcast("files_changed", {"name": report, "task": "review"})
+        self._review["files"].append(report)
+        self._update_run(files=list(self._review["files"]))
         self._update_run(state=state, ended="t%d" % int(self.now), result=result, report=report, phases=self._phase_list(phases), **({"reason": reason} if reason else {}))
         self._card(done=True, state=state, reason=reason, phases=phases)
         self._review = None
