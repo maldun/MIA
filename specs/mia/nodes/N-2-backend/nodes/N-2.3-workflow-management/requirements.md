@@ -458,7 +458,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-23: on a scripted review with two questions the summary message has a later position in the history than the last question and its answer and contains the link to the run; a task that fails leaves a message that contains the reason and the link (exact); the wording is checked in G-V3.CHAT
 - Verified by: TC-WFM-036
-- Status: Draft
+- Status: Verified
 - History: A-23 new; A-27 reworded (a failure is a visible result); A-131 (proposed 2026-11-08): the full result leaves the chat, a short summary with a link takes its place; A-152 (proposed 2026-11-15, owner by questionnaire): the 1200 characters are a request in the prompt of the step, not a cut (REQ-CHA-052, 063)
 
 ### REQ-WFM-037 – Files in a volume
