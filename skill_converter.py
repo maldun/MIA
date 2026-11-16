@@ -163,3 +163,9 @@ class EquivalenceSettings:
                 return [json.loads(line) for line in fp if line.strip()]
         except FileNotFoundError:
             return []
+
+
+def stages_from_toolbox(graph, toolbox):
+    """STUB (T-CV-04a, A-125 Q4): returns (nodes, trust): `nodes` = {node id: Stage(function)} for GraphRunner.run, built from the toolbox entry named by the `toolbox_id` of each transform or
+    master node (an entry with `stage` is called through Toolbox.run_stage, one with `run` through Toolbox.run with the inputs); `trust(node id)` = the trust of that entry."""
+    return None

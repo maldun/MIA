@@ -193,3 +193,10 @@ def convert(pipeline, library_nodes, budget_seconds):
 
 def _result(graph, inputs, result, notes, refused):
     return {"graph": graph, "inputs": inputs, "result": result, "notes": notes, "refused": refused}
+
+
+def bind_skill(graph, library_nodes, skill, changes=None):
+    """STUB (T-CV-04a, A-125 Q2): returns a NEW graph with the model descriptor node `descriptor.model` ({"model": profile, "options": ...} of the skill's `model` setting, `changes["model"]`
+    replacing profile and options where it gives them) and an edge {"as": "model"} into every transform whose library node is of kind model; a data node `descriptor.tool.<name>`
+    ({"tool": name, "settings": {}}) and an edge {"as": "tool"} into every tool step. The stub returns nothing, so the acceptance tests fail on an assertion."""
+    return None
