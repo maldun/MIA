@@ -79,5 +79,31 @@ class ConvertedVariant(unittest.TestCase):
         self.assertTrue(all(c["profile"] is None for c in self.model.calls))
 
 
+class ConvertedPipelineTarget(unittest.TestCase):
+    def test_the_pipeline_target_runs_verify_claim_through_run_converted(self):
+        """Example: variant {"converted": true} on a verdicts case calls run_converted("verify_claim", the case input) with the pin's model and gives a status of the tally."""
+        # Given a verdicts suite of one case, a scripted model and the pin
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        model = Seen()
+        core = Core(os.path.join(REPO, "skills"), Library(os.path.join(REPO, "library")), tmp.name, model=model)
+        with open(os.path.join(REPO, "eval", "suites", "verdicts", "cases.jsonl"), encoding="utf-8") as fp:
+            case = json.loads(fp.readline())
+        folder = os.path.join(tmp.name, "verd")
+        os.makedirs(folder)
+        with open(os.path.join(folder, "suite.json"), "w") as fp:
+            json.dump({"name": "verd", "description": "d", "target": {"kind": "pipeline", "skill": "verify_claim"}}, fp)
+        with open(os.path.join(folder, "cases.jsonl"), "w") as fp:
+            fp.write(json.dumps(case) + "\n")
+        # When the converted variant runs
+        with mock.patch.object(skill_converter, "run_converted", wraps=skill_converter.run_converted) as spy:
+            run = H.Harness(core).run(H.load_suite(folder), variant={"name": "conv", "converted": True}, pin=PIN)
+        records = run["records"] if isinstance(run, dict) else run.records
+        # Then run_converted ran the skill with the case input, the pin's model was used and the status is no error
+        self.assertEqual([(c.args[0], c.args[1]) for c in spy.call_args_list], [("verify_claim", case["input"])])
+        self.assertTrue(model.calls and all(c["model"] == PIN["name"] for c in model.calls))
+        self.assertFalse(str(records[0]["status"]).startswith("error"), records[0])
+
+
 if __name__ == "__main__":
     unittest.main()

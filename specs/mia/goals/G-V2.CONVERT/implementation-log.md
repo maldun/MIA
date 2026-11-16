@@ -72,3 +72,8 @@ Line of work `goal/v2.convert`, supervised. Test runs here are feedback, not ver
 - Run file: `data/eval/extraction__converted__20261116-144402.jsonl` (git-ignored). Feedback of the implementing session, not verification; Verify decides TC-WFM-114 with its own run.
 - Cases that fail in all 3 repeats (read these transcripts before accepting): cite-in-brackets, cite-with-quote, para-eiffel, para-meeting, para-python, para-water, none-page-number (the list printed is cut at the tail; the full list is in the run file).
 - Not done: the acceptance record of the skill (`mark_converted`, REQ-WFM-057/059) is not written; where the record lives is for T-CV-09. No amendment, no prompt change, no label changed.
+
+## T-CV-07 (part): verify_claim on the graph path (REQ-WFM-112)
+- Files: `harness.py` (`_run_skill`, shared by the targets `pipeline` and `extraction`: variant `converted`), `skill_converter.py` (`ConvertedRun` has `error` and `events` like the old result), test `tests/test_harness_converted.py` (`ConvertedPipelineTarget`, red first).
+- Tests reported green (own run): `test_harness_converted` 3, `test_harness` 30, `test_run_converted`; `test_skill_conversion` 4 failures as before (research, verify_computable: `control.*`). TC-WFM-058 for verify_claim stays green (T-CV-04).
+- No requirement text, prompt, skill or pipeline changed; no version bump.

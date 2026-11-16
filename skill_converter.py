@@ -65,9 +65,11 @@ class SkillConverter:
 
 
 class ConvertedRun:
-    """what run_converted returns: `status` of the runner, `answer` (the value of the conversion's result node), `values` (all data nodes), `named` (the refused nodes)"""
+    """what run_converted returns: `status` of the runner, `answer` (the value of the conversion's result node), `values` (all data nodes), `named` (the refused nodes); `error` and `events` have the shape of the old
+    run result (no run events yet on this path)"""
     def __init__(self, result, answer):
         self.status, self.answer, self.values, self.named = result.status, answer, result.values, getattr(result, "named", None)
+        self.error, self.events = (None if result.status == "done" else "the graph run ended with %s %s" % (result.status, self.named or "")), []
 
 
 def _latest_nodes(nodes_dir):
