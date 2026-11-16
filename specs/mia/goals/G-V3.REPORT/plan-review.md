@@ -6,3 +6,4 @@ One check at a time with its scenario (M38); reviewer maldun. The checks are in 
 |---|---|---|---|---|
 | TC-WFM-139 | approved as written | maldun | 2026-11-16 | not split |
 | TC-WFM-140 | approved as written | maldun | 2026-11-16 | |
+| TC-WFM-141 | approved as written | maldun | 2026-11-16 | red-team case; no case added |
