@@ -67,8 +67,10 @@ FB-01 (the chat shows the whole result of a skill) is the origin of G-V3; its re
 - Merge `b560ae1` (TOOLBOX, master `1fb0c35`): no conflict; checked after the merge: SysML model and parser, `check_d_numbers.py` (the two D-182 collisions exist in master), `trace_check` against master, the full suite.
 - Earlier: the renaming of D-numbers against master (D-304 to D-309 are D-332 to D-337, A-143 is A-149), done by `fa41063` and `e67244d`.
 
-### Checks on this branch (merged with master)
-Full unit suite: see the end of the file (filled in when it finished). Integration check of AC-39, acceptance tests, IF-201 contract suites (mock and real), `check_sysml_model.py`, `check_sysml.sh`, plausibility, doc check: green as listed in `verification-report-run5.md` and re-run after the fix rounds.
+### Checks on this branch (merged with master `a17ede7`)
+- **Full unit suite:** 2327 tests, 2326 pass (4 skipped, 2 expected failures), 501 s. One test failed, `test_checkout_untouched`, because the implementing session wrote and committed this very file while the suite was running (the test reports that file as changed in the checkout). Run **alone and untouched** it passes (1 test, OK, 87.5 s, no file changed). Run the full suite once more on the merge commit before merging.
+- Integration check of AC-39, acceptance tests, IF-201 contract suites (mock and real), `check_sysml_model.py`, `check_sysml.sh`, doc check of the goal's tests, plausibility (parses; the one error REQ-RTB-009 belongs to TOOLBOX): green as listed in `verification-report-run5.md`, re-run after the fix rounds.
+- `check_d_numbers.py`: the two D-182 collisions that master has too. `trace_check.py`: 530 errors (master 538). `goal_check.py --parent-ref master`: no frozen requirement changed; `agent_check.py`: no error for this goal.
 
 ### History
 Not rewritten: the branch is pushed. It has the task commits (T-01 to T-06), the amendment commits (A-150 to A-153), the fix commits naming the finding of each Verify run, the owner's installs and label commits, and docs. Merge with a merge commit to keep the audit trail; a squash would lose the finding-by-finding history that the verification reports refer to (the owner decides).
