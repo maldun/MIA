@@ -54,3 +54,9 @@
 - Mutant: `_md` returning its input unchanged: killed by 4 tests (the hostile title, the hostile text of every kind in the chat report and in the file, the escaped brackets).
 - Hand check: `_md("a [b] <c> \d")` is `a \[b\] \<c\> \\d`; `_md("Smith & Jones (2020): a_b *c*")` is unchanged.
 - Findings: no existing test needed an adaptation. The pipe `|` of a keyword in the keyword table can still break a table row (a Markdown table, not a link or tag; outside this decision, noted only).
+
+## State after T-01 to T-03 and T-02b (merged into goal/v3.report)
+- Unit suite (`unittest discover -s tests`, run alone): 2420 tests, 13 failures and 1 error, the same 14 as on master (11 + 1 in the four G-V2.CONVERT modules, 2 in `test_task_files_browser`; F-3), nothing new; expected failures 3 (before T-02b; one of them, `HostileTitles`, is fixed by T-02b).
+- After the merge of T-02b and master: JS 174 of 174; `test_review_report` 9, `test_review_chat` 25, `test_review_chain` 4, `test_chat_review` 8, `test_lookup_report` 8, `test_search_report` 5, `test_skill_run_report` 5, IF-101 contract 82 (2 skipped); all OK.
+- Browser file `test_skill_run_view_browser.py` (alone, with the installed patch): 16 tests; the 12 old ones pass, the 4 new ones (TC-CLV-048, 050, 051, 052) fail on assertions, as intended (T-04 turns them green).
+- Finding F-5 (flaky check, not ours): `test_the_shares_are_kept_in_the_browser_and_a_blocked_profile_still_works` (dark theme, TC-CLV-046) failed in two of four browser runs of this goal (first under load; once alone after the merge: `['16', '34'] != ['20', '25']`) and passed on the re-run each time. Run 1 of 2 failed, run 2 passed: per the rule both runs are recorded; seeds and thresholds were not touched. For the owner: the check depends on timing in the browser (G-V3.PANEL).
