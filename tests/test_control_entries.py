@@ -23,6 +23,9 @@ from storage_files import FileBackend                    # noqa: E402
 from workflow_library import WorkflowLibrary             # noqa: E402
 import common_operations as ops                          # noqa: E402
 import skill_converter                                   # noqa: E402
+import plain_modules                                       # noqa: E402
+
+setUpModule, tearDownModule = plain_modules.hooks()      # the package MIA is not importable while this module runs: F-3, tests/plain_modules.py
 
 SKILLS, LIBRARY = os.path.join(REPO, "skills"), os.path.join(REPO, "library")
 INPUT = {"claim": "1628.89 euros is what 1000 euros grow to", "data_description": "principal, rate, years, claimed", "data": {"principal": 1000, "rate": 5, "years": 10, "claimed": 1628.89}}

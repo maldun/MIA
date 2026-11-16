@@ -17,6 +17,9 @@ import control_flow as CF                                # noqa: E402
 import skill_converter                                   # noqa: E402
 from call_recording import ScriptedModel                 # noqa: E402
 from pipeline import BudgetExceeded, Tool                # noqa: E402
+import plain_modules                                       # noqa: E402
+
+setUpModule, tearDownModule = plain_modules.hooks()      # the package MIA is not importable while this module runs: F-3, tests/plain_modules.py
 
 SKILLS, LIBRARY = os.path.join(REPO, "skills"), os.path.join(REPO, "library")
 SEARCH = {"tool": "web_search", "settings": {}}
