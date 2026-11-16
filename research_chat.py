@@ -6,7 +6,6 @@ sources) can be spoken. The task is chosen by the user: nothing here starts a we
   run_research(core, ...)    runs the skill, turns the failures a user can understand into messages, returns the text
   format_results / run_search  /search: the top results of the search tool as a chat message, no model, no answer
 """
-import datetime
 import re
 
 try:
@@ -115,8 +114,9 @@ def run_search(web_search, query, count=MAX_RESULTS, should_stop=None):
     return format_results(result, count)
 
 
-def run_research(core, question, pipeline=None, on_event=None, should_stop=None, speak=None, on_sources=None, trust=None, files=None):
-    """on_sources([{"url", "trust"}]) gets the sources behind an answered question (trust: url -> {"score"}, the table of source_trust.py), so the chat can keep them"""
+def run_research(core, question, pipeline=None, on_event=None, should_stop=None, speak=None, on_sources=None, trust=None, run_report=None):
+    """on_sources([{"url", "trust"}]) gets the sources behind an answered question (trust: url -> {"score"}, the table of source_trust.py), so the chat can keep them;
+    run_report(markdown) gets the report of an answered question, the runtime stores it as the run report (REQ-WFM-139)"""
     result = core.run("research", {"question": question}, pipeline=pipeline, on_event=on_event, should_stop=should_stop, started_by="command")
     if result.status == "stopped":
         return ""
@@ -125,12 +125,11 @@ def run_research(core, question, pipeline=None, on_event=None, should_stop=None,
     text = format_answer(result.answer)
     if on_sources is not None and trust is not None and isinstance(result.answer, dict) and result.answer.get("status") == "answered":
         on_sources([{"url": s["url"], "trust": trust(s["url"])["score"]} for s in result.answer.get("sources") or [] if isinstance(s, dict) and s.get("url")])
-    if files is not None and isinstance(result.answer, dict) and result.answer.get("status") == "answered" and result.answer.get("sources"):
-        stem = "lookup-%s-%s" % (datetime.date.today().isoformat(), "-".join(re.findall(r"[a-z0-9]+", question.lower())[:6]) or "report")
+    if run_report is not None and isinstance(result.answer, dict) and result.answer.get("status") == "answered":
         try:
-            files(stem + ".md", format_report(question, result.answer))      # the link to the file is added to the result by the chat service
-        except Exception as exc:
-            text += "\n\nThe report file could not be stored: %s." % exc
+            run_report(format_report(question, result.answer))      # the runtime names and stores the file and puts the state line on top; an unanswered question gets the runtime's report
+        except Exception as exc:        # a report that cannot be handed over must not take the answer away
+            text += "\n\nThe report could not be handed over: %s." % exc
     spoken = spoken_text(result.answer)
     if speak is not None and spoken:
         try:

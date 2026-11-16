@@ -182,7 +182,7 @@ def format_report_full(report, question, until):
     return format_report(report, question, until) + "\n\n### All screened works\n" + "\n".join(rows or ["- none"]) + "\n"
 
 
-def _keep(report, question, until, files, reports):
+def _keep(report, question, until, files, reports, run_report=None):
     """the finished report as a record in the database (for reference and benchmarks) and as .md and .tex files in the files volume; what fails is told, the report is never lost"""
     notes = []
     if reports is not None:
@@ -197,13 +197,18 @@ def _keep(report, question, until, files, reports):
             files(stem + ".tex", report_tex(report, question, until))
         except Exception as exc:
             notes.append("The files could not be stored: %s." % exc)
+    if run_report is not None:
+        try:
+            run_report(format_report(report, question, until))              # the report of the run: what the chat shows; the runtime puts the state line on top (REQ-WFM-139)
+        except Exception as exc:
+            notes.append("The report of the run could not be handed over: %s." % exc)
     return "\n\n" + "\n".join(notes) if notes else ""
 
 
 # --- the task --------------------------------------------------------------------------------------------------------------------------
 
 def run_review(text, run_skill, scholar, full_text_source, ask, on_event=None, should_stop=None, cfg=None, today=None, min_works=3, speak=None, options=None, monitor=None,
-               files=None, reports=None):
+               files=None, reports=None, run_report=None):
     """the review of `text` ("question [until YYYY-MM-DD]") as markdown. scholar.search(query, limit, until, since, check_retraction) is Scholar.search; full_text_source(work) is a
     FullTextSource; ask(text) -> the reply text or None; speak(text) says a short text aloud (None: silent). The model steps run through run_skill(name, inputs) (core.run); on_event gets {"kind": "step", "plain": text} per stage."""
     cfg = cfg or {}
@@ -289,4 +294,4 @@ def run_review(text, run_skill, scholar, full_text_source, ask, on_event=None, s
     report = run.run()
     progress("writing the report", "writing the report")
     say(spoken_result(report))
-    return format_report(report, question, request.until.isoformat()) + _keep(report, question, request.until.isoformat(), files, reports)
+    return format_report(report, question, request.until.isoformat()) + _keep(report, question, request.until.isoformat(), files, reports, run_report)

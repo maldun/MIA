@@ -219,10 +219,10 @@ class Routing(unittest.TestCase):
             on_delta("hello")
             return "hello"
 
-        def run_lookup(question, on_delta, on_emotion, should_stop, files=None):
+        def run_lookup(question, on_delta, on_emotion, should_stop, run_report=None):
             self.questions.append(question)
             return "Answer.\n\nSources:\n- https://x.example: “q”"
-        def run_search(query, on_delta, on_emotion, should_stop):
+        def run_search(query, on_delta, on_emotion, should_stop, run_report=None):
             self.queries.append(query)
             return "Results for \u201c%s\u201d (searxng):\n\n1. A title\n   https://x.example" % query
         return self.service_module.ChatService(lambda event, payload: self.events.append((event, payload)), self.log, self.moods.MoodTracker(MOODS), exchange,
