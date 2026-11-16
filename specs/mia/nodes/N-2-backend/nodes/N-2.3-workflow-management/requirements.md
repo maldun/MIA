@@ -1185,7 +1185,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Acceptance criterion: AC-39: a result with an instruction and a script tag is stored and read back byte for byte and starts no tool call (exact)
 - Verified by: TC-WFM-137
 - Status: Draft
-- History: A-131 (proposed 2026-11-08, G-V3.PANEL), new; A-154 (approved 2026-11-16, D-340): the report is stored as data too; Draft until re-verified; A-156 (approved 2026-11-17, D-342, Verify finding V-4): the report is stored with the state line of the runtime on top and the skill's text unchanged below it; the first wording said `unchanged` for the whole report
+- History: A-131 (proposed 2026-11-08, G-V3.PANEL), new; A-154 (approved 2026-11-16, D-340): the report is stored as data too; Draft until re-verified; A-157 (approved 2026-11-17, D-342, Verify finding V-4): the report is stored with the state line of the runtime on top and the skill's text unchanged below it; the first wording said `unchanged` for the whole report
 
 ### REQ-WFM-138 – Elements of a skill passed on
 - Level: low   Subject: TaskRuntime

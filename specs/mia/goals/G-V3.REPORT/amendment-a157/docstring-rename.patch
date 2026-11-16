@@ -1,0 +1,13 @@
+diff --git a/tests/acceptance/test_skill_run_report.py b/tests/acceptance/test_skill_run_report.py
+index 27420ef..6023243 100644
+--- a/tests/acceptance/test_skill_run_report.py
++++ b/tests/acceptance/test_skill_run_report.py
+@@ -151,7 +151,7 @@ class RunReportChecks(unittest.TestCase):
+ 
+     @mark.req("REQ-WFM-137")
+     def test_a_report_with_hostile_text_is_stored_as_text_below_the_state_line(self):
+-        """TC-WFM-137 (report case, A-156): a skill that hands over its own report with the five fixed strings gets it stored as text, the state line on top and the strings below it byte for byte; nothing is executed or interpreted.
++        """TC-WFM-137 (report case, A-157): a skill that hands over its own report with the five fixed strings gets it stored as text, the state line on top and the strings below it byte for byte; nothing is executed or interpreted.
+         Example: the own report "<script>alert(1)</script>\\n..." is in the file unchanged after `# Done` and a blank line."""
+         # Given: a scripted skill that hands over a report made of the five fixed strings, and the real chat service with the files volume
+         own = "\n".join(HOSTILE) + "\n"
