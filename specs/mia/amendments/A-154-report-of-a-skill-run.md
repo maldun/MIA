@@ -1,6 +1,6 @@
 # A-154 – Every skill run ends with a report (proposed 2026-11-16, FB-08)
 
-Status: **Proposed** (all new items Draft; the owner reviews them one by one before they go into the node files).
+Status: **Proposed**. The seven new items (REQ-WFM-139, 140, 141, REQ-CLV-048, 049, 050, 051, 052; eight with the split) are reviewed and approved by maldun on 2026-11-16 (table at the end); they stay Draft until they are in the node files with tests and model. Still open: the changes of REQ-CLV-043 and REQ-WFM-137, the IF-101 v17 contract change, and the protected test TC-CLV-043 / TR-PANEL-005.
 Source: FB-08 (owner, 2026-11-16: sources in the Skill run view, Full run, after `/lookup`, should be hyperlinks). Decisions of the owner by questionnaire, 2026-11-16:
 
 1. The report lives in a **run record field plus a file** of the files volume (the file is the download; the record names it).
@@ -161,3 +161,4 @@ The items are not in the node files yet, so `req_review.py` cannot fingerprint t
 | REQ-CLV-051 | approved as written | maldun | 2026-11-16 | |
 | REQ-CLV-049 | split into REQ-CLV-049 (links) and REQ-CLV-052 (no active content) | maldun | 2026-11-16 | both reviewed one by one |
 | REQ-CLV-049 (after split) | approved as written | maldun | 2026-11-16 | note for Implement: the chat renderer (markdown.js ALLOWED_URI_REGEXP) also lets mailto:, /path and #anchor through; for the report only http and https may be links, so the report needs its own URI rule, not the chat's |
+| REQ-CLV-052 | approved as written | maldun | 2026-11-16 | |
