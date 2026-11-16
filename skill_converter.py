@@ -88,7 +88,7 @@ def _latest_nodes(nodes_dir):
     return latest
 
 
-def run_converted(name, inputs, model=None, tools=None, skills_dir=None, library_dir=None, runs_dir=None, skill_changes=None, functions=None, sandbox=None, broker_factory=None, tool_calls=None, door_tools=None):
+def run_converted(name, inputs, model=None, tools=None, skills_dir=None, library_dir=None, runs_dir=None, skill_changes=None, functions=None, sandbox=None, broker_factory=None, tool_calls=None, door_tools=None, should_stop=None):
     """REQ-WFM-058, REQ-WFM-115 (A-125, D-253): runs skill `name` as a graph on the toolbox with the given model and tools. The pipeline is converted in memory at every call,
     bound to the skill and run by the GraphRunner; `skill_changes` is merged into the skill first (a test plants a changed option with it). `runs_dir` stays unused:
     this path writes no run record yet. Returns a ConvertedRun; a pipeline that cannot be converted raises ConversionError (the skill stays on the old runner)."""
@@ -122,7 +122,7 @@ def run_converted(name, inputs, model=None, tools=None, skills_dir=None, library
         box = Toolbox(WorkflowLibrary(Storage(FileBackend(folder))), lambda account: True, _NoEvents())
         box.seed_shipped(os.path.join(library_dir, "nodes"))
         box.seed_controls()
-        common_operations.register_control(_node_call(box, nodes, setting), control_flow.Limits(seconds=budget.get("seconds"), steps=budget.get("steps")))
+        common_operations.register_control(_node_call(box, nodes, setting), control_flow.Limits(seconds=budget.get("seconds"), steps=budget.get("steps"), should_stop=should_stop))
         stages, trust = stages_from_toolbox(graph, box)
         result = GraphRunner(trust).run(graph, stages, {"input." + field: value for field, value in (inputs or {}).items()})
     return ConvertedRun(result, result.values.get(found["result"]), common_operations.run_events(), common_operations.budget_end())

@@ -633,6 +633,7 @@ core = Core(_own_path(CONST.SKILLS_DIR_KEY, CONST.DEFAULT_SKILLS_DIR), library, 
             store=content_store, store_texts=(lambda skill: True) if cfg.get("store_chat_texts") else None,
             broker_factory=lambda: broker_module.WebBroker(broker_module.web_handlers(_web_search, _web_client)),
             tool_calls=tool_calls, door_tools={name: budget_key for name, (_, budget_key) in _web_tools.items()}, run_events=run_events,
+            conversion_dir=_own_path(CONST.CONVERSION_DIR_KEY, CONST.DEFAULT_CONVERSION_DIR),
             functions={"chunk_text": web_tools.chunk_text, "untrusted": web_tools.untrusted, "injection_signals": web_tools.injection_signals,
                        **checks.build_web_checks(_web_tools["web_search"][0], _web_tools["fetch_page"][0])})
 for _name, _problems in core.check(functions={"converse": None}).items():
