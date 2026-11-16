@@ -121,6 +121,7 @@ Not to be confused with REQ-WFM-038 (the structured report of `/review` as a dat
 | REQ-CLV-043 | Text: "... shall show every text of a run (result, material found, answers, reason) as plain text that starts no action and loads nothing, **except the run report (REQ-CLV-048, REQ-CLV-049)**." Rationale: add "the report is the one text that may hold links, A-154". AC-39 unchanged for all other texts | amendment approved; status back to Draft until re-verified |
 | REQ-WFM-137 | Text: add "report" to the list "(result, material, answers, reason, report)" | amendment approved |
 | IF-101 | v17 to v18: field `report` in the run record (REQ-WFM-140); contract suite and mock follow | contract change by the owner of the interface |
+| IF-302 | v11 to v12: `skill_runs` also keeps `report` (optional), as v9 did for `elements`; TC-IF-302-08 names the field | in `goals/G-V3.REPORT/plan-step4/protected.patch` |
 | TC-CLV-043 / `tests/acceptance/test_skill_run_view_browser.py` | **no change needed** (checked at the approval): its hostile strings go into result, answer and reason, which stay plain text; the Report part is checked by the new TC-CLV-049 and TC-CLV-052 | – |
 | TR-PANEL-005 | the fixed hostile list also applies to the report (TC-CLV-049, TC-CLV-052, TC-WFM-141) | protected: in `protected.patch` |
 
