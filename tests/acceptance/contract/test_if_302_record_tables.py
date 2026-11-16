@@ -146,7 +146,7 @@ class RecordTablesContract(unittest.TestCase):
             self.assertEqual(tables.validate("skill_runs", {k: v for k, v in doc.items() if k != field}), {"rule": "schema", "detail": field})
         full = dict(doc, ended="2026-11-08T10:05:00Z", phases=[{"name": "screening", "state": "done"}], budget={"seconds": 600}, counts={"searches": 3},
                     reason="stopped by the user", answers=[{"text": "yes", "time": "2026-11-08T10:01:00Z"}], result="text", material=[], files=["report.md"],
-                    elements=[{"label": "Works read", "text": "12"}])
+                    elements=[{"label": "Works read", "text": "12"}], report="report.md")
         self.assertIsNone(tables.validate("skill_runs", full))
         self.assertEqual(tables.definitions()["reports"], {"versioned": True, "deletable": False})
 

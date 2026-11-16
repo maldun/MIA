@@ -763,6 +763,53 @@ class SkillRunViewContract(unittest.TestCase):
         self.assertEqual(api.skill_run(s, second)["id"], second)
         self.assertEqual(api.shown_run(s)["id"], second)
 
+    @mark.req("IF-101", "REQ-WFM-139", "REQ-WFM-140")
+    @each_provider(IF, make(review=("First?",)))
+    def test_the_run_record_names_the_report_of_a_run_that_ended(self, api):
+        """TC-IF-101-41 (v18, A-154): the run record carries `report`: null while the run is not over; after the end it is the name of one of the `files`.
+        Example: while the review waits for its first answer `report` is null; after the answer "no" it is "review-contract.md", which is in `files`."""
+        # Given: a review that waits for the answer to its first question
+        s = api.login("anna", "pw-anna")
+        api.connect(s)
+        api.events(s)
+        api.send(s, "/review do canary releases help?")
+        api.settle()
+        run = cards_of(api.events(s))[0]["id"]
+        # When: the record of the running run is read
+        running = api.skill_run(s, run)
+        # Then: it has the field `report` and the field is empty
+        self.assertIn("report", running)
+        self.assertIsNone(running["report"])
+        # When: the answer is given and the run ends
+        api.send(s, "no")
+        api.settle()
+        ended = api.skill_run(s, run)
+        # Then: `report` names one of the files of the run
+        self.assertIsInstance(ended["report"], str)
+        self.assertIn(ended["report"], ended["files"])
+        # And: the run that is shown has the same report
+        self.assertEqual(api.shown_run(s)["report"], ended["report"])
+
+    @mark.req("IF-101", "REQ-WFM-139", "REQ-WFM-140")
+    @each_provider(IF, make(review=("First?",), review_fails="the scholarly service is down"))
+    def test_a_failed_run_has_a_report_too(self, api):
+        """TC-IF-101-42 (v18, A-154): a run that fails also names a report, one of its `files`, and the file is not the only way to learn the state: the record still says failed with the reason.
+        Example: reason "the scholarly service is down": state failed, `report` is in `files`."""
+        # Given: a review that fails after the first answer
+        s = api.login("anna", "pw-anna")
+        api.connect(s)
+        api.events(s)
+        # When: it ends
+        run_review(api, s, "yes")
+        record = api.shown_run(s)
+        # Then: the state and the reason are in the record
+        self.assertEqual(record["state"], "failed")
+        self.assertIn("the scholarly service is down", record["reason"])
+        # And: `report` names one of the files of the run
+        self.assertIsInstance(record["report"], str)
+        self.assertIn(record["report"], record["files"])
+
+
     @mark.req("IF-101", "REQ-API-015")
     @each_provider(IF, make(review=("First?",)))
     def test_the_run_of_another_account_is_not_found(self, api):
