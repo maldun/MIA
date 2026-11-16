@@ -52,6 +52,18 @@ export function createApi({ origin = location.origin, fetchFn = (url, init) => f
     pause: () => request('POST', '/api/pause'),
     resume: () => request('POST', '/api/resume'),
     files: () => request('GET', '/api/files'),
+    /** the text of a run report in the files volume (G-V3.REPORT): null where the file is gone (404), an ApiError for any other failure */
+    reportText: async (name) => {
+      let response;
+      try {
+        response = await fetchFn(new URL(`/api/files/${encodeURIComponent(name)}`, origin), { credentials: 'same-origin' });
+      } catch (error) {
+        throw new ApiError(0, 'offline');
+      }
+      if (response.status === 404) return null;
+      if (!response.ok) throw new ApiError(response.status, 'failed');
+      return response.text();
+    },
     persona: () => request('GET', '/api/persona'),
     savePersona: (doc) => request('POST', '/api/persona', { body: { doc } }),
   };

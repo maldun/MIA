@@ -60,3 +60,14 @@
 - After the merge of T-02b and master: JS 174 of 174; `test_review_report` 9, `test_review_chat` 25, `test_review_chain` 4, `test_chat_review` 8, `test_lookup_report` 8, `test_search_report` 5, `test_skill_run_report` 5, IF-101 contract 82 (2 skipped); all OK.
 - Browser file `test_skill_run_view_browser.py` (alone, with the installed patch): 16 tests; the 12 old ones pass, the 4 new ones (TC-CLV-048, 050, 051, 052) fail on assertions, as intended (T-04 turns them green).
 - Finding F-5 (flaky check, not ours): `test_the_shares_are_kept_in_the_browser_and_a_blocked_profile_still_works` (dark theme, TC-CLV-046) failed in two of four browser runs of this goal (first under load; once alone after the merge: `['16', '34'] != ['20', '25']`) and passed on the re-run each time. Run 1 of 2 failed, run 2 passed: per the rule both runs are recorded; seeds and thresholds were not touched. For the owner: the check depends on timing in the browser (G-V3.PANEL).
+
+## T-04: The Report part in the Full run
+- Status: done
+- Requirements: REQ-CLV-048, 049, 050, 051, 052 in the page; REQ-CLV-043 (exception for the report)
+- Done: `templates/index.html` (`details#srv-report` in the Full run, hooks as in `report-part-interface-note.md`), `skill-run.js` (`drawReport`, `paintReport`; the report is fetched once per run and file name, one request at a time, the part opens by itself when the report is there; the other texts stay text nodes), `skill-run-model.js` (`reportModel`), `api.js` (`reportText`: 404 is null, any other failure an ApiError), `i18n/en.json` and `de.json` (four texts), `components.css`, `ui/README.md`.
+- Tests reported green (feedback, not verification): `tests/js/report-part.test.mjs` (3, new; red first: no export), `tests/js/report-render.test.mjs` (7), all JS 177 of 177; `tests/acceptance/test_skill_run_view_browser.py` 16 of 16 (the 4 new browser checks TC-CLV-048, 050, 051, 052 were red before).
+- Mutant: `renderReport` without the sanitizer: the hostile browser check TC-CLV-052 fails (restored afterwards).
+- Findings:
+  - F-6: the driver's hostile scenario joined its strings with single line breaks; a raw HTML block (CommonMark) swallows the lines after it until a blank line, so the http address was never parsed as a link (the outcome was safe but not what the check names). The scenario in `tests/browser/skill_run_view.py` (unprotected) now separates the strings by blank lines; every safety assertion is unchanged.
+  - The DOM branch of `renderReport` (sanitize, template, unwrap) now runs in the browser checks: the question of T-03 (re-parse of sanitized HTML) is covered by TC-CLV-052 (no script, img, link, iframe, style or form, no alert, no outside request).
+- Decisions: the Report part opens by itself once its report is loaded (open point 1 of A-154, the default); a failed read (not a 404) keeps the part as it is and asks again with the next change of the run.

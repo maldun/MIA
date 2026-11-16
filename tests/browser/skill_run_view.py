@@ -508,7 +508,7 @@ def report_hostile():
     only http and https addresses are links"""
     driver = browser()
     try:
-        bad = "\n".join(HOSTILE + ['<img src="https://evil.example/x.png" onerror="alert(1)">', "[x](javascript:alert(1))", "https://ok.example/a"])
+        bad = "\n\n".join(HOSTILE + ['<img src="https://evil.example/x.png" onerror="alert(1)">', "[x](javascript:alert(1))", "https://ok.example/a"])      # one block each: an HTML block would swallow the lines after it until a blank line
         script({"history_deleted": True}, {"file": {"name": REPORT_NAME, "data": bad}}, *shown(lookup_record("r1")))
         login(driver)
         until(driver, "document.getElementById('skill-run-view')")
