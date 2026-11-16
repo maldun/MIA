@@ -4,6 +4,7 @@ Run: python tests/test_harness_converted.py
 """
 import json
 import os
+import shutil
 import sys
 import tempfile
 import unittest
@@ -126,6 +127,36 @@ class ConvertedPlanTarget(unittest.TestCase):
             H.Harness(core).run(H.load_suite(folder), variant={"name": "conv", "converted": True}, pin=PIN)
         # Then run_converted ran the skill with the case input on the pin's model
         self.assertEqual([(c.args[0], c.args[1]) for c in spy.call_args_list], [("plan_question", case["input"])])
+        self.assertTrue(model.calls and all(c["model"] == PIN["name"] for c in model.calls))
+
+
+class ConvertedResearchTarget(unittest.TestCase):
+    def test_the_research_target_runs_through_run_converted_with_the_recorded_web(self):
+        """Example: variant {"converted": true} on a research case calls run_converted("research", the case input) with the tools web_search and fetch_page (the recorded web, with their budget keys)."""
+        # Given a research suite of one case over the recorded web, a scripted model and the pin
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        model = Seen()
+        core = Core(os.path.join(REPO, "skills"), Library(os.path.join(REPO, "library")), tmp.name, model=model)
+        source = os.path.join(REPO, "eval", "suites", "research")
+        with open(os.path.join(source, "cases.jsonl"), encoding="utf-8") as fp:
+            case = json.loads(fp.readline())
+        with open(os.path.join(source, "suite.json"), encoding="utf-8") as fp:
+            target = json.load(fp)["target"]
+        folder = os.path.join(tmp.name, "res")
+        os.makedirs(folder)
+        shutil.copy(os.path.join(source, target["fixtures"]), os.path.join(folder, target["fixtures"]))
+        with open(os.path.join(folder, "suite.json"), "w") as fp:
+            json.dump({"name": "res", "description": "d", "target": target}, fp)
+        with open(os.path.join(folder, "cases.jsonl"), "w") as fp:
+            fp.write(json.dumps(case) + "\n")
+        # When the converted variant runs
+        with mock.patch.object(skill_converter, "run_converted", wraps=skill_converter.run_converted) as spy:
+            H.Harness(core).run(H.load_suite(folder), variant={"name": "conv", "converted": True}, pin=PIN)
+        # Then run_converted ran the skill with the case input and the two tools, each with a budget key, and the pin's model
+        call = spy.call_args_list[0]
+        self.assertEqual((call.args[0], call.args[1]), (target["skill"], case["input"]))
+        self.assertEqual({n: t.budget_key for n, t in call.kwargs["tools"].items()}, {"web_search": "search_calls", "fetch_page": "fetch_calls"})
         self.assertTrue(model.calls and all(c["model"] == PIN["name"] for c in model.calls))
 
 
