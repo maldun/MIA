@@ -68,13 +68,13 @@ class SkillRunRecorder:
             self._save(doc)
             self._changed(run)
 
-    def end(self, run, state, reason=None, result="", material=()):
+    def end(self, run, state, reason=None, result="", material=(), report=None):
         with self._lock:
             monitor = self._monitor(run)
             monitor.finish()
             doc = self._load(run)
             doc.update(state=state, ended=self._now(), result=result, material=list(material), budget=monitor.state()["budget"], counts=dict(monitor.counts),
-                       elements=list(monitor.elements))
+                       elements=list(monitor.elements), report=report)
             if reason is not None and state != "done":
                 doc["reason"] = reason
             if state == "done":
@@ -97,7 +97,7 @@ class SkillRunRecorder:
         if account is not None and doc["account"] != account:
             return None
         record = {"id": doc["run"], "skill": doc["skill"], "version": doc["skill_version"], "started": doc["started"], "ended": doc.get("ended"), "state": doc["state"]}
-        record.update({field: doc.get(field) for field in ("phases", "budget", "counts", "elements", "answers", "result", "material", "files")})
+        record.update({field: doc.get(field) for field in ("phases", "budget", "counts", "elements", "answers", "result", "material", "files", "report")})      # IF-101 v18: `report` is the name of the run report, None until the run ends (REQ-WFM-140)
         if "reason" in doc:
             record["reason"] = doc["reason"]
         return record

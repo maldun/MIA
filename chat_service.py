@@ -43,6 +43,7 @@ import time
 try:
     from .chat_log import utc_now, MAX_PAGE
     from .pipeline_model import UNREACHABLE
+    from . import run_report
     from .storage import StorageError
     from .speech_text import speech_text
     from .mia_logger import logger
@@ -54,6 +55,7 @@ try:
 except ImportError:  # used as plain script / in tests
     from chat_log import utc_now, MAX_PAGE
     from pipeline_model import UNREACHABLE
+    import run_report
     from storage import StorageError
     from speech_text import speech_text
     from mia_logger import logger
@@ -401,6 +403,17 @@ class ChatService:
             self._emit("files_changed", {"name": info["name"], "task": task})
             return info["name"]
         return put
+
+    def _keep_report(self, task, message_id, argument, created, outcome, reason, result, own):
+        """REQ-WFM-139: the run report of every task run goes into the files volume and its name into the run record; None where the volume cannot take it (the run and its answer are never lost for it)"""
+        if self._files is None or self._recorder is None:
+            return None
+        try:
+            text = run_report.compose(outcome, reason, own=own, result=result, record=self._recorder.record(message_id))
+            return self._file_putter(task, message_id)(run_report.report_name(task, created[:10], argument), text)
+        except Exception as exc:
+            logger.warning("The report of the run %s could not be stored: %s", message_id, exc)
+            return None
 
     def _report_saver(self, entry, message_id, model):
         def save(question, report):
@@ -936,7 +949,8 @@ class ChatService:
             elif entry is None:
                 final = self._run_exchange("[%s] %s" % (speaker, text) if speaker else text, on_delta, on_emotion, self._stop.is_set)
             else:
-                handed = {"ask": self.ask, "options": options or {}, "monitor": self._monitor, "files": self._file_putter(task, message_id), "reports": self._report_saver(entry, message_id, model)}
+                handed = {"ask": self.ask, "options": options or {}, "monitor": self._monitor, "files": self._file_putter(task, message_id), "reports": self._report_saver(entry, message_id, model),
+                          "run_report": lambda markdown: state.update(report=str(markdown))}      # REQ-WFM-139: the skill hands over its own report, the runtime stores it
                 final = entry.run(text, on_delta, on_emotion, self._stopped, **{name: handed[name] for name in entry.needs})
             if final is not None:
                 state["text"] = final
@@ -994,7 +1008,10 @@ class ChatService:
         if summary is not None:
             self._voice(message_id, summary)
         if self._observer is not None:
-            self._observer.end({"done": "done", "stopped": "stopped"}.get(status, "failed"), reason=failure if status == "error" else "stopped by the user" if status == "stopped" else None, result=result)
+            outcome = {"done": "done", "stopped": "stopped"}.get(status, "failed")
+            reason = failure if status == "error" else "stopped by the user" if status == "stopped" else None
+            report = self._keep_report(task, message_id, text, created, outcome, reason, result, state.get("report"))
+            self._observer.end(outcome, reason=reason, result=result, report=report)
             self._observer = None
             self._run_phases.pop(message_id, None)               # the run is over: its phases need no memory (F-13)
         if self._monitor is not None:
