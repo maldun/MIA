@@ -1,6 +1,6 @@
 # A-154 – Every skill run ends with a report (proposed 2026-11-16, FB-08)
 
-Status: **Proposed** (all new items Draft; the owner reviews them one by one before they go into the node files).
+Status: **Proposed**. The seven new items (REQ-WFM-139, 140, 141, REQ-CLV-048, 049, 050, 051, 052; eight with the split) are reviewed and approved by maldun on 2026-11-16 (table at the end); they stay Draft until they are in the node files with tests and model. Still open: the changes of REQ-CLV-043 and REQ-WFM-137, the IF-101 v17 contract change, and the protected test TC-CLV-043 / TR-PANEL-005.
 Source: FB-08 (owner, 2026-11-16: sources in the Skill run view, Full run, after `/lookup`, should be hyperlinks). Decisions of the owner by questionnaire, 2026-11-16:
 
 1. The report lives in a **run record field plus a file** of the files volume (the file is the download; the record names it).
@@ -54,28 +54,65 @@ Not to be confused with REQ-WFM-038 (the structured report of `/review` as a dat
 
 ### REQ-CLV-048 – Report part in the Full run
 - Level: low   Subject: WebFrontEnd
-- Text: The Chat and login views shall show in the Full run of the Skill run view an expandable part Report, whose summary line says the state of the run, that shows the run report of the run that is shown, and that has the download link of its file; while the run has no report the part says that the report comes when the run ends, and where the file is gone from the volume it says that the file was removed.
+- Text: The Chat and login views shall show in the Full run of the Skill run view an expandable part Report, whose summary line says the state of the run, that shows the run report of the run that is shown, and that has the download link of its file.
 - Rationale: refines REQ-FE-032 (FR-46); the sources of a run are links in the window the owner looks at (FB-08)
 - Parent: REQ-FE-032
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-39: in a headless browser after a scripted `/lookup`, the Report part is listed in the Full run, opens to the rendered report, and its download link is `/api/files/<name>` and returns the file byte for byte; before the end it shows the waiting text; with the file deleted it shows the removed text (exact)
+- Acceptance criterion: AC-39: in a headless browser after a scripted `/lookup`, the Report part is listed in the Full run with the state in its summary line, opens to the rendered report, and its download link is `/api/files/<name>` and returns the file byte for byte (exact)
 - Verified by: TC-CLV-048
 - Status: Draft
-- History: A-154 (proposed 2026-11-16, FB-08), new
+- History: A-154 (proposed 2026-11-16, FB-08), new; split at the review of 2026-11-16 (REQ-CLV-050, 051 take the two other states)
 
-### REQ-CLV-049 – Rendering of the report
+### REQ-CLV-050 – Report part before the end of the run
 - Level: low   Subject: WebFrontEnd
-- Text: The Chat and login views shall render the run report with the Markdown renderer of the messages, so that an http or https address is a link that opens in a new tab with `rel="noopener noreferrer"`, an address of any other kind stays text, and no image, script, style, form or event handler comes into the page.
+- Text: While the run that is shown has no report, the Chat and login views shall show in the Report part the sentence that the report comes when the run ends, and no download link.
+- Rationale: refines REQ-CLV-048; a part that is empty without a word reads as broken
+- Parent: REQ-FE-032
+- Priority: Should
+- Verification method: Test
+- Acceptance criterion: AC-39: a scripted run that is still going shows the waiting sentence and no link; when the run ends the part shows the report without a reload (exact)
+- Verified by: TC-CLV-050
+- Status: Draft
+- History: A-154 (proposed 2026-11-16, FB-08), new, split from REQ-CLV-048
+
+### REQ-CLV-051 – Report file that is gone
+- Level: low   Subject: WebFrontEnd
+- Text: Where the run report named in the run record is no longer in the files volume, the Chat and login views shall show in the Report part the sentence that the file was removed, and no download link.
+- Rationale: refines REQ-CLV-048 and REQ-WFM-037 (the user deletes files in the volume, the record keeps the name)
+- Parent: REQ-FE-032
+- Priority: Should
+- Verification method: Test
+- Acceptance criterion: AC-39: after the report file is deleted in the volume the part shows the removed sentence and no link, and the rest of the Full run is unchanged (exact)
+- Verified by: TC-CLV-051
+- Status: Draft
+- History: A-154 (proposed 2026-11-16, FB-08), new, split from REQ-CLV-048
+
+### REQ-CLV-049 – Links in the report
+- Level: low   Subject: WebFrontEnd
+- Text: The Chat and login views shall render the run report with the Markdown renderer of the messages, so that an http or https address is a link that opens in a new tab with `rel="noopener noreferrer"` and an address of any other kind stays text.
 - Rationale: refines REQ-FE-032 and REQ-CLV-043; the one text of a run that may start an action, because the user clicks it and the owner asked for it (FB-08); the renderer of the chat (marked, DOMPurify) is the tested path
 - Parent: REQ-FE-032
 - Group: UT
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-39: a report with a plain URL, a source without a URL, a `javascript:` URL, a `data:` URL, a URL inside Markdown text and the five hostile strings is shown with links only for the http and https addresses (each with target `_blank` and rel `noopener noreferrer`), no `script`, `img`, `link`, `iframe` or `style` node, no alert and no request to another host (exact)
-- Verified by: TC-CLV-049 (browser), unit tests in `tests/js/` (renderer, red-team case)
+- Acceptance criterion: AC-39: a report with a plain URL, a source without a URL, a `javascript:` URL, a `data:` URL and a URL inside Markdown text is shown with links only for the http and https addresses, each with target `_blank` and rel `noopener noreferrer` (exact)
+- Verified by: TC-CLV-049 (browser), unit tests in `tests/js/` (renderer)
 - Status: Draft
-- History: A-154 (proposed 2026-11-16, FB-08), new
+- History: A-154 (proposed 2026-11-16, FB-08), new; split at the review of 2026-11-16 (REQ-CLV-052 takes the active content)
+
+### REQ-CLV-052 – No active content from the report
+- Level: low   Subject: WebFrontEnd
+- Text: The Chat and login views shall let no image, script, style, form, frame or event handler of a run report come into the page, and shall make no request to another host when they show it.
+- Rationale: refines REQ-FE-032 and REQ-CLV-043; NFR-3, TB-web and TB-result (OC-8 of G-V3); the report holds web text
+- Parent: REQ-FE-032
+- Group: UT
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: a report with the five hostile strings of TR-PANEL-005 and an `<img>` with an onerror handler is shown with no `script`, `img`, `link`, `iframe`, `style` or `form` node, no alert and no request to another host (exact)
+- Verified by: TC-CLV-052 (browser, red-team case), unit tests in `tests/js/` (renderer)
+- Status: Draft
+- History: A-154 (proposed 2026-11-16, FB-08), new, split from REQ-CLV-049
 
 ## Changes of approved items
 
@@ -108,3 +145,20 @@ Not to be confused with REQ-WFM-038 (the structured report of `/review` as a dat
 | REQ-WFM-139, 140, 141 | scripted runs of all skills, done, stopped and failed; record field; red-team strings | `tests/` (unit, new) and the contract suite for IF-101 v17 (protected, after approval) |
 | REQ-CLV-049 | renderer red-team and the four cases: plain URL, source without URL, `javascript:` URL, URL inside Markdown text | `tests/js/` (new unit test) |
 | REQ-CLV-048 | the Report part in a headless browser | protected acceptance, after approval |
+
+## Review (one item per question, reviewer maldun)
+
+The items are not in the node files yet, so `req_review.py` cannot fingerprint them; this table is the record until they move in.
+
+| Item | Result | Reviewer | Date | Note |
+|---|---|---|---|---|
+| REQ-WFM-139 | approved as written | maldun | 2026-11-16 | |
+| REQ-WFM-140 | approved as written | maldun | 2026-11-16 | IF-101 v17 still needs the contract-change step |
+| REQ-WFM-141 | approved as written | maldun | 2026-11-16 | not split |
+| REQ-CLV-048 | split into REQ-CLV-048 (part, state, download), REQ-CLV-050 (waiting), REQ-CLV-051 (file gone) | maldun | 2026-11-16 | the three are reviewed one by one; IDs 050, 051 are outside the range 030 to 049 of the plan, to be extended |
+| REQ-CLV-048 (after split) | approved as written | maldun | 2026-11-16 | |
+| REQ-CLV-050 | approved as written | maldun | 2026-11-16 | |
+| REQ-CLV-051 | approved as written | maldun | 2026-11-16 | |
+| REQ-CLV-049 | split into REQ-CLV-049 (links) and REQ-CLV-052 (no active content) | maldun | 2026-11-16 | both reviewed one by one |
+| REQ-CLV-049 (after split) | approved as written | maldun | 2026-11-16 | note for Implement: the chat renderer (markdown.js ALLOWED_URI_REGEXP) also lets mailto:, /path and #anchor through; for the report only http and https may be links, so the report needs its own URI rule, not the chat's |
+| REQ-CLV-052 | approved as written | maldun | 2026-11-16 | |
