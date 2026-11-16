@@ -120,7 +120,7 @@ def resolve_model(descriptor):
     profile = descriptor.get("model") if isinstance(descriptor, dict) else None
     if not isinstance(profile, str) or profile not in _MODELS:
         raise ModelMissing("the model %r is not registered" % (profile,))
-    return _MODELS[profile], profile, descriptor.get("options") or {}
+    return _MODELS[profile], profile, descriptor.get("options") or None
 
 
 def model_step(system, template, schema, inputs, retries=1):

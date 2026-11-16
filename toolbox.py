@@ -84,7 +84,7 @@ def shipped_code(node):
     kind, body = node.get("kind"), node.get("body", {})
     if kind == "code" and body.get("function") in common_operations.FUNCTIONS:
         defaults = _defaults(node, _accepted(common_operations.FUNCTIONS[body["function"]]))
-        return IMPORT_OPS + "\nDEFAULTS = %r\n\n\ndef run(args):\n    return ops.call(%r, {**DEFAULTS, **args})\n" % (defaults, body["function"])
+        return IMPORT_OPS + "\nDEFAULTS = %r\n\n\ndef run(args, settings=None):\n    return ops.call(%r, {**DEFAULTS, **(settings or {}), **args})\n" % (defaults, body["function"])
     if kind == "model":
         return IMPORT_OPS + "\nDEFAULTS = %r\n\n\ndef stage(inputs, outputs, node):\n    return ops.model_step(%r, %r, %r, {**DEFAULTS, **inputs}, retries=%r)\n" % (
             _defaults(node), body["system"], body["template"], body["schema"], body.get("retries", 1))
@@ -222,8 +222,12 @@ class Toolbox:
         exec(entry["doc"]["code"], namespace)       # trusted code runs in the MIA process (SC-09 accepted); only here, never on import
         return namespace
 
-    def run(self, tid, args, as_baseline=False):
-        return self._code_namespace(tid, as_baseline)["run"](args)
+    def run(self, tid, args, as_baseline=False, settings=None):
+        """`settings` (the settings node of a transform, D-254) goes only to an entry whose run takes a second parameter; entries of the form run(args) are called as before"""
+        function = self._code_namespace(tid, as_baseline)["run"]
+        if settings is not None and len(inspect.signature(function).parameters) > 1:
+            return function(args, settings)
+        return function(args)
 
     def run_stage(self, tid, inputs, outputs, node, as_baseline=False):
         stage = self._code_namespace(tid, as_baseline).get("stage")

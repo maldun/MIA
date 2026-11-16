@@ -3,17 +3,32 @@
 The stubs never raise and return values outside the real vocabulary (None, empty), so that the acceptance tests of G-V2.CONVERT fail on an assertion.
 The signatures are the ones the red tests assume (to be confirmed by the owner at the review of the tests).
 """
+import glob
 import json
 import os
 import subprocess
 import sys
+import tempfile
 
 try:
-    from .graph_run import Stage
-    from .toolbox import ToolboxError
+    from . import common_operations, pipeline_graph
+    from .graph_run import GraphRunner, Stage
+    from .library import Library
+    from .skill_store import load_skill
+    from .storage import Storage
+    from .storage_files import FileBackend
+    from .toolbox import Toolbox, ToolboxError
+    from .workflow_library import WorkflowLibrary
 except ImportError:
-    from graph_run import Stage
-    from toolbox import ToolboxError
+    import common_operations
+    import pipeline_graph
+    from graph_run import GraphRunner, Stage
+    from library import Library
+    from skill_store import load_skill
+    from storage import Storage
+    from storage_files import FileBackend
+    from toolbox import Toolbox, ToolboxError
+    from workflow_library import WorkflowLibrary
 
 
 class ConversionError(Exception):
@@ -49,10 +64,53 @@ class SkillConverter:
         return self.runner.run(skill, graph, inputs, **kwargs)
 
 
+class ConvertedRun:
+    """what run_converted returns: `status` of the runner, `answer` (the value of the conversion's result node), `values` (all data nodes), `named` (the refused nodes)"""
+    def __init__(self, result, answer):
+        self.status, self.answer, self.values, self.named = result.status, answer, result.values, getattr(result, "named", None)
+
+
+def _latest_nodes(nodes_dir):
+    """{node id: JSON of its highest version} of library/nodes"""
+    latest = {}
+    for path in sorted(glob.glob(os.path.join(nodes_dir, "*", "*.json"))):
+        with open(path, encoding="utf-8") as handle:
+            node = json.load(handle)
+        if node["version"] > latest.get(node["id"], {"version": 0})["version"]:
+            latest[node["id"]] = node
+    return latest
+
+
 def run_converted(name, inputs, model=None, tools=None, skills_dir=None, library_dir=None, runs_dir=None, skill_changes=None):
-    """STUB (REQ-WFM-058, REQ-WFM-115): runs the converted version of skill `name` on the new path with the given model and tools and returns the run
-    result of the runner (status, answer, ...). `skill_changes` is merged into the skill record first (a test plants a changed option with it)."""
-    return None
+    """REQ-WFM-058, REQ-WFM-115 (A-125, D-253): runs skill `name` as a graph on the toolbox with the given model and tools. The pipeline is converted in memory at every call,
+    bound to the skill and run by the GraphRunner; `skill_changes` is merged into the skill first (a test plants a changed option with it). `runs_dir` stays unused:
+    this path writes no run record yet. Returns a ConvertedRun; a pipeline that cannot be converted raises ConversionError (the skill stays on the old runner)."""
+    skill = load_skill(os.path.join(skills_dir, name + ".md"))
+    pipeline = Library(library_dir).resolve(skill["pipeline"], "pipeline")
+    nodes = _latest_nodes(os.path.join(library_dir, "nodes"))
+    found = pipeline_graph.convert({k: v for k, v in pipeline.items() if not k.startswith("_")}, nodes, (skill.get("budget") or {}).get("seconds", 300))
+    if found["graph"] is None:
+        raise ConversionError("%s cannot be converted: %s" % (name, found["refused"]))
+    graph = pipeline_graph.bind_skill(found["graph"], nodes, skill, skill_changes)
+    setting = {**(skill.get("model") or {}), **((skill_changes or {}).get("model") or {})}
+    # the registries are process-wide: a run starts from what this call hands over
+    common_operations.reset()
+    if model is not None:
+        common_operations.register_model(setting.get("profile"), model)
+    for tool_name, function in (tools or {}).items():
+        common_operations.register_tool(tool_name, function)
+    with tempfile.TemporaryDirectory(prefix="converted-run-") as folder:
+        box = Toolbox(WorkflowLibrary(Storage(FileBackend(folder))), lambda account: True, _NoEvents())
+        box.seed_shipped(os.path.join(library_dir, "nodes"))
+        stages, trust = stages_from_toolbox(graph, box)
+        result = GraphRunner(trust).run(graph, stages, {"input." + field: value for field, value in (inputs or {}).items()})
+    return ConvertedRun(result, result.values.get(found["result"]))
+
+
+class _NoEvents:
+    """the toolbox reports changes to its events; a converted run in memory has no listener"""
+    def record(self, event):
+        return None
 
 
 EVAL_DECIDE = os.path.expanduser("~/.claude/skills/agent-app/scripts/eval_decide.py")
@@ -185,7 +243,7 @@ def stages_from_toolbox(graph, toolbox):
             except ToolboxError as error:
                 if error.code != "no_stage":
                     raise
-            return toolbox.run(tid, dict(inputs))
+            return toolbox.run(tid, dict(inputs), settings=node)
         return Stage(call)
 
     return {node_id: stage_of(tid) for node_id, tid in entries.items()}, lambda node_id: toolbox.look_up(entries[node_id])["trust"]
