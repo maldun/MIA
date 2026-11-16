@@ -79,13 +79,15 @@ class Chain(unittest.TestCase):
         self.assertEqual(last["role"], "assistant")
         self.assertTrue(last["text"].startswith("## Literature review"), last["text"][:200])
         names = [f["name"] for f in self.files.list()]
-        self.assertEqual(sorted(n.rsplit(".", 1)[1] for n in names), ["md", "tex"])
-        self.assertNotIn("Files:", last["text"])                                    # IF-101 v16 (A-140): the files are listed in the Skill run view, the result links to it
         run = self.chat.shown_run("anna")
+        own = [n for n in names if n != run["report"]]                              # the files of the review; the run report that ends every run (REQ-WFM-139, A-154) is one more
+        self.assertEqual(sorted(n.rsplit(".", 1)[1] for n in own), ["md", "tex"])
+        self.assertEqual(len(names), 3)
+        self.assertNotIn("Files:", last["text"])                                    # IF-101 v16 (A-140): the files are listed in the Skill run view, the result links to it
         self.assertTrue(last["text"].endswith("[Open in the Skill run view](#run=%s)" % run["id"]))
         self.assertEqual(sorted(run["files"]), sorted(names))
         done = [p for e, p in self.events if e == "chat_done"][-1]
-        self.assertEqual(sorted(done["files"]), sorted(names))
+        self.assertEqual(sorted(done["files"]), sorted(own))                        # chat_done names the files of the skill; the report is stored after it
         self.assertEqual(done["id"], last["id"])
 
     def test_the_report_is_also_a_record_with_its_origin(self):
