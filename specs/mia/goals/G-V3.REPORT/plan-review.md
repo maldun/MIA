@@ -11,3 +11,4 @@ One check at a time with its scenario (M38); reviewer maldun. The checks are in 
 | TC-CLV-049 | approved as written | maldun | 2026-11-16 | |
 | TC-CLV-050 | scenario approved as written | maldun | 2026-11-16 | the browser test is not written yet |
 | TC-CLV-051 | scenario approved as written | maldun | 2026-11-16 | the browser test is not written yet |
+| TC-CLV-052 | scenario approved as written | maldun | 2026-11-16 | unit half written, browser half not written yet; the hook-leak case is in the notes of T-03 (plan.md) |
