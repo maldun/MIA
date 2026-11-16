@@ -98,11 +98,11 @@ Top-level items it serves: FR-35, FR-46 (the chat part), FR-3 (the spoken short 
 | Phase | State | Record or reason |
 |---|---|---|
 | Explore | done | HLS of iteration 2 approved 2026-11-05 (D-186); wording A-131 |
-| Plan | in progress | started 2026-11-08: Step 1b (REQ-BE-078, REQ-CHA-040 to 054, A-142) and Step 3 (test-spec rows and scenarios, EV-skill_turns, eval-spec rows, TR-CHAT-001 to 007, THR-012) drafted and reviewed one by one (D-303); EV-skill_turns cases labelled and promoted, baseline "no digest" (D-332), plausibility recorded, contract change IF-201 v3 done (A-142); Step 4 (red tests) and Step 5 (plan.md, with target kind and scorer of the suite) open |
-| Implement | open | |
-| Verify | open | |
-| Commit | open | |
-| Deploy | open | |
+| Plan | done | requirements, checks and `plan.md` approved (D-303, A-142), red tests installed, contract changes IF-201 v3 (A-142), later A-150 to A-153 |
+| Implement | done | T-01 to T-06 done, the log is `implementation-log.md` |
+| Verify | done | `verification-report.md` and `verification-report-run2.md` to `-run5.md`: five runs by fresh reviewers; F-33 to F-35 of the fifth fixed in code and accepted as deviations without a sixth run (D-339, TD-85); holdout of EV-skill_turns decided 2026-11-16: REQ-CHA-049, 053, 054 PASS (`holdout-decision.md`) |
+| Commit | done | master merged into `goal/v3.chat` (`0b4e0de`); merged into master by the owner as `8b8bd2a`; no version (the tag comes with iteration 2) |
+| Deploy | empty | the spoken-only chat is reachable only with the iteration goal; delivered with G-V3 / iteration 2 (check the profile `light` first) |
 | Validate | open | |
 
 ## Joint amendments
