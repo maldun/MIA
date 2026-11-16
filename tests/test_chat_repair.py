@@ -102,7 +102,7 @@ class StreamTest(unittest.TestCase):
     @mark.req("REQ-CHA-014")
     def test_lookup_answers_with_quotes_are_not_repaired(self):
         quote = "He wrote: **never** do this *really*."
-        service = self.service("", 1, lookup=lambda text, on_delta, on_emotion, should_stop: quote)
+        service = self.service("", 1, lookup=lambda text, on_delta, on_emotion, should_stop, files=None: quote)
         service.send("/lookup what did he write", author="anna")
         self.assertEqual(self.log.last("assistant")["text"], quote)
 

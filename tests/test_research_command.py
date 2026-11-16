@@ -219,7 +219,7 @@ class Routing(unittest.TestCase):
             on_delta("hello")
             return "hello"
 
-        def run_lookup(question, on_delta, on_emotion, should_stop):
+        def run_lookup(question, on_delta, on_emotion, should_stop, files=None):
             self.questions.append(question)
             return "Answer.\n\nSources:\n- https://x.example: “q”"
         def run_search(query, on_delta, on_emotion, should_stop):
@@ -311,7 +311,7 @@ class Routing(unittest.TestCase):
 
     def test_a_failure_of_the_research_is_reported_like_a_failure_of_the_chat(self):
         service = self.make()
-        service._tasks.get("lookup").run = lambda *a: (_ for _ in ()).throw(RuntimeError("The web search is not reachable (x)."))      # the run function is in the registry since A-23
+        service._tasks.get("lookup").run = lambda *a, **k: (_ for _ in ()).throw(RuntimeError("The web search is not reachable (x)."))      # the run function is in the registry since A-23
         service.send("/lookup anything")
         self.assertTrue(self.idle(service))
         self.assertIn("chat_error", [e for e, _ in self.events])
