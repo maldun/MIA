@@ -2956,17 +2956,17 @@ package MIA_NodeRequirements {
         doc /* The Chat agent shall pass on the summary of SkillDigestStep to the chat uncut. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
-    requirement def <'REQ-CHA-064'> NoMarkupInDigestOutput_Cha064 {
+    requirement def <'REQ-CHA-064'> NoMarkupInTheOutputOfTheDigestStep_Cha064 {
         subject s : ConversationCore;
         doc /* When SkillDigestStep returns a text, the Chat agent shall remove every HTML tag from it, and the content of every script and style element, before the text is repaired or shown. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
-    requirement def <'REQ-CHA-065'> DigestStepOnTheLightProfile_Cha065 {
+    requirement def <'REQ-CHA-065'> TheDigestStepRunsOnTheLightProfile_Cha065 {
         subject s : ConversationCore;
         doc /* The Chat agent shall run every model call of SkillDigestStep on the model profile light. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
-    requirement def <'REQ-CHA-066'> NoRunLinkFromTheModel_Cha066 {
+    requirement def <'REQ-CHA-066'> NoLinkToARunFromTheModelInAnyMessage_Cha066 {
         subject s : ConversationCore;
         doc /* The Chat agent shall remove a link to a run from the text that SkillDigestStep words, in every message of a run. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
@@ -3148,7 +3148,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-WFM-036'> SummaryAtTheEndOfTheChat_Wfm036 {
         subject s : TaskRuntime;
-        doc /* The Workflow management shall, when a task has ended, publish one summary of its result of at most 1200 characters as a new message at the end of the chat with a link to the run in the Skill run view, and, when the task fails, a message that says what failed with the same link. */
+        doc /* The Workflow management shall, when a task has ended, publish one summary of its result, worded by the digest step that is asked to keep it to at most 1200 characters, as a new message at the end of the chat with a link to the run in the Skill run view, and, when the task fails, a message that says what failed with the same link. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-WFM-037'> FilesInAVolume_Wfm037 {
@@ -3353,7 +3353,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-WFM-110'> SameOutcomesResearch_Wfm110 {
         subject s : TaskRuntime;
-        doc /* The Workflow management shall run the converted skill research so that it behaves as expected in at least 82 % of the dev cases of EV-research. */
+        doc /* The Workflow management shall run the converted skill research so that it behaves as expected in at least 85 % of the dev cases of EV-research. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-WFM-111'> SameOutcomesPlanQuestion_Wfm111 {
@@ -3368,7 +3368,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-WFM-113'> SameOutcomesVerifyComputable_Wfm113 {
         subject s : TaskRuntime;
-        doc /* The Workflow management shall run the converted skill verify_computable so that it behaves as expected in at least 82 % of the dev cases of EV-computable. */
+        doc /* The Workflow management shall run the converted skill verify_computable so that it behaves as expected in at least 87 % of the dev cases of EV-computable. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-WFM-114'> SameOutcomesExtractClaims_Wfm114 {
@@ -3519,6 +3519,36 @@ package MIA_NodeRequirements {
     requirement def <'REQ-RUN-019'> FailedNodeStopsTheRun_Run019 {
         subject s : TaskRuntime;
         doc /* If a transform or master node fails during a run, then the Pipeline runner shall stop the run and name the failed node in the run result. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-RUN-030'> StageGetsInputsOutputsAndSettings_Run030 {
+        subject s : TaskRuntime;
+        doc /* When a transform or master node is run as a Stage, the Pipeline runner shall hand it the values of its input data nodes by name, the values of its output data nodes by name and the settings object of its settings node. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-RUN-031'> PerOutputWrites_Run031 {
+        subject s : TaskRuntime;
+        doc /* When a Stage returns an object with an `outputs` entry, the Pipeline runner shall write each value to the output data node of that name, and otherwise shall write the one result to every output data node. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-RUN-032'> PlainCallablesUnchanged_Run032 {
+        subject s : TaskRuntime;
+        doc /* While a callable is not a Stage, the Pipeline runner shall call it with the values of its input data nodes by data node ID and write its result to every output data node. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-RUN-033'> BrokenWiringRefusedBeforeAnyNodeRan_Run033 {
+        subject s : TaskRuntime;
+        doc /* If a transform has more than one settings edge, or two of its output data nodes have the same name, then the Pipeline runner shall refuse the run before any node ran and name the transform. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-RUN-034'> StartValuesOfDataNodes_Run034 {
+        subject s : TaskRuntime;
+        doc /* When a Stage is about to run, the Pipeline runner shall give each data node it reads or writes the value of the run, else the value the Stage's prepare function gave for it, else the value of the graph node, else nothing. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-RUN-035'> OrderEdge_Run035 {
+        subject s : TaskRuntime;
+        doc /* Where an input edge of a transform carries the role order, the Pipeline runner shall run the transform after the node that writes that data node and shall not hand that data node to the transform. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-TLS-001'> CodeChecksFirst_Tls001 {
@@ -4889,9 +4919,9 @@ package MIA_NodeRequirements {
     requirement r_req_cha_061 : ResultGoesToTheDigestStepAsText_Cha061;
     requirement r_req_cha_062 : SummaryFromTheDigestsOnly_Cha062;
     requirement r_req_cha_063 : SummaryPassedOnUncut_Cha063;
-    requirement r_req_cha_064 : NoMarkupInDigestOutput_Cha064;
-    requirement r_req_cha_065 : DigestStepOnTheLightProfile_Cha065;
-    requirement r_req_cha_066 : NoRunLinkFromTheModel_Cha066;
+    requirement r_req_cha_064 : NoMarkupInTheOutputOfTheDigestStep_Cha064;
+    requirement r_req_cha_065 : TheDigestStepRunsOnTheLightProfile_Cha065;
+    requirement r_req_cha_066 : NoLinkToARunFromTheModelInAnyMessage_Cha066;
     requirement r_req_wfm_001 : SkillsAsTasks_Wfm001;
     requirement r_req_wfm_002 : VersionedWorkflowLibrary_Wfm002;
     requirement r_req_wfm_003 : NoCycles_Wfm003;
@@ -5002,6 +5032,12 @@ package MIA_NodeRequirements {
     requirement r_req_run_017 : UntrustedDoesNotRun_Run017;
     requirement r_req_run_018 : MasterNodeRunsLikeATransform_Run018;
     requirement r_req_run_019 : FailedNodeStopsTheRun_Run019;
+    requirement r_req_run_030 : StageGetsInputsOutputsAndSettings_Run030;
+    requirement r_req_run_031 : PerOutputWrites_Run031;
+    requirement r_req_run_032 : PlainCallablesUnchanged_Run032;
+    requirement r_req_run_033 : BrokenWiringRefusedBeforeAnyNodeRan_Run033;
+    requirement r_req_run_034 : StartValuesOfDataNodes_Run034;
+    requirement r_req_run_035 : OrderEdge_Run035;
     requirement r_req_tls_001 : CodeChecksFirst_Tls001;
     requirement r_req_tls_002 : LookupWithSources_Tls002;
     requirement r_req_tls_003 : SourceRecordsAndCutOff_Tls003;
@@ -5519,6 +5555,12 @@ package MIA_NodeRequirements {
     satisfy r_req_run_017 by mia.taskRuntime;
     satisfy r_req_run_018 by mia.taskRuntime;
     satisfy r_req_run_019 by mia.taskRuntime;
+    satisfy r_req_run_030 by mia.taskRuntime;
+    satisfy r_req_run_031 by mia.taskRuntime;
+    satisfy r_req_run_032 by mia.taskRuntime;
+    satisfy r_req_run_033 by mia.taskRuntime;
+    satisfy r_req_run_034 by mia.taskRuntime;
+    satisfy r_req_run_035 by mia.taskRuntime;
     satisfy r_req_tls_001 by mia.verifier;
     satisfy r_req_tls_002 by mia.verifier;
     satisfy r_req_tls_003 by mia.verifier;
@@ -6035,6 +6077,12 @@ package MIA_NodeRequirements {
     allocate r_req_run_017 to mia.taskRuntime;
     allocate r_req_run_018 to mia.taskRuntime;
     allocate r_req_run_019 to mia.taskRuntime;
+    allocate r_req_run_030 to mia.taskRuntime;
+    allocate r_req_run_031 to mia.taskRuntime;
+    allocate r_req_run_032 to mia.taskRuntime;
+    allocate r_req_run_033 to mia.taskRuntime;
+    allocate r_req_run_034 to mia.taskRuntime;
+    allocate r_req_run_035 to mia.taskRuntime;
     allocate r_req_tls_001 to mia.verifier;
     allocate r_req_tls_002 to mia.verifier;
     allocate r_req_tls_003 to mia.verifier;
@@ -6562,6 +6610,12 @@ package MIA_NodeRequirements {
     dependency from r_req_run_017 to fr38;
     dependency from r_req_run_018 to fr37;
     dependency from r_req_run_019 to fr37;
+    dependency from r_req_run_030 to fr37;
+    dependency from r_req_run_031 to fr37;
+    dependency from r_req_run_032 to fr37;
+    dependency from r_req_run_033 to fr37;
+    dependency from r_req_run_034 to fr37;
+    dependency from r_req_run_035 to fr37;
     dependency from r_req_tls_001 to r_req_wfx_005;
     dependency from r_req_tls_002 to r_req_wfx_006;
     dependency from r_req_tls_003 to r_req_wfx_007;
