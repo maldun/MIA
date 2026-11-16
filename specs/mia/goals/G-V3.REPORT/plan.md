@@ -1,6 +1,6 @@
 # Plan: G-V3.REPORT (a report at the end of every skill run)
 
-**Requirements:** REQ-WFM-139, 140, 141 (N-2.3), REQ-CLV-048 to 052 (N-1.1), changed REQ-CLV-043 and REQ-WFM-137; amendment `specs/mia/amendments/A-154-report-of-a-skill-run.md`, decision D-340.   **Status:** Draft (Plan step 4 and 5 written 2026-11-16; waits for the review of the checks and the owner's install of `plan-step4/protected.patch`)
+**Requirements:** REQ-WFM-139, 140, 141 (N-2.3), REQ-CLV-048 to 052 (N-1.1), changed REQ-CLV-043 and REQ-WFM-137; amendment `specs/mia/amendments/A-154-report-of-a-skill-run.md`, decision D-340.   **Status:** Approved (the checks reviewed one by one and the design decisions answered by the owner, 2026-11-16, D-341; `plan-review.md`). Open before T-04: the browser checks (decision 6)
 
 ## Deployment and feedback (M51)
 - Environment for the current-state deployment: none: the goal is a change of the existing page and the skills; the owner tries it on the running MIA (`/lookup` question, Full run, Report part)
@@ -9,13 +9,13 @@
 - Living prototype (M46): none: short goal
 - Source of each fact (P26): requirements.md of N-2.3 and N-1.1 → mirror; satisfy and allocate links in `architecture.sysml`
 
-## Design decisions the tests rely on (for the plan gate)
+## Design decisions the tests rely on (approved by the owner, D-341)
 1. **The skill hands its report to the runtime** through a new need `run_report` (`run_report(markdown)`), next to `files`, `reports` and `monitor`; it is added to `NEEDS` of `extension_loader.py` and to the objects `chat_service.py` hands over. A skill that does not ask for it gets the runtime's fallback report. (The need `reports` stays for the structured record of REQ-WFM-038.)
 2. **The runtime owns the file and the first line.** It stores the report as `<skill>-<date>-<question words>.md` in the files volume (the name rule of `file_store.py`), puts one line at the top that names the state (`Done`, `Stopped` or `Failed`, with the reason of a failure on the same line), then a blank line, then the skill's own text unchanged. The fallback body is built from the record: result, reason, figures; an empty result says `no output`.
 3. **The record names it:** `report` in the run record (`skill_runs.py`, IF-101 v18, IF-302 v12), empty until the run ends; the file is also in `files`.
 4. **Text rules (REQ-WFM-141):** a web address is written as `<address>` only if it is http or https without spaces; all other text of the runtime body is escaped (every Markdown and HTML special character with a backslash). A skill's own text is the skill's to escape (`research_chat.format_report` does it for `/lookup`).
 5. **Front end (REQ-CLV-049, 052):** the pure rule `reportHref` in `markdown.js` and `renderReport` (marked and DOMPurify with its own URI rule, no image, no form, no frame); the Report part is a `<details>` in the Full run that fetches `/api/files/<name>`.
-6. **Open, needs the owner:** the browser checks TC-CLV-048, 050, 051 and the browser half of TC-CLV-052 are **not written** yet: the browser image `localhost/mia-browser` is not on this host (`tests/browser/Containerfile`), so they could not be run red. The stub server `ui/tools/skill_run_stub_server.py` also needs a scripted run with a report. Decision: build the image, then write them with the T-04 stub as a second payload (recommended), or accept the unit half and the manual check of TC-CLV-048 for this small goal.
+6. **Browser checks (decided, D-341):** TC-CLV-048, 050, 051 and the browser half of TC-CLV-052 are written as a second payload once the owner has built the browser image `localhost/mia-browser` (`tests/browser/Containerfile`); the stub server `ui/tools/skill_run_stub_server.py` gets a scripted run with a report with that payload. T-04 starts after it is installed.
 
 ## Task list
 | Task | Implements | Green when | Depends on |
