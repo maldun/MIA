@@ -64,3 +64,11 @@ Line of work `goal/v2.convert`, supervised. Test runs here are feedback, not ver
 ## T-CV-09 (part): variant `converted` of the extraction target (D-255)
 - Files: `harness.py` (`_PinnedChat`, `_extraction` takes `variant["converted"]`), `tools/eval.py` (`--converted`); unit tests `tests/test_harness_converted.py` (2) and `tests/test_eval_cli_converted.py` (2), red first. `test_harness` 30 green (1 expected failure), `test_eval_cli` green.
 - Design: on the converted path the pin decides the model as in `_pinned`: `_PinnedChat` calls the counting model of the core with the pin's name, seed and temperature and no profile.
+
+### Eval runs
+| Date | Suite, split | Skill, variant | Versions | Pin | Repeats | Result | Cost |
+|---|---|---|---|---|---|---|---|
+| 2026-11-16 | EV-extraction, dev (51 cases) | extract_claims, `converted` (graph path through `run_converted`, commit `94f6082`) | skill extract_claims v?, pipeline extract.llm, library nodes as in the commit, no prompt changed | MP-light gemma4:12b-it-qat, sha256:38044be4f923 (digest checked on the server before the run), seed 7, temperature 0 | 3 | `eval_decide` on the criterion of REQ-WFM-114 (min 0.59, rule threshold): **PASS**, 34 of 51 cases right by majority, 0.667 (95 % interval 0.530 to 0.780), stability 1.00. The recorded baseline run of the old runner (`extraction__llm__20261115-173516`, owner's run, the baseline file is not yet in `eval/baselines/`) has 0.68: no claim of "not worse" is made, only the threshold. | 403 s, 153 model calls |
+- Run file: `data/eval/extraction__converted__20261116-144402.jsonl` (git-ignored). Feedback of the implementing session, not verification; Verify decides TC-WFM-114 with its own run.
+- Cases that fail in all 3 repeats (read these transcripts before accepting): cite-in-brackets, cite-with-quote, para-eiffel, para-meeting, para-python, para-water, none-page-number (the list printed is cut at the tail; the full list is in the run file).
+- Not done: the acceptance record of the skill (`mark_converted`, REQ-WFM-057/059) is not written; where the record lives is for T-CV-09. No amendment, no prompt change, no label changed.
