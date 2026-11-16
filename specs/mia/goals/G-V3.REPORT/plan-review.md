@@ -10,3 +10,4 @@ One check at a time with its scenario (M38); reviewer maldun. The checks are in 
 | TC-CLV-048 | scenario approved as written | maldun | 2026-11-16 | the browser test is not written yet (plan.md decision 6) |
 | TC-CLV-049 | approved as written | maldun | 2026-11-16 | |
 | TC-CLV-050 | scenario approved as written | maldun | 2026-11-16 | the browser test is not written yet |
+| TC-CLV-051 | scenario approved as written | maldun | 2026-11-16 | the browser test is not written yet |
