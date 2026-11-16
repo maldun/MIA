@@ -73,7 +73,7 @@ Out as a whole: the other requirements of G-V3, G-V3.PANEL and G-V3.CHAT (finish
 | Phase | State | Record or reason |
 |---|---|---|
 | Explore | done | FB-08 (`specs/mia/feedback/FB-08.md`) and the owner's questionnaire of 2026-11-16 (store, REQ-CLV-043 exception, every skill, placement); no new top-level item (FR-46 covers it) |
-| Plan | in progress | requirements, checks, model and glossary approved (D-340, A-154); open: the owner installs `amendment-a154/protected.patch` (IF-101 v18, test requirements), red tests, `plan.md` |
+| Plan | in progress | requirements, checks, model and glossary approved (D-340, A-154), protected part of A-154 installed; step 4: red tests written (`tests/js/report-render.test.mjs` committed; `plan-step4/protected.patch` waits for the owner's install; browser checks open, `plan.md` decision 6); step 5: `plan.md` Draft |
 | Implement | open | |
 | Verify | open | in a fresh context before the merge |
 | Commit | open | subgoal: merged into the parent's line by the owner |
