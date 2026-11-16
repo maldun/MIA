@@ -34,6 +34,8 @@ import datetime
 import json
 import queue
 import random
+import html
+from urllib.parse import quote
 import re
 import threading
 import time
@@ -44,6 +46,7 @@ try:
     from .storage import StorageError
     from .speech_text import speech_text
     from .mia_logger import logger
+    from .skill_digest import strip_markup
     from .skill_run_observer import SkillRunObserver
     from .skill_runs import SkillRunRecorder
     from .task_monitor import TaskMonitor
@@ -54,6 +57,7 @@ except ImportError:  # used as plain script / in tests
     from storage import StorageError
     from speech_text import speech_text
     from mia_logger import logger
+    from skill_digest import strip_markup
     from skill_run_observer import SkillRunObserver
     from skill_runs import SkillRunRecorder
     from task_monitor import TaskMonitor
@@ -98,6 +102,55 @@ def normalize_text(text):
         return ""
     return CONTROL_CHARACTERS.sub("", text).strip()
 SENTENCE_END = re.compile(r"(?<=[.!?])\s+")
+SKILL_RUNS_IN_HISTORY = 3      # runs whose messages the chat model sees
+SKILL_TURN_KINDS = ("question", "phase", "done", "failed", "stopped")      # IF-201 v3
+SKILL_LINK = re.compile(r"\[(?:[^\[\]]|\[[^\]]{0,100}\]){0,200}\]\(\s*<?#run=[^)]{0,300}\)", re.I)      # a link to a run in a text of the model: one level of brackets in a label of usual size, any case
+CUT_ROUNDS = 6        # the nicer cut: a link that is built from the parts of another needs another round; the rest below does not depend on it
+
+
+FENCE_RUN = re.compile(r"`{3,}|~{3,}")             # a run of three or more backticks or tildes is a code fence when it starts a line
+RISKY_END = re.compile(r"(?:^|\n)(?: {4}|\t)[^\n]*$|\|[^\n]*$")      # the last line is indented code or part of a table
+
+
+def browser_view(text):
+    """what the page and the browser make of a text before they look at a link: character references decoded, backslash escapes of punctuation resolved, tab and newline dropped by the URL
+    parser, lower case. A link is judged by this view, never by the raw text."""
+    try:
+        text = html.unescape(text)
+    except Exception:                                   # a reference with thousands of digits makes int() raise: fail closed, the text is made plain
+        return "#run="
+    text = re.sub(r"\\(?=[!-/:-@\[-`{-~])", "", text)
+    return re.sub(r"[\t\n\r]", "", text).lower()
+
+
+def neutralize_run_links(text):
+    """REQ-CHA-066, by construction: if the browser view of the text holds `#run=` in any form, the text is made plain: every `&` is written as a reference of its own and every `#` as the
+    full-width sign, so that no reference, escape or join can build a link to a run. A text without such a view is not touched."""
+    if "#run=" in browser_view(text):
+        text = text.replace("&", "&amp;").replace("#", "\uff03")
+    return text
+
+
+def cut_run_links(text):
+    """REQ-CHA-066: the links to a run of the usual forms are cut (a few rounds, because cutting one can join the parts of another); what is left is made plain by neutralize_run_links.
+    The patterns are bounded, so no input costs more than a few linear passes."""
+    for _ in range(CUT_ROUNDS):
+        cut = SKILL_LINK.sub("", text)
+        if cut == text:
+            break
+        text = cut
+    return neutralize_run_links(re.sub(r"#run=", "#run ", text, flags=re.I))
+
+
+def clean_model_text(text):
+    """the text of the digest step before it is shown or spoken (REQ-CHA-064, 066): both cuts together a few times, because each can join the parts of what the other removed, then the
+    guarantees by construction: no `<` that starts markup (escape_markup) and no way to a link to a run (neutralize_run_links, last, so that nothing after it can build one)"""
+    for _ in range(3):
+        cleaned = cut_run_links(strip_markup(text))
+        if cleaned == text:
+            break
+        text = cleaned
+    return neutralize_run_links(strip_markup(text))
 
 
 NET_NEGATIVE = 5               # REQ-CHA-017: from this many net negative votes a behaviour is shown only rarely
@@ -140,6 +193,7 @@ class ChatService:
                                         now=lambda: datetime.datetime.fromtimestamp(self._wall_clock(), datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"))      # task_status comes from the monitor of the run, once
         self._recorder = recorder                                          # G-V3.PANEL (REQ-WFM-130..138): the SkillRunRecorder; a SkillRunObserver made in _do_chat reports every task run to it (stub of Plan step 4: not used yet)
         self._digest = digest                                              # G-V3.CHAT (A-142): the SkillDigestStep that words the status, summary, failure and stop messages of a skill run
+        self._run_phases = {}                                              # run -> the phases its skill declares, for a service that has no `declared_phases` of its own (run_phases)
         self._declared_phases = declared_phases                            # run -> the phases the manifest of its skill declares worth telling (REQ-WFM-039)
         self._speak = speak                                                # (sentence, should_stop) -> None: the voice route of live answers (sound server); None = speak again stays silent (REQ-CHA-030)
         self._speak_lock = threading.Lock()                                # one spoken-again playback at a time (REQ-CHA-034)
@@ -430,9 +484,13 @@ class ChatService:
     def speak_again(self, message_id):
         """one audio_chunk per sentence of any answer; the page that owns the voice plays them"""
         record = self._answer(message_id)
-        sentences = [s for s in SENTENCE_END.split(speech_text(record["text"])) if s]
+        return {"sentences": self._voice(record["id"], record["text"])}
+
+    def _voice(self, message_id, text):
+        """the sentences of a message go to the page as audio_chunk events and, where a voice route exists, to the voice; returns their number"""
+        sentences = [s for s in SENTENCE_END.split(speech_text(text)) if s]
         for index, sentence in enumerate(sentences):
-            self._emit("audio_chunk", {"id": record["id"], "index": index, "sentence": sentence})
+            self._emit("audio_chunk", {"id": message_id, "index": index, "sentence": sentence})
         if self._speak is not None and sentences:
             with self._lock:
                 self._speak_pending += 1
@@ -444,7 +502,7 @@ class ChatService:
                 self.mood.set_activity("speaking")
             self.publish_status()                                  # busy and speaking: the page offers its stop button (REQ-CHA-035)
             self._spawn(lambda: self._play_again(sentences, generation))      # the request must not wait until the speech has ended
-        return {"sentences": len(sentences)}
+        return len(sentences)
 
     def _play_again(self, sentences, generation):
         """hands the sentences one by one to the voice route, after any playback that is still running (REQ-CHA-030, 031, 034); a stop since the
@@ -650,12 +708,79 @@ class ChatService:
         return record
 
     def skill_turn(self, account, run, kind, payload):
-        """STUB of Plan Step 4 (IF-201 v3, A-142): one turn of a skill run as a message of MIA; written in Implement"""
-        raise NotImplementedError("REQ-CHA-040 to 047, 055 to 060, 063")
+        """IF-201 v3 (A-142): one turn of a skill run as a message of MIA. `question` is the text of the skill as it is; `phase` (only a phase that the skill declares, REQ-CHA-042, 055), `done`,
+        `failed` and `stopped` are worded by the digest step in persona and repaired like every answer (REQ-CHA-041, 043, 044, 047, 057, 060); the end messages end with the link to the run,
+        added by code (REQ-CHA-056). Every message is a record with `skill_run` and `kind`, an event chat_message and goes to speech once (REQ-CHA-045). Returns {"id"}, {"id": None} for a phase without message."""
+        if kind not in SKILL_TURN_KINDS:
+            raise ChatError("invalid_kind")
+        if kind == "phase" and payload not in self._phases_of(run):
+            return {"id": None}
+        text, spoken = self._turn_text(run, kind, payload)
+        record = self.post_assistant(text, skill_run=run, kind=kind)
+        self._voice(record["id"], spoken)
+        return {"id": record["id"]}
+
+    def _phases_of(self, run):
+        """the phases a run may tell: those of `declared_phases` where the service has it, else those of the entry of the running skill (REQ-WFM-039)"""
+        return self._declared_phases(run) if self._declared_phases else self.run_phases(run)
+
+    def run_phases(self, run):
+        """the phases that the skill of a run declares (REQ-WFM-039); () for a run that is not known"""
+        return self._run_phases.get(run, ())
+
+    def _turn_text(self, run, kind, payload):
+        """(text, spoken text) of one turn: the wording of the digest step, repaired and cleaned, with the link of the run added by code at the end messages. It never raises: a failing
+        cleaning leaves a plain sentence, so that a run always ends in the chat (REQ-CHA-064, 066)"""
+        if kind == "question":
+            return payload, payload
+        try:
+            text = clean_model_text(self._repaired(self._worded(kind, payload)))      # a link in the model text is not the link, in no message of a run (REQ-CHA-066): cut off
+        except Exception as exc:
+            logger.error("The cleaning of a skill message failed: %s", exc)
+            text = {"phase": "Working.", "done": "The run is done.", "failed": "The run failed.", "stopped": "The run was stopped."}[kind]
+        spoken = text
+        if kind in ("done", "failed", "stopped"):
+            text = FENCE_RUN.sub(lambda m: "".join("\\" + c for c in m.group(0)), text).rstrip()      # no code fence can open and swallow the link (REQ-CHA-056)
+            separator = "\n\n" if RISKY_END.search(text) else " "                  # an indented code line or a table row would take the link into itself
+            text += separator + "[Open in the Skill run view](#run=%s)" % quote(str(run), safe="")      # the real one, added by code (REQ-CHA-056)
+        return text, spoken
+
+    def _worded(self, kind, payload):
+        """the wording of the digest step; a step that is missing or fails leaves a plain sentence that invents nothing, so that the user still hears how the run ended"""
+        try:
+            if self._digest is not None:
+                return {"phase": self._digest.status, "done": self._digest.summary, "failed": self._digest.failure, "stopped": self._digest.stopped}[kind](payload)
+        except Exception as exc:
+            logger.error("The digest step failed for a %s message: %s", kind, exc)
+        return {"phase": "Working on: %s." % payload, "done": "The run is done.", "failed": "The run failed: %s" % payload, "stopped": "The run was stopped (%s)." % payload}[kind]
+
+    def _repaired(self, text):
+        try:
+            return self._repair(text) if self._repair is not None else text
+        except Exception as exc:                                  # a repair that fails leaves the text as the step worded it: the run still ends in the chat
+            logger.error("The repair of a skill message failed: %s", exc)
+            return text
 
     def model_history(self):
-        """STUB of Plan Step 4 (REQ-CHA-046, 059): the messages the next chat turn sends to the chat model; written in Implement"""
-        raise NotImplementedError("REQ-CHA-046, 059")
+        """the messages of skill runs that the next chat turn sends to the chat model, [{"role", "text"}] in the order of the chat (REQ-CHA-046, 059): per run its questions, the answers that
+        follow them, the last status message and the end message; never another status message and never the full result (it is not in the chat). The ordinary exchange is the memory of
+        the Communicator and not part of this list. Unspecified: only the last three runs, so that the history stays small."""
+        records = self.log.history(limit=MAX_PAGE)[0]
+        runs = list(dict.fromkeys(r["skill_run"] for r in records if r.get("skill_run")))[-SKILL_RUNS_IN_HISTORY:]
+        last_status = {run: max((r["id"] for r in records if r.get("skill_run") == run and r.get("kind") == "phase"), default=None) for run in runs}
+        history, after_question = [], False
+        for record in records:
+            run = record.get("skill_run")
+            if run is None:
+                if record["role"] == "user" and after_question:      # the first user message after a question is its answer (the waiter takes it)
+                    history.append({"role": "user", "text": record["text"]})
+                after_question = False
+                continue
+            kind = record.get("kind")
+            after_question = kind == "question" and run in runs
+            if run in runs and (kind != "phase" or record["id"] == last_status[run]):
+                history.append({"role": "assistant", "text": record["text"]})
+        return history
 
     def post_assistant(self, text, emotion=None, auto=False, **fields):
         """a finished message of MIA that was not an answer to the page (the hourly time check, ...)"""
@@ -671,7 +796,15 @@ class ChatService:
         waiter = {"author": self._author, "replies": queue.Queue()}
         with self._lock:
             self._waiter = waiter
-        self.post_assistant(text, **({"skill_run": self._observer.run} if self._observer is not None else {}))
+        try:
+            if self._observer is not None:
+                self.skill_turn(self._author or "page", self._observer.run, "question", text)       # a question of a run is a message of MIA with kind and speech (REQ-CHA-040, 045)
+            else:
+                self.post_assistant(text)
+        except Exception:
+            with self._lock:
+                self._waiter = None                      # a question that was not shown has no answer to wait for: the next message is not swallowed
+            raise
         self.set_activity("waiting")
         monitor = self._monitor
         if monitor is not None:
@@ -736,7 +869,8 @@ class ChatService:
         message_id = self.log.new_id()
         created = utc_now()
         entry = self._tasks.get(task) if task != "chat" else None
-        late = entry is not None and "ask" in entry.needs            # REQ-WFM-036: the result of a task that asks questions is the newest message, its progress is the status card
+        turns = entry is not None and self._recorder is not None and self._digest is not None        # G-V3.CHAT T-06: the chat holds the questions, status messages and one summary of a run, never its result
+        late = entry is not None and ("ask" in entry.needs or turns)            # REQ-WFM-036: the result of a task that asks questions is the newest message, its progress is the status card
         with self._lock:
             self._message_id, self._pipeline, self._sources, self._show_pipeline, self._late, self._task_files = message_id, [], [], False, late, []
             self._steps = []
@@ -748,9 +882,12 @@ class ChatService:
                     options = self._prepare_task(entry, dict(options or {}), self.ask)
                 except Exception as exc:
                     self.note("Could not prepare /%s: %s" % (task, exc))
+            self._run_phases[message_id] = entry.phases
             self._monitor = TaskMonitor(self._emit_status, message_id, task, mode="slice" if (options or {}).get("slice") else "run")
             if self._recorder is not None:
-                self._observer = SkillRunObserver(self._recorder, message_id, task, entry.version, self._author or "page", phases=entry.phases)
+                self._observer = SkillRunObserver(self._recorder, message_id, task, entry.version, self._author or "page",
+                                                 phases=self._phases_of(message_id),
+                                                 on_phase=(lambda text, run=message_id: self.skill_turn(self._author or "page", run, "phase", text)) if turns else None)
                 self._observer.start()
                 self._monitor.observer = self._observer
             self._monitor.update(phase="starting")
@@ -815,7 +952,11 @@ class ChatService:
         else:
             self.set_activity(None)
         result = state["text"]                                                   # the result of the run record is the text without the links of its files
-        if self._observer is not None and state["text"]:                       # the result links to the run: the files are listed there, not in the text (IF-101 v16)
+        summary = None
+        if turns and self._observer is not None:
+            kind = {"done": "done", "stopped": "stopped"}.get(status, "failed")
+            state["text"], summary = self._turn_text(message_id, kind, result if kind == "done" else failure or "stopped by the user")      # the link is in the text already
+        elif self._observer is not None and state["text"]:                       # the result links to the run: the files are listed there, not in the text (IF-101 v16)
             state["text"] += " [Open in the Skill run view](#run=%s)" % message_id
         elif self._task_files:                                                 # without run records the files are links in the result (IF-101 v8)
             state["text"] = (state["text"] + "\n\n" if state["text"] else "") + "Files: " + ", ".join("[%s](/api/files/%s)" % (n, n) for n in self._task_files)
@@ -837,6 +978,8 @@ class ChatService:
             extra["task"] = task
         if self._observer is not None:
             extra["skill_run"] = message_id                  # the link from the message to its run survives a reload (IF-101 v16)
+            if turns:
+                extra["kind"] = kind
         with self._lock:
             shown, kept, sources, self._message_id, self._late = self._pipeline, self._steps, self._sources, None, False
         if shown:
@@ -848,9 +991,12 @@ class ChatService:
         record = self.log.append("assistant", state["text"], id=message_id, created=created, emotion=state["emotion"],
                                  status=status, model=model, **extra)
         self._emit("chat_done", {"id": message_id, "text": record["text"], "emotion": record["emotion"], "status": status, **({"files": list(self._task_files)} if self._task_files else {}), **({"skill_run": message_id} if self._observer is not None else {})})
+        if summary is not None:
+            self._voice(message_id, summary)
         if self._observer is not None:
             self._observer.end({"done": "done", "stopped": "stopped"}.get(status, "failed"), reason=failure if status == "error" else "stopped by the user" if status == "stopped" else None, result=result)
             self._observer = None
+            self._run_phases.pop(message_id, None)               # the run is over: its phases need no memory (F-13)
         if self._monitor is not None:
             self._monitor.finish()                      # the card keeps the final figures
             self._monitor = None

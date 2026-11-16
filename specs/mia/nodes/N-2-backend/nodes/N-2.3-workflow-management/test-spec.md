@@ -449,3 +449,9 @@ TC-WFM-110 to 114 (the five eval criteria of the converted skills) are statistic
 - Given: a retired untrusted transform, the owner's account and a second account
 - When: the second account sets the allowance, then the owner does
 - Then: the first is refused and the allowance stays unset; the owner's allowance is set
+
+### TC-WFM-036 – The result of a task that asks is the newest message
+- Verifies: REQ-WFM-036
+- Given: a scripted task that asks one question, reports a progress line and returns "the report"; a second task that fails with a reason
+- When: the user starts the first task, answers its question and waits until it ends; the second task is started
+- Then: no delta event comes before the result starts, the result is later in the history than the question and its answer, the history reads user, assistant, user, assistant, and the last delta equals "the report"; the failed task leaves a message that holds the reason and the link to its run

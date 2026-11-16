@@ -4820,6 +4820,8 @@ plausibility:
       rated: '2026-11-08'
       rated_by: maldun
       rating: plausible
+      claims:
+      - {kind: ceiling, value: 1200, unit: '1', against: REF-CHA-OUTLEN}
     REQ-WFM-038:
       basis:
       - reworded for A-131; the earlier rating stays and applies to the new wording unless
@@ -5004,6 +5006,34 @@ plausibility:
       rated: '2026-11-08'
       rated_by: maldun
       rating: plausible
+    REQ-CHA-064:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run with the fake model; run 6
+        of skill_turns on the pin (step version 6) showed the repair on st-rt-d5 (proposal
+        of the agent, 2026-11-15, A-150 and A-151; rated by the owner by questionnaire)
+      hardware: HW-target
+      rated: '2026-11-15'
+      rated_by: maldun
+      rating: plausible
+    REQ-CHA-065:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run or a recording chat function,
+        no real model (proposal of the agent, 2026-11-15, A-152; the time budget per call was measured in a spike on MP-light the same day, slowest call 12.9 s of 20 s)
+      hardware: HW-target
+      rated: '2026-11-15'
+      rated_by: maldun
+      rating: plausible
+    REQ-CHA-066:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run or a recording chat function,
+        no real model (proposal of the agent, 2026-11-15, A-152)
+      hardware: HW-target
+      rated: '2026-11-15'
+      rated_by: maldun
+      rating: plausible
     REQ-CHA-048:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
@@ -5062,6 +5092,8 @@ plausibility:
       rated: '2026-11-08'
       rated_by: maldun
       rating: plausible
+      claims:
+      - {kind: ceiling, value: 1200, unit: '1', against: REF-CHA-OUTLEN}
     REQ-CHA-053:
       accepted_risk: *id001
       basis:
@@ -5102,6 +5134,8 @@ plausibility:
       rated: '2026-11-08'
       rated_by: maldun
       rating: plausible
+      claims:
+      - {kind: count, value: 1, unit: '1', against: REF-CHA-LINKS}
     REQ-CHA-057:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed
@@ -5180,3 +5214,22 @@ plausibility:
     REF-CONVERT-3: {quantity: "verify.single@1 on EV-verdicts, share of right decisions", value: 0.94, unit: "1", uncertainty: 0.07, kind: measured, basis: "run verdicts__single__20261115-173350: 141 of 150 right decisions (50 cases x 3 repeats), Wilson 95 % half-width over 50 cases; baseline run files placed by the owner in eval/baselines/", hardware: HW-target, date: "2026-11-15"}
     REF-CONVERT-4: {quantity: "verify.computable@2 on EV-computable, share of right decisions", value: 0.974, unit: "1", uncertainty: 0.06, kind: measured, basis: "run computable__computable2__20261115-173501: 114 of 117 (39 cases x 3 repeats), Wilson 95 % half-width over 39 cases; baseline run files placed by the owner in eval/baselines/", hardware: HW-target, date: "2026-11-15"}
     REF-CONVERT-5: {quantity: "extract.llm@1 on EV-extraction, share of texts extracted perfectly", value: 0.68, unit: "1", uncertainty: 0.12, kind: measured, basis: "run extraction__llm__20261115-173516: 104 of 153 (51 cases x 3 repeats), Wilson 95 % half-width over 51 cases; baseline run files placed by the owner in eval/baselines/", hardware: HW-target, date: "2026-11-15"}
+    REF-CHA-OUTLEN:
+      quantity: longest output of SkillDigestStep in characters (72 outputs, 24 dev cases x 3 repeats)
+      value: 606
+      unit: '1'
+      uncertainty: 0
+      kind: measured
+      basis: skill_turns dev run 6 (step version 6, pin MP-light), data/eval/skill_turns__default__20261115-172129.jsonl; a feedback run, not verification (G-V3.CHAT implementation log)
+      hardware: HW-target
+      date: 2026-11-15
+    REF-CHA-LINKS:
+      quantity: links to the run at the end of an end message
+      value: 1
+      unit: '1'
+      uncertainty: 0
+      exact: true
+      kind: calculated
+      basis: the link is added once by code in _turn_text (chat_service.py), TC-CHA-056
+      hardware: HW-target
+      date: 2026-11-15

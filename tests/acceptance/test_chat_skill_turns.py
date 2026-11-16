@@ -376,6 +376,25 @@ class SkillTurns(unittest.TestCase):
         # Then: the chat message equals the 3000-character text
         self.assertEqual(chat.texts(), [summary + LINK % "r1"])
 
+    @mark.req("REQ-CHA-064")
+    def test_html_tags_are_removed_from_every_output_of_the_step(self):
+        """TC-CHA-069: a tag in the text of the step is removed, its inner text stays; text without a tag and a lone `<` are unchanged.
+        Example: `Done: <script>alert(1)</script> and <b>x</b>` gives `Done: and x` (A-151: the content of a script element goes with it); `5 < 6 is true` stays."""
+        # Given: a fake model whose four replies hold tags, a lone `<` and nothing special
+        chat = Chat(self, ["Done: <script>alert(1)</script> and <b>x</b>", "5 < 6 is true", "Plain words.", "Stopped <i>now</i>."])
+        # When: a summary, a failure message, a stop message and a status message are added
+        chat.turn("r1", "done", "result")
+        chat.turn("r2", "failed", "reason")
+        chat.turn("r3", "stopped", "user")
+        chat.turn("r4", "phase", "collect")
+        # Then: the tags are gone, the rest is as the model wrote it, and no message holds a tag
+        texts = chat.texts()
+        self.assertEqual(texts[0], "Done: and x" + LINK % "r1")
+        self.assertEqual(texts[1], "5 < 6 is true" + LINK % "r2")
+        self.assertEqual(texts[2], "Plain words." + LINK % "r3")
+        self.assertEqual(texts[3], "Stopped now.")
+        self.assertFalse(any(re.search(r"</?[A-Za-z][^>]*>", t) for t in texts))
+
 
 if __name__ == "__main__":
     unittest.main()
