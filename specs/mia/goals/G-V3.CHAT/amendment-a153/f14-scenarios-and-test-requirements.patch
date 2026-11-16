@@ -1,0 +1,81 @@
+diff --git a/specs/mia/nodes/N-2-backend/nodes/N-2.2-chat-agent/test-spec.md b/specs/mia/nodes/N-2-backend/nodes/N-2.2-chat-agent/test-spec.md
+index 863da97..52492b0 100644
+--- a/specs/mia/nodes/N-2-backend/nodes/N-2.2-chat-agent/test-spec.md
++++ b/specs/mia/nodes/N-2-backend/nodes/N-2.2-chat-agent/test-spec.md
+@@ -323,3 +323,15 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-201
+ - Given: a scripted skill with one declared phase whose status wording holds `[Open in the Skill run view](#run=evil)`
+ - When: the run is started and ends
+ - Then: the status message and its speech hold no such link; the summary ends with the link of its own run
++
++### TC-CHA-014 – Behaviour violations are repaired silently, and the detectors keep their precision
++- Verifies: REQ-CHA-014
++- Given: the suite `behaviour` (67 texts with people's truth: texts that break a behaviour rule and 32 clean ones) and a chat whose model answer breaks a rule while it is streamed
++- When: the detectors run on the suite, and the answer is streamed to the page
++- Then: every rule has precision and recall 100 % on the suite, the 32 clean texts are left alone and a repair of a repaired text changes nothing; the page sees only repaired text, the violation is recorded as a signal and the correction is not in the conversation memory
++
++### TC-CHA-008 – The persona file reaches the model (interim check of TD-10)
++- Verifies: REQ-CHA-008
++- Given: a persona file that names MIA with its pronouns and form of address, a missing, a broken and a blank file, and a recording stand-in for the model client
++- When: the Chat agent builds the messages of a call, and the file is changed between two calls
++- Then: the persona text is the system message of every call, unchanged; a missing, broken or blank file gives the default form of address "master" alone; a change of the file counts from the next call; the system message is not kept in the history. The statistical check of AC-8 (check dialogues against a baseline) is deferred by TD-10 and is not decided here; the persona of the status and end messages of a skill run is decided by REQ-CHA-054
+diff --git a/specs/mia/nodes/N-2-backend/nodes/N-2.3-workflow-management/test-spec.md b/specs/mia/nodes/N-2-backend/nodes/N-2.3-workflow-management/test-spec.md
+index 6f22bee..70132d6 100644
+--- a/specs/mia/nodes/N-2-backend/nodes/N-2.3-workflow-management/test-spec.md
++++ b/specs/mia/nodes/N-2-backend/nodes/N-2.3-workflow-management/test-spec.md
+@@ -304,3 +304,9 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-203
+ - Given: a retired untrusted transform, the owner's account and a second account
+ - When: the second account sets the allowance, then the owner does
+ - Then: the first is refused and the allowance stays unset; the owner's allowance is set
++
++### TC-WFM-036 – The result of a task that asks is the newest message
++- Verifies: REQ-WFM-036
++- Given: a scripted task that asks one question, reports a progress line and returns "the report"; a second task that fails with a reason
++- When: the user starts the first task, answers its question and waits until it ends; the second task is started
++- Then: no delta event comes before the result starts, the result is later in the history than the question and its answer, the history reads user, assistant, user, assistant, and the last delta equals "the report"; the failed task leaves a message that holds the reason and the link to its run
+diff --git a/specs/mia/test-requirements.md b/specs/mia/test-requirements.md
+index d44d945..5ba82d7 100644
+--- a/specs/mia/test-requirements.md
++++ b/specs/mia/test-requirements.md
+@@ -17,12 +17,13 @@
+ | 6 | Persistence | A restart is a new process (G-V3.PANEL) | TR-PANEL-004 |
+ | 7 | Untrusted text | The fixed list of hostile strings (G-V3.PANEL) | TR-PANEL-005 |
+ | 9 | Eval setup (CHAT) | Pin, holdout, labels, hard checks and error rates of EV-skill_turns (G-V3.CHAT) | TR-CHAT-001, TR-CHAT-002, TR-CHAT-003, TR-CHAT-004, TR-CHAT-005, TR-CHAT-007 |
+-| 10 | Fakes (CHAT) | The fake model server (G-V3.CHAT) | TR-CHAT-006 |
++| 10 | Fakes (CHAT) | The fake model server (G-V3.CHAT) | TR-CHAT-006, TR-CHAT-010 |
+ | 11 | Stand-ins (TOOLBOX) | The mock of the library part and the event record (G-V2.TOOLBOX) | TR-TOOLBOX-001, TR-TOOLBOX-006 |
+ | 12 | Untrusted code (TOOLBOX) | The marker that proves no code ran (G-V2.TOOLBOX) | TR-TOOLBOX-002 |
+ | 13 | Accounts (TOOLBOX) | Owner and other accounts of the refusal checks (G-V2.TOOLBOX) | TR-TOOLBOX-003 |
+ | 14 | Shipped nodes (TOOLBOX) | The fixed copy of shipped nodes (G-V2.TOOLBOX) | TR-TOOLBOX-004 |
+ | 15 | Exact values (TOOLBOX) | IDs, versions, statuses and refusals (G-V2.TOOLBOX) | TR-TOOLBOX-005 |
++| 16 | Exact values (CHAT) | The expected messages, statuses and per-rule figures of the older checks of the chat (G-V3.CHAT) | TR-CHAT-011 |
+ | 9 | Eval setup (CHAT) | Pin, holdout, labels, hard checks and error rates of EV-skill_turns (G-V3.CHAT) | TR-CHAT-001, TR-CHAT-002, TR-CHAT-003, TR-CHAT-004, TR-CHAT-005, TR-CHAT-007, TR-CHAT-008 |
+ | 10 | Fakes (CHAT) | The fake model server (G-V3.CHAT) | TR-CHAT-006, TR-CHAT-009 |
+ | 8 | Exact values (PANEL) | Names, states, orders and figures (G-V3.PANEL) | TR-PANEL-006 |
+@@ -353,3 +354,27 @@
+ - Verified by: inspection of the check: it starts no model server and no container
+ - Status: Draft
+ - History: G-V3 Plan step 4 (2026-11-08), new; the check was renamed from TC-MIA-030 to TC-CHA-068 (a Scenarios section in the root test-spec switches on the scenario rule for every old root check)
++
++### TR-CHAT-010 – the contract checks of IF-201 run on the mock and on the real part
++- Applies to: TC-IF-201-01, TC-IF-201-02, TC-IF-201-03, TC-IF-201-04
++- Requirement: REQ-BE-001
++- Group: Fakes (CHAT)
++- Kind: setup
++- Text: The contract checks of IF-201 shall run with the same cases against the mock (stage 1) and against the real Chat agent (stage 2), and a case that passes on the mock and fails on the real part is a finding against the mock.
++- Rationale: the mock stands in for the Chat agent in the checks of other nodes; this is how its fidelity is shown (the cases TC-IF-201-05 to 12 are held to the same rule by the contract suite)
++- Credibility aspect: stand-in fidelity
++- Verified by: the two variants of the suite `tests/acceptance/contract/test_if_201_chat_turn.py`, both run in the full unit suite
++- Status: Draft
++- History: A-153 (2026-11-15), new, found by the Verify of G-V3.CHAT (F-14: the checks had no test requirement)
++
++### TR-CHAT-011 – exact expected values of the older checks of the chat
++- Applies to: TC-CHA-008, TC-CHA-014, TC-WFM-036
++- Requirement: REQ-CHA-014
++- Group: Exact values (CHAT)
++- Kind: unit
++- Text: The expected form of address, the order of the messages of a task, the status of an answer and the per-rule precision and recall of the suite behaviour shall be written out in the scenario and compared exactly, signed off as one group.
++- Rationale: these checks have exact answers; reviewing them once as a group is enough
++- Credibility aspect: reference accuracy
++- Verified by: skimmed in the review log
++- Status: Draft
++- History: A-153 (2026-11-15), new, found by the Verify of G-V3.CHAT (F-14)

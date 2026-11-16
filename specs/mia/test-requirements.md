@@ -17,12 +17,13 @@
 | 6 | Persistence | A restart is a new process (G-V3.PANEL) | TR-PANEL-004 |
 | 7 | Untrusted text | The fixed list of hostile strings (G-V3.PANEL) | TR-PANEL-005 |
 | 9 | Eval setup (CHAT) | Pin, holdout, labels, hard checks and error rates of EV-skill_turns (G-V3.CHAT) | TR-CHAT-001, TR-CHAT-002, TR-CHAT-003, TR-CHAT-004, TR-CHAT-005, TR-CHAT-007 |
-| 10 | Fakes (CHAT) | The fake model server (G-V3.CHAT) | TR-CHAT-006 |
+| 10 | Fakes (CHAT) | The fake model server (G-V3.CHAT) | TR-CHAT-006, TR-CHAT-010 |
 | 11 | Stand-ins (TOOLBOX) | The mock of the library part and the event record (G-V2.TOOLBOX) | TR-TOOLBOX-001, TR-TOOLBOX-006 |
 | 12 | Untrusted code (TOOLBOX) | The marker that proves no code ran (G-V2.TOOLBOX) | TR-TOOLBOX-002 |
 | 13 | Accounts (TOOLBOX) | Owner and other accounts of the refusal checks (G-V2.TOOLBOX) | TR-TOOLBOX-003 |
 | 14 | Shipped nodes (TOOLBOX) | The fixed copy of shipped nodes (G-V2.TOOLBOX) | TR-TOOLBOX-004 |
 | 15 | Exact values (TOOLBOX) | IDs, versions, statuses and refusals (G-V2.TOOLBOX) | TR-TOOLBOX-005 |
+| 16 | Exact values (CHAT) | The expected messages, statuses and per-rule figures of the older checks of the chat (G-V3.CHAT) | TR-CHAT-011 |
 | 9 | Eval setup (CHAT) | Pin, holdout, labels, hard checks and error rates of EV-skill_turns (G-V3.CHAT) | TR-CHAT-001, TR-CHAT-002, TR-CHAT-003, TR-CHAT-004, TR-CHAT-005, TR-CHAT-007, TR-CHAT-008 |
 | 10 | Fakes (CHAT) | The fake model server (G-V3.CHAT) | TR-CHAT-006, TR-CHAT-009 |
 | 8 | Exact values (PANEL) | Names, states, orders and figures (G-V3.PANEL) | TR-PANEL-006 |
@@ -233,7 +234,7 @@
 - History: G-V3.CHAT Plan step 3 (2026-11-08), new
 
 ### TR-CHAT-006 – fake model server for the logic checks
-- Applies to: TC-CHA-040, TC-CHA-041, TC-CHA-042, TC-CHA-043, TC-CHA-044, TC-CHA-045, TC-CHA-046, TC-CHA-047, TC-CHA-048, TC-CHA-050, TC-CHA-051, TC-CHA-052, TC-CHA-055, TC-CHA-056, TC-CHA-057, TC-CHA-058, TC-CHA-059, TC-CHA-060, TC-CHA-061, TC-CHA-062, TC-CHA-063
+- Applies to: TC-CHA-040, TC-CHA-041, TC-CHA-042, TC-CHA-043, TC-CHA-044, TC-CHA-045, TC-CHA-046, TC-CHA-047, TC-CHA-048, TC-CHA-050, TC-CHA-051, TC-CHA-052, TC-CHA-055, TC-CHA-056, TC-CHA-057, TC-CHA-058, TC-CHA-059, TC-CHA-060, TC-CHA-061, TC-CHA-062, TC-CHA-063, TC-CHA-069, TC-CHA-070, TC-CHA-071
 - Requirement: REQ-CHA-040
 - Group: Fakes (CHAT)
 - Kind: setup
@@ -353,3 +354,27 @@
 - Verified by: inspection of the check: it starts no model server and no container
 - Status: Draft
 - History: G-V3 Plan step 4 (2026-11-08), new; the check was renamed from TC-MIA-030 to TC-CHA-068 (a Scenarios section in the root test-spec switches on the scenario rule for every old root check)
+
+### TR-CHAT-010 – the contract checks of IF-201 run on the mock and on the real part
+- Applies to: TC-IF-201-01, TC-IF-201-02, TC-IF-201-03, TC-IF-201-04
+- Requirement: REQ-BE-001
+- Group: Fakes (CHAT)
+- Kind: setup
+- Text: The contract checks of IF-201 shall run with the same cases against the mock (stage 1) and against the real Chat agent (stage 2), and a case that passes on the mock and fails on the real part is a finding against the mock.
+- Rationale: the mock stands in for the Chat agent in the checks of other nodes; this is how its fidelity is shown (the cases TC-IF-201-05 to 12 are held to the same rule by the contract suite)
+- Credibility aspect: stand-in fidelity
+- Verified by: the two variants of the suite `tests/acceptance/contract/test_if_201_chat_turn.py`, both run in the full unit suite
+- Status: Draft
+- History: A-153 (2026-11-15), new, found by the Verify of G-V3.CHAT (F-14: the checks had no test requirement)
+
+### TR-CHAT-011 – exact expected values of the older checks of the chat
+- Applies to: TC-CHA-008, TC-CHA-014, TC-WFM-036
+- Requirement: REQ-CHA-014
+- Group: Exact values (CHAT)
+- Kind: unit
+- Text: The expected form of address, the order of the messages of a task, the status of an answer and the per-rule precision and recall of the suite behaviour shall be written out in the scenario and compared exactly, signed off as one group.
+- Rationale: these checks have exact answers; reviewing them once as a group is enough
+- Credibility aspect: reference accuracy
+- Verified by: skimmed in the review log
+- Status: Draft
+- History: A-153 (2026-11-15), new, found by the Verify of G-V3.CHAT (F-14)

@@ -2956,6 +2956,21 @@ package MIA_NodeRequirements {
         doc /* The Chat agent shall pass on the summary of SkillDigestStep to the chat uncut. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
+    requirement def <'REQ-CHA-064'> NoMarkupInDigestOutput_Cha064 {
+        subject s : ConversationCore;
+        doc /* When SkillDigestStep returns a text, the Chat agent shall remove every HTML tag from it, and the content of every script and style element, before the text is repaired or shown. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-065'> DigestStepOnTheLightProfile_Cha065 {
+        subject s : ConversationCore;
+        doc /* The Chat agent shall run every model call of SkillDigestStep on the model profile light. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-066'> NoRunLinkFromTheModel_Cha066 {
+        subject s : ConversationCore;
+        doc /* The Chat agent shall remove a link to a run from the text that SkillDigestStep words, in every message of a run. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
     requirement def <'REQ-WFM-001'> SkillsAsTasks_Wfm001 {
         subject s : TaskRuntime;
         doc /* The Workflow management shall perform each kind of work as a task defined by a skill file and a pipeline selectable by every user. */
@@ -4844,6 +4859,9 @@ package MIA_NodeRequirements {
     requirement r_req_cha_061 : ResultGoesToTheDigestStepAsText_Cha061;
     requirement r_req_cha_062 : SummaryFromTheDigestsOnly_Cha062;
     requirement r_req_cha_063 : SummaryPassedOnUncut_Cha063;
+    requirement r_req_cha_064 : NoMarkupInDigestOutput_Cha064;
+    requirement r_req_cha_065 : DigestStepOnTheLightProfile_Cha065;
+    requirement r_req_cha_066 : NoRunLinkFromTheModel_Cha066;
     requirement r_req_wfm_001 : SkillsAsTasks_Wfm001;
     requirement r_req_wfm_002 : VersionedWorkflowLibrary_Wfm002;
     requirement r_req_wfm_003 : NoCycles_Wfm003;
@@ -5352,6 +5370,9 @@ package MIA_NodeRequirements {
     satisfy r_req_cha_061 by mia.conversation;
     satisfy r_req_cha_062 by mia.conversation;
     satisfy r_req_cha_063 by mia.conversation;
+    satisfy r_req_cha_064 by mia.conversation;
+    satisfy r_req_cha_065 by mia.conversation;
+    satisfy r_req_cha_066 by mia.conversation;
     satisfy r_req_wfm_001 by mia.taskRuntime;
     satisfy r_req_wfm_002 by mia.taskRuntime;
     satisfy r_req_wfm_003 by mia.taskRuntime;
@@ -5859,6 +5880,9 @@ package MIA_NodeRequirements {
     allocate r_req_cha_061 to mia.conversation;
     allocate r_req_cha_062 to mia.conversation;
     allocate r_req_cha_063 to mia.conversation;
+    allocate r_req_cha_064 to mia.conversation;
+    allocate r_req_cha_065 to mia.conversation;
+    allocate r_req_cha_066 to mia.conversation;
     allocate r_req_wfm_001 to mia.taskRuntime;
     allocate r_req_wfm_002 to mia.taskRuntime;
     allocate r_req_wfm_003 to mia.taskRuntime;
@@ -6377,6 +6401,9 @@ package MIA_NodeRequirements {
     dependency from r_req_cha_061 to r_req_be_078;
     dependency from r_req_cha_062 to r_req_be_078;
     dependency from r_req_cha_063 to r_req_be_078;
+    dependency from r_req_cha_064 to r_req_be_078;
+    dependency from r_req_cha_065 to r_req_be_078;
+    dependency from r_req_cha_066 to r_req_be_078;
     dependency from r_req_wfm_001 to r_req_be_033;
     dependency from r_req_wfm_002 to r_req_be_035;
     dependency from r_req_wfm_003 to r_req_be_036;

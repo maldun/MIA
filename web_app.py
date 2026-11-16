@@ -53,6 +53,7 @@ from .items_api import create_items_blueprint
 from .graph_api import create_graph_blueprint
 from .trust_persona_api import create_trust_persona_blueprint
 from .persona import read_persona
+from .skill_digest import LiveDigest
 from .internal_auth import ensure_token, internal_headers
 from .storage import Storage
 from .skill_record import SkillCatalog, SkillRecords
@@ -698,7 +699,9 @@ chat_service = ChatService(socketio.emit, chat_log, mood, run_chat_exchange, run
                            behaviours=behaviours_from_file(os.path.join(FPATH, cfg.get(CONST.BEHAVIOURS_FILE_KEY, "library/behaviours.json"))),
                            reputable=cfg.get(CONST.REPUTABLE_TRUST_KEY, 0.6),
                            repair=lambda text: behaviour.apply_rules(text)["text"], remember=_remember,         # the stream is held back and repaired silently (REQ-CHA-014)
+                           digest=LiveDigest(pipeline_model.chat, lambda: read_persona(_persona_file)), declared_phases=lambda run: chat_service.run_phases(run),     # the chat holds status messages and one summary of a run, not its result (G-V3.CHAT T-06)
                            react=lambda expression: character_reaction(expression))         # shocked after a minus (REQ-CHV-006)
+comm.skill_history = chat_service.model_history          # the messages of skill runs go to the chat model with the next turn (REQ-CHA-046, 059)
 app.register_blueprint(create_chat_ops_blueprint(chat_service))
 app.register_blueprint(create_files_blueprint(_file_store))
 app.register_blueprint(create_items_blueprint(_votes_store, socketio.emit))

@@ -1,0 +1,42 @@
+diff --git a/specs/mia/plausibility.yaml b/specs/mia/plausibility.yaml
+index dbd15a0..ae81b2c 100644
+--- a/specs/mia/plausibility.yaml
++++ b/specs/mia/plausibility.yaml
+@@ -4960,6 +4960,24 @@ plausibility:
+       rated: '2026-11-15'
+       rated_by: maldun
+       rating: plausible
++    REQ-CHA-065:
++      basis:
++      - no number, measurement or model quality depends on it; the behaviour is fixed
++        by an exact acceptance criterion on a scripted run or a recording chat function,
++        no real model (proposal of the agent, 2026-11-15, A-152; the time budget per call was measured in a spike on MP-light the same day: slowest call 12.9 s of 20 s)
++      hardware: HW-target
++      rated: '2026-11-15'
++      rated_by: maldun
++      rating: plausible
++    REQ-CHA-066:
++      basis:
++      - no number, measurement or model quality depends on it; the behaviour is fixed
++        by an exact acceptance criterion on a scripted run or a recording chat function,
++        no real model (proposal of the agent, 2026-11-15, A-152)
++      hardware: HW-target
++      rated: '2026-11-15'
++      rated_by: maldun
++      rating: plausible
+     REQ-CHA-048:
+       basis:
+       - no number, measurement or model quality depends on it; the behaviour is fixed
+diff --git a/specs/mia/test-requirements.md b/specs/mia/test-requirements.md
+index 75bd5a8..d44d945 100644
+--- a/specs/mia/test-requirements.md
++++ b/specs/mia/test-requirements.md
+@@ -233,7 +233,7 @@
+ - History: G-V3.CHAT Plan step 3 (2026-11-08), new
+ 
+ ### TR-CHAT-006 – fake model server for the logic checks
+-- Applies to: TC-CHA-040, TC-CHA-041, TC-CHA-042, TC-CHA-043, TC-CHA-044, TC-CHA-045, TC-CHA-046, TC-CHA-047, TC-CHA-048, TC-CHA-050, TC-CHA-051, TC-CHA-052, TC-CHA-055, TC-CHA-056, TC-CHA-057, TC-CHA-058, TC-CHA-059, TC-CHA-060, TC-CHA-061, TC-CHA-062, TC-CHA-063, TC-CHA-069
++- Applies to: TC-CHA-040, TC-CHA-041, TC-CHA-042, TC-CHA-043, TC-CHA-044, TC-CHA-045, TC-CHA-046, TC-CHA-047, TC-CHA-048, TC-CHA-050, TC-CHA-051, TC-CHA-052, TC-CHA-055, TC-CHA-056, TC-CHA-057, TC-CHA-058, TC-CHA-059, TC-CHA-060, TC-CHA-061, TC-CHA-062, TC-CHA-063, TC-CHA-069, TC-CHA-070, TC-CHA-071
+ - Requirement: REQ-CHA-040
+ - Group: Fakes (CHAT)
+ - Kind: setup

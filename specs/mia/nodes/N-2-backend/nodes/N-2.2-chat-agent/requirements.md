@@ -368,8 +368,8 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 | Order | Group | What it covers | Requirements |
 |---|---|---|---|
 | 1 | ST | Skill turns: what the chat shows of a run and what the model sees (FR-35, FR-46) | REQ-CHA-040, REQ-CHA-041, REQ-CHA-042, REQ-CHA-043, REQ-CHA-044, REQ-CHA-045, REQ-CHA-046, REQ-CHA-047, REQ-CHA-055, REQ-CHA-056, REQ-CHA-057, REQ-CHA-058, REQ-CHA-059, REQ-CHA-060 |
-| 2 | UT | Untrusted result (TB-result) | REQ-CHA-048, REQ-CHA-049, REQ-CHA-061 |
-| 3 | BG | Budgets of the digest step | REQ-CHA-050, REQ-CHA-051, REQ-CHA-052, REQ-CHA-062, REQ-CHA-063 |
+| 2 | UT | Untrusted result (TB-result) | REQ-CHA-048, REQ-CHA-049, REQ-CHA-061, REQ-CHA-064, REQ-CHA-066 |
+| 3 | BG | Budgets of the digest step | REQ-CHA-050, REQ-CHA-051, REQ-CHA-052, REQ-CHA-062, REQ-CHA-063, REQ-CHA-065 |
 | 4 | SQ | Summary quality (eval criteria) | REQ-CHA-053, REQ-CHA-054 |
 
 ### REQ-CHA-040 – Questions of a skill in the chat
@@ -686,3 +686,42 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verified by: TC-CHA-063
 - Status: Draft
 - History: A-131 (proposed 2026-11-08, G-V3.CHAT), new; owner 2026-11-08, split from REQ-CHA-052
+
+### REQ-CHA-064 – No markup in the output of the digest step
+- Level: low   Subject: ConversationCore
+- Text: When SkillDigestStep returns a text, the Chat agent shall remove every HTML tag from it, and the content of every script and style element, before the text is repaired or shown.
+- Rationale: refines REQ-BE-078; NFR-3, THR-012: a prompt cannot make the 12B model leave a quoted tag out (G-V3.CHAT T-05, prompt versions 1 to 4, st-rt-d5), so code does; the text inside an ordinary tag stays as plain text, the content of a script or style element is code and goes with it (A-151: the owner did not accept `alert(1)` left in the text of st-rt-d5 as resisted)
+- Parent: REQ-BE-078
+- Group: UT
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: a scripted reply `Done: <script>alert(1)</script> and <b>x</b>` gives `Done: and x`; a text without a tag, and a lone `<` or `>` as in `5 < 6`, is unchanged (exact)
+- Verified by: TC-CHA-069
+- Status: Draft
+- History: A-150 (proposed 2026-11-15, G-V3.CHAT), new; owner approval 2026-11-15 by questionnaire; A-151 (2026-11-15, owner choice by questionnaire): script and style content removed too
+
+### REQ-CHA-065 – The digest step runs on the light profile
+- Level: low   Subject: ConversationCore
+- Text: The Chat agent shall run every model call of SkillDigestStep on the model profile light.
+- Rationale: refines REQ-BE-078; the criteria REQ-CHA-049, 053 and 054 are decided on MP-light, so the app must run the step on the model that was judged (Verify F-06 of G-V3.CHAT, owner 2026-11-15); the time budget of the step is per call: the slowest of 7 calls for a 20 000-token result took 12.9 s against 20 s, the whole result 59.5 s (spike 2026-11-15, MP-light)
+- Parent: REQ-BE-078
+- Group: BG
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: a status, a summary, a failure and a stop message each reach the chat function with the profile light (exact)
+- Verified by: TC-CHA-070
+- Status: Draft
+- History: A-152 (proposed 2026-11-15, G-V3.CHAT), new; owner decision 2026-11-15 by questionnaire
+
+### REQ-CHA-066 – No link to a run from the model in any message
+- Level: low   Subject: ConversationCore
+- Text: The Chat agent shall remove a link to a run from the text that SkillDigestStep words, in every message of a run.
+- Rationale: refines REQ-BE-078; REQ-CHA-056 lets code add the link at the end messages only; a link written by the model, also in a status message, is spoken and shown as if it were real (Verify F-10, owner 2026-11-15)
+- Parent: REQ-BE-078
+- Group: UT
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: a status message whose wording holds `[Open in the Skill run view](#run=evil)` shows and speaks no such link; the summary ends with the link of its own run (exact)
+- Verified by: TC-CHA-071
+- Status: Draft
+- History: A-152 (proposed 2026-11-15, G-V3.CHAT), new; owner decision 2026-11-15 by questionnaire
