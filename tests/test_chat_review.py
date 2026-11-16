@@ -55,7 +55,7 @@ class ReviewTask(unittest.TestCase):
             self.release.wait(5)
             return "the report"
         return self.service_module.ChatService(lambda event, payload: self.events.append((event, payload)), self.log, self.moods.MoodTracker(MOODS), exchange,
-                                               model_info=lambda: ("m", "light"), tasks=registry_of("MIA.", lookup=lambda q, d, e, s, files=None: "found", review=run_review if review else None), unavailable=() if review else ("review",), review_timeout=ask_timeout, user_limit=2, queue_size=3)
+                                               model_info=lambda: ("m", "light"), tasks=registry_of("MIA.", lookup=lambda q, d, e, s, run_report=None: "found", review=run_review if review else None), unavailable=() if review else ("review",), review_timeout=ask_timeout, user_limit=2, queue_size=3)
 
     def idle(self, service):
         return wait_for(lambda: not service.status()["busy"])
