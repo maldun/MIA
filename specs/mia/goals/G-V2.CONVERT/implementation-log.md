@@ -60,3 +60,7 @@ Line of work `goal/v2.convert`, supervised. Test runs here are feedback, not ver
 - Files: `skill_converter.py` (`compare_outputs`), unit test `tests/test_run_converted.py` (`CompareOutputs`, red first: a case on one side only is a difference, sorted by case).
 - Tests reported green (own run, 2026-11-16): TC-WFM-115 both tests (51 outputs of extract_claims_rules equal, old against converted, no model; a planted difference reported with its case). `test_skill_conversion`: 6 failures before, 4 after (research and verify_computable, `control.*` controllers).
 - Not done: TC-WFM-114 (extract_claims on the dev split of EV-extraction, 3 repeats, MP-light, against the baseline) needs a dev eval run of the converted skill and the baseline file `eval/baselines/extraction__llm__baseline.jsonl`, which the owner has not placed yet; the run path of the harness for a converted variant belongs to T-CV-09. No eval run made. The skill stays on the old runner until the criterion passes (REQ-WFM-057).
+
+## T-CV-09 (part): variant `converted` of the extraction target (D-255)
+- Files: `harness.py` (`_PinnedChat`, `_extraction` takes `variant["converted"]`), `tools/eval.py` (`--converted`); unit tests `tests/test_harness_converted.py` (2) and `tests/test_eval_cli_converted.py` (2), red first. `test_harness` 30 green (1 expected failure), `test_eval_cli` green.
+- Design: on the converted path the pin decides the model as in `_pinned`: `_PinnedChat` calls the counting model of the core with the pin's name, seed and temperature and no profile.

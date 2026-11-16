@@ -132,6 +132,7 @@ def main():
     parser.add_argument("--limit", type=int)
     parser.add_argument("--skill")
     parser.add_argument("--pipeline")
+    parser.add_argument("--converted", action="store_true", help="run the skill on the graph path (skill_converter.run_converted), only for the extraction target (REQ-WFM-114)")
     parser.add_argument("--model", help="refused by run: the model of a run is the one of --pin (D-166)")
     parser.add_argument("--pin", choices=sorted(PINS), help="model pin of eval-spec.md, required by run: its seed and temperature go to every model call and the pin is written to the run header")
     parser.add_argument("--sample", type=int, metavar="N", help="a seeded sample of N active cases; the two halves of a pair stay together")
@@ -206,6 +207,8 @@ def main():
     for key in ("skill", "pipeline", "model"):
         if getattr(args, key):
             variant[key] = getattr(args, key)
+    if args.converted:
+        variant["converted"] = True
     only = args.only.split(",") if args.only else None
     if args.sample:
         sampled = [c["id"] for c in harness.sample_cases(suite.select(args.tag or None, only, None, args.include_retired), args.sample, args.sample_seed)]
