@@ -41,10 +41,10 @@ class SkillConverter:
     old_loader(name) and converted_loader(name) give (skill, graph); runner.run(skill, graph, inputs, **kwargs) runs one. The converted loader is
     called only for a skill that is marked converted. A skill starts unconverted."""
 
-    def __init__(self, old_loader, converted_loader, runner):
+    def __init__(self, old_loader, converted_loader, runner, records_dir=None):
         self.old_loader, self.converted_loader, self.runner = old_loader, converted_loader, runner
-
-        self._converted = set()
+        # a skill is converted at start only when its record file says PASS (D-256); no folder, nothing converted
+        self._converted = set(load_checks(records_dir)) if records_dir else set()
 
     def state(self, name):
         """"unconverted" or "converted" """
@@ -142,6 +142,51 @@ SUITE_OF = {"research": ("EV-research", "REQ-WFM-110"), "plan_question": ("EV-pl
             "extract_claims_rules": ("EV-extraction", "REQ-WFM-115")}
 # the owner's one reason for the nine skills without an equivalence requirement (2026-11-07)
 UI_REASON = "old runner: part of the user interface (owner 2026-11-07), revisited in another goal"
+
+
+def _record_file(folder, skill):
+    # the skill name becomes a file name: only plain names (D-256)
+    if not skill or not all(c.isalnum() or c in "_-" for c in skill):
+        raise ConversionError("%r is not a skill name" % (skill,))
+    return os.path.join(folder, skill + ".json")
+
+
+def save_check(folder, skill, check):
+    """D-256: writes the acceptance record of a skill, one JSON file per skill; only a PASS is written (REQ-WFM-057, 059)"""
+    if check.get("verdict") != "PASS":
+        raise ConversionError("%s is not recorded as converted: its check is %s, not PASS" % (skill, check.get("verdict")))
+    path = _record_file(folder, skill)
+    os.makedirs(folder, exist_ok=True)
+    with open(path, "w", encoding="utf-8") as fp:
+        json.dump(check, fp, indent=1, ensure_ascii=False)
+
+
+def load_checks(folder):
+    """{skill: check} of the records in the folder; a missing folder, a damaged file, one without suite, run, pins and PASS counts as no record, so the skill stays on the old runner"""
+    checks = {}
+    for path in sorted(glob.glob(os.path.join(folder, "*.json"))):
+        try:
+            with open(path, encoding="utf-8") as fp:
+                check = json.load(fp)
+        except (OSError, ValueError):
+            continue
+        if isinstance(check, dict) and check.get("verdict") == "PASS" and all(check.get(k) for k in ("suite", "run", "pins")):
+            checks[os.path.splitext(os.path.basename(path))[0]] = check
+    return checks
+
+
+def criterion_of(requirement, requirements_path):
+    """the `Eval criterion:` line of a requirement such as REQ-WFM-111 in the requirements file of the node"""
+    with open(requirements_path, encoding="utf-8") as fp:
+        text = fp.read()
+    start = text.find("### %s " % requirement)
+    if start < 0:
+        raise ConversionError("%s is not in %s" % (requirement, requirements_path))
+    section = text[start:].split("\n### ", 1)[0]
+    for line in section.splitlines():
+        if line.startswith("- Eval criterion:"):
+            return line.split(":", 1)[1].strip()
+    raise ConversionError("%s has no Eval criterion line" % requirement)
 
 
 def conversion_records(skills_dir, checks=None):
