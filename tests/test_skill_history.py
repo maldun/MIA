@@ -31,9 +31,9 @@ def service(test):
 class ModelHistory(unittest.TestCase):
     @mark.req("REQ-CHA-046", "REQ-CHA-059")
     def test_only_the_messages_of_skill_runs_that_the_model_needs(self):
-        """an ordinary chat, a user message that is no answer, system notes and the status messages but the last are not in it.
-        Example: Q1, answer, status a, status b, done -> Q1, answer, status b, done."""
-        # Given: an ordinary exchange, then a run with a question, its answer, two status messages and a summary, then a user message that is no answer
+        """an ordinary chat, a user message that is no answer, system notes and the phases (A-156: no chat message) are not in it.
+        Example: Q1, answer, phase a, phase b, done -> Q1, answer, done."""
+        # Given: an ordinary exchange, then a run with a question, its answer, two phases and an end message, then a user message that is no answer
         chat = service(self)
         chat.log.append("user", "hello", sender="anna")
         chat.log.append("assistant", "Hi.")
@@ -44,12 +44,12 @@ class ModelHistory(unittest.TestCase):
         chat.skill_turn("anna", "r1", "phase", "b")
         chat.skill_turn("anna", "r1", "failed", "no network")
         chat.log.append("user", "thanks", sender="anna")
-        # When / Then: the model history holds the question, the answer, the last status and the end message, in order
+        # When / Then: the model history holds the question, the answer and the end message, in order
         texts = [m["text"] for m in chat.model_history()]
         self.assertEqual(texts[:2], ["Which topic?", "canary"])
-        self.assertEqual(len(texts), 4)
-        self.assertIn("no network", texts[3])
-        self.assertEqual([m["role"] for m in chat.model_history()], ["assistant", "user", "assistant", "assistant"])
+        self.assertEqual(len(texts), 3)
+        self.assertIn("no network", texts[2])
+        self.assertEqual([m["role"] for m in chat.model_history()], ["assistant", "user", "assistant"])
 
     @mark.req("REQ-CHA-046")
     def test_only_the_last_three_runs_are_in_it(self):

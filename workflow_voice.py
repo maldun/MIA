@@ -8,8 +8,11 @@ A value that is not a boolean is ignored. The chat answers themselves are not go
 """
 
 
-def speaker_for(cfg, task, speak):
-    """`speak` if the voice is on for `task`, else None (a task with no voice says nothing and still gives its text)"""
+def speaker_for(cfg, task, speak, end_messages=False):
+    """`speak` if the voice is on for `task`, else None (a task with no voice says nothing and still gives its text). A task whose run has end messages of the Chat agent never speaks
+    itself, whatever the settings say: the end message is the one spoken text of the run (REQ-CHA-067)"""
+    if end_messages:
+        return None
     cfg = cfg or {}
     per_task = (cfg.get("workflow_speak_tasks") or {}).get(task)
     general = cfg.get("workflow_speak", True)

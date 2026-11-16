@@ -675,7 +675,7 @@ _services = types.SimpleNamespace(
     core=core, cfg=cfg, scholar=_scholar, web_get=_web_client.get, library=_workflow_library,
     web_search=lambda: _web_tools["web_search"][0],
     pipeline_event=lambda event: chat_service.pipeline_event(event), note_sources=lambda sources: chat_service.note_sources(sources),   # the chat service is built below
-    speaker=lambda task: speaker_for(cfg, task, speak_answer),                      # one voice rule for all tasks (workflow_voice.py)
+    speaker=lambda task: speaker_for(cfg, task, speak_answer, end_messages=chat_service.has_end_messages()),                      # one voice rule for all tasks (workflow_voice.py)
     trust_for_url=lambda: source_trust.build_trust(cfg).for_url)
 _tasks = TaskRegistry()
 _skill_catalog = SkillCatalog(SkillRecords(_votes_store))          # REQ-WFM-041: a skill with a record takes its command and workflow graph from it

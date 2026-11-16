@@ -708,17 +708,21 @@ class ChatService:
         return record
 
     def skill_turn(self, account, run, kind, payload):
-        """IF-201 v3 (A-142): one turn of a skill run as a message of MIA. `question` is the text of the skill as it is; `phase` (only a phase that the skill declares, REQ-CHA-042, 055), `done`,
-        `failed` and `stopped` are worded by the digest step in persona and repaired like every answer (REQ-CHA-041, 043, 044, 047, 057, 060); the end messages end with the link to the run,
-        added by code (REQ-CHA-056). Every message is a record with `skill_run` and `kind`, an event chat_message and goes to speech once (REQ-CHA-045). Returns {"id"}, {"id": None} for a phase without message."""
+        """IF-201 v3 (A-142, A-156): one turn of a skill run as a message of MIA. `question` is the text of the skill as it is; `done`, `failed` and `stopped` are worded by the digest step in
+        persona and repaired like every answer (REQ-CHA-043, 044, 047, 057, 060); the end messages end with the link to the run, added by code (REQ-CHA-056). Every message is a record with
+        `skill_run` and `kind`, an event chat_message and goes to speech once (REQ-CHA-045). A `phase` is no chat message, it stays in the run status (REQ-CHA-041): returns {"id": None}."""
         if kind not in SKILL_TURN_KINDS:
             raise ChatError("invalid_kind")
-        if kind == "phase" and payload not in self._phases_of(run):
+        if kind == "phase":
             return {"id": None}
         text, spoken = self._turn_text(run, kind, payload)
         record = self.post_assistant(text, skill_run=run, kind=kind)
         self._voice(record["id"], spoken)
         return {"id": record["id"]}
+
+    def has_end_messages(self):
+        """True where a skill run ends with a message of the Chat agent, so the skill must not speak its result itself (REQ-CHA-067)"""
+        return self._recorder is not None and self._digest is not None
 
     def _phases_of(self, run):
         """the phases a run may tell: those of `declared_phases` where the service has it, else those of the entry of the running skill (REQ-WFM-039)"""
@@ -737,7 +741,7 @@ class ChatService:
             text = clean_model_text(self._repaired(self._worded(kind, payload)))      # a link in the model text is not the link, in no message of a run (REQ-CHA-066): cut off
         except Exception as exc:
             logger.error("The cleaning of a skill message failed: %s", exc)
-            text = {"phase": "Working.", "done": "The run is done.", "failed": "The run failed.", "stopped": "The run was stopped."}[kind]
+            text = {"done": "The run is done.", "failed": "The run failed.", "stopped": "The run was stopped."}[kind]
         spoken = text
         if kind in ("done", "failed", "stopped"):
             text = FENCE_RUN.sub(lambda m: "".join("\\" + c for c in m.group(0)), text).rstrip()      # no code fence can open and swallow the link (REQ-CHA-056)
@@ -749,10 +753,10 @@ class ChatService:
         """the wording of the digest step; a step that is missing or fails leaves a plain sentence that invents nothing, so that the user still hears how the run ended"""
         try:
             if self._digest is not None:
-                return {"phase": self._digest.status, "done": self._digest.summary, "failed": self._digest.failure, "stopped": self._digest.stopped}[kind](payload)
+                return {"done": self._digest.summary, "failed": self._digest.failure, "stopped": self._digest.stopped}[kind](payload)
         except Exception as exc:
             logger.error("The digest step failed for a %s message: %s", kind, exc)
-        return {"phase": "Working on: %s." % payload, "done": "The run is done.", "failed": "The run failed: %s" % payload, "stopped": "The run was stopped (%s)." % payload}[kind]
+        return {"done": "The run is done.", "failed": "The run failed: %s" % payload, "stopped": "The run was stopped (%s)." % payload}[kind]
 
     def _repaired(self, text):
         try:
@@ -763,11 +767,10 @@ class ChatService:
 
     def model_history(self):
         """the messages of skill runs that the next chat turn sends to the chat model, [{"role", "text"}] in the order of the chat (REQ-CHA-046, 059): per run its questions, the answers that
-        follow them, the last status message and the end message; never another status message and never the full result (it is not in the chat). The ordinary exchange is the memory of
+        follow them and the end message; never a status message and never the full result (it is not in the chat). The ordinary exchange is the memory of
         the Communicator and not part of this list. Unspecified: only the last three runs, so that the history stays small."""
         records = self.log.history(limit=MAX_PAGE)[0]
         runs = list(dict.fromkeys(r["skill_run"] for r in records if r.get("skill_run")))[-SKILL_RUNS_IN_HISTORY:]
-        last_status = {run: max((r["id"] for r in records if r.get("skill_run") == run and r.get("kind") == "phase"), default=None) for run in runs}
         history, after_question = [], False
         for record in records:
             run = record.get("skill_run")
@@ -778,7 +781,7 @@ class ChatService:
                 continue
             kind = record.get("kind")
             after_question = kind == "question" and run in runs
-            if run in runs and (kind != "phase" or record["id"] == last_status[run]):
+            if run in runs:
                 history.append({"role": "assistant", "text": record["text"]})
         return history
 
@@ -886,8 +889,7 @@ class ChatService:
             self._monitor = TaskMonitor(self._emit_status, message_id, task, mode="slice" if (options or {}).get("slice") else "run")
             if self._recorder is not None:
                 self._observer = SkillRunObserver(self._recorder, message_id, task, entry.version, self._author or "page",
-                                                 phases=self._phases_of(message_id),
-                                                 on_phase=(lambda text, run=message_id: self.skill_turn(self._author or "page", run, "phase", text)) if turns else None)
+                                                 phases=self._phases_of(message_id))
                 self._observer.start()
                 self._monitor.observer = self._observer
             self._monitor.update(phase="starting")

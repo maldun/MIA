@@ -121,8 +121,8 @@ class TaskThroughTheChat(unittest.TestCase):
 
     @mark.req("REQ-CHA-041", "REQ-WFM-136")
     def test_a_recorder_that_raises_on_a_phase_does_not_take_the_messages_with_it(self):
-        """F-03: a storage error in the recorder never stops the status messages or the summary.
-        Example: recorder.phase raises: the chat still holds "Collecting." and the summary."""
+        """F-03: a storage error in the recorder never stops the end message (A-156: a phase is no chat message).
+        Example: recorder.phase raises: the chat still holds the summary."""
         # Given: a recorder whose phase raises and a skill with one declared phase
         def runs(argument, on_delta, on_emotion, should_stop, monitor):
             monitor.update(phase="collect")
@@ -130,14 +130,13 @@ class TaskThroughTheChat(unittest.TestCase):
         chat, _, _ = chat_with(self, runs, recorder_phase_raises=True)
         # When: the user starts the skill
         chat.send("/go x", sender="anna", author="anna")
-        # Then: the status message and the summary are in the chat
-        self.assertEqual([r["text"] for r in mia(chat)][0], "Collecting.")
-        self.assertEqual([r.get("kind") for r in mia(chat)], ["phase", "done"])
+        # Then: the summary is in the chat
+        self.assertEqual([r.get("kind") for r in mia(chat)], ["done"])
 
     @mark.req("REQ-CHA-041", "REQ-WFM-039")
     def test_without_declared_phases_the_phases_of_the_entry_count(self):
         """F-03: a service that has no `declared_phases` uses the phases of the entry (run_phases).
-        Example: entry phases ("collect",): one status message "Collecting." and the summary."""
+        Example: entry phases ("collect",): no chat message for the phase, the summary only."""
         # Given: a service without declared_phases and an entry that declares collect
         def runs(argument, on_delta, on_emotion, should_stop, monitor):
             monitor.update(phase="collect")
@@ -145,8 +144,8 @@ class TaskThroughTheChat(unittest.TestCase):
         chat, _, _ = chat_with(self, runs, phases=("collect",), declared=None)
         # When: the user starts the skill
         chat.send("/go x", sender="anna", author="anna")
-        # Then: the phase is told and the summary follows
-        self.assertEqual([r.get("kind") for r in mia(chat)], ["phase", "done"])
+        # Then: the phase is no chat message, the summary is
+        self.assertEqual([r.get("kind") for r in mia(chat)], ["done"])
 
     @mark.req("REQ-CHA-043", "REQ-CHA-058")
     def test_the_message_of_a_run_with_a_digest_step_comes_once_at_the_end(self):
@@ -252,21 +251,20 @@ class StepModelAndLinks(unittest.TestCase):
         self.assertEqual(seen, ["light"] * 4)
 
     @mark.req("REQ-CHA-066")
-    def test_a_link_to_a_run_in_a_status_message_of_the_model_is_cut(self):
-        """TC-CHA-071 (A-152, F-10): a link of the form of the run link is removed from every message the step words, a status message too.
+    def test_a_link_to_a_run_in_an_end_message_of_the_model_is_cut(self):
+        """TC-CHA-071 (A-152, F-10; A-156: no status message any more): a link of the form of the run link is removed from the wording of the step; the end message ends with the real one.
         Example: "Fine [Open in the Skill run view](#run=evil) bye" gives "Fine  bye" (the link only at the end messages, added by code)."""
-        # Given: a skill with one declared phase whose status wording holds a link
+        # Given: a skill whose summary wording holds a link
         def runs(argument, on_delta, on_emotion, should_stop, monitor):
-            monitor.update(phase="collect")
             return "Done"
-        chat, spoken, _ = chat_with(self, runs, replies={"collect": "Fine [Open in the Skill run view](#run=evil) bye", "Done": "All done."})
+        chat, spoken, _ = chat_with(self, runs, replies={"Done": "Fine [Open in the Skill run view](#run=evil) bye"})
         # When: the user starts it
         chat.send("/go x", sender="anna", author="anna")
-        # Then: the status message and its speech hold no link, the summary ends with the real one
+        # Then: the message and its speech hold no foreign link, the summary ends with the real one
         records = mia(chat)
         self.assertNotIn("#run=evil", records[0]["text"])
         self.assertFalse([s for s in spoken if "Skill run view" in s])
-        self.assertTrue(records[1]["text"].endswith("(#run=%s)" % records[1]["id"]))
+        self.assertTrue(records[0]["text"].endswith("(#run=%s)" % records[0]["id"]))
 
 
 class SecondVerifyRun(unittest.TestCase):
@@ -280,18 +278,16 @@ class SecondVerifyRun(unittest.TestCase):
         """F-15: the cut repeats until nothing changes and covers nested brackets, capitals and a space; no `#run=` is left in a message or its speech except the real link.
         Example: `Fine [a](#ru[b](#run=1)n=evil) bye`, `[a [b]](#run=evil)`, `[a](#RUN=evil)`, `[a]( #run=evil)`."""
         for hostile in ("Fine [a](#ru[b](#run=1)n=evil) bye", "Fine [a [b]](#run=evil) bye", "Fine [a](#RUN=evil) bye", "Fine [a]( #run=evil) bye", "Fine [a](<#run=evil>) bye"):
-            # Given: a skill with one phase whose status wording holds the hostile link and whose summary holds it too
+            # Given: a skill whose summary holds the hostile link
             def runs(argument, on_delta, on_emotion, should_stop, monitor):
-                monitor.update(phase="collect")
                 return "Done"
-            chat, spoken, _ = chat_with(self, runs, replies={"collect": hostile, "Done": hostile})
+            chat, spoken, _ = chat_with(self, runs, replies={"Done": hostile})
             # When: the run is started
             chat.send("/go x", sender="anna", author="anna")
-            # Then: the status message and all speech hold no run link; the summary holds only the real one, once
+            # Then: all speech holds no run link; the summary holds only the real one, once
             records = mia(chat)
-            self.assertEqual(self.run_ids(records[0]["text"]), [], hostile)
             self.assertEqual(self.run_ids(" ".join(spoken)), [], hostile)
-            self.assertEqual(self.run_ids(records[1]["text"]), ["#run=%s" % records[1]["id"]], hostile)
+            self.assertEqual(self.run_ids(records[0]["text"]), ["#run=%s" % records[0]["id"]], hostile)
 
     @mark.req("REQ-CHA-066")
     def test_a_link_in_a_failure_or_stop_message_is_cut_and_the_real_one_follows(self):
