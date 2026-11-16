@@ -30,6 +30,11 @@ if [ -n "$(git status --porcelain --untracked-files=no)" ]; then echo "STOP: tra
 
 if [ "$mode" = decide ]; then
     [ -f "$run_file" ] || { echo "STOP: no such run file: $run_file"; exit 1; }
+    echo "== rescore $run_file with the labels of eval/labels/skill_turns.holdout.jsonl"
+    echo "   (a run is scored while it runs, before its outputs are labelled: every record is stored as open; the same stored outputs are scored again, no model, no new run)"
+    rescored=$($PY -I tools/rescore_digest_run.py "$run_file" skill_turns.holdout | tee /dev/stderr | sed -n 's/^written: //p')
+    [ -f "$rescored" ] || { echo "STOP: the rescoring wrote no file"; exit 1; }
+    run_file="$rescored"
     echo "== decide $run_file (labels: eval/labels/, applied with tools/apply_digest_labels.py)"
     for id in REQ-CHA-049 REQ-CHA-053 REQ-CHA-054; do
         line=$(grep -h "^- Eval criterion:" "$REQS" | grep -F "req:$id" | head -1 | sed 's/^- Eval criterion: //')
