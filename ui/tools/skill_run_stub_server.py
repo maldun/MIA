@@ -1,5 +1,5 @@
 """
-Stub server for the browser checks of the Skill run view (G-V3.PANEL, TC-CLV-030 to 047; interface note specs/mia/goals/G-V3.PANEL/skill-run-view-interface-note.md):
+Stub server for the browser checks of the Skill run view (G-V3.PANEL, TC-CLV-030 to 047, and G-V3.REPORT, TC-CLV-048 to 052; interface note specs/mia/goals/G-V3.PANEL/skill-run-view-interface-note.md):
 the page on the IF-101 mock of tests/helpers/mocks (as chat_mock_server.py) plus the routes of IF-101 v16 and one control route, so that a check puts the page into a
 state without a skill that knows the view (TR-PANEL-002): the scripted skill is a list of steps, it sends only the events of IF-101 and the v16 fields.
   GET  /api/skill-runs/shown      the run record that the script named as shown, 204 when none
@@ -9,6 +9,8 @@ state without a skill that knows the view (TR-PANEL-002): the scripted skill is 
        {"shown": <run record or null>}         what GET /api/skill-runs/shown answers from now on
        {"run": <run record>}                   what GET /api/skill-runs/<record id> answers from now on
        {"history_deleted": true}               no run is shown, no run is known, skill_run_changed with id null goes out
+       {"file": {"name", "data"}}              a file in the files volume of the mock (G-V3.REPORT: the run report; GET /api/files/<name> returns it)
+       {"file_deleted": "<name>"}               the file is gone from the volume
        {"sleep": seconds}                      at most 3 s
 Run in the container of the MIA image like chat_mock_server.py: python MIA/ui/tools/skill_run_stub_server.py
 """
@@ -60,6 +62,12 @@ def script():
         elif step.get("history_deleted"):
             state["shown"], state["runs"] = None, {}
             mock.w.socketio.emit("skill_run_changed", {"id": None})
+        elif "file" in step:
+            with mock.lock:
+                mock.api._files[step["file"]["name"]] = {"data": step["file"]["data"].encode("utf-8"), "created": "t0", "task": "lookup", "message_id": None}
+        elif "file_deleted" in step:
+            with mock.lock:
+                mock.api._files.pop(step["file_deleted"], None)
         elif "sleep" in step:
             time.sleep(min(float(step["sleep"]), 3))
     return jsonify({"ok": True})

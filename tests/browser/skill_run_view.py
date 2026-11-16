@@ -2,7 +2,7 @@
 (ui/tools/skill_run_stub_server.py): the browser checks of the Skill run view TC-CLV-030, 032, 035, 036, 037, 040, 041, 042, 043, 045, 046, 047 (G-V3.PANEL).
 Prints one JSON object {scenario: result}; a scenario that raises returns {"error": "<text>"}.
     podman run --rm -i --network container:<stub> localhost/mia-browser python - http://127.0.0.1:8686 SCENARIO... < tests/browser/skill_run_view.py
-Scenarios: header, meters, reason, full, link, layout, size, phone, hostile, shares, persist, scroll. The page is read only through the hooks of the interface note
+Scenarios: header, meters, reason, full, link, layout, size, phone, hostile, shares, persist, scroll, report, report_wait, report_gone, report_hostile. The page is read only through the hooks of the interface note
 (#skill-run-view, #srv-header, #srv-state, .srv-phase, .srv-meter, .srv-count, #srv-pause, #srv-resume, #srv-stop, #srv-reason, #srv-elements, details#srv-full, ...).
 """
 import json
@@ -416,7 +416,114 @@ def scroll():
         driver.quit()
 
 
-SCENARIOS = {f.__name__: f for f in (header, meters, reason, full, link, layout, size, phone, hostile, shares, persist, scroll)}
+# --- the Report part of the Full run (G-V3.REPORT, A-154): TC-CLV-048, 050, 051, 052; hooks: specs/mia/goals/G-V3.REPORT/report-part-interface-note.md ---
+REPORT_NAME = "lookup-2026-11-08-canary-releases.md"
+REPORT_MD = "# Done\n\n## Sources\n\n- <https://gazette.example/x?a=1>: \u201copened to traffic\u201d\n- A book, p. 12\n"
+
+
+def lookup_record(run="r1", state="done", **extra):
+    fields = {"files": [REPORT_NAME], "report": REPORT_NAME}
+    fields.update(extra)
+    out = record(run, state=state, **fields)
+    out["skill"] = "lookup"
+    return out
+
+
+def open_report(driver):
+    """opens the Full run part and then the Report part (each only if it is closed: the Report part may open by itself when the run has ended)"""
+    driver.execute_script("const d = document.getElementById('srv-full'); if (d && !d.open) d.querySelector('summary').click();")
+    until(driver, "document.getElementById('srv-report')")
+    driver.execute_script("const d = document.getElementById('srv-report'); if (d && !d.open) d.querySelector('summary').click();")      # a part that is not there is the result of the check, not an error of the driver
+    time.sleep(0.5)
+
+
+def report_links(driver):
+    return driver.execute_script("""return [...document.querySelectorAll('#srv-report-body a')].map((a) => (
+        { href: a.getAttribute('href'), target: a.getAttribute('target'), rel: a.getAttribute('rel'), text: a.textContent.trim() }));""")
+
+
+def note_kind(driver):
+    return driver.execute_script("const e = document.getElementById('srv-report-note'); return e && !e.hidden ? e.dataset.kind : null;")
+
+
+@scenario
+def report():
+    """TC-CLV-048: after a /lookup that ends with a report file, the Report part is listed with the state in its summary line, opens to the rendered report (the source with an address is a link, the one
+    without stays text) and its download link is /api/files/<name> and returns the file byte for byte"""
+    driver = browser()
+    try:
+        script({"history_deleted": True}, {"file": {"name": REPORT_NAME, "data": REPORT_MD}}, *shown(lookup_record("r1", result="It opened on 3 May 2021.")))
+        login(driver)
+        until(driver, "document.getElementById('skill-run-view')")
+        open_report(driver)
+        href = driver.execute_script("const a = document.getElementById('srv-report-download'); return a ? a.getAttribute('href') : null;")
+        fetched = driver.execute_async_script("const done = arguments[arguments.length - 1]; fetch(arguments[0]).then((r) => r.text()).then(done, () => done(null));", href) if href else None
+        return {"listed": driver.execute_script("return Boolean(document.getElementById('srv-report'))"),
+                "state": driver.execute_script("const e = document.getElementById('srv-report-state'); return e ? e.dataset.state : null;"),
+                "summary": text(driver, "#srv-report > summary"), "links": report_links(driver), "body": text(driver, "#srv-report-body"), "href": href, "fetched": fetched}
+    finally:
+        driver.quit()
+
+
+@scenario
+def report_wait():
+    """TC-CLV-050: while the run goes the Report part says that the report comes when the run ends and has no link; when the run ends it shows the report without a reload of the page"""
+    driver = browser()
+    try:
+        script({"history_deleted": True}, *shown(lookup_record("r1", state="running", ended=None, report=None, files=[])))
+        login(driver)
+        until(driver, "document.getElementById('skill-run-view')")
+        driver.execute_script("window.__same_page = true")
+        open_report(driver)
+        out = {"before": {"note": note_kind(driver), "downloads": driver.execute_script("return document.querySelectorAll('#srv-report-download').length"),
+                          "links": len(report_links(driver))}}
+        script({"file": {"name": REPORT_NAME, "data": REPORT_MD}}, *shown(lookup_record("r1", result="It opened on 3 May 2021.")))
+        until(driver, "document.querySelectorAll('#srv-report-body a').length > 0")
+        out["after"] = {"note": note_kind(driver), "downloads": driver.execute_script("return document.querySelectorAll('#srv-report-download').length"), "links": len(report_links(driver)),
+                        "same_page": driver.execute_script("return window.__same_page === true")}
+        return out
+    finally:
+        driver.quit()
+
+
+@scenario
+def report_gone():
+    """TC-CLV-051: a finished run whose report file is not in the files volume (any more) shows the removed sentence and no link; the rest of the Full run is unchanged"""
+    driver = browser()
+    try:
+        script({"history_deleted": True}, {"file_deleted": REPORT_NAME}, *shown(lookup_record("r1", result="It opened on 3 May 2021.")))
+        login(driver)
+        until(driver, "document.getElementById('skill-run-view')")
+        open_report(driver)
+        return {"note": note_kind(driver), "downloads": driver.execute_script("return document.querySelectorAll('#srv-report-download').length"),
+                "links": len(report_links(driver)), "body": text(driver, "#srv-report-body"), "result": text(driver, "#srv-result"),
+                "counts": text(driver, "#srv-counts"), "answers": driver.execute_script("return document.querySelectorAll('#srv-answers li').length")}
+    finally:
+        driver.quit()
+
+
+@scenario
+def report_hostile():
+    """TC-CLV-052 (browser half): a report with the five fixed strings and an image with onerror leaves no script, img, link, iframe, style or form in the part, no alert, no request to another host, and
+    only http and https addresses are links"""
+    driver = browser()
+    try:
+        bad = "\n".join(HOSTILE + ['<img src="https://evil.example/x.png" onerror="alert(1)">', "[x](javascript:alert(1))", "https://ok.example/a"])
+        script({"history_deleted": True}, {"file": {"name": REPORT_NAME, "data": bad}}, *shown(lookup_record("r1")))
+        login(driver)
+        until(driver, "document.getElementById('skill-run-view')")
+        driver.execute_script("window.__alerted = false; window.alert = () => { window.__alerted = true; };")
+        open_report(driver)
+        until(driver, "document.getElementById('srv-report-body') && document.getElementById('srv-report-body').textContent.includes('ignore all rules')")
+        return {"active": driver.execute_script("return document.querySelectorAll('#srv-report script, #srv-report img, #srv-report link, #srv-report iframe, #srv-report style, #srv-report form').length"),
+                "alerted": driver.execute_script("return window.__alerted"), "links": report_links(driver),
+                "outside_requests": driver.execute_script("return performance.getEntriesByType('resource').map((e) => e.name).filter((n) => !n.startsWith(location.origin))"),
+                "body": text(driver, "#srv-report-body")}
+    finally:
+        driver.quit()
+
+
+SCENARIOS = {f.__name__: f for f in (header, meters, reason, full, link, layout, size, phone, hostile, shares, persist, scroll, report, report_wait, report_gone, report_hostile)}
 
 if __name__ == "__main__":
     names = sys.argv[2:] or list(SCENARIOS)

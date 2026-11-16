@@ -15,3 +15,10 @@
 - Result (feedback, not verification): `unittest discover -s tests` 2410 tests, the same 12 failures as master and nothing else; acceptance scripts: only TC-IF-101-30 and -35 (real) red, waiting for A-155; the three files named in F-3 as on master.
 - Decisions: the report is written only where a recorder and a files volume exist (a run without them has no record to name it); a volume that cannot take it is logged and the run is not lost (`_keep_report`).
 - Open for Phase 4: the first-line wording (`# Done`, `# Stopped: <reason>`, `# Failed: <reason>`) is not in a requirement; the tests accept the words only.
+
+## Plan step 4b: the browser checks (written during Implement, before T-04)
+- Written: scenarios `report`, `report_wait`, `report_gone`, `report_hostile` in `tests/browser/skill_run_view.py`; the stub steps `file` and `file_deleted` in `ui/tools/skill_run_stub_server.py`; the hooks in `report-part-interface-note.md`; the four test methods (TC-CLV-048, 050, 051, 052 browser half) in `plan-step4b/protected.patch` for the owner to install (the protected file was not edited; built in a sandbox copy).
+- Result in the sandbox, run alone: 16 tests, the 12 old ones pass, the 4 new ones fail on assertions (no `#srv-report` part, no note, no body): red for the right reason.
+- Correction: plan decision 6 rested on my reading of a truncated list of images; `localhost/mia-browser` existed (2026-10-31).
+- Finding F-4: while a full unit run was going I ran the browser checks at the same time; that run showed two extra failures (`test_task_files_browser`, one shares check in the dark theme). Run alone, the shares check passes. `test_task_files_browser` fails alone on master too (the Files tab of the old status card, superseded by the Skill run view): not ours, as F-3. Rule from this: browser and full runs never run together.
+- Unit suite after A-155 (T-01 complete): the same 12 failures as master plus the 2 of `test_task_files_browser`, both also on master; nothing else.

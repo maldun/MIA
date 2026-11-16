@@ -15,7 +15,7 @@
 3. **The record names it:** `report` in the run record (`skill_runs.py`, IF-101 v18, IF-302 v12), empty until the run ends; the file is also in `files`.
 4. **Text rules (REQ-WFM-141):** a web address is written as `<address>` only if it is http or https without spaces; all other text of the runtime body is escaped (every Markdown and HTML special character with a backslash). A skill's own text is the skill's to escape (`research_chat.format_report` does it for `/lookup`).
 5. **Front end (REQ-CLV-049, 052):** the pure rule `reportHref` in `markdown.js` and `renderReport` (marked and DOMPurify with its own URI rule, no image, no form, no frame); the Report part is a `<details>` in the Full run that fetches `/api/files/<name>`.
-6. **Browser checks (decided, D-341):** TC-CLV-048, 050, 051 and the browser half of TC-CLV-052 are written as a second payload once the owner has built the browser image `localhost/mia-browser` (`tests/browser/Containerfile`); the stub server `ui/tools/skill_run_stub_server.py` gets a scripted run with a report with that payload. T-04 starts after it is installed.
+6. **Browser checks (D-341, corrected):** TC-CLV-048, 050, 051 and the browser half of TC-CLV-052 are written (`plan-step4b/protected.patch`, with the scenarios in `tests/browser/skill_run_view.py`, the stub steps `file` and `file_deleted` in `ui/tools/skill_run_stub_server.py` and the hooks in `report-part-interface-note.md`). The browser image `localhost/mia-browser` was on the host all along (built 2026-10-31); the plan had said it was missing after a truncated image list, and the owner was asked to build it without need. T-04 starts after the patch is installed.
 
 ## Task list
 | Task | Implements | Green when | Depends on |
