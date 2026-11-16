@@ -28,6 +28,9 @@ The owner saw the behaviour in the app and judged it much better.
 - Re-run the full suite once the other session's fix is merged and `accounts_enabled` is off; expect `test_task_files_browser`, `test_checkout_untouched`, `test_make_voice_lines` red for the reasons above.
 - The Skill run view reads the phases from the recorder; the change to `skill_turn` should not touch it, but only the unit tests ran, not the browser tests of the view (`TC-CLV-*`).
 
+## Number collision
+`69d8a76a` ("A-156 TC-WFM-137 report case") and `tests/acceptance/test_skill_run_report.py` use A-156 for the G-V3.REPORT amendment. That session renumbered it to **A-157** on `origin/goal/v3.report` (`52ff24e1`, with a docstring-rename patch for the protected test); the renumbering is not on `master` yet. In this goal A-156 is always the FB-09 amendment (a skill run speaks once). The same branch holds `371ec72f`, the fix of the 12 order-dependent converted-test failures (F-3, option 1).
+
 ## Traps
 - Never `git add -A`; name the paths. The untracked `specs/mia/goals/G-V2.CONVERT/handover-2026-11-16-convert-complete.md`, `templates/UI/` and `eval/baselines/verdicts_*` are not this session's.
 - The stage container `mia-test-chat-on-stub` is shared by all checkouts and sessions: a stage running in another session makes the browser tests skip.
