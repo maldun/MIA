@@ -98,6 +98,23 @@ class OtherAddressesCannotBecomeLinks(unittest.TestCase):
         self.assertFalse(reachable(re.sub(r"https?://\S+", "", text)), text)
 
 
+class WebAddressesStayWhole(unittest.TestCase):
+    def test_an_http_address_in_a_text_is_not_defanged(self):
+        """V-2 (regression found by test_searxng_control): the defang leaves http and https addresses alone, also where they hold a www. or an at sign.
+        Example: `https://www.example.org/a@b?x=1` and `http://localhost:8590` are written as they are."""
+        # Given: texts with http and https addresses that hold a www., an at sign and a port, next to an address that is no web address
+        texts = ["https://www.example.org/a@b?x=1", "HTTP://LOCALHOST:8590", "see https://www.example.org/x and ftp://files.example/y and a@b.example"]
+        escapers = (R.escape, rc._md, lambda text: research_chat._plain(text, 300))
+        # When / Then: every escape keeps the web addresses whole and defangs the rest
+        for escape in escapers:
+            self.assertEqual(escape(texts[0]), texts[0])
+            self.assertEqual(escape(texts[1]), texts[1])
+            mixed = escape(texts[2])
+            self.assertIn("https://www.example.org/x", mixed)
+            self.assertIn("ftp\\://files.example/y", mixed)
+            self.assertIn("a\\@b.example", mixed)
+
+
 class ALongQuestionStillGetsItsReport(unittest.TestCase):
     def test_a_run_whose_question_is_one_long_word_ends_with_a_report(self):
         """V-1 (REQ-WFM-139, 140): a /lookup-like run whose question is one very long word still has a report that the record names.

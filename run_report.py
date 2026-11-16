@@ -18,7 +18,18 @@ _DEFANG = ((re.compile(r"@"), r"\\@"), (re.compile(r":(?=//)"), r"\\:"), (re.com
 
 
 def defang(text):
-    """an ftp, a mail and a www address cannot become a link in a Markdown reader outside MIA (`a\\@b.example`, `ftp\\://x`, `www\\.x`): only http and https addresses are links (REQ-WFM-141, V-2 of the Verify)"""
+    """an ftp, a mail and a www address cannot become a link in a Markdown reader outside MIA (`a\\@b.example`, `ftp\\://x`, `www\\.x`): only http and https addresses are links (REQ-WFM-141, V-2 of the Verify);
+    an http or https address in the text is left as it is, with its www. and its at signs"""
+    parts, last = [], 0
+    for match in _ADDRESS.finditer(text):
+        parts.append(_defang_text(text[last:match.start()]))
+        parts.append(match.group(0))
+        last = match.end()
+    parts.append(_defang_text(text[last:]))
+    return "".join(parts)
+
+
+def _defang_text(text):
     for pattern, replacement in _DEFANG:
         text = pattern.sub(replacement, text)
     return text
