@@ -8,8 +8,8 @@ except ImportError:  # used as plain script / in tests
 
 
 def make(services):
-    def run(question, on_delta, on_emotion, should_stop):
+    def run(question, on_delta, on_emotion, should_stop, files=None):
         return research_chat.run_research(services.core, question, pipeline=services.cfg.get(CONST.RESEARCH_PIPELINE_KEY, CONST.DEFAULT_RESEARCH_PIPELINE),
                                           on_event=services.pipeline_event, should_stop=should_stop, speak=services.speaker("lookup"),
-                                          on_sources=services.note_sources, trust=services.trust_for_url())      # a fresh table: the trust of sources is edited on the page
+                                          on_sources=services.note_sources, trust=services.trust_for_url(), files=files)      # a fresh table: the trust of sources is edited on the page
     return run
