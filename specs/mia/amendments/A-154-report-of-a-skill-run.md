@@ -108,3 +108,11 @@ Not to be confused with REQ-WFM-038 (the structured report of `/review` as a dat
 | REQ-WFM-139, 140, 141 | scripted runs of all skills, done, stopped and failed; record field; red-team strings | `tests/` (unit, new) and the contract suite for IF-101 v17 (protected, after approval) |
 | REQ-CLV-049 | renderer red-team and the four cases: plain URL, source without URL, `javascript:` URL, URL inside Markdown text | `tests/js/` (new unit test) |
 | REQ-CLV-048 | the Report part in a headless browser | protected acceptance, after approval |
+
+## Review (one item per question, reviewer maldun)
+
+The items are not in the node files yet, so `req_review.py` cannot fingerprint them; this table is the record until they move in.
+
+| Item | Result | Reviewer | Date | Note |
+|---|---|---|---|---|
+| REQ-WFM-139 | approved as written | maldun | 2026-11-16 | |
