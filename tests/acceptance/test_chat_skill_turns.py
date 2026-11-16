@@ -9,6 +9,7 @@ import re
 import shutil
 import sys
 import tempfile
+import types
 import unittest
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -22,6 +23,7 @@ from chat_service import ChatService           # noqa: E402
 from fake_model import FakeModel               # noqa: E402
 from moods import MoodTracker                  # noqa: E402
 from skill_digest import SkillDigestStep       # noqa: E402
+from skill_run_observer import SkillRunObserver   # noqa: E402
 
 PHASES = ("collect", "rank", "report")
 LINK = " [Open in the Skill run view](#run=%s)"
@@ -89,18 +91,21 @@ class SkillTurns(unittest.TestCase):
         self.assertTrue(chat.spoken_once("Which topic?") and chat.spoken_once("Which year?"))
 
     @mark.req("REQ-CHA-041")
-    def test_one_status_message_per_declared_phase(self):
-        """TC-CHA-041: three declared phases give three status messages in order, each the wording of the step and spoken.
-        Example: phase collect gives "Collecting the works."."""
-        # Given: a scripted skill that declares collect, rank and report; the fake model answers each status request with a fixed sentence
-        chat = Chat(self, {"collect": "Collecting the works.", "rank": "Ranking them.", "report": "Writing the report."})
-        # When: the run enters the three phases
-        for phase in PHASES:
+    def test_a_phase_is_noted_once_in_the_run_status_and_is_no_chat_message(self):
+        """TC-CHA-041 (A-156): three declared phases are three entries of the run status and no chat message; a repeated phase is noted once; nothing is sent to speech.
+        Example: collect, rank, report, report -> the status holds collect, rank, report; the chat is empty."""
+        # Given: a scripted skill that declares collect, rank and report, a recorder of the status of the run and a chat (the digest step has no reply to give)
+        chat = Chat(self, [])
+        noted = []
+        recorder = types.SimpleNamespace(start=lambda *a, **k: None, phase=lambda run, text: noted.append(text))
+        observer = SkillRunObserver(recorder, "r1", "lookup", 1, "anna", phases=PHASES, on_phase=None)
+        # When: the run enters the three phases and then the third one again
+        for phase in PHASES + ("report",):
+            observer.phase(phase)
             chat.turn("r1", "phase", phase)
-        # Then: three status messages follow in this order, worded by the step
-        self.assertEqual(chat.texts(), ["Collecting the works.", "Ranking them.", "Writing the report."])
-        # And: each is spoken
-        self.assertTrue(all(chat.spoken_once(text) for text in chat.texts()))
+        # Then: the status notes the three phases in order, once each; the chat holds no message and nothing was spoken
+        self.assertEqual(noted, ["collect", "rank", "report"])
+        self.assertEqual((chat.texts(), chat.spoken), ([], []))
 
     @mark.req("REQ-CHA-042")
     def test_a_phase_that_is_not_declared_gives_no_message(self):
@@ -112,7 +117,7 @@ class SkillTurns(unittest.TestCase):
         acks = [chat.turn("r1", "phase", phase) for phase in PHASES + ("cleanup",)]
         # Then: the fourth phase gives no message
         self.assertEqual(acks[-1], {"id": None})
-        self.assertEqual(chat.texts(), ["Collecting.", "Ranking.", "Reporting."])
+        self.assertEqual(chat.texts(), [])        # A-156: a declared phase is no chat message either
 
     @mark.req("REQ-CHA-043")
     def test_the_end_summary_is_one_message_worded_by_the_step(self):
@@ -139,8 +144,8 @@ class SkillTurns(unittest.TestCase):
 
     @mark.req("REQ-CHA-045", "REQ-CHA-047")
     def test_every_added_message_is_sent_to_speech_once(self):
-        """TC-CHA-045: every message that the Chat agent added, questions, status messages and the summary, was sent to speech exactly once.
-        Example: two questions, three status messages and one summary are six messages and six speech inputs."""
+        """TC-CHA-045: every message that the Chat agent added, the questions and the summary, was sent to speech exactly once; the phases are no messages (A-156).
+        Example: two questions, three phases and one summary are three messages and three speech inputs."""
         # Given: a scripted review with two questions, three declared phases and a long result, and the speech recorder
         chat = Chat(self, {"collect": "Collecting.", "rank": "Ranking.", "report": "Reporting.", "Sentence": "Found 12 works."})
         # When: the run ends
@@ -151,14 +156,15 @@ class SkillTurns(unittest.TestCase):
         chat.turn("r1", "phase", "report")
         chat.turn("r1", "done", numbered(300))
         # Then: every message of the chat was sent to speech exactly once
-        self.assertEqual(len(chat.records()), 6)
+        self.assertEqual(len(chat.records()), 3)
+        self.assertEqual(len(chat.spoken), 3)
         for record in chat.records():
             self.assertTrue(chat.spoken_once(record["text"].split(" [Open")[0]), record["text"])
 
     @mark.req("REQ-CHA-046")
     def test_the_model_history_holds_questions_answers_summary_and_the_last_status(self):
-        """TC-CHA-046: the history of the next chat turn holds the two questions, the two answers, the summary and the third status message.
-        Example: statuses one and two are not in it, the third is."""
+        """TC-CHA-046: the history of the next chat turn holds the two questions, the two answers and the summary, and no phase text (A-156).
+        Example: "Reporting." is not in it."""
         # Given: a run with two questions, two answers, three status messages and a summary
         chat = Chat(self, {"collect": "Collecting.", "rank": "Ranking.", "report": "Reporting.", "Sentence": "Found 12 works."})
         chat.turn("r1", "question", "Which topic?")
@@ -172,23 +178,22 @@ class SkillTurns(unittest.TestCase):
         # When: the next chat turn builds the model history
         history = [m["text"] for m in chat.service.model_history()]
         # Then: it holds the two questions, the two answers, the third status message and the summary, in order
-        self.assertEqual(history, ["Which topic?", "canary", "Which year?", "2024", "Reporting.", "Found 12 works." + LINK % "r1"])
+        self.assertEqual(history, ["Which topic?", "canary", "Which year?", "2024", "Found 12 works." + LINK % "r1"])
 
     @mark.req("REQ-CHA-047")
     def test_messages_that_break_a_behaviour_rule_are_repaired(self):
-        """TC-CHA-047: a status message, a summary, a failure message and a stop message that each break a rule are repaired, four repairs are made, and no correction is in the conversation memory.
+        """TC-CHA-047: a summary, a failure message and a stop message that each break a rule are repaired, three repairs are made, and no correction is in the conversation memory.
         Example: the scripted wording BAD becomes good."""
         # Given: scripted messages that each break a behaviour rule of the list (the marker BAD stands for the violation)
-        chat = Chat(self, {"collect": "BAD status.", "Sentence": "BAD summary.", "reason one": "BAD failure.", "reason two": "BAD stop."},
+        chat = Chat(self, {"Sentence": "BAD summary.", "reason one": "BAD failure.", "reason two": "BAD stop."},
                     repair=lambda text: text.replace("BAD", "Good"))
         # When: they are worded and added
-        chat.turn("r1", "phase", "collect")
         chat.turn("r1", "done", numbered(300))
         chat.turn("r2", "failed", "reason one")
         chat.turn("r3", "stopped", "reason two")
-        # Then: each one is repaired, four repairs were made
+        # Then: each one is repaired, three repairs were made
         self.assertTrue(all("BAD" not in text for text in chat.texts()))
-        self.assertEqual(len(chat.repaired), 4)
+        self.assertEqual(len(chat.repaired), 3)
         # And: no correction is in the conversation memory
         self.assertTrue(all("BAD" not in m["text"] for m in chat.service.model_history()))
 
@@ -300,7 +305,7 @@ class SkillTurns(unittest.TestCase):
 
     @mark.req("REQ-CHA-059")
     def test_the_first_status_messages_and_the_full_result_are_not_in_the_history(self):
-        """TC-CHA-059: neither of the first two status messages and not the full result is in the model history.
+        """TC-CHA-059: no phase text and not the full result is in the model history (A-156).
         Example: "Collecting." and "Ranking." are not in it."""
         # Given: a run with three status messages and a long result
         result = numbered(300)
@@ -310,9 +315,10 @@ class SkillTurns(unittest.TestCase):
         chat.turn("r1", "done", result)
         # When: the next chat turn builds the model history
         history = [m["text"] for m in chat.service.model_history()]
-        # Then: neither of the first two status messages and not the full result is in it
+        # Then: no phase text and not the full result is in it
         self.assertNotIn("Collecting.", history)
         self.assertNotIn("Ranking.", history)
+        self.assertNotIn("Reporting.", history)
         self.assertTrue(all(result not in text for text in history))
 
     @mark.req("REQ-CHA-060")
@@ -380,20 +386,35 @@ class SkillTurns(unittest.TestCase):
     def test_html_tags_are_removed_from_every_output_of_the_step(self):
         """TC-CHA-069: a tag in the text of the step is removed, its inner text stays; text without a tag and a lone `<` are unchanged.
         Example: `Done: <script>alert(1)</script> and <b>x</b>` gives `Done: and x` (A-151: the content of a script element goes with it); `5 < 6 is true` stays."""
-        # Given: a fake model whose four replies hold tags, a lone `<` and nothing special
-        chat = Chat(self, ["Done: <script>alert(1)</script> and <b>x</b>", "5 < 6 is true", "Plain words.", "Stopped <i>now</i>."])
-        # When: a summary, a failure message, a stop message and a status message are added
+        # Given: a fake model whose three replies hold tags, a lone `<` and nothing special
+        chat = Chat(self, ["Done: <script>alert(1)</script> and <b>x</b>", "5 < 6 is true", "Plain words."])
+        # When: a summary, a failure message and a stop message are added
         chat.turn("r1", "done", "result")
         chat.turn("r2", "failed", "reason")
         chat.turn("r3", "stopped", "user")
-        chat.turn("r4", "phase", "collect")
         # Then: the tags are gone, the rest is as the model wrote it, and no message holds a tag
         texts = chat.texts()
         self.assertEqual(texts[0], "Done: and x" + LINK % "r1")
         self.assertEqual(texts[1], "5 < 6 is true" + LINK % "r2")
         self.assertEqual(texts[2], "Plain words." + LINK % "r3")
-        self.assertEqual(texts[3], "Stopped now.")
         self.assertFalse(any(re.search(r"</?[A-Za-z][^>]*>", t) for t in texts))
+
+
+class OneVoice(unittest.TestCase):
+    @mark.req("REQ-CHA-067")
+    def test_the_skill_of_a_task_with_end_messages_has_no_voice_of_its_own(self):
+        """TC-CHA-072 (A-156): the end message is the only spoken text of a run, so a task with end messages gets no voice for its skill; a task without keeps the voice as the settings say.
+        Example: speaker_for({}, "lookup", speak, end_messages=True) is None; speaker_for({}, "lookup", speak) is speak."""
+        # Given: the voice rule and a voice route
+        from workflow_voice import speaker_for
+        speak = object()
+        # When: it is asked for a task with end messages, in the default settings, with the voice of the task off and with it on
+        # Then: it gives no voice, in all three
+        for cfg in ({}, {"workflow_speak_tasks": {"lookup": False}}, {"workflow_speak_tasks": {"lookup": True}}):
+            self.assertIsNone(speaker_for(cfg, "lookup", speak, end_messages=True))
+        # And: a task without end messages keeps the voice as the settings say
+        self.assertIs(speaker_for({}, "lookup", speak), speak)
+        self.assertIsNone(speaker_for({"workflow_speak_tasks": {"lookup": False}}, "lookup", speak))
 
 
 if __name__ == "__main__":

@@ -5034,6 +5034,15 @@ plausibility:
       rated: '2026-11-15'
       rated_by: maldun
       rating: plausible
+    REQ-CHA-067:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run with a recording voice route,
+        no real model (proposal of the agent, 2026-11-16, A-156)
+      hardware: HW-target
+      rated: '2026-11-16'
+      rated_by: maldun
+      rating: plausible
     REQ-CHA-048:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed

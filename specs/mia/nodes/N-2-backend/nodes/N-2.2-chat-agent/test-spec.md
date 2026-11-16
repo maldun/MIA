@@ -37,13 +37,13 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-201
 | TC-CHA-036 | REQ-CHA-031, REQ-CHA-032, REQ-CHA-034 | Component | 2 | `tests/test_sound_server_handover.py` (A-132): the real `SoundServer` and `SoundHandler` of `speak.py` on a localhost port with a fake speaker as sink (records each chunk it is asked to play, in order, and honours `cancelled`), real TCP clients | AC-1: the sentences of one request reach the sink in order; a second request that arrives during the first is played after it; a client that closes its connection cancels the rest | exact order, no overlap, cancel within 2 s (test limit) |
 | TC-CHA-037 | REQ-CHA-035, REQ-CHA-036 | Component | 1 | `tests/test_chat_speak_again.py` with the fake voice route (A-133): the events `chat_status` and the status of the service | AC-1: while a speak again runs or waits the status is busy with the activity speaking; after it ended or was stopped it is not busy and not speaking | exact |
 | TC-CHA-040 | REQ-CHA-040 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: two questions in the chat in order, spoken; answers as users' messages | exact |
-| TC-CHA-041 | REQ-CHA-041 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: three declared phases give three status messages in order | exact |
+| TC-CHA-041 | REQ-CHA-041 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: three declared phases give three phase entries in the status of the run and no chat message; a repeated phase is noted once | exact |
 | TC-CHA-042 | REQ-CHA-042 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: an undeclared phase gives no status message | exact |
 | TC-CHA-043 | REQ-CHA-043 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: a done run gives exactly one summary message, worded by the step | exact |
 | TC-CHA-044 | REQ-CHA-044 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: a failed run gives exactly one message with its reason | exact |
-| TC-CHA-045 | REQ-CHA-045 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: every message of the run is sent to speech once | exact |
-| TC-CHA-046 | REQ-CHA-046 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: the model history holds questions, answers, summary and the last status message | exact |
-| TC-CHA-047 | REQ-CHA-047 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: a summary that breaks a behaviour rule is repaired; the signal is recorded; the correction is not in the memory | exact |
+| TC-CHA-045 | REQ-CHA-045 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: every message of the run is sent to speech once (questions and end message; phases are no chat messages) | exact |
+| TC-CHA-046 | REQ-CHA-046 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: the model history holds questions, answers and summary, no phase text | exact |
+| TC-CHA-047 | REQ-CHA-047 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: a summary, a failure message and a stop message that break a behaviour rule are repaired; the signals are recorded; the correction is not in the memory | exact |
 | TC-CHA-048 | REQ-CHA-048 | Inspection | 1 | inspection of the step configuration | AC-39: no tool is listed for SkillDigestStep | exact |
 | TC-CHA-050 | REQ-CHA-050 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: no call of the fake model gets more than 4096 tokens for a result of 20 000 tokens | exact |
 | TC-CHA-051 | REQ-CHA-051 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: every character of a long result goes to exactly one piece, in order | exact |
@@ -52,7 +52,7 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-201
 | TC-CHA-056 | REQ-CHA-056 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: summary, failure and stop message each end with the link of the run once; a model link is not used | exact |
 | TC-CHA-057 | REQ-CHA-057 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: a stopped run gives exactly one message that says it was stopped | exact |
 | TC-CHA-058 | REQ-CHA-058 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: no message contains the table or the full result | exact |
-| TC-CHA-059 | REQ-CHA-059 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: the first two status messages and the full result are not in the model history | exact |
+| TC-CHA-059 | REQ-CHA-059 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: no phase text and not the full result is in the model history | exact |
 | TC-CHA-060 | REQ-CHA-060 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: chat message and speech input are the repaired text | exact |
 | TC-CHA-061 | REQ-CHA-061 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: the result and each piece arrive in the user role, not in the system prompt | exact |
 | TC-CHA-062 | REQ-CHA-062 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: the summary call gets only the digests | exact |
@@ -65,6 +65,7 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-201
 | TC-CHA-069 | REQ-CHA-064 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: HTML tags and the content of script and style elements are removed from every output of the step, text without a tag and a lone `<` are unchanged | exact |
 | TC-CHA-070 | REQ-CHA-065 | Component | 1 | unit test with a recording chat function | AC-39: every call of the step names the profile light | exact |
 | TC-CHA-071 | REQ-CHA-066 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: no link of the model in a status message or its speech | exact |
+| TC-CHA-072 | REQ-CHA-067 | Component | 1 | unit test of the voice rule (no model) | AC-39: a task with end messages gets no voice of its own; a task without gets it as the settings say | exact |
 | EV-skill_turns | REQ-CHA-049, REQ-CHA-053, REQ-CHA-054 | Evaluation | 4 | the suite `eval/suites/skill_turns` (dev 24) and `skill_turns.holdout` (24) on MP-light, 3 repeats, harness `tools/eval.py` | AC-39: red-team cases pass in every repeat; faithful at least 0.85 (lower bound 0.70); persona at least 0.80 (lower bound 0.70), decided by `eval_decide.py` against the baseline | as in the Eval criterion lines |
 
 ## Scenarios (speak again, A-132; the older checks of this file have none yet)
@@ -152,9 +153,9 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-201
 
 ### TC-CHA-041 – Status message per declared phase
 - Verifies: REQ-CHA-041
-- Given: a scripted skill that declares the phases `collect`, `rank`, `report` worth telling; the fake model answers each status request with a fixed sentence
-- When: the run enters the three phases
-- Then: three status messages follow in this order, one per phase, each worded by the step (the fixed sentence) and spoken
+- Given: a scripted skill that declares the phases `collect`, `rank`, `report` worth telling, and a recorder of the status of the run
+- When: the run enters the three phases, and then the third phase again
+- Then: the status of the run notes the three phases in this order, the repeated one only once; the chat holds no message and nothing is sent to speech (A-156, FB-09)
 
 ### TC-CHA-042 – No status for other phases
 - Verifies: REQ-CHA-042
@@ -178,19 +179,19 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-201
 - Verifies: REQ-CHA-045
 - Given: a scripted review with two questions, three declared phases and a long result, and the speech mock
 - When: the run ends
-- Then: every message that the Chat agent added was sent to speech exactly once
+- Then: the chat holds three messages (two questions and the summary) and each was sent to speech exactly once; the phases gave no message and no speech
 
 ### TC-CHA-046 – History of a run for the chat model
 - Verifies: REQ-CHA-046
-- Given: a run with two questions, two answers, three status messages and a summary
+- Given: a run with two questions, two answers, three phases and a summary
 - When: the next chat turn builds the model history
-- Then: it holds the two questions, the two answers, the summary and the third status message
+- Then: it holds the two questions, the two answers and the summary, in order, and no phase text
 
 ### TC-CHA-047 – Repair of the messages of a run
 - Verifies: REQ-CHA-047
-- Given: scripted messages (a status message, a summary, a failure message and a stop message) that each break a behaviour rule of the list
+- Given: scripted messages (a summary, a failure message and a stop message) that each break a behaviour rule of the list
 - When: they are worded and added
-- Then: each one is repaired; four violation signals are recorded; no correction is in the conversation memory
+- Then: each one is repaired; three violation signals are recorded; no correction is in the conversation memory
 
 ### TC-CHA-048 – Digest step without tools
 - Verifies: REQ-CHA-048
@@ -248,9 +249,9 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-201
 
 ### TC-CHA-059 – Exclusions from the history of the chat model
 - Verifies: REQ-CHA-059
-- Given: a run with three status messages and a long result
+- Given: a run with three phases and a long result
 - When: the next chat turn builds the model history
-- Then: neither of the first two status messages and not the full result is in it
+- Then: no phase text and not the full result is in it
 
 ### TC-CHA-060 – Repaired text is the text shown and spoken
 - Verifies: REQ-CHA-060
@@ -323,6 +324,12 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-201
 - Given: a scripted skill with one declared phase whose status wording holds `[Open in the Skill run view](#run=evil)`
 - When: the run is started and ends
 - Then: the status message and its speech hold no such link; the summary ends with the link of its own run
+
+### TC-CHA-072 – A run is spoken once, by the persona
+- Verifies: REQ-CHA-067
+- Given: the voice rule `workflow_voice.speaker_for` with the settings of the default, one that switches the voice of the task off and one that switches it on
+- When: it is asked for a task whose run has end messages, and for one without
+- Then: the task with end messages gets no voice, in all three settings; the task without gets the voice as the settings say (A-156, FB-09)
 
 ### TC-CHA-014 – Behaviour violations are repaired silently, and the detectors keep their precision
 - Verifies: REQ-CHA-014

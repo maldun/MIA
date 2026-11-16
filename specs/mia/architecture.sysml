@@ -2333,7 +2333,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-CLV-043'> TextsOfARunAreText_Clv043 {
         subject s : WebFrontEnd;
-        doc /* The Chat and login views shall show every text of a run (result, material found, answers, reason) as plain text that starts no action and loads nothing, except the run report, which REQ-CLV-048 and REQ-CLV-049 show. */
+        doc /* The Chat and login views shall show every text of a run (result, material found, answers, reason) as plain text that starts no action and loads nothing. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-CLV-044'> ElementsOfASkill_Clv044 {
@@ -2866,9 +2866,9 @@ package MIA_NodeRequirements {
         doc /* When a running skill asks a question, the Chat agent shall add the question to the chat as a message of MIA and send it to speech. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
-    requirement def <'REQ-CHA-041'> StatusMessagePerDeclaredPhase_Cha041 {
+    requirement def <'REQ-CHA-041'> PhasesAreNotedInTheRunStatusNotInTheChat_Cha041 {
         subject s : ConversationCore;
-        doc /* When a running skill enters a phase that its manifest declares worth telling, the Chat agent shall add one new status message worded by SkillDigestStep in MIA's persona. */
+        doc /* When a running skill enters a phase that its manifest declares worth telling, the Chat agent shall note the phase once in the status of the run (Skill run view, status card) and shall add no message to the chat for it. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-CHA-042'> NoStatusForOtherPhases_Cha042 {
@@ -2893,12 +2893,12 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-CHA-046'> HistoryOfARunForTheChatModel_Cha046 {
         subject s : ConversationCore;
-        doc /* The Chat agent shall keep the questions, the answers, the end summary and the last status message of each run in the history the chat model sees. */
+        doc /* The Chat agent shall keep the questions, the answers and the end summary of each run in the history the chat model sees. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-CHA-047'> RepairOfTheMessagesOfARun_Cha047 {
         subject s : ConversationCore;
-        doc /* The Chat agent shall apply the repair of REQ-CHA-014 to each status message, summary, failure message and stop message. */
+        doc /* The Chat agent shall apply the repair of REQ-CHA-014 to each summary, failure message and stop message. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-CHA-048'> DigestStepWithoutTools_Cha048 {
@@ -2958,12 +2958,12 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-CHA-059'> ExclusionsFromTheHistoryOfTheChatModel_Cha059 {
         subject s : ConversationCore;
-        doc /* The Chat agent shall keep every other status message of a run and its full result out of the history the chat model sees. */
+        doc /* The Chat agent shall keep the phase texts of a run and its full result out of the history the chat model sees. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-CHA-060'> RepairedTextIsTheTextShownAndSpoken_Cha060 {
         subject s : ConversationCore;
-        doc /* The Chat agent shall show and send to speech the repaired text of each status message, summary, failure message and stop message. */
+        doc /* The Chat agent shall show and send to speech the repaired text of each summary, failure message and stop message. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-CHA-061'> ResultGoesToTheDigestStepAsText_Cha061 {
@@ -2994,6 +2994,11 @@ package MIA_NodeRequirements {
     requirement def <'REQ-CHA-066'> NoLinkToARunFromTheModelInAnyMessage_Cha066 {
         subject s : ConversationCore;
         doc /* The Chat agent shall remove a link to a run from the text that SkillDigestStep words, in every message of a run. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-067'> ARunIsSpokenOnceByThePersona_Cha067 {
+        subject s : ConversationCore;
+        doc /* While a skill run has the end message of the Chat agent, the Chat agent shall make sure that the skill itself does not speak its result, so that the end message is the only spoken text of the run. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-WFM-001'> SkillsAsTasks_Wfm001 {
@@ -4941,7 +4946,7 @@ package MIA_NodeRequirements {
     requirement r_req_cha_035 : StopIsOfferedWhileAMessageIsSpokenAgain_Cha035;
     requirement r_req_cha_036 : TheStatusReturnsWhenTheSpeakAgainHasEnded_Cha036;
     requirement r_req_cha_040 : QuestionsOfASkillInTheChat_Cha040;
-    requirement r_req_cha_041 : StatusMessagePerDeclaredPhase_Cha041;
+    requirement r_req_cha_041 : PhasesAreNotedInTheRunStatusNotInTheChat_Cha041;
     requirement r_req_cha_042 : NoStatusForOtherPhases_Cha042;
     requirement r_req_cha_043 : EndSummary_Cha043;
     requirement r_req_cha_044 : FailedRunInTheChat_Cha044;
@@ -4967,6 +4972,7 @@ package MIA_NodeRequirements {
     requirement r_req_cha_064 : NoMarkupInTheOutputOfTheDigestStep_Cha064;
     requirement r_req_cha_065 : TheDigestStepRunsOnTheLightProfile_Cha065;
     requirement r_req_cha_066 : NoLinkToARunFromTheModelInAnyMessage_Cha066;
+    requirement r_req_cha_067 : ARunIsSpokenOnceByThePersona_Cha067;
     requirement r_req_wfm_001 : SkillsAsTasks_Wfm001;
     requirement r_req_wfm_002 : VersionedWorkflowLibrary_Wfm002;
     requirement r_req_wfm_003 : NoCycles_Wfm003;
@@ -5498,6 +5504,7 @@ package MIA_NodeRequirements {
     satisfy r_req_cha_064 by mia.conversation;
     satisfy r_req_cha_065 by mia.conversation;
     satisfy r_req_cha_066 by mia.conversation;
+    satisfy r_req_cha_067 by mia.conversation;
     satisfy r_req_wfm_001 by mia.taskRuntime;
     satisfy r_req_wfm_002 by mia.taskRuntime;
     satisfy r_req_wfm_003 by mia.taskRuntime;
@@ -6028,6 +6035,7 @@ package MIA_NodeRequirements {
     allocate r_req_cha_064 to mia.conversation;
     allocate r_req_cha_065 to mia.conversation;
     allocate r_req_cha_066 to mia.conversation;
+    allocate r_req_cha_067 to mia.conversation;
     allocate r_req_wfm_001 to mia.taskRuntime;
     allocate r_req_wfm_002 to mia.taskRuntime;
     allocate r_req_wfm_003 to mia.taskRuntime;
@@ -6569,6 +6577,7 @@ package MIA_NodeRequirements {
     dependency from r_req_cha_064 to r_req_be_078;
     dependency from r_req_cha_065 to r_req_be_078;
     dependency from r_req_cha_066 to r_req_be_078;
+    dependency from r_req_cha_067 to r_req_be_078;
     dependency from r_req_wfm_001 to r_req_be_033;
     dependency from r_req_wfm_002 to r_req_be_035;
     dependency from r_req_wfm_003 to r_req_be_036;

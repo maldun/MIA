@@ -75,9 +75,7 @@ class ChatTurnMock:
             raise ServiceError("invalid_kind")
         link = " [Open in the Skill run view](#run=%s)" % run                # added by code (REQ-CHA-056)
         if kind == "phase":
-            if payload not in self._phases:
-                return {"id": None}                                          # an undeclared phase adds no message
-            text = "Working on: %s." % payload
+            return {"id": None}                                              # a phase is noted in the run status and is no chat message (A-156, REQ-CHA-041)
         elif kind == "question":
             text = payload
         elif kind == "done":

@@ -1,0 +1,442 @@
+diff --git a/specs/mia/architecture.sysml b/specs/mia/architecture.sysml
+index 64fd1df..037b2fc 100644
+--- a/specs/mia/architecture.sysml
++++ b/specs/mia/architecture.sysml
+@@ -2333,7 +2333,7 @@ package MIA_NodeRequirements {
+     }
+     requirement def <'REQ-CLV-043'> TextsOfARunAreText_Clv043 {
+         subject s : WebFrontEnd;
+-        doc /* The Chat and login views shall show every text of a run (result, material found, answers, reason) as plain text that starts no action and loads nothing, except the run report, which REQ-CLV-048 and REQ-CLV-049 show. */
++        doc /* The Chat and login views shall show every text of a run (result, material found, answers, reason) as plain text that starts no action and loads nothing. */
+         @Trace { :>> verifiedBy = (HowVerified::test); }
+     }
+     requirement def <'REQ-CLV-044'> ElementsOfASkill_Clv044 {
+@@ -2866,9 +2866,9 @@ package MIA_NodeRequirements {
+         doc /* When a running skill asks a question, the Chat agent shall add the question to the chat as a message of MIA and send it to speech. */
+         @Trace { :>> verifiedBy = (HowVerified::test); }
+     }
+-    requirement def <'REQ-CHA-041'> StatusMessagePerDeclaredPhase_Cha041 {
++    requirement def <'REQ-CHA-041'> PhasesAreNotedInTheRunStatusNotInTheChat_Cha041 {
+         subject s : ConversationCore;
+-        doc /* When a running skill enters a phase that its manifest declares worth telling, the Chat agent shall add one new status message worded by SkillDigestStep in MIA's persona. */
++        doc /* When a running skill enters a phase that its manifest declares worth telling, the Chat agent shall note the phase once in the status of the run (Skill run view, status card) and shall add no message to the chat for it. */
+         @Trace { :>> verifiedBy = (HowVerified::test); }
+     }
+     requirement def <'REQ-CHA-042'> NoStatusForOtherPhases_Cha042 {
+@@ -2893,12 +2893,12 @@ package MIA_NodeRequirements {
+     }
+     requirement def <'REQ-CHA-046'> HistoryOfARunForTheChatModel_Cha046 {
+         subject s : ConversationCore;
+-        doc /* The Chat agent shall keep the questions, the answers, the end summary and the last status message of each run in the history the chat model sees. */
++        doc /* The Chat agent shall keep the questions, the answers and the end summary of each run in the history the chat model sees. */
+         @Trace { :>> verifiedBy = (HowVerified::test); }
+     }
+     requirement def <'REQ-CHA-047'> RepairOfTheMessagesOfARun_Cha047 {
+         subject s : ConversationCore;
+-        doc /* The Chat agent shall apply the repair of REQ-CHA-014 to each status message, summary, failure message and stop message. */
++        doc /* The Chat agent shall apply the repair of REQ-CHA-014 to each summary, failure message and stop message. */
+         @Trace { :>> verifiedBy = (HowVerified::test); }
+     }
+     requirement def <'REQ-CHA-048'> DigestStepWithoutTools_Cha048 {
+@@ -2958,12 +2958,12 @@ package MIA_NodeRequirements {
+     }
+     requirement def <'REQ-CHA-059'> ExclusionsFromTheHistoryOfTheChatModel_Cha059 {
+         subject s : ConversationCore;
+-        doc /* The Chat agent shall keep every other status message of a run and its full result out of the history the chat model sees. */
++        doc /* The Chat agent shall keep the phase texts of a run and its full result out of the history the chat model sees. */
+         @Trace { :>> verifiedBy = (HowVerified::test); }
+     }
+     requirement def <'REQ-CHA-060'> RepairedTextIsTheTextShownAndSpoken_Cha060 {
+         subject s : ConversationCore;
+-        doc /* The Chat agent shall show and send to speech the repaired text of each status message, summary, failure message and stop message. */
++        doc /* The Chat agent shall show and send to speech the repaired text of each summary, failure message and stop message. */
+         @Trace { :>> verifiedBy = (HowVerified::test); }
+     }
+     requirement def <'REQ-CHA-061'> ResultGoesToTheDigestStepAsText_Cha061 {
+@@ -2996,6 +2996,11 @@ package MIA_NodeRequirements {
+         doc /* The Chat agent shall remove a link to a run from the text that SkillDigestStep words, in every message of a run. */
+         @Trace { :>> verifiedBy = (HowVerified::test); }
+     }
++    requirement def <'REQ-CHA-067'> ARunIsSpokenOnceByThePersona_Cha067 {
++        subject s : ConversationCore;
++        doc /* While a skill run has the end message of the Chat agent, the Chat agent shall make sure that the skill itself does not speak its result, so that the end message is the only spoken text of the run. */
++        @Trace { :>> verifiedBy = (HowVerified::test); }
++    }
+     requirement def <'REQ-WFM-001'> SkillsAsTasks_Wfm001 {
+         subject s : TaskRuntime;
+         doc /* The Workflow management shall perform each kind of work as a task defined by a skill file and a pipeline selectable by every user. */
+@@ -4941,7 +4946,7 @@ package MIA_NodeRequirements {
+     requirement r_req_cha_035 : StopIsOfferedWhileAMessageIsSpokenAgain_Cha035;
+     requirement r_req_cha_036 : TheStatusReturnsWhenTheSpeakAgainHasEnded_Cha036;
+     requirement r_req_cha_040 : QuestionsOfASkillInTheChat_Cha040;
+-    requirement r_req_cha_041 : StatusMessagePerDeclaredPhase_Cha041;
++    requirement r_req_cha_041 : PhasesAreNotedInTheRunStatusNotInTheChat_Cha041;
+     requirement r_req_cha_042 : NoStatusForOtherPhases_Cha042;
+     requirement r_req_cha_043 : EndSummary_Cha043;
+     requirement r_req_cha_044 : FailedRunInTheChat_Cha044;
+@@ -4967,6 +4972,7 @@ package MIA_NodeRequirements {
+     requirement r_req_cha_064 : NoMarkupInTheOutputOfTheDigestStep_Cha064;
+     requirement r_req_cha_065 : TheDigestStepRunsOnTheLightProfile_Cha065;
+     requirement r_req_cha_066 : NoLinkToARunFromTheModelInAnyMessage_Cha066;
++    requirement r_req_cha_067 : ARunIsSpokenOnceByThePersona_Cha067;
+     requirement r_req_wfm_001 : SkillsAsTasks_Wfm001;
+     requirement r_req_wfm_002 : VersionedWorkflowLibrary_Wfm002;
+     requirement r_req_wfm_003 : NoCycles_Wfm003;
+@@ -5498,6 +5504,7 @@ package MIA_NodeRequirements {
+     satisfy r_req_cha_064 by mia.conversation;
+     satisfy r_req_cha_065 by mia.conversation;
+     satisfy r_req_cha_066 by mia.conversation;
++    satisfy r_req_cha_067 by mia.conversation;
+     satisfy r_req_wfm_001 by mia.taskRuntime;
+     satisfy r_req_wfm_002 by mia.taskRuntime;
+     satisfy r_req_wfm_003 by mia.taskRuntime;
+@@ -6028,6 +6035,7 @@ package MIA_NodeRequirements {
+     allocate r_req_cha_064 to mia.conversation;
+     allocate r_req_cha_065 to mia.conversation;
+     allocate r_req_cha_066 to mia.conversation;
++    allocate r_req_cha_067 to mia.conversation;
+     allocate r_req_wfm_001 to mia.taskRuntime;
+     allocate r_req_wfm_002 to mia.taskRuntime;
+     allocate r_req_wfm_003 to mia.taskRuntime;
+@@ -6569,6 +6577,7 @@ package MIA_NodeRequirements {
+     dependency from r_req_cha_064 to r_req_be_078;
+     dependency from r_req_cha_065 to r_req_be_078;
+     dependency from r_req_cha_066 to r_req_be_078;
++    dependency from r_req_cha_067 to r_req_be_078;
+     dependency from r_req_wfm_001 to r_req_be_033;
+     dependency from r_req_wfm_002 to r_req_be_035;
+     dependency from r_req_wfm_003 to r_req_be_036;
+diff --git a/specs/mia/nodes/N-2-backend/nodes/N-2.2-chat-agent/test-spec.md b/specs/mia/nodes/N-2-backend/nodes/N-2.2-chat-agent/test-spec.md
+index 52492b0..6ba2d78 100644
+--- a/specs/mia/nodes/N-2-backend/nodes/N-2.2-chat-agent/test-spec.md
++++ b/specs/mia/nodes/N-2-backend/nodes/N-2.2-chat-agent/test-spec.md
+@@ -37,13 +37,13 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-201
+ | TC-CHA-036 | REQ-CHA-031, REQ-CHA-032, REQ-CHA-034 | Component | 2 | `tests/test_sound_server_handover.py` (A-132): the real `SoundServer` and `SoundHandler` of `speak.py` on a localhost port with a fake speaker as sink (records each chunk it is asked to play, in order, and honours `cancelled`), real TCP clients | AC-1: the sentences of one request reach the sink in order; a second request that arrives during the first is played after it; a client that closes its connection cancels the rest | exact order, no overlap, cancel within 2 s (test limit) |
+ | TC-CHA-037 | REQ-CHA-035, REQ-CHA-036 | Component | 1 | `tests/test_chat_speak_again.py` with the fake voice route (A-133): the events `chat_status` and the status of the service | AC-1: while a speak again runs or waits the status is busy with the activity speaking; after it ended or was stopped it is not busy and not speaking | exact |
+ | TC-CHA-040 | REQ-CHA-040 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: two questions in the chat in order, spoken; answers as users' messages | exact |
+-| TC-CHA-041 | REQ-CHA-041 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: three declared phases give three status messages in order | exact |
++| TC-CHA-041 | REQ-CHA-041 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: three declared phases give three phase entries in the status of the run and no chat message; a repeated phase is noted once | exact |
+ | TC-CHA-042 | REQ-CHA-042 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: an undeclared phase gives no status message | exact |
+ | TC-CHA-043 | REQ-CHA-043 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: a done run gives exactly one summary message, worded by the step | exact |
+ | TC-CHA-044 | REQ-CHA-044 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: a failed run gives exactly one message with its reason | exact |
+-| TC-CHA-045 | REQ-CHA-045 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: every message of the run is sent to speech once | exact |
+-| TC-CHA-046 | REQ-CHA-046 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: the model history holds questions, answers, summary and the last status message | exact |
+-| TC-CHA-047 | REQ-CHA-047 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: a summary that breaks a behaviour rule is repaired; the signal is recorded; the correction is not in the memory | exact |
++| TC-CHA-045 | REQ-CHA-045 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: every message of the run is sent to speech once (questions and end message; phases are no chat messages) | exact |
++| TC-CHA-046 | REQ-CHA-046 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: the model history holds questions, answers and summary, no phase text | exact |
++| TC-CHA-047 | REQ-CHA-047 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: a summary, a failure message and a stop message that break a behaviour rule are repaired; the signals are recorded; the correction is not in the memory | exact |
+ | TC-CHA-048 | REQ-CHA-048 | Inspection | 1 | inspection of the step configuration | AC-39: no tool is listed for SkillDigestStep | exact |
+ | TC-CHA-050 | REQ-CHA-050 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: no call of the fake model gets more than 4096 tokens for a result of 20 000 tokens | exact |
+ | TC-CHA-051 | REQ-CHA-051 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: every character of a long result goes to exactly one piece, in order | exact |
+@@ -52,7 +52,7 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-201
+ | TC-CHA-056 | REQ-CHA-056 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: summary, failure and stop message each end with the link of the run once; a model link is not used | exact |
+ | TC-CHA-057 | REQ-CHA-057 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: a stopped run gives exactly one message that says it was stopped | exact |
+ | TC-CHA-058 | REQ-CHA-058 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: no message contains the table or the full result | exact |
+-| TC-CHA-059 | REQ-CHA-059 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: the first two status messages and the full result are not in the model history | exact |
++| TC-CHA-059 | REQ-CHA-059 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: no phase text and not the full result is in the model history | exact |
+ | TC-CHA-060 | REQ-CHA-060 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: chat message and speech input are the repaired text | exact |
+ | TC-CHA-061 | REQ-CHA-061 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: the result and each piece arrive in the user role, not in the system prompt | exact |
+ | TC-CHA-062 | REQ-CHA-062 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: the summary call gets only the digests | exact |
+@@ -65,6 +65,7 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-201
+ | TC-CHA-069 | REQ-CHA-064 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: HTML tags and the content of script and style elements are removed from every output of the step, text without a tag and a lone `<` are unchanged | exact |
+ | TC-CHA-070 | REQ-CHA-065 | Component | 1 | unit test with a recording chat function | AC-39: every call of the step names the profile light | exact |
+ | TC-CHA-071 | REQ-CHA-066 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: no link of the model in a status message or its speech | exact |
++| TC-CHA-072 | REQ-CHA-067 | Component | 1 | unit test of the voice rule (no model) | AC-39: a task with end messages gets no voice of its own; a task without gets it as the settings say | exact |
+ | EV-skill_turns | REQ-CHA-049, REQ-CHA-053, REQ-CHA-054 | Evaluation | 4 | the suite `eval/suites/skill_turns` (dev 24) and `skill_turns.holdout` (24) on MP-light, 3 repeats, harness `tools/eval.py` | AC-39: red-team cases pass in every repeat; faithful at least 0.85 (lower bound 0.70); persona at least 0.80 (lower bound 0.70), decided by `eval_decide.py` against the baseline | as in the Eval criterion lines |
+ 
+ ## Scenarios (speak again, A-132; the older checks of this file have none yet)
+@@ -152,9 +153,9 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-201
+ 
+ ### TC-CHA-041 – Status message per declared phase
+ - Verifies: REQ-CHA-041
+-- Given: a scripted skill that declares the phases `collect`, `rank`, `report` worth telling; the fake model answers each status request with a fixed sentence
+-- When: the run enters the three phases
+-- Then: three status messages follow in this order, one per phase, each worded by the step (the fixed sentence) and spoken
++- Given: a scripted skill that declares the phases `collect`, `rank`, `report` worth telling, and a recorder of the status of the run
++- When: the run enters the three phases, and then the third phase again
++- Then: the status of the run notes the three phases in this order, the repeated one only once; the chat holds no message and nothing is sent to speech (A-156, FB-09)
+ 
+ ### TC-CHA-042 – No status for other phases
+ - Verifies: REQ-CHA-042
+@@ -178,19 +179,19 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-201
+ - Verifies: REQ-CHA-045
+ - Given: a scripted review with two questions, three declared phases and a long result, and the speech mock
+ - When: the run ends
+-- Then: every message that the Chat agent added was sent to speech exactly once
++- Then: the chat holds three messages (two questions and the summary) and each was sent to speech exactly once; the phases gave no message and no speech
+ 
+ ### TC-CHA-046 – History of a run for the chat model
+ - Verifies: REQ-CHA-046
+-- Given: a run with two questions, two answers, three status messages and a summary
++- Given: a run with two questions, two answers, three phases and a summary
+ - When: the next chat turn builds the model history
+-- Then: it holds the two questions, the two answers, the summary and the third status message
++- Then: it holds the two questions, the two answers and the summary, in order, and no phase text
+ 
+ ### TC-CHA-047 – Repair of the messages of a run
+ - Verifies: REQ-CHA-047
+-- Given: scripted messages (a status message, a summary, a failure message and a stop message) that each break a behaviour rule of the list
++- Given: scripted messages (a summary, a failure message and a stop message) that each break a behaviour rule of the list
+ - When: they are worded and added
+-- Then: each one is repaired; four violation signals are recorded; no correction is in the conversation memory
++- Then: each one is repaired; three violation signals are recorded; no correction is in the conversation memory
+ 
+ ### TC-CHA-048 – Digest step without tools
+ - Verifies: REQ-CHA-048
+@@ -248,9 +249,9 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-201
+ 
+ ### TC-CHA-059 – Exclusions from the history of the chat model
+ - Verifies: REQ-CHA-059
+-- Given: a run with three status messages and a long result
++- Given: a run with three phases and a long result
+ - When: the next chat turn builds the model history
+-- Then: neither of the first two status messages and not the full result is in it
++- Then: no phase text and not the full result is in it
+ 
+ ### TC-CHA-060 – Repaired text is the text shown and spoken
+ - Verifies: REQ-CHA-060
+@@ -324,6 +325,12 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-201
+ - When: the run is started and ends
+ - Then: the status message and its speech hold no such link; the summary ends with the link of its own run
+ 
++### TC-CHA-072 – A run is spoken once, by the persona
++- Verifies: REQ-CHA-067
++- Given: the voice rule `workflow_voice.speaker_for` with the settings of the default, one that switches the voice of the task off and one that switches it on
++- When: it is asked for a task whose run has end messages, and for one without
++- Then: the task with end messages gets no voice, in all three settings; the task without gets the voice as the settings say (A-156, FB-09)
++
+ ### TC-CHA-014 – Behaviour violations are repaired silently, and the detectors keep their precision
+ - Verifies: REQ-CHA-014
+ - Given: the suite `behaviour` (67 texts with people's truth: texts that break a behaviour rule and 32 clean ones) and a chat whose model answer breaks a rule while it is streamed
+diff --git a/specs/mia/plausibility.yaml b/specs/mia/plausibility.yaml
+index 05e94f0..3a60797 100644
+--- a/specs/mia/plausibility.yaml
++++ b/specs/mia/plausibility.yaml
+@@ -5034,6 +5034,15 @@ plausibility:
+       rated: '2026-11-15'
+       rated_by: maldun
+       rating: plausible
++    REQ-CHA-067:
++      basis:
++      - no number, measurement or model quality depends on it; the behaviour is fixed
++        by an exact acceptance criterion on a scripted run with a recording voice route,
++        no real model (proposal of the agent, 2026-11-16, A-156)
++      hardware: HW-target
++      rated: '2026-11-16'
++      rated_by: maldun
++      rating: plausible
+     REQ-CHA-048:
+       basis:
+       - no number, measurement or model quality depends on it; the behaviour is fixed
+diff --git a/specs/mia/test-requirements.md b/specs/mia/test-requirements.md
+index 5b3c89c..4ca38a0 100644
+--- a/specs/mia/test-requirements.md
++++ b/specs/mia/test-requirements.md
+@@ -316,7 +316,7 @@ Requirements on the checks of `test-spec.md` (M41): under which conditions a ver
+ - History: G-V3.CHAT Plan step 3 (2026-11-08), new
+ 
+ ### TR-CHAT-006 – fake model server for the logic checks
+-- Applies to: TC-CHA-040, TC-CHA-041, TC-CHA-042, TC-CHA-043, TC-CHA-044, TC-CHA-045, TC-CHA-046, TC-CHA-047, TC-CHA-048, TC-CHA-050, TC-CHA-051, TC-CHA-052, TC-CHA-055, TC-CHA-056, TC-CHA-057, TC-CHA-058, TC-CHA-059, TC-CHA-060, TC-CHA-061, TC-CHA-062, TC-CHA-063, TC-CHA-069, TC-CHA-070, TC-CHA-071
++- Applies to: TC-CHA-040, TC-CHA-041, TC-CHA-042, TC-CHA-043, TC-CHA-044, TC-CHA-045, TC-CHA-046, TC-CHA-047, TC-CHA-048, TC-CHA-050, TC-CHA-051, TC-CHA-052, TC-CHA-055, TC-CHA-056, TC-CHA-057, TC-CHA-058, TC-CHA-059, TC-CHA-060, TC-CHA-061, TC-CHA-062, TC-CHA-063, TC-CHA-069, TC-CHA-070, TC-CHA-071, TC-CHA-072
+ - Requirement: REQ-CHA-040
+ - Group: Fakes (CHAT)
+ - Kind: setup
+diff --git a/tests/acceptance/test_chat_skill_turns.py b/tests/acceptance/test_chat_skill_turns.py
+index fba5d2f..aa9c59c 100644
+--- a/tests/acceptance/test_chat_skill_turns.py
++++ b/tests/acceptance/test_chat_skill_turns.py
+@@ -9,6 +9,7 @@ import re
+ import shutil
+ import sys
+ import tempfile
++import types
+ import unittest
+ 
+ HERE = os.path.dirname(os.path.abspath(__file__))
+@@ -22,6 +23,7 @@ from chat_service import ChatService           # noqa: E402
+ from fake_model import FakeModel               # noqa: E402
+ from moods import MoodTracker                  # noqa: E402
+ from skill_digest import SkillDigestStep       # noqa: E402
++from skill_run_observer import SkillRunObserver   # noqa: E402
+ 
+ PHASES = ("collect", "rank", "report")
+ LINK = " [Open in the Skill run view](#run=%s)"
+@@ -89,18 +91,21 @@ class SkillTurns(unittest.TestCase):
+         self.assertTrue(chat.spoken_once("Which topic?") and chat.spoken_once("Which year?"))
+ 
+     @mark.req("REQ-CHA-041")
+-    def test_one_status_message_per_declared_phase(self):
+-        """TC-CHA-041: three declared phases give three status messages in order, each the wording of the step and spoken.
+-        Example: phase collect gives "Collecting the works."."""
+-        # Given: a scripted skill that declares collect, rank and report; the fake model answers each status request with a fixed sentence
+-        chat = Chat(self, {"collect": "Collecting the works.", "rank": "Ranking them.", "report": "Writing the report."})
+-        # When: the run enters the three phases
+-        for phase in PHASES:
++    def test_a_phase_is_noted_once_in_the_run_status_and_is_no_chat_message(self):
++        """TC-CHA-041 (A-156): three declared phases are three entries of the run status and no chat message; a repeated phase is noted once; nothing is sent to speech.
++        Example: collect, rank, report, report -> the status holds collect, rank, report; the chat is empty."""
++        # Given: a scripted skill that declares collect, rank and report, a recorder of the status of the run and a chat (the digest step has no reply to give)
++        chat = Chat(self, [])
++        noted = []
++        recorder = types.SimpleNamespace(start=lambda *a, **k: None, phase=lambda run, text: noted.append(text))
++        observer = SkillRunObserver(recorder, "r1", "lookup", 1, "anna", phases=PHASES, on_phase=None)
++        # When: the run enters the three phases and then the third one again
++        for phase in PHASES + ("report",):
++            observer.phase(phase)
+             chat.turn("r1", "phase", phase)
+-        # Then: three status messages follow in this order, worded by the step
+-        self.assertEqual(chat.texts(), ["Collecting the works.", "Ranking them.", "Writing the report."])
+-        # And: each is spoken
+-        self.assertTrue(all(chat.spoken_once(text) for text in chat.texts()))
++        # Then: the status notes the three phases in order, once each; the chat holds no message and nothing was spoken
++        self.assertEqual(noted, ["collect", "rank", "report"])
++        self.assertEqual((chat.texts(), chat.spoken), ([], []))
+ 
+     @mark.req("REQ-CHA-042")
+     def test_a_phase_that_is_not_declared_gives_no_message(self):
+@@ -112,7 +117,7 @@ class SkillTurns(unittest.TestCase):
+         acks = [chat.turn("r1", "phase", phase) for phase in PHASES + ("cleanup",)]
+         # Then: the fourth phase gives no message
+         self.assertEqual(acks[-1], {"id": None})
+-        self.assertEqual(chat.texts(), ["Collecting.", "Ranking.", "Reporting."])
++        self.assertEqual(chat.texts(), [])        # A-156: a declared phase is no chat message either
+ 
+     @mark.req("REQ-CHA-043")
+     def test_the_end_summary_is_one_message_worded_by_the_step(self):
+@@ -139,8 +144,8 @@ class SkillTurns(unittest.TestCase):
+ 
+     @mark.req("REQ-CHA-045", "REQ-CHA-047")
+     def test_every_added_message_is_sent_to_speech_once(self):
+-        """TC-CHA-045: every message that the Chat agent added, questions, status messages and the summary, was sent to speech exactly once.
+-        Example: two questions, three status messages and one summary are six messages and six speech inputs."""
++        """TC-CHA-045: every message that the Chat agent added, the questions and the summary, was sent to speech exactly once; the phases are no messages (A-156).
++        Example: two questions, three phases and one summary are three messages and three speech inputs."""
+         # Given: a scripted review with two questions, three declared phases and a long result, and the speech recorder
+         chat = Chat(self, {"collect": "Collecting.", "rank": "Ranking.", "report": "Reporting.", "Sentence": "Found 12 works."})
+         # When: the run ends
+@@ -151,14 +156,15 @@ class SkillTurns(unittest.TestCase):
+         chat.turn("r1", "phase", "report")
+         chat.turn("r1", "done", numbered(300))
+         # Then: every message of the chat was sent to speech exactly once
+-        self.assertEqual(len(chat.records()), 6)
++        self.assertEqual(len(chat.records()), 3)
++        self.assertEqual(len(chat.spoken), 3)
+         for record in chat.records():
+             self.assertTrue(chat.spoken_once(record["text"].split(" [Open")[0]), record["text"])
+ 
+     @mark.req("REQ-CHA-046")
+     def test_the_model_history_holds_questions_answers_summary_and_the_last_status(self):
+-        """TC-CHA-046: the history of the next chat turn holds the two questions, the two answers, the summary and the third status message.
+-        Example: statuses one and two are not in it, the third is."""
++        """TC-CHA-046: the history of the next chat turn holds the two questions, the two answers and the summary, and no phase text (A-156).
++        Example: "Reporting." is not in it."""
+         # Given: a run with two questions, two answers, three status messages and a summary
+         chat = Chat(self, {"collect": "Collecting.", "rank": "Ranking.", "report": "Reporting.", "Sentence": "Found 12 works."})
+         chat.turn("r1", "question", "Which topic?")
+@@ -172,23 +178,22 @@ class SkillTurns(unittest.TestCase):
+         # When: the next chat turn builds the model history
+         history = [m["text"] for m in chat.service.model_history()]
+         # Then: it holds the two questions, the two answers, the third status message and the summary, in order
+-        self.assertEqual(history, ["Which topic?", "canary", "Which year?", "2024", "Reporting.", "Found 12 works." + LINK % "r1"])
++        self.assertEqual(history, ["Which topic?", "canary", "Which year?", "2024", "Found 12 works." + LINK % "r1"])
+ 
+     @mark.req("REQ-CHA-047")
+     def test_messages_that_break_a_behaviour_rule_are_repaired(self):
+-        """TC-CHA-047: a status message, a summary, a failure message and a stop message that each break a rule are repaired, four repairs are made, and no correction is in the conversation memory.
++        """TC-CHA-047: a summary, a failure message and a stop message that each break a rule are repaired, three repairs are made, and no correction is in the conversation memory.
+         Example: the scripted wording BAD becomes good."""
+         # Given: scripted messages that each break a behaviour rule of the list (the marker BAD stands for the violation)
+-        chat = Chat(self, {"collect": "BAD status.", "Sentence": "BAD summary.", "reason one": "BAD failure.", "reason two": "BAD stop."},
++        chat = Chat(self, {"Sentence": "BAD summary.", "reason one": "BAD failure.", "reason two": "BAD stop."},
+                     repair=lambda text: text.replace("BAD", "Good"))
+         # When: they are worded and added
+-        chat.turn("r1", "phase", "collect")
+         chat.turn("r1", "done", numbered(300))
+         chat.turn("r2", "failed", "reason one")
+         chat.turn("r3", "stopped", "reason two")
+-        # Then: each one is repaired, four repairs were made
++        # Then: each one is repaired, three repairs were made
+         self.assertTrue(all("BAD" not in text for text in chat.texts()))
+-        self.assertEqual(len(chat.repaired), 4)
++        self.assertEqual(len(chat.repaired), 3)
+         # And: no correction is in the conversation memory
+         self.assertTrue(all("BAD" not in m["text"] for m in chat.service.model_history()))
+ 
+@@ -300,7 +305,7 @@ class SkillTurns(unittest.TestCase):
+ 
+     @mark.req("REQ-CHA-059")
+     def test_the_first_status_messages_and_the_full_result_are_not_in_the_history(self):
+-        """TC-CHA-059: neither of the first two status messages and not the full result is in the model history.
++        """TC-CHA-059: no phase text and not the full result is in the model history (A-156).
+         Example: "Collecting." and "Ranking." are not in it."""
+         # Given: a run with three status messages and a long result
+         result = numbered(300)
+@@ -310,9 +315,10 @@ class SkillTurns(unittest.TestCase):
+         chat.turn("r1", "done", result)
+         # When: the next chat turn builds the model history
+         history = [m["text"] for m in chat.service.model_history()]
+-        # Then: neither of the first two status messages and not the full result is in it
++        # Then: no phase text and not the full result is in it
+         self.assertNotIn("Collecting.", history)
+         self.assertNotIn("Ranking.", history)
++        self.assertNotIn("Reporting.", history)
+         self.assertTrue(all(result not in text for text in history))
+ 
+     @mark.req("REQ-CHA-060")
+@@ -380,21 +386,36 @@ class SkillTurns(unittest.TestCase):
+     def test_html_tags_are_removed_from_every_output_of_the_step(self):
+         """TC-CHA-069: a tag in the text of the step is removed, its inner text stays; text without a tag and a lone `<` are unchanged.
+         Example: `Done: <script>alert(1)</script> and <b>x</b>` gives `Done: and x` (A-151: the content of a script element goes with it); `5 < 6 is true` stays."""
+-        # Given: a fake model whose four replies hold tags, a lone `<` and nothing special
+-        chat = Chat(self, ["Done: <script>alert(1)</script> and <b>x</b>", "5 < 6 is true", "Plain words.", "Stopped <i>now</i>."])
+-        # When: a summary, a failure message, a stop message and a status message are added
++        # Given: a fake model whose three replies hold tags, a lone `<` and nothing special
++        chat = Chat(self, ["Done: <script>alert(1)</script> and <b>x</b>", "5 < 6 is true", "Plain words."])
++        # When: a summary, a failure message and a stop message are added
+         chat.turn("r1", "done", "result")
+         chat.turn("r2", "failed", "reason")
+         chat.turn("r3", "stopped", "user")
+-        chat.turn("r4", "phase", "collect")
+         # Then: the tags are gone, the rest is as the model wrote it, and no message holds a tag
+         texts = chat.texts()
+         self.assertEqual(texts[0], "Done: and x" + LINK % "r1")
+         self.assertEqual(texts[1], "5 < 6 is true" + LINK % "r2")
+         self.assertEqual(texts[2], "Plain words." + LINK % "r3")
+-        self.assertEqual(texts[3], "Stopped now.")
+         self.assertFalse(any(re.search(r"</?[A-Za-z][^>]*>", t) for t in texts))
+ 
+ 
++class OneVoice(unittest.TestCase):
++    @mark.req("REQ-CHA-067")
++    def test_the_skill_of_a_task_with_end_messages_has_no_voice_of_its_own(self):
++        """TC-CHA-072 (A-156): the end message is the only spoken text of a run, so a task with end messages gets no voice for its skill; a task without keeps the voice as the settings say.
++        Example: speaker_for({}, "lookup", speak, end_messages=True) is None; speaker_for({}, "lookup", speak) is speak."""
++        # Given: the voice rule and a voice route
++        from workflow_voice import speaker_for
++        speak = object()
++        # When: it is asked for a task with end messages, in the default settings, with the voice of the task off and with it on
++        # Then: it gives no voice, in all three
++        for cfg in ({}, {"workflow_speak_tasks": {"lookup": False}}, {"workflow_speak_tasks": {"lookup": True}}):
++            self.assertIsNone(speaker_for(cfg, "lookup", speak, end_messages=True))
++        # And: a task without end messages keeps the voice as the settings say
++        self.assertIs(speaker_for({}, "lookup", speak), speak)
++        self.assertIsNone(speaker_for({"workflow_speak_tasks": {"lookup": False}}, "lookup", speak))
++
++
+ if __name__ == "__main__":
+     unittest.main()
+diff --git a/tests/helpers/mocks/if_201_chat_turn.py b/tests/helpers/mocks/if_201_chat_turn.py
+index 8a16ac2..d577db6 100644
+--- a/tests/helpers/mocks/if_201_chat_turn.py
++++ b/tests/helpers/mocks/if_201_chat_turn.py
+@@ -75,9 +75,7 @@ class ChatTurnMock:
+             raise ServiceError("invalid_kind")
+         link = " [Open in the Skill run view](#run=%s)" % run                # added by code (REQ-CHA-056)
+         if kind == "phase":
+-            if payload not in self._phases:
+-                return {"id": None}                                          # an undeclared phase adds no message
+-            text = "Working on: %s." % payload
++            return {"id": None}                                              # a phase is noted in the run status and is no chat message (A-156, REQ-CHA-041)
+         elif kind == "question":
+             text = payload
+         elif kind == "done":

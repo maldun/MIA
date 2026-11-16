@@ -367,7 +367,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 ## Groups of G-V3.CHAT
 | Order | Group | What it covers | Requirements |
 |---|---|---|---|
-| 1 | ST | Skill turns: what the chat shows of a run and what the model sees (FR-35, FR-46) | REQ-CHA-040, REQ-CHA-041, REQ-CHA-042, REQ-CHA-043, REQ-CHA-044, REQ-CHA-045, REQ-CHA-046, REQ-CHA-047, REQ-CHA-055, REQ-CHA-056, REQ-CHA-057, REQ-CHA-058, REQ-CHA-059, REQ-CHA-060 |
+| 1 | ST | Skill turns: what the chat shows of a run and what the model sees (FR-35, FR-46) | REQ-CHA-040, REQ-CHA-041, REQ-CHA-042, REQ-CHA-043, REQ-CHA-044, REQ-CHA-045, REQ-CHA-046, REQ-CHA-047, REQ-CHA-055, REQ-CHA-056, REQ-CHA-057, REQ-CHA-058, REQ-CHA-059, REQ-CHA-060, REQ-CHA-067 |
 | 2 | UT | Untrusted result (TB-result) | REQ-CHA-048, REQ-CHA-049, REQ-CHA-061, REQ-CHA-064, REQ-CHA-066 |
 | 3 | BG | Budgets of the digest step | REQ-CHA-050, REQ-CHA-051, REQ-CHA-052, REQ-CHA-062, REQ-CHA-063, REQ-CHA-065 |
 | 4 | SQ | Summary quality (eval criteria) | REQ-CHA-053, REQ-CHA-054 |
@@ -385,18 +385,18 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Status: Verified
 - History: A-131 (proposed 2026-11-08, G-V3.CHAT), new; owner 2026-11-08
 
-### REQ-CHA-041 – Status message per declared phase
+### REQ-CHA-041 – Phases are noted in the run status, not in the chat
 - Level: low   Subject: ConversationCore
-- Text: When a running skill enters a phase that its manifest declares worth telling, the Chat agent shall add one new status message worded by SkillDigestStep in MIA's persona.
-- Rationale: refines REQ-BE-078; FR-35: a new message per declared phase
+- Text: When a running skill enters a phase that its manifest declares worth telling, the Chat agent shall note the phase once in the status of the run (Skill run view, status card) and shall add no message to the chat for it.
+- Rationale: refines REQ-BE-078; owner 2026-11-16 (FB-09): phase texts are not in MIA's persona and clutter the chat; only what needs interaction and the end message are in the chat
 - Parent: REQ-BE-078
 - Group: ST
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-39: a scripted run that declares three phases gives three status messages in order, one per phase entered (exact)
+- Acceptance criterion: AC-39: a scripted run that declares three phases gives three phase entries in the status of the run in order and no chat message of kind `phase`; a phase that repeats the one before it is noted once (exact)
 - Verified by: TC-CHA-041
-- Status: Verified
-- History: A-131 (proposed 2026-11-08, G-V3.CHAT), new; owner 2026-11-08
+- Status: Draft
+- History: A-131 (proposed 2026-11-08, G-V3.CHAT), new; owner 2026-11-08; changed by A-156 (owner approved 2026-11-16, FB-09): was "one new status message worded by SkillDigestStep per phase"
 
 ### REQ-CHA-042 – No status for other phases
 - Level: low   Subject: ConversationCore
@@ -452,20 +452,20 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 
 ### REQ-CHA-046 – History of a run for the chat model
 - Level: low   Subject: ConversationCore
-- Text: The Chat agent shall keep the questions, the answers, the end summary and the last status message of each run in the history the chat model sees.
+- Text: The Chat agent shall keep the questions, the answers and the end summary of each run in the history the chat model sees.
 - Rationale: refines REQ-BE-078; FR-35 (owner 2026-10-30); IF-201 amendment A-142
 - Parent: REQ-BE-078
 - Group: ST
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-39: after a run with three status messages the model history holds the questions, the answers, the summary and the third status message (exact)
+- Acceptance criterion: AC-39: after a run with two questions, two answers, three phases and a summary the model history holds the questions, the answers and the summary (exact; no phase text, A-156)
 - Verified by: TC-CHA-046
 - Status: Verified
 - History: A-131 (proposed 2026-11-08, G-V3.CHAT), new; owner 2026-11-08; split at the owner's one-by-one review of 2026-11-08: the exclusions are REQ-CHA-059
 
 ### REQ-CHA-047 – Repair of the messages of a run
 - Level: low   Subject: ConversationCore
-- Text: The Chat agent shall apply the repair of REQ-CHA-014 to each status message, summary, failure message and stop message.
+- Text: The Chat agent shall apply the repair of REQ-CHA-014 to each summary, failure message and stop message.
 - Rationale: refines REQ-BE-078; FR-35, FR-3; same rule as answers
 - Parent: REQ-BE-078
 - Group: ST
@@ -624,20 +624,20 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 
 ### REQ-CHA-059 – Exclusions from the history of the chat model
 - Level: low   Subject: ConversationCore
-- Text: The Chat agent shall keep every other status message of a run and its full result out of the history the chat model sees.
+- Text: The Chat agent shall keep the phase texts of a run and its full result out of the history the chat model sees.
 - Rationale: refines REQ-BE-078; FR-35 (owner 2026-10-30): the history stays short; the full result is in the Skill run view
 - Parent: REQ-BE-078
 - Group: ST
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-39: after a run with three status messages the model history holds neither of the first two and not the full result (exact)
+- Acceptance criterion: AC-39: after a run with three phases and a long result the model history holds no phase text and not the full result (exact)
 - Verified by: TC-CHA-059
 - Status: Verified
 - History: A-131 (proposed 2026-11-08, G-V3.CHAT), new; owner 2026-11-08, split from REQ-CHA-046
 
 ### REQ-CHA-060 – Repaired text is the text shown and spoken
 - Level: low   Subject: ConversationCore
-- Text: The Chat agent shall show and send to speech the repaired text of each status message, summary, failure message and stop message.
+- Text: The Chat agent shall show and send to speech the repaired text of each summary, failure message and stop message.
 - Rationale: refines REQ-BE-078; FR-3, FR-35: spoken like answers, with the same repair
 - Parent: REQ-BE-078
 - Group: ST
@@ -725,3 +725,17 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verified by: TC-CHA-071
 - Status: Verified
 - History: A-152 (proposed 2026-11-15, G-V3.CHAT), new; owner decision 2026-11-15 by questionnaire
+
+### REQ-CHA-067 – A run is spoken once, by the persona
+- Level: low   Subject: ConversationCore
+- Text: While a skill run has the end message of the Chat agent, the Chat agent shall make sure that the skill itself does not speak its result, so that the end message is the only spoken text of the run.
+- Rationale: refines REQ-BE-078; owner 2026-11-16 (FB-09): the answer was heard twice, once from the skill and once as the summary in MIA's persona; the persona stays
+- Parent: REQ-BE-078
+- Group: ST
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: the voice rule (`workflow_voice.speaker_for`) gives no voice to the skill of a task whose run has end messages (`end_messages=True`), whatever the settings say, and keeps it, with the switches of the settings, for a task without end messages (exact); that a scripted /lookup run through the chat service speaks the sentences of its end message once and none of its answer is a unit test of the task
+- Verified by: TC-CHA-072
+- Status: Draft
+- History: A-156 (approved 2026-11-16, FB-09), new
+
