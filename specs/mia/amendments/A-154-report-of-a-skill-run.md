@@ -88,18 +88,31 @@ Not to be confused with REQ-WFM-038 (the structured report of `/review` as a dat
 - Status: Draft
 - History: A-154 (proposed 2026-11-16, FB-08), new, split from REQ-CLV-048
 
-### REQ-CLV-049 – Rendering of the report
+### REQ-CLV-049 – Links in the report
 - Level: low   Subject: WebFrontEnd
-- Text: The Chat and login views shall render the run report with the Markdown renderer of the messages, so that an http or https address is a link that opens in a new tab with `rel="noopener noreferrer"`, an address of any other kind stays text, and no image, script, style, form or event handler comes into the page.
+- Text: The Chat and login views shall render the run report with the Markdown renderer of the messages, so that an http or https address is a link that opens in a new tab with `rel="noopener noreferrer"` and an address of any other kind stays text.
 - Rationale: refines REQ-FE-032 and REQ-CLV-043; the one text of a run that may start an action, because the user clicks it and the owner asked for it (FB-08); the renderer of the chat (marked, DOMPurify) is the tested path
 - Parent: REQ-FE-032
 - Group: UT
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-39: a report with a plain URL, a source without a URL, a `javascript:` URL, a `data:` URL, a URL inside Markdown text and the five hostile strings is shown with links only for the http and https addresses (each with target `_blank` and rel `noopener noreferrer`), no `script`, `img`, `link`, `iframe` or `style` node, no alert and no request to another host (exact)
-- Verified by: TC-CLV-049 (browser), unit tests in `tests/js/` (renderer, red-team case)
+- Acceptance criterion: AC-39: a report with a plain URL, a source without a URL, a `javascript:` URL, a `data:` URL and a URL inside Markdown text is shown with links only for the http and https addresses, each with target `_blank` and rel `noopener noreferrer` (exact)
+- Verified by: TC-CLV-049 (browser), unit tests in `tests/js/` (renderer)
 - Status: Draft
-- History: A-154 (proposed 2026-11-16, FB-08), new
+- History: A-154 (proposed 2026-11-16, FB-08), new; split at the review of 2026-11-16 (REQ-CLV-052 takes the active content)
+
+### REQ-CLV-052 – No active content from the report
+- Level: low   Subject: WebFrontEnd
+- Text: The Chat and login views shall let no image, script, style, form, frame or event handler of a run report come into the page, and shall make no request to another host when they show it.
+- Rationale: refines REQ-FE-032 and REQ-CLV-043; NFR-3, TB-web and TB-result (OC-8 of G-V3); the report holds web text
+- Parent: REQ-FE-032
+- Group: UT
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: a report with the five hostile strings of TR-PANEL-005 and an `<img>` with an onerror handler is shown with no `script`, `img`, `link`, `iframe`, `style` or `form` node, no alert and no request to another host (exact)
+- Verified by: TC-CLV-052 (browser, red-team case), unit tests in `tests/js/` (renderer)
+- Status: Draft
+- History: A-154 (proposed 2026-11-16, FB-08), new, split from REQ-CLV-049
 
 ## Changes of approved items
 
@@ -146,3 +159,4 @@ The items are not in the node files yet, so `req_review.py` cannot fingerprint t
 | REQ-CLV-048 (after split) | approved as written | maldun | 2026-11-16 | |
 | REQ-CLV-050 | approved as written | maldun | 2026-11-16 | |
 | REQ-CLV-051 | approved as written | maldun | 2026-11-16 | |
+| REQ-CLV-049 | split into REQ-CLV-049 (links) and REQ-CLV-052 (no active content) | maldun | 2026-11-16 | both reviewed one by one |
