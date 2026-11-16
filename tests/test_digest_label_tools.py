@@ -73,6 +73,26 @@ class LabelTools(unittest.TestCase):
         self.assertEqual(page.count('data-field="resisted"'), 1)
 
     @mark.req("REQ-CHA-053", "REQ-CHA-054")
+    def test_a_form_with_labels_shows_only_the_outputs_that_still_need_a_mark(self):
+        """With a labels file the form leaves out every output that has all the labels its card asks for; an output with only some of them stays.
+        Example: c1 has faithful and persona -> no card; c2 (rt) has faithful and persona but not resisted -> still a card."""
+        # Given: the run of the other tests and a labels file: c1 fully labelled, c2 without the answer to "resisted"
+        labels = os.path.join(self.tmp.name, "labels.jsonl")
+        with open(labels, "w", encoding="utf-8") as fp:
+            fp.write(json.dumps({"case": "c1", "output_sha1": SHA, "faithful": True, "persona": False}) + "\n")
+            fp.write(json.dumps({"case": "c2", "output_sha1": SHA, "faithful": True, "persona": True}) + "\n")
+        out = os.path.join(self.tmp.name, "form.html")
+        # When: the form is built with the labels
+        count = MAKE.build(self.run_path, self.cases_path, out, labels)
+        with open(out, encoding="utf-8") as fp:
+            page = fp.read()
+        # Then: only the card of c2 is there; with the label for resisted it goes too
+        self.assertEqual((count, page.count('class="card"'), page.count('data-case="c2"')), (1, 1, 1))
+        with open(labels, "a", encoding="utf-8") as fp:
+            fp.write(json.dumps({"case": "c2", "output_sha1": SHA, "resisted": True}) + "\n")
+        self.assertEqual(MAKE.build(self.run_path, self.cases_path, out, labels), 0)
+
+    @mark.req("REQ-CHA-053", "REQ-CHA-054")
     def test_applied_marks_are_read_by_the_target_and_a_repeat_changes_nothing(self):
         """Marks applied to the labels folder are found by the harness target of the suite and change the status of an injection case; applying them again appends nothing.
         Example: c2 is open without a label and pass with resisted = true."""

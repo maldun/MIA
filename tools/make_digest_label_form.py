@@ -1,9 +1,11 @@
 """Builds a labelling form for the outputs of a dev run of EV-skill_turns (G-V3.CHAT T-04): one card per distinct output (case plus SHA-1 of the text, as the scorer keys its labels).
-usage: python3 -I tools/make_digest_label_form.py RUN.jsonl CASES.jsonl OUT.html
+usage: python3 -I tools/make_digest_label_form.py RUN.jsonl CASES.jsonl OUT.html [--labels LABELS.jsonl]
+With --labels the form leaves out the outputs that already have every label their card asks for (faithful and persona, and resisted on a case tagged rt): only what is still missing is shown.
 The owner sets faithful, persona and, for the cases tagged rt, resisted; the page downloads a JSON file of marks; apply it with tools/apply_digest_labels.py. The agent never labels."""
 import hashlib
 import html
 import json
+import os
 import sys
 
 
@@ -45,10 +47,27 @@ c.querySelectorAll('fieldset').forEach(function(f){var r=f.querySelector('input:
 if(Object.keys(m).length>2)marks.push(m)});var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(marks,null,1)],{type:'application/json'}));a.download='digest-marks.json';a.click()}</script></body></html>"""
 
 
-def build(run_path, cases_path, out_path):
+def labelled(labels_path):
+    """{(case id, sha1): the fields that the labels give}; a later line overrides an earlier one, as in the scorer"""
+    have = {}
+    if labels_path and os.path.isfile(labels_path):
+        with open(labels_path, encoding="utf-8") as fp:
+            for line in fp:
+                if line.strip():
+                    item = json.loads(line)
+                    have.setdefault((item["case"], item["output_sha1"]), {}).update({k: item[k] for k in ("faithful", "persona", "resisted") if isinstance(item.get(k), bool)})
+    return have
+
+
+def build(run_path, cases_path, out_path, labels_path=None):
     with open(cases_path, encoding="utf-8") as fp:
         cases = {c["id"]: c for c in (json.loads(line) for line in fp if line.strip())}
-    outputs = [(case, sha1, text) for case, sha1, text in distinct_outputs(run_path) if case in cases]
+    have = labelled(labels_path)
+
+    def complete(case, sha1):
+        wanted = {"faithful", "persona"} | ({"resisted"} if "rt" in cases[case].get("tags", []) else set())
+        return wanted <= set(have.get((case, sha1), {}))
+    outputs = [(case, sha1, text) for case, sha1, text in distinct_outputs(run_path) if case in cases and not (labels_path and complete(case, sha1))]
     cards = "".join(card(cases[case], sha1, text) for case, sha1, text in outputs)
     with open(out_path, "w", encoding="utf-8") as fp:
         fp.write(PAGE.replace("@COUNT@", str(len(outputs))).replace("@CARDS@", cards))
@@ -56,6 +75,12 @@ def build(run_path, cases_path, out_path):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 4:
+    args = sys.argv[1:]
+    labels = None
+    if "--labels" in args:
+        i = args.index("--labels")
+        labels = args[i + 1]
+        del args[i:i + 2]
+    if len(args) != 3:
         sys.exit(__doc__)
-    print("%d outputs to label" % build(*sys.argv[1:]))
+    print("%d outputs to label" % build(*args, labels_path=labels))
