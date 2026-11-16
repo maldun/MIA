@@ -8,6 +8,13 @@ import os
 import subprocess
 import sys
 
+try:
+    from .graph_run import Stage
+    from .toolbox import ToolboxError
+except ImportError:
+    from graph_run import Stage
+    from toolbox import ToolboxError
+
 
 class ConversionError(Exception):
     """a skill is marked converted without a passed equivalence check (REQ-WFM-057)"""
@@ -166,6 +173,19 @@ class EquivalenceSettings:
 
 
 def stages_from_toolbox(graph, toolbox):
-    """STUB (T-CV-04a, A-125 Q4): returns (nodes, trust): `nodes` = {node id: Stage(function)} for GraphRunner.run, built from the toolbox entry named by the `toolbox_id` of each transform or
-    master node (an entry with `stage` is called through Toolbox.run_stage, one with `run` through Toolbox.run with the inputs); `trust(node id)` = the trust of that entry."""
-    return None
+    """(nodes, trust) for GraphRunner.run (A-125 Q4, D-253): `nodes` = {node id: Stage(function)} for each transform or master node, built from the toolbox entry named by its
+    `toolbox_id`; `trust(node id)` = the trust of that entry. The entry is looked up when the node runs, so a trust change between two runs counts."""
+    entries = {n["id"]: n["data"]["toolbox_id"] for n in graph["nodes"] if n["data"].get("type") != "data"}
+
+    def stage_of(tid):
+        def call(inputs, outputs, node):
+            # an entry with `stage` wants the three-argument call; one with `run` only the inputs (the code text is never read here, the entry decides)
+            try:
+                return toolbox.run_stage(tid, inputs, outputs, node)
+            except ToolboxError as error:
+                if error.code != "no_stage":
+                    raise
+            return toolbox.run(tid, dict(inputs))
+        return Stage(call)
+
+    return {node_id: stage_of(tid) for node_id, tid in entries.items()}, lambda node_id: toolbox.look_up(entries[node_id])["trust"]

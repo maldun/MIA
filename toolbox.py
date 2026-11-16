@@ -21,6 +21,7 @@ ToolboxError has `code` and `why` (a text for the person).
 - seed_shipped(nodes_dir): see the method (REQ-WFM-056); shipped entries hold thin code text that calls common_operations (T-CV-03b).
 """
 import glob
+import inspect
 import json
 import os
 
@@ -65,14 +66,28 @@ def stage(inputs, outputs, node):
 """
 
 
+def _defaults(node, accepted=None):
+    """the `params` defaults of a library node as {name: default}; with `accepted` (the parameter names of the function) only those it takes: a node may declare a param its function lacks"""
+    found = {name: spec["default"] for name, spec in (node.get("params") or {}).items() if isinstance(spec, dict) and "default" in spec}
+    return found if accepted is None else {name: value for name, value in found.items() if name in accepted}
+
+
+def _accepted(function):
+    """the parameter names of a function, None when it takes any keyword (a placeholder that the app binds later)"""
+    parameters = inspect.signature(function).parameters.values()
+    return None if any(p.kind is p.VAR_KEYWORD for p in parameters) else {p.name for p in parameters}
+
+
 def shipped_code(node):
-    """the thin code text of a shipped node (T-CV-03b): code nodes call the common module by name, models and tools run as steps with the node's data"""
+    """the thin code text of a shipped node (T-CV-03b): code nodes call the common module by name, models and tools run as steps with the node's data.
+    The `params` defaults of the node are embedded as data and a value in the call wins (T-CV-04a, D-253)."""
     kind, body = node.get("kind"), node.get("body", {})
     if kind == "code" and body.get("function") in common_operations.FUNCTIONS:
-        return IMPORT_OPS + "\n\ndef run(args):\n    return ops.call(%r, args)\n" % body["function"]
+        defaults = _defaults(node, _accepted(common_operations.FUNCTIONS[body["function"]]))
+        return IMPORT_OPS + "\nDEFAULTS = %r\n\n\ndef run(args):\n    return ops.call(%r, {**DEFAULTS, **args})\n" % (defaults, body["function"])
     if kind == "model":
-        return IMPORT_OPS + "\n\ndef stage(inputs, outputs, node):\n    return ops.model_step(%r, %r, %r, inputs, retries=%r)\n" % (
-            body["system"], body["template"], body["schema"], body.get("retries", 1))
+        return IMPORT_OPS + "\nDEFAULTS = %r\n\n\ndef stage(inputs, outputs, node):\n    return ops.model_step(%r, %r, %r, {**DEFAULTS, **inputs}, retries=%r)\n" % (
+            _defaults(node), body["system"], body["template"], body["schema"], body.get("retries", 1))
     if kind == "tool":
         return IMPORT_OPS + "\n\ndef stage(inputs, outputs, node):\n    return ops.tool_step(inputs)\n"
     why = "%s runs only in the old runner: it has no common function." % node["id"]

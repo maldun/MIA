@@ -12,6 +12,8 @@
 - Steps and picks are chained in the order of the pipeline (graph_order.order_steps). What cannot be placed (a library node that is missing, an unknown node kind, an unknown
   variable, an ID used twice) refuses the whole pipeline: graph None, `refused` = [{"node", "reason"}] (the skill stays on the old runner, REQ-WFM-057).
 """
+import copy
+
 try:
     from .graph_order import order_steps
 except ImportError:
@@ -196,7 +198,28 @@ def _result(graph, inputs, result, notes, refused):
 
 
 def bind_skill(graph, library_nodes, skill, changes=None):
-    """STUB (T-CV-04a, A-125 Q2): returns a NEW graph with the model descriptor node `descriptor.model` ({"model": profile, "options": ...} of the skill's `model` setting, `changes["model"]`
-    replacing profile and options where it gives them) and an edge {"as": "model"} into every transform whose library node is of kind model; a data node `descriptor.tool.<name>`
-    ({"tool": name, "settings": {}}) and an edge {"as": "tool"} into every tool step. The stub returns nothing, so the acceptance tests fail on an assertion."""
-    return None
+    """A NEW graph with the descriptors the common operations read (A-125 Q2, D-253): the data node `descriptor.model` ({"model": profile, "options": ...} of the skill's `model`
+    setting, `changes["model"]` replacing profile and options where it gives them) with an edge {"as": "model"} into every transform whose library node is of kind model, and
+    `descriptor.tool.<name>` ({"tool": name, "settings": {}}) with an edge {"as": "tool"} into every tool step. No descriptor node is added where no step needs it."""
+    bound = copy.deepcopy(graph)
+    setting = {**(skill.get("model") or {}), **((changes or {}).get("model") or {})}
+    descriptor = {"model": setting.get("profile"), "options": setting.get("options") or {}}
+    added = {}
+    for node in graph["nodes"]:
+        library = library_nodes.get(node["data"].get("toolbox_id"))
+        if not library or node["data"].get("type") == "data":
+            continue
+        if library.get("kind") == "model":
+            added.setdefault("descriptor.model", (descriptor, "model"))
+            _bind_edge(bound, "descriptor.model", node["id"], "model")
+        elif library.get("kind") == "tool":
+            name = library["body"]["tool"]
+            added.setdefault("descriptor.tool." + name, ({"tool": name, "settings": {}}, "tool"))
+            _bind_edge(bound, "descriptor.tool." + name, node["id"], "tool")
+    for node_id, (value, _) in added.items():
+        bound["nodes"].append({"id": node_id, "data": {"type": "data", "value": value}})
+    return bound
+
+
+def _bind_edge(graph, source, target, name):
+    graph["edges"].append({"id": "%s>%s" % (source, target), "from": source, "to": target, "data": {"as": name}})
