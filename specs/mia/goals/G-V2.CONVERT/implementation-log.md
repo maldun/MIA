@@ -122,3 +122,9 @@ Line of work `goal/v2.convert`, supervised. Test runs here are feedback, not ver
 - Run file `data/eval/computable__converted__20261116-193653.jsonl` (git-ignored); feedback, not verification. First complete run: not the one re-run of a FAIL.
 - Wrong in all 3 repeats (read this transcript before accepting): bmi-right (a true claim judged false, in every repeat). It is the only case; not compared with the old run case by case.
 - The acceptance record (`accept_conversion.py`) is not written for any skill (owner).
+
+## T-CV-06a: tools on the converted path (owner decisions 2026-11-16, questionnaire; D-numbers wait for a new range from the parent, D-259 ended the CONVERT range)
+- **Budgets:** counted inside `tool_step`, one counter per run, the budget keys of the old runner (web_search -> search_calls, fetch_page -> fetch_calls), reserved before the call, over the limit raises BudgetExceeded; covers top-level tool steps and tools inside map and loop, also with parallel workers.
+- **IF-402 door:** `run_converted` takes the app's `tool_calls` and `door_tools`: a door tool goes through `ToolCalls.call` with the run's limits and its trust label is kept; a plain function (eval, tests) is called directly as now. A refusal the door does not count gives the reserved call back, as in the old runner. No new tool, permission or network.
+- **Events:** only `tool_call` (with the trust) and `budget_spent` (used, limit); the other old events stay for a later task.
+- **Budget end:** status `budget` with the reason (search_calls, fetch_calls, seconds or steps), like the old result; the answer is what the result node holds, else empty.
