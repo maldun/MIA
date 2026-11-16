@@ -116,3 +116,4 @@ The items are not in the node files yet, so `req_review.py` cannot fingerprint t
 | Item | Result | Reviewer | Date | Note |
 |---|---|---|---|---|
 | REQ-WFM-139 | approved as written | maldun | 2026-11-16 | |
+| REQ-WFM-140 | approved as written | maldun | 2026-11-16 | IF-101 v17 still needs the contract-change step |
