@@ -527,12 +527,15 @@ class ChatApiContract(unittest.TestCase):
         events = api.events(s)
         changed = [e["payload"] for e in events if e["event"] == "files_changed"]
         done = [e["payload"] for e in events if e["event"] == "chat_done"][0]
-        self.assertEqual(changed, [{"name": "review-contract.md", "task": "review"}])
+        self.assertEqual([c["task"] for c in changed], ["review", "review"])                                       # A-155: the file of the skill, then the run report (REQ-WFM-139)
+        self.assertEqual(changed[0]["name"], "review-contract.md")
+        self.assertTrue(changed[1]["name"].endswith(".md") and changed[1]["name"] != "review-contract.md")
         self.assertEqual(done["files"], ["review-contract.md"])
         self.assertNotIn("Files:", done["text"])                                                                   # v16 (A-140, owner 2026-11-08): the `Files:` suffix of v10 is dropped
         self.assertTrue(done["text"].endswith(" [Open in the Skill run view](#run=%s)" % done["skill_run"]))        # v16: the summary ends with the link to the view
         listed = api.files(s)
-        self.assertEqual([(f["name"], f["size"], f["task"]) for f in listed], [("review-contract.md", len(b"# the report\n"), "review")])
+        self.assertEqual(sorted(f["name"] for f in listed), sorted(c["name"] for c in changed))                      # A-155: the skill's file and the run report
+        self.assertIn(("review-contract.md", len(b"# the report\n"), "review"), [(f["name"], f["size"], f["task"]) for f in listed])
         self.assertEqual(api.file(s, "review-contract.md"), b"# the report\n")
         self.assertEqual(error_of(lambda: api.file(s, "..x.md")).code, "invalid_file_name")
         self.assertEqual((error_of(lambda: api.file(s, "nothing.md")).status, error_of(lambda: api.file(s, "nothing.md")).code), (404, "not_found"))
@@ -641,7 +644,7 @@ class SkillRunViewContract(unittest.TestCase):
     @each_provider(IF, make(review=("First?",)))
     def test_the_run_that_is_shown_and_a_run_by_its_id(self, api):
         """TC-IF-101-35 (v16): `shown_run` (GET /api/skill-runs/shown) is None (204) before any run; afterwards the run record `id, skill, version, started, ended, state, phases, budget, counts, answers [{text, time}], result, material, files, elements` (v17: `elements` is the list of label and text pairs of the skill, empty when none) of the run started most recently; `skill_run(id)` (GET /api/skill-runs/<id>) gives the same record; an unknown id is 404 not_found; both need the session (401 unauthenticated).
-        Example: after a review with the answer "no": state done, answers [{"text": "no", ...}], files ["review-contract.md"]."""
+        Example: after a review with the answer "no": state done, answers [{"text": "no", ...}], files ["review-contract.md", "<the run report>"]."""
         s = api.login("anna", "pw-anna")
         api.connect(s)
         self.assertIsNone(api.shown_run(s))
@@ -651,7 +654,8 @@ class SkillRunViewContract(unittest.TestCase):
         record = api.shown_run(s)
         for key in ("id", "skill", "version", "started", "ended", "state", "phases", "budget", "counts", "answers", "result", "material", "files", "elements"):
             self.assertIn(key, record)
-        self.assertEqual((record["id"], record["state"], record["files"]), (run, "done", ["review-contract.md"]))
+        self.assertEqual((record["id"], record["state"]), (run, "done"))
+        self.assertEqual(record["files"], ["review-contract.md", record["report"]])                            # A-155: the file of the skill, then the run report
         self.assertIsInstance(record["ended"], str)
         self.assertTrue(isinstance(record["result"], str) and record["result"])
         self.assertEqual([a["text"] for a in record["answers"]], ["no"])
@@ -767,7 +771,7 @@ class SkillRunViewContract(unittest.TestCase):
     @each_provider(IF, make(review=("First?",)))
     def test_the_run_record_names_the_report_of_a_run_that_ended(self, api):
         """TC-IF-101-41 (v18, A-154): the run record carries `report`: null while the run is not over; after the end it is the name of one of the `files`.
-        Example: while the review waits for its first answer `report` is null; after the answer "no" it is "review-contract.md", which is in `files`."""
+        Example: while the review waits for its first answer `report` is null; after the answer "no" it is the name of the run report, which is in `files` after the file of the skill."""
         # Given: a review that waits for the answer to its first question
         s = api.login("anna", "pw-anna")
         api.connect(s)
