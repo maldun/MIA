@@ -514,3 +514,65 @@ The chat page: messages, queue, history, status line, voting, tasks and memos, e
 - Verified by: TC-CLV-047
 - Status: Verified
 - History: A-131 (proposed 2026-11-08, G-V3.PANEL), new; owner at the check review of 2026-11-08: the shares apply on the wide layout, the strip content scrolls inside when it does not fit
+
+### REQ-CLV-048 – Report part in the Full run
+- Level: low   Subject: WebFrontEnd
+- Text: The Chat and login views shall show in the Full run of the Skill run view an expandable part Report, whose summary line says the state of the run, that shows the run report of the run that is shown, and that has the download link of its file.
+- Rationale: refines REQ-FE-032 (FR-46); the sources of a run are links in the window the owner looks at (FB-08)
+- Parent: REQ-FE-032
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: in a headless browser after a scripted `/lookup`, the Report part is listed in the Full run with the state in its summary line, opens to the rendered report, and its download link is `/api/files/<name>` and returns the file byte for byte (exact)
+- Verified by: TC-CLV-048
+- Status: Draft
+- History: A-154 (proposed 2026-11-16, FB-08), new; split at the review of 2026-11-16 (REQ-CLV-050, 051 take the two other states)
+
+### REQ-CLV-049 – Links in the report
+- Level: low   Subject: WebFrontEnd
+- Text: The Chat and login views shall render the run report with the Markdown renderer of the messages, so that an http or https address is a link that opens in a new tab with `rel="noopener noreferrer"` and an address of any other kind stays text.
+- Rationale: refines REQ-FE-032 and REQ-CLV-043; the one text of a run that may start an action, because the user clicks it and the owner asked for it (FB-08); the renderer of the chat (marked, DOMPurify) is the tested path
+- Parent: REQ-FE-032
+- Group: UT
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: a report with a plain URL, a source without a URL, a `javascript:` URL, a `data:` URL and a URL inside Markdown text is shown with links only for the http and https addresses, each with target `_blank` and rel `noopener noreferrer` (exact)
+- Verified by: TC-CLV-049
+- Status: Draft
+- History: A-154 (proposed 2026-11-16, FB-08), new; split at the review of 2026-11-16 (REQ-CLV-052 takes the active content)
+
+### REQ-CLV-050 – Report part before the end of the run
+- Level: low   Subject: WebFrontEnd
+- Text: While the run that is shown has no report, the Chat and login views shall show in the Report part the sentence that the report comes when the run ends, and no download link.
+- Rationale: refines REQ-CLV-048; a part that is empty without a word reads as broken
+- Parent: REQ-FE-032
+- Priority: Should
+- Verification method: Test
+- Acceptance criterion: AC-39: a scripted run that is still going shows the waiting sentence and no link; when the run ends the part shows the report without a reload (exact)
+- Verified by: TC-CLV-050
+- Status: Draft
+- History: A-154 (proposed 2026-11-16, FB-08), new, split from REQ-CLV-048
+
+### REQ-CLV-051 – Report file that is gone
+- Level: low   Subject: WebFrontEnd
+- Text: Where the run report named in the run record is no longer in the files volume, the Chat and login views shall show in the Report part the sentence that the file was removed, and no download link.
+- Rationale: refines REQ-CLV-048 and REQ-WFM-037 (the user deletes files in the volume, the record keeps the name)
+- Parent: REQ-FE-032
+- Priority: Should
+- Verification method: Test
+- Acceptance criterion: AC-39: after the report file is deleted in the volume the part shows the removed sentence and no link, and the rest of the Full run is unchanged (exact)
+- Verified by: TC-CLV-051
+- Status: Draft
+- History: A-154 (proposed 2026-11-16, FB-08), new, split from REQ-CLV-048
+
+### REQ-CLV-052 – No active content from the report
+- Level: low   Subject: WebFrontEnd
+- Text: The Chat and login views shall let no image, script, style, form, frame or event handler of a run report come into the page, and shall make no request to another host when they show it.
+- Rationale: refines REQ-FE-032 and REQ-CLV-043; NFR-3, TB-web and TB-result (OC-8 of G-V3); the report holds web text
+- Parent: REQ-FE-032
+- Group: UT
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: a report with the five hostile strings of TR-PANEL-005 and an `<img>` with an onerror handler is shown with no `script`, `img`, `link`, `iframe`, `style` or `form` node, no alert and no request to another host (exact)
+- Verified by: TC-CLV-052
+- Status: Draft
+- History: A-154 (proposed 2026-11-16, FB-08), new, split from REQ-CLV-049

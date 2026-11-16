@@ -50,6 +50,11 @@ Tests of this part alone against the mocks of its neighbours (the mock of IF-101
 | TC-CLV-045 | REQ-CLV-045 | Component (browser) | 2 | a headless browser against the stub server `ui/tools/chat_stub_server.py` with the scripted stand-in skill | AC-39: a value in range is applied at once; values just outside the ranges are refused | exact |
 | TC-CLV-046 | REQ-CLV-046 | Component (browser) | 2 | a headless browser against the stub server `ui/tools/chat_stub_server.py` with the scripted stand-in skill; a fresh profile, and a profile with storage blocked | AC-39: the shares survive a reload; defaults for a fresh profile and for blocked storage | exact |
 | TC-CLV-047 | REQ-CLV-047 | Component (browser) | 2 | a headless browser against the stub server `ui/tools/chat_stub_server.py` with the scripted stand-in skill | AC-39: at the share 12 % the strip content scrolls inside and the page does not scroll | exact |
+| TC-CLV-048 | REQ-CLV-048 | Component (browser) | 2 | a headless browser against the stub server `ui/tools/chat_stub_server.py` with the scripted stand-in skill | AC-39: the Report part with the state, the rendered report and the download link `/api/files/<name>` | exact |
+| TC-CLV-049 | REQ-CLV-049 | Component | 1 | unit test in `tests/js/` with the renderer (`node --test`) | AC-39: only http and https addresses are links (new tab, noopener noreferrer); others stay text | exact |
+| TC-CLV-050 | REQ-CLV-050 | Component (browser) | 2 | a headless browser against the stub server with the scripted stand-in skill | AC-39: the waiting sentence and no link before the end; the report after the end without reload | exact |
+| TC-CLV-051 | REQ-CLV-051 | Component (browser) | 2 | a headless browser against the stub server with the scripted stand-in skill | AC-39: the removed sentence and no link after the file is deleted | exact |
+| TC-CLV-052 | REQ-CLV-052 | Component (browser) | 2 | a headless browser against the stub server with the scripted stand-in skill (red-team case); unit test in `tests/js/` | AC-39: no script, img, link, iframe, style or form node, no alert, no request to another host | exact |
 
 ## Assumptions (checked in validation)
 
@@ -316,3 +321,33 @@ Status: **Draft** (written in Phase 3 after the verification, finding F11 / D-16
 - Given: window 1440 x 900 px, the strip share set to 12 % (108 px), a running skill with three phases and two reported elements
 - When: the page is shown and the strip content is scrolled
 - Then: the strip is not higher than 108 px, its content moves inside it, and the page does not scroll
+### TC-CLV-048 – Report part in the Full run
+- Verifies: REQ-CLV-048
+- Given: a scripted `/lookup` that ends with a report file holding a source link
+- When: the run ends and the Full run part is opened
+- Then: the Report part is listed with the state in its summary line, opens to the rendered report, and its download link is `/api/files/<name>` and returns the file byte for byte
+
+### TC-CLV-049 – Links in the report
+- Verifies: REQ-CLV-049
+- Given: reports with a plain URL, a source without a URL, a `javascript:` URL, a `data:` URL, a `mailto:` address, a relative `/path` and a URL inside Markdown text
+- When: each report is rendered
+- Then: only the http and https addresses are links, each with target `_blank` and rel `noopener noreferrer`; every other address is text
+
+### TC-CLV-050 – Report part before the end of the run
+- Verifies: REQ-CLV-050
+- Given: a scripted run that is still going
+- When: the Full run part is opened, then the run ends
+- Then: the Report part shows the waiting sentence and no link; after the end it shows the report without a reload
+
+### TC-CLV-051 – Report file that is gone
+- Verifies: REQ-CLV-051
+- Given: a finished run whose report file is deleted in the files volume
+- When: the Full run part is opened
+- Then: the Report part shows the removed sentence and no link; the rest of the Full run is unchanged
+
+### TC-CLV-052 – No active content from the report
+- Verifies: REQ-CLV-052
+- Given: a report with the five fixed strings of TR-PANEL-005 and an `<img>` with an `onerror` handler
+- When: the Report part is opened
+- Then: no `script`, `img`, `link`, `iframe`, `style` or `form` node is in the view; no alert; no request leaves the page except the ones of the page itself
+

@@ -1117,3 +1117,42 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verified by: TC-WFM-138
 - Status: Verified
 - History: A-131 (proposed 2026-11-08, G-V3.PANEL), new; owner at review of batch 2: skill specific elements can be added per skill
+
+### REQ-WFM-139 – Every run ends with a report
+- Level: low   Subject: TaskRuntime
+- Text: When a skill run ends (done, stopped or failed), the Workflow management shall make sure that the run has a run report, a Markdown file of the files volume whose first line says whether the run succeeded, was stopped or failed, with the reason where there is one, also when the run gave no output; a skill writes its own report, and where it wrote none the Workflow management writes a short one from the run record (state, reason, result, figures).
+- Rationale: refines REQ-BE-033; one place for what a run found, equal for every skill (owner 2026-11-16, FB-08); a run that gives nothing still says so
+- Parent: REQ-BE-033
+- Group: RV
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: a scripted run of each registered skill (lookup, review, search) that is done, one that is stopped and one that fails each leave a report file in the files volume whose first line names the state; a scripted skill that writes no report and gives no output still gets a report that says so (exact)
+- Verified by: TC-WFM-139
+- Status: Draft
+- History: A-154 (proposed 2026-11-16, FB-08), new
+
+### REQ-WFM-140 – The run record names the report
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall hold the name of the run report in the field `report` of the run record when the run ends, and nothing in that field while the run is not over.
+- Rationale: refines REQ-BE-033 and REQ-WFM-130; the Skill run view needs to know which of the files of a run is its report (a first `.md` file would be a guess); IF-101 v17
+- Parent: REQ-BE-033
+- Group: RV
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: the record of a running run has `report` empty; after the end it holds the name of the report file, which is one of the names in `files` and can be read from the files volume (exact)
+- Verified by: TC-WFM-140
+- Status: Draft
+- History: A-154 (proposed 2026-11-16, FB-08), new; interface change IF-101 v16 to v17: one new field `report` (string or null) of the run record, no route changes
+
+### REQ-WFM-141 – Addresses and texts in a report
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall write a web address in a run report as a link only where it is an http or https address without spaces, and write every other text that came from the web, a model or a user (answer, quote, title, reason) escaped, so that it forms no link, image, tag or script in a Markdown reader.
+- Rationale: refines REQ-BE-033 and REQ-WFM-137; NFR-3; the sources are web text (TB-web, TB-result, OC-8 of G-V3); the file is also opened outside MIA
+- Parent: REQ-BE-033
+- Group: UT
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: reports of scripted runs whose sources and quotes are `javascript:alert(1)`, `data:text/html,...`, `file:///etc/passwd`, an address with `>` and a second link behind it, and the five hostile strings of TR-PANEL-005 contain no link whose target does not start with http:// or https://, and no unescaped tag or image (exact)
+- Verified by: TC-WFM-141
+- Status: Draft
+- History: A-154 (proposed 2026-11-16, FB-08), new; first code: `research_chat.format_report` (36cc3a9)

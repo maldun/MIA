@@ -2356,6 +2356,31 @@ package MIA_NodeRequirements {
         doc /* When the content of the strip does not fit its height, the Chat and login views shall scroll the content inside the strip and not move the page. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
+    requirement def <'REQ-CLV-048'> ReportPartInTheFullRun_Clv048 {
+        subject s : WebFrontEnd;
+        doc /* The Chat and login views shall show in the Full run of the Skill run view an expandable part Report, whose summary line says the state of the run, that shows the run report of the run that is shown, and that has the download link of its file. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CLV-049'> LinksInTheReport_Clv049 {
+        subject s : WebFrontEnd;
+        doc /* The Chat and login views shall render the run report with the Markdown renderer of the messages, so that an http or https address is a link that opens in a new tab with `rel="noopener noreferrer"` and an address of any other kind stays text. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CLV-050'> ReportPartBeforeTheEndOfTheRun_Clv050 {
+        subject s : WebFrontEnd;
+        doc /* While the run that is shown has no report, the Chat and login views shall show in the Report part the sentence that the report comes when the run ends, and no download link. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CLV-051'> ReportFileThatIsGone_Clv051 {
+        subject s : WebFrontEnd;
+        doc /* Where the run report named in the run record is no longer in the files volume, the Chat and login views shall show in the Report part the sentence that the file was removed, and no download link. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CLV-052'> NoActiveContentFromTheReport_Clv052 {
+        subject s : WebFrontEnd;
+        doc /* The Chat and login views shall let no image, script, style, form, frame or event handler of a run report come into the page, and shall make no request to another host when they show it. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
     requirement def <'REQ-CHV-001'> ChatWithoutTheCharacter_Chv001 {
         subject s : WebFrontEnd;
         doc /* If the Character view cannot load, then it shall report the failure to the Chat and login views through IF-111 and stay hidden. */
@@ -3394,6 +3419,21 @@ package MIA_NodeRequirements {
     requirement def <'REQ-WFM-138'> ElementsOfASkillPassedOn_Wfm138 {
         subject s : TaskRuntime;
         doc /* Where a skill reports elements of its own, the Workflow management shall pass them as label and text pairs in the event task_status and store them in the run record, without changing the skill's interface. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-139'> EveryRunEndsWithAReport_Wfm139 {
+        subject s : TaskRuntime;
+        doc /* When a skill run ends (done, stopped or failed), the Workflow management shall make sure that the run has a run report, a Markdown file of the files volume whose first line says whether the run succeeded, was stopped or failed, with the reason where there is one, also when the run gave no output; a skill writes its own report, and where it wrote none the Workflow management writes a short one from the run record (state, reason, result, figures). */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-140'> TheRunRecordNamesTheReport_Wfm140 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall hold the name of the run report in the field `report` of the run record when the run ends, and nothing in that field while the run is not over. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-141'> AddressesAndTextsInAReport_Wfm141 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall write a web address in a run report as a link only where it is an http or https address without spaces, and write every other text that came from the web, a model or a user (answer, quote, title, reason) escaped, so that it forms no link, image, tag or script in a Markdown reader. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-RUN-001'> InternetTasksOnlyOnCommand_Run001 {
@@ -4739,6 +4779,11 @@ package MIA_NodeRequirements {
     requirement r_req_clv_045 : SizesSetByTheUser_Clv045;
     requirement r_req_clv_046 : SizesKeptInTheBrowser_Clv046;
     requirement r_req_clv_047 : StripContentThatDoesNotFit_Clv047;
+    requirement r_req_clv_048 : ReportPartInTheFullRun_Clv048;
+    requirement r_req_clv_049 : LinksInTheReport_Clv049;
+    requirement r_req_clv_050 : ReportPartBeforeTheEndOfTheRun_Clv050;
+    requirement r_req_clv_051 : ReportFileThatIsGone_Clv051;
+    requirement r_req_clv_052 : NoActiveContentFromTheReport_Clv052;
     requirement r_req_chv_001 : ChatWithoutTheCharacter_Chv001;
     requirement r_req_chv_002 : OneExpressionAPI_Chv002;
     requirement r_req_chv_003 : LivingCharacter_Chv003;
@@ -4947,6 +4992,9 @@ package MIA_NodeRequirements {
     requirement r_req_wfm_136 : RunsWithoutKnowledgeOfTheView_Wfm136;
     requirement r_req_wfm_137 : TextsOfARunAreStoredAsData_Wfm137;
     requirement r_req_wfm_138 : ElementsOfASkillPassedOn_Wfm138;
+    requirement r_req_wfm_139 : EveryRunEndsWithAReport_Wfm139;
+    requirement r_req_wfm_140 : TheRunRecordNamesTheReport_Wfm140;
+    requirement r_req_wfm_141 : AddressesAndTextsInAReport_Wfm141;
     requirement r_req_run_001 : InternetTasksOnlyOnCommand_Run001;
     requirement r_req_run_002 : SwitchTheModel_Run002;
     requirement r_req_run_003 : ModelServerUnreachable_Run003;
@@ -5250,6 +5298,11 @@ package MIA_NodeRequirements {
     satisfy r_req_clv_045 by mia.frontEnd;
     satisfy r_req_clv_046 by mia.frontEnd;
     satisfy r_req_clv_047 by mia.frontEnd;
+    satisfy r_req_clv_048 by mia.frontEnd;
+    satisfy r_req_clv_049 by mia.frontEnd;
+    satisfy r_req_clv_050 by mia.frontEnd;
+    satisfy r_req_clv_051 by mia.frontEnd;
+    satisfy r_req_clv_052 by mia.frontEnd;
     satisfy r_req_chv_001 by mia.frontEnd;
     satisfy r_req_chv_002 by mia.frontEnd;
     satisfy r_req_chv_003 by mia.frontEnd;
@@ -5458,6 +5511,9 @@ package MIA_NodeRequirements {
     satisfy r_req_wfm_136 by mia.taskRuntime;
     satisfy r_req_wfm_137 by mia.taskRuntime;
     satisfy r_req_wfm_138 by mia.taskRuntime;
+    satisfy r_req_wfm_139 by mia.taskRuntime;
+    satisfy r_req_wfm_140 by mia.taskRuntime;
+    satisfy r_req_wfm_141 by mia.taskRuntime;
     satisfy r_req_run_001 by mia.taskRuntime;
     satisfy r_req_run_002 by mia.taskRuntime;
     satisfy r_req_run_003 by mia.taskRuntime;
@@ -5760,6 +5816,11 @@ package MIA_NodeRequirements {
     allocate r_req_clv_045 to mia.frontEnd;
     allocate r_req_clv_046 to mia.frontEnd;
     allocate r_req_clv_047 to mia.frontEnd;
+    allocate r_req_clv_048 to mia.frontEnd;
+    allocate r_req_clv_049 to mia.frontEnd;
+    allocate r_req_clv_050 to mia.frontEnd;
+    allocate r_req_clv_051 to mia.frontEnd;
+    allocate r_req_clv_052 to mia.frontEnd;
     allocate r_req_chv_001 to mia.frontEnd;
     allocate r_req_chv_002 to mia.frontEnd;
     allocate r_req_chv_003 to mia.frontEnd;
@@ -5968,6 +6029,9 @@ package MIA_NodeRequirements {
     allocate r_req_wfm_136 to mia.taskRuntime;
     allocate r_req_wfm_137 to mia.taskRuntime;
     allocate r_req_wfm_138 to mia.taskRuntime;
+    allocate r_req_wfm_139 to mia.taskRuntime;
+    allocate r_req_wfm_140 to mia.taskRuntime;
+    allocate r_req_wfm_141 to mia.taskRuntime;
     allocate r_req_run_001 to mia.taskRuntime;
     allocate r_req_run_002 to mia.taskRuntime;
     allocate r_req_run_003 to mia.taskRuntime;
@@ -6272,6 +6336,11 @@ package MIA_NodeRequirements {
     dependency from r_req_clv_045 to r_req_fe_032;
     dependency from r_req_clv_046 to r_req_fe_032;
     dependency from r_req_clv_047 to r_req_fe_032;
+    dependency from r_req_clv_048 to r_req_fe_032;
+    dependency from r_req_clv_049 to r_req_fe_032;
+    dependency from r_req_clv_050 to r_req_fe_032;
+    dependency from r_req_clv_051 to r_req_fe_032;
+    dependency from r_req_clv_052 to r_req_fe_032;
     dependency from r_req_chv_001 to r_req_fe_006;
     dependency from r_req_chv_002 to r_req_fe_008;
     dependency from r_req_chv_003 to r_req_fe_009;
@@ -6489,6 +6558,9 @@ package MIA_NodeRequirements {
     dependency from r_req_wfm_136 to r_req_be_033;
     dependency from r_req_wfm_137 to r_req_be_033;
     dependency from r_req_wfm_138 to r_req_be_033;
+    dependency from r_req_wfm_139 to r_req_be_033;
+    dependency from r_req_wfm_140 to r_req_be_033;
+    dependency from r_req_wfm_141 to r_req_be_033;
     dependency from r_req_run_001 to r_req_wfx_002;
     dependency from r_req_run_002 to r_req_wfx_003;
     dependency from r_req_run_003 to r_req_wfx_004;

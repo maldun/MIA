@@ -162,3 +162,19 @@ The items are not in the node files yet, so `req_review.py` cannot fingerprint t
 | REQ-CLV-049 | split into REQ-CLV-049 (links) and REQ-CLV-052 (no active content) | maldun | 2026-11-16 | both reviewed one by one |
 | REQ-CLV-049 (after split) | approved as written | maldun | 2026-11-16 | note for Implement: the chat renderer (markdown.js ALLOWED_URI_REGEXP) also lets mailto:, /path and #anchor through; for the report only http and https may be links, so the report needs its own URI rule, not the chat's |
 | REQ-CLV-052 | approved as written | maldun | 2026-11-16 | |
+
+## Moved into the node files (2026-11-16)
+
+The eight approved items are Draft in `nodes/N-2-backend/nodes/N-2.3-workflow-management/requirements.md` (REQ-WFM-139 to 141) and `nodes/N-1-web-frontend/nodes/N-1.1-chat-and-login-views/requirements.md` (REQ-CLV-048 to 052), with checks and scenarios in the two `test-spec.md` (TC-WFM-139 to 141, TC-CLV-048 to 052), requirement defs, satisfy, allocate and dependency lines in `architecture.sysml`, and the glossary term "Run report". REQ-CLV-043 and REQ-WFM-137 are **not** changed there: they change when the amendment is approved (M8).
+
+## Test requirements (proposed, `test-requirements.md` is protected: plan amendment needed)
+
+trace_check reports 8 errors until this is applied (no test requirement applies to the 8 new checks, M41). Proposed additions to the `Applies to:` lines:
+
+| Test requirement | Add |
+|---|---|
+| TR-PANEL-001 (browser, fixed window sizes) | TC-CLV-048, TC-CLV-050, TC-CLV-051, TC-CLV-052 |
+| TR-PANEL-002 (scripted stand-in skill knows nothing of the view) | TC-CLV-048, TC-CLV-050, TC-CLV-051, TC-CLV-052, TC-WFM-139, TC-WFM-140 |
+| TR-PANEL-003 (fake of `skill_runs` follows the contract) | TC-WFM-139, TC-WFM-140 |
+| TR-PANEL-005 (fixed hostile strings) | TC-CLV-049, TC-CLV-052, TC-WFM-141 |
+| TR-PANEL-006 (exact names, states, orders, figures) | TC-CLV-048, TC-CLV-050, TC-CLV-051, TC-WFM-139, TC-WFM-140 |

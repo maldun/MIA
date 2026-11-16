@@ -66,6 +66,9 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-203
 | TC-WFM-136 | REQ-WFM-136 | Component | 1 | unit test with the fake storage of `skill_runs` and a fake clock | AC-39: a skill that sends only today's events gets a record and a view | exact |
 | TC-WFM-137 | REQ-WFM-137 | Component | 1 | unit test with the fake storage of `skill_runs` and a fake clock | AC-39: stored and read back byte for byte; no tool call | exact |
 | TC-WFM-138 | REQ-WFM-138 | Component | 1 | unit test with the fake storage of `skill_runs` and a fake clock | AC-39: two reported elements are in task_status and in the run record; none gives an empty list | exact |
+| TC-WFM-139 | REQ-WFM-139 | Component | 1 | unit test with the fake storage of `skill_runs`, the fake files volume and scripted skills (lookup, review, search) | AC-39: done, stopped and failed runs each leave a report whose first line names the state; a skill without report and without output still gets one | exact |
+| TC-WFM-140 | REQ-WFM-140 | Component | 1 | unit test with the fake storage of `skill_runs` and the fake files volume | AC-39: `report` is empty while the run goes and names a file of `files` after the end | exact |
+| TC-WFM-141 | REQ-WFM-141 | Component | 1 | unit test (red-team case) with scripted runs whose sources, quotes and reasons are hostile | AC-39: only http and https addresses are links; every other text is escaped | exact |
 | TC-WFM-050 | REQ-WFM-050 | Component | 1 | unit test with the mock of the library part for transforms; a transform with an ID that is already in the toolbox and a version that is not higher | AC-32: refused naming the ID; the first stays unchanged | exact |
 | TC-WFM-051 | REQ-WFM-051 | Component | 1 | unit test with the mock of the library part for transforms; a transform with each trust value and each lifecycle value, and values outside the lists | AC-32: only untrusted or trusted, and only draft, tested or retired are accepted; any other value is refused; trust and lifecycle change independently | exact |
 | TC-WFM-052 | REQ-WFM-052 | Component | 1 | unit test with the mock of the library part for transforms; an exchange file whose status field says trusted | AC-32: stored untrusted | exact |
@@ -206,6 +209,24 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-203
 - Given: a scripted skill that reports two elements and one that reports none
 - When: both run and end
 - Then: the first has two label and text pairs in `task_status` and in the run record; the second has an empty list in both
+
+### TC-WFM-139 – Every run ends with a report
+- Verifies: REQ-WFM-139
+- Given: scripted skills that end done, stopped and failed, one that writes its own report and one that writes none and gives no output
+- When: each run ends
+- Then: the files volume holds a report per run whose first line names the state (and the reason where there is one); the skill's own report is kept as the skill wrote it; the runtime report of the silent skill says that it gave no output
+
+### TC-WFM-140 – The run record names the report
+- Verifies: REQ-WFM-140
+- Given: a scripted skill that ends with a report
+- When: the record is read while the run goes and after it ended
+- Then: `report` is empty while the run goes; afterwards it is the name of a file in `files` that can be read from the files volume
+
+### TC-WFM-141 – Addresses and texts in a report
+- Verifies: REQ-WFM-141
+- Given: sources and quotes `javascript:alert(1)`, `data:text/html,<script>alert(1)</script>`, `file:///etc/passwd`, `https://ok.example/a> [x](javascript:alert(1)) <b`, `HTTPS://UP.example/` and the five fixed strings of TR-PANEL-005 in the answer, a quote and the reason
+- When: the report is written
+- Then: every link target starts with http:// or https:// (any case); no other `<...>` or `](...)` target appears unescaped; no tag, image or script survives as markup
 
 ## Scenarios (G-V2.TOOLBOX, checks TC-WFM-050 to 056, 067, 068, 070, 090 to 095)
 
