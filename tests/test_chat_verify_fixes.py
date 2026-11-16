@@ -12,6 +12,7 @@ import sys
 import tempfile
 import threading
 import time
+import types
 import unittest
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -647,6 +648,57 @@ class Margin(unittest.TestCase):
         # Then: every call is within 4096 tokens counted 5 % higher
         self.assertTrue(model.calls)
         self.assertLessEqual(max(model.sizes(lambda text: int(len(text) / 4 * 1.05) + 1)), 4096)
+
+
+class RunSpeaksOnce(unittest.TestCase):
+    @mark.req("REQ-CHA-067")
+    def test_a_service_with_recorder_and_digest_step_has_end_messages(self):
+        """A-156: `has_end_messages` is what the voice rule of the app asks; it is true only where the run ends with a message of the Chat agent.
+        Example: recorder and digest step -> True; neither -> False."""
+        # Given: a service with a recorder and a digest step, and one without both
+        with_digest, _, _ = chat_with(self, lambda argument, on_delta, on_emotion, should_stop, monitor: "Done")
+        folder = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, folder, True)
+        plain = ChatService(lambda event, payload: None, ChatLog(os.path.join(folder, "log.jsonl")), MoodTracker(os.path.join(REPO, "moods.json")), lambda *args: "", spawn=lambda target: target())
+        # When / Then: only the first has end messages
+        self.assertTrue(with_digest.has_end_messages())
+        self.assertFalse(plain.has_end_messages())
+
+    @mark.req("REQ-CHA-067")
+    def test_a_run_through_the_chat_is_spoken_once_by_its_end_message(self):
+        """A-156: a skill that speaks its answer through the voice rule of the app is silent where the run has end messages; the summary is the one spoken text.
+        Example: the skill asks speaker_for for its voice, gets None, and the recorded speech is "All done." only."""
+        # Given: a skill that would speak its answer through the voice rule, wired to the service as the app does
+        from workflow_voice import speaker_for
+        holder, own = [], []
+
+        def runs(argument, on_delta, on_emotion, should_stop, monitor):
+            voice = speaker_for({}, "go", own.append, end_messages=holder[0].has_end_messages())
+            if voice is not None:
+                voice("the whole answer")
+            return "the whole answer"
+        chat, spoken, _ = chat_with(self, runs, replies={"the whole answer": "All done."})
+        holder.append(chat)
+        # When: the user starts it
+        chat.send("/go x", sender="anna", author="anna")
+        # Then: the skill said nothing itself, the end message was spoken once
+        self.assertEqual(own, [])
+        self.assertEqual(spoken, ["All done."])
+
+    @mark.req("REQ-CHA-041")
+    def test_an_unchanged_phase_is_noted_once_by_the_observer(self):
+        """A-156: the same phase twice in a row reaches the recorder once; a phase that returns later is noted again.
+        Example: collect, collect, rank, collect -> collect, rank, collect."""
+        # Given: an observer over a recorder that lists the phases it was told
+        from skill_run_observer import SkillRunObserver
+        noted = []
+        recorder = types.SimpleNamespace(start=lambda *a, **k: None, phase=lambda run, text: noted.append(text))
+        observer = SkillRunObserver(recorder, "r1", "go", 1, "anna", phases=PHASES)
+        # When: the phases come in
+        for phase in ("collect", "collect", "rank", "collect"):
+            observer.phase(phase)
+        # Then: a repeat in a row is noted once
+        self.assertEqual(noted, ["collect", "rank", "collect"])
 
 
 if __name__ == "__main__":
