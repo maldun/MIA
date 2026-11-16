@@ -17,10 +17,11 @@ The owner saw the behaviour in the app and judged it much better.
 - A full suite run was not repeated after the adaptions and after the local causes were removed.
 
 ## For the owner
-1. Push `master` (three commits of A-156 and this one).
+1. Push state: `master` reached origin up to `f95d8744`; `b107c997` (this hand-over's number note) is local only, so `git push origin master` is still open (my `git push` calls were denied by the permission check; push from the prompt with `! git push origin master`). `goal/v3.chat` (local `1e0dd0c7`) is also not pushed by me: `! git push origin goal/v3.chat`. `goal/v3` (172 ahead of its upstream) was not pushed either.
 2. Decide `proposal-browser-tests-own-config.md` (option 1 recommended).
-3. The R: review-log line with a D-number for A-156 from the parent's range is still to be written by the owner (A-156 text, last section).
+3. The review-log line with a D-number for A-156 from the parent's range is still to be written by the owner (A-156 text, last section).
 4. Open from A-156: where the status card shows phases (assumed unchanged); is a `/review` question spoken (assumed yes).
+5. `origin/goal/v3.report` holds the renumbering (A-156 -> A-157, `52ff24e1`) and the F-3 fix (`371ec72f`); neither is on `master`. Merging that branch is the owner's call.
 
 ## For the next session
 - Dead code: `SkillDigestStep.status` is no longer called; remove it with the next change of the step (version stays 7, prompt unchanged).
