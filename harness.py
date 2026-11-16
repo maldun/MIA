@@ -357,7 +357,7 @@ class Harness:
         """one run of the skill on the old runner, or with variant["converted"] on the graph path (G-V2.CONVERT, REQ-WFM-112, 114): the same skill and inputs, the pin decides the model"""
         if variant.get("converted"):
             return skill_converter.run_converted(skill["name"], inputs, model=_PinnedChat(self.core.runner.model, self.pin), skills_dir=self.core.skills.folder,
-                                                 library_dir=self.core.library.shipped_dir)
+                                                 library_dir=self.core.library.shipped_dir, sandbox=self.core.sandbox, broker_factory=self.core.runner.broker_factory)
         return self.core.runner.run(self._pinned(skill), self.core.graph(skill)[0], inputs, task="eval:" + suite.name, started_by="command")
 
     def _pinned(self, skill):

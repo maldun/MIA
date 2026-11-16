@@ -11,7 +11,7 @@ import sys
 import tempfile
 
 try:
-    from . import common_operations, control_flow, pipeline_graph
+    from . import checks, common_operations, control_flow, pipeline_graph
     from .graph_run import GraphRunner, Stage
     from .library import Library
     from .skill_store import load_skill
@@ -20,6 +20,7 @@ try:
     from .toolbox import Toolbox, ToolboxError
     from .workflow_library import WorkflowLibrary
 except ImportError:
+    import checks
     import common_operations
     import control_flow
     import pipeline_graph
@@ -84,7 +85,7 @@ def _latest_nodes(nodes_dir):
     return latest
 
 
-def run_converted(name, inputs, model=None, tools=None, skills_dir=None, library_dir=None, runs_dir=None, skill_changes=None, functions=None):
+def run_converted(name, inputs, model=None, tools=None, skills_dir=None, library_dir=None, runs_dir=None, skill_changes=None, functions=None, sandbox=None, broker_factory=None):
     """REQ-WFM-058, REQ-WFM-115 (A-125, D-253): runs skill `name` as a graph on the toolbox with the given model and tools. The pipeline is converted in memory at every call,
     bound to the skill and run by the GraphRunner; `skill_changes` is merged into the skill first (a test plants a changed option with it). `runs_dir` stays unused:
     this path writes no run record yet. Returns a ConvertedRun; a pipeline that cannot be converted raises ConversionError (the skill stays on the old runner)."""
@@ -102,7 +103,9 @@ def run_converted(name, inputs, model=None, tools=None, skills_dir=None, library
         common_operations.register_model(setting.get("profile"), model)
     for tool_name, function in (tools or {}).items():
         common_operations.register_tool(tool_name, function)
-    for function_name, function in (functions or {}).items():        # the functions the app builds (script_check, ...), bound for this run only
+    # script_check is the function of the old runner (checks.make_script_check) on the router the caller hands over (T-CV-07a, D-259): no router, no script runs and the check says so;
+    # `functions` binds more app-built functions (and may replace these) for this run only
+    for function_name, function in {**checks.build_script_checks(sandbox, broker_factory), **(functions or {})}.items():
         common_operations.bind(function_name, function)
     with tempfile.TemporaryDirectory(prefix="converted-run-") as folder:
         box = Toolbox(WorkflowLibrary(Storage(FileBackend(folder))), lambda account: True, _NoEvents())
