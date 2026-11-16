@@ -94,6 +94,10 @@ def shipped_code(node):
     return REFUSED % (why, why)
 
 
+CONTROLS = ("control.branch", "control.map", "control.loop")
+CONTROL_CODE = IMPORT_OPS + "\n\ndef stage(inputs, outputs, node):\n    return ops.control_step(inputs, outputs, node)\n"
+
+
 class ToolboxError(Exception):
     def __init__(self, code, why=""):
         super().__init__("%s: %s" % (code, why))
@@ -234,6 +238,14 @@ class Toolbox:
         if stage is None:
             raise ToolboxError("no_stage", "%s defines no stage(inputs, outputs, node)." % tid)
         return stage(inputs, outputs, node)
+
+    def seed_controls(self):
+        """the three controllers as shipped, trusted entries (D-258); an entry that exists stays. Apart from seed_shipped: they are no library nodes."""
+        for tid in CONTROLS:
+            if tid in self.library.list_ids("transforms"):
+                continue
+            self.library.save("transforms", tid, {"id": tid, "version": 1, "inputs": {}, "outputs": {}, "code": CONTROL_CODE}, SHIPPED_AUTHOR)
+            self.library.set_meta(tid, SHIPPED_AUTHOR, trust="trusted", shipped=True, lifecycle="tested", evidence=SHIPPED_EVIDENCE)
 
     def seed_shipped(self, nodes_dir):
         """One entry per ID of nodes_dir/<id>/<version>.json in its highest version that is not retired, trusted and shipped (REQ-WFM-056). A second call adds nothing."""

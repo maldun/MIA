@@ -11,7 +11,7 @@ import sys
 import tempfile
 
 try:
-    from . import common_operations, pipeline_graph
+    from . import common_operations, control_flow, pipeline_graph
     from .graph_run import GraphRunner, Stage
     from .library import Library
     from .skill_store import load_skill
@@ -21,6 +21,7 @@ try:
     from .workflow_library import WorkflowLibrary
 except ImportError:
     import common_operations
+    import control_flow
     import pipeline_graph
     from graph_run import GraphRunner, Stage
     from library import Library
@@ -83,7 +84,7 @@ def _latest_nodes(nodes_dir):
     return latest
 
 
-def run_converted(name, inputs, model=None, tools=None, skills_dir=None, library_dir=None, runs_dir=None, skill_changes=None):
+def run_converted(name, inputs, model=None, tools=None, skills_dir=None, library_dir=None, runs_dir=None, skill_changes=None, functions=None):
     """REQ-WFM-058, REQ-WFM-115 (A-125, D-253): runs skill `name` as a graph on the toolbox with the given model and tools. The pipeline is converted in memory at every call,
     bound to the skill and run by the GraphRunner; `skill_changes` is merged into the skill first (a test plants a changed option with it). `runs_dir` stays unused:
     this path writes no run record yet. Returns a ConvertedRun; a pipeline that cannot be converted raises ConversionError (the skill stays on the old runner)."""
@@ -101,12 +102,37 @@ def run_converted(name, inputs, model=None, tools=None, skills_dir=None, library
         common_operations.register_model(setting.get("profile"), model)
     for tool_name, function in (tools or {}).items():
         common_operations.register_tool(tool_name, function)
+    for function_name, function in (functions or {}).items():        # the functions the app builds (script_check, ...), bound for this run only
+        common_operations.bind(function_name, function)
     with tempfile.TemporaryDirectory(prefix="converted-run-") as folder:
         box = Toolbox(WorkflowLibrary(Storage(FileBackend(folder))), lambda account: True, _NoEvents())
         box.seed_shipped(os.path.join(library_dir, "nodes"))
+        box.seed_controls()
+        budget = skill.get("budget") or {}
+        common_operations.register_control(_node_call(box, nodes, setting), control_flow.Limits(seconds=budget.get("seconds"), steps=budget.get("steps")))
         stages, trust = stages_from_toolbox(graph, box)
         result = GraphRunner(trust).run(graph, stages, {"input." + field: value for field, value in (inputs or {}).items()})
     return ConvertedRun(result, result.values.get(found["result"]))
+
+
+def _node_call(box, library_nodes, model_setting):
+    """`call(use, args)` of the controllers (D-258): runs the library node `use` through its toolbox entry, so trust and lifecycle count, with the descriptor of the model or the tool
+    that a top-level step gets from bind_skill"""
+    def call(use, args):
+        tid = str(use).split("@")[0]
+        library = library_nodes[tid]
+        inputs = dict(args)
+        if library.get("kind") == "model":
+            inputs["model"] = {"model": model_setting.get("profile"), "options": model_setting.get("options") or {}}
+        elif library.get("kind") == "tool":
+            inputs["tool"] = {"tool": library["body"]["tool"], "settings": {}}
+        try:
+            return box.run_stage(tid, inputs, {}, {})
+        except ToolboxError as error:
+            if error.code != "no_stage":
+                raise
+        return box.run(tid, inputs)
+    return call
 
 
 class _NoEvents:

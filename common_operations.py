@@ -17,9 +17,11 @@ import json
 
 try:
     from . import behaviour, checks, extraction, number_gate, research, verification, web_tools
+    from . import control_flow
     from .pipeline import NodeError, render, _strip_fence
     from .schema_check import check as check_schema
 except ImportError:
+    import control_flow
     import behaviour
     import checks
     import extraction
@@ -50,6 +52,7 @@ class FunctionUnbound(Exception):
 _BOUND = {}
 _TOOLS = {}      # name -> (function, declared setting keys)
 _MODELS = {}     # profile -> chat object
+_CONTROL = {}    # "call" (use, args) -> value of a library node, "limits": the stop rules of this run (control_flow.Limits)
 
 
 def _late(name):
@@ -98,7 +101,20 @@ def register_model(profile, chat):
     _MODELS[profile] = chat
 
 
+def register_control(call, limits=None):
+    """what the controllers need of the run: the call of a library node by its ID and the stop rules (D-258)"""
+    _CONTROL.update(call=call, limits=limits)
+
+
+def control_step(inputs, outputs, node):
+    """what the thin entries control.branch, control.map and control.loop run: `node` is the settings {"construct": kind, "node": the JSON of the construct}"""
+    if "call" not in _CONTROL:
+        raise RuntimeError("no node call is registered: the controllers run only inside run_converted")
+    return control_flow.run_construct(node["node"], inputs, outputs, _CONTROL["call"], _CONTROL.get("limits"))
+
+
 def reset():
+    _CONTROL.clear()
     _TOOLS.clear()
     _MODELS.clear()
     _BOUND.clear()
