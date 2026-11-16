@@ -26,6 +26,7 @@ Task ids carry the prefix CV so that they do not collide with T-01 to T-11 of th
 | T-CV-03b Common operations module and thin toolbox entries | REQ-WFM-058 (precondition), A-123 P1b | every shipped toolbox transform runs: `toolbox.run(id, args)` gives the result of its library node on recorded inputs; a view runs as a model step with its prompt and schema as data | T-CV-03 |
 | T-CV-03c Order of independent steps | REQ-WFM-058 (precondition), A-123 P4, REQ-RUN-035 | TC-RUN-035 and TC-WFM-122 to 124: the graph built from an ordered list of steps has `order_of` equal to that list over order edges that the runner does not hand to a stage; no edge joins two process nodes (R3) | T-CV-03b |
 | T-CV-03d Pipeline to graph converter | REQ-WFM-058 (precondition), A-123 P2, P3 | TC-WFM-125 to 130: a pipeline JSON becomes a graph that passes the graph rules: stages are transforms, a loop or a map over an unknown number of items is a master node with `stop` | T-CV-03c |
+| T-CV-04a Defaults in thin entries, binder, adapter | REQ-WFM-058 (precondition), A-125 | new checks TC-WFM-131 to 134 (to be written first, red): a thin entry applies the param defaults of its library node; `bind_skill` adds the model and tool descriptor nodes; `stages_from_toolbox` runs a converted graph on the toolbox | T-CV-03d |
 | T-CV-04 Same calls on scripted replies | REQ-WFM-058 | TC-WFM-058 for each skill converted in T-CV-06 to T-CV-08 | T-CV-03d |
 | T-CV-05 Snapshots: take, list, restore, nothing deleted, owner only | REQ-WFM-061, REQ-WFM-062, REQ-WFM-063, REQ-WFM-064, REQ-WFM-065, REQ-WFM-066 | TC-WFM-061 to TC-WFM-066 | P1 (snapshotStore, IF-203 v1, IF-301 v2 through their mocks) |
 | T-CV-06 Convert research and plan_question | REQ-WFM-110, REQ-WFM-111 | TC-WFM-110, TC-WFM-111 on the dev split | T-CV-04, P3, P4 |
@@ -97,12 +98,20 @@ Task ids carry the prefix CV so that they do not collide with T-01 to T-11 of th
 - Done when: the five pipelines convert; nothing is run on a model
 - Notes: a node of the pipeline that cannot be placed by the rule of A-123 P2 keeps its skill on the old runner with that reason (REQ-WFM-057)
 
+### T-CV-04a: Defaults in thin entries, binder, adapter
+- Implements: precondition of REQ-WFM-058; A-125 (Q2, Q3, Q4; D-253)
+- Tests to turn green: new, written first (red, protected folder, the owner's go and placement): TC-WFM-131 a thin entry applies the `params` defaults of its library node and a value in the call overrides; TC-WFM-132 `bind_skill` adds a data node with the skill's model settings merged with `skill_changes` and an edge `as: model` into every model step (and tool descriptors into tool steps); TC-WFM-133 `stages_from_toolbox` builds the `nodes` map so that a converted graph of plan.free@1 runs on the toolbox with a scripted model; TC-WFM-134 an untrusted entry refuses the run before any node ran
+- Touches: `toolbox.py` (`shipped_code` embeds the defaults), `pipeline_graph.py` or `skill_converter.py` (`bind_skill`, `stages_from_toolbox`)
+- Must not touch: protected material, library nodes and pipelines, prompts
+- Depends on: T-CV-03d
+- Done when: the converted graph of plan.free@1 runs through the toolbox with a scripted model and writes its result node
+
 ### T-CV-04: Same calls on scripted replies
 - Implements: REQ-WFM-058
 - Tests to turn green: TC-WFM-058 for each converted skill
 - Touches: the converted runner path of N-2.3: `run_converted` reads the skill record and its graph, merges `skill_changes` into the data node that holds the model options, runs the graph with the adapter of T-CV-03b (A-123); the comment of TC-WFM-058 changes accordingly (protected, amendment)
 - Must not touch: protected material, prompts, schemas, tools, budgets of any skill
-- Depends on: T-CV-01, T-CV-03d
+- Depends on: T-CV-01, T-CV-04a
 - Done when: per skill the list of model calls of the old and the converted run on the recording is equal, a diff is shown otherwise
 - Notes: the main guard of the conversion; the suite run is the second guard (miss 0.10 to 0.27 at a loss of 0.20 in `eval-spec.md`)
 

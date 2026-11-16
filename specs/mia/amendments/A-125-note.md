@@ -1,6 +1,6 @@
 # A-125: what `run_converted` needs (T-CV-04, G-V2.CONVERT, design note for the owner's review)
 
-Status: **proposed, not applied, not reviewed**. Written 2026-11-16 after T-CV-03a to T-CV-03d (Stage call, order edge, common operations, pipeline converter). Decides nothing; it lists what TC-WFM-058 demands of `run_converted`, the gaps found in the repo, and the questions for the owner.
+Status: **reviewed by the owner point by point 2026-11-16 (D-253, Q1 to Q6 all as recommended)**. Written 2026-11-16 after T-CV-03a to T-CV-03d (Stage call, order edge, common operations, pipeline converter). Decides nothing; it lists what TC-WFM-058 demands of `run_converted`, the gaps found in the repo, and the questions for the owner.
 
 ## What the protected test demands (tests/acceptance/test_skill_conversion.py)
 - `run_converted(skill, inputs, model=replay.model, tools=replay.tools, skills_dir=skills/, library_dir=library/, skill_changes=...)` on a replay of one recorded run of the **old** runner. The converted run must make the same model calls: same order, messages, schema, model, profile, options (`first_difference`). Both tests loop over **all five** skills (subtests): research, plan_question, verify_claim, verify_computable, extract_claims.
@@ -27,3 +27,7 @@ Stage call with `as`, `role: settings`, `prepare`, start values, order edges (gr
 - **Q4 (G4)** The adapter is a function `stages_from_toolbox(graph, toolbox)` returning the `nodes` map for the runner. Agree?
 - **Q5 (G6, scope of T-CV-04)** TC-WFM-058 loops over five skills. T-CV-04 can make plan_question, verify_claim and extract_claims green; verify_computable and research stay red until their tasks (controllers, bind, tool budgets) are done. Accept that the protected test is green per skill, as skills are converted (no amendment), or amend it to run per skill in a table that grows?
 - **Q6 (G2)** Tool budgets and trust labels: until a task decides how a converted run counts tool calls and labels trust (before research), converted runs of skills with tools are not accepted. Agree that research's conversion is blocked on that decision?
+
+## Owner answers of 2026-11-16 (D-253)
+Q1 in memory now (a stored record is preferred once records exist). Q2 a separate binder `bind_skill(graph, library_nodes, skill, changes)`; the converter stays pure. Q3 parameter defaults inside the thin entries (seed_shipped embeds the defaults of the library node; a value in the call overrides). Q4 the adapter `stages_from_toolbox(graph, toolbox)`. Q5 TC-WFM-058 stays partly red, green skill by skill (no amendment); expected red until their tasks: verify_computable and research. Q6 research's conversion is blocked until a task (T-CV-06a) decides tool budgets and trust labels; no skill with tools is accepted before that.
+Consequence for the plan: a new task **T-CV-04a** before T-CV-04: parameter defaults in the thin entries, `bind_skill`, `stages_from_toolbox` (red tests first, for the owner's placement); T-CV-04 then implements `run_converted` over them.
