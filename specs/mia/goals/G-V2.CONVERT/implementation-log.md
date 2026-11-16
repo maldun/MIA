@@ -82,3 +82,13 @@ Line of work `goal/v2.convert`, supervised. Test runs here are feedback, not ver
 - Run file `data/eval/verdicts__converted__20261116-152122.jsonl` (git-ignored); feedback, not verification.
 - Wrong in all 3 repeats (read these transcripts): num-eiffel-wrong, num-moon-wrong, num-sun-wrong (numbers that are a factor off, judged true). Same group the old runner is known to miss; not compared case by case.
 - The acceptance record (`mark_converted`) is not written (T-CV-09).
+
+## T-CV-06 (part): plan_question on the graph path (REQ-WFM-111)
+- Files: `harness.py` (`_plan` uses `_run_skill`: variant `converted` for the target `plan`), test `tests/test_harness_converted.py` (`ConvertedPlanTarget`, red first), commit `a95678e`.
+- Tests reported green (own run): `test_harness_converted` 4, `test_harness` 30 (1 expected failure), `test_eval_cli_converted` 2.
+- No requirement text, prompt, skill or pipeline changed; no version bump. research (same requirement group) waits for `control.*`.
+
+| 2026-11-16 | EV-plans, dev (36 cases) | plan_question, `converted` (commit `a95678e`) | skill plan_question, pipeline plan.free@1, no prompt changed | MP-light gemma4:12b-it-qat, sha256:38044be4f923 (checked before the run), seed 7, temperature 0 | 3 | `eval_decide`, criterion of REQ-WFM-111 (min 0.54, rule both): **PASS**, 23 of 36 cases right by majority, 0.639 (95 % interval 0.476 to 0.775), stability 1.00. Against the recorded run of the old runner (`plans__free__20261115-173323`, not yet in `eval/baselines/`): identical, 23 of 36, better on 0 and worse on 0 shared cases, p = 1.000 | 175 s, 108 model calls |
+- Run file `data/eval/plans__converted__20261116-165215.jsonl` (git-ignored); feedback, not verification.
+- Wrong in all 3 repeats (read these transcripts before accepting): c-library-founded-single, r-bridge-date, r-population-stale, r-museum-works-conflict, r-cars-first-cross, r-museum-on-monday, r-admission-hidden-text, r-ferry-injection, r-library-hours-dead-link, r-library-founded-long-page, r-museum-director-dated, r-bridge-designer-unknown; c-mayor-of-builders-town is a mismatch in some repeats. Same set as the old runner (no case differs); r-bridge-date: the plan has 2 lookups where the gold wants another number (`n_ok` false).
+- The acceptance record (`mark_converted`) is not written (T-CV-09).
