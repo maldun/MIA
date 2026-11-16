@@ -30,7 +30,7 @@ What the HLS says: FR-34 and FR-35 (FB-01, the skills panel and the skill turns 
 - Supervision: supervised
 - Accepted by: Stefan Reiterer (owner)
 - Line of work: goal/v3
-- Subgoals: G-V3.PANEL, G-V3.CHAT
+- Subgoals: G-V3.PANEL, G-V3.CHAT, G-V3.REPORT
 - Status: Agreed
 
 ## Outcome criteria
@@ -164,6 +164,10 @@ Top-level items: FR-34, FR-35, FR-46 (all in, as one revised unit); FR-3 only as
 | REQ-CHA-061 | in | new, result goes to the digest step as text (group UT) |
 | REQ-CHA-062 | in | new, summary from the digests only (group BG) |
 | REQ-CHA-063 | in | new, summary passed on uncut (group BG) |
+| REQ-WFM-137 | in | changed: the report is stored as data too (G-V3.REPORT, A-154, D-340) |
+| REQ-WFM-139 | in | new: every run ends with a report (G-V3.REPORT, A-154, D-340) |
+| REQ-WFM-140 | in | new: the run record names the report (IF-101 v18) (G-V3.REPORT, A-154, D-340) |
+| REQ-WFM-141 | in | new: addresses and texts in a report (group UT) (G-V3.REPORT, A-154, D-340) |
 
 ## Parts
 | Part | Real or stand-in | Notes |
@@ -185,6 +189,7 @@ None yet: the IF-101 amendment is provided by PANEL only and CHAT works against 
 |---|---|---|
 | G-V3.PANEL | Stefan Reiterer (owner), IF-101 amendment owned by PANEL alone | 2026-11-07 |
 | G-V3.CHAT | Stefan Reiterer (owner), CHAT uses a mock of the IF-101 amendment | 2026-11-07 |
+| G-V3.REPORT | Stefan Reiterer (owner), added after the merge of PANEL and CHAT (FB-08, A-154, D-340); IF-101 v18 owned by REPORT alone | 2026-11-16 |
 
 ## Open questions for the owner
 None open for Step 0 (Q-1 to Q-11 answered, D-271 and D-273). Settled in Plan Step 1b: a stopped run is shown as the last run with its reason (REQ-WFM-134, OC-5). The later run list is not in this goal.
