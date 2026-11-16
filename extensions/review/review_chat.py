@@ -16,8 +16,10 @@ from .review_request import ReviewRequest, RequestError
 
 try:
     from ...report_tex import report_tex
+    from ...run_report import defang
 except ImportError:  # used as plain script / in tests
     from report_tex import report_tex
+    from run_report import defang
 
 YES = {"yes", "y", "ok", "okay", "go", "continue", "sure", "ja", "all"}
 NO = {"no", "n", "stop", "none", "nein", "cancel"}
@@ -150,7 +152,7 @@ def spoken_result(report):
 def _md(text):
     """text from outside (a title, a note, a reason, a keyword, the question, a point of the summary) as Markdown: backslash, brackets and angle brackets are written with a backslash in front,
     so that it can start no link, image or tag in the chat, in the file or in the run report (REQ-WFM-141); everything else stays as it is, a title like "Smith & Jones (2020)" stays readable"""
-    return re.sub(r"([\\\[\]<>])", r"\\\1", str(text))
+    return defang(re.sub(r"([\\\[\]<>])", r"\\\1", str(text)))
 
 
 def format_report(report, question, until):

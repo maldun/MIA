@@ -8,21 +8,36 @@ import re
 STATES = {"done": "Done", "stopped": "Stopped", "failed": "Failed"}
 NO_OUTPUT = "The run gave no output."
 MAX_REASON = 300
+MAX_NAME = 100
 _SPECIAL = re.compile(r"([\\`*_\[\]()<>#|~!&])")                                  # what can start a link, an image, a tag, a heading or a table in a Markdown reader
 _ADDRESS = re.compile(r"https?://[^\s<>]+", re.I)
 _TRAILING = ".,;:!?)]}'\""                                                       # punctuation after an address that belongs to the sentence, not to the address
 
 
+_DEFANG = ((re.compile(r"@"), r"\\@"), (re.compile(r":(?=//)"), r"\\:"), (re.compile(r"(www)\.", re.I), r"\1\\."))
+
+
+def defang(text):
+    """an ftp, a mail and a www address cannot become a link in a Markdown reader outside MIA (`a\\@b.example`, `ftp\\://x`, `www\\.x`): only http and https addresses are links (REQ-WFM-141, V-2 of the Verify)"""
+    for pattern, replacement in _DEFANG:
+        text = pattern.sub(replacement, text)
+    return text
+
+
 def escape(text):
-    """the text with every character that a Markdown or HTML reader could take as markup written as a plain character"""
-    return _SPECIAL.sub(r"\\\1", str(text))
+    """the text with every character that a Markdown or HTML reader could take as markup written as a plain character, and no address that is not an http or https address left to link"""
+    return defang(_SPECIAL.sub(r"\\\1", str(text)))
 
 
 def link_addresses(text):
     """escaped text in which every http or https address is a link `<address>`; any other address (javascript:, data:, file:, relative) stays escaped text"""
     text, parts, last = str(text), [], 0
     for match in _ADDRESS.finditer(text):
-        address = match.group(0).rstrip(_TRAILING)
+        address = match.group(0)
+        while address and address[-1] in _TRAILING:
+            if address[-1] == ")" and address.count("(") >= address.count(")"):
+                break                                                            # a parenthesis that belongs to the address (`.../Foo_(bar)`), not the one that closes a sentence
+            address = address[:-1]
         end = match.start() + len(address)
         parts.append(escape(text[last:match.start()]))
         parts.append("<%s>" % address)
@@ -65,5 +80,6 @@ def compose(state, reason=None, own=None, result="", record=None):
 
 def report_name(skill, date, question):
     """`<skill>-<date>-<first words of the question>.md`: a name that the files volume takes (letters, digits, dot, dash, underscore)"""
-    words = "-".join(re.findall(r"[a-z0-9]+", str(question or "").lower())[:6])
-    return "-".join(part for part in (re.sub(r"[^A-Za-z0-9._-]", "", str(skill)), date, words or "report") if part) + ".md"
+    words = "-".join(word[:30] for word in re.findall(r"[a-z0-9]+", str(question or "").lower())[:6])
+    stem = "-".join(part for part in (re.sub(r"[^A-Za-z0-9._-]", "", str(skill)), date, words or "report") if part)
+    return stem[:MAX_NAME - len(".md")].rstrip("-.") + ".md"                  # the files volume takes names of up to 120 characters; a very long word in the question must not cost the report (V-1 of the Verify)

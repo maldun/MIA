@@ -10,8 +10,10 @@ import re
 
 try:
     from .research import NO_ANSWER
+    from .run_report import defang
 except ImportError:  # used as plain script / in tests
     from research import NO_ANSWER
+    from run_report import defang
 
 MAX_QUOTE = 220
 
@@ -80,7 +82,7 @@ def _plain(text, limit):
     """text from the web as plain words: no markup can come through, no control characters, a limit"""
     text = " ".join(re.sub(r"[\x00-\x1f\x7f]", " ", str(text)).split())
     text = text if len(text) <= limit else text[:limit].rsplit(" ", 1)[0] + " ..."
-    return _MARKDOWN.sub(r"\\\1", text)
+    return defang(_MARKDOWN.sub(r"\\\1", text))
 
 
 def format_results(result, count=MAX_RESULTS):

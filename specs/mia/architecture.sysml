@@ -3443,7 +3443,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-WFM-137'> TextsOfARunAreStoredAsData_Wfm137 {
         subject s : TaskRuntime;
-        doc /* The Workflow management shall store the texts of a run (result, material, answers, reason, report) unchanged as text and never execute or interpret them. */
+        doc /* The Workflow management shall store the texts of a run (result, material, answers, reason) unchanged as text, and the run report as text with its state line on top and the text of the skill unchanged below it, and never execute or interpret any of them. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-WFM-138'> ElementsOfASkillPassedOn_Wfm138 {
