@@ -54,15 +54,39 @@ Not to be confused with REQ-WFM-038 (the structured report of `/review` as a dat
 
 ### REQ-CLV-048 – Report part in the Full run
 - Level: low   Subject: WebFrontEnd
-- Text: The Chat and login views shall show in the Full run of the Skill run view an expandable part Report, whose summary line says the state of the run, that shows the run report of the run that is shown, and that has the download link of its file; while the run has no report the part says that the report comes when the run ends, and where the file is gone from the volume it says that the file was removed.
+- Text: The Chat and login views shall show in the Full run of the Skill run view an expandable part Report, whose summary line says the state of the run, that shows the run report of the run that is shown, and that has the download link of its file.
 - Rationale: refines REQ-FE-032 (FR-46); the sources of a run are links in the window the owner looks at (FB-08)
 - Parent: REQ-FE-032
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-39: in a headless browser after a scripted `/lookup`, the Report part is listed in the Full run, opens to the rendered report, and its download link is `/api/files/<name>` and returns the file byte for byte; before the end it shows the waiting text; with the file deleted it shows the removed text (exact)
+- Acceptance criterion: AC-39: in a headless browser after a scripted `/lookup`, the Report part is listed in the Full run with the state in its summary line, opens to the rendered report, and its download link is `/api/files/<name>` and returns the file byte for byte (exact)
 - Verified by: TC-CLV-048
 - Status: Draft
-- History: A-154 (proposed 2026-11-16, FB-08), new
+- History: A-154 (proposed 2026-11-16, FB-08), new; split at the review of 2026-11-16 (REQ-CLV-050, 051 take the two other states)
+
+### REQ-CLV-050 – Report part before the end of the run
+- Level: low   Subject: WebFrontEnd
+- Text: While the run that is shown has no report, the Chat and login views shall show in the Report part the sentence that the report comes when the run ends, and no download link.
+- Rationale: refines REQ-CLV-048; a part that is empty without a word reads as broken
+- Parent: REQ-FE-032
+- Priority: Should
+- Verification method: Test
+- Acceptance criterion: AC-39: a scripted run that is still going shows the waiting sentence and no link; when the run ends the part shows the report without a reload (exact)
+- Verified by: TC-CLV-050
+- Status: Draft
+- History: A-154 (proposed 2026-11-16, FB-08), new, split from REQ-CLV-048
+
+### REQ-CLV-051 – Report file that is gone
+- Level: low   Subject: WebFrontEnd
+- Text: Where the run report named in the run record is no longer in the files volume, the Chat and login views shall show in the Report part the sentence that the file was removed, and no download link.
+- Rationale: refines REQ-CLV-048 and REQ-WFM-037 (the user deletes files in the volume, the record keeps the name)
+- Parent: REQ-FE-032
+- Priority: Should
+- Verification method: Test
+- Acceptance criterion: AC-39: after the report file is deleted in the volume the part shows the removed sentence and no link, and the rest of the Full run is unchanged (exact)
+- Verified by: TC-CLV-051
+- Status: Draft
+- History: A-154 (proposed 2026-11-16, FB-08), new, split from REQ-CLV-048
 
 ### REQ-CLV-049 – Rendering of the report
 - Level: low   Subject: WebFrontEnd
@@ -118,3 +142,4 @@ The items are not in the node files yet, so `req_review.py` cannot fingerprint t
 | REQ-WFM-139 | approved as written | maldun | 2026-11-16 | |
 | REQ-WFM-140 | approved as written | maldun | 2026-11-16 | IF-101 v17 still needs the contract-change step |
 | REQ-WFM-141 | approved as written | maldun | 2026-11-16 | not split |
+| REQ-CLV-048 | split into REQ-CLV-048 (part, state, download), REQ-CLV-050 (waiting), REQ-CLV-051 (file gone) | maldun | 2026-11-16 | the three are reviewed one by one; IDs 050, 051 are outside the range 030 to 049 of the plan, to be extended |
