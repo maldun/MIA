@@ -145,3 +145,4 @@ The items are not in the node files yet, so `req_review.py` cannot fingerprint t
 | REQ-CLV-048 | split into REQ-CLV-048 (part, state, download), REQ-CLV-050 (waiting), REQ-CLV-051 (file gone) | maldun | 2026-11-16 | the three are reviewed one by one; IDs 050, 051 are outside the range 030 to 049 of the plan, to be extended |
 | REQ-CLV-048 (after split) | approved as written | maldun | 2026-11-16 | |
 | REQ-CLV-050 | approved as written | maldun | 2026-11-16 | |
+| REQ-CLV-051 | approved as written | maldun | 2026-11-16 | |
