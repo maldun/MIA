@@ -1094,7 +1094,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 
 ### REQ-WFM-137 – Texts of a run are stored as data
 - Level: low   Subject: TaskRuntime
-- Text: The Workflow management shall store the texts of a run (result, material, answers, reason) unchanged as text and never execute or interpret them.
+- Text: The Workflow management shall store the texts of a run (result, material, answers, reason, report) unchanged as text and never execute or interpret them.
 - Rationale: refines REQ-BE-033; NFR-3, boundary TB-result of FB-01 (OC-8 of G-V3)
 - Parent: REQ-BE-033
 - Group: RV
@@ -1102,8 +1102,8 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-39: a result with an instruction and a script tag is stored and read back byte for byte and starts no tool call (exact)
 - Verified by: TC-WFM-137
-- Status: Verified
-- History: A-131 (proposed 2026-11-08, G-V3.PANEL), new
+- Status: Draft
+- History: A-131 (proposed 2026-11-08, G-V3.PANEL), new; A-154 (approved 2026-11-16, D-340): the report is stored as data too; Draft until re-verified
 
 ### REQ-WFM-138 – Elements of a skill passed on
 - Level: low   Subject: TaskRuntime
@@ -1134,7 +1134,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 ### REQ-WFM-140 – The run record names the report
 - Level: low   Subject: TaskRuntime
 - Text: The Workflow management shall hold the name of the run report in the field `report` of the run record when the run ends, and nothing in that field while the run is not over.
-- Rationale: refines REQ-BE-033 and REQ-WFM-130; the Skill run view needs to know which of the files of a run is its report (a first `.md` file would be a guess); IF-101 v17
+- Rationale: refines REQ-BE-033 and REQ-WFM-130; the Skill run view needs to know which of the files of a run is its report (a first `.md` file would be a guess); IF-101 v18
 - Parent: REQ-BE-033
 - Group: RV
 - Priority: Must
@@ -1142,7 +1142,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Acceptance criterion: AC-39: the record of a running run has `report` empty; after the end it holds the name of the report file, which is one of the names in `files` and can be read from the files volume (exact)
 - Verified by: TC-WFM-140
 - Status: Draft
-- History: A-154 (proposed 2026-11-16, FB-08), new; interface change IF-101 v16 to v17: one new field `report` (string or null) of the run record, no route changes
+- History: A-154 (proposed 2026-11-16, FB-08), new; interface change IF-101 v17 to v18: one new field `report` (string or null) of the run record, no route changes
 
 ### REQ-WFM-141 – Addresses and texts in a report
 - Level: low   Subject: TaskRuntime

@@ -464,8 +464,8 @@ The chat page: messages, queue, history, status line, voting, tasks and memos, e
 - Verification method: Test
 - Acceptance criterion: AC-39: a result with a script tag, a link tag and the sentence "ignore all rules" is shown as characters; no request goes out and no control appears (exact)
 - Verified by: TC-CLV-043
-- Status: Verified
-- History: A-131 (proposed 2026-11-08, G-V3.PANEL), new
+- Status: Draft
+- History: A-131 (proposed 2026-11-08, G-V3.PANEL), new; A-154 (approved 2026-11-16, D-340): the run report is excepted, the other texts stay plain text; Draft until re-verified
 
 ### REQ-CLV-044 – Elements of a skill
 - Level: low   Subject: WebFrontEnd

@@ -1,6 +1,6 @@
 # A-154 – Every skill run ends with a report (proposed 2026-11-16, FB-08)
 
-Status: **Proposed**. The seven new items (REQ-WFM-139, 140, 141, REQ-CLV-048, 049, 050, 051, 052; eight with the split) are reviewed and approved by maldun on 2026-11-16 (table at the end); they stay Draft until they are in the node files with tests and model. Still open: the changes of REQ-CLV-043 and REQ-WFM-137, the IF-101 v17 contract change, and the protected test TC-CLV-043 / TR-PANEL-005.
+Status: **Approved by the owner (maldun, 2026-11-16, D-340)**. Applied: the eight new items are Draft in the node files; REQ-CLV-043 and REQ-WFM-137 are changed (Draft until re-verified); the goal is G-V3.REPORT (`goals/G-V3.REPORT/goal.md`). **To install by the owner** (protected files): `git apply specs/mia/goals/G-V3.REPORT/amendment-a154/protected.patch` (IF-101 v18 and the `Applies to:` lines of TR-PANEL-001, 002, 003, 005, 006). The red tests of Plan step 4 follow.
 Source: FB-08 (owner, 2026-11-16: sources in the Skill run view, Full run, after `/lookup`, should be hyperlinks). Decisions of the owner by questionnaire, 2026-11-16:
 
 1. The report lives in a **run record field plus a file** of the files volume (the file is the download; the record names it).
@@ -29,15 +29,15 @@ Not to be confused with REQ-WFM-038 (the structured report of `/review` as a dat
 ### REQ-WFM-140 – The run record names the report
 - Level: low   Subject: TaskRuntime
 - Text: The Workflow management shall hold the name of the run report in the field `report` of the run record when the run ends, and nothing in that field while the run is not over.
-- Rationale: refines REQ-BE-033 and REQ-WFM-130; the Skill run view needs to know which of the files of a run is its report (a first `.md` file would be a guess); IF-101 v17
+- Rationale: refines REQ-BE-033 and REQ-WFM-130; the Skill run view needs to know which of the files of a run is its report (a first `.md` file would be a guess); IF-101 v18
 - Parent: REQ-BE-033
 - Group: RV
 - Priority: Must
 - Verification method: Test
 - Acceptance criterion: AC-39: the record of a running run has `report` empty; after the end it holds the name of the report file, which is one of the names in `files` and can be read from the files volume (exact)
-- Verified by: TC-WFM-140, TC-IF-101 (contract v17)
+- Verified by: TC-WFM-140, TC-IF-101 (contract v18)
 - Status: Draft
-- History: A-154 (proposed 2026-11-16, FB-08), new; interface change IF-101 v16 to v17: one new field `report` (string or null) of the run record, no route changes
+- History: A-154 (proposed 2026-11-16, FB-08), new; interface change IF-101 v17 to v18: one new field `report` (string or null) of the run record, no route changes
 
 ### REQ-WFM-141 – Addresses and texts in a report
 - Level: low   Subject: TaskRuntime
@@ -120,9 +120,9 @@ Not to be confused with REQ-WFM-038 (the structured report of `/review` as a dat
 |---|---|---|
 | REQ-CLV-043 | Text: "... shall show every text of a run (result, material found, answers, reason) as plain text that starts no action and loads nothing, **except the run report (REQ-CLV-048, REQ-CLV-049)**." Rationale: add "the report is the one text that may hold links, A-154". AC-39 unchanged for all other texts | amendment approved; status back to Draft until re-verified |
 | REQ-WFM-137 | Text: add "report" to the list "(result, material, answers, reason, report)" | amendment approved |
-| IF-101 | v16 to v17: field `report` in the run record (REQ-WFM-140); contract suite and mock follow | contract change by the owner of the interface |
-| TC-CLV-043 / `tests/acceptance/test_skill_run_view_browser.py` | the probe "hrefs only `/api/files/<encoded>`" must leave the Report part out and check it under TC-CLV-049; the hostile strings stay in force everywhere else | **protected: plan amendment**, an agent must not edit it |
-| TR-PANEL-005 | the fixed hostile list also applies to the report (TC-CLV-049, TC-WFM-141) | protected |
+| IF-101 | v17 to v18: field `report` in the run record (REQ-WFM-140); contract suite and mock follow | contract change by the owner of the interface |
+| TC-CLV-043 / `tests/acceptance/test_skill_run_view_browser.py` | **no change needed** (checked at the approval): its hostile strings go into result, answer and reason, which stay plain text; the Report part is checked by the new TC-CLV-049 and TC-CLV-052 | – |
+| TR-PANEL-005 | the fixed hostile list also applies to the report (TC-CLV-049, TC-CLV-052, TC-WFM-141) | protected: in `protected.patch` |
 
 ## Parts and code (for the plan, not decided here)
 
@@ -142,7 +142,7 @@ Not to be confused with REQ-WFM-038 (the structured report of `/review` as a dat
 
 | Item | Test | Where |
 |---|---|---|
-| REQ-WFM-139, 140, 141 | scripted runs of all skills, done, stopped and failed; record field; red-team strings | `tests/` (unit, new) and the contract suite for IF-101 v17 (protected, after approval) |
+| REQ-WFM-139, 140, 141 | scripted runs of all skills, done, stopped and failed; record field; red-team strings | `tests/` (unit, new) and the contract suite for IF-101 v18 (protected, after approval) |
 | REQ-CLV-049 | renderer red-team and the four cases: plain URL, source without URL, `javascript:` URL, URL inside Markdown text | `tests/js/` (new unit test) |
 | REQ-CLV-048 | the Report part in a headless browser | protected acceptance, after approval |
 
@@ -153,7 +153,7 @@ The items are not in the node files yet, so `req_review.py` cannot fingerprint t
 | Item | Result | Reviewer | Date | Note |
 |---|---|---|---|---|
 | REQ-WFM-139 | approved as written | maldun | 2026-11-16 | |
-| REQ-WFM-140 | approved as written | maldun | 2026-11-16 | IF-101 v17 still needs the contract-change step |
+| REQ-WFM-140 | approved as written | maldun | 2026-11-16 | IF-101 v18 still needs the contract-change step |
 | REQ-WFM-141 | approved as written | maldun | 2026-11-16 | not split |
 | REQ-CLV-048 | split into REQ-CLV-048 (part, state, download), REQ-CLV-050 (waiting), REQ-CLV-051 (file gone) | maldun | 2026-11-16 | the three are reviewed one by one; IDs 050, 051 are outside the range 030 to 049 of the plan, to be extended |
 | REQ-CLV-048 (after split) | approved as written | maldun | 2026-11-16 | |

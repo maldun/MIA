@@ -2333,7 +2333,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-CLV-043'> TextsOfARunAreText_Clv043 {
         subject s : WebFrontEnd;
-        doc /* The Chat and login views shall show every text of a run (result, material found, answers, reason) as plain text that starts no action and loads nothing. */
+        doc /* The Chat and login views shall show every text of a run (result, material found, answers, reason) as plain text that starts no action and loads nothing, except the run report, which REQ-CLV-048 and REQ-CLV-049 show. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-CLV-044'> ElementsOfASkill_Clv044 {
@@ -3413,7 +3413,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-WFM-137'> TextsOfARunAreStoredAsData_Wfm137 {
         subject s : TaskRuntime;
-        doc /* The Workflow management shall store the texts of a run (result, material, answers, reason) unchanged as text and never execute or interpret them. */
+        doc /* The Workflow management shall store the texts of a run (result, material, answers, reason, report) unchanged as text and never execute or interpret them. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-WFM-138'> ElementsOfASkillPassedOn_Wfm138 {
