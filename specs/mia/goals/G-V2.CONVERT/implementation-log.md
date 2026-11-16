@@ -77,3 +77,8 @@ Line of work `goal/v2.convert`, supervised. Test runs here are feedback, not ver
 - Files: `harness.py` (`_run_skill`, shared by the targets `pipeline` and `extraction`: variant `converted`), `skill_converter.py` (`ConvertedRun` has `error` and `events` like the old result), test `tests/test_harness_converted.py` (`ConvertedPipelineTarget`, red first).
 - Tests reported green (own run): `test_harness_converted` 3, `test_harness` 30, `test_run_converted`; `test_skill_conversion` 4 failures as before (research, verify_computable: `control.*`). TC-WFM-058 for verify_claim stays green (T-CV-04).
 - No requirement text, prompt, skill or pipeline changed; no version bump.
+
+| 2026-11-16 | EV-verdicts, dev (50 cases) | verify_claim, `converted` (commit `b18d406`) | skill verify_claim v1, pipeline verify.single@1, no prompt changed | MP-light gemma4:12b-it-qat, sha256:38044be4f923 (checked before the run), seed 7, temperature 0 | 3 | `eval_decide`, criterion of REQ-WFM-112 (min 0.83, rule threshold): **PASS**, 47 of 50 cases right by majority, 0.940 (95 % interval 0.838 to 0.979), stability 1.00. Recorded run of the old runner (`verdicts__single__20261115-173350`, not yet in `eval/baselines/`): 0.94; no claim of "not worse", only the threshold | 209 s, 150 model calls |
+- Run file `data/eval/verdicts__converted__20261116-152122.jsonl` (git-ignored); feedback, not verification.
+- Wrong in all 3 repeats (read these transcripts): num-eiffel-wrong, num-moon-wrong, num-sun-wrong (numbers that are a factor off, judged true). Same group the old runner is known to miss; not compared case by case.
+- The acceptance record (`mark_converted`) is not written (T-CV-09).
