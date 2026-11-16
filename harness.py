@@ -396,7 +396,7 @@ class Harness:
         for key in ("pipeline", "model"):
             if variant.get(key):
                 skill[key] = variant[key] if key == "pipeline" else ({"profile": variant[key]} if variant[key] in ("light", "full", "current") else {"name": variant[key]})
-        result = self.core.runner.run(self._pinned(skill), self.core.graph(skill)[0], case["input"], task="eval:" + suite.name, started_by="command")
+        result = self._run_skill(skill, case["input"], suite, variant)
         if result.status != "done" or not isinstance(result.answer, dict):
             return "error:" + (result.status if result.status != "done" else "no_answer"), {"error": result.error, "answer": result.answer}
         score = plans.score_plan(result.answer, case["gold"], case["input"]["question"])
