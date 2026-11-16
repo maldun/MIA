@@ -22,3 +22,14 @@
 - Correction: plan decision 6 rested on my reading of a truncated list of images; `localhost/mia-browser` existed (2026-10-31).
 - Finding F-4: while a full unit run was going I ran the browser checks at the same time; that run showed two extra failures (`test_task_files_browser`, one shares check in the dark theme). Run alone, the shares check passes. `test_task_files_browser` fails alone on master too (the Files tab of the old status card, superseded by the Skill run view): not ours, as F-3. Rule from this: browser and full runs never run together.
 - Unit suite after A-155 (T-01 complete): the same 12 failures as master plus the 2 of `test_task_files_browser`, both also on master; nothing else.
+
+## T-03: The renderer of the report
+- Status: code done (fork, branch `goal/v3.report.t03`)
+- Requirements: REQ-CLV-049, 052 (unit half)
+- Done: `reportHref` (http or https, any case of the scheme, no whitespace or control character, else null) and `renderReport` in `templates/static/chat/markdown.js`: marked, then DOMPurify with its own call config (no img, form, frame, style, script; attributes href and title only; http and https addresses only); then, on a detached `template` element, every link whose address `reportHref` accepts gets `target="_blank"` and `rel="noopener noreferrer"`, every other link is unwrapped to its text. Without a DOM the report is escaped text (`<p>` and `escapeHtml`).
+- Tests reported green (feedback, not verification): `tests/js/report-render.test.mjs` 7 of 7 (6 written in Plan step 4, one added: rendering a report does not change a chat message); `node --test "tests/js/*.test.mjs"` all green.
+- Mutants: `reportHref` returning its input (checks 2 and 5 fail), the address rule reduced to `^https?:` (check 2 fails): both caught.
+- Decisions: no DOMPurify hook is used at all (hooks are global to the library; the chat installs its own once): the target and rel attributes are set after sanitizing on a detached `template`, so the chat renderer cannot be changed by a report.
+- Findings:
+  - F-4: the DOM branch of `renderReport` (sanitize, `template`, `replaceWith`) cannot run in node (jsdom is not installed); it is covered by the browser checks TC-CLV-052 and TC-CLV-048 of T-04 (decision 6, browser image). Until then it is read, not run.
+  - The chat renderer lets `mailto:`, `/path` and `#anchor` through; the report refuses them (REQ-CLV-049): `renderReport` does not reuse the chat rules.

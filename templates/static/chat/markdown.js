@@ -54,13 +54,30 @@ export function renderMarkdown(text, origin = globalThis.location?.origin ?? 'ht
   });
 }
 
-// --- the run report (A-154, REQ-CLV-049, 052): stubs of Plan step 4, the code follows in the plan's task T-03 ---
-/** the address of a link in a run report, or null: only http and https addresses are links (REQ-CLV-049); stub */
+// --- the run report (A-154, REQ-CLV-049, 052): the one text of a run that may hold links; its own rules, the chat messages above keep theirs ---
+const REPORT_TAGS = ['p', 'br', 'strong', 'em', 'b', 'i', 'del', 'code', 'pre', 'blockquote', 'ul', 'ol', 'li', 'a', 'h1', 'h2', 'h3', 'h4', 'hr', 'table', 'thead', 'tbody', 'tr', 'th', 'td'];      // no img, form, frame, style or script
+const REPORT_ADDRESS = /^https?:\/\/[^\s\u0000-\u001f\u007f]+$/i;
+
+/** the address of a link in a run report, or null: only http and https addresses without spaces or control characters are links (REQ-CLV-049) */
 export function reportHref(href) {
-  return null;
+  return typeof href === 'string' && REPORT_ADDRESS.test(href) ? href : null;
 }
 
-/** safe HTML for a run report: like renderMarkdown, but only reportHref addresses are links and no image comes in (REQ-CLV-049, 052); stub */
-export function renderReport(text, origin = globalThis.location?.origin ?? 'http://localhost') {
-  return '';
+/** safe HTML for a run report: only reportHref addresses are links (new tab, noopener noreferrer), no image, form, frame, style, script or event handler (REQ-CLV-049, 052);
+ *  escaped text where DOMPurify cannot run. No DOMPurify hook is used: hooks are global to the library and would change how the messages of the chat are cleaned. */
+export function renderReport(text) {
+  const html = parseMarkdown(text);
+  if (!DOMPurify.isSupported) return `<p>${escapeHtml(text)}</p>`;
+  const clean = DOMPurify.sanitize(html, { ALLOWED_TAGS: REPORT_TAGS, ALLOWED_ATTR: ['href', 'title'], ALLOW_DATA_ATTR: false, ALLOWED_URI_REGEXP: /^https?:\/\//i });
+  const page = document.createElement('template');
+  page.innerHTML = clean;
+  for (const link of page.content.querySelectorAll('a')) {
+    if (reportHref(link.getAttribute('href'))) {
+      link.setAttribute('target', '_blank');
+      link.setAttribute('rel', 'noopener noreferrer');
+    } else {
+      link.replaceWith(...link.childNodes);      // an address that is not a web address stays text
+    }
+  }
+  return page.innerHTML;
 }
