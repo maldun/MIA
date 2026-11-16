@@ -160,3 +160,4 @@ The items are not in the node files yet, so `req_review.py` cannot fingerprint t
 | REQ-CLV-050 | approved as written | maldun | 2026-11-16 | |
 | REQ-CLV-051 | approved as written | maldun | 2026-11-16 | |
 | REQ-CLV-049 | split into REQ-CLV-049 (links) and REQ-CLV-052 (no active content) | maldun | 2026-11-16 | both reviewed one by one |
+| REQ-CLV-049 (after split) | approved as written | maldun | 2026-11-16 | note for Implement: the chat renderer (markdown.js ALLOWED_URI_REGEXP) also lets mailto:, /path and #anchor through; for the report only http and https may be links, so the report needs its own URI rule, not the chat's |
