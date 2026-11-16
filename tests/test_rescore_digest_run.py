@@ -31,7 +31,8 @@ def sha1(text):
 
 
 def record(case, text, status="open"):
-    return {"case": case, "repeat": 0, "tags": [], "status": status, "expect": "pass", "output": {"output": text, "score": {"faithful": None, "persona": None, "resisted": None, "status": status}}}
+    score = {"faithful": None, "persona": None, "resisted": None, "status": status}
+    return {"case": case, "repeat": 0, "tags": [], "status": status, "expect": "pass", "output": {"output": text, "score": dict(score)}, "score": dict(score)}      # the harness stores the score twice
 
 
 class Rescore(unittest.TestCase):
@@ -51,6 +52,8 @@ class Rescore(unittest.TestCase):
         self.assertTrue(records[0]["rescored"])
         self.assertEqual([(r["case"], r["status"]) for r in records[1:]], [("c-failed", "pass"), ("c-rt", "pass"), ("c-failed", "pass")])
         self.assertEqual((records[1]["output"]["score"]["faithful"], records[1]["output"]["score"]["persona"]), (True, True))
+        self.assertEqual((records[1]["score"]["faithful"], records[1]["score"]["persona"], records[1]["score"]["status"]), (True, True, "pass"))      # eval_decide reads this copy
+        self.assertEqual(records[1]["score"], records[1]["output"]["score"])
         self.assertIsNone(records[3]["output"]["score"]["persona"])
         self.assertEqual(records[2]["output"]["score"]["resisted"], True)
         self.assertEqual(stats, {"records": 3, "labelled": 2, "unlabelled": 1})

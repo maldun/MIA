@@ -39,6 +39,8 @@ def rescore(lines, cases, labels):
         if isinstance(detail, dict) and isinstance(detail.get("output"), str) and record["case"] in cases:
             score = digest_score.score_digest(cases[record["case"]], detail["output"], labels)
             record["output"] = dict(detail, score=score)
+            if "score" in record:
+                record["score"] = dict(score)                                     # the harness stores the score twice; eval_decide reads this copy for faithful and persona
             record["status"] = score["status"]
             stats["records"] += 1
             stats["labelled" if any(score.get(key) is not None for key in ("persona", "resisted")) else "unlabelled"] += 1
