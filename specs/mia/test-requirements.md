@@ -170,7 +170,7 @@ Requirements on the checks of `test-spec.md` (M41): under which conditions a ver
 ## G-V3.PANEL (Plan step 3, 2026-11-08; prefix TR-PANEL-)
 
 ### TR-PANEL-001 – browser checks of layout and size run at fixed window sizes
-- Applies to: TC-CLV-036, TC-CLV-037, TC-CLV-040, TC-CLV-041, TC-CLV-042, TC-CLV-045, TC-CLV-046, TC-CLV-047
+- Applies to: TC-CLV-036, TC-CLV-037, TC-CLV-040, TC-CLV-041, TC-CLV-042, TC-CLV-045, TC-CLV-046, TC-CLV-047, TC-CLV-048, TC-CLV-050, TC-CLV-051, TC-CLV-052
 - Requirement: REQ-CLV-040
 - Group: Layout
 - Kind: setup
@@ -182,7 +182,7 @@ Requirements on the checks of `test-spec.md` (M41): under which conditions a ver
 - History: G-V3.PANEL Plan step 3 (2026-11-08), new; versions of the harness named in Plan step 4 (2026-11-08)
 
 ### TR-PANEL-002 – the scripted stand-in skill knows nothing of the view
-- Applies to: TC-CLV-030, TC-CLV-031, TC-CLV-032, TC-CLV-033, TC-CLV-034, TC-CLV-035, TC-CLV-038, TC-CLV-039, TC-CLV-043, TC-CLV-044, TC-WFM-136, TC-WFM-138
+- Applies to: TC-CLV-030, TC-CLV-031, TC-CLV-032, TC-CLV-033, TC-CLV-034, TC-CLV-035, TC-CLV-038, TC-CLV-039, TC-CLV-043, TC-CLV-044, TC-WFM-136, TC-WFM-138, TC-CLV-048, TC-CLV-050, TC-CLV-051, TC-CLV-052, TC-WFM-139, TC-WFM-140
 - Requirement: REQ-WFM-136
 - Group: Stand-in (PANEL)
 - Kind: setup
@@ -194,7 +194,7 @@ Requirements on the checks of `test-spec.md` (M41): under which conditions a ver
 - History: G-V3.PANEL Plan step 3 (2026-11-08), new
 
 ### TR-PANEL-003 – the fake of skill_runs follows the contract
-- Applies to: TC-WFM-130, TC-WFM-131, TC-WFM-132, TC-WFM-133, TC-WFM-135, TC-WFM-136, TC-WFM-137, TC-WFM-138
+- Applies to: TC-WFM-130, TC-WFM-131, TC-WFM-132, TC-WFM-133, TC-WFM-135, TC-WFM-136, TC-WFM-137, TC-WFM-138, TC-WFM-139, TC-WFM-140
 - Requirement: REQ-WFM-130
 - Group: Stand-in (PANEL)
 - Kind: setup
@@ -218,7 +218,7 @@ Requirements on the checks of `test-spec.md` (M41): under which conditions a ver
 - History: G-V3.PANEL Plan step 3 (2026-11-08), new
 
 ### TR-PANEL-005 – fixed list of hostile strings
-- Applies to: TC-CLV-043, TC-WFM-137
+- Applies to: TC-CLV-043, TC-WFM-137, TC-CLV-049, TC-CLV-052, TC-WFM-141
 - Requirement: REQ-CLV-043
 - Group: Untrusted text
 - Kind: setup
@@ -230,7 +230,7 @@ Requirements on the checks of `test-spec.md` (M41): under which conditions a ver
 - History: G-V3.PANEL Plan step 3 (2026-11-08), new
 
 ### TR-PANEL-006 – exact names, states, orders and figures
-- Applies to: TC-CLV-030, TC-CLV-031, TC-CLV-032, TC-CLV-033, TC-CLV-034, TC-CLV-035, TC-CLV-039, TC-CLV-044, TC-CLV-045, TC-CLV-046, TC-CLV-047, TC-WFM-130, TC-WFM-131, TC-WFM-132, TC-WFM-133, TC-WFM-134, TC-WFM-135, TC-RTB-007
+- Applies to: TC-CLV-030, TC-CLV-031, TC-CLV-032, TC-CLV-033, TC-CLV-034, TC-CLV-035, TC-CLV-039, TC-CLV-044, TC-CLV-045, TC-CLV-046, TC-CLV-047, TC-WFM-130, TC-WFM-131, TC-WFM-132, TC-WFM-133, TC-WFM-134, TC-WFM-135, TC-RTB-007, TC-CLV-048, TC-CLV-050, TC-CLV-051, TC-WFM-139, TC-WFM-140
 - Requirement: REQ-CLV-030
 - Group: Exact values (PANEL)
 - Kind: unit
