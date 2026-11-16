@@ -9,6 +9,7 @@ import os
 import subprocess
 import sys
 import tempfile
+import uuid
 
 try:
     from . import checks, common_operations, control_flow, pipeline_graph
@@ -69,9 +70,11 @@ class SkillConverter:
 class ConvertedRun:
     """what run_converted returns: `status` of the runner, `answer` (the value of the conversion's result node), `values` (all data nodes), `named` (the refused nodes); `error` and `events` have the shape of the old
     run result (no run events yet on this path)"""
-    def __init__(self, result, answer):
+    def __init__(self, result, answer, events=None, budget_end=None):
         self.status, self.answer, self.values, self.named = result.status, answer, result.values, getattr(result, "named", None)
-        self.error, self.events = (None if result.status == "done" else "the graph run ended with %s %s" % (result.status, self.named or "")), []
+        self.error, self.events = (None if result.status == "done" else "the graph run ended with %s %s" % (result.status, self.named or "")), list(events or [])
+        if result.status == "failed" and budget_end:       # a budget end is no failure (T-CV-06a): the status of the old runner, the key as the reason
+            self.status, self.error = "budget", "budget: %s" % budget_end
 
 
 def _latest_nodes(nodes_dir):
@@ -85,7 +88,7 @@ def _latest_nodes(nodes_dir):
     return latest
 
 
-def run_converted(name, inputs, model=None, tools=None, skills_dir=None, library_dir=None, runs_dir=None, skill_changes=None, functions=None, sandbox=None, broker_factory=None):
+def run_converted(name, inputs, model=None, tools=None, skills_dir=None, library_dir=None, runs_dir=None, skill_changes=None, functions=None, sandbox=None, broker_factory=None, tool_calls=None, door_tools=None):
     """REQ-WFM-058, REQ-WFM-115 (A-125, D-253): runs skill `name` as a graph on the toolbox with the given model and tools. The pipeline is converted in memory at every call,
     bound to the skill and run by the GraphRunner; `skill_changes` is merged into the skill first (a test plants a changed option with it). `runs_dir` stays unused:
     this path writes no run record yet. Returns a ConvertedRun; a pipeline that cannot be converted raises ConversionError (the skill stays on the old runner)."""
@@ -101,8 +104,16 @@ def run_converted(name, inputs, model=None, tools=None, skills_dir=None, library
     common_operations.reset()
     if model is not None:
         common_operations.register_model(setting.get("profile"), model)
+    # a tool is a function or a Tool(func, budget_key) as the old runner takes it; a tool of the IF-402 door (`tool_calls`, `door_tools` = {name: budget key}) has no function here
+    keys = dict(door_tools or {})
     for tool_name, function in (tools or {}).items():
-        common_operations.register_tool(tool_name, function)
+        if hasattr(function, "budget_key"):
+            keys.setdefault(tool_name, function.budget_key)
+            function = function.func
+        if function is not None:
+            common_operations.register_tool(tool_name, function)
+    budget = {**(skill.get("budget") or {}), **((skill_changes or {}).get("budget") or {})}
+    common_operations.register_run(budget=budget, tool_keys={n: k for n, k in keys.items() if k}, door=tool_calls, door_tools=door_tools, run_id="converted-" + uuid.uuid4().hex[:8])
     # script_check is the function of the old runner (checks.make_script_check) on the router the caller hands over (T-CV-07a, D-259): no router, no script runs and the check says so;
     # `functions` binds more app-built functions (and may replace these) for this run only
     for function_name, function in {**checks.build_script_checks(sandbox, broker_factory), **(functions or {})}.items():
@@ -111,11 +122,10 @@ def run_converted(name, inputs, model=None, tools=None, skills_dir=None, library
         box = Toolbox(WorkflowLibrary(Storage(FileBackend(folder))), lambda account: True, _NoEvents())
         box.seed_shipped(os.path.join(library_dir, "nodes"))
         box.seed_controls()
-        budget = skill.get("budget") or {}
         common_operations.register_control(_node_call(box, nodes, setting), control_flow.Limits(seconds=budget.get("seconds"), steps=budget.get("steps")))
         stages, trust = stages_from_toolbox(graph, box)
         result = GraphRunner(trust).run(graph, stages, {"input." + field: value for field, value in (inputs or {}).items()})
-    return ConvertedRun(result, result.values.get(found["result"]))
+    return ConvertedRun(result, result.values.get(found["result"]), common_operations.run_events(), common_operations.budget_end())
 
 
 def _node_call(box, library_nodes, model_setting):
