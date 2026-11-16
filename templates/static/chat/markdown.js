@@ -53,3 +53,14 @@ export function renderMarkdown(text, origin = globalThis.location?.origin ?? 'ht
     ALLOWED_URI_REGEXP: /^(?:https?:|mailto:|\/|#)/i,
   });
 }
+
+// --- the run report (A-154, REQ-CLV-049, 052): stubs of Plan step 4, the code follows in the plan's task T-03 ---
+/** the address of a link in a run report, or null: only http and https addresses are links (REQ-CLV-049); stub */
+export function reportHref(href) {
+  return null;
+}
+
+/** safe HTML for a run report: like renderMarkdown, but only reportHref addresses are links and no image comes in (REQ-CLV-049, 052); stub */
+export function renderReport(text, origin = globalThis.location?.origin ?? 'http://localhost') {
+  return '';
+}
