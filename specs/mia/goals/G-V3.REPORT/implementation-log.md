@@ -15,3 +15,14 @@
 - Result (feedback, not verification): `unittest discover -s tests` 2410 tests, the same 12 failures as master and nothing else; acceptance scripts: only TC-IF-101-30 and -35 (real) red, waiting for A-155; the three files named in F-3 as on master.
 - Decisions: the report is written only where a recorder and a files volume exist (a run without them has no record to name it); a volume that cannot take it is logged and the run is not lost (`_keep_report`).
 - Open for Phase 4: the first-line wording (`# Done`, `# Stopped: <reason>`, `# Failed: <reason>`) is not in a requirement; the tests accept the words only.
+
+## T-03: The renderer of the report
+- Status: code done (fork, branch `goal/v3.report.t03`)
+- Requirements: REQ-CLV-049, 052 (unit half)
+- Done: `reportHref` (http or https, any case of the scheme, no whitespace or control character, else null) and `renderReport` in `templates/static/chat/markdown.js`: marked, then DOMPurify with its own call config (no img, form, frame, style, script; attributes href and title only; http and https addresses only); then, on a detached `template` element, every link whose address `reportHref` accepts gets `target="_blank"` and `rel="noopener noreferrer"`, every other link is unwrapped to its text. Without a DOM the report is escaped text (`<p>` and `escapeHtml`).
+- Tests reported green (feedback, not verification): `tests/js/report-render.test.mjs` 7 of 7 (6 written in Plan step 4, one added: rendering a report does not change a chat message); `node --test "tests/js/*.test.mjs"` all green.
+- Mutants: `reportHref` returning its input (checks 2 and 5 fail), the address rule reduced to `^https?:` (check 2 fails): both caught.
+- Decisions: no DOMPurify hook is used at all (hooks are global to the library; the chat installs its own once): the target and rel attributes are set after sanitizing on a detached `template`, so the chat renderer cannot be changed by a report.
+- Findings:
+  - F-4: the DOM branch of `renderReport` (sanitize, `template`, `replaceWith`) cannot run in node (jsdom is not installed); it is covered by the browser checks TC-CLV-052 and TC-CLV-048 of T-04 (decision 6, browser image). Until then it is read, not run.
+  - The chat renderer lets `mailto:`, `/path` and `#anchor` through; the report refuses them (REQ-CLV-049): `renderReport` does not reuse the chat rules.
