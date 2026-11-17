@@ -1,4 +1,4 @@
-# A-158 (DRAFT for the owner, 2026-11-17): the chat shows a skill run like a chatbot does: what to answer, what happens now, the summary
+# A-158 (decided by the owner 2026-11-17, not yet applied; DRAFT text, 2026-11-17): the chat shows a skill run like a chatbot does: what to answer, what happens now, the summary
 
 Source: owner answer of 2026-11-17 to the open point of A-156 ("where the status card shows phases"). Number: A-157 is the G-V3.REPORT renumbering on `origin/goal/v3.report`; check against the parent's range before applying.
 
@@ -21,11 +21,11 @@ The task card (`task-card.js`) is already removed (G-V3.PANEL T-10); the Skill r
 - New: after done/failed/stopped no live line remains and the end message is last; a question sits above the live line; the history for the model holds no live line.
 - JS test of the chat model: the live line stays last when messages arrive.
 
-## Open points for the owner
-- A: should the live line be **stored** in the chat log (survives reload, shows in history afterwards) or **transient** (only while the run works, nothing left behind)? Recommended: transient, the log keeps only question and end message (A-156 point 1b).
-- B: does a run without phases (lookup, search) show a line such as "working" at all? Recommended: yes, a generic line, otherwise the chat is silent for the longest runs; this relaxes REQ-CHA-055 (no status message for a skill without phases).
-- C: wording of the line: fixed text from the manifest's phase names (no model call, recommended) or by the digest step (costs a call per phase; was removed with `status`, commit `bd459bc4`).
-- D: the transport for updating a message (see 6) is an interface change (stop and report rule).
+## Decided by the owner (2026-11-17)
+- A: the live line is **transient**: shown only while the run works, never stored in the chat log.
+- B: a run without phases shows a **generic "working" line**; REQ-CHA-055 is relaxed accordingly.
+- C: the wording is **fixed text from the manifest's phase names**, no model call.
+- D: the interface change (update of a message by id, e.g. a `chat_update` event) is **approved**; it is planned as an IF change.
 
 ## Not done
-Nothing is applied. Requirements, the six protected files, the plan and the review-log line come after the owner's decisions (plan-phase, then red tests, then code).
+Nothing is applied yet. Next: plan-phase (requirements, IF change, the six protected files, review-log line), then red tests, then code. Requirements, the six protected files, the plan and the review-log line come after the owner's decisions (plan-phase, then red tests, then code).
