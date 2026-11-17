@@ -19,6 +19,10 @@ The stubs carry the interface the installed tests expect; the tasks replace the 
 | T-04 Harness target and scorer of EV-skill_turns (spike, tests, code) | REQ-CHA-049, 053, 054 (the means to decide them) | the tests of the scorer (Step 4b) and `python tools/eval.py list` shows a runnable suite | T-01 |
 | T-05 Dev runs and prompt tuning | REQ-CHA-049, 053, 054 (feedback only, the criteria are decided in Verify) | dev-split runs logged with versions and the pin; every bad output proposed as an eval case | T-04 |
 | T-06 Hook-up to the Workflow management (integration, after both subgoals are merged) | REQ-BE-078, AC-39 end to end | the integration check of AC-39 (Step 4b) | T-02, T-03; G-V3.PANEL T-04 and T-05 merged |
+| T-07 Live status line in the chat service (A-158) | REQ-CHA-068, 069, 070, 071; REQ-CHA-041 and 055 as changed | TC-CHA-073, 074, 075 (`test_chat_skill_turns.py`, class `LiveLine`) | A-158 patches applied (`amendment-a158/apply.sh`), T-02 |
+| T-08 Live line in the page (A-158) | REQ-CLV-053, 054 | TC-CLV-053 (`tests/js/run-line.test.mjs`) and a browser check on the stub server | T-07 |
+| T-09 Turns `start` and `answered` from the run (A-158) | REQ-CHA-068, 070 end to end (IF-201 v4) | the integration check of AC-39 extended by a lookup and a review with one question (Step 4b, outside the implementing session) | T-07, T-08, T-06 |
+
 
 ## Tasks
 
@@ -76,8 +80,38 @@ The stubs carry the interface the installed tests expect; the tasks replace the 
 - Done when: the integration check is green, all other tests unchanged
 - Notes: until this task the two subgoals meet only through the contracts and their mocks (the cost of the split, recorded in G-V3)
 
+### T-07: Live status line in the chat service (A-158)
+- Implements: REQ-CHA-068, 069, 070, 071; REQ-CHA-041 and 055 as changed
+- Tests to turn green: TC-CHA-073, 074, 075 (class `LiveLine` in `test_chat_skill_turns.py`); all tests of T-02 stay green
+- Touches: `chat_service.py` (`SKILL_TURN_KINDS` gets `start` and `answered`; event `chat_run_status` {run, text}; clearing before the end message; the line is no record, no history entry, no speech), the docstring of `skill_turn`
+- Must not touch: protected material, the contracts and the IF-201 mock (the contract change of `amendment-a158/IF-101-change.md` is applied by the owner), `communicator.py`
+- Depends on: the A-158 patches applied, T-02
+- Done when: the listed tests are green, `tests/test_chat_*.py`, `test_skill_*` and all other tests unchanged
+- Demonstrator after this task: the events of a scripted run show the line per phase, `waiting for your answer` and the clearing (stub server log)
+- Notes: only a declared and changed phase gives a line (the observer already filters); `start` gives `working` only for a run without declared phases; the line of a run is kept per run id so that `answered` can repeat it
+
+### T-08: Live line in the page (A-158)
+- Implements: REQ-CLV-053, 054
+- Tests to turn green: TC-CLV-053 in `tests/js/run-line.test.mjs`; a browser check on the stub server (the stub emits the event for its scripted skill)
+- Touches: `templates/static/chat/chat-model.js` (`runLineState`, `withRunLine`), `chat.js` and `socket.js` (listen to `chat_run_status`, render the line last with the link of REQ-CLV-037), `messages.css`, the i18n texts, `ui/tools/chat_stub_server.py`
+- Must not touch: protected material, `skill-run*.js` (the Skill run view)
+- Depends on: T-07
+- Done when: the listed tests are green, `node --test "tests/js/*.test.mjs"` all green, the line is seen last on the stub page and removed at the end message
+- Demonstrator after this task: the stub page shows a run's live line below the messages and the summary replacing it
+- Notes: the line is not restored after a reload (REQ-CLV-038 covers the view); texts via i18n, the phase names are shown as the manifest gives them
+
+### T-09: Turns `start` and `answered` from the run (A-158)
+- Implements: REQ-CHA-068 and 070 in the app (IF-201 v4)
+- Tests to turn green: the extended integration check of AC-39 (written outside this session)
+- Touches: the adapter of G-V3.PANEL T-04 (`skill_run_observer.py` start call), `chat_service.py` at `ask` (the call `answered`), `web_app.py` only if the wiring needs it
+- Must not touch: protected material, the skills
+- Depends on: T-07, T-08, T-06
+- Done when: a real `/lookup` shows `working` and ends with the summary last; a `/review` question shows `waiting for your answer`; all other tests unchanged
+- Demonstrator after this task: the app shows the behaviour of a chatbot for both skills
+- Notes: the owner looks at it in the app (as for A-156)
+
 ## Split check
-6 tasks, within the usual 8; T-04 and T-05 are the model-dependent half and need Ollama; T-01 to T-03 need none (fake model). **Decided by the owner (2026-11-08, D-336): keep one plan.** `goal_check` warns GL11 (29 requirements in scope, no subgoals) since the scope rows were added; the goal's Split check already says keep together, and no row is added to the approved goal (the warning stays as a known one).
+9 tasks (T-07 to T-09 added by A-158, 2026-11-17: one backend, one page, one wiring, each reviewable in one sitting); T-04 and T-05 are the model-dependent half and need Ollama; T-01 to T-03 need none (fake model). **Decided by the owner (2026-11-08, D-336): keep one plan.** `goal_check` warns GL11 (29 requirements in scope, no subgoals) since the scope rows were added; the goal's Split check already says keep together, and no row is added to the approved goal (the warning stays as a known one).
 
 ## Open before Implement starts
 1. The integration check of AC-39 (T-06) is written outside the implementing session (Step 4b), before T-06 starts; it is not needed for T-01 to T-05.
