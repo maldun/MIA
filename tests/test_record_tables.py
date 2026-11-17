@@ -19,7 +19,7 @@ class Definitions(unittest.TestCase):
     def test_all_tables_versioned_and_deletable_exactly_where_planned(self):
         """TC-RTB-001, TC-RTB-006."""
         tables = definitions()
-        self.assertEqual(set(tables), {"history", "memory", "votes", "tasks", "memos", "accounts", "presets", "gestures", "runs", "source_trust", "cases", "behaviours", "workflow_meta", "reports", "skill_runs", "transform_meta", "transforms"})
+        self.assertEqual(set(tables), {"history", "memory", "votes", "tasks", "memos", "accounts", "presets", "gestures", "runs", "source_trust", "cases", "behaviours", "workflow_meta", "reports", "skill_runs", "transform_meta", "transforms", "current_versions"})
         self.assertTrue(all(t["versioned"] for t in tables.values()))
         self.assertEqual({k for k, t in tables.items() if t["deletable"]}, {"history", "memory", "tasks", "memos", "skill_runs"})
         self.assertEqual(tables["source_trust"], {"versioned": True, "deletable": False})
@@ -181,6 +181,15 @@ class Validation(unittest.TestCase):
         self.assertEqual(validate("memory", {"text": "x", "kind": "fact"}), {"rule": "schema", "detail": "source"})      # the source stays required, and is checked first
         self.assertIsNone(validate("tasks", {"text": "x", "kind": "anything"}))                                           # only memory has these fields
 
+
+    @mark.req("REQ-WFM-064", "IF-302")
+    def test_the_pointer_record_needs_an_integer_version_and_keeps_every_other_field(self):
+        """IF-302 v13 (A-121): `current_versions` is versioned and not deletable; extra fields are never refused."""
+        self.assertEqual(definitions()["current_versions"], {"versioned": True, "deletable": False})
+        self.assertIsNone(validate("current_versions", {"version": 2, "reason": "save", "format": 1, "later": [1]}))
+        for bad in (0, -1, True, 1.0, "2", None):
+            self.assertEqual(validate("current_versions", {"version": bad}), {"rule": "schema", "detail": "version"}, bad)
+        self.assertEqual(validate("current_versions", {"reason": "save"}), {"rule": "schema", "detail": "version"})
 
 if __name__ == "__main__":
     unittest.main()
