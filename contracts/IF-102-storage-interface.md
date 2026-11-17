@@ -1,4 +1,4 @@
-# IF-102 – Storage interface, v7
+# IF-102 – Storage interface, v8
 
 Owner (provider): N-3 Database   Consumers: N-2 Backend   Decided by: N-0   Mock complexity: 2 (in-memory fake)   Suite: `tests/acceptance/contract/test_if_102_storage.py`
 
@@ -15,7 +15,7 @@ The only door to the shared state. Python calls on a storage client (the real on
 | `categories()` | | list of the vote categories, in their order: `answer_quality`, `reactions`, `character_behaviour`, `service` | read from the record tables (IF-302) inside N-3, so a consumer imports nothing of IF-302 (D-162) |
 | `subscribe(table, callback)` | | a function that unsubscribes | `callback({"table","id","version","author"})` after every write; a delete is a write and is told with `"version": None` and the deleting account as `author`; a refused put or delete tells nothing |
 
-Tables: the tables of IF-301 (`workflows`, `context_graphs`) and IF-302 (`history`, `memory`, `votes`, `tasks`, `memos`, `accounts`, `presets`, `gestures`, `runs`, `source_trust`, `cases`, `behaviours`, `workflow_meta`, `reports`, **[v4]** `skill_runs`, **[v5]** `transform_meta`, **[v6]** `transforms`, **[v7]** `current_versions`); their definitions decide the document rules and whether a record may be deleted.
+Tables: the tables of IF-301 (`workflows`, `context_graphs`) and IF-302 (`history`, `memory`, `votes`, `tasks`, `memos`, `accounts`, `presets`, `gestures`, `runs`, `source_trust`, `cases`, `behaviours`, `workflow_meta`, `reports`, **[v4]** `skill_runs`, **[v5]** `transform_meta`, **[v6]** `transforms`, **[v7]** `current_versions`, **[v8]** `snapshots`); their definitions decide the document rules and whether a record may be deleted.
 
 ## Errors
 | Condition | Signal | What the consumer may rely on afterwards |
@@ -51,3 +51,4 @@ Tables: the tables of IF-301 (`workflows`, `context_graphs`) and IF-302 (`histor
 | v5 | 2026-11-11 | the table list names `transform_meta` (IF-302 v10); no new operation | A-110 |
 | v6 | 2026-11-11 | the table list names `transforms` (IF-302 v11); no new operation | A-112 |
 | v7 | 2026-11-18 | the table list names `current_versions` (IF-302 v13); no new operation: the pointer is written with `put` and read with `get`; the PostgreSQL schema gets one more table of the generic versioned record shape | A-121 |
+| v8 | 2026-11-18 | the table list names `snapshots` (IF-302 v14); no new operation; the PostgreSQL schema gets one more table of the generic versioned record shape | A-161 |

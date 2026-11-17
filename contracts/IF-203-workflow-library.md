@@ -1,4 +1,4 @@
-# IF-203 – Workflow library, v2
+# IF-203 – Workflow library, v3
 
 Owner (provider): N-2.3 Workflow management   Consumers: N-2.1 API and accounts, N-2.2 Chat agent, N-2.4 Workflow execution   Decided by: N-2   Mock complexity: 2 (in-memory library)   Suite: `tests/acceptance/contract/test_if_203_workflow_library.py`
 
@@ -28,7 +28,7 @@ The library of workflows (and context graphs) as versioned data, with lifecycle 
 
 The kinds of `list_ids`, `read`, `save`, `history`, `restore` and `set_current_version` also include `skills`, `transforms`, `snapshots` (A-90 and v1). A `snapshots` record is written once; no kind is deletable. `read(kind, id)` without a version returns the **current** version; an item without a pointer record reads as its newest version, so v0 and v1 behaviour is unchanged. `save` after a pointer move writes version max+1 and moves the pointer to it; `expected_version` is checked against the current version.
 
-**Snapshot record (open):** the stored `snapshots` document is a JSON object. Required: `name`, `time`, `author`, `items` (a list of `{kind, id, version}`; plus `trust` and `lifecycle` on transforms) and `pins`. Further fields are optional, **kept as given and never refused**; known today: `format` (integer, 1 for this text, raised when the meaning of the record changes) and `note` (free text of the owner). `read_snapshot` returns the document as stored, so a reader gets the fields it knows and ignores the rest, and a restore uses only the required ones. Each item may carry extra fields too (kept, ignored by a restore). Exception: `list_snapshots` stays exactly `name`, `time`, `author` (REQ-WFM-062, TC-WFM-062). A snapshot is written once, so a record keeps the shape of the time it was taken.
+**Snapshot record (open):** the stored `snapshots` document (the table `snapshots` of IF-302 v14, record id = the snapshot name) is a JSON object. Required: `name`, `time`, `author`, `items` (a list of `{kind, id, version}`; plus `trust` and `lifecycle` on transforms) and `pins`. Further fields are optional, **kept as given and never refused**; known today: `format` (integer, 1 for this text, raised when the meaning of the record changes) and `note` (free text of the owner). `read_snapshot` returns the document as stored, so a reader gets the fields it knows and ignores the rest, and a restore uses only the required ones. Each item may carry extra fields too (kept, ignored by a restore). Exception: `list_snapshots` stays exactly `name`, `time`, `author` (REQ-WFM-062, TC-WFM-062). A snapshot is written once, so a record keeps the shape of the time it was taken.
 
 ## Errors
 | Condition | Signal | What the consumer may rely on afterwards |
@@ -70,3 +70,4 @@ The kinds of `list_ids`, `read`, `save`, `history`, `restore` and `set_current_v
 | v0 | 2026-10-25 | first draft | 8 |
 | v1 | 2026-11-11 | the kind `transforms` and its meta record: operations `get_meta`, `get_trust`, `get_lifecycle`, `set_trust`, `set_lifecycle`, `set_meta`, golden examples 4 to 7 (suite TC-IF-203-05 to 09) | A-90, A-111 |
 | v2 | 2026-11-18 | snapshot operations (`snapshot`, `read_snapshot`, `list_snapshots`, `restore_snapshot`), `pins()`, kinds `skills` and `snapshots`; `set_current_version` and the table `current_versions` (current-version pointer; `restore` unchanged); `forbidden`; golden examples 8 to 12 | A-90, A-121 |
+| v3 | 2026-11-18 | the place of the snapshot record is named: the table `snapshots` of IF-302 v14 (IF-102 v8); no change of any operation, error or example | A-161 |
