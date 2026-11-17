@@ -21,6 +21,16 @@ def make(kind):
     return SnapshotLibraryMock(owner=OWNER) if kind == "mock" else subject_for(IF, kind)      # the real library of v1 has no pointer and no snapshots: red until T-SN-01
 
 
+def skill_doc(record_id, n=1):
+    """a record of IF-301 v2 (`{"id", "data"}`), valid for the real Storage and the mock alike; `n` changes the content"""
+    return {"id": record_id, "data": {"command": "%s%s" % (record_id, n if n > 1 else ""), "workflow_graph_id": "lookup", "context_graph_id": "places"}}
+
+
+def graph_doc(note=""):
+    """a graph that passes the graph rules of IF-102 (data, process, data): valid for the real Storage and the mock alike"""
+    return {"nodes": [{"id": "q", "kind": "data"}, {"id": "p", "kind": "process", "note": note}, {"id": "r", "kind": "data"}], "edges": [{"from": "q", "to": "p"}, {"from": "p", "to": "r"}]}
+
+
 def error_of(call):
     try:
         call()
@@ -32,10 +42,10 @@ def error_of(call):
 def standard_state(lib):
     """golden 8: 2 skills, 2 workflow graphs, 1 context graph, 3 transforms (trusted tested, trusted draft, untrusted retired)"""
     for i in ("research", "verify_claim"):
-        lib.save("skills", i, {"name": i}, OWNER)
+        lib.save("skills", i, skill_doc(i), OWNER)
     for i in ("lookup", "compare"):
-        lib.save("workflows", i, {"nodes": [i], "edges": []}, OWNER)
-    lib.save("context_graphs", "places", {"nodes": ["places"], "edges": []}, OWNER)
+        lib.save("workflows", i, graph_doc(i), OWNER)
+    lib.save("context_graphs", "places", graph_doc("places"), OWNER)
     for i, trust, lifecycle in (("t_sum", "trusted", "tested"), ("t_draft", "trusted", "draft"), ("t_old", "untrusted", "retired")):
         lib.save("transforms", i, {"id": i, "version": 1, "code": "def run(a):\n    return 1\n"}, OWNER)
         lib.set_trust(i, trust, OWNER)
@@ -58,9 +68,9 @@ def versions(lib):
 
 def change_everything(lib):
     """S2: a skill, a workflow graph, a context graph get a new version, a transform changes its status"""
-    lib.save("skills", "research", {"name": "research", "v": 2}, OWNER)
-    lib.save("workflows", "lookup", {"nodes": ["lookup", "x"], "edges": []}, OWNER)
-    lib.save("context_graphs", "places", {"nodes": ["places", "y"], "edges": []}, OWNER)
+    lib.save("skills", "research", skill_doc("research", 2), OWNER)
+    lib.save("workflows", "lookup", graph_doc("lookup, edited"), OWNER)
+    lib.save("context_graphs", "places", graph_doc("places, edited"), OWNER)
     lib.set_trust("t_old", "trusted", OWNER)
     lib.set_lifecycle("t_old", "tested", OWNER, evidence="run-2")
 
@@ -71,26 +81,26 @@ class SnapshotsContract(unittest.TestCase):
     @each_provider(IF, make)
     def test_the_pointer_moves_without_creating_or_deleting_a_version(self, lib):
         """TC-IF-203-10 (v2) D-241 D-b: save writes version 2, read without a version gives the current one; set_current_version(…, 1) makes version 1 current and creates nothing; restore keeps its v0 meaning (a new version with the old content); a save after a pointer move writes max+1 and moves the pointer; expected_version is checked against the current version."""
-        lib.save("skills", "s", {"n": 1}, OWNER)
-        lib.save("skills", "s", {"n": 2}, OWNER)
+        lib.save("skills", "s", skill_doc("s", 1), OWNER)
+        lib.save("skills", "s", skill_doc("s", 2), OWNER)
         self.assertEqual(lib.read("skills", "s")["version"], 2)
         self.assertEqual(lib.set_current_version("skills", "s", 1, OWNER), {"version": 1})
-        self.assertEqual((lib.read("skills", "s")["version"], lib.read("skills", "s")["doc"]), (1, {"n": 1}))
+        self.assertEqual((lib.read("skills", "s")["version"], lib.read("skills", "s")["doc"]), (1, skill_doc("s", 1)))
         self.assertEqual([h["version"] for h in lib.history("skills", "s")], [1, 2])
-        self.assertEqual(lib.read("skills", "s", 2)["doc"], {"n": 2})      # an explicit version still reads its own document
-        err = error_of(lambda: lib.save("skills", "s", {"n": 3}, OWNER, expected_version=2))      # the current version is 1, not the newest
+        self.assertEqual(lib.read("skills", "s", 2)["doc"], skill_doc("s", 2))      # an explicit version still reads its own document
+        err = error_of(lambda: lib.save("skills", "s", skill_doc("s", 3), OWNER, expected_version=2))      # the current version is 1, not the newest
         self.assertEqual((err.code, err.detail), ("conflict", {"current": 1}))
-        self.assertEqual(lib.save("skills", "s", {"n": 3}, OWNER, expected_version=1), {"version": 3})      # max+1, the pointer follows
+        self.assertEqual(lib.save("skills", "s", skill_doc("s", 3), OWNER, expected_version=1), {"version": 3})      # max+1, the pointer follows
         self.assertEqual(lib.read("skills", "s")["version"], 3)
         self.assertEqual(lib.restore("skills", "s", 1, OWNER), {"version": 4})
-        self.assertEqual((lib.read("skills", "s")["version"], lib.read("skills", "s")["doc"]), (4, {"n": 1}))
+        self.assertEqual((lib.read("skills", "s")["version"], lib.read("skills", "s")["doc"]), (4, skill_doc("s", 1)))
 
     @mark.req("IF-203", "REQ-WFM-064")
     @each_provider(IF, make)
     def test_a_pointer_move_to_a_missing_version_or_item_is_refused(self, lib):
         """TC-IF-203-11 (v2): set_current_version to a version that does not exist (0, 3, a boolean, a text) is invalid/schema; an unknown id or kind is not_found; the pointer stays."""
-        lib.save("skills", "s", {"n": 1}, OWNER)
-        lib.save("skills", "s", {"n": 2}, OWNER)
+        lib.save("skills", "s", skill_doc("s", 1), OWNER)
+        lib.save("skills", "s", skill_doc("s", 2), OWNER)
         for version in (0, 3, True, "1", None):
             err = error_of(lambda: lib.set_current_version("skills", "s", version, OWNER))
             self.assertEqual((err.code, err.rule), ("invalid", "schema"), version)
@@ -173,8 +183,8 @@ class SnapshotsContract(unittest.TestCase):
         standard_state(lib)
         lib.snapshot("old", OWNER)
         for n in range(2, 6):
-            lib.save("skills", "research", {"n": n}, OWNER)
-            lib.save("workflows", "lookup", {"n": n}, OWNER)
+            lib.save("skills", "research", skill_doc("research", n), OWNER)
+            lib.save("workflows", "lookup", graph_doc("edit %d" % n), OWNER)
         lib.set_trust("t_old", "trusted", OWNER)
         before = versions(lib)
         lib.restore_snapshot("old", OWNER)

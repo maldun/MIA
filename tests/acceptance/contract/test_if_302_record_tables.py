@@ -165,5 +165,21 @@ class RecordTablesContract(unittest.TestCase):
         self.assertEqual({t for t, d in tables.definitions().items() if d["deletable"]}, {"history", "memory", "tasks", "memos", "skill_runs"})
 
 
+    @mark.req("IF-302", "REQ-WFM-061")
+    @each_provider(IF)
+    def test_a_snapshot_is_a_versioned_record_that_is_not_deletable(self, tables):
+        """TC-IF-302-12 (v14, A-161): `snapshots` is versioned and not deletable; a record needs name (a text that is not empty), time, author, items (a list) and pins (a mapping), else rule schema with that field as detail; every other field is kept and never refused; the deletable set stays as in v8.
+        Example: validate("snapshots", {"name": "a", "time": 1, "author": "anna", "items": [], "pins": {}}) -> None; with name "" -> {"rule": "schema", "detail": "name"}."""
+        doc = {"name": "a", "time": 1, "author": "anna", "items": [{"kind": "skills", "id": "research", "version": 1}], "pins": {"MP-light": "gemma4:12b-it-qat"}}
+        self.assertEqual(tables.definitions()["snapshots"], {"versioned": True, "deletable": False})
+        self.assertIsNone(tables.validate("snapshots", doc))
+        self.assertIsNone(tables.validate("snapshots", dict(doc, format=1, note="before the rework", unknown_field=[1])))
+        for field in doc:
+            self.assertEqual(tables.validate("snapshots", {k: v for k, v in doc.items() if k != field}), {"rule": "schema", "detail": field}, field)
+        for field, bad in (("name", ""), ("name", 5), ("items", "x"), ("items", None), ("pins", []), ("pins", "MP-light")):
+            self.assertEqual(tables.validate("snapshots", dict(doc, **{field: bad})), {"rule": "schema", "detail": field}, (field, bad))
+        self.assertEqual({t for t, d in tables.definitions().items() if d["deletable"]}, {"history", "memory", "tasks", "memos", "skill_runs"})
+
+
 if __name__ == "__main__":
     unittest.main()

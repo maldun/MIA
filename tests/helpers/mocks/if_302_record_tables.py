@@ -13,11 +13,12 @@ DEFINITIONS = {
     "skill_runs": {"versioned": True, "deletable": True},      # v8 (amendment A-141): the record of a skill run, deleted with the chat history of its account
     "transform_meta": {"versioned": True, "deletable": False},      # v10 (amendment A-110): trust and lifecycle of a transform, one record per transform id
     "transforms": {"versioned": True, "deletable": False},      # v11 (amendment A-112): the versioned code of a transform, one record per transform id
+    "snapshots": {"versioned": True, "deletable": False},      # v14 (amendment A-161): a named snapshot of the skill set, record id = its name
     "current_versions": {"versioned": True, "deletable": False},      # v13 (amendment A-121): the current-version pointer of an item, record id <kind>/<id>
 }
 REQUIRED = {"skill_runs": ("run", "skill", "skill_version", "account", "started", "state"), "reports": ("task", "skill", "skill_version", "question", "account", "model_pin", "report"), "workflow_meta": ("status",), "cases": ("question", "answer", "status"), "behaviours": ("name", "net", "votes"),"memory": ("text", "source"), "votes": ("user", "subject", "category", "value"), "tasks": ("text",), "memos": ("text",),
             "runs": ("workflow", "workflow_version", "model_pin", "benchmark_version"),
-            "transform_meta": ("trust", "lifecycle"), "transforms": ("id", "version"), "current_versions": ("version",)}
+            "transform_meta": ("trust", "lifecycle"), "transforms": ("id", "version"), "current_versions": ("version",), "snapshots": ("name", "time", "author", "items", "pins")}
 CATEGORIES = ("answer_quality", "reactions", "character_behaviour", "service")
 MEMORY_FIELDS = {"kind": ("fact", "preference", "commitment"), "status": ("active", "replaced")}      # v2 (amendment A-10): optional, checked when present
 TRANSFORM_META_FIELDS = {"trust": ("untrusted", "trusted"), "lifecycle": ("draft", "tested", "retired")}      # v10 (amendment A-110): exact values, the optional fields are free
@@ -48,6 +49,13 @@ class RecordTablesMock:
                 return {"rule": "schema", "detail": "id"}
             if type(doc["version"]) is not int or doc["version"] < 1:      # a bool or a float is no version number (as for the vote value)
                 return {"rule": "schema", "detail": "version"}
+        if table == "snapshots":      # v14 (A-161): name a non-empty text, items a list, pins a mapping; other fields are kept, never refused
+            if not isinstance(doc["name"], str) or not doc["name"]:
+                return {"rule": "schema", "detail": "name"}
+            if not isinstance(doc["items"], list):
+                return {"rule": "schema", "detail": "items"}
+            if not isinstance(doc["pins"], dict):
+                return {"rule": "schema", "detail": "pins"}
         if table == "current_versions" and (type(doc["version"]) is not int or doc["version"] < 1):      # v13 (A-121): a bool or a float is no version number; other fields are kept, never refused
             return {"rule": "schema", "detail": "version"}
         if table == "workflow_meta" and doc["status"] not in ("draft", "tested", "trusted", "retired"):

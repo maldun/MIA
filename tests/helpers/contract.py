@@ -531,13 +531,23 @@ class _WorkflowLibraryAdapter:
     The adapter only turns the error class of the library into the one of the mock; production code does not import from tests/."""
 
     def __init__(self, costs=None):
+        import inspect
         import tempfile
         from errors import ServiceError
         from storage import Storage
         from storage_files import FileBackend
         from workflow_library import WorkflowLibrary, WorkflowLibraryError
         self._error, self._library_error = ServiceError, WorkflowLibraryError
-        self._library = WorkflowLibrary(Storage(FileBackend(tempfile.mkdtemp())), costs=costs)
+        extra = {}
+        if "is_owner" in inspect.signature(WorkflowLibrary).parameters:      # IF-203 v2 (A-121): the owner is the account that creates accounts, here "anna"; the pins are those of eval-spec.md
+            extra = {"is_owner": lambda account: account == "anna", "pins": {"MP-light": "gemma4:12b-it-qat"}}
+        self._library = WorkflowLibrary(Storage(FileBackend(tempfile.mkdtemp())), costs=costs, **extra)
+
+    def __setattr__(self, name, value):
+        if name == "fail_set_current_version_at":      # the test seam of TC-IF-203-17 belongs to the library, not to this adapter
+            setattr(self._library, name, value)
+        else:
+            object.__setattr__(self, name, value)
 
     def __getattr__(self, name):
         method = getattr(self._library, name)
