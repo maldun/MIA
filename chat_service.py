@@ -814,9 +814,14 @@ class ChatService:
         """the wording of the digest step; a step that is missing or fails leaves a plain sentence that invents nothing, so that the user still hears how the run ended"""
         try:
             if self._digest is not None:
-                return {"done": self._digest.summary, "failed": self._digest.failure, "stopped": self._digest.stopped}[kind](payload)
+                if kind == "done":      # a stop during the summary ends it (REQ-CHA-075); the messages of a failed or stopped run are worded although the stop flag is set (REQ-CHA-044)
+                    return self._digest.summary(payload, should_stop=self._stop.is_set)
+                return {"failed": self._digest.failure, "stopped": self._digest.stopped}[kind](payload)
         except Exception as exc:
-            logger.error("The digest step failed for a %s message: %s", kind, exc)
+            if getattr(exc, "by_user", False):
+                logger.info("The user stopped the run while its end message was made: the plain sentence stands")
+            else:
+                logger.error("The digest step failed for a %s message: %s", kind, exc)
         return {"done": "The run is done.", "failed": "The run failed: %s" % payload, "stopped": "The run was stopped (%s)." % payload}[kind]
 
     def _repaired(self, text):
@@ -1019,8 +1024,6 @@ class ChatService:
         else:
             self.set_activity(None)
         result = state["text"]                                                   # the result of the run record is the text without the links of its files
-        if self._observer is not None:
-            self._clear_line(message_id)                                         # A-158, REQ-CHA-069: before the end message, so that it is the last thing in the chat
         summary = None
         if turns and self._observer is not None:
             kind = {"done": "done", "stopped": "stopped"}.get(status, "failed")
@@ -1029,6 +1032,8 @@ class ChatService:
             state["text"] += " [Open in the Skill run view](#run=%s)" % message_id
         elif self._task_files:                                                 # without run records the files are links in the result (IF-101 v8)
             state["text"] = (state["text"] + "\n\n" if state["text"] else "") + "Files: " + ", ".join("[%s](/api/files/%s)" % (n, n) for n in self._task_files)
+        if self._observer is not None:
+            self._clear_line(message_id)                                         # A-158, REQ-CHA-069, A-160: when the text of the end message is ready and before the message, so that the line shows the run until then and the message is the last thing in the chat
         if not late and not repairing and state["text"] != state["sent"] and (status != "stopped" or self._task_files):
             self._emit("chat_delta", {"id": message_id, "text": state["text"]})        # the last delta equals the text of chat_done, also when the throttle held it back (IF-101 chat_done)
         if repairing and state["text"]:

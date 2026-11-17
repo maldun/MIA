@@ -33,7 +33,8 @@ class ReportOfAReview(unittest.TestCase):
         # Then: exactly one report is handed over, and the chat text starts with it
         self.assertEqual(len(handed), 1)
         self.assertTrue(handed[0].startswith("## Literature review"))
-        self.assertTrue(out.startswith(handed[0]))
+        head = out.split("\n\n### How the works were selected")[0]            # A-160, REQ-WFM-142: the result is the head of the report and its flow count
+        self.assertTrue(handed[0].startswith(head))
 
     def test_a_report_that_cannot_be_handed_over_does_not_take_the_review_away(self):
         """TC-WFM-139: a failing `run_report` leaves the report in the chat text with a note.

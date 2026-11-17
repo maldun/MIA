@@ -92,9 +92,11 @@ class TestReviewChat(unittest.TestCase):
         self.assertEqual(opened, ["10.1/a"])
 
     def test_a_no_at_the_checkpoint_gives_the_report_as_it_stands_without_a_summary(self):
-        out, calls, _events, _s = review(Conversation("yes", "no"))
+        handed = []
+        out, calls, _events, _s = review(Conversation("yes", "no"), run_report=handed.append)
         self.assertIn("Ended by:** user", out)
-        self.assertIn("**Colouring**", out)
+        self.assertNotIn("**Colouring**", out)                  # A-160, REQ-WFM-142: the result is short, the works are in the report of the run
+        self.assertIn("**Colouring**", handed[0])
         self.assertNotIn("review_summary", calls)
         self.assertNotIn("Summary", out)
 

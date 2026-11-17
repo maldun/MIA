@@ -242,7 +242,7 @@ class StepModelAndLinks(unittest.TestCase):
         # Given: the live step on a recording chat function and a persona provider
         seen = []
 
-        def chat(messages, profile=None):
+        def chat(messages, profile=None, options=None):
             seen.append(profile)
             return "ok"
         step = LiveDigest(chat, lambda: "You are MIA.")
@@ -326,7 +326,7 @@ class SecondVerifyRun(unittest.TestCase):
         Example: the provider says A, then B: the second call carries B."""
         # Given: a live step whose persona provider answers A, then B
         personas, seen = ["A", "B"], []
-        step = LiveDigest(lambda messages, profile=None: seen.append(messages[0]["content"]) or "ok", lambda: personas.pop(0))
+        step = LiveDigest(lambda messages, profile=None, options=None: seen.append(messages[0]["content"]) or "ok", lambda: personas.pop(0))
         # When: two messages are worded
         step.failure("x"), step.failure("y")
         # Then: each call carries the persona of its time

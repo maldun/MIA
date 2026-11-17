@@ -155,7 +155,8 @@ def _md(text):
     return defang(re.sub(r"([\\\[\]<>])", r"\\\1", str(text)))
 
 
-def format_report(report, question, until):
+def _head(report, question, until):
+    """the question, the cut-off, the way the run ended and the summary: what the short result and the full report both begin with"""
     out = ["## Literature review", "", "**Question:** %s" % _md(question), "**Cut-off:** %s   **Ended by:** %s" % (until, report["ended_by"])]
     summary = report.get("summary")
     if summary:
@@ -165,6 +166,16 @@ def format_report(report, question, until):
         out += ["", "**Gaps**"] + (["- %s%s" % (_md(g["gap"]), " (%s)" % _md(", ".join(g["works"])) if g["works"] else "") for g in summary["gaps"]] or ["- none named"])
         if summary["dropped_points"]:
             out.append("(%d point(s) of the summary were removed because they cited no work of this review.)" % summary["dropped_points"])
+    return out
+
+
+def format_result(report, question, until):
+    """the result of the run (REQ-WFM-142, A-160): the head and the flow count, no list of works; the end message is worded from it, the whole report is in the run report and the files"""
+    return "\n".join(_head(report, question, until) + ["", "### How the works were selected", _flow_line(report["flow"]) + "."])
+
+
+def format_report(report, question, until):
+    out = _head(report, question, until)
     out += ["", "### How the works were selected", _flow_line(report["flow"]) + ".", "", "| Keyword | Origin | Hits |", "|---|---|---|"]
     out += ["| %s | %s | %d |" % (_md(k["keyword"]), _md(k["origin"]), k["hits"]) for k in report["keywords"]]
     if report["gaps"]:
@@ -302,4 +313,4 @@ def run_review(text, run_skill, scholar, full_text_source, ask, on_event=None, s
     report = run.run()
     progress("writing the report", "writing the report")
     say(spoken_result(report))
-    return format_report(report, question, request.until.isoformat()) + _keep(report, question, request.until.isoformat(), files, reports, run_report)
+    return format_result(report, question, request.until.isoformat()) + _keep(report, question, request.until.isoformat(), files, reports, run_report)
