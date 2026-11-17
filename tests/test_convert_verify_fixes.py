@@ -6,9 +6,11 @@ import json
 import os
 import subprocess
 import sys
+import shutil
 import tempfile
 import threading
 import unittest
+from unittest import mock
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 for path in (REPO, os.path.join(REPO, "tests", "helpers")):
@@ -174,6 +176,69 @@ class F08_TheRealDoor(unittest.TestCase):
         self.assertEqual(ops.tool_step({"tool": SEARCH, "query": "a"})[0]["url"], "http://example.org/a")
         self.assertEqual(door.used("R2").get("web_search"), 1)
         self.assertIsNone(ops.budget_end())
+
+
+PLAN = {"question": "Which is older, the Tarn Museum or the company that built the Rivertown Bridge?"}
+
+
+class F02_TheRecordIsBoundToWhatRuns(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.records = os.path.join(self.tmp.name, "conversion")
+        self.skills = os.path.join(self.tmp.name, "skills")
+        shutil.copytree(SKILLS, self.skills)
+        self.run_file = os.path.join(self.tmp.name, "plans__converted.jsonl")
+        open(self.run_file, "w").write("{}\n")
+
+    def record(self, **more):
+        """the record of plan_question as accept_conversion.py writes it for the skill file in self.skills"""
+        check = {"suite": "EV-plans", "run": self.run_file, "pins": "MP-light", "verdict": "PASS", "skill_version": 1, "pipeline": "plan.free@1", "pipeline_resolved": "plan.free@1"}
+        C.save_check(self.records, "plan_question", {**check, **more})
+
+    def bound(self):
+        return set(C.bound_checks(self.records, self.skills, LIBRARY))
+
+    def test_a_record_that_matches_the_files_counts(self):
+        """F-02. Example: skill version 1, pipeline plan.free@1 (resolves to itself), the run file there: the record counts."""
+        self.record()
+        self.assertEqual(self.bound(), {"plan_question"})
+
+    def test_a_new_skill_version_is_not_covered_by_the_record(self):
+        """F-02. Example: the record says skill version 1, the skill file says 2: no record, so Core.run uses the old runner."""
+        self.record()
+        path = os.path.join(self.skills, "plan_question.md")
+        text = open(path).read()
+        open(path, "w").write(text.replace("version: 1", "version: 2", 1))
+        self.assertEqual(self.bound(), set())
+        core = Core(self.skills, Library(LIBRARY), os.path.join(self.tmp.name, "runs"), model=ScriptedModel(), conversion_dir=self.records)
+        with mock.patch.object(C, "run_converted") as spy:
+            result = core.run("plan_question", PLAN, started_by="command")
+        spy.assert_not_called()
+        self.assertEqual(result.status, "done")
+
+    def test_another_pipeline_reference_is_not_covered(self):
+        """F-02. Example: the record names plan.free@1, the skill now names plan.checked@1: no record."""
+        self.record(pipeline="plan.checked@1", pipeline_resolved="plan.checked@1")
+        self.assertEqual(self.bound(), set())
+
+    def test_a_pipeline_reference_that_now_resolves_elsewhere_is_not_covered(self):
+        """F-02. Example: the record was made when `plan.free` resolved to plan.free@0 (as verify.computable@2 was the newest before a @3); now it resolves to @1: no record."""
+        self.record(pipeline="plan.free@1", pipeline_resolved="plan.free@0")
+        self.assertEqual(self.bound(), set())
+
+    def test_a_record_without_its_run_file_is_not_covered(self):
+        """F-02. Example: the run file of the record is gone: no record."""
+        self.record(run=os.path.join(self.tmp.name, "gone.jsonl"))
+        self.assertEqual(self.bound(), set())
+
+    def test_the_acceptance_script_writes_the_resolved_pipeline(self):
+        """F-02. Example: accept_conversion.py of a plan_question run: the record carries pipeline_resolved plan.free@1."""
+        out = os.path.join(self.tmp.name, "accepted")
+        run = write_run(self.tmp.name, "r.jsonl", {"name": "converted", "converted": True, "skill": "plan_question"})
+        done = subprocess.run([sys.executable, os.path.join(REPO, "tools", "accept_conversion.py"), "plan_question", "--run", run, "--out", out], capture_output=True, text=True, timeout=90)
+        self.assertEqual(done.returncode, 0, done.stdout + done.stderr)
+        self.assertEqual(C.load_checks(out)["plan_question"].get("pipeline_resolved"), "plan.free@1")
 
 
 if __name__ == "__main__":

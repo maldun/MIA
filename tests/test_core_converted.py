@@ -19,6 +19,7 @@ from call_recording import ScriptedModel                 # noqa: E402
 from core import Core                                    # noqa: E402
 from library import Library                              # noqa: E402
 from pipeline import PipelineError                       # noqa: E402
+from skill_store import load_skill                       # noqa: E402
 import skill_converter                                   # noqa: E402
 import plain_modules                                       # noqa: E402
 
@@ -50,8 +51,13 @@ class CoreRun(unittest.TestCase):
         return Core(SKILLS, Library(LIBRARY), os.path.join(self.tmp.name, "runs"), model=self.model, conversion_dir=self.records, **more)
 
     def record(self, *skills):
+        """a record bound to the skill file and the pipeline on disk, with a run file that exists (F-02: a record that does not fit them no longer routes to the graph path)"""
+        run = os.path.join(self.tmp.name, "run.jsonl")
+        open(run, "w").write("{}\n")
         for name in skills:
-            skill_converter.save_check(self.records, name, CHECK)
+            skill = load_skill(os.path.join(SKILLS, name + ".md"))
+            ref = skill_converter.pipeline_ref(Library(LIBRARY).resolve(skill["pipeline"], "pipeline"))
+            skill_converter.save_check(self.records, name, dict(CHECK, run=run, skill_version=skill["version"], pipeline=skill["pipeline"], pipeline_resolved=ref))
 
     def test_without_a_record_the_old_runner_runs(self):
         """Example: no record for plan_question: run_converted is not called and the run is done on the old runner."""

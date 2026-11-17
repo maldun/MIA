@@ -13,6 +13,7 @@ import sys
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, REPO)
 import skill_converter as C                                  # noqa: E402
+from library import Library                                  # noqa: E402
 
 REQUIREMENTS = os.path.join(REPO, "specs", "mia", "nodes", "N-2-backend", "nodes", "N-2.3-workflow-management", "requirements.md")
 
@@ -59,7 +60,7 @@ def main():
     pin = head.get("pin") or {}
     check = {"suite": suite, "run": os.path.relpath(os.path.abspath(args.run), REPO), "pins": pin.get("id"), "model": pin.get("name"), "digest": pin.get("digest"),
              "verdict": "PASS", "requirement": requirement, "criterion": criterion, "skill_version": head.get("skill_version"), "pipeline": head.get("pipeline"),
-             "commit": head.get("commit")}
+             "pipeline_resolved": C.pipeline_ref(Library(os.path.join(REPO, "library")).resolve(head.get("pipeline"), "pipeline")), "commit": head.get("commit")}
     C.save_check(args.out, args.skill, check)
     print("recorded: %s" % os.path.join(args.out, args.skill + ".json"))
     return 0

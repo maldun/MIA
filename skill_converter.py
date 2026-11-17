@@ -214,6 +214,33 @@ def load_checks(folder):
     return checks
 
 
+def pipeline_ref(pipeline):
+    """"id@version" of a pipeline entry of the library (what a reference without a version resolves to today)"""
+    return "%s@%s" % (pipeline["id"], pipeline["version"])
+
+
+def bound_checks(folder, skills_dir, library_dir):
+    """F-02: the records of `load_checks` that still describe what runs: skill file at the recorded version, the same pipeline reference, a reference without a version still
+    resolving to what it resolved to when the record was made (`pipeline_resolved`, written by accept_conversion.py; an older record has none and is checked on the reference
+    alone), and the run file of the record on disk. Anything else counts as no record, so the skill goes back to the old runner until the owner accepts it again."""
+    root = os.path.dirname(os.path.abspath(__file__))
+    library = Library(library_dir)
+    bound = {}
+    for name, check in load_checks(folder).items():
+        try:
+            skill = load_skill(os.path.join(skills_dir, name + ".md"))
+            if check.get("skill_version") != skill["version"] or check.get("pipeline") != skill["pipeline"]:
+                continue
+            if check.get("pipeline_resolved") and check["pipeline_resolved"] != pipeline_ref(library.resolve(skill["pipeline"], "pipeline")):
+                continue
+        except Exception:                                  # a skill file or pipeline that cannot be read is no match
+            continue
+        if not os.path.isfile(os.path.join(root, check["run"])):         # an absolute path stays absolute
+            continue
+        bound[name] = check
+    return bound
+
+
 def criterion_of(requirement, requirements_path):
     """the `Eval criterion:` line of a requirement such as REQ-WFM-111 in the requirements file of the node"""
     with open(requirements_path, encoding="utf-8") as fp:

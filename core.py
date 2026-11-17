@@ -96,8 +96,8 @@ class Core:
         if pipeline:
             skill = dict(skill, pipeline=pipeline)
         graph = self.graph(skill)[0]
-        # a skill with an acceptance record runs as a graph (D-257); a variant (`pipeline=`) is not the accepted skill, so it stays on the old runner
-        if not pipeline and self.conversion_dir and task in skill_converter.load_checks(self.conversion_dir):
+        # a skill with an acceptance record that still fits the skill file, the pipeline and the run file runs as a graph (D-257, F-02); a variant (`pipeline=`) is not the accepted skill, so it stays on the old runner
+        if not pipeline and self.conversion_dir and task in skill_converter.bound_checks(self.conversion_dir, self.skills.folder, self.library.shipped_dir):
             converted = self._run_converted(task, skill, graph, inputs, **kwargs)
             if converted is not None:
                 return converted
