@@ -2883,7 +2883,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-CHA-041'> PhasesAreNotedInTheRunStatusNotInTheChat_Cha041 {
         subject s : ConversationCore;
-        doc /* When a running skill enters a phase that its manifest declares worth telling, the Chat agent shall note the phase once in the status of the run (Skill run view, status card) and shall add no message to the chat for it. */
+        doc /* When a running skill enters a phase that its manifest declares worth telling, the Chat agent shall note the phase once in the status of the run (Skill run view) and shall add no message to the chat log for it. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-CHA-042'> NoStatusForOtherPhases_Cha042 {
@@ -2953,7 +2953,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-CHA-055'> NoStatusMessageForASkillWithoutPhases_Cha055 {
         subject s : ConversationCore;
-        doc /* While a skill without declared phases runs, the Chat agent shall add no status message. */
+        doc /* While a skill without declared phases runs, the Chat agent shall add no status message to the chat log. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-CHA-056'> LinkAddedByCode_Cha056 {
@@ -3023,7 +3023,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-CHA-069'> LiveLineEndsWithTheRun_Cha069 {
         subject s : ConversationCore;
-        doc /* When a skill run ends done, failed or stopped, the Chat agent shall clear the status line of the run before it adds the end message. */
+        doc /* When a skill run ends done, failed or stopped, the Chat agent shall send the clearing of the status line of the run before it adds the end message, whether or not a line was shown. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-CHA-070'> LiveLineWhileAQuestionWaits_Cha070 {
