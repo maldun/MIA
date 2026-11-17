@@ -29,3 +29,12 @@ The task card (`task-card.js`) is already removed (G-V3.PANEL T-10); the Skill r
 
 ## Not done
 Nothing is applied yet. Next: plan-phase (requirements, IF change, the six protected files, review-log line), then red tests, then code. Requirements, the six protected files, the plan and the review-log line come after the owner's decisions (plan-phase, then red tests, then code).
+
+## Amended after the Verify run (2026-11-17, owner: "amend the requirements")
+Source: `specs/mia/goals/G-V3.CHAT/verification-report-a158.md`, findings F-03, F-04, F-06.
+- **New REQ-CHA-072** (TC-CHA-076): after a question ends by an answer or by a timeout the phase line comes again, or `working` for a run without a phase; after a stop no line is sent again (F-03, and the `answered` fallback of F-06).
+- **REQ-CHA-069 clarified:** the clearing is sent whether or not a line was shown, so that a lost line cannot stay (F-06).
+- **New REQ-CLV-055:** the two generic texts are shown in the language of the page (en, de), any other text of the line as it is (F-06).
+- **F-04 (a reload during a run loses the line): "not now".** Decided with the transience of the line (2026-11-17, A-158 A): the line is not restored after a reload; the Skill run view shows the state (REQ-CLV-038). Recorded here as the accepted risk; to be confirmed by the owner in the review log. A later requirement could resend the line on connect.
+- Protected: TC-CHA-076 is added to the `Applies to:` line of TR-CHAT-006 (patch `amendment-a158/protected-test-requirements-2.patch`, `apply-amend.sh`).
+

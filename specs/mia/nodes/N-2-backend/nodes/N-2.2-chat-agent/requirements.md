@@ -367,7 +367,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 ## Groups of G-V3.CHAT
 | Order | Group | What it covers | Requirements |
 |---|---|---|---|
-| 1 | ST | Skill turns: what the chat shows of a run and what the model sees (FR-35, FR-46) | REQ-CHA-040, REQ-CHA-041, REQ-CHA-042, REQ-CHA-043, REQ-CHA-044, REQ-CHA-045, REQ-CHA-046, REQ-CHA-047, REQ-CHA-055, REQ-CHA-056, REQ-CHA-057, REQ-CHA-058, REQ-CHA-059, REQ-CHA-060, REQ-CHA-067, REQ-CHA-068, REQ-CHA-069, REQ-CHA-070, REQ-CHA-071 |
+| 1 | ST | Skill turns: what the chat shows of a run and what the model sees (FR-35, FR-46) | REQ-CHA-040, REQ-CHA-041, REQ-CHA-042, REQ-CHA-043, REQ-CHA-044, REQ-CHA-045, REQ-CHA-046, REQ-CHA-047, REQ-CHA-055, REQ-CHA-056, REQ-CHA-057, REQ-CHA-058, REQ-CHA-059, REQ-CHA-060, REQ-CHA-067, REQ-CHA-068, REQ-CHA-069, REQ-CHA-070, REQ-CHA-071, REQ-CHA-072 |
 | 2 | UT | Untrusted result (TB-result) | REQ-CHA-048, REQ-CHA-049, REQ-CHA-061, REQ-CHA-064, REQ-CHA-066 |
 | 3 | BG | Budgets of the digest step | REQ-CHA-050, REQ-CHA-051, REQ-CHA-052, REQ-CHA-062, REQ-CHA-063, REQ-CHA-065 |
 | 4 | SQ | Summary quality (eval criteria) | REQ-CHA-053, REQ-CHA-054 |
@@ -754,16 +754,16 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 
 ### REQ-CHA-069 – Live line ends with the run
 - Level: low   Subject: ConversationCore
-- Text: When a skill run ends done, failed or stopped, the Chat agent shall clear the status line of the run before it adds the end message.
+- Text: When a skill run ends done, failed or stopped, the Chat agent shall send the clearing of the status line of the run before it adds the end message, whether or not a line was shown.
 - Rationale: refines REQ-BE-078; owner 2026-11-17 (A-158): the end message is the last thing in the chat, as in common chatbots
 - Parent: REQ-BE-078
 - Group: ST
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-39: for each of the three ends the clearing of the line is sent before the end message and no line follows it (exact)
+- Acceptance criterion: AC-39: for each of the three ends, and for a run that never showed a line, the clearing is sent before the end message and no line follows it (exact)
 - Verified by: TC-CHA-074
 - Status: Draft
-- History: A-158 (owner 2026-11-17), new
+- History: A-158 (owner 2026-11-17), new; clarified by the Verify finding F-06 (the clearing is also sent without a line, so that a lost line cannot stay)
 
 ### REQ-CHA-070 – Live line while a question waits
 - Level: low   Subject: ConversationCore
@@ -790,3 +790,16 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verified by: TC-CHA-073
 - Status: Draft
 - History: A-158 (owner decision 2026-11-17: transient), new, split from REQ-CHA-068
+
+### REQ-CHA-072 – Phase line again after a question
+- Level: low   Subject: ConversationCore
+- Text: When a question of a skill run ends by an answer or a timeout, the Chat agent shall send the status line of the current phase again, or `working` for a run without phases.
+- Rationale: refines REQ-BE-078; owner 2026-11-17 (A-158) and Verify findings F-03, F-06: the line `waiting for your answer` must not stay while the skill goes on
+- Parent: REQ-BE-078
+- Group: ST
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: after an answer, and after a timeout without an answer, the line of the phase is sent again; a run without a phase gets `working` (exact); after a stop of the run no line is sent again
+- Verified by: TC-CHA-076
+- Status: Draft
+- History: A-158 amended (owner 2026-11-17), new, from the Verify findings F-03 and F-06

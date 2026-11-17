@@ -69,6 +69,7 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-201
 | TC-CHA-073 | REQ-CHA-068, REQ-CHA-071 | Component | 1 | unit test with the fake model server and a recording of the events | AC-39: the lines `collect`, `rank`, `report` in order, a repeat once, `working` for a lookup; none in the log, the history or the speech | exact |
 | TC-CHA-074 | REQ-CHA-069 | Component | 1 | unit test with a recording of the events | AC-39: for done, failed and stopped the clearing comes before the end message and no line follows | exact |
 | TC-CHA-075 | REQ-CHA-070 | Component | 1 | unit test with a scripted review | AC-39: `waiting for your answer` after the question, the phase line again after the answer | exact |
+| TC-CHA-076 | REQ-CHA-072 | Component | 1 | unit test with the fake model server and a recording of the events | AC-39: the phase line again after an answer and after a timeout; `working` for a run without phase; none after a stop | exact |
 | EV-skill_turns | REQ-CHA-049, REQ-CHA-053, REQ-CHA-054 | Evaluation | 4 | the suite `eval/suites/skill_turns` (dev 24) and `skill_turns.holdout` (24) on MP-light, 3 repeats, harness `tools/eval.py` | AC-39: red-team cases pass in every repeat; faithful at least 0.85 (lower bound 0.70); persona at least 0.80 (lower bound 0.70), decided by `eval_decide.py` against the baseline | as in the Eval criterion lines |
 
 ## Scenarios (speak again, A-132; the older checks of this file have none yet)
@@ -354,13 +355,19 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-201
 
 ### TC-CHA-074 – Live line ends with the run
 - Verifies: REQ-CHA-069
-- Given: three scripted runs that end done, failed with the reason `search service unreachable`, and stopped, and a recording of the events
+- Given: three scripted runs that end done, failed with the reason `search service unreachable`, and stopped, and a recording of the events; and a run that never showed a line
 - When: each run ends
-- Then: in each recording the clearing of the line comes before the end message and no line comes after it (A-158)
+- Then: in each recording the clearing of the line comes before the end message and no line comes after it, also for the run without a line (A-158, F-06)
 
 ### TC-CHA-075 – Live line while a question waits
 - Verifies: REQ-CHA-070
 - Given: a scripted review with phase `screen` that asks one question, and a recording of the events
 - When: the question is asked and answered
 - Then: the line `waiting for your answer` is sent after the question message; after the answer the line `screen` is sent again (A-158)
+
+### TC-CHA-076 – Phase line again after a question
+- Verifies: REQ-CHA-072
+- Given: a skill with the declared phase `collect` that asks one question; a second skill without phases that asks one; a recording of the events
+- When: the question is answered, or nobody answers (timeout), or the run is stopped while it waits
+- Then: after the answer and after the timeout the line `collect` is sent again (`working` for the skill without phases); after the stop no line is sent again before the clearing (A-158, F-03, F-06)
 

@@ -38,6 +38,7 @@ test('TC-CLV-053: the clearing of another run leaves the line of the run that is
   assert.deepEqual(after, { run: 'r1', text: 'collect' });
 });
 
+// mark.req("REQ-CLV-055")
 test('TC-CLV-053: the two generic texts of the server are shown in the language of the page, a phase name as it is', () => {
   // Given: a translation that marks what it translated
   const t = (key) => `<${key}>`;

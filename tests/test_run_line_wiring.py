@@ -92,9 +92,9 @@ class RunLineWiring(unittest.TestCase):
         # Then: the line is cleared at the end
         self.assertEqual([x[1] for x in seen if x[0] == "line"], ["collect", None])
 
-    @mark.req("REQ-CHA-070")
+    @mark.req("REQ-CHA-070", "REQ-CHA-072")
     def test_a_question_that_times_out_gives_the_phase_line_back(self):
-        """F-03 of the A-158 verification: when nobody answers, the line `waiting for your answer` does not stay while the skill goes on.
+        """TC-CHA-076, F-03 of the A-158 verification: when nobody answers, the line `waiting for your answer` does not stay while the skill goes on.
         Example: collect, waiting for your answer, collect (the timeout), None."""
         # Given: a skill that asks one question after its first phase, on a service whose question times out at once
         def asks(argument, on_delta, on_emotion, should_stop, ask, monitor):
@@ -109,9 +109,9 @@ class RunLineWiring(unittest.TestCase):
         # Then: the phase line comes back after the waiting line
         self.assertEqual([x[1] for x in seen if x[0] == "line"], ["collect", "waiting for your answer", "collect", None])
 
-    @mark.req("REQ-CHA-069", "REQ-CHA-070")
+    @mark.req("REQ-CHA-069", "REQ-CHA-070", "REQ-CHA-072")
     def test_a_stop_while_a_question_waits_clears_the_line_before_the_end_message(self):
-        """F-05 (d): the user stops a run that waits for an answer; the line is cleared before the end message.
+        """TC-CHA-076 (stop), F-05 (d): the user stops a run that waits for an answer; the line is cleared before the end message.
         Example: collect, waiting for your answer, ..., None, then the stopped message."""
         # Given: a skill that waits for an answer
         def asks(argument, on_delta, on_emotion, should_stop, ask, monitor):
@@ -180,6 +180,42 @@ class RunLineWiring(unittest.TestCase):
         chat.skill_turn("anna", "r1", "question", "Still there?")
         # Then: the last line event is the clearing
         self.assertEqual([x[1] for x in seen if x[0] == "line"][-1], None)
+
+    @mark.req("REQ-CHA-072")
+    def test_a_run_without_a_phase_gets_working_again_after_the_answer(self):
+        """TC-CHA-076 (F-06): a lookup-like run that asks one question shows `working`, `waiting for your answer`, `working` again, then the clearing.
+        Example: lines working, waiting for your answer, working, None."""
+        # Given: a skill without declared phases that asks one question
+        def asks(argument, on_delta, on_emotion, should_stop, ask, monitor):
+            return "Done " + str(ask("Which topic?"))
+        chat, _, _ = chat_with(self, asks, needs=("ask", "monitor"), declared=(), spawn=lambda target: threading.Thread(target=target, daemon=True).start())
+        seen = recording(chat)
+        # When: the user starts it and answers
+        chat.send("/go x", sender="anna", author="anna")
+        for _ in range(200):
+            if ("line", "waiting for your answer") in seen:
+                break
+            time.sleep(0.05)
+        chat.send("quantum", sender="anna", author="anna")
+        for _ in range(200):
+            if ("line", None) in seen:
+                break
+            time.sleep(0.05)
+        # Then: the generic line comes back after the answer
+        self.assertEqual([x[1] for x in seen if x[0] == "line"], ["working", "waiting for your answer", "working", None])
+
+    @mark.req("REQ-CHA-069")
+    def test_a_run_that_never_showed_a_line_is_still_cleared_before_its_end(self):
+        """TC-CHA-074 (F-06): a skill that declares phases but enters none sends the clearing before its end message all the same, so that a lost line cannot stay.
+        Example: lines None only; the clearing comes before the end message."""
+        # Given: a skill with declared phases that enters none of them
+        chat, _, _ = chat_with(self, lambda argument, on_delta, on_emotion, should_stop, monitor: "result")
+        seen = recording(chat)
+        # When: the user starts it
+        chat.send("/go x", sender="anna", author="anna")
+        # Then: the only line event is the clearing, before the end message
+        self.assertEqual([x[1] for x in seen if x[0] == "line"], [None])
+        self.assertLess(seen.index(("line", None)), seen.index(("message", "chat_start")))
 
 
 if __name__ == "__main__":

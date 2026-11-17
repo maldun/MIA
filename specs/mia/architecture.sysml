@@ -2391,6 +2391,11 @@ package MIA_NodeRequirements {
         doc /* When the Chat agent clears the status line of a run, the Chat and login views shall remove the line from the chat. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
+    requirement def <'REQ-CLV-055'> TextsOfTheLiveLineInTheLanguageOfThePage_Clv055 {
+        subject s : WebFrontEnd;
+        doc /* The Chat and login views shall show the status line texts `working` and `waiting for your answer` in the language of the page, and any other text of the line as it is. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
     requirement def <'REQ-CHV-001'> ChatWithoutTheCharacter_Chv001 {
         subject s : WebFrontEnd;
         doc /* If the Character view cannot load, then it shall report the failure to the Chat and login views through IF-111 and stay hidden. */
@@ -3029,6 +3034,11 @@ package MIA_NodeRequirements {
     requirement def <'REQ-CHA-071'> LiveLineIsTransient_Cha071 {
         subject s : ConversationCore;
         doc /* The Chat agent shall keep the status line of a run out of the chat log, the history of the chat model and speech. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-072'> PhaseLineAgainAfterAQuestion_Cha072 {
+        subject s : ConversationCore;
+        doc /* When a question of a skill run ends by an answer or a timeout, the Chat agent shall send the status line of the current phase again, or `working` for a run without phases. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-WFM-001'> SkillsAsTasks_Wfm001 {
@@ -4881,6 +4891,7 @@ package MIA_NodeRequirements {
     requirement r_req_clv_052 : NoActiveContentFromTheReport_Clv052;
     requirement r_req_clv_053 : LiveLineIsTheLastElementOfTheChat_Clv053;
     requirement r_req_clv_054 : LiveLineIsRemovedWhenCleared_Clv054;
+    requirement r_req_clv_055 : TextsOfTheLiveLineInTheLanguageOfThePage_Clv055;
     requirement r_req_chv_001 : ChatWithoutTheCharacter_Chv001;
     requirement r_req_chv_002 : OneExpressionAPI_Chv002;
     requirement r_req_chv_003 : LivingCharacter_Chv003;
@@ -5009,6 +5020,7 @@ package MIA_NodeRequirements {
     requirement r_req_cha_069 : LiveLineEndsWithTheRun_Cha069;
     requirement r_req_cha_070 : LiveLineWhileAQuestionWaits_Cha070;
     requirement r_req_cha_071 : LiveLineIsTransient_Cha071;
+    requirement r_req_cha_072 : PhaseLineAgainAfterAQuestion_Cha072;
     requirement r_req_wfm_001 : SkillsAsTasks_Wfm001;
     requirement r_req_wfm_002 : VersionedWorkflowLibrary_Wfm002;
     requirement r_req_wfm_003 : NoCycles_Wfm003;
@@ -5419,6 +5431,7 @@ package MIA_NodeRequirements {
     satisfy r_req_clv_052 by mia.frontEnd;
     satisfy r_req_clv_053 by mia.frontEnd;
     satisfy r_req_clv_054 by mia.frontEnd;
+    satisfy r_req_clv_055 by mia.frontEnd;
     satisfy r_req_chv_001 by mia.frontEnd;
     satisfy r_req_chv_002 by mia.frontEnd;
     satisfy r_req_chv_003 by mia.frontEnd;
@@ -5547,6 +5560,7 @@ package MIA_NodeRequirements {
     satisfy r_req_cha_069 by mia.conversation;
     satisfy r_req_cha_070 by mia.conversation;
     satisfy r_req_cha_071 by mia.conversation;
+    satisfy r_req_cha_072 by mia.conversation;
     satisfy r_req_wfm_001 by mia.taskRuntime;
     satisfy r_req_wfm_002 by mia.taskRuntime;
     satisfy r_req_wfm_003 by mia.taskRuntime;
@@ -5956,6 +5970,7 @@ package MIA_NodeRequirements {
     allocate r_req_clv_052 to mia.frontEnd;
     allocate r_req_clv_053 to mia.frontEnd;
     allocate r_req_clv_054 to mia.frontEnd;
+    allocate r_req_clv_055 to mia.frontEnd;
     allocate r_req_chv_001 to mia.frontEnd;
     allocate r_req_chv_002 to mia.frontEnd;
     allocate r_req_chv_003 to mia.frontEnd;
@@ -6084,6 +6099,7 @@ package MIA_NodeRequirements {
     allocate r_req_cha_069 to mia.conversation;
     allocate r_req_cha_070 to mia.conversation;
     allocate r_req_cha_071 to mia.conversation;
+    allocate r_req_cha_072 to mia.conversation;
     allocate r_req_wfm_001 to mia.taskRuntime;
     allocate r_req_wfm_002 to mia.taskRuntime;
     allocate r_req_wfm_003 to mia.taskRuntime;
@@ -6495,6 +6511,7 @@ package MIA_NodeRequirements {
     dependency from r_req_clv_052 to r_req_fe_032;
     dependency from r_req_clv_053 to r_req_fe_032;
     dependency from r_req_clv_054 to r_req_fe_032;
+    dependency from r_req_clv_055 to r_req_fe_032;
     dependency from r_req_chv_001 to r_req_fe_006;
     dependency from r_req_chv_002 to r_req_fe_008;
     dependency from r_req_chv_003 to r_req_fe_009;
@@ -6632,6 +6649,7 @@ package MIA_NodeRequirements {
     dependency from r_req_cha_069 to r_req_be_078;
     dependency from r_req_cha_070 to r_req_be_078;
     dependency from r_req_cha_071 to r_req_be_078;
+    dependency from r_req_cha_072 to r_req_be_078;
     dependency from r_req_wfm_001 to r_req_be_033;
     dependency from r_req_wfm_002 to r_req_be_035;
     dependency from r_req_wfm_003 to r_req_be_036;

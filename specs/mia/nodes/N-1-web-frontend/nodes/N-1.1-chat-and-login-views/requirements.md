@@ -600,3 +600,16 @@ The chat page: messages, queue, history, status line, voting, tasks and memos, e
 - Verified by: TC-CLV-053
 - Status: Draft
 - History: A-158 (owner 2026-11-17), new, split from REQ-CLV-053
+
+### REQ-CLV-055 – Texts of the live line in the language of the page
+- Level: low   Subject: WebFrontEnd
+- Text: The Chat and login views shall show the status line texts `working` and `waiting for your answer` in the language of the page, and any other text of the line as it is.
+- Rationale: refines REQ-FE-032 (NFR-1, languages of the page); owner 2026-11-17 (A-158); Verify finding F-06: the two texts are fixed by the server, the phase names come from the manifest
+- Parent: REQ-FE-032
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: with a marking translation the two texts are translated and a phase name is not (exact); the page has the texts in English and German
+- Verified by: TC-CLV-053
+- Status: Draft
+- History: A-158 amended (owner 2026-11-17), new, from the Verify finding F-06
+
