@@ -1,0 +1,212 @@
+diff --git a/tests/acceptance/test_end_message.py b/tests/acceptance/test_end_message.py
+new file mode 100644
+index 00000000..5bdf6366
+--- /dev/null
++++ b/tests/acceptance/test_end_message.py
+@@ -0,0 +1,206 @@
++"""
++Acceptance tests of the end message of a skill run (G-V3.CHAT, A-160): TC-CHA-077 to 080 (REQ-CHA-069, 073, 074, 075) against SkillDigestStep, LiveDigest and ChatService with the fake model of
++TR-CHAT-006, and TC-WFM-142 (REQ-WFM-142) against the review with a scripted scholar and scripted skills. Red until A-160 is built.
++Interface of A-160 (specs/mia/amendments/A-160-draft-end-message-is-bounded-and-stoppable.md):
++- `SkillDigestStep.options` is the options of every call, `{"num_predict": 1024}`; `LiveDigest` hands them to the chat function as `options=` next to `profile=`.
++- A summary of more than 1200 characters is asked again once by the step; the text of the second call is the summary.
++- `ChatService` hands its stop flag to the step: `summary(result, should_stop=...)`; a stop ends the step before its next call, and the end message is `The run is done.` plus the link.
++Run with: python tests/acceptance/test_end_message.py
++"""
++
++import datetime
++import os
++import shutil
++import sys
++import tempfile
++import threading
++import unittest
++
++HERE = os.path.dirname(os.path.abspath(__file__))
++REPO = os.path.dirname(os.path.dirname(HERE))
++sys.path.insert(0, REPO)
++sys.path.insert(0, HERE)
++sys.path.insert(0, os.path.join(os.path.dirname(HERE), "helpers"))
++
++from markers import mark                                              # noqa: E402
++from chat_log import ChatLog                                          # noqa: E402
++from chat_service import ChatService                                  # noqa: E402
++from fake_model import FakeModel                                      # noqa: E402
++from moods import MoodTracker                                         # noqa: E402
++from skill_digest import LiveDigest, SkillDigestStep                  # noqa: E402
++from skill_runs import SkillRunRecorder                               # noqa: E402
++from skill_runs_fakes import FakeClock, FakeSkillRunStorage           # noqa: E402
++from task_registry import Task, TaskRegistry                          # noqa: E402
++from test_chat_skill_turns import Chat, LINK, count_tokens, numbered  # noqa: E402
++
++PLAIN = "The run is done."
++
++
++def task_chat(test, skill, model, declared=("collect", "rank"), needs=("monitor",)):
++    """a ChatService that runs one task `go` (`skill`) with a recorder and the digest step on `model`; returns (chat, events); the run is synchronous"""
++    folder = tempfile.mkdtemp()
++    test.addCleanup(shutil.rmtree, folder, True)
++    clock, events = FakeClock(), []
++    recorder = SkillRunRecorder(FakeSkillRunStorage(), lambda event, payload: None, clock=clock.monotonic, now=clock.now)
++    tasks = TaskRegistry()
++    tasks.register(Task("go", skill, "A skill", "your question", "/go a question", needs=needs, version="1"))
++    chat = ChatService(lambda event, payload: events.append((event, payload)), ChatLog(os.path.join(folder, "log.jsonl")), MoodTracker(os.path.join(REPO, "moods.json")), lambda *args: "",
++                       queue_size=5, spawn=lambda target: target(), clock=lambda: 100.0, tasks=tasks, recorder=recorder, digest=SkillDigestStep(model, count_tokens=count_tokens),
++                       declared_phases=lambda run: declared, speak=lambda sentence, should_stop: None, review_timeout=5)
++    return chat, events
++
++
++def mia(chat):
++    return [r for r in chat.log.history(limit=200)[0] if r["role"] == "assistant"]
++
++
++class DigestOutput(unittest.TestCase):
++    @mark.req("REQ-CHA-073")
++    def test_every_call_of_the_step_asks_for_at_most_1024_tokens(self):
++        """TC-CHA-077: the options of the step are `num_predict` 1024, and the live step hands them to the chat function in every call of a long result.
++        Example: a result of 20 000 tokens makes pieces, digests and a summary call, each with options {"num_predict": 1024}."""
++        # Given: the step on a fake model and the live step on a recording chat function
++        self.assertEqual(SkillDigestStep(FakeModel([])).options, {"num_predict": 1024})
++        calls = []
++
++        def chat(messages, profile=None, options=None):
++            calls.append((profile, options))
++            return "Digest."
++        # When: the live step summarizes a long result (pieces, digests, summary)
++        LiveDigest(chat, lambda: "").summary(numbered(6000))
++        # Then: it made several calls and each carried the profile light and the 1024 tokens
++        self.assertGreater(len(calls), 2)
++        self.assertTrue(all(call == ("light", {"num_predict": 1024}) for call in calls), calls[:3])
++
++
++class ShortSummary(unittest.TestCase):
++    @mark.req("REQ-CHA-074")
++    def test_a_summary_over_1200_characters_is_asked_again_once(self):
++        """TC-CHA-078: 800 characters give one call; 3000 then 900 give two calls and the 900 characters reach the chat; 3000 then 2500 give two calls (no third) and the 2500 reach the chat unchanged.
++        Example: the first reply is 3000 times x, the second 900 times y: the end message is the 900 y."""
++        for first, second, calls, expected in (("w" * 800, None, 1, "w" * 800), ("x" * 3000, "y" * 900, 2, "y" * 900), ("x" * 3000, "y" * 2500, 2, "y" * 2500)):
++            with self.subTest(first=len(first), second=len(second or "")):
++                # Given: a digest step with scripted replies
++                chat = Chat(self, [first] + ([second] if second else []))
++                # When: the end message of a run with a short result is made
++                chat.turn("r1", "done", numbered(300))
++                # Then: the number of calls and the text of the chat are as the scripted case says
++                self.assertEqual(len(chat.model.calls), calls)
++                self.assertEqual(chat.texts(), [expected + LINK % "r1"])
++                if second:
++                    self.assertIn(first, chat.model.users(chat.model.calls[1])[-1])               # the second call gets the long text
++                    self.assertIn("1200", " ".join(chat.model.systems(chat.model.calls[1])))        # and asks for at most 1200 characters
++
++
++class StopInTheEndMessage(unittest.TestCase):
++    @mark.req("REQ-CHA-075")
++    def test_a_stop_during_the_digest_ends_the_run_with_the_plain_sentence(self):
++        """TC-CHA-079: a stop during the first piece call of a long result leaves no further model call; the end message is `The run is done.` with the link and no digest text is in the chat or its history.
++        Example: ten pieces, the stop comes in the first call: one call, the message `The run is done.` + link."""
++        # Given: a skill with a long result and a fake model whose first call stops the run
++        holder = {}
++
++        def reply(messages):
++            holder["chat"]._stop.set()                                  # the user presses Stop while the digest works
++            return "DIGEST-TEXT"
++        model = FakeModel(reply)
++
++        def skill(argument, on_delta, on_emotion, should_stop, monitor):
++            return numbered(10000)
++        chat, events = task_chat(self, skill, model)
++        holder["chat"] = chat
++        # When: the user starts the task
++        chat.send("/go a question", sender="anna", author="anna")
++        # Then: one call was made, the end message is the plain sentence with the link of the run
++        self.assertEqual(len(model.calls), 1)
++        end = mia(chat)[-1]
++        self.assertEqual(end["text"], PLAIN + LINK % end["skill_run"])
++        self.assertEqual(end["kind"], "done")
++        # And: no digest text is in the chat or in the history for the chat model
++        self.assertFalse(any("DIGEST-TEXT" in r["text"] for r in chat.log.history(limit=200)[0]))
++        self.assertFalse(any("DIGEST-TEXT" in m["text"] for m in chat.model_history()))
++
++
++class LineUntilReady(unittest.TestCase):
++    @mark.req("REQ-CHA-069")
++    def test_the_line_is_cleared_after_the_digest_and_before_the_end_message(self):
++        """TC-CHA-080: the line of the phase stays while the digest works; the clearing comes after the digest call and before the end message.
++        Example: events line collect, digest call, clearing, end message."""
++        # Given: a skill in its phase collect and a digest step whose call is noted among the events of the chat
++        merged = []
++
++        def reply(messages):
++            merged.append(("digest_call", None))
++            return "Collected."
++
++        def skill(argument, on_delta, on_emotion, should_stop, monitor):
++            monitor.update(phase="collect")
++            return "result"
++        chat, _ = task_chat(self, skill, FakeModel(reply))
++        original = chat._emit
++
++        def emit(event, payload):
++            merged.append((event, payload.get("text") if event == "chat_run_status" else None))
++            original(event, payload)
++        chat._emit = emit
++        # When: the run ends done
++        chat.send("/go a question", sender="anna", author="anna")
++        # Then: line collect, digest call, clearing, end message
++        names = [item for item in merged if item[0] in ("chat_run_status", "digest_call", "chat_start")]
++        self.assertEqual(names[:4], [("chat_run_status", "collect"), ("digest_call", None), ("chat_run_status", None), ("chat_start", None)])
++
++
++# --- TC-WFM-142: the review returns a short result -----------------------------------------------------------------------------------------
++
++def _review_modules():
++    from extensions.review import review_chat as rc
++    import scholar
++    return rc, scholar
++
++
++class ShortReviewResult(unittest.TestCase):
++    @mark.req("REQ-WFM-142")
++    def test_the_result_of_the_review_is_short_and_the_report_is_whole(self):
++        """TC-WFM-142: a scripted review of 400 screened works returns a result with the question, the summary and the flow line, none of the work sections, shorter than 8000 characters; the run report and the .md file are the full report.
++        Example: 400 included works: the result has no `### Included`, the run report has it."""
++        rc, scholar = _review_modules()
++        today = datetime.date(2026, 10, 28)
++        abstract = "Graph methods for scheduling in practice."
++        works = [scholar.new_work("test", doi="10.1/w%d" % n, title="Work %d" % n, date="2020-05-01", year=2020, abstract=abstract, oa_url="https://oa.example/w%d" % n) for n in range(400)]
++
++        class Scholar:
++            def search(self, query, limit=None, until=None, since=None, check_retraction=False):
++                return {"works": [dict(w) for w in works], "errors": {}, "counts": {}, "dropped": [], "merged": 0}
++
++        def run_skill(name, inputs):
++            if name == "review_keywords":
++                return {"concepts": [{"name": "m", "keywords": ["graph colouring"]}], "criteria": [{"code": "outdated", "text": "too old"}]}
++            if name == "review_abstract":
++                return {"grade": 3, "decision": "include", "reason": "", "quote": "Graph methods for scheduling", "statement": "on topic"}
++            if name == "review_summary":
++                return {"found": [{"point": "colouring works", "works": ["10.1/w1"]}], "coverage": "thin", "gaps": []}
++            raise AssertionError("unexpected skill " + name)
++
++        answers = iter(["yes", "no"] + ["summarize"] * 5)
++        stored, run_reports = {}, []
++        # Given: the scripted scholar with 400 works, scripted skills and a scripted user
++        # When: the review runs to its end
++        result = rc.run_review("How to schedule? until 2026-01-01", run_skill, Scholar(), lambda w: None, lambda text: next(answers), today=today, min_works=3,
++                               files=lambda name, text: stored.update({name: text}), reports=lambda question, report: None, run_report=run_reports.append)
++        # Then: the result is short, has the question, the summary and the flow line, and none of the work sections
++        self.assertLess(len(result), 8000)
++        self.assertIn("How to schedule?", result)
++        self.assertIn("Coverage of the question", result)
++        self.assertIn("records found", result)
++        for section in ("### Included", "### Maybe", "### Excluded although closely related"):
++            self.assertNotIn(section, result)
++        # And: the run report and the .md file hold the whole report as before
++        self.assertEqual(len(run_reports), 1)
++        self.assertIn("### Included", run_reports[0])
++        md = [text for name, text in stored.items() if name.endswith(".md")]
++        self.assertEqual(len(md), 1)
++        self.assertIn("### All screened works", md[0])
++
++
++if __name__ == "__main__":
++    unittest.main()
