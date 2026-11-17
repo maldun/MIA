@@ -27,6 +27,17 @@ export function upsert(list, message) {
   return at;
 }
 
+/** the status line of a skill run (A-158, REQ-CLV-053, 054): the event {run, text} sets or replaces it, text null clears it; the clearing of another run leaves it as it is */
+export function runLineState(line, event) {
+  if (event?.text == null) return line && event?.run !== line.run ? line : null;
+  return { run: event.run, text: event.text };
+}
+
+/** the messages as they are shown: the status line is the last element, below every message, and links to the run */
+export function withRunLine(messages, line) {
+  return line ? [...messages, { kind: 'run_line', run: line.run, text: line.text, href: `#run=${encodeURIComponent(line.run)}` }] : [...messages];
+}
+
 /** the oldest messages go when the list is longer than the window; returns the removed ones */
 export function trimOldest(list, max = MAX_IN_DOM) {
   return list.length > max ? list.splice(0, list.length - max) : [];

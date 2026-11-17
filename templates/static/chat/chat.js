@@ -1,7 +1,7 @@
 // The conversation on the page: history, live messages (chat_* events), streaming, sending with retry, paging, autoscroll.
 // The server is the source of truth (see ui/README.md, chat backend); this module only draws it.
 import { lastAnswerId, voteArgs } from './panels-model.js';
-import { clock, continuesGroup, dayKey, dayLabel, emojiFor, linkify, pipelineHeadline, pipelineLine, pipelineRows, pipelineState, queueText, relativeTime, senderName, trimOldest, upsert, MAX_IN_DOM } from './chat-model.js';
+import { clock, continuesGroup, dayKey, dayLabel, emojiFor, linkify, pipelineHeadline, pipelineLine, pipelineRows, pipelineState, queueText, runLineState, withRunLine, relativeTime, senderName, trimOldest, upsert, MAX_IN_DOM } from './chat-model.js';
 
 export function isNearBottom(element, threshold = 80) {
   return element.scrollHeight - element.scrollTop - element.clientHeight <= threshold;
@@ -22,6 +22,9 @@ function el(tag, className, text) {
 export function initChat({ list, empty, jump, olderButton, socket, render, t, origin = location.origin, win = window, notify = () => {}, me = () => null, onLoginRequired = () => {}, onSpeakAgain = () => {}, api = null }) {
   const messages = [];          // sorted by id, what is in the DOM
   const rows = new Map();       // id -> row element
+  const runLineEl = el('div', 'run-line');      // the status line of a skill run, the last element of the list while it is set (A-158)
+  runLineEl.setAttribute('role', 'status');
+  let runLine = null;
   const pendingText = new Map();
   const unsent = new Map();     // client id -> text of messages that could not be sent
   let hasOlder = false;
@@ -222,7 +225,7 @@ export function initChat({ list, empty, jump, olderButton, socket, render, t, or
       if (stored.client_id) row.dataset.client = stored.client_id;
       rows.set(stored.id, row);
       const nextRow = messages[index + 1] ? rows.get(messages[index + 1].id) : null;
-      list.insertBefore(row, nextRow ? (separatorBefore(nextRow) ?? nextRow) : null);
+      list.insertBefore(row, nextRow ? (separatorBefore(nextRow) ?? nextRow) : (runLineEl.isConnected ? runLineEl : null));      // the status line stays last (REQ-CLV-053)
       ensureSeparator(index);
       if (messages[index + 1]) ensureSeparator(index + 1);
     }
@@ -407,6 +410,17 @@ export function initChat({ list, empty, jump, olderButton, socket, render, t, or
     const placed = place({ id: data.id, text: data.text, emotion: data.emotion, status: data.status, streaming: false });
     if (stick) win.requestAnimationFrame(scrollDown);
     return placed;
+  });
+  socket.on('chat_run_status', (data) => {
+    runLine = runLineState(runLine, data);
+    const shown = withRunLine([], runLine).at(0);
+    if (!shown) {
+      runLineEl.remove();
+      return;
+    }
+    runLineEl.replaceChildren(el('span', 'run-line-text', shown.text), document.createTextNode(' '), Object.assign(el('a', 'run-line-link', t('chat.run_line_link')), { href: shown.href }));
+    if (!runLineEl.isConnected) list.append(runLineEl);
+    if (stick) win.requestAnimationFrame(scrollDown);
   });
   socket.on('chat_error', (data) => notify(data?.message ?? t('chat.error')));
 

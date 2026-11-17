@@ -329,3 +329,7 @@ kbd {
 .pipeline-steps .step.error { color: var(--danger); }
 .pipeline-steps .step.error::before { content: "✗"; }
 
+
+/* the status line of a skill run: last element of the chat, not a message (A-158) */
+.run-line { padding: 0.4rem 0.75rem; color: var(--muted, #6b7280); font-style: italic; }
+.run-line-link { margin-inline-start: 0.5rem; }

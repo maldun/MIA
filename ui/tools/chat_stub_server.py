@@ -39,7 +39,22 @@ for i in range(130):
 ANSWER = ["Sure! ", "Here is **a streamed answer**. ", "It has `code`, ", "a list:\n\n- first\n", "- second\n", "- third\n\n", "And a [link](https://example.org). ", "Done."]
 
 
+def scripted_run(run="r-demo"):
+    """a scripted skill run for the status line (A-158): say 'run' to see it: phases, a question that waits 4 s, the end message"""
+    for kind, payload, pause in (("start", "", 0.5), ("phase", "collect", 2), ("phase", "rank", 2), ("question", "Which topic should I look at?", 4), ("answered", "canary", 0.5),
+                                 ("phase", "report", 2), ("done", "Twelve works were found. " * 5, 0)):
+        w.chat_service.skill_turn("anna", run, kind, payload)
+        time.sleep(pause)
+
+
+w.chat_service._declared_phases = lambda run: ("collect", "rank", "report")
+
+
 def fake(text, on_delta, on_emotion, should_stop):
+    if text.strip().lower() == "run":
+        import threading
+        threading.Thread(target=scripted_run, daemon=True).start()
+        return "Starting the run."
     if "error" in text:
         raise ConnectionError("model offline")
     on_emotion("surprised")
