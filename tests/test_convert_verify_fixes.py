@@ -15,6 +15,9 @@ for path in (REPO, os.path.join(REPO, "tests", "helpers")):
     sys.path.insert(0, path)
 
 import common_operations as ops                          # noqa: E402
+from call_recording import ScriptedModel                 # noqa: E402
+from core import Core                                    # noqa: E402
+from library import Library                              # noqa: E402
 import skill_converter as C                               # noqa: E402
 import plain_modules                                       # noqa: E402
 from pipeline import BudgetExceeded                      # noqa: E402
@@ -104,6 +107,34 @@ class F04_AcceptRefusesAWrongRun(unittest.TestCase):
         done = self.accept(write_run(self.tmp.name, "ok.jsonl", {"name": "converted", "converted": True, "skill": "plan_question"}))
         self.assertEqual(done.returncode, 0, done.stdout + done.stderr)
         self.assertIn("plan_question", C.load_checks(self.out))
+
+
+SKILLS, LIBRARY = os.path.join(REPO, "skills"), os.path.join(REPO, "library")
+
+
+class RecordingDoor:
+    """a stand-in for ToolCalls.call(run, tool, args) of IF-402 that remembers the run it was called for"""
+    def __init__(self):
+        self.runs = []
+
+    def call(self, run, name, args):
+        self.runs.append(run["id"])
+        return {"output": [] if name == "web_search" else {"text": ""}, "trust": "untrusted"}
+
+
+class F06_TheDoorGetsTheRunLogId(unittest.TestCase):
+    def test_the_door_sees_the_run_id_of_the_result(self):
+        """F-06. Example: Core.run("research") on the converted path with a recording door: every call of the door names the run id that RunResult.run_id has, so the
+        tool_call events of the door tie to the run log record."""
+        with tempfile.TemporaryDirectory() as tmp:
+            records = os.path.join(tmp, "conversion")
+            C.save_check(records, "research", {"suite": "EV-research", "run": "research__x.jsonl", "pins": "MP-light", "verdict": "PASS"})
+            door = RecordingDoor()
+            core = Core(SKILLS, Library(LIBRARY), os.path.join(tmp, "runs"), model=ScriptedModel(), conversion_dir=records, tool_calls=door,
+                        door_tools={"web_search": "search_calls", "fetch_page": "fetch_calls"})
+            result = core.run("research", {"question": "When did the Rivertown Bridge open to traffic?"}, started_by="command")
+        self.assertTrue(door.runs, "the run made no call through the door")
+        self.assertEqual(set(door.runs), {result.run_id})
 
 
 if __name__ == "__main__":

@@ -88,10 +88,10 @@ def _latest_nodes(nodes_dir):
     return latest
 
 
-def run_converted(name, inputs, model=None, tools=None, skills_dir=None, library_dir=None, runs_dir=None, skill_changes=None, functions=None, sandbox=None, broker_factory=None, tool_calls=None, door_tools=None, should_stop=None):
+def run_converted(name, inputs, model=None, tools=None, skills_dir=None, library_dir=None, runs_dir=None, skill_changes=None, functions=None, sandbox=None, broker_factory=None, tool_calls=None, door_tools=None, should_stop=None, run_id=None):
     """REQ-WFM-058, REQ-WFM-115 (A-125, D-253): runs skill `name` as a graph on the toolbox with the given model and tools. The pipeline is converted in memory at every call,
     bound to the skill and run by the GraphRunner; `skill_changes` is merged into the skill first (a test plants a changed option with it). `runs_dir` stays unused:
-    this path writes no run record yet. Returns a ConvertedRun; a pipeline that cannot be converted raises ConversionError (the skill stays on the old runner)."""
+    this path writes no run record yet. `run_id` (F-06) is the id the IF-402 door sees: the app gives the id of the run log record, so the door's events tie to it. Returns a ConvertedRun; a pipeline that cannot be converted raises ConversionError (the skill stays on the old runner)."""
     skill = load_skill(os.path.join(skills_dir, name + ".md"))
     pipeline = Library(library_dir).resolve(skill["pipeline"], "pipeline")
     nodes = _latest_nodes(os.path.join(library_dir, "nodes"))
@@ -113,7 +113,7 @@ def run_converted(name, inputs, model=None, tools=None, skills_dir=None, library
         if function is not None:
             common_operations.register_tool(tool_name, function)
     budget = {**(skill.get("budget") or {}), **((skill_changes or {}).get("budget") or {})}
-    common_operations.register_run(budget=budget, tool_keys={n: k for n, k in keys.items() if k}, door=tool_calls, door_tools=door_tools, run_id="converted-" + uuid.uuid4().hex[:8])
+    common_operations.register_run(budget=budget, tool_keys={n: k for n, k in keys.items() if k}, door=tool_calls, door_tools=door_tools, run_id=run_id or "converted-" + uuid.uuid4().hex[:8])
     # script_check is the function of the old runner (checks.make_script_check) on the router the caller hands over (T-CV-07a, D-259): no router, no script runs and the check says so;
     # `functions` binds more app-built functions (and may replace these) for this run only
     for function_name, function in {**checks.build_script_checks(sandbox, broker_factory), **(functions or {})}.items():

@@ -123,7 +123,7 @@ class Core:
             try:
                 ended = skill_converter.run_converted(task, inputs, model=self.runner.model, tools=all_tools, skills_dir=self.skills.folder, library_dir=self.library.shipped_dir,
                                                       sandbox=self.sandbox, broker_factory=self.runner.broker_factory, tool_calls=self.runner.tool_calls,
-                                                      door_tools=self.runner.door_tools, should_stop=should_stop)
+                                                      door_tools=self.runner.door_tools, should_stop=should_stop, run_id=record.id)
             except skill_converter.ConversionError:
                 return None
         seconds = time.monotonic() - started
