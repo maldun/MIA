@@ -3,6 +3,7 @@ Tools on the converted path (T-CV-06a, G-V2.CONVERT; owner decisions 2026-11-16)
 when the app gives one, records tool_call and budget_spent events, and a budget end gives the status budget with its reason. No model, no network.
 Run: python tests/test_converted_tools.py
 """
+import contextvars
 import os
 import sys
 import threading
@@ -90,7 +91,8 @@ class Counting(unittest.TestCase):
                 ops.tool_step({"tool": SEARCH, "query": "x"})
             except BudgetExceeded:
                 failures.append(1)
-        threads = [threading.Thread(target=one) for _ in range(8)]
+        # the threads of a parallel map are started with a copy of the run's context (control_flow._map); the state of a run is per run since F-01
+        threads = [threading.Thread(target=contextvars.copy_context().run, args=(one,)) for _ in range(8)]
         [t.start() for t in threads]
         [t.join() for t in threads]
         self.assertEqual((len(self.asked), len(failures)), (5, 3))

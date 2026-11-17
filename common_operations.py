@@ -12,6 +12,7 @@ same function objects; the thin entries of the toolbox call them by name, so no 
 - model_step(system, template, schema, inputs, retries=1) and tool_step(inputs): what a thin entry's `stage(inputs, outputs, node)` calls; the descriptor sits in
   inputs["model"] or inputs["tool"], every other input is an argument of the step.
 """
+import contextvars
 import functools
 import json
 import threading
@@ -50,18 +51,35 @@ class FunctionUnbound(Exception):
     """a function the app builds from its wiring was called before the app bound it"""
 
 
-_BOUND = {}
-_TOOLS = {}      # name -> (function, declared setting keys)
-_MODELS = {}     # profile -> chat object
-_RUN = {}        # the tool budgets, the door and the events of the run that is going on (T-CV-06a); empty outside run_converted: then nothing is counted
-_CONTROL = {}    # "call" (use, args) -> value of a library node, "limits": the stop rules of this run (control_flow.Limits)
+class _State:
+    """what one converted run needs besides its arguments (F-01): the registries, the tool budgets with the door and the events (T-CV-06a), the stop rules of the controllers (D-258).
+    One object per run, kept in a context variable: a run in another thread has its own, and the threads of a parallel map copy the context of their run, so they share it."""
+    def __init__(self):
+        self.bound = {}
+        self.tools = {}       # name -> (function, declared setting keys)
+        self.models = {}      # profile -> chat object
+        self.run = {}         # the tool budgets, the door and the events; empty outside run_converted: then nothing is counted
+        self.control = {}     # "call" (use, args) -> value of a library node, "limits": the stop rules of this run (control_flow.Limits)
+
+
+_STATE = contextvars.ContextVar("common_operations_state")
+
+
+def _state():
+    try:
+        return _STATE.get()
+    except LookupError:
+        state = _State()
+        _STATE.set(state)
+        return state
 
 
 def _late(name):
     def unbound(**args):
-        if name not in _BOUND:
+        bound = _state().bound
+        if name not in bound:
             raise FunctionUnbound("%s is built by the app and has not been bound here" % name)
-        return _BOUND[name](**args)
+        return bound[name](**args)
     return unbound
 
 
@@ -88,7 +106,7 @@ def bind(name, function):
     """gives a function the app builds (a name of APP_BUILT) its implementation"""
     if name not in APP_BUILT:
         raise ValueError("%s is not a function that waits for the app" % name)
-    _BOUND[name] = function
+    _state().bound[name] = function
 
 
 def call(name, args):
@@ -96,63 +114,64 @@ def call(name, args):
 
 
 def register_tool(name, function, settings=()):
-    _TOOLS[name] = (function, tuple(settings))
+    _state().tools[name] = (function, tuple(settings))
 
 
 def register_model(profile, chat):
-    _MODELS[profile] = chat
+    _state().models[profile] = chat
 
 
 def register_run(budget=None, tool_keys=None, door=None, door_tools=None, run_id="converted"):
     """the budget of the run (skill budget keys), the budget key of each tool, and the IF-402 door (`call(run, tool, args)`) with the tools that go through it"""
-    _RUN.clear()
-    _RUN.update(budget=dict(budget or {}), tool_keys=dict(tool_keys or {}), door=door, door_tools=dict(door_tools or {}), run_id=run_id,
+    run = _state().run
+    run.clear()
+    run.update(budget=dict(budget or {}), tool_keys=dict(tool_keys or {}), door=door, door_tools=dict(door_tools or {}), run_id=run_id,
                 calls={}, events=[], lock=threading.Lock(), budget_end=None)
 
 
 def run_events():
-    return list(_RUN.get("events", []))
+    return list(_state().run.get("events", []))
 
 
 def budget_end():
     """the reason of the budget end of the run (a budget key, seconds or steps), else None"""
-    return _RUN.get("budget_end")
+    return _state().run.get("budget_end")
 
 
 def note_budget_end(exc):
-    if _RUN and _RUN["budget_end"] is None:
-        _RUN["budget_end"] = str(exc.args[0]) if exc.args else "budget"
+    run = _state().run
+    if run and run["budget_end"] is None:
+        run["budget_end"] = str(exc.args[0]) if exc.args else "budget"
 
 
 def register_control(call, limits=None):
     """what the controllers need of the run: the call of a library node by its ID and the stop rules (D-258)"""
-    _CONTROL.update(call=call, limits=limits)
+    _state().control.update(call=call, limits=limits)
 
 
 def control_step(inputs, outputs, node):
     """what the thin entries control.branch, control.map and control.loop run: `node` is the settings {"construct": kind, "node": the JSON of the construct}"""
-    if "call" not in _CONTROL:
+    control = _state().control
+    if "call" not in control:
         raise RuntimeError("no node call is registered: the controllers run only inside run_converted")
     try:
-        return control_flow.run_construct(node["node"], inputs, outputs, _CONTROL["call"], _CONTROL.get("limits"))
+        return control_flow.run_construct(node["node"], inputs, outputs, control["call"], control.get("limits"))
     except BudgetExceeded as exc:
         note_budget_end(exc)
         raise
 
 
 def reset():
-    _RUN.clear()
-    _CONTROL.clear()
-    _TOOLS.clear()
-    _MODELS.clear()
-    _BOUND.clear()
+    """a fresh state for the run that starts in this context (F-01: never clears what another run uses)"""
+    _STATE.set(_State())
 
 
 def resolve_tool(descriptor):
     name = descriptor.get("tool") if isinstance(descriptor, dict) else None
-    if not isinstance(name, str) or name not in _TOOLS:
+    tools = _state().tools
+    if not isinstance(name, str) or name not in tools:
         raise ToolMissing("the tool %r is not registered" % (name,))
-    function, declared = _TOOLS[name]
+    function, declared = tools[name]
     settings = descriptor.get("settings") or {}
     undeclared = sorted(set(settings) - set(declared))
     if undeclared:
@@ -162,9 +181,10 @@ def resolve_tool(descriptor):
 
 def resolve_model(descriptor):
     profile = descriptor.get("model") if isinstance(descriptor, dict) else None
-    if not isinstance(profile, str) or profile not in _MODELS:
+    models = _state().models
+    if not isinstance(profile, str) or profile not in models:
         raise ModelMissing("the model %r is not registered" % (profile,))
-    return _MODELS[profile], profile, descriptor.get("options") or None
+    return models[profile], profile, descriptor.get("options") or None
 
 
 def model_step(system, template, schema, inputs, retries=1):
@@ -196,7 +216,7 @@ def tool_step(inputs):
     descriptor = inputs.get("tool")
     name = descriptor.get("tool") if isinstance(descriptor, dict) else None
     args = {key: value for key, value in inputs.items() if key != "tool"}
-    run = _RUN
+    run = _state().run
     door = run.get("door") is not None and name in run.get("door_tools", {})
     function = None if door else resolve_tool(descriptor)
     key, count, limit = run.get("tool_keys", {}).get(name), None, None
@@ -237,6 +257,7 @@ def tool_step(inputs):
 
 
 def _event(event):
-    if _RUN:
-        with _RUN["lock"]:
-            _RUN["events"].append(event)
+    run = _state().run
+    if run:
+        with run["lock"]:
+            run["events"].append(event)
