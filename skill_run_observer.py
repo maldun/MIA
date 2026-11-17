@@ -41,8 +41,8 @@ class SkillRunObserver:
     def file(self, name):
         self._call(self._recorder.file, self.run, name)
 
-    def end(self, state, reason=None, result=""):
-        self._call(self._recorder.end, self.run, state, reason=reason, result=result)
+    def end(self, state, reason=None, result="", report=None):
+        self._call(self._recorder.end, self.run, state, reason=reason, result=result, report=report)
 
     def _call(self, method, *args, **kwargs):
         try:

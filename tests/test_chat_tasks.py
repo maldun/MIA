@@ -245,7 +245,10 @@ class ChatTasks(unittest.TestCase):
         message_id = [p for e, p in self.events if e == "chat_done"][-1]["id"]
         self.assertEqual(self.seen, ["r.md"])
         self.assertEqual([p["files"] for e, p in self.events if e == "chat_done"][-1], ["r.md"])        # IF-101 v8: chat_done names the files of the task
-        self.assertEqual([(f["name"], f["task"], f["message_id"]) for f in files.list()], [("r.md", "demo", message_id)])
+        listed = {f["name"]: (f["task"], f["message_id"]) for f in files.list()}
+        self.assertEqual(len(listed), 2)                                                         # r.md and the run report that ends every run (REQ-WFM-139, A-154)
+        self.assertEqual(set(listed.values()), {("demo", message_id)})                           # both are bound to the message of the run
+        self.assertIn("r.md", listed)
         self.assertIn(("files_changed", {"name": "r.md", "task": "demo"}), self.events)
         doc = store.get("reports", message_id)["doc"]
         self.assertEqual((doc["task"], doc["skill"], doc["question"], doc["account"], doc["model_pin"], doc["report"]), ("demo", "demo", "the question", "anna", "m", {"works": []}))

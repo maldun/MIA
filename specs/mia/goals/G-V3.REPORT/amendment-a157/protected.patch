@@ -1,0 +1,35 @@
+diff --git a/tests/acceptance/test_skill_run_report.py b/tests/acceptance/test_skill_run_report.py
+index d9b8c8e..27420ef 100644
+--- a/tests/acceptance/test_skill_run_report.py
++++ b/tests/acceptance/test_skill_run_report.py
+@@ -149,6 +149,30 @@ class RunReportChecks(unittest.TestCase):
+         # And: the skill's own report follows unchanged
+         self.assertIn(own, text)
+ 
++    @mark.req("REQ-WFM-137")
++    def test_a_report_with_hostile_text_is_stored_as_text_below_the_state_line(self):
++        """TC-WFM-137 (report case, A-156): a skill that hands over its own report with the five fixed strings gets it stored as text, the state line on top and the strings below it byte for byte; nothing is executed or interpreted.
++        Example: the own report "<script>alert(1)</script>\\n..." is in the file unchanged after `# Done` and a blank line."""
++        # Given: a scripted skill that hands over a report made of the five fixed strings, and the real chat service with the files volume
++        own = "\n".join(HOSTILE) + "\n"
++
++        def writer(argument, on_delta, on_emotion, should_stop, run_report):
++            run_report(own)
++            return "Found 3 works."
++
++        setup = Setup(self, registry(writer=(writer, ("run_report",))))
++        # When: it runs and ends
++        run = setup.run("writer")
++        # Then: the record names a report and the file starts with the state line and a blank line
++        name, text = setup.report(run)
++        self.assertIsNotNone(name, "the record of the run names no report")
++        self.assertEqual(text.split("\n", 2)[0:2], ["# Done", ""])
++        # And: the strings follow byte for byte, as they were handed over
++        self.assertEqual(text.split("\n", 2)[2], own)
++        # And: the run record holds the result as it is and nothing was changed in the volume but the report
++        self.assertEqual(setup.recorder.record(run)["result"], "Found 3 works.")
++        self.assertEqual([entry["name"] for entry in setup.files.list()], [name])
++
+     @mark.req("REQ-WFM-140")
+     def test_the_record_names_the_report_only_when_the_run_has_ended(self):
+         """TC-WFM-140: `report` of the record is empty while the run goes; after the end it names a file of the run that is in the files volume.

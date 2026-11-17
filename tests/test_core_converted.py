@@ -20,6 +20,9 @@ from core import Core                                    # noqa: E402
 from library import Library                              # noqa: E402
 from pipeline import PipelineError                       # noqa: E402
 import skill_converter                                   # noqa: E402
+import plain_modules                                       # noqa: E402
+
+setUpModule, tearDownModule = plain_modules.hooks()      # the package MIA is not importable while this module runs: F-3, tests/plain_modules.py
 
 SKILLS, LIBRARY = os.path.join(REPO, "skills"), os.path.join(REPO, "library")
 PLAN = {"question": "Which is older, the Tarn Museum or the company that built the Rivertown Bridge?"}

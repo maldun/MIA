@@ -19,6 +19,9 @@ from core import Core                                     # noqa: E402
 from library import Library                              # noqa: E402
 import skill_converter                                    # noqa: E402
 from unittest import mock                                 # noqa: E402
+import plain_modules                                       # noqa: E402
+
+setUpModule, tearDownModule = plain_modules.hooks()      # the package MIA is not importable while this module runs: F-3, tests/plain_modules.py
 
 PIN = {"id": "MP-light", "name": "gemma4:12b-it-qat", "digest": "sha256:x", "seed": 7, "temperature": 0}
 

@@ -4,8 +4,8 @@
   "argument": "your question",
   "example": "/lookup how tall is the Eiffel Tower",
   "aliases": ["research"],
-  "needs": ["files"],
+  "needs": ["run_report"],
   "options": [],
-  "version": "1",
+  "version": "2",
   "entry": "entry:make"
 }

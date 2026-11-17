@@ -16,8 +16,10 @@ from .review_request import ReviewRequest, RequestError
 
 try:
     from ...report_tex import report_tex
+    from ...run_report import defang
 except ImportError:  # used as plain script / in tests
     from report_tex import report_tex
+    from run_report import defang
 
 YES = {"yes", "y", "ok", "okay", "go", "continue", "sure", "ja", "all"}
 NO = {"no", "n", "stop", "none", "nein", "cancel"}
@@ -147,42 +149,48 @@ def spoken_result(report):
     return "I stopped the review. %s The report is in the chat as it stands." % counts
 
 
+def _md(text):
+    """text from outside (a title, a note, a reason, a keyword, the question, a point of the summary) as Markdown: backslash, brackets and angle brackets are written with a backslash in front,
+    so that it can start no link, image or tag in the chat, in the file or in the run report (REQ-WFM-141); everything else stays as it is, a title like "Smith & Jones (2020)" stays readable"""
+    return defang(re.sub(r"([\\\[\]<>])", r"\\\1", str(text)))
+
+
 def format_report(report, question, until):
-    out = ["## Literature review", "", "**Question:** %s" % question, "**Cut-off:** %s   **Ended by:** %s" % (until, report["ended_by"])]
+    out = ["## Literature review", "", "**Question:** %s" % _md(question), "**Cut-off:** %s   **Ended by:** %s" % (until, report["ended_by"])]
     summary = report.get("summary")
     if summary:
         figures = summary["figures"]
-        out += ["", "### Summary (a draft: a person has to check it against the sources)", "**Coverage of the question: %s.** %s" % (figures["level"], summary["coverage"])]
-        out += ["", "**What was found**"] + (["- %s (%s)" % (p["point"], ", ".join(p["works"])) for p in summary["found"]] or ["- nothing that could be cited"])
-        out += ["", "**Gaps**"] + (["- %s%s" % (g["gap"], " (%s)" % ", ".join(g["works"]) if g["works"] else "") for g in summary["gaps"]] or ["- none named"])
+        out += ["", "### Summary (a draft: a person has to check it against the sources)", "**Coverage of the question: %s.** %s" % (figures["level"], _md(summary["coverage"]))]
+        out += ["", "**What was found**"] + (["- %s (%s)" % (_md(p["point"]), _md(", ".join(p["works"]))) for p in summary["found"]] or ["- nothing that could be cited"])
+        out += ["", "**Gaps**"] + (["- %s%s" % (_md(g["gap"]), " (%s)" % _md(", ".join(g["works"])) if g["works"] else "") for g in summary["gaps"]] or ["- none named"])
         if summary["dropped_points"]:
             out.append("(%d point(s) of the summary were removed because they cited no work of this review.)" % summary["dropped_points"])
     out += ["", "### How the works were selected", _flow_line(report["flow"]) + ".", "", "| Keyword | Origin | Hits |", "|---|---|---|"]
-    out += ["| %s | %s | %d |" % (k["keyword"], k["origin"], k["hits"]) for k in report["keywords"]]
+    out += ["| %s | %s | %d |" % (_md(k["keyword"]), _md(k["origin"]), k["hits"]) for k in report["keywords"]]
     if report["gaps"]:
-        out.append("\nKeywords without an included work: %s." % ", ".join(report["gaps"]))
+        out.append("\nKeywords without an included work: %s." % _md(", ".join(report["gaps"])))
     works = report["works"]
 
     def block(title, rows):
         if rows:
-            out.extend(["", "### " + title] + ["- **%s** (%s, relevance %d%s): %s" % (w["title"], w["doi"] or "no DOI", w["grade"], ", abstract only" if w["abstract_only"] else "",
-                                                                                      " ".join(w["notes"]) or "no note") for w in rows])
+            out.extend(["", "### " + title] + ["- **%s** (%s, relevance %d%s): %s" % (_md(w["title"]), _md(w["doi"] or "no DOI"), w["grade"], ", abstract only" if w["abstract_only"] else "",
+                                                                                      _md(" ".join(w["notes"])) or "no note") for w in rows])
     block("Included", [w for w in works if w["decision"] == "include"])
     block("Maybe", [w for w in works if w["decision"] == "maybe"])
     block("Excluded although closely related (relevance 2 or 3)", [w for w in works if w["decision"] == "exclude" and w["grade"] >= 2])
     if report["dropped"]:
-        out += ["", "### Dropped before screening"] + ["- %s: %s" % (d["work"].get("title") or d["work"].get("doi"), d["reason"]) for d in report["dropped"]]
+        out += ["", "### Dropped before screening"] + ["- %s: %s" % (_md(d["work"].get("title") or d["work"].get("doi")), _md(d["reason"])) for d in report["dropped"]]
     return "\n".join(out)
 
 
 def format_report_full(report, question, until):
     """the markdown file: the report of the chat and below it every screened work with its decision (the chat shows the excluded works of relevance 2 and 3 only)"""
-    rows = ["- **%s** (%s): %s, relevance %d%s%s" % (w["title"], w["doi"] or "no DOI", w["decision"], w["grade"], ", abstract only" if w["abstract_only"] else "",
-                                                     ", reason: " + w["reason"] if w.get("reason") else "") for w in report["works"]]
+    rows = ["- **%s** (%s): %s, relevance %d%s%s" % (_md(w["title"]), _md(w["doi"] or "no DOI"), w["decision"], w["grade"], ", abstract only" if w["abstract_only"] else "",
+                                                     ", reason: " + _md(w["reason"]) if w.get("reason") else "") for w in report["works"]]
     return format_report(report, question, until) + "\n\n### All screened works\n" + "\n".join(rows or ["- none"]) + "\n"
 
 
-def _keep(report, question, until, files, reports):
+def _keep(report, question, until, files, reports, run_report=None):
     """the finished report as a record in the database (for reference and benchmarks) and as .md and .tex files in the files volume; what fails is told, the report is never lost"""
     notes = []
     if reports is not None:
@@ -197,13 +205,18 @@ def _keep(report, question, until, files, reports):
             files(stem + ".tex", report_tex(report, question, until))
         except Exception as exc:
             notes.append("The files could not be stored: %s." % exc)
+    if run_report is not None:
+        try:
+            run_report(format_report(report, question, until))              # the report of the run: what the chat shows; the runtime puts the state line on top (REQ-WFM-139)
+        except Exception as exc:
+            notes.append("The report of the run could not be handed over: %s." % exc)
     return "\n\n" + "\n".join(notes) if notes else ""
 
 
 # --- the task --------------------------------------------------------------------------------------------------------------------------
 
 def run_review(text, run_skill, scholar, full_text_source, ask, on_event=None, should_stop=None, cfg=None, today=None, min_works=3, speak=None, options=None, monitor=None,
-               files=None, reports=None):
+               files=None, reports=None, run_report=None):
     """the review of `text` ("question [until YYYY-MM-DD]") as markdown. scholar.search(query, limit, until, since, check_retraction) is Scholar.search; full_text_source(work) is a
     FullTextSource; ask(text) -> the reply text or None; speak(text) says a short text aloud (None: silent). The model steps run through run_skill(name, inputs) (core.run); on_event gets {"kind": "step", "plain": text} per stage."""
     cfg = cfg or {}
@@ -289,4 +302,4 @@ def run_review(text, run_skill, scholar, full_text_source, ask, on_event=None, s
     report = run.run()
     progress("writing the report", "writing the report")
     say(spoken_result(report))
-    return format_report(report, question, request.until.isoformat()) + _keep(report, question, request.until.isoformat(), files, reports)
+    return format_report(report, question, request.until.isoformat()) + _keep(report, question, request.until.isoformat(), files, reports, run_report)

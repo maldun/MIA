@@ -40,7 +40,7 @@ class MemoryWiringTest(unittest.TestCase):
 
         self.chat = ChatService(lambda event, payload: self.events.append((event, payload)), self.log, MoodTracker(os.path.join(ROOT, "moods.json")), exchange,
                                 queue_size=5, user_limit=2, spawn=lambda target: target(), votes=self.storage,
-                                tasks=registry_of(lookup=lambda question, on_delta, on_emotion, should_stop, files=None: "An answer."), remember=remember)
+                                tasks=registry_of(lookup=lambda question, on_delta, on_emotion, should_stop, run_report=None: "An answer."), remember=remember)
 
     @mark.req('REQ-CHA-011')
     def test_a_plain_chat_turn_hands_the_user_message_to_the_memory(self):

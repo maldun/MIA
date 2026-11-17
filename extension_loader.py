@@ -19,7 +19,7 @@ except ImportError:  # used as plain script / in tests
     from skill_record import command_problem, normal_command
     from task_registry import Option, Task
 
-NEEDS = ("ask", "options", "monitor", "files", "reports")
+NEEDS = ("ask", "options", "monitor", "files", "reports", "run_report")
 REQUIRED = ("id", "text", "argument", "example", "entry")
 
 

@@ -1,6 +1,8 @@
 // The Skill run view (REQ-FE-032, REQ-CLV-030 to 039, 043, 044; IF-101 v16): a strip with the run that the backend names. The model (skill-run-model.js) decides what is shown,
-// this module draws it. Every text of a run (reason, result, answers, material, elements) goes in as a text node: nothing of it is ever markup (REQ-CLV-043).
-import { applyStatus, runOfHash, controlAction, controlsModel, elementsModel, headerModel, meterModel, phaseModel, shownModel } from './skill-run-model.js';
+// this module draws it. Every text of a run (reason, result, answers, material, elements) goes in as a text node: nothing of it is ever markup (REQ-CLV-043); the one exception is the run report,
+// which is rendered by renderReport (only http and https links, no image, REQ-CLV-049, 052; A-154).
+import { applyStatus, runOfHash, controlAction, controlsModel, elementsModel, headerModel, meterModel, phaseModel, reportModel, shownModel } from './skill-run-model.js';
+import { renderReport } from './markdown.js';
 
 function el(tag, className, text) {
   const node = document.createElement(tag);
@@ -13,6 +15,7 @@ export function initSkillRunView({ root, socket, api, t, onStop = () => {}, noti
   const $ = (id) => root.querySelector(`#${id}`);
   let view = null;      // a task_status or a run record of the run that is shown
   const fileInfo = new Map();      // file name -> the entry of the files volume
+  let report = { key: null, text: null, gone: false, loading: false };      // the report that is shown: run and file name, its text, or that the file is gone
 
   const label = (prefix, key) => {
     const text = t(`${prefix}.${key}`);
@@ -23,7 +26,50 @@ export function initSkillRunView({ root, socket, api, t, onStop = () => {}, noti
     return Number.isNaN(date.getTime()) ? String(started ?? '') : date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
+  /** the Report part (REQ-CLV-048, 050, 051): the state of the run, the report of its file with a download, or the sentence for a run without a report or with a removed file */
+  function paintReport(run, model) {
+    $('srv-report-state').textContent = t(`srv.state.${model.state}`);
+    $('srv-report-state').dataset.state = model.state;
+    const note = $('srv-report-note');
+    const kind = model.kind === 'waiting' ? 'waiting' : report.gone ? 'removed' : null;
+    note.hidden = kind === null;
+    if (kind) {
+      note.dataset.kind = kind;
+      note.textContent = t(`srv.report.${kind}`);
+    } else {
+      delete note.dataset.kind;
+    }
+    $('srv-report-body').innerHTML = report.text === null ? '' : renderReport(report.text);      // the one text of a run that is markup, cleaned by renderReport (REQ-CLV-049, 052)
+    $('srv-report-download')?.remove();
+    if (report.text !== null) {
+      const link = el('a', 'srv-report-download', t('srv.report.download'));
+      link.id = 'srv-report-download';
+      link.href = `/api/files/${encodeURIComponent(model.name)}`;
+      $('srv-report').append(link);
+    }
+  }
+
+  async function drawReport(run) {
+    const model = reportModel(run);
+    const key = `${run.id}|${model.name ?? ''}`;
+    if (model.kind === 'waiting' || report.key !== key) report = { key, text: null, gone: false, loading: false };
+    paintReport(run, model);
+    if (model.kind === 'waiting' || report.text !== null || report.gone || report.loading) return;      // one request at a time: the view is drawn on every status
+    report.loading = true;
+    try {
+      const text = await api.reportText(model.name);
+      if (report.key !== key) return;      // another run is shown by now
+      report = text === null ? { key, text: null, gone: true, loading: false } : { key, text, gone: false, loading: false };
+      if (text !== null && !$('srv-report').open) $('srv-report').open = true;      // the report of a run that has ended opens by itself (A-154, open point 1)
+    } catch (error) {
+      if (report.key === key) report.loading = false;      // the part keeps what it shows; the next change of the run asks again
+      return;
+    }
+    paintReport(run, model);
+  }
+
   function drawFull(run) {
+    drawReport(run);
     $('srv-result').textContent = run.result ?? '';
     $('srv-answers').replaceChildren(...(run.answers ?? []).map((a) => el('li', '', a.text)));
     $('srv-material').replaceChildren(...(run.material ?? []).map((m) => el('li', '', typeof m === 'string' ? m : m?.title ?? JSON.stringify(m))));

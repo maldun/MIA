@@ -4,8 +4,8 @@
   "argument": "what to search for",
   "example": "/search Eiffel Tower height",
   "aliases": [],
-  "needs": [],
+  "needs": ["run_report"],
   "options": [],
-  "version": "1",
+  "version": "2",
   "entry": "entry:make"
 }

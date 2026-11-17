@@ -80,6 +80,12 @@ export function shownModel(current, naming) {
   return naming ?? null;
 }
 
+/** what the Report part shows (REQ-CLV-048, 050): the state of the run and the name of its report; `kind` is `waiting` while the record names none */
+export function reportModel(run) {
+  const name = typeof run?.report === 'string' && run.report ? run.report : null;
+  return { state: run?.state ?? '', name, kind: name ? 'ready' : 'waiting' };
+}
+
 /** [{label, text}] as text only, [] when none */
 export function elementsModel(elements) {
   return (elements ?? []).map(({ label, text }) => ({ label: String(label), text: String(text) }));
