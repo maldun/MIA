@@ -14,6 +14,10 @@ link_dir = tempfile.mkdtemp()
 os.symlink(repo, os.path.join(link_dir, "MIA"))
 sys.path.insert(0, link_dir)
 
+# the stage must not depend on the settings of the machine (setup_cfg.json, setup_cfg.local.json): accounts off, as in the defaults; read once at the import of web_app
+from MIA import config as _config  # noqa: E402
+_load = _config.load
+_config.load = lambda path: dict(_load(path), accounts_enabled=False)
 from MIA import web_app as w  # noqa: E402
 
 w.play_intro_sound = lambda: None
