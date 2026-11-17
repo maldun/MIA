@@ -151,5 +151,19 @@ class RecordTablesContract(unittest.TestCase):
         self.assertEqual(tables.definitions()["reports"], {"versioned": True, "deletable": False})
 
 
+    @mark.req("IF-302", "REQ-WFM-064")
+    @each_provider(IF)
+    def test_the_current_version_pointer_is_a_versioned_record_that_is_not_deletable(self, tables):
+        """TC-IF-302-11 (v13, A-121): `current_versions` is versioned and not deletable; a record needs `version`, an integer of at least 1 (a boolean, a float, a text, 0 or a missing field is rule schema with detail version); every other field is kept and never refused (`reason`, `format`, and one nobody knows yet); the deletable set stays as in v8.
+        Example: validate("current_versions", {"version": 2}) -> None; validate("current_versions", {"version": 1.0}) -> {"rule": "schema", "detail": "version"}."""
+        self.assertEqual(tables.definitions()["current_versions"], {"versioned": True, "deletable": False})
+        self.assertIsNone(tables.validate("current_versions", {"version": 2}))
+        self.assertIsNone(tables.validate("current_versions", {"version": 2, "reason": "snapshot restore of a", "format": 1, "note": "later"}))
+        for bad in (0, -1, True, 1.0, "1", None):
+            self.assertEqual(tables.validate("current_versions", {"version": bad}), {"rule": "schema", "detail": "version"}, bad)
+        self.assertEqual(tables.validate("current_versions", {"reason": "save"}), {"rule": "schema", "detail": "version"})
+        self.assertEqual({t for t, d in tables.definitions().items() if d["deletable"]}, {"history", "memory", "tasks", "memos", "skill_runs"})
+
+
 if __name__ == "__main__":
     unittest.main()
