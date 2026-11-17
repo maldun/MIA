@@ -1,5 +1,5 @@
 """
-Acceptance tests of the skill turns of the Chat agent (N-2.2, G-V3.CHAT): TC-CHA-040 to 048, 050 to 052 and 055 to 063 (REQ-BE-078, REQ-CHA-040 to 052, 055 to 063)
+Acceptance tests of the skill turns of the Chat agent (N-2.2, G-V3.CHAT): TC-CHA-040 to 048, 050 to 052, 055 to 063 and 073 to 075 (REQ-BE-078, REQ-CHA-040 to 052, 055 to 063, 068 to 071)
 against ChatService.skill_turn and SkillDigestStep with the fake model of TR-CHAT-006 (scripted replies, a recorder of every call; no evidence for any eval criterion).
 Interface note: specs/mia/goals/G-V3.CHAT/digest-step-interface.md. Run with: python tests/acceptance/test_chat_skill_turns.py
 """
@@ -398,6 +398,65 @@ class SkillTurns(unittest.TestCase):
         self.assertEqual(texts[1], "5 < 6 is true" + LINK % "r2")
         self.assertEqual(texts[2], "Plain words." + LINK % "r3")
         self.assertFalse(any(re.search(r"</?[A-Za-z][^>]*>", t) for t in texts))
+
+
+class LiveLine(unittest.TestCase):
+    """A-158: the status line of a run is the event `chat_run_status` {"run", "text"}; text None clears it. Turn kinds `start` and `answered` are new in IF-201 v4."""
+
+    @staticmethod
+    def lines(chat):
+        return [payload["text"] for event, payload in chat.events if event == "chat_run_status"]
+
+    @mark.req("REQ-CHA-068", "REQ-CHA-071")
+    def test_the_status_line_follows_the_phases_and_is_no_message(self):
+        """TC-CHA-073: the lines are the declared phases in order, a repeat once, `working` for a run without phases; no line is in the log, the model history or the speech.
+        Example: collect, rank, report, report -> the lines collect, rank, report; a lookup -> working."""
+        # Given: a scripted skill that declares collect, rank and report, and a lookup run without phases
+        chat, lookup = Chat(self, []), Chat(self, [], phases=())
+        # When: the first run starts and enters the three phases, then the third again and an undeclared one; the lookup starts
+        chat.turn("r1", "start", "")
+        for phase in PHASES + ("report", "cleanup"):
+            chat.turn("r1", "phase", phase)
+        lookup.turn("r2", "start", "")
+        # Then: the lines are the three phases in order (a repeat and an undeclared phase give none); the lookup gives `working`
+        self.assertEqual(self.lines(chat), ["collect", "rank", "report"])
+        self.assertEqual(self.lines(lookup), ["working"])
+        # And: the chat log, the model history and the speech hold none of them
+        for each in (chat, lookup):
+            self.assertEqual((each.texts(), each.spoken, each.service.model_history()), ([], [], []))
+
+    @mark.req("REQ-CHA-069")
+    def test_the_line_is_cleared_before_the_end_message(self):
+        """TC-CHA-074: for done, failed and stopped the clearing comes before the end message and no line follows.
+        Example: collect, then done -> events: line collect, line None, message, nothing after."""
+        for kind, payload, reply in (("done", "Twelve works were found. " * 5, "Found 12 works."), ("failed", "search service unreachable", "Sorry, it failed."),
+                                     ("stopped", "stopped by the user", "Stopped.")):
+            with self.subTest(kind=kind):
+                # Given: a run in its phase collect
+                chat = Chat(self, [reply])
+                chat.turn("r1", "phase", "collect")
+                # When: it ends
+                chat.turn("r1", kind, payload)
+                # Then: the clearing comes before the end message and nothing follows it
+                names = [(event, body["text"] if event == "chat_run_status" else None) for event, body in chat.events]
+                self.assertIn(("chat_run_status", None), names)
+                clearing, message = names.index(("chat_run_status", None)), names.index(("chat_message", None))
+                self.assertLess(clearing, message)
+                self.assertEqual([n for n in names[message:] if n[0] == "chat_run_status"], [])
+
+    @mark.req("REQ-CHA-070")
+    def test_the_line_says_that_a_question_waits(self):
+        """TC-CHA-075: the line `waiting for your answer` follows the question message; after the answer the line of the phase comes again.
+        Example: phase screen, question "Which topic?", answer -> screen, waiting for your answer, screen."""
+        # Given: a review in its phase screen
+        chat = Chat(self, [], phases=("screen",))
+        chat.turn("r1", "phase", "screen")
+        # When: it asks a question and the answer comes in
+        chat.turn("r1", "question", "Which topic?")
+        chat.turn("r1", "answered", "canary")
+        # Then: the waiting line comes after the question message, and the phase line after the answer
+        order = [(event, body["text"] if event == "chat_run_status" else None) for event, body in chat.events]
+        self.assertEqual(order, [("chat_run_status", "screen"), ("chat_message", None), ("chat_run_status", "waiting for your answer"), ("chat_run_status", "screen")])
 
 
 class OneVoice(unittest.TestCase):
