@@ -103,7 +103,8 @@ def normalize_text(text):
     return CONTROL_CHARACTERS.sub("", text).strip()
 SENTENCE_END = re.compile(r"(?<=[.!?])\s+")
 SKILL_RUNS_IN_HISTORY = 3      # runs whose messages the chat model sees
-SKILL_TURN_KINDS = ("question", "phase", "done", "failed", "stopped")      # IF-201 v3
+SKILL_TURN_KINDS = ("question", "phase", "done", "failed", "stopped", "start", "answered")      # IF-201 v3, v4 (A-158): start, answered
+GENERIC_LINE, WAITING_LINE = "working", "waiting for your answer"      # texts of the status line of a run without phases and of a run that waits (REQ-CHA-068, 070)
 SKILL_LINK = re.compile(r"\[(?:[^\[\]]|\[[^\]]{0,100}\]){0,200}\]\(\s*<?#run=[^)]{0,300}\)", re.I)      # a link to a run in a text of the model: one level of brackets in a label of usual size, any case
 CUT_ROUNDS = 6        # the nicer cut: a link that is built from the parts of another needs another round; the rest below does not depend on it
 
@@ -194,6 +195,7 @@ class ChatService:
         self._recorder = recorder                                          # G-V3.PANEL (REQ-WFM-130..138): the SkillRunRecorder; a SkillRunObserver made in _do_chat reports every task run to it (stub of Plan step 4: not used yet)
         self._digest = digest                                              # G-V3.CHAT (A-142): the SkillDigestStep that words the status, summary, failure and stop messages of a skill run
         self._run_phases = {}                                              # run -> the phases its skill declares, for a service that has no `declared_phases` of its own (run_phases)
+        self._lines = {}                                                   # run -> the phase line it shows when it does not wait (A-158); not a record
         self._declared_phases = declared_phases                            # run -> the phases the manifest of its skill declares worth telling (REQ-WFM-039)
         self._speak = speak                                                # (sentence, should_stop) -> None: the voice route of live answers (sound server); None = speak again stays silent (REQ-CHA-030)
         self._speak_lock = threading.Lock()                                # one spoken-again playback at a time (REQ-CHA-034)
@@ -710,15 +712,38 @@ class ChatService:
     def skill_turn(self, account, run, kind, payload):
         """IF-201 v3 (A-142, A-156): one turn of a skill run as a message of MIA. `question` is the text of the skill as it is; `done`, `failed` and `stopped` are worded by the digest step in
         persona and repaired like every answer (REQ-CHA-043, 044, 047, 057, 060); the end messages end with the link to the run, added by code (REQ-CHA-056). Every message is a record with
-        `skill_run` and `kind`, an event chat_message and goes to speech once (REQ-CHA-045). A `phase` is no chat message, it stays in the run status (REQ-CHA-041): returns {"id": None}."""
+        `skill_run` and `kind`, an event chat_message and goes to speech once (REQ-CHA-045). A `phase` is no chat message, it stays in the run status (REQ-CHA-041): returns {"id": None}.
+        A-158 (IF-201 v4): `phase`, `start` and `answered` give the status line of the run (event chat_run_status, REQ-CHA-068), a question the line `waiting for your answer` (REQ-CHA-070), an end message clears it first (REQ-CHA-069)."""
         if kind not in SKILL_TURN_KINDS:
             raise ChatError("invalid_kind")
-        if kind == "phase":
+        if kind in ("phase", "start", "answered"):
+            self._phase_line(run, kind, payload)
             return {"id": None}
         text, spoken = self._turn_text(run, kind, payload)
+        if kind in ("done", "failed", "stopped"):
+            self._lines.pop(run, None)
+            self._emit("chat_run_status", {"run": run, "text": None})      # the line goes before the end message, which is then the last thing in the chat (REQ-CHA-069)
         record = self.post_assistant(text, skill_run=run, kind=kind)
         self._voice(record["id"], spoken)
+        if kind == "question":
+            self._emit("chat_run_status", {"run": run, "text": WAITING_LINE})      # REQ-CHA-070
         return {"id": record["id"]}
+
+    def _phase_line(self, run, kind, payload):
+        """the status line of a run (A-158, REQ-CHA-068, 071): an event, no record, no history, no speech. A declared phase that changed gives its name; `start` gives `working` for a run
+        without declared phases; `answered` shows the phase line again."""
+        phases = self._phases_of(run)
+        if kind == "phase":
+            if payload not in phases or self._lines.get(run) == payload:
+                return
+            self._lines[run] = payload
+        elif kind == "start":
+            if phases:
+                return
+            self._lines[run] = GENERIC_LINE
+        else:
+            self._lines.setdefault(run, GENERIC_LINE)
+        self._emit("chat_run_status", {"run": run, "text": self._lines[run]})
 
     def has_end_messages(self):
         """True where a skill run ends with a message of the Chat agent, so the skill must not speak its result itself (REQ-CHA-067)"""
