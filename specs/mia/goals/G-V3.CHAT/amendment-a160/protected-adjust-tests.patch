@@ -1,0 +1,29 @@
+diff --git a/tests/acceptance/test_chat_skill_turns.py b/tests/acceptance/test_chat_skill_turns.py
+index 06c6ff7c..60ec438f 100644
+--- a/tests/acceptance/test_chat_skill_turns.py
++++ b/tests/acceptance/test_chat_skill_turns.py
+@@ -374,9 +374,9 @@ class SkillTurns(unittest.TestCase):
+     def test_a_long_summary_is_passed_on_uncut(self):
+         """TC-CHA-063: a summary of 3000 characters is the chat message as it is (the link follows it).
+         Example: 3000 times x."""
+-        # Given: a fake model whose summary has 3000 characters
++        # Given: a fake model whose summary has 3000 characters, also when it is asked to shorten it (A-160, REQ-CHA-074: a summary over 1200 characters is asked again once)
+         summary = "x" * 3000
+-        chat = Chat(self, [summary])
++        chat = Chat(self, [summary, summary])
+         # When: the summary is added to the chat
+         chat.turn("r1", "done", numbered(300))
+         # Then: the chat message equals the 3000-character text
+diff --git a/tests/acceptance/test_end_message.py b/tests/acceptance/test_end_message.py
+index 5bdf6366..1d510894 100644
+--- a/tests/acceptance/test_end_message.py
++++ b/tests/acceptance/test_end_message.py
+@@ -181,7 +181,7 @@ class ShortReviewResult(unittest.TestCase):
+                 return {"found": [{"point": "colouring works", "works": ["10.1/w1"]}], "coverage": "thin", "gaps": []}
+             raise AssertionError("unexpected skill " + name)
+ 
+-        answers = iter(["yes", "no"] + ["summarize"] * 5)
++        answers = iter(["yes", "yes"] + ["summarize"] * 5)           # the keywords, then the full texts: the run goes on to its summary
+         stored, run_reports = {}, []
+         # Given: the scripted scholar with 400 works, scripted skills and a scripted user
+         # When: the review runs to its end

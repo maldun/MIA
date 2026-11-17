@@ -181,7 +181,7 @@ class ShortReviewResult(unittest.TestCase):
                 return {"found": [{"point": "colouring works", "works": ["10.1/w1"]}], "coverage": "thin", "gaps": []}
             raise AssertionError("unexpected skill " + name)
 
-        answers = iter(["yes", "no"] + ["summarize"] * 5)
+        answers = iter(["yes", "yes"] + ["summarize"] * 5)           # the keywords, then the full texts: the run goes on to its summary
         stored, run_reports = {}, []
         # Given: the scripted scholar with 400 works, scripted skills and a scripted user
         # When: the review runs to its end

@@ -374,9 +374,9 @@ class SkillTurns(unittest.TestCase):
     def test_a_long_summary_is_passed_on_uncut(self):
         """TC-CHA-063: a summary of 3000 characters is the chat message as it is (the link follows it).
         Example: 3000 times x."""
-        # Given: a fake model whose summary has 3000 characters
+        # Given: a fake model whose summary has 3000 characters, also when it is asked to shorten it (A-160, REQ-CHA-074: a summary over 1200 characters is asked again once)
         summary = "x" * 3000
-        chat = Chat(self, [summary])
+        chat = Chat(self, [summary, summary])
         # When: the summary is added to the chat
         chat.turn("r1", "done", numbered(300))
         # Then: the chat message equals the 3000-character text
