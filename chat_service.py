@@ -195,6 +195,7 @@ class ChatService:
         self._recorder = recorder                                          # G-V3.PANEL (REQ-WFM-130..138): the SkillRunRecorder; a SkillRunObserver made in _do_chat reports every task run to it (stub of Plan step 4: not used yet)
         self._digest = digest                                              # G-V3.CHAT (A-142): the SkillDigestStep that words the status, summary, failure and stop messages of a skill run
         self._run_phases = {}                                              # run -> the phases its skill declares, for a service that has no `declared_phases` of its own (run_phases)
+        self._line_lock = threading.Lock()                                 # guards `_lines` (check and set) against the threads of the run and of the page
         self._lines = {}                                                   # run -> the phase line it shows when it does not wait (A-158); not a record
         self._declared_phases = declared_phases                            # run -> the phases the manifest of its skill declares worth telling (REQ-WFM-039)
         self._speak = speak                                                # (sentence, should_stop) -> None: the voice route of live answers (sound server); None = speak again stays silent (REQ-CHA-030)
@@ -724,29 +725,48 @@ class ChatService:
             self._clear_line(run)                                              # the line goes before the end message, which is then the last thing in the chat (REQ-CHA-069)
         record = self.post_assistant(text, skill_run=run, kind=kind)
         self._voice(record["id"], spoken)
-        if kind == "question":
-            self._emit("chat_run_status", {"run": run, "text": WAITING_LINE})      # REQ-CHA-070
+        if kind == "question" and self._line_known(run):
+            self._send_line(run, WAITING_LINE)      # REQ-CHA-070; a question after the end of the run leaves no line
         return {"id": record["id"]}
 
+    def _line_known(self, run):
+        """a run that shows a line or is the run of the service now; a late question of an ended run is not"""
+        with self._line_lock:
+            return run in self._lines or (self._observer is not None and self._observer.run == run)
+
+    def _send_line(self, run, text):
+        """the event of the status line; a failing emit is logged and never stops the run, its question or its end (the line is a convenience, A-158 F-05)"""
+        try:
+            self._emit("chat_run_status", {"run": run, "text": text})
+        except Exception as exc:
+            logger.warning("status line of run %s: %s", run, exc)
+
     def _clear_line(self, run):
-        self._lines.pop(run, None)
-        self._emit("chat_run_status", {"run": run, "text": None})      # sent also when no line was shown: the page then has nothing to remove, and a lost line cannot stay
+        with self._line_lock:
+            self._lines.pop(run, None)
+        self._send_line(run, None)      # sent also when no line was shown: the page then has nothing to remove, and a lost line cannot stay
 
     def _phase_line(self, run, kind, payload):
         """the status line of a run (A-158, REQ-CHA-068, 071): an event, no record, no history, no speech. A declared phase that changed gives its name; `start` gives `working` for a run
         without declared phases; `answered` shows the phase line again."""
-        phases = self._phases_of(run)
-        if kind == "phase":
-            if payload not in phases or self._lines.get(run) == payload:
-                return
-            self._lines[run] = payload
-        elif kind == "start":
-            if phases:
-                return
-            self._lines[run] = GENERIC_LINE
-        else:
-            self._lines.setdefault(run, GENERIC_LINE)
-        self._emit("chat_run_status", {"run": run, "text": self._lines[run]})
+        try:
+            phases = self._phases_of(run)
+        except Exception as exc:                                       # the manifest lookup is a convenience here too (F-05)
+            logger.warning("phases of run %s: %s", run, exc)
+            return
+        with self._line_lock:
+            if kind == "phase":
+                if payload not in phases or self._lines.get(run) == payload:
+                    return
+                self._lines[run] = payload
+            elif kind == "start":
+                if phases:
+                    return
+                self._lines[run] = GENERIC_LINE
+            else:
+                self._lines.setdefault(run, GENERIC_LINE)
+            text = self._lines[run]
+        self._send_line(run, text)
 
     def has_end_messages(self):
         """True where a skill run ends with a message of the Chat agent, so the skill must not speak its result itself (REQ-CHA-067)"""
@@ -853,8 +873,8 @@ class ChatService:
             if monitor is not None:
                 monitor.end_wait()
             self.set_activity("thinking")
-        if reply is not None and self._observer is not None:
-            self._phase_line(self._observer.run, "answered", reply)       # A-158: the phase line again after the answer (REQ-CHA-070)
+        if self._observer is not None and not self._stop.is_set():
+            self._phase_line(self._observer.run, "answered", reply)       # A-158: the phase line again after the answer or after the timeout (REQ-CHA-070, F-03)
         return reply
 
     # --- background work ------------------------------------------------------------------------------

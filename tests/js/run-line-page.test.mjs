@@ -47,3 +47,17 @@ test('TC-CLV-053: when the line is cleared it is gone and the end message is the
   assert.equal(p.lines().length, 0);
   assert.notEqual(p.kids().at(-1).className, 'run-line');
 });
+
+test('TC-CLV-053 (F-01 of the A-158 verification): a phase name with markup is shown as text, never as an element', () => {
+  // Given: a phase name that holds markup
+  const p = page();
+  const hostile = '<img src=x onerror="alert(1)">';
+  // When: the line is set to it
+  p.socket.fire('chat_run_status', { run: 'r1', text: hostile });
+  // Then: the text of the line is the string itself and the line has no child element but the text and the link
+  const [line] = p.lines();
+  const text = line.querySelector('.run-line-text');
+  assert.equal(text.textContent, hostile);
+  assert.equal(text.children.length, 0);
+  assert.deepEqual(line.children.map((c) => c.tagName?.toLowerCase()), ['span', 'a']);
+});

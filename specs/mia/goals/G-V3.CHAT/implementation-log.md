@@ -61,3 +61,9 @@ Goal: G-V3.CHAT   Line of work: goal/v3.chat (a worktree of its own, `goal-v3-ch
 
 ## Open questions for Phase 4
 - `secondBudget = 20.0` s of `SkillDigestStep` in `architecture.sysml` is not measured (T-05).
+
+## A-158 Verify findings fixed (2026-11-17)
+- F-01, F-02 (page tests, code was right): `run-line-page.test.mjs` (markup in a phase name is text) and `run-line.test.mjs` (id `a b/c#d` gives `#run=a%20b%2Fc%23d`, `runOfHash` reads it back); both fail under the reviewer's mutations M7 and M8.
+- F-03: after a question timeout the phase line comes back (`ask` sends `answered` whatever ended the wait, not on a stop).
+- F-05: (a) the line events go through `_send_line`, a failing emit or manifest lookup is logged and never loses an answer or the end; (b) `_lines` has `_line_lock`; (c) a question of an ended run gives no waiting line (`_line_known`); (d) test: a stop while a question waits clears the line before the end message (green at once).
+- Open, owner decisions: F-04 (line after a reload: requirement or not now), F-06 (clearing without a line, `answered` fallback, two translated texts: write into REQ-CHA-069/070 and REQ-CLV-053 or remove), F-07 (approver of the two protected patches).

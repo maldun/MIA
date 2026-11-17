@@ -92,6 +92,95 @@ class RunLineWiring(unittest.TestCase):
         # Then: the line is cleared at the end
         self.assertEqual([x[1] for x in seen if x[0] == "line"], ["collect", None])
 
+    @mark.req("REQ-CHA-070")
+    def test_a_question_that_times_out_gives_the_phase_line_back(self):
+        """F-03 of the A-158 verification: when nobody answers, the line `waiting for your answer` does not stay while the skill goes on.
+        Example: collect, waiting for your answer, collect (the timeout), None."""
+        # Given: a skill that asks one question after its first phase, on a service whose question times out at once
+        def asks(argument, on_delta, on_emotion, should_stop, ask, monitor):
+            monitor.update(phase="collect")
+            chat._review_timeout = 0
+            ask("Which topic?")
+            return "result"
+        chat, _, _ = chat_with(self, asks, needs=("ask", "monitor"))
+        seen = recording(chat)
+        # When: the user starts it and nobody answers
+        chat.send("/go x", sender="anna", author="anna")
+        # Then: the phase line comes back after the waiting line
+        self.assertEqual([x[1] for x in seen if x[0] == "line"], ["collect", "waiting for your answer", "collect", None])
+
+    @mark.req("REQ-CHA-069", "REQ-CHA-070")
+    def test_a_stop_while_a_question_waits_clears_the_line_before_the_end_message(self):
+        """F-05 (d): the user stops a run that waits for an answer; the line is cleared before the end message.
+        Example: collect, waiting for your answer, ..., None, then the stopped message."""
+        # Given: a skill that waits for an answer
+        def asks(argument, on_delta, on_emotion, should_stop, ask, monitor):
+            monitor.update(phase="collect")
+            ask("Which topic?")
+            return "result"
+        chat, _, _ = chat_with(self, asks, needs=("ask", "monitor"), spawn=lambda target: threading.Thread(target=target, daemon=True).start())
+        seen = recording(chat)
+        chat.send("/go x", sender="anna", author="anna")
+        for _ in range(200):
+            if ("line", "waiting for your answer") in seen:
+                break
+            time.sleep(0.05)
+        # When: the user stops the run
+        chat.stop()
+        for _ in range(200):
+            if ("done", "stopped") in seen:
+                break
+            time.sleep(0.05)
+        # Then: the clearing comes before the end message and no line follows it
+        cleared = seen.index(("line", None))
+        self.assertLess(cleared, seen.index(("message", "chat_start")))
+        self.assertEqual([x for x in seen[cleared + 1:] if x[0] == "line"], [])
+
+    @mark.req("REQ-CHA-068", "REQ-CHA-070")
+    def test_a_failing_emit_of_the_line_does_not_lose_the_answer_or_the_end(self):
+        """F-05 (a): when the event of the line cannot be sent, the question is still answered and the run still ends with its summary.
+        Example: chat_run_status raises; the answer `quantum` reaches the skill and the done message is in the chat."""
+        # Given: a service whose event for the line raises
+        def asks(argument, on_delta, on_emotion, should_stop, ask, monitor):
+            monitor.update(phase="collect")
+            return "Done " + str(ask("Which topic?"))
+        chat, _, _ = chat_with(self, asks, needs=("ask", "monitor"), spawn=lambda target: threading.Thread(target=target, daemon=True).start())
+        original = chat._emit
+
+        def emit(event, payload):
+            if event == "chat_run_status":
+                raise RuntimeError("socket gone")
+            original(event, payload)
+        chat._emit = emit
+        # When: the user starts it and answers the question
+        chat.send("/go x", sender="anna", author="anna")
+        for _ in range(200):
+            if any(r["text"] == "Which topic?" for r in mia(chat)):
+                break
+            time.sleep(0.05)
+        chat.send("quantum", sender="anna", author="anna")
+        for _ in range(200):
+            if any(r.get("kind") == "done" for r in mia(chat)):
+                break
+            time.sleep(0.05)
+        # Then: the run ended with its summary and the history holds the question and the answer
+        self.assertTrue(any(r.get("kind") == "done" for r in mia(chat)))
+        self.assertEqual([m["text"] for m in chat.model_history()][:2], ["Which topic?", "quantum"])
+
+    @mark.req("REQ-CHA-069", "REQ-CHA-070")
+    def test_a_question_after_the_end_of_the_run_gives_no_line(self):
+        """F-05 (c): a question that arrives after the run ended leaves no stale `waiting for your answer`.
+        Example: collect, done, then a question of the same run: no line after the clearing."""
+        # Given: a run that has ended
+        chat, _, _ = chat_with(self, lambda *a, **k: "result")
+        seen = recording(chat)
+        chat.skill_turn("anna", "r1", "phase", "collect")
+        chat.skill_turn("anna", "r1", "done", "a result")
+        # When: a late question of the same run comes in
+        chat.skill_turn("anna", "r1", "question", "Still there?")
+        # Then: the last line event is the clearing
+        self.assertEqual([x[1] for x in seen if x[0] == "line"][-1], None)
+
 
 if __name__ == "__main__":
     unittest.main()

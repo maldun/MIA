@@ -3,6 +3,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { runLineLabel, runLineState, withRunLine } from '../../templates/static/chat/chat-model.js';
+import { runOfHash } from '../../templates/static/chat/skill-run-model.js';
 
 const msg = (id, text) => ({ id, role: 'assistant', text });
 
@@ -44,4 +45,14 @@ test('TC-CLV-053: the two generic texts of the server are shown in the language 
   const labels = ['working', 'waiting for your answer', 'collect'].map((text) => runLineLabel(text, t));
   // Then: the generic ones are translated, the phase name is not
   assert.deepEqual(labels, ['<chat.run_line_working>', '<chat.run_line_waiting>', 'collect']);
+});
+
+test('TC-CLV-053 (F-02 of the A-158 verification): the link of a run id with special characters is encoded and opens the same run', () => {
+  // Given: a run id with a space, a slash and a hash
+  const id = 'a b/c#d';
+  // When: the line is built for it
+  const href = withRunLine([], runLineState(null, { run: id, text: 'collect' })).at(-1).href;
+  // Then: the href is encoded, and the view reads the same id back from it
+  assert.equal(href, '#run=a%20b%2Fc%23d');
+  assert.equal(runOfHash(href), id);
 });
