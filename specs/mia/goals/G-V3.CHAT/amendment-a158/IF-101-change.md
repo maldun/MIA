@@ -8,3 +8,12 @@ New server-to-client socket event `chat_run_status` (approved by the owner 2026-
 - After a reload the line is not restored; the run strip of the Skill run view shows the state (REQ-CLV-038).
 
 Mock: `tests/helpers/mocks/if_201_chat_turn.py` and the stub server emit the event for the scripted skill (protected files, to be changed with the red tests).
+
+## IF-201 v4 (same amendment): two new turn kinds of `skill_turn`
+- `start` (payload ignored): the run begins; for a run **without declared phases** the chat agent sends the line `working`, for a run with phases it sends nothing yet (the first declared phase gives the first line).
+- `answered` (payload: the answer text): the answer of a question reached the run; the chat agent sends the line of the current phase again, or `working` if the run has none.
+- `question` additionally sends the line `waiting for your answer` after the question message; `done`, `failed` and `stopped` send the clearing line (`text: null`) before the end message; `phase` of a declared, changed phase sends the line with the phase name and still returns `{"id": null}`.
+- The mock `tests/helpers/mocks/if_201_chat_turn.py` and the contract suite get TC-IF-201-13 to -15 with the contract change (owner applies, protected).
+
+## Open until the code exists
+- Browser/JS check TC-CLV-053 (REQ-CLV-053, 054) has no test yet: it needs the page wiring of the event (a pure function of the chat model for the line, or the stub server scripted to emit it). Decide with the code design in the first task.
