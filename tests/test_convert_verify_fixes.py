@@ -18,6 +18,8 @@ import common_operations as ops                          # noqa: E402
 from call_recording import ScriptedModel                 # noqa: E402
 from core import Core                                    # noqa: E402
 from library import Library                              # noqa: E402
+from pipeline import Tool                                # noqa: E402
+from tool_calls import ToolCalls, ToolCallError          # noqa: E402
 import skill_converter as C                               # noqa: E402
 import plain_modules                                       # noqa: E402
 from pipeline import BudgetExceeded                      # noqa: E402
@@ -135,6 +137,43 @@ class F06_TheDoorGetsTheRunLogId(unittest.TestCase):
             result = core.run("research", {"question": "When did the Rivertown Bridge open to traffic?"}, started_by="command")
         self.assertTrue(door.runs, "the run made no call through the door")
         self.assertEqual(set(door.runs), {result.run_id})
+
+
+DOOR_TOOLS = {"web_search": "search_calls", "fetch_page": "fetch_calls"}
+SEARCH = {"tool": "web_search", "settings": {}}
+
+
+class F08_TheRealDoor(unittest.TestCase):
+    """the trust boundary for the web tools, tested with the real ToolCalls (IF-402), not a stand-in"""
+    def door(self):
+        self.asked = []
+        return ToolCalls(web_search=lambda query: self.asked.append(query) or {"results": [{"url": "http://example.org/a", "title": "t", "snippet": "s"}]}, fetch_page=lambda url, max_chars=None: {"text": ""})
+
+    def test_a_run_over_its_search_budget_through_the_real_door_ends_with_status_budget(self):
+        """F-08. Example: research with search_calls 1 and the real door: the second search ends the run with status budget and the key search_calls, the door counted one search
+        (the refused one counts nothing), the search of the run kept the trust label web."""
+        door = self.door()
+        tools = {name: Tool(None, key) for name, key in DOOR_TOOLS.items()}
+        run = C.run_converted("research", {"question": "When did the Rivertown Bridge open to traffic?"}, model=ScriptedModel(), tools=tools, skills_dir=SKILLS, library_dir=LIBRARY,
+                              skill_changes={"budget": {"search_calls": 1}}, tool_calls=door, door_tools=DOOR_TOOLS, run_id="R1")
+        self.assertEqual(run.status, "budget", run.error)
+        self.assertIn("search_calls", run.error)
+        self.assertEqual(door.used("R1").get("web_search"), 1)
+        self.assertEqual(len(self.asked), 1)
+        self.assertIn({"kind": "tool_call", "tool": "web_search", "trust": "web"}, run.events)
+
+    def test_a_call_the_real_door_refuses_for_its_arguments_is_given_back(self):
+        """F-08. Example: search_calls 1, a search with a number as query is refused by the door (bad_arguments, nothing counted there): the refusal reaches the caller, and the
+        next valid search is still inside the budget of 1."""
+        door = self.door()
+        ops.reset()
+        ops.register_run(budget={"search_calls": 1}, tool_keys={"web_search": "search_calls"}, door=door, door_tools={"web_search": "search_calls"}, run_id="R2")
+        with self.assertRaises(ToolCallError) as caught:
+            ops.tool_step({"tool": SEARCH, "query": 7})
+        self.assertEqual(caught.exception.code, "bad_arguments")
+        self.assertEqual(ops.tool_step({"tool": SEARCH, "query": "a"})[0]["url"], "http://example.org/a")
+        self.assertEqual(door.used("R2").get("web_search"), 1)
+        self.assertIsNone(ops.budget_end())
 
 
 if __name__ == "__main__":
