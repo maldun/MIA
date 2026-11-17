@@ -72,9 +72,6 @@ class SkillDigestStep:
         self.prompt = PROMPT         # REQ-CHA-052: names 1200 characters; REQ-CHA-061: holds no text of a result
         self.version = VERSION
 
-    def status(self, phase):
-        return self._ask("status", phase)
-
     def failure(self, reason):
         return self._ask("failure", reason)
 
@@ -135,9 +132,6 @@ class LiveDigest:
 
     def _step(self):
         return SkillDigestStep(lambda messages: self._chat(messages, profile=self._profile), persona=self._persona())
-
-    def status(self, phase):
-        return self._step().status(phase)
 
     def summary(self, full_result):
         return self._step().summary(full_result)

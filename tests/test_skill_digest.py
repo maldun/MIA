@@ -22,22 +22,22 @@ def count_tokens(text):
 
 class OneCallWordings(unittest.TestCase):
     @mark.req("REQ-CHA-041", "REQ-CHA-044", "REQ-CHA-057", "REQ-CHA-061")
-    def test_status_failure_and_stop_are_one_call_with_the_text_in_the_user_role(self):
-        """status, failure and stopped each make one call; the phase or reason is the user text, the persona is in the system prompt, the reply is returned unchanged.
+    def test_failure_and_stop_are_one_call_with_the_text_in_the_user_role(self):
+        """failure and stopped each make one call; the phase or reason is the user text, the persona is in the system prompt, the reply is returned unchanged.
         Example: failure("search service unreachable") -> one call, reply "It failed." returned as it is."""
         # Given: a step with a persona on a fake model that answers every call with the same sentence
         model = FakeModel(lambda messages: "  It failed.  ")
         step = SkillDigestStep(model, persona="You are MIA, warm and brief.", count_tokens=count_tokens)
-        # When: the three wordings are asked for
-        words = [step.status("collect"), step.failure("search service unreachable"), step.stopped("stopped by the user")]
+        # When: the two wordings are asked for
+        words = [step.failure("search service unreachable"), step.stopped("stopped by the user")]
         # Then: one call each, the text of the run only in the user role, the persona in the system prompt
-        self.assertEqual(len(model.calls), 3)
-        for call, text in zip(model.calls, ("collect", "search service unreachable", "stopped by the user")):
+        self.assertEqual(len(model.calls), 2)
+        for call, text in zip(model.calls, ("search service unreachable", "stopped by the user")):
             self.assertEqual(model.users(call), [text])
             self.assertTrue(any("warm and brief" in system for system in model.systems(call)))
             self.assertTrue(all(text not in system for system in model.systems(call)))
         # And: the text of the model is returned unchanged
-        self.assertEqual(words, ["  It failed.  "] * 3)
+        self.assertEqual(words, ["  It failed.  "] * 2)
 
 
 class SizeOfTheCalls(unittest.TestCase):

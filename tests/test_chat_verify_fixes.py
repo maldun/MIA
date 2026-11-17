@@ -237,7 +237,7 @@ class MarkupRemoval(unittest.TestCase):
 class StepModelAndLinks(unittest.TestCase):
     @mark.req("REQ-CHA-065")
     def test_every_call_of_the_step_asks_for_the_light_profile(self):
-        """TC-CHA-070 (A-152, F-06): the step of the app runs on the model profile light, the pin of the evals, for a status, a summary, a failure and a stop message.
+        """TC-CHA-070 (A-152, F-06): the step of the app runs on the model profile light, the pin of the evals, for a summary, a failure and a stop message.
         Example: a status call and a summary call both reach the chat function with profile="light"."""
         # Given: the live step on a recording chat function and a persona provider
         seen = []
@@ -246,10 +246,10 @@ class StepModelAndLinks(unittest.TestCase):
             seen.append(profile)
             return "ok"
         step = LiveDigest(chat, lambda: "You are MIA.")
-        # When: the four wordings are asked
-        step.status("collect"), step.summary("result"), step.failure("why"), step.stopped("who")
+        # When: the three wordings are asked
+        step.summary("result"), step.failure("why"), step.stopped("who")
         # Then: every call named the profile light
-        self.assertEqual(seen, ["light"] * 4)
+        self.assertEqual(seen, ["light"] * 3)
 
     @mark.req("REQ-CHA-066")
     def test_a_link_to_a_run_in_an_end_message_of_the_model_is_cut(self):
@@ -328,7 +328,7 @@ class SecondVerifyRun(unittest.TestCase):
         personas, seen = ["A", "B"], []
         step = LiveDigest(lambda messages, profile=None: seen.append(messages[0]["content"]) or "ok", lambda: personas.pop(0))
         # When: two messages are worded
-        step.status("x"), step.status("y")
+        step.failure("x"), step.failure("y")
         # Then: each call carries the persona of its time
         self.assertTrue(seen[0].startswith("A") and seen[1].startswith("B"))
 
