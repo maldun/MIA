@@ -2,7 +2,7 @@
 // TC-CLV-053 (the model part; the page wiring is checked in the browser with the stub server).  node --test "tests/js/*.test.mjs"
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { runLineState, withRunLine } from '../../templates/static/chat/chat-model.js';
+import { runLineLabel, runLineState, withRunLine } from '../../templates/static/chat/chat-model.js';
 
 const msg = (id, text) => ({ id, role: 'assistant', text });
 
@@ -35,4 +35,13 @@ test('TC-CLV-053: the clearing of another run leaves the line of the run that is
   const after = runLineState(line, { run: 'r2', text: null });
   // Then: the line of r1 is still there
   assert.deepEqual(after, { run: 'r1', text: 'collect' });
+});
+
+test('TC-CLV-053: the two generic texts of the server are shown in the language of the page, a phase name as it is', () => {
+  // Given: a translation that marks what it translated
+  const t = (key) => `<${key}>`;
+  // When: the three kinds of text are labelled
+  const labels = ['working', 'waiting for your answer', 'collect'].map((text) => runLineLabel(text, t));
+  // Then: the generic ones are translated, the phase name is not
+  assert.deepEqual(labels, ['<chat.run_line_working>', '<chat.run_line_waiting>', 'collect']);
 });

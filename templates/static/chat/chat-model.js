@@ -33,6 +33,12 @@ export function runLineState(line, event) {
   return { run: event.run, text: event.text };
 }
 
+/** the words of the line the server sends in English (REQ-CHA-068, 070) in the language of the page; a phase name is shown as the manifest gives it */
+const LINE_KEYS = { 'working': 'chat.run_line_working', 'waiting for your answer': 'chat.run_line_waiting' };
+export function runLineLabel(text, t) {
+  return LINE_KEYS[text] ? t(LINE_KEYS[text]) : text;
+}
+
 /** the messages as they are shown: the status line is the last element, below every message, and links to the run */
 export function withRunLine(messages, line) {
   return line ? [...messages, { kind: 'run_line', run: line.run, text: line.text, href: `#run=${encodeURIComponent(line.run)}` }] : [...messages];

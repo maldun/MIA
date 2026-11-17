@@ -1,7 +1,7 @@
 // The conversation on the page: history, live messages (chat_* events), streaming, sending with retry, paging, autoscroll.
 // The server is the source of truth (see ui/README.md, chat backend); this module only draws it.
 import { lastAnswerId, voteArgs } from './panels-model.js';
-import { clock, continuesGroup, dayKey, dayLabel, emojiFor, linkify, pipelineHeadline, pipelineLine, pipelineRows, pipelineState, queueText, runLineState, withRunLine, relativeTime, senderName, trimOldest, upsert, MAX_IN_DOM } from './chat-model.js';
+import { clock, continuesGroup, dayKey, dayLabel, emojiFor, linkify, pipelineHeadline, pipelineLine, pipelineRows, pipelineState, queueText, runLineLabel, runLineState, withRunLine, relativeTime, senderName, trimOldest, upsert, MAX_IN_DOM } from './chat-model.js';
 
 export function isNearBottom(element, threshold = 80) {
   return element.scrollHeight - element.scrollTop - element.clientHeight <= threshold;
@@ -418,7 +418,7 @@ export function initChat({ list, empty, jump, olderButton, socket, render, t, or
       runLineEl.remove();
       return;
     }
-    runLineEl.replaceChildren(el('span', 'run-line-text', shown.text), document.createTextNode(' '), Object.assign(el('a', 'run-line-link', t('chat.run_line_link')), { href: shown.href }));
+    runLineEl.replaceChildren(el('span', 'run-line-text', runLineLabel(shown.text, t)), document.createTextNode(' '), Object.assign(el('a', 'run-line-link', t('chat.run_line_link')), { href: shown.href }));
     if (!runLineEl.isConnected) list.append(runLineEl);
     if (stick) win.requestAnimationFrame(scrollDown);
   });

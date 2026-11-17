@@ -38,6 +38,8 @@
   "about.close": "Schließen",
   "sound.hint": "Tippen, um den Ton zu aktivieren",
   "chat.sending_failed": "Die Nachricht konnte nicht gesendet werden.",
+  "chat.run_line_working": "Arbeitet",
+  "chat.run_line_waiting": "Wartet auf deine Antwort",
   "chat.run_line_link": "Skill-Ansicht",
   "chat.you": "Du",
   "chat.copy": "Kopieren",

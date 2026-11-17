@@ -70,7 +70,7 @@ class LiveLineInBrowser(unittest.TestCase):
     @mark.req("REQ-CLV-053")
     def test_the_line_is_always_the_last_element_and_shows_the_phases_in_place(self):
         """TC-CLV-053 (REQ-CLV-053): while the run works the status line is the last element of the chat, also after a second message, and shows the phases one after the other.
-        Example: collect, rank, waiting for your answer, rank, report; the line holds the run link."""
+        Example: collect, rank, Waiting for your answer (the page translates it), rank, report; the line holds the run link."""
         # Given the real page on the stub, a run started by `run` and a second message sent 3 s later
         shown = [s for s in self.samples if s["line"] is not None]
         # Then the line was seen, was the last element of the chat whenever it was there, and held the link of the run
@@ -79,7 +79,7 @@ class LiveLineInBrowser(unittest.TestCase):
         self.assertTrue(all(s["link"] == "#run=r-demo" for s in shown), shown)
         # And the texts came in the order of the run, each shown in place (one line at a time)
         texts = [s["line"] for i, s in enumerate(shown) if i == 0 or shown[i - 1]["line"] != s["line"]]
-        self.assertEqual(texts[:3], ["collect", "rank", "waiting for your answer"], texts)
+        self.assertEqual(texts[:3], ["collect", "rank", "Waiting for your answer"], texts)
         self.assertIn("report", texts)
 
     @mark.req("REQ-CLV-054")

@@ -38,6 +38,8 @@
   "about.close": "Close",
   "sound.hint": "Tap to enable sound",
   "chat.sending_failed": "The message could not be sent.",
+  "chat.run_line_working": "Working",
+  "chat.run_line_waiting": "Waiting for your answer",
   "chat.run_line_link": "Skill run view",
   "chat.you": "You",
   "chat.copy": "Copy",
