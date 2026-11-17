@@ -1,0 +1,432 @@
+--- /dev/null
++++ b/tests/helpers/mocks/if_203_snapshots.py
+@@ -0,0 +1,174 @@
++"""Mock of IF-203 v2, the pointer and the snapshots of the workflow library (G-V2.SNAPSHOT, A-121; protected once installed). Complexity 2: an in-memory library for
++the kinds skills, workflows, context_graphs, transforms and snapshots, next to the v0 mock (if_203_workflow_library.py) and the v1 mock (if_203_transforms.py), which stay as
++they are (D-241 D-b: `restore` keeps its v0 meaning, a new version with the old content).
++One record per item with versions 1..n, and the table `current_versions` as a pointer per item (IF-302 v13): `read` without a version gives the current version, `save`
++writes max+1 and moves the pointer, `set_current_version` moves it and creates nothing. The owner is the account that creates accounts (REQ-WFM-066); the mock is
++given it. Run against tests/acceptance/contract/test_if_203_v2_snapshots.py (TR-SNAPSHOT-001).
++`fail_set_current_version_at = n` is a test seam: the n-th pointer move inside `restore_snapshot` raises (golden example 12)."""
++import copy
++import itertools
++
++try:
++    from .errors import ServiceError
++except ImportError:
++    from errors import ServiceError
++
++KINDS = ("skills", "workflows", "context_graphs", "transforms")
++TRUST = ("untrusted", "trusted")
++LIFECYCLE = ("draft", "tested", "retired")
++_clock = itertools.count(1)
++
++
++class SnapshotLibraryMock:
++    def __init__(self, owner="anna", pins=None):
++        self.owner = owner
++        self._pins = dict(pins if pins is not None else {"MP-light": "gemma4:12b-it-qat"})
++        self._rows, self._pointer, self._moves = {}, {}, {}      # (kind, id) -> [row per version]; current version; the moves of the pointer (kept, never deleted)
++        self._meta = {}                                          # transform id -> {"trust", "lifecycle", "evidence"?}
++        self._snapshots = {}                                     # name -> the stored document (written once)
++        self.fail_set_current_version_at = None
++        self._restoring = 0
++
++    # --- items ---------------------------------------------------------------------------------------------------------------------------
++    def _known(self, kind, record_id=None, extra=()):
++        if kind not in KINDS + tuple(extra):
++            raise ServiceError("not_found", detail=kind)
++        if record_id is not None and (kind, record_id) not in self._rows:
++            raise ServiceError("not_found", detail=record_id)
++
++    def list_ids(self, kind):
++        self._known(kind)
++        return sorted(i for (k, i) in self._rows if k == kind)
++
++    def read(self, kind, record_id, version=None):
++        self._known(kind, record_id)
++        rows = self._rows[(kind, record_id)]
++        number = self._pointer[(kind, record_id)] if version is None else version
++        if type(number) is not int or not 1 <= number <= len(rows):
++            raise ServiceError("not_found", detail=version)
++        entry = dict(rows[number - 1], doc=copy.deepcopy(rows[number - 1]["doc"]))
++        if kind == "transforms":
++            entry.update(trust=self._meta[record_id]["trust"], lifecycle=self._meta[record_id]["lifecycle"])
++        return entry
++
++    def save(self, kind, record_id, doc, author, expected_version=None):
++        self._known(kind)
++        key = (kind, record_id)
++        rows = self._rows.setdefault(key, [])
++        current = self._pointer.get(key, 0)
++        if expected_version is not None and expected_version != current:
++            raise ServiceError("conflict", detail={"current": current})      # checked against the current version, not the newest
++        rows.append({"id": record_id, "version": len(rows) + 1, "author": author, "time": next(_clock), "doc": copy.deepcopy(doc)})
++        self._pointer[key] = len(rows)                                         # a save writes max+1 and moves the pointer
++        self._moves.setdefault(key, []).append((len(rows), "save"))
++        if kind == "transforms":
++            self._meta.setdefault(record_id, {"trust": "untrusted", "lifecycle": "draft"})
++        return {"version": len(rows)}
++
++    def history(self, kind, record_id):
++        self._known(kind, record_id)
++        return [{"version": r["version"], "author": r["author"], "time": r["time"]} for r in self._rows[(kind, record_id)]]
++
++    def restore(self, kind, record_id, version, author):
++        """IF-203 v0 meaning, unchanged: a new version with the content of `version`"""
++        return self.save(kind, record_id, self.read(kind, record_id, version)["doc"], author)
++
++    def set_current_version(self, kind, record_id, version, author):
++        self._known(kind, record_id)
++        if type(version) is not int or not 1 <= version <= len(self._rows[(kind, record_id)]):
++            raise ServiceError("invalid", rule="schema", detail="version")
++        if self._restoring:
++            self._restoring += 1
++            if self.fail_set_current_version_at == self._restoring - 1:
++                raise ServiceError("unavailable", detail="injected")
++        self._pointer[(kind, record_id)] = version
++        self._moves.setdefault((kind, record_id), []).append((version, "set_current_version"))
++        return {"version": version}
++
++    # --- transforms ----------------------------------------------------------------------------------------------------------------------
++    def get_meta(self, record_id):
++        self._known("transforms", record_id)
++        return dict(self._meta[record_id])
++
++    def get_trust(self, record_id):
++        return self.get_meta(record_id)["trust"]
++
++    def get_lifecycle(self, record_id):
++        return self.get_meta(record_id)["lifecycle"]
++
++    def set_trust(self, record_id, trust, author):
++        self._known("transforms", record_id)
++        if trust not in TRUST:
++            raise ServiceError("invalid", rule="schema", detail="trust")
++        self._meta[record_id]["trust"] = trust
++        return {"trust": trust}
++
++    def set_lifecycle(self, record_id, lifecycle, author, evidence=None):
++        self._known("transforms", record_id)
++        if lifecycle not in LIFECYCLE:
++            raise ServiceError("invalid", rule="schema", detail="lifecycle")
++        self._meta[record_id]["lifecycle"] = lifecycle
++        if evidence is not None:
++            self._meta[record_id]["evidence"] = evidence
++        return {"lifecycle": lifecycle}
++
++    def pins(self):
++        return dict(self._pins)
++
++    # --- snapshots -----------------------------------------------------------------------------------------------------------------------
++    def _owner_only(self, account):
++        if account != self.owner:
++            raise ServiceError("forbidden")
++
++    def _write_snapshot(self, name, account):
++        if not isinstance(name, str) or not name:
++            raise ServiceError("invalid", rule="schema", detail="name")
++        if name in self._snapshots:
++            raise ServiceError("conflict", detail=name)
++        items = []
++        for kind in KINDS:
++            for record_id in self.list_ids(kind):
++                item = {"kind": kind, "id": record_id, "version": self._pointer[(kind, record_id)]}
++                if kind == "transforms":
++                    item.update(trust=self._meta[record_id]["trust"], lifecycle=self._meta[record_id]["lifecycle"])
++                items.append(item)
++        doc = {"name": name, "time": next(_clock), "author": account, "items": items, "pins": self.pins(), "format": 1}
++        self._snapshots[name] = doc
++        return {"name": name, "time": doc["time"], "author": account}
++
++    def snapshot(self, name, account):
++        self._owner_only(account)
++        return self._write_snapshot(name, account)
++
++    def read_snapshot(self, name):
++        if name not in self._snapshots:
++            raise ServiceError("not_found", detail=name)
++        return copy.deepcopy(self._snapshots[name])
++
++    def list_snapshots(self, account):
++        self._owner_only(account)
++        return [{"name": d["name"], "time": d["time"], "author": d["author"]} for d in sorted(self._snapshots.values(), key=lambda d: d["time"])]
++
++    def restore_snapshot(self, name, account):
++        self._owner_only(account)
++        stored = self.read_snapshot(name)
++        kept = "before restore of %s" % name
++        suffix = itertools.count(2)
++        while kept in self._snapshots:
++            kept = "before restore of %s (%d)" % (name, next(suffix))
++        self._write_snapshot(kept, account)
++        before = ({k: v for k, v in self._pointer.items()}, {k: dict(v) for k, v in self._meta.items()})
++        self._restoring = 1
++        try:
++            for item in stored["items"]:
++                self.set_current_version(item["kind"], item["id"], item["version"], account)
++                if item["kind"] == "transforms":
++                    self.set_trust(item["id"], item["trust"], account)
++                    self.set_lifecycle(item["id"], item["lifecycle"], account, evidence="restore of %s" % name)
++        except Exception:
++            self._pointer.clear(); self._pointer.update(before[0])     # the items already changed are changed back; the automatic snapshot stays
++            self._meta.clear(); self._meta.update(before[1])
++            raise
++        finally:
++            self._restoring = 0
++        return {"kept_as": kept}
+--- a/tests/helpers/mocks/if_302_record_tables.py
++++ b/tests/helpers/mocks/if_302_record_tables.py
+@@ -13,10 +13,11 @@
+     "skill_runs": {"versioned": True, "deletable": True},      # v8 (amendment A-141): the record of a skill run, deleted with the chat history of its account
+     "transform_meta": {"versioned": True, "deletable": False},      # v10 (amendment A-110): trust and lifecycle of a transform, one record per transform id
+     "transforms": {"versioned": True, "deletable": False},      # v11 (amendment A-112): the versioned code of a transform, one record per transform id
++    "current_versions": {"versioned": True, "deletable": False},      # v13 (amendment A-121): the current-version pointer of an item, record id <kind>/<id>
+ }
+ REQUIRED = {"skill_runs": ("run", "skill", "skill_version", "account", "started", "state"), "reports": ("task", "skill", "skill_version", "question", "account", "model_pin", "report"), "workflow_meta": ("status",), "cases": ("question", "answer", "status"), "behaviours": ("name", "net", "votes"),"memory": ("text", "source"), "votes": ("user", "subject", "category", "value"), "tasks": ("text",), "memos": ("text",),
+             "runs": ("workflow", "workflow_version", "model_pin", "benchmark_version"),
+-            "transform_meta": ("trust", "lifecycle"), "transforms": ("id", "version")}
++            "transform_meta": ("trust", "lifecycle"), "transforms": ("id", "version"), "current_versions": ("version",)}
+ CATEGORIES = ("answer_quality", "reactions", "character_behaviour", "service")
+ MEMORY_FIELDS = {"kind": ("fact", "preference", "commitment"), "status": ("active", "replaced")}      # v2 (amendment A-10): optional, checked when present
+ TRANSFORM_META_FIELDS = {"trust": ("untrusted", "trusted"), "lifecycle": ("draft", "tested", "retired")}      # v10 (amendment A-110): exact values, the optional fields are free
+@@ -47,6 +48,8 @@
+                 return {"rule": "schema", "detail": "id"}
+             if type(doc["version"]) is not int or doc["version"] < 1:      # a bool or a float is no version number (as for the vote value)
+                 return {"rule": "schema", "detail": "version"}
++        if table == "current_versions" and (type(doc["version"]) is not int or doc["version"] < 1):      # v13 (A-121): a bool or a float is no version number; other fields are kept, never refused
++            return {"rule": "schema", "detail": "version"}
+         if table == "workflow_meta" and doc["status"] not in ("draft", "tested", "trusted", "retired"):
+             return {"rule": "schema", "detail": "status"}
+         if table == "votes" and doc["category"] not in CATEGORIES:
+--- /dev/null
++++ b/tests/acceptance/contract/test_if_203_v2_snapshots.py
+@@ -0,0 +1,206 @@
++"""IF-203 v2, the pointer and the snapshots of the workflow library (G-V2.SNAPSHOT, A-121, D-241, D-243): the contract suite runs against the mock (stage 1) and the real Workflow
++management (stage 2, red until T-SN-01 of G-V2.SNAPSHOT builds it). Protected after the Plan gate.
++Run with: python tests/acceptance/contract/test_if_203_v2_snapshots.py"""
++import os
++import sys
++import unittest
++
++HERE = os.path.dirname(os.path.abspath(__file__))
++sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(HERE)), "helpers"))
++
++from contract import contract, each_provider, subject_for  # noqa: E402
++from markers import mark                                    # noqa: E402
++from errors import ServiceError                             # noqa: E402
++from if_203_snapshots import SnapshotLibraryMock            # noqa: E402
++
++IF = "IF-203"
++OWNER, OTHER = "anna", "ben"      # the owner is the account that creates accounts (REQ-WFM-066); OTHER was created by it
++
++
++def make(kind):
++    return SnapshotLibraryMock(owner=OWNER) if kind == "mock" else subject_for(IF, kind)      # the real library of v1 has no pointer and no snapshots: red until T-SN-01
++
++
++def error_of(call):
++    try:
++        call()
++    except ServiceError as err:
++        return err
++    raise AssertionError("no ServiceError raised")
++
++
++def standard_state(lib):
++    """golden 8: 2 skills, 2 workflow graphs, 1 context graph, 3 transforms (trusted tested, trusted draft, untrusted retired)"""
++    for i in ("research", "verify_claim"):
++        lib.save("skills", i, {"name": i}, OWNER)
++    for i in ("lookup", "compare"):
++        lib.save("workflows", i, {"nodes": [i], "edges": []}, OWNER)
++    lib.save("context_graphs", "places", {"nodes": ["places"], "edges": []}, OWNER)
++    for i, trust, lifecycle in (("t_sum", "trusted", "tested"), ("t_draft", "trusted", "draft"), ("t_old", "untrusted", "retired")):
++        lib.save("transforms", i, {"id": i, "version": 1, "code": "def run(a):\n    return 1\n"}, OWNER)
++        lib.set_trust(i, trust, OWNER)
++        lib.set_lifecycle(i, lifecycle, OWNER, evidence="run-1" if lifecycle == "tested" else None)
++
++
++def state(lib):
++    """the skill set as one comparable value: (kind, id, current version, doc, trust, lifecycle) per item"""
++    rows = []
++    for kind in ("skills", "workflows", "context_graphs", "transforms"):
++        for i in lib.list_ids(kind):
++            e = lib.read(kind, i)
++            rows.append((kind, i, e["version"], repr(e["doc"]), e.get("trust"), e.get("lifecycle")))
++    return rows
++
++
++def versions(lib):
++    return {(k, i): [h["version"] for h in lib.history(k, i)] for k in ("skills", "workflows", "context_graphs", "transforms") for i in lib.list_ids(k)}
++
++
++def change_everything(lib):
++    """S2: a skill, a workflow graph, a context graph get a new version, a transform changes its status"""
++    lib.save("skills", "research", {"name": "research", "v": 2}, OWNER)
++    lib.save("workflows", "lookup", {"nodes": ["lookup", "x"], "edges": []}, OWNER)
++    lib.save("context_graphs", "places", {"nodes": ["places", "y"], "edges": []}, OWNER)
++    lib.set_trust("t_old", "trusted", OWNER)
++    lib.set_lifecycle("t_old", "tested", OWNER, evidence="run-2")
++
++
++@contract
++class SnapshotsContract(unittest.TestCase):
++    @mark.req("IF-203", "REQ-WFM-064", "REQ-WFM-065")
++    @each_provider(IF, make)
++    def test_the_pointer_moves_without_creating_or_deleting_a_version(self, lib):
++        """TC-IF-203-10 (v2) D-241 D-b: save writes version 2, read without a version gives the current one; set_current_version(…, 1) makes version 1 current and creates nothing; restore keeps its v0 meaning (a new version with the old content); a save after a pointer move writes max+1 and moves the pointer; expected_version is checked against the current version."""
++        lib.save("skills", "s", {"n": 1}, OWNER)
++        lib.save("skills", "s", {"n": 2}, OWNER)
++        self.assertEqual(lib.read("skills", "s")["version"], 2)
++        self.assertEqual(lib.set_current_version("skills", "s", 1, OWNER), {"version": 1})
++        self.assertEqual((lib.read("skills", "s")["version"], lib.read("skills", "s")["doc"]), (1, {"n": 1}))
++        self.assertEqual([h["version"] for h in lib.history("skills", "s")], [1, 2])
++        self.assertEqual(lib.read("skills", "s", 2)["doc"], {"n": 2})      # an explicit version still reads its own document
++        err = error_of(lambda: lib.save("skills", "s", {"n": 3}, OWNER, expected_version=2))      # the current version is 1, not the newest
++        self.assertEqual((err.code, err.detail), ("conflict", {"current": 1}))
++        self.assertEqual(lib.save("skills", "s", {"n": 3}, OWNER, expected_version=1), {"version": 3})      # max+1, the pointer follows
++        self.assertEqual(lib.read("skills", "s")["version"], 3)
++        self.assertEqual(lib.restore("skills", "s", 1, OWNER), {"version": 4})
++        self.assertEqual((lib.read("skills", "s")["version"], lib.read("skills", "s")["doc"]), (4, {"n": 1}))
++
++    @mark.req("IF-203", "REQ-WFM-064")
++    @each_provider(IF, make)
++    def test_a_pointer_move_to_a_missing_version_or_item_is_refused(self, lib):
++        """TC-IF-203-11 (v2): set_current_version to a version that does not exist (0, 3, a boolean, a text) is invalid/schema; an unknown id or kind is not_found; the pointer stays."""
++        lib.save("skills", "s", {"n": 1}, OWNER)
++        lib.save("skills", "s", {"n": 2}, OWNER)
++        for version in (0, 3, True, "1", None):
++            err = error_of(lambda: lib.set_current_version("skills", "s", version, OWNER))
++            self.assertEqual((err.code, err.rule), ("invalid", "schema"), version)
++        for call in (lambda: lib.set_current_version("skills", "none", 1, OWNER), lambda: lib.set_current_version("nothing", "s", 1, OWNER)):
++            self.assertEqual(error_of(call).code, "not_found")
++        self.assertEqual(lib.read("skills", "s")["version"], 2)
++
++    @mark.req("IF-203", "REQ-WFM-061", "REQ-WFM-066")
++    @each_provider(IF, make)
++    def test_a_snapshot_holds_every_item_with_version_trust_lifecycle_and_the_pins(self, lib):
++        """TC-IF-203-12 (v2) golden 8: with 2 skills, 2 workflow graphs, 1 context graph and 3 transforms, snapshot("before-rework") gives {name, time, author}; read_snapshot has 8 items with versions, the transforms with trust and lifecycle (and only they), and the pin MP-light.
++        Hand check: 2 + 2 + 1 + 3 = 8 items; t_sum is trusted and tested, t_old untrusted and retired."""
++        standard_state(lib)
++        made = lib.snapshot("before-rework", OWNER)
++        self.assertEqual(set(made), {"name", "time", "author"})
++        self.assertEqual((made["name"], made["author"]), ("before-rework", OWNER))
++        shot = lib.read_snapshot("before-rework")
++        self.assertEqual(len(shot["items"]), 8)
++        by = {(i["kind"], i["id"]): i for i in shot["items"]}
++        self.assertEqual({k: v["version"] for k, v in by.items()}, {k: 1 for k in by})
++        self.assertEqual((by[("transforms", "t_sum")]["trust"], by[("transforms", "t_sum")]["lifecycle"]), ("trusted", "tested"))
++        self.assertEqual((by[("transforms", "t_old")]["trust"], by[("transforms", "t_old")]["lifecycle"]), ("untrusted", "retired"))
++        self.assertTrue(all("trust" not in v and "lifecycle" not in v for k, v in by.items() if k[0] != "transforms"))
++        self.assertIn("MP-light", shot["pins"])
++        self.assertEqual({k: shot[k] for k in ("name", "author")}, {"name": "before-rework", "author": OWNER})
++
++    @mark.req("IF-203", "REQ-WFM-062")
++    @each_provider(IF, make)
++    def test_snapshots_are_listed_with_exactly_name_time_and_author_oldest_first(self, lib):
++        """TC-IF-203-13 (v2): two snapshots taken one after the other are listed oldest first with exactly the three fields; a new snapshot with an existing name is conflict, an empty name is invalid/schema, an unknown name is not_found; nothing is written by a refusal."""
++        standard_state(lib)
++        lib.snapshot("a", OWNER)
++        lib.snapshot("b", OWNER)
++        listed = lib.list_snapshots(OWNER)
++        self.assertEqual([s["name"] for s in listed], ["a", "b"])
++        self.assertTrue(all(set(s) == {"name", "time", "author"} for s in listed))
++        self.assertEqual(error_of(lambda: lib.snapshot("a", OWNER)).code, "conflict")
++        err = error_of(lambda: lib.snapshot("", OWNER))
++        self.assertEqual((err.code, err.rule), ("invalid", "schema"))
++        self.assertEqual(error_of(lambda: lib.read_snapshot("none")).code, "not_found")
++        self.assertEqual(error_of(lambda: lib.restore_snapshot("none", OWNER)).code, "not_found")
++        self.assertEqual([s["name"] for s in lib.list_snapshots(OWNER)], ["a", "b"])
++
++    @mark.req("IF-203", "REQ-WFM-063", "REQ-WFM-064", "REQ-WFM-065")
++    @each_provider(IF, make)
++    def test_a_restore_keeps_the_former_state_and_gives_version_trust_and_lifecycle_back(self, lib):
++        """TC-IF-203-14 (v2) golden 9: state S1 is stored as "a"; a skill, a workflow graph, a context graph and a transform status change (S2); restore_snapshot("a") gives S1 and {"kept_as": "before restore of a"}, that snapshot holds S2 with the owner as author, restore_snapshot of it gives S2 again; restoring "a" a second time stores "before restore of a (2)"; the evidence of the status change is "restore of a"."""
++        standard_state(lib)
++        s1 = state(lib)
++        lib.snapshot("a", OWNER)
++        change_everything(lib)
++        s2 = state(lib)
++        self.assertNotEqual(s1, s2)
++        self.assertEqual(lib.restore_snapshot("a", OWNER), {"kept_as": "before restore of a"})
++        self.assertEqual(state(lib), s1)
++        self.assertEqual(lib.get_meta("t_old")["evidence"], "restore of a")
++        kept = lib.read_snapshot("before restore of a")
++        self.assertEqual(kept["author"], OWNER)
++        self.assertEqual({(i["kind"], i["id"]): i["version"] for i in kept["items"]}[("skills", "research")], 2)
++        self.assertEqual(lib.restore_snapshot("before restore of a", OWNER), {"kept_as": "before restore of before restore of a"})
++        self.assertEqual(state(lib), s2)
++        self.assertEqual(lib.restore_snapshot("a", OWNER), {"kept_as": "before restore of a (2)"})      # the automatic name exists: the suffix counts up
++        self.assertEqual(state(lib), s1)
++
++    @mark.req("IF-203", "REQ-WFM-066")
++    @each_provider(IF, make)
++    def test_only_the_owner_takes_lists_and_restores(self, lib):
++        """TC-IF-203-15 (v2) golden 10: a second account created by the owner calls snapshot, list_snapshots and restore_snapshot: all forbidden; the list and the state are unchanged; the owner succeeds."""
++        standard_state(lib)
++        lib.snapshot("a", OWNER)
++        before, listed = state(lib), lib.list_snapshots(OWNER)
++        for call in (lambda: lib.snapshot("b", OTHER), lambda: lib.list_snapshots(OTHER), lambda: lib.restore_snapshot("a", OTHER)):
++            self.assertEqual(error_of(call).code, "forbidden")
++        self.assertEqual((state(lib), lib.list_snapshots(OWNER)), (before, listed))
++
++    @mark.req("IF-203", "REQ-WFM-064", "REQ-WFM-065")
++    @each_provider(IF, make)
++    def test_an_old_snapshot_restores_without_deleting_a_version_and_an_untrusted_transform_stays_untrusted(self, lib):
++        """TC-IF-203-16 (v2) golden 11: the snapshot is older than the last 3 versions of every item; after the restore the version list of every item before the call is a prefix of the list after it; a transform that is untrusted in the snapshot is untrusted after the restore although it was trusted before."""
++        standard_state(lib)
++        lib.snapshot("old", OWNER)
++        for n in range(2, 6):
++            lib.save("skills", "research", {"n": n}, OWNER)
++            lib.save("workflows", "lookup", {"n": n}, OWNER)
++        lib.set_trust("t_old", "trusted", OWNER)
++        before = versions(lib)
++        lib.restore_snapshot("old", OWNER)
++        after = versions(lib)
++        for key, found in before.items():
++            self.assertEqual(after[key][:len(found)], found, key)
++        self.assertEqual(lib.read("skills", "research")["version"], 1)
++        self.assertEqual(lib.get_trust("t_old"), "untrusted")
++
++    @mark.req("IF-203", "REQ-WFM-063", "REQ-WFM-064")
++    @each_provider(IF, make)
++    def test_a_failure_inside_a_restore_changes_the_items_back_and_keeps_the_automatic_snapshot(self, lib):
++        """TC-IF-203-17 (v2) golden 12: the write of the third item fails; the first two are changed back, the state equals the one before the call, "before restore of a" exists, the error is raised.
++        Needs the failure seam `fail_set_current_version_at` of the library under test (the mock has it)."""
++        if not hasattr(lib, "fail_set_current_version_at"):
++            raise unittest.SkipTest("the real library gives no seam to fail the third pointer move; T-SN-01 adds one or proves the rollback another way")
++        standard_state(lib)
++        lib.snapshot("a", OWNER)
++        change_everything(lib)
++        before = state(lib)
++        lib.fail_set_current_version_at = 3
++        with self.assertRaises(ServiceError):
++            lib.restore_snapshot("a", OWNER)
++        self.assertEqual(state(lib), before)
++        self.assertIn("before restore of a", [s["name"] for s in lib.list_snapshots(OWNER)])
++
++
++if __name__ == "__main__":
++    unittest.main()
+--- a/tests/acceptance/contract/test_if_302_record_tables.py
++++ b/tests/acceptance/contract/test_if_302_record_tables.py
+@@ -151,5 +151,19 @@
+         self.assertEqual(tables.definitions()["reports"], {"versioned": True, "deletable": False})
+ 
+ 
++    @mark.req("IF-302", "REQ-WFM-064")
++    @each_provider(IF)
++    def test_the_current_version_pointer_is_a_versioned_record_that_is_not_deletable(self, tables):
++        """TC-IF-302-11 (v13, A-121): `current_versions` is versioned and not deletable; a record needs `version`, an integer of at least 1 (a boolean, a float, a text, 0 or a missing field is rule schema with detail version); every other field is kept and never refused (`reason`, `format`, and one nobody knows yet); the deletable set stays as in v8.
++        Example: validate("current_versions", {"version": 2}) -> None; validate("current_versions", {"version": 1.0}) -> {"rule": "schema", "detail": "version"}."""
++        self.assertEqual(tables.definitions()["current_versions"], {"versioned": True, "deletable": False})
++        self.assertIsNone(tables.validate("current_versions", {"version": 2}))
++        self.assertIsNone(tables.validate("current_versions", {"version": 2, "reason": "snapshot restore of a", "format": 1, "note": "later"}))
++        for bad in (0, -1, True, 1.0, "1", None):
++            self.assertEqual(tables.validate("current_versions", {"version": bad}), {"rule": "schema", "detail": "version"}, bad)
++        self.assertEqual(tables.validate("current_versions", {"reason": "save"}), {"rule": "schema", "detail": "version"})
++        self.assertEqual({t for t, d in tables.definitions().items() if d["deletable"]}, {"history", "memory", "tasks", "memos", "skill_runs"})
++
++
+ if __name__ == "__main__":
+     unittest.main()
