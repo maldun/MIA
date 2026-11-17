@@ -367,7 +367,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 ## Groups of G-V3.CHAT
 | Order | Group | What it covers | Requirements |
 |---|---|---|---|
-| 1 | ST | Skill turns: what the chat shows of a run and what the model sees (FR-35, FR-46) | REQ-CHA-040, REQ-CHA-041, REQ-CHA-042, REQ-CHA-043, REQ-CHA-044, REQ-CHA-045, REQ-CHA-046, REQ-CHA-047, REQ-CHA-055, REQ-CHA-056, REQ-CHA-057, REQ-CHA-058, REQ-CHA-059, REQ-CHA-060, REQ-CHA-067 |
+| 1 | ST | Skill turns: what the chat shows of a run and what the model sees (FR-35, FR-46) | REQ-CHA-040, REQ-CHA-041, REQ-CHA-042, REQ-CHA-043, REQ-CHA-044, REQ-CHA-045, REQ-CHA-046, REQ-CHA-047, REQ-CHA-055, REQ-CHA-056, REQ-CHA-057, REQ-CHA-058, REQ-CHA-059, REQ-CHA-060, REQ-CHA-067, REQ-CHA-068, REQ-CHA-069, REQ-CHA-070, REQ-CHA-071 |
 | 2 | UT | Untrusted result (TB-result) | REQ-CHA-048, REQ-CHA-049, REQ-CHA-061, REQ-CHA-064, REQ-CHA-066 |
 | 3 | BG | Budgets of the digest step | REQ-CHA-050, REQ-CHA-051, REQ-CHA-052, REQ-CHA-062, REQ-CHA-063, REQ-CHA-065 |
 | 4 | SQ | Summary quality (eval criteria) | REQ-CHA-053, REQ-CHA-054 |
@@ -387,7 +387,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 
 ### REQ-CHA-041 – Phases are noted in the run status, not in the chat
 - Level: low   Subject: ConversationCore
-- Text: When a running skill enters a phase that its manifest declares worth telling, the Chat agent shall note the phase once in the status of the run (Skill run view, status card) and shall add no message to the chat for it.
+- Text: When a running skill enters a phase that its manifest declares worth telling, the Chat agent shall note the phase once in the status of the run (Skill run view) and shall add no message to the chat log for it.
 - Rationale: refines REQ-BE-078; owner 2026-11-16 (FB-09): phase texts are not in MIA's persona and clutter the chat; only what needs interaction and the end message are in the chat
 - Parent: REQ-BE-078
 - Group: ST
@@ -396,7 +396,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Acceptance criterion: AC-39: a scripted run that declares three phases gives three phase entries in the status of the run in order and no chat message of kind `phase`; a phase that repeats the one before it is noted once (exact)
 - Verified by: TC-CHA-041
 - Status: Draft
-- History: A-131 (proposed 2026-11-08, G-V3.CHAT), new; owner 2026-11-08; changed by A-156 (owner approved 2026-11-16, FB-09): was "one new status message worded by SkillDigestStep per phase"
+- History: A-131 (proposed 2026-11-08, G-V3.CHAT), new; owner 2026-11-08; changed by A-156 (owner approved 2026-11-16, FB-09): was "one new status message worded by SkillDigestStep per phase"; A-158 (owner 2026-11-17): the status card is gone, the chat shows the phase in the live line of REQ-CHA-068, not as a message
 
 ### REQ-CHA-042 – No status for other phases
 - Level: low   Subject: ConversationCore
@@ -572,7 +572,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 
 ### REQ-CHA-055 – No status message for a skill without phases
 - Level: low   Subject: ConversationCore
-- Text: While a skill without declared phases runs, the Chat agent shall add no status message.
+- Text: While a skill without declared phases runs, the Chat agent shall add no status message to the chat log.
 - Rationale: refines REQ-BE-078; lookup and search have no phases (owner Q-9, 2026-11-07); split from REQ-CHA-042 at the owner's one-by-one review of 2026-11-08
 - Parent: REQ-BE-078
 - Group: ST
@@ -581,7 +581,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Acceptance criterion: AC-39: a lookup run and a search run give no status message and one summary (exact)
 - Verified by: TC-CHA-055
 - Status: Verified
-- History: A-131 (proposed 2026-11-08, G-V3.CHAT), new; owner 2026-11-08, split from REQ-CHA-042
+- History: A-131 (proposed 2026-11-08, G-V3.CHAT), new; owner 2026-11-08, split from REQ-CHA-042; A-158 (owner 2026-11-17): such a run shows the generic live line of REQ-CHA-068, which is no message of the log, so this requirement only says "to the chat log"
 
 ### REQ-CHA-056 – Link added by code
 - Level: low   Subject: ConversationCore
@@ -739,3 +739,54 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Status: Draft
 - History: A-156 (approved 2026-11-16, FB-09), new
 
+### REQ-CHA-068 – Live status line of a run
+- Level: low   Subject: ConversationCore
+- Text: While a skill run works, the Chat agent shall send the web frontend one status line with the current phase name of the manifest, or `working` for a run without declared phases.
+- Rationale: refines REQ-BE-078; owner 2026-11-17 (A-158): the chat shows what currently happens like a chatbot, and the status card is superseded by the Skill run view (FB-09, A-156)
+- Parent: REQ-BE-078
+- Group: ST
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: a scripted run with phases `collect`, `rank`, `report` sends the lines `collect`, `rank`, `report` in order, a repeated phase once, and a lookup run sends `working` (exact)
+- Verified by: TC-CHA-073
+- Status: Draft
+- History: A-158 (owner decisions 2026-11-17: generic line, fixed wording), new
+
+### REQ-CHA-069 – Live line ends with the run
+- Level: low   Subject: ConversationCore
+- Text: When a skill run ends done, failed or stopped, the Chat agent shall clear the status line of the run before it adds the end message.
+- Rationale: refines REQ-BE-078; owner 2026-11-17 (A-158): the end message is the last thing in the chat, as in common chatbots
+- Parent: REQ-BE-078
+- Group: ST
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: for each of the three ends the clearing of the line is sent before the end message and no line follows it (exact)
+- Verified by: TC-CHA-074
+- Status: Draft
+- History: A-158 (owner 2026-11-17), new
+
+### REQ-CHA-070 – Live line while a question waits
+- Level: low   Subject: ConversationCore
+- Text: While a skill run waits for the answer to a question, the Chat agent shall send the status line `waiting for your answer`.
+- Rationale: refines REQ-BE-078; owner 2026-11-17 (A-158): the chat tells what to answer and that the run waits for it
+- Parent: REQ-BE-078
+- Group: ST
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: a scripted review that asks one question sends the line `waiting for your answer` after the question message and the line of the phase again after the answer (exact)
+- Verified by: TC-CHA-075
+- Status: Draft
+- History: A-158 (owner 2026-11-17), new
+
+### REQ-CHA-071 – Live line is transient
+- Level: low   Subject: ConversationCore
+- Text: The Chat agent shall keep the status line of a run out of the chat log, the history of the chat model and speech.
+- Rationale: refines REQ-BE-078; owner 2026-11-17 (A-158): transient, so no clutter stays and the persona speaks once (A-156, REQ-CHA-067)
+- Parent: REQ-BE-078
+- Group: ST
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: after a scripted run with three phases the chat log, the model history and the speech route hold none of the lines (exact)
+- Verified by: TC-CHA-073
+- Status: Draft
+- History: A-158 (owner decision 2026-11-17: transient), new, split from REQ-CHA-068

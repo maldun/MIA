@@ -576,3 +576,27 @@ The chat page: messages, queue, history, status line, voting, tasks and memos, e
 - Verified by: TC-CLV-052
 - Status: Draft
 - History: A-154 (proposed 2026-11-16, FB-08), new, split from REQ-CLV-049
+
+### REQ-CLV-053 – Live line is the last element of the chat
+- Level: low   Subject: WebFrontEnd
+- Text: While the page holds a status line of a run, the Chat and login views shall show the line as the last element of the chat, below every message.
+- Rationale: refines REQ-FE-032 (FR-46); owner 2026-11-17 (A-158): the current state is shown last, as in common chatbots, not in a card above the changes; the line holds the link of REQ-CLV-037
+- Parent: REQ-FE-032
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: after a status line and two more messages the line is still the last element, and a changed line replaces the text in place (exact)
+- Verified by: TC-CLV-053
+- Status: Draft
+- History: A-158 (owner 2026-11-17), new
+
+### REQ-CLV-054 – Live line is removed when cleared
+- Level: low   Subject: WebFrontEnd
+- Text: When the Chat agent clears the status line of a run, the Chat and login views shall remove the line from the chat.
+- Rationale: refines REQ-FE-032 (FR-46); owner 2026-11-17 (A-158): the end message is then the last element
+- Parent: REQ-FE-032
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: after the clearing no line is left and the end message that follows is the last element (exact)
+- Verified by: TC-CLV-053
+- Status: Draft
+- History: A-158 (owner 2026-11-17), new, split from REQ-CLV-053

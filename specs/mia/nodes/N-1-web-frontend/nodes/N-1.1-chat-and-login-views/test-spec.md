@@ -55,6 +55,7 @@ Tests of this part alone against the mocks of its neighbours (the mock of IF-101
 | TC-CLV-050 | REQ-CLV-050 | Component (browser) | 2 | a headless browser against the stub server with the scripted stand-in skill | AC-39: the waiting sentence and no link before the end; the report after the end without reload | exact |
 | TC-CLV-051 | REQ-CLV-051 | Component (browser) | 2 | a headless browser against the stub server with the scripted stand-in skill | AC-39: the removed sentence and no link after the file is deleted | exact |
 | TC-CLV-052 | REQ-CLV-052 | Component (browser) | 2 | a headless browser against the stub server with the scripted stand-in skill (red-team case); unit test in `tests/js/` | AC-39: no script, img, link, iframe, style or form node, no alert, no request to another host | exact |
+| TC-CLV-053 | REQ-CLV-053, REQ-CLV-054 | Component (browser) | 2 | unit test of the chat model in `tests/js/` and a headless browser against the stub server with the scripted stand-in skill | AC-39: the status line stays the last element, is removed on clearing, carries the run link | exact |
 
 ## Assumptions (checked in validation)
 
@@ -350,4 +351,10 @@ Status: **Draft** (written in Phase 3 after the verification, finding F11 / D-16
 - Given: a report with the five fixed strings of TR-PANEL-005 and an `<img>` with an `onerror` handler
 - When: the Report part is opened
 - Then: no `script`, `img`, `link`, `iframe`, `style` or `form` node is in the view; no alert; no request leaves the page except the ones of the page itself
+
+### TC-CLV-053 – Live line is the last element of the chat
+- Verifies: REQ-CLV-053, REQ-CLV-054
+- Given: the chat page on the stub server with a scripted skill run that sends the status line `collect`
+- When: two more messages arrive, then the status line changes to `rank`, then the line is cleared and the end message arrives
+- Then: after the two messages the line `collect` is still the last element; it shows `rank` in place (one line, not two); after the clearing no line is left and the end message is the last element; the line holds the link to the run view (A-158)
 

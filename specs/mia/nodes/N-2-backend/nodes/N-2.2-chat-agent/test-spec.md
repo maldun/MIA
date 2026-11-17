@@ -66,6 +66,9 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-201
 | TC-CHA-070 | REQ-CHA-065 | Component | 1 | unit test with a recording chat function | AC-39: every call of the step names the profile light | exact |
 | TC-CHA-071 | REQ-CHA-066 | Component | 1 | unit test with the fake model server (scripted replies) and the mocks of the interfaces | AC-39: no link of the model in a status message or its speech | exact |
 | TC-CHA-072 | REQ-CHA-067 | Component | 1 | unit test of the voice rule (no model) | AC-39: a task with end messages gets no voice of its own; a task without gets it as the settings say | exact |
+| TC-CHA-073 | REQ-CHA-068, REQ-CHA-071 | Component | 1 | unit test with the fake model server and a recording of the events | AC-39: the lines `collect`, `rank`, `report` in order, a repeat once, `working` for a lookup; none in the log, the history or the speech | exact |
+| TC-CHA-074 | REQ-CHA-069 | Component | 1 | unit test with a recording of the events | AC-39: for done, failed and stopped the clearing comes before the end message and no line follows | exact |
+| TC-CHA-075 | REQ-CHA-070 | Component | 1 | unit test with a scripted review | AC-39: `waiting for your answer` after the question, the phase line again after the answer | exact |
 | EV-skill_turns | REQ-CHA-049, REQ-CHA-053, REQ-CHA-054 | Evaluation | 4 | the suite `eval/suites/skill_turns` (dev 24) and `skill_turns.holdout` (24) on MP-light, 3 repeats, harness `tools/eval.py` | AC-39: red-team cases pass in every repeat; faithful at least 0.85 (lower bound 0.70); persona at least 0.80 (lower bound 0.70), decided by `eval_decide.py` against the baseline | as in the Eval criterion lines |
 
 ## Scenarios (speak again, A-132; the older checks of this file have none yet)
@@ -342,3 +345,22 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-201
 - Given: a persona file that names MIA with its pronouns and form of address, a missing, a broken and a blank file, and a recording stand-in for the model client
 - When: the Chat agent builds the messages of a call, and the file is changed between two calls
 - Then: the persona text is the system message of every call, unchanged; a missing, broken or blank file gives the default form of address "master" alone; a change of the file counts from the next call; the system message is not kept in the history. The statistical check of AC-8 (check dialogues against a baseline) is deferred by TD-10 and is not decided here; the persona of the status and end messages of a skill run is decided by REQ-CHA-054
+
+### TC-CHA-073 – Live status line of a run
+- Verifies: REQ-CHA-068, REQ-CHA-071
+- Given: a scripted skill with the declared phases `collect`, `rank`, `report`, a scripted lookup run without phases, and a recording of the events of the service
+- When: the first run enters the three phases and then the third again; the lookup runs
+- Then: the lines `collect`, `rank`, `report` are sent in this order, the repeat once; the lookup sends `working`; the chat log, the history for the model and the speech route hold none of the lines (A-158)
+
+### TC-CHA-074 – Live line ends with the run
+- Verifies: REQ-CHA-069
+- Given: three scripted runs that end done, failed with the reason `search service unreachable`, and stopped, and a recording of the events
+- When: each run ends
+- Then: in each recording the clearing of the line comes before the end message and no line comes after it (A-158)
+
+### TC-CHA-075 – Live line while a question waits
+- Verifies: REQ-CHA-070
+- Given: a scripted review with phase `screen` that asks one question, and a recording of the events
+- When: the question is asked and answered
+- Then: the line `waiting for your answer` is sent after the question message; after the answer the line `screen` is sent again (A-158)
+
