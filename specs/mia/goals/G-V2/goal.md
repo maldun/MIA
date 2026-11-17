@@ -9,7 +9,7 @@ Drafted 2026-11-07 in Plan Step 0 from the approved HLS of iteration 2 (D-186). 
 - Supervision: supervised
 - Accepted by: Stefan Reiterer (owner)
 - Line of work: goal/v2
-- Subgoals: G-V2.STORE, G-V2.MODEL, G-V2.TOOLBOX, G-V2.CONVERT
+- Subgoals: G-V2.STORE, G-V2.MODEL, G-V2.TOOLBOX, G-V2.CONVERT, G-V2.SNAPSHOT
 - Status: Proposed
 
 ## Outcome criteria

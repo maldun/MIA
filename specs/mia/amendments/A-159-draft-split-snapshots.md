@@ -1,6 +1,6 @@
 # A-159 draft: split T-CV-05 (snapshots) out of G-V2.CONVERT; requirement for F-05; F-07 deferred
 
-Status: **draft, not applied** (owner decisions of 2026-11-17: split; F-05 a requirement; F-07 later). The number A-159 is the next free one after A-158 at the time of writing: check before applying. Basis: `goals/G-V2.CONVERT/verification-report.md` (verdict "not verified as a whole": the conversion half is verifiable, snapshots are not built).
+Status: **sections 1 to 3 applied 2026-11-18** (goal files, plan, new subgoal folder; owner decisions in the session: split, F-05 a requirement with parity, F-07 later, the real IF-203 provider inside T-SN-01). **Not applied:** the requirement of section 4 (REQ-WFM-143 replaces the proposed 142, which A-160 uses; `requirements.md` of N-2.3 holds another session's uncommitted A-160 edits, so the text waits in this draft), the `deferred.md` entry of section 5 (that file is write-protected for the agent: text below, TD-86), and the owner's rows: the agreement tables of G-V2 and G-V2.SNAPSHOT, the decision row in the review log. The number A-159 is the next free one after A-158 at the time of writing: check before applying. The number A-159 is the next free one after A-158 at the time of writing: check before applying. Basis: `goals/G-V2.CONVERT/verification-report.md` (verdict "not verified as a whole": the conversion half is verifiable, snapshots are not built).
 
 ## 1. New subgoal G-V2.SNAPSHOT
 - Kind: subgoal, parent G-V2, supervised, accepted by Stefan Reiterer (owner), line of work `goal/v2.snapshot`, status Proposed.
@@ -24,12 +24,12 @@ Status: **draft, not applied** (owner decisions of 2026-11-17: split; F-05 a req
 ## 3. Edit to G-V2 (parent only)
 `goals/G-V2/goal.md`: Subgoals list gets G-V2.SNAPSHOT; OC-4 is now checked there. The exit criterion of G-V2 does not change (AC-34 with AC-31, 32, 38, 40).
 
-## 4. F-05: requirement for budgets and stop on the converted path (proposal, id to confirm: next free REQ-WFM, today REQ-WFM-142)
+## 4. F-05: requirement for budgets and stop on the converted path (proposal, id to confirm: next free REQ-WFM, today REQ-WFM-143)
 - Level: low   Subject: TaskRuntime   Group: CV   Priority: Should   Method: Test
 - Text: While a converted skill runs, the Workflow execution shall check the declared budgets (steps, seconds, calls, tokens) and the stop request before each step and end the run with status `budget` naming the exceeded key, or with status `stopped`, as the old runner does.
 - Rationale: refines FR-45; verification finding F-05: today seconds and steps are checked only inside controllers, calls and tokens not at all, and a stop is read only at the start and in controllers.
 - Acceptance criterion: AC-34: a straight-line converted pipeline with `budget: {seconds: 0.01}` and a slow scripted model ends with status `budget`, key `seconds`; a stop request raised during step 1 ends the run before step 2 (exact).
-- Verified by: TC-WFM-142 (proposal; the next free TC id of the CONVERT range, to confirm), failing test already proposed in the report (F-05 row).
+- Verified by: TC-WFM-143 (proposal; the next free TC id of the CONVERT range, to confirm), failing test already proposed in the report (F-05 row).
 - Not in G-V2: the five skills declare only steps, seconds and tool budgets and are short, so no skill breaks today; the implementation belongs to the next sub goal (improve the skills), which already lists "`model_step` has no budget" (handover 2026-11-16, item 6).
 - Open choice for the owner: this proposal asks for parity with the old runner. If parity is too much for now, the alternative is an accepted deviation in the verification report and no requirement.
 

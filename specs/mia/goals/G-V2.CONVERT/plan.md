@@ -28,7 +28,7 @@ Task ids carry the prefix CV so that they do not collide with T-01 to T-11 of th
 | T-CV-03d Pipeline to graph converter | REQ-WFM-058 (precondition), A-123 P2, P3 | TC-WFM-125 to 130: a pipeline JSON becomes a graph that passes the graph rules: stages are transforms, a loop or a map over an unknown number of items is a master node with `stop` | T-CV-03c |
 | T-CV-04a Defaults in thin entries, binder, adapter | REQ-WFM-058 (precondition), A-125 | new checks TC-WFM-131 to 134 (to be written first, red): a thin entry applies the param defaults of its library node; `bind_skill` adds the model and tool descriptor nodes; `stages_from_toolbox` runs a converted graph on the toolbox | T-CV-03d |
 | T-CV-04 Same calls on scripted replies | REQ-WFM-058 | TC-WFM-058 for each skill converted in T-CV-06 to T-CV-08 | T-CV-03d |
-| T-CV-05 Snapshots: take, list, restore, nothing deleted, owner only | REQ-WFM-061, REQ-WFM-062, REQ-WFM-063, REQ-WFM-064, REQ-WFM-065, REQ-WFM-066 | TC-WFM-061 to TC-WFM-066 | P1 (snapshotStore, IF-203 v1, IF-301 v2 through their mocks) |
+| T-CV-05 (moved to G-V2.SNAPSHOT as T-SN-01, A-159) Snapshots: take, list, restore, nothing deleted, owner only | REQ-WFM-061, REQ-WFM-062, REQ-WFM-063, REQ-WFM-064, REQ-WFM-065, REQ-WFM-066 | TC-WFM-061 to TC-WFM-066 | P1 (snapshotStore, IF-203 v1, IF-301 v2 through their mocks) |
 | T-CV-06 Convert research and plan_question | REQ-WFM-110, REQ-WFM-111 | TC-WFM-110, TC-WFM-111 on the dev split | T-CV-04, P3, P4 |
 | T-CV-07 Convert verify_claim and verify_computable | REQ-WFM-112, REQ-WFM-113 | TC-WFM-112, TC-WFM-113 on the dev split | T-CV-04, P3, P4 |
 | T-CV-08 Convert extract_claims and extract_claims_rules | REQ-WFM-114, REQ-WFM-115 | TC-WFM-114 on the dev split, TC-WFM-115 equality of the 51 outputs | T-CV-04, P3, P4 |
@@ -115,7 +115,7 @@ Task ids carry the prefix CV so that they do not collide with T-01 to T-11 of th
 - Done when: per skill the list of model calls of the old and the converted run on the recording is equal, a diff is shown otherwise
 - Notes: the main guard of the conversion; the suite run is the second guard (miss 0.10 to 0.27 at a loss of 0.20 in `eval-spec.md`)
 
-### T-CV-05: Snapshots
+### T-CV-05: Snapshots (moved to G-V2.SNAPSHOT as T-SN-01, A-159: not a task of this goal any more)
 - Implements: REQ-WFM-061 to REQ-WFM-066
 - Tests to turn green: TC-WFM-061 to TC-WFM-066
 - Touches: the snapshot operations of N-2.3 through the provider mocks (IF-203 v1, IF-301 v2); the owner check as defined in REQ-WFM-066 (account that creates accounts)
