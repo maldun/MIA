@@ -454,8 +454,8 @@ class LiveLine(unittest.TestCase):
         # When: it asks a question and the answer comes in
         chat.turn("r1", "question", "Which topic?")
         chat.turn("r1", "answered", "canary")
-        # Then: the waiting line comes after the question message, and the phase line after the answer
-        order = [(event, body["text"] if event == "chat_run_status" else None) for event, body in chat.events]
+        # Then: the waiting line comes after the question message, and the phase line after the answer (other events between them, such as the voice, do not count)
+        order = [(event, body["text"] if event == "chat_run_status" else None) for event, body in chat.events if event in ("chat_run_status", "chat_message")]
         self.assertEqual(order, [("chat_run_status", "screen"), ("chat_message", None), ("chat_run_status", "waiting for your answer"), ("chat_run_status", "screen")])
 
 
