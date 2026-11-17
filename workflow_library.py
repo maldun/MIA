@@ -13,7 +13,8 @@ except ImportError:
     from storage import StorageError
     import context_graph
 
-KINDS = ("workflows", "context_graphs", "transforms")
+KINDS = ("skills", "workflows", "context_graphs", "transforms")
+POINTER = "current_versions"          # IF-302 v13: one record per "<kind>/<id>", {"version", "reason"}; an item without a record reads as its newest version
 STATUSES = ("draft", "tested", "trusted", "retired")
 NEEDS = ("specification", "benchmark")
 TRANSFORM_META = "transform_meta"
@@ -73,7 +74,7 @@ class WorkflowLibrary:
         self._kind(kind)
         if kind == "transforms":
             return self._read_transform(record_id, version)
-        entry = _storage_call(self._storage.get, kind, record_id, version)
+        entry = _storage_call(self._storage.get, kind, record_id, version or self._current(kind, record_id) or None)
         entry["status"] = self._meta.get(record_id).get("status", "draft") if kind == "workflows" else "draft"
         return entry
 
@@ -87,7 +88,49 @@ class WorkflowLibrary:
                 raise WorkflowLibraryError("invalid", rule="budget_tokens", detail=node.get("id"))      # REQ-WFM-008
         if kind == "workflows" and isinstance(doc, dict) and doc.get("variant") is not None and not (isinstance(doc["variant"], str) and doc["variant"].strip()):
             raise WorkflowLibraryError("invalid", rule="variant", detail=doc["variant"])      # REQ-WFM-010: the name of a character variant
-        return _storage_call(self._storage.put, kind, record_id, doc, author, expected_version)
+        return self._put(kind, record_id, doc, author, expected_version)
+
+    # --- the current-version pointer (IF-203 v2, A-121, D-241): `restore` of v0 stays a new version with the old content; the pointer move creates and deletes nothing ---
+
+    def _newest(self, kind, record_id):
+        try:
+            return len(self._storage.history(kind, record_id))
+        except StorageError as err:
+            if err.code == "not_found":
+                return 0
+            raise
+
+    def _current(self, kind, record_id):
+        """the current version of an item: the pointer when it has one, else its newest version (data from before v2 needs no migration); 0 for an item that does not exist"""
+        try:
+            return self._storage.get(POINTER, "%s/%s" % (kind, record_id))["doc"]["version"]
+        except StorageError as err:
+            if err.code == "not_found":
+                return self._newest(kind, record_id)
+            raise
+
+    def _move(self, kind, record_id, version, author, reason):
+        self._storage.put(POINTER, "%s/%s" % (kind, record_id), {"version": version, "reason": reason}, author)
+
+    def _put(self, kind, record_id, doc, author, expected_version):
+        """a new version max+1 that becomes the current one; expected_version is checked against the current version, not the newest (A-121)"""
+        if expected_version is not None:
+            current = self._current(kind, record_id)
+            if expected_version != current:
+                raise WorkflowLibraryError("conflict", detail={"current": current})
+        saved = _storage_call(self._storage.put, kind, record_id, doc, author)
+        self._move(kind, record_id, saved["version"], author, "save")
+        return saved
+
+    def set_current_version(self, kind, record_id, version, author):
+        self._kind(kind)
+        newest = self._newest(kind, record_id)
+        if not newest:
+            raise WorkflowLibraryError("not_found", detail=record_id)
+        if type(version) is not int or not 1 <= version <= newest:
+            raise WorkflowLibraryError("invalid", rule="schema", detail="version")
+        _storage_call(self._move, kind, record_id, version, author, "set_current_version")
+        return {"version": version}
 
     def history(self, kind, record_id):
         self._kind(kind)
@@ -211,13 +254,13 @@ class WorkflowLibrary:
     # A new version of the code leaves the meta record as it is (REQ-WFM-092); who may set a value is the rule of the toolbox, not of the library.
 
     def _read_transform(self, record_id, version):
-        entry = _storage_call(self._storage.get, "transforms", record_id, version)
+        entry = _storage_call(self._storage.get, "transforms", record_id, version or self._current("transforms", record_id) or None)
         meta = self.get_meta(record_id)
         entry.update(trust=meta["trust"], lifecycle=meta["lifecycle"])
         return entry
 
     def _save_transform(self, record_id, doc, author, expected_version):
-        saved = _storage_call(self._storage.put, "transforms", record_id, doc, author, expected_version)
+        saved = self._put("transforms", record_id, doc, author, expected_version)
         if record_id not in self._storage.ids(TRANSFORM_META):      # the first save of an id: untrusted and draft
             _storage_call(self._storage.put, TRANSFORM_META, record_id, {"trust": "untrusted", "lifecycle": "draft", "changed_by": author}, author)
         return saved
