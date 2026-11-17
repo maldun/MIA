@@ -754,16 +754,16 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 
 ### REQ-CHA-069 – Live line ends with the run
 - Level: low   Subject: ConversationCore
-- Text: When a skill run ends done, failed or stopped, the Chat agent shall send the clearing of the status line of the run before it adds the end message, whether or not a line was shown.
+- Text: When a skill run ends done, failed or stopped, the Chat agent shall send the clearing of the status line of the run when the text of the end message is ready and before it adds the end message, whether or not a line was shown; until then the line shows the phase the run was in.
 - Rationale: refines REQ-BE-078; owner 2026-11-17 (A-158): the end message is the last thing in the chat, as in common chatbots
 - Parent: REQ-BE-078
 - Group: ST
 - Priority: Must
 - Verification method: Test
-- Acceptance criterion: AC-39: for each of the three ends, and for a run that never showed a line, the clearing is sent before the end message and no line follows it (exact)
-- Verified by: TC-CHA-074
+- Acceptance criterion: AC-39: for each of the three ends, and for a run that never showed a line, the clearing is sent before the end message and no line follows it; with a digest that takes a scripted time the line is not cleared before the digest has returned: line, digest call, clearing, message (exact)
+- Verified by: TC-CHA-074, TC-CHA-080
 - Status: Draft
-- History: A-158 (owner 2026-11-17), new; clarified by the Verify finding F-06 (the clearing is also sent without a line, so that a lost line cannot stay)
+- History: A-158 (owner 2026-11-17), new; clarified by the Verify finding F-06 (the clearing is also sent without a line, so that a lost line cannot stay); A-160 (owner 2026-11-18, plan gate): the line stays until the text of the end message is ready (first real /review: the chat was blank for 16 minutes)
 
 ### REQ-CHA-070 – Live line while a question waits
 - Level: low   Subject: ConversationCore
@@ -803,3 +803,42 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verified by: TC-CHA-076
 - Status: Draft
 - History: A-158 amended (owner 2026-11-17), new, from the Verify findings F-03 and F-06
+
+### REQ-CHA-073 – Output of a digest call
+- Level: low   Subject: ConversationCore
+- Text: The Chat agent shall ask the model server for at most 1024 tokens in each model call of SkillDigestStep.
+- Rationale: refines REQ-BE-078 and REQ-CHA-050; owner 2026-11-18 (A-160): with an input of at most 4096 tokens a call stays inside num_ctx 8192, so the server never ends a text at the context limit; first real /review: a digest piece wrote about 1400 tokens and the end message was cut in the middle
+- Parent: REQ-BE-078
+- Group: ST
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: with a fake model that records the options of each call, a summary of a long result makes only calls with `num_predict` 1024 (exact)
+- Verified by: TC-CHA-077
+- Status: Draft
+- History: A-160 (owner 2026-11-18, plan gate), new
+
+### REQ-CHA-074 – A too long summary is asked again once
+- Level: low   Subject: ConversationCore
+- Text: When the text of the last call of SkillDigestStep is longer than 1200 characters, the Chat agent shall ask the step once more to shorten that text to at most 1200 characters and pass on the text of the second call.
+- Rationale: refines REQ-BE-078 and REQ-WFM-036; owner 2026-11-18 (A-160): REQ-CHA-052 only asks for 1200 characters and a 12B model does not always comply; the second call gets the short text and costs seconds; the code never cuts (REQ-CHA-063 unchanged)
+- Parent: REQ-BE-078
+- Group: ST
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: with scripted replies a first reply of 800 characters makes one call; a first reply of 3000 and a second of 900 characters makes two calls and the chat gets the 900 characters; a first reply of 3000 and a second of 2500 characters makes two calls (no third) and the chat gets the 2500 characters unchanged (exact)
+- Verified by: TC-CHA-078
+- Status: Draft
+- History: A-160 (owner 2026-11-18, plan gate), new
+
+### REQ-CHA-075 – Stop ends the end message
+- Level: low   Subject: ConversationCore
+- Text: When the user stops while the end message of a run is made, the Chat agent shall make no further model call for it and end the run with the plain sentence of its outcome and the link to the run.
+- Rationale: refines REQ-BE-078 and REQ-CHA-004; owner 2026-11-18 (A-160, decision A): Stop must work at every point of a run, also in the minutes after its skill returned; the result is stored, the user has the report in the Skill run view
+- Parent: REQ-BE-078
+- Group: ST
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: with a long result of ten pieces and a stop during the first piece call, no further model call is made, the end message is the plain sentence `The run is done.` with the link and the chat model history holds no digest text (exact)
+- Verified by: TC-CHA-079
+- Status: Draft
+- History: A-160 (owner 2026-11-18, plan gate), new

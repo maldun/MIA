@@ -70,6 +70,10 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-201
 | TC-CHA-074 | REQ-CHA-069 | Component | 1 | unit test with a recording of the events | AC-39: for done, failed and stopped the clearing comes before the end message and no line follows | exact |
 | TC-CHA-075 | REQ-CHA-070 | Component | 1 | unit test with a scripted review | AC-39: `waiting for your answer` after the question, the phase line again after the answer | exact |
 | TC-CHA-076 | REQ-CHA-072 | Component | 1 | unit test with the fake model server and a recording of the events | AC-39: the phase line again after an answer and after a timeout; `working` for a run without phase; none after a stop | exact |
+| TC-CHA-077 | REQ-CHA-073 | Component | 1 | unit test with a recording chat function that keeps the options of each call | AC-39: with a long result every call of the step carries the option num_predict 1024 | exact |
+| TC-CHA-078 | REQ-CHA-074 | Component | 1 | unit test with scripted replies of the fake model | AC-39: 800 characters give one call; 3000 then 900 give two calls and 900 reach the chat; 3000 then 2500 give two calls and 2500 reach the chat | exact |
+| TC-CHA-079 | REQ-CHA-075 | Component | 1 | unit test with the fake model server and a stop during the first piece call | AC-39: no further call after the stop; the end message is `The run is done.` with the link; the model history holds no digest text | exact |
+| TC-CHA-080 | REQ-CHA-069 | Component | 1 | unit test with a recording of the events and a scripted slow digest | AC-39: the order of the events is line, digest call, clearing, end message | exact |
 | EV-skill_turns | REQ-CHA-049, REQ-CHA-053, REQ-CHA-054 | Evaluation | 4 | the suite `eval/suites/skill_turns` (dev 24) and `skill_turns.holdout` (24) on MP-light, 3 repeats, harness `tools/eval.py` | AC-39: red-team cases pass in every repeat; faithful at least 0.85 (lower bound 0.70); persona at least 0.80 (lower bound 0.70), decided by `eval_decide.py` against the baseline | as in the Eval criterion lines |
 
 ## Scenarios (speak again, A-132; the older checks of this file have none yet)
@@ -370,4 +374,28 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-201
 - Given: a skill with the declared phase `collect` that asks one question; a second skill without phases that asks one; a recording of the events
 - When: the question is answered, or nobody answers (timeout), or the run is stopped while it waits
 - Then: after the answer and after the timeout the line `collect` is sent again (`working` for the skill without phases); after the stop no line is sent again before the clearing (A-158, F-03, F-06)
+
+### TC-CHA-077 – Output of a digest call
+- Verifies: REQ-CHA-073
+- Given: the digest step on a recording chat function and a result of 20 000 tokens
+- When: the step writes the summary (pieces, digests, last call)
+- Then: every call carried the option `num_predict` 1024 (A-160)
+
+### TC-CHA-078 – A too long summary is asked again once
+- Verifies: REQ-CHA-074
+- Given: the digest step on scripted replies; three runs: a first reply of 800 characters; 3000 then 900; 3000 then 2500
+- When: the step writes the summary
+- Then: one call, then two calls and the 900 characters, then two calls (no third) and the 2500 characters unchanged (A-160)
+
+### TC-CHA-079 – Stop ends the end message
+- Verifies: REQ-CHA-075
+- Given: a run whose result is ten pieces long and a fake model server that stops the run during its first piece call
+- When: the end message is made
+- Then: no further model call is made, the end message is `The run is done.` with the link, and the history for the chat model holds no digest text (A-160, decision A)
+
+### TC-CHA-080 – The line stays until the end message is ready
+- Verifies: REQ-CHA-069
+- Given: a run in its phase `collect` and a digest that takes a scripted time; a recording of the events
+- When: the run ends done
+- Then: the order is the line `collect`, the digest call, the clearing of the line, the end message; no clearing before the digest has returned (A-160)
 

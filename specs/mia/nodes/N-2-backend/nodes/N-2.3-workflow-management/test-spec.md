@@ -73,6 +73,7 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-203
 | TC-WFM-139 | REQ-WFM-139 | Component | 1 | unit test with the fake storage of `skill_runs`, the fake files volume and scripted skills (lookup, review, search) | AC-39: done, stopped and failed runs each leave a report whose first line names the state; a skill without report and without output still gets one | exact |
 | TC-WFM-140 | REQ-WFM-140 | Component | 1 | unit test with the fake storage of `skill_runs` and the fake files volume | AC-39: `report` is empty while the run goes and names a file of `files` after the end | exact |
 | TC-WFM-141 | REQ-WFM-141 | Component | 1 | unit test (red-team case) with scripted runs whose sources, quotes and reasons are hostile | AC-39: only http and https addresses are links; every other text is escaped | exact |
+| TC-WFM-142 | REQ-WFM-142 | Component | 1 | unit test with the scripted review of 400 works, the fake storage and the fake files volume | AC-39: the result holds the question, the summary and the flow line, none of the work sections, under 8000 characters; the run report and the `.md` file are the full texts | exact |
 | TC-WFM-050 | REQ-WFM-050 | Component | 1 | unit test with the mock of the library part for transforms; a transform with an ID that is already in the toolbox and a version that is not higher | AC-32: refused naming the ID; the first stays unchanged | exact |
 | TC-WFM-051 | REQ-WFM-051 | Component | 1 | unit test with the mock of the library part for transforms; a transform with each trust value and each lifecycle value, and values outside the lists | AC-32: only untrusted or trusted, and only draft, tested or retired are accepted; any other value is refused; trust and lifecycle change independently | exact |
 | TC-WFM-052 | REQ-WFM-052 | Component | 1 | unit test with the mock of the library part for transforms; an exchange file whose status field says trusted | AC-32: stored untrusted | exact |
@@ -373,6 +374,12 @@ TC-WFM-110 to 114 (the five eval criteria of the converted skills) are statistic
 - Given: sources and quotes `javascript:alert(1)`, `data:text/html,<script>alert(1)</script>`, `file:///etc/passwd`, `https://ok.example/a> [x](javascript:alert(1)) <b`, `HTTPS://UP.example/` and the five fixed strings of TR-PANEL-005 in the answer, a quote and the reason
 - When: the report is written
 - Then: every link target starts with http:// or https:// (any case); no other `<...>` or `](...)` target appears unescaped; no tag, image or script survives as markup
+
+### TC-WFM-142 – The result of the review is short
+- Verifies: REQ-WFM-142
+- Given: a scripted review that screens 400 works and includes 74 of them, the fake storage and the fake files volume
+- When: the run ends
+- Then: the result holds the question, the summary (coverage, found, gaps) and the flow line, none of the sections `Included`, `Maybe` and `Excluded although closely related`, and is shorter than 8000 characters; the run report and the `.md` file hold the full report as before (A-160, decision C)
 
 ## Scenarios (G-V2.TOOLBOX, checks TC-WFM-050 to 056, 067, 068, 070, 090 to 095)
 

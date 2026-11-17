@@ -1238,3 +1238,16 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verified by: TC-WFM-141
 - Status: Draft
 - History: A-154 (proposed 2026-11-16, FB-08), new; first code: `research_chat.format_report` (36cc3a9)
+
+### REQ-WFM-142 – The result of the review is short
+- Level: low   Subject: TaskRuntime
+- Text: The Workflow management shall deliver the review with a result that holds the question, the cut-off, the way the run ended, the summary (coverage, what was found, gaps) and the flow count, and no list of works, while the full report stays unchanged in the run report, the record of the report and the files.
+- Rationale: refines REQ-BE-053, REQ-WFM-018 and REQ-WFM-139; owner 2026-11-18 (A-160, decision C): the end message is worded from the result (REQ-WFM-036); a result with every screened work made about 17 digest calls and a cut end message in the first real /review; the report is read in the Skill run view and the files as before
+- Parent: REQ-BE-053
+- Group: RV
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-39: with a scripted review of 400 screened works the returned result holds the question, the summary and the flow line, none of the sections `Included`, `Maybe` and `Excluded although closely related`, and is shorter than 8000 characters; the run report and the `.md` file are the same texts as before (exact)
+- Verified by: TC-WFM-142
+- Status: Draft
+- History: A-160 (owner 2026-11-18, plan gate), new

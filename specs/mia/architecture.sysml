@@ -3023,7 +3023,7 @@ package MIA_NodeRequirements {
     }
     requirement def <'REQ-CHA-069'> LiveLineEndsWithTheRun_Cha069 {
         subject s : ConversationCore;
-        doc /* When a skill run ends done, failed or stopped, the Chat agent shall send the clearing of the status line of the run before it adds the end message, whether or not a line was shown. */
+        doc /* When a skill run ends done, failed or stopped, the Chat agent shall send the clearing of the status line of the run when the text of the end message is ready and before it adds the end message, whether or not a line was shown; until then the line shows the phase the run was in. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-CHA-070'> LiveLineWhileAQuestionWaits_Cha070 {
@@ -3039,6 +3039,21 @@ package MIA_NodeRequirements {
     requirement def <'REQ-CHA-072'> PhaseLineAgainAfterAQuestion_Cha072 {
         subject s : ConversationCore;
         doc /* When a question of a skill run ends by an answer or a timeout, the Chat agent shall send the status line of the current phase again, or `working` for a run without phases. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-073'> OutputOfADigestCall_Cha073 {
+        subject s : ConversationCore;
+        doc /* The Chat agent shall ask the model server for at most 1024 tokens in each model call of SkillDigestStep. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-074'> ATooLongSummaryIsAskedAgainOnce_Cha074 {
+        subject s : ConversationCore;
+        doc /* When the text of the last call of SkillDigestStep is longer than 1200 characters, the Chat agent shall ask the step once more to shorten that text to at most 1200 characters and pass on the text of the second call. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-CHA-075'> StopEndsTheEndMessage_Cha075 {
+        subject s : ConversationCore;
+        doc /* When the user stops while the end message of a run is made, the Chat agent shall make no further model call for it and end the run with the plain sentence of its outcome and the link to the run. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-WFM-001'> SkillsAsTasks_Wfm001 {
@@ -3509,6 +3524,11 @@ package MIA_NodeRequirements {
     requirement def <'REQ-WFM-141'> AddressesAndTextsInAReport_Wfm141 {
         subject s : TaskRuntime;
         doc /* The Workflow management shall write a web address in a run report as a link only where it is an http or https address without spaces, and write every other text that came from the web, a model or a user (answer, quote, title, reason) escaped, so that it forms no link, image, tag or script in a Markdown reader. */
+        @Trace { :>> verifiedBy = (HowVerified::test); }
+    }
+    requirement def <'REQ-WFM-142'> TheResultOfTheReviewIsShort_Wfm142 {
+        subject s : TaskRuntime;
+        doc /* The Workflow management shall deliver the review with a result that holds the question, the cut-off, the way the run ended, the summary (coverage, what was found, gaps) and the flow count, and no list of works, while the full report stays unchanged in the run report, the record of the report and the files. */
         @Trace { :>> verifiedBy = (HowVerified::test); }
     }
     requirement def <'REQ-RUN-001'> InternetTasksOnlyOnCommand_Run001 {
@@ -5021,6 +5041,9 @@ package MIA_NodeRequirements {
     requirement r_req_cha_070 : LiveLineWhileAQuestionWaits_Cha070;
     requirement r_req_cha_071 : LiveLineIsTransient_Cha071;
     requirement r_req_cha_072 : PhaseLineAgainAfterAQuestion_Cha072;
+    requirement r_req_cha_073 : OutputOfADigestCall_Cha073;
+    requirement r_req_cha_074 : ATooLongSummaryIsAskedAgainOnce_Cha074;
+    requirement r_req_cha_075 : StopEndsTheEndMessage_Cha075;
     requirement r_req_wfm_001 : SkillsAsTasks_Wfm001;
     requirement r_req_wfm_002 : VersionedWorkflowLibrary_Wfm002;
     requirement r_req_wfm_003 : NoCycles_Wfm003;
@@ -5115,6 +5138,7 @@ package MIA_NodeRequirements {
     requirement r_req_wfm_139 : EveryRunEndsWithAReport_Wfm139;
     requirement r_req_wfm_140 : TheRunRecordNamesTheReport_Wfm140;
     requirement r_req_wfm_141 : AddressesAndTextsInAReport_Wfm141;
+    requirement r_req_wfm_142 : TheResultOfTheReviewIsShort_Wfm142;
     requirement r_req_run_001 : InternetTasksOnlyOnCommand_Run001;
     requirement r_req_run_002 : SwitchTheModel_Run002;
     requirement r_req_run_003 : ModelServerUnreachable_Run003;
@@ -5561,6 +5585,9 @@ package MIA_NodeRequirements {
     satisfy r_req_cha_070 by mia.conversation;
     satisfy r_req_cha_071 by mia.conversation;
     satisfy r_req_cha_072 by mia.conversation;
+    satisfy r_req_cha_073 by mia.conversation;
+    satisfy r_req_cha_074 by mia.conversation;
+    satisfy r_req_cha_075 by mia.conversation;
     satisfy r_req_wfm_001 by mia.taskRuntime;
     satisfy r_req_wfm_002 by mia.taskRuntime;
     satisfy r_req_wfm_003 by mia.taskRuntime;
@@ -5655,6 +5682,7 @@ package MIA_NodeRequirements {
     satisfy r_req_wfm_139 by mia.taskRuntime;
     satisfy r_req_wfm_140 by mia.taskRuntime;
     satisfy r_req_wfm_141 by mia.taskRuntime;
+    satisfy r_req_wfm_142 by mia.taskRuntime;
     satisfy r_req_run_001 by mia.taskRuntime;
     satisfy r_req_run_002 by mia.taskRuntime;
     satisfy r_req_run_003 by mia.taskRuntime;
@@ -6100,6 +6128,9 @@ package MIA_NodeRequirements {
     allocate r_req_cha_070 to mia.conversation;
     allocate r_req_cha_071 to mia.conversation;
     allocate r_req_cha_072 to mia.conversation;
+    allocate r_req_cha_073 to mia.conversation;
+    allocate r_req_cha_074 to mia.conversation;
+    allocate r_req_cha_075 to mia.conversation;
     allocate r_req_wfm_001 to mia.taskRuntime;
     allocate r_req_wfm_002 to mia.taskRuntime;
     allocate r_req_wfm_003 to mia.taskRuntime;
@@ -6194,6 +6225,7 @@ package MIA_NodeRequirements {
     allocate r_req_wfm_139 to mia.taskRuntime;
     allocate r_req_wfm_140 to mia.taskRuntime;
     allocate r_req_wfm_141 to mia.taskRuntime;
+    allocate r_req_wfm_142 to mia.taskRuntime;
     allocate r_req_run_001 to mia.taskRuntime;
     allocate r_req_run_002 to mia.taskRuntime;
     allocate r_req_run_003 to mia.taskRuntime;
@@ -6650,6 +6682,9 @@ package MIA_NodeRequirements {
     dependency from r_req_cha_070 to r_req_be_078;
     dependency from r_req_cha_071 to r_req_be_078;
     dependency from r_req_cha_072 to r_req_be_078;
+    dependency from r_req_cha_073 to r_req_be_078;
+    dependency from r_req_cha_074 to r_req_be_078;
+    dependency from r_req_cha_075 to r_req_be_078;
     dependency from r_req_wfm_001 to r_req_be_033;
     dependency from r_req_wfm_002 to r_req_be_035;
     dependency from r_req_wfm_003 to r_req_be_036;
@@ -6744,6 +6779,7 @@ package MIA_NodeRequirements {
     dependency from r_req_wfm_139 to r_req_be_033;
     dependency from r_req_wfm_140 to r_req_be_033;
     dependency from r_req_wfm_141 to r_req_be_033;
+    dependency from r_req_wfm_142 to r_req_be_053;
     dependency from r_req_run_001 to r_req_wfx_002;
     dependency from r_req_run_002 to r_req_wfx_003;
     dependency from r_req_run_003 to r_req_wfx_004;
