@@ -22,6 +22,18 @@ def header_of(run):
         return json.loads(fp.readline())
 
 
+def wrong_run(head, skill, suite):
+    """why a run file cannot decide the acceptance of `skill` (F-04), or None: it must be a run of the converted path, of this skill, on this suite"""
+    variant = head.get("variant") or {}
+    if not variant.get("converted"):
+        return "the run is not of the converted variant (header variant %r): the old runner proves nothing for the graph path" % (variant.get("name"),)
+    if (variant.get("skill") or head.get("skill")) != skill:
+        return "the run is of the skill %r, not %r" % (variant.get("skill") or head.get("skill"), skill)
+    if head.get("suite") not in (suite, suite.replace("EV-", "", 1)):
+        return "the run is on the suite %r, not %s" % (head.get("suite"), suite)
+    return None
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("skill")
@@ -34,8 +46,12 @@ def main():
         return 2
     suite, requirement = C.SUITE_OF[args.skill]
     criterion = C.criterion_of(requirement, REQUIREMENTS)
-    decision = C.decide_acceptance(args.run, criterion, rerun_path=args.rerun)
     head = header_of(args.run)
+    wrong = wrong_run(head, args.skill, suite)
+    if wrong:
+        print("not accepted: %s (no record written)" % wrong)
+        return 1
+    decision = C.decide_acceptance(args.run, criterion, rerun_path=args.rerun)
     print("%s: %s on %s (%s)\ncriterion: %s\n%s" % (args.skill, decision["verdict"], suite, requirement, criterion, decision["reason"]))
     if not decision["accepted"]:
         print("not accepted: no record written")

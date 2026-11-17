@@ -24,7 +24,8 @@ GOOD = {"suite": "EV-plans", "run": "plans__converted__x.jsonl", "pins": "MP-lig
 def write_run(folder, name, suite, right, total=20, pin=PIN):
     path = os.path.join(folder, name)
     with open(path, "w") as fp:
-        fp.write(json.dumps({"kind": "header", "suite": suite, "repeats": 3, "cases": total, "pin": pin, "skill": "plan_question", "skill_version": 1, "pipeline": "plan.free@1"}) + "\n")
+        fp.write(json.dumps({"kind": "header", "suite": suite, "repeats": 3, "cases": total, "pin": pin, "skill": "plan_question", "skill_version": 1, "pipeline": "plan.free@1",
+                             "variant": {"name": "converted", "skill": "plan_question", "converted": True}}) + "\n")
         for i in range(total):
             for repeat in range(3):
                 fp.write(json.dumps({"kind": "record", "case": "c%d" % i, "repeat": repeat, "status": "pass" if i < right else "fail", "truth": True, "tags": ["split:dev"]}) + "\n")
