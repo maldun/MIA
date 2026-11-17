@@ -1,0 +1,174 @@
+--- a/tests/helpers/contract.py
++++ b/tests/helpers/contract.py
+@@ -531,13 +531,23 @@
+     The adapter only turns the error class of the library into the one of the mock; production code does not import from tests/."""
+ 
+     def __init__(self, costs=None):
++        import inspect
+         import tempfile
+         from errors import ServiceError
+         from storage import Storage
+         from storage_files import FileBackend
+         from workflow_library import WorkflowLibrary, WorkflowLibraryError
+         self._error, self._library_error = ServiceError, WorkflowLibraryError
+-        self._library = WorkflowLibrary(Storage(FileBackend(tempfile.mkdtemp())), costs=costs)
++        extra = {}
++        if "is_owner" in inspect.signature(WorkflowLibrary).parameters:      # IF-203 v2 (A-121): the owner is the account that creates accounts, here "anna"; the pins are those of eval-spec.md
++            extra = {"is_owner": lambda account: account == "anna", "pins": {"MP-light": "gemma4:12b-it-qat"}}
++        self._library = WorkflowLibrary(Storage(FileBackend(tempfile.mkdtemp())), costs=costs, **extra)
++
++    def __setattr__(self, name, value):
++        if name == "fail_set_current_version_at":      # the test seam of TC-IF-203-17 belongs to the library, not to this adapter
++            setattr(self._library, name, value)
++        else:
++            object.__setattr__(self, name, value)
+ 
+     def __getattr__(self, name):
+         method = getattr(self._library, name)
+--- a/tests/helpers/mocks/if_302_record_tables.py
++++ b/tests/helpers/mocks/if_302_record_tables.py
+@@ -13,11 +13,12 @@
+     "skill_runs": {"versioned": True, "deletable": True},      # v8 (amendment A-141): the record of a skill run, deleted with the chat history of its account
+     "transform_meta": {"versioned": True, "deletable": False},      # v10 (amendment A-110): trust and lifecycle of a transform, one record per transform id
+     "transforms": {"versioned": True, "deletable": False},      # v11 (amendment A-112): the versioned code of a transform, one record per transform id
++    "snapshots": {"versioned": True, "deletable": False},      # v14 (amendment A-161): a named snapshot of the skill set, record id = its name
+     "current_versions": {"versioned": True, "deletable": False},      # v13 (amendment A-121): the current-version pointer of an item, record id <kind>/<id>
+ }
+ REQUIRED = {"skill_runs": ("run", "skill", "skill_version", "account", "started", "state"), "reports": ("task", "skill", "skill_version", "question", "account", "model_pin", "report"), "workflow_meta": ("status",), "cases": ("question", "answer", "status"), "behaviours": ("name", "net", "votes"),"memory": ("text", "source"), "votes": ("user", "subject", "category", "value"), "tasks": ("text",), "memos": ("text",),
+             "runs": ("workflow", "workflow_version", "model_pin", "benchmark_version"),
+-            "transform_meta": ("trust", "lifecycle"), "transforms": ("id", "version"), "current_versions": ("version",)}
++            "transform_meta": ("trust", "lifecycle"), "transforms": ("id", "version"), "current_versions": ("version",), "snapshots": ("name", "time", "author", "items", "pins")}
+ CATEGORIES = ("answer_quality", "reactions", "character_behaviour", "service")
+ MEMORY_FIELDS = {"kind": ("fact", "preference", "commitment"), "status": ("active", "replaced")}      # v2 (amendment A-10): optional, checked when present
+ TRANSFORM_META_FIELDS = {"trust": ("untrusted", "trusted"), "lifecycle": ("draft", "tested", "retired")}      # v10 (amendment A-110): exact values, the optional fields are free
+@@ -48,6 +49,13 @@
+                 return {"rule": "schema", "detail": "id"}
+             if type(doc["version"]) is not int or doc["version"] < 1:      # a bool or a float is no version number (as for the vote value)
+                 return {"rule": "schema", "detail": "version"}
++        if table == "snapshots":      # v14 (A-161): name a non-empty text, items a list, pins a mapping; other fields are kept, never refused
++            if not isinstance(doc["name"], str) or not doc["name"]:
++                return {"rule": "schema", "detail": "name"}
++            if not isinstance(doc["items"], list):
++                return {"rule": "schema", "detail": "items"}
++            if not isinstance(doc["pins"], dict):
++                return {"rule": "schema", "detail": "pins"}
+         if table == "current_versions" and (type(doc["version"]) is not int or doc["version"] < 1):      # v13 (A-121): a bool or a float is no version number; other fields are kept, never refused
+             return {"rule": "schema", "detail": "version"}
+         if table == "workflow_meta" and doc["status"] not in ("draft", "tested", "trusted", "retired"):
+--- a/tests/acceptance/contract/test_if_203_v2_snapshots.py
++++ b/tests/acceptance/contract/test_if_203_v2_snapshots.py
+@@ -21,6 +21,16 @@
+     return SnapshotLibraryMock(owner=OWNER) if kind == "mock" else subject_for(IF, kind)      # the real library of v1 has no pointer and no snapshots: red until T-SN-01
+ 
+ 
++def skill_doc(record_id, n=1):
++    """a record of IF-301 v2 (`{"id", "data"}`), valid for the real Storage and the mock alike; `n` changes the content"""
++    return {"id": record_id, "data": {"command": "%s%s" % (record_id, n if n > 1 else ""), "workflow_graph_id": "lookup", "context_graph_id": "places"}}
++
++
++def graph_doc(note=""):
++    """a graph that passes the graph rules of IF-102 (data, process, data): valid for the real Storage and the mock alike"""
++    return {"nodes": [{"id": "q", "kind": "data"}, {"id": "p", "kind": "process", "note": note}, {"id": "r", "kind": "data"}], "edges": [{"from": "q", "to": "p"}, {"from": "p", "to": "r"}]}
++
++
+ def error_of(call):
+     try:
+         call()
+@@ -32,10 +42,10 @@
+ def standard_state(lib):
+     """golden 8: 2 skills, 2 workflow graphs, 1 context graph, 3 transforms (trusted tested, trusted draft, untrusted retired)"""
+     for i in ("research", "verify_claim"):
+-        lib.save("skills", i, {"name": i}, OWNER)
++        lib.save("skills", i, skill_doc(i), OWNER)
+     for i in ("lookup", "compare"):
+-        lib.save("workflows", i, {"nodes": [i], "edges": []}, OWNER)
+-    lib.save("context_graphs", "places", {"nodes": ["places"], "edges": []}, OWNER)
++        lib.save("workflows", i, graph_doc(i), OWNER)
++    lib.save("context_graphs", "places", graph_doc("places"), OWNER)
+     for i, trust, lifecycle in (("t_sum", "trusted", "tested"), ("t_draft", "trusted", "draft"), ("t_old", "untrusted", "retired")):
+         lib.save("transforms", i, {"id": i, "version": 1, "code": "def run(a):\n    return 1\n"}, OWNER)
+         lib.set_trust(i, trust, OWNER)
+@@ -58,9 +68,9 @@
+ 
+ def change_everything(lib):
+     """S2: a skill, a workflow graph, a context graph get a new version, a transform changes its status"""
+-    lib.save("skills", "research", {"name": "research", "v": 2}, OWNER)
+-    lib.save("workflows", "lookup", {"nodes": ["lookup", "x"], "edges": []}, OWNER)
+-    lib.save("context_graphs", "places", {"nodes": ["places", "y"], "edges": []}, OWNER)
++    lib.save("skills", "research", skill_doc("research", 2), OWNER)
++    lib.save("workflows", "lookup", graph_doc("lookup, edited"), OWNER)
++    lib.save("context_graphs", "places", graph_doc("places, edited"), OWNER)
+     lib.set_trust("t_old", "trusted", OWNER)
+     lib.set_lifecycle("t_old", "tested", OWNER, evidence="run-2")
+ 
+@@ -71,26 +81,26 @@
+     @each_provider(IF, make)
+     def test_the_pointer_moves_without_creating_or_deleting_a_version(self, lib):
+         """TC-IF-203-10 (v2) D-241 D-b: save writes version 2, read without a version gives the current one; set_current_version(…, 1) makes version 1 current and creates nothing; restore keeps its v0 meaning (a new version with the old content); a save after a pointer move writes max+1 and moves the pointer; expected_version is checked against the current version."""
+-        lib.save("skills", "s", {"n": 1}, OWNER)
+-        lib.save("skills", "s", {"n": 2}, OWNER)
++        lib.save("skills", "s", skill_doc("s", 1), OWNER)
++        lib.save("skills", "s", skill_doc("s", 2), OWNER)
+         self.assertEqual(lib.read("skills", "s")["version"], 2)
+         self.assertEqual(lib.set_current_version("skills", "s", 1, OWNER), {"version": 1})
+-        self.assertEqual((lib.read("skills", "s")["version"], lib.read("skills", "s")["doc"]), (1, {"n": 1}))
++        self.assertEqual((lib.read("skills", "s")["version"], lib.read("skills", "s")["doc"]), (1, skill_doc("s", 1)))
+         self.assertEqual([h["version"] for h in lib.history("skills", "s")], [1, 2])
+-        self.assertEqual(lib.read("skills", "s", 2)["doc"], {"n": 2})      # an explicit version still reads its own document
+-        err = error_of(lambda: lib.save("skills", "s", {"n": 3}, OWNER, expected_version=2))      # the current version is 1, not the newest
++        self.assertEqual(lib.read("skills", "s", 2)["doc"], skill_doc("s", 2))      # an explicit version still reads its own document
++        err = error_of(lambda: lib.save("skills", "s", skill_doc("s", 3), OWNER, expected_version=2))      # the current version is 1, not the newest
+         self.assertEqual((err.code, err.detail), ("conflict", {"current": 1}))
+-        self.assertEqual(lib.save("skills", "s", {"n": 3}, OWNER, expected_version=1), {"version": 3})      # max+1, the pointer follows
++        self.assertEqual(lib.save("skills", "s", skill_doc("s", 3), OWNER, expected_version=1), {"version": 3})      # max+1, the pointer follows
+         self.assertEqual(lib.read("skills", "s")["version"], 3)
+         self.assertEqual(lib.restore("skills", "s", 1, OWNER), {"version": 4})
+-        self.assertEqual((lib.read("skills", "s")["version"], lib.read("skills", "s")["doc"]), (4, {"n": 1}))
++        self.assertEqual((lib.read("skills", "s")["version"], lib.read("skills", "s")["doc"]), (4, skill_doc("s", 1)))
+ 
+     @mark.req("IF-203", "REQ-WFM-064")
+     @each_provider(IF, make)
+     def test_a_pointer_move_to_a_missing_version_or_item_is_refused(self, lib):
+         """TC-IF-203-11 (v2): set_current_version to a version that does not exist (0, 3, a boolean, a text) is invalid/schema; an unknown id or kind is not_found; the pointer stays."""
+-        lib.save("skills", "s", {"n": 1}, OWNER)
+-        lib.save("skills", "s", {"n": 2}, OWNER)
++        lib.save("skills", "s", skill_doc("s", 1), OWNER)
++        lib.save("skills", "s", skill_doc("s", 2), OWNER)
+         for version in (0, 3, True, "1", None):
+             err = error_of(lambda: lib.set_current_version("skills", "s", version, OWNER))
+             self.assertEqual((err.code, err.rule), ("invalid", "schema"), version)
+@@ -173,8 +183,8 @@
+         standard_state(lib)
+         lib.snapshot("old", OWNER)
+         for n in range(2, 6):
+-            lib.save("skills", "research", {"n": n}, OWNER)
+-            lib.save("workflows", "lookup", {"n": n}, OWNER)
++            lib.save("skills", "research", skill_doc("research", n), OWNER)
++            lib.save("workflows", "lookup", graph_doc("edit %d" % n), OWNER)
+         lib.set_trust("t_old", "trusted", OWNER)
+         before = versions(lib)
+         lib.restore_snapshot("old", OWNER)
+--- a/tests/acceptance/contract/test_if_302_record_tables.py
++++ b/tests/acceptance/contract/test_if_302_record_tables.py
+@@ -165,5 +165,21 @@
+         self.assertEqual({t for t, d in tables.definitions().items() if d["deletable"]}, {"history", "memory", "tasks", "memos", "skill_runs"})
+ 
+ 
++    @mark.req("IF-302", "REQ-WFM-061")
++    @each_provider(IF)
++    def test_a_snapshot_is_a_versioned_record_that_is_not_deletable(self, tables):
++        """TC-IF-302-12 (v14, A-161): `snapshots` is versioned and not deletable; a record needs name (a text that is not empty), time, author, items (a list) and pins (a mapping), else rule schema with that field as detail; every other field is kept and never refused; the deletable set stays as in v8.
++        Example: validate("snapshots", {"name": "a", "time": 1, "author": "anna", "items": [], "pins": {}}) -> None; with name "" -> {"rule": "schema", "detail": "name"}."""
++        doc = {"name": "a", "time": 1, "author": "anna", "items": [{"kind": "skills", "id": "research", "version": 1}], "pins": {"MP-light": "gemma4:12b-it-qat"}}
++        self.assertEqual(tables.definitions()["snapshots"], {"versioned": True, "deletable": False})
++        self.assertIsNone(tables.validate("snapshots", doc))
++        self.assertIsNone(tables.validate("snapshots", dict(doc, format=1, note="before the rework", unknown_field=[1])))
++        for field in doc:
++            self.assertEqual(tables.validate("snapshots", {k: v for k, v in doc.items() if k != field}), {"rule": "schema", "detail": field}, field)
++        for field, bad in (("name", ""), ("name", 5), ("items", "x"), ("items", None), ("pins", []), ("pins", "MP-light")):
++            self.assertEqual(tables.validate("snapshots", dict(doc, **{field: bad})), {"rule": "schema", "detail": field}, (field, bad))
++        self.assertEqual({t for t, d in tables.definitions().items() if d["deletable"]}, {"history", "memory", "tasks", "memos", "skill_runs"})
++
++
+ if __name__ == "__main__":
+     unittest.main()
