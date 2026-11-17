@@ -19,6 +19,7 @@ class ChatTurnMock:
         self._observer = self._sessions["ben"]
         self._api.connect(self._observer)
         self._callbacks = []
+        self._lines = {}                                                      # v4 (A-158): the status line of each run
         self._api.events(self._observer)
 
     def _call(self, fn):
@@ -67,16 +68,33 @@ class ChatTurnMock:
         self._forward()
         return result
 
-    # v3 (amendment A-142): the turns of a skill run; the mock words them by rule, the real step words them in persona (REQ-CHA-054)
-    KINDS = ("question", "phase", "done", "failed", "stopped")
+    # v3 (amendment A-142), v4 (A-158): the turns of a skill run; the mock words them by rule, the real step words them in persona (REQ-CHA-054).
+    # A phase, start or answered turn is no message: it gives the status line, the event chat_run_status (no record, no history, no speech; REQ-CHA-068).
+    KINDS = ("question", "phase", "start", "answered", "done", "failed", "stopped")
+    WORKING, WAITING = "working", "waiting for your answer"
+
+    def _line(self, run, text):
+        self._api._broadcast("chat_run_status", {"run": run, "text": text})
 
     def skill_turn(self, account, run, kind, payload):
         if kind not in self.KINDS:
             raise ServiceError("invalid_kind")
+        if kind in ("phase", "start", "answered"):
+            if kind == "phase":
+                if payload not in self._phases or self._lines.get(run) == payload:
+                    return {"id": None}                                      # undeclared or repeated: no line
+                self._lines[run] = payload
+            elif kind == "start":
+                if self._phases:
+                    return {"id": None}                                      # the first declared phase gives the first line
+                self._lines[run] = self.WORKING
+            else:
+                self._lines.setdefault(run, self.WORKING)
+            self._line(run, self._lines[run])
+            self._forward()
+            return {"id": None}
         link = " [Open in the Skill run view](#run=%s)" % run                # added by code (REQ-CHA-056)
-        if kind == "phase":
-            return {"id": None}                                              # a phase is noted in the run status and is no chat message (A-156, REQ-CHA-041)
-        elif kind == "question":
+        if kind == "question":
             text = payload
         elif kind == "done":
             text = payload[:1200] + link                                     # the real summary is worded by the digest step; the full result never goes into the chat
@@ -84,11 +102,16 @@ class ChatTurnMock:
             text = "%s%s" % (payload, link)
         else:
             text = "The run was stopped (%s).%s" % (payload, link)
+        if kind in ("done", "failed", "stopped"):
+            self._lines.pop(run, None)
+            self._line(run, None)                                            # the line goes before the end message (REQ-CHA-069)
         record = self._api._record("assistant", "MIA", text)
         record["skill_run"], record["kind"] = run, kind
         self._api._broadcast("chat_message", record)
         for index, sentence in enumerate(s for s in text.replace("?", "?|").replace(".", ".|").replace("!", "!|").split("|") if s.strip()):
             self._api._broadcast("audio_chunk", {"id": record["id"], "index": index, "sentence": sentence.strip()})      # spoken with the repair of REQ-CHA-014 (REQ-CHA-047)
+        if kind == "question":
+            self._line(run, self.WAITING)                                    # REQ-CHA-070; the mock knows no ended run, so it always sends it
         self._forward()
         return {"id": record["id"]}
 
