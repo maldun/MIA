@@ -20,7 +20,7 @@ No `chat_run_status` is in the log, the history or the speech (TC-CHA-073, green
 1. The line stays last while new messages arrive (say another message during the run), is replaced in place, and disappears when the summary comes.
 2. The link `Skill run view` on the line opens the run view.
 3. Wording and look of the line (italic, muted). The texts `working` and `waiting for your answer` are English only so far (i18n of these two is open).
-4. Plausibility of the six requirements REQ-CHA-068 to 071, REQ-CLV-053, 054: they are met by this prototype except the browser check of the DOM order (not run headless by me: no browser available in this session).
+4. Plausibility of the six requirements REQ-CHA-068 to 071, REQ-CLV-053, 054: they are met by this prototype; the DOM order was checked in headless Chromium (`tests/test_run_line_browser.py`: the line stays last while a second message and its answer arrive mid-run, one line at a time, gone with the end message as the last row) and on a fake DOM (`tests/js/run-line-page.test.mjs`).
 
 ## Known gaps
 - `TC-CLV-021` (every socket event of the page is named in IF-101) is red until the contract text of `IF-101-change.md` is applied.

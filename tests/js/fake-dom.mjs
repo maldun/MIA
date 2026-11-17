@@ -43,6 +43,7 @@ export class FakeElement {
   }
 
   get children() { return this.childNodes.filter((n) => n.nodeType === 1); }
+  get isConnected() { return Boolean(this.parentElement); }      // enough for the code under test: attached to some parent
   get textContent() { return this._html !== undefined ? this._html.replace(/<[^>]*>/g, '') : this.childNodes.map((n) => n.textContent).join(''); }
   set textContent(text) { this._clear(); if (text !== '' && text !== undefined && text !== null) this.append(String(text)); }
   set innerHTML(html) { this._clear(); this._html = String(html); }
