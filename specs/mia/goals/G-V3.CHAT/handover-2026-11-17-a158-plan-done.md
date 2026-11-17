@@ -13,7 +13,7 @@ The owner (2026-11-17, questionnaires): the status card is superseded by the Ski
 - `7a750eea`, `907ef3fa` patches for the protected files and `amendment-a158/apply.sh`; IF-201 v4 notes.
 - `cd4c6e1a` `tests/js/run-line.test.mjs` (red).
 - `8db7aa54` tasks T-07 to T-09, draft review-log lines.
-- The owner ran `apply.sh`: `test-requirements.md` and `tests/acceptance/test_chat_skill_turns.py` (class `LiveLine`) changed in the working tree. **Check `git status`: if they are still uncommitted, the owner commits them** (`git add specs/mia/test-requirements.md tests/acceptance/test_chat_skill_turns.py`).
+- `aa2150b5` (owner) the protected files: `test-requirements.md` and `tests/acceptance/test_chat_skill_turns.py` (class `LiveLine`) applied and committed.
 
 ## Red state to start from
 - `python tests/acceptance/test_chat_skill_turns.py`: 3 `LiveLine` tests red (3 failures, 2 errors); the other 23 green.
