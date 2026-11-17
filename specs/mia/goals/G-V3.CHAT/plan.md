@@ -102,7 +102,7 @@ The stubs carry the interface the installed tests expect; the tasks replace the 
 
 ### T-09: Turns `start` and `answered` from the run (A-158)
 - Implements: REQ-CHA-068 and 070 in the app (IF-201 v4)
-- Tests to turn green: the extended integration check of AC-39 (written outside this session)
+- Tests to turn green: `tests/test_run_line_wiring.py` (unit, written in the task) and the integration check TC-CHA-068 as amended (`amendment-a158/apply-integration.sh`, applied by the owner)
 - Touches: the adapter of G-V3.PANEL T-04 (`skill_run_observer.py` start call), `chat_service.py` at `ask` (the call `answered`), `web_app.py` only if the wiring needs it
 - Must not touch: protected material, the skills
 - Depends on: T-07, T-08, T-06
