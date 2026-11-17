@@ -721,13 +721,16 @@ class ChatService:
             return {"id": None}
         text, spoken = self._turn_text(run, kind, payload)
         if kind in ("done", "failed", "stopped"):
-            self._lines.pop(run, None)
-            self._emit("chat_run_status", {"run": run, "text": None})      # the line goes before the end message, which is then the last thing in the chat (REQ-CHA-069)
+            self._clear_line(run)                                              # the line goes before the end message, which is then the last thing in the chat (REQ-CHA-069)
         record = self.post_assistant(text, skill_run=run, kind=kind)
         self._voice(record["id"], spoken)
         if kind == "question":
             self._emit("chat_run_status", {"run": run, "text": WAITING_LINE})      # REQ-CHA-070
         return {"id": record["id"]}
+
+    def _clear_line(self, run):
+        self._lines.pop(run, None)
+        self._emit("chat_run_status", {"run": run, "text": None})      # sent also when no line was shown: the page then has nothing to remove, and a lost line cannot stay
 
     def _phase_line(self, run, kind, payload):
         """the status line of a run (A-158, REQ-CHA-068, 071): an event, no record, no history, no speech. A declared phase that changed gives its name; `start` gives `working` for a run
@@ -850,6 +853,8 @@ class ChatService:
             if monitor is not None:
                 monitor.end_wait()
             self.set_activity("thinking")
+        if reply is not None and self._observer is not None:
+            self._phase_line(self._observer.run, "answered", reply)       # A-158: the phase line again after the answer (REQ-CHA-070)
         return reply
 
     # --- background work ------------------------------------------------------------------------------
@@ -914,8 +919,9 @@ class ChatService:
             self._monitor = TaskMonitor(self._emit_status, message_id, task, mode="slice" if (options or {}).get("slice") else "run")
             if self._recorder is not None:
                 self._observer = SkillRunObserver(self._recorder, message_id, task, entry.version, self._author or "page",
-                                                 phases=self._phases_of(message_id))
+                                                 phases=self._phases_of(message_id), on_phase=lambda text, run=message_id: self._phase_line(run, "phase", text))
                 self._observer.start()
+                self._phase_line(message_id, "start", "")                 # A-158: `working` for a run without declared phases
                 self._monitor.observer = self._observer
             self._monitor.update(phase="starting")
         starter = {"id": message_id, "role": "assistant", "created": created, **({"task": task} if task != "chat" else {}), **({"skill_run": message_id} if self._observer is not None else {})}
@@ -979,6 +985,8 @@ class ChatService:
         else:
             self.set_activity(None)
         result = state["text"]                                                   # the result of the run record is the text without the links of its files
+        if self._observer is not None:
+            self._clear_line(message_id)                                         # A-158, REQ-CHA-069: before the end message, so that it is the last thing in the chat
         summary = None
         if turns and self._observer is not None:
             kind = {"done": "done", "stopped": "stopped"}.get(status, "failed")
