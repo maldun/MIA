@@ -5043,6 +5043,86 @@ plausibility:
       rated: '2026-11-16'
       rated_by: maldun
       rating: plausible
+    REQ-CHA-068:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no real model (proposal
+        of the agent, 2026-11-17, A-158; rated plausible by the owner in the plan gate
+        questionnaire)
+      hardware: HW-target
+      rated: '2026-11-17'
+      rated_by: maldun
+      rating: plausible
+    REQ-CHA-069:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no real model (proposal
+        of the agent, 2026-11-17, A-158; rated plausible by the owner in the plan gate
+        questionnaire)
+      hardware: HW-target
+      rated: '2026-11-17'
+      rated_by: maldun
+      rating: plausible
+    REQ-CHA-070:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no real model (proposal
+        of the agent, 2026-11-17, A-158; rated plausible by the owner in the plan gate
+        questionnaire)
+      hardware: HW-target
+      rated: '2026-11-17'
+      rated_by: maldun
+      rating: plausible
+    REQ-CHA-071:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no real model (proposal
+        of the agent, 2026-11-17, A-158; rated plausible by the owner in the plan gate
+        questionnaire)
+      hardware: HW-target
+      rated: '2026-11-17'
+      rated_by: maldun
+      rating: plausible
+    REQ-CHA-072:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no real model (proposal
+        of the agent, 2026-11-17, A-158; rated plausible by the owner in the plan gate
+        questionnaire)
+      hardware: HW-target
+      rated: '2026-11-17'
+      rated_by: maldun
+      rating: plausible
+    REQ-CLV-053:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no real model (proposal
+        of the agent, 2026-11-17, A-158; rated plausible by the owner in the plan gate
+        questionnaire)
+      hardware: HW-target
+      rated: '2026-11-17'
+      rated_by: maldun
+      rating: plausible
+    REQ-CLV-054:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no real model (proposal
+        of the agent, 2026-11-17, A-158; rated plausible by the owner in the plan gate
+        questionnaire)
+      hardware: HW-target
+      rated: '2026-11-17'
+      rated_by: maldun
+      rating: plausible
+    REQ-CLV-055:
+      basis:
+      - no number, measurement or model quality depends on it; the behaviour is fixed
+        by an exact acceptance criterion on a scripted run, no real model (proposal
+        of the agent, 2026-11-17, A-158; rated plausible by the owner in the plan gate
+        questionnaire)
+      hardware: HW-target
+      rated: '2026-11-17'
+      rated_by: maldun
+      rating: plausible
     REQ-CHA-048:
       basis:
       - no number, measurement or model quality depends on it; the behaviour is fixed

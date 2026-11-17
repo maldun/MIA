@@ -19,6 +19,7 @@ class ChatTurnMock:
         self._observer = self._sessions["ben"]
         self._api.connect(self._observer)
         self._callbacks = []
+        self._ended = set()                                                   # v4 (A-158): the runs that ended; a late question of one gets no line
         self._lines = {}                                                      # v4 (A-158): the status line of each run
         self._api.events(self._observer)
 
@@ -104,14 +105,15 @@ class ChatTurnMock:
             text = "The run was stopped (%s).%s" % (payload, link)
         if kind in ("done", "failed", "stopped"):
             self._lines.pop(run, None)
+            self._ended.add(run)
             self._line(run, None)                                            # the line goes before the end message (REQ-CHA-069)
         record = self._api._record("assistant", "MIA", text)
         record["skill_run"], record["kind"] = run, kind
         self._api._broadcast("chat_message", record)
         for index, sentence in enumerate(s for s in text.replace("?", "?|").replace(".", ".|").replace("!", "!|").split("|") if s.strip()):
             self._api._broadcast("audio_chunk", {"id": record["id"], "index": index, "sentence": sentence.strip()})      # spoken with the repair of REQ-CHA-014 (REQ-CHA-047)
-        if kind == "question":
-            self._line(run, self.WAITING)                                    # REQ-CHA-070; the mock knows no ended run, so it always sends it
+        if kind == "question" and run not in self._ended:
+            self._line(run, self.WAITING)                                    # REQ-CHA-070; a question after the end of its run leaves no line, as in the real service
         self._forward()
         return {"id": record["id"]}
 

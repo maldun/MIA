@@ -326,5 +326,25 @@ class SkillTurnContract(unittest.TestCase):
                 self.assertEqual(order, [("chat_run_status", "screening"), ("chat_run_status", None), ("chat_message", kind)])
 
 
+    @mark.req("IF-201", "REQ-CHA-070")
+    @each_provider(IF, make(phases=("screening",)))
+    def test_a_late_question_of_an_ended_run_gets_no_line(self, chat):
+        """TC-IF-201-16 (v4): a question that arrives after the end of its run is a message and gets no line `waiting for your answer`.
+        Example: screening, done, then the question "Which period?" -> the message, no line after it."""
+        # Given: a run that has ended, and a subscriber
+        seen = []
+        chat.subscribe(seen.append)
+        chat.skill_turn("anna", "r1", "phase", "screening")
+        chat.skill_turn("anna", "r1", "done", "All done.")
+        chat.settle()
+        first = len(seen)
+        # When: a question of that run arrives late
+        ack = chat.skill_turn("anna", "r1", "question", "Which period?")
+        # Then: it is a message and no line follows it
+        chat.settle()
+        self.assertTrue(ack["id"])
+        self.assertEqual([e["event"] for e in seen[first:] if e["event"] in ("chat_message", "chat_run_status")], ["chat_message"])
+
+
 if __name__ == "__main__":
     unittest.main()
