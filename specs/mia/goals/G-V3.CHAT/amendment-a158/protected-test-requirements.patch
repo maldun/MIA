@@ -1,0 +1,20 @@
+--- a/specs/mia/test-requirements.md	2026-11-16 23:39:51.584972355 +0100
++++ b/specs/mia/test-requirements.md	2026-11-17 20:41:16.114304893 +0100
+@@ -170,7 +170,7 @@
+ ## G-V3.PANEL (Plan step 3, 2026-11-08; prefix TR-PANEL-)
+ 
+ ### TR-PANEL-001 – browser checks of layout and size run at fixed window sizes
+-- Applies to: TC-CLV-036, TC-CLV-037, TC-CLV-040, TC-CLV-041, TC-CLV-042, TC-CLV-045, TC-CLV-046, TC-CLV-047, TC-CLV-048, TC-CLV-050, TC-CLV-051, TC-CLV-052
++- Applies to: TC-CLV-036, TC-CLV-037, TC-CLV-040, TC-CLV-041, TC-CLV-042, TC-CLV-045, TC-CLV-046, TC-CLV-047, TC-CLV-048, TC-CLV-050, TC-CLV-051, TC-CLV-052, TC-CLV-053
+ - Requirement: REQ-CLV-040
+ - Group: Layout
+ - Kind: setup
+@@ -316,7 +316,7 @@
+ - History: G-V3.CHAT Plan step 3 (2026-11-08), new
+ 
+ ### TR-CHAT-006 – fake model server for the logic checks
+-- Applies to: TC-CHA-040, TC-CHA-041, TC-CHA-042, TC-CHA-043, TC-CHA-044, TC-CHA-045, TC-CHA-046, TC-CHA-047, TC-CHA-048, TC-CHA-050, TC-CHA-051, TC-CHA-052, TC-CHA-055, TC-CHA-056, TC-CHA-057, TC-CHA-058, TC-CHA-059, TC-CHA-060, TC-CHA-061, TC-CHA-062, TC-CHA-063, TC-CHA-069, TC-CHA-070, TC-CHA-071, TC-CHA-072
++- Applies to: TC-CHA-040, TC-CHA-041, TC-CHA-042, TC-CHA-043, TC-CHA-044, TC-CHA-045, TC-CHA-046, TC-CHA-047, TC-CHA-048, TC-CHA-050, TC-CHA-051, TC-CHA-052, TC-CHA-055, TC-CHA-056, TC-CHA-057, TC-CHA-058, TC-CHA-059, TC-CHA-060, TC-CHA-061, TC-CHA-062, TC-CHA-063, TC-CHA-069, TC-CHA-070, TC-CHA-071, TC-CHA-072, TC-CHA-073, TC-CHA-074, TC-CHA-075
+ - Requirement: REQ-CHA-040
+ - Group: Fakes (CHAT)
+ - Kind: setup
