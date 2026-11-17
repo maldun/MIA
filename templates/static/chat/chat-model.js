@@ -14,7 +14,7 @@ export function emojiFor(emotion) {
 }
 
 /** inserts into a list sorted by id; a message with the same id (or the same client id) is replaced. Returns the index. */
-export function upsert(list, message) {
+export function upsert(list, message, atEnd = false) {
   let index = list.findIndex((m) => m.id === message.id);
   if (index < 0 && message.client_id) index = list.findIndex((m) => m.client_id === message.client_id);
   if (index >= 0) {
@@ -22,7 +22,8 @@ export function upsert(list, message) {
     return index;
   }
   let at = list.length;
-  while (at > 0 && String(list[at - 1].id) > String(message.id)) at -= 1;
+  // a message that arrives live is the newest, whatever its id: the end message of a run keeps the id of the run, which is older than its questions (REQ-WFM-036)
+  while (!atEnd && at > 0 && String(list[at - 1].id) > String(message.id)) at -= 1;
   list.splice(at, 0, message);
   return at;
 }

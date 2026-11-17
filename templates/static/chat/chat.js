@@ -208,8 +208,8 @@ export function initChat({ list, empty, jump, olderButton, socket, render, t, or
     }
   }
 
-  function place(message) {
-    const index = upsert(messages, message);
+  function place(message, atEnd = false) {
+    const index = upsert(messages, message, atEnd);
     const stored = messages[index];
     let row = rows.get(stored.id);
     if (!row && stored.client_id) {
@@ -368,7 +368,7 @@ export function initChat({ list, empty, jump, olderButton, socket, render, t, or
   function streaming(id) {
     let message = messages.find((m) => m.id === id);
     if (!message) {
-      message = place({ id, role: 'assistant', text: '', streaming: true, created: new Date().toISOString(), status: 'done' });
+      message = place({ id, role: 'assistant', text: '', streaming: true, created: new Date().toISOString(), status: 'done' }, true);
       afterAdd(message, true);
     }
     return message;
@@ -389,7 +389,7 @@ export function initChat({ list, empty, jump, olderButton, socket, render, t, or
 
   socket.on('chat_start', (data) => {
     moveQueue();
-    const placed = place({ id: data.id, role: 'assistant', text: '', streaming: true, created: data.created, status: 'done' });
+    const placed = place({ id: data.id, role: 'assistant', text: '', streaming: true, created: data.created, status: 'done' }, true);
     afterAdd(placed, true);
   });
   socket.on('chat_delta', (data) => {
