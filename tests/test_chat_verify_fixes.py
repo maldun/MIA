@@ -197,6 +197,18 @@ class WebAppWiring(unittest.TestCase):
         self.assertEqual(ast.unparse(sets[0].value), "chat_service.model_history")
         self.assertIn("digest=LiveDigest(", open(os.path.join(REPO, "web_app.py"), encoding="utf-8").read())
 
+    @mark.req("REQ-CHA-067")
+    def test_the_voice_rule_of_the_tasks_asks_the_service_for_end_messages(self):
+        """A-156, verify finding: the `speaker` the tasks get from web_app.py passes `end_messages=chat_service.has_end_messages()` to speaker_for.
+        Example: the source holds speaker=lambda task: speaker_for(cfg, task, speak_answer, end_messages=chat_service.has_end_messages())."""
+        # Given: the source of web_app.py (importing it would start the app)
+        tree = ast.parse(open(os.path.join(REPO, "web_app.py"), encoding="utf-8").read())
+        # When: the calls of speaker_for are read
+        calls = [n for n in ast.walk(tree) if isinstance(n, ast.Call) and getattr(n.func, "id", None) == "speaker_for"]
+        # Then: the one call hands the answer of the service
+        self.assertEqual(len(calls), 1)
+        self.assertEqual({k.arg: ast.unparse(k.value) for k in calls[0].keywords}, {"end_messages": "chat_service.has_end_messages()"})
+
 
 def step_saying(*texts):
     replies = list(texts)
@@ -663,6 +675,18 @@ class RunSpeaksOnce(unittest.TestCase):
         # When / Then: only the first has end messages
         self.assertTrue(with_digest.has_end_messages())
         self.assertFalse(plain.has_end_messages())
+
+    @mark.req("REQ-CHA-067")
+    def test_a_recorder_without_a_digest_step_leaves_the_voice_to_the_skill(self):
+        """A-156, verify finding: without a digest step there is no end message, so the skill must keep its voice (else the run would be silent).
+        Example: a service with a recorder and no digest step -> has_end_messages() is False."""
+        # Given: a service with a recorder but no digest step
+        folder = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, folder, True)
+        recorder = SkillRunRecorder(FakeSkillRunStorage(), lambda event, payload: None)
+        chat = ChatService(lambda event, payload: None, ChatLog(os.path.join(folder, "log.jsonl")), MoodTracker(os.path.join(REPO, "moods.json")), lambda *args: "", spawn=lambda target: target(), recorder=recorder)
+        # When / Then: no end message is announced
+        self.assertFalse(chat.has_end_messages())
 
     @mark.req("REQ-CHA-067")
     def test_a_run_through_the_chat_is_spoken_once_by_its_end_message(self):
