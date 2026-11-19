@@ -8,12 +8,14 @@ Errors are WorkflowLibraryError with the codes of contracts/IF-203-workflow-libr
 """
 try:
     from .storage import StorageError
-    from . import context_graph
+    from . import context_graph, snapshot_store
 except ImportError:
     from storage import StorageError
     import context_graph
+    import snapshot_store
 
 KINDS = ("skills", "workflows", "context_graphs", "transforms")
+SNAPSHOTS = "snapshots"          # IF-302 v14: the records of the snapshots; an internal kind of the library, not one of KINDS (the graph API offers only KINDS)
 POINTER = "current_versions"          # IF-302 v13: one record per "<kind>/<id>", {"version", "reason"}; an item without a record reads as its newest version
 STATUSES = ("draft", "tested", "trusted", "retired")
 NEEDS = ("specification", "benchmark")
@@ -48,6 +50,11 @@ class TableMeta:
         self._storage.put(self.TABLE, record_id, dict(meta, status=meta.get("status", "draft")), author)
 
 
+class _Accounts:
+    def __init__(self, is_owner):
+        self.is_owner = is_owner
+
+
 def _storage_call(call, *args, **kw):
     try:
         return call(*args, **kw)
@@ -56,14 +63,20 @@ def _storage_call(call, *args, **kw):
 
 
 class WorkflowLibrary:
-    def __init__(self, storage, costs=None, meta=None):
+    def __init__(self, storage, costs=None, meta=None, is_owner=None, pins=None):
         # costs: node id -> {"seconds", "calls", "tokens"} as measured by the runs (IF-202), or a function that gives them
+        # is_owner: account -> bool, the account that creates accounts (REQ-WFM-066); without it nobody is the owner and every snapshot call is `forbidden`
+        # pins: the model pins in force (eval-spec.md) as stored in a snapshot; a mapping or a function that gives it
         self._storage, self._meta = storage, meta or TableMeta(storage)
         self._costs = costs if callable(costs) else (lambda: costs or {})
+        self._is_owner = is_owner or (lambda account: False)
+        self._pins = pins if callable(pins) else (lambda: dict(pins or {}))
+        self.fail_set_current_version_at = None      # test seam (TC-IF-203-17): the n-th pointer move of a snapshot restore fails once with `unavailable`
+        self._restore_moves = None
 
     @staticmethod
     def _kind(kind):
-        if kind not in KINDS:
+        if kind not in KINDS + (SNAPSHOTS,):
             raise WorkflowLibraryError("not_found", detail=kind)
 
     def list_ids(self, kind):
@@ -124,6 +137,11 @@ class WorkflowLibrary:
 
     def set_current_version(self, kind, record_id, version, author):
         self._kind(kind)
+        if self._restore_moves is not None:
+            self._restore_moves += 1
+            if self._restore_moves == self.fail_set_current_version_at:
+                self.fail_set_current_version_at = None      # once: the way back of the restore must not fail again
+                raise WorkflowLibraryError("unavailable", detail="injected")
         newest = self._newest(kind, record_id)
         if not newest:
             raise WorkflowLibraryError("not_found", detail=record_id)
@@ -135,6 +153,42 @@ class WorkflowLibrary:
     def history(self, kind, record_id):
         self._kind(kind)
         return _storage_call(self._storage.history, kind, record_id)
+
+    # --- snapshots (IF-203 v2, A-121, A-161; REQ-WFM-061 to 066): the work is the SnapshotStore's, this maps its errors to the codes of the contract ---
+
+    def pins(self):
+        return self._pins()
+
+    def _snapshots(self):
+        return snapshot_store.SnapshotStore(self, _Accounts(self._is_owner))
+
+    def _snapshot_call(self, call, *args):
+        try:
+            return call(*args)
+        except snapshot_store.Conflict as err:
+            raise WorkflowLibraryError("conflict", detail=str(err)) from err
+        except snapshot_store.Refused as err:
+            raise WorkflowLibraryError("forbidden", detail=str(err)) from err
+        except snapshot_store.NotFound as err:
+            raise WorkflowLibraryError("not_found", detail=str(err)) from err
+        except ValueError as err:
+            raise WorkflowLibraryError("invalid", rule="schema", detail="name") from err
+
+    def snapshot(self, name, account):
+        return self._snapshot_call(self._snapshots().snapshot, name, account)
+
+    def read_snapshot(self, name):
+        return self._snapshot_call(self._snapshots().read_snapshot, name)
+
+    def list_snapshots(self, account):
+        return self._snapshot_call(self._snapshots().list_snapshots, account)
+
+    def restore_snapshot(self, name, account):
+        self._restore_moves = 0
+        try:
+            return self._snapshot_call(self._snapshots().restore_snapshot, name, account)
+        finally:
+            self._restore_moves = None
 
     def diff(self, kind, record_id, a, b):
         old, new = self.read(kind, record_id, a)["doc"], self.read(kind, record_id, b)["doc"]
