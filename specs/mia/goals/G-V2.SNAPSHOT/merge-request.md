@@ -1,7 +1,7 @@
 ## G-V2.SNAPSHOT: snapshots of the skill set, real provider, owner and pins (DRAFT, not for merge before the reports are signed)
 
 **Goal:** G-V2.SNAPSHOT (subgoal of G-V2; supervised)   **Branch:** goal/v2.snapshot-prod → master (G-V2 has no `goal/v2` branch; its subgoals went into master, as STORE, MODEL, TOOLBOX and CONVERT did)
-**Accepted by:** [ ] maldun (owner: mark with an X; also the Agreement row in `goals/G-V2.SNAPSHOT/goal.md`)
+**Accepted by:** [X] maldun (owner: mark with an X; also the Agreement row in `goals/G-V2.SNAPSHOT/goal.md`)
 **TLS:** specs/mia/top-level-spec.md (FR-47)   **HLS:** specs/mia/high-level-spec.md
 **Goal record:** specs/mia/goals/G-V2.SNAPSHOT/goal.md
 **Plan:** specs/mia/goals/G-V2.SNAPSHOT/plan.md (T-SN-01)
