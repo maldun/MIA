@@ -115,3 +115,38 @@ These fixes came after both review rounds. No reviewer has seen them. The status
 Re-run by the implementer on `eeef2346`: `tests/test_storage_postgres.py` 43 of 43 OK; whole suite 2499 tests, only the 2 known `test_task_files_browser` failures (also on master).
 
 Owner decisions (maldun, 2026-11-19): F-02, F-05, F-06, F-07, F-10, F-11 accepted; F-01, F-03, F-04, F-08, F-09 fixed. The condition of round 2 (close F-08) is met by the implementer's claim above; a reviewer has not confirmed it.
+
+## Sign-off
+Verdict: Verified with accepted deviations (rounds 1 to 3, commits b660b282 to eeef2346)
+Accepted deviations: F-02, F-05, F-06, F-07, F-10, F-11
+Fixed: F-01, F-03, F-04, F-08, F-09 (F-01, F-08, F-09 re-checked in round 3)
+Signed: maldun, 2026-11-19
+
+## Third round (2026-11-19, fresh reviewer, commits 32fc1873, 42043f16, eeef2346)
+
+**Verdict for these three commits: Verified.** F-01, F-08 and F-09 are fixed as claimed; no new finding of medium or higher severity. One info note (N-1) on the file backend. Reviewed in a detached worktree at `eeef2346` (removed afterwards); nothing else was touched.
+
+### Evidence
+1. **F-01 (written once, atomic, race).**
+   - `_put` passes `expected_version=0` to `Storage.put` only for kind `snapshots` (`workflow_library.py:149`). `Storage.put` (`storage.py:179`) checks it under the process lock and raises `StorageError("conflict")` before `backend.append`; `_storage_call` maps it to `WorkflowLibraryError("conflict")`. `_move` (the pointer) comes after the put, so on a conflict `current_versions` is not moved.
+   - Postgres backend: `append` turns `UniqueViolation` into `conflict` too (`storage_postgres.py:63`), so the guard holds across processes there. Files backend: guard holds inside one process (see N-1).
+   - Real race, two threads, barrier right after the name check (`list_ids("snapshots")`), same Storage: files backend gave one `ok` and one `WorkflowLibraryError conflict {'current': 1}`, history 1, pointer 1. Same on a throwaway Postgres 16 (podman). With the guard removed the same script gave two `ok`, history 2 (the bug is real, the fix cures it).
+   - Two Storage instances (two connections) racing on Postgres: one `ok`, one `conflict`, history 1, pointer 1. On the files backend with two Storage instances (as two processes would be): both `ok`, history 1 (lost update), see N-1.
+   - Only `SnapshotStore._write` writes kind `snapshots` (grep over non-test code), so no other write is affected; the restore name "before restore of X" with " (2)" is unchanged (`restore_snapshot` takes the free name from `list_ids`, then `_write`) and the restore tests and contract suites are green. Ordinary kinds: `test_f01_a_new_version_of_an_ordinary_item_is_still_allowed` plus `test_library_pointer`, `test_graph_api` and the IF-203 suites green.
+   - Mutants (own worktree, restored with `git checkout`): `expected_version=0` removed: killed by `test_f01_a_snapshot_is_written_once...` (10 tests, 1 failure) and by my race script (two `ok`). `expected_version=0` for all kinds: killed by 2 errors in test_library_snapshots (the ordinary-kind test and the contract/other tests); test_snapshot_store alone stays OK, as expected. None survived. The test is a real regression test: it hides the existing snapshot from the name check and requires `conflict`, one history entry and an unchanged record.
+2. **F-08.** `owner_account: ""` is in `setup_cfg.example.json`, `deploy/setup_cfg.compose.json` and described in `deploy/README.md`. The description matches `accounts.py` (`is_owner`, lines 80 to 88): empty or non-text entry means the first account; a non-empty text always wins, also for a name with no account (then nobody is owner). `tests/test_config.py` 14 OK, `tests/test_deploy.py` 19 OK, `tests/test_owner_account.py` 7 OK.
+3. **F-09.** `test_f09_every_kind_of_malformed_stored_snapshot...` covers items not a list, items missing, unknown kind, non-text id, version "1", version True, item not a mapping, and checks state and snapshot names unchanged. Mutants of `_check_items`, each killed only by this test (test names checked): no list check, no id check, no kind check, `isinstance(..., int)` instead of `type(...) is int` (kills the bool case), no version check, no dict check; also no trust/lifecycle check for transforms (killed). **No survivor.**
+4. **Rest of the diff (`693a5c48..eeef2346`).** Seven files: three config/doc files, two test files, `workflow_library.py` (one line), implementation log. No change in `tests/acceptance/`, `tests/helpers/`, `tests/smoke/`, `benchmarks/`, `contracts/`, `eval/` (diff stat empty for these paths). No wrong error code found: second write is `conflict` (A-121 meaning), not `unavailable` or `invalid`. The comment in `snapshot_store._write` ("nothing else changes a snapshot") is now backed by the storage guard.
+5. **Re-run (venv mia312, detached worktree at `eeef2346`, clean `git status`).** test_library_snapshots 10, test_snapshot_store 8, test_config 14, test_deploy 19, test_owner_account 7, test_library_pointer 7, test_graph_api 10, IF-203 v2 16, IF-203 workflow library 8, IF-302 record tables 24: all OK. `tests/test_storage_postgres.py`: 43 OK (own throwaway postgres, no other podman job at that time). Whole suite: 2499 tests, 781 s, 2 failures (both `test_task_files_browser`, 4 skipped, 2 expected failures); the same 2 tests fail on `master` (run in my worktree at master). Not run: `tools/contract_postgres.sh` (not requested), the traceability and SysML checks (no spec or model change in these commits), any real model job.
+
+### Mutants
+Run: 2 on `_put` (guard removed; guard for all kinds) and 8 on `_check_items` (list, id, kind, int/bool looseness, version, dict, trust). Survived: none. (The all-kinds mutant is killed only by the ordinary-kind test, which confirms that test is needed.)
+
+### New findings
+| ID | Severity | Finding | Test that would pin it |
+|---|---|---|---|
+| N-1 | info | The file backend's `append` is read-modify-write without a cross-process lock; two processes on one data folder can both pass `expected_version=0` and the second overwrites the first (two Storage instances raced: both `ok`, history 1). Not a regression (same for the accounts guard F3), Postgres is safe, a single process is safe. Matters only if two MIA processes share a file store. | none now; if wanted, a two-Storage race test on the file backend (would need a file lock in `storage_files.py`, a new change, not in scope) |
+
+### For a human
+- Sign off on F-01, F-08, F-09 as fixed; N-1 is a note (accept or open a goal for a file lock).
+- `merge_gate.py --approved-by` and the merge are yours. Still open from earlier rounds: no HTTP route calls the snapshot operations; real start of `web_app.py` with the two new lines not run.
