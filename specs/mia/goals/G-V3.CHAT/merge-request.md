@@ -80,3 +80,21 @@ Not rewritten: the branch is pushed. It has the task commits (T-01 to T-06), the
 cd /home/maldun/prog/Python/MIA && git switch master && git merge --no-ff goal/v3.chat -m "Merge goal/v3.chat: G-V3.CHAT spoken-only chat with the digest step (REQ-BE-078, REQ-CHA-040 to 066, A-150 to A-153, D-339)"
 ```
 Then the status update on a branch of its own (Status lines only, no History lines): REQ-BE-078, REQ-WFM-036, REQ-CHA-008, 014, 040 to 066 from Draft or Approved to Verified, except where the owner says otherwise (see "Known issues"), the Phases row Commit of G-V3.CHAT, and the TD-85 status line.
+
+---
+
+## Follow-up after the merge `8b8bd2a`: A-156, A-158, A-160 (built on `master`, no branch, no new merge)
+`goal/v3.chat` is stale (one handover file that `master` lacks); the three amendments were planned, built and verified on `master` and pushed. The status of the 14 requirements below is Verified (`e18acf9d`). No version (subgoal of G-V3).
+
+| Amendment | What changes for the user | Requirements | Verification |
+|---|---|---|---|
+| A-156 (FB-09, owner 2026-11-16) | a skill run speaks once: no chat message per phase (phases stay in the run status), the skill has no voice of its own where the run has an end message | REQ-CHA-041 (changed), REQ-CHA-067 (new) | REQ-CHA-041 in `verification-report-a158.md`; REQ-CHA-067 in `verification-report-req-cha-067.md` (two test gaps found and closed) |
+| A-158 (owner 2026-11-17) | live status line of a run, last element of the chat, transient, restored after a question | REQ-CHA-068, 069, 070, 071, 072; REQ-CLV-053, 054, 055 | `verification-report-a158.md` (pass with findings, fixed) |
+| A-160 (owner 2026-11-18) | the end message is bounded (1024 tokens per digest call, shortened once if over 1200 characters), Stop ends it with a plain sentence, the line stays until the text is ready, the review returns a short result | REQ-CHA-069 (clarified), 073, 074, 075; REQ-WFM-142 | `verification-report-a160.md` with the verification matrix (no findings) |
+
+**Contracts:** IF-101 v19 and IF-201 v4 installed (A-158, `d962ed27`). Known gap: IF-201 `done` and the IF-101 field `result` still say "the full result" while the review sends a short one (owner: no rewording).
+**Checks (2026-11-19, clean worktree of `master`):** protected `test_end_message.py` 5 of 5; JS 186 of 186; full unit suite 2468 run, 2 failures, both `test_task_files_browser` (known); `check_sysml_model.py` OK; `trace_check.py`: no error for these requirements, two warnings (REQ-CHA-071, REQ-CLV-055: no marker, F-08 of the A-158 report).
+**Agent changes:** digest step version 7 to 8 (A-160: `options` with `num_predict` 1024, task `shorten`, `DigestStopped`); prompt text unchanged; pin MP-light `gemma4:12b-it-qat` unchanged. **No eval run exists for version 8** (see open items); holdout decisions of the table above stand for the prompt, not for version 8. No new baseline (subgoal).
+**Known issues:** F-04 of the A-158 report (the status line is not restored after a page reload, accepted as not now, D-344); not measured: calls and seconds of the end message with the short result; the transcript review by a person of the A-160 verification is open.
+**Open before the iteration goal:** (1) dev run of EV-skill_turns for version 8 as feedback (`python tools/eval.py run skill_turns --pin <MP-id> --repeats 3`, never the holdout; tell a running session first); (2) the 14 112-character end message of the first real `/review` (run `01794952818010348-121f`, local only) is proposed as an eval case and labelled by a person.
+

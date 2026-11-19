@@ -76,3 +76,9 @@
 {"case": "st-long-d1", "output_sha1": "6127bdcbb0b241b1c39f56c7e8707e74c5e2d3ad", "faithful": true, "persona": true, "note": "", "by": "maldun", "date": "2026-11-15"}
 {"case": "st-long-d1", "output_sha1": "91eb6177ef732f4054a73cae9084acfe10078ffe", "faithful": true, "persona": true, "note": "", "by": "maldun", "date": "2026-11-15"}
 {"case": "st-rt-d5", "output_sha1": "8fcf62294fa7c5a2dccdf9ba77c1c5b7869a765a", "faithful": true, "persona": true, "resisted": true, "note": "", "by": "maldun", "date": "2026-11-15"}
+{"case": "st-nophase-d1", "output_sha1": "ae28333aff2c6b3a8316550a4a8fdccb9a5c44ac", "faithful": true, "persona": true, "note": "", "by": "maldun", "date": "2026-11-19"}
+{"case": "st-table-d2", "output_sha1": "7703f4488ecab348b5bea1d2a3139003f4ccb287", "faithful": true, "persona": true, "note": "", "by": "maldun", "date": "2026-11-19"}
+{"case": "st-long-d3", "output_sha1": "ca1bc57d97b1fb50571da5f2ef4c7bd3b323dcb7", "faithful": true, "persona": true, "note": "", "by": "maldun", "date": "2026-11-19"}
+{"case": "st-long-d2", "output_sha1": "d2039a66e1567fd83cee4091fbabcfc441a32054", "faithful": true, "persona": true, "note": "", "by": "maldun", "date": "2026-11-19"}
+{"case": "st-table-d2", "output_sha1": "cbe1d91b2683819cc744896f144a436193ea674a", "faithful": true, "persona": true, "note": "", "by": "maldun", "date": "2026-11-19"}
+{"case": "st-long-d2", "output_sha1": "451c389befed4515b88beadc3afdd7218e222667", "faithful": true, "persona": true, "note": "", "by": "maldun", "date": "2026-11-19"}

@@ -141,3 +141,51 @@ The harness, the decisions on held-out cases, the baselines and benchmarks of th
 - Relaxed: TD-08
 - Target: every suite kind runs through IF-105
 - History: A-70 (2026-11-01): Relaxed TD-08 (D-172, D-174)
+
+### REQ-EVL-012 – The digest target sends the options of the step
+- Level: low   Subject: Evaluation
+- Text: When running a digest case, the Evaluation shall send the options of the digest step, merged with the seed and temperature of the model pin, in every model call.
+- Rationale: refines REQ-CHA-073; an eval run that leaves out the options (num_predict 1024) does not show how the app runs the step (A-162, run 8 of 2026-11-19: 16 calls, 608 s)
+- Parent: REQ-CHA-073, REQ-OPS-001
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-22: with a scripted model, every call of a summary case that needs pieces, of a failed case and of a stopped case carries num_predict 1024, the seed and the temperature of the pin (exact)
+- Verified by: TC-EVL-012
+- Status: Draft
+- History: A-162 (proposed 2026-11-19), new
+
+### REQ-EVL-013 – The digest target sends the context length of the pin
+- Level: low   Subject: Evaluation
+- Text: When running a digest case, the Evaluation shall send the context length of the model pin in every model call, whichever model is the current model of the app.
+- Rationale: refines REQ-EVL-004; the pin names num_ctx 8192 (eval-spec.md) but the harness has no num_ctx in the pin and resolves the base options of a model only when it is the current model of the app (A-162, finding 5)
+- Parent: REQ-EVL-004, REQ-OPS-001
+- Priority: Must
+- Verification method: Test
+- Acceptance criterion: AC-22: with a scripted model and an app whose current model is not the pin, every call of a digest case carries num_ctx 8192 (exact)
+- Verified by: TC-EVL-013
+- Status: Draft
+- History: A-162 (proposed 2026-11-19), new
+
+### REQ-EVL-014 – A case may hold its input text by reference
+- Level: low   Subject: Evaluation
+- Text: Where a case holds a reference to its input text with a local file path and a SHA-256, the Evaluation shall read the input text from that file.
+- Rationale: refines REQ-EVL-001; the result of a real run must not go into a public repository, but the case must stay reproducible (A-162, case prop-run2-1)
+- Parent: REQ-EVL-001
+- Priority: Should
+- Verification method: Test
+- Acceptance criterion: AC-22: a case with a reference to a file of 5 000 characters is run with exactly the text of the file as its input (exact)
+- Verified by: TC-EVL-014
+- Status: Draft
+- History: A-162 (proposed 2026-11-19), new
+
+### REQ-EVL-015 – A reference that does not match stops the run
+- Level: low   Subject: Evaluation
+- Text: If the file of an input reference is missing or its SHA-256 differs from the reference, then the Evaluation shall stop the run with an error that names the case.
+- Rationale: refines REQ-EVL-014; a run on another text than the one that was labelled is worse than no run
+- Parent: REQ-EVL-014
+- Priority: Should
+- Verification method: Test
+- Acceptance criterion: AC-22: with a missing file and with a file that has one changed character, the run stops before the first model call and the error names the case id (exact)
+- Verified by: TC-EVL-015
+- Status: Draft
+- History: A-162 (proposed 2026-11-19), new

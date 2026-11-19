@@ -107,7 +107,7 @@ Requirements on the checks of `test-spec.md` (M41): under which conditions a ver
 | 15 | Exact values (TOOLBOX) | IDs, versions, statuses and refusals (G-V2.TOOLBOX) | TR-TOOLBOX-005 |
 | 16 | Exact values (CHAT) | The expected messages, statuses and per-rule figures of the older checks of the chat (G-V3.CHAT) | TR-CHAT-011 |
 | 9 | Eval setup (CHAT) | Pin, holdout, labels, hard checks and error rates of EV-skill_turns (G-V3.CHAT) | TR-CHAT-001, TR-CHAT-002, TR-CHAT-003, TR-CHAT-004, TR-CHAT-005, TR-CHAT-007, TR-CHAT-008 |
-| 10 | Fakes (CHAT) | The fake model server (G-V3.CHAT) | TR-CHAT-006, TR-CHAT-009 |
+| 10 | Fakes (CHAT) | The fake model server (G-V3.CHAT) | TR-CHAT-006, TR-CHAT-009, TR-CHAT-012 |
 | 8 | Exact values (PANEL) | Names, states, orders and figures (G-V3.PANEL) | TR-PANEL-006 |
 
 ### TR-MODEL-001 – storage stand-in is a minimal fake with a known gap
@@ -338,6 +338,18 @@ Requirements on the checks of `test-spec.md` (M41): under which conditions a ver
 - Verified by: tag rt:RT-nnn on each case
 - Status: Draft
 - History: G-V3.CHAT Plan step 3 (2026-11-08), new
+
+### TR-CHAT-012 – the scripted model of the digest target takes the arguments of the real model
+- Applies to: TC-EVL-012, TC-EVL-013, TC-EVL-014, TC-EVL-015
+- Requirement: REQ-EVL-012
+- Group: Fakes (CHAT)
+- Kind: setup
+- Text: The scripted model of the digest target checks shall take the same arguments as `OllamaModel.chat` (messages, schema, model, profile, options) and fail on an unknown argument.
+- Rationale: stand-in fidelity: a change of the signature of the real model must break these checks
+- Credibility aspect: stand-in fidelity
+- Verified by: a signature check in the test itself
+- Status: Draft
+- History: A-162 (2026-11-19), new
 
 ## G-V2.TOOLBOX (Plan step 3, 2026-11-08; prefix TR-TOOLBOX-)
 

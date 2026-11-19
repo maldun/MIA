@@ -101,7 +101,7 @@ Top-level items it serves: FR-35, FR-46 (the chat part), FR-3 (the spoken short 
 | Plan | done | requirements, checks and `plan.md` approved (D-303, A-142), red tests installed, contract changes IF-201 v3 (A-142), later A-150 to A-153 |
 | Implement | done | T-01 to T-06 done, the log is `implementation-log.md` |
 | Verify | done | `verification-report.md` and `verification-report-run2.md` to `-run5.md`: five runs by fresh reviewers; F-33 to F-35 of the fifth fixed in code and accepted as deviations without a sixth run (D-339, TD-85); holdout of EV-skill_turns decided 2026-11-16: REQ-CHA-049, 053, 054 PASS (`holdout-decision.md`) |
-| Commit | done | master merged into `goal/v3.chat` (`0b4e0de`); merged into master by the owner as `8b8bd2a`; no version (the tag comes with iteration 2) |
+| Commit | done | master merged into `goal/v3.chat` (`0b4e0de`); merged into master by the owner as `8b8bd2a`; no version (the tag comes with iteration 2); follow-up A-156, A-158, A-160 built and verified on `master` without a branch, their 14 requirements Verified (`e18acf9d`), see `merge-request.md` |
 | Deploy | empty | the spoken-only chat is reachable only with the iteration goal; delivered with G-V3 / iteration 2 (check the profile `light` first) |
 | Validate | open | |
 

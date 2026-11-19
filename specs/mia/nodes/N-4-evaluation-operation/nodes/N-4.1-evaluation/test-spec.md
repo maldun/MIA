@@ -21,6 +21,10 @@ Since A-63 (D-164 F6) the tests of TC-EVL-001 to TC-EVL-008 and TC-EVL-011 are p
 | TC-EVL-009 | REQ-EVL-009 | Inspection | 1 | the suites of lookup and verify (and of review when it is promoted) and `agent_check.py` | each has a dev part, a holdout part and a recorded baseline; the A-checks of the agent-app workflow report no error for them | exact |
 | TC-EVL-010 | REQ-EVL-010 | Integration | 3 | the lookup scenario: a question through IF-105 against the mocks (step 0), then against each real node as it is integrated; the library time stamps of the lookup | the answer carries a source and a verbatim quote or unknown; the library holds the time stamps idea and promotion of the lookup | exact |
 | TC-EVL-011 | REQ-EVL-011 | Inspection | 1 | the imports of the harness package; test: `tests/acceptance/test_eval_platform.py` | the harness reaches the platform only through the interface IF-105 (no import of the runner, the library or the stores) | exact |
+| TC-EVL-012 | REQ-EVL-012 | Component | 1 | the digest target with a scripted model that records the keyword arguments of every call; three cases (a summary of 20 000 characters, a failed and a stopped case) | every call carries num_predict 1024, seed 7 and temperature 0 | exact |
+| TC-EVL-013 | REQ-EVL-013 | Component | 1 | the digest target with the same scripted model and an app whose current model is not the pin | every call carries num_ctx 8192 | exact |
+| TC-EVL-014 | REQ-EVL-014 | Component | 1 | a file of 5 000 characters and a case with its path and SHA-256 and no result | the step receives exactly the text of the file | exact |
+| TC-EVL-015 | REQ-EVL-015 | Component | 1 | the case of TC-EVL-014 with the file removed and with one character changed | the run stops with an error that names the case; no model call is recorded | exact |
 
 ## Assumptions and open numbers
 
@@ -101,3 +105,29 @@ Drafted in Phase 3 after Verify F10 (D-164), from the table above and the tests 
 - Given: the source of the harness adapter `eval_platform.py`
 - When: its imports are collected
 - Then: all of them are in the standard library: no runner, library or store
+
+### TC-EVL-012 – The step runs with its own options
+- Verifies: REQ-EVL-012
+- Given: a scripted model that records the keyword arguments of every call, a pin with seed 7 and temperature 0, and three digest cases (a summary of 20 000 characters that needs pieces, a failed case and a stopped case)
+- When: the harness runs the three cases
+- Then: every recorded call carries num_predict 1024, seed 7 and temperature 0
+- And: the first case needs more than one call
+
+### TC-EVL-013 – The step runs with the context length of the pin
+- Verifies: REQ-EVL-013
+- Given: the same scripted model and an app whose current model is another model than the pin
+- When: the harness runs one digest case
+- Then: every recorded call carries num_ctx 8192
+
+### TC-EVL-014 – A case reads its input from a referenced file
+- Verifies: REQ-EVL-014
+- Given: a file of 5 000 characters of known text and a case that holds its path and SHA-256 and no result
+- When: the harness runs the case
+- Then: the step receives exactly the text of the file, compared character by character
+
+### TC-EVL-015 – A reference that does not match stops the run
+- Verifies: REQ-EVL-015
+- Given: the case of TC-EVL-014 once with the file removed and once with one character of the file changed
+- When: the harness runs it
+- Then: the run stops with an error that holds the case id
+- And: the scripted model has recorded no call
