@@ -14,6 +14,11 @@ try:
 except ImportError:  # used as plain script / in tests
     from storage import StorageError
 
+try:
+    from .constants import OWNER_ACCOUNT_KEY
+except ImportError:
+    from constants import OWNER_ACCOUNT_KEY
+
 N, R, P = 2 ** 14, 8, 1          # scrypt: about 16 MiB and tens of milliseconds per check
 KEY_BYTES = 32
 
@@ -62,3 +67,10 @@ def verify(store, name, password):
         return False
     expected = bytes.fromhex(doc["hash"])
     return hmac.compare_digest(_hash(password, bytes.fromhex(doc["salt"]), doc["n"], doc["r"], doc["p"]), expected)
+
+
+def owner_check(cfg):
+    """account -> bool: true only for the account that `owner_account` of the configuration names. An entry that is missing, empty or not a text names nobody,
+    so a missing setting never makes anyone the owner (REQ-WFM-066)."""
+    name = cfg.get(OWNER_ACCOUNT_KEY)
+    return lambda account: isinstance(name, str) and bool(name) and account == name

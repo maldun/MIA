@@ -62,6 +62,7 @@ CHAT_QUEUE_KEY = "chat_queue"                  # how many messages may wait whil
 CHAT_RATE_KEY = "chat_rate_per_minute"         # messages per 60 s of an account (of a connection without accounts), 0 = no limit; 10 by REQ-API-007 (D-149)
 CHAT_TOKEN_KEY = "chat_token"                  # token for deleting the conversation (default: the editor token)
 ACCOUNTS_KEY = "accounts_enabled"              # login, session and logout (N-2.1); off until the other routes are protected too (T-02)
+OWNER_ACCOUNT_KEY = "owner_account"          # the account that creates accounts and so the only one that takes, lists and restores snapshots (REQ-WFM-066)
 ACCOUNTS_DIR_KEY = "accounts_dir"              # the folder of the file storage that holds the accounts
 BEHAVIOURS_FILE_KEY = "behaviours_file"          # the behaviours users can vote on (REQ-CHA-017), default library/behaviours.json
 STRUCTURED_MEMORY_KEY = "structured_memory"    # the structured memory (REQ-CHA-011): off by default; it asks the LIGHT model once after every plain chat turn, so with the full model as chat both would unload each other
