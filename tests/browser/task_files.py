@@ -85,15 +85,16 @@ def files():
         emit(driver, "/review contract")                     # while the dialog is open: the task stores its report and sends files_changed
         until(driver, "document.getElementById('srv-header').textContent.trim() !== ''", 20)     # the review runs and waits for its answer: the Skill run view shows it
         emit(driver, "yes")
-        out["redrawn"] = until(driver, "document.querySelectorAll('#workspace-body ul.files li').length === 2", 20)
+        out["redrawn"] = until(driver, "document.querySelectorAll('#workspace-body ul.files li').length === 3", 20)     # the file of the skill and, since IF-101 v18 (A-154), the report of the run as a file of its own
         out["after"] = driver.execute_script(FILES)
         out["not_reloaded"] = driver.execute_script("return window.notReloaded === true")
         out["controls"] = driver.execute_script("""
             return [...document.querySelectorAll('#workspace-body button, #workspace-body [role=button]')].map((b) => b.textContent);""")
-        out["download"] = driver.execute_async_script("""
+        fetch_file = """
             const done = arguments[arguments.length - 1];
-            fetch(arguments[0]).then(async (r) => done({ status: r.status, disposition: r.headers.get('content-disposition'), body: await r.text() }));""",
-                                                       out["after"][0]["href"])
+            fetch(arguments[0]).then(async (r) => done({ status: r.status, disposition: r.headers.get('content-disposition'), body: await r.text() }));"""
+        out["download"] = driver.execute_async_script(fetch_file, "/api/files/review-contract.md")
+        out["report_download"] = driver.execute_async_script(fetch_file, "/api/files/review-contract-report.md")
         return out
     finally:
         driver.quit()

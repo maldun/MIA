@@ -75,32 +75,36 @@ class FilesInBrowser(unittest.TestCase):
         """TC-CLV-024 (TD-02): the Files tab lists the volume with a link to /api/files/<name> each; a file stored by a task appears at the top
         without a reload (event files_changed) and the older one follows; the link downloads as an attachment.
 
-        Example: [notes-older.txt] -> task ends -> [review-contract.md, notes-older.txt], href /api/files/review-contract.md, status 200.
+        Example: [notes-older.txt] -> task ends -> [review-contract-report.md, review-contract.md, notes-older.txt], href /api/files/review-contract.md, status 200.
         """
         # Given: the run with the Files tab open while a task stored its report
         files = self.results["files"]
         # When / Then: before, the older file only
         self.assertEqual([f["name"] for f in files["before"]], ["notes-older.txt"])
         self.assertEqual(files["before"][0]["href"], "/api/files/notes-older.txt")
-        # and after the event: newest first, no reload, each entry a download link
+        # and after the event: newest first, no reload, each entry a download link; the report of the run is a file of its own (IF-101 v18, A-154)
         self.assertTrue(files["redrawn"] and files["not_reloaded"])
-        self.assertEqual([f["name"] for f in files["after"]], ["review-contract.md", "notes-older.txt"])
-        self.assertEqual([f["href"] for f in files["after"]], ["/api/files/review-contract.md", "/api/files/notes-older.txt"])
+        self.assertEqual([f["name"] for f in files["after"]], ["review-contract-report.md", "review-contract.md", "notes-older.txt"])
+        self.assertEqual([f["href"] for f in files["after"]],
+                         ["/api/files/review-contract-report.md", "/api/files/review-contract.md", "/api/files/notes-older.txt"])
         self.assertTrue(all(f["download"] for f in files["after"]))
         self.assertEqual(files["download"]["status"], 200)
         self.assertIn("attachment", files["download"]["disposition"])
         self.assertEqual(files["download"]["body"], "# the report\n")
+        self.assertEqual(files["report_download"]["status"], 200)
+        self.assertIn("attachment", files["report_download"]["disposition"])
+        self.assertEqual(files["report_download"]["body"], "# Done\n")
 
     @mark.req("REQ-CLV-024")
     def test_the_files_tab_offers_no_way_to_delete(self):
         """TC-CLV-024 (TD-02): the tab has no button or control at all, so no delete.
 
-        Example: controls == [] with two files listed.
+        Example: controls == [] with three files listed.
         """
-        # Given: the Files tab with two files
+        # Given: the Files tab with three files (the older one, the file of the skill and the report of the run)
         files = self.results["files"]
         # When / Then: it has no control that could delete
-        self.assertEqual(len(files["after"]), 2)
+        self.assertEqual(len(files["after"]), 3)
         self.assertEqual(files["controls"], [])
 
 
