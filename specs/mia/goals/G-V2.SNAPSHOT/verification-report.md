@@ -155,10 +155,10 @@ Run: 2 on `_put` (guard removed; guard for all kinds) and 8 on `_check_items` (l
 
 Rounds 1 to 3, commits b660b282 to eeef2346. Round 3 verdict for 32fc1873, 42043f16, eeef2346: Verified.
 
-- [ ] Verdict accepted: Verified with accepted deviations
-- [ ] Deviations accepted: F-02, F-05, F-06, F-07, F-10, F-11
-- [ ] Fixes accepted as closed: F-01, F-03, F-04, F-08, F-09 (F-01, F-08, F-09 re-checked by a reviewer in round 3)
-- [ ] N-1 (info, no cross-process lock in the file backend): accepted as a note
-- [ ] Open point accepted for a later goal: no HTTP route calls the snapshot operations
+- [X] Verdict accepted: Verified with accepted deviations
+- [X] Deviations accepted: F-02, F-05, F-06, F-07, F-10, F-11
+- [X] Fixes accepted as closed: F-01, F-03, F-04, F-08, F-09 (F-01, F-08, F-09 re-checked by a reviewer in round 3)
+- [X] N-1 (info, no cross-process lock in the file backend): accepted as a note
+- [X] Open point accepted for a later goal: no HTTP route calls the snapshot operations
 
-Signed by / date:
+Signed by maldun / date:  19.11.2026
