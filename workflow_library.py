@@ -171,8 +171,10 @@ class WorkflowLibrary:
             raise WorkflowLibraryError("forbidden", detail=str(err)) from err
         except snapshot_store.NotFound as err:
             raise WorkflowLibraryError("not_found", detail=str(err)) from err
-        except ValueError as err:
+        except snapshot_store.InvalidName as err:
             raise WorkflowLibraryError("invalid", rule="schema", detail="name") from err
+        except snapshot_store.Malformed as err:
+            raise WorkflowLibraryError("invalid", rule="schema", detail="snapshot") from err
 
     def snapshot(self, name, account):
         return self._snapshot_call(self._snapshots().snapshot, name, account)

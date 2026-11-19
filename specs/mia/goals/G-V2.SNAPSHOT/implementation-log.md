@@ -34,3 +34,9 @@ Branch `goal/v2.snapshot` from master `c939cc51` (protected tests of A-121 insta
 - Contract: `test_if_203_v2_snapshots` 16 of 16 (TC-IF-203-17 real no longer skipped), `test_if_302_record_tables` 24 of 24. New `tests/test_library_snapshots.py` 6; `tests/test_record_tables.py` set of tables updated.
 - Full unittest run: 2474 tests; failures only the two of `test_task_files_browser` (they fail on master too) and the table set, fixed here. `tests/test_storage_postgres.py` not yet run on this branch (slow podman start): the verifier runs it.
 - Open: the race between the `expected_version` check and the put (see above) is unchanged.
+
+## Verify round 1, F-03 and F-04 (2026-11-19, owner decision: fix F-03 and F-04, accept F-01)
+- F-03: new test `test_f03_the_list_is_oldest_first_by_time_not_by_name` (snapshot "b" before "a", fake clock) kills the mutant that sorts by name. No code change.
+- F-04: `InvalidName` (a `ValueError`) is the only error the library maps to `invalid/schema/name`; other `ValueError`s pass through. A stored snapshot is checked before the first write (`Malformed`: items not a list, kind unknown, id, version, a transform without trust or lifecycle): `invalid/schema/snapshot`, no automatic snapshot, nothing moved. A failure while changing items back is logged and the original error is raised.
+- Tests: `tests/test_snapshot_store.py` 7, `tests/test_library_snapshots.py` 8; IF-203 v2 16, TC-WFM-061 to 066 8, `test_library_pointer` 7, `test_record_tables` 18 green.
+- Not changed: F-01 (accepted candidate, same race class as the documented one), F-02, F-05, F-06, F-07 (left for the owner's decision in the report).

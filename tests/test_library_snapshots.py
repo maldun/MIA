@@ -59,6 +59,30 @@ class LibrarySnapshots(unittest.TestCase):
             lib.snapshot("", "anna")
         self.assertEqual((caught.exception.code, caught.exception.rule), ("invalid", "schema"))
 
+    def test_f04_only_a_bad_name_is_mapped_to_invalid_name(self):
+        import snapshot_store
+        lib = library(is_owner=lambda a: True)
+        original = snapshot_store.SnapshotStore.snapshot
+        snapshot_store.SnapshotStore.snapshot = lambda self, name, account: (_ for _ in ()).throw(ValueError("other"))
+        try:
+            with self.assertRaises(ValueError):          # not turned into invalid/schema/name
+                lib.snapshot("a", "anna")
+        finally:
+            snapshot_store.SnapshotStore.snapshot = original
+
+    def test_f04_a_malformed_stored_snapshot_is_invalid_schema_snapshot(self):
+        lib = library(is_owner=lambda a: True)
+        lib.save("skills", "s", SKILL, "anna")
+        lib.snapshot("a", "anna")
+        doc = lib.read_snapshot("a")
+        doc["items"] = [{"kind": "transforms", "id": "t", "version": 1}]          # a transform without trust and lifecycle
+        lib.save("snapshots", "bad", dict(doc, name="bad"), "anna")
+        before = lib.list_snapshots("anna")
+        with self.assertRaises(WorkflowLibraryError) as caught:
+            lib.restore_snapshot("bad", "anna")
+        self.assertEqual((caught.exception.code, caught.exception.rule, caught.exception.detail), ("invalid", "schema", "snapshot"))
+        self.assertEqual(lib.list_snapshots("anna"), before)
+
 
 if __name__ == "__main__":
     unittest.main()
