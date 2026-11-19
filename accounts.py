@@ -69,8 +69,20 @@ def verify(store, name, password):
     return hmac.compare_digest(_hash(password, bytes.fromhex(doc["salt"]), doc["n"], doc["r"], doc["p"]), expected)
 
 
-def owner_check(cfg):
-    """account -> bool: true only for the account that `owner_account` of the configuration names. An entry that is missing, empty or not a text names nobody,
-    so a missing setting never makes anyone the owner (REQ-WFM-066)."""
-    name = cfg.get(OWNER_ACCOUNT_KEY)
-    return lambda account: isinstance(name, str) and bool(name) and account == name
+def first_account(store):
+    """the name of the account that was made first (the time of its first version; a tie in the same second goes to the smaller name), or None without accounts;
+    accounts are never deleted, so it does not change"""
+    made = [(store.history("accounts", name)[0]["time"], name) for name in store.ids("accounts")]
+    return min(made)[1] if made else None
+
+
+def owner_check(cfg, store):
+    """account -> bool, for the snapshots (REQ-WFM-066): the owner is the account that `owner_account` of the configuration names; with no entry, an empty one or
+    one that is not a text it is the first account made. A text entry always wins, also when no such account exists (a typo makes nobody the owner, it does not
+    hand the rights to the first account). The owner is looked up at each call, so an account made after the start counts."""
+    def is_owner(account):
+        name = cfg.get(OWNER_ACCOUNT_KEY)
+        if not (isinstance(name, str) and name):
+            name = first_account(store)
+        return isinstance(account, str) and bool(account) and account == name
+    return is_owner
