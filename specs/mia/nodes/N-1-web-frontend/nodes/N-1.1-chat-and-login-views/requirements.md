@@ -586,7 +586,7 @@ The chat page: messages, queue, history, status line, voting, tasks and memos, e
 - Verification method: Test
 - Acceptance criterion: AC-39: after a status line and two more messages the line is still the last element, and a changed line replaces the text in place (exact)
 - Verified by: TC-CLV-053
-- Status: Draft
+- Status: Verified
 - History: A-158 (owner 2026-11-17), new
 
 ### REQ-CLV-054 – Live line is removed when cleared
@@ -598,7 +598,7 @@ The chat page: messages, queue, history, status line, voting, tasks and memos, e
 - Verification method: Test
 - Acceptance criterion: AC-39: after the clearing no line is left and the end message that follows is the last element (exact)
 - Verified by: TC-CLV-053
-- Status: Draft
+- Status: Verified
 - History: A-158 (owner 2026-11-17), new, split from REQ-CLV-053
 
 ### REQ-CLV-055 – Texts of the live line in the language of the page
@@ -610,6 +610,6 @@ The chat page: messages, queue, history, status line, voting, tasks and memos, e
 - Verification method: Test
 - Acceptance criterion: AC-39: with a marking translation the two texts are translated and a phase name is not (exact); the page has the texts in English and German
 - Verified by: TC-CLV-053
-- Status: Draft
+- Status: Verified
 - History: A-158 amended (owner 2026-11-17), new, from the Verify finding F-06
 

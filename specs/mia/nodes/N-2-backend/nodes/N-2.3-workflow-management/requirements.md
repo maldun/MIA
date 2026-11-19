@@ -1249,5 +1249,5 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-39: with a scripted review of 400 screened works the returned result holds the question, the summary and the flow line, none of the sections `Included`, `Maybe` and `Excluded although closely related`, and is shorter than 8000 characters; the run report and the `.md` file are the same texts as before (exact)
 - Verified by: TC-WFM-142
-- Status: Draft
+- Status: Verified
 - History: A-160 (owner 2026-11-18, plan gate), new

@@ -395,7 +395,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-39: a scripted run that declares three phases gives three phase entries in the status of the run in order and no chat message of kind `phase`; a phase that repeats the one before it is noted once (exact)
 - Verified by: TC-CHA-041
-- Status: Draft
+- Status: Verified
 - History: A-131 (proposed 2026-11-08, G-V3.CHAT), new; owner 2026-11-08; changed by A-156 (owner approved 2026-11-16, FB-09): was "one new status message worded by SkillDigestStep per phase"; A-158 (owner 2026-11-17): the status card is gone, the chat shows the phase in the live line of REQ-CHA-068, not as a message
 
 ### REQ-CHA-042 – No status for other phases
@@ -736,7 +736,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-39: the voice rule (`workflow_voice.speaker_for`) gives no voice to the skill of a task whose run has end messages (`end_messages=True`), whatever the settings say, and keeps it, with the switches of the settings, for a task without end messages (exact); that a scripted /lookup run through the chat service speaks the sentences of its end message once and none of its answer is a unit test of the task
 - Verified by: TC-CHA-072
-- Status: Draft
+- Status: Verified
 - History: A-156 (approved 2026-11-16, FB-09), new
 
 ### REQ-CHA-068 – Live status line of a run
@@ -749,7 +749,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-39: a scripted run with phases `collect`, `rank`, `report` sends the lines `collect`, `rank`, `report` in order, a repeated phase once, and a lookup run sends `working` (exact)
 - Verified by: TC-CHA-073
-- Status: Draft
+- Status: Verified
 - History: A-158 (owner decisions 2026-11-17: generic line, fixed wording), new
 
 ### REQ-CHA-069 – Live line ends with the run
@@ -762,7 +762,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-39: for each of the three ends, and for a run that never showed a line, the clearing is sent before the end message and no line follows it; with a digest that takes a scripted time the line is not cleared before the digest has returned: line, digest call, clearing, message (exact)
 - Verified by: TC-CHA-074, TC-CHA-080
-- Status: Draft
+- Status: Verified
 - History: A-158 (owner 2026-11-17), new; clarified by the Verify finding F-06 (the clearing is also sent without a line, so that a lost line cannot stay); A-160 (owner 2026-11-18, plan gate): the line stays until the text of the end message is ready (first real /review: the chat was blank for 16 minutes)
 
 ### REQ-CHA-070 – Live line while a question waits
@@ -775,7 +775,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-39: a scripted review that asks one question sends the line `waiting for your answer` after the question message and the line of the phase again after the answer (exact)
 - Verified by: TC-CHA-075
-- Status: Draft
+- Status: Verified
 - History: A-158 (owner 2026-11-17), new
 
 ### REQ-CHA-071 – Live line is transient
@@ -788,7 +788,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-39: after a scripted run with three phases the chat log, the model history and the speech route hold none of the lines (exact)
 - Verified by: TC-CHA-073
-- Status: Draft
+- Status: Verified
 - History: A-158 (owner decision 2026-11-17: transient), new, split from REQ-CHA-068
 
 ### REQ-CHA-072 – Phase line again after a question
@@ -801,7 +801,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-39: after an answer, and after a timeout without an answer, the line of the phase is sent again; a run without a phase gets `working` (exact); after a stop of the run no line is sent again
 - Verified by: TC-CHA-076
-- Status: Draft
+- Status: Verified
 - History: A-158 amended (owner 2026-11-17), new, from the Verify findings F-03 and F-06
 
 ### REQ-CHA-073 – Output of a digest call
@@ -814,7 +814,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-39: with a fake model that records the options of each call, a summary of a long result makes only calls with `num_predict` 1024 (exact)
 - Verified by: TC-CHA-077
-- Status: Draft
+- Status: Verified
 - History: A-160 (owner 2026-11-18, plan gate), new
 
 ### REQ-CHA-074 – A too long summary is asked again once
@@ -827,7 +827,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-39: with scripted replies a first reply of 800 characters makes one call; a first reply of 3000 and a second of 900 characters makes two calls and the chat gets the 900 characters; a first reply of 3000 and a second of 2500 characters makes two calls (no third) and the chat gets the 2500 characters unchanged (exact)
 - Verified by: TC-CHA-078
-- Status: Draft
+- Status: Verified
 - History: A-160 (owner 2026-11-18, plan gate), new
 
 ### REQ-CHA-075 – Stop ends the end message
@@ -840,5 +840,5 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-39: with a long result of ten pieces and a stop during the first piece call, no further model call is made, the end message is the plain sentence `The run is done.` with the link and the chat model history holds no digest text (exact)
 - Verified by: TC-CHA-079
-- Status: Draft
+- Status: Verified
 - History: A-160 (owner 2026-11-18, plan gate), new
