@@ -41,7 +41,7 @@ from MIA.workflow_library import WorkflowLibrary  # noqa: E402
 
 SUITES = os.environ.get("MIA_SUITES") or os.path.join(REPO, "eval", "suites")       # a worktree finds the labelled suites of the main checkout this way
 # the model pins of specs/number-gate/eval-spec.md ("Model pins"); a change of a pin is an amendment there first
-PINS = {"MP-light": {"name": "gemma4:12b-it-qat", "digest": "sha256:38044be4f923e5a55264ed7df4eaac2676651a905f735197c504045140c02bd3", "seed": 7, "temperature": 0}}
+PINS = {"MP-light": {"name": "gemma4:12b-it-qat", "digest": "sha256:38044be4f923e5a55264ed7df4eaac2676651a905f735197c504045140c02bd3", "seed": 7, "temperature": 0, "num_ctx": 8192}}
 
 
 def pin_record(pin_id):

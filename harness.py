@@ -46,6 +46,24 @@ class SuiteError(Exception):
     pass
 
 
+class InputReferenceError(SuiteError):
+    """an input reference that does not match its file stops the run; it is no result of the case (REQ-EVL-015)"""
+
+
+def read_reference(ref, case_id):
+    """REQ-EVL-014, 015: the input text of a case from a local file (an absolute path, or relative to the repository) whose SHA-256 must equal the reference; else SuiteError naming the case"""
+    path = ref.get("path", "")
+    path = path if os.path.isabs(path) else os.path.join(os.path.dirname(os.path.abspath(__file__)), path)
+    try:
+        with open(path, "rb") as fp:
+            raw = fp.read()
+    except OSError as exc:
+        raise InputReferenceError("case %s: the file of its input reference cannot be read (%s)" % (case_id, exc))
+    if hashlib.sha256(raw).hexdigest() != ref.get("sha256"):
+        raise InputReferenceError("case %s: the SHA-256 of %s differs from the reference" % (case_id, ref.get("path")))
+    return raw.decode("utf-8")
+
+
 class Suite:
     def __init__(self, name, description, target, cases, path=""):
         self.name, self.description, self.target, self.cases, self.path = name, description, target, cases, path
@@ -405,18 +423,21 @@ class Harness:
 
     def _digest(self, case, variant, suite):
         """the production SkillDigestStep (never a copy of its prompt) on the pin, scored by digest_score.py with the labels of the owner (G-V3.CHAT T-04, note eval-target-note.md);
-        every call carries the model, seed and temperature of the pin and no tool (REQ-EVAL-003, REQ-CHA-048)"""
+        every call carries the model of the pin, the options of the step with the seed, temperature and context length of the pin (REQ-EVL-012, 013) and no tool (REQ-CHA-048)"""
         model, pin = self.core.runner.model, self.pin or {}
-        args = {"model": pin["name"], "options": {"seed": pin["seed"], "temperature": pin["temperature"]}} if pin else {}
+        fixed = {k: pin[k] for k in ("seed", "temperature", "num_ctx") if k in pin}            # the pin wins over the options of the step; num_ctx whichever model is current
 
-        def call(messages):
+        def call(messages, options=None):
+            args = {"model": pin["name"], "options": {**(options or {}), **fixed}} if pin else {}
             reply = model.chat(messages, **args)
             return reply if isinstance(reply, str) else json.dumps(reply, ensure_ascii=False)
         text = suite.target.get("persona")
         if text is None:
             text = persona.read_persona(suite.target["persona_file"]) if suite.target.get("persona_file") else ""
-        step = skill_digest.SkillDigestStep(call, persona=text)
-        data = case["input"]
+        data = dict(case["input"])
+        if data.get("result_ref"):                                           # REQ-EVL-014, 015: read and checked before the first model call
+            data["result"] = read_reference(data["result_ref"], case["id"])
+        step = skill_digest.SkillDigestStep(call, persona=text, with_options=True)
         asks = {"summary": lambda: step.summary(data["result"]), "failed": lambda: step.failure(data["reason"]), "stopped": lambda: step.stopped(data["reason"])}
         if data.get("kind") not in asks:
             raise SuiteError("%s: the case %s has the kind '%s' (summary, failed or stopped)" % (suite.name, case["id"], data.get("kind")))
@@ -426,7 +447,7 @@ class Harness:
             return "error:no_output", {"error": "%s: %s" % (type(exc).__name__, exc)}
         if not isinstance(output, str) or not output.strip():
             return "error:no_output", {"output": output}
-        score = digest_score.score_digest(case, output, self._labels(suite))
+        score = digest_score.score_digest(dict(case, input=data), output, self._labels(suite))
         return score["status"], {"output": output, "score": score}
 
     def _labels(self, suite):
@@ -487,9 +508,12 @@ class Harness:
         if target is None:
             raise SuiteError("the harness has no target of kind '%s'" % suite.target["kind"])
         self.pin = pin
+        for case in cases:                                                   # REQ-EVL-015: every reference is checked before the first model call
+            if isinstance(case.get("input"), dict) and case["input"].get("result_ref"):
+                read_reference(case["input"]["result_ref"], case["id"])
         header = {"suite": suite.name, "variant": variant, "repeats": repeats, "cases": len(cases), "started": self._clock(), "target": suite.target}
         if pin:
-            header["pin"] = {key: pin.get(key) for key in ("id", "name", "digest", "seed", "temperature")}
+            header["pin"] = {key: pin.get(key) for key in ("id", "name", "digest", "seed", "temperature", "num_ctx") if key != "num_ctx" or key in pin}
         header["suite_sha1"] = suite_sha1(suite.path)
         header["benchmark_version"] = header["suite_sha1"]               # REQ-EVL-004: the version of the benchmark is the content of the suite
         if pin and variant.get("model"):
@@ -526,6 +550,8 @@ class Harness:
         error, output = None, None
         try:
             status, output = target(case, variant, suite)
+        except InputReferenceError:
+            raise
         except Exception as exc:                                    # a case that breaks the target is a result, not the end of the run
             status, error = "error:%s" % type(exc).__name__, "%s: %s" % (type(exc).__name__, exc)
         after = self.counter.snapshot() if self.counter else (0, 0, 0)
