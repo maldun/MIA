@@ -58,3 +58,8 @@ Branch `goal/v2.snapshot` from master `c939cc51` (protected tests of A-121 insta
 - Test: `tests/test_model_pins.py` 5; `test_owner_account`, `test_library_snapshots`, `test_workflow_library`, IF-203 v0 and v2 green; `web_app.py` compiles.
 - Limit: `cfg` is read once at start, so a changed model setting counts after a restart; the function form only keeps the library free of a stale copy.
 - Still open: no HTTP route calls the snapshot operations.
+
+## Verify round 2: F-08 and F-09 (2026-11-19)
+- F-08 (medium, a regression of the owner commits): `owner_account` was read by the code but missing in `setup_cfg.example.json`, so `tests/test_config.py::Example::test_every_option_the_code_reads_is_in_the_example` failed. I had not run the whole suite after that commit. Fix: `"owner_account": ""` in the example (empty means the first account) and a paragraph "The owner" in `deploy/README.md` (login section). The existing test is the regression test (red before, green after).
+- F-09 (low): `test_f09_every_kind_of_malformed_stored_snapshot_is_refused_and_changes_nothing` (7 shapes: items not a list or missing, unknown kind, id not a text, version a text or a boolean, item not a mapping). The four survivors of the round (kind, id type, version type, list check) each fail it now.
+- Not changed: F-10 (reword of REQ-WFM-066 "the account that creates accounts", owner decision), F-11 (allowed by REQ-WFM-064), F-01, F-02, F-05, F-06, F-07.

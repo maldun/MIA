@@ -70,6 +70,23 @@ class Verify(unittest.TestCase):
             store.restore_snapshot("bad", "anna")
         self.assertEqual((self.lab.state(), self.lab.list_ids("snapshots")), (state, names))      # no "before restore" snapshot, no move
 
+    def test_f09_every_kind_of_malformed_stored_snapshot_is_refused_and_changes_nothing(self):
+        store = SnapshotStore(self.lab, AccountsLab("anna"))
+        store.snapshot("a", "anna")
+        good = store.read_snapshot("a")
+        first = good["items"][0]
+        broken = {"items is not a list": "x", "items is missing": None, "unknown kind": [dict(first, kind="nothing")], "id is not a text": [dict(first, id=5)],
+                  "version is not an integer": [dict(first, version="1")], "version is a boolean": [dict(first, version=True)], "item is not a mapping": ["x"]}
+        for label, items in broken.items():
+            doc = {k: v for k, v in good.items() if k != "items"}
+            if items is not None:
+                doc["items"] = items
+            self.lab.save("snapshots", "bad", dict(doc, name="bad"), "anna")
+            state, names = self.lab.state(), self.lab.list_ids("snapshots")
+            with self.assertRaises(Malformed, msg=label):
+                store.restore_snapshot("bad", "anna")
+            self.assertEqual((self.lab.state(), self.lab.list_ids("snapshots")), (state, names), label)
+
     def test_f04_a_failure_of_the_way_back_does_not_replace_the_original_error(self):
         store = SnapshotStore(self.lab, AccountsLab("anna"))
         store.snapshot("a", "anna")
