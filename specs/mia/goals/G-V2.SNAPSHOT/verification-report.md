@@ -101,3 +101,17 @@ Survivors:
 - Close F-08 (add the option to the example config and README), re-run the full suite, then sign; `merge_gate.py --approved-by` is theirs.
 - Decide F-09 (test) and whether to reword REQ-WFM-066 (F-10).
 - Later: an HTTP route for snapshots and a real start of `web_app.py` with the two new lines.
+
+## Resolution after round 2 (2026-11-19, written by the implementing agent, NOT by a reviewer)
+
+These fixes came after both review rounds. No reviewer has seen them. The status below is the implementer's claim; closing the findings in the signed report is the owner's decision (or a third review pass).
+
+| Finding | Status | Commit on `goal/v2.snapshot-prod` | Evidence |
+|---|---|---|---|
+| F-01 | fixed | `eeef2346` | `_put` passes `expected_version=0` for the kind `snapshots`; a second write of the same name is `conflict`, also when two writers pass the name check together. Two tests in `tests/test_library_snapshots.py` (10 tests in the module). |
+| F-08 | fixed | `32fc1873`, `42043f16` | `owner_account` in `setup_cfg.example.json` and `deploy/setup_cfg.compose.json` (the second one was found by `tests/test_deploy.py` after the first fix), described in `deploy/README.md`. |
+| F-09 | fixed (tests) | `32fc1873` | Seven-shape test of malformed stored snapshots in `tests/test_snapshot_store.py` (8 tests in the module). |
+
+Re-run by the implementer on `eeef2346`: `tests/test_storage_postgres.py` 43 of 43 OK; whole suite 2499 tests, only the 2 known `test_task_files_browser` failures (also on master).
+
+Owner decisions (maldun, 2026-11-19): F-02, F-05, F-06, F-07, F-10, F-11 accepted; F-01, F-03, F-04, F-08, F-09 fixed. The condition of round 2 (close F-08) is met by the implementer's claim above; a reviewer has not confirmed it.
