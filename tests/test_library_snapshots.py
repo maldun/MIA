@@ -83,6 +83,24 @@ class LibrarySnapshots(unittest.TestCase):
         self.assertEqual((caught.exception.code, caught.exception.rule, caught.exception.detail), ("invalid", "schema", "snapshot"))
         self.assertEqual(lib.list_snapshots("anna"), before)
 
+    def test_f01_a_snapshot_is_written_once_even_when_the_name_check_is_passed_by_a_second_writer(self):
+        lib = library(is_owner=lambda a: True)
+        lib.snapshot("a", "anna")
+        first = lib.read_snapshot("a")
+        real = lib.list_ids
+        lib.list_ids = lambda kind: [] if kind == "snapshots" else real(kind)          # the other writer is not visible when the name is checked
+        with self.assertRaises(WorkflowLibraryError) as caught:
+            lib.snapshot("a", "anna")
+        self.assertEqual(caught.exception.code, "conflict")
+        del lib.list_ids
+        self.assertEqual(len(lib.history("snapshots", "a")), 1)          # no version 2
+        self.assertEqual(lib.read_snapshot("a"), first)
+
+    def test_f01_a_new_version_of_an_ordinary_item_is_still_allowed(self):
+        lib = library()
+        lib.save("skills", "s", SKILL, "anna")
+        self.assertEqual(lib.save("skills", "s", SKILL, "anna"), {"version": 2})
+
 
 if __name__ == "__main__":
     unittest.main()

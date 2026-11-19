@@ -145,7 +145,8 @@ class WorkflowLibrary:
             current = self._current(kind, record_id)
             if expected_version != current:
                 raise WorkflowLibraryError("conflict", detail={"current": current})
-        saved = _storage_call(self._storage.put, kind, record_id, doc, author)
+        # a snapshot is written once (REQ-WFM-061): the Storage refuses a second version with `conflict`, atomically, also when two writers passed the name check together (F-01)
+        saved = _storage_call(self._storage.put, kind, record_id, doc, author, expected_version=0 if kind == SNAPSHOTS else None)
         self._move(kind, record_id, saved["version"], author, "save")
         return saved
 
