@@ -53,4 +53,4 @@ Protected tests: the IF-203 v2 mock and suite and the IF-302 check were added on
 ## Agreement
 | Subgoal | Agreed by | Date |
 |---|---|---|
-| G-V2.SNAPSHOT | (owner to fill in) | |
+| G-V2.SNAPSHOT | maldun | 19.11.2026 |
