@@ -150,3 +150,15 @@ Run: 2 on `_put` (guard removed; guard for all kinds) and 8 on `_check_items` (l
 ### For a human
 - Sign off on F-01, F-08, F-09 as fixed; N-1 is a note (accept or open a goal for a file lock).
 - `merge_gate.py --approved-by` and the merge are yours. Still open from earlier rounds: no HTTP route calls the snapshot operations; real start of `web_app.py` with the two new lines not run.
+
+## Sign-off (for the owner: mark with an X)
+
+Rounds 1 to 3, commits b660b282 to eeef2346. Round 3 verdict for 32fc1873, 42043f16, eeef2346: Verified.
+
+- [ ] Verdict accepted: Verified with accepted deviations
+- [ ] Deviations accepted: F-02, F-05, F-06, F-07, F-10, F-11
+- [ ] Fixes accepted as closed: F-01, F-03, F-04, F-08, F-09 (F-01, F-08, F-09 re-checked by a reviewer in round 3)
+- [ ] N-1 (info, no cross-process lock in the file backend): accepted as a note
+- [ ] Open point accepted for a later goal: no HTTP route calls the snapshot operations
+
+Signed by / date:
