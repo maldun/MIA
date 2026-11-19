@@ -8,9 +8,11 @@ Errors are WorkflowLibraryError with the codes of contracts/IF-203-workflow-libr
 """
 try:
     from .storage import StorageError
+    from .constants import MODEL_KEY, MODEL_LIGHT_KEY
     from . import context_graph, snapshot_store
 except ImportError:
     from storage import StorageError
+    from constants import MODEL_KEY, MODEL_LIGHT_KEY
     import context_graph
     import snapshot_store
 
@@ -24,6 +26,18 @@ TRANSFORM_META = "transform_meta"
 TRANSFORM_FIELDS = {"trust": None, "lifecycle": None, "reason": str, "evidence": str, "baseline_allowed": bool, "shipped": bool, "changed_by": str}
 DEFAULT_STEP_BUDGET = 800          # tokens of the view of a step whose node names no budget (the default of context_graph.render)
 NO_COST = {"seconds": 0.0, "calls": 0, "tokens": 0}
+
+
+def pins_from_config(cfg):
+    """{pin id: model name} of the models the app is set to use (IF-203 `pins()`, ids of eval-spec.md): the light model is MP-light, the full model MP-full. An entry that is
+    missing, empty or not a text leaves its pin out; no name is made up. Digests are not part of it: they belong to the deployment record, and a snapshot must not need the
+    model server."""
+    pins = {}
+    for pin, key in (("MP-light", MODEL_LIGHT_KEY), ("MP-full", MODEL_KEY)):
+        name = cfg.get(key)
+        if isinstance(name, str) and name:
+            pins[pin] = name
+    return pins
 
 
 class WorkflowLibraryError(Exception):

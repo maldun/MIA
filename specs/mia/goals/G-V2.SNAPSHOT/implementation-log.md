@@ -52,3 +52,9 @@ Branch `goal/v2.snapshot` from master `c939cc51` (protected tests of A-121 insta
 - Test: `tests/test_owner_account.py` 7; `test_accounts`, `test_accounts_api`, `test_first_account`, `test_library_snapshots`, IF-203 v2 green.
 - Known limit: the time has a resolution of one second (`utc_now`), so two accounts made in the same second are ordered by name, not by creation.
 - Changing the owner means editing `owner_account` in `setup_cfg.json` (or `setup_cfg.local.json`) and restarting; no route or command changes it. REQ-WFM-066 says "the account that creates accounts": the first account satisfies it for a single owner.
+
+## Pins of a snapshot from the config (2026-11-19, owner decision: build what was suggested)
+- `workflow_library.pins_from_config(cfg)`: `{"MP-light": cfg["version_light"], "MP-full": cfg["version"]}`; an entry that is missing, empty or not a text leaves its pin out. No digests (deployment record) and no call to the model server, so a snapshot never fails because Ollama is down. Keys `MODEL_KEY`, `MODEL_LIGHT_KEY` in `constants.py`. `web_app.py`: `WorkflowLibrary(..., pins=lambda: pins_from_config(cfg))`. Shape as the contract and its mock: `{pin id: model name}`, no contract change.
+- Test: `tests/test_model_pins.py` 5; `test_owner_account`, `test_library_snapshots`, `test_workflow_library`, IF-203 v0 and v2 green; `web_app.py` compiles.
+- Limit: `cfg` is read once at start, so a changed model setting counts after a restart; the function form only keeps the library free of a stale copy.
+- Still open: no HTTP route calls the snapshot operations.

@@ -85,7 +85,7 @@ from .model_class import ModelClasses
 from .model_gate import make_model_command, make_prepare
 from .task_registry import TaskRegistry
 from .workflow_voice import speaker_for
-from .workflow_library import WorkflowLibrary
+from .workflow_library import WorkflowLibrary, pins_from_config
 from .scholar import build_scholar
 from . import tailscale_serve
 FPATH = os.path.split(__file__)[0]
@@ -657,7 +657,7 @@ def speak_answer(text, should_stop=None):
 
 _db_dir = os.path.join(FPATH, cfg.get(CONST.ACCOUNTS_DIR_KEY, "data/db"))
 _votes_store = Storage(FileBackend(_db_dir))                  # the votes table (REQ-CHA-015); the accounts use the same folder
-_workflow_library = WorkflowLibrary(_votes_store, is_owner=accounts.owner_check(cfg, _votes_store))             # IF-203 on the same storage; the review workflow is its first entry (a draft); the owner of the snapshots is `owner_account`, else the first account
+_workflow_library = WorkflowLibrary(_votes_store, is_owner=accounts.owner_check(cfg, _votes_store), pins=lambda: pins_from_config(cfg))             # IF-203 on the same storage; the review workflow is its first entry (a draft); the owner of the snapshots is `owner_account`, else the first account
 
 def run_memory_skill(inputs):
     """the skill memory_write: what to remember from one message of the user"""
