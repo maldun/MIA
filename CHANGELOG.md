@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.2.0] – 2026-11-20, G-V2 skill rework foundation and G-V3 skill run view (not yet validated)
+
 ### Added (G-V2, skill rework foundation)
 - Skills are records: one description gives command, steps and knowledge; a wrong one is refused with the reason. Graphs and skill sets are stored as node and edge records (IF-302).
 - Toolbox with trust status: a step from outside does not run until the owner allows it (IF-402 door).
@@ -11,7 +13,7 @@
 ### Known limitations (G-V2)
 - TD-86 live trust and lifecycle on the converted path; TD-87 budgets and stop there; TD-88 AC-34 decided on dev only (no holdout); TD-89 `research.escalate@3` in the check, `@1` in the skill; TD-90 real half of the IF-103 contract suite skipped (all DRAFT until signed). No red-team case for THR-011 (V2-6). `test_decide_guard.py` and `test_judge_calibration.py` fail (`behaviour.FUNCTIONS`).
 
-### For deployment
+### For deployment (Phase 6)
 - The stack starts from a fresh copy (SMOKE-MIA-001 green 2026-11-20). `deploy/build.sh` does not exist yet (gap for Phase 6).
 
 ### Added (G-V3)
@@ -21,28 +23,29 @@
 - G-V3.REPORT (FB-08): every skill run ends with a report file (`# Done`, `# Stopped: ...`, `# Failed: ...`), shown in the Report part of the Full run and downloadable; http and https addresses are links that open in a new tab, nothing else is active (REQ-WFM-139 to 141, REQ-CLV-048 to 052; IF-101 v18). `lookup`, `review` and `search` are at version 2.
 - Evaluation: the eval target `digest` runs the step as the app does and reads an input text by checked reference (REQ-EVL-012 to 015).
 
-### Changed
+### Changed (G-V3)
 - The result of a skill ends with a link to the Skill run view instead of a `Files:` list; a failed run says `The /<skill> run failed: <reason>`.
 
-### Removed
+### Removed (G-V3)
 - The status card in the chat (REQ-CLV-023 is superseded by REQ-CLV-030 to 039).
 
-## [Unreleased] – 2026-11-08, TD-11 option B: speak again through the voice route (verified, not released)
-
-### Fixed
+### Fixed (TD-11 option B: speak again through the voice route, verified 2026-11-08)
 - The speaker button under a message ("Speak again") is heard: the chat agent hands the stored text sentence by sentence, in order and through the speech filter, to the voice route of live answers, one repeat at a time (REQ-CHA-030, REQ-CHA-031, REQ-CHA-034). Before, it only sent audio_chunk events that no page played (D-276).
 - Stop ends a spoken-again playback, also when no answer is generated (REQ-CHA-032); the Stop button is shown while a message is spoken again, also over a running answer, and the status returns afterwards (REQ-CHA-035, REQ-CHA-036); a spoken-again line is heard within 3 s after a Stop (REQ-VPB-006).
 - A voice route that is not reachable does not break the chat: one connection attempt, the rest of that repeat is dropped (REQ-CHA-033).
 
-### Changed
+### Changed (TD-11)
 - `stop()` returns true only when an answer was stopped (IF-101 and IF-201 unchanged).
 - Specification: parents of REQ-CHA-030..036 and REQ-VPB-006 one level up (A-134); REQ-CHA-033 AC-1 reworded (A-135); the 3 s of REQ-VPB-006 recorded as an accepted risk (A-136).
 
-### Known limitations
+### Known limitations (TD-11)
 - `/api/speak_again` has no rate limit and no cap on waiting repeats (F4, accepted; revisit with TD-61). TD-61 is open: two voice paths. A failed repeat logs two error lines (A-135). Hand check TC-CHA-035 is owner-reported, device and commit not recorded. The 3 s of REQ-VPB-006 is an accepted risk (VAL-006). Open deviations of the ladder: TD-62 (tailscale unit test), the plan backlog of `decomposition` and the red G-V2.MODEL acceptance tests (other goals). Production changes on master since v0.1.0 that this verification did not cover: `deploy/preflight.sh`, `deploy/up.sh voice`, `tools/recovery_check.sh`, `tools/fetch_kokoro.sh`, `tools/fetch_benchmarks.py`, the G-V2.MODEL stubs.
 
-### Release record
-- Verified (verification report approved 2026-11-08, `specs/mia/amendments/A-132-verification-report.md`), on master since the merges of 2026-11-08; no tag (the owner, 2026-11-08: the tag comes with iteration 2). The ladder ran locally on master `1732666`, stages 0 to 3, no CI.
+### Release record (TD-11)
+- Verified (verification report approved 2026-11-08, `specs/mia/amendments/A-132-verification-report.md`), on master since the merges of 2026-11-08; released with v0.2.0 (owner, 2026-11-08). The ladder ran locally on master `1732666`, stages 0 to 3, no CI.
+
+### Release record (v0.2.0)
+- Verified with accepted deviations (G-V2 verification report approved 2026-11-20; G-V3 D-354). All subgoals were merged into master before the tag; merge request `specs/mia/goals/G-V2/merge-request.md`, release notes `specs/mia/goals/G-V2/release-notes.md`. Checks ran locally on master (no CI).
 
 ## [0.1.0] – 2026-11-01, G-V1 first version of MIA (not yet validated)
 

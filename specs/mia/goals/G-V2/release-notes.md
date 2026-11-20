@@ -1,4 +1,4 @@
-# MIA v0.2.0 (draft, date of the tag; not tagged)
+# MIA v0.2.0 (2026-11-20)
 
 Iteration 2: G-V2 (skill rework, foundation) and G-V3 (skill run view, spoken-only chat). Not yet validated in the field.
 
@@ -47,13 +47,20 @@ Smoke subset on master 2026-11-20 (verdicts_wikidata, 3 cases x 3): 6 of 9, same
 - No red-team run in this phase; THR-011 has no case (V2-6). Budgets not re-measured (TD-87).
 
 ### Baselines
-Kept: the old-runner dev baselines of D-355 (owner decision pending, recommended). No new baseline files.
+Kept: the old-runner dev baselines of D-355 (owner decision 2026-11-20). No new baseline files.
 
 ## Known issues and open deferrals
-- TD-86 live trust and lifecycle on the converted path; TD-87 budgets and stop on the converted path; TD-88 AC-34 on dev only; TD-89 research.escalate@3 (check) vs @1 (skill); TD-90 real half of the IF-103 contract suite skipped. All DRAFT until signed.
+- TD-86 live trust and lifecycle on the converted path; TD-87 budgets and stop on the converted path; TD-88 AC-34 on dev only; TD-89 research.escalate@3 (check) vs @1 (skill); TD-90 real half of the IF-103 contract suite skipped. Signed by the owner 2026-11-20 (D-355, D-356, D-357).
 - V2-6 no red-team case for THR-011; D-309 MODEL deviations (context graph ID not read from the record, F-04); TD-81 to TD-85.
 - `test_decide_guard.py` and `test_judge_calibration.py` fail on master (`behaviour.FUNCTIONS`), not G-V2.
 - No current-state deployment record exists (`specs/mia/deployment/current-state.md`); none created without the owner.
+
+## Also in this release
+- TD-11 option B (speak again through the voice route, verified 2026-11-08) and all of G-V3: see `CHANGELOG.md`, section 0.2.0. Open deferrals of G-V3: TD-82 to TD-85 (signed).
+
+## Statuses at the tag
+- Goal G-V2 and its five subgoals: Verified. Requirements REQ-RUN-030 to 035, REQ-WFM-057 to 060, 069, 110 to 115 are still Draft (owner approval open); all other G-V2 requirements are Verified.
+- Open paperwork: V2-8 (TC-WFM-110 to 114 in no test-spec table), V2-3 (stale docstring in `skill_converter.py`, Implement), V2-1 (scope wording `REQ-WFM-143`).
 
 ## For deployment (Phase 6)
 - Artifact: built from tag v0.2.0 by `deploy/build.sh` in CI. **`deploy/build.sh` does not exist: gap for Deploy; no build on the laptop.**
