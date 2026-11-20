@@ -10,7 +10,7 @@ The approved `nodes/N-5-graph-app/requirements.md` (REQ-GA-001 to -011, written 
 | REQ-GA-001 show as nodes and edges | **supersede** by FR-48 to FR-53 | history names the new items; the stable-layout, physics-off tests of `tests/js/graph-view.test.mjs` are rewritten by amendment |
 | REQ-GA-002 edit as JSON | **keep, refine in EDIT** | text unchanged; EDIT decides JSON text, form or both |
 | REQ-GA-003 graph rules before saving | **amend** | the page asks the backend check route (D-363); one rule set (GRAPHAPI); needs the IF-104 amendment; belongs to EDIT |
-| REQ-GA-004 versions, history, diff, restore | **split into four, supersede** | save and restore to EDIT, history list and viewing a version to VIEW (FR-55, FR-56), diff to REPLAY |
+| REQ-GA-004 versions, history, diff, restore | **split into four, supersede** | save and restore to EDIT, history list and viewing a version to VIEW (FR-55), diff to REPLAY |
 | REQ-GA-005 only through IF-104 | **keep as written** | IF-104 changes by the joint amendment (C-5) |
 | REQ-GA-006 edit context graphs | **keep, assign to G-V4.CONTEXT** (changed 2026-11-20, D-369; was EDIT) | after GRAPHSTORE moves context graphs into the same stored form |
 | REQ-GA-007 login required | **keep, NFR-12 refines it** | no change |

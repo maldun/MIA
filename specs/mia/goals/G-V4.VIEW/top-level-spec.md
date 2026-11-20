@@ -9,7 +9,7 @@ The owner wants to look at the workflows and context graphs MIA works with, as t
 
 ## 2. Scope
 ### In scope
-Opening and looking at stored graphs: the list, the drawing, the content of a selected item, the arrangement the earlier versions and their history, and the view settings. Requirements FR-48 to FR-56 and FR-96 (search by description, new number) below (new numbers after FR-47 and NFR-9; assigned for real when Plan writes them into `requirements.md`).
+Opening and looking at stored graphs: the list, the drawing, the content of a selected item, the arrangement the earlier versions and their history, and the view settings. Requirements FR-48 to FR-55 and FR-96 (search by description, new number) below (new numbers after FR-47 and NFR-9; assigned for real when Plan writes them into `requirements.md`).
 ### Out of scope (non-goals)
 Changing a graph, saving, keeping where the owner placed the steps between visits (G-V4.EDIT); the playback of the individual changes and what a change did within a session (G-V4.REPLAY); running a workflow from the viewer; the skills window (goal B); building context graphs (goal C).
 ### Known shortcuts (prototype)
@@ -17,7 +17,7 @@ The prototype `prototype/graphview` shows the data path and the look; it has no 
 ### Candidate goals (increments) and proposed first split
 | Candidate goal | What users get (outcome) | Likely in scope | Why this cut |
 |---|---|---|---|
-| VIEW (this) | the owner sees any stored graph drawn clearly and can inspect every item | FR-48 to FR-56 | can be judged by looking, before any editing exists |
+| VIEW (this) | the owner sees any stored graph drawn clearly and can inspect every item | FR-48 to FR-55, FR-96 | can be judged by looking, before any editing exists |
 | EDIT | the owner changes a graph, with the rules applied | FR-22 editing | needs the view first |
 | REPLAY | every change made in the editor can be played back and explained step by step | FR-22 history of changes, FR-16 | needs the edits first |
 
@@ -35,16 +35,14 @@ The prototype `prototype/graphview` shows the data path and the look; it has no 
 - FR-51: The system shall show the full content of a selected step or connection.
   - Outcome: Given a drawn graph, when the owner selects a step or a connection, then its known values appear beside the picture as labelled read-only fields and the full stored text is available next to them as plain text, and selecting nothing clears it.
 - FR-52: The system shall arrange the graph so that it reads naturally and keeps what the owner arranged.
-  - Outcome: Given a graph of about fifty steps, when it is opened, then the arrangement settles by itself into a picture where steps do not lie on each other and connections are followable; when the owner moves a step, it stays where it was put while the graph is open; the owner can return to a clear layered arrangement in which every connection points forward.
+  - Outcome: Given a graph of about fifty steps, when it is opened, then it appears with the arrangement the owner saved in the editor if there is one, otherwise it settles by itself into a picture where steps do not lie on each other and connections are followable; when the owner moves a step it stays where it was put while the graph is open; the owner can return to a clear layered arrangement in which every connection points forward.
 - FR-53: The system shall let the owner choose how connections and the arrangement look, in one place.
-  - Outcome: Given a drawn graph, when the owner changes the connection style (rounded or straight) or the automatic arrangement, then the picture follows at once, the moved steps stay in place, and all such choices are found in one settings place.
+  - Outcome: Given a drawn graph, when the owner changes the connection style (rounded or straight) or the automatic arrangement, then the picture follows at once, the moved steps stay in place, all such choices are found in one settings place, and they are remembered on that device for the next visit; if they cannot be remembered the viewer works with its defaults.
 - FR-54: The system shall always show the graph as it is stored and never run or follow what it contains.
-  - Outcome: Given a stored graph whose names or contents contain text that looks like an instruction, markup or code, when it is shown or selected, then it appears as text only and nothing is executed or opened.
+  - Outcome: Given a stored graph whose names or contents contain text that looks like an instruction, markup or code, when it is shown or selected, then it appears as text only and nothing is executed or opened; a step that holds code is marked as such together with its trust state.
 
-- FR-55: The system shall let the owner look at any earlier stored version of a graph.
-  - Outcome: Given a graph with several stored versions, when the owner chooses one, then that version is shown as it was stored, read-only, and the picture says which version it is and when it was stored.
-- FR-56: The system shall show the history of a graph as a list the owner can scroll through.
-  - Outcome: Given a graph with several stored versions, when the owner opens its history, then the versions are listed newest first with who stored each and when; choosing an entry shows that version; the owner can step to the previous and the next version, and the current one is marked.
+- FR-55: The system shall show the history of a graph as a list the owner can scroll through and let the owner look at any earlier stored version.
+  - Outcome: Given a graph with several stored versions, when the owner opens its history, then the versions are listed newest first with who stored each and when and the current one is marked; choosing an entry shows that version as it was stored, read-only, and the picture says which version it is and when it was stored; the owner can step to the previous and the next version. *(FR-56 of the first draft is merged into this item; the number is not reused.)*
 
 ### 3.2 Non-functional requirements
 - NFR-10 (Usability): The owner can find, open and read a graph without help.
@@ -99,7 +97,7 @@ Findings with references are in `research.md` of this folder: the page opens a f
 | Loop-controlling steps (none in today's 15 converted graphs) may not be drawable the same way | FR-49, FR-50 incomplete for such graphs | include one in the cases; owner |
 | Context graphs differ from workflow graphs (Q-5 of N-5) | FR-48 may need a second look | decide in Plan with G-V4.GRAPHSTORE; owner |
 | Natural arrangement is not reproducible | the same graph may look different on each opening, and moved steps are not kept after closing | decided: saved positions belong to G-V4.EDIT (D-366); in VIEW the layered arrangement is the reproducible reset |
-| A history shows who stored a version but not what changed between two; the comparison of two versions stays in REPLAY (owner, D-366) | FR-56 shows a list, not a difference | decided |
+| A history shows who stored a version but not what changed between two; the comparison of two versions stays in REPLAY (owner, D-366) | FR-55 shows a list, not a difference | decided |
 | Search by description uses a language model: graph content is untrusted text for the model, the model is local, the result only selects a graph | FR-96 adds an agent feature to the viewer (agent profile, evaluation cases, injection check) | decide in Plan with the agent-app rules; owner |
 | Very large graphs (more than a few hundred steps) | readability and speed unknown | out of this goal unless the owner wants a bound |
 
