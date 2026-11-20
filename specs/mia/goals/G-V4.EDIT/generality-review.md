@@ -1,0 +1,51 @@
+# Review: how general is the graph editor? (owner's remark of 2026-11-21)
+
+**Remark of the owner:** the editor should ultimately edit both context graphs and workflow graphs, with little difference by design. A context graph may have more kinds of nodes, but the basic functions (add a node, edit the entries of a node, make connections) stay the same. The generality of the editor is reviewed before more is planned on it.
+
+Written by the agent from the prototype (branch `prototype/g-v4`, round 03) and the specs of EDIT, CONTEXT, VIEW, RULES and REPLAY. Status: for the owner's decision; nothing here changes an approved spec.
+
+## 1. What is already general
+| Part | Why it is general |
+|---|---|
+| Working copy, undo and redo, keep as a new version, restore, conflicts (`undo-stack.js`, keep and restore routes) | they work on `{nodes, edges}` and never look at what a node is |
+| Edit log, playback and comparison (`graph_changes.py`, `change-log.js`, `replay.js`, `compare.js`) | entries are add, remove or change of a step or connection with the content before and after; no kind appears in them |
+| Storage and versions (CORE, round 03) | a context graph is stored through the same save path, by `kind` of the graph |
+| Add and remove a connection, copy of a step (as content) | they only need the IDs and the content |
+
+## 2. Where the prototype assumes a workflow graph
+| Place | The assumption | What a general editor does instead |
+|---|---|---|
+| `edit-model.js` `START`, `KNOWN`, `formFor`, `applyForm` | the node types are data, processing and loop-controlling, each with hard-coded fields (`value`, `parameters`, `toolbox_id`, `stop`) | node types and their fields come from a **description of the graph kind**; the form and its checks are built from it |
+| `edit-panel.js` `toolPicker` | a node has a tool from the toolbox | a field can be of the kind "choose from a list" (tools for processing steps, categories or other lists for context nodes); the list is part of the description |
+| `step-marks.js` `groupOf`, `KIND_NAMES`, trust marks | three shapes and the trust and lifecycle marks | shape, words and marks per node type come from the description; trust marks only where the type has a tool |
+| `graph_rules_proto.py` (the check route and the keep route) | the eight workflow rules, including "no two data steps adjacent" and the kinds of step | one **rule set per graph kind**: the workflow set of eight; for a context graph its own (identity, ends, category schema, budgets; FR-7 extended, D-369) |
+| `graph_proto_app.py` `full_graph`, `keep_graph`, `check_graph` | a graph is a workflow graph: the header fields are those of a workflow, `kind` is dropped | the route follows the `kind` of the stored graph and asks its rule set |
+| `graph_proto_app.py` `steps_info`, `/api/v2/toolbox` | trust and lifecycle from the toolbox for processing and loop-controlling steps | information about a node comes from its type's description (a tool, a category, nothing) |
+| the connection form (`role`: settings, order, code) | roles of workflow connections | the description of the kind lists the connection fields (workflow: role and name; context: the relation) |
+| Run, stand-in steps, missing inputs | workflow only | stays workflow-only by nature (a context graph is not run) |
+
+## 3. Proposed design: one editor, a description per graph kind
+The editor core knows nodes, connections, entries, the working copy and the record of changes. Everything that differs between kinds is data in a **graph profile**:
+- the **node types**: ID, name, shape, marks, and a list of **fields** (name, label, kind of input: text, number, JSON, choice from a list; limits; start value);
+- the **connection fields** (workflow: `role`, `as`; context: for example `relation`);
+- the **rule set** of the kind (an ordered list, every broken rule named, as FR-63);
+- **lists** a choice field draws from (the toolbox for a processing step; the categories for a context node).
+
+Two profiles to begin with: **workflow** (the fixed list of IF-301: data, processing, loop-controlling) and **context** (the node types are categories with their schemas; where these come from is the builder's subject, goal C). A new kind of graph later is a new profile, not a new editor.
+
+## 4. What this changes in the plan
+| Spec | Change proposed (for the owner to decide; nothing is edited without that) |
+|---|---|
+| EDIT, FR-92 ("a form for the known fields of each kind of step: data, processing, loop-controlling") | wording: "each type of node of the graph's kind"; the three workflow types stay as the first profile |
+| EDIT scope | EDIT is the general editor with the **workflow profile and a minimal context profile** (so generality is proven early); the prototype round for EDIT shows both kinds in one editor |
+| CONTEXT (OC-1, REQ-GA-006) | shrinks to the context profile in full (categories, their schemas, budgets), the run's context graph view (FR-97) and the context rule set; the editing functions are EDIT's |
+| RULES, FR-63 ("one set of eight rules") | "one rule set **per graph kind**, in one fixed order"; the eight are the workflow set; the context set extends the one rule set (D-369) |
+| VIEW, FR-50 (kinds, trust and lifecycle at a glance) | "the type of each node by shape and words, and for nodes with a tool its trust and lifecycle"; the three shapes are the workflow profile |
+| REPLAY | none: already general |
+| CORE | none beyond round 03 (both kinds are stored) |
+
+## 5. Open for the owner
+1. Is the principle right: one editor, a profile per kind, workflow and context as the first two?
+2. Where do the node types and field schemas of a context graph come from: the categories of the builder (goal C), or a fixed list in the profile until then?
+3. May a step be copied between graphs of different kinds (FR-94)?
+4. What does the review gate: the plan of EDIT only, the plans of RULES, VIEW and CORE as well, or only the EDIT prototype round?
