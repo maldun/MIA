@@ -43,8 +43,8 @@ Can the graph app pull a real stored graph from the data source (files or Postgr
 | Item | Where | Decision: adopt / adapt / drop / stand-in | Reason |
 |---|---|---|---|
 | Proposed decisions are the agent's suggestions; the owner decides and ticks. | | | |
-| graph routes for the record form | `serve.py` | [ ] adapt (proposed) | the real routes follow the interface amendment of Plan; the prototype's two routes show the shape |
-| adapter record form to view | `adapter.js` | [ ] adapt (proposed) | the view should read the stored type directly once the form is settled |
+| graph routes for the record form | `serve.py` | [x] adapt (owner, 2026-11-20) | the real routes follow the interface amendment of Plan; the prototype's two routes show the shape |
+| adapter record form to view | `adapter.js` | [x] adapt (owner, 2026-11-20) | the view should read the stored type directly once the form is settled |
 | own check over HTTP | `check.mjs` | [ ] adopt as a contract idea (proposed) | every stored graph is drawn completely, from both backends |
 | detail panel on the left | `index.html` | [ ] adopt (proposed) | the editor's place (OC-8) |
 | physics with solver choice and freeze after settling | `proto.js` | [ ] adopt, with the positions as a side record (proposed) | natural look; replaces the "physics off" rule of REQ-GA-001, which needs an amendment |

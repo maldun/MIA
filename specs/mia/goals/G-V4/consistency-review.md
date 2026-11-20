@@ -33,9 +33,9 @@ IDs are unique across the seven specs. Gaps are deliberate: FR-56 is retired (me
 ## 3. Earlier findings
 | # | Finding | State |
 |---|---|---|
-| C-1 | the system-wide `high-level-spec.md` is in the old format (no HR items, no DEP table, no measures) | **open for Plan:** add one section in the new format for G-V4 and leave the old text as legacy (D-362) |
+| C-1 | the system-wide `high-level-spec.md` is in the old format (no HR items, no DEP table, no measures) | **decided (D-387):** add one section in the new format for G-V4 and leave the old text as legacy (D-362); Plan writes it |
 | C-2 | top-level specs of the subgoals | **done:** seven reviewed specs |
-| C-3 | new requirement IDs | **done for the drafts:** unique, see section 1; **open:** Plan assigns them for real |
+| C-3 | new requirement IDs | **decided (D-387):** the drafted numbers stay (gaps included); Plan writes them into `requirements.md` |
 | C-4 | scope tables, Parts and Frozen tables of the subgoals (GL3, GL6 errors) | **open for Plan step 0** |
 | C-5 | IF-104 | **decided (D-368):** one IF-104 v2 written whole at G-V4 level, frozen for the subgoals that share it; v1 stays until the migration is confirmed. The contents list is in section 4 |
 | C-6 | spike S1: node IDs shared by several graphs | **decided (D-368):** record IDs scoped by graph, the storage layer refuses an unscoped ID (amends A-92 / REQ-GTB-021) |
@@ -78,7 +78,7 @@ No contradiction was found; the points below are consistent only because of the 
 - [x] Owner decided the REQ-GA rows (D-367, D-369)
 - [x] Owner decided C-5 and C-6 (D-368)
 - [x] Owner reviewed the seven top-level specs item by item (D-369 to D-384)
-- [ ] Owner decides C-1 (new section in the high-level spec) and C-3 (IDs assigned in Plan)
+- [x] Owner decided C-1 and C-3 (2026-11-20, D-387): one new section in the existing `high-level-spec.md`, old text stays legacy; the IDs stay as drafted
 - [ ] Owner ticks the carry-over of the prototype graphview (C-7)
 - [ ] Owner approves each of the seven top-level specs: GRAPHSTORE, GRAPHAPI, VIEW, EDIT, REPLAY, CONTEXT, BUILDER
 - [ ] Owner agrees to the split (the Agreement rows of `G-V4/goal.md`, seven subgoals)
