@@ -1,6 +1,6 @@
 # Goal G-V4 – Graph rework, graph app and context-graph builder (DRAFT)
 
-Opened 2026-11-20 on the owner's request ("G-V4 starts a bigger rework"). Scope as the owner set it on 2026-11-20 (D-360 to D-385): the graph rework (storage, runner), the graph app in three stages, context graphs and their builder. The leftovers of G-V2 and G-V3 and the validation moved to the new goal **G-V5, the first test run** (D-385). **State:** Explore artifacts and reviewed top-level specs exist per subgoal; the owner's Explore gate and the agreements below are open; scope rows, Parts and frozen requirements are Plan step 0.
+Opened 2026-11-20 on the owner's request ("G-V4 starts a bigger rework"). Scope as the owner set it on 2026-11-20 (D-360 to D-385): the graph rework (storage, runner), the graph app in three stages, context graphs and their builder. The leftovers of G-V2 and G-V3 and the validation moved to a new goal **G-V5, the first test run**, whose definition is parked until G-V4 closes (D-385, D-386; drafts in `../../parked/G-V5/`). **State:** Explore artifacts and reviewed top-level specs exist per subgoal; the owner's Explore gate and the agreements below are open; scope rows, Parts and frozen requirements are Plan step 0.
 
 - Kind: iteration
 - Parent: –
@@ -121,4 +121,4 @@ None yet: the subgoals share the stored graph form (G-V4.GRAPHSTORE); Plan freez
 | Verify | open | |
 | Commit | open | |
 | Deploy | open | |
-| Validate | open | the first test run, G-V5 (D-385) |
+| Validate | open | the first test run, G-V5, to be defined when G-V4 closes (D-386) |

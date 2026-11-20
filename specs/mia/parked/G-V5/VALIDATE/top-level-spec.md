@@ -49,10 +49,10 @@ The owner's host and the owner's phones, one week of use; a deployment of the re
 - Quality model: ISO/IEC 25010:2023; the characteristics that matter are named in the requirements above.
 - Security: The sessions read run logs; they stay local. Consent of any user besides the owner is open (validation plan).
 - Sharing: owner only; AI use disclosed. Maintained, not frozen. Path to product undecided.
-- Scale and first split: a leaf inside the existing decomposition; cut from the other G-V4 subgoals as in `../G-V5/goal.md`.
+- Scale and first split: a leaf inside the existing decomposition; cut from the other G-V4 subgoals as in `../goal.md`.
 
 ## 4. Context view (technology independent)
-The owner and MIA's store, as in `../G-V4.VIEW/top-level-spec.md` section 4; the flows specific to this subgoal are in the requirements. No internal parts are named here.
+The owner and MIA's store, as in `../../../goals/G-V4.VIEW/top-level-spec.md` section 4; the flows specific to this subgoal are in the requirements. No internal parts are named here.
 
 ## 5. Acceptance scenarios (end to end)
 - AC-1: After a week the owner has a validation report with a rating for each of VAL-006, 007, 009, 012 and 013 and a triage of every finding.
@@ -72,4 +72,4 @@ The owner and MIA's store, as in `../G-V4.VIEW/top-level-spec.md` section 4; the
 
 ## 7. References
 - Sources: `test-spec.md` (VAL rows), `validation-plan-v0.2.1.md`, `goals/G-V5.VALIDATE/goal.md`
-- Parent `../G-V5/goal.md` (OC-5, OC-9)
+- Parent `../goal.md` (OC-5, OC-9)

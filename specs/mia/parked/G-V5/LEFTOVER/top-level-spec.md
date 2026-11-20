@@ -39,10 +39,10 @@ The owner's host with the pinned local models.
 - Quality model: ISO/IEC 25010:2023; the characteristics that matter are named in the requirements above.
 - Security: Imported steps are untrusted (THR-011); the refusal case is a red-team case written with the owner. Agents never label or open holdout cases.
 - Sharing: owner only; AI use disclosed. Maintained, not frozen. Path to product undecided.
-- Scale and first split: a leaf inside the existing decomposition; cut from the other G-V4 subgoals as in `../G-V5/goal.md`.
+- Scale and first split: a leaf inside the existing decomposition; cut from the other G-V4 subgoals as in `../goal.md`.
 
 ## 4. Context view (technology independent)
-The owner and MIA's store, as in `../G-V4.VIEW/top-level-spec.md` section 4; the flows specific to this subgoal are in the requirements. No internal parts are named here.
+The owner and MIA's store, as in `../../../goals/G-V4.VIEW/top-level-spec.md` section 4; the flows specific to this subgoal are in the requirements. No internal parts are named here.
 
 ## 5. Acceptance scenarios (end to end)
 - AC-1: The owner stops a running lookup; it ends as stopped. The owner marks a step untrusted before a run; the step does not run and is named.
@@ -62,5 +62,5 @@ The owner and MIA's store, as in `../G-V4.VIEW/top-level-spec.md` section 4; the
 | FR-82 to FR-85 | not needed | proposed by the agent, the owner confirms: the items are known from the verification reports; no feasibility doubt |
 
 ## 7. References
-- Sources: `../G-V2/remainder-for-next-goal.md`, `../G-V3/verification-report.md`, `deferred.md`
-- Goal record: `goal.md`; parent `../G-V5/goal.md` (OC-1 to OC-4)
+- Sources: `../../../goals/G-V2/remainder-for-next-goal.md`, `../../../goals/G-V3/verification-report.md`, `deferred.md`
+- Goal record: `goal.md`; parent `../goal.md` (OC-1 to OC-4)

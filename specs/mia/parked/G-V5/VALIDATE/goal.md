@@ -1,6 +1,6 @@
 # Goal G-V5.VALIDATE – Validation of G-V2, G-V3 and G-V4 and improvement of the graphs
 
-Opened 2026-11-20 on the owner's request: G-V2 (v0.2.x) and G-V3 are in the Validate phase, and G-V4 starts a larger rework. Parts of the rework may change what the validation runs would see, so validating v0.2.1 now would be effort that may have to be repeated. The validation of both goals is therefore collected here and run **on the version after the rework**. G-V4 now has a goal record (`../G-V5/goal.md`, Proposed); this subgoal is its last one and a draft until the rework is planned.
+Opened 2026-11-20 on the owner's request: G-V2 (v0.2.x) and G-V3 are in the Validate phase, and G-V4 starts a larger rework. Parts of the rework may change what the validation runs would see, so validating v0.2.1 now would be effort that may have to be repeated. The validation of both goals is therefore collected here and run **on the version after the rework**. G-V4 now has a goal record (`../goal.md`, Proposed); this subgoal is its last one and a draft until the rework is planned.
 
 - Kind: subgoal
 - Parent: G-V5

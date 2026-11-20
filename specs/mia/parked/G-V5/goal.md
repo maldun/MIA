@@ -1,6 +1,6 @@
-# Goal G-V5 – First test run (DRAFT)
+# Goal G-V5 – First test run (PARKED DRAFT)
 
-Opened 2026-11-20 by the owner (maldun), D-385: the leftovers and the validation of G-V2 and G-V3 move out of G-V4, which now only builds, and are joined with the leftovers and the validation of G-V4 itself in one goal, the first test run of everything that was built since v0.2.1. **Nothing here is decided beyond what the owner said on 2026-11-20**; the outcome criteria and scope rows are a proposal for Explore.
+Opened 2026-11-20 by the owner (maldun), D-385: the leftovers and the validation of G-V2 and G-V3 move out of G-V4, which now only builds, and are joined with the leftovers and the validation of G-V4 itself in one goal, the first test run of everything that was built since v0.2.1. **Parked by the owner on 2026-11-20 (D-386): the definition of G-V5 waits until G-V4 is closed, because G-V4 will change along the way.** Nothing here is decided beyond what the owner said on 2026-11-20; the outcome criteria and scope rows are a proposal for Explore.
 
 - Kind: iteration
 - Parent: –
@@ -10,7 +10,7 @@ Opened 2026-11-20 by the owner (maldun), D-385: the leftovers and the validation
 - Accepted by: Stefan Reiterer (owner)
 - Line of work: goal/v5
 - Subgoals: G-V5.LEFTOVER, then G-V5.VALIDATE
-- Status: Proposed
+- Status: Proposed (parked: the definition is deferred until G-V4 is closed, D-386)
 
 ## Outcome criteria (proposal, to confirm in Explore)
 | ID | Expected outcome | Derived from |
