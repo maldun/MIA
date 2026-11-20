@@ -19,7 +19,7 @@
 |---|---|
 | SMOKE-MIA-001 `smoke_fresh_install.py` | green |
 | SMOKE-MIA-003 `smoke_stack.py` (mia/db/graph alone, 5 services together) | green |
-| SMOKE-GATE `smoke_gate.py` | **not run: red by environment**, suite `verdicts_vitaminc` is git-ignored and absent in the tag checkout (see Known issues) |
+| SMOKE-GATE `smoke_gate.py` | green (5 cases), 2026-11-20, run from the main checkout (the git-ignored dev suite `verdicts_vitaminc` is there; the `.py` files of master equal the tag; holdout not touched) |
 | Running stack: page 200, 5 services up | ok |
 
 ## Rollback
@@ -27,8 +27,8 @@ Previous image `localhost/mia:pre-v0.2.1` (id `c58b66d1...`, built 2026-11-07). 
 
 ## Known issues
 - **F-1 build context:** there is no `.dockerignore`. `deploy/up.sh` (default `--build`) baked `deploy/.env` (secrets) and the 1 GB `dist/` tar into a rebuilt image. Found, removed (image deleted, stack runs the clean `v0.2.1` image, checked: no `.env`, no `dist/` inside). Never start with the default `--build` after `build.sh SAVE=1`; use `--no-build`. Fix = Plan task (`.dockerignore`), not done here.
-- **F-2 smoke gate:** `verdicts_vitaminc` is git-ignored; the gate needs it (2 of its 5 cases). Open: owner supplies the suite from the laptop or the gate is run there.
-- **F-3 records:** `data/conversion` (five acceptance records) is not on the target yet: all five skills run on the **old runner**. Owner decided to copy them; source path still to be given. Update this record when done.
+- **F-2 smoke gate:** settled 2026-11-20: run from the main checkout, green (owner's choice). The suite stays git-ignored; a fresh clone cannot run the gate.
+- **F-3 records:** settled 2026-11-20 (owner: copy all five): the five acceptance records and their five run files (`data/conversion`, `data/eval/*__converted__*`, dev runs of 2026-11-16) were copied with `podman cp` into the data volume of `mia_mia_1` (`/opt/mia/MIA/data`), `mia` restarted; `bound_checks` in the container returns all five skills. **Path per skill: research, plan_question, verify_claim, extract_claims, verify_computable run on the graph path; lookup, review, search and everything else on the old runner.** Records live in the volume, not in git or the image. Not timed on both paths (V2-4 goes to Validate). No call through the UI was made to see the graph path run.
 - Carried from the handover: TD-86 to TD-90, V2-6, TD-81 to TD-85, `sandbox_backend: none` (script check off, TD-24), failing master acceptance scripts `test_decide_guard.py`, `test_judge_calibration.py`.
 - Not installed: character page, Kokoro voice, voice lines (MIA answers in text).
 
@@ -36,7 +36,7 @@ Previous image `localhost/mia:pre-v0.2.1` (id `c58b66d1...`, built 2026-11-07). 
 - `deploy/build.sh` is a new script without a requirement id; Plan assigns one (A-BUILD note).
 
 ## Validation hand-over
-Ready for validation: **not yet**, after F-2 and F-3 are settled. Version frozen during validation: v0.2.1 image `439429d0b8d5`.
+Ready for validation: **yes** (F-2 and F-3 settled 2026-11-20; owner merges this branch). Version frozen during validation: v0.2.1 image `439429d0b8d5`.
 
 ## Agent deployment
 
@@ -70,4 +70,4 @@ No `eval_decide` against the baseline file (it is not part of the tag checkout's
 Previous image `pre-v0.2.1`; model digests unchanged (no pin change, nothing pulled or removed). Tested 2026-11-20: PASS (see above).
 
 ### Frozen during validation
-Pins and skill versions to be frozen from the day F-2 and F-3 are settled; no pulls, no skill edits on the target. Run logs: in the data volume `mia_mia-data` (histories, logs); retention and feedback controls as in v0.1.0 (not changed).
+Pins and skill versions frozen from 2026-11-20 (F-2 and F-3 settled); no pulls, no skill edits on the target. Run logs: in the data volume `mia_mia-data` (histories, logs); retention and feedback controls as in v0.1.0 (not changed).
