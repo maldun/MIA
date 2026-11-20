@@ -54,3 +54,41 @@ export function connectionFields(link) {
 
 /** the complete stored content as plain text */
 export const fullText = (item) => JSON.stringify(item, null, 2);
+
+/** vis-network draws the label of a hexagon outside the shape (or not at all), so the loop-controlling step is drawn here: a hexagon that fits its text,
+ *  the step name and its marks inside. `untrusted` is the set of step IDs drawn with a dashed border, like the other untrusted steps. */
+export function makeHexagonRenderer(colors, untrusted = new Set()) {
+  return ({ ctx, id, x, y, state, label }) => {
+    const lines = String(label ?? '').split('\n');
+    const font = '14px system-ui, sans-serif';
+    ctx.font = font;
+    const lineHeight = 17, padX = 22, padY = 10;
+    const width = Math.max(...lines.map((l) => ctx.measureText(l).width)) + 2 * padX;
+    const height = lines.length * lineHeight + 2 * padY;
+    const tip = Math.min(18, height / 2);
+    return {
+      drawNode() {
+        ctx.save();
+        ctx.beginPath();
+        const pts = [[x - width / 2, y], [x - width / 2 + tip, y - height / 2], [x + width / 2 - tip, y - height / 2], [x + width / 2, y], [x + width / 2 - tip, y + height / 2], [x - width / 2 + tip, y + height / 2]];
+        pts.forEach(([px, py], i) => (i ? ctx.lineTo(px, py) : ctx.moveTo(px, py)));
+        ctx.closePath();
+        ctx.fillStyle = colors.fill;
+        ctx.fill();
+        ctx.lineWidth = state?.selected ? 3 : 1;
+        ctx.strokeStyle = colors.line;
+        if (untrusted.has(id)) ctx.setLineDash([3, 3]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = colors.text;
+        ctx.font = font;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        lines.forEach((line, i) => ctx.fillText(line, x, y - ((lines.length - 1) * lineHeight) / 2 + i * lineHeight));
+        ctx.restore();
+      },
+      drawExternalLabel() {},
+      nodeDimensions: { width, height },
+    };
+  };
+}

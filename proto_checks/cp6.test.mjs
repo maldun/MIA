@@ -4,7 +4,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import { SHAPES, groupOf, marksOf, labelOf, fieldsOf, connectionFields } from '../graph_app_v2/step-marks.js';
+import { SHAPES, groupOf, marksOf, labelOf, fieldsOf, connectionFields, makeHexagonRenderer } from '../graph_app_v2/step-marks.js';
 import { renderPanel, renderStepList } from '../graph_app_v2/panel.js';
 import { loadSettings, saveSettings, DEFAULTS, KEY, edgeSmooth } from '../graph_app_v2/settings.js';
 
@@ -100,4 +100,31 @@ test('NFR-13: the page loads nothing from outside: no address with another host 
     const found = [...text.matchAll(/https?:\/\/([^\s"'`)<>/]+)/g)].map((m) => m[1]).filter((h) => !/^(127\.0\.0\.1|localhost)/.test(h));
     assert.deepEqual(found, [], `${f} names an outside address`);
   }
+});
+
+// a stand-in canvas that records what is drawn
+function fakeCanvas() {
+  const calls = [];
+  const ctx = { font: '', measureText: (t) => ({ width: String(t).length * 8 }), save() {}, restore() {}, beginPath() {}, closePath() {}, fill() {}, stroke() {},
+    moveTo: (...a) => calls.push(['moveTo', ...a]), lineTo: (...a) => calls.push(['lineTo', ...a]), setLineDash: (d) => calls.push(['dash', d]), fillText: (...a) => calls.push(['text', ...a]) };
+  return { ctx, calls };
+}
+
+test('FR-50: the hexagon of a loop-controlling step has the step name and its marks inside, sized to fit them', () => {
+  const { ctx, calls } = fakeCanvas();
+  const r = makeHexagonRenderer({ fill: '#fff', line: '#000', text: '#111' })({ ctx, id: 'loop.review', x: 100, y: 50, state: {}, label: 'loop.review\ntrusted · tested' });
+  r.drawNode();
+  assert.deepEqual(calls.filter((c) => c[0] === 'text').map((c) => c[1]), ['loop.review', 'trusted · tested']);
+  assert.equal(calls.filter((c) => c[0] === 'lineTo' || c[0] === 'moveTo').length, 6);          // six corners
+  assert.ok(r.nodeDimensions.width >= 'trusted · tested'.length * 8);                           // it fits its longest line
+  assert.ok(r.nodeDimensions.height >= 2 * 17);
+  assert.equal(typeof r.drawExternalLabel, 'function');                                         // nothing is drawn outside
+});
+
+test('FR-50: an untrusted loop-controlling step is drawn with a dashed border like the other untrusted steps', () => {
+  const a = fakeCanvas(), b = fakeCanvas();
+  makeHexagonRenderer({ fill: '#fff', line: '#000', text: '#111' }, new Set(['x']))({ ctx: a.ctx, id: 'x', x: 0, y: 0, state: {}, label: 'x\nUNTRUSTED' }).drawNode();
+  makeHexagonRenderer({ fill: '#fff', line: '#000', text: '#111' }, new Set(['x']))({ ctx: b.ctx, id: 'y', x: 0, y: 0, state: {}, label: 'y' }).drawNode();
+  assert.ok(a.calls.some((c) => c[0] === 'dash' && c[1].length === 2));
+  assert.ok(!b.calls.some((c) => c[0] === 'dash' && c[1].length === 2));
 });

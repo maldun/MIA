@@ -2,7 +2,7 @@
 import { visData, visOptions } from './graph-view.js';
 import { filterGraphs, entryLabel } from './list-filter.js';
 import { withProblemMarks } from './problems.js';
-import { groupOf, labelOf, SHAPES } from './step-marks.js';
+import { groupOf, labelOf, makeHexagonRenderer } from './step-marks.js';
 import { renderPanel, renderStepList } from './panel.js';
 import { loadSettings, saveSettings, edgeSmooth } from './settings.js';
 import { applyPositions, positionsOf, arrangementNote } from './arrangement.js';
@@ -120,7 +120,9 @@ function draw() {
   const options = visOptions(colors());
   options.edges.smooth = edgeSmooth(settings);
   options.interaction.keyboard = true;
-  options.groups.master = { shape: SHAPES.master, color: options.groups.process.color };
+  const untrusted = new Set(nodes.filter((n) => current.steps[n.id] && current.steps[n.id].trust !== 'trusted' && (current.steps[n.id].kind === 'master' || current.steps[n.id].kind === 'transform')).map((n) => n.id));
+  const c = colors();
+  options.groups.master = { shape: 'custom', ctxRenderer: makeHexagonRenderer({ fill: c.process, line: c.line, text: c.text }, untrusted) };   // a hexagon with its name inside
   options.groups.missing = { shape: 'box', color: { background: 'transparent', border: '#b3261e' }, shapeProperties: { borderDashes: [5, 5] } };
   options.physics = { enabled: settings.physics && !placed.fixed, solver: 'barnesHut', stabilization: { enabled: true, iterations: 250, fit: true } };
   network?.destroy();
