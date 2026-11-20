@@ -132,6 +132,7 @@ As in the subgoal specs.
 |---|---|---|
 | G-V4 viewer, look and data path (round 01, the earlier `graphview` prototype) | accepted | `prototype/rounds/01/prototype-report.md` |
 | G-V4 graph path slice, run 1 (round 02): storage, transfer and sync, rules and refusal before a run, viewer, editor, edit log, playback and comparison; MVP level | accepted | `prototype/rounds/02/prototype-report.md`, authorized by the owner in `prototype/rounds/02/run.md` (2026-11-20); built in 12 checkpoints on `prototype/g-v4`; the owner's validation is `prototype/rounds/02/validation.md`; what is carried into Plan is decided in the carry-over table of the report (the owner decides) |
+| G-V4.GRAPHSTORE.CORE, prototype expansion (round 03): context graphs stored, the same cases on PostgreSQL, fault injection at every write position; MVP level | accepted | `prototype/rounds/03/prototype-report.md`, authorized by the owner in `prototype/rounds/03/run.md` (2026-11-21); the owner's validation is `prototype/rounds/03/validation.md` |
 
 ## 7. References
 - Subgoal specs: `../G-V4.GRAPHSTORE/`, `../G-V4.GRAPHAPI/`, `../G-V4.VIEW/`, `../G-V4.EDIT/`, `../G-V4.REPLAY/` (`top-level-spec.md`)
