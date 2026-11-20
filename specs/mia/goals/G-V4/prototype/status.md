@@ -2,12 +2,12 @@
 
 Single source for what the demonstrator can show (`dev-workflow/references/prototyping.md`). Updated with every checkpoint and at merges.
 
-Demonstrator deployed at: not yet (worktree `../MIA-prototype-g-v4`, branch `prototype/g-v4`; round 01 ran from `serve.py files 8765`) · Last updated: 85efcc21 (CP5), 2026-11-20
+Demonstrator deployed at: not yet (worktree `../MIA-prototype-g-v4`, branch `prototype/g-v4`; round 01 ran from `serve.py files 8765`) · Last updated: 80bd08df (CP6), 2026-11-20
 
 | Part / feature | Requirement IDs | State (mock / working / real / not yet / retired) | Made real by task | Commit | Date | Notes |
 |---|---|---|---|---|---|---|
 | viewer page: login, list with name filter, drawing, problems named and marked (`graph_app_v2/`) | FR-48, FR-49 | working | – | 85efcc21 | 2026-11-20 | CP5: builds on round 01; left panel still shows the JSON of the selected item (CP6 makes it read-only fields); physics and rounded edges as in round 01; context graphs not in the slice; reuse decision: see reuse-map.md (not yet written) |
-| viewer page: left panel, settings menu, physics, rounded edges (round 01) | FR-51, FR-52, FR-53 | working | – | – | 2026-11-20 | from round 01, now inside `graph_app_v2`; no saved arrangement, settings not remembered yet |
+| viewer page: physics, rounded edges, left panel (round 01) | FR-52 | working | – | – | 2026-11-20 | from round 01 inside `graph_app_v2`; no saved arrangement yet (CP7) |
 | graph routes for the stored form (round 01) | FR-48 | working | – | – | 2026-11-20 | two routes; to be replaced by the prototype of IF-104 v2 in CP5 |
 | scoped record IDs `<graph>/<local>` and the storage refusal | FR-60 | working | – | 2f9312f8 | 2026-11-20 | CP1: `graph_tables.py` (rule `unscoped_id`), `graph_model.py`; 154 step records for 107 local names; files and PostgreSQL |
 | save without half graphs, versions, authors, step history | FR-57, NFR-16 | working | – | 2f9312f8 | 2026-11-20 | CP1: everything checked before the first write; unchanged save = no version; interrupted save leaves nothing visible; `proto_checks/cp1_check.py` |
@@ -16,7 +16,8 @@ Demonstrator deployed at: not yet (worktree `../MIA-prototype-g-v4`, branch `pro
 | sync live store to copy | FR-93, NFR-15 | not yet | – | – | – | CP3 |
 | eight rules and the check route | FR-63, FR-64 | not yet | – | – | – | CP4 |
 | graph backend with login, list, graph and versions (IF-104 v2 read side draft) | FR-48, NFR-12 | working | – | 85efcc21 | 2026-11-20 | CP5: `graph_proto_app.py`, existing accounts and session cookie; `GET /api/v2/graphs`, `/api/v2/graphs/<id>[?version=n]`, `/versions`; the history list in the page comes in CP7 |
-| kinds and trust marks, read-only fields, text-only display | FR-50, FR-51, FR-54 | not yet | – | – | – | CP6 |
+| kinds by shape and words, trust and lifecycle marks, code mark, read-only fields with the full stored text, text-only display | FR-50, FR-51, FR-54 | working | – | 80bd08df | 2026-11-20 | CP6: `graph_app_v2/step-marks.js`, `panel.js`; trust and lifecycle from the toolbox (shipped entries seeded in memory); code mark = input connection with role `code`; **the mark "changed since trusted" is a mock**: nothing records the trusted content yet (FR-67, GRAPHAPI.CODE), the page shows it when the backend says so |
+| settings menu remembered per browser, legend, step list for the keyboard, clearer status line | FR-53, NFR-14 | working | – | 80bd08df | 2026-11-20 | CP6: `settings.js`; light and dark by the system setting (round 01 CSS); phone layout out of scope (D-389) |
 | shared arrangement, history list with stepping | FR-52, FR-55 | not yet | – | – | – | CP7 |
 | editor: change, rule feedback, keep, restore, undo | FR-68, FR-69, FR-70, FR-71, FR-72, FR-73, FR-91, FR-92, FR-95, NFR-19 | not yet | – | – | – | CP8, CP9 |
 | arrangement saving, copy a step | FR-74, FR-94 | not yet | – | – | – | CP10 |

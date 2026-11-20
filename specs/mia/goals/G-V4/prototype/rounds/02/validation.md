@@ -10,11 +10,11 @@ Date: – · Prototype state: branch prototype/g-v4 · Where it ran: –
 |---|---|---|---|---|
 | FR-48 | Given the sample store, start the viewer (`graph_proto_app.py --store files:/tmp/gs/v`), log in, type part of a name into the filter, pick a graph; then start it on the database store and compare | – | not tried | – |
 | FR-49 | Given the graph `sample.broken`, open it: a dashed connection to a marked missing step and the problem named above the picture | – | not tried | – |
-| FR-50 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
-| FR-51 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
+| FR-50 | Given the sample store with --code, open `sample.code`: three shapes for data, processing and loop-controlling steps; an UNTRUSTED code step; trusted marks on the others; the legend above the picture | – | not tried | – |
+| FR-51 | Given a graph, click a step: labelled fields on the left, `Full stored text` opens the complete content; click a connection; click empty space: it clears | – | not tried | – |
 | FR-52 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
-| FR-53 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
-| FR-54 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
+| FR-53 | Given the settings menu, switch the connections to straight and physics off, reload the page: the choices are still there | – | not tried | – |
+| FR-54 | Given `sample.code` with a step named like an HTML tag and a value that tells the viewer what to do: both appear as plain text, nothing happens | – | not tried | – |
 | FR-55 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
 | FR-57 | Given graphs stored, run `python proto_checks/cp1_demo.py`; look at the versions of `lookup` after a change and after saving the same graph again | – | not tried | – |
 | FR-58 | Given the same operations on files and on the database, run `python proto_checks/cp2_check.py` (check 1 and 2) and compare | – | not tried | – |
@@ -43,8 +43,8 @@ Date: – · Prototype state: branch prototype/g-v4 · Where it ran: –
 | NFR-10 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
 | NFR-11 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
 | NFR-12 | Given you are not logged in, open `/api/v2/graphs` and a graph: nothing is shown; log in once, log out | – | not tried | – |
-| NFR-13 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
-| NFR-14 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
+| NFR-13 | Given the browser's network tab while you use the viewer for a while: only requests to 127.0.0.1 | – | not tried | – |
+| NFR-14 | Given only the keyboard: Tab to the graph list and the step list, Enter selects; the settings button opens with Enter and closes with Escape; switch the system between light and dark | – | not tried | – |
 | NFR-15 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
 | NFR-16 | Given a graph with a cycle and an interrupted save, look at the demo output and at the checks 8 to 10 of `python proto_checks/cp1_check.py files` | – | not tried | – |
 | NFR-18 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
