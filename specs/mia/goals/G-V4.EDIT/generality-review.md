@@ -44,7 +44,24 @@ Two profiles to begin with: **workflow** (the fixed list of IF-301: data, proces
 | REPLAY | none: already general |
 | CORE | none beyond round 03 (both kinds are stored) |
 
-## 5. Open for the owner
+## 5. Decided by the owner (2026-11-21, D-403)
+1. **Principle:** one editor, a profile per graph kind, **workflow first, context later**: the design is general from the start; the context profile is built when CONTEXT is planned. (This replaces the proposal in section 4 that EDIT's prototype round shows both kinds.)
+2. **Context node types:** a fixed list in the context profile for now, the builder's categories later (goal C).
+3. **Copy of a step (FR-94):** only within the same kind of graph.
+4. **Gate:** the plans of EDIT, RULES and VIEW follow the profile design and wait for the amendments below; CORE goes on.
+
+## 6. Proposed amendments of the top-level specs (not applied; the owner approves each)
+| Spec | Now | Proposed |
+|---|---|---|
+| EDIT FR-92 | "…the known fields of each kind of step as a form with checks…" Outcome: "Given a step of each kind (data, processing, loop-controlling)…" | "…the known fields of each type of node of the graph's kind as a form with checks, and any other field as editable text." Outcome: "Given a node of each type of a workflow graph (data, processing, loop-controlling), when the owner opens it for change, then…" (rest unchanged); the profile of a further kind adds its types later |
+| RULES FR-63 | "…one set of eight graph rules to a graph wherever it is checked…" | "…one set of graph rules **for the kind of the graph** wherever it is checked, in the same fixed order…"; the outcome keeps the eight rules of workflow graphs and says that the rule set of a context graph is written in the same place (its content is CONTEXT's, FR-75) |
+| VIEW FR-50 | "…the kind of each step, and the trust and lifecycle state of each processing step…" | "…the type of each node, and for a node that uses a tool its trust and lifecycle state…"; the outcome keeps the three workflow types as the example |
+| CONTEXT FR-75 | "…with the structural rules of workflow graphs and the rules for categories and budgets" | unchanged; **note:** which of the workflow rules are structural for a context graph (identity, ends and duplicates are; order and the data/processing alternation probably are not) is decided in CONTEXT's plan; the prototype round 03 assumed identity and ends only (ASM-4) |
+| EDIT scope and CONTEXT scope | EDIT: workflow editor; CONTEXT: edit context graphs and view a run's graph | EDIT: the general editor (core and workflow profile); CONTEXT: the context profile, its rule set, the run view; no change of the requirements' text |
+
+## 7. Still open
+The wording of the amendments in section 6 (approve, change or leave).
+
 1. Is the principle right: one editor, a profile per kind, workflow and context as the first two?
 2. Where do the node types and field schemas of a context graph come from: the categories of the builder (goal C), or a fixed list in the profile until then?
 3. May a step be copied between graphs of different kinds (FR-94)?
