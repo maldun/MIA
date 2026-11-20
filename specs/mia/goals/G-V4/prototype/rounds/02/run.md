@@ -11,6 +11,8 @@
 <!-- git worktree add ../MIA-prototype-g-v4 -b prototype/g-v4 <commit of the approved TLS and this run.md> -->
 
 ## Slicing: checkpoints and breakpoints
+**Order changed on 2026-11-20 (D-399):** the owner wants to validate the earlier subgoals through the viewer, so VIEW (CP5 to CP7) is built next; the sync (CP3) and the rules (CP4) follow after CP7. The table keeps the original numbers.
+
 A checkpoint ends with: the demonstrator runs, `status.md` updated, a commit on the branch, one short report line. A breakpoint (★) is the end of a subgoal: the report section is written. **Change of 2026-11-20 (D-398):** the run does not stop at a breakpoint for validation; the owner starts validating at a later checkpoint (the agent proposes one), with `rounds/02/validation.md` (one row per item).
 
 | Checkpoint | Subgoal | What the demonstrator shows afterwards (the question: what is new?) | Items |
