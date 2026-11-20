@@ -1,6 +1,6 @@
 # Top-Level Specification: Graph rules and the run of a stored graph (G-V4.GRAPHAPI)
 
-**Status:** Approved by the owner as revised (maldun, 2026-11-20, D-390, D-391)
+**Status:** Approved by the owner as revised (maldun, 2026-11-20, D-390, D-391); amended by the owner 2026-11-21 (D-403 to D-405): FR-63 and FR-64 reworded, one rule set per kind of graph, a kind that cannot run is refused
 **Owner:** Stefan Reiterer   **Date:** 2026-11-20
 **Project / deliverable:** MIA, subgoal GRAPHAPI of G-V4. Reviews how a graph is checked and run (item 2 of the owner's list). Requirement IDs are provisional (continuing after FR-56 and NFR-14 of the VIEW spec); Plan assigns them in `requirements.md`.
 
@@ -15,10 +15,10 @@ Storing graphs (G-V4.GRAPHSTORE); drawing and editing (VIEW, EDIT); live trust, 
 
 ## 3. Top-level requirements
 ### 3.1 Functional requirements
-- FR-63: The system shall apply one set of eight graph rules to a graph wherever it is checked, in the same fixed order, and name every broken rule.
-  - Outcome: Given a graph that breaks two rules, when it is checked while saving, while editing and before a run, then the same broken rules are listed in the same order every time, each with its steps or connections; the eight rules and their order are written in one place: ids, kind of step, connections to missing steps and duplicate connections, no two data steps adjacent, one writer per piece of data, session setting and stop limit, no cycle.
-- FR-64: The system shall refuse to run a graph that breaks the rules or has a step input that nobody supplies, and name the broken part before any step has run.
-  - Outcome: Given a stored graph with a cycle, two writers of one piece of data, a connection to a missing step, two identical connections, or a step input that has no writer, no start value in the graph and no value given with the run, when the owner runs it, then no step runs, the run ends as refused and names each broken step, connection or input.
+- FR-63: The system shall apply one set of graph rules for the kind of the graph wherever it is checked, in the same fixed order, and name every broken rule.
+  - Outcome: Given a workflow graph that breaks two rules, when it is checked while saving, while editing and before a run, then the same broken rules are listed in the same order every time, each with its steps or connections; the eight rules of workflow graphs and their order are written in one place: ids, kind of step, connections to missing steps and duplicate connections, no two data steps adjacent, one writer per piece of data, session setting and stop limit, no cycle; the rule set of a context graph, and of any further kind of graph, is written in the same place and chosen by the kind of the graph.
+- FR-64: The system shall refuse to run a graph that breaks the rules, has a step input that nobody supplies or is of a kind that cannot run, and name the broken part before any step has run.
+  - Outcome: Given a stored graph with a cycle, two writers of one piece of data, a connection to a missing step, two identical connections, or a step input that has no writer, no start value in the graph and no value given with the run, when the owner runs it, then no step runs, the run ends as refused and names each broken step, connection or input; given a graph of a kind that cannot run, or of a kind the program does not know, then no step runs and the run ends as refused naming the kind.
 - FR-65: The system shall run the steps of a stored graph one after the other in a fixed order in which every step runs after the steps it reads from.
   - Outcome: Given a stored graph, when it runs, then every step starts only after all the steps that supply its inputs have finished, no two steps run at the same time, and the same graph with the same inputs runs the same steps in the same order.
 - FR-66: The system shall run a piece of code that is stored in a graph only through a tool and a step the owner has trusted, never by itself.

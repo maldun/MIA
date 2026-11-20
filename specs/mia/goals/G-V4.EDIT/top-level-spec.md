@@ -1,6 +1,6 @@
 # Top-Level Specification: Graph editor (G-V4.EDIT)
 
-**Status:** Approved by the owner (maldun, 2026-11-20, D-389)
+**Status:** Approved by the owner (maldun, 2026-11-20, D-389); amended by the owner 2026-11-21 (D-403 to D-405): the editor is general, the kind of the graph selects its description (FR-72, FR-73, FR-92, FR-94 reworded)
 **Owner:** Stefan Reiterer   **Date:** 2026-11-20
 **Project / deliverable:** MIA, subgoal EDIT of G-V4. Adds editing to the graph viewer (item 3b of the owner's list). Requirement IDs are provisional (continuing after FR-56 and NFR-14 of the VIEW spec); Plan assigns them in `requirements.md`.
 
@@ -9,9 +9,9 @@ The owner wants to change a graph in the web app instead of in files: change a s
 
 ## 2. Scope
 ### In scope
-Changing steps, connections and their fields; rule check before keeping; new versions and restoring; conflicts; keeping the arrangement of a graph; trust of changed steps. Requirements FR-68 to FR-74, FR-91, FR-92, FR-94, FR-95 (new numbers for undo, the field form, copying a step and the live store), NFR-18, NFR-19.
+The general editor: its core (add, remove, change nodes and connections and their fields, undo, versions, restore, conflicts) and the description of the workflow kind (types data, processing, loop-controlling); the kind of the graph selects the description, the rule set and the copy rule (D-403, D-404); rule check before keeping; new versions and restoring; conflicts; keeping the arrangement of a graph; trust of changed steps. Requirements FR-68 to FR-74, FR-91, FR-92, FR-94, FR-95 (new numbers for undo, the field form, copying a step and the live store), NFR-18, NFR-19.
 ### Out of scope (non-goals)
-Drawing and history (G-V4.VIEW); playback and comparison (G-V4.REPLAY); editing context graphs (G-V4.CONTEXT, owner 2026-11-20); the skills window and who may promote a skill (goal B).
+Drawing and history (G-V4.VIEW); playback and comparison (G-V4.REPLAY); the description of the context kind and its rule set (G-V4.CONTEXT, owner 2026-11-20; workflow first, context later, D-403); the skills window and who may promote a skill (goal B).
 
 ## 3. Top-level requirements
 ### 3.1 Functional requirements
@@ -24,18 +24,18 @@ Drawing and history (G-V4.VIEW); playback and comparison (G-V4.REPLAY); editing 
 - FR-71: The system shall keep every kept change as a new version and leave earlier versions reachable.
   - Outcome: Given a graph at version 3, when the owner keeps a change, then version 4 exists with the change, version 3 is still there as it was, and version 4 names the owner and the time.
 - FR-72: The system shall not overwrite a graph that changed while the owner was editing it.
-  - Outcome: Given a graph opened at version 3 that another session changes to version 4, when the owner tries to keep a change made on version 3, then nothing is overwritten and the owner is told that the graph has changed.
+  - Outcome: Given a graph opened at version 3 that another session changes to version 4, when the owner tries to keep a change made on version 3, then nothing is overwritten and the owner is told that the graph has changed; given a graph of a kind the program does not know, when the owner tries to keep a change, then it is refused with the reason unknown kind and nothing is written.
 - FR-73: The system shall let the owner make an earlier version the current one again.
-  - Outcome: Given a graph at version 5, when the owner restores version 2, then version 6 exists with the content of version 2, and versions 1 to 5 are unchanged.
+  - Outcome: Given a graph at version 5, when the owner restores version 2, then version 6 exists with the content of version 2, and versions 1 to 5 are unchanged; given a graph of a kind the program does not know, then the restore is refused with the reason unknown kind and nothing is written.
 - FR-74: The system shall keep where the owner placed the steps of a graph between visits, the same for everyone who opens it, without making a new version.
   - Outcome: Given a graph in which the owner has moved steps, when anyone opens it again, then the steps are where they were last left and the graph's version list is unchanged; if two accounts move the same step, the last move counts.
 - FR-91: The system shall let the owner undo and redo the changes of the open editing session one by one before they are kept.
   - Outcome: Given an editing session with three changes that are not yet kept, when the owner undoes the last two and redoes one, then the drawn graph shows the first and second change only, and nothing has been kept or recorded as a version.
-- FR-92: The system shall offer the known fields of each kind of step as a form with checks, and any other field as editable text.
-  - Outcome: Given a step of each kind (data, processing, loop-controlling), when the owner opens it for change, then its known fields appear as labelled form fields, any further field appears as text the owner can edit, and a value that does not fit a form field is refused with the reason before it is kept.
+- FR-92: The system shall offer the known fields of each type of node of the graph's kind as a form with checks, and any other field as editable text.
+  - Outcome: Given a node of each type of a workflow graph (data, processing, loop-controlling), when the owner opens it for change, then its known fields appear as labelled form fields, any further field appears as text the owner can edit, and a value that does not fit a form field is refused with the reason before it is kept; a further kind of graph brings the types and fields of its own.
 
-- FR-94: The system shall let the owner copy a step into another graph as an independent copy.
-  - Outcome: Given a step in one graph, when the owner copies it into another graph, then the other graph has a step with the same content and its own history from that moment, and a later change to either step does not change the other.
+- FR-94: The system shall let the owner copy a step into another graph of the same kind as an independent copy.
+  - Outcome: Given a step in one graph, when the owner copies it into another graph of the same kind, then the other graph has a step with the same content and its own history from that moment, and a later change to either step does not change the other; given a graph of another kind or of a kind the program does not know, then the copy is refused naming both kinds and nothing is written.
 
 - FR-95: The system shall write every kept change to the live store, and make the editor read-only when the live store cannot be reached.
   - Outcome: Given MIA running on a copy of the graphs, when the owner keeps a change, then it is stored in the live store and reaches the copy at the next sync; given the live store cannot be reached, when the owner opens a graph, then it can be looked at, the editor says that changing is not possible now and why, and nothing is kept.

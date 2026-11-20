@@ -1,6 +1,6 @@
 # Top-Level Specification: Graph viewer (G-V4.VIEW)
 
-**Status:** Approved by the owner (maldun, 2026-11-20, D-389), with the phone aspects moved out of scope
+**Status:** Approved by the owner (maldun, 2026-11-20, D-389), with the phone aspects moved out of scope; amended by the owner 2026-11-21 (D-403 to D-405): FR-48 and FR-50 reworded for the kind of the graph
 **Owner:** Stefan Reiterer   **Date:** 2026-11-20
 **Project / deliverable:** MIA, subgoal VIEW of G-V4 (item 3a of the owner's list). Refines FR-22 (graph app, legacy text stays, D-362); the later subgoals EDIT and REPLAY build on it.
 
@@ -25,13 +25,13 @@ The prototype `prototype/graphview` shows the data path and the look; it has no 
 
 ### 3.1 Functional requirements
 - FR-48: The system shall let the owner open any stored workflow graph or context graph and find it by name.
-  - Outcome: Given graphs stored in the live store, when the owner opens the viewer, then a list of all stored graphs is offered, each marked as workflow graph or context graph, the list narrows as the owner types part of a name, and choosing one shows that graph; given the same graphs kept as a set of files, then the list and the picture are the same.
+  - Outcome: Given graphs stored in the live store, when the owner opens the viewer, then a list of all stored graphs is offered, each marked with its kind (workflow graph or context graph), the list narrows as the owner types part of a name, and choosing one shows that graph; given the same graphs kept as a set of files, then the list and the picture are the same; given a graph of a kind the viewer does not know, then it is listed with its kind named and shown as plain steps and connections, read-only.
 - FR-96: The system shall, when a language model is available, let the owner describe in words which graph is wanted and propose matching graphs.
   - Outcome: Given the owner types a description such as "the graph that checks claims against sources", when the model is available, then the viewer proposes up to a few matching graphs, best first, each with a short reason, and choosing one opens it; when the model is not available, then the owner is told that the search by description is not available and the name filter of FR-48 still works; a proposal only selects a graph to open and changes nothing.
 - FR-49: The system shall draw every step and connection of a stored graph, and say what it cannot draw.
   - Outcome: Given a stored graph with N steps and M connections, when it is opened, then N steps and M connections are shown, each connection with its direction; if something is wrong (for example a connection to a step that does not exist) it is named beside the picture and marked on the drawing, for instance as a broken line to a marked missing step, and nothing is dropped silently.
-- FR-50: The system shall show the kind of each step, and the trust and lifecycle state of each processing step, at a glance.
-  - Outcome: Given a graph with data, processing and loop-controlling steps, when it is shown, then the owner can tell the three kinds apart without opening any of them and without relying on colour alone, and each processing step shows whether it is trusted, whether it changed since it was trusted, and whether it is draft, tested or retired.
+- FR-50: The system shall show the type of each node, and the trust and lifecycle state of each node that uses a tool, at a glance.
+  - Outcome: Given a workflow graph with data, processing and loop-controlling steps, when it is shown, then the owner can tell the three types apart without opening any of them and without relying on colour alone, and each processing step shows whether it is trusted, whether it changed since it was trusted, and whether it is draft, tested or retired; the types of a graph of another kind are shown by the same rule, taken from the description of that kind.
 - FR-51: The system shall show the full content of a selected step or connection.
   - Outcome: Given a drawn graph, when the owner selects a step or a connection, then its known values appear beside the picture as labelled read-only fields and the full stored text is available next to them as plain text, and selecting nothing clears it.
 - FR-52: The system shall arrange the graph so that it reads naturally and keeps what the owner arranged.
