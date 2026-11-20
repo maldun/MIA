@@ -9,7 +9,7 @@ Opened 2026-11-20 on the owner's request: "G-V4 starts a bigger rework". The own
 - Supervision: supervised
 - Accepted by: Stefan Reiterer (owner)
 - Line of work: goal/v4
-- Subgoals (proposed, owner 2026-11-20, D-360): G-V4.GRAPHSTORE, then G-V4.GRAPHAPI, then G-V4.VIEW, G-V4.EDIT, G-V4.REPLAY, with G-V4.LEFTOVER alongside, and G-V4.VALIDATE last
+- Subgoals: G-V4.GRAPHSTORE, then G-V4.GRAPHAPI, then G-V4.VIEW, G-V4.EDIT, G-V4.REPLAY, with G-V4.LEFTOVER alongside, and G-V4.VALIDATE last
 - Status: Proposed
 
 ## Owner's scope of 2026-11-20 (D-360)
@@ -27,12 +27,21 @@ New outcome criteria OC-6 to OC-9 are in the table; OC-1 to OC-5 stay as propose
 | OC-1 | Given a skill that runs on the graph path, when the owner changes its trust or lifecycle, or asks it to stop, or it reaches its budget, then the run follows the owner's current setting and ends as the old runner would | FR-6, FR-7, FR-34 (TD-86, TD-87) |
 | OC-2 | Given the skills of the rework, when they are measured against their suites, then the decision rests on holdout cases labelled by the owner, not on the dev split alone | FR-6 (TD-88, TD-89, TD-90) |
 | OC-3 | Given an imported skill step that would do harm, when it is offered to MIA, then it is refused and a red-team case shows that | NFR-3 (V2-6, THR-011) |
-| OC-4 | Given the requirements, tests and records of G-V2 and G-V3, when they are checked, then no draft, stale scope wording or missing table entry from the lists of both goals remains | (V2-1 to V2-3, V2-8, TD-82 to TD-85) |
-| OC-6 | Given a graph in the files or in the database, when it is moved to the other, then it reads back identical with all versions | FR-40, owner 2026-11-20 (item 1) |
-| OC-7 | Given a stored graph, when a workflow is run or checked, then it reaches the runner as one directed graph, and the call of a code snippet in a graph goes through the toolbox with its trust, never directly | FB-02, owner 2026-11-20 (item 2) |
-| OC-8 | Given a stored graph, when the owner opens it in the web app, then it is drawn from the data source, can be edited with the graph rules applied, and every edit is stored and can be played back on the graph | FR-22, owner 2026-11-20 (item 3) |
-| OC-9 | Given the validation runs, when a workflow graph is found weak, then the owner improves it in the editor and the change is traceable in the edit log | owner 2026-11-20 (item 4) |
-| OC-5 | Given the finished rework, when the owner uses the version, then G-V2 and G-V3 are validated on it (G-V4.VALIDATE) | VAL-006, 007, 009, 012, 013 |
+| OC-4 | Given the requirements, tests and records of G-V2 and G-V3, when they are checked, then no draft, stale scope wording or missing table entry from the lists of both goals remains | FR-6, FR-34 (V2-1 to V2-3, V2-8, TD-82 to TD-85) |
+| OC-6 | Given a graph kept in one place, when the owner moves it to the other place (the files used for tests, or the database), then it is there with all its versions and reads back exactly as before | FR-40, owner 2026-11-20 (item 1) |
+| OC-7 | Given a skill with a stored graph, when the owner runs it, then the run follows exactly that graph, the same one the owner sees and edits, and a piece of code inside the graph runs only with the trust the owner has given it | FR-6, FR-40 (FB-02, owner 2026-11-20, item 2) |
+| OC-8 | Given a stored graph, when the owner opens it in the web app, then it is drawn as it is stored, the owner can change it, a change that breaks a graph rule is refused with the rule named, and every change can be played back on the graph | FR-22, owner 2026-11-20 (item 3) |
+| OC-9 | Given the validation runs, when a workflow graph turns out to be weak, then the owner improves it in the web app and can later see what was changed, when and why | FR-6, FR-22 (owner 2026-11-20, item 4) |
+| OC-5 | Given the finished rework, when the owner uses the version, then G-V2 and G-V3 are validated on it (G-V4.VALIDATE) | FR-6, FR-34, FR-46 (VAL-006, 007, 009, 012, 013) |
+
+## Measure ideas for Plan step 1a (technology dependent second layer, not outcomes)
+Written here so they are not lost; Plan turns them into `Kind: measure` items (Method, Metric, Reference, Detail in).
+| Outcome | Measure idea |
+|---|---|
+| OC-6 | round trip of the 15 converted skill graphs, both directions, files and PostgreSQL 16: identical content and version lists (the spike of GRAPHSTORE is the first run) |
+| OC-7 | the run record names the stored graph and its version; a run of each converted skill on the stored graph gives the same results as the converted-in-memory run on its suite (decided by `eval_decide.py`, pins of `eval-spec.md`); a code step without trust is refused in a red-team case |
+| OC-8 | demonstration TC-GA-016 plus contract suite of the graph interface; replay of the edit log on the first version gives the stored last version for every edit sequence of a seeded generator |
+| OC-9 | at least one workflow graph improved in a validation session, with its edit log shown to the owner |
 
 ## Dependencies and bounds
 | Item (DEP-n / HR-nnn) | Real or stand-in | Note |

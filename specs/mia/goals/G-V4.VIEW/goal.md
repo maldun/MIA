@@ -6,11 +6,17 @@ Proposed 2026-11-20 by the owner (maldun), D-360. Draft for Explore and Plan; no
 - Parent: G-V4
 - Statement: A minimal prototype of the Graph app (N-5) reads a stored graph through the backend API from the real data source (files or database) and draws it in the web app.
 - Exit criterion: the same graph is drawn from the files and from the database, as the owner checks in the web app (tests still to be written in Plan)
+- Subgoals: –
 - Supervision: supervised
 - Accepted by: Stefan Reiterer (owner)
 - Line of work: goal/v4.view (to be created)
 - Depends on: G-V4.GRAPHSTORE (one stored form; IF-104 stays or is amended)
 - Status: Proposed
+
+## Outcome criteria
+| ID | Expected outcome | Derived from |
+|---|---|---|
+| OC-1 | Given a stored graph in the files or in the database, when the owner opens it in the web app, then the graph is drawn with all its steps and connections, and it is the same picture from either place | OC-8 of G-V4 (FR-22) |
 
 ## Source
 N-5 log (`nodes/N-5-graph-app/implementation-log.md`): T-01 is a vis-network mockup that opens a JSON file; IF-104 mock A-36 is drafted, not installed; Q-5 and Q-6 (context graphs, node positions) open.

@@ -4,7 +4,7 @@ Proposed 2026-11-19 by the owner (maldun): the interface between the database an
 
 - Kind: subgoal
 - Parent: G-V4
-- Statement: A stored graph is turned into a networkx directed graph in one place, and the graph rules, the order of the nodes and the runner work on that graph.
+- Statement: A stored graph reaches the checks and the runner as one graph, built in one place, and the graph rules, the order of the steps and the run all work on it (networkx is the chosen means, a decision for the high-level spec).
 - Exit criterion: OC-1 to OC-3 below, checked by tests still to be written in Plan (no ids yet)
 - Supervision: supervised
 - Accepted by: pending (the owner records the agreement in the table below)
@@ -20,9 +20,9 @@ Proposed 2026-11-19 by the owner (maldun): the interface between the database an
 ## Outcome criteria
 | ID | Expected outcome | Derived from |
 |---|---|---|
-| OC-1 | Given any stored graph, when a workflow is run or checked, then the stored graph reaches the execution as one directed graph, built in one place from the database | owner 2026-11-19 |
-| OC-2 | Given the graphs and runs of the current tests, when the order, the rules and the run use the directed graph, then every result is the same as before (same order up to equal choices, same refusals with the same named nodes, same run result) | no regression |
-| OC-3 | Given a graph with master nodes, session nodes or a transform that reads several data nodes, when it is loaded, then everything the runner needs (node kind, type, stop criterion, edge role and `as` name) is on the loaded graph | REQ-RUN-030 to 035 |
+| OC-1 | Given any stored graph, when a workflow is run or checked, then the stored graph reaches the execution as one directed graph, built in one place from the database | OC-7 of G-V4 (FR-6, FR-40) |
+| OC-2 | Given the graphs and runs of the current tests, when the order, the rules and the run use the directed graph, then every result is the same as before (same order up to equal choices, same refusals with the same named nodes, same run result) | OC-7 of G-V4 (FR-6) |
+| OC-3 | Given a graph with master nodes, session nodes or a transform that reads several data nodes, when it is loaded, then everything the runner needs (node kind, type, stop criterion, edge role and `as` name) is on the loaded graph | OC-7 of G-V4 (REQ-RUN-030 to 035) |
 
 ## Dependencies and bounds
 | Item | Real or stand-in | Note |

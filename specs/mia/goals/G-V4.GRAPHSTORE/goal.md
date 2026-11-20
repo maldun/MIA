@@ -4,7 +4,7 @@ Proposed 2026-11-19 by the owner (maldun) in the design review of the graph stor
 
 - Kind: subgoal
 - Parent: G-V4
-- Statement: Every workflow graph and every context graph is stored in one form, the record form, and the library, the runner and the snapshots all use it.
+- Statement: Every workflow graph and every context graph has one stored truth, in the files or in the database, and the library, the runner and the snapshots all use it (the record form is the chosen means, a decision for the high-level spec).
 - Exit criterion: OC-1 to OC-3 below, checked by tests still to be written in Plan (no ids yet)
 - Supervision: supervised
 - Accepted by: pending (the owner records the agreement in the table below)
@@ -22,7 +22,7 @@ Proposed 2026-11-19 by the owner (maldun) in the design review of the graph stor
 | ID | Expected outcome | Derived from |
 |---|---|---|
 | OC-1 | Given a workflow graph or a context graph, when it is saved, read, changed and listed, then there is one stored truth for it, with every edit a new version and no version deleted | FR-40, owner 2026-11-19 |
-| OC-2 | Given the graphs stored today, when they are moved to the new form, then each reads back as before (same nodes, edges and versions as far as the old form could hold them) and the owner can compare old and new before anything old is removed | owner 2026-11-19 |
+| OC-2 | Given the graphs stored today, when they are moved to the new form, then each reads back as before (same nodes, edges and versions as far as the old form could hold them) and the owner can compare old and new before anything old is removed | OC-6 of G-V4 (FR-40) |
 | OC-3 | Given a snapshot taken before and one after the change, when the owner restores either, then the graphs are as they were at that snapshot | FR-47, OC-1 of G-V2.SNAPSHOT |
 
 ## Added 2026-11-20 (D-360)

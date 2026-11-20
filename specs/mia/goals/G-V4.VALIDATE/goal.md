@@ -10,7 +10,7 @@ Opened 2026-11-20 on the owner's request: G-V2 (v0.2.x) and G-V3 are in the Vali
 - Accepted by: Stefan Reiterer (owner)
 - Line of work: goal/v4.validate
 - Subgoals: –
-- Status: Draft
+- Status: Proposed
 
 ## Validation goals collected
 | From | Criterion | What it settles | Source |
