@@ -2,7 +2,19 @@
 
 ## [Unreleased]
 
-### Added
+### Added (G-V2, skill rework foundation)
+- Skills are records: one description gives command, steps and knowledge; a wrong one is refused with the reason. Graphs and skill sets are stored as node and edge records (IF-302).
+- Toolbox with trust status: a step from outside does not run until the owner allows it (IF-402 door).
+- Snapshots of the skill set with restore; the state before restoring is kept (IF-102 v7, IF-203 v2, IF-302 v13 and v14).
+- The five skills with a suite (research, plan_question, verify_claim, extract_claims, verify_computable) run from records on the workflow graph when an acceptance record exists (`conversion_dir`, default `data/conversion`, written with `tools/accept_conversion.py`); dev decisions PASS on MP-light.
+
+### Known limitations (G-V2)
+- TD-86 live trust and lifecycle on the converted path; TD-87 budgets and stop there; TD-88 AC-34 decided on dev only (no holdout); TD-89 `research.escalate@3` in the check, `@1` in the skill; TD-90 real half of the IF-103 contract suite skipped (all DRAFT until signed). No red-team case for THR-011 (V2-6). `test_decide_guard.py` and `test_judge_calibration.py` fail (`behaviour.FUNCTIONS`).
+
+### For deployment
+- The stack starts from a fresh copy (SMOKE-MIA-001 green 2026-11-20). `deploy/build.sh` does not exist yet (gap for Phase 6).
+
+### Added (G-V3)
 - G-V3.PANEL: the Skill run view, one strip across the full width below the character box and the chat. It shows the skill that runs (or the last run): header, phases, Time and Searches meters, counts, pause, resume and stop, the reason of a failed or stopped run and the elements a skill reports; a collapsed Full run part holds the result, your answers, the material, the files and the counts. The chat links to it (`#run=<id>`), it survives a reload and a restart, and its heights are two shares of the window that are set in the settings of the browser (strip 12 to 40 %, default 16; Full run part 20 to 60 %, default 34). On the phone character, chat and view are stacked.
 - IF-101 v16/v17: `task_status` carries skill, start, phases, state, elements and reason; `GET /api/skill-runs/shown` and `GET /api/skill-runs/<id>`; the event `skill_run_changed`; the marker `skill_run` on the messages of a run. The table `skill_runs` (IF-302 v8). The review declares its five stages in its manifest.
 - G-V3.CHAT: during a skill run the chat holds only spoken text: the skill's questions, a short status message per declared phase and a short end summary in MIA's persona with a link to the Skill run view (digest step, version 8); a live status line shows the run; the model text is cleaned of tags, scripts and run links.
