@@ -51,7 +51,8 @@ def script(backend):
     return json.loads(json.dumps(out, default=str))
 
 def entries(backend):
-    return {t: {i: strip(backend.versions(t, i)) for i in sorted(backend.ids(t))} for t in graph_store_move.GRAPH_TABLES}
+    """all entries INCLUDING author and time: a move must keep them"""
+    return {t: {i: backend.versions(t, i) for i in sorted(backend.ids(t))} for t in graph_store_move.GRAPH_TABLES}
 
 def populate(backend):
     m = graph_model.GraphModel(Storage(backend), author="owner")
