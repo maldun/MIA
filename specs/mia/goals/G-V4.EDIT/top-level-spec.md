@@ -9,9 +9,9 @@ The owner wants to change a graph in the web app instead of in files: change a s
 
 ## 2. Scope
 ### In scope
-Changing steps, connections and their fields; rule check before keeping; new versions and restoring; conflicts; keeping the owner's arrangement; editing context graphs; trust of changed steps. Requirements FR-68 to FR-75, NFR-18, NFR-19.
+Changing steps, connections and their fields; rule check before keeping; new versions and restoring; conflicts; keeping the arrangement of a graph; trust of changed steps. Requirements FR-68 to FR-74, NFR-18, NFR-19.
 ### Out of scope (non-goals)
-Drawing and history (G-V4.VIEW); playback and comparison (G-V4.REPLAY); the skills window and who may promote a skill (goal B).
+Drawing and history (G-V4.VIEW); playback and comparison (G-V4.REPLAY); editing context graphs (G-V4.CONTEXT, owner 2026-11-20); the skills window and who may promote a skill (goal B).
 
 ## 3. Top-level requirements
 ### 3.1 Functional requirements
@@ -27,10 +27,9 @@ Drawing and history (G-V4.VIEW); playback and comparison (G-V4.REPLAY); the skil
   - Outcome: Given a graph opened at version 3 that another session changes to version 4, when the owner tries to keep a change made on version 3, then nothing is overwritten and the owner is told that the graph has changed.
 - FR-73: The system shall let the owner make an earlier version the current one again.
   - Outcome: Given a graph at version 5, when the owner restores version 2, then version 6 exists with the content of version 2, and versions 1 to 5 are unchanged.
-- FR-74: The system shall keep where the owner placed the steps of a graph between visits without making a new version.
-  - Outcome: Given a graph in which the owner has moved steps, when the owner closes and opens it again, then the steps are where they were left and the graph's version list is unchanged.
-- FR-75: The system shall let the owner change a context graph in the same way.
-  - Outcome: Given a stored context graph, when the owner changes and keeps it, then the same checks, versions and restore apply as for a workflow graph.
+- FR-74: The system shall keep where the owner placed the steps of a graph between visits, the same for everyone who opens it, without making a new version.
+  - Outcome: Given a graph in which the owner has moved steps, when anyone opens it again, then the steps are where they were last left and the graph's version list is unchanged; if two accounts move the same step, the last move counts.
+
 ### 3.2 Non-functional requirements
 - NFR-18 (Usability): A first change is possible without instructions.
   - Outcome: Given the owner has not used the editor before, when the owner wants to change one field of one step and keep it, then it is done in under three minutes without instructions.
@@ -63,6 +62,7 @@ The owner and MIA's store, as in `../G-V4.VIEW/top-level-spec.md` section 4; the
 | Risk / question | Impact | Mitigation / owner |
 |---|---|---|
 | Who may edit: the owner only (interview decision 11 of iteration 2) or every logged-in user (CON-6) | FR-68 to FR-75 and NFR-19 | owner decides in Plan |
+| One shared arrangement per graph (owner, 2026-11-20): a move by one account changes the picture of all | surprise for other accounts | accepted by the owner; the edit log records who moved what (REPLAY) |
 | Undo within a session is not asked for yet | an edit mistake needs a restore | owner decides whether undo is a requirement |
 | Editing by form or as text (REQ-GA-002) | FR-68 | decided in Plan; owner |
 | The check route and the edit log need IF-104 v2 | FR-69, FR-70 | D-368, joint amendment |
@@ -75,4 +75,4 @@ The owner and MIA's store, as in `../G-V4.VIEW/top-level-spec.md` section 4; the
 ## 7. References
 - Research: `../G-V4.VIEW/research.md`
 - Goal record: `goal.md`; parent `../G-V4/goal.md` (OC-8, OC-9)
-- Decisions: D-363, D-366, D-367, D-368
+- Decisions: D-363, D-366, D-367, D-368, D-369

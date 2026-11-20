@@ -18,7 +18,7 @@ Proposed 2026-11-20 by the owner (maldun), D-360. Draft for Explore and Plan; no
 |---|---|---|
 | OC-1 | Given a stored graph open in the web app, when the owner changes it in a way that keeps the graph rules, then the change is kept as a new version and the earlier version stays reachable | OC-8 of G-V4 (FR-22) |
 | OC-2 | Given a change that breaks a graph rule, when the owner tries to keep it, then it is refused and the broken rule is named | OC-8 of G-V4 (FR-22) |
-| OC-3 | Given a graph in which the owner has placed steps, when the owner opens it again, then the steps are where the owner left them, without this being a new version of the graph | OC-8 of G-V4 (FR-22); moved here from the VIEW review (owner, 2026-11-20, D-366) |
+| OC-3 | Given a graph in which the owner has placed steps, when the owner opens it again, then the steps are where they were last left, the same for everyone who opens the graph, without this being a new version of the graph | OC-8 of G-V4 (FR-22); moved here from the VIEW review (owner, 2026-11-20, D-366) |
 
 ## Explore result (2026-11-20, D-363)
 `../G-V4.VIEW/research.md`. Decision: the graph rules are checked by a backend check route that the page asks before saving (one rule set after G-V4.GRAPHAPI; the route is an amendment of IF-104 in Plan); the backend still validates on save. Open for Plan: the protected mock of the graph interface for the JavaScript tests (A-36 drafts), conflict handling (`expected_version`).

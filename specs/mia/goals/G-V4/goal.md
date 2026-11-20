@@ -9,7 +9,7 @@ Opened 2026-11-20 on the owner's request ("G-V4 starts a bigger rework"). Scope 
 - Supervision: supervised
 - Accepted by: Stefan Reiterer (owner)
 - Line of work: goal/v4
-- Subgoals: G-V4.GRAPHSTORE, then G-V4.GRAPHAPI, then G-V4.VIEW, G-V4.EDIT, G-V4.REPLAY, with G-V4.LEFTOVER alongside, and G-V4.VALIDATE last
+- Subgoals: G-V4.GRAPHSTORE, then G-V4.GRAPHAPI, then G-V4.VIEW, G-V4.EDIT, G-V4.REPLAY, G-V4.CONTEXT (after EDIT), with G-V4.LEFTOVER alongside, and G-V4.VALIDATE last
 - Status: Proposed
 
 ## Owner's scope of 2026-11-20 (D-360)
@@ -60,6 +60,7 @@ Written here so they are not lost; Plan turns them into `Kind: measure` items (M
 | the four leftovers (OC-1 to OC-4) | split: G-V4.LEFTOVER | owner 2026-11-20 (D-360) | 2026-11-20 |
 | graph storage, runner on networkx | split: G-V4.GRAPHSTORE, G-V4.GRAPHAPI | owner 2026-11-19 and 2026-11-20 (D-360) | 2026-11-20 |
 | viewer stages | split: G-V4.VIEW, G-V4.EDIT, G-V4.REPLAY, each with all seven phases | owner 2026-11-20 (D-360) | 2026-11-20 |
+| editing context graphs | split: G-V4.CONTEXT | owner 2026-11-20 (D-369) | 2026-11-20 |
 
 ## Scope
 Marked in Explore by the owner's direction of 2026-11-20 (D-360 to D-362) for the top-level items of `requirements.md`. "partly" counts as in; the subgoals take the parts (their own scope tables come in Plan).
@@ -69,7 +70,7 @@ Marked in Explore by the owner's direction of 2026-11-20 (D-360 to D-362) for th
 | FR-6 | in | skills run on the stored graph with the owner's trust, lifecycle, budgets and stop (OC-1, OC-7; TD-86, TD-87), G-V4.GRAPHAPI, G-V4.LEFTOVER |
 | FR-7 | in | the graph rules become one set and apply to the stored graph (G-V4.GRAPHAPI) |
 | FR-22 | in | the graph app: view, edit, edit log (G-V4.VIEW, G-V4.EDIT, G-V4.REPLAY); the old text of the requirement stays as legacy (D-362) |
-| FR-30 | partly | context graphs follow the same stored form (G-V4.GRAPHSTORE); their content and the context-graph builder stay as they are |
+| FR-30 | partly | context graphs follow the same stored form (G-V4.GRAPHSTORE) and are edited in G-V4.CONTEXT; their content and the context-graph builder stay as they are |
 | FR-34, FR-35, FR-46 | partly | open items of G-V3 only (V3-6, F-04, TD-82 to TD-85) in G-V4.LEFTOVER |
 | FR-36 | partly | the skill record points at its stored graph (G-V4.GRAPHSTORE); the skill definition itself is unchanged |
 | FR-37 | in | the graph model: one rule set and one stored truth (G-V4.GRAPHSTORE, G-V4.GRAPHAPI) |
@@ -110,6 +111,7 @@ None yet: the subgoals share the stored graph form (G-V4.GRAPHSTORE); Plan freez
 | G-V4.VIEW | [ ] Stefan Reiterer (owner) | |
 | G-V4.EDIT | [ ] Stefan Reiterer (owner) | |
 | G-V4.REPLAY | [ ] Stefan Reiterer (owner) | |
+| G-V4.CONTEXT | [ ] Stefan Reiterer (owner) | |
 | G-V4.LEFTOVER | [ ] Stefan Reiterer (owner) | |
 | G-V4.VALIDATE | [ ] Stefan Reiterer (owner) | |
 
