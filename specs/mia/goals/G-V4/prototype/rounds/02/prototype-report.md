@@ -34,6 +34,13 @@ The items of `../../top-level-spec.md` (the aggregate of the subgoal specs in sc
 - Settings menu (physics on/off, rounded or straight connections, reset to layers): opens under its button, closes with Escape or a click outside, applies at once and is remembered in this browser; defaults when it cannot be kept.
 - Demonstration: `python proto_checks/make_sample_store.py /tmp/gs/v --broken --code`, then the viewer as in CP5; open `sample.code` (an untrusted code step with a name that looks like markup, a loop-controlling step, an instruction in a value) and `sample.broken`; checks: `python proto_checks/cp6_check.py` (7 pass), `node --test proto_checks/cp6.test.mjs` (8 pass).
 
+
+**CP7 (VIEW, third part), 2026-11-20, commit 20574749.**
+- Arrangement: one arrangement per graph, the same for everyone, kept apart from the graph versions (table `arrangements`, a record table of IF-302 added in the prototype). The viewer opens a graph with it when there is one (no physics when every step has a place), otherwise the graph settles by itself; "Reset to layers" shows the layered picture without changing the saved one; "Save this arrangement" (settings menu) saves the places for everyone; only the owner (the account made first) may, others are refused. A place for a step the graph does not have is ignored.
+- History: the versions as a list, newest first, with who and when, the current one marked; click or Enter shows that version (read-only, the status line says so), and Previous and Next step through them; every version uses the saved arrangement.
+- First look at speed: the backend answers the 54-step graph in about 9 ms (test client, files); the layout of 54 steps takes under 0.1 ms; the drawing and the physics in the browser are for the owner to judge.
+- Demonstration: the viewer as before with `--broken --code` sample store; open `cp2.multi` (four versions by four authors), step back, drag steps, save the arrangement, reload; checks: `python proto_checks/cp7_check.py` (14 pass), `node --test proto_checks/cp7.test.mjs` (7 pass).
+
 ## Findings
 - The 15 converted graphs give 154 step records for 107 distinct local names: with scoped IDs the 13 shared names (4 with different content) no longer share a history.
 - The new rule breaks existing tests that use plain IDs: `tests/test_graph_record_checks.py` (34 failures), `tests/acceptance/contract/test_if_301_v2_graph_tables.py` (28) and `tests/acceptance/test_graph_records.py` (14 errors), all with `unscoped_id`; `test_graph_model.py`, `test_graph_run.py`, `test_graph_tables.py` still pass. The amendment of A-92 / REQ-GTB-021 therefore has to rewrite those protected tests.
@@ -42,6 +49,7 @@ The items of `../../top-level-spec.md` (the aggregate of the subgoal specs in sc
 - The page itself was not looked at in a browser by the agent (none in the session); the HTTP side was run for real with curl (login, 401 without it, list, the broken graph's problem).
 - Context graphs are not stored anywhere yet (the context tables exist, no data, no `GraphModel` for them), so the list shows workflow graphs only; FR-48 asks for both kinds.
 - A graph that stores code as text cannot be saved as a processing step with a field: the transform schema refuses extra fields (`additionalProperties: false`), so code lives in a connected data step with the role `code` on the connection (as decided in D-360); the VIEW requirements do not say how a code step is recognised, and the mark "changed since trusted" has no data yet (GRAPHAPI.CODE). Proposed for Plan: name the role `code` in IF-301 and record the trusted content with the trust.
+- **Owner's remark after CP6 (2026-11-20):** for the editor the side panel will have to change, because the contents of steps are edited there and the current panel (a narrow column of read-only fields) does not look good for editing; the place, width and form of the editing panel are to be decided at CP8 (FB-1 in `rounds/02/validation.md`).
 - Not examined: context graphs, a graph with a loop-controlling step (none among the 15), the `review` workflow (document form, migration is out of this run).
 
 ## Assumptions and choices the prototype made
@@ -53,6 +61,7 @@ The items of `../../top-level-spec.md` (the aggregate of the subgoal specs in sc
 ## Prototype tests (run once here)
 | Question (requirement or top-level item) | Command (repeatable) | Result (value, unit, uncertainty, hardware, date; pass / fail / not_run) |
 |---|---|---|
+| FR-52, FR-55, NFR-11: the arrangement, the history list, a first look at speed | `python proto_checks/cp7_check.py`, `node --test proto_checks/cp7.test.mjs` | 14 and 7 pass, 2026-11-20, Fedora host |
 | FR-50, FR-54: kinds, trust and lifecycle, code mark, text-only display; FR-51, FR-53, NFR-13, NFR-14: fields, remembered settings, nothing from outside, keyboard | `python proto_checks/cp6_check.py`, `node --test proto_checks/cp6.test.mjs` | 7 and 8 pass, 2026-11-20, Fedora host |
 | FR-48, FR-49, NFR-12: login, list from files and database, graph and versions, problems named | `python proto_checks/cp5_check.py`, `node --test proto_checks/cp5.test.mjs` | 19 and 4 pass, 2026-11-20, Fedora host, PostgreSQL 16 under podman |
 | FR-58, FR-59: the same answers in files and database; the whole store moves both ways, repeatably, all or nothing | `python proto_checks/cp2_check.py` | 9 of 9 pass, 2026-11-20, Fedora host, PostgreSQL 16 under podman |
