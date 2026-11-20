@@ -5,11 +5,11 @@ Opened 2026-11-20 on the owner's request ("G-V4 starts a bigger rework"). Scope 
 - Kind: iteration
 - Parent: –
 - Statement: The converted skills run with the live trust, lifecycle, budgets and stop of the owner, the skills improved by the rework are measured on holdout suites, the draft requirements and deferrals of G-V2 and G-V3 are settled, and the validation of G-V2 and G-V3 is done on this version.
-- Exit criterion: OC-1 to OC-10 below (to confirm in Plan), checked by the exit criteria of the subgoals; the validation criteria are those collected in G-V4.VALIDATE
+- Exit criterion: OC-1 to OC-11 below (to confirm in Plan), checked by the exit criteria of the subgoals; the validation criteria are those collected in G-V4.VALIDATE
 - Supervision: supervised
 - Accepted by: Stefan Reiterer (owner)
 - Line of work: goal/v4
-- Subgoals: G-V4.GRAPHSTORE, then G-V4.GRAPHAPI, then G-V4.VIEW, G-V4.EDIT, G-V4.REPLAY, G-V4.CONTEXT (after EDIT), with G-V4.LEFTOVER alongside, and G-V4.VALIDATE last
+- Subgoals: G-V4.GRAPHSTORE, then G-V4.GRAPHAPI, then G-V4.VIEW, G-V4.EDIT, G-V4.REPLAY, G-V4.CONTEXT (after EDIT), G-V4.BUILDER (after CONTEXT), with G-V4.LEFTOVER alongside, and G-V4.VALIDATE last
 - Status: Proposed
 
 ## Owner's scope of 2026-11-20 (D-360)
@@ -34,6 +34,7 @@ New outcome criteria OC-6 to OC-9 are in the table; OC-1 to OC-5 stay as propose
 | OC-8 | Given a stored graph, when the owner opens it in the web app, then it is drawn as it is stored, the owner can change it, a change that breaks a graph rule is refused with the rule named, and every change can be played back on the graph | FR-22, owner 2026-11-20 (item 3), FR-16, FR-21, NFR-6, NFR-9 |
 | OC-9 | Given the validation runs, when a workflow graph turns out to be weak, then the owner improves it in the web app and can later see what was changed, when and why | FR-6, FR-22 (owner 2026-11-20, item 4) |
 | OC-10 | Given a snapshot of the skill set taken before the rework and one after, when the owner restores either, then every graph is as it was at that snapshot, and the state before a restore is kept | FR-47 |
+| OC-11 | Given a document the owner adds, when the owner builds a context graph from it, then items are proposed with their source, only confirmed items are read by skills, and the proposals meet the owner's quality bar | FR-41, FR-42 (owner 2026-11-20, D-380) |
 
 ## Measure ideas for Plan step 1a (technology dependent second layer, not outcomes)
 Written here so they are not lost; Plan turns them into `Kind: measure` items (Method, Metric, Reference, Detail in).
@@ -61,6 +62,7 @@ Written here so they are not lost; Plan turns them into `Kind: measure` items (M
 | graph storage, runner on networkx | split: G-V4.GRAPHSTORE, G-V4.GRAPHAPI | owner 2026-11-19 and 2026-11-20 (D-360) | 2026-11-20 |
 | viewer stages | split: G-V4.VIEW, G-V4.EDIT, G-V4.REPLAY, each with all seven phases | owner 2026-11-20 (D-360) | 2026-11-20 |
 | editing context graphs | split: G-V4.CONTEXT | owner 2026-11-20 (D-369) | 2026-11-20 |
+| the context-graph builder (goal C) | split: G-V4.BUILDER, the largest and last graph subgoal; first slice documents only (proposed) | owner 2026-11-20 (D-380) | 2026-11-20 |
 
 ## Scope
 Marked in Explore by the owner's direction of 2026-11-20 (D-360 to D-362) for the top-level items of `requirements.md`. "partly" counts as in; the subgoals take the parts (their own scope tables come in Plan).
@@ -89,7 +91,7 @@ Marked in Explore by the owner's direction of 2026-11-20 (D-360 to D-362) for th
 | FR-8, FR-14, FR-15, FR-18, FR-19, FR-27, FR-28, FR-29, FR-33 | out | model management, memory, rules, learning, operation, feedback, tasks and schedule are not touched |
 | FR-9, FR-10, FR-11, FR-12, FR-13 | out | the verification, lookup, literature, source and method skills only run on the new path; their behaviour is checked as equivalence under OC-7, not changed |
 | FR-20, FR-26 | out | the path to promotion and the specification and benchmark of a workflow stay as they are; improving graphs in the editor (OC-9) does not change them |
-| FR-41, FR-42 | out | goal C (categories as schemas, proposals of items) overlaps with context graphs and waits (open question of G-V4.GRAPHSTORE) |
+| FR-41, FR-42 | in | the context-graph builder and the reading of the confirmed part (G-V4.BUILDER, D-380); was out as goal C |
 | FR-43 | out | the skills window is goal B; the graph app is the editor of this goal |
 | FR-39, FR-44 | out | goal D (debates, benchmarks, review of exchanged transforms) |
 | NFR-1, NFR-2, NFR-4, NFR-5, NFR-7 | out | device range, small-model strategies, honest confidence, privacy and efficiency are not changed by the rework (the loader is measured inside OC-7) |
@@ -112,6 +114,7 @@ None yet: the subgoals share the stored graph form (G-V4.GRAPHSTORE); Plan freez
 | G-V4.EDIT | [ ] Stefan Reiterer (owner) | |
 | G-V4.REPLAY | [ ] Stefan Reiterer (owner) | |
 | G-V4.CONTEXT | [ ] Stefan Reiterer (owner) | |
+| G-V4.BUILDER | [ ] Stefan Reiterer (owner) | |
 | G-V4.LEFTOVER | [ ] Stefan Reiterer (owner) | |
 | G-V4.VALIDATE | [ ] Stefan Reiterer (owner) | |
 
