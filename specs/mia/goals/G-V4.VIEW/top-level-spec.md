@@ -9,7 +9,7 @@ The owner wants to look at the workflows and context graphs MIA works with, as t
 
 ## 2. Scope
 ### In scope
-Opening and looking at stored graphs: the list, the drawing, the content of a selected item, the arrangement the earlier versions and their history, and the view settings. Requirements FR-48 to FR-56 below (new numbers after FR-47 and NFR-9; assigned for real when Plan writes them into `requirements.md`).
+Opening and looking at stored graphs: the list, the drawing, the content of a selected item, the arrangement the earlier versions and their history, and the view settings. Requirements FR-48 to FR-56 and FR-96 (search by description, new number) below (new numbers after FR-47 and NFR-9; assigned for real when Plan writes them into `requirements.md`).
 ### Out of scope (non-goals)
 Changing a graph, saving, keeping where the owner placed the steps between visits (G-V4.EDIT); the playback of the individual changes and what a change did within a session (G-V4.REPLAY); running a workflow from the viewer; the skills window (goal B); building context graphs (goal C).
 ### Known shortcuts (prototype)
@@ -24,14 +24,16 @@ The prototype `prototype/graphview` shows the data path and the look; it has no 
 ## 3. Top-level requirements
 
 ### 3.1 Functional requirements
-- FR-48: The system shall let the owner open any stored workflow graph or context graph.
-  - Outcome: Given graphs stored in the live store, when the owner opens the viewer, then a list of all stored graphs is offered, and choosing one shows that graph; given the same graphs kept as a set of files, then the list and the picture are the same.
+- FR-48: The system shall let the owner open any stored workflow graph or context graph and find it by name.
+  - Outcome: Given graphs stored in the live store, when the owner opens the viewer, then a list of all stored graphs is offered, each marked as workflow graph or context graph, the list narrows as the owner types part of a name, and choosing one shows that graph; given the same graphs kept as a set of files, then the list and the picture are the same.
+- FR-96: The system shall, when a language model is available, let the owner describe in words which graph is wanted and propose matching graphs.
+  - Outcome: Given the owner types a description such as "the graph that checks claims against sources", when the model is available, then the viewer proposes up to a few matching graphs, best first, each with a short reason, and choosing one opens it; when the model is not available, then the owner is told that the search by description is not available and the name filter of FR-48 still works; a proposal only selects a graph to open and changes nothing.
 - FR-49: The system shall draw every step and connection of a stored graph, and say what it cannot draw.
-  - Outcome: Given a stored graph with N steps and M connections, when it is opened, then N steps and M connections are shown, each connection with its direction; if something cannot be shown (for example a connection to a step that does not exist) it is named next to the picture and nothing is dropped silently.
-- FR-50: The system shall show the kind of each step at a glance.
-  - Outcome: Given a graph with data, processing and loop-controlling steps, when it is shown, then the owner can tell the three kinds apart without opening any of them, and without relying on colour alone.
+  - Outcome: Given a stored graph with N steps and M connections, when it is opened, then N steps and M connections are shown, each connection with its direction; if something is wrong (for example a connection to a step that does not exist) it is named beside the picture and marked on the drawing, for instance as a broken line to a marked missing step, and nothing is dropped silently.
+- FR-50: The system shall show the kind of each step, and the trust and lifecycle state of each processing step, at a glance.
+  - Outcome: Given a graph with data, processing and loop-controlling steps, when it is shown, then the owner can tell the three kinds apart without opening any of them and without relying on colour alone, and each processing step shows whether it is trusted and whether it is draft, tested or retired.
 - FR-51: The system shall show the full content of a selected step or connection.
-  - Outcome: Given a drawn graph, when the owner selects a step or a connection, then its complete stored content appears beside the picture, as plain readable text, and selecting nothing clears it.
+  - Outcome: Given a drawn graph, when the owner selects a step or a connection, then its known values appear beside the picture as labelled read-only fields and the full stored text is available next to them as plain text, and selecting nothing clears it.
 - FR-52: The system shall arrange the graph so that it reads naturally and keeps what the owner arranged.
   - Outcome: Given a graph of about fifty steps, when it is opened, then the arrangement settles by itself into a picture where steps do not lie on each other and connections are followable; when the owner moves a step, it stays where it was put while the graph is open; the owner can return to a clear layered arrangement in which every connection points forward.
 - FR-53: The system shall let the owner choose how connections and the arrangement look, in one place.
@@ -98,6 +100,7 @@ Findings with references are in `research.md` of this folder: the page opens a f
 | Context graphs differ from workflow graphs (Q-5 of N-5) | FR-48 may need a second look | decide in Plan with G-V4.GRAPHSTORE; owner |
 | Natural arrangement is not reproducible | the same graph may look different on each opening, and moved steps are not kept after closing | decided: saved positions belong to G-V4.EDIT (D-366); in VIEW the layered arrangement is the reproducible reset |
 | A history shows who stored a version but not what changed between two; the comparison of two versions stays in REPLAY (owner, D-366) | FR-56 shows a list, not a difference | decided |
+| Search by description uses a language model: graph content is untrusted text for the model, the model is local, the result only selects a graph | FR-96 adds an agent feature to the viewer (agent profile, evaluation cases, injection check) | decide in Plan with the agent-app rules; owner |
 | Very large graphs (more than a few hundred steps) | readability and speed unknown | out of this goal unless the owner wants a bound |
 
 ### Prototype decisions
@@ -108,4 +111,4 @@ Findings with references are in `research.md` of this folder: the page opens a f
 ## 7. References
 - Research notes: `specs/mia/goals/G-V4.VIEW/research.md`
 - Goal record: `specs/mia/goals/G-V4.VIEW/goal.md`; parent `specs/mia/goals/G-V4/goal.md` (OC-8)
-- Decisions: D-360 to D-363 in `specs/mia/review-log.md`
+- Decisions: D-360 to D-363, D-376 in `specs/mia/review-log.md`
