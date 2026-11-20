@@ -24,7 +24,7 @@ Can the graph app pull a real stored graph from the data source (files or Postgr
 - The IF-104 routes serve the document form (`graph_api.py`); the prototype had to add its own routes for the record form. Plan decides the interface (amendment of IF-104).
 - The static page and the API must share an origin (cookie): here one process serves both; the real setup has two containers (`deploy/compose.yaml:33-38`) and needs a routing check.
 - The owner looked at it in a browser on 2026-11-20 and found the look good for a prototype; the left panel, the physics and the rounded edges were the owner's requests.
-- Physics gives a more natural picture but is not reproducible: the same graph settles differently each time. That conflicts with the test of N-5 T-01 (stable places, physics off, REQ-GA-001) and is why saved positions (D-363, a side record per graph and account) matter: settle once, keep, reuse. The layered layout stays as the reset.
+- Physics gives a more natural picture but is not reproducible: the same graph settles differently each time. That conflicts with the test of N-5 T-01 (stable places, physics off, REQ-GA-001) and is why saved positions (D-363; one shared arrangement per graph, D-369) matter: settle once, keep, reuse. The layered layout stays as the reset.
 - The settings are not remembered between visits (a per-viewer convenience, left out).
 - Not examined: login, a graph with a master node, context graphs, larger layouts (the largest graph has 54 nodes), the look of the drawing.
 
