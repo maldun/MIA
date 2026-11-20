@@ -1,6 +1,6 @@
-# MIA v0.2.0 (2026-11-20)
+# MIA v0.2.1 (2026-11-20)
 
-Iteration 2: G-V2 (skill rework, foundation) and G-V3 (skill run view, spoken-only chat). Not yet validated in the field.
+Iteration 2: G-V2 (skill rework, foundation) and G-V3 (skill run view, spoken-only chat). Not yet validated in the field. The tag v0.2.0 (pushed on commit `4a3a74c9`) has the same code but no CHANGELOG entry, release notes or D-358; v0.2.1 replaces it.
 
 ## New
 - Skills are records (command, steps, knowledge); wrong records are refused with the reason. Workflow graphs and the skill set are stored as node and edge records (IF-302).
@@ -56,14 +56,14 @@ Kept: the old-runner dev baselines of D-355 (owner decision 2026-11-20). No new 
 - No current-state deployment record exists (`specs/mia/deployment/current-state.md`); none created without the owner.
 
 ## Also in this release
-- TD-11 option B (speak again through the voice route, verified 2026-11-08) and all of G-V3: see `CHANGELOG.md`, section 0.2.0. Open deferrals of G-V3: TD-82 to TD-85 (signed).
+- TD-11 option B (speak again through the voice route, verified 2026-11-08) and all of G-V3: see `CHANGELOG.md`, section 0.2.1. Open deferrals of G-V3: TD-82 to TD-85 (signed).
 
 ## Statuses at the tag
 - Goal G-V2 and its five subgoals: Verified. Requirements REQ-RUN-030 to 035, REQ-WFM-057 to 060, 069, 110 to 115 are still Draft (owner approval open); all other G-V2 requirements are Verified.
 - Open paperwork: V2-8 (TC-WFM-110 to 114 in no test-spec table), V2-3 (stale docstring in `skill_converter.py`, Implement), V2-1 (scope wording `REQ-WFM-143`).
 
 ## For deployment (Phase 6)
-- Artifact: built from tag v0.2.0 by `deploy/build.sh` in CI. **`deploy/build.sh` does not exist: gap for Deploy; no build on the laptop.**
+- Artifact: built from tag v0.2.1 by `deploy/build.sh` in CI. **`deploy/build.sh` does not exist: gap for Deploy; no build on the laptop.**
 - Target: the reference host (Fedora, RX 7800 XT 16 GB, podman, Ollama).
 - Pull model by digest: `gemma4:12b-it-qat` (`sha256:38044be4f923...`); `num_ctx` 8192.
 - Services: PostgreSQL, sandbox, search as in the compose stack. The stack starts from a fresh copy (SMOKE-MIA-001 green 2026-11-20).

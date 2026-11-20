@@ -1,4 +1,4 @@
-## G-V2: Skill rework, foundation (iteration goal, goal A; version v0.2.0 together with G-V3)
+## G-V2: Skill rework, foundation (iteration goal, goal A; version v0.2.1 (v0.2.0 was pushed early) together with G-V3)
 
 **Goal:** G-V2 (iteration, supervised)   **Branch:** none. STORE, MODEL, TOOLBOX, CONVERT and SNAPSHOT are all already in `master`; there is no `goal/v2` branch. So the update of the branch, the range-diff and the history cleaning (commit-phase steps 1 to 3) have nothing to act on. This record documents what is already merged.
 **Accepted by:** Stefan Reiterer (owner); he tags
@@ -55,14 +55,14 @@ V2-1 (scope wording `REQ-WFM-143`), V2-7 (SNAPSHOT agreement row, CONVERT Phases
 1. **Baselines.** `eval/baselines/` holds the old-runner dev runs of 2026-11-15 (D-355). The skill says baselines come from holdout and verified runs, never dev only; no holdout exists (TD-88). Recommended: keep these baselines, record the converted dev runs only in the release notes. Baselines are protected; nothing is written.
 2. **Statuses**: G-V2 requirements Implemented → Verified (except those with deferrals), Phases rows, goal Proposed → Verified.
 3. **Signing** TD-86 to TD-90, the D-358 row.
-4. **Tag** `v0.2.0` (below).
+4. **Tag** `v0.2.1` (below); `v0.2.0` stays on `4a3a74c9`, already pushed.
 
 ### Merge, tag, push (the owner; nothing was done by the agent)
 Everything is on master. After the status commit (on branch `commit/g-v2`, own worktree `/home/maldun/prog/Python/MIA-commit-g-v2-work`):
 ```
 cd /home/maldun/prog/Python/MIA && git status --short   # only the untracked files of other sessions
 git merge --ff-only commit/g-v2
-git tag -a v0.2.0 -m "MIA v0.2.0: G-V2 skill rework foundation, G-V3 skill run view"
-git push origin master v0.2.0
+git tag -a v0.2.1 -m "MIA v0.2.1: G-V2 skill rework foundation, G-V3 skill run view"
+git push origin master v0.2.1
 ```
 `deploy/build.sh` does not exist: the release artifact cannot be built from the tag yet (gap for Deploy).

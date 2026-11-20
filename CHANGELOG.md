@@ -2,7 +2,9 @@
 
 ## [Unreleased]
 
-## [0.2.0] – 2026-11-20, G-V2 skill rework foundation and G-V3 skill run view (not yet validated)
+## [0.2.1] – 2026-11-20, G-V2 skill rework foundation and G-V3 skill run view (not yet validated)
+
+The tag v0.2.0 was set and pushed on 2026-11-20 on commit `4a3a74c9`, before this CHANGELOG, the release notes and D-358 were written; v0.2.1 is the release with them. The code is the same.
 
 ### Added (G-V2, skill rework foundation)
 - Skills are records: one description gives command, steps and knowledge; a wrong one is refused with the reason. Graphs and skill sets are stored as node and edge records (IF-302).
@@ -42,10 +44,10 @@
 - `/api/speak_again` has no rate limit and no cap on waiting repeats (F4, accepted; revisit with TD-61). TD-61 is open: two voice paths. A failed repeat logs two error lines (A-135). Hand check TC-CHA-035 is owner-reported, device and commit not recorded. The 3 s of REQ-VPB-006 is an accepted risk (VAL-006). Open deviations of the ladder: TD-62 (tailscale unit test), the plan backlog of `decomposition` and the red G-V2.MODEL acceptance tests (other goals). Production changes on master since v0.1.0 that this verification did not cover: `deploy/preflight.sh`, `deploy/up.sh voice`, `tools/recovery_check.sh`, `tools/fetch_kokoro.sh`, `tools/fetch_benchmarks.py`, the G-V2.MODEL stubs.
 
 ### Release record (TD-11)
-- Verified (verification report approved 2026-11-08, `specs/mia/amendments/A-132-verification-report.md`), on master since the merges of 2026-11-08; released with v0.2.0 (owner, 2026-11-08). The ladder ran locally on master `1732666`, stages 0 to 3, no CI.
+- Verified (verification report approved 2026-11-08, `specs/mia/amendments/A-132-verification-report.md`), on master since the merges of 2026-11-08; released with v0.2.1 (owner, 2026-11-08: the tag comes with iteration 2). The ladder ran locally on master `1732666`, stages 0 to 3, no CI.
 
-### Release record (v0.2.0)
-- Verified with accepted deviations (G-V2 verification report approved 2026-11-20; G-V3 D-354). All subgoals were merged into master before the tag; merge request `specs/mia/goals/G-V2/merge-request.md`, release notes `specs/mia/goals/G-V2/release-notes.md`. Checks ran locally on master (no CI).
+### Release record (v0.2.1)
+- Verified with accepted deviations (G-V2 D-358, verification report approved 2026-11-20; G-V3 D-354). All subgoals were merged into master before the tag; merge request `specs/mia/goals/G-V2/merge-request.md`, release notes `specs/mia/goals/G-V2/release-notes.md`. Checks ran locally on master (no CI).
 
 ## [0.1.0] – 2026-11-01, G-V1 first version of MIA (not yet validated)
 
