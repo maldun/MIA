@@ -14,7 +14,17 @@ Exit criterion: OC-1 to OC-5 of G-V2, checked by AC-34 (per-skill equivalence wi
 ## Run (foreground, one after another; a background start makes `test_shutdown*` fail; never run browser checks while another run goes)
 - In a clean worktree of master: `python -m unittest discover -s tests` in pieces (`test_[a-c]*`, `[d-m]`, `[n-r]`, `s[a-gi-z]`, `sh*`, `[t-z]`, each under 10 minutes), `node --test "tests/js/*.test.mjs"`, every `tests/acceptance/test_*.py` and `tests/acceptance/contract/test_*.py` as a script, PostgreSQL (`tests/test_storage_postgres.py`, `MIA_DB_PYTHON=... bash tools/contract_postgres.sh`), `check_sysml_model.py`, `check_sysml.sh`, `trace_check`, `goal_check`, `agent_check`.
 - Expected and not ours: `test_decide_guard.py` and `test_judge_calibration.py` (`behaviour.FUNCTIONS`); in the main checkout `test_expression_llm.ApiTest` and `test_make_voice_lines` (leaked `setup_cfg.json`, folder named `MIA`): use a clean worktree.
-- Equivalence: decide each of the five criteria with `eval_decide.py --baseline` on a run of the converted variant of the **final code** (the owner's run files of 2026-11-20 are in `data/eval/*__converted__20261120-*`; the model server must be free: look at `ListAgents`, tell running sessions first). Report the run paths, the table of every decision and the cases wrong in all repeats.
+- Equivalence: decide each of the five criteria with `eval_decide.py --baseline` on a run of the converted variant of the **final code**. The runs were made by the author session on 2026-11-20 (feedback, not your evidence), `tools/check_conversion.py <skill>` on master, the model server free, pin MP-light, 3 repeats, dev split; each step printed PASS and each rate equals the one of the acceptance run of 2026-11-16. Files (git-ignored, in `/home/maldun/prog/Python/MIA/data/eval/`):
+
+  | Skill | Run file | Rate, minimum | Baseline |
+  |---|---|---|---|
+  | research | `research__converted__20261120-111026.jsonl` | 0.950, 0.85 | `eval/baselines/research__escalate__baseline.jsonl` |
+  | plan_question | `plans__converted__20261120-111505.jsonl` | 0.639, 0.54 | `eval/baselines/plans__free__baseline.jsonl` |
+  | verify_claim | `verdicts__converted__20261120-111801.jsonl` | 0.940, 0.83 | `eval/baselines/verdicts__single__baseline.jsonl` |
+  | extract_claims | `extraction__converted__20261120-112131.jsonl` | 0.667, 0.59 | `eval/baselines/extraction__llm__baseline.jsonl` |
+  | verify_computable | `computable__converted__20261120-112720.jsonl` | 0.974, 0.87 | `eval/baselines/computable__computable2__baseline.jsonl` |
+
+  Use these files for the decision (a decision needs no model) or make your own run if the model server is free (`ListAgents` first). The five rates equal the earlier ones exactly: check that the runs went through the graph path (header `variant.converted`, the `commit` field, the call counts) and not a cached or old-runner route (point 10).
 - Baseline check: `python ~/.claude/skills/agent-app/scripts/agent_check.py --spec-dir specs/mia --eval-dir eval`.
 
 ## Look hard at
