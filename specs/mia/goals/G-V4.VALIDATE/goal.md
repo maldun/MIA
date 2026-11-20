@@ -12,6 +12,12 @@ Opened 2026-11-20 on the owner's request: G-V2 (v0.2.x) and G-V3 are in the Vali
 - Subgoals: –
 - Status: Proposed
 
+## Outcome criteria
+| ID | Expected outcome | Derived from |
+|---|---|---|
+| OC-1 | Given the finished rework, when the owner uses the version, then G-V2 and G-V3 are judged in real use and every finding is triaged | OC-5 of G-V4 (FR-6, FR-46) |
+| OC-2 | Given the validation runs, when a graph turns out weak, then the owner improves it with the editor | OC-9 of G-V4 (FR-22) |
+
 ## Validation goals collected
 | From | Criterion | What it settles | Source |
 |---|---|---|---|

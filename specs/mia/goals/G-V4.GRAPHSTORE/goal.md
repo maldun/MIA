@@ -8,7 +8,7 @@ Proposed 2026-11-19 by the owner (maldun) in the design review of the graph stor
 - Exit criterion: OC-1 to OC-3 below, checked by tests still to be written in Plan (no ids yet)
 - Supervision: supervised
 - Accepted by: pending (the owner records the agreement in the table below)
-- Line of work: goal/v4.graphstore (to be created)
+- Line of work: goal/v4.graphstore
 - Subgoals: –
 - Status: Proposed
 

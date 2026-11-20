@@ -9,7 +9,7 @@ Proposed 2026-11-20 by the owner (maldun), D-360. Draft for Explore and Plan; no
 - Subgoals: –
 - Supervision: supervised
 - Accepted by: Stefan Reiterer (owner)
-- Line of work: goal/v4.replay (to be created)
+- Line of work: goal/v4.replay
 - Depends on: G-V4.EDIT
 - Status: Proposed
 

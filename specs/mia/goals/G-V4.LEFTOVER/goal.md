@@ -9,7 +9,7 @@ Proposed 2026-11-20 by the owner (maldun), D-360. Draft for Explore and Plan; no
 - Subgoals: –
 - Supervision: supervised
 - Accepted by: Stefan Reiterer (owner)
-- Line of work: goal/v4.leftover (to be created)
+- Line of work: goal/v4.leftover
 - Depends on: –; OC-1 touches the runner, so it is planned with G-V4.GRAPHAPI
 - Status: Proposed
 

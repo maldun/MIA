@@ -8,7 +8,7 @@ Proposed 2026-11-19 by the owner (maldun): the interface between the database an
 - Exit criterion: OC-1 to OC-3 below, checked by tests still to be written in Plan (no ids yet)
 - Supervision: supervised
 - Accepted by: pending (the owner records the agreement in the table below)
-- Line of work: goal/v4.graphapi (to be created)
+- Line of work: goal/v4.graphapi
 - Subgoals: –
 - Depends on: G-V4.GRAPHSTORE (the loader reads the one stored form)
 - Status: Proposed
@@ -20,7 +20,7 @@ Proposed 2026-11-19 by the owner (maldun): the interface between the database an
 ## Outcome criteria
 | ID | Expected outcome | Derived from |
 |---|---|---|
-| OC-1 | Given any stored graph, when a workflow is run or checked, then the stored graph reaches the execution as one directed graph, built in one place from the database | OC-7 of G-V4 (FR-6, FR-40) |
+| OC-1 | Given any stored graph, when a workflow is run or checked, then the stored graph reaches the execution as one graph, built in one place from the stored graph | OC-7 of G-V4 (FR-6, FR-40) |
 | OC-2 | Given the graphs and runs of the current tests, when the order, the rules and the run use the directed graph, then every result is the same as before (same order up to equal choices, same refusals with the same named nodes, same run result) | OC-7 of G-V4 (FR-6) |
 | OC-3 | Given a graph with master nodes, session nodes or a transform that reads several data nodes, when it is loaded, then everything the runner needs (node kind, type, stop criterion, edge role and `as` name) is on the loaded graph | OC-7 of G-V4 (REQ-RUN-030 to 035) |
 
