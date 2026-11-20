@@ -873,7 +873,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-40: a snapshot holds every item named, each with its version, trust status and lifecycle (exact)
 - Verified by: TC-WFM-061
-- Status: Approved
+- Status: Verified
 - History: G-V2 Plan step 1 (2026-11-07), new; 2026-11-17 (owner): status Approved as in review-log, text unchanged
 
 ### REQ-WFM-062 – List snapshots
@@ -886,7 +886,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-40: two snapshots are listed with the three fields (exact)
 - Verified by: TC-WFM-062
-- Status: Approved
+- Status: Verified
 - History: G-V2 Plan step 1 (2026-11-07), new; Plan step 3 (2026-11-07): Should raised to Must (owner: a restore asks for a name, and the snapshots of REQ-WFM-063 would be invisible without a list); 2026-11-17 (owner): status Approved as in review-log, text unchanged
 
 ### REQ-WFM-063 – Restore keeps the former state
@@ -899,7 +899,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-40: after a restore of snapshot "a" a new snapshot named "before restore of a" with the state before it and the owner as author exists and can be restored (exact)
 - Verified by: TC-WFM-063
-- Status: Approved
+- Status: Verified
 - History: G-V2 Plan step 1 (2026-11-07), new; Plan step 3 (2026-11-07): name and author of the automatic snapshot added to the criterion (owner); text unchanged; 2026-11-17 (owner): status Approved as in review-log, text unchanged
 
 ### REQ-WFM-064 – Restore gives version and statuses
@@ -912,7 +912,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-40: a skill, a workflow graph, a context graph and a transform status are changed, then restored, and equal the stored ones; a transform untrusted in the snapshot is untrusted (exact)
 - Verified by: TC-WFM-064
-- Status: Approved
+- Status: Verified
 - History: G-V2 Plan step 1 (2026-11-07), new; 2026-11-17 (owner): status Approved as in review-log, rationale names `set_current_version`, text unchanged
 
 ### REQ-WFM-065 – Restore deletes nothing
@@ -925,7 +925,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-40: the list of versions before the restore is a prefix of the list after it (exact)
 - Verified by: TC-WFM-065
-- Status: Approved
+- Status: Verified
 - History: G-V2 Plan step 1 (2026-11-07), new; 2026-11-17 (owner): status Approved as in review-log, text unchanged
 
 ### REQ-WFM-066 – Snapshots only by the owner
@@ -938,7 +938,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-40: a non-owner account is refused for both, the state stays (exact)
 - Verified by: TC-WFM-066
-- Status: Approved
+- Status: Verified
 - History: G-V2 Plan step 1 (2026-11-07), new; Plan step 3 (2026-11-07): "owner" defined in the text as the account that creates accounts (owner, D-260 B; TC-MIA-014); 2026-11-17 (owner): status Approved as in review-log, text unchanged
 
 ### REQ-WFM-067 – Lifecycle of a transform

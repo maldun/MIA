@@ -129,8 +129,8 @@ Merge order STORE, MODEL, TOOLBOX, CONVERT; reserved IDs per session and rules f
 | Phase | State | Record or reason |
 |---|---|---|
 | Explore | done | HLS of iteration 2 approved 2026-11-05 (D-186) |
-| Plan | in progress | started 2026-11-07, Step 0 |
-| Implement | open | |
+| Plan | done | the plans of the five subgoals; G-V2.SNAPSHOT split out (A-159) |
+| Implement | done | STORE, MODEL, TOOLBOX, CONVERT and SNAPSHOT are in master |
 | Verify | open | |
 | Commit | open | |
 | Deploy | open | |

@@ -7,10 +7,10 @@ Split out of G-V2.CONVERT on 2026-11-18 (A-159) after the Verify of CONVERT: the
 - Statement: The owner can take and restore a snapshot of the skill set.
 - Exit criterion: OC-1 below (it serves OC-4 of G-V2), checked by AC-40, TC-WFM-061 to 066, TC-IF-203-10 to 17 and TC-IF-302-11
 - Supervision: supervised
-- Accepted by: pending (the owner records the agreement in the table below)
+- Accepted by: Stefan Reiterer (owner), agreement row signed 2026-11-19
 - Line of work: goal/v2.snapshot
 - Subgoals: –
-- Status: Proposed
+- Status: Verified
 
 ## Outcome criteria
 | ID | Expected outcome | Derived from |
@@ -54,3 +54,14 @@ Protected tests: the IF-203 v2 mock and suite and the IF-302 check were added on
 | Subgoal | Agreed by | Date |
 |---|---|---|
 | G-V2.SNAPSHOT | maldun | 19.11.2026 |
+
+## Phases
+| Phase | State | Record or reason |
+|---|---|---|
+| Explore | done | FR-47 and OC-4 of G-V2; split out of G-V2.CONVERT (A-159, 2026-11-18) |
+| Plan | done | `plan.md` (T-SN-01), contracts IF-203 v2, IF-302 v13 and v14, IF-102 v7 and v8 (A-121, A-161), protected tests installed |
+| Implement | done | `implementation-log.md`; core (`snapshot_store.py`) and the production fork on `goal/v2.snapshot-prod` |
+| Verify | done | `verification-report.md`: three rounds by fresh reviewers, signed by the owner 2026-11-19; Verified with accepted deviations F-02, F-05, F-06, F-07, F-10, F-11 |
+| Commit | done | merged into master by the owner as `8c21be4d` (2026-11-20); checks on the merged candidate the same day: contracts, PostgreSQL 43, unit suite 2503, JS 186 green; no version (subgoal) |
+| Deploy | empty | snapshots are inside the backend; delivered with the iteration goal G-V2 |
+| Validate | open | |
