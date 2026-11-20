@@ -16,8 +16,8 @@ Proposed 2026-11-20 by the owner (maldun), D-380: a subgoal for the context-grap
 ## Outcome criteria
 | ID | Expected outcome | Derived from |
 |---|---|---|
-| OC-1 | Given a document the owner adds, when the builder runs, then it proposes items and relations, each with the passage it comes from, and no step reads a proposal before the owner has confirmed it | FR-42 |
-| OC-2 | Given the proposals built from documents, when the owner marks a random sample of at least 120 of them, then at most 4 are marked invented and at least 91 right | FR-42 (owner's bar of 2026-11-05, sample plan of 2026-11-07) |
+| OC-1 | Given a document the owner adds, when the builder runs, then it proposes items, relations, definitions and stated facts, each with the passage it comes from, and no step reads a proposal before the owner has confirmed it | FR-42 |
+| OC-2 | Given the proposals built from documents, when the owner marks a random sample of at least 120 items and relations and a second one of at least 120 definitions and facts, then in each at most 4 are marked invented and at least 91 right | FR-42 (owner's bar of 2026-11-05, sample plan of 2026-11-07) |
 | OC-3 | Given a confirmed context graph, when a skill that names it runs, then the step reads the confirmed part within its token budget and the run records which graph and version it read | FR-41 |
 | OC-4 | Given the builder with its limits, when a document is too large or too slow, then the builder stops at the limit and says so | FR-42 |
 
@@ -32,7 +32,7 @@ Proposed 2026-11-20 by the owner (maldun), D-380: a subgoal for the context-grap
 ## Phases
 | Phase | State | Record or reason |
 |---|---|---|
-| Explore | in progress | `top-level-spec.md` drafted from FR-41, FR-42 and the N-6 notes; scope decided (D-381); item-by-item review open |
+| Explore | done | `top-level-spec.md` reviewed item by item (D-381 to D-384); the owner's approval box is open |
 | Plan | open | |
 | Implement | open | |
 | Verify | open | |

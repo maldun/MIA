@@ -1,6 +1,6 @@
 # Top-Level Specification: Context graph builder (G-V4.BUILDER)
 
-**Status:** Draft, scope questions answered (D-381); the requirements are still to be reviewed one by one
+**Status:** Reviewed by the owner item by item (D-382 to D-384); approval box open
 **Owner:** Stefan Reiterer   **Date:** 2026-11-20
 **Project / deliverable:** MIA, subgoal BUILDER of G-V4 (decided by the owner 2026-11-20, D-380). Requirement IDs are provisional (continuing after FR-97 and NFR-22); Plan assigns them in `requirements.md`. Refines FR-41 and FR-42 (their approved text stays, D-362).
 
@@ -9,7 +9,7 @@ A context graph is the knowledge a skill reads when it runs. Today the owner wou
 
 ## 2. Scope
 ### In scope
-Building from documents the owner adds (first slice, D-381), with proposals, sources, checks against invented items, confirmation, limits; manual additions; steps reading the confirmed part within a token budget (the last task of this subgoal). Requirements FR-98 to FR-105 and NFR-23 to NFR-25 (reviewed so far: FR-98 to FR-101, D-382).
+Building from documents the owner adds (first slice, D-381), with proposals, sources, checks against invented items, confirmation, limits; manual additions; steps reading the confirmed part within a token budget (the last task of this subgoal). Requirements FR-98 to FR-105 and NFR-23 to NFR-25 (all reviewed, D-382 to D-384).
 ### Out of scope (non-goals)
 Building from runs, reviews and web results (a later slice, D-381); categories as schemas edited in the editor beyond G-V4.CONTEXT; any model other than the pinned local one.
 
@@ -34,11 +34,11 @@ Building from runs, reviews and web results (a later slice, D-381); categories a
 
 ### 3.2 Non-functional requirements
 - NFR-23 (Correctness of proposals): The builder rarely invents.
-  - Outcome: Given proposals built from documents, when the owner marks a random sample of at least 120 of them for each kind of proposal, then at most 4 of each sample are marked invented and at least 91 right; for definitions and stated facts, which no sample has measured yet, the first sample is marked before they are offered for confirmation; a larger sample may be decided later as a written decision made before the extra marks are looked at.
+  - Outcome: Given proposals built from documents, when the owner marks a random sample of at least 120 items and relations, then at most 4 are marked invented and at least 91 right; when the owner marks a second random sample of at least 120 definitions and stated facts before they are offered for confirmation, then the same holds for it; a larger sample may be decided later as a written decision made before the extra marks are looked at.
 - NFR-24 (Privacy): Documents never leave the host.
-  - Outcome: Given a document with private content, when the builder runs, then nothing of it is sent to any outside address, and only the local model reads it.
+  - Outcome: Given a document with private content, when the builder runs, then nothing of it is sent to any outside address and only a local model reads it, the pinned light model by default and the full local model when the owner chooses it for that run; a run with the full model is shown as unmeasured against the bar of NFR-23 until a sample for it has been marked.
 - NFR-25 (Untrusted input): Instructions inside a document are data.
-  - Outcome: Given a document that contains text that tells the builder to do something (for example to confirm itself or to ignore its rules), when the builder runs, then the text is treated as content of the document, no proposal is confirmed by it, and nothing outside the proposals is changed.
+  - Outcome: Given a document that contains text that tells the builder to do something (for example to confirm itself or to ignore its rules), when the builder runs, then the owner is told before reading the proposals that the document contains instruction-like text, the text is treated as content of the document, no proposal is confirmed by it, and nothing outside the proposals is changed.
 
 ### 3.3 Given constraints
 | Constraint | Source | Why it cannot be changed |
@@ -72,6 +72,7 @@ The owner adds documents and later points the builder at runs and web results; t
 | Whether steps reading the context graph within a budget (FR-104) belong here or to the runner subgoals | scope | **decided (D-381):** here, as the last task of the subgoal |
 | Where the owner uses the builder | usability, containers | **decided (D-381):** a page of its own in the same web app, as part N-6 with its own container, reached from the graph viewer |
 | Definitions and stated facts (owner, D-382) have no measured quality yet; spike C and the 120-item sample covered items and relations only | NFR-23 cannot be claimed for them | the owner marks a first sample before they are offered; if the bar is missed they are switched off; owner |
+| The full local model was not measured against the bar (spike C used the light model) | NFR-23 holds only for the model that was marked | a full-model run is shown as unmeasured until a sample exists (D-384); owner |
 | The quality bar rests on the owner marking at least 120 items per verdict | time of the owner | the owner schedules the marking; agents never label |
 | The neighbour part of FR-100 rests on thin evidence | may need a change | Provisional, improved in validation |
 | Two quality notions, the owner's bar and a model as judge (kappa 0.11, not usable) | no automatic quality check | only the owner's marks decide (spike C) |
