@@ -36,13 +36,13 @@ U = "/api/v2/graphs/cp2.multi"
 body = lambda g, **kw: {"graph": {"nodes": g["nodes"], "edges": g["edges"]}, **kw}
 cur = o.get(U).get_json()["graph"]
 
-check("FR-95 with a live store and a copy, the status says both are there and the copy is not behind", o.get("/api/v2/status").get_json() == {"split": True, "live": "reachable", "lag": 0})
+check("FR-95 with a live store and a copy, the status says both are there and the copy is not behind", o.get("/api/v2/status").get_json() == {"split": True, "live": "reachable", "lag": 0, "behind": {}})
 changed = copy.deepcopy(cur); changed["nodes"][1]["data"]["toolbox_id"] = "check.number"
 r = o.put(U, json=body(changed, expected_version=4), headers=ORIGIN)
 live_versions = [e["version"] for e in live.versions("graphs", "cp2.multi")]
 copy_versions = [e["version"] for e in copy_.versions("graphs", "cp2.multi")]
 check("FR-95 a kept change is stored in the live store, not in the copy", r.status_code == 200 and live_versions == [1, 2, 3, 4, 5] and copy_versions == [1, 2, 3, 4])
-check("FR-95 the viewer still shows the copy until the sync, and says how far it is behind", o.get(U).get_json()["current"] == 4 and o.get("/api/v2/status").get_json()["lag"] == 1)
+check("FR-95 the viewer still shows the copy until the sync, and says how far it is behind and on which graph", o.get(U).get_json()["current"] == 4 and o.get("/api/v2/status").get_json()["lag"] == 1 and o.get("/api/v2/status").get_json()["behind"] == {"cp2.multi": {"live": 5, "copy": 4}})
 more = copy.deepcopy(changed); more["nodes"][0]["data"]["value"] = "other"
 check("FR-72 a change made on the version of the copy is refused when the live store has moved on: nothing is overwritten", o.put(U, json=body(more, expected_version=4), headers=ORIGIN).status_code == 409 and [e["version"] for e in live.versions("graphs", "cp2.multi")] == [1, 2, 3, 4, 5])
 check("a sync is for the owner only", gst.post("/api/v2/sync", headers=ORIGIN).status_code == 403)

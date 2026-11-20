@@ -219,10 +219,13 @@ def create_app(backend, accounts_store, port=8801, live=None):
         if live is None:
             return jsonify({"split": False, "live": "reachable", "lag": 0})
         try:
-            lag = 0
+            lag, behind = 0, {}
             for graph_id in live_backend.ids("graphs"):
-                lag += max(0, len(live_backend.versions("graphs", graph_id)) - len(backend.versions("graphs", graph_id)))
-            return jsonify({"split": True, "live": "reachable", "lag": lag})
+                there, here = len(live_backend.versions("graphs", graph_id)), len(backend.versions("graphs", graph_id))
+                if there > here:
+                    lag += there - here
+                    behind[graph_id] = {"live": there, "copy": here}      # which graphs the copy is behind on, and by how much
+            return jsonify({"split": True, "live": "reachable", "lag": lag, "behind": behind})
         except Exception as error:                                  # noqa: BLE001 - only an unreachable store is told, anything else is a bug
             if not _unreachable(error):
                 raise

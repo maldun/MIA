@@ -95,6 +95,7 @@ async function open(id, version) {
   chosen = id;
   renderList();
   const q = version ? `?version=${version}` : '';
+  if (storeStatus?.split) await loadStoreStatus();
   const [res, arr, vs] = await Promise.all([api(`/api/v2/graphs/${encodeURIComponent(id)}${q}`), api(`/api/v2/graphs/${encodeURIComponent(id)}/arrangement`), api(`/api/v2/graphs/${encodeURIComponent(id)}/versions`)]);
   current = await res.json();
   saved = await arr.json();
@@ -159,7 +160,7 @@ function draw() {
     else renderPanel(document, $('detail'), null);
   });
   renderStepList(document, $('steps'), viewGraph(), Object.fromEntries(viewGraph().nodes.map((n) => [n.id, infoOf(n.id)])), pick);
-  $('status').textContent = `${current.graph.id}, ${editing ? 'WORKING COPY of ' : ''}${versionNote(current.version, current.current)} (${current.author}): ${nodes.length - missing.size} steps, ${edges.length} connections` + (named.length ? `; ${named.length} problem(s)` : '');
+  $('status').textContent = `${current.graph.id}, ${editing ? 'WORKING COPY of ' : ''}${versionNote(current.version, current.current)} (${current.author}): ${nodes.length - missing.size} steps, ${edges.length} connections` + (named.length ? `; ${named.length} problem(s)` : '') + liveNote(current.graph.id);
   $('arr-note').textContent = arrangementNote(saved, mode);
   $('problems').replaceChildren(...named.map((text) => { const li = document.createElement('li'); li.textContent = text; return li; }));
   renderPanel(document, $('detail'), null);
@@ -211,6 +212,7 @@ document.addEventListener('keydown', (e) => {
 });
 
 const behind = () => (storeStatus?.split && storeStatus.lag > 0 ? ' - the copy shows it after the sync' : '');
+const liveNote = (id) => (storeStatus?.behind?.[id] ? ` - the live store already has version ${storeStatus.behind[id].live}: sync the copy to see it` : '');
 function refreshStoreNote() {
   $('store-note').textContent = storeNote(storeStatus);
   $('sync').hidden = !(isOwner && storeStatus?.split);
@@ -225,7 +227,7 @@ async function loadStoreStatus() {
 $('sync').addEventListener('click', async () => {
   const res = await api('/api/v2/sync', { method: 'POST' });
   const body = await res.json();
-  if (res.ok) { $('status').textContent = `Synced: ${body.versions_added} version(s) and ${body.records} record(s) added to the copy.`; await loadStoreStatus(); if (chosen) await open(chosen); return; }
+  if (res.ok) { $('status').textContent = `Synced: ${body.versions_added} version(s) and ${body.records} record(s) added to the copy.`; await loadStoreStatus(); $('sync').classList.remove('attention'); if (chosen) await open(chosen); return; }
   $('status').textContent = res.status === 503 ? 'The live store cannot be reached: nothing was synced.' : `The sync was refused: ${JSON.stringify(body.graphs ?? body.error)}`;
 });
 $('restore').addEventListener('click', async () => {
@@ -233,7 +235,15 @@ $('restore').addEventListener('click', async () => {
   const shown = current.version;
   const res = await api(`/api/v2/graphs/${encodeURIComponent(chosen)}/restore`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ version: shown }) });
   const body = await res.json();
-  if (res.ok) { await loadStoreStatus(); await open(chosen); $('status').textContent += ` (version ${shown} restored as version ${body.version}${behind()})`; return; }
+  if (res.ok) {
+    await loadStoreStatus();
+    await open(chosen);
+    $('status').textContent = body.changed
+      ? `Version ${shown} was restored as version ${body.version}.${storeStatus?.behind?.[chosen] ? ` It is in the live store; you are looking at the copy (version ${current.version}): use "Sync the copy now" to see it.` : ''}`
+      : `Version ${shown} has the same content as the current version (${body.version}): nothing was restored.`;
+    $('sync').classList.toggle('attention', Boolean(storeStatus?.lag));
+    return;
+  }
   $('status').textContent = res.status === 503 ? 'The live store cannot be reached: nothing was restored.' : `The restore failed (${res.status} ${body.error ?? ''}).`;
 });
 
@@ -314,7 +324,7 @@ $('add-conn').addEventListener('click', () => {
 $('keep').addEventListener('click', async () => {
   const res = await api(`/api/v2/graphs/${encodeURIComponent(chosen)}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ graph: { nodes: draft.nodes, edges: draft.edges }, expected_version: current.version }) });
   const body = await res.json();
-  if (res.ok) { stopEdit(); note(''); await loadStoreStatus(); await open(chosen); $('status').textContent += body.changed ? ` (kept as version ${body.version}${behind()})` : ' (nothing had changed)'; return; }
+  if (res.ok) { stopEdit(); note(''); await loadStoreStatus(); await open(chosen); $('status').textContent = body.changed ? `Kept as version ${body.version}.${storeStatus?.behind?.[chosen] ? ` It is in the live store; you are looking at the copy (version ${current.version}): use "Sync the copy now" to see it.` : ''}` : 'Nothing had changed: no new version.'; $('sync').classList.toggle('attention', Boolean(storeStatus?.lag)); return; }
   if (res.status === 409) { note(`The graph changed meanwhile (now version ${body.current}). Nothing was overwritten; discard the changes and open it again.`); return; }
   if (res.status === 422 && body.rules) { note('The change breaks a rule and was not kept.'); $('rules').replaceChildren(...body.rules.map((r) => { const li = document.createElement('li'); li.textContent = `${r.rule}: ${r.text} (${r.parts.join(', ')})`; return li; })); return; }
   if (res.status === 503) { note('The live store cannot be reached: nothing was kept. Editing is not possible now.'); return; }
