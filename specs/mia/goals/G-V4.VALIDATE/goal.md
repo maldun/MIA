@@ -1,6 +1,6 @@
 # Goal G-V4.VALIDATE – Validation of G-V2 and G-V3 after the G-V4 rework
 
-Opened 2026-11-20 on the owner's request: G-V2 (v0.2.x) and G-V3 are in the Validate phase, and G-V4 starts a larger rework. Parts of the rework may change what the validation runs would see, so validating v0.2.1 now would be effort that may have to be repeated. The validation of both goals is therefore collected here and run **on the version after the rework**. **G-V4 itself has no goal record yet**; this subgoal is a draft that waits for it (see "Open").
+Opened 2026-11-20 on the owner's request: G-V2 (v0.2.x) and G-V3 are in the Validate phase, and G-V4 starts a larger rework. Parts of the rework may change what the validation runs would see, so validating v0.2.1 now would be effort that may have to be repeated. The validation of both goals is therefore collected here and run **on the version after the rework**. G-V4 now has a goal record (`../G-V4/goal.md`, Proposed); this subgoal is its last one and a draft until the rework is planned.
 
 - Kind: subgoal
 - Parent: G-V4
@@ -45,7 +45,7 @@ Also: re-check the Provisional strip height of REQ-CLV-041 and every other `Prov
 Output: a short `validation-goals-review.md` in this folder (one row per criterion: keep / change / drop / add, reason, owner decision), the amendments it needs, and the re-based `validation-plan` for the frozen post-rework version. Only then do the sessions start.
 
 ## Open
-- G-V4 has only a Proposed draft (`../G-V4/goal.md`, scope from the G-V2 and G-V3 leftovers, not yet confirmed by the owner). Until its Explore settles the scope, the line of work and the dependency "after the rework is deployed" stay placeholders.
+- G-V4 is Proposed with its subgoals (D-360); the owner's Explore gate is open. Until the rework is planned, the line of work and the dependency "after the rework is deployed" stay placeholders. The editor-driven improvement of the workflow graphs (OC-9 of G-V4) is a stage of this subgoal; its place in the plan is open.
 - Decide whether VAL-001, 003, 004 and 005 (G-V1 material, never run, D-185) join this round.
 - Retention and deletion date for the run logs, and consent of any user besides the owner (validation plan).
 - Whether the Validate rows of G-V2 and G-V3 (`goal.md`, Phases) should say "deferred to G-V4.VALIDATE". Not changed yet.
