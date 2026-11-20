@@ -1,0 +1,11 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Graph viewer prototype</title>
+<link rel="stylesheet" href="graph.css"><script src="vendor/vis-network.min.js"></script><script type="module" src="proto.js"></script>
+<style>.work{flex-wrap:nowrap;align-items:stretch}aside{flex:0 0 340px;order:-1}main{flex:1 1 auto;min-width:0}.menu{position:relative}#settings{position:absolute;z-index:10;top:100%;left:0;margin-top:6px;min-width:260px;padding:12px;background:var(--panel);border:1px solid var(--line);border-radius:6px;display:flex;flex-direction:column;gap:10px}#settings[hidden]{display:none}#settings h2{margin:0;font-size:1rem}.row{display:flex;justify-content:space-between;gap:12px;align-items:center}.row.check{justify-content:flex-start}</style></head>
+<body><header><h1>Graph viewer prototype</h1><label>Graph <select id="pick"></select></label>
+<span class="menu"><button id="settings-button" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="settings">Settings</button>
+<div id="settings" role="group" aria-label="Settings" hidden><h2>View</h2><label class="row check"><input type="checkbox" id="physics" checked> Physics</label>
+<label class="row">Solver <select id="solver"><option>barnesHut</option><option>forceAtlas2Based</option><option>repulsion</option><option>hierarchicalRepulsion</option></select></label>
+<label class="row check"><input type="checkbox" id="freeze" checked> Freeze after settling</label>
+<label class="row">Edges <select id="edges"><option value="cubicBezier">rounded (bezier)</option><option value="curvedCW">rounded (arc)</option><option value="continuous">smooth</option><option value="dynamic">dynamic</option><option value="straight">straight</option></select></label>
+<button id="layers" type="button">Reset to layers (fixed)</button></div></span></header><p id="status" role="status"></p>
+<div class="work"><aside aria-label="selected node"><h2>Selected</h2><pre id="detail">Click a node or an edge.</pre></aside><main id="view" aria-label="graph"></main></div></body></html>
