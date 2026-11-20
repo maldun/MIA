@@ -835,7 +835,9 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Acceptance criterion: AC-34: per skill, the list of model calls of the old and the converted run on scripted replies is equal (exact, a diff is shown)
 - Verified by: TC-WFM-058
 - Status: Draft
-- History: G-V2 Plan step 1 (2026-11-07), new
+- Relaxed: TD-86
+- Target: converted runs read the live toolbox store of the app, trust and lifecycle included (see TD-86); TD-89 and TD-90 also name this requirement
+- History: G-V2 Plan step 1 (2026-11-07), new; Commit G-V2 (2026-11-20): Relaxed TD-86 (D-355)
 
 ### REQ-WFM-059 – Same outcomes on the suite
 - Level: low   Subject: TaskRuntime
@@ -1005,7 +1007,9 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Eval criterion: suite=EV-research; select=; metric=right; min=0.85; n=20; repeats=3; pin=MP-light; rule=threshold; alpha=0.05; false_alarm=0.0003; split=dev
 - Verified by: TC-WFM-110, EV-research
 - Status: Draft
-- History: G-V2 Plan step 3 (2026-11-07), new, split from REQ-WFM-059 (owner); A-122 (2026-11-15): floor 0.82 to 0.85 on the recorded baseline (0.95), owner approved, back in review
+- Relaxed: TD-88
+- Target: holdout suites for the five skills, decided once in a Verify (see TD-88)
+- History: G-V2 Plan step 3 (2026-11-07), new, split from REQ-WFM-059 (owner); A-122 (2026-11-15): floor 0.82 to 0.85 on the recorded baseline (0.95), owner approved, back in review; Commit G-V2 (2026-11-20): Relaxed TD-88 (D-355)
 
 ### REQ-WFM-111 – Same outcomes: plan_question
 - Level: low   Subject: TaskRuntime

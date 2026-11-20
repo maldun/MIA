@@ -779,7 +779,9 @@ The HLS requirements FR-36 to FR-47 in EARS form; only those in the scope of G-V
 - Refined in: N-2.3
 - Verified by: TC-WFM-058
 - Status: Draft
-- History: G-V2 Plan step 1 (2026-11-07), new
+- Relaxed: TD-87
+- Target: REQ-WFM-143 as drafted in section 4 of `amendments/A-159-draft-split-snapshots.md`: budgets and the stop request are checked on the converted path (see TD-87)
+- History: G-V2 Plan step 1 (2026-11-07), new; Commit G-V2 (2026-11-20): Relaxed TD-87 (D-355)
 
 ### FR-47 – Snapshots of the skill set
 - Level: top   Subject: MiaSystem
