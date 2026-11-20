@@ -14,6 +14,8 @@ import { storeNote, canEdit, syncMessage } from './store-note.js';
 import { renderCopyPanel, copyMessage } from './copy-panel.js';
 import { brokenLines, runMessage, parseInputs } from './run-note.js';
 import { sessionChanges, withReasons, changeKey, describeChange, explain } from './change-log.js';
+import { states, sameGraph, stepNote } from './replay.js';
+import { compareView, markText, compareNote } from './compare.js';
 
 const $ = (id) => document.getElementById(id);
 let graphs = [];
@@ -32,8 +34,11 @@ let history = null;
 let storeStatus = null;
 let changeLog = [];
 let reasons = new Map();
+let overlay = null;                                   // a playback or comparison: {graph, marks, edgeMarks, lines, note}; the picture is read-only then
+let playback = null;                                  // {record, list, k, ok}
+const MARK = { added: '#1b7f3b', removed: '#b3261e', changed: '#b45309' };
 
-const viewGraph = () => (editing && draft ? draft : current.graph);
+const viewGraph = () => (overlay ? overlay.graph : editing && draft ? draft : current.graph);
 const kindOf = (id) => viewGraph().nodes.find((n) => n.id === id)?.data?.type;
 const infoOf = (id) => {
   const type = kindOf(id);
@@ -44,7 +49,7 @@ const infoOf = (id) => {
   return current.steps[id] ?? { kind: type };
 };
 const localProblems = (graph) => { const ids = new Set(graph.nodes.map((n) => n.id)); return graph.edges.flatMap((e) => ['from', 'to'].filter((end) => !ids.has(e[end])).map((end) => ({ problem: 'missing_step', connection: e.id, step: e[end], end }))); };
-const problemsOf = () => (editing ? localProblems(draft) : current.problems);
+const problemsOf = () => (overlay ? localProblems(overlay.graph) : editing ? localProblems(draft) : current.problems);
 let storage = null;
 try { storage = window.localStorage; } catch { storage = null; }
 const settings = loadSettings(storage);
@@ -107,6 +112,7 @@ async function open(id, version) {
   versions = await vs.json();
   changeLog = await log.json();
   mode = 'auto';
+  overlay = null; playback = null;
   if (!editing) $('rules').replaceChildren();
   renderHistory();
   draw();
@@ -126,6 +132,9 @@ function renderHistory() {
   });
   $('history').replaceChildren(...items);
   $('how').replaceChildren(...explain(changeLog.find((r) => r.version === current.version)).map((text) => { const li = document.createElement('li'); li.textContent = text; return li; }));
+  $('cmp-with').replaceChildren(...versions.filter((v) => v.version !== current.version).map((v) => { const o = document.createElement('option'); o.value = String(v.version); o.textContent = `version ${v.version}`; return o; }));
+  $('compare').disabled = versions.length < 2;
+  $('play').disabled = false;
   $('prev').disabled = neighbour(versions, current.version, 'previous') === null;
   $('next').disabled = neighbour(versions, current.version, 'next') === null;
 }
@@ -135,7 +144,7 @@ $('next').addEventListener('click', () => { const v = neighbour(versions, curren
 // a selected step in the viewing mode: its fields, and for the owner the form that copies it into another graph (FR-94)
 function showStep(step, info) {
   renderPanel(document, $('detail'), step, info);
-  if (!isOwner || editing || !step || info?.kind === 'missing' || step.data?.type === 'missing') return;
+  if (!isOwner || editing || overlay || !step || info?.kind === 'missing' || step.data?.type === 'missing') return;
   renderCopyPanel(document, $('detail'), step, graphs, chosen, {
     onCopy: async ({ target, name }) => {
       const res = await api(`/api/v2/graphs/${encodeURIComponent(chosen)}/copy-step`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ step: step.id, target, name, version: current.version }) });
@@ -163,8 +172,21 @@ function draw() {
     n.label = missing.has(n.id) ? `missing: ${n.id}` : labelOf(n.id, infoOf(n.id));
     if (infoOf(n.id).trust !== undefined && (infoOf(n.id).kind === 'transform' || infoOf(n.id).kind === 'master') && infoOf(n.id).trust !== 'trusted') n.shapeProperties = { borderDashes: [3, 3] };
   }
+  for (const n of nodes) {
+    const m = overlay?.marks[n.id];
+    if (!m) continue;
+    n.label = `${n.label}\n${markText(m)}`;
+    n.borderWidth = 4;
+    n.color = m === 'removed' ? { border: MARK[m], background: 'transparent' } : { border: MARK[m] };
+    if (m === 'removed') n.shapeProperties = { borderDashes: [6, 4] };
+  }
   const dashed = new Set(problemsOf().filter((p) => p.problem === 'missing_step').map((p) => p.connection));
   for (const e of edges) if (dashed.has(graph.edges[Number(e.id.slice(1))]?.id)) { e.dashes = true; e.color = { color: '#b3261e' }; }
+  for (const e of edges) {
+    const m = overlay?.edgeMarks[graph.edges[Number(e.id.slice(1))]?.id];
+    if (!m) continue;
+    e.color = { color: MARK[m] }; e.width = 3; e.label = markText(m); e.dashes = m === 'removed';
+  }
   const options = visOptions(colors());
   options.edges.smooth = edgeSmooth(settings);
   options.interaction.keyboard = true;
@@ -182,12 +204,14 @@ function draw() {
     else renderPanel(document, $('detail'), null);
   });
   renderStepList(document, $('steps'), viewGraph(), Object.fromEntries(viewGraph().nodes.map((n) => [n.id, infoOf(n.id)])), pick);
-  $('status').textContent = `${current.graph.id}, ${editing ? 'WORKING COPY of ' : ''}${versionNote(current.version, current.current)} (${current.author}): ${nodes.length - missing.size} steps, ${edges.length} connections` + (named.length ? `; ${named.length} problem(s)` : '') + liveNote(current.graph.id);
+  $('status').textContent = overlay ? `${current.graph.id}: ${overlay.note}` : `${current.graph.id}, ${editing ? 'WORKING COPY of ' : ''}${versionNote(current.version, current.current)} (${current.author}): ${nodes.length - missing.size} steps, ${edges.length} connections` + (named.length ? `; ${named.length} problem(s)` : '') + liveNote(current.graph.id);
   $('arr-note').textContent = arrangementNote(saved, mode);
   $('problems').replaceChildren(...named.map((text) => { const li = document.createElement('li'); li.textContent = text; return li; }));
   renderPanel(document, $('detail'), null);
   if (editing && history) refreshUndo();
-  $('restore').hidden = !(isOwner && !editing && current.version !== current.current);
+  $('restore').hidden = !(isOwner && !editing && !overlay && current.version !== current.current);
+  $('replay-bar').hidden = !overlay;
+  $('edit-toggle').disabled = !canEdit(storeStatus) || Boolean(overlay);
 }
 
 // settings menu: opens under its button, closes with Escape, a click outside or the button again; every change applies at once and is remembered
@@ -287,6 +311,46 @@ $('restore').addEventListener('click', async () => {
   $('status').textContent = res.status === 503 ? 'The live store cannot be reached: nothing was restored.' : `The restore failed (${res.status} ${body.error ?? ''}).`;
 });
 
+// ---- playback and comparison (CP12, FR-78, FR-79): read-only views on the shown version ----
+const lineItems = (lines) => lines.map((text) => { const li = document.createElement('li'); li.textContent = text; return li; });
+function leaveOverlay() { overlay = null; playback = null; draw(); }
+function showPlayback() {
+  const { record, list, k, ok } = playback, entries = record.entries;
+  const view = k === 0 ? { graph: list[0], marks: {}, edgeMarks: {}, lines: [] } : compareView(list[k - 1], list[k]);
+  const e = k > 0 ? entries[k - 1] : null;
+  overlay = { ...view, note: `Playback of version ${record.version}: ${stepNote(k, entries, ok)}` };
+  draw();
+  $('overlay-lines').replaceChildren(...lineItems(e ? [`${k}. ${describeChange(e)} - ${e.reason ? `reason: ${e.reason}` : 'no reason given'}`] : []));
+  $('rp-back').disabled = k === 0; $('rp-fwd').disabled = k === entries.length; $('rp-note').textContent = `by ${record.author}, ${record.time}`;
+}
+$('play').addEventListener('click', async () => {
+  const record = changeLog.find((r) => r.version === current.version);
+  if (!record || record.kind === 'before_the_record') { $('status').textContent = `Version ${current.version} was made before the record of changes existed: there is nothing to play back. "Compare" shows what differs from another version.`; return; }
+  const get = async (n) => (await (await api(`/api/v2/graphs/${encodeURIComponent(chosen)}?version=${n}`)).json()).graph;
+  const start = await get(record.from_version);
+  const earlier = {};
+  for (const e of record.entries) if (e.op === 'restore') earlier[e.target] = await get(e.target);
+  let list;
+  try { list = states(start, record.entries, (n) => earlier[n]); } catch (error) { $('status').textContent = `The playback failed: ${error.message}`; return; }
+  playback = { record, list, k: 0, ok: sameGraph(list[list.length - 1], current.graph) };
+  showPlayback();
+});
+$('rp-fwd').addEventListener('click', () => { if (playback && playback.k < playback.record.entries.length) { playback.k += 1; showPlayback(); } });
+$('rp-back').addEventListener('click', () => { if (playback && playback.k > 0) { playback.k -= 1; showPlayback(); } });
+$('rp-leave').addEventListener('click', leaveOverlay);
+$('compare').addEventListener('click', async () => {
+  const other = Number($('cmp-with').value);
+  if (!other || !current) return;
+  const theirs = (await (await api(`/api/v2/graphs/${encodeURIComponent(chosen)}?version=${other}`)).json()).graph;
+  const [from, to, a, b] = other < current.version ? [other, current.version, theirs, current.graph] : [current.version, other, current.graph, theirs];
+  playback = null;
+  const view = compareView(a, b);
+  overlay = { ...view, note: compareNote(from, to, view) };
+  draw();
+  $('overlay-lines').replaceChildren(...lineItems(view.lines));
+  $('rp-back').disabled = true; $('rp-fwd').disabled = true; $('rp-note').textContent = '';
+});
+
 // ---- a run is tried behind the checks (CP4, FR-64): refused before any step runs, every broken part named ----
 $('run-try').addEventListener('click', async () => {
   if (!current) return;
@@ -345,6 +409,7 @@ function showConnectionEditor(link) {
 }
 
 function startEdit() {
+  if (overlay) { $('status').textContent = 'Leave the playback or comparison first.'; return; }
   if (!current || current.version !== current.current) { $('status').textContent = 'Only the current version can be edited: open the current version first.'; return; }
   editing = true;
   draft = JSON.parse(JSON.stringify(current.graph));
