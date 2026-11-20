@@ -12,6 +12,7 @@ import { renderStepEditor, renderConnectionEditor } from './edit-panel.js';
 import * as hist from './undo-stack.js';
 import { storeNote, canEdit, syncMessage } from './store-note.js';
 import { renderCopyPanel, copyMessage } from './copy-panel.js';
+import { brokenLines, runMessage, parseInputs } from './run-note.js';
 
 const $ = (id) => document.getElementById(id);
 let graphs = [];
@@ -102,6 +103,7 @@ async function open(id, version) {
   saved = await arr.json();
   versions = await vs.json();
   mode = 'auto';
+  if (!editing) $('rules').replaceChildren();
   renderHistory();
   draw();
 }
@@ -267,6 +269,17 @@ $('restore').addEventListener('click', async () => {
   $('status').textContent = res.status === 503 ? 'The live store cannot be reached: nothing was restored.' : `The restore failed (${res.status} ${body.error ?? ''}).`;
 });
 
+// ---- a run is tried behind the checks (CP4, FR-64): refused before any step runs, every broken part named ----
+$('run-try').addEventListener('click', async () => {
+  if (!current) return;
+  const typed = parseInputs($('run-inputs').value);
+  if (typed.error) { $('status').textContent = typed.error; return; }
+  const res = await api(`/api/v2/graphs/${encodeURIComponent(chosen)}/run`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ inputs: typed.values, version: current.version }) });
+  const body = await res.json().catch(() => ({}));
+  $('status').textContent = runMessage(res.status, body);
+  $('rules').replaceChildren(...brokenLines(body.broken).map((text) => { const li = document.createElement('li'); li.textContent = text; return li; }));
+});
+
 // ---- editing (CP8): a working copy, the rules asked after every change, the change kept as a new version ----
 const editBar = $('edit-bar');
 function fillEnds() {
@@ -359,6 +372,7 @@ async function start() {
   if (isOwner) tools = await (await api('/api/v2/toolbox')).json();
   await loadStoreStatus();
   $('edit-toggle').hidden = !isOwner || editing;
+  $('run-box').hidden = !isOwner;
   show('viewer');
   graphs = await (await api('/api/v2/graphs')).json();
   renderList();

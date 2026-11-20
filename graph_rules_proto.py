@@ -7,7 +7,8 @@ rule_report(graph) -> [{"rule", "parts", "text"}] for each broken rule, in this 
   4 duplicate_connection   a connection ID or an identical connection used twice
   5 adjacency              a connection between two data steps, or between two steps that are not data
   6 single_writer          a data step that more than one step writes
-  7 stop_limit             a loop-controlling step without a valid stop limit
+  7 stop_limit             session settings: a data step that carries a session setting (`stop` or `session`), a step with more than one settings connection,
+                           a loop-controlling step without a valid stop limit
   8 cycle                  the steps cannot be put in an order
 `graph` is {"nodes": [{"id", "data"}], "edges": [{"id", "from", "to", "data"}]} with local IDs.
 """
@@ -24,7 +25,7 @@ TEXTS = {
     "duplicate_connection": "the same connection is there twice",
     "adjacency": "a connection joins two data steps or two steps that are not data",
     "single_writer": "a piece of data is written by more than one step",
-    "stop_limit": "a loop-controlling step has no valid stop limit",
+    "stop_limit": "a session setting is wrong: a data step holds a stop or session setting, a step has more than one settings connection, or a loop-controlling step has no valid stop limit",
     "cycle": "the steps run in a circle",
 }
 
@@ -65,8 +66,55 @@ def rule_report(graph):
         if kinds.get(e.get("to")) == "data" and e.get("from") in kinds:
             writers.setdefault(e["to"], set()).add(e["from"])
     add("single_writer", [d for d, w in writers.items() if len(w) > 1])
-    add("stop_limit", [n["id"] for n in nodes if _kind(n) == "master" and not stop_is_valid((n.get("data") or {}).get("stop"))])
+    settings_in = {}
+    for e in edges:
+        if (e.get("data") or {}).get("role") == "settings":
+            settings_in.setdefault(e.get("to"), []).append(e.get("id"))
+    add("stop_limit", [n["id"] for n in nodes if _kind(n) == "master" and not stop_is_valid((n.get("data") or {}).get("stop"))]
+        + [n["id"] for n in nodes if _kind(n) == "data" and ({"stop", "session"} & set(n.get("data") or {}))]
+        + [t for t, ids in settings_in.items() if len(ids) > 1])
     if not report or all(r["rule"] != "connection_endpoints" and r["rule"] != "step_identity" for r in report):
         cycle = find_cycle([i for i in ids if isinstance(i, str)], [e for e in edges if e.get("from") in known and e.get("to") in known])
         add("cycle", cycle or [])
     return report
+
+
+def missing_inputs(graph, given=None):
+    """[{"step", "input"}]: an input of a processing or loop-controlling step (a connection from a data step that is neither a settings nor an order connection) whose data step
+    has no writer (no connection into it), no start value in the graph and no value given with the run. Settings are optional (the step gets {} without them)."""
+    given = given or {}
+    nodes = {n.get("id"): n for n in graph.get("nodes", [])}
+    edges = [e for e in graph.get("edges", []) if e.get("from") in nodes and e.get("to") in nodes]
+    written = {e["to"] for e in edges}
+    found = []
+    for e in edges:
+        if _kind(nodes[e["to"]]) not in ("transform", "master") or _kind(nodes[e["from"]]) != "data":
+            continue
+        if (e.get("data") or {}).get("role") in ("settings", "order"):
+            continue
+        source = nodes[e["from"]]
+        has_value = (source.get("data") or {}).get("value") is not None
+        if e["from"] not in written and not has_value and e["from"] not in given:
+            found.append({"step": e["to"], "input": e["from"]})
+    return found
+
+
+def refusal(graph, given=None):
+    """what stops a run, before any step runs: {"status": "refused" | "ready", "broken": [...]}; every broken rule (in the fixed order), then every input nobody supplies"""
+    broken = [{"kind": "rule", **r} for r in rule_report(graph)]
+    broken += [{"kind": "input", "step": m["step"], "input": m["input"], "text": "an input of the step has no writer, no start value in the graph and no value given with the run", "parts": [m["input"]]}
+               for m in missing_inputs(graph, given)]
+    return {"status": "refused" if broken else "ready", "broken": broken}
+
+
+def run_guarded(runner, graph, nodes, inputs):
+    """the run of the existing runner behind the refusal: nothing is called when the graph is refused. Returns (result, refusal); the result is RunResult("refused", ...) then."""
+    try:
+        from .graph_run import RunResult
+    except ImportError:
+        from graph_run import RunResult
+    said = refusal(graph, inputs)
+    if said["status"] == "refused":
+        named = list(dict.fromkeys(part for b in said["broken"] for part in b["parts"]))
+        return RunResult("refused", named, None, {}), said
+    return runner.run(graph, nodes, inputs), said

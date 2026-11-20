@@ -24,6 +24,7 @@ import accounts
 import accounts_api
 import graph_model
 import graph_rules_proto
+import graph_run
 import graph_store_move
 import graph_store_sync
 import tempfile
@@ -312,6 +313,31 @@ def create_app(backend, accounts_store, port=8801, live=None, aside=None):
         if not saved.saved:
             return jsonify({"error": "refused", "rule": saved.rule, "detail": saved.detail, "named": saved.named}), 422
         return jsonify({"version": saved.version, "changed": saved.version != current, **sync_graph(graph_id)})
+
+    @app.post("/api/v2/graphs/<path:graph_id>/run")
+    def run_graph(graph_id):
+        """a run behind the refusal (FR-64): a graph that breaks a rule, or has an input nobody supplies, is refused before any step runs and every broken part is named.
+        The steps here are stand-ins that only note that they ran (the runner of G-V4.GRAPHAPI.RUN is not part of this prototype)."""
+        denied = owner_only()
+        if denied:
+            return denied
+        body = request.get_json(silent=True) or {}
+        inputs = body.get("inputs") if isinstance(body.get("inputs"), dict) else {}
+        try:
+            version = body.get("version") if isinstance(body.get("version"), int) and not isinstance(body.get("version"), bool) else None
+            graph = model.read_graph(graph_id, version)
+        except StorageError:
+            return jsonify({"error": "not_found"}), 404
+        ran = []
+        def stand_in(step_id):
+            def f(values):
+                ran.append(step_id)
+                return "ran " + step_id
+            return f
+        steps = {n["id"]: stand_in(n["id"]) for n in graph["nodes"] if (n.get("data") or {}).get("type") != "data"}
+        result, said = graph_rules_proto.run_guarded(graph_run.GraphRunner(lambda step: "trusted"), graph, steps, inputs)
+        out = {"status": result.status, "ran": ran, "broken": said["broken"], "order": ran}
+        return jsonify(out), (422 if result.status == "refused" else 200)
 
     @app.post("/api/v2/graphs/<path:graph_id>/copy-step")
     def copy_step(graph_id):

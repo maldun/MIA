@@ -25,7 +25,7 @@ dl{margin:0 0 8px;display:grid;grid-template-columns:max-content 1fr;gap:2px 10p
 <button id="layers" type="button">Reset to layers (fixed)</button>
 <button id="use-saved" type="button">Use the saved arrangement</button>
 <button id="save-arr" type="button">Save this arrangement (owner, for everyone)</button><p id="arr-note" role="status"></p></div></span>
-<span id="store-note" role="status"></span><button id="sync" type="button" hidden>Sync the copy now</button><button id="edit-toggle" type="button" hidden>Edit this graph</button><button id="logout" type="button">Log out</button></header>
+<span id="store-note" role="status"></span><button id="sync" type="button" hidden>Sync the copy now</button><span id="run-box" hidden><input id="run-inputs" aria-label="start values for the run as JSON" placeholder='start values, e.g. {"input.text": "hi"}' size="28"><button id="run-try" type="button">Try a run (stand-in steps)</button></span><button id="edit-toggle" type="button" hidden>Edit this graph</button><button id="logout" type="button">Log out</button></header>
 <p id="status" role="status" aria-live="polite">Opening ...</p><ul id="problems" aria-label="what cannot be drawn"></ul><ul id="rules" aria-label="broken rules in the working copy"></ul>
 <p id="legend" aria-label="legend"><span>ellipse: data step</span><span>box: processing step</span><span>hexagon: loop-controlling step</span><span>dashed box: missing step</span><span>UNTRUSTED / trusted and lifecycle under the name; "code" = the step holds code</span></p>
 <div class="work"><aside aria-label="graphs and selected step"><h2>Graphs</h2><input id="filter" type="search" placeholder="filter by name" aria-label="filter by name"><ul id="list" role="listbox" aria-label="stored graphs"></ul>
