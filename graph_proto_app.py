@@ -15,6 +15,7 @@ import sys
 
 REPO = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, REPO)
+import math
 from flask import Flask, g, jsonify, request, send_from_directory
 
 import accounts
@@ -120,6 +121,41 @@ def create_app(backend, accounts_store, port=8801):
             return jsonify({"error": "not_found"}), 404
         return jsonify({"graph": graph, "version": shown, "current": max(head), "author": head[shown]["author"], "time": head[shown]["time"],
                         "problems": problems_of(graph), "steps": steps_info(graph, box)})
+
+    def is_owner(account):
+        return account is not None and account == accounts.first_account(accounts_store)
+
+    @app.get("/api/v2/graphs/<path:graph_id>/arrangement")
+    def get_arrangement(graph_id):
+        """where the owner put the steps of the graph: one arrangement per graph, the same for everyone; not part of a graph version (D-363, D-369)"""
+        try:
+            head = model.tables.get("arrangements", graph_id)
+        except StorageError:
+            return jsonify({"positions": None})
+        return jsonify({"positions": head["doc"]["positions"], "version": head["version"], "author": head["author"], "time": head["time"]})
+
+    @app.put("/api/v2/graphs/<path:graph_id>/arrangement")
+    def put_arrangement(graph_id):
+        if not is_owner(getattr(g, "account", None)):
+            return jsonify({"error": "not_owner"}), 403
+        try:
+            steps = {n["id"] for n in model.read_graph(graph_id)["nodes"]}
+        except StorageError:
+            return jsonify({"error": "not_found"}), 404
+        body = request.get_json(silent=True) or {}
+        raw = body.get("positions")
+        if not isinstance(raw, dict):
+            return jsonify({"error": "invalid", "detail": "positions"}), 422
+        positions = {}
+        for step, xy in raw.items():
+            if step not in steps:
+                continue                                    # a place for a step the graph does not have is ignored
+            ok = isinstance(xy, dict) and all(isinstance(xy.get(k), (int, float)) and not isinstance(xy.get(k), bool) and math.isfinite(xy[k]) for k in ("x", "y"))
+            if not ok:
+                return jsonify({"error": "invalid", "detail": step}), 422
+            positions[step] = {"x": round(xy["x"]), "y": round(xy["y"])}
+        saved = model.tables.put("arrangements", graph_id, {"graph": graph_id, "positions": positions}, g.account)
+        return jsonify({"version": saved["version"], "saved": len(positions)})
 
     @app.get("/")
     def index():

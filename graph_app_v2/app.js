@@ -5,12 +5,17 @@ import { withProblemMarks } from './problems.js';
 import { groupOf, labelOf, SHAPES } from './step-marks.js';
 import { renderPanel, renderStepList } from './panel.js';
 import { loadSettings, saveSettings, edgeSmooth } from './settings.js';
+import { applyPositions, positionsOf, arrangementNote } from './arrangement.js';
+import { historyEntries, neighbour, versionNote } from './history.js';
 
 const $ = (id) => document.getElementById(id);
 let graphs = [];
 let network = null;
 let current = null;
 let chosen = null;
+let versions = [];
+let saved = null;
+let mode = 'auto';
 let storage = null;
 try { storage = window.localStorage; } catch { storage = null; }
 const settings = loadSettings(storage);
@@ -61,13 +66,37 @@ function colors() {
   return { data: c('--data'), process: c('--process'), line: c('--line'), text: c('--fg') };
 }
 
-async function open(id) {
+async function open(id, version) {
   chosen = id;
   renderList();
-  const res = await api(`/api/v2/graphs/${encodeURIComponent(id)}`);
+  const q = version ? `?version=${version}` : '';
+  const [res, arr, vs] = await Promise.all([api(`/api/v2/graphs/${encodeURIComponent(id)}${q}`), api(`/api/v2/graphs/${encodeURIComponent(id)}/arrangement`), api(`/api/v2/graphs/${encodeURIComponent(id)}/versions`)]);
   current = await res.json();
+  saved = await arr.json();
+  versions = await vs.json();
+  mode = 'auto';
+  renderHistory();
   draw();
 }
+
+function renderHistory() {
+  const entries = historyEntries(versions, current.version);
+  const items = entries.map((e) => {
+    const li = document.createElement('li');
+    li.textContent = e.text;                                     // text, never markup
+    li.setAttribute('role', 'option');
+    li.setAttribute('aria-selected', String(e.version === current.version));
+    li.tabIndex = 0;
+    li.addEventListener('click', () => open(chosen, e.version));
+    li.addEventListener('keydown', (ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); open(chosen, e.version); } });
+    return li;
+  });
+  $('history').replaceChildren(...items);
+  $('prev').disabled = neighbour(versions, current.version, 'previous') === null;
+  $('next').disabled = neighbour(versions, current.version, 'next') === null;
+}
+$('prev').addEventListener('click', () => { const v = neighbour(versions, current.version, 'previous'); if (v !== null) open(chosen, v); });
+$('next').addEventListener('click', () => { const v = neighbour(versions, current.version, 'next'); if (v !== null) open(chosen, v); });
 
 function pick(id) {
   const step = current.graph.nodes.find((x) => x.id === id);
@@ -77,7 +106,10 @@ function pick(id) {
 
 function draw() {
   const { graph, named, missing } = withProblemMarks(current.graph, current.problems);
-  const { nodes, edges } = visData(graph);
+  const layered = visData(graph);
+  const placed = mode === 'layers' ? { nodes: layered.nodes, fixed: true } : applyPositions(layered.nodes, saved?.positions);
+  const nodes = placed.nodes;
+  const edges = layered.edges;
   for (const n of nodes) {
     n.group = missing.has(n.id) ? 'missing' : groupOf(current.graph.nodes.find((x) => x.id === n.id)?.data?.type);
     n.label = missing.has(n.id) ? `missing: ${n.id}` : labelOf(n.id, current.steps[n.id]);
@@ -90,7 +122,7 @@ function draw() {
   options.interaction.keyboard = true;
   options.groups.master = { shape: SHAPES.master, color: options.groups.process.color };
   options.groups.missing = { shape: 'box', color: { background: 'transparent', border: '#b3261e' }, shapeProperties: { borderDashes: [5, 5] } };
-  options.physics = { enabled: settings.physics, solver: 'barnesHut', stabilization: { enabled: true, iterations: 250, fit: true } };
+  options.physics = { enabled: settings.physics && !placed.fixed, solver: 'barnesHut', stabilization: { enabled: true, iterations: 250, fit: true } };
   network?.destroy();
   network = new vis.Network($('view'), { nodes: new vis.DataSet(nodes), edges: new vis.DataSet(edges) }, options);
   network.on('stabilizationIterationsDone', () => network.setOptions({ physics: { enabled: false } }));
@@ -100,7 +132,8 @@ function draw() {
     else renderPanel(document, $('detail'), null);
   });
   renderStepList(document, $('steps'), current.graph, current.steps, pick);
-  $('status').textContent = `${current.graph.id}, version ${current.version} of ${current.current} (${current.author}): ${nodes.length - missing.size} steps, ${edges.length} connections` + (named.length ? `; ${named.length} problem(s)` : '');
+  $('status').textContent = `${current.graph.id}, ${versionNote(current.version, current.current)} (${current.author}): ${nodes.length - missing.size} steps, ${edges.length} connections` + (named.length ? `; ${named.length} problem(s)` : '');
+  $('arr-note').textContent = arrangementNote(saved, mode);
   $('problems').replaceChildren(...named.map((text) => { const li = document.createElement('li'); li.textContent = text; return li; }));
   renderPanel(document, $('detail'), null);
 }
@@ -115,7 +148,17 @@ $('physics').checked = settings.physics;
 $('edges').value = settings.edges;
 $('physics').addEventListener('change', () => { settings.physics = $('physics').checked; saveSettings(storage, settings); network?.setOptions({ physics: { enabled: settings.physics } }); });
 $('edges').addEventListener('change', () => { settings.edges = $('edges').value; saveSettings(storage, settings); network?.setOptions({ edges: { smooth: edgeSmooth(settings) } }); });
-$('layers').addEventListener('click', () => { settings.physics = false; $('physics').checked = false; saveSettings(storage, settings); if (current) draw(); });
+$('layers').addEventListener('click', () => { mode = 'layers'; if (current) draw(); });
+$('use-saved').addEventListener('click', () => { mode = 'auto'; if (current) draw(); });
+$('save-arr').addEventListener('click', async () => {
+  if (!current || !network) return;
+  const res = await api(`/api/v2/graphs/${encodeURIComponent(chosen)}/arrangement`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ positions: positionsOf(network.getPositions()) }) });
+  if (res.status === 403) { $('arr-note').textContent = 'Only the owner can save an arrangement.'; return; }
+  if (!res.ok) { $('arr-note').textContent = `The arrangement was not saved (${res.status}).`; return; }
+  saved = await (await api(`/api/v2/graphs/${encodeURIComponent(chosen)}/arrangement`)).json();
+  mode = 'auto';
+  $('arr-note').textContent = arrangementNote(saved, mode);
+});
 
 async function start() {
   const who = await (await fetch('/api/whoami', { credentials: 'same-origin' })).json();
