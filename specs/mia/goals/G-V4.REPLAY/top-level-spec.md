@@ -55,6 +55,7 @@ The owner and MIA's store, as in `../G-V4.VIEW/top-level-spec.md` section 4; the
 ## 6. Risks and open questions
 | Risk / question | Impact | Mitigation / owner |
 |---|---|---|
+| Whether undone changes (FR-91 of EDIT) appear in the edit log | log readability | decide in Plan; owner |
 | How long entries are kept | storage growth | no deletion by decision; the owner revisits if it grows |
 | Moves of steps are also entries (D-363); many small moves would fill the log | readability | the history may fold moves; owner decides |
 | Relation of the record to the list of versions of VIEW | duplicated facts | VIEW lists versions, REPLAY explains how each came about (D-366) |
