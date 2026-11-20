@@ -485,7 +485,7 @@ Proposed on 2026-10-29 after the usability work of N-2.3 T-09 to T-11 and N-1.1 
 - Sign-off: maldun, 2026-11-15
 - Status: open
 
-## TD-86 – Converted runs read a fresh seeded toolbox, not the live trust and lifecycle of the owner (DRAFT)
+## TD-86 – Converted runs read a fresh seeded toolbox, not the live trust and lifecycle of the owner
 - Kind: defer
 - Requirement: REQ-WFM-058, REQ-WFM-060 (finding F-07 of the Verify of G-V2.CONVERT: trust and lifecycle of a node are not live on the converted path)
 - Interim criterion: each converted run builds a fresh in-memory toolbox and seeds the node code shipped in `library/nodes` as trusted and tested; the code text comes from the repository, so no code that the owner has not reviewed runs; the five accepted skills use only those nodes
@@ -497,10 +497,10 @@ Proposed on 2026-10-29 after the usability work of N-2.3 T-09 to T-11 and N-1.1 
 - Trigger: the start of the sub goal "improve the skills", or the first node that is not shipped in the repository, whichever first
 - Target check: specified only
 - Decision: D-355, 2026-11-20 (F-07 first decided 2026-11-17)
-- Sign-off: pending
+- Sign-off: maldun, 2026-11-20
 - Status: open
 
-## TD-87 – Budgets and a stop request on the converted path have no requirement (REQ-WFM-143 stays a draft) (DRAFT)
+## TD-87 – Budgets and a stop request on the converted path have no requirement (REQ-WFM-143 stays a draft)
 - Kind: defer
 - Requirement: FR-45 (finding F-05 of the Verify of G-V2.CONVERT: seconds and steps are checked only inside controllers, calls and tokens not at all, a stop is read only at the start and in controllers)
 - Interim criterion: the five converted skills declare only steps, seconds and tool budgets and are short; the tool budgets and the IF-402 door are checked by `tests/test_converted_tools.py`; the old runner remains the path of a skill whose converted run fails its criterion
@@ -512,10 +512,10 @@ Proposed on 2026-10-29 after the usability work of N-2.3 T-09 to T-11 and N-1.1 
 - Trigger: the start of the sub goal "improve the skills", or the first converted skill with a budget of calls or tokens, whichever first
 - Target check: specified only
 - Decision: D-355, 2026-11-20
-- Sign-off: pending
+- Sign-off: maldun, 2026-11-20
 - Status: open
 
-## TD-88 – AC-34 is decided on the dev split only, the suites of research, plans, verdicts, computable and extraction have no holdout (DRAFT)
+## TD-88 – AC-34 is decided on the dev split only, the suites of research, plans, verdicts, computable and extraction have no holdout
 - Kind: defer
 - Requirement: AC-34, REQ-WFM-110 to 114 (equivalence of the converted skills with the old runner)
 - Interim criterion: each criterion is decided on the dev split as AC-34 says, with the pin MP-light (digest `38044be4f923`, seed 7, temperature 0), 3 repeats and the baselines of the old runner of 2026-11-15; a criterion that fails and cannot be re-run with fresh seeds (the pin fixes the seed, `tools/eval.py` has no seed option) is NOT DECIDED, accepted by the owner, and that skill stays on the old runner
@@ -527,10 +527,10 @@ Proposed on 2026-10-29 after the usability work of N-2.3 T-09 to T-11 and N-1.1 
 - Trigger: the first change of a converted skill that is tuned on its dev cases (the sub goal "improve the skills"), or the Validate of G-V2 (VAL-007), whichever first
 - Target check: specified only
 - Decision: D-355, 2026-11-20
-- Sign-off: pending
+- Sign-off: maldun, 2026-11-20
 - Status: open
 
-## TD-89 – The converter check of research runs on research.escalate@3, the skill runs research.escalate@1 (DRAFT)
+## TD-89 – The converter check of research runs on research.escalate@3, the skill runs research.escalate@1
 - Kind: defer
 - Requirement: REQ-WFM-058, REQ-WFM-110 (check TC-WFM-128 and the protected test `tests/acceptance/test_pipeline_graph.py`, `test_research_escalate_keeps_its_calls_as_transforms_and_wraps_every_map_and_loop`, which load `research.escalate@3`; the skill `research`, version 3, names `pipeline: research.escalate@1`; finding F-09(e) of the Verify of G-V2.CONVERT, noted again in the Verify of G-V2)
 - Interim criterion: the equivalence of the converted skill is decided on the pipeline that runs: TC-WFM-110 runs the skill through `Core.run` on the graph path, so the rate of `research` (0.95, 57 of 60 on the dev run of 2026-11-16, criterion 0.85) is measured on `research.escalate@1`; TC-WFM-128 checks only that the converter turns the version-3 pipeline into a valid graph with its maps, branch and loop
@@ -542,10 +542,10 @@ Proposed on 2026-10-29 after the usability work of N-2.3 T-09 to T-11 and N-1.1 
 - Trigger: the start of the sub goal "improve the skills", or the next edit of `library/pipelines/research.escalate/**` or of `skills/research.md`, whichever first
 - Target check: specified only
 - Decision: D-356, 2026-11-20
-- Sign-off: pending
+- Sign-off: maldun, 2026-11-20
 - Status: open
 
-## TD-90 – The fake model server of TC-WFM-058 is not shown to be as faithful as the real one: the real half of the IF-103 contract suite is skipped (DRAFT)
+## TD-90 – The fake model server of TC-WFM-058 is not shown to be as faithful as the real one: the real half of the IF-103 contract suite is skipped
 - Kind: defer
 - Requirement: REQ-WFM-058 (TR-CONVERT-006: "the fake model server passes the contract suite of the model server interface"; finding F-09(a) of the Verify of G-V2.CONVERT)
 - Interim criterion: the check TC-WFM-058 compares the model calls of the old runner and of the graph path on the same scripted replies, so both sides send through the same fake; the fake never decides an eval criterion (the rates of TC-WFM-110 to 114 are decided on the real pinned model); the mock side of the IF-103 suite passes (6 of 6), the real side is skipped by the table of reasons in `tests/helpers/contract.py` ("the real model server is only used in stage 2") because a real Ollama cannot be scripted to give bad output, a timeout or an unreachable server
@@ -557,5 +557,5 @@ Proposed on 2026-10-29 after the usability work of N-2.3 T-09 to T-11 and N-1.1 
 - Trigger: the first change of the model client (`model_client`, the options sent to Ollama) or of the runner's calls, the first provider other than Ollama, or the start of the stage 2 integration of IF-404 and IF-405, whichever first
 - Target check: specified only
 - Decision: D-357, 2026-11-20
-- Sign-off: pending
+- Sign-off: maldun, 2026-11-20
 - Status: open
