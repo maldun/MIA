@@ -9,7 +9,7 @@ The owner wants to change a graph in the web app instead of in files: change a s
 
 ## 2. Scope
 ### In scope
-Changing steps, connections and their fields; rule check before keeping; new versions and restoring; conflicts; keeping the arrangement of a graph; trust of changed steps. Requirements FR-68 to FR-74, FR-91, FR-92, FR-94 (new numbers for undo, the field form and copying a step), NFR-18, NFR-19.
+Changing steps, connections and their fields; rule check before keeping; new versions and restoring; conflicts; keeping the arrangement of a graph; trust of changed steps. Requirements FR-68 to FR-74, FR-91, FR-92, FR-94, FR-95 (new numbers for undo, the field form, copying a step and the live store), NFR-18, NFR-19.
 ### Out of scope (non-goals)
 Drawing and history (G-V4.VIEW); playback and comparison (G-V4.REPLAY); editing context graphs (G-V4.CONTEXT, owner 2026-11-20); the skills window and who may promote a skill (goal B).
 
@@ -36,6 +36,9 @@ Drawing and history (G-V4.VIEW); playback and comparison (G-V4.REPLAY); editing 
 
 - FR-94: The system shall let the owner copy a step into another graph as an independent copy.
   - Outcome: Given a step in one graph, when the owner copies it into another graph, then the other graph has a step with the same content and its own history from that moment, and a later change to either step does not change the other.
+
+- FR-95: The system shall write every kept change to the live store, and make the editor read-only when the live store cannot be reached.
+  - Outcome: Given MIA running on a copy of the graphs, when the owner keeps a change, then it is stored in the live store and reaches the copy at the next sync; given the live store cannot be reached, when the owner opens a graph, then it can be looked at, the editor says that changing is not possible now and why, and nothing is kept.
 
 ### 3.2 Non-functional requirements
 - NFR-18 (Usability): A first change is possible without instructions.

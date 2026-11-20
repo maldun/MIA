@@ -16,7 +16,7 @@ Drawing and editing (G-V4.VIEW, EDIT, REPLAY); how a run executes a graph (G-V4.
 ## 3. Top-level requirements
 ### 3.1 Functional requirements
 - FR-57: The system shall keep exactly one stored truth for every workflow graph and every context graph, with every change a new version and no version deleted.
-  - Outcome: Given a graph that is saved, changed twice, read and listed, when the owner asks for it, then the newest state is returned, all three versions are listed with who stored each and when, and no version has disappeared.
+  - Outcome: Given a graph that is saved, changed twice, read and listed, when the owner asks for it, then the newest state is returned, all three versions are listed with who stored each and when, and no version has disappeared; the same holds for graphs with steps of every kind, including a step that controls loops.
 - FR-58: The system shall keep graphs in the live store, which holds everything, and in a copy as a portable set of files, with the same behaviour in both, so that MIA can run daily on the copy.
   - Outcome: Given the same sequence of saving, changing, reading and listing graphs carried out once in the live store and once in a copy, then every answer is the same in both, including versions, authors and refusals.
 - FR-59: The system shall move the whole store between the live store and a set of files in both directions without loss.
@@ -24,11 +24,11 @@ Drawing and editing (G-V4.VIEW, EDIT, REPLAY); how a run executes a graph (G-V4.
 - FR-60: The system shall let every step and connection belong to exactly one graph.
   - Outcome: Given two graphs that both contain a step of the same local name but different content, when the owner changes that step in one graph, then the other graph and its history are untouched, and the step's history lists only the changes made in its own graph.
 - FR-93: The system shall keep the copy in sync with the live store, which is the master, and never lose a version that exists only on the copy.
-  - Outcome: Given a live store with new versions and a copy that lags behind, when the owner runs the sync or MIA starts or stops in an orderly way, then the copy receives the missing versions and equals the live store; MIA shows how far the copy lags before a sync; given graphs that got different new versions on the copy since the last sync, then the live store's history counts, and the copy's differing versions are saved aside and named to the owner, not discarded.
+  - Outcome: Given a live store with new versions and a copy that lags behind, when the owner runs the sync or MIA starts or stops in an orderly way, then the copy receives the missing versions and equals the live store; MIA shows how far the copy lags before a sync; given graphs that got different new versions on the copy since the last sync, then the live store's history counts, and the copy's differing versions are saved aside and named to the owner, not discarded. Graphs are changed only in the live store (FR-95 of G-V4.EDIT), so the copy never holds versions of its own in normal use.
 - FR-61: The system shall move the graphs that exist today to the new stored form and let the owner check the result before anything old is removed.
   - Outcome: Given the graphs stored today, when the owner runs the move first as a trial on a copy of the data, then nothing real changes and a report compares each old graph with its new one (steps, connections, versions) and shows no difference except the new names; when the owner then runs the real move, the same report is produced, and the old graphs remain until the owner confirms.
 - FR-62: The system shall run each skill from its stored workflow graph.
-  - Outcome: Given a skill that has a stored workflow graph, when the owner runs it, then the run follows that stored graph and says which graph and version it used; given a skill that has no stored graph yet, then it runs as before and the run says so; given a skill that has only a pipeline definition, when the owner imports it, then a stored graph is created from it once, and importing it again does not create a second copy.
+  - Outcome: Given a skill that has a stored workflow graph, when the owner runs it, then the run follows that stored graph and says which graph and version it used; given a skill that has no stored graph yet, then it runs as before and the run says so; given a skill that has only a pipeline definition, when the owner imports it, then a stored graph is created from it once, and importing it again does not create a second copy; given a skill whose definition changed after an import, when the owner imports it again, then the differences to the stored graph are shown first and a new version of the same graph is added only after the owner agrees, and changes made in the editor are never overwritten silently.
 ### 3.2 Non-functional requirements
 - NFR-15 (Portability): A set of files made on one machine works on another.
   - Outcome: Given a set of files moved from the owner's host to a test machine, when MIA is started there on those files, then every graph is listed with the same versions and content as at the source; given a set of files made by an older version of MIA, when a newer version opens it, then it is read completely or converted by a stated step that reports what it did.
@@ -59,10 +59,10 @@ The owner and MIA's store, as in `../G-V4.VIEW/top-level-spec.md` section 4; the
 ## 6. Risks and open questions
 | Risk / question | Impact | Mitigation / owner |
 |---|---|---|
-| Context graphs may differ from workflow graphs (goal C overlap) | FR-57 may need a separate look | open question of the old record; decide in Plan; owner |
-| A graph with a step that controls loops (none today) may not move as a plain document | FR-59, FR-62 incomplete for it | include one in the cases; owner |
-| While MIA runs on a copy, edits made in the editor land on the copy and would be set aside at the next sync (the live store wins) | edits could seem lost | **open for the owner:** whether the editor writes to the live store directly, or whether edits on the copy are sent to the live store (the one-way decision of 2026-11-20 says no) |
-| Importing a skill creates the graph once; a later change of its definition | the two may drift apart | the stored graph is the truth after import (D-361); owner confirms the rule for re-import |
+| Context graphs may differ from workflow graphs | FR-57 | **decided (D-374):** storing, moving and syncing both kinds stays here; editing is G-V4.CONTEXT |
+| A graph with a loop-controlling step (none today) | FR-59, FR-62 | **decided (D-374):** all requirements apply to it and the cases include one such graph |
+| While MIA runs on a copy, where do edits go | edits could seem lost | **decided (D-374):** the editor writes to the live store directly and the copy receives the change at the next sync; if the live store is unreachable the editor is read-only (FR-95 of EDIT) |
+| Importing a skill again after its definition changed | the two may drift apart | **decided (D-374):** a new import shows the differences first and adds a version only after the owner agrees (FR-62) |
 
 ### Prototype decisions
 | Item | Decision | Report or reason |

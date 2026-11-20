@@ -23,6 +23,7 @@ Proposed 2026-11-20 by the owner (maldun), D-360. Draft for Explore and Plan; no
 | OC-5 | Given a step of any kind, when the owner opens it for change, then its known fields are a checked form and any other field is editable text | OC-8 of G-V4 (FR-22) |
 | OC-6 | Given an account other than the owner's, when it opens a graph, then it can look and cannot change anything | OC-8 of G-V4 (FR-21, NFR-6) |
 | OC-7 | Given a step in one graph, when the owner copies it into another graph, then the other graph has an independent copy with its own history | OC-8 of G-V4 (FR-22) |
+| OC-8 | Given MIA running on a copy of the graphs, when the owner keeps a change, then it is stored in the live store and reaches the copy at the next sync; when the live store cannot be reached, then the editor is read-only and says so | OC-6, OC-8 of G-V4 (FR-22, NFR-8) |
 
 ## Explore result (2026-11-20, D-363)
 `../G-V4.VIEW/research.md`. Decision: the graph rules are checked by a backend check route that the page asks before saving (one rule set after G-V4.GRAPHAPI; the route is an amendment of IF-104 in Plan); the backend still validates on save. Open for Plan: the protected mock of the graph interface for the JavaScript tests (A-36 drafts), conflict handling (`expected_version`).
