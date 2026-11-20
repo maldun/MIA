@@ -66,7 +66,7 @@ The owner and MIA's store, as in `../G-V4.VIEW/top-level-spec.md` section 4; the
 | Risk / question | Impact | Mitigation / owner |
 |---|---|---|
 | Who may edit | NFR-19 | **decided (D-370):** only the owner; others read; CON-6 stays legacy |
-| One shared arrangement per graph (owner, 2026-11-20): a move by one account changes the picture of all | surprise for other accounts | accepted by the owner; the edit log records who moved what (REPLAY) |
+| One shared arrangement per graph (owner, 2026-11-20): a move by one account changes the picture of all | surprise for other accounts | accepted by the owner; moves are kept in a record of their own (D-371), not in the edit log |
 | Undo within a session | an edit mistake needs a restore | **decided (D-370):** undo and redo before keeping (FR-91); whether undone changes appear in the edit log is open for REPLAY |
 | Editing by form or as text (REQ-GA-002) | FR-68, FR-92 | **decided (D-370):** a form per kind of step for known fields, text for the rest |
 | The check route and the edit log need IF-104 v2 | FR-69, FR-70 | D-368, joint amendment |
