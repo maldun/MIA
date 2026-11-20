@@ -10,5 +10,4 @@ Effect on `trace_check` (errors, main checkout today 598): test-spec edits alone
 Not done, needs your decision:
 - F-09(a): TR-CONVERT-006 says the fake model server passes the IF-103 contract suite; the replay helper is not a model server and the real half of the suite is skipped (6 of 12). Reword the TR or accept "in spirit".
 - F-09(b): TR-CONVERT-001 to 008 and TR-MODEL-006 are Draft: set them after your review.
-- F-09(c) rest: plausibility records for REQ-RUN-030 to 035 (`plausibility.yaml`, protected, your rating).
 - F-09(e): TC-WFM-128 and `test_pipeline_graph.py` load `research.escalate@3`, the skill `research` runs `research.escalate@1`. Which one is right? Changing it moves a protected test; not touched.
