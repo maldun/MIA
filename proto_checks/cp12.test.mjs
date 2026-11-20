@@ -1,7 +1,7 @@
 // PROTOTYPE CP12 checks (node --test): playback of recorded changes (FR-78), the comparison of two versions (FR-79)
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { applyChange, states, sameGraph, canonical, stepNote } from '../graph_app_v2/replay.js';
+import { applyChange, states, sameGraph, canonical, stepNote, playbackState } from '../graph_app_v2/replay.js';
 import { compareView, markText, compareNote } from '../graph_app_v2/compare.js';
 import { diffChanges } from '../graph_app_v2/change-log.js';
 
@@ -77,4 +77,20 @@ test('FR-79: two equal versions say so; a changed connection is listed with both
 
 test('FR-79: the comparison lists the same differences as the changes that the record would hold', () => {
   assert.equal(compareView(v1, saved).lines.length, diffChanges(v1, saved).length);
+});
+
+test('FR-78: the bar says where the playback is, what comes next and when the end is reached', () => {
+  const rec = { version: 5, from_version: 4, entries: [{}, {}, {}] };
+  let b = playbackState(rec, 0, true);
+  assert.match(b.note, /Showing version 4, the starting point. Version 5 is reached after 3 change/);
+  assert.deepEqual([b.backDisabled, b.fwdDisabled, b.backLabel, b.fwdLabel], [true, false, 'At the start', 'Forward one change (1 of 3)']);
+  b = playbackState(rec, 1, true);
+  assert.match(b.note, /Change 1 of 3; 2 more to reach version 5/);
+  assert.deepEqual([b.backDisabled, b.fwdDisabled, b.fwdLabel], [false, false, 'Forward one change (2 of 3)']);
+  b = playbackState(rec, 3, true);
+  assert.match(b.note, /Change 3 of 3: the end of the playback. This is version 5, identical to the saved version/);
+  assert.deepEqual([b.fwdDisabled, b.fwdLabel], [true, 'End reached']);
+  assert.match(playbackState(rec, 3, false).note, /NOT identical/);
+  const one = playbackState({ version: 5, from_version: 4, entries: [{}] }, 1, true);       // a version with one recorded change ends after it
+  assert.deepEqual([one.fwdDisabled, one.fwdLabel], [true, 'End reached']);
 });

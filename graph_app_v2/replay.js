@@ -29,6 +29,15 @@ export function states(start, entries, earlier) {
 export const canonical = (g) => JSON.stringify({ nodes: [...g.nodes].map((n) => ({ id: n.id, data: n.data ?? {} })).sort((a, b) => (a.id < b.id ? -1 : 1)), edges: [...g.edges].map((e) => ({ id: e.id, from: e.from, to: e.to, data: e.data ?? {} })).sort((a, b) => (a.id < b.id ? -1 : 1)) }, (k, v) => (v && typeof v === 'object' && !Array.isArray(v) ? Object.fromEntries(Object.entries(v).sort(([a], [b]) => (a < b ? -1 : 1))) : v));
 export const sameGraph = (a, b) => canonical(a) === canonical(b);
 
+/** what the bar of the playback shows at position k of n (0 = the starting version): the text, the labels of the two buttons and whether each can be pressed */
+export function playbackState(record, k, ok) {
+  const n = record.entries.length;
+  const note = k === 0 ? `Showing version ${record.from_version}, the starting point. Version ${record.version} is reached after ${n} change(s).`
+    : k === n ? `Change ${n} of ${n}: the end of the playback. This is version ${record.version}${ok ? ', identical to the saved version.' : ', but NOT identical to the saved version.'}`
+    : `Change ${k} of ${n}; ${n - k} more to reach version ${record.version}.`;
+  return { note, fwdLabel: k === n ? 'End reached' : `Forward one change (${k + 1} of ${n})`, backLabel: k === 0 ? 'At the start' : 'Back one change', fwdDisabled: k === n, backDisabled: k === 0 };
+}
+
 /** what the playback says at position k of n (0 = the starting version) */
 export function stepNote(k, entries, ok) {
   const n = entries.length;

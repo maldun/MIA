@@ -14,7 +14,7 @@ import { storeNote, canEdit, syncMessage } from './store-note.js';
 import { renderCopyPanel, copyMessage } from './copy-panel.js';
 import { brokenLines, runMessage, parseInputs } from './run-note.js';
 import { sessionChanges, withReasons, changeKey, describeChange, explain } from './change-log.js';
-import { states, sameGraph, stepNote } from './replay.js';
+import { states, sameGraph, playbackState } from './replay.js';
 import { compareView, markText, compareNote } from './compare.js';
 
 const $ = (id) => document.getElementById(id);
@@ -318,10 +318,12 @@ function showPlayback() {
   const { record, list, k, ok } = playback, entries = record.entries;
   const view = k === 0 ? { graph: list[0], marks: {}, edgeMarks: {}, lines: [] } : compareView(list[k - 1], list[k]);
   const e = k > 0 ? entries[k - 1] : null;
-  overlay = { ...view, note: `Playback of version ${record.version}: ${stepNote(k, entries, ok)}` };
+  const bar = playbackState(record, k, ok);
+  overlay = { ...view, note: `Playback of version ${record.version} - ${bar.note}` };
   draw();
   $('overlay-lines').replaceChildren(...lineItems(e ? [`${k}. ${describeChange(e)} - ${e.reason ? `reason: ${e.reason}` : 'no reason given'}`] : []));
-  $('rp-back').disabled = k === 0; $('rp-fwd').disabled = k === entries.length; $('rp-note').textContent = `by ${record.author}, ${record.time}`;
+  $('rp-back').disabled = bar.backDisabled; $('rp-fwd').disabled = bar.fwdDisabled; $('rp-back').textContent = bar.backLabel; $('rp-fwd').textContent = bar.fwdLabel;
+  $('rp-note').textContent = `kept by ${record.author}, ${record.time}`;
 }
 $('play').addEventListener('click', async () => {
   const record = changeLog.find((r) => r.version === current.version);
@@ -348,7 +350,7 @@ $('compare').addEventListener('click', async () => {
   overlay = { ...view, note: compareNote(from, to, view) };
   draw();
   $('overlay-lines').replaceChildren(...lineItems(view.lines));
-  $('rp-back').disabled = true; $('rp-fwd').disabled = true; $('rp-note').textContent = '';
+  $('rp-back').disabled = true; $('rp-fwd').disabled = true; $('rp-back').textContent = 'Back one change'; $('rp-fwd').textContent = 'Forward one change'; $('rp-note').textContent = '';
 });
 
 // ---- a run is tried behind the checks (CP4, FR-64): refused before any step runs, every broken part named ----
