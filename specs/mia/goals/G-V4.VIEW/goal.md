@@ -19,7 +19,7 @@ Proposed 2026-11-20 by the owner (maldun), D-360. Draft for Explore and Plan; no
 | OC-1 | Given a stored graph in the live store or in a set of files, when the owner opens it in the web app, then the graph is drawn with all its steps and connections, and it is the same picture from either place | OC-8 of G-V4 (FR-22) |
 
 ## Explore result (2026-11-20, D-363)
-`research.md` (shared by VIEW, EDIT, REPLAY). Prototype `prototype/graphview` (accepted by the owner, never merged): 15 of 15 stored graphs are pulled from files and from PostgreSQL and drawn completely; report `prototypes/graphview/prototype-report.md` on that branch (commit `f5b327f6`), carry-over for the owner to decide. Open for Plan: the graph interface for the record form (amendment of IF-104), master nodes in the view, context graphs (Q-5), routing between the two containers.
+`research.md` (shared by VIEW, EDIT, REPLAY). Prototype `prototype/graphview` (accepted by the owner, never merged): 15 of 15 stored graphs are pulled from files and from PostgreSQL and drawn completely; report `prototypes/graphview/prototype-report.md` on that branch (commit `e263f361`), carry-over table with proposed decisions for the owner to tick. The owner looked at it and asked for the detail panel on the left, vis-network physics, rounded edges and a settings menu; all four are in the prototype. Physics makes the layout non-reproducible, so REQ-GA-001 ("physics off") needs an amendment and saved positions (D-363) carry the stable picture. Open for Plan: the graph interface for the record form (amendment of IF-104), master nodes in the view, context graphs (Q-5), routing between the two containers.
 
 ## Source
 N-5 log (`nodes/N-5-graph-app/implementation-log.md`): T-01 is a vis-network mockup that opens a JSON file; IF-104 mock A-36 is drafted, not installed; Q-5 and Q-6 (context graphs, node positions) open.
@@ -32,7 +32,7 @@ N-5 log (`nodes/N-5-graph-app/implementation-log.md`): T-01 is a vis-network moc
 ## Phases
 | Phase | State | Record or reason |
 |---|---|---|
-| Explore | open | |
+| Explore | done | `research.md`, prototype `prototype/graphview` (report, carry-over to be ticked by the owner), D-363 |
 | Plan | open | |
 | Implement | open | |
 | Verify | open | |
