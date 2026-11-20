@@ -12,7 +12,7 @@ Amended 2026-11-08 after the toolbox prototype (`prototype/toolbox`, owner decis
 - Accepted by: Stefan Reiterer (owner)
 - Line of work: goal/v2.toolbox
 - Subgoals: –
-- Status: Proposed
+- Status: Verified
 
 ## Outcome criteria
 | ID | Expected outcome | Derived from |

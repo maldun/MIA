@@ -10,7 +10,7 @@ Drafted 2026-11-07 when the owner asked to split G-V2 into four subgoals for rev
 - Accepted by: Stefan Reiterer (owner)
 - Line of work: goal/v2.convert
 - Subgoals: –
-- Status: Proposed
+- Status: Verified
 
 ## Outcome criteria
 | ID | Expected outcome | Derived from |
@@ -83,7 +83,7 @@ Top-level items it serves: FR-45, FR-47. Requirements by ID (inside G-V2's scope
 | Explore | done | HLS of iteration 2 approved 2026-11-05 (D-186) |
 | Plan | done | the plan package, drafts of the open plan documents in `drafts/` |
 | Implement | done | `implementation-log.md`; snapshots (T-CV-05) split out to G-V2.SNAPSHOT (A-159) |
-| Verify | in progress | `verification-report.md` (2026-11-17): the conversion half verified with deviations, fixes F-01, F-02, F-04, F-06, F-08 merged; open: F-03, F-05, F-07, F-09, the five baselines and the decision of the five equivalence criteria; decided in the Verify of G-V2 |
+| Verify | done | `verification-report.md` (2026-11-17, conversion half) and the parent Verify of G-V2 (`../G-V2/verification-report.md`, 2026-11-20): Verified with accepted deviations (TD-86 to TD-90) |
 | Commit | done | merged into master by the owner as `054f1d2` (2026-11-16), fixes up to `0251723b` |
 | Deploy | open | |
 | Validate | open | |

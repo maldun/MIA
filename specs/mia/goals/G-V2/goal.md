@@ -10,7 +10,7 @@ Drafted 2026-11-07 in Plan Step 0 from the approved HLS of iteration 2 (D-186). 
 - Accepted by: Stefan Reiterer (owner)
 - Line of work: goal/v2
 - Subgoals: G-V2.STORE, G-V2.MODEL, G-V2.TOOLBOX, G-V2.CONVERT, G-V2.SNAPSHOT
-- Status: Proposed
+- Status: Verified
 
 ## Outcome criteria
 | ID | Expected outcome | Derived from |
@@ -121,6 +121,7 @@ Acceptance criteria in scope: AC-31, AC-32, AC-34, AC-38, AC-40. Out: AC-33, AC-
 | G-V2.MODEL | Stefan Reiterer (owner) | 2026-11-07 |
 | G-V2.TOOLBOX | Stefan Reiterer (owner) | 2026-11-07 |
 | G-V2.CONVERT | Stefan Reiterer (owner) | 2026-11-07 |
+| G-V2.SNAPSHOT | maldun | 2026-11-19 (A-159) |
 
 ## Parallel work
 Merge order STORE, MODEL, TOOLBOX, CONVERT; reserved IDs per session and rules for shared files: `parallel-work.md` (2026-11-07).
@@ -131,8 +132,8 @@ Merge order STORE, MODEL, TOOLBOX, CONVERT; reserved IDs per session and rules f
 | Explore | done | HLS of iteration 2 approved 2026-11-05 (D-186) |
 | Plan | done | the plans of the five subgoals; G-V2.SNAPSHOT split out (A-159) |
 | Implement | done | STORE, MODEL, TOOLBOX, CONVERT and SNAPSHOT are in master |
-| Verify | open | |
-| Commit | open | |
+| Verify | done | `verification-report.md` (2026-11-20): Verified with accepted deviations (owner, 2026-11-20) |
+| Commit | in progress | `merge-request.md`, `release-notes.md`; all subgoals already in master, no `goal/v2` branch; tag `v0.2.0` is the owner's |
 | Deploy | open | |
 | Validate | open | |
 

@@ -10,7 +10,7 @@ Drafted 2026-11-07 when the owner asked to split G-V2 into four subgoals for rev
 - Accepted by: Stefan Reiterer (owner)
 - Line of work: goal/v2.store
 - Subgoals: –
-- Status: Proposed
+- Status: Verified
 
 ## Outcome criteria
 | ID | Expected outcome | Derived from |
