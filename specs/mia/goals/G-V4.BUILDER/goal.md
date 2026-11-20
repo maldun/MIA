@@ -4,7 +4,7 @@ Proposed 2026-11-20 by the owner (maldun), D-380: a subgoal for the context-grap
 
 - Kind: subgoal
 - Parent: G-V4
-- Statement: The owner can build up a context graph from documents (and later from runs, reviews and web results) with a tool that proposes items with their source, lets the owner confirm them, and lets only confirmed items be read by steps.
+- Statement: The owner can build up a context graph from documents and manual entry (runs, reviews and web results follow in a later slice, D-381) with a tool that proposes items with their source, lets the owner confirm them, and lets only confirmed items be read by steps.
 - Exit criterion: OC-1 to OC-4 (tests still to be written in Plan)
 - Supervision: supervised
 - Accepted by: Stefan Reiterer (owner)
@@ -32,7 +32,7 @@ Proposed 2026-11-20 by the owner (maldun), D-380: a subgoal for the context-grap
 ## Phases
 | Phase | State | Record or reason |
 |---|---|---|
-| Explore | open | `top-level-spec.md` drafted from FR-41, FR-42 and the N-6 notes; scope questions to the owner |
+| Explore | in progress | `top-level-spec.md` drafted from FR-41, FR-42 and the N-6 notes; scope decided (D-381); item-by-item review open |
 | Plan | open | |
 | Implement | open | |
 | Verify | open | |
