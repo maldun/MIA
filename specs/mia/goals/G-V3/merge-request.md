@@ -28,7 +28,7 @@ Unit suite in six pieces green; JS 186 of 186; acceptance scripts green except `
 No baselines are written: the quick eval subset was not re-run (no eval path changed since the verified runs except A-160 and A-162, both covered by their own reports); baselines are recorded with the release run.
 
 ### Known limitations and open items
-V3-1 and V3-4 (accepted deviations). F-04 (status line not restored after a reload, D-344). Not measured: calls and seconds of the end message. The 14 112-character `/review` end message is not yet a labelled eval case. Open deferrals TD-82 to TD-85 (signed).
+V3-1 and V3-4 (accepted deviations). F-04 (status line not restored after a reload, D-344). Not measured: calls and seconds of the end message. Open deferrals TD-82 to TD-85 (signed).
 
 ### Next
 Tag v0.2.0 together with G-V2 (owner decision 2026-11-08: the tag comes with iteration 2); join the two `[Unreleased]` blocks of the CHANGELOG then.

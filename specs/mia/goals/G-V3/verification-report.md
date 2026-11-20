@@ -43,7 +43,7 @@ Note on the first run in the main checkout: `test_expression_llm.ApiTest` (3) an
 | V3-4 | T-06 and T-07 of REPORT (V-1 to V-4 fixes, `plain_modules`) were not re-checked by a second fresh reviewer; this run re-ran every test after them, all green, but did not read the diffs | low | owner: accept, or a small brief |
 | V3-5 | FB-08 hand check (`/lookup`, Report part, links, download): done by the owner 2026-11-20, worked well | closed | FB-08 re-validated |
 | V3-6 | Not measured: calls and seconds of the end message with the short result; F-04 (status line not restored after reload, accepted D-344) | info | Validate |
-| V3-7 | Open from earlier: the 14 112-character `/review` end message is not yet a labelled eval case | info | owner labels |
+| V3-7 | The long `/review` case `prop-run2-1` was dropped as an eval case by the owner on 2026-11-19 (the run record clips the output at 3000 characters, so it cannot be labelled); nothing to label | closed | – |
 
 ## 5. Not covered
 No fresh holdout, no transcript review by a person (check F), no mutation testing of the REPORT code, no current-state deployment check. Budgets were not re-measured.
