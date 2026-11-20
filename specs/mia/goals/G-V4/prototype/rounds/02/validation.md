@@ -17,8 +17,8 @@ Date: – · Prototype state: branch prototype/g-v4 · Where it ran: –
 | FR-54 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
 | FR-55 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
 | FR-57 | Given graphs stored, run `python proto_checks/cp1_demo.py`; look at the versions of `lookup` after a change and after saving the same graph again | – | not tried | – |
-| FR-58 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
-| FR-59 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
+| FR-58 | Given the same operations on files and on the database, run `python proto_checks/cp2_check.py` (check 1 and 2) and compare | – | not tried | – |
+| FR-59 | Given a store, move it with `python graph_store_move.py files:<folder> postgres:<url>` and back, repeat it, and try a store with a missing step (checks 3 to 9 of `cp2_check.py`) | – | not tried | – |
 | FR-60 | Given two graphs with a step named `step.write`, change it in `lookup` and look at the histories of both graphs (`cp1_demo.py`) | – | not tried | – |
 | FR-63 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
 | FR-64 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |

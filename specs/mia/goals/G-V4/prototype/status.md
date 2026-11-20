@@ -2,7 +2,7 @@
 
 Single source for what the demonstrator can show (`dev-workflow/references/prototyping.md`). Updated with every checkpoint and at merges.
 
-Demonstrator deployed at: not yet (worktree `../MIA-prototype-g-v4`, branch `prototype/g-v4`; round 01 ran from `serve.py files 8765`) · Last updated: 2f9312f8 (CP1), 2026-11-20
+Demonstrator deployed at: not yet (worktree `../MIA-prototype-g-v4`, branch `prototype/g-v4`; round 01 ran from `serve.py files 8765`) · Last updated: 2f9312f8 (CP2), 2026-11-20
 
 | Part / feature | Requirement IDs | State (mock / working / real / not yet / retired) | Made real by task | Commit | Date | Notes |
 |---|---|---|---|---|---|---|
@@ -10,8 +10,8 @@ Demonstrator deployed at: not yet (worktree `../MIA-prototype-g-v4`, branch `pro
 | graph routes for the stored form (round 01) | FR-48 | working | – | – | 2026-11-20 | two routes; to be replaced by the prototype of IF-104 v2 in CP5 |
 | scoped record IDs `<graph>/<local>` and the storage refusal | FR-60 | working | – | 2f9312f8 | 2026-11-20 | CP1: `graph_tables.py` (rule `unscoped_id`), `graph_model.py`; 154 step records for 107 local names; files and PostgreSQL |
 | save without half graphs, versions, authors, step history | FR-57, NFR-16 | working | – | 2f9312f8 | 2026-11-20 | CP1: everything checked before the first write; unchanged save = no version; interrupted save leaves nothing visible; `proto_checks/cp1_check.py` |
-| same behaviour in files and database | FR-58 | not yet | – | – | – | CP2 |
-| whole-store move | FR-59 | not yet | – | – | – | CP2 |
+| same behaviour in files and database | FR-58 | working | – | 70e9c2cb | 2026-11-20 | CP2: one sequence of operations gives the same answers on both (9 fields incl. five refusals) |
+| whole-store move files <-> database | FR-59 | working | – | 70e9c2cb | 2026-11-20 | CP2: `graph_store_move.py`; all or nothing, names the graph, repeatable, interrupted move can be run again; command line `python graph_store_move.py files:<dir> postgres:<url>` |
 | sync live store to copy | FR-93, NFR-15 | not yet | – | – | – | CP3 |
 | eight rules and the check route | FR-63, FR-64 | not yet | – | – | – | CP4 |
 | graph backend with login, list, versions, history (IF-104 v2 draft) | FR-48, FR-55, NFR-12 | not yet | – | – | – | CP5 |

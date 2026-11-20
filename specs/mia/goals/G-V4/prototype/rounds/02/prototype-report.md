@@ -16,10 +16,15 @@ The items of `../../top-level-spec.md` (the aggregate of the subgoal specs in sc
 - Demonstration: `python proto_checks/cp1_demo.py` (a short story) and `python proto_checks/cp1_check.py files|postgres` (10 checks, all pass on both backends).
 - Plan checkpoints CP2 to CP12 follow in `run.md`.
 
+**CP2 (GRAPHSTORE.TRANSFER, first part), 2026-11-20, commit 70e9c2cb.**
+- `graph_store_move.py` moves the whole store (steps, connections, headers) between any two backends: every graph is checked first (headers, pinned step versions, scoped IDs) and compared with the target; one graph that cannot be moved, or that has a different history in the target, refuses the whole move with the graphs named and writes nothing. Steps are written before headers, so a graph appears only when complete; nothing is renumbered; authors and times are kept; a second move changes nothing.
+- Demonstration: `python proto_checks/cp2_check.py` (9 checks, all pass, PostgreSQL 16 under podman) and the command line `python graph_store_move.py files:<folder> postgres:<url>`.
+
 ## Findings
 - The 15 converted graphs give 154 step records for 107 distinct local names: with scoped IDs the 13 shared names (4 with different content) no longer share a history.
 - The new rule breaks existing tests that use plain IDs: `tests/test_graph_record_checks.py` (34 failures), `tests/acceptance/contract/test_if_301_v2_graph_tables.py` (28) and `tests/acceptance/test_graph_records.py` (14 errors), all with `unscoped_id`; `test_graph_model.py`, `test_graph_run.py`, `test_graph_tables.py` still pass. The amendment of A-92 / REQ-GTB-021 therefore has to rewrite those protected tests.
 - A crash between the writes of the steps and of the header can still leave unused step versions; they are not part of any graph and `step_history` ignores them; a second save pins them again if the content is the same.
+- The move reuses `copy_records` of the existing copy operation and adds the graph-level check; 16 graphs make 341 records.
 - Not examined: context graphs, a graph with a loop-controlling step (none among the 15), the `review` workflow (document form, migration is out of this run).
 
 ## Assumptions and choices the prototype made
@@ -31,6 +36,7 @@ The items of `../../top-level-spec.md` (the aggregate of the subgoal specs in sc
 ## Prototype tests (run once here)
 | Question (requirement or top-level item) | Command (repeatable) | Result (value, unit, uncertainty, hardware, date; pass / fail / not_run) |
 |---|---|---|
+| FR-58, FR-59: the same answers in files and database; the whole store moves both ways, repeatably, all or nothing | `python proto_checks/cp2_check.py` | 9 of 9 pass, 2026-11-20, Fedora host, PostgreSQL 16 under podman |
 | FR-57, FR-60, NFR-16: scoped storage, versions, refused and interrupted saves | `python proto_checks/cp1_check.py files` and `postgres` | 10 of 10 pass on each backend, 2026-11-20, Fedora host, PostgreSQL 16 under podman |
 
 ## Carry-over (the developer decides)
