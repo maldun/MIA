@@ -274,9 +274,9 @@ $('run-try').addEventListener('click', async () => {
   if (!current) return;
   const typed = parseInputs($('run-inputs').value);
   if (typed.error) { $('status').textContent = typed.error; return; }
-  const res = await api(`/api/v2/graphs/${encodeURIComponent(chosen)}/run`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ inputs: typed.values, version: current.version }) });
+  const res = await api(`/api/v2/graphs/${encodeURIComponent(chosen)}/run`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(editing && draft ? { inputs: typed.values, graph: { nodes: draft.nodes, edges: draft.edges } } : { inputs: typed.values, version: current.version }) });
   const body = await res.json().catch(() => ({}));
-  $('status').textContent = runMessage(res.status, body);
+  $('status').textContent = (editing ? 'Working copy: ' : '') + runMessage(res.status, body);
   $('rules').replaceChildren(...brokenLines(body.broken).map((text) => { const li = document.createElement('li'); li.textContent = text; return li; }));
 });
 

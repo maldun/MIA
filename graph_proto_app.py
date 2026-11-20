@@ -324,8 +324,13 @@ def create_app(backend, accounts_store, port=8801, live=None, aside=None):
         body = request.get_json(silent=True) or {}
         inputs = body.get("inputs") if isinstance(body.get("inputs"), dict) else {}
         try:
-            version = body.get("version") if isinstance(body.get("version"), int) and not isinstance(body.get("version"), bool) else None
-            graph = model.read_graph(graph_id, version)
+            if "graph" in body:                                # the working copy of the editor: what is on the screen is what is tried, kept or not
+                graph = full_graph(graph_id, body)
+                if graph is None:
+                    return jsonify({"error": "invalid", "detail": "graph"}), 422
+            else:
+                version = body.get("version") if isinstance(body.get("version"), int) and not isinstance(body.get("version"), bool) else None
+                graph = model.read_graph(graph_id, version)
         except StorageError:
             return jsonify({"error": "not_found"}), 404
         ran = []

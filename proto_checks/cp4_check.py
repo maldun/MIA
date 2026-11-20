@@ -82,6 +82,10 @@ rk = o.put(U + "sample.broken", json={"graph": {"nodes": bad["nodes"], "edges": 
 check("FR-63 keeping the same broken graph is refused with the same rules the run named", rk.status_code == 422 and [r["rule"] for r in rk.get_json()["rules"]] == [b["rule"] for b in o.post(U + "sample.broken/run", json={}, headers=ORIGIN).get_json()["broken"] if b["kind"] == "rule"])
 rc2 = o.post(U + "sample.broken/check", json={"graph": {"nodes": bad["nodes"], "edges": bad["edges"]}}, headers=ORIGIN).get_json()["rules"]
 check("FR-63 while editing (the check route), while keeping and before a run the same broken rules come in the same order", [r["rule"] for r in rc2] == [r["rule"] for r in rk.get_json()["rules"]] == [b["rule"] for b in o.post(U + "sample.broken/run", json={}, headers=ORIGIN).get_json()["broken"] if b["kind"] == "rule"] and len(rc2) >= 1)
+cp = o.get(U + "cp2.multi").get_json()["graph"]; loop = copy.deepcopy(cp); loop["edges"].append(E("e99", "var.out", "step.write"))
+r1 = o.post(U + "cp2.multi/run", json={"inputs": {}, "graph": {"nodes": loop["nodes"], "edges": loop["edges"]}}, headers=ORIGIN)
+r2 = o.post(U + "cp2.multi/run", json={"inputs": {}}, headers=ORIGIN)
+check("FR-64 a run tried from the editor uses the working copy: a cycle that was not kept is refused, while the stored graph still runs", r1.status_code == 422 and r1.get_json()["ran"] == [] and "cycle" in [b.get("rule") for b in r1.get_json()["broken"]] and r2.status_code == 200, json.dumps(r1.get_json())[:120])
 failed = [n for n, ok, _ in results if not ok]
 print("\n%d checks, %d failed" % (len(results), len(failed)))
 sys.exit(1 if failed else 0)
