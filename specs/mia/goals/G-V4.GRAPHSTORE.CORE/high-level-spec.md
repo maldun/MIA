@@ -101,10 +101,13 @@ Keep together: the 37 requirements come from the descendants of two or three ite
 - The converter and the 15 skill graphs already use the scoped form through `GraphModel` (prototype, round 02).
 
 ## 6. Risks and open questions
+Decided by the owner in the HLS review of 2026-11-21 (D-402): the separator rule is confirmed, orphan step versions are accepted without a clean-up, a context graph is stored in prototype round 03, no hard bound.
+
 | Risk / question | Impact | Mitigation / owner |
 |---|---|---|
-| A context graph was never stored by the model | FR-57 for both kinds is untested | prototype round 03: store, read, list and change a context graph with steps of every kind |
-| An interrupted save leaves step versions no graph names; they accumulate | storage growth, unused rows | accepted as harmless for now (`step_history` ignores them); decide in the requirements whether a clean-up is wanted (owner) |
-| The separator `/` is the first slash (ASM-1) | a graph ID with a slash is refused | HR-001 says so; the owner confirms |
-| The files backend cannot make several records atomic | the order is the only protection | the fault-injection measure (HR-005) proves it for both backends; if PostgreSQL could do better (one transaction), say so in the requirements (owner) |
+| A context graph was never stored by the model | FR-57 for both kinds is untested | **decided:** prototype round 03 stores, reads, lists and changes a context graph with steps of every kind |
+| An interrupted save leaves step versions no graph names; they accumulate | storage growth, unused rows | **decided:** accepted for now, no clean-up (`step_history` ignores them); revisited when the amount matters |
+| The separator `/` is the first slash (ASM-1) | a graph ID with a slash is refused | **decided:** confirmed (HR-001) |
+| The files backend cannot make several records atomic | the order is the only protection | the fault-injection measure (HR-005) proves it for both backends; if PostgreSQL could do better (one transaction), say so in the requirements |
 | Rewriting the protected tests of A-92 | amendment effort | one amendment, joint with IF-301 v2 owners, listed in the plan |
+| No hard performance bound | none claimed | **decided:** none (owner); a budget, if any, comes with the requirements |
