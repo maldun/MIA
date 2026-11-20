@@ -23,7 +23,12 @@ function show(which) {
 $('login-form').addEventListener('submit', async (event) => {
   event.preventDefault();
   const res = await fetch('/api/login', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user: $('user').value, password: $('password').value }) });
-  if (!res.ok) { $('login-error').textContent = 'The name or the password is wrong.'; return; }
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    const reasons = { bad_credentials: 'The name or the password is wrong.', throttled: 'Too many wrong tries; wait a minute.', bad_origin: 'The server refused this address (bad_origin).', insecure_channel: 'A password may only be sent over HTTPS or from this machine.' };
+    $('login-error').textContent = reasons[body.error] ?? `The login failed (${res.status} ${body.error ?? ''}).`;
+    return;
+  }
   $('login-error').textContent = '';
   start();
 });

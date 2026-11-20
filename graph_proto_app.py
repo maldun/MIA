@@ -48,12 +48,14 @@ def problems_of(graph):
     return found
 
 
-def create_app(backend, accounts_store, secret_check=None):
+def create_app(backend, accounts_store, port=8801):
     app = Flask(__name__, static_folder=None)
     model = graph_model.GraphModel(Storage(backend), author="viewer")
     service = SessionService(accounts_store)
     app.register_blueprint(accounts_api.create_accounts_blueprint(service))
-    accounts_api.install_guard(app, service, open_paths=("/",), open_prefixes=("/static/", "/page/"))
+    # a browser sends the Origin of the page with every login and change; the guard refuses every other one (bad_origin), so the pages of this host are allowed
+    origins = ["http://127.0.0.1:%d" % port, "http://localhost:%d" % port]
+    accounts_api.install_guard(app, service, open_paths=("/",), open_prefixes=("/static/", "/page/"), allowed_origins=lambda: origins)
 
     def summary(graph_id):
         head = model.tables.get("graphs", graph_id)
@@ -114,4 +116,4 @@ if __name__ == "__main__":
         except Exception as err:      # the account exists with another password
             print("account", name, "exists:", err)
     print("viewer: http://127.0.0.1:%d/  (login %s)" % (a.port, name))
-    create_app(open_store(a.store), acc).run("127.0.0.1", a.port)
+    create_app(open_store(a.store), acc, a.port).run("127.0.0.1", a.port)

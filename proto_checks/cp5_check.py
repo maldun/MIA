@@ -20,14 +20,17 @@ def client_for(backend, accounts_dir):
     return app.test_client(), app
 
 def login(c):
-    return c.post("/api/login", json={"user": "owner", "password": "secret"})
+    # like a browser: the page of this host sends its Origin with the login
+    return c.post("/api/login", json={"user": "owner", "password": "secret"}, headers={"Origin": "http://127.0.0.1:8801"})
 
 def run(kind, backend, tmp):
     c, app = client_for(backend, os.path.join(tmp, "acc_" + kind))
     r = c.get("/api/v2/graphs")
     check(f"[{kind}] NFR-12 without a login the list of graphs is not shown", r.status_code == 401 and b"cp2" not in r.data and b"lookup" not in r.data)
     check(f"[{kind}] NFR-12 a graph is not shown without a login either", c.get("/api/v2/graphs/sample.broken").status_code == 401)
-    bad = c.post("/api/login", json={"user": "owner", "password": "wrong"})
+    foreign = c.post("/api/login", json={"user": "owner", "password": "secret"}, headers={"Origin": "http://evil.example"})
+    check(f"[{kind}] a login from another address is refused with its reason (bad_origin)", foreign.status_code == 403 and foreign.get_json()["error"] == "bad_origin")
+    bad = c.post("/api/login", json={"user": "owner", "password": "wrong"}, headers={"Origin": "http://127.0.0.1:8801"})
     check(f"[{kind}] a wrong password gives no session", bad.status_code == 401 and c.get("/api/v2/graphs").status_code == 401)
     check(f"[{kind}] the right password logs in once", login(c).status_code == 200 and c.get("/api/v2/graphs").status_code == 200)
     listing = c.get("/api/v2/graphs").get_json()
@@ -60,7 +63,7 @@ def main():
         check("FR-49 a connection to a missing step is named by the backend, not dropped", b["problems"] == [{"problem": "missing_step", "connection": "e2", "step": "var.gone", "end": "to"}], json.dumps(b["problems"]))
         check("FR-49 a graph without a problem has none", cf.get("/api/v2/graphs/cp2.multi").get_json()["problems"] == [])
         check("FR-49 the same problem is named from the database", cp.get("/api/v2/graphs/sample.broken").get_json()["problems"] == b["problems"])
-        out = cf.post("/api/logout")
+        out = cf.post("/api/logout", headers={"Origin": "http://127.0.0.1:8801"})
         check("after the log-out the graphs are not shown again", out.status_code in (200, 204) and cf.get("/api/v2/graphs").status_code == 401)
     finally:
         tp.stop_database()
