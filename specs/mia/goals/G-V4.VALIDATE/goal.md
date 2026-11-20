@@ -3,7 +3,7 @@
 Opened 2026-11-20 on the owner's request: G-V2 (v0.2.x) and G-V3 are in the Validate phase, and G-V4 starts a larger rework. Parts of the rework may change what the validation runs would see, so validating v0.2.1 now would be effort that may have to be repeated. The validation of both goals is therefore collected here and run **on the version after the rework**. **G-V4 itself has no goal record yet**; this subgoal is a draft that waits for it (see "Open").
 
 - Kind: subgoal
-- Parent: G-V4 (draft record `../G-V4/goal.md`)
+- Parent: G-V4
 - Statement: The owner has judged, in real use of the version after the G-V4 rework, whether the converted skills and snapshots (G-V2) and the Skill run view with the spoken-only chat and the report (G-V3) are the right thing, and every finding is triaged.
 - Exit criterion: VAL-007, VAL-009, VAL-012, VAL-013 and VAL-006 (field items) rated pass, partial or fail with evidence; the Provisional strip height of REQ-CLV-041 settled; every finding triaged; decision on the next iteration recorded (validation report)
 - Supervision: supervised
