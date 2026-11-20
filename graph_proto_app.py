@@ -21,6 +21,7 @@ from flask import Flask, g, jsonify, request, send_from_directory
 import accounts
 import accounts_api
 import graph_model
+import graph_rules_proto
 import tempfile
 from toolbox import Toolbox, ToolboxError
 from workflow_library import WorkflowLibrary
@@ -156,6 +157,62 @@ def create_app(backend, accounts_store, port=8801):
             positions[step] = {"x": round(xy["x"]), "y": round(xy["y"])}
         saved = model.tables.put("arrangements", graph_id, {"graph": graph_id, "positions": positions}, g.account)
         return jsonify({"version": saved["version"], "saved": len(positions)})
+
+    def owner_only():
+        return None if is_owner(getattr(g, "account", None)) else (jsonify({"error": "not_owner"}), 403)
+
+    def full_graph(graph_id, body):
+        """the graph a request describes: its steps and connections, with the header of the stored graph"""
+        stored = model.read_graph(graph_id)
+        sent = body.get("graph") if isinstance(body.get("graph"), dict) else {}
+        if not isinstance(sent.get("nodes"), list) or not isinstance(sent.get("edges"), list):
+            return None
+        return {"id": graph_id, "context_graph_id": stored["context_graph_id"], "testbench_id": stored["testbench_id"],
+                "description": sent.get("description", stored["description"]), "nodes": sent["nodes"], "edges": sent["edges"]}
+
+    @app.get("/api/v2/me")
+    def me():
+        account = getattr(g, "account", None)
+        return jsonify({"user": account, "owner": is_owner(account)})
+
+    @app.post("/api/v2/graphs/<path:graph_id>/check")
+    def check_graph(graph_id):
+        """the rules of a graph that has not been kept yet: the editor asks it after every change (D-363)"""
+        denied = owner_only()
+        if denied:
+            return denied
+        try:
+            graph = full_graph(graph_id, request.get_json(silent=True) or {})
+        except StorageError:
+            return jsonify({"error": "not_found"}), 404
+        if graph is None:
+            return jsonify({"error": "invalid", "detail": "graph"}), 422
+        return jsonify({"rules": graph_rules_proto.rule_report(graph)})
+
+    @app.put("/api/v2/graphs/<path:graph_id>")
+    def keep_graph(graph_id):
+        """keeps a change as a new version when every rule holds; otherwise nothing is written and the broken rules are named"""
+        denied = owner_only()
+        if denied:
+            return denied
+        body = request.get_json(silent=True) or {}
+        try:
+            current = max(e["version"] for e in model.graph_versions(graph_id))
+            graph = full_graph(graph_id, body)
+        except StorageError:
+            return jsonify({"error": "not_found"}), 404
+        if graph is None:
+            return jsonify({"error": "invalid", "detail": "graph"}), 422
+        if body.get("expected_version") is not None and body["expected_version"] != current:
+            return jsonify({"error": "conflict", "current": current}), 409
+        rules = graph_rules_proto.rule_report(graph)
+        if rules:
+            return jsonify({"error": "rules_broken", "rules": rules}), 422
+        model.author = g.account                          # the version names the account that kept it (the prototype serves one request at a time)
+        saved = model.save_graph(graph)
+        if not saved.saved:
+            return jsonify({"error": "refused", "rule": saved.rule, "detail": saved.detail, "named": saved.named}), 422
+        return jsonify({"version": saved.version, "changed": saved.version != current})
 
     @app.get("/")
     def index():

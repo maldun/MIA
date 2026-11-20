@@ -7,6 +7,8 @@ import { renderPanel, renderStepList } from './panel.js';
 import { loadSettings, saveSettings, edgeSmooth } from './settings.js';
 import { applyPositions, positionsOf, arrangementNote } from './arrangement.js';
 import { historyEntries, neighbour, versionNote } from './history.js';
+import { addStep, removeStep, changeStep, addConnection, removeConnection, changeConnection } from './edit-model.js';
+import { renderStepEditor, renderConnectionEditor } from './edit-panel.js';
 
 const $ = (id) => document.getElementById(id);
 let graphs = [];
@@ -16,6 +18,16 @@ let chosen = null;
 let versions = [];
 let saved = null;
 let mode = 'auto';
+let editing = false;
+let draft = null;
+let livePositions = null;
+let isOwner = false;
+
+const viewGraph = () => (editing && draft ? draft : current.graph);
+const kindOf = (id) => viewGraph().nodes.find((n) => n.id === id)?.data?.type;
+const infoOf = (id) => current.steps[id] ?? { kind: kindOf(id) };
+const localProblems = (graph) => { const ids = new Set(graph.nodes.map((n) => n.id)); return graph.edges.flatMap((e) => ['from', 'to'].filter((end) => !ids.has(e[end])).map((end) => ({ problem: 'missing_step', connection: e.id, step: e[end], end }))); };
+const problemsOf = () => (editing ? localProblems(draft) : current.problems);
 let storage = null;
 try { storage = window.localStorage; } catch { storage = null; }
 const settings = loadSettings(storage);
@@ -99,28 +111,28 @@ $('prev').addEventListener('click', () => { const v = neighbour(versions, curren
 $('next').addEventListener('click', () => { const v = neighbour(versions, current.version, 'next'); if (v !== null) open(chosen, v); });
 
 function pick(id) {
-  const step = current.graph.nodes.find((x) => x.id === id);
-  renderPanel(document, $('detail'), step, current.steps[id]);
+  const step = viewGraph().nodes.find((x) => x.id === id);
+  if (editing) showEditor(step); else renderPanel(document, $('detail'), step, infoOf(id));
   network?.selectNodes([id]);
 }
 
 function draw() {
-  const { graph, named, missing } = withProblemMarks(current.graph, current.problems);
+  const { graph, named, missing } = withProblemMarks(viewGraph(), problemsOf());
   const layered = visData(graph);
-  const placed = mode === 'layers' ? { nodes: layered.nodes, fixed: true } : applyPositions(layered.nodes, saved?.positions);
+  const placed = mode === 'layers' ? { nodes: layered.nodes, fixed: true } : applyPositions(layered.nodes, editing ? livePositions : saved?.positions);
   const nodes = placed.nodes;
   const edges = layered.edges;
   for (const n of nodes) {
-    n.group = missing.has(n.id) ? 'missing' : groupOf(current.graph.nodes.find((x) => x.id === n.id)?.data?.type);
-    n.label = missing.has(n.id) ? `missing: ${n.id}` : labelOf(n.id, current.steps[n.id]);
-    if (current.steps[n.id] && (current.steps[n.id].kind === 'transform' || current.steps[n.id].kind === 'master') && current.steps[n.id].trust !== 'trusted') n.shapeProperties = { borderDashes: [3, 3] };
+    n.group = missing.has(n.id) ? 'missing' : groupOf(kindOf(n.id));
+    n.label = missing.has(n.id) ? `missing: ${n.id}` : labelOf(n.id, infoOf(n.id));
+    if (infoOf(n.id).trust !== undefined && (infoOf(n.id).kind === 'transform' || infoOf(n.id).kind === 'master') && infoOf(n.id).trust !== 'trusted') n.shapeProperties = { borderDashes: [3, 3] };
   }
-  const dashed = new Set(current.problems.filter((p) => p.problem === 'missing_step').map((p) => p.connection));
+  const dashed = new Set(problemsOf().filter((p) => p.problem === 'missing_step').map((p) => p.connection));
   for (const e of edges) if (dashed.has(graph.edges[Number(e.id.slice(1))]?.id)) { e.dashes = true; e.color = { color: '#b3261e' }; }
   const options = visOptions(colors());
   options.edges.smooth = edgeSmooth(settings);
   options.interaction.keyboard = true;
-  const untrusted = new Set(nodes.filter((n) => current.steps[n.id] && current.steps[n.id].trust !== 'trusted' && (current.steps[n.id].kind === 'master' || current.steps[n.id].kind === 'transform')).map((n) => n.id));
+  const untrusted = new Set(nodes.filter((n) => infoOf(n.id).trust !== undefined && infoOf(n.id).trust !== 'trusted' && (infoOf(n.id).kind === 'master' || infoOf(n.id).kind === 'transform')).map((n) => n.id));
   const c = colors();
   options.groups.master = { shape: 'custom', ctxRenderer: makeHexagonRenderer({ fill: c.process, line: c.line, text: c.text }, untrusted) };   // a hexagon with its name inside
   options.groups.missing = { shape: 'box', color: { background: 'transparent', border: '#b3261e' }, shapeProperties: { borderDashes: [5, 5] } };
@@ -129,12 +141,12 @@ function draw() {
   network = new vis.Network($('view'), { nodes: new vis.DataSet(nodes), edges: new vis.DataSet(edges) }, options);
   network.on('stabilizationIterationsDone', () => network.setOptions({ physics: { enabled: false } }));
   network.on('click', ({ nodes: [n], edges: [e] }) => {
-    if (n !== undefined) { const step = current.graph.nodes.find((x) => x.id === n); renderPanel(document, $('detail'), step ?? { id: n, data: { type: 'missing' } }, current.steps[n]); }
-    else if (e !== undefined) renderPanel(document, $('detail'), current.graph.edges[Number(e.slice(1))], null, true);
+    if (n !== undefined) { const step = viewGraph().nodes.find((x) => x.id === n); if (editing && step) showEditor(step); else renderPanel(document, $('detail'), step ?? { id: n, data: { type: 'missing' } }, infoOf(n)); }
+    else if (e !== undefined) { const link = viewGraph().edges[Number(e.slice(1))]; if (editing) showConnectionEditor(link); else renderPanel(document, $('detail'), link, null, true); }
     else renderPanel(document, $('detail'), null);
   });
-  renderStepList(document, $('steps'), current.graph, current.steps, pick);
-  $('status').textContent = `${current.graph.id}, ${versionNote(current.version, current.current)} (${current.author}): ${nodes.length - missing.size} steps, ${edges.length} connections` + (named.length ? `; ${named.length} problem(s)` : '');
+  renderStepList(document, $('steps'), viewGraph(), Object.fromEntries(viewGraph().nodes.map((n) => [n.id, infoOf(n.id)])), pick);
+  $('status').textContent = `${current.graph.id}, ${editing ? 'WORKING COPY of ' : ''}${versionNote(current.version, current.current)} (${current.author}): ${nodes.length - missing.size} steps, ${edges.length} connections` + (named.length ? `; ${named.length} problem(s)` : '');
   $('arr-note').textContent = arrangementNote(saved, mode);
   $('problems').replaceChildren(...named.map((text) => { const li = document.createElement('li'); li.textContent = text; return li; }));
   renderPanel(document, $('detail'), null);
@@ -162,10 +174,92 @@ $('save-arr').addEventListener('click', async () => {
   $('arr-note').textContent = arrangementNote(saved, mode);
 });
 
+// ---- editing (CP8): a working copy, the rules asked after every change, the change kept as a new version ----
+const editBar = $('edit-bar');
+function fillEnds() {
+  for (const id of ['conn-from', 'conn-to']) {
+    const select = $(id);
+    select.replaceChildren(...draft.nodes.map((n) => { const o = document.createElement('option'); o.value = n.id; o.textContent = n.id; return o; }));
+  }
+}
+function note(text) { $('edit-note').textContent = text; }
+
+async function checkRules() {
+  const res = await api(`/api/v2/graphs/${encodeURIComponent(chosen)}/check`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ graph: { nodes: draft.nodes, edges: draft.edges } }) });
+  const { rules } = await res.json();
+  $('rules').replaceChildren(...rules.map((r) => { const li = document.createElement('li'); li.textContent = `${r.rule}: ${r.text} (${r.parts.join(', ')})`; return li; }));
+  $('keep').disabled = rules.length > 0;
+  note(rules.length ? `${rules.length} broken rule(s): the change cannot be kept yet.` : 'Every rule holds.');
+}
+
+function change(next) {
+  if (network) livePositions = positionsOf(network.getPositions());
+  draft = next;
+  fillEnds();
+  draw();
+  checkRules();
+}
+
+function showEditor(step, errors = {}) {
+  renderStepEditor(document, $('detail'), step, {
+    errors,
+    onApply: ({ data, errors: found }) => {
+      if (Object.keys(found).length) { showEditor(step, found); return; }
+      const r = changeStep(draft, step.id, data);
+      if (r.error) note(r.error); else { change(r.graph); showEditor(r.graph.nodes.find((n) => n.id === step.id)); }
+    },
+    onRemove: () => { change(removeStep(draft, step.id)); renderPanel(document, $('detail'), null); },
+  });
+}
+function showConnectionEditor(link) {
+  renderConnectionEditor(document, $('detail'), link, {
+    onApply: (values) => { const r = changeConnection(draft, link.id, values); if (r.error) note(r.error); else change(r.graph); },
+    onRemove: () => { change(removeConnection(draft, link.id)); renderPanel(document, $('detail'), null); },
+  });
+}
+
+function startEdit() {
+  if (!current || current.version !== current.current) { $('status').textContent = 'Only the current version can be edited: open the current version first.'; return; }
+  editing = true;
+  draft = JSON.parse(JSON.stringify(current.graph));
+  livePositions = network ? positionsOf(network.getPositions()) : null;
+  editBar.hidden = false;
+  $('edit-toggle').hidden = true;
+  fillEnds();
+  draw();
+  checkRules();
+}
+function stopEdit() {
+  editing = false; draft = null; editBar.hidden = true; $('edit-toggle').hidden = !isOwner; $('rules').replaceChildren();
+  renderPanel(document, $('detail'), null);
+}
+$('edit-toggle').addEventListener('click', startEdit);
+$('discard').addEventListener('click', () => { stopEdit(); draw(); });
+$('add-step').addEventListener('click', () => {
+  const r = addStep(draft, $('new-name').value, $('new-kind').value);
+  if (r.error) { note(r.error); return; }
+  $('new-name').value = '';
+  change(r.graph);
+});
+$('add-conn').addEventListener('click', () => {
+  const r = addConnection(draft, $('conn-from').value, $('conn-to').value, { role: $('conn-role').value });
+  if (r.error) note(r.error); else change(r.graph);
+});
+$('keep').addEventListener('click', async () => {
+  const res = await api(`/api/v2/graphs/${encodeURIComponent(chosen)}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ graph: { nodes: draft.nodes, edges: draft.edges }, expected_version: current.version }) });
+  const body = await res.json();
+  if (res.ok) { stopEdit(); note(''); await open(chosen); $('status').textContent += body.changed ? ` (kept as version ${body.version})` : ' (nothing had changed)'; return; }
+  if (res.status === 409) { note(`The graph changed meanwhile (now version ${body.current}). Nothing was overwritten; discard the changes and open it again.`); return; }
+  if (res.status === 422 && body.rules) { note('The change breaks a rule and was not kept.'); $('rules').replaceChildren(...body.rules.map((r) => { const li = document.createElement('li'); li.textContent = `${r.rule}: ${r.text} (${r.parts.join(', ')})`; return li; })); return; }
+  note(`The change was not kept (${res.status} ${body.error ?? ''}).`);
+});
+
 async function start() {
   const who = await (await fetch('/api/whoami', { credentials: 'same-origin' })).json();
   if (!who.user && !who.account) { show('login'); return; }
   $('who').textContent = who.user ?? who.account;
+  isOwner = (await (await api('/api/v2/me')).json()).owner;
+  $('edit-toggle').hidden = !isOwner || editing;
   show('viewer');
   graphs = await (await api('/api/v2/graphs')).json();
   renderList();
