@@ -1,8 +1,8 @@
-# Top-Level Specification: Leftovers of G-V2 and G-V3 (G-V4.LEFTOVER)
+# Top-Level Specification: Leftovers of G-V2 and G-V3 (G-V5.LEFTOVER)
 
 **Status:** Draft, for the owner's review
 **Owner:** Stefan Reiterer   **Date:** 2026-11-20
-**Project / deliverable:** MIA, subgoal LEFTOVER of G-V4. Settles what the two earlier goals left open. Requirement IDs are provisional (continuing after FR-56 and NFR-14 of the VIEW spec); Plan assigns them in `requirements.md`.
+**Project / deliverable:** MIA, subgoal LEFTOVER of G-V5. Settles what the earlier goals (G-V2, G-V3 and G-V4) left open; moved from G-V4 to G-V5 by the owner (D-385). Requirement IDs are provisional (continuing after the other G-V4 specs); Plan assigns them in `requirements.md`.
 
 ## 1. Context and goal
 G-V2 and G-V3 were closed with accepted deviations (D-358, D-359). The owner wants the converted skills to follow the live settings (trust, lifecycle, budgets, stop), improved skills to be decided on cases the owner labelled, harmful imported steps to be refused with proof, and the records to be consistent.
@@ -11,7 +11,7 @@ G-V2 and G-V3 were closed with accepted deviations (D-358, D-359). The owner wan
 ### In scope
 The live settings on the graph path (TD-86, TD-87), decisions on labelled holdout cases (TD-88, TD-89, TD-90), the refusal of harmful imported steps (V2-6, THR-011), consistency of the records (V2-1 to V2-3, V2-8, TD-82 to TD-85), the open items V3-6 and F-04. Requirements FR-82 to FR-85, NFR-21.
 ### Out of scope (non-goals)
-New skills or new conversions; the graph rework itself (GRAPHSTORE, GRAPHAPI); validation sessions (G-V4.VALIDATE).
+New skills or new conversions; the graph rework itself (GRAPHSTORE, GRAPHAPI); validation sessions (G-V5.VALIDATE).
 
 ## 3. Top-level requirements
 ### 3.1 Functional requirements
@@ -25,7 +25,7 @@ New skills or new conversions; the graph rework itself (GRAPHSTORE, GRAPHAPI); v
   - Outcome: Given a converted skill, when the owner compares the old and the new runner on the same cases, then both results and their time are shown side by side, and the difference in time is stated.
 ### 3.2 Non-functional requirements
 - NFR-21 (Consistency of records): Requirements, tests and records of G-V2 and G-V3 agree.
-  - Outcome: Given the requirements, tests and records of the two goals, when the owner runs the consistency checks, then no requirement is left as a draft without a decision, no scope wording is stale and no check is missing from its table; every open deferral has a decision or a new date.
+  - Outcome: Given the requirements, tests and records of G-V2, G-V3 and G-V4, when the owner runs the consistency checks, then no requirement is left as a draft without a decision, no scope wording is stale and no check is missing from its table; every open deferral has a decision or a new date, including those that G-V4 leaves open.
 ### 3.3 Given constraints
 | Constraint | Source | Why it cannot be changed |
 |---|---|---|
@@ -39,7 +39,7 @@ The owner's host with the pinned local models.
 - Quality model: ISO/IEC 25010:2023; the characteristics that matter are named in the requirements above.
 - Security: Imported steps are untrusted (THR-011); the refusal case is a red-team case written with the owner. Agents never label or open holdout cases.
 - Sharing: owner only; AI use disclosed. Maintained, not frozen. Path to product undecided.
-- Scale and first split: a leaf inside the existing decomposition; cut from the other G-V4 subgoals as in `../G-V4/goal.md`.
+- Scale and first split: a leaf inside the existing decomposition; cut from the other G-V4 subgoals as in `../G-V5/goal.md`.
 
 ## 4. Context view (technology independent)
 The owner and MIA's store, as in `../G-V4.VIEW/top-level-spec.md` section 4; the flows specific to this subgoal are in the requirements. No internal parts are named here.
@@ -53,7 +53,7 @@ The owner and MIA's store, as in `../G-V4.VIEW/top-level-spec.md` section 4; the
 | Risk / question | Impact | Mitigation / owner |
 |---|---|---|
 | Holdout suites need the owner's labelling time | FR-83 cannot be decided without them | owner schedules the labelling |
-| FR-85 may duplicate G-V4.VALIDATE (V2-4) | scope | the owner decides whether the timing comparison stays here |
+| FR-85 may duplicate G-V5.VALIDATE (V2-4) | scope | the owner decides whether the timing comparison stays here |
 | Several items (TD-82 to TD-85, F-04) are small and technical | readability of the goal | list them as tasks, not requirements |
 
 ### Prototype decisions
@@ -63,4 +63,4 @@ The owner and MIA's store, as in `../G-V4.VIEW/top-level-spec.md` section 4; the
 
 ## 7. References
 - Sources: `../G-V2/remainder-for-next-goal.md`, `../G-V3/verification-report.md`, `deferred.md`
-- Goal record: `goal.md`; parent `../G-V4/goal.md` (OC-1 to OC-4)
+- Goal record: `goal.md`; parent `../G-V5/goal.md` (OC-1 to OC-4)

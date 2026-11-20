@@ -135,7 +135,7 @@ Merge order STORE, MODEL, TOOLBOX, CONVERT; reserved IDs per session and rules f
 | Verify | done | `verification-report.md` (2026-11-20): Verified with accepted deviations (owner, 2026-11-20) |
 | Commit | done | merged into master before the tag; tag `v0.2.1` (2026-11-20) with G-V3; `v0.2.0` was pushed early on `4a3a74c9` (same code, no CHANGELOG); `merge-request.md`, `release-notes.md`, D-358 |
 | Deploy | done | `deployment/deployment-record.md`: v0.2.1 on the reference host, 2026-11-20, image `439429d0b8d5`, smoke green, rollback tested |
-| Validate | empty | closed, **not validated**: owner, 2026-11-20 (D-359). VAL criteria move to G-V4.VALIDATE (`goals/G-V4.VALIDATE/goal.md`), run after the G-V4 rework; requirements stay `Verified`, none becomes `Validated`; open items stay open |
+| Validate | empty | closed, **not validated**: owner, 2026-11-20 (D-359). VAL criteria move to G-V5.VALIDATE (`goals/G-V5.VALIDATE/goal.md`), run after the G-V4 rework; requirements stay `Verified`, none becomes `Validated`; open items stay open |
 
 ## Joint amendments
 | ID | Requirement | Agreed by | Date |

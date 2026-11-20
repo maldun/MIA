@@ -39,4 +39,4 @@ Owner 2026-11-20: an edit log of operations, replayable on a graph (not only ver
 | Verify | open | |
 | Commit | open | |
 | Deploy | open | |
-| Validate | open | covered by G-V4.VALIDATE |
+| Validate | open | covered by G-V5.VALIDATE |

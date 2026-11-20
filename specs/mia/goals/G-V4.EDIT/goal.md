@@ -45,4 +45,4 @@ REQ-GA-002, REQ-GA-003 (N-5 T-02, open Q-2: where the rules run in the page); th
 | Verify | open | |
 | Commit | open | |
 | Deploy | open | |
-| Validate | open | covered by G-V4.VALIDATE |
+| Validate | open | covered by G-V5.VALIDATE |

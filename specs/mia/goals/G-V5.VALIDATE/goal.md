@@ -1,22 +1,22 @@
-# Goal G-V4.VALIDATE – Validation of G-V2 and G-V3 after the G-V4 rework
+# Goal G-V5.VALIDATE – Validation of G-V2, G-V3 and G-V4 and improvement of the graphs
 
-Opened 2026-11-20 on the owner's request: G-V2 (v0.2.x) and G-V3 are in the Validate phase, and G-V4 starts a larger rework. Parts of the rework may change what the validation runs would see, so validating v0.2.1 now would be effort that may have to be repeated. The validation of both goals is therefore collected here and run **on the version after the rework**. G-V4 now has a goal record (`../G-V4/goal.md`, Proposed); this subgoal is its last one and a draft until the rework is planned.
+Opened 2026-11-20 on the owner's request: G-V2 (v0.2.x) and G-V3 are in the Validate phase, and G-V4 starts a larger rework. Parts of the rework may change what the validation runs would see, so validating v0.2.1 now would be effort that may have to be repeated. The validation of both goals is therefore collected here and run **on the version after the rework**. G-V4 now has a goal record (`../G-V5/goal.md`, Proposed); this subgoal is its last one and a draft until the rework is planned.
 
 - Kind: subgoal
-- Parent: G-V4
-- Statement: The owner has judged, in real use of the version after the G-V4 rework, whether the converted skills and snapshots (G-V2) and the Skill run view with the spoken-only chat and the report (G-V3) are the right thing, and every finding is triaged.
-- Exit criterion: VAL-007, VAL-009, VAL-012, VAL-013 and VAL-006 (field items) rated pass, partial or fail with evidence; the Provisional strip height of REQ-CLV-041 settled; every finding triaged; decision on the next iteration recorded (validation report)
+- Parent: G-V5
+- Statement: The owner has judged, in real use of the version after the G-V4 rework, what G-V2 (converted skills and snapshots), G-V3 (Skill run view, spoken-only chat, report) and G-V4 (graph storage, viewer, editor, edit log, context-graph builder) built, every finding is triaged, and weak workflow graphs are improved with the editor.
+- Exit criterion: VAL-006, VAL-007, VAL-009, VAL-012, VAL-013 and the validation criteria of G-V4 rated pass, partial or fail with evidence; the Provisional strip height of REQ-CLV-041 settled; at least one graph improved with the editor; every finding triaged; decision on the next iteration recorded (validation report)
 - Supervision: supervised
 - Accepted by: Stefan Reiterer (owner)
-- Line of work: goal/v4.validate
+- Line of work: goal/v5.validate
 - Subgoals: –
 - Status: Proposed
 
 ## Outcome criteria
 | ID | Expected outcome | Derived from |
 |---|---|---|
-| OC-1 | Given the finished rework, when the owner uses the version, then G-V2 and G-V3 are judged in real use and every finding is triaged | OC-5 of G-V4 (FR-6, FR-46) |
-| OC-2 | Given the validation runs, when a graph turns out weak, then the owner improves it with the editor | OC-9 of G-V4 (FR-22) |
+| OC-1 | Given the finished version, when the owner uses it, then G-V2, G-V3 and G-V4 are judged in real use and every finding is triaged | OC-5 and OC-6 of G-V5 (FR-6, FR-22, FR-34, FR-46) |
+| OC-2 | Given the validation runs, when a graph turns out weak, then the owner improves it with the editor and sees the effect | OC-7 of G-V5 (FR-6, FR-22) |
 
 ## Validation goals collected
 | From | Criterion | What it settles | Source |
@@ -48,13 +48,13 @@ Output: a short `validation-goals-review.md` in this folder (one row per criteri
 - G-V4 is Proposed with its subgoals (D-360); the owner's Explore gate is open. Until the rework is planned, the line of work and the dependency "after the rework is deployed" stay placeholders. The editor-driven improvement of the workflow graphs (OC-9 of G-V4) is a stage of this subgoal; its place in the plan is open.
 - Decide whether VAL-001, 003, 004 and 005 (G-V1 material, never run, D-185) join this round.
 - Retention and deletion date for the run logs, and consent of any user besides the owner (validation plan).
-- Whether the Validate rows of G-V2 and G-V3 (`goal.md`, Phases) should say "deferred to G-V4.VALIDATE". Not changed yet.
+- Whether the Validate rows of G-V2 and G-V3 (`goal.md`, Phases) should say "deferred to G-V5.VALIDATE". Not changed yet.
 - Whether a version tag of the rework is the frozen version for this subgoal (needs a deployment record for it first).
 
 ## Agreement
 | Subgoal | Agreed by | Date |
 |---|---|---|
-| G-V4.VALIDATE | [ ] Stefan Reiterer (owner) | |
+| G-V5.VALIDATE | [ ] Stefan Reiterer (owner) | |
 
 ## Phases
 | Phase | State | Record or reason |

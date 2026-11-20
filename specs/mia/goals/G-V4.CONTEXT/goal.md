@@ -36,4 +36,4 @@ Proposed 2026-11-20 by the owner (maldun), D-369: editing context graphs is its 
 | Verify | open | |
 | Commit | open | |
 | Deploy | open | |
-| Validate | open | covered by G-V4.VALIDATE |
+| Validate | open | covered by G-V5.VALIDATE |

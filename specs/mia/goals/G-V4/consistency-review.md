@@ -1,6 +1,6 @@
 # Consistency review of the G-V4 Explore artifacts (2026-11-20)
 
-Done before the owner's Explore gate, as the owner chose on 2026-11-20. Fixed mechanically: stale wording in `G-V4/goal.md` and `G-V4.VALIDATE/goal.md`, order of the outcome rows, the Explore row of the Phases table. Everything below needs the owner's decision.
+Done before the owner's Explore gate, as the owner chose on 2026-11-20. Fixed mechanically: stale wording in `G-V4/goal.md` and `G-V5.VALIDATE/goal.md`, order of the outcome rows, the Explore row of the Phases table. Everything below needs the owner's decision.
 
 ## 1. Old N-5 requirements against the new items: decisions of the owner (maldun, 2026-11-20, D-367)
 The approved `nodes/N-5-graph-app/requirements.md` (REQ-GA-001 to -011, written in G-V1) overlaps the new VIEW items. The decisions below are applied by plan amendments in Plan (the approved text is not edited now).

@@ -39,4 +39,4 @@ N-5 log (`nodes/N-5-graph-app/implementation-log.md`): T-01 is a vis-network moc
 | Verify | open | |
 | Commit | open | |
 | Deploy | open | |
-| Validate | open | covered by G-V4.VALIDATE |
+| Validate | open | covered by G-V5.VALIDATE |

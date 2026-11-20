@@ -203,7 +203,7 @@ None open for Step 0 (Q-1 to Q-11 answered, D-271 and D-273). Settled in Plan St
 | Verify | done | `verification-report.md` (2026-11-20, a clean checkout of master): verified with accepted deviations V3-1 and V3-4 (D-354); hand check of `/lookup` by the owner 2026-11-20 |
 | Commit | done | all three subgoals are in master (PANEL `772abc2`, CHAT `8b8bd2a`, REPORT merge `2db7f8d5`); status updates and `merge-request.md` of 2026-11-20; no version yet: the tag v0.2.0 comes with G-V2 (owner) |
 | Deploy | done | `deployment/deployment-record.md`: v0.2.1 (with G-V2) on the reference host, 2026-11-20, smoke green, rollback tested |
-| Validate | empty | closed, **not validated**: owner, 2026-11-20 (D-359). VAL criteria move to G-V4.VALIDATE (`goals/G-V4.VALIDATE/goal.md`), run after the G-V4 rework; requirements stay `Verified`, none becomes `Validated`; open items stay open |
+| Validate | empty | closed, **not validated**: owner, 2026-11-20 (D-359). VAL criteria move to G-V5.VALIDATE (`goals/G-V5.VALIDATE/goal.md`), run after the G-V4 rework; requirements stay `Verified`, none becomes `Validated`; open items stay open |
 
 ## Joint amendments
 | ID | Requirement | Agreed by | Date |

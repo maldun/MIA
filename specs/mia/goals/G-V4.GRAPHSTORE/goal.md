@@ -23,7 +23,7 @@ Proposed 2026-11-19 by the owner (maldun) in the design review of the graph stor
 |---|---|---|
 | OC-1 | Given a workflow graph or a context graph, when it is saved, read, changed and listed, then there is one stored truth for it, with every edit a new version and no version deleted | FR-40, owner 2026-11-19 |
 | OC-2 | Given the graphs stored today, when they are moved to the new form, then each reads back as before (same nodes, edges and versions as far as the old form could hold them) and the owner can compare old and new before anything old is removed | OC-6 of G-V4 (FR-40) |
-| OC-3 | Given a snapshot taken before and one after the change, when the owner restores either, then the graphs are as they were at that snapshot | FR-47, OC-1 of G-V2.SNAPSHOT |
+| OC-3 | Given a snapshot taken before and one after the change, when the owner restores either, then the graphs are as they were at that snapshot | OC-10 of G-V4 (FR-47) |
 | OC-4 | Given a live store and a copy used for daily running, when the owner syncs them (on command, at start and at an orderly stop), then the copy equals the live store, and nothing that exists only on the copy is lost | OC-6 of G-V4 (FR-40, NFR-8) |
 
 ## Added 2026-11-20 (D-360)

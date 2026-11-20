@@ -11,7 +11,7 @@ The owner wants a stored graph to be checked and run as the same graph they see 
 ### In scope
 The rules, the order of steps, the run of a stored graph, code inside a graph, equivalence with today's skills. Requirements FR-63 to FR-67, NFR-17.
 ### Out of scope (non-goals)
-Storing graphs (G-V4.GRAPHSTORE); drawing and editing (VIEW, EDIT); live trust, lifecycle, budgets and stop of a running skill (G-V4.LEFTOVER, planned together with this subgoal).
+Storing graphs (G-V4.GRAPHSTORE); drawing and editing (VIEW, EDIT); live trust, lifecycle, budgets and stop of a running skill (G-V5.LEFTOVER, planned together with this subgoal).
 
 ## 3. Top-level requirements
 ### 3.1 Functional requirements
@@ -27,7 +27,7 @@ Storing graphs (G-V4.GRAPHSTORE); drawing and editing (VIEW, EDIT); live trust, 
   - Outcome: Given a trusted step whose code, tool or settings are changed, when the owner next runs the graph, then the step is untrusted until the owner trusts it again, and the run record names the version of the step that ran; a change of the step's position or of a reason text does not drop its trust.
 ### 3.2 Non-functional requirements
 - NFR-17 (Compatibility): Skills give the same results after the rework as before.
-  - Outcome: Given every skill that was converted at the end of G-V2 and its cases, when it is run on its stored graph, then it gives the same results on those cases as before the rework, decided on the dev suites against the old-runner baselines with the agreed statistical rule and the pinned model; the same check is repeated on holdout cases as soon as the owner has labelled them (G-V4.LEFTOVER).
+  - Outcome: Given every skill that was converted at the end of G-V2 and its cases, when it is run on its stored graph, then it gives the same results on those cases as before the rework, decided on the dev suites against the old-runner baselines with the agreed statistical rule and the pinned model; the same check is repeated on holdout cases as soon as the owner has labelled them (G-V5.LEFTOVER).
 ### 3.3 Given constraints
 | Constraint | Source | Why it cannot be changed |
 |---|---|---|
