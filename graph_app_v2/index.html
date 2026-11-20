@@ -1,0 +1,11 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>MIA graph viewer (prototype)</title>
+<link rel="stylesheet" href="/page/graph.css"><script src="/page/vendor/vis-network.min.js"></script><script type="module" src="/page/app.js"></script>
+<style>.work{flex-wrap:nowrap;align-items:stretch}aside{flex:0 0 340px;order:-1}main{flex:1 1 auto;min-width:0}#list{max-height:30vh;overflow:auto;margin:6px 0;padding:0;list-style:none}#list li{padding:3px 6px;cursor:pointer;border-radius:4px}#list li[aria-selected=true]{background:var(--process)}#login{max-width:340px;margin:10vh auto;padding:16px}#login label{display:block;margin:8px 0}#problems{color:#b3261e;margin:4px 0;padding-left:16px}</style></head>
+<body>
+<section id="login" hidden><h1>MIA graph viewer</h1><form id="login-form"><label>Name <input id="user" autocomplete="username"></label><label>Password <input id="password" type="password" autocomplete="current-password"></label><button type="submit">Log in</button></form><p id="login-error" role="alert"></p></section>
+<div id="viewer" hidden>
+<header><h1>Graph viewer</h1><span id="who"></span><button id="logout" type="button">Log out</button></header>
+<p id="status" role="status"></p><ul id="problems" aria-label="what cannot be drawn"></ul>
+<div class="work"><aside aria-label="graphs and selected step"><h2>Graphs</h2><input id="filter" type="search" placeholder="filter by name" aria-label="filter by name"><ul id="list" role="listbox" aria-label="stored graphs"></ul><h2>Selected</h2><pre id="detail">Click a step or a connection.</pre></aside><main id="view" aria-label="graph"></main></div>
+</div>
+</body></html>
