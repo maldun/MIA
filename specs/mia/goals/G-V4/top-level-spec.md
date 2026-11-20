@@ -130,7 +130,8 @@ As in the subgoal specs.
 ### Prototype decisions
 | Item | Decision | Report or reason |
 |---|---|---|
-| G-V4 graph path slice | accepted | `prototype/rounds/01/prototype-report.md` (round 01, the earlier `graphview` prototype); run 1 is round 02, `prototype/rounds/02/prototype-report.md`, authorized in `prototype/rounds/02/run.md` (MVP, the owner, 2026-11-20) |
+| G-V4 viewer, look and data path (round 01, the earlier `graphview` prototype) | accepted | `prototype/rounds/01/prototype-report.md` |
+| G-V4 graph path slice, run 1 (round 02): storage, transfer and sync, rules and refusal before a run, viewer, editor, edit log, playback and comparison; MVP level | accepted | `prototype/rounds/02/prototype-report.md`, authorized by the owner in `prototype/rounds/02/run.md` (2026-11-20); built in 12 checkpoints on `prototype/g-v4`; the owner's validation is `prototype/rounds/02/validation.md`; what is carried into Plan is decided in the carry-over table of the report (the owner decides) |
 
 ## 7. References
 - Subgoal specs: `../G-V4.GRAPHSTORE/`, `../G-V4.GRAPHAPI/`, `../G-V4.VIEW/`, `../G-V4.EDIT/`, `../G-V4.REPLAY/` (`top-level-spec.md`)
