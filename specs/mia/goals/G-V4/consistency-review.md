@@ -33,7 +33,7 @@ IDs are unique across the seven specs. Gaps are deliberate: FR-56 is retired (me
 ## 3. Earlier findings
 | # | Finding | State |
 |---|---|---|
-| C-1 | the system-wide `high-level-spec.md` is in the old format (no HR items, no DEP table, no measures) | **decided (D-387):** add one section in the new format for G-V4 and leave the old text as legacy (D-362); Plan writes it |
+| C-1 | the system-wide `high-level-spec.md` is in the old format (no HR items, no DEP table, no measures) | **superseded (D-396):** G-V4 is a research prototype; no HR items and no new section are written; the old text stays as legacy (D-362) |
 | C-2 | top-level specs of the subgoals | **done:** seven reviewed specs |
 | C-3 | new requirement IDs | **decided (D-387):** the drafted numbers stay (gaps included); Plan writes them into `requirements.md` |
 | C-4 | scope tables, Parts and Frozen tables of the subgoals (GL3, GL6 errors) | **open for Plan step 0** |
