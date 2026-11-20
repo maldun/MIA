@@ -15,6 +15,7 @@ Requirements on the checks of `test-spec.md` (M41): under which conditions a ver
 | 1 | Conversion eval runs | conditions under which an equivalence decision of a converted skill counts | TR-CONVERT-001, TR-CONVERT-002, TR-CONVERT-003, TR-CONVERT-004, TR-CONVERT-005 |
 | 2 | Conversion stand-ins | the fake model server of the same-calls check | TR-CONVERT-006 |
 | 3 | Conversion exact values | hand-checked expected values of the deterministic conversion and snapshot tests | TR-CONVERT-007 |
+| 4 | Conversion component checks | The unit and component checks of the converter, the toolbox entries and the descriptors | TR-CONVERT-008 |
 
 ### TR-CONVERT-001 – Equivalence runs use the pinned model
 - Applies to: EV-research, EV-plans, EV-verdicts, EV-computable, EV-extraction, TC-WFM-110, TC-WFM-111, TC-WFM-112, TC-WFM-113, TC-WFM-114
@@ -91,7 +92,7 @@ Requirements on the checks of `test-spec.md` (M41): under which conditions a ver
 - Rationale: counts (8 items, 51 outputs, 17 of 20), versions and statuses are exact
 - Credibility aspect: numerical settings
 - Verified by: known answer
-| 1 | Stand-ins | The fakes that stand in for storage, models and transforms | TR-MODEL-001, TR-MODEL-004 |
+| 1 | Stand-ins | The fakes that stand in for storage, models and transforms | TR-MODEL-001, TR-MODEL-004, TR-MODEL-006 |
 | 2 | Rule checks | Checks that must refuse a wrong graph and accept a right one | TR-MODEL-002, TR-MODEL-003 |
 | 3 | Exact values | Names and IDs in messages, versions | TR-MODEL-005 |
 | 4 | Layout | Window sizes and theme of the browser checks (G-V3.PANEL) | TR-PANEL-001 |
@@ -109,6 +110,17 @@ Requirements on the checks of `test-spec.md` (M41): under which conditions a ver
 | 9 | Eval setup (CHAT) | Pin, holdout, labels, hard checks and error rates of EV-skill_turns (G-V3.CHAT) | TR-CHAT-001, TR-CHAT-002, TR-CHAT-003, TR-CHAT-004, TR-CHAT-005, TR-CHAT-007, TR-CHAT-008 |
 | 10 | Fakes (CHAT) | The fake model server (G-V3.CHAT) | TR-CHAT-006, TR-CHAT-009, TR-CHAT-012 |
 | 8 | Exact values (PANEL) | Names, states, orders and figures (G-V3.PANEL) | TR-PANEL-006 |
+
+### TR-CONVERT-008 – Component checks of the conversion use the shipped library and exact values
+- Applies to: TC-WFM-116, TC-WFM-117, TC-WFM-118, TC-WFM-119, TC-WFM-120, TC-WFM-121, TC-WFM-122, TC-WFM-123, TC-WFM-124, TC-WFM-125, TC-WFM-126, TC-WFM-127, TC-WFM-128, TC-WFM-129, TC-WFM-144, TC-WFM-145, TC-WFM-146, TC-WFM-147, TC-WFM-148
+- Requirement: REQ-WFM-058
+- Group: Conversion component checks
+- Kind: unit
+- Text: Each check shall run on the shipped nodes and pipelines of `library/` as they are in the commit under test, with a scripted model and scripted tools (no model server, no network), and shall compare exact expected values (counts of nodes and edges, ids, orders, statuses, refusals) that are written out in its scenario.
+- Rationale: the conversion is deterministic code; a check that used its own copy of a pipeline would pass while the shipped one changed; a model server would add noise that these checks do not need (the model-dependent equivalence is decided by TC-WFM-110 to 114)
+- Credibility aspect: numerical settings
+- Verified by: known answer
+- Status: Draft
 
 ### TR-MODEL-001 – storage stand-in is a minimal fake with a known gap
 - Applies to: TC-WFM-040, TC-WFM-041, TC-WFM-042, TC-WFM-044, TC-WFM-049
@@ -168,6 +180,17 @@ Requirements on the checks of `test-spec.md` (M41): under which conditions a ver
 - Status: Draft
 
 ## G-V3.PANEL (Plan step 3, 2026-11-08; prefix TR-PANEL-)
+
+### TR-MODEL-006 – Stage checks use recording stages and fresh graphs
+- Applies to: TC-RUN-030, TC-RUN-031, TC-RUN-032, TC-RUN-033, TC-RUN-034, TC-RUN-035
+- Requirement: REQ-RUN-030, REQ-RUN-031, REQ-RUN-032, REQ-RUN-033, REQ-RUN-034, REQ-RUN-035
+- Group: Stand-ins
+- Kind: setup
+- Text: The checks shall use recording stages that store the three objects they were called with and graphs written as data in each test, no model server and no shared state between tests, and shall compare the recorded objects exactly.
+- Rationale: what a Stage receives and in which order nodes run is observable only by recording it; a graph or stage shared between tests could carry a value from one check into the next
+- Credibility aspect: stand-in fidelity
+- Verified by: review
+- Status: Draft
 
 ### TR-PANEL-001 – browser checks of layout and size run at fixed window sizes
 - Applies to: TC-CLV-036, TC-CLV-037, TC-CLV-040, TC-CLV-041, TC-CLV-042, TC-CLV-045, TC-CLV-046, TC-CLV-047, TC-CLV-048, TC-CLV-050, TC-CLV-051, TC-CLV-052, TC-CLV-053

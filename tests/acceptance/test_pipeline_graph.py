@@ -1,5 +1,5 @@
 """
-Acceptance tests of the pipeline-to-graph converter (G-V2.CONVERT, task T-CV-03d, A-123 P2 and P3, D-246): TC-WFM-125 to TC-WFM-130, preconditions of REQ-WFM-058.
+Acceptance tests of the pipeline-to-graph converter (G-V2.CONVERT, task T-CV-03d, A-123 P2 and P3, D-246): TC-WFM-125 to TC-WFM-129 and TC-WFM-144, preconditions of REQ-WFM-058.
 RED until T-CV-03d: `pipeline_graph.py` is a stub. No model, no network: the converter only reads the pipeline JSON of library/pipelines and the node JSON of library/nodes.
 
 Interface under test (a proposal, reviewed with the tests): `pipeline_graph.convert(pipeline, library_nodes, budget_seconds)` -> {"graph", "inputs", "result", "notes", "refused"}.
@@ -212,7 +212,7 @@ class PipelineGraph(unittest.TestCase):
 
     @mark.req("REQ-WFM-058")
     def test_converted_names_never_clash_and_no_data_node_has_two_writers(self):
-        """TC-WFM-130: a step and a variable with the same name (plan.free has step `plan` and variable `plan`) and a variable named like an order node (`order-step.a`) give a graph
+        """TC-WFM-144: a step and a variable with the same name (plan.free has step `plan` and variable `plan`) and a variable named like an order node (`order-step.a`) give a graph
         with unique node IDs in which every data node has at most one writer, or a refusal; never a graph that breaks the rules."""
         pipeline = {"id": "t.clash", "version": 1, "result": "plan", "nodes": [
             {"id": "plan", "use": "code.tally@1", "wire": {"verdicts": "$input.v"}, "output": "order-step.plan"},

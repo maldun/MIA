@@ -1,6 +1,6 @@
 """
-Acceptance tests of defaults in thin entries, the skill binder and the adapter between toolbox and runner (G-V2.CONVERT, task T-CV-04a, A-125 Q2 to Q4, D-253): TC-WFM-131 to
-TC-WFM-134, preconditions of REQ-WFM-058. RED until T-CV-04a: `bind_skill` and `stages_from_toolbox` are stubs and the thin entries do not apply the parameter defaults of their node.
+Acceptance tests of defaults in thin entries, the skill binder and the adapter between toolbox and runner (G-V2.CONVERT, task T-CV-04a, A-125 Q2 to Q4, D-253): TC-WFM-145 to
+TC-WFM-148, preconditions of REQ-WFM-058. RED until T-CV-04a: `bind_skill` and `stages_from_toolbox` are stubs and the thin entries do not apply the parameter defaults of their node.
 No model, no network: scripted model, recording.
 Interface under test (reviewed, D-253):
 - `pipeline_graph.bind_skill(graph, library_nodes, skill, changes=None)` -> a NEW graph (the input is not changed): a data node `descriptor.model` with the value
@@ -82,7 +82,7 @@ class SkillBinding(unittest.TestCase):
 
     @mark.req("REQ-WFM-058")
     def test_a_thin_entry_applies_the_parameter_defaults_of_its_node_and_a_given_value_wins(self):
-        """TC-WFM-131: view.extract_claims has the default `guide` (a long text in the template); run as a stage without a `guide` it renders the template with that default, with a
+        """TC-WFM-145: view.extract_claims has the default `guide` (a long text in the template); run as a stage without a `guide` it renders the template with that default, with a
         `guide` given it renders the given one. rule.speech.no_bold has the default rules ["speech.no_bold"]: run on "**Hello** and *emphasis* here" it removes only the bold markup
         (the function alone, without the default, removes both); with `rules` given the given rules apply."""
         view = self.nodes["view.extract_claims"]
@@ -103,7 +103,7 @@ class SkillBinding(unittest.TestCase):
 
     @mark.req("REQ-WFM-058")
     def test_the_binder_adds_the_model_and_tool_descriptors_and_changes_replace_options(self):
-        """TC-WFM-132: verify.single@1 (a model step `judge`, a code step `count`) bound to a skill with model {profile light, options {num_ctx 4096}} gets the data node
+        """TC-WFM-146: verify.single@1 (a model step `judge`, a code step `count`) bound to a skill with model {profile light, options {num_ctx 4096}} gets the data node
         `descriptor.model` with {"model": "light", "options": {"num_ctx": 4096}} and one edge {"as": "model"} into step.judge, none into step.count; the input graph is unchanged and the
         bound one keeps the rules and the order. changes {"model": {"options": {"temperature": 0.2}}} give options {"temperature": 0.2} (replaced, the profile stays). A pipeline with a
         tool step gets `descriptor.tool.web_search` {"tool": "web_search", "settings": {}} and an edge {"as": "tool"} into it and no model node."""
@@ -140,7 +140,7 @@ class SkillBinding(unittest.TestCase):
 
     @mark.req("REQ-WFM-058")
     def test_a_converted_graph_runs_on_the_toolbox_with_a_scripted_model(self):
-        """TC-WFM-133: plan.free@1 of the skill plan_question, converted, bound and handed to GraphRunner with `stages_from_toolbox`, runs with a scripted registered model: status
+        """TC-WFM-147: plan.free@1 of the skill plan_question, converted, bound and handed to GraphRunner with `stages_from_toolbox`, runs with a scripted registered model: status
         done, one model call whose user message is the template rendered with the question, and the result node var.plan holds what normalize_plan gives for the parsed reply."""
         skill, bound = self.converted_plan()
         view = self.nodes["view.research_plan"]
@@ -158,7 +158,7 @@ class SkillBinding(unittest.TestCase):
 
     @mark.req("REQ-WFM-058")
     def test_an_untrusted_entry_refuses_the_run_before_any_node_ran(self):
-        """TC-WFM-134: with the toolbox entry code.normalize_plan untrusted, the run of the converted graph is refused naming step.norm before the model was asked; trusted again, the
+        """TC-WFM-148: with the toolbox entry code.normalize_plan untrusted, the run of the converted graph is refused naming step.norm before the model was asked; trusted again, the
         same graph runs to done."""
         skill, bound = self.converted_plan()
         view = self.nodes["view.research_plan"]
