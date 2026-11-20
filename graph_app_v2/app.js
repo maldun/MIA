@@ -10,7 +10,7 @@ import { historyEntries, neighbour, versionNote } from './history.js';
 import { addStep, removeStep, changeStep, addConnection, removeConnection, changeConnection } from './edit-model.js';
 import { renderStepEditor, renderConnectionEditor } from './edit-panel.js';
 import * as hist from './undo-stack.js';
-import { storeNote, canEdit } from './store-note.js';
+import { storeNote, canEdit, syncMessage } from './store-note.js';
 import { renderCopyPanel, copyMessage } from './copy-panel.js';
 
 const $ = (id) => document.getElementById(id);
@@ -247,7 +247,7 @@ async function loadStoreStatus() {
 $('sync').addEventListener('click', async () => {
   const res = await api('/api/v2/sync', { method: 'POST' });
   const body = await res.json();
-  if (res.ok) { $('status').textContent = `Synced: ${body.versions_added} version(s) and ${body.records} record(s) added to the copy.`; await loadStoreStatus(); $('sync').classList.remove('attention'); if (chosen) await open(chosen); return; }
+  if (res.ok) { $('status').textContent = syncMessage(body); await loadStoreStatus(); $('sync').classList.remove('attention'); if (chosen) await open(chosen); return; }
   $('status').textContent = res.status === 503 ? 'The live store cannot be reached: nothing was synced.' : `The sync was refused: ${JSON.stringify(body.graphs ?? body.error)}`;
 });
 $('restore').addEventListener('click', async () => {

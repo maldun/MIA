@@ -25,6 +25,7 @@ import accounts_api
 import graph_model
 import graph_rules_proto
 import graph_store_move
+import graph_store_sync
 import tempfile
 from toolbox import Toolbox, ToolboxError
 from workflow_library import WorkflowLibrary
@@ -95,11 +96,12 @@ def _unreachable(error):
     return isinstance(error, UNREACHABLE) or type(error).__name__ in ("OperationalError", "InterfaceError", "AdminShutdown", "ConnectionTimeout")
 
 
-def create_app(backend, accounts_store, port=8801, live=None):
+def create_app(backend, accounts_store, port=8801, live=None, aside=None):
     """backend: the store that is read (the copy MIA runs on); live: the live store that every change is written to (the same store when it is None)"""
     app = Flask(__name__, static_folder=None)
     model = graph_model.GraphModel(Storage(backend), author="viewer")
     live_backend = live if live is not None else backend
+    aside = aside or os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "proto_aside")
     wmodel = model if live is None else graph_model.GraphModel(Storage(live_backend), author="viewer")   # writes go to the live store (FR-95)
     service = SessionService(accounts_store)
     box = make_toolbox()
@@ -220,13 +222,14 @@ def create_app(backend, accounts_store, port=8801, live=None):
         if live is None:
             return jsonify({"split": False, "live": "reachable", "lag": 0})
         try:
-            lag, behind = 0, {}
-            for graph_id in live_backend.ids("graphs"):
-                there, here = len(live_backend.versions("graphs", graph_id)), len(backend.versions("graphs", graph_id))
-                if there > here:
-                    lag += there - here
-                    behind[graph_id] = {"live": there, "copy": here}      # which graphs the copy is behind on, and by how much
-            return jsonify({"split": True, "live": "reachable", "lag": lag, "behind": behind})
+            lag, behind, differs = 0, {}, {}
+            for graph_id, row in graph_store_sync.lag(live_backend, backend).items():
+                if row["state"] == "behind":
+                    lag += row["live"] - row["copy"]
+                    behind[graph_id] = {"live": row["live"], "copy": row["copy"]}      # which graphs the copy is behind on, and by how much
+                elif row["state"] in ("differs", "copy_only"):
+                    differs[graph_id] = row["reason"]                                  # the live store wins at the next sync: the copy's version is set aside, named
+            return jsonify({"split": True, "live": "reachable", "lag": lag, "behind": behind, "differs": differs})
         except Exception as error:                                  # noqa: BLE001 - only an unreachable store is told, anything else is a bug
             if not _unreachable(error):
                 raise
@@ -234,14 +237,14 @@ def create_app(backend, accounts_store, port=8801, live=None):
 
     @app.post("/api/v2/sync")
     def sync():
-        """brings the copy up to date with the live store (one way; the first form of the sync, CP9): the whole move, all or nothing"""
+        """brings the copy up to date with the live store (one way, the live store wins; CP3): what only the copy has is written to a file in the aside folder and named in the answer"""
         denied = owner_only()
         if denied:
             return denied
         if live is None:
             return jsonify({"error": "no_live_store"}), 409
         try:
-            return jsonify(graph_store_move.move_store(live_backend, backend))
+            return jsonify(graph_store_sync.sync_store(live_backend, backend, aside))
         except StorageError as error:
             if error.rule == "move_refused":
                 return jsonify({"error": "move_refused", "graphs": error.detail["graphs"]}), 409
@@ -369,6 +372,8 @@ if __name__ == "__main__":
     ap.add_argument("--accounts", default=os.path.join(REPO, "data", "proto_accounts"))
     ap.add_argument("--user", default="owner:secret")
     ap.add_argument("--port", type=int, default=8801)
+    ap.add_argument("--aside", default=os.path.join(REPO, "data", "proto_aside"), help="where copy versions that the live store replaces are written (sync)")
+    ap.add_argument("--auto-sync", action="store_true", help="with --live: sync when the viewer starts and when it stops in an orderly way (Ctrl+C or SIGTERM), as MIA does")
     a = ap.parse_args()
     acc = Storage(FileBackend(a.accounts))
     name, _, password = a.user.partition(":")
@@ -378,4 +383,17 @@ if __name__ == "__main__":
         except Exception as err:      # the account exists with another password
             print("account", name, "exists:", err)
     print("viewer: http://127.0.0.1:%d/  (login %s)" % (a.port, name))
-    create_app(open_store(a.store), acc, a.port, open_store(a.live) if a.live else None).run("127.0.0.1", a.port)
+    copy_store, live_store = open_store(a.store), (open_store(a.live) if a.live else None)
+    server = create_app(copy_store, acc, a.port, live_store, a.aside)
+    if a.auto_sync and live_store is not None:
+        import signal
+        signal.signal(signal.SIGTERM, lambda *_: sys.exit(0))
+        auto = graph_store_sync.AutoSync(live_store, copy_store, a.aside)
+        try:
+            with auto:
+                print("sync at start:", json.dumps(auto.reports[-1]), flush=True)
+                server.run("127.0.0.1", a.port)
+        finally:
+            print("sync at stop:", json.dumps(auto.reports[-1]), flush=True)
+    else:
+        server.run("127.0.0.1", a.port)

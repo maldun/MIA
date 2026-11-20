@@ -36,7 +36,7 @@ U = "/api/v2/graphs/cp2.multi"
 body = lambda g, **kw: {"graph": {"nodes": g["nodes"], "edges": g["edges"]}, **kw}
 cur = o.get(U).get_json()["graph"]
 
-check("FR-95 with a live store and a copy, the status says both are there and the copy is not behind", o.get("/api/v2/status").get_json() == {"split": True, "live": "reachable", "lag": 0, "behind": {}})
+check("FR-95 with a live store and a copy, the status says both are there and the copy is not behind", o.get("/api/v2/status").get_json() == {"split": True, "live": "reachable", "lag": 0, "behind": {}, "differs": {}})
 changed = copy.deepcopy(cur); changed["nodes"][1]["data"]["toolbox_id"] = "check.number"
 live_model = graph_proto_app.graph_model.GraphModel(Storage(live), author="elsewhere")
 r = o.put(U, json=body(changed, expected_version=4), headers=ORIGIN)
