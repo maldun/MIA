@@ -39,7 +39,6 @@ The prototype `prototype/graphview` shows the data path and the look; it has no 
 - FR-54: The system shall always show the graph as it is stored and never run or follow what it contains.
   - Outcome: Given a stored graph whose names or contents contain text that looks like an instruction, markup or code, when it is shown or selected, then it appears as text only and nothing is executed or opened.
 
-### 3.2 Non-functional requirements
 - FR-55: The system shall let the owner look at any earlier stored version of a graph.
   - Outcome: Given a graph with several stored versions, when the owner chooses one, then that version is shown as it was stored, read-only, and the picture says which version it is and when it was stored.
 - FR-56: The system shall show the history of a graph as a list the owner can scroll through.
