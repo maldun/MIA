@@ -9,17 +9,17 @@ The owner wants to look at the workflows and context graphs MIA works with, as t
 
 ## 2. Scope
 ### In scope
-Opening and looking at stored graphs: the list, the drawing, the content of a selected item, the arrangement and the view settings. Requirements FR-48 to FR-54 below (new numbers after FR-47 and NFR-9; assigned for real when Plan writes them into `requirements.md`).
+Opening and looking at stored graphs: the list, the drawing, the content of a selected item, the arrangement the earlier versions and their history, and the view settings. Requirements FR-48 to FR-56 below (new numbers after FR-47 and NFR-9; assigned for real when Plan writes them into `requirements.md`).
 ### Out of scope (non-goals)
-Changing a graph, saving (G-V4.EDIT); showing an earlier version of a graph, history and diff, replay of changes (G-V4.REPLAY, decided by the owner 2026-11-20); the viewer always shows the current version; running a workflow from the viewer; the skills window (goal B); building context graphs (goal C).
+Changing a graph, saving (G-V4.EDIT); the playback of the individual changes and what a change did within a session (G-V4.REPLAY); running a workflow from the viewer; the skills window (goal B); building context graphs (goal C).
 ### Known shortcuts (prototype)
 The prototype `prototype/graphview` shows the data path and the look; it has no login, shows no graph with a loop-controlling step, and keeps no settings between visits.
 ### Candidate goals (increments) and proposed first split
 | Candidate goal | What users get (outcome) | Likely in scope | Why this cut |
 |---|---|---|---|
-| VIEW (this) | the owner sees any stored graph drawn clearly and can inspect every item | FR-48 to FR-54 | can be judged by looking, before any editing exists |
+| VIEW (this) | the owner sees any stored graph drawn clearly and can inspect every item | FR-48 to FR-56 | can be judged by looking, before any editing exists |
 | EDIT | the owner changes a graph, with the rules applied | FR-22 editing | needs the view first |
-| REPLAY | every change can be played back, and an earlier version of a graph can be shown | FR-22 history, FR-16, earlier versions | needs the edits first |
+| REPLAY | every change made in the editor can be played back and explained step by step | FR-22 history of changes, FR-16 | needs the edits first |
 
 ## 3. Top-level requirements
 
@@ -38,6 +38,12 @@ The prototype `prototype/graphview` shows the data path and the look; it has no 
   - Outcome: Given a drawn graph, when the owner changes the connection style (rounded or straight) or the automatic arrangement, then the picture follows at once, the moved steps stay in place, and all such choices are found in one settings place.
 - FR-54: The system shall always show the graph as it is stored and never run or follow what it contains.
   - Outcome: Given a stored graph whose names or contents contain text that looks like an instruction, markup or code, when it is shown or selected, then it appears as text only and nothing is executed or opened.
+
+### 3.2 Non-functional requirements
+- FR-55: The system shall let the owner look at any earlier stored version of a graph.
+  - Outcome: Given a graph with several stored versions, when the owner chooses one, then that version is shown as it was stored, read-only, and the picture says which version it is and when it was stored.
+- FR-56: The system shall show the history of a graph as a list the owner can scroll through.
+  - Outcome: Given a graph with several stored versions, when the owner opens its history, then the versions are listed newest first with who stored each and when; choosing an entry shows that version; the owner can step to the previous and the next version, and the current one is marked.
 
 ### 3.2 Non-functional requirements
 - NFR-10 (Usability): The owner can find, open and read a graph without help.
@@ -75,7 +81,7 @@ The owner looks at stored graphs through the viewer. The viewer asks MIA's store
 Not yet written; the context model of G-V4 (`architecture.sysml`) gets the viewer, the owner and the store with the flows below in Plan.
 ```sysml
 // actor Owner -> part GraphViewer : requests graph, selection, settings
-// part GraphViewer <- store : list of graphs, the current stored graph
+// part GraphViewer <- store : list of graphs, a stored graph and its versions
 // no internal parts
 ```
 ### 4.3 Integration with the existing system
@@ -92,6 +98,7 @@ Findings with references are in `research.md` of this folder: the page opens a f
 | Loop-controlling steps (none in today's 15 converted graphs) may not be drawable the same way | FR-49, FR-50 incomplete for such graphs | include one in the cases; owner |
 | Context graphs differ from workflow graphs (Q-5 of N-5) | FR-48 may need a second look | decide in Plan with G-V4.GRAPHSTORE; owner |
 | Natural arrangement is not reproducible | the same graph looks different on each opening | saved positions per graph (D-363) in EDIT or here; owner decides where |
+| A history shows who stored a version but not what changed between two; the comparison of two versions is for REPLAY | FR-56 shows a list, not a difference | owner confirms the cut |
 | Very large graphs (more than a few hundred steps) | readability and speed unknown | out of this goal unless the owner wants a bound |
 
 ### Prototype decisions
