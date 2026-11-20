@@ -1,7 +1,7 @@
 # Prototype run 03: G-V4.GRAPHSTORE.CORE (MVP), to confirm the requirements of the subgoal
 
-**Authorized by:** –   <!-- the owner authorizes; the agent never authorizes itself. DRAFT until then: no worktree work is done for this round -->
-**Date:** –
+**Authorized by:** Stefan Reiterer (owner), by answer in the session on 2026-11-21
+**Date:** 2026-11-21
 **Level:** MVP        <!-- the minimum that works end to end for the outcomes in scope; no polish -->
 **Scope:** the outcomes of G-V4.GRAPHSTORE.CORE: FR-57 (for workflow graphs and for context graphs), FR-60, NFR-16, tried against the measures HR-003, HR-004 and HR-005 of `specs/mia/goals/G-V4.GRAPHSTORE.CORE/high-level-spec.md` and the accepted cases AC-001 to AC-003. Not in this round: transfer, rules, viewer, editor, log, migration
 **Budget:** 4 checkpoints of at most about an hour each; the run reports after every checkpoint; it stops at the budget or when an outcome looks unreachable
@@ -26,7 +26,7 @@ Stop at the budget, when a top-level outcome looks unreachable, or when the roun
 ## TLS fingerprint (the protected part)
 | Fingerprint | Date | Decided by | Reason |
 |---|---|---|---|
-| 7eadf4eb83d0 | 2026-11-21 | – | unchanged since round 02; to be confirmed with the authorization |
+| 7eadf4eb83d0 | 2026-11-21 | Stefan Reiterer | run authorized; the TLS is unchanged since round 02 |
 
 ## Validation plan
 The owner validates with `rounds/03/validation.md` (one row per outcome), after CP15. Findings go to the requirements of this subgoal.
