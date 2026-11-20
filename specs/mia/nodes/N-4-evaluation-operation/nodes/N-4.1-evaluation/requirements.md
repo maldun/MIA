@@ -151,7 +151,7 @@ The harness, the decisions on held-out cases, the baselines and benchmarks of th
 - Verification method: Test
 - Acceptance criterion: AC-22: with a scripted model, every call of a summary case that needs pieces, of a failed case and of a stopped case carries num_predict 1024, the seed and the temperature of the pin (exact)
 - Verified by: TC-EVL-012
-- Status: Draft
+- Status: Verified
 - History: A-162 (proposed 2026-11-19), new
 
 ### REQ-EVL-013 – The digest target sends the context length of the pin
@@ -163,7 +163,7 @@ The harness, the decisions on held-out cases, the baselines and benchmarks of th
 - Verification method: Test
 - Acceptance criterion: AC-22: with a scripted model and an app whose current model is not the pin, every call of a digest case carries num_ctx 8192 (exact)
 - Verified by: TC-EVL-013
-- Status: Draft
+- Status: Verified
 - History: A-162 (proposed 2026-11-19), new
 
 ### REQ-EVL-014 – A case may hold its input text by reference
@@ -175,7 +175,7 @@ The harness, the decisions on held-out cases, the baselines and benchmarks of th
 - Verification method: Test
 - Acceptance criterion: AC-22: a case with a reference to a file of 5 000 characters is run with exactly the text of the file as its input (exact)
 - Verified by: TC-EVL-014
-- Status: Draft
+- Status: Verified
 - History: A-162 (proposed 2026-11-19), new
 
 ### REQ-EVL-015 – A reference that does not match stops the run
@@ -187,5 +187,5 @@ The harness, the decisions on held-out cases, the baselines and benchmarks of th
 - Verification method: Test
 - Acceptance criterion: AC-22: with a missing file and with a file that has one changed character, the run stops before the first model call and the error names the case id (exact)
 - Verified by: TC-EVL-015
-- Status: Draft
+- Status: Verified
 - History: A-162 (proposed 2026-11-19), new
