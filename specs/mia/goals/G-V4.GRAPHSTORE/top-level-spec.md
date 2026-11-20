@@ -26,14 +26,14 @@ Drawing and editing (G-V4.VIEW, EDIT, REPLAY); how a run executes a graph (G-V4.
 - FR-93: The system shall keep the copy in sync with the live store, which is the master, and never lose a version that exists only on the copy.
   - Outcome: Given a live store with new versions and a copy that lags behind, when the owner runs the sync or MIA starts or stops in an orderly way, then the copy receives the missing versions and equals the live store; MIA shows how far the copy lags before a sync; given graphs that got different new versions on the copy since the last sync, then the live store's history counts, and the copy's differing versions are saved aside and named to the owner, not discarded.
 - FR-61: The system shall move the graphs that exist today to the new stored form and let the owner check the result before anything old is removed.
-  - Outcome: Given the graphs stored today, when the owner runs the move, then a report compares each old graph with its new one (steps, connections, versions) and shows no difference except the new names; the old graphs remain until the owner confirms.
+  - Outcome: Given the graphs stored today, when the owner runs the move first as a trial on a copy of the data, then nothing real changes and a report compares each old graph with its new one (steps, connections, versions) and shows no difference except the new names; when the owner then runs the real move, the same report is produced, and the old graphs remain until the owner confirms.
 - FR-62: The system shall run each skill from its stored workflow graph.
-  - Outcome: Given a skill that has a stored workflow graph, when the owner runs the skill, then the run follows that stored graph and says which graph and version it used; given a skill that has only a pipeline definition, when the owner imports it, then a stored graph is created from it once, and importing it again does not create a second copy.
+  - Outcome: Given a skill that has a stored workflow graph, when the owner runs it, then the run follows that stored graph and says which graph and version it used; given a skill that has no stored graph yet, then it runs as before and the run says so; given a skill that has only a pipeline definition, when the owner imports it, then a stored graph is created from it once, and importing it again does not create a second copy.
 ### 3.2 Non-functional requirements
 - NFR-15 (Portability): A set of files made on one machine works on another.
-  - Outcome: Given a set of files moved from the owner's host to a test machine, when MIA is started there on those files, then every graph is listed with the same versions and content as at the source.
-- NFR-16 (Reliability of storage): A refused or interrupted save never leaves a half-stored graph.
-  - Outcome: Given a save of a graph that is refused for breaking a rule or interrupted halfway, when the owner lists and reads graphs afterwards, then the graph is either entirely as before or entirely new; a refused save is not counted as a version.
+  - Outcome: Given a set of files moved from the owner's host to a test machine, when MIA is started there on those files, then every graph is listed with the same versions and content as at the source; given a set of files made by an older version of MIA, when a newer version opens it, then it is read completely or converted by a stated step that reports what it did.
+- NFR-16 (Reliability of storage): A refused or interrupted save, move or sync never leaves a half-stored graph.
+  - Outcome: Given a save, a move of the whole store or a sync that is refused or interrupted halfway, when the owner lists and reads graphs afterwards, then every graph is entirely as before or entirely new in both places, a refused save is not counted as a version, and an interrupted move or sync can be run again to finish.
 ### 3.3 Given constraints
 | Constraint | Source | Why it cannot be changed |
 |---|---|---|
