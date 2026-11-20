@@ -95,7 +95,21 @@ Marked in Explore by the owner's direction of 2026-11-20 (D-360 to D-362) for th
 | NFR-1, NFR-2, NFR-4, NFR-5, NFR-7 | out | device range, small-model strategies, honest confidence, privacy and efficiency are not changed by the rework (the loader is measured inside OC-7) |
 
 ## Parts
-To be written in Plan.
+| Part | Real or stand-in | Notes |
+|---|---|---|
+| N-2.1 API and accounts | real |  |
+| N-2.3 Workflow management (library, graph model, snapshots, toolbox) | real | library, snapshots, toolbox |
+| N-2.4.1 Pipeline runner (graph run, converter) | real | the runner and the converter |
+| N-2.4.2 Tools and sandbox | real | contained space for code steps |
+| N-2.4.3 Run log | real | run record, a run's context graph |
+| N-3.1 Storage layer (files and PostgreSQL backends, copy) | real | both backends |
+| N-3.2 Workflows and context graphs (graph tables, rules) | real |  |
+| N-3.3 Memories, history, feedback (record tables) | real | new tables for the edit log and the arrangement |
+| N-4.1 Evaluation (suites, harness) | real | the equivalence suites |
+| N-5 Graph app (page, vendored vis-network) | real |  |
+| N-6 Context-graph builder (new, own container) | real | new part |
+| local model server with the pinned models (Ollama) | real | the pinned models; scripted replies in the unit tests |
+| compose stack and web routing (Caddy) | real | one origin for page and backend |
 
 ## Frozen requirements
 | Requirement | Shared by | Reason |

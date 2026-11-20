@@ -33,6 +33,15 @@ Inside the scope of G-V4.GRAPHSTORE (`../G-V4.GRAPHSTORE/goal.md`). The new requ
 ## Source
 Group spec FR-61, FR-62; decisions D-361, D-373, D-374.
 
+## Parts
+| Part | Real or stand-in | Notes |
+|---|---|---|
+| N-3.1 Storage layer (files and PostgreSQL backends, copy) | real |  |
+| N-3.2 Workflows and context graphs (graph tables, rules) | real |  |
+| N-2.3 Workflow management (library, graph model, snapshots, toolbox) | real | snapshots, skill record, import |
+| N-2.4.1 Pipeline runner (graph run, converter) | real | the converter and the old runner as the baseline |
+| local model server with the pinned models (Ollama) | stand-in | scripted replies; no model is needed for the migration |
+
 ## Agreement
 | Subgoal | Agreed by | Date |
 |---|---|---|

@@ -56,9 +56,12 @@ Node and edge records are scoped by graph (`<graph id>/<local id>`) and the stor
 ## Parts
 | Part | Real or stand-in | Notes |
 |---|---|---|
-| N-3.2 Graph tables, N-3.1 Storage layer | real | table definitions, copy and migration |
-| N-2.3 Workflow management (library, graph model, snapshots) | real | |
-| N-2.4.1 Pipeline runner (`graph_run`) | real | reads the record form already |
+| N-3.1 Storage layer (files and PostgreSQL backends, copy) | real | files and PostgreSQL 16 under podman |
+| N-3.2 Workflows and context graphs (graph tables, rules) | real | tables, scoped IDs |
+| N-2.3 Workflow management (library, graph model, snapshots, toolbox) | real | library, snapshots, skill record |
+| N-2.4.1 Pipeline runner (graph run, converter) | real | the converter and the run as consumers |
+| N-2.1 API and accounts | stand-in | mock of IF-104 for the contract suite |
+| N-5 Graph app (page, vendored vis-network) | stand-in | not touched; the prototype shows the data path |
 
 ## Open questions (for the owner, before Plan)
 1. (answered 2026-11-19: parent is the new iteration goal G-V4; G-V2 is closed separately.)

@@ -28,8 +28,20 @@ Inside the scope of G-V4.GRAPHAPI (`../G-V4.GRAPHAPI/goal.md`). The new requirem
 | REQ-GA-003 | out | graph rules before saving are refined in G-V4.EDIT, which asks the check route of the interface |
 | FR-37, FR-6, FR-38, NFR-3 | out | the run and code in graphs are G-V4.GRAPHAPI.RUN and G-V4.GRAPHAPI.CODE |
 
+## Split check
+| Suggestion | Decision (split / keep together) | Reason | Date |
+|---|---|---|---|
+| cut again (the checker counts 26 to 42 requirements in scope) | keep together (proposed by the agent, the owner confirms in the plan review) | the number comes from the descendants of one or two top-level items, most of them verified in G-V1 and G-V2; the new work is a few requirements of the group spec; the cut into tasks follows in Plan step 5 | 2026-11-20 |
+
 ## Source
 Group spec FR-63, FR-64; decision D-375; the two existing rule sets (`../G-V4.GRAPHAPI/research.md`, F3).
+
+## Parts
+| Part | Real or stand-in | Notes |
+|---|---|---|
+| N-3.2 Workflows and context graphs (graph tables, rules) | real | the rules module and its table checks |
+| N-2.4.1 Pipeline runner (graph run, converter) | real | the check before a run |
+| N-5 Graph app (page, vendored vis-network) | stand-in | the check route is tested against the mock |
 
 ## Agreement
 | Subgoal | Agreed by | Date |

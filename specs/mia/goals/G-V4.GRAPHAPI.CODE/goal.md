@@ -28,8 +28,21 @@ Inside the scope of G-V4.GRAPHAPI (`../G-V4.GRAPHAPI/goal.md`). The new requirem
 | NFR-3 | in | stored code and imported steps stay data until the toolbox runs them (THR-013) |
 | FR-7, FR-37, FR-6 | out | the rules and the run are the other two parts |
 
+## Split check
+| Suggestion | Decision (split / keep together) | Reason | Date |
+|---|---|---|---|
+| cut again (the checker counts 26 to 42 requirements in scope) | keep together (proposed by the agent, the owner confirms in the plan review) | the number comes from the descendants of one or two top-level items, most of them verified in G-V1 and G-V2; the new work is a few requirements of the group spec; the cut into tasks follows in Plan step 5 | 2026-11-20 |
+
 ## Source
 Group spec FR-66, FR-67; decisions D-360, D-390; `../G-V4.GRAPHAPI/research.md` (proposed THR-013).
+
+## Parts
+| Part | Real or stand-in | Notes |
+|---|---|---|
+| N-2.4.2 Tools and sandbox | real | the contained space of the code tool |
+| N-2.3 Workflow management (library, graph model, snapshots, toolbox) | real | toolbox, trust and marks |
+| N-2.4.1 Pipeline runner (graph run, converter) | real | the refusal before a run |
+| local model server with the pinned models (Ollama) | stand-in | scripted replies; code text from fixtures |
 
 ## Agreement
 | Subgoal | Agreed by | Date |

@@ -40,6 +40,15 @@ Inside the scope of G-V4 (`../G-V4/goal.md`). Items are the existing top-level i
 | REQ-GA-006, REQ-GA-008 | out | context graph editing is G-V4.CONTEXT; export and seed are G-V4.GRAPHSTORE |
 | FR-21, NFR-6, NFR-9 | out | accounts, secure access and containers as a whole are not changed; the viewer meets them through REQ-GA-007 and REQ-GA-011 |
 
+## Parts
+| Part | Real or stand-in | Notes |
+|---|---|---|
+| N-5 Graph app (page, vendored vis-network) | real | the page and the vendored library |
+| N-2.1 API and accounts | stand-in | JS mock of IF-104 v2 for the page tests; real in the end-to-end check |
+| N-3.1 Storage layer (files and PostgreSQL backends, copy) | real | files and the database behind the real backend for the demonstration |
+| compose stack and web routing (Caddy) | real | one origin and session for page and API |
+| local model server with the pinned models (Ollama) | real | for the search by description (FR-96); scripted replies in unit tests |
+
 ## Agreement
 | Subgoal | Agreed by | Date |
 |---|---|---|

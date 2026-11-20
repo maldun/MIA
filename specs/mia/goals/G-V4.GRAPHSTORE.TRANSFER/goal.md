@@ -29,8 +29,21 @@ Inside the scope of G-V4.GRAPHSTORE (`../G-V4.GRAPHSTORE/goal.md`). The new requ
 | FR-40, FR-30 | out | the stored truth itself is G-V4.GRAPHSTORE.CORE |
 | FR-47, FR-36, FR-45 | out | snapshots, skills and migration are G-V4.GRAPHSTORE.MIGRATION |
 
+## Split check
+| Suggestion | Decision (split / keep together) | Reason | Date |
+|---|---|---|---|
+| cut again (the checker counts 26 to 42 requirements in scope) | keep together (proposed by the agent, the owner confirms in the plan review) | the number comes from the descendants of one or two top-level items, most of them verified in G-V1 and G-V2; the new work is a few requirements of the group spec; the cut into tasks follows in Plan step 5 | 2026-11-20 |
+
 ## Source
 Group spec FR-58, FR-59, FR-93, NFR-15; decisions D-372 to D-374; `../G-V4.GRAPHSTORE/spikes.md`.
+
+## Parts
+| Part | Real or stand-in | Notes |
+|---|---|---|
+| N-3.1 Storage layer (files and PostgreSQL backends, copy) | real | both backends and the copy operation |
+| N-3.2 Workflows and context graphs (graph tables, rules) | real | the tables that are moved |
+| N-2.3 Workflow management (library, graph model, snapshots, toolbox) | stand-in | not needed; operations are called directly |
+| compose stack and web routing (Caddy) | stand-in | a second machine is simulated by a second folder |
 
 ## Agreement
 | Subgoal | Agreed by | Date |

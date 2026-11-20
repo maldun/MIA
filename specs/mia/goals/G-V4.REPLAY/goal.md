@@ -34,6 +34,14 @@ Inside the scope of G-V4 (`../G-V4/goal.md`). Items are the existing top-level i
 | REQ-GA-004 | out | its comparison part becomes FR-79 here, but the requirement as a whole is split in G-V4.EDIT's plan |
 | FR-22 | out | the graph app is refined by the other subgoals; the edit log and playback are new items under FR-16 and FR-22, listed when Plan writes them |
 
+## Parts
+| Part | Real or stand-in | Notes |
+|---|---|---|
+| N-5 Graph app (page, vendored vis-network) | real | history, playback, comparison |
+| N-2.1 API and accounts | stand-in | mocks of IF-104 v2 |
+| N-3.3 Memories, history, feedback (record tables) | real | the table of the edit log |
+| N-3.1 Storage layer (files and PostgreSQL backends, copy) | real | the log moves with the graph |
+
 ## Agreement
 | Subgoal | Agreed by | Date |
 |---|---|---|

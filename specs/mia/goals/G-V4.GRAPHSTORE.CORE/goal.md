@@ -30,8 +30,20 @@ Inside the scope of G-V4.GRAPHSTORE (`../G-V4.GRAPHSTORE/goal.md`). The new requ
 | REQ-GA-006 | out | editing context graphs is G-V4.CONTEXT |
 | NFR-8, FR-47, FR-36, FR-45, REQ-GA-008 | out | interchange of files and database and the transfer are G-V4.GRAPHSTORE.TRANSFER; snapshots, skills and migration are G-V4.GRAPHSTORE.MIGRATION |
 
+## Split check
+| Suggestion | Decision (split / keep together) | Reason | Date |
+|---|---|---|---|
+| cut again (the checker counts 26 to 42 requirements in scope) | keep together (proposed by the agent, the owner confirms in the plan review) | the number comes from the descendants of one or two top-level items, most of them verified in G-V1 and G-V2; the new work is a few requirements of the group spec; the cut into tasks follows in Plan step 5 | 2026-11-20 |
+
 ## Source
 Group spec FR-57, FR-60, NFR-16; `../G-V4.GRAPHSTORE/research.md`, `spikes.md` (finding S1); D-368.
+
+## Parts
+| Part | Real or stand-in | Notes |
+|---|---|---|
+| N-3.1 Storage layer (files and PostgreSQL backends, copy) | real | files backend; PostgreSQL for the contract suite |
+| N-3.2 Workflows and context graphs (graph tables, rules) | real | tables and the refusal of unscoped IDs |
+| N-2.3 Workflow management (library, graph model, snapshots, toolbox) | stand-in | a fake library on the storage mock |
 
 ## Agreement
 | Subgoal | Agreed by | Date |

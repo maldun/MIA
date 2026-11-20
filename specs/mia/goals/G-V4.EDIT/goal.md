@@ -43,6 +43,14 @@ Inside the scope of G-V4 (`../G-V4/goal.md`). Items are the existing top-level i
 | REQ-GA-001, REQ-GA-005, REQ-GA-007, REQ-GA-009, REQ-GA-010, REQ-GA-011 | out | the viewer's requirements are G-V4.VIEW; the editor builds on them |
 | REQ-GA-006 | out | context graph editing is G-V4.CONTEXT |
 
+## Parts
+| Part | Real or stand-in | Notes |
+|---|---|---|
+| N-5 Graph app (page, vendored vis-network) | real | editor panel and checks |
+| N-2.1 API and accounts | stand-in | JS and Python mocks of IF-104 v2 |
+| N-3.2 Workflows and context graphs (graph tables, rules) | real | the one rule set behind the check route |
+| N-3.1 Storage layer (files and PostgreSQL backends, copy) | real | writes go to the live store |
+
 ## Agreement
 | Subgoal | Agreed by | Date |
 |---|---|---|

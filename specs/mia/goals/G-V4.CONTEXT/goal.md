@@ -31,6 +31,14 @@ Inside the scope of G-V4 (`../G-V4/goal.md`). Items are the existing top-level i
 | FR-30 | out | the stored form of context graphs is G-V4.GRAPHSTORE; here only editing and the view of a run's context graph (FR-97) |
 | REQ-GA-002, REQ-GA-003, REQ-GA-004 | out | the general editor is G-V4.EDIT; CONTEXT adds the context-graph part on top |
 
+## Parts
+| Part | Real or stand-in | Notes |
+|---|---|---|
+| N-5 Graph app (page, vendored vis-network) | real | context graph editing and the run view |
+| N-3.2 Workflows and context graphs (graph tables, rules) | real | context tables and rules |
+| N-2.4.3 Run log | real | the run log from which a run's context graph is rebuilt |
+| N-2.1 API and accounts | stand-in | mocks of IF-104 v2 |
+
 ## Agreement
 | Subgoal | Agreed by | Date |
 |---|---|---|

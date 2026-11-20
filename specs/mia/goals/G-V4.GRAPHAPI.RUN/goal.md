@@ -29,8 +29,22 @@ Inside the scope of G-V4.GRAPHAPI (`../G-V4.GRAPHAPI/goal.md`). The new requirem
 | FR-6 | partly | skills run on the stored graph; the live trust, lifecycle, budgets and stop are parked in G-V5 |
 | FR-7, FR-38, NFR-3 | out | the rules are G-V4.GRAPHAPI.RULES, code in graphs is G-V4.GRAPHAPI.CODE |
 
+## Split check
+| Suggestion | Decision (split / keep together) | Reason | Date |
+|---|---|---|---|
+| cut again (the checker counts 26 to 42 requirements in scope) | keep together (proposed by the agent, the owner confirms in the plan review) | the number comes from the descendants of one or two top-level items, most of them verified in G-V1 and G-V2; the new work is a few requirements of the group spec; the cut into tasks follows in Plan step 5 | 2026-11-20 |
+
 ## Source
 Group spec FR-65, NFR-17; `../G-V4.GRAPHAPI/spikes.md` (networkx spike); D-375.
+
+## Parts
+| Part | Real or stand-in | Notes |
+|---|---|---|
+| N-2.4.1 Pipeline runner (graph run, converter) | real | the loader, the order, the run |
+| N-3.1 Storage layer (files and PostgreSQL backends, copy) | stand-in | a fake storage serves stored graphs |
+| N-4.1 Evaluation (suites, harness) | real | the suites of the converted skills |
+| local model server with the pinned models (Ollama) | real | the pinned model for the equivalence runs; scripted replies in unit tests |
+| N-2.4.2 Tools and sandbox | stand-in | scripted tools |
 
 ## Agreement
 | Subgoal | Agreed by | Date |

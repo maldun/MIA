@@ -34,6 +34,16 @@ Inside the scope of G-V4 (`../G-V4/goal.md`). Items are the existing top-level i
 | FR-30 | out | the stored form is G-V4.GRAPHSTORE, editing G-V4.CONTEXT |
 | NFR-3 | out | untrusted input for the builder is handled by NFR-25 of its spec; the graph-side rule is G-V4.GRAPHAPI |
 
+## Parts
+| Part | Real or stand-in | Notes |
+|---|---|---|
+| N-6 Context-graph builder (new, own container) | real | the builder and its page |
+| local model server with the pinned models (Ollama) | real | the pinned light model; scripted replies for unit tests |
+| N-3.2 Workflows and context graphs (graph tables, rules) | real | context tables for the confirmed graph |
+| N-2.4.1 Pipeline runner (graph run, converter) | real | a step reads the confirmed part within its budget |
+| N-5 Graph app (page, vendored vis-network) | stand-in | the viewer is used as it is; no change here |
+| documents | stand-in | the owner's sample documents and the marked samples |
+
 ## Agreement
 | Subgoal | Agreed by | Date |
 |---|---|---|

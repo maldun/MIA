@@ -69,6 +69,17 @@ Inside the scope of G-V4 (`../G-V4/goal.md`). Items are the existing top-level i
 | FR-30, FR-36, FR-40, FR-45, FR-47, NFR-8 | out | storing, moving and snapshots are G-V4.GRAPHSTORE |
 | FR-21, FR-22, FR-41, FR-42, NFR-6, NFR-9 | out | the graph app, access, the builder and containers are other subgoals |
 
+## Parts
+| Part | Real or stand-in | Notes |
+|---|---|---|
+| N-2.4.1 Pipeline runner (graph run, converter) | real | the runner |
+| N-2.4.2 Tools and sandbox | real | code steps |
+| N-2.3 Workflow management (library, graph model, snapshots, toolbox) | real | toolbox and trust |
+| N-3.2 Workflows and context graphs (graph tables, rules) | real | rules at the storage door |
+| N-3.1 Storage layer (files and PostgreSQL backends, copy) | stand-in | a fake storage for the unit tests |
+| N-4.1 Evaluation (suites, harness) | real | equivalence suites |
+| local model server with the pinned models (Ollama) | real | for the equivalence runs; scripted replies elsewhere |
+
 ## Frozen requirements
 | Requirement | Shared by | Reason |
 |---|---|---|
