@@ -18,6 +18,7 @@ Proposed 2026-11-20 by the owner (maldun), D-360. Draft for Explore and Plan; no
 |---|---|---|
 | OC-1 | Given the changes made in the web app to a graph, when the owner plays them back on the starting version, then the result is the graph as it was left | OC-8 of G-V4 (FR-22) |
 | OC-2 | Given a graph with changes, when the owner looks at its history, then every change shows who made it, when and what changed | OC-9 of G-V4 (FR-22) |
+| OC-3 | Given a graph with several stored versions, when the owner chooses one, then that version is shown read-only and it is clear which version it is | OC-8 of G-V4 (FR-22); moved here from G-V4.VIEW (owner, 2026-11-20) |
 
 ## Explore result (2026-11-20, D-363)
 `../G-V4.VIEW/research.md`. Decisions: one edit-log entry per operation (add, remove or change a node or edge, change a field, move a node) with account, time, start version and a reason; a save closes a group that makes one graph version; replay applies the entries to the start version. Node positions are a side record per graph and account, not part of the graph version, and are also in the edit log. Open for Plan: where the log is stored (a table of the storage layer), the retention, and how the existing history and diff relate to it.
