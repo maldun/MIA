@@ -1,0 +1,52 @@
+# Goal G-V4.VALIDATE – Validation of G-V2 and G-V3 after the G-V4 rework
+
+Opened 2026-11-20 on the owner's request: G-V2 (v0.2.x) and G-V3 are in the Validate phase, and G-V4 starts a larger rework. Parts of the rework may change what the validation runs would see, so validating v0.2.1 now would be effort that may have to be repeated. The validation of both goals is therefore collected here and run **on the version after the rework**. **G-V4 itself has no goal record yet**; this subgoal is a draft that waits for it (see "Open").
+
+- Kind: subgoal
+- Parent: G-V4 (no record yet)
+- Statement: The owner has judged, in real use of the version after the G-V4 rework, whether the converted skills and snapshots (G-V2) and the Skill run view with the spoken-only chat and the report (G-V3) are the right thing, and every finding is triaged.
+- Exit criterion: VAL-007, VAL-009, VAL-012, VAL-013 and VAL-006 (field items) rated pass, partial or fail with evidence; the Provisional strip height of REQ-CLV-041 settled; every finding triaged; decision on the next iteration recorded (validation report)
+- Supervision: supervised
+- Accepted by: Stefan Reiterer (owner)
+- Line of work: goal/v4.validate
+- Subgoals: –
+- Status: Draft
+
+## Validation goals collected
+| From | Criterion | What it settles | Source |
+|---|---|---|---|
+| G-V2 | VAL-007 | converted skills and snapshots as good as before (OC-1, OC-2 of CONVERT); V2-4 timing on both runners | `test-spec.md`, `goals/G-V2/goal.md`, `goals/G-V2/verification-report.md` |
+| G-V2 | VAL-009 | skill record and refusals understood (MODEL OC-1 to OC-3) | `test-spec.md` |
+| G-V3 | VAL-012 | the Skill run view followed without the chat; **Provisional** strip height of REQ-CLV-041 | `test-spec.md`, `goals/G-V3/goal.md` |
+| G-V3 | VAL-013 | summaries and status messages faithful and in persona at production temperature (TR-CHAT-001) | `test-spec.md`, `G-V3.CHAT/holdout-decision.md` |
+| G-V3.REPORT | FB-08 | closed: re-validated by the owner on 2026-11-20 (v0.2.1) | `feedback/FB-08.md` |
+| both | VAL-006 | speed and weight in daily use (field items) | `test-spec.md` |
+| both | open items | V2-4, V3-6, F-04 (D-344), V2-6 (THR-011 has no red-team case), TD-82 to TD-90 | verification reports, `deferred.md` |
+
+The plan for sessions, tasks and analysis is `specs/mia/validation-plan-v0.2.1.md`. It is written against v0.2.1 and is the starting point: **re-base it on the post-rework version** (frozen version, pins, which skills run on which path, which VAL steps the rework made obsolete or changed).
+
+## Why wait (the check to make first)
+Before the rework lands, G-V4 should list which of its changes touch what these criteria observe: the converted-skill path and runner, snapshots, the Skill run view and layout, the digest step, the report, run-log events, model pins. A criterion that no change touches may be run on v0.2.1 now without waste; the rest waits. That list is the first task of this subgoal.
+
+## Open
+- G-V4 has no record: its scope, line of work and version are unknown. Parent, line of work and the dependency "after the rework is deployed" are placeholders until it exists.
+- Decide whether VAL-001, 003, 004 and 005 (G-V1 material, never run, D-185) join this round.
+- Retention and deletion date for the run logs, and consent of any user besides the owner (validation plan).
+- Whether the Validate rows of G-V2 and G-V3 (`goal.md`, Phases) should say "deferred to G-V4.VALIDATE". Not changed yet.
+- Whether a version tag of the rework is the frozen version for this subgoal (needs a deployment record for it first).
+
+## Agreement
+| Subgoal | Agreed by | Date |
+|---|---|---|
+| G-V4.VALIDATE | [ ] Stefan Reiterer (owner) | |
+
+## Phases
+| Phase | State | Record or reason |
+|---|---|---|
+| Explore | empty | the criteria exist in `test-spec.md`; nothing new to scope |
+| Plan | open | re-base `validation-plan-v0.2.1.md` on the post-rework version |
+| Implement | empty | no code; only analysis tooling if `run_explain.py` lacks a query |
+| Verify | empty | nothing built |
+| Commit | empty | records only |
+| Deploy | empty | uses the deployment of the G-V4 rework |
+| Validate | open | the whole subgoal |
