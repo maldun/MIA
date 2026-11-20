@@ -44,7 +44,16 @@ def _problems(source, target):
             continue
         have = target.versions(HEADER_TABLE, graph_id)
         if have != entries[:len(have)]:
-            found[graph_id] = "conflict: the target has a different history"
+            found[graph_id] = "conflict: the target has a different history of the graph"
+            continue
+        for entry in entries:                       # a step or connection with a different history in the target is a conflict of this graph too
+            data = entry["doc"]["data"]
+            node_table, edge_table = MEMBER_TABLES[data["kind"]]
+            for key, table in (("nodes", node_table), ("edges", edge_table)):
+                for member in data[key]:
+                    wanted, there = source.versions(table, member["id"]), target.versions(table, member["id"])
+                    if there != wanted[:len(there)]:
+                        found[graph_id] = "conflict: the target has a different history of %s" % member["id"]
     return found
 
 
@@ -86,5 +95,10 @@ if __name__ == "__main__":     # python graph_store_move.py files:/some/folder f
     try:
         print(json.dumps(move_store(_open(sys.argv[1]), _open(sys.argv[2]))))
     except StorageError as err:
-        print("refused:", err.rule, json.dumps(err.detail))
+        if err.rule == "move_refused":
+            print("refused: nothing was moved. These graphs cannot be moved:")
+            for graph, reason in err.detail["graphs"].items():
+                print("  %s: %s" % (graph, reason))
+        else:
+            print("refused:", err.code, err.rule or "", json.dumps(err.detail))
         raise SystemExit(1)

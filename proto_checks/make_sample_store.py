@@ -25,6 +25,8 @@ if __name__ == "__main__":
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     if len(args) != 1:
         raise SystemExit(__doc__)
+    if os.path.isdir(args[0]) and os.listdir(args[0]):
+        raise SystemExit("%s is not empty: use a new folder, or remove it first (rm -rf %s)" % (args[0], args[0]))
     backend = FileBackend(args[0])
     populate(backend)
     if "--broken" in sys.argv:

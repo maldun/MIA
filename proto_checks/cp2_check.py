@@ -118,6 +118,19 @@ def main():
         except StorageError as e:
             conflict = "cp2.multi" in e.detail["graphs"]
         check("FR-59 a graph with a different history in the target is a conflict that names the graph and writes nothing", conflict and entries(other) == before)
+        # a step with a different history in the target (the header history is equal) is a conflict that names the graph
+        other2 = FileBackend(os.path.join(tmp, "other2"))
+        graph_store_move.move_store(src, other2)
+        step = other2.versions("graph_nodes", "cp2.multi/step.write")
+        step[-1] = {**step[-1], "author": "intruder"}
+        other2.remove("graph_nodes", "cp2.multi/step.write")
+        for e in step: other2.append("graph_nodes", "cp2.multi/step.write", e)
+        try:
+            graph_store_move.move_store(src, other2)
+            named2 = ""
+        except StorageError as e:
+            named2 = e.detail["graphs"].get("cp2.multi", "")
+        check("FR-59 a step with a different history in the target is a conflict that names the graph and the step", "cp2.multi/step.write" in named2, named2)
         # an interrupted move finishes when run again
         part = FileBackend(os.path.join(tmp, "part"))
         class Flaky:
