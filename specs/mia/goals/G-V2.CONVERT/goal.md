@@ -83,7 +83,7 @@ Top-level items it serves: FR-45, FR-47. Requirements by ID (inside G-V2's scope
 | Explore | done | HLS of iteration 2 approved 2026-11-05 (D-186) |
 | Plan | done | the plan package, drafts of the open plan documents in `drafts/` |
 | Implement | done | `implementation-log.md`; snapshots (T-CV-05) split out to G-V2.SNAPSHOT (A-159) |
-| Verify | partly | `verification-report.md` (2026-11-17): the conversion half verified with deviations, fixes F-01, F-02, F-04, F-06, F-08 merged; open: F-03, F-05, F-07, F-09, the five baselines and the decision of the five equivalence criteria; decided in the Verify of G-V2 |
+| Verify | in progress | `verification-report.md` (2026-11-17): the conversion half verified with deviations, fixes F-01, F-02, F-04, F-06, F-08 merged; open: F-03, F-05, F-07, F-09, the five baselines and the decision of the five equivalence criteria; decided in the Verify of G-V2 |
 | Commit | done | merged into master by the owner as `054f1d2` (2026-11-16), fixes up to `0251723b` |
 | Deploy | open | |
 | Validate | open | |
