@@ -25,8 +25,18 @@ Opened 2026-11-20 on the owner's request: G-V2 (v0.2.x) and G-V3 are in the Vali
 
 The plan for sessions, tasks and analysis is `specs/mia/validation-plan-v0.2.1.md`. It is written against v0.2.1 and is the starting point: **re-base it on the post-rework version** (frozen version, pins, which skills run on which path, which VAL steps the rework made obsolete or changed).
 
-## Why wait (the check to make first)
-Before the rework lands, G-V4 should list which of its changes touch what these criteria observe: the converted-skill path and runner, snapshots, the Skill run view and layout, the digest step, the report, run-log events, model pins. A criterion that no change touches may be run on v0.2.1 now without waste; the rest waits. That list is the first task of this subgoal.
+## First task: review the validation goals after the rework
+The subgoal starts with a review of every criterion in "Validation goals collected", **once the G-V4 rework is finished** (merged and deployed), before any session is prepared. The review updates the goals to what the reworked version is; the owner decides each one.
+
+For each criterion (VAL-006, 007, 009, 012, 013) and each open item, take the finished rework's changes (its goal record, verification reports and amendments) and decide:
+- **keep**: nothing the rework changed is observed by it;
+- **change**: wording, session, evidence or tool names no longer fit (for example the converted-skill path, runner, Skill run view and layout, digest step, report, run-log events, model pins); the change goes through a test-spec amendment, not into the session notes only;
+- **drop or replace**: the rework made it obsolete or answered it (with the reason);
+- **add**: a new validation criterion for a rework change that users can judge.
+
+Also: re-check the Provisional strip height of REQ-CLV-041 and every other `Provisional:` the rework touched (`grep -rn "Provisional:"`), the open items (V2-4, V3-6, F-04, V2-6, TD-82 to TD-90: still open, fixed, or moved), the assumptions (ASM-MU-001, model and VRAM) and the "not covered" contexts. A criterion that no rework change touches may be run on v0.2.1 earlier without waste; the owner may allow that.
+
+Output: a short `validation-goals-review.md` in this folder (one row per criterion: keep / change / drop / add, reason, owner decision), the amendments it needs, and the re-based `validation-plan` for the frozen post-rework version. Only then do the sessions start.
 
 ## Open
 - G-V4 has no record: its scope, line of work and version are unknown. Parent, line of work and the dependency "after the rework is deployed" are placeholders until it exists.
@@ -43,8 +53,8 @@ Before the rework lands, G-V4 should list which of its changes touch what these 
 ## Phases
 | Phase | State | Record or reason |
 |---|---|---|
-| Explore | empty | the criteria exist in `test-spec.md`; nothing new to scope |
-| Plan | open | re-base `validation-plan-v0.2.1.md` on the post-rework version |
+| Explore | open | the review of the validation goals after the rework (First task), `validation-goals-review.md` |
+| Plan | open | amend `test-spec.md` as the review decides; re-base `validation-plan-v0.2.1.md` on the post-rework version |
 | Implement | empty | no code; only analysis tooling if `run_explain.py` lacks a query |
 | Verify | empty | nothing built |
 | Commit | empty | records only |
