@@ -1,0 +1,126 @@
+diff --git a/specs/mia/test-requirements.md b/specs/mia/test-requirements.md
+index 86adddb..12beb08 100644
+--- a/specs/mia/test-requirements.md
++++ b/specs/mia/test-requirements.md
+@@ -15,6 +15,7 @@ Requirements on the checks of `test-spec.md` (M41): under which conditions a ver
+ | 1 | Conversion eval runs | conditions under which an equivalence decision of a converted skill counts | TR-CONVERT-001, TR-CONVERT-002, TR-CONVERT-003, TR-CONVERT-004, TR-CONVERT-005 |
+ | 2 | Conversion stand-ins | the fake model server of the same-calls check | TR-CONVERT-006 |
+ | 3 | Conversion exact values | hand-checked expected values of the deterministic conversion and snapshot tests | TR-CONVERT-007 |
++| 4 | Conversion component checks | The unit and component checks of the converter, the toolbox entries and the descriptors | TR-CONVERT-008 |
+ 
+ ### TR-CONVERT-001 – Equivalence runs use the pinned model
+ - Applies to: EV-research, EV-plans, EV-verdicts, EV-computable, EV-extraction, TC-WFM-110, TC-WFM-111, TC-WFM-112, TC-WFM-113, TC-WFM-114
+@@ -91,7 +92,7 @@ Requirements on the checks of `test-spec.md` (M41): under which conditions a ver
+ - Rationale: counts (8 items, 51 outputs, 17 of 20), versions and statuses are exact
+ - Credibility aspect: numerical settings
+ - Verified by: known answer
+-| 1 | Stand-ins | The fakes that stand in for storage, models and transforms | TR-MODEL-001, TR-MODEL-004 |
++| 1 | Stand-ins | The fakes that stand in for storage, models and transforms | TR-MODEL-001, TR-MODEL-004, TR-MODEL-006 |
+ | 2 | Rule checks | Checks that must refuse a wrong graph and accept a right one | TR-MODEL-002, TR-MODEL-003 |
+ | 3 | Exact values | Names and IDs in messages, versions | TR-MODEL-005 |
+ | 4 | Layout | Window sizes and theme of the browser checks (G-V3.PANEL) | TR-PANEL-001 |
+@@ -110,6 +111,17 @@ Requirements on the checks of `test-spec.md` (M41): under which conditions a ver
+ | 10 | Fakes (CHAT) | The fake model server (G-V3.CHAT) | TR-CHAT-006, TR-CHAT-009, TR-CHAT-012 |
+ | 8 | Exact values (PANEL) | Names, states, orders and figures (G-V3.PANEL) | TR-PANEL-006 |
+ 
++### TR-CONVERT-008 – Component checks of the conversion use the shipped library and exact values
++- Applies to: TC-WFM-116, TC-WFM-117, TC-WFM-118, TC-WFM-119, TC-WFM-120, TC-WFM-121, TC-WFM-122, TC-WFM-123, TC-WFM-124, TC-WFM-125, TC-WFM-126, TC-WFM-127, TC-WFM-128, TC-WFM-129, TC-WFM-144, TC-WFM-145, TC-WFM-146, TC-WFM-147, TC-WFM-148
++- Requirement: REQ-WFM-058
++- Group: Conversion component checks
++- Kind: unit
++- Text: Each check shall run on the shipped nodes and pipelines of `library/` as they are in the commit under test, with a scripted model and scripted tools (no model server, no network), and shall compare exact expected values (counts of nodes and edges, ids, orders, statuses, refusals) that are written out in its scenario.
++- Rationale: the conversion is deterministic code; a check that used its own copy of a pipeline would pass while the shipped one changed; a model server would add noise that these checks do not need (the model-dependent equivalence is decided by TC-WFM-110 to 114)
++- Credibility aspect: numerical settings
++- Verified by: known answer
++- Status: Draft
++
+ ### TR-MODEL-001 – storage stand-in is a minimal fake with a known gap
+ - Applies to: TC-WFM-040, TC-WFM-041, TC-WFM-042, TC-WFM-044, TC-WFM-049
+ - Requirement: REQ-WFM-040
+@@ -169,6 +181,17 @@ Requirements on the checks of `test-spec.md` (M41): under which conditions a ver
+ 
+ ## G-V3.PANEL (Plan step 3, 2026-11-08; prefix TR-PANEL-)
+ 
++### TR-MODEL-006 – Stage checks use recording stages and fresh graphs
++- Applies to: TC-RUN-030, TC-RUN-031, TC-RUN-032, TC-RUN-033, TC-RUN-034, TC-RUN-035
++- Requirement: REQ-RUN-030, REQ-RUN-031, REQ-RUN-032, REQ-RUN-033, REQ-RUN-034, REQ-RUN-035
++- Group: Stand-ins
++- Kind: setup
++- Text: The checks shall use recording stages that store the three objects they were called with and graphs written as data in each test, no model server and no shared state between tests, and shall compare the recorded objects exactly.
++- Rationale: what a Stage receives and in which order nodes run is observable only by recording it; a graph or stage shared between tests could carry a value from one check into the next
++- Credibility aspect: stand-in fidelity
++- Verified by: review
++- Status: Draft
++
+ ### TR-PANEL-001 – browser checks of layout and size run at fixed window sizes
+ - Applies to: TC-CLV-036, TC-CLV-037, TC-CLV-040, TC-CLV-041, TC-CLV-042, TC-CLV-045, TC-CLV-046, TC-CLV-047, TC-CLV-048, TC-CLV-050, TC-CLV-051, TC-CLV-052, TC-CLV-053
+ - Requirement: REQ-CLV-040
+diff --git a/tests/acceptance/test_pipeline_graph.py b/tests/acceptance/test_pipeline_graph.py
+index 11b8ac8..4d92d2d 100644
+--- a/tests/acceptance/test_pipeline_graph.py
++++ b/tests/acceptance/test_pipeline_graph.py
+@@ -1,5 +1,5 @@
+ """
+-Acceptance tests of the pipeline-to-graph converter (G-V2.CONVERT, task T-CV-03d, A-123 P2 and P3, D-246): TC-WFM-125 to TC-WFM-130, preconditions of REQ-WFM-058.
++Acceptance tests of the pipeline-to-graph converter (G-V2.CONVERT, task T-CV-03d, A-123 P2 and P3, D-246): TC-WFM-125 to TC-WFM-129 and TC-WFM-144, preconditions of REQ-WFM-058.
+ RED until T-CV-03d: `pipeline_graph.py` is a stub. No model, no network: the converter only reads the pipeline JSON of library/pipelines and the node JSON of library/nodes.
+ 
+ Interface under test (a proposal, reviewed with the tests): `pipeline_graph.convert(pipeline, library_nodes, budget_seconds)` -> {"graph", "inputs", "result", "notes", "refused"}.
+@@ -212,7 +212,7 @@ class PipelineGraph(unittest.TestCase):
+ 
+     @mark.req("REQ-WFM-058")
+     def test_converted_names_never_clash_and_no_data_node_has_two_writers(self):
+-        """TC-WFM-130: a step and a variable with the same name (plan.free has step `plan` and variable `plan`) and a variable named like an order node (`order-step.a`) give a graph
++        """TC-WFM-144: a step and a variable with the same name (plan.free has step `plan` and variable `plan`) and a variable named like an order node (`order-step.a`) give a graph
+         with unique node IDs in which every data node has at most one writer, or a refusal; never a graph that breaks the rules."""
+         pipeline = {"id": "t.clash", "version": 1, "result": "plan", "nodes": [
+             {"id": "plan", "use": "code.tally@1", "wire": {"verdicts": "$input.v"}, "output": "order-step.plan"},
+diff --git a/tests/acceptance/test_skill_binding.py b/tests/acceptance/test_skill_binding.py
+index c5a22ed..077417f 100644
+--- a/tests/acceptance/test_skill_binding.py
++++ b/tests/acceptance/test_skill_binding.py
+@@ -1,6 +1,6 @@
+ """
+-Acceptance tests of defaults in thin entries, the skill binder and the adapter between toolbox and runner (G-V2.CONVERT, task T-CV-04a, A-125 Q2 to Q4, D-253): TC-WFM-131 to
+-TC-WFM-134, preconditions of REQ-WFM-058. RED until T-CV-04a: `bind_skill` and `stages_from_toolbox` are stubs and the thin entries do not apply the parameter defaults of their node.
++Acceptance tests of defaults in thin entries, the skill binder and the adapter between toolbox and runner (G-V2.CONVERT, task T-CV-04a, A-125 Q2 to Q4, D-253): TC-WFM-145 to
++TC-WFM-148, preconditions of REQ-WFM-058. RED until T-CV-04a: `bind_skill` and `stages_from_toolbox` are stubs and the thin entries do not apply the parameter defaults of their node.
+ No model, no network: scripted model, recording.
+ Interface under test (reviewed, D-253):
+ - `pipeline_graph.bind_skill(graph, library_nodes, skill, changes=None)` -> a NEW graph (the input is not changed): a data node `descriptor.model` with the value
+@@ -82,7 +82,7 @@ class SkillBinding(unittest.TestCase):
+ 
+     @mark.req("REQ-WFM-058")
+     def test_a_thin_entry_applies_the_parameter_defaults_of_its_node_and_a_given_value_wins(self):
+-        """TC-WFM-131: view.extract_claims has the default `guide` (a long text in the template); run as a stage without a `guide` it renders the template with that default, with a
++        """TC-WFM-145: view.extract_claims has the default `guide` (a long text in the template); run as a stage without a `guide` it renders the template with that default, with a
+         `guide` given it renders the given one. rule.speech.no_bold has the default rules ["speech.no_bold"]: run on "**Hello** and *emphasis* here" it removes only the bold markup
+         (the function alone, without the default, removes both); with `rules` given the given rules apply."""
+         view = self.nodes["view.extract_claims"]
+@@ -103,7 +103,7 @@ class SkillBinding(unittest.TestCase):
+ 
+     @mark.req("REQ-WFM-058")
+     def test_the_binder_adds_the_model_and_tool_descriptors_and_changes_replace_options(self):
+-        """TC-WFM-132: verify.single@1 (a model step `judge`, a code step `count`) bound to a skill with model {profile light, options {num_ctx 4096}} gets the data node
++        """TC-WFM-146: verify.single@1 (a model step `judge`, a code step `count`) bound to a skill with model {profile light, options {num_ctx 4096}} gets the data node
+         `descriptor.model` with {"model": "light", "options": {"num_ctx": 4096}} and one edge {"as": "model"} into step.judge, none into step.count; the input graph is unchanged and the
+         bound one keeps the rules and the order. changes {"model": {"options": {"temperature": 0.2}}} give options {"temperature": 0.2} (replaced, the profile stays). A pipeline with a
+         tool step gets `descriptor.tool.web_search` {"tool": "web_search", "settings": {}} and an edge {"as": "tool"} into it and no model node."""
+@@ -140,7 +140,7 @@ class SkillBinding(unittest.TestCase):
+ 
+     @mark.req("REQ-WFM-058")
+     def test_a_converted_graph_runs_on_the_toolbox_with_a_scripted_model(self):
+-        """TC-WFM-133: plan.free@1 of the skill plan_question, converted, bound and handed to GraphRunner with `stages_from_toolbox`, runs with a scripted registered model: status
++        """TC-WFM-147: plan.free@1 of the skill plan_question, converted, bound and handed to GraphRunner with `stages_from_toolbox`, runs with a scripted registered model: status
+         done, one model call whose user message is the template rendered with the question, and the result node var.plan holds what normalize_plan gives for the parsed reply."""
+         skill, bound = self.converted_plan()
+         view = self.nodes["view.research_plan"]
+@@ -158,7 +158,7 @@ class SkillBinding(unittest.TestCase):
+ 
+     @mark.req("REQ-WFM-058")
+     def test_an_untrusted_entry_refuses_the_run_before_any_node_ran(self):
+-        """TC-WFM-134: with the toolbox entry code.normalize_plan untrusted, the run of the converted graph is refused naming step.norm before the model was asked; trusted again, the
++        """TC-WFM-148: with the toolbox entry code.normalize_plan untrusted, the run of the converted graph is refused naming step.norm before the model was asked; trusted again, the
+         same graph runs to done."""
+         skill, bound = self.converted_plan()
+         view = self.nodes["view.research_plan"]

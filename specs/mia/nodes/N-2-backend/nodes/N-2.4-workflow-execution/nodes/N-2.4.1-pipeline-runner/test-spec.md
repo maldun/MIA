@@ -64,3 +64,41 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-202
 - Given: a chain T1 -> T2 -> T3 where T2 raises an error
 - When: the graph is run
 - Then: T3 did not run and the run result names `T2`
+
+## Scenarios (G-V2.CONVERT, checks TC-RUN-030 to 035)
+
+### TC-RUN-030 – A Stage gets inputs, outputs and settings
+- Verifies: REQ-RUN-030
+- Given: a Stage on a transform with two input data nodes (one renamed by `as`), one output data node and a settings node
+- When: the graph is run
+- Then: the Stage receives exactly three objects: the two inputs by name (the renamed one under its `as`), the output by name, and the settings value
+
+### TC-RUN-031 – Outputs are written one by one
+- Verifies: REQ-RUN-031
+- Given: a Stage with two outputs, in three runs: it returns `{"outputs": {a: 1, b: 2}}`, it returns a plain value, it names an unknown output
+- When: each graph is run
+- Then: two different values are written; the plain value is written to both nodes; the unknown name fails the node and the result names it
+
+### TC-RUN-032 – Plain functions run as before
+- Verifies: REQ-RUN-032
+- Given: a plain function and a Stage in one graph
+- When: the graph is run
+- Then: the plain function is called with the contents of its input data nodes as before; `TC-RUN-016` to `TC-RUN-019` are unchanged
+
+### TC-RUN-033 – Broken wiring is refused before anything runs
+- Verifies: REQ-RUN-033
+- Given: a graph with two settings edges into one transform, one with two outputs of one name, and the same graph corrected
+- When: each is run
+- Then: for the broken ones nothing ran and the refusal names the transform; the corrected graph runs
+
+### TC-RUN-034 – Start values come in a fixed order
+- Verifies: REQ-RUN-034
+- Given: a Stage with `prepare` and a data node that has a graph value, in three runs (graph value only; with prepare; with a value given to the run)
+- When: each is run
+- Then: the Stage gets the run value, else the prepare value, else the graph value, else nothing; `prepare` ran once before the Stage
+
+### TC-RUN-035 – An order edge orders and gives no input
+- Verifies: REQ-RUN-035
+- Given: a transform with an order edge from a data node written by another transform
+- When: the graph is run
+- Then: the writer runs first and the Stage's inputs hold no entry for the order node

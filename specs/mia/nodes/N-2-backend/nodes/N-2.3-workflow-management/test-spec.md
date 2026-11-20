@@ -58,10 +58,10 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-203
 | TC-WFM-048 | REQ-WFM-048 | Component | 2 | unit test, graphs written as data | AC-31: a master node with neither a maximum of repetitions nor a maximum time is refused naming it; with a maximum of 1 repetition it is accepted | exact |
 | TC-WFM-049 | REQ-WFM-049 | Component | 2 | unit test with the fake storage | AC-31: a data node with parameters is stored and read back with the parameters apart from its value | exact |
 | TC-WFM-130 | REQ-WFM-130 | Component | 1 | unit test with the fake storage of `skill_runs` and a fake clock | AC-39: lookup, search and review each leave one record with the six fields | exact |
-| TC-WFM-131 | REQ-WFM-058 (A-125 Q3) | Component | 2 | view.extract_claims (default `guide`) and rule.speech.no_bold (default `rules`) run through the toolbox, with and without the parameter | the default of the node applies when nothing is given and a given value wins; the rule default removes only bold markup | exact |
-| TC-WFM-132 | REQ-WFM-058 (A-125 Q2) | Component | 2 | verify.single@1 and a pipeline with a tool step bound to a skill, with and without changes | descriptor nodes `descriptor.model` and `descriptor.tool.<name>` with edges `as` model and tool into the steps that need them; changes replace the options; the input graph is unchanged; rules and order kept | exact |
-| TC-WFM-133 | REQ-WFM-058 (A-125 Q4) | Component | 2 | plan.free@1 of plan_question converted, bound, run with `stages_from_toolbox` and a scripted registered model | status done, one model call with the rendered template, the result node holds what normalize_plan gives | exact |
-| TC-WFM-134 | REQ-WFM-058 (A-125 Q4) | Component | 1 | the same graph with the entry code.normalize_plan untrusted, then trusted | refused naming step.norm before the model was asked; trusted again it runs to done | exact |
+| TC-WFM-145 | REQ-WFM-058 (A-125 Q3) | Component | 2 | view.extract_claims (default `guide`) and rule.speech.no_bold (default `rules`) run through the toolbox, with and without the parameter | the default of the node applies when nothing is given and a given value wins; the rule default removes only bold markup | exact |
+| TC-WFM-146 | REQ-WFM-058 (A-125 Q2) | Component | 2 | verify.single@1 and a pipeline with a tool step bound to a skill, with and without changes | descriptor nodes `descriptor.model` and `descriptor.tool.<name>` with edges `as` model and tool into the steps that need them; changes replace the options; the input graph is unchanged; rules and order kept | exact |
+| TC-WFM-147 | REQ-WFM-058 (A-125 Q4) | Component | 2 | plan.free@1 of plan_question converted, bound, run with `stages_from_toolbox` and a scripted registered model | status done, one model call with the rendered template, the result node holds what normalize_plan gives | exact |
+| TC-WFM-148 | REQ-WFM-058 (A-125 Q4) | Component | 1 | the same graph with the entry code.normalize_plan untrusted, then trusted | refused naming step.norm before the model was asked; trusted again it runs to done | exact |
 | TC-WFM-131 | REQ-WFM-131 | Component | 1 | unit test with the fake storage of `skill_runs` and a fake clock | AC-39: figures last reported; reason for failed and stopped | exact |
 | TC-WFM-132 | REQ-WFM-132 | Component | 1 | unit test with the fake storage of `skill_runs` and a fake clock | AC-39: result, material and file names stored | exact |
 | TC-WFM-133 | REQ-WFM-133 | Component | 1 | unit test with the fake storage of `skill_runs` and a fake clock | AC-39: answers in order with their times | exact |
@@ -121,7 +121,7 @@ Tests of this part alone against the mocks of its neighbours. Interfaces: IF-203
 | TC-WFM-127 | REQ-WFM-058 (A-123 P2, P3) | Component | 2 | verify.computable@2 | the repair branch with its loop is one master node control.branch with stop max_repetitions 2 and the budget seconds, settings node holding the branch JSON, reads and writes of its variables, result the last version of `verdict` | exact |
 | TC-WFM-128 | REQ-WFM-058 (A-123 P2, P3) | Component | 2 | research.escalate@3 | calls are transforms in pipeline order; the map `read` is a master node control.map with max_seconds only (noted); the branch with maps and a loop is a master node control.branch; two master nodes in all | exact |
 | TC-WFM-129 | REQ-WFM-058 (A-123 P2) | Component | 2 | a pipeline with an unknown library node, with an unknown node kind, without them, and with a plain branch | refusals name the node and a reason and give no graph; the plain branch is a transform control.branch with a settings node | exact |
-| TC-WFM-130 | REQ-WFM-058 (A-123) | Component | 1 | a step and a variable of the same name, a variable named like an order node | unique node IDs, valid graph, one writer per data node, or a refusal | exact |
+| TC-WFM-144 | REQ-WFM-058 (A-123) | Component | 1 | a step and a variable of the same name, a variable named like an order node | unique node IDs, valid graph, one writer per data node, or a refusal | exact |
 
 TC-WFM-110 to 114 (the five eval criteria of the converted skills) are statistical checks at stage 4 and are in the table "Statistical checks" of the root `test-spec.md`. The eval runs need the cases tagged `split:dev` (amendment A-120, proposed) and the v0.1.0 baselines recorded with 3 repeats (see `eval-spec.md`, section G-V2.CONVERT).
 
@@ -231,6 +231,122 @@ TC-WFM-110 to 114 (the five eval criteria of the converted skills) are statistic
 - Given: suite EV-extraction dev (51 cases, split:dev), MP-light, 3 repeats, the converted skill extract_claims, baseline of extract.llm@1 re-recorded at 3 repeats (reference 0.69 from 1 run)
 - When: one run of the suite
 - Then: PASS with at least 31 of 51 cases right (0.59); a FAIL is re-run once
+
+### TC-WFM-116 – Every function of a shipped node is in the common module
+- Verifies: REQ-WFM-058 (A-123)
+- Given: the shipped library nodes (`library/nodes`) and the old registries of research, extraction and verification
+- When: the function each shipped code node names is looked up in `common_operations.FUNCTIONS`
+- Then: every one is there and callable; a function of the old registries is the same object there, not a copy
+- Carried by: `tests/acceptance/test_common_operations.py`
+
+### TC-WFM-117 – The toolbox gives the value of the old function
+- Verifies: REQ-WFM-058 (A-123)
+- Given: the toolbox seeded from `library/nodes`; the inputs of `top_urls`, `tally` and `tidy_claims`
+- When: `Toolbox.run(<node id>, args)` is called for each
+- Then: the value equals exactly what the old function returns for the same input
+- Carried by: `tests/acceptance/test_toolbox.py`
+
+### TC-WFM-118 – Entries are thin
+- Verifies: REQ-WFM-058 (A-123)
+- Given: the seeded toolbox
+- When: the code text of every shipped entry of kind code, model, tool or script is read
+- Then: each has `run(args)` or `stage(inputs, outputs, node)`; an entry of a common function has at most 12 lines
+
+### TC-WFM-119 – A model step is one call like the old runner's
+- Verifies: REQ-WFM-058 (A-123, D-248)
+- Given: `view.verdict` run as a stage with the model as an input descriptor and a scripted registered model
+- When: the stage runs
+- Then: exactly one model call, with the messages, schema, profile and options of the old runner, and the parsed reply is returned
+
+### TC-WFM-120 – A tool step calls the registered function
+- Verifies: REQ-WFM-058 (A-123, D-248)
+- Given: `tool.web_search` run as a stage with a tool descriptor and a registered function
+- When: the stage runs, then once without a descriptor
+- Then: the function is called with the other inputs as keywords and the declared settings; without a descriptor `ToolMissing` is raised
+
+### TC-WFM-121 – Descriptors are resolved only against what MIA registered
+- Verifies: REQ-WFM-058 (D-248 D)
+- Given: descriptors of an unknown tool, of an undeclared setting and of an unknown model profile, and their registered twins
+- When: each is resolved
+- Then: the refusals are `ToolMissing`, `DescriptorRefused` and `ModelMissing`, raised before anything is called; the twins resolve
+
+### TC-WFM-122 – Independent steps keep the listed order
+- Verifies: REQ-WFM-058 (A-123 P4)
+- Given: all 12 listings of four steps in which S1 precedes S3 and S2 reads nothing
+- When: `order_steps` builds the graph for each
+- Then: the transforms come in `order_of` exactly as listed, and the graph keeps the graph rules
+
+### TC-WFM-123 – The graph holds the given reads and writes and a few order edges
+- Verifies: REQ-WFM-058 (A-123 P4)
+- Given: the built graph of one listing
+- When: its edges are read
+- Then: the given reads and writes are edges with their `as` names; the added edges are order edges through extra data nodes with one writer each, at most steps minus one
+
+### TC-WFM-124 – Run order, names and order inputs
+- Verifies: REQ-WFM-058 (A-123 P4)
+- Given: the graph of the listing S2, S1, S4, S3 run with recording stages
+- When: it runs
+- Then: the calls come in that order, S3 reads S1's result under its name, and no stage sees an order input
+
+### TC-WFM-125 – The three plain pipelines convert
+- Verifies: REQ-WFM-058 (A-123 P2, P3)
+- Given: `plan.free@1`, `verify.single@1`, `extract.llm@1` from `library/pipelines` and the library nodes
+- When: each is converted
+- Then: no refusal and a valid graph; one transform per call with its node ID as toolbox ID, in pipeline order; data nodes for inputs, variables and the result, named
+
+### TC-WFM-126 – Literals and field references
+- Verifies: REQ-WFM-058 (A-123, D-252)
+- Given: `verify.single@1` and `extract.llm@1`
+- When: they are converted
+- Then: a literal in a wire is a data node with that value, read under the parameter name; a field reference goes through a pick transform `code.pick_field` with a settings node holding the path
+
+### TC-WFM-127 – The repair branch is one master node
+- Verifies: REQ-WFM-058 (A-123 P2, P3)
+- Given: `verify.computable@2`
+- When: it is converted
+- Then: the repair branch with its loop is one master node `control.branch` with stop `max_repetitions` 2 and the budget seconds, a settings node holding the branch JSON, the reads and writes of its variables, and the last version of `verdict` as the result
+
+### TC-WFM-128 – Maps, branches and loops of research
+- Verifies: REQ-WFM-058 (A-123 P2, P3)
+- Given: `research.escalate@3`
+- When: it is converted
+- Then: calls are transforms in pipeline order; the map `read` is a master node `control.map` with `max_seconds` only (noted); the branch that holds maps and a loop is a master node `control.branch`; two master nodes in all
+
+### TC-WFM-129 – What cannot be placed is refused with a reason
+- Verifies: REQ-WFM-058 (A-123 P2)
+- Given: a pipeline with an unknown library node, one with an unknown node kind, one with neither, and one with a plain branch
+- When: each is converted
+- Then: the refusals name the node and a reason and give no graph; the plain branch is a transform `control.branch` with a settings node
+
+### TC-WFM-144 – Same ids are kept apart (was TC-WFM-130 of A-123)
+- Verifies: REQ-WFM-058 (A-123)
+- Given: a step and a variable of the same name, and a variable named like an order node
+- When: the pipeline is converted
+- Then: node ids are unique, the graph is valid and every data node has one writer, or the pipeline is refused
+
+### TC-WFM-145 – Defaults of a node apply, a given value wins (was TC-WFM-131 of A-125 Q3)
+- Verifies: REQ-WFM-058 (A-125 Q3)
+- Given: `view.extract_claims` (default `guide`) and `rule.speech.no_bold` (default `rules`) run through the toolbox, with and without the parameter
+- When: each runs both ways
+- Then: the default of the node applies when nothing is given and a given value wins; the rule default removes only bold markup
+
+### TC-WFM-146 – Binding a skill to a graph (was TC-WFM-132 of A-125 Q2)
+- Verifies: REQ-WFM-058 (A-125 Q2)
+- Given: `verify.single@1` and a pipeline with a tool step, bound to a skill with and without changes
+- When: `bind_skill` is called
+- Then: data nodes `descriptor.model` and `descriptor.tool.<name>` with edges `as` model and tool into the steps that need them; changes replace the options; the input graph is unchanged; rules and order are kept
+
+### TC-WFM-147 – A converted plan runs on scripted replies (was TC-WFM-133 of A-125 Q4)
+- Verifies: REQ-WFM-058 (A-125 Q4)
+- Given: `plan.free@1` of `plan_question`, converted, bound and run with `stages_from_toolbox` and a scripted registered model
+- When: it runs
+- Then: status done, one model call with the rendered template, and the result node holds what `normalize_plan` gives
+
+### TC-WFM-148 – An untrusted entry stops the run before the model is asked (was TC-WFM-134 of A-125 Q4)
+- Verifies: REQ-WFM-058 (A-125 Q4)
+- Given: the same graph with the entry `code.normalize_plan` untrusted, then trusted
+- When: it is run each way
+- Then: refused naming `step.norm` before the model was asked; trusted again it runs to done
 
 ## Assumptions (checked in validation)
 
