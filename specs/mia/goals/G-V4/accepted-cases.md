@@ -5,6 +5,12 @@
      Witnesses are empty on purpose: the low-level requirements do not exist yet (Plan step 1b); they are filled in when they are written, then binding_check.py BD5 can run.
      `Accepted by` stays empty until the owner confirms the case list: the agent never fills it. Without the confirmation a case is not frozen. -->
 
+## Approval of all cases at once
+
+The owner approves the whole list below with one box. Tick it in Emacs (`C-c C-c` on the line) or say so in the chat; the date goes after the box. The agent then fills `Accepted by` and `Date` of every row from this line, and not before. A case the owner does not want is struck out of the table first and the box ticked afterwards.
+
+- [ ] Approved by Stefan Reiterer (owner): all 36 cases of the table below are accepted as seen and accepted in the validation of round 02. Date: ____-__-__
+
 | ID | Outcome | Input | Expected (what was seen and accepted, with units) | Witnesses | Accepted by | Date |
 |---|---|---|---|---|---|---|
 | AC-001 | FR-57 | Save a graph, change one step, save again; then save the identical graph again (`proto_checks/cp1_demo.py`, graph `lookup`) | The change makes exactly one new version of the changed step and of the graph; saving identical content again makes no new version | – | – | – |
