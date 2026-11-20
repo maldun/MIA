@@ -42,17 +42,16 @@ Can the graph app pull a real stored graph from the data source (files or Postgr
 ## Carry-over (the developer decides)
 | Item | Where | Decision: adopt / adapt / drop / stand-in | Reason |
 |---|---|---|---|
-| Proposed decisions are the agent's suggestions; the owner decides and ticks. | | | |
-| graph routes for the record form | `serve.py` | [x] adapt (owner, 2026-11-20) | the real routes follow the interface amendment of Plan; the prototype's two routes show the shape |
-| adapter record form to view | `adapter.js` | [x] adapt (owner, 2026-11-20) | the view should read the stored type directly once the form is settled |
-| own check over HTTP | `check.mjs` | [x] adopt as a contract idea (owner, 2026-11-20) | every stored graph is drawn completely, from both backends |
-| detail panel on the left | `index.html` | [x] adopt (owner, 2026-11-20) | the editor's place (OC-8) |
-| physics with solver choice and freeze after settling | `proto.js` | [x] adopt, with the arrangement saved as one shared record per graph (owner, 2026-11-20; D-369) | natural look; replaces the "physics off" rule of REQ-GA-001, which needs an amendment |
-| rounded edges, selectable style | `proto.js` | [x] adopt the bezier as default, straight as the alternative; the other styles dropped (owner, 2026-11-20) | the owner asked for it; the other styles for comparison only |
-| settings menu | `index.html`, `proto.js` | [x] adopt (owner's request, FR-53 of the VIEW spec, D-377) | one place for view options as the editor grows |
-| remembering the settings | – | [x] adopt: remembered per browser (owner, D-377, FR-53) | the prototype did not build it; the real viewer does |
+| graph routes for the record form | `serve.py` | adapt | the real routes follow the interface amendment of Plan; the prototype's two routes show the shape (owner 2026-11-20) |
+| adapter record form to view | `adapter.js` | adapt | the view should read the stored type directly once the form is settled (owner 2026-11-20) |
+| own check over HTTP | `check.mjs` | adopt | every stored graph is drawn completely, from both backends (owner 2026-11-20: as a contract idea) |
+| detail panel on the left | `index.html` | adopt | the editor's place (OC-8) (owner 2026-11-20) |
+| physics with solver choice and freeze after settling | `proto.js` | adopt | natural look; replaces the "physics off" rule of REQ-GA-001, which needs an amendment (owner 2026-11-20: with the arrangement saved as one shared record per graph D-369) |
+| rounded edges, selectable style | `proto.js` | adopt | the owner asked for it; the other styles for comparison only (owner 2026-11-20: the bezier as default, straight as the alternative; the other styles dropped) |
+| settings menu | `index.html`, `proto.js` | adopt | one place for view options as the editor grows (owner 2026-11-20, FR-53, D-377) |
+| remembering the settings | – | adopt | the prototype did not build it; the real viewer does (owner 2026-11-20: remembered per browser, FR-53, D-377) |
 
-Decided by: Stefan Reiterer (owner), 2026-11-20, by the answers in the session (rows 1 to 8, D-387, D-388); every row is ticked from that answer
+Decided by: Stefan Reiterer (owner), 2026-11-20, by the answers in the session (rows 1 to 8, D-387, D-388); each row records that answer
 
 ## Effect on the TLS
 The data path of G-V4.VIEW is plausible; the open work is the interface (record form or document export), master nodes and the two-container routing. No outcome changed.
