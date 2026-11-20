@@ -2,14 +2,14 @@
 
 Single source for what the demonstrator can show (`dev-workflow/references/prototyping.md`). Updated with every checkpoint and at merges.
 
-Demonstrator deployed at: not yet (worktree `../MIA-prototype-g-v4`, branch `prototype/g-v4`; round 01 ran from `serve.py files 8765`) · Last updated: set at the first checkpoint, 2026-11-20
+Demonstrator deployed at: not yet (worktree `../MIA-prototype-g-v4`, branch `prototype/g-v4`; round 01 ran from `serve.py files 8765`) · Last updated: 2f9312f8 (CP1), 2026-11-20
 
 | Part / feature | Requirement IDs | State (mock / working / real / not yet / retired) | Made real by task | Commit | Date | Notes |
 |---|---|---|---|---|---|---|
 | viewer page: list, drawing, left panel, settings menu, physics, rounded edges (round 01) | FR-48, FR-49, FR-51, FR-52, FR-53 | working | – | – | 2026-11-20 | built in round 01 from the stored record form; no login, no history, no editing; reuse decision: see reuse-map.md (not yet written) |
 | graph routes for the stored form (round 01) | FR-48 | working | – | – | 2026-11-20 | two routes; to be replaced by the prototype of IF-104 v2 in CP5 |
-| scoped record IDs | FR-60 | not yet | – | – | – | CP1 |
-| atomic save, versions, authors | FR-57, NFR-16 | not yet | – | – | – | CP1 |
+| scoped record IDs `<graph>/<local>` and the storage refusal | FR-60 | working | – | 2f9312f8 | 2026-11-20 | CP1: `graph_tables.py` (rule `unscoped_id`), `graph_model.py`; 154 step records for 107 local names; files and PostgreSQL |
+| save without half graphs, versions, authors, step history | FR-57, NFR-16 | working | – | 2f9312f8 | 2026-11-20 | CP1: everything checked before the first write; unchanged save = no version; interrupted save leaves nothing visible; `proto_checks/cp1_check.py` |
 | same behaviour in files and database | FR-58 | not yet | – | – | – | CP2 |
 | whole-store move | FR-59 | not yet | – | – | – | CP2 |
 | sync live store to copy | FR-93, NFR-15 | not yet | – | – | – | CP3 |

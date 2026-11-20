@@ -16,10 +16,10 @@ Date: – · Prototype state: branch prototype/g-v4 · Where it ran: –
 | FR-53 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
 | FR-54 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
 | FR-55 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
-| FR-57 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
+| FR-57 | Given graphs stored, run `python proto_checks/cp1_demo.py`; look at the versions of `lookup` after a change and after saving the same graph again | – | not tried | – |
 | FR-58 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
 | FR-59 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
-| FR-60 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
+| FR-60 | Given two graphs with a step named `step.write`, change it in `lookup` and look at the histories of both graphs (`cp1_demo.py`) | – | not tried | – |
 | FR-63 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
 | FR-64 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
 | FR-68 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
@@ -46,7 +46,7 @@ Date: – · Prototype state: branch prototype/g-v4 · Where it ran: –
 | NFR-13 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
 | NFR-14 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
 | NFR-15 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
-| NFR-16 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
+| NFR-16 | Given a graph with a cycle and an interrupted save, look at the demo output and at the checks 8 to 10 of `python proto_checks/cp1_check.py files` | – | not tried | – |
 | NFR-18 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
 | NFR-19 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
 | NFR-20 | the outcome's Given and When, as steps (written when its subgoal's breakpoint is reached) | – | not tried | – |
