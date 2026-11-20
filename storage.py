@@ -184,6 +184,8 @@ class Storage:
         with self._lock:                      # one writer at a time per process: the numbers of the versions have no gap
             self._check_graph_record(table, record_id, doc)
             current = len(self.backend.versions(table, record_id))
+            if current and table in record_tables.ONCE:
+                raise StorageError("invalid", rule="append_only", detail=record_id)      # FR-80: a recorded change is never altered
             if expected_version is not None and expected_version != current:
                 raise StorageError("conflict", detail={"current": current})
             try:

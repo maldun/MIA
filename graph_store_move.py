@@ -17,7 +17,13 @@ except ImportError:
 
 MEMBER_TABLES = {"workflow": ("graph_nodes", "graph_edges"), "context": ("context_nodes", "context_edges")}
 HEADER_TABLE = "graphs"
-GRAPH_TABLES = ("graph_nodes", "graph_edges", "context_nodes", "context_edges", HEADER_TABLE)
+CHANGES_TABLE = "graph_changes"           # CP11 (FR-81): the record of changes belongs to the graph and moves with it; one record per version, id <graph id>/<version>
+GRAPH_TABLES = ("graph_nodes", "graph_edges", "context_nodes", "context_edges", CHANGES_TABLE, HEADER_TABLE)
+
+
+def change_ids(backend, graph_id):
+    """the IDs of the records of changes of the graph that the backend has"""
+    return [rid for rid in (("%s/%d" % (graph_id, e["version"])) for e in backend.versions(HEADER_TABLE, graph_id)) if backend.versions(CHANGES_TABLE, rid)]
 
 
 def _problems(source, target, only=None):
@@ -46,6 +52,11 @@ def _problems(source, target, only=None):
         if have != entries[:len(have)]:
             found[graph_id] = "conflict: the target has a different history of the graph"
             continue
+        for entry in entries:                       # the record of a change with a different history in the target is a conflict of this graph too
+            rid = "%s/%d" % (graph_id, entry["version"])
+            wanted_c, there_c = source.versions(CHANGES_TABLE, rid), target.versions(CHANGES_TABLE, rid)
+            if there_c != wanted_c[:len(there_c)]:
+                found[graph_id] = "conflict: the target has a different record of the change of version %d" % entry["version"]
         for entry in entries:                       # a step or connection with a different history in the target is a conflict of this graph too
             data = entry["doc"]["data"]
             node_table, edge_table = MEMBER_TABLES[data["kind"]]
@@ -72,7 +83,8 @@ def move_graph(source, target, graph_id):
                 if (table, member["id"]) not in members:
                     members.append((table, member["id"]))
     added = 0
-    for table, record_id in members + [(HEADER_TABLE, graph_id)]:           # the steps first, the header last
+    changes = [(CHANGES_TABLE, "%s/%d" % (graph_id, e["version"])) for e in source.versions(HEADER_TABLE, graph_id)]
+    for table, record_id in members + changes + [(HEADER_TABLE, graph_id)]:           # the steps and the record of changes first, the header last
         wanted, have = source.versions(table, record_id), target.versions(table, record_id)
         for entry in wanted[len(have):]:
             target.append(table, record_id, entry)

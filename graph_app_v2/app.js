@@ -13,6 +13,7 @@ import * as hist from './undo-stack.js';
 import { storeNote, canEdit, syncMessage } from './store-note.js';
 import { renderCopyPanel, copyMessage } from './copy-panel.js';
 import { brokenLines, runMessage, parseInputs } from './run-note.js';
+import { sessionChanges, withReasons, changeKey, describeChange, explain } from './change-log.js';
 
 const $ = (id) => document.getElementById(id);
 let graphs = [];
@@ -29,6 +30,8 @@ let isOwner = false;
 let tools = [];
 let history = null;
 let storeStatus = null;
+let changeLog = [];
+let reasons = new Map();
 
 const viewGraph = () => (editing && draft ? draft : current.graph);
 const kindOf = (id) => viewGraph().nodes.find((n) => n.id === id)?.data?.type;
@@ -98,10 +101,11 @@ async function open(id, version) {
   renderList();
   const q = version ? `?version=${version}` : '';
   if (storeStatus?.split) await loadStoreStatus();
-  const [res, arr, vs] = await Promise.all([api(`/api/v2/graphs/${encodeURIComponent(id)}${q}`), api(`/api/v2/graphs/${encodeURIComponent(id)}/arrangement`), api(`/api/v2/graphs/${encodeURIComponent(id)}/versions`)]);
+  const [res, arr, vs, log] = await Promise.all([api(`/api/v2/graphs/${encodeURIComponent(id)}${q}`), api(`/api/v2/graphs/${encodeURIComponent(id)}/arrangement`), api(`/api/v2/graphs/${encodeURIComponent(id)}/versions`), api(`/api/v2/graphs/${encodeURIComponent(id)}/changes`)]);
   current = await res.json();
   saved = await arr.json();
   versions = await vs.json();
+  changeLog = await log.json();
   mode = 'auto';
   if (!editing) $('rules').replaceChildren();
   renderHistory();
@@ -121,6 +125,7 @@ function renderHistory() {
     return li;
   });
   $('history').replaceChildren(...items);
+  $('how').replaceChildren(...explain(changeLog.find((r) => r.version === current.version)).map((text) => { const li = document.createElement('li'); li.textContent = text; return li; }));
   $('prev').disabled = neighbour(versions, current.version, 'previous') === null;
   $('next').disabled = neighbour(versions, current.version, 'next') === null;
 }
@@ -213,7 +218,20 @@ async function saveArrangement() {
 $('save-arr').addEventListener('click', saveArrangement);
 $('save-arr-edit').addEventListener('click', saveArrangement);
 
-function refreshUndo() { $('undo').disabled = !hist.canUndo(history); $('redo').disabled = !hist.canRedo(history); $('undo-note').textContent = hist.note(history); }
+function renderSessionChanges() {
+  const list = sessionChanges(history);
+  $('session-changes').replaceChildren(...list.map((c) => {
+    const li = document.createElement('li');
+    li.textContent = describeChange(c);                          // text, never markup
+    const input = document.createElement('input');
+    input.setAttribute('aria-label', `reason for: ${describeChange(c)}`); input.setAttribute('placeholder', 'reason (optional)');
+    input.value = reasons.get(changeKey(c)) ?? '';
+    input.addEventListener('input', () => reasons.set(changeKey(c), input.value));
+    li.append(document.createElement('br'), input);
+    return li;
+  }));
+}
+function refreshUndo() { $('undo').disabled = !hist.canUndo(history); $('redo').disabled = !hist.canRedo(history); $('undo-note').textContent = hist.note(history); renderSessionChanges(); }
 function stepHistory(fn) {
   if (!editing || !history) return;
   if (network) livePositions = positionsOf(network.getPositions());
@@ -331,6 +349,7 @@ function startEdit() {
   editing = true;
   draft = JSON.parse(JSON.stringify(current.graph));
   history = hist.create(draft);
+  reasons = new Map();
   livePositions = network ? positionsOf(network.getPositions()) : null;
   editBar.hidden = false;
   $('edit-toggle').hidden = true;
@@ -339,7 +358,7 @@ function startEdit() {
   checkRules();
 }
 function stopEdit() {
-  editing = false; draft = null; history = null; editBar.hidden = true; $('edit-toggle').hidden = !isOwner; $('rules').replaceChildren();
+  editing = false; draft = null; history = null; editBar.hidden = true; $('edit-toggle').hidden = !isOwner; $('rules').replaceChildren(); $('session-changes').replaceChildren();
   renderPanel(document, $('detail'), null);
 }
 $('edit-toggle').addEventListener('click', startEdit);
@@ -355,9 +374,9 @@ $('add-conn').addEventListener('click', () => {
   if (r.error) note(r.error); else change(r.graph);
 });
 $('keep').addEventListener('click', async () => {
-  const res = await api(`/api/v2/graphs/${encodeURIComponent(chosen)}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ graph: { nodes: draft.nodes, edges: draft.edges }, expected_version: current.version }) });
+  const res = await api(`/api/v2/graphs/${encodeURIComponent(chosen)}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ graph: { nodes: draft.nodes, edges: draft.edges }, expected_version: current.version, changes: withReasons(sessionChanges(history), reasons) }) });
   const body = await res.json();
-  if (res.ok) { stopEdit(); note(''); await loadStoreStatus(); await open(chosen); $('status').textContent = body.changed ? `Kept as version ${body.version}.${body.synced === false ? ` It is in the live store, but the copy could not be updated (${body.sync_problem}): you are looking at the copy (version ${current.version}).` : ''}` : 'Nothing had changed: no new version.'; $('sync').classList.toggle('attention', Boolean(storeStatus?.lag)); return; }
+  if (res.ok) { stopEdit(); note(''); await loadStoreStatus(); await open(chosen); $('status').textContent = body.changed ? `Kept as version ${body.version} with ${body.entries} recorded change(s)${body.logged === false ? ' (the record could not be written)' : ''}.${body.synced === false ? ` It is in the live store, but the copy could not be updated (${body.sync_problem}): you are looking at the copy (version ${current.version}).` : ''}` : 'Nothing had changed: no new version.'; $('sync').classList.toggle('attention', Boolean(storeStatus?.lag)); return; }
   if (res.status === 409) { note(`The graph changed meanwhile (now version ${body.current}). Nothing was overwritten; discard the changes and open it again.`); return; }
   if (res.status === 422 && body.rules) { note('The change breaks a rule and was not kept.'); $('rules').replaceChildren(...body.rules.map((r) => { const li = document.createElement('li'); li.textContent = `${r.rule}: ${r.text} (${r.parts.join(', ')})`; return li; })); return; }
   if (res.status === 503) { note('The live store cannot be reached: nothing was kept. Editing is not possible now.'); return; }

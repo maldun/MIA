@@ -23,6 +23,7 @@ from werkzeug.exceptions import HTTPException
 import accounts
 import accounts_api
 import graph_model
+import graph_changes
 import graph_rules_proto
 import graph_run
 import graph_store_move
@@ -183,6 +184,33 @@ def create_app(backend, accounts_store, port=8801, live=None, aside=None):
         saved = model.tables.put("arrangements", graph_id, {"graph": graph_id, "positions": positions}, g.account)
         return jsonify({"version": saved["version"], "saved": len(positions)})
 
+    def record_changes(graph_id, from_version, version, entries, kind):
+        """the record of how a version came about (FR-76): written once, after the version is stored; False when it could not be written (the version stays, it is listed as having no record)"""
+        doc = {"graph": graph_id, "version": version, "from_version": from_version, "kind": kind,
+               "entries": [{"n": i + 1, **entry} for i, entry in enumerate(entries)]}
+        try:
+            wmodel.tables.put("graph_changes", "%s/%d" % (graph_id, version), doc, g.account)
+            return True
+        except StorageError:
+            return False
+
+    @app.get("/api/v2/graphs/<path:graph_id>/changes")
+    def changes_of(graph_id):
+        """how each version came about: its entries (who, when, what, before and after, reason, the version it started from); a version without a record is listed as made before the record"""
+        try:
+            versions = model.graph_versions(graph_id)
+        except StorageError:
+            return jsonify({"error": "not_found"}), 404
+        out = []
+        for v in versions:
+            try:
+                rec = model.tables.get("graph_changes", "%s/%d" % (graph_id, v["version"]))
+            except StorageError:
+                out.append({"version": v["version"], "kind": "before_the_record", "author": v["author"], "time": v["time"], "entries": []})
+                continue
+            out.append({"version": v["version"], "kind": rec["doc"]["kind"], "from_version": rec["doc"]["from_version"], "author": rec["author"], "time": rec["time"], "entries": rec["doc"]["entries"]})
+        return jsonify(out)
+
     def owner_only():
         return None if is_owner(getattr(g, "account", None)) else (jsonify({"error": "not_owner"}), 403)
 
@@ -215,6 +243,9 @@ def create_app(backend, accounts_store, port=8801, live=None, aside=None):
         saved = wmodel.save_graph(old)
         if not saved.saved:
             return jsonify({"error": "refused", "rule": saved.rule, "detail": saved.detail}), 422
+        if saved.version != current:
+            reason = body.get("reason") if isinstance(body.get("reason"), str) and body["reason"].strip() else None
+            record_changes(graph_id, current, saved.version, [{"op": "restore", "target": version, "before": None, "after": None, "reason": reason}], "restore")
         return jsonify({"version": saved.version, "restored": version, "changed": saved.version != current, **sync_graph(graph_id)})
 
     @app.get("/api/v2/status")
@@ -308,11 +339,25 @@ def create_app(backend, accounts_store, port=8801, live=None, aside=None):
         rules = graph_rules_proto.rule_report(graph)
         if rules:
             return jsonify({"error": "rules_broken", "rules": rules}), 422
+        start = wmodel.read_graph(graph_id)
+        kind = "editor"
+        try:
+            if isinstance(body.get("changes"), list):
+                entries = [graph_changes.clean(c) for c in body["changes"]]
+                if not graph_changes.same(graph_changes.replay(start, entries), graph):
+                    return jsonify({"error": "changes_do_not_match"}), 422         # a record that does not give the kept version would explain nothing (NFR-20)
+            else:
+                entries, kind = graph_changes.diff(start, graph), "derived"
+        except (ValueError, KeyError, TypeError):
+            return jsonify({"error": "changes_do_not_match"}), 422
         wmodel.author = g.account                         # the version names the account that kept it (the prototype serves one request at a time)
         saved = wmodel.save_graph(graph)
         if not saved.saved:
             return jsonify({"error": "refused", "rule": saved.rule, "detail": saved.detail, "named": saved.named}), 422
-        return jsonify({"version": saved.version, "changed": saved.version != current, **sync_graph(graph_id)})
+        logged = None
+        if saved.version != current:
+            logged = record_changes(graph_id, current, saved.version, entries, kind)
+        return jsonify({"version": saved.version, "changed": saved.version != current, "logged": logged, "entries": len(entries), **sync_graph(graph_id)})
 
     @app.post("/api/v2/graphs/<path:graph_id>/run")
     def run_graph(graph_id):
@@ -379,6 +424,8 @@ def create_app(backend, accounts_store, port=8801, live=None, aside=None):
         saved = wmodel.save_graph(target)
         if not saved.saved:
             return jsonify({"error": "refused", "rule": saved.rule, "detail": saved.detail}), 422
+        if saved.version != current:
+            record_changes(target_id, current, saved.version, [{"op": "add_step", "target": name, "before": None, "after": json.loads(json.dumps(step.get("data") or {})), "reason": None, "note": "copied from %s: %s" % (graph_id, step_id)}], "editor")
         return jsonify({"graph": target_id, "step": name, "version": saved.version, "changed": saved.version != current, **sync_graph(target_id)})
 
     @app.get("/")

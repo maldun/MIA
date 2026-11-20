@@ -69,6 +69,7 @@ def _set_aside(copy, graph_id, folder, stamp):
         n += 1
         path = os.path.join(folder, "%s__%s_%d.json" % (graph_id.replace("/", "_"), stamp, n))
     members = {"%s|%s" % key: copy.versions(*key) for key in _members(copy, graph_id)}
+    members.update({"%s|%s" % (move.CHANGES_TABLE, rid): copy.versions(move.CHANGES_TABLE, rid) for rid in move.change_ids(copy, graph_id)})      # the record of changes goes with the graph
     doc = {"graph": graph_id, "set_aside_at": stamp, "reason": "the live store won", "header": copy.versions(HEADER, graph_id), "members": members}
     tmp = path + ".part"
     with open(tmp, "w", encoding="utf-8") as f:
@@ -80,7 +81,7 @@ def _set_aside(copy, graph_id, folder, stamp):
 
 
 def _remove_from(copy, graph_id):
-    members = _members(copy, graph_id)
+    members = _members(copy, graph_id) + [(move.CHANGES_TABLE, rid) for rid in move.change_ids(copy, graph_id)]
     copy.remove(HEADER, graph_id)                                          # the header first: a graph is never listed with missing steps
     for table, record_id in members:
         copy.remove(table, record_id)
