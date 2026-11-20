@@ -2,22 +2,22 @@
 
 Done before the owner's Explore gate, as the owner chose on 2026-11-20. Fixed mechanically: stale wording in `G-V4/goal.md` and `G-V4.VALIDATE/goal.md`, order of the outcome rows, the Explore row of the Phases table. Everything below needs the owner's decision.
 
-## 1. Old N-5 requirements against the new items
-The approved `nodes/N-5-graph-app/requirements.md` (REQ-GA-001 to -011, written in G-V1) overlaps the new VIEW items (FR-48 to FR-56, NFR-10 to NFR-14) and the decisions D-363 and D-366. Proposal; the owner decides each row (keep, amend, supersede, move).
+## 1. Old N-5 requirements against the new items: decisions of the owner (maldun, 2026-11-20, D-367)
+The approved `nodes/N-5-graph-app/requirements.md` (REQ-GA-001 to -011, written in G-V1) overlaps the new VIEW items. The decisions below are applied by plan amendments in Plan (the approved text is not edited now).
 
-| Old requirement | Overlaps with | Proposal |
+| Old requirement | Decision | What the amendment does |
 |---|---|---|
-| REQ-GA-001 show as nodes and edges (test `tests/js/graph-view.test.mjs`: "layout is stable", physics off) | FR-48 to FR-53 | **supersede** by the VIEW requirements; its stable-layout tests conflict with physics (FR-52) and need a rewrite by amendment |
-| REQ-GA-002 edit as JSON | G-V4.EDIT | **keep for EDIT**, to be refined there (the editor may offer more than JSON) |
-| REQ-GA-003 graph rules before saving ("in the app and again by the backend") | D-363 check route, FR-7 | **amend**: the page asks the backend check route; one rule set |
-| REQ-GA-004 versions, history, diff, restore | FR-55, FR-56 (VIEW), comparison (REPLAY), restore (EDIT) | **split** into three; supersede the old text |
-| REQ-GA-005 only through the graph interface (IF-104) | FR-48 data path | **keep**; IF-104 gets a new version (record form, check route) by amendment |
-| REQ-GA-006 edit context graphs | FR-30, G-V4.EDIT | **keep for EDIT** |
-| REQ-GA-007 login required | NFR-12 | **keep**; NFR-12 refines it |
-| REQ-GA-008 export and seed of the library | G-V4.GRAPHSTORE (files and database interchangeable) | **move** to GRAPHSTORE (the page's buttons are a Could) |
-| REQ-GA-009 plain stack, vendored library | HR (vis-network 10.1.2 pinned) | **keep** |
-| REQ-GA-010 no outside request | NFR-13 | **keep**; NFR-13 refines it |
-| REQ-GA-011 own container | NFR-9 (partly in scope) | **keep** |
+| REQ-GA-001 show as nodes and edges | **supersede** by FR-48 to FR-53 | history names the new items; the stable-layout, physics-off tests of `tests/js/graph-view.test.mjs` are rewritten by amendment |
+| REQ-GA-002 edit as JSON | **keep, refine in EDIT** | text unchanged; EDIT decides JSON text, form or both |
+| REQ-GA-003 graph rules before saving | **amend** | the page asks the backend check route (D-363); one rule set (GRAPHAPI); needs the IF-104 amendment; belongs to EDIT |
+| REQ-GA-004 versions, history, diff, restore | **split into four, supersede** | save and restore to EDIT, history list and viewing a version to VIEW (FR-55, FR-56), diff to REPLAY |
+| REQ-GA-005 only through IF-104 | **keep as written** | IF-104 changes by the joint amendment (C-5) |
+| REQ-GA-006 edit context graphs | **keep, assign to EDIT** | after GRAPHSTORE moves context graphs into the same stored form |
+| REQ-GA-007 login required | **keep, NFR-12 refines it** | no change |
+| REQ-GA-008 export and seed | **move to GRAPHSTORE** | transfer between files and database is GRAPHSTORE's (OC-6); page buttons stay a Could, none built unless the owner asks |
+| REQ-GA-009 plain stack, vendored library | **keep as written** | the high-level spec records vis-network 10.1.2 as a dependency |
+| REQ-GA-010 no outside request | **supersede by NFR-13** | its test moves to the measure of NFR-13 |
+| REQ-GA-011 own container | **keep, check the routing in Plan** | VIEW's plan adds a check that page and API share one origin and session in the stack |
 
 ## 2. Findings that need a decision
 | # | Finding | Proposal |
@@ -33,6 +33,7 @@ The approved `nodes/N-5-graph-app/requirements.md` (REQ-GA-001 to -011, written 
 
 ## 3. Owner's gate (all empty boxes, not pre-filled)
 - [ ] Owner approves the Explore results per subgoal: GRAPHSTORE, GRAPHAPI, VIEW, EDIT, REPLAY
-- [ ] Owner decides the open rows of section 1 and section 2
+- [x] Owner decided the rows of section 1 (D-367)
+- [ ] Owner decides the open rows of section 2
 - [ ] Owner ticks the carry-over of the prototype graphview
 - [ ] Owner agrees to the split (the seven Agreement rows of `G-V4/goal.md`)
