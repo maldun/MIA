@@ -31,6 +31,9 @@ Files and database must be interchangeable and graphs transferable (files serve 
 ## Explore result (2026-11-20, D-361)
 `research.md` (facts), `spikes.md` (15 converted graphs through both backends). Decisions: the stored graph is the truth and the pipeline JSON becomes an import path; target form is the record form with the document as export; one-time migration of the existing record with a comparison report. Open for Plan: graph-scoped record IDs (spike finding S1), the effect on IF-203, the toolbox and snapshots, how run_workflow's derived document (D-112) is replaced.
 
+## Decisions of 2026-11-20 (D-368)
+Node and edge records are scoped by graph (`<graph id>/<local id>`) and the storage layer refuses an unscoped ID (amendment of A-92 / REQ-GTB-021 and its test). The converted graphs and `review` are migrated once with the new IDs. IF-104 v2 is written at G-V4 level; v1 stays until the migration is confirmed.
+
 ## Decisions of the owner (2026-11-19)
 | Question | Answer |
 |---|---|
