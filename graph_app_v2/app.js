@@ -9,6 +9,8 @@ import { applyPositions, positionsOf, arrangementNote } from './arrangement.js';
 import { historyEntries, neighbour, versionNote } from './history.js';
 import { addStep, removeStep, changeStep, addConnection, removeConnection, changeConnection } from './edit-model.js';
 import { renderStepEditor, renderConnectionEditor } from './edit-panel.js';
+import * as hist from './undo-stack.js';
+import { storeNote, canEdit } from './store-note.js';
 
 const $ = (id) => document.getElementById(id);
 let graphs = [];
@@ -23,6 +25,8 @@ let draft = null;
 let livePositions = null;
 let isOwner = false;
 let tools = [];
+let history = null;
+let storeStatus = null;
 
 const viewGraph = () => (editing && draft ? draft : current.graph);
 const kindOf = (id) => viewGraph().nodes.find((n) => n.id === id)?.data?.type;
@@ -43,6 +47,7 @@ const settings = loadSettings(storage);
 const api = async (path, options) => {
   const res = await fetch(path, { credentials: 'same-origin', ...options });
   if (res.status === 401) { show('login'); throw new Error('login needed'); }
+  if (res.status === 503) { storeStatus = { split: true, live: 'unreachable', lag: null }; refreshStoreNote(); }
   return res;
 };
 
@@ -158,6 +163,8 @@ function draw() {
   $('arr-note').textContent = arrangementNote(saved, mode);
   $('problems').replaceChildren(...named.map((text) => { const li = document.createElement('li'); li.textContent = text; return li; }));
   renderPanel(document, $('detail'), null);
+  if (editing && history) refreshUndo();
+  $('restore').hidden = !(isOwner && !editing && current.version !== current.current);
 }
 
 // settings menu: opens under its button, closes with Escape, a click outside or the button again; every change applies at once and is remembered
@@ -182,6 +189,54 @@ $('save-arr').addEventListener('click', async () => {
   $('arr-note').textContent = arrangementNote(saved, mode);
 });
 
+
+function refreshUndo() { $('undo').disabled = !hist.canUndo(history); $('redo').disabled = !hist.canRedo(history); $('undo-note').textContent = hist.note(history); }
+function stepHistory(fn) {
+  if (!editing || !history) return;
+  if (network) livePositions = positionsOf(network.getPositions());
+  history = fn(history);
+  draft = history.present;
+  fillEnds();
+  draw();
+  checkRules();
+  renderPanel(document, $('detail'), null);
+}
+$('undo').addEventListener('click', () => stepHistory(hist.undo));
+$('redo').addEventListener('click', () => stepHistory(hist.redo));
+document.addEventListener('keydown', (e) => {
+  if (!editing || !(e.ctrlKey || e.metaKey) || ['INPUT', 'TEXTAREA'].includes(e.target?.tagName)) return;
+  const key = String(e.key).toLowerCase();
+  if (key === 'z' && !e.shiftKey) { e.preventDefault(); stepHistory(hist.undo); }
+  else if ((key === 'z' && e.shiftKey) || key === 'y') { e.preventDefault(); stepHistory(hist.redo); }
+});
+
+const behind = () => (storeStatus?.split && storeStatus.lag > 0 ? ' - the copy shows it after the sync' : '');
+function refreshStoreNote() {
+  $('store-note').textContent = storeNote(storeStatus);
+  $('sync').hidden = !(isOwner && storeStatus?.split);
+  $('edit-toggle').disabled = !canEdit(storeStatus);
+  $('edit-toggle').title = canEdit(storeStatus) ? '' : 'The live store cannot be reached.';
+  $('restore').disabled = !canEdit(storeStatus);
+}
+async function loadStoreStatus() {
+  try { storeStatus = await (await fetch('/api/v2/status', { credentials: 'same-origin' })).json(); } catch { storeStatus = { split: true, live: 'unreachable', lag: null }; }
+  refreshStoreNote();
+}
+$('sync').addEventListener('click', async () => {
+  const res = await api('/api/v2/sync', { method: 'POST' });
+  const body = await res.json();
+  if (res.ok) { $('status').textContent = `Synced: ${body.versions_added} version(s) and ${body.records} record(s) added to the copy.`; await loadStoreStatus(); if (chosen) await open(chosen); return; }
+  $('status').textContent = res.status === 503 ? 'The live store cannot be reached: nothing was synced.' : `The sync was refused: ${JSON.stringify(body.graphs ?? body.error)}`;
+});
+$('restore').addEventListener('click', async () => {
+  if (!current || current.version === current.current) return;
+  const shown = current.version;
+  const res = await api(`/api/v2/graphs/${encodeURIComponent(chosen)}/restore`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ version: shown }) });
+  const body = await res.json();
+  if (res.ok) { await loadStoreStatus(); await open(chosen); $('status').textContent += ` (version ${shown} restored as version ${body.version}${behind()})`; return; }
+  $('status').textContent = res.status === 503 ? 'The live store cannot be reached: nothing was restored.' : `The restore failed (${res.status} ${body.error ?? ''}).`;
+});
+
 // ---- editing (CP8): a working copy, the rules asked after every change, the change kept as a new version ----
 const editBar = $('edit-bar');
 function fillEnds() {
@@ -194,6 +249,7 @@ function note(text) { $('edit-note').textContent = text; }
 
 async function checkRules() {
   const res = await api(`/api/v2/graphs/${encodeURIComponent(chosen)}/check`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ graph: { nodes: draft.nodes, edges: draft.edges } }) });
+  if (res.status === 503) { note('The live store cannot be reached: editing is not possible now.'); $('keep').disabled = true; return; }
   const { rules } = await res.json();
   $('rules').replaceChildren(...rules.map((r) => { const li = document.createElement('li'); li.textContent = `${r.rule}: ${r.text} (${r.parts.join(', ')})`; return li; }));
   $('keep').disabled = rules.length > 0;
@@ -202,7 +258,8 @@ async function checkRules() {
 
 function change(next) {
   if (network) livePositions = positionsOf(network.getPositions());
-  draft = next;
+  history = hist.push(history, next);
+  draft = history.present;
   fillEnds();
   draw();
   checkRules();
@@ -230,6 +287,7 @@ function startEdit() {
   if (!current || current.version !== current.current) { $('status').textContent = 'Only the current version can be edited: open the current version first.'; return; }
   editing = true;
   draft = JSON.parse(JSON.stringify(current.graph));
+  history = hist.create(draft);
   livePositions = network ? positionsOf(network.getPositions()) : null;
   editBar.hidden = false;
   $('edit-toggle').hidden = true;
@@ -238,7 +296,7 @@ function startEdit() {
   checkRules();
 }
 function stopEdit() {
-  editing = false; draft = null; editBar.hidden = true; $('edit-toggle').hidden = !isOwner; $('rules').replaceChildren();
+  editing = false; draft = null; history = null; editBar.hidden = true; $('edit-toggle').hidden = !isOwner; $('rules').replaceChildren();
   renderPanel(document, $('detail'), null);
 }
 $('edit-toggle').addEventListener('click', startEdit);
@@ -256,9 +314,10 @@ $('add-conn').addEventListener('click', () => {
 $('keep').addEventListener('click', async () => {
   const res = await api(`/api/v2/graphs/${encodeURIComponent(chosen)}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ graph: { nodes: draft.nodes, edges: draft.edges }, expected_version: current.version }) });
   const body = await res.json();
-  if (res.ok) { stopEdit(); note(''); await open(chosen); $('status').textContent += body.changed ? ` (kept as version ${body.version})` : ' (nothing had changed)'; return; }
+  if (res.ok) { stopEdit(); note(''); await loadStoreStatus(); await open(chosen); $('status').textContent += body.changed ? ` (kept as version ${body.version}${behind()})` : ' (nothing had changed)'; return; }
   if (res.status === 409) { note(`The graph changed meanwhile (now version ${body.current}). Nothing was overwritten; discard the changes and open it again.`); return; }
   if (res.status === 422 && body.rules) { note('The change breaks a rule and was not kept.'); $('rules').replaceChildren(...body.rules.map((r) => { const li = document.createElement('li'); li.textContent = `${r.rule}: ${r.text} (${r.parts.join(', ')})`; return li; })); return; }
+  if (res.status === 503) { note('The live store cannot be reached: nothing was kept. Editing is not possible now.'); return; }
   note(`The change was not kept (${res.status} ${body.error ?? ''}).`);
 });
 
@@ -268,6 +327,7 @@ async function start() {
   $('who').textContent = who.user ?? who.account;
   isOwner = (await (await api('/api/v2/me')).json()).owner;
   if (isOwner) tools = await (await api('/api/v2/toolbox')).json();
+  await loadStoreStatus();
   $('edit-toggle').hidden = !isOwner || editing;
   show('viewer');
   graphs = await (await api('/api/v2/graphs')).json();

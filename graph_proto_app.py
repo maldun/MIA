@@ -17,11 +17,13 @@ REPO = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, REPO)
 import math
 from flask import Flask, g, jsonify, request, send_from_directory
+from werkzeug.exceptions import HTTPException
 
 import accounts
 import accounts_api
 import graph_model
 import graph_rules_proto
+import graph_store_move
 import tempfile
 from toolbox import Toolbox, ToolboxError
 from workflow_library import WorkflowLibrary
@@ -84,9 +86,20 @@ def steps_info(graph, box):
     return out
 
 
-def create_app(backend, accounts_store, port=8801):
+UNREACHABLE = (OSError, ConnectionError, TimeoutError)
+
+
+def _unreachable(error):
+    """the live store cannot be reached: a file or network error, or a database driver error (named by class, so the viewer needs no driver)"""
+    return isinstance(error, UNREACHABLE) or type(error).__name__ in ("OperationalError", "InterfaceError", "AdminShutdown", "ConnectionTimeout")
+
+
+def create_app(backend, accounts_store, port=8801, live=None):
+    """backend: the store that is read (the copy MIA runs on); live: the live store that every change is written to (the same store when it is None)"""
     app = Flask(__name__, static_folder=None)
     model = graph_model.GraphModel(Storage(backend), author="viewer")
+    live_backend = live if live is not None else backend
+    wmodel = model if live is None else graph_model.GraphModel(Storage(live_backend), author="viewer")   # writes go to the live store (FR-95)
     service = SessionService(accounts_store)
     box = make_toolbox()
     app.register_blueprint(accounts_api.create_accounts_blueprint(service))
@@ -99,6 +112,14 @@ def create_app(backend, accounts_store, port=8801):
         data = head["doc"]["data"]
         return {"id": graph_id, "kind": data["kind"], "version": head["version"], "author": head["author"], "time": head["time"],
                 "description": data["description"], "steps": len(data["nodes"]), "connections": len(data["edges"])}
+
+    @app.errorhandler(Exception)
+    def failed(error):
+        if isinstance(error, HTTPException):
+            return error
+        if isinstance(error, StorageError) or not _unreachable(error):
+            raise error
+        return jsonify({"error": "store_unreachable"}), 503
 
     @app.get("/api/v2/graphs")
     def list_graphs():
@@ -163,12 +184,64 @@ def create_app(backend, accounts_store, port=8801):
 
     def full_graph(graph_id, body):
         """the graph a request describes: its steps and connections, with the header of the stored graph"""
-        stored = model.read_graph(graph_id)
+        stored = wmodel.read_graph(graph_id)
         sent = body.get("graph") if isinstance(body.get("graph"), dict) else {}
         if not isinstance(sent.get("nodes"), list) or not isinstance(sent.get("edges"), list):
             return None
         return {"id": graph_id, "context_graph_id": stored["context_graph_id"], "testbench_id": stored["testbench_id"],
                 "description": sent.get("description", stored["description"]), "nodes": sent["nodes"], "edges": sent["edges"]}
+
+    @app.post("/api/v2/graphs/<path:graph_id>/restore")
+    def restore(graph_id):
+        """makes an earlier version the current one again: its content is saved as a new version; nothing is deleted (FR-73)"""
+        denied = owner_only()
+        if denied:
+            return denied
+        body = request.get_json(silent=True) or {}
+        version = body.get("version")
+        try:
+            versions = [e["version"] for e in wmodel.graph_versions(graph_id)]
+            if not isinstance(version, int) or isinstance(version, bool) or version not in versions:
+                return jsonify({"error": "not_found", "detail": "version"}), 404
+            current = max(versions)
+            old = wmodel.read_graph(graph_id, version)
+        except StorageError:
+            return jsonify({"error": "not_found"}), 404
+        wmodel.author = g.account
+        saved = wmodel.save_graph(old)
+        if not saved.saved:
+            return jsonify({"error": "refused", "rule": saved.rule, "detail": saved.detail}), 422
+        return jsonify({"version": saved.version, "restored": version, "changed": saved.version != current})
+
+    @app.get("/api/v2/status")
+    def status():
+        """whether the live store can be reached, and how far the copy is behind it (versions of graphs the copy does not have yet)"""
+        if live is None:
+            return jsonify({"split": False, "live": "reachable", "lag": 0})
+        try:
+            lag = 0
+            for graph_id in live_backend.ids("graphs"):
+                lag += max(0, len(live_backend.versions("graphs", graph_id)) - len(backend.versions("graphs", graph_id)))
+            return jsonify({"split": True, "live": "reachable", "lag": lag})
+        except Exception as error:                                  # noqa: BLE001 - only an unreachable store is told, anything else is a bug
+            if not _unreachable(error):
+                raise
+            return jsonify({"split": True, "live": "unreachable", "lag": None})
+
+    @app.post("/api/v2/sync")
+    def sync():
+        """brings the copy up to date with the live store (one way; the first form of the sync, CP9): the whole move, all or nothing"""
+        denied = owner_only()
+        if denied:
+            return denied
+        if live is None:
+            return jsonify({"error": "no_live_store"}), 409
+        try:
+            return jsonify(graph_store_move.move_store(live_backend, backend))
+        except StorageError as error:
+            if error.rule == "move_refused":
+                return jsonify({"error": "move_refused", "graphs": error.detail["graphs"]}), 409
+            raise
 
     @app.get("/api/v2/toolbox")
     def toolbox():
@@ -206,7 +279,7 @@ def create_app(backend, accounts_store, port=8801):
             return denied
         body = request.get_json(silent=True) or {}
         try:
-            current = max(e["version"] for e in model.graph_versions(graph_id))
+            current = max(e["version"] for e in wmodel.graph_versions(graph_id))
             graph = full_graph(graph_id, body)
         except StorageError:
             return jsonify({"error": "not_found"}), 404
@@ -217,8 +290,8 @@ def create_app(backend, accounts_store, port=8801):
         rules = graph_rules_proto.rule_report(graph)
         if rules:
             return jsonify({"error": "rules_broken", "rules": rules}), 422
-        model.author = g.account                          # the version names the account that kept it (the prototype serves one request at a time)
-        saved = model.save_graph(graph)
+        wmodel.author = g.account                         # the version names the account that kept it (the prototype serves one request at a time)
+        saved = wmodel.save_graph(graph)
         if not saved.saved:
             return jsonify({"error": "refused", "rule": saved.rule, "detail": saved.detail, "named": saved.named}), 422
         return jsonify({"version": saved.version, "changed": saved.version != current})
@@ -241,6 +314,7 @@ def create_app(backend, accounts_store, port=8801):
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--store", required=True)
+    ap.add_argument("--live", default=None, help="the live store the changes are written to (files:<folder> or postgres:<url>); --store is then the copy that is read")
     ap.add_argument("--accounts", default=os.path.join(REPO, "data", "proto_accounts"))
     ap.add_argument("--user", default="owner:secret")
     ap.add_argument("--port", type=int, default=8801)
@@ -253,4 +327,4 @@ if __name__ == "__main__":
         except Exception as err:      # the account exists with another password
             print("account", name, "exists:", err)
     print("viewer: http://127.0.0.1:%d/  (login %s)" % (a.port, name))
-    create_app(open_store(a.store), acc, a.port).run("127.0.0.1", a.port)
+    create_app(open_store(a.store), acc, a.port, open_store(a.live) if a.live else None).run("127.0.0.1", a.port)
