@@ -137,7 +137,7 @@ The items of `../../top-level-spec.md` (the aggregate of the subgoal specs in sc
 | Cases the owner accepted in `validation.md` (met rows) | `rounds/02/validation.md` | adopt | Proposed by the agent, for the owner to confirm or change: become the `accepted-cases.md` of Plan and the witnesses of the binding map |
 | Sample store maker and the 15 converted graphs as test data | `proto_checks/make_sample_store.py` | adapt | Proposed by the agent, for the owner to confirm or change: reused as fixtures for the real tests |
 
-Decided by: –   <!-- the owner decides: change any Decision cell, then sign here; the agent's proposal does not count until then -->
+Decided by: Stefan Reiterer   <!-- the owner decides: change any Decision cell, then sign here; the agent's proposal does not count until then -->
 
 ## Proposed TLS changes
 - –

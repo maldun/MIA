@@ -2,8 +2,8 @@
 
 <!-- Written for the owner at each breakpoint (★), filled during and after the session. The owner, not the agent, judges. One row per item of the scope. -->
 
-Validated by: –
-Date: – · Prototype state: branch prototype/g-v4 · Where it ran: –
+Validated by: Stefan Reiterer
+Date: 20.11.2026 · Prototype state: branch prototype/g-v4 · Where it ran: –
 
 ## Outcomes
 | Item | What the user tried (Given / When from the outcome) | What was observed | Result (met / partly / not met / not tried) | Finding |
@@ -39,7 +39,7 @@ Date: – · Prototype state: branch prototype/g-v4 · Where it ran: –
 | FR-92 | Given a processing step selected while editing: a form with the tool; a data step: value and parameters; a loop-controlling step: stop limits; type something wrong and read the reason; other stored fields as JSON text | tried by the owner 2026-11-20 (statement: all steps tried except those named as not tried): worked | met | – |
 | FR-93 | Given a live and a copy folder (`python graph_store_sync.py files:<live> files:<copy> --lag` shows the lag per graph): change a graph in the live store through the viewer started on the live folder only, look at the lag, `python graph_store_sync.py ...` or `Sync the copy now`: the copy equals it. Then write a version on the copy and another on the live store for the same graph: the header names the graph as differing, the sync names the version it set aside and the file in `data/proto_aside` (or `--aside`); the file holds the copy's version. Start the viewer with `--auto-sync` and stop it with Ctrl+C: both syncs are printed | steps 1 to 4 tried by the owner 2026-11-20: worked (the optional step 6, unreachable live store, was not tried) | met | – |
 | FR-94 | Given a step selected while not editing (owner): under its fields "Copy ... into another graph": search a graph, choose it, `Copy the step`; open that graph: the step is there with the same content and a new version; change either step and keep: the other is unchanged; a name that is used there is refused with the reason | tried by the owner 2026-11-20 (statement: all steps tried except those named as not tried): worked | met | – |
-| FR-95 | Given the viewer started with `--store <copy> --live <live>`: keep a change (the live store gets it, the header says the copy is behind), `Sync the copy now`; then remove the live folder: the header says NOT REACHABLE, the edit button is disabled, looking still works | tried by the owner 2026-11-20 (statement: all steps tried except those named as not tried): keep, the copy behind, the sync worked; the step that removes the live folder (live store not reachable) was not tried | partly | – |
+| FR-95 | Given the viewer started with `--store <copy> --live <live>`: keep a change (the live store gets it, the header says the copy is behind), `Sync the copy now`; then remove the live folder: the header says NOT REACHABLE, the edit button is disabled, looking still works | tried by the owner 2026-11-20 (statement: all steps tried except those named as not tried): keep, the copy behind, the sync worked; the step that removes the live folder (live store not reachable) was not tried | partly | FB-2 |
 | NFR-10 | Given you have never used the viewer: from the login find `research.escalate@1`, open it and read the content of one step without instructions; note the time | tried by the owner 2026-11-20 (statement: all steps tried except those named as not tried): worked | met | – |
 | NFR-11 | Given `research.escalate@1` (54 steps): how long until the picture is usable, and do moving and selecting stay smooth? | tried by the owner 2026-11-20 (statement: all steps tried except those named as not tried); no time or observation was noted | met | – |
 | NFR-12 | Given you are not logged in, open `/api/v2/graphs` and a graph: nothing is shown; log in once, log out | tried by the owner 2026-11-20 (statement: all steps tried except those named as not tried): worked | met | – |
@@ -59,6 +59,6 @@ Date: – · Prototype state: branch prototype/g-v4 · Where it ran: –
 ## What this changes
 | Finding | Goes to | Change |
 |---|---|---|
-| – | – | – |
+| FB-2: the step of FR-95 "remove the live folder: the header says NOT REACHABLE, the edit button is disabled, looking still works" was not tried (owner, 2026-11-20); the behaviour is only checked by `proto_checks/cp9_check.py` | Plan: becomes a scenario and an acceptance test of FR-95; the owner may try it by hand before then | none to the prototype |
 
 Hand-over to Plan: the prototype's specs are taken over as drafts and changed by the table above, then go through the normal Plan pipeline.
