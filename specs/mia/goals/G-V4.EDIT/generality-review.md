@@ -66,3 +66,22 @@ The wording of the amendments in section 6 (approve, change or leave).
 2. Where do the node types and field schemas of a context graph come from: the categories of the builder (goal C), or a fixed list in the profile until then?
 3. May a step be copied between graphs of different kinds (FR-94)?
 4. What does the review gate: the plan of EDIT only, the plans of RULES, VIEW and CORE as well, or only the EDIT prototype round?
+
+## 8. The kind flag (owner's addition, 2026-11-21)
+**Remark of the owner:** like the copy rule, the structural checks differ between context graphs and workflow graphs (and later other kinds); there should be a flag for the kind. The editor stays mostly generic, but the flag steers the things that must stay consistent: the checks, whether a copy is allowed, and so on.
+
+**What exists:** the stored header of every graph already has a field `kind` (`workflow` or `context`; the schema is an enumeration of these two, IF-301 v2). The prototype stores and reads it (round 03) and reads the table set from it. Nothing else uses it yet: the check route, the keep route and the copy route treat every graph as a workflow graph.
+
+**Proposal:** the `kind` of the header is the flag. A **kind** is a named entry (a registry, one place in the code and the spec) that says, for graphs of that kind:
+| What depends on the flag | Today (prototype) | With the flag |
+|---|---|---|
+| the structural rule set (check while editing, keep, save, run) | the eight workflow rules for every graph | the rule set of the kind: workflow = the eight; context = its own (CONTEXT, FR-75); a further kind brings its own |
+| the member tables of the store | by kind (round 03) | unchanged |
+| the editor profile (node types, fields, connection fields, choice lists) | hard-coded workflow | the profile of the kind |
+| the copy of a step (FR-94) | not checked | refused when the kinds differ, naming both kinds |
+| marks and shapes in the viewer and the list | workflow shapes only | from the profile of the kind; the list shows the kind |
+| running | any graph | only a kind that says it can run (workflow); a run of another kind is refused before any step |
+| comparison and playback | kind-free | unchanged (compare only graphs of the same kind: a comparison across kinds is refused) |
+| the stored enumeration of kinds (IF-301 v2) | two fixed values | the registry is the list; a new kind is an amendment of IF-301 with its tables |
+
+**Open:** what happens to a graph whose kind is not in the registry (an older program opening a newer store).
