@@ -59,8 +59,8 @@ Two profiles to begin with: **workflow** (the fixed list of IF-301: data, proces
 | CONTEXT FR-75 | "…with the structural rules of workflow graphs and the rules for categories and budgets" | unchanged; **note:** which of the workflow rules are structural for a context graph (identity, ends and duplicates are; order and the data/processing alternation probably are not) is decided in CONTEXT's plan; the prototype round 03 assumed identity and ends only (ASM-4) |
 | EDIT scope and CONTEXT scope | EDIT: workflow editor; CONTEXT: edit context graphs and view a run's graph | EDIT: the general editor (core and workflow profile); CONTEXT: the context profile, its rule set, the run view; no change of the requirements' text |
 
-## 7. Still open
-The wording of the amendments in section 6 (approve, change or leave).
+## 7. Applied
+The owner approved the amendments "as written" on 2026-11-21 (D-405). They are applied to the subgoal specs of VIEW (FR-48, FR-50), GRAPHAPI (FR-63, FR-64), EDIT (FR-72, FR-73, FR-92, FR-94, scope) and CONTEXT (scope note, risk row), and to the aggregate `../G-V4/top-level-spec.md`. The fingerprint of the protected part of the aggregate is now `cb0a21233175` (row in `../G-V4/prototype/rounds/03/run.md`).
 
 1. Is the principle right: one editor, a profile per kind, workflow and context as the first two?
 2. Where do the node types and field schemas of a context graph come from: the categories of the builder (goal C), or a fixed list in the profile until then?

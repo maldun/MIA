@@ -1,6 +1,6 @@
 # Top-Level Specification: Context graph editing (G-V4.CONTEXT)
 
-**Status:** Approved by the owner (maldun, 2026-11-20, D-390)
+**Status:** Approved by the owner (maldun, 2026-11-20, D-390); scope note by the owner 2026-11-21 (D-403 to D-405): the editor's functions are EDIT's, this subgoal brings the description of the context kind, its rule set and the run view; the text of FR-75 and FR-97 is unchanged
 **Owner:** Stefan Reiterer   **Date:** 2026-11-20
 **Project / deliverable:** MIA, subgoal CONTEXT of G-V4 (decided by the owner 2026-11-20, D-369). Requirement IDs provisional (FR-75 moved from G-V4.EDIT, FR-97 new); Plan assigns it in `requirements.md`.
 
@@ -9,7 +9,7 @@ A context graph is the knowledge a skill reads when it runs. The owner wants to 
 
 ## 2. Scope
 ### In scope
-Changing stored context graphs with the editor's checks, versions and restore (FR-75), and showing the context graph of a finished run read-only (FR-97, new number).
+Changing stored context graphs: the description of the context kind for the general editor (its node types from a fixed list for now, the builder's categories later), its rule set, with the editor's versions and restore (FR-75), and showing the context graph of a finished run read-only (FR-97, new number).
 ### Out of scope (non-goals)
 Building context graphs from documents and runs, categories as schemas, proposals of items (goal C, FR-41, FR-42, N-6); everything the editor does for workflow graphs (G-V4.EDIT).
 
@@ -48,6 +48,7 @@ As in `../G-V4.VIEW/top-level-spec.md` section 4.
 | Context graphs are not yet in the stored form of workflow graphs | FR-75 cannot be built first | depends on G-V4.GRAPHSTORE; owner |
 | Whether goal C (builder, schemas) joins this subgoal | scope | **decided (D-379):** no; the builder, schema categories and proposals wait for their own goal |
 | Whether viewing and storing context graphs stay in VIEW (FR-48) and GRAPHSTORE (FR-57) | cuts | **decided (D-374, D-378):** yes; this subgoal edits stored context graphs and shows a run's graph |
+| Which of the workflow rules are structural for a context graph (FR-75: "the structural rules of workflow graphs"): identity, ends and duplicates are, order and the data/processing alternation probably are not | the rule set of the context kind | **open (D-403):** decided in this subgoal's plan; prototype round 03 assumed identity and ends only (ASM-4) |
 | A run's context graph is rebuilt from its events and never stored | FR-97 needs a read route and the log must be readable | **decided (D-379):** shown read-only here (answers Q-5 of N-5) |
 
 ### Prototype decisions
