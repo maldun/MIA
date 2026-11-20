@@ -57,6 +57,7 @@ Hard bounds: **none**. Nothing the owner says depends on how fast a graph is sav
 - Text: A graph saved, changed twice, read and listed shall give the newest state, all three versions with account and time, and no version missing, for graphs with data, processing and loop-controlling steps, as workflow graph and as context graph.
 - Method: the golden examples AC-001 and AC-003 on the 15 converted skill graphs, the sample graph with a loop-controlling step (`sample.code`) and one context graph (to be added in round 03), run on files and on PostgreSQL.
 - Metric: for every example 3 of 3 versions listed with author and time, 0 versions lost, 0 differing bytes between what was saved and what is read; identical result on both backends.
+- Rationale: FR-57 is an outcome of the owner, "nothing disappears"; counting versions and comparing what is read with what was saved decides it on real graphs, not on toy cases.
 - Reference: Fedora host, Python 3.12, PostgreSQL 16 under podman.
 - Detail in: the test requirements of this subgoal (to be written in step 3).
 - Status: Draft
@@ -66,6 +67,7 @@ Hard bounds: **none**. Nothing the owner says depends on how fast a graph is sav
 - Parent: FR-60
 - Text: Changing a step in one of two graphs that share its local name shall not add a version to any record of the other graph and shall list only changes of its own graph in the step's history.
 - Method: AC-002 on the 15 converted graphs, which hold 13 shared local names (4 of different content).
+- Rationale: the converted skills really share local names (13 of 107, 4 with different content), so the owner's case is the normal case, not a corner.
 - Metric: 0 new record versions in the other graph; the history of the changed step has exactly the changes made in its graph.
 - Reference: as HR-003.
 - Detail in: the test requirements of this subgoal.
@@ -76,6 +78,7 @@ Hard bounds: **none**. Nothing the owner says depends on how fast a graph is sav
 - Parent: NFR-16
 - Text: A save that is refused, or interrupted after any number of writes, shall leave every graph entirely as before or entirely new, shall not count the refused save as a version, and a repeated save shall finish it.
 - Method: fault injection at every write position of one save (the position k = 0 up to the last write), for a workflow graph and a context graph, on files and on PostgreSQL (the connection fails at write k); a refused save by a graph with a cycle, a broken rule or an unscoped ID.
+- Rationale: an interruption can happen after any write; only trying every position shows that no position leaves a half graph, and the number of writes of one save is small enough to try them all.
 - Metric: for every k and every case 0 graphs that are listed with a missing member, 0 counted versions for a refused save, 100 % of repeated saves reach the full graph. Pass only when all k pass; no sampling.
 - Reference: as HR-003.
 - Detail in: the test requirements of this subgoal.
