@@ -10,6 +10,7 @@ Routes (a draft of IF-104 v2, read side; the frozen v1 stays working):
 Everything except the login and the page needs a session (NFR-12). The page is graph_app_v2/ (its own files first, then graph_app/).
 """
 import argparse
+import json
 import os
 import sys
 
@@ -211,7 +212,7 @@ def create_app(backend, accounts_store, port=8801, live=None):
         saved = wmodel.save_graph(old)
         if not saved.saved:
             return jsonify({"error": "refused", "rule": saved.rule, "detail": saved.detail}), 422
-        return jsonify({"version": saved.version, "restored": version, "changed": saved.version != current})
+        return jsonify({"version": saved.version, "restored": version, "changed": saved.version != current, **sync_graph(graph_id)})
 
     @app.get("/api/v2/status")
     def status():
@@ -255,6 +256,16 @@ def create_app(backend, accounts_store, port=8801, live=None):
             out.append({"id": tid, "trust": found["trust"], "lifecycle": found["lifecycle"], "controller": tid.startswith("control.")})
         return jsonify(out)
 
+    def sync_graph(graph_id):
+        """after a change in the live store the copy gets that graph at once (the owner expects to see what was just done); {"synced": bool, "sync_problem": text}"""
+        if live is None:
+            return {"synced": True}
+        try:
+            graph_store_move.move_graph(live_backend, backend, graph_id)
+            return {"synced": True}
+        except StorageError as error:
+            return {"synced": False, "sync_problem": json.dumps(error.detail.get("graphs", error.detail)) if isinstance(error.detail, dict) else str(error.detail)}
+
     @app.get("/api/v2/me")
     def me():
         account = getattr(g, "account", None)
@@ -297,7 +308,7 @@ def create_app(backend, accounts_store, port=8801, live=None):
         saved = wmodel.save_graph(graph)
         if not saved.saved:
             return jsonify({"error": "refused", "rule": saved.rule, "detail": saved.detail, "named": saved.named}), 422
-        return jsonify({"version": saved.version, "changed": saved.version != current})
+        return jsonify({"version": saved.version, "changed": saved.version != current, **sync_graph(graph_id)})
 
     @app.get("/")
     def index():

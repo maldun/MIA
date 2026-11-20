@@ -59,10 +59,10 @@ check("FR-70 keeping a graph that breaks a rule is refused with the rule named, 
 changed = copy.deepcopy(cur); changed["nodes"][1]["data"]["toolbox_id"] = "tool.edited"
 r = o.put(U, json=body(changed, expected_version=4), headers=ORIGIN)
 v = o.get(U + "/versions").get_json()
-check("FR-70 a change that keeps every rule is kept as a new version by the account that kept it", r.status_code == 200 and r.get_json() == {"version": 5, "changed": True} and [e["version"] for e in v] == [1, 2, 3, 4, 5] and v[-1]["author"] == "owner")
+check("FR-70 a change that keeps every rule is kept as a new version by the account that kept it", r.status_code == 200 and {k: r.get_json()[k] for k in ("version", "changed")} == {"version": 5, "changed": True} and [e["version"] for e in v] == [1, 2, 3, 4, 5] and v[-1]["author"] == "owner")
 check("FR-71 the earlier version is still there as it was", o.get(U + "?version=4").get_json()["graph"] == cur and o.get(U).get_json()["graph"]["nodes"][1]["data"]["toolbox_id"] == "tool.edited")
 r = o.put(U, json=body(changed), headers=ORIGIN)
-check("FR-71 keeping the same graph again makes no new version", r.get_json() == {"version": 5, "changed": False} and len(o.get(U + "/versions").get_json()) == 5)
+check("FR-71 keeping the same graph again makes no new version", {k: r.get_json()[k] for k in ("version", "changed")} == {"version": 5, "changed": False} and len(o.get(U + "/versions").get_json()) == 5)
 more = copy.deepcopy(changed); more["nodes"].append({"id": "var.extra", "data": {"type": "data", "value": 1}}); more["edges"].append({"id": "e7", "from": "step.write", "to": "var.extra", "data": {}})
 r = o.put(U, json=body(more), headers=ORIGIN)
 check("FR-68 a new step and a new connection are kept together", r.status_code == 200 and r.get_json()["version"] == 6 and len(o.get(U).get_json()["graph"]["nodes"]) == 4)

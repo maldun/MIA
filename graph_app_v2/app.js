@@ -239,7 +239,7 @@ $('restore').addEventListener('click', async () => {
     await loadStoreStatus();
     await open(chosen);
     $('status').textContent = body.changed
-      ? `Version ${shown} was restored as version ${body.version}.${storeStatus?.behind?.[chosen] ? ` It is in the live store; you are looking at the copy (version ${current.version}): use "Sync the copy now" to see it.` : ''}`
+      ? `Version ${shown} was restored as version ${body.version}.${body.synced === false ? ` It is in the live store, but the copy could not be updated (${body.sync_problem}): you are looking at the copy (version ${current.version}).` : ''}`
       : `Version ${shown} has the same content as the current version (${body.version}): nothing was restored.`;
     $('sync').classList.toggle('attention', Boolean(storeStatus?.lag));
     return;
@@ -324,7 +324,7 @@ $('add-conn').addEventListener('click', () => {
 $('keep').addEventListener('click', async () => {
   const res = await api(`/api/v2/graphs/${encodeURIComponent(chosen)}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ graph: { nodes: draft.nodes, edges: draft.edges }, expected_version: current.version }) });
   const body = await res.json();
-  if (res.ok) { stopEdit(); note(''); await loadStoreStatus(); await open(chosen); $('status').textContent = body.changed ? `Kept as version ${body.version}.${storeStatus?.behind?.[chosen] ? ` It is in the live store; you are looking at the copy (version ${current.version}): use "Sync the copy now" to see it.` : ''}` : 'Nothing had changed: no new version.'; $('sync').classList.toggle('attention', Boolean(storeStatus?.lag)); return; }
+  if (res.ok) { stopEdit(); note(''); await loadStoreStatus(); await open(chosen); $('status').textContent = body.changed ? `Kept as version ${body.version}.${body.synced === false ? ` It is in the live store, but the copy could not be updated (${body.sync_problem}): you are looking at the copy (version ${current.version}).` : ''}` : 'Nothing had changed: no new version.'; $('sync').classList.toggle('attention', Boolean(storeStatus?.lag)); return; }
   if (res.status === 409) { note(`The graph changed meanwhile (now version ${body.current}). Nothing was overwritten; discard the changes and open it again.`); return; }
   if (res.status === 422 && body.rules) { note('The change breaks a rule and was not kept.'); $('rules').replaceChildren(...body.rules.map((r) => { const li = document.createElement('li'); li.textContent = `${r.rule}: ${r.text} (${r.parts.join(', ')})`; return li; })); return; }
   if (res.status === 503) { note('The live store cannot be reached: nothing was kept. Editing is not possible now.'); return; }

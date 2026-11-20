@@ -20,10 +20,10 @@ HEADER_TABLE = "graphs"
 GRAPH_TABLES = ("graph_nodes", "graph_edges", "context_nodes", "context_edges", HEADER_TABLE)
 
 
-def _problems(source, target):
-    """{graph id: reason} of the graphs that cannot be moved or that conflict with the target."""
+def _problems(source, target, only=None):
+    """{graph id: reason} of the graphs that cannot be moved or that conflict with the target (only those named, when `only` is given)."""
     found = {}
-    for graph_id in source.ids(HEADER_TABLE):
+    for graph_id in (only if only is not None else source.ids(HEADER_TABLE)):
         entries = source.versions(HEADER_TABLE, graph_id)
         try:
             _check_entries(HEADER_TABLE, graph_id, entries)
@@ -55,6 +55,29 @@ def _problems(source, target):
                     if there != wanted[:len(there)]:
                         found[graph_id] = "conflict: the target has a different history of %s" % member["id"]
     return found
+
+
+def move_graph(source, target, graph_id):
+    """One graph with all its steps and connections and all its versions, from the source to the target (after a change in the live store, the copy gets it at once).
+    The same rules as move_store: checked first, a conflict or a graph that cannot be moved is refused with the graph named and nothing is written; repeatable."""
+    problems = _problems(source, target, only=[graph_id])
+    if problems:
+        raise StorageError("invalid", rule="move_refused", detail={"graphs": problems})
+    members = []
+    for entry in source.versions(HEADER_TABLE, graph_id):
+        data = entry["doc"]["data"]
+        node_table, edge_table = MEMBER_TABLES[data["kind"]]
+        for key, table in (("nodes", node_table), ("edges", edge_table)):
+            for member in data[key]:
+                if (table, member["id"]) not in members:
+                    members.append((table, member["id"]))
+    added = 0
+    for table, record_id in members + [(HEADER_TABLE, graph_id)]:           # the steps first, the header last
+        wanted, have = source.versions(table, record_id), target.versions(table, record_id)
+        for entry in wanted[len(have):]:
+            target.append(table, record_id, entry)
+            added += 1
+    return {"graphs": 1, "records": added}
 
 
 def move_store(source, target):
