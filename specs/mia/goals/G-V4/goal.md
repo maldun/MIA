@@ -100,8 +100,17 @@ To be written in Plan.
 ## Frozen requirements
 | Requirement | Shared by | Reason |
 |---|---|---|
+| IF-102 | G-V4.GRAPHSTORE, G-V4.GRAPHAPI | the storage layer interface, read by both groups; changes only by a joint amendment (scoped record IDs, sync) |
+| IF-104 | G-V4.GRAPHSTORE, G-V4.GRAPHAPI | the graph interface for the app; IF-104 v2 is written at G-V4 level (D-368) and shared with VIEW, EDIT, REPLAY and CONTEXT |
+| IF-203 | G-V4.GRAPHSTORE, G-V4.GRAPHAPI | the workflow library interface, used by storage and by the run |
+| IF-301 | G-V4.GRAPHSTORE, G-V4.GRAPHAPI | the graph tables; scoped record IDs and the rules refusal live here (D-368) |
+| REQ-API-014 | G-V4.GRAPHSTORE, G-V4.GRAPHAPI | the workflow and graph routes of the backend |
+| REQ-API-016 | G-V4.GRAPHSTORE, G-V4.GRAPHAPI | graph routes under the session, author of a version |
+| REQ-BE-076 | G-V4.GRAPHSTORE, G-V4.GRAPHAPI | the backend reads graphs through the library |
+| REQ-SLY-012 | G-V4.GRAPHSTORE, G-V4.GRAPHAPI | the storage notices after a write |
+| REQ-WFM-026 | G-V4.GRAPHSTORE, G-V4.GRAPHAPI | the library keeps the versions of workflows and context graphs |
 
-None yet: the subgoals share the stored graph form (G-V4.GRAPHSTORE); Plan freezes the requirements they share.
+The new shared items are frozen when Plan step 1b writes them: IF-104 v2, the scoped record IDs and their refusal (IF-301), the one rule set of eight rules, and the arrangement record. Until then they are named in `consistency-review.md` section 4.
 
 ## Agreement
 | Subgoal | Agreed by | Date |

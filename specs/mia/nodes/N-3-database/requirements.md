@@ -236,4 +236,5 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Acceptance criterion: AC-15, AC-27: the contract suite test_if_102_storage.py passes against the mock (stage 1) and the Database (stage 2)
 - Verified by: TC-IF-102-01..07
 - Status: Verified
+- Frozen: G-V4
 - History: v0, amendment 5/7 (2026-10-25)

@@ -172,6 +172,7 @@ The gateway of the Backend: the Socket.IO and REST surface (IF-101, IF-104), acc
 - Acceptance criterion: AC-16: with the fake storage each of the six operations works; an invalid graph is refused with the rule named (exact)
 - Verified by: TC-API-014
 - Status: Verified
+- Frozen: G-V4
 - History: –
 
 ### REQ-API-015 – Realise IF-101
@@ -196,6 +197,7 @@ The gateway of the Backend: the Socket.IO and REST surface (IF-101, IF-104), acc
 - Acceptance criterion: AC-16: the contract suite test_if_104_graph_api.py passes against the API and accounts (stage 2)
 - Verified by: TC-API-016
 - Status: Verified
+- Frozen: G-V4
 - History: –
 
 ### REQ-API-017 – Logout

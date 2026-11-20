@@ -102,9 +102,9 @@ None yet; the shared interfaces are marked in the next step of Plan step 0.
 ## Agreement
 | Subgoal | Agreed by | Date |
 |---|---|---|
-| G-V4.GRAPHSTORE.CORE | [ ] Stefan Reiterer (owner) | |
-| G-V4.GRAPHSTORE.TRANSFER | [ ] Stefan Reiterer (owner) | |
-| G-V4.GRAPHSTORE.MIGRATION | [ ] Stefan Reiterer (owner) | |
+| G-V4.GRAPHSTORE.CORE | [x] Stefan Reiterer (owner) | 2026-11-20 |
+| G-V4.GRAPHSTORE.TRANSFER | [x] Stefan Reiterer (owner) | 2026-11-20 |
+| G-V4.GRAPHSTORE.MIGRATION | [x] Stefan Reiterer (owner) | 2026-11-20 |
 
 ## Phases
 | Phase | State | Record or reason |

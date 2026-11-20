@@ -11,7 +11,7 @@ Proposed 2026-11-20 by the owner (maldun), D-392: G-V4.GRAPHAPI is cut into thre
 - Line of work: goal/v4.graphapi.run
 - Subgoals: –
 - Depends on: G-V4.GRAPHSTORE.CORE (the loader reads the stored form); G-V4.GRAPHAPI.RULES
-- Status: Proposed
+- Status: Agreed
 
 ## Outcome criteria
 | ID | Expected outcome | Derived from |
@@ -35,7 +35,7 @@ Group spec FR-65, NFR-17; `../G-V4.GRAPHAPI/spikes.md` (networkx spike); D-375.
 ## Agreement
 | Subgoal | Agreed by | Date |
 |---|---|---|
-| G-V4.GRAPHAPI.RUN | [ ] Stefan Reiterer (owner) | |
+| G-V4.GRAPHAPI.RUN | [x] Stefan Reiterer (owner) | 2026-11-20 |
 
 ## Phases
 | Phase | State | Record or reason |

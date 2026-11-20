@@ -916,6 +916,7 @@ The server and accounts, the chat agent, workflow management, workflow execution
 - Acceptance criterion: AC-16: with the fake storage each of the six operations works; an invalid graph is refused with the rule named (exact)
 - Verified by: TC-API-014, TC-WFM-026, TC-N2-005
 - Status: Verified
+- Frozen: G-V4
 - History: –
 
 ### REQ-BE-078 – Skill turns in the chat
@@ -970,6 +971,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Acceptance criterion: AC-16, AC-27: the contract suite test_if_104_graph_api.py passes against the mock (stage 1) and the Backend (stage 2)
 - Verified by: TC-IF-104-01..05, TC-API-016, TC-N2-005
 - Status: Verified
+- Frozen: G-V4
 - History: v0, amendment 5/7 (2026-10-25)
 
 ### IF-105 – Evaluation access for the harness

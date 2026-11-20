@@ -11,7 +11,7 @@ Proposed 2026-11-20 by the owner (maldun), D-392: G-V4.GRAPHSTORE is cut into th
 - Line of work: goal/v4.graphstore.transfer
 - Subgoals: –
 - Depends on: G-V4.GRAPHSTORE.CORE (one stored truth)
-- Status: Proposed
+- Status: Agreed
 
 ## Outcome criteria
 | ID | Expected outcome | Derived from |
@@ -35,7 +35,7 @@ Group spec FR-58, FR-59, FR-93, NFR-15; decisions D-372 to D-374; `../G-V4.GRAPH
 ## Agreement
 | Subgoal | Agreed by | Date |
 |---|---|---|
-| G-V4.GRAPHSTORE.TRANSFER | [ ] Stefan Reiterer (owner) | |
+| G-V4.GRAPHSTORE.TRANSFER | [x] Stefan Reiterer (owner) | 2026-11-20 |
 
 ## Phases
 | Phase | State | Record or reason |

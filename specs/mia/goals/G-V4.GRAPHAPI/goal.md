@@ -78,9 +78,9 @@ None yet; the shared interfaces are marked in the next step of Plan step 0.
 ## Agreement
 | Subgoal | Agreed by | Date |
 |---|---|---|
-| G-V4.GRAPHAPI.RULES | [ ] Stefan Reiterer (owner) | |
-| G-V4.GRAPHAPI.RUN | [ ] Stefan Reiterer (owner) | |
-| G-V4.GRAPHAPI.CODE | [ ] Stefan Reiterer (owner) | |
+| G-V4.GRAPHAPI.RULES | [x] Stefan Reiterer (owner) | 2026-11-20 |
+| G-V4.GRAPHAPI.RUN | [x] Stefan Reiterer (owner) | 2026-11-20 |
+| G-V4.GRAPHAPI.CODE | [x] Stefan Reiterer (owner) | 2026-11-20 |
 
 ## Phases
 | Phase | State | Record or reason |

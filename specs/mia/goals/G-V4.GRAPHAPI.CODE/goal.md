@@ -11,7 +11,7 @@ Proposed 2026-11-20 by the owner (maldun), D-392: G-V4.GRAPHAPI is cut into thre
 - Line of work: goal/v4.graphapi.code
 - Subgoals: –
 - Depends on: G-V4.GRAPHAPI.RUN; the threat entry THR-013 is written in its plan
-- Status: Proposed
+- Status: Agreed
 
 ## Outcome criteria
 | ID | Expected outcome | Derived from |
@@ -34,7 +34,7 @@ Group spec FR-66, FR-67; decisions D-360, D-390; `../G-V4.GRAPHAPI/research.md` 
 ## Agreement
 | Subgoal | Agreed by | Date |
 |---|---|---|
-| G-V4.GRAPHAPI.CODE | [ ] Stefan Reiterer (owner) | |
+| G-V4.GRAPHAPI.CODE | [x] Stefan Reiterer (owner) | 2026-11-20 |
 
 ## Phases
 | Phase | State | Record or reason |

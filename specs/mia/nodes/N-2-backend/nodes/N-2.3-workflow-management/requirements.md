@@ -317,6 +317,7 @@ The library of workflows and skills as versioned data, the graph rules, specific
 - Acceptance criterion: AC-16: with the fake storage each of the six operations works; an invalid graph is refused with the rule named (exact)
 - Verified by: TC-WFM-026
 - Status: Verified
+- Frozen: G-V4
 - History: –
 
 ## Interface requirements
@@ -332,9 +333,9 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-10, AC-16, AC-28: the contract suite test_if_203_workflow_library.py passes against the mock (stage 1) and the Workflow management (stage 2)
 - Verified by: TC-IF-203-01..04
-- Frozen: G-V2
+- Frozen: G-V4
 - Status: Verified
-- History: v0, amendment 5/7 (2026-10-25)
+- History: v0, amendment 5/7 (2026-10-25); frozen by G-V4 (D-393, 2026-11-20) after G-V2 closed
 
 ### REQ-WFM-027 – Keyword extension with approval
 - Level: low   Subject: TaskRuntime

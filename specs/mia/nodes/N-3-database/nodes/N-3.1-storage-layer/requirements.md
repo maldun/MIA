@@ -148,6 +148,7 @@ The PostgreSQL database and the one door to it (IF-102): immutable versions, acc
 - Acceptance criterion: AC-15: the contract suite test_if_102_storage.py passes against the Storage layer (stage 2)
 - Verified by: TC-SLY-001
 - Status: Verified
+- Frozen: G-V4
 - History: –
 
 ### REQ-SLY-013 – Depth of a document

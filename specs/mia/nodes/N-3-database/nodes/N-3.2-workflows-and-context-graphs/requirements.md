@@ -69,9 +69,9 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-27: the contract suite test_if_301_graph_tables.py passes against the mock (stage 1) and the Graph tables (stage 2)
 - Verified by: TC-IF-301-01..04
-- Frozen: G-V2
+- Frozen: G-V4
 - Status: Verified
-- History: v0, amendment 5/7 (2026-10-25); v1, A-60 (2026-10-31): session limit and malformed parts
+- History: v0, amendment 5/7 (2026-10-25); v1, A-60 (2026-10-31): session limit and malformed parts; frozen by G-V4 (D-393, 2026-11-20) after G-V2 closed
 
 ## Iteration 2 (goal G-V2, skill rework: foundation)
 

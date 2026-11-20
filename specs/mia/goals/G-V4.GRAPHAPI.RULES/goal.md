@@ -11,7 +11,7 @@ Proposed 2026-11-20 by the owner (maldun), D-392: G-V4.GRAPHAPI is cut into thre
 - Line of work: goal/v4.graphapi.rules
 - Subgoals: –
 - Depends on: –; pure checks, they need no stored graph
-- Status: Proposed
+- Status: Agreed
 
 ## Outcome criteria
 | ID | Expected outcome | Derived from |
@@ -34,7 +34,7 @@ Group spec FR-63, FR-64; decision D-375; the two existing rule sets (`../G-V4.GR
 ## Agreement
 | Subgoal | Agreed by | Date |
 |---|---|---|
-| G-V4.GRAPHAPI.RULES | [ ] Stefan Reiterer (owner) | |
+| G-V4.GRAPHAPI.RULES | [x] Stefan Reiterer (owner) | 2026-11-20 |
 
 ## Phases
 | Phase | State | Record or reason |

@@ -11,7 +11,7 @@ Proposed 2026-11-20 by the owner (maldun), D-392: G-V4.GRAPHSTORE is cut into th
 - Line of work: goal/v4.graphstore.core
 - Subgoals: –
 - Depends on: –; first of the group
-- Status: Proposed
+- Status: Agreed
 
 ## Outcome criteria
 | ID | Expected outcome | Derived from |
@@ -36,7 +36,7 @@ Group spec FR-57, FR-60, NFR-16; `../G-V4.GRAPHSTORE/research.md`, `spikes.md` (
 ## Agreement
 | Subgoal | Agreed by | Date |
 |---|---|---|
-| G-V4.GRAPHSTORE.CORE | [ ] Stefan Reiterer (owner) | |
+| G-V4.GRAPHSTORE.CORE | [x] Stefan Reiterer (owner) | 2026-11-20 |
 
 ## Phases
 | Phase | State | Record or reason |
