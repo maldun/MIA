@@ -1,6 +1,6 @@
 # Top-Level Specification: Graph viewer (G-V4.VIEW)
 
-**Status:** Reviewed by the owner item by item (D-376 to D-378); approval box open
+**Status:** Approved by the owner (maldun, 2026-11-20, D-389), with the phone aspects moved out of scope
 **Owner:** Stefan Reiterer   **Date:** 2026-11-20
 **Project / deliverable:** MIA, subgoal VIEW of G-V4 (item 3a of the owner's list). Refines FR-22 (graph app, legacy text stays, D-362); the later subgoals EDIT and REPLAY build on it.
 
@@ -11,7 +11,7 @@ The owner wants to look at the workflows and context graphs MIA works with, as t
 ### In scope
 Opening and looking at stored graphs: the list, the drawing, the content of a selected item, the arrangement the earlier versions and their history, and the view settings. Requirements FR-48 to FR-55 and FR-96 (search by description, new number) below (new numbers after FR-47 and NFR-9; assigned for real when Plan writes them into `requirements.md`).
 ### Out of scope (non-goals)
-Changing a graph, saving, keeping where the owner placed the steps between visits (G-V4.EDIT); the playback of the individual changes and what a change did within a session (G-V4.REPLAY); running a workflow from the viewer; the skills window (goal B); building context graphs (goal C).
+Use on a phone-sized screen (the owner moved it out of scope for now, 2026-11-20, D-389; the stacked layout of the picture and the side panel follows in a later iteration); Changing a graph, saving, keeping where the owner placed the steps between visits (G-V4.EDIT); the playback of the individual changes and what a change did within a session (G-V4.REPLAY); running a workflow from the viewer; the skills window (goal B); building context graphs (goal C).
 ### Known shortcuts (prototype)
 The prototype `prototype/graphview` shows the data path and the look; it has no login, shows no graph with a loop-controlling step, and keeps no settings between visits.
 ### Candidate goals (increments) and proposed first split
@@ -53,8 +53,8 @@ The prototype `prototype/graphview` shows the data path and the look; it has no 
   - Outcome: Given someone who is not logged in, when they try to open the viewer or a graph, then nothing is shown and they are asked to log in; given any logged-in account, then it can look at graphs but not change them (G-V4.EDIT, NFR-19); given the owner logged in once, then the viewer needs no second login.
 - NFR-13 (Privacy): The viewer works inside the home network only.
   - Outcome: Given the viewer in use, when the owner opens graphs for an hour, then nothing is requested from or sent to any outside address.
-- NFR-14 (Looks and accessibility): The viewer follows the system's light or dark setting, works by keyboard and on a phone-sized screen.
-  - Outcome: Given either the light or the dark setting, when a graph is shown, then labels, steps and connections can be read and the three kinds of step stay distinguishable; given only a keyboard, then the owner can pick a graph, move between steps, select one and open the settings; given a phone-sized screen, then the picture and the side panel stack so both stay usable.
+- NFR-14 (Looks and accessibility): The viewer follows the system's light or dark setting and works by keyboard.
+  - Outcome: Given either the light or the dark setting, when a graph is shown, then labels, steps and connections can be read and the three kinds of step stay distinguishable; given only a keyboard, then the owner can pick a graph, move between steps, select one and open the settings.
 
 ### 3.3 Given constraints
 | Constraint | Source | Why it cannot be changed |
@@ -99,6 +99,7 @@ Findings with references are in `research.md` of this folder: the page opens a f
 | Natural arrangement is not reproducible | a graph never arranged settles differently on each opening | decided: the viewer opens with the arrangement saved in EDIT if there is one (D-377); the layered arrangement is the reproducible reset |
 | A history shows who stored a version but not what changed between two; the comparison of two versions stays in REPLAY (owner, D-366) | FR-55 shows a list, not a difference | decided |
 | Search by description uses a language model: graph content is untrusted text for the model, the model is local, the result only selects a graph | FR-96 adds an agent feature to the viewer (agent profile, evaluation cases, injection check) | decide in Plan with the agent-app rules; owner |
+| Use on a phone-sized screen is out of scope for now | the viewer may be hard to use on the phones in use (NFR-1 of the product) | owner decision D-389; revisit in a later iteration |
 | Very large graphs (more than about fifty steps) | readability and speed unknown | **decided (D-378):** no bound for now; only about fifty steps are promised (NFR-11) |
 
 ### Prototype decisions

@@ -1,6 +1,6 @@
 # Top-Level Specification: Graph storage (G-V4.GRAPHSTORE)
 
-**Status:** Draft, for the owner's review
+**Status:** Approved by the owner (maldun, 2026-11-20, D-389)
 **Owner:** Stefan Reiterer   **Date:** 2026-11-20
 **Project / deliverable:** MIA, subgoal GRAPHSTORE of G-V4. Reviews how graphs are stored (item 1 of the owner's list). Requirement IDs are provisional (continuing after FR-56 and NFR-14 of the VIEW spec); Plan assigns them in `requirements.md`.
 
