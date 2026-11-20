@@ -84,4 +84,6 @@ The wording of the amendments in section 6 (approve, change or leave).
 | comparison and playback | kind-free | unchanged (compare only graphs of the same kind: a comparison across kinds is refused) |
 | the stored enumeration of kinds (IF-301 v2) | two fixed values | the registry is the list; a new kind is an amendment of IF-301 with its tables |
 
-**Open:** what happens to a graph whose kind is not in the registry (an older program opening a newer store).
+**Decided by the owner (2026-11-21, D-404):** the header field `kind` is the flag, with one registry of kinds (workflow and context first; a new kind is an amendment of IF-301 with its tables). A graph whose kind is not in the registry is **listed with its kind named and shown read-only** (plain steps and connections); keeping, copying, restoring and running it are refused with the reason `unknown kind`; nothing is lost or rewritten.
+
+**For the specs (proposed wording, to be applied with the amendments of section 6):** RULES FR-63 names the rule set per kind and the registry as the place where kinds are listed; EDIT FR-94 says a step is copied only into a graph of the same kind and the refusal names both kinds; VIEW FR-48 lists each graph with its kind, and an unknown kind is shown read-only; EDIT FR-72/FR-73 refuse a change or restore of an unknown kind; GRAPHAPI RUN refuses a kind that cannot run before any step. The prototype shows this in the rounds of RULES (rule set per kind, refusal of run by kind) and EDIT (copy within the kind, unknown kind read-only).
