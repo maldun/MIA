@@ -78,7 +78,7 @@ Out as a whole: the other requirements of G-V3, G-V3.PANEL and G-V3.CHAT (finish
 | Verify | done | `verification-report.md` (fresh reviewer, 11 findings, V-1 to V-4 fixed in T-06, F-3 in T-07); the state after the fixes was checked by the Verify of G-V3 (tests green on master), 2026-11-20, deviation V3-4 accepted (D-354) |
 | Commit | done | merged into master by the owner (`2db7f8d5`); requirements Verified 2026-11-20 |
 | Deploy | empty | reachable only with the iteration goal; delivered with G-V3 / iteration 2 |
-| Validate | open | the owner looks at a `/lookup` run: the sources are links |
+| Validate | done | FB-08 re-validated by the owner 2026-11-20 (the sources in a `/lookup` run are links); the rest of G-V3 is validated in G-V4.VALIDATE |
 
 ## Joint amendments
 | ID | Requirement | Agreed by | Date |
