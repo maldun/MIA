@@ -28,6 +28,9 @@ Proposed 2026-11-19 by the owner (maldun) in the design review of the graph stor
 ## Added 2026-11-20 (D-360)
 Files and database must be interchangeable and graphs transferable (files serve tests): the file backend, the PostgreSQL backend and `storage_copy.py` exist, so the review checks the round trip in both directions.
 
+## Explore result (2026-11-20, D-361)
+`research.md` (facts), `spikes.md` (15 converted graphs through both backends). Decisions: the stored graph is the truth and the pipeline JSON becomes an import path; target form is the record form with the document as export; one-time migration of the existing record with a comparison report. Open for Plan: graph-scoped record IDs (spike finding S1), the effect on IF-203, the toolbox and snapshots, how run_workflow's derived document (D-112) is replaced.
+
 ## Decisions of the owner (2026-11-19)
 | Question | Answer |
 |---|---|
