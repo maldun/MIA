@@ -57,7 +57,7 @@ Written here so they are not lost; Plan turns them into `Kind: measure` items (M
 | the four leftovers (old OC-1 to OC-4) | moved out of G-V4 to G-V5.LEFTOVER | owner 2026-11-20 (D-385) | 2026-11-20 |
 | graph storage, runner on networkx | split: G-V4.GRAPHSTORE, G-V4.GRAPHAPI | owner 2026-11-19 and 2026-11-20 (D-360) | 2026-11-20 |
 | viewer stages | split: G-V4.VIEW, G-V4.EDIT, G-V4.REPLAY, each with all seven phases | owner 2026-11-20 (D-360) | 2026-11-20 |
-| size of GRAPHSTORE and GRAPHAPI by descendants (about 90 and 96 requirements, most of them verified in G-V1 and G-V2) | keep as one subgoal each (proposed by the agent, the owner confirms in Plan); the cut into tasks follows in step 5 | the number comes from the descendants of 5 and 6 top-level items, not from new work | 2026-11-20 |
+| size of GRAPHSTORE and GRAPHAPI by descendants (about 90 and 96 requirements, most of them verified in G-V1 and G-V2) | split by the owner on 2026-11-20 (D-392) into three parts each: GRAPHSTORE.CORE, .TRANSFER, .MIGRATION and GRAPHAPI.RULES, .RUN, .CODE (26 to 42 requirements each by descendants; the cut into tasks follows in step 5) | the number comes from the descendants of 5 and 6 top-level items, not from new work | 2026-11-20 |
 | editing context graphs | split: G-V4.CONTEXT | owner 2026-11-20 (D-369) | 2026-11-20 |
 | the context-graph builder (goal C) | split: G-V4.BUILDER, the largest and last graph subgoal; first slice documents only (proposed) | owner 2026-11-20 (D-380) | 2026-11-20 |
 

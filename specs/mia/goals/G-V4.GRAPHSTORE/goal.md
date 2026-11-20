@@ -9,7 +9,7 @@ Proposed 2026-11-19 by the owner (maldun) in the design review of the graph stor
 - Supervision: supervised
 - Accepted by: pending (the owner records the agreement in the table below)
 - Line of work: goal/v4.graphstore
-- Subgoals: –
+- Subgoals: G-V4.GRAPHSTORE.CORE, G-V4.GRAPHSTORE.TRANSFER, G-V4.GRAPHSTORE.MIGRATION
 - Status: Agreed
 
 ## Where we are (checked in the code on 2026-11-19)
@@ -24,7 +24,9 @@ Proposed 2026-11-19 by the owner (maldun) in the design review of the graph stor
 | OC-1 | Given a workflow graph or a context graph, when it is saved, read, changed and listed, then there is one stored truth for it, with every edit a new version and no version deleted | FR-40, owner 2026-11-19 |
 | OC-2 | Given the graphs stored today, when they are moved to the new form, then each reads back as before (same nodes, edges and versions as far as the old form could hold them) and the owner can compare old and new before anything old is removed | OC-6 of G-V4 (FR-40) |
 | OC-3 | Given a snapshot taken before and one after the change, when the owner restores either, then the graphs are as they were at that snapshot | OC-10 of G-V4 (FR-47) |
-| OC-4 | Given a live store and a copy used for daily running, when the owner syncs them (on command, at start and at an orderly stop), then the copy equals the live store, and nothing that exists only on the copy is lost | OC-6 of G-V4 (FR-40, NFR-8) |
+| OC-4 | Given a live store and a copy used for daily running, when the owner syncs them (on command, at start and at an orderly stop), then the copy equals the live store, and nothing that exists only on the copy is lost | FR-40, NFR-8 (OC-6 of G-V4) |
+| OC-5 | Given graphs in the live store or in a set of files, when the same operations run in both and the whole store moves between them, then the answers are the same and nothing is lost | FR-40, NFR-8 (OC-6 of G-V4) |
+| OC-6 | Given a skill with a stored graph, when the owner runs it, then the run follows that graph and says which graph and version it used | FR-36, FR-45 (OC-7 of G-V4) |
 
 ## Added 2026-11-20 (D-360)
 Files and database must be interchangeable and graphs transferable (files serve tests): the file backend, the PostgreSQL backend and `storage_copy.py` exist, so the review checks the round trip in both directions.
@@ -72,6 +74,9 @@ Node and edge records are scoped by graph (`<graph id>/<local id>`) and the stor
 4. Migration tool with the comparison report; run on a copy of the real data first.
 5. Remove the old tables only after the owner's confirmation (own task, owner gate).
 
+## Split into parts (owner, 2026-11-20, D-392)
+Three parts, in this order: **CORE** (one stored truth, graph-scoped steps, atomic saves), then **TRANSFER** (files and database, whole-store move, sync) and **MIGRATION** (today's graphs with a comparison report, pipelines imported once, skills run from stored graphs, snapshots), which both depend on CORE. The requirements of the group's top-level spec are allocated: CORE FR-57, FR-60, NFR-16; TRANSFER FR-58, FR-59, FR-93, NFR-15; MIGRATION FR-61, FR-62 and snapshots (FR-47).
+
 ## Scope
 Inside the scope of G-V4 (`../G-V4/goal.md`). Items are the existing top-level items and requirements; the new items of this subgoal's top-level spec (FR-48 and later) are listed here when Plan step 1b writes them into `requirements.md`.
 
@@ -88,10 +93,18 @@ Inside the scope of G-V4 (`../G-V4/goal.md`). Items are the existing top-level i
 | FR-6, FR-7, FR-16, FR-37, FR-38, NFR-3 | out | the run, the rules, the run record and trust of steps are G-V4.GRAPHAPI |
 | FR-21, FR-22, FR-41, FR-42, NFR-6, NFR-9 | out | the graph app, access, the builder and containers are other subgoals |
 
+## Frozen requirements
+| Requirement | Shared by | Reason |
+|---|---|---|
+
+None yet; the shared interfaces are marked in the next step of Plan step 0.
+
 ## Agreement
 | Subgoal | Agreed by | Date |
 |---|---|---|
-| G-V4.GRAPHSTORE | [x] Stefan Reiterer (owner) | 2026-11-20 |
+| G-V4.GRAPHSTORE.CORE | [ ] Stefan Reiterer (owner) | |
+| G-V4.GRAPHSTORE.TRANSFER | [ ] Stefan Reiterer (owner) | |
+| G-V4.GRAPHSTORE.MIGRATION | [ ] Stefan Reiterer (owner) | |
 
 ## Phases
 | Phase | State | Record or reason |

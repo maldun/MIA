@@ -9,7 +9,7 @@ Proposed 2026-11-19 by the owner (maldun): the interface between the database an
 - Supervision: supervised
 - Accepted by: pending (the owner records the agreement in the table below)
 - Line of work: goal/v4.graphapi
-- Subgoals: –
+- Subgoals: G-V4.GRAPHAPI.RULES, G-V4.GRAPHAPI.RUN, G-V4.GRAPHAPI.CODE
 - Depends on: G-V4.GRAPHSTORE (the loader reads the one stored form)
 - Status: Agreed
 
@@ -23,6 +23,8 @@ Proposed 2026-11-19 by the owner (maldun): the interface between the database an
 | OC-1 | Given any stored graph, when a workflow is run or checked, then the stored graph reaches the execution as one graph, built in one place from the stored graph | OC-7 of G-V4 (FR-6) |
 | OC-2 | Given the graphs and runs of the current tests, when the order, the rules and the run use the directed graph, then every result is the same as before (same order up to equal choices, same refusals with the same named nodes, same run result) | OC-7 of G-V4 (FR-6) |
 | OC-3 | Given a graph with master nodes, session nodes or a transform that reads several data nodes, when it is loaded, then everything the runner needs (node kind, type, stop criterion, edge role and `as` name) is on the loaded graph | OC-7 of G-V4 (REQ-RUN-030 to 035) |
+| OC-4 | Given a graph that breaks several rules, when it is checked while saving, while editing and before a run, then the same broken rules are listed in the same order and a run is refused before any step runs | FR-7 (OC-7 of G-V4) |
+| OC-5 | Given a graph with a code step, when the owner has not trusted it, then the run is refused; when trusted, it runs only through its trusted tool, and a changed step keeps its trust with a mark | FR-38, NFR-3 (OC-7 of G-V4) |
 
 ## Dependencies and bounds
 | Item | Real or stand-in | Note |
@@ -49,6 +51,9 @@ Code may be stored in a graph: a code snippet is a data node attached to a trans
 3. Loader and `graph_model` order on it; then the rules; then `graph_run`.
 4. Remove the plain code after the oracle comparison and the owner's agreement.
 
+## Split into parts (owner, 2026-11-20, D-392)
+Three parts: **RULES** (eight rules in one order, refusal before running; independent of storage), **RUN** (the stored graph as one graph for the order and the run, equivalence with the old runner; needs GRAPHSTORE.CORE and RULES) and **CODE** (code steps through trusted tools, trust kept with a mark, THR-013; needs RUN). The requirements of the group's top-level spec are allocated: RULES FR-63, FR-64; RUN FR-65, NFR-17; CODE FR-66, FR-67.
+
 ## Scope
 Inside the scope of G-V4 (`../G-V4/goal.md`). Items are the existing top-level items and requirements; the new items of this subgoal's top-level spec (FR-48 and later) are listed here when Plan step 1b writes them into `requirements.md`.
 
@@ -64,10 +69,18 @@ Inside the scope of G-V4 (`../G-V4/goal.md`). Items are the existing top-level i
 | FR-30, FR-36, FR-40, FR-45, FR-47, NFR-8 | out | storing, moving and snapshots are G-V4.GRAPHSTORE |
 | FR-21, FR-22, FR-41, FR-42, NFR-6, NFR-9 | out | the graph app, access, the builder and containers are other subgoals |
 
+## Frozen requirements
+| Requirement | Shared by | Reason |
+|---|---|---|
+
+None yet; the shared interfaces are marked in the next step of Plan step 0.
+
 ## Agreement
 | Subgoal | Agreed by | Date |
 |---|---|---|
-| G-V4.GRAPHAPI | [x] Stefan Reiterer (owner) | 2026-11-20 |
+| G-V4.GRAPHAPI.RULES | [ ] Stefan Reiterer (owner) | |
+| G-V4.GRAPHAPI.RUN | [ ] Stefan Reiterer (owner) | |
+| G-V4.GRAPHAPI.CODE | [ ] Stefan Reiterer (owner) | |
 
 ## Phases
 | Phase | State | Record or reason |
