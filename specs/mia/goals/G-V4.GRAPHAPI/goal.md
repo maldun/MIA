@@ -40,6 +40,9 @@ Proposed 2026-11-19 by the owner (maldun): the interface between the database an
 | Plain order and rule code | in | keep as a test oracle during the move, remove after the owner agrees |
 | Drawing, layout, the Graph app | out | N-5 works through IF-104 |
 
+## Explore result (2026-11-20, D-362)
+`research.md`, `spikes.md`. The loader must keep several edges between two nodes (a `MultiDiGraph`). Two sets of graph rules exist and must become one. Open for Plan: the single rule set and its order, whether the run applies the rules (today it does not, F4), the threat entry THR-013.
+
 ## Decision of 2026-11-20 (D-360)
 Code may be stored in a graph: a code snippet is a data node attached to a transform node, and the toolbox reference of the transform (for example a `python-exec` tool) calls it, with its trust and sandbox. The runner never executes code itself. It needs an entry in the threat model (untrusted code text in a stored graph) before Plan.
 
