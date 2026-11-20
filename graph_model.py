@@ -137,23 +137,55 @@ class GraphModel:
         self.author = author
         self.real = hasattr(tables, "ids")
 
+    # --- CP1 (prototype, D-368): every step and connection belongs to one graph; its record ID is `<graph id>/<local id>`, the graph the caller sees has local IDs.
+    def _scoped(self, graph):
+        gid = graph["id"]
+        nodes = [{**n, "id": graph_tables.scoped(gid, n["id"])} for n in graph["nodes"]]
+        edges = [{**e, "id": graph_tables.scoped(gid, e["id"]), "from": graph_tables.scoped(gid, e["from"]), "to": graph_tables.scoped(gid, e["to"])} for e in graph["edges"]]
+        return nodes, edges
+
+    def _latest(self, table, record_id):
+        try:
+            return self.tables.get(table, record_id)
+        except StorageError as err:
+            if err.code == "not_found":
+                return None
+            raise
+
     def save_graph(self, graph):
         named = check_graph(graph)
         if named:
             return _refuse(named)
         if not self.real:
             return SaveResult(True, self.tables.put(TABLE, graph["id"], graph), [])
-        # A record the record checks refuse is a refused result like a broken graph rule; other errors raise. Members written before the refusal stay as
-        # unused versions of their records (the header, which makes them a graph, is not written).
-        for node in graph["nodes"]:     # a broken node is found before anything is written
-            broken = graph_tables.check_record("graph_nodes", node, record_id=node["id"])
-            if broken:
-                return SaveResult(False, None, [], broken["rule"], broken["detail"])
+        gid = graph["id"]
+        nodes, edges = self._scoped(graph)
+        # everything the storage would refuse is found BEFORE the first write, so a refused save leaves no unused version of any step (NFR-16)
+        known = {n["id"]: [1] for n in nodes}
+        for table, records in (("graph_nodes", nodes), ("graph_edges", edges)):
+            for record in records:
+                broken = graph_tables.check_record(table, record, record_id=record["id"], stored={"nodes": known} if table == "graph_edges" else None)
+                if broken:
+                    return SaveResult(False, None, [], broken["rule"], broken["detail"])
+        trial = {"kind": "workflow", "nodes": [{"id": n["id"], "version": 1} for n in nodes], "edges": [{"id": e["id"], "version": 1} for e in edges],
+                 **{key: graph[key] for key in HEADER}}
+        broken = graph_tables.check_record("graphs", {"id": gid, "data": trial}, record_id=gid)
+        if broken:
+            return SaveResult(False, None, [], broken["rule"], broken["detail"])
         try:
-            members = {name: [{"id": m["id"], "version": self.tables.put(table, m["id"], m, self.author)["version"]} for m in graph[name]]
-                       for name, table in (("nodes", "graph_nodes"), ("edges", "graph_edges"))}
-            data = {"kind": "workflow", **members, **{key: graph[key] for key in HEADER}}
-            version = self.tables.put("graphs", graph["id"], {"id": graph["id"], "data": data}, self.author)["version"]
+            # a member is written as a new version only when it differs from its newest version: the history of a step lists real changes only
+            pins = {}
+            for name, table, records in (("nodes", "graph_nodes", nodes), ("edges", "graph_edges", edges)):
+                pins[name] = []
+                for record in records:
+                    latest = self._latest(table, record["id"])
+                    version = latest["version"] if latest is not None and latest["doc"] == record else self.tables.put(table, record["id"], record, self.author)["version"]
+                    pins[name].append({"id": record["id"], "version": version})
+            data = {"kind": "workflow", **pins, **{key: graph[key] for key in HEADER}}
+            head = self._latest("graphs", gid)
+            if head is not None and head["doc"]["data"] == data:
+                return SaveResult(True, head["version"], [])        # nothing changed: no new version
+            version = self.tables.put("graphs", gid, {"id": gid, "data": data}, self.author)["version"]
         except StorageError as refusal:
             if refusal.code != "invalid":
                 raise
@@ -165,9 +197,31 @@ class GraphModel:
             return self.tables.get(TABLE, graph_id, version)
         header = self.tables.get("graphs", graph_id, version)["doc"]
         data = header["data"]
-        pinned = lambda table, members: [self.tables.get(table, m["id"], m["version"])["doc"] for m in members]    # noqa: E731
-        return {"id": header["id"], **{key: data[key] for key in HEADER},
-                "nodes": pinned("graph_nodes", data["nodes"]), "edges": pinned("graph_edges", data["edges"])}
+        local = lambda rid: graph_tables.split_scoped(rid)[1]                                                    # noqa: E731
+        node = lambda m: {**self.tables.get("graph_nodes", m["id"], m["version"])["doc"], "id": local(m["id"])}  # noqa: E731
+
+        def edge(m):
+            doc = self.tables.get("graph_edges", m["id"], m["version"])["doc"]
+            return {**doc, "id": local(m["id"]), "from": local(doc["from"]), "to": local(doc["to"])}
+        return {"id": header["id"], **{key: data[key] for key in HEADER}, "nodes": [node(m) for m in data["nodes"]], "edges": [edge(m) for m in data["edges"]]}
+
+    def graph_versions(self, graph_id):
+        """The versions of a stored graph, oldest first: [{"version", "author", "time"}]."""
+        return self.tables.history("graphs", graph_id)
+
+    def step_history(self, graph_id, local_id):
+        """The versions of one step or connection of ONE graph, as the headers of that graph pinned them: only changes made in its own graph, and never
+        an unused version left by an interrupted save (FR-60, NFR-16). [{"version", "author", "time"}], oldest first."""
+        rid, seen, out = graph_tables.scoped(graph_id, local_id), set(), []
+        for entry in self.tables.history("graphs", graph_id):
+            header = self.tables.get("graphs", graph_id, entry["version"])["doc"]
+            for key, table in (("nodes", "graph_nodes"), ("edges", "graph_edges")):
+                for member in header["data"][key]:
+                    if member["id"] == rid and member["version"] not in seen:
+                        seen.add(member["version"])
+                        stored = {e["version"]: e for e in self.tables.history(table, rid)}[member["version"]]
+                        out.append({"version": member["version"], "author": stored["author"], "time": stored["time"]})
+        return out
 
     def topological_order(self, graph_id):
         return order_of(self.read_graph(graph_id))
