@@ -1,6 +1,6 @@
 # Top-Level Specification: Graph storage (G-V4.GRAPHSTORE)
 
-**Status:** Approved by the owner (maldun, 2026-11-20, D-389)
+**Status:** Approved by the owner (maldun, 2026-11-20, D-389); amended by the owner 2026-11-21 (D-406): NFR-16 outcome allows an earlier complete version after an interrupted move or sync
 **Owner:** Stefan Reiterer   **Date:** 2026-11-20
 **Project / deliverable:** MIA, subgoal GRAPHSTORE of G-V4. Reviews how graphs are stored (item 1 of the owner's list). Requirement IDs are provisional (continuing after FR-56 and NFR-14 of the VIEW spec); Plan assigns them in `requirements.md`.
 
@@ -33,7 +33,7 @@ Drawing and editing (G-V4.VIEW, EDIT, REPLAY); how a run executes a graph (G-V4.
 - NFR-15 (Portability): A set of files made on one machine works on another.
   - Outcome: Given a set of files moved from the owner's host to a test machine, when MIA is started there on those files, then every graph is listed with the same versions and content as at the source; given a set of files made by an older version of MIA, when a newer version opens it, then it is read completely or converted by a stated step that reports what it did.
 - NFR-16 (Reliability of storage): A refused or interrupted save, move or sync never leaves a half-stored graph.
-  - Outcome: Given a save, a move of the whole store or a sync that is refused or interrupted halfway, when the owner lists and reads graphs afterwards, then every graph is entirely as before or entirely new in both places, a refused save is not counted as a version, and an interrupted move or sync can be run again to finish.
+  - Outcome: Given a save, a move of the whole store or a sync that is refused or interrupted halfway, when the owner lists and reads graphs afterwards, then every graph is entirely as before, entirely new, or (after a move or sync that brings several new versions) at an earlier complete version of the live store's history, never with a missing step or connection, in both places, a refused save is not counted as a version, and an interrupted move or sync can be run again to finish.
 ### 3.3 Given constraints
 | Constraint | Source | Why it cannot be changed |
 |---|---|---|

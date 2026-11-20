@@ -28,6 +28,7 @@ Stop at the budget, when a top-level outcome looks unreachable, or when the roun
 |---|---|---|---|
 | 7eadf4eb83d0 | 2026-11-21 | Stefan Reiterer | run authorized; the TLS is unchanged since round 02 |
 | cb0a21233175 | 2026-11-21 | Stefan Reiterer | the owner approved the amendments of D-405 (FR-48, FR-50, FR-63, FR-64, FR-72, FR-73, FR-92, FR-94: the kind of the graph selects rule set, description and copy rule) |
+| 604223c1fd0f | 2026-11-21 | Stefan Reiterer | the owner accepted the proposed NFR-16 sentence (D-406): an earlier complete version of the live history is allowed after an interrupted move or sync |
 
 ## Validation plan
 The owner validates with `rounds/03/validation.md` (one row per outcome), after CP15. Findings go to the requirements of this subgoal.
