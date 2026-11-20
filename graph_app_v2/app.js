@@ -18,6 +18,9 @@ import { states, sameGraph, playbackState } from './replay.js';
 import { compareView, markText, compareNote } from './compare.js';
 
 const $ = (id) => document.getElementById(id);
+// an error in the page is shown on the status line instead of vanishing in the browser console
+window.addEventListener?.('error', (e) => { const bar = document.getElementById('status'); if (bar) bar.textContent = `Page error: ${e.message} (${String(e.filename ?? '').split('/').pop()}:${e.lineno})`; });
+window.addEventListener?.('unhandledrejection', (e) => { const bar = document.getElementById('status'); if (bar) bar.textContent = `Page error: ${e.reason?.message ?? e.reason}`; });
 let graphs = [];
 let network = null;
 let current = null;
