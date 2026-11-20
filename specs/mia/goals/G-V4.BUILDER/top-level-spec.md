@@ -9,20 +9,20 @@ A context graph is the knowledge a skill reads when it runs. Today the owner wou
 
 ## 2. Scope
 ### In scope
-Building from documents the owner adds (first slice, D-381), with proposals, sources, checks against invented items, confirmation, limits; manual additions; steps reading the confirmed part within a token budget (the last task of this subgoal). Requirements FR-98 to FR-105 and NFR-23 to NFR-25.
+Building from documents the owner adds (first slice, D-381), with proposals, sources, checks against invented items, confirmation, limits; manual additions; steps reading the confirmed part within a token budget (the last task of this subgoal). Requirements FR-98 to FR-105 and NFR-23 to NFR-25 (reviewed so far: FR-98 to FR-101, D-382).
 ### Out of scope (non-goals)
 Building from runs, reviews and web results (a later slice, D-381); categories as schemas edited in the editor beyond G-V4.CONTEXT; any model other than the pinned local one.
 
 ## 3. Top-level requirements
 ### 3.1 Functional requirements
-- FR-98: The system shall propose items and relations from a document the owner adds, each with the passage it comes from.
-  - Outcome: Given a document the owner adds, when the builder runs, then it shows proposed items and relations, each with the passage of the document it comes from, and nothing is added to any context graph yet.
-- FR-99: The system shall refuse a proposed item whose name does not occur in its document.
-  - Outcome: Given proposals built from a document, when each is checked, then every proposal whose name does not occur in that document is refused and listed as refused with the reason.
+- FR-98: The system shall propose items, relations, definitions and stated facts from a document the owner adds, each with the passage it comes from.
+  - Outcome: Given a document the owner adds, when the builder runs, then it shows proposed items (named things), relations between them, definitions and stated facts, each with the passage of the document it comes from, and nothing is added to any context graph yet.
+- FR-99: The system shall refuse a proposed item or relation whose name does not occur in its document, and a definition or fact whose quoted passage does not occur in it.
+  - Outcome: Given proposals built from a document, when each is checked, then every proposal whose name does not occur in that document, ignoring upper and lower case and extra spaces, and every definition or fact whose quoted passage does not occur in it word for word, is refused and listed as refused with the reason.
 - FR-100: The system shall give every proposed relation the passage that states it, with both ends in that passage or in the sentences directly before or after it. *(Provisional: the neighbour part is improved in validation.)*
   - Outcome: Given a proposed relation, when the owner looks at it, then the passage that states it is shown and both ends of the relation occur in that passage or in the sentences directly before or after it; a relation for which that does not hold is refused.
-- FR-101: The system shall let the owner confirm, change or reject each proposal, and let steps read only confirmed items.
-  - Outcome: Given proposals from a document, when the owner confirms two, changes one and rejects all the others, then only the two confirmed and the changed item are part of the context graph, and a step that reads the graph sees exactly those and never a proposal.
+- FR-101: The system shall let the owner confirm, change or reject each proposal, singly or in a selection, and let steps read only confirmed items.
+  - Outcome: Given proposals from a document, when the owner confirms two, changes one and rejects all the others, singly or by selecting several together, then only the two confirmed and the changed item are part of the context graph, nothing confirms itself, and a step that reads the graph sees exactly those and never a proposal.
 - FR-102: The system shall let the owner add and change items by hand.
   - Outcome: Given a context graph, when the owner adds an item or changes one, then it is part of the graph as confirmed, with the owner named as its source.
 - FR-103: The system shall keep the limits of the builder as settings and stop at them.
@@ -34,7 +34,7 @@ Building from runs, reviews and web results (a later slice, D-381); categories a
 
 ### 3.2 Non-functional requirements
 - NFR-23 (Correctness of proposals): The builder rarely invents.
-  - Outcome: Given proposals built from documents, when the owner marks a random sample of at least 120 of them, then at most 4 are marked invented and at least 91 are marked right; a larger sample may be decided later as a written decision made before the extra marks are looked at.
+  - Outcome: Given proposals built from documents, when the owner marks a random sample of at least 120 of them for each kind of proposal, then at most 4 of each sample are marked invented and at least 91 right; for definitions and stated facts, which no sample has measured yet, the first sample is marked before they are offered for confirmation; a larger sample may be decided later as a written decision made before the extra marks are looked at.
 - NFR-24 (Privacy): Documents never leave the host.
   - Outcome: Given a document with private content, when the builder runs, then nothing of it is sent to any outside address, and only the local model reads it.
 - NFR-25 (Untrusted input): Instructions inside a document are data.
@@ -71,6 +71,7 @@ The owner adds documents and later points the builder at runs and web results; t
 | Which sources are in this subgoal | size of the subgoal | **decided (D-381):** documents and manual entry first; runs, reviews and web results are a later slice |
 | Whether steps reading the context graph within a budget (FR-104) belong here or to the runner subgoals | scope | **decided (D-381):** here, as the last task of the subgoal |
 | Where the owner uses the builder | usability, containers | **decided (D-381):** a page of its own in the same web app, as part N-6 with its own container, reached from the graph viewer |
+| Definitions and stated facts (owner, D-382) have no measured quality yet; spike C and the 120-item sample covered items and relations only | NFR-23 cannot be claimed for them | the owner marks a first sample before they are offered; if the bar is missed they are switched off; owner |
 | The quality bar rests on the owner marking at least 120 items per verdict | time of the owner | the owner schedules the marking; agents never label |
 | The neighbour part of FR-100 rests on thin evidence | may need a change | Provisional, improved in validation |
 | Two quality notions, the owner's bar and a model as judge (kappa 0.11, not usable) | no automatic quality check | only the owner's marks decide (spike C) |
