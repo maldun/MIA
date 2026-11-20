@@ -4,14 +4,14 @@
 **Date:** 2026-11-20
 **Level:** MVP        <!-- the minimum that already works and fulfils the outcomes in scope, end to end; thin where not cheap; no polish -->
 **Scope:** the graph path slice, these subgoals in this order: G-V4.GRAPHSTORE.CORE (FR-57, FR-60, NFR-16), G-V4.GRAPHSTORE.TRANSFER (FR-58, FR-59, FR-93, NFR-15), G-V4.GRAPHAPI.RULES (FR-63, FR-64), G-V4.VIEW (FR-48 to FR-55, NFR-10 to NFR-14), G-V4.EDIT (FR-68 to FR-74, FR-91, FR-92, FR-94, FR-95, NFR-18, NFR-19), G-V4.REPLAY (FR-76 to FR-81, NFR-20). Not in this run: MIGRATION (FR-61, FR-62), RUN and CODE (FR-65 to FR-67, NFR-17), CONTEXT, BUILDER, the search by description (FR-96); the phone layout is out of scope (D-389)
-**Budget:** 12 checkpoints of at most about an hour each (about 12 hours in all); the run **stops at every subgoal breakpoint (★)** and reports; between two breakpoints it continues from checkpoint to checkpoint unless the owner stops it
+**Budget:** 12 checkpoints of at most about an hour each (about 12 hours in all); the run reports after every checkpoint and continues from checkpoint to checkpoint unless the owner stops it; **the owner's first validation session starts at a later checkpoint, when there is more to work with (the owner, 2026-11-20, D-398); the subgoal breakpoints (★) are report points until then**
 **Worktree:** ../MIA-prototype-g-v4
 **Branch:** prototype/g-v4
 
 <!-- git worktree add ../MIA-prototype-g-v4 -b prototype/g-v4 <commit of the approved TLS and this run.md> -->
 
 ## Slicing: checkpoints and breakpoints
-A checkpoint ends with: the demonstrator runs, `status.md` updated, a commit on the branch, one short report line. A breakpoint (★) is the end of a subgoal: the run stops, writes the report section, and the owner validates that subgoal's items (`rounds/02/validation.md`) before the next subgoal starts.
+A checkpoint ends with: the demonstrator runs, `status.md` updated, a commit on the branch, one short report line. A breakpoint (★) is the end of a subgoal: the report section is written. **Change of 2026-11-20 (D-398):** the run does not stop at a breakpoint for validation; the owner starts validating at a later checkpoint (the agent proposes one), with `rounds/02/validation.md` (one row per item).
 
 | Checkpoint | Subgoal | What the demonstrator shows afterwards (the question: what is new?) | Items |
 |---|---|---|---|
@@ -41,7 +41,7 @@ A checkpoint ends with: the demonstrator runs, `status.md` updated, a commit on 
 - Authorize a further run itself.
 
 ## Stop rules
-Stop at the budget, at every breakpoint (★), when a top-level outcome looks unreachable, or when the run would need something not allowed above. Write the report either way.
+Stop at the budget, when a top-level outcome looks unreachable, or when the run would need something not allowed above. Write the report either way.
 
 ## TLS fingerprint (the protected part)
 | Fingerprint | Date | Decided by | Reason |
@@ -49,4 +49,4 @@ Stop at the budget, at every breakpoint (★), when a top-level outcome looks un
 | 7eadf4eb83d0 | 2026-11-20 | Stefan Reiterer | run authorized |
 
 ## Validation plan
-The owner validates at each breakpoint with `rounds/02/validation.md` (one row per item of the subgoal just reached), at the end of the session of that breakpoint. Findings go to the next checkpoint or to Plan.
+The owner validates from a later checkpoint on (D-398) with `rounds/02/validation.md` (one row per item). Findings go to the next checkpoint or to Plan.
