@@ -49,7 +49,7 @@ Date: – · Prototype state: branch prototype/g-v4 · Where it ran: –
 | NFR-16 | Given a graph with a cycle and an interrupted save, look at the demo output and at the checks 8 to 10 of `python proto_checks/cp1_check.py files` | – | not tried | – |
 | NFR-18 | Given you have not used the editor (or someone else tries it): change the tool of one step and keep it, without any instructions; note the time (the aim is under three minutes) and where you hesitated | – | not tried | – |
 | NFR-19 | Given a second account (not the owner): no `Edit this graph` button; the routes refuse it | – | not tried | – |
-| NFR-20 | Given the sample graphs: versions made before the record say "made before the record of changes existed"; a version you kept shows its entries from the version it started from. (The comparison of two versions comes with CP12) | steps 1 to 9 tried by the owner 2026-11-20: worked; the comparison of two versions comes with CP12 | partly | – |
+| NFR-20 | Given the sample graphs: versions made before the record say "made before the record of changes existed"; a version you kept shows its entries from the version it started from. Then "Play back" on such a version says there is nothing to play, and "Compare" still shows what differs from another version (CP12) | steps 1 to 9 tried by the owner 2026-11-20: worked; the comparison of two versions comes with CP12 | partly | – |
 
 ## Beyond the outcomes
 - **FB-1 (owner, 2026-11-20, after CP6):** for the editor the panel for the contents of a step is the place where edits happen; the current narrow column of read-only fields does not look good for editing, so its place and form may change. To decide at CP8 (EDIT).
