@@ -11,7 +11,7 @@ Proposed 2026-11-20 by the owner (maldun), D-380: a subgoal for the context-grap
 - Line of work: goal/v4.builder
 - Subgoals: –
 - Depends on: G-V4.GRAPHSTORE (context graphs in the stored form), G-V4.CONTEXT (editing and the rules for categories and budgets), G-V4.VIEW
-- Status: Proposed
+- Status: Agreed
 
 ## Outcome criteria
 | ID | Expected outcome | Derived from |
@@ -27,15 +27,15 @@ Proposed 2026-11-20 by the owner (maldun), D-380: a subgoal for the context-grap
 ## Agreement
 | Subgoal | Agreed by | Date |
 |---|---|---|
-| G-V4.BUILDER | [ ] Stefan Reiterer (owner) | |
+| G-V4.BUILDER | [x] Stefan Reiterer (owner) | 2026-11-20 |
 
 ## Phases
 | Phase | State | Record or reason |
 |---|---|---|
-| Explore | done | `top-level-spec.md` reviewed item by item (D-381 to D-384); the owner's approval box is open |
+| Explore | done | `top-level-spec.md` approved 2026-11-20 (D-389 to D-391) |
 | Plan | open | |
 | Implement | open | |
 | Verify | open | |
 | Commit | open | |
 | Deploy | open | |
-| Validate | open | covered by G-V5.VALIDATE |
+| Validate | open | the first test run, G-V5 (parked, D-386) |

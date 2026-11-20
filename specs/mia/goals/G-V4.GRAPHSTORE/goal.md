@@ -10,7 +10,7 @@ Proposed 2026-11-19 by the owner (maldun) in the design review of the graph stor
 - Accepted by: pending (the owner records the agreement in the table below)
 - Line of work: goal/v4.graphstore
 - Subgoals: –
-- Status: Proposed
+- Status: Agreed
 
 ## Where we are (checked in the code on 2026-11-19)
 - **Two forms of a graph exist in the same Storage backend (files or PostgreSQL, one generic `records` table there).** Document form: tables `workflows` and `context_graphs`, one `{"nodes", "edges"}` document per version; `WorkflowLibrary` (IF-203) reads and writes it. Record form (IF-301 v2, FR-40): tables `graph_nodes`, `graph_edges`, `graphs` and, since A-98, `context_nodes` and `context_edges`; a `graphs` header pins the version of every node and edge; `graph_model.py` and `graph_run.py` (converted skills) use it.
@@ -86,4 +86,15 @@ Node and edge records are scoped by graph (`<graph id>/<local id>`) and the stor
 ## Agreement
 | Subgoal | Agreed by | Date |
 |---|---|---|
-| G-V4.GRAPHSTORE | [ ] Stefan Reiterer (owner) | |
+| G-V4.GRAPHSTORE | [x] Stefan Reiterer (owner) | 2026-11-20 |
+
+## Phases
+| Phase | State | Record or reason |
+|---|---|---|
+| Explore | done | research and spikes in this folder, `top-level-spec.md` approved 2026-11-20 (D-389 to D-391) |
+| Plan | open | |
+| Implement | open | |
+| Verify | open | |
+| Commit | open | |
+| Deploy | open | |
+| Validate | open | the first test run, G-V5 (parked, D-386) |

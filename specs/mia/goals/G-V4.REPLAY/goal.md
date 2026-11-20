@@ -11,7 +11,7 @@ Proposed 2026-11-20 by the owner (maldun), D-360. Draft for Explore and Plan; no
 - Accepted by: Stefan Reiterer (owner)
 - Line of work: goal/v4.replay
 - Depends on: G-V4.EDIT
-- Status: Proposed
+- Status: Agreed
 
 ## Outcome criteria
 | ID | Expected outcome | Derived from |
@@ -28,15 +28,15 @@ Owner 2026-11-20: an edit log of operations, replayable on a graph (not only ver
 ## Agreement
 | Subgoal | Agreed by | Date |
 |---|---|---|
-| G-V4.REPLAY | [ ] Stefan Reiterer (owner) | |
+| G-V4.REPLAY | [x] Stefan Reiterer (owner) | 2026-11-20 |
 
 ## Phases
 | Phase | State | Record or reason |
 |---|---|---|
-| Explore | open | |
+| Explore | done | `top-level-spec.md` approved 2026-11-20 (D-389 to D-391) |
 | Plan | open | |
 | Implement | open | |
 | Verify | open | |
 | Commit | open | |
 | Deploy | open | |
-| Validate | open | covered by G-V5.VALIDATE |
+| Validate | open | the first test run, G-V5 (parked, D-386) |

@@ -11,7 +11,7 @@ Proposed 2026-11-20 by the owner (maldun), D-360. Draft for Explore and Plan; no
 - Accepted by: Stefan Reiterer (owner)
 - Line of work: goal/v4.view
 - Depends on: G-V4.GRAPHSTORE (one stored form; IF-104 stays or is amended)
-- Status: Proposed
+- Status: Agreed
 
 ## Outcome criteria
 | ID | Expected outcome | Derived from |
@@ -28,15 +28,15 @@ N-5 log (`nodes/N-5-graph-app/implementation-log.md`): T-01 is a vis-network moc
 ## Agreement
 | Subgoal | Agreed by | Date |
 |---|---|---|
-| G-V4.VIEW | [ ] Stefan Reiterer (owner) | |
+| G-V4.VIEW | [x] Stefan Reiterer (owner) | 2026-11-20 |
 
 ## Phases
 | Phase | State | Record or reason |
 |---|---|---|
-| Explore | done | `research.md`, prototype `prototype/graphview` (report, carry-over to be ticked by the owner), D-363 |
+| Explore | done | `top-level-spec.md` approved 2026-11-20 (D-389 to D-391) |
 | Plan | open | |
 | Implement | open | |
 | Verify | open | |
 | Commit | open | |
 | Deploy | open | |
-| Validate | open | covered by G-V5.VALIDATE |
+| Validate | open | the first test run, G-V5 (parked, D-386) |

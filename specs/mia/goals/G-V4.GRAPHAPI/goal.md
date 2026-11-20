@@ -11,7 +11,7 @@ Proposed 2026-11-19 by the owner (maldun): the interface between the database an
 - Line of work: goal/v4.graphapi
 - Subgoals: –
 - Depends on: G-V4.GRAPHSTORE (the loader reads the one stored form)
-- Status: Proposed
+- Status: Agreed
 
 ## Where we are (checked in the code on 2026-11-19)
 - No production module imports `networkx`. It was approved on 2026-11-07 (D-187, "graph rules") and is named in the goal files of G-V2 and G-V2.MODEL, but it is not in the requirements files and not in the code (only a spike input uses it).
@@ -60,4 +60,15 @@ Code may be stored in a graph: a code snippet is a data node attached to a trans
 ## Agreement
 | Subgoal | Agreed by | Date |
 |---|---|---|
-| G-V4.GRAPHAPI | [ ] Stefan Reiterer (owner) | |
+| G-V4.GRAPHAPI | [x] Stefan Reiterer (owner) | 2026-11-20 |
+
+## Phases
+| Phase | State | Record or reason |
+|---|---|---|
+| Explore | done | research and spikes in this folder, `top-level-spec.md` approved 2026-11-20 (D-389 to D-391) |
+| Plan | open | |
+| Implement | open | |
+| Verify | open | |
+| Commit | open | |
+| Deploy | open | |
+| Validate | open | the first test run, G-V5 (parked, D-386) |

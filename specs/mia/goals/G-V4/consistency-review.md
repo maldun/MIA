@@ -1,11 +1,11 @@
-# Consistency review of G-V4 after the item-by-item reviews (updated 2026-11-20)
+# Consistency review of G-V4 after the item-by-item reviews (updated 2026-11-20; Explore gate passed, D-391)
 
 First written before the owner's Explore gate (D-367, D-368); updated after every subgoal's top-level spec was reviewed item by item. The leftovers and the validation moved to the parked goal G-V5 (D-385, D-386). Fixed mechanically in this update: the stale text about saved positions in the copy of the prototype report. Everything marked **owner** needs a decision or a tick.
 
 ## 1. Where each subgoal stands
 | Subgoal | Top-level spec | Reviewed by the owner | Requirement IDs (provisional) | `spec_check` |
 |---|---|---|---|---|
-| GRAPHSTORE | `G-V4.GRAPHSTORE/top-level-spec.md` | D-372 to D-374 | FR-57 to FR-62, FR-93, NFR-15, NFR-16 | no errors |
+| GRAPHSTORE | `G-V4.GRAPHSTORE/top-level-spec.md` | D-372 to D-374, approved D-389 | FR-57 to FR-62, FR-93, NFR-15, NFR-16 | no errors |
 | GRAPHAPI | `G-V4.GRAPHAPI/top-level-spec.md` | D-375 | FR-63 to FR-67, NFR-17 | no errors |
 | VIEW | `G-V4.VIEW/top-level-spec.md` | D-376 to D-378 | FR-48 to FR-55, FR-96, NFR-10 to NFR-14 | 9 errors, all PT3: the carry-over of the prototype graphview is not ticked (owner) |
 | EDIT | `G-V4.EDIT/top-level-spec.md` | D-369, D-370 | FR-68 to FR-74, FR-91, FR-92, FR-94, FR-95, NFR-18, NFR-19 | no errors |
@@ -79,6 +79,6 @@ No contradiction was found; the points below are consistent only because of the 
 - [x] Owner decided C-5 and C-6 (D-368)
 - [x] Owner reviewed the seven top-level specs item by item (D-369 to D-384)
 - [x] Owner decided C-1 and C-3 (2026-11-20, D-387): one new section in the existing `high-level-spec.md`, old text stays legacy; the IDs stay as drafted
-- [ ] Owner ticks the carry-over of the prototype graphview (C-7)
-- [ ] Owner approves each of the seven top-level specs: GRAPHSTORE, GRAPHAPI, VIEW, EDIT, REPLAY, CONTEXT, BUILDER
-- [ ] Owner agrees to the split (the Agreement rows of `G-V4/goal.md`, seven subgoals)
+- [x] Owner decided the carry-over of the prototype graphview (C-7, D-387, D-388)
+- [x] Owner approved the seven top-level specs (D-389 to D-391); GRAPHAPI as revised (trust stays on change, with a mark), VIEW with the phone aspects out of scope
+- [x] Owner agreed to the split (the seven Agreement rows of `G-V4/goal.md`, 2026-11-20, D-391)

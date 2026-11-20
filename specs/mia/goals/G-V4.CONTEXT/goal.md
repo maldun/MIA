@@ -11,7 +11,7 @@ Proposed 2026-11-20 by the owner (maldun), D-369: editing context graphs is its 
 - Line of work: goal/v4.context
 - Subgoals: –
 - Depends on: G-V4.GRAPHSTORE (context graphs in the stored form), G-V4.VIEW, G-V4.EDIT (the editor)
-- Status: Proposed
+- Status: Agreed
 
 ## Outcome criteria
 | ID | Expected outcome | Derived from |
@@ -25,15 +25,15 @@ Proposed 2026-11-20 by the owner (maldun), D-369: editing context graphs is its 
 ## Agreement
 | Subgoal | Agreed by | Date |
 |---|---|---|
-| G-V4.CONTEXT | [ ] Stefan Reiterer (owner) | |
+| G-V4.CONTEXT | [x] Stefan Reiterer (owner) | 2026-11-20 |
 
 ## Phases
 | Phase | State | Record or reason |
 |---|---|---|
-| Explore | open | `top-level-spec.md` drafted from the moved requirement |
+| Explore | done | `top-level-spec.md` approved 2026-11-20 (D-389 to D-391) |
 | Plan | open | |
 | Implement | open | |
 | Verify | open | |
 | Commit | open | |
 | Deploy | open | |
-| Validate | open | covered by G-V5.VALIDATE |
+| Validate | open | the first test run, G-V5 (parked, D-386) |

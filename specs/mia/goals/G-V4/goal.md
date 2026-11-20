@@ -104,18 +104,18 @@ None yet: the subgoals share the stored graph form (G-V4.GRAPHSTORE); Plan freez
 ## Agreement
 | Subgoal | Agreed by | Date |
 |---|---|---|
-| G-V4.GRAPHSTORE | [ ] Stefan Reiterer (owner) | |
-| G-V4.GRAPHAPI | [ ] Stefan Reiterer (owner) | |
-| G-V4.VIEW | [ ] Stefan Reiterer (owner) | |
-| G-V4.EDIT | [ ] Stefan Reiterer (owner) | |
-| G-V4.REPLAY | [ ] Stefan Reiterer (owner) | |
-| G-V4.CONTEXT | [ ] Stefan Reiterer (owner) | |
-| G-V4.BUILDER | [ ] Stefan Reiterer (owner) | |
+| G-V4.GRAPHSTORE | [x] Stefan Reiterer (owner) | 2026-11-20 |
+| G-V4.GRAPHAPI | [x] Stefan Reiterer (owner) | 2026-11-20 |
+| G-V4.VIEW | [x] Stefan Reiterer (owner) | 2026-11-20 |
+| G-V4.EDIT | [x] Stefan Reiterer (owner) | 2026-11-20 |
+| G-V4.REPLAY | [x] Stefan Reiterer (owner) | 2026-11-20 |
+| G-V4.CONTEXT | [x] Stefan Reiterer (owner) | 2026-11-20 |
+| G-V4.BUILDER | [x] Stefan Reiterer (owner) | 2026-11-20 |
 
 ## Phases
 | Phase | State | Record or reason |
 |---|---|---|
-| Explore | in progress | per subgoal: GRAPHSTORE and GRAPHAPI (research, spikes), VIEW (research, prototype, TLS draft), EDIT and REPLAY (decisions D-363, D-366); open: LEFTOVER, VALIDATE, outcome-level TLS of the others, `consistency-review.md`, the owner's gate |
+| Explore | done | gate passed 2026-11-20: the seven top-level specs approved (D-389 to D-391), the agreements to the split ticked, `consistency-review.md`, the carry-over of the prototype graphview decided (D-387, D-388) |
 | Plan | open | |
 | Implement | open | |
 | Verify | open | |

@@ -1,6 +1,6 @@
 # Top-Level Specification: Graph rules and the run of a stored graph (G-V4.GRAPHAPI)
 
-**Status:** Reviewed; approved by the owner with the revised FR-67 (D-390), the owner's confirmation of the revision is open
+**Status:** Approved by the owner as revised (maldun, 2026-11-20, D-390, D-391)
 **Owner:** Stefan Reiterer   **Date:** 2026-11-20
 **Project / deliverable:** MIA, subgoal GRAPHAPI of G-V4. Reviews how a graph is checked and run (item 2 of the owner's list). Requirement IDs are provisional (continuing after FR-56 and NFR-14 of the VIEW spec); Plan assigns them in `requirements.md`.
 
