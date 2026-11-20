@@ -8,7 +8,10 @@ pointer of every item to the stored version (`set_current_version`, A-121, D-241
 get_trust(id), set_trust(id, trust, author), get_lifecycle(id), set_lifecycle(id, lifecycle, author, evidence=None), pins(); the snapshots themselves are records of the kind
 `snapshots`. `accounts.is_owner(account)` says whether an account is the owner (the account that creates accounts, REQ-WFM-066).
 """
+import logging
 import time
+
+log = logging.getLogger("snapshot_store")
 
 KINDS = ("skills", "workflows", "context_graphs", "transforms")
 FORMAT = 1          # raised when the meaning of the stored record changes (A-121: the record is open, a reader ignores what it does not know)
@@ -16,6 +19,14 @@ FORMAT = 1          # raised when the meaning of the stored record changes (A-12
 
 class Conflict(Exception):
     """a snapshot name that exists (A-121: `conflict`, D-240 O3)"""
+
+
+class InvalidName(ValueError):
+    """an empty or missing snapshot name; a class of its own so that no other ValueError is taken for it (F-04)"""
+
+
+class Malformed(Exception):
+    """a stored snapshot whose items cannot be restored (a missing field, a kind that does not exist); nothing was changed (F-04)"""
 
 
 class Refused(Exception):
@@ -45,9 +56,22 @@ class SnapshotStore:
                 items.append(item)
         return items
 
+    @staticmethod
+    def _check_items(name, stored):
+        """a snapshot is data from the database: look at every item before the first write, so a broken one changes nothing and costs no automatic snapshot"""
+        items = stored.get("items") if isinstance(stored, dict) else None
+        if not isinstance(items, list):
+            raise Malformed(name)
+        for item in items:
+            ok = isinstance(item, dict) and item.get("kind") in KINDS and isinstance(item.get("id"), str) and type(item.get("version")) is int
+            if ok and item["kind"] == "transforms":
+                ok = "trust" in item and "lifecycle" in item
+            if not ok:
+                raise Malformed(name)
+
     def _write(self, name, account):
         if not isinstance(name, str) or not name:
-            raise ValueError("a snapshot needs a name")
+            raise InvalidName("a snapshot needs a name")
         if name in self.library.list_ids("snapshots"):
             raise Conflict(name)
         doc = {"name": name, "time": self.clock(), "author": account, "items": self._items(), "pins": self.library.pins(), "format": FORMAT}
@@ -77,6 +101,7 @@ class SnapshotStore:
         error is raised. A non-owner is refused and nothing changes."""
         self._owner_only(account)
         stored = self.read_snapshot(name)
+        self._check_items(name, stored)
         kept = "before restore of %s" % name
         taken, count = set(self.library.list_ids("snapshots")), 1
         while kept in taken:
@@ -94,7 +119,10 @@ class SnapshotStore:
                     self.library.set_lifecycle(record_id, item["lifecycle"], account, evidence="restore of %s" % name)
         except Exception:
             for before in reversed(undo):
-                self._put_back(before, account)
+                try:
+                    self._put_back(before, account)
+                except Exception:          # the caller must see the error that started the restore, not one of the way back
+                    log.exception("snapshot restore: could not change %s/%s back", before["kind"], before["id"])
             raise
         return {"kept_as": kept}
 

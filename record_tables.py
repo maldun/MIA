@@ -7,8 +7,8 @@ categories and the vote value. It never changes a document (a task or memo comes
 """
 
 TABLES = {name: {"versioned": True, "deletable": name in ("history", "memory", "tasks", "memos", "skill_runs")}
-          for name in ("history", "memory", "votes", "tasks", "memos", "accounts", "presets", "gestures", "runs", "source_trust", "cases", "behaviours", "workflow_meta", "reports", "skill_runs", "transform_meta", "transforms", "current_versions")}     # reports: the finished report of a task (REQ-WFM-038); cases: proposed benchmark cases (REQ-CHA-016); behaviours: the adaptation counters (REQ-CHA-017, -018)
-REQUIRED = {"skill_runs": ("run", "skill", "skill_version", "account", "started", "state"), "reports": ("task", "skill", "skill_version", "question", "account", "model_pin", "report"), "workflow_meta": ("status",), "transform_meta": ("trust", "lifecycle"), "transforms": ("id", "version"), "current_versions": ("version",), "cases": ("question", "answer", "status"), "behaviours": ("name", "net", "votes"), "memory": ("text", "source"), "votes": ("user", "subject", "category", "value"), "tasks": ("text",), "memos": ("text",),
+          for name in ("history", "memory", "votes", "tasks", "memos", "accounts", "presets", "gestures", "runs", "source_trust", "cases", "behaviours", "workflow_meta", "reports", "skill_runs", "transform_meta", "transforms", "current_versions", "snapshots")}     # reports: the finished report of a task (REQ-WFM-038); cases: proposed benchmark cases (REQ-CHA-016); behaviours: the adaptation counters (REQ-CHA-017, -018)
+REQUIRED = {"skill_runs": ("run", "skill", "skill_version", "account", "started", "state"), "reports": ("task", "skill", "skill_version", "question", "account", "model_pin", "report"), "workflow_meta": ("status",), "transform_meta": ("trust", "lifecycle"), "transforms": ("id", "version"), "current_versions": ("version",), "snapshots": ("name", "time", "author", "items", "pins"), "cases": ("question", "answer", "status"), "behaviours": ("name", "net", "votes"), "memory": ("text", "source"), "votes": ("user", "subject", "category", "value"), "tasks": ("text",), "memos": ("text",),
             "runs": ("workflow", "workflow_version", "model_pin", "benchmark_version")}
 CATEGORIES = ("answer_quality", "reactions", "character_behaviour", "service")
 MEMORY_KINDS = ("fact", "preference", "commitment")       # IF-302 v2 (REQ-CHA-011): the optional fields `kind` and `status` of a memory record; `subject` and `updated` are free
@@ -50,6 +50,13 @@ def validate(table, doc):
     if table == "current_versions":      # IF-302 v13 (A-121, REQ-WFM-064): the pointer of an item to its current version; every other field is kept as given and never refused
         if type(doc["version"]) is not int or doc["version"] < 1:      # a bool or a float is no version number; that the version exists is checked by the library before the write
             return {"rule": "schema", "detail": "version"}
+    if table == "snapshots":      # IF-302 v14 (A-161, REQ-WFM-061): written once, never deleted; the item list and the pins are checked by their type only, every other field is kept
+        if not isinstance(doc["name"], str) or not doc["name"]:
+            return {"rule": "schema", "detail": "name"}
+        if not isinstance(doc["items"], list):
+            return {"rule": "schema", "detail": "items"}
+        if not isinstance(doc["pins"], dict):
+            return {"rule": "schema", "detail": "pins"}
     if table == "votes":
         if doc["category"] not in CATEGORIES:
             return {"rule": "category", "detail": doc["category"]}
