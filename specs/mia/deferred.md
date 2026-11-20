@@ -487,7 +487,7 @@ Proposed on 2026-10-29 after the usability work of N-2.3 T-09 to T-11 and N-1.1 
 
 ## TD-86 – Converted runs read a fresh seeded toolbox, not the live trust and lifecycle of the owner
 - Kind: defer
-- Requirement: REQ-WFM-058, REQ-WFM-060 (finding F-07 of the Verify of G-V2.CONVERT: trust and lifecycle of a node are not live on the converted path)
+- Requirement: REQ-WFM-060, REQ-WFM-058 (finding F-07 of the Verify of G-V2.CONVERT: trust and lifecycle of a node are not live on the converted path)
 - Interim criterion: each converted run builds a fresh in-memory toolbox and seeds the node code shipped in `library/nodes` as trusted and tested; the code text comes from the repository, so no code that the owner has not reviewed runs; the five accepted skills use only those nodes
 - Target: a test with `code.normalize_plan` set untrusted by the owner: `Core.run("plan_question")` refuses and says why; the converted path reads the toolbox store of the app
 - Reason: the owner decided on 2026-11-17 that this belongs to the sub goal that improves the skills; no skill breaks today
@@ -532,7 +532,7 @@ Proposed on 2026-10-29 after the usability work of N-2.3 T-09 to T-11 and N-1.1 
 
 ## TD-89 – The converter check of research runs on research.escalate@3, the skill runs research.escalate@1
 - Kind: defer
-- Requirement: REQ-WFM-058, REQ-WFM-110 (check TC-WFM-128 and the protected test `tests/acceptance/test_pipeline_graph.py`, `test_research_escalate_keeps_its_calls_as_transforms_and_wraps_every_map_and_loop`, which load `research.escalate@3`; the skill `research`, version 3, names `pipeline: research.escalate@1`; finding F-09(e) of the Verify of G-V2.CONVERT, noted again in the Verify of G-V2)
+- Requirement: REQ-WFM-059, REQ-WFM-058, REQ-WFM-110 (check TC-WFM-128 and the protected test `tests/acceptance/test_pipeline_graph.py`, `test_research_escalate_keeps_its_calls_as_transforms_and_wraps_every_map_and_loop`, which load `research.escalate@3`; the skill `research`, version 3, names `pipeline: research.escalate@1`; finding F-09(e) of the Verify of G-V2.CONVERT, noted again in the Verify of G-V2)
 - Interim criterion: the equivalence of the converted skill is decided on the pipeline that runs: TC-WFM-110 runs the skill through `Core.run` on the graph path, so the rate of `research` (0.95, 57 of 60 on the dev run of 2026-11-16, criterion 0.85) is measured on `research.escalate@1`; TC-WFM-128 checks only that the converter turns the version-3 pipeline into a valid graph with its maps, branch and loop
 - Target: decide which version is the right one for the skill (move the skill to `@3`, or move the check to `@1`); then the check, its scenario and the protected test name the same version as the skill file and the acceptance record; if `@1` and `@3` differ in graph shape, a check on `@1` too
 - Reason: the owner decided on 2026-11-20 (D-356) to leave it as it is and to take it up in the sub goal that improves the skills; changing it moves a protected test and may change what the skill does
