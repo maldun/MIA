@@ -10,7 +10,7 @@ Drafted 2026-11-07 in Plan Step 0 from the approved HLS of iteration 2 (D-186). 
 - Accepted by: Stefan Reiterer (owner)
 - Line of work: goal/v2
 - Subgoals: G-V2.STORE, G-V2.MODEL, G-V2.TOOLBOX, G-V2.CONVERT, G-V2.SNAPSHOT
-- Status: Verified
+- Status: Closed
 
 ## Outcome criteria
 | ID | Expected outcome | Derived from |
@@ -134,8 +134,8 @@ Merge order STORE, MODEL, TOOLBOX, CONVERT; reserved IDs per session and rules f
 | Implement | done | STORE, MODEL, TOOLBOX, CONVERT and SNAPSHOT are in master |
 | Verify | done | `verification-report.md` (2026-11-20): Verified with accepted deviations (owner, 2026-11-20) |
 | Commit | done | merged into master before the tag; tag `v0.2.1` (2026-11-20) with G-V3; `v0.2.0` was pushed early on `4a3a74c9` (same code, no CHANGELOG); `merge-request.md`, `release-notes.md`, D-358 |
-| Deploy | open | hand-over: `handover-2026-11-20-deploy.md` |
-| Validate | open | deferred to G-V4.VALIDATE (after the G-V4 rework; `goals/G-V4.VALIDATE/goal.md`) |
+| Deploy | done | `deployment/deployment-record.md`: v0.2.1 on the reference host, 2026-11-20, image `439429d0b8d5`, smoke green, rollback tested |
+| Validate | empty | closed, **not validated**: owner, 2026-11-20 (D-359). VAL criteria move to G-V4.VALIDATE (`goals/G-V4.VALIDATE/goal.md`), run after the G-V4 rework; requirements stay `Verified`, none becomes `Validated`; open items stay open |
 
 ## Joint amendments
 | ID | Requirement | Agreed by | Date |
