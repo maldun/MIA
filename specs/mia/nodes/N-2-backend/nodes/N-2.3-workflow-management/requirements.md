@@ -1184,7 +1184,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-39: a result with an instruction and a script tag is stored and read back byte for byte and starts no tool call (exact)
 - Verified by: TC-WFM-137
-- Status: Draft
+- Status: Verified
 - History: A-131 (proposed 2026-11-08, G-V3.PANEL), new; A-154 (approved 2026-11-16, D-340): the report is stored as data too; Draft until re-verified; A-157 (approved 2026-11-17, D-342, Verify finding V-4): the report is stored with the state line of the runtime on top and the skill's text unchanged below it; the first wording said `unchanged` for the whole report
 
 ### REQ-WFM-138 – Elements of a skill passed on
@@ -1210,7 +1210,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-39: a scripted run of each registered skill (lookup, review, search) that is done, one that is stopped and one that fails each leave a report file in the files volume whose first line names the state; a scripted skill that writes no report and gives no output still gets a report that says so (exact)
 - Verified by: TC-WFM-139
-- Status: Draft
+- Status: Verified
 - History: A-154 (proposed 2026-11-16, FB-08), new
 
 ### REQ-WFM-140 – The run record names the report
@@ -1223,7 +1223,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-39: the record of a running run has `report` empty; after the end it holds the name of the report file, which is one of the names in `files` and can be read from the files volume (exact)
 - Verified by: TC-WFM-140
-- Status: Draft
+- Status: Verified
 - History: A-154 (proposed 2026-11-16, FB-08), new; interface change IF-101 v17 to v18: one new field `report` (string or null) of the run record, no route changes
 
 ### REQ-WFM-141 – Addresses and texts in a report
@@ -1236,7 +1236,7 @@ Owned by this node as provider (or, for an external provider, as the consumer th
 - Verification method: Test
 - Acceptance criterion: AC-39: reports of scripted runs whose sources and quotes are `javascript:alert(1)`, `data:text/html,...`, `file:///etc/passwd`, an address with `>` and a second link behind it, and the five hostile strings of TR-PANEL-005 contain no link whose target does not start with http:// or https://, and no unescaped tag or image (exact)
 - Verified by: TC-WFM-141
-- Status: Draft
+- Status: Verified
 - History: A-154 (proposed 2026-11-16, FB-08), new; first code: `research_chat.format_report` (36cc3a9)
 
 ### REQ-WFM-142 – The result of the review is short

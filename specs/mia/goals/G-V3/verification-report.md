@@ -48,5 +48,8 @@ Note on the first run in the main checkout: `test_expression_llm.ApiTest` (3) an
 ## 5. Not covered
 No fresh holdout, no transcript review by a person (check F), no mutation testing of the REPORT code, no current-state deployment check. Budgets were not re-measured.
 
-## 6. Verdict (proposal)
+## 6. Decisions of the owner, 2026-11-20 (D-354)
+V3-1 (no holdout for digest version 8) and V3-4 (T-06 and T-07 not re-read by a second reviewer) are **accepted as deviations**; V3-5 closed by the hand check. V3-2 and V3-3 were done in the Commit phase. Final verdict: **Verified with accepted deviations**.
+
+## 6a. Verdict (proposal, as written before the decisions)
 All in-scope checks are green on a clean checkout. Verified with accepted deviations if the owner settles V3-1 and V3-4. Then Commit: statuses (V3-2, V3-3), CHANGELOG, tag v0.2.0 (the owner tags, together with G-V2).

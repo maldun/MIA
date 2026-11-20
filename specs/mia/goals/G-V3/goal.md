@@ -31,7 +31,7 @@ What the HLS says: FR-34 and FR-35 (FB-01, the skills panel and the skill turns 
 - Accepted by: Stefan Reiterer (owner)
 - Line of work: goal/v3
 - Subgoals: G-V3.PANEL, G-V3.CHAT, G-V3.REPORT
-- Status: Agreed
+- Status: Verified
 
 ## Outcome criteria
 | ID | Expected outcome | Derived from |
@@ -198,10 +198,10 @@ None open for Step 0 (Q-1 to Q-11 answered, D-271 and D-273). Settled in Plan St
 | Phase | State | Record or reason |
 |---|---|---|
 | Explore | done | FR-34, FR-35 and FR-46 are in the HLS of iteration 2 (approved 2026-11-05, D-186); the new wording (one Skill run view, no card in the chat) is proposal A-131 |
-| Plan | in progress | started 2026-11-07; Steps 0 to 3 done for both subgoals (D-300 to D-303 and D-332), contract change applied; Step 4 (red tests) and Step 5 (plan.md) open |
-| Implement | open | |
-| Verify | open | |
-| Commit | open | |
+| Plan | done | the plans of the three subgoals (D-300 to D-303, D-332, D-340, D-341), amendments A-131, A-141, A-142, A-150 to A-162 |
+| Implement | done | in the subgoals: PANEL, CHAT (and its follow-ups A-156, A-158, A-160, A-162), REPORT |
+| Verify | done | `verification-report.md` (2026-11-20, a clean checkout of master): verified with accepted deviations V3-1 and V3-4 (D-354); hand check of `/lookup` by the owner 2026-11-20 |
+| Commit | done | all three subgoals are in master (PANEL `772abc2`, CHAT `8b8bd2a`, REPORT merge `2db7f8d5`); status updates and `merge-request.md` of 2026-11-20; no version yet: the tag v0.2.0 comes with G-V2 (owner) |
 | Deploy | open | |
 | Validate | open | |
 

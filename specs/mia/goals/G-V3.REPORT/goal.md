@@ -75,8 +75,8 @@ Out as a whole: the other requirements of G-V3, G-V3.PANEL and G-V3.CHAT (finish
 | Explore | done | FB-08 (`specs/mia/feedback/FB-08.md`) and the owner's questionnaire of 2026-11-16 (store, REQ-CLV-043 exception, every skill, placement); no new top-level item (FR-46 covers it) |
 | Plan | done | requirements, checks, model and glossary approved (D-340, A-154); red tests installed (`plan-baseline-g-v3-report`); the checks reviewed and `plan.md` approved (D-341, `plan-review.md`); open: the browser checks as a second payload before T-04 (plan.md decision 6) |
 | Implement | done | T-01 to T-05 and T-02b done, the log is `implementation-log.md` (amendments A-155 and the browser payload installed by the owner); Verify in a fresh context next (`verify-brief.md`) |
-| Verify | open | in a fresh context before the merge |
-| Commit | open | subgoal: merged into the parent's line by the owner |
+| Verify | done | `verification-report.md` (fresh reviewer, 11 findings, V-1 to V-4 fixed in T-06, F-3 in T-07); the state after the fixes was checked by the Verify of G-V3 (tests green on master), 2026-11-20, deviation V3-4 accepted (D-354) |
+| Commit | done | merged into master by the owner (`2db7f8d5`); requirements Verified 2026-11-20 |
 | Deploy | empty | reachable only with the iteration goal; delivered with G-V3 / iteration 2 |
 | Validate | open | the owner looks at a `/lookup` run: the sources are links |
 

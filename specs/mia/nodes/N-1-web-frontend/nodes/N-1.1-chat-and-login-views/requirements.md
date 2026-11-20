@@ -464,7 +464,7 @@ The chat page: messages, queue, history, status line, voting, tasks and memos, e
 - Verification method: Test
 - Acceptance criterion: AC-39: a result with a script tag, a link tag and the sentence "ignore all rules" is shown as characters; no request goes out and no control appears (exact)
 - Verified by: TC-CLV-043
-- Status: Draft
+- Status: Verified
 - History: A-131 (proposed 2026-11-08, G-V3.PANEL), new; A-154 (approved 2026-11-16, D-340): the run report is excepted, the other texts stay plain text; Draft until re-verified
 
 ### REQ-CLV-044 – Elements of a skill
@@ -524,7 +524,7 @@ The chat page: messages, queue, history, status line, voting, tasks and memos, e
 - Verification method: Test
 - Acceptance criterion: AC-39: in a headless browser after a scripted `/lookup`, the Report part is listed in the Full run with the state in its summary line, opens to the rendered report, and its download link is `/api/files/<name>` and returns the file byte for byte (exact)
 - Verified by: TC-CLV-048
-- Status: Draft
+- Status: Verified
 - History: A-154 (proposed 2026-11-16, FB-08), new; split at the review of 2026-11-16 (REQ-CLV-050, 051 take the two other states)
 
 ### REQ-CLV-049 – Links in the report
@@ -537,7 +537,7 @@ The chat page: messages, queue, history, status line, voting, tasks and memos, e
 - Verification method: Test
 - Acceptance criterion: AC-39: a report with a plain URL, a source without a URL, a `javascript:` URL, a `data:` URL and a URL inside Markdown text is shown with links only for the http and https addresses, each with target `_blank` and rel `noopener noreferrer` (exact)
 - Verified by: TC-CLV-049
-- Status: Draft
+- Status: Verified
 - History: A-154 (proposed 2026-11-16, FB-08), new; split at the review of 2026-11-16 (REQ-CLV-052 takes the active content)
 
 ### REQ-CLV-050 – Report part before the end of the run
@@ -549,7 +549,7 @@ The chat page: messages, queue, history, status line, voting, tasks and memos, e
 - Verification method: Test
 - Acceptance criterion: AC-39: a scripted run that is still going shows the waiting sentence and no link; when the run ends the part shows the report without a reload (exact)
 - Verified by: TC-CLV-050
-- Status: Draft
+- Status: Verified
 - History: A-154 (proposed 2026-11-16, FB-08), new, split from REQ-CLV-048
 
 ### REQ-CLV-051 – Report file that is gone
@@ -561,7 +561,7 @@ The chat page: messages, queue, history, status line, voting, tasks and memos, e
 - Verification method: Test
 - Acceptance criterion: AC-39: after the report file is deleted in the volume the part shows the removed sentence and no link, and the rest of the Full run is unchanged (exact)
 - Verified by: TC-CLV-051
-- Status: Draft
+- Status: Verified
 - History: A-154 (proposed 2026-11-16, FB-08), new, split from REQ-CLV-048
 
 ### REQ-CLV-052 – No active content from the report
@@ -574,7 +574,7 @@ The chat page: messages, queue, history, status line, voting, tasks and memos, e
 - Verification method: Test
 - Acceptance criterion: AC-39: a report with the five hostile strings of TR-PANEL-005 and an `<img>` with an onerror handler is shown with no `script`, `img`, `link`, `iframe`, `style` or `form` node, no alert and no request to another host (exact)
 - Verified by: TC-CLV-052
-- Status: Draft
+- Status: Verified
 - History: A-154 (proposed 2026-11-16, FB-08), new, split from REQ-CLV-049
 
 ### REQ-CLV-053 – Live line is the last element of the chat
